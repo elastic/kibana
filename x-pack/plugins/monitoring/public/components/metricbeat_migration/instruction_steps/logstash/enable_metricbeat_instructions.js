@@ -14,10 +14,10 @@ import { Legacy } from '../../../../legacy_shims';
 import { getMigrationStatusStep, getSecurityStep } from '../common_instructions';
 
 export function getLogstashInstructionsForEnablingMetricbeat(product, _meta, { esMonitoringUrl }) {
-  const { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } = Legacy.shims.docLinks;
-  const securitySetup = getSecurityStep(
-    `${ELASTIC_WEBSITE_URL}guide/en/logstash/${DOC_LINK_VERSION}/monitoring-with-metricbeat.html`
-  );
+  const logstashUrl = Legacy.shims.docLinks.links.monitoring.monitorLogstash;
+  const metricbeatInstallUrl = Legacy.shims.docLinks.links.metricbeat.install;
+  const metricbeatStartUrl = Legacy.shims.docLinks.links.metricbeat.start;
+  const securitySetup = getSecurityStep(logstashUrl);
 
   const installMetricbeatStep = {
     title: i18n.translate(
@@ -29,10 +29,7 @@ export function getLogstashInstructionsForEnablingMetricbeat(product, _meta, { e
     children: (
       <EuiText>
         <p>
-          <EuiLink
-            href={`${ELASTIC_WEBSITE_URL}guide/en/beats/metricbeat/${DOC_LINK_VERSION}/metricbeat-installation-configuration.html`}
-            target="_blank"
-          >
+          <EuiLink href={metricbeatInstallUrl} target="_blank">
             <FormattedMessage
               id="xpack.monitoring.metricbeatMigration.logstashInstructions.installMetricbeatLinkText"
               defaultMessage="Follow the instructions here."
@@ -117,10 +114,7 @@ export function getLogstashInstructionsForEnablingMetricbeat(product, _meta, { e
     children: (
       <EuiText>
         <p>
-          <EuiLink
-            href={`${ELASTIC_WEBSITE_URL}guide/en/beats/metricbeat/${DOC_LINK_VERSION}/metricbeat-starting.html`}
-            target="_blank"
-          >
+          <EuiLink href={metricbeatStartUrl} target="_blank">
             <FormattedMessage
               id="xpack.monitoring.metricbeatMigration.logstashInstructions.startMetricbeatLinkText"
               defaultMessage="Follow the instructions here."

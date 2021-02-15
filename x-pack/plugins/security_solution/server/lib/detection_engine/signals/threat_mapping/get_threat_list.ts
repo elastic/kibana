@@ -55,6 +55,12 @@ export const getThreatList = async ({
   const response: SearchResponse<ThreatListItem> = await callCluster('search', {
     body: {
       query: queryFilter,
+      fields: [
+        {
+          field: '*',
+          include_unmapped: true,
+        },
+      ],
       search_after: searchAfter,
       sort: getSortWithTieBreaker({
         sortField,

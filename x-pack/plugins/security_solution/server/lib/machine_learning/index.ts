@@ -47,6 +47,7 @@ export const getAnomalies = async (
                   analyze_wildcard: false,
                 },
               },
+              { term: { is_interim: false } },
               {
                 bool: {
                   must: boolCriteria,
@@ -60,6 +61,12 @@ export const getAnomalies = async (
             })?.query,
           },
         },
+        fields: [
+          {
+            field: '*',
+            include_unmapped: true,
+          },
+        ],
         sort: [{ record_score: { order: 'desc' } }],
       },
     },

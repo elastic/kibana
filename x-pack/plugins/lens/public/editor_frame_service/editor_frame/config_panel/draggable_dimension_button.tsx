@@ -5,16 +5,31 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useCallback } from 'react';
 import { DragDrop, DragDropIdentifier, DragContextState } from '../../../drag_drop';
-import { Datasource, VisualizationDimensionGroupConfig, isDraggedOperation } from '../../../types';
+import {
+  Datasource,
+  VisualizationDimensionGroupConfig,
+  isDraggedOperation,
+  DropType,
+} from '../../../types';
 import { LayerDatasourceDropProps } from './types';
 
-const isFromTheSameGroup = (el1: DragDropIdentifier, el2?: DragDropIdentifier) =>
-  el2 && isDraggedOperation(el2) && el1.groupId === el2.groupId && el1.columnId !== el2.columnId;
+const getAdditionalClassesOnEnter = (dropType?: string) => {
+  if (
+    dropType === 'field_replace' ||
+    dropType === 'replace_compatible' ||
+    dropType === 'replace_incompatible'
+  ) {
+    return 'lnsDragDrop-isReplacing';
+  }
+};
 
-const isSelf = (el1: DragDropIdentifier, el2?: DragDropIdentifier) =>
-  isDraggedOperation(el2) && el1.columnId === el2.columnId;
+const getAdditionalClassesOnDroppable = (dropType?: string) => {
+  if (dropType === 'move_incompatible' || dropType === 'replace_incompatible') {
+    return 'lnsDragDrop-notCompatible';
+  }
+};
 
 export function DraggableDimensionButton({
   layerId,
@@ -29,12 +44,17 @@ export function DraggableDimensionButton({
   dragDropContext,
   layerDatasourceDropProps,
   layerDatasource,
+  registerNewButtonRef,
 }: {
   dragDropContext: DragContextState;
   layerId: string;
   groupIndex: number;
   layerIndex: number;
-  onDrop: (droppedItem: DragDropIdentifier, dropTarget: DragDropIdentifier) => void;
+  onDrop: (
+    droppedItem: DragDropIdentifier,
+    dropTarget: DragDropIdentifier,
+    dropType?: DropType
+  ) => void;
   group: VisualizationDimensionGroupConfig;
   label: string;
   children: React.ReactElement;
@@ -42,67 +62,63 @@ export function DraggableDimensionButton({
   layerDatasourceDropProps: LayerDatasourceDropProps;
   accessorIndex: number;
   columnId: string;
+  registerNewButtonRef: (id: string, instance: HTMLDivElement | null) => void;
 }) {
-  const value = useMemo(() => {
-    return {
+  const dropType = layerDatasource.getDropTypes({
+    ...layerDatasourceDropProps,
+    columnId,
+    filterOperations: group.filterOperations,
+    groupId: group.groupId,
+  });
+
+  const value = useMemo(
+    () => ({
       columnId,
       groupId: group.groupId,
       layerId,
       id: columnId,
-    };
-  }, [columnId, group.groupId, layerId]);
-
-  const { dragging } = dragDropContext;
-
-  const isCurrentGroup = group.groupId === dragging?.groupId;
-  const isOperationDragged = isDraggedOperation(dragging);
-  const canHandleDrop =
-    Boolean(dragDropContext.dragging) &&
-    layerDatasource.canHandleDrop({
-      ...layerDatasourceDropProps,
-      columnId,
-      filterOperations: group.filterOperations,
-    });
-
-  const dragType = isSelf(value, dragging)
-    ? 'move'
-    : isOperationDragged && isCurrentGroup
-    ? 'reorder'
-    : 'copy';
-
-  const dropType = isOperationDragged ? (!isCurrentGroup ? 'replace' : 'reorder') : 'add';
-
-  const isCompatibleFromOtherGroup = !isCurrentGroup && canHandleDrop;
-
-  const isDroppable = isOperationDragged
-    ? dragType === 'reorder'
-      ? isFromTheSameGroup(value, dragging)
-      : isCompatibleFromOtherGroup
-    : canHandleDrop;
-
-  const reorderableGroup = useMemo(
-    () =>
-      group.accessors.map((a) => ({
-        columnId: a.columnId,
-        id: a.columnId,
-        groupId: group.groupId,
-        layerId,
-      })),
-    [group, layerId]
+      dropType,
+      humanData: {
+        label,
+        groupLabel: group.groupLabel,
+        position: accessorIndex + 1,
+      },
+    }),
+    [columnId, group.groupId, accessorIndex, layerId, dropType, label, group.groupLabel]
   );
 
+  // todo: simplify by id and use drop targets?
+  const reorderableGroup = useMemo(
+    () =>
+      group.accessors.map((g) => ({
+        id: g.columnId,
+      })),
+    [group.accessors]
+  );
+
+  const registerNewButtonRefMemoized = useCallback((el) => registerNewButtonRef(columnId, el), [
+    registerNewButtonRef,
+    columnId,
+  ]);
+
   return (
-    <div className="lnsLayerPanel__dimensionContainer" data-test-subj={group.dataTestSubj}>
+    <div
+      ref={registerNewButtonRefMemoized}
+      className="lnsLayerPanel__dimensionContainer"
+      data-test-subj={group.dataTestSubj}
+    >
       <DragDrop
-        noKeyboardSupportYet={reorderableGroup.length < 2} // to be removed when navigating outside of groups is added
+        getAdditionalClassesOnEnter={getAdditionalClassesOnEnter}
+        getAdditionalClassesOnDroppable={getAdditionalClassesOnDroppable}
+        order={[2, layerIndex, groupIndex, accessorIndex]}
         draggable
-        dragType={dragType}
+        dragType={isDraggedOperation(dragDropContext.dragging) ? 'move' : 'copy'}
         dropType={dropType}
         reorderableGroup={reorderableGroup.length > 1 ? reorderableGroup : undefined}
         value={value}
-        label={label}
-        droppable={dragging && isDroppable}
-        onDrop={onDrop}
+        onDrop={(drag: DragDropIdentifier, selectedDropType?: DropType) =>
+          onDrop(drag, value, selectedDropType)
+        }
       >
         {children}
       </DragDrop>

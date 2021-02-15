@@ -18,7 +18,6 @@ describe('documents routes', () => {
       mockRouter = new MockRouter({
         method: 'post',
         path: '/api/app_search/engines/{engineName}/documents',
-        payload: 'body',
       });
 
       registerDocumentsRoutes({

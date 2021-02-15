@@ -56,7 +56,12 @@ describe('create_signals', () => {
             ],
           },
         },
-
+        fields: [
+          {
+            field: '*',
+            include_unmapped: true,
+          },
+        ],
         sort: [
           {
             '@timestamp': {
@@ -115,7 +120,12 @@ describe('create_signals', () => {
             ],
           },
         },
-
+        fields: [
+          {
+            field: '*',
+            include_unmapped: true,
+          },
+        ],
         sort: [
           {
             '@timestamp': {
@@ -175,7 +185,12 @@ describe('create_signals', () => {
             ],
           },
         },
-
+        fields: [
+          {
+            field: '*',
+            include_unmapped: true,
+          },
+        ],
         sort: [
           {
             '@timestamp': {
@@ -236,7 +251,12 @@ describe('create_signals', () => {
             ],
           },
         },
-
+        fields: [
+          {
+            field: '*',
+            include_unmapped: true,
+          },
+        ],
         sort: [
           {
             '@timestamp': {
@@ -296,7 +316,12 @@ describe('create_signals', () => {
             ],
           },
         },
-
+        fields: [
+          {
+            field: '*',
+            include_unmapped: true,
+          },
+        ],
         sort: [
           {
             '@timestamp': {
@@ -358,6 +383,12 @@ describe('create_signals', () => {
             ],
           },
         },
+        fields: [
+          {
+            field: '*',
+            include_unmapped: true,
+          },
+        ],
         aggregations: {
           tags: {
             terms: {

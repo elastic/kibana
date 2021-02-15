@@ -558,6 +558,8 @@ export class EndpointDocGenerator {
             version: '3.0.33',
           },
           temp_file_path: 'C:/temp/fake_malware.exe',
+          quarantine_result: true,
+          quarantine_message: 'fake quarantine message',
         },
       },
       process: {
@@ -1277,6 +1279,7 @@ export class EndpointDocGenerator {
       status: agentPolicyStatuses.Active,
       description: 'Some description',
       namespace: 'default',
+      is_managed: false,
       monitoring_enabled: ['logs', 'metrics'],
       revision: 2,
       updated_at: '2020-07-22T16:36:49.196Z',

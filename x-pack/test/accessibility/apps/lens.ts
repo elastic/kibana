@@ -44,8 +44,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await PageObjects.lens.configureDimension({
         dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
-        operation: 'date_histogram',
-        field: 'timestamp',
+        operation: 'terms',
+        field: 'DestCityName',
       });
 
       await PageObjects.lens.configureDimension({

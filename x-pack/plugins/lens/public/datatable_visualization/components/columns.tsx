@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiDataGridColumn, EuiDataGridColumnCellActionProps } from '@elastic/eui';
 import type { Datatable, DatatableColumnMeta } from 'src/plugins/expressions';
 import type { FormatFactory } from '../../types';
-import type { DatatableColumns } from './types';
+import { ColumnConfig } from './table_basic';
 
 export const createGridColumns = (
   bucketColumns: string[],
@@ -23,10 +23,11 @@ export const createGridColumns = (
     negate?: boolean
   ) => void,
   isReadOnly: boolean,
-  columnConfig: DatatableColumns & { type: 'lens_datatable_columns' },
+  columnConfig: ColumnConfig,
   visibleColumns: string[],
   formatFactory: FormatFactory,
-  onColumnResize: (eventData: { columnId: string; width: number | undefined }) => void
+  onColumnResize: (eventData: { columnId: string; width: number | undefined }) => void,
+  onColumnHide: (eventData: { columnId: string }) => void
 ) => {
   const columnsReverseLookup = table.columns.reduce<
     Record<string, { name: string; index: number; meta?: DatatableColumnMeta }>
@@ -134,8 +135,9 @@ export const createGridColumns = (
         ]
       : undefined;
 
-    const initialWidth = columnConfig.columnWidth?.find(({ columnId }) => columnId === field)
-      ?.width;
+    const column = columnConfig.columns.find(({ columnId }) => columnId === field);
+    const initialWidth = column?.width;
+    const isHidden = column?.hidden;
 
     const columnDefinition: EuiDataGridColumn = {
       id: field,
@@ -173,6 +175,17 @@ export const createGridColumns = (
                 }),
                 'data-test-subj': 'lensDatatableResetWidth',
                 isDisabled: initialWidth == null,
+              },
+              {
+                color: 'text',
+                size: 'xs',
+                onClick: () => onColumnHide({ columnId: field }),
+                iconType: 'eyeClosed',
+                label: i18n.translate('xpack.lens.table.hide.hideLabel', {
+                  defaultMessage: 'Hide',
+                }),
+                'data-test-subj': 'lensDatatableHide',
+                isDisabled: !isHidden && visibleColumns.length <= 1,
               },
             ],
       },

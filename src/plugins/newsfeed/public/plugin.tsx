@@ -51,7 +51,10 @@ export class NewsfeedPublicPlugin
     return {
       createNewsFeed$: (endpoint: NewsfeedApiEndpoint) => {
         const config = Object.assign({}, this.config, {
-          service: { pathTemplate: `/${endpoint}/v{VERSION}.json` },
+          service: {
+            ...this.config.service,
+            pathTemplate: `/${endpoint}/v{VERSION}.json`,
+          },
         });
         return this.fetchNewsfeed(core, config);
       },

@@ -142,7 +142,7 @@ export const getTopNavConfig = (
           if (setOriginatingApp && originatingApp && newlyCreated) {
             setOriginatingApp(undefined);
             // remove editor state so the connection is still broken after reload
-            stateTransfer.clearEditorState();
+            stateTransfer.clearEditorState(VisualizeConstants.APP_ID);
           }
           chrome.docTitle.change(savedVis.lastSavedTitle);
           chrome.setBreadcrumbs(getEditBreadcrumbs({}, savedVis.lastSavedTitle));
@@ -250,7 +250,7 @@ export const getTopNavConfig = (
           share.toggleShareContextMenu({
             anchorElement,
             allowEmbed: true,
-            allowShortUrl: visualizeCapabilities.createShortUrl,
+            allowShortUrl: Boolean(visualizeCapabilities.createShortUrl),
             shareableUrl: unhashUrl(window.location.href),
             objectId: savedVis?.id,
             objectType: 'visualization',

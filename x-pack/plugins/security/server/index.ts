@@ -15,7 +15,7 @@ import type {
 import { ConfigSchema } from './config';
 import { securityConfigDeprecationProvider } from './config_deprecations';
 import {
-  Plugin,
+  SecurityPlugin,
   SecurityPluginSetup,
   SecurityPluginStart,
   PluginSetupDependencies,
@@ -51,4 +51,4 @@ export const plugin: PluginInitializer<
   RecursiveReadonly<SecurityPluginSetup>,
   RecursiveReadonly<SecurityPluginStart>,
   PluginSetupDependencies
-> = (initializerContext: PluginInitializerContext) => new Plugin(initializerContext);
+> = (initializerContext: PluginInitializerContext) => new SecurityPlugin(initializerContext);

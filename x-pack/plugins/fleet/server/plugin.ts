@@ -12,7 +12,7 @@ import {
   CoreStart,
   ElasticsearchServiceStart,
   Logger,
-  Plugin,
+  AsyncPlugin,
   PluginInitializerContext,
   SavedObjectsServiceStart,
   HttpServiceSetup,
@@ -95,7 +95,7 @@ export interface FleetSetupDeps {
 }
 
 export interface FleetStartDeps {
-  encryptedSavedObjects?: EncryptedSavedObjectsPluginStart;
+  encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
   security?: SecurityPluginStart;
 }
 
@@ -169,7 +169,7 @@ export interface FleetStartContract {
 }
 
 export class FleetPlugin
-  implements Plugin<FleetSetupContract, FleetStartContract, FleetSetupDeps, FleetStartDeps> {
+  implements AsyncPlugin<FleetSetupContract, FleetStartContract, FleetSetupDeps, FleetStartDeps> {
   private licensing$!: Observable<ILicense>;
   private config$: Observable<FleetConfigType>;
   private cloud: CloudSetup | undefined;
@@ -255,11 +255,11 @@ export class FleetPlugin
 
       // Conditional config routes
       if (config.agents.enabled) {
-        const isESOUsingEphemeralEncryptionKey = !deps.encryptedSavedObjects;
-        if (isESOUsingEphemeralEncryptionKey) {
+        const isESOCanEncrypt = deps.encryptedSavedObjects.canEncrypt;
+        if (!isESOCanEncrypt) {
           if (this.logger) {
             this.logger.warn(
-              'Fleet APIs are disabled because the Encrypted Saved Objects plugin uses an ephemeral encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.'
+              'Fleet APIs are disabled because the Encrypted Saved Objects plugin is missing encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.'
             );
           }
         } else {

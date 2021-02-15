@@ -24,6 +24,7 @@ export const DEFAULT_AGENT_POLICY: Omit<
   status: agentPolicyStatuses.Active,
   package_policies: [],
   is_default: true,
+  is_managed: false,
   monitoring_enabled: ['logs', 'metrics'] as Array<'logs' | 'metrics'>,
 };
 

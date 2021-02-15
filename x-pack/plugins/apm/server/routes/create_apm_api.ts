@@ -61,20 +61,14 @@ import {
   transactionChartsDistributionRoute,
   transactionChartsErrorRateRoute,
   transactionGroupsRoute,
-  transactionGroupsOverviewRoute,
+  transactionGroupsPrimaryStatisticsRoute,
   transactionLatencyChatsRoute,
   transactionThroughputChatsRoute,
+  transactionGroupsComparisonStatisticsRoute,
 } from './transactions';
 import {
-  errorGroupsLocalFiltersRoute,
-  metricsLocalFiltersRoute,
-  servicesLocalFiltersRoute,
-  tracesLocalFiltersRoute,
-  transactionGroupsLocalFiltersRoute,
-  transactionsLocalFiltersRoute,
-  serviceNodesLocalFiltersRoute,
-  uiFiltersEnvironmentsRoute,
   rumOverviewLocalFiltersRoute,
+  uiFiltersEnvironmentsRoute,
 } from './ui_filters';
 import { serviceMapRoute, serviceMapServiceNodeRoute } from './service_map';
 import {
@@ -171,18 +165,12 @@ const createApmApi = () => {
     .add(transactionChartsDistributionRoute)
     .add(transactionChartsErrorRateRoute)
     .add(transactionGroupsRoute)
-    .add(transactionGroupsOverviewRoute)
+    .add(transactionGroupsPrimaryStatisticsRoute)
     .add(transactionLatencyChatsRoute)
     .add(transactionThroughputChatsRoute)
+    .add(transactionGroupsComparisonStatisticsRoute)
 
     // UI filters
-    .add(errorGroupsLocalFiltersRoute)
-    .add(metricsLocalFiltersRoute)
-    .add(servicesLocalFiltersRoute)
-    .add(tracesLocalFiltersRoute)
-    .add(transactionGroupsLocalFiltersRoute)
-    .add(transactionsLocalFiltersRoute)
-    .add(serviceNodesLocalFiltersRoute)
     .add(uiFiltersEnvironmentsRoute)
 
     // Service map

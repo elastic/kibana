@@ -34,48 +34,6 @@ export const tagCloudVisTypeDefinition = {
   },
   toExpressionAst,
   editorConfig: {
-    collections: {
-      scales: [
-        {
-          text: i18n.translate('visTypeTagCloud.vis.editorConfig.scales.linearText', {
-            defaultMessage: 'Linear',
-          }),
-          value: 'linear',
-        },
-        {
-          text: i18n.translate('visTypeTagCloud.vis.editorConfig.scales.logText', {
-            defaultMessage: 'Log',
-          }),
-          value: 'log',
-        },
-        {
-          text: i18n.translate('visTypeTagCloud.vis.editorConfig.scales.squareRootText', {
-            defaultMessage: 'Square root',
-          }),
-          value: 'square root',
-        },
-      ],
-      orientations: [
-        {
-          text: i18n.translate('visTypeTagCloud.vis.editorConfig.orientations.singleText', {
-            defaultMessage: 'Single',
-          }),
-          value: 'single',
-        },
-        {
-          text: i18n.translate('visTypeTagCloud.vis.editorConfig.orientations.rightAngledText', {
-            defaultMessage: 'Right angled',
-          }),
-          value: 'right angled',
-        },
-        {
-          text: i18n.translate('visTypeTagCloud.vis.editorConfig.orientations.multipleText', {
-            defaultMessage: 'Multiple',
-          }),
-          value: 'multiple',
-        },
-      ],
-    },
     optionsTemplate: TagCloudOptions,
     schemas: [
       {

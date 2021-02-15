@@ -8,8 +8,7 @@
 import { Server } from '@hapi/hapi';
 import { schema, TypeOf } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
-import { Observable } from 'rxjs';
-import { CoreSetup, PluginInitializerContext } from 'src/core/server';
+import { CoreSetup, PluginInitializerContext, Plugin } from 'src/core/server';
 import { InfraStaticSourceConfiguration } from '../common/http_api/source_api';
 import { inventoryViewSavedObjectType } from '../common/saved_objects/inventory_view';
 import { metricsExplorerViewSavedObjectType } from '../common/saved_objects/metrics_explorer_view';
@@ -79,22 +78,15 @@ export interface InfraPluginSetup {
   ) => void;
 }
 
-export class InfraServerPlugin {
-  private config$: Observable<InfraConfig>;
-  public config = {} as InfraConfig;
+export class InfraServerPlugin implements Plugin<InfraPluginSetup> {
+  public config: InfraConfig;
   public libs: InfraBackendLibs | undefined;
 
   constructor(context: PluginInitializerContext) {
-    this.config$ = context.config.create<InfraConfig>();
+    this.config = context.config.get<InfraConfig>();
   }
 
-  async setup(core: CoreSetup<InfraServerPluginStartDeps>, plugins: InfraServerPluginSetupDeps) {
-    await new Promise<void>((resolve) => {
-      this.config$.subscribe((configValue) => {
-        this.config = configValue;
-        resolve();
-      });
-    });
+  setup(core: CoreSetup<InfraServerPluginStartDeps>, plugins: InfraServerPluginSetupDeps) {
     const framework = new KibanaFramework(core, this.config, plugins);
     const sources = new InfraSources({
       config: this.config,
@@ -145,7 +137,7 @@ export class InfraServerPlugin {
     ]);
 
     initInfraServer(this.libs);
-    registerAlertTypes(plugins.alerts, this.libs);
+    registerAlertTypes(plugins.alerts, this.libs, plugins.ml);
 
     core.http.registerRouteHandlerContext<InfraPluginRequestHandlerContext, 'infra'>(
       'infra',

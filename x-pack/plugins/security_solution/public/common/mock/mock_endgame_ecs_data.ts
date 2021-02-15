@@ -58,6 +58,121 @@ export const mockEndgameDnsRequest: Ecs = {
   },
 };
 
+export const mockEndpointNetworkLookupRequestedEvent: Ecs = {
+  host: {
+    os: {
+      full: ['Windows Server 2019 Datacenter 1809 (10.0.17763.1697)'],
+      name: ['Windows'],
+      version: ['1809 (10.0.17763.1697)'],
+      family: ['windows'],
+      kernel: ['1809 (10.0.17763.1697)'],
+      platform: ['windows'],
+    },
+    mac: ['aa:bb:cc:dd:ee:ff'],
+    name: ['win2019-endpoint'],
+    architecture: ['x86_64'],
+    ip: ['10.1.2.3'],
+    id: ['d8ad572e-d224-4044-a57d-f5a84c0dfe5d'],
+  },
+  event: {
+    category: ['network'],
+    kind: ['event'],
+    created: ['2021-01-25T16:44:40.788Z'],
+    module: ['endpoint'],
+    action: ['lookup_requested'],
+    type: ['protocol,info'],
+    id: ['LzzWB9jjGmCwGMvk++++6FZj'],
+    dataset: ['endpoint.events.network'],
+  },
+  process: {
+    name: ['google_osconfig_agent.exe'],
+    pid: [3272],
+    entity_id: [
+      'MWQxNWNmOWUtM2RjNy01Yjk3LWY1ODYtNzQzZjdjMjUxOGIyLTMyNzItMTMyNTUwNzg4NjguNjUzODkxNTAw',
+    ],
+    executable: ['C:\\Program Files\\Google\\OSConfig\\google_osconfig_agent.exe'],
+  },
+  dns: {
+    question: {
+      name: ['logging.googleapis.com'],
+      type: ['A'],
+    },
+  },
+  agent: {
+    type: ['endpoint'],
+  },
+  user: {
+    name: ['SYSTEM'],
+    domain: ['NT AUTHORITY'],
+  },
+  network: {
+    protocol: ['dns'],
+  },
+  message: [
+    'DNS query is completed for the name logging.googleapis.com, type 1, query options 1073766400 with status 87 Results',
+  ],
+  timestamp: '2021-01-25T16:44:40.788Z',
+  _id: 'sUNzOncBPmkOXwyN9VbT',
+};
+
+export const mockEndpointNetworkLookupResultEvent: Ecs = {
+  host: {
+    os: {
+      full: ['Windows Server 2019 Datacenter 1809 (10.0.17763.1697)'],
+      name: ['Windows'],
+      version: ['1809 (10.0.17763.1697)'],
+      family: ['windows'],
+      kernel: ['1809 (10.0.17763.1697)'],
+      platform: ['windows'],
+    },
+    mac: ['aa:bb:cc:dd:ee:ff'],
+    name: ['win2019-endpoint'],
+    architecture: ['x86_64'],
+    ip: ['10.1.2.3'],
+    id: ['d8ad572e-d224-4044-a57d-f5a84c0dfe5d'],
+  },
+  event: {
+    category: ['network'],
+    kind: ['event'],
+    outcome: ['success'],
+    created: ['2021-01-25T16:44:40.789Z'],
+    module: ['endpoint'],
+    action: ['lookup_result'],
+    type: ['protocol,info'],
+    id: ['LzzWB9jjGmCwGMvk++++6FZq'],
+    dataset: ['endpoint.events.network'],
+  },
+  process: {
+    name: ['google_osconfig_agent.exe'],
+    pid: [3272],
+    entity_id: [
+      'MWQxNWNmOWUtM2RjNy01Yjk3LWY1ODYtNzQzZjdjMjUxOGIyLTMyNzItMTMyNTUwNzg4NjguNjUzODkxNTAw',
+    ],
+    executable: ['C:\\Program Files\\Google\\OSConfig\\google_osconfig_agent.exe'],
+  },
+  agent: {
+    type: ['endpoint'],
+  },
+  dns: {
+    question: {
+      name: ['logging.googleapis.com'],
+      type: ['AAAA'],
+    },
+  },
+  user: {
+    name: ['SYSTEM'],
+    domain: ['NT AUTHORITY'],
+  },
+  network: {
+    protocol: ['dns'],
+  },
+  message: [
+    'DNS query is completed for the name logging.googleapis.com, type 28, query options 2251800887582720 with status 0 Results',
+  ],
+  timestamp: '2021-01-25T16:44:40.789Z',
+  _id: 'skNzOncBPmkOXwyN9VbT',
+};
+
 export const mockEndgameFileCreateEvent: Ecs = {
   _id: '98jPcG0BOpWiDweSouzg',
   user: {
@@ -91,6 +206,59 @@ export const mockEndgameFileCreateEvent: Ecs = {
   },
 };
 
+export const mockEndpointFileCreationEvent: Ecs = {
+  file: {
+    path: ['C:\\Windows\\TEMP\\E38FD162-B6E6-4799-B52D-F590BACBAE94\\WimProvider.dll'],
+    extension: ['dll'],
+    name: ['WimProvider.dll'],
+  },
+  host: {
+    os: {
+      full: ['Windows Server 2019 Datacenter 1809 (10.0.17763.1697)'],
+      name: ['Windows'],
+      version: ['1809 (10.0.17763.1697)'],
+      family: ['windows'],
+      kernel: ['1809 (10.0.17763.1697)'],
+      platform: ['windows'],
+    },
+    mac: ['aa:bb:cc:dd:ee:ff'],
+    name: ['win2019-endpoint'],
+    architecture: ['x86_64'],
+    ip: ['10.9.8.7'],
+    id: ['d8ad572e-d224-4044-a57d-f5a84c0dfe5d'],
+  },
+  event: {
+    category: ['file'],
+    kind: ['event'],
+    created: ['2021-01-25T16:21:56.832Z'],
+    module: ['endpoint'],
+    action: ['creation'],
+    type: ['creation'],
+    id: ['LzzWB9jjGmCwGMvk++++6FEM'],
+    dataset: ['endpoint.events.file'],
+  },
+  process: {
+    name: ['MsMpEng.exe'],
+    pid: [2424],
+    entity_id: [
+      'MWQxNWNmOWUtM2RjNy01Yjk3LWY1ODYtNzQzZjdjMjUxOGIyLTI0MjQtMTMyNTUwNzg2OTAuNDQ1MzY0NzAw',
+    ],
+    executable: [
+      'C:\\ProgramData\\Microsoft\\Windows Defender\\Platform\\4.18.2011.6-0\\MsMpEng.exe',
+    ],
+  },
+  agent: {
+    type: ['endpoint'],
+  },
+  user: {
+    name: ['SYSTEM'],
+    domain: ['NT AUTHORITY'],
+  },
+  message: ['Endpoint file event'],
+  timestamp: '2021-01-25T16:21:56.832Z',
+  _id: 'eSdbOncBLJMagDUQ3YFs',
+};
+
 export const mockEndgameFileDeleteEvent: Ecs = {
   _id: 'OMjPcG0BOpWiDweSeuW9',
   user: {
@@ -121,6 +289,58 @@ export const mockEndgameFileDeleteEvent: Ecs = {
     file_path: ['C:\\Windows\\TEMP\\tmp00000404\\tmp000002f6'],
     process_name: ['AmSvc.exe'],
   },
+};
+
+export const mockEndpointFileDeletionEvent: Ecs = {
+  file: {
+    path: ['C:\\Windows\\SoftwareDistribution\\Download\\Install\\AM_Delta_Patch_1.329.2793.0.exe'],
+    extension: ['exe'],
+    name: ['AM_Delta_Patch_1.329.2793.0.exe'],
+  },
+  host: {
+    os: {
+      full: ['Windows Server 2019 Datacenter 1809 (10.0.17763.1697)'],
+      name: ['Windows'],
+      version: ['1809 (10.0.17763.1697)'],
+      family: ['windows'],
+      kernel: ['1809 (10.0.17763.1697)'],
+      platform: ['windows'],
+    },
+    mac: ['11:22:33:44:55:66'],
+    name: ['windows-endpoint-1'],
+    architecture: ['x86_64'],
+    ip: ['10.1.2.3'],
+    id: ['ce6fa3c3-fda1-4984-9bce-f6d602a5bd1a'],
+  },
+  event: {
+    category: ['file'],
+    kind: ['event'],
+    created: ['2021-01-25T22:50:36.783Z'],
+    module: ['endpoint'],
+    action: ['deletion'],
+    type: ['deletion'],
+    id: ['Lzty2lsJxA05IUWg++++CBsc'],
+    dataset: ['endpoint.events.file'],
+  },
+  process: {
+    name: ['svchost.exe'],
+    pid: [1728],
+    entity_id: [
+      'YjUwNDNiMTMtYTdjNi0xZGFlLTEyZWQtODQ1ZDlhNTRhZmQyLTE3MjgtMTMyNTQ5ODc2MjYuNjg3OTg0MDAw',
+    ],
+    executable: ['C:\\Windows\\System32\\svchost.exe'],
+  },
+  user: {
+    id: ['S-1-5-18'],
+    name: ['SYSTEM'],
+    domain: ['NT AUTHORITY'],
+  },
+  agent: {
+    type: ['endpoint'],
+  },
+  message: ['Endpoint file event'],
+  timestamp: '2021-01-25T22:50:36.783Z',
+  _id: 'mnXHO3cBPmkOXwyNlyv_',
 };
 
 export const mockEndgameIpv4ConnectionAcceptEvent: Ecs = {
@@ -211,6 +431,74 @@ export const mockEndgameIpv6ConnectionAcceptEvent: Ecs = {
   endgame: {
     pid: [4],
   },
+};
+
+export const mockEndpointNetworkConnectionAcceptedEvent: Ecs = {
+  host: {
+    os: {
+      full: ['Windows Server 2019 Datacenter 1809 (10.0.17763.1697)'],
+      name: ['Windows'],
+      version: ['1809 (10.0.17763.1697)'],
+      family: ['windows'],
+      kernel: ['1809 (10.0.17763.1697)'],
+      platform: ['windows'],
+    },
+    mac: ['aa:bb:cc:dd:ee:ff'],
+    name: ['windows-endpoint-1'],
+    architecture: ['x86_64'],
+    ip: ['10.1.2.3'],
+    id: ['ce6fa3c3-fda1-4984-9bce-f6d602a5bd1a'],
+  },
+  event: {
+    category: ['network'],
+    kind: ['event'],
+    outcome: ['success'],
+    created: ['2021-01-25T16:44:45.048Z'],
+    module: ['endpoint'],
+    action: ['connection_accepted'],
+    type: ['start'],
+    id: ['Lzty2lsJxA05IUWg++++C1CY'],
+    dataset: ['endpoint.events.network'],
+  },
+  process: {
+    name: ['svchost.exe'],
+    pid: [328],
+    entity_id: [
+      'YjUwNDNiMTMtYTdjNi0xZGFlLTEyZWQtODQ1ZDlhNTRhZmQyLTMyOC0xMzI1NDk4NzUwNS45OTYxMjUzMDA=',
+    ],
+    executable: ['C:\\Windows\\System32\\svchost.exe'],
+  },
+  source: {
+    geo: {
+      region_name: ['North Carolina'],
+      region_iso_code: ['US-NC'],
+      city_name: ['Concord'],
+      country_iso_code: ['US'],
+      continent_name: ['North America'],
+      country_name: ['United States'],
+    },
+    ip: ['10.1.2.3'],
+    port: [64557],
+  },
+  destination: {
+    port: [3389],
+    ip: ['10.50.60.70'],
+  },
+  user: {
+    id: ['S-1-5-20'],
+    name: ['NETWORK SERVICE'],
+    domain: ['NT AUTHORITY'],
+  },
+  agent: {
+    type: ['endpoint'],
+  },
+  network: {
+    direction: ['incoming'],
+    transport: ['tcp'],
+  },
+  message: ['Endpoint network event'],
+  timestamp: '2021-01-25T16:44:45.048Z',
+  _id: 'tUN0OncBPmkOXwyNOGPV',
 };
 
 export const mockEndgameIpv4DisconnectReceivedEvent: Ecs = {
@@ -309,6 +597,75 @@ export const mockEndgameIpv6DisconnectReceivedEvent: Ecs = {
   },
 };
 
+export const mockEndpointDisconnectReceivedEvent: Ecs = {
+  host: {
+    os: {
+      full: ['Windows Server 2019 Datacenter 1809 (10.0.17763.1697)'],
+      name: ['Windows'],
+      version: ['1809 (10.0.17763.1697)'],
+      family: ['windows'],
+      kernel: ['1809 (10.0.17763.1697)'],
+      platform: ['windows'],
+    },
+    mac: ['aa:bb:cc:dd:ee:ff'],
+    name: ['windows-endpoint-1'],
+    architecture: ['x86_64'],
+    ip: ['10.1.2.3'],
+    id: ['ce6fa3c3-fda1-4984-9bce-f6d602a5bd1a'],
+  },
+  event: {
+    category: ['network'],
+    kind: ['event'],
+    created: ['2021-01-25T16:44:47.004Z'],
+    module: ['endpoint'],
+    action: ['disconnect_received'],
+    type: ['end'],
+    id: ['Lzty2lsJxA05IUWg++++C1Ch'],
+    dataset: ['endpoint.events.network'],
+  },
+  process: {
+    name: ['svchost.exe'],
+    pid: [328],
+    entity_id: [
+      'YjUwNDNiMTMtYTdjNi0xZGFlLTEyZWQtODQ1ZDlhNTRhZmQyLTMyOC0xMzI1NDk4NzUwNS45OTYxMjUzMDA=',
+    ],
+    executable: ['C:\\Windows\\System32\\svchost.exe'],
+  },
+  source: {
+    geo: {
+      region_name: ['North Carolina'],
+      region_iso_code: ['US-NC'],
+      city_name: ['Concord'],
+      country_iso_code: ['US'],
+      continent_name: ['North America'],
+      country_name: ['United States'],
+    },
+    ip: ['10.20.30.40'],
+    port: [64557],
+    bytes: [1192],
+  },
+  destination: {
+    bytes: [1615],
+    port: [3389],
+    ip: ['10.11.12.13'],
+  },
+  user: {
+    id: ['S-1-5-20'],
+    name: ['NETWORK SERVICE'],
+    domain: ['NT AUTHORITY'],
+  },
+  agent: {
+    type: ['endpoint'],
+  },
+  network: {
+    direction: ['incoming'],
+    transport: ['tcp'],
+  },
+  message: ['Endpoint network event'],
+  timestamp: '2021-01-25T16:44:47.004Z',
+  _id: 'uUN0OncBPmkOXwyNOGPV',
+};
+
 export const mockEndgameUserLogon: Ecs = {
   _id: 'QsjPcG0BOpWiDweSeuRE',
   user: {
@@ -355,6 +712,92 @@ export const mockEndgameUserLogon: Ecs = {
     target_user_name: ['SYSTEM'],
     target_domain_name: ['NT AUTHORITY'],
   },
+};
+
+export const mockEndpointSecurityLogOnSuccessEvent: Ecs = {
+  host: {
+    os: {
+      full: ['Windows Server 2019 Datacenter 1809 (10.0.17763.1697)'],
+      name: ['Windows'],
+      version: ['1809 (10.0.17763.1697)'],
+      family: ['windows'],
+      kernel: ['1809 (10.0.17763.1697)'],
+      platform: ['windows'],
+    },
+    mac: ['aa:bb:cc:dd:ee:ff'],
+    name: ['win2019-endpoint'],
+    architecture: ['x86_64'],
+    ip: ['10.1.2.3'],
+    id: ['d8ad572e-d224-4044-a57d-f5a84c0dfe5d'],
+  },
+  event: {
+    category: ['authentication', 'session'],
+    kind: ['event'],
+    outcome: ['success'],
+    created: ['2021-01-25T16:24:51.761Z'],
+    module: ['endpoint'],
+    action: ['log_on'],
+    type: ['start'],
+    id: ['LzzWB9jjGmCwGMvk++++6FKC'],
+    dataset: ['endpoint.events.security'],
+  },
+  process: {
+    name: ['C:\\Program Files\\OpenSSH-Win64\\sshd.exe'],
+    entity_id: [
+      'MWQxNWNmOWUtM2RjNy01Yjk3LWY1ODYtNzQzZjdjMjUxOGIyLTQzNDQtMTMyNTYwNjU0ODYuMzIwNDI3MDAw',
+    ],
+    executable: ['C:\\Program Files\\OpenSSH-Win64\\sshd.exe'],
+    pid: [90210],
+  },
+  agent: {
+    type: ['endpoint'],
+  },
+  user: {
+    name: ['SYSTEM'],
+    domain: ['NT AUTHORITY'],
+  },
+  message: ['Endpoint security event'],
+  timestamp: '2021-01-25T16:24:51.761Z',
+  _id: 'eSlgOncBLJMagDUQ-yBL',
+};
+
+export const mockEndpointSecurityLogOnFailureEvent: Ecs = {
+  host: {
+    os: {
+      full: ['Windows Server 2019 Datacenter 1809 (10.0.17763.1637)'],
+      name: ['Windows'],
+      version: ['1809 (10.0.17763.1637)'],
+      kernel: ['1809 (10.0.17763.1637)'],
+      platform: ['windows'],
+      family: ['windows'],
+    },
+    mac: ['aa:bb:cc:dd:ee:ff'],
+    ip: ['10.1.2.3'],
+    name: ['win2019-endpoint'],
+    id: ['d8ad572e-d224-4044-a57d-f5a84c0dfe5d'],
+    architecture: ['x86_64'],
+  },
+  event: {
+    category: ['authentication', 'session'],
+    module: ['endpoint'],
+    kind: ['event'],
+    outcome: ['failure'],
+    action: ['log_on'],
+    created: ['2020-12-28T04:05:01.409Z'],
+    type: ['start'],
+    id: ['Ly1AjdVRChqy2iq3++++3jlX'],
+    dataset: ['endpoint.events.security'],
+  },
+  process: {
+    name: ['C:\\Program Files\\OpenSSH-Win64\\sshd.exe'],
+    pid: [90210],
+  },
+  agent: {
+    type: ['endpoint'],
+  },
+  message: ['Endpoint security event'],
+  timestamp: '2020-12-28T04:05:01.409Z',
+  _id: 's8GIp3YBN9Y7_e914Upz',
 };
 
 export const mockEndgameAdminLogon: Ecs = {
@@ -488,6 +931,49 @@ export const mockEndgameUserLogoff: Ecs = {
   },
 };
 
+export const mockEndpointSecurityLogOffEvent: Ecs = {
+  host: {
+    os: {
+      full: ['Windows Server 2019 Datacenter 1809 (10.0.17763.1697)'],
+      name: ['Windows'],
+      version: ['1809 (10.0.17763.1697)'],
+      family: ['windows'],
+      kernel: ['1809 (10.0.17763.1697)'],
+      platform: ['windows'],
+    },
+    mac: ['aa:bb:cc:dd:ee:ff'],
+    name: ['win2019-endpoint'],
+    architecture: ['x86_64'],
+    ip: ['10.1.2.3'],
+    id: ['d8ad572e-d224-4044-a57d-f5a84c0dfe5d'],
+  },
+  event: {
+    category: ['authentication,session'],
+    kind: ['event'],
+    outcome: ['success'],
+    created: ['2021-01-26T23:27:27.610Z'],
+    module: ['endpoint'],
+    action: ['log_off'],
+    type: ['end'],
+    id: ['LzzWB9jjGmCwGMvk++++6l0y'],
+    dataset: ['endpoint.events.security'],
+  },
+  process: {
+    entity_id: [
+      'MWQxNWNmOWUtM2RjNy01Yjk3LWY1ODYtNzQzZjdjMjUxOGIyLTU4MC0xMzI1NTA3ODY2Ny45MTg5Njc1MDA=',
+    ],
+    executable: ['C:\\Windows\\System32\\lsass.exe'],
+    pid: [90210],
+  },
+  user: {
+    name: ['SYSTEM'],
+    domain: ['NT AUTHORITY'],
+  },
+  message: ['Endpoint security event'],
+  timestamp: '2021-01-26T23:27:27.610Z',
+  _id: 'ZesLQXcBPmkOXwyNdT1a',
+};
+
 export const mockEndgameCreationEvent: Ecs = {
   _id: 'BcjPcG0BOpWiDweSou3g',
   user: {
@@ -537,6 +1023,58 @@ export const mockEndgameCreationEvent: Ecs = {
   },
 };
 
+export const mockEndpointProcessStartEvent: Ecs = {
+  process: {
+    hash: {
+      md5: ['1b0e9b5fcb62de0787235ecca560b610'],
+      sha256: ['697334c236cce7d4c9e223146ee683a1219adced9729d4ae771fd6a1502a6b63'],
+      sha1: ['e19da2c35ba1c38adf12d1a472c1fcf1f1a811a7'],
+    },
+    name: ['conhost.exe'],
+    pid: [3636],
+    entity_id: [
+      'MWQxNWNmOWUtM2RjNy01Yjk3LWY1ODYtNzQzZjdjMjUxOGIyLTM2MzYtMTMyNTYwODU1OTguMTA3NTA3MDAw',
+    ],
+    executable: ['C:\\Windows\\System32\\conhost.exe'],
+    args: ['C:\\Windows\\system32\\conhost.exe,0xffffffff,-ForceV1'],
+  },
+  host: {
+    os: {
+      full: ['Windows Server 2019 Datacenter 1809 (10.0.17763.1697)'],
+      name: ['Windows'],
+      version: ['1809 (10.0.17763.1697)'],
+      family: ['windows'],
+      kernel: ['1809 (10.0.17763.1697)'],
+      platform: ['windows'],
+    },
+    mac: ['aa:bb:cc:dd:ee:ff'],
+    name: ['win2019-endpoint-1'],
+    architecture: ['x86_64'],
+    ip: ['10.1.2.3'],
+    id: ['d8ad572e-d224-4044-a57d-f5a84c0dfe5d'],
+  },
+  event: {
+    category: ['process'],
+    kind: ['event'],
+    created: ['2021-01-25T21:59:58.107Z'],
+    module: ['endpoint'],
+    action: ['start'],
+    type: ['start'],
+    id: ['LzzWB9jjGmCwGMvk++++6Kw+'],
+    dataset: ['endpoint.events.process'],
+  },
+  agent: {
+    type: ['endpoint'],
+  },
+  user: {
+    name: ['SYSTEM'],
+    domain: ['NT AUTHORITY'],
+  },
+  message: ['Endpoint process event'],
+  timestamp: '2021-01-25T21:59:58.107Z',
+  _id: 't5KSO3cB8l64wN2iQ8V9',
+};
+
 export const mockEndgameTerminationEvent: Ecs = {
   _id: '2MjPcG0BOpWiDweSoutC',
   user: {
@@ -577,4 +1115,60 @@ export const mockEndgameTerminationEvent: Ecs = {
     process_name: ['RuntimeBroker.exe'],
     exit_code: [0],
   },
+};
+
+export const mockEndpointProcessEndEvent: Ecs = {
+  process: {
+    hash: {
+      md5: ['8a0a29438052faed8a2532da50455756'],
+      sha256: ['7fd065bac18c5278777ae44908101cdfed72d26fa741367f0ad4d02020787ab6'],
+      sha1: ['a1385ce20ad79f55df235effd9780c31442aa234'],
+    },
+    name: ['svchost.exe'],
+    parent: {
+      name: ['services.exe'],
+    },
+    pid: [10392],
+    entity_id: [
+      'MWQxNWNmOWUtM2RjNy01Yjk3LWY1ODYtNzQzZjdjMjUxOGIyLTEwMzkyLTEzMjU2MjY2OTkwLjcwMzgzMDgwMA==',
+    ],
+    executable: ['C:\\Windows\\System32\\svchost.exe'],
+    exit_code: [-1],
+    args: ['C:\\Windows\\System32\\svchost.exe,-k,netsvcs,-p,-s,NetSetupSvc'],
+  },
+  host: {
+    os: {
+      full: ['Windows Server 2019 Datacenter 1809 (10.0.17763.1697)'],
+      name: ['Windows'],
+      version: ['1809 (10.0.17763.1697)'],
+      family: ['windows'],
+      kernel: ['1809 (10.0.17763.1697)'],
+      platform: ['windows'],
+    },
+    mac: ['aa:bb:cc:dd:ee:ff'],
+    name: ['win2019-endpoint'],
+    architecture: ['x86_64'],
+    ip: ['10.1.2.3'],
+    id: ['d8ad572e-d224-4044-a57d-f5a84c0dfe5d'],
+  },
+  event: {
+    category: ['process'],
+    kind: ['event'],
+    created: ['2021-01-28T00:24:05.929Z'],
+    module: ['endpoint'],
+    action: ['end'],
+    type: ['end'],
+    id: ['LzzWB9jjGmCwGMvk++++77mE'],
+    dataset: ['endpoint.events.process'],
+  },
+  agent: {
+    type: ['endpoint'],
+  },
+  user: {
+    name: ['SYSTEM'],
+    domain: ['NT AUTHORITY'],
+  },
+  message: ['Endpoint process event'],
+  timestamp: '2021-01-28T00:24:05.929Z',
+  _id: 'quloRncBX5UUcOOYo2ZS',
 };

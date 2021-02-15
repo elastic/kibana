@@ -23,7 +23,7 @@ import { AnomalyDetection } from '../../Settings/anomaly_detection';
 import { ApmIndices } from '../../Settings/ApmIndices';
 import { CustomizeUI } from '../../Settings/CustomizeUI';
 import { TraceLink } from '../../TraceLink';
-import { TransactionDetails } from '../../TransactionDetails';
+import { TransactionDetails } from '../../transaction_details';
 import {
   CreateAgentConfigurationRouteHandler,
   EditAgentConfigurationRouteHandler,

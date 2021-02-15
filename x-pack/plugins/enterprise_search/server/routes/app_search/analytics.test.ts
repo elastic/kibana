@@ -18,7 +18,6 @@ describe('analytics routes', () => {
       mockRouter = new MockRouter({
         method: 'get',
         path: '/api/app_search/engines/{engineName}/analytics/queries',
-        payload: 'query',
       });
 
       registerAnalyticsRoutes({
@@ -71,7 +70,6 @@ describe('analytics routes', () => {
       mockRouter = new MockRouter({
         method: 'get',
         path: '/api/app_search/engines/{engineName}/analytics/queries/{query}',
-        payload: 'query',
       });
 
       registerAnalyticsRoutes({

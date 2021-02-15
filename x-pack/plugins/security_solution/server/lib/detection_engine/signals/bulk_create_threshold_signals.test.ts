@@ -67,7 +67,7 @@ describe('transformThresholdResultsToEcs', () => {
             _id,
             _index: 'test',
             _source: {
-              '@timestamp': '2020-04-20T21:27:45+0000',
+              '@timestamp': ['2020-04-20T21:27:45+0000'],
               threshold_result: {
                 count: 1,
                 value: '127.0.0.1',

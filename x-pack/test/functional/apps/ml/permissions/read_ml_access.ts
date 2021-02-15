@@ -99,6 +99,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       const ecIndexPattern = 'ft_module_sample_ecommerce';
       const ecExpectedTotalCount = '287';
+      const ecExpectedModuleId = 'sample_data_ecommerce';
 
       const uploadFilePath = path.join(
         __dirname,
@@ -349,8 +350,16 @@ export default function ({ getService }: FtrProviderContext) {
             await ml.testExecution.logTestStep('should display the data visualizer table');
             await ml.dataVisualizerIndexBased.assertDataVisualizerTableExist();
 
-            await ml.testExecution.logTestStep('should not display the actions panel');
-            await ml.dataVisualizerIndexBased.assertActionsPanelNotExists();
+            await ml.testExecution.logTestStep(
+              'should display the actions panel with Discover card'
+            );
+            await ml.dataVisualizerIndexBased.assertActionsPanelExists();
+            await ml.dataVisualizerIndexBased.assertViewInDiscoverCardExists();
+
+            await ml.testExecution.logTestStep('should not display job cards');
+            await ml.dataVisualizerIndexBased.assertCreateAdvancedJobCardNotExists();
+            await ml.dataVisualizerIndexBased.assertRecognizerCardNotExists(ecExpectedModuleId);
+            await ml.dataVisualizerIndexBased.assertCreateDataFrameAnalyticsCardNotExists();
           });
 
           it('should display elements on File Data Visualizer page correctly', async () => {
