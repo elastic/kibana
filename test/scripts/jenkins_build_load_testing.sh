@@ -35,11 +35,13 @@ while [ 1 ]; do
 
 # Install Metricbeat
 echo "untar metricbeat and config"
-tar -xzf metricbeat-${MB_BUILD}-linux-x86_64.tar.gz
+#tar -xzf metricbeat-${MB_BUILD}-linux-x86_64.tar.gz
+tar -xzf metricbeat-7.11.0-linux-x86_64.tar.gz
 #--directory "$KIBANA_DIR"
 ls -l
 echo "rename"
-mv metricbeat-${MB_BUILD}-linux-x86_64 metricbeat-install
+#mv metricbeat-${MB_BUILD}-linux-x86_64 metricbeat-install
+mv metricbeat-7.11.0-linux-x86_64 metricbeat-install
 ls -l
 # Configure Metricbeat
 
