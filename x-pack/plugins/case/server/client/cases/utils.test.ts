@@ -537,12 +537,12 @@ describe('utils', () => {
         },
         {
           comment:
-            'Alert with id alert-id-1 added to case (added at 2019-11-25T21:55:00.177Z by elastic)',
+            'Alert with ids alert-id-1 added to case (added at 2019-11-25T21:55:00.177Z by elastic)',
           commentId: 'comment-alert-1',
         },
         {
           comment:
-            'Alert with id alert-id-1 added to case (added at 2019-11-25T21:55:00.177Z by elastic)',
+            'Alert with ids alert-id-1 added to case (added at 2019-11-25T21:55:00.177Z by elastic)',
           commentId: 'comment-alert-2',
         },
       ]);

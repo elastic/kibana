@@ -37,7 +37,11 @@ import {
   AGENT_POLICY_INDEX,
   DEFAULT_FLEET_SERVER_AGENT_POLICY,
 } from '../../common';
-import { AgentPolicyNameExistsError, AgentPolicyDeletionError } from '../errors';
+import {
+  AgentPolicyNameExistsError,
+  AgentPolicyDeletionError,
+  IngestManagerError,
+} from '../errors';
 import { createAgentPolicyAction, listAgents } from './agents';
 import { packagePolicyService } from './package_policy';
 import { outputService } from './output';
@@ -416,6 +420,10 @@ class AgentPolicyService {
       throw new Error('Agent policy not found');
     }
 
+    if (oldAgentPolicy.is_managed) {
+      throw new IngestManagerError(`Cannot update integrations of managed policy ${id}`);
+    }
+
     return await this._update(
       soClient,
       esClient,
@@ -441,6 +449,10 @@ class AgentPolicyService {
 
     if (!oldAgentPolicy) {
       throw new Error('Agent policy not found');
+    }
+
+    if (oldAgentPolicy.is_managed) {
+      throw new IngestManagerError(`Cannot remove integrations of managed policy ${id}`);
     }
 
     return await this._update(
