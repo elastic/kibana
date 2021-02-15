@@ -7,7 +7,6 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { HttpSetup, ToastsApi } from 'kibana/public';
-import { AbortError } from '../../../../../../../../src/plugins/kibana_utils/common';
 import { ActionConnector } from '../../../containers/types';
 import { getSeverity } from './api';
 import * as i18n from './translations';
@@ -65,7 +64,7 @@ export const useGetSeverity = ({ http, toastNotifications, connector }: Props): 
       } catch (error) {
         if (!didCancel.current) {
           setIsLoading(false);
-          if (!(error instanceof AbortError)) {
+          if (error.name !== 'AbortError') {
             toastNotifications.addDanger({
               title: i18n.SEVERITY_API_ERROR,
               text: error.message,

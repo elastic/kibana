@@ -6,7 +6,6 @@
  */
 
 import { useCallback, useReducer, useRef, useEffect } from 'react';
-import { AbortError } from '../../../../../../src/plugins/kibana_utils/common';
 import { CaseStatuses } from '../../../../case/common/api';
 import {
   displaySuccessToast,
@@ -117,7 +116,7 @@ export const useUpdateCases = (): UseUpdateCases => {
       }
     } catch (error) {
       if (!didCancel.current) {
-        if (!(error instanceof AbortError)) {
+        if (error.name !== 'AbortError') {
           errorToToaster({
             title: i18n.ERROR_TITLE,
             error: error.body && error.body.message ? new Error(error.body.message) : error,

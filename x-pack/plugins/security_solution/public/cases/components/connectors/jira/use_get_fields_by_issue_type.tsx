@@ -7,7 +7,6 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { HttpSetup, ToastsApi } from 'kibana/public';
-import { AbortError } from '../../../../../../../../src/plugins/kibana_utils/common';
 import { ActionConnector } from '../../../containers/types';
 import { getFieldsByIssueType } from './api';
 import { Fields } from './types';
@@ -70,7 +69,7 @@ export const useGetFieldsByIssueType = ({
       } catch (error) {
         if (!didCancel.current) {
           setIsLoading(false);
-          if (!(error instanceof AbortError)) {
+          if (error.name !== 'AbortError') {
             toastNotifications.addDanger({
               title: i18n.FIELDS_API_ERROR,
               text: error.message,

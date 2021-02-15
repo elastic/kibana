@@ -7,7 +7,6 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { HttpSetup, ToastsApi } from 'kibana/public';
-import { AbortError } from '../../../../../../../../src/plugins/kibana_utils/common';
 import { ActionConnector } from '../../../containers/types';
 import { getIssue } from './api';
 import { Issue } from './types';
@@ -69,7 +68,7 @@ export const useGetSingleIssue = ({
       } catch (error) {
         if (!didCancel.current) {
           setIsLoading(false);
-          if (!(error instanceof AbortError)) {
+          if (error.name !== 'AbortError') {
             toastNotifications.addDanger({
               title: i18n.GET_ISSUE_API_ERROR(id),
               text: error.message,

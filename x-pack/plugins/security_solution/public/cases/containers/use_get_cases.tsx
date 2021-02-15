@@ -6,7 +6,6 @@
  */
 
 import { useCallback, useEffect, useReducer, useRef } from 'react';
-import { AbortError } from '../../../../../../src/plugins/kibana_utils/common';
 import { CaseStatuses } from '../../../../case/common/api';
 import { DEFAULT_TABLE_ACTIVE_PAGE, DEFAULT_TABLE_LIMIT } from './constants';
 import { AllCases, SortFieldCase, FilterOptions, QueryParams, Case, UpdateByKey } from './types';
@@ -178,7 +177,7 @@ export const useGetCases = (initialQueryParams?: QueryParams): UseGetCases => {
       }
     } catch (error) {
       if (!didCancelFetchCases.current) {
-        if (!(error instanceof AbortError)) {
+        if (error.name !== 'AbortError') {
           errorToToaster({
             title: i18n.ERROR_TITLE,
             error: error.body && error.body.message ? new Error(error.body.message) : error,
@@ -214,7 +213,7 @@ export const useGetCases = (initialQueryParams?: QueryParams): UseGetCases => {
         }
       } catch (error) {
         if (!didCancelUpdateCases.current) {
-          if (!(error instanceof AbortError)) {
+          if (error.name !== 'AbortError') {
             errorToToaster({ title: i18n.ERROR_TITLE, error, dispatchToaster });
           }
           dispatch({ type: 'FETCH_FAILURE', payload: 'caseUpdate' });

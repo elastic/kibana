@@ -8,7 +8,6 @@
 import { isEmpty, debounce } from 'lodash/fp';
 import { useState, useEffect, useRef } from 'react';
 import { HttpSetup, ToastsApi } from 'kibana/public';
-import { AbortError } from '../../../../../../../../src/plugins/kibana_utils/common';
 import { ActionConnector } from '../../../containers/types';
 import { getIssues } from './api';
 import { Issues } from './types';
@@ -71,7 +70,7 @@ export const useGetIssues = ({
       } catch (error) {
         if (!didCancel.current) {
           setIsLoading(false);
-          if (!(error instanceof AbortError)) {
+          if (error.name !== 'AbortError') {
             toastNotifications.addDanger({
               title: i18n.ISSUES_API_ERROR,
               text: error.message,

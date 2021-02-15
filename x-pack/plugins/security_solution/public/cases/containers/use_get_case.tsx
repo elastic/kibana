@@ -8,7 +8,6 @@
 import { useEffect, useReducer, useCallback, useRef } from 'react';
 import { CaseStatuses, CaseType } from '../../../../case/common/api';
 
-import { AbortError } from '../../../../../../src/plugins/kibana_utils/common';
 import { Case } from './types';
 import * as i18n from './translations';
 import { errorToToaster, useStateToaster } from '../../common/components/toasters';
@@ -119,7 +118,7 @@ export const useGetCase = (caseId: string, subCaseId?: string): UseGetCase => {
       }
     } catch (error) {
       if (!didCancel.current) {
-        if (!(error instanceof AbortError)) {
+        if (error.name !== 'AbortError') {
           errorToToaster({
             title: i18n.ERROR_TITLE,
             error: error.body && error.body.message ? new Error(error.body.message) : error,

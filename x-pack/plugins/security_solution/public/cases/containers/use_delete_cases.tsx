@@ -6,7 +6,6 @@
  */
 
 import { useCallback, useReducer, useRef, useEffect } from 'react';
-import { AbortError } from '../../../../../../src/plugins/kibana_utils/common';
 import {
   displaySuccessToast,
   errorToToaster,
@@ -106,7 +105,7 @@ export const useDeleteCases = (): UseDeleteCase => {
       }
     } catch (error) {
       if (!didCancel.current) {
-        if (!(error instanceof AbortError)) {
+        if (error.name !== 'AbortError') {
           errorToToaster({
             title: i18n.ERROR_DELETING,
             error: error.body && error.body.message ? new Error(error.body.message) : error,

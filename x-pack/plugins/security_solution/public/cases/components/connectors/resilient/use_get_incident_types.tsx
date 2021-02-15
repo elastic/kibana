@@ -7,7 +7,6 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { HttpSetup, ToastsApi } from 'kibana/public';
-import { AbortError } from '../../../../../../../../src/plugins/kibana_utils/common';
 import { ActionConnector } from '../../../containers/types';
 import { getIncidentTypes } from './api';
 import * as i18n from './translations';
@@ -68,7 +67,7 @@ export const useGetIncidentTypes = ({
       } catch (error) {
         if (!didCancel.current) {
           setIsLoading(false);
-          if (!(error instanceof AbortError)) {
+          if (error.name !== 'AbortError') {
             toastNotifications.addDanger({
               title: i18n.INCIDENT_TYPES_API_ERROR,
               text: error.message,

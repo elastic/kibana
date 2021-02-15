@@ -6,7 +6,6 @@
  */
 
 import { useReducer, useCallback, useRef, useEffect } from 'react';
-import { AbortError } from '../../../../../../src/plugins/kibana_utils/common';
 import { CasePostRequest } from '../../../../case/common/api';
 import { errorToToaster, useStateToaster } from '../../common/components/toasters';
 import { postCase } from './api';
@@ -69,7 +68,7 @@ export const usePostCase = (): UsePostCase => {
       return response;
     } catch (error) {
       if (!didCancel.current) {
-        if (!(error instanceof AbortError)) {
+        if (error.name !== 'AbortError') {
           errorToToaster({
             title: i18n.ERROR_TITLE,
             error: error.body && error.body.message ? new Error(error.body.message) : error,

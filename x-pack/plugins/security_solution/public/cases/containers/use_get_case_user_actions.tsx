@@ -9,7 +9,6 @@ import { isEmpty, uniqBy } from 'lodash/fp';
 import { useCallback, useEffect, useState, useRef } from 'react';
 import deepEqual from 'fast-deep-equal';
 
-import { AbortError } from '../../../../../../src/plugins/kibana_utils/common';
 import { errorToToaster, useStateToaster } from '../../common/components/toasters';
 import { CaseFullExternalService } from '../../../../case/common/api/cases';
 import { getCaseUserActions, getSubCaseUserActions } from './api';
@@ -288,7 +287,7 @@ export const useGetCaseUserActions = (
         }
       } catch (error) {
         if (!didCancel.current) {
-          if (!(error instanceof AbortError)) {
+          if (error.name !== 'AbortError') {
             errorToToaster({
               title: i18n.ERROR_TITLE,
               error: error.body && error.body.message ? new Error(error.body.message) : error,

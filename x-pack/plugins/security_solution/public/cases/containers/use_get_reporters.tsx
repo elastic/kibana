@@ -8,7 +8,6 @@
 import { useCallback, useEffect, useState, useRef } from 'react';
 import { isEmpty } from 'lodash/fp';
 
-import { AbortError } from '../../../../../../src/plugins/kibana_utils/common';
 import { User } from '../../../../case/common/api';
 import { errorToToaster, useStateToaster } from '../../common/components/toasters';
 import { getReporters } from './api';
@@ -64,7 +63,7 @@ export const useGetReporters = (): UseGetReporters => {
       }
     } catch (error) {
       if (!didCancel.current) {
-        if (!(error instanceof AbortError)) {
+        if (error.name !== 'AbortError') {
           errorToToaster({
             title: i18n.ERROR_TITLE,
             error: error.body && error.body.message ? new Error(error.body.message) : error,

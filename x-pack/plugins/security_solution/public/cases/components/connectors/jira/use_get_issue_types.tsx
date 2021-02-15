@@ -73,7 +73,7 @@ export const useGetIssueTypes = ({
       } catch (error) {
         if (!didCancel.current) {
           setIsLoading(false);
-          if (!(error.name === 'AbortError')) {
+          if (error.name !== 'AbortError') {
             toastNotifications.addDanger({
               title: i18n.ISSUE_TYPES_API_ERROR,
               text: error.message,
