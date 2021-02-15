@@ -447,6 +447,10 @@ describe('LayerPanel', () => {
         indexPatternId: 'a',
         id: '1',
         humanData: { label: 'Label' },
+        ghost: {
+          children: <button>Hello!</button>,
+          style: {},
+        },
       };
 
       const component = mountWithIntl(
@@ -463,7 +467,7 @@ describe('LayerPanel', () => {
         })
       );
 
-      component.find('[data-test-subj="lnsGroup"] DragDrop').first().simulate('drop');
+      component.find('[data-test-subj="lnsGroup"] DragDrop .lnsDragDrop').first().simulate('drop');
 
       expect(mockDatasource.onDrop).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -497,6 +501,10 @@ describe('LayerPanel', () => {
         indexPatternId: 'a',
         id: '1',
         humanData: { label: 'Label' },
+        ghost: {
+          children: <button>Hello!</button>,
+          style: {},
+        },
       };
 
       const component = mountWithIntl(
@@ -554,6 +562,10 @@ describe('LayerPanel', () => {
         groupId: 'a',
         id: 'a',
         humanData: { label: 'Label' },
+        ghost: {
+          children: <button>Hello!</button>,
+          style: {},
+        },
       };
 
       const component = mountWithIntl(
@@ -571,7 +583,7 @@ describe('LayerPanel', () => {
       );
 
       // Simulate drop on the pre-populated dimension
-      component.find('[data-test-subj="lnsGroupB"] DragDrop').at(0).simulate('drop');
+      component.find('[data-test-subj="lnsGroupB"] DragDrop .lnsDragDrop').at(0).simulate('drop');
       expect(mockDatasource.onDrop).toHaveBeenCalledWith(
         expect.objectContaining({
           columnId: 'b',
@@ -582,7 +594,7 @@ describe('LayerPanel', () => {
       );
 
       // Simulate drop on the empty dimension
-      component.find('[data-test-subj="lnsGroupB"] DragDrop').at(1).simulate('drop');
+      component.find('[data-test-subj="lnsGroupB"] DragDrop .lnsDragDrop').at(1).simulate('drop');
       expect(mockDatasource.onDrop).toHaveBeenCalledWith(
         expect.objectContaining({
           columnId: 'newid',
@@ -613,6 +625,10 @@ describe('LayerPanel', () => {
         groupId: 'a',
         id: 'a',
         humanData: { label: 'Label' },
+        ghost: {
+          children: <button>Hello!</button>,
+          style: {},
+        },
       };
 
       const component = mountWithIntl(
@@ -659,6 +675,10 @@ describe('LayerPanel', () => {
         groupId: 'a',
         id: 'a',
         humanData: { label: 'Label' },
+        ghost: {
+          children: <button>Hello!</button>,
+          style: {},
+        },
       };
 
       const component = mountWithIntl(
