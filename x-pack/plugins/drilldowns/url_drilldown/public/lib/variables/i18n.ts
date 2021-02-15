@@ -5,4 +5,12 @@
  * 2.0.
  */
 
-export { UrlDrilldownCollectConfig } from './url_drilldown_collect_config';
+import { i18n } from '@kbn/i18n';
+
+export const txtValue = (value: string) =>
+  i18n.translate('xpack.urlDrilldown.valuePreview', {
+    defaultMessage: 'Value: {value}',
+    values: {
+      value,
+    },
+  });
