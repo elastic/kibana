@@ -642,9 +642,9 @@ export class SearchSource {
 
     // specific fields were provided, so we need to exclude any others
     if (fieldListProvided || fieldsFromSource.length) {
-      const bodyFieldNames = body.fields.map((field: string | Record<string, any>) => {
-        return this.getFieldName(field);
-      });
+      const bodyFieldNames = body.fields.map((field: string | Record<string, any>) =>
+        this.getFieldName(field)
+      );
       const uniqFieldNames = [...new Set([...bodyFieldNames, ...fieldsFromSource])];
 
       if (!uniqFieldNames.includes('*')) {

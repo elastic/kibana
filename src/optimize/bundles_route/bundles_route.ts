@@ -10,6 +10,7 @@ import { extname, join } from 'path';
 
 import Hapi from '@hapi/hapi';
 import * as UiSharedDeps from '@kbn/ui-shared-deps';
+import agent from 'elastic-apm-node';
 
 import { createDynamicAssetResponse } from './dynamic_asset_response';
 import { FileHashCache } from './file_hash_cache';
@@ -100,6 +101,8 @@ function buildRouteForBundles({
         onPreHandler: {
           method(request: Hapi.Request, h: Hapi.ResponseToolkit) {
             const ext = extname(request.params.path);
+
+            agent.setTransactionName('GET ?/bundles/?');
 
             if (ext !== '.js' && ext !== '.css') {
               return h.continue;

@@ -1,5 +1,5 @@
 {
-  "id": "newsfeed-fixtures",
+  "id": "newsfeedFixtures",
   "version": "kibana",
   "server": true,
   "ui": false
