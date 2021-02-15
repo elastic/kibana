@@ -88,7 +88,7 @@ export class EnhancedDataServerPlugin
     });
 
     if (deps.usageCollection) {
-      registerUsageCollector(deps.usageCollection, this.initializerContext);
+      registerUsageCollector(deps.usageCollection, this.initializerContext, this.logger);
     }
   }
 

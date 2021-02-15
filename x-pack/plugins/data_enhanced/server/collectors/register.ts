@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PluginInitializerContext } from 'kibana/server';
+import { PluginInitializerContext, Logger } from 'kibana/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { fetchProvider } from './fetch';
 
@@ -17,13 +17,14 @@ export interface ReportedUsage {
 
 export async function registerUsageCollector(
   usageCollection: UsageCollectionSetup,
-  context: PluginInitializerContext
+  context: PluginInitializerContext,
+  logger: Logger
 ) {
   try {
     const collector = usageCollection.makeUsageCollector<ReportedUsage>({
       type: 'search-session',
       isReady: () => true,
-      fetch: fetchProvider(context.config.legacy.globalConfig$),
+      fetch: fetchProvider(context.config.legacy.globalConfig$, logger),
       schema: {
         transientCount: { type: 'long' },
         persistedCount: { type: 'long' },

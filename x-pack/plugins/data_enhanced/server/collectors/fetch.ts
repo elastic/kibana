@@ -8,7 +8,7 @@
 import { Observable } from 'rxjs';
 import { first } from 'rxjs/operators';
 import { SearchResponse } from 'elasticsearch';
-import { SharedGlobalConfig } from 'kibana/server';
+import { SharedGlobalConfig, Logger } from 'kibana/server';
 import { CollectorFetchContext } from '../../../../../src/plugins/usage_collection/server';
 import { SEARCH_SESSION_TYPE } from '../../common';
 import { ReportedUsage } from './register';
@@ -18,36 +18,42 @@ interface SessionPersistedTermsBucket {
   doc_count: number;
 }
 
-export function fetchProvider(config$: Observable<SharedGlobalConfig>) {
+export function fetchProvider(config$: Observable<SharedGlobalConfig>, logger: Logger) {
   return async ({ esClient }: CollectorFetchContext): Promise<ReportedUsage> => {
-    const config = await config$.pipe(first()).toPromise();
-    const { body: esResponse } = await esClient.search<SearchResponse<unknown>>({
-      index: config.kibana.index,
-      body: {
-        size: 0,
-        aggs: {
-          persisted: {
-            terms: {
-              field: `${SEARCH_SESSION_TYPE}.persisted`,
+    try {
+      const config = await config$.pipe(first()).toPromise();
+      const { body: esResponse } = await esClient.search<SearchResponse<unknown>>({
+        index: config.kibana.index,
+        body: {
+          size: 0,
+          aggs: {
+            persisted: {
+              terms: {
+                field: `${SEARCH_SESSION_TYPE}.persisted`,
+              },
             },
           },
         },
-      },
-    });
+      });
 
-    const { buckets } = esResponse.aggregations.persisted;
-    if (!buckets.length) {
+      const { buckets } = esResponse.aggregations.persisted;
+      if (!buckets.length) {
+        return { transientCount: 0, persistedCount: 0, totalCount: 0 };
+      }
+
+      const { transientCount = 0, persistedCount = 0 } = buckets.reduce(
+        (usage: Partial<ReportedUsage>, bucket: SessionPersistedTermsBucket) => {
+          const key = bucket.key_as_string === 'false' ? 'transientCount' : 'persistedCount';
+          return { ...usage, [key]: bucket.doc_count };
+        },
+        {}
+      );
+      const totalCount = transientCount + persistedCount;
+      logger.debug(`fetchProvider | ${persistedCount} persisted | ${transientCount} transient`);
+      return { transientCount, persistedCount, totalCount };
+    } catch (e) {
+      logger.warn(`fetchProvider | error | ${e.message}`);
       return { transientCount: 0, persistedCount: 0, totalCount: 0 };
     }
-
-    const { transientCount = 0, persistedCount = 0 } = buckets.reduce(
-      (usage: Partial<ReportedUsage>, bucket: SessionPersistedTermsBucket) => {
-        const key = bucket.key_as_string === 'false' ? 'transientCount' : 'persistedCount';
-        return { ...usage, [key]: bucket.doc_count };
-      },
-      {}
-    );
-    const totalCount = transientCount + persistedCount;
-    return { transientCount, persistedCount, totalCount };
   };
 }
