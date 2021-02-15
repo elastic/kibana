@@ -118,7 +118,7 @@ describe('Config Deprecations', () => {
     `);
   });
 
-  it('renames audit.appender.policy.kind to audit.appender.policy.type', () => {
+  it('renames audit.appender.strategy.kind to audit.appender.strategy.type', () => {
     const config = {
       xpack: {
         security: {
