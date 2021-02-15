@@ -2,3 +2,153 @@
 [[task-manager-health-endpoint]]
 == Task Manager Health Endpoint
 
+The {kib} Task Manager has an internal monitoring mechanism in which keeps track of a variety of metrics which can be consumed via a `health` api endpoint, or via the {kib} Server Log.
+
+The `health` api is exposed at `/api/task_manager/_health`, and is designed to be fast enough to provide a reliable monitoriable endpoint.
+Consuming this endpoint doesn't actually cause additional load by performing health checks, but rather it returns the latest observations made by the system. This design enables the consumption of by external services at a regular cadance without the concern of additional load to the system.
+
+Monitoring this `health` api is the recommended method for monitoring the health of the {kib} Task Management, which enables such mission critical services such as Alerting and Actions.
+
+=== Configuring the Monitored Health Statistics
+
+The Health Endpoint monitors Task Manager's performance out of the box, but certain performance considerination are deployment specific and are configurable as a result.
+
+Health thresholds are configurable via the <<task-manager-health-settings,`xpack.task_manager.monitored_task_execution_thresholds`>> setting.
+This configuration specifies the threshold of failed task executions which, once exceeded, sets a health status of `warn` or `error` on the corresponding task type execution status.
+This setting can be set as either the default level, which is applied to all task types in the system, or at a custom task type specific level. 
+
+By default, this setting is configured to mark the health of every task type as `warning` when it exceeds 80% failed executions, and as `error` at 90%.
+This value can be set to any number between 0 to 100, and a threshold is hit when the value *exceeds* this number.
+This means that you can avoid setting the status to `error` by setting the threshold at 100, or hit `error` the moment any task failes by setting the threshold to 0 (as it will exceed 0 once a single failer occurs).
+
+Custom configurations allow you to set lower thresholds for task types you might consider critical, such as alerting tasks, which you might wish to detect sooner in an external monitoring service.
+
+[source,yml]
+----
+xpack.task_manager.monitored_task_execution_thresholds:
+  default: # <1>
+    error_threshold: 70
+    warn_threshold: 50
+  custom:
+    "alerting:.index-threshold": # <2>
+      error_threshold: 50
+      warn_threshold: 0
+----
+<1> default configuration, setting a system wide `warn` threshold at 50%, and `error` at 70% failure rate
+<2> custom configuration for the `alerting:.index-threshold` task type, setting a system wide `warn` threshold at 0% (which will set a `warn` status the moment any task of that type fails), and `error` at 50% failure rate
+
+=== Consuming Health Stats
+
+The `health` api is best consumed by via the `/api/task_manager/_health` endpoint.
+
+Additionally, the metrics are logged out into the {kib} `DEBUG` logger at a regular cadence.
+If you wish to enable Task Manager DEBUG logging in your {kib} instance, you will need to add the following to your `Kibana.yml`:
+```
+logging:
+  loggers:
+      - context: plugins.taskManager
+        appenders: [console]
+        level: debug
+```
+
+Please bear in mind that these stats are logged as often as your <<task-manager-settings,`xpack.task_manager.poll_interval`>> setting, which means it could add substantial noise to your logs.
+
+We would recommend only enabling this level of logging temporarily.
+
+[float]
+[[making-sense-of-task-manager-health-stats]]
+=== Making Sense of Task Manager Health Stats
+
+The Health Monitoring api exposes three sections: `configuration`, `workload` and `runtime`:
+
+[cols="2"]
+|===
+
+a| Configuration
+
+| This section summarizes Task Manager's current configuration, including dynamic configurations which change over time, such as `poll_interval` and `max_workers` which can adjust in reaction to changing load on the system.
+
+a| Workload
+
+| This section summarizes the work load across the cluster, listing the tasks in the system, their types and what their current status is.
+
+a| Runtime
+
+| This section tracks excution performance of Task Manager, tracking task _drift_, worker _load_, and execution stats broken down by type, including duration and execution results
+
+|===
+
+Each section has a `timestamp` and a `status` which indicates when the last update to this setion took place and whether the health of this section was evaluated as `OK`, `Warning` or `Error`.
+
+The root has its own `status` which indicate the `status` of the system overall.
+
+[float]
+[[task-manager-health-diagnosing-unexpected-behavior]]
+==== Diagnosing Unexpected Task Manager Behavior
+
+Task Manager is used by a wide ange of services in {kib}, such as <<alerting-production-considerations, Alerting>>, Reporting and Telemetry.
+Unexpected behavior in these services might be a downstream issue originating in Task Manager.
+
+Use the information in this section to troubleshoot common problems and find answers for frequently asked questions.
+
+For issues that you cannot fix yourself … we’re here to help.
+If you are an existing Elastic customer with a support contract, please create a ticket in the
+https://support.elastic.co/customers/s/login/[Elastic Support portal].
+Or post in the https://discuss.elastic.co/[Elastic forum].
+
+
+[float]
+[[task-manager-health-scheduled-tasks-small-schedule-interval-run-late]]
+=== Scheduled Tasks with Small Schedule Intervals Run Late
+
+*Symptom*:
+Tasks are scheduled to run every 2 seconds but they seem to be running too late
+
+*Resolution*:
+Task Manager polls for tasks at the cadence specified by the <<task-manager-settings,`xpack.task_manager.poll_interval`>> setting, which is 3 seconds by default. This means that a Task could run late if it uses a schedule which is smaller than this setting.
+
+This can be addressed by adjusting the <<task-manager-settings,`xpack.task_manager.poll_interval`>> setting, though this will add additional load to both {kib} and {es} instances in the cluster, as they will peform more queries.
+
+
+[float]
+[[task-manager-health-tasks-run-late]]
+=== Tasks Run Late
+
+*Symptoms*:
+Recurring Tasks run at an inconsistent cadence, often running late.
+Tasks run long after their scheduled running time.
+
+*Resolution*:
+By default {kib} polls for tasks at a rate of 10 tasks every 3 seconds.
+
+This means that if there are many tasks that have been scheduled to run at the same time, pending tasks will queue in {es}, and be pulled 10 at a time from the queue at 3 second intervals. The consequence of which is that only 10 tasks can be run concurrently per {kib} instance.
+
+As a result of these capacity limitations tasks can run late.
+We refer to this sort of delay as _drift_, the underlying cause of which vary from deployment to deployment, and for that reason there are no hard and fast rules to addressing them.
+
+A possible cause for both consistent and inconsistent _drift_ is *an excess of concurrent tasks* relative to the available capacity of {kib} instances in the cluster, which can be addressed by expanding the throughput of the cluster.
+An additional possible cause for consistent _drift_ is that *Long running tasks* may overrun their scheduled cadence. Such a scenario would ocurr if a task is scheduled to execute every 2 seconds, but takes 4 seconds to complete, in which case it will consistenly suffer from a _drift_ of, at least, 2 seconds.
+
+There are several options for addressing _drift_ in the system, each with their own considerations
+Before we dig deeper into diagnosing the underlying cause, it is worth understanding the options on the table:
+
+[float]
+[[task-manager-health-resolution-scale-horizontally]]
+==== Scale Horizontaly
+
+At times it the most sustainbale approach might be to expand the throughput of your cluster by provisioning additional {kib} instances.
+By default, each additional {kib} instance will add an additional 10 tasks that your cluster can run concurrenctly. You can also scale each {kib} instance vertically, if your dignosis indicates they can handle the additiuonal workload.
+
+[float]
+[[task-manager-health-resolution-scale-vertically]]
+==== Scale Vertically
+
+Other times it, might be preferable to increase the throughput of individual {kib} instances.
+
+Tweak the *Max Workers* via the <<task-manager-settings,`xpack.task_manager.max_workers`>> setting, which would allow each {kib} to pull a higher numebr of tasks per interval, but keep in mind that this could impact the performance of each {kib} instance as their workload would be higher.
+Tweak the *Poll Interval* via the <<task-manager-settings,`xpack.task_manager.poll_interval`>> setting, which would allow each {kib} to pull scheduled tasks at a higher rate, but keep in mind that this could impact the performance of the {es} cluster as their workload would be higher.
+
+[float]
+==== Diagnosing A Preferred Strategy
+
+...

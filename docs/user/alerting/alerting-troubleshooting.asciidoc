@@ -1,0 +1,52 @@
+[role="xpack"]
+[[alerting-troubleshooting]]
+== Alerting Troubleshooting
+
+Use the information in this section to troubleshoot common problems and find answers for frequently asked questions.
+
+For issues that you cannot fix yourself … we’re here to help.
+If you are an existing Elastic customer with a support contract, please create a ticket in the
+https://support.elastic.co/customers/s/login/[Elastic Support portal].
+Or post in the https://discuss.elastic.co/[Elastic forum].
+
+[IMPORTANT]
+==============================================
+The most common problems encountered by customers can be addressed by tweaking the {kib} Task Manager or adjusting the cluster scaling strategy to better suit their unique use case.
+
+For details on the settings that can influence the performance and throughput of Task Manager, see <<task-manager-settings-kb, Task Manager Settings>>.
+
+For details on diagnosing issues using the Task Manager Health endpoint, see <<task-manager-health-endpoint, Task Manager Health Monitoring>>.
+
+==============================================
+
+[float]
+[[scheduled-alerts-small-check-interval-run-late]]
+=== Scheduled Alerts with Small Check Intervals Run Late
+
+*Symptoms*:
+Alert are scheduled to run every 2 seconds but they seem to be running too late
+
+*Resolution*:
+As mentioned in <<alerting-production-considerations>>, Alerts are ran as background tasks at a cadence defined by their *check interval*.
+
+For details on resolving this issue please see <<task-manager-health-scheduled-tasks-small-schedule-interval-run-late>>.
+
+
+[float]
+[[scheduled-alerts-run-late]]
+=== Scheduled Alerts Run Late
+
+*Symptoms*:
+Scheduled Alerts run at an inconsistent cadence, often running late.
+Actions run long after the status of an Alert changes, notifying us of the change too late.
+
+*Resolution*:
+As mentioned in <<alerting-production-considerations>>, Alerts and Actions are ran as background tasks for which each {kib} instance polls at a default rate of 10 tasks every 3 seconds.
+
+This means that if there are many alerts or actions that have been scheduled to run at the same time, pending tasks will queue in {es}, and be pulled 10 at a time from the queue at 3 second intervals. The consequence of which is that only 10 tasks can be run concurrently per {kib} instance.
+As each and every Alert or Action is backed by a task, it is possible under certain situations to exceeding the default capacity.
+
+For details on diagnosing the underlying causes of such delays, please see <<task-manager-health-tasks-run-late>>.
+Keep in mind that in order to diagnose issues specific to Alerting, a subset of tasks is of interest, which is those whose `type` begins with `alerting:`. For example, task whose type is `alerting:.index-threshold`, which denotes the tasks backing the <<alert-type-index-threshold, Index Threshold Stack Alert>>.
+
+For broader details on diagnosing task execution using the Task Manager Health endpoint, see <<task-manager-health-endpoint, Task Manager Health Monitoring>>.
