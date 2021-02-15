@@ -123,7 +123,7 @@ export default function ({ getService, getPageObjects }) {
       });
       const rowData = await PageObjects.discover.getDocTableIndex(1);
       expect(rowData).to.be(
-        '_id2_type - _indexflstest_score0customer_name.keywordABC Companycustomer_region.keywordWEST customer_regionWESTcustomer_nameABCCompany'
+        '_id2_type - _indexflstest_score0customer_name.keywordABC Companycustomer_region.keywordWESTcustomer_regionWESTcustomer_nameABC Company'
       );
     });
 
