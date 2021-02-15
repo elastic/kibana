@@ -4,7 +4,7 @@
   "private": true,
   "version": "1.0.0",
   "main": "./target/index.js",
-  "license": "SSPL-1.0 OR Elastic License",
+  "license": "SSPL-1.0 OR Elastic License 2.0",
   "repository": {
     "type": "git",
     "url": "https://github.com/elastic/kibana/tree/master/packages/kbn-babel-code-parser"

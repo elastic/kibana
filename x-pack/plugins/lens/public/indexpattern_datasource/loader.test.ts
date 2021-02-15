@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { HttpHandler, SavedObjectsClientContract } from 'kibana/public';
@@ -346,6 +347,7 @@ describe('loader', () => {
         savedObjectsClient: mockClient(),
         indexPatternsService: mockIndexPatternsService(),
         storage,
+        options: { isFullEditor: true },
       });
 
       expect(state).toMatchObject({
@@ -364,12 +366,35 @@ describe('loader', () => {
       });
     });
 
+    it('should load a default state without loading the indexPatterns when embedded', async () => {
+      const storage = createMockStorage();
+      const savedObjectsClient = mockClient();
+      const state = await loadInitialState({
+        savedObjectsClient,
+        indexPatternsService: mockIndexPatternsService(),
+        storage,
+        options: { isFullEditor: false },
+      });
+
+      expect(state).toMatchObject({
+        currentIndexPatternId: undefined,
+        indexPatternRefs: [],
+        indexPatterns: {},
+        layers: {},
+      });
+
+      expect(storage.set).not.toHaveBeenCalled();
+
+      expect(savedObjectsClient.find).not.toHaveBeenCalled();
+    });
+
     it('should load a default state when lastUsedIndexPatternId is not found in indexPatternRefs', async () => {
       const storage = createMockStorage({ indexPatternId: 'c' });
       const state = await loadInitialState({
         savedObjectsClient: mockClient(),
         indexPatternsService: mockIndexPatternsService(),
         storage,
+        options: { isFullEditor: true },
       });
 
       expect(state).toMatchObject({
@@ -393,6 +418,7 @@ describe('loader', () => {
         savedObjectsClient: mockClient(),
         indexPatternsService: mockIndexPatternsService(),
         storage: createMockStorage({ indexPatternId: '2' }),
+        options: { isFullEditor: true },
       });
 
       expect(state).toMatchObject({
@@ -415,6 +441,7 @@ describe('loader', () => {
         savedObjectsClient: mockClient(),
         indexPatternsService: mockIndexPatternsService(),
         storage,
+        options: { isFullEditor: true },
       });
 
       expect(state).toMatchObject({
@@ -443,6 +470,7 @@ describe('loader', () => {
           indexPatternId: '1',
           fieldName: '',
         },
+        options: { isFullEditor: true },
       });
 
       expect(state).toMatchObject({
@@ -499,6 +527,7 @@ describe('loader', () => {
         savedObjectsClient: mockClient(),
         indexPatternsService: mockIndexPatternsService(),
         storage,
+        options: { isFullEditor: true },
       });
 
       expect(state).toMatchObject({

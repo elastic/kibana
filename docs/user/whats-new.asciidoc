@@ -1,26 +1,278 @@
 [[whats-new]]
 == What's new in {minor-version}
 
-This section summarizes the most important changes in this release. For previous
-releases, refer to:
+Here are the highlights of what's new and improved in {minor-version}.
+For detailed information about this release,
+check out the <<release-notes, release notes>>,
+<<breaking-changes, breaking changes>>, and https://www.elastic.co/blog/whats-new-kibana-7-11-0-alerting-generally-available[release blog].
 
-* {kibana-ref-all}/7.9/whats-new.html[7.9]
-* {kibana-ref-all}/7.8/whats-new.html[7.8]
-* {kibana-ref-all}/7.7/release-highlights-7.7.0.html[7.7]
-* {kibana-ref-all}/7.6/release-highlights-7.6.0.html[7.6]
-* {kibana-ref-all}/7.5/release-highlights-7.5.0.html[7.5]
-* {kibana-ref-all}/7.4/release-highlights-7.4.0.html[7.4]
-* {kibana-ref-all}/7.3/release-highlights-7.3.0.html[7.3]
-* {kibana-ref-all}/7.2/release-highlights-7.2.0.html[7.2]
-* {kibana-ref-all}/7.1/release-highlights-7.1.0.html[7.1]
-* {kibana-ref-all}/7.0/release-highlights-7.0.0.html[7.0]
-
-For the full list of changes in {minor-version}, see <<release-notes>> and
-<<breaking-changes>>. 
+Other versions: {kibana-ref-all}/7.10/whats-new.html[7.10] | {kibana-ref-all}/7.9/whats-new.html[7.9] | {kibana-ref-all}/7.8/whats-new.html[7.8] | {kibana-ref-all}/7.7/release-highlights-7.7.0.html[7.7] |
+{kibana-ref-all}/7.6/release-highlights-7.6.0.html[7.6] | {kibana-ref-all}/7.5/release-highlights-7.5.0.html[7.5] |
+{kibana-ref-all}/7.4/release-highlights-7.4.0.html[7.4] | {kibana-ref-all}/7.3/release-highlights-7.3.0.html[7.3] | {kibana-ref-all}/7.2/release-highlights-7.2.0.html[7.2]
+| {kibana-ref-all}/7.1/release-highlights-7.1.0.html[7.1] | {kibana-ref-all}/7.0/release-highlights-7.0.0.html[7.0]
 
 //NOTE: The notable-highlights tagged regions are re-used in the
 //Installation and Upgrade Guide
 
 // tag::notable-highlights[]
+
+[float]
+[[alerting-generally-available]]
+=== Alerting is generally available
+The first Beta version of the new {kib} *Alerting* was released in 7.7.
+In 7.11, *Alerting* is generally available (GA), which means that it
+is officially recommended for use in production. *Alerting* guides you
+through building your alerts, provides seamless integration with
+*Elastic Security* and *Elastic Observability*, integrates with the external
+systems where your workflows run, and more. For more information,
+check out the
+https://www.elastic.co/blog/elastic-stack-alerting-now-generally-available[{kib} alerting GA 7.11 blog].
+
+[role="screenshot"]
+image::user/images/highlights-alerting.png[Alerts and actions]
+
+With 7.11, comes the following enhancements:
+
+* Set up an alert to produce a notification or incident only when the alert changes state.
+* Optionally set your PagerDuty incidents to auto-resolve once your alert returns to normal.
+* Use Microsoft Teams as part of the ever-growing collection of connectors.
++
+[role="screenshot"]
+image::user/images/highlights-connectors.png[Connectors view of Alerts and actions]
+
+[float]
+[[anonymous-access-available]]
+=== Anonymous access and improved audit logging
+
+Anonymous access gives users access to {kib} without requiring them to
+provide credentials. This is useful if you want your users to skip the
+login step when you embed dashboards in another application or set up a demo
+{kib} instance in your internal network, while keeping other security features intact.
+To get started with anonymous access, check out {kibana-ref}/kibana-authentication.html#anonymous-authentication[the docs].
+
+[role="screenshot"]
+image::user/images/highlights-security-anon-acess-7-11.gif[Demo that shows how anonymous access works]
+
+
+Also in 7.11, {kib}’s audit logging was completely
+revamped. When configured, {kib} will record a
+{kibana-ref}/xpack-security-audit-logging.html#xpack-security-ecs-audit-logging[wide array of user activity]
+in a dedicated log file. These logs are compliant with the
+{ecs-ref}/index.html[ECS specification],
+and are easily ingested using Filebeat’s https://www.elastic.co/guide/en/beats/filebeat/7.11/filebeat-module-kibana.html[{kib} module].
+Check out {kibana-ref}/security-settings-kb.html#ecs-audit-logging-settings[the docs]
+to configure the new audit logger, and gain more insight in your user’s activity.
+
+[float]
+[[introducing-tags]]
+=== Introducing tags for content management
+
+Tags makes it easier for you to manage your content. Tags are keywords or labels
+that you assign to {kib} saved objects, such as dashboards and visualizations,
+so you can classify them in a way that is meaningful to you.
+
+The biggest advantage of tags is that they allow you to quickly group and
+manage related objects. For example, if you tag objects with “design”,
+you can search and filter on the tag to see related objects.
+See {kibana-ref}/managing-tags.html[Tags] for information on saving tags
+with your content, filtering on them, and searching across {kib} for related assets.
+
+[role="screenshot"]
+image::user/images/highlights-tags.png[Tags view in Stack Management]
+
+[float]
+[[deep-linking-in-search]]
+=== Navigational search deep links into apps
+
+In 7.10, {kib} added navigational search, so you can rapidly move to a dashboard,
+visualization, or application in just a few keystrokes. This release enhances
+search suggestions to include deep links into applications,
+allowing you to directly navigate to the views you need most.
+
+[role="screenshot"]
+image::user/images/highlights-deep-links.png[Global search field with suggestions for deep links into apps]
+
+The enhanced search syntax in 7.11 lets you filter results by type and by tag.
+For example you can find objects by type using the `syntax type:dashboard dashboard_name`
+and by tag using `tag:tag-name`. See
+{kibana-ref}/introduction.html#kibana-navigation-search[navigational search] for more examples.
+
+[role="screenshot"]
+image::user/images/highlights-search-syntax.png[Global search field with syntax for how to search by tag]
+
+[float]
+[[improved-visualization-chooser]]
+=== Simplier visualization workflow
+
+{kib} simplifies the visualization workflow by providing guidance for
+which visualization editor to use for your type of data. To view the new visualization selector,
+open *Dashboard*, click *Create visualization*, and then click *Create panel*.
+*Lens*, {kib}'s' drag and drop editor, is recommended for most users.
+
+[role="screenshot"]
+image::user/images/highlights-visualization-chooser.png[Improved visualization chooser with in-line help]
+
+[float]
+[[maps-layers-styles-alerts]]
+=== Maps&mdash;Elastic Maps Server, tracks layer, & more
+
+[float]
+==== Elastic Maps Server
+
+The Elastic Maps Service powers *Maps* for most instances of {kib}.
+In 7.11, for customers in a secure, air-gapped environment, you can now use the
+same maps and boundaries that come with {kib} by default. The Elastic Maps Server
+can be
+https://www.elastic.co/downloads/elastic-maps-server[downloaded and deployed to your self-managed environment].
+
+[float]
+==== Tracks layer
+
+The new tracks layer is a simple
+way to connect the dots, taking an index of point locations by time and displaying
+them as a line. This is good for customers working with GPS, sensor, or
+location-tracked time-series data, who want to visualize the routes and paths of their data.
+
+[role="screenshot"]
+image::user/images/highlights-tracks-layer.png[Tracks layer in Maps]
+
+[float]
+==== Style by percentile
+
+*Maps* has a new option for styling layers. Now you can apply color
+by percentile data ranges, making it easier to separate above and below the mean.
+You can add any number of percentile ranges.
+
+[role="screenshot"]
+image::user/images/highlights-style-by-percentile.png[Style by percentile in Maps]
+
+[float]
+==== Geo alerts (Beta)
+
+In 7.10, {kib} introduced a new location-driven alert called the tracking alert.
+Enhanced in 7.11, the tracking alert now allows you to trigger alerts when entities enter,
+leave, or cross a boundary. Further, there's a new geographic alert based on containment.
+You can now monitor the location of an entity as long as it is within a specified boundary
+with the containment alert.
+
+[role="screenshot"]
+image::user/images/highlights-geo-alerts.png[Geo alerts in Maps]
+
+[float]
+[[Lens-color-palettes]]
+=== Lens has new palettes
+
+Choose from one of the new *Lens* palettes to make your visualizations
+really stand out. Use a diverging palette to show status, a gradient palette
+for a muted look, or a backwards compatible palette to blend with existing dashboards.
+
+[role="screenshot"]
+image::user/images/highlights-lens-color-palette.png[Lens color palettes]
+
+*Lens* now supports *drag to reorder* in all chart types.
+Reprioritize how the data displays in your visualizations by reordering the fields in the editor.
+
+[role="screenshot"]
+image::user/images/highlights-drag-to-reorder.png[Lens drag to reorder for all chart types]
+
+*Lens* also has improved tables&mdash;click the column header to sort in place, or use the newly
+introduced *last value* metric to create detail tables. For example,
+visualize the most recent flight that has departed a given city.
+
+[role="screenshot"]
+image::user/images/highlights-improved-tables.png[Improved tables in Lens]
+
+More new *Lens* features:
+
+* Download *Lens* panels as CSV from a dashboard.
+* When you configure the *Top values* function, group “Other” values by default.
+* From the editor, apply the *Median* function to fields.
+
+[float]
+[[drilldowns-trigger-types]]
+=== Drilldowns offers new trigger types
+
+When the drilldown feature was first introduced, it offered
+the ability to click on a chart element,
+known as a “trigger.” This release adds two new trigger types for use with
+URL drilldowns.
+
+[float]
+==== Context menu trigger
+
+A context menu trigger allows you to attach a drilldown to the panel context menu.
+This trigger is useful for navigating to contextual information
+related to a panel.
+
+[role="screenshot"]
+image::user/images/highlights-context-trigger-menu.png[Drilldown context trigger menu]
+
+[float]
+==== Table row trigger
+
+Previously, {kib} supported attaching a drilldown to a table. The table row
+trigger expands on this functionality by allowing you to configure the URL
+with one or more specific columns from a *Lens* table.
+
+When your URL requires multiple parameters, you can present them in a table,
+and use the URL template to format and concatenate the values.
+
+[role="screenshot"]
+image::user/images/highlights-table-row-trigger.png[Drilldown table row trigger]
+
+[float]
+[[custom-labels-for-fields]]
+=== Fields now support custom labels
+
+Custom labels are especially useful for displaying long field names in much shorter versions.
+These labels appear in *Discover*, *Maps*, and *Visualize* (not yet in TSVB, but coming soon).
+To add a custom label to a field, go to *Stack Management > Index Pattern*. Details are in
+{kibana-ref}/managing-fields.html[the documentation].
+
+[role="screenshot"]
+image::user/images/highlights-custom-field-labels.png[Drilldown table row trigger]
+
+
+[float]
+[[ml-jobs-space]]
+=== {ml-cap} jobs are now space-aware
+
+{anomaly-detect-cap} and {dfanalytics} jobs are space-aware starting in 7.11.
+{kibana-ref}/xpack-spaces.html[Spaces] enable you to organize your {ml} jobs
+and other {kib} saved objects into meaningful categories. Once a {ml} job is
+limited to a {kib} space, users only see the job if they are assigned to the
+same space. Extra checks for spaces have been added when deleting jobs, and a
+warning is shown if any jobs are missing their saved objects.
+
+
+[float]
+[[index-data-visualizer-design]]
+=== Index Data Visualizer has new design
+
+The {ml-cap} Data Visualizer provides a view into your indices to give a better
+understanding of the fields in the data set prior to creating {anomaly-detect}
+or {dfanalytics-jobs}. The Data Visualizer went through a major redesign and the
+previous card based display is switched to a table. It has the benefit of a more
+compact layout, a new document count chart, and expanded rows for viewing
+details on individual fields.
+
+[role="screenshot"]
+image::user/images/highlights-index-data-vis-design.png[Index data visualizer table]
+
+
+[float]
+[[single-metric-viewer-nav]]
+=== Enhanced navigation for the Single Metric Viewer
+
+The new navigation enables you to explore the results of the {anomaly-jobs}
+easier and provides more control for selecting the partitioning field in the
+Single Metric Viewer. An indication of the maximum anomaly score for each value
+is now displayed, and you have the possibility to sort matches by score or name
+and to limit the selection to values which are anomalous over the selected time
+range.
+
+[role="screenshot"]
+image::user/images/highlights-smv-nav.png[Single Metric Viewer enhanced navigation]
+
 
 // end::notable-highlights[]

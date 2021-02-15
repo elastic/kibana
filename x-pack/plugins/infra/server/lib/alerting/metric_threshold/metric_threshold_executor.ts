@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { first, last } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
@@ -41,9 +43,6 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
     // Because each alert result has the same group definitions, just grab the groups from the first one.
     const groups = Object.keys(first(alertResults)!);
     for (const group of groups) {
-      const alertInstance = services.alertInstanceFactory(`${group}`);
-      const prevState = alertInstance.getState();
-
       // AND logic; all criteria must be across the threshold
       const shouldAlertFire = alertResults.every((result) =>
         // Grab the result of the most recent bucket
@@ -67,12 +66,12 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
         reason = alertResults
           .map((result) => buildFiredAlertReason(formatAlertResult(result[group])))
           .join('\n');
-      } else if (nextState === AlertStates.OK && prevState?.alertState === AlertStates.ALERT) {
         /*
          * Custom recovery actions aren't yet available in the alerting framework
          * Uncomment the code below once they've been implemented
          * Reference: https://github.com/elastic/kibana/issues/87048
          */
+        // } else if (nextState === AlertStates.OK && prevState?.alertState === AlertStates.ALERT) {
         // reason = alertResults
         //   .map((result) => buildRecoveredAlertReason(formatAlertResult(result[group])))
         //   .join('\n');
@@ -95,6 +94,7 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
         const timestamp = (firstResult && firstResult[group].timestamp) ?? moment().toISOString();
         const actionGroupId =
           nextState === AlertStates.OK ? RecoveredActionGroup.id : FIRED_ACTIONS.id;
+        const alertInstance = services.alertInstanceFactory(`${group}`);
         alertInstance.scheduleActions(actionGroupId, {
           group,
           alertState: stateToAlertMessage[nextState],
@@ -111,10 +111,6 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
           metric: mapToConditionsLookup(criteria, (c) => c.metric),
         });
       }
-
-      alertInstance.replaceState({
-        alertState: nextState,
-      });
     }
   };
 

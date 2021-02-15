@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { TypeRegistry } from '../../../type_registry';
 import { registerBuiltInActionTypes } from '.././index';
 import { ActionTypeModel } from '../../../../types';
@@ -82,7 +84,7 @@ describe('jira action params validation', () => {
     };
 
     expect(actionTypeModel.validateParams(actionParams)).toEqual({
-      errors: { summary: [] },
+      errors: { summary: [], labels: [] },
     });
   });
 
@@ -94,6 +96,23 @@ describe('jira action params validation', () => {
     expect(actionTypeModel.validateParams(actionParams)).toEqual({
       errors: {
         summary: ['Summary is required.'],
+        labels: [],
+      },
+    });
+  });
+
+  test('params validation fails when labels contain spaces', () => {
+    const actionParams = {
+      subActionParams: {
+        incident: { summary: 'some title', labels: ['label with spaces'] },
+        comments: [],
+      },
+    };
+
+    expect(actionTypeModel.validateParams(actionParams)).toEqual({
+      errors: {
+        summary: [],
+        labels: ['Labels cannot contain spaces.'],
       },
     });
   });
