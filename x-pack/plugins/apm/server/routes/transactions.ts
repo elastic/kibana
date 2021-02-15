@@ -20,11 +20,10 @@ import { getServiceTransactionGroupComparisonStatistics } from '../lib/services/
 import { getTransactionBreakdown } from '../lib/transactions/breakdown';
 import { getTransactionDistribution } from '../lib/transactions/distribution';
 import { getAnomalySeries } from '../lib/transactions/get_anomaly_data';
-import { getLatencyTimeseries } from '../lib/transactions/get_latency_charts';
+import { getLatencyPeriods } from '../lib/transactions/get_latency_charts';
 import { getThroughputCharts } from '../lib/transactions/get_throughput_charts';
 import { getTransactionGroupList } from '../lib/transaction_groups';
 import { getErrorRate } from '../lib/transaction_groups/get_error_rate';
-import { offsetPreviousPeriodCoordinates } from '../utils/offset_previous_period_coordinate';
 import { createRoute } from './create_route';
 import { comparisonRangeRt, rangeRt, uiFiltersRt } from './default_api_types';
 
@@ -195,8 +194,6 @@ export const transactionLatencyChatsRoute = createRoute({
       setup
     );
 
-    const { start, end } = setup;
-
     const options = {
       serviceName,
       transactionType,
@@ -207,36 +204,20 @@ export const transactionLatencyChatsRoute = createRoute({
     };
 
     const [
-      currentPeriod,
+      { currentPeriod, previousPeriod },
       anomalyTimeseries,
-      previousPeriod,
     ] = await Promise.all([
-      getLatencyTimeseries({
+      getLatencyPeriods({
         ...options,
-        start,
-        end,
         latencyAggregationType: latencyAggregationType as LatencyAggregationType,
+        comparisonStart,
+        comparisonEnd,
       }),
       getAnomalySeries(options).catch((error) => {
         logger.warn(`Unable to retrieve anomalies for latency charts.`);
         logger.error(error);
         return undefined;
       }),
-      comparisonStart && comparisonEnd
-        ? getLatencyTimeseries({
-            ...options,
-            start: comparisonStart,
-            end: comparisonEnd,
-            latencyAggregationType: latencyAggregationType as LatencyAggregationType,
-          }).then((latency) => ({
-            ...latency,
-            latencyTimeseries: offsetPreviousPeriodCoordinates({
-              currentPeriodStart: start,
-              previousPeriodStart: comparisonStart,
-              previousPeriodTimeseries: latency.latencyTimeseries,
-            }),
-          }))
-        : { latencyTimeseries: [], overallAvgDuration: null },
     ]);
 
     return {

@@ -44,6 +44,7 @@ describe('getLatencyChartSelector', () => {
       const latencyChart = getLatencyChartSelector({ theme });
       expect(latencyChart).toEqual({
         currentPeriod: [],
+        previousPeriod: [],
         mlJobId: undefined,
         anomalyTimeseries: undefined,
       });
@@ -66,12 +67,14 @@ describe('getLatencyChartSelector', () => {
             color: 'blue',
           },
         ],
-        previousPeriod: {
-          color: 'green',
-          data: [{ x: 1, y: 10 }],
-          type: 'area',
-          title: 'Previous period',
-        },
+        previousPeriod: [
+          {
+            color: 'green',
+            data: [{ x: 1, y: 10 }],
+            type: 'area',
+            title: 'Previous period',
+          },
+        ],
       });
     });
 
@@ -92,12 +95,14 @@ describe('getLatencyChartSelector', () => {
             color: 'red',
           },
         ],
-        previousPeriod: {
-          data: [{ x: 1, y: 10 }],
-          type: 'area',
-          color: 'green',
-          title: 'Previous period',
-        },
+        previousPeriod: [
+          {
+            data: [{ x: 1, y: 10 }],
+            type: 'area',
+            color: 'green',
+            title: 'Previous period',
+          },
+        ],
       });
     });
 
@@ -119,12 +124,14 @@ describe('getLatencyChartSelector', () => {
             color: 'black',
           },
         ],
-        previousPeriod: {
-          data: [{ x: 1, y: 10 }],
-          type: 'area',
-          color: 'green',
-          title: 'Previous period',
-        },
+        previousPeriod: [
+          {
+            data: [{ x: 1, y: 10 }],
+            type: 'area',
+            color: 'green',
+            title: 'Previous period',
+          },
+        ],
       });
     });
   });
@@ -146,12 +153,14 @@ describe('getLatencyChartSelector', () => {
             color: 'black',
           },
         ],
-        previousPeriod: {
-          data: [{ x: 1, y: 10 }],
-          type: 'area',
-          color: 'green',
-          title: 'Previous period',
-        },
+        previousPeriod: [
+          {
+            data: [{ x: 1, y: 10 }],
+            type: 'area',
+            color: 'green',
+            title: 'Previous period',
+          },
+        ],
         mlJobId: '1',
         anomalyTimeseries: {
           boundaries: [

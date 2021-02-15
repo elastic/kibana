@@ -54,7 +54,12 @@ export function LatencyChart({ height }: Props) {
     mlJobId,
   } = latencyChartsData;
 
-  const latencyMaxY = getMaxY(currentPeriod);
+  const timeseries = [
+    ...currentPeriod,
+    ...(comparisonEnabled ? previousPeriod : []),
+  ];
+
+  const latencyMaxY = getMaxY(timeseries);
   const latencyFormatter = getDurationFormatter(latencyMaxY);
 
   return (
@@ -109,10 +114,7 @@ export function LatencyChart({ height }: Props) {
           fetchStatus={latencyChartsStatus}
           id="latencyChart"
           customTheme={comparisonChartTheme}
-          timeseries={[
-            ...currentPeriod,
-            ...(comparisonEnabled && previousPeriod ? [previousPeriod] : []),
-          ]}
+          timeseries={timeseries}
           yLabelFormat={getResponseTimeTickFormatter(latencyFormatter)}
           anomalyTimeseries={anomalyTimeseries}
         />

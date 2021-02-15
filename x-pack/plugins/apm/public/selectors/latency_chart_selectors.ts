@@ -17,7 +17,7 @@ export type LatencyChartsResponse = APIReturnType<'GET /api/apm/services/{servic
 
 export interface LatencyChartData {
   currentPeriod: Array<APMChartSpec<Coordinate>>;
-  previousPeriod?: APMChartSpec<Coordinate>;
+  previousPeriod: Array<APMChartSpec<Coordinate>>;
   mlJobId?: string;
   anomalyTimeseries?: { boundaries: APMChartSpec[]; scores: APMChartSpec };
 }
@@ -37,7 +37,7 @@ export function getLatencyChartSelector({
   ) {
     return {
       currentPeriod: [],
-      previousPeriod: undefined,
+      previousPeriod: [],
       mlJobId: undefined,
       anomalyTimeseries: undefined,
     };
@@ -67,17 +67,19 @@ function getPreviousPeriodTimeseries({
   previousPeriod: LatencyChartsResponse['previousPeriod'];
   theme: EuiTheme;
 }) {
-  return {
-    data: previousPeriod.latencyTimeseries ?? [],
-    type: 'area',
-    color: theme.eui.euiColorLightestShade,
-    title: i18n.translate(
-      'xpack.apm.serviceOverview.latencyChartTitle.previousPeriodLabel',
-      {
-        defaultMessage: 'Previous period',
-      }
-    ),
-  };
+  return [
+    {
+      data: previousPeriod.latencyTimeseries ?? [],
+      type: 'area',
+      color: theme.eui.euiColorLightestShade,
+      title: i18n.translate(
+        'xpack.apm.serviceOverview.latencyChartTitle.previousPeriodLabel',
+        {
+          defaultMessage: 'Previous period',
+        }
+      ),
+    },
+  ];
 }
 
 function getLatencyTimeseries({

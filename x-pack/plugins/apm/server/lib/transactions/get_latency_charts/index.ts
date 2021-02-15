@@ -20,7 +20,8 @@ import {
   getTransactionDurationFieldForAggregatedTransactions,
 } from '../../../lib/helpers/aggregated_transactions';
 import { getBucketSize } from '../../../lib/helpers/get_bucket_size';
-import { Setup } from '../../../lib/helpers/setup_request';
+import { Setup, SetupTimeRange } from '../../../lib/helpers/setup_request';
+import { offsetPreviousPeriodCoordinates } from '../../../utils/offset_previous_period_coordinate';
 import { withApmSpan } from '../../../utils/with_apm_span';
 import {
   getLatencyAggregation,
@@ -156,4 +157,64 @@ export function getLatencyTimeseries({
       ),
     };
   });
+}
+
+export async function getLatencyPeriods({
+  serviceName,
+  transactionType,
+  transactionName,
+  setup,
+  searchAggregatedTransactions,
+  latencyAggregationType,
+  comparisonStart,
+  comparisonEnd,
+}: {
+  serviceName: string;
+  transactionType: string | undefined;
+  transactionName: string | undefined;
+  setup: Setup & SetupTimeRange;
+  searchAggregatedTransactions: boolean;
+  latencyAggregationType: LatencyAggregationType;
+  comparisonStart?: number;
+  comparisonEnd?: number;
+}) {
+  const { start, end } = setup;
+  const options = {
+    serviceName,
+    transactionType,
+    transactionName,
+    setup,
+    searchAggregatedTransactions,
+  };
+
+  const currentPeriodPromise = getLatencyTimeseries({
+    ...options,
+    start,
+    end,
+    latencyAggregationType: latencyAggregationType as LatencyAggregationType,
+  });
+
+  const previousPeriodPromise =
+    comparisonStart && comparisonEnd
+      ? getLatencyTimeseries({
+          ...options,
+          start: comparisonStart,
+          end: comparisonEnd,
+          latencyAggregationType: latencyAggregationType as LatencyAggregationType,
+        }).then((latency) => ({
+          ...latency,
+          latencyTimeseries: offsetPreviousPeriodCoordinates({
+            currentPeriodStart: start,
+            previousPeriodStart: comparisonStart,
+            previousPeriodTimeseries: latency.latencyTimeseries,
+          }),
+        }))
+      : { latencyTimeseries: [], overallAvgDuration: null };
+
+  const [currentPeriod, previousPeriod] = await Promise.all([
+    currentPeriodPromise,
+    previousPeriodPromise,
+  ]);
+
+  return { currentPeriod, previousPeriod };
 }
