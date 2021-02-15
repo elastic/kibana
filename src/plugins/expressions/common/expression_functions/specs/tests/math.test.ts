@@ -45,6 +45,14 @@ describe('math', () => {
         expect(fn(testTable, { expression: 'count(name)' })).toBe(9);
       });
     });
+
+    describe('onError', () => {
+      it('should return the desired fallback value, for invalid expressions', () => {
+        expect(fn(testTable, { expression: 'mean(name)', onError: 'zero' })).toBe(0);
+        expect(fn(testTable, { expression: 'mean(name)', onError: 'null' })).toBe(null);
+        expect(fn(testTable, { expression: 'mean(name)', onError: 'false' })).toBe(false);
+      });
+    });
   });
 
   describe('invalid expressions', () => {
@@ -83,6 +91,18 @@ describe('math', () => {
     it('throws when passing a context variable from an empty datatable', () => {
       expect(() => fn(emptyTable, { expression: 'mean(foo)' })).toThrow(
         new RegExp(errors.emptyDatatable().message)
+      );
+    });
+
+    it('should not throw when requesting fallback values for invalid expression', () => {
+      expect(() => fn(testTable, { expression: 'mean(name)', onError: 'zero' })).not.toThrow();
+      expect(() => fn(testTable, { expression: 'mean(name)', onError: 'false' })).not.toThrow();
+      expect(() => fn(testTable, { expression: 'mean(name)', onError: 'null' })).not.toThrow();
+    });
+
+    it('should throw when declared in the onError argument', () => {
+      expect(() => fn(testTable, { expression: 'mean(name)', onError: 'throw' })).toThrow(
+        new RegExp(errors.executionFailed().message)
       );
     });
   });

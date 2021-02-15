@@ -12,9 +12,10 @@ import { evaluate } from '@kbn/tinymath';
 import { ExpressionFunctionDefinition } from '../types';
 import { Datatable, isDatatable } from '../../expression_types';
 
-export interface MathArguments {
+export type MathArguments = {
   expression: string;
-}
+  onError?: 'null' | 'zero' | 'false' | 'throw';
+};
 
 export type MathInput = number | Datatable;
 
@@ -69,9 +70,20 @@ export const errors = {
     ),
 };
 
-export const math: ExpressionFunctionDefinition<'math', MathInput, MathArguments, number> = {
+const fallbackValue = {
+  null: null,
+  zero: 0,
+  false: false,
+} as const;
+
+export const math: ExpressionFunctionDefinition<
+  'math',
+  MathInput,
+  MathArguments,
+  boolean | number | null
+> = {
   name: 'math',
-  type: 'number',
+  type: undefined,
   inputTypes: ['number', 'datatable'],
   help: i18n.translate('expressions.functions.mathHelpText', {
     defaultMessage:
@@ -98,9 +110,20 @@ export const math: ExpressionFunctionDefinition<'math', MathInput, MathArguments
         },
       }),
     },
+    onError: {
+      types: ['string'],
+      help: i18n.translate('expressions.functions.math.args.onErrorHelpText', {
+        defaultMessage:
+          "In case the {TINYMATH} evaluation fails or returns NaN, the return value is specified by onError. If it's set to throw, it will throw an exception, terminating expression execution (default).",
+        values: {
+          TINYMATH,
+        },
+      }),
+    },
   },
   fn: (input, args) => {
-    const { expression } = args;
+    const { expression, onError } = args;
+    const onErrorValue = onError ?? 'throw';
 
     if (!expression || expression.trim() === '') {
       throw errors.emptyExpression();
@@ -122,6 +145,10 @@ export const math: ExpressionFunctionDefinition<'math', MathInput, MathArguments
         throw errors.tooManyResults();
       }
       if (isNaN(result)) {
+        // make TS happy
+        if (onErrorValue !== 'throw' && onErrorValue in fallbackValue) {
+          return fallbackValue[onErrorValue];
+        }
         throw errors.executionFailed();
       }
       return result;
