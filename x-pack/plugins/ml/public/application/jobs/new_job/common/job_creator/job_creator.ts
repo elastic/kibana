@@ -93,7 +93,7 @@ export class JobCreator {
       this._job_config.data_description.time_field = indexPattern.timeFieldName;
     }
 
-    this._extractRunTimeMappings();
+    this._extractRuntimeMappings();
 
     this._datafeed_config.query = query;
   }
@@ -675,10 +675,9 @@ export class JobCreator {
     this._job_config.analysis_config.per_partition_categorization!.stop_on_warn = enabled;
   }
 
-  private _extractRunTimeMappings() {
+  private _extractRuntimeMappings() {
     const runtimeFieldMap = this._indexPattern.toSpec().runtimeFieldMap;
     if (runtimeFieldMap !== undefined) {
-      // console.log(indexPattern.toSpec().runtimeFieldMap);
       if (this._datafeed_config.runtime_mappings === undefined) {
         this._datafeed_config.runtime_mappings = {};
       }

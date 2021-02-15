@@ -172,16 +172,3 @@ export function getAggFieldPairNames(af: AggFieldPair) {
     by,
   };
 }
-
-// export function getRuntimeMappings(runtimeFields: Field[]): RuntimeMappings | undefined {
-//   let match = false;
-//   const rf = runtimeFields.reduce((acc, field) => {
-//     if (field.runtimeField !== undefined) {
-//       acc[field.id] = field.runtimeField;
-//       match = true;
-//     }
-//     return acc;
-//   }, {} as RuntimeMappings);
-
-//   return match ? rf : undefined;
-// }
