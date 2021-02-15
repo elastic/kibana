@@ -48,11 +48,10 @@ describe('RollingFileAppender', () => {
   });
 
   afterEach(async () => {
-    try {
-      await rmdir(testDir);
-    } catch (e) {
-      /* trap */
+    if (testDir) {
+      await rmdir(testDir, { recursive: true });
     }
+
     if (root) {
       await root.shutdown();
     }

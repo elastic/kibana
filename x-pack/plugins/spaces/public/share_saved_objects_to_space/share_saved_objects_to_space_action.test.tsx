@@ -5,21 +5,14 @@
  * 2.0.
  */
 
-import { coreMock, notificationServiceMock } from 'src/core/public/mocks';
 import { SavedObjectsManagementRecord } from '../../../../../src/plugins/saved_objects_management/public';
-import { spacesManagerMock } from '../spaces_manager/mocks';
+import { uiApiMock } from '../ui_api/mocks';
 import { ShareToSpaceSavedObjectsManagementAction } from './share_saved_objects_to_space_action';
 
 describe('ShareToSpaceSavedObjectsManagementAction', () => {
   const createAction = () => {
-    const spacesManager = spacesManagerMock.create();
-    const notificationsStart = notificationServiceMock.createStartContract();
-    const { getStartServices } = coreMock.createSetup();
-    return new ShareToSpaceSavedObjectsManagementAction(
-      spacesManager,
-      notificationsStart,
-      getStartServices
-    );
+    const spacesApiUi = uiApiMock.create();
+    return new ShareToSpaceSavedObjectsManagementAction(spacesApiUi);
   };
   describe('#euiAction.available', () => {
     describe('with an object type that has a namespaceType of "multiple"', () => {

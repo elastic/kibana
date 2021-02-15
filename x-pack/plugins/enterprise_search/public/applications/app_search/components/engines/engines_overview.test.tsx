@@ -77,6 +77,14 @@ describe('EnginesOverview', () => {
       expect(actions.loadEngines).toHaveBeenCalled();
     });
 
+    it('renders a create engine button which takes users to the create engine page', () => {
+      const wrapper = shallow(<EnginesOverview />);
+
+      expect(
+        wrapper.find('[data-test-subj="appSearchEnginesEngineCreationButton"]').prop('to')
+      ).toEqual('/engine_creation');
+    });
+
     describe('when on a platinum license', () => {
       it('renders a 2nd meta engines table & makes a 2nd meta engines API call', async () => {
         setMockValues({

@@ -17,8 +17,8 @@ import {
   SeriesNameFn,
   Settings,
   timeFormatter,
+  Position,
 } from '@elastic/charts';
-import { Position } from '@elastic/charts/dist/utils/commons';
 import {
   EUI_CHARTS_THEME_DARK,
   EUI_CHARTS_THEME_LIGHT,
