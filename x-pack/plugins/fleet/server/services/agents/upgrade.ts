@@ -112,12 +112,12 @@ export async function sendUpgradeAgentsActions(
     : agents.filter((agent) => isAgentUpgradeable(agent, kibanaVersion));
 
   // get any policy ids from upgradable agents
-  const policyIdsToGet: string[] = upgradeableAgents
-    .filter((agent) => agent.policy_id)
-    .map((agent) => agent.policy_id!);
+  const policyIdsToGet = new Set(
+    upgradeableAgents.filter((agent) => agent.policy_id).map((agent) => agent.policy_id!)
+  );
 
   // get the agent policies for those ids
-  const agentPolicies = await agentPolicyService.getByIDs(soClient, policyIdsToGet, {
+  const agentPolicies = await agentPolicyService.getByIDs(soClient, Array.from(policyIdsToGet), {
     fields: ['is_managed'],
   });
 
