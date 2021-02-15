@@ -9,7 +9,10 @@ import { EuiTab } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { ReactNode } from 'react';
 import { isJavaAgentName, isRumAgentName } from '../../../../common/agent_name';
-import { enableServiceOverview } from '../../../../common/ui_settings_keys';
+import {
+  enableServiceOverview,
+  enableProfiling,
+} from '../../../../common/ui_settings_keys';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
@@ -19,6 +22,7 @@ import { useServiceMapHref } from '../../shared/Links/apm/ServiceMapLink';
 import { useServiceNodeOverviewHref } from '../../shared/Links/apm/ServiceNodeOverviewLink';
 import { useServiceOverviewHref } from '../../shared/Links/apm/service_overview_link';
 import { useTransactionsOverviewHref } from '../../shared/Links/apm/transaction_overview_link';
+import { useServiceProfilingHref } from '../../shared/Links/apm/service_profiling_link';
 import { MainTabs } from '../../shared/main_tabs';
 import { ErrorGroupOverview } from '../error_group_overview';
 import { ServiceMap } from '../ServiceMap';
@@ -26,6 +30,7 @@ import { ServiceNodeOverview } from '../service_node_overview';
 import { ServiceMetrics } from '../service_metrics';
 import { ServiceOverview } from '../service_overview';
 import { TransactionOverview } from '../transaction_overview';
+import { ServiceProfiling } from '../service_profiling';
 
 interface Tab {
   key: string;
@@ -42,6 +47,7 @@ interface Props {
     | 'nodes'
     | 'overview'
     | 'service-map'
+    | 'profiling'
     | 'transactions';
 }
 
@@ -113,6 +119,15 @@ export function ServiceDetailTabs({ serviceName, tab }: Props) {
       ) : null,
   };
 
+  const profilingTab = {
+    key: 'profiling',
+    href: useServiceProfilingHref({ serviceName }),
+    text: i18n.translate('xpack.apm.serviceDetails.profilingTabLabel', {
+      defaultMessage: 'Profiling',
+    }),
+    render: () => <ServiceProfiling serviceName={serviceName} />,
+  };
+
   const tabs: Tab[] = [transactionsTab, errorsTab];
 
   if (uiSettings.get(enableServiceOverview)) {
@@ -126,6 +141,10 @@ export function ServiceDetailTabs({ serviceName, tab }: Props) {
   }
 
   tabs.push(serviceMapTab);
+
+  if (uiSettings.get(enableProfiling)) {
+    tabs.push(profilingTab);
+  }
 
   const selectedTab = tabs.find((serviceTab) => serviceTab.key === tab);
 

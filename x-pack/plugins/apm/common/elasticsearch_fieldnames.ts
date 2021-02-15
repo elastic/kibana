@@ -132,3 +132,11 @@ export const LCP_FIELD = 'transaction.marks.agent.largestContentfulPaint';
 export const TBT_FIELD = 'transaction.experience.tbt';
 export const FID_FIELD = 'transaction.experience.fid';
 export const CLS_FIELD = 'transaction.experience.cls';
+
+export const PROFILE_ID = 'profile.id';
+export const PROFILE_DURATION = 'profile.duration';
+export const PROFILE_TOP_ID = 'profile.top.id';
+export const PROFILE_CPU_NS = 'profile.cpu.ns';
+export const PROFILE_WALL_US = 'profile.wall.us';
+export const PROFILE_SAMPLES_COUNT = 'profile.samples.count';
+export const PROFILE_STACK = 'profile.stack';

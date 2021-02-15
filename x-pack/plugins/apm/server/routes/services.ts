@@ -27,6 +27,7 @@ import { offsetPreviousPeriodCoordinates } from '../utils/offset_previous_period
 import { createRoute } from './create_route';
 import { comparisonRangeRt, rangeRt, uiFiltersRt } from './default_api_types';
 import { withApmSpan } from '../utils/with_apm_span';
+import { getServiceProfile } from '../lib/services/profiling/get_service_profile';
 
 export const servicesRoute = createRoute({
   endpoint: 'GET /api/apm/services',
@@ -440,6 +441,38 @@ export const serviceDependenciesRoute = createRoute({
       environment,
       setup,
       numBuckets,
+    });
+  },
+});
+
+export const serviceProfilingRoute = createRoute({
+  endpoint: 'GET /api/apm/services/{serviceName}/profiling',
+  params: t.type({
+    path: t.type({
+      serviceName: t.string,
+    }),
+    query: t.intersection([
+      rangeRt,
+      t.partial({
+        environment: t.string,
+      }),
+    ]),
+  }),
+  options: {
+    tags: ['access:apm'],
+  },
+  handler: async ({ context, request }) => {
+    const setup = await setupRequest(context, request);
+
+    const {
+      path: { serviceName },
+      query: { environment },
+    } = context.params;
+
+    return getServiceProfile({
+      serviceName,
+      environment,
+      setup,
     });
   },
 });

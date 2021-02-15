@@ -7,3 +7,4 @@
 
 export const enableCorrelations = 'apm:enableCorrelations';
 export const enableServiceOverview = 'apm:enableServiceOverview';
+export const enableProfiling = 'apm:enableProfiling';

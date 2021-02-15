@@ -11,6 +11,7 @@ import { UiSettingsParams } from '../../../../src/core/types';
 import {
   enableCorrelations,
   enableServiceOverview,
+  enableProfiling,
 } from '../common/ui_settings_keys';
 
 /**
@@ -41,6 +42,20 @@ export const uiSettings: Record<string, UiSettingsParams<boolean>> = {
       'xpack.apm.enableServiceOverviewExperimentDescription',
       {
         defaultMessage: 'Enable the Overview tab for services in APM.',
+      }
+    ),
+    schema: schema.boolean(),
+  },
+  [enableProfiling]: {
+    category: ['observability'],
+    name: i18n.translate('xpack.apm.enableProfilingExperimentName', {
+      defaultMessage: 'APM Profiling',
+    }),
+    value: false,
+    description: i18n.translate(
+      'xpack.apm.enableProfilingExperimentDescription',
+      {
+        defaultMessage: 'Enable the Profiling tab for services in APM.',
       }
     ),
     schema: schema.boolean(),
