@@ -203,13 +203,12 @@ export const i18nTexts = {
       }),
       cold: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.coldPhase.coldPhaseDescription', {
         defaultMessage:
-          'Move data to the cold tier, which is optimized for cost savings over search performance. Data is normally read-only in the cold phase.,
+          'Move data to the cold tier, which is optimized for cost savings over search performance. Data is normally read-only in the cold phase.',
       }),
       delete: i18n.translate(
         'xpack.indexLifecycleMgmt.editPolicy.deletePhase.deletePhaseDescription',
         {
-          defaultMessage:
-            'Delete data you no longer need.',
+          defaultMessage: 'Delete data you no longer need.',
         }
       ),
     },
