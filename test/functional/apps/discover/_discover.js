@@ -98,10 +98,10 @@ export default function ({ getService, getPageObjects }) {
       it('should modify the time range when the histogram is brushed', async function () {
         // this is the number of renderings of the histogram needed when new data is fetched
         // this needs to be improved
-        const renderingCountInc = 2;
         const prevRenderingCount = await elasticChart.getVisualizationRenderingCount(
           'discoverChart'
         );
+        log.debug(`Number of renderings initially: ${prevRenderingCount}`);
         await PageObjects.timePicker.setDefaultAbsoluteRange();
         await PageObjects.discover.waitUntilSearchingHasFinished();
         await retry.waitFor('chart rendering complete', async () => {
@@ -109,7 +109,7 @@ export default function ({ getService, getPageObjects }) {
             'discoverChart'
           );
           log.debug(`Number of renderings before brushing: ${actualRenderingCount}`);
-          return actualRenderingCount === prevRenderingCount + renderingCountInc;
+          return actualRenderingCount === prevRenderingCount + 2;
         });
         await PageObjects.discover.brushHistogram();
         await PageObjects.discover.waitUntilSearchingHasFinished();
