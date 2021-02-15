@@ -24,6 +24,7 @@ import * as CSS from 'csstype';
 import { Datatable as Datatable_2 } from 'src/plugins/expressions';
 import { Datatable as Datatable_3 } from 'src/plugins/expressions/common';
 import { DatatableColumn as DatatableColumn_2 } from 'src/plugins/expressions';
+import { DatatableColumnType } from 'src/plugins/expressions/common';
 import { DetailedPeerCertificate } from 'tls';
 import { Ensure } from '@kbn/utility-types';
 import { EnvironmentMode } from '@kbn/config';

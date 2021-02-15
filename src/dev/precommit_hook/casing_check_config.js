@@ -123,7 +123,6 @@ export const REMOVE_EXTENSION = ['packages/kbn-plugin-generator/template/**/*.ej
  * @type {Array}
  */
 export const TEMPORARILY_IGNORED_PATHS = [
-  'src/fixtures/config_upgrade_from_4.0.0_to_4.0.1-snapshot.json',
   'src/core/server/core_app/assets/favicons/android-chrome-192x192.png',
   'src/core/server/core_app/assets/favicons/android-chrome-256x256.png',
   'src/core/server/core_app/assets/favicons/android-chrome-512x512.png',
