@@ -6,6 +6,7 @@
  */
 
 import { joinByKey } from '../../../../common/utils/join_by_key';
+import { withApmSpan } from '../../../utils/with_apm_span';
 import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 import { getServiceInstanceSystemMetricStats } from './get_service_instance_system_metric_stats';
 import { getServiceInstanceTransactionStats } from './get_service_instance_transaction_stats';
@@ -22,20 +23,22 @@ export interface ServiceInstanceParams {
 export async function getServiceInstances(
   params: Omit<ServiceInstanceParams, 'size'>
 ) {
-  const paramsForSubQueries = {
-    ...params,
-    size: 50,
-  };
+  return withApmSpan('get_service_instances', async () => {
+    const paramsForSubQueries = {
+      ...params,
+      size: 50,
+    };
 
-  const [transactionStats, systemMetricStats] = await Promise.all([
-    getServiceInstanceTransactionStats(paramsForSubQueries),
-    getServiceInstanceSystemMetricStats(paramsForSubQueries),
-  ]);
+    const [transactionStats, systemMetricStats] = await Promise.all([
+      getServiceInstanceTransactionStats(paramsForSubQueries),
+      getServiceInstanceSystemMetricStats(paramsForSubQueries),
+    ]);
 
-  const stats = joinByKey(
-    [...transactionStats, ...systemMetricStats],
-    'serviceNodeName'
-  );
+    const stats = joinByKey(
+      [...transactionStats, ...systemMetricStats],
+      'serviceNodeName'
+    );
 
-  return stats;
+    return stats;
+  });
 }

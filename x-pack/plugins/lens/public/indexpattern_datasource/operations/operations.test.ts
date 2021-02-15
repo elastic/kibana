@@ -86,12 +86,12 @@ describe('getOperationTypesForField', () => {
       ).toEqual([
         'range',
         'terms',
+        'median',
         'avg',
         'sum',
         'min',
         'max',
         'cardinality',
-        'median',
         'percentile',
         'last_value',
       ]);
@@ -109,7 +109,7 @@ describe('getOperationTypesForField', () => {
           },
           (op) => !op.isBucketed
         )
-      ).toEqual(['avg', 'sum', 'min', 'max', 'cardinality', 'median', 'percentile', 'last_value']);
+      ).toEqual(['median', 'avg', 'sum', 'min', 'max', 'cardinality', 'percentile', 'last_value']);
     });
 
     it('should return operations on dates', () => {
