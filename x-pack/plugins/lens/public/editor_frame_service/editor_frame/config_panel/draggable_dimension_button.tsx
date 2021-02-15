@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useCallback } from 'react';
 import { DragDrop, DragDropIdentifier, DragContextState } from '../../../drag_drop';
 import {
   Datasource,
@@ -44,6 +44,7 @@ export function DraggableDimensionButton({
   dragDropContext,
   layerDatasourceDropProps,
   layerDatasource,
+  registerNewButtonRef,
 }: {
   dragDropContext: DragContextState;
   layerId: string;
@@ -61,6 +62,7 @@ export function DraggableDimensionButton({
   layerDatasourceDropProps: LayerDatasourceDropProps;
   accessorIndex: number;
   columnId: string;
+  registerNewButtonRef: (id: string, instance: HTMLDivElement | null) => void;
 }) {
   const dropType = layerDatasource.getDropTypes({
     ...layerDatasourceDropProps,
@@ -94,8 +96,17 @@ export function DraggableDimensionButton({
     [group.accessors]
   );
 
+  const registerNewButtonRefMemoized = useCallback((el) => registerNewButtonRef(columnId, el), [
+    registerNewButtonRef,
+    columnId,
+  ]);
+
   return (
-    <div className="lnsLayerPanel__dimensionContainer" data-test-subj={group.dataTestSubj}>
+    <div
+      ref={registerNewButtonRefMemoized}
+      className="lnsLayerPanel__dimensionContainer"
+      data-test-subj={group.dataTestSubj}
+    >
       <DragDrop
         getAdditionalClassesOnEnter={getAdditionalClassesOnEnter}
         getAdditionalClassesOnDroppable={getAdditionalClassesOnDroppable}

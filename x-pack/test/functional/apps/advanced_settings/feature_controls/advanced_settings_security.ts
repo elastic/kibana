@@ -148,7 +148,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           kibana: [
             {
               feature: {
-                discover: ['all'],
+                discover: ['read'],
               },
               spaces: ['*'],
             },

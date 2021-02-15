@@ -68,7 +68,7 @@ describe('LayerPanel', () => {
       dispatch: jest.fn(),
       core: coreMock.createStart(),
       layerIndex: 0,
-      setLayerRef: jest.fn(),
+      registerNewLayerRef: jest.fn(),
     };
   }
 
@@ -447,6 +447,10 @@ describe('LayerPanel', () => {
         indexPatternId: 'a',
         id: '1',
         humanData: { label: 'Label' },
+        ghost: {
+          children: <button>Hello!</button>,
+          style: {},
+        },
       };
 
       const component = mountWithIntl(
@@ -463,7 +467,7 @@ describe('LayerPanel', () => {
         })
       );
 
-      component.find('[data-test-subj="lnsGroup"] DragDrop').first().simulate('drop');
+      component.find('[data-test-subj="lnsGroup"] DragDrop .lnsDragDrop').first().simulate('drop');
 
       expect(mockDatasource.onDrop).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -497,6 +501,10 @@ describe('LayerPanel', () => {
         indexPatternId: 'a',
         id: '1',
         humanData: { label: 'Label' },
+        ghost: {
+          children: <button>Hello!</button>,
+          style: {},
+        },
       };
 
       const component = mountWithIntl(
@@ -554,6 +562,10 @@ describe('LayerPanel', () => {
         groupId: 'a',
         id: 'a',
         humanData: { label: 'Label' },
+        ghost: {
+          children: <button>Hello!</button>,
+          style: {},
+        },
       };
 
       const component = mountWithIntl(
@@ -571,7 +583,7 @@ describe('LayerPanel', () => {
       );
 
       // Simulate drop on the pre-populated dimension
-      component.find('[data-test-subj="lnsGroupB"] DragDrop').at(0).simulate('drop');
+      component.find('[data-test-subj="lnsGroupB"] DragDrop .lnsDragDrop').at(0).simulate('drop');
       expect(mockDatasource.onDrop).toHaveBeenCalledWith(
         expect.objectContaining({
           columnId: 'b',
@@ -582,7 +594,7 @@ describe('LayerPanel', () => {
       );
 
       // Simulate drop on the empty dimension
-      component.find('[data-test-subj="lnsGroupB"] DragDrop').at(1).simulate('drop');
+      component.find('[data-test-subj="lnsGroupB"] DragDrop .lnsDragDrop').at(1).simulate('drop');
       expect(mockDatasource.onDrop).toHaveBeenCalledWith(
         expect.objectContaining({
           columnId: 'newid',
@@ -613,6 +625,10 @@ describe('LayerPanel', () => {
         groupId: 'a',
         id: 'a',
         humanData: { label: 'Label' },
+        ghost: {
+          children: <button>Hello!</button>,
+          style: {},
+        },
       };
 
       const component = mountWithIntl(
@@ -620,17 +636,26 @@ describe('LayerPanel', () => {
           <LayerPanel {...getDefaultProps()} />
         </ChildDragDropProvider>
       );
-
-      component.find(DragDrop).at(1).prop('onDrop')!(draggingOperation, 'reorder');
+      act(() => {
+        component.find(DragDrop).at(1).prop('onDrop')!(draggingOperation, 'reorder');
+      });
       expect(mockDatasource.onDrop).toHaveBeenCalledWith(
         expect.objectContaining({
           dropType: 'reorder',
           droppedItem: draggingOperation,
         })
       );
+      const secondButton = component
+        .find(DragDrop)
+        .at(1)
+        .find('[data-test-subj="lnsDragDrop-keyboardHandler"]')
+        .instance();
+      const focusedEl = document.activeElement;
+      expect(focusedEl).toEqual(secondButton);
     });
 
     it('should copy when dropping on empty slot in the same group', () => {
+      (generateId as jest.Mock).mockReturnValue(`newid`);
       mockVisualization.getConfiguration.mockReturnValue({
         groups: [
           {
@@ -650,6 +675,10 @@ describe('LayerPanel', () => {
         groupId: 'a',
         id: 'a',
         humanData: { label: 'Label' },
+        ghost: {
+          children: <button>Hello!</button>,
+          style: {},
+        },
       };
 
       const component = mountWithIntl(
@@ -657,9 +686,12 @@ describe('LayerPanel', () => {
           <LayerPanel {...getDefaultProps()} />
         </ChildDragDropProvider>
       );
-      component.find(DragDrop).at(2).prop('onDrop')!(draggingOperation, 'duplicate_in_group');
+      act(() => {
+        component.find(DragDrop).at(2).prop('onDrop')!(draggingOperation, 'duplicate_in_group');
+      });
       expect(mockDatasource.onDrop).toHaveBeenCalledWith(
         expect.objectContaining({
+          columnId: 'newid',
           dropType: 'duplicate_in_group',
           droppedItem: draggingOperation,
         })

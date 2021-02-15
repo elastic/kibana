@@ -5,17 +5,30 @@
  * 2.0.
  */
 
+import { SavedObjectsClientContract } from 'kibana/server';
 import { flattenCaseSavedObject } from '../../routes/api/utils';
 import { CaseResponseRt, CaseResponse } from '../../../common/api';
-import { CaseClientGet, CaseClientFactoryArguments } from '../types';
+import { CaseServiceSetup } from '../../services';
+import { countAlertsForID } from '../../common';
 
-export const get = ({ savedObjectsClient, caseService }: CaseClientFactoryArguments) => async ({
+interface GetParams {
+  savedObjectsClient: SavedObjectsClientContract;
+  caseService: CaseServiceSetup;
+  id: string;
+  includeComments?: boolean;
+  includeSubCaseComments?: boolean;
+}
+
+export const get = async ({
+  savedObjectsClient,
+  caseService,
   id,
   includeComments = false,
-}: CaseClientGet): Promise<CaseResponse> => {
+  includeSubCaseComments = false,
+}: GetParams): Promise<CaseResponse> => {
   const theCase = await caseService.getCase({
     client: savedObjectsClient,
-    caseId: id,
+    id,
   });
 
   if (!includeComments) {
@@ -28,11 +41,12 @@ export const get = ({ savedObjectsClient, caseService }: CaseClientFactoryArgume
 
   const theComments = await caseService.getAllCaseComments({
     client: savedObjectsClient,
-    caseId: id,
+    id,
     options: {
       sortField: 'created_at',
       sortOrder: 'asc',
     },
+    includeSubCaseComments,
   });
 
   return CaseResponseRt.encode(
@@ -40,6 +54,7 @@ export const get = ({ savedObjectsClient, caseService }: CaseClientFactoryArgume
       savedObject: theCase,
       comments: theComments.saved_objects,
       totalComment: theComments.total,
+      totalAlerts: countAlertsForID({ comments: theComments, id }),
     })
   );
 };

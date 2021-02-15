@@ -22,17 +22,8 @@ export async function generateOutputApiKey(
       cluster: ['monitor'],
       index: [
         {
-          names: [
-            'logs-*',
-            'metrics-*',
-            'traces-*',
-            '.ds-logs-*',
-            '.ds-metrics-*',
-            '.ds-traces-*',
-            '.logs-endpoint.diagnostic.collection-*',
-            '.ds-.logs-endpoint.diagnostic.collection-*',
-          ],
-          privileges: ['write', 'create_index', 'indices:admin/auto_create'],
+          names: ['logs-*', 'metrics-*', 'traces-*', '.logs-endpoint.diagnostic.collection-*'],
+          privileges: ['auto_configure', 'create_doc'],
         },
       ],
     },
