@@ -59,6 +59,7 @@ export default function () {
         ...(!!process.env.CODE_COVERAGE
           ? [`--plugin-path=${path.join(__dirname, 'fixtures', 'plugins', 'coverage')}`]
           : []),
+        '--migrations.enableV2=false',
       ],
     },
     services,

@@ -40,7 +40,7 @@ export default function ({ getService }: FtrProviderContext) {
                 {
                   type: 'visualization',
                   id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
-                  version: 'WzE4LDJd',
+                  version: 'WzIsMV0=',
                   attributes: {
                     title: 'Count of requests',
                   },
@@ -137,7 +137,7 @@ export default function ({ getService }: FtrProviderContext) {
                   {
                     type: 'visualization',
                     id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
-                    version: 'WzE4LDJd',
+                    version: 'WzIsMV0=',
                     attributes: {
                       title: 'Count of requests',
                     },
@@ -174,7 +174,7 @@ export default function ({ getService }: FtrProviderContext) {
                   {
                     type: 'visualization',
                     id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
-                    version: 'WzE4LDJd',
+                    version: 'WzIsMV0=',
                     attributes: {
                       title: 'Count of requests',
                     },
@@ -256,7 +256,7 @@ export default function ({ getService }: FtrProviderContext) {
                     migrationVersion: resp.body.saved_objects[0].migrationVersion,
                     coreMigrationVersion: KIBANA_VERSION,
                     updated_at: '2017-09-21T18:51:23.794Z',
-                    version: 'WzE4LDJd',
+                    version: 'WzIsMV0=',
                   },
                 ],
               });
