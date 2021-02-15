@@ -42,7 +42,7 @@ export function registerLensUsageCollector(
         const suggestions = getDataByDate(state.suggestionsByDate);
 
         return {
-          ...emptyUsageCollecction,
+          ...emptyUsageCollection,
           ...state.saved,
           events_30_days: events.last30,
           events_90_days: events.last90,
