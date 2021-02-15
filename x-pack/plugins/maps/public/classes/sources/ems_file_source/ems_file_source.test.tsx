@@ -7,7 +7,7 @@
 
 import { EMSFileSource } from './ems_file_source';
 
-jest.mock('../../layers/vector_layer/vector_layer', () => {});
+jest.mock('../../layers/vector_layer', () => {});
 
 function makeEMSFileSource(tooltipProperties: string[]) {
   const emsFileSource = new EMSFileSource({ tooltipProperties });

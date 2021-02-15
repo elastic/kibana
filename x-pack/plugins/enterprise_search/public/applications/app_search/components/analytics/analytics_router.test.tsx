@@ -8,8 +8,10 @@
 import '../../__mocks__/engine_logic.mock';
 
 import React from 'react';
-import { shallow } from 'enzyme';
+
 import { Route, Switch } from 'react-router-dom';
+
+import { shallow } from 'enzyme';
 
 import { AnalyticsRouter } from './';
 

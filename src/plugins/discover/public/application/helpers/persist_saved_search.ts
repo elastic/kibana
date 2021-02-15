@@ -48,6 +48,9 @@ export async function persistSavedSearch(
   if (state.grid) {
     savedSearch.grid = state.grid;
   }
+  if (state.hideChart) {
+    savedSearch.hideChart = state.hideChart;
+  }
 
   try {
     const id = await savedSearch.save(saveOptions);

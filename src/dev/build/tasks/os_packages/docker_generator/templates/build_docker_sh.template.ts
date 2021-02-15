@@ -16,7 +16,6 @@ function generator({
   version,
   dockerTargetFilename,
   baseOSImage,
-  ubiImageFlavor,
   architecture,
 }: TemplateContext) {
   return dedent(`
@@ -54,10 +53,10 @@ function generator({
 
   retry_docker_pull ${baseOSImage}
 
-  echo "Building: kibana${imageFlavor}${ubiImageFlavor}-docker"; \\
-  docker build -t ${imageTag}${imageFlavor}${ubiImageFlavor}:${version} -f Dockerfile . || exit 1;
+  echo "Building: kibana${imageFlavor}-docker"; \\
+  docker build -t ${imageTag}${imageFlavor}:${version} -f Dockerfile . || exit 1;
 
-  docker save ${imageTag}${imageFlavor}${ubiImageFlavor}:${version} | gzip -c > ${dockerTargetFilename}
+  docker save ${imageTag}${imageFlavor}:${version} | gzip -c > ${dockerTargetFilename}
 
   exit 0
   `);

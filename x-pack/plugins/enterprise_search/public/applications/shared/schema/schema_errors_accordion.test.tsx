@@ -6,11 +6,13 @@
  */
 
 import React from 'react';
+
 import { shallow } from 'enzyme';
 
 import { EuiAccordion, EuiTableRow } from '@elastic/eui';
 
 import { EuiLinkTo } from '../react_router_helpers';
+
 import { SchemaErrorsAccordion } from './schema_errors_accordion';
 
 describe('SchemaErrorsAccordion', () => {

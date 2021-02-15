@@ -6,15 +6,16 @@
  */
 
 import { setMockValues } from '../../../../__mocks__';
-import { groups } from '../../../__mocks__/groups.mock';
 import { contentSources } from '../../../__mocks__/content_sources.mock';
+import { groups } from '../../../__mocks__/groups.mock';
 
 import React from 'react';
+
 import { shallow } from 'enzyme';
 
-import { GroupManagerModal } from './group_manager_modal';
-
 import { EuiOverlayMask, EuiModal, EuiEmptyPrompt } from '@elastic/eui';
+
+import { GroupManagerModal } from './group_manager_modal';
 
 const hideModal = jest.fn();
 const selectAll = jest.fn();

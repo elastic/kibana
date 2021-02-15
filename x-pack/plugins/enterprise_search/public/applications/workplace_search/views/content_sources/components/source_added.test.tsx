@@ -10,9 +10,9 @@ import '../../../../__mocks__/shallow_useeffect.mock';
 import { setMockActions } from '../../../../__mocks__';
 
 import React from 'react';
-import { shallow } from 'enzyme';
-
 import { useLocation } from 'react-router-dom';
+
+import { shallow } from 'enzyme';
 
 import { Loading } from '../../../../shared/loading';
 
