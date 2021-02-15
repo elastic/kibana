@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { set } from '@elastic/safer-lodash-set';
@@ -205,7 +205,25 @@ export const hasFilterKeyError = (
   return null;
 };
 
-const fieldDefined = (indexMappings: IndexMapping, key: string) => {
+export const fieldDefined = (indexMappings: IndexMapping, key: string): boolean => {
   const mappingKey = 'properties.' + key.split('.').join('.properties.');
-  return get(indexMappings, mappingKey) != null;
+  const potentialKey = get(indexMappings, mappingKey);
+
+  // If the `mappingKey` does not match a valid path, before returning null,
+  // we want to check and see if the intended path was for a multi-field
+  // such as `x.attributes.field.text` where `field` is mapped to both text
+  // and keyword
+  if (potentialKey == null) {
+    const propertiesAttribute = 'properties';
+    const indexOfLastProperties = mappingKey.lastIndexOf(propertiesAttribute);
+    const fieldMapping = mappingKey.substr(0, indexOfLastProperties);
+    const fieldType = mappingKey.substr(
+      mappingKey.lastIndexOf(propertiesAttribute) + `${propertiesAttribute}.`.length
+    );
+    const mapping = `${fieldMapping}fields.${fieldType}`;
+
+    return get(indexMappings, mapping) != null;
+  } else {
+    return true;
+  }
 };

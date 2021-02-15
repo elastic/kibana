@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 // @ts-expect-error
@@ -9,6 +10,7 @@ import geojsonvt from 'geojson-vt';
 // @ts-expect-error
 import vtpbf from 'vt-pbf';
 import { Logger } from 'src/core/server';
+import type { DataRequestHandlerContext } from 'src/plugins/data/server';
 import { Feature, FeatureCollection, Polygon } from 'geojson';
 import {
   ES_GEO_FIELD_TYPE,
@@ -23,12 +25,12 @@ import {
 
 import { convertRegularRespToGeoJson, hitsToGeoJson } from '../../common/elasticsearch_util';
 import { flattenHit } from './util';
-import { ESBounds, tile2lat, tile2long, tileToESBbox } from '../../common/geo_tile_utils';
+import { ESBounds, tileToESBbox } from '../../common/geo_tile_utils';
 import { getCentroidFeatures } from '../../common/get_centroid_features';
 
 export async function getGridTile({
   logger,
-  callElasticsearch,
+  context,
   index,
   geometryFieldName,
   x,
@@ -37,55 +39,43 @@ export async function getGridTile({
   requestBody = {},
   requestType = RENDER_AS.POINT,
   geoFieldType = ES_GEO_FIELD_TYPE.GEO_POINT,
+  searchSessionId,
 }: {
   x: number;
   y: number;
   z: number;
   geometryFieldName: string;
   index: string;
-  callElasticsearch: (type: string, ...args: any[]) => Promise<unknown>;
+  context: DataRequestHandlerContext;
   logger: Logger;
   requestBody: any;
   requestType: RENDER_AS;
   geoFieldType: ES_GEO_FIELD_TYPE;
+  searchSessionId?: string;
 }): Promise<Buffer | null> {
-  const esBbox: ESBounds = tileToESBbox(x, y, z);
   try {
-    let bboxFilter;
-    if (geoFieldType === ES_GEO_FIELD_TYPE.GEO_POINT) {
-      bboxFilter = {
-        geo_bounding_box: {
-          [geometryFieldName]: esBbox,
-        },
-      };
-    } else if (geoFieldType === ES_GEO_FIELD_TYPE.GEO_SHAPE) {
-      const geojsonPolygon = tileToGeoJsonPolygon(x, y, z);
-      bboxFilter = {
-        geo_shape: {
-          [geometryFieldName]: {
-            shape: geojsonPolygon,
-            relation: 'INTERSECTS',
-          },
-        },
-      };
-    } else {
-      throw new Error(`${geoFieldType} is not valid geo field-type`);
-    }
-    requestBody.query.bool.filter.push(bboxFilter);
-
+    const tileBounds: ESBounds = tileToESBbox(x, y, z);
+    requestBody.query.bool.filter.push(getTileSpatialFilter(geometryFieldName, tileBounds));
     requestBody.aggs[GEOTILE_GRID_AGG_NAME].geotile_grid.precision = Math.min(
       z + SUPER_FINE_ZOOM_DELTA,
       MAX_ZOOM
     );
-    requestBody.aggs[GEOTILE_GRID_AGG_NAME].geotile_grid.bounds = esBbox;
+    requestBody.aggs[GEOTILE_GRID_AGG_NAME].geotile_grid.bounds = tileBounds;
 
-    const esGeotileGridQuery = {
-      index,
-      body: requestBody,
-    };
-
-    const gridAggResult = await callElasticsearch('search', esGeotileGridQuery);
-    const features: Feature[] = convertRegularRespToGeoJson(gridAggResult, requestType);
+    const response = await context
+      .search!.search(
+        {
+          params: {
+            index,
+            body: requestBody,
+          },
+        },
+        {
+          sessionId: searchSessionId,
+        }
+      )
+      .toPromise();
+    const features: Feature[] = convertRegularRespToGeoJson(response.rawResponse, requestType);
     const featureCollection: FeatureCollection = {
       features,
       type: 'FeatureCollection',
@@ -100,7 +90,7 @@ export async function getGridTile({
 
 export async function getTile({
   logger,
-  callElasticsearch,
+  context,
   index,
   geometryFieldName,
   x,
@@ -108,112 +98,117 @@ export async function getTile({
   z,
   requestBody = {},
   geoFieldType,
+  searchSessionId,
 }: {
   x: number;
   y: number;
   z: number;
   geometryFieldName: string;
   index: string;
-  callElasticsearch: (type: string, ...args: any[]) => Promise<unknown>;
+  context: DataRequestHandlerContext;
   logger: Logger;
   requestBody: any;
   geoFieldType: ES_GEO_FIELD_TYPE;
+  searchSessionId?: string;
 }): Promise<Buffer | null> {
-  const geojsonBbox = tileToGeoJsonPolygon(x, y, z);
-
-  let resultFeatures: Feature[];
+  let features: Feature[];
   try {
-    let result;
-    try {
-      const geoShapeFilter = {
-        geo_shape: {
-          [geometryFieldName]: {
-            shape: geojsonBbox,
-            relation: 'INTERSECTS',
+    requestBody.query.bool.filter.push(
+      getTileSpatialFilter(geometryFieldName, tileToESBbox(x, y, z))
+    );
+
+    const searchOptions = {
+      sessionId: searchSessionId,
+    };
+
+    const countResponse = await context
+      .search!.search(
+        {
+          params: {
+            index,
+            body: {
+              size: 0,
+              query: requestBody.query,
+            },
           },
         },
-      };
-      requestBody.query.bool.filter.push(geoShapeFilter);
+        searchOptions
+      )
+      .toPromise();
 
-      const esSearchQuery = {
-        index,
-        body: requestBody,
-      };
-
-      const esCountQuery = {
-        index,
-        body: {
-          query: requestBody.query,
-        },
-      };
-
-      const countResult = await callElasticsearch('count', esCountQuery);
-
-      // @ts-expect-error
-      if (countResult.count > requestBody.size) {
-        // Generate "too many features"-bounds
-        const bboxAggName = 'data_bounds';
-        const bboxQuery = {
-          index,
-          body: {
-            size: 0,
-            query: requestBody.query,
-            aggs: {
-              [bboxAggName]: {
-                geo_bounds: {
-                  field: geometryFieldName,
+    if (countResponse.rawResponse.hits.total > requestBody.size) {
+      // Generate "too many features"-bounds
+      const bboxResponse = await context
+        .search!.search(
+          {
+            params: {
+              index,
+              body: {
+                size: 0,
+                query: requestBody.query,
+                aggs: {
+                  data_bounds: {
+                    geo_bounds: {
+                      field: geometryFieldName,
+                    },
+                  },
                 },
               },
             },
           },
-        };
+          searchOptions
+        )
+        .toPromise();
 
-        const bboxResult = await callElasticsearch('search', bboxQuery);
-
-        // @ts-expect-error
-        const bboxForData = esBboxToGeoJsonPolygon(bboxResult.aggregations[bboxAggName].bounds);
-
-        resultFeatures = [
+      features = [
+        {
+          type: 'Feature',
+          properties: {
+            [KBN_TOO_MANY_FEATURES_PROPERTY]: true,
+          },
+          geometry: esBboxToGeoJsonPolygon(
+            bboxResponse.rawResponse.aggregations.data_bounds.bounds,
+            tileToESBbox(x, y, z)
+          ),
+        },
+      ];
+    } else {
+      const documentsResponse = await context
+        .search!.search(
           {
-            type: 'Feature',
-            properties: {
-              [KBN_TOO_MANY_FEATURES_PROPERTY]: true,
+            params: {
+              index,
+              body: requestBody,
             },
-            geometry: bboxForData,
           },
-        ];
-      } else {
-        result = await callElasticsearch('search', esSearchQuery);
+          searchOptions
+        )
+        .toPromise();
 
-        // Todo: pass in epochMillies-fields
-        const featureCollection = hitsToGeoJson(
-          // @ts-expect-error
-          result.hits.hits,
-          (hit: Record<string, unknown>) => {
-            return flattenHit(geometryFieldName, hit);
-          },
-          geometryFieldName,
-          geoFieldType,
-          []
-        );
+      // Todo: pass in epochMillies-fields
+      const featureCollection = hitsToGeoJson(
+        documentsResponse.rawResponse.hits.hits,
+        (hit: Record<string, unknown>) => {
+          return flattenHit(geometryFieldName, hit);
+        },
+        geometryFieldName,
+        geoFieldType,
+        []
+      );
 
-        resultFeatures = featureCollection.features;
+      features = featureCollection.features;
 
-        // Correct system-fields.
-        for (let i = 0; i < resultFeatures.length; i++) {
-          const props = resultFeatures[i].properties;
-          if (props !== null) {
-            props[FEATURE_ID_PROPERTY_NAME] = resultFeatures[i].id;
-          }
+      // Correct system-fields.
+      for (let i = 0; i < features.length; i++) {
+        const props = features[i].properties;
+        if (props !== null) {
+          props[FEATURE_ID_PROPERTY_NAME] = features[i].id;
         }
       }
-    } catch (e) {
-      logger.warn(e.message);
-      throw e;
     }
 
     const featureCollection: FeatureCollection = {
-      features: resultFeatures,
+      features,
       type: 'FeatureCollection',
     };
 
@@ -224,32 +219,31 @@ export async function getTile({
   }
 }
 
-function tileToGeoJsonPolygon(x: number, y: number, z: number): Polygon {
-  const wLon = tile2long(x, z);
-  const sLat = tile2lat(y + 1, z);
-  const eLon = tile2long(x + 1, z);
-  const nLat = tile2lat(y, z);
-
+function getTileSpatialFilter(geometryFieldName: string, tileBounds: ESBounds): unknown {
   return {
-    type: 'Polygon',
-    coordinates: [
-      [
-        [wLon, sLat],
-        [wLon, nLat],
-        [eLon, nLat],
-        [eLon, sLat],
-        [wLon, sLat],
-      ],
-    ],
+    geo_shape: {
+      [geometryFieldName]: {
+        shape: {
+          type: 'envelope',
+          // upper left and lower right points of the shape to represent a bounding rectangle in the format [[minLon, maxLat], [maxLon, minLat]]
+          coordinates: [
+            [tileBounds.top_left.lon, tileBounds.top_left.lat],
+            [tileBounds.bottom_right.lon, tileBounds.bottom_right.lat],
+          ],
+        },
+        relation: 'INTERSECTS',
+      },
+    },
   };
 }
 
-function esBboxToGeoJsonPolygon(esBounds: ESBounds): Polygon {
-  let minLon = esBounds.top_left.lon;
-  const maxLon = esBounds.bottom_right.lon;
+function esBboxToGeoJsonPolygon(esBounds: ESBounds, tileBounds: ESBounds): Polygon {
+  // Intersecting geo_shapes may push bounding box outside of tile so need to clamp to tile bounds.
+  let minLon = Math.max(esBounds.top_left.lon, tileBounds.top_left.lon);
+  const maxLon = Math.min(esBounds.bottom_right.lon, tileBounds.bottom_right.lon);
   minLon = minLon > maxLon ? minLon - 360 : minLon; // fixes an ES bbox to straddle dateline
-  const minLat = esBounds.bottom_right.lat;
-  const maxLat = esBounds.top_left.lat;
+  const minLat = Math.max(esBounds.bottom_right.lat, tileBounds.bottom_right.lat);
+  const maxLat = Math.min(esBounds.top_left.lat, tileBounds.top_left.lat);
 
   return {
     type: 'Polygon',

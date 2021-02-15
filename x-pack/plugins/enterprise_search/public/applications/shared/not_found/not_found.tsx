@@ -1,12 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
+
 import { useValues } from 'kea';
-import { i18n } from '@kbn/i18n';
+
 import {
   EuiPageContent,
   EuiEmptyPrompt,
@@ -15,6 +17,7 @@ import {
   EuiFlexItem,
   EuiButton,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 import {
   APP_SEARCH_PLUGIN,
@@ -22,11 +25,11 @@ import {
   LICENSED_SUPPORT_URL,
 } from '../../../../common/constants';
 
-import { EuiButtonTo } from '../react_router_helpers';
-import { BreadcrumbTrail } from '../kibana_chrome/generate_breadcrumbs';
 import { SetAppSearchChrome, SetWorkplaceSearchChrome } from '../kibana_chrome';
-import { SendAppSearchTelemetry, SendWorkplaceSearchTelemetry } from '../telemetry';
+import { BreadcrumbTrail } from '../kibana_chrome/generate_breadcrumbs';
 import { LicensingLogic } from '../licensing';
+import { EuiButtonTo } from '../react_router_helpers';
+import { SendAppSearchTelemetry, SendWorkplaceSearchTelemetry } from '../telemetry';
 
 import { AppSearchLogo } from './assets/app_search_logo';
 import { WorkplaceSearchLogo } from './assets/workplace_search_logo';

@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 export * from './plugin';
 export * from './routes';
 
@@ -19,3 +21,12 @@ export * from './settings';
 // for the actual setting to differ from the default. Can we retrieve the real
 // setting in the future?
 export const SO_SEARCH_LIMIT = 10000;
+
+export const FLEET_SERVER_INDICES = [
+  '.fleet-actions',
+  '.fleet-agents',
+  '.fleet-enrollment-api-keys',
+  '.fleet-policies',
+  '.fleet-policies-leader',
+  '.fleet-servers',
+];

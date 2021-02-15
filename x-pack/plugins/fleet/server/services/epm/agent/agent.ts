@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import Handlebars from 'handlebars';
@@ -57,6 +58,10 @@ function replaceVariablesInYaml(yamlVariables: { [k: string]: any }, yaml: any) 
   return yaml;
 }
 
+const maybeEscapeNumericString = (value: string) => {
+  return value.length && !isNaN(+value) ? `"${value}"` : value;
+};
+
 function buildTemplateVariables(variables: PackagePolicyConfigRecord, templateStr: string) {
   const yamlValues: { [k: string]: any } = {};
   const vars = Object.entries(variables).reduce((acc, [key, recordEntry]) => {
@@ -83,6 +88,14 @@ function buildTemplateVariables(variables: PackagePolicyConfigRecord, templateSt
       const yamlKeyPlaceholder = `##${key}##`;
       varPart[lastKeyPart] = `"${yamlKeyPlaceholder}"`;
       yamlValues[yamlKeyPlaceholder] = recordEntry.value ? safeLoad(recordEntry.value) : null;
+    } else if (recordEntry.type && recordEntry.type === 'text' && recordEntry.value?.length) {
+      if (Array.isArray(recordEntry.value)) {
+        varPart[lastKeyPart] = recordEntry.value.map((value: string) =>
+          maybeEscapeNumericString(value)
+        );
+      } else {
+        varPart[lastKeyPart] = maybeEscapeNumericString(recordEntry.value);
+      }
     } else {
       varPart[lastKeyPart] = recordEntry.value;
     }

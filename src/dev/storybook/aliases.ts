@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 export const storybookAliases = {
@@ -18,4 +18,5 @@ export const storybookAliases = {
   security_solution: 'x-pack/plugins/security_solution/.storybook',
   ui_actions_enhanced: 'x-pack/plugins/ui_actions_enhanced/.storybook',
   observability: 'x-pack/plugins/observability/.storybook',
+  presentation: 'src/plugins/presentation_util/storybook',
 };

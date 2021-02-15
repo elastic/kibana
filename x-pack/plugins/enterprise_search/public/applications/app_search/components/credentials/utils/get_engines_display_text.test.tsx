@@ -1,26 +1,29 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
+
 import { shallow } from 'enzyme';
 
-import { getEnginesDisplayText } from './get_engines_display_text';
-import { ApiToken } from '../types';
 import { ApiTokenTypes } from '../constants';
+import { ApiToken } from '../types';
 
-const apiToken: ApiToken = {
-  name: '',
-  type: ApiTokenTypes.Private,
-  read: true,
-  write: true,
-  access_all_engines: true,
-  engines: ['engine1', 'engine2', 'engine3'],
-};
+import { getEnginesDisplayText } from './get_engines_display_text';
 
 describe('getEnginesDisplayText', () => {
+  const apiToken: ApiToken = {
+    name: '',
+    type: ApiTokenTypes.Private,
+    read: true,
+    write: true,
+    access_all_engines: true,
+    engines: ['engine1', 'engine2', 'engine3'],
+  };
+
   it('returns "--" when the token is an admin token', () => {
     const wrapper = shallow(
       <div>{getEnginesDisplayText({ ...apiToken, type: ApiTokenTypes.Admin })}</div>

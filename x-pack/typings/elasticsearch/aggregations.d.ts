@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { Unionize, UnionToIntersection } from 'utility-types';
 import { ESSearchHit, MaybeReadonlyArray, ESSourceOptions, ESHitsOf } from '.';
 
-type SortOrder = 'asc' | 'desc';
+export type SortOrder = 'asc' | 'desc';
 type SortInstruction = Record<string, SortOrder | { order: SortOrder }>;
 export type SortOptions = SortOrder | SortInstruction | SortInstruction[];
 
@@ -189,6 +190,15 @@ export interface AggregationOptionsByType {
     gap_policy?: 'skip' | 'insert_zeros';
     format?: string;
   };
+  rate: {
+    unit: 'minute' | 'hour' | 'day' | 'week' | 'month' | 'quarter' | 'year';
+  } & (
+    | {
+        field: string;
+        mode: 'sum' | 'value_count';
+      }
+    | {}
+  );
 }
 
 type AggregationType = keyof AggregationOptionsByType;
@@ -406,6 +416,9 @@ interface AggregationResponsePart<TAggregationOptionsMap extends AggregationOpti
     ];
   };
   avg_bucket: {
+    value: number | null;
+  };
+  rate: {
     value: number | null;
   };
 }

@@ -110,7 +110,8 @@ Example of `%meta` output:
 
 ##### date
 Outputs the date of the logging event. The date conversion specifier may be followed by a set of braces containing a name of predefined date format and canonical timezone name.
-Timezone name is expected to be one from [TZ database name](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones)
+Timezone name is expected to be one from [TZ database name](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones). 
+Timezone defaults to the host timezone when not explicitly specified.
 Example of `%date` output:
 
 | Conversion pattern                       | Example                                                          |
@@ -347,6 +348,8 @@ logging.root.level: off
 ```
 ### Dedicated loggers
 
+**Metrics Logs**
+
 The `metrics.ops` logger is configured with `debug` level and will automatically output sample system and process information at a regular interval.
 The metrics that are logged are a subset of the data collected and are formatted in the log message as follows:
 
@@ -364,6 +367,28 @@ ops.interval: 5000
 ```
 
 The minimum interval is 100ms and defaults to 5000ms.
+
+**Request and Response Logs**
+
+The `http.server.response` logger is configured with `debug` level and will automatically output
+data about http requests and responses occurring on the Kibana server.
+The message contains some high-level information, and the corresponding log meta contains the following:
+
+| Meta property | Description | Format
+| :------------------------- | :-------------------------- | :-------------------------- |
+| client.ip | IP address of the requesting client | ip |
+| http.request.method | http verb for the request (uppercase) | string |
+| http.request.mime_type | (optional) mime as specified in the headers | string |
+| http.request.referrer | (optional) referrer | string |
+| http.request.headers | request headers | object |
+| http.response.body.bytes | (optional) Calculated response payload size in bytes | number |
+| http.response.status_code | status code returned | number |
+| http.response.headers | response headers | object |
+| http.response.responseTime | (optional) Calculated response time in ms | number |
+| url.path | request path | string |
+| url.query | (optional) request query string | string |
+| user_agent.original | raw user-agent string provided in request headers | string |
+
 ## Usage
 
 Usage is very straightforward, one should just get a logger for a specific context and use it to log messages with 
@@ -386,22 +411,22 @@ loggerWithNestedContext.debug('Message with `debug` log level.');
 
 And assuming logger for `server` context with `console` appender and `trace` level was used, console output will look like this:
 ```bash
-[2017-07-25T18:54:41.639Z][TRACE][server] Message with `trace` log level.
-[2017-07-25T18:54:41.639Z][DEBUG][server] Message with `debug` log level.
-[2017-07-25T18:54:41.639Z][INFO ][server] Message with `info` log level.
-[2017-07-25T18:54:41.639Z][WARN ][server] Message with `warn` log level.
-[2017-07-25T18:54:41.639Z][ERROR][server] Message with `error` log level.
-[2017-07-25T18:54:41.639Z][FATAL][server] Message with `fatal` log level.
+[2017-07-25T11:54:41.639-07:00][TRACE][server] Message with `trace` log level.
+[2017-07-25T11:54:41.639-07:00][DEBUG][server] Message with `debug` log level.
+[2017-07-25T11:54:41.639-07:00][INFO ][server] Message with `info` log level.
+[2017-07-25T11:54:41.639-07:00][WARN ][server] Message with `warn` log level.
+[2017-07-25T11:54:41.639-07:00][ERROR][server] Message with `error` log level.
+[2017-07-25T11:54:41.639-07:00][FATAL][server] Message with `fatal` log level.
 
-[2017-07-25T18:54:41.639Z][TRACE][server.http] Message with `trace` log level.
-[2017-07-25T18:54:41.639Z][DEBUG][server.http] Message with `debug` log level.
+[2017-07-25T11:54:41.639-07:00][TRACE][server.http] Message with `trace` log level.
+[2017-07-25T11:54:41.639-07:00][DEBUG][server.http] Message with `debug` log level.
 ```
 
 The log will be less verbose with `warn` level for the `server` context:
 ```bash
-[2017-07-25T18:54:41.639Z][WARN ][server] Message with `warn` log level.
-[2017-07-25T18:54:41.639Z][ERROR][server] Message with `error` log level.
-[2017-07-25T18:54:41.639Z][FATAL][server] Message with `fatal` log level.
+[2017-07-25T11:54:41.639-07:00][WARN ][server] Message with `warn` log level.
+[2017-07-25T11:54:41.639-07:00][ERROR][server] Message with `error` log level.
+[2017-07-25T11:54:41.639-07:00][FATAL][server] Message with `fatal` log level.
 ```
 
 ### Logging config migration
@@ -464,7 +489,7 @@ logging.root.level: all
 
 #### logging.timezone
 Set to the canonical timezone id to log events using that timezone. New logging config allows
-to [specify timezone](#date) for `layout: pattern`.
+to [specify timezone](#date) for `layout: pattern`. Defaults to host timezone when not specified.
 ```yaml
 logging:
   appenders:
@@ -479,6 +504,26 @@ logging:
 #### logging.events
 Define a custom logger for a specific context.
 
+**`logging.events.ops`** outputs sample system and process information at a regular interval.
+With the new logging config, these are provided by a dedicated [context](#logger-hierarchy),
+and you can enable them by adjusting the minimum required [logging level](#log-level) to `debug`:
+```yaml
+  loggers:
+    - context: metrics.ops
+      appenders: [console]
+      level: debug
+```
+
+**`logging.events.request` and `logging.events.response`** provide logs for each request handled
+by the http service. With the new logging config, these are provided by a dedicated [context](#logger-hierarchy),
+and you can enable them by adjusting the minimum required [logging level](#log-level) to `debug`:
+```yaml
+  loggers:
+    - context: http.server.response
+      appenders: [console]
+      level: debug
+```
+
 #### logging.filter
 TBD
 
@@ -486,7 +531,7 @@ TBD
 
 | Parameter       | Platform log record in **pattern** format  | Legacy Platform log record **text** format |
 | --------------- | ------------------------------------------ | ------------------------------------------ |
-| @timestamp      | ISO8601 `2012-01-31T23:33:22.011Z`         | Absolute `23:33:22.011`                    |
+| @timestamp      | ISO8601_TZ `2012-01-31T23:33:22.011-05:00` | Absolute `23:33:22.011`                    |
 | context         | `parent.child`                             | `['parent', 'child']`                      |
 | level           | `DEBUG`                                    | `['debug']`                                |
 | meta            | stringified JSON object `{"to": "v8"}`     | N/A                                        |

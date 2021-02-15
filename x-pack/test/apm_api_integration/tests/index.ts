@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { FtrProviderContext } from '../common/ftr_provider_context';
@@ -61,7 +62,8 @@ export default function apmApiIntegrationTests(providerContext: FtrProviderConte
     loadTestFile(require.resolve('./transactions/latency'));
     loadTestFile(require.resolve('./transactions/throughput'));
     loadTestFile(require.resolve('./transactions/top_transaction_groups'));
-    loadTestFile(require.resolve('./transactions/transactions_groups_overview'));
+    loadTestFile(require.resolve('./transactions/transactions_groups_primary_statistics'));
+    loadTestFile(require.resolve('./transactions/transactions_groups_comparison_statistics'));
 
     loadTestFile(require.resolve('./feature_controls'));
 

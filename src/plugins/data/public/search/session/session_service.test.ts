@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { SessionService, ISessionService } from './session_service';
@@ -14,11 +14,13 @@ import { BehaviorSubject } from 'rxjs';
 import { SearchSessionState } from './search_session_state';
 import { createNowProviderMock } from '../../now_provider/mocks';
 import { NowProviderInternalContract } from '../../now_provider';
+import { SEARCH_SESSIONS_MANAGEMENT_ID } from './constants';
 
 describe('Session service', () => {
   let sessionService: ISessionService;
   let state$: BehaviorSubject<SearchSessionState>;
   let nowProvider: jest.Mocked<NowProviderInternalContract>;
+  let userHasAccessToSearchSessions = true;
 
   beforeEach(() => {
     const initializerContext = coreMock.createPluginInitializerContext();
@@ -30,7 +32,18 @@ describe('Session service', () => {
         startService().then(([coreStart, ...rest]) => [
           {
             ...coreStart,
-            application: { ...coreStart.application, currentAppId$: new BehaviorSubject('app') },
+            application: {
+              ...coreStart.application,
+              currentAppId$: new BehaviorSubject('app'),
+              capabilities: {
+                ...coreStart.application.capabilities,
+                management: {
+                  kibana: {
+                    [SEARCH_SESSIONS_MANAGEMENT_ID]: userHasAccessToSearchSessions,
+                  },
+                },
+              },
+            },
           },
           ...rest,
         ]),
@@ -146,6 +159,8 @@ describe('Session service', () => {
       isRestore: true,
       sessionId,
     });
+
+    expect(sessionService.getSearchOptions(undefined)).toBeNull();
   });
   test('isCurrentSession', () => {
     expect(sessionService.isCurrentSession()).toBeFalsy();
@@ -213,5 +228,26 @@ describe('Session service', () => {
     });
     sessionService.start();
     await expect(() => sessionService.save()).rejects.toMatchInlineSnapshot(`[Error: Haha]`);
+  });
+
+  describe("user doesn't have access to search session", () => {
+    beforeAll(() => {
+      userHasAccessToSearchSessions = false;
+    });
+    afterAll(() => {
+      userHasAccessToSearchSessions = true;
+    });
+
+    test("getSearchOptions doesn't return sessionId", () => {
+      const sessionId = sessionService.start();
+      expect(sessionService.getSearchOptions(sessionId)).toBeNull();
+    });
+
+    test('save() throws', async () => {
+      sessionService.start();
+      await expect(() => sessionService.save()).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"No access to search sessions"`
+      );
+    });
   });
 });

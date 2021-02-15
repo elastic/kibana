@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { Dictionary, pickBy, mapValues, without, cloneDeep } from 'lodash';
 import type { Request } from '@hapi/hapi';
@@ -232,6 +234,7 @@ export class TaskRunner<
       (rawAlertInstance) => new AlertInstance<InstanceState, InstanceContext>(rawAlertInstance)
     );
     const originalAlertInstances = cloneDeep(alertInstances);
+    const originalAlertInstanceIds = new Set(Object.keys(originalAlertInstances));
 
     const eventLogger = this.context.eventLogger;
     const alertLabel = `${this.alertType.id}:${alertId}: '${name}'`;
@@ -280,8 +283,8 @@ export class TaskRunner<
     );
     const recoveredAlertInstances = pickBy(
       alertInstances,
-      (alertInstance: AlertInstance<InstanceState, InstanceContext>) =>
-        !alertInstance.hasScheduledActions()
+      (alertInstance: AlertInstance<InstanceState, InstanceContext>, id) =>
+        !alertInstance.hasScheduledActions() && originalAlertInstanceIds.has(id)
     );
 
     logActiveAndRecoveredInstances({

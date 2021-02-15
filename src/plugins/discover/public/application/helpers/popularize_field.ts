@@ -1,17 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import { IndexPattern, IndexPatternsService } from '../../../../data/public';
+import { IndexPattern, IndexPatternsContract } from '../../../../data/public';
 
 async function popularizeField(
   indexPattern: IndexPattern,
   fieldName: string,
-  indexPatternsService: IndexPatternsService
+  indexPatternsService: IndexPatternsContract
 ) {
   if (!indexPattern.id) return;
   const field = indexPattern.fields.getByName(fieldName);

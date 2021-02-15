@@ -1,37 +1,30 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { i18n } from '@kbn/i18n';
-import React, { FunctionComponent, useMemo } from 'react';
-import {
-  EuiText,
-  EuiIcon,
-  EuiIconProps,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiTitle,
-  EuiIconTip,
-} from '@elastic/eui';
+
+import React, { FunctionComponent, memo } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiText, EuiIconTip } from '@elastic/eui';
 
 import { PhasesExceptDelete } from '../../../../../../common/types';
-import { useFormData } from '../../../../../shared_imports';
-
-import { FormInternal } from '../../types';
 
 import {
-  calculateRelativeTimingMs,
-  normalizeTimingsToHumanReadable,
+  calculateRelativeFromAbsoluteMilliseconds,
   PhaseAgeInMilliseconds,
+  AbsoluteTimings,
 } from '../../lib';
 
-import './timeline.scss';
-import { InfinityIconSvg } from './infinity_icon.svg';
+import { InfinityIcon } from '../infinity_icon';
 
-const InfinityIcon: FunctionComponent<Omit<EuiIconProps, 'type'>> = (props) => (
-  <EuiIcon type={InfinityIconSvg} {...props} />
-);
+import { TimelinePhaseText } from './components';
+
+const exists = (v: unknown) => v != null;
+
+import './timeline.scss';
 
 const toPercent = (n: number, total: number) => (n / total) * 100;
 
@@ -53,9 +46,22 @@ const msTimeToOverallPercent = (ms: number, totalMs: number) => {
 const SCORE_BUFFER_AMOUNT = 50;
 
 const i18nTexts = {
+  title: i18n.translate('xpack.indexLifecycleMgmt.timeline.title', {
+    defaultMessage: 'Policy Summary',
+  }),
+  description: i18n.translate('xpack.indexLifecycleMgmt.timeline.description', {
+    defaultMessage: 'This policy moves data through the following phases.',
+  }),
   hotPhase: i18n.translate('xpack.indexLifecycleMgmt.timeline.hotPhaseSectionTitle', {
     defaultMessage: 'Hot phase',
   }),
+  rolloverTooltip: i18n.translate(
+    'xpack.indexLifecycleMgmt.timeline.hotPhaseRolloverToolTipContent',
+    {
+      defaultMessage:
+        'How long it takes to reach the rollover criteria in the hot phase can vary. Data moves to the next phase when the time since rollover reaches the minimum age.',
+    }
+  ),
   warmPhase: i18n.translate('xpack.indexLifecycleMgmt.timeline.warmPhaseSectionTitle', {
     defaultMessage: 'Warm phase',
   }),
@@ -65,6 +71,11 @@ const i18nTexts = {
   deleteIcon: {
     toolTipContent: i18n.translate('xpack.indexLifecycleMgmt.timeline.deleteIconToolTipContent', {
       defaultMessage: 'Policy deletes the index after lifecycle phases complete.',
+    }),
+  },
+  foreverIcon: {
+    ariaLabel: i18n.translate('xpack.indexLifecycleMgmt.timeline.foreverIconToolTipContent', {
+      defaultMessage: 'Forever',
     }),
   },
 };
@@ -88,121 +99,117 @@ const calculateWidths = (inputs: PhaseAgeInMilliseconds) => {
   };
 };
 
-const TimelinePhaseText: FunctionComponent<{
-  phaseName: string;
-  durationInPhase?: React.ReactNode | string;
-}> = ({ phaseName, durationInPhase }) => (
-  <EuiFlexGroup justifyContent="spaceBetween" gutterSize="none">
-    <EuiFlexItem>
-      <EuiText size="s">
-        <strong>{phaseName}</strong>
-      </EuiText>
-    </EuiFlexItem>
-    <EuiFlexItem grow={false}>
-      {typeof durationInPhase === 'string' ? (
-        <EuiText size="s">{durationInPhase}</EuiText>
-      ) : (
-        durationInPhase
-      )}
-    </EuiFlexItem>
-  </EuiFlexGroup>
-);
+interface Props {
+  hasDeletePhase: boolean;
+  /**
+   * For now we assume the hot phase does not have a min age
+   */
+  hotPhaseMinAge: undefined;
+  isUsingRollover: boolean;
+  warmPhaseMinAge?: string;
+  coldPhaseMinAge?: string;
+  deletePhaseMinAge?: string;
+}
 
-export const Timeline: FunctionComponent = () => {
-  const [formData] = useFormData<FormInternal>();
+/**
+ * Display a timeline given ILM policy phase information. This component is re-usable and memo-ized
+ * and should not rely directly on any application-specific context.
+ */
+export const Timeline: FunctionComponent<Props> = memo(
+  ({ hasDeletePhase, isUsingRollover, ...phasesMinAge }) => {
+    const absoluteTimings: AbsoluteTimings = {
+      hot: { min_age: phasesMinAge.hotPhaseMinAge },
+      warm: phasesMinAge.warmPhaseMinAge ? { min_age: phasesMinAge.warmPhaseMinAge } : undefined,
+      cold: phasesMinAge.coldPhaseMinAge ? { min_age: phasesMinAge.coldPhaseMinAge } : undefined,
+      delete: phasesMinAge.deletePhaseMinAge
+        ? { min_age: phasesMinAge.deletePhaseMinAge }
+        : undefined,
+    };
 
-  const phaseTimingInMs = useMemo(() => {
-    return calculateRelativeTimingMs(formData);
-  }, [formData]);
+    const phaseAgeInMilliseconds = calculateRelativeFromAbsoluteMilliseconds(absoluteTimings);
 
-  const humanReadableTimings = useMemo(() => normalizeTimingsToHumanReadable(phaseTimingInMs), [
-    phaseTimingInMs,
-  ]);
+    const widths = calculateWidths(phaseAgeInMilliseconds);
 
-  const widths = calculateWidths(phaseTimingInMs);
+    const getDurationInPhaseContent = (phase: PhasesExceptDelete): string | React.ReactNode =>
+      phaseAgeInMilliseconds.phases[phase] === Infinity ? (
+        <InfinityIcon color="subdued" aria-label={i18nTexts.foreverIcon.ariaLabel} />
+      ) : null;
 
-  const getDurationInPhaseContent = (phase: PhasesExceptDelete): string | React.ReactNode =>
-    phaseTimingInMs.phases[phase] === Infinity ? (
-      <InfinityIcon aria-label={humanReadableTimings[phase]} />
-    ) : (
-      humanReadableTimings[phase]
-    );
-
-  return (
-    <EuiFlexGroup gutterSize="s" direction="column" responsive={false}>
-      <EuiFlexItem>
-        <EuiTitle size="s">
-          <h2>
-            {i18n.translate('xpack.indexLifecycleMgmt.timeline.title', {
-              defaultMessage: 'Policy Timeline',
-            })}
-          </h2>
-        </EuiTitle>
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <div
-          className="ilmTimeline"
-          ref={(el) => {
-            if (el) {
-              el.style.setProperty('--ilm-timeline-hot-phase-width', widths.hot);
-              el.style.setProperty('--ilm-timeline-warm-phase-width', widths.warm ?? null);
-              el.style.setProperty('--ilm-timeline-cold-phase-width', widths.cold ?? null);
-            }
-          }}
-        >
-          <EuiFlexGroup gutterSize="none" alignItems="flexStart" responsive={false}>
-            <EuiFlexItem>
-              <div className="ilmTimeline__phasesContainer">
-                {/* These are the actual color bars for the timeline */}
-                <div
-                  data-test-subj="ilmTimelineHotPhase"
-                  className="ilmTimeline__phasesContainer__phase ilmTimeline__hotPhase"
-                >
-                  <div className="ilmTimeline__colorBar ilmTimeline__hotPhase__colorBar" />
-                  <TimelinePhaseText
-                    phaseName={i18nTexts.hotPhase}
-                    durationInPhase={getDurationInPhaseContent('hot')}
-                  />
-                </div>
-                {formData._meta?.warm.enabled && (
+    return (
+      <EuiFlexGroup gutterSize="s" direction="column" responsive={false}>
+        <EuiFlexItem>
+          <EuiTitle size="s">
+            <h2>{i18nTexts.title}</h2>
+          </EuiTitle>
+          <EuiText size="s" color="subdued">
+            {i18nTexts.description}
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <div
+            className="ilmTimeline"
+            ref={(el) => {
+              if (el) {
+                el.style.setProperty('--ilm-timeline-hot-phase-width', widths.hot);
+                el.style.setProperty('--ilm-timeline-warm-phase-width', widths.warm ?? null);
+                el.style.setProperty('--ilm-timeline-cold-phase-width', widths.cold ?? null);
+              }
+            }}
+          >
+            <EuiFlexGroup gutterSize="none" alignItems="flexStart" responsive={false}>
+              <EuiFlexItem>
+                <div className="ilmTimeline__phasesContainer">
+                  {/* These are the actual color bars for the timeline */}
                   <div
-                    data-test-subj="ilmTimelineWarmPhase"
-                    className="ilmTimeline__phasesContainer__phase ilmTimeline__warmPhase"
+                    data-test-subj="ilmTimelineHotPhase"
+                    className="ilmTimeline__phasesContainer__phase ilmTimeline__hotPhase"
                   >
-                    <div className="ilmTimeline__colorBar ilmTimeline__warmPhase__colorBar" />
+                    <div className="ilmTimeline__colorBar ilmTimeline__hotPhase__colorBar" />
                     <TimelinePhaseText
-                      phaseName={i18nTexts.warmPhase}
-                      durationInPhase={getDurationInPhaseContent('warm')}
+                      phaseName={i18nTexts.hotPhase}
+                      durationInPhase={getDurationInPhaseContent('hot')}
                     />
                   </div>
-                )}
-                {formData._meta?.cold.enabled && (
-                  <div
-                    data-test-subj="ilmTimelineColdPhase"
-                    className="ilmTimeline__phasesContainer__phase ilmTimeline__coldPhase"
-                  >
-                    <div className="ilmTimeline__colorBar ilmTimeline__coldPhase__colorBar" />
-                    <TimelinePhaseText
-                      phaseName={i18nTexts.coldPhase}
-                      durationInPhase={getDurationInPhaseContent('cold')}
-                    />
-                  </div>
-                )}
-              </div>
-            </EuiFlexItem>
-            {formData._meta?.delete.enabled && (
-              <EuiFlexItem grow={false}>
-                <div
-                  data-test-subj="ilmTimelineDeletePhase"
-                  className="ilmTimeline__deleteIconContainer"
-                >
-                  <EuiIconTip type="trash" content={i18nTexts.deleteIcon.toolTipContent} />
+                  {exists(phaseAgeInMilliseconds.phases.warm) && (
+                    <div
+                      data-test-subj="ilmTimelineWarmPhase"
+                      className="ilmTimeline__phasesContainer__phase ilmTimeline__warmPhase"
+                    >
+                      <div className="ilmTimeline__colorBar ilmTimeline__warmPhase__colorBar" />
+                      <TimelinePhaseText
+                        phaseName={i18nTexts.warmPhase}
+                        durationInPhase={getDurationInPhaseContent('warm')}
+                      />
+                    </div>
+                  )}
+                  {exists(phaseAgeInMilliseconds.phases.cold) && (
+                    <div
+                      data-test-subj="ilmTimelineColdPhase"
+                      className="ilmTimeline__phasesContainer__phase ilmTimeline__coldPhase"
+                    >
+                      <div className="ilmTimeline__colorBar ilmTimeline__coldPhase__colorBar" />
+                      <TimelinePhaseText
+                        phaseName={i18nTexts.coldPhase}
+                        durationInPhase={getDurationInPhaseContent('cold')}
+                      />
+                    </div>
+                  )}
                 </div>
               </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
-        </div>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
-};
+              {hasDeletePhase && (
+                <EuiFlexItem grow={false}>
+                  <div
+                    data-test-subj="ilmTimelineDeletePhase"
+                    className="ilmTimeline__deleteIconContainer"
+                  >
+                    <EuiIconTip type="trash" content={i18nTexts.deleteIcon.toolTipContent} />
+                  </div>
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
+          </div>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }
+);

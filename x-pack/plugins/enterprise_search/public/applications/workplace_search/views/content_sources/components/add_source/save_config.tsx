@@ -1,13 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FormEvent } from 'react';
 
 import { useActions, useValues } from 'kea';
-import { i18n } from '@kbn/i18n';
 
 import {
   EuiButton,
@@ -20,7 +20,10 @@ import {
   EuiSpacer,
   EuiSteps,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
+import { LicensingLogic } from '../../../../../shared/licensing';
+import { ApiKey } from '../../../../components/shared/api_key';
 import {
   PUBLIC_KEY_LABEL,
   CONSUMER_KEY_LABEL,
@@ -28,22 +31,13 @@ import {
   BASE_URL_LABEL,
   CLIENT_ID_LABEL,
   CLIENT_SECRET_LABEL,
+  REMOVE_BUTTON,
 } from '../../../../constants';
-
-import {
-  OAUTH_SAVE_CONFIG_BUTTON,
-  OAUTH_REMOVE_BUTTON,
-  OAUTH_BACK_BUTTON,
-  OAUTH_STEP_2,
-} from './constants';
-
-import { LicensingLogic } from '../../../../../../applications/shared/licensing';
-
-import { ApiKey } from '../../../../components/shared/api_key';
-import { AddSourceLogic } from './add_source_logic';
 import { Configuration } from '../../../../types';
 
+import { AddSourceLogic } from './add_source_logic';
 import { ConfigDocsLinks } from './config_docs_links';
+import { OAUTH_SAVE_CONFIG_BUTTON, OAUTH_BACK_BUTTON, OAUTH_STEP_2 } from './constants';
 
 interface SaveConfigProps {
   header: React.ReactNode;
@@ -99,7 +93,7 @@ export const SaveConfig: React.FC<SaveConfigProps> = ({
 
   const deleteButton = (
     <EuiButton color="danger" fill disabled={buttonLoading} onClick={onDeleteConfig}>
-      {OAUTH_REMOVE_BUTTON}
+      {REMOVE_BUTTON}
     </EuiButton>
   );
 

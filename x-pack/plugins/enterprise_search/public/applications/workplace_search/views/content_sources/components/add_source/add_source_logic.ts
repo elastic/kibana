@@ -1,28 +1,31 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+import { Search } from 'history';
+import { kea, MakeLogicType } from 'kea';
 import { keys, pickBy } from 'lodash';
 
-import { kea, MakeLogicType } from 'kea';
-
 import { i18n } from '@kbn/i18n';
-
-import { HttpLogic } from '../../../../../shared/http';
+import { HttpFetchQuery } from 'src/core/public';
 
 import {
   flashAPIErrors,
   setSuccessMessage,
   clearFlashMessages,
 } from '../../../../../shared/flash_messages';
-
-import { staticSourceData } from '../../source_data';
-import { CUSTOM_SERVICE_TYPE } from '../../../../constants';
-
+import { HttpLogic } from '../../../../../shared/http';
+import { KibanaLogic } from '../../../../../shared/kibana';
+import { parseQueryParams } from '../../../../../shared/query_params';
 import { AppLogic } from '../../../../app_logic';
+import { CUSTOM_SERVICE_TYPE, WORKPLACE_SEARCH_URL_PREFIX } from '../../../../constants';
+import { SOURCES_PATH, getSourcesPath } from '../../../../routes';
 import { CustomSource } from '../../../../types';
+import { staticSourceData } from '../../source_data';
+import { SourcesLogic } from '../../sources_logic';
 
 export interface AddSourceProps {
   sourceIndex: number;
@@ -40,6 +43,13 @@ export enum AddSourceSteps {
   ConfigureOauthStep = 'Configure Oauth',
   SaveCustomStep = 'Save Custom',
   ReAuthenticateStep = 'ReAuthenticate',
+}
+
+export interface OauthParams {
+  code: string;
+  state: string;
+  session_state: string;
+  oauth_verifier?: string;
 }
 
 export interface AddSourceActions {
@@ -75,6 +85,7 @@ export interface AddSourceActions {
     isUpdating: boolean,
     successCallback?: () => void
   ): { isUpdating: boolean; successCallback?(): void };
+  saveSourceParams(search: Search): { search: Search };
   getSourceConfigData(serviceType: string): { serviceType: string };
   getSourceConnectData(
     serviceType: string,
@@ -141,6 +152,15 @@ interface PreContentSourceResponse {
   githubOrganizations: string[];
 }
 
+/**
+ * Workplace Search needs to know the host for the redirect. As of yet, we do not
+ * have access to this in Kibana. We parse it from the browser and pass it as a param.
+ */
+const {
+  location: { href },
+} = window;
+const kibanaHost = href.substr(0, href.indexOf(WORKPLACE_SEARCH_URL_PREFIX));
+
 export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceActions>>({
   path: ['enterprise_search', 'workplace_search', 'add_source_logic'],
   actions: {
@@ -173,6 +193,7 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
       isUpdating,
       successCallback,
     }),
+    saveSourceParams: (search: Search) => ({ search }),
     createContentSource: (
       serviceType: string,
       successCallback: () => void,
@@ -356,14 +377,15 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
         ? `/api/workplace_search/org/sources/${serviceType}/prepare`
         : `/api/workplace_search/account/sources/${serviceType}/prepare`;
 
-      const params = new URLSearchParams();
-      if (subdomain) params.append('subdomain', subdomain);
-      if (indexPermissions) params.append('index_permissions', indexPermissions.toString());
-      const hasParams = params.has('subdomain') || params.has('index_permissions');
-      const paramsString = hasParams ? `?${params}` : '';
+      const query = {
+        kibana_host: kibanaHost,
+      } as HttpFetchQuery;
+
+      if (isOrganization) query.index_permissions = indexPermissions;
+      if (subdomain) query.subdomain = subdomain;
 
       try {
-        const response = await HttpLogic.values.http.get(`${route}${paramsString}`);
+        const response = await HttpLogic.values.http.get(route, { query });
         actions.setSourceConnectData(response);
         successCallback(response.oauthUrl);
       } catch (e) {
@@ -426,7 +448,7 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
 
       try {
         const response = await http(route, {
-          body: JSON.stringify({ params }),
+          body: JSON.stringify(params),
         });
         if (successCallback) successCallback();
         if (isUpdating) {
@@ -444,6 +466,26 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
         flashAPIErrors(e);
       } finally {
         actions.setButtonNotLoading();
+      }
+    },
+    saveSourceParams: async ({ search }) => {
+      const { http } = HttpLogic.values;
+      const { isOrganization } = AppLogic.values;
+      const { navigateToUrl } = KibanaLogic.values;
+      const { setAddedSource } = SourcesLogic.actions;
+      const params = (parseQueryParams(search) as unknown) as OauthParams;
+      const query = { ...params, kibana_host: kibanaHost };
+      const route = '/api/workplace_search/sources/create';
+
+      try {
+        const response = await http.get(route, { query });
+
+        const { serviceName, indexPermissions, serviceType } = response;
+        setAddedSource(serviceName, indexPermissions, serviceType);
+      } catch (e) {
+        flashAPIErrors(e);
+      } finally {
+        navigateToUrl(getSourcesPath(SOURCES_PATH, isOrganization));
       }
     },
     createContentSource: async ({ serviceType, successCallback, errorCallback }) => {

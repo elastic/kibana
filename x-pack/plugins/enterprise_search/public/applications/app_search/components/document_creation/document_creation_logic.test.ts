@@ -1,17 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { LogicMounter, mockHttpValues } from '../../../__mocks__';
 
 import dedent from 'dedent';
 
-jest.mock('./utils', () => ({
-  readUploadedFileAsText: jest.fn(),
-}));
-import { readUploadedFileAsText } from './utils';
+import { nextTick } from '@kbn/test/jest';
 
 jest.mock('../engine', () => ({
   EngineLogic: { values: { engineName: 'test-engine' } },
@@ -19,6 +17,12 @@ jest.mock('../engine', () => ({
 
 import { DOCUMENTS_API_JSON_EXAMPLE } from './constants';
 import { DocumentCreationStep } from './types';
+
+jest.mock('./utils', () => ({
+  readUploadedFileAsText: jest.fn(),
+}));
+import { readUploadedFileAsText } from './utils';
+
 import { DocumentCreationLogic } from './';
 
 describe('DocumentCreationLogic', () => {
@@ -443,10 +447,10 @@ describe('DocumentCreationLogic', () => {
         });
 
         it('should set and show summary from the returned response', async () => {
-          const promise = http.post.mockReturnValueOnce(Promise.resolve(mockValidResponse));
+          http.post.mockReturnValueOnce(Promise.resolve(mockValidResponse));
 
           await DocumentCreationLogic.actions.uploadDocuments({ documents: mockValidDocuments });
-          await promise;
+          await nextTick();
 
           expect(DocumentCreationLogic.actions.setSummary).toHaveBeenCalledWith(mockValidResponse);
           expect(DocumentCreationLogic.actions.setCreationStep).toHaveBeenCalledWith(
@@ -462,7 +466,7 @@ describe('DocumentCreationLogic', () => {
         });
 
         it('handles API errors', async () => {
-          const promise = http.post.mockReturnValueOnce(
+          http.post.mockReturnValueOnce(
             Promise.reject({
               body: {
                 statusCode: 400,
@@ -473,7 +477,7 @@ describe('DocumentCreationLogic', () => {
           );
 
           await DocumentCreationLogic.actions.uploadDocuments({ documents: [{}] });
-          await promise;
+          await nextTick();
 
           expect(DocumentCreationLogic.actions.setErrors).toHaveBeenCalledWith(
             '[400 Bad Request] Invalid request payload JSON format'
@@ -481,10 +485,10 @@ describe('DocumentCreationLogic', () => {
         });
 
         it('handles client-side errors', async () => {
-          const promise = (http.post as jest.Mock).mockReturnValueOnce(new Error());
+          (http.post as jest.Mock).mockReturnValueOnce(new Error());
 
           await DocumentCreationLogic.actions.uploadDocuments({ documents: [{}] });
-          await promise;
+          await nextTick();
 
           expect(DocumentCreationLogic.actions.setErrors).toHaveBeenCalledWith(
             "Cannot read property 'total' of undefined"
@@ -493,14 +497,14 @@ describe('DocumentCreationLogic', () => {
 
         // NOTE: I can't seem to reproduce this in a production setting.
         it('handles errors returned from the API', async () => {
-          const promise = http.post.mockReturnValueOnce(
+          http.post.mockReturnValueOnce(
             Promise.resolve({
               errors: ['JSON cannot be empty'],
             })
           );
 
           await DocumentCreationLogic.actions.uploadDocuments({ documents: [{}] });
-          await promise;
+          await nextTick();
 
           expect(DocumentCreationLogic.actions.setErrors).toHaveBeenCalledWith([
             'JSON cannot be empty',
@@ -536,12 +540,12 @@ describe('DocumentCreationLogic', () => {
         });
 
         it('should correctly merge multiple API calls into a single summary obj', async () => {
-          const promise = (http.post as jest.Mock)
+          (http.post as jest.Mock)
             .mockReturnValueOnce(mockFirstResponse)
             .mockReturnValueOnce(mockSecondResponse);
 
           await DocumentCreationLogic.actions.uploadDocuments({ documents: largeDocumentsArray });
-          await promise;
+          await nextTick();
 
           expect(http.post).toHaveBeenCalledTimes(2);
           expect(DocumentCreationLogic.actions.setSummary).toHaveBeenCalledWith({
@@ -562,12 +566,12 @@ describe('DocumentCreationLogic', () => {
         });
 
         it('should correctly merge response errors', async () => {
-          const promise = (http.post as jest.Mock)
+          (http.post as jest.Mock)
             .mockReturnValueOnce({ ...mockFirstResponse, errors: ['JSON cannot be empty'] })
             .mockReturnValueOnce({ ...mockSecondResponse, errors: ['Too large to render'] });
 
           await DocumentCreationLogic.actions.uploadDocuments({ documents: largeDocumentsArray });
-          await promise;
+          await nextTick();
 
           expect(http.post).toHaveBeenCalledTimes(2);
           expect(DocumentCreationLogic.actions.setErrors).toHaveBeenCalledWith([

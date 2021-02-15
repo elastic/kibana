@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { Component } from 'react';
@@ -32,6 +33,7 @@ import { MultiJobActions } from '../multi_job_actions';
 import { NewJobButton } from '../new_job_button';
 import { JobStatsBar } from '../jobs_stats_bar';
 import { NodeAvailableWarning } from '../../../../components/node_available_warning';
+import { JobsAwaitingNodeWarning } from '../../../../components/jobs_awaiting_node_warning';
 import { SavedObjectsWarning } from '../../../../components/saved_objects_warning';
 import { DatePickerWrapper } from '../../../../components/navigation_menu/date_picker_wrapper';
 import { UpgradeWarning } from '../../../../components/upgrade';
@@ -56,9 +58,9 @@ export class JobsListView extends Component {
       itemIdToExpandedRowMap: {},
       filterClauses: [],
       deletingJobIds: [],
+      jobsAwaitingNodeCount: 0,
     };
 
-    this.spacesEnabled = props.spacesEnabled ?? false;
     this.updateFunctions = {};
 
     this.showEditJobFlyout = () => {};
@@ -266,12 +268,13 @@ export class JobsListView extends Component {
 
       const expandedJobsIds = Object.keys(this.state.itemIdToExpandedRowMap);
       try {
-        let spaces = {};
-        if (this.props.spacesEnabled && this.props.isManagementTable) {
+        let jobsSpaces = {};
+        if (this.props.spacesApi && this.props.isManagementTable) {
           const allSpaces = await ml.savedObjects.jobsSpaces();
-          spaces = allSpaces['anomaly-detector'];
+          jobsSpaces = allSpaces['anomaly-detector'];
         }
 
+        let jobsAwaitingNodeCount = 0;
         const jobs = await ml.jobs.jobsSummary(expandedJobsIds);
         const fullJobsList = {};
         const jobsSummaryList = jobs.map((job) => {
@@ -281,17 +284,27 @@ export class JobsListView extends Component {
           }
           job.latestTimestampSortValue = job.latestTimestampMs || 0;
           job.spaceIds =
-            this.props.spacesEnabled &&
+            this.props.spacesApi &&
             this.props.isManagementTable &&
-            spaces &&
-            spaces[job.id] !== undefined
-              ? spaces[job.id]
+            jobsSpaces &&
+            jobsSpaces[job.id] !== undefined
+              ? jobsSpaces[job.id]
               : [];
+
+          if (job.awaitingNodeAssignment === true) {
+            jobsAwaitingNodeCount++;
+          }
           return job;
         });
         const filteredJobsSummaryList = filterJobs(jobsSummaryList, this.state.filterClauses);
         this.setState(
-          { jobsSummaryList, filteredJobsSummaryList, fullJobsList, loading: false },
+          {
+            jobsSummaryList,
+            filteredJobsSummaryList,
+            fullJobsList,
+            loading: false,
+            jobsAwaitingNodeCount,
+          },
           () => {
             this.refreshSelectedJobs();
           }
@@ -396,7 +409,7 @@ export class JobsListView extends Component {
             loading={loading}
             isManagementTable={true}
             isMlEnabledInSpace={this.props.isMlEnabledInSpace}
-            spacesEnabled={this.props.spacesEnabled}
+            spacesApi={this.props.spacesApi}
             jobsViewState={this.props.jobsViewState}
             onJobsViewStateUpdate={this.props.onJobsViewStateUpdate}
             refreshJobs={() => this.refreshJobSummaryList(true)}
@@ -407,7 +420,7 @@ export class JobsListView extends Component {
   }
 
   renderJobsListComponents() {
-    const { isRefreshing, loading, jobsSummaryList } = this.state;
+    const { isRefreshing, loading, jobsSummaryList, jobsAwaitingNodeCount } = this.state;
     const jobIds = jobsSummaryList.map((j) => j.id);
 
     return (
@@ -440,6 +453,7 @@ export class JobsListView extends Component {
           </EuiPageHeader>
 
           <NodeAvailableWarning />
+          <JobsAwaitingNodeWarning jobCount={jobsAwaitingNodeCount} />
           <SavedObjectsWarning jobType="anomaly-detector" />
 
           <UpgradeWarning />

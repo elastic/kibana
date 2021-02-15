@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import {
@@ -14,17 +14,38 @@ import {
   KibanaRequest,
 } from 'src/core/server';
 
-export type AllowedSchemaNumberTypes = 'long' | 'integer' | 'short' | 'byte' | 'double' | 'float';
+export type AllowedSchemaNumberTypes =
+  | 'long'
+  | 'integer'
+  | 'short'
+  | 'byte'
+  | 'double'
+  | 'float'
+  | 'date';
+export type AllowedSchemaStringTypes = 'keyword' | 'text' | 'date';
+export type AllowedSchemaBooleanTypes = 'boolean';
 
-export type AllowedSchemaTypes = AllowedSchemaNumberTypes | 'keyword' | 'text' | 'boolean' | 'date';
+export type AllowedSchemaTypes =
+  | AllowedSchemaNumberTypes
+  | AllowedSchemaStringTypes
+  | AllowedSchemaBooleanTypes;
 
 export interface SchemaField {
   type: string;
 }
 
+export type PossibleSchemaTypes<U> = U extends string
+  ? AllowedSchemaStringTypes
+  : U extends number
+  ? AllowedSchemaNumberTypes
+  : U extends boolean
+  ? AllowedSchemaBooleanTypes
+  : // allow any schema type from the union if typescript is unable to resolve the exact U type
+    AllowedSchemaTypes;
+
 export type RecursiveMakeSchemaFrom<U> = U extends object
   ? MakeSchemaFrom<U>
-  : { type: AllowedSchemaTypes };
+  : { type: PossibleSchemaTypes<U> };
 
 // Using Required to enforce all optional keys in the object
 export type MakeSchemaFrom<Base> = {

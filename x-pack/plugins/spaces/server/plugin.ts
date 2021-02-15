@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { Observable } from 'rxjs';
@@ -12,6 +13,7 @@ import {
   CoreStart,
   Logger,
   PluginInitializerContext,
+  Plugin,
 } from '../../../../src/core/server';
 import {
   PluginSetupContract as FeaturesPluginSetup,
@@ -61,7 +63,8 @@ export interface SpacesPluginStart {
   spacesService: SpacesServiceStart;
 }
 
-export class Plugin {
+export class SpacesPlugin
+  implements Plugin<SpacesPluginSetup, SpacesPluginStart, PluginsSetup, PluginsStart> {
   private readonly config$: Observable<ConfigType>;
 
   private readonly kibanaIndexConfig$: Observable<{ kibana: { index: string } }>;

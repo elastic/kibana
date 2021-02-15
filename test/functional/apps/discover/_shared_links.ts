@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import expect from '@kbn/expect';
@@ -77,7 +77,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             '/app/discover?_t=1453775307251#' +
             '/?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time' +
             ":(from:'2015-09-19T06:31:44.000Z',to:'2015-09" +
-            "-23T18:31:44.000Z'))&_a=(columns:!(),filters:!(),index:'logstash-" +
+            "-23T18:31:44.000Z'))&_a=(columns:!(_source),filters:!(),index:'logstash-" +
             "*',interval:auto,query:(language:kuery,query:'')" +
             ",sort:!(!('@timestamp',desc)))";
           const actualUrl = await PageObjects.share.getSharedUrl();

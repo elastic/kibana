@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { ActionTypeRegistry } from './action_type_registry';
 import { PluginSetupContract, PluginStartContract } from './plugin';
@@ -55,12 +57,6 @@ export interface ActionsPlugin {
   start: PluginStartContract;
 }
 
-export interface ActionsConfigType {
-  enabled: boolean;
-  allowedHosts: string[];
-  enabledActionTypes: string[];
-}
-
 // the parameters passed to an action type executor function
 export interface ActionTypeExecutorOptions<Config, Secrets, Params> {
   actionId: string;
@@ -68,7 +64,6 @@ export interface ActionTypeExecutorOptions<Config, Secrets, Params> {
   config: Config;
   secrets: Secrets;
   params: Params;
-  proxySettings?: ProxySettings;
 }
 
 export interface ActionResult<Config extends ActionTypeConfig = ActionTypeConfig> {

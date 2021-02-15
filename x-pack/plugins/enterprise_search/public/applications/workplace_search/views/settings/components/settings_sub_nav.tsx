@@ -1,15 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
 
-import { NAV } from '../../../constants';
-
 import { SideNavLink } from '../../../../shared/layout';
-
+import { NAV } from '../../../constants';
 import {
   ORG_SETTINGS_CUSTOMIZE_PATH,
   ORG_SETTINGS_CONNECTORS_PATH,

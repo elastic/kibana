@@ -1,15 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { i18n } from '@kbn/i18n';
 
 import { VisTypeDefinition } from '../../visualizations/public';
-import { truncatedColorSchemas } from '../../charts/public';
 import { ORIGIN } from '../../maps_legacy/public';
 
 import { getDeprecationMessage } from './get_deprecation_message';
@@ -18,6 +17,7 @@ import { createRegionMapOptions } from './components';
 import { toExpressionAst } from './to_ast';
 import { RegionMapVisParams } from './region_map_types';
 import { mapToLayerWithId } from './util';
+import { setTmsLayers, setVectorLayers } from './kibana_services';
 
 export function createRegionMapTypeDefinition({
   uiSettings,
@@ -50,11 +50,6 @@ provided base maps, or add your own. Darker colors represent higher values.',
     },
     editorConfig: {
       optionsTemplate: createRegionMapOptions(getServiceSettings),
-      collections: {
-        colorSchemas: truncatedColorSchemas,
-        vectorLayers: [],
-        tmsLayers: [],
-      },
       schemas: [
         {
           group: 'metrics',
@@ -95,7 +90,9 @@ provided base maps, or add your own. Darker colors represent higher values.',
     setup: async (vis) => {
       const serviceSettings = await getServiceSettings();
       const tmsLayers = await serviceSettings.getTMSServices();
-      vis.type.editorConfig.collections.tmsLayers = tmsLayers;
+      setTmsLayers(tmsLayers);
+      setVectorLayers([]);
+
       if (!vis.params.wms.selectedTmsLayer && tmsLayers.length) {
         vis.params.wms.selectedTmsLayer = tmsLayers[0];
       }
@@ -122,9 +119,10 @@ provided base maps, or add your own. Darker colors represent higher values.',
           }
         });
 
-        vis.type.editorConfig.collections.vectorLayers = [...vectorLayers, ...newLayers];
+        const allVectorLayers = [...vectorLayers, ...newLayers];
+        setVectorLayers(allVectorLayers);
 
-        [selectedLayer] = vis.type.editorConfig.collections.vectorLayers;
+        [selectedLayer] = allVectorLayers;
         selectedJoinField = selectedLayer ? selectedLayer.fields[0] : undefined;
 
         if (selectedLayer && !vis.params.selectedLayer && selectedLayer.isEMS) {

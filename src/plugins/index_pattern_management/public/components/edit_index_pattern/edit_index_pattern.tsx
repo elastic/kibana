@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { filter } from 'lodash';
@@ -149,7 +149,8 @@ export const EditIndexPattern = withRouter(
     chrome.docTitle.change(indexPattern.title);
 
     const showTagsSection = Boolean(indexPattern.timeFieldName || (tags && tags.length > 0));
-
+    const kibana = useKibana();
+    const docsUrl = kibana.services.docLinks!.links.elasticsearch.mapping;
     return (
       <EuiPanel paddingSize={'l'}>
         <div data-test-subj="editIndexPattern" role="region" aria-label={headingAriaLabel}>
@@ -182,11 +183,7 @@ export const EditIndexPattern = withRouter(
                 defaultMessage="This page lists every field in the {indexPatternTitle} index and the field's associated core type as recorded by Elasticsearch. To change a field type, use the Elasticsearch"
                 values={{ indexPatternTitle: <strong>{indexPattern.title}</strong> }}
               />{' '}
-              <EuiLink
-                href="http://www.elastic.co/guide/en/elasticsearch/reference/current/mapping.html"
-                target="_blank"
-                external
-              >
+              <EuiLink href={docsUrl} target="_blank" external>
                 {mappingAPILink}
               </EuiLink>
             </p>

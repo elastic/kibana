@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { mockConfig, mockLogger } from '../__mocks__';
+
 import { JSON_HEADER, READ_ONLY_MODE_HEADER } from '../../common/constants';
 
 import { EnterpriseSearchRequestHandler } from './enterprise_search_request_handler';
@@ -12,6 +14,7 @@ import { EnterpriseSearchRequestHandler } from './enterprise_search_request_hand
 jest.mock('node-fetch');
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const fetchMock = require('node-fetch') as jest.Mock;
+
 const { Response } = jest.requireActual('node-fetch');
 
 const responseMock = {

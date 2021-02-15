@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import _, { partition } from 'lodash';
@@ -870,12 +871,7 @@ export function getErrorMessages(
 ): string[] | undefined {
   const errors: string[] = Object.entries(layer.columns)
     .flatMap(([columnId, column]) => {
-      // If we're transitioning to another operation, check for "new" incompleteColumns rather
-      // than "old" saved operation on the layer
-      const columnFinalRef =
-        layer.incompleteColumns?.[columnId]?.operationType || column.operationType;
-      const def = operationDefinitionMap[columnFinalRef];
-
+      const def = operationDefinitionMap[column.operationType];
       if (def.getErrorMessage) {
         return def.getErrorMessage(layer, columnId, indexPattern);
       }

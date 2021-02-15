@@ -1,19 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
+
 import { useValues } from 'kea';
 
+import { SideNavLink } from '../../../../shared/layout';
 import { AppLogic } from '../../../app_logic';
 import { NAV, CUSTOM_SERVICE_TYPE } from '../../../constants';
-
-import { SourceLogic } from '../source_logic';
-
-import { SideNavLink } from '../../../../shared/layout';
-
 import {
   getContentSourcePath,
   SOURCE_DETAILS_PATH,
@@ -22,6 +20,7 @@ import {
   SOURCE_DISPLAY_SETTINGS_PATH,
   SOURCE_SETTINGS_PATH,
 } from '../../../routes';
+import { SourceLogic } from '../source_logic';
 
 export const SourceSubNav: React.FC = () => {
   const { isOrganization } = useValues(AppLogic);

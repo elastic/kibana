@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import semverParse from 'semver/functions/parse';
@@ -44,7 +45,7 @@ import {
 } from '../actions';
 import { appContextService } from '../../app_context';
 import { toPromiseAbortable, AbortError, createRateLimiter } from './rxjs_utils';
-import { getAgent } from '../crud';
+import { getAgent, updateAgent } from '../crud';
 
 function getInternalUserSOClient() {
   const fakeRequest = ({
@@ -105,31 +106,45 @@ function createAgentPolicyActionSharedObservable(agentPolicyId: string) {
   );
 }
 
+async function getAgentDefaultOutputAPIKey(
+  soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient,
+  agent: Agent
+) {
+  if (appContextService.getConfig()?.agents?.fleetServerEnabled) {
+    return agent.default_api_key;
+  } else {
+    const {
+      attributes: { default_api_key: defaultApiKey },
+    } = await appContextService
+      .getEncryptedSavedObjects()
+      .getDecryptedAsInternalUser<AgentSOAttributes>(AGENT_SAVED_OBJECT_TYPE, agent.id);
+
+    return defaultApiKey;
+  }
+}
+
 async function getOrCreateAgentDefaultOutputAPIKey(
   soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient,
   agent: Agent
 ): Promise<string> {
-  const {
-    attributes: { default_api_key: defaultApiKey },
-  } = await appContextService
-    .getEncryptedSavedObjects()
-    .getDecryptedAsInternalUser<AgentSOAttributes>(AGENT_SAVED_OBJECT_TYPE, agent.id);
-
-  if (defaultApiKey) {
-    return defaultApiKey;
+  const defaultAPIKey = await getAgentDefaultOutputAPIKey(soClient, esClient, agent);
+  if (defaultAPIKey) {
+    return defaultAPIKey;
   }
 
   const outputAPIKey = await APIKeysService.generateOutputApiKey(soClient, 'default', agent.id);
-  await soClient.update<AgentSOAttributes>(AGENT_SAVED_OBJECT_TYPE, agent.id, {
+  await updateAgent(soClient, esClient, agent.id, {
     default_api_key: outputAPIKey.key,
     default_api_key_id: outputAPIKey.id,
   });
-
   return outputAPIKey.key;
 }
 
 export async function createAgentActionFromPolicyAction(
   soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient,
   agent: Agent,
   policyAction: AgentPolicyAction
 ) {
@@ -167,7 +182,7 @@ export async function createAgentActionFromPolicyAction(
   );
 
   // Mutate the policy to set the api token for this agent
-  const apiKey = await getOrCreateAgentDefaultOutputAPIKey(soClient, agent);
+  const apiKey = await getOrCreateAgentDefaultOutputAPIKey(soClient, esClient, agent);
   if (newAgentAction.data.policy) {
     newAgentAction.data.policy.outputs.default.api_key = apiKey;
   }
@@ -248,7 +263,9 @@ export function agentCheckinStateNewActionsFactory() {
           (!agent.policy_revision || action.policy_revision > agent.policy_revision)
       ),
       rateLimiter(),
-      concatMap((policyAction) => createAgentActionFromPolicyAction(soClient, agent, policyAction)),
+      concatMap((policyAction) =>
+        createAgentActionFromPolicyAction(soClient, esClient, agent, policyAction)
+      ),
       merge(newActions$),
       concatMap((data: AgentAction[] | undefined) => {
         if (data === undefined) {
@@ -273,7 +290,7 @@ export function agentCheckinStateNewActionsFactory() {
             }),
             rateLimiter(),
             concatMap((policyAction) =>
-              createAgentActionFromPolicyAction(soClient, agent, policyAction)
+              createAgentActionFromPolicyAction(soClient, esClient, agent, policyAction)
             )
           );
         }

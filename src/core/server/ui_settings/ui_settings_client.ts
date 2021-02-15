@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { defaultsDeep, omit } from 'lodash';
@@ -52,7 +52,6 @@ export class UiSettingsClient implements IUiSettingsClient {
 
   constructor(options: UiSettingsServiceOptions) {
     const { type, id, buildNum, savedObjectsClient, log, defaults = {}, overrides = {} } = options;
-
     this.type = type;
     this.id = id;
     this.buildNum = buildNum;
@@ -130,6 +129,11 @@ export class UiSettingsClient implements IUiSettingsClient {
 
   isOverridden(key: string) {
     return this.overrides.hasOwnProperty(key);
+  }
+
+  isSensitive(key: string): boolean {
+    const definition = this.defaults[key];
+    return !!definition?.sensitive;
   }
 
   private assertUpdateAllowed(key: string) {

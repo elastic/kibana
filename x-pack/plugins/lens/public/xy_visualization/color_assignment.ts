@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { uniq, mapValues } from 'lodash';
@@ -9,7 +10,7 @@ import { PaletteOutput, PaletteRegistry } from 'src/plugins/charts/public';
 import { Datatable } from 'src/plugins/expressions';
 import { AccessorConfig, FormatFactory, FramePublicAPI } from '../types';
 import { getColumnToLabelMap } from './state_helpers';
-import { LayerConfig } from './types';
+import { XYLayerConfig } from './types';
 
 const isPrimitive = (value: unknown): boolean => value != null && typeof value !== 'object';
 
@@ -95,7 +96,7 @@ export function getColorAssignments(
 export function getAccessorColorConfig(
   colorAssignments: ColorAssignments,
   frame: FramePublicAPI,
-  layer: LayerConfig,
+  layer: XYLayerConfig,
   paletteService: PaletteRegistry
 ): AccessorConfig[] {
   const layerContainsSplits = Boolean(layer.splitAccessor);

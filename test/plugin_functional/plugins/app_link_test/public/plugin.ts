@@ -1,16 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { Plugin, CoreSetup, AppMountParameters } from 'kibana/public';
 import { renderApp } from './app';
 
 export class CoreAppLinkPlugin implements Plugin<CoreAppLinkPluginSetup, CoreAppLinkPluginStart> {
-  public async setup(core: CoreSetup, deps: {}) {
+  public setup(core: CoreSetup, deps: {}) {
     core.application.register({
       id: 'applink_start',
       title: 'AppLink Start',

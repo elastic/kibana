@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -23,7 +24,6 @@ export interface IESAggSource extends IESSource {
   getAggKey(aggType: AGG_TYPE, fieldName: string): string;
   getAggLabel(aggType: AGG_TYPE, fieldLabel: string): string;
   getMetricFields(): IESAggField[];
-  hasMatchingMetricField(fieldName: string): boolean;
   getMetricFieldForName(fieldName: string): IESAggField | null;
   getValueAggsDsl(indexPattern: IndexPattern): { [key: string]: unknown };
 }
@@ -72,11 +72,6 @@ export abstract class AbstractESAggSource extends AbstractESSource implements IE
 
   createField({ fieldName }: { fieldName: string }): IField {
     throw new Error('Cannot create a new field from just a fieldname for an es_agg_source.');
-  }
-
-  hasMatchingMetricField(fieldName: string): boolean {
-    const matchingField = this.getMetricFieldForName(fieldName);
-    return !!matchingField;
   }
 
   getMetricFieldForName(fieldName: string): IESAggField | null {

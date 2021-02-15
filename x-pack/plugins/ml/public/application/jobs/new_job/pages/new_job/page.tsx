@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FC, useEffect, Fragment } from 'react';
@@ -37,7 +38,6 @@ import { useMlContext } from '../../../../contexts/ml';
 import { getTimeFilterRange } from '../../../../components/full_time_range_selector';
 import { getTimeBucketsFromCache } from '../../../../util/time_buckets';
 import { ExistingJobsAndGroups, mlJobService } from '../../../../services/job_service';
-import { expandCombinedJobConfig } from '../../../../../../common/types/anomaly_detection_jobs';
 import { newJobCapsService } from '../../../../services/new_job_capabilities_service';
 import { EVENT_RATE_FIELD_ID } from '../../../../../../common/types/fields';
 import { getNewJobDefaults } from '../../../../services/ml_server_info';
@@ -72,12 +72,16 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
 
   let autoSetTimeRange = false;
 
-  if (mlJobService.tempJobCloningObjects.job !== undefined) {
+  if (
+    mlJobService.tempJobCloningObjects.job !== undefined &&
+    mlJobService.tempJobCloningObjects.datafeed !== undefined
+  ) {
     // cloning a job
-    const clonedJob = mlJobService.cloneJob(mlJobService.tempJobCloningObjects.job);
-    const { job, datafeed } = expandCombinedJobConfig(clonedJob);
+    const clonedJob = mlJobService.tempJobCloningObjects.job;
+    const clonedDatafeed = mlJobService.cloneDatafeed(mlJobService.tempJobCloningObjects.datafeed);
+
     initCategorizationSettings();
-    jobCreator.cloneFromExistingJob(job, datafeed);
+    jobCreator.cloneFromExistingJob(clonedJob, clonedDatafeed);
 
     // if we're not skipping the time range, this is a standard job clone, so wipe the jobId
     if (mlJobService.tempJobCloningObjects.skipTimeRangeStep === false) {
@@ -88,6 +92,8 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
 
     mlJobService.tempJobCloningObjects.skipTimeRangeStep = false;
     mlJobService.tempJobCloningObjects.job = undefined;
+    mlJobService.tempJobCloningObjects.datafeed = undefined;
+    mlJobService.tempJobCloningObjects.createdBy = undefined;
 
     if (
       mlJobService.tempJobCloningObjects.start !== undefined &&

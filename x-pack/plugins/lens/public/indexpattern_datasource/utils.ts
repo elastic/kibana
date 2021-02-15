@@ -1,12 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { DataType } from '../types';
-import { IndexPattern, IndexPatternLayer } from './types';
-import { DraggedField } from './indexpattern';
+import { IndexPattern, IndexPatternLayer, DraggedField } from './types';
 import type {
   BaseIndexPatternColumn,
   FieldBasedIndexPatternColumn,

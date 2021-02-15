@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiTab } from '@elastic/eui';
@@ -19,9 +20,9 @@ import { useServiceNodeOverviewHref } from '../../shared/Links/apm/ServiceNodeOv
 import { useServiceOverviewHref } from '../../shared/Links/apm/service_overview_link';
 import { useTransactionsOverviewHref } from '../../shared/Links/apm/transaction_overview_link';
 import { MainTabs } from '../../shared/main_tabs';
-import { ErrorGroupOverview } from '../ErrorGroupOverview';
+import { ErrorGroupOverview } from '../error_group_overview';
 import { ServiceMap } from '../ServiceMap';
-import { ServiceNodeOverview } from '../ServiceNodeOverview';
+import { ServiceNodeOverview } from '../service_node_overview';
 import { ServiceMetrics } from '../service_metrics';
 import { ServiceOverview } from '../service_overview';
 import { TransactionOverview } from '../transaction_overview';

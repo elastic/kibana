@@ -1,15 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { Transform, Readable } from 'stream';
 import { inspect } from 'util';
 
-import { Client } from 'elasticsearch';
+import { Client } from '@elastic/elasticsearch';
 import { ToolingLog } from '@kbn/dev-utils';
 
 import { Stats } from '../stats';
@@ -88,7 +88,10 @@ export function createCreateIndexStream({
           return;
         }
 
-        if (err?.body?.error?.type !== 'resource_already_exists_exception' || attemptNumber >= 3) {
+        if (
+          err?.meta?.body?.error?.type !== 'resource_already_exists_exception' ||
+          attemptNumber >= 3
+        ) {
           throw err;
         }
 

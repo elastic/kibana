@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -58,6 +59,7 @@ interface Props {
   anomalyTimeseries?: ReturnType<
     typeof getLatencyChartSelector
   >['anomalyTimeseries'];
+  customTheme?: Record<string, unknown>;
 }
 
 export function TimeseriesChart({
@@ -71,13 +73,14 @@ export function TimeseriesChart({
   showAnnotations = true,
   yDomain,
   anomalyTimeseries,
+  customTheme = {},
 }: Props) {
   const history = useHistory();
   const { annotations } = useAnnotationsContext();
-  const chartTheme = useChartTheme();
   const { setPointerEvent, chartRef } = useChartPointerEventContext();
   const { urlParams } = useUrlParams();
   const theme = useTheme();
+  const chartTheme = useChartTheme();
 
   const { start, end } = urlParams;
 
@@ -102,6 +105,7 @@ export function TimeseriesChart({
             areaSeriesStyle: {
               line: { visible: false },
             },
+            ...customTheme,
           }}
           onPointerUpdate={setPointerEvent}
           externalPointerEvents={{

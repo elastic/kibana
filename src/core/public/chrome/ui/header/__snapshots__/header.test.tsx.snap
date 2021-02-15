@@ -452,6 +452,55 @@ exports[`Header renders 1`] = `
       "thrownError": null,
     }
   }
+  headerBanner$={
+    BehaviorSubject {
+      "_isScalar": false,
+      "_value": undefined,
+      "closed": false,
+      "hasError": false,
+      "isStopped": false,
+      "observers": Array [
+        Subscriber {
+          "_parentOrParents": null,
+          "_subscriptions": Array [
+            SubjectSubscription {
+              "_parentOrParents": [Circular],
+              "_subscriptions": null,
+              "closed": false,
+              "subject": [Circular],
+              "subscriber": [Circular],
+            },
+          ],
+          "closed": false,
+          "destination": SafeSubscriber {
+            "_complete": undefined,
+            "_context": [Circular],
+            "_error": undefined,
+            "_next": [Function],
+            "_parentOrParents": null,
+            "_parentSubscriber": [Circular],
+            "_subscriptions": null,
+            "closed": false,
+            "destination": Object {
+              "closed": true,
+              "complete": [Function],
+              "error": [Function],
+              "next": [Function],
+            },
+            "isStopped": false,
+            "syncErrorThrowable": false,
+            "syncErrorThrown": false,
+            "syncErrorValue": null,
+          },
+          "isStopped": false,
+          "syncErrorThrowable": true,
+          "syncErrorThrown": false,
+          "syncErrorValue": null,
+        },
+      ],
+      "thrownError": null,
+    }
+  }
   helpExtension$={
     BehaviorSubject {
       "_isScalar": false,
@@ -1699,14 +1748,67 @@ exports[`Header renders 1`] = `
     }
   }
 >
+  <HeaderTopBanner
+    headerBanner$={
+      BehaviorSubject {
+        "_isScalar": false,
+        "_value": undefined,
+        "closed": false,
+        "hasError": false,
+        "isStopped": false,
+        "observers": Array [
+          Subscriber {
+            "_parentOrParents": null,
+            "_subscriptions": Array [
+              SubjectSubscription {
+                "_parentOrParents": [Circular],
+                "_subscriptions": null,
+                "closed": false,
+                "subject": [Circular],
+                "subscriber": [Circular],
+              },
+            ],
+            "closed": false,
+            "destination": SafeSubscriber {
+              "_complete": undefined,
+              "_context": [Circular],
+              "_error": undefined,
+              "_next": [Function],
+              "_parentOrParents": null,
+              "_parentSubscriber": [Circular],
+              "_subscriptions": null,
+              "closed": false,
+              "destination": Object {
+                "closed": true,
+                "complete": [Function],
+                "error": [Function],
+                "next": [Function],
+              },
+              "isStopped": false,
+              "syncErrorThrowable": false,
+              "syncErrorThrown": false,
+              "syncErrorValue": null,
+            },
+            "isStopped": false,
+            "syncErrorThrowable": true,
+            "syncErrorThrown": false,
+            "syncErrorValue": null,
+          },
+        ],
+        "thrownError": null,
+      }
+    }
+  />
   <header
     className="hide-for-sharing headerGlobalNav"
     data-test-subj="headerGlobalNav"
   >
     <div
+      className="header__bars"
       id="globalHeaderBars"
     >
       <EuiHeader
+        className="header__firstBar"
         position="fixed"
         sections={
           Array [
@@ -2801,7 +2903,7 @@ exports[`Header renders 1`] = `
         theme="dark"
       >
         <div
-          className="euiHeader euiHeader--dark euiHeader--fixed"
+          className="euiHeader euiHeader--dark euiHeader--fixed header__firstBar"
         >
           <EuiHeaderSection
             key="items-0"
@@ -4065,10 +4167,11 @@ exports[`Header renders 1`] = `
         </div>
       </EuiHeader>
       <EuiHeader
+        className="header__secondBar"
         position="fixed"
       >
         <div
-          className="euiHeader euiHeader--default euiHeader--fixed"
+          className="euiHeader euiHeader--default euiHeader--fixed header__secondBar"
         >
           <EuiHeaderSection
             grow={false}
@@ -4226,55 +4329,6 @@ exports[`Header renders 1`] = `
                     "text": "test",
                   },
                 ],
-                "closed": false,
-                "hasError": false,
-                "isStopped": false,
-                "observers": Array [
-                  Subscriber {
-                    "_parentOrParents": null,
-                    "_subscriptions": Array [
-                      SubjectSubscription {
-                        "_parentOrParents": [Circular],
-                        "_subscriptions": null,
-                        "closed": false,
-                        "subject": [Circular],
-                        "subscriber": [Circular],
-                      },
-                    ],
-                    "closed": false,
-                    "destination": SafeSubscriber {
-                      "_complete": undefined,
-                      "_context": [Circular],
-                      "_error": undefined,
-                      "_next": [Function],
-                      "_parentOrParents": null,
-                      "_parentSubscriber": [Circular],
-                      "_subscriptions": null,
-                      "closed": false,
-                      "destination": Object {
-                        "closed": true,
-                        "complete": [Function],
-                        "error": [Function],
-                        "next": [Function],
-                      },
-                      "isStopped": false,
-                      "syncErrorThrowable": false,
-                      "syncErrorThrown": false,
-                      "syncErrorValue": null,
-                    },
-                    "isStopped": false,
-                    "syncErrorThrowable": true,
-                    "syncErrorThrown": false,
-                    "syncErrorValue": null,
-                  },
-                ],
-                "thrownError": null,
-              }
-            }
-            breadcrumbsAppendExtension$={
-              BehaviorSubject {
-                "_isScalar": false,
-                "_value": undefined,
                 "closed": false,
                 "hasError": false,
                 "isStopped": false,
@@ -4943,6 +4997,7 @@ exports[`Header renders 1`] = `
                           listItems={
                             Array [
                               Object {
+                                "data-test-subj": "homeLink",
                                 "href": "/",
                                 "iconType": "home",
                                 "label": "Home",
@@ -4964,6 +5019,7 @@ exports[`Header renders 1`] = `
                           >
                             <EuiListGroupItem
                               color="text"
+                              data-test-subj="homeLink"
                               href="/"
                               iconType="home"
                               key="title-0"
@@ -4978,6 +5034,7 @@ exports[`Header renders 1`] = `
                               >
                                 <a
                                   className="euiListGroupItem__button"
+                                  data-test-subj="homeLink"
                                   href="/"
                                   onClick={[Function]}
                                   rel="noreferrer"

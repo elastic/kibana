@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import PropTypes from 'prop-types';
@@ -95,7 +96,7 @@ export class JobsList extends Component {
   }
 
   render() {
-    const { loading, isManagementTable, spacesEnabled } = this.props;
+    const { loading, isManagementTable, spacesApi } = this.props;
     const selectionControls = {
       selectable: (job) => job.deleting !== true,
       selectableMessage: (selectable, rowItem) =>
@@ -242,7 +243,7 @@ export class JobsList extends Component {
     ];
 
     if (isManagementTable === true) {
-      if (spacesEnabled === true) {
+      if (spacesApi) {
         // insert before last column
         columns.splice(columns.length - 1, 0, {
           name: i18n.translate('xpack.ml.jobsList.spacesLabel', {
@@ -250,6 +251,7 @@ export class JobsList extends Component {
           }),
           render: (item) => (
             <JobSpacesList
+              spacesApi={spacesApi}
               spaceIds={item.spaceIds}
               jobId={item.id}
               jobType="anomaly-detector"

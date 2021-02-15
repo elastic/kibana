@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiFlexItem } from '@elastic/eui';
@@ -50,14 +51,15 @@ export const isFileEvent = ({
   eventCategory: string | null | undefined;
   eventDataset: string | null | undefined;
 }) =>
-  (eventCategory != null && eventCategory.toLowerCase() === 'file') ||
-  (eventDataset != null && eventDataset.toLowerCase() === 'file');
+  eventCategory?.toLowerCase() === 'file' ||
+  eventDataset?.toLowerCase() === 'file' ||
+  eventDataset?.toLowerCase() === 'endpoint.events.file';
 
 export const isProcessStoppedOrTerminationEvent = (
   eventAction: string | null | undefined
 ): boolean => ['process_stopped', 'termination_event'].includes(`${eventAction}`.toLowerCase());
 
 export const showVia = (eventAction: string | null | undefined): boolean =>
-  ['file_create_event', 'created', 'file_delete_event', 'deleted'].includes(
+  ['file_create_event', 'created', 'creation', 'file_delete_event', 'deleted', 'deletion'].includes(
     `${eventAction}`.toLowerCase()
   );

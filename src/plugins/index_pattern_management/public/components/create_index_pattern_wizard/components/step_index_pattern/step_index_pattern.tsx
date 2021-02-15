@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React, { Component } from 'react';
@@ -193,12 +193,12 @@ export class StepIndexPattern extends Component<StepIndexPatternProps, StepIndex
     const { target } = e;
 
     let query = target.value;
-    if (query.length === 1 && canAppendWildcard(query)) {
+    if (query.length === 1 && !appendedWildcard && canAppendWildcard(query)) {
       query += '*';
       this.setState({ appendedWildcard: true });
       setTimeout(() => target.setSelectionRange(1, 1));
     } else {
-      if (query === '*' && appendedWildcard) {
+      if (['', '*'].includes(query) && appendedWildcard) {
         query = '';
         this.setState({ appendedWildcard: false });
       }

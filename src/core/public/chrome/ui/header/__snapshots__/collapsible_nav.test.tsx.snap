@@ -543,6 +543,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                       listItems={
                         Array [
                           Object {
+                            "data-test-subj": "homeLink",
                             "href": "/",
                             "iconType": "home",
                             "label": "Home",
@@ -564,6 +565,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                       >
                         <EuiListGroupItem
                           color="text"
+                          data-test-subj="homeLink"
                           href="/"
                           iconType="home"
                           key="title-0"
@@ -578,6 +580,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                           >
                             <a
                               className="euiListGroupItem__button"
+                              data-test-subj="homeLink"
                               href="/"
                               onClick={[Function]}
                               rel="noreferrer"
@@ -2792,6 +2795,7 @@ exports[`CollapsibleNav renders the default nav 3`] = `
                       listItems={
                         Array [
                           Object {
+                            "data-test-subj": "homeLink",
                             "href": "/",
                             "iconType": "home",
                             "label": "Home",
@@ -2813,6 +2817,7 @@ exports[`CollapsibleNav renders the default nav 3`] = `
                       >
                         <EuiListGroupItem
                           color="text"
+                          data-test-subj="homeLink"
                           href="/"
                           iconType="home"
                           key="title-0"
@@ -2827,6 +2832,7 @@ exports[`CollapsibleNav renders the default nav 3`] = `
                           >
                             <a
                               className="euiListGroupItem__button"
+                              data-test-subj="homeLink"
                               href="/"
                               onClick={[Function]}
                               rel="noreferrer"

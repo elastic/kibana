@@ -150,14 +150,14 @@ e.g. `build` or `test`. Instead of jumping into each package and running
 `yarn build` you can run:
 
 ```
-yarn kbn run build
+yarn kbn run build --skip-missing
 ```
 
 And if needed, you can skip packages in the same way as for bootstrapping, e.g.
 with `--exclude` and `--skip-kibana-plugins`:
 
 ```
-yarn kbn run build --exclude kibana
+yarn kbn run build --exclude kibana --skip-missing
 ```
 
 ### Watching

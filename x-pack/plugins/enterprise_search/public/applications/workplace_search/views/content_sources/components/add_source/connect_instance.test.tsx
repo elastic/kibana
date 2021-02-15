@@ -1,19 +1,22 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import '../../../../../__mocks__/shallow_useeffect.mock';
 import { setMockActions, setMockValues } from '../../../../../__mocks__';
 
 import React from 'react';
+
 import { shallow } from 'enzyme';
 
 import { EuiBadge, EuiCallOut, EuiSwitch } from '@elastic/eui';
 
 import { FeatureIds } from '../../../../types';
 import { staticSourceData } from '../../source_data';
+
 import { ConnectInstance } from './connect_instance';
 
 describe('ConnectInstance', () => {

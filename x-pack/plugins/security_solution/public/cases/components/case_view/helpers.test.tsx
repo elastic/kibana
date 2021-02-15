@@ -1,16 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { CommentType } from '../../../../../case/common/api';
+import { AssociationType, CommentType } from '../../../../../case/common/api';
 import { Comment } from '../../containers/types';
 
 import { getRuleIdsFromComments, buildAlertsQuery } from './helpers';
 
 const comments: Comment[] = [
   {
+    associationType: AssociationType.case,
     type: CommentType.alert,
     alertId: 'alert-id-1',
     index: 'alert-index-1',
@@ -24,6 +26,7 @@ const comments: Comment[] = [
     version: 'WzQ3LDFc',
   },
   {
+    associationType: AssociationType.case,
     type: CommentType.alert,
     alertId: 'alert-id-2',
     index: 'alert-index-2',

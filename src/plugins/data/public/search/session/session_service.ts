@@ -1,14 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { PublicContract } from '@kbn/utility-types';
 import { distinctUntilChanged, map, startWith } from 'rxjs/operators';
-import { Observable, Subject, Subscription } from 'rxjs';
+import { Observable, Subscription } from 'rxjs';
 import { PluginInitializerContext, StartServicesAccessor } from 'kibana/public';
 import { UrlGeneratorId, UrlGeneratorStateMapping } from '../../../../share/public/';
 import { ConfigSchema } from '../../../config';
@@ -20,6 +20,7 @@ import {
 import { ISessionsClient } from './sessions_client';
 import { ISearchOptions } from '../../../common';
 import { NowProviderInternalContract } from '../../now_provider';
+import { SEARCH_SESSIONS_MANAGEMENT_ID } from './constants';
 
 export type ISessionService = PublicContract<SessionService>;
 
@@ -68,6 +69,7 @@ export class SessionService {
   private searchSessionIndicatorUiConfig?: Partial<SearchSessionIndicatorUiConfig>;
   private subscription = new Subscription();
   private curApp?: string;
+  private hasAccessToSearchSessions: boolean = false;
 
   constructor(
     initializerContext: PluginInitializerContext<ConfigSchema>,
@@ -94,6 +96,10 @@ export class SessionService {
     );
 
     getStartServices().then(([coreStart]) => {
+      // using management?.kibana? we infer if any of the apps allows current user to store sessions
+      this.hasAccessToSearchSessions =
+        coreStart.application.capabilities.management?.kibana?.[SEARCH_SESSIONS_MANAGEMENT_ID];
+
       // Apps required to clean up their sessions before unmounting
       // Make sure that apps don't leave sessions open.
       this.subscription.add(
@@ -115,6 +121,15 @@ export class SessionService {
         })
       );
     });
+  }
+
+  /**
+   * If user has access to search sessions
+   * This resolves to `true` in case at least one app allows user to create search session
+   * In this case search session management is available
+   */
+  public hasAccess() {
+    return this.hasAccessToSearchSessions;
   }
 
   /**
@@ -193,21 +208,6 @@ export class SessionService {
     this.searchSessionIndicatorUiConfig = undefined;
   }
 
-  private refresh$ = new Subject<void>();
-  /**
-   * Observable emits when search result refresh was requested
-   * For example, the UI could have it's own "refresh" button
-   * Application would use this observable to handle user interaction on that button
-   */
-  public onRefresh$ = this.refresh$.asObservable();
-
-  /**
-   * Request a search results refresh
-   */
-  public refresh() {
-    this.refresh$.next();
-  }
-
   /**
    * Request a cancellation of on-going search requests within current session
    */
@@ -230,6 +230,7 @@ export class SessionService {
     const sessionId = this.getSessionId();
     if (!sessionId) throw new Error('No current session');
     if (!this.curApp) throw new Error('No current app id');
+    if (!this.hasAccess()) throw new Error('No access to search sessions');
     const currentSessionInfoProvider = this.searchSessionInfoProvider;
     if (!currentSessionInfoProvider) throw new Error('No info provider for current session');
     const [name, { initialState, restoreState, urlGeneratorId }] = await Promise.all([
@@ -262,11 +263,25 @@ export class SessionService {
 
   /**
    * Infers search session options for sessionId using current session state
+   *
+   * In case user doesn't has access to `search-session` SO returns null,
+   * meaning that sessionId and other session parameters shouldn't be used when doing searches
+   *
    * @param sessionId
    */
   public getSearchOptions(
-    sessionId: string
-  ): Required<Pick<ISearchOptions, 'sessionId' | 'isRestore' | 'isStored'>> {
+    sessionId?: string
+  ): Required<Pick<ISearchOptions, 'sessionId' | 'isRestore' | 'isStored'>> | null {
+    if (!sessionId) {
+      return null;
+    }
+
+    // in case user doesn't have permissions to search session, do not forward sessionId to the server
+    // because user most likely also doesn't have access to `search-session` SO
+    if (!this.hasAccessToSearchSessions) {
+      return null;
+    }
+
     const isCurrentSession = this.isCurrentSession(sessionId);
     return {
       sessionId,

@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { IFieldFormat } from 'src/plugins/data/public';
+import { DatatableColumn, DatatableRow } from 'src/plugins/expressions';
 import { SchemaConfig } from 'src/plugins/visualizations/public';
 import { TableVisParams } from '../common';
 
@@ -43,11 +44,31 @@ export interface TableVisConfig extends TableVisParams {
 }
 
 export interface FormattedColumn {
-  id: string;
   title: string;
   formatter: IFieldFormat;
   formattedTotal?: string | number;
   filterable: boolean;
   sumTotal?: number;
   total?: number;
+}
+
+export interface FormattedColumns {
+  [key: string]: FormattedColumn;
+}
+
+export interface TableContext {
+  columns: DatatableColumn[];
+  rows: DatatableRow[];
+  formattedColumns: FormattedColumns;
+}
+
+export interface TableGroup {
+  table: TableContext;
+  title: string;
+}
+
+export interface TableVisData {
+  table?: TableContext;
+  tables: TableGroup[];
+  direction?: 'row' | 'column';
 }

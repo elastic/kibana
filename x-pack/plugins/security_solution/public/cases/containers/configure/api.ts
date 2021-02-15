@@ -1,12 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { isEmpty } from 'lodash/fp';
 import {
   ActionConnector,
+  ActionTypeConnector,
   CasesConfigurePatch,
   CasesConfigureResponse,
   CasesConfigureRequest,
@@ -16,6 +18,7 @@ import { KibanaServices } from '../../../common/lib/kibana';
 import {
   CASE_CONFIGURE_CONNECTORS_URL,
   CASE_CONFIGURE_URL,
+  ACTION_TYPES_URL,
 } from '../../../../../case/common/constants';
 
 import { ApiProps } from '../types';
@@ -88,4 +91,13 @@ export const patchCaseConfigure = async (
   return convertToCamelCase<CasesConfigureResponse, CaseConfigure>(
     decodeCaseConfigureResponse(response)
   );
+};
+
+export const fetchActionTypes = async ({ signal }: ApiProps): Promise<ActionTypeConnector[]> => {
+  const response = await KibanaServices.get().http.fetch(ACTION_TYPES_URL, {
+    method: 'GET',
+    signal,
+  });
+
+  return response;
 };

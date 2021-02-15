@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { castArray, groupBy } from 'lodash';
 import callsites from 'callsites';
 import { maybe } from '../../../plugins/apm/common/utils/maybe';
@@ -36,55 +38,69 @@ let configName: APMFtrConfigName | undefined;
 
 let running: boolean = false;
 
+function when(
+  title: string,
+  conditions: RunCondition | RunCondition[],
+  callback: (condition: RunCondition) => void,
+  skip?: boolean
+) {
+  const allConditions = castArray(conditions);
+
+  if (!allConditions.length) {
+    throw new Error('At least one condition should be defined');
+  }
+
+  if (running) {
+    throw new Error("Can't add tests when running");
+  }
+
+  const frame = maybe(callsites()[1]);
+
+  const file = frame?.getFileName();
+
+  if (!file) {
+    throw new Error('Could not infer file for suite');
+  }
+
+  allConditions.forEach((matchedCondition) => {
+    callbacks.push({
+      ...matchedCondition,
+      runs: [
+        {
+          cb: () => {
+            const suite: ReturnType<typeof describe> = (skip ? describe.skip : describe)(
+              title,
+              () => {
+                callback(matchedCondition);
+              }
+            ) as any;
+
+            suite.file = file;
+            suite.eachTest((test) => {
+              test.file = file;
+            });
+          },
+        },
+      ],
+    });
+  });
+}
+
+when.skip = (
+  title: string,
+  conditions: RunCondition | RunCondition[],
+  callback: (condition: RunCondition) => void
+) => {
+  when(title, conditions, callback, true);
+};
+
 export const registry = {
   init: (config: APMFtrConfigName) => {
     configName = config;
     callbacks.length = 0;
     running = false;
   },
-  when: (
-    title: string,
-    conditions: RunCondition | RunCondition[],
-    callback: (condition: RunCondition) => void
-  ) => {
-    const allConditions = castArray(conditions);
-
-    if (!allConditions.length) {
-      throw new Error('At least one condition should be defined');
-    }
-
-    if (running) {
-      throw new Error("Can't add tests when running");
-    }
-
-    const frame = maybe(callsites()[1]);
-
-    const file = frame?.getFileName();
-
-    if (!file) {
-      throw new Error('Could not infer file for suite');
-    }
-
-    allConditions.forEach((matchedCondition) => {
-      callbacks.push({
-        ...matchedCondition,
-        runs: [
-          {
-            cb: () => {
-              const suite = describe(title, () => {
-                callback(matchedCondition);
-              });
-
-              suite.file = file;
-              suite.eachTest((test) => {
-                test.file = file;
-              });
-            },
-          },
-        ],
-      });
-    });
-  },
+  when,
   run: (context: FtrProviderContext) => {
     if (!configName) {
       throw new Error(`registry was not init() before running`);

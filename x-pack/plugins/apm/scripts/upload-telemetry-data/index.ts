@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 // This script downloads the telemetry mapping, runs the APM telemetry tasks,
@@ -82,7 +83,7 @@ async function uploadData() {
         apmAgentConfigurationIndex: '.apm-agent-configuration',
       },
       search: (body) => {
-        return unwrapEsResponse(client.search<any>(body));
+        return unwrapEsResponse(client.search<any>(body as any));
       },
       indicesStats: (body) => {
         return unwrapEsResponse(client.indices.stats<any>(body));

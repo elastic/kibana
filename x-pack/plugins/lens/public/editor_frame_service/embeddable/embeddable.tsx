@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import _ from 'lodash';
@@ -228,9 +229,6 @@ export class Embeddable
     this.expression = expression ? toExpression(expression) : null;
     await this.initializeOutput();
     this.isInitialized = true;
-    if (this.domNode) {
-      this.render(this.domNode);
-    }
   }
 
   onContainerStateChanged(containerState: LensEmbeddableInput) {

@@ -1,27 +1,31 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import '../../../../__mocks__/enterprise_search_url.mock';
 import { setMockValues } from '../../../../__mocks__';
+
+import React from 'react';
+
+import { shallow, ShallowWrapper } from 'enzyme';
+
+// @ts-expect-error types are not available for this package yet
+import { SearchProvider, Facet } from '@elastic/react-search-ui';
 
 jest.mock('../../../../shared/use_local_storage', () => ({
   useLocalStorage: jest.fn(),
 }));
 import { useLocalStorage } from '../../../../shared/use_local_storage';
 
-import React from 'react';
-// @ts-expect-error types are not available for this package yet
-import { SearchProvider, Facet } from '@elastic/react-search-ui';
-import { shallow, ShallowWrapper } from 'enzyme';
-
 import { CustomizationCallout } from './customization_callout';
 import { CustomizationModal } from './customization_modal';
+
 import { Fields } from './types';
 
-import { SearchExperience } from './search_experience';
+import { SearchExperience } from './';
 
 describe('SearchExperience', () => {
   const values = {

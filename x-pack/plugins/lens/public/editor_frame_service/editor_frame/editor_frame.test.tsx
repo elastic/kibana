@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { ReactElement } from 'react';
@@ -1322,7 +1323,7 @@ describe('editor_frame', () => {
                 getDatasourceSuggestionsForVisualizeField: () => [generateSuggestion()],
                 renderDataPanel: (_element, { dragDropContext: { setDragging, dragging } }) => {
                   if (!dragging || dragging.id !== 'draggedField') {
-                    setDragging({ id: 'draggedField' });
+                    setDragging({ id: 'draggedField', humanData: { label: 'draggedField' } });
                   }
                 },
               },
@@ -1338,10 +1339,15 @@ describe('editor_frame', () => {
       instance.update();
 
       act(() => {
-        instance.find(DragDrop).filter('[data-test-subj="mockVisA"]').prop('onDrop')!({
-          indexPatternId: '1',
-          field: {},
-        });
+        instance.find('[data-test-subj="mockVisA"]').find(DragDrop).prop('onDrop')!(
+          {
+            indexPatternId: '1',
+            field: {},
+            id: '1',
+            humanData: { label: 'draggedField' },
+          },
+          'field_replace'
+        );
       });
 
       expect(mockVisualization2.getConfiguration).toHaveBeenCalledWith(
@@ -1419,7 +1425,7 @@ describe('editor_frame', () => {
                 getDatasourceSuggestionsForVisualizeField: () => [generateSuggestion()],
                 renderDataPanel: (_element, { dragDropContext: { setDragging, dragging } }) => {
                   if (!dragging || dragging.id !== 'draggedField') {
-                    setDragging({ id: 'draggedField' });
+                    setDragging({ id: 'draggedField', humanData: { label: '1' } });
                   }
                 },
               },
@@ -1435,10 +1441,17 @@ describe('editor_frame', () => {
       instance.update();
 
       act(() => {
-        instance.find(DragDrop).filter('[data-test-subj="lnsWorkspace"]').prop('onDrop')!({
-          indexPatternId: '1',
-          field: {},
-        });
+        instance.find(DragDrop).filter('[dataTestSubj="lnsWorkspace"]').prop('onDrop')!(
+          {
+            indexPatternId: '1',
+            field: {},
+            id: '1',
+            humanData: {
+              label: 'label',
+            },
+          },
+          'field_replace'
+        );
       });
 
       expect(mockVisualization3.getConfiguration).toHaveBeenCalledWith(

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { SpacesPlugin } from './plugin';
@@ -10,9 +11,7 @@ export { SpaceAvatar, getSpaceColor, getSpaceImageUrl, getSpaceInitials } from '
 
 export { SpacesPluginSetup, SpacesPluginStart } from './plugin';
 
-export { SpacesManager } from './spaces_manager';
-
-export { GetAllSpacesOptions, GetAllSpacesPurpose, GetSpaceResult } from '../common';
+export type { GetAllSpacesPurpose, GetSpaceResult } from '../common';
 
 // re-export types from oss definition
 export type { Space } from '../../../../src/plugins/spaces_oss/common';

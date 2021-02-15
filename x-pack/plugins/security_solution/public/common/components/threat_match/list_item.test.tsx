@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -68,7 +69,6 @@ describe('ListItemComponent', () => {
         <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
           <ListItemComponent
             listItem={doublePayload()}
-            listId={'123'}
             listItemIndex={0}
             indexPattern={
               {
@@ -102,7 +102,6 @@ describe('ListItemComponent', () => {
         <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
           <ListItemComponent
             listItem={doublePayload()}
-            listId={'123'}
             listItemIndex={1}
             indexPattern={
               {
@@ -134,7 +133,6 @@ describe('ListItemComponent', () => {
         <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
           <ListItemComponent
             listItem={singlePayload()}
-            listId={'123'}
             listItemIndex={1}
             indexPattern={
               {
@@ -168,7 +166,6 @@ describe('ListItemComponent', () => {
         <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
           <ListItemComponent
             listItem={singlePayload()}
-            listId={'123'}
             listItemIndex={1}
             indexPattern={
               {
@@ -210,7 +207,6 @@ describe('ListItemComponent', () => {
       const wrapper = mount(
         <ListItemComponent
           listItem={item}
-          listId={'123'}
           listItemIndex={0}
           indexPattern={
             {
@@ -242,7 +238,6 @@ describe('ListItemComponent', () => {
       const wrapper = mount(
         <ListItemComponent
           listItem={singlePayload()}
-          listId={'123'}
           listItemIndex={0}
           indexPattern={
             {
@@ -274,7 +269,6 @@ describe('ListItemComponent', () => {
       const wrapper = mount(
         <ListItemComponent
           listItem={singlePayload()}
-          listId={'123'}
           listItemIndex={1}
           indexPattern={
             {
@@ -308,7 +302,6 @@ describe('ListItemComponent', () => {
       const wrapper = mount(
         <ListItemComponent
           listItem={doublePayload()}
-          listId={'123'}
           listItemIndex={0}
           indexPattern={
             {
@@ -341,7 +334,6 @@ describe('ListItemComponent', () => {
       const wrapper = mount(
         <ListItemComponent
           listItem={doublePayload()}
-          listId={'123'}
           listItemIndex={0}
           indexPattern={
             {

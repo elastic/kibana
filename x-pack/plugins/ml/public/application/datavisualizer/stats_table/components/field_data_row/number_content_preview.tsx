@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FC, useEffect, useState } from 'react';
@@ -14,6 +15,7 @@ import {
 } from '../metric_distribution_chart';
 import { formatSingleValue } from '../../../../formatters/format_value';
 import { FieldVisConfig } from '../../types';
+import { kibanaFieldFormat } from '../../../../formatters/kibana_field_format';
 
 const METRIC_DISTRIBUTION_CHART_WIDTH = 150;
 const METRIC_DISTRIBUTION_CHART_HEIGHT = 80;
@@ -59,14 +61,16 @@ export const IndexBasedNumberContentPreview: FC<NumberContentPreviewProps> = ({ 
           <>
             <EuiSpacer size="s" />
             <EuiFlexGroup direction={'row'} data-test-subj={`${dataTestSubj}-legend`}>
-              <EuiFlexItem className={'mlDataGridChart__legend'}>{legendText.min}</EuiFlexItem>
+              <EuiFlexItem className={'mlDataGridChart__legend'}>
+                {kibanaFieldFormat(legendText.min, fieldFormat)}
+              </EuiFlexItem>
               <EuiFlexItem
                 className={classNames(
                   'mlDataGridChart__legend',
                   'mlDataGridChart__legend--numeric'
                 )}
               >
-                {legendText.max}
+                {kibanaFieldFormat(legendText.max, fieldFormat)}
               </EuiFlexItem>
             </EuiFlexGroup>
           </>

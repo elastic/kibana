@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -15,7 +16,7 @@ import {
   TableSuggestion,
   TableChangeType,
 } from '../types';
-import { State, SeriesType, XYState, visualizationTypes, LayerConfig } from './types';
+import { State, SeriesType, XYState, visualizationTypes, XYLayerConfig } from './types';
 import { getIconForSeries } from './state_helpers';
 
 const columnSortOrder = {
@@ -485,7 +486,7 @@ function buildSuggestion({
     splitBy = xValue;
     xValue = undefined;
   }
-  const existingLayer: LayerConfig | {} = getExistingLayer(currentState, layerId) || {};
+  const existingLayer: XYLayerConfig | {} = getExistingLayer(currentState, layerId) || {};
   const accessors = yValues.map((col) => col.columnId);
   const newLayer = {
     ...existingLayer,
