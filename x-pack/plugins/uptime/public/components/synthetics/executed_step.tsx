@@ -79,7 +79,7 @@ export const ExecutedStep: FC<ExecutedStepProps> = ({
             initialIsOpen={!isSucceeded}
           >
             {step.synthetics?.payload?.source}
-          </CodeBlockAccordion>{' '}
+          </CodeBlockAccordion>
           <EuiSpacer />
           <CodeBlockAccordion
             id={step.synthetics?.step?.name + String(index)}
@@ -93,7 +93,9 @@ export const ExecutedStep: FC<ExecutedStepProps> = ({
             language="javascript"
             initialIsOpen={!isSucceeded}
           >
-            {browserConsole}
+            <>
+              {browserConsole} <EuiSpacer />
+            </>
           </CodeBlockAccordion>
           <EuiSpacer />
           <StepScreenshots step={step} />
