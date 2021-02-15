@@ -54,15 +54,13 @@ export const CreateDockerCentOS: Task = {
 
   async run(config, log, build) {
     await runDockerGenerator(config, log, build, {
-      ubi: false,
-      context: false,
       architecture: 'x64',
+      context: false,
       image: true,
     });
     await runDockerGenerator(config, log, build, {
-      ubi: false,
-      context: false,
       architecture: 'aarch64',
+      context: false,
       image: true,
     });
   },
@@ -74,9 +72,9 @@ export const CreateDockerUBI: Task = {
   async run(config, log, build) {
     if (!build.isOss()) {
       await runDockerGenerator(config, log, build, {
-        ubi: true,
-        context: false,
         architecture: 'x64',
+        context: false,
+        ubi: true,
         image: true,
       });
     }
@@ -88,7 +86,6 @@ export const CreateDockerContexts: Task = {
 
   async run(config, log, build) {
     await runDockerGenerator(config, log, build, {
-      ubi: false,
       context: true,
       image: false,
     });
@@ -96,6 +93,11 @@ export const CreateDockerContexts: Task = {
     if (!build.isOss()) {
       await runDockerGenerator(config, log, build, {
         ubi: true,
+        context: true,
+        image: false,
+      });
+      await runDockerGenerator(config, log, build, {
+        ironbank: true,
         context: true,
         image: false,
       });
