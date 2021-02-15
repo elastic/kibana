@@ -46,6 +46,8 @@ export function transposeTable(
 ) {
   args.columns
     .filter((columnArgs) => columnArgs.isTransposed)
+    // start with the inner nested transposed column and work up to preserve column grouping
+    .reverse()
     .forEach(({ columnId: transposedColumnId }) => {
       const datatableColumnIndex = firstTable.columns.findIndex((c) => c.id === transposedColumnId);
       const datatableColumn = firstTable.columns[datatableColumnIndex];
@@ -59,23 +61,40 @@ export function transposeTable(
       const bucketsColumnArgs = args.columns.filter(
         (c) => !c.transposable && c.columnId !== transposedColumnId
       );
-
       firstTable.columns.splice(datatableColumnIndex, 1);
-      transposeColumns(args, bucketsColumnArgs, metricsColumnArgs, firstTable, uniqueValues);
 
-      const rowsByBucketColumns: Record<string, DatatableRow[]> = groupRowsByBucketColumns(
+      transposeColumns(args, bucketsColumnArgs, metricsColumnArgs, firstTable, uniqueValues);
+      transposeRows(
         firstTable,
         bucketsColumnArgs,
-        formatters
-      );
-      firstTable.rows = mergeRowGroups(
-        rowsByBucketColumns,
-        bucketsColumnArgs,
+        formatters,
         transposedColumnFormatter,
         transposedColumnId,
         metricsColumnArgs
       );
     });
+}
+
+function transposeRows(
+  firstTable: Datatable,
+  bucketsColumnArgs: Array<ColumnState & { type: 'lens_datatable_column' }>,
+  formatters: Record<string, FieldFormat>,
+  transposedColumnFormatter: FieldFormat,
+  transposedColumnId: string,
+  metricsColumnArgs: Array<ColumnState & { type: 'lens_datatable_column' }>
+) {
+  const rowsByBucketColumns: Record<string, DatatableRow[]> = groupRowsByBucketColumns(
+    firstTable,
+    bucketsColumnArgs,
+    formatters
+  );
+  firstTable.rows = mergeRowGroups(
+    rowsByBucketColumns,
+    bucketsColumnArgs,
+    transposedColumnFormatter,
+    transposedColumnId,
+    metricsColumnArgs
+  );
 }
 
 /**

@@ -12,7 +12,13 @@ import {
   DraggedOperation,
 } from '../../types';
 import { IndexPatternColumn } from '../indexpattern';
-import { insertOrReplaceColumn, deleteColumn, getOperationTypesForField, getColumnOrder } from '../operations';
+import {
+  insertOrReplaceColumn,
+  deleteColumn,
+  getOperationTypesForField,
+  getColumnOrder,
+  reorderByGroups,
+} from '../operations';
 import { mergeLayer } from '../state_helpers';
 import { hasField, isDraggedField } from '../utils';
 import { IndexPatternPrivateState, IndexPatternField, DraggedField } from '../types';
@@ -213,6 +219,8 @@ function onSameGroupDuplicateDrop({
   state,
   layerId,
   droppedItem,
+  dimensionGroups,
+  groupId,
 }: DropHandlerProps<DraggedOperation>) {
   const layer = state.layers[layerId];
 
@@ -224,19 +232,29 @@ function onSameGroupDuplicateDrop({
 
   const newColumnOrder = [...layer.columnOrder];
   // put a new bucketed dimension just in front of the metric dimensions, a metric dimension in the back of the array
-  // TODO this logic does not take into account groups - we probably need to pass the current
-  // group config to this position to place the column right
+  // then reorder based on dimension groups if necessary
   const insertionIndex = op.isBucketed
     ? newColumnOrder.findIndex((id) => !newColumns[id].isBucketed)
     : newColumnOrder.length;
   newColumnOrder.splice(insertionIndex, 0, columnId);
+
+  const newLayer = {
+    ...layer,
+    columnOrder: newColumnOrder,
+    columns: newColumns,
+  };
+
+  const updatedColumnOrder = getColumnOrder(newLayer);
+
+  reorderByGroups(dimensionGroups, groupId, updatedColumnOrder, columnId);
+
   // Time to replace
   setState(
     mergeLayer({
       state,
       layerId,
       newLayer: {
-        columnOrder: newColumnOrder,
+        columnOrder: updatedColumnOrder,
         columns: newColumns,
       },
     })
@@ -297,7 +315,7 @@ function onMoveDropToCompatibleGroup({
 }
 
 function onFieldDrop(props: DropHandlerProps<DraggedField>) {
-  const { columnId, setState, state, layerId, droppedItem } = props;
+  const { columnId, setState, state, layerId, droppedItem, groupId, dimensionGroups } = props;
 
   const operationsForNewField = getOperationTypesForField(
     droppedItem.field,

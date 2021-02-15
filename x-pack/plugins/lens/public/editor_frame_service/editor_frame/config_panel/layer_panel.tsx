@@ -8,7 +8,14 @@
 import './layer_panel.scss';
 
 import React, { useContext, useState, useEffect, useMemo, useCallback } from 'react';
-import { EuiPanel, EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
+import {
+  EuiPanel,
+  EuiSpacer,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiIconTip,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { NativeRenderer } from '../../../native_renderer';
 import { StateSetter, Visualization, DraggedOperation, DropType } from '../../../types';
@@ -264,7 +271,26 @@ export function LayerPanel(
                     : 'lnsLayerPanel__row lnsLayerPanel__row--notSupportsMoreColumns'
                 }
                 fullWidth
-                label={<div className="lnsLayerPanel__groupLabel">{group.groupLabel}</div>}
+                label={
+                  <div className="lnsLayerPanel__groupLabel">
+                    {group.groupLabel}
+                    {group.groupTooltip && (
+                      <>
+                        {' '}
+                        <EuiIconTip
+                          color="subdued"
+                          content={group.groupTooltip}
+                          iconProps={{
+                            className: 'eui-alignTop',
+                          }}
+                          position="top"
+                          size="s"
+                          type="questionInCircle"
+                        />
+                      </>
+                    )}
+                  </div>
+                }
                 labelType="legend"
                 key={group.groupId}
                 isInvalid={isMissing}

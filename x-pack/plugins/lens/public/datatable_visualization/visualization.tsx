@@ -178,6 +178,10 @@ export const datatableVisualization: Visualization<DatatableVisualizationState> 
           groupLabel: i18n.translate('xpack.lens.datatable.breakdownColumns', {
             defaultMessage: 'Split columns',
           }),
+          groupTooltip: i18n.translate('xpack.lens.datatable.breakdownColumns.description', {
+            defaultMessage:
+              "Split metric columns by field. It's recommended to keep the number of columns low to avoid horizontal scrolling.",
+          }),
           layerId: state.layerId,
           accessors: sortedColumns
             .filter(
@@ -196,6 +200,10 @@ export const datatableVisualization: Visualization<DatatableVisualizationState> 
           groupId: 'rows',
           groupLabel: i18n.translate('xpack.lens.datatable.breakdownRows', {
             defaultMessage: 'Split rows',
+          }),
+          groupTooltip: i18n.translate('xpack.lens.datatable.breakdownRows.description', {
+            defaultMessage:
+              'Split table rows by field. This is recommended for high cardinality breakdowns.',
           }),
           layerId: state.layerId,
           accessors: sortedColumns

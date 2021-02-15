@@ -17,7 +17,7 @@ import type {
 import { ColumnConfig } from './table_basic';
 
 import { desanitizeFilterContext } from '../../utils';
-import { getOriginalId } from '../expression';
+import { getOriginalId } from '../transpose_helpers';
 
 export const createGridResizeHandler = (
   columnConfig: ColumnConfig,

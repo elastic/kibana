@@ -14,7 +14,7 @@ import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { IndexPatternPrivateState } from '../types';
 import { documentField } from '../document_field';
 import { OperationMetadata, DropType } from '../../types';
-import { IndexPatternColumn } from '../operations';
+import { IndexPatternColumn, MedianIndexPatternColumn } from '../operations';
 import { getFieldByNameFactory } from '../pure_helpers';
 
 const fields = [
@@ -640,7 +640,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
       });
     });
 
-    describe('dimension group aware ordering', () => {
+    describe('dimension group aware ordering and copying', () => {
       let dragging: DragDropIdentifier;
       let testState: IndexPatternPrivateState;
       beforeEach(() => {
@@ -667,7 +667,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
               // Private
               operationType: 'terms',
               params: {
-                orderBy: { type: 'column', columnId: 'col4' },
+                orderBy: { type: 'alphabetical' },
                 orderDirection: 'desc',
                 size: 10,
               },
@@ -681,20 +681,20 @@ describe('IndexPatternDimensionEditorPanel', () => {
               // Private
               operationType: 'terms',
               params: {
-                orderBy: { type: 'column', columnId: 'col4' },
+                orderBy: { type: 'alphabetical' },
                 orderDirection: 'desc',
                 size: 10,
               },
               sourceField: 'dest',
             },
             col4: {
-              label: 'Count of records',
+              label: 'Median of bytes',
               dataType: 'number',
               isBucketed: false,
 
               // Private
-              operationType: 'count',
-              sourceField: 'Records',
+              operationType: 'median',
+              sourceField: 'bytes',
             },
           },
         };
@@ -916,10 +916,117 @@ describe('IndexPatternDimensionEditorPanel', () => {
           },
         });
       });
+
+      it('copies column to the bottom of the current group', () => {
+        // config:
+        // a: col1
+        // b: col2, col3
+        // c: col4
+        // copying col1 within group a
+        const draggingCol1 = {
+          columnId: 'col1',
+          groupId: 'a',
+          layerId: 'first',
+          id: 'col1',
+          humanData: {
+            label: '',
+          },
+        };
+        onDrop({
+          ...defaultProps,
+          columnId: 'newCol',
+          dragDropContext: {
+            ...dragDropContext,
+            dragging: draggingCol1,
+          },
+          dropType: 'duplicate_in_group',
+          droppedItem: draggingCol1,
+          state: testState,
+          groupId: 'a',
+          dimensionGroups: [
+            { ...dimensionGroups[0], accessors: [{ columnId: 'col1' }] },
+            { ...dimensionGroups[1], accessors: [{ columnId: 'col2' }, { columnId: 'col3' }] },
+            { ...dimensionGroups[2] },
+          ],
+        });
+
+        expect(setState).toBeCalledTimes(1);
+        expect(setState).toHaveBeenCalledWith({
+          ...testState,
+          layers: {
+            first: {
+              ...testState.layers.first,
+              columnOrder: ['col1', 'newCol', 'col2', 'col3', 'col4'],
+              columns: {
+                col1: testState.layers.first.columns.col1,
+                newCol: testState.layers.first.columns.col1,
+                col2: testState.layers.first.columns.col2,
+                col3: testState.layers.first.columns.col3,
+                col4: testState.layers.first.columns.col4,
+              },
+            },
+          },
+        });
+      });
+
+      it('moves incompatible column to the bottom of the target group', () => {
+        // config:
+        // a: col1
+        // b: col2, col3
+        // c: col4
+        // dragging col4 into newCol in group a
+        const draggingCol4 = {
+          columnId: 'col4',
+          groupId: 'c',
+          layerId: 'first',
+          id: 'col4',
+          humanData: {
+            label: '',
+          },
+        };
+        onDrop({
+          ...defaultProps,
+          columnId: 'newCol',
+          dragDropContext: {
+            ...dragDropContext,
+            dragging: draggingCol4,
+          },
+          dropType: 'move_incompatible',
+          droppedItem: draggingCol4,
+          state: testState,
+          groupId: 'a',
+          dimensionGroups: [
+            { ...dimensionGroups[0], accessors: [{ columnId: 'col1' }] },
+            { ...dimensionGroups[1], accessors: [{ columnId: 'col2' }, { columnId: 'col3' }] },
+            { ...dimensionGroups[2] },
+          ],
+        });
+
+        expect(setState).toBeCalledTimes(1);
+        expect(setState).toHaveBeenCalledWith({
+          ...testState,
+          layers: {
+            first: {
+              ...testState.layers.first,
+              columnOrder: ['col1', 'newCol', 'col2', 'col3'],
+              columns: {
+                col1: testState.layers.first.columns.col1,
+                newCol: expect.objectContaining({
+                  sourceField: (testState.layers.first.columns.col4 as MedianIndexPatternColumn)
+                    .sourceField,
+                }),
+                col2: testState.layers.first.columns.col2,
+                col3: testState.layers.first.columns.col3,
+              },
+              incompleteColumns: {},
+            },
+          },
+        });
+      });
     });
 
     it('if dnd is reorder, it correctly reorders columns', () => {
-      const testState = {
+      const testState: IndexPatternPrivateState = {
         ...state,
         layers: {
           first: {
@@ -930,17 +1037,31 @@ describe('IndexPatternDimensionEditorPanel', () => {
                 label: 'Date histogram of timestamp',
                 dataType: 'date',
                 isBucketed: true,
-              } as IndexPatternColumn,
+                operationType: 'date_histogram',
+                params: {
+                  interval: '1d',
+                },
+                sourceField: 'timestamp',
+              },
               col2: {
                 label: 'Top values of bar',
                 dataType: 'number',
                 isBucketed: true,
-              } as IndexPatternColumn,
+                operationType: 'terms',
+                sourceField: 'bar',
+                params: {
+                  orderBy: { type: 'alphabetical' },
+                  orderDirection: 'asc',
+                  size: 5,
+                },
+              },
               col3: {
-                label: 'Top values of memory',
+                operationType: 'avg',
+                sourceField: 'memory',
+                label: 'average of memory',
                 dataType: 'number',
-                isBucketed: true,
-              } as IndexPatternColumn,
+                isBucketed: false,
+              },
             },
           },
         },
