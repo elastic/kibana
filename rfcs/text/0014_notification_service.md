@@ -41,7 +41,7 @@ It became clear we need a unified mechanism to help our users to navigate throug
 ## Unified Notification Service
 The main goal of the Notification service is to provide seamless integration for notifications across different Elastic products.
 This will be achieved through introducing Unified Notification Service (UNS), which can be accessed by a variety of
-Elastic products deployed on the Cloud. It accumulates notifications creates by different company products and provides
+Elastic products deployed on the Cloud. It accumulates notifications created by different company products and provides
 access to them via the Kibana UI and Cloud Console UI.
 Unified Notification Service is still in the planning stages and beyond the scope of this RFC.
 ![image](../images/0014/uns.png)
@@ -167,8 +167,8 @@ Might be paginated using `search_after` filed.
 - `markAsRead({ notification_id: string[] })` - mark notifications with given ids as read.
 - `markAsUnread({ notification_id: string[] })` - mark notifications with given ids as unread.
 - `markAllAsRead()` - mark all the notifications as read.
-- `markAsPin({ notification_id: string[] })` - mark notifications with given ids as pinned.
-- `markAsUnpin({ notification_id: string[] })` - mark notifications with given ids as unpinned.
+- `markAsPinned({ notification_id: string[] })` - mark notifications with given ids as pinned.
+- `markAsUnpinned({ notification_id: string[] })` - mark notifications with given ids as unpinned.
 - `configure()` - updates user-specific notification settings.
 
 #### LocalRepository
@@ -245,7 +245,7 @@ For simplicity, we can start with Kibana UI using the HTTP polling mechanism to 
 Server orders notifications by *pinned_status* and *created_at* timestamp.
 
 Kibana HTTP API:
-- Endpoint: `GET /notifications/` 
+- Endpoint: `GET /api/notifications/` 
     - `search_after?: number` - Unix timestamp to start searching from.
     - `type_id?: string[]` - list of source types to filter by.
     - `size?: number` - max number of notifications to retrieve.
@@ -314,7 +314,7 @@ It forces us to evaluate each feature separately as to how difficult it will be 
 
 # Alternatives
 
-### Threat Cloud as another pluggable storage mechanism.
+### Treat Cloud as another pluggable storage mechanism.
 Kibana notification service collects internal notifications and shows them in the UI for both on-prem and Cloud environments.
 Kibana reuses Notification service implementation on Cloud but enhances it with additional pluggable storage of external notifications.
 ![img](../images/0014/alternative_implementation.png)
