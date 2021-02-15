@@ -87,8 +87,7 @@ export async function initFieldsRoute(setup: CoreSetup<PluginStartContract>) {
             body: {
               query,
               aggs,
-              runtime_mappings:
-                !field.isMapped && field.runtimeField ? { [fieldName]: field.runtimeField } : {},
+              runtime_mappings: field.runtimeField ? { [fieldName]: field.runtimeField } : {},
             },
             size: 0,
           });
