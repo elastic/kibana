@@ -20,24 +20,24 @@ const HashFlexGroup = styled(EuiFlexGroup)`
 interface Props {
   contextId: string;
   eventId: string;
-  processHashSha256: string | null | undefined;
+  fileHashSha256: string | null | undefined;
 }
 
-export const ProcessHash = React.memo<Props>(({ contextId, eventId, processHashSha256 }) => {
-  if (isNillEmptyOrNotFinite(processHashSha256)) {
+export const FileHash = React.memo<Props>(({ contextId, eventId, fileHashSha256 }) => {
+  if (isNillEmptyOrNotFinite(fileHashSha256)) {
     return null;
   }
 
   return (
     <HashFlexGroup alignItems="center" direction="column" gutterSize="none">
-      {!isNillEmptyOrNotFinite(processHashSha256) && (
+      {!isNillEmptyOrNotFinite(fileHashSha256) && (
         <TokensFlexItem grow={false} component="div">
           <DraggableBadge
             contextId={contextId}
             eventId={eventId}
-            field="process.hash.sha256"
+            field="file.hash.sha256"
             iconType="number"
-            value={processHashSha256}
+            value={fileHashSha256}
           />
         </TokensFlexItem>
       )}
@@ -45,4 +45,4 @@ export const ProcessHash = React.memo<Props>(({ contextId, eventId, processHashS
   );
 });
 
-ProcessHash.displayName = 'ProcessHash';
+FileHash.displayName = 'FileHash';
