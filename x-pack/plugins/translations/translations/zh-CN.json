@@ -10965,7 +10965,6 @@
     "xpack.ingestPipelines.pipelineEditor.setForm.propertiesFieldHelpText": "要添加的用户详情。默认为 {value}",
     "xpack.ingestPipelines.pipelineEditor.setForm.valueFieldHelpText": "字段的值。",
     "xpack.ingestPipelines.pipelineEditor.setForm.valueFieldLabel": "值",
-    "xpack.ingestPipelines.pipelineEditor.setForm.valueRequiredError": "需要值。",
     "xpack.ingestPipelines.pipelineEditor.setSecurityUserForm.fieldNameField": "输出字段。",
     "xpack.ingestPipelines.pipelineEditor.setSecurityUserForm.propertiesFieldLabel": "属性（可选）",
     "xpack.ingestPipelines.pipelineEditor.settingsForm.learnMoreLabelLink.processor": "{processorLabel}文档",

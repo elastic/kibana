@@ -19,7 +19,7 @@ import {
   SelectField,
 } from '../../../../../../shared_imports';
 
-import { FieldsConfig, to } from './shared';
+import { FieldsConfig, to, from } from './shared';
 import { FieldNameField } from './common_fields/field_name_field';
 
 const { emptyField } = fieldValidators;
@@ -57,7 +57,7 @@ const fieldsConfig: FieldsConfig = {
   /* Optional fields config */
   index_name_prefix: {
     type: FIELD_TYPES.TEXT,
-    serializer: (v) => (v ? v : undefined),
+    serializer: from.emptyStringToUndefined,
     label: i18n.translate(
       'xpack.ingestPipelines.pipelineEditor.dateIndexNameForm.indexNamePrefixFieldLabel',
       {
@@ -71,7 +71,7 @@ const fieldsConfig: FieldsConfig = {
   },
   index_name_format: {
     type: FIELD_TYPES.TEXT,
-    serializer: (v) => (v ? v : undefined),
+    serializer: from.emptyStringToUndefined,
     label: i18n.translate(
       'xpack.ingestPipelines.pipelineEditor.dateIndexNameForm.indexNameFormatFieldLabel',
       {
@@ -108,7 +108,7 @@ const fieldsConfig: FieldsConfig = {
   },
   timezone: {
     type: FIELD_TYPES.TEXT,
-    serializer: (v) => (v ? v : undefined),
+    serializer: from.emptyStringToUndefined,
     label: i18n.translate(
       'xpack.ingestPipelines.pipelineEditor.dateIndexNameForm.timezoneFieldLabel',
       {
@@ -125,7 +125,7 @@ const fieldsConfig: FieldsConfig = {
   },
   locale: {
     type: FIELD_TYPES.TEXT,
-    serializer: (v) => (v ? v : undefined),
+    serializer: from.emptyStringToUndefined,
     label: i18n.translate(
       'xpack.ingestPipelines.pipelineEditor.dateIndexNameForm.localeFieldLabel',
       {

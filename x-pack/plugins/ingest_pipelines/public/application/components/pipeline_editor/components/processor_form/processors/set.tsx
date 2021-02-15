@@ -10,22 +10,15 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiCode } from '@elastic/eui';
 
-import {
-  FIELD_TYPES,
-  fieldValidators,
-  ToggleField,
-  UseField,
-  Field,
-} from '../../../../../../shared_imports';
+import { FIELD_TYPES, ToggleField, UseField, Field } from '../../../../../../shared_imports';
 
 import { FieldsConfig, to, from } from './shared';
 
 import { FieldNameField } from './common_fields/field_name_field';
 
-const { emptyField } = fieldValidators;
-
 const fieldsConfig: FieldsConfig = {
   /* Required fields config */
+  // This is a required field, but we exclude validation because we accept empty values as ''
   value: {
     type: FIELD_TYPES.TEXT,
     deserializer: String,
@@ -35,15 +28,6 @@ const fieldsConfig: FieldsConfig = {
     helpText: i18n.translate('xpack.ingestPipelines.pipelineEditor.setForm.valueFieldHelpText', {
       defaultMessage: 'Value for the field.',
     }),
-    validations: [
-      {
-        validator: emptyField(
-          i18n.translate('xpack.ingestPipelines.pipelineEditor.setForm.valueRequiredError', {
-            defaultMessage: 'A value is required.',
-          })
-        ),
-      },
-    ],
   },
   /* Optional fields config */
   override: {

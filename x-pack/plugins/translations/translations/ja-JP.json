@@ -10937,7 +10937,6 @@
     "xpack.ingestPipelines.pipelineEditor.setForm.propertiesFieldHelpText": "追加するユーザー詳細情報。フォルトは{value}です。",
     "xpack.ingestPipelines.pipelineEditor.setForm.valueFieldHelpText": "フィールドの値。",
     "xpack.ingestPipelines.pipelineEditor.setForm.valueFieldLabel": "値",
-    "xpack.ingestPipelines.pipelineEditor.setForm.valueRequiredError": "値が必要です。",
     "xpack.ingestPipelines.pipelineEditor.setSecurityUserForm.fieldNameField": "出力フィールド。",
     "xpack.ingestPipelines.pipelineEditor.setSecurityUserForm.propertiesFieldLabel": "プロパティ（任意）",
     "xpack.ingestPipelines.pipelineEditor.settingsForm.learnMoreLabelLink.processor": "{processorLabel}ドキュメント",
