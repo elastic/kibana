@@ -38,7 +38,12 @@ function isStepEnd(step: Ping) {
   return step.synthetics?.type === 'step/end';
 }
 
-function statusMessage(count: StepStatusCount) {
+function statusMessage(count: StepStatusCount, loading?: boolean) {
+  if (loading) {
+    return i18n.translate('xpack.uptime.synthetics.journey.loadingSteps', {
+      defaultMessage: 'Loading steps ...',
+    });
+  }
   const total = count.succeeded + count.failed + count.skipped;
   if (count.failed + count.skipped === total) {
     return i18n.translate('xpack.uptime.synthetics.journey.allFailedMessage', {
@@ -139,7 +144,10 @@ export const StepsList = ({ data, error, loading }: Props) => {
     <EuiPanel>
       <EuiTitle>
         <h2>
-          {statusMessage(steps.reduce(reduceStepStatus, { failed: 0, skipped: 0, succeeded: 0 }))}
+          {statusMessage(
+            steps.reduce(reduceStepStatus, { failed: 0, skipped: 0, succeeded: 0 }),
+            loading
+          )}
         </h2>
       </EuiTitle>
       <EuiBasicTable
