@@ -153,18 +153,31 @@ const FieldEditorFlyoutContentComponent = ({
 
   const namesNotAllowed = useMemo(() => fields.map((fld) => fld.name), [fields]);
 
-  const existingConcreteFields = useMemo(
-    () =>
-      fields
-        .filter((fld) => {
-          const isFieldBeingEdited = field?.name === fld.name;
-          return !isFieldBeingEdited && fld.isMapped;
-        })
-        .map((fld) => ({
+  const existingConcreteFields = useMemo(() => {
+    const existing: Array<{ name: string; type: string }> = [];
+
+    fields
+      .filter((fld) => {
+        const isFieldBeingEdited = field?.name === fld.name;
+        return !isFieldBeingEdited && fld.isMapped;
+      })
+      .forEach((fld) => {
+        existing.push({
           name: fld.name,
           type: (fld.esTypes && fld.esTypes[0]) || '',
-        })),
-    [fields, field]
+        });
+      });
+
+    return existing;
+  }, [fields, field]);
+
+  const ctx = useMemo(
+    () => ({
+      fieldTypeToProcess,
+      namesNotAllowed,
+      existingConcreteFields,
+    }),
+    [fieldTypeToProcess, namesNotAllowed, existingConcreteFields]
   );
 
   return (
@@ -185,7 +198,7 @@ const FieldEditorFlyoutContentComponent = ({
             links={getLinks(docLinks)}
             field={field}
             onChange={setFormState}
-            ctx={{ fieldTypeToProcess, namesNotAllowed, existingConcreteFields }}
+            ctx={ctx}
             syntaxError={syntaxError}
           />
         )}
