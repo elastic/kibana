@@ -26,7 +26,11 @@ import { useMlApiContext } from '../../contexts/kibana';
 
 import { getProcessedFields } from '../data_grid';
 import { useCurrentEuiTheme } from '../color_range_legend';
-import { LegendType, VegaChart, VegaChartLoading } from '../vega_chart';
+
+// Separate imports for lazy loadable VegaChart and related code
+import { VegaChart } from '../vega_chart';
+import type { LegendType } from '../vega_chart/common';
+import { VegaChartLoading } from '../vega_chart/vega_chart_loading';
 
 import {
   getScatterplotMatrixVegaLiteSpec,

@@ -21,7 +21,11 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { useMlKibana } from '../../../../../contexts/kibana';
-import { VegaChart, VegaChartLoading } from '../../../../../components/vega_chart';
+
+// Separate imports for lazy loadable VegaChart and related code
+import { VegaChart } from '../../../../../components/vega_chart';
+import { VegaChartLoading } from '../../../../../components/vega_chart/vega_chart_loading';
+
 import { ErrorCallout } from '../error_callout';
 import { getDependentVar, DataFrameAnalyticsConfig } from '../../../../common';
 import { DataFrameTaskStateType } from '../../../analytics_management/components/analytics_list/common';

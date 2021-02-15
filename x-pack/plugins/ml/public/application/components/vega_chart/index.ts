@@ -5,6 +5,7 @@
  * 2.0.
  */
 
-export { LegendType, LEGEND_TYPES } from './common';
+// Make sure to only export the component we can lazy load here.
+// Code from other files in this directory should be imported directly from the file,
+// otherwise we break the bundling approach using lazy loading.
 export { VegaChart } from './vega_chart';
-export { VegaChartLoading } from './vega_chart_loading';
