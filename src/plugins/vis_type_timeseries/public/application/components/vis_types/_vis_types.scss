@@ -1,4 +1,7 @@
 .tvbVis {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 100%;
   position: absolute;
   top: 0;
   right: 0;
