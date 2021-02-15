@@ -63,7 +63,7 @@ export const MARK_IN_PROGRESS_CASES = ({
   totalCases: number;
   caseTitle?: string;
 }) =>
-  i18n.translate('xpack.securitySolution.containers.case.reopenedCases', {
+  i18n.translate('xpack.securitySolution.containers.case.markInProgressCases', {
     values: { caseTitle, totalCases },
     defaultMessage:
       'Marked {totalCases, plural, =1 {"{caseTitle}"} other {{totalCases} cases}} as in progress',
