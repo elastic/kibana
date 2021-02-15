@@ -14,7 +14,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import { orderBy } from 'lodash';
 import React, { useState } from 'react';
-import uuid from 'uuid';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
@@ -36,6 +35,10 @@ const DEFAULT_SORT = {
   field: 'occurrences' as const,
 };
 
+const INITIAL_STATE = {
+  items: [],
+};
+
 export function ServiceOverviewErrorsTable({ serviceName }: Props) {
   const {
     urlParams: { start, end },
@@ -55,18 +58,11 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
 
   const { pageIndex, sort } = tableOptions;
 
-  const {
-    data = {
-      items: [],
-      requestId: '',
-    },
-    status,
-  } = useFetcher(
+  const { data = INITIAL_STATE, status } = useFetcher(
     (callApmApi) => {
       if (!start || !end || !transactionType) {
         return;
       }
-
       return callApmApi({
         endpoint:
           'GET /api/apm/services/{serviceName}/error_groups/primary_statistics',
@@ -81,7 +77,6 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
         },
       }).then((response) => {
         return {
-          requestId: uuid(),
           items: response.error_groups,
         };
       });
@@ -89,15 +84,10 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
     [start, end, serviceName, uiFilters, transactionType]
   );
 
-  const { items, requestId } = data;
+  const { items } = data;
   const currentPageErrorGroups = orderBy(
     items,
-    (group) => {
-      if (sort.field === 'occurrences') {
-        return group.occurrences.value;
-      }
-      return group[sort.field];
-    },
+    sort.field,
     sort.direction
   ).slice(pageIndex * PAGE_SIZE, (pageIndex + 1) * PAGE_SIZE);
 
@@ -109,7 +99,13 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
     status: errorGroupComparisonStatisticsStatus,
   } = useFetcher(
     (callApmApi) => {
-      if (currentPageErrorGroups.length && start && end && transactionType) {
+      if (
+        status === FETCH_STATUS.SUCCESS &&
+        currentPageErrorGroups.length &&
+        start &&
+        end &&
+        transactionType
+      ) {
         return callApmApi({
           endpoint:
             'GET /api/apm/services/{serviceName}/error_groups/comparison_statistics',
@@ -127,9 +123,9 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
         });
       }
     },
-    // only fetches agg results when requestId changes or group ids change
+    // only fetches agg results when status changes or group ids change
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [requestId, groupIds],
+    [status, groupIds],
     { preservePreviousData: false }
   );
 

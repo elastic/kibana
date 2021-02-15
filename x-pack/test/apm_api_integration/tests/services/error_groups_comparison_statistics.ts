@@ -10,6 +10,9 @@ import expect from '@kbn/expect';
 import archives_metadata from '../../common/fixtures/es_archiver/archives_metadata';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { registry } from '../../common/registry';
+import { APIReturnType } from '../../../../plugins/apm/public/services/rest/createCallApmApi';
+
+type ErrorGroupsComparisonStatistics = APIReturnType<'GET /api/apm/services/{serviceName}/error_groups/comparison_statistics'>;
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -69,12 +72,22 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         );
 
         expect(response.status).to.be(200);
-        expect(Object.keys(response.body).length).to.be(5);
-        const errorMetric = response.body[groupIds[0]];
-        expect(errorMetric.timeseries.length).to.be(31);
+
+        const errorGroupsComparisonStatistics = response.body as ErrorGroupsComparisonStatistics;
+        expect(Object.keys(errorGroupsComparisonStatistics).length).to.be.eql(groupIds.length);
+
+        groupIds.map((groupId) => {
+          expect(errorGroupsComparisonStatistics[groupId]).not.to.be.empty();
+        });
+
+        const errorgroupsComparisonStatistics = errorGroupsComparisonStatistics[groupIds[0]];
+        expect(
+          errorgroupsComparisonStatistics.timeseries.map(({ y }) => isFinite(y)).length
+        ).to.be.greaterThan(0);
+        expectSnapshot(errorgroupsComparisonStatistics).toMatch();
       });
 
-      it('returns empty data', async () => {
+      it('returns an empty list when requested groupIds are not available in the given time range', async () => {
         const response = await supertest.get(
           url.format({
             pathname: `/api/apm/services/opbeans-java/error_groups/comparison_statistics`,

@@ -82,7 +82,7 @@ export function getColumns({
               {
                 defaultMessage: `{occurrencesCount} occ.`,
                 values: {
-                  occurrencesCount: asInteger(occurrences.value),
+                  occurrencesCount: asInteger(occurrences),
                 },
               }
             )}

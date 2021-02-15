@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { orderBy } from 'lodash';
 import {
   ERROR_EXC_MESSAGE,
   ERROR_GROUP_ID,
@@ -82,21 +81,13 @@ export function getServiceErrorGroupPrimaryStatistics({
         last_seen: new Date(
           bucket.sample.hits.hits[0]?._source['@timestamp']
         ).getTime(),
-        occurrences: {
-          value: bucket.doc_count,
-        },
+        occurrences: bucket.doc_count,
       })) ?? [];
-
-    const sortedErrorGroups = orderBy(
-      errorGroups,
-      (group) => group.occurrences.value,
-      'desc'
-    );
 
     return {
       is_aggregation_accurate:
         (response.aggregations?.error_groups.sum_other_doc_count ?? 0) === 0,
-      error_groups: sortedErrorGroups,
+      error_groups: errorGroups,
     };
   });
 }

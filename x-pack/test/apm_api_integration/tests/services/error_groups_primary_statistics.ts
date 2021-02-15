@@ -58,7 +58,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         expect(response.status).to.be(200);
         expect(response.body.is_aggregation_accurate).to.eql(true);
-        expect(response.body.error_groups.length).to.be(5);
+        expect(response.body.error_groups.length).to.be.greaterThan(0);
+        expectSnapshot(response.body).toMatch();
       });
     }
   );
