@@ -110,6 +110,7 @@ export function render<ExtraCore>(
     ...mockState,
     ...state,
   };
+
   return reactTestLibRender(
     <MountWithReduxProvider state={testState}>
       <MockRouter history={history} kibanaProps={kibanaProps} core={core}>

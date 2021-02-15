@@ -103,28 +103,26 @@ export const EnableMonitorAlert = ({ monitorId, selectedMonitor }: Props) => {
 
   return hasDefaultConnectors || hasAlert ? (
     <div className="eui-displayInlineBlock" style={{ marginRight: 10 }}>
-      {
-        <EuiToolTip content={btnLabel}>
-          <>
-            <EuiSwitch
-              id={'enableDisableAlertSwitch'}
-              compressed={!isMonitorPage}
-              disabled={showSpinner}
-              label={btnLabel}
-              showLabel={!!isMonitorPage}
-              aria-label={btnLabel}
-              onChange={onAlertClick}
-              checked={!!hasAlert}
-              data-test-subj={
-                hasAlert
-                  ? 'uptimeDisableSimpleDownAlert' + monitorId
-                  : 'uptimeEnableSimpleDownAlert' + monitorId
-              }
-            />{' '}
-            {showSpinner && <EuiLoadingSpinner className="eui-alignMiddle" />}
-          </>
-        </EuiToolTip>
-      }
+      <EuiToolTip content={btnLabel}>
+        <>
+          <EuiSwitch
+            id={'enableDisableAlertSwitch'}
+            compressed={!isMonitorPage}
+            disabled={showSpinner}
+            label={btnLabel}
+            showLabel={!!isMonitorPage}
+            aria-label={btnLabel}
+            onChange={onAlertClick}
+            checked={!!hasAlert}
+            data-test-subj={
+              hasAlert
+                ? 'uptimeDisableSimpleDownAlert' + monitorId
+                : 'uptimeEnableSimpleDownAlert' + monitorId
+            }
+          />{' '}
+          {showSpinner && <EuiLoadingSpinner className="eui-alignMiddle" />}
+        </>
+      </EuiToolTip>
     </div>
   ) : (
     <DefineAlertConnectors />
