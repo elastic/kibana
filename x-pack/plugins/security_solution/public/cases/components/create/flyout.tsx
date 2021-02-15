@@ -29,8 +29,14 @@ const Container = styled.div`
 
 const StyledFlyout = styled(EuiFlyout)`
   ${({ theme }) => `
-  z-index: ${theme.eui.euiZNavigation + 1};
+    z-index: ${theme.eui.euiZModal};
   `}
+`;
+
+// Adding bottom padding because timeline's
+// bottom bar gonna hide the submit button.
+const FormWrapper = styled.div`
+  padding-bottom: 50px;
 `;
 
 const CreateCaseFlyoutComponent: React.FC<CreateCaseModalProps> = ({
@@ -38,19 +44,21 @@ const CreateCaseFlyoutComponent: React.FC<CreateCaseModalProps> = ({
   onCloseFlyout,
 }) => {
   return (
-    <StyledFlyout onClose={onCloseFlyout}>
+    <StyledFlyout onClose={onCloseFlyout} data-test-subj="create-case-flyout">
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
           <h2>{i18n.CREATE_TITLE}</h2>
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        <FormContext onSuccess={onCaseCreated}>
-          <CreateCaseForm withSteps={false} />
-          <Container>
-            <SubmitCaseButton />
-          </Container>
-        </FormContext>
+        <FormWrapper>
+          <FormContext onSuccess={onCaseCreated}>
+            <CreateCaseForm withSteps={false} />
+            <Container>
+              <SubmitCaseButton />
+            </Container>
+          </FormContext>
+        </FormWrapper>
       </EuiFlyoutBody>
     </StyledFlyout>
   );
