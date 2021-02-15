@@ -540,7 +540,13 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
                 )}
               >
                 <EuiFieldText
-                  placeholder="delay"
+                  placeholder={i18n.translate(
+                    'xpack.transform.stepDetailsForm.continuousModeDelayPlaceholderText',
+                    {
+                      defaultMessage: 'delay e.g. {exampleValue}',
+                      values: { exampleValue: '60s' },
+                    }
+                  )}
                   value={continuousModeDelay}
                   onChange={(e) => setContinuousModeDelay(e.target.value)}
                   aria-label={i18n.translate(
@@ -591,7 +597,7 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
                   'xpack.transform.stepDetailsForm.retentionPolicyDateFieldHelpText',
                   {
                     defaultMessage:
-                      'Select the date field that can be used to identify out of date documents.',
+                      'Select the date field that can be used to identify out of date documents in the destination index.',
                   }
                 )}
               >
@@ -621,12 +627,19 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
                 helpText={i18n.translate(
                   'xpack.transform.stepDetailsForm.retentionPolicyMaxAgeHelpText',
                   {
-                    defaultMessage: 'Maximum age of documents to be considered outdated.',
+                    defaultMessage:
+                      'Documents that are older than the configured value will be removed from the destination index.',
                   }
                 )}
               >
                 <EuiFieldText
-                  placeholder="max_age"
+                  placeholder={i18n.translate(
+                    'xpack.transform.stepDetailsForm.retentionPolicyMaxAgePlaceholderText',
+                    {
+                      defaultMessage: 'max_age e.g. {exampleValue}',
+                      values: { exampleValue: '7d' },
+                    }
+                  )}
                   value={retentionPolicyMaxAge}
                   onChange={(e) => setRetentionPolicyMaxAge(e.target.value)}
                   aria-label={i18n.translate(
