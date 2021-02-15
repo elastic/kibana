@@ -143,7 +143,7 @@ describe('embeddable', () => {
 | expression`);
   });
 
-  it('should render validation errors if any', async () => {
+  it('should not render the visualization if any error arises', async () => {
     const embeddable = new Embeddable(
       {
         timefilter: dataPluginMock.createSetupContract().query.timefilter.timefilter,
