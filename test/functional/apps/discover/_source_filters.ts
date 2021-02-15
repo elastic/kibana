@@ -30,7 +30,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await esArchiver.loadIfNeeded('logstash_functional');
 
       await kibanaServer.uiSettings.update({
-        'discover:searchFieldsFromSource': false,
+        'discover:searchFieldsFromSource': true,
       });
 
       log.debug('discover');
