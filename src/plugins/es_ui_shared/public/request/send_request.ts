@@ -13,6 +13,10 @@ export interface SendRequestConfig {
   method: 'get' | 'post' | 'put' | 'delete' | 'patch' | 'head';
   query?: HttpFetchQuery;
   body?: any;
+  /**
+   * If set, flags this as a "system request" to indicate that this is not a user-initiated request. For more information, see
+   * HttpFetchOptions#asSystemRequest.
+   */
   asSystemRequest?: boolean;
 }
 

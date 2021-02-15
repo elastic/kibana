@@ -77,6 +77,9 @@ export const useRequest = <D = any, E = Error>(
       // "old" error/data or loading state when a new request is in-flight.
       setIsLoading(true);
 
+      // Any requests that are sent in the background (without user interaction) should be flagged as "system requests". This should not be
+      // confused with any terminology in Elasticsearch. This is a Kibana-specific construct that allows the server to differentiate between
+      // user-initiated and requests "system"-initiated requests, for purposes like security features.
       const requestPayload = { ...requestBody, asSystemRequest };
       const response = await sendRequest<D, E>(httpClient, requestPayload);
       const { data: serializedResponseData, error: responseError } = response;
@@ -111,7 +114,10 @@ export const useRequest = <D = any, E = Error>(
     clearPollInterval();
 
     if (pollIntervalMs) {
-      pollIntervalIdRef.current = setTimeout(() => resendRequest(true), pollIntervalMs);
+      pollIntervalIdRef.current = setTimeout(
+        () => resendRequest(true), // This is happening on an interval in the background, so we flag it as a "system request".
+        pollIntervalMs
+      );
     }
   }, [pollIntervalMs, resendRequest, clearPollInterval]);
 
@@ -141,11 +147,15 @@ export const useRequest = <D = any, E = Error>(
     };
   }, [clearPollInterval]);
 
+  const resendRequestForConsumer = useCallback(() => {
+    return resendRequest();
+  }, [resendRequest]);
+
   return {
     isInitialRequest: isInitialRequestRef.current,
     isLoading,
     error,
     data,
-    resendRequest, // Gives the user the ability to manually request data
+    resendRequest: resendRequestForConsumer, // Gives the user the ability to manually request data
   };
 };
