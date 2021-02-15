@@ -46,17 +46,17 @@ export const useLogEntriesAfterRequest = ({
   const { search: fetchLogEntriesAfter, requests$: logEntriesAfterSearchRequests$ } = useDataSearch(
     {
       getRequest: useCallback(
-        (cursor: LogEntryAfterCursor['after'], size: number) => {
+        (cursor: LogEntryAfterCursor['after'], params: { size: number; extendTo?: number }) => {
           return !!sourceId
             ? {
                 request: {
                   params: logEntriesSearchRequestParamsRT.encode({
                     after: cursor,
                     columns: columnOverrides,
-                    endTimestamp,
+                    endTimestamp: params?.extendTo ?? endTimestamp,
                     highlightPhrase,
                     query,
-                    size,
+                    size: params.size,
                     sourceId,
                     startTimestamp,
                   }),
