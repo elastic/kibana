@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import {
+import type {
   CoreSetup,
   KibanaRequest,
   LifecycleResponseFactory,
   OnPreAuthToolkit,
+  OnPreAuthHandler,
 } from 'kibana/server';
 import { LIMITED_CONCURRENCY_ROUTE_TAG } from '../../common';
 import { FleetConfigType } from '../index';
@@ -48,7 +49,7 @@ export function createLimitedPreAuthHandler({
 }: {
   isMatch: (request: KibanaRequest) => boolean;
   maxCounter: IMaxCounter;
-}) {
+}): OnPreAuthHandler {
   return function preAuthHandler(
     request: KibanaRequest,
     response: LifecycleResponseFactory,

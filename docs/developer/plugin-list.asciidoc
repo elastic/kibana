@@ -301,6 +301,10 @@ which will load the visualization's editor.
 |To access an elasticsearch instance that has live data you have two options:
 
 
+|{kib-repo}blob/{branch}/x-pack/plugins/banners/README.md[banners]
+|Allow to add a header banner that will be displayed on every page of the Kibana application
+
+
 |{kib-repo}blob/{branch}/x-pack/plugins/beats_management/readme.md[beatsManagement]
 |Notes:
 Failure to have auth enabled in Kibana will make for a broken UI. UI-based errors not yet in place
@@ -316,10 +320,6 @@ Failure to have auth enabled in Kibana will make for a broken UI. UI-based error
 
 |{kib-repo}blob/{branch}/x-pack/plugins/cloud/README.md[cloud]
 |The cloud plugin adds cloud specific features to Kibana.
-
-
-|{kib-repo}blob/{branch}/x-pack/plugins/code[code]
-|WARNING: Missing README.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/console_extensions/README.md[consoleExtensions]
