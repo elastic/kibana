@@ -17,8 +17,8 @@ export const gridStyle = {
   rowHover: 'none',
 };
 
-export const pageSizeArr = [25, 50, 100];
-export const defaultPageSize = 25;
+export const pageSizeArr = [100, 250, 500];
+export const defaultPageSize = 250;
 export const toolbarVisibility = {
   showColumnSelector: {
     allowHide: false,
