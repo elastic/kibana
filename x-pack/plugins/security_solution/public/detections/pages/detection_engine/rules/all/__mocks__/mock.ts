@@ -166,7 +166,6 @@ export const mockAboutStepRule = (): AboutStepRule => ({
   falsePositives: ['test'],
   tags: ['tag1', 'tag2'],
   threat: getThreatMock(),
-  threatIndicatorPath: '',
   note: '# this is some markdown documentation',
 });
 

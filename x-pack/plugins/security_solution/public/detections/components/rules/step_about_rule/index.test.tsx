@@ -171,7 +171,6 @@ describe('StepAboutRuleComponent', () => {
           technique: [],
         },
       ],
-      threatIndicatorPath: '',
     };
 
     await act(async () => {
@@ -235,7 +234,6 @@ describe('StepAboutRuleComponent', () => {
           technique: [],
         },
       ],
-      threatIndicatorPath: '',
     };
 
     await act(async () => {
