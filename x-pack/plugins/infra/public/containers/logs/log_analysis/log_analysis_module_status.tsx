@@ -105,10 +105,10 @@ const createStatusReducer = <JobType extends string>(jobTypes: JobType[]) => (
             reasons: [
               ...Object.values(datafeedSetupResults)
                 .filter(hasError)
-                .map((datafeed) => datafeed.error.msg),
+                .map((datafeed) => datafeed.error.error?.reason),
               ...Object.values(jobSetupResults)
                 .filter(hasError)
-                .map((job) => job.error.msg),
+                .map((job) => job.error.error?.reason),
             ],
           };
 

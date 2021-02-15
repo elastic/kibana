@@ -37,7 +37,6 @@ module.exports = {
     '\\.ace\\.worker.js$': '<rootDir>/packages/kbn-test/target/jest/mocks/worker_module_mock.js',
     '\\.editor\\.worker.js$': '<rootDir>/packages/kbn-test/target/jest/mocks/worker_module_mock.js',
     '^(!!)?file-loader!': '<rootDir>/packages/kbn-test/target/jest/mocks/file_mock.js',
-    '^fixtures/(.*)': '<rootDir>/src/fixtures/$1',
     '^src/core/(.*)': '<rootDir>/src/core/$1',
     '^src/plugins/(.*)': '<rootDir>/src/plugins/$1',
   },
@@ -93,9 +92,9 @@ module.exports = {
 
   // An array of regexp pattern strings that are matched against all source file paths, matched files will skip transformation
   transformIgnorePatterns: [
-    // ignore all node_modules except monaco-editor which requires babel transforms to handle dynamic import()
+    // ignore all node_modules except monaco-editor and react-monaco-editor which requires babel transforms to handle dynamic import()
     // since ESM modules are not natively supported in Jest yet (https://github.com/facebook/jest/issues/4842)
-    '[/\\\\]node_modules(?![\\/\\\\]monaco-editor)[/\\\\].+\\.js$',
+    '[/\\\\]node_modules(?![\\/\\\\](monaco-editor|react-monaco-editor))[/\\\\].+\\.js$',
     'packages/kbn-pm/dist/index.js',
   ],
 

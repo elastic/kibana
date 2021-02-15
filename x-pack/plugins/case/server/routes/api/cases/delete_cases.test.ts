@@ -52,12 +52,15 @@ describe('DELETE case', () => {
       },
     });
 
-    const { context } = await createRouteContext(
-      createMockSavedObjectsRepository({
-        caseSavedObject: mockCases,
-        caseCommentSavedObject: mockCaseComments,
-      })
-    );
+    const mockSO = createMockSavedObjectsRepository({
+      caseSavedObject: mockCases,
+      caseCommentSavedObject: mockCaseComments,
+    });
+    // Adding this because the delete API needs to get all the cases first to determine if they are removable or not
+    // so it makes a call to bulkGet first
+    mockSO.bulkGet.mockImplementation(async () => ({ saved_objects: [] }));
+
+    const { context } = await createRouteContext(mockSO);
 
     const response = await routeHandler(context, request, kibanaResponseFactory);
     expect(response.status).toEqual(404);
@@ -71,12 +74,16 @@ describe('DELETE case', () => {
       },
     });
 
-    const { context } = await createRouteContext(
-      createMockSavedObjectsRepository({
-        caseSavedObject: mockCasesErrorTriggerData,
-        caseCommentSavedObject: mockCaseComments,
-      })
-    );
+    const mockSO = createMockSavedObjectsRepository({
+      caseSavedObject: mockCasesErrorTriggerData,
+      caseCommentSavedObject: mockCaseComments,
+    });
+
+    // Adding this because the delete API needs to get all the cases first to determine if they are removable or not
+    // so it makes a call to bulkGet first
+    mockSO.bulkGet.mockImplementation(async () => ({ saved_objects: [] }));
+
+    const { context } = await createRouteContext(mockSO);
 
     const response = await routeHandler(context, request, kibanaResponseFactory);
     expect(response.status).toEqual(400);
@@ -90,12 +97,16 @@ describe('DELETE case', () => {
       },
     });
 
-    const { context } = await createRouteContext(
-      createMockSavedObjectsRepository({
-        caseSavedObject: mockCasesErrorTriggerData,
-        caseCommentSavedObject: mockCasesErrorTriggerData,
-      })
-    );
+    const mockSO = createMockSavedObjectsRepository({
+      caseSavedObject: mockCasesErrorTriggerData,
+      caseCommentSavedObject: mockCasesErrorTriggerData,
+    });
+
+    // Adding this because the delete API needs to get all the cases first to determine if they are removable or not
+    // so it makes a call to bulkGet first
+    mockSO.bulkGet.mockImplementation(async () => ({ saved_objects: [] }));
+
+    const { context } = await createRouteContext(mockSO);
 
     const response = await routeHandler(context, request, kibanaResponseFactory);
     expect(response.status).toEqual(400);
