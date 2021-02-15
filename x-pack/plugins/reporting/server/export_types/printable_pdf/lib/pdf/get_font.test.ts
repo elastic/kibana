@@ -31,4 +31,4 @@ describe('getFont', () => {
     expect(getFont('')).toBe('Roboto');
     expect(getFont(undefined!)).toBe('Roboto');
   });
-})
+});
