@@ -12,7 +12,7 @@ import { SavedObjectUnsanitizedDoc } from 'kibana/server';
 import { encryptedSavedObjectsMock } from '../../../encrypted_saved_objects/server/mocks';
 import { migrationMocks } from 'src/core/server/mocks';
 
-const { log } = migrationMocks.createContext();
+const migrationContext = migrationMocks.createContext();
 const encryptedSavedObjectsSetup = encryptedSavedObjectsMock.createSetup();
 
 describe('7.10.0', () => {
@@ -26,7 +26,7 @@ describe('7.10.0', () => {
   test('marks alerts as legacy', () => {
     const migration710 = getMigrations(encryptedSavedObjectsSetup)['7.10.0'];
     const alert = getMockData({});
-    expect(migration710(alert, { log })).toMatchObject({
+    expect(migration710(alert, migrationContext)).toMatchObject({
       ...alert,
       attributes: {
         ...alert.attributes,
@@ -42,7 +42,7 @@ describe('7.10.0', () => {
     const alert = getMockData({
       consumer: 'metrics',
     });
-    expect(migration710(alert, { log })).toMatchObject({
+    expect(migration710(alert, migrationContext)).toMatchObject({
       ...alert,
       attributes: {
         ...alert.attributes,
@@ -59,7 +59,7 @@ describe('7.10.0', () => {
     const alert = getMockData({
       consumer: 'securitySolution',
     });
-    expect(migration710(alert, { log })).toMatchObject({
+    expect(migration710(alert, migrationContext)).toMatchObject({
       ...alert,
       attributes: {
         ...alert.attributes,
@@ -76,7 +76,7 @@ describe('7.10.0', () => {
     const alert = getMockData({
       consumer: 'alerting',
     });
-    expect(migration710(alert, { log })).toMatchObject({
+    expect(migration710(alert, migrationContext)).toMatchObject({
       ...alert,
       attributes: {
         ...alert.attributes,
@@ -104,7 +104,7 @@ describe('7.10.0', () => {
         },
       ],
     });
-    expect(migration710(alert, { log })).toMatchObject({
+    expect(migration710(alert, migrationContext)).toMatchObject({
       ...alert,
       attributes: {
         ...alert.attributes,
@@ -142,7 +142,7 @@ describe('7.10.0', () => {
         },
       ],
     });
-    expect(migration710(alert, { log })).toMatchObject({
+    expect(migration710(alert, migrationContext)).toMatchObject({
       ...alert,
       attributes: {
         ...alert.attributes,
@@ -179,7 +179,7 @@ describe('7.10.0', () => {
         },
       ],
     });
-    expect(migration710(alert, { log })).toMatchObject({
+    expect(migration710(alert, migrationContext)).toMatchObject({
       ...alert,
       attributes: {
         ...alert.attributes,
@@ -206,7 +206,7 @@ describe('7.10.0', () => {
     const migration710 = getMigrations(encryptedSavedObjectsSetup)['7.10.0'];
     const alert = getMockData();
     const dateStart = Date.now();
-    const migratedAlert = migration710(alert, { log });
+    const migratedAlert = migration710(alert, migrationContext);
     const dateStop = Date.now();
     const dateExecutionStatus = Date.parse(
       migratedAlert.attributes.executionStatus.lastExecutionDate
@@ -242,14 +242,14 @@ describe('7.10.0 migrates with failure', () => {
     const alert = getMockData({
       consumer: 'alerting',
     });
-    const res = migration710(alert, { log });
+    const res = migration710(alert, migrationContext);
     expect(res).toMatchObject({
       ...alert,
       attributes: {
         ...alert.attributes,
       },
     });
-    expect(log.error).toHaveBeenCalledWith(
+    expect(migrationContext.log.error).toHaveBeenCalledWith(
       `encryptedSavedObject 7.10.0 migration failed for alert ${alert.id} with error: Can't migrate!`,
       {
         alertDocument: {
@@ -274,7 +274,7 @@ describe('7.11.0', () => {
   test('add updatedAt field to alert - set to SavedObject updated_at attribute', () => {
     const migration711 = getMigrations(encryptedSavedObjectsSetup)['7.11.0'];
     const alert = getMockData({}, true);
-    expect(migration711(alert, { log })).toEqual({
+    expect(migration711(alert, migrationContext)).toEqual({
       ...alert,
       attributes: {
         ...alert.attributes,
@@ -287,7 +287,7 @@ describe('7.11.0', () => {
   test('add updatedAt field to alert - set to createdAt when SavedObject updated_at is not defined', () => {
     const migration711 = getMigrations(encryptedSavedObjectsSetup)['7.11.0'];
     const alert = getMockData({});
-    expect(migration711(alert, { log })).toEqual({
+    expect(migration711(alert, migrationContext)).toEqual({
       ...alert,
       attributes: {
         ...alert.attributes,
@@ -300,7 +300,7 @@ describe('7.11.0', () => {
   test('add notifyWhen=onActiveAlert when throttle is null', () => {
     const migration711 = getMigrations(encryptedSavedObjectsSetup)['7.11.0'];
     const alert = getMockData({});
-    expect(migration711(alert, { log })).toEqual({
+    expect(migration711(alert, migrationContext)).toEqual({
       ...alert,
       attributes: {
         ...alert.attributes,
@@ -313,7 +313,7 @@ describe('7.11.0', () => {
   test('add notifyWhen=onActiveAlert when throttle is set', () => {
     const migration711 = getMigrations(encryptedSavedObjectsSetup)['7.11.0'];
     const alert = getMockData({ throttle: '5m' });
-    expect(migration711(alert, { log })).toEqual({
+    expect(migration711(alert, migrationContext)).toEqual({
       ...alert,
       attributes: {
         ...alert.attributes,
