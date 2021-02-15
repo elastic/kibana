@@ -20,7 +20,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   let originalPanelCount = 0;
   let unsavedPanelCount = 0;
 
-  describe('dashboard unsaved panels', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/91191
+  describe.skip('dashboard unsaved panels', () => {
     before(async () => {
       await esArchiver.load('dashboard/current/kibana');
       await kibanaServer.uiSettings.replace({
