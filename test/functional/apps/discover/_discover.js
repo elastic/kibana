@@ -99,18 +99,24 @@ export default function ({ getService, getPageObjects }) {
         // this is the number of renderings of the histogram needed when new data is fetched
         // this needs to be improved
         const renderingCountInc = 2;
-        const prevRenderingCount = await elasticChart.getVisualizationRenderingCount('discoverChart');
+        const prevRenderingCount = await elasticChart.getVisualizationRenderingCount(
+          'discoverChart'
+        );
         await PageObjects.timePicker.setDefaultAbsoluteRange();
         await PageObjects.discover.waitUntilSearchingHasFinished();
         await retry.waitFor('chart rendering complete', async () => {
-          const actualRenderingCount = await elasticChart.getVisualizationRenderingCount('discoverChart');
+          const actualRenderingCount = await elasticChart.getVisualizationRenderingCount(
+            'discoverChart'
+          );
           log.debug(`Number of renderings before brushing: ${actualRenderingCount}`);
           return actualRenderingCount === prevRenderingCount + renderingCountInc;
         });
         await PageObjects.discover.brushHistogram();
         await PageObjects.discover.waitUntilSearchingHasFinished();
         await retry.waitFor('chart rendering complete after being brushed', async () => {
-          const actualRenderingCount = await elasticChart.getVisualizationRenderingCount('discoverChart');
+          const actualRenderingCount = await elasticChart.getVisualizationRenderingCount(
+            'discoverChart'
+          );
           log.debug(`Number of renderings after brushing: ${actualRenderingCount}`);
           return actualRenderingCount === prevRenderingCount + 5;
         });
