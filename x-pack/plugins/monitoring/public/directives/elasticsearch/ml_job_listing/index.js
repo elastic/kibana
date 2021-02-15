@@ -111,7 +111,16 @@ export function monitoringMlListingProvider() {
         }
       );
 
-      scope.$watch('jobs', (jobs = []) => {
+      scope.$watch('jobs', (_jobs = []) => {
+        const jobs = _jobs.map((job) => {
+          if (job.ml) {
+            return {
+              ...job.ml.job,
+              job_id: job.ml.job.id,
+            };
+          }
+          return job;
+        });
         const mlTable = (
           <EuiPage>
             <EuiPageBody>

@@ -324,6 +324,17 @@ export interface ElasticsearchMetricbeatSource {
         uuid?: string;
       };
     };
+    ml?: {
+      job?: {
+        id?: string;
+        state?: string;
+        model_size?: {};
+        data_counts?: {
+          processed_record_count?: number;
+        };
+        forecasts_stats?: {};
+      };
+    };
     cluster?: {
       name?: string;
       id?: string;
