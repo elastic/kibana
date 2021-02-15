@@ -27,10 +27,7 @@ export interface RuleEcs {
   severity?: string[];
   tags?: string[];
   threat?: unknown;
-  threshold?: Array<{
-    field: string | string[];
-    value: number;
-  }>;
+  threshold?: unknown;
   type?: string[];
   size?: string[];
   to?: string[];

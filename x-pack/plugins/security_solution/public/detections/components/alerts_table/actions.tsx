@@ -8,7 +8,7 @@
 /* eslint-disable complexity */
 
 import dateMath from '@elastic/datemath';
-import { get, getOr, isEmpty, find } from 'lodash/fp';
+import { getOr, isEmpty } from 'lodash/fp';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 
@@ -131,13 +131,16 @@ export const getThresholdAggregationDataProvider = (
   ecsData: Ecs,
   nonEcsData: TimelineNonEcsData[]
 ): DataProvider[] => {
-  const threshold = ecsData.signal?.rule?.threshold;
-  const aggField = Array.isArray(threshold) ? threshold[0].field : [];
+  const threshold = ecsData.signal?.rule?.threshold as string[];
+  const thresholdResult = JSON.parse((ecsData.signal?.threshold_result as string[])[0]);
+
+  const aggField = JSON.parse(threshold[0]).field;
   const aggregationFields = Array.isArray(aggField) ? aggField : [aggField];
 
-  return aggregationFields.reduce<DataProvider[]>((acc, aggregationField) => {
-    const aggregationValue =
-      get(aggregationField, ecsData) ?? find(['field', aggregationField], nonEcsData)?.value;
+  return aggregationFields.reduce<DataProvider[]>((acc, aggregationField, i) => {
+    const aggregationValue = thresholdResult.terms.filter(
+      (term) => term.field === aggregationField
+    )[0].value;
     const dataProviderValue = Array.isArray(aggregationValue)
       ? aggregationValue[0]
       : aggregationValue;
@@ -147,23 +150,31 @@ export const getThresholdAggregationDataProvider = (
     }
 
     const aggregationFieldId = aggregationField.replace('.', '-');
-
-    return [
-      ...acc,
-      {
-        and: [],
-        id: `send-alert-to-timeline-action-default-draggable-event-details-value-formatted-field-value-${TimelineId.active}-${aggregationFieldId}-${dataProviderValue}`,
-        name: aggregationField,
-        enabled: true,
-        excluded: false,
-        kqlQuery: '',
-        queryMatch: {
-          field: aggregationField,
-          value: dataProviderValue,
-          operator: ':',
-        },
+    const dataProviderPartial = {
+      id: `send-alert-to-timeline-action-default-draggable-event-details-value-formatted-field-value-${TimelineId.active}-${aggregationFieldId}-${dataProviderValue}`,
+      name: aggregationField,
+      enabled: true,
+      excluded: false,
+      kqlQuery: '',
+      queryMatch: {
+        field: aggregationField as string,
+        value: dataProviderValue as string,
+        operator: ':',
       },
-    ];
+    };
+
+    if (i === 0) {
+      return [
+        ...acc,
+        {
+          ...dataProviderPartial,
+          and: [],
+        },
+      ];
+    } else {
+      acc[0].and.push(dataProviderPartial);
+      return acc;
+    }
   }, []);
 };
 
