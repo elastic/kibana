@@ -97,9 +97,16 @@ async function updateIndex(esClient: ElasticsearchClient, indexName: string, ind
 
 async function createIndex(esClient: ElasticsearchClient, indexName: string, indexData: any) {
   try {
+    const migrationHash = hash(indexData);
     await esClient.indices.create({
       index: indexName,
-      body: indexData,
+      body: {
+        ...indexData,
+        mappings: Object.assign({
+          ...indexData.mappings,
+          _meta: { ...(indexData.mappings._meta || {}), migrationHash },
+        }),
+      },
     });
   } catch (err) {
     // Swallow already exists errors as concurent Kibana can try to create that indice
