@@ -61,7 +61,6 @@ export class JobsListView extends Component {
       jobsAwaitingNodeCount: 0,
     };
 
-    this.spacesEnabled = props.spacesEnabled ?? false;
     this.updateFunctions = {};
 
     this.showEditJobFlyout = () => {};
@@ -269,10 +268,10 @@ export class JobsListView extends Component {
 
       const expandedJobsIds = Object.keys(this.state.itemIdToExpandedRowMap);
       try {
-        let spaces = {};
-        if (this.props.spacesEnabled && this.props.isManagementTable) {
+        let jobsSpaces = {};
+        if (this.props.spacesApi && this.props.isManagementTable) {
           const allSpaces = await ml.savedObjects.jobsSpaces();
-          spaces = allSpaces['anomaly-detector'];
+          jobsSpaces = allSpaces['anomaly-detector'];
         }
 
         let jobsAwaitingNodeCount = 0;
@@ -285,11 +284,11 @@ export class JobsListView extends Component {
           }
           job.latestTimestampSortValue = job.latestTimestampMs || 0;
           job.spaceIds =
-            this.props.spacesEnabled &&
+            this.props.spacesApi &&
             this.props.isManagementTable &&
-            spaces &&
-            spaces[job.id] !== undefined
-              ? spaces[job.id]
+            jobsSpaces &&
+            jobsSpaces[job.id] !== undefined
+              ? jobsSpaces[job.id]
               : [];
 
           if (job.awaitingNodeAssignment === true) {
@@ -410,7 +409,7 @@ export class JobsListView extends Component {
             loading={loading}
             isManagementTable={true}
             isMlEnabledInSpace={this.props.isMlEnabledInSpace}
-            spacesEnabled={this.props.spacesEnabled}
+            spacesApi={this.props.spacesApi}
             jobsViewState={this.props.jobsViewState}
             onJobsViewStateUpdate={this.props.onJobsViewStateUpdate}
             refreshJobs={() => this.refreshJobSummaryList(true)}
