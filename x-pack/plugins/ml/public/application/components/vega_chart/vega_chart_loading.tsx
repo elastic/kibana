@@ -9,7 +9,7 @@ import React from 'react';
 
 import { EuiLoadingSpinner, EuiSpacer, EuiText } from '@elastic/eui';
 
-export const ScatterplotMatrixLoading = () => {
+export const VegaChartLoading = () => {
   return (
     <EuiText textAlign="center">
       <EuiSpacer size="l" />

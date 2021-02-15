@@ -117,7 +117,7 @@ export const metricVisualization: Visualization<MetricState> = {
     return { ...prevState, accessor: undefined };
   },
 
-  getErrorMessages(state, frame) {
+  getErrorMessages(state) {
     // Is it possible to break it?
     return undefined;
   },
