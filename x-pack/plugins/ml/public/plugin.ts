@@ -129,6 +129,10 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
       this.urlGenerator = registerUrlGenerator(pluginsSetup.share, core);
     }
 
+    if (pluginsSetup.triggersActionsUi) {
+      registerMlAlerts(pluginsSetup.triggersActionsUi);
+    }
+
     const licensing = pluginsSetup.licensing.license$.pipe(take(1));
     licensing.subscribe(async (license) => {
       const [coreStart] = await core.getStartServices();
@@ -190,9 +194,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
       http: core.http,
       i18n: core.i18n,
     });
-    if (deps.triggersActionsUi) {
-      registerMlAlerts(deps.triggersActionsUi.alertTypeRegistry);
-    }
+
     return {
       urlGenerator: this.urlGenerator,
     };
