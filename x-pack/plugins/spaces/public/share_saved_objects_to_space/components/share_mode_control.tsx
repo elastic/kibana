@@ -8,27 +8,33 @@
 import './share_mode_control.scss';
 import React from 'react';
 import {
+  EuiCallOut,
   EuiCheckableCard,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFormFieldset,
   EuiIconTip,
+  EuiLink,
   EuiLoadingSpinner,
   EuiSpacer,
   EuiText,
-  EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { SelectableSpacesControl } from './selectable_spaces_control';
 import { ALL_SPACES_ID } from '../../../common/constants';
-import { SpaceTarget } from '../types';
+import { DocumentationLinksService } from '../../lib';
+import { useSpaces } from '../../spaces_context';
+import { ShareToSpaceTarget } from '../../types';
+import { ShareOptions } from '../types';
 
 interface Props {
-  spaces: SpaceTarget[];
+  spaces: ShareToSpaceTarget[];
+  objectNoun: string;
   canShareToAllSpaces: boolean;
-  selectedSpaceIds: string[];
+  shareOptions: ShareOptions;
   onChange: (selectedSpaceIds: string[]) => void;
-  disabled?: boolean;
+  enableCreateNewSpaceLink: boolean;
+  enableSpaceAgnosticBehavior: boolean;
 }
 
 function createLabel({
@@ -63,31 +69,41 @@ function createLabel({
 }
 
 export const ShareModeControl = (props: Props) => {
-  const { spaces, canShareToAllSpaces, selectedSpaceIds, onChange } = props;
+  const {
+    spaces,
+    objectNoun,
+    canShareToAllSpaces,
+    shareOptions,
+    onChange,
+    enableCreateNewSpaceLink,
+    enableSpaceAgnosticBehavior,
+  } = props;
+  const { services } = useSpaces();
+  const { docLinks } = services;
 
   if (spaces.length === 0) {
     return <EuiLoadingSpinner />;
   }
 
+  const { selectedSpaceIds } = shareOptions;
   const isGlobalControlChecked = selectedSpaceIds.includes(ALL_SPACES_ID);
   const shareToAllSpaces = {
     id: 'shareToAllSpaces',
-    title: i18n.translate(
-      'xpack.spaces.management.shareToSpace.shareModeControl.shareToAllSpaces.title',
-      { defaultMessage: 'All spaces' }
-    ),
-    text: i18n.translate(
-      'xpack.spaces.management.shareToSpace.shareModeControl.shareToAllSpaces.text',
-      { defaultMessage: 'Make object available in all current and future spaces.' }
-    ),
+    title: i18n.translate('xpack.spaces.shareToSpace.shareModeControl.shareToAllSpaces.title', {
+      defaultMessage: 'All spaces',
+    }),
+    text: i18n.translate('xpack.spaces.shareToSpace.shareModeControl.shareToAllSpaces.text', {
+      defaultMessage: 'Make {objectNoun} available in all current and future spaces.',
+      values: { objectNoun },
+    }),
     ...(!canShareToAllSpaces && {
       tooltip: isGlobalControlChecked
         ? i18n.translate(
-            'xpack.spaces.management.shareToSpace.shareModeControl.shareToAllSpaces.cannotUncheckTooltip',
+            'xpack.spaces.shareToSpace.shareModeControl.shareToAllSpaces.cannotUncheckTooltip',
             { defaultMessage: 'You need additional privileges to change this option.' }
           )
         : i18n.translate(
-            'xpack.spaces.management.shareToSpace.shareModeControl.shareToAllSpaces.cannotCheckTooltip',
+            'xpack.spaces.shareToSpace.shareModeControl.shareToAllSpaces.cannotCheckTooltip',
             { defaultMessage: 'You need additional privileges to use this option.' }
           ),
     }),
@@ -96,19 +112,15 @@ export const ShareModeControl = (props: Props) => {
   const shareToExplicitSpaces = {
     id: 'shareToExplicitSpaces',
     title: i18n.translate(
-      'xpack.spaces.management.shareToSpace.shareModeControl.shareToExplicitSpaces.title',
+      'xpack.spaces.shareToSpace.shareModeControl.shareToExplicitSpaces.title',
       { defaultMessage: 'Select spaces' }
     ),
-    text: i18n.translate(
-      'xpack.spaces.management.shareToSpace.shareModeControl.shareToExplicitSpaces.text',
-      { defaultMessage: 'Make object available in selected spaces only.' }
-    ),
+    text: i18n.translate('xpack.spaces.shareToSpace.shareModeControl.shareToExplicitSpaces.text', {
+      defaultMessage: 'Make {objectNoun} available in selected spaces only.',
+      values: { objectNoun },
+    }),
     disabled: !canShareToAllSpaces && isGlobalControlChecked,
   };
-  const shareOptionsTitle = i18n.translate(
-    'xpack.spaces.management.shareToSpace.shareModeControl.shareOptionsTitle',
-    { defaultMessage: 'Share options' }
-  );
 
   const toggleShareOption = (allSpaces: boolean) => {
     const updatedSpaceIds = allSpaces
@@ -117,35 +129,77 @@ export const ShareModeControl = (props: Props) => {
     onChange(updatedSpaceIds);
   };
 
+  const getPrivilegeWarning = () => {
+    if (!shareToExplicitSpaces.disabled) {
+      return null;
+    }
+
+    const kibanaPrivilegesUrl = new DocumentationLinksService(
+      docLinks!
+    ).getKibanaPrivilegesDocUrl();
+
+    return (
+      <>
+        <EuiCallOut
+          size="s"
+          iconType="help"
+          title={
+            <FormattedMessage
+              id="xpack.spaces.shareToSpace.privilegeWarningTitle"
+              defaultMessage="Additional privileges required"
+            />
+          }
+          color="warning"
+        >
+          <FormattedMessage
+            id="xpack.spaces.shareToSpace.privilegeWarningBody"
+            defaultMessage="To edit the spaces for this {objectNoun}, you need {readAndWritePrivilegesLink} in all spaces."
+            values={{
+              objectNoun,
+              readAndWritePrivilegesLink: (
+                <EuiLink href={kibanaPrivilegesUrl} target="_blank">
+                  <FormattedMessage
+                    id="xpack.spaces.shareToSpace.privilegeWarningLink"
+                    defaultMessage="read and write privileges"
+                  />
+                </EuiLink>
+              ),
+            }}
+          />
+        </EuiCallOut>
+
+        <EuiSpacer size="m" />
+      </>
+    );
+  };
+
   return (
     <>
-      <EuiFormFieldset
-        legend={{
-          children: (
-            <EuiTitle size="xs">
-              <span>{shareOptionsTitle}</span>
-            </EuiTitle>
-          ),
-        }}
+      {getPrivilegeWarning()}
+
+      <EuiCheckableCard
+        id={shareToExplicitSpaces.id}
+        label={createLabel(shareToExplicitSpaces)}
+        checked={!isGlobalControlChecked}
+        onChange={() => toggleShareOption(false)}
+        disabled={shareToExplicitSpaces.disabled}
       >
-        <EuiCheckableCard
-          id={shareToExplicitSpaces.id}
-          label={createLabel(shareToExplicitSpaces)}
-          checked={!isGlobalControlChecked}
-          onChange={() => toggleShareOption(false)}
-          disabled={shareToExplicitSpaces.disabled}
-        >
-          <SelectableSpacesControl {...props} />
-        </EuiCheckableCard>
-        <EuiSpacer size="s" />
-        <EuiCheckableCard
-          id={shareToAllSpaces.id}
-          label={createLabel(shareToAllSpaces)}
-          checked={isGlobalControlChecked}
-          onChange={() => toggleShareOption(true)}
-          disabled={shareToAllSpaces.disabled}
+        <SelectableSpacesControl
+          spaces={spaces}
+          shareOptions={shareOptions}
+          onChange={onChange}
+          enableCreateNewSpaceLink={enableCreateNewSpaceLink}
+          enableSpaceAgnosticBehavior={enableSpaceAgnosticBehavior}
         />
-      </EuiFormFieldset>
+      </EuiCheckableCard>
+      <EuiSpacer size="s" />
+      <EuiCheckableCard
+        id={shareToAllSpaces.id}
+        label={createLabel(shareToAllSpaces)}
+        checked={isGlobalControlChecked}
+        onChange={() => toggleShareOption(true)}
+        disabled={shareToAllSpaces.disabled}
+      />
     </>
   );
 };
