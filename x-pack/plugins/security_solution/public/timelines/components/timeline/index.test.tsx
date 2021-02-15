@@ -12,7 +12,7 @@ import useResizeObserver from 'use-resize-observer/polyfilled';
 import { DragDropContextWrapper } from '../../../common/components/drag_and_drop/drag_drop_context_wrapper';
 import '../../../common/mock/match_media';
 import { mockBrowserFields, mockDocValueFields } from '../../../common/containers/source/mock';
-
+import { TimelineId } from '../../../../common/types/timeline';
 import { mockIndexNames, mockIndexPattern, TestProviders } from '../../../common/mock';
 
 import { StatefulTimeline, Props as StatefulTimelineOwnProps } from './index';
@@ -55,7 +55,7 @@ jest.mock('../../../common/containers/sourcerer', () => {
 });
 describe('StatefulTimeline', () => {
   const props: StatefulTimelineOwnProps = {
-    timelineId: 'timeline-test',
+    timelineId: TimelineId.test,
   };
 
   beforeEach(() => {
@@ -91,7 +91,7 @@ describe('StatefulTimeline', () => {
     );
     expect(
       wrapper
-        .find(`[data-timeline-id="timeline-test"].${SELECTOR_TIMELINE_GLOBAL_CONTAINER}`)
+        .find(`[data-timeline-id="test"].${SELECTOR_TIMELINE_GLOBAL_CONTAINER}`)
         .first()
         .exists()
     ).toEqual(true);

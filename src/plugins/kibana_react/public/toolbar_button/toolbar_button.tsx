@@ -13,9 +13,9 @@ import { EuiButton, PropsOf, EuiButtonProps } from '@elastic/eui';
 
 const groupPositionToClassMap = {
   none: null,
-  left: 'toolbarButton--groupLeft',
-  center: 'toolbarButton--groupCenter',
-  right: 'toolbarButton--groupRight',
+  left: 'kbnToolbarButton--groupLeft',
+  center: 'kbnToolbarButton--groupCenter',
+  right: 'kbnToolbarButton--groupRight',
 };
 
 type ButtonPositions = keyof typeof groupPositionToClassMap;
@@ -62,6 +62,7 @@ export const ToolbarButton: React.FunctionComponent<ToolbarButtonProps> = ({
     [`kbnToolbarButton--${fontWeight}`, `kbnToolbarButton--${size}`],
     className
   );
+
   return (
     <EuiButton
       data-test-subj={dataTestSubj}
