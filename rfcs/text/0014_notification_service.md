@@ -182,7 +182,7 @@ Notification model is responsible for:
 - Writing new incoming messages to the Notification storage.
 
 Processing a large number of incoming notifications might slow down Kibana and create a disproportionately high load on some Kibana instances.
-The use of a queue allows us to make the handling of incoming notifications asynchronously.
+The use of a queue allows us to make the handling of incoming notifications asynchronous.
 Async mechanism lets Kibana to cope with spikes in the number of messages created. The queue implementation is based on the Elasticsearch server. 
 
 The logic is run as a background task. The usage of the single background task:
