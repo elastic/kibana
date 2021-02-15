@@ -15,7 +15,6 @@ import {
   DATE_PICKER_START_DATE_POPOVER_BUTTON,
   DATE_PICKER_START_DATE_POPOVER_BUTTON_TIMELINE,
 } from '../screens/date_picker';
-import { TIMELINE_FLYOUT_HEADER } from '../screens/timeline';
 
 export const setEndDate = (date: string) => {
   cy.get(DATE_PICKER_END_DATE_POPOVER_BUTTON).click({ force: true });
