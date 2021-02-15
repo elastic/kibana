@@ -12,36 +12,36 @@ import { TimeSeries } from '../../typings/timeseries';
 import { APIReturnType } from '../services/rest/createCallApmApi';
 import { httpStatusCodeToColor } from '../utils/httpStatusCodeToColor';
 
-export type ThrouputChartsResponse = APIReturnType<'GET /api/apm/services/{serviceName}/transactions/charts/throughput'>;
+export type ThroughputChartsResponse = APIReturnType<'GET /api/apm/services/{serviceName}/transactions/charts/throughput'>;
 
-interface ThroughputChart {
+export interface ThroughputChart {
   throughputTimeseries: TimeSeries[];
 }
 
-export function getThrouputChartSelector({
+export function getThroughputChartSelector({
   theme,
-  throuputChart,
+  throughputChart,
 }: {
   theme: EuiTheme;
-  throuputChart?: ThrouputChartsResponse;
+  throughputChart?: ThroughputChartsResponse;
 }): ThroughputChart {
-  if (!throuputChart) {
+  if (!throughputChart) {
     return { throughputTimeseries: [] };
   }
 
   return {
-    throughputTimeseries: getThroughputTimeseries({ throuputChart, theme }),
+    throughputTimeseries: getThroughputTimeseries({ throughputChart, theme }),
   };
 }
 
 function getThroughputTimeseries({
-  throuputChart,
+  throughputChart,
   theme,
 }: {
   theme: EuiTheme;
-  throuputChart: ThrouputChartsResponse;
+  throughputChart: ThroughputChartsResponse;
 }) {
-  const { throughputTimeseries } = throuputChart;
+  const { throughputTimeseries } = throughputChart;
   const bucketKeys = throughputTimeseries.map(({ key }) => key);
   const getColor = getColorByKey(bucketKeys, theme);
 

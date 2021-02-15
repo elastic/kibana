@@ -20,7 +20,7 @@ import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import { PromiseValueType } from '../../../typings/common';
 import { withApmSpan } from '../../utils/with_apm_span';
 
-interface ErrorsPerTransaction {
+export interface ErrorsPerTransaction {
   [transactionId: string]: number;
 }
 
