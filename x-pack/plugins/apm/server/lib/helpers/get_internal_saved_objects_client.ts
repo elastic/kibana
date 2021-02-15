@@ -7,12 +7,15 @@
 
 import { CoreSetup } from 'src/core/server';
 import { PromiseReturnType } from '../../../../observability/typings/common';
+import { withApmSpan } from '../../utils/with_apm_span';
 
 export type InternalSavedObjectsClient = PromiseReturnType<
   typeof getInternalSavedObjectsClient
 >;
 export async function getInternalSavedObjectsClient(core: CoreSetup) {
-  return core.getStartServices().then(async ([coreStart]) => {
-    return coreStart.savedObjects.createInternalRepository();
-  });
+  return withApmSpan('get_internal_saved_objects_client', () =>
+    core.getStartServices().then(async ([coreStart]) => {
+      return coreStart.savedObjects.createInternalRepository();
+    })
+  );
 }
