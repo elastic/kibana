@@ -5,8 +5,7 @@
       // Allows for importing from `kibana` package for the exported types.
       "kibana": ["./kibana"],
       "kibana/public": ["src/core/public"],
-      "kibana/server": ["src/core/server"],
-      "fixtures/*": ["src/fixtures/*"]
+      "kibana/server": ["src/core/server"]
     },
     // Support .tsx files and transform JSX into calls to React.createElement
     "jsx": "react",

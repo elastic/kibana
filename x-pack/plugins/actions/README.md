@@ -595,6 +595,8 @@ The following table describes the properties of the `incident` object.
 | severity          | The name of the severity in ServiceNow.                                                                                   | string _(optional)_ |
 | urgency           | The name of the urgency in ServiceNow.                                                                                    | string _(optional)_ |
 | impact            | The name of the impact in ServiceNow.                                                                                     | string _(optional)_ |
+| category          | The name of the category in ServiceNow.                                                                                   | string _(optional)_ |
+| subcategory       | The name of the subcategory in ServiceNow.                                                                                | string _(optional)_ |
 
 #### `subActionParams (getFields)`
 

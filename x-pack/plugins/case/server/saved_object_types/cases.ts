@@ -118,7 +118,10 @@ export const caseSavedObjectType: SavedObjectsType = {
       tags: {
         type: 'keyword',
       },
-
+      // collection or individual
+      type: {
+        type: 'keyword',
+      },
       updated_at: {
         type: 'date',
       },

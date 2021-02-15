@@ -35,7 +35,7 @@ import {
   showCallOutUnauthorizedMsg,
   showTimeline,
   startTimelineSaving,
-  toggleExpandedEvent,
+  toggleDetailPanel,
   unPinEvent,
   updateAutoSaveMsg,
   updateColumns,
@@ -99,11 +99,12 @@ import {
   updateSavedQuery,
   updateGraphEventId,
   updateFilters,
+  updateTimelineDetailsPanel,
   updateTimelineEventType,
 } from './helpers';
 
 import { TimelineState, EMPTY_TIMELINE_BY_ID } from './types';
-import { TimelineType, TimelineTabs } from '../../../../common/types/timeline';
+import { TimelineType } from '../../../../common/types/timeline';
 
 export const initialTimelineState: TimelineState = {
   timelineById: EMPTY_TIMELINE_BY_ID,
@@ -130,6 +131,7 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
         dataProviders,
         dateRange,
         excludedRowRendererIds,
+        expandedDetail = {},
         show,
         columns,
         itemsPerPage,
@@ -148,6 +150,7 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
           dataProviders,
           dateRange,
           excludedRowRendererIds,
+          expandedDetail,
           filters,
           id,
           itemsPerPage,
@@ -178,22 +181,19 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
     ...state,
     timelineById: addTimelineNoteToEvent({ id, noteId, eventId, timelineById: state.timelineById }),
   }))
-  .case(toggleExpandedEvent, (state, { tabType, timelineId, event = {} }) => {
-    const expandedTabType = tabType ?? TimelineTabs.query;
-    return {
-      ...state,
-      timelineById: {
-        ...state.timelineById,
-        [timelineId]: {
-          ...state.timelineById[timelineId],
-          expandedEvent: {
-            ...state.timelineById[timelineId].expandedEvent,
-            [expandedTabType]: event,
-          },
+  .case(toggleDetailPanel, (state, action) => ({
+    ...state,
+    timelineById: {
+      ...state.timelineById,
+      [action.timelineId]: {
+        ...state.timelineById[action.timelineId],
+        expandedDetail: {
+          ...state.timelineById[action.timelineId].expandedDetail,
+          ...updateTimelineDetailsPanel(action),
         },
       },
-    };
-  })
+    },
+  }))
   .case(addProvider, (state, { id, provider }) => ({
     ...state,
     timelineById: addTimelineProvider({ id, provider, timelineById: state.timelineById }),
