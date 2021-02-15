@@ -299,7 +299,8 @@ export class JobsList extends Component {
           this.props.showEditJobFlyout,
           this.props.showDeleteJobModal,
           this.props.showStartDatafeedModal,
-          this.props.refreshJobs
+          this.props.refreshJobs,
+          this.props.showCreateAlertFlyout
         ),
       });
     }
@@ -371,6 +372,7 @@ JobsList.propTypes = {
   showEditJobFlyout: PropTypes.func,
   showDeleteJobModal: PropTypes.func,
   showStartDatafeedModal: PropTypes.func,
+  showCreateAlertFlyout: PropTypes.func,
   refreshJobs: PropTypes.func,
   selectedJobsCount: PropTypes.number.isRequired,
   loading: PropTypes.bool,

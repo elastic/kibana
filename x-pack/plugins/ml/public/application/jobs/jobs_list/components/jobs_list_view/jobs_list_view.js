@@ -497,6 +497,7 @@ export class JobsListView extends Component {
                 jobsViewState={this.props.jobsViewState}
                 onJobsViewStateUpdate={this.props.onJobsViewStateUpdate}
                 selectedJobsCount={this.state.selectedJobs.length}
+                showCreateAlertFlyout={this.showCreateAlertFlyout}
                 loading={loading}
               />
               <EditJobFlyout
