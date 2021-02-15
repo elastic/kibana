@@ -21,8 +21,8 @@ export const InterimResultsControl: FC<InterimResultsControlProps> = React.memo(
         <EuiSwitch
           label={
             <FormattedMessage
-              id={'xpack.ml.interimResultsControl.label'}
-              defaultMessage={'Include interim results'}
+              id="xpack.ml.interimResultsControl.label"
+              defaultMessage="Include interim results"
             />
           }
           checked={value}
