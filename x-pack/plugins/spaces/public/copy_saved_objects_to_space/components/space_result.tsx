@@ -15,7 +15,6 @@ import {
   EuiSpacer,
   EuiLoadingSpinner,
 } from '@elastic/eui';
-import { SavedObjectsManagementRecord } from '../../../../../../src/plugins/saved_objects_management/public';
 import { Space } from '../../../../../../src/plugins/spaces_oss/common';
 import { SummarizedCopyToSpaceResult } from '../index';
 import { SpaceAvatar } from '../../space_avatar';
@@ -24,7 +23,6 @@ import { SpaceCopyResultDetails } from './space_result_details';
 import { ImportRetry } from '../types';
 
 interface Props {
-  savedObject: SavedObjectsManagementRecord;
   space: Space;
   summarizedCopyResult: SummarizedCopyToSpaceResult;
   retries: ImportRetry[];
@@ -71,7 +69,6 @@ export const SpaceResult = (props: Props) => {
     summarizedCopyResult,
     retries,
     onRetriesChange,
-    savedObject,
     conflictResolutionInProgress,
   } = props;
   const { objects } = summarizedCopyResult;
@@ -109,7 +106,6 @@ export const SpaceResult = (props: Props) => {
     >
       <EuiSpacer size="s" />
       <SpaceCopyResultDetails
-        savedObject={savedObject}
         summarizedCopyResult={summarizedCopyResult}
         space={space}
         retries={retries}
