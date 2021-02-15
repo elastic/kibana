@@ -10,8 +10,8 @@ export const INFRA_ALERT_PREVIEW_PATH = '/api/infra/alerting/preview';
 
 export const TOO_MANY_BUCKETS_PREVIEW_EXCEPTION = 'TOO_MANY_BUCKETS_PREVIEW_EXCEPTION';
 export interface TooManyBucketsPreviewExceptionMetadata {
-  TOO_MANY_BUCKETS_PREVIEW_EXCEPTION: any;
-  maxBuckets: number;
+  TOO_MANY_BUCKETS_PREVIEW_EXCEPTION: boolean;
+  maxBuckets: any;
 }
 export const isTooManyBucketsPreviewException = (
   value: any

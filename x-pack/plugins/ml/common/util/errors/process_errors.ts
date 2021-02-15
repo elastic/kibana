@@ -59,11 +59,21 @@ export const extractErrorProperties = (error: ErrorType): MLErrorObject => {
       typeof error.body.attributes === 'object' &&
       typeof error.body.attributes.body?.error?.reason === 'string'
     ) {
-      return {
+      const errObj: MLErrorObject = {
         message: error.body.attributes.body.error.reason,
         statusCode: error.body.statusCode,
         fullError: error.body.attributes.body,
       };
+      if (
+        typeof error.body.attributes.body.error.caused_by === 'object' &&
+        (typeof error.body.attributes.body.error.caused_by?.reason === 'string' ||
+          typeof error.body.attributes.body.error.caused_by?.caused_by?.reason === 'string')
+      ) {
+        errObj.causedBy =
+          error.body.attributes.body.error.caused_by?.caused_by?.reason ||
+          error.body.attributes.body.error.caused_by?.reason;
+      }
+      return errObj;
     } else {
       return {
         message: error.body.message,

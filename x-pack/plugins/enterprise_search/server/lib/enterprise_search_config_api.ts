@@ -9,11 +9,12 @@ import AbortController from 'abort-controller';
 import fetch from 'node-fetch';
 
 import { KibanaRequest, Logger } from 'src/core/server';
-import { ConfigType } from '../';
-import { Access } from './check_access';
 
-import { InitialAppData } from '../../common/types';
 import { stripTrailingSlash } from '../../common/strip_slashes';
+import { InitialAppData } from '../../common/types';
+import { ConfigType } from '../index';
+
+import { Access } from './check_access';
 
 interface Params {
   request: KibanaRequest;

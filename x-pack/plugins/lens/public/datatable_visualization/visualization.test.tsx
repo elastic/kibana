@@ -122,6 +122,10 @@ describe('Datatable Visualization', () => {
             { columnId: 'col1', width: 123 },
             { columnId: 'col2', hidden: true },
           ],
+          sorting: {
+            columnId: 'col1',
+            direction: 'asc',
+          },
         },
         table: {
           isMultiRow: true,
@@ -138,6 +142,10 @@ describe('Datatable Visualization', () => {
         { columnId: 'col2', hidden: true, isTransposed: false },
         { columnId: 'col3', isTransposed: false },
       ]);
+      expect(suggestions[0].state.sorting).toEqual({
+        columnId: 'col1',
+        direction: 'asc',
+      });
     });
 
     it('should not make suggestions when the table is unchanged', () => {
@@ -467,10 +475,10 @@ describe('Datatable Visualization', () => {
         label: 'label',
       });
 
-      const error = datatableVisualization.getErrorMessages(
-        { layerId: 'a', columns: [{ columnId: 'b' }, { columnId: 'c' }] },
-        frame
-      );
+      const error = datatableVisualization.getErrorMessages({
+        layerId: 'a',
+        columns: [{ columnId: 'b' }, { columnId: 'c' }],
+      });
 
       expect(error).toBeUndefined();
     });
@@ -486,10 +494,10 @@ describe('Datatable Visualization', () => {
         label: 'label',
       });
 
-      const error = datatableVisualization.getErrorMessages(
-        { layerId: 'a', columns: [{ columnId: 'b' }, { columnId: 'c' }] },
-        frame
-      );
+      const error = datatableVisualization.getErrorMessages({
+        layerId: 'a',
+        columns: [{ columnId: 'b' }, { columnId: 'c' }],
+      });
 
       expect(error).toBeUndefined();
     });

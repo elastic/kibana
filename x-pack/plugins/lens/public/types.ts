@@ -361,7 +361,7 @@ export interface LensMultiTable {
 
 export interface VisualizationConfigProps<T = unknown> {
   layerId: string;
-  frame: FramePublicAPI;
+  frame: Pick<FramePublicAPI, 'datasourceLayers' | 'activeData'>;
   state: T;
 }
 
@@ -636,10 +636,7 @@ export interface Visualization<T = unknown> {
    * The frame will call this function on all visualizations at few stages (pre-build/build error) in order
    * to provide more context to the error and show it to the user
    */
-  getErrorMessages: (
-    state: T,
-    frame: FramePublicAPI
-  ) => Array<{ shortMessage: string; longMessage: string }> | undefined;
+  getErrorMessages: (state: T) => Array<{ shortMessage: string; longMessage: string }> | undefined;
 
   /**
    * The frame calls this function to display warnings about visualization

@@ -20,7 +20,7 @@ import { DynamicIconProperty } from './dynamic_icon_property';
 import { mockField, MockLayer } from './test_helpers/test_util';
 import { IconDynamicOptions } from '../../../../../common/descriptor_types';
 import { IField } from '../../../fields/field';
-import { IVectorLayer } from '../../../layers/vector_layer/vector_layer';
+import { IVectorLayer } from '../../../layers/vector_layer';
 
 const makeProperty = (options: Partial<IconDynamicOptions>, field: IField = mockField) => {
   const defaultOptions: IconDynamicOptions = {

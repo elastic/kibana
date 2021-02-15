@@ -84,7 +84,7 @@ export class VisualizePlugin
 
   constructor(private initializerContext: PluginInitializerContext) {}
 
-  public async setup(
+  public setup(
     core: CoreSetup<VisualizePluginStartDependencies>,
     { home, urlForwarding, data }: VisualizePluginSetupDependencies
   ) {
@@ -132,8 +132,8 @@ export class VisualizePlugin
     setUISettings(core.uiSettings);
 
     core.application.register({
-      id: 'visualize',
-      title: 'Visualize',
+      id: VisualizeConstants.APP_ID,
+      title: 'Visualize Library',
       order: 8000,
       euiIconType: 'logoKibana',
       defaultPath: '#/',
@@ -147,7 +147,9 @@ export class VisualizePlugin
         // allows the urlTracker to only save URLs that are not linked to an originatingApp
         this.isLinkedToOriginatingApp = () => {
           return Boolean(
-            pluginsStart.embeddable.getStateTransfer().getIncomingEditorState()?.originatingApp
+            pluginsStart.embeddable
+              .getStateTransfer()
+              .getIncomingEditorState(VisualizeConstants.APP_ID)?.originatingApp
           );
         };
 
@@ -222,7 +224,7 @@ export class VisualizePlugin
     if (home) {
       home.featureCatalogue.register({
         id: 'visualize',
-        title: 'Visualize',
+        title: 'Visualize Library',
         description: i18n.translate('visualize.visualizeDescription', {
           defaultMessage:
             'Create visualizations and aggregate data stores in your Elasticsearch indices.',

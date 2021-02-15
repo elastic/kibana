@@ -143,6 +143,7 @@ export const datatableVisualization: Visualization<DatatableVisualizationState> 
         // table with >= 10 columns will have a score of 0.4, fewer columns reduce score
         score: (Math.min(table.columns.length, 10) / 10) * 0.4,
         state: {
+          ...(state || {}),
           layerId: table.layerId,
           columns: table.columns.map((col, columnIndex) => ({
             ...(oldColumnSettings[col.columnId] || {}),
@@ -329,7 +330,7 @@ export const datatableVisualization: Visualization<DatatableVisualizationState> 
     };
   },
 
-  getErrorMessages(state, frame) {
+  getErrorMessages(state) {
     return undefined;
   },
 
