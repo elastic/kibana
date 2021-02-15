@@ -75,6 +75,33 @@ export const dashboardFeatureCatalog = {
 /*
   Actions
 */
+export const dashboardCopyToDashboardAction = {
+  getDisplayName: () =>
+    i18n.translate('dashboard.panel.copyToDashboard.title', {
+      defaultMessage: 'Copy to dashboard',
+    }),
+  getCancelButtonName: () =>
+    i18n.translate('dashboard.panel.copyToDashboard.cancel', {
+      defaultMessage: 'Cancel',
+    }),
+  getAcceptButtonName: () =>
+    i18n.translate('dashboard.panel.copyToDashboard.goToDashboard', {
+      defaultMessage: 'Copy and go to dashboard',
+    }),
+  getNewDashboardOption: () =>
+    i18n.translate('dashboard.panel.copyToDashboard.newDashboardOptionLabel', {
+      defaultMessage: 'New dashboard',
+    }),
+  getExistingDashboardOption: () =>
+    i18n.translate('dashboard.panel.copyToDashboard.existingDashboardOptionLabel', {
+      defaultMessage: 'Existing dashboard',
+    }),
+  getDescription: () =>
+    i18n.translate('dashboard.panel.copyToDashboard.description', {
+      defaultMessage: "Select where to copy the panel. You're navigated to destination dashboard.",
+    }),
+};
+
 export const dashboardAddToLibraryAction = {
   getDisplayName: () =>
     i18n.translate('dashboard.panel.AddToLibrary', {

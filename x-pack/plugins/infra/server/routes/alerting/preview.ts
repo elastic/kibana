@@ -43,6 +43,7 @@ export const initAlertPreviewRoute = ({ framework, sources }: InfraBackendLibs) 
         alertInterval,
         alertThrottle,
         alertOnNoData,
+        alertNotifyWhen,
       } = request.body;
 
       const callCluster = (endpoint: string, opts: Record<string, any>) => {
@@ -69,6 +70,7 @@ export const initAlertPreviewRoute = ({ framework, sources }: InfraBackendLibs) 
               config: source.configuration,
               alertInterval,
               alertThrottle,
+              alertNotifyWhen,
               alertOnNoData,
             });
 
@@ -90,6 +92,7 @@ export const initAlertPreviewRoute = ({ framework, sources }: InfraBackendLibs) 
               source,
               alertInterval,
               alertThrottle,
+              alertNotifyWhen,
               alertOnNoData,
             });
 
@@ -119,6 +122,7 @@ export const initAlertPreviewRoute = ({ framework, sources }: InfraBackendLibs) 
               alertInterval,
               alertThrottle,
               alertOnNoData,
+              alertNotifyWhen,
             });
 
             return response.ok({

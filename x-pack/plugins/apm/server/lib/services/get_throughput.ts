@@ -6,7 +6,6 @@
  */
 
 import { ESFilter } from '../../../../../typings/elasticsearch';
-import { PromiseReturnType } from '../../../../observability/typings/common';
 import {
   SERVICE_NAME,
   TRANSACTION_TYPE,
@@ -17,37 +16,27 @@ import {
   getProcessorEventForAggregatedTransactions,
 } from '../helpers/aggregated_transactions';
 import { getBucketSize } from '../helpers/get_bucket_size';
-import { calculateThroughput } from '../helpers/calculate_throughput';
-import { Setup, SetupTimeRange } from '../helpers/setup_request';
+import { Setup } from '../helpers/setup_request';
+import { withApmSpan } from '../../utils/with_apm_span';
 
 interface Options {
   searchAggregatedTransactions: boolean;
   serviceName: string;
-  setup: Setup & SetupTimeRange;
+  setup: Setup;
   transactionType: string;
+  start: number;
+  end: number;
 }
 
-type ESResponse = PromiseReturnType<typeof fetcher>;
-
-function transform(options: Options, response: ESResponse) {
-  if (response.hits.total.value === 0) {
-    return [];
-  }
-  const { start, end } = options.setup;
-  const buckets = response.aggregations?.throughput.buckets ?? [];
-  return buckets.map(({ key: x, doc_count: value }) => ({
-    x,
-    y: calculateThroughput({ start, end, value }),
-  }));
-}
-
-async function fetcher({
+function fetcher({
   searchAggregatedTransactions,
   serviceName,
   setup,
   transactionType,
+  start,
+  end,
 }: Options) {
-  const { start, end, apmEventClient } = setup;
+  const { apmEventClient } = setup;
   const { intervalString } = getBucketSize({ start, end });
   const filter: ESFilter[] = [
     { term: { [SERVICE_NAME]: serviceName } },
@@ -71,12 +60,19 @@ async function fetcher({
       size: 0,
       query: { bool: { filter } },
       aggs: {
-        throughput: {
+        timeseries: {
           date_histogram: {
             field: '@timestamp',
             fixed_interval: intervalString,
             min_doc_count: 0,
             extended_bounds: { min: start, max: end },
+          },
+          aggs: {
+            throughput: {
+              rate: {
+                unit: 'minute' as const,
+              },
+            },
           },
         },
       },
@@ -86,8 +82,17 @@ async function fetcher({
   return apmEventClient.search(params);
 }
 
-export async function getThroughput(options: Options) {
-  return {
-    throughput: transform(options, await fetcher(options)),
-  };
+export function getThroughput(options: Options) {
+  return withApmSpan('get_throughput_for_service', async () => {
+    const response = await fetcher(options);
+
+    return (
+      response.aggregations?.timeseries.buckets.map((bucket) => {
+        return {
+          x: bucket.key,
+          y: bucket.throughput.value,
+        };
+      }) ?? []
+    );
+  });
 }
