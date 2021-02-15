@@ -20,13 +20,15 @@ export interface IndexPatternLayerPanelProps
 export function LayerPanel({ state, layerId, onChangeIndexPattern }: IndexPatternLayerPanelProps) {
   const layer = state.layers[layerId];
 
+  const indexPattern = state.indexPatterns[layer.indexPatternId];
+
   return (
     <I18nProvider>
       <ChangeIndexPattern
         data-test-subj="indexPattern-switcher"
         trigger={{
-          label: state.indexPatterns[layer.indexPatternId].title,
-          title: state.indexPatterns[layer.indexPatternId].title,
+          label: indexPattern?.title || '-- Index pattern not found --',
+          title: indexPattern?.title || '-- Index pattern not found --',
           'data-test-subj': 'lns_layerIndexPatternLabel',
           size: 's',
           fontWeight: 'normal',

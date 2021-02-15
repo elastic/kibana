@@ -53,7 +53,7 @@ import { VIS_EVENT_TO_TRIGGER } from '../../../../../../../src/plugins/visualiza
 import { WorkspacePanelWrapper } from './workspace_panel_wrapper';
 import { DropIllustration } from '../../../assets/drop_illustration';
 import { getOriginalRequestErrorMessage } from '../../error_helper';
-import { validateDatasourceAndVisualization } from '../state_helpers';
+import { getMissingIndexPattern, validateDatasourceAndVisualization } from '../state_helpers';
 import { DefaultInspectorAdapters } from '../../../../../../../src/plugins/expressions/common';
 
 export interface WorkspacePanelProps {
@@ -127,6 +127,24 @@ export const WorkspacePanel = React.memo(function WorkspacePanel({
     ? visualizationMap[activeVisualizationId]
     : null;
 
+  const missingIndexPatterns = getMissingIndexPattern(
+    activeDatasourceId && datasourceStates[activeDatasourceId]
+  );
+
+  const missingRefsErrors = missingIndexPatterns.length
+    ? [
+        {
+          shortMessage: '',
+          longMessage: i18n.translate('xpack.lens.indexPattern.missingIndexPattern', {
+            defaultMessage: 'The index pattern (id: {indexpattern}) cannot be found',
+            values: {
+              indexpattern: missingIndexPatterns[0],
+            },
+          }),
+        },
+      ]
+    : [];
+
   // Note: mind to all these eslint disable lines: the frameAPI will change too frequently
   // and to prevent race conditions it is ok to leave them there.
 
@@ -145,7 +163,7 @@ export const WorkspacePanel = React.memo(function WorkspacePanel({
 
   const expression = useMemo(
     () => {
-      if (!configurationValidationError?.length) {
+      if (!configurationValidationError?.length && !missingRefsErrors.length) {
         try {
           return buildExpression({
             visualization: activeVisualization,
@@ -291,7 +309,7 @@ export const WorkspacePanel = React.memo(function WorkspacePanel({
         dispatch={dispatch}
         onEvent={onEvent}
         setLocalState={setLocalState}
-        localState={{ ...localState, configurationValidationError }}
+        localState={{ ...localState, configurationValidationError, missingRefsErrors }}
         ExpressionRendererComponent={ExpressionRendererComponent}
       />
     );
@@ -344,6 +362,7 @@ export const InnerVisualizationWrapper = ({
   setLocalState: (dispatch: (prevState: WorkspaceState) => WorkspaceState) => void;
   localState: WorkspaceState & {
     configurationValidationError?: Array<{ shortMessage: string; longMessage: string }>;
+    missingRefsErrors?: Array<{ shortMessage: string; longMessage: string }>;
   };
   ExpressionRendererComponent: ReactExpressionRendererType;
 }) => {
@@ -437,6 +456,23 @@ export const InnerVisualizationWrapper = ({
           {localState.configurationValidationError[0].longMessage}
         </EuiFlexItem>
         {showExtraErrors}
+      </EuiFlexGroup>
+    );
+  }
+
+  if (localState.missingRefsErrors?.length) {
+    return (
+      <EuiFlexGroup style={{ maxWidth: '100%' }} direction="column" alignItems="center">
+        <EuiFlexItem>
+          <EuiIcon type="alert" size="xl" color="danger" />
+        </EuiFlexItem>
+        <EuiFlexItem data-test-subj="missing-refs-failure">
+          <FormattedMessage
+            id="xpack.lens.editorFrame.indexPatternNotFound"
+            defaultMessage="Index pattern not found"
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>{localState.missingRefsErrors[0].longMessage}</EuiFlexItem>
       </EuiFlexGroup>
     );
   }

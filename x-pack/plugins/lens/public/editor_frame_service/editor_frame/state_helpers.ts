@@ -108,6 +108,26 @@ export async function persistedStateToExpression(
   });
 }
 
+export function getMissingIndexPattern(
+  currentDatasourceState:
+    | {
+        isLoading: boolean;
+        state: unknown;
+      }
+    | null
+    | string
+) {
+  if (currentDatasourceState == null || typeof currentDatasourceState === 'string') {
+    return [];
+  }
+  const datasourceState = currentDatasourceState.state as {
+    layers: Record<string, unknown>;
+    indexPatterns: Record<string, unknown>;
+  };
+  const ids = Object.keys(datasourceState.layers);
+  return ids.filter((id) => !datasourceState.indexPatterns[id]);
+}
+
 export const validateDatasourceAndVisualization = (
   currentDataSource: Datasource | null,
   currentDatasourceState: unknown | null,

@@ -115,8 +115,8 @@ export function IndexPatternDataPanel({
       .map((l) => l.indexPatternId)
       .concat(currentIndexPatternId)
   )
-    .sort((a, b) => a.localeCompare(b))
     .filter((id) => !!indexPatterns[id])
+    .sort((a, b) => a.localeCompare(b))
     .map((id) => ({
       id,
       title: indexPatterns[id].title,
@@ -140,7 +140,7 @@ export function IndexPatternDataPanel({
             dateRange,
             setState,
             isFirstExistenceFetch: state.isFirstExistenceFetch,
-            currentIndexPatternTitle: indexPatterns[currentIndexPatternId].title,
+            currentIndexPatternTitle: indexPatterns[currentIndexPatternId]?.title || '',
             showNoDataPopover,
             indexPatterns: indexPatternList,
             fetchJson: core.http.post,
@@ -156,7 +156,7 @@ export function IndexPatternDataPanel({
         ]}
       />
 
-      {Object.keys(indexPatterns).length === 0 ? (
+      {Object.keys(indexPatterns).length === 0 && indexPatternRefs.length === 0 ? (
         <EuiFlexGroup
           gutterSize="m"
           className="lnsInnerIndexPatternDataPanel"
@@ -182,6 +182,8 @@ export function IndexPatternDataPanel({
           </EuiFlexItem>
         </EuiFlexGroup>
       ) : (
+        // TODO: in case of missing currentIndexPatternId,
+        // this should automatically switch to the next available one
         <MemoizedDataPanel
           currentIndexPatternId={currentIndexPatternId}
           indexPatternRefs={indexPatternRefs}

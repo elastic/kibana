@@ -333,11 +333,10 @@ export function App({
             initialInput.savedObjectId
           );
         }
-        getAllIndexPatterns(
-          _.uniq(doc.references.filter(({ type }) => type === 'index-pattern').map(({ id }) => id)),
-          data.indexPatterns,
-          notifications
-        )
+        const indexPatternIds = _.uniq(
+          doc.references.filter(({ type }) => type === 'index-pattern').map(({ id }) => id)
+        );
+        getAllIndexPatterns(indexPatternIds, data.indexPatterns, notifications)
           .then((indexPatterns) => {
             // Don't overwrite any pinned filters
             data.query.filterManager.setAppFilters(
@@ -808,15 +807,17 @@ export async function getAllIndexPatterns(
   indexPatternsService: IndexPatternsContract,
   notifications: NotificationsStart
 ): Promise<IndexPatternInstance[]> {
-  try {
-    return await Promise.all(ids.map((id) => indexPatternsService.get(id)));
-  } catch (e) {
+  const responses = await Promise.allSettled(ids.map((id) => indexPatternsService.get(id)));
+  const fullfilled = responses.filter(
+    (response): response is PromiseFulfilledResult<IndexPatternInstance> =>
+      response.status === 'fulfilled'
+  );
+  if (fullfilled.length < responses.length) {
     notifications.toasts.addDanger(
       i18n.translate('xpack.lens.app.indexPatternLoadingError', {
         defaultMessage: 'Error loading index patterns',
       })
     );
-
-    throw new Error(e);
   }
+  return fullfilled.map((response) => response.value);
 }

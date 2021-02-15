@@ -22,6 +22,7 @@ import { DateRange, ExistingFields } from '../../common/types';
 import { BASE_API_URL } from '../../common';
 import {
   IndexPatternsContract,
+  IndexPattern as IndexPatternInstance,
   indexPatterns as indexPatternsUtils,
 } from '../../../../../src/plugins/data/public';
 import { VisualizeFieldContext } from '../../../../../src/plugins/ui_actions/public';
@@ -49,7 +50,17 @@ export async function loadIndexPatterns({
     return cache;
   }
 
-  const indexPatterns = await Promise.all(missingIds.map((id) => indexPatternsService.get(id)));
+  const allIndexPatterns = await Promise.allSettled(
+    missingIds.map((id) => indexPatternsService.get(id))
+  );
+  // ignore rejected indexpatterns here, they're already handled at the app level
+  const indexPatterns = allIndexPatterns
+    .filter(
+      (response): response is PromiseFulfilledResult<IndexPatternInstance> =>
+        response.status === 'fulfilled'
+    )
+    .map((response) => response.value);
+
   const indexPatternsObject = indexPatterns.reduce(
     (acc, indexPattern) => {
       const newFields = indexPattern.fields
