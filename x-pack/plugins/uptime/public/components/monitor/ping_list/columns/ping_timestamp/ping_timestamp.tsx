@@ -28,6 +28,10 @@ const StepDiv = styled.div`
   figure.euiImage-isFullScreen {
     div.stepArrowsFullScreen {
       display: flex;
+      background-color: #fff;
+    }
+    .euiImage__caption {
+      background-color: #fff;
     }
   }
   position: relative;
