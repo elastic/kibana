@@ -75,7 +75,12 @@ export const MinAgeField: FunctionComponent<Props> = ({ phase }): React.ReactEle
         const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
         return (
           <EuiFormRow fullWidth isInvalid={isInvalid} error={errorMessage}>
-            <EuiFlexGroup gutterSize={'s'} alignItems={'center'} justifyContent={'spaceBetween'}>
+            <EuiFlexGroup
+              gutterSize={'s'}
+              alignItems={'center'}
+              justifyContent={'spaceBetween'}
+              wrap
+            >
               <EuiFlexItem grow={false}>
                 <EuiText className={'eui-textNoWrap'} size={'xs'}>
                   <FormattedMessage

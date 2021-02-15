@@ -8,10 +8,13 @@
 import { setMockValues, setMockActions, rerender } from '../../../../__mocks__';
 
 import React from 'react';
+
 import { shallow } from 'enzyme';
+
 import { EuiTextArea, EuiButtonEmpty, EuiButton } from '@elastic/eui';
 
 import { Errors } from '../creation_response_components';
+
 import { PasteJsonText, FlyoutHeader, FlyoutBody, FlyoutFooter } from './paste_json_text';
 
 describe('PasteJsonText', () => {

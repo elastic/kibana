@@ -248,6 +248,8 @@ export interface QueryFilter {
   };
 }
 
+export type SignalsEnrichment = (signals: SignalSearchResponse) => Promise<SignalSearchResponse>;
+
 export interface SearchAfterAndBulkCreateParams {
   gap: moment.Duration | null;
   previousStartedAt: Date | null | undefined;
@@ -274,6 +276,7 @@ export interface SearchAfterAndBulkCreateParams {
   tags: string[];
   throttle: string;
   buildRuleMessage: BuildRuleMessage;
+  enrichment?: SignalsEnrichment;
 }
 
 export interface SearchAfterAndBulkCreateReturnType {

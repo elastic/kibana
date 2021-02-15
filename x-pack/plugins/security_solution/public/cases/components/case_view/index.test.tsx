@@ -107,7 +107,7 @@ describe('CaseView ', () => {
   const fetchCaseUserActions = jest.fn();
   const fetchCase = jest.fn();
   const updateCase = jest.fn();
-  const postPushToService = jest.fn();
+  const pushCaseToExternalService = jest.fn();
 
   const data = caseProps.caseData;
   const defaultGetCase = {
@@ -144,7 +144,10 @@ describe('CaseView ', () => {
 
     jest.spyOn(routeData, 'useLocation').mockReturnValue(mockLocation);
     useGetCaseUserActionsMock.mockImplementation(() => defaultUseGetCaseUserActions);
-    usePostPushToServiceMock.mockImplementation(() => ({ isLoading: false, postPushToService }));
+    usePostPushToServiceMock.mockImplementation(() => ({
+      isLoading: false,
+      pushCaseToExternalService,
+    }));
     useConnectorsMock.mockImplementation(() => ({ connectors: connectorsMock, loading: false }));
     useQueryAlertsMock.mockImplementation(() => ({
       loading: false,
@@ -378,7 +381,7 @@ describe('CaseView ', () => {
 
       wrapper.update();
 
-      expect(postPushToService).toHaveBeenCalled();
+      expect(pushCaseToExternalService).toHaveBeenCalled();
     });
   });
 
@@ -508,7 +511,7 @@ describe('CaseView ', () => {
               connector: {
                 id: 'servicenow-1',
                 name: 'SN 1',
-                type: ConnectorTypes.servicenow,
+                type: ConnectorTypes.serviceNowITSM,
                 fields: null,
               },
             }}
@@ -556,7 +559,7 @@ describe('CaseView ', () => {
               connector: {
                 id: 'servicenow-1',
                 name: 'SN 1',
-                type: ConnectorTypes.servicenow,
+                type: ConnectorTypes.serviceNowITSM,
                 fields: null,
               },
             }}
@@ -612,7 +615,7 @@ describe('CaseView ', () => {
         type: 'x-pack/security_solution/local/timeline/CREATE_TIMELINE',
         payload: {
           columns: [],
-          expandedEvent: {},
+          expandedDetail: {},
           id: 'timeline-case',
           indexNames: [],
           show: false,
@@ -658,9 +661,10 @@ describe('CaseView ', () => {
         .first()
         .simulate('click');
       expect(mockDispatch).toHaveBeenCalledWith({
-        type: 'x-pack/security_solution/local/timeline/TOGGLE_EXPANDED_EVENT',
+        type: 'x-pack/security_solution/local/timeline/TOGGLE_DETAIL_PANEL',
         payload: {
-          event: { eventId: 'alert-id-1', indexName: 'alert-index-1' },
+          panelView: 'eventDetail',
+          params: { eventId: 'alert-id-1', indexName: 'alert-index-1' },
           timelineId: 'timeline-case',
         },
       });

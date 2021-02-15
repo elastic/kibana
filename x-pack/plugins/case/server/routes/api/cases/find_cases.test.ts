@@ -30,13 +30,13 @@ describe('FIND all cases', () => {
       method: 'get',
     });
 
-    const theContext = await createRouteContext(
+    const { context } = await createRouteContext(
       createMockSavedObjectsRepository({
         caseSavedObject: mockCases,
       })
     );
 
-    const response = await routeHandler(theContext, request, kibanaResponseFactory);
+    const response = await routeHandler(context, request, kibanaResponseFactory);
     expect(response.status).toEqual(200);
     expect(response.payload.cases).toHaveLength(4);
     // mockSavedObjectsRepository do not support filters and returns all cases every time.
@@ -51,13 +51,13 @@ describe('FIND all cases', () => {
       method: 'get',
     });
 
-    const theContext = await createRouteContext(
+    const { context } = await createRouteContext(
       createMockSavedObjectsRepository({
         caseSavedObject: mockCases,
       })
     );
 
-    const response = await routeHandler(theContext, request, kibanaResponseFactory);
+    const response = await routeHandler(context, request, kibanaResponseFactory);
     expect(response.status).toEqual(200);
     expect(response.payload.cases[2].connector.id).toEqual('123');
   });
@@ -68,13 +68,13 @@ describe('FIND all cases', () => {
       method: 'get',
     });
 
-    const theContext = await createRouteContext(
+    const { context } = await createRouteContext(
       createMockSavedObjectsRepository({
         caseSavedObject: [mockCaseNoConnectorId],
       })
     );
 
-    const response = await routeHandler(theContext, request, kibanaResponseFactory);
+    const response = await routeHandler(context, request, kibanaResponseFactory);
     expect(response.status).toEqual(200);
     expect(response.payload.cases[0].connector.id).toEqual('none');
   });
@@ -85,14 +85,14 @@ describe('FIND all cases', () => {
       method: 'get',
     });
 
-    const theContext = await createRouteContext(
+    const { context } = await createRouteContext(
       createMockSavedObjectsRepository({
         caseSavedObject: [mockCaseNoConnectorId],
         caseConfigureSavedObject: mockCaseConfigure,
       })
     );
 
-    const response = await routeHandler(theContext, request, kibanaResponseFactory);
+    const response = await routeHandler(context, request, kibanaResponseFactory);
     expect(response.status).toEqual(200);
     expect(response.payload.cases[0].connector.id).toEqual('none');
   });

@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { first } from 'rxjs/operators';
 import {
   PluginInitializerContext,
   Logger,
@@ -27,20 +26,15 @@ export class UsageCollectionPlugin implements Plugin<CollectorSet> {
     this.logger = this.initializerContext.logger.get();
   }
 
-  public async setup(core: CoreSetup) {
-    const config = await this.initializerContext.config
-      .create<ConfigType>()
-      .pipe(first())
-      .toPromise();
+  public setup(core: CoreSetup) {
+    const config = this.initializerContext.config.get<ConfigType>();
 
     const collectorSet = new CollectorSet({
       logger: this.logger.get('collector-set'),
       maximumWaitTimeForAllCollectorsInS: config.maximumWaitTimeForAllCollectorsInS,
     });
 
-    const globalConfig = await this.initializerContext.config.legacy.globalConfig$
-      .pipe(first())
-      .toPromise();
+    const globalConfig = this.initializerContext.config.legacy.get();
 
     const router = core.http.createRouter();
     setupRoutes({

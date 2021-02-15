@@ -93,6 +93,16 @@ async function createSetupSideEffects(
     await runFleetServerMigration();
   }
 
+  if (appContextService.getConfig()?.agents?.fleetServerEnabled) {
+    await ensureInstalledPackage({
+      savedObjectsClient: soClient,
+      pkgName: FLEET_SERVER_PACKAGE,
+      callCluster,
+    });
+    await ensureFleetServerIndicesCreated(esClient);
+    await runFleetServerMigration();
+  }
+
   // If we just created the default policy, ensure default packages are added to it
   if (defaultAgentPolicyCreated) {
     const agentPolicyWithPackagePolicies = await agentPolicyService.get(
@@ -182,17 +192,8 @@ async function putFleetRole(callCluster: CallESAsCurrentUser) {
       cluster: ['monitor', 'manage_api_key'],
       indices: [
         {
-          names: [
-            'logs-*',
-            'metrics-*',
-            'traces-*',
-            '.ds-logs-*',
-            '.ds-metrics-*',
-            '.ds-traces-*',
-            '.logs-endpoint.diagnostic.collection-*',
-            '.ds-.logs-endpoint.diagnostic.collection-*',
-          ],
-          privileges: ['write', 'create_index', 'indices:admin/auto_create'],
+          names: ['logs-*', 'metrics-*', 'traces-*', '.logs-endpoint.diagnostic.collection-*'],
+          privileges: ['auto_configure', 'create_doc'],
         },
       ],
     },

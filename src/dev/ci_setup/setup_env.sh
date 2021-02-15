@@ -181,6 +181,15 @@ fi
 cp -f "$KIBANA_DIR/src/dev/ci_setup/.bazelrc-ci" "$HOME/.bazelrc";
 
 ###
+### remove write permissions on buildbuddy remote cache for prs
+###
+if [[ "$ghprbPullId" ]] ; then
+  echo "# Appended by $KIBANA_DIR/src/dev/ci_setup/setup.sh" >> "$HOME/.bazelrc"
+  echo "# Uploads logs & artifacts without writing to cache" >> "$HOME/.bazelrc"
+  echo "build --noremote_upload_local_results" >> "$HOME/.bazelrc"
+fi
+
+###
 ### append auth token to buildbuddy into "$HOME/.bazelrc";
 ###
 echo "# Appended by $KIBANA_DIR/src/dev/ci_setup/setup.sh" >> "$HOME/.bazelrc"

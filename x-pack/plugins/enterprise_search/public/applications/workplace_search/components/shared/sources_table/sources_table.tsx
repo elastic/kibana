@@ -10,8 +10,8 @@ import React from 'react';
 import { EuiTable, EuiTableBody } from '@elastic/eui';
 
 import { TableHeader } from '../../../../shared/table_header/table_header';
-import { SourceRow, ISourceRow } from '../source_row';
 import { ContentSourceDetails } from '../../../types';
+import { SourceRow, ISourceRow } from '../source_row';
 
 interface SourcesTableProps extends ISourceRow {
   sources: ContentSourceDetails[];

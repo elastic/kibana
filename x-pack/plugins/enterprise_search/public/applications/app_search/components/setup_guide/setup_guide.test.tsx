@@ -6,10 +6,12 @@
  */
 
 import React from 'react';
+
 import { shallow } from 'enzyme';
 
 import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
 import { SetupGuideLayout } from '../../../shared/setup_guide';
+
 import { SetupGuide } from './';
 
 describe('SetupGuide', () => {

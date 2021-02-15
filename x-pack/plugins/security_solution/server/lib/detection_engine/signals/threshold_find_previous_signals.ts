@@ -44,6 +44,25 @@ export const findPreviousThresholdSignals = async ({
   searchDuration: string;
   searchErrors: string[];
 }> => {
+<<<<<<< HEAD
+=======
+  const aggregations = {
+    threshold: {
+      terms: {
+        field: 'signal.threshold_result.value',
+        size: 10000,
+      },
+      aggs: {
+        lastSignalTimestamp: {
+          max: {
+            field: 'signal.original_time', // timestamp of last event captured by bucket
+          },
+        },
+      },
+    },
+  };
+
+>>>>>>> c1d1b2b453465a2d788110b7847e15c31be95b28
   const filter = {
     bool: {
       must: [
