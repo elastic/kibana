@@ -40,7 +40,7 @@ const ONE_SECOND_AS_MICROS = 1000000;
 // the limit for converting to seconds is >= 1 sec
 const MILLIS_LIMIT = ONE_SECOND_AS_MICROS * 1;
 
-export const formatDuration = (durationMicros: number) => {
+export const formatDuration = (durationMicros: number, shortLabel?: boolean) => {
   if (durationMicros < MILLIS_LIMIT) {
     return i18n.translate('xpack.uptime.pingList.durationMsColumnFormatting', {
       values: { millis: microsToMillis(durationMicros) },
@@ -49,6 +49,18 @@ export const formatDuration = (durationMicros: number) => {
   }
   const seconds = (durationMicros / ONE_SECOND_AS_MICROS).toFixed(0);
 
+  if (shortLabel) {
+    if (seconds === '1') {
+      return i18n.translate('xpack.uptime.pingist.durationSecondsColumnFormatting.singular.sec', {
+        values: { seconds },
+        defaultMessage: '{seconds} sec',
+      });
+    }
+    return i18n.translate('xpack.uptime.pingist.durationSecondsColumnFormatting.sec', {
+      values: { seconds },
+      defaultMessage: '{seconds} sec',
+    });
+  }
   // we format seconds with correct pulralization here and not for `ms` because it is much more likely users
   // will encounter times of exactly '1' second.
   if (seconds === '1') {

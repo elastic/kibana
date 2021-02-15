@@ -29,6 +29,7 @@ import { DurationAnomaliesBar } from './duration_line_bar_list';
 import { AnomalyRecords } from '../../../state/actions';
 import { UptimeThemeContext } from '../../../contexts';
 import { MONITOR_CHART_HEIGHT } from '../../monitor';
+import { formatDuration } from '../../monitor/ping_list/ping_list';
 
 interface DurationChartProps {
   /**
@@ -112,8 +113,9 @@ export const DurationChartComponent = ({
             position={Position.Left}
             tickFormat={(d) => getTickFormat(d)}
             title={i18n.translate('xpack.uptime.monitorCharts.durationChart.leftAxis.title', {
-              defaultMessage: 'Duration in ms',
+              defaultMessage: 'Duration',
             })}
+            labelFormat={(d) => formatDuration(d, true)}
           />
           <DurationLineSeriesList lines={locationDurationLines} />
           <DurationAnomaliesBar anomalies={anomalies} hiddenLegends={hiddenLegends} />
