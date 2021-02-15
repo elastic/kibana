@@ -15,10 +15,12 @@ import { Datatable } from '../../../expression_types';
  * Takes a function spec and passes in default args,
  * overriding with any provided args.
  */
-export const functionWrapper = (spec: AnyExpressionFunctionDefinition) => {
+export const functionWrapper = <ContextType = object | null>(
+  spec: AnyExpressionFunctionDefinition
+) => {
   const defaultArgs = mapValues(spec.args, (argSpec) => argSpec.default);
   return (
-    context: object | null,
+    context: ContextType,
     args: Record<string, any> = {},
     handlers: ExecutionContext = {} as ExecutionContext
   ) => spec.fn(context, { ...defaultArgs, ...args }, handlers);

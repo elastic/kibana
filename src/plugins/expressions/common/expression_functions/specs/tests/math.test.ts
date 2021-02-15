@@ -1,19 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import { functionWrapper } from '../../../test_helpers/function_wrapper';
-import { getFunctionErrors } from '../../../i18n';
-import { emptyTable, testTable } from './__fixtures__/test_tables';
-import { math } from './math';
-
-const errors = getFunctionErrors().math;
+import { errors, math } from '../math';
+import { emptyTable, functionWrapper, testTable } from './utils';
 
 describe('math', () => {
-  const fn = functionWrapper(math);
+  const fn = functionWrapper<unknown>(math);
 
   it('evaluates math expressions without reference to context', () => {
     expect(fn(null, { expression: '10.5345' })).toBe(10.5345);
