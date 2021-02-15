@@ -221,6 +221,9 @@ export const PingList = () => {
   ];
 
   const getRowProps = (item: Ping) => {
+    if (monitorType !== MONITOR_TYPES.BROWSER) {
+      return {};
+    }
     const { monitor } = item;
     return {
       'data-test-subj': `row-${monitor.check_group}`,
