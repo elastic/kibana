@@ -97,7 +97,7 @@ export function TransactionDetails({
           <h1>{transactionName}</h1>
         </EuiTitle>
       </ApmHeader>
-      <SearchBar showTimeComparison />
+      <SearchBar />
       <EuiPage>
         <EuiFlexGroup direction="column" gutterSize="s">
           <EuiFlexGroup justifyContent="flexEnd">
