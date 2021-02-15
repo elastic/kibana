@@ -44,7 +44,6 @@ export class SettingsChecker {
 
   async executeCheck() {
     try {
-      console.log('EXECUTE CHECK');
       const { data } = await this.$http.get(this.getApi(), {
         headers: { 'kbn-system-request': 'true' },
       });

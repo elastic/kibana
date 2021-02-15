@@ -9,6 +9,10 @@
 import $ from 'jquery';
 import { stringify } from 'query-string';
 
+interface SendOptions {
+  asSystemRequest?: boolean;
+}
+
 const esVersion: string[] = [];
 
 export function getVersion() {
@@ -20,7 +24,12 @@ export function getContentType(body: any) {
   return 'application/json';
 }
 
-export function send(method: string, path: string, data: any, asSystemRequest?: boolean) {
+export function send(
+  method: string,
+  path: string,
+  data: any,
+  { asSystemRequest }: SendOptions = {}
+) {
   const wrappedDfd = $.Deferred();
 
   const options: JQuery.AjaxSettings = {
