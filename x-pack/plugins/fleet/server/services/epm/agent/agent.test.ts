@@ -179,4 +179,32 @@ input: logs
       input: 'logs',
     });
   });
+
+  it('should escape string values when necessary', () => {
+    const stringTemplate = `
+my-package:
+    specialchar: {{specialchar}}
+    specialarray: {{specialarray}}
+    numeric: {{numeric}}
+    mixed: {{mixed}}`;
+
+    const vars = {
+      specialchar: { value: '*', type: 'string' },
+      specialarray: { value: ['*'], type: 'string' },
+      numeric: { value: '100', type: 'string' },
+      mixed: { value: 'localhost:8200', type: 'string' },
+    };
+
+    const targetOutput = {
+      'my-package': {
+        specialchar: '*',
+        specialarray: '*',
+        numeric: '100',
+        mixed: 'localhost:8200',
+      },
+    };
+    const output = compileTemplate(vars, stringTemplate);
+
+    expect(output).toEqual(targetOutput);
+  });
 });
