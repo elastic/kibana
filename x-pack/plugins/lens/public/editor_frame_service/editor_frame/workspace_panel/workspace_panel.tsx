@@ -10,16 +10,7 @@ import classNames from 'classnames';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { Ast } from '@kbn/interpreter/common';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiText,
-  EuiTextColor,
-  EuiButtonEmpty,
-  EuiLink,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText, EuiButtonEmpty, EuiLink } from '@elastic/eui';
 import { CoreStart, CoreSetup } from 'kibana/public';
 import {
   DataPublicPluginStart,
@@ -422,16 +413,6 @@ export const InnerVisualizationWrapper = ({
       >
         <EuiFlexItem>
           <EuiIcon type="alert" size="xl" color="danger" />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiTitle size="s">
-            <EuiTextColor color="danger">
-              <FormattedMessage
-                id="xpack.lens.editorFrame.configurationFailure"
-                defaultMessage="Invalid configuration"
-              />
-            </EuiTextColor>
-          </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem className="eui-textBreakAll" data-test-subj="configuration-failure-error">
           {localState.configurationValidationError[0].longMessage}
