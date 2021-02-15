@@ -10865,7 +10865,6 @@
     "xpack.ingestPipelines.pipelineEditor.gsubForm.patternRequiredError": "需要值。",
     "xpack.ingestPipelines.pipelineEditor.gsubForm.replacementFieldHelpText": "匹配项的替换文本。",
     "xpack.ingestPipelines.pipelineEditor.gsubForm.replacementFieldLabel": "替换",
-    "xpack.ingestPipelines.pipelineEditor.gsubForm.replacementRequiredError": "需要值。",
     "xpack.ingestPipelines.pipelineEditor.htmlStripForm.fieldNameHelpText": "从其中移除 HTML 标记的字段。",
     "xpack.ingestPipelines.pipelineEditor.inferenceForm.fieldMapHelpText": "将文档字段名称映射到模型的已知字段名称。优先于模型中的任何映射。",
     "xpack.ingestPipelines.pipelineEditor.inferenceForm.fieldMapInvalidJSONError": "JSON 无效",
