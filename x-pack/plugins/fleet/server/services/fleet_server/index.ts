@@ -36,7 +36,7 @@ export async function startFleetServerSetup() {
   const logger = appContextService.getLogger();
   if (!appContextService.hasSecurity()) {
     // Fleet will not work if security is not enabled
-    logger?.warn('Fleet need the security plugin to be enabled.');
+    logger?.warn('Fleet requires the security plugin to be enabled.');
     return;
   }
 
@@ -47,7 +47,7 @@ export async function startFleetServerSetup() {
     await runFleetServerMigration();
     _isFleetServerSetup = true;
   } catch (err) {
-    logger?.error('Setup for central management for agent failed.');
+    logger?.error('Setup for central management of agents failed.');
     logger?.error(err);
   }
   _isPending = false;
