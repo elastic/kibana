@@ -76,12 +76,10 @@ It consists of a message with an associated CTA to show to an end-user.
 *NotificationEvent* interface
 - `recipient_id: string []` - unique identifiers of all the recipients. It might be the same as `elastic_id` (if the env supports it) - the unique user identifier across all the company products. 
 There is currently no way to unambiguously identify the user. WIP [#82725](https://github.com/elastic/kibana/issues/82725)
-- `priority: number` - to prioritize the delivery in case of async delivery mechanism.
-Where 0 - the standard priority, 10 - the critical priority. An event with high priority is processed first.
-Shouldn’t be used in UI.
+- `priority?: 'normal' | 'high' | 'critical'` - to prioritize the delivery in case of async delivery mechanism. An event with high priority is processed first. Shouldn’t be used in UI. Considered as `normal` if not specified. Important messages have `high` priority. `Critical` is used in emergency cases.
 - `created_at: number` - Unix timestamp in UTC timezone when a notification has been created.
-- `expired_at?: number` - Unix timestamp in UTC timezone when notification can be removed from the system. 
-- `pinned_status?: boolean` - a flag to pin a notification at top of the list of notifications. Used by a source to draw a user's attention to a notification.
+- `expire_at?: number` - Unix timestamp in UTC timezone when notification will be removed from the system. 
+- `pinned?: boolean` - a flag to pin a notification at top of the list of notifications. Used by a source to draw a user's attention to a notification.
 - `source_type: string` - source type. the same as source domain name: `cloud`, `alerting`.
 - `source_subtype: string` - source-specific type (`cloud.insufficient_funds`, `alerting.something`)
 - `group_id?: string` - identifier to associate several notifications in the UI
@@ -142,8 +140,12 @@ The notification service doesn't know about any user groups within the sources. 
 Since the users in a group might have different roles and permissions, we have two options for security model implementation for group notifications:
 - A notification source, being a feature owner, enumerates a list of recipients before creating a notification.
   It's technically impossible at the moment, but potentially this functionality might be added in [#80334](https://github.com/elastic/kibana/issues/80334).
-  With this model, it’s possible to create a notification that a user cannot act on when user permissions have been changed after notification creation.
-  It’s acceptable because it will be even more confusing if a notification disappears from the UI later due to changes in users permissions.
+  <details><summary>With this model, it’s possible to create a notification that a user cannot act on when user permissions have been changed after notification creation. It’s acceptable because it will be even more confusing if a notification disappears from the UI later due to changes in users permissions.</summary>
+  <p>
+  Say, a plugin created a notification for user Amy. The notification system stores this notification and probably it's been shown to the user. Later, an admin changed Amy's roles and permissions. What should the notification system do in this case? Hide the notification from Amy? She remembers that there was a notification and maybe wants to refer to it.
+  The notification service continues showing such notifications. When a user clicks on CTA, it navigates to the plugin page, showing a message that a user doesn't have sufficient permission to act.
+  </p>
+  </details>
   Having more use-cases, we can consider extending notification creation API to specify Kibana-specific permissions for the recipients
   (send a notification to all the users with access to a feature X or space Y).
   Although, it will require declaring Notification plugin dependency on other Kibana plugins, which can turn into circular dependency problems later.
@@ -162,7 +164,7 @@ In this case, a user can see in Kibana UI the external notifications created out
 
 *Repository* interface:
 - `create(NotificationEvent)`- creates a notification in the Notification system. 
-- `get({ search_after?: number; size?: number; type_id?: string[] })` - retrieves last notifications for the current user.
+- `get({ search_after?: number; size?: number; filter?: NotificationFilter })` - retrieves last notifications for the current user.
 Might be paginated using `search_after` filed.
 - `markAsRead({ notification_id: string[] })` - mark notifications with given ids as read.
 - `markAsUnread({ notification_id: string[] })` - mark notifications with given ids as unread.
@@ -171,6 +173,14 @@ Might be paginated using `search_after` filed.
 - `markAsUnpinned({ notification_id: string[] })` - mark notifications with given ids as unpinned.
 - `configure()` - updates user-specific notification settings.
 
+*Repository* interace if not exposed outside of Notification system.
+Sources interact with Notification sustem via plugin contract:
+```typescript
+interface Notifications {
+  create(events: NotificationEvent): void;
+}
+```
+
 #### LocalRepository
 ![image](../images/0014/local_repository.png)
 
@@ -178,7 +188,7 @@ Might be paginated using `search_after` filed.
 Notification model is responsible for:
 - Applying policies to an incoming notification. NS must check whether a recipient unsubscribed from a source before processing to delivery.
 - Enhancing an incoming notification with necessary data: 
-    - `expired_at` if not specified. Kibana allows administrators to set how long notifications will be stored. Falls back to 30 - 90 days be default. 
+    - `expire_at` if not specified. Kibana allows administrators to set how long notifications will be stored. Falls back to 30 - 90 days be default. 
 - Writing new incoming messages to the Notification storage.
 
 Processing a large number of incoming notifications might slow down Kibana and create a disproportionately high load on some Kibana instances.
@@ -202,8 +212,8 @@ although there are some odd instances with >100k users. So we consider two optio
 interface  NotificationState {
   notification_id: string;
   recipient_id: string;
-  read_status: boolean;
-  pinned_status: boolean;
+  read: boolean;
+  pinned: boolean;
 }
 ``` 
 This option consumes less storage space but might lead to expensive read operations due to an additional JOIN call to 
@@ -212,7 +222,7 @@ search for notification state objects. We don’t expect Kibana to read more tha
 but it leads to duplicating notification messages. 
 
 Stale notifications and their states must be removed from the storage. There should be a dedicated task performing
-look up through the storage to remove notifications with *expired_at* > the current timestamp.
+look up through the storage to remove notifications with *expire_at* > the current timestamp.
 
 Data are stored in the hidden system index to prevent accidental access by a random user.
 We don’t expect notifications to contain sensitive information.
@@ -241,8 +251,8 @@ Kibana-specific entities shouldn’t leak to UNS:
 The delivery mechanism is responsible for the notifications shipment to Kibana UI. 
 
 #### List of notifications
-For simplicity, we can start with Kibana UI using the HTTP polling mechanism to fetch the last notifications from `/notifications` endpoint.
-Server orders notifications by *pinned_status* and *created_at* timestamp.
+For simplicity, we can start with Kibana UI using the HTTP polling mechanism to fetch the last notifications from `/api/notifications` endpoint.
+Server orders notifications by *pinned* and *created_at* timestamp.
 
 Kibana HTTP API:
 - Endpoint: `GET /api/notifications/` 
@@ -271,21 +281,21 @@ The user can change the status for all the existing notifications (`mark all as 
 Kibana HTTP API:
 - mark notification as read
 ```
-POST /notification/read
+POST /api/notifications/read
 { notification_id: string[] }
 ```
 - Mark all the notification read
 ```
-POST /notifications/_mark_all_read
+POST /api/notifications/_mark_all_read
 ```
 - Pin a notification.
 ```
-POST /notification/pin
+POST /api/notifications/pin
 { notification_id: string[] }
 ```
 - Unpin a notification.
 ```
-POST /notification/unpin
+POST /api/notifications/unpin
 { notification_id: string[] }
 ```
 
@@ -302,6 +312,14 @@ Not provided in MVP, we might add in the future:
 Filtering allows users to hide notifications they aren’t interested in. Kibana UI attaches a list of filters when requesting notifications.
 Kibana stores filter as a part of User settings data to provide a seamless experience between different deployments on Cloud and user sessions.
 
+Filter configuration is passed to `Repository.get` method as `filter` property.
+```typescript
+interface NotificationFilter {
+  source_type?: string[];
+  group_id?: string[];
+  read?: boolean;
+}
+```
 
 # Drawbacks
 
@@ -322,7 +340,7 @@ Kibana reuses Notification service implementation on Cloud but enhances it with 
 The main benefit of this approach is that Kibana always uses the same service in any environment.
 But in addition to the restrictions listed in the [Drawbacks](#drawbacks) section, the following are added:
 - Each retrieval of a notification list still requires waiting for a roundtrip to UNS.
-- The list of Kibana notifications stored in an instance might be out of sync with a copy stored in UNS due to network problems. 
+- The list of Kibana notifications stored in an instance might be out of sync with a copy stored in UNS due to network problems.
 - Storing notifications in the Cloud deployment and their copy in UNS consumes twice the disk space.
 
 # Adoption strategy
@@ -334,7 +352,7 @@ Integration with UNS is something that is not going to happen any time soon. The
 Kibana shows notifications created by the Newsfeed Kibana plugin in Notification flyout.
 ![img](../images/0014/kns_flyout.png)
 A notification cannot have a particular recipient in the lack of a way to identify a user in the system. A notification will be shown to all the users instead.
-User-specific notification state (*read_status*) is not stored in Kibana but browser Local Storage.
+User-specific notification state (*read*) is not stored in Kibana but browser Local Storage.
 ### Phase II
 When [user profiles](https://github.com/elastic/kibana/issues/17888) are supported, Kibana UI starts showing user-specific notifications.
 KIbana UI supports applying filters to the notification list.
