@@ -13,7 +13,7 @@ export const getTimelineNoteSelector = () =>
   createSelector(timelineSelectors.selectTimeline, (timeline) => {
     return {
       createdBy: timeline.createdBy,
-      expandedEvent: timeline.expandedEvent?.notes ?? {},
+      expandedDetail: timeline.expandedDetail ?? {},
       eventIdToNoteIds: timeline?.eventIdToNoteIds ?? {},
       noteIds: timeline.noteIds,
       status: timeline.status,

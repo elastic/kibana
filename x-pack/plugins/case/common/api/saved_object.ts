@@ -20,9 +20,12 @@ export const NumberFromString = new rt.Type<number, string, unknown>(
   String
 );
 
+const ReferenceRt = rt.type({ id: rt.string, type: rt.string });
+
 export const SavedObjectFindOptionsRt = rt.partial({
   defaultSearchOperator: rt.union([rt.literal('AND'), rt.literal('OR')]),
-  hasReference: rt.type({ id: rt.string, type: rt.string }),
+  hasReferenceOperator: rt.union([rt.literal('AND'), rt.literal('OR')]),
+  hasReference: rt.union([rt.array(ReferenceRt), ReferenceRt]),
   fields: rt.array(rt.string),
   filter: rt.string,
   page: NumberFromString,
