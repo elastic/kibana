@@ -1112,12 +1112,22 @@ module.exports = {
 
     /**
      * Enterprise Search overrides
+     * NOTE: We also have a single rule at the bottom of the file that
+     * overrides Prettier's default of not linting unnecessary backticks
      */
     {
+      // All files
+      files: ['x-pack/plugins/enterprise_search/**/*.{ts,tsx}'],
+      rules: {
+        'react-hooks/exhaustive-deps': 'off',
+        'react/jsx-boolean-value': ['error', 'never'],
+      },
+    },
+    {
+      // Source files only - allow `any` in test/mock files
       files: ['x-pack/plugins/enterprise_search/**/*.{ts,tsx}'],
       excludedFiles: ['x-pack/plugins/enterprise_search/**/*.{test,mock}.{ts,tsx}'],
       rules: {
-        'react-hooks/exhaustive-deps': 'off',
         '@typescript-eslint/no-explicit-any': 'error',
       },
     },
@@ -1258,6 +1268,16 @@ module.exports = {
         ...require('eslint-config-prettier').rules,
         ...require('eslint-config-prettier/react').rules,
         ...require('eslint-config-prettier/@typescript-eslint').rules,
+      },
+    },
+    /**
+     * Enterprise Search Prettier override
+     * Lints unnecessary backticks - @see https://github.com/prettier/eslint-config-prettier/blob/main/README.md#forbid-unnecessary-backticks
+     */
+    {
+      files: ['x-pack/plugins/enterprise_search/**/*.{ts,tsx}'],
+      rules: {
+        quotes: ['error', 'single', { avoidEscape: true, allowTemplateLiterals: false }],
       },
     },
 

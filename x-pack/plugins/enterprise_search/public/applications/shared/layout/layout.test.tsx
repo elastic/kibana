@@ -57,7 +57,7 @@ describe('Layout', () => {
   });
 
   it('renders a read-only mode callout', () => {
-    const wrapper = shallow(<Layout navigation={null} readOnlyMode={true} />);
+    const wrapper = shallow(<Layout navigation={null} readOnlyMode />);
 
     expect(wrapper.find(EuiCallOut)).toHaveLength(1);
   });

@@ -22,7 +22,7 @@ export const ResultView: React.FC<Props> = ({ result, schemaForTypeHighlights, i
     <li>
       <Result
         result={result}
-        shouldLinkToDetailPage={true}
+        shouldLinkToDetailPage
         schemaForTypeHighlights={schemaForTypeHighlights}
         isMetaEngine={isMetaEngine}
       />

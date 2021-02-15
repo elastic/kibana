@@ -79,7 +79,7 @@ export const ResultDetail: React.FC = () => {
                     <EuiDroppable
                       droppableId="visible_fields"
                       className="visible-fields-container"
-                      withPanel={true}
+                      withPanel
                     >
                       <>
                         {detailFields.map(({ fieldName, label }, index) => (
@@ -87,7 +87,7 @@ export const ResultDetail: React.FC = () => {
                             key={`${fieldName}-${index}`}
                             index={index}
                             draggableId={`${fieldName}-${index}`}
-                            customDragHandle={true}
+                            customDragHandle
                             spacing="m"
                           >
                             {(provided) => (

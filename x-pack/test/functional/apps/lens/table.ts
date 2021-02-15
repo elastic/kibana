@@ -12,6 +12,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['visualize', 'lens', 'common', 'header']);
   const listingTable = getService('listingTable');
   const find = getService('find');
+  const retry = getService('retry');
 
   describe('lens datatable', () => {
     it('should able to sort a table by a column', async () => {
@@ -40,13 +41,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should able to use filters cell actions in table', async () => {
       const firstCellContent = await PageObjects.lens.getDatatableCellText(0, 0);
-      await PageObjects.lens.clickTableCellAction(0, 0, 'lensDatatableFilterOut');
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      expect(
-        await find.existsByCssSelector(
-          `[data-test-subj*="filter-value-${firstCellContent}"][data-test-subj*="filter-negated"]`
-        )
-      ).to.eql(true);
+      await retry.try(async () => {
+        await PageObjects.lens.clickTableCellAction(0, 0, 'lensDatatableFilterOut');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        expect(
+          await find.existsByCssSelector(
+            `[data-test-subj*="filter-value-${firstCellContent}"][data-test-subj*="filter-negated"]`
+          )
+        ).to.eql(true);
+      });
     });
 
     it('should allow to configure column visibility', async () => {

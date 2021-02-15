@@ -44,7 +44,7 @@ export const TableFilterUsersDropdown: React.FC<{}> = () => {
     <FilterableUsersPopover
       users={users}
       selectedOptions={filteredUsers}
-      itemsClickable={true}
+      itemsClickable
       isPopoverOpen={filterUsersDropdownOpen}
       button={filterButton}
       closePopover={closeFilterUsersDropdown}

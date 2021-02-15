@@ -299,6 +299,7 @@ export class SavedObjectsRepository {
       refresh,
       body: raw._source,
       ...(overwrite && version ? decodeRequestVersion(version) : {}),
+      require_alias: true,
     };
 
     const { body } =
@@ -469,6 +470,7 @@ export class SavedObjectsRepository {
     const bulkResponse = bulkCreateParams.length
       ? await this.client.bulk({
           refresh,
+          require_alias: true,
           body: bulkCreateParams,
         })
       : undefined;
@@ -1117,8 +1119,8 @@ export class SavedObjectsRepository {
       ...(Array.isArray(references) && { references }),
     };
 
-    const { body, statusCode } = await this.client.update(
-      {
+    const { body } = await this.client
+      .update({
         id: this._serializer.generateRawId(namespace, type, id),
         index: this.getIndexForType(type),
         ...getExpectedVersionProperties(version, preflightResult),
@@ -1128,14 +1130,15 @@ export class SavedObjectsRepository {
           doc,
         },
         _source_includes: ['namespace', 'namespaces', 'originId'],
-      },
-      { ignore: [404] }
-    );
-
-    if (statusCode === 404) {
-      // see "404s from missing index" above
-      throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
-    }
+        require_alias: true,
+      })
+      .catch((err) => {
+        if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
+          // see "404s from missing index" above
+          throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
+        }
+        throw err;
+      });
 
     const { originId } = body.get._source;
     let namespaces = [];
@@ -1496,6 +1499,7 @@ export class SavedObjectsRepository {
           refresh,
           body: bulkUpdateParams,
           _source_includes: ['originId'],
+          require_alias: true,
         })
       : undefined;
 
@@ -1712,6 +1716,7 @@ export class SavedObjectsRepository {
       id: raw._id,
       index: this.getIndexForType(type),
       refresh,
+      require_alias: true,
       _source: 'true',
       body: {
         script: {
@@ -1933,12 +1938,18 @@ export class SavedObjectsRepository {
   }
 }
 
-function getBulkOperationError(error: { type: string; reason?: string }, type: string, id: string) {
+function getBulkOperationError(
+  error: { type: string; reason?: string; index?: string },
+  type: string,
+  id: string
+) {
   switch (error.type) {
     case 'version_conflict_engine_exception':
       return errorContent(SavedObjectsErrorHelpers.createConflictError(type, id));
     case 'document_missing_exception':
       return errorContent(SavedObjectsErrorHelpers.createGenericNotFoundError(type, id));
+    case 'index_not_found_exception':
+      return errorContent(SavedObjectsErrorHelpers.createIndexAliasNotFoundError(error.index!));
     default:
       return {
         message: error.reason || JSON.stringify(error),

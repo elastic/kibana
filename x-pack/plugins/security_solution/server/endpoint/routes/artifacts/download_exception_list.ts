@@ -54,7 +54,11 @@ export function registerDownloadExceptionListRoute(
       // The ApiKey must be associated with an enrolled Fleet agent
       try {
         scopedSOClient = endpointContext.service.getScopedSavedObjectsClient(req);
-        await authenticateAgentWithAccessToken(scopedSOClient, req);
+        await authenticateAgentWithAccessToken(
+          scopedSOClient,
+          context.core.elasticsearch.client.asInternalUser,
+          req
+        );
       } catch (err) {
         if ((err.isBoom ? err.output.statusCode : err.statusCode) === 401) {
           return res.unauthorized();

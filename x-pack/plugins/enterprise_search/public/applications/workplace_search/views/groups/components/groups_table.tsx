@@ -91,7 +91,7 @@ export const GroupsTable: React.FC<{}> = () => {
         </EuiTableBody>
       </EuiTable>
       <EuiSpacer size="m" />
-      {showPagination && <TablePaginationBar {...paginationOptions} hideLabelCount={true} />}
+      {showPagination && <TablePaginationBar {...paginationOptions} hideLabelCount />}
     </>
   );
 };

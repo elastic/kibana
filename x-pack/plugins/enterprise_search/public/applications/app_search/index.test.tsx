@@ -65,7 +65,7 @@ describe('AppSearchConfigured', () => {
     const initializeAppData = jest.fn();
     setMockActions({ initializeAppData });
 
-    shallow(<AppSearchConfigured ilmEnabled={true} />);
+    shallow(<AppSearchConfigured ilmEnabled />);
 
     expect(initializeAppData).toHaveBeenCalledWith({ ilmEnabled: true });
   });

@@ -22,8 +22,8 @@ export const CredentialsFlyout: React.FC = () => {
     <EuiPortal>
       <EuiFlyout
         onClose={hideCredentialsForm}
-        hideCloseButton={true}
-        ownFocus={true}
+        hideCloseButton
+        ownFocus
         aria-labelledby={FLYOUT_ARIA_LABEL_ID}
         size="s"
       >

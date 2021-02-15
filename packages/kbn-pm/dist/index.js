@@ -48106,23 +48106,59 @@ async function isBazelBinAvailable() {
   }
 }
 
+async function isBazeliskInstalled(bazeliskVersion) {
+  try {
+    const {
+      stdout: bazeliskPkgInstallStdout
+    } = await Object(_child_process__WEBPACK_IMPORTED_MODULE_2__["spawn"])('npm', ['ls', '--global', '--parseable', '--long', `@bazel/bazelisk@${bazeliskVersion}`], {
+      stdio: 'pipe'
+    });
+    return bazeliskPkgInstallStdout.includes(`@bazel/bazelisk@${bazeliskVersion}`);
+  } catch {
+    return false;
+  }
+}
+
+async function tryRemoveBazeliskFromYarnGlobal() {
+  try {
+    // Check if Bazelisk is installed on the yarn global scope
+    const {
+      stdout: bazeliskPkgInstallStdout
+    } = await Object(_child_process__WEBPACK_IMPORTED_MODULE_2__["spawn"])('yarn', ['global', 'list'], {
+      stdio: 'pipe'
+    }); // Bazelisk was found on yarn global scope so lets remove it
+
+    if (bazeliskPkgInstallStdout.includes(`@bazel/bazelisk@`)) {
+      await Object(_child_process__WEBPACK_IMPORTED_MODULE_2__["spawn"])('yarn', ['global', 'remove', `@bazel/bazelisk`], {
+        stdio: 'pipe'
+      });
+      _log__WEBPACK_IMPORTED_MODULE_4__["log"].info(`[bazel_tools] bazelisk was installed on Yarn global packages and is now removed`);
+      return true;
+    }
+
+    return false;
+  } catch {
+    return false;
+  }
+}
+
 async function installBazelTools(repoRootPath) {
   _log__WEBPACK_IMPORTED_MODULE_4__["log"].debug(`[bazel_tools] reading bazel tools versions from version files`);
   const bazeliskVersion = await readBazelToolsVersionFile(repoRootPath, '.bazeliskversion');
   const bazelVersion = await readBazelToolsVersionFile(repoRootPath, '.bazelversion'); // Check what globals are installed
 
-  _log__WEBPACK_IMPORTED_MODULE_4__["log"].debug(`[bazel_tools] verify if bazelisk is installed`);
-  const {
-    stdout: bazeliskPkgInstallStdout
-  } = await Object(_child_process__WEBPACK_IMPORTED_MODULE_2__["spawn"])('yarn', ['global', 'list'], {
-    stdio: 'pipe'
-  });
-  const isBazelBinAlreadyAvailable = await isBazelBinAvailable(); // Install bazelisk if not installed
+  _log__WEBPACK_IMPORTED_MODULE_4__["log"].debug(`[bazel_tools] verify if bazelisk is installed`); // Test if bazelisk is already installed in the correct version
 
-  if (!bazeliskPkgInstallStdout.includes(`@bazel/bazelisk@${bazeliskVersion}`) || !isBazelBinAlreadyAvailable) {
+  const isBazeliskPkgInstalled = await isBazeliskInstalled(bazeliskVersion); // Test if bazel bin is available
+
+  const isBazelBinAlreadyAvailable = await isBazelBinAvailable(); // Check if we need to remove bazelisk from yarn
+
+  await tryRemoveBazeliskFromYarnGlobal(); // Install bazelisk if not installed
+
+  if (!isBazeliskPkgInstalled || !isBazelBinAlreadyAvailable) {
     _log__WEBPACK_IMPORTED_MODULE_4__["log"].info(`[bazel_tools] installing Bazel tools`);
     _log__WEBPACK_IMPORTED_MODULE_4__["log"].debug(`[bazel_tools] bazelisk is not installed. Installing @bazel/bazelisk@${bazeliskVersion} and bazel@${bazelVersion}`);
-    await Object(_child_process__WEBPACK_IMPORTED_MODULE_2__["spawn"])('yarn', ['global', 'add', `@bazel/bazelisk@${bazeliskVersion}`], {
+    await Object(_child_process__WEBPACK_IMPORTED_MODULE_2__["spawn"])('npm', ['install', '--global', `@bazel/bazelisk@${bazeliskVersion}`], {
       env: {
         USE_BAZEL_VERSION: bazelVersion
       },
@@ -48132,7 +48168,7 @@ async function installBazelTools(repoRootPath) {
 
     if (!isBazelBinAvailableAfterInstall) {
       throw new Error(dedent__WEBPACK_IMPORTED_MODULE_0___default.a`
-        [bazel_tools] an error occurred when installing the Bazel tools. Please make sure 'yarn global bin' is on your $PATH, otherwise just add it there
+        [bazel_tools] an error occurred when installing the Bazel tools. Please make sure you have access to npm globally installed modules on your $PATH
       `);
     }
   }
@@ -59771,10 +59807,11 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var path__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(4);
 /* harmony import */ var path__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(path__WEBPACK_IMPORTED_MODULE_2__);
 /* harmony import */ var _build_non_bazel_production_projects__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(745);
-/* harmony import */ var _utils_fs__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(131);
-/* harmony import */ var _utils_log__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(246);
-/* harmony import */ var _utils_package_json__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(251);
-/* harmony import */ var _utils_projects__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(248);
+/* harmony import */ var _utils_bazel_run__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(374);
+/* harmony import */ var _utils_fs__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(131);
+/* harmony import */ var _utils_log__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(246);
+/* harmony import */ var _utils_package_json__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(251);
+/* harmony import */ var _utils_projects__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(248);
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -59790,17 +59827,19 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
+
 async function buildBazelProductionProjects({
   kibanaRoot,
   buildRoot,
   onlyOSS
 }) {
-  const projects = await Object(_utils_projects__WEBPACK_IMPORTED_MODULE_7__["getBazelProjectsOnly"])(await Object(_build_non_bazel_production_projects__WEBPACK_IMPORTED_MODULE_3__["getProductionProjects"])(kibanaRoot, onlyOSS));
+  const projects = await Object(_utils_projects__WEBPACK_IMPORTED_MODULE_8__["getBazelProjectsOnly"])(await Object(_build_non_bazel_production_projects__WEBPACK_IMPORTED_MODULE_3__["getProductionProjects"])(kibanaRoot, onlyOSS));
   const projectNames = [...projects.values()].map(project => project.name);
-  _utils_log__WEBPACK_IMPORTED_MODULE_5__["log"].info(`Preparing Bazel projects production build for [${projectNames.join(', ')}]`);
+  _utils_log__WEBPACK_IMPORTED_MODULE_6__["log"].info(`Preparing Bazel projects production build for [${projectNames.join(', ')}]`);
+  await Object(_utils_bazel_run__WEBPACK_IMPORTED_MODULE_4__["runBazel"])(['build', '//packages:build']);
+  _utils_log__WEBPACK_IMPORTED_MODULE_6__["log"].info(`All Bazel projects production builds for [${projectNames.join(', ')}] are complete}]`);
 
   for (const project of projects.values()) {
-    await Object(_build_non_bazel_production_projects__WEBPACK_IMPORTED_MODULE_3__["buildProject"])(project);
     await copyToBuild(project, kibanaRoot, buildRoot);
     await applyCorrectPermissions(project, kibanaRoot, buildRoot);
   }
@@ -59835,9 +59874,9 @@ async function copyToBuild(project, kibanaRoot, buildRoot) {
   // the intermediate build, we fall back to using the project's already defined
   // `package.json`.
 
-  const packageJson = (await Object(_utils_fs__WEBPACK_IMPORTED_MODULE_4__["isFile"])(Object(path__WEBPACK_IMPORTED_MODULE_2__["join"])(buildProjectPath, 'package.json'))) ? await Object(_utils_package_json__WEBPACK_IMPORTED_MODULE_6__["readPackageJson"])(buildProjectPath) : project.json;
-  const preparedPackageJson = Object(_utils_package_json__WEBPACK_IMPORTED_MODULE_6__["createProductionPackageJson"])(packageJson);
-  await Object(_utils_package_json__WEBPACK_IMPORTED_MODULE_6__["writePackageJson"])(buildProjectPath, preparedPackageJson);
+  const packageJson = (await Object(_utils_fs__WEBPACK_IMPORTED_MODULE_5__["isFile"])(Object(path__WEBPACK_IMPORTED_MODULE_2__["join"])(buildProjectPath, 'package.json'))) ? await Object(_utils_package_json__WEBPACK_IMPORTED_MODULE_7__["readPackageJson"])(buildProjectPath) : project.json;
+  const preparedPackageJson = Object(_utils_package_json__WEBPACK_IMPORTED_MODULE_7__["createProductionPackageJson"])(packageJson);
+  await Object(_utils_package_json__WEBPACK_IMPORTED_MODULE_7__["writePackageJson"])(buildProjectPath, preparedPackageJson);
 }
 
 async function applyCorrectPermissions(project, kibanaRoot, buildRoot) {
@@ -59852,12 +59891,12 @@ async function applyCorrectPermissions(project, kibanaRoot, buildRoot) {
   for (const pluginPath of allPluginPaths) {
     const resolvedPluginPath = Object(path__WEBPACK_IMPORTED_MODULE_2__["resolve"])(buildRoot, pluginPath);
 
-    if (await Object(_utils_fs__WEBPACK_IMPORTED_MODULE_4__["isFile"])(resolvedPluginPath)) {
-      await Object(_utils_fs__WEBPACK_IMPORTED_MODULE_4__["chmod"])(resolvedPluginPath, 0o644);
+    if (await Object(_utils_fs__WEBPACK_IMPORTED_MODULE_5__["isFile"])(resolvedPluginPath)) {
+      await Object(_utils_fs__WEBPACK_IMPORTED_MODULE_5__["chmod"])(resolvedPluginPath, 0o644);
     }
 
-    if (await Object(_utils_fs__WEBPACK_IMPORTED_MODULE_4__["isDirectory"])(resolvedPluginPath)) {
-      await Object(_utils_fs__WEBPACK_IMPORTED_MODULE_4__["chmod"])(resolvedPluginPath, 0o755);
+    if (await Object(_utils_fs__WEBPACK_IMPORTED_MODULE_5__["isDirectory"])(resolvedPluginPath)) {
+      await Object(_utils_fs__WEBPACK_IMPORTED_MODULE_5__["chmod"])(resolvedPluginPath, 0o755);
     }
   }
 }

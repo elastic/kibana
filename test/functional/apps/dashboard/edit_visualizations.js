@@ -12,6 +12,7 @@ export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['dashboard', 'header', 'visualize', 'common', 'visEditor']);
   const esArchiver = getService('esArchiver');
   const testSubjects = getService('testSubjects');
+  const appsMenu = getService('appsMenu');
   const kibanaServer = getService('kibanaServer');
   const dashboardPanelActions = getService('dashboardPanelActions');
   const dashboardVisualizations = getService('dashboardVisualizations');
@@ -25,10 +26,14 @@ export default function ({ getService, getPageObjects }) {
     await PageObjects.visualize.clickMarkdownWidget();
     await PageObjects.visEditor.setMarkdownTxt(originalMarkdownText);
     await PageObjects.visEditor.clickGo();
-    await PageObjects.visualize.saveVisualizationExpectSuccess(title, {
-      saveAsNew: true,
-      redirectToOrigin: true,
-    });
+    if (title) {
+      await PageObjects.visualize.saveVisualizationExpectSuccess(title, {
+        saveAsNew: true,
+        redirectToOrigin: true,
+      });
+    } else {
+      await PageObjects.visualize.saveVisualizationAndReturn();
+    }
   };
 
   const editMarkdownVis = async () => {
@@ -85,6 +90,23 @@ export default function ({ getService, getPageObjects }) {
 
       const markdownText = await testSubjects.find('markdownBody');
       expect(await markdownText.getVisibleText()).to.eql(originalMarkdownText);
+    });
+
+    it('visualize app menu navigates to the visualize listing page if the last opened visualization was by value', async () => {
+      await PageObjects.dashboard.gotoDashboardLandingPage();
+      await PageObjects.dashboard.clickNewDashboard();
+
+      // Create markdown by value.
+      await createMarkdownVis();
+
+      // Edit then save and return
+      await editMarkdownVis();
+      await PageObjects.visualize.saveVisualizationAndReturn();
+
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await appsMenu.clickLink('Visualize');
+      await PageObjects.common.clickConfirmOnModal();
+      expect(await testSubjects.exists('visualizationLandingPage')).to.be(true);
     });
   });
 }

@@ -207,7 +207,7 @@ describe('Credentials', () => {
           isHidden: expect.any(Boolean),
           text: (
             <span aria-label="Hidden text">
-              <span aria-hidden={true}>•••••••</span>
+              <span aria-hidden>•••••••</span>
             </span>
           ),
         });

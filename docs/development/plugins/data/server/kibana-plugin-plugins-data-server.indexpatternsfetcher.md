@@ -22,4 +22,5 @@ export declare class IndexPatternsFetcher
 |  --- | --- | --- |
 |  [getFieldsForTimePattern(options)](./kibana-plugin-plugins-data-server.indexpatternsfetcher.getfieldsfortimepattern.md) |  | Get a list of field objects for a time pattern |
 |  [getFieldsForWildcard(options)](./kibana-plugin-plugins-data-server.indexpatternsfetcher.getfieldsforwildcard.md) |  | Get a list of field objects for an index pattern that may contain wildcards |
+|  [validatePatternListActive(patternList)](./kibana-plugin-plugins-data-server.indexpatternsfetcher.validatepatternlistactive.md) |  | Returns an index pattern list of only those index pattern strings in the given list that return indices |
 

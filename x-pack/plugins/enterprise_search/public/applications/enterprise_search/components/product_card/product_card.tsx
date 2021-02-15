@@ -53,7 +53,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, image }) => {
       className="productCard"
       titleElement="h2"
       title={i18n.translate('xpack.enterpriseSearch.overview.productCard.heading', {
-        defaultMessage: `Elastic {productName}`,
+        defaultMessage: 'Elastic {productName}',
         values: { productName: product.NAME },
       })}
       image={
@@ -67,7 +67,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, image }) => {
         <EuiButtonTo
           fill
           to={product.URL}
-          shouldNotCreateHref={true}
+          shouldNotCreateHref
           onClick={() =>
             sendEnterpriseSearchTelemetry({
               action: 'clicked',

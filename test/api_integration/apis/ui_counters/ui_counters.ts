@@ -13,6 +13,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
+  const esArchiver = getService('esArchiver');
   const es = getService('es');
 
   const createUiCounterEvent = (eventName: string, type: UiCounterMetricType, count = 1) => ({
@@ -24,6 +25,9 @@ export default function ({ getService }: FtrProviderContext) {
 
   // FLAKY: https://github.com/elastic/kibana/issues/85086
   describe.skip('UI Counters API', () => {
+    before(async () => {
+      await esArchiver.emptyKibanaIndex();
+    });
     const dayDate = moment().format('DDMMYYYY');
 
     it('stores ui counter events in savedObjects', async () => {

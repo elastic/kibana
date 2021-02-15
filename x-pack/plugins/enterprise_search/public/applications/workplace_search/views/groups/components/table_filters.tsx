@@ -41,7 +41,7 @@ export const TableFilters: React.FC = () => {
             <EuiFieldSearch
               value={filterValue}
               onChange={handleSearchChange}
-              fullWidth={true}
+              fullWidth
               placeholder={FILTER_GROUPS_PLACEHOLDER}
             />
           </EuiFlexItem>

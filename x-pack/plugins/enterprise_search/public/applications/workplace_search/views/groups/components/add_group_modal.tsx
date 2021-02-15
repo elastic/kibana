@@ -73,7 +73,7 @@ export const AddGroupModal: React.FC<{}> = () => {
             <EuiButton
               disabled={!newGroupName}
               onClick={saveNewGroup}
-              fill={true}
+              fill
               data-test-subj="AddGroupSubmit"
             >
               {ADD_GROUP_SUBMIT}

@@ -174,6 +174,9 @@ describe('test alerts route', () => {
           savedObjects: {
             client: mockSavedObjectClient,
           },
+          elasticsearch: {
+            client: { asInternalUser: elasticsearchServiceMock.createInternalClient() },
+          },
         },
       } as unknown) as SecuritySolutionRequestHandlerContext,
       mockRequest,
@@ -218,6 +221,9 @@ describe('test alerts route', () => {
           savedObjects: {
             client: mockSavedObjectClient,
           },
+          elasticsearch: {
+            client: { asInternalUser: elasticsearchServiceMock.createInternalClient() },
+          },
         },
       } as unknown) as SecuritySolutionRequestHandlerContext,
       mockRequest,
@@ -252,6 +258,9 @@ describe('test alerts route', () => {
           savedObjects: {
             client: mockSavedObjectClient,
           },
+          elasticsearch: {
+            client: { asInternalUser: elasticsearchServiceMock.createInternalClient() },
+          },
         },
       } as unknown) as SecuritySolutionRequestHandlerContext,
       mockRequest,
@@ -279,6 +288,9 @@ describe('test alerts route', () => {
         core: {
           savedObjects: {
             client: mockSavedObjectClient,
+          },
+          elasticsearch: {
+            client: { asInternalUser: elasticsearchServiceMock.createInternalClient() },
           },
         },
       } as unknown) as SecuritySolutionRequestHandlerContext,
@@ -313,6 +325,9 @@ describe('test alerts route', () => {
         core: {
           savedObjects: {
             client: mockSavedObjectClient,
+          },
+          elasticsearch: {
+            client: { asInternalUser: elasticsearchServiceMock.createInternalClient() },
           },
         },
       } as unknown) as SecuritySolutionRequestHandlerContext,

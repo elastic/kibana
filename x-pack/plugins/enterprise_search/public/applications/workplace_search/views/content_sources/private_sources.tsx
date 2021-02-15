@@ -109,7 +109,7 @@ export const PrivateSources: React.FC = () => {
   const privateSourcesTable = (
     <ContentSection>
       <SourcesTable
-        showDetails={true}
+        showDetails
         onSearchableToggle={setSourceSearchability}
         sources={privateContentSources}
       />

@@ -62,7 +62,7 @@ describe('Result', () => {
   });
 
   it('passes showScore, resultMeta, and isMetaEngine to ResultHeader', () => {
-    const wrapper = shallow(<Result {...props} showScore={true} isMetaEngine={true} />);
+    const wrapper = shallow(<Result {...props} showScore isMetaEngine />);
     expect(wrapper.find(ResultHeader).props()).toEqual({
       isMetaEngine: true,
       showScore: true,
@@ -76,7 +76,7 @@ describe('Result', () => {
 
   describe('document detail link', () => {
     it('will render a link if shouldLinkToDetailPage is true', () => {
-      const wrapper = shallow(<Result {...props} shouldLinkToDetailPage={true} />);
+      const wrapper = shallow(<Result {...props} shouldLinkToDetailPage />);
       wrapper.find(ReactRouterHelper).forEach((link) => {
         expect(link.prop('to')).toEqual('/engines/my-engine/documents/1');
       });
@@ -96,7 +96,7 @@ describe('Result', () => {
 
   it('will render field details with type highlights if schemaForTypeHighlights has been provided', () => {
     const wrapper = shallow(
-      <Result {...props} shouldLinkToDetailPage={true} schemaForTypeHighlights={schema} />
+      <Result {...props} shouldLinkToDetailPage schemaForTypeHighlights={schema} />
     );
     expect(wrapper.find(ResultField).map((rf) => rf.prop('type'))).toEqual([
       'text',

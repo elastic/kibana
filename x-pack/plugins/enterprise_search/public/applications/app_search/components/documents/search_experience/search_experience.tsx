@@ -80,7 +80,7 @@ export const SearchExperience: React.FC = () => {
     <div className="documentsSearchExperience">
       <SearchProvider config={searchProviderConfig}>
         <SearchBox
-          searchAsYouType={true}
+          searchAsYouType
           inputProps={{
             placeholder: i18n.translate(
               'xpack.enterpriseSearch.appSearch.documents.search.placeholder',

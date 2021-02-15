@@ -25,7 +25,8 @@
     "spaces",
     "management",
     "licenseManagement",
-    "maps"
+    "maps",
+    "lens"
   ],
   "server": true,
   "ui": true,

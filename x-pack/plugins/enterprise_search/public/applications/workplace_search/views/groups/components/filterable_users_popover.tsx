@@ -41,7 +41,7 @@ export const FilterableUsersPopover: React.FC<FilterableUsersPopoverProps> = ({
   return (
     <EuiFilterGroup className={className}>
       <EuiPopover
-        ownFocus={true}
+        ownFocus
         button={button}
         isOpen={isPopoverOpen}
         closePopover={closePopover}
@@ -54,7 +54,7 @@ export const FilterableUsersPopover: React.FC<FilterableUsersPopoverProps> = ({
           addFilteredUser={addFilteredUser}
           allGroupUsersLoading={allGroupUsersLoading}
           removeFilteredUser={removeFilteredUser}
-          isPopover={true}
+          isPopover
         />
       </EuiPopover>
     </EuiFilterGroup>

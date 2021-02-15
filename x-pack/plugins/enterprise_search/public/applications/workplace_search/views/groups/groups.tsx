@@ -86,7 +86,7 @@ export const Groups: React.FC = () => {
   const headerAction = (
     <EuiFlexGroup responsive={false} gutterSize="m">
       <EuiFlexItem grow={false}>
-        <EuiButton data-test-subj="AddGroupButton" fill={true} onClick={openNewGroupModal}>
+        <EuiButton data-test-subj="AddGroupButton" fill onClick={openNewGroupModal}>
           {i18n.translate('xpack.enterpriseSearch.workplaceSearch.groups.addGroupForm.action', {
             defaultMessage: 'Create a group',
           })}
