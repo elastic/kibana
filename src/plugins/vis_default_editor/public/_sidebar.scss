@@ -5,6 +5,10 @@
 .visEditorSidebar {
   height: 100%;
   padding-left: $euiSizeS;
+
+  @include euiBreakpoint('xs', 's', 'm') {
+    padding-left: 0;
+  }
 }
 
 .visEditorSidebar__form {
