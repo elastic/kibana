@@ -5,5 +5,8 @@
  * 2.0.
  */
 
-export { useScatterplotFieldOptions } from './use_scatterplot_field_options';
-export { ScatterplotMatrix, ScatterplotMatrixProps } from './scatterplot_matrix';
+export const LEGEND_TYPES = {
+  NOMINAL: 'nominal',
+  QUANTITATIVE: 'quantitative',
+} as const;
+export type LegendType = typeof LEGEND_TYPES[keyof typeof LEGEND_TYPES];
