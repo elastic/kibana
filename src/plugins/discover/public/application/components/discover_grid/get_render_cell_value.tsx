@@ -90,25 +90,36 @@ export const getRenderCellValueFn = (
       coordinates?: number[];
       type?: 'string';
     };
+
     const getLatLon = () => {
+      /**
+       * That's usually provided when using _source as source
+       */
       if (typeof valueFormatted.lat === 'number' && typeof valueFormatted.lon === 'number') {
         return {
           lat: valueFormatted.lat,
           lon: valueFormatted.lon,
         };
       }
+      /**
+       * That's provided when using fields as source
+       */
       if (valueFormatted.coordinates && typeof valueFormatted.type) {
         return {
           lat: valueFormatted.coordinates[0],
           lon: valueFormatted.coordinates[1],
         };
       }
-      return {
-        lat: valueFormatted.lat,
-        lon: valueFormatted.lon,
-      };
+      /**
+       * For any other cases, to display the value
+       */
+      return { custom: valueFormatted };
     };
-    const { lat, lon } = getLatLon();
+    const { lat, lon, custom } = getLatLon();
+
+    if (custom) {
+      return <div>{JSON.stringify(custom)}</div>;
+    }
 
     return (
       <div>
