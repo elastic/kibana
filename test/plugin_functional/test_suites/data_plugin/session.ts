@@ -54,7 +54,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
 
       it('Starts a new session on sort', async () => {
         await PageObjects.discover.clickFieldListItemAdd('speaker');
-        await PageObjects.discover.clickFieldSort('speaker');
+        await PageObjects.discover.clickFieldSort('speaker', 'Sort A-Z');
         await PageObjects.header.waitUntilLoadingHasFinished();
         const sessionIds = await getSessionIds();
         expect(sessionIds.length).to.be(1);
