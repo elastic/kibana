@@ -45,18 +45,18 @@ describe('parseDuration', () => {
   it('should return parsed data for valid time units nanos|micros|ms|s|m|h|d.', () => {
     expect(parseDuration('1a')).toEqual(undefined);
     expect(parseDuration('1nanos')).toEqual({
-      valueNumber: 1,
-      valueTimeUnit: 'nanos',
+      number: 1,
+      timeUnit: 'nanos',
     });
     expect(parseDuration('1micros')).toEqual({
-      valueNumber: 1,
-      valueTimeUnit: 'micros',
+      number: 1,
+      timeUnit: 'micros',
     });
-    expect(parseDuration('1ms')).toEqual({ valueNumber: 1, valueTimeUnit: 'ms' });
-    expect(parseDuration('1s')).toEqual({ valueNumber: 1, valueTimeUnit: 's' });
-    expect(parseDuration('1m')).toEqual({ valueNumber: 1, valueTimeUnit: 'm' });
-    expect(parseDuration('1h')).toEqual({ valueNumber: 1, valueTimeUnit: 'h' });
-    expect(parseDuration('1d')).toEqual({ valueNumber: 1, valueTimeUnit: 'd' });
+    expect(parseDuration('1ms')).toEqual({ number: 1, timeUnit: 'ms' });
+    expect(parseDuration('1s')).toEqual({ number: 1, timeUnit: 's' });
+    expect(parseDuration('1m')).toEqual({ number: 1, timeUnit: 'm' });
+    expect(parseDuration('1h')).toEqual({ number: 1, timeUnit: 'h' });
+    expect(parseDuration('1d')).toEqual({ number: 1, timeUnit: 'd' });
   });
 });
 
