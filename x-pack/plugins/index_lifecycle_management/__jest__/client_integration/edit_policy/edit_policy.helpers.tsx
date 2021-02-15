@@ -275,6 +275,9 @@ export const setup = async (arg?: { appServicesContext: Partial<AppServicesConte
     };
   };
 
+  const hasRolloverTipOnMinAge = (phase: Phases) => (): boolean =>
+    exists(`${phase}-rolloverMinAgeInputIconTip`);
+
   return {
     ...testBed,
     actions: {
@@ -311,6 +314,7 @@ export const setup = async (arg?: { appServicesContext: Partial<AppServicesConte
         setSelectedNodeAttribute: setSelectedNodeAttribute('warm'),
         setReplicas: setReplicas('warm'),
         hasErrorIndicator: () => exists('phaseErrorIndicator-warm'),
+        hasRolloverTipOnMinAge: hasRolloverTipOnMinAge('warm'),
         ...createShrinkActions('warm'),
         ...createForceMergeActions('warm'),
         setReadonly: setReadonly('warm'),
@@ -327,11 +331,13 @@ export const setup = async (arg?: { appServicesContext: Partial<AppServicesConte
         setFreeze,
         freezeExists,
         hasErrorIndicator: () => exists('phaseErrorIndicator-cold'),
+        hasRolloverTipOnMinAge: hasRolloverTipOnMinAge('cold'),
         ...createIndexPriorityActions('cold'),
         ...createSearchableSnapshotActions('cold'),
       },
       delete: {
         ...createToggleDeletePhaseActions(),
+        hasRolloverTipOnMinAge: hasRolloverTipOnMinAge('delete'),
         setMinAgeValue: setMinAgeValue('delete'),
         setMinAgeUnits: setMinAgeUnits('delete'),
       },
