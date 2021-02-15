@@ -6,8 +6,9 @@
  */
 
 import React from 'react';
-import { i18n } from '@kbn/i18n';
+
 import { EuiEmptyPrompt } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 import { FlashMessages } from '../../../../shared/flash_messages';
 

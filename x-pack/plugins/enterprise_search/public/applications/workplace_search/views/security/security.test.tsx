@@ -9,11 +9,14 @@ import { setMockValues, setMockActions } from '../../../__mocks__';
 import { unmountHandler } from '../../../__mocks__/shallow_useeffect.mock';
 
 import React from 'react';
-import { shallow } from 'enzyme';
-import { EuiSwitch, EuiConfirmModal } from '@elastic/eui';
-import { Loading } from '../../../shared/loading';
 
+import { shallow } from 'enzyme';
+
+import { EuiSwitch, EuiConfirmModal } from '@elastic/eui';
+
+import { Loading } from '../../../shared/loading';
 import { ViewContentHeader } from '../../components/shared/view_content_header';
+
 import { Security } from './security';
 
 describe('Security', () => {

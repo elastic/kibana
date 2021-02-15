@@ -96,7 +96,7 @@ import {
 import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
 import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
 
-import { DETECTIONS_URL } from '../../urls/navigation';
+import { DETECTIONS_URL, RULE_CREATION } from '../../urls/navigation';
 
 describe('Detection rules, Indicator Match', () => {
   const expectedUrls = newThreatIndicatorRule.referenceUrls.join('');
@@ -106,25 +106,22 @@ describe('Detection rules, Indicator Match', () => {
   const expectedNumberOfRules = 1;
   const expectedNumberOfAlerts = 1;
 
-  beforeEach(() => {
+  before(() => {
     cleanKibana();
     esArchiverLoad('threat_indicator');
     esArchiverLoad('threat_data');
-    loginAndWaitForPageWithoutDateRange(DETECTIONS_URL);
-    waitForAlertsPanelToBeLoaded();
-    waitForAlertsIndexToBeCreated();
-    goToManageAlertsDetectionRules();
-    waitForLoadElasticPrebuiltDetectionRulesTableToBeLoaded();
-    goToCreateNewRule();
-    selectIndicatorMatchType();
   });
-
-  afterEach(() => {
+  after(() => {
     esArchiverUnload('threat_indicator');
     esArchiverUnload('threat_data');
   });
 
   describe('Creating new indicator match rules', () => {
+    beforeEach(() => {
+      loginAndWaitForPageWithoutDateRange(RULE_CREATION);
+      selectIndicatorMatchType();
+    });
+
     describe('Index patterns', () => {
       it('Contains a predefined index pattern', () => {
         getIndicatorIndex().should('have.text', indexPatterns.join(''));
@@ -354,6 +351,19 @@ describe('Detection rules, Indicator Match', () => {
         getIndicatorIndexComboField(2).should('not.exist');
         getIndicatorMappingComboField(2).should('not.exist');
       });
+    });
+  });
+
+  describe('Generating signals', () => {
+    beforeEach(() => {
+      cleanKibana();
+      loginAndWaitForPageWithoutDateRange(DETECTIONS_URL);
+      waitForAlertsPanelToBeLoaded();
+      waitForAlertsIndexToBeCreated();
+      goToManageAlertsDetectionRules();
+      waitForLoadElasticPrebuiltDetectionRulesTableToBeLoaded();
+      goToCreateNewRule();
+      selectIndicatorMatchType();
     });
 
     it('Creates and activates a new Indicator Match rule', () => {

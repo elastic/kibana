@@ -10,6 +10,9 @@ import { PluginFunctionalProviderContext } from '../../services';
 
 export default function ({ loadTestFile }: PluginFunctionalProviderContext) {
   describe('Saved Objects Management', function () {
+    loadTestFile(require.resolve('./find'));
+    loadTestFile(require.resolve('./scroll_count'));
+    loadTestFile(require.resolve('./get'));
     loadTestFile(require.resolve('./export_transform'));
     loadTestFile(require.resolve('./import_warnings'));
   });

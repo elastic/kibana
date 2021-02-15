@@ -6,7 +6,9 @@ exports[`CheckupTab render with deprecations 1`] = `
   <EuiText
     grow={false}
   >
-    <p>
+    <p
+      data-test-subj="upgradeAssistantIndexTabDetail"
+    >
       <FormattedMessage
         defaultMessage="These {strongCheckupLabel} issues need your attention. Resolve them before upgrading to Elasticsearch {nextEsVersion}."
         id="xpack.upgradeAssistant.checkupTab.tabDetail"
@@ -288,7 +290,9 @@ exports[`CheckupTab render with error 1`] = `
   <EuiText
     grow={false}
   >
-    <p>
+    <p
+      data-test-subj="upgradeAssistantIndexTabDetail"
+    >
       <FormattedMessage
         defaultMessage="These {strongCheckupLabel} issues need your attention. Resolve them before upgrading to Elasticsearch {nextEsVersion}."
         id="xpack.upgradeAssistant.checkupTab.tabDetail"
@@ -354,7 +358,9 @@ exports[`CheckupTab render without deprecations 1`] = `
   <EuiText
     grow={false}
   >
-    <p>
+    <p
+      data-test-subj="upgradeAssistantIndexTabDetail"
+    >
       <FormattedMessage
         defaultMessage="These {strongCheckupLabel} issues need your attention. Resolve them before upgrading to Elasticsearch {nextEsVersion}."
         id="xpack.upgradeAssistant.checkupTab.tabDetail"

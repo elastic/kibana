@@ -7,12 +7,13 @@
 
 import { schema } from '@kbn/config-schema';
 
-import { RouteDependencies } from '../../plugin';
-import { incrementUICounter } from '../../collectors/lib/telemetry';
-
-import { ES_TELEMETRY_NAME } from '../../collectors/enterprise_search/telemetry';
 import { AS_TELEMETRY_NAME } from '../../collectors/app_search/telemetry';
+import { ES_TELEMETRY_NAME } from '../../collectors/enterprise_search/telemetry';
+import { incrementUICounter } from '../../collectors/lib/telemetry';
 import { WS_TELEMETRY_NAME } from '../../collectors/workplace_search/telemetry';
+
+import { RouteDependencies } from '../../plugin';
+
 const productToTelemetryMap = {
   enterprise_search: ES_TELEMETRY_NAME,
   app_search: AS_TELEMETRY_NAME,

@@ -64,6 +64,7 @@ describe('ExpressionChart', () => {
           pod: 'kubernetes.pod.uid',
           tiebreaker: '_doc',
         },
+        anomalyThreshold: 20,
       },
     };
 
