@@ -10,7 +10,7 @@ import React, { useEffect } from 'react';
 import { useActions, useValues } from 'kea';
 
 import { EuiCallOut, EuiEmptyPrompt, EuiSpacer, EuiPanel } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import { LicensingLogic } from '../../../shared/licensing';
 import { Loading } from '../../../shared/loading';
@@ -19,16 +19,11 @@ import { AppLogic } from '../../app_logic';
 import noSharedSourcesIcon from '../../assets/share_circle.svg';
 import { ContentSection } from '../../components/shared/content_section';
 import { SourcesTable } from '../../components/shared/sources_table';
-import { ViewContentHeader } from '../../components/shared/view_content_header';
 import { ADD_SOURCE_PATH, getSourcesPath } from '../../routes';
 
 import {
   AND,
   PRIVATE_LINK_TITLE,
-  PRIVATE_CAN_CREATE_PAGE_TITLE,
-  PRIVATE_VIEW_ONLY_PAGE_TITLE,
-  PRIVATE_VIEW_ONLY_PAGE_DESCRIPTION,
-  PRIVATE_CAN_CREATE_PAGE_DESCRIPTION,
   PRIVATE_HEADER_TITLE,
   PRIVATE_HEADER_DESCRIPTION,
   PRIVATE_SHARED_SOURCES_TITLE,
@@ -40,17 +35,6 @@ import {
 } from './constants';
 import { SourcesLogic } from './sources_logic';
 import { SourcesView } from './sources_view';
-
-// TODO: Remove this after links in Kibana sidenav
-interface SidebarLink {
-  title: string;
-  path?: string;
-  disabled?: boolean;
-  iconType?: string;
-  otherActivePath?: string;
-  dataTestSubj?: string;
-  onClick?(): void;
-}
 
 export const PrivateSources: React.FC = () => {
   const { hasPlatinumLicense } = useValues(LicensingLogic);
@@ -71,16 +55,19 @@ export const PrivateSources: React.FC = () => {
 
   if (dataLoading) return <Loading />;
 
-  const sidebarLinks = [] as SidebarLink[];
   const hasConfiguredConnectors = serviceTypes.some(({ configured }) => configured);
   const canAddSources = canCreatePersonalSources && hasConfiguredConnectors;
-  if (canAddSources) {
-    sidebarLinks.push({
-      title: PRIVATE_LINK_TITLE,
-      iconType: 'plusInCircle',
-      path: getSourcesPath(ADD_SOURCE_PATH, false),
-    });
-  }
+  const hasPrivateSources = privateContentSources?.length > 0;
+  const hasSharedSources = contentSources.length > 0;
+
+  const licenseCallout = (
+    <>
+      <EuiCallOut title={LICENSE_CALLOUT_TITLE} iconType="iInCircle">
+        <p>{LICENSE_CALLOUT_DESCRIPTION}</p>
+      </EuiCallOut>
+      <EuiSpacer />
+    </>
+  );
 
   const headerAction = (
     <EuiButtonTo
@@ -93,98 +80,77 @@ export const PrivateSources: React.FC = () => {
     </EuiButtonTo>
   );
 
-  const sourcesHeader = (
-    <ViewContentHeader
-      title={PRIVATE_HEADER_TITLE}
-      action={headerAction}
-      description={PRIVATE_HEADER_DESCRIPTION}
-      alignItems="flexStart"
-    />
+  const privateSourcesEmptyState = (
+    <EuiPanel>
+      <EuiSpacer size="xxl" />
+      <EuiEmptyPrompt iconType="lock" title={<h2>{PRIVATE_EMPTY_TITLE}</h2>} />
+      <EuiSpacer size="xxl" />
+    </EuiPanel>
   );
 
   const privateSourcesTable = (
-    <ContentSection>
-      <SourcesTable
-        showDetails
-        onSearchableToggle={setSourceSearchability}
-        sources={privateContentSources}
-      />
-    </ContentSection>
+    <SourcesTable
+      showDetails
+      onSearchableToggle={setSourceSearchability}
+      sources={privateContentSources}
+    />
   );
 
-  const privateSourcesEmptyState = (
-    <ContentSection className="zero-state__private-sources">
-      <EuiPanel className="euiPanel--inset">
-        <EuiSpacer size="xxl" />
-        <EuiEmptyPrompt iconType="lock" title={<h2>{PRIVATE_EMPTY_TITLE}</h2>} />
-        <EuiSpacer size="xxl" />
-      </EuiPanel>
+  const privateSourcesSection = (
+    <ContentSection
+      title={PRIVATE_HEADER_TITLE}
+      description={PRIVATE_HEADER_DESCRIPTION}
+      action={canAddSources && headerAction}
+    >
+      {hasPrivateSources ? privateSourcesTable : privateSourcesEmptyState}
     </ContentSection>
   );
 
   const sharedSourcesEmptyState = (
-    <ContentSection className="zero-state__private-sources">
-      <EuiPanel className="euiPanel--inset">
-        <EuiSpacer size="xxl" />
-        <EuiEmptyPrompt
-          iconType={noSharedSourcesIcon}
-          title={<h2>{SHARED_EMPTY_TITLE}</h2>}
-          body={<p>{SHARED_EMPTY_DESCRIPTION}</p>}
-        />
-        <EuiSpacer size="xxl" />
-      </EuiPanel>
-    </ContentSection>
+    <EuiPanel>
+      <EuiSpacer size="xxl" />
+      <EuiEmptyPrompt
+        iconType={noSharedSourcesIcon}
+        title={<h2>{SHARED_EMPTY_TITLE}</h2>}
+        body={<p>{SHARED_EMPTY_DESCRIPTION}</p>}
+      />
+      <EuiSpacer size="xxl" />
+    </EuiPanel>
   );
 
-  const hasPrivateSources = privateContentSources?.length > 0;
-  const privateSources = hasPrivateSources ? privateSourcesTable : privateSourcesEmptyState;
+  const sharedSourcesTable = (
+    <SourcesTable showDetails={false} isOrganization={false} sources={contentSources} />
+  );
 
-  const groupsSentence = `${groups.slice(0, groups.length - 1).join(', ')}, ${AND} ${groups.slice(
-    -1
-  )}`;
+  const groupsSentence =
+    groups.length === 1
+      ? `${groups}`
+      : `${groups.slice(0, groups.length - 1).join(', ')}${
+          groups.length === 2 ? '' : ','
+        } ${AND} ${groups.slice(-1)}`;
 
-  const sharedSources = (
+  const sharedSourcesSection = (
     <ContentSection
       title={PRIVATE_SHARED_SOURCES_TITLE}
-      description={i18n.translate(
-        'xpack.enterpriseSearch.workplaceSearch.sources.private.privateShared.header.description',
-        {
-          defaultMessage:
-            'You have access to the following sources through the {groups, plural, one {group} other {groups}} {groupsSentence}.',
-          values: { groups: groups.length, groupsSentence },
-        }
-      )}
+      description={
+        hasSharedSources && (
+          <FormattedMessage
+            id="xpack.enterpriseSearch.workplaceSearch.sources.private.privateShared.header.description"
+            defaultMessage="You have access to the following sources through {newline}the {groups, plural, one {group} other {groups}} {groupsSentence}."
+            values={{ groups: groups.length, groupsSentence, newline: <br /> }}
+          />
+        )
+      }
     >
-      <SourcesTable showDetails={false} isOrganization={false} sources={contentSources} />
+      {hasSharedSources ? sharedSourcesTable : sharedSourcesEmptyState}
     </ContentSection>
   );
-
-  const licenseCallout = (
-    <>
-      <EuiCallOut title={LICENSE_CALLOUT_TITLE} iconType="iInCircle">
-        <p>{LICENSE_CALLOUT_DESCRIPTION}</p>
-      </EuiCallOut>
-      <EuiSpacer />
-    </>
-  );
-
-  const PAGE_TITLE = canCreatePersonalSources
-    ? PRIVATE_CAN_CREATE_PAGE_TITLE
-    : PRIVATE_VIEW_ONLY_PAGE_TITLE;
-  const PAGE_DESCRIPTION = canCreatePersonalSources
-    ? PRIVATE_CAN_CREATE_PAGE_DESCRIPTION
-    : PRIVATE_VIEW_ONLY_PAGE_DESCRIPTION;
-
-  const pageHeader = <ViewContentHeader title={PAGE_TITLE} description={PAGE_DESCRIPTION} />;
 
   return (
     <SourcesView>
-      {/* TODO: Figure out with design how to make this look better w/o 2 ViewContentHeaders */}
-      {pageHeader}
       {hasPrivateSources && !hasPlatinumLicense && licenseCallout}
-      {canAddSources && sourcesHeader}
-      {canCreatePersonalSources && privateSources}
-      {contentSources.length > 0 ? sharedSources : sharedSourcesEmptyState}
+      {canCreatePersonalSources && privateSourcesSection}
+      {sharedSourcesSection}
     </SourcesView>
   );
 };
