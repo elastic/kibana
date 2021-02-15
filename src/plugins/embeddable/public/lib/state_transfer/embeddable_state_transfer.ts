@@ -75,10 +75,14 @@ export class EmbeddableStateTransfer {
    * @param appId - The app to fetch incomingEditorState for
    * @param removeAfterFetch - Whether to remove the package state after fetch to prevent duplicates.
    */
-  public clearEditorState(appId: string) {
+  public clearEditorState(appId?: string) {
     const currentState = this.storage.get(EMBEDDABLE_STATE_TRANSFER_STORAGE_KEY);
     if (currentState) {
-      delete currentState[this.buildKey(appId, EMBEDDABLE_EDITOR_STATE_KEY)];
+      if (appId) {
+        delete currentState[EMBEDDABLE_EDITOR_STATE_KEY]?.[appId];
+      } else {
+        delete currentState[EMBEDDABLE_EDITOR_STATE_KEY];
+      }
       this.storage.set(EMBEDDABLE_STATE_TRANSFER_STORAGE_KEY, currentState);
     }
   }
@@ -117,7 +121,6 @@ export class EmbeddableStateTransfer {
     this.isTransferInProgress = true;
     await this.navigateToWithState<EmbeddableEditorState>(appId, EMBEDDABLE_EDITOR_STATE_KEY, {
       ...options,
-      appendToExistingState: true,
     });
   }
 
@@ -132,12 +135,7 @@ export class EmbeddableStateTransfer {
     this.isTransferInProgress = true;
     await this.navigateToWithState<EmbeddablePackageState>(appId, EMBEDDABLE_PACKAGE_STATE_KEY, {
       ...options,
-      appendToExistingState: true,
     });
-  }
-
-  private buildKey(appId: string, key: string) {
-    return `${appId}-${key}`;
   }
 
   private getIncomingState<IncomingStateType>(
@@ -148,15 +146,13 @@ export class EmbeddableStateTransfer {
       keysToRemoveAfterFetch?: string[];
     }
   ): IncomingStateType | undefined {
-    const incomingState = this.storage.get(EMBEDDABLE_STATE_TRANSFER_STORAGE_KEY)?.[
-      this.buildKey(appId, key)
-    ];
+    const incomingState = this.storage.get(EMBEDDABLE_STATE_TRANSFER_STORAGE_KEY)?.[key]?.[appId];
     const castState =
       !guard || guard(incomingState) ? (cloneDeep(incomingState) as IncomingStateType) : undefined;
     if (castState && options?.keysToRemoveAfterFetch) {
       const stateReplace = { ...this.storage.get(EMBEDDABLE_STATE_TRANSFER_STORAGE_KEY) };
       options.keysToRemoveAfterFetch.forEach((keyToRemove: string) => {
-        delete stateReplace[this.buildKey(appId, keyToRemove)];
+        delete stateReplace[keyToRemove];
       });
       this.storage.set(EMBEDDABLE_STATE_TRANSFER_STORAGE_KEY, stateReplace);
     }
@@ -166,14 +162,16 @@ export class EmbeddableStateTransfer {
   private async navigateToWithState<OutgoingStateType = unknown>(
     appId: string,
     key: string,
-    options?: { path?: string; state?: OutgoingStateType; appendToExistingState?: boolean }
+    options?: { path?: string; state?: OutgoingStateType }
   ): Promise<void> {
-    const stateObject = options?.appendToExistingState
-      ? {
-          ...this.storage.get(EMBEDDABLE_STATE_TRANSFER_STORAGE_KEY),
-          [this.buildKey(appId, key)]: options.state,
-        }
-      : { [this.buildKey(appId, key)]: options?.state };
+    const existingAppState = this.storage.get(EMBEDDABLE_STATE_TRANSFER_STORAGE_KEY)?.[key] || {};
+    const stateObject = {
+      ...this.storage.get(EMBEDDABLE_STATE_TRANSFER_STORAGE_KEY),
+      [key]: {
+        ...existingAppState,
+        [appId]: options?.state,
+      },
+    };
     this.storage.set(EMBEDDABLE_STATE_TRANSFER_STORAGE_KEY, stateObject);
     await this.navigateToApp(appId, { path: options?.path });
   }
