@@ -114,6 +114,7 @@ describe('setupFleetServerIndexes ', () => {
     const indexesMappingUpdated = esMock.indices.putMapping.mock.calls
       .map((call) => call[0].index)
       .sort();
+
     expect(indexesMappingUpdated).toEqual([
       '.fleet-actions_1',
       '.fleet-agents_1',
