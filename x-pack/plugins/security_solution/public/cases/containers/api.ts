@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { assign } from 'lodash';
+
 import {
   CasePatchRequest,
   CasePostRequest,
@@ -16,6 +18,9 @@ import {
   CaseUserActionsResponse,
   CommentRequest,
   CommentType,
+  SubCasePatchRequest,
+  SubCaseResponse,
+  SubCasesResponse,
   User,
 } from '../../../../case/common/api';
 
@@ -25,6 +30,7 @@ import {
   CASE_STATUS_URL,
   CASE_TAGS_URL,
   CASES_URL,
+  SUB_CASE_DETAILS_URL,
 } from '../../../../case/common/constants';
 
 import {
@@ -32,6 +38,8 @@ import {
   getCasePushUrl,
   getCaseDetailsUrl,
   getCaseUserActionUrl,
+  getSubCaseDetailsUrl,
+  getSubCaseUserActionUrl,
 } from '../../../../case/common/api/helpers';
 
 import { KibanaServices } from '../../common/lib/kibana';
@@ -73,6 +81,32 @@ export const getCase = async (
   return convertToCamelCase<CaseResponse, Case>(decodeCaseResponse(response));
 };
 
+export const getSubCase = async (
+  caseId: string,
+  subCaseId: string,
+  includeComments: boolean = true,
+  signal: AbortSignal
+): Promise<Case> => {
+  const [caseResponse, subCaseResponse] = await Promise.all([
+    KibanaServices.get().http.fetch<CaseResponse>(getCaseDetailsUrl(caseId), {
+      method: 'GET',
+      query: {
+        includeComments: false,
+      },
+      signal,
+    }),
+    KibanaServices.get().http.fetch<SubCaseResponse>(getSubCaseDetailsUrl(caseId, subCaseId), {
+      method: 'GET',
+      query: {
+        includeComments,
+      },
+      signal,
+    }),
+  ]);
+  const response = assign<CaseResponse, SubCaseResponse>(caseResponse, subCaseResponse);
+  return convertToCamelCase<CaseResponse, Case>(decodeCaseResponse(response));
+};
+
 export const getCasesStatus = async (signal: AbortSignal): Promise<CasesStatus> => {
   const response = await KibanaServices.get().http.fetch<CasesStatusResponse>(CASE_STATUS_URL, {
     method: 'GET',
@@ -103,6 +137,21 @@ export const getCaseUserActions = async (
 ): Promise<CaseUserActions[]> => {
   const response = await KibanaServices.get().http.fetch<CaseUserActionsResponse>(
     getCaseUserActionUrl(caseId),
+    {
+      method: 'GET',
+      signal,
+    }
+  );
+  return convertArrayToCamelCase(decodeCaseUserActionsResponse(response)) as CaseUserActions[];
+};
+
+export const getSubCaseUserActions = async (
+  caseId: string,
+  subCaseId: string,
+  signal: AbortSignal
+): Promise<CaseUserActions[]> => {
+  const response = await KibanaServices.get().http.fetch<CaseUserActionsResponse>(
+    getSubCaseUserActionUrl(caseId, subCaseId),
     {
       method: 'GET',
       signal,
@@ -164,6 +213,35 @@ export const patchCase = async (
     body: JSON.stringify({ cases: [{ ...updatedCase, id: caseId, version }] }),
     signal,
   });
+  return convertToCamelCase<CasesResponse, Case[]>(decodeCasesResponse(response));
+};
+
+export const patchSubCase = async (
+  caseId: string,
+  subCaseId: string,
+  updatedSubCase: Pick<SubCasePatchRequest, 'status'>,
+  version: string,
+  signal: AbortSignal
+): Promise<Case[]> => {
+  const subCaseResponse = await KibanaServices.get().http.fetch<SubCasesResponse>(
+    SUB_CASE_DETAILS_URL,
+    {
+      method: 'PATCH',
+      body: JSON.stringify({ cases: [{ ...updatedSubCase, id: caseId, version }] }),
+      signal,
+    }
+  );
+  const caseResponse = await KibanaServices.get().http.fetch<CaseResponse>(
+    getCaseDetailsUrl(caseId),
+    {
+      method: 'GET',
+      query: {
+        includeComments: false,
+      },
+      signal,
+    }
+  );
+  const response = subCaseResponse.map((subCaseResp) => assign(caseResponse, subCaseResp));
   return convertToCamelCase<CasesResponse, Case[]>(decodeCasesResponse(response));
 };
 

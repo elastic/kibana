@@ -51,7 +51,7 @@ const AlertCommentEventComponent: React.FC<Props> = ({ alert, alertsCount, comme
       </>
     ) : (
       <>
-        <b>{i18n.GENERATED_ALERT_COUNT_COMMENT_LABEL_TITLE(alertsCount)}</b>{' '}
+        <b>{i18n.GENERATED_ALERT_COUNT_COMMENT_LABEL_TITLE(alertsCount ?? 0)}</b>{' '}
         {i18n.GENERATED_ALERT_COMMENT_LABEL_TITLE}{' '}
         <EuiLink
           onClick={onLinkClick}

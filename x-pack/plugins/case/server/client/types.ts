@@ -8,7 +8,6 @@
 import { ElasticsearchClient, SavedObjectsClientContract } from 'kibana/server';
 import { ActionsClient } from '../../../actions/server';
 import {
-  CaseClientPostRequest,
   CasePostRequest,
   CaseResponse,
   CasesPatchRequest,
@@ -60,6 +59,7 @@ export interface CaseClientGetAlerts {
 
 export interface CaseClientGetUserActions {
   caseId: string;
+  subCaseId?: string;
 }
 
 export interface MappingsClient {

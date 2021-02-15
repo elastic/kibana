@@ -18,7 +18,7 @@ import {
   AssociationType,
 } from '../../../../case/common/api';
 
-export { CaseConnector, ActionConnector } from '../../../../case/common/api';
+export { CaseConnector, ActionConnector, CaseStatuses } from '../../../../case/common/api';
 
 export type AllCaseType = AssociationType & CaseType;
 
@@ -165,7 +165,7 @@ export type UpdateKey = keyof Pick<
 export interface UpdateByKey {
   updateKey: UpdateKey;
   updateValue: CasePatchRequest[UpdateKey];
-  fetchCaseUserActions?: (caseId: string) => void;
+  fetchCaseUserActions?: (caseId: string, subCaseId?: string) => void;
   updateCase?: (newCase: Case) => void;
   caseData: Case;
   onSuccess?: () => void;

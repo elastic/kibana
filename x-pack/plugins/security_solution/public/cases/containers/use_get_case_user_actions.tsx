@@ -11,7 +11,7 @@ import deepEqual from 'fast-deep-equal';
 
 import { errorToToaster, useStateToaster } from '../../common/components/toasters';
 import { CaseFullExternalService } from '../../../../case/common/api/cases';
-import { getCaseUserActions } from './api';
+import { getCaseUserActions, getSubCaseUserActions } from './api';
 import * as i18n from './translations';
 import { CaseConnector, CaseExternalService, CaseUserActions, ElasticUser } from './types';
 import { convertToCamelCase, parseString } from './utils';
@@ -46,7 +46,7 @@ export const initialData: CaseUserActionsState = {
 };
 
 export interface UseGetCaseUserActions extends CaseUserActionsState {
-  fetchCaseUserActions: (caseId: string) => void;
+  fetchCaseUserActions: (caseId: string, subCaseId?: string) => void;
 }
 
 const getExternalService = (value: string): CaseExternalService | null =>
@@ -238,7 +238,8 @@ export const getPushedInfo = (
 
 export const useGetCaseUserActions = (
   caseId: string,
-  caseConnectorId: string
+  caseConnectorId: string,
+  subCaseId?: string
 ): UseGetCaseUserActions => {
   const [caseUserActionsState, setCaseUserActionsState] = useState<CaseUserActionsState>(
     initialData
@@ -247,7 +248,7 @@ export const useGetCaseUserActions = (
   const [, dispatchToaster] = useStateToaster();
 
   const fetchCaseUserActions = useCallback(
-    (thisCaseId: string) => {
+    (thisCaseId: string, thisSubCaseId?: string) => {
       let didCancel = false;
       const abortCtrl = new AbortController();
       const fetchData = async () => {
@@ -256,7 +257,9 @@ export const useGetCaseUserActions = (
           isLoading: true,
         });
         try {
-          const response = await getCaseUserActions(thisCaseId, abortCtrl.signal);
+          const response = await (thisSubCaseId
+            ? getSubCaseUserActions(thisCaseId, thisSubCaseId, abortCtrl.signal)
+            : getCaseUserActions(thisCaseId, abortCtrl.signal));
           if (!didCancel) {
             // Attention Future developer
             // We are removing the first item because it will always be the creation of the case
@@ -298,15 +301,14 @@ export const useGetCaseUserActions = (
         abortCtrl.abort();
       };
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [caseUserActionsState, caseConnectorId]
+    [caseUserActionsState, caseConnectorId, dispatchToaster]
   );
 
   useEffect(() => {
     if (!isEmpty(caseId)) {
-      fetchCaseUserActions(caseId);
+      fetchCaseUserActions(caseId, subCaseId);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [caseId, caseConnectorId]);
+  }, [caseId, fetchCaseUserActions, subCaseId]);
   return { ...caseUserActionsState, fetchCaseUserActions };
 };

@@ -228,7 +228,7 @@ export const getAlertComment = ({
           <UserActionCopyLink id={action.actionId} />
         </EuiFlexItem>
         <EuiFlexItem>
-          {alert != null && commentType !== CommentType.generatedAlert && (
+          {alert != null && commentType !== CommentType.alert && (
             <UserActionShowAlert
               id={action.actionId}
               alert={alert}

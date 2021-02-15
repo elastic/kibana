@@ -55,6 +55,7 @@ import * as i18n from './translations';
 
 interface Props {
   caseId: string;
+  subCaseId?: string;
   userCanCrud: boolean;
 }
 
@@ -112,7 +113,7 @@ export type Alert = {
 } & Signal;
 
 export const CaseComponent = React.memo<CaseProps>(
-  ({ caseId, caseData, fetchCase, updateCase, userCanCrud }) => {
+  ({ caseId, caseData, fetchCase, subCaseId, updateCase, userCanCrud }) => {
     const dispatch = useDispatch();
     const { formatUrl, search } = useFormatUrl(SecurityPageName.case);
     const allCasesLink = getCaseUrl(search);
@@ -127,10 +128,11 @@ export const CaseComponent = React.memo<CaseProps>(
       hasDataToPush,
       isLoading: isLoadingUserActions,
       participants,
-    } = useGetCaseUserActions(caseId, caseData.connector.id);
+    } = useGetCaseUserActions(caseId, caseData.connector.id, subCaseId);
 
     const { isLoading, updateKey, updateCaseProperty } = useUpdateCase({
       caseId,
+      subCaseId,
     });
 
     const alertsQuery = useMemo(() => buildAlertsQuery(getRuleIdsFromComments(caseData.comments)), [
@@ -513,8 +515,8 @@ export const CaseComponent = React.memo<CaseProps>(
   }
 );
 
-export const CaseView = React.memo(({ caseId, userCanCrud }: Props) => {
-  const { data, isLoading, isError, fetchCase, updateCase } = useGetCase(caseId);
+export const CaseView = React.memo(({ caseId, subCaseId, userCanCrud }: Props) => {
+  const { data, isLoading, isError, fetchCase, updateCase } = useGetCase(caseId, subCaseId);
   if (isError) {
     return null;
   }
@@ -531,6 +533,7 @@ export const CaseView = React.memo(({ caseId, userCanCrud }: Props) => {
   return (
     <CaseComponent
       caseId={caseId}
+      subCaseId={subCaseId}
       fetchCase={fetchCase}
       caseData={data}
       updateCase={updateCase}

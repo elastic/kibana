@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { useEffect, useReducer, useCallback } from 'react';
+import { useEffect, useReducer, useCallback, useRef } from 'react';
 import { CaseStatuses, CaseType } from '../../../../case/common/api';
 
 import { Case } from './types';
 import * as i18n from './translations';
 import { errorToToaster, useStateToaster } from '../../common/components/toasters';
-import { getCase } from './api';
+import { getCase, getSubCase } from './api';
 import { getNoneConnector } from '../components/configure_cases/utils';
 
 interface CaseState {
@@ -87,31 +87,32 @@ export interface UseGetCase extends CaseState {
   updateCase: (newCase: Case) => void;
 }
 
-export const useGetCase = (caseId: string): UseGetCase => {
+export const useGetCase = (caseId: string, subCaseId?: string): UseGetCase => {
   const [state, dispatch] = useReducer(dataFetchReducer, {
     isLoading: true,
     isError: false,
     data: initialData,
   });
   const [, dispatchToaster] = useStateToaster();
+  const abortCtrl = useRef(new AbortController());
+  const didCancel = useRef(false);
 
   const updateCase = useCallback((newCase: Case) => {
     dispatch({ type: 'UPDATE_CASE', payload: newCase });
   }, []);
 
   const callFetch = useCallback(async () => {
-    let didCancel = false;
-    const abortCtrl = new AbortController();
-
     const fetchData = async () => {
       dispatch({ type: 'FETCH_INIT' });
       try {
-        const response = await getCase(caseId, true, abortCtrl.signal);
-        if (!didCancel) {
+        const response = await (subCaseId
+          ? getSubCase(caseId, subCaseId, true, abortCtrl.current.signal)
+          : getCase(caseId, true, abortCtrl.current.signal));
+        if (!didCancel.current) {
           dispatch({ type: 'FETCH_SUCCESS', payload: response });
         }
       } catch (error) {
-        if (!didCancel) {
+        if (!didCancel.current) {
           errorToToaster({
             title: i18n.ERROR_TITLE,
             error: error.body && error.body.message ? new Error(error.body.message) : error,
@@ -121,17 +122,19 @@ export const useGetCase = (caseId: string): UseGetCase => {
         }
       }
     };
+    didCancel.current = false;
+    abortCtrl.current.abort();
+    abortCtrl.current = new AbortController();
     fetchData();
-    return () => {
-      didCancel = true;
-      abortCtrl.abort();
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [caseId]);
+  }, [caseId, subCaseId, dispatch, dispatchToaster]);
 
   useEffect(() => {
     callFetch();
+    return () => {
+      didCancel.current = true;
+      abortCtrl.current.abort();
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [caseId]);
+  }, [caseId, subCaseId]);
   return { ...state, fetchCase: callFetch, updateCase };
 };
