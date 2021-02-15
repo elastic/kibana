@@ -23,6 +23,7 @@ echo $MB_BUILD
 MB_BUILD_ID=$(echo $TOP | sed 's/.*"build_id" : "\(.*\)", "manifest_url.*/\1/')
 
 URL=https://snapshots.elastic.co/${MB_BUILD_ID}/downloads/beats/metricbeat/metricbeat-${MB_BUILD}-linux-x86_64.tar.gz
+URL=https://artifacts.elastic.co/downloads/beats/metricbeat/metricbeat-7.11.0-linux-x86_64.tar.gz
 echo $URL
 # Downloading the Metricbeat package
 while [ 1 ]; do
