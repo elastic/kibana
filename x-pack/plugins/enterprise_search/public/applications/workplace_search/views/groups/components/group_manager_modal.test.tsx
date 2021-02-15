@@ -1,19 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { setMockValues } from '../../../../__mocks__';
-import { groups } from '../../../__mocks__/groups.mock';
 import { contentSources } from '../../../__mocks__/content_sources.mock';
+import { groups } from '../../../__mocks__/groups.mock';
 
 import React from 'react';
+
 import { shallow } from 'enzyme';
 
-import { GroupManagerModal } from './group_manager_modal';
-
 import { EuiOverlayMask, EuiModal, EuiEmptyPrompt } from '@elastic/eui';
+
+import { GroupManagerModal } from './group_manager_modal';
 
 const hideModal = jest.fn();
 const selectAll = jest.fn();

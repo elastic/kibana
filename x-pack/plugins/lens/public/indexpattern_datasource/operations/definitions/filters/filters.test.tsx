@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -16,9 +17,11 @@ import type { IndexPatternLayer } from '../../../types';
 import { createMockedIndexPattern } from '../../../mocks';
 import { FilterPopover } from './filter_popover';
 
+const uiSettingsMock = {} as IUiSettingsClient;
+
 const defaultProps = {
   storage: {} as IStorageWrapper,
-  uiSettings: {} as IUiSettingsClient,
+  uiSettings: uiSettingsMock,
   savedObjectsClient: {} as SavedObjectsClientContract,
   dateRange: { fromDate: 'now-1d', toDate: 'now' },
   data: dataPluginMock.createStartContract(),
@@ -84,7 +87,8 @@ describe('filters', () => {
         layer.columns.col1 as FiltersIndexPatternColumn,
         'col1',
         createMockedIndexPattern(),
-        layer
+        layer,
+        uiSettingsMock
       );
       expect(esAggsFn).toEqual(
         expect.objectContaining({

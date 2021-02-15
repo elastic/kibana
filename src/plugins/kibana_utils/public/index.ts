@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 export {
@@ -68,7 +68,14 @@ export {
   StopSyncStateFnType,
 } from './state_sync';
 export { Configurable, CollectConfigProps } from './ui';
-export { removeQueryParam, redirectWhenMissing, getQueryParams } from './history';
+export {
+  removeQueryParam,
+  redirectWhenMissing,
+  getQueryParams,
+  createQueryParamsObservable,
+  createHistoryObservable,
+  createQueryParamObservable,
+} from './history';
 export { applyDiff } from './state_management/utils/diff_object';
 export { createStartServicesGetter, StartServicesGetter } from './core/create_start_service_getter';
 

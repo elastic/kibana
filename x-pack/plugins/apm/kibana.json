@@ -25,19 +25,14 @@
   ],
   "server": true,
   "ui": true,
-  "configPath": [
-    "xpack",
-    "apm"
-  ],
-  "extraPublicDirs": [
-    "public/style/variables"
-  ],
+  "configPath": ["xpack", "apm"],
+  "extraPublicDirs": ["public/style/variables"],
   "requiredBundles": [
+    "home",
     "kibanaReact",
     "kibanaUtils",
-    "observability",
-    "home",
     "maps",
-    "ml"
+    "ml",
+    "observability"
   ]
 }

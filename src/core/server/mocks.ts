@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { of } from 'rxjs';
@@ -69,9 +69,12 @@ export function pluginInitializerContextConfigMock<T>(config: T) {
   };
 
   const mock: jest.Mocked<PluginInitializerContext<T>['config']> = {
-    legacy: { globalConfig$: of(globalConfig) },
+    legacy: {
+      globalConfig$: of(globalConfig),
+      get: () => globalConfig,
+    },
     create: jest.fn().mockReturnValue(of(config)),
-    createIfExists: jest.fn().mockReturnValue(of(config)),
+    get: jest.fn().mockReturnValue(config),
   };
 
   return mock;
@@ -193,8 +196,9 @@ function createCoreRequestHandlerContextMock() {
     savedObjects: {
       client: savedObjectsClientMock.create(),
       typeRegistry: savedObjectsTypeRegistryMock.create(),
-      exporter: savedObjectsServiceMock.createExporter(),
-      importer: savedObjectsServiceMock.createImporter(),
+      getClient: savedObjectsClientMock.create,
+      getExporter: savedObjectsServiceMock.createExporter,
+      getImporter: savedObjectsServiceMock.createImporter,
     },
     elasticsearch: {
       client: elasticsearchServiceMock.createScopedClusterClient(),

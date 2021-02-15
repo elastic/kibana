@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { format } from 'util';
@@ -89,8 +89,8 @@ it('only runs hooks of parents and tests in level1a', async () => {
       "suite: ",
       "suite: level 1",
       "suite: level 1 level 1a",
-      "hook:  \\"before each\\" hook: rootBeforeEach",
-      "hook:  level 1 \\"before each\\" hook: level1BeforeEach",
+      "hook:  \\"before each\\" hook: rootBeforeEach for \\"test 1a\\"",
+      "hook:  level 1 \\"before each\\" hook: level1BeforeEach for \\"test 1a\\"",
       "test:  level 1 level 1a test 1a",
     ]
   `);
@@ -108,8 +108,8 @@ it('only runs hooks of parents and tests in level1b', async () => {
       "suite: ",
       "suite: level 1",
       "suite: level 1 level 1b",
-      "hook:  \\"before each\\" hook: rootBeforeEach",
-      "hook:  level 1 \\"before each\\" hook: level1BeforeEach",
+      "hook:  \\"before each\\" hook: rootBeforeEach for \\"test 1b\\"",
+      "hook:  level 1 \\"before each\\" hook: level1BeforeEach for \\"test 1b\\"",
       "test:  level 1 level 1b test 1b",
     ]
   `);
@@ -127,12 +127,12 @@ it('only runs hooks of parents and tests in level1a and level1b', async () => {
       "suite: ",
       "suite: level 1",
       "suite: level 1 level 1a",
-      "hook:  \\"before each\\" hook: rootBeforeEach",
-      "hook:  level 1 \\"before each\\" hook: level1BeforeEach",
+      "hook:  \\"before each\\" hook: rootBeforeEach for \\"test 1a\\"",
+      "hook:  level 1 \\"before each\\" hook: level1BeforeEach for \\"test 1a\\"",
       "test:  level 1 level 1a test 1a",
       "suite: level 1 level 1b",
-      "hook:  \\"before each\\" hook: rootBeforeEach",
-      "hook:  level 1 \\"before each\\" hook: level1BeforeEach",
+      "hook:  \\"before each\\" hook: rootBeforeEach for \\"test 1b\\"",
+      "hook:  level 1 \\"before each\\" hook: level1BeforeEach for \\"test 1b\\"",
       "test:  level 1 level 1b test 1b",
     ]
   `);
@@ -151,8 +151,8 @@ it('only runs level1a if including level1 and excluding level1b', async () => {
       "suite: ",
       "suite: level 1",
       "suite: level 1 level 1a",
-      "hook:  \\"before each\\" hook: rootBeforeEach",
-      "hook:  level 1 \\"before each\\" hook: level1BeforeEach",
+      "hook:  \\"before each\\" hook: rootBeforeEach for \\"test 1a\\"",
+      "hook:  level 1 \\"before each\\" hook: level1BeforeEach for \\"test 1a\\"",
       "test:  level 1 level 1a test 1a",
     ]
   `);
@@ -171,8 +171,8 @@ it('only runs level1b if including level1 and excluding level1a', async () => {
       "suite: ",
       "suite: level 1",
       "suite: level 1 level 1b",
-      "hook:  \\"before each\\" hook: rootBeforeEach",
-      "hook:  level 1 \\"before each\\" hook: level1BeforeEach",
+      "hook:  \\"before each\\" hook: rootBeforeEach for \\"test 1b\\"",
+      "hook:  level 1 \\"before each\\" hook: level1BeforeEach for \\"test 1b\\"",
       "test:  level 1 level 1b test 1b",
     ]
   `);
@@ -190,7 +190,7 @@ it('only runs level2 if excluding level1', async () => {
       "suite: ",
       "suite: level 2",
       "suite: level 2 level 2a",
-      "hook:  \\"before each\\" hook: rootBeforeEach",
+      "hook:  \\"before each\\" hook: rootBeforeEach for \\"test 2a\\"",
       "test:  level 2 level 2a test 2a",
     ]
   `);

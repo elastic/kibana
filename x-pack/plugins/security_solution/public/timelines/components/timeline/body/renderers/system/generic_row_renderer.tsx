@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 /* eslint-disable react/display-name */
@@ -62,11 +63,11 @@ export const createEndgameProcessRowRenderer = ({
   isInstance: (ecs) => {
     const action: string | null | undefined = get('event.action[0]', ecs);
     const category: string | null | undefined = get('event.category[0]', ecs);
+    const dataset: string | null | undefined = get('event.dataset[0]', ecs);
     return (
-      category != null &&
-      category.toLowerCase() === 'process' &&
-      action != null &&
-      action.toLowerCase() === actionName
+      (category?.toLowerCase() === 'process' ||
+        dataset?.toLowerCase() === 'endpoint.events.process') &&
+      action?.toLowerCase() === actionName
     );
   },
   renderRow: ({ browserFields, data, timelineId }) => (
@@ -97,8 +98,7 @@ export const createFimRowRenderer = ({
     const dataset: string | null | undefined = get('event.dataset[0]', ecs);
     return (
       isFileEvent({ eventCategory: category, eventDataset: dataset }) &&
-      action != null &&
-      action.toLowerCase() === actionName
+      action?.toLowerCase() === actionName
     );
   },
   renderRow: ({ browserFields, data, timelineId }) => (
@@ -180,11 +180,11 @@ export const createSecurityEventRowRenderer = ({
   isInstance: (ecs) => {
     const category: string | null | undefined = get('event.category[0]', ecs);
     const action: string | null | undefined = get('event.action[0]', ecs);
+    const dataset: string | null | undefined = get('event.dataset[0]', ecs);
     return (
-      category != null &&
-      category.toLowerCase() === 'authentication' &&
-      action != null &&
-      action.toLowerCase() === actionName
+      (category?.toLowerCase() === 'authentication' ||
+        dataset?.toLowerCase() === 'endpoint.events.security') &&
+      action?.toLowerCase() === actionName
     );
   },
   renderRow: ({ browserFields, data, timelineId }) => (
@@ -233,6 +233,11 @@ const endgameProcessStartedRowRenderer = createEndgameProcessRowRenderer({
   text: i18n.PROCESS_STARTED,
 });
 
+const endpointProcessStartRowRenderer = createEndgameProcessRowRenderer({
+  actionName: 'start',
+  text: i18n.PROCESS_STARTED,
+});
+
 const systemProcessStoppedRowRenderer = createGenericFileRowRenderer({
   actionName: 'process_stopped',
   text: i18n.PROCESS_STOPPED,
@@ -243,8 +248,18 @@ const endgameProcessTerminationRowRenderer = createEndgameProcessRowRenderer({
   text: i18n.TERMINATED_PROCESS,
 });
 
+const endpointProcessEndRowRenderer = createEndgameProcessRowRenderer({
+  actionName: 'end',
+  text: i18n.TERMINATED_PROCESS,
+});
+
 const endgameFileCreateEventRowRenderer = createFimRowRenderer({
   actionName: 'file_create_event',
+  text: i18n.CREATED_FILE,
+});
+
+const endpointFileCreationEventRowRenderer = createFimRowRenderer({
+  actionName: 'creation',
   text: i18n.CREATED_FILE,
 });
 
@@ -255,6 +270,11 @@ const fimFileCreateEventRowRenderer = createFimRowRenderer({
 
 const endgameFileDeleteEventRowRenderer = createFimRowRenderer({
   actionName: 'file_delete_event',
+  text: i18n.DELETED_FILE,
+});
+
+const endpointFileDeletionEventRowRenderer = createFimRowRenderer({
+  actionName: 'deletion',
   text: i18n.DELETED_FILE,
 });
 
@@ -283,6 +303,11 @@ const endgameIpv4ConnectionAcceptEventRowRenderer = createSocketRowRenderer({
   text: i18n.ACCEPTED_A_CONNECTION_VIA,
 });
 
+const endpointConnectionAcceptedEventRowRenderer = createSocketRowRenderer({
+  actionName: 'connection_accepted',
+  text: i18n.ACCEPTED_A_CONNECTION_VIA,
+});
+
 const endgameIpv6ConnectionAcceptEventRowRenderer = createSocketRowRenderer({
   actionName: 'ipv6_connection_accept_event',
   text: i18n.ACCEPTED_A_CONNECTION_VIA,
@@ -290,6 +315,11 @@ const endgameIpv6ConnectionAcceptEventRowRenderer = createSocketRowRenderer({
 
 const endgameIpv4DisconnectReceivedEventRowRenderer = createSocketRowRenderer({
   actionName: 'ipv4_disconnect_received_event',
+  text: i18n.DISCONNECTED_VIA,
+});
+
+const endpointDisconnectReceivedEventRowRenderer = createSocketRowRenderer({
+  actionName: 'disconnect_received',
   text: i18n.DISCONNECTED_VIA,
 });
 
@@ -312,6 +342,10 @@ const endgameUserLogoffRowRenderer = createSecurityEventRowRenderer({
 
 const endgameUserLogonRowRenderer = createSecurityEventRowRenderer({
   actionName: 'user_logon',
+});
+
+const endpointUserLogOnRowRenderer = createSecurityEventRowRenderer({
+  actionName: 'log_on',
 });
 
 const dnsRowRenderer = createDnsRowRenderer();
@@ -354,6 +388,10 @@ const systemUserAddedRowRenderer = createGenericSystemRowRenderer({
 const systemLogoutRowRenderer = createGenericSystemRowRenderer({
   actionName: 'user_logout',
   text: i18n.LOGGED_OUT,
+});
+
+const endpointUserLogOffRowRenderer = createSecurityEventRowRenderer({
+  actionName: 'log_off',
 });
 
 const systemProcessErrorRowRenderer = createGenericFileRowRenderer({
@@ -407,15 +445,22 @@ export const systemRowRenderers: RowRenderer[] = [
   endgameAdminLogonRowRenderer,
   endgameExplicitUserLogonRowRenderer,
   endgameFileCreateEventRowRenderer,
+  endpointFileCreationEventRowRenderer,
   endgameFileDeleteEventRowRenderer,
+  endpointFileDeletionEventRowRenderer,
   endgameIpv4ConnectionAcceptEventRowRenderer,
+  endpointConnectionAcceptedEventRowRenderer,
   endgameIpv6ConnectionAcceptEventRowRenderer,
   endgameIpv4DisconnectReceivedEventRowRenderer,
+  endpointDisconnectReceivedEventRowRenderer,
   endgameIpv6DisconnectReceivedEventRowRenderer,
   endgameProcessStartedRowRenderer,
+  endpointProcessStartRowRenderer,
   endgameProcessTerminationRowRenderer,
+  endpointProcessEndRowRenderer,
   endgameUserLogoffRowRenderer,
   endgameUserLogonRowRenderer,
+  endpointUserLogOnRowRenderer,
   fimFileCreateEventRowRenderer,
   fimFileDeletedEventRowRenderer,
   systemAcceptedRowRenderer,
@@ -430,6 +475,7 @@ export const systemRowRenderers: RowRenderer[] = [
   systemInvalidRowRenderer,
   systemLoginRowRenderer,
   systemLogoutRowRenderer,
+  endpointUserLogOffRowRenderer,
   systemPackageInstalledRowRenderer,
   systemPackageUpdatedRowRenderer,
   systemPackageRemovedRowRenderer,

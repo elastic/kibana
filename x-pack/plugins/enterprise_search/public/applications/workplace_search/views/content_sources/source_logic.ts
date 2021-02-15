@@ -1,24 +1,23 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { kea, MakeLogicType } from 'kea';
 
 import { i18n } from '@kbn/i18n';
 
-import { HttpLogic } from '../../../shared/http';
-import { KibanaLogic } from '../../../shared/kibana';
-
+import { DEFAULT_META } from '../../../shared/constants';
 import {
   flashAPIErrors,
   setSuccessMessage,
   setQueuedSuccessMessage,
   clearFlashMessages,
 } from '../../../shared/flash_messages';
-
-import { DEFAULT_META } from '../../../shared/constants';
+import { HttpLogic } from '../../../shared/http';
+import { KibanaLogic } from '../../../shared/kibana';
 import { AppLogic } from '../../app_logic';
 import { NOT_FOUND_PATH, SOURCES_PATH, getSourcesPath } from '../../routes';
 import { ContentSourceFullData, Meta, DocumentSummaryItem, SourceContentItem } from '../../types';
@@ -26,7 +25,6 @@ import { ContentSourceFullData, Meta, DocumentSummaryItem, SourceContentItem } f
 export interface SourceActions {
   onInitializeSource(contentSource: ContentSourceFullData): ContentSourceFullData;
   onUpdateSourceName(name: string): string;
-  setSourceConfigData(sourceConfigData: SourceConfigData): SourceConfigData;
   setSearchResults(searchResultsResponse: SearchResultsResponse): SearchResultsResponse;
   initializeFederatedSummary(sourceId: string): { sourceId: string };
   onUpdateSummary(summary: DocumentSummaryItem[]): DocumentSummaryItem[];
@@ -40,26 +38,7 @@ export interface SourceActions {
   resetSourceState(): void;
   removeContentSource(sourceId: string): { sourceId: string };
   initializeSource(sourceId: string): { sourceId: string };
-  getSourceConfigData(serviceType: string): { serviceType: string };
   setButtonNotLoading(): void;
-}
-
-interface SourceConfigData {
-  serviceType: string;
-  name: string;
-  configured: boolean;
-  categories: string[];
-  needsPermissions?: boolean;
-  privateSourcesEnabled: boolean;
-  configuredFields: {
-    publicKey: string;
-    privateKey: string;
-    consumerKey: string;
-    baseUrl?: string;
-    clientId?: string;
-    clientSecret?: string;
-  };
-  accountContextOnly?: boolean;
 }
 
 interface SourceValues {
@@ -70,7 +49,6 @@ interface SourceValues {
   contentItems: SourceContentItem[];
   contentMeta: Meta;
   contentFilterValue: string;
-  sourceConfigData: SourceConfigData;
 }
 
 interface SearchResultsResponse {
@@ -83,7 +61,6 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
   actions: {
     onInitializeSource: (contentSource: ContentSourceFullData) => contentSource,
     onUpdateSourceName: (name: string) => name,
-    setSourceConfigData: (sourceConfigData: SourceConfigData) => sourceConfigData,
     onUpdateSummary: (summary: object[]) => summary,
     setSearchResults: (searchResultsResponse: SearchResultsResponse) => searchResultsResponse,
     setContentFilterValue: (contentFilterValue: string) => contentFilterValue,
@@ -95,7 +72,6 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
     removeContentSource: (sourceId: string) => ({
       sourceId,
     }),
-    getSourceConfigData: (serviceType: string) => ({ serviceType }),
     resetSourceState: () => true,
     setButtonNotLoading: () => false,
   },
@@ -114,41 +90,26 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
         }),
       },
     ],
-    sourceConfigData: [
-      {} as SourceConfigData,
-      {
-        setSourceConfigData: (_, sourceConfigData) => sourceConfigData,
-      },
-    ],
     dataLoading: [
       true,
       {
         onInitializeSource: () => false,
-        setSourceConfigData: () => false,
         resetSourceState: () => false,
-        setPreContentSourceConfigData: () => false,
       },
     ],
     buttonLoading: [
       false,
       {
         setButtonNotLoading: () => false,
-        setSourceConnectData: () => false,
-        setSourceConfigData: () => false,
         resetSourceState: () => false,
         removeContentSource: () => true,
-        saveSourceConfig: () => true,
-        getSourceConnectData: () => true,
-        createContentSource: () => true,
       },
     ],
     sectionLoading: [
       true,
       {
         searchContentSourceDocuments: () => true,
-        getPreContentSourceConfigData: () => true,
         setSearchResults: () => false,
-        setPreContentSourceConfigData: () => false,
       },
     ],
     contentItems: [
@@ -187,7 +148,6 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
           actions.initializeFederatedSummary(sourceId);
         }
       } catch (e) {
-        // TODO: Verify this works once components are there. Not sure if the catch gives a status code.
         if (e.response.status === 404) {
           KibanaLogic.values.navigateToUrl(NOT_FOUND_PATH);
         } else {
@@ -264,16 +224,6 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
         flashAPIErrors(e);
       } finally {
         actions.setButtonNotLoading();
-      }
-    },
-    getSourceConfigData: async ({ serviceType }) => {
-      const route = `/api/workplace_search/org/settings/connectors/${serviceType}`;
-
-      try {
-        const response = await HttpLogic.values.http.get(route);
-        actions.setSourceConfigData(response);
-      } catch (e) {
-        flashAPIErrors(e);
       }
     },
     onUpdateSourceName: (name: string) => {

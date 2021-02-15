@@ -1,21 +1,24 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import '../../../__mocks__/react_router_history.mock';
-import { unmountHandler } from '../../../__mocks__/shallow_useeffect.mock';
 import { mockFlashMessageHelpers, setMockValues, setMockActions } from '../../../__mocks__';
+import { unmountHandler } from '../../../__mocks__/shallow_useeffect.mock';
 import { mockEngineValues } from '../../__mocks__';
 
 import React from 'react';
-import { shallow } from 'enzyme';
 import { Switch, Redirect, useParams } from 'react-router-dom';
 
+import { shallow } from 'enzyme';
+
 import { Loading } from '../../../shared/loading';
-import { EngineOverview } from '../engine_overview';
 import { AnalyticsRouter } from '../analytics';
+import { EngineOverview } from '../engine_overview';
+import { RelevanceTuning } from '../relevance_tuning';
 
 import { EngineRouter } from './engine_router';
 
@@ -92,5 +95,12 @@ describe('EngineRouter', () => {
     const wrapper = shallow(<EngineRouter />);
 
     expect(wrapper.find(AnalyticsRouter)).toHaveLength(1);
+  });
+
+  it('renders an relevance tuning view', () => {
+    setMockValues({ ...values, myRole: { canManageEngineRelevanceTuning: true } });
+    const wrapper = shallow(<EngineRouter />);
+
+    expect(wrapper.find(RelevanceTuning)).toHaveLength(1);
   });
 });

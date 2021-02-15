@@ -1,12 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { combineLatest, Subscription } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { TypeOf } from '@kbn/config-schema';
+import { RecursiveReadonly } from '@kbn/utility-types';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { SecurityOssPluginSetup } from 'src/plugins/security_oss/server';
 import {
@@ -15,6 +17,7 @@ import {
   KibanaRequest,
   Logger,
   PluginInitializerContext,
+  Plugin,
 } from '../../../../src/core/server';
 import { SpacesPluginSetup, SpacesPluginStart } from '../../spaces/server';
 import { PluginSetupContract as FeaturesSetupContract } from '../../features/server';
@@ -100,7 +103,13 @@ export interface PluginStartDependencies {
 /**
  * Represents Security Plugin instance that will be managed by the Kibana plugin system.
  */
-export class Plugin {
+export class SecurityPlugin
+  implements
+    Plugin<
+      RecursiveReadonly<SecurityPluginSetup>,
+      RecursiveReadonly<SecurityPluginStart>,
+      PluginSetupDependencies
+    > {
   private readonly logger: Logger;
   private authorizationSetup?: AuthorizationServiceSetup;
   private auditSetup?: AuditServiceSetup;

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -98,7 +99,6 @@ export const ParamsSchema = schema.object({
   boundaryIndexId: schema.string({ minLength: 1 }),
   boundaryGeoField: schema.string({ minLength: 1 }),
   boundaryNameField: schema.maybe(schema.string({ minLength: 1 })),
-  delayOffsetWithUnits: schema.maybe(schema.string({ minLength: 1 })),
   indexQuery: schema.maybe(schema.any({})),
   boundaryIndexQuery: schema.maybe(schema.any({})),
 });
@@ -114,7 +114,6 @@ export interface GeoContainmentParams extends AlertTypeParams {
   boundaryIndexId: string;
   boundaryGeoField: string;
   boundaryNameField?: string;
-  delayOffsetWithUnits?: string;
   indexQuery?: Query;
   boundaryIndexQuery?: Query;
 }

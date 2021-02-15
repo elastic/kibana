@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 jest.mock('../selectors/map_selectors', () => ({}));
@@ -260,6 +261,7 @@ describe('map_actions', () => {
         $state: { store: 'appState' },
       },
     ];
+    const searchSessionId = '1234';
 
     beforeEach(() => {
       //Mocks the "previous" state
@@ -271,6 +273,9 @@ describe('map_actions', () => {
       };
       require('../selectors/map_selectors').getFilters = () => {
         return filters;
+      };
+      require('../selectors/map_selectors').getSearchSessionId = () => {
+        return searchSessionId;
       };
       require('../selectors/map_selectors').getMapSettings = () => {
         return {
@@ -288,12 +293,14 @@ describe('map_actions', () => {
       const setQueryAction = await setQuery({
         query: newQuery,
         filters,
+        searchSessionId,
       });
       await setQueryAction(dispatchMock, getStoreMock);
 
       expect(dispatchMock.mock.calls).toEqual([
         [
           {
+            searchSessionId,
             timeFilters,
             query: newQuery,
             filters,
@@ -304,11 +311,25 @@ describe('map_actions', () => {
       ]);
     });
 
+    it('should dispatch query action when searchSessionId changes', async () => {
+      const setQueryAction = await setQuery({
+        timeFilters,
+        query,
+        filters,
+        searchSessionId: '5678',
+      });
+      await setQueryAction(dispatchMock, getStoreMock);
+
+      // dispatchMock calls: dispatch(SET_QUERY) and dispatch(syncDataForAllLayers())
+      expect(dispatchMock.mock.calls.length).toEqual(2);
+    });
+
     it('should not dispatch query action when nothing changes', async () => {
       const setQueryAction = await setQuery({
         timeFilters,
         query,
         filters,
+        searchSessionId,
       });
       await setQueryAction(dispatchMock, getStoreMock);
 

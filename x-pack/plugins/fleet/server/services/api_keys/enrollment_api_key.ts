@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { SavedObjectsClientContract, ElasticsearchClient } from 'src/core/server';
@@ -76,5 +77,17 @@ export async function generateEnrollmentAPIKey(
     return enrollmentApiKeyServiceFleetServer.generateEnrollmentAPIKey(soClient, esClient, data);
   } else {
     return enrollmentApiKeyServiceSO.generateEnrollmentAPIKey(soClient, data);
+  }
+}
+
+export async function getEnrollmentAPIKeyById(
+  soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient,
+  apiKeyId: string
+) {
+  if (appContextService.getConfig()?.agents?.fleetServerEnabled === true) {
+    return enrollmentApiKeyServiceFleetServer.getEnrollmentAPIKeyById(esClient, apiKeyId);
+  } else {
+    return enrollmentApiKeyServiceSO.getEnrollmentAPIKeyById(soClient, apiKeyId);
   }
 }

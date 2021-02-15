@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React, { FunctionComponent } from 'react';
@@ -20,6 +20,7 @@ export interface Props<T, FormType = FormData, I = T> {
   componentProps?: Record<string, any>;
   readDefaultValueOnForm?: boolean;
   onChange?: (value: I) => void;
+  onError?: (errors: string[] | null) => void;
   children?: (field: FieldHook<T, I>) => JSX.Element | null;
   [key: string]: any;
 }
@@ -33,6 +34,7 @@ function UseFieldComp<T = unknown, FormType = FormData, I = T>(props: Props<T, F
     componentProps,
     readDefaultValueOnForm = true,
     onChange,
+    onError,
     children,
     ...rest
   } = props;
@@ -62,7 +64,7 @@ function UseFieldComp<T = unknown, FormType = FormData, I = T>(props: Props<T, F
     }
   }
 
-  const field = useField<T, FormType, I>(form, path, fieldConfig, onChange);
+  const field = useField<T, FormType, I>(form, path, fieldConfig, onChange, onError);
 
   // Children prevails over anything else provided.
   if (children) {

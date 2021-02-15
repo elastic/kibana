@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { CoreSetup, PluginInitializerContext, KibanaRequest } from 'kibana/server';
 import { PromiseReturnType } from '../../../typings/common';
 import { createAnnotationsClient } from './create_annotations_client';
@@ -38,7 +40,7 @@ export async function bootstrapAnnotations({ index, core, context }: Params) {
     ) => {
       return createAnnotationsClient({
         index,
-        apiCaller: requestContext.core.elasticsearch.legacy.client.callAsCurrentUser,
+        esClient: requestContext.core.elasticsearch.client.asCurrentUser,
         logger,
         license: requestContext.licensing?.license,
       });

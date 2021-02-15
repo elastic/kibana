@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { RequestHandler } from 'src/core/server';
@@ -131,8 +132,8 @@ export const updateAgentHandler: RequestHandler<
   const esClient = context.core.elasticsearch.client.asCurrentUser;
 
   try {
-    await AgentService.updateAgent(soClient, request.params.agentId, {
-      userProvidedMetatada: request.body.user_provided_metadata,
+    await AgentService.updateAgent(soClient, esClient, request.params.agentId, {
+      user_provided_metadata: request.body.user_provided_metadata,
     });
     const agent = await AgentService.getAgent(soClient, esClient, request.params.agentId);
 
@@ -163,12 +164,13 @@ export const postAgentCheckinHandler: RequestHandler<
   try {
     const soClient = appContextService.getInternalUserSOClient(request);
     const esClient = appContextService.getInternalUserESClient();
-    const agent = await AgentService.authenticateAgentWithAccessToken(soClient, request);
+    const agent = await AgentService.authenticateAgentWithAccessToken(soClient, esClient, request);
     const abortController = new AbortController();
     request.events.aborted$.subscribe(() => {
       abortController.abort();
     });
     const signal = abortController.signal;
+
     const { actions } = await AgentService.agentCheckin(
       soClient,
       esClient,
@@ -204,8 +206,13 @@ export const postAgentEnrollHandler: RequestHandler<
 > = async (context, request, response) => {
   try {
     const soClient = appContextService.getInternalUserSOClient(request);
+    const esClient = context.core.elasticsearch.client.asInternalUser;
     const { apiKeyId } = APIKeyService.parseApiKeyFromHeaders(request.headers);
-    const enrollmentAPIKey = await APIKeyService.getEnrollmentAPIKeyById(soClient, apiKeyId);
+    const enrollmentAPIKey = await APIKeyService.getEnrollmentAPIKeyById(
+      soClient,
+      esClient,
+      apiKeyId
+    );
 
     if (!enrollmentAPIKey || !enrollmentAPIKey.active) {
       return response.unauthorized({
@@ -310,21 +317,16 @@ export const postBulkAgentsReassignHandler: RequestHandler<
   const soClient = context.core.savedObjects.client;
   const esClient = context.core.elasticsearch.client.asInternalUser;
   try {
-    // Reassign by array of IDs
-    const result = Array.isArray(request.body.agents)
-      ? await AgentService.reassignAgents(
-          soClient,
-          esClient,
-          { agentIds: request.body.agents },
-          request.body.policy_id
-        )
-      : await AgentService.reassignAgents(
-          soClient,
-          esClient,
-          { kuery: request.body.agents },
-          request.body.policy_id
-        );
-    const body: PostBulkAgentReassignResponse = result.saved_objects.reduce((acc, so) => {
+    const results = await AgentService.reassignAgents(
+      soClient,
+      esClient,
+      Array.isArray(request.body.agents)
+        ? { agentIds: request.body.agents }
+        : { kuery: request.body.agents },
+      request.body.policy_id
+    );
+
+    const body: PostBulkAgentReassignResponse = results.items.reduce((acc, so) => {
       return {
         ...acc,
         [so.id]: {

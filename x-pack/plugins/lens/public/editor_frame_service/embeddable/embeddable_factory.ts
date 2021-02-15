@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { Capabilities, HttpSetup } from 'kibana/public';
@@ -22,6 +23,7 @@ import { UiActionsStart } from '../../../../../../src/plugins/ui_actions/public'
 import { Document } from '../../persistence/saved_object_store';
 import { LensAttributeService } from '../../lens_attribute_service';
 import { DOC_TYPE } from '../../../common';
+import { ErrorMessage } from '../types';
 
 export interface LensEmbeddableStartServices {
   timefilter: TimefilterContract;
@@ -31,7 +33,9 @@ export interface LensEmbeddableStartServices {
   expressionRenderer: ReactExpressionRendererType;
   indexPatternService: IndexPatternsContract;
   uiActions?: UiActionsStart;
-  documentToExpression: (doc: Document) => Promise<Ast | null>;
+  documentToExpression: (
+    doc: Document
+  ) => Promise<{ ast: Ast | null; errors: ErrorMessage[] | undefined }>;
 }
 
 export class EmbeddableFactory implements EmbeddableFactoryDefinition {

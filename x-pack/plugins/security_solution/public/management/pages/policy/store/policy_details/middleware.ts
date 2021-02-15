@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { IHttpFetchError } from 'kibana/public';
@@ -40,6 +41,10 @@ export const policyDetailsMiddlewareFactory: ImmutableMiddlewareFactory<PolicyDe
         if (policyItem.inputs[0].config.policy.value.windows.popup.malware.message === '') {
           policyItem.inputs[0].config.policy.value.windows.popup.malware.message = DefaultMalwareMessage;
           policyItem.inputs[0].config.policy.value.mac.popup.malware.message = DefaultMalwareMessage;
+        }
+        if (policyItem.inputs[0].config.policy.value.windows.popup.ransomware.message === '') {
+          policyItem.inputs[0].config.policy.value.windows.popup.ransomware.message = DefaultMalwareMessage;
+          policyItem.inputs[0].config.policy.value.mac.popup.ransomware.message = DefaultMalwareMessage;
         }
       } catch (error) {
         dispatch({

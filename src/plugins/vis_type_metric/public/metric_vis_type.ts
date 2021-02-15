@@ -1,14 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { i18n } from '@kbn/i18n';
 import { MetricVisOptions } from './components/metric_vis_options';
-import { ColorSchemas, colorSchemas, ColorMode } from '../../charts/public';
+import { ColorSchemas, ColorMode } from '../../charts/public';
 import { VisTypeDefinition } from '../../visualizations/public';
 import { AggGroupNames } from '../../data/public';
 import { toExpressionAst } from './to_ast';
@@ -48,29 +48,6 @@ export const createMetricVisTypeDefinition = (): VisTypeDefinition<VisParams> =>
     },
   },
   editorConfig: {
-    collections: {
-      metricColorMode: [
-        {
-          id: ColorMode.None,
-          label: i18n.translate('visTypeMetric.colorModes.noneOptionLabel', {
-            defaultMessage: 'None',
-          }),
-        },
-        {
-          id: ColorMode.Labels,
-          label: i18n.translate('visTypeMetric.colorModes.labelsOptionLabel', {
-            defaultMessage: 'Labels',
-          }),
-        },
-        {
-          id: ColorMode.Background,
-          label: i18n.translate('visTypeMetric.colorModes.backgroundOptionLabel', {
-            defaultMessage: 'Background',
-          }),
-        },
-      ],
-      colorSchemas,
-    },
     optionsTemplate: MetricVisOptions,
     schemas: [
       {

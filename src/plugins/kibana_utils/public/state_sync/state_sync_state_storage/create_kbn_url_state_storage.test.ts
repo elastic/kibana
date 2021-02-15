@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { mockStorage } from '../../storage/hashed_item_store/mock';
@@ -39,11 +39,11 @@ describe('KbnUrlStateStorage', () => {
       const key = '_s';
       urlStateStorage.set(key, state);
       expect(getCurrentUrl()).toMatchInlineSnapshot(`"/"`);
-      expect(urlStateStorage.flush()).toBe(true);
+      expect(!!urlStateStorage.kbnUrlControls.flush()).toBe(true);
       expect(getCurrentUrl()).toMatchInlineSnapshot(`"/#?_s=(ok:1,test:test)"`);
       expect(urlStateStorage.get(key)).toEqual(state);
 
-      expect(urlStateStorage.flush()).toBe(false); // nothing to flush, not update
+      expect(!!urlStateStorage.kbnUrlControls.flush()).toBe(false); // nothing to flush, not update
     });
 
     it('should cancel url updates', async () => {
@@ -215,11 +215,11 @@ describe('KbnUrlStateStorage', () => {
       const key = '_s';
       urlStateStorage.set(key, state);
       expect(getCurrentUrl()).toMatchInlineSnapshot(`"/kibana/app/"`);
-      expect(urlStateStorage.flush()).toBe(true);
+      expect(!!urlStateStorage.kbnUrlControls.flush()).toBe(true);
       expect(getCurrentUrl()).toMatchInlineSnapshot(`"/kibana/app/#?_s=(ok:1,test:test)"`);
       expect(urlStateStorage.get(key)).toEqual(state);
 
-      expect(urlStateStorage.flush()).toBe(false); // nothing to flush, not update
+      expect(!!urlStateStorage.kbnUrlControls.flush()).toBe(false); // nothing to flush, not update
     });
 
     it('should cancel url updates', async () => {
@@ -227,7 +227,7 @@ describe('KbnUrlStateStorage', () => {
       const key = '_s';
       const pr = urlStateStorage.set(key, state);
       expect(getCurrentUrl()).toMatchInlineSnapshot(`"/kibana/app/"`);
-      urlStateStorage.cancel();
+      urlStateStorage.kbnUrlControls.cancel();
       await pr;
       expect(getCurrentUrl()).toMatchInlineSnapshot(`"/kibana/app/"`);
       expect(urlStateStorage.get(key)).toEqual(null);

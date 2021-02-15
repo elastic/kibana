@@ -1,14 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { PublicContract } from '@kbn/utility-types';
 import { distinctUntilChanged, map, startWith } from 'rxjs/operators';
-import { Observable, Subject, Subscription } from 'rxjs';
+import { Observable, Subscription } from 'rxjs';
 import { PluginInitializerContext, StartServicesAccessor } from 'kibana/public';
 import { UrlGeneratorId, UrlGeneratorStateMapping } from '../../../../share/public/';
 import { ConfigSchema } from '../../../config';
@@ -20,6 +20,7 @@ import {
 import { ISessionsClient } from './sessions_client';
 import { ISearchOptions } from '../../../common';
 import { NowProviderInternalContract } from '../../now_provider';
+import { SEARCH_SESSIONS_MANAGEMENT_ID } from './constants';
 
 export type ISessionService = PublicContract<SessionService>;
 
@@ -44,6 +45,20 @@ export interface SearchSessionInfoProvider<ID extends UrlGeneratorId = UrlGenera
 }
 
 /**
+ * Configure a "Search session indicator" UI
+ */
+export interface SearchSessionIndicatorUiConfig {
+  /**
+   * App controls if "Search session indicator" UI should be disabled.
+   * reasonText will appear in a tooltip.
+   *
+   * Could be used, for example, to disable "Search session indicator" UI
+   * in case user doesn't have permissions to store a search session
+   */
+  isDisabled: () => { disabled: true; reasonText: string } | { disabled: false };
+}
+
+/**
  * Responsible for tracking a current search session. Supports only a single session at a time.
  */
 export class SessionService {
@@ -51,8 +66,10 @@ export class SessionService {
   private readonly state: SessionStateContainer<TrackSearchDescriptor>;
 
   private searchSessionInfoProvider?: SearchSessionInfoProvider;
+  private searchSessionIndicatorUiConfig?: Partial<SearchSessionIndicatorUiConfig>;
   private subscription = new Subscription();
   private curApp?: string;
+  private hasAccessToSearchSessions: boolean = false;
 
   constructor(
     initializerContext: PluginInitializerContext<ConfigSchema>,
@@ -79,6 +96,10 @@ export class SessionService {
     );
 
     getStartServices().then(([coreStart]) => {
+      // using management?.kibana? we infer if any of the apps allows current user to store sessions
+      this.hasAccessToSearchSessions =
+        coreStart.application.capabilities.management?.kibana?.[SEARCH_SESSIONS_MANAGEMENT_ID];
+
       // Apps required to clean up their sessions before unmounting
       // Make sure that apps don't leave sessions open.
       this.subscription.add(
@@ -103,14 +124,12 @@ export class SessionService {
   }
 
   /**
-   * Set a provider of info about current session
-   * This will be used for creating a search session saved object
-   * @param searchSessionInfoProvider
+   * If user has access to search sessions
+   * This resolves to `true` in case at least one app allows user to create search session
+   * In this case search session management is available
    */
-  public setSearchSessionInfoProvider<ID extends UrlGeneratorId = UrlGeneratorId>(
-    searchSessionInfoProvider: SearchSessionInfoProvider<ID> | undefined
-  ) {
-    this.searchSessionInfoProvider = searchSessionInfoProvider;
+  public hasAccess() {
+    return this.hasAccessToSearchSessions;
   }
 
   /**
@@ -185,22 +204,8 @@ export class SessionService {
    */
   public clear() {
     this.state.transitions.clear();
-    this.setSearchSessionInfoProvider(undefined);
-  }
-
-  private refresh$ = new Subject<void>();
-  /**
-   * Observable emits when search result refresh was requested
-   * For example, the UI could have it's own "refresh" button
-   * Application would use this observable to handle user interaction on that button
-   */
-  public onRefresh$ = this.refresh$.asObservable();
-
-  /**
-   * Request a search results refresh
-   */
-  public refresh() {
-    this.refresh$.next();
+    this.searchSessionInfoProvider = undefined;
+    this.searchSessionIndicatorUiConfig = undefined;
   }
 
   /**
@@ -225,6 +230,7 @@ export class SessionService {
     const sessionId = this.getSessionId();
     if (!sessionId) throw new Error('No current session');
     if (!this.curApp) throw new Error('No current app id');
+    if (!this.hasAccess()) throw new Error('No access to search sessions');
     const currentSessionInfoProvider = this.searchSessionInfoProvider;
     if (!currentSessionInfoProvider) throw new Error('No info provider for current session');
     const [name, { initialState, restoreState, urlGeneratorId }] = await Promise.all([
@@ -257,16 +263,60 @@ export class SessionService {
 
   /**
    * Infers search session options for sessionId using current session state
+   *
+   * In case user doesn't has access to `search-session` SO returns null,
+   * meaning that sessionId and other session parameters shouldn't be used when doing searches
+   *
    * @param sessionId
    */
   public getSearchOptions(
-    sessionId: string
-  ): Required<Pick<ISearchOptions, 'sessionId' | 'isRestore' | 'isStored'>> {
+    sessionId?: string
+  ): Required<Pick<ISearchOptions, 'sessionId' | 'isRestore' | 'isStored'>> | null {
+    if (!sessionId) {
+      return null;
+    }
+
+    // in case user doesn't have permissions to search session, do not forward sessionId to the server
+    // because user most likely also doesn't have access to `search-session` SO
+    if (!this.hasAccessToSearchSessions) {
+      return null;
+    }
+
     const isCurrentSession = this.isCurrentSession(sessionId);
     return {
       sessionId,
       isRestore: isCurrentSession ? this.isRestore() : false,
       isStored: isCurrentSession ? this.isStored() : false,
+    };
+  }
+
+  /**
+   * Provide an info about current session which is needed for storing a search session.
+   * To opt-into "Search session indicator" UI app has to call {@link enableStorage}.
+   *
+   * @param searchSessionInfoProvider - info provider for saving a search session
+   * @param searchSessionIndicatorUiConfig - config for "Search session indicator" UI
+   */
+  public enableStorage<ID extends UrlGeneratorId = UrlGeneratorId>(
+    searchSessionInfoProvider: SearchSessionInfoProvider<ID>,
+    searchSessionIndicatorUiConfig?: SearchSessionIndicatorUiConfig
+  ) {
+    this.searchSessionInfoProvider = searchSessionInfoProvider;
+    this.searchSessionIndicatorUiConfig = searchSessionIndicatorUiConfig;
+  }
+
+  /**
+   * If the current app explicitly called {@link enableStorage} and provided all configuration needed
+   * for storing its search sessions
+   */
+  public isSessionStorageReady(): boolean {
+    return !!this.searchSessionInfoProvider;
+  }
+
+  public getSearchSessionIndicatorUiConfig(): SearchSessionIndicatorUiConfig {
+    return {
+      isDisabled: () => ({ disabled: false }),
+      ...this.searchSessionIndicatorUiConfig,
     };
   }
 }

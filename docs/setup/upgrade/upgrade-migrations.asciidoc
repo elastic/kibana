@@ -19,17 +19,16 @@ Saved objects are stored in two indices:
 * `.kibana_{kibana_version}_001`, or if the `kibana.index` configuration setting is set `.{kibana.index}_{kibana_version}_001`. E.g. for Kibana v7.12.0 `.kibana_7.12.0_001`.
 * `.kibana_task_manager_{kibana_version}_001`, or if the `xpack.tasks.index` configuration setting is set `.{xpack.tasks.index}_{kibana_version}_001` E.g. for Kibana v7.12.0 `.kibana_task_manager_7.12.0_001`.
  
-The index aliases `.kibana` and `.kibana_task_manager` will always point to the most up-to-date version indices.
+The index aliases `.kibana` and `.kibana_task_manager` will always point to
+the most up-to-date saved object indices.
 
 The first time a newer {kib} starts, it will first perform an upgrade migration before starting plugins or serving HTTP traffic. To prevent losing acknowledged writes old nodes should be shutdown before starting the upgrade. To reduce the likelihood of old nodes losing acknowledged writes, {kib} 7.12.0 and later will add a write block to the outdated index. Table 1 lists the saved objects indices used by previous versions of {kib}.
 
 .Saved object indices and aliases per {kib} version
 [options="header"]
-[cols="a,a,a"]
 |=======================
-|Upgrading from version | Outdated index (alias) | Upgraded index (alias)
-| 6.0.0 through 6.4.x    | `.kibana`     1.3+^.^| `.kibana_7.12.0_001`
-(`.kibana` alias)
+|Upgrading from version | Outdated index (alias)
+| 6.0.0 through 6.4.x    | `.kibana`     
 
 `.kibana_task_manager_7.12.0_001` (`.kibana_task_manager` alias)
 | 6.5.0 through 7.3.x    | `.kibana_N` (`.kibana` alias)

@@ -1,20 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { IUiSettingsClient } from 'kibana/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { stackManagementSchema } from './schema';
-
-export interface UsageStats extends Record<string, boolean | number | string> {
-  // We don't support `type` yet. Only interfaces. So I added at least 1 known key to the generic
-  // Record extension to avoid eslint reverting it back to a `type`
-  'visualize:enableLabs': boolean;
-}
+import { UsageStats } from './types';
+import { REDACTED_KEYWORD } from '../../../common/constants';
 
 export function createCollectorFetch(getUiSettingsClient: () => IUiSettingsClient | undefined) {
   return async function fetchUsageStats(): Promise<UsageStats | undefined> {
@@ -23,11 +19,12 @@ export function createCollectorFetch(getUiSettingsClient: () => IUiSettingsClien
       return;
     }
 
-    const user = await uiSettingsClient.getUserProvided();
-    const modifiedEntries = Object.keys(user)
-      .filter((key: string) => key !== 'buildNum')
-      .reduce((obj: any, key: string) => {
-        obj[key] = user[key].userValue;
+    const userProvided = await uiSettingsClient.getUserProvided();
+    const modifiedEntries = Object.entries(userProvided)
+      .filter(([key]) => key !== 'buildNum')
+      .reduce((obj: any, [key, { userValue }]) => {
+        const sensitive = uiSettingsClient.isSensitive(key);
+        obj[key] = sensitive ? REDACTED_KEYWORD : userValue;
         return obj;
       }, {});
 

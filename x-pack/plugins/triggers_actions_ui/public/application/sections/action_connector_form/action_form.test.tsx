@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React, { Fragment, lazy } from 'react';
 import { mountWithIntl, nextTick } from '@kbn/test/jest';
 import { EuiAccordion } from '@elastic/eui';
@@ -550,7 +552,9 @@ describe('action_form', () => {
       ]);
       expect(setHasActionsWithBrokenConnector).toHaveBeenLastCalledWith(true);
       expect(wrapper.find(EuiAccordion)).toHaveLength(3);
-      expect(wrapper.find(`div[data-test-subj="alertActionAccordionCallout"]`)).toHaveLength(2);
+      expect(
+        wrapper.find(`EuiIconTip[data-test-subj="alertActionAccordionErrorTooltip"]`)
+      ).toHaveLength(2);
     });
   });
 });

@@ -1,11 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FC, ReactNode } from 'react';
-import { EuiBasicTable, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiBasicTable, EuiFlexItem } from '@elastic/eui';
 // @ts-ignore
 import { formatDate } from '@elastic/eui/lib/services/format';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -14,6 +15,7 @@ import { i18n } from '@kbn/i18n';
 import type { FieldDataRowProps } from '../../types/field_data_row';
 import { ExpandedRowFieldHeader } from '../expanded_row_field_header';
 import { DocumentStatsTable } from './document_stats';
+import { ExpandedRowContent } from './expanded_row_content';
 const TIME_FORMAT = 'MMM D YYYY, HH:mm:ss.SSS';
 interface SummaryTableItem {
   function: string;
@@ -66,7 +68,7 @@ export const DateContent: FC<FieldDataRowProps> = ({ config }) => {
   ];
 
   return (
-    <EuiFlexGroup data-test-subj={'mlDVDateContent'} gutterSize={'xl'}>
+    <ExpandedRowContent dataTestSubj={'mlDVDateContent'}>
       <DocumentStatsTable config={config} />
       <EuiFlexItem className={'mlDataVisualizerSummaryTableWrapper'}>
         <ExpandedRowFieldHeader>{summaryTableTitle}</ExpandedRowFieldHeader>
@@ -80,6 +82,6 @@ export const DateContent: FC<FieldDataRowProps> = ({ config }) => {
           tableLayout="auto"
         />
       </EuiFlexItem>
-    </EuiFlexGroup>
+    </ExpandedRowContent>
   );
 };

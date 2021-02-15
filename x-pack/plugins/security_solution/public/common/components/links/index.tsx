@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -54,10 +55,11 @@ export const LinkAnchor: React.FC<EuiLinkProps> = ({ children, ...props }) => (
 );
 
 // Internal Links
-const HostDetailsLinkComponent: React.FC<{ children?: React.ReactNode; hostName: string }> = ({
-  children,
-  hostName,
-}) => {
+const HostDetailsLinkComponent: React.FC<{
+  children?: React.ReactNode;
+  hostName: string;
+  isButton?: boolean;
+}> = ({ children, hostName, isButton }) => {
   const { formatUrl, search } = useFormatUrl(SecurityPageName.hosts);
   const { navigateToApp } = useKibana().services.application;
   const goToHostDetails = useCallback(
@@ -70,7 +72,14 @@ const HostDetailsLinkComponent: React.FC<{ children?: React.ReactNode; hostName:
     [hostName, navigateToApp, search]
   );
 
-  return (
+  return isButton ? (
+    <LinkButton
+      onClick={goToHostDetails}
+      href={formatUrl(getHostDetailsUrl(encodeURIComponent(hostName)))}
+    >
+      {children ? children : hostName}
+    </LinkButton>
+  ) : (
     <LinkAnchor
       onClick={goToHostDetails}
       href={formatUrl(getHostDetailsUrl(encodeURIComponent(hostName)))}
@@ -79,6 +88,7 @@ const HostDetailsLinkComponent: React.FC<{ children?: React.ReactNode; hostName:
     </LinkAnchor>
   );
 };
+
 export const HostDetailsLink = React.memo(HostDetailsLinkComponent);
 
 const allowedUrlSchemes = ['http://', 'https://'];
@@ -118,7 +128,8 @@ const NetworkDetailsLinkComponent: React.FC<{
   children?: React.ReactNode;
   ip: string;
   flowTarget?: FlowTarget | FlowTargetSourceDest;
-}> = ({ children, ip, flowTarget = FlowTarget.source }) => {
+  isButton?: boolean;
+}> = ({ children, ip, flowTarget = FlowTarget.source, isButton }) => {
   const { formatUrl, search } = useFormatUrl(SecurityPageName.network);
   const { navigateToApp } = useKibana().services.application;
   const goToNetworkDetails = useCallback(
@@ -131,7 +142,14 @@ const NetworkDetailsLinkComponent: React.FC<{
     [flowTarget, ip, navigateToApp, search]
   );
 
-  return (
+  return isButton ? (
+    <LinkButton
+      href={formatUrl(getNetworkDetailsUrl(encodeURIComponent(encodeIpv6(ip))))}
+      onClick={goToNetworkDetails}
+    >
+      {children ? children : ip}
+    </LinkButton>
+  ) : (
     <LinkAnchor
       onClick={goToNetworkDetails}
       href={formatUrl(getNetworkDetailsUrl(encodeURIComponent(encodeIpv6(ip))))}

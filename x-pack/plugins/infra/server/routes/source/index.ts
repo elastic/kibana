@@ -1,23 +1,31 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { schema } from '@kbn/config-schema';
-import { SourceResponseRuntimeType } from '../../../common/http_api/source_api';
+import Boom from '@hapi/boom';
+import { createValidationFunction } from '../../../common/runtime_types';
+import {
+  InfraSourceStatus,
+  SavedSourceConfigurationRuntimeType,
+  SourceResponseRuntimeType,
+} from '../../../common/http_api/source_api';
 import { InfraBackendLibs } from '../../lib/infra_types';
-import { InfraIndexType } from '../../graphql/types';
 import { hasData } from '../../lib/sources/has_data';
 import { createSearchClient } from '../../lib/create_search_client';
+import { AnomalyThresholdRangeError } from '../../lib/sources/errors';
 
 const typeToInfraIndexType = (value: string | undefined) => {
   switch (value) {
     case 'metrics':
-      return InfraIndexType.METRICS;
+      return 'METRICS';
     case 'logs':
-      return InfraIndexType.LOGS;
+      return 'LOGS';
     default:
-      return InfraIndexType.ANY;
+      return 'ANY';
   }
 };
 
@@ -50,14 +58,14 @@ export const initSourceRoute = (libs: InfraBackendLibs) => {
           return response.notFound();
         }
 
-        const status = {
+        const status: InfraSourceStatus = {
           logIndicesExist: logIndexStatus !== 'missing',
           metricIndicesExist,
           indexFields,
         };
 
         return response.ok({
-          body: SourceResponseRuntimeType.encode({ source, status }),
+          body: SourceResponseRuntimeType.encode({ source: { ...source, status } }),
         });
       } catch (error) {
         return response.internalError({
@@ -65,6 +73,88 @@ export const initSourceRoute = (libs: InfraBackendLibs) => {
         });
       }
     }
+  );
+
+  framework.registerRoute(
+    {
+      method: 'patch',
+      path: '/api/metrics/source/{sourceId}',
+      validate: {
+        params: schema.object({
+          sourceId: schema.string(),
+        }),
+        body: createValidationFunction(SavedSourceConfigurationRuntimeType),
+      },
+    },
+    framework.router.handleLegacyErrors(async (requestContext, request, response) => {
+      const { sources } = libs;
+      const { sourceId } = request.params;
+      const patchedSourceConfigurationProperties = request.body;
+
+      try {
+        const sourceConfiguration = await sources.getSourceConfiguration(
+          requestContext.core.savedObjects.client,
+          sourceId
+        );
+
+        if (sourceConfiguration.origin === 'internal') {
+          response.conflict({
+            body: 'A conflicting read-only source configuration already exists.',
+          });
+        }
+
+        const sourceConfigurationExists = sourceConfiguration.origin === 'stored';
+        const patchedSourceConfiguration = await (sourceConfigurationExists
+          ? sources.updateSourceConfiguration(
+              requestContext.core.savedObjects.client,
+              sourceId,
+              patchedSourceConfigurationProperties
+            )
+          : sources.createSourceConfiguration(
+              requestContext.core.savedObjects.client,
+              sourceId,
+              patchedSourceConfigurationProperties
+            ));
+
+        const [logIndexStatus, metricIndicesExist, indexFields] = await Promise.all([
+          libs.sourceStatus.getLogIndexStatus(requestContext, sourceId),
+          libs.sourceStatus.hasMetricIndices(requestContext, sourceId),
+          libs.fields.getFields(requestContext, sourceId, typeToInfraIndexType('metrics')),
+        ]);
+
+        const status: InfraSourceStatus = {
+          logIndicesExist: logIndexStatus !== 'missing',
+          metricIndicesExist,
+          indexFields,
+        };
+
+        return response.ok({
+          body: SourceResponseRuntimeType.encode({
+            source: { ...patchedSourceConfiguration, status },
+          }),
+        });
+      } catch (error) {
+        if (Boom.isBoom(error)) {
+          throw error;
+        }
+
+        if (error instanceof AnomalyThresholdRangeError) {
+          return response.customError({
+            statusCode: 400,
+            body: {
+              message: error.message,
+            },
+          });
+        }
+
+        return response.customError({
+          statusCode: error.statusCode ?? 500,
+          body: {
+            message: error.message ?? 'An unexpected error occurred',
+          },
+        });
+      }
+    })
   );
 
   framework.registerRoute(

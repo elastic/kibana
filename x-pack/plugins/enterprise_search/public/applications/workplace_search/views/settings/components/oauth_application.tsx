@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FormEvent, useState } from 'react';
@@ -25,7 +26,11 @@ import {
   EuiText,
 } from '@elastic/eui';
 
-import { ENT_SEARCH_LICENSE_MANAGEMENT } from '../../../routes';
+import { LicensingLogic } from '../../../../shared/licensing';
+import { ContentSection } from '../../../components/shared/content_section';
+import { CredentialItem } from '../../../components/shared/credential_item';
+import { LicenseBadge } from '../../../components/shared/license_badge';
+import { ViewContentHeader } from '../../../components/shared/view_content_header';
 import {
   CLIENT_ID_LABEL,
   CLIENT_SECRET_LABEL,
@@ -47,12 +52,7 @@ import {
   LICENSE_MODAL_DESCRIPTION,
   LICENSE_MODAL_LINK,
 } from '../../../constants';
-
-import { LicensingLogic } from '../../../../shared/licensing';
-import { ContentSection } from '../../../components/shared/content_section';
-import { LicenseBadge } from '../../../components/shared/license_badge';
-import { ViewContentHeader } from '../../../components/shared/view_content_header';
-import { CredentialItem } from '../../../components/shared/credential_item';
+import { ENT_SEARCH_LICENSE_MANAGEMENT } from '../../../routes';
 import { SettingsLogic } from '../settings_logic';
 
 export const OauthApplication: React.FC = () => {

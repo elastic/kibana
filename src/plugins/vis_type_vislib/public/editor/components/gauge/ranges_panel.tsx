@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React, { useCallback } from 'react';
@@ -16,7 +16,7 @@ import {
   SwitchOption,
   ColorSchemaOptions,
 } from '../../../../../vis_default_editor/public';
-import { ColorSchemaParams, ColorSchemas } from '../../../../../charts/public';
+import { ColorSchemaParams, ColorSchemas, colorSchemas } from '../../../../../charts/public';
 import { GaugeOptionsInternalProps } from '../gauge';
 import { Gauge } from '../../../gauge';
 
@@ -27,7 +27,6 @@ function RangesPanel({
   setValue,
   stateParams,
   uiState,
-  vis,
 }: GaugeOptionsInternalProps) {
   const setColorSchemaOptions = useCallback(
     <T extends keyof ColorSchemaParams>(paramName: T, value: ColorSchemaParams[T]) => {
@@ -91,7 +90,7 @@ function RangesPanel({
       <ColorSchemaOptions
         disabled={stateParams.gauge.colorsRange.length < 2}
         colorSchema={stateParams.gauge.colorSchema}
-        colorSchemas={vis.type.editorConfig.collections.colorSchemas}
+        colorSchemas={colorSchemas}
         invertColors={stateParams.gauge.invertColors}
         uiState={uiState}
         setValue={setColorSchemaOptions}

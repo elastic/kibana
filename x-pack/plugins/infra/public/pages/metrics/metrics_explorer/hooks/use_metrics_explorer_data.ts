@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import DateMath from '@elastic/datemath';
 import { isEqual } from 'lodash';
 import { useEffect, useState, useCallback } from 'react';
 import { IIndexPattern } from 'src/plugins/data/public';
-import { SourceQuery } from '../../../../../common/graphql/types';
+import { InfraSourceConfiguration } from '../../../../../common/http_api/source_api';
 import {
   MetricsExplorerResponse,
   metricsExplorerResponseRT,
@@ -24,7 +25,7 @@ function isSameOptions(current: MetricsExplorerOptions, next: MetricsExplorerOpt
 
 export function useMetricsExplorerData(
   options: MetricsExplorerOptions,
-  source: SourceQuery.Query['source']['configuration'] | undefined,
+  source: InfraSourceConfiguration | undefined,
   derivedIndexPattern: IIndexPattern,
   timerange: MetricsExplorerTimeOptions,
   afterKey: string | null | Record<string, string | null>,

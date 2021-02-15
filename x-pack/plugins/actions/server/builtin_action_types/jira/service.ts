@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import axios from 'axios';
@@ -26,7 +27,7 @@ import {
 
 import * as i18n from './translations';
 import { request, getErrorMessage } from '../lib/axios_utils';
-import { ProxySettings } from '../../types';
+import { ActionsConfigurationUtilities } from '../../actions_config';
 
 const VERSION = '2';
 const BASE_URL = `rest/api/${VERSION}`;
@@ -39,7 +40,7 @@ const createMetaCapabilities = ['list-project-issuetypes', 'list-issuetype-field
 export const createExternalService = (
   { config, secrets }: ExternalServiceCredentials,
   logger: Logger,
-  proxySettings?: ProxySettings
+  configurationUtilities: ActionsConfigurationUtilities
 ): ExternalService => {
   const { apiUrl: url, projectKey } = config as JiraPublicConfigurationType;
   const { apiToken, email } = secrets as JiraSecretConfigurationType;
@@ -173,7 +174,7 @@ export const createExternalService = (
         axios: axiosInstance,
         url: `${incidentUrl}/${id}`,
         logger,
-        proxySettings,
+        configurationUtilities,
       });
 
       const { fields, ...rest } = res.data;
@@ -222,7 +223,7 @@ export const createExternalService = (
         data: {
           fields,
         },
-        proxySettings,
+        configurationUtilities,
       });
 
       const updatedIncident = await getIncident(res.data.id);
@@ -263,7 +264,7 @@ export const createExternalService = (
         url: `${incidentUrl}/${incidentId}`,
         logger,
         data: { fields },
-        proxySettings,
+        configurationUtilities,
       });
 
       const updatedIncident = await getIncident(incidentId as string);
@@ -297,7 +298,7 @@ export const createExternalService = (
         url: getCommentsURL(incidentId),
         logger,
         data: { body: comment.comment },
-        proxySettings,
+        configurationUtilities,
       });
 
       return {
@@ -324,7 +325,7 @@ export const createExternalService = (
         method: 'get',
         url: capabilitiesUrl,
         logger,
-        proxySettings,
+        configurationUtilities,
       });
 
       return { ...res.data };
@@ -350,7 +351,7 @@ export const createExternalService = (
           method: 'get',
           url: getIssueTypesOldAPIURL,
           logger,
-          proxySettings,
+          configurationUtilities,
         });
 
         const issueTypes = res.data.projects[0]?.issuetypes ?? [];
@@ -361,7 +362,7 @@ export const createExternalService = (
           method: 'get',
           url: getIssueTypesUrl,
           logger,
-          proxySettings,
+          configurationUtilities,
         });
 
         const issueTypes = res.data.values;
@@ -389,7 +390,7 @@ export const createExternalService = (
           method: 'get',
           url: createGetIssueTypeFieldsUrl(getIssueTypeFieldsOldAPIURL, issueTypeId),
           logger,
-          proxySettings,
+          configurationUtilities,
         });
 
         const fields = res.data.projects[0]?.issuetypes[0]?.fields || {};
@@ -400,7 +401,7 @@ export const createExternalService = (
           method: 'get',
           url: createGetIssueTypeFieldsUrl(getIssueTypeFieldsUrl, issueTypeId),
           logger,
-          proxySettings,
+          configurationUtilities,
         });
 
         const fields = res.data.values.reduce(
@@ -459,7 +460,7 @@ export const createExternalService = (
         method: 'get',
         url: query,
         logger,
-        proxySettings,
+        configurationUtilities,
       });
 
       return normalizeSearchResults(res.data?.issues ?? []);
@@ -483,7 +484,7 @@ export const createExternalService = (
         method: 'get',
         url: getIssueUrl,
         logger,
-        proxySettings,
+        configurationUtilities,
       });
 
       return normalizeIssue(res.data ?? {});

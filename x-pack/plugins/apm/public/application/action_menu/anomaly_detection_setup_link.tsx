@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import {
   EuiHeaderLink,
   EuiIcon,
@@ -57,7 +59,9 @@ export function AnomalyDetectionSetupLink() {
 export function MissingJobsAlert({ environment }: { environment?: string }) {
   const { data = DEFAULT_DATA, status } = useFetcher(
     (callApmApi) =>
-      callApmApi({ endpoint: `GET /api/apm/settings/anomaly-detection/jobs` }),
+      callApmApi({
+        endpoint: `GET /api/apm/settings/anomaly-detection/jobs`,
+      }),
     [],
     { preservePreviousData: false, showToastOnError: false }
   );

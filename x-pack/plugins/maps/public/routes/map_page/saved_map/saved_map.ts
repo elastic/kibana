@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { EmbeddableStateTransfer } from 'src/plugins/embeddable/public';
 import { MapSavedObjectAttributes } from '../../../../common/map_saved_object_type';
-import { MAP_PATH, MAP_SAVED_OBJECT_TYPE } from '../../../../common/constants';
+import { APP_ID, MAP_PATH, MAP_SAVED_OBJECT_TYPE } from '../../../../common/constants';
 import { createMapStore, MapStore, MapStoreState } from '../../../reducers/store';
 import {
   getTimeFilters,
@@ -281,10 +282,12 @@ export class SavedMap {
     returnToOrigin,
     newTags,
     saveByReference,
+    dashboardId,
   }: OnSaveProps & {
-    returnToOrigin: boolean;
+    returnToOrigin?: boolean;
     newTags?: string[];
     saveByReference: boolean;
+    dashboardId?: string | null;
   }) {
     if (!this._attributes) {
       throw new Error('Invalid usage, must await whenReady before calling save');
@@ -337,12 +340,21 @@ export class SavedMap {
         });
         return;
       }
-      this._getStateTransfer().navigateToWithEmbeddablePackage(this._originatingApp, {
+      await this._getStateTransfer().navigateToWithEmbeddablePackage(this._originatingApp, {
         state: {
           embeddableId: newCopyOnSave ? undefined : this._embeddableId,
           type: MAP_SAVED_OBJECT_TYPE,
           input: updatedMapEmbeddableInput,
         },
+      });
+      return;
+    } else if (dashboardId) {
+      await this._getStateTransfer().navigateToWithEmbeddablePackage('dashboards', {
+        state: {
+          type: MAP_SAVED_OBJECT_TYPE,
+          input: updatedMapEmbeddableInput,
+        },
+        path: dashboardId === 'new' ? '#/create' : `#/view/${dashboardId}`,
       });
       return;
     }
@@ -352,7 +364,7 @@ export class SavedMap {
     this._originatingApp = undefined;
 
     // remove editor state so the connection is still broken after reload
-    this._getStateTransfer().clearEditorState();
+    this._getStateTransfer().clearEditorState(APP_ID);
 
     getToasts().addSuccess({
       title: i18n.translate('xpack.maps.topNav.saveSuccessMessage', {

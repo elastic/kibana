@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 const APACHE_2_0_LICENSE_HEADER = `
@@ -27,7 +27,7 @@ const APACHE_2_0_LICENSE_HEADER = `
  */
 `;
 
-const DUAL_LICENSE_HEADER = `
+const OLD_DUAL_LICENSE_HEADER = `
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -37,11 +37,30 @@ const DUAL_LICENSE_HEADER = `
  */
 `;
 
-const ELASTIC_LICENSE_HEADER = `
+const DUAL_LICENSE_HEADER = `
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
+ */
+`;
+
+const OLD_ELASTIC_LICENSE_HEADER = `
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
+ */
+`;
+
+const ELASTIC_LICENSE_HEADER = `
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 `;
 
@@ -136,6 +155,8 @@ module.exports = {
             licenses: [
               APACHE_2_0_LICENSE_HEADER,
               ELASTIC_LICENSE_HEADER,
+              OLD_DUAL_LICENSE_HEADER,
+              OLD_ELASTIC_LICENSE_HEADER,
               SAFER_LODASH_SET_HEADER,
               SAFER_LODASH_SET_LODASH_HEADER,
               SAFER_LODASH_SET_DEFINITELYTYPED_HEADER,
@@ -166,6 +187,8 @@ module.exports = {
             licenses: [
               DUAL_LICENSE_HEADER,
               ELASTIC_LICENSE_HEADER,
+              OLD_DUAL_LICENSE_HEADER,
+              OLD_ELASTIC_LICENSE_HEADER,
               SAFER_LODASH_SET_HEADER,
               SAFER_LODASH_SET_LODASH_HEADER,
               SAFER_LODASH_SET_DEFINITELYTYPED_HEADER,
@@ -201,8 +224,10 @@ module.exports = {
           'error',
           {
             licenses: [
-              DUAL_LICENSE_HEADER,
               APACHE_2_0_LICENSE_HEADER,
+              DUAL_LICENSE_HEADER,
+              OLD_DUAL_LICENSE_HEADER,
+              OLD_ELASTIC_LICENSE_HEADER,
               SAFER_LODASH_SET_HEADER,
               SAFER_LODASH_SET_LODASH_HEADER,
               SAFER_LODASH_SET_DEFINITELYTYPED_HEADER,
@@ -228,9 +253,11 @@ module.exports = {
           'error',
           {
             licenses: [
+              APACHE_2_0_LICENSE_HEADER,
               DUAL_LICENSE_HEADER,
               ELASTIC_LICENSE_HEADER,
-              APACHE_2_0_LICENSE_HEADER,
+              OLD_DUAL_LICENSE_HEADER,
+              OLD_ELASTIC_LICENSE_HEADER,
               SAFER_LODASH_SET_HEADER,
               SAFER_LODASH_SET_DEFINITELYTYPED_HEADER,
             ],
@@ -251,9 +278,11 @@ module.exports = {
           'error',
           {
             licenses: [
+              APACHE_2_0_LICENSE_HEADER,
               DUAL_LICENSE_HEADER,
               ELASTIC_LICENSE_HEADER,
-              APACHE_2_0_LICENSE_HEADER,
+              OLD_DUAL_LICENSE_HEADER,
+              OLD_ELASTIC_LICENSE_HEADER,
               SAFER_LODASH_SET_LODASH_HEADER,
               SAFER_LODASH_SET_DEFINITELYTYPED_HEADER,
             ],
@@ -274,9 +303,11 @@ module.exports = {
           'error',
           {
             licenses: [
+              APACHE_2_0_LICENSE_HEADER,
               DUAL_LICENSE_HEADER,
               ELASTIC_LICENSE_HEADER,
-              APACHE_2_0_LICENSE_HEADER,
+              OLD_ELASTIC_LICENSE_HEADER,
+              OLD_DUAL_LICENSE_HEADER,
               SAFER_LODASH_SET_HEADER,
               SAFER_LODASH_SET_LODASH_HEADER,
             ],
@@ -1081,12 +1112,55 @@ module.exports = {
 
     /**
      * Enterprise Search overrides
+     * NOTE: We also have a single rule at the bottom of the file that
+     * overrides Prettier's default of not linting unnecessary backticks
      */
     {
+      // All files
+      files: ['x-pack/plugins/enterprise_search/**/*.{ts,tsx}'],
+      rules: {
+        'import/order': [
+          'error',
+          {
+            groups: ['unknown', ['builtin', 'external'], 'internal', 'parent', 'sibling', 'index'],
+            pathGroups: [
+              {
+                pattern:
+                  '{../../../../../../,../../../../../,../../../../,../../../,../../,../}{common/,*}__mocks__{*,/**}',
+                group: 'unknown',
+              },
+              {
+                pattern: '{**,.}/*.mock',
+                group: 'unknown',
+              },
+              {
+                pattern: 'react*',
+                group: 'external',
+                position: 'before',
+              },
+              {
+                pattern: '{@elastic/**,@kbn/**,src/**}',
+                group: 'internal',
+              },
+            ],
+            pathGroupsExcludedImportTypes: [],
+            alphabetize: {
+              order: 'asc',
+              caseInsensitive: true,
+            },
+            'newlines-between': 'always-and-inside-groups',
+          },
+        ],
+        'import/newline-after-import': 'error',
+        'react-hooks/exhaustive-deps': 'off',
+        'react/jsx-boolean-value': ['error', 'never'],
+      },
+    },
+    {
+      // Source files only - allow `any` in test/mock files
       files: ['x-pack/plugins/enterprise_search/**/*.{ts,tsx}'],
       excludedFiles: ['x-pack/plugins/enterprise_search/**/*.{test,mock}.{ts,tsx}'],
       rules: {
-        'react-hooks/exhaustive-deps': 'off',
         '@typescript-eslint/no-explicit-any': 'error',
       },
     },
@@ -1193,6 +1267,32 @@ module.exports = {
     },
 
     /**
+     * Osquery overrides
+     */
+    {
+      extends: ['eslint:recommended', 'plugin:react/recommended'],
+      plugins: ['react'],
+      files: ['x-pack/plugins/osquery/**/*.{js,mjs,ts,tsx}'],
+      rules: {
+        'arrow-body-style': ['error', 'as-needed'],
+        'prefer-arrow-callback': 'error',
+        'no-unused-vars': 'off',
+        'react/prop-types': 'off',
+      },
+    },
+    {
+      // typescript and javascript for front end react performance
+      files: ['x-pack/plugins/osquery/public/**/!(*.test).{js,mjs,ts,tsx}'],
+      plugins: ['react', 'react-perf'],
+      rules: {
+        'react-perf/jsx-no-new-object-as-prop': 'error',
+        'react-perf/jsx-no-new-array-as-prop': 'error',
+        'react-perf/jsx-no-new-function-as-prop': 'error',
+        'react/jsx-no-bind': 'error',
+      },
+    },
+
+    /**
      * Prettier disables all conflicting rules, listing as last override so it takes precedence
      */
     {
@@ -1201,6 +1301,16 @@ module.exports = {
         ...require('eslint-config-prettier').rules,
         ...require('eslint-config-prettier/react').rules,
         ...require('eslint-config-prettier/@typescript-eslint').rules,
+      },
+    },
+    /**
+     * Enterprise Search Prettier override
+     * Lints unnecessary backticks - @see https://github.com/prettier/eslint-config-prettier/blob/main/README.md#forbid-unnecessary-backticks
+     */
+    {
+      files: ['x-pack/plugins/enterprise_search/**/*.{ts,tsx}'],
+      rules: {
+        quotes: ['error', 'single', { avoidEscape: true, allowTemplateLiterals: false }],
       },
     },
 

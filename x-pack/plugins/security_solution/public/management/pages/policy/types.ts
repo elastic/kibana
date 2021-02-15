@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { ILicense } from '../../../../../licensing/common/types';
 import {
   AppLocation,
   Immutable,
-  MalwareFields,
+  ProtectionFields,
   PolicyData,
   UIPolicyConfig,
 } from '../../../../common/endpoint/types';
@@ -108,7 +109,16 @@ export type KeysByValueCriteria<O, Criteria> = {
 }[keyof O];
 
 /** Returns an array of the policy OSes that have a malware protection field */
-export type MalwareProtectionOSes = KeysByValueCriteria<UIPolicyConfig, { malware: MalwareFields }>;
+export type MalwareProtectionOSes = KeysByValueCriteria<
+  UIPolicyConfig,
+  { malware: ProtectionFields }
+>;
+
+/** Returns an array of the policy OSes that have a ransomware protection field */
+export type RansomwareProtectionOSes = KeysByValueCriteria<
+  UIPolicyConfig,
+  { ransomware: ProtectionFields }
+>;
 
 export interface GetPolicyListResponse extends GetPackagePoliciesResponse {
   items: PolicyData[];

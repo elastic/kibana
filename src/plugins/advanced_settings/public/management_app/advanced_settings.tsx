@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React, { Component } from 'react';
@@ -12,7 +12,7 @@ import { UnregisterCallback } from 'history';
 import { parse } from 'query-string';
 
 import { UiCounterMetricType } from '@kbn/analytics';
-import { Comparators, EuiFlexGroup, EuiFlexItem, EuiSpacer, Query } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, Query } from '@elastic/eui';
 
 import {
   IUiSettingsClient,
@@ -28,7 +28,7 @@ import { Form } from './components/form';
 import { AdvancedSettingsVoiceAnnouncement } from './components/advanced_settings_voice_announcement';
 import { ComponentRegistry } from '../';
 
-import { getAriaName, toEditableConfig, DEFAULT_CATEGORY } from './lib';
+import { getAriaName, toEditableConfig, fieldSorter, DEFAULT_CATEGORY } from './lib';
 
 import { FieldSetting, SettingsChanges } from './types';
 import { parseErrorMsg } from './components/search/search';
@@ -185,17 +185,17 @@ export class AdvancedSettings extends Component<AdvancedSettingsProps, AdvancedS
   mapConfig(config: IUiSettingsClient) {
     const all = config.getAll();
     return Object.entries(all)
-      .map((setting) => {
+      .map(([settingId, settingDef]) => {
         return toEditableConfig({
-          def: setting[1],
-          name: setting[0],
-          value: setting[1].userValue,
-          isCustom: config.isCustom(setting[0]),
-          isOverridden: config.isOverridden(setting[0]),
+          def: settingDef,
+          name: settingId,
+          value: settingDef.userValue,
+          isCustom: config.isCustom(settingId),
+          isOverridden: config.isOverridden(settingId),
         });
       })
-      .filter((c) => !c.readonly)
-      .sort(Comparators.property('name', Comparators.default('asc')));
+      .filter((c) => !c.readOnly)
+      .sort(fieldSorter);
   }
 
   mapSettings(settings: FieldSetting[]) {

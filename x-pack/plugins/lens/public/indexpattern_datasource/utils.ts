@@ -1,15 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { DataType } from '../types';
-import { IndexPattern, IndexPatternLayer } from './types';
-import { DraggedField } from './indexpattern';
-import {
+import { IndexPattern, IndexPatternLayer, DraggedField } from './types';
+import type {
   BaseIndexPatternColumn,
   FieldBasedIndexPatternColumn,
+  ReferenceBasedIndexPatternColumn,
 } from './operations/definitions/column_types';
 import { operationDefinitionMap, IndexPatternColumn } from './operations';
 
@@ -53,10 +54,27 @@ export function isColumnInvalid(
   if (!column) return;
 
   const operationDefinition = column.operationType && operationDefinitionMap[column.operationType];
-  return !!(
-    operationDefinition.getErrorMessage &&
-    operationDefinition.getErrorMessage(layer, columnId, indexPattern)
+  // check also references for errors
+  const referencesHaveErrors =
+    true &&
+    'references' in column &&
+    Boolean(getReferencesErrors(layer, column, indexPattern).filter(Boolean).length);
+
+  return (
+    !!operationDefinition.getErrorMessage?.(layer, columnId, indexPattern) || referencesHaveErrors
   );
+}
+
+function getReferencesErrors(
+  layer: IndexPatternLayer,
+  column: ReferenceBasedIndexPatternColumn,
+  indexPattern: IndexPattern
+) {
+  return column.references?.map((referenceId: string) => {
+    const referencedOperation = layer.columns[referenceId]?.operationType;
+    const referencedDefinition = operationDefinitionMap[referencedOperation];
+    return referencedDefinition?.getErrorMessage?.(layer, referenceId, indexPattern);
+  });
 }
 
 export function fieldIsInvalid(column: IndexPatternColumn | undefined, indexPattern: IndexPattern) {

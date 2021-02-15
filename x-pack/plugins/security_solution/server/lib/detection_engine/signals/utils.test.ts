@@ -1,11 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import moment from 'moment';
 import sinon from 'sinon';
+import { ApiResponse, Context } from '@elastic/elasticsearch/lib/Transport';
 
 import { alertsMock, AlertServicesMock } from '../../../../../alerts/server/mocks';
 import { listMock } from '../../../../../lists/server/mocks';
@@ -28,6 +30,7 @@ import {
   getListsClient,
   getSignalTimeTuples,
   getExceptions,
+  hasTimestampFields,
   wrapBuildingBlocks,
   generateSignalId,
   createErrorsFromShard,
@@ -60,6 +63,14 @@ const buildRuleMessage = buildRuleMessageFactory({
   index: 'fakeindex',
   name: 'fake name',
 });
+
+const ruleStatusServiceMock = {
+  success: jest.fn(),
+  find: jest.fn(),
+  goingToRun: jest.fn(),
+  error: jest.fn(),
+  partialFailure: jest.fn(),
+};
 
 describe('utils', () => {
   const anchor = '2020-01-01T06:06:06.666Z';
@@ -803,6 +814,89 @@ describe('utils', () => {
     });
   });
 
+  describe('hasTimestampFields', () => {
+    test('returns true when missing timestamp override field', async () => {
+      const timestampField = 'event.ingested';
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const timestampFieldCapsResponse: Partial<ApiResponse<Record<string, any>, Context>> = {
+        body: {
+          indices: ['myfakeindex-1', 'myfakeindex-2', 'myfakeindex-3', 'myfakeindex-4'],
+          fields: {
+            [timestampField]: {
+              date: {
+                type: 'date',
+                searchable: true,
+                aggregatable: true,
+                indices: ['myfakeindex-3', 'myfakeindex-4'],
+              },
+              unmapped: {
+                type: 'unmapped',
+                searchable: false,
+                aggregatable: false,
+                indices: ['myfakeindex-1', 'myfakeindex-2'],
+              },
+            },
+          },
+        },
+      };
+      mockLogger.error.mockClear();
+      const res = await hasTimestampFields(
+        false,
+        timestampField,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        timestampFieldCapsResponse as ApiResponse<Record<string, any>>,
+        ['myfa*'],
+        ruleStatusServiceMock,
+        mockLogger,
+        buildRuleMessage
+      );
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        'The following indices are missing the timestamp override field "event.ingested": ["myfakeindex-1","myfakeindex-2"] name: "fake name" id: "fake id" rule id: "fake rule id" signals index: "fakeindex"'
+      );
+      expect(res).toBeTruthy();
+    });
+    test('returns true when missing timestamp field', async () => {
+      const timestampField = '@timestamp';
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const timestampFieldCapsResponse: Partial<ApiResponse<Record<string, any>, Context>> = {
+        body: {
+          indices: ['myfakeindex-1', 'myfakeindex-2', 'myfakeindex-3', 'myfakeindex-4'],
+          fields: {
+            [timestampField]: {
+              date: {
+                type: 'date',
+                searchable: true,
+                aggregatable: true,
+                indices: ['myfakeindex-3', 'myfakeindex-4'],
+              },
+              unmapped: {
+                type: 'unmapped',
+                searchable: false,
+                aggregatable: false,
+                indices: ['myfakeindex-1', 'myfakeindex-2'],
+              },
+            },
+          },
+        },
+      };
+      mockLogger.error.mockClear();
+      const res = await hasTimestampFields(
+        false,
+        timestampField,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        timestampFieldCapsResponse as ApiResponse<Record<string, any>>,
+        ['myfa*'],
+        ruleStatusServiceMock,
+        mockLogger,
+        buildRuleMessage
+      );
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        'The following indices are missing the timestamp field "@timestamp": ["myfakeindex-1","myfakeindex-2"] name: "fake name" id: "fake id" rule id: "fake rule id" signals index: "fakeindex"'
+      );
+      expect(res).toBeTruthy();
+    });
+  });
+
   describe('wrapBuildingBlocks', () => {
     it('should generate a unique id for each building block', () => {
       const wrappedBlocks = wrapBuildingBlocks(
@@ -1072,6 +1166,9 @@ describe('utils', () => {
     test('It will not set an invalid date time stamp from a non-existent @timestamp when the index is not 100% ECS compliant', () => {
       const searchResult = sampleDocSearchResultsNoSortId();
       (searchResult.hits.hits[0]._source['@timestamp'] as unknown) = undefined;
+      if (searchResult.hits.hits[0].fields != null) {
+        (searchResult.hits.hits[0].fields['@timestamp'] as unknown) = undefined;
+      }
       const { lastLookBackDate } = createSearchAfterReturnTypeFromResponse({
         searchResult,
         timestampOverride: undefined,
@@ -1082,6 +1179,9 @@ describe('utils', () => {
     test('It will not set an invalid date time stamp from a null @timestamp when the index is not 100% ECS compliant', () => {
       const searchResult = sampleDocSearchResultsNoSortId();
       (searchResult.hits.hits[0]._source['@timestamp'] as unknown) = null;
+      if (searchResult.hits.hits[0].fields != null) {
+        (searchResult.hits.hits[0].fields['@timestamp'] as unknown) = null;
+      }
       const { lastLookBackDate } = createSearchAfterReturnTypeFromResponse({
         searchResult,
         timestampOverride: undefined,
@@ -1092,6 +1192,9 @@ describe('utils', () => {
     test('It will not set an invalid date time stamp from an invalid @timestamp string', () => {
       const searchResult = sampleDocSearchResultsNoSortId();
       (searchResult.hits.hits[0]._source['@timestamp'] as unknown) = 'invalid';
+      if (searchResult.hits.hits[0].fields != null) {
+        (searchResult.hits.hits[0].fields['@timestamp'] as unknown) = ['invalid'];
+      }
       const { lastLookBackDate } = createSearchAfterReturnTypeFromResponse({
         searchResult,
         timestampOverride: undefined,
@@ -1104,6 +1207,9 @@ describe('utils', () => {
     test('It returns undefined if the search result contains a null timestamp', () => {
       const searchResult = sampleDocSearchResultsNoSortId();
       (searchResult.hits.hits[0]._source['@timestamp'] as unknown) = null;
+      if (searchResult.hits.hits[0].fields != null) {
+        (searchResult.hits.hits[0].fields['@timestamp'] as unknown) = null;
+      }
       const date = lastValidDate({ searchResult, timestampOverride: undefined });
       expect(date).toEqual(undefined);
     });
@@ -1111,6 +1217,9 @@ describe('utils', () => {
     test('It returns undefined if the search result contains a undefined timestamp', () => {
       const searchResult = sampleDocSearchResultsNoSortId();
       (searchResult.hits.hits[0]._source['@timestamp'] as unknown) = undefined;
+      if (searchResult.hits.hits[0].fields != null) {
+        (searchResult.hits.hits[0].fields['@timestamp'] as unknown) = undefined;
+      }
       const date = lastValidDate({ searchResult, timestampOverride: undefined });
       expect(date).toEqual(undefined);
     });
@@ -1118,13 +1227,9 @@ describe('utils', () => {
     test('It returns undefined if the search result contains an invalid string value', () => {
       const searchResult = sampleDocSearchResultsNoSortId();
       (searchResult.hits.hits[0]._source['@timestamp'] as unknown) = 'invalid value';
-      const date = lastValidDate({ searchResult, timestampOverride: undefined });
-      expect(date).toEqual(undefined);
-    });
-
-    test('It returns correct date time stamp if the search result contains an invalid string value', () => {
-      const searchResult = sampleDocSearchResultsNoSortId();
-      (searchResult.hits.hits[0]._source['@timestamp'] as unknown) = 'invalid value';
+      if (searchResult.hits.hits[0].fields != null) {
+        (searchResult.hits.hits[0].fields['@timestamp'] as unknown) = ['invalid value'];
+      }
       const date = lastValidDate({ searchResult, timestampOverride: undefined });
       expect(date).toEqual(undefined);
     });
@@ -1341,13 +1446,13 @@ describe('utils', () => {
     it('should generate a uuid without key', () => {
       const startedAt = new Date('2020-12-17T16:27:00Z');
       const signalUuid = calculateThresholdSignalUuid('abcd', startedAt, 'agent.name');
-      expect(signalUuid).toEqual('c0cbe4b7-48de-5734-ae81-d8de3e79839d');
+      expect(signalUuid).toEqual('a4832768-a379-583a-b1a2-e2ce2ad9e6e9');
     });
 
     it('should generate a uuid with key', () => {
       const startedAt = new Date('2019-11-18T13:32:00Z');
       const signalUuid = calculateThresholdSignalUuid('abcd', startedAt, 'host.ip', '1.2.3.4');
-      expect(signalUuid).toEqual('f568509e-b570-5d3c-a7ed-7c73fd29ddaf');
+      expect(signalUuid).toEqual('ee8870dc-45ff-5e6c-a2f9-80886651ce03');
     });
   });
 });

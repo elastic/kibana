@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { LegacyLoggingConfig } from '@kbn/config';
@@ -87,7 +87,7 @@ describe('logging service', () => {
         const loggedString = getPlatformLogsFromMock(mockConsoleLog);
         expect(loggedString).toMatchInlineSnapshot(`
           Array [
-            "[xxxx-xx-xxTxx:xx:xx.xxxZ][INFO ][test-file] handled by NP",
+            "[xxxx-xx-xxTxx:xx:xx.xxx-xx:xx][INFO ][test-file] handled by NP",
           ]
         `);
       });
@@ -131,9 +131,9 @@ describe('logging service', () => {
 
         expect(getPlatformLogsFromMock(mockConsoleLog)).toMatchInlineSnapshot(`
           Array [
-            "[xxxx-xx-xxTxx:xx:xx.xxxZ][INFO ][test-file] info",
-            "[xxxx-xx-xxTxx:xx:xx.xxxZ][WARN ][test-file] warn",
-            "[xxxx-xx-xxTxx:xx:xx.xxxZ][ERROR][test-file] error",
+            "[xxxx-xx-xxTxx:xx:xx.xxx-xx:xx][INFO ][test-file] info",
+            "[xxxx-xx-xxTxx:xx:xx.xxx-xx:xx][WARN ][test-file] warn",
+            "[xxxx-xx-xxTxx:xx:xx.xxx-xx:xx][ERROR][test-file] error",
           ]
         `);
 
@@ -162,9 +162,9 @@ describe('logging service', () => {
 
         expect(getPlatformLogsFromMock(mockConsoleLog)).toMatchInlineSnapshot(`
           Array [
-            "[xxxx-xx-xxTxx:xx:xx.xxxZ][INFO ][test-file] info",
-            "[xxxx-xx-xxTxx:xx:xx.xxxZ][WARN ][test-file] warn",
-            "[xxxx-xx-xxTxx:xx:xx.xxxZ][ERROR][test-file] error",
+            "[xxxx-xx-xxTxx:xx:xx.xxx-xx:xx][INFO ][test-file] info",
+            "[xxxx-xx-xxTxx:xx:xx.xxx-xx:xx][WARN ][test-file] warn",
+            "[xxxx-xx-xxTxx:xx:xx.xxx-xx:xx][ERROR][test-file] error",
           ]
         `);
 
@@ -199,9 +199,9 @@ describe('logging service', () => {
 
         expect(getPlatformLogsFromMock(mockConsoleLog)).toMatchInlineSnapshot(`
           Array [
-            "[xxxx-xx-xxTxx:xx:xx.xxxZ][INFO ][test-file] info",
-            "[xxxx-xx-xxTxx:xx:xx.xxxZ][WARN ][test-file] warn",
-            "[xxxx-xx-xxTxx:xx:xx.xxxZ][ERROR][test-file] error",
+            "[xxxx-xx-xxTxx:xx:xx.xxx-xx:xx][INFO ][test-file] info",
+            "[xxxx-xx-xxTxx:xx:xx.xxx-xx:xx][WARN ][test-file] warn",
+            "[xxxx-xx-xxTxx:xx:xx.xxx-xx:xx][ERROR][test-file] error",
           ]
         `);
 

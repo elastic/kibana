@@ -38,6 +38,7 @@
     "xpack.maps": ["plugins/maps"],
     "xpack.ml": ["plugins/ml"],
     "xpack.monitoring": ["plugins/monitoring"],
+    "xpack.osquery": ["plugins/osquery"],
     "xpack.painlessLab": "plugins/painless_lab",
     "xpack.remoteClusters": "plugins/remote_clusters",
     "xpack.reporting": ["plugins/reporting"],
@@ -57,7 +58,8 @@
     "xpack.uptime": ["plugins/uptime"],
     "xpack.urlDrilldown": "plugins/drilldowns/url_drilldown",
     "xpack.watcher": "plugins/watcher",
-    "xpack.observability": "plugins/observability"
+    "xpack.observability": "plugins/observability",
+    "xpack.banners": "plugins/banners"
   },
   "exclude": ["examples"],
   "translations": [
