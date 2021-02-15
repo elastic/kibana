@@ -13,7 +13,7 @@ import { TaskManagerStartContract } from '../../../task_manager/server';
 import { LensUsage, LensTelemetryState } from './types';
 import { lensUsageSchema } from './schema';
 
-const emptyUsageCollecction = {
+const emptyUsageCollection = {
   saved_overall: {},
   saved_30_days: {},
   saved_90_days: {},
