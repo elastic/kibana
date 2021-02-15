@@ -91,7 +91,7 @@ pageLoadAssetSize:
   visTypeMetric: 42790
   visTypeTable: 94934
   visTypeTagcloud: 37575
-  visTypeTimelion: 51933
+  visTypeTimelion: 68883
   visTypeTimeseries: 155203
   visTypeVega: 153573
   visTypeVislib: 242838
@@ -105,3 +105,4 @@ pageLoadAssetSize:
   spacesOss: 18817
   osquery: 107090
   fileUpload: 25664
+  banners: 17946

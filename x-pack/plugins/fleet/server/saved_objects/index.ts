@@ -10,7 +10,8 @@ import { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objec
 import {
   migratePackagePolicyToV7110,
   migratePackagePolicyToV7120,
-} from '../../../security_solution/common';
+  // @ts-expect-error
+} from './security_solution';
 import {
   OUTPUT_SAVED_OBJECT_TYPE,
   AGENT_POLICY_SAVED_OBJECT_TYPE,

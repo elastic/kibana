@@ -237,7 +237,9 @@ export const setup = async (arg?: { appServicesContext: Partial<AppServicesConte
         exists(`${fieldSelector}.searchableSnapshotDisabledDueToLicense`),
       toggleSearchableSnapshot,
       setSearchableSnapshot: async (value: string) => {
-        await toggleSearchableSnapshot(true);
+        if (!exists(`searchableSnapshotField-${phase}.searchableSnapshotCombobox`)) {
+          await toggleSearchableSnapshot(true);
+        }
         act(() => {
           find(`searchableSnapshotField-${phase}.searchableSnapshotCombobox`).simulate('change', [
             { label: value },

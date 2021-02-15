@@ -9,7 +9,7 @@ import { EuiBadge, EuiLoadingContent, EuiTabs, EuiTab } from '@elastic/eui';
 import React, { lazy, memo, Suspense, useCallback, useEffect, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
-import { TimelineTabs } from '../../../../../common/types/timeline';
+import { TimelineTabs, TimelineId } from '../../../../../common/types/timeline';
 
 import {
   useShallowEqualSelector,
@@ -42,7 +42,7 @@ const NotesTabContent = lazy(() => import('../notes_tab_content'));
 const PinnedTabContent = lazy(() => import('../pinned_tab_content'));
 
 interface BasicTimelineTab {
-  timelineId: string;
+  timelineId: TimelineId;
   graphEventId?: string;
 }
 

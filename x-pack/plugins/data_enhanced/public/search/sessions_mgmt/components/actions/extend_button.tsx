@@ -38,7 +38,7 @@ const ExtendConfirm = ({
     defaultMessage: 'Extend search session expiration',
   });
   const confirm = i18n.translate('xpack.data.mgmt.searchSessions.extendModal.extendButton', {
-    defaultMessage: 'Extend',
+    defaultMessage: 'Extend expiration',
   });
   const extend = i18n.translate('xpack.data.mgmt.searchSessions.extendModal.dontExtendButton', {
     defaultMessage: 'Cancel',
