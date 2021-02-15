@@ -25,12 +25,15 @@ import { getUiSettings } from './ui_settings';
 import type { DataEnhancedRequestHandlerContext } from './type';
 import { ConfigSchema } from '../config';
 import { registerUsageCollector } from './collectors';
+import { SecurityPluginSetup } from '../../security/server';
 
 interface SetupDependencies {
   data: DataPluginSetup;
   usageCollection?: UsageCollectionSetup;
   taskManager: TaskManagerSetupContract;
+  security?: SecurityPluginSetup;
 }
+
 export interface StartDependencies {
   data: DataPluginStart;
   taskManager: TaskManagerStartContract;
@@ -68,7 +71,7 @@ export class EnhancedDataServerPlugin
       eqlSearchStrategyProvider(this.logger)
     );
 
-    this.sessionService = new SearchSessionService(this.logger, this.config);
+    this.sessionService = new SearchSessionService(this.logger, this.config, deps.security);
 
     deps.data.__enhance({
       search: {
