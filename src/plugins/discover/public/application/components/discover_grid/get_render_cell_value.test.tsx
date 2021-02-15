@@ -78,7 +78,13 @@ describe('Discover grid cell rendering', function () {
     );
     expect(component.html()).toMatchInlineSnapshot(`
       "<span>{
-        &quot;bytes&quot;: 100
+        &quot;_id&quot;: &quot;1&quot;,
+        &quot;_index&quot;: &quot;test&quot;,
+        &quot;_type&quot;: &quot;test&quot;,
+        &quot;_score&quot;: 1,
+        &quot;_source&quot;: {
+          &quot;bytes&quot;: 100
+        }
       }</span>"
     `);
   });
