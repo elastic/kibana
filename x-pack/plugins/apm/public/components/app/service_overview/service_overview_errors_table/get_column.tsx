@@ -10,11 +10,11 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { asInteger } from '../../../../../common/utils/formatters';
 import { px, unit } from '../../../../style/variables';
-import { SparkPlot } from '../../../shared/charts/spark_plot';
 import { ErrorDetailLink } from '../../../shared/Links/apm/ErrorDetailLink';
 import { TimestampTooltip } from '../../../shared/TimestampTooltip';
 import { TruncateWithTooltip } from '../../../shared/truncate_with_tooltip';
 import { APIReturnType } from '../../../../services/rest/createCallApmApi';
+import { ComparisonSparkPlot } from '../../../shared/charts/comparion_spark_plot';
 
 type ErrorGroupPrimaryStatistics = APIReturnType<'GET /api/apm/services/{serviceName}/error_groups/primary_statistics'>;
 type ErrorGroupComparisonStatistics = APIReturnType<'GET /api/apm/services/{serviceName}/error_groups/comparison_statistics'>;
@@ -22,9 +22,11 @@ type ErrorGroupComparisonStatistics = APIReturnType<'GET /api/apm/services/{serv
 export function getColumns({
   serviceName,
   errorGroupComparisonStatistics,
+  comparisonEnabled = true,
 }: {
   serviceName: string;
-  errorGroupComparisonStatistics: ErrorGroupComparisonStatistics;
+  errorGroupComparisonStatistics?: ErrorGroupComparisonStatistics;
+  comparisonEnabled?: boolean;
 }): Array<EuiBasicTableColumn<ErrorGroupPrimaryStatistics['error_groups'][0]>> {
   return [
     {
@@ -71,12 +73,19 @@ export function getColumns({
       ),
       width: px(unit * 12),
       render: (_, { occurrences, group_id: errorGroupId }) => {
-        const timeseries =
-          errorGroupComparisonStatistics?.[errorGroupId]?.timeseries;
+        const currentPeriodTimeseries =
+          errorGroupComparisonStatistics?.currentPeriod?.[errorGroupId]
+            ?.timeseries;
+        const previousPeriodTimeseries =
+          errorGroupComparisonStatistics?.previousPeriod?.[errorGroupId]
+            ?.timeseries;
         return (
-          <SparkPlot
+          <ComparisonSparkPlot
             color="euiColorVis7"
-            series={timeseries}
+            series={currentPeriodTimeseries}
+            comparisonSeries={
+              comparisonEnabled ? previousPeriodTimeseries : undefined
+            }
             valueLabel={i18n.translate(
               'xpack.apm.serviceOveriew.errorsTableOccurrences',
               {

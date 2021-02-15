@@ -12,6 +12,8 @@ import {
 } from '../../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../../common/processor_event';
 import { environmentQuery, rangeQuery } from '../../../../common/utils/queries';
+import { Coordinate } from '../../../../typings/timeseries';
+import { offsetPreviousPeriodCoordinates } from '../../../utils/offset_previous_period_coordinate';
 import { withApmSpan } from '../../../utils/with_apm_span';
 import { getBucketSize } from '../../helpers/get_bucket_size';
 import { Setup, SetupTimeRange } from '../../helpers/setup_request';
@@ -23,18 +25,22 @@ export async function getServiceErrorGroupComparisonStatistics({
   transactionType,
   groupIds,
   environment,
+  start,
+  end,
 }: {
   serviceName: string;
-  setup: Setup & SetupTimeRange;
+  setup: Setup;
   numBuckets: number;
   transactionType: string;
   groupIds: string[];
   environment?: string;
-}) {
+  start: number;
+  end: number;
+}): Promise<Array<{ groupId: string; timeseries: Coordinate[] }>> {
   return withApmSpan(
     'get_service_error_group_comparison_statistics',
     async () => {
-      const { apmEventClient, start, end, esFilter } = setup;
+      const { apmEventClient, esFilter } = setup;
 
       const { intervalString } = getBucketSize({ start, end, numBuckets });
 
@@ -81,10 +87,10 @@ export async function getServiceErrorGroupComparisonStatistics({
       });
 
       if (!timeseriesResponse.aggregations) {
-        return {};
+        return [];
       }
 
-      const groups = timeseriesResponse.aggregations.error_groups.buckets.map(
+      return timeseriesResponse.aggregations.error_groups.buckets.map(
         (bucket) => {
           const groupId = bucket.key as string;
           return {
@@ -98,8 +104,70 @@ export async function getServiceErrorGroupComparisonStatistics({
           };
         }
       );
-
-      return keyBy(groups, 'groupId');
     }
   );
+}
+
+export async function getServiceErrorGroupComparisonStatisticsPeriods({
+  serviceName,
+  setup,
+  numBuckets,
+  transactionType,
+  groupIds,
+  comparisonStart,
+  comparisonEnd,
+  environment,
+}: {
+  serviceName: string;
+  setup: Setup & SetupTimeRange;
+  numBuckets: number;
+  transactionType: string;
+  groupIds: string[];
+  comparisonStart?: number;
+  comparisonEnd?: number;
+  environment?: string;
+}) {
+  const { start, end } = setup;
+  const commonProps = {
+    serviceName,
+    setup,
+    numBuckets,
+    transactionType,
+    groupIds,
+    environment,
+  };
+
+  const currentPeriodPromise = getServiceErrorGroupComparisonStatistics({
+    ...commonProps,
+    start,
+    end,
+  });
+
+  const previousPeriodPromise =
+    comparisonStart && comparisonEnd
+      ? getServiceErrorGroupComparisonStatistics({
+          ...commonProps,
+          start: comparisonStart,
+          end: comparisonEnd,
+        }).then((errorRateGroupResponse) => {
+          return errorRateGroupResponse.map((errorRate) => ({
+            ...errorRate,
+            timeseries: offsetPreviousPeriodCoordinates({
+              currentPeriodStart: start,
+              previousPeriodStart: comparisonStart,
+              previousPeriodTimeseries: errorRate.timeseries,
+            }),
+          }));
+        })
+      : [];
+
+  const [currentPeriod, previousPeriod] = await Promise.all([
+    currentPeriodPromise,
+    previousPeriodPromise,
+  ]);
+
+  return {
+    currentPeriod: keyBy(currentPeriod, 'groupId'),
+    previousPeriod: keyBy(previousPeriod, 'groupId'),
+  };
 }

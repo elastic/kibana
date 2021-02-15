@@ -20,6 +20,7 @@ import { useUrlParams } from '../../../../context/url_params_context/use_url_par
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { ErrorOverviewLink } from '../../../shared/Links/apm/ErrorOverviewLink';
 import { TableFetchWrapper } from '../../../shared/table_fetch_wrapper';
+import { getTimeRangeComparison } from '../../../shared/time_comparison/get_time_range_comparison';
 import { ServiceOverviewTableContainer } from '../service_overview_table_container';
 import { getColumns } from './get_column';
 
@@ -43,10 +44,17 @@ const INITIAL_STATE = {
 
 export function ServiceOverviewErrorsTable({ serviceName }: Props) {
   const {
-    urlParams: { environment, start, end },
+    urlParams: { environment, start, end, comparisonType, comparisonEnabled },
     uiFilters,
   } = useUrlParams();
   const { transactionType } = useApmServiceContext();
+  const {
+    comparisonStart = undefined,
+    comparisonEnd = undefined,
+  } = comparisonType
+    ? getTimeRangeComparison({ start, end, comparisonType })
+    : {};
+
   const [tableOptions, setTableOptions] = useState<{
     pageIndex: number;
     sort: {
@@ -122,6 +130,8 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
               numBuckets: 20,
               transactionType,
               groupIds,
+              comparisonStart,
+              comparisonEnd,
             },
           },
         });
@@ -129,13 +139,14 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
     },
     // only fetches agg results when requestId or group ids change
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [requestId, groupIds],
+    [requestId, groupIds, comparisonStart, comparisonEnd],
     { preservePreviousData: false }
   );
 
   const columns = getColumns({
     serviceName,
-    errorGroupComparisonStatistics: errorGroupComparisonStatistics ?? {},
+    errorGroupComparisonStatistics,
+    comparisonEnabled,
   });
 
   return (

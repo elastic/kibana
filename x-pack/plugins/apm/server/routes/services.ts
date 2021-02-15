@@ -8,7 +8,12 @@
 import Boom from '@hapi/boom';
 import * as t from 'io-ts';
 import { uniq } from 'lodash';
+import {
+  LatencyAggregationType,
+  latencyAggregationTypeRt,
+} from '../../common/latency_aggregation_types';
 import { isoToEpochRt } from '../../common/runtime_types/iso_to_epoch_rt';
+import { jsonRt } from '../../common/runtime_types/json_rt';
 import { toNumberRt } from '../../common/runtime_types/to_number_rt';
 import { getSearchAggregatedTransactions } from '../lib/helpers/aggregated_transactions';
 import { setupRequest } from '../lib/helpers/setup_request';
@@ -16,28 +21,23 @@ import { getServiceAnnotations } from '../lib/services/annotations';
 import { getServices } from '../lib/services/get_services';
 import { getServiceAgentName } from '../lib/services/get_service_agent_name';
 import { getServiceDependencies } from '../lib/services/get_service_dependencies';
+import { getServiceErrorGroupComparisonStatisticsPeriods } from '../lib/services/get_service_error_groups/get_service_error_group_comparison_statistics';
 import { getServiceErrorGroupPrimaryStatistics } from '../lib/services/get_service_error_groups/get_service_error_group_primary_statistics';
-import { getServiceErrorGroupComparisonStatistics } from '../lib/services/get_service_error_groups/get_service_error_group_comparison_statistics';
 import { getServiceInstances } from '../lib/services/get_service_instances';
 import { getServiceMetadataDetails } from '../lib/services/get_service_metadata_details';
 import { getServiceMetadataIcons } from '../lib/services/get_service_metadata_icons';
 import { getServiceNodeMetadata } from '../lib/services/get_service_node_metadata';
 import { getServiceTransactionTypes } from '../lib/services/get_service_transaction_types';
 import { getThroughput } from '../lib/services/get_throughput';
-import { createRoute } from './create_route';
 import { offsetPreviousPeriodCoordinates } from '../utils/offset_previous_period_coordinate';
-import { jsonRt } from '../../common/runtime_types/json_rt';
+import { withApmSpan } from '../utils/with_apm_span';
+import { createRoute } from './create_route';
 import {
   comparisonRangeRt,
   environmentRt,
   rangeRt,
   uiFiltersRt,
 } from './default_api_types';
-import { withApmSpan } from '../utils/with_apm_span';
-import {
-  latencyAggregationTypeRt,
-  LatencyAggregationType,
-} from '../../common/latency_aggregation_types';
 
 export const servicesRoute = createRoute({
   endpoint: 'GET /api/apm/services',
@@ -322,6 +322,7 @@ export const serviceErrorGroupsComparisonStatisticsRoute = createRoute({
       environmentRt,
       rangeRt,
       uiFiltersRt,
+      comparisonRangeRt,
       t.type({
         numBuckets: toNumberRt,
         transactionType: t.string,
@@ -335,16 +336,25 @@ export const serviceErrorGroupsComparisonStatisticsRoute = createRoute({
 
     const {
       path: { serviceName },
-      query: { environment, numBuckets, transactionType, groupIds },
+      query: {
+        environment,
+        numBuckets,
+        transactionType,
+        groupIds,
+        comparisonStart,
+        comparisonEnd,
+      },
     } = context.params;
 
-    return getServiceErrorGroupComparisonStatistics({
-      environment,
+    return await getServiceErrorGroupComparisonStatisticsPeriods({
       serviceName,
       setup,
       numBuckets,
       transactionType,
       groupIds,
+      comparisonStart,
+      comparisonEnd,
+      environment,
     });
   },
 });

@@ -7,6 +7,7 @@
 
 import url from 'url';
 import expect from '@kbn/expect';
+import moment from 'moment';
 import archives_metadata from '../../common/fixtures/es_archiver/archives_metadata';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { registry } from '../../common/registry';
@@ -47,7 +48,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           })
         );
         expect(response.status).to.be(200);
-        expect(response.body).to.empty();
+        expect(response.body).to.be.eql({ currentPeriod: {}, previousPeriod: {} });
       });
     }
   );
@@ -56,7 +57,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     'Error groups comparison statistics when data is loaded',
     { config: 'basic', archives: [archiveName] },
     () => {
-      it('returns the correct data', async () => {
+      it('returns the correct data without previous period', async () => {
         const response = await supertest.get(
           url.format({
             pathname: `/api/apm/services/opbeans-java/error_groups/comparison_statistics`,
@@ -73,18 +74,53 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         expect(response.status).to.be(200);
 
-        const errorGroupsComparisonStatistics = response.body as ErrorGroupsComparisonStatistics;
-        expect(Object.keys(errorGroupsComparisonStatistics).sort()).to.eql(groupIds.sort());
+        const { currentPeriod, previousPeriod } = response.body as ErrorGroupsComparisonStatistics;
+        expect(Object.keys(currentPeriod).length).to.be.eql(groupIds.length);
+        expect(previousPeriod).to.be.empty();
 
-        groupIds.forEach((groupId) => {
-          expect(errorGroupsComparisonStatistics[groupId]).not.to.be.empty();
+        groupIds.map((groupId) => {
+          expect(currentPeriod[groupId]).not.to.be.empty();
         });
 
-        const errorgroupsComparisonStatistics = errorGroupsComparisonStatistics[groupIds[0]];
+        const firstItem = currentPeriod[groupIds[0]];
+        expect(firstItem.timeseries.map(({ y }) => y && isFinite(y)).length).to.be.greaterThan(0);
+        expectSnapshot(firstItem).toMatch();
+      });
+
+      it('returns the correct data with previous period', async () => {
+        const response = await supertest.get(
+          url.format({
+            pathname: `/api/apm/services/opbeans-java/error_groups/comparison_statistics`,
+            query: {
+              uiFilters: '{}',
+              numBuckets: 20,
+              transactionType: 'request',
+              groupIds: JSON.stringify(groupIds),
+              start: moment(metadata.end).subtract(15, 'minutes').toISOString(),
+              end: metadata.end,
+              comparisonStart: metadata.start,
+              comparisonEnd: moment(metadata.start).add(15, 'minutes').toISOString(),
+            },
+          })
+        );
+
+        expect(response.status).to.be(200);
+
+        const { currentPeriod, previousPeriod } = response.body as ErrorGroupsComparisonStatistics;
+        expect(Object.keys(currentPeriod).length).to.be.greaterThan(0);
+        expect(Object.keys(previousPeriod).length).to.be.greaterThan(0);
+
+        const firstCurrentPeriodItem = currentPeriod[groupIds[0]];
         expect(
-          errorgroupsComparisonStatistics.timeseries.map(({ y }) => isFinite(y)).length
+          firstCurrentPeriodItem.timeseries.map(({ y }) => y && isFinite(y)).length
         ).to.be.greaterThan(0);
-        expectSnapshot(errorgroupsComparisonStatistics).toMatch();
+        expectSnapshot(firstCurrentPeriodItem).toMatch();
+
+        const firstPreviousPeriodItem = previousPeriod[groupIds[0]];
+        expect(
+          firstPreviousPeriodItem.timeseries.map(({ y }) => y && isFinite(y)).length
+        ).to.be.greaterThan(0);
+        expectSnapshot(firstPreviousPeriodItem).toMatch();
       });
 
       it('returns an empty list when requested groupIds are not available in the given time range', async () => {
@@ -103,7 +139,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         );
 
         expect(response.status).to.be(200);
-        expect(response.body).to.empty();
+        expect(response.body).to.be.eql({ currentPeriod: {}, previousPeriod: {} });
       });
     }
   );
