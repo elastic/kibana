@@ -23,6 +23,7 @@ export function DataGridProvider({ getService, getPageObjects }: FtrProviderCont
   const find = getService('find');
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['common', 'header']);
+  const retry = getService('retry');
 
   class DataGrid {
     async getDataGridTableData(): Promise<TabbedGridData> {
@@ -183,9 +184,17 @@ export function DataGridProvider({ getService, getPageObjects }: FtrProviderCont
       return await detailsRow.findAllByTestSubject('~docTableRowAction');
     }
 
+    public async openColMenuByField(field: string) {
+      retry.waitFor('header cell action being displayed', async () => {
+        // to prevent flakiness
+        await testSubjects.click(`dataGridHeaderCell-${field}`);
+        return await testSubjects.exists(`dataGridHeaderCellActionGroup-${field}`);
+      });
+    }
+
     public async clickDocSortAsc(field?: string, sortText = 'Sort New-Old') {
       if (field) {
-        await testSubjects.click(`dataGridHeaderCell-${field}`);
+        await this.openColMenuByField(field);
       } else {
         await find.clickByCssSelector('.euiDataGridHeaderCell__button');
       }
@@ -194,7 +203,7 @@ export function DataGridProvider({ getService, getPageObjects }: FtrProviderCont
 
     public async clickDocSortDesc(field?: string, sortText = 'Sort Old-New') {
       if (field) {
-        await testSubjects.click(`dataGridHeaderCell-${field}`);
+        await this.openColMenuByField(field);
       } else {
         await find.clickByCssSelector('.euiDataGridHeaderCell__button');
       }
