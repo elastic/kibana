@@ -45,7 +45,7 @@ describe('ExecutedStep', () => {
       },
     };
 
-    const { getByText } = render(<ExecutedStep index={3} step={step} />);
+    const { getByText } = render(<ExecutedStep index={3} step={step} loading={false} />);
 
     expect(getByText('Script executed at this step'));
     expect(getByText(`const someVar = "the var"`));
@@ -59,7 +59,7 @@ describe('ExecutedStep', () => {
       },
     };
 
-    const { getByText } = render(<ExecutedStep index={3} step={step} />);
+    const { getByText } = render(<ExecutedStep index={3} step={step} loading={false} />);
 
     expect(getByText('Error message'));
     expect(getByText('There was an error executing the step.'));
@@ -71,7 +71,7 @@ describe('ExecutedStep', () => {
       "Refused to execute script from because its MIME type ('image/gif') is not executable";
 
     const { getByText } = render(
-      <ExecutedStep browserConsole={browserConsole} index={3} step={step} />
+      <ExecutedStep browserConsole={browserConsole} index={3} step={step} loading={false} />
     );
 
     expect(getByText('Console output'));

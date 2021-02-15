@@ -19,14 +19,13 @@ import { COLLAPSE_LABEL, EXPAND_LABEL } from '../translations';
 import { act } from 'react-dom/test-utils';
 
 describe('useExpandedROw', () => {
-  const steps: Ping[];
   let expandedRowsObj = {};
   const TEST_ID = 'uptimeStepListExpandBtn';
 
   const history = createMemoryHistory({
     initialEntries: ['/journey/fake-group/steps'],
   });
-  steps = [
+  const steps: Ping[] = [
     {
       docId: '1',
       timestamp: '123',
