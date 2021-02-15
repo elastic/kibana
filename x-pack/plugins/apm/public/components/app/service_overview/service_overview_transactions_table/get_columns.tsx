@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiBasicTableColumn } from '@elastic/eui';
+import { EuiBasicTableColumn, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { ValuesType } from 'utility-types';
@@ -54,10 +54,12 @@ export function getColumns({
   serviceName,
   latencyAggregationType,
   transactionGroupComparisonStatistics,
+  comparisonEnabled = true,
 }: {
   serviceName: string;
   latencyAggregationType?: string;
   transactionGroupComparisonStatistics?: TransactionGroupComparisonStatistics;
+  comparisonEnabled?: boolean;
 }): Array<EuiBasicTableColumn<ServiceTransactionGroupItem>> {
   return [
     {
@@ -91,13 +93,18 @@ export function getColumns({
       name: getLatencyAggregationTypeLabel(latencyAggregationType),
       width: px(unit * 10),
       render: (_, { latency, name }) => {
-        const timeseries =
-          transactionGroupComparisonStatistics?.[name]?.latency;
+        const currentTimeseries =
+          transactionGroupComparisonStatistics?.currentPeriod?.[name]?.latency;
+        const previousTimeseries =
+          transactionGroupComparisonStatistics?.previousPeriod?.[name]?.latency;
         return (
           <SparkPlot
             color="euiColorVis1"
             compact
-            series={timeseries}
+            series={currentTimeseries}
+            comparisonSeries={
+              comparisonEnabled ? previousTimeseries : undefined
+            }
             valueLabel={asMillisecondDuration(latency)}
           />
         );
@@ -112,13 +119,20 @@ export function getColumns({
       ),
       width: px(unit * 10),
       render: (_, { throughput, name }) => {
-        const timeseries =
-          transactionGroupComparisonStatistics?.[name]?.throughput;
+        const currentTimeseries =
+          transactionGroupComparisonStatistics?.currentPeriod?.[name]
+            ?.throughput;
+        const previousTimeseries =
+          transactionGroupComparisonStatistics?.previousPeriod?.[name]
+            ?.throughput;
         return (
           <SparkPlot
             color="euiColorVis0"
             compact
-            series={timeseries}
+            series={currentTimeseries}
+            comparisonSeries={
+              comparisonEnabled ? previousTimeseries : undefined
+            }
             valueLabel={asTransactionRate(throughput)}
           />
         );
@@ -133,13 +147,20 @@ export function getColumns({
       ),
       width: px(unit * 8),
       render: (_, { errorRate, name }) => {
-        const timeseries =
-          transactionGroupComparisonStatistics?.[name]?.errorRate;
+        const currentTimeseries =
+          transactionGroupComparisonStatistics?.currentPeriod?.[name]
+            ?.errorRate;
+        const previousTimeseries =
+          transactionGroupComparisonStatistics?.previousPeriod?.[name]
+            ?.errorRate;
         return (
           <SparkPlot
             color="euiColorVis7"
             compact
-            series={timeseries}
+            series={currentTimeseries}
+            comparisonSeries={
+              comparisonEnabled ? previousTimeseries : undefined
+            }
             valueLabel={asPercent(errorRate, 1)}
           />
         );
@@ -154,9 +175,22 @@ export function getColumns({
       ),
       width: px(unit * 5),
       render: (_, { name }) => {
-        const impact =
-          transactionGroupComparisonStatistics?.[name]?.impact ?? 0;
-        return <ImpactBar value={impact} size="m" />;
+        const currenIimpact =
+          transactionGroupComparisonStatistics?.currentPeriod?.[name]?.impact ??
+          0;
+        const previousIimpact =
+          transactionGroupComparisonStatistics?.previousPeriod?.[name]
+            ?.impact ?? 0;
+        return (
+          <EuiFlexGroup gutterSize="xs" direction="column">
+            <EuiFlexItem>
+              <ImpactBar value={currenIimpact} size="m" />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <ImpactBar value={previousIimpact} size="s" color="subdued" />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        );
       },
     },
   ];

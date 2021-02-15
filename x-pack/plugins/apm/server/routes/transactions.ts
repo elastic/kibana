@@ -7,6 +7,7 @@
 
 import Boom from '@hapi/boom';
 import * as t from 'io-ts';
+import { keyBy } from 'lodash';
 import {
   LatencyAggregationType,
   latencyAggregationTypeRt,
@@ -24,8 +25,9 @@ import { getLatencyTimeseries } from '../lib/transactions/get_latency_charts';
 import { getThroughputCharts } from '../lib/transactions/get_throughput_charts';
 import { getTransactionGroupList } from '../lib/transaction_groups';
 import { getErrorRate } from '../lib/transaction_groups/get_error_rate';
+import { offsetPreviousPeriodCoordinates } from '../utils/offset_previous_period_coordinate';
 import { createRoute } from './create_route';
-import { rangeRt, uiFiltersRt } from './default_api_types';
+import { comparisonRangeRt, rangeRt, uiFiltersRt } from './default_api_types';
 
 /**
  * Returns a list of transactions grouped by name
@@ -111,6 +113,7 @@ export const transactionGroupsComparisonStatisticsRoute = createRoute({
     path: t.type({ serviceName: t.string }),
     query: t.intersection([
       rangeRt,
+      comparisonRangeRt,
       uiFiltersRt,
       t.type({
         transactionNames: jsonRt,
@@ -137,10 +140,14 @@ export const transactionGroupsComparisonStatisticsRoute = createRoute({
         latencyAggregationType,
         numBuckets,
         transactionType,
+        comparisonStart,
+        comparisonEnd,
       },
     } = context.params;
 
-    return getServiceTransactionGroupComparisonStatistics({
+    const { start, end } = setup;
+
+    const commomProps = {
       setup,
       serviceName,
       transactionNames,
@@ -148,7 +155,54 @@ export const transactionGroupsComparisonStatisticsRoute = createRoute({
       transactionType,
       numBuckets,
       latencyAggregationType: latencyAggregationType as LatencyAggregationType,
-    });
+    };
+
+    const previousPeriodPromise =
+      comparisonStart && comparisonEnd
+        ? getServiceTransactionGroupComparisonStatistics({
+            ...commomProps,
+            start: comparisonStart,
+            end: comparisonEnd,
+          }).then((previousStatistics) => {
+            return previousStatistics.map(
+              ({ transactionName, errorRate, throughput, latency, impact }) => {
+                return {
+                  transactionName,
+                  impact,
+                  errorRate: offsetPreviousPeriodCoordinates({
+                    currentPeriodStart: start,
+                    previousPeriodStart: comparisonStart,
+                    previousPeriodTimeseries: errorRate,
+                  }),
+                  throughput: offsetPreviousPeriodCoordinates({
+                    currentPeriodStart: start,
+                    previousPeriodStart: comparisonStart,
+                    previousPeriodTimeseries: throughput,
+                  }),
+                  latency: offsetPreviousPeriodCoordinates({
+                    currentPeriodStart: start,
+                    previousPeriodStart: comparisonStart,
+                    previousPeriodTimeseries: latency,
+                  }),
+                };
+              }
+            );
+          })
+        : [];
+
+    const [currentPeriod, previousPeriod] = await Promise.all([
+      getServiceTransactionGroupComparisonStatistics({
+        ...commomProps,
+        start,
+        end,
+      }),
+      previousPeriodPromise,
+    ]);
+
+    return {
+      currentPeriod: keyBy(currentPeriod, 'transactionName'),
+      previousPeriod: keyBy(previousPeriod, 'transactionName'),
+    };
   },
 });
 

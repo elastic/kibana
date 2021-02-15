@@ -27,7 +27,7 @@ import {
   getLatencyAggregation,
   getLatencyValue,
 } from '../helpers/latency_aggregation_type';
-import { Setup, SetupTimeRange } from '../helpers/setup_request';
+import { Setup } from '../helpers/setup_request';
 import { calculateTransactionErrorPercentage } from '../helpers/transaction_error_rate';
 
 export async function getServiceTransactionGroupComparisonStatistics({
@@ -38,29 +38,31 @@ export async function getServiceTransactionGroupComparisonStatistics({
   searchAggregatedTransactions,
   transactionType,
   latencyAggregationType,
+  start,
+  end,
 }: {
   serviceName: string;
   transactionNames: string[];
-  setup: Setup & SetupTimeRange;
+  setup: Setup;
   numBuckets: number;
   searchAggregatedTransactions: boolean;
   transactionType: string;
   latencyAggregationType: LatencyAggregationType;
+  start: number;
+  end: number;
 }): Promise<
-  Record<
-    string,
-    {
-      latency: Coordinate[];
-      throughput: Coordinate[];
-      errorRate: Coordinate[];
-      impact: number;
-    }
-  >
+  Array<{
+    transactionName: string;
+    latency: Coordinate[];
+    throughput: Coordinate[];
+    errorRate: Coordinate[];
+    impact: number;
+  }>
 > {
   return withApmSpan(
     'get_service_transaction_group_comparison_statistics',
     async () => {
-      const { apmEventClient, start, end, esFilter } = setup;
+      const { apmEventClient, esFilter } = setup;
       const { intervalString } = getBucketSize({ start, end, numBuckets });
 
       const field = getTransactionDurationFieldForAggregatedTransactions(
@@ -136,44 +138,39 @@ export async function getServiceTransactionGroupComparisonStatistics({
       const buckets = response.aggregations?.transaction_groups.buckets ?? [];
 
       const totalDuration = response.aggregations?.total_duration.value;
-      return keyBy(
-        buckets.map((bucket) => {
-          const transactionName = bucket.key;
-          const latency = bucket.timeseries.buckets.map((timeseriesBucket) => ({
+      return buckets.map((bucket) => {
+        const transactionName = bucket.key as string;
+        const latency = bucket.timeseries.buckets.map((timeseriesBucket) => ({
+          x: timeseriesBucket.key,
+          y: getLatencyValue({
+            latencyAggregationType,
+            aggregation: timeseriesBucket.latency,
+          }),
+        }));
+        const throughput = bucket.timeseries.buckets.map(
+          (timeseriesBucket) => ({
             x: timeseriesBucket.key,
-            y: getLatencyValue({
-              latencyAggregationType,
-              aggregation: timeseriesBucket.latency,
-            }),
-          }));
-          const throughput = bucket.timeseries.buckets.map(
-            (timeseriesBucket) => ({
-              x: timeseriesBucket.key,
-              y: timeseriesBucket.throughput_rate.value,
-            })
-          );
-          const errorRate = bucket.timeseries.buckets.map(
-            (timeseriesBucket) => ({
-              x: timeseriesBucket.key,
-              y: calculateTransactionErrorPercentage(
-                timeseriesBucket[EVENT_OUTCOME]
-              ),
-            })
-          );
-          const transactionGroupTotalDuration =
-            bucket.transaction_group_total_duration.value || 0;
-          return {
-            transactionName,
-            latency,
-            throughput,
-            errorRate,
-            impact: totalDuration
-              ? (transactionGroupTotalDuration * 100) / totalDuration
-              : 0,
-          };
-        }),
-        'transactionName'
-      );
+            y: timeseriesBucket.throughput_rate.value,
+          })
+        );
+        const errorRate = bucket.timeseries.buckets.map((timeseriesBucket) => ({
+          x: timeseriesBucket.key,
+          y: calculateTransactionErrorPercentage(
+            timeseriesBucket[EVENT_OUTCOME]
+          ),
+        }));
+        const transactionGroupTotalDuration =
+          bucket.transaction_group_total_duration.value || 0;
+        return {
+          transactionName,
+          latency,
+          throughput,
+          errorRate,
+          impact: totalDuration
+            ? (transactionGroupTotalDuration * 100) / totalDuration
+            : 0,
+        };
+      });
     }
   );
 }

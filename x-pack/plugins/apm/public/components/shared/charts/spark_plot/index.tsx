@@ -12,6 +12,7 @@ import {
   AreaSeries,
   Chart,
   CurveType,
+  LineSeries,
   ScaleType,
   Settings,
 } from '@elastic/charts';
@@ -20,6 +21,7 @@ import { Coordinate } from '../../../../../typings/timeseries';
 import { useChartTheme } from '../../../../../../observability/public';
 import { px, unit } from '../../../../style/variables';
 import { useTheme } from '../../../../hooks/use_theme';
+import { getComparisonChartTheme } from '../../time_comparison/get_time_range_comparison';
 
 type Color =
   | 'euiColorVis0'
@@ -38,23 +40,24 @@ export function SparkPlot({
   series,
   valueLabel,
   compact,
+  comparisonSeries = [],
 }: {
   color: Color;
   series?: Coordinate[] | null;
   valueLabel: React.ReactNode;
   compact?: boolean;
+  comparisonSeries?: Coordinate[];
 }) {
   const theme = useTheme();
   const defaultChartTheme = useChartTheme();
+  const comparisonChartTheme = getComparisonChartTheme(theme);
 
   const sparkplotChartTheme = merge({}, defaultChartTheme, {
     chartMargins: { left: 0, right: 0, top: 0, bottom: 0 },
     lineSeriesStyle: {
       point: { opacity: 0 },
     },
-    areaSeriesStyle: {
-      point: { opacity: 0 },
-    },
+    ...comparisonChartTheme,
   });
 
   const colorValue = theme.eui[color];
@@ -76,14 +79,24 @@ export function SparkPlot({
               showLegend={false}
               tooltip="none"
             />
-            <AreaSeries
-              id="area"
+            <LineSeries
+              id="line"
               xScaleType={ScaleType.Time}
               yScaleType={ScaleType.Linear}
               xAccessor={'x'}
               yAccessors={['y']}
               data={series}
               color={colorValue}
+              curve={CurveType.CURVE_MONOTONE_X}
+            />
+            <AreaSeries
+              id="area"
+              xScaleType={ScaleType.Time}
+              yScaleType={ScaleType.Linear}
+              xAccessor={'x'}
+              yAccessors={['y']}
+              data={comparisonSeries}
+              color={theme.eui.euiColorLightestShade}
               curve={CurveType.CURVE_MONOTONE_X}
             />
           </Chart>

@@ -20,6 +20,7 @@ import { useUrlParams } from '../../../../context/url_params_context/use_url_par
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { TransactionOverviewLink } from '../../../shared/Links/apm/transaction_overview_link';
 import { TableFetchWrapper } from '../../../shared/table_fetch_wrapper';
+import { getTimeRangeComparison } from '../../../shared/time_comparison/get_time_range_comparison';
 import { ServiceOverviewTableContainer } from '../service_overview_table_container';
 import { getColumns } from './get_columns';
 
@@ -58,8 +59,25 @@ export function ServiceOverviewTransactionsTable({ serviceName }: Props) {
   const { transactionType } = useApmServiceContext();
   const {
     uiFilters,
-    urlParams: { start, end, latencyAggregationType },
+    urlParams: {
+      start,
+      end,
+      latencyAggregationType,
+      comparisonType,
+      comparisonEnabled,
+    },
   } = useUrlParams();
+
+  const {
+    comparisonStart = undefined,
+    comparisonEnd = undefined,
+  } = comparisonType
+    ? getTimeRangeComparison({
+        start,
+        end,
+        comparisonType,
+      })
+    : {};
 
   const { data = INITIAL_STATE, status } = useFetcher(
     (callApmApi) => {
@@ -132,14 +150,16 @@ export function ServiceOverviewTransactionsTable({ serviceName }: Props) {
               transactionType,
               latencyAggregationType,
               transactionNames,
+              comparisonStart,
+              comparisonEnd,
             },
           },
         });
       }
     },
-    // only fetches statistics when requestId changes or transaction names changes
+    // only fetches statistics when requestId, transaction names or comparison range change
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [requestId, transactionNames],
+    [requestId, transactionNames, comparisonStart, comparisonEnd],
     { preservePreviousData: false }
   );
 
@@ -147,6 +167,7 @@ export function ServiceOverviewTransactionsTable({ serviceName }: Props) {
     serviceName,
     latencyAggregationType,
     transactionGroupComparisonStatistics,
+    comparisonEnabled,
   });
 
   const isLoading =
