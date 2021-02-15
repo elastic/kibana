@@ -25,22 +25,29 @@ jest.mock('@elastic/eui', () => {
 describe('ExitCodeDraggable', () => {
   const mount = useMountAppended();
 
-  test('it renders the expected text and exit code, when both text and an endgameExitCode are provided', () => {
+  test('it renders the expected text and exit codes, when text, processExitCode, and an endgameExitCode are provided', () => {
     const wrapper = mount(
       <TestProviders>
-        <ExitCodeDraggable contextId="test" endgameExitCode="0" eventId="1" text="with exit code" />
+        <ExitCodeDraggable
+          contextId="test"
+          endgameExitCode="0"
+          eventId="1"
+          processExitCode={-1}
+          text="with exit code"
+        />
       </TestProviders>
     );
-    expect(wrapper.text()).toEqual('with exit code0');
+    expect(wrapper.text()).toEqual('with exit code-10');
   });
 
-  test('it returns an empty string when text is provided, but endgameExitCode is undefined', () => {
+  test('it returns an empty string when text is provided, but processExitCode and endgameExitCode are undefined', () => {
     const wrapper = mount(
       <TestProviders>
         <ExitCodeDraggable
           contextId="test"
           endgameExitCode={undefined}
           eventId="1"
+          processExitCode={undefined}
           text="with exit code"
         />
       </TestProviders>
@@ -48,13 +55,14 @@ describe('ExitCodeDraggable', () => {
     expect(wrapper.text()).toEqual('');
   });
 
-  test('it returns an empty string when text is provided, but endgameExitCode is null', () => {
+  test('it returns an empty string when text is provided, but processExitCode and endgameExitCode are null', () => {
     const wrapper = mount(
       <TestProviders>
         <ExitCodeDraggable
           contextId="test"
           endgameExitCode={null}
           eventId="1"
+          processExitCode={null}
           text="with exit code"
         />
       </TestProviders>
@@ -65,36 +73,105 @@ describe('ExitCodeDraggable', () => {
   test('it returns an empty string when text is provided, but endgameExitCode is an empty string', () => {
     const wrapper = mount(
       <TestProviders>
-        <ExitCodeDraggable contextId="test" endgameExitCode="" eventId="1" text="with exit code" />
+        <ExitCodeDraggable
+          contextId="test"
+          endgameExitCode=""
+          eventId="1"
+          processExitCode={undefined}
+          text="with exit code"
+        />
       </TestProviders>
     );
     expect(wrapper.text()).toEqual('');
   });
 
-  test('it renders just the exit code when text is undefined', () => {
+  test('it renders just the endgameExitCode code when text is undefined', () => {
     const wrapper = mount(
       <TestProviders>
-        <ExitCodeDraggable contextId="test" endgameExitCode="1" eventId="1" text={undefined} />
+        <ExitCodeDraggable
+          contextId="test"
+          endgameExitCode="1"
+          eventId="1"
+          processExitCode={undefined}
+          text={undefined}
+        />
       </TestProviders>
     );
     expect(wrapper.text()).toEqual('1');
   });
 
-  test('it renders just the exit code when text is null', () => {
+  test('it renders just the processExitCode code when text is undefined', () => {
     const wrapper = mount(
       <TestProviders>
-        <ExitCodeDraggable contextId="test" endgameExitCode="1" eventId="1" text={null} />
+        <ExitCodeDraggable
+          contextId="test"
+          endgameExitCode={undefined}
+          eventId="1"
+          processExitCode={-1}
+          text={undefined}
+        />
+      </TestProviders>
+    );
+    expect(wrapper.text()).toEqual('-1');
+  });
+
+  test('it renders just the endgameExitCode code when text is null', () => {
+    const wrapper = mount(
+      <TestProviders>
+        <ExitCodeDraggable
+          contextId="test"
+          endgameExitCode="1"
+          eventId="1"
+          processExitCode={undefined}
+          text={null}
+        />
       </TestProviders>
     );
     expect(wrapper.text()).toEqual('1');
   });
 
-  test('it renders just the exit code when text is an empty string', () => {
+  test('it renders just the processExitCode code when text is null', () => {
     const wrapper = mount(
       <TestProviders>
-        <ExitCodeDraggable contextId="test" endgameExitCode="1" eventId="1" text="" />
+        <ExitCodeDraggable
+          contextId="test"
+          endgameExitCode={undefined}
+          eventId="1"
+          processExitCode={-1}
+          text={null}
+        />
+      </TestProviders>
+    );
+    expect(wrapper.text()).toEqual('-1');
+  });
+
+  test('it renders just the endgameExitCode code when text is an empty string', () => {
+    const wrapper = mount(
+      <TestProviders>
+        <ExitCodeDraggable
+          contextId="test"
+          endgameExitCode="1"
+          eventId="1"
+          processExitCode={undefined}
+          text=""
+        />
       </TestProviders>
     );
     expect(wrapper.text()).toEqual('1');
+  });
+
+  test('it renders just the processExitCode code when text is an empty string', () => {
+    const wrapper = mount(
+      <TestProviders>
+        <ExitCodeDraggable
+          contextId="test"
+          endgameExitCode={undefined}
+          eventId="1"
+          processExitCode={-1}
+          text=""
+        />
+      </TestProviders>
+    );
+    expect(wrapper.text()).toEqual('-1');
   });
 });

@@ -10,6 +10,7 @@ import { Switch, Route, Redirect, Router } from 'react-router-dom';
 import { ChromeBreadcrumb, CoreStart, ScopedHistory } from 'kibana/public';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { I18nProvider } from '@kbn/i18n/react';
+import useObservable from 'react-use/lib/useObservable';
 import { KibanaFeature } from '../../../features/common';
 import { Section, routeToAlertDetails } from './constants';
 import { ActionTypeRegistryContract, AlertTypeRegistryContract } from '../types';
@@ -18,6 +19,7 @@ import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
 import { PluginStartContract as AlertingStart } from '../../../alerts/public';
 import { suspendedComponentWithProps } from './lib/suspended_component_with_props';
 import { Storage } from '../../../../../src/plugins/kibana_utils/public';
+import { EuiThemeProvider } from '../../../../../src/plugins/kibana_react/common';
 
 import { setSavedObjectsClient } from '../common/lib/data_apis';
 import { KibanaContextProvider } from '../common/lib/kibana';
@@ -41,25 +43,31 @@ export interface TriggersAndActionsUiServices extends CoreStart {
 }
 
 export const renderApp = (deps: TriggersAndActionsUiServices) => {
-  const { element, savedObjects } = deps;
-  const sections: Section[] = ['alerts', 'connectors'];
-
-  const sectionsRegex = sections.join('|');
-  setSavedObjectsClient(savedObjects.client);
-
-  render(
-    <I18nProvider>
-      <KibanaContextProvider services={{ ...deps }}>
-        <Router history={deps.history}>
-          <AppWithoutRouter sectionsRegex={sectionsRegex} />
-        </Router>
-      </KibanaContextProvider>
-    </I18nProvider>,
-    element
-  );
+  const { element } = deps;
+  render(<App deps={deps} />, element);
   return () => {
     unmountComponentAtNode(element);
   };
+};
+
+export const App = ({ deps }: { deps: TriggersAndActionsUiServices }) => {
+  const { savedObjects, uiSettings } = deps;
+  const sections: Section[] = ['alerts', 'connectors'];
+  const isDarkMode = useObservable<boolean>(uiSettings.get$('theme:darkMode'));
+
+  const sectionsRegex = sections.join('|');
+  setSavedObjectsClient(savedObjects.client);
+  return (
+    <I18nProvider>
+      <EuiThemeProvider darkMode={isDarkMode}>
+        <KibanaContextProvider services={{ ...deps }}>
+          <Router history={deps.history}>
+            <AppWithoutRouter sectionsRegex={sectionsRegex} />
+          </Router>
+        </KibanaContextProvider>
+      </EuiThemeProvider>
+    </I18nProvider>
+  );
 };
 
 export const AppWithoutRouter = ({ sectionsRegex }: { sectionsRegex: string }) => {

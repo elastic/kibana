@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { ReactText } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 
@@ -43,7 +43,47 @@ export const createInputFieldProps = <
   value,
 });
 
-export const validateInputFieldNotEmpty = (value: string) =>
+export interface InputRangeFieldProps<
+  Value extends ReactText = ReactText,
+  FieldElement extends HTMLInputElement = HTMLInputElement,
+  ButtonElement extends HTMLButtonElement = HTMLButtonElement
+> {
+  error: React.ReactNode[];
+  isInvalid: boolean;
+  name: string;
+  onChange?: (
+    evt: React.ChangeEvent<FieldElement> | React.MouseEvent<ButtonElement>,
+    isValid: boolean
+  ) => void;
+  value: Value;
+}
+
+export const createInputRangeFieldProps = <
+  Value extends ReactText = ReactText,
+  FieldElement extends HTMLInputElement = HTMLInputElement,
+  ButtonElement extends HTMLButtonElement = HTMLButtonElement
+>({
+  errors,
+  name,
+  onChange,
+  value,
+}: {
+  errors: FieldErrorMessage[];
+  name: string;
+  onChange: (newValue: number, isValid: boolean) => void;
+  value: Value;
+}): InputRangeFieldProps<Value, FieldElement, ButtonElement> => ({
+  error: errors,
+  isInvalid: errors.length > 0,
+  name,
+  onChange: (
+    evt: React.ChangeEvent<FieldElement> | React.MouseEvent<ButtonElement>,
+    isValid: boolean
+  ) => onChange(+evt.currentTarget.value, isValid),
+  value,
+});
+
+export const validateInputFieldNotEmpty = (value: React.ReactText) =>
   value === ''
     ? [
         <FormattedMessage

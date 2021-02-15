@@ -28,6 +28,7 @@ export const getTopNavLinks = ({
   savedSearch,
   services,
   state,
+  onOpenInspector,
 }: {
   getFieldCounts: () => Promise<Record<string, number>>;
   indexPattern: IndexPattern;
@@ -36,6 +37,7 @@ export const getTopNavLinks = ({
   savedSearch: SavedSearch;
   services: DiscoverServices;
   state: GetStateReturn;
+  onOpenInspector: () => void;
 }) => {
   const newSearch = {
     id: 'new',
@@ -123,6 +125,7 @@ export const getTopNavLinks = ({
     }),
     testId: 'openInspectorButton',
     run: () => {
+      onOpenInspector();
       services.inspector.open(inspectorAdapters, {
         title: savedSearch.title,
       });

@@ -7,9 +7,9 @@
 
 import React from 'react';
 
-import { Result as ResultType } from '../../../result/types';
 import { Schema } from '../../../../../shared/types';
 import { Result } from '../../../result/result';
+import { Result as ResultType } from '../../../result/types';
 
 export interface Props {
   result: ResultType;
@@ -22,7 +22,7 @@ export const ResultView: React.FC<Props> = ({ result, schemaForTypeHighlights, i
     <li>
       <Result
         result={result}
-        shouldLinkToDetailPage={true}
+        shouldLinkToDetailPage
         schemaForTypeHighlights={schemaForTypeHighlights}
         isMetaEngine={isMetaEngine}
       />

@@ -14,6 +14,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const filterBar = getService('filterBar');
   const renderable = getService('renderable');
   const embedding = getService('embedding');
+  const retry = getService('retry');
   const PageObjects = getPageObjects([
     'visualize',
     'visEditor',
@@ -80,23 +81,25 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should allow to change timerange from the visualization in embedded mode', async () => {
-        await PageObjects.visChart.filterOnTableCell(1, 7);
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        await renderable.waitForRender();
+        await retry.try(async () => {
+          await PageObjects.visChart.filterOnTableCell(1, 7);
+          await PageObjects.header.waitUntilLoadingHasFinished();
+          await renderable.waitForRender();
 
-        const data = await PageObjects.visChart.getTableVisContent();
-        expect(data).to.be.eql([
-          ['03:00', '0B', '1'],
-          ['03:00', '1.953KB', '1'],
-          ['03:00', '3.906KB', '1'],
-          ['03:00', '5.859KB', '2'],
-          ['03:10', '0B', '1'],
-          ['03:10', '5.859KB', '1'],
-          ['03:10', '7.813KB', '1'],
-          ['03:15', '0B', '1'],
-          ['03:15', '1.953KB', '1'],
-          ['03:20', '1.953KB', '1'],
-        ]);
+          const data = await PageObjects.visChart.getTableVisContent();
+          expect(data).to.be.eql([
+            ['03:00', '0B', '1'],
+            ['03:00', '1.953KB', '1'],
+            ['03:00', '3.906KB', '1'],
+            ['03:00', '5.859KB', '2'],
+            ['03:10', '0B', '1'],
+            ['03:10', '5.859KB', '1'],
+            ['03:10', '7.813KB', '1'],
+            ['03:15', '0B', '1'],
+            ['03:15', '1.953KB', '1'],
+            ['03:20', '1.953KB', '1'],
+          ]);
+        });
       });
     });
   });

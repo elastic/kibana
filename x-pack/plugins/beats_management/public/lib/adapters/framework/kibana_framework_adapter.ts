@@ -11,6 +11,7 @@ import { PathReporter } from 'io-ts/lib/PathReporter';
 import { isLeft } from 'fp-ts/lib/Either';
 import { first } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
+import { MANAGEMENT_SECTION } from '../../../../common/constants';
 import { SecurityPluginSetup } from '../../../../../security/public';
 import { BufferedKibanaServiceCall, KibanaAdapterServiceRefs, KibanaUIConfig } from '../../types';
 import {
@@ -107,7 +108,7 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
   public registerManagementUI(mount: RegisterManagementAppArgs['mount']) {
     const section = this.management.sections.section.ingest;
     section.registerApp({
-      id: 'beats_management',
+      id: MANAGEMENT_SECTION,
       title: i18n.translate('xpack.beatsManagement.centralManagementLinkLabel', {
         defaultMessage: 'Beats Central Management',
       }),

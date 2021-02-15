@@ -101,9 +101,8 @@ export function DocViewTable({
               ? 'nested'
               : indexPattern.fields.getByName(field)?.type;
             return (
-              <React.Fragment>
+              <React.Fragment key={field}>
                 <DocViewTableRow
-                  key={field}
                   field={field}
                   fieldMapping={mapping(field)}
                   fieldType={String(fieldType)}

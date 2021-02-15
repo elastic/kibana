@@ -53,7 +53,9 @@ export function MachineLearningDataFrameAnalyticsResultsProvider({
     },
 
     async getResultTableRows() {
-      return await testSubjects.findAll('mlExplorationDataGrid loaded > dataGridRow');
+      return (await testSubjects.find('mlExplorationDataGrid loaded')).findAllByTestSubject(
+        'dataGridRowCell'
+      );
     },
 
     async assertResultsTableNotEmpty() {
@@ -88,6 +90,7 @@ export function MachineLearningDataFrameAnalyticsResultsProvider({
       this.assertResultsTableNotEmpty();
 
       const featureImportanceCell = await this.getFirstFeatureImportanceCell();
+      await featureImportanceCell.focus();
       const interactionButton = await featureImportanceCell.findByTagName('button');
 
       // simulate hover and wait for button to appear
@@ -101,11 +104,9 @@ export function MachineLearningDataFrameAnalyticsResultsProvider({
 
     async getFirstFeatureImportanceCell(): Promise<WebElementWrapper> {
       // get first row of the data grid
-      const firstDataGridRow = await testSubjects.find(
-        'mlExplorationDataGrid loaded > dataGridRow'
-      );
+      const dataGrid = await testSubjects.find('mlExplorationDataGrid loaded');
       // find the feature importance cell in that row
-      const featureImportanceCell = await firstDataGridRow.findByCssSelector(
+      const featureImportanceCell = await dataGrid.findByCssSelector(
         '[data-test-subj="dataGridRowCell"][class*="featureImportance"]'
       );
       return featureImportanceCell;

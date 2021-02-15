@@ -22,7 +22,6 @@ import { CaseServices } from '../../containers/use_get_case_user_actions';
 import { LinkAnchor } from '../../../common/components/links';
 import { SecurityPageName } from '../../../app/types';
 import { ErrorMessage } from '../callout/types';
-import { Alert } from '../case_view';
 
 export interface UsePushToService {
   caseId: string;
@@ -33,7 +32,6 @@ export interface UsePushToService {
   updateCase: (newCase: Case) => void;
   userCanCrud: boolean;
   isValidConnector: boolean;
-  alerts: Record<string, Alert>;
 }
 
 export interface ReturnUsePushToService {
@@ -50,25 +48,25 @@ export const usePushToService = ({
   updateCase,
   userCanCrud,
   isValidConnector,
-  alerts,
 }: UsePushToService): ReturnUsePushToService => {
   const history = useHistory();
   const { formatUrl, search: urlSearch } = useFormatUrl(SecurityPageName.case);
-  const { isLoading, postPushToService } = usePostPushToService();
+  const { isLoading, pushCaseToExternalService } = usePostPushToService();
 
   const { isLoading: loadingLicense, actionLicense } = useGetActionLicense();
 
-  const handlePushToService = useCallback(() => {
+  const handlePushToService = useCallback(async () => {
     if (connector.id != null && connector.id !== 'none') {
-      postPushToService({
+      const theCase = await pushCaseToExternalService({
         caseId,
-        caseServices,
         connector,
-        updateCase,
-        alerts,
       });
+
+      if (theCase != null) {
+        updateCase(theCase);
+      }
     }
-  }, [alerts, caseId, caseServices, connector, postPushToService, updateCase]);
+  }, [caseId, connector, pushCaseToExternalService, updateCase]);
 
   const goToConfigureCases = useCallback(
     (ev) => {

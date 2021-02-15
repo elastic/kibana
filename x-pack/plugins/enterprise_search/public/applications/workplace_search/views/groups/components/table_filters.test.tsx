@@ -8,13 +8,14 @@
 import { setMockActions, setMockValues } from '../../../../__mocks__';
 
 import React from 'react';
+
 import { shallow } from 'enzyme';
 
-import { TableFilters } from './table_filters';
-
 import { EuiFieldSearch } from '@elastic/eui';
+
 import { TableFilterSourcesDropdown } from './table_filter_sources_dropdown';
 import { TableFilterUsersDropdown } from './table_filter_users_dropdown';
+import { TableFilters } from './table_filters';
 
 const setFilterValue = jest.fn();
 

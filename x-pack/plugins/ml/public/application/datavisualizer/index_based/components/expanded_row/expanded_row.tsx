@@ -10,7 +10,6 @@ import React from 'react';
 import { ML_JOB_FIELD_TYPES } from '../../../../../../common/constants/field_types';
 import { LoadingIndicator } from '../field_data_row/loading_indicator';
 import { NotInDocsContent } from '../field_data_row/content_types';
-import { FieldVisConfig } from '../../../stats_table/types';
 import {
   BooleanContent,
   DateContent,
@@ -20,8 +19,10 @@ import {
   OtherContent,
   TextContent,
 } from '../../../stats_table/components/field_data_expanded_row';
-import { CombinedQuery, GeoPointContent } from './geo_point_content';
-import { IndexPattern } from '../../../../../../../../../src/plugins/data/common/index_patterns/index_patterns';
+import { GeoPointContent } from './geo_point_content';
+import type { CombinedQuery } from '../../common';
+import type { IndexPattern } from '../../../../../../../../../src/plugins/data/common/index_patterns/index_patterns';
+import type { FieldVisConfig } from '../../../stats_table/types';
 
 export const IndexBasedDataVisualizerExpandedRow = ({
   item,
