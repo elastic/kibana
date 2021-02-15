@@ -23,9 +23,11 @@ export interface SavedObjectsFindOptions
 |  [namespaces](./kibana-plugin-core-public.savedobjectsfindoptions.namespaces.md) | <code>string[]</code> |  |
 |  [page](./kibana-plugin-core-public.savedobjectsfindoptions.page.md) | <code>number</code> |  |
 |  [perPage](./kibana-plugin-core-public.savedobjectsfindoptions.perpage.md) | <code>number</code> |  |
+|  [pit](./kibana-plugin-core-public.savedobjectsfindoptions.pit.md) | <code>SavedObjectsPitParams</code> | Search against a specific Point In Time (PIT) that you've opened with . |
 |  [preference](./kibana-plugin-core-public.savedobjectsfindoptions.preference.md) | <code>string</code> | An optional ES preference value to be used for the query \* |
 |  [rootSearchFields](./kibana-plugin-core-public.savedobjectsfindoptions.rootsearchfields.md) | <code>string[]</code> | The fields to perform the parsed query against. Unlike the <code>searchFields</code> argument, these are expected to be root fields and will not be modified. If used in conjunction with <code>searchFields</code>, both are concatenated together. |
 |  [search](./kibana-plugin-core-public.savedobjectsfindoptions.search.md) | <code>string</code> | Search documents using the Elasticsearch Simple Query String syntax. See Elasticsearch Simple Query String <code>query</code> argument for more information |
+|  [searchAfter](./kibana-plugin-core-public.savedobjectsfindoptions.searchafter.md) | <code>unknown[]</code> | Use the sort values from the previous page to retrieve the next page of results. |
 |  [searchFields](./kibana-plugin-core-public.savedobjectsfindoptions.searchfields.md) | <code>string[]</code> | The fields to perform the parsed query against. See Elasticsearch Simple Query String <code>fields</code> argument for more information |
 |  [sortField](./kibana-plugin-core-public.savedobjectsfindoptions.sortfield.md) | <code>string</code> |  |
 |  [sortOrder](./kibana-plugin-core-public.savedobjectsfindoptions.sortorder.md) | <code>string</code> |  |

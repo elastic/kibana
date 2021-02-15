@@ -43,6 +43,7 @@ export const buildHostsQuery = ({
     allowNoIndices: true,
     index: defaultIndex,
     ignoreUnavailable: true,
+    track_total_hits: false,
     body: {
       ...(!isEmpty(docValueFields) ? { docvalue_fields: docValueFields } : {}),
       aggregations: {
@@ -71,7 +72,6 @@ export const buildHostsQuery = ({
       },
       query: { bool: { filter } },
       size: 0,
-      track_total_hits: false,
     },
   };
 

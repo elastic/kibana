@@ -45,9 +45,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
-    describe('global dashboard all with index_management_user', () => {
+    describe('global dashboard read with index_management_user', () => {
       before(async () => {
-        await security.testUser.setRoles(['global_dashboard_all', 'index_management_user'], true);
+        await security.testUser.setRoles(['global_dashboard_read', 'index_management_user'], true);
       });
       after(async () => {
         await security.testUser.restoreDefaults();
