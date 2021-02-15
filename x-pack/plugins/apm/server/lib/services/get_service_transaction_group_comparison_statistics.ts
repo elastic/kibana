@@ -16,6 +16,7 @@ import { EventOutcome } from '../../../common/event_outcome';
 import { LatencyAggregationType } from '../../../common/latency_aggregation_types';
 import { rangeFilter } from '../../../common/utils/range_filter';
 import { Coordinate } from '../../../typings/timeseries';
+import { offsetPreviousPeriodCoordinates } from '../../utils/offset_previous_period_coordinate';
 import { withApmSpan } from '../../utils/with_apm_span';
 import {
   getDocumentTypeFilterForAggregatedTransactions,
@@ -27,7 +28,7 @@ import {
   getLatencyAggregation,
   getLatencyValue,
 } from '../helpers/latency_aggregation_type';
-import { Setup } from '../helpers/setup_request';
+import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import { calculateTransactionErrorPercentage } from '../helpers/transaction_error_rate';
 
 export async function getServiceTransactionGroupComparisonStatistics({
@@ -173,4 +174,87 @@ export async function getServiceTransactionGroupComparisonStatistics({
       });
     }
   );
+}
+
+export async function getServiceTransactionGroupComparisonStatisticsPeriods({
+  serviceName,
+  transactionNames,
+  setup,
+  numBuckets,
+  searchAggregatedTransactions,
+  transactionType,
+  latencyAggregationType,
+  comparisonStart,
+  comparisonEnd,
+}: {
+  serviceName: string;
+  transactionNames: string[];
+  setup: Setup & SetupTimeRange;
+  numBuckets: number;
+  searchAggregatedTransactions: boolean;
+  transactionType: string;
+  latencyAggregationType: LatencyAggregationType;
+  comparisonStart?: number;
+  comparisonEnd?: number;
+}) {
+  const { start, end } = setup;
+
+  const commomProps = {
+    setup,
+    serviceName,
+    transactionNames,
+    searchAggregatedTransactions,
+    transactionType,
+    numBuckets,
+    latencyAggregationType: latencyAggregationType as LatencyAggregationType,
+  };
+
+  const currentPeriodPromise = getServiceTransactionGroupComparisonStatistics({
+    ...commomProps,
+    start,
+    end,
+  });
+
+  const previousPeriodPromise =
+    comparisonStart && comparisonEnd
+      ? getServiceTransactionGroupComparisonStatistics({
+          ...commomProps,
+          start: comparisonStart,
+          end: comparisonEnd,
+        }).then((previousStatistics) => {
+          return previousStatistics.map(
+            ({ transactionName, errorRate, throughput, latency, impact }) => {
+              return {
+                transactionName,
+                impact,
+                errorRate: offsetPreviousPeriodCoordinates({
+                  currentPeriodStart: start,
+                  previousPeriodStart: comparisonStart,
+                  previousPeriodTimeseries: errorRate,
+                }),
+                throughput: offsetPreviousPeriodCoordinates({
+                  currentPeriodStart: start,
+                  previousPeriodStart: comparisonStart,
+                  previousPeriodTimeseries: throughput,
+                }),
+                latency: offsetPreviousPeriodCoordinates({
+                  currentPeriodStart: start,
+                  previousPeriodStart: comparisonStart,
+                  previousPeriodTimeseries: latency,
+                }),
+              };
+            }
+          );
+        })
+      : [];
+
+  const [currentPeriod, previousPeriod] = await Promise.all([
+    currentPeriodPromise,
+    previousPeriodPromise,
+  ]);
+
+  return {
+    currentPeriod: keyBy(currentPeriod, 'transactionName'),
+    previousPeriod: keyBy(previousPeriod, 'transactionName'),
+  };
 }

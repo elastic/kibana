@@ -16,7 +16,7 @@ import {
 } from '../../../../../common/utils/formatters';
 import { APIReturnType } from '../../../../services/rest/createCallApmApi';
 import { px, unit } from '../../../../style/variables';
-import { SparkPlot } from '../../../shared/charts/spark_plot';
+import { ComparisonSparkPlot } from '../../../shared/charts/comparison_spark_plot';
 import { ImpactBar } from '../../../shared/ImpactBar';
 import { TransactionDetailLink } from '../../../shared/Links/apm/transaction_detail_link';
 import { TruncateWithTooltip } from '../../../shared/truncate_with_tooltip';
@@ -98,7 +98,7 @@ export function getColumns({
         const previousTimeseries =
           transactionGroupComparisonStatistics?.previousPeriod?.[name]?.latency;
         return (
-          <SparkPlot
+          <ComparisonSparkPlot
             color="euiColorVis1"
             compact
             series={currentTimeseries}
@@ -126,7 +126,7 @@ export function getColumns({
           transactionGroupComparisonStatistics?.previousPeriod?.[name]
             ?.throughput;
         return (
-          <SparkPlot
+          <ComparisonSparkPlot
             color="euiColorVis0"
             compact
             series={currentTimeseries}
@@ -154,7 +154,7 @@ export function getColumns({
           transactionGroupComparisonStatistics?.previousPeriod?.[name]
             ?.errorRate;
         return (
-          <SparkPlot
+          <ComparisonSparkPlot
             color="euiColorVis7"
             compact
             series={currentTimeseries}
