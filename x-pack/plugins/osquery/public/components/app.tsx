@@ -22,6 +22,7 @@ import {
 import { PLUGIN_NAME } from '../../common';
 import { Queries } from '../queries';
 import { ScheduledQueries } from '../scheduled_query';
+import { Packs } from '../packs';
 
 export const OsqueryAppComponent = () => {
   return (
@@ -44,6 +45,9 @@ export const OsqueryAppComponent = () => {
             <EuiSpacer />
 
             <Switch>
+              <Route path="/packs">
+                <Packs />
+              </Route>
               <Route path={`/scheduled_queries`}>
                 <ScheduledQueries />
               </Route>

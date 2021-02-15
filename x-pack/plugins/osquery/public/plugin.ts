@@ -21,7 +21,8 @@ import {
 } from './types';
 import { PLUGIN_NAME } from '../common';
 import {
-  LazyOsqueryManagedPolicyCreateExtension,
+  // LazyOsqueryManagedPolicyCreateExtension,
+  LazyOsqueryManagedCustomExtension,
   LazyOsqueryManagedPolicyEditExtension,
 } from './fleet_integration';
 
@@ -70,16 +71,22 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
     if (plugins.fleet) {
       const { registerExtension } = plugins.fleet;
 
-      registerExtension({
-        package: 'osquery_elastic_managed',
-        view: 'package-policy-create',
-        component: LazyOsqueryManagedPolicyCreateExtension,
-      });
+      // registerExtension({
+      //   package: 'osquery_elastic_managed',
+      //   view: 'package-policy-create',
+      //   component: LazyOsqueryManagedPolicyCreateExtension,
+      // });
 
       registerExtension({
         package: 'osquery_elastic_managed',
         view: 'package-policy-edit',
         component: LazyOsqueryManagedPolicyEditExtension,
+      });
+
+      registerExtension({
+        package: 'osquery_elastic_managed',
+        view: 'package-detail-custom',
+        component: LazyOsqueryManagedCustomExtension,
       });
     }
 

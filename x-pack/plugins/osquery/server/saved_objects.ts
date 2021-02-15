@@ -7,9 +7,9 @@
 
 import { CoreSetup } from '../../../../src/core/server';
 
-import { type as savedQueryType } from './lib/saved_query/saved_object_mappings';
+import { savedQueryType, packType } from './lib/saved_query/saved_object_mappings';
 
-const types = [savedQueryType];
+const types = [savedQueryType, packType];
 
 export const savedObjectTypes = types.map((type) => type.name);
 

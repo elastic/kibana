@@ -7,7 +7,7 @@
 
 import { SavedObjectsType } from '../../../../../../src/core/server';
 
-import { savedQuerySavedObjectType } from '../../../common/types';
+import { savedQuerySavedObjectType, packSavedObjectType } from '../../../common/types';
 
 export const savedQuerySavedObjectMappings: SavedObjectsType['mappings'] = {
   properties: {
@@ -35,9 +35,49 @@ export const savedQuerySavedObjectMappings: SavedObjectsType['mappings'] = {
   },
 };
 
-export const type: SavedObjectsType = {
+export const savedQueryType: SavedObjectsType = {
   name: savedQuerySavedObjectType,
   hidden: false,
   namespaceType: 'single',
   mappings: savedQuerySavedObjectMappings,
+};
+
+export const packSavedObjectMappings: SavedObjectsType['mappings'] = {
+  properties: {
+    description: {
+      type: 'text',
+    },
+    title: {
+      type: 'text',
+    },
+    created: {
+      type: 'date',
+    },
+    createdBy: {
+      type: 'text',
+    },
+    updated: {
+      type: 'date',
+    },
+    updatedBy: {
+      type: 'text',
+    },
+    queries: {
+      properties: {
+        name: {
+          type: 'keyword',
+        },
+        interval: {
+          type: 'text',
+        },
+      },
+    },
+  },
+};
+
+export const packType: SavedObjectsType = {
+  name: packSavedObjectType,
+  hidden: false,
+  namespaceType: 'single',
+  mappings: packSavedObjectMappings,
 };

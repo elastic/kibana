@@ -138,7 +138,7 @@ const OsqueryStreamFieldComponent = ({ field, removeItem }) => {
       </EuiFormRow>
       <EuiSpacer />
       <EuiFormRow>
-        <EuiButtonIcon onClick={removeItem} color="danger" iconType="trash" />
+        <EuiButtonIcon aria-label="remove" onClick={removeItem} color="danger" iconType="trash" />
       </EuiFormRow>
       <EuiFormRow>
         <EuiSelect

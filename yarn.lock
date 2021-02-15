@@ -17325,10 +17325,10 @@ invert-kv@^1.0.0:
   resolved "https://registry.yarnpkg.com/invert-kv/-/invert-kv-1.0.0.tgz#104a8e4aaca6d3d8cd157a8ef8bfab2d7a3ffdb6"
   integrity sha1-EEqOSqym09jNFXqO+L+rLXo//bY=
 
-io-ts@^2.0.5:
-  version "2.0.5"
-  resolved "https://registry.yarnpkg.com/io-ts/-/io-ts-2.0.5.tgz#e6e3db9df8b047f9cbd6b69e7d2ad3e6437a0b13"
-  integrity sha512-pL7uUptryanI5Glv+GUv7xh+aLBjxGEDmLwmEYNSx0yOD3djK0Nw5Bt0N6BAkv9LadOUU7QKpRsLcqnTh3UlLA==
+io-ts@^2.2.14:
+  version "2.2.14"
+  resolved "https://registry.yarnpkg.com/io-ts/-/io-ts-2.2.14.tgz#99405fab547690784d70c54a3048a44711237316"
+  integrity sha512-UWL1mdDe5YI4+/7YlrbsSwKmsECFFlWcVHT2CPGzeNODHj2qY0cibjulYfrfz5SCPoDAsjVP7vFKGcF+L10+SQ==
 
 iota-array@^1.0.0:
   version "1.0.0"
@@ -24304,10 +24304,10 @@ react-portal@^3.2.0:
   dependencies:
     prop-types "^15.5.8"
 
-react-query@^3.6.0:
-  version "3.6.0"
-  resolved "https://registry.yarnpkg.com/react-query/-/react-query-3.6.0.tgz#3da307a4a4cb6ea95f9c95b7e50b5281d5244e4d"
-  integrity sha512-39ptLt4qaKO1DE+ta6SpPutweEgDvUQj/KlebC+okJ9Nxbs5ExxKV8RYlLeop6vdDFyiMmwYrt1POiF8oWGh1A==
+react-query@^3.9.6:
+  version "3.9.6"
+  resolved "https://registry.yarnpkg.com/react-query/-/react-query-3.9.6.tgz#59d5fb162009be82586ad697a62091d2fd3a62a4"
+  integrity sha512-EA0HDhryEYSsiVBkCtqpPAnKbIayUqJNz2eImEPgyVaaUxQhG53rnruknt4E1l3bL3nj+RbXFf7zUV5Q6kJgBw==
   dependencies:
     "@babel/runtime" "^7.5.5"
     match-sorter "^6.0.2"

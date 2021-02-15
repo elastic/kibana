@@ -10,9 +10,11 @@ import { initSavedQueryRoutes } from './saved_query';
 import { initScheduledQueryRoutes } from './scheduled_query';
 import { initActionRoutes } from './action';
 import { OsqueryAppContext } from '../lib/osquery_app_context_services';
+import { initPackRoutes } from './pack';
 
 export const defineRoutes = (router: IRouter, context: OsqueryAppContext) => {
   initActionRoutes(router);
+  initPackRoutes(router);
   initSavedQueryRoutes(router);
   initScheduledQueryRoutes(router, context);
 };
