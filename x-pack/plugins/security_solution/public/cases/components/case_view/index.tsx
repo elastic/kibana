@@ -114,7 +114,7 @@ export interface Alert {
   '@timestamp': string;
   signal: Signal;
   [key: string]: unknown;
-};
+}
 
 export const CaseComponent = React.memo<CaseProps>(
   ({ caseId, caseData, fetchCase, subCaseId, updateCase, userCanCrud }) => {
@@ -139,8 +139,6 @@ export const CaseComponent = React.memo<CaseProps>(
       subCaseId,
     });
 
-
-
     /**
      * For the future developer: useSourcererScope is security solution dependent.
      * You can use useSignalIndex as an alternative.
@@ -148,9 +146,10 @@ export const CaseComponent = React.memo<CaseProps>(
     const { browserFields, docValueFields, selectedPatterns } = useSourcererScope(
       SourcererScopeName.detections
     );
-    const alertsQuery = useMemo(() => buildAlertsQuery(getAlertIdsFromComments(caseData.comments)), [
-      caseData.comments,
-    ]);
+    const alertsQuery = useMemo(
+      () => buildAlertsQuery(getAlertIdsFromComments(caseData.comments)),
+      [caseData.comments]
+    );
     const { loading: isLoadingAlerts, data: alertsData } = useQueryAlerts<SignalHit, unknown>(
       alertsQuery,
       selectedPatterns[0]
@@ -161,11 +160,12 @@ export const CaseComponent = React.memo<CaseProps>(
         alertsData?.hits.hits.reduce<Record<string, Ecs>>(
           (acc, { _id, _index, _source }) => ({
             ...acc,
-            [_id]: formatAlertToEcsSignal({
+            [_id]: {
+              ...formatAlertToEcsSignal(_source),
               _id,
               _index,
-              ..._source,
-            }),
+              timestamp: _source['@timestamp'],
+            },
           }),
           {}
         ) ?? {},
@@ -440,18 +440,18 @@ export const CaseComponent = React.memo<CaseProps>(
                 {!initLoadingData && (
                   <>
                     <UserActionTree
+                      alerts={alerts}
+                      caseServices={caseServices}
                       caseUserActions={caseUserActions}
                       connectors={connectors}
                       data={caseData}
                       fetchUserActions={fetchCaseUserActions.bind(null, caseData.id)}
-                      caseServices={caseServices}
                       isLoadingDescription={isLoading && updateKey === 'description'}
                       isLoadingUserActions={isLoadingUserActions}
+                      onShowAlertDetails={showAlert}
                       onUpdateField={onUpdateField}
                       updateCase={updateCase}
                       userCanCrud={userCanCrud}
-                      alerts={alerts}
-                      onShowAlertDetails={showAlert}
                     />
                     <MyEuiHorizontalRule margin="s" />
                     <EuiFlexGroup alignItems="center" gutterSize="s" justifyContent="flexEnd">

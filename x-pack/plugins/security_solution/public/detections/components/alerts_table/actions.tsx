@@ -103,13 +103,28 @@ export const updateAlertStatusAction = async ({
   }
 };
 
-export const determineToAndFrom = ({ ecsData }: { ecsData: Ecs }) => {
+export const determineToAndFrom = ({ ecs }: { ecs: Ecs[] | Ecs }) => {
+  if (Array.isArray(ecs)) {
+    const timestamps = ecs.reduce<number[]>((acc, item) => {
+      if (item.timestamp != null) {
+        const dateTimestamp = new Date(item.timestamp);
+        if (!acc.includes(dateTimestamp.valueOf())) {
+          return [...acc, dateTimestamp.valueOf()];
+        }
+      }
+      return acc;
+    }, []);
+    return {
+      from: new Date(Math.min(...timestamps)).toISOString(),
+      to: new Date(Math.max(...timestamps)).toISOString(),
+    };
+  }
+  const ecsData = ecs as Ecs;
   const ellapsedTimeRule = moment.duration(
     moment().diff(
       dateMath.parse(ecsData.signal?.rule?.from != null ? ecsData.signal?.rule?.from[0] : 'now-0s')
     )
   );
-
   const from = moment(ecsData.timestamp ?? new Date())
     .subtract(ellapsedTimeRule)
     .toISOString();
@@ -148,7 +163,8 @@ export const getThresholdAggregationDataProvider = (
     const aggregationFieldId = aggregationField.replace('.', '-');
 
     return [
-      ...acc,{
+      ...acc,
+      {
         and: [],
         id: `send-alert-to-timeline-action-default-draggable-event-details-value-formatted-field-value-${TimelineId.active}-${aggregationFieldId}-${dataProviderValue}`,
         name: aggregationField,
@@ -160,9 +176,9 @@ export const getThresholdAggregationDataProvider = (
           value: dataProviderValue,
           operator: ':',
         },
-      }];
-}, []);
-
+      },
+    ];
+  }, []);
 };
 
 export const isEqlRuleWithGroupId = (ecsData: Ecs) =>
@@ -173,37 +189,45 @@ export const isEqlRuleWithGroupId = (ecsData: Ecs) =>
 export const isThresholdRule = (ecsData: Ecs) =>
   ecsData.signal?.rule?.type?.length && ecsData.signal?.rule?.type[0] === 'threshold';
 
-export const buildAlertsKqlFilter = (key: '_id' | 'signal.group.id',alertIds: string[]): Filter[] => {
-  return [{
-    query: {
-      bool: {
-        should: alertIds.map(id => ({match_phrase: {_id: id }})),
-        minimum_should_match: true,
+export const buildAlertsKqlFilter = (
+  key: '_id' | 'signal.group.id',
+  alertIds: string[]
+): Filter[] => {
+  return [
+    {
+      query: {
+        bool: {
+          should: alertIds.map((id) => ({ match_phrase: { _id: id } })),
+          minimum_should_match: 1,
+        },
+      },
+      meta: {
+        alias: 'Alert Ids',
+        negate: false,
+        disabled: false,
+        type: 'phrases',
+        key,
+        value: alertIds.join(),
+        params: alertIds,
+      },
+      $state: {
+        store: esFilters.FilterStateStore.APP_STATE,
       },
     },
-    meta: {
-      alias: 'Alert Ids',
-      negate: false,
-      disabled: false,
-      type: 'phrases',
-      key,
-      value: alertIds.join(),
-      params: alertIds
-    },
-    $state: {
-      store: esFilters.FilterStateStore.APP_STATE,
-    },
-  }];
+  ];
 };
 
-export const buildTimelineDataProviderOrFilter = (alertsIds: string[], _id: string): { filters: Filter[]; dataProviders: DataProvider[]} => {
+export const buildTimelineDataProviderOrFilter = (
+  alertsIds: string[],
+  _id: string
+): { filters: Filter[]; dataProviders: DataProvider[] } => {
   if (!isEmpty(alertsIds)) {
     return {
       dataProviders: [],
       filters: buildAlertsKqlFilter('_id', alertsIds),
-    }
+    };
   }
-  return{
+  return {
     filters: [],
     dataProviders: [
       {
@@ -219,23 +243,29 @@ export const buildTimelineDataProviderOrFilter = (alertsIds: string[], _id: stri
           operator: ':' as const,
         },
       },
-    ]
-  }
+    ],
+  };
 };
 
-export const buildEqlDataProviderOrFilter = (alertsIds: string[], ecs: Ecs[] | Ecs): { filters: Filter[]; dataProviders: DataProvider[] } => {
+export const buildEqlDataProviderOrFilter = (
+  alertsIds: string[],
+  ecs: Ecs[] | Ecs
+): { filters: Filter[]; dataProviders: DataProvider[] } => {
   if (!isEmpty(alertsIds) && Array.isArray(ecs)) {
     return {
       dataProviders: [],
-      filters: buildAlertsKqlFilter('signal.group.id', ecs.reduce<string[]>((acc, ecsData) => {
-        const signalGroupId = ecsData.signal?.group?.id?.length
-          ? ecsData.signal?.group?.id[0]
-          : 'unknown-signal-group-id';
-        if (!acc.includes(signalGroupId)) {
-          return [...acc, signalGroupId];
-        }
-        return acc;
-      }, [])),
+      filters: buildAlertsKqlFilter(
+        'signal.group.id',
+        ecs.reduce<string[]>((acc, ecsData) => {
+          const signalGroupId = ecsData.signal?.group?.id?.length
+            ? ecsData.signal?.group?.id[0]
+            : 'unknown-signal-group-id';
+          if (!acc.includes(signalGroupId)) {
+            return [...acc, signalGroupId];
+          }
+          return acc;
+        }, [])
+      ),
     };
   } else if (!Array.isArray(ecs)) {
     const signalGroupId = ecs.signal?.group?.id?.length
@@ -258,10 +288,10 @@ export const buildEqlDataProviderOrFilter = (alertsIds: string[], ecs: Ecs[] | E
         },
       ],
       filters: [],
-    }
+    };
   }
   return { filters: [], dataProviders: [] };
-}
+};
 
 export const sendAlertToTimelineAction = async ({
   apolloClient,
@@ -273,14 +303,14 @@ export const sendAlertToTimelineAction = async ({
   searchStrategyClient,
 }: SendAlertToTimelineActionProps) => {
   /* FUTURE DEVELOPER
-   * We are making an assumption here that if you array of ecs data they are all coming from the same rule
+   * We are making an assumption here that if you have an array of ecs data they are all coming from the same rule
    * but we still want to determine the filter for each alerts
    */
-  const ecsData: Ecs = Array.isArray(ecs) && ecs.length > 0 ? ecs[0] : ecs as Ecs;
+  const ecsData: Ecs = Array.isArray(ecs) && ecs.length > 0 ? ecs[0] : (ecs as Ecs);
   const noteContent = ecsData.signal?.rule?.note != null ? ecsData.signal?.rule?.note[0] : '';
   const timelineId =
     ecsData.signal?.rule?.timeline_id != null ? ecsData.signal?.rule?.timeline_id[0] : '';
-  const { to, from } = determineToAndFrom({ ecsData });
+  const { to, from } = determineToAndFrom({ ecs });
 
   // For now we do not want to populate the template timeline if we have alertIds
   if (!isEmpty(timelineId) && apolloClient != null && isEmpty(alertIds)) {
@@ -404,7 +434,7 @@ export const sendAlertToTimelineAction = async ({
   } else {
     let { dataProviders, filters } = buildTimelineDataProviderOrFilter(alertIds ?? [], ecsData._id);
     if (isEqlRuleWithGroupId(ecsData)) {
-      const tempEql =  buildEqlDataProviderOrFilter(alertIds ?? [], ecs);
+      const tempEql = buildEqlDataProviderOrFilter(alertIds ?? [], ecs);
       dataProviders = tempEql.dataProviders;
       filters = tempEql.filters;
     }

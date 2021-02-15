@@ -12,14 +12,15 @@ export const getAlertIdsFromComments = (comments: Comment[]): string[] => {
   const dedupeAlerts = comments.reduce((alertIds, comment: Comment) => {
     if (comment.type === CommentType.alert || comment.type === CommentType.generatedAlert) {
       const ids = Array.isArray(comment.alertId) ? comment.alertId : [comment.alertId];
-      ids.forEach(id => alertIds.add(id));
+      ids.forEach((id) => alertIds.add(id));
       return alertIds;
     }
     return alertIds;
   }, new Set<string>());
   return [...dedupeAlerts];
-}
+};
 
+// TODO we need to allow ->  docValueFields: [{ field: "@timestamp" }],
 export const buildAlertsQuery = (alertIds: string[]) => ({
   query: {
     bool: {
@@ -30,5 +31,5 @@ export const buildAlertsQuery = (alertIds: string[]) => ({
       },
     },
   },
-  size: 5000,
+  size: 10000,
 });

@@ -250,12 +250,14 @@ export const flattenCaseSavedObject = ({
   totalComment = comments.length,
   totalAlerts = 0,
   subCases,
+  subCaseIds = [],
 }: {
   savedObject: SavedObject<ESCaseAttributes>;
   comments?: Array<SavedObject<CommentAttributes>>;
   totalComment?: number;
   totalAlerts?: number;
   subCases?: SubCaseResponse[];
+  subCaseIds?: string[];
 }): CaseResponse => ({
   id: savedObject.id,
   version: savedObject.version ?? '0',
@@ -265,6 +267,7 @@ export const flattenCaseSavedObject = ({
   ...savedObject.attributes,
   connector: transformESConnectorToCaseConnector(savedObject.attributes.connector),
   subCases,
+  subCaseIds,
 });
 
 export const flattenSubCaseSavedObject = ({

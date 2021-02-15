@@ -117,7 +117,7 @@ export const UserActionTree = React.memo(
     alerts,
     onShowAlertDetails,
   }: UserActionTreeProps) => {
-    const { commentId, subCaseId } = useParams<{ commentId?: string, subCaseId?: string }>();
+    const { commentId, subCaseId } = useParams<{ commentId?: string; subCaseId?: string }>();
     const handlerTimeoutId = useRef(0);
     const addCommentRef = useRef<AddCommentRefObject>(null);
     const [initLoading, setInitLoading] = useState(true);
@@ -223,7 +223,7 @@ export const UserActionTree = React.memo(
           subCaseId={subCaseId}
         />
       ),
-      [caseData.id, handleUpdate, userCanCrud, handleManageMarkdownEditId]
+      [caseData.id, handleUpdate, userCanCrud, handleManageMarkdownEditId, subCaseId]
     );
 
     useEffect(() => {
@@ -353,7 +353,9 @@ export const UserActionTree = React.memo(
                 return [...comments, getAlertAttachment({ action, alert, onShowAlertDetails })];
               } else if (comment != null && comment.type === CommentType.generatedAlert) {
                 // TODO: clean this up
-                const alertIds = Array.isArray(comment.alertId) ? comment.alertId : [comment.alertId];
+                const alertIds = Array.isArray(comment.alertId)
+                  ? comment.alertId
+                  : [comment.alertId];
                 if (isEmpty(alertIds)) {
                   return comments;
                 }

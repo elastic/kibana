@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiCommentProps, EuiIconTip } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiLink,
+  EuiCommentProps,
+  EuiIconTip,
+} from '@elastic/eui';
 import { isObject, get, isString, isNumber } from 'lodash';
 import React from 'react';
 
@@ -26,12 +33,10 @@ import { UserActionMoveToReference } from './user_action_move_to_reference';
 import { Status, statuses } from '../status';
 import { UserActionShowAlert } from './user_action_show_alert';
 import * as i18n from './translations';
-import { Alert } from '../case_view';
 import { AlertCommentEvent } from './user_action_alert_comment_event';
 import { InvestigateInTimelineAction } from '../../../detections/components/alerts_table/timeline_actions/investigate_in_timeline_action';
 import { Ecs } from '../../../../common/ecs';
 import { TimelineNonEcsData } from '../../../../common/search_strategy';
-
 
 interface LabelTitle {
   action: CaseUserActions;
@@ -284,20 +289,16 @@ export const toStringArray = (value: unknown): string[] => {
   }
 };
 
-export const formatAlertToEcsSignal = (
-  alert: {},
-): Ecs =>
+export const formatAlertToEcsSignal = (alert: {}): Ecs =>
   Object.keys(alert).reduce<Ecs>((accumulator, key) => {
     const item = get(alert, key);
     if (item != null && isObject(item)) {
-      return { ...accumulator, [key]: formatAlertToEcsSignal(item)};
+      return { ...accumulator, [key]: formatAlertToEcsSignal(item) };
     } else if (Array.isArray(item) || isString(item) || isNumber(item)) {
-      return { ...accumulator, [key]: toStringArray(item)}
+      return { ...accumulator, [key]: toStringArray(item) };
     }
     return accumulator;
   }, {} as Ecs);
-
-
 
 const EMPTY_ARRAY: TimelineNonEcsData[] = [];
 export const getGeneratedAlertsAttachment = ({
@@ -312,12 +313,16 @@ export const getGeneratedAlertsAttachment = ({
   const alert = alerts[alertIds[0]];
   const ecsData: Ecs[] = Object.values(alerts);
   return {
-    username: (
-      <EuiIcon type="logoSecurity" size="s" />
-    ),
+    username: <EuiIcon type="logoSecurity" size="s" />,
     className: 'comment-alert',
     type: 'update',
-    event: <AlertCommentEvent alert={alert} alertsCount={alertIds.length} commentType={CommentType.generatedAlert} />,
+    event: (
+      <AlertCommentEvent
+        alert={alert}
+        alertsCount={alertIds.length}
+        commentType={CommentType.generatedAlert}
+      />
+    ),
     'data-test-subj': `${action.actionField[0]}-${action.action}-action-${action.actionId}`,
     timestamp: <UserActionTimestamp createdAt={action.actionAt} />,
     timelineIcon: 'bell',
@@ -327,13 +332,13 @@ export const getGeneratedAlertsAttachment = ({
           <UserActionCopyLink id={action.actionId} />
         </EuiFlexItem>
         <EuiFlexItem>
-            <InvestigateInTimelineAction
-              ariaLabel={i18n.SEND_ALERT_TO_TIMELINE}
-              alertIds={alertIds}
-              key="investigate-in-timeline"
-              ecsRowData={ecsData}
-              nonEcsRowData={EMPTY_ARRAY}
-            />
+          <InvestigateInTimelineAction
+            ariaLabel={i18n.SEND_ALERT_TO_TIMELINE}
+            alertIds={alertIds}
+            key="investigate-in-timeline"
+            ecsRowData={ecsData}
+            nonEcsRowData={EMPTY_ARRAY}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
     ),

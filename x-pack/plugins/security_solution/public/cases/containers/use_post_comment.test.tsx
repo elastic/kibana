@@ -49,7 +49,11 @@ describe('usePostComment', () => {
       );
       await waitForNextUpdate();
 
-      result.current.postComment({ caseId: basicCaseId, data: samplePost, updateCase: updateCaseCallback });
+      result.current.postComment({
+        caseId: basicCaseId,
+        data: samplePost,
+        updateCase: updateCaseCallback,
+      });
       await waitForNextUpdate();
       expect(spyOnPostCase).toBeCalledWith(samplePost, basicCaseId, abortCtrl.signal);
     });
@@ -61,7 +65,11 @@ describe('usePostComment', () => {
         usePostComment()
       );
       await waitForNextUpdate();
-      result.current.postComment({ caseId: basicCaseId, data: samplePost, updateCase: updateCaseCallback});
+      result.current.postComment({
+        caseId: basicCaseId,
+        data: samplePost,
+        updateCase: updateCaseCallback,
+      });
       await waitForNextUpdate();
       expect(result.current).toEqual({
         isLoading: false,
@@ -77,7 +85,11 @@ describe('usePostComment', () => {
         usePostComment()
       );
       await waitForNextUpdate();
-      result.current.postComment({ caseId: basicCaseId, data: samplePost, updateCase: updateCaseCallback});
+      result.current.postComment({
+        caseId: basicCaseId,
+        data: samplePost,
+        updateCase: updateCaseCallback,
+      });
 
       expect(result.current.isLoading).toBe(true);
     });
@@ -94,7 +106,11 @@ describe('usePostComment', () => {
         usePostComment()
       );
       await waitForNextUpdate();
-      result.current.postComment({ caseId: basicCaseId, data: samplePost, updateCase: updateCaseCallback});
+      result.current.postComment({
+        caseId: basicCaseId,
+        data: samplePost,
+        updateCase: updateCaseCallback,
+      });
 
       expect(result.current).toEqual({
         isLoading: false,

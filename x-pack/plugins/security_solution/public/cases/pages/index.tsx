@@ -15,7 +15,7 @@ import { ConfigureCasesPage } from './configure_cases';
 
 const casesPagePath = '';
 const caseDetailsPagePath = `${casesPagePath}/:detailName`;
-const subCaseDetailsPagePath = `${caseDetailsPagePath}/sub-case/:subCaseId`;
+const subCaseDetailsPagePath = `${caseDetailsPagePath}/sub-cases/:subCaseId`;
 const caseDetailsPagePathWithCommentId = `${caseDetailsPagePath}/:commentId`;
 const subCaseDetailsPagePathWithCommentId = `${subCaseDetailsPagePath}/:commentId`;
 const createCasePagePath = `${casesPagePath}/create`;

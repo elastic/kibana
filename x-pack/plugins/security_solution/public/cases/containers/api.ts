@@ -104,6 +104,8 @@ export const getSubCase = async (
     }),
   ]);
   const response = assign<CaseResponse, SubCaseResponse>(caseResponse, subCaseResponse);
+  const subCaseIndex = response.subCaseIds?.findIndex((scId) => scId === response.id) ?? -1;
+  response.title = `${response.title}${subCaseIndex >= 0 ? ` ${subCaseIndex + 1}` : ''}`;
   return convertToCamelCase<CaseResponse, Case>(decodeCaseResponse(response));
 };
 
@@ -261,7 +263,7 @@ export const postComment = async (
   newComment: CommentRequest,
   caseId: string,
   signal: AbortSignal,
-  subCaseId?: string,
+  subCaseId?: string
 ): Promise<Case> => {
   const response = await KibanaServices.get().http.fetch<CaseResponse>(
     `${CASES_URL}/${caseId}/comments`,
@@ -281,7 +283,7 @@ export const patchComment = async (
   commentUpdate: string,
   version: string,
   signal: AbortSignal,
-  subCaseId?: string,
+  subCaseId?: string
 ): Promise<Case> => {
   const response = await KibanaServices.get().http.fetch<CaseResponse>(getCaseCommentsUrl(caseId), {
     method: 'PATCH',
