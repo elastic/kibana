@@ -10,7 +10,7 @@ import { compile } from 'vega-lite/build-es5/vega-lite';
 
 import euiThemeLight from '@elastic/eui/dist/eui_theme_light.json';
 
-import { LEGEND_TYPES } from '../vega_chart';
+import { LEGEND_TYPES } from '../vega_chart/common';
 
 import {
   getColorSpec,
