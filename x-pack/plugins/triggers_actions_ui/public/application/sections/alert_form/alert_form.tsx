@@ -591,6 +591,7 @@ export const AlertForm = ({
               alertParams={alert.params}
               alertInterval={`${alertInterval ?? 1}${alertIntervalUnit}`}
               alertThrottle={`${alertThrottle ?? 1}${alertThrottleUnit}`}
+              alertNotifyWhen={alert.notifyWhen ?? 'onActionGroupChange'}
               errors={errors}
               setAlertParams={setAlertParams}
               setAlertProperty={setAlertProperty}

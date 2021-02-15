@@ -3660,6 +3660,9 @@
             },
             "savedObjects": {
               "properties": {
+                "customIndex": {
+                  "type": "boolean"
+                },
                 "maxImportPayloadBytes": {
                   "type": "long"
                 },
