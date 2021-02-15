@@ -14,6 +14,7 @@ import { LineChartData } from '../../../../../common/chart_loader';
 import { DropDownLabel, DropDownProps } from '../agg_select';
 import { newJobCapsService } from '../../../../../../../services/new_job_capabilities_service';
 import { Field, AggFieldPair } from '../../../../../../../../../common/types/fields';
+import { sortFields } from '../../../../../../../../../common/util/fields_utils';
 import { getChartSettings, defaultChartSettings } from '../../../charts/common/settings';
 import { MetricSelector } from './metric_selector';
 import { SplitFieldSelector } from '../split_field';
@@ -36,7 +37,7 @@ export const PopulationDetectors: FC<Props> = ({ setIsValid }) => {
   } = useContext(JobCreatorContext);
   const jobCreator = jc as PopulationJobCreator;
 
-  const [fields] = useState([...newJobCapsService.fields, ...jobCreator.runtimeFields]);
+  const [fields] = useState(sortFields([...newJobCapsService.fields, ...jobCreator.runtimeFields]));
   const [selectedOptions, setSelectedOptions] = useState<DropDownProps>([]);
   const [aggFieldPairList, setAggFieldPairList] = useState<AggFieldPair[]>(
     jobCreator.aggFieldPairs

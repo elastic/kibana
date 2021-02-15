@@ -12,6 +12,7 @@ import { LineChartData } from '../../../../../common/chart_loader';
 import { AggSelect, DropDownLabel, DropDownProps, createLabel } from '../agg_select';
 import { newJobCapsService } from '../../../../../../../services/new_job_capabilities_service';
 import { AggFieldPair } from '../../../../../../../../../common/types/fields';
+import { sortFields } from '../../../../../../../../../common/util/fields_utils';
 import { AnomalyChart, CHART_TYPE } from '../../../charts/anomaly_chart';
 import { getChartSettings } from '../../../charts/common/settings';
 import { getToastNotificationService } from '../../../../../../../services/toast_notification_service';
@@ -32,7 +33,7 @@ export const SingleMetricDetectors: FC<Props> = ({ setIsValid }) => {
   } = useContext(JobCreatorContext);
   const jobCreator = jc as SingleMetricJobCreator;
 
-  const [fields] = useState([...newJobCapsService.fields, ...jobCreator.runtimeFields]);
+  const [fields] = useState(sortFields([...newJobCapsService.fields, ...jobCreator.runtimeFields]));
   const [selectedOptions, setSelectedOptions] = useState<DropDownProps>(
     jobCreator.aggFieldPair !== null ? [{ label: createLabel(jobCreator.aggFieldPair) }] : []
   );

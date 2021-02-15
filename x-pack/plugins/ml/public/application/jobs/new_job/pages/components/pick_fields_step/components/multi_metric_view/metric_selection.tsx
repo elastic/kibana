@@ -13,6 +13,7 @@ import { LineChartData } from '../../../../../common/chart_loader';
 import { DropDownLabel, DropDownProps } from '../agg_select';
 import { newJobCapsService } from '../../../../../../../services/new_job_capabilities_service';
 import { AggFieldPair } from '../../../../../../../../../common/types/fields';
+import { sortFields } from '../../../../../../../../../common/util/fields_utils';
 import { getChartSettings, defaultChartSettings } from '../../../charts/common/settings';
 import { MetricSelector } from './metric_selector';
 import { ChartGrid } from './chart_grid';
@@ -33,7 +34,7 @@ export const MultiMetricDetectors: FC<Props> = ({ setIsValid }) => {
 
   const jobCreator = jc as MultiMetricJobCreator;
 
-  const [fields] = useState([...newJobCapsService.fields, ...jobCreator.runtimeFields]);
+  const [fields] = useState(sortFields([...newJobCapsService.fields, ...jobCreator.runtimeFields]));
   const [selectedOptions, setSelectedOptions] = useState<DropDownProps>([]);
   const [aggFieldPairList, setAggFieldPairList] = useState<AggFieldPair[]>(
     jobCreator.aggFieldPairs

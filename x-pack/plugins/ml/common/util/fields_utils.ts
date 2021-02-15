@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-import { Field, Aggregation, NewJobCaps, METRIC_AGG_TYPE, RollupFields } from '../types/fields';
+import {
+  Field,
+  Aggregation,
+  NewJobCaps,
+  METRIC_AGG_TYPE,
+  RollupFields,
+  EVENT_RATE_FIELD_ID,
+} from '../types/fields';
 import { ES_FIELD_TYPES } from '../../../../../src/plugins/data/common';
 import { ML_JOB_AGGREGATION } from '../constants/aggregation_types';
 
@@ -115,4 +122,23 @@ function getGeoFields(fields: Field[]): Field[] {
   return fields.filter(
     (f) => f.type === ES_FIELD_TYPES.GEO_POINT || f.type === ES_FIELD_TYPES.GEO_SHAPE
   );
+}
+
+/**
+ * Sort fields by name, keeping event rate at the beginning
+ */
+export function sortFields(fields: Field[]) {
+  if (fields.length === 0) {
+    return fields;
+  }
+
+  let eventRate: Field | undefined;
+  if (fields[0].id === EVENT_RATE_FIELD_ID) {
+    [eventRate] = fields.splice(0, 1);
+  }
+  fields.sort((a, b) => a.name.localeCompare(b.name));
+  if (eventRate !== undefined) {
+    fields.splice(0, 0, eventRate);
+  }
+  return fields;
 }
