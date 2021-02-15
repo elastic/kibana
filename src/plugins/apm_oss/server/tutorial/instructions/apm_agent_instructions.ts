@@ -709,50 +709,45 @@ export const createPhpAgentInstructions = (apmServerUrl = '', secretToken = '') 
     }),
     textPre: i18n.translate('apmOss.tutorial.phpClient.download.textPre', {
       defaultMessage:
-        '[NameOfPackage]({linkToPackage}) package. \
-        Text in same paragraph. \n\n \
-        Text after linebreaks.',
+        'Download the package corresponding to your platform from [GitHub releases]({githubReleasesLink}).',
       values: {
-        linkToPackage: 'https://example.com',
+        githubReleasesLink: 'https://github.com/elastic/apm-agent-php/releases',
       },
     }),
   },
   {
-    title: i18n.translate('apmOss.tutorial.phpClient.configureApplication.title', {
-      defaultMessage: 'Add the agent to the application',
+    title: i18n.translate('apmOss.tutorial.phpClient.installPackage.title', {
+      defaultMessage: 'Install the downloaded package',
     }),
-    textPre: i18n.translate('apmOss.tutorial.phpClient.configureApplication.textPre', {
-      defaultMessage: 'Explain how to configure the agent',
+    textPre: i18n.translate('apmOss.tutorial.phpClient.installPackage.textPre', {
+      defaultMessage: 'For example on Alpine Linux using APK package:',
     }),
-    commands: `public class Startup
-{curlyOpen}
-  public void Configure(IApplicationBuilder app, IHostingEnvironment env)
-  {curlyOpen}
-    app.UseAllElasticApm(Configuration);
-    //…rest of the method
-  {curlyClose}
-  //…rest of the class
-{curlyClose}`.split('\n'),
-    textPost: i18n.translate('apmOss.tutorial.phpClient.configureApplication.textPost', {
-      defaultMessage: 'Text after application configuration',
+    commands: ['apk add --allow-untrusted <package-file>.apk'],
+    textPost: i18n.translate('apmOss.tutorial.phpClient.installPackage.textPost', {
+      defaultMessage:
+        'See the [documentation]({documentationLink}) for installation commands on other supported platforms and advanced installation.',
+      values: {
+        documentationLink: '{config.docs.base_url}guide/en/apm/agent/php/current/setup.html',
+      },
     }),
   },
   {
     title: i18n.translate('apmOss.tutorial.phpClient.configureAgent.title', {
-      defaultMessage: 'Sample appsettings.json file:',
+      defaultMessage: 'Configure the agent',
     }),
-    commands: `{curlyOpen}
-    "ElasticApm": {curlyOpen}
-    "SecretToken": "${secretToken}",
-    "ServerUrls": "${
-      apmServerUrl || 'http://localhost:8200'
-    }", //Set custom APM Server URL (default: http://localhost:8200)
-    "ServiceName": "MyApp", //allowed characters: a-z, A-Z, 0-9, -, _, and space. Default is the entry assembly of the application
-    "Environment": "production", // Set the service environment
-  {curlyClose}
-{curlyClose}`.split('\n'),
-    textPost: i18n.translate('apmOss.tutorial.phpClient.configureAgent.textPost', {
-      defaultMessage: 'Text after agent configuration',
+    textPre: i18n.translate('apmOss.tutorial.phpClient.configureAgent.textPre', {
+      defaultMessage:
+        'APM is automatically started when your app boots. Configure the agent either via `php.ini` file:',
+    }),
+    commands: `elastic_apm.server_url=http://localhost:8200
+elastic_apm.service_name="My service"
+`.split('\n'),
+    textPost: i18n.translate('apmOss.tutorial.phpClient.configure.textPost', {
+      defaultMessage:
+        'See the [documentation]({documentationLink}) for configuration options and advanced usage.\n\n',
+      values: {
+        documentationLink: '{config.docs.base_url}guide/en/apm/agent/php/current/index.html',
+      },
     }),
   },
 ];
