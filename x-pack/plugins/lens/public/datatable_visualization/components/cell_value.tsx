@@ -18,6 +18,7 @@ export const createGridCell = (
   const rowValue = table?.rows[rowIndex][columnId];
   const content = formatters[columnId]?.convert(rowValue, 'html');
   const currentAlignment = alignments && alignments[columnId];
+  const alignmentClassName = `lnsTableCell--${currentAlignment}`;
 
   useEffect(() => {
     setCellProps({
@@ -28,13 +29,14 @@ export const createGridCell = (
   }, [currentAlignment, setCellProps]);
 
   return (
-    <span
+    <div
       /*
        * dangerouslySetInnerHTML is necessary because the field formatter might produce HTML markup
        * which is produced in a safe way.
        */
       dangerouslySetInnerHTML={{ __html: content }} // eslint-disable-line react/no-danger
       data-test-subj="lnsTableCellContent"
+      className={`lnsTableCell ${alignmentClassName}`}
     />
   );
 };

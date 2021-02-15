@@ -56,9 +56,8 @@ describe('datatable cell renderer', () => {
     expect(instance.text()).toEqual('formatted 123');
   });
 
-  it('call setCellProps with text alignment', () => {
-    const setCellPropsFn = jest.fn();
-    mountWithIntl(
+  it('set class with text alignment', () => {
+    const cell = mountWithIntl(
       <DataContext.Provider
         value={{
           table,
@@ -70,17 +69,13 @@ describe('datatable cell renderer', () => {
         <CellRenderer
           rowIndex={0}
           columnId="a"
-          setCellProps={setCellPropsFn}
+          setCellProps={() => {}}
           isExpandable={false}
           isDetails={false}
           isExpanded={false}
         />
       </DataContext.Provider>
     );
-    expect(setCellPropsFn).toHaveBeenCalledWith({
-      style: {
-        textAlign: 'right',
-      },
-    });
+    expect(cell.find('.lnsTableCell').prop('className')).toContain('--right');
   });
 });
