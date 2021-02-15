@@ -25,12 +25,14 @@ import {
 
 interface InvestigateInTimelineActionProps {
   ariaLabel?: string;
-  ecsRowData: Ecs;
+  alertIds?: string[];
+  ecsRowData: Ecs | Ecs[];
   nonEcsRowData: TimelineNonEcsData[];
 }
 
 const InvestigateInTimelineActionComponent: React.FC<InvestigateInTimelineActionProps> = ({
   ariaLabel = ACTION_INVESTIGATE_IN_TIMELINE_ARIA_LABEL,
+  alertIds,
   ecsRowData,
   nonEcsRowData,
 }) => {
@@ -70,6 +72,7 @@ const InvestigateInTimelineActionComponent: React.FC<InvestigateInTimelineAction
     () =>
       sendAlertToTimelineAction({
         apolloClient,
+        alertIds,
         createTimeline,
         ecsData: ecsRowData,
         nonEcsData: nonEcsRowData,

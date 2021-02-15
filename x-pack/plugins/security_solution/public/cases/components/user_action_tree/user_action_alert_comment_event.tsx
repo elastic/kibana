@@ -13,19 +13,19 @@ import { useKibana } from '../../../common/lib/kibana';
 import { getRuleDetailsUrl } from '../../../common/components/link_to';
 import { SecurityPageName } from '../../../app/types';
 
-import { Alert } from '../case_view';
 import * as i18n from './translations';
 import { CommentType } from '../../../../../case/common/api';
+import { Ecs } from '../../../../common/ecs';
 
 interface Props {
-  alert: Alert | undefined;
+  alert: Ecs | undefined;
   alertsCount?: number;
-  commentType?: CommentType;
+  commentType: CommentType;
 }
 
 const AlertCommentEventComponent: React.FC<Props> = ({ alert, alertsCount, commentType }) => {
-  const ruleName = alert?.rule?.name ?? null;
-  const ruleId = alert?.rule?.id ?? null;
+  const ruleName = alert?.signal?.rule?.name ? alert?.signal?.rule?.name[0] : null;
+  const ruleId = alert?.signal?.rule?.id ? alert?.signal?.rule?.id[0] : null;
   const { navigateToApp } = useKibana().services.application;
 
   const onLinkClick = useCallback(

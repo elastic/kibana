@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiCommentProps, EuiIconTip } from '@elastic/eui';
+import { isObject, get, isString, isNumber } from 'lodash';
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiCommentProps, EuiIconTip } from '@elastic/eui';
 
 import {
   CaseFullExternalService,
@@ -28,6 +29,9 @@ import * as i18n from './translations';
 import { Alert } from '../case_view';
 import { AlertCommentEvent } from './user_action_alert_comment_event';
 import { InvestigateInTimelineAction } from '../../../detections/components/alerts_table/timeline_actions/investigate_in_timeline_action';
+import { Ecs } from '../../../../common/ecs';
+import { TimelineNonEcsData } from '../../../../common/search_strategy';
+
 
 interface LabelTitle {
   action: CaseUserActions;
@@ -196,17 +200,13 @@ export const getUpdateAction = ({
   ),
 });
 
-export const getAlertComment = ({
+export const getAlertAttachment = ({
   action,
   alert,
-  alertsCount,
-  commentType,
   onShowAlertDetails,
 }: {
   action: CaseUserActions;
-  alert: Alert | undefined;
-  alertsCount?: number;
-  commentType?: CommentType;
+  alert: Ecs | undefined;
   onShowAlertDetails: (alertId: string, index: string) => void;
 }): EuiCommentProps => {
   return {
@@ -218,7 +218,7 @@ export const getAlertComment = ({
     ),
     className: 'comment-alert',
     type: 'update',
-    event: <AlertCommentEvent alert={alert} alertsCount={alertsCount} commentType={commentType} />,
+    event: <AlertCommentEvent alert={alert} commentType={CommentType.alert} />,
     'data-test-subj': `${action.actionField[0]}-${action.action}-action-${action.actionId}`,
     timestamp: <UserActionTimestamp createdAt={action.actionAt} />,
     timelineIcon: 'bell',
@@ -228,14 +228,13 @@ export const getAlertComment = ({
           <UserActionCopyLink id={action.actionId} />
         </EuiFlexItem>
         <EuiFlexItem>
-          {alert != null && commentType !== CommentType.alert && (
+          {alert != null ? (
             <UserActionShowAlert
               id={action.actionId}
               alert={alert}
               onShowAlertDetails={onShowAlertDetails}
             />
-          )}
-          {alert == null && commentType !== CommentType.generatedAlert && (
+          ) : (
             <EuiIconTip
               aria-label={i18n.ALERT_NOT_FOUND_TOOLTIP}
               size="l"
@@ -244,14 +243,97 @@ export const getAlertComment = ({
               content={i18n.ALERT_NOT_FOUND_TOOLTIP}
             />
           )}
-          {commentType === CommentType.generatedAlert && (
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    ),
+  };
+};
+
+export const toStringArray = (value: unknown): string[] => {
+  if (Array.isArray(value)) {
+    return value.reduce<string[]>((acc, v) => {
+      if (v != null) {
+        switch (typeof v) {
+          case 'number':
+          case 'boolean':
+            return [...acc, v.toString()];
+          case 'object':
+            try {
+              return [...acc, JSON.stringify(v)];
+            } catch {
+              return [...acc, 'Invalid Object'];
+            }
+          case 'string':
+            return [...acc, v];
+          default:
+            return [...acc, `${v}`];
+        }
+      }
+      return acc;
+    }, []);
+  } else if (value == null) {
+    return [];
+  } else if (!Array.isArray(value) && typeof value === 'object') {
+    try {
+      return [JSON.stringify(value)];
+    } catch {
+      return ['Invalid Object'];
+    }
+  } else {
+    return [`${value}`];
+  }
+};
+
+export const formatAlertToEcsSignal = (
+  alert: {},
+): Ecs =>
+  Object.keys(alert).reduce<Ecs>((accumulator, key) => {
+    const item = get(alert, key);
+    if (item != null && isObject(item)) {
+      return { ...accumulator, [key]: formatAlertToEcsSignal(item)};
+    } else if (Array.isArray(item) || isString(item) || isNumber(item)) {
+      return { ...accumulator, [key]: toStringArray(item)}
+    }
+    return accumulator;
+  }, {} as Ecs);
+
+
+
+const EMPTY_ARRAY: TimelineNonEcsData[] = [];
+export const getGeneratedAlertsAttachment = ({
+  action,
+  alerts,
+  alertIds,
+}: {
+  action: CaseUserActions;
+  alerts: Record<string, Ecs>;
+  alertIds: string[];
+}): EuiCommentProps => {
+  const alert = alerts[alertIds[0]];
+  const ecsData: Ecs[] = Object.values(alerts);
+  return {
+    username: (
+      <EuiIcon type="logoSecurity" size="s" />
+    ),
+    className: 'comment-alert',
+    type: 'update',
+    event: <AlertCommentEvent alert={alert} alertsCount={alertIds.length} commentType={CommentType.generatedAlert} />,
+    'data-test-subj': `${action.actionField[0]}-${action.action}-action-${action.actionId}`,
+    timestamp: <UserActionTimestamp createdAt={action.actionAt} />,
+    timelineIcon: 'bell',
+    actions: (
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <UserActionCopyLink id={action.actionId} />
+        </EuiFlexItem>
+        <EuiFlexItem>
             <InvestigateInTimelineAction
               ariaLabel={i18n.SEND_ALERT_TO_TIMELINE}
+              alertIds={alertIds}
               key="investigate-in-timeline"
               ecsRowData={ecsData}
-              nonEcsRowData={data}
+              nonEcsRowData={EMPTY_ARRAY}
             />
-          )}
         </EuiFlexItem>
       </EuiFlexGroup>
     ),

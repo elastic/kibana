@@ -9,12 +9,13 @@ import React, { memo, useCallback } from 'react';
 import { EuiToolTip, EuiButtonIcon } from '@elastic/eui';
 import deepEqual from 'fast-deep-equal';
 
-import { Alert } from '../case_view';
+import { Ecs } from '../../../../common/ecs';
 import * as i18n from './translations';
+
 
 interface UserActionShowAlertProps {
   id: string;
-  alert: Alert;
+  alert: Ecs;
   onShowAlertDetails: (alertId: string, index: string) => void;
 }
 
@@ -23,7 +24,7 @@ const UserActionShowAlertComponent = ({
   alert,
   onShowAlertDetails,
 }: UserActionShowAlertProps) => {
-  const onClick = useCallback(() => onShowAlertDetails(alert._id, alert._index), [
+  const onClick = useCallback(() => onShowAlertDetails(alert._id, alert?._index ?? ''), [
     alert._id,
     alert._index,
     onShowAlertDetails,

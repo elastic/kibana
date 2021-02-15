@@ -260,13 +260,15 @@ export const patchCasesStatus = async (
 export const postComment = async (
   newComment: CommentRequest,
   caseId: string,
-  signal: AbortSignal
+  signal: AbortSignal,
+  subCaseId?: string,
 ): Promise<Case> => {
   const response = await KibanaServices.get().http.fetch<CaseResponse>(
     `${CASES_URL}/${caseId}/comments`,
     {
       method: 'POST',
       body: JSON.stringify(newComment),
+      query: { subCaseId },
       signal,
     }
   );
@@ -278,7 +280,8 @@ export const patchComment = async (
   commentId: string,
   commentUpdate: string,
   version: string,
-  signal: AbortSignal
+  signal: AbortSignal,
+  subCaseId?: string,
 ): Promise<Case> => {
   const response = await KibanaServices.get().http.fetch<CaseResponse>(getCaseCommentsUrl(caseId), {
     method: 'PATCH',
@@ -288,6 +291,7 @@ export const patchComment = async (
       id: commentId,
       version,
     }),
+    query: { subCaseId },
     signal,
   });
   return convertToCamelCase<CaseResponse, Case>(decodeCaseResponse(response));

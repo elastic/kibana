@@ -43,7 +43,7 @@ import {
   getNoneConnector,
 } from '../configure_cases/utils';
 import { useQueryAlerts } from '../../../detections/containers/detection_engine/alerts/use_query';
-import { buildAlertsQuery, getRuleIdsFromComments } from './helpers';
+import { buildAlertsQuery, getAlertIdsFromComments } from './helpers';
 import { DetailsPanel } from '../../../timelines/components/side_panel';
 import { useSourcererScope } from '../../../common/containers/sourcerer';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
@@ -52,6 +52,8 @@ import { timelineActions } from '../../../timelines/store/timeline';
 import { StatusActionButton } from '../status/button';
 
 import * as i18n from './translations';
+import { formatAlertToEcsSignal } from '../user_action_tree/helpers';
+import { Ecs } from '../../../../common/ecs';
 
 interface Props {
   caseId: string;
@@ -106,11 +108,13 @@ interface SignalHit {
   };
 }
 
-export type Alert = {
+export interface Alert {
   _id: string;
   _index: string;
   '@timestamp': string;
-} & Signal;
+  signal: Signal;
+  [key: string]: unknown;
+};
 
 export const CaseComponent = React.memo<CaseProps>(
   ({ caseId, caseData, fetchCase, subCaseId, updateCase, userCanCrud }) => {
@@ -135,9 +139,7 @@ export const CaseComponent = React.memo<CaseProps>(
       subCaseId,
     });
 
-    const alertsQuery = useMemo(() => buildAlertsQuery(getRuleIdsFromComments(caseData.comments)), [
-      caseData.comments,
-    ]);
+
 
     /**
      * For the future developer: useSourcererScope is security solution dependent.
@@ -146,7 +148,9 @@ export const CaseComponent = React.memo<CaseProps>(
     const { browserFields, docValueFields, selectedPatterns } = useSourcererScope(
       SourcererScopeName.detections
     );
-
+    const alertsQuery = useMemo(() => buildAlertsQuery(getAlertIdsFromComments(caseData.comments)), [
+      caseData.comments,
+    ]);
     const { loading: isLoadingAlerts, data: alertsData } = useQueryAlerts<SignalHit, unknown>(
       alertsQuery,
       selectedPatterns[0]
@@ -154,15 +158,14 @@ export const CaseComponent = React.memo<CaseProps>(
 
     const alerts = useMemo(
       () =>
-        alertsData?.hits.hits.reduce<Record<string, Alert>>(
+        alertsData?.hits.hits.reduce<Record<string, Ecs>>(
           (acc, { _id, _index, _source }) => ({
             ...acc,
-            [_id]: {
+            [_id]: formatAlertToEcsSignal({
               _id,
               _index,
-              '@timestamp': _source['@timestamp'],
-              ..._source.signal,
-            },
+              ..._source,
+            }),
           }),
           {}
         ) ?? {},

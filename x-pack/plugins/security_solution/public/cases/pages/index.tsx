@@ -15,7 +15,7 @@ import { ConfigureCasesPage } from './configure_cases';
 
 const casesPagePath = '';
 const caseDetailsPagePath = `${casesPagePath}/:detailName`;
-const subCaseDetailsPagePath = `${casesPagePath}/:detailName/sub-case/:subCaseId`;
+const subCaseDetailsPagePath = `${caseDetailsPagePath}/sub-case/:subCaseId`;
 const caseDetailsPagePathWithCommentId = `${caseDetailsPagePath}/:commentId`;
 const subCaseDetailsPagePathWithCommentId = `${subCaseDetailsPagePath}/:commentId`;
 const createCasePagePath = `${casesPagePath}/create`;
@@ -29,15 +29,15 @@ const CaseContainerComponent: React.FC = () => (
     <Route path={configureCasesPagePath}>
       <ConfigureCasesPage />
     </Route>
-    <Route path={subCaseDetailsPagePathWithCommentId}>
+    <Route exact path={subCaseDetailsPagePathWithCommentId}>
       <CaseDetailsPage />
     </Route>
-    <Route path={caseDetailsPagePathWithCommentId}>
+    <Route exact path={caseDetailsPagePathWithCommentId}>
       <CaseDetailsPage />
     </Route>
-    <Route path={subCaseDetailsPagePath}>
+    <Route exact path={subCaseDetailsPagePath}>
       <CaseDetailsPage />
-    </Route>s
+    </Route>
     <Route path={caseDetailsPagePath}>
       <CaseDetailsPage />
     </Route>

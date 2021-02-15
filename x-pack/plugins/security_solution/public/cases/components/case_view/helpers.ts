@@ -8,25 +8,27 @@
 import { CommentType } from '../../../../../case/common/api';
 import { Comment } from '../../containers/types';
 
-export const getRuleIdsFromComments = (comments: Comment[]) =>
-  comments.reduce<string[]>((ruleIds, comment: Comment) => {
-    if (comment.type === CommentType.alert) {
+export const getAlertIdsFromComments = (comments: Comment[]): string[] => {
+  const dedupeAlerts = comments.reduce((alertIds, comment: Comment) => {
+    if (comment.type === CommentType.alert || comment.type === CommentType.generatedAlert) {
       const ids = Array.isArray(comment.alertId) ? comment.alertId : [comment.alertId];
-      return [...ruleIds, ...ids];
+      ids.forEach(id => alertIds.add(id));
+      return alertIds;
     }
+    return alertIds;
+  }, new Set<string>());
+  return [...dedupeAlerts];
+}
 
-    return ruleIds;
-  }, []);
-
-export const buildAlertsQuery = (ruleIds: string[]) => ({
+export const buildAlertsQuery = (alertIds: string[]) => ({
   query: {
     bool: {
       filter: {
-        bool: {
-          should: ruleIds.map((_id) => ({ match: { _id } })),
-          minimum_should_match: 1,
+        ids: {
+          values: alertIds,
         },
       },
     },
   },
+  size: 5000,
 });

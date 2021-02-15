@@ -21,6 +21,8 @@ import { savedObjectReadOnlyErrorMessage, CaseCallOut } from '../components/call
 export const CaseDetailsPage = React.memo(() => {
   const history = useHistory();
   const userPermissions = useGetUserSavedObjectPermissions();
+  const params = useParams();
+  console.log(params);
   const { detailName: caseId, subCaseId } = useParams<{
     detailName?: string;
     subCaseId?: string;

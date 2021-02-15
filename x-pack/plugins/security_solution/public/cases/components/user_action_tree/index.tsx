@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import classNames from 'classnames';
-
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -14,12 +12,15 @@ import {
   EuiCommentList,
   EuiCommentProps,
 } from '@elastic/eui';
+import classNames from 'classnames';
+import { isEmpty } from 'lodash';
 import React, { useCallback, useMemo, useRef, useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
 import * as i18n from './translations';
 
+import { Ecs } from '../../../../common/ecs';
 import { Case, CaseUserActions } from '../../containers/types';
 import { useUpdateComment } from '../../containers/use_update_comment';
 import { useCurrentUser } from '../../../common/lib/kibana';
@@ -27,14 +28,15 @@ import { AddComment, AddCommentRefObject } from '../add_comment';
 import { ActionConnector, CommentType } from '../../../../../case/common/api';
 import { CaseServices } from '../../containers/use_get_case_user_actions';
 import { parseString } from '../../containers/utils';
-import { Alert, OnUpdateFields } from '../case_view';
+import { OnUpdateFields } from '../case_view';
 import {
   getConnectorLabelTitle,
   getLabelTitle,
   getPushedServiceLabelTitle,
   getPushInfo,
   getUpdateAction,
-  getAlertComment,
+  getAlertAttachment,
+  getGeneratedAlertsAttachment,
 } from './helpers';
 import { UserActionAvatar } from './user_action_avatar';
 import { UserActionMarkdown } from './user_action_markdown';
@@ -53,7 +55,7 @@ export interface UserActionTreeProps {
   onUpdateField: ({ key, value, onSuccess, onError }: OnUpdateFields) => void;
   updateCase: (newCase: Case) => void;
   userCanCrud: boolean;
-  alerts: Record<string, Alert>;
+  alerts: Record<string, Ecs>;
   onShowAlertDetails: (alertId: string, index: string) => void;
 }
 
@@ -115,7 +117,7 @@ export const UserActionTree = React.memo(
     alerts,
     onShowAlertDetails,
   }: UserActionTreeProps) => {
-    const { commentId } = useParams<{ commentId?: string }>();
+    const { commentId, subCaseId } = useParams<{ commentId?: string, subCaseId?: string }>();
     const handlerTimeoutId = useRef(0);
     const addCommentRef = useRef<AddCommentRefObject>(null);
     const [initLoading, setInitLoading] = useState(true);
@@ -218,6 +220,7 @@ export const UserActionTree = React.memo(
           onCommentPosted={handleUpdate}
           onCommentSaving={handleManageMarkdownEditId.bind(null, NEW_ID)}
           showLoading={false}
+          subCaseId={subCaseId}
         />
       ),
       [caseData.id, handleUpdate, userCanCrud, handleManageMarkdownEditId]
@@ -343,8 +346,18 @@ export const UserActionTree = React.memo(
                     ? comment.alertId[0]
                     : ''
                   : comment.alertId;
+                if (isEmpty(alertId)) {
+                  return comments;
+                }
                 const alert = alerts[alertId];
-                return [...comments, getAlertComment({ action, alert, onShowAlertDetails })];
+                return [...comments, getAlertAttachment({ action, alert, onShowAlertDetails })];
+              } else if (comment != null && comment.type === CommentType.generatedAlert) {
+                // TODO: clean this up
+                const alertIds = Array.isArray(comment.alertId) ? comment.alertId : [comment.alertId];
+                if (isEmpty(alertIds)) {
+                  return comments;
+                }
+                return [...comments, getGeneratedAlertsAttachment({ action, alertIds, alerts })];
               }
             }
 

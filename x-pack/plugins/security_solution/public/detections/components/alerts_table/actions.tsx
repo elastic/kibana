@@ -39,6 +39,7 @@ import {
 } from './helpers';
 import { KueryFilterQueryKind } from '../../../common/store';
 import { DataProvider } from '../../../timelines/components/timeline/data_providers/data_provider';
+import { esFilters } from '../../../../../../../src/plugins/data/public';
 
 export const getUpdateAlertsQuery = (eventIds: Readonly<string[]>) => {
   return {
@@ -128,37 +129,40 @@ const getFiltersFromRule = (filters: string[]): Filter[] =>
   }, [] as Filter[]);
 
 export const getThresholdAggregationDataProvider = (
-  ecsData: Ecs,
+  ecsData: Ecs | Ecs[],
   nonEcsData: TimelineNonEcsData[]
 ): DataProvider[] => {
-  const aggregationField = ecsData.signal?.rule?.threshold?.field!;
-  const aggregationValue =
-    get(aggregationField, ecsData) ?? find(['field', aggregationField], nonEcsData)?.value;
-  const dataProviderValue = Array.isArray(aggregationValue)
-    ? aggregationValue[0]
-    : aggregationValue;
+  const thresholdEcsData: Ecs[] = Array.isArray(ecsData) ? ecsData : [ecsData];
+  return thresholdEcsData.reduce<DataProvider[]>((acc, tresholdData) => {
+    const aggregationField = tresholdData.signal?.rule?.threshold?.field!;
+    const aggregationValue =
+      get(aggregationField, tresholdData) ?? find(['field', aggregationField], nonEcsData)?.value;
+    const dataProviderValue = Array.isArray(aggregationValue)
+      ? aggregationValue[0]
+      : aggregationValue;
 
-  if (!dataProviderValue) {
-    return [];
-  }
+    if (!dataProviderValue) {
+      return acc;
+    }
 
-  const aggregationFieldId = aggregationField.replace('.', '-');
+    const aggregationFieldId = aggregationField.replace('.', '-');
 
-  return [
-    {
-      and: [],
-      id: `send-alert-to-timeline-action-default-draggable-event-details-value-formatted-field-value-${TimelineId.active}-${aggregationFieldId}-${dataProviderValue}`,
-      name: aggregationField,
-      enabled: true,
-      excluded: false,
-      kqlQuery: '',
-      queryMatch: {
-        field: aggregationField,
-        value: dataProviderValue,
-        operator: ':',
-      },
-    },
-  ];
+    return [
+      ...acc,{
+        and: [],
+        id: `send-alert-to-timeline-action-default-draggable-event-details-value-formatted-field-value-${TimelineId.active}-${aggregationFieldId}-${dataProviderValue}`,
+        name: aggregationField,
+        enabled: true,
+        excluded: false,
+        kqlQuery: '',
+        queryMatch: {
+          field: aggregationField,
+          value: dataProviderValue,
+          operator: ':',
+        },
+      }];
+}, []);
+
 };
 
 export const isEqlRuleWithGroupId = (ecsData: Ecs) =>
@@ -169,20 +173,117 @@ export const isEqlRuleWithGroupId = (ecsData: Ecs) =>
 export const isThresholdRule = (ecsData: Ecs) =>
   ecsData.signal?.rule?.type?.length && ecsData.signal?.rule?.type[0] === 'threshold';
 
+export const buildAlertsKqlFilter = (key: '_id' | 'signal.group.id',alertIds: string[]): Filter[] => {
+  return [{
+    query: {
+      bool: {
+        should: alertIds.map(id => ({match_phrase: {_id: id }})),
+        minimum_should_match: true,
+      },
+    },
+    meta: {
+      alias: 'Alert Ids',
+      negate: false,
+      disabled: false,
+      type: 'phrases',
+      key,
+      value: alertIds.join(),
+      params: alertIds
+    },
+    $state: {
+      store: esFilters.FilterStateStore.APP_STATE,
+    },
+  }];
+};
+
+export const buildTimelineDataProviderOrFilter = (alertsIds: string[], _id: string): { filters: Filter[]; dataProviders: DataProvider[]} => {
+  if (!isEmpty(alertsIds)) {
+    return {
+      dataProviders: [],
+      filters: buildAlertsKqlFilter('_id', alertsIds),
+    }
+  }
+  return{
+    filters: [],
+    dataProviders: [
+      {
+        and: [],
+        id: `send-alert-to-timeline-action-default-draggable-event-details-value-formatted-field-value-${TimelineId.active}-alert-id-${_id}`,
+        name: _id,
+        enabled: true,
+        excluded: false,
+        kqlQuery: '',
+        queryMatch: {
+          field: '_id',
+          value: _id,
+          operator: ':' as const,
+        },
+      },
+    ]
+  }
+};
+
+export const buildEqlDataProviderOrFilter = (alertsIds: string[], ecs: Ecs[] | Ecs): { filters: Filter[]; dataProviders: DataProvider[] } => {
+  if (!isEmpty(alertsIds) && Array.isArray(ecs)) {
+    return {
+      dataProviders: [],
+      filters: buildAlertsKqlFilter('signal.group.id', ecs.reduce<string[]>((acc, ecsData) => {
+        const signalGroupId = ecsData.signal?.group?.id?.length
+          ? ecsData.signal?.group?.id[0]
+          : 'unknown-signal-group-id';
+        if (!acc.includes(signalGroupId)) {
+          return [...acc, signalGroupId];
+        }
+        return acc;
+      }, [])),
+    };
+  } else if (!Array.isArray(ecs)) {
+    const signalGroupId = ecs.signal?.group?.id?.length
+      ? ecs.signal?.group?.id[0]
+      : 'unknown-signal-group-id';
+    return {
+      dataProviders: [
+        {
+          and: [],
+          id: `send-alert-to-timeline-action-default-draggable-event-details-value-formatted-field-value-${TimelineId.active}-alert-id-${signalGroupId}`,
+          name: signalGroupId,
+          enabled: true,
+          excluded: false,
+          kqlQuery: '',
+          queryMatch: {
+            field: 'signal.group.id',
+            value: signalGroupId,
+            operator: ':' as const,
+          },
+        },
+      ],
+      filters: [],
+    }
+  }
+  return { filters: [], dataProviders: [] };
+}
+
 export const sendAlertToTimelineAction = async ({
   apolloClient,
+  alertIds,
   createTimeline,
-  ecsData,
+  ecsData: ecs,
   nonEcsData,
   updateTimelineIsLoading,
   searchStrategyClient,
 }: SendAlertToTimelineActionProps) => {
+  /* FUTURE DEVELOPER
+   * We are making an assumption here that if you array of ecs data they are all coming from the same rule
+   * but we still want to determine the filter for each alerts
+   */
+  const ecsData: Ecs = Array.isArray(ecs) && ecs.length > 0 ? ecs[0] : ecs as Ecs;
   const noteContent = ecsData.signal?.rule?.note != null ? ecsData.signal?.rule?.note[0] : '';
   const timelineId =
     ecsData.signal?.rule?.timeline_id != null ? ecsData.signal?.rule?.timeline_id[0] : '';
   const { to, from } = determineToAndFrom({ ecsData });
 
-  if (!isEmpty(timelineId) && apolloClient != null) {
+  // For now we do not want to populate the template timeline if we have alertIds
+  if (!isEmpty(timelineId) && apolloClient != null && isEmpty(alertIds)) {
     try {
       updateTimelineIsLoading({ id: TimelineId.active, isLoading: true });
       const [responseTimeline, eventDataResp] = await Promise.all([
@@ -275,7 +376,7 @@ export const sendAlertToTimelineAction = async ({
         ...timelineDefaults,
         description: `_id: ${ecsData._id}`,
         filters: getFiltersFromRule(ecsData.signal?.rule?.filters as string[]),
-        dataProviders: [...getThresholdAggregationDataProvider(ecsData, nonEcsData)],
+        dataProviders: [...getThresholdAggregationDataProvider(ecs, nonEcsData)],
         id: TimelineId.active,
         indexNames: [],
         dateRange: {
@@ -301,36 +402,11 @@ export const sendAlertToTimelineAction = async ({
       ruleNote: noteContent,
     });
   } else {
-    let dataProviders = [
-      {
-        and: [],
-        id: `send-alert-to-timeline-action-default-draggable-event-details-value-formatted-field-value-${TimelineId.active}-alert-id-${ecsData._id}`,
-        name: ecsData._id,
-        enabled: true,
-        excluded: false,
-        kqlQuery: '',
-        queryMatch: {
-          field: '_id',
-          value: ecsData._id,
-          operator: ':' as const,
-        },
-      },
-    ];
+    let { dataProviders, filters } = buildTimelineDataProviderOrFilter(alertIds ?? [], ecsData._id);
     if (isEqlRuleWithGroupId(ecsData)) {
-      const signalGroupId = ecsData.signal?.group?.id?.length
-        ? ecsData.signal?.group?.id[0]
-        : 'unknown-signal-group-id';
-      dataProviders = [
-        {
-          ...dataProviders[0],
-          id: `send-alert-to-timeline-action-default-draggable-event-details-value-formatted-field-value-${TimelineId.active}-alert-id-${signalGroupId}`,
-          queryMatch: {
-            field: 'signal.group.id',
-            value: signalGroupId,
-            operator: ':' as const,
-          },
-        },
-      ];
+      const tempEql =  buildEqlDataProviderOrFilter(alertIds ?? [], ecs);
+      dataProviders = tempEql.dataProviders;
+      filters = tempEql.filters;
     }
 
     return createTimeline({
@@ -346,6 +422,7 @@ export const sendAlertToTimelineAction = async ({
           end: to,
         },
         eventType: 'all',
+        filters,
         kqlQuery: {
           filterQuery: {
             kuery: {

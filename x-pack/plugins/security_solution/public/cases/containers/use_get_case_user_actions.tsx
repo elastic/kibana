@@ -6,7 +6,7 @@
  */
 
 import { isEmpty, uniqBy } from 'lodash/fp';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import deepEqual from 'fast-deep-equal';
 
 import { errorToToaster, useStateToaster } from '../../common/components/toasters';
@@ -244,13 +244,12 @@ export const useGetCaseUserActions = (
   const [caseUserActionsState, setCaseUserActionsState] = useState<CaseUserActionsState>(
     initialData
   );
-
+  const abortCtrl = useRef(new AbortController());
+  const didCancel = useRef(false);
   const [, dispatchToaster] = useStateToaster();
 
   const fetchCaseUserActions = useCallback(
     (thisCaseId: string, thisSubCaseId?: string) => {
-      let didCancel = false;
-      const abortCtrl = new AbortController();
       const fetchData = async () => {
         setCaseUserActionsState({
           ...caseUserActionsState,
@@ -258,9 +257,9 @@ export const useGetCaseUserActions = (
         });
         try {
           const response = await (thisSubCaseId
-            ? getSubCaseUserActions(thisCaseId, thisSubCaseId, abortCtrl.signal)
-            : getCaseUserActions(thisCaseId, abortCtrl.signal));
-          if (!didCancel) {
+            ? getSubCaseUserActions(thisCaseId, thisSubCaseId, abortCtrl.current.signal)
+            : getCaseUserActions(thisCaseId, abortCtrl.current.signal));
+          if (!didCancel.current) {
             // Attention Future developer
             // We are removing the first item because it will always be the creation of the case
             // and we do not want it to simplify our life
@@ -278,7 +277,7 @@ export const useGetCaseUserActions = (
             });
           }
         } catch (error) {
-          if (!didCancel) {
+          if (!didCancel.current) {
             errorToToaster({
               title: i18n.ERROR_TITLE,
               error: error.body && error.body.message ? new Error(error.body.message) : error,
@@ -295,19 +294,22 @@ export const useGetCaseUserActions = (
           }
         }
       };
+      abortCtrl.current.abort();
+      abortCtrl.current = new AbortController();
       fetchData();
-      return () => {
-        didCancel = true;
-        abortCtrl.abort();
-      };
     },
-    [caseUserActionsState, caseConnectorId, dispatchToaster]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [caseConnectorId]
   );
 
   useEffect(() => {
     if (!isEmpty(caseId)) {
       fetchCaseUserActions(caseId, subCaseId);
     }
+    return () => {
+      didCancel.current = true;
+      abortCtrl.current.abort();
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [caseId, fetchCaseUserActions, subCaseId]);
   return { ...caseUserActionsState, fetchCaseUserActions };

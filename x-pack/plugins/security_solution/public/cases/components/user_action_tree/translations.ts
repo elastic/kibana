@@ -52,7 +52,7 @@ export const GENERATED_ALERT_COMMENT_LABEL_TITLE = i18n.translate(
 export const GENERATED_ALERT_COUNT_COMMENT_LABEL_TITLE = (totalCount: number) =>
   i18n.translate('xpack.securitySolution.case.caseView.generatedAlertCountCommentLabelTitle', {
     values: { totalCount },
-    defaultMessage: `{totalCount, plural, =1 {alert} other {alerts}}`,
+    defaultMessage: `{totalCount} {totalCount, plural, =1 {alert} other {alerts}}`,
   });
 
 export const ALERT_RULE_DELETED_COMMENT_LABEL = i18n.translate(
