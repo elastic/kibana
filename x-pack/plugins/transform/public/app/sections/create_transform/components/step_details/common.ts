@@ -42,7 +42,7 @@ export function getDefaultStepDetailsState(): StepDetailsExposedState {
     isContinuousModeEnabled: false,
     isRetentionPolicyEnabled: false,
     retentionPolicyDateField: '',
-    retentionPolicyMaxAge: defaultContinuousModeDelay,
+    retentionPolicyMaxAge: '',
     transformId: '',
     transformDescription: '',
     transformFrequency: defaultTransformFrequency,
