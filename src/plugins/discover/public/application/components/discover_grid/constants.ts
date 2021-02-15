@@ -9,7 +9,6 @@
 // data types
 export const kibanaJSON = 'kibana-json';
 export const geoPoint = 'geo-point';
-export const unknownType = 'unknown';
 export const gridStyle = {
   border: 'all',
   fontSize: 's',

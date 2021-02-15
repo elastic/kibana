@@ -14,6 +14,7 @@ import {
   repeatedSearchResultsWithSortId,
   repeatedSearchResultsWithNoSortId,
   sampleDocSearchResultsNoSortIdNoHits,
+  sampleDocWithSortId,
 } from './__mocks__/es_results';
 import { searchAfterAndBulkCreate } from './search_after_bulk_create';
 import { buildRuleMessageFactory } from './rule_messages';
@@ -868,6 +869,95 @@ describe('searchAfterAndBulkCreate', () => {
     expect(errors).toEqual(['error on creation']);
     expect(mockService.callCluster).toHaveBeenCalledTimes(9);
     expect(createdSignalsCount).toEqual(4);
+    expect(lastLookBackDate).toEqual(new Date('2020-04-20T21:27:45+0000'));
+  });
+
+  it('invokes the enrichment callback with signal search results', async () => {
+    const sampleParams = sampleRuleAlertParams(30);
+    mockService.callCluster
+      .mockResolvedValueOnce(repeatedSearchResultsWithSortId(4, 1, someGuids.slice(0, 3)))
+      .mockResolvedValueOnce({
+        took: 100,
+        errors: false,
+        items: [
+          {
+            create: {
+              status: 201,
+            },
+          },
+        ],
+      })
+      .mockResolvedValueOnce(repeatedSearchResultsWithSortId(4, 1, someGuids.slice(3, 6)))
+      .mockResolvedValueOnce({
+        took: 100,
+        errors: false,
+        items: [
+          {
+            create: {
+              status: 201,
+            },
+          },
+        ],
+      })
+      .mockResolvedValueOnce(repeatedSearchResultsWithSortId(4, 1, someGuids.slice(6, 9)))
+      .mockResolvedValueOnce({
+        took: 100,
+        errors: false,
+        items: [
+          {
+            create: {
+              status: 201,
+            },
+          },
+        ],
+      })
+      .mockResolvedValueOnce(sampleDocSearchResultsNoSortIdNoHits());
+
+    const mockEnrichment = jest.fn((a) => a);
+    const { success, createdSignalsCount, lastLookBackDate } = await searchAfterAndBulkCreate({
+      enrichment: mockEnrichment,
+      ruleParams: sampleParams,
+      gap: moment.duration(2, 'm'),
+      previousStartedAt: moment().subtract(10, 'm').toDate(),
+      listClient,
+      exceptionsList: [],
+      services: mockService,
+      logger: mockLogger,
+      eventsTelemetry: undefined,
+      id: sampleRuleGuid,
+      inputIndexPattern,
+      signalsIndex: DEFAULT_SIGNALS_INDEX,
+      name: 'rule-name',
+      actions: [],
+      createdAt: '2020-01-28T15:58:34.810Z',
+      updatedAt: '2020-01-28T15:59:14.004Z',
+      createdBy: 'elastic',
+      updatedBy: 'elastic',
+      interval: '5m',
+      enabled: true,
+      pageSize: 1,
+      filter: undefined,
+      refresh: false,
+      tags: ['some fake tag 1', 'some fake tag 2'],
+      throttle: 'no_actions',
+      buildRuleMessage,
+    });
+
+    expect(mockEnrichment).toHaveBeenCalledWith(
+      expect.objectContaining({
+        hits: expect.objectContaining({
+          hits: expect.arrayContaining([
+            expect.objectContaining({
+              ...sampleDocWithSortId(),
+              _id: expect.any(String),
+            }),
+          ]),
+        }),
+      })
+    );
+    expect(success).toEqual(true);
+    expect(mockService.callCluster).toHaveBeenCalledTimes(7);
+    expect(createdSignalsCount).toEqual(3);
     expect(lastLookBackDate).toEqual(new Date('2020-04-20T21:27:45+0000'));
   });
 });

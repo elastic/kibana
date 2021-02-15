@@ -19,3 +19,30 @@ export type ImportRetry = Omit<SavedObjectsImportRetry, 'replaceReferences'>;
 export interface CopySavedObjectsToSpaceResponse {
   [spaceId: string]: SavedObjectsImportResponse;
 }
+
+export interface SavedObjectTarget {
+  /**
+   * The object's type.
+   */
+  type: string;
+  /**
+   * The object's ID.
+   */
+  id: string;
+  /**
+   * The namespaces that the object currently exists in.
+   */
+  namespaces: string[];
+  /**
+   * The EUI icon that is rendered in the flyout's subtitle.
+   *
+   * Default is 'apps'.
+   */
+  icon?: string;
+  /**
+   * The string that is rendered in the flyout's subtitle.
+   *
+   * Default is `${type} [id=${id}]`.
+   */
+  title?: string;
+}

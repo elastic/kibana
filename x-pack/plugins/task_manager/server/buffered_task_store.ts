@@ -26,10 +26,6 @@ export class BufferedTaskStore implements Updatable {
     );
   }
 
-  public get maxAttempts(): number {
-    return this.taskStore.maxAttempts;
-  }
-
   public async update(doc: ConcreteTaskInstance): Promise<ConcreteTaskInstance> {
     return unwrapPromise(this.bufferedUpdate(doc));
   }
