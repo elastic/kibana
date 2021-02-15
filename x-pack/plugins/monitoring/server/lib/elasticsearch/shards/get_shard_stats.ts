@@ -19,9 +19,14 @@ import { getShardAggs } from './get_shard_stat_aggs';
 // @ts-ignore
 import { calculateIndicesTotals } from './calculate_shard_stat_indices_totals';
 import { LegacyRequest } from '../../../types';
-import { ElasticsearchModifiedSource } from '../../../../common/types/es';
+import { ElasticsearchResponse, ElasticsearchModifiedSource } from '../../../../common/types/es';
 
-export function handleResponse(resp, includeNodes, includeIndices, cluster) {
+export function handleResponse(
+  resp: ElasticsearchResponse,
+  includeNodes: boolean,
+  includeIndices: boolean,
+  cluster: ElasticsearchModifiedSource
+) {
   let indices;
   let indicesTotals;
   let nodes;

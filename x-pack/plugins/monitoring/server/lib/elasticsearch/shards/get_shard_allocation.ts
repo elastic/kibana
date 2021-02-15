@@ -11,7 +11,11 @@ import { checkParam } from '../../error_missing_required';
 import { createQuery } from '../../create_query';
 // @ts-ignore
 import { ElasticsearchMetric } from '../../metrics';
-import { ElasticsearchResponse, ElasticsearchLegacySource } from '../../../../common/types/es';
+import {
+  ElasticsearchResponse,
+  ElasticsearchLegacySource,
+  ElasticsearchMetricbeatSource,
+} from '../../../../common/types/es';
 import { LegacyRequest } from '../../../types';
 
 export function handleResponse(response: ElasticsearchResponse) {
@@ -24,26 +28,38 @@ export function handleResponse(response: ElasticsearchResponse) {
   const uniqueShards = new Set<string>();
 
   // map into object with shard and source propertiesd
-  return hits.reduce((shards: Array<ElasticsearchLegacySource['shard']>, hit) => {
-    const shard = hit._source.shard ?? hit._source.elasticsearch;
+  return hits.reduce(
+    (
+      shards: Array<
+        | ElasticsearchLegacySource['shard']
+        | NonNullable<ElasticsearchMetricbeatSource['elasticsearch']>['shard']
+      >,
+      hit
+    ) => {
+      const legacyShard = hit._source.shard;
+      const mbShard = hit._source.elasticsearch;
 
-    if (shard) {
-      const index = shard.index?.name ?? shard.index;
-      const shardNumber = shard.shard?.number ?? shard.shard;
-      const primary = shard.shard?.primary ?? shard.primary;
-      const relocatingNode = shard.shard?.relocating_node?.uuid ?? shard.relocating_node;
-      const node = shard.node?.name ?? shard.node;
-      // note: if the request is for a node, then it's enough to deduplicate without primary, but for indices it displays both
-      const shardId = `${index}-${shardNumber}-${primary}-${relocatingNode}-${node}`;
+      if (legacyShard || mbShard) {
+        const index = mbShard?.index?.name ?? legacyShard?.index;
+        const shardNumber = mbShard?.shard?.number ?? legacyShard?.shard;
+        const primary = mbShard?.shard?.primary ?? legacyShard?.primary;
+        const relocatingNode =
+          mbShard?.shard?.relocating_node?.uuid ?? legacyShard?.relocating_node;
+        const node = mbShard?.node?.name ?? legacyShard?.node;
+        // note: if the request is for a node, then it's enough to deduplicate without primary, but for indices it displays both
+        const shardId = `${index}-${shardNumber}-${primary}-${relocatingNode}-${node}`;
 
-      if (!uniqueShards.has(shardId)) {
-        shards.push(shard);
-        uniqueShards.add(shardId);
+        if (!uniqueShards.has(shardId)) {
+          // @ts-ignore
+          shards.push(legacyShard || mbShard);
+          uniqueShards.add(shardId);
+        }
       }
-    }
 
-    return shards;
-  }, []);
+      return shards;
+    },
+    []
+  );
 }
 
 export function getShardAllocation(
@@ -68,7 +84,7 @@ export function getShardAllocation(
           },
           {
             term: {
-              'elasticsearch.cluster.stats.state.state_uuid': stateUuid,
+              'elasticsearch.cluster.state.id': stateUuid,
             },
           },
         ],

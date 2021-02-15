@@ -6,11 +6,7 @@
  */
 
 import { omit, get } from 'lodash';
-import {
-  ElasticsearchModifiedSource,
-  ElasticsearchLegacySource,
-  ElasticsearchMetricbeatSource,
-} from '../../../common/types/es';
+import { ElasticsearchModifiedSource, ElasticsearchLegacySource } from '../../../common/types/es';
 // @ts-ignore
 import { calculateOverallStatus } from '../calculate_overall_status';
 // @ts-ignore
@@ -44,11 +40,8 @@ export function getClustersSummary(
     const license = cluster.license || cluster.elasticsearch?.cluster?.stats?.license;
     const version = cluster.version || cluster.elasticsearch?.version;
     const clusterUuid = cluster.cluster_uuid || cluster.elasticsearch?.cluster?.id;
-    const clusterStats:
-      | ElasticsearchLegacySource['cluster_stats']
-      | NonNullable<
-          NonNullable<ElasticsearchMetricbeatSource['elasticsearch']>['cluster']
-        >['stats'] = cluster.cluster_stats || cluster.elasticsearch?.cluster?.stats;
+    const clusterStatsLegacy = cluster.cluster_stats;
+    const clusterStatsMB = cluster.elasticsearch?.cluster?.stats;
 
     const clusterName = get(clusterSettings, 'cluster.metadata.display_name', cluster.cluster_name);
 
@@ -71,22 +64,23 @@ export function getClustersSummary(
     } = license;
 
     const indices = {
-      count: clusterStats?.indices?.count ?? clusterStats?.indices?.total,
-      docs: clusterStats?.indices?.docs,
-      shards: clusterStats?.indices?.shards,
-      store: clusterStats?.indices?.store,
+      count: clusterStatsLegacy?.indices?.count ?? clusterStatsMB?.indices?.total,
+      docs: clusterStatsLegacy?.indices?.docs ?? clusterStatsMB?.indices?.docs,
+      shards: clusterStatsLegacy?.indices?.shards ?? clusterStatsMB?.indices?.shards,
+      store: clusterStatsLegacy?.indices?.store ?? clusterStatsMB?.indices?.store,
     };
 
     const jvm = {
       max_uptime_in_millis:
-        clusterStats?.nodes?.jvm?.max_uptime_in_millis ?? clusterStats?.nodes?.jvm?.max_uptime?.ms,
-      mem: clusterStats?.nodes?.jvm?.mem ?? clusterStats?.nodes?.jvm?.memory,
+        clusterStatsLegacy?.nodes?.jvm?.max_uptime_in_millis ??
+        clusterStatsMB?.nodes?.jvm?.max_uptime?.ms,
+      mem: clusterStatsLegacy?.nodes?.jvm?.mem ?? clusterStatsMB?.nodes?.jvm?.memory,
     };
 
     const nodes = {
-      fs: clusterStats?.nodes?.fs,
+      fs: clusterStatsLegacy?.nodes?.fs ?? clusterStatsMB?.nodes?.fs,
       count: {
-        total: clusterStats?.nodes?.count?.total ?? clusterStats?.nodes?.count,
+        total: clusterStatsLegacy?.nodes?.count?.total ?? clusterStatsMB?.nodes?.count,
       },
       jvm,
     };

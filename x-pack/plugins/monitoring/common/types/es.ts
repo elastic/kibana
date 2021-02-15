@@ -100,6 +100,7 @@ export interface ElasticsearchNodeStats {
 
 export interface ElasticsearchIndexStats {
   index?: string;
+  name?: string;
   primaries?: {
     docs?: {
       count?: number;
@@ -315,10 +316,14 @@ export interface ElasticsearchMetricbeatSource {
   '@timestamp'?: string;
   elasticsearch?: {
     node?: ElasticsearchLegacySource['source_node'] & ElasticsearchMetricbeatNode;
-    index?: ElasticsearchIndexStats & {
-      name?: string;
+    index?: ElasticsearchIndexStats;
+    version?: string;
+    shard?: ElasticsearchLegacySource['shard'] & {
+      number?: string;
+      relocating_node?: {
+        uuid?: string;
+      };
     };
-    shard?: ElasticsearchLegacySource['shard'];
     cluster?: {
       name?: string;
       id?: string;

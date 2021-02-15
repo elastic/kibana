@@ -157,7 +157,6 @@ export const metrics = {
   }),
   cluster_index_latency: new LatencyMetric({
     metric: 'index',
-    debug: true,
     fieldSource: 'indices_stats._all.primaries',
     field: 'indices_stats._all.primaries.indexing.index_total',
     label: i18n.translate('xpack.monitoring.metrics.es.indexingLatencyLabel', {
