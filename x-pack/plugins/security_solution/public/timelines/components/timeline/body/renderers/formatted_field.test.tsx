@@ -243,7 +243,7 @@ describe('Events', () => {
     expect(wrapper.find('[data-test-subj="truncatable-message"]').exists()).toEqual(false);
   });
 
-  test('it renders a hyperlink to the hosts details page when fieldName is host.name, and a hostname is provided', () => {
+  test('it renders a button to open the hosts details panel when fieldName is host.name, and a hostname is provided', () => {
     const wrapper = mount(
       <TestProviders>
         <FormattedFieldValue
@@ -255,10 +255,10 @@ describe('Events', () => {
         />
       </TestProviders>
     );
-    expect(wrapper.find('[data-test-subj="host-details-link"]').exists()).toEqual(true);
+    expect(wrapper.find('[data-test-subj="host-details-button"]').exists()).toEqual(true);
   });
 
-  test('it does NOT render a hyperlink to the hosts details page when fieldName is host.name, but a hostname is NOT provided', () => {
+  test('it does NOT render a button to open the hosts details panel when fieldName is host.name, but a hostname is NOT provided', () => {
     const wrapper = mount(
       <TestProviders>
         <FormattedFieldValue
@@ -270,7 +270,7 @@ describe('Events', () => {
         />
       </TestProviders>
     );
-    expect(wrapper.find('[data-test-subj="host-details-link"]').exists()).toEqual(false);
+    expect(wrapper.find('[data-test-subj="host-details-button"]').exists()).toEqual(false);
   });
 
   test('it renders placeholder text when fieldName is host.name, but a hostname is NOT provided', () => {

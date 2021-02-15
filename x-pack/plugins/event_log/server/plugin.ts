@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { Observable } from 'rxjs';
-import { first } from 'rxjs/operators';
 import {
   CoreSetup,
   CoreStart,
@@ -24,7 +22,6 @@ import type {
   IEventLogConfig,
   IEventLogService,
   IEventLogger,
-  IEventLogConfig$,
   IEventLogClientService,
 } from './types';
 import { findRoute } from './routes';
@@ -49,31 +46,28 @@ interface PluginStartDeps {
 }
 
 export class Plugin implements CorePlugin<IEventLogService, IEventLogClientService> {
-  private readonly config$: IEventLogConfig$;
+  private readonly config: IEventLogConfig;
   private systemLogger: Logger;
   private eventLogService?: EventLogService;
   private esContext?: EsContext;
   private eventLogger?: IEventLogger;
-  private globalConfig$: Observable<SharedGlobalConfig>;
+  private globalConfig: SharedGlobalConfig;
   private eventLogClientService?: EventLogClientService;
   private savedObjectProviderRegistry: SavedObjectProviderRegistry;
   private kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
 
   constructor(private readonly context: PluginInitializerContext) {
     this.systemLogger = this.context.logger.get();
-    this.config$ = this.context.config.create<IEventLogConfig>();
-    this.globalConfig$ = this.context.config.legacy.globalConfig$;
+    this.config = this.context.config.get<IEventLogConfig>();
+    this.globalConfig = this.context.config.legacy.get();
     this.savedObjectProviderRegistry = new SavedObjectProviderRegistry();
     this.kibanaVersion = this.context.env.packageInfo.version;
   }
 
-  async setup(core: CoreSetup): Promise<IEventLogService> {
-    const globalConfig = await this.globalConfig$.pipe(first()).toPromise();
-    const kibanaIndex = globalConfig.kibana.index;
+  setup(core: CoreSetup): IEventLogService {
+    const kibanaIndex = this.globalConfig.kibana.index;
 
     this.systemLogger.debug('setting up plugin');
-
-    const config = await this.config$.pipe(first()).toPromise();
 
     this.esContext = createEsContext({
       logger: this.systemLogger,
@@ -86,7 +80,7 @@ export class Plugin implements CorePlugin<IEventLogService, IEventLogClientServi
     });
 
     this.eventLogService = new EventLogService({
-      config,
+      config: this.config,
       esContext: this.esContext,
       systemLogger: this.systemLogger,
       kibanaUUID: this.context.env.instanceUuid,
@@ -114,7 +108,7 @@ export class Plugin implements CorePlugin<IEventLogService, IEventLogClientServi
     return this.eventLogService;
   }
 
-  async start(core: CoreStart, { spaces }: PluginStartDeps): Promise<IEventLogClientService> {
+  start(core: CoreStart, { spaces }: PluginStartDeps): IEventLogClientService {
     this.systemLogger.debug('starting plugin');
 
     if (!this.esContext) throw new Error('esContext not initialized');

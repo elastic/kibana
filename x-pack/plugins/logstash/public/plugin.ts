@@ -6,11 +6,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Subscription } from 'rxjs';
+import { Subscription, Subject, combineLatest } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { once } from 'lodash';
 
-import { CoreSetup, CoreStart, Plugin } from 'src/core/public';
+import { Capabilities, CoreSetup, CoreStart, Plugin } from 'src/core/public';
 import {
   HomePublicPluginSetup,
   FeatureCatalogueCategory,
@@ -30,6 +30,7 @@ interface SetupDeps {
 
 export class LogstashPlugin implements Plugin<void, void, SetupDeps> {
   private licenseSubscription?: Subscription;
+  private capabilities$ = new Subject<Capabilities>();
 
   public setup(core: CoreSetup, plugins: SetupDeps) {
     const logstashLicense$ = plugins.licensing.license$.pipe(
@@ -51,35 +52,43 @@ export class LogstashPlugin implements Plugin<void, void, SetupDeps> {
       },
     });
 
-    this.licenseSubscription = logstashLicense$.subscribe((license: any) => {
-      if (license.enableLinks) {
-        managementApp.enable();
-      } else {
-        managementApp.disable();
-      }
+    this.licenseSubscription = combineLatest([logstashLicense$, this.capabilities$]).subscribe(
+      ([license, capabilities]) => {
+        const shouldShow = license.enableLinks && capabilities.management.ingest.pipelines === true;
+        if (shouldShow) {
+          managementApp.enable();
+        } else {
+          managementApp.disable();
+        }
 
-      if (plugins.home && license.enableLinks) {
-        // Ensure that we don't register the feature more than once
-        once(() => {
-          plugins.home!.featureCatalogue.register({
-            id: 'management_logstash',
-            title: i18n.translate('xpack.logstash.homeFeature.logstashPipelinesTitle', {
-              defaultMessage: 'Logstash Pipelines',
-            }),
-            description: i18n.translate('xpack.logstash.homeFeature.logstashPipelinesDescription', {
-              defaultMessage: 'Create, delete, update, and clone data ingestion pipelines.',
-            }),
-            icon: 'pipelineApp',
-            path: '/app/management/ingest/pipelines',
-            showOnHomePage: false,
-            category: FeatureCatalogueCategory.ADMIN,
+        if (plugins.home && shouldShow) {
+          // Ensure that we don't register the feature more than once
+          once(() => {
+            plugins.home!.featureCatalogue.register({
+              id: 'management_logstash',
+              title: i18n.translate('xpack.logstash.homeFeature.logstashPipelinesTitle', {
+                defaultMessage: 'Logstash Pipelines',
+              }),
+              description: i18n.translate(
+                'xpack.logstash.homeFeature.logstashPipelinesDescription',
+                {
+                  defaultMessage: 'Create, delete, update, and clone data ingestion pipelines.',
+                }
+              ),
+              icon: 'pipelineApp',
+              path: '/app/management/ingest/pipelines',
+              showOnHomePage: false,
+              category: FeatureCatalogueCategory.ADMIN,
+            });
           });
-        });
+        }
       }
-    });
+    );
   }
 
-  public start(core: CoreStart) {}
+  public start(core: CoreStart) {
+    this.capabilities$.next(core.application.capabilities);
+  }
 
   public stop() {
     if (this.licenseSubscription) {

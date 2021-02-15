@@ -30,7 +30,7 @@ describe('migration v2', () => {
       adjustTimeout: (t: number) => jest.setTimeout(t),
       settings: {
         es: {
-          license: oss ? 'oss' : 'trial',
+          license: 'trial',
           dataArchive,
         },
       },

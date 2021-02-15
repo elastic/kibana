@@ -14,6 +14,8 @@ import { AgentStatus } from '../../types';
 import { AgentStatusKueryHelper } from '../../../common/services';
 import { esKuery, KueryNode } from '../../../../../../src/plugins/data/server';
 import { normalizeKuery } from '../saved_object';
+import { appContextService } from '../app_context';
+import { removeSOAttributes } from './crud_fleet_server';
 
 export async function getAgentStatusById(
   soClient: SavedObjectsClientContract,
@@ -27,6 +29,8 @@ export async function getAgentStatusById(
 export const getAgentStatus = AgentStatusKueryHelper.getAgentStatus;
 
 function joinKuerys(...kuerys: Array<string | undefined>) {
+  const isFleetServerEnabled = appContextService.getConfig()?.agents?.fleetServerEnabled;
+
   return kuerys
     .filter((kuery) => kuery !== undefined)
     .reduce((acc: KueryNode | undefined, kuery: string | undefined): KueryNode | undefined => {
@@ -34,7 +38,9 @@ function joinKuerys(...kuerys: Array<string | undefined>) {
         return acc;
       }
       const normalizedKuery: KueryNode = esKuery.fromKueryExpression(
-        normalizeKuery(AGENT_SAVED_OBJECT_TYPE, kuery || '')
+        isFleetServerEnabled
+          ? removeSOAttributes(kuery || '')
+          : normalizeKuery(AGENT_SAVED_OBJECT_TYPE, kuery || '')
       );
 
       if (!acc) {

@@ -142,10 +142,10 @@ export const EditPolicy: React.FunctionComponent<Props> = ({ history }) => {
                 <h1>
                   {isNewPolicy
                     ? i18n.translate('xpack.indexLifecycleMgmt.editPolicy.createPolicyMessage', {
-                        defaultMessage: 'Create Policy',
+                        defaultMessage: 'Create policy',
                       })
                     : i18n.translate('xpack.indexLifecycleMgmt.editPolicy.editPolicyMessage', {
-                        defaultMessage: 'Edit Policy {originalPolicyName}',
+                        defaultMessage: 'Edit policy {originalPolicyName}',
                         values: { originalPolicyName },
                       })}
                 </h1>
@@ -239,19 +239,19 @@ export const EditPolicy: React.FunctionComponent<Props> = ({ history }) => {
 
             <EuiSpacer size="l" />
 
-            <HotPhase />
+            <div>
+              <HotPhase />
 
-            <EuiSpacer />
+              <EuiSpacer />
 
-            <WarmPhase />
+              <WarmPhase />
 
-            <EuiSpacer />
+              <EuiSpacer />
 
-            <ColdPhase />
+              <ColdPhase />
 
-            <EuiSpacer />
-
-            <DeletePhase />
+              <DeletePhase />
+            </div>
 
             <EuiHorizontalRule />
 

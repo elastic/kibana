@@ -6,14 +6,15 @@
  */
 
 import React, { useEffect, useState, FormEvent } from 'react';
+import { useLocation } from 'react-router-dom';
 
 import { Location } from 'history';
 import { useActions, useValues } from 'kea';
-import { useLocation } from 'react-router-dom';
-import { i18n } from '@kbn/i18n';
 
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSpacer } from '@elastic/eui';
-import { parseQueryParams } from '../../../../../../applications/shared/query_params';
+import { i18n } from '@kbn/i18n';
+
+import { parseQueryParams } from '../../../../../shared/query_params';
 
 import { AddSourceLogic } from './add_source_logic';
 

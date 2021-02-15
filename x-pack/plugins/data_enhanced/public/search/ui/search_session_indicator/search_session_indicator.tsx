@@ -31,8 +31,11 @@ export interface SearchSessionIndicatorProps {
   onCancel?: () => void;
   viewSearchSessionsLink?: string;
   onSaveResults?: () => void;
-  disabled?: boolean;
-  disabledReasonText?: string;
+  managementDisabled?: boolean;
+  managementDisabledReasonText?: string;
+  saveDisabled?: boolean;
+  saveDisabledReasonText?: string;
+
   onOpened?: (openedState: SearchSessionState) => void;
 }
 
@@ -55,46 +58,64 @@ const CancelButton = ({ onCancel = () => {}, buttonProps = {} }: ActionButtonPro
 const ContinueInBackgroundButton = ({
   onContinueInBackground = () => {},
   buttonProps = {},
+  saveDisabled = false,
+  saveDisabledReasonText,
 }: ActionButtonProps) => (
-  <EuiButtonEmpty
-    onClick={onContinueInBackground}
-    data-test-subj={'searchSessionIndicatorContinueInBackgroundBtn'}
-    {...buttonProps}
-  >
-    <FormattedMessage
-      id="xpack.data.searchSessionIndicator.continueInBackgroundButtonText"
-      defaultMessage="Save session"
-    />
-  </EuiButtonEmpty>
+  <EuiToolTip content={saveDisabledReasonText}>
+    <EuiButtonEmpty
+      onClick={onContinueInBackground}
+      data-test-subj={'searchSessionIndicatorContinueInBackgroundBtn'}
+      isDisabled={saveDisabled}
+      {...buttonProps}
+    >
+      <FormattedMessage
+        id="xpack.data.searchSessionIndicator.continueInBackgroundButtonText"
+        defaultMessage="Save session"
+      />
+    </EuiButtonEmpty>
+  </EuiToolTip>
 );
 
 const ViewAllSearchSessionsButton = ({
   viewSearchSessionsLink = 'management/kibana/search_sessions',
   buttonProps = {},
+  managementDisabled,
+  managementDisabledReasonText,
 }: ActionButtonProps) => (
-  <EuiButtonEmpty
-    href={viewSearchSessionsLink}
-    data-test-subj={'searchSessionIndicatorViewSearchSessionsLink'}
-    {...buttonProps}
-  >
-    <FormattedMessage
-      id="xpack.data.searchSessionIndicator.viewSearchSessionsLinkText"
-      defaultMessage="Manage sessions"
-    />
-  </EuiButtonEmpty>
+  <EuiToolTip content={managementDisabledReasonText}>
+    <EuiButtonEmpty
+      href={viewSearchSessionsLink}
+      data-test-subj={'searchSessionIndicatorViewSearchSessionsLink'}
+      isDisabled={managementDisabled}
+      {...buttonProps}
+    >
+      <FormattedMessage
+        id="xpack.data.searchSessionIndicator.viewSearchSessionsLinkText"
+        defaultMessage="Manage sessions"
+      />
+    </EuiButtonEmpty>
+  </EuiToolTip>
 );
 
-const SaveButton = ({ onSaveResults = () => {}, buttonProps = {} }: ActionButtonProps) => (
-  <EuiButtonEmpty
-    onClick={onSaveResults}
-    data-test-subj={'searchSessionIndicatorSaveBtn'}
-    {...buttonProps}
-  >
-    <FormattedMessage
-      id="xpack.data.searchSessionIndicator.saveButtonText"
-      defaultMessage="Save session"
-    />
-  </EuiButtonEmpty>
+const SaveButton = ({
+  onSaveResults = () => {},
+  buttonProps = {},
+  saveDisabled = false,
+  saveDisabledReasonText,
+}: ActionButtonProps) => (
+  <EuiToolTip content={saveDisabledReasonText}>
+    <EuiButtonEmpty
+      onClick={onSaveResults}
+      data-test-subj={'searchSessionIndicatorSaveBtn'}
+      isDisabled={saveDisabled}
+      {...buttonProps}
+    >
+      <FormattedMessage
+        id="xpack.data.searchSessionIndicator.saveButtonText"
+        defaultMessage="Save session"
+      />
+    </EuiButtonEmpty>
+  </EuiToolTip>
 );
 
 const searchSessionIndicatorViewStateToProps: {
@@ -325,19 +346,16 @@ export const SearchSessionIndicator = React.forwardRef<
       className="searchSessionIndicator"
       data-test-subj={'searchSessionIndicator'}
       data-state={props.state}
+      data-save-disabled={props.saveDisabled ?? false}
       panelClassName={'searchSessionIndicator__panel'}
       repositionOnScroll={true}
       button={
-        <EuiToolTip
-          content={props.disabled ? props.disabledReasonText : button.tooltipText}
-          delay={props.disabled ? 'regular' : 'long'}
-        >
+        <EuiToolTip content={button.tooltipText} delay={'long'}>
           <EuiButtonIcon
             color={button.color}
             aria-label={button['aria-label']}
             iconType={button.iconType}
             onClick={onButtonClick}
-            disabled={props.disabled}
           />
         </EuiToolTip>
       }
