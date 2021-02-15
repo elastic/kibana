@@ -197,9 +197,11 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
       const result = await Promise.all(row.map(async (cell) => await cell.getVisibleText()));
       // Remove first control column
       return result.slice(1).join(' ');
+    }
 
-      // const row = await find.byCssSelector(`tr.kbnDocTable__row:nth-child(${index})`);
-      // return await row.getVisibleText();
+    public async getDocTableIndexLegacy(index: number) {
+      const row = await find.byCssSelector(`tr.kbnDocTable__row:nth-child(${index})`);
+      return await row.getVisibleText();
     }
 
     public async getDocTableField(index: number) {
