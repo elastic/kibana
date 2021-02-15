@@ -189,27 +189,27 @@ export const i18nTexts = {
         defaultMessage: 'Cold phase',
       }),
       delete: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.deletePhase.deletePhaseTitle', {
-        defaultMessage: 'Delete data',
+        defaultMessage: 'Delete phase',
       }),
     },
     descriptions: {
       hot: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.hotPhase.hotPhaseDescription', {
         defaultMessage:
-          'You store and query your data on hot nodes, your most performant hardware. Highest search speed for the biggest cost.',
+          'Store your most-recent, most frequently-searched data in the hot tier, which provides the best indexing and search performance at the highest cost.',
       }),
       warm: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.warmPhase.warmPhaseDescription', {
         defaultMessage:
-          'Your data is read-only and you query it on warm nodes, less performant hardware. Slightly slower search for the smaller cost.',
+          'Move data to the warm tier, which is optimized for search performance over indexing performance. Data is infrequently added or updated in the warm phase.',
       }),
       cold: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.coldPhase.coldPhaseDescription', {
         defaultMessage:
-          'You query your data less frequently and move it to cold nodes, your significantly less performant hardware. Slower search for the cheapest cost.',
+          'Move data to the cold tier, which is optimized for cost savings over search performance. Data is normally read-only in the cold phase.,
       }),
       delete: i18n.translate(
         'xpack.indexLifecycleMgmt.editPolicy.deletePhase.deletePhaseDescription',
         {
           defaultMessage:
-            'You no longer need your data. You can define when it is safe to delete it.',
+            'Delete data you no longer need.',
         }
       ),
     },
