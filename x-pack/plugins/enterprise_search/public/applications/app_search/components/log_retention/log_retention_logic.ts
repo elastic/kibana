@@ -7,8 +7,8 @@
 
 import { kea, MakeLogicType } from 'kea';
 
-import { HttpLogic } from '../../../shared/http';
 import { flashAPIErrors } from '../../../shared/flash_messages';
+import { HttpLogic } from '../../../shared/http';
 
 import { LogRetentionOptions, LogRetention, LogRetentionServer } from './types';
 import { convertLogRetentionFromServerToClient } from './utils/convert_log_retention';

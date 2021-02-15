@@ -8,6 +8,7 @@
 import React from 'react';
 
 import { shallow } from 'enzyme';
+
 import { EuiFieldSearch } from '@elastic/eui';
 
 import { SearchBoxView } from './search_box_view';

@@ -87,7 +87,7 @@ describe('logging service', () => {
         const loggedString = getPlatformLogsFromMock(mockConsoleLog);
         expect(loggedString).toMatchInlineSnapshot(`
           Array [
-            "[xxxx-xx-xxTxx:xx:xx.xxxZ][INFO ][test-file] handled by NP",
+            "[xxxx-xx-xxTxx:xx:xx.xxx-xx:xx][INFO ][test-file] handled by NP",
           ]
         `);
       });
@@ -131,9 +131,9 @@ describe('logging service', () => {
 
         expect(getPlatformLogsFromMock(mockConsoleLog)).toMatchInlineSnapshot(`
           Array [
-            "[xxxx-xx-xxTxx:xx:xx.xxxZ][INFO ][test-file] info",
-            "[xxxx-xx-xxTxx:xx:xx.xxxZ][WARN ][test-file] warn",
-            "[xxxx-xx-xxTxx:xx:xx.xxxZ][ERROR][test-file] error",
+            "[xxxx-xx-xxTxx:xx:xx.xxx-xx:xx][INFO ][test-file] info",
+            "[xxxx-xx-xxTxx:xx:xx.xxx-xx:xx][WARN ][test-file] warn",
+            "[xxxx-xx-xxTxx:xx:xx.xxx-xx:xx][ERROR][test-file] error",
           ]
         `);
 
@@ -162,9 +162,9 @@ describe('logging service', () => {
 
         expect(getPlatformLogsFromMock(mockConsoleLog)).toMatchInlineSnapshot(`
           Array [
-            "[xxxx-xx-xxTxx:xx:xx.xxxZ][INFO ][test-file] info",
-            "[xxxx-xx-xxTxx:xx:xx.xxxZ][WARN ][test-file] warn",
-            "[xxxx-xx-xxTxx:xx:xx.xxxZ][ERROR][test-file] error",
+            "[xxxx-xx-xxTxx:xx:xx.xxx-xx:xx][INFO ][test-file] info",
+            "[xxxx-xx-xxTxx:xx:xx.xxx-xx:xx][WARN ][test-file] warn",
+            "[xxxx-xx-xxTxx:xx:xx.xxx-xx:xx][ERROR][test-file] error",
           ]
         `);
 
@@ -199,9 +199,9 @@ describe('logging service', () => {
 
         expect(getPlatformLogsFromMock(mockConsoleLog)).toMatchInlineSnapshot(`
           Array [
-            "[xxxx-xx-xxTxx:xx:xx.xxxZ][INFO ][test-file] info",
-            "[xxxx-xx-xxTxx:xx:xx.xxxZ][WARN ][test-file] warn",
-            "[xxxx-xx-xxTxx:xx:xx.xxxZ][ERROR][test-file] error",
+            "[xxxx-xx-xxTxx:xx:xx.xxx-xx:xx][INFO ][test-file] info",
+            "[xxxx-xx-xxTxx:xx:xx.xxx-xx:xx][WARN ][test-file] warn",
+            "[xxxx-xx-xxTxx:xx:xx.xxx-xx:xx][ERROR][test-file] error",
           ]
         `);
 

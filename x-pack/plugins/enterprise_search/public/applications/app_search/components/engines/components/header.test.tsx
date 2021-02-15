@@ -10,6 +10,7 @@ import '../../../../__mocks__/enterprise_search_url.mock';
 import { mockTelemetryActions } from '../../../../__mocks__';
 
 import React from 'react';
+
 import { shallow } from 'enzyme';
 
 import { EnginesOverviewHeader } from './';

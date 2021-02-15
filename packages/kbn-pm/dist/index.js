@@ -48147,13 +48147,13 @@ async function installBazelTools(repoRootPath) {
   const bazeliskVersion = await readBazelToolsVersionFile(repoRootPath, '.bazeliskversion');
   const bazelVersion = await readBazelToolsVersionFile(repoRootPath, '.bazelversion'); // Check what globals are installed
 
-  _log__WEBPACK_IMPORTED_MODULE_4__["log"].debug(`[bazel_tools] verify if bazelisk is installed`); // Test if bazelisk is already installed in the correct version
+  _log__WEBPACK_IMPORTED_MODULE_4__["log"].debug(`[bazel_tools] verify if bazelisk is installed`); // Check if we need to remove bazelisk from yarn
+
+  await tryRemoveBazeliskFromYarnGlobal(); // Test if bazelisk is already installed in the correct version
 
   const isBazeliskPkgInstalled = await isBazeliskInstalled(bazeliskVersion); // Test if bazel bin is available
 
-  const isBazelBinAlreadyAvailable = await isBazelBinAvailable(); // Check if we need to remove bazelisk from yarn
-
-  await tryRemoveBazeliskFromYarnGlobal(); // Install bazelisk if not installed
+  const isBazelBinAlreadyAvailable = await isBazelBinAvailable(); // Install bazelisk if not installed
 
   if (!isBazeliskPkgInstalled || !isBazelBinAlreadyAvailable) {
     _log__WEBPACK_IMPORTED_MODULE_4__["log"].info(`[bazel_tools] installing Bazel tools`);

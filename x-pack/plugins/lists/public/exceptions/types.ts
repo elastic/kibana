@@ -128,6 +128,8 @@ export interface ExceptionListFilter {
   name?: string | null;
   list_id?: string | null;
   created_by?: string | null;
+  type?: string | null;
+  tags?: string | null;
 }
 
 export interface UseExceptionListsProps {
