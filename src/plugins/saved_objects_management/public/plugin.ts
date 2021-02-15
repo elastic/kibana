@@ -15,6 +15,7 @@ import { DiscoverStart } from '../../discover/public';
 import { HomePublicPluginSetup, FeatureCatalogueCategory } from '../../home/public';
 import { VisualizationsStart } from '../../visualizations/public';
 import { SavedObjectTaggingOssPluginStart } from '../../saved_objects_tagging_oss/public';
+import type { SpacesOssPluginStart } from '../../spaces_oss/public';
 import {
   SavedObjectsManagementActionService,
   SavedObjectsManagementActionServiceSetup,
@@ -49,6 +50,7 @@ export interface StartDependencies {
   visualizations?: VisualizationsStart;
   discover?: DiscoverStart;
   savedObjectsTaggingOss?: SavedObjectTaggingOssPluginStart;
+  spacesOss?: SpacesOssPluginStart;
 }
 
 export class SavedObjectsManagementPlugin

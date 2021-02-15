@@ -54,18 +54,20 @@ export const getRenderCellValueFn = (
 
   if (field && field.type === '_source') {
     if (isDetails) {
-      const source = row.fields ? row.fields : row[columnId];
       // nicely formatted JSON for the expanded view
-      return <span>{JSON.stringify(source, null, 2)}</span>;
+      return <span>{JSON.stringify(row, null, 2)}</span>;
     }
     const formatted = indexPattern.formatHit(row);
 
     return (
-      <EuiDescriptionList type="inline" compressed>
+      <EuiDescriptionList type="inline" compressed className="dscDiscoverGrid__descriptionList">
         {Object.keys(formatted).map((key) => (
           <Fragment key={key}>
             <EuiDescriptionListTitle>{key}</EuiDescriptionListTitle>
-            <EuiDescriptionListDescription dangerouslySetInnerHTML={{ __html: formatted[key] }} />
+            <EuiDescriptionListDescription
+              dangerouslySetInnerHTML={{ __html: formatted[key] }}
+              className="dscDiscoverGrid__descriptionListDescription"
+            />
           </Fragment>
         ))}
       </EuiDescriptionList>
