@@ -49,6 +49,7 @@ import {
 import { EsIndexName, IndexPatternTitle } from './common';
 import {
   continuousModeDelayValidator,
+  retentionPolicyMaxAgeValidator,
   transformFrequencyValidator,
   transformSettingsMaxPageSearchSizeValidator,
 } from '../../../../common/validators';
@@ -104,15 +105,6 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
         setIndexPatternTimeField(timeField);
       },
       [setIndexPatternTimeField, indexPatternAvailableTimeFields]
-    );
-
-    // Continuous mode state
-    const [isContinuousModeEnabled, setContinuousModeEnabled] = useState(
-      defaults.isContinuousModeEnabled
-    );
-    // Retention policy state
-    const [isRetentionPolicyEnabled, setRetentionPolicyEnabled] = useState(
-      defaults.isRetentionPolicyEnabled
     );
 
     const api = useApi();
@@ -210,6 +202,9 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
 
     // Continuous Mode
     const isContinuousModeAvailable = dateFieldNames.length > 0;
+    const [isContinuousModeEnabled, setContinuousModeEnabled] = useState(
+      defaults.isContinuousModeEnabled
+    );
     const [continuousModeDateField, setContinuousModeDateField] = useState(
       isContinuousModeAvailable ? dateFieldNames[0] : ''
     );
@@ -218,13 +213,26 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
 
     // Retention Policy
     const isRetentionPolicyAvailable = dateFieldNames.length > 0;
+    const [isRetentionPolicyEnabled, setRetentionPolicyEnabled] = useState(
+      defaults.isRetentionPolicyEnabled
+    );
     const [retentionPolicyDateField, setRetentionPolicyDateField] = useState(
       isRetentionPolicyAvailable ? dateFieldNames[0] : ''
     );
     const [retentionPolicyMaxAge, setRetentionPolicyMaxAge] = useState(
       defaults.retentionPolicyMaxAge
     );
-    const isRetentionPolicyMaxAgeValid = continuousModeDelayValidator(continuousModeDelay);
+    const retentionPolicyMaxAgeEmpty = retentionPolicyMaxAge === '';
+    const isRetentionPolicyMaxAgeValid = retentionPolicyMaxAgeValidator(retentionPolicyMaxAge);
+
+    // Reset retention policy settings when the user disables the whole option
+    useEffect(() => {
+      if (!isRetentionPolicyEnabled) {
+        setRetentionPolicyDateField(isRetentionPolicyAvailable ? dateFieldNames[0] : '');
+        setRetentionPolicyMaxAge('');
+      }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [isRetentionPolicyEnabled]);
 
     const transformIdExists = transformIds.some((id) => transformId === id);
     const transformIdEmpty = transformId === '';
@@ -257,7 +265,12 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
       indexNameValid &&
       (!indexPatternTitleExists || !createIndexPattern) &&
       (!isContinuousModeAvailable || (isContinuousModeAvailable && isContinuousModeDelayValid)) &&
-      (!isRetentionPolicyAvailable || (isRetentionPolicyAvailable && isRetentionPolicyMaxAgeValid));
+      (!isRetentionPolicyAvailable ||
+        !isRetentionPolicyEnabled ||
+        (isRetentionPolicyAvailable &&
+          isRetentionPolicyEnabled &&
+          !retentionPolicyMaxAgeEmpty &&
+          isRetentionPolicyMaxAgeValid));
 
     // expose state to wizard
     useEffect(() => {
@@ -596,11 +609,12 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
                     defaultMessage: 'Max age',
                   }
                 )}
-                isInvalid={!isRetentionPolicyMaxAgeValid}
+                isInvalid={!retentionPolicyMaxAgeEmpty && !isRetentionPolicyMaxAgeValid}
                 error={
+                  !retentionPolicyMaxAgeEmpty &&
                   !isRetentionPolicyMaxAgeValid && [
                     i18n.translate('xpack.transform.stepDetailsForm.retentionPolicyMaxAgeError', {
-                      defaultMessage: 'Invalid max age format',
+                      defaultMessage: 'Invalid max age format. Minimum of 60s required.',
                     }),
                   ]
                 }
@@ -621,7 +635,7 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
                       defaultMessage: 'Choose a max age.',
                     }
                   )}
-                  isInvalid={!isRetentionPolicyMaxAgeValid}
+                  isInvalid={!retentionPolicyMaxAgeEmpty && !isRetentionPolicyMaxAgeValid}
                   data-test-subj="transformRetentionPolicyMaxAgeInput"
                 />
               </EuiFormRow>

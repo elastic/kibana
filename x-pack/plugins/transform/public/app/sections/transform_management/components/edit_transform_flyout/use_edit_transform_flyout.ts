@@ -16,6 +16,12 @@ import { PostTransformsUpdateRequestSchema } from '../../../../../../common/api_
 import { TransformConfigUnion } from '../../../../../../common/types/transform';
 import { getNestedProperty, setNestedProperty } from '../../../../../../common/utils/object_utils';
 
+import {
+  isValidFrequency,
+  isValidRetentionPolicyMaxAge,
+  ParsedDuration,
+} from '../../../../common/validators';
+
 // This custom hook uses nested reducers to provide a generic framework to manage form state
 // and apply it to a final possibly nested configuration object suitable for passing on
 // directly to an API call. For now this is only used for the transform edit form.
@@ -124,14 +130,7 @@ export const stringValidator: Validator = (value, isOptional = true) => {
   return [];
 };
 
-// Only allow frequencies in the form of 1s/1h etc.
-const frequencyNotValidErrorMessage = i18n.translate(
-  'xpack.transform.transformList.editFlyoutFormFrequencyNotValidErrorMessage',
-  {
-    defaultMessage: 'The frequency value is not valid.',
-  }
-);
-export const frequencyValidator: Validator = (arg) => {
+function parseDurationAboveZero(arg: any, errorMessage: string): ParsedDuration | string[] {
   if (typeof arg !== 'string' || arg === null) {
     return [stringNotValidErrorMessage];
   }
@@ -144,20 +143,49 @@ export const frequencyValidator: Validator = (arg) => {
     return [frequencyNotValidErrorMessage];
   }
 
-  const valueNumber = +regexStr[0];
-  const valueTimeUnit = regexStr[1];
+  const number = +regexStr[0];
+  const timeUnit = regexStr[1];
 
   // only valid if number is an integer above 0
-  if (isNaN(valueNumber) || !Number.isInteger(valueNumber) || valueNumber === 0) {
+  if (isNaN(number) || !Number.isInteger(number) || number === 0) {
     return [frequencyNotValidErrorMessage];
   }
 
-  // only valid if value is up to 1 hour
-  return (valueTimeUnit === 's' && valueNumber <= 3600) ||
-    (valueTimeUnit === 'm' && valueNumber <= 60) ||
-    (valueTimeUnit === 'h' && valueNumber === 1)
-    ? []
-    : [frequencyNotValidErrorMessage];
+  return { number, timeUnit };
+}
+
+// Only allow frequencies in the form of 1s/1h etc.
+const frequencyNotValidErrorMessage = i18n.translate(
+  'xpack.transform.transformList.editFlyoutFormFrequencyNotValidErrorMessage',
+  {
+    defaultMessage: 'The frequency value is not valid.',
+  }
+);
+export const frequencyValidator: Validator = (arg) => {
+  const parsedArg = parseDurationAboveZero(arg, frequencyNotValidErrorMessage);
+
+  if (Array.isArray(parsedArg)) {
+    return parsedArg;
+  }
+
+  return isValidFrequency(parsedArg) ? [] : [frequencyNotValidErrorMessage];
+};
+
+// Retention policy max age validator
+const retentionPolicyMaxAgeNotValidErrorMessage = i18n.translate(
+  'xpack.transform.transformList.editFlyoutFormRetentionPolicyMaxAgeNotValidErrorMessage',
+  {
+    defaultMessage: 'Invalid max age format. Minimum of 60s required.',
+  }
+);
+export const retentionPolicyMaxAgeValidator: Validator = (arg) => {
+  const parsedArg = parseDurationAboveZero(arg, retentionPolicyMaxAgeNotValidErrorMessage);
+
+  if (Array.isArray(parsedArg)) {
+    return parsedArg;
+  }
+
+  return isValidRetentionPolicyMaxAge(parsedArg) ? [] : [retentionPolicyMaxAgeNotValidErrorMessage];
 };
 
 const validate = {
@@ -165,6 +193,7 @@ const validate = {
   frequency: frequencyValidator,
   integerAboveZero: integerAboveZeroValidator,
   integerRange10To10000: integerRange10To10000Validator,
+  retentionPolicyMaxAge: retentionPolicyMaxAgeValidator,
 } as const;
 
 export const initializeField = (
@@ -310,7 +339,7 @@ export const getDefaultState = (config: TransformConfigUnion): EditTransformFlyo
         dependsOn: ['retentionPolicyField'],
         isNullable: false,
         isOptional: true,
-        validator: 'frequency',
+        validator: 'retentionPolicyMaxAge',
       }
     ),
   },

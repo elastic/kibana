@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { continuousModeDelayValidator, transformFrequencyValidator } from './validators';
+import {
+  continuousModeDelayValidator,
+  parseDuration,
+  retentionPolicyMaxAgeValidator,
+  transformFrequencyValidator,
+} from './validators';
 
 describe('continuousModeDelayValidator', () => {
   it('should allow 0 input without unit', () => {
@@ -26,6 +31,73 @@ describe('continuousModeDelayValidator', () => {
 
   it('should not allow float input', () => {
     expect(continuousModeDelayValidator('122.5d')).toBe(false);
+  });
+});
+
+describe('parseDuration', () => {
+  it('should return undefined when the input is not an integer and valid time unit.', () => {
+    expect(parseDuration('0')).toBe(undefined);
+    expect(parseDuration('0.1s')).toBe(undefined);
+    expect(parseDuration('1.1m')).toBe(undefined);
+    expect(parseDuration('10.1asdf')).toBe(undefined);
+  });
+
+  it('should return parsed data for valid time units nanos|micros|ms|s|m|h|d.', () => {
+    expect(parseDuration('1a')).toEqual(undefined);
+    expect(parseDuration('1nanos')).toEqual({
+      valueNumber: 1,
+      valueTimeUnit: 'nanos',
+    });
+    expect(parseDuration('1micros')).toEqual({
+      valueNumber: 1,
+      valueTimeUnit: 'micros',
+    });
+    expect(parseDuration('1ms')).toEqual({ valueNumber: 1, valueTimeUnit: 'ms' });
+    expect(parseDuration('1s')).toEqual({ valueNumber: 1, valueTimeUnit: 's' });
+    expect(parseDuration('1m')).toEqual({ valueNumber: 1, valueTimeUnit: 'm' });
+    expect(parseDuration('1h')).toEqual({ valueNumber: 1, valueTimeUnit: 'h' });
+    expect(parseDuration('1d')).toEqual({ valueNumber: 1, valueTimeUnit: 'd' });
+  });
+});
+
+describe('retentionPolicyMaxAgeValidator', () => {
+  it('should fail when the input is not an integer and valid time unit.', () => {
+    expect(retentionPolicyMaxAgeValidator('0')).toBe(false);
+    expect(retentionPolicyMaxAgeValidator('0.1s')).toBe(false);
+    expect(retentionPolicyMaxAgeValidator('1.1m')).toBe(false);
+    expect(retentionPolicyMaxAgeValidator('10.1asdf')).toBe(false);
+  });
+
+  it('should only allow values equal or above 60s.', () => {
+    expect(retentionPolicyMaxAgeValidator('0nanos')).toBe(false);
+    expect(retentionPolicyMaxAgeValidator('59999999999nanos')).toBe(false);
+    expect(retentionPolicyMaxAgeValidator('60000000000nanos')).toBe(true);
+    expect(retentionPolicyMaxAgeValidator('60000000001nanos')).toBe(true);
+
+    expect(retentionPolicyMaxAgeValidator('0micros')).toBe(false);
+    expect(retentionPolicyMaxAgeValidator('59999999micros')).toBe(false);
+    expect(retentionPolicyMaxAgeValidator('60000000micros')).toBe(true);
+    expect(retentionPolicyMaxAgeValidator('60000001micros')).toBe(true);
+
+    expect(retentionPolicyMaxAgeValidator('0ms')).toBe(false);
+    expect(retentionPolicyMaxAgeValidator('59999ms')).toBe(false);
+    expect(retentionPolicyMaxAgeValidator('60000ms')).toBe(true);
+    expect(retentionPolicyMaxAgeValidator('60001ms')).toBe(true);
+
+    expect(retentionPolicyMaxAgeValidator('0s')).toBe(false);
+    expect(retentionPolicyMaxAgeValidator('1s')).toBe(false);
+    expect(retentionPolicyMaxAgeValidator('59s')).toBe(false);
+    expect(retentionPolicyMaxAgeValidator('60s')).toBe(true);
+    expect(retentionPolicyMaxAgeValidator('61s')).toBe(true);
+    expect(retentionPolicyMaxAgeValidator('10000s')).toBe(true);
+
+    expect(retentionPolicyMaxAgeValidator('0m')).toBe(false);
+    expect(retentionPolicyMaxAgeValidator('1m')).toBe(true);
+    expect(retentionPolicyMaxAgeValidator('100m')).toBe(true);
+
+    expect(retentionPolicyMaxAgeValidator('0h')).toBe(false);
+    expect(retentionPolicyMaxAgeValidator('1h')).toBe(true);
+    expect(retentionPolicyMaxAgeValidator('2h')).toBe(true);
   });
 });
 

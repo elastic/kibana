@@ -30,7 +30,6 @@ export interface StepDetailsExposedState {
 }
 
 const defaultContinuousModeDelay = '60s';
-const defaultRetentionPolicyMaxAge = '60s';
 const defaultTransformFrequency = '1m';
 const defaultTransformSettingsMaxPageSearchSize = 500;
 
@@ -82,7 +81,7 @@ export function applyTransformConfigToDetailsState(
     const retentionPolicyTime = transformConfig.retention_policy?.time;
     if (retentionPolicyTime !== undefined) {
       state.retentionPolicyDateField = retentionPolicyTime.field;
-      state.retentionPolicyMaxAge = retentionPolicyTime?.max_age ?? defaultRetentionPolicyMaxAge;
+      state.retentionPolicyMaxAge = retentionPolicyTime.max_age;
       state.isRetentionPolicyEnabled = true;
     }
 
