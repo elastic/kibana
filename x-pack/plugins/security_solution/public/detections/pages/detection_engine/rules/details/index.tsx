@@ -486,6 +486,7 @@ const RuleDetailsPageComponent = () => {
                   href: getRulesUrl(),
                   text: i18n.BACK_TO_RULES,
                   pageId: SecurityPageName.detections,
+                  dataTestSubj: 'ruleDetailsBackToAllRules',
                 }}
                 border
                 subtitle={subTitle}

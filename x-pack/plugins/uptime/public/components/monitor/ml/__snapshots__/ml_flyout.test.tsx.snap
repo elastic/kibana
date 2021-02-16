@@ -84,7 +84,7 @@ exports[`ML Flyout component shows license info if no ml available 1`] = `
   data-eui="EuiFocusTrap"
 >
   <div
-    class="euiFlyout euiFlyout--small"
+    class="euiFlyout euiFlyout--small euiFlyout--paddingLarge"
     data-test-subj="uptimeMLFlyout"
     role="dialog"
     tabindex="0"

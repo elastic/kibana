@@ -32,6 +32,8 @@ const typeToFn: Record<string, string> = {
   median: 'aggMedian',
 };
 
+const supportedTypes = ['number', 'histogram'];
+
 function buildMetricOperation<T extends MetricColumn<string>>({
   type,
   displayName,
@@ -61,7 +63,7 @@ function buildMetricOperation<T extends MetricColumn<string>>({
     timeScalingMode: optionalTimeScaling ? 'optional' : undefined,
     getPossibleOperationForField: ({ aggregationRestrictions, aggregatable, type: fieldType }) => {
       if (
-        fieldType === 'number' &&
+        supportedTypes.includes(fieldType) &&
         aggregatable &&
         (!aggregationRestrictions || aggregationRestrictions[type])
       ) {
@@ -77,7 +79,7 @@ function buildMetricOperation<T extends MetricColumn<string>>({
 
       return Boolean(
         newField &&
-          newField.type === 'number' &&
+          supportedTypes.includes(newField.type) &&
           newField.aggregatable &&
           (!newField.aggregationRestrictions || newField.aggregationRestrictions![type])
       );
@@ -181,6 +183,7 @@ export const sumOperation = buildMetricOperation<SumIndexPatternColumn>({
 
 export const medianOperation = buildMetricOperation<MedianIndexPatternColumn>({
   type: 'median',
+  priority: 3,
   displayName: i18n.translate('xpack.lens.indexPattern.median', {
     defaultMessage: 'Median',
   }),
