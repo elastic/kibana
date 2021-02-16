@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { schema } from '@kbn/config-schema';
@@ -28,12 +29,9 @@ export function registerGroupsRoute({ router, enterpriseSearchRequestHandler }: 
         }),
       },
     },
-    async (context, request, response) => {
-      return enterpriseSearchRequestHandler.createRequest({
-        path: '/ws/org/groups',
-        body: request.body,
-      })(context, request, response);
-    }
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/ws/org/groups',
+    })
   );
 }
 
@@ -58,12 +56,9 @@ export function registerSearchGroupsRoute({
         }),
       },
     },
-    async (context, request, response) => {
-      return enterpriseSearchRequestHandler.createRequest({
-        path: '/ws/org/groups/search',
-        body: request.body,
-      })(context, request, response);
-    }
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/ws/org/groups/search',
+    })
   );
 }
 
@@ -77,11 +72,9 @@ export function registerGroupRoute({ router, enterpriseSearchRequestHandler }: R
         }),
       },
     },
-    async (context, request, response) => {
-      return enterpriseSearchRequestHandler.createRequest({
-        path: `/ws/org/groups/${request.params.id}`,
-      })(context, request, response);
-    }
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/ws/org/groups/:id',
+    })
   );
 
   router.put(
@@ -98,12 +91,9 @@ export function registerGroupRoute({ router, enterpriseSearchRequestHandler }: R
         }),
       },
     },
-    async (context, request, response) => {
-      return enterpriseSearchRequestHandler.createRequest({
-        path: `/ws/org/groups/${request.params.id}`,
-        body: request.body,
-      })(context, request, response);
-    }
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/ws/org/groups/:id',
+    })
   );
 
   router.delete(
@@ -115,11 +105,9 @@ export function registerGroupRoute({ router, enterpriseSearchRequestHandler }: R
         }),
       },
     },
-    async (context, request, response) => {
-      return enterpriseSearchRequestHandler.createRequest({
-        path: `/ws/org/groups/${request.params.id}`,
-      })(context, request, response);
-    }
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/ws/org/groups/:id',
+    })
   );
 }
 
@@ -136,11 +124,9 @@ export function registerGroupUsersRoute({
         }),
       },
     },
-    async (context, request, response) => {
-      return enterpriseSearchRequestHandler.createRequest({
-        path: `/ws/org/groups/${request.params.id}/group_users`,
-      })(context, request, response);
-    }
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/ws/org/groups/:id/group_users',
+    })
   );
 }
 
@@ -160,12 +146,9 @@ export function registerShareGroupRoute({
         }),
       },
     },
-    async (context, request, response) => {
-      return enterpriseSearchRequestHandler.createRequest({
-        path: `/ws/org/groups/${request.params.id}/share`,
-        body: request.body,
-      })(context, request, response);
-    }
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/ws/org/groups/:id/share',
+    })
   );
 }
 
@@ -185,12 +168,9 @@ export function registerAssignGroupRoute({
         }),
       },
     },
-    async (context, request, response) => {
-      return enterpriseSearchRequestHandler.createRequest({
-        path: `/ws/org/groups/${request.params.id}/assign`,
-        body: request.body,
-      })(context, request, response);
-    }
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/ws/org/groups/:id/assign',
+    })
   );
 }
 
@@ -212,12 +192,9 @@ export function registerBoostsGroupRoute({
         }),
       },
     },
-    async (context, request, response) => {
-      return enterpriseSearchRequestHandler.createRequest({
-        path: `/ws/org/groups/${request.params.id}/update_source_boosts`,
-        body: request.body,
-      })(context, request, response);
-    }
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/ws/org/groups/:id/update_source_boosts',
+    })
   );
 }
 

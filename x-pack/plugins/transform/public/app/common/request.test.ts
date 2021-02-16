@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { PIVOT_SUPPORTED_AGGS } from '../../../common/types/pivot_aggs';
@@ -9,7 +10,7 @@ import { PIVOT_SUPPORTED_AGGS } from '../../../common/types/pivot_aggs';
 import { PivotGroupByConfig } from '../common';
 
 import { StepDefineExposedState } from '../sections/create_transform/components/step_define';
-import { StepDetailsExposedState } from '../sections/create_transform/components/step_details/step_details_form';
+import { StepDetailsExposedState } from '../sections/create_transform/components/step_details';
 
 import { PIVOT_SUPPORTED_GROUP_BY_AGGS } from './pivot_group_by';
 import { PivotAggsConfig } from './pivot_aggs';
@@ -173,6 +174,9 @@ describe('Transform: Common', () => {
       continuousModeDelay: 'the-continuous-mode-delay',
       createIndexPattern: false,
       isContinuousModeEnabled: false,
+      isRetentionPolicyEnabled: false,
+      retentionPolicyDateField: '',
+      retentionPolicyMaxAge: '',
       transformId: 'the-transform-id',
       transformDescription: 'the-transform-description',
       transformFrequency: '1m',

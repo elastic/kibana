@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { Readable } from 'stream';
@@ -26,9 +15,10 @@ import {
   SavedObjectsImportFailure,
   SavedObjectsImportRetry,
   SavedObjectReference,
+  SavedObjectsImportWarning,
 } from '../types';
 import { savedObjectsClientMock } from '../../mocks';
-import { ISavedObjectTypeRegistry } from '..';
+import { ISavedObjectTypeRegistry, SavedObjectsImportHook } from '..';
 import { typeRegistryMock } from '../saved_objects_type_registry.mock';
 import {
   resolveSavedObjectsImportErrors,
@@ -45,6 +35,7 @@ import {
   splitOverwrites,
   createSavedObjects,
   createObjectsFilter,
+  executeImportHooks,
 } from './lib';
 
 jest.mock('./lib/validate_retries');
@@ -56,6 +47,7 @@ jest.mock('./lib/check_conflicts');
 jest.mock('./lib/check_origin_conflicts');
 jest.mock('./lib/split_overwrites');
 jest.mock('./lib/create_saved_objects');
+jest.mock('./lib/execute_import_hooks');
 
 const getMockFn = <T extends (...args: any[]) => any, U>(fn: (...args: Parameters<T>) => U) =>
   fn as jest.MockedFunction<(...args: Parameters<T>) => U>;
@@ -84,6 +76,7 @@ describe('#importSavedObjectsFromStream', () => {
       objectsToNotOverwrite: [],
     });
     getMockFn(createSavedObjects).mockResolvedValue({ errors: [], createdObjects: [] });
+    getMockFn(executeImportHooks).mockResolvedValue([]);
   });
 
   let readStream: Readable;
@@ -92,15 +85,21 @@ describe('#importSavedObjectsFromStream', () => {
   let typeRegistry: jest.Mocked<ISavedObjectTypeRegistry>;
   const namespace = 'some-namespace';
 
-  const setupOptions = (
-    retries: SavedObjectsImportRetry[] = [],
-    createNewCopies: boolean = false,
-    getTypeImpl: (name: string) => any = (type: string) =>
+  const setupOptions = ({
+    retries = [],
+    createNewCopies = false,
+    getTypeImpl = (type: string) =>
       ({
         // other attributes aren't needed for the purposes of injecting metadata
         management: { icon: `${type}-icon` },
-      } as any)
-  ): ResolveSavedObjectsImportErrorsOptions => {
+      } as any),
+    importHooks = {},
+  }: {
+    retries?: SavedObjectsImportRetry[];
+    createNewCopies?: boolean;
+    getTypeImpl?: (name: string) => any;
+    importHooks?: Record<string, SavedObjectsImportHook[]>;
+  } = {}): ResolveSavedObjectsImportErrorsOptions => {
     readStream = new Readable();
     savedObjectsClient = savedObjectsClientMock.create();
     typeRegistry = typeRegistryMock.create();
@@ -112,6 +111,7 @@ describe('#importSavedObjectsFromStream', () => {
       retries,
       savedObjectsClient,
       typeRegistry,
+      importHooks,
       // namespace and createNewCopies don't matter, as they don't change the logic in this module, they just get passed to sub-module methods
       namespace,
       createNewCopies,
@@ -159,7 +159,7 @@ describe('#importSavedObjectsFromStream', () => {
   describe('module calls', () => {
     test('validates retries', async () => {
       const retry = createRetry();
-      const options = setupOptions([retry]);
+      const options = setupOptions({ retries: [retry] });
 
       await resolveSavedObjectsImportErrors(options);
       expect(validateRetries).toHaveBeenCalledWith([retry]);
@@ -167,7 +167,7 @@ describe('#importSavedObjectsFromStream', () => {
 
     test('creates objects filter', async () => {
       const retry = createRetry();
-      const options = setupOptions([retry]);
+      const options = setupOptions({ retries: [retry] });
 
       await resolveSavedObjectsImportErrors(options);
       expect(createObjectsFilter).toHaveBeenCalledWith([retry]);
@@ -189,7 +189,7 @@ describe('#importSavedObjectsFromStream', () => {
 
     test('validates references', async () => {
       const retries = [createRetry()];
-      const options = setupOptions(retries);
+      const options = setupOptions({ retries });
       const collectedObjects = [createObject()];
       getMockFn(collectSavedObjects).mockResolvedValue({
         errors: [],
@@ -206,6 +206,30 @@ describe('#importSavedObjectsFromStream', () => {
       );
     });
 
+    test('execute import hooks', async () => {
+      const importHooks = {
+        foo: [jest.fn()],
+      };
+      const options = setupOptions({ importHooks });
+      const collectedObjects = [createObject()];
+      getMockFn(collectSavedObjects).mockResolvedValue({
+        errors: [],
+        collectedObjects,
+        importIdMap: new Map(),
+      });
+      getMockFn(createSavedObjects).mockResolvedValueOnce({
+        errors: [],
+        createdObjects: collectedObjects,
+      });
+
+      await resolveSavedObjectsImportErrors(options);
+
+      expect(executeImportHooks).toHaveBeenCalledWith({
+        objects: collectedObjects,
+        importHooks,
+      });
+    });
+
     test('uses `retries` to replace references of collected objects before validating', async () => {
       const object = createObject([{ type: 'bar-type', id: 'abc', name: 'some name' }]);
       const retries = [
@@ -214,7 +238,7 @@ describe('#importSavedObjectsFromStream', () => {
           replaceReferences: [{ type: 'bar-type', from: 'abc', to: 'def' }],
         }),
       ];
-      const options = setupOptions(retries);
+      const options = setupOptions({ retries });
       getMockFn(collectSavedObjects).mockResolvedValue({
         errors: [],
         collectedObjects: [object],
@@ -237,7 +261,7 @@ describe('#importSavedObjectsFromStream', () => {
     test('checks conflicts', async () => {
       const createNewCopies = (Symbol() as unknown) as boolean;
       const retries = [createRetry()];
-      const options = setupOptions(retries, createNewCopies);
+      const options = setupOptions({ retries, createNewCopies });
       const collectedObjects = [createObject()];
       getMockFn(collectSavedObjects).mockResolvedValue({
         errors: [],
@@ -259,7 +283,7 @@ describe('#importSavedObjectsFromStream', () => {
     test('gets import ID map for retries', async () => {
       const retries = [createRetry()];
       const createNewCopies = (Symbol() as unknown) as boolean;
-      const options = setupOptions(retries, createNewCopies);
+      const options = setupOptions({ retries, createNewCopies });
       const filteredObjects = [createObject()];
       getMockFn(checkConflicts).mockResolvedValue({
         errors: [],
@@ -275,7 +299,7 @@ describe('#importSavedObjectsFromStream', () => {
 
     test('splits objects to overwrite from those not to overwrite', async () => {
       const retries = [createRetry()];
-      const options = setupOptions(retries);
+      const options = setupOptions({ retries });
       const collectedObjects = [createObject()];
       getMockFn(collectSavedObjects).mockResolvedValue({
         errors: [],
@@ -355,7 +379,7 @@ describe('#importSavedObjectsFromStream', () => {
 
     describe('with createNewCopies enabled', () => {
       test('regenerates object IDs', async () => {
-        const options = setupOptions([], true);
+        const options = setupOptions({ createNewCopies: true });
         const collectedObjects = [createObject()];
         getMockFn(collectSavedObjects).mockResolvedValue({
           errors: [],
@@ -368,7 +392,7 @@ describe('#importSavedObjectsFromStream', () => {
       });
 
       test('creates saved objects', async () => {
-        const options = setupOptions([], true);
+        const options = setupOptions({ createNewCopies: true });
         const errors = [createError(), createError(), createError()];
         getMockFn(collectSavedObjects).mockResolvedValue({
           errors: [errors[0]],
@@ -433,7 +457,7 @@ describe('#importSavedObjectsFromStream', () => {
       const options = setupOptions();
 
       const result = await resolveSavedObjectsImportErrors(options);
-      expect(result).toEqual({ success: true, successCount: 0 });
+      expect(result).toEqual({ success: true, successCount: 0, warnings: [] });
     });
 
     test('returns success=false if an error occurred', async () => {
@@ -445,15 +469,40 @@ describe('#importSavedObjectsFromStream', () => {
       });
 
       const result = await resolveSavedObjectsImportErrors(options);
-      expect(result).toEqual({ success: false, successCount: 0, errors: [expect.any(Object)] });
+      expect(result).toEqual({
+        success: false,
+        successCount: 0,
+        errors: [expect.any(Object)],
+        warnings: [],
+      });
+    });
+
+    test('executes import hooks', async () => {
+      const options = setupOptions();
+      const collectedObjects = [createObject()];
+      getMockFn(collectSavedObjects).mockResolvedValue({
+        errors: [],
+        collectedObjects,
+        importIdMap: new Map(),
+      });
+      getMockFn(createSavedObjects).mockResolvedValueOnce({
+        errors: [],
+        createdObjects: collectedObjects,
+      });
+      const warnings: SavedObjectsImportWarning[] = [{ type: 'simple', message: 'foo' }];
+      getMockFn(executeImportHooks).mockResolvedValue(warnings);
+
+      const result = await resolveSavedObjectsImportErrors(options);
+
+      expect(result.warnings).toEqual(warnings);
     });
 
     test('handles a mix of successes and errors and injects metadata', async () => {
       const error1 = createError();
       const error2 = createError();
-      const options = setupOptions([
-        { type: error2.type, id: error2.id, overwrite: true, replaceReferences: [] },
-      ]);
+      const options = setupOptions({
+        retries: [{ type: error2.type, id: error2.id, overwrite: true, replaceReferences: [] }],
+      });
       const obj1 = createObject();
       const tmp = createObject();
       const obj2 = { ...tmp, destinationId: 'some-destinationId', originId: tmp.id };
@@ -494,22 +543,30 @@ describe('#importSavedObjectsFromStream', () => {
         { ...error1, meta: { ...error1.meta, icon: `${error1.type}-icon` } },
         { ...error2, meta: { ...error2.meta, icon: `${error2.type}-icon` }, overwrite: true },
       ];
-      expect(result).toEqual({ success: false, successCount: 3, successResults, errors });
+      expect(result).toEqual({
+        success: false,
+        successCount: 3,
+        successResults,
+        errors,
+        warnings: [],
+      });
     });
 
     test('uses `type.management.getTitle` to resolve the titles', async () => {
       const obj1 = createObject([], { type: 'foo' });
       const obj2 = createObject([], { type: 'bar', title: 'bar-title' });
 
-      const options = setupOptions([], false, (type) => {
-        if (type === 'foo') {
+      const options = setupOptions({
+        getTypeImpl: (type) => {
+          if (type === 'foo') {
+            return {
+              management: { getTitle: () => 'getTitle-foo', icon: `${type}-icon` },
+            };
+          }
           return {
-            management: { getTitle: () => 'getTitle-foo', icon: `${type}-icon` },
+            management: { icon: `${type}-icon` },
           };
-        }
-        return {
-          management: { icon: `${type}-icon` },
-        };
+        },
       });
 
       getMockFn(checkConflicts).mockResolvedValue({
@@ -543,6 +600,7 @@ describe('#importSavedObjectsFromStream', () => {
         success: true,
         successCount: 2,
         successResults,
+        warnings: [],
       });
     });
 
@@ -566,7 +624,12 @@ describe('#importSavedObjectsFromStream', () => {
 
       const result = await resolveSavedObjectsImportErrors(options);
       const expectedErrors = errors.map(({ type, id }) => expect.objectContaining({ type, id }));
-      expect(result).toEqual({ success: false, successCount: 0, errors: expectedErrors });
+      expect(result).toEqual({
+        success: false,
+        successCount: 0,
+        errors: expectedErrors,
+        warnings: [],
+      });
     });
   });
 });

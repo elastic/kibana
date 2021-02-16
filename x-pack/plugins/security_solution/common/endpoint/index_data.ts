@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { Client } from '@elastic/elasticsearch';
@@ -30,7 +31,7 @@ import {
   PostAgentAcksResponse,
   PostAgentAcksRequest,
 } from '../../../fleet/common';
-import { factory as policyConfigFactory } from './models/policy_config';
+import { policyFactory as policyConfigFactory } from './models/policy_config';
 import { HostMetadata } from './types';
 import { KbnClientWithApiKeySupport } from '../../scripts/endpoint/kbn_client_with_api_key_support';
 

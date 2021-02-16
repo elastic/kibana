@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
-import { validate, MonitoringAlertTypeParams } from '../components/duration/validation';
-import { Expression, Props } from '../components/duration/expression';
+import { validate, MonitoringAlertTypeParams } from '../components/param_details_form/validation';
+import { Expression, Props } from '../components/param_details_form/expression';
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { AlertTypeModel } from '../../../../triggers_actions_ui/public/types';
@@ -18,7 +19,7 @@ export function createDiskUsageAlertType(): AlertTypeModel<MonitoringAlertTypePa
     description: ALERT_DETAILS[ALERT_DISK_USAGE].description,
     iconClass: 'bell',
     documentationUrl(docLinks) {
-      return `${docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${docLinks.DOC_LINK_VERSION}/kibana-alerts.html#kibana-alerts-disk-usage-threshold`;
+      return `${docLinks.links.monitoring.alertsKibanaDiskThreshold}`;
     },
     alertParamsExpression: (props: Props) => (
       <Expression {...props} paramDetails={ALERT_DETAILS[ALERT_DISK_USAGE].paramDetails} />

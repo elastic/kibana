@@ -1,29 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import _ from 'lodash';
-import { ES_GEO_FIELD_TYPE } from '../../common/constants/file_import';
 
-const DEFAULT_SETTINGS = {
-  number_of_shards: 1,
+export const ES_GEO_FIELD_TYPE = {
+  GEO_POINT: 'geo_point',
+  GEO_SHAPE: 'geo_shape',
 };
-
-const DEFAULT_GEO_SHAPE_MAPPINGS = {
-  coordinates: {
-    type: ES_GEO_FIELD_TYPE.GEO_SHAPE,
-  },
-};
-
-const DEFAULT_GEO_POINT_MAPPINGS = {
-  coordinates: {
-    type: ES_GEO_FIELD_TYPE.GEO_POINT,
-  },
-};
-
-const DEFAULT_INGEST_PIPELINE = {};
 
 export function getGeoIndexTypesForFeatures(featureTypes) {
   const hasNoFeatureType = !featureTypes || !featureTypes.length;
@@ -76,11 +63,16 @@ export function geoJsonToEs(parsedGeojson, datatype) {
 export function getGeoJsonIndexingDetails(parsedGeojson, dataType) {
   return {
     data: geoJsonToEs(parsedGeojson, dataType),
-    ingestPipeline: DEFAULT_INGEST_PIPELINE,
-    mappings:
-      dataType === ES_GEO_FIELD_TYPE.GEO_POINT
-        ? DEFAULT_GEO_POINT_MAPPINGS
-        : DEFAULT_GEO_SHAPE_MAPPINGS,
-    settings: DEFAULT_SETTINGS,
+    ingestPipeline: {},
+    mappings: {
+      properties: {
+        coordinates: {
+          type: dataType,
+        },
+      },
+    },
+    settings: {
+      number_of_shards: 1,
+    },
   };
 }

@@ -1,18 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { DocLinksStart } from 'kibana/public';
 import { ComponentType } from 'react';
 import { ChartsPluginSetup } from 'src/plugins/charts/public';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
-import { ActionGroup, AlertActionParam, AlertTypeParams } from '../../alerts/common';
 import { ActionType } from '../../actions/common';
 import { TypeRegistry } from './application/type_registry';
 import { AlertType as CommonAlertType } from '../../alerts/common';
 import {
+  ActionGroup,
+  AlertActionParam,
   SanitizedAlert,
   AlertAction,
   AlertAggregations,
@@ -22,6 +25,7 @@ import {
   RawAlertInstance,
   AlertingFrameworkHealth,
   AlertNotifyWhenType,
+  AlertTypeParams,
 } from '../../alerts/common';
 
 // In Triggers and Actions we treat all `Alert`s as `SanitizedAlert<AlertTypeParams>`
@@ -38,6 +42,7 @@ export {
   RawAlertInstance,
   AlertingFrameworkHealth,
   AlertNotifyWhenType,
+  AlertTypeParams,
 };
 export { ActionType };
 
@@ -193,6 +198,7 @@ export interface AlertTypeParamsExpressionProps<
   alertParams: Params;
   alertInterval: string;
   alertThrottle: string;
+  alertNotifyWhen: AlertNotifyWhenType;
   setAlertParams: <Key extends keyof Params>(property: Key, value: Params[Key] | undefined) => void;
   setAlertProperty: <Prop extends keyof Alert>(
     key: Prop,

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { sortBy, slice, get } from 'lodash';
@@ -17,7 +18,7 @@ import {
 } from '../../../common/types/anomalies';
 import { JOB_ID, PARTITION_FIELD_VALUE } from '../../../common/constants/anomalies';
 import { GetStoppedPartitionResult } from '../../../common/types/results';
-import { MlJobsResponse } from '../job_service/jobs';
+import { MlJobsResponse } from '../../../common/types/job_service';
 import type { MlClient } from '../../lib/ml_client';
 
 // Service for carrying out Elasticsearch queries to obtain data for the

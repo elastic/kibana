@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
@@ -35,7 +36,7 @@ import { SecurityPageName } from '../../../../app/types';
 import { LinkButton } from '../../../../common/components/links';
 import { useFormatUrl } from '../../../../common/components/link_to';
 
-type Func = (refreshPrePackagedRule?: boolean) => void;
+type Func = () => Promise<void>;
 
 const RulesPageComponent: React.FC = () => {
   const history = useHistory();
@@ -94,20 +95,22 @@ const RulesPageComponent: React.FC = () => {
 
   const handleRefreshRules = useCallback(async () => {
     if (refreshRulesData.current != null) {
-      refreshRulesData.current(true);
+      await refreshRulesData.current();
     }
   }, [refreshRulesData]);
 
   const handleCreatePrePackagedRules = useCallback(async () => {
     if (createPrePackagedRules != null) {
       await createPrePackagedRules();
-      handleRefreshRules();
+      return handleRefreshRules();
     }
   }, [createPrePackagedRules, handleRefreshRules]);
 
   const handleRefetchPrePackagedRulesStatus = useCallback(() => {
     if (refetchPrePackagedRulesStatus != null) {
-      refetchPrePackagedRulesStatus();
+      return refetchPrePackagedRulesStatus();
+    } else {
+      return Promise.resolve();
     }
   }, [refetchPrePackagedRulesStatus]);
 

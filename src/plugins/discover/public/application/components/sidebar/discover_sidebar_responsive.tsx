@@ -1,26 +1,17 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
+
 import React, { useState } from 'react';
 import { sortBy } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { UiCounterMetricType } from '@kbn/analytics';
+import { IUiSettingsClient } from 'kibana/public';
 import {
   EuiTitle,
   EuiHideFor,
@@ -35,13 +26,14 @@ import {
   EuiPortal,
 } from '@elastic/eui';
 import { DiscoverIndexPattern } from './discover_index_pattern';
-import { IndexPatternAttributes } from '../../../../../data/common';
+import { IndexPatternAttributes, IndexPatternsContract } from '../../../../../data/common';
 import { SavedObject } from '../../../../../../core/types';
 import { IndexPatternField, IndexPattern } from '../../../../../data/public';
 import { getDefaultFieldFilter } from './lib/field_filter';
 import { DiscoverSidebar } from './discover_sidebar';
 import { DiscoverServices } from '../../../build_services';
 import { ElasticSearchHit } from '../../doc_views/doc_views_types';
+import { AppState } from '../../angular/discover_state';
 
 export interface DiscoverSidebarResponsiveProps {
   /**
@@ -52,6 +44,10 @@ export interface DiscoverSidebarResponsiveProps {
    * the selected columns displayed in the doc table in discover
    */
   columns: string[];
+  /**
+   * Client of uiSettings
+   */
+  config: IUiSettingsClient;
   /**
    * a statistics of the distribution of fields in the given hits
    */
@@ -64,6 +60,10 @@ export interface DiscoverSidebarResponsiveProps {
    * List of available index patterns
    */
   indexPatternList: Array<SavedObject<IndexPatternAttributes>>;
+  /**
+   * Index patterns service
+   */
+  indexPatterns: IndexPatternsContract;
   /**
    * Has been toggled closed
    */
@@ -90,9 +90,13 @@ export interface DiscoverSidebarResponsiveProps {
    */
   services: DiscoverServices;
   /**
-   * Callback function to select another index pattern
+   * Function to set the current state
    */
-  setIndexPattern: (id: string) => void;
+  setAppState: (state: Partial<AppState>) => void;
+  /**
+   * Discover App state
+   */
+  state: AppState;
   /**
    * Metric tracking function
    * @param metricType
@@ -103,6 +107,31 @@ export interface DiscoverSidebarResponsiveProps {
    * Shows index pattern and a button that displays the sidebar in a flyout
    */
   useFlyout?: boolean;
+  /**
+   * Read from the Fields API
+   */
+  useNewFieldsApi?: boolean;
+
+  /**
+   * an object containing properties for proper handling of unmapped fields in the UI
+   */
+  unmappedFieldsConfig?: {
+    /**
+     * callback function to change the value of `showUnmappedFields` flag
+     * @param value new value to set
+     */
+    onChangeUnmappedFields: (value: boolean) => void;
+    /**
+     * determines whether to display unmapped fields
+     * configurable through the switch in the UI
+     */
+    showUnmappedFields: boolean;
+    /**
+     * determines if we should display an option to toggle showUnmappedFields value in the first place
+     * this value is not configurable through the UI
+     */
+    showUnmappedFieldsDefaultValue: boolean;
+  };
 }
 
 /**
@@ -136,9 +165,13 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
             )}
           >
             <DiscoverIndexPattern
+              config={props.config}
               selectedIndexPattern={props.selectedIndexPattern}
-              setIndexPattern={props.setIndexPattern}
               indexPatternList={sortBy(props.indexPatternList, (o) => o.attributes.title)}
+              indexPatterns={props.indexPatterns}
+              state={props.state}
+              setAppState={props.setAppState}
+              useNewFieldsApi={props.useNewFieldsApi}
             />
           </section>
           <EuiSpacer size="s" />

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -18,7 +19,6 @@ import {
   AlertInstanceState,
   AlertInstanceContext,
 } from '../../../../alerts/server';
-import { IRouter } from 'kibana/server';
 import { UMServerLibs } from '../lib';
 import { UptimeCorePlugins, UptimeCoreSetup } from '../adapters';
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../common/constants';
@@ -26,6 +26,7 @@ import { alertsMock, AlertServicesMock } from '../../../../alerts/server/mocks';
 import { GetMonitorStatusResult } from '../requests/get_monitor_status';
 import { makePing } from '../../../common/runtime_types/ping';
 import { GetMonitorAvailabilityResult } from '../requests/get_monitor_availability';
+import type { UptimeRouter } from '../../types';
 
 /**
  * The alert takes some dependencies as parameters; these are things like
@@ -35,7 +36,7 @@ import { GetMonitorAvailabilityResult } from '../requests/get_monitor_availabili
  * so we don't have to mock them all for each test.
  */
 const bootstrapDependencies = (customRequests?: any) => {
-  const router: IRouter = {} as IRouter;
+  const router = {} as UptimeRouter;
   // these server/libs parameters don't have any functionality, which is fine
   // because we aren't testing them here
   const server: UptimeCoreSetup = { router };

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -26,7 +27,7 @@ import {
   waitForRuleSuccessOrStatus,
   getRuleForSignalTesting,
 } from '../../utils';
-import { createUserAndRole } from '../roles_users_utils';
+import { createUserAndRole, deleteUserAndRole } from '../roles_users_utils';
 import { ROLES } from '../../../../plugins/security_solution/common/test';
 
 // eslint-disable-next-line import/no-default-export
@@ -34,7 +35,6 @@ export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
-  const securityService = getService('security');
 
   describe('open_close_signals', () => {
     describe('validation checks', () => {
@@ -166,12 +166,12 @@ export default ({ getService }: FtrProviderContext) => {
           expect(everySignalClosed).to.eql(true);
         });
 
-        it('should NOT be able to close signals with t1 analyst user', async () => {
+        it('should be able to close signals with t1 analyst user', async () => {
           const rule = getRuleForSignalTesting(['auditbeat-*']);
           const { id } = await createRule(supertest, rule);
           await waitForRuleSuccessOrStatus(supertest, id);
           await waitForSignalsToBePresent(supertest, 1, [id]);
-          await createUserAndRole(securityService, ROLES.t1_analyst);
+          await createUserAndRole(getService, ROLES.t1_analyst);
           const signalsOpen = await getSignalsByIds(supertest, [id]);
           const signalIds = signalsOpen.hits.hits.map((signal) => signal._id);
 
@@ -182,7 +182,7 @@ export default ({ getService }: FtrProviderContext) => {
             .set('kbn-xsrf', 'true')
             .auth(ROLES.t1_analyst, 'changeme')
             .send(setSignalStatus({ signalIds, status: 'closed' }))
-            .expect(403);
+            .expect(200);
 
           // query for the signals with the superuser
           // to allow a check that the signals were NOT closed with t1 analyst
@@ -199,9 +199,11 @@ export default ({ getService }: FtrProviderContext) => {
               _source: {
                 signal: { status },
               },
-            }) => status === 'open'
+            }) => status === 'closed'
           );
           expect(everySignalOpen).to.eql(true);
+
+          await deleteUserAndRole(getService, ROLES.t1_analyst);
         });
 
         it('should be able to close signals with soc_manager user', async () => {
@@ -210,7 +212,7 @@ export default ({ getService }: FtrProviderContext) => {
           await waitForRuleSuccessOrStatus(supertest, id);
           await waitForSignalsToBePresent(supertest, 1, [id]);
           const userAndRole = ROLES.soc_manager;
-          await createUserAndRole(securityService, userAndRole);
+          await createUserAndRole(getService, userAndRole);
           const signalsOpen = await getSignalsByIds(supertest, [id]);
           const signalIds = signalsOpen.hits.hits.map((signal) => signal._id);
 
@@ -239,6 +241,8 @@ export default ({ getService }: FtrProviderContext) => {
             }) => status === 'closed'
           );
           expect(everySignalClosed).to.eql(true);
+
+          await deleteUserAndRole(getService, userAndRole);
         });
       });
     });

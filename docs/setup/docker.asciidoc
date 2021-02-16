@@ -11,12 +11,8 @@ A list of all published Docker images and tags is available at
 https://www.docker.elastic.co[www.docker.elastic.co]. The source code is in
 https://github.com/elastic/dockerfiles/tree/{branch}/kibana[GitHub].
 
-These images are free to use under the Elastic license. They contain open source
-and free commercial features and access to paid commercial features.
-<<managing-licenses,Start a 30-day trial>> to try out all of the
-paid commercial features. See the
-https://www.elastic.co/subscriptions[Subscriptions] page for information about
-Elastic license levels.
+These images contain both free and subscription features.
+<<managing-licenses,Start a 30-day trial>> to try out all of the features.
 
 [float]
 [[pull-image]]
@@ -38,10 +34,6 @@ ifeval::["{release-state}"!="unreleased"]
 --------------------------------------------
 docker pull {docker-repo}:{version}
 --------------------------------------------
-
-Alternatively, you can download other Docker images that contain only features
-available under the Apache 2.0 license. To download the images, go to
-https://www.docker.elastic.co[www.docker.elastic.co].
 
 [float]
 === Run Kibana on Docker for development
@@ -132,9 +124,6 @@ images:
 `server.host`:: `"0.0.0.0"`
 `elasticsearch.hosts`:: `http://elasticsearch:9200`
 `monitoring.ui.container.elasticsearch.enabled`:: `true`
-
-NOTE: The setting `monitoring.ui.container.elasticsearch.enabled` is not
-defined in the `-oss` image.
 
 These settings are defined in the default `kibana.yml`. They can be overridden
 with a <<bind-mount-config,custom `kibana.yml`>> or via

@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { BehaviorSubject, of } from 'rxjs';
@@ -31,6 +20,7 @@ const getComputedFields = () => ({
   storedFields: [],
   scriptFields: {},
   docvalueFields: [],
+  runtimeFields: {},
 });
 
 const mockSource = { excludes: ['foo-*'] };
@@ -38,6 +28,7 @@ const mockSource2 = { excludes: ['bar-*'] };
 
 const indexPattern = ({
   title: 'foo',
+  fields: [{ name: 'foo-bar' }, { name: 'field1' }, { name: 'field2' }],
   getComputedFields,
   getSourceFiltering: () => mockSource,
 } as unknown) as IndexPattern;
@@ -48,16 +39,35 @@ const indexPattern2 = ({
   getSourceFiltering: () => mockSource2,
 } as unknown) as IndexPattern;
 
+const runtimeFieldDef = {
+  type: 'keyword',
+  script: {
+    source: "emit('hello world')",
+  },
+};
+
 describe('SearchSource', () => {
   let mockSearchMethod: any;
   let searchSourceDependencies: SearchSourceDependencies;
   let searchSource: SearchSource;
 
   beforeEach(() => {
-    mockSearchMethod = jest.fn().mockReturnValue(of({ rawResponse: '' }));
+    const getConfigMock = jest
+      .fn()
+      .mockImplementation((param) => param === 'metaFields' && ['_type', '_source'])
+      .mockName('getConfig');
+
+    mockSearchMethod = jest
+      .fn()
+      .mockReturnValue(
+        of(
+          { rawResponse: { isPartial: true, isRunning: true } },
+          { rawResponse: { isPartial: false, isRunning: false } }
+        )
+      );
 
     searchSourceDependencies = {
-      getConfig: jest.fn(),
+      getConfig: getConfigMock,
       search: mockSearchMethod,
       onResponse: (req, res) => res,
       legacy: {
@@ -73,6 +83,175 @@ describe('SearchSource', () => {
     test('gets the value for the property', () => {
       searchSource.setField('aggs', 5);
       expect(searchSource.getField('aggs')).toBe(5);
+    });
+  });
+
+  describe('#getFields()', () => {
+    test('gets the value for the property', () => {
+      searchSource.setField('aggs', 5);
+      expect(searchSource.getFields()).toMatchInlineSnapshot(`
+        Object {
+          "aggs": 5,
+        }
+      `);
+    });
+
+    test('recurses parents to get the entire filters: plain object filter', () => {
+      const RECURSE = true;
+
+      const parent = new SearchSource({}, searchSourceDependencies);
+      parent.setField('filter', [
+        {
+          meta: {
+            index: 'd180cae0-60c3-11eb-8569-bd1f5ed24bc9',
+            params: {},
+            alias: null,
+            disabled: false,
+            negate: false,
+          },
+          query: {
+            range: {
+              '@date': {
+                gte: '2016-01-27T18:11:05.010Z',
+                lte: '2021-01-27T18:11:05.010Z',
+                format: 'strict_date_optional_time',
+              },
+            },
+          },
+        },
+      ]);
+      searchSource.setParent(parent);
+      searchSource.setField('aggs', 5);
+      expect(searchSource.getFields(RECURSE)).toMatchInlineSnapshot(`
+        Object {
+          "aggs": 5,
+          "filter": Array [
+            Object {
+              "meta": Object {
+                "alias": null,
+                "disabled": false,
+                "index": "d180cae0-60c3-11eb-8569-bd1f5ed24bc9",
+                "negate": false,
+                "params": Object {},
+              },
+              "query": Object {
+                "range": Object {
+                  "@date": Object {
+                    "format": "strict_date_optional_time",
+                    "gte": "2016-01-27T18:11:05.010Z",
+                    "lte": "2021-01-27T18:11:05.010Z",
+                  },
+                },
+              },
+            },
+          ],
+        }
+      `);
+
+      // calling twice gives the same result: no searchSources in the hierarchy were modified
+      expect(searchSource.getFields(RECURSE)).toMatchInlineSnapshot(`
+        Object {
+          "aggs": 5,
+          "filter": Array [
+            Object {
+              "meta": Object {
+                "alias": null,
+                "disabled": false,
+                "index": "d180cae0-60c3-11eb-8569-bd1f5ed24bc9",
+                "negate": false,
+                "params": Object {},
+              },
+              "query": Object {
+                "range": Object {
+                  "@date": Object {
+                    "format": "strict_date_optional_time",
+                    "gte": "2016-01-27T18:11:05.010Z",
+                    "lte": "2021-01-27T18:11:05.010Z",
+                  },
+                },
+              },
+            },
+          ],
+        }
+      `);
+    });
+
+    test('recurses parents to get the entire filters: function filter', () => {
+      const RECURSE = true;
+
+      const parent = new SearchSource({}, searchSourceDependencies);
+      parent.setField('filter', () => ({
+        meta: {
+          index: 'd180cae0-60c3-11eb-8569-bd1f5ed24bc9',
+          params: {},
+          alias: null,
+          disabled: false,
+          negate: false,
+        },
+        query: {
+          range: {
+            '@date': {
+              gte: '2016-01-27T18:11:05.010Z',
+              lte: '2021-01-27T18:11:05.010Z',
+              format: 'strict_date_optional_time',
+            },
+          },
+        },
+      }));
+      searchSource.setParent(parent);
+      searchSource.setField('aggs', 5);
+      expect(searchSource.getFields(RECURSE)).toMatchInlineSnapshot(`
+        Object {
+          "aggs": 5,
+          "filter": Array [
+            Object {
+              "meta": Object {
+                "alias": null,
+                "disabled": false,
+                "index": "d180cae0-60c3-11eb-8569-bd1f5ed24bc9",
+                "negate": false,
+                "params": Object {},
+              },
+              "query": Object {
+                "range": Object {
+                  "@date": Object {
+                    "format": "strict_date_optional_time",
+                    "gte": "2016-01-27T18:11:05.010Z",
+                    "lte": "2021-01-27T18:11:05.010Z",
+                  },
+                },
+              },
+            },
+          ],
+        }
+      `);
+
+      // calling twice gives the same result: no double-added filters
+      expect(searchSource.getFields(RECURSE)).toMatchInlineSnapshot(`
+        Object {
+          "aggs": 5,
+          "filter": Array [
+            Object {
+              "meta": Object {
+                "alias": null,
+                "disabled": false,
+                "index": "d180cae0-60c3-11eb-8569-bd1f5ed24bc9",
+                "negate": false,
+                "params": Object {},
+              },
+              "query": Object {
+                "range": Object {
+                  "@date": Object {
+                    "format": "strict_date_optional_time",
+                    "gte": "2016-01-27T18:11:05.010Z",
+                    "lte": "2021-01-27T18:11:05.010Z",
+                  },
+                },
+              },
+            },
+          ],
+        }
+      `);
     });
   });
 
@@ -93,12 +272,14 @@ describe('SearchSource', () => {
 
     describe('computed fields handling', () => {
       test('still provides computed fields when no fields are specified', async () => {
+        const runtimeFields = { runtime_field: runtimeFieldDef };
         searchSource.setField('index', ({
           ...indexPattern,
           getComputedFields: () => ({
             storedFields: ['hello'],
             scriptFields: { world: {} },
             docvalueFields: ['@timestamp'],
+            runtimeFields,
           }),
         } as unknown) as IndexPattern);
 
@@ -106,6 +287,7 @@ describe('SearchSource', () => {
         expect(request.stored_fields).toEqual(['hello']);
         expect(request.script_fields).toEqual({ world: {} });
         expect(request.fields).toEqual(['@timestamp']);
+        expect(request.runtime_mappings).toEqual(runtimeFields);
       });
 
       test('never includes docvalue_fields', async () => {
@@ -342,6 +524,54 @@ describe('SearchSource', () => {
         expect(request.script_fields).toEqual({ hello: {} });
       });
 
+      test('request all fields except the ones specified with source filters', async () => {
+        searchSource.setField('index', ({
+          ...indexPattern,
+          getComputedFields: () => ({
+            storedFields: [],
+            scriptFields: [],
+            docvalueFields: [],
+          }),
+        } as unknown) as IndexPattern);
+        searchSource.setField('fields', ['hello', 'foo']);
+
+        const request = await searchSource.getSearchRequestBody();
+        expect(request.fields).toEqual(['hello']);
+      });
+
+      test('request all fields from index pattern except the ones specified with source filters', async () => {
+        searchSource.setField('index', ({
+          ...indexPattern,
+          getComputedFields: () => ({
+            storedFields: [],
+            scriptFields: [],
+            docvalueFields: [],
+          }),
+        } as unknown) as IndexPattern);
+        searchSource.setField('fields', ['*']);
+
+        const request = await searchSource.getSearchRequestBody();
+        expect(request.fields).toEqual([{ field: 'field1' }, { field: 'field2' }]);
+      });
+
+      test('request all fields from index pattern except the ones specified with source filters with unmapped_fields option', async () => {
+        searchSource.setField('index', ({
+          ...indexPattern,
+          getComputedFields: () => ({
+            storedFields: [],
+            scriptFields: [],
+            docvalueFields: [],
+          }),
+        } as unknown) as IndexPattern);
+        searchSource.setField('fields', [{ field: '*', include_unmapped: 'true' }]);
+
+        const request = await searchSource.getSearchRequestBody();
+        expect(request.fields).toEqual([
+          { field: 'field1', include_unmapped: 'true' },
+          { field: 'field2', include_unmapped: 'true' },
+        ]);
+      });
+
       test('returns all scripted fields when one fields entry is *', async () => {
         searchSource.setField('index', ({
           ...indexPattern,
@@ -401,15 +631,23 @@ describe('SearchSource', () => {
       });
 
       test('filters request when a specific list of fields is provided with fieldsFromSource', async () => {
+        const runtimeFields = { runtime_field: runtimeFieldDef, runtime_field_b: runtimeFieldDef };
         searchSource.setField('index', ({
           ...indexPattern,
           getComputedFields: () => ({
             storedFields: ['*'],
             scriptFields: { hello: {}, world: {} },
             docvalueFields: ['@timestamp', 'date'],
+            runtimeFields,
           }),
         } as unknown) as IndexPattern);
-        searchSource.setField('fieldsFromSource', ['hello', '@timestamp', 'foo-a', 'bar']);
+        searchSource.setField('fieldsFromSource', [
+          'hello',
+          '@timestamp',
+          'foo-a',
+          'bar',
+          'runtime_field',
+        ]);
 
         const request = await searchSource.getSearchRequestBody();
         expect(request._source).toEqual({
@@ -418,6 +656,7 @@ describe('SearchSource', () => {
         expect(request.fields).toEqual(['@timestamp']);
         expect(request.script_fields).toEqual({ hello: {} });
         expect(request.stored_fields).toEqual(['@timestamp', 'bar']);
+        expect(request.runtime_mappings).toEqual({ runtime_field: runtimeFieldDef });
       });
 
       test('filters request when a specific list of fields is provided with fieldsFromSource or fields', async () => {
@@ -555,6 +794,34 @@ describe('SearchSource', () => {
       await searchSource.fetch(options);
       expect(mockSearchMethod).toBeCalledTimes(1);
     });
+
+    test('should return partial results', (done) => {
+      searchSource = new SearchSource({ index: indexPattern }, searchSourceDependencies);
+      const options = {};
+
+      const next = jest.fn();
+      const complete = () => {
+        expect(next).toBeCalledTimes(2);
+        expect(next.mock.calls[0]).toMatchInlineSnapshot(`
+          Array [
+            Object {
+              "isPartial": true,
+              "isRunning": true,
+            },
+          ]
+        `);
+        expect(next.mock.calls[1]).toMatchInlineSnapshot(`
+          Array [
+            Object {
+              "isPartial": false,
+              "isRunning": false,
+            },
+          ]
+        `);
+        done();
+      };
+      searchSource.fetch$(options).subscribe({ next, complete });
+    });
   });
 
   describe('#serialize', () => {
@@ -575,13 +842,13 @@ describe('SearchSource', () => {
       expect(JSON.parse(searchSourceJSON).from).toEqual(123456);
     });
 
-    test('should omit sort and size', () => {
+    test('should omit size but not sort', () => {
       searchSource.setField('highlightAll', true);
       searchSource.setField('from', 123456);
       searchSource.setField('sort', { field: SortDirection.asc });
       searchSource.setField('size', 200);
       const { searchSourceJSON } = searchSource.serialize();
-      expect(Object.keys(JSON.parse(searchSourceJSON))).toEqual(['highlightAll', 'from']);
+      expect(Object.keys(JSON.parse(searchSourceJSON))).toEqual(['highlightAll', 'from', 'sort']);
     });
 
     test('should serialize filters', () => {
@@ -622,6 +889,26 @@ describe('SearchSource', () => {
       expect(references[1].id).toEqual('456');
       expect(references[1].type).toEqual('index-pattern');
       expect(JSON.parse(searchSourceJSON).filter[0].meta.indexRefName).toEqual(references[1].name);
+    });
+
+    test('mvt geoshape layer test', async () => {
+      // @ts-expect-error TS won't like using this field name, but technically it's possible.
+      searchSource.setField('docvalue_fields', ['prop1']);
+      searchSource.setField('source', ['geometry']);
+      searchSource.setField('fieldsFromSource', ['geometry', 'prop1']);
+      searchSource.setField('index', ({
+        ...indexPattern,
+        getSourceFiltering: () => ({ excludes: [] }),
+        getComputedFields: () => ({
+          storedFields: ['*'],
+          scriptFields: {},
+          docvalueFields: [],
+        }),
+      } as unknown) as IndexPattern);
+      const request = await searchSource.getSearchRequestBody();
+      expect(request.stored_fields).toEqual(['geometry', 'prop1']);
+      expect(request.docvalue_fields).toEqual(['prop1']);
+      expect(request._source).toEqual(['geometry']);
     });
   });
 });

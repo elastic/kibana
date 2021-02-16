@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, {
@@ -22,7 +23,6 @@ import {
   EuiEmptyPrompt,
   EuiFieldSearch,
   EuiSpacer,
-  EuiOverlayMask,
   EuiButton,
 } from '@elastic/eui';
 import { sortBy } from 'lodash';
@@ -116,16 +116,14 @@ export const SavedElementsModal: FunctionComponent<Props> = ({
     }
 
     return (
-      <EuiOverlayMask>
-        <CustomElementModal
-          title={strings.getEditElementTitle()}
-          name={elementToEdit.displayName}
-          description={elementToEdit.help}
-          image={elementToEdit.image}
-          onSave={handleEdit}
-          onCancel={hideEditModal}
-        />
-      </EuiOverlayMask>
+      <CustomElementModal
+        title={strings.getEditElementTitle()}
+        name={elementToEdit.displayName}
+        description={elementToEdit.help}
+        image={elementToEdit.image}
+        onSave={handleEdit}
+        onCancel={hideEditModal}
+      />
     );
   };
 
@@ -175,40 +173,34 @@ export const SavedElementsModal: FunctionComponent<Props> = ({
 
   return (
     <Fragment>
-      <EuiOverlayMask>
-        <EuiModal
-          onClose={onClose}
-          className="canvasModal--fixedSize"
-          maxWidth="1000px"
-          initialFocus=".canvasElements__filter input"
-        >
-          <EuiModalHeader className="canvasAssetManager__modalHeader">
-            <EuiModalHeaderTitle className="canvasAssetManager__modalHeaderTitle">
-              {strings.getModalTitle()}
-            </EuiModalHeaderTitle>
-          </EuiModalHeader>
+      <EuiModal
+        onClose={onClose}
+        className="canvasModal--fixedSize"
+        maxWidth="1000px"
+        initialFocus=".canvasElements__filter input"
+      >
+        <EuiModalHeader className="canvasAssetManager__modalHeader">
+          <EuiModalHeaderTitle className="canvasAssetManager__modalHeaderTitle">
+            {strings.getModalTitle()}
+          </EuiModalHeaderTitle>
+        </EuiModalHeader>
 
-          <EuiModalBody style={{ paddingRight: '1px' }}>
-            <EuiFieldSearch
-              fullWidth
-              value={search}
-              placeholder={strings.getFindElementPlaceholder()}
-              onChange={onSearch}
-            />
-            <EuiSpacer />
-            {customElementContent}
-          </EuiModalBody>
-          <EuiModalFooter>
-            <EuiButton
-              size="s"
-              onClick={onClose}
-              data-test-subj="saved-elements-modal-close-button"
-            >
-              {strings.getSavedElementsModalCloseButtonLabel()}
-            </EuiButton>
-          </EuiModalFooter>
-        </EuiModal>
-      </EuiOverlayMask>
+        <EuiModalBody style={{ paddingRight: '1px' }}>
+          <EuiFieldSearch
+            fullWidth
+            value={search}
+            placeholder={strings.getFindElementPlaceholder()}
+            onChange={onSearch}
+          />
+          <EuiSpacer />
+          {customElementContent}
+        </EuiModalBody>
+        <EuiModalFooter>
+          <EuiButton size="s" onClick={onClose} data-test-subj="saved-elements-modal-close-button">
+            {strings.getSavedElementsModalCloseButtonLabel()}
+          </EuiButton>
+        </EuiModalFooter>
+      </EuiModal>
 
       {renderDeleteModal()}
       {renderEditModal()}

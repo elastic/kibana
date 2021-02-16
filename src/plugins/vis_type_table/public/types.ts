@@ -1,32 +1,15 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { IFieldFormat } from 'src/plugins/data/public';
+import { DatatableColumn, DatatableRow } from 'src/plugins/expressions';
 import { SchemaConfig } from 'src/plugins/visualizations/public';
-
-export enum AggTypes {
-  SUM = 'sum',
-  AVG = 'avg',
-  MIN = 'min',
-  MAX = 'max',
-  COUNT = 'count',
-}
+import { TableVisParams } from '../common';
 
 export interface Dimensions {
   buckets: SchemaConfig[];
@@ -55,27 +38,37 @@ export interface TableVisUseUiStateProps {
   setColumnsWidth: (column: ColumnWidthData) => void;
 }
 
-export interface TableVisParams {
-  perPage: number | '';
-  showPartialRows: boolean;
-  showMetricsAtAllLevels: boolean;
-  showToolbar: boolean;
-  showTotal: boolean;
-  totalFunc: AggTypes;
-  percentageCol: string;
-}
-
 export interface TableVisConfig extends TableVisParams {
   title: string;
   dimensions: Dimensions;
 }
 
 export interface FormattedColumn {
-  id: string;
   title: string;
   formatter: IFieldFormat;
   formattedTotal?: string | number;
   filterable: boolean;
   sumTotal?: number;
   total?: number;
+}
+
+export interface FormattedColumns {
+  [key: string]: FormattedColumn;
+}
+
+export interface TableContext {
+  columns: DatatableColumn[];
+  rows: DatatableRow[];
+  formattedColumns: FormattedColumns;
+}
+
+export interface TableGroup {
+  table: TableContext;
+  title: string;
+}
+
+export interface TableVisData {
+  table?: TableContext;
+  tables: TableGroup[];
+  direction?: 'row' | 'column';
 }

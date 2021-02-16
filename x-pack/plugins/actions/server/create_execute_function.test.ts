@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { KibanaRequest } from 'src/core/server';
@@ -27,7 +28,7 @@ describe('execute()', () => {
     const executeFn = createExecutionEnqueuerFunction({
       taskManager: mockTaskManager,
       actionTypeRegistry,
-      isESOUsingEphemeralEncryptionKey: false,
+      isESOCanEncrypt: true,
       preconfiguredActions: [],
     });
     savedObjectsClient.get.mockResolvedValueOnce({
@@ -86,7 +87,7 @@ describe('execute()', () => {
     const executeFn = createExecutionEnqueuerFunction({
       taskManager: mockTaskManager,
       actionTypeRegistry: actionTypeRegistryMock.create(),
-      isESOUsingEphemeralEncryptionKey: false,
+      isESOCanEncrypt: true,
       preconfiguredActions: [
         {
           id: '123',
@@ -157,10 +158,10 @@ describe('execute()', () => {
     );
   });
 
-  test('throws when passing isESOUsingEphemeralEncryptionKey with true as a value', async () => {
+  test('throws when passing isESOCanEncrypt with false as a value', async () => {
     const executeFn = createExecutionEnqueuerFunction({
       taskManager: mockTaskManager,
-      isESOUsingEphemeralEncryptionKey: true,
+      isESOCanEncrypt: false,
       actionTypeRegistry: actionTypeRegistryMock.create(),
       preconfiguredActions: [],
     });
@@ -172,7 +173,7 @@ describe('execute()', () => {
         apiKey: null,
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Unable to execute action because the Encrypted Saved Objects plugin uses an ephemeral encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command."`
+      `"Unable to execute action because the Encrypted Saved Objects plugin is missing encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command."`
     );
   });
 
@@ -180,7 +181,7 @@ describe('execute()', () => {
     const mockedActionTypeRegistry = actionTypeRegistryMock.create();
     const executeFn = createExecutionEnqueuerFunction({
       taskManager: mockTaskManager,
-      isESOUsingEphemeralEncryptionKey: false,
+      isESOCanEncrypt: true,
       actionTypeRegistry: mockedActionTypeRegistry,
       preconfiguredActions: [],
     });
@@ -210,7 +211,7 @@ describe('execute()', () => {
     const mockedActionTypeRegistry = actionTypeRegistryMock.create();
     const executeFn = createExecutionEnqueuerFunction({
       taskManager: mockTaskManager,
-      isESOUsingEphemeralEncryptionKey: false,
+      isESOCanEncrypt: true,
       actionTypeRegistry: mockedActionTypeRegistry,
       preconfiguredActions: [
         {

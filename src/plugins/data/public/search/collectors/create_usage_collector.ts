@@ -1,23 +1,13 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { first } from 'rxjs/operators';
+import { UiCounterMetricType } from '@kbn/analytics';
 import { StartServicesAccessor } from '../../../../../core/public';
 import { METRIC_TYPE, UsageCollectionSetup } from '../../../../usage_collection/public';
 import { SEARCH_EVENT_TYPE, SearchUsageCollector } from './types';
@@ -31,22 +21,48 @@ export const createUsageCollector = (
     return application.currentAppId$.pipe(first()).toPromise();
   };
 
+  const getCollector = (metricType: UiCounterMetricType, eventType: SEARCH_EVENT_TYPE) => {
+    return async () => {
+      const currentApp = await getCurrentApp();
+      return usageCollection?.reportUiCounter(currentApp!, metricType, eventType);
+    };
+  };
+
   return {
-    trackQueryTimedOut: async () => {
-      const currentApp = await getCurrentApp();
-      return usageCollection?.reportUiCounter(
-        currentApp!,
-        METRIC_TYPE.LOADED,
-        SEARCH_EVENT_TYPE.QUERY_TIMED_OUT
-      );
-    },
-    trackQueriesCancelled: async () => {
-      const currentApp = await getCurrentApp();
-      return usageCollection?.reportUiCounter(
-        currentApp!,
-        METRIC_TYPE.LOADED,
-        SEARCH_EVENT_TYPE.QUERIES_CANCELLED
-      );
-    },
+    trackQueryTimedOut: getCollector(METRIC_TYPE.LOADED, SEARCH_EVENT_TYPE.QUERY_TIMED_OUT),
+    trackSessionIndicatorTourLoading: getCollector(
+      METRIC_TYPE.LOADED,
+      SEARCH_EVENT_TYPE.SESSION_INDICATOR_TOUR_LOADING
+    ),
+    trackSessionIndicatorTourRestored: getCollector(
+      METRIC_TYPE.LOADED,
+      SEARCH_EVENT_TYPE.SESSION_INDICATOR_TOUR_RESTORED
+    ),
+    trackSessionIndicatorSaveDisabled: getCollector(
+      METRIC_TYPE.LOADED,
+      SEARCH_EVENT_TYPE.SESSION_INDICATOR_SAVE_DISABLED
+    ),
+    trackSessionSentToBackground: getCollector(
+      METRIC_TYPE.CLICK,
+      SEARCH_EVENT_TYPE.SESSION_SENT_TO_BACKGROUND
+    ),
+    trackSessionSavedResults: getCollector(
+      METRIC_TYPE.CLICK,
+      SEARCH_EVENT_TYPE.SESSION_SAVED_RESULTS
+    ),
+    trackSessionViewRestored: getCollector(
+      METRIC_TYPE.CLICK,
+      SEARCH_EVENT_TYPE.SESSION_VIEW_RESTORED
+    ),
+    trackSessionIsRestored: getCollector(METRIC_TYPE.CLICK, SEARCH_EVENT_TYPE.SESSION_IS_RESTORED),
+    trackSessionReloaded: getCollector(METRIC_TYPE.CLICK, SEARCH_EVENT_TYPE.SESSION_RELOADED),
+    trackSessionExtended: getCollector(METRIC_TYPE.CLICK, SEARCH_EVENT_TYPE.SESSION_EXTENDED),
+    trackSessionCancelled: getCollector(METRIC_TYPE.CLICK, SEARCH_EVENT_TYPE.SESSION_CANCELLED),
+    trackSessionDeleted: getCollector(METRIC_TYPE.CLICK, SEARCH_EVENT_TYPE.SESSION_DELETED),
+    trackViewSessionsList: getCollector(METRIC_TYPE.CLICK, SEARCH_EVENT_TYPE.SESSION_VIEW_LIST),
+    trackSessionsListLoaded: getCollector(
+      METRIC_TYPE.LOADED,
+      SEARCH_EVENT_TYPE.SESSIONS_LIST_LOADED
+    ),
   };
 };

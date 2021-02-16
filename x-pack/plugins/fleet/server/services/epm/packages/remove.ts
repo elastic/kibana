@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { SavedObjectsClientContract } from 'src/core/server';
@@ -115,7 +116,10 @@ async function deleteAssets(
   try {
     await Promise.all(deletePromises);
   } catch (err) {
-    logger.error(err);
+    // in the rollback case, partial installs are likely, so missing assets are not an error
+    if (!savedObjectsClient.errors.isNotFoundError(err)) {
+      logger.error(err);
+    }
   }
 }
 

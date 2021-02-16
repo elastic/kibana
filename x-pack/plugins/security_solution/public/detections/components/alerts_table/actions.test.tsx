@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { get } from 'lodash/fp';
@@ -111,6 +112,7 @@ describe('alert actions', () => {
               {
                 columnHeaderType: 'not-filtered',
                 id: '@timestamp',
+                type: 'number',
                 width: 190,
               },
               {
@@ -154,7 +156,7 @@ describe('alert actions', () => {
             eventIdToNoteIds: {},
             eventType: 'all',
             excludedRowRendererIds: [],
-            expandedEvent: {},
+            expandedDetail: {},
             filters: [
               {
                 $state: {
@@ -207,6 +209,7 @@ describe('alert actions', () => {
             sort: [
               {
                 columnId: '@timestamp',
+                columnType: 'number',
                 sortDirection: 'desc',
               },
             ],

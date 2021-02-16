@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import {
@@ -40,6 +29,9 @@ export interface BrushTriggerEvent {
 }
 
 type AllSeriesAccessors = Array<[accessor: Accessor | AccessorFn, value: string | number]>;
+
+// TODO: replace when exported from elastic/charts
+const DEFAULT_SINGLE_PANEL_SM_VALUE = '__ECH_DEFAULT_SINGLE_PANEL_SM_VALUE__';
 
 /**
  * returns accessor value from string or function accessor
@@ -94,6 +86,29 @@ const getAllSplitAccessors = (
   ]);
 
 /**
+ * Gets value from small multiple accessors
+ *
+ * Only handles single small multiple accessor
+ */
+function getSplitChartValue({
+  smHorizontalAccessorValue,
+  smVerticalAccessorValue,
+}: Pick<XYChartSeriesIdentifier, 'smHorizontalAccessorValue' | 'smVerticalAccessorValue'>):
+  | string
+  | number
+  | undefined {
+  if (smHorizontalAccessorValue !== DEFAULT_SINGLE_PANEL_SM_VALUE) {
+    return smHorizontalAccessorValue;
+  }
+
+  if (smVerticalAccessorValue !== DEFAULT_SINGLE_PANEL_SM_VALUE) {
+    return smVerticalAccessorValue;
+  }
+
+  return;
+}
+
+/**
  * Reduces matching column indexes
  *
  * @param xAccessor
@@ -103,7 +118,8 @@ const getAllSplitAccessors = (
 const columnReducer = (
   xAccessor: Accessor | AccessorFn | null,
   yAccessor: Accessor | AccessorFn | null,
-  splitAccessors: AllSeriesAccessors
+  splitAccessors: AllSeriesAccessors,
+  splitChartAccessor?: Accessor | AccessorFn
 ) => (
   acc: Array<[index: number, id: string]>,
   { id }: Datatable['columns'][number],
@@ -112,6 +128,7 @@ const columnReducer = (
   if (
     (xAccessor !== null && validateAccessorId(id, xAccessor)) ||
     (yAccessor !== null && validateAccessorId(id, yAccessor)) ||
+    (splitChartAccessor !== undefined && validateAccessorId(id, splitChartAccessor)) ||
     splitAccessors.some(([accessor]) => validateAccessorId(id, accessor))
   ) {
     acc.push([index, id]);
@@ -132,13 +149,18 @@ const rowFindPredicate = (
   geometry: GeometryValue | null,
   xAccessor: Accessor | AccessorFn | null,
   yAccessor: Accessor | AccessorFn | null,
-  splitAccessors: AllSeriesAccessors
+  splitAccessors: AllSeriesAccessors,
+  splitChartAccessor?: Accessor | AccessorFn,
+  splitChartValue?: string | number
 ) => (row: Datatable['rows'][number]): boolean =>
   (geometry === null ||
     (xAccessor !== null &&
       getAccessorValue(row, xAccessor) === geometry.x &&
       yAccessor !== null &&
-      getAccessorValue(row, yAccessor) === geometry.y)) &&
+      getAccessorValue(row, yAccessor) === geometry.y &&
+      (splitChartAccessor === undefined ||
+        (splitChartValue !== undefined &&
+          getAccessorValue(row, splitChartAccessor) === splitChartValue)))) &&
   [...splitAccessors].every(([accessor, value]) => getAccessorValue(row, accessor) === value);
 
 /**
@@ -153,19 +175,28 @@ export const getFilterFromChartClickEventFn = (
   table: Datatable,
   xAccessor: Accessor | AccessorFn,
   splitSeriesAccessorFnMap?: Map<string | number, AccessorFn>,
+  splitChartAccessor?: Accessor | AccessorFn,
   negate: boolean = false
 ) => (points: Array<[GeometryValue, XYChartSeriesIdentifier]>): ClickTriggerEvent => {
   const data: ValueClickContext['data']['data'] = [];
 
   points.forEach((point) => {
     const [geometry, { yAccessor, splitAccessors }] = point;
+    const splitChartValue = getSplitChartValue(point[1]);
     const allSplitAccessors = getAllSplitAccessors(splitAccessors, splitSeriesAccessorFnMap);
     const columns = table.columns.reduce<Array<[index: number, id: string]>>(
-      columnReducer(xAccessor, yAccessor, allSplitAccessors),
+      columnReducer(xAccessor, yAccessor, allSplitAccessors, splitChartAccessor),
       []
     );
     const row = table.rows.findIndex(
-      rowFindPredicate(geometry, xAccessor, yAccessor, allSplitAccessors)
+      rowFindPredicate(
+        geometry,
+        xAccessor,
+        yAccessor,
+        allSplitAccessors,
+        splitChartAccessor,
+        splitChartValue
+      )
     );
     const newData = columns.map(([column, id]) => ({
       table,
@@ -190,16 +221,20 @@ export const getFilterFromChartClickEventFn = (
  * Helper function to get filter action event from series
  */
 export const getFilterFromSeriesFn = (table: Datatable) => (
-  { splitAccessors }: XYChartSeriesIdentifier,
+  { splitAccessors, ...rest }: XYChartSeriesIdentifier,
   splitSeriesAccessorFnMap?: Map<string | number, AccessorFn>,
+  splitChartAccessor?: Accessor | AccessorFn,
   negate = false
 ): ClickTriggerEvent => {
+  const splitChartValue = getSplitChartValue(rest);
   const allSplitAccessors = getAllSplitAccessors(splitAccessors, splitSeriesAccessorFnMap);
   const columns = table.columns.reduce<Array<[index: number, id: string]>>(
-    columnReducer(null, null, allSplitAccessors),
+    columnReducer(null, null, allSplitAccessors, splitChartAccessor),
     []
   );
-  const row = table.rows.findIndex(rowFindPredicate(null, null, null, allSplitAccessors));
+  const row = table.rows.findIndex(
+    rowFindPredicate(null, null, null, allSplitAccessors, splitChartAccessor, splitChartValue)
+  );
   const data: ValueClickContext['data']['data'] = columns.map(([column, id]) => ({
     table,
     column,

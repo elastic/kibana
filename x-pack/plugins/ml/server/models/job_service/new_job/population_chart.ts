@@ -1,12 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { get } from 'lodash';
 import { IScopedClusterClient } from 'kibana/server';
-import { AggFieldNamePair, EVENT_RATE_FIELD_ID } from '../../../../common/types/fields';
+import {
+  AggFieldNamePair,
+  EVENT_RATE_FIELD_ID,
+  RuntimeMappings,
+} from '../../../../common/types/fields';
 import { ML_MEDIAN_PERCENTS } from '../../../../common/util/job_utils';
 
 const OVER_FIELD_EXAMPLES_COUNT = 40;
@@ -23,7 +28,7 @@ interface Result {
   values: Thing[];
 }
 
-interface ProcessedResults {
+export interface ProcessedResults {
   success: boolean;
   results: Record<number, Result[]>;
   totalResults: number;
@@ -38,7 +43,8 @@ export function newJobPopulationChartProvider({ asCurrentUser }: IScopedClusterC
     intervalMs: number,
     query: object,
     aggFieldNamePairs: AggFieldNamePair[],
-    splitFieldName: string | null
+    splitFieldName: string | null,
+    runtimeMappings: RuntimeMappings | undefined
   ) {
     const json: object = getPopulationSearchJsonFromConfig(
       indexPatternTitle,
@@ -48,7 +54,8 @@ export function newJobPopulationChartProvider({ asCurrentUser }: IScopedClusterC
       intervalMs,
       query,
       aggFieldNamePairs,
-      splitFieldName
+      splitFieldName,
+      runtimeMappings
     );
 
     const { body } = await asCurrentUser.search(json);
@@ -130,7 +137,8 @@ function getPopulationSearchJsonFromConfig(
   intervalMs: number,
   query: any,
   aggFieldNamePairs: AggFieldNamePair[],
-  splitFieldName: string | null
+  splitFieldName: string | null,
+  runtimeMappings: RuntimeMappings | undefined
 ): object {
   const json = {
     index: indexPatternTitle,
@@ -152,6 +160,7 @@ function getPopulationSearchJsonFromConfig(
           aggs: {},
         },
       },
+      ...(runtimeMappings !== undefined ? { runtime_mappings: runtimeMappings } : {}),
     },
   };
 
@@ -236,5 +245,6 @@ function getPopulationSearchJsonFromConfig(
   } else {
     json.body.aggs.times.aggs = aggs;
   }
+
   return json;
 }

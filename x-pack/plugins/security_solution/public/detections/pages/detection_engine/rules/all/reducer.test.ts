@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { FilterOptions, PaginationOptions } from '../../../../containers/detection_engine/rules';
 
 import { Action, State, allRulesReducer } from './reducer';
@@ -14,6 +16,9 @@ const initialState: State = {
     filter: '',
     sortField: 'enabled',
     sortOrder: 'desc',
+    tags: [],
+    showCustomRules: false,
+    showElasticRules: false,
   },
   loadingRuleIds: [],
   loadingRulesAction: null,
@@ -193,6 +198,9 @@ describe('allRulesReducer', () => {
         filter: 'host.name:*',
         sortField: 'enabled',
         sortOrder: 'desc',
+        tags: [],
+        showCustomRules: false,
+        showElasticRules: false,
       };
       const { filterOptions, pagination } = reducer(initialState, {
         type: 'updateFilterOptions',

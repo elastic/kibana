@@ -57,3 +57,15 @@
     }
   }
 }
+
+{
+  "type": "doc",
+  "value": {
+    "index": "lens_regular_data",
+    "id": "1",
+    "source": {
+      "@timestamp": "2015-09-20T02:00:00.000Z",
+      "bytes": 16788
+    }
+  }
+}

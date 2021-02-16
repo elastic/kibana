@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { EuiLink } from '@elastic/eui';
 import React from 'react';
 import { APMQueryParams } from '../url_helpers';
@@ -17,18 +19,28 @@ const persistedFilters: Array<keyof APMQueryParams> = [
   'latencyAggregationType',
 ];
 
-export function useServiceOrTransactionsOverviewHref(serviceName: string) {
-  return useAPMHref(`/services/${serviceName}`, persistedFilters);
+export function useServiceOrTransactionsOverviewHref(
+  serviceName: string,
+  environment?: string
+) {
+  const query = environment ? { environment } : {};
+  return useAPMHref({
+    path: `/services/${serviceName}`,
+    persistedFilters,
+    query,
+  });
 }
 
 interface Props extends APMLinkExtendProps {
   serviceName: string;
+  environment?: string;
 }
 
 export function ServiceOrTransactionsOverviewLink({
   serviceName,
+  environment,
   ...rest
 }: Props) {
-  const href = useServiceOrTransactionsOverviewHref(serviceName);
+  const href = useServiceOrTransactionsOverviewHref(serviceName, environment);
   return <EuiLink href={href} {...rest} />;
 }

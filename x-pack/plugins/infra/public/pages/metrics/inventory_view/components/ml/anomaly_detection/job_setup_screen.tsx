@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-
+import { debounce } from 'lodash';
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { EuiForm, EuiDescribedFormGroup, EuiFormRow } from '@elastic/eui';
 import { EuiText, EuiSpacer } from '@elastic/eui';
@@ -21,6 +22,8 @@ import { useMetricK8sModuleContext } from '../../../../../../containers/ml/modul
 import { useMetricHostsModuleContext } from '../../../../../../containers/ml/modules/metrics_hosts/module';
 import { FixedDatePicker } from '../../../../../../components/fixed_datepicker';
 import { DEFAULT_K8S_PARTITION_FIELD } from '../../../../../../containers/ml/modules/metrics_k8s/module_descriptor';
+import { MetricsExplorerKueryBar } from '../../../../metrics_explorer/components/kuery_bar';
+import { convertKueryToElasticSearchQuery } from '../../../../../../utils/kuery';
 
 interface Props {
   jobType: 'hosts' | 'kubernetes';
@@ -35,6 +38,8 @@ export const JobSetupScreen = (props: Props) => {
   const [partitionField, setPartitionField] = useState<string[] | null>(null);
   const h = useMetricHostsModuleContext();
   const k = useMetricK8sModuleContext();
+  const [filter, setFilter] = useState<string>('');
+  const [filterQuery, setFilterQuery] = useState<string>('');
   const { createDerivedIndexPattern } = useSourceViaHttp({
     sourceId: 'default',
     type: 'metrics',
@@ -88,7 +93,7 @@ export const JobSetupScreen = (props: Props) => {
         indicies,
         moment(startDate).toDate().getTime(),
         undefined,
-        { type: 'includeAll' },
+        filterQuery,
         partitionField ? partitionField[0] : undefined
       );
     } else {
@@ -96,11 +101,30 @@ export const JobSetupScreen = (props: Props) => {
         indicies,
         moment(startDate).toDate().getTime(),
         undefined,
-        { type: 'includeAll' },
+        filterQuery,
         partitionField ? partitionField[0] : undefined
       );
     }
-  }, [cleanUpAndSetUpModule, setUpModule, hasSummaries, indicies, partitionField, startDate]);
+  }, [
+    cleanUpAndSetUpModule,
+    filterQuery,
+    setUpModule,
+    hasSummaries,
+    indicies,
+    partitionField,
+    startDate,
+  ]);
+
+  const onFilterChange = useCallback(
+    (f: string) => {
+      setFilter(f || '');
+      setFilterQuery(convertKueryToElasticSearchQuery(f, derivedIndexPattern) || '');
+    },
+    [derivedIndexPattern]
+  );
+
+  /* eslint-disable-next-line react-hooks/exhaustive-deps */
+  const debouncedOnFilterChange = useCallback(debounce(onFilterChange, 500), [onFilterChange]);
 
   const onPartitionFieldChange = useCallback((value: Array<{ label: string }>) => {
     setPartitionField(value.map((v) => v.label));
@@ -246,6 +270,40 @@ export const JobSetupScreen = (props: Props) => {
                       .map((f) => ({ label: f.name }))}
                     onChange={onPartitionFieldChange}
                     isClearable={true}
+                  />
+                </EuiFormRow>
+              </EuiDescribedFormGroup>
+
+              <EuiDescribedFormGroup
+                title={
+                  <h3>
+                    <FormattedMessage
+                      id="xpack.infra.ml.steps.setupProcess.filter.title"
+                      defaultMessage="Filter"
+                    />
+                  </h3>
+                }
+                description={
+                  <FormattedMessage
+                    id="xpack.infra.ml.steps.setupProcess.filter.description"
+                    defaultMessage="By default, machine learning jobs analyze all of your metric data."
+                  />
+                }
+              >
+                <EuiFormRow
+                  display="rowCompressed"
+                  label={
+                    <FormattedMessage
+                      id="xpack.infra.ml.steps.setupProcess.filter.label"
+                      defaultMessage="Filter (optional)"
+                    />
+                  }
+                >
+                  <MetricsExplorerKueryBar
+                    derivedIndexPattern={derivedIndexPattern}
+                    onSubmit={onFilterChange}
+                    onChange={debouncedOnFilterChange}
+                    value={filter}
                   />
                 </EuiFormRow>
               </EuiDescribedFormGroup>

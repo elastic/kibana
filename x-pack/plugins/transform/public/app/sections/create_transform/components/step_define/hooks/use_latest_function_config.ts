@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { useCallback, useMemo, useState } from 'react';
@@ -18,14 +19,10 @@ import { useAppDependencies } from '../../../../../app_dependencies';
  * Latest function config mapper between API and UI
  */
 export const latestConfigMapper = {
-  toAPIConfig(uiConfig: LatestFunctionConfigUI): LatestFunctionConfig | undefined {
-    if (uiConfig.sort === undefined || !uiConfig.unique_key?.length) {
-      return;
-    }
-
+  toAPIConfig(uiConfig: LatestFunctionConfigUI): LatestFunctionConfig {
     return {
-      unique_key: uiConfig.unique_key.map((v) => v.value!),
-      sort: uiConfig.sort.value!,
+      unique_key: uiConfig.unique_key?.length ? uiConfig.unique_key.map((v) => v.value!) : [],
+      sort: uiConfig.sort?.value !== undefined ? uiConfig.sort.value! : '',
     };
   },
   toUIConfig() {},
@@ -56,7 +53,8 @@ function getOptions(
     }));
 
   const sortFieldOptions: Array<EuiComboBoxOptionOption<string>> = indexPattern.fields
-    .filter((v) => !ignoreFieldNames.has(v.name) && v.sortable)
+    // The backend API for `latest` allows all field types for sort but the UI will be limited to `date`.
+    .filter((v) => !ignoreFieldNames.has(v.name) && v.sortable && v.type === 'date')
     .map((v) => ({
       label: v.displayName,
       value: v.name,
@@ -69,7 +67,8 @@ function getOptions(
  * Validates latest function configuration
  */
 export function validateLatestConfig(config?: LatestFunctionConfig) {
-  const isValid: boolean = !!config?.unique_key?.length && config?.sort !== undefined;
+  const isValid: boolean =
+    !!config?.unique_key?.length && typeof config?.sort === 'string' && config?.sort.length > 0;
   return {
     isValid,
     ...(isValid

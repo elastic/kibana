@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -30,6 +31,8 @@ const typeToFn: Record<string, string> = {
   sum: 'aggSum',
   median: 'aggMedian',
 };
+
+const supportedTypes = ['number', 'histogram'];
 
 function buildMetricOperation<T extends MetricColumn<string>>({
   type,
@@ -60,7 +63,7 @@ function buildMetricOperation<T extends MetricColumn<string>>({
     timeScalingMode: optionalTimeScaling ? 'optional' : undefined,
     getPossibleOperationForField: ({ aggregationRestrictions, aggregatable, type: fieldType }) => {
       if (
-        fieldType === 'number' &&
+        supportedTypes.includes(fieldType) &&
         aggregatable &&
         (!aggregationRestrictions || aggregationRestrictions[type])
       ) {
@@ -76,7 +79,7 @@ function buildMetricOperation<T extends MetricColumn<string>>({
 
       return Boolean(
         newField &&
-          newField.type === 'number' &&
+          supportedTypes.includes(newField.type) &&
           newField.aggregatable &&
           (!newField.aggregationRestrictions || newField.aggregationRestrictions![type])
       );
@@ -180,6 +183,7 @@ export const sumOperation = buildMetricOperation<SumIndexPatternColumn>({
 
 export const medianOperation = buildMetricOperation<MedianIndexPatternColumn>({
   type: 'median',
+  priority: 3,
   displayName: i18n.translate('xpack.lens.indexPattern.median', {
     defaultMessage: 'Median',
   }),

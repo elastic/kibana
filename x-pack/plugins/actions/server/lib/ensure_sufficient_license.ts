@@ -1,13 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { ActionType } from '../types';
 import { LICENSE_TYPE } from '../../../licensing/common/types';
 import { ServerLogActionTypeId, IndexActionTypeId } from '../builtin_action_types';
-import { CASE_ACTION_TYPE_ID } from '../../../case/server';
 import { ActionTypeConfig, ActionTypeSecrets, ActionTypeParams } from '../types';
+
+const CASE_ACTION_TYPE_ID = '.case';
 
 const ACTIONS_SCOPED_WITHIN_STACK = new Set([
   ServerLogActionTypeId,

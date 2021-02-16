@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { memo, useCallback } from 'react';
@@ -37,7 +38,9 @@ const AlertCommentEventComponent: React.FC<Props> = ({ alert }) => {
   return ruleId != null && ruleName != null ? (
     <>
       {`${i18n.ALERT_COMMENT_LABEL_TITLE} `}
-      <EuiLink onClick={onLinkClick}>{ruleName}</EuiLink>
+      <EuiLink onClick={onLinkClick} data-test-subj={`alert-rule-link-${alert?._id ?? 'deleted'}`}>
+        {ruleName}
+      </EuiLink>
     </>
   ) : (
     <>{i18n.ALERT_RULE_DELETED_COMMENT_LABEL}</>

@@ -1,10 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { SavedObjectsClientContract, KibanaRequest } from 'kibana/server';
+import { ElasticsearchClient, SavedObjectsClientContract, KibanaRequest } from 'kibana/server';
 import { AgentStatus, Agent, EsAssetReference } from '../types';
 import * as settingsService from './settings';
 import { getAgent, listAgents } from './agents';
@@ -48,12 +49,17 @@ export interface AgentService {
    */
   authenticateAgentWithAccessToken(
     soClient: SavedObjectsClientContract,
+    esClient: ElasticsearchClient,
     request: KibanaRequest
   ): Promise<Agent>;
   /**
    * Return the status by the Agent's id
    */
-  getAgentStatusById(soClient: SavedObjectsClientContract, agentId: string): Promise<AgentStatus>;
+  getAgentStatusById(
+    soClient: SavedObjectsClientContract,
+    esClient: ElasticsearchClient,
+    agentId: string
+  ): Promise<AgentStatus>;
   /**
    * List agents
    */

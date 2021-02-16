@@ -1,16 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-import React, { useCallback, useReducer, useMemo, useState, useEffect } from 'react';
+
+import React, { useReducer, useMemo, useState, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiTitle, EuiFlyoutHeader, EuiFlyout, EuiFlyoutBody, EuiPortal } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { isEmpty } from 'lodash';
 import {
   ActionTypeRegistryContract,
   Alert,
   AlertTypeRegistryContract,
+  AlertTypeParams,
   AlertUpdates,
 } from '../../../types';
 import { AlertForm, getAlertErrors, isValidAlert } from './alert_form';
@@ -18,10 +22,12 @@ import { alertReducer, InitialAlert, InitialAlertReducer } from './alert_reducer
 import { createAlert } from '../../lib/alert_api';
 import { HealthCheck } from '../../components/health_check';
 import { ConfirmAlertSave } from './confirm_alert_save';
+import { ConfirmAlertClose } from './confirm_alert_close';
 import { hasShowActionsCapability } from '../../lib/capabilities';
 import AlertAddFooter from './alert_add_footer';
 import { HealthContextProvider } from '../../context/health_context';
 import { useKibana } from '../../../common/lib/kibana';
+import { hasAlertChanged, haveAlertParamsChanged } from './has_alert_changed';
 import { getAlertWithInvalidatedFields } from '../../lib/value_validators';
 
 export interface AlertAddProps<MetaData = Record<string, any>> {
@@ -66,8 +72,10 @@ const AlertAdd = ({
   const [{ alert }, dispatch] = useReducer(alertReducer as InitialAlertReducer, {
     alert: initialAlert,
   });
+  const [initialAlertParams, setInitialAlertParams] = useState<AlertTypeParams>({});
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [isConfirmAlertSaveModalOpen, setIsConfirmAlertSaveModalOpen] = useState<boolean>(false);
+  const [isConfirmAlertCloseModalOpen, setIsConfirmAlertCloseModalOpen] = useState<boolean>(false);
 
   const setAlert = (value: InitialAlert) => {
     dispatch({ command: { type: 'setAlert' }, payload: { key: 'alert', value } });
@@ -91,16 +99,35 @@ const AlertAdd = ({
     }
   }, [alertTypeId]);
 
-  const closeFlyout = useCallback(() => {
-    setAlert(initialAlert);
-    onClose();
-  }, [initialAlert, onClose]);
+  useEffect(() => {
+    if (isEmpty(alert.params) && !isEmpty(initialAlertParams)) {
+      // alert params are explicitly cleared when the alert type is cleared.
+      // clear the "initial" params in order to capture the
+      // default when a new alert type is selected
+      setInitialAlertParams({});
+    } else if (isEmpty(initialAlertParams)) {
+      // captures the first change to the alert params,
+      // when consumers set a default value for the alert params
+      setInitialAlertParams(alert.params);
+    }
+  }, [alert.params, initialAlertParams, setInitialAlertParams]);
+
+  const checkForChangesAndCloseFlyout = () => {
+    if (
+      hasAlertChanged(alert, initialAlert, false) ||
+      haveAlertParamsChanged(alert.params, initialAlertParams)
+    ) {
+      setIsConfirmAlertCloseModalOpen(true);
+    } else {
+      onClose();
+    }
+  };
 
   const saveAlertAndCloseFlyout = async () => {
     const savedAlert = await onSaveAlert();
     setIsSaving(false);
     if (savedAlert) {
-      closeFlyout();
+      onClose();
       if (reloadAlerts) {
         reloadAlerts();
       }
@@ -142,7 +169,7 @@ const AlertAdd = ({
   return (
     <EuiPortal>
       <EuiFlyout
-        onClose={closeFlyout}
+        onClose={checkForChangesAndCloseFlyout}
         aria-labelledby="flyoutAlertAddTitle"
         size="m"
         maxWidth={620}
@@ -198,7 +225,7 @@ const AlertAdd = ({
                   await saveAlertAndCloseFlyout();
                 }
               }}
-              onCancel={closeFlyout}
+              onCancel={checkForChangesAndCloseFlyout}
             />
           </HealthCheck>
         </HealthContextProvider>
@@ -211,6 +238,17 @@ const AlertAdd = ({
             onCancel={() => {
               setIsSaving(false);
               setIsConfirmAlertSaveModalOpen(false);
+            }}
+          />
+        )}
+        {isConfirmAlertCloseModalOpen && (
+          <ConfirmAlertClose
+            onConfirm={() => {
+              setIsConfirmAlertCloseModalOpen(false);
+              onClose();
+            }}
+            onCancel={() => {
+              setIsConfirmAlertCloseModalOpen(false);
             }}
           />
         )}

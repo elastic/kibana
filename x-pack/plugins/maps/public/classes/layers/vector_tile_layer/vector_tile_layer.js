@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { TileLayer } from '../tile_layer/tile_layer';
@@ -44,7 +45,7 @@ export class VectorTileLayer extends TileLayer {
     return prevMeta.tileLayerId === nextMeta.tileLayerId;
   }
 
-  async syncData({ startLoading, stopLoading, onLoadError, dataFilters }) {
+  async syncData({ startLoading, stopLoading, onLoadError }) {
     const nextMeta = { tileLayerId: this.getSource().getTileLayerId() };
     const canSkipSync = this._canSkipSync({
       prevDataRequest: this.getSourceDataRequest(),
@@ -56,14 +57,14 @@ export class VectorTileLayer extends TileLayer {
 
     const requestToken = Symbol(`layer-source-refresh:${this.getId()} - source`);
     try {
-      startLoading(SOURCE_DATA_REQUEST_ID, requestToken, dataFilters);
+      startLoading(SOURCE_DATA_REQUEST_ID, requestToken, nextMeta);
       const styleAndSprites = await this.getSource().getVectorStyleSheetAndSpriteMeta(isRetina());
       const spriteSheetImageData = await loadSpriteSheetImageData(styleAndSprites.spriteMeta.png);
       const data = {
         ...styleAndSprites,
         spriteSheetImageData,
       };
-      stopLoading(SOURCE_DATA_REQUEST_ID, requestToken, data, nextMeta);
+      stopLoading(SOURCE_DATA_REQUEST_ID, requestToken, data);
     } catch (error) {
       onLoadError(SOURCE_DATA_REQUEST_ID, requestToken, error.message);
     }

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { checkClusterSettings } from '.';
@@ -57,7 +58,6 @@ describe('Elasticsearch Cluster Settings', () => {
       reason: {
         context: `cluster ${source}`,
         data: '-1',
-        isCloudEnabled: false,
         property: 'xpack.monitoring.collection.interval',
       },
     });
@@ -87,7 +87,6 @@ describe('Elasticsearch Cluster Settings', () => {
       reason: {
         context: `cluster ${source}`,
         data: 'Remote exporters indicate a possible misconfiguration: myCoolExporter',
-        isCloudEnabled: false,
         property: 'xpack.monitoring.exporters',
       },
     });
@@ -117,7 +116,6 @@ describe('Elasticsearch Cluster Settings', () => {
       reason: {
         context: `cluster ${source}`,
         data: 'false',
-        isCloudEnabled: false,
         property: 'xpack.monitoring.enabled',
       },
     });

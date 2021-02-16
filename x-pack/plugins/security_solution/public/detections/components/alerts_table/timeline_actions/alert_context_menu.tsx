@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
@@ -99,7 +100,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
     setPopover(false);
   }, []);
   const [exceptionModalType, setOpenAddExceptionModal] = useState<ExceptionListType | null>(null);
-  const [{ canUserCRUD, hasIndexWrite, hasIndexUpdateDelete }] = useUserData();
+  const [{ canUserCRUD, hasIndexWrite, hasIndexMaintenance, hasIndexUpdateDelete }] = useUserData();
 
   const isEndpointAlert = useMemo((): boolean => {
     if (ecsRowData == null) {
@@ -215,7 +216,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
       data-test-subj="open-alert-status"
       id={FILTER_OPEN}
       onClick={openAlertActionOnClick}
-      disabled={!canUserCRUD || !hasIndexUpdateDelete}
+      disabled={!hasIndexUpdateDelete && !hasIndexMaintenance}
     >
       <EuiText size="m">{i18n.ACTION_OPEN_ALERT}</EuiText>
     </EuiContextMenuItem>
@@ -248,7 +249,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
       data-test-subj="close-alert-status"
       id={FILTER_CLOSED}
       onClick={closeAlertActionClick}
-      disabled={!canUserCRUD || !hasIndexUpdateDelete}
+      disabled={!hasIndexUpdateDelete && !hasIndexMaintenance}
     >
       <EuiText size="m">{i18n.ACTION_CLOSE_ALERT}</EuiText>
     </EuiContextMenuItem>

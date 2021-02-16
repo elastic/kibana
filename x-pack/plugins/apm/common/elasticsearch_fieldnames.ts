@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 export const CLOUD = 'cloud';
@@ -108,7 +109,7 @@ export const LABEL_NAME = 'labels.name';
 
 export const HOST = 'host';
 export const HOST_NAME = 'host.hostname';
-export const CONTAINER = 'container.id';
+export const HOST_OS_PLATFORM = 'host.os.platform';
 export const CONTAINER_ID = 'container.id';
 export const KUBERNETES = 'kubernetes';
 export const POD_NAME = 'kubernetes.pod.name';

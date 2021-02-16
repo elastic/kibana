@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { AuthenticatedUser } from '../../../security/common/model';
-import { RequestHandlerContext } from '../../../../../src/core/server';
 export { ConfigType as Configuration } from '../config';
+import type { SecuritySolutionRequestHandlerContext } from '../types';
 
 import { FrameworkAdapter, FrameworkRequest } from './framework';
 import { Hosts } from './hosts';
@@ -36,7 +37,7 @@ export interface AppBackendLibs extends AppDomainLibs {
 
 export interface SiemContext {
   req: FrameworkRequest;
-  context: RequestHandlerContext;
+  context: SecuritySolutionRequestHandlerContext;
   user: AuthenticatedUser | null;
 }
 

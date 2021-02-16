@@ -1,10 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { IRouter } from 'kibana/server';
 import {
   DeleteTrustedAppsRequestSchema,
   GetTrustedAppsRequestSchema,
@@ -23,9 +23,10 @@ import {
   getTrustedAppsSummaryRouteHandler,
 } from './handlers';
 import { EndpointAppContext } from '../../types';
+import { SecuritySolutionPluginRouter } from '../../../types';
 
 export const registerTrustedAppsRoutes = (
-  router: IRouter,
+  router: SecuritySolutionPluginRouter,
   endpointAppContext: EndpointAppContext
 ) => {
   // DELETE one

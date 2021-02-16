@@ -1,14 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import './dimension_editor.scss';
 import _ from 'lodash';
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFormRow, EuiSpacer, EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
+import {
+  EuiFormRow,
+  EuiFormRowProps,
+  EuiSpacer,
+  EuiComboBox,
+  EuiComboBoxOptionOption,
+} from '@elastic/eui';
 import type { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from 'kibana/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import type { DataPublicPluginStart } from 'src/plugins/data/public';
@@ -40,6 +47,7 @@ export interface ReferenceEditorProps {
   currentIndexPattern: IndexPattern;
   existingFields: IndexPatternPrivateState['existingFields'];
   dateRange: DateRange;
+  labelAppend?: EuiFormRowProps['labelAppend'];
 
   // Services
   uiSettings: IUiSettingsClient;
@@ -59,6 +67,7 @@ export function ReferenceEditor(props: ReferenceEditorProps) {
     validation,
     selectionStyle,
     dateRange,
+    labelAppend,
     ...services
   } = props;
 
@@ -183,19 +192,39 @@ export function ReferenceEditor(props: ReferenceEditorProps) {
     return;
   }
 
-  const selectedOption = incompleteInfo?.operationType
-    ? [functionOptions.find(({ value }) => value === incompleteInfo.operationType)!]
+  const selectedOption = incompleteOperation
+    ? [functionOptions.find(({ value }) => value === incompleteOperation)!]
     : column
     ? [functionOptions.find(({ value }) => value === column.operationType)!]
     : [];
 
   // If the operationType is incomplete, the user needs to select a field- so
   // the function is marked as valid.
-  const showOperationInvalid = !column && !Boolean(incompleteInfo?.operationType);
+  const showOperationInvalid = !column && !Boolean(incompleteOperation);
   // The field is invalid if the operation has been updated without a field,
   // or if we are in a field-only mode but empty state
-  const showFieldInvalid =
-    Boolean(incompleteInfo?.operationType) || (selectionStyle === 'field' && !column);
+  const showFieldInvalid = Boolean(incompleteOperation) || (selectionStyle === 'field' && !column);
+  // Check if the field still exists to protect from changes
+  const showFieldMissingInvalid = !currentIndexPattern.getFieldByName(
+    incompleteField ?? (column as FieldBasedIndexPatternColumn)?.sourceField
+  );
+
+  // what about a field changing type and becoming invalid?
+  // Let's say this change makes the indexpattern without any number field but the operation was set to a numeric operation.
+  // At this point the ComboBox will crash.
+  // Therefore check if the selectedOption is in functionOptions and in case fill it in as disabled option
+  const showSelectionFunctionInvalid = Boolean(selectedOption.length && selectedOption[0] == null);
+  if (showSelectionFunctionInvalid) {
+    const selectedOperationType = incompleteOperation || column.operationType;
+    const brokenFunctionOption = {
+      label: operationPanels[selectedOperationType].displayName,
+      value: selectedOperationType,
+      className: 'lnsIndexPatternDimensionEditor__operation',
+      'data-test-subj': `lns-indexPatternDimension-${selectedOperationType} incompatible`,
+    };
+    functionOptions.push(brokenFunctionOption);
+    selectedOption[0] = brokenFunctionOption;
+  }
 
   return (
     <div id={columnId}>
@@ -208,7 +237,7 @@ export function ReferenceEditor(props: ReferenceEditorProps) {
                 defaultMessage: 'Choose a sub-function',
               })}
               fullWidth
-              isInvalid={showOperationInvalid}
+              isInvalid={showOperationInvalid || showSelectionFunctionInvalid}
             >
               <EuiComboBox
                 fullWidth
@@ -222,7 +251,7 @@ export function ReferenceEditor(props: ReferenceEditorProps) {
                   }
                 )}
                 options={functionOptions}
-                isInvalid={showOperationInvalid}
+                isInvalid={showOperationInvalid || showSelectionFunctionInvalid}
                 selectedOptions={selectedOption}
                 singleSelection={{ asPlainText: true }}
                 onChange={(choices) => {
@@ -250,10 +279,11 @@ export function ReferenceEditor(props: ReferenceEditorProps) {
               defaultMessage: 'Select a field',
             })}
             fullWidth
-            isInvalid={showFieldInvalid}
+            isInvalid={showFieldInvalid || showFieldMissingInvalid}
+            labelAppend={labelAppend}
           >
             <FieldSelect
-              fieldIsInvalid={showFieldInvalid}
+              fieldIsInvalid={showFieldInvalid || showFieldMissingInvalid}
               currentIndexPattern={currentIndexPattern}
               existingFields={existingFields}
               operationSupportMatrix={operationSupportMatrix}
@@ -263,9 +293,7 @@ export function ReferenceEditor(props: ReferenceEditorProps) {
               }
               selectedField={
                 // Allows field to be selected
-                incompleteField
-                  ? incompleteField
-                  : (column as FieldBasedIndexPatternColumn)?.sourceField
+                incompleteField ?? (column as FieldBasedIndexPatternColumn)?.sourceField
               }
               incompleteOperation={incompleteOperation}
               markAllFieldsCompatible={selectionStyle === 'field'}

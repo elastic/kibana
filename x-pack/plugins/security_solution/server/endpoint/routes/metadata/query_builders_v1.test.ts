@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { httpServerMock, loggingSystemMock } from '../../../../../../../src/core/server/mocks';
 import { kibanaRequestToMetadataListESQuery, getESQueryHostMetadataByID } from './query_builders';
 import { EndpointAppContextService } from '../../endpoint_app_context_services';
@@ -25,39 +27,24 @@ describe('query builder v1', () => {
         },
         metadataQueryStrategyV1()
       );
-      expect(query).toEqual({
-        body: {
-          query: {
-            match_all: {},
-          },
-          collapse: {
-            field: 'agent.id',
-            inner_hits: {
-              name: 'most_recent',
-              size: 1,
-              sort: [{ 'event.created': 'desc' }],
-            },
-          },
-          aggs: {
-            total: {
-              cardinality: {
-                field: 'agent.id',
-              },
-            },
-          },
-          sort: [
-            {
-              'event.created': {
-                order: 'desc',
-              },
-            },
-          ],
+
+      expect(query.body.query).toHaveProperty('match_all'); // no filtering
+      expect(query.body.collapse).toEqual({
+        field: 'agent.id',
+        inner_hits: {
+          name: 'most_recent',
+          size: 1,
+          sort: [{ 'event.created': 'desc' }],
         },
-        from: 0,
-        size: 10,
-        index: metadataIndexPattern,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } as Record<string, any>);
+      });
+      expect(query.body.aggs).toEqual({
+        total: {
+          cardinality: {
+            field: 'agent.id',
+          },
+        },
+      });
+      expect(query.index).toEqual(metadataIndexPattern);
     });
 
     it(
@@ -80,45 +67,10 @@ describe('query builder v1', () => {
             unenrolledAgentIds: [unenrolledElasticAgentId],
           }
         );
-        expect(query).toEqual({
-          body: {
-            query: {
-              bool: {
-                must_not: {
-                  terms: {
-                    'elastic.agent.id': [unenrolledElasticAgentId],
-                  },
-                },
-              },
-            },
-            collapse: {
-              field: 'agent.id',
-              inner_hits: {
-                name: 'most_recent',
-                size: 1,
-                sort: [{ 'event.created': 'desc' }],
-              },
-            },
-            aggs: {
-              total: {
-                cardinality: {
-                  field: 'agent.id',
-                },
-              },
-            },
-            sort: [
-              {
-                'event.created': {
-                  order: 'desc',
-                },
-              },
-            ],
-          },
-          from: 0,
-          size: 10,
-          index: metadataIndexPattern,
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        } as Record<string, any>);
+        expect(Object.keys(query.body.query.bool)).toEqual(['must_not']); // only filtering out unenrolled
+        expect(query.body.query.bool.must_not).toContainEqual({
+          terms: { 'elastic.agent.id': [unenrolledElasticAgentId] },
+        });
       }
     );
   });
@@ -139,59 +91,23 @@ describe('query builder v1', () => {
         },
         metadataQueryStrategyV1()
       );
-
-      expect(query).toEqual({
-        body: {
-          query: {
+      expect(query.body.query.bool.must).toHaveLength(1); // should not be any other filtering happening
+      expect(query.body.query.bool.must).toContainEqual({
+        bool: {
+          must_not: {
             bool: {
-              must: [
+              should: [
                 {
-                  bool: {
-                    must_not: {
-                      bool: {
-                        should: [
-                          {
-                            match: {
-                              'host.ip': '10.140.73.246',
-                            },
-                          },
-                        ],
-                        minimum_should_match: 1,
-                      },
-                    },
+                  match: {
+                    'host.ip': '10.140.73.246',
                   },
                 },
               ],
+              minimum_should_match: 1,
             },
           },
-          collapse: {
-            field: 'agent.id',
-            inner_hits: {
-              name: 'most_recent',
-              size: 1,
-              sort: [{ 'event.created': 'desc' }],
-            },
-          },
-          aggs: {
-            total: {
-              cardinality: {
-                field: 'agent.id',
-              },
-            },
-          },
-          sort: [
-            {
-              'event.created': {
-                order: 'desc',
-              },
-            },
-          ],
         },
-        from: 0,
-        size: 10,
-        index: metadataIndexPattern,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } as Record<string, any>);
+      });
     });
 
     it(
@@ -217,67 +133,34 @@ describe('query builder v1', () => {
           }
         );
 
-        expect(query).toEqual({
-          body: {
-            query: {
+        expect(query.body.query.bool.must.length).toBeGreaterThan(1);
+        // unenrollment filter should be there
+        expect(query.body.query.bool.must).toContainEqual({
+          bool: {
+            must_not: [
+              { terms: { 'elastic.agent.id': [unenrolledElasticAgentId] } },
+              // below is not actually necessary behavior for v1, but hard to structure the test to ignore it
+              { terms: { 'HostDetails.elastic.agent.id': [unenrolledElasticAgentId] } },
+            ],
+          },
+        });
+        // and KQL should also be there
+        expect(query.body.query.bool.must).toContainEqual({
+          bool: {
+            must_not: {
               bool: {
-                must: [
+                should: [
                   {
-                    bool: {
-                      must_not: {
-                        terms: {
-                          'elastic.agent.id': [unenrolledElasticAgentId],
-                        },
-                      },
-                    },
-                  },
-                  {
-                    bool: {
-                      must_not: {
-                        bool: {
-                          should: [
-                            {
-                              match: {
-                                'host.ip': '10.140.73.246',
-                              },
-                            },
-                          ],
-                          minimum_should_match: 1,
-                        },
-                      },
+                    match: {
+                      'host.ip': '10.140.73.246',
                     },
                   },
                 ],
+                minimum_should_match: 1,
               },
             },
-            collapse: {
-              field: 'agent.id',
-              inner_hits: {
-                name: 'most_recent',
-                size: 1,
-                sort: [{ 'event.created': 'desc' }],
-              },
-            },
-            aggs: {
-              total: {
-                cardinality: {
-                  field: 'agent.id',
-                },
-              },
-            },
-            sort: [
-              {
-                'event.created': {
-                  order: 'desc',
-                },
-              },
-            ],
           },
-          from: 0,
-          size: 10,
-          index: metadataIndexPattern,
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        } as Record<string, any>);
+        });
       }
     );
   });
@@ -287,13 +170,8 @@ describe('query builder v1', () => {
       const mockID = 'AABBCCDD-0011-2233-AA44-DEADBEEF8899';
       const query = getESQueryHostMetadataByID(mockID, metadataQueryStrategyV1());
 
-      expect(query).toEqual({
-        body: {
-          query: { match: { 'agent.id': mockID } },
-          sort: [{ 'event.created': { order: 'desc' } }],
-          size: 1,
-        },
-        index: metadataIndexPattern,
+      expect(query.body.query.bool.filter[0].bool.should).toContainEqual({
+        term: { 'agent.id': mockID },
       });
     });
   });

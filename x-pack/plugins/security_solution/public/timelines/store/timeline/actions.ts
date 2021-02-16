@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import actionCreatorFactory from 'typescript-fsa';
@@ -19,10 +20,10 @@ import { KqlMode, TimelineModel, ColumnHeaderOptions } from './model';
 import { TimelineNonEcsData } from '../../../../common/search_strategy/timeline';
 import {
   TimelineEventsType,
-  TimelineExpandedEventType,
+  TimelineExpandedDetail,
+  TimelineExpandedDetailType,
   TimelineTypeLiteral,
   RowRendererId,
-  TimelineExpandedEvent,
   TimelineTabs,
 } from '../../../../common/types/timeline';
 import { InsertTimeline } from './types';
@@ -37,12 +38,12 @@ export const addNoteToEvent = actionCreator<{ id: string; noteId: string; eventI
   'ADD_NOTE_TO_EVENT'
 );
 
-export interface ToggleExpandedEvent {
-  event?: TimelineExpandedEventType;
+export type ToggleDetailPanel = TimelineExpandedDetailType & {
   tabType?: TimelineTabs;
   timelineId: string;
-}
-export const toggleExpandedEvent = actionCreator<ToggleExpandedEvent>('TOGGLE_EXPANDED_EVENT');
+};
+
+export const toggleDetailPanel = actionCreator<ToggleDetailPanel>('TOGGLE_DETAIL_PANEL');
 
 export const upsertColumn = actionCreator<{
   column: ColumnHeaderOptions;
@@ -66,7 +67,7 @@ export interface TimelineInput {
     end: string;
   };
   excludedRowRendererIds?: RowRendererId[];
-  expandedEvent?: TimelineExpandedEvent;
+  expandedDetail?: TimelineExpandedDetail;
   filters?: Filter[];
   columns: ColumnHeaderOptions[];
   itemsPerPage?: number;

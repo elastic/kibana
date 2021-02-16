@@ -1,17 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { memo } from 'react';
-import {
-  EuiModal,
-  EuiModalBody,
-  EuiModalHeader,
-  EuiModalHeaderTitle,
-  EuiOverlayMask,
-} from '@elastic/eui';
+import { EuiModal, EuiModalBody, EuiModalHeader, EuiModalHeaderTitle } from '@elastic/eui';
 
 import { useGetUserSavedObjectPermissions } from '../../../common/lib/kibana';
 import { Case } from '../../containers/types';
@@ -33,16 +28,14 @@ const AllCasesModalComponent: React.FC<AllCasesModalProps> = ({
   const userCanCrud = userPermissions?.crud ?? false;
 
   return isModalOpen ? (
-    <EuiOverlayMask data-test-subj="all-cases-modal">
-      <EuiModal onClose={onCloseCaseModal}>
-        <EuiModalHeader>
-          <EuiModalHeaderTitle>{i18n.SELECT_CASE_TITLE}</EuiModalHeaderTitle>
-        </EuiModalHeader>
-        <EuiModalBody>
-          <AllCases onRowClick={onRowClick} userCanCrud={userCanCrud} isModal />
-        </EuiModalBody>
-      </EuiModal>
-    </EuiOverlayMask>
+    <EuiModal onClose={onCloseCaseModal} data-test-subj="all-cases-modal">
+      <EuiModalHeader>
+        <EuiModalHeaderTitle>{i18n.SELECT_CASE_TITLE}</EuiModalHeaderTitle>
+      </EuiModalHeader>
+      <EuiModalBody>
+        <AllCases onRowClick={onRowClick} userCanCrud={userCanCrud} isModal />
+      </EuiModalBody>
+    </EuiModal>
   ) : null;
 };
 

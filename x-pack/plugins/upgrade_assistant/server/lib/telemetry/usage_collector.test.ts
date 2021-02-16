@@ -1,11 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { elasticsearchServiceMock } from 'src/core/server/mocks';
 import { registerUpgradeAssistantUsageCollector } from './usage_collector';
-import { ILegacyClusterClient } from 'src/core/server';
+import { IClusterClient } from 'src/core/server';
 
 /**
  * Since these route callbacks are so thin, these serve simply as integration tests
@@ -18,15 +20,17 @@ describe('Upgrade Assistant Usage Collector', () => {
   let dependencies: any;
   let callClusterStub: any;
   let usageCollection: any;
-  let clusterClient: ILegacyClusterClient;
+  let clusterClient: IClusterClient;
 
   beforeEach(() => {
-    clusterClient = elasticsearchServiceMock.createLegacyClusterClient();
-    (clusterClient.callAsInternalUser as jest.Mock).mockResolvedValue({
-      persistent: {},
-      transient: {
-        logger: {
-          deprecation: 'WARN',
+    clusterClient = elasticsearchServiceMock.createClusterClient();
+    (clusterClient.asInternalUser.cluster.getSettings as jest.Mock).mockResolvedValue({
+      body: {
+        persistent: {},
+        transient: {
+          logger: {
+            deprecation: 'WARN',
+          },
         },
       },
     });
@@ -59,7 +63,7 @@ describe('Upgrade Assistant Usage Collector', () => {
         }),
       },
       elasticsearch: {
-        legacy: { client: clusterClient },
+        client: clusterClient,
       },
     };
   });

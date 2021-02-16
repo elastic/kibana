@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 /**
@@ -10,11 +11,11 @@
  * NOTE: These variable names MUST start with 'mock*' in order for
  * Jest to accept its use within a jest.mock()
  */
+import { mockFlashMessagesValues, mockFlashMessagesActions } from './flash_messages_logic.mock';
+import { mockHttpValues } from './http_logic.mock';
 import { mockKibanaValues } from './kibana_logic.mock';
 import { mockLicensingValues } from './licensing_logic.mock';
-import { mockHttpValues } from './http_logic.mock';
 import { mockTelemetryActions } from './telemetry_logic.mock';
-import { mockFlashMessagesValues, mockFlashMessagesActions } from './flash_messages_logic.mock';
 
 export const mockAllValues = {
   ...mockKibanaValues,
@@ -119,5 +120,30 @@ export class LogicMounter {
   // Also add unmount as a class method that can be destructured on init without becoming stale later
   public unmount = () => {
     this.unmountFn();
+  };
+
+  /**
+   * Some tests (e.g. async tests, tests that expect thrown errors) need to access
+   * listener functions directly instead of calling `SomeLogic.actions.someListener`,
+   * due to how Kea invokes/wraps action fns by design.
+   *
+   * Example usage:
+   *
+   * const { mount, getListeners } = new LogicMounter(SomeLogic);
+   *
+   * it('some test', async () => {
+   *   mount();
+   *   const { someListener } = getListeners({ values: { someMockValue: false } });
+   *
+   *   const mockBreakpoint = jest.fn();
+   *   await someListener({ someMockArgument: true }, mockBreakpoint);
+   * });
+   */
+  public getListeners = (listenersArgs: object = {}) => {
+    const { listeners } = this.logicFile.inputs[0];
+
+    return typeof listeners === 'function'
+      ? (listeners as Function)(listenersArgs) // e.g., listeners({ values, actions, props }) => ({ ... })
+      : listeners; // handles simpler logic files that just define listeners: { ... }
   };
 }

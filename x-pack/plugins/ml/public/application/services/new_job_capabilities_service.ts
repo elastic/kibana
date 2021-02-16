@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -85,7 +86,7 @@ class NewJobCapsService {
   }
 
   public get categoryFields(): Field[] {
-    return this._fields.filter((f) => categoryFieldTypes.includes(f.type));
+    return filterCategoryFields(this._fields);
   }
 
   public async initializeFromIndexPattern(
@@ -249,6 +250,10 @@ function processTextAndKeywordFields(fields: Field[]) {
   );
 
   return { fieldsPreferringKeyword, fieldsPreferringText };
+}
+
+export function filterCategoryFields(fields: Field[]) {
+  return fields.filter((f) => categoryFieldTypes.includes(f.type));
 }
 
 export const newJobCapsService = new NewJobCapsService();

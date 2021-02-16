@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { mount } from 'enzyme';
@@ -11,7 +12,7 @@ import useResizeObserver from 'use-resize-observer/polyfilled';
 import { DragDropContextWrapper } from '../../../common/components/drag_and_drop/drag_drop_context_wrapper';
 import '../../../common/mock/match_media';
 import { mockBrowserFields, mockDocValueFields } from '../../../common/containers/source/mock';
-
+import { TimelineId } from '../../../../common/types/timeline';
 import { mockIndexNames, mockIndexPattern, TestProviders } from '../../../common/mock';
 
 import { StatefulTimeline, Props as StatefulTimelineOwnProps } from './index';
@@ -54,7 +55,7 @@ jest.mock('../../../common/containers/sourcerer', () => {
 });
 describe('StatefulTimeline', () => {
   const props: StatefulTimelineOwnProps = {
-    timelineId: 'timeline-test',
+    timelineId: TimelineId.test,
   };
 
   beforeEach(() => {
@@ -90,7 +91,7 @@ describe('StatefulTimeline', () => {
     );
     expect(
       wrapper
-        .find(`[data-timeline-id="timeline-test"].${SELECTOR_TIMELINE_GLOBAL_CONTAINER}`)
+        .find(`[data-timeline-id="test"].${SELECTOR_TIMELINE_GLOBAL_CONTAINER}`)
         .first()
         .exists()
     ).toEqual(true);

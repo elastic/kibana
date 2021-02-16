@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 jest.mock('./api_keys_grid', () => ({
@@ -43,7 +44,7 @@ describe('apiKeysManagementApp', () => {
     expect(setBreadcrumbs).toHaveBeenCalledWith([{ href: '/', text: 'API Keys' }]);
     expect(container).toMatchInlineSnapshot(`
       <div>
-        Page: {"notifications":{"toasts":{}},"docLinks":{"esDocBasePath":"https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/"},"apiKeysAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{},"externalUrl":{}}}}
+        Page: {"notifications":{"toasts":{}},"apiKeysAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{},"externalUrl":{}}}}
       </div>
     `);
 

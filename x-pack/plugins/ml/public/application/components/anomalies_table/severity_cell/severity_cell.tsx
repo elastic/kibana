@@ -1,13 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FC, memo } from 'react';
 import { EuiHealth, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { MULTI_BUCKET_IMPACT } from '../../../../../common/constants/multi_bucket_impact';
-import { getSeverityColor } from '../../../../../common/util/anomaly_utils';
+import {
+  getSeverityColor,
+  getFormattedSeverityScore,
+} from '../../../../../common/util/anomaly_utils';
 
 interface SeverityCellProps {
   /**
@@ -26,7 +30,7 @@ interface SeverityCellProps {
  * Renders anomaly severity score with single or multi-bucket impact marker.
  */
 export const SeverityCell: FC<SeverityCellProps> = memo(({ score, multiBucketImpact }) => {
-  const severity = score >= 1 ? Math.floor(score) : '< 1';
+  const severity = getFormattedSeverityScore(score);
   const color = getSeverityColor(score);
   const isMultiBucket = multiBucketImpact >= MULTI_BUCKET_IMPACT.MEDIUM;
   return isMultiBucket ? (

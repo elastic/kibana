@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React, { useMemo, useCallback } from 'react';
@@ -22,13 +11,15 @@ import React, { useMemo, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 
-import { Vis } from '../../../../../../visualizations/public';
 import { SelectOption } from '../../../../../../vis_default_editor/public';
 
 import { SeriesParam, ValueAxis } from '../../../../types';
 import { LineOptions } from './line_options';
 import { SetParamByIndex, ChangeValueAxis } from '.';
 import { ChartType } from '../../../../../common';
+import { getConfigCollections } from '../../../collections';
+
+const collections = getConfigCollections();
 
 export type SetChart = <T extends keyof SeriesParam>(paramName: T, value: SeriesParam[T]) => void;
 
@@ -38,14 +29,12 @@ export interface ChartOptionsParams {
   changeValueAxis: ChangeValueAxis;
   setParamByIndex: SetParamByIndex;
   valueAxes: ValueAxis[];
-  vis: Vis;
 }
 
 function ChartOptions({
   chart,
   index,
   valueAxes,
-  vis,
   changeValueAxis,
   setParamByIndex,
 }: ChartOptionsParams) {
@@ -101,7 +90,7 @@ function ChartOptions({
             label={i18n.translate('visTypeXy.controls.pointSeries.series.chartTypeLabel', {
               defaultMessage: 'Chart type',
             })}
-            options={vis.type.editorConfig.collections.chartTypes}
+            options={collections.chartTypes}
             paramName="type"
             value={chart.type}
             setValue={setChart}
@@ -113,7 +102,7 @@ function ChartOptions({
             label={i18n.translate('visTypeXy.controls.pointSeries.series.modeLabel', {
               defaultMessage: 'Mode',
             })}
-            options={vis.type.editorConfig.collections.chartModes}
+            options={collections.chartModes}
             paramName="mode"
             value={chart.mode}
             setValue={setChart}
@@ -129,7 +118,7 @@ function ChartOptions({
             label={i18n.translate('visTypeXy.controls.pointSeries.series.lineModeLabel', {
               defaultMessage: 'Line mode',
             })}
-            options={vis.type.editorConfig.collections.interpolationModes}
+            options={collections.interpolationModes}
             paramName="interpolate"
             value={chart.interpolate}
             setValue={setChart}
@@ -137,7 +126,7 @@ function ChartOptions({
         </>
       )}
 
-      {chart.type === ChartType.Line && <LineOptions chart={chart} vis={vis} setChart={setChart} />}
+      {chart.type === ChartType.Line && <LineOptions chart={chart} setChart={setChart} />}
     </>
   );
 }

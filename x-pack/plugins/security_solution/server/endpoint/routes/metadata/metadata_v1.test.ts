@@ -1,11 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import {
   ILegacyClusterClient,
-  IRouter,
   ILegacyScopedClusterClient,
   KibanaResponseFactory,
   RequestHandler,
@@ -38,16 +39,17 @@ import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data'
 import { Agent, EsAssetReference } from '../../../../../fleet/common/types/models';
 import { createV1SearchResponse } from './support/test_support';
 import { PackageService } from '../../../../../fleet/server/services';
+import type { SecuritySolutionPluginRouter } from '../../../types';
 
 describe('test endpoint route v1', () => {
-  let routerMock: jest.Mocked<IRouter>;
+  let routerMock: jest.Mocked<SecuritySolutionPluginRouter>;
   let mockResponse: jest.Mocked<KibanaResponseFactory>;
   let mockClusterClient: jest.Mocked<ILegacyClusterClient>;
   let mockScopedClient: jest.Mocked<ILegacyScopedClusterClient>;
   let mockSavedObjectClient: jest.Mocked<SavedObjectsClientContract>;
   let mockPackageService: jest.Mocked<PackageService>;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let routeHandler: RequestHandler<any, any, any>;
+  let routeHandler: RequestHandler<any, any, any, any>;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let routeConfig: RouteConfig<any, any, any, any>;
   // tests assume that fleet is enabled, and thus agentService is available
@@ -145,16 +147,14 @@ describe('test endpoint route v1', () => {
     );
 
     expect(mockScopedClient.callAsCurrentUser).toHaveBeenCalledTimes(1);
-    expect(mockScopedClient.callAsCurrentUser.mock.calls[0][1]?.body?.query).toEqual({
-      bool: {
-        must_not: {
-          terms: {
-            'elastic.agent.id': [
-              '00000000-0000-0000-0000-000000000000',
-              '11111111-1111-1111-1111-111111111111',
-            ],
-          },
-        },
+    expect(
+      mockScopedClient.callAsCurrentUser.mock.calls[0][1]?.body?.query.bool.must_not
+    ).toContainEqual({
+      terms: {
+        'elastic.agent.id': [
+          '00000000-0000-0000-0000-000000000000',
+          '11111111-1111-1111-1111-111111111111',
+        ],
       },
     });
     expect(routeConfig.options).toEqual({ authRequired: true, tags: ['access:securitySolution'] });
@@ -201,35 +201,47 @@ describe('test endpoint route v1', () => {
     );
 
     expect(mockScopedClient.callAsCurrentUser).toBeCalled();
-    expect(mockScopedClient.callAsCurrentUser.mock.calls[0][1]?.body?.query).toEqual({
+    // needs to have the KQL filter passed through
+    expect(
+      mockScopedClient.callAsCurrentUser.mock.calls[0][1]?.body?.query.bool.must
+    ).toContainEqual({
       bool: {
-        must: [
-          {
-            bool: {
-              must_not: {
-                terms: {
-                  'elastic.agent.id': [
-                    '00000000-0000-0000-0000-000000000000',
-                    '11111111-1111-1111-1111-111111111111',
-                  ],
+        must_not: {
+          bool: {
+            should: [
+              {
+                match: {
+                  'host.ip': '10.140.73.246',
                 },
               },
+            ],
+            minimum_should_match: 1,
+          },
+        },
+      },
+    });
+    // and unenrolled should be filtered out.
+    expect(
+      mockScopedClient.callAsCurrentUser.mock.calls[0][1]?.body?.query.bool.must
+    ).toContainEqual({
+      bool: {
+        must_not: [
+          {
+            terms: {
+              'elastic.agent.id': [
+                '00000000-0000-0000-0000-000000000000',
+                '11111111-1111-1111-1111-111111111111',
+              ],
             },
           },
           {
-            bool: {
-              must_not: {
-                bool: {
-                  should: [
-                    {
-                      match: {
-                        'host.ip': '10.140.73.246',
-                      },
-                    },
-                  ],
-                  minimum_should_match: 1,
-                },
-              },
+            terms: {
+              // we actually don't care about HostDetails in v1 queries, but
+              // harder to set up the expectation to ignore its inclusion succinctly
+              'HostDetails.elastic.agent.id': [
+                '00000000-0000-0000-0000-000000000000',
+                '11111111-1111-1111-1111-111111111111',
+              ],
             },
           },
         ],

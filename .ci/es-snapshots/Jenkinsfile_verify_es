@@ -26,10 +26,12 @@ kibanaPipeline(timeoutMinutes: 150) {
       message: "[${SNAPSHOT_VERSION}] ES Snapshot Verification Failure",
     ) {
       retryable.enable(2)
-      withEnv(["ES_SNAPSHOT_MANIFEST=${SNAPSHOT_MANIFEST}"]) {
+      withEnv([
+        "ES_SNAPSHOT_MANIFEST=${SNAPSHOT_MANIFEST}",
+        'IGNORE_SHIP_CI_STATS_ERROR=true',
+      ]) {
         parallel([
           'kibana-intake-agent': workers.intake('kibana-intake', './test/scripts/jenkins_unit.sh'),
-          'x-pack-intake-agent': workers.intake('x-pack-intake', './test/scripts/jenkins_xpack.sh'),
           'kibana-oss-agent': workers.functional('kibana-oss-tests', { kibanaPipeline.buildOss() }, [
             'oss-ciGroup1': kibanaPipeline.ossCiGroupProcess(1),
             'oss-ciGroup2': kibanaPipeline.ossCiGroupProcess(2),
@@ -56,6 +58,8 @@ kibanaPipeline(timeoutMinutes: 150) {
             'xpack-ciGroup9': kibanaPipeline.xpackCiGroupProcess(9),
             'xpack-ciGroup10': kibanaPipeline.xpackCiGroupProcess(10),
             'xpack-ciGroup11': kibanaPipeline.xpackCiGroupProcess(11),
+            'xpack-ciGroup12': kibanaPipeline.xpackCiGroupProcess(12),
+            'xpack-ciGroup13': kibanaPipeline.xpackCiGroupProcess(13),
           ]),
         ])
       }

@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 /* eslint-disable react/display-name */
 
 import React from 'react';
@@ -35,6 +37,19 @@ export const getAllExceptionListsColumns = (
     render: (value: ExceptionListInfo['list_id']) => (
       <EuiToolTip position="left" content={value}>
         <p data-test-subj="exceptionsTableListId">{value}</p>
+      </EuiToolTip>
+    ),
+  },
+  {
+    align: 'left',
+    field: 'name',
+    name: i18n.EXCEPTION_LIST_NAME,
+    truncateText: true,
+    dataType: 'string',
+    width: '10%',
+    render: (value: ExceptionListInfo['name']) => (
+      <EuiToolTip position="left" content={value}>
+        <p data-test-subj="exceptionsTableName">{value}</p>
       </EuiToolTip>
     ),
   },
@@ -107,6 +122,7 @@ export const getAllExceptionListsColumns = (
         })}
         aria-label="Export exception list"
         iconType="exportAction"
+        data-test-subj="exceptionsTableExportButton"
       />
     ),
   },

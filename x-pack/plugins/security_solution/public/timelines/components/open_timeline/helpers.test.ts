@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { cloneDeep, getOr, omit } from 'lodash/fp';
 import { Dispatch } from 'redux';
 import ApolloClient from 'apollo-client';
@@ -246,6 +248,7 @@ describe('helpers', () => {
           {
             columnHeaderType: 'not-filtered',
             id: '@timestamp',
+            type: 'number',
             width: 190,
           },
           {
@@ -291,7 +294,7 @@ describe('helpers', () => {
         eventIdToNoteIds: {},
         eventType: 'all',
         excludedRowRendererIds: [],
-        expandedEvent: {},
+        expandedDetail: {},
         filters: [],
         highlightedDropAndProviderId: '',
         historyIds: [],
@@ -319,6 +322,7 @@ describe('helpers', () => {
         sort: [
           {
             columnId: '@timestamp',
+            columnType: 'number',
             sortDirection: 'desc',
           },
         ],
@@ -347,6 +351,7 @@ describe('helpers', () => {
           {
             columnHeaderType: 'not-filtered',
             id: '@timestamp',
+            type: 'number',
             width: 190,
           },
           {
@@ -392,7 +397,7 @@ describe('helpers', () => {
         eventIdToNoteIds: {},
         eventType: 'all',
         excludedRowRendererIds: [],
-        expandedEvent: {},
+        expandedDetail: {},
         filters: [],
         highlightedDropAndProviderId: '',
         historyIds: [],
@@ -420,6 +425,7 @@ describe('helpers', () => {
         sort: [
           {
             columnId: '@timestamp',
+            columnType: 'number',
             sortDirection: 'desc',
           },
         ],
@@ -448,6 +454,7 @@ describe('helpers', () => {
           {
             columnHeaderType: 'not-filtered',
             id: '@timestamp',
+            type: 'number',
             width: 190,
           },
           {
@@ -493,7 +500,7 @@ describe('helpers', () => {
         eventIdToNoteIds: {},
         eventType: 'all',
         excludedRowRendererIds: [],
-        expandedEvent: {},
+        expandedDetail: {},
         filters: [],
         highlightedDropAndProviderId: '',
         historyIds: [],
@@ -521,6 +528,7 @@ describe('helpers', () => {
         sort: [
           {
             columnId: '@timestamp',
+            columnType: 'number',
             sortDirection: 'desc',
           },
         ],
@@ -547,6 +555,7 @@ describe('helpers', () => {
           {
             columnHeaderType: 'not-filtered',
             id: '@timestamp',
+            type: 'number',
             width: 190,
           },
           {
@@ -592,7 +601,7 @@ describe('helpers', () => {
         eventIdToNoteIds: {},
         eventType: 'all',
         excludedRowRendererIds: [],
-        expandedEvent: {},
+        expandedDetail: {},
         filters: [],
         highlightedDropAndProviderId: '',
         historyIds: [],
@@ -620,6 +629,7 @@ describe('helpers', () => {
         sort: [
           {
             columnId: '@timestamp',
+            columnType: 'number',
             sortDirection: 'desc',
           },
         ],
@@ -652,7 +662,7 @@ describe('helpers', () => {
             example: undefined,
             id: '@timestamp',
             placeholder: undefined,
-            type: undefined,
+            type: 'number',
             width: 190,
           },
           {
@@ -730,7 +740,7 @@ describe('helpers', () => {
         eventIdToNoteIds: {},
         eventType: 'all',
         excludedRowRendererIds: [],
-        expandedEvent: {},
+        expandedDetail: {},
         filters: [],
         highlightedDropAndProviderId: '',
         historyIds: [],
@@ -760,6 +770,7 @@ describe('helpers', () => {
         sort: [
           {
             columnId: '@timestamp',
+            columnType: 'number',
             sortDirection: 'desc',
           },
         ],
@@ -815,6 +826,7 @@ describe('helpers', () => {
           {
             columnHeaderType: 'not-filtered',
             id: '@timestamp',
+            type: 'number',
             width: 190,
           },
           {
@@ -856,7 +868,7 @@ describe('helpers', () => {
         eventIdToNoteIds: {},
         eventType: 'all',
         excludedRowRendererIds: [],
-        expandedEvent: {},
+        expandedDetail: {},
         filters: [
           {
             $state: {
@@ -929,6 +941,7 @@ describe('helpers', () => {
         sort: [
           {
             columnId: '@timestamp',
+            columnType: 'number',
             sortDirection: 'desc',
           },
         ],
@@ -953,6 +966,7 @@ describe('helpers', () => {
           {
             columnHeaderType: 'not-filtered',
             id: '@timestamp',
+            type: 'number',
             width: 190,
           },
           {
@@ -998,7 +1012,7 @@ describe('helpers', () => {
         eventIdToNoteIds: {},
         eventType: 'all',
         excludedRowRendererIds: [],
-        expandedEvent: {},
+        expandedDetail: {},
         filters: [],
         highlightedDropAndProviderId: '',
         historyIds: [],
@@ -1026,6 +1040,7 @@ describe('helpers', () => {
         sort: [
           {
             columnId: '@timestamp',
+            columnType: 'number',
             sortDirection: 'desc',
           },
         ],
@@ -1054,6 +1069,7 @@ describe('helpers', () => {
           {
             columnHeaderType: 'not-filtered',
             id: '@timestamp',
+            type: 'number',
             width: 190,
           },
           {
@@ -1099,7 +1115,7 @@ describe('helpers', () => {
         eventIdToNoteIds: {},
         eventType: 'all',
         excludedRowRendererIds: [],
-        expandedEvent: {},
+        expandedDetail: {},
         filters: [],
         highlightedDropAndProviderId: '',
         historyIds: [],
@@ -1127,6 +1143,7 @@ describe('helpers', () => {
         sort: [
           {
             columnId: '@timestamp',
+            columnType: 'number',
             sortDirection: 'desc',
           },
         ],

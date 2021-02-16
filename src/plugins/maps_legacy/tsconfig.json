@@ -1,0 +1,14 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "composite": true,
+    "outDir": "./target/types",
+    "emitDeclarationOnly": true,
+    "declaration": true,
+    "declarationMap": true
+  },
+  "include": ["common/**/*", "public/**/*", "server/**/*", "config.ts"],
+  "references": [
+    { "path": "../vis_default_editor/tsconfig.json" },
+  ]
+}

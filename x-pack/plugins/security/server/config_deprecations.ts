@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import type { ConfigDeprecationProvider } from 'src/core/server';
@@ -11,6 +12,13 @@ export const securityConfigDeprecationProvider: ConfigDeprecationProvider = ({
   unused,
 }) => [
   rename('sessionTimeout', 'session.idleTimeout'),
+
+  rename('audit.appender.kind', 'audit.appender.type'),
+  rename('audit.appender.layout.kind', 'audit.appender.layout.type'),
+  rename('audit.appender.policy.kind', 'audit.appender.policy.type'),
+  rename('audit.appender.strategy.kind', 'audit.appender.strategy.type'),
+  rename('audit.appender.path', 'audit.appender.fileName'),
+
   unused('authorization.legacyFallback.enabled'),
   unused('authc.saml.maxRedirectURLSize'),
   // Deprecation warning for the old array-based format of `xpack.security.authc.providers`.

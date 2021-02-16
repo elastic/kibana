@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useState, useEffect, useMemo, useContext, useCallback } from 'react';
@@ -9,16 +10,7 @@ import classNames from 'classnames';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { Ast } from '@kbn/interpreter/common';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiText,
-  EuiTextColor,
-  EuiButtonEmpty,
-  EuiLink,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText, EuiButtonEmpty, EuiLink } from '@elastic/eui';
 import { CoreStart, CoreSetup } from 'kibana/public';
 import {
   DataPublicPluginStart,
@@ -39,8 +31,8 @@ import {
   isLensFilterEvent,
   isLensEditEvent,
 } from '../../../types';
-import { DragDrop, DragContext } from '../../../drag_drop';
-import { getSuggestions, switchToSuggestion } from '../suggestion_helpers';
+import { DragDrop, DragContext, DragDropIdentifier } from '../../../drag_drop';
+import { Suggestion, switchToSuggestion } from '../suggestion_helpers';
 import { buildExpression } from '../expression_helpers';
 import { debouncedComponent } from '../../../debounced_component';
 import { trackUiEvent } from '../../../lens_ui_telemetry';
@@ -75,6 +67,7 @@ export interface WorkspacePanelProps {
   plugins: { uiActions?: UiActionsStart; data: DataPublicPluginStart };
   title?: string;
   visualizeTriggerFieldContext?: VisualizeFieldContext;
+  getSuggestionForField: (field: DragDropIdentifier) => Suggestion | undefined;
 }
 
 interface WorkspaceState {
@@ -82,8 +75,20 @@ interface WorkspaceState {
   expandError: boolean;
 }
 
+const dropProps = {
+  value: {
+    id: 'lnsWorkspace',
+    humanData: {
+      label: i18n.translate('xpack.lens.editorFrame.workspaceLabel', {
+        defaultMessage: 'Workspace',
+      }),
+    },
+  },
+  order: [1, 0, 0, 0],
+};
+
 // Exported for testing purposes only.
-export function WorkspacePanel({
+export const WorkspacePanel = React.memo(function WorkspacePanel({
   activeDatasourceId,
   activeVisualizationId,
   visualizationMap,
@@ -97,43 +102,12 @@ export function WorkspacePanel({
   ExpressionRenderer: ExpressionRendererComponent,
   title,
   visualizeTriggerFieldContext,
+  getSuggestionForField,
 }: WorkspacePanelProps) {
   const dragDropContext = useContext(DragContext);
 
-  const suggestionForDraggedField = useMemo(
-    () => {
-      if (!dragDropContext.dragging || !activeDatasourceId) {
-        return;
-      }
-
-      const hasData = Object.values(framePublicAPI.datasourceLayers).some(
-        (datasource) => datasource.getTableSpec().length > 0
-      );
-
-      const mainPalette =
-        activeVisualizationId &&
-        visualizationMap[activeVisualizationId] &&
-        visualizationMap[activeVisualizationId].getMainPalette
-          ? visualizationMap[activeVisualizationId].getMainPalette!(visualizationState)
-          : undefined;
-      const suggestions = getSuggestions({
-        datasourceMap: { [activeDatasourceId]: datasourceMap[activeDatasourceId] },
-        datasourceStates,
-        visualizationMap:
-          hasData && activeVisualizationId
-            ? { [activeVisualizationId]: visualizationMap[activeVisualizationId] }
-            : visualizationMap,
-        activeVisualizationId,
-        visualizationState,
-        field: dragDropContext.dragging,
-        mainPalette,
-      });
-
-      return suggestions.find((s) => s.visualizationId === activeVisualizationId) || suggestions[0];
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [dragDropContext.dragging]
-  );
+  const suggestionForDraggedField =
+    dragDropContext.dragging && getSuggestionForField(dragDropContext.dragging);
 
   const [localState, setLocalState] = useState<WorkspaceState>({
     expressionBuildError: undefined,
@@ -172,10 +146,7 @@ export function WorkspacePanel({
             datasourceLayers: framePublicAPI.datasourceLayers,
           });
         } catch (e) {
-          const buildMessages = activeVisualization?.getErrorMessages(
-            visualizationState,
-            framePublicAPI
-          );
+          const buildMessages = activeVisualization?.getErrorMessages(visualizationState);
           const defaultMessage = {
             shortMessage: i18n.translate('xpack.lens.editorFrame.buildExpressionError', {
               defaultMessage: 'An unexpected error occurred while preparing the chart',
@@ -327,10 +298,12 @@ export function WorkspacePanel({
     >
       <DragDrop
         className="lnsWorkspacePanel__dragDrop"
-        data-test-subj="lnsWorkspace"
+        dataTestSubj="lnsWorkspace"
         draggable={false}
-        droppable={Boolean(suggestionForDraggedField)}
+        dropType={suggestionForDraggedField ? 'field_add' : undefined}
         onDrop={onDrop}
+        value={dropProps.value}
+        order={dropProps.order}
       >
         <div>
           {renderVisualization()}
@@ -339,7 +312,7 @@ export function WorkspacePanel({
       </DragDrop>
     </WorkspacePanelWrapper>
   );
-}
+});
 
 export const InnerVisualizationWrapper = ({
   expression,
@@ -437,16 +410,6 @@ export const InnerVisualizationWrapper = ({
       >
         <EuiFlexItem>
           <EuiIcon type="alert" size="xl" color="danger" />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiTitle size="s">
-            <EuiTextColor color="danger">
-              <FormattedMessage
-                id="xpack.lens.editorFrame.configurationFailure"
-                defaultMessage="Invalid configuration"
-              />
-            </EuiTextColor>
-          </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem className="eui-textBreakAll" data-test-subj="configuration-failure-error">
           {localState.configurationValidationError[0].longMessage}

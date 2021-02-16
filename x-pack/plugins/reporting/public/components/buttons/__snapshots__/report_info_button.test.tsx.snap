@@ -58,7 +58,7 @@ Array [
       >
         <div
           aria-labelledby="flyoutTitle"
-          className="euiFlyout euiFlyout--small"
+          className="euiFlyout euiFlyout--small euiFlyout--paddingLarge"
           data-test-subj="reportInfoFlyout"
           role="dialog"
           tabIndex={0}
@@ -144,7 +144,7 @@ Array [
   </EuiFlyout>,
   <div
     aria-labelledby="flyoutTitle"
-    className="euiFlyout euiFlyout--small"
+    className="euiFlyout euiFlyout--small euiFlyout--paddingLarge"
     data-test-subj="reportInfoFlyout"
     role="dialog"
     tabIndex={0}
@@ -261,7 +261,7 @@ Array [
       >
         <div
           aria-labelledby="flyoutTitle"
-          className="euiFlyout euiFlyout--small"
+          className="euiFlyout euiFlyout--small euiFlyout--paddingLarge"
           data-test-subj="reportInfoFlyout"
           role="dialog"
           tabIndex={0}
@@ -345,7 +345,7 @@ Array [
   </EuiFlyout>,
   <div
     aria-labelledby="flyoutTitle"
-    className="euiFlyout euiFlyout--small"
+    className="euiFlyout euiFlyout--small euiFlyout--paddingLarge"
     data-test-subj="reportInfoFlyout"
     role="dialog"
     tabIndex={0}

@@ -1,10 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { ES_FIELD_TYPES } from '../../../../../src/plugins/data/common';
+import { ES_FIELD_TYPES, RuntimeField } from '../../../../../src/plugins/data/common';
 import {
   ML_JOB_AGGREGATION,
   KIBANA_AGGREGATION,
@@ -26,6 +27,7 @@ export interface Field {
   aggregatable?: boolean;
   aggIds?: AggId[];
   aggs?: Aggregation[];
+  runtimeField?: RuntimeField;
 }
 
 export interface Aggregation {
@@ -102,3 +104,6 @@ export interface ScriptAggCardinality {
 export interface AggCardinality {
   cardinality: FieldAggCardinality | ScriptAggCardinality;
 }
+
+export type RollupFields = Record<FieldId, [Record<'agg', ES_AGGREGATION>]>;
+export type RuntimeMappings = Record<string, RuntimeField>;

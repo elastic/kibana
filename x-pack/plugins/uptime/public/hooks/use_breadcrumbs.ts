@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { ChromeBreadcrumb } from 'kibana/public';
@@ -38,10 +39,7 @@ function handleBreadcrumbClick(
 export const makeBaseBreadcrumb = (href: string, params?: UptimeUrlParams): EuiBreadcrumb => {
   if (params) {
     const crumbParams: Partial<UptimeUrlParams> = { ...params };
-    // We don't want to encode this values because they are often set to Date.now(), the relative
-    // values in dateRangeStart are better for a URL.
-    delete crumbParams.absoluteDateRangeStart;
-    delete crumbParams.absoluteDateRangeEnd;
+
     delete crumbParams.statusFilter;
     const query = stringifyUrlParams(crumbParams, true);
     href += query === EMPTY_QUERY ? '' : query;

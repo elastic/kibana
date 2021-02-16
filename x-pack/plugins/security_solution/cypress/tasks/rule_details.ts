@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { Exception } from '../objects/exception';
@@ -17,6 +18,7 @@ import {
 } from '../screens/exceptions';
 import {
   ALERTS_TAB,
+  BACK_TO_RULES,
   EXCEPTIONS_TAB,
   REFRESH_BUTTON,
   REMOVE_EXCEPTION_BTN,
@@ -88,4 +90,8 @@ export const waitForTheRuleToBeExecuted = async () => {
     cy.get(REFRESH_BUTTON).click({ force: true });
     status = await cy.get(RULE_STATUS).invoke('text').promisify();
   }
+};
+
+export const goBackToAllRulesTable = () => {
+  cy.get(BACK_TO_RULES).click();
 };

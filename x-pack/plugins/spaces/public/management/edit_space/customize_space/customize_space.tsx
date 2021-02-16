@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -17,8 +18,8 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import React, { ChangeEvent, Component, Fragment } from 'react';
+import { Space } from '../../../../../../../src/plugins/spaces_oss/common';
 import { isReservedSpace } from '../../../../common';
-import { Space } from '../../../../common/model/space';
 import { SpaceAvatar } from '../../../space_avatar';
 import { SpaceValidator, toSpaceIdentifier } from '../../lib';
 import { SectionPanel } from '../section_panel';

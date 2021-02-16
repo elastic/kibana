@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { noop } from 'lodash/fp';
@@ -35,6 +36,7 @@ export const HeaderComponent: React.FC<Props> = ({
 
   const onColumnSort = useCallback(() => {
     const columnId = header.id;
+    const columnType = header.type ?? 'text';
     const sortDirection = getNewSortDirectionOnClick({
       clickedHeader: header,
       currentSort: sort,
@@ -46,6 +48,7 @@ export const HeaderComponent: React.FC<Props> = ({
         ...sort,
         {
           columnId,
+          columnType,
           sortDirection,
         },
       ];
@@ -54,6 +57,7 @@ export const HeaderComponent: React.FC<Props> = ({
         ...sort.slice(0, headerIndex),
         {
           columnId,
+          columnType,
           sortDirection,
         },
         ...sort.slice(headerIndex + 1),

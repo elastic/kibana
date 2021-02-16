@@ -1,10 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import React, { useContext } from 'react';
+import React, { useContext, useMemo } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -17,7 +18,7 @@ import { I18LABELS } from '../translations';
 import { KeyUXMetrics } from './KeyUXMetrics';
 import { useFetcher } from '../../../../hooks/use_fetcher';
 import { useUxQuery } from '../hooks/useUxQuery';
-import { CoreVitals } from '../../../../../../observability/public';
+import { getCoreVitalsComponent } from '../../../../../../observability/public';
 import { CsmSharedContext } from '../CsmSharedContext';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { getPercentileLabel } from './translations';
@@ -48,6 +49,18 @@ export function UXMetrics() {
     sharedData: { totalPageViews },
   } = useContext(CsmSharedContext);
 
+  const CoreVitals = useMemo(
+    () =>
+      getCoreVitalsComponent({
+        data,
+        totalPageViews,
+        loading: status !== 'success',
+        displayTrafficMetric: true,
+      }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [status]
+  );
+
   return (
     <EuiPanel>
       <EuiFlexGroup justifyContent="spaceBetween" wrap>
@@ -67,12 +80,7 @@ export function UXMetrics() {
       <EuiFlexGroup justifyContent="spaceBetween" wrap>
         <EuiFlexItem grow={1} data-cy={`client-metrics`}>
           <EuiSpacer size="s" />
-          <CoreVitals
-            data={data}
-            totalPageViews={totalPageViews}
-            loading={status !== 'success'}
-            displayTrafficMetric={true}
-          />
+          {CoreVitals}
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPanel>

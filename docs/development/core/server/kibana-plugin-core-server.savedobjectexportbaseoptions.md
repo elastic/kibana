@@ -18,4 +18,5 @@ export interface SavedObjectExportBaseOptions
 |  [excludeExportDetails](./kibana-plugin-core-server.savedobjectexportbaseoptions.excludeexportdetails.md) | <code>boolean</code> | flag to not append [export details](./kibana-plugin-core-server.savedobjectsexportresultdetails.md) to the end of the export stream. |
 |  [includeReferencesDeep](./kibana-plugin-core-server.savedobjectexportbaseoptions.includereferencesdeep.md) | <code>boolean</code> | flag to also include all related saved objects in the export stream. |
 |  [namespace](./kibana-plugin-core-server.savedobjectexportbaseoptions.namespace.md) | <code>string</code> | optional namespace to override the namespace used by the savedObjectsClient. |
+|  [request](./kibana-plugin-core-server.savedobjectexportbaseoptions.request.md) | <code>KibanaRequest</code> | The http request initiating the export. |
 

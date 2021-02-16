@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { IRouter } from 'src/core/server';
+import type { TagsPluginRouter } from '../../types';
 
-export const registerGetAllTagsRoute = (router: IRouter) => {
+export const registerGetAllTagsRoute = (router: TagsPluginRouter) => {
   router.get(
     {
       path: '/api/saved_objects_tagging/tags',

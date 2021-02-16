@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -213,7 +214,7 @@ export const mockGlobalState: State = {
         description: '',
         eventIdToNoteIds: {},
         excludedRowRendererIds: [],
-        expandedEvent: {},
+        expandedDetail: {},
         highlightedDropAndProviderId: '',
         historyIds: [],
         isFavorite: false,
@@ -238,7 +239,7 @@ export const mockGlobalState: State = {
         pinnedEventIds: {},
         pinnedEventsSaveObject: {},
         itemsPerPageOptions: [5, 10, 20],
-        sort: [{ columnId: '@timestamp', sortDirection: Direction.desc }],
+        sort: [{ columnId: '@timestamp', columnType: 'number', sortDirection: Direction.desc }],
         isSaving: false,
         version: null,
         status: TimelineStatus.active,

@@ -12,6 +12,20 @@
     "mappings": {
       "dynamic": "strict",
       "properties": {
+        "references": {
+          "properties": {
+            "id": {
+              "type": "keyword"
+            },
+            "name": {
+              "type": "keyword"
+            },
+            "type": {
+              "type": "keyword"
+            }
+          },
+          "type": "nested"
+        },
         "config": {
           "dynamic": "true",
           "properties": {

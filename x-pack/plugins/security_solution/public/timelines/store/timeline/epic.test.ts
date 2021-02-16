@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { Filter, esFilters } from '../../../../../../../src/plugins/data/public';
@@ -90,7 +91,7 @@ describe('Epic Timeline', () => {
         description: '',
         eventIdToNoteIds: {},
         eventType: 'all',
-        expandedEvent: {},
+        expandedDetail: {},
         excludedRowRendererIds: [],
         highlightedDropAndProviderId: '',
         historyIds: [],
@@ -149,7 +150,7 @@ describe('Epic Timeline', () => {
         selectedEventIds: {},
         show: true,
         showCheckboxes: false,
-        sort: [{ columnId: '@timestamp', sortDirection: Direction.desc }],
+        sort: [{ columnId: '@timestamp', columnType: 'number', sortDirection: Direction.desc }],
         status: TimelineStatus.active,
         version: 'WzM4LDFd',
         id: '11169110-fc22-11e9-8ca9-072f15ce2685',
@@ -289,6 +290,7 @@ describe('Epic Timeline', () => {
         sort: [
           {
             columnId: '@timestamp',
+            columnType: 'number',
             sortDirection: 'desc',
           },
         ],

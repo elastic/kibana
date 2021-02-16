@@ -1,0 +1,316 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`AlertsAuthorization getFindAuthorizationFilter creates a filter based on the privileged types 1`] = `
+Object {
+  "arguments": Array [
+    Object {
+      "arguments": Array [
+        Object {
+          "arguments": Array [
+            Object {
+              "type": "literal",
+              "value": "alert.attributes.alertTypeId",
+            },
+            Object {
+              "type": "literal",
+              "value": "myAppAlertType",
+            },
+            Object {
+              "type": "literal",
+              "value": false,
+            },
+          ],
+          "function": "is",
+          "type": "function",
+        },
+        Object {
+          "arguments": Array [
+            Object {
+              "arguments": Array [
+                Object {
+                  "type": "literal",
+                  "value": "alert.attributes.consumer",
+                },
+                Object {
+                  "type": "literal",
+                  "value": "alerts",
+                },
+                Object {
+                  "type": "literal",
+                  "value": false,
+                },
+              ],
+              "function": "is",
+              "type": "function",
+            },
+            Object {
+              "arguments": Array [
+                Object {
+                  "type": "literal",
+                  "value": "alert.attributes.consumer",
+                },
+                Object {
+                  "type": "literal",
+                  "value": "myApp",
+                },
+                Object {
+                  "type": "literal",
+                  "value": false,
+                },
+              ],
+              "function": "is",
+              "type": "function",
+            },
+            Object {
+              "arguments": Array [
+                Object {
+                  "type": "literal",
+                  "value": "alert.attributes.consumer",
+                },
+                Object {
+                  "type": "literal",
+                  "value": "myOtherApp",
+                },
+                Object {
+                  "type": "literal",
+                  "value": false,
+                },
+              ],
+              "function": "is",
+              "type": "function",
+            },
+            Object {
+              "arguments": Array [
+                Object {
+                  "type": "literal",
+                  "value": "alert.attributes.consumer",
+                },
+                Object {
+                  "type": "literal",
+                  "value": "myAppWithSubFeature",
+                },
+                Object {
+                  "type": "literal",
+                  "value": false,
+                },
+              ],
+              "function": "is",
+              "type": "function",
+            },
+          ],
+          "function": "or",
+          "type": "function",
+        },
+      ],
+      "function": "and",
+      "type": "function",
+    },
+    Object {
+      "arguments": Array [
+        Object {
+          "arguments": Array [
+            Object {
+              "type": "literal",
+              "value": "alert.attributes.alertTypeId",
+            },
+            Object {
+              "type": "literal",
+              "value": "myOtherAppAlertType",
+            },
+            Object {
+              "type": "literal",
+              "value": false,
+            },
+          ],
+          "function": "is",
+          "type": "function",
+        },
+        Object {
+          "arguments": Array [
+            Object {
+              "arguments": Array [
+                Object {
+                  "type": "literal",
+                  "value": "alert.attributes.consumer",
+                },
+                Object {
+                  "type": "literal",
+                  "value": "alerts",
+                },
+                Object {
+                  "type": "literal",
+                  "value": false,
+                },
+              ],
+              "function": "is",
+              "type": "function",
+            },
+            Object {
+              "arguments": Array [
+                Object {
+                  "type": "literal",
+                  "value": "alert.attributes.consumer",
+                },
+                Object {
+                  "type": "literal",
+                  "value": "myApp",
+                },
+                Object {
+                  "type": "literal",
+                  "value": false,
+                },
+              ],
+              "function": "is",
+              "type": "function",
+            },
+            Object {
+              "arguments": Array [
+                Object {
+                  "type": "literal",
+                  "value": "alert.attributes.consumer",
+                },
+                Object {
+                  "type": "literal",
+                  "value": "myOtherApp",
+                },
+                Object {
+                  "type": "literal",
+                  "value": false,
+                },
+              ],
+              "function": "is",
+              "type": "function",
+            },
+            Object {
+              "arguments": Array [
+                Object {
+                  "type": "literal",
+                  "value": "alert.attributes.consumer",
+                },
+                Object {
+                  "type": "literal",
+                  "value": "myAppWithSubFeature",
+                },
+                Object {
+                  "type": "literal",
+                  "value": false,
+                },
+              ],
+              "function": "is",
+              "type": "function",
+            },
+          ],
+          "function": "or",
+          "type": "function",
+        },
+      ],
+      "function": "and",
+      "type": "function",
+    },
+    Object {
+      "arguments": Array [
+        Object {
+          "arguments": Array [
+            Object {
+              "type": "literal",
+              "value": "alert.attributes.alertTypeId",
+            },
+            Object {
+              "type": "literal",
+              "value": "mySecondAppAlertType",
+            },
+            Object {
+              "type": "literal",
+              "value": false,
+            },
+          ],
+          "function": "is",
+          "type": "function",
+        },
+        Object {
+          "arguments": Array [
+            Object {
+              "arguments": Array [
+                Object {
+                  "type": "literal",
+                  "value": "alert.attributes.consumer",
+                },
+                Object {
+                  "type": "literal",
+                  "value": "alerts",
+                },
+                Object {
+                  "type": "literal",
+                  "value": false,
+                },
+              ],
+              "function": "is",
+              "type": "function",
+            },
+            Object {
+              "arguments": Array [
+                Object {
+                  "type": "literal",
+                  "value": "alert.attributes.consumer",
+                },
+                Object {
+                  "type": "literal",
+                  "value": "myApp",
+                },
+                Object {
+                  "type": "literal",
+                  "value": false,
+                },
+              ],
+              "function": "is",
+              "type": "function",
+            },
+            Object {
+              "arguments": Array [
+                Object {
+                  "type": "literal",
+                  "value": "alert.attributes.consumer",
+                },
+                Object {
+                  "type": "literal",
+                  "value": "myOtherApp",
+                },
+                Object {
+                  "type": "literal",
+                  "value": false,
+                },
+              ],
+              "function": "is",
+              "type": "function",
+            },
+            Object {
+              "arguments": Array [
+                Object {
+                  "type": "literal",
+                  "value": "alert.attributes.consumer",
+                },
+                Object {
+                  "type": "literal",
+                  "value": "myAppWithSubFeature",
+                },
+                Object {
+                  "type": "literal",
+                  "value": false,
+                },
+              ],
+              "function": "is",
+              "type": "function",
+            },
+          ],
+          "function": "or",
+          "type": "function",
+        },
+      ],
+      "function": "and",
+      "type": "function",
+    },
+  ],
+  "function": "or",
+  "type": "function",
+}
+`;

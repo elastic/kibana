@@ -19,8 +19,9 @@ You’ll learn how to:
 [[index-patterns-read-only-access]]
 === Before you begin
 
-* To access *Index Patterns*, you must have the {kib} privilege
-`Index Pattern Management`.  To add the privilege, open the main menu, then click *Stack Management > Roles*.
+* To access the *Index Patterns* view, you must have the {kib} privilege
+`Index Pattern Management`.  To create an index pattern, you must have the {es} privilege
+`view_index_metadata`. To add the privileges, open the main menu, then click *Stack Management > Roles*.
 
 * If a read-only indicator appears in {kib}, you have insufficient privileges
 to create or save index patterns. The buttons to create new index patterns or
@@ -157,10 +158,13 @@ date values in {es}, you can use a {kib} field formatter to change the display t
 <<field-formatters-geopoint, geopoints>>,
 and <<field-formatters-numeric, numbers>>.
 
+To customize the displayed field name provided by {es}, you can 
+use *Custom Label* .
+
 A popularity counter keeps track of the fields you use most often.
 The top five most popular fields and their values are displayed in <<discover,*Discover*>>.
 
-To edit the field format and popularity counter, click the edit icon
+To edit the field display, click the edit icon
 (image:management/index-patterns/images/edit_icon.png[]) in the index pattern detail view.
 
 [role="screenshot"]

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { SavedObjectsClientContract } from '../../../../src/core/server';
@@ -13,7 +14,7 @@ import { isSavedObjectExecutionSource } from './lib';
 
 interface CreateExecuteFunctionOptions {
   taskManager: TaskManagerStartContract;
-  isESOUsingEphemeralEncryptionKey: boolean;
+  isESOCanEncrypt: boolean;
   actionTypeRegistry: ActionTypeRegistryContract;
   preconfiguredActions: PreConfiguredAction[];
 }
@@ -32,16 +33,16 @@ export type ExecutionEnqueuer = (
 export function createExecutionEnqueuerFunction({
   taskManager,
   actionTypeRegistry,
-  isESOUsingEphemeralEncryptionKey,
+  isESOCanEncrypt,
   preconfiguredActions,
 }: CreateExecuteFunctionOptions) {
   return async function execute(
     unsecuredSavedObjectsClient: SavedObjectsClientContract,
     { id, params, spaceId, source, apiKey }: ExecuteOptions
   ) {
-    if (isESOUsingEphemeralEncryptionKey === true) {
+    if (!isESOCanEncrypt) {
       throw new Error(
-        `Unable to execute action because the Encrypted Saved Objects plugin uses an ephemeral encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.`
+        `Unable to execute action because the Encrypted Saved Objects plugin is missing encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.`
       );
     }
 

@@ -1,13 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { RequestHandlerContext } from 'src/core/server';
-import { InfraIndexField, InfraIndexType } from '../../graphql/types';
+import type { InfraPluginRequestHandlerContext } from '../../types';
 import { FieldsAdapter } from '../adapters/fields';
-import { InfraSources } from '../sources';
+import { InfraSourceIndexField, InfraSources } from '../sources';
 
 export class InfraFieldsDomain {
   constructor(
@@ -16,16 +16,16 @@ export class InfraFieldsDomain {
   ) {}
 
   public async getFields(
-    requestContext: RequestHandlerContext,
+    requestContext: InfraPluginRequestHandlerContext,
     sourceId: string,
-    indexType: InfraIndexType
-  ): Promise<InfraIndexField[]> {
+    indexType: 'LOGS' | 'METRICS' | 'ANY'
+  ): Promise<InfraSourceIndexField[]> {
     const { configuration } = await this.libs.sources.getSourceConfiguration(
       requestContext.core.savedObjects.client,
       sourceId
     );
-    const includeMetricIndices = [InfraIndexType.ANY, InfraIndexType.METRICS].includes(indexType);
-    const includeLogIndices = [InfraIndexType.ANY, InfraIndexType.LOGS].includes(indexType);
+    const includeMetricIndices = ['ANY', 'METRICS'].includes(indexType);
+    const includeLogIndices = ['ANY', 'LOGS'].includes(indexType);
 
     const fields = await this.adapter.getIndexFields(
       requestContext,

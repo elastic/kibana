@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiTab } from '@elastic/eui';
@@ -11,6 +12,7 @@ import { isJavaAgentName, isRumAgentName } from '../../../../common/agent_name';
 import { enableServiceOverview } from '../../../../common/ui_settings_keys';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
+import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useErrorOverviewHref } from '../../shared/Links/apm/ErrorOverviewLink';
 import { useMetricOverviewHref } from '../../shared/Links/apm/MetricOverviewLink';
 import { useServiceMapHref } from '../../shared/Links/apm/ServiceMapLink';
@@ -18,9 +20,9 @@ import { useServiceNodeOverviewHref } from '../../shared/Links/apm/ServiceNodeOv
 import { useServiceOverviewHref } from '../../shared/Links/apm/service_overview_link';
 import { useTransactionsOverviewHref } from '../../shared/Links/apm/transaction_overview_link';
 import { MainTabs } from '../../shared/main_tabs';
-import { ErrorGroupOverview } from '../ErrorGroupOverview';
+import { ErrorGroupOverview } from '../error_group_overview';
 import { ServiceMap } from '../ServiceMap';
-import { ServiceNodeOverview } from '../ServiceNodeOverview';
+import { ServiceNodeOverview } from '../service_node_overview';
 import { ServiceMetrics } from '../service_metrics';
 import { ServiceOverview } from '../service_overview';
 import { TransactionOverview } from '../transaction_overview';
@@ -46,6 +48,9 @@ interface Props {
 export function ServiceDetailTabs({ serviceName, tab }: Props) {
   const { agentName } = useApmServiceContext();
   const { uiSettings } = useApmPluginContext().core;
+  const {
+    urlParams: { latencyAggregationType },
+  } = useUrlParams();
 
   const overviewTab = {
     key: 'overview',
@@ -60,7 +65,7 @@ export function ServiceDetailTabs({ serviceName, tab }: Props) {
 
   const transactionsTab = {
     key: 'transactions',
-    href: useTransactionsOverviewHref(serviceName),
+    href: useTransactionsOverviewHref({ serviceName, latencyAggregationType }),
     text: i18n.translate('xpack.apm.serviceDetails.transactionsTabLabel', {
       defaultMessage: 'Transactions',
     }),

@@ -30,6 +30,7 @@
   @import 'components/navigation_menu/index';
   @import 'components/rule_editor/index'; // SASSTODO: This file overwrites EUI directly
   @import 'components/stats_bar/index';
+  @import 'components/ml_embedded_map/index';
 
   // Hacks are last so they can overwrite anything above if needed
   @import 'hacks';

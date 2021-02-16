@@ -1,15 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import Url from 'url';
 import Path from 'path';
-import getPort from 'get-port';
 import type { FtrConfigProviderContext } from '@kbn/test/types/ftr';
 import { kbnTestConfig } from '@kbn/test';
 import { pageObjects } from '../functional/page_objects';
+
+const pluginPort = process.env.TEST_CORS_SERVER_PORT
+  ? parseInt(process.env.TEST_CORS_SERVER_PORT, 10)
+  : 5699;
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const kibanaFunctionalConfig = await readConfigFile(require.resolve('../functional/config.js'));
@@ -27,7 +31,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   };
 
   const { protocol, hostname } = kbnTestConfig.getUrlParts();
-  const pluginPort = await getPort();
   const originUrl = Url.format({
     protocol,
     hostname,

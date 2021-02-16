@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { ArchiveEntry } from './index';
 import { ArchivePackage, RegistryPackage } from '../../../../common';
 
@@ -39,6 +41,7 @@ export const getPackageInfo = (args: SharedKey) => {
 export const getArchivePackage = (args: SharedKey) => {
   const packageInfo = getPackageInfo(args);
   const paths = getArchiveFilelist(args);
+  if (!paths || !packageInfo) return undefined;
   return {
     paths,
     packageInfo,

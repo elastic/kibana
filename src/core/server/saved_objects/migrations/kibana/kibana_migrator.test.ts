@@ -1,21 +1,11 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
+
 import { take } from 'rxjs/operators';
 
 import { elasticsearchClientMock } from '../../../elasticsearch/client/mocks';
@@ -24,6 +14,16 @@ import { loggingSystemMock } from '../../../logging/logging_system.mock';
 import { SavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 import { SavedObjectsType } from '../../types';
 import { errors as esErrors } from '@elastic/elasticsearch';
+import { DocumentMigrator } from '../core/document_migrator';
+jest.mock('../core/document_migrator', () => {
+  return {
+    // Create a mock for spying on the constructor
+    DocumentMigrator: jest.fn().mockImplementation((...args) => {
+      const { DocumentMigrator: RealDocMigrator } = jest.requireActual('../core/document_migrator');
+      return new RealDocMigrator(args[0]);
+    }),
+  };
+});
 
 const createRegistry = (types: Array<Partial<SavedObjectsType>>) => {
   const registry = new SavedObjectTypeRegistry();
@@ -41,6 +41,18 @@ const createRegistry = (types: Array<Partial<SavedObjectsType>>) => {
 };
 
 describe('KibanaMigrator', () => {
+  beforeEach(() => {
+    (DocumentMigrator as jest.Mock).mockClear();
+  });
+  describe('constructor', () => {
+    it('coerces the current Kibana version if it has a hyphen', () => {
+      const options = mockOptions();
+      options.kibanaVersion = '3.2.1-SNAPSHOT';
+      const migrator = new KibanaMigrator(options);
+      expect(migrator.kibanaVersion).toEqual('3.2.1');
+      expect((DocumentMigrator as jest.Mock).mock.calls[0][0].kibanaVersion).toEqual('3.2.1');
+    });
+  });
   describe('getActiveMappings', () => {
     it('returns full index mappings w/ core properties', () => {
       const options = mockOptions();
@@ -65,7 +77,53 @@ describe('KibanaMigrator', () => {
     });
   });
 
+  describe('migrateDocument', () => {
+    it('throws an error if documentMigrator.prepareMigrations is not called previously', () => {
+      const options = mockOptions();
+      const kibanaMigrator = new KibanaMigrator(options);
+      const doc = {} as any;
+      expect(() => kibanaMigrator.migrateDocument(doc)).toThrowError(
+        /Migrations are not ready. Make sure prepareMigrations is called first./i
+      );
+    });
+
+    it('calls documentMigrator.migrate', () => {
+      const options = mockOptions();
+      const kibanaMigrator = new KibanaMigrator(options);
+      const mockDocumentMigrator = { migrate: jest.fn() };
+      // @ts-expect-error `documentMigrator` is readonly.
+      kibanaMigrator.documentMigrator = mockDocumentMigrator;
+      const doc = {} as any;
+
+      expect(() => kibanaMigrator.migrateDocument(doc)).not.toThrowError();
+      expect(mockDocumentMigrator.migrate).toBeCalledTimes(1);
+    });
+  });
+
   describe('runMigrations', () => {
+    it('throws if prepareMigrations is not called first', async () => {
+      const options = mockOptions();
+
+      options.client.cat.templates.mockReturnValue(
+        elasticsearchClientMock.createSuccessTransportRequestPromise(
+          { templates: [] },
+          { statusCode: 404 }
+        )
+      );
+      options.client.indices.get.mockReturnValue(
+        elasticsearchClientMock.createSuccessTransportRequestPromise({}, { statusCode: 404 })
+      );
+      options.client.indices.getAlias.mockReturnValue(
+        elasticsearchClientMock.createSuccessTransportRequestPromise({}, { statusCode: 404 })
+      );
+
+      const migrator = new KibanaMigrator(options);
+
+      await expect(() => migrator.runMigrations()).toThrowErrorMatchingInlineSnapshot(
+        `"Migrations are not ready. Make sure prepareMigrations is called first."`
+      );
+    });
+
     it('only runs migrations once if called multiple times', async () => {
       const options = mockOptions();
 
@@ -84,6 +142,7 @@ describe('KibanaMigrator', () => {
 
       const migrator = new KibanaMigrator(options);
 
+      migrator.prepareMigrations();
       await migrator.runMigrations();
       await migrator.runMigrations();
 
@@ -120,6 +179,8 @@ describe('KibanaMigrator', () => {
 
         const migrator = new KibanaMigrator(options);
         const migratorStatus = migrator.getStatus$().pipe(take(3)).toPromise();
+
+        migrator.prepareMigrations();
         await migrator.runMigrations();
 
         expect(options.client.indices.create).toHaveBeenCalledTimes(3);
@@ -145,6 +206,7 @@ describe('KibanaMigrator', () => {
 
         const migrator = new KibanaMigrator(options);
         const migratorStatus = migrator.getStatus$().pipe(take(3)).toPromise();
+        migrator.prepareMigrations();
         await migrator.runMigrations();
         const { status, result } = await migratorStatus;
         expect(status).toEqual('completed');
@@ -171,6 +233,7 @@ describe('KibanaMigrator', () => {
         const options = mockV2MigrationOptions();
         const migrator = new KibanaMigrator(options);
         const migratorStatus = migrator.getStatus$().pipe(take(3)).toPromise();
+        migrator.prepareMigrations();
         await migrator.runMigrations();
 
         // Basic assertions that we're creating and reindexing the expected indices
@@ -212,6 +275,7 @@ describe('KibanaMigrator', () => {
         const options = mockV2MigrationOptions();
         const migrator = new KibanaMigrator(options);
         const migratorStatus = migrator.getStatus$().pipe(take(3)).toPromise();
+        migrator.prepareMigrations();
         await migrator.runMigrations();
 
         const { status, result } = await migratorStatus;
@@ -247,6 +311,7 @@ describe('KibanaMigrator', () => {
         );
 
         const migrator = new KibanaMigrator(options);
+        migrator.prepareMigrations();
         return expect(migrator.runMigrations()).rejects.toMatchInlineSnapshot(
           `[Error: Unable to complete saved object migrations for the [.my-index] index: The .my-index alias is pointing to a newer version of Kibana: v8.2.4]`
         );
@@ -263,7 +328,7 @@ describe('KibanaMigrator', () => {
         );
 
         const migrator = new KibanaMigrator(options);
-
+        migrator.prepareMigrations();
         await expect(migrator.runMigrations()).rejects.toMatchInlineSnapshot(`
                 [Error: Unable to complete saved object migrations for the [.my-index] index. Please check the health of your Elasticsearch cluster and try again. Error: Reindex failed with the following error:
                 {"_tag":"Some","value":{"type":"elatsicsearch_exception","reason":"task failed with an error"}}]

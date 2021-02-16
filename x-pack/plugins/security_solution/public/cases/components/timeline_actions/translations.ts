@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -51,5 +52,12 @@ export const CASE_CREATED_SUCCESS_TOAST_TEXT = i18n.translate(
   'xpack.securitySolution.case.timeline.actions.caseCreatedSuccessToastText',
   {
     defaultMessage: 'Alerts in this case have their status synched with the case status',
+  }
+);
+
+export const VIEW_CASE = i18n.translate(
+  'xpack.securitySolution.case.timeline.actions.caseCreatedSuccessToastViewCaseLink',
+  {
+    defaultMessage: 'View Case',
   }
 );

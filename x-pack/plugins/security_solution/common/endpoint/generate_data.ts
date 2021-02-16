@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import uuid from 'uuid';
 import seedrandom from 'seedrandom';
 import {
@@ -17,7 +19,7 @@ import {
   PolicyData,
   SafeEndpointEvent,
 } from './types';
-import { factory as policyFactory } from './models/policy_config';
+import { policyFactory } from './models/policy_config';
 import {
   ancestryArray,
   entityIDSafeVersion,
@@ -99,6 +101,7 @@ const POLICY_RESPONSE_STATUSES: HostPolicyResponseActionStatus[] = [
   HostPolicyResponseActionStatus.success,
   HostPolicyResponseActionStatus.failure,
   HostPolicyResponseActionStatus.warning,
+  HostPolicyResponseActionStatus.unsupported,
 ];
 
 const APPLIED_POLICIES: Array<{
@@ -556,6 +559,8 @@ export class EndpointDocGenerator {
             version: '3.0.33',
           },
           temp_file_path: 'C:/temp/fake_malware.exe',
+          quarantine_result: true,
+          quarantine_message: 'fake quarantine message',
         },
       },
       process: {
@@ -1275,6 +1280,7 @@ export class EndpointDocGenerator {
       status: agentPolicyStatuses.Active,
       description: 'Some description',
       namespace: 'default',
+      is_managed: false,
       monitoring_enabled: ['logs', 'metrics'],
       revision: 2,
       updated_at: '2020-07-22T16:36:49.196Z',
@@ -1487,7 +1493,7 @@ export class EndpointDocGenerator {
               {
                 name: 'workflow',
                 message: 'Failed to apply a portion of the configuration (kernel)',
-                status: HostPolicyResponseActionStatus.success,
+                status: HostPolicyResponseActionStatus.unsupported,
               },
               {
                 name: 'download_model',
@@ -1632,6 +1638,7 @@ export class EndpointDocGenerator {
       HostPolicyResponseActionStatus.failure,
       HostPolicyResponseActionStatus.success,
       HostPolicyResponseActionStatus.warning,
+      HostPolicyResponseActionStatus.unsupported,
     ]);
   }
 
