@@ -8,6 +8,7 @@
 export const ROUTES = {
   list: '/policies',
   edit: '/policies/edit/:policyName?',
+  rollupWizard: '/policies/edit/:policyName/rollups',
   create: '/policies/edit',
 };
 

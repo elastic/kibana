@@ -3,23 +3,8 @@
   "version": "kibana",
   "server": true,
   "ui": true,
-  "requiredPlugins": [
-    "licensing",
-    "management",
-    "features",
-    "share"
-  ],
-  "optionalPlugins": [
-    "cloud",
-    "usageCollection",
-    "indexManagement",
-    "home"
-  ],
+  "requiredPlugins": ["licensing", "management", "features", "share"],
+  "optionalPlugins": ["cloud", "usageCollection", "indexManagement", "home"],
   "configPath": ["xpack", "ilm"],
-  "requiredBundles": [
-    "indexManagement",
-    "kibanaReact",
-    "esUiShared",
-    "home"
-  ]
+  "requiredBundles": ["data", "indexManagement", "kibanaReact", "esUiShared", "home"]
 }

@@ -13,6 +13,7 @@ import { METRIC_TYPE } from '@kbn/analytics';
 import { UIM_APP_LOAD } from './constants/ui_metric';
 import { EditPolicy } from './sections/edit_policy';
 import { PolicyTable } from './sections/policy_table';
+import { RollupWizard } from './sections/rollup_wizard';
 import { trackUiMetric } from './services/ui_metric';
 import { ROUTES } from './services/navigation';
 
@@ -51,6 +52,7 @@ export const App = ({
         path={ROUTES.edit}
         render={(props) => <EditPolicy {...props} getUrlForApp={getUrlForApp} />}
       />
+      <Route path={ROUTES.rollupWizard} render={(props) => <RollupWizard {...props} />} />
     </Switch>
   );
 };
