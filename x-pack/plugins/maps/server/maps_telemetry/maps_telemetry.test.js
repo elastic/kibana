@@ -13,6 +13,17 @@ import {
 } from './maps_telemetry';
 
 jest.mock('../kibana_server_services', () => {
+  // Mocked for geo shape agg detection
+  const testAggIndexPatternId = '4a7f6010-0aed-11ea-9dd2-95afd7ad44d4';
+  const testAggIndexPattern = {
+    id: testAggIndexPatternId,
+    fields: [
+      {
+        name: 'geometry',
+        esTypes: ['geo_shape'],
+      },
+    ],
+  };
   const testIndexPatterns = {
     1: {
       id: '1',
@@ -46,7 +57,7 @@ jest.mock('../kibana_server_services', () => {
     getIndexPatternsService() {
       return {
         async get(x) {
-          return testIndexPatterns[x];
+          return x === testAggIndexPatternId ? testAggIndexPattern : testIndexPatterns[x];
         },
         async getIds() {
           return Object.values(testIndexPatterns).map((x) => x.id);
@@ -140,7 +151,7 @@ describe('buildMapsSavedObjectsTelemetry', () => {
       indexPatternsWithGeoFieldCount: 3,
       indexPatternsWithGeoPointFieldCount: 2,
       indexPatternsWithGeoShapeFieldCount: 1,
-      geoShapeAggLayersCount: 0,
+      geoShapeAggLayersCount: 2,
     });
   });
 });
