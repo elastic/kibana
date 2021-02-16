@@ -491,6 +491,7 @@ export class DataRecognizer {
           const startedDatafeed = startResults[df.id];
           if (startedDatafeed !== undefined) {
             df.started = startedDatafeed.started;
+            df.awaitingMlNodeAllocation = startedDatafeed.awaitingMlNodeAllocation;
             if (startedDatafeed.error !== undefined) {
               df.error = startedDatafeed.error;
             }
@@ -749,9 +750,20 @@ export class DataRecognizer {
       datafeeds.map(async (datafeed) => {
         try {
           await this.saveDatafeed(datafeed);
-          return { id: datafeed.id, success: true, started: false };
+          return {
+            id: datafeed.id,
+            success: true,
+            started: false,
+            awaitingMlNodeAllocation: false,
+          };
         } catch ({ body }) {
-          return { id: datafeed.id, success: false, started: false, error: body };
+          return {
+            id: datafeed.id,
+            success: false,
+            started: false,
+            awaitingMlNodeAllocation: false,
+            error: body,
+          };
         }
       })
     );
@@ -811,11 +823,18 @@ export class DataRecognizer {
           duration.end = (end as unknown) as string;
         }
 
-        await this._mlClient.startDatafeed({
+        const {
+          body: { started, node },
+        } = await this._mlClient.startDatafeed<{
+          started: boolean;
+          node: string;
+        }>({
           datafeed_id: datafeed.id,
           ...duration,
         });
-        result.started = true;
+
+        result.started = started;
+        result.awaitingMlNodeAllocation = node?.length === 0;
       } catch ({ body }) {
         result.started = false;
         result.error = body;
@@ -845,6 +864,7 @@ export class DataRecognizer {
         if (d.id === d2.id) {
           d.success = d2.success;
           d.started = d2.started;
+          d.awaitingMlNodeAllocation = d2.awaitingMlNodeAllocation;
           if (d2.error !== undefined) {
             d.error = d2.error;
           }
