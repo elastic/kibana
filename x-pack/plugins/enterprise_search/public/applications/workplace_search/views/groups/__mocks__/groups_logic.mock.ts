@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { ContentSource, User, Group } from '../../../types';
-
 import { DEFAULT_META } from '../../../../shared/constants';
+import { ContentSource, User, Group } from '../../../types';
 
 export const mockGroupsValues = {
   groups: [] as Group[],

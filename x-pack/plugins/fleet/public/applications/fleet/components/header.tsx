@@ -37,7 +37,7 @@ export interface HeaderProps {
   leftColumn?: JSX.Element;
   rightColumn?: JSX.Element;
   rightColumnGrow?: EuiFlexItemProps['grow'];
-  tabs?: EuiTabProps[];
+  tabs?: Array<Omit<EuiTabProps, 'name'> & { name?: JSX.Element | string }>;
   tabsClassName?: string;
   'data-test-subj'?: string;
 }
@@ -73,7 +73,7 @@ export const Header: React.FC<HeaderProps> = ({
             <EuiSpacer size="s" />
             <Tabs className={tabsClassName}>
               {tabs.map((props) => (
-                <EuiTab {...props} key={props.id}>
+                <EuiTab {...(props as EuiTabProps)} key={props.id}>
                   {props.name}
                 </EuiTab>
               ))}

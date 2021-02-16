@@ -10,3 +10,4 @@ export { OfExpression } from './of';
 export { GroupByExpression } from './group_by_over';
 export { ThresholdExpression } from './threshold';
 export { ForLastExpression } from './for_the_last';
+export { ValueExpression } from './value';

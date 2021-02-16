@@ -9,9 +9,10 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { ResultView } from '.';
 import { SchemaTypes } from '../../../../../shared/types';
 import { Result } from '../../../result/result';
+
+import { ResultView } from '.';
 
 describe('ResultView', () => {
   const result = {

@@ -1,5 +1,5 @@
 {
-  "id": "event_log_fixture",
+  "id": "eventLogFixture",
   "version": "1.0.0",
   "kibanaVersion": "kibana",
   "configPath": ["xpack"],

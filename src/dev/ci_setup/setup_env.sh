@@ -56,7 +56,13 @@ export WORKSPACE="${WORKSPACE:-$PARENT_DIR}"
 nodeVersion="$(cat "$dir/.node-version")"
 nodeDir="$cacheDir/node/$nodeVersion"
 nodeBin="$nodeDir/bin"
-classifier="x64.tar.gz"
+hostArch="$(command uname -m)"
+case "${hostArch}" in
+  x86_64 | amd64) nodeArch="x64" ;;
+  aarch64) nodeArch="arm64" ;;
+  *) nodeArch="${hostArch}" ;;
+esac
+classifier="$nodeArch.tar.gz"
 
 UNAME=$(uname)
 OS="linux"
@@ -179,6 +185,15 @@ fi
 ### copy .bazelrc-ci into $HOME/.bazelrc
 ###
 cp -f "$KIBANA_DIR/src/dev/ci_setup/.bazelrc-ci" "$HOME/.bazelrc";
+
+###
+### remove write permissions on buildbuddy remote cache for prs
+###
+if [[ "$ghprbPullId" ]] ; then
+  echo "# Appended by $KIBANA_DIR/src/dev/ci_setup/setup.sh" >> "$HOME/.bazelrc"
+  echo "# Uploads logs & artifacts without writing to cache" >> "$HOME/.bazelrc"
+  echo "build --noremote_upload_local_results" >> "$HOME/.bazelrc"
+fi
 
 ###
 ### append auth token to buildbuddy into "$HOME/.bazelrc";

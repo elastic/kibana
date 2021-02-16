@@ -6,9 +6,11 @@
  */
 
 import React from 'react';
+
 import { useValues } from 'kea';
 
 import moment from 'moment';
+
 import { Chart, Settings, LineSeries, CurveType, Axis } from '@elastic/charts';
 
 import { KibanaLogic } from '../../../../shared/kibana';

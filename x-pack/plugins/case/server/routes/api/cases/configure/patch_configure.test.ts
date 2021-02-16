@@ -42,7 +42,7 @@ describe('PATCH configuration', () => {
       },
     });
 
-    const context = await createRouteContext(
+    const { context } = await createRouteContext(
       createMockSavedObjectsRepository({
         caseConfigureSavedObject: mockCaseConfigure,
         caseMappingsSavedObject: mockCaseMappings,
@@ -76,7 +76,7 @@ describe('PATCH configuration', () => {
       },
     });
 
-    const context = await createRouteContext(
+    const { context } = await createRouteContext(
       createMockSavedObjectsRepository({
         caseConfigureSavedObject: mockCaseConfigure,
         caseMappingsSavedObject: mockCaseMappings,
@@ -115,7 +115,7 @@ describe('PATCH configuration', () => {
       },
     });
 
-    const context = await createRouteContext(
+    const { context } = await createRouteContext(
       createMockSavedObjectsRepository({
         caseConfigureSavedObject: mockCaseConfigure,
         caseMappingsSavedObject: mockCaseMappings,
@@ -153,7 +153,7 @@ describe('PATCH configuration', () => {
       },
     });
 
-    const context = await createRouteContext(
+    const { context } = await createRouteContext(
       createMockSavedObjectsRepository({
         caseConfigureSavedObject: mockCaseConfigure,
         caseMappingsSavedObject: [],
@@ -193,7 +193,7 @@ describe('PATCH configuration', () => {
       },
     });
 
-    const context = await createRouteContext(
+    const { context } = await createRouteContext(
       createMockSavedObjectsRepository({
         caseConfigureSavedObject: [],
       })
@@ -215,7 +215,7 @@ describe('PATCH configuration', () => {
       },
     });
 
-    const context = await createRouteContext(
+    const { context } = await createRouteContext(
       createMockSavedObjectsRepository({
         caseConfigureSavedObject: mockCaseConfigure,
         caseMappingsSavedObject: mockCaseMappings,
@@ -243,7 +243,7 @@ describe('PATCH configuration', () => {
       },
     });
 
-    const context = await createRouteContext(
+    const { context } = await createRouteContext(
       createMockSavedObjectsRepository({
         caseConfigureSavedObject: mockCaseConfigure,
         caseMappingsSavedObject: mockCaseMappings,

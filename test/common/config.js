@@ -21,9 +21,7 @@ export default function () {
     servers,
 
     esTestCluster: {
-      license: 'oss',
-      from: 'snapshot',
-      serverArgs: [],
+      serverArgs: ['xpack.security.enabled=false'],
     },
 
     kbnTestServer: {
