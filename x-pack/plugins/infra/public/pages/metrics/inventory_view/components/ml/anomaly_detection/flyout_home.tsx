@@ -181,34 +181,8 @@ const JobsEnabledCallout = (props: CalloutProps) => {
     pathname: '/jobs',
   });
 
-  const anomaliesUrl = useLinkProps({
-    app: 'ml',
-    pathname: `/explorer?_g=${createResultsUrl(props.jobIds)}`,
-  });
-
   return (
     <>
-      <EuiFlexGroup gutterSize={'s'}>
-        <EuiFlexItem grow={false}>
-          <EuiButton {...manageJobsLinkProps} style={{ marginRight: 5 }}>
-            <FormattedMessage
-              defaultMessage="Manage jobs"
-              id="xpack.infra.ml.anomalyFlyout.manageJobs"
-            />
-          </EuiButton>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButton {...anomaliesUrl}>
-            <FormattedMessage
-              defaultMessage="View anomalies"
-              id="xpack.infra.ml.anomalyFlyout.anomaliesTabLabel"
-            />
-          </EuiButton>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-
-      <EuiSpacer size="l" />
-
       <EuiCallOut
         size="m"
         color="success"
@@ -221,6 +195,19 @@ const JobsEnabledCallout = (props: CalloutProps) => {
         }
         iconType="check"
       />
+
+      <EuiSpacer size="l" />
+
+      <EuiFlexGroup gutterSize={'s'}>
+        <EuiFlexItem grow={false}>
+          <EuiButton {...manageJobsLinkProps} style={{ marginRight: 5 }}>
+            <FormattedMessage
+              defaultMessage="Manage jobs in ML"
+              id="xpack.infra.ml.anomalyFlyout.manageJobs"
+            />
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </>
   );
 };
@@ -320,7 +307,7 @@ const CreateJobTab = (props: CreateJobTab) => {
   );
 };
 
-function createResultsUrl(jobIds: string[], mode = 'absolute') {
+export const createResultsUrl = (jobIds: string[], mode = 'absolute') => {
   const idString = jobIds.map((j) => `'${j}'`).join(',');
   let path = '';
 
@@ -336,4 +323,4 @@ function createResultsUrl(jobIds: string[], mode = 'absolute') {
   path += "))&_a=(query:(query_string:(analyze_wildcard:!t,query:'*')))";
 
   return path;
-}
+};

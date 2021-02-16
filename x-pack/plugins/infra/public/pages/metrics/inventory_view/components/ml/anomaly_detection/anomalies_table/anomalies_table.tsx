@@ -20,8 +20,14 @@ import {
   EuiTableFieldDataColumnType,
   EuiTableActionsColumnType,
   Criteria,
+  EuiContextMenuItem,
 } from '@elastic/eui';
-import { FormattedDate } from 'react-intl';
+import { FormattedDate, FormattedMessage } from 'react-intl';
+import { EuiPopover } from '@elastic/eui';
+import { EuiButtonIcon } from '@elastic/eui';
+import { EuiContextMenuPanel } from '@elastic/eui';
+import { PrefilledAnomalyAlertFlyout } from '../../../../../../../alerting/metric_anomaly/components/alert_flyout';
+import { useLinkProps } from '../../../../../../../hooks/use_link_props';
 import { useSorting } from '../../../../../../../hooks/use_sorting';
 import { useMetricsK8sAnomaliesResults } from '../../../../hooks/use_metrics_k8s_anomalies';
 import { useMetricsHostsAnomaliesResults } from '../../../../hooks/use_metrics_hosts_anomalies';
@@ -33,10 +39,61 @@ import { PaginationControls } from './pagination';
 import { AnomalySummary } from './annomaly_summary';
 import { AnomalySeverityIndicator } from '../../../../../../../components/logging/log_analysis_results/anomaly_severity_indicator';
 import { useSourceContext } from '../../../../../../../containers/source';
-
+import { createResultsUrl } from '../flyout_home';
 type JobType = 'k8s' | 'hosts';
 type SortField = 'anomalyScore' | 'startTime';
 
+const AnomalyActionMenu = React.memo<{ jobId: string }>(({ jobId }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [isAlertOpen, setIsAlertOpen] = useState(false);
+  const close = useCallback(() => setIsOpen(false), [setIsOpen]);
+  const handleToggleMenu = useCallback(() => setIsOpen(!isOpen), [isOpen]);
+  const openAlert = useCallback(() => setIsAlertOpen(true), [setIsAlertOpen]);
+  const closeAlert = useCallback(() => setIsAlertOpen(false), [setIsAlertOpen]);
+
+  const anomaliesUrl = useLinkProps({
+    app: 'ml',
+    pathname: `/explorer?_g=${createResultsUrl([jobId.toString()])}`,
+  });
+
+  const items = [
+    <EuiContextMenuItem key="openInAnomalyExplorer" icon="popout" {...anomaliesUrl}>
+      <FormattedMessage
+        id="xpack.infra.ml.anomalyFlyout.actions.openInAnomalyExplorer"
+        defaultMessage="Open in Anomaly Explorer"
+      />
+    </EuiContextMenuItem>,
+    <EuiContextMenuItem key="createAlert" icon="bell" onClick={openAlert}>
+      <FormattedMessage
+        id="xpack.infra.ml.anomalyFlyout.actions.createAlert"
+        defaultMessage="Create Alert"
+      />
+    </EuiContextMenuItem>,
+  ];
+
+  return (
+    <>
+      <EuiPopover
+        anchorPosition="downRight"
+        panelPaddingSize="none"
+        button={
+          <EuiButtonIcon
+            iconType="boxesHorizontal"
+            onClick={handleToggleMenu}
+            aria-label={i18n.translate('xpack.infra.ml.anomalyFlyout.actions.openActionMenu', {
+              defaultMessage: 'Open',
+            })}
+          />
+        }
+        isOpen={isOpen && !isAlertOpen}
+        closePopover={close}
+      >
+        <EuiContextMenuPanel items={items} />
+      </EuiPopover>
+      {isAlertOpen && <PrefilledAnomalyAlertFlyout onClose={closeAlert} />}
+    </>
+  );
+});
 export const AnomaliesTable = () => {
   const [search, setSearch] = useState('');
   const [start, setStart] = useState('now-30d');
@@ -196,7 +253,7 @@ export const AnomaliesTable = () => {
           <EuiFieldSearch
             fullWidth
             placeholder={i18n.translate('xpack.infra.ml.anomalyFlyout.searchPlaceholder', {
-              defaultMessage: 'Search for anomalies',
+              defaultMessage: 'Search',
             })}
             value={search}
             onChange={onSearchChange}
@@ -303,5 +360,16 @@ const columns: Array<
     textOnly: true,
     truncateText: true,
     render: (influencers: string[]) => influencers.join(','),
+  },
+  {
+    name: i18n.translate('xpack.infra.ml.anomalyFlyout.columnActionsName', {
+      defaultMessage: 'Actions',
+    }),
+    width: '10%',
+    actions: [
+      {
+        render: (anomaly: MetricsHostsAnomaly) => <AnomalyActionMenu jobId={anomaly.jobId} />,
+      },
+    ],
   },
 ];
