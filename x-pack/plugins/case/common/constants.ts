@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { DEFAULT_MAX_SIGNALS } from '../../security_solution/common/constants';
+
 export const APP_ID = 'case';
 
 /**
@@ -46,3 +48,10 @@ export const SUPPORTED_CONNECTORS = [
   JIRA_ACTION_TYPE_ID,
   RESILIENT_ACTION_TYPE_ID,
 ];
+
+/**
+ * Alerts
+ */
+
+export const MAX_ALERTS_PER_SUB_CASE = 10000;
+export const MAX_GENERATED_ALERTS_PER_SUB_CASE = MAX_ALERTS_PER_SUB_CASE / DEFAULT_MAX_SIGNALS;

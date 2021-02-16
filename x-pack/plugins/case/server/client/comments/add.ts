@@ -39,6 +39,7 @@ import { CaseServiceSetup, CaseUserActionServiceSetup } from '../../services';
 import { CommentableCase } from '../../common';
 import { CaseClientHandler } from '..';
 import { CASE_COMMENT_SAVED_OBJECT } from '../../saved_object_types';
+import { MAX_GENERATED_ALERTS_PER_SUB_CASE } from '../../../common/constants';
 
 async function getSubCase({
   caseService,
@@ -67,7 +68,8 @@ async function getSubCase({
         perPage: 1,
       },
     });
-    if (subCaseAlertsAttachement.total <= 10000) {
+
+    if (subCaseAlertsAttachement.total <= MAX_GENERATED_ALERTS_PER_SUB_CASE) {
       return mostRecentSubCase;
     }
   }
