@@ -237,7 +237,9 @@ export const setup = async (arg?: { appServicesContext: Partial<AppServicesConte
         exists(`${fieldSelector}.searchableSnapshotDisabledDueToLicense`),
       toggleSearchableSnapshot,
       setSearchableSnapshot: async (value: string) => {
-        await toggleSearchableSnapshot(true);
+        if (!exists(`searchableSnapshotField-${phase}.searchableSnapshotCombobox`)) {
+          await toggleSearchableSnapshot(true);
+        }
         act(() => {
           find(`searchableSnapshotField-${phase}.searchableSnapshotCombobox`).simulate('change', [
             { label: value },
@@ -248,6 +250,30 @@ export const setup = async (arg?: { appServicesContext: Partial<AppServicesConte
     };
   };
 
+  const createToggleDeletePhaseActions = () => {
+    const enablePhase = async () => {
+      await act(async () => {
+        find('enableDeletePhaseButton').simulate('click');
+      });
+      component.update();
+    };
+
+    const disablePhase = async () => {
+      await act(async () => {
+        find('disableDeletePhaseButton').simulate('click');
+      });
+      component.update();
+    };
+
+    return {
+      enablePhase,
+      disablePhase,
+    };
+  };
+
+  const hasRolloverTipOnMinAge = (phase: Phases) => (): boolean =>
+    exists(`${phase}-rolloverMinAgeInputIconTip`);
+
   return {
     ...testBed,
     actions: {
@@ -257,7 +283,6 @@ export const setup = async (arg?: { appServicesContext: Partial<AppServicesConte
       savePolicy,
       hasGlobalErrorCallout: () => exists('policyFormErrorsCallout'),
       timeline: {
-        hasRolloverIndicator: () => exists('timelineHotPhaseRolloverToolTip'),
         hasHotPhase: () => exists('ilmTimelineHotPhase'),
         hasWarmPhase: () => exists('ilmTimelineWarmPhase'),
         hasColdPhase: () => exists('ilmTimelineColdPhase'),
@@ -284,6 +309,7 @@ export const setup = async (arg?: { appServicesContext: Partial<AppServicesConte
         setSelectedNodeAttribute: setSelectedNodeAttribute('warm'),
         setReplicas: setReplicas('warm'),
         hasErrorIndicator: () => exists('phaseErrorIndicator-warm'),
+        hasRolloverTipOnMinAge: hasRolloverTipOnMinAge('warm'),
         ...createShrinkActions('warm'),
         ...createForceMergeActions('warm'),
         setReadonly: setReadonly('warm'),
@@ -299,11 +325,13 @@ export const setup = async (arg?: { appServicesContext: Partial<AppServicesConte
         setFreeze,
         freezeExists,
         hasErrorIndicator: () => exists('phaseErrorIndicator-cold'),
+        hasRolloverTipOnMinAge: hasRolloverTipOnMinAge('cold'),
         ...createIndexPriorityActions('cold'),
         ...createSearchableSnapshotActions('cold'),
       },
       delete: {
-        enable: enable('delete'),
+        ...createToggleDeletePhaseActions(),
+        hasRolloverTipOnMinAge: hasRolloverTipOnMinAge('delete'),
         setMinAgeValue: setMinAgeValue('delete'),
         setMinAgeUnits: setMinAgeUnits('delete'),
       },

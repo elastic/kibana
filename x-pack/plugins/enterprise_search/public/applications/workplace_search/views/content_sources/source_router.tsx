@@ -6,24 +6,19 @@
  */
 
 import React, { useEffect } from 'react';
+import { Route, Switch, useParams } from 'react-router-dom';
 
 import { useActions, useValues } from 'kea';
 import moment from 'moment';
-import { Route, Switch, useParams } from 'react-router-dom';
 
 import { EuiButton, EuiCallOut, EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
 
 import { SetWorkplaceSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
+import { Loading } from '../../../shared/loading';
 import { SendWorkplaceSearchTelemetry as SendTelemetry } from '../../../shared/telemetry';
-
+import { AppLogic } from '../../app_logic';
 import { NAV } from '../../constants';
-
-import {
-  SOURCE_DISABLED_CALLOUT_TITLE,
-  SOURCE_DISABLED_CALLOUT_DESCRIPTION,
-  SOURCE_DISABLED_CALLOUT_BUTTON,
-} from './constants';
-
+import { CUSTOM_SERVICE_TYPE } from '../../constants';
 import {
   ENT_SEARCH_LICENSE_MANAGEMENT,
   REINDEX_JOB_PATH,
@@ -36,13 +31,6 @@ import {
   getSourcesPath,
 } from '../../routes';
 
-import { AppLogic } from '../../app_logic';
-
-import { Loading } from '../../../shared/loading';
-
-import { CUSTOM_SERVICE_TYPE } from '../../constants';
-import { SourceLogic } from './source_logic';
-
 import { DisplaySettingsRouter } from './components/display_settings';
 import { Overview } from './components/overview';
 import { Schema } from './components/schema';
@@ -50,6 +38,12 @@ import { SchemaChangeErrors } from './components/schema/schema_change_errors';
 import { SourceContent } from './components/source_content';
 import { SourceInfoCard } from './components/source_info_card';
 import { SourceSettings } from './components/source_settings';
+import {
+  SOURCE_DISABLED_CALLOUT_TITLE,
+  SOURCE_DISABLED_CALLOUT_DESCRIPTION,
+  SOURCE_DISABLED_CALLOUT_BUTTON,
+} from './constants';
+import { SourceLogic } from './source_logic';
 
 export const SourceRouter: React.FC = () => {
   const { sourceId } = useParams() as { sourceId: string };

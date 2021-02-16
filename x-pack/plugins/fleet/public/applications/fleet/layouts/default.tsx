@@ -110,7 +110,7 @@ export const DefaultLayout: React.FunctionComponent<Props> = ({
                   <EuiFlexItem>
                     <EuiButtonEmpty
                       iconType="popout"
-                      href="https://ela.st/ingest-manager-feedback"
+                      href="https://ela.st/fleet-feedback"
                       target="_blank"
                     >
                       <FormattedMessage

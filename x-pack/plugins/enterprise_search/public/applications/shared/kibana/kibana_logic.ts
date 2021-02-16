@@ -5,12 +5,13 @@
  * 2.0.
  */
 
+import { FC } from 'react';
+
+import { History } from 'history';
 import { kea, MakeLogicType } from 'kea';
 
-import { FC } from 'react';
-import { History } from 'history';
-import { ApplicationStart, ChromeBreadcrumb } from 'src/core/public';
-import { ChartsPluginStart } from 'src/plugins/charts/public';
+import { ApplicationStart, ChromeBreadcrumb } from '../../../../../../../src/core/public';
+import { ChartsPluginStart } from '../../../../../../../src/plugins/charts/public';
 import { CloudSetup } from '../../../../../cloud/public';
 
 import { HttpLogic } from '../http';

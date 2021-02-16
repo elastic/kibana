@@ -10,6 +10,9 @@ import {
   loggingSystemMock,
   savedObjectsServiceMock,
 } from 'src/core/server/mocks';
+import { coreMock } from '../../../../src/core/server/mocks';
+import { licensingMock } from '../../../plugins/licensing/server/mocks';
+
 import { FleetAppContext } from './plugin';
 import { encryptedSavedObjectsMock } from '../../encrypted_saved_objects/server/mocks';
 import { securityMock } from '../../security/server/mocks';
@@ -29,6 +32,17 @@ export const createAppContextStartContractMock = (): FleetAppContext => {
   };
 };
 
+function createCoreRequestHandlerContextMock() {
+  return {
+    core: coreMock.createRequestHandlerContext(),
+    licensing: licensingMock.createRequestHandlerContext(),
+  };
+}
+
+export const xpackMocks = {
+  createRequestHandlerContext: createCoreRequestHandlerContextMock,
+};
+
 export const createPackagePolicyServiceMock = () => {
   return {
     compilePackagePolicyInputs: jest.fn(),
@@ -39,6 +53,7 @@ export const createPackagePolicyServiceMock = () => {
     get: jest.fn(),
     getByIDs: jest.fn(),
     list: jest.fn(),
+    listIds: jest.fn(),
     update: jest.fn(),
     runExternalCallbacks: jest.fn(),
   } as jest.Mocked<PackagePolicyServiceInterface>;

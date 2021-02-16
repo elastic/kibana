@@ -5,10 +5,17 @@
  * 2.0.
  */
 
-import { bucketRulesResponse, caseInsensitiveSort, showRulesTable } from './helpers';
+import {
+  bucketRulesResponse,
+  caseInsensitiveSort,
+  showRulesTable,
+  getSearchFilters,
+} from './helpers';
 import { mockRule, mockRuleError } from './__mocks__/mock';
 import uuid from 'uuid';
 import { Rule, RuleError } from '../../../../containers/detection_engine/rules';
+import { Query } from '@elastic/eui';
+import { EXCEPTIONS_SEARCH_SCHEMA } from './exceptions/exceptions_search_bar';
 
 describe('AllRulesTable Helpers', () => {
   const mockRule1: Readonly<Rule> = mockRule(uuid.v4());
@@ -96,6 +103,59 @@ describe('AllRulesTable Helpers', () => {
         const expected = ['atest', 'Atest', 'Btest', 'btest', 'Ctest', 'ctest'];
         expect(result).toEqual(expected);
       });
+    });
+  });
+
+  describe('getSearchFilters', () => {
+    const filterOptions = {
+      name: null,
+      list_id: null,
+      created_by: null,
+      type: null,
+      tags: null,
+    };
+
+    test('it does not modify filter options if no query clauses match', () => {
+      const searchValues = getSearchFilters({
+        query: null,
+        searchValue: 'bar',
+        filterOptions,
+        defaultSearchTerm: 'name',
+      });
+
+      expect(searchValues).toEqual({ name: 'bar' });
+    });
+
+    test('it properly formats search options', () => {
+      const query = Query.parse('name:bar list_id:some_id', { schema: EXCEPTIONS_SEARCH_SCHEMA });
+
+      const searchValues = getSearchFilters({
+        query,
+        searchValue: 'bar',
+        filterOptions,
+        defaultSearchTerm: 'name',
+      });
+
+      expect(searchValues).toEqual({
+        created_by: null,
+        list_id: 'some_id',
+        name: 'bar',
+        tags: null,
+        type: null,
+      });
+    });
+
+    test('it properly formats search options when no query clauses used', () => {
+      const query = Query.parse('some list name', { schema: EXCEPTIONS_SEARCH_SCHEMA });
+
+      const searchValues = getSearchFilters({
+        query,
+        searchValue: 'some list name',
+        filterOptions,
+        defaultSearchTerm: 'name',
+      });
+
+      expect(searchValues).toEqual({ name: 'some list name' });
     });
   });
 });

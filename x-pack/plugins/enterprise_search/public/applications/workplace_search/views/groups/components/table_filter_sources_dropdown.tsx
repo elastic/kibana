@@ -9,11 +9,11 @@ import React from 'react';
 
 import { useActions, useValues } from 'kea';
 
+import { EuiFilterButton, EuiFilterGroup, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { EuiFilterButton, EuiFilterGroup, EuiPopover } from '@elastic/eui';
-
 import { GroupsLogic } from '../groups_logic';
+
 import { SourcesList } from './sources_list';
 
 const FILTER_SOURCES_BUTTON_TEXT = i18n.translate(

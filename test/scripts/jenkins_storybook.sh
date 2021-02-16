@@ -10,6 +10,7 @@ cd "$KIBANA_DIR"
 # yarn storybook --site apm # TODO re-enable after being fixed
 yarn storybook --site canvas
 yarn storybook --site ci_composite
+yarn storybook --site url_template_editor
 yarn storybook --site codeeditor
 yarn storybook --site dashboard
 yarn storybook --site dashboard_enhanced
