@@ -143,7 +143,15 @@ export function createInstallRoute(
 
       let createResults;
       try {
-        createResults = await context.core.savedObjects.client.bulkCreate(
+        const { getClient, typeRegistry } = context.core.savedObjects;
+
+        const includedHiddenTypes = sampleDataset.savedObjects
+          .map((object) => object.type)
+          .filter((supportedType) => typeRegistry.isHidden(supportedType));
+
+        const client = getClient({ includedHiddenTypes });
+
+        createResults = await client.bulkCreate(
           sampleDataset.savedObjects.map(({ version, ...savedObject }) => savedObject),
           { overwrite: true }
         );
@@ -156,8 +164,8 @@ export function createInstallRoute(
         return Boolean(savedObjectCreateResult.error);
       });
       if (errors.length > 0) {
-        const errMsg = `sample_data install errors while loading saved objects. Errors: ${errors.join(
-          ','
+        const errMsg = `sample_data install errors while loading saved objects. Errors: ${JSON.stringify(
+          errors
         )}`;
         logger.warn(errMsg);
         return res.customError({ body: errMsg, statusCode: 403 });

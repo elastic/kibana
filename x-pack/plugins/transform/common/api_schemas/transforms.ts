@@ -51,6 +51,13 @@ export type PivotConfig = TypeOf<typeof pivotSchema>;
 
 export type LatestFunctionConfig = TypeOf<typeof latestFunctionSchema>;
 
+export const retentionPolicySchema = schema.object({
+  time: schema.object({
+    field: schema.string(),
+    max_age: schema.string(),
+  }),
+});
+
 export const settingsSchema = schema.object({
   max_page_search_size: schema.maybe(schema.number()),
   // The default value is null, which disables throttling.
@@ -94,6 +101,7 @@ export const putTransformsRequestSchema = schema.object(
      * Latest and pivot are mutually exclusive, i.e. exactly one must be specified in the transform configuration
      */
     latest: schema.maybe(latestFunctionSchema),
+    retention_policy: schema.maybe(retentionPolicySchema),
     settings: schema.maybe(settingsSchema),
     source: sourceSchema,
     sync: schema.maybe(syncSchema),
