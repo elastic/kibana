@@ -14,8 +14,8 @@ import {
   EuiTableActionsColumnType,
   EuiTableComputedColumnType,
   EuiTableFieldDataColumnType,
-  HorizontalAlignment,
 } from '@elastic/eui';
+import { RIGHT_ALIGNMENT } from '@elastic/eui/lib/services';
 import styled from 'styled-components';
 import { DefaultItemIconButtonAction } from '@elastic/eui/src/components/basic_table/action_types';
 
@@ -45,8 +45,6 @@ const Spacer = styled.span`
 const TagWrapper = styled(EuiBadgeGroup)`
   width: 100%;
 `;
-
-export const NUMERIC_COLUMN_WIDTH = '120px';
 
 const renderStringField = (field: string, dataTestSubj: string) =>
   field != null ? <span data-test-subj={dataTestSubj}>{field}</span> : getEmptyTagValue();
@@ -131,9 +129,8 @@ export const getCasesColumns = (
       truncateText: true,
     },
     {
-      align: 'right' as HorizontalAlignment,
+      align: RIGHT_ALIGNMENT,
       field: 'totalAlerts',
-      // width: NUMERIC_COLUMN_WIDTH,
       name: ALERTS,
       sortable: true,
       render: (totalAlerts: Case['totalAlerts']) =>
@@ -142,9 +139,8 @@ export const getCasesColumns = (
           : getEmptyTagValue(),
     },
     {
-      align: 'right' as HorizontalAlignment,
+      align: RIGHT_ALIGNMENT,
       field: 'totalComment',
-      // width: NUMERIC_COLUMN_WIDTH,
       name: i18n.COMMENTS,
       sortable: true,
       render: (totalComment: Case['totalComment']) =>

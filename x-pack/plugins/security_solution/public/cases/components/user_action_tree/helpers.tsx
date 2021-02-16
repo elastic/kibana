@@ -313,7 +313,7 @@ export const getGeneratedAlertsAttachment = ({
   const alert = alerts[alertIds[0]];
   const ecsData: Ecs[] = Object.values(alerts);
   return {
-    username: <EuiIcon type="logoSecurity" size="s" />,
+    username: <EuiIcon type="logoSecurity" size="m" />,
     className: 'comment-alert',
     type: 'update',
     event: (
