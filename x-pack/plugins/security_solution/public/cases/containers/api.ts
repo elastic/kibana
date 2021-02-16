@@ -270,7 +270,7 @@ export const postComment = async (
     {
       method: 'POST',
       body: JSON.stringify(newComment),
-      query: { subCaseId },
+      ...(subCaseId ? { query: { subCaseId } } : {}),
       signal,
     }
   );
