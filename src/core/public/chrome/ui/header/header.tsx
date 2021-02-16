@@ -32,7 +32,11 @@ import {
 } from '../..';
 import { InternalApplicationStart } from '../../../application/types';
 import { HttpStart } from '../../../http';
-import { ChromeBreadcrumbsAppendExtension, ChromeHelpExtension } from '../../chrome_service';
+import {
+  ChromeBreadcrumbsAppendExtension,
+  ChromeHelpExtension,
+  ChromeUserBanner,
+} from '../../types';
 import { OnIsLockedUpdate } from './';
 import { CollapsibleNav } from './collapsible_nav';
 import { HeaderBadge } from './header_badge';
@@ -42,10 +46,12 @@ import { HeaderLogo } from './header_logo';
 import { HeaderNavControls } from './header_nav_controls';
 import { HeaderActionMenu } from './header_action_menu';
 import { HeaderExtension } from './header_extension';
+import { HeaderTopBanner } from './header_top_banner';
 
 export interface HeaderProps {
   kibanaVersion: string;
   application: InternalApplicationStart;
+  headerBanner$: Observable<ChromeUserBanner | undefined>;
   appTitle$: Observable<string>;
   badge$: Observable<ChromeBadge | undefined>;
   breadcrumbs$: Observable<ChromeBreadcrumb[]>;
@@ -84,7 +90,12 @@ export function Header({
   const breadcrumbsAppendExtension = useObservable(breadcrumbsAppendExtension$);
 
   if (!isVisible) {
-    return <LoadingIndicator loadingCount$={observables.loadingCount$} showAsBar />;
+    return (
+      <>
+        <LoadingIndicator loadingCount$={observables.loadingCount$} showAsBar />
+        <HeaderTopBanner headerBanner$={observables.headerBanner$} />
+      </>
+    );
   }
 
   const toggleCollapsibleNavRef = createRef<HTMLButtonElement>();
@@ -97,11 +108,13 @@ export function Header({
 
   return (
     <>
+      <HeaderTopBanner headerBanner$={observables.headerBanner$} />
       <header className={className} data-test-subj="headerGlobalNav">
-        <div id="globalHeaderBars">
+        <div id="globalHeaderBars" className="header__bars">
           <EuiHeader
             theme="dark"
             position="fixed"
+            className="header__firstBar"
             sections={[
               {
                 items: [
@@ -144,7 +157,7 @@ export function Header({
             ]}
           />
 
-          <EuiHeader position="fixed">
+          <EuiHeader position="fixed" className="header__secondBar">
             <EuiHeaderSection grow={false}>
               <EuiHeaderSectionItem border="right" className="header__toggleNavButtonSection">
                 <EuiHeaderSectionItemButton

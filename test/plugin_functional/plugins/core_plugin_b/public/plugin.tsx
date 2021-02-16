@@ -16,7 +16,7 @@ declare global {
 }
 
 export interface CorePluginBDeps {
-  core_plugin_a: CorePluginAPluginSetup;
+  corePluginA: CorePluginAPluginSetup;
 }
 
 export class CorePluginBPlugin
@@ -37,7 +37,7 @@ export class CorePluginBPlugin
 
     return {
       sayHi() {
-        return `Plugin A said: ${deps.core_plugin_a.getGreeting()}`;
+        return `Plugin A said: ${deps.corePluginA.getGreeting()}`;
       },
     };
   }

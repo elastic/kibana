@@ -6,15 +6,7 @@
  * Side Public License, v 1.
  */
 
-export {
-  ChromeBadge,
-  ChromeBreadcrumb,
-  ChromeService,
-  ChromeStart,
-  InternalChromeStart,
-  ChromeBrand,
-  ChromeHelpExtension,
-} from './chrome_service';
+export { ChromeService } from './chrome_service';
 export {
   ChromeHelpExtensionLinkBase,
   ChromeHelpExtensionMenuLink,
@@ -28,3 +20,13 @@ export { ChromeNavLink, ChromeNavLinks, ChromeNavLinkUpdateableFields } from './
 export { ChromeRecentlyAccessed, ChromeRecentlyAccessedHistoryItem } from './recently_accessed';
 export { ChromeNavControl, ChromeNavControls } from './nav_controls';
 export { ChromeDocTitle } from './doc_title';
+export {
+  InternalChromeStart,
+  ChromeStart,
+  ChromeHelpExtension,
+  ChromeBreadcrumbsAppendExtension,
+  ChromeBreadcrumb,
+  ChromeBrand,
+  ChromeBadge,
+  ChromeUserBanner,
+} from './types';
