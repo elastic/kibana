@@ -74,8 +74,7 @@ export const postCommentAlertReq: CommentRequestAlertType = {
 };
 
 export const postCommentGenAlertReq: ContextTypeGeneratedAlertType = {
-  alerts: [{ _id: 'test-id' }, { _id: 'test-id2' }],
-  index: 'test-index',
+  alerts: `[{ "_id": "test-id" }__SEPARATOR__{ "_id": "test-id2" }]`,
   type: CommentType.generatedAlert,
 };
 
