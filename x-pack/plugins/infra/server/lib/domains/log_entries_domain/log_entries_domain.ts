@@ -11,8 +11,8 @@ import type { InfraPluginRequestHandlerContext } from '../../../types';
 import {
   LogEntriesSummaryBucket,
   LogEntriesSummaryHighlightsBucket,
-  LogEntriesRequest,
 } from '../../../../common/http_api';
+import { LogSourceColumnConfiguration } from '../../../../common/http_api/log_sources';
 import { LogColumn, LogEntryCursor, LogEntry } from '../../../../common/log_entry';
 import {
   InfraSourceConfiguration,
@@ -71,7 +71,7 @@ export class InfraLogEntriesDomain {
     requestContext: InfraPluginRequestHandlerContext,
     sourceId: string,
     params: LogEntriesAroundParams,
-    columnOverrides?: LogEntriesRequest['columns']
+    columnOverrides?: LogSourceColumnConfiguration[]
   ): Promise<{ entries: LogEntry[]; hasMoreBefore?: boolean; hasMoreAfter?: boolean }> {
     const { startTimestamp, endTimestamp, center, query, size, highlightTerm } = params;
 
@@ -131,7 +131,7 @@ export class InfraLogEntriesDomain {
     requestContext: InfraPluginRequestHandlerContext,
     sourceId: string,
     params: LogEntriesParams,
-    columnOverrides?: LogEntriesRequest['columns']
+    columnOverrides?: LogSourceColumnConfiguration[]
   ): Promise<{ entries: LogEntry[]; hasMoreBefore?: boolean; hasMoreAfter?: boolean }> {
     const { configuration } = await this.libs.sources.getSourceConfiguration(
       requestContext.core.savedObjects.client,
