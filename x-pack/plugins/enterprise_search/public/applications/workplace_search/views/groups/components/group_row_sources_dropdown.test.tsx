@@ -8,12 +8,13 @@
 import { contentSources } from '../../../__mocks__/content_sources.mock';
 
 import React from 'react';
+
 import { shallow } from 'enzyme';
+
+import { EuiFilterGroup } from '@elastic/eui';
 
 import { GroupRowSourcesDropdown } from './group_row_sources_dropdown';
 import { SourceOptionItem } from './source_option_item';
-
-import { EuiFilterGroup } from '@elastic/eui';
 
 const onButtonClick = jest.fn();
 const closePopover = jest.fn();

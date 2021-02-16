@@ -9,9 +9,9 @@ import { ServiceNowITSMFieldsType, ConnectorServiceNowITSMTypeFields } from '../
 import { ExternalServiceFormatter } from '../types';
 
 const format: ExternalServiceFormatter<ServiceNowITSMFieldsType>['format'] = (theCase) => {
-  const { severity = null, urgency = null, impact = null } =
+  const { severity = null, urgency = null, impact = null, category = null, subcategory = null } =
     (theCase.connector.fields as ConnectorServiceNowITSMTypeFields['fields']) ?? {};
-  return { severity, urgency, impact };
+  return { severity, urgency, impact, category, subcategory };
 };
 
 export const serviceNowITSMExternalServiceFormatter: ExternalServiceFormatter<ServiceNowITSMFieldsType> = {

@@ -6,7 +6,9 @@
  */
 
 import React from 'react';
+
 import { useValues } from 'kea';
+
 import {
   EuiPage,
   EuiPageBody,
@@ -25,11 +27,10 @@ import { KibanaLogic } from '../../../shared/kibana';
 import { SetEnterpriseSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
 import { SendEnterpriseSearchTelemetry as SendTelemetry } from '../../../shared/telemetry';
 
-import { ProductCard } from '../product_card';
-import { SetupGuideCta } from '../setup_guide';
-
 import AppSearchImage from '../../assets/app_search.png';
 import WorkplaceSearchImage from '../../assets/workplace_search.png';
+import { ProductCard } from '../product_card';
+import { SetupGuideCta } from '../setup_guide';
 
 interface ProductSelectorProps {
   access: {

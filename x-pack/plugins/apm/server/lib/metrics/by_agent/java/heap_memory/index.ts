@@ -7,6 +7,7 @@
 
 import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { i18n } from '@kbn/i18n';
+import { withApmSpan } from '../../../../../utils/with_apm_span';
 import {
   METRIC_JAVA_HEAP_MEMORY_MAX,
   METRIC_JAVA_HEAP_MEMORY_COMMITTED,
@@ -51,7 +52,7 @@ const chartBase: ChartBase = {
   series,
 };
 
-export async function getHeapMemoryChart({
+export function getHeapMemoryChart({
   setup,
   serviceName,
   serviceNodeName,
@@ -60,18 +61,20 @@ export async function getHeapMemoryChart({
   serviceName: string;
   serviceNodeName?: string;
 }) {
-  return fetchAndTransformMetrics({
-    setup,
-    serviceName,
-    serviceNodeName,
-    chartBase,
-    aggs: {
-      heapMemoryMax: { avg: { field: METRIC_JAVA_HEAP_MEMORY_MAX } },
-      heapMemoryCommitted: {
-        avg: { field: METRIC_JAVA_HEAP_MEMORY_COMMITTED },
+  return withApmSpan('get_heap_memory_charts', () =>
+    fetchAndTransformMetrics({
+      setup,
+      serviceName,
+      serviceNodeName,
+      chartBase,
+      aggs: {
+        heapMemoryMax: { avg: { field: METRIC_JAVA_HEAP_MEMORY_MAX } },
+        heapMemoryCommitted: {
+          avg: { field: METRIC_JAVA_HEAP_MEMORY_COMMITTED },
+        },
+        heapMemoryUsed: { avg: { field: METRIC_JAVA_HEAP_MEMORY_USED } },
       },
-      heapMemoryUsed: { avg: { field: METRIC_JAVA_HEAP_MEMORY_USED } },
-    },
-    additionalFilters: [{ term: { [AGENT_NAME]: 'java' } }],
-  });
+      additionalFilters: [{ term: { [AGENT_NAME]: 'java' } }],
+    })
+  );
 }

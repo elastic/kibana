@@ -6,18 +6,20 @@
  */
 
 import { setMockValues } from '../../../../__mocks__/kea.mock';
-import { setMockSearchContextState } from './__mocks__/hooks.mock';
 
 import React from 'react';
 
 import { shallow, mount } from 'enzyme';
+
 // @ts-expect-error types are not available for this package yet
 import { Results } from '@elastic/react-search-ui';
 
-import { ResultView } from './views';
-import { Pagination } from './pagination';
 import { SchemaTypes } from '../../../../shared/types';
+
+import { setMockSearchContextState } from './__mocks__/hooks.mock';
+import { Pagination } from './pagination';
 import { SearchExperienceContent } from './search_experience_content';
+import { ResultView } from './views';
 
 describe('SearchExperienceContent', () => {
   const searchState = {
