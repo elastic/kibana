@@ -359,11 +359,7 @@ export default function ({ getService }: FtrProviderContext) {
               } Discover card`
             );
             await ml.dataVisualizerIndexBased.assertActionsPanelExists();
-            if (testUser.discoverAvailable) {
-              await ml.dataVisualizerIndexBased.assertViewInDiscoverCardExists();
-            } else {
-              await ml.dataVisualizerIndexBased.assertViewInDiscoverCardNotExists();
-            }
+            await ml.dataVisualizerIndexBased.assertViewInDiscoverCard(testUser.discoverAvailable);
 
             await ml.testExecution.logTestStep('should not display job cards');
             await ml.dataVisualizerIndexBased.assertCreateAdvancedJobCardNotExists();
