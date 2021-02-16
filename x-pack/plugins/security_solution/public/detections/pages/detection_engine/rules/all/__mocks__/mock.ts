@@ -141,9 +141,9 @@ export const mockRuleWithEverything = (id: string): Rule => ({
   type: 'saved_query',
   threat: getThreatMock(),
   threshold: {
-    field: 'host.name',
+    field: ['host.name'],
     value: 50,
-    cardinality_field: 'process.name',
+    cardinality_field: ['process.name'],
     cardinality_value: 2,
   },
   throttle: 'no_actions',
@@ -195,7 +195,7 @@ export const mockDefineStepRule = (): DefineStepRule => ({
     field: [''],
     value: '100',
     cardinality_field: [''],
-    cardinality_value: 2,
+    cardinality_value: '2',
   },
 });
 

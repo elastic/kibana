@@ -468,7 +468,7 @@ export const threshold = t.intersection([
   ),
   t.exact(
     t.partial({
-      cardinality_field: t.union([t.string, t.undefined]),
+      cardinality_field: t.union([t.string, t.array(t.string), t.undefined]),
       cardinality_value: t.union([PositiveInteger, t.undefined]), // TODO: cardinality_value should be set if cardinality_field is set
     })
   ),
