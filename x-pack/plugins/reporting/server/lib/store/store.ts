@@ -17,7 +17,7 @@ import { mapping } from './mapping';
 import { Report, ReportDocument } from './report';
 
 /*
- * When searching for zombie reports, we get a subset of fields
+ * When searching for long-pending reports, we get a subset of fields
  */
 export interface ReportRecordTimeout {
   _id: string;
@@ -42,20 +42,20 @@ const checkReportIsEditable = (report: Report) => {
  * - interface for downloading the report
  */
 export class ReportingStore {
-  private readonly index: string; // config setting of index prefix in system index name
+  private readonly indexPrefix: string; // config setting of index prefix in system index name
   private readonly indexInterval: string; // config setting of index prefix: how often to poll for pending work
   private readonly queueTimeoutMins: number; // config setting of queue timeout, rounded up to nearest minute
   private client: ElasticsearchServiceSetup['legacy']['client'];
   private logger: LevelLogger;
 
-  constructor(reporting: ReportingCore, parentLogger: LevelLogger) {
+  constructor(reporting: ReportingCore, logger: LevelLogger) {
     const config = reporting.getConfig();
     const elasticsearch = reporting.getElasticsearchService();
 
-    this.logger = parentLogger.clone(['store']);
     this.client = elasticsearch.legacy.client;
-    this.index = config.get('index');
+    this.indexPrefix = config.get('index');
     this.indexInterval = config.get('queue', 'indexInterval');
+    this.logger = logger.clone(['store']);
     this.queueTimeoutMins = Math.ceil(numberToDuration(config.get('queue', 'timeout')).asMinutes());
   }
 
@@ -109,7 +109,7 @@ export class ReportingStore {
       id: report._id,
       body: {
         ...report.toEsDocsJSON()._source,
-        process_expiration: null,
+        process_expiration: new Date(0), // use epoch so the job query works
         attempts: 0,
         status: statuses.JOB_STATUS_PENDING,
       },
@@ -128,7 +128,7 @@ export class ReportingStore {
     let index = report._index;
     if (!index) {
       const timestamp = indexTimestamp(this.indexInterval);
-      index = `${this.index}-${timestamp}`;
+      index = `${this.indexPrefix}-${timestamp}`;
       report._index = index;
     }
     await this.createIndex(index);
@@ -283,11 +283,11 @@ export class ReportingStore {
   }
 
   /*
-   * Finds timing-out jobs stuck in pending or processing status
+   * Finds jobs stuck in pending status, or timed-out jobs stuck in processing status
    */
   public async findLongPendingReports(logger = this.logger): Promise<ReportRecordTimeout[] | null> {
     const searchParams: SearchParams = {
-      index: this.index + '-*',
+      index: this.indexPrefix + '-*',
       filterPath: 'hits.hits',
       body: {
         sort: { created_at: { order: 'desc' } },

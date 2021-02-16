@@ -47,11 +47,11 @@ export function enqueueJobFactory(
     const job = await createJob(jobParams, context, request);
 
     // 1. Add the report to ReportingStore to show as pending
-    const pendingReport = await store.addReport(
+    const report = await store.addReport(
       new Report({
         jobtype: exportType.jobType,
         created_by: user ? user.username : false,
-        max_attempts: config.get('capture', 'maxAttempts'), // NOTE: changing the capture.maxAttempts config setting does not existing pending reports
+        max_attempts: config.get('capture', 'maxAttempts'), // NOTE: changing the capture.maxAttempts config setting does not affect existing pending reports
         payload: job,
         meta: {
           objectType: jobParams.objectType,
@@ -59,12 +59,12 @@ export function enqueueJobFactory(
         },
       })
     );
-    logger.debug(`Successfully stored pending job: ${pendingReport._index}/${pendingReport._id}`);
+    logger.debug(`Successfully stored pending job: ${report._index}/${report._id}`);
 
     // 2. Schedule the report with Task Manager
-    const task = await reporting.scheduleTask(pendingReport.toReportTaskJSON());
+    const task = await reporting.scheduleTask(report.toReportTaskJSON());
     logger.info(`Scheduled ${exportType.name} reporting task: ${task.id}`);
 
-    return pendingReport;
+    return report;
   };
 }

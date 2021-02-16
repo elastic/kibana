@@ -40,7 +40,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         `--xpack.reporting.capture.maxAttempts=1`,
         `--xpack.reporting.csv.maxSizeBytes=2850`,
         `--xpack.security.enabled=false`,
-        `--xpack.reporting.encryptionKey=fluregdokpolqwohfjokkk37848tekisuor`,
       ],
     },
   };

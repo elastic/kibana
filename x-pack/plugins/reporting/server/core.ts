@@ -96,7 +96,7 @@ export class ReportingCore {
       // enable this instance to generate reports and to monitor for pending reports
       await Promise.all([executeTask.init(taskManager), monitorTask.init(taskManager)]);
     } else {
-      // enable requesting other instances to generate reports
+      // enable this instance to request other instances to generate reports
       await this.executeTask.init(taskManager);
     }
   }
