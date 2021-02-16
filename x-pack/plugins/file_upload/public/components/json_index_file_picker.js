@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import _ from 'lodash';
 import React, { Fragment, Component } from 'react';
 import { EuiFilePicker, EuiFormRow, EuiProgress } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -178,28 +177,24 @@ export class JsonIndexFilePicker extends Component {
       resetFileAndIndexSettings();
       return;
     }
-    const { errors, parsedGeojson } = fileResult;
 
-    if (errors.length) {
-      // Set only the first error for now (since there's only one).
-      // TODO: Add handling in case of further errors
-      const error = errors[0];
+    if (fileResult.errors.length) {
       this.setState({
         fileUploadError: (
           <FormattedMessage
             id="xpack.fileUpload.jsonIndexFilePicker.fileParseError"
             defaultMessage="File parse error(s) detected: {error}"
-            values={{ error }}
+            values={{ error: fileResult.errors[0] }}
           />
         ),
       });
     }
-    if (parsedGeojson) {
-      onFileUpload(parsedGeojson, _.get(parsedGeojson, 'name', file.name));
+    if (fileResult.parsedGeojson) {
+      onFileUpload(fileResult.parsedGeojson, file.name);
     }
     setIndexName(defaultIndexName);
     setFileRef(file);
-    setParsedFile(parsedGeojson);
+    setParsedFile(fileResult);
   }
 
   render() {

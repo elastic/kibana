@@ -72,7 +72,7 @@ export abstract class Importer implements IImporter {
           }
         : {};
 
-    const createIndexResp = await callImportRoute({
+    return await callImportRoute({
       id: undefined,
       index,
       data: [],
@@ -80,8 +80,6 @@ export abstract class Importer implements IImporter {
       mappings,
       ingestPipeline,
     });
-
-    return createIndexResp;
   }
 
   public async import(

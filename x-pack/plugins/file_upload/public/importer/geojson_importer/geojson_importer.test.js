@@ -6,25 +6,28 @@
  */
 
 import { GeoJsonImporter } from './geojson_importer';
+import { ES_FIELD_TYPES } from '../../../../../../src/plugins/data/public';
 import '@loaders.gl/polyfills';
+
+const FEATURE_COLLECTION = {
+  type: 'FeatureCollection',
+  features: [
+    {
+      type: 'Feature',
+      properties: {
+        population: 200,
+      },
+      geometry: {
+        type: 'Point',
+        coordinates: [-112.0372, 46.608058],
+      },
+    },
+  ],
+};
 
 describe('readFile', () => {
   const setFileProgress = jest.fn((a) => a);
-  const FEATURE_COLLECTION = {
-    type: 'FeatureCollection',
-    features: [
-      {
-        type: 'Feature',
-        properties: {
-          population: 200,
-        },
-        geometry: {
-          type: 'Point',
-          coordinates: [-112.0372, 46.608058],
-        },
-      },
-    ],
-  };
+
   const FILE_WITH_FEATURE_COLLECTION = new File(
     [JSON.stringify(FEATURE_COLLECTION)],
     'testfile.json',
@@ -66,6 +69,7 @@ describe('readFile', () => {
     expect(setFileProgress).toHaveBeenCalled();
     expect(results).toEqual({
       errors: [],
+      geometryTypes: ['Point'],
       parsedGeojson: FEATURE_COLLECTION,
     });
   });
@@ -107,6 +111,7 @@ describe('readFile', () => {
     expect(setFileProgress).toHaveBeenCalled();
     expect(results).toEqual({
       errors: ['2 features without geometry omitted'],
+      geometryTypes: ['Point'],
       parsedGeojson: FEATURE_COLLECTION,
     });
   });
@@ -137,6 +142,7 @@ describe('readFile', () => {
     expect(setFileProgress).toHaveBeenCalled();
     expect(results).toEqual({
       errors: [],
+      geometryTypes: ['Point'],
       parsedGeojson: FEATURE_COLLECTION,
     });
   });
@@ -188,5 +194,32 @@ describe('readFile', () => {
       .catch((e) => {
         expect(e.message).toMatch('Error, no features detected');
       });
+  });
+});
+
+describe('setDocs', () => {
+  test('should convert features to geo_point ES documents', () => {
+    const importer = new GeoJsonImporter();
+    importer.setDocs(FEATURE_COLLECTION, ES_FIELD_TYPES.GEO_POINT);
+    expect(importer.getDocs()).toEqual([
+      {
+        coordinates: [-112.0372, 46.608058],
+        population: 200,
+      },
+    ]);
+  });
+
+  test('should convert features to geo_shape ES documents', () => {
+    const importer = new GeoJsonImporter();
+    importer.setDocs(FEATURE_COLLECTION, ES_FIELD_TYPES.GEO_SHAPE);
+    expect(importer.getDocs()).toEqual([
+      {
+        coordinates: {
+          type: 'point',
+          coordinates: [-112.0372, 46.608058],
+        },
+        population: 200,
+      },
+    ]);
   });
 });

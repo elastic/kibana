@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ImportDoc, Mappings, Settings, IngestPipeline } from '../../common';
+import { IngestPipeline, ImportDoc, ImportResponse, Mappings, Settings } from '../../common';
 
 export interface ImportConfig {
   settings: Settings;
@@ -40,7 +40,7 @@ export interface IImporter {
     settings: Settings,
     mappings: Mappings,
     pipeline: IngestPipeline
-  ): Promise<ImportResults>;
+  ): Promise<ImportResponse>;
   import(
     id: string,
     index: string,

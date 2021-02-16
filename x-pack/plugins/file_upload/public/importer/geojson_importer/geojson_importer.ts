@@ -5,13 +5,23 @@
  * 2.0.
  */
 
-import { Feature, FeatureCollection } from 'geojson';
+import {
+  Feature,
+  FeatureCollection,
+  Point,
+  MultiPoint,
+  LineString,
+  MultiLineString,
+  Polygon,
+  MultiPolygon,
+} from 'geojson';
 import { i18n } from '@kbn/i18n';
 // @ts-expect-error
 import { JSONLoader } from '@loaders.gl/json';
 import { loadInBatches } from '@loaders.gl/core';
 import { CreateDocsResponse } from '../types';
 import { Importer } from '../importer';
+import { ES_FIELD_TYPES } from '../../../../../../src/plugins/data/public';
 // @ts-expect-error
 import { geoJsonCleanAndValidate } from './geojson_clean_and_validate';
 
@@ -28,6 +38,39 @@ export class GeoJsonImporter extends Importer {
     throw new Error('_createDocs not implemented.');
   }
 
+  public getDocs() {
+    return this._docArray;
+  }
+
+  public setDocs(
+    featureCollection: FeatureCollection,
+    geoFieldType: ES_FIELD_TYPES.GEO_POINT | ES_FIELD_TYPES.GEO_SHAPE
+  ) {
+    this._docArray = [];
+    for (let i = 0; i < featureCollection.features.length; i++) {
+      const feature = featureCollection.features[i];
+      const geometry = feature.geometry as
+        | Point
+        | MultiPoint
+        | LineString
+        | MultiLineString
+        | Polygon
+        | MultiPolygon;
+      const coordinates =
+        geoFieldType === ES_FIELD_TYPES.GEO_SHAPE
+          ? {
+              type: geometry.type.toLowerCase(),
+              coordinates: geometry.coordinates,
+            }
+          : geometry.coordinates;
+      const properties = feature.properties ? feature.properties : {};
+      this._docArray.push({
+        coordinates,
+        ...properties,
+      });
+    }
+  }
+
   public async readFile(
     file: File,
     setFileProgress: ({
@@ -40,7 +83,11 @@ export class GeoJsonImporter extends Importer {
       totalBytes: number;
     }) => void,
     isFileParseActive: () => boolean
-  ): Promise<{ errors: string[]; parsedGeojson: FeatureCollection } | null> {
+  ): Promise<{
+    errors: string[];
+    geometryTypes: string[];
+    parsedGeojson: FeatureCollection;
+  } | null> {
     if (!file) {
       throw new Error(
         i18n.translate('xpack.fileUpload.fileParser.noFileProvided', {
@@ -96,12 +143,16 @@ export class GeoJsonImporter extends Importer {
       }
 
       const features: Feature[] = [];
+      const geometryTypesMap = new Map<string, boolean>();
       let invalidCount = 0;
       for (let i = 0; i < rawFeatures.length; i++) {
         const rawFeature = rawFeatures[i] as Feature;
         if (!rawFeature.geometry || !rawFeature.geometry.type) {
           invalidCount++;
         } else {
+          if (!geometryTypesMap.has(rawFeature.geometry.type)) {
+            geometryTypesMap.set(rawFeature.geometry.type, true);
+          }
           features.push(geoJsonCleanAndValidate(rawFeature));
         }
       }
@@ -117,6 +168,7 @@ export class GeoJsonImporter extends Importer {
       }
       resolve({
         errors,
+        geometryTypes: Array.from(geometryTypesMap.keys()),
         parsedGeojson: {
           type: 'FeatureCollection',
           features,
