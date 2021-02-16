@@ -117,8 +117,6 @@ For the Elastic Security Solution 7.11.1 bug fixes, refer to {security-guide}/re
 Lens and visualizations::
 * *Lens* visualizations now load faster on dashboards {kibana-pull}88953[#88953]
 * Advanced input now works for aggregation-based visualizations {kibana-pull}88154[#88154]
-Machine Learning::
-* Fixes cloning of anomaly detection job with sparse data {kibana-pull}88322[#88322]
 Maps::
 * Always check license at plugin startup {kibana-pull}87873[#87873]
 Monitoring::
