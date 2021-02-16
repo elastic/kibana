@@ -9,13 +9,7 @@ import React, { FC } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import {
-  EuiModal,
-  EuiModalBody,
-  EuiModalHeader,
-  EuiModalHeaderTitle,
-  EuiOverlayMask,
-} from '@elastic/eui';
+import { EuiModal, EuiModalBody, EuiModalHeader, EuiModalHeaderTitle } from '@elastic/eui';
 
 import { SavedObjectFinderUi } from '../../../../../../../../../../src/plugins/saved_objects/public';
 import { useMlKibana, useNavigateToPath } from '../../../../../contexts/kibana';
@@ -41,66 +35,62 @@ export const SourceSelection: FC<Props> = ({ onClose }) => {
   };
 
   return (
-    <>
-      <EuiOverlayMask>
-        <EuiModal
-          className="dataFrameAnalyticsCreateSearchDialog"
-          onClose={onClose}
-          data-test-subj="analyticsCreateSourceIndexModal"
-        >
-          <EuiModalHeader>
-            <EuiModalHeaderTitle>
-              <FormattedMessage
-                id="xpack.ml.dataframe.analytics.create.newAnalyticsTitle"
-                defaultMessage="New analytics job"
-              />{' '}
-              /{' '}
-              <FormattedMessage
-                id="xpack.ml.dataframe.analytics.create.chooseSourceTitle"
-                defaultMessage="Choose a source index pattern"
-              />
-            </EuiModalHeaderTitle>
-          </EuiModalHeader>
-          <EuiModalBody>
-            <SavedObjectFinderUi
-              key="searchSavedObjectFinder"
-              onChoose={onSearchSelected}
-              showFilter
-              noItemsMessage={i18n.translate(
-                'xpack.ml.dataFrame.analytics.create.searchSelection.notFoundLabel',
+    <EuiModal
+      className="dataFrameAnalyticsCreateSearchDialog"
+      onClose={onClose}
+      data-test-subj="analyticsCreateSourceIndexModal"
+    >
+      <EuiModalHeader>
+        <EuiModalHeaderTitle>
+          <FormattedMessage
+            id="xpack.ml.dataframe.analytics.create.newAnalyticsTitle"
+            defaultMessage="New analytics job"
+          />{' '}
+          /{' '}
+          <FormattedMessage
+            id="xpack.ml.dataframe.analytics.create.chooseSourceTitle"
+            defaultMessage="Choose a source index pattern"
+          />
+        </EuiModalHeaderTitle>
+      </EuiModalHeader>
+      <EuiModalBody>
+        <SavedObjectFinderUi
+          key="searchSavedObjectFinder"
+          onChoose={onSearchSelected}
+          showFilter
+          noItemsMessage={i18n.translate(
+            'xpack.ml.dataFrame.analytics.create.searchSelection.notFoundLabel',
+            {
+              defaultMessage: 'No matching indices or saved searches found.',
+            }
+          )}
+          savedObjectMetaData={[
+            {
+              type: 'search',
+              getIconForSavedObject: () => 'search',
+              name: i18n.translate(
+                'xpack.ml.dataFrame.analytics.create.searchSelection.savedObjectType.search',
                 {
-                  defaultMessage: 'No matching indices or saved searches found.',
+                  defaultMessage: 'Saved search',
                 }
-              )}
-              savedObjectMetaData={[
+              ),
+            },
+            {
+              type: 'index-pattern',
+              getIconForSavedObject: () => 'indexPatternApp',
+              name: i18n.translate(
+                'xpack.ml.dataFrame.analytics.create.searchSelection.savedObjectType.indexPattern',
                 {
-                  type: 'search',
-                  getIconForSavedObject: () => 'search',
-                  name: i18n.translate(
-                    'xpack.ml.dataFrame.analytics.create.searchSelection.savedObjectType.search',
-                    {
-                      defaultMessage: 'Saved search',
-                    }
-                  ),
-                },
-                {
-                  type: 'index-pattern',
-                  getIconForSavedObject: () => 'indexPatternApp',
-                  name: i18n.translate(
-                    'xpack.ml.dataFrame.analytics.create.searchSelection.savedObjectType.indexPattern',
-                    {
-                      defaultMessage: 'Index pattern',
-                    }
-                  ),
-                },
-              ]}
-              fixedPageSize={fixedPageSize}
-              uiSettings={uiSettings}
-              savedObjects={savedObjects}
-            />
-          </EuiModalBody>
-        </EuiModal>
-      </EuiOverlayMask>
-    </>
+                  defaultMessage: 'Index pattern',
+                }
+              ),
+            },
+          ]}
+          fixedPageSize={fixedPageSize}
+          uiSettings={uiSettings}
+          savedObjects={savedObjects}
+        />
+      </EuiModalBody>
+    </EuiModal>
   );
 };

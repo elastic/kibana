@@ -17,6 +17,10 @@ import { withApmSpan } from '../../utils/with_apm_span';
 import { getProcessorEventForAggregatedTransactions } from '../helpers/aggregated_transactions';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
 
+/**
+ * This is used for getting the list of environments for the environments selector,
+ * filtered by range.
+ */
 export async function getEnvironments({
   setup,
   serviceName,

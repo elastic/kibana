@@ -8,7 +8,6 @@
 import React, { Fragment, useRef, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
-  EuiOverlayMask,
   EuiModal,
   EuiModalHeader,
   EuiModalHeaderTitle,
@@ -129,165 +128,161 @@ export const RetentionSettingsUpdateModalProvider: React.FunctionComponent<Props
     }
 
     return (
-      <EuiOverlayMask>
-        <EuiModal onClose={closeModal}>
-          <EuiModalHeader>
-            <EuiModalHeaderTitle>
-              {isEditing ? (
-                <FormattedMessage
-                  id="xpack.snapshotRestore.policyForm.stepRetention.policyUpdateRetentionEditTitle"
-                  defaultMessage="Edit retention schedule"
-                />
-              ) : (
-                <FormattedMessage
-                  id="xpack.snapshotRestore.policyForm.stepRetention.policyUpdateRetentionAddTitle"
-                  defaultMessage="Add retention schedule"
-                />
-              )}
-            </EuiModalHeaderTitle>
-          </EuiModalHeader>
-
-          <EuiModalBody>
-            {saveError && (
-              <Fragment>
-                <EuiCallOut
-                  title={
-                    <FormattedMessage
-                      id="xpack.snapshotRestore.policyForm.stepRetention.policyUpdateRetentionErrorTitle"
-                      defaultMessage="Error saving retention schedule"
-                    />
-                  }
-                  color="danger"
-                  iconType="alert"
-                >
-                  {saveError.data && saveError.data.message ? (
-                    <p>{saveError.data.message}</p>
-                  ) : null}
-                </EuiCallOut>
-                <EuiSpacer size="m" />
-              </Fragment>
-            )}
-            {isAdvancedCronVisible ? (
-              <Fragment>
-                <EuiFormRow
-                  label={
-                    <FormattedMessage
-                      id="xpack.snapshotRestore.policyForm.stepRetention.policyUpdateRetentionScheduleLabel"
-                      defaultMessage="Retention schedule"
-                    />
-                  }
-                  isInvalid={isInvalid}
-                  error={i18n.translate(
-                    'xpack.snapshotRestore.policyForm.stepRetention.policyUpdateRetentionScheduleFieldErrorMessage',
-                    {
-                      defaultMessage: 'Retention schedule is required.',
-                    }
-                  )}
-                  helpText={
-                    <FormattedMessage
-                      id="xpack.snapshotRestore.policyForm.stepRetention.policyUpdateRetentionHelpText"
-                      defaultMessage="Use cron expression. {docLink}"
-                      values={{
-                        docLink: (
-                          <EuiLink href={documentationLinksService.getCronUrl()} target="_blank">
-                            <FormattedMessage
-                              id="xpack.snapshotRestore.policyForm.stepRetention.policyUpdateRetentionHelpTextDocLinkText"
-                              defaultMessage="Learn more."
-                            />
-                          </EuiLink>
-                        ),
-                      }}
-                    />
-                  }
-                  fullWidth
-                >
-                  <EuiFieldText
-                    defaultValue={retentionSchedule}
-                    fullWidth
-                    onChange={(e) => setRetentionSchedule(e.target.value)}
-                  />
-                </EuiFormRow>
-
-                <EuiSpacer size="m" />
-
-                <EuiText size="s">
-                  <EuiLink
-                    onClick={() => {
-                      setIsAdvancedCronVisible(false);
-                      setRetentionSchedule(simpleCron.expression);
-                    }}
-                    data-test-subj="showBasicCronLink"
-                  >
-                    <FormattedMessage
-                      id="xpack.snapshotRestore.policyForm.stepRetention.policyUpdateRetentionBasicLabel"
-                      defaultMessage="Create basic interval"
-                    />
-                  </EuiLink>
-                </EuiText>
-              </Fragment>
-            ) : (
-              <Fragment>
-                <CronEditor
-                  fieldToPreferredValueMap={fieldToPreferredValueMap}
-                  cronExpression={simpleCron.expression}
-                  frequency={simpleCron.frequency}
-                  onChange={({
-                    cronExpression: expression,
-                    frequency,
-                    fieldToPreferredValueMap: newFieldToPreferredValueMap,
-                  }) => {
-                    setSimpleCron({
-                      expression,
-                      frequency,
-                    });
-                    setFieldToPreferredValueMap(newFieldToPreferredValueMap);
-                    setRetentionSchedule(expression);
-                  }}
-                />
-
-                <EuiSpacer size="m" />
-
-                <EuiText size="s">
-                  <EuiLink
-                    onClick={() => {
-                      setIsAdvancedCronVisible(true);
-                    }}
-                    data-test-subj="showAdvancedCronLink"
-                  >
-                    <FormattedMessage
-                      id="xpack.snapshotRestore.policyForm.stepRetention.policyUpdateRetentionAdvancedLabel"
-                      defaultMessage="Create cron expression"
-                    />
-                  </EuiLink>
-                </EuiText>
-              </Fragment>
-            )}
-          </EuiModalBody>
-
-          <EuiModalFooter>
-            <EuiButtonEmpty onClick={closeModal}>
+      <EuiModal onClose={closeModal}>
+        <EuiModalHeader>
+          <EuiModalHeaderTitle>
+            {isEditing ? (
               <FormattedMessage
-                id="xpack.snapshotRestore.policyForm.stepRetention.policyUpdateRetentionCancelButtonLabel"
-                defaultMessage="Cancel"
+                id="xpack.snapshotRestore.policyForm.stepRetention.policyUpdateRetentionEditTitle"
+                defaultMessage="Edit retention schedule"
               />
-            </EuiButtonEmpty>
+            ) : (
+              <FormattedMessage
+                id="xpack.snapshotRestore.policyForm.stepRetention.policyUpdateRetentionAddTitle"
+                defaultMessage="Add retention schedule"
+              />
+            )}
+          </EuiModalHeaderTitle>
+        </EuiModalHeader>
 
-            <EuiButton onClick={updateRetentionSetting} fill isLoading={isSaving}>
-              {isEditing ? (
-                <FormattedMessage
-                  id="xpack.snapshotRestore.policyForm.stepRetention.policyUpdateRetentionEditButtonLabel"
-                  defaultMessage="Save changes"
+        <EuiModalBody>
+          {saveError && (
+            <Fragment>
+              <EuiCallOut
+                title={
+                  <FormattedMessage
+                    id="xpack.snapshotRestore.policyForm.stepRetention.policyUpdateRetentionErrorTitle"
+                    defaultMessage="Error saving retention schedule"
+                  />
+                }
+                color="danger"
+                iconType="alert"
+              >
+                {saveError.data && saveError.data.message ? <p>{saveError.data.message}</p> : null}
+              </EuiCallOut>
+              <EuiSpacer size="m" />
+            </Fragment>
+          )}
+          {isAdvancedCronVisible ? (
+            <Fragment>
+              <EuiFormRow
+                label={
+                  <FormattedMessage
+                    id="xpack.snapshotRestore.policyForm.stepRetention.policyUpdateRetentionScheduleLabel"
+                    defaultMessage="Retention schedule"
+                  />
+                }
+                isInvalid={isInvalid}
+                error={i18n.translate(
+                  'xpack.snapshotRestore.policyForm.stepRetention.policyUpdateRetentionScheduleFieldErrorMessage',
+                  {
+                    defaultMessage: 'Retention schedule is required.',
+                  }
+                )}
+                helpText={
+                  <FormattedMessage
+                    id="xpack.snapshotRestore.policyForm.stepRetention.policyUpdateRetentionHelpText"
+                    defaultMessage="Use cron expression. {docLink}"
+                    values={{
+                      docLink: (
+                        <EuiLink href={documentationLinksService.getCronUrl()} target="_blank">
+                          <FormattedMessage
+                            id="xpack.snapshotRestore.policyForm.stepRetention.policyUpdateRetentionHelpTextDocLinkText"
+                            defaultMessage="Learn more."
+                          />
+                        </EuiLink>
+                      ),
+                    }}
+                  />
+                }
+                fullWidth
+              >
+                <EuiFieldText
+                  defaultValue={retentionSchedule}
+                  fullWidth
+                  onChange={(e) => setRetentionSchedule(e.target.value)}
                 />
-              ) : (
-                <FormattedMessage
-                  id="xpack.snapshotRestore.policyForm.stepRetention.policyUpdateRetentionSaveButtonLabel"
-                  defaultMessage="Schedule"
-                />
-              )}
-            </EuiButton>
-          </EuiModalFooter>
-        </EuiModal>
-      </EuiOverlayMask>
+              </EuiFormRow>
+
+              <EuiSpacer size="m" />
+
+              <EuiText size="s">
+                <EuiLink
+                  onClick={() => {
+                    setIsAdvancedCronVisible(false);
+                    setRetentionSchedule(simpleCron.expression);
+                  }}
+                  data-test-subj="showBasicCronLink"
+                >
+                  <FormattedMessage
+                    id="xpack.snapshotRestore.policyForm.stepRetention.policyUpdateRetentionBasicLabel"
+                    defaultMessage="Create basic interval"
+                  />
+                </EuiLink>
+              </EuiText>
+            </Fragment>
+          ) : (
+            <Fragment>
+              <CronEditor
+                fieldToPreferredValueMap={fieldToPreferredValueMap}
+                cronExpression={simpleCron.expression}
+                frequency={simpleCron.frequency}
+                onChange={({
+                  cronExpression: expression,
+                  frequency,
+                  fieldToPreferredValueMap: newFieldToPreferredValueMap,
+                }) => {
+                  setSimpleCron({
+                    expression,
+                    frequency,
+                  });
+                  setFieldToPreferredValueMap(newFieldToPreferredValueMap);
+                  setRetentionSchedule(expression);
+                }}
+              />
+
+              <EuiSpacer size="m" />
+
+              <EuiText size="s">
+                <EuiLink
+                  onClick={() => {
+                    setIsAdvancedCronVisible(true);
+                  }}
+                  data-test-subj="showAdvancedCronLink"
+                >
+                  <FormattedMessage
+                    id="xpack.snapshotRestore.policyForm.stepRetention.policyUpdateRetentionAdvancedLabel"
+                    defaultMessage="Create cron expression"
+                  />
+                </EuiLink>
+              </EuiText>
+            </Fragment>
+          )}
+        </EuiModalBody>
+
+        <EuiModalFooter>
+          <EuiButtonEmpty onClick={closeModal}>
+            <FormattedMessage
+              id="xpack.snapshotRestore.policyForm.stepRetention.policyUpdateRetentionCancelButtonLabel"
+              defaultMessage="Cancel"
+            />
+          </EuiButtonEmpty>
+
+          <EuiButton onClick={updateRetentionSetting} fill isLoading={isSaving}>
+            {isEditing ? (
+              <FormattedMessage
+                id="xpack.snapshotRestore.policyForm.stepRetention.policyUpdateRetentionEditButtonLabel"
+                defaultMessage="Save changes"
+              />
+            ) : (
+              <FormattedMessage
+                id="xpack.snapshotRestore.policyForm.stepRetention.policyUpdateRetentionSaveButtonLabel"
+                defaultMessage="Schedule"
+              />
+            )}
+          </EuiButton>
+        </EuiModalFooter>
+      </EuiModal>
     );
   };
 
