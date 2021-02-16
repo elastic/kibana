@@ -769,6 +769,38 @@ describe('<EditPolicy />', () => {
       });
     });
   });
+  describe('with rollover', () => {
+    beforeEach(async () => {
+      httpRequestsMockHelpers.setLoadPolicies([getDefaultHotPhasePolicy('my_policy')]);
+      httpRequestsMockHelpers.setListNodes({
+        isUsingDeprecatedDataRoleConfig: false,
+        nodesByAttributes: { test: ['123'] },
+        nodesByRoles: { data: ['123'] },
+      });
+      httpRequestsMockHelpers.setListSnapshotRepos({ repositories: ['abc'] });
+      httpRequestsMockHelpers.setLoadSnapshotPolicies([]);
+
+      await act(async () => {
+        testBed = await setup();
+      });
+
+      const { component } = testBed;
+      component.update();
+    });
+
+    test('shows rollover tip on minimum age', async () => {
+      const { actions } = testBed;
+
+      await actions.warm.enable(true);
+      await actions.cold.enable(true);
+      await actions.delete.enablePhase();
+
+      expect(actions.warm.hasRolloverTipOnMinAge()).toBeTruthy();
+      expect(actions.cold.hasRolloverTipOnMinAge()).toBeTruthy();
+      expect(actions.delete.hasRolloverTipOnMinAge()).toBeTruthy();
+    });
+  });
+
   describe('without rollover', () => {
     beforeEach(async () => {
       httpRequestsMockHelpers.setLoadPolicies([getDefaultHotPhasePolicy('my_policy')]);
@@ -778,6 +810,7 @@ describe('<EditPolicy />', () => {
         nodesByRoles: { data: ['123'] },
       });
       httpRequestsMockHelpers.setListSnapshotRepos({ repositories: ['found-snapshots'] });
+      httpRequestsMockHelpers.setLoadSnapshotPolicies([]);
 
       await act(async () => {
         testBed = await setup({
@@ -798,6 +831,20 @@ describe('<EditPolicy />', () => {
 
       expect(actions.hot.searchableSnapshotsExists()).toBeFalsy();
       expect(actions.cold.searchableSnapshotDisabledDueToRollover()).toBeTruthy();
+    });
+
+    test('hiding rollover tip on minimum age', async () => {
+      const { actions } = testBed;
+      await actions.hot.toggleDefaultRollover(false);
+      await actions.hot.toggleRollover(false);
+
+      await actions.warm.enable(true);
+      await actions.cold.enable(true);
+      await actions.delete.enablePhase();
+
+      expect(actions.warm.hasRolloverTipOnMinAge()).toBeFalsy();
+      expect(actions.cold.hasRolloverTipOnMinAge()).toBeFalsy();
+      expect(actions.delete.hasRolloverTipOnMinAge()).toBeFalsy();
     });
   });
 
