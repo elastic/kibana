@@ -42,8 +42,8 @@ import { ResizeChecker } from '../../../../../../src/plugins/kibana_utils/public
 import { GeoFieldWithIndex } from '../../components/geo_field_with_index';
 import { RenderToolTipContent } from '../../classes/tooltips/tooltip_property';
 import { MapExtentState } from '../../actions';
-// @ts-expect-error
 import { TileStatusTracker } from './tile_status_tracker';
+// @ts-expect-error
 import mbRtlPlugin from '!!file-loader!@mapbox/mapbox-gl-rtl-text/mapbox-gl-rtl-text.min.js';
 // @ts-expect-error
 import mbWorkerUrl from '!!file-loader!mapbox-gl/dist/mapbox-gl-csp-worker';
@@ -210,7 +210,7 @@ export class MBMap extends Component<Props, State> {
       this._tileStatusTracker = new TileStatusTracker({
         mbMap,
         getCurrentLayerList: () => this.props.layerList,
-        setAreTilesLoaded: (layerId, areTilesLoaded) => {
+        setAreTilesLoaded: (layerId: string, areTilesLoaded: boolean) => {
           this.props.setAreTilesLoaded(layerId, areTilesLoaded);
         },
       });

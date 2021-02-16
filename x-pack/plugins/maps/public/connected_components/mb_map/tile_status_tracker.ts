@@ -6,6 +6,7 @@
  */
 
 import { Map as MapboxMap, MapDataEvent } from 'mapbox-gl';
+import _ from 'lodash';
 import { ILayer } from '../../classes/layers/layer';
 import { SPATIAL_FILTERS_LAYER_ID } from '../../../common/constants';
 
@@ -21,7 +22,7 @@ interface Tile {
 }
 
 export class TileStatusTracker {
-  private _tileCache: Tile[];
+  private _tileCache: Tile[] | null;
   private readonly _setAreTilesLoaded: (layerId: string, areTilesLoaded: boolean) => void;
   private readonly _getCurrentLayerList: () => ILayer[];
 
@@ -31,7 +32,7 @@ export class TileStatusTracker {
     getCurrentLayerList,
   }: {
     mbMap: MapboxMap;
-    setAreTilesLoaded: (layerId: string, areTilesLoaded: boolean) => {};
+    setAreTilesLoaded: (layerId: string, areTilesLoaded: boolean) => void;
     getCurrentLayerList: () => ILayer[];
   }) {
     this._tileCache = [];
@@ -39,6 +40,10 @@ export class TileStatusTracker {
     this._getCurrentLayerList = getCurrentLayerList;
 
     mbMap.on('sourcedataloading', (e) => {
+      if (!this._tileCache) {
+        return;
+      }
+
       if (
         e.sourceId &&
         e.sourceId !== SPATIAL_FILTERS_LAYER_ID &&
@@ -81,6 +86,10 @@ export class TileStatusTracker {
   }
 
   _updateTileStatus = _.debounce(() => {
+    if (!this._tileCache) {
+      return;
+    }
+
     this._tileCache = this._tileCache.filter((tile) => {
       return typeof tile.mbTile.aborted === 'boolean' ? !tile.mbTile.aborted : true;
     });
@@ -101,6 +110,9 @@ export class TileStatusTracker {
   }, 100);
 
   _removeTileFromCache = (mbSourceId: string, mbKey: string) => {
+    if (!this._tileCache) {
+      return;
+    }
     const trackedIndex = this._tileCache.findIndex((tile) => {
       return tile.mbKey === ((mbKey as unknown) as string) && tile.mbSourceId === mbSourceId;
     });
