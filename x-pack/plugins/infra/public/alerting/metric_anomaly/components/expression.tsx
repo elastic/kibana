@@ -38,6 +38,7 @@ import { ANOMALY_THRESHOLD } from '../../../../common/infra_ml';
 import { validateMetricAnomaly } from './validation';
 import { InfluencerFilter } from './influencer_filter';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
+import { useActiveKibanaSpace } from '../../../hooks/use_kibana_space';
 
 export interface AlertContextMeta {
   metric?: InfraWaffleMapOptions['metric'];
@@ -45,7 +46,7 @@ export interface AlertContextMeta {
 }
 
 type AlertParams = AlertTypeParams &
-  MetricAnomalyParams & { sourceId: string; hasInfraMLCapabilities: boolean };
+  MetricAnomalyParams & { sourceId: string; spaceId: string; hasInfraMLCapabilities: boolean };
 
 type Props = Omit<
   AlertTypeParamsExpressionProps<AlertParams, AlertContextMeta>,
@@ -62,6 +63,8 @@ export const defaultExpression = {
 export const Expression: React.FC<Props> = (props) => {
   const { hasInfraMLCapabilities, isLoading: isLoadingMLCapabilities } = useInfraMLCapabilities();
   const { http, notifications } = useKibanaContextForPlugin().services;
+  const { space } = useActiveKibanaSpace();
+
   const {
     setAlertParams,
     alertParams,
@@ -176,7 +179,11 @@ export const Expression: React.FC<Props> = (props) => {
     if (!alertParams.sourceId) {
       setAlertParams('sourceId', source?.id || 'default');
     }
-  }, [metadata, derivedIndexPattern, defaultExpression, source]); // eslint-disable-line react-hooks/exhaustive-deps
+
+    if (!alertParams.spaceId) {
+      setAlertParams('spaceId', space?.id || 'default');
+    }
+  }, [metadata, derivedIndexPattern, defaultExpression, source, space]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (isLoadingMLCapabilities) return <EuiLoadingContent lines={10} />;
   if (!hasInfraMLCapabilities) return <SubscriptionSplashContent />;
@@ -263,6 +270,7 @@ export const Expression: React.FC<Props> = (props) => {
           'threshold',
           'nodeType',
           'sourceId',
+          'spaceId',
           'influencerFilter'
         )}
         validate={validateMetricAnomaly}
