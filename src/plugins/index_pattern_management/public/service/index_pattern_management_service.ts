@@ -24,6 +24,7 @@ import {
   StringFormatEditor,
   TruncateFormatEditor,
   UrlFormatEditor,
+  HistogramFormatEditor,
 } from '../components/field_editor/components/field_format_editor';
 
 interface SetupDependencies {
@@ -67,6 +68,7 @@ export class IndexPatternManagementService {
       StringFormatEditor,
       TruncateFormatEditor,
       UrlFormatEditor,
+      HistogramFormatEditor,
     ];
 
     const fieldFormatEditorsSetup = this.fieldFormatEditors.setup(defaultFieldFormatEditors);
