@@ -240,9 +240,7 @@ We don’t expect notifications to contain sensitive information.
 They must be stored in an encrypted form otherwise. 
 Kibana can query user-specific notifications by *recipent_id*.
 
-Alternative implementation might be to use SO with OLS([#17888](https://github.com/elastic/kibana/issues/17888)),
-but it might be overhead as we don't need any advanced SO functionality like export/import.
-Also, SO search functionality is quite limited and doesn’t allow using complex search queries. 
+Alternative implementation might be to use SO with OLS([#17888](https://github.com/elastic/kibana/issues/17888)) and built-in migration support. The main obstacle to use SO is limited search functionality that doesn’t allow using complex search queries (can be addressed in [#84729](https://github.com/elastic/kibana/issues/84729)).
 
 ### RemoteRepository
 Cloud plugin registered RemoteRepository as a strategy Kibana Notification Service for creation, storage,
