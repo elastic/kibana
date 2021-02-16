@@ -493,8 +493,11 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
       if (script) {
         await this.setFieldScript(script);
       }
+      log.error('clicking save field');
       await this.clickSaveField();
+      log.error('save field clicked');
       await new Promise((resolve) => setTimeout(resolve, 1000 * 30));
+      log.error('30s timeout passed');
     }
 
     async clickAddField() {
@@ -520,7 +523,9 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
     async setFieldScript(script: string) {
       log.debug('set script = ' + script);
       await (await testSubjects.findAll('formRowToggle'))[1].click();
-      await new Promise((resolve) => setTimeout(resolve, 1000 * 5));
+      await new Promise((resolve) => setTimeout(resolve, 1000 * 5 * 60));
+      await (await testSubjects.find('valueRowToggle')).click();
+      await new Promise((resolve) => setTimeout(resolve, 1000 * 5 * 60));
       await browser.pressKeys(browser.keys.TAB);
       await new Promise((resolve) => setTimeout(resolve, 1000 * 5));
       browser.pressKeys(script);
