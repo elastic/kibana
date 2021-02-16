@@ -55,7 +55,14 @@ const ExpandedRowContent = memo<Pick<TrustedAppCardProps, 'trustedApp'>>(({ trus
     );
   }, [history, location, trustedApp.id]);
 
-  return <TrustedAppCard trustedApp={trustedApp} onEdit={handleOnEdit} onDelete={handleOnDelete} />;
+  return (
+    <TrustedAppCard
+      trustedApp={trustedApp}
+      onEdit={handleOnEdit}
+      onDelete={handleOnDelete}
+      data-test-subj="trustedAppCard"
+    />
+  );
 });
 ExpandedRowContent.displayName = 'ExpandedRowContent';
 
@@ -104,6 +111,7 @@ export const TrustedAppsList = memo(() => {
       {
         field: 'name',
         name: PROPERTY_TITLES.name,
+        'data-test-subj': 'trustedAppNameTableCell',
         render(value: TrustedApp['name']) {
           return (
             <TextFieldValue
