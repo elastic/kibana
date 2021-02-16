@@ -28,7 +28,12 @@ import {
 } from '../../../../../src/plugins/data/public';
 import { alertTypeInitializers } from '../lib/alert_types';
 import { FetchDataParams, ObservabilityPluginSetup } from '../../../observability/public';
+import { FleetStart } from '../../../fleet/public';
 import { PLUGIN } from '../../common/constants/plugin';
+import {
+  LazySyntheticsPolicyCreateExtension,
+  LazySyntheticsPolicyEditExtension,
+} from '../components/package';
 
 export interface ClientPluginsSetup {
   data: DataPublicPluginSetup;
@@ -41,6 +46,7 @@ export interface ClientPluginsStart {
   embeddable: EmbeddableStart;
   data: DataPublicPluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
+  fleet?: FleetStart;
 }
 
 export type ClientSetup = void;
@@ -132,6 +138,22 @@ export class UptimePlugin
         plugins.triggersActionsUi.alertTypeRegistry.register(alertInitializer);
       }
     });
+
+    if (plugins.fleet) {
+      const { registerExtension } = plugins.fleet;
+
+      registerExtension({
+        package: 'synthetics',
+        view: 'package-policy-create',
+        component: LazySyntheticsPolicyCreateExtension,
+      });
+
+      registerExtension({
+        package: 'synthetics',
+        view: 'package-policy-edit',
+        component: LazySyntheticsPolicyEditExtension,
+      });
+    }
   }
 
   public stop(): void {}
