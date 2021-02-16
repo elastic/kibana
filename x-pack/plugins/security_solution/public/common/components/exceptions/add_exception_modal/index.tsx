@@ -23,7 +23,6 @@ import {
   EuiText,
   EuiCallOut,
 } from '@elastic/eui';
-import { useQueryAlerts } from '../../../../detections/containers/detection_engine/alerts/use_query';
 import { hasEqlSequenceQuery, isEqlRule } from '../../../../../common/detection_engine/utils';
 import { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
 import {
@@ -52,12 +51,12 @@ import {
   defaultEndpointExceptionItems,
   entryHasListType,
   entryHasNonEcsType,
-  buildGetAlertByIdQuery,
 } from '../helpers';
 import { ErrorInfo, ErrorCallout } from '../error_callout';
 import { ExceptionsBuilderExceptionItem, FlattenType } from '../types';
 import { useFetchIndex } from '../../../containers/source';
 import { useGetInstalledJob } from '../../ml/hooks/use_get_jobs';
+import { useFetchAlertData } from '../use_fetch_alert_data';
 
 export interface AddExceptionModalProps {
   ruleName: string;
@@ -99,14 +98,6 @@ const ModalBodySection = styled.section`
   `}
 `;
 
-interface EcsHit {
-  _id: string;
-  _index: string;
-  _source: {
-    '@timestamp': string;
-  } & Omit<FlattenType<Ecs>, '_id' | '_index'>;
-}
-
 export type Alert = {
   '@timestamp': string;
 } & FlattenType<Ecs>;
@@ -142,9 +133,10 @@ export const AddExceptionModal = memo(function AddExceptionModal({
     memoSignalIndexName
   );
 
-  const { loading: isLoadingAlertData, data: alertData } = ecsData
-    ? useQueryAlerts<EcsHit, {}>(buildGetAlertByIdQuery(ecsData?._id), signalIndexName)
-    : { loading: false, data: undefined };
+  const { loading: isLoadingAlertData, data: alertData } = useFetchAlertData(
+    ecsData?._id,
+    signalIndexName
+  );
 
   const alert = useMemo(() => {
     if (isLoadingAlertData === false && ecsData != null) {
