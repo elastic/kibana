@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { REPO_ROOT, kibanaPackageJSON } from '@kbn/utils';
+import { REPO_ROOT, kibanaPackageJson } from '@kbn/utils';
 import { ParameterDeclaration, ClassMemberTypes, Node } from 'ts-morph';
 import { SourceLink } from '../types';
 
@@ -32,6 +32,6 @@ export function getSourceForNode(node: Node): SourceLink {
   return {
     path,
     lineNumber,
-    link: `https://github.com/elastic/kibana/tree/${kibanaPackageJSON.branch}${path}#L${lineNumber}`,
+    link: `https://github.com/elastic/kibana/tree/${kibanaPackageJson.branch}${path}#L${lineNumber}`,
   };
 }
