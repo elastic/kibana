@@ -40,6 +40,9 @@ Dashboards support many types of panels, and provide several editors that you ca
 | <<xpack-ml-anomalies,Machine Learning>>
 | Display a previously saved visualization of <<xpack-ml, machine learning>> anomaly detection data.
 
+| <<logs-app,Log Stream>>
+| Display a stream of your <<logs-app, ingested logs>>.
+
 |===
 
 [float]
