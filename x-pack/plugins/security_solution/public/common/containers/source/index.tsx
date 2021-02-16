@@ -145,7 +145,7 @@ export const useFetchIndex = (
   });
 
   const indexFieldsSearch = useCallback(
-    (newSelectedPatterns) => {
+    (newSelectedPatterns: SelectablePatterns) => {
       let didCancel = false;
       const asyncSearch = async () => {
         abortCtrl.current = new AbortController();
@@ -163,7 +163,7 @@ export const useFetchIndex = (
               if (!response.isPartial && !response.isRunning) {
                 if (!didCancel) {
                   const stringifyIndices = response.indicesExist.sort().join();
-                  previousIndexesName.current = response.indicesExist;
+                  previousIndexesName.current = newSelectedPatterns.map(({ title }) => title);
                   setLoading(false);
                   setState({
                     browserFields: getBrowserFields(stringifyIndices, response.indexFields),
@@ -228,6 +228,7 @@ export const useIndexFields = (sourcererScopeName: SourcererScopeName) => {
     () => sourcererSelectors.getIndexPatternsSelectedSelector(),
     []
   );
+  const previousIndexesName = useRef<string[]>([]);
   const sourcererScopeSelector = useMemo(getSourcererScopeSelector, []);
   const { sourcererScope } = useSelector<State, SourcererScopeSelector>(
     (state) => sourcererScopeSelector(state, sourcererScopeName),
@@ -245,7 +246,7 @@ export const useIndexFields = (sourcererScopeName: SourcererScopeName) => {
   );
 
   const indexFieldsSearch = useCallback(
-    (newSelectedPatterns) => {
+    (newSelectedPatterns: SelectablePatterns) => {
       let didCancel = false;
       const asyncSearch = async () => {
         abortCtrl.current = new AbortController();
@@ -262,6 +263,7 @@ export const useIndexFields = (sourcererScopeName: SourcererScopeName) => {
             next: (response) => {
               if (!response.isPartial && !response.isRunning) {
                 if (!didCancel) {
+                  previousIndexesName.current = newSelectedPatterns.map(({ title }) => title);
                   const stringifyIndices = response.indicesExist.sort().join();
                   dispatch(
                     sourcererActions.setSource({
@@ -317,9 +319,9 @@ export const useIndexFields = (sourcererScopeName: SourcererScopeName) => {
       selectedPatterns
         .map(({ title }) => title)
         .sort()
-        .join() !== sourcererScope.indexPattern.title
+        .join() !== previousIndexesName.current.sort().join()
     ) {
       indexFieldsSearch(selectedPatterns);
     }
-  }, [selectedPatterns, indexFieldsSearch, sourcererScope]);
+  }, [selectedPatterns, indexFieldsSearch, previousIndexesName, sourcererScope]);
 };

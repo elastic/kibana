@@ -62,6 +62,11 @@ import { licenseService } from './common/hooks/use_license';
 import { getLazyEndpointPolicyEditExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_policy_edit_extension';
 import { LazyEndpointPolicyCreateExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_policy_create_extension';
 import { getLazyEndpointPackageCustomExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_package_custom_extension';
+import {
+  IndexFieldsStrategyRequest,
+  IndexFieldsStrategyResponse,
+  SourcererPatternType,
+} from '../common/search_strategy/index_fields';
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   private kibanaVersion: string;
@@ -425,10 +430,25 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           timelines: timelinesSubPlugin,
           management: managementSubPlugin,
         },
+        configIndexPatterns,
       ] = await Promise.all([
         this.lazyApplicationDependencies(),
         startPlugins.data.indexPatterns.getIdsWithTitle(),
         this.subPlugins(),
+        startPlugins.data.search
+          .search<IndexFieldsStrategyRequest, IndexFieldsStrategyResponse>(
+            {
+              selectedPatterns: defaultIndicesName.map((title: string) => ({
+                id: SourcererPatternType.config,
+                title,
+              })),
+              onlyCheckIfIndicesExist: true,
+            },
+            {
+              strategy: 'securitySolutionIndexFields',
+            }
+          )
+          .toPromise(),
       ]);
 
       let signal: { name: string | null } = { name: null };
@@ -472,7 +492,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           },
           {
             kibanaIndexPatterns,
-            configIndexPatterns: defaultIndicesName,
+            configIndexPatterns: configIndexPatterns.indicesExist,
             signalIndexName: signal.name,
           }
         ),

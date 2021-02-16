@@ -58,10 +58,10 @@ export const securitySolutionIndexFieldsProvider = <T extends FactoryQueryTypes>
     search: (request, options, { esClient, savedObjectsClient }) =>
       from(
         new Promise<IndexFieldsStrategyResponse>(async (resolve) => {
-          const indexPatternsFetcher = new IndexPatternsFetcher(esClient.asCurrentUser);
           let responsesIndexFields: FieldDescriptor[] | IFieldType[] = [];
           let selectedIndexNames: string[] = [];
           let indexFields: IndexField[] = [];
+          const indexPatternsFetcher = new IndexPatternsFetcher(esClient.asCurrentUser);
           if (
             request.selectedPatterns.length === 1 &&
             request.selectedPatterns[0].id !== SourcererPatternType.config &&
@@ -73,17 +73,26 @@ export const securitySolutionIndexFieldsProvider = <T extends FactoryQueryTypes>
             );
             selectedIndexNames = [request.selectedPatterns[0].title];
             // selected pattern is a KIP, get fields from KIP API
-            const ourPattern = await indexPatternsService.get(request.selectedPatterns[0].id);
+            const ourPattern = await indexPatternsService
+              .get(request.selectedPatterns[0].id)
+              .catch(() => ({ fields: [] }));
             responsesIndexFields = ourPattern.fields;
           } else if (request.selectedPatterns.length > 0) {
-            selectedIndexNames = dedupeIndexName(
+            const activePatterns = dedupeIndexName(
               request.selectedPatterns.map(({ title }) => title)
             );
-            responsesIndexFields = await indexPatternsFetcher.getFieldsForWildcard({
-              pattern: selectedIndexNames.join(),
-            });
+            selectedIndexNames = await indexPatternsFetcher
+              .validatePatternListActive(activePatterns)
+              .catch(() => []);
+            responsesIndexFields =
+              selectedIndexNames.length > 0 // getFieldsForWildcard returns all fields ever with an empty pattern
+                ? await indexPatternsFetcher
+                    .getFieldsForWildcard({
+                      pattern: selectedIndexNames.join(),
+                    })
+                    .catch(() => [])
+                : [];
           }
-
           if (!request.onlyCheckIfIndicesExist && responsesIndexFields.length > 0) {
             indexFields = await formatIndexFields(beatFields, responsesIndexFields);
           }

@@ -38,37 +38,37 @@ const mockOptions = [
   {
     label: 'apm-*-transaction*',
     value: SourcererPatternType.config,
-    key: `${SourcererPatternType.config}-0`,
+    key: `apm-*-transaction*-${SourcererPatternType.config}`,
   },
   {
     label: 'auditbeat-*',
     value: SourcererPatternType.config,
-    key: `${SourcererPatternType.config}-1`,
+    key: `auditbeat-*-${SourcererPatternType.config}`,
   },
   {
     label: 'endgame-*',
     value: SourcererPatternType.config,
-    key: `${SourcererPatternType.config}-2`,
+    key: `endgame-*-${SourcererPatternType.config}`,
   },
   {
     label: 'filebeat-*',
     value: SourcererPatternType.config,
-    key: `${SourcererPatternType.config}-3`,
+    key: `filebeat-*-${SourcererPatternType.config}`,
   },
   {
     label: 'logs-*',
     value: SourcererPatternType.config,
-    key: `${SourcererPatternType.config}-4`,
+    key: `logs-*-${SourcererPatternType.config}`,
   },
   {
     label: 'packetbeat-*',
     value: SourcererPatternType.config,
-    key: `${SourcererPatternType.config}-5`,
+    key: `packetbeat-*-${SourcererPatternType.config}`,
   },
   {
     label: 'winlogbeat-*',
     value: SourcererPatternType.config,
-    key: `${SourcererPatternType.config}-6`,
+    key: `winlogbeat-*-${SourcererPatternType.config}`,
   },
 ];
 
