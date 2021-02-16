@@ -67,7 +67,7 @@ Having UNS as a single source of truth reduces the disk space usage for the syst
 - *Source* - a program entity creating a notification event.
 - *Sourcing* - collects notification events created by different internal sources.
 - *Notification* system - abstracts the way notifications are created, stored, configured, and retrieved.  Ensures compatible operation for on-prem and Cloud Kibana versions.
-- *Delivery* - provides API for Kibana UI to retrieve the latest notifications for a user, to update notification status (isRead).
+- *Delivery* - provides API for Kibana UI to retrieve the latest notifications for a user, to update notification status (is_read).
 - *Settings* - provides API to adjust user-specific notification settings (unsubscribe from / subscribe to a source).
 ![image](../images/0014/kns_key_elements.png)
 
@@ -79,7 +79,7 @@ There is currently no way to unambiguously identify the user. WIP [#82725](https
 - `priority?: 'normal' | 'high' | 'critical'` - to prioritize the delivery in case of async delivery mechanism. An event with high priority is processed first. Shouldn’t be used in UI. Considered as `normal` if not specified. Important messages have `high` priority. `Critical` is used in emergency cases.
 - `created_at: number` - Unix timestamp in UTC timezone when a notification has been created.
 - `expire_at?: number` - Unix timestamp in UTC timezone when notification will be removed from the system. 
-- `isPinned?: boolean` - a flag to pin a notification at top of the list of notifications. Used by a source to draw a user's attention to a notification.
+- `is_pinned?: boolean` - a flag to pin a notification at top of the list of notifications. Used by a source to draw a user's attention to a notification.
 - `source_type: string` - source type. the same as source domain name: `cloud`, `alerting`.
 - `group_id?: string` - identifier to associate several notifications in the UI. Notifications are rendered in form of an event timeline in UI.
 - `content: NotificationContent` - see below.
@@ -223,8 +223,8 @@ although there are some odd instances with >100k users. So we consider two optio
 interface  NotificationState {
   notification_id: string;
   recipient_id: string;
-  isRead: boolean;
-  isPinned: boolean;
+  is_read: boolean;
+  is_pinned: boolean;
 }
 ``` 
 This option consumes less storage space but might lead to expensive read operations due to an additional JOIN call to 
@@ -280,12 +280,12 @@ to HTTP polling delivery mechanisms: passing information with a response header 
 The delivery mechanism handles Notification status change performed by Kibana UI.
 Every notification has a different status for every user.
 Supported notification statuses:
-- `isRead: boolean`
-- `isPinned: boolean`
+- `is_read: boolean`
+- `is_pinned: boolean`
 
-Kibana UI changes notification status to `isRead: true` when a user interacts with it: clicks on CTA or `Mark as Read` button.
+Kibana UI changes notification status to `is_read: true` when a user interacts with it: clicks on CTA or `Mark as Read` button.
 
-The user can change the notification status to `isRead: false` manually in the Kibana UI.
+The user can change the notification status to `is_read: false` manually in the Kibana UI.
 
 The user can change the status for all the existing notifications (`mark all as read`), even for those not-rendered in UI yet.
 
@@ -363,7 +363,7 @@ Integration with UNS is something that is not going to happen any time soon. The
 Kibana shows notifications created by the Newsfeed Kibana plugin in Notification flyout.
 ![img](../images/0014/kns_flyout.png)
 A notification cannot have a particular recipient in the lack of a way to identify a user in the system. A notification will be shown to all the users instead.
-User-specific notification state (*isRead*) is not stored in Kibana but browser Local Storage.
+User-specific notification state (*is_read*) is not stored in Kibana but browser Local Storage.
 ### Phase II
 When [user profiles](https://github.com/elastic/kibana/issues/17888) are supported, Kibana UI starts showing user-specific notifications.
 KIbana UI supports applying filters to the notification list.
