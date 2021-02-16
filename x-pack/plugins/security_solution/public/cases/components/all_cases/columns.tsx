@@ -186,6 +186,27 @@ export const getCasesColumns = (
     {
       name: i18n.EXTERNAL_INCIDENT,
       render: (theCase: Case) => {
+        if (theCase.id != null) {
+          return <ExternalServiceColumn theCase={theCase} />;
+        }
+        return getEmptyTagValue();
+      },
+    },
+    {
+      name: i18n.INCIDENT_MANAGEMENT_SYSTEM,
+      render: (theCase: Case) => {
+        if (theCase.externalService != null) {
+          return renderStringField(
+            `${theCase.externalService.connectorName}`,
+            `case-table-column-connector`
+          );
+        }
+        return getEmptyTagValue();
+      },
+    },
+    {
+      name: i18n.STATUS,
+      render: (theCase: Case) => {
         if (theCase?.subCases == null || theCase.subCases.length === 0) {
           if (theCase.status == null) {
             return getEmptyTagValue();
