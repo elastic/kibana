@@ -182,14 +182,11 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
     public async getDocHeader() {
       const docHeader = await dataGrid.getHeaders();
       return docHeader.join();
-      // const docHeader = await find.byCssSelector('thead > tr:nth-child(1)');
-      // return await docHeader.getVisibleText();
     }
 
     public async getDocTableRows() {
       await header.waitUntilLoadingHasFinished();
       return await dataGrid.getBodyRows();
-      // return await testSubjects.findAll('docTableRow');
     }
 
     public async getDocTableIndex(index: number) {
@@ -225,12 +222,10 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
 
     public async clickDocSortDown() {
       await dataGrid.clickDocSortAsc();
-      // await find.clickByCssSelector('.fa-sort-down');
     }
 
     public async clickDocSortUp() {
       await dataGrid.clickDocSortDesc();
-      // await find.clickByCssSelector('.fa-sort-up');
     }
 
     public async getMarks() {
@@ -265,7 +260,6 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
 
     public async clickFieldSort(field: string, text = 'Sort New-Old') {
       await dataGrid.clickDocSortAsc(field, text);
-      // return await testSubjects.click(`docTableHeaderFieldSort_${field}`);
     }
 
     public async clickFieldListItemToggle(field: string) {
