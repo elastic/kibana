@@ -79,6 +79,14 @@ import {
 } from './types';
 export { MapEmbeddableInput, MapEmbeddableOutput };
 
+function getIsRestore(searchSessionId?: string) {
+  if (!searchSessionId) {
+    return false;
+  }
+  const searchSessionOptions = getSearchService().session.getSearchOptions(searchSessionId);
+  return searchSessionOptions ? searchSessionOptions.isRestore : false;
+}
+
 export class MapEmbeddable
   extends Embeddable<MapEmbeddableInput, MapEmbeddableOutput>
   implements ReferenceOrValueEmbeddable<MapByValueInput, MapByReferenceInput> {
@@ -238,9 +246,7 @@ export class MapEmbeddable
       this._dispatchSetChartsPaletteServiceGetColor(this.input.syncColors);
     }
 
-    const isRestore =
-      this.input.searchSessionId &&
-      getSearchService().session.getSearchOptions(this.input.searchSessionId).isRestore;
+    const isRestore = getIsRestore(this.input.searchSessionId);
     if (isRestore !== this._prevIsRestore) {
       this._prevIsRestore = isRestore;
       this._savedMap.getStore().dispatch(
