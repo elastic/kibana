@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { mergeServerAndStaticData } from '../views/content_sources/sources_logic';
-import { staticSourceData } from '../views/content_sources/source_data';
 import { groups } from './groups.mock';
+
+import { staticSourceData } from '../views/content_sources/source_data';
+import { mergeServerAndStaticData } from '../views/content_sources/sources_logic';
 
 export const contentSources = [
   {

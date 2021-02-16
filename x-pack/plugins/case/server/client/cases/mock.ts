@@ -10,6 +10,7 @@ import {
   CommentType,
   ConnectorMappingsAttributes,
   CaseUserActionsResponse,
+  AssociationType,
 } from '../../../common/api';
 
 import { BasicParams } from './types';
@@ -27,6 +28,7 @@ const entity = {
 };
 
 export const comment: CommentResponse = {
+  associationType: AssociationType.case,
   id: 'mock-comment-1',
   comment: 'Wow, good luck catching that bad meanie!',
   type: CommentType.user as const,
@@ -48,6 +50,7 @@ export const comment: CommentResponse = {
 };
 
 export const commentAlert: CommentResponse = {
+  associationType: AssociationType.case,
   id: 'mock-comment-1',
   alertId: 'alert-id-1',
   index: 'alert-index-1',

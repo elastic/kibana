@@ -7,12 +7,14 @@
 
 import React, { useEffect } from 'react';
 import { Route, Switch, Redirect, useParams } from 'react-router-dom';
+
 import { useValues, useActions } from 'kea';
 
 import { i18n } from '@kbn/i18n';
 
-import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
 import { setQueuedErrorMessage } from '../../../shared/flash_messages';
+import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
+import { Loading } from '../../../shared/loading';
 import { AppLogic } from '../../app_logic';
 
 // TODO: Uncomment and add more routes as we migrate them
@@ -31,13 +33,11 @@ import {
   // ENGINE_SEARCH_UI_PATH,
   // ENGINE_API_LOGS_PATH,
 } from '../../routes';
-import { ENGINES_TITLE } from '../engines';
-import { OVERVIEW_TITLE } from '../engine_overview';
-
-import { Loading } from '../../../shared/loading';
-import { EngineOverview } from '../engine_overview';
 import { AnalyticsRouter } from '../analytics';
 import { DocumentDetail, Documents } from '../documents';
+import { OVERVIEW_TITLE } from '../engine_overview';
+import { EngineOverview } from '../engine_overview';
+import { ENGINES_TITLE } from '../engines';
 import { RelevanceTuning } from '../relevance_tuning';
 
 import { EngineLogic } from './';

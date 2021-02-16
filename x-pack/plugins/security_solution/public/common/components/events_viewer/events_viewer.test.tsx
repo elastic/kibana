@@ -86,7 +86,6 @@ const eventsViewerDefaultProps = {
   deletedEventIds: [],
   docValueFields: [],
   end: to,
-  expandedEvent: {},
   filters: [],
   id: TimelineId.detectionsPage,
   indexNames: mockIndexNames,
@@ -100,7 +99,6 @@ const eventsViewerDefaultProps = {
     query: '',
     language: 'kql',
   },
-  handleCloseExpandedEvent: jest.fn(),
   start: from,
   sort: [
     {
@@ -119,7 +117,7 @@ describe('EventsViewer', () => {
   let testProps = {
     defaultModel: eventsDefaultModel,
     end: to,
-    id: 'test-stateful-events-viewer',
+    id: TimelineId.test,
     start: from,
     scopeId: SourcererScopeName.timeline,
   };
@@ -150,14 +148,15 @@ describe('EventsViewer', () => {
         expect(mockDispatch).toBeCalledTimes(2);
         expect(mockDispatch.mock.calls[1][0]).toEqual({
           payload: {
-            event: {
+            panelView: 'eventDetail',
+            params: {
               eventId: 'yb8TkHYBRgU82_bJu_rY',
               indexName: 'auditbeat-7.10.1-2020.12.18-000001',
             },
             tabType: 'query',
-            timelineId: 'test-stateful-events-viewer',
+            timelineId: TimelineId.test,
           },
-          type: 'x-pack/security_solution/local/timeline/TOGGLE_EXPANDED_EVENT',
+          type: 'x-pack/security_solution/local/timeline/TOGGLE_DETAIL_PANEL',
         });
       });
     });
@@ -199,17 +198,22 @@ describe('EventsViewer', () => {
 
     defaultHeaders.forEach((header) => {
       test(`it renders the ${header.id} default EventsViewer column header`, () => {
+        testProps = {
+          ...testProps,
+          // Update with a new id, to force columns back to default.
+          id: TimelineId.test2,
+        };
         const wrapper = mount(
           <TestProviders>
             <StatefulEventsViewer {...testProps} />
           </TestProviders>
         );
 
-        defaultHeaders.forEach((h) =>
+        defaultHeaders.forEach((h) => {
           expect(wrapper.find(`[data-test-subj="header-text-${header.id}"]`).first().exists()).toBe(
             true
-          )
-        );
+          );
+        });
       });
     });
   });

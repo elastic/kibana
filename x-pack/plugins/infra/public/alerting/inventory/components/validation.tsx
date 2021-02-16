@@ -6,8 +6,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { InventoryMetricConditions } from '../../../../server/lib/alerting/inventory_metric_threshold/types';
+import {
+  InventoryMetricConditions,
+  Comparator,
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+} from '../../../../server/lib/alerting/inventory_metric_threshold/types';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ValidationResult } from '../../../../../triggers_actions_ui/public/types';
 
@@ -21,8 +24,14 @@ export function validateMetricThreshold({
     [id: string]: {
       timeSizeUnit: string[];
       timeWindowSize: string[];
-      threshold0: string[];
-      threshold1: string[];
+      critical: {
+        threshold0: string[];
+        threshold1: string[];
+      };
+      warning: {
+        threshold0: string[];
+        threshold1: string[];
+      };
       metric: string[];
     };
   } = {};
@@ -39,40 +48,63 @@ export function validateMetricThreshold({
     errors[id] = errors[id] || {
       timeSizeUnit: [],
       timeWindowSize: [],
-      threshold0: [],
-      threshold1: [],
+      critical: {
+        threshold0: [],
+        threshold1: [],
+      },
+      warning: {
+        threshold0: [],
+        threshold1: [],
+      },
       metric: [],
     };
 
     if (!c.threshold || !c.threshold.length) {
-      errors[id].threshold0.push(
+      errors[id].critical.threshold0.push(
         i18n.translate('xpack.infra.metrics.alertFlyout.error.thresholdRequired', {
           defaultMessage: 'Threshold is required.',
         })
       );
     }
 
-    // The Threshold component returns an empty array with a length ([empty]) because it's using delete newThreshold[i].
-    // We need to use [...c.threshold] to convert it to an array with an undefined value ([undefined]) so we can test each element.
-    if (c.threshold && c.threshold.length && ![...c.threshold].every(isNumber)) {
-      [...c.threshold].forEach((v, i) => {
-        if (!isNumber(v)) {
-          const key = i === 0 ? 'threshold0' : 'threshold1';
-          errors[id][key].push(
-            i18n.translate('xpack.infra.metrics.alertFlyout.error.thresholdTypeRequired', {
-              defaultMessage: 'Thresholds must contain a valid number.',
-            })
-          );
-        }
-      });
-    }
-
-    if (c.comparator === 'between' && (!c.threshold || c.threshold.length < 2)) {
-      errors[id].threshold1.push(
+    if (c.warningThreshold && !c.warningThreshold.length) {
+      errors[id].warning.threshold0.push(
         i18n.translate('xpack.infra.metrics.alertFlyout.error.thresholdRequired', {
           defaultMessage: 'Threshold is required.',
         })
       );
+    }
+    for (const props of [
+      { comparator: c.comparator, threshold: c.threshold, type: 'critical' },
+      { comparator: c.warningComparator, threshold: c.warningThreshold, type: 'warning' },
+    ]) {
+      // The Threshold component returns an empty array with a length ([empty]) because it's using delete newThreshold[i].
+      // We need to use [...c.threshold] to convert it to an array with an undefined value ([undefined]) so we can test each element.
+      const { comparator, threshold, type } = props as {
+        comparator?: Comparator;
+        threshold?: number[];
+        type: 'critical' | 'warning';
+      };
+      if (threshold && threshold.length && ![...threshold].every(isNumber)) {
+        [...threshold].forEach((v, i) => {
+          if (!isNumber(v)) {
+            const key = i === 0 ? 'threshold0' : 'threshold1';
+            errors[id][type][key].push(
+              i18n.translate('xpack.infra.metrics.alertFlyout.error.thresholdTypeRequired', {
+                defaultMessage: 'Thresholds must contain a valid number.',
+              })
+            );
+          }
+        });
+      }
+
+      if (comparator === Comparator.BETWEEN && (!threshold || threshold.length < 2)) {
+        errors[id][type].threshold1.push(
+          i18n.translate('xpack.infra.metrics.alertFlyout.error.thresholdRequired', {
+            defaultMessage: 'Threshold is required.',
+          })
+        );
+      }
     }
 
     if (!c.timeSize) {

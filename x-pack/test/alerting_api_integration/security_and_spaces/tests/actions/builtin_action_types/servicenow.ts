@@ -40,6 +40,8 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
           severity: '1',
           short_description: 'a title',
           urgency: '1',
+          category: 'software',
+          subcategory: 'software',
         },
         comments: [
           {
