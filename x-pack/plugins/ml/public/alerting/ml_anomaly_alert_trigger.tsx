@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useEffect, useMemo } from 'react';
+import React, { FC, useCallback, useMemo } from 'react';
 import { EuiSpacer, EuiForm } from '@elastic/eui';
+import useMount from 'react-use/lib/useMount';
 import { JobSelectorControl } from './job_selector';
 import { useMlKibana } from '../application/contexts/kibana';
 import { jobsApiProvider } from '../application/services/ml_api_service/jobs';
@@ -18,6 +19,7 @@ import { PreviewAlertCondition } from './preview_alert_condition';
 import { ANOMALY_THRESHOLD } from '../../common';
 import { MlAnomalyDetectionAlertParams } from '../../common/types/alerts';
 import { ANOMALY_RESULT_TYPE } from '../../common/constants/anomalies';
+import { InterimResultsControl } from './interim_results_control';
 
 interface MlAnomalyAlertTriggerProps {
   alertParams: MlAnomalyDetectionAlertParams;
@@ -25,12 +27,14 @@ interface MlAnomalyAlertTriggerProps {
     key: T,
     value: MlAnomalyDetectionAlertParams[T]
   ) => void;
+  setAlertProperty: (prop: string, update: Partial<MlAnomalyDetectionAlertParams>) => void;
   errors: Record<keyof MlAnomalyDetectionAlertParams, string[]>;
 }
 
 const MlAnomalyAlertTrigger: FC<MlAnomalyAlertTriggerProps> = ({
   alertParams,
   setAlertParams,
+  setAlertProperty,
   errors,
 }) => {
   const {
@@ -49,21 +53,26 @@ const MlAnomalyAlertTrigger: FC<MlAnomalyAlertTriggerProps> = ({
     []
   );
 
-  useEffect(function setDefaults() {
-    if (alertParams.severity === undefined) {
-      onAlertParamChange('severity')(ANOMALY_THRESHOLD.CRITICAL);
+  useMount(function setDefaults() {
+    const { jobSelection, ...rest } = alertParams;
+    if (Object.keys(rest).length === 0) {
+      setAlertProperty('params', {
+        // Set defaults
+        severity: ANOMALY_THRESHOLD.CRITICAL,
+        resultType: ANOMALY_RESULT_TYPE.BUCKET,
+        includeInterim: true,
+        // Preserve job selection
+        jobSelection,
+      });
     }
-    if (alertParams.resultType === undefined) {
-      onAlertParamChange('resultType')(ANOMALY_RESULT_TYPE.BUCKET);
-    }
-  }, []);
+  });
 
   return (
     <EuiForm data-test-subj={'mlAnomalyAlertForm'}>
       <JobSelectorControl
         jobSelection={alertParams.jobSelection}
         adJobsApiService={adJobsApiService}
-        onSelectionChange={useCallback(onAlertParamChange('jobSelection'), [])}
+        onChange={useCallback(onAlertParamChange('jobSelection'), [])}
         errors={errors.jobSelection}
       />
       <ResultTypeSelector
@@ -75,6 +84,12 @@ const MlAnomalyAlertTrigger: FC<MlAnomalyAlertTriggerProps> = ({
         onChange={useCallback(onAlertParamChange('severity'), [])}
       />
       <EuiSpacer size="m" />
+      <InterimResultsControl
+        value={alertParams.includeInterim}
+        onChange={useCallback(onAlertParamChange('includeInterim'), [])}
+      />
+      <EuiSpacer size="m" />
+
       <PreviewAlertCondition alertingApiService={alertingApiService} alertParams={alertParams} />
 
       <EuiSpacer size="m" />
