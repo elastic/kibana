@@ -80,6 +80,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('retains unsaved panel count after returning to edit mode', async () => {
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.dashboard.switchToEditMode();
+      await PageObjects.header.waitUntilLoadingHasFinished();
       const currentPanelCount = await PageObjects.dashboard.getPanelCount();
       expect(currentPanelCount).to.eql(unsavedPanelCount);
     });

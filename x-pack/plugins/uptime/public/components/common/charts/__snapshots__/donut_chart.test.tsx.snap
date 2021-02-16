@@ -50,6 +50,17 @@ exports[`DonutChart component passes correct props without errors for valid prop
               "strokeWidth": 1,
               "visible": true,
             },
+            "axisPanelTitle": Object {
+              "fill": "#333",
+              "fontFamily": "sans-serif",
+              "fontSize": 10,
+              "fontStyle": "bold",
+              "padding": Object {
+                "inner": 8,
+                "outer": 0,
+              },
+              "visible": true,
+            },
             "axisTitle": Object {
               "fill": "#333",
               "fontFamily": "sans-serif",
