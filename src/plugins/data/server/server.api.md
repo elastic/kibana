@@ -912,6 +912,7 @@ export class IndexPatternsService implements Plugin_3<void, IndexPatternsService
 // @public (undocumented)
 export interface ISearchOptions {
     abortSignal?: AbortSignal;
+    indexPattern?: IndexPattern;
     isRestore?: boolean;
     isStored?: boolean;
     legacyHitsTotal?: boolean;
@@ -1138,7 +1139,7 @@ export class Plugin implements Plugin_2<PluginSetup, PluginStart, DataPluginSetu
             fieldFormatServiceFactory: (uiSettings: import("../../../core/server").IUiSettingsClient) => Promise<import("../common").FieldFormatsRegistry>;
         };
         indexPatterns: {
-            indexPatternsServiceFactory: (savedObjectsClient: Pick<import("../../../core/server").SavedObjectsClient, "get" | "delete" | "create" | "update" | "bulkCreate" | "checkConflicts" | "find" | "bulkGet" | "resolve" | "addToNamespaces" | "deleteFromNamespaces" | "bulkUpdate" | "removeReferencesTo" | "errors">, elasticsearchClient: import("../../../core/server").ElasticsearchClient) => Promise<import("../public").IndexPatternsService>;
+            indexPatternsServiceFactory: (savedObjectsClient: Pick<import("../../../core/server").SavedObjectsClient, "get" | "delete" | "closePointInTime" | "create" | "update" | "bulkCreate" | "checkConflicts" | "find" | "bulkGet" | "resolve" | "addToNamespaces" | "deleteFromNamespaces" | "bulkUpdate" | "removeReferencesTo" | "openPointInTimeForType" | "errors">, elasticsearchClient: import("../../../core/server").ElasticsearchClient) => Promise<import("../public").IndexPatternsService>;
         };
         search: ISearchStart<import("./search").IEsSearchRequest, import("./search").IEsSearchResponse<any>>;
     };
