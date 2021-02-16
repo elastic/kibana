@@ -84,6 +84,7 @@ async function executor(
     connectorMappingsService,
     userActionService,
     alertsService,
+    logger,
   });
 
   if (!supportedSubActions.includes(subAction)) {

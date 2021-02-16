@@ -57,6 +57,7 @@ export const createRouteContext = async (client: any, badAuth = false) => {
     userActionService,
     alertsService,
     scopedClusterClient: esClient,
+    logger: log,
   });
 
   return { context, services: { userActionService } };

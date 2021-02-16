@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
+import { ElasticsearchClient, SavedObjectsClientContract, Logger } from 'src/core/server';
 import {
   CaseClientFactoryArguments,
   CaseClient,
@@ -49,6 +49,7 @@ export class CaseClientHandler implements CaseClient {
   private readonly _savedObjectsClient: SavedObjectsClientContract;
   private readonly _userActionService: CaseUserActionServiceSetup;
   private readonly _alertsService: AlertServiceContract;
+  private readonly logger: Logger;
 
   constructor(clientArgs: CaseClientFactoryArguments) {
     this._scopedClusterClient = clientArgs.scopedClusterClient;
@@ -59,6 +60,7 @@ export class CaseClientHandler implements CaseClient {
     this._savedObjectsClient = clientArgs.savedObjectsClient;
     this._userActionService = clientArgs.userActionService;
     this._alertsService = clientArgs.alertsService;
+    this.logger = clientArgs.logger;
   }
 
   public async create(caseInfo: CasePostRequest) {
@@ -92,6 +94,7 @@ export class CaseClientHandler implements CaseClient {
       caseId,
       comment,
       user: this.user,
+      logger: this.logger,
     });
   }
 

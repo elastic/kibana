@@ -621,7 +621,7 @@ export class CaseService implements CaseServiceSetup {
         ],
       });
     } catch (error) {
-      this.log.debug(`Error on POST a new sub case: ${error}`);
+      this.log.error(`Error on POST a new sub case for id ${caseId}: ${error}`);
       throw error;
     }
   }
@@ -642,7 +642,7 @@ export class CaseService implements CaseServiceSetup {
 
       return subCases.saved_objects[0];
     } catch (error) {
-      this.log.debug(`Error finding the most recent sub case for case: ${caseId}`);
+      this.log.error(`Error finding the most recent sub case for case: ${caseId}: ${error}`);
       throw error;
     }
   }
@@ -652,7 +652,7 @@ export class CaseService implements CaseServiceSetup {
       this.log.debug(`Attempting to DELETE sub case ${id}`);
       return await client.delete(SUB_CASE_SAVED_OBJECT, id);
     } catch (error) {
-      this.log.debug(`Error on DELETE sub case ${id}: ${error}`);
+      this.log.error(`Error on DELETE sub case ${id}: ${error}`);
       throw error;
     }
   }
@@ -662,7 +662,7 @@ export class CaseService implements CaseServiceSetup {
       this.log.debug(`Attempting to DELETE case ${caseId}`);
       return await client.delete(CASE_SAVED_OBJECT, caseId);
     } catch (error) {
-      this.log.debug(`Error on DELETE case ${caseId}: ${error}`);
+      this.log.error(`Error on DELETE case ${caseId}: ${error}`);
       throw error;
     }
   }
@@ -671,7 +671,7 @@ export class CaseService implements CaseServiceSetup {
       this.log.debug(`Attempting to GET comment ${commentId}`);
       return await client.delete(CASE_COMMENT_SAVED_OBJECT, commentId);
     } catch (error) {
-      this.log.debug(`Error on GET comment ${commentId}: ${error}`);
+      this.log.error(`Error on GET comment ${commentId}: ${error}`);
       throw error;
     }
   }
@@ -683,7 +683,7 @@ export class CaseService implements CaseServiceSetup {
       this.log.debug(`Attempting to GET case ${caseId}`);
       return await client.get(CASE_SAVED_OBJECT, caseId);
     } catch (error) {
-      this.log.debug(`Error on GET case ${caseId}: ${error}`);
+      this.log.error(`Error on GET case ${caseId}: ${error}`);
       throw error;
     }
   }
@@ -692,7 +692,7 @@ export class CaseService implements CaseServiceSetup {
       this.log.debug(`Attempting to GET sub case ${id}`);
       return await client.get(SUB_CASE_SAVED_OBJECT, id);
     } catch (error) {
-      this.log.debug(`Error on GET sub case ${id}: ${error}`);
+      this.log.error(`Error on GET sub case ${id}: ${error}`);
       throw error;
     }
   }
@@ -705,7 +705,7 @@ export class CaseService implements CaseServiceSetup {
       this.log.debug(`Attempting to GET sub cases ${ids.join(', ')}`);
       return await client.bulkGet(ids.map((id) => ({ type: SUB_CASE_SAVED_OBJECT, id })));
     } catch (error) {
-      this.log.debug(`Error on GET cases ${ids.join(', ')}: ${error}`);
+      this.log.error(`Error on GET cases ${ids.join(', ')}: ${error}`);
       throw error;
     }
   }
@@ -720,7 +720,7 @@ export class CaseService implements CaseServiceSetup {
         caseIds.map((caseId) => ({ type: CASE_SAVED_OBJECT, id: caseId }))
       );
     } catch (error) {
-      this.log.debug(`Error on GET cases ${caseIds.join(', ')}: ${error}`);
+      this.log.error(`Error on GET cases ${caseIds.join(', ')}: ${error}`);
       throw error;
     }
   }
@@ -732,7 +732,7 @@ export class CaseService implements CaseServiceSetup {
       this.log.debug(`Attempting to GET comment ${commentId}`);
       return await client.get(CASE_COMMENT_SAVED_OBJECT, commentId);
     } catch (error) {
-      this.log.debug(`Error on GET comment ${commentId}: ${error}`);
+      this.log.error(`Error on GET comment ${commentId}: ${error}`);
       throw error;
     }
   }
@@ -749,7 +749,7 @@ export class CaseService implements CaseServiceSetup {
         type: CASE_SAVED_OBJECT,
       });
     } catch (error) {
-      this.log.debug(`Error on find cases: ${error}`);
+      this.log.error(`Error on find cases: ${error}`);
       throw error;
     }
   }
@@ -786,7 +786,7 @@ export class CaseService implements CaseServiceSetup {
         type: SUB_CASE_SAVED_OBJECT,
       });
     } catch (error) {
-      this.log.debug(`Error on find sub cases: ${error}`);
+      this.log.error(`Error on find sub cases: ${error}`);
       throw error;
     }
   }
@@ -824,7 +824,7 @@ export class CaseService implements CaseServiceSetup {
         },
       });
     } catch (error) {
-      this.log.debug(
+      this.log.error(
         `Error on GET all sub cases for case collection id ${ids.join(', ')}: ${error}`
       );
       throw error;
@@ -847,7 +847,7 @@ export class CaseService implements CaseServiceSetup {
     options,
   }: FindCommentsArgs): Promise<SavedObjectsFindResponse<CommentAttributes>> {
     try {
-      this.log.debug(`Attempting to GET all comments for id ${id}`);
+      this.log.debug(`Attempting to GET all comments for id ${JSON.stringify(id)}`);
       if (options?.page !== undefined || options?.perPage !== undefined) {
         return client.find({
           type: CASE_COMMENT_SAVED_OBJECT,
@@ -874,7 +874,7 @@ export class CaseService implements CaseServiceSetup {
         ...options,
       });
     } catch (error) {
-      this.log.debug(`Error on GET all comments for ${id}: ${error}`);
+      this.log.error(`Error on GET all comments for ${JSON.stringify(id)}: ${error}`);
       throw error;
     }
   }
@@ -915,7 +915,7 @@ export class CaseService implements CaseServiceSetup {
         );
       }
 
-      this.log.debug(`Attempting to GET all comments for case caseID ${id}`);
+      this.log.debug(`Attempting to GET all comments for case caseID ${JSON.stringify(id)}`);
       return this.getAllComments({
         client,
         id,
@@ -927,7 +927,7 @@ export class CaseService implements CaseServiceSetup {
         },
       });
     } catch (error) {
-      this.log.debug(`Error on GET all comments for case ${id}: ${error}`);
+      this.log.error(`Error on GET all comments for case ${JSON.stringify(id)}: ${error}`);
       throw error;
     }
   }
@@ -948,7 +948,7 @@ export class CaseService implements CaseServiceSetup {
         };
       }
 
-      this.log.debug(`Attempting to GET all comments for sub case caseID ${id}`);
+      this.log.debug(`Attempting to GET all comments for sub case caseID ${JSON.stringify(id)}`);
       return this.getAllComments({
         client,
         id,
@@ -959,7 +959,7 @@ export class CaseService implements CaseServiceSetup {
         },
       });
     } catch (error) {
-      this.log.debug(`Error on GET all comments for sub case ${id}: ${error}`);
+      this.log.error(`Error on GET all comments for sub case ${JSON.stringify(id)}: ${error}`);
       throw error;
     }
   }
@@ -969,7 +969,7 @@ export class CaseService implements CaseServiceSetup {
       this.log.debug(`Attempting to GET all reporters`);
       return await readReporters({ client });
     } catch (error) {
-      this.log.debug(`Error on GET all reporters: ${error}`);
+      this.log.error(`Error on GET all reporters: ${error}`);
       throw error;
     }
   }
@@ -978,7 +978,7 @@ export class CaseService implements CaseServiceSetup {
       this.log.debug(`Attempting to GET all cases`);
       return await readTags({ client });
     } catch (error) {
-      this.log.debug(`Error on GET cases: ${error}`);
+      this.log.error(`Error on GET cases: ${error}`);
       throw error;
     }
   }
@@ -1003,7 +1003,7 @@ export class CaseService implements CaseServiceSetup {
         email: null,
       };
     } catch (error) {
-      this.log.debug(`Error on GET cases: ${error}`);
+      this.log.error(`Error on GET cases: ${error}`);
       throw error;
     }
   }
@@ -1012,7 +1012,7 @@ export class CaseService implements CaseServiceSetup {
       this.log.debug(`Attempting to POST a new case`);
       return await client.create(CASE_SAVED_OBJECT, { ...attributes });
     } catch (error) {
-      this.log.debug(`Error on POST a new case: ${error}`);
+      this.log.error(`Error on POST a new case: ${error}`);
       throw error;
     }
   }
@@ -1021,7 +1021,7 @@ export class CaseService implements CaseServiceSetup {
       this.log.debug(`Attempting to POST a new comment`);
       return await client.create(CASE_COMMENT_SAVED_OBJECT, attributes, { references });
     } catch (error) {
-      this.log.debug(`Error on POST a new comment: ${error}`);
+      this.log.error(`Error on POST a new comment: ${error}`);
       throw error;
     }
   }
@@ -1030,7 +1030,7 @@ export class CaseService implements CaseServiceSetup {
       this.log.debug(`Attempting to UPDATE case ${caseId}`);
       return await client.update(CASE_SAVED_OBJECT, caseId, { ...updatedAttributes }, { version });
     } catch (error) {
-      this.log.debug(`Error on UPDATE case ${caseId}: ${error}`);
+      this.log.error(`Error on UPDATE case ${caseId}: ${error}`);
       throw error;
     }
   }
@@ -1046,7 +1046,7 @@ export class CaseService implements CaseServiceSetup {
         }))
       );
     } catch (error) {
-      this.log.debug(`Error on UPDATE case ${cases.map((c) => c.caseId).join(', ')}: ${error}`);
+      this.log.error(`Error on UPDATE case ${cases.map((c) => c.caseId).join(', ')}: ${error}`);
       throw error;
     }
   }
@@ -1062,7 +1062,7 @@ export class CaseService implements CaseServiceSetup {
         { version }
       );
     } catch (error) {
-      this.log.debug(`Error on UPDATE comment ${commentId}: ${error}`);
+      this.log.error(`Error on UPDATE comment ${commentId}: ${error}`);
       throw error;
     }
   }
@@ -1080,7 +1080,7 @@ export class CaseService implements CaseServiceSetup {
         }))
       );
     } catch (error) {
-      this.log.debug(
+      this.log.error(
         `Error on UPDATE comments ${comments.map((c) => c.commentId).join(', ')}: ${error}`
       );
       throw error;
@@ -1096,7 +1096,7 @@ export class CaseService implements CaseServiceSetup {
         { version }
       );
     } catch (error) {
-      this.log.debug(`Error on UPDATE sub case ${subCaseId}: ${error}`);
+      this.log.error(`Error on UPDATE sub case ${subCaseId}: ${error}`);
       throw error;
     }
   }
@@ -1115,7 +1115,7 @@ export class CaseService implements CaseServiceSetup {
         }))
       );
     } catch (error) {
-      this.log.debug(
+      this.log.error(
         `Error on UPDATE sub case ${subCases.map((c) => c.subCaseId).join(', ')}: ${error}`
       );
       throw error;

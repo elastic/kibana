@@ -56,7 +56,7 @@ export class CasePlugin {
   private alertsService?: AlertService;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
-    this.log = this.initializerContext.logger.get();
+    this.log = this.initializerContext.logger.get('case');
   }
 
   public async setup(core: CoreSetup, plugins: PluginsSetup) {
@@ -97,6 +97,7 @@ export class CasePlugin {
         connectorMappingsService: this.connectorMappingsService,
         userActionService: this.userActionService,
         alertsService: this.alertsService,
+        logger: this.log,
       })
     );
 
@@ -137,6 +138,7 @@ export class CasePlugin {
         connectorMappingsService: this.connectorMappingsService!,
         userActionService: this.userActionService!,
         alertsService: this.alertsService!,
+        logger: this.log,
       });
     };
 
@@ -156,6 +158,7 @@ export class CasePlugin {
     connectorMappingsService,
     userActionService,
     alertsService,
+    logger,
   }: {
     core: CoreSetup;
     caseService: CaseServiceSetup;
@@ -163,6 +166,7 @@ export class CasePlugin {
     connectorMappingsService: ConnectorMappingsServiceSetup;
     userActionService: CaseUserActionServiceSetup;
     alertsService: AlertServiceContract;
+    logger: Logger;
   }): IContextProvider<CasesRequestHandlerContext, 'case'> => {
     return async (context, request, response) => {
       const [{ savedObjects }] = await core.getStartServices();
@@ -178,6 +182,7 @@ export class CasePlugin {
             userActionService,
             alertsService,
             user,
+            logger,
           });
         },
       };

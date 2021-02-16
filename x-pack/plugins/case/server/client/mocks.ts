@@ -47,7 +47,6 @@ export const createCaseClientWithMockSavedObjectsClient = async ({
   };
 }> => {
   const esClient = elasticsearchServiceMock.createElasticsearchClient();
-  // const actionsMock = createActionsClient();
   const log = loggingSystemMock.create().get('case');
 
   const auth = badAuth ? authenticationMock.createInvalid() : authenticationMock.create();
@@ -78,6 +77,7 @@ export const createCaseClientWithMockSavedObjectsClient = async ({
     userActionService,
     alertsService,
     scopedClusterClient: esClient,
+    logger: log,
   });
   return {
     client: caseClient,
