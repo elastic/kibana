@@ -32,10 +32,10 @@ describe('PercentageModeOption', function () {
     fieldText.props().onChange!({
       target: {
         value: '0.0%',
-      }
+      },
     } as React.ChangeEvent<HTMLInputElement>);
 
-    expect(props.setValue).toHaveBeenCalledWith("percentageFormatPattern", '0.0%');
+    expect(props.setValue).toHaveBeenCalledWith('percentageFormatPattern', '0.0%');
   });
 
   it('fieldText should be disabled when percentageMode is false', () => {
