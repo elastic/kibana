@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import type { CoreStart, HttpStart, I18nStart, IUiSettingsClient } from 'kibana/public';
 import { CoreSetup } from 'kibana/public';
-import type { DataPublicPluginStart } from 'src/plugins/data/public';
+import type { DataPublicPluginSetup, DataPublicPluginStart } from 'src/plugins/data/public';
 import type { ManagementSetup } from 'src/plugins/management/public';
 import type { SharePluginStart } from 'src/plugins/share/public';
 import type { ConfigSchema } from '../../../config';
@@ -18,6 +18,7 @@ import type { AsyncSearchIntroDocumentation } from './lib/documentation';
 import { SEARCH_SESSIONS_MANAGEMENT_ID } from '../../../../../../src/plugins/data/public';
 
 export interface IManagementSectionsPluginsSetup {
+  data: DataPublicPluginSetup;
   management: ManagementSetup;
 }
 
@@ -56,7 +57,7 @@ export function registerSearchSessionsMgmt(
   services.management.sections.section.kibana.registerApp({
     id: APP.id,
     title: APP.getI18nName(),
-    order: 2,
+    order: 1.75,
     mount: async (params) => {
       const { SearchSessionsMgmtApp: MgmtApp } = await import('./application');
       const mgmtApp = new MgmtApp(coreSetup, config, params, services);

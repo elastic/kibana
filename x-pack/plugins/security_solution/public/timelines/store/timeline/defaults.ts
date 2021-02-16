@@ -25,7 +25,7 @@ export const timelineDefaults: SubsetTimelineModel & Pick<TimelineModel, 'filter
   eventType: 'all',
   eventIdToNoteIds: {},
   excludedRowRendererIds: [],
-  expandedEvent: {},
+  expandedDetail: {},
   highlightedDropAndProviderId: '',
   historyIds: [],
   filters: [],
