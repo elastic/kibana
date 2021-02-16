@@ -27,6 +27,7 @@ export const mlAnomalyDetectionAlertParams = schema.object({
   ),
   severity: schema.number(),
   resultType: schema.string(),
+  includeInterim: schema.boolean({ defaultValue: true }),
 });
 
 export const mlAnomalyDetectionAlertPreviewRequest = schema.object({

@@ -48,8 +48,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should add new visualization from dashboard', async () => {
-      await testSubjects.exists('addVisualizationButton');
-      await testSubjects.click('addVisualizationButton');
+      await testSubjects.exists('dashboardAddNewPanelButton');
+      await testSubjects.click('dashboardAddNewPanelButton');
       await dashboardVisualizations.createAndAddMarkdown({
         name: 'Dashboard Test Markdown',
         markdown: 'Markdown text',

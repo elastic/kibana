@@ -5,24 +5,26 @@
  * 2.0.
  */
 
+import _ from 'lodash';
+
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
-import { IClusterClient, KibanaRequest } from 'kibana/server';
+import { ElasticsearchClient } from 'kibana/server';
 import { CaseStatuses } from '../../../common/api';
 
 export type AlertServiceContract = PublicMethodsOf<AlertService>;
 
 interface UpdateAlertsStatusArgs {
-  request: KibanaRequest;
   ids: string[];
   status: CaseStatuses;
-  index: string;
+  indices: Set<string>;
+  scopedClusterClient: ElasticsearchClient;
 }
 
 interface GetAlertsArgs {
-  request: KibanaRequest;
   ids: string[];
-  index: string;
+  indices: Set<string>;
+  scopedClusterClient: ElasticsearchClient;
 }
 
 interface Alert {
@@ -37,29 +39,32 @@ interface AlertsResponse {
   };
 }
 
-export class AlertService {
-  private isInitialized = false;
-  private esClient?: IClusterClient;
+/**
+ * remove empty strings from the indices, I'm not sure how likely this is but in the case that
+ * the document doesn't have _index set the security_solution code sets the value to an empty string
+ * instead
+ */
+function getValidIndices(indices: Set<string>): string[] {
+  return [...indices].filter((index) => !_.isEmpty(index));
+}
 
+export class AlertService {
   constructor() {}
 
-  public initialize(esClient: IClusterClient) {
-    if (this.isInitialized) {
-      throw new Error('AlertService already initialized');
+  public async updateAlertsStatus({
+    ids,
+    status,
+    indices,
+    scopedClusterClient,
+  }: UpdateAlertsStatusArgs) {
+    const sanitizedIndices = getValidIndices(indices);
+    if (sanitizedIndices.length <= 0) {
+      // log that we only had invalid indices
+      return;
     }
 
-    this.isInitialized = true;
-    this.esClient = esClient;
-  }
-
-  public async updateAlertsStatus({ request, ids, status, index }: UpdateAlertsStatusArgs) {
-    if (!this.isInitialized) {
-      throw new Error('AlertService not initialized');
-    }
-
-    // The above check makes sure that esClient is defined.
-    const result = await this.esClient!.asScoped(request).asCurrentUser.updateByQuery({
-      index,
+    const result = await scopedClusterClient.updateByQuery({
+      index: sanitizedIndices,
       conflicts: 'abort',
       body: {
         script: {
@@ -74,13 +79,17 @@ export class AlertService {
     return result;
   }
 
-  public async getAlerts({ request, ids, index }: GetAlertsArgs): Promise<AlertsResponse> {
-    if (!this.isInitialized) {
-      throw new Error('AlertService not initialized');
+  public async getAlerts({
+    scopedClusterClient,
+    ids,
+    indices,
+  }: GetAlertsArgs): Promise<AlertsResponse | undefined> {
+    const index = getValidIndices(indices);
+    if (index.length <= 0) {
+      return;
     }
 
-    // The above check makes sure that esClient is defined.
-    const result = await this.esClient!.asScoped(request).asCurrentUser.search<AlertsResponse>({
+    const result = await scopedClusterClient.search<AlertsResponse>({
       index,
       body: {
         query: {

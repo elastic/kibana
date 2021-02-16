@@ -28,6 +28,7 @@ const mockSource2 = { excludes: ['bar-*'] };
 
 const indexPattern = ({
   title: 'foo',
+  fields: [{ name: 'foo-bar' }, { name: 'field1' }, { name: 'field2' }],
   getComputedFields,
   getSourceFiltering: () => mockSource,
 } as unknown) as IndexPattern;
@@ -51,6 +52,11 @@ describe('SearchSource', () => {
   let searchSource: SearchSource;
 
   beforeEach(() => {
+    const getConfigMock = jest
+      .fn()
+      .mockImplementation((param) => param === 'metaFields' && ['_type', '_source'])
+      .mockName('getConfig');
+
     mockSearchMethod = jest
       .fn()
       .mockReturnValue(
@@ -61,7 +67,7 @@ describe('SearchSource', () => {
       );
 
     searchSourceDependencies = {
-      getConfig: jest.fn(),
+      getConfig: getConfigMock,
       search: mockSearchMethod,
       onResponse: (req, res) => res,
       legacy: {
@@ -518,6 +524,54 @@ describe('SearchSource', () => {
         expect(request.script_fields).toEqual({ hello: {} });
       });
 
+      test('request all fields except the ones specified with source filters', async () => {
+        searchSource.setField('index', ({
+          ...indexPattern,
+          getComputedFields: () => ({
+            storedFields: [],
+            scriptFields: [],
+            docvalueFields: [],
+          }),
+        } as unknown) as IndexPattern);
+        searchSource.setField('fields', ['hello', 'foo']);
+
+        const request = await searchSource.getSearchRequestBody();
+        expect(request.fields).toEqual(['hello']);
+      });
+
+      test('request all fields from index pattern except the ones specified with source filters', async () => {
+        searchSource.setField('index', ({
+          ...indexPattern,
+          getComputedFields: () => ({
+            storedFields: [],
+            scriptFields: [],
+            docvalueFields: [],
+          }),
+        } as unknown) as IndexPattern);
+        searchSource.setField('fields', ['*']);
+
+        const request = await searchSource.getSearchRequestBody();
+        expect(request.fields).toEqual([{ field: 'field1' }, { field: 'field2' }]);
+      });
+
+      test('request all fields from index pattern except the ones specified with source filters with unmapped_fields option', async () => {
+        searchSource.setField('index', ({
+          ...indexPattern,
+          getComputedFields: () => ({
+            storedFields: [],
+            scriptFields: [],
+            docvalueFields: [],
+          }),
+        } as unknown) as IndexPattern);
+        searchSource.setField('fields', [{ field: '*', include_unmapped: 'true' }]);
+
+        const request = await searchSource.getSearchRequestBody();
+        expect(request.fields).toEqual([
+          { field: 'field1', include_unmapped: 'true' },
+          { field: 'field2', include_unmapped: 'true' },
+        ]);
+      });
+
       test('returns all scripted fields when one fields entry is *', async () => {
         searchSource.setField('index', ({
           ...indexPattern,
@@ -835,6 +889,26 @@ describe('SearchSource', () => {
       expect(references[1].id).toEqual('456');
       expect(references[1].type).toEqual('index-pattern');
       expect(JSON.parse(searchSourceJSON).filter[0].meta.indexRefName).toEqual(references[1].name);
+    });
+
+    test('mvt geoshape layer test', async () => {
+      // @ts-expect-error TS won't like using this field name, but technically it's possible.
+      searchSource.setField('docvalue_fields', ['prop1']);
+      searchSource.setField('source', ['geometry']);
+      searchSource.setField('fieldsFromSource', ['geometry', 'prop1']);
+      searchSource.setField('index', ({
+        ...indexPattern,
+        getSourceFiltering: () => ({ excludes: [] }),
+        getComputedFields: () => ({
+          storedFields: ['*'],
+          scriptFields: {},
+          docvalueFields: [],
+        }),
+      } as unknown) as IndexPattern);
+      const request = await searchSource.getSearchRequestBody();
+      expect(request.stored_fields).toEqual(['geometry', 'prop1']);
+      expect(request.docvalue_fields).toEqual(['prop1']);
+      expect(request._source).toEqual(['geometry']);
     });
   });
 });

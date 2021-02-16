@@ -33,7 +33,7 @@ export function createUninstallRoute(
               client: { callAsCurrentUser },
             },
           },
-          savedObjects: { client: savedObjectsClient },
+          savedObjects: { getClient: getSavedObjectsClient, typeRegistry },
         },
       },
       request,
@@ -60,6 +60,12 @@ export function createUninstallRoute(
           });
         }
       }
+
+      const includedHiddenTypes = sampleDataset.savedObjects
+        .map((object) => object.type)
+        .filter((supportedType) => typeRegistry.isHidden(supportedType));
+
+      const savedObjectsClient = getSavedObjectsClient({ includedHiddenTypes });
 
       const deletePromises = sampleDataset.savedObjects.map(({ type, id }) =>
         savedObjectsClient.delete(type, id)
