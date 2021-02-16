@@ -263,6 +263,19 @@
             }
           }
         },
+        "sharecapabletype": {
+          "properties": {
+            "title": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 2048
+                }
+              }
+            }
+          }
+        },
         "space": {
           "properties": {
             "_reserved": {

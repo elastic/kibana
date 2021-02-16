@@ -18,6 +18,17 @@ export enum Timings {
   Receive = 'receive',
 }
 
+export enum Metadata {
+  BytesDownloadedCompressed = 'bytesDownloadedCompressed',
+  CertificateIssuer = 'certificateIssuer',
+  CertificateIssueDate = 'certificateIssueDate',
+  CertificateExpiryDate = 'certificateExpiryDate',
+  CertificateSubject = 'certificateSubject',
+  IP = 'ip',
+  MimeType = 'mimeType',
+  RequestStart = 'requestStart',
+}
+
 export const FriendlyTimingLabels = {
   [Timings.Blocked]: i18n.translate(
     'xpack.uptime.synthetics.waterfallChart.labels.timings.blocked',
@@ -51,6 +62,54 @@ export const FriendlyTimingLabels = {
   ),
 };
 
+export const FriendlyFlyoutLabels = {
+  [Metadata.MimeType]: i18n.translate(
+    'xpack.uptime.synthetics.waterfallChart.labels.metadata.contentType',
+    {
+      defaultMessage: 'Content type',
+    }
+  ),
+  [Metadata.RequestStart]: i18n.translate(
+    'xpack.uptime.synthetics.waterfallChart.labels.metadata.requestStart',
+    {
+      defaultMessage: 'Request start',
+    }
+  ),
+  [Metadata.BytesDownloadedCompressed]: i18n.translate(
+    'xpack.uptime.synthetics.waterfallChart.labels.metadata.bytesDownloadedCompressed',
+    {
+      defaultMessage: 'Bytes downloaded (compressed)',
+    }
+  ),
+  [Metadata.CertificateIssuer]: i18n.translate(
+    'xpack.uptime.synthetics.waterfallChart.labels.metadata.certificateIssuer',
+    {
+      defaultMessage: 'Issuer',
+    }
+  ),
+  [Metadata.CertificateIssueDate]: i18n.translate(
+    'xpack.uptime.synthetics.waterfallChart.labels.metadata.certificateIssueDate',
+    {
+      defaultMessage: 'Valid from',
+    }
+  ),
+  [Metadata.CertificateExpiryDate]: i18n.translate(
+    'xpack.uptime.synthetics.waterfallChart.labels.metadata.certificateExpiryDate',
+    {
+      defaultMessage: 'Valid until',
+    }
+  ),
+  [Metadata.CertificateSubject]: i18n.translate(
+    'xpack.uptime.synthetics.waterfallChart.labels.metadata.certificateSubject',
+    {
+      defaultMessage: 'Common name',
+    }
+  ),
+  [Metadata.IP]: i18n.translate('xpack.uptime.synthetics.waterfallChart.labels.metadata.ip', {
+    defaultMessage: 'IP',
+  }),
+};
+
 export const TIMING_ORDER = [
   Timings.Blocked,
   Timings.Dns,
@@ -60,6 +119,19 @@ export const TIMING_ORDER = [
   Timings.Wait,
   Timings.Receive,
 ] as const;
+
+export const META_DATA_ORDER_FLYOUT = [
+  Metadata.MimeType,
+  Timings.Dns,
+  Timings.Connect,
+  Timings.Ssl,
+  Timings.Wait,
+  Timings.Receive,
+] as const;
+
+export type CalculatedTimings = {
+  [K in Timings]?: number;
+};
 
 export enum MimeType {
   Html = 'html',
@@ -155,6 +227,7 @@ export type NetworkItems = NetworkItem[];
 
 export type SidebarItem = Pick<NetworkItem, 'url' | 'status' | 'method'> & {
   isHighlighted: boolean;
+  index: number;
   offsetIndex: number;
 };
 export type SidebarItems = SidebarItem[];

@@ -340,7 +340,7 @@ export const getXyVisualization = ({
     toExpression(state, layers, paletteService, attributes),
   toPreviewExpression: (state, layers) => toPreviewExpression(state, layers, paletteService),
 
-  getErrorMessages(state, frame) {
+  getErrorMessages(state) {
     // Data error handling below here
     const hasNoAccessors = ({ accessors }: XYLayerConfig) =>
       accessors == null || accessors.length === 0;
