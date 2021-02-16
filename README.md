@@ -1,6 +1,6 @@
 # backport
 
-[![Build Status](https://travis-ci.org/sqren/backport.svg?branch=master)](https://travis-ci.org/sqren/backport)
+[![Build Status](https://travis-ci.com/sqren/backport.svg?branch=master)](https://travis-ci.com/sqren/backport)
 [![NPM version](https://img.shields.io/npm/v/backport.svg)](https://www.npmjs.com/package/backport)
 [![dependencies Status](https://david-dm.org/sqren/backport/status.svg)](https://david-dm.org/sqren/backport)
 [![Coverage Status](https://coveralls.io/repos/github/sqren/backport/badge.svg?branch=master)](https://coveralls.io/github/sqren/backport?branch=master)
