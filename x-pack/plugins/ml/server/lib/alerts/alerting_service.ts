@@ -7,6 +7,7 @@
 
 import Boom from '@hapi/boom';
 import rison from 'rison-node';
+import { ElasticsearchClient } from 'kibana/server';
 import { MlClient } from '../ml_client';
 import {
   MlAnomalyDetectionAlertParams,
@@ -25,6 +26,7 @@ import {
 import { parseInterval } from '../../../common/util/parse_interval';
 import { AnomalyDetectionAlertContext } from './register_anomaly_detection_alert_type';
 import { MlJobsResponse } from '../../../common/types/job_service';
+import { ANOMALY_SCORE_MATCH_GROUP_ID } from '../../../common/constants/alerts';
 
 function isDefined<T>(argument: T | undefined | null): argument is T {
   return argument !== undefined && argument !== null;
@@ -48,8 +50,9 @@ export function resolveTimeInterval(bucketSpans: string[]): string {
 /**
  * Alerting related server-side methods
  * @param mlClient
+ * @param esClient
  */
-export function alertingServiceProvider(mlClient: MlClient) {
+export function alertingServiceProvider(mlClient: MlClient, esClient: ElasticsearchClient) {
   const getAggResultsLabel = (resultType: AnomalyResultType) => {
     return {
       aggGroupLabel: `${resultType}_results` as PreviewResultsKeys,
@@ -496,12 +499,53 @@ export function alertingServiceProvider(mlClient: MlClient) {
 
       const anomalyExplorerUrl = buildExplorerUrl(result, params.resultType as AnomalyResultType);
 
-      return {
+      const executionResult = {
         ...result,
         name: result.key_as_string,
         anomalyExplorerUrl,
         kibanaBaseUrl: publicBaseUrl!,
       };
+
+      let kibanaEventLogCount = 0;
+      try {
+        // Check kibana-event-logs for presence of this alert instance
+        const kibanaLogResults = await esClient.count({
+          index: '.kibana-event-log-*',
+          body: {
+            query: {
+              bool: {
+                must: [
+                  {
+                    term: {
+                      'kibana.alerting.action_group_id': {
+                        value: ANOMALY_SCORE_MATCH_GROUP_ID,
+                      },
+                    },
+                  },
+                  {
+                    term: {
+                      'kibana.alerting.instance_id': {
+                        value: executionResult.name,
+                      },
+                    },
+                  },
+                ],
+              },
+            },
+          },
+        });
+
+        kibanaEventLogCount = kibanaLogResults.body.count;
+      } catch (e) {
+        // eslint-disable-next-line no-console
+        console.log('Unable to check kibana event logs', e);
+      }
+
+      if (kibanaEventLogCount > 0) {
+        return;
+      }
+
+      return executionResult;
     },
     /**
      * Checks how often the alert condition will fire an alert instance
