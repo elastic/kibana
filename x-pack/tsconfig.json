@@ -7,7 +7,6 @@
     "plugins/case/**/*",
     "plugins/lists/**/*",
     "plugins/logstash/**/*",
-    "plugins/monitoring/**/*",
     "plugins/security_solution/**/*",
     "plugins/xpack_legacy/**/*",
     "plugins/drilldowns/url_drilldown/**/*"
