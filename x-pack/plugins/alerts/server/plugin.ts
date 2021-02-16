@@ -153,7 +153,7 @@ export class AlertingPlugin {
   private alertTypeRegistry?: AlertTypeRegistry;
   private readonly taskRunnerFactory: TaskRunnerFactory;
   private licenseState: ILicenseState | null = null;
-  private isESOUsingEphemeralEncryptionKey?: boolean;
+  private isESOCanEncrypt?: boolean;
   private security?: SecurityPluginSetup;
   private readonly alertsClientFactory: AlertsClientFactory;
   private readonly telemetryLogger: Logger;
@@ -189,12 +189,11 @@ export class AlertingPlugin {
       };
     });
 
-    this.isESOUsingEphemeralEncryptionKey =
-      plugins.encryptedSavedObjects.usingEphemeralEncryptionKey;
+    this.isESOCanEncrypt = plugins.encryptedSavedObjects.canEncrypt;
 
-    if (this.isESOUsingEphemeralEncryptionKey) {
+    if (!this.isESOCanEncrypt) {
       this.logger.warn(
-        'APIs are disabled because the Encrypted Saved Objects plugin uses an ephemeral encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.'
+        'APIs are disabled because the Encrypted Saved Objects plugin is missing encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.'
       );
     }
 
@@ -311,7 +310,7 @@ export class AlertingPlugin {
 
   public start(core: CoreStart, plugins: AlertingPluginsStart): PluginStartContract {
     const {
-      isESOUsingEphemeralEncryptionKey,
+      isESOCanEncrypt,
       logger,
       taskRunnerFactory,
       alertTypeRegistry,
@@ -353,9 +352,9 @@ export class AlertingPlugin {
     });
 
     const getAlertsClientWithRequest = (request: KibanaRequest) => {
-      if (isESOUsingEphemeralEncryptionKey === true) {
+      if (isESOCanEncrypt !== true) {
         throw new Error(
-          `Unable to create alerts client because the Encrypted Saved Objects plugin uses an ephemeral encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.`
+          `Unable to create alerts client because the Encrypted Saved Objects plugin is missing encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.`
         );
       }
       return alertsClientFactory!.create(request, core.savedObjects);

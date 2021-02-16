@@ -7,6 +7,7 @@
  */
 
 import { IUiSettingsClient, MountPoint, SavedObject } from 'kibana/public';
+import { Subject } from 'rxjs';
 import { Chart } from '../angular/helpers/point_series';
 import { IndexPattern } from '../../../../data/common/index_patterns/index_patterns';
 import { ElasticSearchHit } from '../doc_views/doc_views_types';
@@ -17,13 +18,12 @@ import {
   FilterManager,
   IndexPatternAttributes,
   ISearchSource,
-  Query,
-  TimeRange,
 } from '../../../../data/public';
 import { SavedSearch } from '../../saved_searches';
 import { AppState, GetStateReturn } from '../angular/discover_state';
 import { RequestAdapter } from '../../../../inspector/common';
 import { DiscoverServices } from '../../build_services';
+import { DiscoverSearchSessionManager } from '../angular/discover_search_session';
 
 export interface DiscoverProps {
   /**
@@ -98,9 +98,17 @@ export interface DiscoverProps {
      */
     indexPatternList: Array<SavedObject<IndexPatternAttributes>>;
     /**
+     * Refetch observable
+     */
+    refetch$: Subject<undefined>;
+    /**
      * Kibana core services used by discover
      */
     services: DiscoverServices;
+    /**
+     * Helps with state management of search session
+     */
+    searchSessionManager: DiscoverSearchSessionManager;
     /**
      * The number of documents that can be displayed in the table/grid
      */
@@ -114,10 +122,6 @@ export interface DiscoverProps {
      */
     setHeaderActionMenu: (menuMount: MountPoint | undefined) => void;
     /**
-     * Functions for retrieving/mutating state
-     */
-    stateContainer: GetStateReturn;
-    /**
      * Timefield of the currently used index pattern
      */
     timefield: string;
@@ -125,6 +129,10 @@ export interface DiscoverProps {
      * Function to set the current state
      */
     setAppState: (state: Partial<AppState>) => void;
+    /**
+     * State container providing globalState, appState and functions
+     */
+    stateContainer: GetStateReturn;
   };
   /**
    * Function to reset the current query
@@ -150,10 +158,6 @@ export interface DiscoverProps {
    * Currently selected time range
    */
   timeRange?: { from: string; to: string };
-  /**
-   * Function to update the actual query
-   */
-  updateQuery: (payload: { dateRange: TimeRange; query?: Query }, isUpdate?: boolean) => void;
   /**
    * An object containing properties for proper handling of unmapped fields in the UI
    */

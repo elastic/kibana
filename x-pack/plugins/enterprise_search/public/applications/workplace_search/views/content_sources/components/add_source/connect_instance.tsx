@@ -28,7 +28,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { LicensingLogic } from '../../../../../../applications/shared/licensing';
+import { LicensingLogic } from '../../../../../shared/licensing';
 import { AppLogic } from '../../../../app_logic';
 import { DOCUMENT_PERMISSIONS_DOCS_URL } from '../../../../routes';
 import { FeatureIds, Configuration, Features } from '../../../../types';

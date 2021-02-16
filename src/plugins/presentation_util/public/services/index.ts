@@ -7,20 +7,22 @@
  */
 
 import { SimpleSavedObject } from 'src/core/public';
-import { DashboardSavedObject } from 'src/plugins/dashboard/public';
 import { PluginServices } from './create';
+import { PartialDashboardAttributes } from './kibana/dashboards';
+
 export interface PresentationDashboardsService {
   findDashboards: (
     query: string,
     fields: string[]
-  ) => Promise<Array<SimpleSavedObject<DashboardSavedObject>>>;
-  findDashboardsByTitle: (title: string) => Promise<Array<SimpleSavedObject<DashboardSavedObject>>>;
+  ) => Promise<Array<SimpleSavedObject<PartialDashboardAttributes>>>;
+  findDashboardsByTitle: (
+    title: string
+  ) => Promise<Array<SimpleSavedObject<PartialDashboardAttributes>>>;
 }
 
 export interface PresentationCapabilitiesService {
   canAccessDashboards: () => boolean;
   canCreateNewDashboards: () => boolean;
-  canEditDashboards: () => boolean;
 }
 
 export interface PresentationUtilServices {

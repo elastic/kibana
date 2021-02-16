@@ -13,7 +13,6 @@ import {
   EuiFlexItem,
   EuiSpacer,
   EuiTitle,
-  EuiSelectOption,
 } from '@elastic/eui';
 import { useKibana } from '../../../../common/lib/kibana';
 import { ActionParamsProps } from '../../../../types';
@@ -23,6 +22,7 @@ import { TextFieldWithMessageVariables } from '../../text_field_with_message_var
 import * as i18n from './translations';
 import { useGetChoices } from './use_get_choices';
 import { ServiceNowSIRActionParams, Fields, Choice } from './types';
+import { choicesToEuiOptions } from './helpers';
 
 const useGetChoicesFields = ['category', 'subcategory', 'priority'];
 const defaultFields: Fields = {
@@ -30,9 +30,6 @@ const defaultFields: Fields = {
   subcategory: [],
   priority: [],
 };
-
-const choicesToEuiOptions = (choices: Choice[]): EuiSelectOption[] =>
-  choices.map((choice) => ({ value: choice.value, text: choice.label }));
 
 const ServiceNowSIRParamsFields: React.FunctionComponent<
   ActionParamsProps<ServiceNowSIRActionParams>
@@ -218,16 +215,7 @@ const ServiceNowSIRParamsFields: React.FunctionComponent<
           disabled={isLoadingChoices}
           options={priorityOptions}
           value={incident.priority ?? undefined}
-          onChange={(e) => {
-            editAction(
-              'subActionParams',
-              {
-                incident: { ...incident, priority: e.target.value },
-                comments,
-              },
-              index
-            );
-          }}
+          onChange={(e) => editSubActionProperty('priority', e.target.value)}
         />
       </EuiFormRow>
       <EuiSpacer size="m" />

@@ -16,6 +16,7 @@ import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 import { getMetrics } from './get_metrics';
 import { getDestinationMap } from './get_destination_map';
 import { calculateThroughput } from '../../helpers/calculate_throughput';
+import { withApmSpan } from '../../../utils/with_apm_span';
 
 export type ServiceDependencyItem = {
   name: string;
@@ -42,7 +43,7 @@ export type ServiceDependencyItem = {
   | { type: 'external'; spanType?: string; spanSubtype?: string }
 );
 
-export async function getServiceDependencies({
+export function getServiceDependencies({
   setup,
   serviceName,
   environment,
@@ -53,171 +54,177 @@ export async function getServiceDependencies({
   environment: string;
   numBuckets: number;
 }): Promise<ServiceDependencyItem[]> {
-  const { start, end } = setup;
-  const [allMetrics, destinationMap] = await Promise.all([
-    getMetrics({
-      setup,
-      serviceName,
-      environment,
-      numBuckets,
-    }),
-    getDestinationMap({
-      setup,
-      serviceName,
-      environment,
-    }),
-  ]);
+  return withApmSpan('get_service_dependencies', async () => {
+    const { start, end } = setup;
+    const [allMetrics, destinationMap] = await Promise.all([
+      getMetrics({
+        setup,
+        serviceName,
+        environment,
+        numBuckets,
+      }),
+      getDestinationMap({
+        setup,
+        serviceName,
+        environment,
+      }),
+    ]);
 
-  const metricsWithDestinationIds = allMetrics.map((metricItem) => {
-    const spanDestination = metricItem.span.destination.service.resource;
+    const metricsWithDestinationIds = allMetrics.map((metricItem) => {
+      const spanDestination = metricItem.span.destination.service.resource;
 
-    const destination = maybe(destinationMap[spanDestination]);
-    const id = destination?.id || {
-      [SPAN_DESTINATION_SERVICE_RESOURCE]: spanDestination,
-    };
+      const destination = maybe(destinationMap[spanDestination]);
+      const id = destination?.id || {
+        [SPAN_DESTINATION_SERVICE_RESOURCE]: spanDestination,
+      };
 
-    return merge(
-      {
-        id,
-        metrics: [metricItem],
-        span: {
-          destination: {
-            service: {
-              resource: spanDestination,
+      return merge(
+        {
+          id,
+          metrics: [metricItem],
+          span: {
+            destination: {
+              service: {
+                resource: spanDestination,
+              },
             },
           },
         },
-      },
-      destination
-    );
-  }, []);
+        destination
+      );
+    }, []);
 
-  const metricsJoinedByDestinationId = joinByKey(
-    metricsWithDestinationIds,
-    'id',
-    (a, b) => {
-      const { metrics: metricsA, ...itemA } = a;
-      const { metrics: metricsB, ...itemB } = b;
+    const metricsJoinedByDestinationId = joinByKey(
+      metricsWithDestinationIds,
+      'id',
+      (a, b) => {
+        const { metrics: metricsA, ...itemA } = a;
+        const { metrics: metricsB, ...itemB } = b;
 
-      return merge({}, itemA, itemB, { metrics: metricsA.concat(metricsB) });
-    }
-  );
-
-  const metricsByResolvedAddress = metricsJoinedByDestinationId.map((item) => {
-    const mergedMetrics = item.metrics.reduce<
-      Omit<ValuesType<typeof item.metrics>, 'span'>
-    >(
-      (prev, current) => {
-        return {
-          value: {
-            count: prev.value.count + current.value.count,
-            latency_sum: prev.value.latency_sum + current.value.latency_sum,
-            error_count: prev.value.error_count + current.value.error_count,
-          },
-          timeseries: joinByKey(
-            [...prev.timeseries, ...current.timeseries],
-            'x',
-            (a, b) => ({
-              x: a.x,
-              count: a.count + b.count,
-              latency_sum: a.latency_sum + b.latency_sum,
-              error_count: a.error_count + b.error_count,
-            })
-          ),
-        };
-      },
-      {
-        value: {
-          count: 0,
-          latency_sum: 0,
-          error_count: 0,
-        },
-        timeseries: [],
+        return merge({}, itemA, itemB, { metrics: metricsA.concat(metricsB) });
       }
     );
 
-    const destMetrics = {
-      latency: {
-        value:
-          mergedMetrics.value.count > 0
-            ? mergedMetrics.value.latency_sum / mergedMetrics.value.count
-            : null,
-        timeseries: mergedMetrics.timeseries.map((point) => ({
-          x: point.x,
-          y: point.count > 0 ? point.latency_sum / point.count : null,
-        })),
-      },
-      throughput: {
-        value:
-          mergedMetrics.value.count > 0
-            ? calculateThroughput({
-                start,
-                end,
-                value: mergedMetrics.value.count,
-              })
-            : null,
-        timeseries: mergedMetrics.timeseries.map((point) => ({
-          x: point.x,
-          y:
-            point.count > 0
-              ? calculateThroughput({ start, end, value: point.count })
-              : null,
-        })),
-      },
-      errorRate: {
-        value:
-          mergedMetrics.value.count > 0
-            ? (mergedMetrics.value.error_count ?? 0) / mergedMetrics.value.count
-            : null,
-        timeseries: mergedMetrics.timeseries.map((point) => ({
-          x: point.x,
-          y: point.count > 0 ? (point.error_count ?? 0) / point.count : null,
-        })),
-      },
-    };
+    const metricsByResolvedAddress = metricsJoinedByDestinationId.map(
+      (item) => {
+        const mergedMetrics = item.metrics.reduce<
+          Omit<ValuesType<typeof item.metrics>, 'span'>
+        >(
+          (prev, current) => {
+            return {
+              value: {
+                count: prev.value.count + current.value.count,
+                latency_sum: prev.value.latency_sum + current.value.latency_sum,
+                error_count: prev.value.error_count + current.value.error_count,
+              },
+              timeseries: joinByKey(
+                [...prev.timeseries, ...current.timeseries],
+                'x',
+                (a, b) => ({
+                  x: a.x,
+                  count: a.count + b.count,
+                  latency_sum: a.latency_sum + b.latency_sum,
+                  error_count: a.error_count + b.error_count,
+                })
+              ),
+            };
+          },
+          {
+            value: {
+              count: 0,
+              latency_sum: 0,
+              error_count: 0,
+            },
+            timeseries: [],
+          }
+        );
 
-    if (item.service) {
+        const destMetrics = {
+          latency: {
+            value:
+              mergedMetrics.value.count > 0
+                ? mergedMetrics.value.latency_sum / mergedMetrics.value.count
+                : null,
+            timeseries: mergedMetrics.timeseries.map((point) => ({
+              x: point.x,
+              y: point.count > 0 ? point.latency_sum / point.count : null,
+            })),
+          },
+          throughput: {
+            value:
+              mergedMetrics.value.count > 0
+                ? calculateThroughput({
+                    start,
+                    end,
+                    value: mergedMetrics.value.count,
+                  })
+                : null,
+            timeseries: mergedMetrics.timeseries.map((point) => ({
+              x: point.x,
+              y:
+                point.count > 0
+                  ? calculateThroughput({ start, end, value: point.count })
+                  : null,
+            })),
+          },
+          errorRate: {
+            value:
+              mergedMetrics.value.count > 0
+                ? (mergedMetrics.value.error_count ?? 0) /
+                  mergedMetrics.value.count
+                : null,
+            timeseries: mergedMetrics.timeseries.map((point) => ({
+              x: point.x,
+              y:
+                point.count > 0 ? (point.error_count ?? 0) / point.count : null,
+            })),
+          },
+        };
+
+        if (item.service) {
+          return {
+            name: item.service.name,
+            type: 'service' as const,
+            serviceName: item.service.name,
+            environment: item.service.environment,
+            // agent.name should always be there, type returned from joinByKey is too pessimistic
+            agentName: item.agent!.name,
+            ...destMetrics,
+          };
+        }
+
+        return {
+          name: item.span.destination.service.resource,
+          type: 'external' as const,
+          spanType: item.span.type,
+          spanSubtype: item.span.subtype,
+          ...destMetrics,
+        };
+      }
+    );
+
+    const latencySums = metricsByResolvedAddress
+      .map(
+        (metric) => (metric.latency.value ?? 0) * (metric.throughput.value ?? 0)
+      )
+      .filter(isFiniteNumber);
+
+    const minLatencySum = Math.min(...latencySums);
+    const maxLatencySum = Math.max(...latencySums);
+
+    return metricsByResolvedAddress.map((metric) => {
+      const impact =
+        isFiniteNumber(metric.latency.value) &&
+        isFiniteNumber(metric.throughput.value)
+          ? ((metric.latency.value * metric.throughput.value - minLatencySum) /
+              (maxLatencySum - minLatencySum)) *
+            100
+          : 0;
+
       return {
-        name: item.service.name,
-        type: 'service' as const,
-        serviceName: item.service.name,
-        environment: item.service.environment,
-        // agent.name should always be there, type returned from joinByKey is too pessimistic
-        agentName: item.agent!.name,
-        ...destMetrics,
+        ...metric,
+        impact,
       };
-    }
-
-    return {
-      name: item.span.destination.service.resource,
-      type: 'external' as const,
-      spanType: item.span.type,
-      spanSubtype: item.span.subtype,
-      ...destMetrics,
-    };
-  });
-
-  const latencySums = metricsByResolvedAddress
-    .map(
-      (metric) => (metric.latency.value ?? 0) * (metric.throughput.value ?? 0)
-    )
-    .filter(isFiniteNumber);
-
-  const minLatencySum = Math.min(...latencySums);
-  const maxLatencySum = Math.max(...latencySums);
-
-  return metricsByResolvedAddress.map((metric) => {
-    const impact =
-      isFiniteNumber(metric.latency.value) &&
-      isFiniteNumber(metric.throughput.value)
-        ? ((metric.latency.value * metric.throughput.value - minLatencySum) /
-            (maxLatencySum - minLatencySum)) *
-          100
-        : 0;
-
-    return {
-      ...metric,
-      impact,
-    };
+    });
   });
 }

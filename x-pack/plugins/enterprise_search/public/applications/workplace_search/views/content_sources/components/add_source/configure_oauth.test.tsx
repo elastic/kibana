@@ -14,7 +14,7 @@ import { shallow } from 'enzyme';
 
 import { EuiCheckboxGroup } from '@elastic/eui';
 
-import { Loading } from '../../../../../../applications/shared/loading';
+import { Loading } from '../../../../../shared/loading';
 
 import { ConfigureOauth } from './configure_oauth';
 

@@ -101,6 +101,7 @@ export interface OverlayModalOpenOptions {
   className?: string;
   closeButtonAriaLabel?: string;
   'data-test-subj'?: string;
+  maxWidth?: boolean | number | string;
 }
 
 interface StartDeps {

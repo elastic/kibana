@@ -24,8 +24,8 @@ import {
   EuiLink,
 } from '@elastic/eui';
 
-import { Loading } from '../../../../../applications/shared/loading';
 import { DEFAULT_META } from '../../../../shared/constants';
+import { Loading } from '../../../../shared/loading';
 import { ComponentLoader } from '../../../components/shared/component_loader';
 import { TablePaginationBar } from '../../../components/shared/table_pagination_bar';
 
