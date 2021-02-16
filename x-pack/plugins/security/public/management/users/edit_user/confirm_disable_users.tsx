@@ -80,7 +80,6 @@ export const ConfirmDisableUsers: FunctionComponent<ConfirmDisableUsersProps> = 
       }
       confirmButtonColor={isSystemUser ? 'danger' : undefined}
       isLoading={state.loading}
-      ownFocus
     >
       {isSystemUser ? (
         <EuiText>
