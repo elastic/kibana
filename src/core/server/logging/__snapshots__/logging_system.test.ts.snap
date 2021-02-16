@@ -1,20 +1,20 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`appends records via multiple appenders.: console logs 1`] = `"[2012-01-31T23:33:22.011Z][INFO ][some-context] You know, just for your info."`;
+exports[`appends records via multiple appenders.: console logs 1`] = `"[2012-01-31T18:33:22.011-05:00][INFO ][some-context] You know, just for your info."`;
 
 exports[`appends records via multiple appenders.: file logs 1`] = `
-"[2012-01-31T23:33:22.011Z][WARN ][tests] Config is not ready!
+"[2012-01-31T13:33:22.011-05:00][WARN ][tests] Config is not ready!
 "
 `;
 
 exports[`appends records via multiple appenders.: file logs 2`] = `
-"[2012-01-31T23:33:22.011Z][ERROR][tests.child] Too bad that config is not ready :/
+"[2012-01-31T08:33:22.011-05:00][ERROR][tests.child] Too bad that config is not ready :/
 "
 `;
 
 exports[`asLoggerFactory() only allows to create new loggers. 1`] = `
 Object {
-  "@timestamp": "2012-01-31T18:33:22.011-05:00",
+  "@timestamp": "2012-01-30T22:33:22.011-05:00",
   "log": Object {
     "level": "TRACE",
     "logger": "test.context",
@@ -28,7 +28,7 @@ Object {
 
 exports[`asLoggerFactory() only allows to create new loggers. 2`] = `
 Object {
-  "@timestamp": "2012-01-31T13:33:22.011-05:00",
+  "@timestamp": "2012-01-30T17:33:22.011-05:00",
   "log": Object {
     "level": "INFO",
     "logger": "test.context",
@@ -43,7 +43,7 @@ Object {
 
 exports[`asLoggerFactory() only allows to create new loggers. 3`] = `
 Object {
-  "@timestamp": "2012-01-31T08:33:22.011-05:00",
+  "@timestamp": "2012-01-30T12:33:22.011-05:00",
   "log": Object {
     "level": "FATAL",
     "logger": "test.context",
@@ -87,7 +87,7 @@ Object {
 exports[`uses \`root\` logger if context is not specified. 1`] = `
 Array [
   Array [
-    "[2012-01-31T23:33:22.011Z][INFO ][root] This message goes to a root context.",
+    "[2012-01-31T03:33:22.011-05:00][INFO ][root] This message goes to a root context.",
   ],
 ]
 `;

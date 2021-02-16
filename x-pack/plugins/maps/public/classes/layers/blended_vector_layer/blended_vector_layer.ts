@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { VectorLayer } from '../vector_layer/vector_layer';
+import { IVectorLayer, VectorLayer } from '../vector_layer';
 import { IVectorStyle, VectorStyle } from '../../styles/vector/vector_style';
 import { getDefaultDynamicProperties } from '../../styles/vector/vector_style_defaults';
 import { IDynamicStyleProperty } from '../../styles/vector/properties/dynamic_style_property';
@@ -24,7 +24,6 @@ import {
 } from '../../../../common/constants';
 import { ESGeoGridSource } from '../../sources/es_geo_grid_source/es_geo_grid_source';
 import { canSkipSourceUpdate } from '../../util/can_skip_fetch';
-import { IVectorLayer } from '../vector_layer/vector_layer';
 import { IESSource } from '../../sources/es_source';
 import { ISource } from '../../sources/source';
 import { DataRequestContext } from '../../../actions';

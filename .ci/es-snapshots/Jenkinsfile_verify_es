@@ -26,7 +26,10 @@ kibanaPipeline(timeoutMinutes: 150) {
       message: "[${SNAPSHOT_VERSION}] ES Snapshot Verification Failure",
     ) {
       retryable.enable(2)
-      withEnv(["ES_SNAPSHOT_MANIFEST=${SNAPSHOT_MANIFEST}"]) {
+      withEnv([
+        "ES_SNAPSHOT_MANIFEST=${SNAPSHOT_MANIFEST}",
+        'IGNORE_SHIP_CI_STATS_ERROR=true',
+      ]) {
         parallel([
           'kibana-intake-agent': workers.intake('kibana-intake', './test/scripts/jenkins_unit.sh'),
           'kibana-oss-agent': workers.functional('kibana-oss-tests', { kibanaPipeline.buildOss() }, [

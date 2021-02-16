@@ -131,6 +131,8 @@ if (doc['task.runAt'].size()!=0) {
         .join(' ')}
     } else if (!params.skippedTaskTypes.contains(ctx._source.task.taskType)) {
       ctx._source.task.status = "unrecognized";
+    } else {
+      ctx.op = "noop";
     }`,
         lang: 'painless',
         params: {
@@ -185,6 +187,8 @@ if (doc['task.runAt'].size()!=0) {
         .join(' ')}
     } else if (!params.skippedTaskTypes.contains(ctx._source.task.taskType)) {
       ctx._source.task.status = "unrecognized";
+    } else {
+      ctx.op = "noop";
     }`,
         lang: 'painless',
         params: {
@@ -201,6 +205,22 @@ if (doc['task.runAt'].size()!=0) {
           },
         },
       });
+    });
+
+    test('it marks the update as a noop if the type is skipped', async () => {
+      const taskManagerId = '3478fg6-82374f6-83467gf5-384g6f';
+      const claimOwnershipUntil = '2019-02-12T21:01:22.479Z';
+      const fieldUpdates = {
+        ownerId: taskManagerId,
+        retryAt: claimOwnershipUntil,
+      };
+
+      expect(
+        updateFieldsAndMarkAsFailed(fieldUpdates, [], ['foo', 'bar'], [], {
+          foo: 5,
+          bar: 2,
+        }).source
+      ).toMatch(/ctx.op = "noop"/);
     });
   });
 });

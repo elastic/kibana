@@ -15,8 +15,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const appsMenu = getService('appsMenu');
   const managementMenu = getService('managementMenu');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/90576
-  describe.skip('security', () => {
+  describe('security', () => {
     before(async () => {
       await esArchiver.load('empty_kibana');
       await PageObjects.security.forceLogout();
@@ -47,9 +46,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
-    describe('global dashboard all with transform_user', () => {
+    describe('global dashboard read with transform_user', () => {
       before(async () => {
-        await security.testUser.setRoles(['global_dashboard_all', 'transform_user'], true);
+        await security.testUser.setRoles(['global_dashboard_read', 'transform_user'], true);
       });
       after(async () => {
         await security.testUser.restoreDefaults();

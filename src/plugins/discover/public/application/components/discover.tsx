@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import './discover.scss';
-import React, { useCallback, useMemo, useRef, useState } from 'react';
+import React, { useState, useRef, useMemo, useCallback } from 'react';
 import {
   EuiButtonEmpty,
   EuiButtonIcon,
@@ -66,7 +66,6 @@ export function Discover({
   searchSource,
   state,
   timeRange,
-  updateQuery,
   unmappedFieldsConfig,
 }: DiscoverProps) {
   const [expandedDoc, setExpandedDoc] = useState<ElasticSearchHit | undefined>(undefined);
@@ -76,8 +75,11 @@ export function Discover({
     // collapse icon isn't displayed in mobile view, use it to detect which view is displayed
     return collapseIcon && !collapseIcon.current;
   };
-
-  const [toggleOn, toggleChart] = useState(true);
+  const toggleHideChart = useCallback(() => {
+    const newState = { ...state, hideChart: !state.hideChart };
+    opts.stateContainer.setAppState(newState);
+  }, [state, opts]);
+  const hideChart = useMemo(() => state.hideChart, [state]);
   const { savedSearch, indexPatternList, config, services, data, setAppState } = opts;
   const { trackUiMetric, capabilities, indexPatterns } = services;
   const [isSidebarClosed, setIsSidebarClosed] = useState(false);
@@ -89,6 +91,15 @@ export function Discover({
   const contentCentered = resultState === 'uninitialized';
   const isLegacy = services.uiSettings.get('doc_table:legacy');
   const useNewFieldsApi = !services.uiSettings.get(SEARCH_FIELDS_FROM_SOURCE);
+  const updateQuery = useCallback(
+    (_payload, isUpdate?: boolean) => {
+      if (isUpdate === false) {
+        opts.searchSessionManager.removeSearchSessionIdFromURL({ replace: false });
+        opts.refetch$.next();
+      }
+    },
+    [opts]
+  );
 
   const { onAddColumn, onRemoveColumn, onMoveColumn, onSetColumns } = useMemo(
     () =>
@@ -192,7 +203,8 @@ export function Discover({
           indexPattern={indexPattern}
           opts={opts}
           onOpenInspector={onOpenInspector}
-          state={state}
+          query={state.query}
+          savedQuery={state.savedQuery}
           updateQuery={updateQuery}
         />
         <EuiPageBody className="dscPageBody" aria-describedby="savedSearchTitle">
@@ -277,7 +289,7 @@ export function Discover({
                             onResetQuery={resetQuery}
                           />
                         </EuiFlexItem>
-                        {toggleOn && (
+                        {!hideChart && (
                           <EuiFlexItem className="dscResultCount__actions">
                             <TimechartHeader
                               dateFormat={opts.config.get('dateFormat')}
@@ -293,13 +305,13 @@ export function Discover({
                           <EuiFlexItem className="dscResultCount__toggle" grow={false}>
                             <EuiButtonEmpty
                               size="xs"
-                              iconType={toggleOn ? 'eyeClosed' : 'eye'}
+                              iconType={!hideChart ? 'eyeClosed' : 'eye'}
                               onClick={() => {
-                                toggleChart(!toggleOn);
+                                toggleHideChart();
                               }}
                               data-test-subj="discoverChartToggle"
                             >
-                              {toggleOn
+                              {!hideChart
                                 ? i18n.translate('discover.hideChart', {
                                     defaultMessage: 'Hide chart',
                                   })
@@ -312,7 +324,7 @@ export function Discover({
                       </EuiFlexGroup>
                       {isLegacy && <SkipBottomButton onClick={onSkipBottomButtonClick} />}
                     </EuiFlexItem>
-                    {toggleOn && opts.timefield && (
+                    {!hideChart && opts.timefield && (
                       <EuiFlexItem grow={false}>
                         <section
                           aria-label={i18n.translate(
