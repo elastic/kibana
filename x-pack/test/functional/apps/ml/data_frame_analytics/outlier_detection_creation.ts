@@ -129,7 +129,7 @@ export default function ({ getService }: FtrProviderContext) {
 
           await ml.testExecution.logTestStep('displays the scatterplot matrix');
           await ml.dataFrameAnalyticsCanvasElement.assertCanvasElement(
-            'mlAnalyticsCreateJobWizardScatterplotMatrixFormRow',
+            'mlAnalyticsCreateJobWizardScatterplotMatrixPanel',
             testData.expected.scatterplotMatrixColorStatsWizard
           );
 

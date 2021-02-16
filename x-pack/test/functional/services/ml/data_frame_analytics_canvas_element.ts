@@ -21,19 +21,30 @@ export function MachineLearningDataFrameAnalyticsCanvasElementProvider({
       expectedColorStats: Array<{
         key: string;
         value: number;
-      }>
+      }>,
+      exclude?: string[],
+      percentageThreshold = 1
     ) {
       await testSubjects.existOrFail(dataTestSubj);
 
+      const sortedExpectedColorStats = [...expectedColorStats].sort((a, b) =>
+        a.key.localeCompare(b.key)
+      );
+
       const actualColorStats = await canvasElement.getColorStats(
         `[data-test-subj="${dataTestSubj}"] canvas`,
-        expectedColorStats,
-        1
+        sortedExpectedColorStats,
+        exclude,
+        percentageThreshold
+      );
+      expect(actualColorStats.length).to.eql(
+        sortedExpectedColorStats.length,
+        `Expected and actual color stats for '${dataTestSubj}' should have the same amount of elements. Expected: ${sortedExpectedColorStats.length} (got ${actualColorStats.length})`
       );
       expect(actualColorStats.every((d) => d.withinTolerance)).to.eql(
         true,
-        `Color stats for canvas element should be within tolerance. Expected: '${JSON.stringify(
-          expectedColorStats
+        `Color stats for '${dataTestSubj}' should be within tolerance. Expected: '${JSON.stringify(
+          sortedExpectedColorStats
         )}' (got '${JSON.stringify(actualColorStats)}')`
       );
     }

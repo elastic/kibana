@@ -42,13 +42,12 @@ export default function ({ getService }: FtrProviderContext) {
         createIndexPattern: true,
         expected: {
           rocCurveColorState: [
-            // background
-            { key: '#FFFFFF', value: 93 },
             // tick/grid/axis
-            { key: '#98A2B3', value: 1 },
-            { key: '#DDDDDD', value: 3 },
-            // line
-            { key: '#6092C0', value: 1 },
+            { key: '#DDDDDD', value: 48 },
+            // lines
+            { key: '#98A2B3', value: 22 },
+            { key: '#6092C0', value: 9 },
+            { key: '#54B399', value: 6 },
           ],
           scatterplotMatrixColorStats: [
             // background
@@ -112,7 +111,7 @@ export default function ({ getService }: FtrProviderContext) {
 
           await ml.testExecution.logTestStep('displays the scatterplot matrix');
           await ml.dataFrameAnalyticsCanvasElement.assertCanvasElement(
-            'mlAnalyticsCreateJobWizardScatterplotMatrixFormRow',
+            'mlAnalyticsCreateJobWizardScatterplotMatrixPanel',
             testData.expected.scatterplotMatrixColorStats
           );
 
@@ -232,7 +231,9 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.dataFrameAnalyticsResults.assertClassificationEvaluatePanelElementsExists();
           await ml.dataFrameAnalyticsCanvasElement.assertCanvasElement(
             'mlDFAnalyticsClassificationExplorationRocCurveChart',
-            testData.expected.rocCurveColorState
+            testData.expected.rocCurveColorState,
+            ['#000000'],
+            5
           );
           await ml.dataFrameAnalyticsResults.assertClassificationTablePanelExists();
           await ml.dataFrameAnalyticsResults.assertResultsTableExists();
