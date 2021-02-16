@@ -40,20 +40,61 @@ import { AnomalySummary } from './annomaly_summary';
 import { AnomalySeverityIndicator } from '../../../../../../../components/logging/log_analysis_results/anomaly_severity_indicator';
 import { useSourceContext } from '../../../../../../../containers/source';
 import { createResultsUrl } from '../flyout_home';
+import { useWaffleViewState, WaffleViewState } from '../../../../hooks/use_waffle_view_state';
 type JobType = 'k8s' | 'hosts';
 type SortField = 'anomalyScore' | 'startTime';
 interface JobOption {
   id: JobType;
   label: string;
 }
-
-const AnomalyActionMenu = React.memo<{ jobId: string }>(({ jobId }) => {
+const AnomalyActionMenu = React.memo<{
+  jobId: string;
+  influencers: string[];
+  type: string;
+  startTime: number;
+}>(({ jobId, influencers, type, startTime }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isAlertOpen, setIsAlertOpen] = useState(false);
   const close = useCallback(() => setIsOpen(false), [setIsOpen]);
   const handleToggleMenu = useCallback(() => setIsOpen(!isOpen), [isOpen]);
   const openAlert = useCallback(() => setIsAlertOpen(true), [setIsAlertOpen]);
   const closeAlert = useCallback(() => setIsAlertOpen(false), [setIsAlertOpen]);
+  const { onViewChange } = useWaffleViewState();
+
+  const metricTypeMap: { [key: string]: string } = {
+    memory_usage: 'memory',
+    network_in: 'rx',
+    network_out: 'tx',
+  };
+  const showInInventory = () => {
+    const filters = influencers.map(
+      (influencer) =>
+        `${type === 'metrics_k8s' ? 'kubernetes.pod.uid' : 'host.name'}: "${influencer}"`
+    );
+
+    const nodeType = `${type === 'metrics_k8s' ? 'pod' : 'host'}`;
+    const jobIdParts = jobId.split('-');
+    const jobIdMetric = jobIdParts[jobIdParts.length - 1];
+    const metricType = metricTypeMap[jobIdMetric.replace(/hosts_|k8s_/, '')];
+    const anomalyViewParams = {
+      metric: { type: metricType },
+      sort: { by: 'name', direction: 'desc' },
+      groupBy: [],
+      nodeType,
+      view: 'map',
+      customOptions: [],
+      customMetrics: [],
+      boundsOverride: { max: 1, min: 0 },
+      autoBounds: true,
+      accountId: '',
+      region: '',
+      autoReload: false,
+      filterQuery: { expression: filters.join(' or '), kind: 'kuery' },
+      legend: { palette: 'cool', reverseColors: false, steps: 10 },
+      time: startTime,
+    } as WaffleViewState;
+    onViewChange(anomalyViewParams);
+  };
 
   const anomaliesUrl = useLinkProps({
     app: 'ml',
@@ -61,6 +102,12 @@ const AnomalyActionMenu = React.memo<{ jobId: string }>(({ jobId }) => {
   });
 
   const items = [
+    <EuiContextMenuItem key="showInInventory" icon="search" onClick={showInInventory}>
+      <FormattedMessage
+        id="xpack.infra.ml.anomalyFlyout.actions.showInInventory"
+        defaultMessage="Show in Inventory"
+      />
+    </EuiContextMenuItem>,
     <EuiContextMenuItem key="openInAnomalyExplorer" icon="popout" {...anomaliesUrl}>
       <FormattedMessage
         id="xpack.infra.ml.anomalyFlyout.actions.openInAnomalyExplorer"
@@ -377,7 +424,14 @@ const columns: Array<
     width: '10%',
     actions: [
       {
-        render: (anomaly: MetricsHostsAnomaly) => <AnomalyActionMenu jobId={anomaly.jobId} />,
+        render: (anomaly: MetricsHostsAnomaly) => (
+          <AnomalyActionMenu
+            jobId={anomaly.jobId}
+            type={anomaly.type}
+            influencers={anomaly.influencers}
+            startTime={anomaly.startTime}
+          />
+        ),
       },
     ],
   },
