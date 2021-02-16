@@ -14,7 +14,7 @@ import { SwitchOption } from './switch';
 import { useKibana } from '../../../../kibana_react/public';
 import { UI_SETTINGS } from '../../../../data/public';
 
-interface PercentageModeProps {
+export interface PercentageModeOptionProps {
   setValue: (
     paramName: 'percentageMode' | 'percentageFormatPattern',
     value: boolean | string | undefined
@@ -29,7 +29,7 @@ function PercentageModeOption({
   setValue,
   percentageMode,
   formatPattern,
-}: PercentageModeProps) {
+}: PercentageModeOptionProps) {
   const { services } = useKibana();
   const defaultPattern = services.uiSettings?.get(UI_SETTINGS.FORMAT_PERCENT_DEFAULT_PATTERN);
 
@@ -65,6 +65,7 @@ function PercentageModeOption({
         }
       >
         <EuiFieldText
+          data-test-subj={`${dataTestSubj}FormatPattern`}
           value={formatPattern}
           placeholder={defaultPattern}
           onChange={(e) => {
