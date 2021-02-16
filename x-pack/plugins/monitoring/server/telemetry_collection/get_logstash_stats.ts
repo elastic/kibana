@@ -126,51 +126,47 @@ export function processStatsResults(
       versions[clusterUuid] = new Map();
       plugins[clusterUuid] = new Map();
     }
+    const logstashStats = hit._source.logstash_stats;
+    const clusterStats = clusters[clusterUuid].cluster_stats;
 
-    const processLogstashStatsResults = () => {
-      const logstashStats = hit._source.logstash_stats;
-      const clusterStats = clusters[clusterUuid].cluster_stats;
+    if (clusterStats !== undefined && logstashStats !== undefined) {
+      clusters[clusterUuid].count = (clusters[clusterUuid].count || 0) + 1;
 
-      if (clusterStats !== undefined && logstashStats !== undefined) {
-        clusters[clusterUuid].count = (clusters[clusterUuid].count || 0) + 1;
+      const thisVersion = logstashStats.logstash?.version;
+      const a: Counter = versions[clusterUuid];
+      incrementByKey(a, thisVersion);
+      clusters[clusterUuid].versions = mapToList(a, 'version');
 
-        const thisVersion = logstashStats.logstash?.version;
-        const a: Counter = versions[clusterUuid];
-        incrementByKey(a, thisVersion);
-        clusters[clusterUuid].versions = mapToList(a, 'version');
-
-        // Internal Collection has no agent field, so default to 'internal_collection'
-        let thisCollectionType = hit._source.agent?.type;
-        if (thisCollectionType === undefined) {
-          thisCollectionType = 'internal_collection';
-        }
-        if (!clusterStats.hasOwnProperty('collection_types')) {
-          clusterStats.collection_types = {};
-        }
-        clusterStats.collection_types![thisCollectionType] =
-          (clusterStats.collection_types![thisCollectionType] || 0) + 1;
-
-        const theseEphemeralIds: string[] = [];
-        const pipelines = logstashStats.pipelines || [];
-
-        pipelines.forEach((pipeline) => {
-          const thisQueueType = pipeline.queue?.type;
-          if (thisQueueType !== undefined) {
-            if (!clusterStats.hasOwnProperty('queues')) {
-              clusterStats.queues = {};
-            }
-            clusterStats.queues![thisQueueType] = (clusterStats.queues![thisQueueType] || 0) + 1;
-          }
-
-          const ephemeralId = pipeline.ephemeral_id;
-          if (ephemeralId !== undefined) {
-            theseEphemeralIds.push(ephemeralId);
-          }
-        });
-        allEphemeralIds[clusterUuid] = theseEphemeralIds;
+      // Internal Collection has no agent field, so default to 'internal_collection'
+      let thisCollectionType = hit._source.agent?.type;
+      if (thisCollectionType === undefined) {
+        thisCollectionType = 'internal_collection';
       }
-    };
-    processLogstashStatsResults();
+      if (!clusterStats.hasOwnProperty('collection_types')) {
+        clusterStats.collection_types = {};
+      }
+      clusterStats.collection_types![thisCollectionType] =
+        (clusterStats.collection_types![thisCollectionType] || 0) + 1;
+
+      const theseEphemeralIds: string[] = [];
+      const pipelines = logstashStats.pipelines || [];
+
+      pipelines.forEach((pipeline) => {
+        const thisQueueType = pipeline.queue?.type;
+        if (thisQueueType !== undefined) {
+          if (!clusterStats.hasOwnProperty('queues')) {
+            clusterStats.queues = {};
+          }
+          clusterStats.queues![thisQueueType] = (clusterStats.queues![thisQueueType] || 0) + 1;
+        }
+
+        const ephemeralId = pipeline.ephemeral_id;
+        if (ephemeralId !== undefined) {
+          theseEphemeralIds.push(ephemeralId);
+        }
+      });
+      allEphemeralIds[clusterUuid] = theseEphemeralIds;
+    }
   });
 }
 
@@ -405,19 +401,13 @@ export async function getLogstashStats(
     plugins: {},
   };
 
-  await Promise.all([fetchLogstashStats(callCluster, clusterUuids, options)]).then(() => {
-    Promise.all([
-      clusterUuids.forEach((clusterUuid) => {
-        if (options.clusters[clusterUuid] !== undefined) {
-          fetchLogstashState(
-            callCluster,
-            clusterUuid,
-            options.allEphemeralIds[clusterUuid],
-            options
-          );
-        }
-      }),
-    ]);
-  });
+  await fetchLogstashStats(callCluster, clusterUuids, options);
+  await Promise.all([
+    clusterUuids.forEach((clusterUuid) => {
+      if (options.clusters[clusterUuid] !== undefined) {
+        fetchLogstashState(callCluster, clusterUuid, options.allEphemeralIds[clusterUuid], options);
+      }
+    }),
+  ]);
   return options.clusters;
 }
