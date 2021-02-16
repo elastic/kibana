@@ -11,6 +11,7 @@ import type { PublicMethodsOf } from '@kbn/utility-types';
 
 import { ElasticsearchClient } from 'kibana/server';
 import { CaseStatuses } from '../../../common/api';
+import { MAX_ALERTS_PER_SUB_CASE } from '../../../common/constants';
 
 export type AlertServiceContract = PublicMethodsOf<AlertService>;
 
@@ -102,7 +103,7 @@ export class AlertService {
           },
         },
       },
-      size: 10000,
+      size: MAX_ALERTS_PER_SUB_CASE,
       ignore_unavailable: true,
     });
 
