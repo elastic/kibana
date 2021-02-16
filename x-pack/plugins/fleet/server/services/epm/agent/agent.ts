@@ -58,7 +58,16 @@ function replaceVariablesInYaml(yamlVariables: { [k: string]: any }, yaml: any) 
 }
 
 const maybeEscapeString = (value: string) => {
-  return safeDump(value);
+  // List of special chars that may lead to YAML parsing errors when not quoted.
+  // See YAML specification section 5.3 Indicator characters
+  // https://yaml.org/spec/1.2/spec.html#id2772075
+  const yamlSpecialCharsRegex = /[{}\[\],&*?|\-<>=!%@:]/;
+
+  // In addition, numeric strings need to be quoted to stay strings.
+  if ((value.length && !isNaN(+value)) || value.match(yamlSpecialCharsRegex)) {
+    return `"${value}"`;
+  }
+  return value;
 };
 
 function buildTemplateVariables(variables: PackagePolicyConfigRecord, templateStr: string) {
