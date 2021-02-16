@@ -29,6 +29,9 @@ import { ErrorCorrelations } from './error_correlations';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { createHref } from '../../shared/Links/url_helpers';
 import { useUiTracker } from '../../../../../observability/public';
+import { isActivePlatinumLicense } from '../../../../common/license_check';
+import { useLicenseContext } from '../../../context/license/use_license_context';
+import { LicensePrompt } from '../../shared/LicensePrompt';
 
 const latencyTab = {
   key: 'latency',
@@ -98,47 +101,49 @@ export function Correlations() {
               </EuiTitle>
             </EuiFlyoutHeader>
             <EuiFlyoutBody>
-              {urlParams.kuery ? (
-                <>
-                  <EuiCallOut size="m">
-                    <span>
-                      {i18n.translate(
-                        'xpack.apm.correlations.filteringByLabel',
-                        { defaultMessage: 'Filtering by' }
-                      )}
-                    </span>
-                    <EuiCode>{urlParams.kuery}</EuiCode>
-                    <EuiLink
-                      href={createHref(history, { query: { kuery: '' } })}
-                    >
-                      <EuiButtonEmpty iconType="cross">
+              <CorrelationsLicenseCheck>
+                {urlParams.kuery ? (
+                  <>
+                    <EuiCallOut size="m">
+                      <span>
                         {i18n.translate(
-                          'xpack.apm.correlations.clearFiltersLabel',
-                          { defaultMessage: 'Clear' }
+                          'xpack.apm.correlations.filteringByLabel',
+                          { defaultMessage: 'Filtering by' }
                         )}
-                      </EuiButtonEmpty>
-                    </EuiLink>
-                  </EuiCallOut>
-                  <EuiSpacer />
-                </>
-              ) : null}
+                      </span>
+                      <EuiCode>{urlParams.kuery}</EuiCode>
+                      <EuiLink
+                        href={createHref(history, { query: { kuery: '' } })}
+                      >
+                        <EuiButtonEmpty iconType="cross">
+                          {i18n.translate(
+                            'xpack.apm.correlations.clearFiltersLabel',
+                            { defaultMessage: 'Clear' }
+                          )}
+                        </EuiButtonEmpty>
+                      </EuiLink>
+                    </EuiCallOut>
+                    <EuiSpacer />
+                  </>
+                ) : null}
 
-              <EuiSpacer />
-              <EuiTabs>
-                {tabs.map(({ key, label }) => (
-                  <EuiTab
-                    key={key}
-                    isSelected={key === currentTab}
-                    onClick={() => {
-                      setCurrentTab(key);
-                    }}
-                  >
-                    {label}
-                  </EuiTab>
-                ))}
-              </EuiTabs>
-              <EuiSpacer />
-              <TabContent onClose={() => setIsFlyoutVisible(false)} />
+                <EuiSpacer />
+                <EuiTabs>
+                  {tabs.map(({ key, label }) => (
+                    <EuiTab
+                      key={key}
+                      isSelected={key === currentTab}
+                      onClick={() => {
+                        setCurrentTab(key);
+                      }}
+                    >
+                      {label}
+                    </EuiTab>
+                  ))}
+                </EuiTabs>
+                <EuiSpacer />
+                <TabContent onClose={() => setIsFlyoutVisible(false)} />
+              </CorrelationsLicenseCheck>
             </EuiFlyoutBody>
           </EuiFlyout>
         </EuiPortal>
@@ -150,3 +155,21 @@ export function Correlations() {
 const CORRELATIONS_TITLE = i18n.translate('xpack.apm.correlations.title', {
   defaultMessage: 'Correlations',
 });
+
+function CorrelationsLicenseCheck({ children }: { children: React.ReactNode }) {
+  const license = useLicenseContext();
+  const hasActivePlatinumLicense = isActivePlatinumLicense(license);
+  return (
+    <>
+      {hasActivePlatinumLicense ? (
+        children
+      ) : (
+        <LicensePrompt
+          text={i18n.translate('xpack.apm.correlations.licenseCheckText', {
+            defaultMessage: `To use correlations, you must be subscribed to an Elastic Platinum license. With it, you'll be able to discover which fields are correlated with poor performance.`,
+          })}
+        />
+      )}
+    </>
+  );
+}
