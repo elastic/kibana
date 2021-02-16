@@ -1,55 +1,17 @@
 import { ValidConfigOptions } from '../../../options/options';
+import { fetchPullRequestId } from './FetchPullRequestId';
 import { apiRequestV4 } from './apiRequestV4';
-
-export interface PullRequestResponse {
-  repository: {
-    pullRequest: { id: string };
-  };
-}
 
 export interface PullRequestAutoMergeResponse {
   disablePullRequestAutoMerge: { pullRequest?: { number: number } };
 }
 
-export async function disablePullRequestAutoMerge(options: ValidConfigOptions) {
-  const {
-    accessToken,
-    githubApiBaseUrlV4,
-    pullNumber,
-    repoName,
-    repoOwner,
-  } = options;
-
-  if (!pullNumber) {
-    return;
-  }
-
-  const prQuery = /* GraphQL */ `
-    query GetRepoId(
-      $repoOwner: String!
-      $repoName: String!
-      $pullNumber: Int!
-    ) {
-      repository(owner: $repoOwner, name: $repoName) {
-        pullRequest(number: $pullNumber) {
-          id
-        }
-      }
-    }
-  `;
-
-  const prResponse = await apiRequestV4<PullRequestResponse>({
-    githubApiBaseUrlV4,
-    accessToken,
-    query: prQuery,
-    variables: {
-      repoOwner,
-      repoName,
-      pullNumber,
-    },
-  });
-
-  const pullRequestId = prResponse.repository.pullRequest.id;
+export async function disablePullRequestAutoMerge(
+  options: ValidConfigOptions,
+  pullNumber: number
+) {
+  const { accessToken, githubApiBaseUrlV4 } = options;
+  const pullRequestId = await fetchPullRequestId(options, pullNumber);
 
   const query = /* GraphQL */ `
     mutation DisablePullRequestAutoMerge($pullRequestId: ID!) {

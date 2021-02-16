@@ -26,6 +26,7 @@ import {
   getBody,
   PullRequestPayload,
 } from '../services/github/v3/createPullRequest';
+import { enablePullRequestAutoMerge } from '../services/github/v4/enablePullRequestAutoMerge';
 import { consoleLog, logger } from '../services/logger';
 import { confirmPrompt } from '../services/prompts';
 import { sequentially } from '../services/sequentially';
@@ -77,6 +78,11 @@ export async function cherrypickAndCreateTargetPullRequest({
       targetPullRequest.number,
       options.targetPRLabels
     );
+  }
+
+  // make PR auto mergable
+  if (options.autoMerge) {
+    await enablePullRequestAutoMerge(options, targetPullRequest.number);
   }
 
   // add labels to source pull requests

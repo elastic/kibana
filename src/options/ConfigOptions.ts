@@ -24,6 +24,8 @@ export type ConfigOptions = Partial<{
   assignees: string[];
   author: string;
   autoAssign: boolean;
+  autoMerge: boolean;
+  autoMergeMethod: string;
   autoFixConflicts: AutoFixConflictsHandler;
   branchLabelMapping: Record<string, string>;
   ci: boolean;
