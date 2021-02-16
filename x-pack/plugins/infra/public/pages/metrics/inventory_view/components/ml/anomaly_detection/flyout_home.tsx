@@ -113,18 +113,6 @@ export const FlyoutHome = (props: Props) => {
         <EuiFlyoutBody>
           {tab === 'jobs' && (
             <>
-              <div>
-                <EuiText>
-                  <p>
-                    <FormattedMessage
-                      defaultMessage="Anomaly detection is powered by machine learning. Machine learning jobs are available for the following resource types. Enable these jobs to begin detecting anomalies in your infrastructure metrics."
-                      id="xpack.infra.ml.anomalyFlyout.create.description"
-                    />
-                  </p>
-                </EuiText>
-              </div>
-
-              <EuiSpacer size="l" />
               {(hostJobSummaries.length > 0 || k8sJobSummaries.length > 0) && (
                 <>
                   <JobsEnabledCallout
@@ -137,7 +125,7 @@ export const FlyoutHome = (props: Props) => {
                     <h4>Create ML Jobs</h4>
                     <p>
                       <FormattedMessage
-                        defaultMessage="Machine Learning jobs are available for the following the resource types. Enable these jobs to begin detecting anomalies in your infrastructure metrics."
+                        defaultMessage="Anomaly detection is powered by machine learning. Machine learning jobs are available for the following resource types. Enable these jobs to begin detecting anomalies in your infrastructure metrics."
                         id="xpack.infra.ml.anomalyFlyout.createJobs"
                       />
                     </p>
@@ -248,7 +236,7 @@ const CreateJobTab = (props: CreateJobTab) => {
             }
             description={
               <FormattedMessage
-                defaultMessage="Detect anomalies for CPU usage, memory usage, network traffic, and load."
+                defaultMessage="Detect anomalies for memory usage and network traffic on hosts."
                 id="xpack.infra.ml.anomalyFlyout.create.hostDescription"
               />
             }
@@ -286,7 +274,7 @@ const CreateJobTab = (props: CreateJobTab) => {
             }
             description={
               <FormattedMessage
-                defaultMessage="Detect anomalies for CPU usage, memory usage, network traffic, and load."
+                defaultMessage="Detect anomalies for memory usage and network traffic on Kubernetes Pods."
                 id="xpack.infra.ml.anomalyFlyout.create.k8sDescription"
               />
             }

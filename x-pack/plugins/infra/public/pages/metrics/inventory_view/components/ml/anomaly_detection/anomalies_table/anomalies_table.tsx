@@ -11,7 +11,6 @@ import DateMath from '@elastic/datemath';
 import { EuiSuperDatePicker } from '@elastic/eui';
 import moment from 'moment';
 import {
-  EuiButtonGroup,
   EuiFlexItem,
   EuiSpacer,
   EuiFieldSearch,
@@ -21,6 +20,7 @@ import {
   EuiTableActionsColumnType,
   Criteria,
   EuiContextMenuItem,
+  EuiComboBox,
 } from '@elastic/eui';
 import { FormattedDate, FormattedMessage } from 'react-intl';
 import { EuiPopover } from '@elastic/eui';
@@ -42,6 +42,10 @@ import { useSourceContext } from '../../../../../../../containers/source';
 import { createResultsUrl } from '../flyout_home';
 type JobType = 'k8s' | 'hosts';
 type SortField = 'anomalyScore' | 'startTime';
+interface JobOption {
+  id: JobType;
+  label: string;
+}
 
 const AnomalyActionMenu = React.memo<{ jobId: string }>(({ jobId }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -108,7 +112,24 @@ export const AnomaliesTable = () => {
     field: 'startTime',
     direction: 'desc',
   });
+  const jobOptions = [
+    {
+      id: `hosts` as JobType,
+      label: i18n.translate('xpack.infra.ml.anomalyFlyout.hostBtn', {
+        defaultMessage: 'Hosts',
+      }),
+    },
+    {
+      id: `k8s` as JobType,
+      label: i18n.translate('xpack.infra.ml.anomalyFlyout.podsBtn', {
+        defaultMessage: 'Kubernetes Pods',
+      }),
+    },
+  ];
   const [jobType, setJobType] = useState<JobType>('hosts');
+  const [selectedJobType, setSelectedJobType] = useState<JobOption[]>([
+    jobOptions.find((item) => item.id === 'hosts') || jobOptions[0],
+  ]);
   const { source } = useSourceContext();
   const anomalyThreshold = source?.configuration.anomalyThreshold;
 
@@ -191,8 +212,9 @@ export const AnomaliesTable = () => {
     setSearch(e.target.value);
   }, []);
 
-  const changeJobType = useCallback((type: string) => {
-    setJobType(type as JobType);
+  const changeJobType = useCallback((selectedOptions) => {
+    setSelectedJobType(selectedOptions);
+    setJobType(selectedOptions[0].id);
   }, []);
 
   const changeSortOptions = useCallback(
@@ -220,21 +242,6 @@ export const AnomaliesTable = () => {
     }
   }, [getAnomalies]);
 
-  const toggleButtons = [
-    {
-      id: `hosts`,
-      label: i18n.translate('xpack.infra.ml.anomalyFlyout.hostBtn', {
-        defaultMessage: 'Hosts',
-      }),
-    },
-    {
-      id: `k8s`,
-      label: i18n.translate('xpack.infra.ml.anomalyFlyout.podsBtn', {
-        defaultMessage: 'Pods',
-      }),
-    },
-  ];
-
   return (
     <div>
       <EuiFlexGroup>
@@ -249,7 +256,7 @@ export const AnomaliesTable = () => {
       </EuiFlexGroup>
 
       <EuiFlexGroup alignItems="center">
-        <EuiFlexItem grow={1}>
+        <EuiFlexItem grow={3}>
           <EuiFieldSearch
             fullWidth
             placeholder={i18n.translate('xpack.infra.ml.anomalyFlyout.searchPlaceholder', {
@@ -260,14 +267,16 @@ export const AnomaliesTable = () => {
             isClearable={true}
           />
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButtonGroup
-            legend={i18n.translate('xpack.infra.ml.anomalyFlyout.jobTypLegend', {
-              defaultMessage: 'Job Types',
+        <EuiFlexItem grow={1}>
+          <EuiComboBox
+            placeholder={i18n.translate('xpack.infra.ml.anomalyFlyout.jobTypeSelect', {
+              defaultMessage: 'Select group',
             })}
-            options={toggleButtons}
-            idSelected={jobType}
+            singleSelection={{ asPlainText: true }}
+            options={jobOptions}
+            selectedOptions={selectedJobType}
             onChange={changeJobType}
+            isClearable={false}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
