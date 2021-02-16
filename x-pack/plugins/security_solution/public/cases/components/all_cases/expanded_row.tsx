@@ -42,9 +42,9 @@ export const getExpandedRowMap = ({
     return {};
   }
 
-  return data.reduce((acc, curr, index) => {
+  return data.reduce((acc, curr) => {
     if (curr.subCases != null) {
-      const subCases = curr.subCases.map((subCase) => ({
+      const subCases = curr.subCases.map((subCase, index) => ({
         ...subCase,
         caseParentId: curr.id,
         title: `${curr.title} ${index + 1}`,
