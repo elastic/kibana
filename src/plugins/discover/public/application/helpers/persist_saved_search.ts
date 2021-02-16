@@ -35,7 +35,7 @@ export async function persistSavedSearch(
     state: AppState;
   }
 ) {
-  updateSearchSource(savedSearch.searchSource, {
+  updateSearchSource(savedSearch.searchSource, undefined, {
     indexPattern,
     services,
     sort: state.sort as SortOrder[],
