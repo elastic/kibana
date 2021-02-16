@@ -487,24 +487,25 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
     }
 
     async addRuntimeField(name: string, type: string, script: string) {
-      // eslint-disable-next-line
-      console.log('addRuntimeField');
       await this.clickAddField();
       await this.setFieldName(name);
       await this.setFieldType(type);
-      // eslint-disable-next-line
-      console.log('set script');
       if (script) {
         await this.setFieldScript(script);
       }
-      // eslint-disable-next-line
-      console.log('clicking save field');
       await this.clickSaveField();
       // eslint-disable-next-line
       console.log('save field clicked');
-      await new Promise((resolve) => setTimeout(resolve, 1000 * 30));
-      // eslint-disable-next-line
-      console.log('30s timeout passed');
+      // await new Promise((resolve) => setTimeout(resolve, 1000 * 30 * 5));
+      // console.log('30s timeout passed');
+
+      await this.closeIndexPatternFieldEditor();
+    }
+
+    async closeIndexPatternFieldEditor() {
+      await retry.waitFor('field editor flyout to close', async () => {
+        return !(await testSubjects.exists('euiFlyoutCloseButton'));
+      });
     }
 
     async clickAddField() {
