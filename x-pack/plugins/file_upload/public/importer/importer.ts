@@ -18,7 +18,7 @@ import {
   IngestPipeline,
   MB,
 } from '../../common';
-import { CreateDocsResponse, IImporter, ImportConfig, ImportResults } from './types';
+import { CreateDocsResponse, IImporter, ImportResults } from './types';
 
 const CHUNK_SIZE = 5000;
 const MAX_CHUNK_CHAR_COUNT = 1000000;

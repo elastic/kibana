@@ -5,21 +5,27 @@
  * 2.0.
  */
 
-import { Feature } from 'geojson';
+import { Feature, FeatureCollection } from 'geojson';
 import { i18n } from '@kbn/i18n';
+// @ts-expect-error
 import { JSONLoader } from '@loaders.gl/json';
 import { loadInBatches } from '@loaders.gl/core';
-import { ImportFactoryOptions } from './types';
-import { Importer } from './importer';
-import { geoJsonCleanAndValidate } from '../util/geo_json_clean_and_validate';
+import { CreateDocsResponse } from '../types';
+import { Importer } from '../importer';
+// @ts-expect-error
+import { geoJsonCleanAndValidate } from './geo_json_clean_and_validate';
 
 export class GeoJsonImporter extends Importer {
   constructor() {
     super();
   }
 
-  public read(data: ArrayBuffer) {
+  public read(data: ArrayBuffer): { success: boolean } {
     throw new Error('read(data: ArrayBuffer) not supported, use readFile instead.');
+  }
+
+  protected _createDocs(text: string): CreateDocsResponse {
+    throw new Error('_createDocs not implemented.');
   }
 
   public async readFile(
@@ -34,7 +40,7 @@ export class GeoJsonImporter extends Importer {
       totalBytes: number;
     }) => void,
     isFileParseActive: () => boolean
-  ) {
+  ): Promise<{ errors: string[]; parsedGeojson: FeatureCollection } | null> {
     if (!file) {
       throw new Error(
         i18n.translate('xpack.fileUpload.fileParser.noFileProvided', {
@@ -43,7 +49,7 @@ export class GeoJsonImporter extends Importer {
       );
     }
 
-    const filePromise = new Promise(async (resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
       const batches = await loadInBatches(file, JSONLoader, {
         json: {
           jsonpaths: ['$.features'],
@@ -51,50 +57,23 @@ export class GeoJsonImporter extends Importer {
         },
       });
 
-      let featuresProcessed = 0;
-      const features: Feature[] = [];
-      const errors: string = [];
-      let boolGeometryErrs = false;
-      let parsedGeojson;
+      const rawFeatures: unknown[] = [];
       for await (const batch of batches) {
         if (!isFileParseActive()) {
           break;
         }
 
         if (batch.batchType === 'root-object-batch-complete') {
-          if (featuresProcessed > 0) {
-            parsedGeojson = { ...batch.container, features };
-          } else {
-            // Handle single feature geoJson
-            const cleanedSingleFeature = geoJsonCleanAndValidate(batch.container);
-            if (cleanedSingleFeature.geometry && cleanedSingleFeature.geometry.type) {
-              parsedGeojson = cleanedSingleFeature;
-              featuresProcessed++;
-            }
+          // Handle single feature geoJson
+          if (rawFeatures.length === 0) {
+            rawFeatures.push(batch.container);
           }
         } else {
-          for (const feature of batch.data) {
-            if (!feature.geometry || !feature.geometry.type) {
-              if (!boolGeometryErrs) {
-                boolGeometryErrs = true;
-                errors.push(
-                  new Error(
-                    i18n.translate('xpack.fileUpload.fileParser.featuresOmitted', {
-                      defaultMessage: 'Some features without geometry omitted',
-                    })
-                  )
-                );
-              }
-            } else {
-              const cleanFeature = geoJsonCleanAndValidate(feature);
-              features.push(cleanFeature);
-              featuresProcessed++;
-            }
-          }
+          rawFeatures.push(...batch.data);
         }
 
         setFileProgress({
-          featuresProcessed,
+          featuresProcessed: rawFeatures.length,
           bytesProcessed: batch.bytesUsed,
           totalBytes: file.size,
         });
@@ -105,7 +84,7 @@ export class GeoJsonImporter extends Importer {
         return;
       }
 
-      if (featuresProcessed === 0) {
+      if (rawFeatures.length === 0) {
         reject(
           new Error(
             i18n.translate('xpack.fileUpload.fileParser.noFeaturesDetected', {
@@ -113,14 +92,36 @@ export class GeoJsonImporter extends Importer {
             })
           )
         );
-      } else {
-        resolve({
-          errors,
-          parsedGeojson,
-        });
+        return;
       }
-    });
 
-    return filePromise;
+      const features: Feature[] = [];
+      let invalidCount = 0;
+      for (let i = 0; i < rawFeatures.length; i++) {
+        const rawFeature = rawFeatures[i] as Feature;
+        if (!rawFeature.geometry || !rawFeature.geometry.type) {
+          invalidCount++;
+        } else {
+          features.push(geoJsonCleanAndValidate(rawFeature));
+        }
+      }
+
+      const errors: string[] = [];
+      if (invalidCount > 0) {
+        errors.push(
+          i18n.translate('xpack.fileUpload.fileParser.featuresOmitted', {
+            defaultMessage: '{invalidCount} features without geometry omitted',
+            values: { invalidCount },
+          })
+        );
+      }
+      resolve({
+        errors,
+        parsedGeojson: {
+          type: 'FeatureCollection',
+          features,
+        },
+      });
+    });
   }
 }

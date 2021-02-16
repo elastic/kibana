@@ -35,7 +35,12 @@ export interface ImportFactoryOptions {
 
 export interface IImporter {
   read(data: ArrayBuffer): { success: boolean };
-  initializeImport(index: string): Promise<ImportResults>;
+  initializeImport(
+    index: string,
+    settings: Settings,
+    mappings: Mappings,
+    pipeline: IngestPipeline
+  ): Promise<ImportResults>;
   import(
     id: string,
     index: string,
