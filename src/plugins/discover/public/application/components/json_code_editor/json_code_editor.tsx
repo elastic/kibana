@@ -20,7 +20,7 @@ const copyToClipboardLabel = i18n.translate('discover.json.copyToClipboardLabel'
 });
 
 export const JsonCodeEditor = (value: any) => {
-  const jsonValue = JSON.stringify(value, null, 2);
+  const jsonValue = JSON.stringify(Object.values(value)[0], null, 2);
 
   // setting editor height based on lines height and count to stretch and fit its content
   const setEditorCalculatedHeight = useCallback((editor) => {
@@ -39,8 +39,8 @@ export const JsonCodeEditor = (value: any) => {
   }, []);
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="s" wrap={true} responsive={true}>
-      <EuiFlexItem grow={false}>
+    <EuiFlexGroup direction="column" gutterSize="s" style={{ width: '100%' }}>
+      <EuiFlexItem grow={true}>
         <EuiSpacer size="s" />
         <div className="eui-textRight">
           <EuiCopy textToCopy={jsonValue}>
