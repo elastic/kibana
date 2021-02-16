@@ -266,7 +266,6 @@ export class Explorer extends React.Component {
         <ExplorerPage jobSelectorProps={jobSelectorProps}>
           <ExplorerNoResultsFound
             hasResults={hasResults}
-            hasResultsWithAnomalies={hasResultsWithAnomalies}
             selectedJobsRunning={selectedJobsRunning}
           />
         </ExplorerPage>

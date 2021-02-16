@@ -14,13 +14,9 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 import { EuiEmptyPrompt } from '@elastic/eui';
 
-export const ExplorerNoResultsFound = ({
-  hasResults,
-  hasResultsWithAnomalies,
-  selectedJobsRunning,
-}) => {
-  const resultsHaveNoAnomalies = hasResults === true && hasResultsWithAnomalies === false;
-  const noResults = hasResults === false && hasResultsWithAnomalies === false;
+export const ExplorerNoResultsFound = ({ hasResults, selectedJobsRunning }) => {
+  const resultsHaveNoAnomalies = hasResults === true;
+  const noResults = hasResults === false;
   return (
     <EuiEmptyPrompt
       iconType="iInCircle"
