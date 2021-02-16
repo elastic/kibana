@@ -16,7 +16,7 @@ import {
   BuilderEntry,
   CreateExceptionListItemBuilderSchema,
   ExceptionsBuilderExceptionItem,
-  flattenType,
+  FlattenType,
 } from './types';
 import { EXCEPTION_OPERATORS, isOperator } from '../autocomplete/operators';
 import { OperatorOption } from '../autocomplete/types';
@@ -370,7 +370,7 @@ export const entryHasListType = (
  * can be an object or array of objects
  */
 export const getFileCodeSignature = (
-  alertData: flattenType<Ecs>
+  alertData: FlattenType<Ecs>
 ): Array<{ subjectName: string; trusted: string }> => {
   const { file } = alertData;
   const codeSignature = file && file.Ext && file.Ext.code_signature;
@@ -383,7 +383,7 @@ export const getFileCodeSignature = (
  * can be an object or array of objects
  */
 export const getProcessCodeSignature = (
-  alertData: flattenType<Ecs>
+  alertData: FlattenType<Ecs>
 ): Array<{ subjectName: string; trusted: string }> => {
   const { process } = alertData;
   const codeSignature = process && process.Ext && process.Ext.code_signature;
@@ -396,25 +396,29 @@ export const getProcessCodeSignature = (
  * a single object with subject_name and trusted.
  */
 export const getCodeSignatureValue = (
-  codeSignature: flattenType<CodeSignature> | flattenType<CodeSignature[]> | undefined
+  codeSignature: FlattenType<CodeSignature> | FlattenType<CodeSignature[]> | undefined
 ): Array<{ subjectName: string; trusted: string }> => {
   if (Array.isArray(codeSignature) && codeSignature.length > 0) {
-    return codeSignature.map((signature) => ({
-      subjectName: (signature.subject_name && signature.subject_name) ?? '',
-      trusted: (signature.trusted && signature.trusted) ?? '',
-    }));
+    return codeSignature.map((signature) => {
+      const subjectName = signature.subject_name ?? '';
+      const trusted = signature.trusted ?? '';
+
+      return {
+        subjectName: Array.isArray(subjectName) ? subjectName[0] : subjectName,
+        trusted: Array.isArray(trusted) ? trusted[0] : trusted,
+      };
+    });
   } else {
-    const signature: flattenType<CodeSignature> | undefined = !Array.isArray(codeSignature)
+    const signature: FlattenType<CodeSignature> | undefined = !Array.isArray(codeSignature)
       ? codeSignature
       : undefined;
-    const subjectName: string | undefined =
-      signature && signature.subject_name && signature.subject_name;
-    const trusted: string | undefined = signature && signature.trusted && signature.trusted;
+    const subjectName = signature?.subject_name ?? '';
+    const trusted = signature?.trusted ?? '';
 
     return [
       {
-        subjectName: subjectName ?? '',
-        trusted: trusted ?? '',
+        subjectName: Array.isArray(subjectName) ? subjectName[0] : subjectName,
+        trusted: Array.isArray(trusted) ? trusted[0] : trusted,
       },
     ];
   }
@@ -590,7 +594,7 @@ export const entryHasNonEcsType = (
 export const defaultEndpointExceptionItems = (
   listId: string,
   ruleName: string,
-  alertEcsData: flattenType<Ecs>
+  alertEcsData: FlattenType<Ecs>
 ): ExceptionsBuilderExceptionItem[] => {
   const { file, process, Ransomware, event: alertEvent } = alertEcsData;
   const eventCode = alertEvent && alertEvent.code ? alertEvent.code : '';

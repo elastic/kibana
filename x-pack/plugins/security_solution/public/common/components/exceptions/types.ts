@@ -6,6 +6,7 @@
  */
 
 import { ReactNode } from 'react';
+import { CodeSignature } from '../../../../common/ecs/file';
 import { IFieldType } from '../../../../../../../src/plugins/data/common';
 import { OperatorOption } from '../autocomplete/types';
 import {
@@ -105,6 +106,19 @@ export type ExceptionsBuilderExceptionItem =
   | ExceptionListItemBuilderSchema
   | CreateExceptionListItemBuilderSchema;
 
-export type flattenType<T> = {
-  [K in keyof T]: T[K] extends infer AliasType ? ( AliasType extends Array<infer rawType> ? rawType : AliasType extends object ? flattenType<AliasType> : AliasType) : never;
+export interface FlattenedCodeSignature {
+  subject_name: string;
+  trusted: string;
 }
+
+export type FlattenType<T> = {
+  [K in keyof T]: T[K] extends infer AliasType
+    ? AliasType extends CodeSignature[]
+      ? FlattenedCodeSignature[]
+      : AliasType extends Array<infer rawType>
+      ? rawType
+      : AliasType extends object
+      ? FlattenType<AliasType>
+      : AliasType
+    : never;
+};

@@ -704,8 +704,8 @@ describe('Exception helpers', () => {
         file: {
           Ext: {
             code_signature: {
-              subject_name: ['some_subject'],
-              trusted: ['false'],
+              subject_name: 'some_subject',
+              trusted: 'false',
             },
           },
         },
@@ -720,8 +720,8 @@ describe('Exception helpers', () => {
         file: {
           Ext: {
             code_signature: [
-              { subject_name: ['some_subject'], trusted: ['false'] },
-              { subject_name: ['some_subject_2'], trusted: ['true'] },
+              { subject_name: 'some_subject', trusted: 'false' },
+              { subject_name: 'some_subject_2', trusted: 'true' },
             ],
           },
         },
@@ -741,7 +741,7 @@ describe('Exception helpers', () => {
         _id: '123',
         file: {
           Ext: {
-            code_signature: { subject_name: [], trusted: [] },
+            code_signature: { subject_name: '', trusted: '' },
           },
         },
       });
@@ -778,8 +778,8 @@ describe('Exception helpers', () => {
         process: {
           Ext: {
             code_signature: {
-              subject_name: ['some_subject'],
-              trusted: ['false'],
+              subject_name: 'some_subject',
+              trusted: 'false',
             },
           },
         },
@@ -794,8 +794,8 @@ describe('Exception helpers', () => {
         process: {
           Ext: {
             code_signature: [
-              { subject_name: ['some_subject'], trusted: ['false'] },
-              { subject_name: ['some_subject_2'], trusted: ['true'] },
+              { subject_name: 'some_subject', trusted: 'false' },
+              { subject_name: 'some_subject_2', trusted: 'true' },
             ],
           },
         },
@@ -815,7 +815,7 @@ describe('Exception helpers', () => {
         _id: '123',
         process: {
           Ext: {
-            code_signature: { subject_name: [], trusted: [] },
+            code_signature: { subject_name: '', trusted: '' },
           },
         },
       });
@@ -852,17 +852,17 @@ describe('Exception helpers', () => {
         file: {
           Ext: {
             code_signature: [
-              { subject_name: ['some_subject'], trusted: ['false'] },
-              { subject_name: ['some_subject_2'], trusted: ['true'] },
+              { subject_name: 'some_subject', trusted: 'false' },
+              { subject_name: 'some_subject_2', trusted: 'true' },
             ],
           },
-          path: ['some file path'],
+          path: 'some file path',
           hash: {
-            sha256: ['some hash'],
+            sha256: 'some hash',
           },
         },
         event: {
-          code: ['some event code'],
+          code: 'some event code',
         },
       });
 
@@ -920,20 +920,20 @@ describe('Exception helpers', () => {
         process: {
           Ext: {
             code_signature: [
-              { subject_name: ['some_subject'], trusted: ['false'] },
-              { subject_name: ['some_subject_2'], trusted: ['true'] },
+              { subject_name: 'some_subject', trusted: 'false' },
+              { subject_name: 'some_subject_2', trusted: 'true' },
             ],
           },
-          executable: ['some file path'],
+          executable: 'some file path',
           hash: {
-            sha256: ['some hash'],
+            sha256: 'some hash',
           },
         },
         Ransomware: {
-          feature: ['some ransomware feature'],
+          feature: 'some ransomware feature',
         },
         event: {
-          code: ['ransomware'],
+          code: 'ransomware',
         },
       });
 

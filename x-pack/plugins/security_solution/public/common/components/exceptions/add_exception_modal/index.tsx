@@ -55,7 +55,7 @@ import {
   buildGetAlertByIdQuery,
 } from '../helpers';
 import { ErrorInfo, ErrorCallout } from '../error_callout';
-import { ExceptionsBuilderExceptionItem, flattenType } from '../types';
+import { ExceptionsBuilderExceptionItem, FlattenType } from '../types';
 import { useFetchIndex } from '../../../containers/source';
 import { useGetInstalledJob } from '../../ml/hooks/use_get_jobs';
 
@@ -104,12 +104,12 @@ interface EcsHit {
   _index: string;
   _source: {
     '@timestamp': string;
-  } & Omit<flattenType<Ecs>, '_id' | '_index'>;
+  } & Omit<FlattenType<Ecs>, '_id' | '_index'>;
 }
 
 export type Alert = {
   '@timestamp': string;
-} & flattenType<Ecs>;
+} & FlattenType<Ecs>;
 
 export const AddExceptionModal = memo(function AddExceptionModal({
   ruleName,
@@ -142,17 +142,16 @@ export const AddExceptionModal = memo(function AddExceptionModal({
     memoSignalIndexName
   );
 
-  const { loading: isLoadingAlertData, data: alertData } = ecsData ? useQueryAlerts<EcsHit, {}>(
-    buildGetAlertByIdQuery(ecsData?._id),
-    signalIndexName
-  ) : {loading: false, data: undefined};
+  const { loading: isLoadingAlertData, data: alertData } = ecsData
+    ? useQueryAlerts<EcsHit, {}>(buildGetAlertByIdQuery(ecsData?._id), signalIndexName)
+    : { loading: false, data: undefined };
 
   const alert = useMemo(() => {
-    if (isLoadingAlertData === false && ecsData != null ) {
+    if (isLoadingAlertData === false && ecsData != null) {
       const { _id, _index, _source } = alertData?.hits.hits[0] || {};
       return { _id: _id || ecsData._id, _index, ..._source };
     }
-  }, [alertData?.hits.hits, isLoadingAlertData]);
+  }, [alertData?.hits.hits, isLoadingAlertData, ecsData]);
 
   const memoMlJobIds = useMemo(
     () => (maybeRule?.machine_learning_job_id != null ? [maybeRule.machine_learning_job_id] : []),
@@ -265,7 +264,7 @@ export const AddExceptionModal = memo(function AddExceptionModal({
     } else {
       return [];
     }
-  }, [exceptionListType, ruleExceptionList, ruleName, alert]);
+  }, [exceptionListType, ruleExceptionList, ruleName, alert, ecsData]);
 
   useEffect((): void => {
     if (isSignalIndexPatternLoading === false && isSignalIndexLoading === false) {
