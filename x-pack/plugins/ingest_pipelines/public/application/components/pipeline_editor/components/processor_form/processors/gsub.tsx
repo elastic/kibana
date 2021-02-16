@@ -49,7 +49,10 @@ const fieldsConfig: FieldsConfig = {
     }),
     helpText: i18n.translate(
       'xpack.ingestPipelines.pipelineEditor.gsubForm.replacementFieldHelpText',
-      { defaultMessage: 'Replacement text for matches.' }
+      {
+        defaultMessage:
+          'Replacement text for matches. A blank value will remove the matched text from the resulting text.',
+      }
     ),
   },
 };

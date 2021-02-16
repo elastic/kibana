@@ -25,9 +25,15 @@ const fieldsConfig: FieldsConfig = {
     label: i18n.translate('xpack.ingestPipelines.pipelineEditor.setForm.valueFieldLabel', {
       defaultMessage: 'Value',
     }),
-    helpText: i18n.translate('xpack.ingestPipelines.pipelineEditor.setForm.valueFieldHelpText', {
-      defaultMessage: 'Value for the field.',
-    }),
+    helpText: (
+      <FormattedMessage
+        id="xpack.ingestPipelines.pipelineEditor.setForm.valueFieldHelpText"
+        defaultMessage="Value for the field. A blank value will set {emptyString}."
+        values={{
+          emptyString: <EuiCode>{'""'}</EuiCode>,
+        }}
+      />
+    ),
   },
   /* Optional fields config */
   override: {

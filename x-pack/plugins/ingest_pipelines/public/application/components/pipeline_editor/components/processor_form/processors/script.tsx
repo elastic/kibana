@@ -81,7 +81,7 @@ const fieldsConfig: FieldsConfig = {
   lang: {
     type: FIELD_TYPES.TEXT,
     deserializer: String,
-    serializer: (v: unknown) => (v === 'painless' || v === '' ? undefined : v),
+    serializer: from.emptyStringToUndefined,
     label: i18n.translate('xpack.ingestPipelines.pipelineEditor.scriptForm.langFieldLabel', {
       defaultMessage: 'Language (optional)',
     }),
