@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AND } from '../views/content_sources/constants';
+import { AND } from '../constants';
 
 export const toSentenceSerial = (array: string[]) =>
   array.length === 1
