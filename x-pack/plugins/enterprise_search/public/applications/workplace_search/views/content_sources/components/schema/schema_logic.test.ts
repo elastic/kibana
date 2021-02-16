@@ -307,16 +307,25 @@ describe('SchemaLogic', () => {
       });
     });
 
-    it('addNewField', () => {
-      const setServerFieldSpy = jest.spyOn(SchemaLogic.actions, 'setServerField');
-      SchemaLogic.actions.onInitializeSchema(serverResponse);
-      const newSchema = {
-        ...schema,
-        bar: 'number',
-      };
-      SchemaLogic.actions.addNewField('bar', 'number');
+    describe('addNewField', () => {
+      it('handles happy path', () => {
+        const setServerFieldSpy = jest.spyOn(SchemaLogic.actions, 'setServerField');
+        SchemaLogic.actions.onInitializeSchema(serverResponse);
+        const newSchema = {
+          ...schema,
+          bar: 'number',
+        };
+        SchemaLogic.actions.addNewField('bar', 'number');
 
-      expect(setServerFieldSpy).toHaveBeenCalledWith(newSchema, ADD);
+        expect(setServerFieldSpy).toHaveBeenCalledWith(newSchema, ADD);
+      });
+
+      it('handles duplicate', () => {
+        SchemaLogic.actions.onInitializeSchema(serverResponse);
+        SchemaLogic.actions.addNewField('foo', 'number');
+
+        expect(setErrorMessage).toHaveBeenCalledWith('New field already exists: foo.');
+      });
     });
 
     it('updateExistingFieldType', () => {

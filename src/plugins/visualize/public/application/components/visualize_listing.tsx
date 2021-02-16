@@ -64,17 +64,17 @@ export const VisualizeListing = () => {
   }, [history, pathname, visualizations]);
 
   useMount(() => {
-    // Reset editor state if the visualize listing page is loaded.
-    stateTransferService.clearEditorState(VisualizeConstants.APP_ID);
+    // Reset editor state for all apps if the visualize listing page is loaded.
+    stateTransferService.clearEditorState();
     chrome.setBreadcrumbs([
       {
         text: i18n.translate('visualize.visualizeListingBreadcrumbsTitle', {
-          defaultMessage: 'Visualize',
+          defaultMessage: 'Visualize Library',
         }),
       },
     ]);
     chrome.docTitle.change(
-      i18n.translate('visualize.listingPageTitle', { defaultMessage: 'Visualize' })
+      i18n.translate('visualize.listingPageTitle', { defaultMessage: 'Visualize Library' })
     );
   });
   useUnmount(() => closeNewVisModal.current());
@@ -186,7 +186,7 @@ export const VisualizeListing = () => {
         // for data exploration purposes
         createItem={createNewVis}
         tableCaption={i18n.translate('visualize.listing.table.listTitle', {
-          defaultMessage: 'Visualizations',
+          defaultMessage: 'Visualize Library',
         })}
         findItems={fetchItems}
         deleteItems={visualizeCapabilities.delete ? deleteItems : undefined}
@@ -204,7 +204,7 @@ export const VisualizeListing = () => {
           defaultMessage: 'visualizations',
         })}
         tableListTitle={i18n.translate('visualize.listing.table.listTitle', {
-          defaultMessage: 'Visualizations',
+          defaultMessage: 'Visualize Library',
         })}
         toastNotifications={toastNotifications}
         searchFilters={searchFilters}

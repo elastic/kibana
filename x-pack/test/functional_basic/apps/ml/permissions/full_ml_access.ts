@@ -15,11 +15,14 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
 
-  const testUsers = [USER.ML_POWERUSER, USER.ML_POWERUSER_SPACES];
+  const testUsers = [
+    { user: USER.ML_POWERUSER, discoverAvailable: true },
+    { user: USER.ML_POWERUSER_SPACES, discoverAvailable: false },
+  ];
 
   describe('for user with full ML access', function () {
-    for (const user of testUsers) {
-      describe(`(${user})`, function () {
+    for (const testUser of testUsers) {
+      describe(`(${testUser.user})`, function () {
         const ecIndexPattern = 'ft_module_sample_ecommerce';
         const ecExpectedTotalCount = '287';
         const ecExpectedModuleId = 'sample_data_ecommerce';
@@ -45,7 +48,7 @@ export default function ({ getService }: FtrProviderContext) {
           await esArchiver.loadIfNeeded('ml/module_sample_ecommerce');
           await ml.testResources.createIndexPatternIfNeeded(ecIndexPattern, 'order_date');
 
-          await ml.securityUI.loginAs(user);
+          await ml.securityUI.loginAs(testUser.user);
         });
 
         after(async () => {
@@ -127,13 +130,18 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.testExecution.logTestStep('should display the data visualizer table');
           await ml.dataVisualizerIndexBased.assertDataVisualizerTableExist();
 
-          await ml.testExecution.logTestStep('should display the actions panel with Discover card');
+          await ml.testExecution.logTestStep(
+            `should display the actions panel ${
+              testUser.discoverAvailable ? 'with' : 'without'
+            } Discover card`
+          );
           await ml.dataVisualizerIndexBased.assertActionsPanelExists();
-          await ml.dataVisualizerIndexBased.assertViewInDiscoverCardExists();
+          await ml.dataVisualizerIndexBased.assertViewInDiscoverCard(testUser.discoverAvailable);
 
           await ml.testExecution.logTestStep('should not display job cards');
           await ml.dataVisualizerIndexBased.assertCreateAdvancedJobCardNotExists();
           await ml.dataVisualizerIndexBased.assertRecognizerCardNotExists(ecExpectedModuleId);
+          await ml.dataVisualizerIndexBased.assertCreateDataFrameAnalyticsCardNotExists();
         });
 
         it('should display elements on File Data Visualizer page correctly', async () => {

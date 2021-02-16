@@ -10,10 +10,12 @@ import {
   LatencyAggregationType,
   latencyAggregationTypeRt,
 } from '../../common/latency_aggregation_types';
+import { jsonRt } from '../../common/runtime_types/json_rt';
 import { toNumberRt } from '../../common/runtime_types/to_number_rt';
 import { getSearchAggregatedTransactions } from '../lib/helpers/aggregated_transactions';
 import { setupRequest } from '../lib/helpers/setup_request';
 import { getServiceTransactionGroups } from '../lib/services/get_service_transaction_groups';
+import { getServiceTransactionGroupComparisonStatistics } from '../lib/services/get_service_transaction_group_comparison_statistics';
 import { getTransactionBreakdown } from '../lib/transactions/breakdown';
 import { getTransactionDistribution } from '../lib/transactions/distribution';
 import { getAnomalySeries } from '../lib/transactions/get_anomaly_data';
@@ -26,7 +28,7 @@ import { environmentRt, rangeRt, uiFiltersRt } from './default_api_types';
 
 /**
  * Returns a list of transactions grouped by name
- * //TODO: delete this once we moved away from the old table in the transaction overview page. It should be replaced by /transactions/groups/overview/
+ * //TODO: delete this once we moved away from the old table in the transaction overview page. It should be replaced by /transactions/groups/primary_statistics/
  */
 export const transactionGroupsRoute = createRoute({
   endpoint: 'GET /api/apm/services/{serviceName}/transactions/groups',
@@ -64,8 +66,9 @@ export const transactionGroupsRoute = createRoute({
   },
 });
 
-export const transactionGroupsOverviewRoute = createRoute({
-  endpoint: 'GET /api/apm/services/{serviceName}/transactions/groups/overview',
+export const transactionGroupsPrimaryStatisticsRoute = createRoute({
+  endpoint:
+    'GET /api/apm/services/{serviceName}/transactions/groups/primary_statistics',
   params: t.type({
     path: t.type({ serviceName: t.string }),
     query: t.intersection([
@@ -73,17 +76,49 @@ export const transactionGroupsOverviewRoute = createRoute({
       rangeRt,
       uiFiltersRt,
       t.type({
-        size: toNumberRt,
+        transactionType: t.string,
+        latencyAggregationType: latencyAggregationTypeRt,
+      }),
+    ]),
+  }),
+  options: {
+    tags: ['access:apm'],
+  },
+  handler: async ({ context, request }) => {
+    const setup = await setupRequest(context, request);
+
+    const searchAggregatedTransactions = await getSearchAggregatedTransactions(
+      setup
+    );
+
+    const {
+      path: { serviceName },
+      query: { environment, latencyAggregationType, transactionType },
+    } = context.params;
+
+    return getServiceTransactionGroups({
+      environment,
+      setup,
+      serviceName,
+      searchAggregatedTransactions,
+      transactionType,
+      latencyAggregationType: latencyAggregationType as LatencyAggregationType,
+    });
+  },
+});
+
+export const transactionGroupsComparisonStatisticsRoute = createRoute({
+  endpoint:
+    'GET /api/apm/services/{serviceName}/transactions/groups/comparison_statistics',
+  params: t.type({
+    path: t.type({ serviceName: t.string }),
+    query: t.intersection([
+      environmentRt,
+      rangeRt,
+      uiFiltersRt,
+      t.type({
+        transactionNames: jsonRt,
         numBuckets: toNumberRt,
-        pageIndex: toNumberRt,
-        sortDirection: t.union([t.literal('asc'), t.literal('desc')]),
-        sortField: t.union([
-          t.literal('name'),
-          t.literal('latency'),
-          t.literal('throughput'),
-          t.literal('errorRate'),
-          t.literal('impact'),
-        ]),
         transactionType: t.string,
         latencyAggregationType: latencyAggregationTypeRt,
       }),
@@ -103,25 +138,19 @@ export const transactionGroupsOverviewRoute = createRoute({
       path: { serviceName },
       query: {
         environment,
+        transactionNames,
         latencyAggregationType,
         numBuckets,
-        pageIndex,
-        size,
-        sortDirection,
-        sortField,
         transactionType,
       },
     } = context.params;
 
-    return getServiceTransactionGroups({
+    return getServiceTransactionGroupComparisonStatistics({
       environment,
       setup,
       serviceName,
-      pageIndex,
+      transactionNames,
       searchAggregatedTransactions,
-      size,
-      sortDirection,
-      sortField,
       transactionType,
       numBuckets,
       latencyAggregationType: latencyAggregationType as LatencyAggregationType,

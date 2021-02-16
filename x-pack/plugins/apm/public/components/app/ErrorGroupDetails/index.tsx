@@ -38,7 +38,7 @@ const Titles = euiStyled.div`
 const Label = euiStyled.div`
   margin-bottom: ${px(units.quarter)};
   font-size: ${fontSizes.small};
-  color: ${({ theme }) => theme.eui.euiColorMediumShade};
+  color: ${({ theme }) => theme.eui.euiColorDarkShade};
 `;
 
 const Message = euiStyled.div`
