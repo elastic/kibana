@@ -293,7 +293,7 @@ export const patchComment = async (
       id: commentId,
       version,
     }),
-    query: { subCaseId },
+    ...(subCaseId ? { query: { subCaseId } } : {}),
     signal,
   });
   return convertToCamelCase<CaseResponse, Case>(decodeCaseResponse(response));
