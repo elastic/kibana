@@ -16,7 +16,7 @@ export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
   const PageObjects = getPageObjects(['settings']);
 
-  describe('scripted fields', function () {
+  describe('runtime fields', function () {
     this.tags(['skipFirefox']);
 
     before(async function () {
@@ -42,7 +42,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.settings.clickIndexPatternLogstash();
         const startingCount = parseInt(await PageObjects.settings.getFieldsTabCount());
         await log.debug('add runtime field');
-        await PageObjects.settings.addRuntimeField(fieldName, 'Keyword');
+        await PageObjects.settings.addRuntimeField(fieldName, 'Keyword', "emit('hello world')");
         await retry.try(async function () {
           expect(parseInt(await PageObjects.settings.getFieldsTabCount())).to.be(startingCount + 1);
         });

@@ -491,7 +491,6 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
       await this.setFieldName(name);
       await this.setFieldType(type);
       if (script) {
-        await this.toggleScriptRow();
         await this.setFieldScript(script);
       }
       await this.clickSaveField();
@@ -519,11 +518,13 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
 
     async setFieldScript(script: string) {
       log.debug('set script = ' + script);
-      await testSubjects.setValue('scriptField', script);
-    }
-
-    async toggleScriptRow() {
+      // (await testSubjects.findAll('.monaco-mouse-cursor-text'))[0].click();
       await (await testSubjects.findAll('formRowToggle'))[1].click();
+      await new Promise((resolve) => setTimeout(resolve, 1000 * 5));
+      await browser.pressKeys(browser.keys.TAB);
+      await new Promise((resolve) => setTimeout(resolve, 1000 * 5));
+      browser.pressKeys(script);
+      // await testSubjects.setValue('.monaco-mouse-cursor-text', script);
     }
 
     async clickAddScriptedField() {
