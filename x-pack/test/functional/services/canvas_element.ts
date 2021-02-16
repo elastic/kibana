@@ -137,8 +137,8 @@ export async function CanvasElementProvider({ getService }: FtrProviderContext) 
             ...(expectedColorStats !== undefined
               ? {
                   withinTolerance:
-                    isValueWithinTolerance(value, expectedColorStats[i].value, valueTolerance) &&
-                    isColorWithinTolerance(s.key, expectedColorStats[i].key, channelTolerance),
+                    isValueWithinTolerance(value, expectedColorStats[i]?.value, valueTolerance) &&
+                    isColorWithinTolerance(s.key, expectedColorStats[i]?.key, channelTolerance),
                 }
               : {}),
           };

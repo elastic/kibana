@@ -51,25 +51,24 @@ export default function ({ getService }: FtrProviderContext) {
             { chartAvailable: true, id: 'Fireplaces', legend: '0 - 3' },
           ],
           scatterplotMatrixColorStatsWizard: [
-            // background
-            { key: '#000000', value: 91 },
-            // tick/grid/axis
-            { key: '#6A717D', value: 2 },
-            { key: '#F5F7FA', value: 2 },
-            { key: '#D3DAE6', value: 1 },
+            // tick/grid/axis, grey markers
+            { key: '#6A717D', value: 21 },
+            { key: '#D3DAE6', value: 7 },
             // scatterplot circles
-            { key: '#54B399', value: 1 },
-            { key: '#54B39A', value: 1 },
+            { key: '#54B399', value: 6 },
+            { key: '#54B39A', value: 9 },
+            // anti-aliasing
+            { key: '#F5F7FA', value: 26 },
           ],
           scatterplotMatrixColorStatsResults: [
-            // background
-            { key: '#000000', value: 91 },
             // tick/grid/axis, grey markers
-            // the red outlier color is not above the 1% threshold.
-            { key: '#6A717D', value: 2 },
-            { key: '#98A2B3', value: 1 },
-            { key: '#F5F7FA', value: 2 },
-            { key: '#D3DAE6', value: 1 },
+            // the red outlier color is not above the 5% threshold.
+            { key: '#6A717D', value: 21 },
+            { key: '#D3DAE6', value: 7 },
+            { key: '#98A1B3', value: 6 },
+            { key: '#98A2B3', value: 7 },
+            // anti-aliasing
+            { key: '#F5F7FA', value: 26 },
           ],
           row: {
             type: 'outlier_detection',
@@ -130,7 +129,9 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.testExecution.logTestStep('displays the scatterplot matrix');
           await ml.dataFrameAnalyticsCanvasElement.assertCanvasElement(
             'mlAnalyticsCreateJobWizardScatterplotMatrixPanel',
-            testData.expected.scatterplotMatrixColorStatsWizard
+            testData.expected.scatterplotMatrixColorStatsWizard,
+            ['#000000'],
+            5
           );
 
           await ml.testExecution.logTestStep('continues to the additional options step');
@@ -251,7 +252,9 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.dataFrameAnalyticsResults.assertResultsTableNotEmpty();
           await ml.dataFrameAnalyticsCanvasElement.assertCanvasElement(
             'mlDFExpandableSection-splom',
-            testData.expected.scatterplotMatrixColorStatsResults
+            testData.expected.scatterplotMatrixColorStatsResults,
+            ['#000000'],
+            5
           );
         });
 

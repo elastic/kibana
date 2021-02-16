@@ -39,7 +39,11 @@ export function MachineLearningDataFrameAnalyticsCanvasElementProvider({
       );
       expect(actualColorStats.length).to.eql(
         sortedExpectedColorStats.length,
-        `Expected and actual color stats for '${dataTestSubj}' should have the same amount of elements. Expected: ${sortedExpectedColorStats.length} (got ${actualColorStats.length})`
+        `Expected and actual color stats for '${dataTestSubj}' should have the same amount of elements. Expected: ${
+          sortedExpectedColorStats.length
+        } ${JSON.stringify(sortedExpectedColorStats)} (got ${
+          actualColorStats.length
+        } ${JSON.stringify(actualColorStats)})`
       );
       expect(actualColorStats.every((d) => d.withinTolerance)).to.eql(
         true,
