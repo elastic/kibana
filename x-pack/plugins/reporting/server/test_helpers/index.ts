@@ -14,4 +14,3 @@ export {
   createMockPluginSetup,
   createMockReportingCore,
 } from './create_mock_reportingplugin';
-export { createMockServer } from './create_mock_server';
