@@ -6,7 +6,7 @@
  */
 
 import React, { Component, Fragment } from 'react';
-import { EuiOverlayMask, EuiConfirmModal } from '@elastic/eui';
+import { EuiConfirmModal } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import type { PublicMethodsOf } from '@kbn/utility-types';
@@ -35,46 +35,44 @@ export class ConfirmDeleteUsers extends Component<Props, unknown> {
           values: { userLength: usersToDelete[0] },
         });
     return (
-      <EuiOverlayMask>
-        <EuiConfirmModal
-          title={title}
-          onCancel={onCancel}
-          onConfirm={this.deleteUsers}
-          cancelButtonText={i18n.translate(
-            'xpack.security.management.users.confirmDelete.cancelButtonLabel',
-            { defaultMessage: 'Cancel' }
-          )}
-          confirmButtonText={i18n.translate(
-            'xpack.security.management.users.confirmDelete.confirmButtonLabel',
-            { defaultMessage: 'Delete' }
-          )}
-          buttonColor="danger"
-        >
-          <div>
-            {moreThanOne ? (
-              <Fragment>
-                <p>
-                  <FormattedMessage
-                    id="xpack.security.management.users.confirmDelete.removingUsersDescription"
-                    defaultMessage="You are about to delete these users:"
-                  />
-                </p>
-                <ul>
-                  {usersToDelete.map((username) => (
-                    <li key={username}>{username}</li>
-                  ))}
-                </ul>
-              </Fragment>
-            ) : null}
-            <p>
-              <FormattedMessage
-                id="xpack.security.management.users.confirmDelete.removingUsersWarningMessage"
-                defaultMessage="This operation cannot be undone."
-              />
-            </p>
-          </div>
-        </EuiConfirmModal>
-      </EuiOverlayMask>
+      <EuiConfirmModal
+        title={title}
+        onCancel={onCancel}
+        onConfirm={this.deleteUsers}
+        cancelButtonText={i18n.translate(
+          'xpack.security.management.users.confirmDelete.cancelButtonLabel',
+          { defaultMessage: 'Cancel' }
+        )}
+        confirmButtonText={i18n.translate(
+          'xpack.security.management.users.confirmDelete.confirmButtonLabel',
+          { defaultMessage: 'Delete' }
+        )}
+        buttonColor="danger"
+      >
+        <div>
+          {moreThanOne ? (
+            <Fragment>
+              <p>
+                <FormattedMessage
+                  id="xpack.security.management.users.confirmDelete.removingUsersDescription"
+                  defaultMessage="You are about to delete these users:"
+                />
+              </p>
+              <ul>
+                {usersToDelete.map((username) => (
+                  <li key={username}>{username}</li>
+                ))}
+              </ul>
+            </Fragment>
+          ) : null}
+          <p>
+            <FormattedMessage
+              id="xpack.security.management.users.confirmDelete.removingUsersWarningMessage"
+              defaultMessage="This operation cannot be undone."
+            />
+          </p>
+        </div>
+      </EuiConfirmModal>
     );
   }
 
