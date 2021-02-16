@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import React, { memo, useEffect, useState, useRef } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiForm, EuiFormRow, EuiFieldText } from '@elastic/eui';
-import useDebounce from 'react-use/lib/useDebounce';
+import React, { memo, useCallback, useEffect, useState, useRef } from 'react';
 import { PackagePolicyEditExtensionComponentProps } from '../../../../fleet/public';
-import { ConfigKeys, Config } from './types';
+import { ConfigKeys, Config, ICustomFields } from './types';
+import { CustomFields } from './custom_fields';
 
 /**
  * Exports Synthetics-specific package policy instructions
@@ -22,8 +21,6 @@ export const SyntheticsPolicyEditExtension = memo<PackagePolicyEditExtensionComp
       urls: currentPolicy.inputs[0]?.streams[0]?.vars?.urls.value,
       schedule: currentPolicy.inputs[0]?.streams[0]?.vars?.schedule.value,
     };
-    const [schedule, setSchedule] = useState<string>(defaultConfig.schedule);
-    const [urls, setUrl] = useState<string>(defaultConfig.urls);
     const [config, setConfig] = useState<Config>(defaultConfig);
     const currentConfig = useRef<Config>(defaultConfig);
 
@@ -50,46 +47,23 @@ export const SyntheticsPolicyEditExtension = memo<PackagePolicyEditExtensionComp
       }
     }, [config, newPolicy, onChange]);
 
-    useDebounce(
-      () => {
-        // urls and schedule is managed by us, name is managed by fleet
-        setConfig({ name: newPolicy.name, urls, schedule });
+    useEffect(() => {
+      setConfig((prevConfig) => ({ ...prevConfig, name: newPolicy.name }));
+    }, [newPolicy.name]);
+
+    const handleInputChange = useCallback(
+      (fields: ICustomFields) => {
+        setConfig((prevConfig) => ({ ...prevConfig, ...fields }));
       },
-      250,
-      [newPolicy.name, schedule, setConfig, urls]
+      [setConfig]
     );
 
     return (
-      <EuiFlexGroup>
-        <EuiFlexItem />
-        <EuiFlexItem>
-          <EuiForm component="form">
-            <EuiFormRow label="Schedule" isInvalid={!schedule}>
-              <EuiFieldText
-                value={schedule}
-                onChange={(event) => handleInputChange({ event, onInputChange: setSchedule })}
-              />
-            </EuiFormRow>
-            <EuiFormRow label="Url" isInvalid={!urls}>
-              <EuiFieldText
-                value={urls}
-                onChange={(event) => handleInputChange({ event, onInputChange: setUrl })}
-              />
-            </EuiFormRow>
-          </EuiForm>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <CustomFields
+        defaultValues={{ urls: defaultConfig.urls, schedule: defaultConfig.schedule }}
+        onChange={handleInputChange}
+      />
     );
   }
 );
 SyntheticsPolicyEditExtension.displayName = 'SyntheticsPolicyEditExtension';
-
-const handleInputChange = ({
-  event,
-  onInputChange,
-}: {
-  event: React.ChangeEvent<HTMLInputElement>;
-  onInputChange: (value: string) => void;
-}) => {
-  onInputChange(event.target.value);
-};

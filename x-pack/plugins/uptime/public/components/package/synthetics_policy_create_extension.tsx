@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import React, { memo, useEffect, useState, useRef } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiForm, EuiFormRow, EuiFieldText } from '@elastic/eui';
-import useDebounce from 'react-use/lib/useDebounce';
+import React, { memo, useCallback, useEffect, useState, useRef } from 'react';
 import { PackagePolicyCreateExtensionComponentProps } from '../../../../fleet/public';
-import { ConfigKeys, Config } from './types';
+import { ConfigKeys, Config, ICustomFields } from './types';
+import { CustomFields } from './custom_fields';
 
 /**
  * Exports Synthetics-specific package policy instructions
@@ -17,8 +16,6 @@ import { ConfigKeys, Config } from './types';
  */
 export const SyntheticsPolicyCreateExtension = memo<PackagePolicyCreateExtensionComponentProps>(
   ({ newPolicy, onChange }) => {
-    const [schedule, setSchedule] = useState<string>('');
-    const [urls, setUrl] = useState<string>('');
     const [config, setConfig] = useState<Config>(defaultConfig);
     const currentConfig = useRef<Config>(defaultConfig);
 
@@ -36,7 +33,6 @@ export const SyntheticsPolicyCreateExtension = memo<PackagePolicyCreateExtension
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    // Update the integration policy with our custom fields
     useEffect(() => {
       const configKeys = Object.keys(config) as ConfigKeys[];
       const configDidUpdate = configKeys.some((key) => config[key] !== currentConfig.current[key]);
@@ -59,52 +55,29 @@ export const SyntheticsPolicyCreateExtension = memo<PackagePolicyCreateExtension
       }
     }, [config, newPolicy, onChange]);
 
-    useDebounce(
-      () => {
-        // urls and schedule is managed by us, name is managed by fleet
-        setConfig({ name: newPolicy.name, urls, schedule });
+    // update our local config state ever time name, which is managed by fleet, changes
+    useEffect(() => {
+      setConfig((prevConfig) => ({ ...prevConfig, name: newPolicy.name }));
+    }, [newPolicy.name]);
+
+    const handleInputChange = useCallback(
+      (fields: ICustomFields) => {
+        setConfig((prevConfig) => ({ ...prevConfig, ...fields }));
       },
-      250,
-      [newPolicy.name, schedule, setConfig, urls]
+      [setConfig]
     );
 
-    return (
-      <EuiFlexGroup>
-        <EuiFlexItem />
-        <EuiFlexItem>
-          <EuiForm component="form">
-            <EuiFormRow label="Schedule" isInvalid={!schedule}>
-              <EuiFieldText
-                value={schedule}
-                onChange={(event) => handleInputChange({ event, onInputChange: setSchedule })}
-              />
-            </EuiFormRow>
-            <EuiFormRow label="Url" isInvalid={!urls}>
-              <EuiFieldText
-                value={urls}
-                onChange={(event) => handleInputChange({ event, onInputChange: setUrl })}
-              />
-            </EuiFormRow>
-          </EuiForm>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    );
+    return <CustomFields defaultValues={defaultValues} onChange={handleInputChange} />;
   }
 );
 SyntheticsPolicyCreateExtension.displayName = 'SyntheticsPolicyCreateExtension';
 
-const handleInputChange = ({
-  event,
-  onInputChange,
-}: {
-  event: React.ChangeEvent<HTMLInputElement>;
-  onInputChange: (value: string) => void;
-}) => {
-  onInputChange(event.target.value);
+const defaultValues = {
+  urls: '',
+  schedule: '',
 };
 
 const defaultConfig: Config = {
   name: '',
-  urls: '',
-  schedule: '',
+  ...defaultValues,
 };

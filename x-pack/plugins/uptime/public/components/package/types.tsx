@@ -12,3 +12,8 @@ export enum ConfigKeys {
 }
 
 export type Config = Record<ConfigKeys, string>;
+
+export interface ICustomFields {
+  schedule: Config['schedule'];
+  urls: Config['urls'];
+}
