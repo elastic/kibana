@@ -84,7 +84,9 @@ export function getPivotDropdownOptions(
     });
   }
 
-  const combinedFields = [...indexPatternFields, ...runtimeFields];
+  const sortByLabel = (a: Field, b: Field) => a.name.localeCompare(b.name);
+
+  const combinedFields = [...indexPatternFields, ...runtimeFields].sort(sortByLabel);
   combinedFields.forEach((field) => {
     // Group by
     const availableGroupByAggs: [] = getNestedProperty(pivotGroupByFieldSupport, field.type);

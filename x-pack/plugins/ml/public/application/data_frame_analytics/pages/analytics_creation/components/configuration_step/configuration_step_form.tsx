@@ -64,6 +64,8 @@ const requiredFieldsErrorText = i18n.translate(
   }
 );
 
+const maxRuntimeFieldsDisplayCount = 5;
+
 export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
   actions,
   state,
@@ -465,21 +467,20 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
               values={{
                 runtimeFieldsCount: unsupportedRuntimeFields.length,
                 extraCountMsg:
-                  unsupportedRuntimeFields.length - 5 > 0 ? (
+                  unsupportedRuntimeFields.length - maxRuntimeFieldsDisplayCount > 0 ? (
                     <FormattedMessage
                       id="xpack.ml.dataframe.analytics.create.extraUnsupportedRuntimeFieldsMsg"
                       defaultMessage="and {count} more"
                       values={{
-                        count: unsupportedRuntimeFields.length - 5,
+                        count: unsupportedRuntimeFields.length - maxRuntimeFieldsDisplayCount,
                       }}
                     />
                   ) : (
                     ''
                   ),
-                unsupportedRuntimeFields:
-                  unsupportedRuntimeFields.length > 5
-                    ? unsupportedRuntimeFields.slice(0, 5).join(', ')
-                    : unsupportedRuntimeFields.join(', '),
+                unsupportedRuntimeFields: unsupportedRuntimeFields
+                  .slice(0, maxRuntimeFieldsDisplayCount)
+                  .join(', '),
               }}
             />
           </EuiCallOut>
