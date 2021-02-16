@@ -38,6 +38,11 @@ export interface ReportingExecuteTaskInstance /* extends TaskInstanceWithDepreca
   runAt?: Date;
 }
 
+export enum ReportingTaskStatus {
+  UNINITIALIZED = 'uninitialized',
+  INITIALIZED = 'initialized',
+}
+
 export interface ReportingTask {
   getTaskDefinition: () => {
     type: string;
@@ -46,4 +51,6 @@ export interface ReportingTask {
     maxAttempts: number;
     timeout: string;
   };
+
+  getStatus: () => ReportingTaskStatus;
 }

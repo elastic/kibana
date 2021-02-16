@@ -15,6 +15,7 @@ import { Report } from '../store';
 import {
   ReportingExecuteTaskInstance,
   ReportingTask,
+  ReportingTaskStatus,
   REPORTING_EXECUTE_TYPE,
   REPORTING_MONITOR_TYPE,
   ReportTaskParams,
@@ -99,8 +100,6 @@ export class MonitorReportsTask implements ReportingTask {
               const reschedulingTask = oldReport.toReportTaskJSON();
               await reportingStore.clearExpiration(oldReport);
               await this.rescheduleTask(reschedulingTask, this.logger);
-              // TODO handle error
-              // if there is an error that is not a conflict, then mark the report failed?
             }
           } catch (err) {
             this.logger.error('Could not find and update expired reports!');
@@ -140,5 +139,13 @@ export class MonitorReportsTask implements ReportingTask {
       params: task,
     };
     return await this.taskManagerStart.schedule(oldTaskInstance);
+  }
+
+  public getStatus() {
+    if (this.taskManagerStart) {
+      return ReportingTaskStatus.INITIALIZED;
+    }
+
+    return ReportingTaskStatus.UNINITIALIZED;
   }
 }

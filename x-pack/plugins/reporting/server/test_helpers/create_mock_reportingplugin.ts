@@ -124,21 +124,22 @@ export const createMockReportingCore = async (
   setupDepsMock: ReportingInternalSetup | undefined = undefined,
   startDepsMock: ReportingInternalStart | undefined = undefined
 ) => {
+  config = config || {};
+
   if (!setupDepsMock) {
     setupDepsMock = createMockPluginSetup({});
   }
 
-  config = config || {};
   const context = coreMock.createPluginInitializerContext(createMockConfigSchema());
   const core = new ReportingCore(logger, context);
   core.setConfig(config);
+
   core.pluginSetup(setupDepsMock);
   await core.pluginSetsUp();
 
   if (!startDepsMock) {
     startDepsMock = createMockPluginStart(core, context);
   }
-
   await core.pluginStart(startDepsMock);
   await core.pluginStartsUp();
 

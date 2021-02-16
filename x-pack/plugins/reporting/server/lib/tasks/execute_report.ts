@@ -23,6 +23,7 @@ import { Report, ReportingStore } from '../store';
 import {
   ReportingExecuteTaskInstance,
   ReportingTask,
+  ReportingTaskStatus,
   REPORTING_EXECUTE_TYPE,
   ReportTaskParams,
   TaskRunResult,
@@ -58,7 +59,7 @@ export class ExecuteReportTask implements ReportingTask {
   /*
    * To be called from plugin start
    */
-  public async init(taskManager: TaskManagerStartContract, opts: { noPolling?: boolean } = {}) {
+  public async init(taskManager: TaskManagerStartContract) {
     this.taskManagerStart = taskManager;
 
     const { reporting } = this;
@@ -376,5 +377,13 @@ export class ExecuteReportTask implements ReportingTask {
       params: task,
     };
     return await this.getTaskManagerStart().schedule(oldTaskInstance);
+  }
+
+  public getStatus() {
+    if (this.taskManagerStart) {
+      return ReportingTaskStatus.INITIALIZED;
+    }
+
+    return ReportingTaskStatus.UNINITIALIZED;
   }
 }

@@ -7,21 +7,69 @@
 
 import { ExecuteReportTask } from '.';
 import { ReportingCore } from '../..';
+import { RunContext } from '../../../../task_manager/server';
+import { taskManagerMock } from '../../../../task_manager/server/mocks';
 import { ReportingConfigType } from '../../config';
-import { createMockConfigSchema, createMockLevelLogger } from '../../test_helpers';
+import {
+  createMockConfig,
+  createMockConfigSchema,
+  createMockLevelLogger,
+  createMockReportingCore,
+} from '../../test_helpers';
 
 const logger = createMockLevelLogger();
 
-describe('Execute Report Logger', () => {
+describe('Execute Report Task', () => {
   let mockReporting: ReportingCore;
-  let mockSchema: ReportingConfigType;
+  let configType: ReportingConfigType;
   beforeAll(async () => {
-    mockSchema = createMockConfigSchema();
+    configType = createMockConfigSchema();
+    const mockConfig = createMockConfig(configType);
+    mockReporting = await createMockReportingCore(mockConfig);
   });
 
-  it('Is great', () => {
-    // FIXME
-    const task = new ExecuteReportTask(mockReporting, mockSchema, logger);
-    expect(task);
+  it('Instance setup', () => {
+    const task = new ExecuteReportTask(mockReporting, configType, logger);
+    expect(task.getStatus()).toBe('uninitialized');
+    expect(task.getTaskDefinition()).toMatchInlineSnapshot(`
+      Object {
+        "createTaskRunner": [Function],
+        "maxAttempts": 1,
+        "maxConcurrency": 1,
+        "timeout": "120s",
+        "title": "Reporting: execute job",
+        "type": "report:execute",
+      }
+    `);
+  });
+
+  it('Instance start', () => {
+    const mockTaskManager = taskManagerMock.createStart();
+    const task = new ExecuteReportTask(mockReporting, configType, logger);
+    expect(task.init(mockTaskManager));
+    expect(task.getStatus()).toBe('initialized');
+  });
+
+  it('create task runner', async () => {
+    logger.info = jest.fn();
+    logger.error = jest.fn();
+
+    mockReporting.getElasticsearchService = () => {
+      return {
+        callAsInternalUser: jest.fn(),
+      };
+    };
+    const task = new ExecuteReportTask(mockReporting, configType, logger);
+    const taskDef = task.getTaskDefinition();
+    const taskRunner = taskDef.createTaskRunner(({
+      taskInstance: {
+        id: 'random-task-id',
+        params: { index: 'cool-reporting-index', id: 'cool-reporting-id' },
+      },
+    } as unknown) as RunContext);
+    expect(taskRunner).toHaveProperty('run');
+    expect(taskRunner).toHaveProperty('cancel');
+
+    expect(await taskRunner.run()).toBe(undefined);
   });
 });
