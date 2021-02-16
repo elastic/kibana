@@ -19,6 +19,7 @@ import { IStorageWrapper } from '../../../../../../../src/plugins/kibana_utils/p
 import type { EmbeddableStart } from '../../../../../../../src/plugins/embeddable/public';
 import type { MapsStartApi } from '../../../../../maps/public';
 import type { LensPublicStart } from '../../../../../lens/public';
+import { TriggersAndActionsUIPublicPluginStart } from '../../../../../triggers_actions_ui/public';
 
 interface StartPlugins {
   data: DataPublicPluginStart;
@@ -28,6 +29,7 @@ interface StartPlugins {
   embeddable: EmbeddableStart;
   maps?: MapsStartApi;
   lens?: LensPublicStart;
+  triggersActionsUi?: TriggersAndActionsUIPublicPluginStart;
 }
 export type StartServices = CoreStart &
   StartPlugins & {
