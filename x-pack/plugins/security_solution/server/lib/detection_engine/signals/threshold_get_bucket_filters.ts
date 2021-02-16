@@ -83,6 +83,7 @@ export const getThresholdBucketFilters = async ({
         .createHash('sha256')
         .update(
           terms
+            .sort((term1, term2) => (term1.field > term2.field ? 1 : -1))
             .map((field) => {
               return field.value;
             })
@@ -130,10 +131,9 @@ export const getThresholdBucketFilters = async ({
       if (!isEmpty(bucketByFields)) {
         bucket.terms.forEach((term) => {
           if (term.field != null) {
-            // TODO: is this right?
             (filter.bool.filter as ESFilter[]).push({
               term: {
-                [term.field]: term.value as string, // TODO: is this right?
+                [term.field]: `${term.value}`,
               },
             });
           }
