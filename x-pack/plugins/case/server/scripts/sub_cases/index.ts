@@ -149,7 +149,7 @@ async function main() {
       kibana: {
         alias: 'k',
         describe: 'kibana url',
-        default: 'http://XavierM:Ry4t9RHeCXEwPzj@localhost:5601',
+        default: 'http://elastic:changeme@localhost:5601',
         type: 'string',
       },
     })
