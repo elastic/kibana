@@ -75,6 +75,33 @@ export const dashboardFeatureCatalog = {
 /*
   Actions
 */
+export const dashboardCopyToDashboardAction = {
+  getDisplayName: () =>
+    i18n.translate('dashboard.panel.copyToDashboard.title', {
+      defaultMessage: 'Copy to dashboard',
+    }),
+  getCancelButtonName: () =>
+    i18n.translate('dashboard.panel.copyToDashboard.cancel', {
+      defaultMessage: 'Cancel',
+    }),
+  getAcceptButtonName: () =>
+    i18n.translate('dashboard.panel.copyToDashboard.goToDashboard', {
+      defaultMessage: 'Copy and go to dashboard',
+    }),
+  getNewDashboardOption: () =>
+    i18n.translate('dashboard.panel.copyToDashboard.newDashboardOptionLabel', {
+      defaultMessage: 'New dashboard',
+    }),
+  getExistingDashboardOption: () =>
+    i18n.translate('dashboard.panel.copyToDashboard.existingDashboardOptionLabel', {
+      defaultMessage: 'Existing dashboard',
+    }),
+  getDescription: () =>
+    i18n.translate('dashboard.panel.copyToDashboard.description', {
+      defaultMessage: "Select where to copy the panel. You're navigated to destination dashboard.",
+    }),
+};
+
 export const dashboardAddToLibraryAction = {
   getDisplayName: () =>
     i18n.translate('dashboard.panel.AddToLibrary', {
@@ -225,6 +252,18 @@ export const leaveConfirmStrings = {
   getLeaveSubtitle: () =>
     i18n.translate('dashboard.appLeaveConfirmModal.unsavedChangesSubtitle', {
       defaultMessage: 'Leave Dashboard with unsaved work?',
+    }),
+  getKeepChangesText: () =>
+    i18n.translate('dashboard.appLeaveConfirmModal.keepUnsavedChangesButtonLabel', {
+      defaultMessage: 'Keep unsaved changes',
+    }),
+  getLeaveEditModeTitle: () =>
+    i18n.translate('dashboard.changeViewModeConfirmModal.leaveEditMode', {
+      defaultMessage: 'Leave edit mode with unsaved work?',
+    }),
+  getLeaveEditModeSubtitle: () =>
+    i18n.translate('dashboard.changeViewModeConfirmModal.discardChangesOptionalDescription', {
+      defaultMessage: `If you discard your changes, there's no getting them back.`,
     }),
   getDiscardTitle: () =>
     i18n.translate('dashboard.changeViewModeConfirmModal.discardChangesTitle', {

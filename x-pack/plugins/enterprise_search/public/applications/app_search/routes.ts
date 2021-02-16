@@ -17,7 +17,7 @@ export const CREDENTIALS_PATH = '/credentials';
 export const ROLE_MAPPINGS_PATH = '#/role-mappings'; // This page seems to 404 if the # isn't included
 
 export const ENGINES_PATH = '/engines';
-export const CREATE_ENGINES_PATH = `${ENGINES_PATH}/new`;
+export const ENGINE_CREATION_PATH = '/engine_creation';
 
 export const ENGINE_PATH = `${ENGINES_PATH}/:engineName`;
 export const SAMPLE_ENGINE_PATH = `${ENGINES_PATH}/national-parks-demo`;
@@ -44,9 +44,12 @@ export const META_ENGINE_SOURCE_ENGINES_PATH = `${ENGINE_PATH}/engines`;
 
 export const ENGINE_RELEVANCE_TUNING_PATH = `${ENGINE_PATH}/relevance_tuning`;
 export const ENGINE_SYNONYMS_PATH = `${ENGINE_PATH}/synonyms`;
-export const ENGINE_CURATIONS_PATH = `${ENGINE_PATH}/curations`;
-// TODO: Curations sub-pages
 export const ENGINE_RESULT_SETTINGS_PATH = `${ENGINE_PATH}/result-settings`;
+
+export const ENGINE_CURATIONS_PATH = `${ENGINE_PATH}/curations`;
+export const ENGINE_CURATIONS_NEW_PATH = `${ENGINE_CURATIONS_PATH}/new`;
+export const ENGINE_CURATION_PATH = `${ENGINE_CURATIONS_PATH}/:curationId`;
+export const ENGINE_CURATION_ADD_RESULT_PATH = `${ENGINE_CURATIONS_PATH}/:curationId/add_result`;
 
 export const ENGINE_SEARCH_UI_PATH = `${ENGINE_PATH}/reference_application/new`;
 export const ENGINE_API_LOGS_PATH = `${ENGINE_PATH}/api-logs`;
