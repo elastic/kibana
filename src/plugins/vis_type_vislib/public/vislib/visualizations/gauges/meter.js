@@ -70,13 +70,19 @@ export class MeterGauge {
 
   getLabels() {
     const isPercentageMode = this.gaugeConfig.percentageMode;
-    const percentageFormatPattern = this.gaugeConfig.percentageFormatPattern || this.gaugeChart.events.uiSettings.get(UI_SETTINGS.FORMAT_PERCENT_DEFAULT_PATTERN);
+    const percentageFormatPattern =
+      this.gaugeConfig.percentageFormatPattern ||
+      this.gaugeChart.events.uiSettings.get(UI_SETTINGS.FORMAT_PERCENT_DEFAULT_PATTERN);
     const colorsRange = this.gaugeConfig.colorsRange;
     const max = _.last(colorsRange).to;
     const labels = [];
     colorsRange.forEach((range) => {
-      const from = isPercentageMode ? getValueForPercentageMode(range.from / max, percentageFormatPattern): range.from;
-      const to = isPercentageMode ? getValueForPercentageMode(range.to / max, percentageFormatPattern) : range.to;
+      const from = isPercentageMode
+        ? getValueForPercentageMode(range.from / max, percentageFormatPattern)
+        : range.from;
+      const to = isPercentageMode
+        ? getValueForPercentageMode(range.to / max, percentageFormatPattern)
+        : range.to;
       labels.push(`${from} - ${to}`);
     });
 

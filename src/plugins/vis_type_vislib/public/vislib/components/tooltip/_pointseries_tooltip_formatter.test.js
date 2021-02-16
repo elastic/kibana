@@ -43,6 +43,30 @@ describe('tooltipFormatter', function () {
       extraMetrics: [],
       seriesId: '1',
     },
+    config: {
+      get: (name) => {
+        const config = {
+          setColorRange: false,
+          gauge: false,
+          percentageMode: false,
+        };
+        return config[name];
+      },
+    },
+    handler: {
+      pointSeries: {
+        getSeries: () => ({
+          getValueAxis: () => ({
+            getScale: () => ({
+              domain: () => [0, 10],
+            }),
+          }),
+        }),
+      },
+      uiSettings: {
+        get: () => '',
+      },
+    },
   };
 
   it('returns html based on the mouse event', function () {

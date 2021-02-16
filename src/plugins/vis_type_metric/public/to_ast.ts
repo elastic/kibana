@@ -55,7 +55,10 @@ export const toExpressionAst: VisToExpressionAst<VisParams> = (vis, params) => {
   // fix formatter for percentage mode
   if (get(vis.params, 'metric.percentageMode') === true) {
     schemas.metric.forEach((metric: SchemaConfig) => {
-      metric.format = { id: 'percent', params: { pattern: get(vis.params, 'metric.percentageFormatPattern', undefined)} };
+      metric.format = {
+        id: 'percent',
+        params: { pattern: get(vis.params, 'metric.percentageFormatPattern', undefined) }
+      };
     });
   }
 

@@ -52,7 +52,10 @@ export class HeatmapChart extends PointSeries {
 
   getHeatmapLabels(cfg) {
     const percentageMode = cfg.get('percentageMode');
-    const percentageFormatPattern = cfg.get('percentageFormatPattern', this.uiSettings.get(UI_SETTINGS.FORMAT_PERCENT_DEFAULT_PATTERN));
+    const percentageFormatPattern = cfg.get(
+      'percentageFormatPattern',
+      this.uiSettings.get(UI_SETTINGS.FORMAT_PERCENT_DEFAULT_PATTERN)
+    );
     const colorsNumber = cfg.get('colorsNumber');
     const colorsRange = cfg.get('colorsRange');
     const zAxisConfig = this.getValueAxis().axisConfig;

@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { last } from 'lodash';
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { UI_SETTINGS } from '../../../../../../plugins/data/public';
@@ -18,7 +19,7 @@ function getMax(handler, config, isGauge) {
     const scale = series.getValueAxis().getScale();
     max = scale.domain()[1];
   } else {
-    max = _.last(config.get(isGauge ? 'gauge.colorsRange' : 'colorsRange', [{}])).to
+    max = last(config.get(isGauge ? 'gauge.colorsRange' : 'colorsRange', [{}])).to;
   }
 
   return max;
@@ -50,12 +51,18 @@ export function pointSeriesTooltipFormatter() {
     if (datum.y !== null && datum.y !== undefined) {
       let value = datum.yScale ? datum.yScale * datum.y : datum.y;
       if (isPercentageMode && !isSetColorRange) {
-        const percentageFormatPattern = config.get(isGauge ? 'gauge.percentageFormatPattern' : 'percentageFormatPattern', handler.uiSettings.get(UI_SETTINGS.FORMAT_PERCENT_DEFAULT_PATTERN));
-        value = getValueForPercentageMode(value / getMax(handler, config, isGauge), percentageFormatPattern);
+        const percentageFormatPattern = config.get(
+          isGauge ? 'gauge.percentageFormatPattern' : 'percentageFormatPattern',
+          handler.uiSettings.get(UI_SETTINGS.FORMAT_PERCENT_DEFAULT_PATTERN)
+        );
+        value = getValueForPercentageMode(
+          value / getMax(handler, config, isGauge),
+          percentageFormatPattern
+        );
         addDetail(currentSeries.label, value);
       } else {
         addDetail(currentSeries.label, currentSeries.yAxisFormatter(value));
-      } 
+      }
     }
 
     if (datum.z !== null && datum.z !== undefined) {

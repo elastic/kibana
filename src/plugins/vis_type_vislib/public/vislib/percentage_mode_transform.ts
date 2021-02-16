@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
- // @ts-ignore
+// @ts-ignore
 import numeral from '@elastic/numeral';
 
 const numeralInst = numeral();
