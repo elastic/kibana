@@ -17,38 +17,12 @@ import {
   AgentSOAttributes,
   FleetServerAgent,
   SO_SEARCH_LIMIT,
-  FLEET_SERVER_PACKAGE,
-  FLEET_SERVER_INDICES,
-} from '../../common';
-import { listEnrollmentApiKeys, getEnrollmentAPIKey } from './api_keys/enrollment_api_key_so';
-import { appContextService } from './app_context';
-import { getInstallation } from './epm/packages';
+} from '../../../common';
+import { listEnrollmentApiKeys, getEnrollmentAPIKey } from '../api_keys/enrollment_api_key_so';
+import { appContextService } from '../app_context';
 
-import { isAgentsSetup } from './agents';
-import { agentPolicyService } from './agent_policy';
-
-export async function isFleetServerSetup() {
-  const pkgInstall = await getInstallation({
-    savedObjectsClient: getInternalUserSOClient(),
-    pkgName: FLEET_SERVER_PACKAGE,
-  });
-
-  if (!pkgInstall) {
-    return false;
-  }
-
-  const esClient = appContextService.getInternalUserESClient();
-  const exists = await Promise.all(
-    FLEET_SERVER_INDICES.map(async (index) => {
-      const res = await esClient.indices.exists({
-        index,
-      });
-      return res.statusCode !== 404;
-    })
-  );
-
-  return exists.every((exist) => exist === true);
-}
+import { isAgentsSetup } from '../agents';
+import { agentPolicyService } from '../agent_policy';
 
 export async function runFleetServerMigration() {
   // If Agents are not setup skip as there is nothing to migrate

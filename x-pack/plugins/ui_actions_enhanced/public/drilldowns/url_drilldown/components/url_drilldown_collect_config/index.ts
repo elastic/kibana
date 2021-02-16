@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { CreateWatchFlyout } from './create_watch_flyout';
+export { UrlDrilldownCollectConfig, UrlDrilldownCollectConfigProps } from './lazy';
