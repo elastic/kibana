@@ -43,7 +43,7 @@ export const mapping = {
   browser_type: { type: 'keyword' },
   jobtype: { type: 'keyword' },
   payload: { type: 'object', enabled: false },
-  priority: { type: 'byte' }, // NOTE unused
+  priority: { type: 'byte' }, // NOTE: this is unused, but older data may have a mapping for this field
   timeout: { type: 'long' },
   process_expiration: { type: 'date' },
   created_by: { type: 'keyword' }, // `null` if security is disabled
