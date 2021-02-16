@@ -25,6 +25,7 @@ import { createConditionEntry, createEntryMatch } from './mapping';
 import {
   getTrustedAppsCreateRouteHandler,
   getTrustedAppsDeleteRouteHandler,
+  getTrustedAppsGetOneHandler,
   getTrustedAppsListRouteHandler,
   getTrustedAppsSummaryRouteHandler,
   getTrustedAppsUpdateRouteHandler,
@@ -334,6 +335,60 @@ describe('handlers', () => {
           mockResponse
         )
       ).rejects.toThrowError(error);
+    });
+  });
+
+  describe('getTrustedAppsGetOneHandler', () => {
+    let getOneHandler: ReturnType<typeof getTrustedAppsGetOneHandler>;
+
+    beforeEach(() => {
+      getOneHandler = getTrustedAppsGetOneHandler(appContextMock);
+    });
+
+    it('should return single trusted app', async () => {
+      const mockResponse = httpServerMock.createResponseFactory();
+
+      exceptionsListClient.getExceptionListItem.mockResolvedValue(EXCEPTION_LIST_ITEM);
+
+      await getOneHandler(
+        createHandlerContextMock(),
+        httpServerMock.createKibanaRequest({ params: { page: 1, per_page: 20 } }),
+        mockResponse
+      );
+
+      assertResponse(mockResponse, 'ok', {
+        data: TRUSTED_APP,
+      });
+    });
+
+    it('should return 404 if trusted app does not exist', async () => {
+      const mockResponse = httpServerMock.createResponseFactory();
+
+      exceptionsListClient.getExceptionListItem.mockResolvedValue(null);
+
+      await getOneHandler(
+        createHandlerContextMock(),
+        httpServerMock.createKibanaRequest({ params: { page: 1, per_page: 20 } }),
+        mockResponse
+      );
+
+      assertResponse(mockResponse, 'notFound', expect.any(TrustedAppNotFoundError));
+    });
+
+    it('should log errors if any are encountered', async () => {
+      const mockResponse = httpServerMock.createResponseFactory();
+      const error = new Error('I am an error');
+      exceptionsListClient.getExceptionListItem.mockImplementation(async () => {
+        throw error;
+      });
+
+      await getOneHandler(
+        createHandlerContextMock(),
+        httpServerMock.createKibanaRequest({ params: { page: 1, per_page: 20 } }),
+        mockResponse
+      );
+
+      expect(appContextMock.logFactory.get('trusted_apps').error).toHaveBeenCalledWith(error);
     });
   });
 

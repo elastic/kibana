@@ -12,6 +12,7 @@ import { ExceptionListClient } from '../../../../../lists/server';
 
 import {
   DeleteTrustedAppsRequestParams,
+  GetOneTrustedAppRequestParams,
   GetTrustedAppsListRequest,
   PostTrustedAppCreateRequest,
   PutTrustedAppsRequestParams,
@@ -21,6 +22,7 @@ import {
 import {
   createTrustedApp,
   deleteTrustedApp,
+  getTrustedApp,
   getTrustedAppsList,
   getTrustedAppsSummary,
   updateTrustedApp,
@@ -76,7 +78,30 @@ export const getTrustedAppsDeleteRouteHandler = (
   };
 };
 
-export const getTrustedAppsListRouteHandler = (): RequestHandler<
+export const getTrustedAppsGetOneHandler = (
+  endpointAppContext: EndpointAppContext
+): RequestHandler<
+  GetOneTrustedAppRequestParams,
+  unknown,
+  unknown,
+  SecuritySolutionRequestHandlerContext
+> => {
+  const logger = endpointAppContext.logFactory.get('trusted_apps');
+
+  return async (context, req, res) => {
+    try {
+      return res.ok({
+        body: await getTrustedApp(exceptionListClientFromContext(context), req.params.id),
+      });
+    } catch (error) {
+      return errorHandler(logger, res, error);
+    }
+  };
+};
+
+export const getTrustedAppsListRouteHandler = (
+  endpointAppContext: EndpointAppContext
+): RequestHandler<
   unknown,
   GetTrustedAppsListRequest,
   unknown,
