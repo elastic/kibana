@@ -65,7 +65,6 @@ export class TaskTypeDictionary {
       }
     } catch (e) {
       this.logger.error('Could not sanitize task definitions');
-      this.logger.error(e);
     }
   }
 }
