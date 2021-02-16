@@ -12,6 +12,7 @@ import { CreateThreatSignalsOptions } from './types';
 import { createThreatSignal } from './create_threat_signal';
 import { SearchAfterAndBulkCreateReturnType } from '../types';
 import { combineConcurrentResults } from './utils';
+import { buildThreatEnrichment } from './build_threat_enrichment';
 
 export const createThreatSignals = async ({
   threatMapping,
@@ -90,12 +91,25 @@ export const createThreatSignals = async ({
     perPage,
   });
 
+  const threatEnrichment = buildThreatEnrichment({
+    buildRuleMessage,
+    exceptionItems,
+    listClient,
+    logger,
+    services,
+    threatFilters,
+    threatIndex,
+    threatLanguage,
+    threatQuery,
+  });
+
   while (threatList.hits.hits.length !== 0) {
     const chunks = chunk(itemsPerSearch, threatList.hits.hits);
     logger.debug(buildRuleMessage(`${chunks.length} concurrent indicator searches are starting.`));
     const concurrentSearchesPerformed = chunks.map<Promise<SearchAfterAndBulkCreateReturnType>>(
       (slicedChunk) =>
         createThreatSignal({
+          threatEnrichment,
           threatMapping,
           query,
           inputIndex,

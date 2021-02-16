@@ -7,6 +7,7 @@
 
 import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { i18n } from '@kbn/i18n';
+import { withApmSpan } from '../../../../../utils/with_apm_span';
 import {
   METRIC_SYSTEM_CPU_PERCENT,
   METRIC_PROCESS_CPU_PERCENT,
@@ -52,7 +53,7 @@ const chartBase: ChartBase = {
   series,
 };
 
-export async function getCPUChartData({
+export function getCPUChartData({
   setup,
   serviceName,
   serviceNodeName,
@@ -61,18 +62,18 @@ export async function getCPUChartData({
   serviceName: string;
   serviceNodeName?: string;
 }) {
-  const metricsChart = await fetchAndTransformMetrics({
-    setup,
-    serviceName,
-    serviceNodeName,
-    chartBase,
-    aggs: {
-      systemCPUAverage: { avg: { field: METRIC_SYSTEM_CPU_PERCENT } },
-      systemCPUMax: { max: { field: METRIC_SYSTEM_CPU_PERCENT } },
-      processCPUAverage: { avg: { field: METRIC_PROCESS_CPU_PERCENT } },
-      processCPUMax: { max: { field: METRIC_PROCESS_CPU_PERCENT } },
-    },
-  });
-
-  return metricsChart;
+  return withApmSpan('get_cpu_metric_charts', () =>
+    fetchAndTransformMetrics({
+      setup,
+      serviceName,
+      serviceNodeName,
+      chartBase,
+      aggs: {
+        systemCPUAverage: { avg: { field: METRIC_SYSTEM_CPU_PERCENT } },
+        systemCPUMax: { max: { field: METRIC_SYSTEM_CPU_PERCENT } },
+        processCPUAverage: { avg: { field: METRIC_PROCESS_CPU_PERCENT } },
+        processCPUMax: { max: { field: METRIC_PROCESS_CPU_PERCENT } },
+      },
+    })
+  );
 }
