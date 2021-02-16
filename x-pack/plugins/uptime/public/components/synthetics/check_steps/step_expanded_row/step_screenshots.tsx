@@ -15,17 +15,12 @@ import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/comm
 import { useUiSetting$ } from '../../../../../../../../src/plugins/kibana_react/public';
 import { useFetcher } from '../../../../../../observability/public';
 import { fetchLastSuccessfulStep } from '../../../../state/api/journey';
-import { ReactRouterEuiLink } from '../../../common/react_router_helpers';
+import { ScreenshotLink } from './screenshot_link';
 
 const Label = euiStyled.div`
   margin-bottom: ${(props) => props.theme.eui.paddingSizes.xs};
   font-size: ${({ theme }) => theme.eui.euiFontSizeS};
   color: ${({ theme }) => theme.eui.euiColorDarkShade};
-`;
-
-const LabelLink = euiStyled.div`
-  margin-bottom: ${(props) => props.theme.eui.paddingSizes.xs};
-  font-size: ${({ theme }) => theme.eui.euiFontSizeS};
 `;
 
 interface Props {
@@ -76,14 +71,7 @@ export const StepScreenshots = ({ step }: Props) => {
       </EuiFlexItem>
       {!isSucceeded && lastSuccessfulStep?.monitor && (
         <EuiFlexItem>
-          <ReactRouterEuiLink to={`/journey/${lastSuccessfulStep?.monitor?.check_group}/steps`}>
-            <LabelLink>
-              <FormattedMessage
-                id="xpack.uptime.synthetics.executedStep.screenshot.success"
-                defaultMessage="Screenshot from last successful check"
-              />
-            </LabelLink>
-          </ReactRouterEuiLink>
+          <ScreenshotLink lastSuccessfulStep={lastSuccessfulStep} />
           <StepScreenshotDisplay
             checkGroup={lastSuccessfulStep.monitor.check_group}
             screenshotExists={true}
