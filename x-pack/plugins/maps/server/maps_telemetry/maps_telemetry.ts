@@ -126,8 +126,7 @@ async function isFieldGeoShape(
   }
   const fieldsForIndexPattern = await indexPatternsService.getFieldsForIndexPattern(indexPattern);
   return fieldsForIndexPattern.some(
-    (fieldDescriptor: IFieldType) =>
-      fieldDescriptor.esTypes && fieldDescriptor.esTypes.includes(geoField!)
+    (fieldDescriptor: IFieldType) => fieldDescriptor.name && fieldDescriptor.name === geoField!
   );
 }
 

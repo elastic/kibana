@@ -6,7 +6,58 @@
  */
 
 import mapSavedObjects from './test_resources/sample_map_saved_objects.json';
-import { buildMapsSavedObjectsTelemetry, getLayerLists } from './maps_telemetry';
+import {
+  buildMapsIndexPatternsTelemetry,
+  buildMapsSavedObjectsTelemetry,
+  getLayerLists,
+} from './maps_telemetry';
+
+jest.mock('../kibana_server_services', () => {
+  const testIndexPatterns = {
+    1: {
+      id: '1',
+      fields: [
+        {
+          name: 'one',
+          esTypes: ['geo_point'],
+        },
+      ],
+    },
+    2: {
+      id: '2',
+      fields: [
+        {
+          name: 'two',
+          esTypes: ['geo_point'],
+        },
+      ],
+    },
+    3: {
+      id: '3',
+      fields: [
+        {
+          name: 'three',
+          esTypes: ['geo_shape'],
+        },
+      ],
+    },
+  };
+  return {
+    getIndexPatternsService() {
+      return {
+        async get(x) {
+          return testIndexPatterns[x];
+        },
+        async getIds() {
+          return Object.values(testIndexPatterns).map((x) => x.id);
+        },
+        async getFieldsForIndexPattern(x) {
+          return x.fields;
+        },
+      };
+    },
+  };
+});
 
 describe('buildMapsSavedObjectsTelemetry', () => {
   test('returns zeroed telemetry data when there are no saved objects', async () => {
@@ -78,6 +129,18 @@ describe('buildMapsSavedObjectsTelemetry', () => {
         },
       },
       mapsTotalCount: 5,
+    });
+  });
+
+  test('returns expected telemetry data from index patterns', async () => {
+    const layerLists = getLayerLists(mapSavedObjects);
+    const result = await buildMapsIndexPatternsTelemetry(layerLists);
+
+    expect(result).toMatchObject({
+      indexPatternsWithGeoFieldCount: 3,
+      indexPatternsWithGeoPointFieldCount: 2,
+      indexPatternsWithGeoShapeFieldCount: 1,
+      geoShapeAggLayersCount: 0,
     });
   });
 });
