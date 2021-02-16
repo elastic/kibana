@@ -74,11 +74,11 @@ export function Metrics() {
     setSharedData({ totalPageViews: data?.pageViews?.value ?? 0 });
   }, [data, setSharedData]);
 
-  const STAT_STYLE = { width: '240px' };
+  const STAT_STYLE = { minWidth: '150px', maxWidth: '250px' };
 
   return (
     <ClFlexGroup wrap>
-      <EuiFlexItem grow={false} style={STAT_STYLE}>
+      <EuiFlexItem style={STAT_STYLE}>
         <EuiStat
           titleSize="l"
           title={formatTitle('ms', data?.totalPageLoadDuration?.value)}
@@ -94,7 +94,7 @@ export function Metrics() {
           isLoading={status !== 'success'}
         />
       </EuiFlexItem>
-      <EuiFlexItem grow={false} style={STAT_STYLE}>
+      <EuiFlexItem style={STAT_STYLE}>
         <EuiStat
           titleSize="l"
           title={formatTitle('ms', data?.backEnd?.value)}
@@ -110,7 +110,7 @@ export function Metrics() {
           isLoading={status !== 'success'}
         />
       </EuiFlexItem>
-      <EuiFlexItem grow={false} style={STAT_STYLE}>
+      <EuiFlexItem style={STAT_STYLE}>
         <EuiStat
           titleSize="l"
           title={formatTitle('ms', data?.frontEnd?.value)}
@@ -126,7 +126,7 @@ export function Metrics() {
           isLoading={status !== 'success'}
         />
       </EuiFlexItem>
-      <EuiFlexItem grow={false} style={STAT_STYLE}>
+      <EuiFlexItem style={STAT_STYLE}>
         <EuiStat
           titleSize="l"
           title={<PageViewsTotalTitle pageViews={data?.pageViews?.value} />}

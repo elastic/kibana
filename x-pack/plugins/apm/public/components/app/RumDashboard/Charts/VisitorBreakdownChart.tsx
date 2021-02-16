@@ -8,7 +8,10 @@
 import React from 'react';
 import {
   Chart,
+  DARK_THEME,
   Datum,
+  LIGHT_THEME,
+  PartialTheme,
   Partition,
   PartitionLayout,
   Settings,
@@ -34,6 +37,12 @@ interface Props {
   loading: boolean;
 }
 
+const theme: PartialTheme = {
+  legend: {
+    verticalWidth: 100,
+  },
+};
+
 export function VisitorBreakdownChart({ loading, options }: Props) {
   const [darkMode] = useUiSetting$<boolean>('theme:darkMode');
 
@@ -45,7 +54,11 @@ export function VisitorBreakdownChart({ loading, options }: Props) {
     <ChartWrapper loading={loading} height="245px" maxWidth="430px">
       <StyleChart>
         <Chart>
-          <Settings showLegend showLegendExtra />
+          <Settings
+            showLegend
+            baseTheme={darkMode ? DARK_THEME : LIGHT_THEME}
+            theme={theme}
+          />
           <Partition
             id="spec_1"
             data={
