@@ -27,7 +27,9 @@ import { offsetPreviousPeriodCoordinates } from '../utils/offset_previous_period
 import { createRoute } from './create_route';
 import { comparisonRangeRt, rangeRt, uiFiltersRt } from './default_api_types';
 import { withApmSpan } from '../utils/with_apm_span';
-import { getServiceProfile } from '../lib/services/profiling/get_service_profile';
+import { getServiceProfilingStatistics } from '../lib/services/profiling/get_service_profiling_statistics';
+import { getServiceProfilingTimeline } from '../lib/services/profiling/get_service_profiling_timeline';
+import { ProfilingValueType } from '../../common/profiling';
 
 export const servicesRoute = createRoute({
   endpoint: 'GET /api/apm/services',
@@ -445,14 +447,15 @@ export const serviceDependenciesRoute = createRoute({
   },
 });
 
-export const serviceProfilingRoute = createRoute({
-  endpoint: 'GET /api/apm/services/{serviceName}/profiling',
+export const serviceProfilingTimelineRoute = createRoute({
+  endpoint: 'GET /api/apm/services/{serviceName}/profiling/timeline',
   params: t.type({
     path: t.type({
       serviceName: t.string,
     }),
     query: t.intersection([
       rangeRt,
+      uiFiltersRt,
       t.partial({
         environment: t.string,
       }),
@@ -469,9 +472,48 @@ export const serviceProfilingRoute = createRoute({
       query: { environment },
     } = context.params;
 
-    return getServiceProfile({
+    return getServiceProfilingTimeline({
+      setup,
       serviceName,
       environment,
+    });
+  },
+});
+
+export const serviceProfilingStatisticsRoute = createRoute({
+  endpoint: 'GET /api/apm/services/{serviceName}/profiling/statistics',
+  params: t.type({
+    path: t.type({
+      serviceName: t.string,
+    }),
+    query: t.intersection([
+      rangeRt,
+      t.partial({
+        environment: t.string,
+      }),
+      t.type({
+        valueType: t.union([
+          t.literal(ProfilingValueType.wallTime),
+          t.literal(ProfilingValueType.cpuTime),
+        ]),
+      }),
+    ]),
+  }),
+  options: {
+    tags: ['access:apm'],
+  },
+  handler: async ({ context, request }) => {
+    const setup = await setupRequest(context, request);
+
+    const {
+      path: { serviceName },
+      query: { environment, valueType },
+    } = context.params;
+
+    return getServiceProfilingStatistics({
+      serviceName,
+      environment,
+      valueType,
       setup,
     });
   },

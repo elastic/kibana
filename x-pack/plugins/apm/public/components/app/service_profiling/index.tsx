@@ -4,14 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { Chart, Partition, PartitionLayout, Settings } from '@elastic/charts';
 import { EuiPanel } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiPage, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { ProfilingValueType } from '../../../../common/profiling';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
-import { useFetcher } from '../../../hooks/use_fetcher';
 import { SearchBar } from '../../shared/search_bar';
+import { ServiceProfilingFlamegraph } from './service_profiling_flamegraph';
 
 interface ServiceProfilingProps {
   serviceName: string;
@@ -26,29 +26,7 @@ export function ServiceProfiling({
     urlParams: { start, end },
   } = useUrlParams();
 
-  // @ts-expect-error
-  const { data } = useFetcher(
-    (callApmApi) => {
-      if (!start || !end) {
-        return undefined;
-      }
-
-      return callApmApi({
-        endpoint: 'GET /api/apm/services/{serviceName}/profiling',
-        params: {
-          path: {
-            serviceName,
-          },
-          query: {
-            start,
-            end,
-            environment,
-          },
-        },
-      });
-    },
-    [start, end, environment, serviceName]
-  );
+  const valueType = ProfilingValueType.cpuTime;
 
   return (
     <>
@@ -66,17 +44,13 @@ export function ServiceProfiling({
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiPanel>
-              <Chart className="story-chart">
-                <Settings showLegend flatLegend />
-                <Partition
-                  id="spec_1"
-                  data={[]}
-                  layers={[]}
-                  config={{
-                    partitionLayout: PartitionLayout.flame,
-                  }}
-                />
-              </Chart>
+              <ServiceProfilingFlamegraph
+                serviceName={serviceName}
+                environment={environment}
+                valueType={valueType}
+                start={start}
+                end={end}
+              />
             </EuiPanel>
           </EuiFlexItem>
         </EuiFlexGroup>

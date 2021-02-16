@@ -6,10 +6,9 @@
  */
 
 import { Observer } from '@elastic/eui/src/components/observer/observer';
-import { APMBaseDoc } from '../raw/apm_base_doc';
 import { Agent } from './fields/agent';
 
-interface ProfileStackFrame {
+export interface ProfileStackFrame {
   filename?: string;
   line?: string;
   function: string;
