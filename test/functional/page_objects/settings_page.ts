@@ -494,6 +494,7 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
         await this.setFieldScript(script);
       }
       await this.clickSaveField();
+      await new Promise((resolve) => setTimeout(resolve, 1000 * 30));
     }
 
     async clickAddField() {
