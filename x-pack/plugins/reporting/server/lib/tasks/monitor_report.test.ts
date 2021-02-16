@@ -15,7 +15,7 @@ import {
   createMockLevelLogger,
   createMockReportingCore,
 } from '../../test_helpers';
-import { ExecuteReportTask } from './';
+import { MonitorReportsTask } from './';
 
 const logger = createMockLevelLogger();
 
@@ -29,23 +29,22 @@ describe('Execute Report Task', () => {
   });
 
   it('Instance setup', () => {
-    const task = new ExecuteReportTask(mockReporting, configType, logger);
+    const task = new MonitorReportsTask(mockReporting, configType, logger);
     expect(task.getStatus()).toBe('uninitialized');
     expect(task.getTaskDefinition()).toMatchInlineSnapshot(`
       Object {
         "createTaskRunner": [Function],
         "maxAttempts": 1,
-        "maxConcurrency": 1,
         "timeout": "120s",
-        "title": "Reporting: execute job",
-        "type": "report:execute",
+        "title": "Reporting: monitor jobs",
+        "type": "reports:monitor",
       }
     `);
   });
 
   it('Instance start', () => {
     const mockTaskManager = taskManagerMock.createStart();
-    const task = new ExecuteReportTask(mockReporting, configType, logger);
+    const task = new MonitorReportsTask(mockReporting, configType, logger);
     expect(task.init(mockTaskManager));
     expect(task.getStatus()).toBe('initialized');
   });
@@ -54,7 +53,7 @@ describe('Execute Report Task', () => {
     logger.info = jest.fn();
     logger.error = jest.fn();
 
-    const task = new ExecuteReportTask(mockReporting, configType, logger);
+    const task = new MonitorReportsTask(mockReporting, configType, logger);
     const taskDef = task.getTaskDefinition();
     const taskRunner = taskDef.createTaskRunner(({
       taskInstance: {
@@ -64,24 +63,5 @@ describe('Execute Report Task', () => {
     } as unknown) as RunContext);
     expect(taskRunner).toHaveProperty('run');
     expect(taskRunner).toHaveProperty('cancel');
-  });
-
-  it('Max Concurrency is 0 if pollEnabled is false', () => {
-    const queueConfig = ({
-      queue: { pollEnabled: false, timeout: 55000 },
-    } as unknown) as ReportingConfigType['queue'];
-
-    const task = new ExecuteReportTask(mockReporting, { ...configType, ...queueConfig }, logger);
-    expect(task.getStatus()).toBe('uninitialized');
-    expect(task.getTaskDefinition()).toMatchInlineSnapshot(`
-      Object {
-        "createTaskRunner": [Function],
-        "maxAttempts": 1,
-        "maxConcurrency": 0,
-        "timeout": "55s",
-        "title": "Reporting: execute job",
-        "type": "report:execute",
-      }
-    `);
   });
 });
