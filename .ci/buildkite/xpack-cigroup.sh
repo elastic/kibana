@@ -121,8 +121,7 @@ export JOB=kibana-default-ciGroup${CI_GROUP}
 
 cd "$XPACK_DIR"
 
-checks-reporter-with-killswitch "Default Distro Chrome Functional tests / Group ${CI_GROUP}" \
-  node scripts/functional_tests \
-    --debug --bail \
-    --kibana-install-dir "$KIBANA_INSTALL_DIR" \
-    --include-tag "ciGroup$CI_GROUP"
+node scripts/functional_tests \
+  --debug --bail \
+  --kibana-install-dir "$KIBANA_INSTALL_DIR" \
+  --include-tag "ciGroup$CI_GROUP"
