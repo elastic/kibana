@@ -9,5 +9,5 @@
 // Make sure the charts tooltip in popover
 // have higher zIndex than Eui popover cells
 [id^='echTooltipPortal'] {
-  z-index: 10000 !important;
+  z-index: $euiZLevel9 !important;
 }
