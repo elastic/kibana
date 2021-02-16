@@ -88,12 +88,23 @@ There is currently no way to unambiguously identify the user. WIP [#82725](https
 - `icon?: { euiIconType: string }` - icon on the left side of the title.
 Compatible with all the types supported by euiIcon type: a predefined EUI icon name, URL to SVG file, data URL for SVG file.
 - `severity?: 'normal' | 'high' | 'critical'` -  type of severity. Used in UI only. Shows as a text after the `source_type` following the format "Alert: Critical".
-- `message: { i18n_key: string, values: object } | { text: string }` - a notification message is subject to i18n. 
+- `message: TranslatedContent` - a notification message is subject to i18n. 
 Locale might be changed on the Space level (on the User level in the future).
 Thus, we cannot determine a message locale during notification creation.
 Considering that Kibana notifications might be rendered outside of Kibana UI (in Cloud UI, for example), the message must contain translations for all the supported locales.
-- `title: { i18n_key: string, values: object, url?: string } | { text: string, url?: string }` - notification header.
-- `action: { i18n_key: string, values: object, url: string } | { text: string, url: string }` - notification CTA
+- `title: TranslatedContent & { url?: string }` - notification header.
+- `action: TranslatedContent & { url: string }` - notification CTA
+
+```typescript
+import type { TranslateArguments } from '@kbn/i18n';
+
+interface TranslatedContent {
+  translations: {
+    [locale: string]: string;
+  }
+  arguments: TranslateArguments;
+}
+```
 
 ### Sourcing
 Source is a program entity creating a notification event.
