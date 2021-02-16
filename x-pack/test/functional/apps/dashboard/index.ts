@@ -18,5 +18,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./sync_colors'));
     loadTestFile(require.resolve('./_async_dashboard'));
     loadTestFile(require.resolve('./dashboard_lens_by_value'));
+    loadTestFile(require.resolve('./dashboard_maps_by_value'));
   });
 }

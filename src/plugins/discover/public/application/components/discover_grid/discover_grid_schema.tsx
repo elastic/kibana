@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import React, { ReactNode } from 'react';
-import { EuiCodeBlock } from '@elastic/eui';
-import { geoPoint, kibanaJSON, unknownType } from './constants';
+import React from 'react';
+import { EuiCodeBlock, EuiDataGridPopoverContents } from '@elastic/eui';
+import { geoPoint, kibanaJSON } from './constants';
 import { KBN_FIELD_TYPES } from '../../../../../data/common';
 
 export function getSchemaByKbnType(kbnType: string | undefined) {
@@ -24,12 +24,10 @@ export function getSchemaByKbnType(kbnType: string | undefined) {
       return 'string';
     case KBN_FIELD_TYPES.DATE:
       return 'datetime';
-    case KBN_FIELD_TYPES._SOURCE:
-      return kibanaJSON;
     case KBN_FIELD_TYPES.GEO_POINT:
       return geoPoint;
     default:
-      return unknownType;
+      return kibanaJSON;
   }
 }
 
@@ -37,16 +35,6 @@ export function getSchemaDetectors() {
   return [
     {
       type: kibanaJSON,
-      detector() {
-        return 0; // this schema is always explicitly defined
-      },
-      sortTextAsc: '',
-      sortTextDesc: '',
-      icon: '',
-      color: '',
-    },
-    {
-      type: unknownType,
       detector() {
         return 0; // this schema is always explicitly defined
       },
@@ -70,19 +58,12 @@ export function getSchemaDetectors() {
 /**
  * Returns custom popover content for certain schemas
  */
-export function getPopoverContents() {
+export function getPopoverContents(): EuiDataGridPopoverContents {
   return {
-    [geoPoint]: ({ children }: { children: ReactNode }) => {
+    [geoPoint]: ({ children }) => {
       return <span className="geo-point">{children}</span>;
     },
-    [unknownType]: ({ children }: { children: ReactNode }) => {
-      return (
-        <EuiCodeBlock isCopyable language="json" paddingSize="none" transparentBackground={true}>
-          {children}
-        </EuiCodeBlock>
-      );
-    },
-    [kibanaJSON]: ({ children }: { children: ReactNode }) => {
+    [kibanaJSON]: ({ children }) => {
       return (
         <EuiCodeBlock isCopyable language="json" paddingSize="none" transparentBackground={true}>
           {children}

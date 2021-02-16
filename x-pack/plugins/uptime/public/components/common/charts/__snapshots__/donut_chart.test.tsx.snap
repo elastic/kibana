@@ -39,6 +39,7 @@ exports[`DonutChart component passes correct props without errors for valid prop
               "fill": "white",
               "opacity": 1,
               "radius": 2,
+              "shape": "circle",
               "strokeWidth": 1,
               "visible": false,
             },
@@ -134,6 +135,7 @@ exports[`DonutChart component passes correct props without errors for valid prop
               "fill": "white",
               "opacity": 1,
               "radius": 2,
+              "shape": "circle",
               "strokeWidth": 1,
               "visible": true,
             },
@@ -170,12 +172,17 @@ exports[`DonutChart component passes correct props without errors for valid prop
               "fill": "#F5F5F5",
               "visible": true,
             },
-            "line": Object {
+            "crossLine": Object {
               "dash": Array [
                 5,
                 5,
               ],
-              "stroke": "#777",
+              "stroke": "#98A2B3",
+              "strokeWidth": 1,
+              "visible": true,
+            },
+            "line": Object {
+              "stroke": "#98A2B3",
               "strokeWidth": 1,
               "visible": true,
             },
@@ -196,6 +203,7 @@ exports[`DonutChart component passes correct props without errors for valid prop
               "fill": "white",
               "opacity": 1,
               "radius": 2,
+              "shape": "circle",
               "strokeWidth": 1,
               "visible": true,
             },
