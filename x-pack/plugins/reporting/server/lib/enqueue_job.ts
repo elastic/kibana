@@ -24,6 +24,7 @@ export function enqueueJobFactory(
   reporting: ReportingCore,
   parentLogger: LevelLogger
 ): EnqueueJobFn {
+  const logger = parentLogger.clone(['createJob']);
   return async function enqueueJob(
     exportTypeId: string,
     jobParams: BaseParams,
@@ -31,7 +32,6 @@ export function enqueueJobFactory(
     context: ReportingRequestHandlerContext,
     request: KibanaRequest
   ) {
-    const logger = parentLogger.clone(['create-job']);
     const exportType = reporting.getExportTypesRegistry().getById(exportTypeId);
 
     if (exportType == null) {
@@ -39,7 +39,7 @@ export function enqueueJobFactory(
     }
 
     const [createJob, store] = await Promise.all([
-      exportType.createJobFnFactory(reporting, logger),
+      exportType.createJobFnFactory(reporting, logger.clone([exportType.id])),
       reporting.getStore(),
     ]);
 

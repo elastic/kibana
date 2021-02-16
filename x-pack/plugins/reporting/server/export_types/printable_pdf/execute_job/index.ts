@@ -8,7 +8,6 @@
 import apm from 'elastic-apm-node';
 import * as Rx from 'rxjs';
 import { catchError, map, mergeMap, takeUntil } from 'rxjs/operators';
-import { PDF_JOB_TYPE } from '../../../../common/constants';
 import { TaskRunResult } from '../../../lib/tasks';
 import { RunTaskFn, RunTaskFnFactory } from '../../../types';
 import {
@@ -34,7 +33,7 @@ export const runTaskFnFactory: RunTaskFnFactory<
 
     const generatePdfObservable = await generatePdfObservableFactory(reporting);
 
-    const logger = parentLogger.clone([PDF_JOB_TYPE, jobId]);
+    const logger = parentLogger.clone([jobId]);
     const process$: Rx.Observable<TaskRunResult> = Rx.of(1).pipe(
       mergeMap(() => decryptJobHeaders(encryptionKey, job.headers, logger)),
       map((decryptedHeaders) => omitBlockedHeaders(decryptedHeaders)),
@@ -50,7 +49,7 @@ export const runTaskFnFactory: RunTaskFnFactory<
 
         apmGeneratePdf = apmTrans?.startSpan('generate_pdf_pipeline', 'execute');
         return generatePdfObservable(
-          jobLogger,
+          logger,
           title,
           urls,
           browserTimezone,
@@ -74,7 +73,7 @@ export const runTaskFnFactory: RunTaskFnFactory<
         };
       }),
       catchError((err) => {
-        jobLogger.error(err);
+        logger.error(err);
         return Rx.throwError(err);
       })
     );

@@ -53,7 +53,7 @@ export class ExecuteReportTask implements ReportingTask {
     private config: ReportingConfigType,
     logger: LevelLogger
   ) {
-    this.logger = logger.clone(['run-task']);
+    this.logger = logger.clone(['runTask']);
   }
 
   /*
@@ -67,7 +67,8 @@ export class ExecuteReportTask implements ReportingTask {
     const exportTypesRegistry = reporting.getExportTypesRegistry();
     const executors = new Map<string, RunTaskFn<BasePayload>>();
     for (const exportType of exportTypesRegistry.getAll()) {
-      const jobExecutor = exportType.runTaskFnFactory(reporting, this.logger);
+      const jobLogger = this.logger.clone([exportType.id]);
+      const jobExecutor = exportType.runTaskFnFactory(reporting, jobLogger);
       // The task will run the function with the job type as a param.
       // This allows us to retrieve the specific export type runFn when called to run an export
       executors.set(exportType.jobType, jobExecutor);
