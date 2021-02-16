@@ -50,7 +50,7 @@ describe('throwOnInvalidAccessToken', () => {
             'x-accepted-oauth-scopes': 'a,b,c',
           },
           data: {
-            errors: [{ type: 'NOT_FOUND' }],
+            errors: [{ type: 'NOT_FOUND', path: ['repository'] }],
           },
         },
       } as any;
@@ -73,7 +73,7 @@ describe('throwOnInvalidAccessToken', () => {
             'x-accepted-oauth-scopes': 'a,b,c',
           },
           data: {
-            errors: [{ type: 'NOT_FOUND' }],
+            errors: [{ type: 'NOT_FOUND', path: ['repository'] }],
           },
         },
       } as any;

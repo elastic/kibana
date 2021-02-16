@@ -51,7 +51,9 @@ export async function getOptionsFromGithub(
     spinner.stop();
   } catch (e) {
     spinner.stop();
-    const error = e as AxiosError<GithubV4Response<null>>;
+    const error = e as AxiosError<
+      GithubV4Response<GithubConfigOptionsResponse | null>
+    >;
 
     throwOnInvalidAccessToken({
       error,
@@ -59,7 +61,20 @@ export async function getOptionsFromGithub(
       repoOwner,
     });
 
-    throw handleGithubV4Error(error);
+    const configFileNotFound = error.response?.data.errors?.some(
+      (error) =>
+        error.type === 'NOT_FOUND' &&
+        error.path.join('.') ===
+          'repository.defaultBranchRef.target.jsonConfigFile.edges.0.config.file'
+    );
+
+    if (configFileNotFound && error.response?.data.data) {
+      // swallow error if caused by missing config file on Github
+      res = error.response.data.data;
+    } else {
+      // throw generic Github error
+      throw handleGithubV4Error(error);
+    }
   }
 
   // get the original repo (not the fork)

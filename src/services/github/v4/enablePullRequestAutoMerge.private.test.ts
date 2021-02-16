@@ -11,6 +11,8 @@ const TEST_REPO_OWNER = 'backport-org';
 const TEST_REPO_NAME = 'repo-with-auto-merge-enabled';
 const TEST_PULL_NUMBER = 1;
 
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
 let options: ValidConfigOptions;
 
 describe('enablePullRequestAutoMerge', () => {
@@ -35,6 +37,10 @@ describe('enablePullRequestAutoMerge', () => {
       { ...options, autoMergeMethod: 'merge' },
       TEST_PULL_NUMBER
     );
+
+    // ensure Github API reflects the change before querying
+    await sleep(100);
+
     const autoMergeMethod = await fetchPullRequestAutoMergeMethod(
       options,
       TEST_PULL_NUMBER
@@ -47,6 +53,10 @@ describe('enablePullRequestAutoMerge', () => {
       { ...options, autoMergeMethod: 'rebase' },
       TEST_PULL_NUMBER
     );
+
+    // ensure Github API reflects the change before querying
+    await sleep(100);
+
     const autoMergeMethod = await fetchPullRequestAutoMergeMethod(
       options,
       TEST_PULL_NUMBER
@@ -59,6 +69,10 @@ describe('enablePullRequestAutoMerge', () => {
       { ...options, autoMergeMethod: 'squash' },
       TEST_PULL_NUMBER
     );
+
+    // ensure Github API reflects the change before querying
+    await sleep(100);
+
     const autoMergeMethod = await fetchPullRequestAutoMergeMethod(
       options,
       TEST_PULL_NUMBER

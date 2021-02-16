@@ -142,4 +142,23 @@ describe('getOptionsFromGithub', () => {
       });
     });
   });
+
+  describe('when a backportrc.json config was deleted from repo', () => {
+    it('does not throw', async () => {
+      const optionsFromConfigFiles = {
+        username: 'sqren',
+        accessToken: devAccessToken,
+        githubApiBaseUrlV4: 'https://api.github.com/graphql',
+        upstream: 'backport-org/repo-with-backportrc-removed',
+      } as OptionsFromConfigFiles;
+      const optionsFromCliArgs = {} as OptionsFromCliArgs;
+
+      const options = await getOptionsFromGithub(
+        optionsFromConfigFiles,
+        optionsFromCliArgs
+      );
+
+      expect(options).toEqual({ sourceBranch: 'main' });
+    });
+  });
 });

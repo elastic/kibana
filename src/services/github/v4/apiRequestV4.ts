@@ -1,5 +1,4 @@
-import axios from 'axios';
-import { AxiosError } from 'axios';
+import axios, { AxiosError } from 'axios';
 import { HandledError } from '../../HandledError';
 import { logger } from '../../logger';
 
@@ -71,15 +70,17 @@ export async function apiRequestV4<DataResponse>({
   }
 }
 
-export function handleGithubV4Error(e: AxiosError<GithubV4Response<null>>) {
-  // not github api error
+export function handleGithubV4Error(e: AxiosError<GithubV4Response<unknown>>) {
+  // re-throw unknown error
   if (!e.response?.data) {
     return e;
   }
 
   const errorMessages = e.response.data.errors?.map((error) => error.message);
   if (errorMessages) {
-    return new HandledError(`${errorMessages.join(', ')} (Github v4)`);
+    return new HandledError(
+      `${errorMessages.join(', ')} (Unhandled Github v4 error)`
+    );
   }
 
   return new HandledError(

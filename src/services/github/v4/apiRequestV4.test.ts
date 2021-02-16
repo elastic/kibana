@@ -62,7 +62,9 @@ describe('apiRequestV4', () => {
           },
         })
       ).rejects.toThrowError(
-        new HandledError(`some error, some other error (Github v4)`)
+        new HandledError(
+          `some error, some other error (Unhandled Github v4 error)`
+        )
       );
     });
   });

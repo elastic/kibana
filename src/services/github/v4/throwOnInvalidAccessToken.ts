@@ -12,7 +12,7 @@ export function throwOnInvalidAccessToken({
 }: {
   repoOwner: string;
   repoName: string;
-  error: AxiosError<GithubV4Response<null>>;
+  error: AxiosError<GithubV4Response<unknown>>;
 }) {
   type MaybeString = string | undefined;
 
@@ -28,7 +28,8 @@ export function throwOnInvalidAccessToken({
   switch (statusCode) {
     case 200: {
       const repoNotFound = error.response?.data.errors?.some(
-        (error) => error.type === 'NOT_FOUND'
+        (error) =>
+          error.type === 'NOT_FOUND' && error.path.join('.') === 'repository'
       );
 
       const grantedScopes = error.response?.headers['x-oauth-scopes'] || '';

@@ -61,7 +61,7 @@ describe('fetchCommitByPullNumber', () => {
       } as ValidConfigOptions & { pullNumber: number };
 
       await expect(fetchCommitByPullNumber(options)).rejects.toThrowError(
-        `Could not resolve to a PullRequest with the number of 9999999999999. (Github v4)`
+        `Could not resolve to a PullRequest with the number of 9999999999999. (Unhandled Github v4 error)`
       );
     });
   });
