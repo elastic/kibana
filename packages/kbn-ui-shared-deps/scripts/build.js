@@ -9,7 +9,7 @@
 const Path = require('path');
 const Fs = require('fs');
 
-const { run, createFailError, CiStatsReporter } = require('@kbn/dev-utils');
+const { run, createFailError } = require('@kbn/dev-utils');
 const webpack = require('webpack');
 const Stats = require('webpack/lib/Stats');
 const del = require('del');
@@ -35,8 +35,6 @@ run(
 
       if (!stats.hasErrors() && !stats.hasWarnings()) {
         if (!flags.dev) {
-          const reporter = CiStatsReporter.fromEnv(log);
-
           const metrics = [
             {
               group: '@kbn/ui-shared-deps asset size',
@@ -57,9 +55,9 @@ run(
             },
           ];
 
-          log.debug('metrics:', metrics);
-
-          await reporter.metrics(metrics);
+          const metricsPath = Path.resolve(DIST_DIR, 'metrics.json');
+          Fs.writeFileSync(metricsPath, JSON.stringify(metrics, null, 2));
+          log.info('wrote metrics to', metricsPath);
         }
 
         log.success(`webpack completed in about ${took} seconds`);
@@ -101,6 +99,7 @@ run(
       return;
     }
 
+    log.info('running webpack');
     await onCompilationComplete(
       await new Promise((resolve, reject) => {
         compiler.run((error, stats) => {
