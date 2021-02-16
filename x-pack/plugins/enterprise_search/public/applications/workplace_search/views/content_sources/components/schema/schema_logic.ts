@@ -8,6 +8,8 @@
 import { kea, MakeLogicType } from 'kea';
 import { cloneDeep, isEqual } from 'lodash';
 
+import { i18n } from '@kbn/i18n';
+
 import { TEXT } from '../../../../../shared/constants/field_types';
 import { ADD, UPDATE } from '../../../../../shared/constants/operations';
 import {
@@ -300,9 +302,22 @@ export const SchemaLogic = kea<MakeLogicType<SchemaValues, SchemaActions>>({
       }
     },
     addNewField: ({ fieldName, newFieldType }) => {
-      const schema = cloneDeep(values.activeSchema);
-      schema[fieldName] = newFieldType;
-      actions.setServerField(schema, ADD);
+      if (fieldName in values.activeSchema) {
+        window.scrollTo(0, 0);
+        setErrorMessage(
+          i18n.translate(
+            'xpack.enterpriseSearch.workplaceSearch.contentSource.schema.newFieldExists.message',
+            {
+              defaultMessage: 'New field already exists: {fieldName}.',
+              values: { fieldName },
+            }
+          )
+        );
+      } else {
+        const schema = cloneDeep(values.activeSchema);
+        schema[fieldName] = newFieldType;
+        actions.setServerField(schema, ADD);
+      }
     },
     updateExistingFieldType: ({ fieldName, newFieldType }) => {
       const schema = cloneDeep(values.activeSchema);
