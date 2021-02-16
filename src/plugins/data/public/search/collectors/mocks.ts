@@ -13,7 +13,7 @@ export function createSearchUsageCollectorMock(): jest.Mocked<SearchUsageCollect
     trackQueryTimedOut: jest.fn(),
     trackSessionIndicatorTourLoading: jest.fn(),
     trackSessionIndicatorTourRestored: jest.fn(),
-    trackSessionIndicatorTourDisabled: jest.fn(),
+    trackSessionIndicatorSaveDisabled: jest.fn(),
     trackSessionSentToBackground: jest.fn(),
     trackSessionSavedResults: jest.fn(),
     trackSessionViewRestored: jest.fn(),

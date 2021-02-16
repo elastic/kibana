@@ -2466,7 +2466,7 @@ export interface SearchUsageCollector {
     // (undocumented)
     trackSessionExtended: () => Promise<void>;
     // (undocumented)
-    trackSessionIndicatorTourDisabled: () => Promise<void>;
+    trackSessionIndicatorSaveDisabled: () => Promise<void>;
     // (undocumented)
     trackSessionIndicatorTourLoading: () => Promise<void>;
     // (undocumented)
