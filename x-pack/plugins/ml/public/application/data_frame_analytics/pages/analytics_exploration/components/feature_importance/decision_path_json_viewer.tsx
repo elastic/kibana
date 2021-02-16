@@ -7,7 +7,7 @@
 
 import React, { FC } from 'react';
 import { EuiCodeBlock } from '@elastic/eui';
-import { FeatureImportance } from '../../../../../common/types/feature_importance';
+import type { FeatureImportance } from '../../../../../../../common/types/feature_importance';
 
 interface DecisionPathJSONViewerProps {
   featureImportance: FeatureImportance[];

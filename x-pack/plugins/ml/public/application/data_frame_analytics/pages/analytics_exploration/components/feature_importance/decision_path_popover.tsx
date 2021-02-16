@@ -16,11 +16,11 @@ import {
   isClassificationFeatureImportanceBaseline,
   isRegressionFeatureImportanceBaseline,
   TopClasses,
-} from '../../../../../common/types/feature_importance';
-import { ANALYSIS_CONFIG_TYPE } from '../../../data_frame_analytics/common';
+} from '../../../../../../../common/types/feature_importance';
+import { ANALYSIS_CONFIG_TYPE } from '../../../../common';
 import { ClassificationDecisionPath } from './decision_path_classification';
-import { useMlKibana } from '../../../contexts/kibana';
-import { DataFrameAnalysisConfigType } from '../../../../../common/types/data_frame_analytics';
+import { useMlKibana } from '../../../../../contexts/kibana';
+import type { DataFrameAnalysisConfigType } from '../../../../../../../common/types/data_frame_analytics';
 import { getStringBasedClassName } from './use_classification_path_data';
 
 interface DecisionPathPopoverProps {
