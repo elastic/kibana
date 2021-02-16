@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { safeDump, safeLoad } from 'js-yaml';
 import { compileTemplate } from './agent';
 
 describe('compileTemplate', () => {
