@@ -487,17 +487,24 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
     }
 
     async addRuntimeField(name: string, type: string, script: string) {
+      // eslint-disable-next-line
+      console.log('addRuntimeField');
       await this.clickAddField();
       await this.setFieldName(name);
       await this.setFieldType(type);
+      // eslint-disable-next-line
+      console.log('set script');
       if (script) {
         await this.setFieldScript(script);
       }
-      log.error('clicking save field');
+      // eslint-disable-next-line
+      console.log('clicking save field');
       await this.clickSaveField();
-      log.error('save field clicked');
+      // eslint-disable-next-line
+      console.log('save field clicked');
       await new Promise((resolve) => setTimeout(resolve, 1000 * 30));
-      log.error('30s timeout passed');
+      // eslint-disable-next-line
+      console.log('30s timeout passed');
     }
 
     async clickAddField() {
@@ -523,9 +530,16 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
     async setFieldScript(script: string) {
       log.debug('set script = ' + script);
       await (await testSubjects.findAll('formRowToggle'))[1].click();
-      await new Promise((resolve) => setTimeout(resolve, 1000 * 5 * 60));
+      await new Promise((resolve) => setTimeout(resolve, 1000 * 5));
       // await (await testSubjects.find('valueRowToggle')).click();
-      await new Promise((resolve) => setTimeout(resolve, 1000 * 5 * 60));
+      // await new Promise((resolve) => setTimeout(resolve, 1000 * 5 * 60));
+
+      /*
+      await retry.waitFor('script editor to be visible', async () => {
+        return await find.existsByCssSelector('.monaco-editor');
+      });
+      */
+
       await browser.pressKeys(browser.keys.TAB);
       await new Promise((resolve) => setTimeout(resolve, 1000 * 5));
       browser.pressKeys(script);
