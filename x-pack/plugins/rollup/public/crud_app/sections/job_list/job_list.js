@@ -73,7 +73,10 @@ export class JobListUi extends Component {
   }
 
   componentDidMount() {
-    this.interval = setInterval(this.props.refreshJobs, REFRESH_RATE_MS);
+    this.interval = setInterval(
+      () => this.props.refreshJobs({ asSystemRequest: true }),
+      REFRESH_RATE_MS
+    );
   }
 
   componentWillUnmount() {
