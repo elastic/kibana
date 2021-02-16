@@ -34,6 +34,7 @@ export const POLICY_STATUS_TO_BADGE_COLOR = Object.freeze<
   success: 'secondary',
   warning: 'warning',
   failure: 'danger',
+  unsupported: 'default',
 });
 
 export const POLICY_STATUS_TO_TEXT = Object.freeze<
