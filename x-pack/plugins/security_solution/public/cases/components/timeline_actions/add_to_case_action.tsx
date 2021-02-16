@@ -63,19 +63,19 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
 
   const attachAlertToCase = useCallback(
     (theCase: Case) => {
-      postComment(
-        theCase.id,
-        {
+      postComment({
+        caseId: theCase.id,
+        data: {
           type: CommentType.alert,
           alertId: eventId,
           index: eventIndex ?? '',
         },
-        () =>
+        updateCase: () =>
           dispatchToaster({
             type: 'addToaster',
             toast: createUpdateSuccessToaster(theCase, onViewCaseClick),
-          })
-      );
+          }),
+      });
     },
     [postComment, eventId, eventIndex, dispatchToaster, onViewCaseClick]
   );

@@ -120,11 +120,13 @@ export const useUpdateCase = ({
         }
       } catch (error) {
         if (!didCancel.current) {
-          errorToToaster({
-            title: i18n.ERROR_TITLE,
-            error: error.body && error.body.message ? new Error(error.body.message) : error,
-            dispatchToaster,
-          });
+          if (error.name !== 'AbortError') {
+            errorToToaster({
+              title: i18n.ERROR_TITLE,
+              error: error.body && error.body.message ? new Error(error.body.message) : error,
+              dispatchToaster,
+            });
+          }
           dispatch({ type: 'FETCH_FAILURE' });
           if (onError) {
             onError();
@@ -132,7 +134,8 @@ export const useUpdateCase = ({
         }
       }
     },
-    [caseId, dispatch, dispatchToaster, subCaseId]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [caseId, subCaseId]
   );
 
   useEffect(() => {
@@ -140,7 +143,7 @@ export const useUpdateCase = ({
       didCancel.current = true;
       abortCtrl.current.abort();
     };
-  });
+  }, []);
 
   return { ...state, updateCaseProperty: dispatchUpdateCaseProperty };
 };
