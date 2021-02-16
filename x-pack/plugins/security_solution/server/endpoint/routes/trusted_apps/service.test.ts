@@ -17,6 +17,7 @@ import { createConditionEntry, createEntryMatch } from './mapping';
 import {
   createTrustedApp,
   deleteTrustedApp,
+  getTrustedApp,
   getTrustedAppsList,
   getTrustedAppsSummary,
   updateTrustedApp,
@@ -253,6 +254,20 @@ describe('service', () => {
       await expect(
         updateTrustedApp(exceptionsListClient, TRUSTED_APP.id, toUpdateTrustedApp(TRUSTED_APP))
       ).rejects.toBeInstanceOf(TrustedAppNotFoundError);
+    });
+  });
+
+  describe('getTrustedApp', () => {
+    it('should return a single trusted app', async () => {
+      exceptionsListClient.getExceptionListItem.mockResolvedValue(EXCEPTION_LIST_ITEM);
+      expect(await getTrustedApp(exceptionsListClient, '123')).toEqual({ data: TRUSTED_APP });
+    });
+
+    it('should return Trusted App Not Found Error if it does not exist', async () => {
+      exceptionsListClient.getExceptionListItem.mockResolvedValue(null);
+      await expect(getTrustedApp(exceptionsListClient, '123')).rejects.toBeInstanceOf(
+        TrustedAppNotFoundError
+      );
     });
   });
 });

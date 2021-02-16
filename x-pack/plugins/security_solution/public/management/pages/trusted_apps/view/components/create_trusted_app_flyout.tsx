@@ -22,10 +22,14 @@ import React, { memo, useCallback, useEffect, useMemo } from 'react';
 import { EuiFlyoutProps } from '@elastic/eui/src/components/flyout/flyout';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { useDispatch } from 'react-redux';
+import { useHistory } from 'react-router-dom';
+import { i18n } from '@kbn/i18n';
 import { CreateTrustedAppForm, CreateTrustedAppFormProps } from './create_trusted_app_form';
 import {
+  editTrustedAppFetchError,
   getCreationDialogFormEntry,
   getCreationError,
+  getCurrentLocation,
   isCreationDialogFormValid,
   isCreationInProgress,
   isCreationSuccessful,
@@ -37,11 +41,15 @@ import { AppAction } from '../../../../../common/store/actions';
 import { useTrustedAppsSelector } from '../hooks';
 import { ABOUT_TRUSTED_APPS } from '../translations';
 import { defaultNewTrustedApp } from '../../store/builders';
+import { getTrustedAppsListPath } from '../../../../common/routing';
+import { useToasts } from '../../../../../common/lib/kibana';
 
 type CreateTrustedAppFlyoutProps = Omit<EuiFlyoutProps, 'hideCloseButton'>;
 export const CreateTrustedAppFlyout = memo<CreateTrustedAppFlyoutProps>(
   ({ onClose, ...flyoutProps }) => {
     const dispatch = useDispatch<(action: AppAction) => void>();
+    const history = useHistory();
+    const toasts = useToasts();
 
     const creationInProgress = useTrustedAppsSelector(isCreationInProgress);
     const creationErrors = useTrustedAppsSelector(getCreationError);
@@ -50,7 +58,9 @@ export const CreateTrustedAppFlyout = memo<CreateTrustedAppFlyoutProps>(
     const isLoadingPolicies = useTrustedAppsSelector(loadingPolicies);
     const policyList = useTrustedAppsSelector(listOfPolicies);
     const isEditMode = useTrustedAppsSelector(isEdit);
+    const trustedAppFetchError = useTrustedAppsSelector(editTrustedAppFetchError);
     const formValues = useTrustedAppsSelector(getCreationDialogFormEntry) || defaultNewTrustedApp();
+    const location = useTrustedAppsSelector(getCurrentLocation);
 
     const dataTestSubj = flyoutProps['data-test-subj'];
 
@@ -92,6 +102,33 @@ export const CreateTrustedAppFlyout = memo<CreateTrustedAppFlyoutProps>(
       },
       [dispatch]
     );
+
+    // If there was a failure trying to retrieve the Trusted App for edit item,
+    // then redirect back to the list ++ show toast message.
+    useEffect(() => {
+      if (trustedAppFetchError) {
+        // Replace the current URL route so that user does not keep hitting this page via browser back/fwd buttons
+        history.replace(
+          getTrustedAppsListPath({
+            ...location,
+            show: undefined,
+            id: undefined,
+          })
+        );
+
+        toasts.addWarning(
+          i18n.translate(
+            'xpack.securitySolution.trustedapps.createTrustedAppFlyout.notFoundToastMessage',
+            {
+              defaultMessage: 'Unable to edit trusted application ({apiMsg})',
+              values: {
+                apiMsg: trustedAppFetchError.message,
+              },
+            }
+          )
+        );
+      }
+    }, [history, location, toasts, trustedAppFetchError]);
 
     // If it was created, then close flyout
     useEffect(() => {
