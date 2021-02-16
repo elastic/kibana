@@ -746,7 +746,7 @@ elastic_apm.service_name="My service"
       defaultMessage:
         'See the [documentation]({documentationLink}) for configuration options and advanced usage.\n\n',
       values: {
-        documentationLink: '{config.docs.base_url}guide/en/apm/agent/php/current/index.html',
+        documentationLink: '{config.docs.base_url}guide/en/apm/agent/php/current/configuration.html',
       },
     }),
   },
