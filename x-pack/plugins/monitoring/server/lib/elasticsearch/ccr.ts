@@ -15,15 +15,8 @@ import { createQuery } from '../create_query';
 import { ElasticsearchResponse } from '../../../common/types/es';
 import { LegacyRequest } from '../../types';
 
-export function handleResponse(response: ElasticsearchResponse) {
-  const isEnabled = response.hits?.hits[0]?._source.stack_stats?.xpack?.ccr?.enabled ?? undefined;
-  const isAvailable =
-    response.hits?.hits[0]?._source.stack_stats?.xpack?.ccr?.available ?? undefined;
-  return isEnabled && isAvailable;
-}
-
-export async function checkCcrEnabled(req: LegacyRequest, esIndexPattern: string) {
-  checkParam(esIndexPattern, 'esIndexPattern in getNodes');
+async function checkCcrEnabledLegacy(req: LegacyRequest, esIndexPattern: string) {
+  checkParam(esIndexPattern, 'esIndexPattern in checkCcrEnabledLegacy');
 
   const start = moment.utc(req.payload.timeRange.min).valueOf();
   const end = moment.utc(req.payload.timeRange.max).valueOf();
@@ -50,5 +43,44 @@ export async function checkCcrEnabled(req: LegacyRequest, esIndexPattern: string
 
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
   const response = await callWithRequest(req, 'search', params);
-  return handleResponse(response);
+  const isEnabled = response.hits?.hits[0]?._source.stack_stats?.xpack?.ccr?.enabled ?? undefined;
+  const isAvailable =
+    response.hits?.hits[0]?._source.stack_stats?.xpack?.ccr?.available ?? undefined;
+  return isEnabled && isAvailable;
+}
+
+async function checkCcrEnabledMB(req: LegacyRequest, esIndexPattern: string) {
+  const start = moment.utc(req.payload.timeRange.min).valueOf();
+  const end = moment.utc(req.payload.timeRange.max).valueOf();
+
+  const clusterUuid = req.params.clusterUuid;
+  const metricFields = ElasticsearchMetric.getMetricFields();
+
+  const params = {
+    index: esIndexPattern,
+    size: 0,
+    ignoreUnavailable: true,
+    body: {
+      query: createQuery({
+        type: 'ccr',
+        start,
+        end,
+        clusterUuid,
+        metric: metricFields,
+      }),
+      sort: [{ timestamp: { order: 'desc', unmapped_type: 'long' } }],
+    },
+  };
+
+  const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
+  const response: ElasticsearchResponse = await callWithRequest(req, 'search', params);
+  return response.hits?.total?.value ?? 0 > 0;
+}
+
+export async function checkCcrEnabled(req: LegacyRequest, esIndexPattern: string) {
+  checkParam(esIndexPattern, 'esIndexPattern in checkCcrEnabled');
+  return (
+    (await checkCcrEnabledMB(req, esIndexPattern)) ||
+    (await checkCcrEnabledLegacy(req, esIndexPattern))
+  );
 }

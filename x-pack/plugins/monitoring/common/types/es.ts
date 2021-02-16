@@ -335,6 +335,19 @@ export interface ElasticsearchMetricbeatSource {
         forecasts_stats?: {};
       };
     };
+    ccr?: {
+      follower?: {
+        index?: string;
+        shard?: {
+          number?: number;
+        };
+        time_since_last_read?: {
+          ms?: number;
+        };
+      };
+
+      read_exceptions?: [];
+    };
     cluster?: {
       name?: string;
       id?: string;
