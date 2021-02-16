@@ -28,7 +28,10 @@ import { LatencyCorrelations } from './latency_correlations';
 import { ErrorCorrelations } from './error_correlations';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { createHref } from '../../shared/Links/url_helpers';
-import { useUiTracker } from '../../../../../observability/public';
+import {
+  METRIC_TYPE,
+  useTrackMetric,
+} from '../../../../../observability/public';
 import { isActivePlatinumLicense } from '../../../../common/license_check';
 import { useLicenseContext } from '../../../context/license/use_license_context';
 import { LicensePrompt } from '../../shared/LicensePrompt';
@@ -50,7 +53,6 @@ const errorRateTab = {
 const tabs = [latencyTab, errorRateTab];
 
 export function Correlations() {
-  const trackApmEvent = useUiTracker({ app: 'apm' });
   const { urlParams } = useUrlParams();
   const history = useHistory();
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
@@ -63,7 +65,6 @@ export function Correlations() {
       <EuiButton
         onClick={() => {
           setIsFlyoutVisible(true);
-          trackApmEvent({ metric: 'show_correlations_flyout' });
         }}
         iconType="visTagCloud"
       >
@@ -101,7 +102,7 @@ export function Correlations() {
               </EuiTitle>
             </EuiFlyoutHeader>
             <EuiFlyoutBody>
-              <CorrelationsLicenseCheck>
+              <CorrelationsMetricsLicenseCheck>
                 {urlParams.kuery ? (
                   <>
                     <EuiCallOut size="m">
@@ -143,7 +144,7 @@ export function Correlations() {
                 </EuiTabs>
                 <EuiSpacer />
                 <TabContent onClose={() => setIsFlyoutVisible(false)} />
-              </CorrelationsLicenseCheck>
+              </CorrelationsMetricsLicenseCheck>
             </EuiFlyoutBody>
           </EuiFlyout>
         </EuiPortal>
@@ -156,9 +157,24 @@ const CORRELATIONS_TITLE = i18n.translate('xpack.apm.correlations.title', {
   defaultMessage: 'Correlations',
 });
 
-function CorrelationsLicenseCheck({ children }: { children: React.ReactNode }) {
+function CorrelationsMetricsLicenseCheck({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const license = useLicenseContext();
   const hasActivePlatinumLicense = isActivePlatinumLicense(license);
+
+  const metric = {
+    app: 'apm' as const,
+    metric: hasActivePlatinumLicense
+      ? 'correlations_flyout_view'
+      : 'correlations_license_prompt',
+    metricType: METRIC_TYPE.COUNT as METRIC_TYPE.COUNT,
+  };
+  useTrackMetric(metric);
+  useTrackMetric({ ...metric, delay: 15000 });
+
   return (
     <>
       {hasActivePlatinumLicense ? (
