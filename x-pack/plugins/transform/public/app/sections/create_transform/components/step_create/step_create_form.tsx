@@ -48,6 +48,7 @@ import {
 } from '../../../../../../common/api_schemas/transforms';
 import type { RuntimeField } from '../../../../../../../../../src/plugins/data/common/index_patterns';
 import { isPopulatedObject } from '../../../../common/utils/object_utils';
+import { isLatestTransform } from '../../../../../../common/types/transform';
 
 export interface StepDetailsExposedState {
   created: boolean;
@@ -201,7 +202,9 @@ export const StepCreateForm: FC<StepCreateFormProps> = React.memo(
           {
             title: indexPatternName,
             timeFieldName,
-            ...(isPopulatedObject(runtimeMappings) ? { runtimeFieldMap: runtimeMappings } : {}),
+            ...(isPopulatedObject(runtimeMappings) && isLatestTransform(transformConfig)
+              ? { runtimeFieldMap: runtimeMappings }
+              : {}),
           },
           false,
           true
