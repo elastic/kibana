@@ -7,6 +7,7 @@
 
 import { Logger } from '@kbn/logging';
 import { isEmpty } from 'lodash';
+import { withApmSpan } from '../../../utils/with_apm_span';
 import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 import { getLegacyDataStatus } from './get_legacy_data_status';
 import { getServicesItems } from './get_services_items';
@@ -21,23 +22,25 @@ export async function getServices({
   searchAggregatedTransactions: boolean;
   logger: Logger;
 }) {
-  const [items, hasLegacyData] = await Promise.all([
-    getServicesItems({
-      setup,
-      searchAggregatedTransactions,
-      logger,
-    }),
-    getLegacyDataStatus(setup),
-  ]);
+  return withApmSpan('get_services', async () => {
+    const [items, hasLegacyData] = await Promise.all([
+      getServicesItems({
+        setup,
+        searchAggregatedTransactions,
+        logger,
+      }),
+      getLegacyDataStatus(setup),
+    ]);
 
-  const noDataInCurrentTimeRange = isEmpty(items);
-  const hasHistoricalData = noDataInCurrentTimeRange
-    ? await hasHistoricalAgentData(setup)
-    : true;
+    const noDataInCurrentTimeRange = isEmpty(items);
+    const hasHistoricalData = noDataInCurrentTimeRange
+      ? await hasHistoricalAgentData(setup)
+      : true;
 
-  return {
-    items,
-    hasHistoricalData,
-    hasLegacyData,
-  };
+    return {
+      items,
+      hasHistoricalData,
+      hasLegacyData,
+    };
+  });
 }
