@@ -58,7 +58,7 @@ Full documentation for this syntax is available as part of {es}
 {ref}/query-dsl-query-string-query.html#query-string-syntax[query string syntax].
 
 The main reason to use the Lucene query syntax in {kib} is for advanced
-Lucene features such as regular expressions or fuzzy term matching. However,
+Lucene features, such as regular expressions or fuzzy term matching. However,
 Lucene syntax is not able to search nested objects or scripted fields.
 
 To perform a free text search, simply enter a text string. For example, if
