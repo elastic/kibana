@@ -11,19 +11,24 @@ import { mount } from 'enzyme';
 import { TestProviders } from '../../../common/mock';
 import { useKibana } from '../../../common/lib/kibana';
 import { AlertCommentEvent } from './user_action_alert_comment_event';
+import { CommentType } from '../../../../../case/common/api';
+import { RuleEcs } from '../../../../common/ecs/rule';
 
 const props = {
   alert: {
     _id: 'alert-id-1',
     _index: 'alert-index-1',
     '@timestamp': '2021-01-07T13:58:31.487Z',
-    rule: {
-      id: 'rule-id-1',
-      name: 'Awesome rule',
-      from: '2021-01-07T13:58:31.487Z',
-      to: '2021-01-07T14:58:31.487Z',
+    signal: {
+      rule: ({
+        id: ['rule-id-1'],
+        name: ['Awesome rule'],
+        from: ['2021-01-07T13:58:31.487Z'],
+        to: ['2021-01-07T14:58:31.487Z'],
+      } as unknown) as RuleEcs,
     },
   },
+  commentType: CommentType.alert,
 };
 
 jest.mock('../../../common/lib/kibana');
@@ -54,7 +59,7 @@ describe('UserActionAvatar ', () => {
   it('does NOT render the link when the alert is undefined', async () => {
     const wrapper = mount(
       <TestProviders>
-        <AlertCommentEvent alert={undefined} />
+        <AlertCommentEvent alert={undefined} commentType={CommentType.alert} />
       </TestProviders>
     );
 

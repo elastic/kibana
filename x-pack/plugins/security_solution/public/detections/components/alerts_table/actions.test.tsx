@@ -414,7 +414,7 @@ describe('alert actions', () => {
         ...mockEcsDataWithAlert,
         timestamp: '2020-03-20T17:59:46.349Z',
       };
-      const result = determineToAndFrom({ ecsData: ecsDataMock });
+      const result = determineToAndFrom({ ecs: ecsDataMock });
 
       expect(result.from).toEqual('2020-03-20T17:54:46.349Z');
       expect(result.to).toEqual('2020-03-20T17:59:46.349Z');
@@ -424,7 +424,7 @@ describe('alert actions', () => {
       const { timestamp, ...ecsDataMock } = {
         ...mockEcsDataWithAlert,
       };
-      const result = determineToAndFrom({ ecsData: ecsDataMock });
+      const result = determineToAndFrom({ ecs: ecsDataMock });
 
       expect(result.from).toEqual('2020-03-01T17:54:46.349Z');
       expect(result.to).toEqual('2020-03-01T17:59:46.349Z');

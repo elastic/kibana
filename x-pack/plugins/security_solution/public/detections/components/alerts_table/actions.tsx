@@ -122,13 +122,13 @@ export const determineToAndFrom = ({ ecs }: { ecs: Ecs[] | Ecs }) => {
   const ecsData = ecs as Ecs;
   const ellapsedTimeRule = moment.duration(
     moment().diff(
-      dateMath.parse(ecsData.signal?.rule?.from != null ? ecsData.signal?.rule?.from[0] : 'now-0s')
+      dateMath.parse(ecsData?.signal?.rule?.from != null ? ecsData.signal?.rule?.from[0] : 'now-0s')
     )
   );
-  const from = moment(ecsData.timestamp ?? new Date())
+  const from = moment(ecsData?.timestamp ?? new Date())
     .subtract(ellapsedTimeRule)
     .toISOString();
-  const to = moment(ecsData.timestamp ?? new Date()).toISOString();
+  const to = moment(ecsData?.timestamp ?? new Date()).toISOString();
 
   return { to, from };
 };

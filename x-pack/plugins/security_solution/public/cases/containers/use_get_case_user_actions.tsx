@@ -251,11 +251,12 @@ export const useGetCaseUserActions = (
   const fetchCaseUserActions = useCallback(
     (thisCaseId: string, thisSubCaseId?: string) => {
       const fetchData = async () => {
-        setCaseUserActionsState({
-          ...caseUserActionsState,
-          isLoading: true,
-        });
         try {
+          setCaseUserActionsState({
+            ...caseUserActionsState,
+            isLoading: true,
+          });
+
           const response = await (thisSubCaseId
             ? getSubCaseUserActions(thisCaseId, thisSubCaseId, abortCtrl.current.signal)
             : getCaseUserActions(thisCaseId, abortCtrl.current.signal));
@@ -306,11 +307,12 @@ export const useGetCaseUserActions = (
     if (!isEmpty(caseId)) {
       fetchCaseUserActions(caseId, subCaseId);
     }
+
     return () => {
       didCancel.current = true;
       abortCtrl.current.abort();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [caseId, fetchCaseUserActions, subCaseId]);
+  }, [caseId, subCaseId]);
   return { ...caseUserActionsState, fetchCaseUserActions };
 };

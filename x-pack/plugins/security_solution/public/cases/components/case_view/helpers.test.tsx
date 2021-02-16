@@ -8,7 +8,7 @@
 import { AssociationType, CommentType } from '../../../../../case/common/api';
 import { Comment } from '../../containers/types';
 
-import { getRuleIdsFromComments, buildAlertsQuery } from './helpers';
+import { getAlertIdsFromComments, buildAlertsQuery } from './helpers';
 
 const comments: Comment[] = [
   {
@@ -42,9 +42,9 @@ const comments: Comment[] = [
 ];
 
 describe('Case view helpers', () => {
-  describe('getRuleIdsFromComments', () => {
+  describe('getAlertIdsFromComments', () => {
     it('it returns the rules ids from the comments', () => {
-      expect(getRuleIdsFromComments(comments)).toEqual(['alert-id-1', 'alert-id-2']);
+      expect(getAlertIdsFromComments(comments)).toEqual(['alert-id-1', 'alert-id-2']);
     });
   });
 
@@ -54,13 +54,13 @@ describe('Case view helpers', () => {
         query: {
           bool: {
             filter: {
-              bool: {
-                should: [{ match: { _id: 'alert-id-1' } }, { match: { _id: 'alert-id-2' } }],
-                minimum_should_match: 1,
+              ids: {
+                values: ['alert-id-1', 'alert-id-2'],
               },
             },
           },
         },
+        size: 10000,
       });
     });
   });
