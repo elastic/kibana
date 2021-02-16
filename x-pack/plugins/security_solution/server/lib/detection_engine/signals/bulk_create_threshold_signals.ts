@@ -147,7 +147,7 @@ const getTransformedHits = (
             threshold.cardinality_field != null
               ? [
                   {
-                    field: threshold.cardinality_field,
+                    field: Array.isArray(threshold.cardinality_field) ? threshold.cardinality_field[0] : threshold.cardinality_field,
                     value: bucket.cardinality_count!.value,
                   },
                 ]
