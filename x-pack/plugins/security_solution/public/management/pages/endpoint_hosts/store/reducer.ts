@@ -59,7 +59,6 @@ export const endpointListReducer: ImmutableReducer<EndpointState, AppAction> = (
       request_page_index: pageIndex,
       query_strategy_version: queryStrategyVersion,
       policy_info: policyVersionInfo,
-      host_status: hostStatus,
     } = action.payload;
     return {
       ...state,
@@ -69,7 +68,6 @@ export const endpointListReducer: ImmutableReducer<EndpointState, AppAction> = (
       pageIndex,
       queryStrategyVersion,
       policyVersionInfo,
-      hostStatus,
       loading: false,
       error: undefined,
     };

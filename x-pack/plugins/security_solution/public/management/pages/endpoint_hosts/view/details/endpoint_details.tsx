@@ -209,7 +209,7 @@ export const EndpointDetails = memo(
             defaultMessage: 'Policy Response',
           }),
           description: (
-            /** EuiBadge requires additional unnecessary props when the href prop is defined */
+            // https://github.com/elastic/eui/issues/4530
             // @ts-ignore
             <EuiBadge
               color={POLICY_STATUS_TO_BADGE_COLOR[policyStatus] || 'default'}

@@ -176,7 +176,6 @@ export interface HostResultList {
   query_strategy_version: MetadataQueryStrategyVersions;
   /* policy IDs and versions */
   policy_info?: HostInfo['policy_info'];
-  host_status?: HostStatus;
 }
 
 /**
