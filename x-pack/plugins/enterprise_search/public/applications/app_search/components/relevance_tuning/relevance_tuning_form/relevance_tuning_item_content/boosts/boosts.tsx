@@ -80,10 +80,6 @@ interface Props {
 export const Boosts: React.FC<Props> = ({ name, type, boosts = [] }) => {
   const { addBoost } = useActions(RelevanceTuningLogic);
 
-  const addBoostClick = (value: BoostType) => {
-    addBoost(name, value);
-  };
-
   const selectOptions = useMemo(
     () => BASE_OPTIONS.filter((option) => filterInvalidOptions(option.value as BoostType, type)),
     [type]
@@ -110,7 +106,7 @@ export const Boosts: React.FC<Props> = ({ name, type, boosts = [] }) => {
             itemClassName="boostSelectOption"
             valueOfSelected={'add-boost'}
             options={selectOptions}
-            onChange={(value) => addBoostClick(value as BoostType)}
+            onChange={(value) => addBoost(name, value as BoostType)}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
