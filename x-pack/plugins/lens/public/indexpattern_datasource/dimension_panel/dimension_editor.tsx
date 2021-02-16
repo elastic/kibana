@@ -423,7 +423,6 @@ export function DimensionEditor(props: DimensionEditorProps) {
                     layer: state.layers[layerId],
                     columnId,
                     indexPattern: currentIndexPattern,
-                    visualizationGroups: dimensionGroups,
                   })
                 );
               }}

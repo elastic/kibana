@@ -266,7 +266,6 @@ export function ReferenceEditor(props: ReferenceEditorProps) {
                         layer,
                         columnId,
                         indexPattern: currentIndexPattern,
-                        visualizationGroups: dimensionGroups,
                       })
                     );
                     return;
@@ -313,7 +312,6 @@ export function ReferenceEditor(props: ReferenceEditorProps) {
                     layer,
                     columnId,
                     indexPattern: currentIndexPattern,
-                    visualizationGroups: dimensionGroups,
                   })
                 );
               }}

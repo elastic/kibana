@@ -192,6 +192,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
       } as unknown) as DataPublicPluginStart,
       core: {} as CoreSetup,
       dimensionGroups: [],
+      groupId: 'a',
     };
 
     jest.clearAllMocks();

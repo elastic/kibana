@@ -158,12 +158,10 @@ export function getIndexPatternDatasource({
       return mergeLayer({
         state: prevState,
         layerId,
-        // TODO its uhly to pass in just an empty array
         newLayer: deleteColumn({
           layer: prevState.layers[layerId],
           columnId,
           indexPattern,
-          visualizationGroups: [],
         }),
       });
     },
