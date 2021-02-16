@@ -14,8 +14,6 @@ import { KueryBar } from './KueryBar';
 import { TimeComparison } from './time_comparison';
 import { useBreakPoints } from '../../hooks/use_break_points';
 import { Correlations } from '../app/correlations';
-import { enableCorrelations } from '../../../common/ui_settings_keys';
-import { useApmPluginContext } from '../../context/apm_plugin/use_apm_plugin_context';
 import { isActivePlatinumLicense } from '../../../common/license_check';
 import { useLicenseContext } from '../../context/license/use_license_context';
 
@@ -39,10 +37,8 @@ export function SearchBar({
   showTimeComparison = false,
   showCorrelations = false,
 }: Props) {
-  const { uiSettings } = useApmPluginContext().core;
   const license = useLicenseContext();
-  const hasCorrelationsAccess =
-    uiSettings.get(enableCorrelations) && isActivePlatinumLicense(license);
+  const hasActivePlatinumLicense = isActivePlatinumLicense(license);
 
   const { isMedium, isLarge } = useBreakPoints();
   const itemsStyle = { marginBottom: isLarge ? px(unit) : 0 };
@@ -68,7 +64,7 @@ export function SearchBar({
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
-      {showCorrelations && hasCorrelationsAccess && (
+      {showCorrelations && hasActivePlatinumLicense && (
         <EuiFlexItem grow={false}>
           <Correlations />
         </EuiFlexItem>
