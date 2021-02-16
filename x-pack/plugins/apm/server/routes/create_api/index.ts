@@ -13,6 +13,7 @@ import { PathReporter } from 'io-ts/lib/PathReporter';
 import { isLeft } from 'fp-ts/lib/Either';
 import { KibanaResponseFactory, RouteRegistrar } from 'src/core/server';
 import { RequestAbortedError } from '@elastic/elasticsearch/lib/errors';
+import agent from 'elastic-apm-node';
 import { merge } from '../../../common/runtime_types/merge';
 import { strictKeysRt } from '../../../common/runtime_types/strict_keys_rt';
 import { APMConfig } from '../..';
@@ -95,6 +96,12 @@ export function createApi() {
             },
           },
           async (context, request, response) => {
+            if (agent.isStarted()) {
+              agent.addLabels({
+                plugin: 'apm',
+              });
+            }
+
             try {
               const paramMap = pickBy(
                 {

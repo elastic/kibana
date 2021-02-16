@@ -381,6 +381,7 @@ export {
   TimeoutErrorMode,
   PainlessError,
   noSearchSessionStorageCapabilityMessage,
+  SEARCH_SESSIONS_MANAGEMENT_ID,
 } from './search';
 
 export type {
@@ -388,6 +389,7 @@ export type {
   ISessionService,
   SearchSessionInfoProvider,
   ISessionsClient,
+  SearchUsageCollector,
 } from './search';
 
 export { ISearchOptions, isErrorResponse, isCompleteResponse, isPartialResponse } from '../common';
