@@ -177,6 +177,7 @@ export const DragDrop = (props: BaseProps) => {
   );
   const dropProps = {
     ...props,
+    keyboardMode,
     setKeyboardMode,
     dragging,
     setDragging,
@@ -219,7 +220,10 @@ const DragInner = memo(function DragInner({
   ariaDescribedBy,
   setA11yMessage,
 }: DragInnerProps) {
-  const dragStart = (e?: DroppableEvent | React.KeyboardEvent<HTMLButtonElement>) => {
+  const dragStart = (
+    e: DroppableEvent | React.KeyboardEvent<HTMLButtonElement>,
+    keyboardModeOn?: boolean
+  ) => {
     // Setting stopPropgagation causes Chrome failures, so
     // we are manually checking if we've already handled this
     // in a nested child, and doing nothing if so...
@@ -237,9 +241,21 @@ const DragInner = memo(function DragInner({
     // dragStart event, so we drop a setTimeout to avoid that.
 
     const currentTarget = e?.currentTarget;
+
     setTimeout(() => {
-      setDragging(value);
+      setDragging({
+        ...value,
+        ghost: keyboardModeOn
+          ? {
+              children,
+              style: { width: currentTarget.offsetWidth, height: currentTarget.offsetHeight },
+            }
+          : undefined,
+      });
       setA11yMessage(announce.lifted(value.humanData));
+      if (keyboardModeOn) {
+        setKeyboardMode(true);
+      }
       if (onDragStart) {
         onDragStart(currentTarget);
       }
@@ -284,8 +300,19 @@ const DragInner = memo(function DragInner({
         : announce.noTarget()
     );
   };
+  const shouldShowGhostImageInstead =
+    isDragging &&
+    dragType === 'move' &&
+    keyboardMode &&
+    activeDropTarget?.activeDropTarget &&
+    activeDropTarget?.activeDropTarget.dropType !== 'reorder';
   return (
-    <div className={className} data-test-subj={`lnsDragDrop_draggable-${value.humanData.label}`}>
+    <div
+      className={classNames(className, {
+        'lnsDragDrop-isHidden-noFocus': shouldShowGhostImageInstead,
+      })}
+      data-test-subj={`lnsDragDrop_draggable-${value.humanData.label}`}
+    >
       <EuiScreenReaderOnly showOnFocus>
         <button
           aria-label={value.humanData.label}
@@ -303,14 +330,16 @@ const DragInner = memo(function DragInner({
               if (activeDropTarget) {
                 dropToActiveDropTarget();
               }
+
               if (isDragging) {
                 dragEnd();
               } else {
-                dragStart(e);
-                setKeyboardMode(true);
+                dragStart(e, true);
               }
             } else if (key === keys.ESCAPE) {
               if (isDragging) {
+                e.stopPropagation();
+                e.preventDefault();
                 dragEnd();
               }
             }
@@ -327,7 +356,8 @@ const DragInner = memo(function DragInner({
       {React.cloneElement(children, {
         'data-test-subj': dataTestSubj || 'lnsDragDrop',
         className: classNames(children.props.className, 'lnsDragDrop', 'lnsDragDrop-isDraggable', {
-          'lnsDragDrop-isHidden': isDragging && dragType === 'move' && !keyboardMode,
+          'lnsDragDrop-isHidden':
+            (isDragging && dragType === 'move' && !keyboardMode) || shouldShowGhostImageInstead,
         }),
         draggable: true,
         onDragEnd: dragEnd,
@@ -416,8 +446,12 @@ const DropInner = memo(function DropInner(props: DropInnerProps) {
     setActiveDropTarget(undefined);
     setKeyboardMode(false);
   };
+
+  const ghost =
+    isActiveDropTarget && dropType !== 'reorder' && dragging?.ghost ? dragging.ghost : undefined;
+
   return (
-    <>
+    <div className="lnsDragDrop__container">
       {React.cloneElement(children, {
         'data-test-subj': dataTestSubj || 'lnsDragDrop',
         className: classNames(children.props.className, classes, className),
@@ -426,7 +460,13 @@ const DropInner = memo(function DropInner(props: DropInnerProps) {
         onDrop: drop,
         draggable,
       })}
-    </>
+      {ghost
+        ? React.cloneElement(ghost.children, {
+            className: classNames(ghost.children.props.className, 'lnsDragDrop_ghost'),
+            style: ghost.style,
+          })
+        : null}
+    </div>
   );
 });
 

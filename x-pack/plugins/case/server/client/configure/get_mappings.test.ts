@@ -31,7 +31,6 @@ describe('get_mappings', () => {
       const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
       const res = await caseClient.client.getMappings({
         actionsClient: actionsMock,
-        caseClient: caseClient.client,
         connectorType: ConnectorTypes.jira,
         connectorId: '123',
       });
@@ -45,7 +44,6 @@ describe('get_mappings', () => {
       const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
       const res = await caseClient.client.getMappings({
         actionsClient: actionsMock,
-        caseClient: caseClient.client,
         connectorType: ConnectorTypes.jira,
         connectorId: '123',
       });

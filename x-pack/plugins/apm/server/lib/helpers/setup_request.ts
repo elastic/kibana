@@ -6,7 +6,6 @@
  */
 
 import { Logger } from 'kibana/server';
-import moment from 'moment';
 import { isActivePlatinumLicense } from '../../../common/license_check';
 import { APMConfig } from '../..';
 import { KibanaRequest } from '../../../../../../src/core/server';
@@ -27,6 +26,7 @@ import {
   APMInternalClient,
   createInternalESClient,
 } from './create_es_client/create_internal_es_client';
+import { withApmSpan } from '../../utils/with_apm_span';
 
 // Explicitly type Setup to prevent TS initialization errors
 // https://github.com/microsoft/TypeScript/issues/34933
@@ -53,68 +53,72 @@ interface SetupRequestParams {
     /**
      * Timestamp in ms since epoch
      */
-    start?: string;
+    start?: number;
 
     /**
      * Timestamp in ms since epoch
      */
-    end?: string;
+    end?: number;
     uiFilters?: string;
   };
 }
 
 type InferSetup<TParams extends SetupRequestParams> = Setup &
-  (TParams extends { query: { start: string } } ? { start: number } : {}) &
-  (TParams extends { query: { end: string } } ? { end: number } : {});
+  (TParams extends { query: { start: number } } ? { start: number } : {}) &
+  (TParams extends { query: { end: number } } ? { end: number } : {});
 
 export async function setupRequest<TParams extends SetupRequestParams>(
   context: APMRequestHandlerContext<TParams>,
   request: KibanaRequest
 ): Promise<InferSetup<TParams>> {
-  const { config, logger } = context;
-  const { query } = context.params;
+  return withApmSpan('setup_request', async () => {
+    const { config, logger } = context;
+    const { query } = context.params;
 
-  const [indices, includeFrozen] = await Promise.all([
-    getApmIndices({
-      savedObjectsClient: context.core.savedObjects.client,
-      config,
-    }),
-    context.core.uiSettings.client.get(UI_SETTINGS.SEARCH_INCLUDE_FROZEN),
-  ]);
+    const [indices, includeFrozen] = await Promise.all([
+      getApmIndices({
+        savedObjectsClient: context.core.savedObjects.client,
+        config,
+      }),
+      withApmSpan('get_ui_settings', () =>
+        context.core.uiSettings.client.get(UI_SETTINGS.SEARCH_INCLUDE_FROZEN)
+      ),
+    ]);
 
-  const uiFilters = decodeUiFilters(logger, query.uiFilters);
+    const uiFilters = decodeUiFilters(logger, query.uiFilters);
 
-  const coreSetupRequest = {
-    indices,
-    apmEventClient: createApmEventClient({
-      esClient: context.core.elasticsearch.client.asCurrentUser,
-      debug: context.params.query._debug,
-      request,
+    const coreSetupRequest = {
       indices,
-      options: { includeFrozen },
-    }),
-    internalClient: createInternalESClient({
-      context,
-      request,
-    }),
-    ml:
-      context.plugins.ml && isActivePlatinumLicense(context.licensing.license)
-        ? getMlSetup(
-            context.plugins.ml,
-            context.core.savedObjects.client,
-            request
-          )
-        : undefined,
-    config,
-    uiFilters,
-    esFilter: getEsFilter(uiFilters),
-  };
+      apmEventClient: createApmEventClient({
+        esClient: context.core.elasticsearch.client.asCurrentUser,
+        debug: context.params.query._debug,
+        request,
+        indices,
+        options: { includeFrozen },
+      }),
+      internalClient: createInternalESClient({
+        context,
+        request,
+      }),
+      ml:
+        context.plugins.ml && isActivePlatinumLicense(context.licensing.license)
+          ? getMlSetup(
+              context.plugins.ml,
+              context.core.savedObjects.client,
+              request
+            )
+          : undefined,
+      config,
+      uiFilters,
+      esFilter: getEsFilter(uiFilters),
+    };
 
-  return {
-    ...('start' in query ? { start: moment.utc(query.start).valueOf() } : {}),
-    ...('end' in query ? { end: moment.utc(query.end).valueOf() } : {}),
-    ...coreSetupRequest,
-  } as InferSetup<TParams>;
+    return {
+      ...('start' in query ? { start: query.start } : {}),
+      ...('end' in query ? { end: query.end } : {}),
+      ...coreSetupRequest,
+    } as InferSetup<TParams>;
+  });
 }
 
 function getMlSetup(
