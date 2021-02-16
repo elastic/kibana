@@ -297,6 +297,9 @@ export class SearchSource {
       switchMap(() => {
         const searchRequest = this.flatten();
         this.history = [searchRequest];
+        if (searchRequest.index) {
+          options.indexPattern = searchRequest.index;
+        }
 
         return getConfig(UI_SETTINGS.COURIER_BATCH_SEARCHES)
           ? from(this.legacyFetch(searchRequest, options))
