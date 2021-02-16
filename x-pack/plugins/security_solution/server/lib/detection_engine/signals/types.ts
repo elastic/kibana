@@ -93,7 +93,7 @@ export interface SignalSource {
     };
     // signal.depth doesn't exist on pre-7.10 signals
     depth?: number;
-    original_time?: number;
+    original_time?: string;
     threshold_result?: ThresholdResult;
   };
 }

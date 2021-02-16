@@ -91,17 +91,19 @@ export const getThresholdBucketFilters = async ({
         .digest('hex');
 
       const existing = acc[hash];
+      const originalTime =
+        hit._source.signal?.original_time != null
+          ? new Date(hit._source.signal?.original_time).getTime()
+          : undefined;
+
       if (existing != null) {
-        if (
-          hit._source.signal?.original_time &&
-          hit._source.signal?.original_time > existing.lastSignalTimestamp
-        ) {
-          acc[hash].lastSignalTimestamp = hit._source.signal?.original_time as number;
+        if (originalTime && originalTime > existing.lastSignalTimestamp) {
+          acc[hash].lastSignalTimestamp = originalTime;
         }
-      } else {
+      } else if (originalTime) {
         acc[hash] = {
           terms,
-          lastSignalTimestamp: hit._source.signal?.original_time as number,
+          lastSignalTimestamp: originalTime,
         };
       }
       return acc;
@@ -117,7 +119,7 @@ export const getThresholdBucketFilters = async ({
             {
               range: {
                 [timestampOverride ?? '@timestamp']: {
-                  lte: bucket.lastSignalTimestamp, // TODO: convert to string?
+                  lte: new Date(bucket.lastSignalTimestamp).toISOString(),
                 },
               },
             },
