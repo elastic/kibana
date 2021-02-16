@@ -27,7 +27,7 @@ const initialState = {
 
 type State = Readonly<typeof initialState>;
 
-export const CustomFieldPanel = class extends React.PureComponent<Props, State> {
+export class CustomFieldPanel extends React.PureComponent<Props, State> {
   public static displayName = 'CustomFieldPanel';
   public readonly state: State = initialState;
   public render() {
@@ -86,4 +86,4 @@ export const CustomFieldPanel = class extends React.PureComponent<Props, State> 
   private handleFieldSelection = (selectedOptions: SelectedOption[]) => {
     this.setState({ selectedOptions });
   };
-};
+}

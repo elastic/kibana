@@ -85,7 +85,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.console.dismissTutorial();
       expect(await PageObjects.console.hasAutocompleter()).to.be(false);
       await PageObjects.console.promptAutocomplete();
-      retry.waitFor('autocomplete to be visible', () => PageObjects.console.hasAutocompleter());
+      await retry.waitFor('autocomplete to be visible', () =>
+        PageObjects.console.hasAutocompleter()
+      );
     });
   });
 }

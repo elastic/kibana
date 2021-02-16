@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { ReactNode } from 'react';
 import { StubBrowserStorage } from '@kbn/test/jest';
 import { render, waitFor, screen, act } from '@testing-library/react';
 import { Storage } from '../../../../../../../src/plugins/kibana_utils/public/';
@@ -20,8 +20,11 @@ import {
 } from '../../../../../../../src/plugins/data/public';
 import { coreMock } from '../../../../../../../src/core/public/mocks';
 import { TOUR_RESTORE_STEP_KEY, TOUR_TAKING_TOO_LONG_STEP_KEY } from './search_session_tour';
+import userEvent from '@testing-library/user-event';
+import { IntlProvider } from 'react-intl';
 
 const coreStart = coreMock.createStart();
+const application = coreStart.application;
 const dataStart = dataPluginMock.createStartContract();
 const sessionService = dataStart.search.session as jest.Mocked<ISessionService>;
 let storage: Storage;
@@ -29,6 +32,12 @@ const refreshInterval$ = new BehaviorSubject<RefreshInterval>({ value: 0, pause:
 const timeFilter = dataStart.query.timefilter.timefilter as jest.Mocked<TimefilterContract>;
 timeFilter.getRefreshIntervalUpdate$.mockImplementation(() => refreshInterval$);
 timeFilter.getRefreshInterval.mockImplementation(() => refreshInterval$.getValue());
+
+const disableSaveAfterSessionCompletesTimeout = 5 * 60 * 1000;
+
+function Container({ children }: { children?: ReactNode }) {
+  return <IntlProvider locale="en">{children}</IntlProvider>;
+}
 
 beforeEach(() => {
   storage = new Storage(new StubBrowserStorage());
@@ -44,11 +53,16 @@ beforeEach(() => {
 test("shouldn't show indicator in case no active search session", async () => {
   const SearchSessionIndicator = createConnectedSearchSessionIndicator({
     sessionService,
-    application: coreStart.application,
+    application,
     timeFilter,
     storage,
+    disableSaveAfterSessionCompletesTimeout,
   });
-  const { getByTestId, container } = render(<SearchSessionIndicator />);
+  const { getByTestId, container } = render(
+    <Container>
+      <SearchSessionIndicator />
+    </Container>
+  );
 
   // make sure `searchSessionIndicator` isn't appearing after some time (lazy-loading)
   await expect(
@@ -66,11 +80,16 @@ test("shouldn't show indicator in case no active search session", async () => {
 test("shouldn't show indicator in case app hasn't opt-in", async () => {
   const SearchSessionIndicator = createConnectedSearchSessionIndicator({
     sessionService,
-    application: coreStart.application,
+    application,
     timeFilter,
     storage,
+    disableSaveAfterSessionCompletesTimeout,
   });
-  const { getByTestId, container } = render(<SearchSessionIndicator />);
+  const { getByTestId, container } = render(
+    <Container>
+      <SearchSessionIndicator />
+    </Container>
+  );
   sessionService.isSessionStorageReady.mockImplementation(() => false);
 
   // make sure `searchSessionIndicator` isn't appearing after some time (lazy-loading)
@@ -90,23 +109,22 @@ test('should show indicator in case there is an active search session', async ()
   const state$ = new BehaviorSubject(SearchSessionState.Loading);
   const SearchSessionIndicator = createConnectedSearchSessionIndicator({
     sessionService: { ...sessionService, state$ },
-    application: coreStart.application,
+    application,
     timeFilter,
     storage,
+    disableSaveAfterSessionCompletesTimeout,
   });
-  const { getByTestId } = render(<SearchSessionIndicator />);
+  const { getByTestId } = render(
+    <Container>
+      <SearchSessionIndicator />
+    </Container>
+  );
 
   await waitFor(() => getByTestId('searchSessionIndicator'));
 });
 
 test('should be disabled in case uiConfig says so ', async () => {
   const state$ = new BehaviorSubject(SearchSessionState.Loading);
-  coreStart.application.currentAppId$ = new BehaviorSubject('discover');
-  (coreStart.application.capabilities as any) = {
-    discover: {
-      storeSearchSession: false,
-    },
-  };
   sessionService.getSearchSessionIndicatorUiConfig.mockImplementation(() => ({
     isDisabled: () => ({
       disabled: true,
@@ -115,16 +133,47 @@ test('should be disabled in case uiConfig says so ', async () => {
   }));
   const SearchSessionIndicator = createConnectedSearchSessionIndicator({
     sessionService: { ...sessionService, state$ },
-    application: coreStart.application,
+    application,
     timeFilter,
     storage,
+    disableSaveAfterSessionCompletesTimeout,
   });
 
-  render(<SearchSessionIndicator />);
+  render(
+    <Container>
+      <SearchSessionIndicator />
+    </Container>
+  );
 
   await waitFor(() => screen.getByTestId('searchSessionIndicator'));
 
-  expect(screen.getByTestId('searchSessionIndicator').querySelector('button')).toBeDisabled();
+  await userEvent.click(screen.getByLabelText('Search session loading'));
+
+  expect(screen.getByRole('button', { name: 'Save session' })).toBeDisabled();
+});
+
+test('should be disabled in case not enough permissions', async () => {
+  const state$ = new BehaviorSubject(SearchSessionState.Completed);
+  const SearchSessionIndicator = createConnectedSearchSessionIndicator({
+    sessionService: { ...sessionService, state$, hasAccess: () => false },
+    application,
+    timeFilter,
+    storage,
+    disableSaveAfterSessionCompletesTimeout,
+  });
+
+  render(
+    <Container>
+      <SearchSessionIndicator />
+    </Container>
+  );
+
+  await waitFor(() => screen.getByTestId('searchSessionIndicator'));
+
+  await userEvent.click(screen.getByLabelText('Search session complete'));
+
+  expect(screen.getByRole('button', { name: 'Save session' })).toBeDisabled();
+  expect(screen.getByRole('button', { name: 'Manage sessions' })).toBeDisabled();
 });
 
 test('should be disabled during auto-refresh', async () => {
@@ -132,22 +181,85 @@ test('should be disabled during auto-refresh', async () => {
 
   const SearchSessionIndicator = createConnectedSearchSessionIndicator({
     sessionService: { ...sessionService, state$ },
-    application: coreStart.application,
+    application,
     timeFilter,
     storage,
+    disableSaveAfterSessionCompletesTimeout,
   });
 
-  render(<SearchSessionIndicator />);
+  render(
+    <Container>
+      <SearchSessionIndicator />
+    </Container>
+  );
 
   await waitFor(() => screen.getByTestId('searchSessionIndicator'));
 
-  expect(screen.getByTestId('searchSessionIndicator').querySelector('button')).not.toBeDisabled();
+  await userEvent.click(screen.getByLabelText('Search session loading'));
+
+  expect(screen.getByRole('button', { name: 'Save session' })).not.toBeDisabled();
 
   act(() => {
     refreshInterval$.next({ value: 0, pause: false });
   });
 
-  expect(screen.getByTestId('searchSessionIndicator').querySelector('button')).toBeDisabled();
+  expect(screen.getByRole('button', { name: 'Save session' })).toBeDisabled();
+});
+
+describe('Completed inactivity', () => {
+  beforeEach(() => {
+    jest.useFakeTimers();
+  });
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+  test('save should be disabled after completed and timeout', async () => {
+    const state$ = new BehaviorSubject(SearchSessionState.Loading);
+
+    const SearchSessionIndicator = createConnectedSearchSessionIndicator({
+      sessionService: { ...sessionService, state$ },
+      application,
+      timeFilter,
+      storage,
+      disableSaveAfterSessionCompletesTimeout,
+    });
+
+    render(
+      <Container>
+        <SearchSessionIndicator />
+      </Container>
+    );
+
+    await waitFor(() => screen.getByTestId('searchSessionIndicator'));
+
+    await userEvent.click(screen.getByLabelText('Search session loading'));
+
+    expect(screen.getByRole('button', { name: 'Save session' })).not.toBeDisabled();
+
+    act(() => {
+      jest.advanceTimersByTime(5 * 60 * 1000);
+    });
+
+    expect(screen.getByRole('button', { name: 'Save session' })).not.toBeDisabled();
+
+    act(() => {
+      state$.next(SearchSessionState.Completed);
+    });
+
+    expect(screen.getByRole('button', { name: 'Save session' })).not.toBeDisabled();
+
+    act(() => {
+      jest.advanceTimersByTime(2.5 * 60 * 1000);
+    });
+
+    expect(screen.getByRole('button', { name: 'Save session' })).not.toBeDisabled();
+
+    act(() => {
+      jest.advanceTimersByTime(2.5 * 60 * 1000);
+    });
+
+    expect(screen.getByRole('button', { name: 'Save session' })).toBeDisabled();
+  });
 });
 
 describe('tour steps', () => {
@@ -164,11 +276,16 @@ describe('tour steps', () => {
       const state$ = new BehaviorSubject(SearchSessionState.Loading);
       const SearchSessionIndicator = createConnectedSearchSessionIndicator({
         sessionService: { ...sessionService, state$ },
-        application: coreStart.application,
+        application,
         timeFilter,
         storage,
+        disableSaveAfterSessionCompletesTimeout,
       });
-      const rendered = render(<SearchSessionIndicator />);
+      const rendered = render(
+        <Container>
+          <SearchSessionIndicator />
+        </Container>
+      );
 
       await waitFor(() => rendered.getByTestId('searchSessionIndicator'));
 
@@ -196,11 +313,16 @@ describe('tour steps', () => {
       const state$ = new BehaviorSubject(SearchSessionState.Loading);
       const SearchSessionIndicator = createConnectedSearchSessionIndicator({
         sessionService: { ...sessionService, state$ },
-        application: coreStart.application,
+        application,
         timeFilter,
         storage,
+        disableSaveAfterSessionCompletesTimeout,
       });
-      const rendered = render(<SearchSessionIndicator />);
+      const rendered = render(
+        <Container>
+          <SearchSessionIndicator />
+        </Container>
+      );
 
       const searchSessionIndicator = await rendered.findByTestId('searchSessionIndicator');
       expect(searchSessionIndicator).toBeTruthy();
@@ -222,11 +344,16 @@ describe('tour steps', () => {
     const state$ = new BehaviorSubject(SearchSessionState.Restored);
     const SearchSessionIndicator = createConnectedSearchSessionIndicator({
       sessionService: { ...sessionService, state$ },
-      application: coreStart.application,
+      application,
       timeFilter,
       storage,
+      disableSaveAfterSessionCompletesTimeout,
     });
-    const rendered = render(<SearchSessionIndicator />);
+    const rendered = render(
+      <Container>
+        <SearchSessionIndicator />
+      </Container>
+    );
 
     await waitFor(() => rendered.getByTestId('searchSessionIndicator'));
     expect(screen.getByTestId('searchSessionIndicatorPopoverContainer')).toBeInTheDocument();
@@ -239,11 +366,16 @@ describe('tour steps', () => {
     const state$ = new BehaviorSubject(SearchSessionState.Completed);
     const SearchSessionIndicator = createConnectedSearchSessionIndicator({
       sessionService: { ...sessionService, state$ },
-      application: coreStart.application,
+      application,
       timeFilter,
       storage,
+      disableSaveAfterSessionCompletesTimeout,
     });
-    const rendered = render(<SearchSessionIndicator />);
+    const rendered = render(
+      <Container>
+        <SearchSessionIndicator />
+      </Container>
+    );
 
     await waitFor(() => rendered.getByTestId('searchSessionIndicator'));
 

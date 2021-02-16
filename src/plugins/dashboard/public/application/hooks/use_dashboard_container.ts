@@ -21,7 +21,7 @@ import {
 
 import { DashboardStateManager } from '../dashboard_state_manager';
 import { getDashboardContainerInput, getSearchSessionIdFromURL } from '../dashboard_app_functions';
-import { DashboardContainer, DashboardContainerInput } from '../..';
+import { DashboardConstants, DashboardContainer, DashboardContainerInput } from '../..';
 import { DashboardAppServices } from '../types';
 import { DASHBOARD_CONTAINER_TYPE } from '..';
 
@@ -68,7 +68,9 @@ export const useDashboardContainer = (
       searchSession.restore(searchSessionIdFromURL);
     }
 
-    const incomingEmbeddable = embeddable.getStateTransfer().getIncomingEmbeddablePackage(true);
+    const incomingEmbeddable = embeddable
+      .getStateTransfer()
+      .getIncomingEmbeddablePackage(DashboardConstants.DASHBOARDS_ID, true);
 
     let canceled = false;
     let pendingContainer: DashboardContainer | ErrorEmbeddable | null | undefined;

@@ -1119,6 +1119,39 @@ module.exports = {
       // All files
       files: ['x-pack/plugins/enterprise_search/**/*.{ts,tsx}'],
       rules: {
+        'import/order': [
+          'error',
+          {
+            groups: ['unknown', ['builtin', 'external'], 'internal', 'parent', 'sibling', 'index'],
+            pathGroups: [
+              {
+                pattern:
+                  '{../../../../../../,../../../../../,../../../../,../../../,../../,../}{common/,*}__mocks__{*,/**}',
+                group: 'unknown',
+              },
+              {
+                pattern: '{**,.}/*.mock',
+                group: 'unknown',
+              },
+              {
+                pattern: 'react*',
+                group: 'external',
+                position: 'before',
+              },
+              {
+                pattern: '{@elastic/**,@kbn/**,src/**}',
+                group: 'internal',
+              },
+            ],
+            pathGroupsExcludedImportTypes: [],
+            alphabetize: {
+              order: 'asc',
+              caseInsensitive: true,
+            },
+            'newlines-between': 'always-and-inside-groups',
+          },
+        ],
+        'import/newline-after-import': 'error',
         'react-hooks/exhaustive-deps': 'off',
         'react/jsx-boolean-value': ['error', 'never'],
       },

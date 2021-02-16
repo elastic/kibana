@@ -8,13 +8,13 @@
 import { contentSources } from '../../../__mocks__/content_sources.mock';
 
 import React from 'react';
+
 import { shallow } from 'enzyme';
 
-import { SourceOptionItem } from './source_option_item';
-
 import { TruncatedContent } from '../../../../shared/truncate';
-
 import { SourceIcon } from '../../../components/shared/source_icon';
+
+import { SourceOptionItem } from './source_option_item';
 
 describe('SourceOptionItem', () => {
   it('renders', () => {

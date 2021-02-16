@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { useRef } from 'react';
-import { debounce, distinctUntilChanged, map } from 'rxjs/operators';
-import { timer } from 'rxjs';
+import React, { useCallback, useState } from 'react';
+import { debounce, distinctUntilChanged, map, mapTo, switchMap } from 'rxjs/operators';
+import { merge, of, timer } from 'rxjs';
 import useObservable from 'react-use/lib/useObservable';
 import { i18n } from '@kbn/i18n';
 import { SearchSessionIndicator, SearchSessionIndicatorRef } from '../search_session_indicator';
@@ -26,6 +26,11 @@ export interface SearchSessionIndicatorDeps {
   timeFilter: TimefilterContract;
   application: ApplicationStart;
   storage: IStorageWrapper;
+  /**
+   * Controls for how long we allow to save a session,
+   * after the last search in the session has completed
+   */
+  disableSaveAfterSessionCompletesTimeout: number;
 }
 
 export const createConnectedSearchSessionIndicator = ({
@@ -33,6 +38,7 @@ export const createConnectedSearchSessionIndicator = ({
   application,
   timeFilter,
   storage,
+  disableSaveAfterSessionCompletesTimeout,
 }: SearchSessionIndicatorDeps): React.FC => {
   const isAutoRefreshEnabled = () => !timeFilter.getRefreshInterval().pause;
   const isAutoRefreshEnabled$ = timeFilter
@@ -43,60 +49,121 @@ export const createConnectedSearchSessionIndicator = ({
     debounce((_state) => timer(_state === SearchSessionState.None ? 50 : 300)) // switch to None faster to quickly remove indicator when navigating away
   );
 
+  const disableSaveAfterSessionCompleteTimedOut$ = sessionService.state$.pipe(
+    switchMap((_state) =>
+      _state === SearchSessionState.Completed
+        ? merge(of(false), timer(disableSaveAfterSessionCompletesTimeout).pipe(mapTo(true)))
+        : of(false)
+    ),
+    distinctUntilChanged()
+  );
+
   return () => {
-    const ref = useRef<SearchSessionIndicatorRef>(null);
     const state = useObservable(debouncedSessionServiceState$, SearchSessionState.None);
     const autoRefreshEnabled = useObservable(isAutoRefreshEnabled$, isAutoRefreshEnabled());
-    const isDisabledByApp = sessionService.getSearchSessionIndicatorUiConfig().isDisabled();
+    const isSaveDisabledByApp = sessionService.getSearchSessionIndicatorUiConfig().isDisabled();
+    const disableSaveAfterSessionCompleteTimedOut = useObservable(
+      disableSaveAfterSessionCompleteTimedOut$,
+      false
+    );
+    const [
+      searchSessionIndicator,
+      setSearchSessionIndicator,
+    ] = useState<SearchSessionIndicatorRef | null>(null);
+    const searchSessionIndicatorRef = useCallback((ref: SearchSessionIndicatorRef) => {
+      if (ref !== null) {
+        setSearchSessionIndicator(ref);
+      }
+    }, []);
 
-    let disabled = false;
-    let disabledReasonText: string = '';
+    let saveDisabled = false;
+    let saveDisabledReasonText: string = '';
+
+    let managementDisabled = false;
+    let managementDisabledReasonText: string = '';
 
     if (autoRefreshEnabled) {
-      disabled = true;
-      disabledReasonText = i18n.translate(
+      saveDisabled = true;
+      saveDisabledReasonText = i18n.translate(
         'xpack.data.searchSessionIndicator.disabledDueToAutoRefreshMessage',
         {
-          defaultMessage: 'Search sessions are not available when auto refresh is enabled.',
+          defaultMessage: 'Saving search session is not available when auto refresh is enabled.',
+        }
+      );
+    }
+
+    if (disableSaveAfterSessionCompleteTimedOut) {
+      saveDisabled = true;
+      saveDisabledReasonText = i18n.translate(
+        'xpack.data.searchSessionIndicator.disabledDueToTimeoutMessage',
+        {
+          defaultMessage: 'Search session results expired.',
+        }
+      );
+    }
+
+    if (isSaveDisabledByApp.disabled) {
+      saveDisabled = true;
+      saveDisabledReasonText = isSaveDisabledByApp.reasonText;
+    }
+
+    // check if user doesn't have access to search_sessions and search_sessions mgtm
+    // this happens in case there is no app that allows current user to use search session
+    if (!sessionService.hasAccess()) {
+      managementDisabled = saveDisabled = true;
+      managementDisabledReasonText = saveDisabledReasonText = i18n.translate(
+        'xpack.data.searchSessionIndicator.disabledDueToDisabledGloballyMessage',
+        {
+          defaultMessage: "You don't have permissions to manage search sessions",
         }
       );
     }
 
     const { markOpenedDone, markRestoredDone } = useSearchSessionTour(
       storage,
-      ref,
+      searchSessionIndicator,
       state,
-      disabled
+      saveDisabled
     );
 
-    if (isDisabledByApp.disabled) {
-      disabled = true;
-      disabledReasonText = isDisabledByApp.reasonText;
-    }
+    const onOpened = useCallback(
+      (openedState: SearchSessionState) => {
+        markOpenedDone();
+        if (openedState === SearchSessionState.Restored) {
+          markRestoredDone();
+        }
+      },
+      [markOpenedDone, markRestoredDone]
+    );
+
+    const onContinueInBackground = useCallback(() => {
+      if (saveDisabled) return;
+      sessionService.save();
+    }, [saveDisabled]);
+
+    const onSaveResults = useCallback(() => {
+      if (saveDisabled) return;
+      sessionService.save();
+    }, [saveDisabled]);
+
+    const onCancel = useCallback(() => {
+      sessionService.cancel();
+    }, []);
 
     if (!sessionService.isSessionStorageReady()) return null;
     return (
       <RedirectAppLinks application={application}>
         <SearchSessionIndicator
-          ref={ref}
+          ref={searchSessionIndicatorRef}
           state={state}
-          onContinueInBackground={() => {
-            sessionService.save();
-          }}
-          onSaveResults={() => {
-            sessionService.save();
-          }}
-          onCancel={() => {
-            sessionService.cancel();
-          }}
-          disabled={disabled}
-          disabledReasonText={disabledReasonText}
-          onOpened={(openedState) => {
-            markOpenedDone();
-            if (openedState === SearchSessionState.Restored) {
-              markRestoredDone();
-            }
-          }}
+          saveDisabled={saveDisabled}
+          saveDisabledReasonText={saveDisabledReasonText}
+          managementDisabled={managementDisabled}
+          managementDisabledReasonText={managementDisabledReasonText}
+          onContinueInBackground={onContinueInBackground}
+          onSaveResults={onSaveResults}
+          onCancel={onCancel}
+          onOpened={onOpened}
         />
       </RedirectAppLinks>
     );

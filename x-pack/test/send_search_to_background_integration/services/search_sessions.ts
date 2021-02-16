@@ -47,9 +47,7 @@ export function SearchSessionsProvider({ getService }: FtrProviderContext) {
 
     public async disabledOrFail() {
       await this.exists();
-      await expect(await (await (await this.find()).findByTagName('button')).isEnabled()).to.be(
-        false
-      );
+      await expect(await (await this.find()).getAttribute('data-save-disabled')).to.be('true');
     }
 
     public async expectState(state: SessionStateType) {
