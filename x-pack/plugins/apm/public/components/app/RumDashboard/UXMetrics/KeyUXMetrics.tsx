@@ -36,7 +36,7 @@ export function formatToSec(
   }
   return (valueInMs / 1000).toFixed(2) + ' s';
 }
-const STAT_STYLE = { width: '240px' };
+const STAT_STYLE = { width: '200px' };
 
 interface Props {
   data?: UXMetrics | null;

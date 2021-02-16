@@ -12,18 +12,15 @@ import { RumOverview } from '../RumDashboard';
 import { CsmSharedContextProvider } from './CsmSharedContext';
 import { MainFilters } from './Panels/MainFilters';
 import { DatePicker } from '../../shared/DatePicker';
-import { useBreakPoints } from '../../../hooks/use_break_points';
 
 export const UX_LABEL = i18n.translate('xpack.apm.ux.title', {
   defaultMessage: 'User Experience',
 });
 
 export function RumHome() {
-  const { isSmall } = useBreakPoints();
-
   return (
     <CsmSharedContextProvider>
-      <EuiFlexGroup wrap justifyContent={isSmall ? 'flexStart' : 'flexEnd'}>
+      <EuiFlexGroup wrap justifyContent={'flexEnd'} responsive={false}>
         <EuiFlexItem>
           <EuiTitle>
             <h1 className="eui-textNoWrap">{UX_LABEL}</h1>

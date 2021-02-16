@@ -77,7 +77,7 @@ export function Metrics() {
   const STAT_STYLE = { minWidth: '150px', maxWidth: '250px' };
 
   return (
-    <ClFlexGroup wrap>
+    <ClFlexGroup wrap responsive={false}>
       <EuiFlexItem style={STAT_STYLE}>
         <EuiStat
           titleSize="l"
