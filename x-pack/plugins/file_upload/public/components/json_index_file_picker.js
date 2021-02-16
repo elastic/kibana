@@ -112,13 +112,7 @@ export class JsonIndexFilePicker extends Component {
 
   async _parseFile(file) {
     const { currentFileTracker } = this.state;
-    const {
-      setFileRef,
-      setParsedFile,
-      resetFileAndIndexSettings,
-      onFileUpload,
-      setIndexName,
-    } = this.props;
+    const { setFileRef, setParsedFile, resetFileAndIndexSettings } = this.props;
 
     if (file.size > MAX_FILE_SIZE) {
       this.setState({
@@ -189,12 +183,8 @@ export class JsonIndexFilePicker extends Component {
         ),
       });
     }
-    if (fileResult.parsedGeojson) {
-      onFileUpload(fileResult.parsedGeojson, file.name);
-    }
-    setIndexName(defaultIndexName);
     setFileRef(file);
-    setParsedFile(fileResult);
+    setParsedFile(fileResult, defaultIndexName);
   }
 
   render() {

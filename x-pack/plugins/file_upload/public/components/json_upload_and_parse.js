@@ -297,11 +297,12 @@ export class JsonUploadAndParse extends Component {
         ) : (
           <Fragment>
             <JsonIndexFilePicker
-              onFileUpload={this.props.onFileUpload}
               fileRef={fileRef}
-              setIndexName={(indexName) => this.setState({ indexName })}
               setFileRef={(fileRef) => this.setState({ fileRef })}
-              setParsedFile={(parsedFile) => this.setState({ parsedFile })}
+              setParsedFile={(parsedFile, indexName) => {
+                this.setState({ parsedFile, indexName });
+                this.props.onFileUpload(parsedFile.parsedGeojson, indexName);
+              }}
               resetFileAndIndexSettings={this._resetFileAndIndexSettings}
               geojsonImporter={this.state.geojsonImporter}
             />
