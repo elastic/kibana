@@ -28,6 +28,13 @@ export class BufferAppender implements DisposableAppender {
   }
 
   /**
+   * Updates `BufferAppender` configuration.
+   */
+  public update() {
+    // noop
+  }
+
+  /**
    * Clears buffer and returns all records that it had.
    */
   public flush() {

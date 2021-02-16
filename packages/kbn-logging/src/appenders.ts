@@ -15,6 +15,7 @@ import { LogRecord } from './log_record';
  */
 export interface Appender {
   append(record: LogRecord): void;
+  update(config: { appenders?: Map<string, Appender> }): void;
 }
 
 /**

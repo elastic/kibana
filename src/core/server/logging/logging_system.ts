@@ -167,6 +167,13 @@ export class LoggingSystem implements LoggerFactory {
       this.appenders.set(appenderKey, Appenders.create(appenderConfig));
     }
 
+    // Once all appenders have been created, update them with a reference to
+    // the other configured appenders. This enables appenders to act as a sort
+    // of middleware and call `append` on each other if needed.
+    for (const [, appenderConfig] of this.appenders) {
+      appenderConfig.update({ appenders: this.appenders });
+    }
+
     for (const [loggerKey, loggerAdapter] of this.loggers) {
       loggerAdapter.updateLogger(this.createLogger(loggerKey, computedConfig));
     }

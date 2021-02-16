@@ -104,6 +104,13 @@ export class RollingFileAppender implements DisposableAppender {
   }
 
   /**
+   * Updates `RollingFileAppender` configuration.
+   */
+  public update() {
+    // noop
+  }
+
+  /**
    * Disposes the appender.
    * If a rollout is currently in progress, it will be awaited.
    */
