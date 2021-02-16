@@ -12,12 +12,11 @@ import {
   DraggedOperation,
 } from '../../types';
 import { IndexPatternColumn } from '../indexpattern';
-import { insertOrReplaceColumn, deleteColumn } from '../operations';
+import { insertOrReplaceColumn, deleteColumn, getOperationTypesForField } from '../operations';
 import { mergeLayer } from '../state_helpers';
 import { hasField, isDraggedField } from '../utils';
 import { IndexPatternPrivateState, IndexPatternField, DraggedField } from '../types';
 import { trackUiEvent } from '../../lens_ui_telemetry';
-import { getOperationSupportMatrix } from './operation_support';
 
 type DropHandlerProps<T> = DatasourceDimensionDropHandlerProps<IndexPatternPrivateState> & {
   droppedItem: T;
@@ -34,7 +33,8 @@ export function getDropTypes(
   const layerIndexPatternId = props.state.layers[props.layerId].indexPatternId;
 
   function hasOperationForField(field: IndexPatternField) {
-    return !!getOperationSupportMatrix(props).operationByField[field.name];
+    const operationsForNewField = getOperationTypesForField(field, props.filterOperations);
+    return !!operationsForNewField.length;
   }
 
   const currentColumn = props.state.layers[props.layerId].columns[props.columnId];
@@ -171,10 +171,9 @@ function onMoveDropToNonCompatibleGroup(props: DropHandlerProps<DraggedOperation
     return false;
   }
 
-  const operationSupportMatrix = getOperationSupportMatrix(props);
-  const operationsForNewField = operationSupportMatrix.operationByField[field.name];
+  const operationsForNewField = getOperationTypesForField(field, props.filterOperations);
 
-  if (!operationsForNewField || operationsForNewField.size === 0) {
+  if (!operationsForNewField.length) {
     return false;
   }
 
@@ -188,7 +187,7 @@ function onMoveDropToNonCompatibleGroup(props: DropHandlerProps<DraggedOperation
     }),
     columnId,
     indexPattern: currentIndexPattern,
-    op: operationsForNewField.values().next().value,
+    op: operationsForNewField[0],
     field,
   });
 
@@ -282,22 +281,14 @@ function onMoveDropToCompatibleGroup({
 
 function onFieldDrop(props: DropHandlerProps<DraggedField>) {
   const { columnId, setState, state, layerId, droppedItem } = props;
-  const operationSupportMatrix = getOperationSupportMatrix(props);
 
-  function hasOperationForField(field: IndexPatternField) {
-    return !!operationSupportMatrix.operationByField[field.name];
-  }
+  const operationsForNewField = getOperationTypesForField(
+    droppedItem.field,
+    props.filterOperations
+  );
 
-  if (!isDraggedField(droppedItem) || !hasOperationForField(droppedItem.field)) {
+  if (!isDraggedField(droppedItem) || !operationsForNewField.length) {
     // TODO: What do we do if we couldn't find a column?
-    return false;
-  }
-
-  // dragged field, not operation
-
-  const operationsForNewField = operationSupportMatrix.operationByField[droppedItem.field.name];
-
-  if (!operationsForNewField || operationsForNewField.size === 0) {
     return false;
   }
 
@@ -308,18 +299,13 @@ function onFieldDrop(props: DropHandlerProps<DraggedField>) {
 
   // Detects if we can change the field only, otherwise change field + operation
   const fieldIsCompatibleWithCurrent =
-    selectedColumn &&
-    operationSupportMatrix.operationByField[droppedItem.field.name]?.has(
-      selectedColumn.operationType
-    );
+    selectedColumn && operationsForNewField.includes(selectedColumn.operationType);
 
   const newLayer = insertOrReplaceColumn({
     layer,
     columnId,
     indexPattern: currentIndexPattern,
-    op: fieldIsCompatibleWithCurrent
-      ? selectedColumn.operationType
-      : operationsForNewField.values().next().value,
+    op: fieldIsCompatibleWithCurrent ? selectedColumn.operationType : operationsForNewField[0],
     field: droppedItem.field,
   });
 
