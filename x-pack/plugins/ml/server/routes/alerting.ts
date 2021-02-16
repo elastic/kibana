@@ -17,6 +17,8 @@ export function alertingRoutes({ router, routeGuard }: RouteInitialization) {
    * @api {post} /api/ml/alerting/preview Preview alerting condition
    * @apiName PreviewAlert
    * @apiDescription Returns a preview of the alerting condition
+   *
+   * @apiSchema (body) mlAnomalyDetectionAlertPreviewRequest
    */
   router.post(
     {
