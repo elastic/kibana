@@ -121,6 +121,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
             lens: pluginsStart.lens,
             kibanaVersion,
             triggersActionsUi: pluginsStart.triggersActionsUi,
+            fileUpload: pluginsStart.fileUpload,
           },
           params
         );

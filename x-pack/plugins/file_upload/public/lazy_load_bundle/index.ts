@@ -7,19 +7,19 @@
 
 import React from 'react';
 import { FeatureCollection } from 'geojson';
-import { IImporter, ImportFactoryOptions } from '../importer';
+import { IndexPattern } from 'src/plugins/data/public';
+import { IImporter, ImportFactoryOptions, ImportResults } from '../importer';
 
 export interface FileUploadComponentProps {
-  appName: string;
   isIndexingTriggered: boolean;
   onFileUpload: (geojsonFile: FeatureCollection, name: string) => void;
   onFileRemove: () => void;
   onIndexReady: (indexReady: boolean) => void;
-  transformDetails: string;
-  onIndexingComplete: (indexResponses: {
-    indexDataResp: unknown;
-    indexPatternResp: unknown;
+  onIndexingComplete: (results: {
+    indexDataResp: ImportResults;
+    indexPattern: IndexPattern;
   }) => void;
+  onIndexingError: () => void;
 }
 
 let loadModulesPromise: Promise<LazyLoadedFileUploadModules>;

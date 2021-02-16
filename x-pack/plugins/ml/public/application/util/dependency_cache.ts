@@ -23,7 +23,7 @@ import type { IndexPatternsContract, DataPublicPluginStart } from 'src/plugins/d
 import type { SharePluginStart } from 'src/plugins/share/public';
 import type { SecurityPluginSetup } from '../../../../security/public';
 import type { MapsStartApi } from '../../../../maps/public';
-import type { FileUploadPluginStart } from '../../../../fileUpload/public';
+import type { FileUploadPluginStart } from '../../../../file_upload/public';
 
 export interface DependencyCache {
   timefilter: DataPublicPluginSetup['query']['timefilter'] | null;

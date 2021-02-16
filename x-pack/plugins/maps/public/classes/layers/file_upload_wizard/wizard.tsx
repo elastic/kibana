@@ -19,7 +19,7 @@ import { GeoJsonFileSource } from '../../sources/geojson_file_source';
 import { VectorLayer } from '../../layers/vector_layer';
 import { createDefaultLayerDescriptor } from '../../sources/es_search_source';
 import { RenderWizardArguments } from '../../layers/layer_wizard_registry';
-import { FileUploadComponentProps } from '../../../../../file_upload/public';
+import { FileUploadComponentProps, ImportResults } from '../../../../../file_upload/public';
 
 export const INDEX_SETUP_STEP_ID = 'INDEX_SETUP_STEP_ID';
 export const INDEXING_STEP_ID = 'INDEXING_STEP_ID';
@@ -91,7 +91,7 @@ export class ClientFileCreateSourceEditor extends Component<RenderWizardArgument
     this.props.previewLayers([layerDescriptor]);
   };
 
-  _onIndexingComplete = (results: { indexDataResp: unknown; indexPattern: IndexPattern }) => {
+  _onIndexingComplete = (results: { indexDataResp: ImportResults; indexPattern: IndexPattern }) => {
     if (!this._isMounted) {
       return;
     }
