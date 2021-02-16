@@ -33,7 +33,7 @@ import { PLUGIN } from '../../common/constants/plugin';
 import {
   LazySyntheticsPolicyCreateExtension,
   LazySyntheticsPolicyEditExtension,
-} from '../components/package';
+} from '../components/fleet_package';
 
 export interface ClientPluginsSetup {
   data: DataPublicPluginSetup;
