@@ -101,14 +101,6 @@ Array [
           "aggs": Object {
             "transactionType": Object {
               "aggs": Object {
-                "agentName": Object {
-                  "top_hits": Object {
-                    "docvalue_fields": Array [
-                      "agent.name",
-                    ],
-                    "size": 1,
-                  },
-                },
                 "avg_duration": Object {
                   "avg": Object {
                     "field": "transaction.duration.us",
@@ -127,6 +119,16 @@ Array [
                       "failure",
                       "success",
                     ],
+                  },
+                },
+                "sample": Object {
+                  "top_metrics": Object {
+                    "metrics": Object {
+                      "field": "agent.name",
+                    },
+                    "sort": Object {
+                      "@timestamp": "desc",
+                    },
                   },
                 },
                 "timeseries": Object {
