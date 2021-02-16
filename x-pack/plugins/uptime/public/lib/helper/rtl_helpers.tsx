@@ -22,6 +22,8 @@ import {
 } from '../../../../../../src/plugins/kibana_react/public';
 import { MountWithReduxProvider } from './helper_with_redux';
 import { AppState } from '../../state';
+import { ClientPluginsStart } from '../../apps/plugin';
+import { createTriggerActionUIMock } from '../../../../triggers_actions_ui/public';
 
 interface KibanaProps {
   services?: KibanaServices;
@@ -46,20 +48,39 @@ interface RenderRouterOptions<ExtraCore> extends KibanaProviderOptions<ExtraCore
   state?: Partial<AppState>;
 }
 
+function getSetting<T = any>(key: string): T {
+  return ('MMM D, YYYY @ HH:mm:ss.SSS' as unknown) as T;
+}
+
+function setSetting$<T = any>(key: string): T {
+  return (of('MMM D, YYYY @ HH:mm:ss.SSS') as unknown) as T;
+}
+
 /* default mock core */
 const defaultCore = coreMock.createStart();
-const mockCore: () => any = () => {
-  const core = {
+const mockCore: () => Partial<CoreStart> = () => {
+  const core: Partial<CoreStart & ClientPluginsStart> = {
     ...defaultCore,
     application: {
+      ...defaultCore.application,
       getUrlForApp: () => '/app/uptime',
       navigateToUrl: jest.fn(),
+      capabilities: {
+        ...defaultCore.application.capabilities,
+        uptime: {
+          'alerting:save': true,
+          configureSettings: true,
+          save: true,
+          show: true,
+        },
+      },
     },
     uiSettings: {
-      get: (key: string) => 'MMM D, YYYY @ HH:mm:ss.SSS',
-      get$: (key: string) => of('MMM D, YYYY @ HH:mm:ss.SSS'),
+      ...defaultCore.uiSettings,
+      get: getSetting,
+      get$: setSetting$,
     },
-    usageCollection: { reportUiCounter: () => {} },
+    triggersActionsUi: createTriggerActionUIMock(),
   };
 
   return core;
