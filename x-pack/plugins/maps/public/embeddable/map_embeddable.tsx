@@ -238,8 +238,9 @@ export class MapEmbeddable
       this._dispatchSetChartsPaletteServiceGetColor(this.input.syncColors);
     }
 
-    const isRestore = getSearchService().session.getSearchOptions(this.input.searchSessionId)
-      .isRestore;
+    const isRestore =
+      this.input.searchSessionId &&
+      getSearchService().session.getSearchOptions(this.input.searchSessionId).isRestore;
     if (isRestore !== this._prevIsRestore) {
       this._prevIsRestore = isRestore;
       this._savedMap.getStore().dispatch(
