@@ -12,7 +12,11 @@ import { JsonCodeEditor } from './json_code_editor';
 
 it('returns the `JsonCodeEditor` component', () => {
   const value = {
-    hit: { _index: 'test', _type: 'doc', _id: 'foo', _score: 1, _source: { test: 123 } },
+    _index: 'test',
+    _type: 'doc',
+    _id: 'foo',
+    _score: 1,
+    _source: { test: 123 },
   };
   expect(shallow(<JsonCodeEditor value={value} />)).toMatchSnapshot();
 });

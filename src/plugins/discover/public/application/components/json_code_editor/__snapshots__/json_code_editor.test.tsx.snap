@@ -22,14 +22,12 @@ exports[`returns the \`JsonCodeEditor\` component 1`] = `
       <EuiCopy
         afterMessage="Copied"
         textToCopy="{
-  \\"hit\\": {
-    \\"_index\\": \\"test\\",
-    \\"_type\\": \\"doc\\",
-    \\"_id\\": \\"foo\\",
-    \\"_score\\": 1,
-    \\"_source\\": {
-      \\"test\\": 123
-    }
+  \\"_index\\": \\"test\\",
+  \\"_type\\": \\"doc\\",
+  \\"_id\\": \\"foo\\",
+  \\"_score\\": 1,
+  \\"_source\\": {
+    \\"test\\": 123
   }
 }"
       >
@@ -63,14 +61,12 @@ exports[`returns the \`JsonCodeEditor\` component 1`] = `
         }
       }
       value="{
-  \\"hit\\": {
-    \\"_index\\": \\"test\\",
-    \\"_type\\": \\"doc\\",
-    \\"_id\\": \\"foo\\",
-    \\"_score\\": 1,
-    \\"_source\\": {
-      \\"test\\": 123
-    }
+  \\"_index\\": \\"test\\",
+  \\"_type\\": \\"doc\\",
+  \\"_id\\": \\"foo\\",
+  \\"_score\\": 1,
+  \\"_source\\": {
+    \\"test\\": 123
   }
 }"
     />
