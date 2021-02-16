@@ -48,7 +48,6 @@ export const setupValueSuggestionProvider = (
   }: { timefilter: TimefilterSetup; usageCollector?: AutocompleteUsageCollector }
 ): ValueSuggestionsGetFn => {
   function resolver(title: string, field: IFieldType, query: string, filters: any[]) {
-    usageCollector?.trackCall();
     // Only cache results for a minute
     const ttl = Math.floor(Date.now() / 1000 / 60);
     return [ttl, query, title, field.name, JSON.stringify(filters)].join('|');
@@ -98,6 +97,7 @@ export const setupValueSuggestionProvider = (
     const filterQuery = timeFilter ? buildQueryFromFilters([timeFilter], indexPattern).filter : [];
     const filters = [...(boolFilter ? boolFilter : []), ...filterQuery];
     try {
+      usageCollector?.trackCall();
       return await requestSuggestions(title, field, query, filters, signal);
     } catch (e) {
       if (!signal?.aborted) {
