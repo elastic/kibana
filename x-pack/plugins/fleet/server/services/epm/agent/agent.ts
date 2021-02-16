@@ -64,7 +64,7 @@ const maybeEscapeString = (value: string) => {
   const yamlSpecialCharsRegex = /[{}\[\],&*?|\-<>=!%@:]/;
 
   // In addition, numeric strings need to be quoted to stay strings.
-  if ((value.length && !isNaN(+value)) || value.match(yamlSpecialCharsRegex)) {
+  if ((value.length && !isNaN(+value)) || yamlSpecialCharsRegex.test(value)) {
     return `"${value}"`;
   }
   return value;
