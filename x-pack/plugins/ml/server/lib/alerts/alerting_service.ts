@@ -309,6 +309,13 @@ export function alertingServiceProvider(mlClient: MlClient) {
                 result_type: Object.values(ANOMALY_RESULT_TYPE),
               },
             },
+            ...(params.includeInterim
+              ? []
+              : [
+                  {
+                    term: { is_interim: false },
+                  },
+                ]),
           ],
         },
       },
