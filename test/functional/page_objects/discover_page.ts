@@ -78,7 +78,8 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
     }
 
     public async getColumnHeaders() {
-      return await docTable.getHeaderFields('embeddedSavedSearchDocTable');
+      return await dataGrid.getHeaderFields();
+      // return await docTable.getHeaderFields('embeddedSavedSearchDocTable');
     }
 
     public async openLoadSavedSearchPanel() {

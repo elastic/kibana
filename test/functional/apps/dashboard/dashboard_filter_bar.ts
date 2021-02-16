@@ -162,24 +162,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('saved search filtering', function () {
-      before(async () => {
-        await filterBar.ensureFieldEditorModalIsClosed();
-        await PageObjects.dashboard.gotoDashboardLandingPage();
-        await PageObjects.dashboard.clickNewDashboard();
-        await PageObjects.timePicker.setDefaultDataRange();
-      });
-
-      it('are added when a cell magnifying glass is clicked', async function () {
-        await dashboardAddPanel.addSavedSearch('Rendering-Test:-saved-search');
-        await PageObjects.dashboard.waitForRenderComplete();
-        await testSubjects.click('docTableCellFilter');
-
-        const filterCount = await filterBar.getFilterCount();
-        expect(filterCount).to.equal(1);
-      });
-    });
-
     describe('bad filters are loaded properly', function () {
       before(async () => {
         await filterBar.ensureFieldEditorModalIsClosed();
