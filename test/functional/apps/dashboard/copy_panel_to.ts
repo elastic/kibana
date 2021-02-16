@@ -115,7 +115,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('confirmCopyToButton');
 
       await PageObjects.dashboard.waitForRenderComplete();
-      await PageObjects.dashboard.expectOnDashboard(`Editing New Dashboard (unsaved)`);
+      await PageObjects.dashboard.expectOnDashboard(`Editing New Dashboard`);
     });
 
     it('it always appends new panels instead of overwriting', async () => {
