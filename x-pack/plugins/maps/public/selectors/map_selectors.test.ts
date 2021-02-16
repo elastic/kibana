@@ -66,12 +66,12 @@ describe('getTimeFilters', () => {
 describe('areLayersLoaded', () => {
   function createLayerMock({
     hasErrors = false,
-    isDataLoaded = false,
+    isInitialDataLoadComplete = false,
     isVisible = true,
     showAtZoomLevel = true,
   }: {
     hasErrors?: boolean;
-    isDataLoaded?: boolean;
+    isInitialDataLoadComplete?: boolean;
     isVisible?: boolean;
     showAtZoomLevel?: boolean;
   }) {
@@ -79,8 +79,8 @@ describe('areLayersLoaded', () => {
       hasErrors: () => {
         return hasErrors;
       },
-      isDataLoaded: () => {
-        return isDataLoaded;
+      isInitialDataLoadComplete: () => {
+        return isInitialDataLoadComplete;
       },
       isVisible: () => {
         return isVisible;
@@ -99,35 +99,37 @@ describe('areLayersLoaded', () => {
   });
 
   test('layer should not be counted as loaded if it has not loaded', () => {
-    const layerList = [createLayerMock({ isDataLoaded: false })];
+    const layerList = [createLayerMock({ isInitialDataLoadComplete: false })];
     const waitingForMapReadyLayerList: LayerDescriptor[] = [];
     const zoom = 4;
     expect(areLayersLoaded.resultFunc(layerList, waitingForMapReadyLayerList, zoom)).toBe(false);
   });
 
   test('layer should be counted as loaded if its not visible', () => {
-    const layerList = [createLayerMock({ isVisible: false, isDataLoaded: false })];
+    const layerList = [createLayerMock({ isVisible: false, isInitialDataLoadComplete: false })];
     const waitingForMapReadyLayerList: LayerDescriptor[] = [];
     const zoom = 4;
     expect(areLayersLoaded.resultFunc(layerList, waitingForMapReadyLayerList, zoom)).toBe(true);
   });
 
   test('layer should be counted as loaded if its not shown at zoom level', () => {
-    const layerList = [createLayerMock({ showAtZoomLevel: false, isDataLoaded: false })];
+    const layerList = [
+      createLayerMock({ showAtZoomLevel: false, isInitialDataLoadComplete: false }),
+    ];
     const waitingForMapReadyLayerList: LayerDescriptor[] = [];
     const zoom = 4;
     expect(areLayersLoaded.resultFunc(layerList, waitingForMapReadyLayerList, zoom)).toBe(true);
   });
 
   test('layer should be counted as loaded if it has a loading error', () => {
-    const layerList = [createLayerMock({ hasErrors: true, isDataLoaded: false })];
+    const layerList = [createLayerMock({ hasErrors: true, isInitialDataLoadComplete: false })];
     const waitingForMapReadyLayerList: LayerDescriptor[] = [];
     const zoom = 4;
     expect(areLayersLoaded.resultFunc(layerList, waitingForMapReadyLayerList, zoom)).toBe(true);
   });
 
   test('layer should be counted as loaded if its loaded', () => {
-    const layerList = [createLayerMock({ isDataLoaded: true })];
+    const layerList = [createLayerMock({ isInitialDataLoadComplete: true })];
     const waitingForMapReadyLayerList: LayerDescriptor[] = [];
     const zoom = 4;
     expect(areLayersLoaded.resultFunc(layerList, waitingForMapReadyLayerList, zoom)).toBe(true);
