@@ -336,6 +336,9 @@ export interface ElasticsearchMetricbeatSource {
       };
     };
     ccr?: {
+      leader?: {
+        index?: string;
+      };
       follower?: {
         index?: string;
         shard?: {
@@ -344,6 +347,8 @@ export interface ElasticsearchMetricbeatSource {
         time_since_last_read?: {
           ms?: number;
         };
+        operations_written?: number;
+        failed_read_requests?: number;
       };
 
       read_exceptions?: [];
