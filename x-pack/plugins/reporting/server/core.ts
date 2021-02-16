@@ -90,12 +90,14 @@ export class ReportingCore {
     this.pluginStart$.next(startDeps); // trigger the observer
     this.pluginStartDeps = startDeps; // cache
 
-    // check if Reporting is allowed to poll the TM queue for jobs
+    const { taskManager } = startDeps;
     if (this.getConfig().get('queue', 'pollEnabled')) {
-      // initialize polling with TM
-      const { taskManager } = startDeps;
       const { executeTask, monitorTask } = this;
+      // enable this instance to generate reports and to monitor for pending reports
       await Promise.all([executeTask.init(taskManager), monitorTask.init(taskManager)]);
+    } else {
+      // enable requesting other instances to generate reports
+      await this.executeTask.init(taskManager);
     }
   }
 
