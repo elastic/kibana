@@ -96,7 +96,7 @@ describe('SuggestionComponent', () => {
 
     component.simulate('click');
     expect(mockHandler).toHaveBeenCalledTimes(1);
-    expect(mockHandler).toHaveBeenCalledWith(mockSuggestion);
+    expect(mockHandler).toHaveBeenCalledWith(mockSuggestion, 0);
   });
 
   it('Should call onMouseEnter when user mouses over the element', () => {
