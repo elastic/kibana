@@ -41,7 +41,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       await PageObjects.lens.switchToVisualization('lnsDatatable');
-      await PageObjects.lens.removeDimension('lnsDatatable_column');
+      await PageObjects.lens.removeDimension('lnsDatatable_rows');
       await PageObjects.lens.switchToVisualization('bar_stacked');
 
       await PageObjects.lens.configureDimension({
