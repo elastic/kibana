@@ -37,6 +37,7 @@ export const WorkpadManager = ({ onClose }) => {
     {
       id: 'workpadTemplates',
       name: strings.getWorkpadTemplatesTabLabel(),
+      'data-test-subj': 'workpadTemplates',
       content: (
         <Fragment>
           <EuiSpacer />

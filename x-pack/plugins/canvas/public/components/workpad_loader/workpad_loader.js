@@ -310,6 +310,7 @@ export class WorkpadLoader extends React.PureComponent {
         onClick={this.openRemoveConfirm}
         disabled={!canUserWrite}
         aria-label={strings.getDeleteButtonAriaLabel(selectedWorkpads.length)}
+        data-test-subj="deleteWorkpadButton"
       >
         {strings.getDeleteButtonLabel(selectedWorkpads.length)}
       </EuiButton>
