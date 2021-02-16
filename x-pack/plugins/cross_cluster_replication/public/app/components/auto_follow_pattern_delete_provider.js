@@ -61,45 +61,43 @@ class AutoFollowPatternDeleteProviderUi extends PureComponent {
         );
 
     return (
-      <>
-        {/* eslint-disable-next-line jsx-a11y/mouse-events-have-key-events */}
-        <EuiConfirmModal
-          title={title}
-          onCancel={this.closeConfirmModal}
-          onConfirm={this.onConfirm}
-          cancelButtonText={i18n.translate(
-            'xpack.crossClusterReplication.deleteAutoFollowPattern.confirmModal.cancelButtonText',
-            {
-              defaultMessage: 'Cancel',
-            }
-          )}
-          buttonColor="danger"
-          confirmButtonText={i18n.translate(
-            'xpack.crossClusterReplication.deleteAutoFollowPattern.confirmModal.confirmButtonText',
-            {
-              defaultMessage: 'Remove',
-            }
-          )}
-          onMouseOver={this.onMouseOverModal}
-          data-test-subj="deleteAutoFollowPatternConfirmation"
-        >
-          {!isSingle && (
-            <Fragment>
-              <p>
-                <FormattedMessage
-                  id="xpack.crossClusterReplication.deleteAutoFollowPattern.confirmModal.multipleDeletionDescription"
-                  defaultMessage="You are about to remove these auto-follow patterns:"
-                />
-              </p>
-              <ul>
-                {ids.map((id) => (
-                  <li key={id}>{id}</li>
-                ))}
-              </ul>
-            </Fragment>
-          )}
-        </EuiConfirmModal>
-      </>
+      // eslint-disable-next-line jsx-a11y/mouse-events-have-key-events
+      <EuiConfirmModal
+        title={title}
+        onCancel={this.closeConfirmModal}
+        onConfirm={this.onConfirm}
+        cancelButtonText={i18n.translate(
+          'xpack.crossClusterReplication.deleteAutoFollowPattern.confirmModal.cancelButtonText',
+          {
+            defaultMessage: 'Cancel',
+          }
+        )}
+        buttonColor="danger"
+        confirmButtonText={i18n.translate(
+          'xpack.crossClusterReplication.deleteAutoFollowPattern.confirmModal.confirmButtonText',
+          {
+            defaultMessage: 'Remove',
+          }
+        )}
+        onMouseOver={this.onMouseOverModal}
+        data-test-subj="deleteAutoFollowPatternConfirmation"
+      >
+        {!isSingle && (
+          <Fragment>
+            <p>
+              <FormattedMessage
+                id="xpack.crossClusterReplication.deleteAutoFollowPattern.confirmModal.multipleDeletionDescription"
+                defaultMessage="You are about to remove these auto-follow patterns:"
+              />
+            </p>
+            <ul>
+              {ids.map((id) => (
+                <li key={id}>{id}</li>
+              ))}
+            </ul>
+          </Fragment>
+        )}
+      </EuiConfirmModal>
     );
   };
 

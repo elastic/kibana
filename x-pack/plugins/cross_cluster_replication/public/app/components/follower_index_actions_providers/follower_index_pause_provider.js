@@ -69,64 +69,62 @@ class FollowerIndexPauseProviderUi extends PureComponent {
     const hasCustomSettings = indices.some((index) => !areAllSettingsDefault(index));
 
     return (
-      <>
-        {/* eslint-disable-next-line jsx-a11y/mouse-events-have-key-events */}
-        <EuiConfirmModal
-          title={title}
-          onCancel={this.closeConfirmModal}
-          onConfirm={this.onConfirm}
-          cancelButtonText={i18n.translate(
-            'xpack.crossClusterReplication.pauseFollowerIndex.confirmModal.cancelButtonText',
-            {
-              defaultMessage: 'Cancel',
-            }
-          )}
-          buttonColor={hasCustomSettings ? 'danger' : 'primary'}
-          confirmButtonText={i18n.translate(
-            'xpack.crossClusterReplication.pauseFollowerIndex.confirmModal.confirmButtonText',
-            {
-              defaultMessage: 'Pause replication',
-            }
-          )}
-          onMouseOver={this.onMouseOverModal}
-          data-test-subj="pauseReplicationConfirmation"
-        >
-          {hasCustomSettings && (
+      // eslint-disable-next-line jsx-a11y/mouse-events-have-key-events
+      <EuiConfirmModal
+        title={title}
+        onCancel={this.closeConfirmModal}
+        onConfirm={this.onConfirm}
+        cancelButtonText={i18n.translate(
+          'xpack.crossClusterReplication.pauseFollowerIndex.confirmModal.cancelButtonText',
+          {
+            defaultMessage: 'Cancel',
+          }
+        )}
+        buttonColor={hasCustomSettings ? 'danger' : 'primary'}
+        confirmButtonText={i18n.translate(
+          'xpack.crossClusterReplication.pauseFollowerIndex.confirmModal.confirmButtonText',
+          {
+            defaultMessage: 'Pause replication',
+          }
+        )}
+        onMouseOver={this.onMouseOverModal}
+        data-test-subj="pauseReplicationConfirmation"
+      >
+        {hasCustomSettings && (
+          <p>
+            {isSingle ? (
+              <FormattedMessage
+                id="xpack.crossClusterReplication.pauseFollowerIndex.confirmModal.singlePauseDescriptionWithSettingWarning"
+                defaultMessage="Pausing replication to this follower index clears its custom
+                    advanced settings."
+              />
+            ) : (
+              <FormattedMessage
+                id="xpack.crossClusterReplication.pauseFollowerIndex.confirmModal.multiplePauseDescriptionWithSettingWarning"
+                defaultMessage="Pausing replication to a follower index clears its custom
+                    advanced settings."
+              />
+            )}
+          </p>
+        )}
+
+        {!isSingle && (
+          <Fragment>
             <p>
-              {isSingle ? (
-                <FormattedMessage
-                  id="xpack.crossClusterReplication.pauseFollowerIndex.confirmModal.singlePauseDescriptionWithSettingWarning"
-                  defaultMessage="Pausing replication to this follower index clears its custom
-                    advanced settings."
-                />
-              ) : (
-                <FormattedMessage
-                  id="xpack.crossClusterReplication.pauseFollowerIndex.confirmModal.multiplePauseDescriptionWithSettingWarning"
-                  defaultMessage="Pausing replication to a follower index clears its custom
-                    advanced settings."
-                />
-              )}
+              <FormattedMessage
+                id="xpack.crossClusterReplication.pauseFollowerIndex.confirmModal.multiplePauseDescription"
+                defaultMessage="Replication will pause on these follower indices:"
+              />
             </p>
-          )}
 
-          {!isSingle && (
-            <Fragment>
-              <p>
-                <FormattedMessage
-                  id="xpack.crossClusterReplication.pauseFollowerIndex.confirmModal.multiplePauseDescription"
-                  defaultMessage="Replication will pause on these follower indices:"
-                />
-              </p>
-
-              <ul>
-                {indices.map((index) => (
-                  <li key={index.name}>{index.name}</li>
-                ))}
-              </ul>
-            </Fragment>
-          )}
-        </EuiConfirmModal>
-      </>
+            <ul>
+              {indices.map((index) => (
+                <li key={index.name}>{index.name}</li>
+              ))}
+            </ul>
+          </Fragment>
+        )}
+      </EuiConfirmModal>
     );
   };
 
