@@ -74,6 +74,13 @@ export class MonitorReportsTask implements ReportingTask {
     return () => {
       return {
         run: async () => {
+          if (!this.config.queue.pollEnabled) {
+            this.logger.debug(
+              `This instance is configured to not poll for pending reports. Exiting from the monitoring task.`
+            );
+            return;
+          }
+
           const reportingStore = await this.getStore();
 
           try {
