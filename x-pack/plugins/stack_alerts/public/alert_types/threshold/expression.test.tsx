@@ -89,6 +89,7 @@ describe('IndexThresholdAlertTypeExpression', () => {
       <IndexThresholdAlertTypeExpression
         alertInterval="1m"
         alertThrottle="1m"
+        alertNotifyWhen="onThrottleInterval"
         alertParams={alertParams}
         setAlertParams={() => {}}
         setAlertProperty={() => {}}

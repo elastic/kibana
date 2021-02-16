@@ -6,14 +6,14 @@
  */
 
 import React, { useEffect, useRef, useState } from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup } from '@elastic/eui';
 import { TickFormatter, DomainRange, BarStyleAccessor } from '@elastic/charts';
-
 import { useWaterfallContext } from '../context/waterfall_chart';
 import {
   WaterfallChartOuterContainer,
   WaterfallChartFixedTopContainer,
   WaterfallChartFixedTopContainerSidebarCover,
+  WaterfallChartSidebarWrapper,
   WaterfallChartTopContainer,
   RelativeContainer,
   WaterfallChartFilterContainer,
@@ -27,8 +27,12 @@ import { WaterfallBarChart } from './waterfall_bar_chart';
 import { WaterfallChartFixedAxis } from './waterfall_chart_fixed_axis';
 import { NetworkRequestsTotal } from './network_requests_total';
 
-export type RenderItem<I = any> = (item: I, index?: number) => JSX.Element;
-export type RenderFilter = () => JSX.Element;
+export type RenderItem<I = any> = (
+  item: I,
+  index: number,
+  onClick?: (event: any) => void
+) => JSX.Element;
+export type RenderElement = () => JSX.Element;
 
 export interface WaterfallChartProps {
   tickFormat: TickFormatter;
@@ -36,7 +40,8 @@ export interface WaterfallChartProps {
   barStyleAccessor: BarStyleAccessor;
   renderSidebarItem?: RenderItem;
   renderLegendItem?: RenderItem;
-  renderFilter?: RenderFilter;
+  renderFilter?: RenderElement;
+  renderFlyout?: RenderElement;
   maxHeight?: string;
   fullHeight?: boolean;
 }
@@ -48,6 +53,7 @@ export const WaterfallChart = ({
   renderSidebarItem,
   renderLegendItem,
   renderFilter,
+  renderFlyout,
   maxHeight = '800px',
   fullHeight = false,
 }: WaterfallChartProps) => {
@@ -82,7 +88,7 @@ export const WaterfallChart = ({
       <WaterfallChartFixedTopContainer>
         <WaterfallChartTopContainer gutterSize="none" responsive={false}>
           {shouldRenderSidebar && (
-            <EuiFlexItem grow={SIDEBAR_GROW_SIZE}>
+            <WaterfallChartSidebarWrapper grow={SIDEBAR_GROW_SIZE}>
               <WaterfallChartFixedTopContainerSidebarCover paddingSize="none" hasShadow={false} />
               <NetworkRequestsTotal
                 totalNetworkRequests={totalNetworkRequests}
@@ -93,7 +99,7 @@ export const WaterfallChart = ({
               {renderFilter && (
                 <WaterfallChartFilterContainer>{renderFilter()}</WaterfallChartFilterContainer>
               )}
-            </EuiFlexItem>
+            </WaterfallChartSidebarWrapper>
           )}
 
           <WaterfallChartAxisOnlyContainer
@@ -130,6 +136,7 @@ export const WaterfallChart = ({
         </EuiFlexGroup>
       </WaterfallChartOuterContainer>
       {shouldRenderLegend && <Legend items={legendItems!} render={renderLegendItem!} />}
+      {renderFlyout && renderFlyout()}
     </RelativeContainer>
   );
 };

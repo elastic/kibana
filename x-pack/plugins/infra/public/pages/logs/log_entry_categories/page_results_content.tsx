@@ -10,6 +10,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiPage, EuiPanel, EuiSuperDatePicker } from
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import useInterval from 'react-use/lib/useInterval';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
 import { useTrackPageview } from '../../../../../observability/public';
@@ -17,7 +18,6 @@ import { TimeRange } from '../../../../common/time/time_range';
 import { CategoryJobNoticesSection } from '../../../components/logging/log_analysis_job_status';
 import { useLogEntryCategoriesModuleContext } from '../../../containers/logs/log_analysis/modules/log_entry_categories';
 import { ViewLogInContext } from '../../../containers/logs/view_log_in_context';
-import { useInterval } from '../../../hooks/use_interval';
 import { PageViewLogInContext } from '../stream/page_view_log_in_context';
 import { TopCategoriesSection } from './sections/top_categories';
 import { useLogEntryCategoriesResults } from './use_log_entry_categories_results';
