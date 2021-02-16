@@ -458,13 +458,28 @@ Uptime::
 * UX use replace history instead of push on first load {kibana-pull}88586[#88586]
 * Fixes impacted page load errors {kibana-pull}88597[#88597]
 
-
 [[release-notes-7.10.2]]
 == {kib} 7.10.2
 
-For detailed information about the 7.10.2 release, review the following bug fixes.
+For detailed information about the 7.10.2 release, review the following bug fixes. For the breaking changes, refer to the <<breaking-changes-7.10,breaking changes in 7.10>>.
 
-For the breaking changes, refer to the <<breaking-changes-7.10,breaking changes in 7.10>>.
+[float]
+[[security-update-v7.10.2]]
+=== Security update
+*Vega* visualizations are susceptible to stored and reflected XSS via a vulnerable version of the Vega library. When you create *Vega* visualizations or create a vulnerable URL that describes the visualization, an arbitrary JavaScript can execute in your browser.
+
+[float]
+[[affected-versions-v7.10.2]]
+==== Affected versions
+Affected versions include 7.10.1 and earlier.
+
+[float]
+[[solution-v7.10.2]]
+==== Solution
+Verify if you use *Vega* visualizations, then complete the following:
+
+* If you use *Vega* visualizations, upgrade to 7.10.2.
+* If you do not use *Vega* visualizations, open your kibana.yml file, then change `vega.enabled: true` to `vega.enabled: false`.
 
 [float]
 [[bug-v7.10.2]]
