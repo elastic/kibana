@@ -18,7 +18,6 @@ export default function ({ getService, getPageObjects }) {
   const security = getService('security');
   const PageObjects = getPageObjects(['common', 'context', 'timePicker', 'discover']);
   const esArchiver = getService('esArchiver');
-  const log = getService('log');
 
   describe('context view for date_nanos with custom timestamp', () => {
     before(async function () {
@@ -35,8 +34,6 @@ export default function ({ getService, getPageObjects }) {
     it('displays predessors - anchor - successors in right order ', async function () {
       await PageObjects.context.navigateTo(TEST_INDEX_PATTERN, '1');
       const actualRowsText = await docTable.getRowsText();
-      expect(actualRowsText.length).to.eql(3);
-      log.debug(actualRowsText);
       const expectedRowsText = [
         'Oct 21, 2019 @ 08:30:04.828733000 -',
         'Oct 21, 2019 @ 00:30:04.828740000 -',
