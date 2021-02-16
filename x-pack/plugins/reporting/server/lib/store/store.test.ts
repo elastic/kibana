@@ -239,7 +239,6 @@ describe('ReportingStore', () => {
         "payload": Object {
           "testPayload": "payload",
         },
-        "priority": 12,
         "process_expiration": undefined,
         "started_at": undefined,
         "status": "pending",
