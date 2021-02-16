@@ -16,6 +16,7 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
   const find = getService('find');
   const retry = getService('retry');
   const browser = getService('browser');
+  const globalNav = getService('globalNav');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
@@ -157,6 +158,13 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
       await testSubjects.click('breadcrumb dashboardListingBreadcrumb first');
     }
 
+    public async expectOnDashboard(dashboardTitle: string) {
+      await retry.waitFor(
+        'last breadcrumb to have dashboard title',
+        async () => (await globalNav.getLastBreadcrumb()) === dashboardTitle
+      );
+    }
+
     public async gotoDashboardLandingPage(ignorePageLeaveWarning = true) {
       log.debug('gotoDashboardLandingPage');
       const onPage = await this.onDashboardLandingPage();
@@ -238,14 +246,26 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
       return await testSubjects.exists('dashboardEditMode');
     }
 
-    public async clickCancelOutOfEditMode() {
+    public async clickCancelOutOfEditMode(accept = true) {
       log.debug('clickCancelOutOfEditMode');
       await testSubjects.click('dashboardViewOnlyMode');
+      if (accept) {
+        const confirmation = await testSubjects.exists('dashboardDiscardConfirmKeep');
+        if (confirmation) {
+          await testSubjects.click('dashboardDiscardConfirmKeep');
+        }
+      }
     }
 
-    public async clickDiscardChanges() {
+    public async clickDiscardChanges(accept = true) {
       log.debug('clickDiscardChanges');
-      await testSubjects.click('dashboardDiscardChanges');
+      await testSubjects.click('dashboardViewOnlyMode');
+      if (accept) {
+        const confirmation = await testSubjects.exists('dashboardDiscardConfirmDiscard');
+        if (confirmation) {
+          await testSubjects.click('dashboardDiscardConfirmDiscard');
+        }
+      }
     }
 
     public async clickQuickSave() {
