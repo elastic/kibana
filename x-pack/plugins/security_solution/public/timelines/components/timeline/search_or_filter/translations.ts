@@ -106,6 +106,13 @@ export const SELECT_INDEX_PATTERNS = i18n.translate(
   }
 );
 
+export const INDEX_PATTERNS_SELECTION_LABEL = i18n.translate(
+  'xpack.securitySolution.timeline.searchOrFilter.indexPatterns.selectionLabel',
+  {
+    defaultMessage: 'Choose the source of the data on this timeline',
+  }
+);
+
 export const CONFIGURE_INDEX_PATTERNS = i18n.translate(
   'xpack.securitySolution.timeline.searchOrFilter.indexPatterns.configure',
   {

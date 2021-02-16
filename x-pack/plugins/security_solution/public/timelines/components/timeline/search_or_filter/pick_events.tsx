@@ -41,7 +41,6 @@ import {
   renderPatternOption,
 } from '../../../../common/components/sourcerer/helpers';
 import { IndexPatternInfo } from '../../../../common/components/sourcerer/index_pattern_info';
-import * as i18nSourcerer from '../../../../common/components/sourcerer/translations';
 
 const PopoverContent = styled.div`
   width: 600px;
@@ -379,7 +378,7 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
               <>
                 <EuiSpacer size="s" />
                 <EuiText color="default">
-                  {i18nSourcerer.INDEX_PATTERNS_SELECTION_LABEL} <IndexPatternInfo />
+                  {i18n.INDEX_PATTERNS_SELECTION_LABEL} <IndexPatternInfo />
                 </EuiText>
                 <EuiSpacer size="xs" />
                 {comboBox}
