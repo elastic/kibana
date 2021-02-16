@@ -10,7 +10,7 @@ import { PIVOT_SUPPORTED_AGGS } from '../../../common/types/pivot_aggs';
 import { PivotGroupByConfig } from '../common';
 
 import { StepDefineExposedState } from '../sections/create_transform/components/step_define';
-import { StepDetailsExposedState } from '../sections/create_transform/components/step_details/step_details_form';
+import { StepDetailsExposedState } from '../sections/create_transform/components/step_details';
 
 import { PIVOT_SUPPORTED_GROUP_BY_AGGS } from './pivot_group_by';
 import { PivotAggsConfig } from './pivot_aggs';
@@ -178,6 +178,9 @@ describe('Transform: Common', () => {
       continuousModeDelay: 'the-continuous-mode-delay',
       createIndexPattern: false,
       isContinuousModeEnabled: false,
+      isRetentionPolicyEnabled: false,
+      retentionPolicyDateField: '',
+      retentionPolicyMaxAge: '',
       transformId: 'the-transform-id',
       transformDescription: 'the-transform-description',
       transformFrequency: '1m',

@@ -19,7 +19,7 @@ import type {
 
 import type { SavedSearchQuery } from '../hooks/use_search_items';
 import type { StepDefineExposedState } from '../sections/create_transform/components/step_define';
-import type { StepDetailsExposedState } from '../sections/create_transform/components/step_details/step_details_form';
+import type { StepDetailsExposedState } from '../sections/create_transform/components/step_details';
 import { isPopulatedObject } from './utils/object_utils';
 
 export interface SimpleQuery {
@@ -142,6 +142,17 @@ export const getCreateTransformRequestBody = (
           time: {
             field: transformDetailsState.continuousModeDateField,
             delay: transformDetailsState.continuousModeDelay,
+          },
+        },
+      }
+    : {}),
+  // conditionally add retention policy settings
+  ...(transformDetailsState.isRetentionPolicyEnabled
+    ? {
+        retention_policy: {
+          time: {
+            field: transformDetailsState.retentionPolicyDateField,
+            max_age: transformDetailsState.retentionPolicyMaxAge,
           },
         },
       }
