@@ -73,7 +73,7 @@ export const mapColumn: ExpressionFunctionDefinition<
       types: ['string', 'null'],
       help: i18n.translate('expressions.functions.mapColumn.args.copyMetaFromHelpText', {
         defaultMessage:
-          "if set, the meta object from the specified column id is copied over to the specified target column. Throws an exception of the column doesn't exist",
+          "If set, the meta object from the specified column id is copied over to the specified target column. Throws an exception if the column doesn't exist",
       }),
       required: false,
       default: null,
