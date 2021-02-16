@@ -318,7 +318,8 @@ export type DatasourceDimensionDropHandlerProps<T> = DatasourceDimensionDropProp
   dropType: DropType;
 };
 
-export type DataType = 'document' | 'string' | 'number' | 'date' | 'boolean' | 'ip';
+export type FieldOnlyDataType = 'document' | 'ip' | 'histogram';
+export type DataType = 'string' | 'number' | 'date' | 'boolean' | FieldOnlyDataType;
 
 // An operation represents a column in a table, not any information
 // about how the column was created such as whether it is a sum or average.
