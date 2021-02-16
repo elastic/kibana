@@ -159,7 +159,7 @@ export const getHistogramBucketAgg = ({
         serialize(val, aggConfig) {
           // store actually used auto interval in serialized agg config to be able to read it from the result data table meta information
           const autoBounds = aggConfig?.getAutoBounds();
-          if (aggConfig && autoBounds) {
+          if (val === autoInterval && aggConfig && autoBounds) {
             const usedInterval = calculateHistogramInterval({
               values: autoBounds,
               interval: aggConfig.params.interval,
