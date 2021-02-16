@@ -37,12 +37,6 @@ if [[ "$BUILD_TS_REFS_CACHE_CAPTURE" == "true" ]]; then
 fi
 
 ###
-### ship ci-stats created durring bootstrap
-###
-node scripts/ship_ci_stats \
-  --metrics "$KIBANA_DIR/packages/kbn-ui-shared-deps/target/metrics.json"
-
-###
 ### Download es snapshots
 ###
 echo " -- downloading es snapshot"
