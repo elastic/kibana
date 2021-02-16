@@ -133,7 +133,7 @@ function FilterBarUI(props: Props) {
   }
 
   function onUpdate(i: number, filter: Filter) {
-    reportUiCounter?.(METRIC_TYPE.CLICK, `filte:edited`);
+    reportUiCounter?.(METRIC_TYPE.CLICK, `filter:edited`);
     const filters = [...props.filters];
     filters[i] = filter;
     onFiltersUpdated(filters);

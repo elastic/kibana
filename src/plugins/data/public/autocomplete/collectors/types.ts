@@ -7,10 +7,10 @@
  */
 
 export enum AUTOCOMPLETE_EVENT_TYPE {
-  CALL = 'call',
-  REQUEST = 'req',
-  RESULT = 'res',
-  ERROR = 'err',
+  CALL = 'autocomplete:call',
+  REQUEST = 'autocomplete:req',
+  RESULT = 'autocomplete:res',
+  ERROR = 'autocomplete:err',
 }
 
 export interface AutocompleteUsageCollector {
