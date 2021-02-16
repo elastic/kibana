@@ -35,7 +35,12 @@ import { SchemaLogic, dataTypeOptions } from './schema_logic';
 
 describe('SchemaLogic', () => {
   const { http } = mockHttpValues;
-  const { clearFlashMessages, flashAPIErrors, setSuccessMessage } = mockFlashMessageHelpers;
+  const {
+    clearFlashMessages,
+    flashAPIErrors,
+    setSuccessMessage,
+    setErrorMessage,
+  } = mockFlashMessageHelpers;
   const { mount } = new LogicMounter(SchemaLogic);
 
   const defaultValues = {
@@ -298,10 +303,7 @@ describe('SchemaLogic', () => {
         );
         await nextTick();
 
-        expect(flashAPIErrors).toHaveBeenCalledWith({
-          error: 'this is an error',
-          message: SCHEMA_FIELD_ERRORS_ERROR_MESSAGE,
-        });
+        expect(setErrorMessage).toHaveBeenCalledWith(SCHEMA_FIELD_ERRORS_ERROR_MESSAGE);
       });
     });
 

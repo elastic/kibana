@@ -13,6 +13,7 @@ import { ADD, UPDATE } from '../../../../../shared/constants/operations';
 import {
   flashAPIErrors,
   setSuccessMessage,
+  setErrorMessage,
   clearFlashMessages,
 } from '../../../../../shared/flash_messages';
 import { HttpLogic } from '../../../../../shared/http';
@@ -295,7 +296,7 @@ export const SchemaLogic = kea<MakeLogicType<SchemaValues, SchemaActions>>({
           fieldCoercionErrors: response.fieldCoercionErrors,
         });
       } catch (e) {
-        flashAPIErrors({ ...e, message: SCHEMA_FIELD_ERRORS_ERROR_MESSAGE });
+        setErrorMessage(SCHEMA_FIELD_ERRORS_ERROR_MESSAGE);
       }
     },
     addNewField: ({ fieldName, newFieldType }) => {
