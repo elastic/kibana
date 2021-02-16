@@ -65,11 +65,9 @@ export function Correlations() {
         iconType="visTagCloud"
       >
         {i18n.translate('xpack.apm.correlations.buttonLabel', {
-          defaultMessage: 'Explore correlations',
+          defaultMessage: 'View correlations',
         })}
       </EuiButton>
-
-      <EuiSpacer size="s" />
 
       {isFlyoutVisible && (
         <EuiPortal>
@@ -81,14 +79,20 @@ export function Correlations() {
             <EuiFlyoutHeader hasBorder aria-labelledby="correlations-flyout">
               <EuiTitle>
                 <h2 id="correlations-flyout">
-                  {i18n.translate('xpack.apm.correlations.title', {
-                    defaultMessage: 'Correlations',
-                  })}
+                  {CORRELATIONS_TITLE}
                   &nbsp;
                   <EuiBetaBadge
-                    label="Beta"
-                    title="Correlations"
-                    tooltipContent="Correlations is not GA. Please help us by reporting any bugs."
+                    label={i18n.translate('xpack.apm.correlations.betaLabel', {
+                      defaultMessage: 'Beta',
+                    })}
+                    title={CORRELATIONS_TITLE}
+                    tooltipContent={i18n.translate(
+                      'xpack.apm.correlations.betaDescription',
+                      {
+                        defaultMessage:
+                          'Correlations is not GA. Please help us by reporting any bugs.',
+                      }
+                    )}
                   />
                 </h2>
               </EuiTitle>
@@ -142,3 +146,7 @@ export function Correlations() {
     </>
   );
 }
+
+const CORRELATIONS_TITLE = i18n.translate('xpack.apm.correlations.title', {
+  defaultMessage: 'Correlations',
+});
