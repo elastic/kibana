@@ -646,7 +646,6 @@
     "dashboard.savedDashboard.newDashboardTitle": "新建仪表板",
     "dashboard.stateManager.timeNotSavedWithDashboardErrorMessage": "时间未随此仪表板保存，因此无法同步。",
     "dashboard.strings.dashboardEditTitle": "正在编辑 {title}",
-    "dashboard.strings.dashboardUnsavedEditTitle": "正在编辑 {title}（未保存）",
     "dashboard.topNav.cloneModal.cancelButtonLabel": "取消",
     "dashboard.topNav.cloneModal.cloneDashboardModalHeaderTitle": "克隆仪表板",
     "dashboard.topNav.cloneModal.confirmButtonLabel": "确认克隆",
