@@ -105,14 +105,15 @@ export const enrichSignalThreatMatches = async (
       },
     };
   });
-  /* eslint-disable require-atomic-updates */
-  signals.hits.hits = enrichedSignals;
-  if (isObject(signals.hits.total)) {
-    signals.hits.total.value = enrichedSignals.length;
-  } else {
-    signals.hits.total = enrichedSignals.length;
-  }
-  /* eslint-enable require-atomic-updates */
 
-  return signals;
+  return {
+    ...signals,
+    hits: {
+      ...signals.hits,
+      hits: enrichedSignals,
+      total: isObject(signals.hits.total)
+        ? { ...signals.hits.total, value: enrichedSignals.length }
+        : enrichedSignals.length,
+    },
+  };
 };
