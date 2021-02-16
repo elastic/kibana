@@ -2,6 +2,7 @@
   display: flex;
   flex-direction: column;
   flex: 1 1 100%;
+  overflow: auto;
 
   .tvbVisTimeSeries {
     overflow: hidden;
