@@ -7,8 +7,8 @@
  */
 import { act } from 'react-dom/test-utils';
 
-import '../__jest__/setup_environment';
-import { registerTestBed, TestBed, noop, docLinks } from '../test_utils';
+import '../test_utils/setup_environment';
+import { registerTestBed, TestBed, noop, docLinks, getCommonActions } from '../test_utils';
 
 import { FieldEditor } from './field_editor';
 import { FieldEditorFlyoutContent, Props } from './field_editor_flyout_content';
@@ -33,17 +33,7 @@ const setup = (props: Props = defaultProps) => {
   })(props) as TestBed;
 
   const actions = {
-    toggleFormRow(row: 'customLabel' | 'value' | 'format', value: 'on' | 'off' = 'on') {
-      const testSubj = `${row}Row.toggle`;
-      const toggle = testBed.find(testSubj);
-      const isOn = toggle.props()['aria-checked'];
-
-      if ((value === 'on' && isOn) || (value === 'off' && isOn === false)) {
-        return;
-      }
-
-      testBed.form.toggleEuiSwitch(testSubj);
-    },
+    ...getCommonActions(testBed),
   };
 
   return {
