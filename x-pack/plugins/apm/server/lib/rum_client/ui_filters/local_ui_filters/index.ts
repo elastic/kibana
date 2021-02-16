@@ -13,7 +13,7 @@ import { getLocalFilterQuery } from './get_local_filter_query';
 import { Setup } from '../../../helpers/setup_request';
 import { localUIFilters } from './config';
 import { LocalUIFilterName } from '../../../../../common/ui_filter';
-import { withApmSpan } from '../../../utils/with_apm_span';
+import { withApmSpan } from '../../../../utils/with_apm_span';
 
 export type LocalUIFiltersAPIResponse = PromiseReturnType<
   typeof getLocalUIFilters
