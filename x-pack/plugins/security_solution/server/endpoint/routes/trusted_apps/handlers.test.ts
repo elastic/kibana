@@ -75,6 +75,8 @@ const TRUSTED_APP: TrustedApp = {
   version: 'abc123',
   created_at: '11/11/2011T11:11:11.111',
   created_by: 'admin',
+  updated_at: '2021-01-04T13:55:00.561Z',
+  updated_by: 'me',
   name: 'linux trusted app 1',
   description: 'Linux trusted app 1',
   os: OperatingSystem.LINUX,

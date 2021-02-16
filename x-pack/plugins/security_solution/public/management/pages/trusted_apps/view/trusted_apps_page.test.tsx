@@ -58,6 +58,8 @@ describe('When on the Trusted Apps Page', () => {
     os: OperatingSystem.WINDOWS,
     created_at: '2021-01-04T13:55:00.561Z',
     created_by: 'me',
+    updated_at: '2021-01-04T13:55:00.561Z',
+    updated_by: 'me',
     description: 'a good one',
     effectScope: { type: 'global' },
     entries: [
@@ -521,6 +523,8 @@ describe('When on the Trusted Apps Page', () => {
                 version: 'abc123',
                 created_at: '2020-09-16T14:09:45.484Z',
                 created_by: 'kibana',
+                updated_at: '2021-01-04T13:55:00.561Z',
+                updated_by: 'me',
               },
             };
             await reactTestingLibrary.act(async () => {
