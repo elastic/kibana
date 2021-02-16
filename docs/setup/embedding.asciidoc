@@ -1,0 +1,49 @@
+[[embedding]]
+== Embedding {kib}
+
+You can embed a {kib} dashboard or visualization using an HTML code snippet generated with the *Copy iFrame code* button in *Share > Embed code* menu in *Dashboard* or *Visualize*.
+
+NOTE: Embedding of any other part of {kib} is also generally possible, but you may need to craft the proper HTML code manually.
+
+[role="screenshot"]
+image::images/embed-kibana.png[Generate an HTML snippet to embed {kib}, align=center]
+
+[float]
+[[embedding-security]]
+=== Configure security
+
+Embedding through iframes, if used properly, does not directly pose a security risk, but still requires a careful consideration.
+
+[float]
+==== Authentication
+If you're embedding {kib} to the website that supports Single Sign-On with SAML, OpenID Connect, Kerberos or PKI it's highly advisable to configure {kib} as a part of this Single Sign-On setup as well. Operating within a single and properly configured security domain would provide you with the most secure and seamless user experience. You can read more at <<kibana-authentication, Authentication in {kib}>>.
+
+If you want anyone to access embedded {kib} skipping the login step, but the Single Sign-On isn't an option for you, consider configuring the <<anonymous-authentication, anonymous access>> instead. It is already natively integrated into the embedding workflow for the dashboards and visualizations.
+
+If you have multiple authentication providers enabled, and you want to automatically log in anonymous users when embedding anything other than dashboards and visualizations, then you will need to add the `auth_provider_hint=<anonymous-provider-name>` query string parameter to the {kib} URL that you're embedding.
+
+For example, if you craft the iframe code to embed {kib}, it may look like this:
+
+```html
+<iframe src="https://localhost:5601/app/monitoring#/elasticsearch/nodes?embed=true&_g=(....)" height="600" width="800"></iframe>
+```
+
+To make this iframe leverage anonymous access automatically, you will need to modify a link to {kib} in the `src` iframe attribute to look like this:
+
+```html
+<iframe src="https://localhost:5601/app/monitoring?auth_provider_hint=anonymous1#/elasticsearch/nodes?embed=true&_g=(....)" height="600" width="800"></iframe>
+```
+
+Note that `auth_provider_hint` query string parameter goes *before* the hash URL fragment.
+
+[float]
+==== Cookies
+
+Irrespective to the authentication type you're going to use for the embedded {kib} you need to make sure that browsers can transmit session cookies to a {kib} server. The setting you need to be aware of is <<xpack-security-sameSiteCookies, `xpack.security.sameSiteCookies`>>, and to support modern browsers, you might need to set it to `None`:
+
+[source,yaml]
+--
+xpack.security.sameSiteCookies: "None"
+--
+
+You can find more information about possible values and implications <<xpack-security-sameSiteCookies, here>>.
