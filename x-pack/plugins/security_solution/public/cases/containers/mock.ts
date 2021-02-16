@@ -26,6 +26,7 @@ import { ConnectorTypes } from '../../../../case/common/api/connectors';
 export { connectorsMock } from './configure/mock';
 
 export const basicCaseId = 'basic-case-id';
+export const basicSubCaseId = 'basic-sub-case-id';
 const basicCommentId = 'basic-comment-id';
 const basicCreatedAt = '2020-02-19T23:06:33.798Z';
 const basicUpdatedAt = '2020-02-20T15:02:57.995Z';

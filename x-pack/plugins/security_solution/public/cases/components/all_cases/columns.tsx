@@ -25,7 +25,6 @@ import { Case, SubCase } from '../../containers/types';
 import { FormattedRelativePreferenceDate } from '../../../common/components/formatted_date';
 import { CaseDetailsLink } from '../../../common/components/links';
 import * as i18n from './translations';
-import { STATUS } from '../case_view/translations';
 import { Status } from '../status';
 import { getSubCasesStatusCountsBadges, isSubCase } from './helpers';
 import { ALERTS } from '../../../app/home/translations';
@@ -187,30 +186,13 @@ export const getCasesColumns = (
     {
       name: i18n.EXTERNAL_INCIDENT,
       render: (theCase: Case) => {
-        if (theCase.id != null) {
-          return <ExternalServiceColumn theCase={theCase} />;
-        }
-        return getEmptyTagValue();
-      },
-    },
-    {
-      name: i18n.INCIDENT_MANAGEMENT_SYSTEM,
-      render: (theCase: Case) => {
-        if (theCase.externalService != null) {
-          return renderStringField(
-            `${theCase.externalService.connectorName}`,
-            `case-table-column-connector`
-          );
-        }
-        return getEmptyTagValue();
-      },
-    },
-    {
-      name: STATUS,
-      render: (theCase: Case) => {
         if (theCase?.subCases == null || theCase.subCases.length === 0) {
+          if (theCase.status == null) {
+            return getEmptyTagValue();
+          }
           return <Status type={theCase.status} />;
         }
+
         const badges = getSubCasesStatusCountsBadges(theCase.subCases);
         return badges.map(({ color, count }) => <EuiBadge color={color}>{count}</EuiBadge>);
       },
