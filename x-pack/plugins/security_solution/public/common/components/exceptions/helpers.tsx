@@ -16,6 +16,7 @@ import {
   BuilderEntry,
   CreateExceptionListItemBuilderSchema,
   ExceptionsBuilderExceptionItem,
+  flattenType,
 } from './types';
 import { EXCEPTION_OPERATORS, isOperator } from '../autocomplete/operators';
 import { OperatorOption } from '../autocomplete/types';
@@ -369,7 +370,7 @@ export const entryHasListType = (
  * can be an object or array of objects
  */
 export const getFileCodeSignature = (
-  alertData: Ecs
+  alertData: flattenType<Ecs>
 ): Array<{ subjectName: string; trusted: string }> => {
   const { file } = alertData;
   const codeSignature = file && file.Ext && file.Ext.code_signature;
@@ -382,7 +383,7 @@ export const getFileCodeSignature = (
  * can be an object or array of objects
  */
 export const getProcessCodeSignature = (
-  alertData: Ecs
+  alertData: flattenType<Ecs>
 ): Array<{ subjectName: string; trusted: string }> => {
   const { process } = alertData;
   const codeSignature = process && process.Ext && process.Ext.code_signature;
@@ -395,7 +396,7 @@ export const getProcessCodeSignature = (
  * a single object with subject_name and trusted.
  */
 export const getCodeSignatureValue = (
-  codeSignature: CodeSignature | CodeSignature[] | undefined
+  codeSignature: flattenType<CodeSignature> | flattenType<CodeSignature[]> | undefined
 ): Array<{ subjectName: string; trusted: string }> => {
   if (Array.isArray(codeSignature) && codeSignature.length > 0) {
     return codeSignature.map((signature) => ({
@@ -403,7 +404,7 @@ export const getCodeSignatureValue = (
       trusted: (signature.trusted && signature.trusted) ?? '',
     }));
   } else {
-    const signature: CodeSignature | undefined = !Array.isArray(codeSignature)
+    const signature: flattenType<CodeSignature> | undefined = !Array.isArray(codeSignature)
       ? codeSignature
       : undefined;
     const subjectName: string | undefined =
@@ -589,7 +590,7 @@ export const entryHasNonEcsType = (
 export const defaultEndpointExceptionItems = (
   listId: string,
   ruleName: string,
-  alertEcsData: Ecs
+  alertEcsData: flattenType<Ecs>
 ): ExceptionsBuilderExceptionItem[] => {
   const { file, process, Ransomware, event: alertEvent } = alertEcsData;
   const eventCode = alertEvent && alertEvent.code ? alertEvent.code : '';

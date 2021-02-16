@@ -55,7 +55,7 @@ import {
   buildGetAlertByIdQuery,
 } from '../helpers';
 import { ErrorInfo, ErrorCallout } from '../error_callout';
-import { ExceptionsBuilderExceptionItem } from '../types';
+import { ExceptionsBuilderExceptionItem, flattenType } from '../types';
 import { useFetchIndex } from '../../../containers/source';
 import { useGetInstalledJob } from '../../ml/hooks/use_get_jobs';
 
@@ -104,12 +104,12 @@ interface EcsHit {
   _index: string;
   _source: {
     '@timestamp': string;
-  } & Omit<Ecs, '_id' | '_index'>;
+  } & Omit<flattenType<Ecs>, '_id' | '_index'>;
 }
 
 export type Alert = {
   '@timestamp': string;
-} & Ecs;
+} & flattenType<Ecs>;
 
 export const AddExceptionModal = memo(function AddExceptionModal({
   ruleName,
@@ -142,15 +142,15 @@ export const AddExceptionModal = memo(function AddExceptionModal({
     memoSignalIndexName
   );
 
-  const { loading: isLoadingAlertData, data: alertData } = useQueryAlerts<EcsHit, {}>(
+  const { loading: isLoadingAlertData, data: alertData } = ecsData ? useQueryAlerts<EcsHit, {}>(
     buildGetAlertByIdQuery(ecsData?._id),
     signalIndexName
-  );
+  ) : {loading: false, data: undefined};
 
   const alert = useMemo(() => {
-    if (isLoadingAlertData === false) {
+    if (isLoadingAlertData === false && ecsData != null ) {
       const { _id, _index, _source } = alertData?.hits.hits[0] || {};
-      return { _id, _index, ..._source };
+      return { _id: _id || ecsData._id, _index, ..._source };
     }
   }, [alertData?.hits.hits, isLoadingAlertData]);
 
@@ -260,7 +260,7 @@ export const AddExceptionModal = memo(function AddExceptionModal({
   });
 
   const initialExceptionItems = useMemo((): ExceptionsBuilderExceptionItem[] => {
-    if (exceptionListType === 'endpoint' && alert != null && ruleExceptionList) {
+    if (exceptionListType === 'endpoint' && alert != null && ecsData != null && ruleExceptionList) {
       return defaultEndpointExceptionItems(ruleExceptionList.list_id, ruleName, alert);
     } else {
       return [];

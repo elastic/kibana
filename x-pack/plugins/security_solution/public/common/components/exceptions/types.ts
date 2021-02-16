@@ -104,3 +104,7 @@ export type CreateExceptionListItemBuilderSchema = Omit<
 export type ExceptionsBuilderExceptionItem =
   | ExceptionListItemBuilderSchema
   | CreateExceptionListItemBuilderSchema;
+
+export type flattenType<T> = {
+  [K in keyof T]: T[K] extends infer AliasType ? ( AliasType extends Array<infer rawType> ? rawType : AliasType extends object ? flattenType<AliasType> : AliasType) : never;
+}
