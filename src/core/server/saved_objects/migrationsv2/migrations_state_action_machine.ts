@@ -153,12 +153,27 @@ export async function migrationStateActionMachine({
       logger.error(
         logMessagePrefix + `[${e.body?.error?.type}]: ${e.body?.error?.reason ?? e.message}`
       );
+      dumpExecutionLog(logger, logMessagePrefix, executionLog);
+      throw new Error(
+        `Unable to complete saved object migrations for the [${
+          initialState.indexPrefix
+        }] index. Please check the health of your Elasticsearch cluster and try again. Error: [${
+          e.body?.error?.type
+        }]: ${e.body?.error?.reason ?? e.message}`
+      );
     } else {
       logger.error(e);
+
+      dumpExecutionLog(logger, logMessagePrefix, executionLog);
+      if (e.message.startsWith('Unable to migrate the corrupt saved object document')) {
+        throw new Error(
+          `${e.message} To allow migrations to proceed, please delete this document from the [${initialState.indexPrefix}_${initialState.kibanaVersion}_001] index.`
+        );
+      }
+
+      throw new Error(
+        `Unable to complete saved object migrations for the [${initialState.indexPrefix}] index. ${e}`
+      );
     }
-    dumpExecutionLog(logger, logMessagePrefix, executionLog);
-    throw new Error(
-      `Unable to complete saved object migrations for the [${initialState.indexPrefix}] index. Please check the health of your Elasticsearch cluster and try again. ${e}`
-    );
   }
 }

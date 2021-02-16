@@ -747,10 +747,10 @@ describe('DocumentMigrator', () => {
         migrator.migrate(_.cloneDeep(failedDoc));
         expect('Did not throw').toEqual('But it should have!');
       } catch (error) {
-        expect(error.message).toMatch(/Dang diggity!/);
-        const warning = loggingSystemMock.collect(mockLoggerFactory).warn[0][0];
-        expect(warning).toContain(JSON.stringify(failedDoc));
-        expect(warning).toContain('dog:1.2.3');
+        expect(error.message).toMatchInlineSnapshot(`
+          "Failed to transform document smelly. Transform: dog:1.2.3
+          Doc: {\\"id\\":\\"smelly\\",\\"type\\":\\"dog\\",\\"attributes\\":{},\\"migrationVersion\\":{}}"
+        `);
       }
     });
 
@@ -779,7 +779,7 @@ describe('DocumentMigrator', () => {
       };
       migrator.migrate(doc);
       expect(loggingSystemMock.collect(mockLoggerFactory).info[0][0]).toEqual(logTestMsg);
-      expect(loggingSystemMock.collect(mockLoggerFactory).warn[1][0]).toEqual(logTestMsg);
+      expect(loggingSystemMock.collect(mockLoggerFactory).warn[0][0]).toEqual(logTestMsg);
     });
 
     test('extracts the latest migration version info', () => {

@@ -35,7 +35,7 @@ export async function migrateRawDocs(
   const migrateDocWithoutBlocking = transformNonBlocking(migrateDoc);
   const processedDocs = [];
   for (const raw of rawDocs) {
-    const options = { namespaceTreatment: 'lax' as 'lax' };
+    const options = { namespaceTreatment: 'lax' as const };
     if (serializer.isRawSavedObject(raw, options)) {
       const savedObject = serializer.rawToSavedObject(raw, options);
       savedObject.migrationVersion = savedObject.migrationVersion || {};
@@ -48,11 +48,9 @@ export async function migrateRawDocs(
         )
       );
     } else {
-      log.error(
-        `Error: Unable to migrate the corrupt Saved Object document ${raw._id}. To prevent Kibana from performing a migration on every restart, please delete or fix this document by ensuring that the namespace and type in the document's id matches the values in the namespace and type fields.`,
-        { rawDocument: raw }
+      throw new Error(
+        `Unable to migrate the corrupt saved object document with _id: '${raw._id}'.`
       );
-      processedDocs.push(raw);
     }
   }
   return processedDocs;
