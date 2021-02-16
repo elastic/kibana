@@ -13,7 +13,7 @@ import { loadInBatches } from '@loaders.gl/core';
 import { CreateDocsResponse } from '../types';
 import { Importer } from '../importer';
 // @ts-expect-error
-import { geoJsonCleanAndValidate } from './geo_json_clean_and_validate';
+import { geoJsonCleanAndValidate } from './geojson_clean_and_validate';
 
 export class GeoJsonImporter extends Importer {
   constructor() {
