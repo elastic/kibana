@@ -91,12 +91,9 @@ export abstract class Importer implements IImporter {
     if (!id || !index) {
       return {
         success: false,
-        error: i18n.translate(
-          'xpack.ml.fileDatavisualizer.importView.noIdOrIndexSuppliedErrorMessage',
-          {
-            defaultMessage: 'no ID or index supplied',
-          }
-        ),
+        error: i18n.translate('xpack.fileUpload.import.noIdOrIndexSuppliedErrorMessage', {
+          defaultMessage: 'no ID or index supplied',
+        }),
       };
     }
 

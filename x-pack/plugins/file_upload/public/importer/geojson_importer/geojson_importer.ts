@@ -17,8 +17,7 @@ import {
 } from 'geojson';
 import { i18n } from '@kbn/i18n';
 // @ts-expect-error
-import { JSONLoader } from '@loaders.gl/json';
-import { loadInBatches } from '@loaders.gl/core';
+import { JSONLoader, loadInBatches } from './loaders';
 import { CreateDocsResponse } from '../types';
 import { Importer } from '../importer';
 import { ES_FIELD_TYPES } from '../../../../../../src/plugins/data/public';
