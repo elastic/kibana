@@ -201,7 +201,7 @@ export function DashboardTopNav({
    * @resolved {String} - The id of the doc
    */
   const save = useCallback(
-    async (saveOptions: SavedObjectSaveOpts) => {
+    async (saveOptions: SavedObjectSaveOpts & { stayInEditMode?: boolean }) => {
       return saveDashboard(angular.toJson, timefilter, dashboardStateManager, saveOptions)
         .then(function (id) {
           if (id) {
@@ -218,7 +218,9 @@ export function DashboardTopNav({
               redirectTo({ destination: 'dashboard', id, useReplace: !lastDashboardId });
             } else {
               chrome.docTitle.change(dashboardStateManager.savedDashboard.lastSavedTitle);
-              dashboardStateManager.switchViewMode(ViewMode.VIEW);
+              if (!saveOptions.stayInEditMode) {
+                dashboardStateManager.switchViewMode(ViewMode.VIEW);
+              }
             }
           }
           return { id };
@@ -334,7 +336,7 @@ export function DashboardTopNav({
       }
     }
 
-    save({}).then((response: SaveResult) => {
+    save({ stayInEditMode: true }).then((response: SaveResult) => {
       // If the save wasn't successful, put the original values back.
       if (!(response as { id: string }).id) {
         dashboardStateManager.setTitle(currentTitle);
