@@ -212,7 +212,11 @@ export const getCasesColumns = (
           return <Status type={theCase.status} />;
         }
         const badges = getSubCasesStatusCountsBadges(theCase.subCases);
-        return badges.map(({ color, count }) => <EuiBadge color={color}>{count}</EuiBadge>);
+        return badges.map(({ color, count }, index) => (
+          <EuiBadge key={index} color={color}>
+            {count}
+          </EuiBadge>
+        ));
       },
     },
     {
