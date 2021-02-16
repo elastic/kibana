@@ -115,7 +115,10 @@ export class DataPublicPlugin
     );
 
     return {
-      autocomplete: this.autocomplete.setup(core, { timefilter: queryService.timefilter }),
+      autocomplete: this.autocomplete.setup(core, {
+        timefilter: queryService.timefilter,
+        usageCollection,
+      }),
       search: searchService,
       fieldFormats: this.fieldFormatsService.setup(core),
       query: queryService,
