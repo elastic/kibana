@@ -332,8 +332,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
     }
 
     public async removeHeaderColumn(name: string) {
-      await testSubjects.moveMouseTo(`docTableHeader-${name}`);
-      await testSubjects.click(`docTableRemoveHeader-${name}`);
+      await dataGrid.clickRemoveColumn(name);
     }
 
     public async openSidebarFieldFilter() {

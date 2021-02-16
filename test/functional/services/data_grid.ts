@@ -185,7 +185,7 @@ export function DataGridProvider({ getService, getPageObjects }: FtrProviderCont
     }
 
     public async openColMenuByField(field: string) {
-      retry.waitFor('header cell action being displayed', async () => {
+      await retry.waitFor('header cell action being displayed', async () => {
         // to prevent flakiness
         await testSubjects.click(`dataGridHeaderCell-${field}`);
         return await testSubjects.exists(`dataGridHeaderCellActionGroup-${field}`);
@@ -208,6 +208,15 @@ export function DataGridProvider({ getService, getPageObjects }: FtrProviderCont
         await find.clickByCssSelector('.euiDataGridHeaderCell__button');
       }
       await find.clickByButtonText(sortText);
+    }
+
+    public async clickRemoveColumn(field?: string) {
+      if (field) {
+        await this.openColMenuByField(field);
+      } else {
+        await find.clickByCssSelector('.euiDataGridHeaderCell__button');
+      }
+      await find.clickByButtonText('Remove column');
     }
     public async getDetailsRow(): Promise<WebElementWrapper> {
       const detailRows = await this.getDetailsRows();
