@@ -35,6 +35,7 @@ const formConfig: BucketSpanEstimatorData = {
   },
   splitField: undefined,
   timeField: undefined,
+  runtimeMappings: undefined,
 };
 
 describe('ML - BucketSpanEstimator', () => {

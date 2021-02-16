@@ -31,7 +31,7 @@ export class RepoInfo {
 
     this.log.info('determining merge base with upstream');
 
-    const mergeBase = this.git(['merge-base', ref, 'FETCH_HEAD']);
+    const mergeBase = await this.git(['merge-base', ref, 'FETCH_HEAD']);
     this.log.info('merge base with', upstreamBranch, 'is', mergeBase);
 
     return mergeBase;
