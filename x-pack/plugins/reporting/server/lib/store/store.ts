@@ -178,7 +178,6 @@ export class ReportingStore {
         process_expiration: document._source.process_expiration,
         status: document._source.status,
         timeout: document._source.timeout,
-        priority: document._source.priority,
       });
     } catch (err) {
       this.logger.error('Error in finding a report! ' + JSON.stringify({ report: taskJson }));

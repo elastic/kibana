@@ -44,7 +44,6 @@ export class Report implements Partial<ReportSource> {
   public readonly output?: ReportSource['output'];
   public readonly started_at?: ReportSource['started_at'];
   public readonly completed_at?: ReportSource['completed_at'];
-  public readonly priority?: ReportSource['priority'];
   public readonly timeout?: ReportSource['timeout'];
 
   public process_expiration?: ReportSource['process_expiration'];
@@ -73,7 +72,6 @@ export class Report implements Partial<ReportSource> {
     this.created_by = opts.created_by || false;
     this.meta = opts.meta || { objectType: 'unknown' };
     this.browser_type = opts.browser_type;
-    this.priority = opts.priority;
 
     this.status = opts.status || JOB_STATUSES.PENDING;
     this.output = opts.output || null;
@@ -108,7 +106,6 @@ export class Report implements Partial<ReportSource> {
         meta: this.meta,
         timeout: this.timeout,
         max_attempts: this.max_attempts,
-        priority: this.priority,
         browser_type: this.browser_type,
         status: this.status,
         attempts: this.attempts,
@@ -136,6 +133,7 @@ export class Report implements Partial<ReportSource> {
       payload: this.payload,
       meta: this.meta,
       attempts: this.attempts,
+      max_attempts: this.max_attempts,
     };
   }
 
@@ -155,7 +153,6 @@ export class Report implements Partial<ReportSource> {
       meta: this.meta,
       timeout: this.timeout,
       max_attempts: this.max_attempts,
-      priority: this.priority,
       browser_type: this.browser_type,
       status: this.status,
       attempts: this.attempts,

@@ -18,7 +18,6 @@ describe('Class Report', () => {
       payload: { headers: 'payload_test_field', objectType: 'testOt', title: 'cool report' },
       meta: { objectType: 'test' },
       timeout: 30000,
-      priority: 1,
     });
 
     expect(report.toEsDocsJSON()).toMatchObject({
@@ -73,7 +72,6 @@ describe('Class Report', () => {
       payload: { headers: 'payload_test_field', objectType: 'testOt', title: 'hot report' },
       meta: { objectType: 'stange' },
       timeout: 30000,
-      priority: 1,
     });
 
     const metadata = {

@@ -116,8 +116,9 @@ export class ExecuteReportTask implements ReportingTask {
 
     const m = moment();
 
-    // check if job has exceeded maxAttempts and somehow hasn't been marked as failed yet
-    const maxAttempts = this.config.capture.maxAttempts;
+    // check if job has exceeded maxAttempts (stored in job params) and somehow hasn't been marked as failed yet
+    // NOTE: changing the capture.maxAttempts config setting does not affect existing pending reports
+    const maxAttempts = task.max_attempts;
     if (report.attempts >= maxAttempts) {
       const err = new Error(`Max attempts reached (${maxAttempts}). Queue timeout reached.`);
       await this._failJob(task, err);
