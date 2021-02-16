@@ -56,6 +56,10 @@ export const useFetchAlertData = (
     const fetchData = async () => {
       try {
         setLoading(true);
+        if (alertId == null) {
+          setLoading(false);
+          return;
+        }
         const alertResponse = await fetchQueryAlerts<EcsHit, {}>({
           query: buildGetAlertByIdQuery(alertId),
           signal: abortCtrl.signal,
