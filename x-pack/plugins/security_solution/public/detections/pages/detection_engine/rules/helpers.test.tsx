@@ -85,7 +85,7 @@ describe('rule helpers', () => {
           field: ['host.name'],
           value: '50',
           cardinality_field: ['process.name'],
-          cardinality_value: 0,
+          cardinality_value: 2,
         },
         threatIndex: [],
         threatMapping: [],
