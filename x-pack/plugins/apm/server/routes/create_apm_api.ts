@@ -62,9 +62,10 @@ import {
   transactionChartsDistributionRoute,
   transactionChartsErrorRateRoute,
   transactionGroupsRoute,
-  transactionGroupsOverviewRoute,
+  transactionGroupsPrimaryStatisticsRoute,
   transactionLatencyChatsRoute,
   transactionThroughputChatsRoute,
+  transactionGroupsComparisonStatisticsRoute,
 } from './transactions';
 import { serviceMapRoute, serviceMapServiceNodeRoute } from './service_map';
 import {
@@ -165,9 +166,10 @@ const createApmApi = () => {
     .add(transactionChartsDistributionRoute)
     .add(transactionChartsErrorRateRoute)
     .add(transactionGroupsRoute)
-    .add(transactionGroupsOverviewRoute)
+    .add(transactionGroupsPrimaryStatisticsRoute)
     .add(transactionLatencyChatsRoute)
     .add(transactionThroughputChatsRoute)
+    .add(transactionGroupsComparisonStatisticsRoute)
 
     // Service map
     .add(serviceMapRoute)

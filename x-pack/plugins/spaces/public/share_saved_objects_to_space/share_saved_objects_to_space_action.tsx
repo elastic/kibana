@@ -7,23 +7,20 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { NotificationsStart, StartServicesAccessor } from 'src/core/public';
 import {
   SavedObjectsManagementAction,
   SavedObjectsManagementRecord,
 } from '../../../../../src/plugins/saved_objects_management/public';
-import { ContextWrapper, ShareSavedObjectsToSpaceFlyout } from './components';
-import { SpacesManager } from '../spaces_manager';
-import { PluginsStart } from '../plugin';
+import type { SpacesApiUi } from '../../../../../src/plugins/spaces_oss/public';
 
 export class ShareToSpaceSavedObjectsManagementAction extends SavedObjectsManagementAction {
   public id: string = 'share_saved_objects_to_space';
 
   public euiAction = {
-    name: i18n.translate('xpack.spaces.management.shareToSpace.actionTitle', {
+    name: i18n.translate('xpack.spaces.shareToSpace.actionTitle', {
       defaultMessage: 'Share to space',
     }),
-    description: i18n.translate('xpack.spaces.management.shareToSpace.actionDescription', {
+    description: i18n.translate('xpack.spaces.shareToSpace.actionDescription', {
       defaultMessage: 'Share this saved object to one or more spaces',
     }),
     icon: 'share',
@@ -43,11 +40,7 @@ export class ShareToSpaceSavedObjectsManagementAction extends SavedObjectsManage
 
   private isDataChanged: boolean = false;
 
-  constructor(
-    private readonly spacesManager: SpacesManager,
-    private readonly notifications: NotificationsStart,
-    private readonly getStartServices: StartServicesAccessor<PluginsStart>
-  ) {
+  constructor(private readonly spacesApiUi: SpacesApiUi) {
     super();
   }
 
@@ -56,16 +49,24 @@ export class ShareToSpaceSavedObjectsManagementAction extends SavedObjectsManage
       throw new Error('No record available! `render()` was likely called before `start()`.');
     }
 
+    const savedObjectTarget = {
+      type: this.record.type,
+      id: this.record.id,
+      namespaces: this.record.namespaces ?? [],
+      title: this.record.meta.title,
+      icon: this.record.meta.icon,
+    };
+    const { ShareToSpaceFlyout } = this.spacesApiUi.components;
+
     return (
-      <ContextWrapper getStartServices={this.getStartServices}>
-        <ShareSavedObjectsToSpaceFlyout
-          onClose={this.onClose}
-          onObjectUpdated={() => (this.isDataChanged = true)}
-          savedObject={this.record}
-          spacesManager={this.spacesManager}
-          toastNotifications={this.notifications.toasts}
-        />
-      </ContextWrapper>
+      <ShareToSpaceFlyout
+        savedObjectTarget={savedObjectTarget}
+        flyoutIcon="share"
+        onUpdate={() => (this.isDataChanged = true)}
+        onClose={this.onClose}
+        enableCreateCopyCallout={true}
+        enableCreateNewSpaceLink={true}
+      />
     );
   };
 
