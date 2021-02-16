@@ -440,7 +440,7 @@ export const AddExceptionModal = memo(function AddExceptionModal({
             </ModalBodySection>
             <EuiHorizontalRule />
             <ModalBodySection>
-              {alertData !== undefined && alertStatus !== 'closed' && (
+              {ecsData != null && alertStatus !== 'closed' && (
                 <EuiFormRow fullWidth>
                   <EuiCheckbox
                     data-test-subj="close-alert-on-add-add-exception-checkbox"

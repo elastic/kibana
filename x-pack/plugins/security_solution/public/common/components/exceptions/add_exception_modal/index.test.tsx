@@ -31,6 +31,8 @@ import {
   getRulesSchemaMock,
 } from '../../../../../common/detection_engine/schemas/response/rules_schema.mocks';
 import { useRuleAsync } from '../../../../detections/containers/detection_engine/rules/use_rule_async';
+import { useFetchAlertData } from '../use_fetch_alert_data';
+import { alertsMock } from '../../../../detections/containers/detection_engine/alerts/mock';
 
 jest.mock('../../../../detections/containers/detection_engine/alerts/use_signal_index');
 jest.mock('../../../../common/lib/kibana');
@@ -41,6 +43,7 @@ jest.mock('../use_fetch_or_create_rule_exception_list');
 jest.mock('../builder');
 jest.mock('../../../../shared_imports');
 jest.mock('../../../../detections/containers/detection_engine/rules/use_rule_async');
+jest.mock('../use_fetch_alert_data');
 
 describe('When the add exception modal is opened', () => {
   const ruleName = 'test rule';
@@ -82,6 +85,10 @@ describe('When the add exception modal is opened', () => {
     (useCurrentUser as jest.Mock).mockReturnValue({ username: 'test-username' });
     (useRuleAsync as jest.Mock).mockImplementation(() => ({
       rule: getRulesSchemaMock(),
+    }));
+    (useFetchAlertData as jest.Mock).mockImplementation(() => ({
+      data: alertsMock,
+      loading: false,
     }));
   });
 
@@ -168,7 +175,7 @@ describe('When the add exception modal is opened', () => {
             exceptionListType={'endpoint'}
             onCancel={jest.fn()}
             onConfirm={jest.fn()}
-            alertData={alertDataMock}
+            ecsData={alertDataMock}
           />
         </ThemeProvider>
       );
@@ -222,7 +229,7 @@ describe('When the add exception modal is opened', () => {
             exceptionListType={'detection'}
             onCancel={jest.fn()}
             onConfirm={jest.fn()}
-            alertData={alertDataMock}
+            ecsData={alertDataMock}
           />
         </ThemeProvider>
       );
@@ -279,7 +286,7 @@ describe('When the add exception modal is opened', () => {
             exceptionListType={'detection'}
             onCancel={jest.fn()}
             onConfirm={jest.fn()}
-            alertData={alertDataMock}
+            ecsData={alertDataMock}
           />
         </ThemeProvider>
       );
@@ -349,7 +356,7 @@ describe('When the add exception modal is opened', () => {
             exceptionListType={'endpoint'}
             onCancel={jest.fn()}
             onConfirm={jest.fn()}
-            alertData={alertDataMock}
+            ecsData={alertDataMock}
           />
         </ThemeProvider>
       );
