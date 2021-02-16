@@ -274,11 +274,11 @@ export const ConnectInstance: React.FC<ConnectInstanceProps> = ({
         >
           <EuiFlexItem grow={1} className="adding-a-source__connect-an-instance">
             <EuiPanel paddingSize="none">
-              <EuiPanel className="euiPanel--noShadow" paddingSize="l">
+              <EuiPanel hasShadow={false} paddingSize="l">
                 {header}
               </EuiPanel>
               <EuiHorizontalRule margin="xs" />
-              <EuiPanel className="euiPanel--noShadow" paddingSize="l">
+              <EuiPanel hasShadow={false} paddingSize="l">
                 <SourceFeatures features={features} name={name} objTypes={objTypes} />
               </EuiPanel>
             </EuiPanel>
