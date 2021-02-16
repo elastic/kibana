@@ -80,6 +80,10 @@ class AppContextService {
     return this.security;
   }
 
+  public hasSecurity() {
+    return !!this.security;
+  }
+
   public getCloud() {
     return this.cloud;
   }
