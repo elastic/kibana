@@ -4,11 +4,14 @@ exports[`returns the \`JsonCodeEditor\` component 1`] = `
 <EuiFlexGroup
   direction="column"
   gutterSize="s"
-  responsive={true}
-  wrap={true}
+  style={
+    Object {
+      "width": "100%",
+    }
+  }
 >
   <EuiFlexItem
-    grow={false}
+    grow={true}
   >
     <EuiSpacer
       size="s"
@@ -19,15 +22,13 @@ exports[`returns the \`JsonCodeEditor\` component 1`] = `
       <EuiCopy
         afterMessage="Copied"
         textToCopy="{
-  \\"value\\": {
-    \\"hit\\": {
-      \\"_index\\": \\"test\\",
-      \\"_type\\": \\"doc\\",
-      \\"_id\\": \\"foo\\",
-      \\"_score\\": 1,
-      \\"_source\\": {
-        \\"test\\": 123
-      }
+  \\"hit\\": {
+    \\"_index\\": \\"test\\",
+    \\"_type\\": \\"doc\\",
+    \\"_id\\": \\"foo\\",
+    \\"_score\\": 1,
+    \\"_source\\": {
+      \\"test\\": 123
     }
   }
 }"
@@ -62,15 +63,13 @@ exports[`returns the \`JsonCodeEditor\` component 1`] = `
         }
       }
       value="{
-  \\"value\\": {
-    \\"hit\\": {
-      \\"_index\\": \\"test\\",
-      \\"_type\\": \\"doc\\",
-      \\"_id\\": \\"foo\\",
-      \\"_score\\": 1,
-      \\"_source\\": {
-        \\"test\\": 123
-      }
+  \\"hit\\": {
+    \\"_index\\": \\"test\\",
+    \\"_type\\": \\"doc\\",
+    \\"_id\\": \\"foo\\",
+    \\"_score\\": 1,
+    \\"_source\\": {
+      \\"test\\": 123
     }
   }
 }"
