@@ -4,7 +4,7 @@
 <titleabbrev>Update action API</titleabbrev>
 ++++
 
-experimental[] Update the attributes for an existing {kib} action
+Update the attributes for an existing {kib} action
 
 [[actions-and-connectors-api-update-request]]
 ==== Request

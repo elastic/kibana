@@ -4,7 +4,7 @@
 <titleabbrev>List all action types API</titleabbrev>
 ++++
 
-experimental[] Retrieve a list of all {kib} action types.
+Retrieve a list of all {kib} action types.
 
 [[actions-and-connectors-api-list-request]]
 ==== Request

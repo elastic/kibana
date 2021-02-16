@@ -4,7 +4,7 @@
 <titleabbrev>Get action API</titleabbrev>
 ++++
 
-experimental[] Retrieve a single {kib} action by ID.
+Retrieve a single {kib} action by ID.
 
 [[actions-and-connectors-api-get-request]]
 ==== Request

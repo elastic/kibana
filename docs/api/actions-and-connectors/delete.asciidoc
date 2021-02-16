@@ -4,7 +4,7 @@
 <titleabbrev>Delete action API</titleabbrev>
 ++++
 
-experimental[] Remove a {kib} action by ID
+Remove a {kib} action by ID
 
 WARNING: Once you delete an action, _it cannot be recovered_.
 
