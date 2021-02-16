@@ -360,9 +360,7 @@ export class SearchSource {
       getConfig,
     });
 
-    return search({ params, indexType: searchRequest.indexType }, options, {
-      indexPattern: searchRequest.index,
-    }).pipe(
+    return search({ params, indexType: searchRequest.indexType }, options).pipe(
       map(({ rawResponse }) => {
         return onResponse(searchRequest, rawResponse);
       })

@@ -133,8 +133,8 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     { application, http, notifications, uiSettings }: CoreStart,
     { fieldFormats, indexPatterns }: SearchServiceStartDependencies
   ): ISearchStart {
-    const search = ((request, options, metadata) => {
-      return this.searchInterceptor.search(request, options, metadata);
+    const search = ((request, options) => {
+      return this.searchInterceptor.search(request, options);
     }) as ISearchGeneric;
 
     const loadingCount$ = new BehaviorSubject(0);

@@ -15,7 +15,6 @@ import {
   UI_SETTINGS,
   IKibanaSearchRequest,
   SearchSessionState,
-  IndexPattern,
 } from '../../../../../src/plugins/data/public';
 import { ENHANCED_ES_SEARCH_STRATEGY, IAsyncSearchOptions, pollSearch } from '../../common';
 
@@ -56,11 +55,7 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
     if (this.deps.usageCollector) this.deps.usageCollector.trackQueriesCancelled();
   };
 
-  public search(
-    { id, ...request }: IKibanaSearchRequest,
-    options: IAsyncSearchOptions = {},
-    metadata?: { indexPattern: IndexPattern }
-  ) {
+  public search({ id, ...request }: IKibanaSearchRequest, options: IAsyncSearchOptions = {}) {
     const { combinedSignal, timeoutSignal, cleanup, abort } = this.setupAbortSignal({
       abortSignal: options.abortSignal,
       timeout: this.searchTimeout,
@@ -102,9 +97,7 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
       tap((response) => (id = response.id)),
       catchError((e: Error) => {
         cancel();
-        return throwError(
-          this.handleSearchError(e, timeoutSignal, options, metadata?.indexPattern)
-        );
+        return throwError(this.handleSearchError(e, timeoutSignal, options));
       }),
       finalize(() => {
         this.pendingCount$.next(this.pendingCount$.getValue() - 1);

@@ -15,8 +15,7 @@ export type ISearchGeneric = <
   SearchStrategyResponse extends IKibanaSearchResponse = IEsSearchResponse
 >(
   request: SearchStrategyRequest,
-  options?: ISearchOptions,
-  metadata?: { indexPattern: IndexPattern }
+  options?: ISearchOptions
 ) => Observable<SearchStrategyResponse>;
 
 export type ISearchCancelGeneric = (id: string, options?: ISearchOptions) => Promise<void>;
@@ -113,4 +112,10 @@ export interface ISearchOptions {
    * rather than starting from scratch)
    */
   isRestore?: boolean;
+
+  /**
+   * Index pattern reference is used for better error messages
+   */
+
+  indexPattern?: IndexPattern;
 }
