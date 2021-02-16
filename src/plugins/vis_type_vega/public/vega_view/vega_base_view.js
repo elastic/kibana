@@ -62,6 +62,7 @@ export class VegaBaseView {
     this._destroyHandlers = [];
     this._initialized = false;
     this._enableExternalUrls = getEnableExternalUrls();
+    this._vegaStateRestorer = opts.vegaStateRestorer;
   }
 
   async init() {
@@ -103,6 +104,10 @@ export class VegaBaseView {
           this._$messages = null;
         }
         if (this._view) {
+          const state = this._view.getState();
+          if (state) {
+            this._vegaStateRestorer.save(state);
+          }
           this._view.finalize();
         }
         this._view = null;
@@ -262,7 +267,13 @@ export class VegaBaseView {
         this._addDestroyHandler(() => tthandler.hideTooltip());
       }
 
-      return view.runAsync(); // Allows callers to await rendering
+      const state = this._vegaStateRestorer.restore();
+
+      if (state) {
+        return view.setState(state);
+      } else {
+        return view.runAsync();
+      }
     }
   }
 

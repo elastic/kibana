@@ -30,6 +30,7 @@ export default async function ({ readConfigFile }) {
         '--elasticsearch.healthCheck.delay=3600000',
         '--server.xsrf.disableProtection=true',
         '--server.compression.referrerWhitelist=["some-host.com"]',
+        `--savedObjects.maxImportExportSize=10001`,
       ],
     },
   };
