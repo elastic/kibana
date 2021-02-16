@@ -11,7 +11,7 @@ import { FeatureCollection, Feature } from 'geojson';
 
 const DUMMY_JOB_LIST = [
   {
-    jobId: 'Africa incidents',
+    jobId: 'Nigeria incidents',
     results: [
       {
         typical: [10, 12],

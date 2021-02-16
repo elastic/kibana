@@ -9,6 +9,7 @@ import React, { Component } from 'react';
 
 import { EuiComboBox, EuiFormRow, EuiComboBoxOptionOption } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import _ from 'lodash';
 import { getAnomalyJobList } from './util';
 
 interface Props {
