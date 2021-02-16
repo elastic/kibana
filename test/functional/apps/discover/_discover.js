@@ -109,7 +109,7 @@ export default function ({ getService, getPageObjects }) {
             'discoverChart'
           );
           log.debug(`Number of renderings before brushing: ${actualRenderingCount}`);
-          return actualRenderingCount === prevRenderingCount + 2;
+          return actualRenderingCount === prevRenderingCount + 3;
         });
         await PageObjects.discover.brushHistogram();
         await PageObjects.discover.waitUntilSearchingHasFinished();
@@ -118,7 +118,7 @@ export default function ({ getService, getPageObjects }) {
             'discoverChart'
           );
           log.debug(`Number of renderings after brushing: ${actualRenderingCount}`);
-          return actualRenderingCount === prevRenderingCount + 5;
+          return actualRenderingCount === prevRenderingCount + 6;
         });
         const newDurationHours = await PageObjects.timePicker.getTimeDurationInHours();
         expect(Math.round(newDurationHours)).to.be(26);
