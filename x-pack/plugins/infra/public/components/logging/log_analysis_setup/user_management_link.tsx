@@ -17,7 +17,7 @@ export const UserManagementLink: React.FunctionComponent<EuiButtonProps> = (prop
       application: { capabilities },
     },
   } = useKibanaContextForPlugin();
-  const canAccessUserManagement = capabilities?.management?.security?.users;
+  const canAccessUserManagement = capabilities?.management?.security?.users ?? false;
 
   const linkProps = useLinkProps({
     app: 'management',
