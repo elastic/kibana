@@ -7,14 +7,12 @@
 
 import { i18n } from '@kbn/i18n';
 import { lazy } from 'react';
-import { MlStartDependencies } from '../plugin';
 import { ML_ALERT_TYPES } from '../../common/constants/alerts';
 import { MlAnomalyDetectionAlertParams } from '../../common/types/alerts';
+import { TriggersAndActionsUIPublicPluginSetup } from '../../../triggers_actions_ui/public';
 
-export function registerMlAlerts(
-  alertTypeRegistry: MlStartDependencies['triggersActionsUi']['alertTypeRegistry']
-) {
-  alertTypeRegistry.register({
+export function registerMlAlerts(triggersActionsUi: TriggersAndActionsUIPublicPluginSetup) {
+  triggersActionsUi.alertTypeRegistry.register({
     id: ML_ALERT_TYPES.ANOMALY_DETECTION,
     description: i18n.translate('xpack.ml.alertTypes.anomalyDetection.description', {
       defaultMessage: 'Alert when anomaly detection jobs results match the condition.',

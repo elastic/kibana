@@ -3183,6 +3183,19 @@
         }
       }
     },
+    "search-session": {
+      "properties": {
+        "transientCount": {
+          "type": "long"
+        },
+        "persistedCount": {
+          "type": "long"
+        },
+        "totalCount": {
+          "type": "long"
+        }
+      }
+    },
     "security_solution": {
       "properties": {
         "detections": {
