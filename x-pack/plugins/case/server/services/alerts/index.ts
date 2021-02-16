@@ -95,14 +95,14 @@ export class AlertService {
         query: {
           bool: {
             filter: {
-              bool: {
-                should: ids.map((_id) => ({ match: { _id } })),
-                minimum_should_match: 1,
+              ids: {
+                values: ids,
               },
             },
           },
         },
       },
+      size: 10000,
       ignore_unavailable: true,
     });
 
