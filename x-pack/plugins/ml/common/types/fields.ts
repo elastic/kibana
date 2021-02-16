@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ES_FIELD_TYPES } from '../../../../../src/plugins/data/common';
+import { ES_FIELD_TYPES, RuntimeField } from '../../../../../src/plugins/data/common';
 import {
   ML_JOB_AGGREGATION,
   KIBANA_AGGREGATION,
@@ -27,6 +27,7 @@ export interface Field {
   aggregatable?: boolean;
   aggIds?: AggId[];
   aggs?: Aggregation[];
+  runtimeField?: RuntimeField;
 }
 
 export interface Aggregation {
@@ -103,3 +104,6 @@ export interface ScriptAggCardinality {
 export interface AggCardinality {
   cardinality: FieldAggCardinality | ScriptAggCardinality;
 }
+
+export type RollupFields = Record<FieldId, [Record<'agg', ES_AGGREGATION>]>;
+export type RuntimeMappings = Record<string, RuntimeField>;
