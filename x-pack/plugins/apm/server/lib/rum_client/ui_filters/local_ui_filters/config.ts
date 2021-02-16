@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { filtersByName, LocalUIFilterName } from '../../../../common/ui_filter';
+import {
+  filtersByName,
+  LocalUIFilterName,
+} from '../../../../../common/ui_filter';
 
 export interface LocalUIFilter {
   name: LocalUIFilterName;
