@@ -85,7 +85,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('only shows the dashboard navlink', async () => {
         const navLinks = await appsMenu.readLinks();
-        expect(navLinks.map((link) => link.text)).to.eql(['Overview', 'Dashboard']);
+        expect(navLinks.map((link) => link.text)).to.eql([
+          'Overview',
+          'Dashboard',
+          'Stack Management', // dashboard_all enables search sessions which enables 'Stack Management'
+        ]);
       });
 
       it(`landing page shows "Create new Dashboard" button`, async () => {

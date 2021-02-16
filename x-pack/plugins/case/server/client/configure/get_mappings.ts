@@ -5,20 +5,31 @@
  * 2.0.
  */
 
+import { SavedObjectsClientContract } from 'src/core/server';
+import { ActionsClient } from '../../../../actions/server';
 import { ConnectorMappingsAttributes, ConnectorTypes } from '../../../common/api';
-import { CaseClientFactoryArguments, MappingsClient } from '../types';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ACTION_SAVED_OBJECT_TYPE } from '../../../../actions/server/saved_objects';
+import { ConnectorMappingsServiceSetup } from '../../services';
+import { CaseClientHandler } from '..';
 
-export const getMappings = ({
+interface GetMappingsArgs {
+  savedObjectsClient: SavedObjectsClientContract;
+  connectorMappingsService: ConnectorMappingsServiceSetup;
+  actionsClient: ActionsClient;
+  caseClient: CaseClientHandler;
+  connectorType: string;
+  connectorId: string;
+}
+
+export const getMappings = async ({
   savedObjectsClient,
   connectorMappingsService,
-}: CaseClientFactoryArguments) => async ({
   actionsClient,
   caseClient,
   connectorType,
   connectorId,
-}: MappingsClient): Promise<ConnectorMappingsAttributes[]> => {
+}: GetMappingsArgs): Promise<ConnectorMappingsAttributes[]> => {
   if (connectorType === ConnectorTypes.none) {
     return [];
   }

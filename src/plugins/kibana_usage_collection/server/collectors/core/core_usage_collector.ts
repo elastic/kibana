@@ -98,7 +98,7 @@ export function getCoreUsageCollector(
             items: {
               docsCount: { type: 'long' },
               docsDeleted: { type: 'long' },
-              alias: { type: 'text' },
+              alias: { type: 'keyword' },
               primaryStoreSizeBytes: { type: 'long' },
               storeSizeBytes: { type: 'long' },
             },

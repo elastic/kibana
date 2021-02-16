@@ -177,6 +177,7 @@ export default function ({ getService }: FtrProviderContext) {
       describe('basic behaviour', () => {
         let savedObjectIds: string[] = [];
         before('create application usage entries', async () => {
+          await esArchiver.emptyKibanaIndex();
           savedObjectIds = await Promise.all([
             createSavedObject(),
             createSavedObject('appView1'),

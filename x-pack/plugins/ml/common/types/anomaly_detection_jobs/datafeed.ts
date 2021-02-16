@@ -6,6 +6,7 @@
  */
 
 import { IndexPatternTitle } from '../kibana';
+import { RuntimeMappings } from '../fields';
 import { JobId } from './job';
 export type DatafeedId = string;
 
@@ -21,7 +22,7 @@ export interface Datafeed {
   query: object;
   query_delay?: string;
   script_fields?: Record<string, any>;
-  runtime_mappings?: Record<string, any>;
+  runtime_mappings?: RuntimeMappings;
   scroll_size?: number;
   delayed_data_check_config?: object;
   indices_options?: IndicesOptions;
