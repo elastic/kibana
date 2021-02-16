@@ -524,7 +524,7 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
       log.debug('set script = ' + script);
       await (await testSubjects.findAll('formRowToggle'))[1].click();
       await new Promise((resolve) => setTimeout(resolve, 1000 * 5 * 60));
-      await (await testSubjects.find('valueRowToggle')).click();
+      // await (await testSubjects.find('valueRowToggle')).click();
       await new Promise((resolve) => setTimeout(resolve, 1000 * 5 * 60));
       await browser.pressKeys(browser.keys.TAB);
       await new Promise((resolve) => setTimeout(resolve, 1000 * 5));
