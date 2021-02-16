@@ -133,6 +133,16 @@ export const FlyoutHome = (props: Props) => {
                     jobIds={jobIds}
                   />
                   <EuiSpacer size="l" />
+                  <EuiText>
+                    <h4>Create ML Jobs</h4>
+                    <p>
+                      <FormattedMessage
+                        defaultMessage="Machine Learning jobs are available for the following the resource types. Enable these jobs to begin detecting anomalies in your infrastructure metrics."
+                        id="xpack.infra.ml.anomalyFlyout.createJobs"
+                      />
+                    </p>
+                  </EuiText>
+                  <EuiSpacer size="l" />
                 </>
               )}
 
@@ -228,7 +238,7 @@ const CreateJobTab = (props: CreateJobTab) => {
         <EuiFlexItem>
           <EuiCard
             isDisabled={!props.hasSetupCapabilities}
-            icon={<EuiIcon type={'storage'} />}
+            icon={<EuiIcon type={'storage'} size="xl" />}
             // title="Hosts"
             title={
               <FormattedMessage
@@ -238,7 +248,7 @@ const CreateJobTab = (props: CreateJobTab) => {
             }
             description={
               <FormattedMessage
-                defaultMessage="Detect anomalies for memory usage and network traffic on hosts."
+                defaultMessage="Detect anomalies for CPU usage, memory usage, network traffic, and load."
                 id="xpack.infra.ml.anomalyFlyout.create.hostDescription"
               />
             }
@@ -267,7 +277,7 @@ const CreateJobTab = (props: CreateJobTab) => {
         <EuiFlexItem>
           <EuiCard
             isDisabled={!props.hasSetupCapabilities}
-            icon={<EuiIcon type={'logoKubernetes'} />}
+            icon={<EuiIcon type={'logoKubernetes'} size="xl" />}
             title={
               <FormattedMessage
                 defaultMessage="Kubernetes Pods"
@@ -276,7 +286,7 @@ const CreateJobTab = (props: CreateJobTab) => {
             }
             description={
               <FormattedMessage
-                defaultMessage="Detect anomalies for memory usage and network traffic on Kubernetes Pods."
+                defaultMessage="Detect anomalies for CPU usage, memory usage, network traffic, and load."
                 id="xpack.infra.ml.anomalyFlyout.create.k8sDescription"
               />
             }
