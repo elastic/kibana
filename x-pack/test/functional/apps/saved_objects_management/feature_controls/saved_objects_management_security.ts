@@ -70,7 +70,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         it('shows all saved objects', async () => {
           const objects = await PageObjects.savedObjects.getRowTitles();
           expect(objects).to.eql([
-            'Advanced Settings [6.0.0]',
             `Advanced Settings [${version}]`,
             'A Dashboard',
             'logstash-*',
@@ -81,10 +80,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         it('can view all saved objects in applications', async () => {
           const bools = await PageObjects.savedObjects.getTableSummary();
           expect(bools).to.eql([
-            {
-              title: 'Advanced Settings [6.0.0]',
-              canViewInApp: false,
-            },
             {
               title: `Advanced Settings [${version}]`,
               canViewInApp: false,
@@ -189,7 +184,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         it('shows all saved objects', async () => {
           const objects = await PageObjects.savedObjects.getRowTitles();
           expect(objects).to.eql([
-            'Advanced Settings [6.0.0]',
             `Advanced Settings [${version}]`,
             'A Dashboard',
             'logstash-*',
@@ -200,10 +194,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         it('cannot view any saved objects in applications', async () => {
           const bools = await PageObjects.savedObjects.getTableSummary();
           expect(bools).to.eql([
-            {
-              title: 'Advanced Settings [6.0.0]',
-              canViewInApp: false,
-            },
             {
               title: `Advanced Settings [${version}]`,
               canViewInApp: false,

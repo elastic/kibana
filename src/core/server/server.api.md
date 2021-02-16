@@ -2360,6 +2360,8 @@ export class SavedObjectsErrorHelpers {
     // (undocumented)
     static createGenericNotFoundError(type?: string | null, id?: string | null): DecoratedError;
     // (undocumented)
+    static createIndexAliasNotFoundError(alias: string): DecoratedError;
+    // (undocumented)
     static createInvalidVersionError(versionInput?: string): DecoratedError;
     // (undocumented)
     static createTooManyRequestsError(type: string, id: string): DecoratedError;
@@ -2378,6 +2380,8 @@ export class SavedObjectsErrorHelpers {
     // (undocumented)
     static decorateGeneralError(error: Error, reason?: string): DecoratedError;
     // (undocumented)
+    static decorateIndexAliasNotFoundError(error: Error, alias: string): DecoratedError;
+    // (undocumented)
     static decorateNotAuthorizedError(error: Error, reason?: string): DecoratedError;
     // (undocumented)
     static decorateRequestEntityTooLargeError(error: Error, reason?: string): DecoratedError;
@@ -2393,6 +2397,8 @@ export class SavedObjectsErrorHelpers {
     static isEsUnavailableError(error: Error | DecoratedError): boolean;
     // (undocumented)
     static isForbiddenError(error: Error | DecoratedError): boolean;
+    // (undocumented)
+    static isGeneralError(error: Error | DecoratedError): boolean;
     // (undocumented)
     static isInvalidVersionError(error: Error | DecoratedError): boolean;
     // (undocumented)

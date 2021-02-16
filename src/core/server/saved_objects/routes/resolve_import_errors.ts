@@ -14,8 +14,7 @@ import { IRouter } from '../../http';
 import { CoreUsageDataSetup } from '../../core_usage_data';
 import { SavedObjectConfig } from '../saved_objects_config';
 import { SavedObjectsImportError } from '../import';
-import { createSavedObjectsStreamFromNdJson } from './utils';
-
+import { catchAndReturnBoomErrors, createSavedObjectsStreamFromNdJson } from './utils';
 interface RouteDependencies {
   config: SavedObjectConfig;
   coreUsageData: CoreUsageDataSetup;
@@ -70,7 +69,7 @@ export const registerResolveImportErrorsRoute = (
         }),
       },
     },
-    router.handleLegacyErrors(async (context, req, res) => {
+    catchAndReturnBoomErrors(async (context, req, res) => {
       const { createNewCopies } = req.query;
 
       const usageStatsClient = coreUsageData.getClient();
