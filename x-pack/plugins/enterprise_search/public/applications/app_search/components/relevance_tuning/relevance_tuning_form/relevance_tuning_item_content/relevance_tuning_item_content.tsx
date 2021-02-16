@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { EuiPageContent, EuiPageContentBody } from '@elastic/eui';
+import { EuiPanel } from '@elastic/eui';
 
 import { SchemaTypes } from '../../../../../shared/types';
 
@@ -29,12 +29,10 @@ interface Props {
 export const RelevanceTuningItemContent: React.FC<Props> = ({ name, type, boosts, field }) => {
   return (
     <>
-      <EuiPageContent hasShadow={false} className="relevanceTuningForm__itemContent">
-        <EuiPageContentBody>
-          <TextSearchToggle name={name} type={type} field={field} />
-          {field && <WeightSlider name={name} field={field} />}
-        </EuiPageContentBody>
-      </EuiPageContent>
+      <EuiPanel hasShadow={false} className="relevanceTuningForm__itemContent">
+        <TextSearchToggle name={name} type={type} field={field} />
+        {field && <WeightSlider name={name} field={field} />}
+      </EuiPanel>
       <Boosts name={name} type={type} boosts={boosts} />
     </>
   );

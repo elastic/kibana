@@ -9,14 +9,7 @@ import React, { useMemo } from 'react';
 
 import { useActions } from 'kea';
 
-import {
-  EuiPageContent,
-  EuiPageContentHeader,
-  EuiPageContentHeaderSection,
-  EuiPageContentBody,
-  EuiTitle,
-  EuiSuperSelect,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle, EuiSuperSelect } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
@@ -97,9 +90,9 @@ export const Boosts: React.FC<Props> = ({ name, type, boosts = [] }) => {
   );
 
   return (
-    <EuiPageContent className="boosts">
-      <EuiPageContentHeader className="boosts__header" responsive={false}>
-        <EuiPageContentHeaderSection>
+    <EuiPanel className="boosts">
+      <EuiFlexGroup className="boosts__header" responsive={false} alignItems="center">
+        <EuiFlexItem>
           <EuiTitle size="xxs">
             <h4>
               {i18n.translate(
@@ -110,8 +103,8 @@ export const Boosts: React.FC<Props> = ({ name, type, boosts = [] }) => {
               )}
             </h4>
           </EuiTitle>
-        </EuiPageContentHeaderSection>
-        <EuiPageContentHeaderSection>
+        </EuiFlexItem>
+        <EuiFlexItem>
           <EuiSuperSelect
             className="boosts__select"
             itemClassName="boostSelectOption"
@@ -119,13 +112,11 @@ export const Boosts: React.FC<Props> = ({ name, type, boosts = [] }) => {
             options={selectOptions}
             onChange={(value) => addBoostClick(value as BoostType)}
           />
-        </EuiPageContentHeaderSection>
-      </EuiPageContentHeader>
-      <EuiPageContentBody>
-        {boosts.map((boost, index) => (
-          <BoostItem key={index} id={`boost-${index}`} boost={boost} />
-        ))}
-      </EuiPageContentBody>
-    </EuiPageContent>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      {boosts.map((boost, index) => (
+        <BoostItem key={index} id={`boost-${index}`} boost={boost} />
+      ))}
+    </EuiPanel>
   );
 };
