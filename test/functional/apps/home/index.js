@@ -9,7 +9,7 @@
 export default function ({ getService, loadTestFile }) {
   const browser = getService('browser');
 
-  describe.only('homepage app', function () {
+  describe('homepage app', function () {
     this.tags('ciGroup6');
 
     before(function () {
