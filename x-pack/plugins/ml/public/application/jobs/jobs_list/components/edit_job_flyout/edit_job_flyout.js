@@ -21,7 +21,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiTabbedContent,
-  EuiOverlayMask,
   EuiConfirmModal,
 } from '@elastic/eui';
 
@@ -443,38 +442,36 @@ export class EditJobFlyoutUI extends Component {
 
     if (this.state.isConfirmationModalVisible) {
       confirmationModal = (
-        <EuiOverlayMask>
-          <EuiConfirmModal
-            title={
-              <FormattedMessage
-                id="xpack.ml.jobsList.editJobFlyout.unsavedChangesDialogTitle"
-                defaultMessage="Save changes before leaving?"
-              />
-            }
-            onCancel={() => this.closeFlyout(true)}
-            onConfirm={() => this.save()}
-            cancelButtonText={
-              <FormattedMessage
-                id="xpack.ml.jobsList.editJobFlyout.leaveAnywayButtonLabel"
-                defaultMessage="Leave anyway"
-              />
-            }
-            confirmButtonText={
-              <FormattedMessage
-                id="xpack.ml.jobsList.editJobFlyout.saveChangesButtonLabel"
-                defaultMessage="Save changes"
-              />
-            }
-            defaultFocusedButton="confirm"
-          >
-            <p>
-              <FormattedMessage
-                id="xpack.ml.jobsList.editJobFlyout.unsavedChangesDialogMessage"
-                defaultMessage="If you don't save, your changes will be lost."
-              />
-            </p>
-          </EuiConfirmModal>
-        </EuiOverlayMask>
+        <EuiConfirmModal
+          title={
+            <FormattedMessage
+              id="xpack.ml.jobsList.editJobFlyout.unsavedChangesDialogTitle"
+              defaultMessage="Save changes before leaving?"
+            />
+          }
+          onCancel={() => this.closeFlyout(true)}
+          onConfirm={() => this.save()}
+          cancelButtonText={
+            <FormattedMessage
+              id="xpack.ml.jobsList.editJobFlyout.leaveAnywayButtonLabel"
+              defaultMessage="Leave anyway"
+            />
+          }
+          confirmButtonText={
+            <FormattedMessage
+              id="xpack.ml.jobsList.editJobFlyout.saveChangesButtonLabel"
+              defaultMessage="Save changes"
+            />
+          }
+          defaultFocusedButton="confirm"
+        >
+          <p>
+            <FormattedMessage
+              id="xpack.ml.jobsList.editJobFlyout.unsavedChangesDialogMessage"
+              defaultMessage="If you don't save, your changes will be lost."
+            />
+          </p>
+        </EuiConfirmModal>
       );
     }
 

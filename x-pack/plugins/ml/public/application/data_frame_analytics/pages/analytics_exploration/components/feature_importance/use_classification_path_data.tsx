@@ -14,8 +14,8 @@ import {
   isClassificationFeatureImportanceBaseline,
   isRegressionFeatureImportanceBaseline,
   TopClasses,
-} from '../../../../../common/types/feature_importance';
-import { ExtendedFeatureImportance } from './decision_path_popover';
+} from '../../../../../../../common/types/feature_importance';
+import type { ExtendedFeatureImportance } from './decision_path_popover';
 
 export type DecisionPathPlotData = Array<[string, number, number]>;
 
