@@ -5,23 +5,20 @@
  * 2.0.
  */
 
-import { memoize, take } from 'lodash';
+import { memoize } from 'lodash';
 import { useEffect, useMemo, useState } from 'react';
-import { ProcessorEvent } from '../../../../common/processor_event';
 import { isRumAgentName } from '../../../../common/agent_name';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { useDynamicIndexPatternFetcher } from '../../../hooks/use_dynamic_index_pattern';
 
 interface IndexPattern {
-  fields: Array<{ name: string }>;
+  fields: Array<{ name: string; esTypes: string[] }>;
 }
 
 export function useFieldNames() {
   const { agentName } = useApmServiceContext();
   const isRumAgent = isRumAgentName(agentName);
-  const { indexPattern } = useDynamicIndexPatternFetcher(
-    ProcessorEvent.transaction
-  );
+  const { indexPattern } = useDynamicIndexPatternFetcher();
 
   const [defaultFieldNames, setDefaultFieldNames] = useState(
     getDefaultFieldNames(indexPattern, isRumAgent)
@@ -49,28 +46,29 @@ function getMatchingFieldNames(
   if (!indexPattern) {
     return [];
   }
-  return indexPattern.fields.reduce(
-    (acc, { name }) => (name.startsWith(inputValue) ? [...acc, name] : acc),
-    [] as string[]
-  );
+  return indexPattern.fields
+    .filter(
+      ({ name, esTypes }) =>
+        name.startsWith(inputValue) && esTypes[0] === 'keyword' // only show fields of type 'keyword'
+    )
+    .map(({ name }) => name);
 }
 
 function getDefaultFieldNames(
   indexPattern: IndexPattern | undefined,
   isRumAgent: boolean
 ) {
+  const labelFields = getMatchingFieldNames(indexPattern, 'labels.').slice(
+    0,
+    6
+  );
   return isRumAgent
     ? [
-        ...take(getMatchingFieldNames(indexPattern, 'labels.'), 6),
+        ...labelFields,
         'user_agent.name',
         'user_agent.os.name',
         'url.original',
-        ...take(getMatchingFieldNames(indexPattern, 'user.'), 6),
+        ...getMatchingFieldNames(indexPattern, 'user.').slice(0, 6),
       ]
-    : [
-        ...take(getMatchingFieldNames(indexPattern, 'labels.'), 6),
-        'service.version',
-        'service.node.name',
-        'host.ip',
-      ];
+    : [...labelFields, 'service.version', 'service.node.name', 'host.ip'];
 }

@@ -18,7 +18,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useEffect, useState } from 'react';
-import { useFieldNames } from './useFieldNames';
+import { useFieldNames } from './use_field_names';
 import { ElasticDocsLink } from '../../shared/Links/ElasticDocsLink';
 import { useUiTracker } from '../../../../../observability/public';
 
