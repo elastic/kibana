@@ -218,7 +218,7 @@ export const ConnectInstance: React.FC<ConnectInstanceProps> = ({
 
   const documentLevelPermissionsCallout = (
     <>
-      <EuiPanel paddingSize="l">
+      <EuiPanel paddingSize="l" data-test-subj="DocumentLevelPermissionsCallout">
         <EuiFlexGroup gutterSize="s" alignItems="center">
           <EuiFlexItem grow={false}>
             <EuiIcon size="m" type="lock" />
