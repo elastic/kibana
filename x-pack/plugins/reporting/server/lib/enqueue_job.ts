@@ -31,7 +31,7 @@ export function enqueueJobFactory(
     context: ReportingRequestHandlerContext,
     request: KibanaRequest
   ) {
-    const logger = parentLogger.clone([exportTypeId, 'queue-job']);
+    const logger = parentLogger.clone(['create-job']);
     const exportType = reporting.getExportTypesRegistry().getById(exportTypeId);
 
     if (exportType == null) {
@@ -59,6 +59,7 @@ export function enqueueJobFactory(
         },
       })
     );
+    logger.debug(`Successfully stored pending job: ${pendingReport._index}/${pendingReport._id}`);
 
     // 2. Schedule the report with Task Manager
     const task = await reporting.scheduleTask(pendingReport.toReportTaskJSON());

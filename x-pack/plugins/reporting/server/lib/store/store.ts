@@ -138,7 +138,6 @@ export class ReportingStore {
       report.updateWithEsDoc(doc);
 
       await this.refreshIndex(index);
-      this.logger.debug(`Successfully stored pending job: ${report._index}/${report._id}`);
 
       return report;
     } catch (err) {
@@ -277,7 +276,7 @@ export class ReportingStore {
 
       return await this.client.callAsInternalUser('update', updateParams);
     } catch (err) {
-      this.logger.error('Error in resetting expired report document!');
+      this.logger.error('Error in clearing expiration!');
       this.logger.error(err);
       throw err;
     }
@@ -286,7 +285,7 @@ export class ReportingStore {
   /*
    * Finds timing-out jobs stuck in pending or processing status
    */
-  public async findExpiredReports(): Promise<ReportRecordTimeout[] | null> {
+  public async findLongPendingReports(logger = this.logger): Promise<ReportRecordTimeout[] | null> {
     const searchParams: SearchParams = {
       index: this.index + '-*',
       filterPath: 'hits.hits',
@@ -317,14 +316,6 @@ export class ReportingStore {
       'search',
       searchParams
     );
-
-    if (result.hits?.hits.length) {
-      this.logger.info(
-        `Found ${result.hits?.hits.length} expired reports waiting to be rescheduled.`
-      );
-    } else {
-      this.logger.debug(`Found 0 expired reports.`);
-    }
 
     return result.hits?.hits;
   }

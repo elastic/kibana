@@ -14,7 +14,7 @@ import { JobParamsPNG, TaskPayloadPNG } from '../types';
 export const createJobFnFactory: CreateJobFnFactory<
   CreateJobFn<JobParamsPNG, TaskPayloadPNG>
 > = function createJobFactoryFn(reporting, parentLogger) {
-  const logger = parentLogger.clone([PNG_JOB_TYPE, 'execute-job']);
+  const logger = parentLogger.clone([PNG_JOB_TYPE]);
   const config = reporting.getConfig();
   const crypto = cryptoFactory(config.get('encryptionKey'));
 

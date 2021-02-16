@@ -28,14 +28,13 @@ export const runTaskFnFactory: RunTaskFnFactory<
   const encryptionKey = config.get('encryptionKey');
 
   return async function runTask(jobId, job, cancellationToken) {
-    const logger = parentLogger.clone([PDF_JOB_TYPE, 'execute-job', jobId]);
     const apmTrans = apm.startTransaction('reporting execute_job pdf', 'reporting');
     const apmGetAssets = apmTrans?.startSpan('get_assets', 'setup');
     let apmGeneratePdf: { end: () => void } | null | undefined;
 
     const generatePdfObservable = await generatePdfObservableFactory(reporting);
 
-    const jobLogger = logger.clone([jobId]);
+    const logger = parentLogger.clone([PDF_JOB_TYPE, jobId]);
     const process$: Rx.Observable<TaskRunResult> = Rx.of(1).pipe(
       mergeMap(() => decryptJobHeaders(encryptionKey, job.headers, logger)),
       map((decryptedHeaders) => omitBlockedHeaders(decryptedHeaders)),

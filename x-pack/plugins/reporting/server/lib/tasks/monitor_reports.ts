@@ -40,7 +40,7 @@ export class MonitorReportsTask implements ReportingTask {
     private config: ReportingConfigType,
     parentLogger: LevelLogger
   ) {
-    this.logger = parentLogger.clone(['monitored-expired']);
+    this.logger = parentLogger.clone([REPORTING_MONITOR_TYPE]);
     this.timeout = numberToDuration(config.queue.timeout);
   }
 
@@ -60,13 +60,13 @@ export class MonitorReportsTask implements ReportingTask {
     // support milliseconds
     const scheduleInterval =
       Math.ceil(numberToDuration(this.config.queue.pollInterval).asSeconds()) + 's';
-
+    this.logger.debug(`Task to monitor for pending reports to run every ${scheduleInterval}.`);
     await taskManager.ensureScheduled({
       id: this.TYPE,
       taskType: this.TYPE,
+      schedule: { interval: scheduleInterval },
       state: {},
       params: {},
-      schedule: { interval: scheduleInterval },
     });
   }
 
@@ -77,17 +77,21 @@ export class MonitorReportsTask implements ReportingTask {
           const reportingStore = await this.getStore();
 
           try {
-            this.logger.debug('Checking for expired reports...');
-            const results = await reportingStore.findExpiredReports();
+            const results = await reportingStore.findLongPendingReports();
             if (!results || results.length < 1) {
               return;
             }
+            if (results.length) {
+              this.logger.info(`Found ${results.length} pending reports to reschedule.`);
+            } else {
+              this.logger.debug(`Found 0 pending reports.`);
+            }
 
-            for (const expired of results) {
+            for (const pending of results) {
               const {
                 _id: jobId,
                 _source: { process_expiration: processExpiration, status },
-              } = expired;
+              } = pending;
               const expirationTime = moment(processExpiration);
               const timeWaitValue = moment().valueOf() - expirationTime.valueOf();
               const timeWaitTime = moment.duration(timeWaitValue);
@@ -96,13 +100,12 @@ export class MonitorReportsTask implements ReportingTask {
               );
 
               // clear process expiration and reschedule
-              const oldReport = new Report({ ...expired, ...expired._source });
+              const oldReport = new Report({ ...pending, ...pending._source });
               const reschedulingTask = oldReport.toReportTaskJSON();
               await reportingStore.clearExpiration(oldReport);
               await this.rescheduleTask(reschedulingTask, this.logger);
             }
           } catch (err) {
-            this.logger.error('Could not find and update expired reports!');
             this.logger.error(err);
           }
 

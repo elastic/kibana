@@ -17,7 +17,7 @@ import {
 export const createJobFnFactory: CreateJobFnFactory<
   CreateJobFn<JobParamsDeprecatedCSV, TaskPayloadDeprecatedCSV>
 > = function createJobFactoryFn(reporting, parentLogger) {
-  const logger = parentLogger.clone([CSV_JOB_TYPE_DEPRECATED, 'create-job']);
+  const logger = parentLogger.clone([CSV_JOB_TYPE_DEPRECATED]);
 
   const config = reporting.getConfig();
   const crypto = cryptoFactory(config.get('encryptionKey'));

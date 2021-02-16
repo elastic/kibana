@@ -16,7 +16,7 @@ export const createJobFnFactory: CreateJobFnFactory<
 > = function createJobFactoryFn(reporting, parentLogger) {
   const config = reporting.getConfig();
   const crypto = cryptoFactory(config.get('encryptionKey'));
-  const logger = parentLogger.clone([PDF_JOB_TYPE, 'create-job']);
+  const logger = parentLogger.clone([PDF_JOB_TYPE]);
 
   return async function createJob(
     { title, relativeUrls, browserTimezone, layout, objectType },
