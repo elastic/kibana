@@ -288,8 +288,7 @@ Additionally, you can use `latitude`, `longitude`, and `zoom` signals.
 These signals can be used in the graph, or can be updated to modify the
 position of the map.
 
-experimental[] You can use the *Vega* https://vega.github.io/vega/docs/data/[data] element to access https://www.elastic.co/elastic-maps-service[Elastic Maps Service (EMS)] 
-vector shapes of administrative boundaries in your Vega map by setting `url.data` to `emsFile`:
+experimental[] You can use the *Vega* https://vega.github.io/vega/docs/data/[data] element to access https://www.elastic.co/elastic-maps-service[Elastic Maps Service (EMS)] vector shapes of administrative boundaries in your Vega map by setting `url.data` to `emsFile`:
 
 [source,yaml]
 ----
@@ -402,7 +401,9 @@ Vega-Lite compilation.
 [[vega-expression-functions]]
 ===== Expression functions which can update the time range and dashboard filters
 
-{kib} has extended the Vega expression language with these functions:
+{kib} has extended the Vega expression language with these functions. 
+These functions will trigger new data to be fetched, which by default will reset Vega signals. 
+To keep signal values set `restoreSignalValuesOnRefresh: true` in the Vega config.
 
 ```js
 /**
@@ -445,6 +446,8 @@ kibanaSetTimeFilter(start, end)
       hideWarnings: true
       // Vega renderer to use: `svg` or `canvas` (default)
       renderer: canvas
+      // Defaults to 'false', restores Vega signal values on refresh
+      restoreSignalValuesOnRefresh: false
     }
   }
 }

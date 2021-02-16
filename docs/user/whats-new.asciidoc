@@ -4,6 +4,8 @@
 This section summarizes the most important changes in this release. For previous
 releases, refer to:
 
+* {kibana-ref-all}/7.11/whats-new.html[7.11]
+* {kibana-ref-all}/7.10/whats-new.html[7.10]
 * {kibana-ref-all}/7.9/whats-new.html[7.9]
 * {kibana-ref-all}/7.8/whats-new.html[7.8]
 * {kibana-ref-all}/7.7/release-highlights-7.7.0.html[7.7]
@@ -16,7 +18,7 @@ releases, refer to:
 * {kibana-ref-all}/7.0/release-highlights-7.0.0.html[7.0]
 
 For the full list of changes in {minor-version}, see <<release-notes>> and
-<<breaking-changes>>. 
+<<breaking-changes>>.
 
 //NOTE: The notable-highlights tagged regions are re-used in the
 //Installation and Upgrade Guide
