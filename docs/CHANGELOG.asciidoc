@@ -99,7 +99,6 @@ The 7.11.1 release includes the following enhancements and bug fixes. For inform
 [[enhancement-v7.11.1]]
 === Enhancements
 Machine Learning::
-* Improves existing job check in anomaly detection wizard {kibana-pull}87674[#87674]
 * Improves the lazy ML node UI {kibana-pull}90455[#90455]
 
 Security::
