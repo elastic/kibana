@@ -180,8 +180,11 @@ export function alertingServiceProvider(mlClient: MlClient, esClient: Elasticsea
                   'is_interim',
                   'function',
                   'field_name',
+                  'by_field_name',
                   'by_field_value',
+                  'over_field_name',
                   'over_field_value',
+                  'partition_field_name',
                   'partition_field_value',
                   'job_id',
                 ],
@@ -258,6 +261,26 @@ export function alertingServiceProvider(mlClient: MlClient, esClient: Elasticsea
           }
         : {}),
     };
+  };
+
+  /**
+   * Provides unique key for the anomaly result.
+   */
+  const getAlertInstanceKey = (source: any): string => {
+    let alertInstanceKey = `${source.job_id}_${source.timestamp}`;
+    if (source.result_type === ANOMALY_RESULT_TYPE.INFLUENCER) {
+      alertInstanceKey += `_${source.influencer_field_name}_${source.influencer_field_value}`;
+    } else if (source.result_type === ANOMALY_RESULT_TYPE.RECORD) {
+      const fieldName =
+        source.field_name ??
+        source.by_field_name ??
+        source.over_field_name ??
+        source.partition_field_name;
+      const fieldValue =
+        source.by_field_value ?? source.over_field_value ?? source.partition_field_value;
+      alertInstanceKey += `_${source.function}_${fieldName}_${fieldValue}`;
+    }
+    return alertInstanceKey;
   };
 
   /**
@@ -373,19 +396,22 @@ export function alertingServiceProvider(mlClient: MlClient, esClient: Elasticsea
           const aggTypeResults = v[resultsLabel.aggGroupLabel];
           const requestedAnomalies = aggTypeResults[resultsLabel.topHitsLabel].hits.hits;
 
+          const topAnomaly = requestedAnomalies[0];
+          const alertInstanceKey = getAlertInstanceKey(topAnomaly._source);
+
           return {
             count: aggTypeResults.doc_count,
             key: v.key,
-            key_as_string: v.key_as_string,
+            alertInstanceKey,
             jobIds: [...new Set(requestedAnomalies.map((h) => h._source.job_id))],
             isInterim: requestedAnomalies.some((h) => h._source.is_interim),
-            timestamp: requestedAnomalies[0]._source.timestamp,
-            timestampIso8601: requestedAnomalies[0].fields.timestamp_iso8601[0],
-            timestampEpoch: requestedAnomalies[0].fields.timestamp_epoch[0],
-            score: requestedAnomalies[0].fields.score[0],
+            timestamp: topAnomaly._source.timestamp,
+            timestampIso8601: topAnomaly.fields.timestamp_iso8601[0],
+            timestampEpoch: topAnomaly.fields.timestamp_epoch[0],
+            score: topAnomaly.fields.score[0],
             bucketRange: {
-              start: requestedAnomalies[0].fields.start[0],
-              end: requestedAnomalies[0].fields.end[0],
+              start: topAnomaly.fields.start[0],
+              end: topAnomaly.fields.end[0],
             },
             topRecords: v.record_results.top_record_hits.hits.hits.map((h) => ({
               ...h._source,
@@ -482,11 +508,14 @@ export function alertingServiceProvider(mlClient: MlClient, esClient: Elasticsea
     /**
      * Return the result of an alert condition execution.
      *
-     * @param params
+     * @param params - Alert params
+     * @param publicBaseUrl
+     * @param alertId - Alert ID
      */
     execute: async (
       params: MlAnomalyDetectionAlertParams,
-      publicBaseUrl: string | undefined
+      publicBaseUrl: string | undefined,
+      alertId: string
     ): Promise<AnomalyDetectionAlertContext | undefined> => {
       const res = await fetchAnomalies(params);
 
@@ -501,7 +530,7 @@ export function alertingServiceProvider(mlClient: MlClient, esClient: Elasticsea
 
       const executionResult = {
         ...result,
-        name: result.key_as_string,
+        name: result.alertInstanceKey,
         anomalyExplorerUrl,
         kibanaBaseUrl: publicBaseUrl!,
       };
@@ -526,6 +555,18 @@ export function alertingServiceProvider(mlClient: MlClient, esClient: Elasticsea
                     term: {
                       'kibana.alerting.instance_id': {
                         value: executionResult.name,
+                      },
+                    },
+                  },
+                  {
+                    nested: {
+                      path: 'kibana.saved_objects',
+                      query: {
+                        term: {
+                          'kibana.saved_objects.id': {
+                            value: alertId,
+                          },
+                        },
                       },
                     },
                   },
