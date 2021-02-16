@@ -361,9 +361,7 @@ export class SearchSource {
     });
 
     return search({ params, indexType: searchRequest.indexType }, options).pipe(
-      map(({ rawResponse }) => {
-        return onResponse(searchRequest, rawResponse);
-      })
+      map(({ rawResponse }) => onResponse(searchRequest, rawResponse))
     );
   }
 
