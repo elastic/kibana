@@ -58,7 +58,7 @@ export class ExecuteReportTask implements ReportingTask {
   /*
    * To be called from plugin start
    */
-  public async init(taskManager: TaskManagerStartContract) {
+  public async init(taskManager: TaskManagerStartContract, opts: { noPolling?: boolean } = {}) {
     this.taskManagerStart = taskManager;
 
     const { reporting } = this;
@@ -346,14 +346,15 @@ export class ExecuteReportTask implements ReportingTask {
   public getTaskDefinition() {
     // round up from ms to the nearest second
     const queueTimeout = Math.ceil(numberToDuration(this.config.queue.timeout).asSeconds()) + 's';
+    const maxConcurrency = this.config.queue.pollEnabled ? 1 : 0;
 
     return {
       type: REPORTING_EXECUTE_TYPE,
-      maxConcurrency: 1,
       title: 'Reporting: execute job',
       createTaskRunner: this.getTaskRunner(),
       maxAttempts: 1, // NOTE: not using Task Manager retries
       timeout: queueTimeout,
+      maxConcurrency,
     };
   }
 

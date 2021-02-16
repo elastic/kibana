@@ -90,13 +90,11 @@ export class ReportingCore {
     this.pluginStart$.next(startDeps); // trigger the observer
     this.pluginStartDeps = startDeps; // cache
 
-    // check if Reporting is allowed to work the queue
+    // check if Reporting is allowed to poll the TM queue for jobs
     if (this.getConfig().get('queue', 'pollEnabled')) {
-      // initialize our tasks for Task Manager
+      // initialize polling with TM
       const { taskManager } = startDeps;
       const { executeTask, monitorTask } = this;
-      // FIXME: If Polling is disabled, register the task, but set concurrency to 0
-      // User should be able to queue jobs with this Kibana, but force jobs to always run on a different Kibana
       await Promise.all([executeTask.init(taskManager), monitorTask.init(taskManager)]);
     }
   }
