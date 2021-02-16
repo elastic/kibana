@@ -217,7 +217,7 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
     }
     return from === 'policy'
       ? getHref('policy_details', { policyId: agentPolicyId || policyId })
-      : getHref('integration_details', { pkgkey });
+      : getHref('integration_details_overview', { pkgkey });
   }, [agentPolicyId, policyId, from, getHref, pkgkey, routeState]);
 
   const cancelClickHandler: ReactEventHandler = useCallback(

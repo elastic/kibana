@@ -69,6 +69,7 @@ export const formattedSearchStrategyResponse = {
             'winlogbeat-*',
           ],
           ignoreUnavailable: true,
+          track_total_hits: false,
           body: {
             aggregations: {
               firstSeen: { min: { field: '@timestamp' } },
@@ -76,7 +77,6 @@ export const formattedSearchStrategyResponse = {
             },
             query: { bool: { filter: [{ term: { 'host.name': 'siem-kibana' } }] } },
             size: 0,
-            track_total_hits: false,
           },
         },
         null,
@@ -100,6 +100,7 @@ export const expectedDsl = {
     'winlogbeat-*',
   ],
   ignoreUnavailable: true,
+  track_total_hits: false,
   body: {
     aggregations: {
       firstSeen: { min: { field: '@timestamp' } },
@@ -107,6 +108,5 @@ export const expectedDsl = {
     },
     query: { bool: { filter: [{ term: { 'host.name': 'siem-kibana' } }] } },
     size: 0,
-    track_total_hits: false,
   },
 };
