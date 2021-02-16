@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useEffect, useState, useRef } from 'react';
+import React, { memo, useCallback, useEffect } from 'react';
 import { PackagePolicyCreateExtensionComponentProps } from '../../../../fleet/public';
-import { ConfigKeys, Config, ICustomFields } from './types';
+import { Config, ICustomFields } from './types';
 import { CustomFields } from './custom_fields';
+import { useUpdatePolicy } from './use_update_policy';
 
 /**
  * Exports Synthetics-specific package policy instructions
@@ -16,8 +17,7 @@ import { CustomFields } from './custom_fields';
  */
 export const SyntheticsPolicyCreateExtension = memo<PackagePolicyCreateExtensionComponentProps>(
   ({ newPolicy, onChange }) => {
-    const [config, setConfig] = useState<Config>(defaultConfig);
-    const currentConfig = useRef<Config>(defaultConfig);
+    const { setConfig } = useUpdatePolicy({ defaultConfig, newPolicy, onChange });
 
     // Fleet will initialize the create form with a default name for the integratin policy, however,
     // for synthetics, we want the user to explicitely type in a name to use as the monitor name,
@@ -32,33 +32,6 @@ export const SyntheticsPolicyCreateExtension = memo<PackagePolicyCreateExtension
       });
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
-
-    useEffect(() => {
-      const configKeys = Object.keys(config) as ConfigKeys[];
-      const configDidUpdate = configKeys.some((key) => config[key] !== currentConfig.current[key]);
-      const isValid = !!newPolicy.name && !!config.urls && !!config.schedule;
-
-      // prevent an infinite loop of updating the policy
-      if (configDidUpdate) {
-        const updatedPolicy = { ...newPolicy };
-        configKeys.forEach((key) => {
-          const configItem = updatedPolicy.inputs[0]?.streams[0]?.vars?.[key];
-          if (configItem) {
-            configItem.value = config[key];
-          }
-        });
-        currentConfig.current = config;
-        onChange({
-          isValid,
-          updatedPolicy,
-        });
-      }
-    }, [config, newPolicy, onChange]);
-
-    // update our local config state ever time name, which is managed by fleet, changes
-    useEffect(() => {
-      setConfig((prevConfig) => ({ ...prevConfig, name: newPolicy.name }));
-    }, [newPolicy.name]);
 
     const handleInputChange = useCallback(
       (fields: ICustomFields) => {

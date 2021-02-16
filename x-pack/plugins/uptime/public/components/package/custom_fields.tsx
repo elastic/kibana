@@ -37,13 +37,17 @@ export const CustomFields = ({ defaultValues, onChange }: Props) => {
       <EuiFlexItem />
       <EuiFlexItem>
         <EuiForm component="form">
-          <EuiFormRow label="Schedule" isInvalid={!schedule}>
+          <EuiFormRow
+            label="Schedule"
+            isInvalid={!schedule}
+            error={!schedule ? ['Schedule is required'] : undefined}
+          >
             <EuiFieldText
               value={schedule}
               onChange={(event) => handleInputChange({ event, onInputChange: setSchedule })}
             />
           </EuiFormRow>
-          <EuiFormRow label="Url" isInvalid={!urls}>
+          <EuiFormRow label="Url" isInvalid={!urls} error={!urls ? ['Url is required'] : undefined}>
             <EuiFieldText
               value={urls}
               onChange={(event) => handleInputChange({ event, onInputChange: setUrl })}

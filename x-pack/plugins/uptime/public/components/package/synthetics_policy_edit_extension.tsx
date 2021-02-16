@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useEffect, useState, useRef } from 'react';
+import React, { memo, useCallback } from 'react';
 import { PackagePolicyEditExtensionComponentProps } from '../../../../fleet/public';
-import { ConfigKeys, Config, ICustomFields } from './types';
+import { ICustomFields } from './types';
 import { CustomFields } from './custom_fields';
+import { useUpdatePolicy } from './use_update_policy';
 
 /**
  * Exports Synthetics-specific package policy instructions
@@ -21,35 +22,7 @@ export const SyntheticsPolicyEditExtension = memo<PackagePolicyEditExtensionComp
       urls: currentPolicy.inputs[0]?.streams[0]?.vars?.urls.value,
       schedule: currentPolicy.inputs[0]?.streams[0]?.vars?.schedule.value,
     };
-    const [config, setConfig] = useState<Config>(defaultConfig);
-    const currentConfig = useRef<Config>(defaultConfig);
-
-    // Update the integration policy with our custom fields
-    useEffect(() => {
-      const configKeys = Object.keys(config) as ConfigKeys[];
-      const configDidUpdate = configKeys.some((key) => config[key] !== currentConfig.current[key]);
-      const isValid = !!newPolicy.name && !!config.urls && !!config.schedule;
-
-      // prevent an infinite loop of updating the policy
-      if (configDidUpdate) {
-        const updatedPolicy = { ...newPolicy };
-        configKeys.forEach((key) => {
-          const configItem = updatedPolicy.inputs[0]?.streams[0]?.vars?.[key];
-          if (configItem) {
-            configItem.value = config[key];
-          }
-        });
-        currentConfig.current = config;
-        onChange({
-          isValid,
-          updatedPolicy,
-        });
-      }
-    }, [config, newPolicy, onChange]);
-
-    useEffect(() => {
-      setConfig((prevConfig) => ({ ...prevConfig, name: newPolicy.name }));
-    }, [newPolicy.name]);
+    const { setConfig } = useUpdatePolicy({ defaultConfig, newPolicy, onChange });
 
     const handleInputChange = useCallback(
       (fields: ICustomFields) => {
