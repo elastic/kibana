@@ -25,12 +25,12 @@ import { EuiIcon } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import euiVars from '@elastic/eui/dist/eui_theme_light.json';
-import { DecisionPathPlotData } from './use_classification_path_data';
-import { formatSingleValue } from '../../../formatters/format_value';
+import type { DecisionPathPlotData } from './use_classification_path_data';
+import { formatSingleValue } from '../../../../../formatters/format_value';
 import {
   FeatureImportanceBaseline,
   isRegressionFeatureImportanceBaseline,
-} from '../../../../../common/types/feature_importance';
+} from '../../../../../../../common/types/feature_importance';
 const { euiColorFullShade, euiColorMediumShade } = euiVars;
 const axisColor = euiColorMediumShade;
 

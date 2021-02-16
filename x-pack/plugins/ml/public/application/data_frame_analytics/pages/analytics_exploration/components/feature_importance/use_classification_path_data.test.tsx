@@ -9,7 +9,7 @@ import {
   buildClassificationDecisionPathData,
   buildRegressionDecisionPathData,
 } from './use_classification_path_data';
-import { FeatureImportance } from '../../../../../common/types/feature_importance';
+import type { FeatureImportance } from '../../../../../../../common/types/feature_importance';
 
 describe('buildClassificationDecisionPathData()', () => {
   test('should return correct prediction probability for binary classification', () => {
