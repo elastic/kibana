@@ -28,7 +28,7 @@ export default function ({ getService, getPageObjects }) {
       await kibanaServer.uiSettings.update({
         'context:defaultSize': `${TEST_DEFAULT_CONTEXT_SIZE}`,
         'context:step': `${TEST_STEP_SIZE}`,
-        'discover:searchFieldsFromSource': false,
+        'discover:searchFieldsFromSource': true,
       });
     });
 
@@ -47,7 +47,7 @@ export default function ({ getService, getPageObjects }) {
 
     after(async function () {
       await security.testUser.restoreDefaults();
-      // await esArchiver.unload('date_nanos_custom');
+      await esArchiver.unload('date_nanos_custom');
     });
   });
 }

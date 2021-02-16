@@ -59,7 +59,7 @@
  */
 
 import { setWith } from '@elastic/safer-lodash-set';
-import { uniqueId, keyBy, pick, difference, omit, isFunction, isEqual } from 'lodash';
+import { uniqueId, keyBy, pick, difference, omit, isFunction, isEqual, uniqWith } from 'lodash';
 import { map, switchMap, tap } from 'rxjs/operators';
 import { defer, from } from 'rxjs';
 import { isObject } from 'rxjs/internal-compatibility';
@@ -545,25 +545,8 @@ export class SearchSource {
       }));
   }
 
-  private getDateFields(index: IndexPattern | undefined, bodyFields: SearchFieldValue[]) {
-    const dateFields = [...bodyFields];
-    if (!index) {
-      return dateFields;
-    }
-    const { fields } = index;
-    fields.forEach((fld: IndexPatternField) => {
-      const { esTypes } = fld;
-      if (esTypes?.includes('date_nanos')) {
-        dateFields.push({ field: fld.name, format: 'strict_date_optional_time_nanos' });
-      } else if (esTypes?.includes('date')) {
-        dateFields.push({ field: fld.name, format: 'strict_date_optional_time' });
-      }
-    });
-    return dateFields;
-  }
-
   private getFieldFromDocValueFieldsOrIndexPattern(
-    docValuesIndex: Record<string, object>,
+    docvaluesIndex: Record<string, object>,
     fld: SearchFieldValue,
     index?: IndexPattern
   ) {
@@ -572,7 +555,7 @@ export class SearchSource {
     }
     const fieldName = this.getFieldName(fld);
     const field = {
-      ...docValuesIndex[fieldName],
+      ...docvaluesIndex[fieldName],
       ...fld,
     };
     if (!index) {
@@ -702,20 +685,25 @@ export class SearchSource {
         // if items that are in the docvalueFields are provided, we should
         // inject the format from the computed fields if one isn't given
         const docvaluesIndex = keyBy(filteredDocvalueFields, 'field');
-        body.fields = this.getDateFields(index, body.fields);
-        body.fields = this.getFieldsWithoutSourceFilters(index, body.fields).map(
-          (fld: SearchFieldValue) => {
-            const fieldName = this.getFieldName(fld);
-            if (Object.keys(docvaluesIndex).includes(fieldName)) {
-              // either provide the field object from computed docvalues,
-              // or merge the user-provided field with the one in docvalues
-              return typeof fld === 'string'
-                ? docvaluesIndex[fld]
-                : this.getFieldFromDocValueFieldsOrIndexPattern(docvalueFields, fld, index);
-            }
-            return fld;
+        body.fields = this.getFieldsWithoutSourceFilters(index, body.fields);
+        body.fields = uniqWith(
+          body.fields.concat(filteredDocvalueFields),
+          (fld1: SearchFieldValue, fld2: SearchFieldValue) => {
+            const field1Name = this.getFieldName(fld1);
+            const field2Name = this.getFieldName(fld2);
+            return field1Name === field2Name;
           }
-        );
+        ).map((fld: SearchFieldValue) => {
+          const fieldName = this.getFieldName(fld);
+          if (Object.keys(docvaluesIndex).includes(fieldName)) {
+            // either provide the field object from computed docvalues,
+            // or merge the user-provided field with the one in docvalues
+            return typeof fld === 'string'
+              ? docvaluesIndex[fld]
+              : this.getFieldFromDocValueFieldsOrIndexPattern(docvaluesIndex, fld, index);
+          }
+          return fld;
+        });
       }
     } else {
       body.fields = filteredDocvalueFields;
