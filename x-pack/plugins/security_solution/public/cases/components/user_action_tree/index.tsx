@@ -282,6 +282,7 @@ export const UserActionTree = React.memo(
     const userActions: EuiCommentProps[] = useMemo(
       () =>
         caseUserActions.reduce<EuiCommentProps[]>(
+          // eslint-disable-next-line complexity
           (comments, action, index) => {
             // Comment creation
             if (action.commentId != null && action.action === 'create') {
@@ -338,7 +339,6 @@ export const UserActionTree = React.memo(
                     ),
                   },
                 ];
-                // TODO: need to handle CommentType.generatedAlert here to
               } else if (comment != null && comment.type === CommentType.alert) {
                 // TODO: clean this up
                 const alertId = Array.isArray(comment.alertId)
