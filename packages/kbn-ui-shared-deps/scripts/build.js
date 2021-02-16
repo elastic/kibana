@@ -7,7 +7,6 @@
  */
 
 const Path = require('path');
-const Fs = require('fs');
 
 const { run, createFailError } = require('@kbn/dev-utils');
 const webpack = require('webpack');
@@ -34,32 +33,6 @@ run(
       const took = Math.round((stats.endTime - stats.startTime) / 1000);
 
       if (!stats.hasErrors() && !stats.hasWarnings()) {
-        if (!flags.dev) {
-          const metrics = [
-            {
-              group: '@kbn/ui-shared-deps asset size',
-              id: 'kbn-ui-shared-deps.js',
-              value: Fs.statSync(Path.resolve(DIST_DIR, 'kbn-ui-shared-deps.js')).size,
-            },
-            {
-              group: '@kbn/ui-shared-deps asset size',
-              id: 'kbn-ui-shared-deps.@elastic.js',
-              value: Fs.statSync(Path.resolve(DIST_DIR, 'kbn-ui-shared-deps.@elastic.js')).size,
-            },
-            {
-              group: '@kbn/ui-shared-deps asset size',
-              id: 'css',
-              value:
-                Fs.statSync(Path.resolve(DIST_DIR, 'kbn-ui-shared-deps.css')).size +
-                Fs.statSync(Path.resolve(DIST_DIR, 'kbn-ui-shared-deps.v7.light.css')).size,
-            },
-          ];
-
-          const metricsPath = Path.resolve(DIST_DIR, 'metrics.json');
-          Fs.writeFileSync(metricsPath, JSON.stringify(metrics, null, 2));
-          log.info('wrote metrics to', metricsPath);
-        }
-
         log.success(`webpack completed in about ${took} seconds`);
         return;
       }
