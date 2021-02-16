@@ -8,7 +8,7 @@
 import { getFont } from './get_font';
 
 describe('getFont', () => {
-  it(`returns 'noto-cjk' when matching chinese characters`, () => {
+  it(`returns 'noto-cjk' when matching cjk characters`, () => {
     const cjkStrings = [
       'vi-Hani: 关',
       'ko: 全',
