@@ -36,7 +36,7 @@ Create {kib} alerts.
   (Optional, boolean) Indicates if you want to run the alert on an interval basis after it is created.
 
 `consumer`::
-  (Required, string) The name of the application that owns the alert.
+  (Required, string) The name of the application that owns the alert. This name has to match the Kibana Feature name, as that dictates the required RBAC privileges.
 
 `params`::
   (Required, object) The parameters to pass to the alert type executor `params` value. This will also validate against the alert type params validator, if defined.

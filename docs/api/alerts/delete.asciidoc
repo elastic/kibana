@@ -4,7 +4,7 @@
 <titleabbrev>Delete alert</titleabbrev>
 ++++
 
-Remove {kib} alerts.
+Permanently remove an alert.
 
 WARNING: Once you delete an alert, _it cannot be recovered_.
 

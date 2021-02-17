@@ -15,10 +15,10 @@ Retrieve a paginated set of {kib} alerts by various conditions.
 ==== Query Parameters
 
 `per_page`::
-  (Optional, number) The number of objects to return per page.
+  (Optional, number) The number of alerts to return per page.
 
 `page`::
-  (Optional, number) The page of objects to return.
+  (Optional, number) The page number.
 
 `search`::
   (Optional, string) An Elasticsearch {ref}/query-dsl-simple-query-string-query.html[simple_query_string] query that filters the alerts in the response.
@@ -42,7 +42,7 @@ Retrieve a paginated set of {kib} alerts by various conditions.
   (Optional, string) Sort directions. Could be two values 'asc' or 'desc'.
 
 `has_reference`::
-  (Optional, object) Filters to objects that have a relationship with the type and ID combination.
+  (Optional, object) Filters the alerts that have a relations with the reference objects with the specific "type" and "ID".
 
 `filter`::
   (Optional, string) The filter is a KQL string with the caveat that if you filter with an attribute from your type saved object.
