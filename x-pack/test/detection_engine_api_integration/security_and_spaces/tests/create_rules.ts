@@ -27,6 +27,7 @@ import {
   getSimpleMlRuleOutput,
   waitForRuleSuccessOrStatus,
   waitForSignalsToBePresent,
+  waitForAlertToComplete,
   getRuleForSignalTesting,
   getRuleForSignalTestingWithTimestampOverride,
 } from '../../utils';
@@ -304,10 +305,7 @@ export default ({ getService }: FtrProviderContext) => {
           .expect(200);
         const bodyId = body.id;
 
-        // since we write multiple statuses throughout the execution
-        // waiting for a 'partial failure' status to be written does not
-        // necessarily guarantee the rule has completed execution
-        // we need a new mechanism for determining when a rule has completed executing.
+        await waitForAlertToComplete(supertest, bodyId);
         await waitForRuleSuccessOrStatus(supertest, bodyId, 'warning');
 
         const { body: statusBody } = await supertest
