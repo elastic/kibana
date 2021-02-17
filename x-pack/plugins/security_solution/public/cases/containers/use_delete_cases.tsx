@@ -12,7 +12,7 @@ import {
   useStateToaster,
 } from '../../common/components/toasters';
 import * as i18n from './translations';
-import { deleteCases } from './api';
+import { deleteCases, deleteSubCases } from './api';
 import { DeleteCase } from './types';
 
 interface DeleteState {
@@ -87,7 +87,12 @@ export const useDeleteCases = (): UseDeleteCase => {
       try {
         dispatch({ type: 'FETCH_INIT' });
         const caseIds = cases.map((theCase) => theCase.id);
-        await deleteCases(caseIds, abortCtrl.signal);
+        if (cases[0].type != null) {
+          await deleteCases(caseIds, abortCtrl.signal);
+        } else {
+          await deleteSubCases(caseIds, abortCtrl.signal);
+        }
+
         if (!cancel) {
           dispatch({ type: 'FETCH_SUCCESS', payload: true });
           displaySuccessToast(

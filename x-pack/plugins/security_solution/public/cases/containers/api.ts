@@ -31,6 +31,7 @@ import {
   CASE_TAGS_URL,
   CASES_URL,
   SUB_CASE_DETAILS_URL,
+  SUB_CASES_PATCH_DEL_URL,
 } from '../../../../case/common/constants';
 
 import {
@@ -301,6 +302,15 @@ export const patchComment = async (
 
 export const deleteCases = async (caseIds: string[], signal: AbortSignal): Promise<string> => {
   const response = await KibanaServices.get().http.fetch<string>(CASES_URL, {
+    method: 'DELETE',
+    query: { ids: JSON.stringify(caseIds) },
+    signal,
+  });
+  return response;
+};
+
+export const deleteSubCases = async (caseIds: string[], signal: AbortSignal): Promise<string> => {
+  const response = await KibanaServices.get().http.fetch<string>(SUB_CASES_PATCH_DEL_URL, {
     method: 'DELETE',
     query: { ids: JSON.stringify(caseIds) },
     signal,

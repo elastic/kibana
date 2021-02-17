@@ -139,7 +139,7 @@ export const AllCases = React.memo<AllCasesProps>(
       isUpdated,
       updateBulkStatus,
     } = useUpdateCases();
-    const [deleteThisCase, setDeleteThisCase] = useState({
+    const [deleteThisCase, setDeleteThisCase] = useState<DeleteCase>({
       title: '',
       id: '',
     });
@@ -199,7 +199,7 @@ export const AllCases = React.memo<AllCasesProps>(
     const toggleDeleteModal = useCallback(
       (deleteCase: Case) => {
         handleToggleModal();
-        setDeleteThisCase(deleteCase);
+        setDeleteThisCase({ id: deleteCase.id, title: deleteCase.title, type: deleteCase.type });
       },
       [handleToggleModal]
     );
@@ -210,7 +210,11 @@ export const AllCases = React.memo<AllCasesProps>(
         if (caseIds.length === 1) {
           const singleCase = selectedCases.find((theCase) => theCase.id === caseIds[0]);
           if (singleCase) {
-            return setDeleteThisCase({ id: singleCase.id, title: singleCase.title });
+            return setDeleteThisCase({
+              id: singleCase.id,
+              title: singleCase.title,
+              type: singleCase.type,
+            });
           }
         }
         const convertToDeleteCases: DeleteCase[] = caseIds.map((id) => ({ id }));
