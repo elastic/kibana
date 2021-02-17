@@ -10,21 +10,29 @@ import {
   DatasourceDimensionDropHandlerProps,
   isDraggedOperation,
   DraggedOperation,
+  DropType,
 } from '../../types';
 import { IndexPatternColumn } from '../indexpattern';
-import { insertOrReplaceColumn, deleteColumn, getOperationTypesForField } from '../operations';
+import {
+  insertOrReplaceColumn,
+  deleteColumn,
+  getOperationTypesForField,
+  getOperationDisplay,
+} from '../operations';
 import { mergeLayer } from '../state_helpers';
 import { hasField, isDraggedField } from '../utils';
-import { IndexPatternPrivateState, IndexPatternField, DraggedField } from '../types';
+import { IndexPatternPrivateState, DraggedField } from '../types';
 import { trackUiEvent } from '../../lens_ui_telemetry';
 
 type DropHandlerProps<T> = DatasourceDimensionDropHandlerProps<IndexPatternPrivateState> & {
   droppedItem: T;
 };
 
-export function getDropTypes(
+const operationLabels = getOperationDisplay();
+
+export function getDropProps(
   props: DatasourceDimensionDropProps<IndexPatternPrivateState> & { groupId: string }
-) {
+): { dropType: DropType; nextLabel?: string } | undefined {
   const { dragging } = props.dragDropContext;
   if (!dragging) {
     return;
@@ -32,23 +40,27 @@ export function getDropTypes(
 
   const layerIndexPatternId = props.state.layers[props.layerId].indexPatternId;
 
-  function hasOperationForField(field: IndexPatternField) {
-    const operationsForNewField = getOperationTypesForField(field, props.filterOperations);
-    return !!operationsForNewField.length;
-  }
-
   const currentColumn = props.state.layers[props.layerId].columns[props.columnId];
   if (isDraggedField(dragging)) {
-    if (
-      !!(layerIndexPatternId === dragging.indexPatternId && hasOperationForField(dragging.field))
-    ) {
+    const operationsForNewField = getOperationTypesForField(dragging.field, props.filterOperations);
+
+    if (!!(layerIndexPatternId === dragging.indexPatternId && operationsForNewField.length)) {
+      const highestPriorityOperationLabel = operationLabels[operationsForNewField[0]].displayName;
       if (!currentColumn) {
-        return 'field_add';
+        return { dropType: 'field_add', nextLabel: highestPriorityOperationLabel };
       } else if (
         (hasField(currentColumn) && currentColumn.sourceField !== dragging.field.name) ||
         !hasField(currentColumn)
       ) {
-        return 'field_replace';
+        const persistingOperationLabel =
+          currentColumn &&
+          operationsForNewField.includes(currentColumn.operationType) &&
+          operationLabels[currentColumn.operationType].displayName;
+
+        return {
+          dropType: 'field_replace',
+          nextLabel: persistingOperationLabel || highestPriorityOperationLabel,
+        };
       }
     }
     return;
@@ -62,9 +74,9 @@ export function getDropTypes(
     // same group
     if (props.groupId === dragging.groupId) {
       if (currentColumn) {
-        return 'reorder';
+        return { dropType: 'reorder' };
       }
-      return 'duplicate_in_group';
+      return { dropType: 'duplicate_in_group' };
     }
 
     // compatible group
@@ -80,20 +92,34 @@ export function getDropTypes(
     }
     if (props.filterOperations(op)) {
       if (currentColumn) {
-        return 'replace_compatible'; // in the future also 'swap_compatible' and 'duplicate_compatible'
+        return { dropType: 'replace_compatible' }; // in the future also 'swap_compatible' and 'duplicate_compatible'
       } else {
-        return 'move_compatible'; // in the future also 'duplicate_compatible'
+        return { dropType: 'move_compatible' }; // in the future also 'duplicate_compatible'
       }
     }
 
     // suggest
     const field =
       hasField(op) && props.state.indexPatterns[layerIndexPatternId].getFieldByName(op.sourceField);
-    if (field && hasOperationForField(field)) {
+    const operationsForNewField = field && getOperationTypesForField(field, props.filterOperations);
+
+    if (operationsForNewField && operationsForNewField?.length) {
+      const highestPriorityOperationLabel = operationLabels[operationsForNewField[0]].displayName;
+
       if (currentColumn) {
-        return 'replace_incompatible'; // in the future also 'swap_incompatible', 'duplicate_incompatible'
+        const persistingOperationLabel =
+          currentColumn &&
+          operationsForNewField.includes(currentColumn.operationType) &&
+          operationLabels[currentColumn.operationType].displayName;
+        return {
+          dropType: 'replace_incompatible',
+          nextLabel: persistingOperationLabel || highestPriorityOperationLabel,
+        }; // in the future also 'swap_incompatible', 'duplicate_incompatible'
       } else {
-        return 'move_incompatible'; // in the future also 'duplicate_incompatible'
+        return {
+          dropType: 'move_incompatible',
+          nextLabel: highestPriorityOperationLabel,
+        }; // in the future also 'duplicate_incompatible'
       }
     }
   }
@@ -178,6 +204,12 @@ function onMoveDropToNonCompatibleGroup(props: DropHandlerProps<DraggedOperation
   }
 
   const currentIndexPattern = state.indexPatterns[layer.indexPatternId];
+  // Detects if we can change the field only, otherwise change field + operation
+
+  const selectedColumn: IndexPatternColumn | null = layer.columns[columnId] || null;
+
+  const fieldIsCompatibleWithCurrent =
+    selectedColumn && operationsForNewField.includes(selectedColumn.operationType);
 
   const newLayer = insertOrReplaceColumn({
     layer: deleteColumn({
@@ -187,7 +219,7 @@ function onMoveDropToNonCompatibleGroup(props: DropHandlerProps<DraggedOperation
     }),
     columnId,
     indexPattern: currentIndexPattern,
-    op: operationsForNewField[0],
+    op: fieldIsCompatibleWithCurrent ? selectedColumn.operationType : operationsForNewField[0],
     field,
   });
 
