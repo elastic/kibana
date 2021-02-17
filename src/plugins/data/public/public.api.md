@@ -2444,6 +2444,8 @@ export interface SearchSourceFields {
     // (undocumented)
     timeout?: string;
     // (undocumented)
+    track_total_hits?: boolean | number;
+    // (undocumented)
     type?: string;
     // (undocumented)
     version?: boolean;

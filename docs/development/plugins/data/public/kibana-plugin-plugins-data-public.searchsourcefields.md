@@ -31,6 +31,7 @@ export interface SearchSourceFields
 |  [source](./kibana-plugin-plugins-data-public.searchsourcefields.source.md) | <code>NameList</code> |  |
 |  [terminate\_after](./kibana-plugin-plugins-data-public.searchsourcefields.terminate_after.md) | <code>number</code> |  |
 |  [timeout](./kibana-plugin-plugins-data-public.searchsourcefields.timeout.md) | <code>string</code> |  |
+|  [track\_total\_hits](./kibana-plugin-plugins-data-public.searchsourcefields.track_total_hits.md) | <code>boolean &#124; number</code> |  |
 |  [type](./kibana-plugin-plugins-data-public.searchsourcefields.type.md) | <code>string</code> |  |
 |  [version](./kibana-plugin-plugins-data-public.searchsourcefields.version.md) | <code>boolean</code> |  |
 
