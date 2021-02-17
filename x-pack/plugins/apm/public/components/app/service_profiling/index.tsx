@@ -7,11 +7,13 @@
 import { EuiPanel } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiPage, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { ProfilingValueType } from '../../../../common/profiling';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
+import { useFetcher } from '../../../hooks/use_fetcher';
 import { SearchBar } from '../../shared/search_bar';
 import { ServiceProfilingFlamegraph } from './service_profiling_flamegraph';
+import { ServiceProfilingTimeline } from './service_profiling_timeline';
 
 interface ServiceProfilingProps {
   serviceName: string;
@@ -26,7 +28,44 @@ export function ServiceProfiling({
     urlParams: { start, end },
   } = useUrlParams();
 
-  const valueType = ProfilingValueType.cpuTime;
+  const { data = [] } = useFetcher(
+    (callApmApi) => {
+      if (!start || !end) {
+        return;
+      }
+
+      return callApmApi({
+        endpoint: 'GET /api/apm/services/{serviceName}/profiling/timeline',
+        params: {
+          path: { serviceName },
+          query: { start, end, environment, uiFilters: JSON.stringify({}) },
+        },
+      });
+    },
+    [start, end, serviceName, environment]
+  );
+
+  const [valueType, setValueType] = useState<ProfilingValueType | undefined>();
+
+  useEffect(() => {
+    if (!data.length) {
+      return;
+    }
+
+    const availableValueTypes = data.reduce((set, point) => {
+      (Object.keys(point.valueTypes) as ProfilingValueType[])
+        .filter((type) => point.valueTypes[type] > 0)
+        .forEach((type) => {
+          set.add(type);
+        });
+
+      return set;
+    }, new Set<ProfilingValueType>());
+
+    if (!valueType || !availableValueTypes.has(valueType)) {
+      setValueType(Array.from(availableValueTypes)[0]);
+    }
+  }, [data, valueType]);
 
   return (
     <>
@@ -44,6 +83,7 @@ export function ServiceProfiling({
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiPanel>
+              <ServiceProfilingTimeline profiles={data} />
               <ServiceProfilingFlamegraph
                 serviceName={serviceName}
                 environment={environment}

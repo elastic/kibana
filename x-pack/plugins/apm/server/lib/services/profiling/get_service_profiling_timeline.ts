@@ -9,6 +9,7 @@ import { rangeFilter } from '../../../../common/utils/range_filter';
 import { ProcessorEvent } from '../../../../common/processor_event';
 import {
   PROFILE_CPU_NS,
+  PROFILE_ID,
   PROFILE_WALL_US,
   SERVICE_NAME,
 } from '../../../../common/elasticsearch_fieldnames';
@@ -56,6 +57,11 @@ export async function getServiceProfilingTimeline({
             },
           },
           aggs: {
+            num_profiles: {
+              cardinality: {
+                field: PROFILE_ID,
+              },
+            },
             value_type: {
               filters: {
                 filters: {
@@ -64,6 +70,13 @@ export async function getServiceProfilingTimeline({
                   },
                   [ProfilingValueType.wallTime]: {
                     exists: { field: PROFILE_WALL_US },
+                  },
+                },
+              },
+              aggs: {
+                num_profiles: {
+                  cardinality: {
+                    field: PROFILE_ID,
                   },
                 },
               },
@@ -83,12 +96,12 @@ export async function getServiceProfilingTimeline({
   return aggregations.timeseries.buckets.map((bucket) => {
     return {
       x: bucket.key,
-      count: bucket.doc_count,
+      count: bucket.num_profiles.value,
       valueTypes: {
-        [ProfilingValueType.cpuTime]:
-          bucket.value_type.buckets.cpu_time.doc_count,
-        [ProfilingValueType.wallTime]:
-          bucket.value_type.buckets.wall_time.doc_count,
+        // TODO: use enum as object key. not possible right now
+        // because of https://github.com/microsoft/TypeScript/issues/37888
+        cpu_time: bucket.value_type.buckets.cpu_time.num_profiles.value,
+        wall_time: bucket.value_type.buckets.wall_time.num_profiles.value,
       },
     };
   });

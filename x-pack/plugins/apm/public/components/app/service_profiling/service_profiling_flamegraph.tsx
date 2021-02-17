@@ -16,10 +16,13 @@ import {
 } from '@elastic/charts';
 import { euiPaletteForTemperature } from '@elastic/eui';
 import { useMemo } from 'react';
+import seedrandom from 'seedrandom/';
 import { useChartTheme } from '../../../../../observability/public';
 import { ProfileNode, ProfilingValueType } from '../../../../common/profiling';
 import { useFetcher } from '../../../hooks/use_fetcher';
 import { useTheme } from '../../../hooks/use_theme';
+
+const colors = euiPaletteForTemperature(100).slice(50, 85);
 
 interface ProfileDataPoint {
   value: number;
@@ -145,15 +148,17 @@ export function ServiceProfilingFlamegraph({
 
     const maxDepth = Math.max(...points.map((point) => point.depth));
 
-    const colors = euiPaletteForTemperature(80).slice(50);
-
     const layers = [...new Array(maxDepth)].map((_, depth) => {
       return {
         groupByRollup: (d: Datum) => d.layers[depth],
         nodeLabel: (d: PrimitiveValue) => String(d),
         showAccessor: (d: PrimitiveValue) => !!d,
         shape: {
-          fillColor: () => colors[Math.floor(Math.random() * colors.length)],
+          fillColor: (d: { dataName: string }) => {
+            const integer =
+              Math.abs(seedrandom(d.dataName).int32()) % colors.length;
+            return colors[integer];
+          },
         },
       };
     });
@@ -167,7 +172,7 @@ export function ServiceProfilingFlamegraph({
   const chartTheme = useChartTheme();
 
   const chartSize = {
-    height: 600,
+    height: 800,
     width: '100%',
   };
 
@@ -183,10 +188,12 @@ export function ServiceProfilingFlamegraph({
         config={{
           fillLabel: {
             fontFamily: theme.eui.euiCodeFontFamily,
+            clip: true,
           },
           fontFamily: theme.eui.euiCodeFontFamily,
           minFontSize: 9,
           maxFontSize: 9,
+          maxRowCount: 1,
           partitionLayout: PartitionLayout.icicle,
         }}
       />
