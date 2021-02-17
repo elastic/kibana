@@ -22,7 +22,7 @@ export function KibanaServerProvider({ getService }: FtrProviderContext) {
     url,
     certificateAuthorities: config.get('servers.kibana.certificateAuthorities'),
     uiSettingDefaults: defaults,
-    importExportDir: config.get('savedObjects.directory'),
+    importExportDir: config.get('kbnArchiver.directory'),
   });
 
   if (defaults) {
