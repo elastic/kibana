@@ -20,7 +20,7 @@ import styled from 'styled-components';
 
 import { FULL_SCREEN } from '../timeline/body/column_headers/translations';
 import { EXIT_FULL_SCREEN } from '../../../common/components/exit_full_screen/translations';
-import { FULL_SCREEN_TOGGLED_CLASS_NAME } from '../../../../common/constants';
+import { DEFAULT_INDEX_KEY, FULL_SCREEN_TOGGLED_CLASS_NAME } from '../../../../common/constants';
 import {
   useGlobalFullScreen,
   useTimelineFullScreen,
@@ -40,6 +40,8 @@ import {
   endSelector,
 } from '../../../common/components/super_date_picker/selectors';
 import * as i18n from './translations';
+import { useUiSetting$ } from '../../../common/lib/kibana';
+import { useSignalIndex } from '../../../detections/containers/detection_engine/alerts/use_signal_index';
 
 const OverlayContainer = styled.div`
   ${({ $restrictWidth }: { $restrictWidth: boolean }) =>
@@ -177,6 +179,16 @@ const GraphOverlayComponent: React.FC<OwnProps> = ({ isEventViewer, timelineId }
   }
 
   const { selectedPatterns } = useSourcererScope(sourcereScope);
+  const { signalIndexName } = useSignalIndex();
+  const [siemDefaultIndices] = useUiSetting$<string[]>(DEFAULT_INDEX_KEY);
+
+  const allIndicies = useMemo(() => {
+    const signalIndex = signalIndexName !== null ? signalIndexName : '';
+    return timelineId.includes('detections')
+      ? [...selectedPatterns, ...siemDefaultIndices, signalIndex]
+      : [...selectedPatterns];
+  }, [timelineId, selectedPatterns, siemDefaultIndices, signalIndexName]);
+
   return (
     <OverlayContainer
       data-test-subj="overlayContainer"
@@ -200,7 +212,7 @@ const GraphOverlayComponent: React.FC<OwnProps> = ({ isEventViewer, timelineId }
         <StyledResolver
           databaseDocumentID={graphEventId}
           resolverComponentInstanceID={timelineId}
-          indices={selectedPatterns}
+          indices={allIndicies}
           shouldUpdate={shouldUpdate}
           filters={{ from, to }}
         />
