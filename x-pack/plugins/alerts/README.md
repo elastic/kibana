@@ -20,11 +20,10 @@ Table of Contents
 		- [Example](#example)
 	- [Role Based Access-Control](#role-based-access-control)
 	- [Alert Navigation](#alert-navigation)
-	- [RESTful API](#restful-api)
+	- [Experimental RESTful API](#restful-api)
 		- [`GET /api/alerts/alert/{id}/state`: Get alert state](#get-apialertidstate-get-alert-state)
 		- [`GET /api/alerts/alert/{id}/_instance_summary`: Get alert instance summary](#get-apialertidstate-get-alert-instance-summary)
 		- [`POST /api/alerts/alert/{id}/_update_api_key`: Update alert API key](#post-apialertidupdateapikey-update-alert-api-key)
-	- [Schedule Formats](#schedule-formats)
 	- [Alert instance factory](#alert-instance-factory)
 	- [Templating actions](#templating-actions)
 		- [Examples](#examples)
@@ -298,29 +297,37 @@ It's important to note that any role can be granted a mix of `all` and `read` pr
 
 ```typescript
 features.registerKibanaFeature({
-	id: 'my-application-id',
-	name: 'My Application',
-	app: [],
-	privileges: {
-		all: {
-			alerting: {
-				all: [
-					'my-application-id.my-alert-type',
-					'my-application-id.my-restricted-alert-type'
-				],
-			},
-		},
-		read: {
-			alerting: {
-				all: [
-					'my-application-id.my-alert-type'
-				]
-				read: [
-					'my-application-id.my-restricted-alert-type'
-				],
-			},
-		},
-	},
+  id: 'my-application-id',
+  name: 'My Application',
+  app: [],
+  privileges: {
+    all: {
+      app: ['my-application-id', 'kibana'],
+      savedObject: {
+        all: [],
+        read: [],
+      },
+      ui: [],
+      api: [],
+    },
+    read: {
+      app: ['lens', 'kibana'],
+      alerting: {
+        all: [
+          'my-application-id.my-alert-type'
+        ],
+        read: [
+          'my-application-id.my-restricted-alert-type'
+        ],
+      },
+      savedObject: {
+        all: [],
+        read: [],
+      },
+      ui: [],
+      api: [],
+    },
+  },
 });
 ```
 
@@ -405,10 +412,10 @@ The only case in which this handler will not be used to evaluate the navigation 
 
 You can use the `registerNavigation` api to specify as many AlertType specific handlers as you like, but you can only use it once per AlertType as we wouldn't know which handler to use if you specified two for the same AlertType. For the same reason, you can only use `registerDefaultNavigation` once per plugin, as it covers all cases for your specific plugin.
 
-## RESTful API
+## Experimental RESTful API
 
-Using an alert type requires you to create an alert that will contain parameters and actions for a given alert type. See below for CRUD operations using the API.
-
+Using an alert type requires you to create an alert that will contain parameters and actions for a given alert type. API for CRUD operations is a part of ascii [Documentation](https://www.elastic.co/guide/en/kibana/master/alerts-api-update.html).
+API listed below is experimental and could be changed or removed in the future.
 
 ### `GET /api/alerts/alert/{id}/state`: Get alert state
 
@@ -440,14 +447,6 @@ Query:
 |Property|Description|Type|
 |---|---|---|
 |id|The id of the alert you're trying to update the API key for. System will use user in request context to generate an API key for.|string|
-
-## Schedule Formats
-A schedule is structured such that the key specifies the format you wish to use and its value specifies the schedule.
-
-We currently support the _Interval format_ which specifies the interval in seconds, minutes, hours or days at which the alert should execute.
-Example: `{ interval: "10s" }`, `{ interval: "5m" }`, `{ interval: "1h" }`, `{ interval: "1d" }`.
-
-There are plans to support multiple other schedule formats in the near future.
 
 ## Alert instance factory
 
