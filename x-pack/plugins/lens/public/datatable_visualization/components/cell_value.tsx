@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useContext, useEffect } from 'react';
+import React, { useContext } from 'react';
 import { EuiDataGridCellValueElementProps } from '@elastic/eui';
 import type { FormatFactory } from '../../types';
 import type { DataContextType } from './types';
@@ -13,7 +13,7 @@ import type { DataContextType } from './types';
 export const createGridCell = (
   formatters: Record<string, ReturnType<FormatFactory>>,
   DataContext: React.Context<DataContextType>
-) => ({ rowIndex, columnId, setCellProps }: EuiDataGridCellValueElementProps) => {
+) => ({ rowIndex, columnId }: EuiDataGridCellValueElementProps) => {
   const { table, alignments } = useContext(DataContext);
   const rowValue = table?.rows[rowIndex][columnId];
   const content = formatters[columnId]?.convert(rowValue, 'html');
