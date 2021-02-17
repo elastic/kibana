@@ -59,23 +59,20 @@ export const RelevanceTuningForm: React.FC = () => {
           </EuiPageHeaderSection>
         </EuiPageHeader>
         {schemaFields.length > FIELD_FILTER_CUTOFF && (
-          <>
-            <EuiSpacer />
-            <EuiFieldSearch
-              value={filterInputValue}
-              onChange={(e) => setFilterValue(e.target.value)}
-              placeholder={i18n.translate(
-                'xpack.enterpriseSearch.appSearch.engine.relevanceTuning.manageFields.filterPlaceholder',
-                {
-                  defaultMessage: 'Filter {schemaFieldsLength} fields...',
-                  values: {
-                    schemaFieldsLength: schemaFields.length,
-                  },
-                }
-              )}
-              fullWidth
-            />
-          </>
+          <EuiFieldSearch
+            value={filterInputValue}
+            onChange={(e) => setFilterValue(e.target.value)}
+            placeholder={i18n.translate(
+              'xpack.enterpriseSearch.appSearch.engine.relevanceTuning.manageFields.filterPlaceholder',
+              {
+                defaultMessage: 'Filter {schemaFieldsLength} fields...',
+                values: {
+                  schemaFieldsLength: schemaFields.length,
+                },
+              }
+            )}
+            fullWidth
+          />
         )}
         <EuiSpacer />
         {filteredSchemaFields.map((fieldName) => (
