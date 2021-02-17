@@ -1000,7 +1000,6 @@ export class TimeSeriesExplorer extends React.Component {
                   }}
                 />
               }
-              color="warning"
               iconType="help"
               size="s"
             />

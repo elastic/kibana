@@ -13,13 +13,16 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'error']);
   const ml = getService('ml');
 
-  const testUsers = [USER.ML_UNAUTHORIZED, USER.ML_UNAUTHORIZED_SPACES];
+  const testUsers = [
+    { user: USER.ML_UNAUTHORIZED, discoverAvailable: true },
+    { user: USER.ML_UNAUTHORIZED_SPACES, discoverAvailable: true },
+  ];
 
   describe('for user with no ML access', function () {
-    for (const user of testUsers) {
-      describe(`(${user})`, function () {
+    for (const testUser of testUsers) {
+      describe(`(${testUser.user})`, function () {
         before(async () => {
-          await ml.securityUI.loginAs(user);
+          await ml.securityUI.loginAs(testUser.user);
         });
 
         after(async () => {
