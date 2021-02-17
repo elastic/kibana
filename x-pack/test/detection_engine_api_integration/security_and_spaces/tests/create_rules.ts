@@ -118,7 +118,7 @@ export default ({ getService }: FtrProviderContext) => {
           expect(statusBody[body.id].current_status.status).to.eql('succeeded');
         });
 
-        it('should create a single rule with a rule_id and an index pattern that does not match anything available and fail the rule', async () => {
+        it('should create a single rule with a rule_id and an index pattern that does not match anything available and warning for the rule', async () => {
           const simpleRule = getRuleForSignalTesting(['does-not-exist-*']);
           const { body } = await supertest
             .post(DETECTION_ENGINE_RULES_URL)
@@ -126,7 +126,7 @@ export default ({ getService }: FtrProviderContext) => {
             .send(simpleRule)
             .expect(200);
 
-          await waitForRuleSuccessOrStatus(supertest, body.id, 'failed');
+          await waitForRuleSuccessOrStatus(supertest, body.id, 'warning');
 
           const { body: statusBody } = await supertest
             .post(DETECTION_ENGINE_RULES_STATUS_URL)
@@ -134,8 +134,8 @@ export default ({ getService }: FtrProviderContext) => {
             .send({ ids: [body.id] })
             .expect(200);
 
-          expect(statusBody[body.id].current_status.status).to.eql('failed');
-          expect(statusBody[body.id].current_status.last_failure_message).to.eql(
+          expect(statusBody[body.id].current_status.status).to.eql('warning');
+          expect(statusBody[body.id].current_status.last_success_message).to.eql(
             'The following index patterns did not match any indices: ["does-not-exist-*"]'
           );
         });
@@ -287,10 +287,7 @@ export default ({ getService }: FtrProviderContext) => {
         await deleteAllAlerts(supertest);
         await esArchiver.unload('security_solution/timestamp_override');
       });
-      it('should create a single rule which has a timestamp override and generates two signals with a failing status', async () => {
-        // should be a failing status because one of the indices in the index pattern is missing
-        // the timestamp override field.
-
+      it('should create a single rule which has a timestamp override and generates two signals with a "warning" status', async () => {
         // defaults to event.ingested timestamp override.
         // event.ingested is one of the timestamp fields set on the es archive data
         // inside of x-pack/test/functional/es_archives/security_solution/timestamp_override/data.json.gz
@@ -302,7 +299,7 @@ export default ({ getService }: FtrProviderContext) => {
           .expect(200);
         const bodyId = body.id;
 
-        await waitForRuleSuccessOrStatus(supertest, bodyId, 'partial failure');
+        await waitForRuleSuccessOrStatus(supertest, bodyId, 'warning');
         await waitForSignalsToBePresent(supertest, 2, [bodyId]);
 
         const { body: statusBody } = await supertest
@@ -311,9 +308,7 @@ export default ({ getService }: FtrProviderContext) => {
           .send({ ids: [bodyId] })
           .expect(200);
 
-        // set to "failed" for now. Will update this with a partial failure
-        // once I figure out the logic
-        expect(statusBody[bodyId].current_status.status).to.eql('partial failure');
+        expect(statusBody[bodyId].current_status.status).to.eql('warning');
       });
     });
   });
