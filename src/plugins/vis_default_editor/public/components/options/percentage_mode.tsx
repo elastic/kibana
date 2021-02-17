@@ -45,6 +45,7 @@ function PercentageModeOption({
         setValue={setValue}
       />
       <EuiFormRow
+        fullWidth
         label={
           <FormattedMessage
             id="visDefaultEditor.options.percentageMode.numeralLabel"
@@ -65,6 +66,7 @@ function PercentageModeOption({
         }
       >
         <EuiFieldText
+          fullWidth
           data-test-subj={`${dataTestSubj}FormatPattern`}
           value={formatPattern}
           placeholder={defaultPattern}
