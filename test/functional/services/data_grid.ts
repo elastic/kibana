@@ -127,6 +127,9 @@ export function DataGridProvider({ getService, getPageObjects }: FtrProviderCont
      */
     public async getDocTableRows() {
       const table = await this.getTable();
+      if (!table) {
+        return [];
+      }
       const cells = await table.findAllByCssSelector('.euiDataGridRowCell');
 
       const rows: WebElementWrapper[][] = [];
@@ -259,6 +262,10 @@ export function DataGridProvider({ getService, getPageObjects }: FtrProviderCont
       const addInclusiveFilterButton = await this.getRemoveInclusiveFilterButton(tableDocViewRow);
       await addInclusiveFilterButton.click();
       await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
+    }
+
+    public async hasNoResults() {
+      return await find.existsByCssSelector('.euiDataGrid__noResults');
     }
   }
 

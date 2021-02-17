@@ -50,14 +50,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         fields: ['bytes', 'agent'],
       });
       const initialRows = await dataGrid.getDocTableRows();
+      expect(initialRows.length).to.be(11);
 
       // Set to time range with no data
       await PageObjects.timePicker.setAbsoluteRange(
         'Jan 1, 2000 @ 00:00:00.000',
         'Jan 1, 2000 @ 01:00:00.000'
       );
-      const updatedRows = await dataGrid.getDocTableRows();
-      expect(updatedRows.length).to.be.below(initialRows.length);
+      const noResults = await dataGrid.hasNoResults();
+      expect(noResults).to.be.ok();
     });
 
     it('Timepicker start, end, interval values are set by url', async () => {
