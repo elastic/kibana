@@ -28,7 +28,7 @@ The following alerts APIs are available:
 
 * <<alerts-api-unmute, Unmute alert instance API>> to unmute alert instances for a single alert by ID
 
-* <<alerts-api-health, Get framework health API>> to retrieve a {kib} alerts framework health
+* <<alerts-api-health, Get framework health API>> to retrieve the health of the alerts framework
 
 include::alerts/get.asciidoc[]
 include::alerts/list.asciidoc[]
