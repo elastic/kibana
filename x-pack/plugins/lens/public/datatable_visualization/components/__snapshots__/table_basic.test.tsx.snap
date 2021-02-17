@@ -107,10 +107,10 @@ exports[`DatatableComponent it renders actions column when there are row actions
               "showMoveLeft": false,
               "showMoveRight": false,
               "showSortAsc": Object {
-                "label": "Sort asc",
+                "label": "Sort ascending",
               },
               "showSortDesc": Object {
-                "label": "Sort desc",
+                "label": "Sort descending",
               },
             },
             "cellActions": undefined,
@@ -144,10 +144,10 @@ exports[`DatatableComponent it renders actions column when there are row actions
               "showMoveLeft": false,
               "showMoveRight": false,
               "showSortAsc": Object {
-                "label": "Sort asc",
+                "label": "Sort ascending",
               },
               "showSortDesc": Object {
-                "label": "Sort desc",
+                "label": "Sort descending",
               },
             },
             "cellActions": undefined,
@@ -181,10 +181,10 @@ exports[`DatatableComponent it renders actions column when there are row actions
               "showMoveLeft": false,
               "showMoveRight": false,
               "showSortAsc": Object {
-                "label": "Sort asc",
+                "label": "Sort ascending",
               },
               "showSortDesc": Object {
-                "label": "Sort desc",
+                "label": "Sort descending",
               },
             },
             "cellActions": undefined,
@@ -329,10 +329,10 @@ exports[`DatatableComponent it renders the title and value 1`] = `
               "showMoveLeft": false,
               "showMoveRight": false,
               "showSortAsc": Object {
-                "label": "Sort asc",
+                "label": "Sort ascending",
               },
               "showSortDesc": Object {
-                "label": "Sort desc",
+                "label": "Sort descending",
               },
             },
             "cellActions": undefined,
@@ -366,10 +366,10 @@ exports[`DatatableComponent it renders the title and value 1`] = `
               "showMoveLeft": false,
               "showMoveRight": false,
               "showSortAsc": Object {
-                "label": "Sort asc",
+                "label": "Sort ascending",
               },
               "showSortDesc": Object {
-                "label": "Sort desc",
+                "label": "Sort descending",
               },
             },
             "cellActions": undefined,
@@ -403,10 +403,10 @@ exports[`DatatableComponent it renders the title and value 1`] = `
               "showMoveLeft": false,
               "showMoveRight": false,
               "showSortAsc": Object {
-                "label": "Sort asc",
+                "label": "Sort ascending",
               },
               "showSortDesc": Object {
-                "label": "Sort desc",
+                "label": "Sort descending",
               },
             },
             "cellActions": undefined,

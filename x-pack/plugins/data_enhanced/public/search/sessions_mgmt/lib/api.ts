@@ -11,7 +11,10 @@ import moment from 'moment';
 import { from, race, timer } from 'rxjs';
 import { mapTo, tap } from 'rxjs/operators';
 import type { SharePluginStart } from 'src/plugins/share/public';
-import { ISessionsClient } from '../../../../../../../src/plugins/data/public';
+import {
+  ISessionsClient,
+  SearchUsageCollector,
+} from '../../../../../../../src/plugins/data/public';
 import { SearchSessionStatus } from '../../../../common/search';
 import { ACTION } from '../components/actions';
 import { PersistedSearchSessionSavedObjectAttributes, UISession } from '../types';
@@ -84,17 +87,18 @@ const mapToUISession = (urls: UrlGeneratorsStart, config: SessionsConfigSchema) 
   };
 };
 
-interface SearcgSessuibManagementDeps {
+interface SearchSessionManagementDeps {
   urls: UrlGeneratorsStart;
   notifications: NotificationsStart;
   application: ApplicationStart;
+  usageCollector?: SearchUsageCollector;
 }
 
 export class SearchSessionsMgmtAPI {
   constructor(
     private sessionsClient: ISessionsClient,
     private config: SessionsConfigSchema,
-    private deps: SearcgSessuibManagementDeps
+    private deps: SearchSessionManagementDeps
   ) {}
 
   public async fetchTableData(): Promise<UISession[]> {
@@ -151,6 +155,7 @@ export class SearchSessionsMgmtAPI {
   }
 
   public reloadSearchSession(reloadUrl: string) {
+    this.deps.usageCollector?.trackSessionReloaded();
     this.deps.application.navigateToUrl(reloadUrl);
   }
 
@@ -160,6 +165,7 @@ export class SearchSessionsMgmtAPI {
 
   // Cancel and expire
   public async sendCancel(id: string): Promise<void> {
+    this.deps.usageCollector?.trackSessionDeleted();
     try {
       await this.sessionsClient.delete(id);
 
@@ -179,6 +185,7 @@ export class SearchSessionsMgmtAPI {
 
   // Extend
   public async sendExtend(id: string, expires: string): Promise<void> {
+    this.deps.usageCollector?.trackSessionExtended();
     try {
       await this.sessionsClient.extend(id, expires);
 

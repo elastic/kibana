@@ -146,7 +146,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.settings.clickIndexPatternLogstash();
         await PageObjects.settings.filterField(termsField);
         await PageObjects.settings.openControlsByName(termsField);
-        await (await testSubjects.findAll('formRowToggle'))[1].click();
+        await (
+          await (await testSubjects.find('formatRow')).findAllByCssSelector(
+            '[data-test-subj="toggle"]'
+          )
+        )[0].click();
         await PageObjects.settings.setFieldFormat('bytes');
         await PageObjects.settings.controlChangeSave();
         await PageObjects.common.navigateToApp('visualize');

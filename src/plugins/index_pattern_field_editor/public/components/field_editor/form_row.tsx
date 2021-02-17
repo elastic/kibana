@@ -25,6 +25,7 @@ interface Props {
   children: React.ReactNode;
   description?: string | JSX.Element;
   withDividerRule?: boolean;
+  'data-test-subj'?: string;
 }
 
 export const FormRow = ({
@@ -33,13 +34,14 @@ export const FormRow = ({
   children,
   formFieldPath,
   withDividerRule = false,
+  'data-test-subj': dataTestSubj,
 }: Props) => {
   const [formData] = useFormData({ watch: formFieldPath });
   const isContentVisible = Boolean(get(formData, formFieldPath));
 
   return (
     <>
-      <EuiFlexGroup>
+      <EuiFlexGroup data-test-subj={dataTestSubj ?? 'formRow'}>
         <EuiFlexItem grow={false}>
           <UseField
             path={formFieldPath}
@@ -48,7 +50,7 @@ export const FormRow = ({
               euiFieldProps: {
                 label: title,
                 showLabel: false,
-                'data-test-subj': 'formRowToggle',
+                'data-test-subj': 'toggle',
               },
             }}
           />

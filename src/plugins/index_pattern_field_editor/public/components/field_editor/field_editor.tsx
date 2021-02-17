@@ -8,7 +8,14 @@
 
 import React, { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiComboBoxOptionOption } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiComboBoxOptionOption,
+  EuiCode,
+} from '@elastic/eui';
 import type { CoreStart } from 'src/core/public';
 
 import {
@@ -87,7 +94,9 @@ export interface Props {
   syntaxError: ScriptSyntaxError;
 }
 
-const geti18nTexts = () => ({
+const geti18nTexts = (): {
+  [key: string]: { title: string; description: JSX.Element | string };
+} => ({
   customLabel: {
     title: i18n.translate('indexPatternFieldEditor.editor.form.customLabelTitle', {
       defaultMessage: 'Set custom label',
@@ -100,9 +109,15 @@ const geti18nTexts = () => ({
     title: i18n.translate('indexPatternFieldEditor.editor.form.valueTitle', {
       defaultMessage: 'Set value',
     }),
-    description: i18n.translate('indexPatternFieldEditor.editor.form.valueDescription', {
-      defaultMessage: `Set a value for the field instead of retrieving it from the field with the same name in _source.`,
-    }),
+    description: (
+      <FormattedMessage
+        id="indexPatternFieldEditor.editor.form.valueDescription"
+        defaultMessage="Set a value for the field instead of retrieving it from the field with the same name in {source}."
+        values={{
+          source: <EuiCode>{'_source'}</EuiCode>,
+        }}
+      />
+    ),
   },
   format: {
     title: i18n.translate('indexPatternFieldEditor.editor.form.formatTitle', {
@@ -213,6 +228,7 @@ const FieldEditorComponent = ({
         title={i18nTexts.customLabel.title}
         description={i18nTexts.customLabel.description}
         formFieldPath="__meta__.isCustomLabelVisible"
+        data-test-subj="customLabelRow"
         withDividerRule
       >
         <CustomLabelField />
@@ -224,6 +240,7 @@ const FieldEditorComponent = ({
           title={i18nTexts.value.title}
           description={i18nTexts.value.description}
           formFieldPath="__meta__.isValueVisible"
+          data-test-subj="valueRow"
           withDividerRule
         >
           <ScriptField
@@ -239,6 +256,7 @@ const FieldEditorComponent = ({
         title={i18nTexts.format.title}
         description={i18nTexts.format.description}
         formFieldPath="__meta__.isFormatVisible"
+        data-test-subj="formatRow"
         withDividerRule
       >
         <FormatField
@@ -255,6 +273,7 @@ const FieldEditorComponent = ({
           title={i18nTexts.popularity.title}
           description={i18nTexts.popularity.description}
           formFieldPath="__meta__.isPopularityVisible"
+          data-test-subj="popularityRow"
           withDividerRule
         >
           <PopularityField />
