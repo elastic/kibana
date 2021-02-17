@@ -4,7 +4,7 @@
 <titleabbrev>Enable alert</titleabbrev>
 ++++
 
-Enable {kib} alerts.
+Enable an alert.
 
 [[alerts-api-enable-request]]
 ==== Request
