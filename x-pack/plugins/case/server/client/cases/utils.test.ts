@@ -17,6 +17,7 @@ import {
   basicParams,
   userActions,
   commentAlert,
+  commentAlertMultipleIds,
 } from './mock';
 
 import {
@@ -48,7 +49,7 @@ describe('utils', () => {
         {
           actionType: 'overwrite',
           key: 'short_description',
-          pipes: ['informationCreated'],
+          pipes: [],
           value: 'a title',
         },
         {
@@ -71,7 +72,7 @@ describe('utils', () => {
         {
           actionType: 'overwrite',
           key: 'short_description',
-          pipes: ['myTestPipe'],
+          pipes: [],
           value: 'a title',
         },
         {
@@ -98,7 +99,7 @@ describe('utils', () => {
       });
 
       expect(res).toEqual({
-        short_description: 'a title (created at 2020-03-13T08:34:53.450Z by Elastic User)',
+        short_description: 'a title',
         description: 'a description (created at 2020-03-13T08:34:53.450Z by Elastic User)',
       });
     });
@@ -122,13 +123,13 @@ describe('utils', () => {
         },
         fields,
         currentIncident: {
-          short_description: 'first title (created at 2020-03-13T08:34:53.450Z by Elastic User)',
+          short_description: 'first title',
           description: 'first description (created at 2020-03-13T08:34:53.450Z by Elastic User)',
         },
       });
 
       expect(res).toEqual({
-        short_description: 'a title (updated at 2020-03-15T08:34:53.450Z by Another User)',
+        short_description: 'a title',
         description:
           'first description (created at 2020-03-13T08:34:53.450Z by Elastic User) \r\na description (updated at 2020-03-15T08:34:53.450Z by Another User)',
       });
@@ -168,7 +169,7 @@ describe('utils', () => {
       });
 
       expect(res).toEqual({
-        short_description: 'a title (created at 2020-03-13T08:34:53.450Z by elastic)',
+        short_description: 'a title',
         description: 'a description (created at 2020-03-13T08:34:53.450Z by elastic)',
       });
     });
@@ -190,7 +191,7 @@ describe('utils', () => {
       });
 
       expect(res).toEqual({
-        short_description: 'a title (updated at 2020-03-15T08:34:53.450Z by anotherUser)',
+        short_description: 'a title',
         description: 'a description (updated at 2020-03-15T08:34:53.450Z by anotherUser)',
       });
     });
@@ -448,8 +449,7 @@ describe('utils', () => {
           labels: ['defacement'],
           issueType: null,
           parent: null,
-          short_description:
-            'Super Bad Security Issue (created at 2019-11-25T21:54:48.952Z by elastic)',
+          short_description: 'Super Bad Security Issue',
           description:
             'This is a brand new case of a bad meanie defacing data (created at 2019-11-25T21:54:48.952Z by elastic)',
           externalId: null,
@@ -504,7 +504,7 @@ describe('utils', () => {
       expect(res.comments).toEqual([]);
     });
 
-    it('it creates comments of type alert correctly', async () => {
+    it('it adds the total alert comments correctly', async () => {
       const res = await createIncident({
         actionsClient: actionsMock,
         theCase: {
@@ -512,7 +512,9 @@ describe('utils', () => {
           comments: [
             { ...commentObj, id: 'comment-user-1' },
             { ...commentAlert, id: 'comment-alert-1' },
-            { ...commentAlert, id: 'comment-alert-2' },
+            {
+              ...commentAlertMultipleIds,
+            },
           ],
         },
         // Remove second push
@@ -536,14 +538,8 @@ describe('utils', () => {
           commentId: 'comment-user-1',
         },
         {
-          comment:
-            'Alert with ids alert-id-1 added to case (added at 2019-11-25T21:55:00.177Z by elastic)',
-          commentId: 'comment-alert-1',
-        },
-        {
-          comment:
-            'Alert with ids alert-id-1 added to case (added at 2019-11-25T21:55:00.177Z by elastic)',
-          commentId: 'comment-alert-2',
+          comment: 'Elastic Security Alerts attached to the case: 3',
+          commentId: '',
         },
       ]);
     });
@@ -578,8 +574,7 @@ describe('utils', () => {
           description:
             'fun description \r\nThis is a brand new case of a bad meanie defacing data (updated at 2019-11-25T21:54:48.952Z by elastic)',
           externalId: 'external-id',
-          short_description:
-            'Super Bad Security Issue (updated at 2019-11-25T21:54:48.952Z by elastic)',
+          short_description: 'Super Bad Security Issue',
         },
         comments: [],
       });

@@ -152,20 +152,36 @@ export const createIncident = async ({
     userActions
       .slice(latestPushInfo?.index ?? 0)
       .filter(
-        (action, index) =>
-          Array.isArray(action.action_field) && action.action_field[0] === 'comment'
+        (action) => Array.isArray(action.action_field) && action.action_field[0] === 'comment'
       )
       .map((action) => action.comment_id)
   );
-  const commentsToBeUpdated = caseComments?.filter((comment) =>
-    commentsIdsToBeUpdated.has(comment.id)
+
+  const commentsToBeUpdated = caseComments?.filter(
+    (comment) =>
+      // We push only user's comments
+      comment.type === CommentType.user && commentsIdsToBeUpdated.has(comment.id)
   );
+
+  const totalAlerts =
+    caseComments?.reduce<number>((total, comment) => {
+      if (comment.type === CommentType.alert || comment.type === CommentType.generatedAlert) {
+        return total + (Array.isArray(comment.alertId) ? comment.alertId.length : 1);
+      }
+      return total;
+    }, 0) ?? 0;
 
   let comments: ExternalServiceComment[] = [];
   if (commentsToBeUpdated && Array.isArray(commentsToBeUpdated) && commentsToBeUpdated.length > 0) {
     const commentsMapping = mappings.find((m) => m.source === 'comments');
     if (commentsMapping?.action_type !== 'nothing') {
       comments = transformComments(commentsToBeUpdated, ['informationAdded']);
+      if (totalAlerts > 0) {
+        comments.push({
+          comment: `Elastic Security Alerts attached to the case: ${totalAlerts}`,
+          commentId: '',
+        });
+      }
     }
   }
   return { incident, comments };
@@ -247,7 +263,13 @@ export const prepareFieldsForTransformation = ({
               key: mapping.target,
               value: params[mapping.source] ?? '',
               actionType: mapping.action_type,
-              pipes: mapping.action_type === 'append' ? [...defaultPipes, 'append'] : defaultPipes,
+              pipes:
+                // Do not transform titles
+                mapping.source !== 'title'
+                  ? mapping.action_type === 'append'
+                    ? [...defaultPipes, 'append']
+                    : defaultPipes
+                  : [],
             },
           ]
         : acc,
