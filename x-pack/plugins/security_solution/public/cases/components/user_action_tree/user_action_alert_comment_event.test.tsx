@@ -15,6 +15,7 @@ import { CommentType } from '../../../../../case/common/api';
 import { RuleEcs } from '../../../../common/ecs/rule';
 
 const props = {
+  alertId: 'alert-id-1',
   alert: {
     _id: 'alert-id-1',
     _index: 'alert-index-1',
@@ -59,6 +60,7 @@ describe('UserActionAvatar ', () => {
   it('does NOT render the link when the alert is undefined', async () => {
     const wrapper = mount(
       <TestProviders>
+        {/* @ts-expect-error */}
         <AlertCommentEvent alert={undefined} commentType={CommentType.alert} />
       </TestProviders>
     );

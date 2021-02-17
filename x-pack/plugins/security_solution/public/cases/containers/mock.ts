@@ -66,7 +66,7 @@ export const alertComment: Comment = {
   pushedBy: null,
   rule: {
     id: 'rule-id-1',
-    name: 'rule-name-1',
+    name: 'Awesome rule',
   },
   updatedAt: null,
   updatedBy: null,
