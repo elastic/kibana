@@ -402,12 +402,12 @@ export async function getLogstashStats(
   };
 
   await fetchLogstashStats(callCluster, clusterUuids, options);
-  await Promise.all([
-    clusterUuids.forEach((clusterUuid) => {
+  await Promise.all(
+    clusterUuids.map(async (clusterUuid) => {
       if (options.clusters[clusterUuid] !== undefined) {
-        fetchLogstashState(callCluster, clusterUuid, options.allEphemeralIds[clusterUuid], options);
+        await fetchLogstashState(callCluster, clusterUuid, options.allEphemeralIds[clusterUuid], options);
       }
     }),
-  ]);
+  );
   return options.clusters;
 }
