@@ -85,7 +85,7 @@ const getSelectedOptions = (
   const options: Array<EuiComboBoxOptionOption<string>> = groupedOptions.reduce(
     (acc: Array<EuiComboBoxOptionOption<string>>, n: EuiComboBoxOptionOption<string>) => [
       ...acc,
-      ...(n.options || []),
+      ...(n.options as Array<EuiComboBoxOptionOption<string>>),
     ],
     []
   );
@@ -124,7 +124,7 @@ export const AttributeSelector: React.FC<IAttributeSelectorProps> = ({
                 selectedOptions={getSelectedOptions(selectedAuthProviders, availableAuthProviders)}
                 options={getAuthProviderOptions(availableAuthProviders)}
                 onChange={(options) => {
-                  handleAuthProviderChange(options.map((o) => o.value || ''));
+                  handleAuthProviderChange(options.map((o) => o.value as string));
                 }}
                 fullWidth
                 isDisabled={disabled}
