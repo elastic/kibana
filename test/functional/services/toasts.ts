@@ -45,6 +45,9 @@ export function ToastsProvider({ getService }: FtrProviderContext) {
     public async dismissAllToasts() {
       const list = await this.getGlobalToastList();
       const toasts = await list.findAllByCssSelector(`.euiToast`);
+
+      if (toasts.length === 0) return;
+
       for (const toast of toasts) {
         await toast.moveMouseTo();
         const dismissButton = await testSubjects.findDescendant('toastCloseButton', toast);

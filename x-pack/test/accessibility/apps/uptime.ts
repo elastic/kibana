@@ -60,6 +60,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('overview alert popover controls', async () => {
       await uptimeService.overview.openAlertsPopover();
       await a11y.testAppSnapshot();
+    });
+
+    it('overview alert popover controls nested content', async () => {
       await uptimeService.overview.navigateToNestedPopover();
       await a11y.testAppSnapshot();
     });
@@ -80,4 +83,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await a11y.testAppSnapshot();
     });
   });
+}
+
+async function delay(millis: number): Promise<void> {
+  await new Promise((resolve) => setTimeout(resolve, millis));
 }
