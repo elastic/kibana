@@ -94,7 +94,7 @@ image::images/visualization-journey.png[User data analysis journey]
 available from the <<kibana-home-page,home page>>. You can collect data from an app or service, upload a
 file, or add a sample data set.
 
-| *2.*
+| *2*
 | *Explore.* With <<discover,*Discover*>>, you can search your data for hidden
 insights and relationships. Ask your questions, and then filter the results to just the data you want.
 You can limit your results to the most recent documents added to {es}.
