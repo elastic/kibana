@@ -76,12 +76,14 @@ export const runtimeMappingsSchema = schema.maybe(
         schema.literal('ip'),
         schema.literal('boolean'),
       ]),
-      script: schema.oneOf([
-        schema.string(),
-        schema.object({
-          source: schema.string(),
-        }),
-      ]),
+      script: schema.maybe(
+        schema.oneOf([
+          schema.string(),
+          schema.object({
+            source: schema.string(),
+          }),
+        ])
+      ),
     })
   )
 );
