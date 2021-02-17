@@ -15,7 +15,6 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiConfirmModal,
-  EuiOverlayMask,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
@@ -101,26 +100,24 @@ export const SourceSettings: React.FC = () => {
   };
 
   const confirmModal = (
-    <EuiOverlayMask>
-      <EuiConfirmModal
-        title={CONFIRM_MODAL_TITLE}
-        onConfirm={handleSourceRemoval}
-        onCancel={hideConfirm}
-        buttonColor="danger"
-        cancelButtonText={CANCEL_BUTTON}
-        confirmButtonText={OK_BUTTON}
-        defaultFocusedButton="confirm"
-      >
-        <FormattedMessage
-          id="xpack.enterpriseSearch.workplaceSearch.sources.settingsModal.text"
-          defaultMessage="Your source documents will be deleted from Workplace Search.{lineBreak}Are you sure you want to remove {name}?"
-          values={{
-            name,
-            lineBreak: <br />,
-          }}
-        />
-      </EuiConfirmModal>
-    </EuiOverlayMask>
+    <EuiConfirmModal
+      title={CONFIRM_MODAL_TITLE}
+      onConfirm={handleSourceRemoval}
+      onCancel={hideConfirm}
+      buttonColor="danger"
+      cancelButtonText={CANCEL_BUTTON}
+      confirmButtonText={OK_BUTTON}
+      defaultFocusedButton="confirm"
+    >
+      <FormattedMessage
+        id="xpack.enterpriseSearch.workplaceSearch.sources.settingsModal.text"
+        defaultMessage="Your source documents will be deleted from Workplace Search.{lineBreak}Are you sure you want to remove {name}?"
+        values={{
+          name,
+          lineBreak: <br />,
+        }}
+      />
+    </EuiConfirmModal>
   );
 
   return (
