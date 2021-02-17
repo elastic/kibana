@@ -25,7 +25,12 @@ import { getServiceTransactionTypes } from '../lib/services/get_service_transact
 import { getThroughput } from '../lib/services/get_throughput';
 import { offsetPreviousPeriodCoordinates } from '../utils/offset_previous_period_coordinate';
 import { createRoute } from './create_route';
-import { comparisonRangeRt, rangeRt, uiFiltersRt } from './default_api_types';
+import {
+  comparisonRangeRt,
+  environmentRt,
+  rangeRt,
+  uiFiltersRt,
+} from './default_api_types';
 import { withApmSpan } from '../utils/with_apm_span';
 import {
   latencyAggregationTypeRt,
@@ -35,17 +40,18 @@ import {
 export const servicesRoute = createRoute({
   endpoint: 'GET /api/apm/services',
   params: t.type({
-    query: t.intersection([uiFiltersRt, rangeRt]),
+    query: t.intersection([environmentRt, uiFiltersRt, rangeRt]),
   }),
   options: { tags: ['access:apm'] },
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
-
+    const { environment } = context.params.query;
     const searchAggregatedTransactions = await getSearchAggregatedTransactions(
       setup
     );
 
     const services = await getServices({
+      environment,
       setup,
       searchAggregatedTransactions,
       logger: context.logger,
@@ -277,6 +283,7 @@ export const serviceErrorGroupsRoute = createRoute({
       serviceName: t.string,
     }),
     query: t.intersection([
+      environmentRt,
       rangeRt,
       uiFiltersRt,
       t.type({
@@ -300,6 +307,7 @@ export const serviceErrorGroupsRoute = createRoute({
     const {
       path: { serviceName },
       query: {
+        environment,
         numBuckets,
         pageIndex,
         size,
@@ -308,7 +316,9 @@ export const serviceErrorGroupsRoute = createRoute({
         transactionType,
       },
     } = context.params;
+
     return getServiceErrorGroups({
+      environment,
       serviceName,
       setup,
       size,
@@ -329,6 +339,7 @@ export const serviceThroughputRoute = createRoute({
     }),
     query: t.intersection([
       t.type({ transactionType: t.string }),
+      environmentRt,
       uiFiltersRt,
       rangeRt,
       comparisonRangeRt,
@@ -339,6 +350,7 @@ export const serviceThroughputRoute = createRoute({
     const setup = await setupRequest(context, request);
     const { serviceName } = context.params.path;
     const {
+      environment,
       transactionType,
       comparisonStart,
       comparisonEnd,
@@ -359,12 +371,14 @@ export const serviceThroughputRoute = createRoute({
     const [currentPeriod, previousPeriod] = await Promise.all([
       getThroughput({
         ...commonProps,
+        environment,
         start,
         end,
       }),
       comparisonStart && comparisonEnd
         ? getThroughput({
             ...commonProps,
+            environment,
             start: comparisonStart,
             end: comparisonEnd,
           }).then((coordinates) =>
@@ -396,6 +410,7 @@ export const serviceInstancesRoute = createRoute({
         transactionType: t.string,
         numBuckets: toNumberRt,
       }),
+      environmentRt,
       uiFiltersRt,
       rangeRt,
     ]),
@@ -404,7 +419,7 @@ export const serviceInstancesRoute = createRoute({
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
     const { serviceName } = context.params.path;
-    const { transactionType, numBuckets } = context.params.query;
+    const { environment, transactionType, numBuckets } = context.params.query;
     const latencyAggregationType = (context.params.query
       .latencyAggregationType as unknown) as LatencyAggregationType;
 
@@ -413,6 +428,7 @@ export const serviceInstancesRoute = createRoute({
     );
 
     return getServiceInstances({
+      environment,
       latencyAggregationType,
       serviceName,
       setup,
@@ -431,9 +447,9 @@ export const serviceDependenciesRoute = createRoute({
     }),
     query: t.intersection([
       t.type({
-        environment: t.string,
         numBuckets: toNumberRt,
       }),
+      environmentRt,
       rangeRt,
     ]),
   }),

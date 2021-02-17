@@ -6,7 +6,7 @@
  */
 
 import { EventOutcome } from '../../../../common/event_outcome';
-import { rangeFilter } from '../../../../common/utils/range_filter';
+import { environmentQuery, rangeQuery } from '../../../../common/utils/queries';
 import { SERVICE_NODE_NAME_MISSING } from '../../../../common/service_nodes';
 import {
   EVENT_OUTCOME,
@@ -28,6 +28,7 @@ import {
 } from '../../helpers/latency_aggregation_type';
 
 export async function getServiceInstanceTransactionStats({
+  environment,
   latencyAggregationType,
   setup,
   transactionType,
@@ -73,9 +74,10 @@ export async function getServiceInstanceTransactionStats({
         query: {
           bool: {
             filter: [
-              { range: rangeFilter(start, end) },
               { term: { [SERVICE_NAME]: serviceName } },
               { term: { [TRANSACTION_TYPE]: transactionType } },
+              ...rangeQuery(start, end),
+              ...environmentQuery(environment),
               ...esFilter,
             ],
           },

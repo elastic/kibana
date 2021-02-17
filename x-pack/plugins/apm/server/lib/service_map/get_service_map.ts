@@ -15,8 +15,8 @@ import {
 } from '../../../common/elasticsearch_fieldnames';
 import { getServicesProjection } from '../../projections/services';
 import { mergeProjection } from '../../projections/util/merge_projection';
+import { environmentQuery } from '../../../common/utils/queries';
 import { withApmSpan } from '../../utils/with_apm_span';
-import { getEnvironmentUiFilterES } from '../helpers/convert_ui_filters/get_environment_ui_filter_es';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import {
   DEFAULT_ANOMALIES,
@@ -88,14 +88,17 @@ async function getConnectionData({
 
 async function getServicesData(options: IEnvOptions) {
   return withApmSpan('get_service_stats_for_service_map', async () => {
-    const { setup, searchAggregatedTransactions } = options;
+    const { environment, setup, searchAggregatedTransactions } = options;
 
     const projection = getServicesProjection({
       setup: { ...setup, esFilter: [] },
       searchAggregatedTransactions,
     });
 
-    let { filter } = projection.body.query.bool;
+    let filter = [
+      ...projection.body.query.bool.filter,
+      ...environmentQuery(environment),
+    ];
 
     if (options.serviceName) {
       filter = filter.concat({
@@ -103,10 +106,6 @@ async function getServicesData(options: IEnvOptions) {
           [SERVICE_NAME]: options.serviceName,
         },
       });
-    }
-
-    if (options.environment) {
-      filter = filter.concat(getEnvironmentUiFilterES(options.environment));
     }
 
     const params = mergeProjection(projection, {
