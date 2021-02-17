@@ -190,6 +190,7 @@ export function alertingServiceProvider(mlClient: MlClient, esClient: Elasticsea
                   'partition_field_name',
                   'partition_field_value',
                   'job_id',
+                  'detector_index',
                 ],
               },
               size: 3,
