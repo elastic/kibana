@@ -77,7 +77,7 @@ alertingFrameworkHeath itself consists from the following properties:
 | Returns the timestamp and status  of the alert decryption: `ok`, `warn` or `error` .
 
 | `executionHealth`
-| Return the latest status `ok`, `warn` or `error` with the timestamp, which identify if the alerts executions have results with the errors.
+| Returns the timestamp and status of the alert execution: `ok`, `warn` or `error`.
 
 | `readHealth`
 | Return the latest status `ok`, `warn` or `error` with the timestamp, which identify if the alerts read events have any errors.
