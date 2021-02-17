@@ -6,8 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { BehaviorSubject } from 'rxjs';
-import { pluck, take } from 'rxjs/operators';
+import { BehaviorSubject, Subject } from 'rxjs';
+import { pluck } from 'rxjs/operators';
 import {
   PluginSetup,
   PluginStart,
@@ -75,9 +75,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   constructor(initializerContext: PluginInitializerContext) {
     this.kibanaVersion = initializerContext.env.packageInfo.version;
   }
-  private detectionsUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
-  private hostsUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
-  private networkUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
+  private detectionsUpdater$ = new Subject<AppUpdater>();
+  private hostsUpdater$ = new Subject<AppUpdater>();
+  private networkUpdater$ = new Subject<AppUpdater>();
 
   private storage = new Storage(localStorage);
 
@@ -366,9 +366,11 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     }
     licenseService.start(plugins.licensing.license$);
     const licensing = licenseService.getLicenseInformation$();
+    /**
+     * Register searchDeepLinks and pass an appUpdater for each subPlugin, to change searchDeepLinks as needed when licensing changes.
+     */
     if (licensing !== null) {
-      const license = licensing.pipe(take(1));
-      license.subscribe((currentLicense) => {
+      licensing.subscribe((currentLicense) => {
         if (currentLicense.type !== undefined) {
           registerSearchLinks(SecurityPageName.network, this.networkUpdater$, currentLicense.type);
           registerSearchLinks(

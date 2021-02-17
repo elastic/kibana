@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { BehaviorSubject } from 'rxjs';
+import { Subject } from 'rxjs';
 
 import { AppUpdater } from 'src/core/public';
 import { LicenseType } from '../../../../licensing/common/types';
@@ -25,17 +25,6 @@ const securityDeepLinks: SecurityDeepLinks = {
         path: '/rules',
       },
     ],
-    // The tabs in the detections subPlugin are not their own route as they are in other subplugins. If they were, add metadata here to enable search.
-    // premium: [
-    //   {
-    //     id: 'siemDetectionRuleAnomalies',
-    //     title: i18n.translate('xpack.securitySolution.search.detections.anomalies', {
-    //       defaultMessage: 'Rule Anomalies',
-    //     }),
-    //     keywords: ['rules'],
-    //     path: '/anomalies',
-    //   },
-    // ],
   },
   hosts: {
     base: [
@@ -234,7 +223,7 @@ export function getSearchDeepLinksAndKeywords(
  */
 export function registerSearchLinks(
   subPluginName: SecuritySubPluginNames,
-  appUpdater?: BehaviorSubject<AppUpdater>,
+  appUpdater?: Subject<AppUpdater>,
   licenseType?: LicenseType
 ) {
   if (appUpdater !== undefined) {

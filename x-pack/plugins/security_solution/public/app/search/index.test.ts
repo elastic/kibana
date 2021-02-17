@@ -12,6 +12,7 @@ describe('public search functions', () => {
     const basicLicense = 'basic';
     const platinumLicense = 'platinum';
     for (const pageName of Object.values(SecurityPageName)) {
+      expect.assertions(Object.values(SecurityPageName).length * 2);
       const basicLinkCount =
         getSearchDeepLinksAndKeywords(pageName, basicLicense).searchDeepLinks?.length || 0;
       const platinumLinks = getSearchDeepLinksAndKeywords(pageName, platinumLicense);
