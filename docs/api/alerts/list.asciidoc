@@ -89,7 +89,7 @@ The API returns the following:
 ]
 --------------------------------------------------
 
-Each alert type object contains the following properties:
+Each alert type contains the following properties:
 
 [cols="2*<"]
 |===
