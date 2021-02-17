@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import React, { Fragment, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
 import {
+  htmlIdGenerator,
   EuiButton,
+  EuiCheckbox,
   EuiCodeEditor,
   EuiFieldText,
   EuiForm,
@@ -102,9 +104,14 @@ export const PopoverForm: React.FC<Props> = ({ defaultData, otherAggNames, onCha
     isPivotGroupByConfigWithUiSupport(defaultData) ? defaultData.field : ''
   );
   const [interval, setInterval] = useState(getDefaultInterval(defaultData));
+  const [missingBucket, setMissingBucket] = useState(
+    isPivotGroupByConfigWithUiSupport(defaultData) && defaultData.missing_bucket
+  );
+
+  const missingBucketSwitchId = useMemo(() => htmlIdGenerator()(), []);
 
   function getUpdatedItem(): PivotGroupByConfig {
-    const updatedItem = { ...defaultData, agg, aggName, field };
+    const updatedItem = { ...defaultData, agg, aggName, field, missing_bucket: missingBucket };
 
     if (isGroupByHistogram(updatedItem) && interval !== undefined) {
       updatedItem.interval = interval;
@@ -225,7 +232,7 @@ export const PopoverForm: React.FC<Props> = ({ defaultData, otherAggNames, onCha
             defaultMessage: 'Interval',
           })}
         >
-          <Fragment>
+          <>
             {isGroupByHistogram(defaultData) && (
               <EuiFieldText
                 defaultValue={interval}
@@ -248,11 +255,20 @@ export const PopoverForm: React.FC<Props> = ({ defaultData, otherAggNames, onCha
                 onChange={(e) => setInterval(e.target.value)}
               />
             )}
-          </Fragment>
+          </>
         </EuiFormRow>
       )}
+      <EuiSpacer size="m" />
+      <EuiCheckbox
+        id={missingBucketSwitchId}
+        label={i18n.translate('xpack.transform.groupby.popoverForm.missingBucketCheckboxLabel', {
+          defaultMessage: 'Missing bucket',
+        })}
+        checked={missingBucket}
+        onChange={() => setMissingBucket(!missingBucket)}
+      />
       {isUnsupportedAgg && (
-        <Fragment>
+        <>
           <EuiSpacer size="m" />
           <EuiCodeEditor
             mode="json"
@@ -264,7 +280,7 @@ export const PopoverForm: React.FC<Props> = ({ defaultData, otherAggNames, onCha
             isReadOnly
             aria-label="Read only code editor"
           />
-        </Fragment>
+        </>
       )}
       <EuiFormRow hasEmptyLabelSpace>
         <EuiButton isDisabled={!formValid} onClick={() => onChange(getUpdatedItem())}>
