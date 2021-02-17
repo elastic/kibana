@@ -55,6 +55,16 @@ const createTestCases = (overwrite: boolean, spaceId: string) => {
       ...fail409(!overwrite || spaceId !== SPACE_2_ID),
       ...unresolvableConflict(spaceId !== SPACE_2_ID),
     },
+    {
+      ...CASES.MULTI_NAMESPACE_ISOLATED_ONLY_DEFAULT_SPACE,
+      ...fail409(!overwrite || spaceId !== DEFAULT_SPACE_ID),
+      ...unresolvableConflict(spaceId !== DEFAULT_SPACE_ID),
+    },
+    {
+      ...CASES.MULTI_NAMESPACE_ISOLATED_ONLY_SPACE_1,
+      ...fail409(!overwrite || spaceId !== SPACE_1_ID),
+      ...unresolvableConflict(spaceId !== SPACE_1_ID),
+    },
     { ...CASES.NAMESPACE_AGNOSTIC, ...fail409(!overwrite) },
     { ...CASES.HIDDEN, ...fail400() },
     { ...CASES.NEW_SINGLE_NAMESPACE_OBJ, expectedNamespaces },

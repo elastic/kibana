@@ -103,6 +103,7 @@ import * as detectionI18n from '../../translations';
 import * as ruleI18n from '../translations';
 import * as i18n from './translations';
 import { isTab } from '../../../../../common/components/accessibility/helpers';
+import { NeedAdminForUpdateRulesCallOut } from '../../../../components/callouts/need_admin_for_update_callout';
 
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
@@ -314,7 +315,7 @@ const RuleDetailsPageComponent = () => {
         />
       );
     } else if (
-      rule?.status === 'partial failure' &&
+      (rule?.status === 'warning' || rule?.status === 'partial failure') &&
       ruleDetailTab === RuleDetailTabs.alerts &&
       rule?.last_success_at != null
     ) {
@@ -468,6 +469,7 @@ const RuleDetailsPageComponent = () => {
 
   return (
     <>
+      <NeedAdminForUpdateRulesCallOut />
       <ReadOnlyAlertsCallOut />
       <ReadOnlyRulesCallOut />
       {indicesExist ? (
@@ -484,6 +486,7 @@ const RuleDetailsPageComponent = () => {
                   href: getRulesUrl(),
                   text: i18n.BACK_TO_RULES,
                   pageId: SecurityPageName.detections,
+                  dataTestSubj: 'ruleDetailsBackToAllRules',
                 }}
                 border
                 subtitle={subTitle}

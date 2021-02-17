@@ -15,7 +15,6 @@ import {
   EuiModalHeader,
   EuiModalHeaderTitle,
   EuiModalFooter,
-  EuiOverlayMask,
   EuiSpacer,
   EuiTabbedContent,
 } from '@elastic/eui';
@@ -211,24 +210,22 @@ export const ModalInspectQuery = ({
   ];
 
   return (
-    <EuiOverlayMask>
-      <MyEuiModal onClose={closeModal} data-test-subj="modal-inspect-euiModal">
-        <EuiModalHeader>
-          <EuiModalHeaderTitle>
-            {i18n.INSPECT} {title}
-          </EuiModalHeaderTitle>
-        </EuiModalHeader>
+    <MyEuiModal onClose={closeModal} data-test-subj="modal-inspect-euiModal">
+      <EuiModalHeader>
+        <EuiModalHeaderTitle>
+          {i18n.INSPECT} {title}
+        </EuiModalHeaderTitle>
+      </EuiModalHeader>
 
-        <EuiModalBody>
-          <EuiTabbedContent tabs={tabs} initialSelectedTab={tabs[0]} autoFocus="selected" />
-        </EuiModalBody>
+      <EuiModalBody>
+        <EuiTabbedContent tabs={tabs} initialSelectedTab={tabs[0]} autoFocus="selected" />
+      </EuiModalBody>
 
-        <EuiModalFooter>
-          <EuiButton onClick={closeModal} fill data-test-subj="modal-inspect-close">
-            {i18n.CLOSE}
-          </EuiButton>
-        </EuiModalFooter>
-      </MyEuiModal>
-    </EuiOverlayMask>
+      <EuiModalFooter>
+        <EuiButton onClick={closeModal} fill data-test-subj="modal-inspect-close">
+          {i18n.CLOSE}
+        </EuiButton>
+      </EuiModalFooter>
+    </MyEuiModal>
   );
 };

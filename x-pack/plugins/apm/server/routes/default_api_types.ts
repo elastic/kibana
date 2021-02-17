@@ -6,11 +6,16 @@
  */
 
 import * as t from 'io-ts';
-import { dateAsStringRt } from '../../common/runtime_types/date_as_string_rt';
+import { isoToEpochRt } from '../../common/runtime_types/iso_to_epoch_rt';
 
 export const rangeRt = t.type({
-  start: dateAsStringRt,
-  end: dateAsStringRt,
+  start: isoToEpochRt,
+  end: isoToEpochRt,
+});
+
+export const comparisonRangeRt = t.partial({
+  comparisonStart: isoToEpochRt,
+  comparisonEnd: isoToEpochRt,
 });
 
 export const uiFiltersRt = t.type({ uiFilters: t.string });
