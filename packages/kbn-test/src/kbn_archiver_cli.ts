@@ -135,5 +135,13 @@ export function runKbnArchiverCli() {
         await kbnClient.importExport.load(getSinglePositionalArg(flags));
       },
     })
+    .command({
+      name: 'unload',
+      usage: 'unload <name>',
+      description: 'delete the saved objects saved in the archive from the Kibana index',
+      async run({ kbnClient, flags }) {
+        await kbnClient.importExport.unload(getSinglePositionalArg(flags));
+      },
+    })
     .execute();
 }
