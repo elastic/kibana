@@ -4,7 +4,7 @@
 <titleabbrev>List all alert types API</titleabbrev>
 ++++
 
-Retrieve a list of all {kib} alert types.
+Retrieve a list of all alert types.
 
 [[alerts-api-list-request]]
 ==== Request
