@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { MouseEvent } from 'react';
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiText, EuiSpacer } from '@elastic/eui';
+import React, { MouseEvent, useEffect } from 'react';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { nextAriaLabel, prevAriaLabel } from './translations';
 import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common';
 
@@ -17,6 +17,7 @@ export interface StepImageCaptionProps {
   setStepNumber: React.Dispatch<React.SetStateAction<number>>;
   stepNumber: number;
   label?: string;
+  onVisible: (val: boolean) => void;
 }
 
 const ImageCaption = euiStyled.div`
@@ -33,7 +34,16 @@ export const StepImageCaption: React.FC<StepImageCaptionProps> = ({
   setStepNumber,
   stepNumber,
   label,
+  onVisible,
 }) => {
+  useEffect(() => {
+    onVisible(true);
+    return () => {
+      onVisible(false);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return (
     <ImageCaption
       onClick={(evt) => {

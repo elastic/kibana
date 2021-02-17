@@ -13,7 +13,6 @@ import { Ping } from '../../../../../../common/runtime_types/ping';
 import { useFetcher, FETCH_STATUS } from '../../../../../../../observability/public';
 import { getJourneyScreenshot } from '../../../../../state/api/journey';
 import { UptimeSettingsContext } from '../../../../../contexts';
-import { NavButtons } from './nav_buttons';
 import { NoImageDisplay } from './no_image_display';
 import { StepImageCaption } from './step_image_caption';
 import { StepImagePopover } from './step_image_popover';
@@ -25,26 +24,15 @@ const StepDiv = styled.div`
       display: none;
     }
   }
-
-  position: relative;
-  div.stepArrows {
-    display: none;
-  }
-  :hover {
-    div.stepArrows {
-      display: flex;
-    }
-  }
 `;
 
 interface Props {
   label?: string;
   ping: Ping;
-  showNavBtn?: boolean;
   initialStepNo?: number;
 }
 
-export const PingTimestamp = ({ label, ping, showNavBtn = true, initialStepNo = 1 }: Props) => {
+export const PingTimestamp = ({ label, ping, initialStepNo = 1 }: Props) => {
   const [stepNumber, setStepNumber] = useState(initialStepNo);
   const [isImagePopoverOpen, setIsImagePopoverOpen] = useState(false);
 
@@ -77,6 +65,8 @@ export const PingTimestamp = ({ label, ping, showNavBtn = true, initialStepNo = 
 
   const captionContent = formatCaptionContent(stepNumber, data?.maxSteps);
 
+  const [numberOfCaptions, setNumberOfCaptions] = useState(0);
+
   const ImageCaption = (
     <StepImageCaption
       captionContent={captionContent}
@@ -85,8 +75,21 @@ export const PingTimestamp = ({ label, ping, showNavBtn = true, initialStepNo = 
       setStepNumber={setStepNumber}
       stepNumber={stepNumber}
       label={label}
+      onVisible={(val) => setNumberOfCaptions((prevVal) => (val ? prevVal + 1 : prevVal - 1))}
     />
   );
+
+  useEffect(() => {
+    // This is a hack to get state if image is in full screen, we should refactor
+    // it once eui image exposes it's full screen state
+    // we are checking if number of captions are 2, that means
+    // image is in full screen mode since caption is also rendered on
+    // full screen image
+    // we dont want to change image displayed in thumbnail
+    if (numberOfCaptions === 1 && stepNumber !== initialStepNo) {
+      setStepNumber(initialStepNo);
+    }
+  }, [numberOfCaptions, initialStepNo, stepNumber]);
 
   return (
     <EuiFlexGroup alignItems="center">
@@ -108,14 +111,6 @@ export const PingTimestamp = ({ label, ping, showNavBtn = true, initialStepNo = 
               imageCaption={ImageCaption}
               isLoading={status === FETCH_STATUS.LOADING}
               isPending={status === FETCH_STATUS.PENDING}
-            />
-          )}
-          {showNavBtn && (
-            <NavButtons
-              maxSteps={data?.maxSteps}
-              setIsImagePopoverOpen={setIsImagePopoverOpen}
-              setStepNumber={setStepNumber}
-              stepNumber={stepNumber}
             />
           )}
         </StepDiv>
