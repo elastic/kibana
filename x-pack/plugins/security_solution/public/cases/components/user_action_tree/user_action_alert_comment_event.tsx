@@ -43,25 +43,21 @@ const AlertCommentEventComponent: React.FC<Props> = ({
     [ruleId, navigateToApp]
   );
 
-  return ruleId != null && ruleName != null ? (
-    commentType !== CommentType.generatedAlert ? (
-      <>
-        {`${i18n.ALERT_COMMENT_LABEL_TITLE} `}
-        <EuiLink onClick={onLinkClick} data-test-subj={`alert-rule-link-${alertId ?? 'deleted'}`}>
-          {ruleName}
-        </EuiLink>
-      </>
-    ) : (
-      <>
-        <b>{i18n.GENERATED_ALERT_COUNT_COMMENT_LABEL_TITLE(alertsCount ?? 0)}</b>{' '}
-        {i18n.GENERATED_ALERT_COMMENT_LABEL_TITLE}{' '}
-        <EuiLink onClick={onLinkClick} data-test-subj={`alert-rule-link-${alertId ?? 'deleted'}`}>
-          {ruleName}
-        </EuiLink>
-      </>
-    )
+  return commentType !== CommentType.generatedAlert ? (
+    <>
+      {`${i18n.ALERT_COMMENT_LABEL_TITLE} `}
+      <EuiLink onClick={onLinkClick} data-test-subj={`alert-rule-link-${alertId ?? 'deleted'}`}>
+        {ruleName}
+      </EuiLink>
+    </>
   ) : (
-    <>{i18n.ALERT_RULE_DELETED_COMMENT_LABEL}</>
+    <>
+      <b>{i18n.GENERATED_ALERT_COUNT_COMMENT_LABEL_TITLE(alertsCount ?? 0)}</b>{' '}
+      {i18n.GENERATED_ALERT_COMMENT_LABEL_TITLE}{' '}
+      <EuiLink onClick={onLinkClick} data-test-subj={`alert-rule-link-${alertId ?? 'deleted'}`}>
+        {ruleName}
+      </EuiLink>
+    </>
   );
 };
 

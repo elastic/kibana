@@ -128,8 +128,8 @@ export const transformConnectorComment = (comment: CommentSchemaType): CommentRe
       const genAlerts: Array<{
         _id: string;
         _index: string;
-        ruleId: string;
-        ruleName: string;
+        ruleId: string | undefined;
+        ruleName: string | undefined;
       }> = JSON.parse(
         `${comment.alerts.substring(0, comment.alerts.lastIndexOf('__SEPARATOR__'))}]`.replace(
           /__SEPARATOR__/gi,
@@ -144,7 +144,7 @@ export const transformConnectorComment = (comment: CommentSchemaType): CommentRe
           acc.ids.push(_id);
           acc.indices.push(_index);
           // We assume one rule per batch of alerts
-          acc.rule = { id: ruleId, name: ruleName };
+          acc.rule = { id: ruleId ?? null, name: ruleName ?? null };
           return acc;
         },
         { ids: [], indices: [], rule: { id: null, name: null } } as {
