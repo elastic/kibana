@@ -59,7 +59,6 @@ import { LocationDescriptorObject } from 'history';
 import { Logger } from '@kbn/logging';
 import { LogMeta } from '@kbn/logging';
 import { MaybePromise } from '@kbn/utility-types';
-import { METRIC_TYPE } from '@kbn/analytics';
 import { Moment } from 'moment';
 import moment from 'moment';
 import { NameList } from 'elasticsearch';
