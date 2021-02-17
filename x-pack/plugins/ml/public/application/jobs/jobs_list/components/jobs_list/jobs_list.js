@@ -116,8 +116,8 @@ export class JobsList extends Component {
       onSelectionChange: this.props.selectJobChange,
     };
     // Adding 'width' props to columns for use in the Kibana management jobs list table
-    // The version of the table used in ML > Job Managment depends on many EUI class overrides that set the width explicitly.
-    // The ML > Job Managment table won't change as the overwritten class styles take precedence, though these values may need to
+    // The version of the table used in ML > Job Management depends on many EUI class overrides that set the width explicitly.
+    // The ML > Job Management table won't change as the overwritten class styles take precedence, though these values may need to
     // be updated if we move to always using props for width.
     const columns = [
       {
@@ -299,7 +299,8 @@ export class JobsList extends Component {
           this.props.showEditJobFlyout,
           this.props.showDeleteJobModal,
           this.props.showStartDatafeedModal,
-          this.props.refreshJobs
+          this.props.refreshJobs,
+          this.props.showCreateAlertFlyout
         ),
       });
     }
@@ -371,6 +372,7 @@ JobsList.propTypes = {
   showEditJobFlyout: PropTypes.func,
   showDeleteJobModal: PropTypes.func,
   showStartDatafeedModal: PropTypes.func,
+  showCreateAlertFlyout: PropTypes.func,
   refreshJobs: PropTypes.func,
   selectedJobsCount: PropTypes.number.isRequired,
   loading: PropTypes.bool,
