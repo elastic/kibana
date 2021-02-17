@@ -6,7 +6,6 @@
  */
 
 import { Router } from 'react-router-dom';
-// eslint-disable-next-line @kbn/eslint/module_migration
 import routeData from 'react-router';
 type Action = 'PUSH' | 'POP' | 'REPLACE';
 const pop: Action = 'POP';
