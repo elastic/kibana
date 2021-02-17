@@ -50,7 +50,7 @@ const plugins = ({
   data: { query: { timefilter: { timefilter: { setTime: jest.fn() } } } },
 } as unknown) as ObservabilityPluginSetupDeps;
 
-export const render = (((component: React.ReactNode) => {
+export const render = (component: React.ReactNode): RenderResult => {
   return testLibRender(
     <IntlProvider locale="en-US" messages={translations.messages}>
       <KibanaContextProvider services={{ ...core }}>
@@ -60,4 +60,4 @@ export const render = (((component: React.ReactNode) => {
       </KibanaContextProvider>
     </IntlProvider>
   );
-}) as unknown) as RenderResult;
+};
