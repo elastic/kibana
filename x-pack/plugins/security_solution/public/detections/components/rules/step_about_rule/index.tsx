@@ -40,6 +40,7 @@ import { SeverityField } from '../severity_mapping';
 import { RiskScoreField } from '../risk_score_mapping';
 import { AutocompleteField } from '../autocomplete_field';
 import { useFetchIndex } from '../../../../common/containers/source';
+import { isThreatMatchRule } from '../../../../../common/detection_engine/utils';
 
 const CommonUseField = getUseField({ component: Field });
 
@@ -297,6 +298,23 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
                 }}
               />
             </EuiFormRow>
+            <EuiSpacer size="l" />
+            {isThreatMatchRule(defineRuleData?.ruleType) && (
+              <>
+                <CommonUseField
+                  path="threatIndicatorPath"
+                  componentProps={{
+                    idAria: 'detectionEngineStepAboutThreatIndicatorPath',
+                    'data-test-subj': 'detectionEngineStepAboutThreatIndicatorPath',
+                    euiFieldProps: {
+                      fullWidth: true,
+                      disabled: isLoading,
+                      placeholder: 'threat.indicator',
+                    },
+                  }}
+                />
+              </>
+            )}
             <EuiSpacer size="l" />
             <UseField
               path="ruleNameOverride"
