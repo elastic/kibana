@@ -6,10 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { IndexPattern, getServices } from '../../../kibana_services';
 import { DocProps } from './doc';
 import { ElasticSearchHit } from '../../doc_views/doc_views_types';
+import { SEARCH_FIELDS_FROM_SOURCE } from '../../../../common';
 
 export enum ElasticRequestState {
   Loading,
@@ -23,7 +24,11 @@ export enum ElasticRequestState {
  * helper function to build a query body for Elasticsearch
  * https://www.elastic.co/guide/en/elasticsearch/reference/current//query-dsl-ids-query.html
  */
-export function buildSearchBody(id: string, indexPattern: IndexPattern): Record<string, any> {
+export function buildSearchBody(
+  id: string,
+  indexPattern: IndexPattern,
+  useNewFieldsApi: boolean
+): Record<string, any> {
   const computedFields = indexPattern.getComputedFields();
 
   return {
@@ -33,7 +38,8 @@ export function buildSearchBody(id: string, indexPattern: IndexPattern): Record<
       },
     },
     stored_fields: computedFields.storedFields,
-    _source: true,
+    _source: !useNewFieldsApi,
+    fields: useNewFieldsApi ? ['*'] : undefined,
     script_fields: computedFields.scriptFields,
     docvalue_fields: computedFields.docvalueFields,
   };
@@ -51,6 +57,8 @@ export function useEsDocSearch({
   const [indexPattern, setIndexPattern] = useState<IndexPattern | null>(null);
   const [status, setStatus] = useState(ElasticRequestState.Loading);
   const [hit, setHit] = useState<ElasticSearchHit | null>(null);
+  const { data, uiSettings } = useMemo(() => getServices(), []);
+  const useNewFieldsApi = useMemo(() => !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE), [uiSettings]);
 
   useEffect(() => {
     async function requestData() {
@@ -58,11 +66,11 @@ export function useEsDocSearch({
         const indexPatternEntity = await indexPatternService.get(indexPatternId);
         setIndexPattern(indexPatternEntity);
 
-        const { rawResponse } = await getServices()
-          .data.search.search({
+        const { rawResponse } = await data.search
+          .search({
             params: {
               index,
-              body: buildSearchBody(id, indexPatternEntity),
+              body: buildSearchBody(id, indexPatternEntity, useNewFieldsApi),
             },
           })
           .toPromise();
@@ -86,6 +94,6 @@ export function useEsDocSearch({
       }
     }
     requestData();
-  }, [id, index, indexPatternId, indexPatternService]);
+  }, [id, index, indexPatternId, indexPatternService, data.search, useNewFieldsApi]);
   return [status, hit, indexPattern];
 }
