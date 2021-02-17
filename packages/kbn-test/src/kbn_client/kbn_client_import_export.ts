@@ -13,7 +13,6 @@ import Path from 'path';
 import FormData from 'form-data';
 import { ToolingLog, isAxiosResponseError, createFailError } from '@kbn/dev-utils';
 
-import type { SavedObjectsImportResponse } from 'src/core/server/saved_objects/import/types';
 import { KbnClientRequester, uriencode } from './kbn_client_requester';
 
 const DEFAULT_SAVED_OBJECT_TYPES = ['index-pattern', 'search', 'visualization', 'dashboard'];
@@ -57,7 +56,7 @@ export class KbnClientImportExport {
 
     let resp;
     try {
-      resp = await this.requester.request<SavedObjectsImportResponse>({
+      resp = await this.requester.request<{ success: boolean; [key: string]: unknown }>({
         method: 'POST',
         path: options?.space
           ? uriencode`/s/${options.space}/api/saved_objects/_import`
