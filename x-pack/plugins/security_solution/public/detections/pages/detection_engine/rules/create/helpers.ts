@@ -290,6 +290,7 @@ export const formatAboutStepData = (
     isBuildingBlock,
     note,
     ruleNameOverride,
+    threatIndicatorPath,
     timestampOverride,
     ...rest
   } = aboutStepData;
@@ -332,6 +333,7 @@ export const formatAboutStepData = (
       ...singleThreat,
       framework: 'MITRE ATT&CK',
     })),
+    threat_indicator_path: threatIndicatorPath,
     timestamp_override: timestampOverride !== '' ? timestampOverride : undefined,
     ...(!isEmpty(note) ? { note } : {}),
     ...rest,

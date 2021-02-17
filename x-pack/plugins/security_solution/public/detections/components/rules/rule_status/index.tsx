@@ -16,7 +16,11 @@ import {
 import React, { memo, useCallback, useEffect, useState } from 'react';
 import deepEqual from 'fast-deep-equal';
 
-import { useRuleStatus, RuleInfoStatus } from '../../../containers/detection_engine/rules';
+import {
+  useRuleStatus,
+  RuleInfoStatus,
+  RuleStatusType,
+} from '../../../containers/detection_engine/rules';
 import { FormattedDate } from '../../../../common/components/formatted_date';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import { getStatusColor } from './helpers';
@@ -55,6 +59,19 @@ const RuleStatusComponent: React.FC<RuleStatusProps> = ({ ruleId, ruleEnabled })
     }
   }, [fetchRuleStatus, ruleId]);
 
+  const getStatus = useCallback((status: RuleStatusType | null | undefined) => {
+    if (status == null) {
+      return getEmptyTagValue();
+    } else if (status != null && status === 'partial failure') {
+      // Temporary fix if on upgrade a rule has a status of 'partial failure' we want to display that text as 'warning'
+      // On the next subsequent rule run, that 'partial failure' status will be re-written as a 'warning' status
+      // and this code will no longer be necessary
+      // TODO: remove this code in 8.0.0
+      return 'warning';
+    }
+    return status;
+  }, []);
+
   return (
     <EuiFlexGroup gutterSize="xs" alignItems="center" justifyContent="flexStart">
       <EuiFlexItem grow={false}>
@@ -71,7 +88,7 @@ const RuleStatusComponent: React.FC<RuleStatusProps> = ({ ruleId, ruleEnabled })
           <EuiFlexItem grow={false}>
             <EuiHealth color={getStatusColor(currentStatus?.status ?? null)}>
               <EuiText data-test-subj="ruleStatus" size="xs">
-                {currentStatus?.status ?? getEmptyTagValue()}
+                {getStatus(currentStatus?.status)}
               </EuiText>
             </EuiHealth>
           </EuiFlexItem>

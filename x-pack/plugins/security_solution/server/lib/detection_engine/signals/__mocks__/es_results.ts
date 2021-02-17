@@ -59,6 +59,7 @@ export const sampleRuleAlertParams = (
   threatQuery: undefined,
   threatMapping: undefined,
   threatIndex: undefined,
+  threatIndicatorPath: undefined,
   threatLanguage: undefined,
   timelineId: undefined,
   timelineTitle: undefined,

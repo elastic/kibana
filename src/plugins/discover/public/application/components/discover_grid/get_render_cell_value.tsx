@@ -7,7 +7,6 @@
  */
 
 import React, { Fragment, useContext, useEffect } from 'react';
-import { i18n } from '@kbn/i18n';
 import themeLight from '@elastic/eui/dist/eui_theme_light.json';
 import themeDark from '@elastic/eui/dist/eui_theme_dark.json';
 
@@ -81,21 +80,6 @@ export const getRenderCellValueFn = (
     }
 
     return <span>{JSON.stringify(rowFlattened[columnId])}</span>;
-  }
-
-  if (field?.type === 'geo_point' && rowFlattened && rowFlattened[columnId]) {
-    const valueFormatted = rowFlattened[columnId] as { lat: number; lon: number };
-    return (
-      <div>
-        {i18n.translate('discover.latitudeAndLongitude', {
-          defaultMessage: 'Lat: {lat} Lon: {lon}',
-          values: {
-            lat: valueFormatted?.lat,
-            lon: valueFormatted?.lon,
-          },
-        })}
-      </div>
-    );
   }
 
   const valueFormatted = indexPattern.formatField(row, columnId);
