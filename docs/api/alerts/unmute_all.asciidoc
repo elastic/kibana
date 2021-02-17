@@ -4,7 +4,7 @@
 <titleabbrev>Unmute all alert instances</titleabbrev>
 ++++
 
-Unmute all {kib} alert instances.
+Unmute all alert instances.
 
 [[alerts-api-unmute-all-request]]
 ==== Request
