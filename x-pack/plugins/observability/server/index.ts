@@ -10,7 +10,7 @@ import { PluginInitializerContext } from 'src/core/server';
 import { ObservabilityPlugin, ObservabilityPluginSetup } from './plugin';
 import { createOrUpdateIndex, MappingsDefinition } from './utils/create_or_update_index';
 import { ScopedAnnotationsClient } from './lib/annotations/bootstrap_annotations';
-import { unwrapEsResponse } from './utils/unwrap_es_response';
+import { unwrapEsResponse, WrappedElasticsearchClientError } from './utils/unwrap_es_response';
 
 export const config = {
   schema: schema.object({
@@ -33,4 +33,5 @@ export {
   ObservabilityPluginSetup,
   ScopedAnnotationsClient,
   unwrapEsResponse,
+  WrappedElasticsearchClientError,
 };
