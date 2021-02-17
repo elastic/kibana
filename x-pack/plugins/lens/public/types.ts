@@ -189,9 +189,9 @@ export interface Datasource<T = unknown, P = unknown> {
   renderDimensionTrigger: (domElement: Element, props: DatasourceDimensionTriggerProps<T>) => void;
   renderDimensionEditor: (domElement: Element, props: DatasourceDimensionEditorProps<T>) => void;
   renderLayerPanel: (domElement: Element, props: DatasourceLayerPanelProps<T>) => void;
-  getDropTypes: (
+  getDropProps: (
     props: DatasourceDimensionDropProps<T> & { groupId: string }
-  ) => DropType | undefined;
+  ) => { dropType: DropType; nextLabel?: string } | undefined;
   onDrop: (props: DatasourceDimensionDropHandlerProps<T>) => false | true | { deleted: string };
   updateStateOnCloseDimension?: (props: {
     layerId: string;

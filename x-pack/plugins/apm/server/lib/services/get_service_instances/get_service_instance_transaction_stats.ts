@@ -6,7 +6,7 @@
  */
 
 import { EventOutcome } from '../../../../common/event_outcome';
-import { rangeFilter } from '../../../../common/utils/range_filter';
+import { environmentQuery, rangeQuery } from '../../../../common/utils/queries';
 import { SERVICE_NODE_NAME_MISSING } from '../../../../common/service_nodes';
 import {
   EVENT_OUTCOME,
@@ -24,6 +24,7 @@ import { calculateThroughput } from '../../helpers/calculate_throughput';
 import { withApmSpan } from '../../../utils/with_apm_span';
 
 export async function getServiceInstanceTransactionStats({
+  environment,
   setup,
   transactionType,
   serviceName,
@@ -72,9 +73,10 @@ export async function getServiceInstanceTransactionStats({
         query: {
           bool: {
             filter: [
-              { range: rangeFilter(start, end) },
               { term: { [SERVICE_NAME]: serviceName } },
               { term: { [TRANSACTION_TYPE]: transactionType } },
+              ...rangeQuery(start, end),
+              ...environmentQuery(environment),
               ...esFilter,
             ],
           },
