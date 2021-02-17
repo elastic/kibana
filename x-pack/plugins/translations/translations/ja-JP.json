@@ -18883,8 +18883,6 @@
     "xpack.securitySolution.hooks.useAddToTimeline.addedFieldMessage": "{fieldOrValue}をタイムラインに追加しました",
     "xpack.securitySolution.host.details.architectureLabel": "アーキテクチャー",
     "xpack.securitySolution.host.details.endpoint.endpointPolicy": "統合",
-    "xpack.securitySolution.host.details.endpoint.policyStatus": "構成ステータス",
-    "xpack.securitySolution.host.details.endpoint.sensorversion": "センサーバージョン",
     "xpack.securitySolution.host.details.firstSeenTitle": "初回の認識",
     "xpack.securitySolution.host.details.lastSeenTitle": "前回の認識",
     "xpack.securitySolution.host.details.overview.cloudProviderTitle": "クラウドプロバイダー",

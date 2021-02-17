@@ -18929,8 +18929,6 @@
     "xpack.securitySolution.hooks.useAddToTimeline.addedFieldMessage": "已将 {fieldOrValue} 添加到时间线",
     "xpack.securitySolution.host.details.architectureLabel": "架构",
     "xpack.securitySolution.host.details.endpoint.endpointPolicy": "集成",
-    "xpack.securitySolution.host.details.endpoint.policyStatus": "配置状态",
-    "xpack.securitySolution.host.details.endpoint.sensorversion": "感应器版本",
     "xpack.securitySolution.host.details.firstSeenTitle": "首次看到时间",
     "xpack.securitySolution.host.details.lastSeenTitle": "最后看到时间",
     "xpack.securitySolution.host.details.overview.cloudProviderTitle": "云服务提供商",
