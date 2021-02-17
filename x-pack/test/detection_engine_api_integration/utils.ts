@@ -972,7 +972,7 @@ export const getRule = async (
 export const waitForRuleSuccessOrStatus = async (
   supertest: SuperTest<supertestAsPromised.Test>,
   id: string,
-  status: 'succeeded' | 'failed' | 'partial failure' = 'succeeded'
+  status: 'succeeded' | 'failed' | 'partial failure' | 'warning' = 'succeeded'
 ): Promise<void> => {
   await waitFor(async () => {
     const { body } = await supertest
