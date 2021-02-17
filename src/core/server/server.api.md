@@ -180,10 +180,11 @@ export interface AppCategory {
 // Warning: (ae-forgotten-export) The symbol "ConsoleAppenderConfig" needs to be exported by the entry point index.d.ts
 // Warning: (ae-forgotten-export) The symbol "FileAppenderConfig" needs to be exported by the entry point index.d.ts
 // Warning: (ae-forgotten-export) The symbol "LegacyAppenderConfig" needs to be exported by the entry point index.d.ts
+// Warning: (ae-forgotten-export) The symbol "RewriteAppenderConfig" needs to be exported by the entry point index.d.ts
 // Warning: (ae-forgotten-export) The symbol "RollingFileAppenderConfig" needs to be exported by the entry point index.d.ts
 //
 // @public (undocumented)
-export type AppenderConfigType = ConsoleAppenderConfig | FileAppenderConfig | LegacyAppenderConfig | RollingFileAppenderConfig;
+export type AppenderConfigType = ConsoleAppenderConfig | FileAppenderConfig | LegacyAppenderConfig | RewriteAppenderConfig | RollingFileAppenderConfig;
 
 // @public @deprecated (undocumented)
 export interface AssistanceAPIResponse {
