@@ -22,7 +22,7 @@ The following alerts APIs are available:
 
 * <<alerts-api-mute-all, Mute all alert instances API>> to mute all alert instances for a single alert by ID
 
-* <<alerts-api-mute, Mute alert instance API>> to mute alert instance for a single {kib} alert by ID
+* <<alerts-api-mute, Mute alert instance API>> to mute alert instances for a single alert by ID
 
 * <<alerts-api-unmute-all, Unmute all alert instances API>> to unmute all alert instances for a single {kib} alert by ID
 
