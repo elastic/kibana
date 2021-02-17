@@ -16,7 +16,7 @@ The following alerts APIs are available:
 
 * <<alerts-api-list, List all alert types API>> to retrieve a list of all alert types
 
-* <<alerts-api-enable, Enable alert API>> to enable a single {kib} alert by ID
+* <<alerts-api-enable, Enable alert API>> to enable a single alert by ID
 
 * <<alerts-api-disable, Disable alert API>> to disable a single {kib} alert by ID
 
