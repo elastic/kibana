@@ -13,6 +13,13 @@ export const securityConfigDeprecationProvider: ConfigDeprecationProvider = ({
 }) => [
   rename('sessionTimeout', 'session.idleTimeout'),
   rename('authProviders', 'authc.providers'),
+
+  rename('audit.appender.kind', 'audit.appender.type'),
+  rename('audit.appender.layout.kind', 'audit.appender.layout.type'),
+  rename('audit.appender.policy.kind', 'audit.appender.policy.type'),
+  rename('audit.appender.strategy.kind', 'audit.appender.strategy.type'),
+  rename('audit.appender.path', 'audit.appender.fileName'),
+
   unused('authorization.legacyFallback.enabled'),
   unused('authc.saml.maxRedirectURLSize'),
   // Deprecation warning for the old array-based format of `xpack.security.authc.providers`.

@@ -1692,21 +1692,21 @@ describe('createConfig()', () => {
       ConfigSchema.validate({
         audit: {
           appender: {
-            kind: 'file',
-            path: '/path/to/file.txt',
+            type: 'file',
+            fileName: '/path/to/file.txt',
             layout: {
-              kind: 'json',
+              type: 'json',
             },
           },
         },
       }).audit.appender
     ).toMatchInlineSnapshot(`
       Object {
-        "kind": "file",
+        "fileName": "/path/to/file.txt",
         "layout": Object {
-          "kind": "json",
+          "type": "json",
         },
-        "path": "/path/to/file.txt",
+        "type": "file",
       }
     `);
   });
@@ -1717,12 +1717,12 @@ describe('createConfig()', () => {
         audit: {
           // no layout configured
           appender: {
-            kind: 'file',
+            type: 'file',
             path: '/path/to/file.txt',
           },
         },
       })
-    ).toThrow('[audit.appender.2.kind]: expected value to equal [legacy-appender]');
+    ).toThrow('[audit.appender.2.type]: expected value to equal [legacy-appender]');
   });
 
   it('rejects an ignore_filter when no appender is configured', () => {
