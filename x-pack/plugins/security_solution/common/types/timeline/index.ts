@@ -14,6 +14,7 @@ import {
   success,
   success_count as successCount,
 } from '../../detection_engine/schemas/common/schemas';
+import { FlowTarget } from '../../search_strategy/security_solution/network';
 import { PositiveInteger } from '../../detection_engine/schemas/types';
 import { errorSchema } from '../../detection_engine/schemas/response/error_schema';
 
@@ -179,10 +180,13 @@ export type TimelineStatusLiteralWithNull = runtimeTypes.TypeOf<
 >;
 
 export enum RowRendererId {
+  alerts = 'alerts',
   auditd = 'auditd',
   auditd_file = 'auditd_file',
+  library = 'library',
   netflow = 'netflow',
   plain = 'plain',
+  registry = 'registry',
   suricata = 'suricata',
   system = 'system',
   system_dns = 'system_dns',
@@ -280,7 +284,7 @@ export enum TimelineId {
   active = 'timeline-1',
   casePage = 'timeline-case',
   test = 'test', // Reserved for testing purposes
-  test2 = 'test2',
+  alternateTest = 'alternateTest',
 }
 
 export const TimelineIdLiteralRt = runtimeTypes.union([
@@ -423,11 +427,38 @@ type EmptyObject = Record<any, never>;
 
 export type TimelineExpandedEventType =
   | {
-      eventId: string;
-      indexName: string;
+      panelView?: 'eventDetail';
+      params?: {
+        eventId: string;
+        indexName: string;
+      };
     }
   | EmptyObject;
 
-export type TimelineExpandedEvent = {
-  [tab in TimelineTabs]?: TimelineExpandedEventType;
+export type TimelineExpandedHostType =
+  | {
+      panelView?: 'hostDetail';
+      params?: {
+        hostName: string;
+      };
+    }
+  | EmptyObject;
+
+export type TimelineExpandedNetworkType =
+  | {
+      panelView?: 'networkDetail';
+      params?: {
+        ip: string;
+        flowTarget: FlowTarget;
+      };
+    }
+  | EmptyObject;
+
+export type TimelineExpandedDetailType =
+  | TimelineExpandedEventType
+  | TimelineExpandedHostType
+  | TimelineExpandedNetworkType;
+
+export type TimelineExpandedDetail = {
+  [tab in TimelineTabs]?: TimelineExpandedDetailType;
 };

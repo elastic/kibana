@@ -7,10 +7,10 @@
 
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n/react';
+import { MockedKeys } from '@kbn/utility-types/jest';
 import { coreMock } from '../../../../../../../src/core/public/mocks';
 import { createStartDepsMock } from './plugin_dependencies';
 import { IStorage, Storage } from '../../../../../../../src/plugins/kibana_utils/public';
-import { MockedKeys } from '../../../../../../../packages/kbn-utility-types/jest/index';
 import { setHttpClient } from '../hooks/use_request';
 import { MockedFleetStartServices } from './types';
 
