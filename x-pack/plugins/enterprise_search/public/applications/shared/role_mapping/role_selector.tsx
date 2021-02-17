@@ -7,6 +7,8 @@
 
 import React from 'react';
 
+import { startCase } from 'lodash';
+
 import {
   EuiCallOut,
   EuiFormRow,
@@ -16,7 +18,6 @@ import {
   EuiTextColor,
   EuiTitle,
 } from '@elastic/eui';
-import { toSentenceCase } from '@elastic/eui/lib/services/string';
 
 interface IRoleSelectorProps {
   disabled?: boolean;
@@ -46,7 +47,7 @@ export const RoleSelector: React.FC<IRoleSelectorProps> = ({
       label={
         <>
           <EuiTitle size="xs">
-            <h4 className="users-layout__users--roletype">{toSentenceCase(roleTypeOption)}</h4>
+            <h4 className="users-layout__users--roletype">{startCase(roleTypeOption)}</h4>
           </EuiTitle>
           {disabled && disabledText && (
             <EuiCallOut
