@@ -2,13 +2,9 @@
 
 exports[`returns the \`JsonCodeEditor\` component 1`] = `
 <EuiFlexGroup
+  className="jsonCodeEditor"
   direction="column"
   gutterSize="s"
-  style={
-    Object {
-      "width": "100%",
-    }
-  }
 >
   <EuiFlexItem
     grow={true}

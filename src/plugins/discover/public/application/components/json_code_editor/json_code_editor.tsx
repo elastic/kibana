@@ -6,12 +6,14 @@
  * Side Public License, v 1.
  */
 
+import './json_code_editor.scss';
+
 import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { monaco, XJsonLang } from '@kbn/monaco';
 import { EuiButtonEmpty, EuiCopy, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { CodeEditor } from '../../../../../kibana_react/public';
-import { ElasticSearchHit } from '../../../application/doc_views/doc_views_types';
+import { DocViewRenderProps } from '../../../application/doc_views/doc_views_types';
 
 const codeEditorAriaLabel = i18n.translate('discover.json.codeEditorAriaLabel', {
   defaultMessage: 'Read only JSON view of an elasticsearch document',
@@ -20,12 +22,8 @@ const copyToClipboardLabel = i18n.translate('discover.json.copyToClipboardLabel'
   defaultMessage: 'Copy to clipboard',
 });
 
-interface JsonCodeEditorProps {
-  value: ElasticSearchHit;
-}
-
-export const JsonCodeEditor = ({ value }: JsonCodeEditorProps) => {
-  const jsonValue = JSON.stringify(value, null, 2);
+export const JsonCodeEditor = ({ hit }: DocViewRenderProps) => {
+  const jsonValue = JSON.stringify(hit, null, 2);
 
   // setting editor height based on lines height and count to stretch and fit its content
   const setEditorCalculatedHeight = useCallback((editor) => {
@@ -44,7 +42,7 @@ export const JsonCodeEditor = ({ value }: JsonCodeEditorProps) => {
   }, []);
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="s" style={{ width: '100%' }}>
+    <EuiFlexGroup className="jsonCodeEditor" direction="column" gutterSize="s">
       <EuiFlexItem grow={true}>
         <EuiSpacer size="s" />
         <div className="eui-textRight">
