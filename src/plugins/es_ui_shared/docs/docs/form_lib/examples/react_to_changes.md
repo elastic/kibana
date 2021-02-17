@@ -146,6 +146,9 @@ const MyForm = ({ defaultValue, onChange }: Props) => {
   const { form } = useForm<MyForm>({ defaultValue, schema });
   const { isValid, validate, getFormData } = form;
 
+  // "getFormData" is a stable reference that is not mutated
+  // when the form data change.
+  // This means that it does not trigger a re-render on each form data change.
   useEffect(() => {
     onChange({ isValid, validate, getData: getFormData });
   }, [onChange, isValid, validate, getFormData]);
@@ -172,12 +175,15 @@ export const ForwardFormStateToParent = () => {
   const [formState, setFormState] = useState<FormState>(initialState);
 
   const sendForm = useCallback(async () => {
-    // The form isValid state will stay "undefined" until all the fields are dirty.
-    // This is why we check first if its undefined, and if so  we call the validate() method
-    // to trigger the validation on all the fields that haven't been validated yet.
+    // The form isValid state will stay "undefined" until either:
+    // - all the fields are dirty
+    // - we call the form "validate()" or "submit()" methods
+
+    // This is why we first check if it is undefined and if it is, we call the validate() method
+    // which will validate **only** the fields that haven't been validated yet.
     const isValid = formState.isValid ?? (await formState.validate());
     if (!isValid) {
-      // Maybe show a callout?
+      // Show a callout somewhere...
       return;
     }
 
