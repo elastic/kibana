@@ -9,6 +9,7 @@ import React, { FC, useEffect, useMemo, useState } from 'react';
 import { EuiButtonGroup, EuiCode, EuiFlexGroup, EuiFlexItem, EuiInputPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import { debounce } from 'lodash';
 import { Dictionary } from '../../../../../../../common/types/common';
 import { IIndexPattern } from '../../../../../../../../../../src/plugins/data/common/index_patterns';
 import {
@@ -132,7 +133,7 @@ export const ExplorationQueryBar: FC<ExplorationQueryBarProps> = ({
     });
   };
 
-  const handleFilterUpdate = (optionId: string, currentIdToSelectedMap: any) => {
+  const debouncedHandleFilterUpdate = debounce((optionId: string, currentIdToSelectedMap: any) => {
     let newQuery = '';
     const filterValue = filters?.key[optionId];
     const filterQueryString = `${filters?.columnId}:${filterValue}`;
@@ -164,7 +165,7 @@ export const ExplorationQueryBar: FC<ExplorationQueryBarProps> = ({
 
     setSearchInput(newSearchInput);
     searchSubmitHandler(newSearchInput, true);
-  };
+  }, 200);
 
   return (
     <EuiInputPopover
@@ -213,7 +214,7 @@ export const ExplorationQueryBar: FC<ExplorationQueryBarProps> = ({
                 onChange={(optionId: string) => {
                   const newIdToSelectedMap = { [optionId]: !idToSelectedMap[optionId] };
                   setIdToSelectedMap(newIdToSelectedMap);
-                  handleFilterUpdate(optionId, newIdToSelectedMap);
+                  debouncedHandleFilterUpdate(optionId, newIdToSelectedMap);
                 }}
               />
             </EuiFlexItem>
