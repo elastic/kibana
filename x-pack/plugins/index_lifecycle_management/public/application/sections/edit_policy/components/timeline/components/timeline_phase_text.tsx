@@ -12,8 +12,8 @@ export const TimelinePhaseText: FunctionComponent<{
   phaseName: ReactNode | string;
   durationInPhase?: ReactNode | string;
 }> = ({ phaseName, durationInPhase }) => (
-  <EuiFlexGroup justifyContent="spaceBetween" gutterSize="none">
-    <EuiFlexItem>
+  <EuiFlexGroup alignItems="center" justifyContent="flexStart" gutterSize="s">
+    <EuiFlexItem grow={false}>
       <EuiText size="s">
         <strong>{phaseName}</strong>
       </EuiText>

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import {
   Immutable,
   PostTrustedAppCreateRequest,
@@ -60,8 +61,9 @@ import {
   editItemId,
   editingTrustedApp,
   getListItems,
+  editItemState,
 } from './selectors';
-import { toNewTrustedApp } from '../service/to_new_trusted_app';
+import { toUpdateTrustedApp } from '../../../../../common/endpoint/service/trusted_apps/to_update_trusted_app';
 
 const createTrustedAppsListResourceStateChangedAction = (
   newState: Immutable<AsyncResourceState<TrustedAppsListData>>
@@ -152,21 +154,6 @@ const submitCreationIfNeeded = async (
   const entry = getCreationDialogFormEntry(currentState);
   const editMode = isEdit(currentState);
 
-  // FIXME: Implement PUT API for updating Trusted App
-  if (editMode) {
-    // eslint-disable-next-line no-console
-    console.warn('PUT Trusted APP API missing');
-    store.dispatch(
-      createTrustedAppCreationSubmissionResourceStateChanged({
-        type: 'LoadedResourceState',
-        data: entry as TrustedApp,
-      })
-    );
-    store.dispatch({
-      type: 'trustedAppsListDataOutdated',
-    });
-  }
-
   if (isStaleResourceState(submissionResourceState) && entry !== undefined && isValid) {
     store.dispatch(
       createTrustedAppCreationSubmissionResourceStateChanged({
@@ -176,12 +163,27 @@ const submitCreationIfNeeded = async (
     );
 
     try {
+      let responseTrustedApp: TrustedApp;
+
+      if (editMode) {
+        responseTrustedApp = (
+          await trustedAppsService.updateTrustedApp(
+            { id: editItemId(currentState)! },
+            // TODO: try to remove the cast
+            entry as PostTrustedAppCreateRequest
+          )
+        ).data;
+      } else {
+        // TODO: try to remove the cast
+        responseTrustedApp = (
+          await trustedAppsService.createTrustedApp(entry as PostTrustedAppCreateRequest)
+        ).data;
+      }
+
       store.dispatch(
         createTrustedAppCreationSubmissionResourceStateChanged({
           type: 'LoadedResourceState',
-          // TODO: try to remove the cast
-          data: (await trustedAppsService.createTrustedApp(entry as PostTrustedAppCreateRequest))
-            .data,
+          data: responseTrustedApp,
         })
       );
       store.dispatch({
@@ -331,7 +333,7 @@ export const retrieveListOfPoliciesIfNeeded = async (
         type: 'trustedAppsPoliciesStateChanged',
         payload: {
           type: 'FailedResourceState',
-          error: error.body,
+          error: error.body || error,
           lastLoadedState: getLastLoadedResourceState(policiesState(getState())),
         },
       });
@@ -349,7 +351,25 @@ const fetchEditTrustedAppIfNeeded = async (
   const isAlreadyFetching = isFetchingEditTrustedAppItem(currentState);
   const editTrustedAppId = editItemId(currentState);
 
-  if (isPageActive && isEditFlow && editTrustedAppId && !isAlreadyFetching) {
+  if (isPageActive && isEditFlow && !isAlreadyFetching) {
+    if (!editTrustedAppId) {
+      const errorMessage = i18n.translate(
+        'xpack.securitySolution.trustedapps.middleware.editIdMissing',
+        {
+          defaultMessage: 'No id provided',
+        }
+      );
+
+      dispatch({
+        type: 'trustedAppCreationEditItemStateChanged',
+        payload: {
+          type: 'FailedResourceState',
+          error: Object.assign(new Error(errorMessage), { statusCode: 404, error: errorMessage }),
+        },
+      });
+      return;
+    }
+
     let trustedAppForEdit = editingTrustedApp(currentState);
 
     // If Trusted App is already loaded, then do nothing
@@ -359,7 +379,27 @@ const fetchEditTrustedAppIfNeeded = async (
 
     // See if we can get the Trusted App record from the current list of Trusted Apps being displayed
     trustedAppForEdit = getListItems(currentState).find((ta) => ta.id === editTrustedAppId);
-    if (trustedAppForEdit) {
+
+    try {
+      // Retrieve Trusted App record via API if it was not in the list data.
+      // This would be the case when linking from another place or using an UUID for a Trusted App
+      // that is not currently displayed on the list view.
+      if (!trustedAppForEdit) {
+        dispatch({
+          type: 'trustedAppCreationEditItemStateChanged',
+          payload: {
+            type: 'LoadingResourceState',
+            // No easy way to get around this that I can see. `previousState` does not
+            // seem to allow everything that `editItem` state can hold, so not even sure if using
+            // type guards would work here
+            // @ts-ignore
+            previousState: editItemState(currentState)!,
+          },
+        });
+
+        trustedAppForEdit = (await trustedAppsService.getTrustedApp({ id: editTrustedAppId })).data;
+      }
+
       dispatch({
         type: 'trustedAppCreationEditItemStateChanged',
         payload: {
@@ -371,21 +411,19 @@ const fetchEditTrustedAppIfNeeded = async (
       dispatch({
         type: 'trustedAppCreationDialogFormStateUpdated',
         payload: {
-          entry: toNewTrustedApp(trustedAppForEdit),
+          entry: toUpdateTrustedApp(trustedAppForEdit),
           isValid: true,
         },
       });
-      return;
+    } catch (e) {
+      dispatch({
+        type: 'trustedAppCreationEditItemStateChanged',
+        payload: {
+          type: 'FailedResourceState',
+          error: e,
+        },
+      });
     }
-
-    // Retrieve Trusted App record via API. This would be the case when linking from another place or
-    // using an UUID for a Trusted App that is not currently displayed on the list view.
-
-    // eslint-disable-next-line no-console
-    console.log('todo: api call');
-
-    // FIXME: Implement GET API
-    throw new Error('GET trusted app API missing!');
   }
 };
 

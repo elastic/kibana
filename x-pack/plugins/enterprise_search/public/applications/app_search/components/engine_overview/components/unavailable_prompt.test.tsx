@@ -6,7 +6,9 @@
  */
 
 import React from 'react';
+
 import { shallow } from 'enzyme';
+
 import { EuiEmptyPrompt } from '@elastic/eui';
 
 import { UnavailablePrompt } from './unavailable_prompt';

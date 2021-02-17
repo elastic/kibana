@@ -20,14 +20,18 @@ import {
   TrustedApp,
 } from '../../../../../common/endpoint/types';
 import { HttpFetchOptions } from 'kibana/public';
-import { TRUSTED_APPS_LIST_API } from '../../../../../common/endpoint/constants';
+import {
+  TRUSTED_APPS_GET_API,
+  TRUSTED_APPS_LIST_API,
+} from '../../../../../common/endpoint/constants';
 import {
   GetPackagePoliciesResponse,
   PACKAGE_POLICY_API_ROUTES,
 } from '../../../../../../fleet/common';
 import { EndpointDocGenerator } from '../../../../../common/endpoint/generate_data';
-import { isLoadedResourceState } from '../state';
+import { isFailedResourceState, isLoadedResourceState } from '../state';
 import { forceHTMLElementOffsetWidth } from './components/effected_policy_select/test_utils';
+import { resolvePathVariables } from '../service/utils';
 
 jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
   htmlIdGenerator: () => () => 'mockId',
@@ -49,6 +53,7 @@ describe('When on the Trusted Apps Page', () => {
 
   const getFakeTrustedApp = (): TrustedApp => ({
     id: '1111-2222-3333-4444',
+    version: 'abc123',
     name: 'one app',
     os: OperatingSystem.WINDOWS,
     created_at: '2021-01-04T13:55:00.561Z',
@@ -157,6 +162,10 @@ describe('When on the Trusted Apps Page', () => {
         });
       });
 
+      it('should persist edit params to url', () => {
+        expect(history.location.search).toEqual('?show=edit&id=1111-2222-3333-4444');
+      });
+
       it('should display the Edit flyout', () => {
         expect(renderResult.getByTestId('addTrustedAppFlyout'));
       });
@@ -177,14 +186,145 @@ describe('When on the Trusted Apps Page', () => {
         );
       });
 
+      it('should display trusted app data for edit', async () => {
+        const formNameInput = renderResult.getByTestId(
+          'addTrustedAppFlyout-createForm-nameTextField'
+        ) as HTMLInputElement;
+        const formDescriptionInput = renderResult.getByTestId(
+          'addTrustedAppFlyout-createForm-descriptionField'
+        ) as HTMLTextAreaElement;
+
+        expect(formNameInput.value).toEqual('one app');
+        expect(formDescriptionInput.value).toEqual('a good one');
+      });
+
       describe('and when Save is clicked', () => {
-        // Will be unskiped once PUT API is created
-        it.skip('should call the correct api (PUT)', () => {
+        it('should call the correct api (PUT)', () => {
           act(() => {
             fireEvent.click(renderResult.getByTestId('addTrustedAppFlyout-createButton'));
           });
-          expect(coreStart.http.put).toHaveBeenCalledWith({});
+
+          expect(coreStart.http.put).toHaveBeenCalledTimes(1);
+
+          const lastCallToPut = (coreStart.http.put.mock.calls[0] as unknown) as [
+            string,
+            HttpFetchOptions
+          ];
+
+          expect(lastCallToPut[0]).toEqual('/api/endpoint/trusted_apps/1111-2222-3333-4444');
+          expect(JSON.parse(lastCallToPut[1].body as string)).toEqual({
+            name: 'one app',
+            os: 'windows',
+            entries: [
+              {
+                field: 'process.executable.caseless',
+                value: 'one/two',
+                operator: 'included',
+                type: 'match',
+              },
+            ],
+            description: 'a good one',
+            effectScope: {
+              type: 'global',
+            },
+            version: 'abc123',
+          });
         });
+      });
+    });
+
+    describe('and attempting to show Edit panel based on URL params', () => {
+      const TRUSTED_APP_GET_URI = resolvePathVariables(TRUSTED_APPS_GET_API, {
+        id: '9999-edit-8888',
+      });
+
+      const renderAndWaitForGetApi = async () => {
+        // the store action watcher is setup prior to render because `renderWithListData()`
+        // also awaits API calls and this action could be missed.
+        const apiResponseForEditTrustedApp = waitForAction(
+          'trustedAppCreationEditItemStateChanged',
+          {
+            validate({ payload }) {
+              return isLoadedResourceState(payload) || isFailedResourceState(payload);
+            },
+          }
+        );
+
+        const renderResult = await renderWithListData();
+
+        await reactTestingLibrary.act(async () => {
+          await apiResponseForEditTrustedApp;
+        });
+
+        return renderResult;
+      };
+
+      beforeEach(() => {
+        // Mock the API GET for the trusted application
+        const priorMockImplementation = coreStart.http.get.getMockImplementation();
+        coreStart.http.get.mockImplementation(async (...args) => {
+          if ('string' === typeof args[0] && args[0] === TRUSTED_APP_GET_URI) {
+            return {
+              data: {
+                ...getFakeTrustedApp(),
+                id: '9999-edit-8888',
+                name: 'one app for edit',
+              },
+            };
+          }
+          if (priorMockImplementation) {
+            return priorMockImplementation(...args);
+          }
+        });
+
+        reactTestingLibrary.act(() => {
+          history.push('/trusted_apps?show=edit&id=9999-edit-8888');
+        });
+      });
+
+      it('should retrieve trusted app via API using url `id`', async () => {
+        const renderResult = await renderAndWaitForGetApi();
+
+        expect(coreStart.http.get).toHaveBeenCalledWith(TRUSTED_APP_GET_URI);
+
+        expect(
+          (renderResult.getByTestId(
+            'addTrustedAppFlyout-createForm-nameTextField'
+          ) as HTMLInputElement).value
+        ).toEqual('one app for edit');
+      });
+
+      it('should redirect to list and show toast message if `id` is missing from URL', async () => {
+        reactTestingLibrary.act(() => {
+          history.push('/trusted_apps?show=edit&id=');
+        });
+
+        await renderAndWaitForGetApi();
+
+        expect(history.location.search).toEqual('');
+        expect(coreStart.notifications.toasts.addWarning.mock.calls[0][0]).toEqual(
+          'Unable to edit trusted application (No id provided)'
+        );
+      });
+
+      it('should redirect to list and show toast message on API error for GET of `id`', async () => {
+        // Mock the API GET for the trusted application
+        const priorMockImplementation = coreStart.http.get.getMockImplementation();
+        coreStart.http.get.mockImplementation(async (...args) => {
+          if ('string' === typeof args[0] && args[0] === TRUSTED_APP_GET_URI) {
+            throw new Error('test: api error response');
+          }
+          if (priorMockImplementation) {
+            return priorMockImplementation(...args);
+          }
+        });
+
+        await renderAndWaitForGetApi();
+
+        expect(history.location.search).toEqual('');
+        expect(coreStart.notifications.toasts.addWarning.mock.calls[0][0]).toEqual(
+          'Unable to edit trusted application (test: api error response)'
+        );
       });
     });
   });
@@ -378,6 +518,7 @@ describe('When on the Trusted Apps Page', () => {
               data: {
                 ...(JSON.parse(httpPostBody) as NewTrustedApp),
                 id: '1',
+                version: 'abc123',
                 created_at: '2020-09-16T14:09:45.484Z',
                 created_by: 'kibana',
               },

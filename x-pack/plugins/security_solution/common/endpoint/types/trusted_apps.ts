@@ -9,13 +9,21 @@ import { TypeOf } from '@kbn/config-schema';
 import { ApplicationStart } from 'kibana/public';
 import {
   DeleteTrustedAppsRequestSchema,
+  GetOneTrustedAppRequestSchema,
   GetTrustedAppsRequestSchema,
   PostTrustedAppCreateRequestSchema,
+  PutTrustedAppUpdateRequestSchema,
 } from '../schema/trusted_apps';
 import { OperatingSystem } from './os';
 
 /** API request params for deleting Trusted App entry */
 export type DeleteTrustedAppsRequestParams = TypeOf<typeof DeleteTrustedAppsRequestSchema.params>;
+
+export type GetOneTrustedAppRequestParams = TypeOf<typeof GetOneTrustedAppRequestSchema.params>;
+
+export interface GetOneTrustedAppResponse {
+  data: TrustedApp;
+}
 
 /** API request params for retrieving a list of Trusted Apps */
 export type GetTrustedAppsListRequest = TypeOf<typeof GetTrustedAppsRequestSchema.query>;
@@ -33,6 +41,14 @@ export type PostTrustedAppCreateRequest = TypeOf<typeof PostTrustedAppCreateRequ
 export interface PostTrustedAppCreateResponse {
   data: TrustedApp;
 }
+
+/** API request params for updating a Trusted App */
+export type PutTrustedAppsRequestParams = TypeOf<typeof PutTrustedAppUpdateRequestSchema.params>;
+
+/** API Request body for Updating a new Trusted App entry */
+export type PutTrustedAppUpdateRequest = TypeOf<typeof PutTrustedAppUpdateRequestSchema.body>;
+
+export type PutTrustedAppUpdateResponse = PostTrustedAppCreateResponse;
 
 export interface GetTrustedAppsSummaryResponse {
   total: number;
@@ -90,8 +106,14 @@ export type NewTrustedApp = {
   effectScope: EffectScope;
 } & (MacosLinuxConditionEntries | WindowsConditionEntries);
 
+/** An Update to a Trusted App Entry */
+export type UpdateTrustedApp = NewTrustedApp & {
+  version?: string;
+};
+
 /** A trusted app entry */
 export type TrustedApp = NewTrustedApp & {
+  version: string;
   id: string;
   created_at: string;
   created_by: string;

@@ -14,8 +14,8 @@ import { EuiCallOut } from '@elastic/eui';
 import { EuiButton } from '@elastic/eui';
 import { EuiButtonEmpty } from '@elastic/eui';
 import moment from 'moment';
+import { SubscriptionSplashContent } from '../../../../../../components/subscription_splash_content';
 import { useInfraMLCapabilitiesContext } from '../../../../../../containers/ml/infra_ml_capabilities';
-import { SubscriptionSplashContent } from './subscription_splash_content';
 import {
   MissingResultsPrivilegesPrompt,
   MissingSetupPrivilegesPrompt,
@@ -44,7 +44,7 @@ export const FlyoutHome = (props: Props) => {
     jobSummaries: k8sJobSummaries,
   } = useMetricK8sModuleContext();
   const {
-    hasInfraMLCapabilites,
+    hasInfraMLCapabilities,
     hasInfraMLReadCapabilities,
     hasInfraMLSetupCapabilities,
   } = useInfraMLCapabilitiesContext();
@@ -69,7 +69,7 @@ export const FlyoutHome = (props: Props) => {
     }
   }, [fetchK8sJobStatus, fetchHostJobStatus, hasInfraMLReadCapabilities]);
 
-  if (!hasInfraMLCapabilites) {
+  if (!hasInfraMLCapabilities) {
     return <SubscriptionSplashContent />;
   } else if (!hasInfraMLReadCapabilities) {
     return <MissingResultsPrivilegesPrompt />;

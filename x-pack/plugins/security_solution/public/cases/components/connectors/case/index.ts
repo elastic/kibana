@@ -37,6 +37,6 @@ export function getActionType(): ActionTypeModel {
     validateConnector: () => ({ config: { errors: {} }, secrets: { errors: {} } }),
     validateParams,
     actionConnectorFields: null,
-    actionParamsFields: lazy(() => import('./fields')),
+    actionParamsFields: lazy(() => import('./alert_fields')),
   };
 }

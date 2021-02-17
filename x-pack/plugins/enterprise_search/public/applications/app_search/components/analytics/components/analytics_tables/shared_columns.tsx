@@ -6,14 +6,15 @@
  */
 
 import React from 'react';
+
 import { i18n } from '@kbn/i18n';
 
-import { EuiLinkTo } from '../../../../../shared/react_router_helpers';
 import { KibanaLogic } from '../../../../../shared/kibana';
+import { EuiLinkTo } from '../../../../../shared/react_router_helpers';
 import { ENGINE_ANALYTICS_QUERY_DETAIL_PATH } from '../../../../routes';
 import { generateEnginePath } from '../../../engine';
-
 import { Query, RecentQuery } from '../../types';
+
 import { InlineTagsList } from './inline_tags_list';
 
 /**

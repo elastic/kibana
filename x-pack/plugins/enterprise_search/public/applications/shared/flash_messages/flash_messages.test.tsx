@@ -8,7 +8,9 @@
 import { setMockValues } from '../../__mocks__/kea.mock';
 
 import React from 'react';
+
 import { shallow } from 'enzyme';
+
 import { EuiCallOut } from '@elastic/eui';
 
 import { FlashMessages } from './flash_messages';

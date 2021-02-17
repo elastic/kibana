@@ -28,7 +28,7 @@ export async function fetchStatus(
   await Promise.all(
     (alertTypes || ALERTS).map(async (type) => {
       const alert = await AlertsFactory.getByType(type, alertsClient);
-      if (!alert || !alert.isEnabled(licenseService) || !alert.rawAlert) {
+      if (!alert || !alert.rawAlert) {
         return;
       }
 
