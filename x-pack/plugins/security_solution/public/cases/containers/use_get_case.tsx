@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { isEmpty } from 'lodash';
 import { useEffect, useReducer, useCallback, useRef } from 'react';
 import { CaseStatuses, CaseType } from '../../../../case/common/api';
 
@@ -131,7 +132,9 @@ export const useGetCase = (caseId: string, subCaseId?: string): UseGetCase => {
   }, [caseId, subCaseId]);
 
   useEffect(() => {
-    callFetch();
+    if (!isEmpty(caseId)) {
+      callFetch();
+    }
     return () => {
       didCancel.current = true;
       abortCtrl.current.abort();

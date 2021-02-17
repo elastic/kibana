@@ -20,6 +20,7 @@ function getBucketSize(max: number) {
 }
 
 export async function getTransactionDistribution({
+  environment,
   serviceName,
   transactionName,
   transactionType,
@@ -28,6 +29,7 @@ export async function getTransactionDistribution({
   setup,
   searchAggregatedTransactions,
 }: {
+  environment?: string;
   serviceName: string;
   transactionName: string;
   transactionType: string;
@@ -38,6 +40,7 @@ export async function getTransactionDistribution({
 }) {
   return withApmSpan('get_transaction_latency_distribution', async () => {
     const distributionMax = await getDistributionMax({
+      environment,
       serviceName,
       transactionName,
       transactionType,
@@ -52,6 +55,7 @@ export async function getTransactionDistribution({
     const bucketSize = getBucketSize(distributionMax);
 
     const { buckets, noHits } = await getBuckets({
+      environment,
       serviceName,
       transactionName,
       transactionType,

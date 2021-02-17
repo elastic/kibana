@@ -2138,10 +2138,10 @@
   dependencies:
     object-hash "^1.3.0"
 
-"@elastic/charts@24.6.0":
-  version "24.6.0"
-  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-24.6.0.tgz#2123c72e69e1e4557be41ae55c085a5a9f75d3b6"
-  integrity sha512-fL0301EcHxJEYRzdlD4JIA3VXY4qwRPSkRrk8hvJNryTlQWEdyXZF3HNczk0IrgST5cfCOGAWG8IVtO59HxUJw==
+"@elastic/charts@25.0.1":
+  version "25.0.1"
+  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-25.0.1.tgz#7c61fc22887b7b1feba3e52fc1b44f21a9c1d0bc"
+  integrity sha512-UYGO9Yg2+cdJOOs9DjlYeB2Oy/3UMXTtF6/yWZt2iXh7mmW9jI5DqfjgG/9BFSCwQZHUKBZ58d5ZCQfe72maGA==
   dependencies:
     "@popperjs/core" "^2.4.0"
     chroma-js "^2.1.0"
@@ -9020,10 +9020,10 @@ bach@^1.0.0:
     async-settle "^1.0.0"
     now-and-later "^2.0.0"
 
-backport@^5.6.4:
-  version "5.6.4"
-  resolved "https://registry.yarnpkg.com/backport/-/backport-5.6.4.tgz#8cf4bc750b26d27161306858ee9069218ad7cdfd"
-  integrity sha512-ZhuZcGxOBHBXFBCwweVf02b+KhWe0tdgg71jPSl583YYxlru+JBRH+TFM8S0J6/6YUuTWO81M9funjehJ18jqg==
+backport@^5.6.6:
+  version "5.6.6"
+  resolved "https://registry.yarnpkg.com/backport/-/backport-5.6.6.tgz#cb03f948a36386734fa491343b93f4ca280e00f3"
+  integrity sha512-8O7z0q6m5DfQgrhLDUOLcH2y/rXwSgqv5WIWSSoZpPyRdPpmd3xApIfohlJ3oBX9W0TdbO3aKzaV00qg3H9P7w==
   dependencies:
     "@octokit/rest" "^18.0.12"
     "@types/lodash.difference" "^4.5.6"
@@ -9040,7 +9040,7 @@ backport@^5.6.4:
     lodash.isstring "^4.0.1"
     lodash.uniq "^4.5.0"
     make-dir "^3.1.0"
-    ora "^5.2.0"
+    ora "^5.3.0"
     safe-json-stringify "^1.2.0"
     strip-json-comments "^3.1.1"
     winston "^3.3.3"
@@ -22186,10 +22186,10 @@ ora@^4.0.3, ora@^4.0.4:
     strip-ansi "^6.0.0"
     wcwidth "^1.0.1"
 
-ora@^5.2.0:
-  version "5.2.0"
-  resolved "https://registry.yarnpkg.com/ora/-/ora-5.2.0.tgz#de10bfd2d15514384af45f3fa9d9b1aaf344fda1"
-  integrity sha512-+wG2v8TUU8EgzPHun1k/n45pXquQ9fHnbXVetl9rRgO6kjZszGGbraF3XPTIdgeA+s1lbRjSEftAnyT0w8ZMvQ==
+ora@^5.3.0:
+  version "5.3.0"
+  resolved "https://registry.yarnpkg.com/ora/-/ora-5.3.0.tgz#fb832899d3a1372fe71c8b2c534bbfe74961bb6f"
+  integrity sha512-zAKMgGXUim0Jyd6CXK9lraBnD3H5yPGBPPOkC23a2BG6hsm4Zu6OQSjQuEtV0BHDf4aKHcUFvJiGRrFuW3MG8g==
   dependencies:
     bl "^4.0.3"
     chalk "^4.1.0"

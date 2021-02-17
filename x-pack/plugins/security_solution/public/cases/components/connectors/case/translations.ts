@@ -93,9 +93,9 @@ export const CREATE_CASE = i18n.translate(
   }
 );
 
-export const SUCCESS_CREATED_CASE = i18n.translate(
-  'xpack.securitySolution.case.components.connectors.case.successCreatedCaseLabel',
+export const CONNECTED_CASE = i18n.translate(
+  'xpack.securitySolution.case.components.connectors.case.connectedCaseLabel',
   {
-    defaultMessage: 'Success! your case have been created',
+    defaultMessage: 'Connected case',
   }
 );
