@@ -11,7 +11,7 @@ import { fetchMlJob, MappedAnomalyHit, InfluencerFilter } from './common';
 import { getJobId, metricsHostsJobTypes, ANOMALY_THRESHOLD } from '../../../common/infra_ml';
 import { Sort, Pagination } from '../../../common/http_api/infra_ml';
 import type { MlSystem, MlAnomalyDetectors } from '../../types';
-import { InsufficientAnomalyMlJobsConfigured, isMlPrivilegesError } from './errors';
+import { isMlPrivilegesError } from './errors';
 import { decodeOrThrow } from '../../../common/runtime_types';
 import {
   metricsHostsAnomaliesResponseRT,
@@ -60,17 +60,29 @@ async function getCompatibleAnomaliesJobIds(
   };
 }
 
-export async function getMetricsHostsAnomalies(
-  context: Required<InfraRequestHandlerContext>,
-  sourceId: string,
-  anomalyThreshold: ANOMALY_THRESHOLD,
-  startTime: number,
-  endTime: number,
-  metric: 'memory_usage' | 'network_in' | 'network_out' | undefined,
-  sort: Sort,
-  pagination: Pagination,
-  influencerFilter?: InfluencerFilter
-) {
+export async function getMetricsHostsAnomalies({
+  context,
+  sourceId,
+  anomalyThreshold,
+  startTime,
+  endTime,
+  metric,
+  sort,
+  pagination,
+  influencerFilter,
+  query,
+}: {
+  context: Required<InfraRequestHandlerContext>;
+  sourceId: string;
+  anomalyThreshold: ANOMALY_THRESHOLD;
+  startTime: number;
+  endTime: number;
+  metric: 'memory_usage' | 'network_in' | 'network_out' | undefined;
+  sort: Sort;
+  pagination: Pagination;
+  influencerFilter?: InfluencerFilter;
+  query?: string;
+}) {
   const finalizeMetricsHostsAnomaliesSpan = startTracingSpan('get metrics hosts entry anomalies');
 
   const {
@@ -84,9 +96,11 @@ export async function getMetricsHostsAnomalies(
   );
 
   if (jobIds.length === 0) {
-    throw new InsufficientAnomalyMlJobsConfigured(
-      'Metrics Hosts ML jobs need to be configured to search anomalies'
-    );
+    return {
+      data: [],
+      hasMoreEntries: false,
+      timimg: { spans: [] },
+    };
   }
 
   try {
@@ -103,7 +117,8 @@ export async function getMetricsHostsAnomalies(
       endTime,
       sort,
       pagination,
-      influencerFilter
+      influencerFilter,
+      query
     );
 
     const data = anomalies.map((anomaly) => {
@@ -159,7 +174,8 @@ async function fetchMetricsHostsAnomalies(
   endTime: number,
   sort: Sort,
   pagination: Pagination,
-  influencerFilter?: InfluencerFilter
+  influencerFilter?: InfluencerFilter,
+  query?: string
 ) {
   // We'll request 1 extra entry on top of our pageSize to determine if there are
   // more entries to be fetched. This avoids scenarios where the client side can't
@@ -179,6 +195,7 @@ async function fetchMetricsHostsAnomalies(
         sort,
         pagination: expandedPagination,
         influencerFilter,
+        jobQuery: query,
       }),
       jobIds
     )

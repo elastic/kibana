@@ -285,9 +285,9 @@ export const AnomaliesTable = () => {
 
   useEffect(() => {
     if (getAnomalies) {
-      getAnomalies();
+      getAnomalies(undefined, search);
     }
-  }, [getAnomalies]);
+  }, [getAnomalies, search]);
 
   return (
     <div>

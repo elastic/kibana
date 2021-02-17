@@ -15,6 +15,7 @@ import {
   defaultRequestParameters,
   createAnomalyScoreFilter,
   createInfluencerFilter,
+  createJobIdsQuery,
 } from './common';
 import { InfluencerFilter } from '../common';
 import { Sort, Pagination } from '../../../../common/http_api/infra_ml';
@@ -36,6 +37,7 @@ export const createMetricsHostsAnomaliesQuery = ({
   sort,
   pagination,
   influencerFilter,
+  jobQuery,
 }: {
   jobIds: string[];
   anomalyThreshold: ANOMALY_THRESHOLD;
@@ -44,16 +46,19 @@ export const createMetricsHostsAnomaliesQuery = ({
   sort: Sort;
   pagination: Pagination;
   influencerFilter?: InfluencerFilter;
+  jobQuery?: string;
 }) => {
   const { field } = sort;
   const { pageSize } = pagination;
-
-  const filters = [
+  let filters: any = [
     ...createJobIdsFilters(jobIds),
     ...createAnomalyScoreFilter(anomalyThreshold),
     ...createTimeRangeFilters(startTime, endTime),
     ...createResultTypeFilters(['record']),
   ];
+  if (jobQuery) {
+    filters = [...filters, ...createJobIdsQuery(jobQuery)];
+  }
 
   const influencerQuery = influencerFilter
     ? { must: createInfluencerFilter(influencerFilter) }

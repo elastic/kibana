@@ -67,13 +67,12 @@ export const getMetricsK8sAnomaliesRequestPayloadRT = rt.type({
       timeRange: timeRangeRT,
     }),
     rt.partial({
+      query: rt.string,
       metric: metricRT,
       // Pagination properties
       pagination: paginationRT,
       // Sort properties
       sort: sortRT,
-      // Dataset filters
-      datasets: rt.array(rt.string),
     }),
   ]),
 });
