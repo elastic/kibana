@@ -214,11 +214,9 @@ export const schema = Joi.object()
       .default(),
 
     // settings for the saved objects svc
-    savedObjects: Joi.object()
+    kbnArchiver: Joi.object()
       .keys({
-        directory: Joi.string().default(
-          defaultRelativeToConfigPath('fixtures/exported_saved_objects')
-        ),
+        directory: Joi.string().default(defaultRelativeToConfigPath('fixtures/kbn_archiver')),
       })
       .default(),
 

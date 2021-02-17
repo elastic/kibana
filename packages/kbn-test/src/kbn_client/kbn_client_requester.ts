@@ -8,10 +8,9 @@
 
 import Url from 'url';
 import Https from 'https';
-import Axios, { AxiosResponse } from 'axios';
 
-import { isAxiosRequestError, isAxiosResponseError } from '../axios';
-import { ToolingLog } from '../tooling_log';
+import Axios, { AxiosResponse } from 'axios';
+import { ToolingLog, isAxiosRequestError, isAxiosResponseError } from '@kbn/dev-utils';
 
 const isConcliftOnGetError = (error: any) => {
   return (

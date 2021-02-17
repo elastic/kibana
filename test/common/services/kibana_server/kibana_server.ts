@@ -7,7 +7,7 @@
  */
 
 import Url from 'url';
-import { KbnClient } from '@kbn/dev-utils';
+import { KbnClient } from '@kbn/test';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 

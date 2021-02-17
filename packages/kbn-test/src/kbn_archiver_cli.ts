@@ -9,7 +9,8 @@
 import Path from 'path';
 import Url from 'url';
 
-import { RunWithCommands, createFlagError, Flags, KbnClient } from '@kbn/dev-utils';
+import { RunWithCommands, createFlagError, Flags } from '@kbn/dev-utils';
+import { KbnClient } from '@kbn/test';
 
 import { readConfigFile } from './functional_test_runner';
 
@@ -26,21 +27,21 @@ function getSinglePositionalArg(flags: Flags) {
   return positional[0];
 }
 
-export function runSavedObjectsCli() {
+export function runKbnArchiverCli() {
   new RunWithCommands({
     description: 'Import/export saved objects from archives, for testing',
     globalFlags: {
       string: ['config'],
       help: `
         --config           optional path to an FTR config file that will be parsed and used for defaults
-        --kibana-url       set the url that kibana can be reached at, uses the URL from --config by default, or localhost:5601
-        --dir              directory that contains exports to be imported, or where exports will be saved, uses the path from --config
-                             by default or failes when not specified.
+        --kibana-url       set the url that kibana can be reached at, uses the "servers.kibana" setting from --config by default
+        --dir              directory that contains exports to be imported, or where exports will be saved, uses the "kbnArchiver.directory"
+                             setting from --config by default
       `,
     },
     async extendContext({ log, flags }) {
       let config;
-      if (!flags.config) {
+      if (flags.config) {
         if (typeof flags.config !== 'string') {
           throw createFlagError('expected --config to be a string');
         }
@@ -59,6 +60,12 @@ export function runSavedObjectsCli() {
         kibanaUrl = Url.format(config.get('servers.kibana'));
       }
 
+      if (!kibanaUrl) {
+        throw createFlagError(
+          'Either a --config file with `servers.kibana` defined, or a --kibana-url must be passed'
+        );
+      }
+
       let importExportDir;
       if (flags.dir) {
         if (typeof flags.dir !== 'string') {
@@ -67,38 +74,38 @@ export function runSavedObjectsCli() {
 
         importExportDir = flags.dir;
       } else if (config) {
-        importExportDir = config.get('savedObjects.directory');
+        importExportDir = config.get('kbnArchiver.directory');
       }
 
       if (!importExportDir) {
         throw createFlagError(
-          '--config does not include a savedObjects.directory, specify it or include --dir flag'
+          '--config does not include a kbnArchiver.directory, specify it or include --dir flag'
         );
       }
 
       return {
         kbnClient: new KbnClient({
           log,
-          url: kibanaUrl ?? 'http://localhost:5601',
+          url: kibanaUrl,
           importExportDir,
         }),
       };
     },
   })
     .command({
-      name: 'import',
-      usage: 'import <name>',
-      description: 'import a saved export to Kibana',
-      async run({ kbnClient, flags }) {
-        await kbnClient.importExport.import(getSinglePositionalArg(flags));
-      },
-    })
-    .command({
-      name: 'export',
-      usage: 'export <name>',
+      name: 'save',
+      usage: 'save <name>',
       description: 'export saved objects from Kibana to a file',
       async run({ kbnClient, flags }) {
         await kbnClient.importExport.export(getSinglePositionalArg(flags));
+      },
+    })
+    .command({
+      name: 'load',
+      usage: 'load <name>',
+      description: 'import a saved export to Kibana',
+      async run({ kbnClient, flags }) {
+        await kbnClient.importExport.import(getSinglePositionalArg(flags));
       },
     })
     .execute();

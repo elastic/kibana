@@ -9,10 +9,12 @@
 import { inspect } from 'util';
 import Fs from 'fs/promises';
 import Path from 'path';
+import { Readable } from 'stream';
 
 import FormData from 'form-data';
+import { ToolingLog, isAxiosResponseError, createFailError } from '@kbn/dev-utils';
 
-import { ToolingLog } from '../tooling_log';
+import type { SavedObjectsImportResponse } from 'src/core/server/saved_objects/import/types';
 import { KbnClientRequester, uriencode } from './kbn_client_requester';
 
 export class KbnClientImportExport {
@@ -39,31 +41,48 @@ export class KbnClientImportExport {
   async import(name: string, options?: { space?: string }) {
     const src = this.resolvePath(name);
 
-    const flattenedJson = (await Fs.readFile(src, 'utf-8'))
+    const objects = (await Fs.readFile(src, 'utf-8'))
       .split('\n\n')
-      .map((json) => JSON.stringify(JSON.parse(json)))
-      .join('\n');
+      .filter((line) => !!line)
+      .map((line) => JSON.parse(line));
+
+    this.log.debug('importing', objects.length, 'saved objects');
 
     const formData = new FormData();
-    formData.append('file', flattenedJson);
+    formData.append('file', objects.map((obj) => JSON.stringify(obj)).join('\n'), 'import.ndjson');
 
     // TODO: should we clear out the existing saved objects?
 
-    await this.requester.request({
-      method: 'POST',
-      path: options?.space
-        ? uriencode`/s/${options.space}/api/saved_objects/_import`
-        : '/api/saved_objects/_import',
-      query: {
-        overwrite: true,
-      },
-      body: formData,
-      headers: formData.getHeaders(),
-    });
+    let resp;
+    try {
+      resp = await this.requester.request<SavedObjectsImportResponse>({
+        method: 'POST',
+        path: options?.space
+          ? uriencode`/s/${options.space}/api/saved_objects/_import`
+          : '/api/saved_objects/_import',
+        query: {
+          overwrite: true,
+        },
+        body: formData,
+        headers: formData.getHeaders(),
+      });
+    } catch (error) {
+      if (!isAxiosResponseError(error)) {
+        throw error;
+      }
 
-    // TODO: we should verify that the import was successfull by inspecting the response
+      throw createFailError(
+        `[KbnClientImportExport] ${error.response.status} resp: ${inspect(error.response.data)}`
+      );
+    }
 
-    this.log.debug(`[KbnClientImportExport] import successful of ${src}`);
+    if (resp.data.success) {
+      this.log.debug('[KbnClientImportExport] import success');
+    } else {
+      throw createFailError(
+        `[KbnClientImportExport] failed to import all saved objects: ${inspect(resp.data)}`
+      );
+    }
   }
 
   async export(name: string, options?: { space?: string }) {

@@ -7,4 +7,4 @@
  */
 
 require('../src/setup_node_env');
-require('@kbn/test').runSavedObjectsCli();
+require('@kbn/test').runKbnArchiverCli();
