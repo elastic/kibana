@@ -8,17 +8,15 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
-import { JsonCodeBlock } from './json_code_block';
-import { IndexPattern } from '../../../../../data/public';
+import { JsonCodeEditor } from './json_code_editor';
 
 it('returns the `JsonCodeEditor` component', () => {
-  const props = {
-    hit: { _index: 'test', _type: 'doc', _id: 'foo', _score: 1, _source: { test: 123 } },
-    columns: [],
-    indexPattern: {} as IndexPattern,
-    filter: jest.fn(),
-    onAddColumn: jest.fn(),
-    onRemoveColumn: jest.fn(),
+  const value = {
+    _index: 'test',
+    _type: 'doc',
+    _id: 'foo',
+    _score: 1,
+    _source: { test: 123 },
   };
-  expect(shallow(<JsonCodeBlock {...props} />)).toMatchSnapshot();
+  expect(shallow(<JsonCodeEditor hit={value} />)).toMatchSnapshot();
 });
