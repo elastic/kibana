@@ -531,7 +531,12 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
     async setFieldScript(script: string) {
       log.debug('set script = ' + script);
       await (await testSubjects.findAll('formRowToggle'))[1].click();
-      await new Promise((resolve) => setTimeout(resolve, 1000 * 5));
+      await (
+        await (await testSubjects.find('formatRow')).findAllByCssSelector(
+          '[data-test-subj="toggle"]'
+        )
+      )[0].click();
+      // await new Promise((resolve) => setTimeout(resolve, 1000 * 5));
       // await (await testSubjects.find('valueRowToggle')).click();
       // await new Promise((resolve) => setTimeout(resolve, 1000 * 5 * 60));
 
