@@ -14,7 +14,7 @@ The following alerts APIs are available:
 
 * <<alerts-api-find, Find alerts API>> to retrieve a paginated set of alerts by condition
 
-* <<alerts-api-list, List all alert types API>> to retrieve a list of all {kib} alert types
+* <<alerts-api-list, List all alert types API>> to retrieve a list of all alert types
 
 * <<alerts-api-enable, Enable alert API>> to enable a single {kib} alert by ID
 
