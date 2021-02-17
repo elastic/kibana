@@ -72,7 +72,7 @@ export class MeterGauge {
     const isPercentageMode = this.gaugeConfig.percentageMode;
     const percentageFormatPattern =
       this.gaugeConfig.percentageFormatPattern ||
-      this.gaugeChart.events.uiSettings.get(UI_SETTINGS.FORMAT_PERCENT_DEFAULT_PATTERN);
+      this.gaugeChart.handler.uiSettings.get(UI_SETTINGS.FORMAT_PERCENT_DEFAULT_PATTERN);
     const colorsRange = this.gaugeConfig.colorsRange;
     const max = _.last(colorsRange).to;
     const labels = [];

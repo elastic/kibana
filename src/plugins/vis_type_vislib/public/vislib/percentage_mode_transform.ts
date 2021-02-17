@@ -8,9 +8,11 @@
 
 // @ts-ignore
 import numeral from '@elastic/numeral';
-
-const numeralInst = numeral();
+import { getFormatService } from '../services';
 
 export function getValueForPercentageMode(value: string | number, percentageFormatPattern: string) {
-  return numeralInst.set(value).format(percentageFormatPattern);
+  const formatServices = getFormatService();
+  const percentFormatter = formatServices.getInstance('percent', { pattern: percentageFormatPattern });
+
+  return percentFormatter.convert(value);
 }
