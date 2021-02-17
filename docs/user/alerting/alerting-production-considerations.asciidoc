@@ -24,8 +24,7 @@ This is usually a symptom of the specific usage or scaling strategy of the clust
 
 Such issues can be addressed by tweaking the {kib} Task Manager or adjusting the cluster scaling strategy to better suit the unique use case.
 
-For details guidance, see <<alerting-troubleshooting,`Alerting Troubelshooting`>>.
-
+For detailed guidance, see <<alerting-troubleshooting,`Alerting Troubelshooting`>>.
 ==============================================
 
 [float]

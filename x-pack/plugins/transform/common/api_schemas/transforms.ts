@@ -51,13 +51,43 @@ export type PivotConfig = TypeOf<typeof pivotSchema>;
 
 export type LatestFunctionConfig = TypeOf<typeof latestFunctionSchema>;
 
+export const retentionPolicySchema = schema.object({
+  time: schema.object({
+    field: schema.string(),
+    max_age: schema.string(),
+  }),
+});
+
 export const settingsSchema = schema.object({
   max_page_search_size: schema.maybe(schema.number()),
   // The default value is null, which disables throttling.
   docs_per_second: schema.maybe(schema.nullable(schema.number())),
 });
 
+export const runtimeMappingsSchema = schema.maybe(
+  schema.recordOf(
+    schema.string(),
+    schema.object({
+      type: schema.oneOf([
+        schema.literal('keyword'),
+        schema.literal('long'),
+        schema.literal('double'),
+        schema.literal('date'),
+        schema.literal('ip'),
+        schema.literal('boolean'),
+      ]),
+      script: schema.oneOf([
+        schema.string(),
+        schema.object({
+          source: schema.string(),
+        }),
+      ]),
+    })
+  )
+);
+
 export const sourceSchema = schema.object({
+  runtime_mappings: runtimeMappingsSchema,
   index: schema.oneOf([schema.string(), schema.arrayOf(schema.string())]),
   query: schema.maybe(schema.recordOf(schema.string(), schema.any())),
 });
@@ -94,6 +124,7 @@ export const putTransformsRequestSchema = schema.object(
      * Latest and pivot are mutually exclusive, i.e. exactly one must be specified in the transform configuration
      */
     latest: schema.maybe(latestFunctionSchema),
+    retention_policy: schema.maybe(retentionPolicySchema),
     settings: schema.maybe(settingsSchema),
     source: sourceSchema,
     sync: schema.maybe(syncSchema),

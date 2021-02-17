@@ -36,8 +36,8 @@ export const getInternalArtifactMock = async (
 ): Promise<InternalArtifactCompleteSchema> => {
   const artifact = await buildArtifact(
     getTranslatedExceptionListMock(),
-    os,
     schemaVersion,
+    os,
     artifactName
   );
   return opts?.compress ? compressArtifact(artifact) : artifact;
@@ -49,7 +49,7 @@ export const getEmptyInternalArtifactMock = async (
   opts?: { compress: boolean },
   artifactName: string = ArtifactConstants.GLOBAL_ALLOWLIST_NAME
 ): Promise<InternalArtifactCompleteSchema> => {
-  const artifact = await buildArtifact({ entries: [] }, os, schemaVersion, artifactName);
+  const artifact = await buildArtifact({ entries: [] }, schemaVersion, os, artifactName);
   return opts?.compress ? compressArtifact(artifact) : artifact;
 };
 
@@ -62,8 +62,8 @@ export const getInternalArtifactMockWithDiffs = async (
   mock.entries.pop();
   const artifact = await buildArtifact(
     mock,
-    os,
     schemaVersion,
+    os,
     ArtifactConstants.GLOBAL_ALLOWLIST_NAME
   );
   return opts?.compress ? compressArtifact(artifact) : artifact;
