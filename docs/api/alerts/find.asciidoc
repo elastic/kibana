@@ -39,7 +39,7 @@ Retrieve a paginated set of alerts based on condition.
   are defined in the `type` parameter, only "root" fields are allowed.
 
 `sort_order`::
-  (Optional, string) Sort directions. Could be two values 'asc' or 'desc'.
+  (Optional, string) Sort direction, either `asc` or `desc`.
 
 `has_reference`::
   (Optional, object) Filters to objects that have a relationship with the type and ID combination.
