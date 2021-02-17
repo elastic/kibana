@@ -12,6 +12,7 @@ import {
   EuiPageBody,
   EuiPageHeader,
   EuiPageHeaderSection,
+  EuiSpacer,
   EuiText,
   EuiTitle,
   EuiButton,
@@ -22,6 +23,8 @@ import { FlashMessages } from '../../../shared/flash_messages';
 import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
 
 import {
+  META_ENGINE_CREATION_FORM_DOCUMENTATION_DESCRIPTION,
+  META_ENGINE_CREATION_FORM_META_ENGINE_DESCRIPTION,
   META_ENGINE_CREATION_FORM_SUBMIT_BUTTON_LABEL,
   META_ENGINE_CREATION_FORM_TITLE,
   META_ENGINE_CREATION_TITLE,
@@ -36,9 +39,8 @@ export const MetaEngineCreation: React.FC = () => {
           <EuiTitle size="l">
             <h1>{META_ENGINE_CREATION_TITLE}</h1>
           </EuiTitle>
-          {/*
-          TODO DESCRIPTION GOES HERE
-          */}
+          <EuiText>{META_ENGINE_CREATION_FORM_META_ENGINE_DESCRIPTION}</EuiText>
+          <EuiText>{META_ENGINE_CREATION_FORM_DOCUMENTATION_DESCRIPTION}</EuiText>
         </EuiPageHeaderSection>
       </EuiPageHeader>
       <EuiPageBody>
@@ -54,6 +56,7 @@ export const MetaEngineCreation: React.FC = () => {
               <EuiTitle>
                 <EuiText>{META_ENGINE_CREATION_FORM_TITLE}</EuiText>
               </EuiTitle>
+              <EuiSpacer />
               <EuiButton
                 disabled
                 type="submit"
