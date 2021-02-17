@@ -13,6 +13,10 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
+import { EuiCallOut } from '@elastic/eui';
+
+import { ViewContentHeader } from '../../components/shared/view_content_header';
+
 import {
   PRIVATE_CAN_CREATE_PAGE_TITLE,
   PRIVATE_VIEW_ONLY_PAGE_TITLE,
@@ -41,8 +45,8 @@ describe('PrivateSourcesLayout', () => {
   it('uses correct title and description when private sources are enabled', () => {
     const wrapper = shallow(<PrivateSourcesLayout>{children}</PrivateSourcesLayout>);
 
-    expect(wrapper.find('ViewContentHeader').prop('title')).toEqual(PRIVATE_CAN_CREATE_PAGE_TITLE);
-    expect(wrapper.find('ViewContentHeader').prop('description')).toEqual(
+    expect(wrapper.find(ViewContentHeader).prop('title')).toEqual(PRIVATE_CAN_CREATE_PAGE_TITLE);
+    expect(wrapper.find(ViewContentHeader).prop('description')).toEqual(
       PRIVATE_CAN_CREATE_PAGE_DESCRIPTION
     );
   });
@@ -51,8 +55,8 @@ describe('PrivateSourcesLayout', () => {
     setMockValues({ account: { canCreatePersonalSources: false } });
     const wrapper = shallow(<PrivateSourcesLayout>{children}</PrivateSourcesLayout>);
 
-    expect(wrapper.find('ViewContentHeader').prop('title')).toEqual(PRIVATE_VIEW_ONLY_PAGE_TITLE);
-    expect(wrapper.find('ViewContentHeader').prop('description')).toEqual(
+    expect(wrapper.find(ViewContentHeader).prop('title')).toEqual(PRIVATE_VIEW_ONLY_PAGE_TITLE);
+    expect(wrapper.find(ViewContentHeader).prop('description')).toEqual(
       PRIVATE_VIEW_ONLY_PAGE_DESCRIPTION
     );
   });
@@ -60,6 +64,6 @@ describe('PrivateSourcesLayout', () => {
   it('renders callout when in read-only mode', () => {
     const wrapper = shallow(<PrivateSourcesLayout readOnlyMode>{children}</PrivateSourcesLayout>);
 
-    expect(wrapper.find('EuiCallOut')).toHaveLength(1);
+    expect(wrapper.find(EuiCallOut)).toHaveLength(1);
   });
 });
