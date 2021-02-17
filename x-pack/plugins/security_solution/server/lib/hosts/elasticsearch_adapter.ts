@@ -21,7 +21,7 @@ import { FrameworkAdapter, FrameworkRequest } from '../framework';
 import { TermAggregation } from '../types';
 import { buildHostOverviewQuery } from './query.detail_host.dsl';
 import { buildHostsQuery } from './query.hosts.dsl';
-import { buildLastSeenHostQuery } from './query.last_first_seen_host.dsl';
+import { buildLastSeenHostQuery } from './query.last_seen_host.dsl';
 import {
   HostAggEsData,
   HostAggEsItem,
