@@ -40,7 +40,7 @@ type RuntimeType = typeof RUNTIME_FIELD_TYPES[number];
 
 export interface RuntimeField {
   type: RuntimeType;
-  script:
+  script?:
     | string
     | {
         source: string;
