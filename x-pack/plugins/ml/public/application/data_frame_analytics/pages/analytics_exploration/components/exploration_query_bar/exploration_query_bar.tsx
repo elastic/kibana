@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useEffect, useState } from 'react';
+import React, { FC, useEffect, useMemo, useState } from 'react';
 import { EuiButtonGroup, EuiCode, EuiFlexGroup, EuiFlexItem, EuiInputPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -59,6 +59,31 @@ export const ExplorationQueryBar: FC<ExplorationQueryBarProps> = ({
 
   const searchChangeHandler = (q: Query) => setSearchInput(q);
 
+  const regex = useMemo(() => new RegExp(`${filters?.columnId}\s?:\s?(true|false)`, 'g'), []);
+
+  /**
+   * If a filter option is active in the url set the corresponding options
+   * button to selected mode
+   */
+  useEffect(() => {
+    if (filters !== undefined) {
+      const match: string[] | null = query.query.match(regex);
+      let filterKeyInEffect: string | undefined;
+
+      if (match !== null && match[0].includes('true')) {
+        // set { training: true }
+        filterKeyInEffect = Object.keys(filters.key).find((i) => filters.key[i] === true);
+      } else if (match !== null && match[0].includes('false')) {
+        // set { testing: true }
+        filterKeyInEffect = Object.keys(filters.key).find((i) => filters.key[i] === false);
+      }
+
+      if (filterKeyInEffect) {
+        setIdToSelectedMap({ [filterKeyInEffect]: true });
+      }
+    }
+  }, []);
+
   /**
    * Component is responsible for parsing the query string,
    * hence it should sync submitted query string.
@@ -111,7 +136,6 @@ export const ExplorationQueryBar: FC<ExplorationQueryBarProps> = ({
     let newQuery = '';
     const filterValue = filters?.key[optionId];
     const filterQueryString = `${filters?.columnId}:${filterValue}`;
-    const regex = new RegExp(`${filters?.columnId}\s?:\s?(true|false)`, 'g');
 
     // Toggling selected optionId to 'off' - remove column id query from filter
     if (currentIdToSelectedMap[optionId] === false) {
