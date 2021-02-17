@@ -28,6 +28,10 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { FormattedDate, FormattedMessage } from 'react-intl';
+import {
+  InventoryItemType,
+  SnapshotMetricType,
+} from '../../../../../../../../common/inventory_models/types';
 import { withTheme } from '../../../../../../../../../../../src/plugins/kibana_react/common';
 import { PrefilledAnomalyAlertFlyout } from '../../../../../../../alerting/metric_anomaly/components/alert_flyout';
 import { useLinkProps } from '../../../../../../../hooks/use_link_props';
@@ -35,6 +39,7 @@ import { useSorting } from '../../../../../../../hooks/use_sorting';
 import { useMetricsK8sAnomaliesResults } from '../../../../hooks/use_metrics_k8s_anomalies';
 import { useMetricsHostsAnomaliesResults } from '../../../../hooks/use_metrics_hosts_anomalies';
 import {
+  Metric,
   MetricsHostsAnomaly,
   Sort,
 } from '../../../../../../../../common/http_api/infra_ml/results';
@@ -50,12 +55,17 @@ interface JobOption {
   id: JobType;
   label: string;
 }
-const AnomalyActionMenu = React.memo<{
+const AnomalyActionMenu = ({
+  jobId,
+  influencers,
+  type,
+  startTime,
+}: {
   jobId: string;
   influencers: string[];
   type: string;
   startTime: number;
-}>(({ jobId, influencers, type, startTime }) => {
+}) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isAlertOpen, setIsAlertOpen] = useState(false);
   const close = useCallback(() => setIsOpen(false), [setIsOpen]);
@@ -64,26 +74,28 @@ const AnomalyActionMenu = React.memo<{
   const closeAlert = useCallback(() => setIsAlertOpen(false), [setIsAlertOpen]);
   const { onViewChange } = useWaffleViewState();
 
-  const metricTypeMap: { [key: string]: string } = {
-    memory_usage: 'memory',
-    network_in: 'rx',
-    network_out: 'tx',
+  const filters = influencers.map(
+    (influencer) =>
+      `${type === 'metrics_k8s' ? 'kubernetes.pod.uid' : 'host.name'}: "${influencer}"`
+  );
+  const getNodeType = (metricType: string): InventoryItemType => {
+    return metricType === 'metrics_k8s' ? 'pod' : 'host';
   };
-  const showInInventory = () => {
-    const filters = influencers.map(
-      (influencer) =>
-        `${type === 'metrics_k8s' ? 'kubernetes.pod.uid' : 'host.name'}: "${influencer}"`
-    );
-
-    const nodeType = `${type === 'metrics_k8s' ? 'pod' : 'host'}`;
+  const showInInventory = useCallback(() => {
+    const metricTypeMap: { [key in Metric]: SnapshotMetricType } = {
+      memory_usage: 'memory',
+      network_in: 'rx',
+      network_out: 'tx',
+    };
+    // parse the anomaly job id for metric type
     const jobIdParts = jobId.split('-');
     const jobIdMetric = jobIdParts[jobIdParts.length - 1];
-    const metricType = metricTypeMap[jobIdMetric.replace(/hosts_|k8s_/, '')];
-    const anomalyViewParams = {
+    const metricType = metricTypeMap[jobIdMetric.replace(/hosts_|k8s_/, '') as Metric];
+    const anomalyViewParams: WaffleViewState = {
       metric: { type: metricType },
       sort: { by: 'name', direction: 'desc' },
       groupBy: [],
-      nodeType,
+      nodeType: getNodeType(type),
       view: 'map',
       customOptions: [],
       customMetrics: [],
@@ -95,9 +107,9 @@ const AnomalyActionMenu = React.memo<{
       filterQuery: { expression: filters.join(' or '), kind: 'kuery' },
       legend: { palette: 'cool', reverseColors: false, steps: 10 },
       time: startTime,
-    } as WaffleViewState;
+    };
     onViewChange(anomalyViewParams);
-  };
+  }, [filters, jobId, onViewChange, startTime, type]);
 
   const anomaliesUrl = useLinkProps({
     app: 'ml',
@@ -147,7 +159,7 @@ const AnomalyActionMenu = React.memo<{
       {isAlertOpen && <PrefilledAnomalyAlertFlyout onClose={closeAlert} />}
     </>
   );
-});
+};
 export const NoAnomaliesFound = withTheme(({ theme }) => (
   <EuiText>
     <EuiSpacer size="xl" />
