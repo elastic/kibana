@@ -80,6 +80,6 @@ alertingFrameworkHeath itself consists from the following properties:
 | Returns the timestamp and status of the alert execution: `ok`, `warn` or `error`.
 
 | `readHealth`
-| Return the latest status `ok`, `warn` or `error` with the timestamp, which identify if the alerts read events have any errors.
+| Returns the timestamp and status of the alert reading events: `ok`, `warn` or `error`.
 
 |===
