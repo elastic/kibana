@@ -17,19 +17,19 @@ import {
 } from '@elastic/charts';
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
-import {
-  EuiTitle,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiComboBox,
-  EuiAccordion,
-} from '@elastic/eui';
+import { EuiTitle, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import { APIReturnType } from '../../../services/rest/createCallApmApi';
 import { px } from '../../../style/variables';
-import { SignificantTermsTable } from './SignificantTermsTable';
+import { CorrelationsTable } from './correlations_table';
 import { ChartContainer } from '../../shared/charts/chart_container';
+import { useTheme } from '../../../hooks/use_theme';
+import { CustomFields } from './custom_fields';
+import { useFieldNames } from './use_field_names';
+import { useLocalStorage } from '../../../hooks/useLocalStorage';
+import { useUiTracker } from '../../../../../observability/public';
 
 type CorrelationsApiResponse = NonNullable<
   APIReturnType<'GET /api/apm/correlations/failed_transactions'>
@@ -39,29 +39,24 @@ type SignificantTerm = NonNullable<
   CorrelationsApiResponse['significantTerms']
 >[0];
 
-const initialFieldNames = [
-  'transaction.name',
-  'user.username',
-  'user.id',
-  'host.ip',
-  'user_agent.name',
-  'kubernetes.pod.uuid',
-  'kubernetes.pod.name',
-  'url.domain',
-  'container.id',
-  'service.node.name',
-].map((label) => ({ label }));
+interface Props {
+  onClose: () => void;
+}
 
-export function ErrorCorrelations() {
+export function ErrorCorrelations({ onClose }: Props) {
   const [
     selectedSignificantTerm,
     setSelectedSignificantTerm,
   ] = useState<SignificantTerm | null>(null);
 
-  const [fieldNames, setFieldNames] = useState(initialFieldNames);
   const { serviceName } = useParams<{ serviceName?: string }>();
   const { urlParams, uiFilters } = useUrlParams();
   const { transactionName, transactionType, start, end } = urlParams;
+  const { defaultFieldNames } = useFieldNames();
+  const [fieldNames, setFieldNames] = useLocalStorage(
+    `apm.correlations.errors.fields:${serviceName}`,
+    defaultFieldNames
+  );
 
   const { data, status } = useFetcher(
     (callApmApi) => {
@@ -76,7 +71,7 @@ export function ErrorCorrelations() {
               start,
               end,
               uiFilters: JSON.stringify(uiFilters),
-              fieldNames: fieldNames.map((field) => field.label).join(','),
+              fieldNames: fieldNames.join(','),
             },
           },
         });
@@ -93,12 +88,29 @@ export function ErrorCorrelations() {
     ]
   );
 
+  const trackApmEvent = useUiTracker({ app: 'apm' });
+  trackApmEvent({ metric: 'view_errors_correlations' });
+
   return (
     <>
       <EuiFlexGroup direction="column">
         <EuiFlexItem>
-          <EuiTitle size="s">
-            <h4>Error rate over time</h4>
+          <EuiText size="s">
+            <p>
+              {i18n.translate('xpack.apm.correlations.error.description', {
+                defaultMessage:
+                  'Why are some transactions failing and returning errors? Correlations will help discover a possible culprit in a particular cohort of your data. Either by host, version, or other custom fields.',
+              })}
+            </p>
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiTitle size="xxs">
+            <h4>
+              {i18n.translate('xpack.apm.correlations.error.chart.title', {
+                defaultMessage: 'Error rate over time',
+              })}
+            </h4>
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem>
@@ -109,25 +121,19 @@ export function ErrorCorrelations() {
           />
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiAccordion id="accordion" buttonContent="Customize">
-            <EuiComboBox
-              fullWidth={true}
-              placeholder="Select or create options"
-              selectedOptions={fieldNames}
-              onChange={setFieldNames}
-              onCreateOption={(term) =>
-                setFieldNames((names) => [...names, { label: term }])
-              }
-            />
-          </EuiAccordion>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <SignificantTermsTable
-            cardinalityColumnName="# of failed transactions"
+          <CorrelationsTable
+            percentageColumnName={i18n.translate(
+              'xpack.apm.correlations.error.percentageColumnName',
+              { defaultMessage: '% of failed transactions' }
+            )}
             significantTerms={data?.significantTerms}
             status={status}
             setSelectedSignificantTerm={setSelectedSignificantTerm}
+            onFilter={onClose}
           />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <CustomFields fieldNames={fieldNames} setFieldNames={setFieldNames} />
         </EuiFlexItem>
       </EuiFlexGroup>
     </>
@@ -143,6 +149,7 @@ function ErrorTimeseriesChart({
   selectedSignificantTerm: SignificantTerm | null;
   status: FETCH_STATUS;
 }) {
+  const theme = useTheme();
   const dateFormatter = timeFormatter('HH:mm:ss');
 
   return (
@@ -164,7 +171,10 @@ function ErrorTimeseriesChart({
         />
 
         <LineSeries
-          id="Overall error rate"
+          id={i18n.translate(
+            'xpack.apm.correlations.error.chart.overallErrorRateLabel',
+            { defaultMessage: 'Overall error rate' }
+          )}
           xScaleType={ScaleType.Time}
           yScaleType={ScaleType.Linear}
           xAccessor={'x'}
@@ -175,12 +185,21 @@ function ErrorTimeseriesChart({
 
         {selectedSignificantTerm !== null ? (
           <LineSeries
-            id="Error rate for selected term"
+            id={i18n.translate(
+              'xpack.apm.correlations.error.chart.selectedTermErrorRateLabel',
+              {
+                defaultMessage: '{fieldName}:{fieldValue}',
+                values: {
+                  fieldName: selectedSignificantTerm.fieldName,
+                  fieldValue: selectedSignificantTerm.fieldValue,
+                },
+              }
+            )}
             xScaleType={ScaleType.Time}
             yScaleType={ScaleType.Linear}
             xAccessor={'x'}
             yAccessors={['y']}
-            color="red"
+            color={theme.eui.euiColorAccent}
             data={selectedSignificantTerm.timeseries}
             curve={CurveType.CURVE_MONOTONE_X}
           />
