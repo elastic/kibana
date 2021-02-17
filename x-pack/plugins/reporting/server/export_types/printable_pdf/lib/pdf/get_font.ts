@@ -5,16 +5,11 @@
  * 2.0.
  */
 
-// @ts-ignore: no module definition
-import xRegExp from 'xregexp';
-
 export function getFont(text: string) {
-  // Once unicode regex scripts are fully supported we should be able to get rid of the dependency
-  // on xRegExp library.  See https://github.com/tc39/proposal-regexp-unicode-property-escapes
-  // for more information. We are matching Han characters which is one of the supported unicode scripts
+  // We are matching Han characters which is one of the supported unicode scripts
   // (you can see the full list of supported scripts here: http://www.unicode.org/standard/supported.html).
   // This will match Chinese, Japanese, Korean and some other Asian languages.
-  const isCKJ = xRegExp('\\p{Han}').test(text, 'g');
+  const isCKJ = /\p{Script=Han}/gu.test(text);
   if (isCKJ) {
     return 'noto-cjk';
   } else {

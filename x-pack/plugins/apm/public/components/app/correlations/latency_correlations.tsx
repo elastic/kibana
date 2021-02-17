@@ -15,21 +15,19 @@ import {
 } from '@elastic/charts';
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
-import {
-  EuiTitle,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiComboBox,
-  EuiAccordion,
-  EuiFormRow,
-  EuiFieldNumber,
-} from '@elastic/eui';
+import { EuiTitle, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { getDurationFormatter } from '../../../../common/utils/formatters';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import { APIReturnType } from '../../../services/rest/createCallApmApi';
-import { SignificantTermsTable } from './SignificantTermsTable';
+import { CorrelationsTable } from './correlations_table';
 import { ChartContainer } from '../../shared/charts/chart_container';
+import { useTheme } from '../../../hooks/use_theme';
+import { CustomFields, PercentileOption } from './custom_fields';
+import { useFieldNames } from './use_field_names';
+import { useLocalStorage } from '../../../hooks/useLocalStorage';
+import { useUiTracker } from '../../../../../observability/public';
 
 type CorrelationsApiResponse = NonNullable<
   APIReturnType<'GET /api/apm/correlations/slow_transactions'>
@@ -39,29 +37,31 @@ type SignificantTerm = NonNullable<
   CorrelationsApiResponse['significantTerms']
 >[0];
 
-const initialFieldNames = [
-  'user.username',
-  'user.id',
-  'host.ip',
-  'user_agent.name',
-  'kubernetes.pod.uuid',
-  'kubernetes.pod.name',
-  'url.domain',
-  'container.id',
-  'service.node.name',
-].map((label) => ({ label }));
+interface Props {
+  onClose: () => void;
+}
 
-export function LatencyCorrelations() {
+export function LatencyCorrelations({ onClose }: Props) {
   const [
     selectedSignificantTerm,
     setSelectedSignificantTerm,
   ] = useState<SignificantTerm | null>(null);
 
-  const [fieldNames, setFieldNames] = useState(initialFieldNames);
-  const [durationPercentile, setDurationPercentile] = useState('50');
   const { serviceName } = useParams<{ serviceName?: string }>();
   const { urlParams, uiFilters } = useUrlParams();
   const { transactionName, transactionType, start, end } = urlParams;
+  const { defaultFieldNames } = useFieldNames();
+  const [fieldNames, setFieldNames] = useLocalStorage(
+    `apm.correlations.latency.fields:${serviceName}`,
+    defaultFieldNames
+  );
+  const [
+    durationPercentile,
+    setDurationPercentile,
+  ] = useLocalStorage<PercentileOption>(
+    `apm.correlations.latency.threshold:${serviceName}`,
+    75
+  );
 
   const { data, status } = useFetcher(
     (callApmApi) => {
@@ -76,8 +76,8 @@ export function LatencyCorrelations() {
               start,
               end,
               uiFilters: JSON.stringify(uiFilters),
-              durationPercentile,
-              fieldNames: fieldNames.map((field) => field.label).join(','),
+              durationPercentile: durationPercentile.toString(10),
+              fieldNames: fieldNames.join(','),
             },
           },
         });
@@ -95,14 +95,32 @@ export function LatencyCorrelations() {
     ]
   );
 
+  const trackApmEvent = useUiTracker({ app: 'apm' });
+  trackApmEvent({ metric: 'view_latency_correlations' });
+
   return (
     <>
       <EuiFlexGroup direction="column">
         <EuiFlexItem>
+          <EuiText size="s">
+            <p>
+              {i18n.translate('xpack.apm.correlations.latency.description', {
+                defaultMessage:
+                  'What is slowing down my service? Correlations will help discover a slower performance in a particular cohort of your data. Either by host, version, or other custom fields.',
+              })}
+            </p>
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem>
           <EuiFlexGroup direction="row">
             <EuiFlexItem>
-              <EuiTitle size="s">
-                <h4>Latency distribution</h4>
+              <EuiTitle size="xxs">
+                <h4>
+                  {i18n.translate(
+                    'xpack.apm.correlations.latency.chart.title',
+                    { defaultMessage: 'Latency distribution' }
+                  )}
+                </h4>
               </EuiTitle>
               <LatencyDistributionChart
                 data={data}
@@ -113,44 +131,24 @@ export function LatencyCorrelations() {
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiAccordion id="accordion" buttonContent="Customize">
-            <EuiFlexGroup>
-              <EuiFlexItem grow={1}>
-                <EuiFormRow label="Threshold">
-                  <EuiFieldNumber
-                    value={durationPercentile}
-                    onChange={(e) =>
-                      setDurationPercentile(e.currentTarget.value)
-                    }
-                  />
-                </EuiFormRow>
-              </EuiFlexItem>
-              <EuiFlexItem grow={4}>
-                <EuiFormRow
-                  fullWidth={true}
-                  label="Field"
-                  helpText="Fields to analyse for correlations"
-                >
-                  <EuiComboBox
-                    fullWidth={true}
-                    placeholder="Select or create options"
-                    selectedOptions={fieldNames}
-                    onChange={setFieldNames}
-                    onCreateOption={(term) => {
-                      setFieldNames((names) => [...names, { label: term }]);
-                    }}
-                  />
-                </EuiFormRow>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiAccordion>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <SignificantTermsTable
-            cardinalityColumnName="# of slow transactions"
+          <CorrelationsTable
+            percentageColumnName={i18n.translate(
+              'xpack.apm.correlations.latency.percentageColumnName',
+              { defaultMessage: '% of slow transactions' }
+            )}
             significantTerms={data?.significantTerms}
             status={status}
             setSelectedSignificantTerm={setSelectedSignificantTerm}
+            onFilter={onClose}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <CustomFields
+            fieldNames={fieldNames}
+            setFieldNames={setFieldNames}
+            showThreshold
+            setDurationPercentile={setDurationPercentile}
+            durationPercentile={durationPercentile}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -181,6 +179,7 @@ function LatencyDistributionChart({
   selectedSignificantTerm: SignificantTerm | null;
   status: FETCH_STATUS;
 }) {
+  const theme = useTheme();
   const xMax = Math.max(
     ...(data?.overall?.distribution.map((p) => p.x ?? 0) ?? [])
   );
@@ -218,7 +217,10 @@ function LatencyDistributionChart({
         />
 
         <BarSeries
-          id="Overall latency distribution"
+          id={i18n.translate(
+            'xpack.apm.correlations.latency.chart.overallLatencyDistributionLabel',
+            { defaultMessage: 'Overall latency distribution' }
+          )}
           xScaleType={ScaleType.Linear}
           yScaleType={ScaleType.Linear}
           xAccessor={'x'}
@@ -230,12 +232,21 @@ function LatencyDistributionChart({
 
         {selectedSignificantTerm !== null ? (
           <BarSeries
-            id="Latency distribution for selected term"
+            id={i18n.translate(
+              'xpack.apm.correlations.latency.chart.selectedTermLatencyDistributionLabel',
+              {
+                defaultMessage: '{fieldName}:{fieldValue}',
+                values: {
+                  fieldName: selectedSignificantTerm.fieldName,
+                  fieldValue: selectedSignificantTerm.fieldValue,
+                },
+              }
+            )}
             xScaleType={ScaleType.Linear}
             yScaleType={ScaleType.Linear}
             xAccessor={'x'}
             yAccessors={['y']}
-            color="red"
+            color={theme.eui.euiColorAccent}
             data={selectedSignificantTerm.distribution}
             minBarHeight={5}
             tickFormat={(d) => `${roundFloat(d)}%`}
