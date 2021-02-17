@@ -21,7 +21,6 @@ import { isRight } from 'fp-ts/Either';
 
 import * as i18n from './translations';
 
-import { Ecs } from '../../../../common/ecs';
 import { Case, CaseUserActions } from '../../containers/types';
 import { useUpdateComment } from '../../containers/use_update_comment';
 import { useCurrentUser } from '../../../common/lib/kibana';
@@ -61,7 +60,6 @@ export interface UserActionTreeProps {
   onUpdateField: ({ key, value, onSuccess, onError }: OnUpdateFields) => void;
   updateCase: (newCase: Case) => void;
   userCanCrud: boolean;
-  alerts: Record<string, Ecs>;
   onShowAlertDetails: (alertId: string, index: string) => void;
 }
 
@@ -120,7 +118,6 @@ export const UserActionTree = React.memo(
     onUpdateField,
     updateCase,
     userCanCrud,
-    alerts,
     onShowAlertDetails,
   }: UserActionTreeProps) => {
     const { commentId, subCaseId } = useParams<{ commentId?: string; subCaseId?: string }>();
@@ -360,24 +357,47 @@ export const UserActionTree = React.memo(
                     ? comment.alertId[0]
                     : ''
                   : comment.alertId;
+
+                const alertIndex = Array.isArray(comment.index)
+                  ? comment.index.length > 0
+                    ? comment.index[0]
+                    : ''
+                  : comment.index;
+
                 if (isEmpty(alertId)) {
                   return comments;
                 }
-                const alert = alerts[alertId];
-                return [...comments, getAlertAttachment({ action, alert, onShowAlertDetails })];
-              } else if (
-                comment != null &&
-                isRight(AlertCommentRequestRt.decode(comment)) &&
-                comment.type === CommentType.generatedAlert
-              ) {
+
+                return [
+                  ...comments,
+                  getAlertAttachment({
+                    action,
+                    alertId,
+                    index: alertIndex,
+                    ruleId: comment.rule.id,
+                    ruleName: comment.rule.name,
+                    onShowAlertDetails,
+                  }),
+                ];
+              } else if (comment != null && comment.type === CommentType.generatedAlert) {
                 // TODO: clean this up
                 const alertIds = Array.isArray(comment.alertId)
                   ? comment.alertId
                   : [comment.alertId];
+
                 if (isEmpty(alertIds)) {
                   return comments;
                 }
-                return [...comments, getGeneratedAlertsAttachment({ action, alertIds, alerts })];
+
+                return [
+                  ...comments,
+                  getGeneratedAlertsAttachment({
+                    action,
+                    alertIds,
+                    ruleId: comment.rule.id,
+                    ruleName: comment.rule.name,
+                  }),
+                ];
               }
             }
 
@@ -474,7 +494,6 @@ export const UserActionTree = React.memo(
         manageMarkdownEditIds,
         selectedOutlineCommentId,
         userCanCrud,
-        alerts,
         onShowAlertDetails,
       ]
     );

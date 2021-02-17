@@ -71,9 +71,8 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
           alertId: eventId,
           index: eventIndex ?? '',
           rule: {
-            // Rule id and name are a string
-            id: ((rule?.id as unknown) as string) ?? '',
-            name: ((rule?.name as unknown) as string) ?? '',
+            id: rule?.id != null ? rule.id[0] : null,
+            name: rule?.name != null ? rule.name[0] : null,
           },
         },
         updateCase: () =>

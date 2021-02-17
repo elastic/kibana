@@ -7,26 +7,24 @@
 
 import React, { memo, useCallback } from 'react';
 import { EuiToolTip, EuiButtonIcon } from '@elastic/eui';
-import deepEqual from 'fast-deep-equal';
-
-import { Ecs } from '../../../../common/ecs';
 import * as i18n from './translations';
-
 
 interface UserActionShowAlertProps {
   id: string;
-  alert: Ecs;
+  alertId: string;
+  index: string;
   onShowAlertDetails: (alertId: string, index: string) => void;
 }
 
 const UserActionShowAlertComponent = ({
   id,
-  alert,
+  alertId,
+  index,
   onShowAlertDetails,
 }: UserActionShowAlertProps) => {
-  const onClick = useCallback(() => onShowAlertDetails(alert._id, alert?._index ?? ''), [
-    alert._id,
-    alert._index,
+  const onClick = useCallback(() => onShowAlertDetails(alertId, index), [
+    alertId,
+    index,
     onShowAlertDetails,
   ]);
   return (
@@ -42,10 +40,4 @@ const UserActionShowAlertComponent = ({
   );
 };
 
-export const UserActionShowAlert = memo(
-  UserActionShowAlertComponent,
-  (prevProps, nextProps) =>
-    prevProps.id === nextProps.id &&
-    deepEqual(prevProps.alert, nextProps.alert) &&
-    prevProps.onShowAlertDetails === nextProps.onShowAlertDetails
-);
+export const UserActionShowAlert = memo(UserActionShowAlertComponent);

@@ -175,7 +175,7 @@ interface SanitizedComment {
 
 interface SanitizedCommentFoSubCases {
   associationType: AssociationType;
-  rule: { id: string; name: string };
+  rule: { id: string | null; name: string | null };
 }
 
 export const commentsMigrations = {
@@ -198,7 +198,7 @@ export const commentsMigrations = {
       ...doc,
       attributes: {
         ...doc.attributes,
-        rule: { id: '', name: '' },
+        rule: { id: null, name: null },
         associationType: AssociationType.case,
       },
       references: doc.references || [],

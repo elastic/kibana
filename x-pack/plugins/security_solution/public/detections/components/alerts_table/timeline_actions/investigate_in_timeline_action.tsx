@@ -80,6 +80,7 @@ const InvestigateInTimelineActionComponent: React.FC<InvestigateInTimelineAction
         updateTimelineIsLoading,
       }),
     [
+      alertIds,
       apolloClient,
       createTimeline,
       ecsRowData,

@@ -42,8 +42,6 @@ import {
   normalizeActionConnector,
   getNoneConnector,
 } from '../configure_cases/utils';
-import { useQueryAlerts } from '../../../detections/containers/detection_engine/alerts/use_query';
-import { buildAlertsQuery, getAlertIdsFromComments } from './helpers';
 import { DetailsPanel } from '../../../timelines/components/side_panel';
 import { useSourcererScope } from '../../../common/containers/sourcerer';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
@@ -52,8 +50,6 @@ import { timelineActions } from '../../../timelines/store/timeline';
 import { StatusActionButton } from '../status/button';
 
 import * as i18n from './translations';
-import { formatAlertToEcsSignal } from '../user_action_tree/helpers';
-import { Ecs } from '../../../../common/ecs';
 
 interface Props {
   caseId: string;
@@ -90,32 +86,6 @@ export interface CaseProps extends Props {
   updateCase: (newCase: Case) => void;
 }
 
-interface Signal {
-  rule: {
-    id: string;
-    name: string;
-    to: string;
-    from: string;
-  };
-}
-
-interface SignalHit {
-  _id: string;
-  _index: string;
-  _source: {
-    '@timestamp': string;
-    signal: Signal;
-  };
-}
-
-export interface Alert {
-  _id: string;
-  _index: string;
-  '@timestamp': string;
-  signal: Signal;
-  [key: string]: unknown;
-}
-
 export const CaseComponent = React.memo<CaseProps>(
   ({ caseId, caseData, fetchCase, subCaseId, updateCase, userCanCrud }) => {
     const dispatch = useDispatch();
@@ -143,34 +113,7 @@ export const CaseComponent = React.memo<CaseProps>(
      * For the future developer: useSourcererScope is security solution dependent.
      * You can use useSignalIndex as an alternative.
      */
-    const { browserFields, docValueFields, selectedPatterns } = useSourcererScope(
-      SourcererScopeName.detections
-    );
-    const alertsQuery = useMemo(
-      () => buildAlertsQuery(getAlertIdsFromComments(caseData.comments)),
-      [caseData.comments]
-    );
-    const { loading: isLoadingAlerts, data: alertsData } = useQueryAlerts<SignalHit, unknown>(
-      alertsQuery,
-      selectedPatterns[0]
-    );
-
-    const alerts = useMemo(
-      () =>
-        alertsData?.hits.hits.reduce<Record<string, Ecs>>(
-          (acc, { _id, _index, _source }) => ({
-            ...acc,
-            [_id]: {
-              ...formatAlertToEcsSignal(_source),
-              _id,
-              _index,
-              timestamp: _source['@timestamp'],
-            },
-          }),
-          {}
-        ) ?? {},
-      [alertsData?.hits.hits]
-    );
+    const { browserFields, docValueFields } = useSourcererScope(SourcererScopeName.detections);
 
     // Update Fields
     const onUpdateField = useCallback(
@@ -355,10 +298,10 @@ export const CaseComponent = React.memo<CaseProps>(
     );
 
     useEffect(() => {
-      if (initLoadingData && !isLoadingUserActions && !isLoadingAlerts) {
+      if (initLoadingData && !isLoadingUserActions) {
         setInitLoadingData(false);
       }
-    }, [initLoadingData, isLoadingAlerts, isLoadingUserActions]);
+    }, [initLoadingData, isLoadingUserActions]);
 
     const backOptions = useMemo(
       () => ({
@@ -440,7 +383,6 @@ export const CaseComponent = React.memo<CaseProps>(
                 {!initLoadingData && (
                   <>
                     <UserActionTree
-                      alerts={alerts}
                       caseServices={caseServices}
                       caseUserActions={caseUserActions}
                       connectors={connectors}
