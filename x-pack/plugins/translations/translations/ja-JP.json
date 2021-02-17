@@ -5022,8 +5022,6 @@
     "xpack.apm.customLink.empty": "カスタムリンクが見つかりません。独自のカスタムリンク、たとえば特定のダッシュボードまたは外部リンクへのリンクをセットアップします。",
     "xpack.apm.emptyMessage.noDataFoundDescription": "別の時間範囲を試すか検索フィルターをリセットしてください。",
     "xpack.apm.emptyMessage.noDataFoundLabel": "データが見つかりません。",
-    "xpack.apm.enableCorrelationsExperimentDescription": "APM で実験的な重要な用語機能を有効にする",
-    "xpack.apm.enableCorrelationsExperimentName": "APM 重要な用語",
     "xpack.apm.enableServiceOverviewExperimentDescription": "APM でサービスの［概要］タブを有効にします。",
     "xpack.apm.enableServiceOverviewExperimentName": "APM サービス概要",
     "xpack.apm.error.prompt.body": "詳細はブラウザの開発者コンソールをご確認ください。",
