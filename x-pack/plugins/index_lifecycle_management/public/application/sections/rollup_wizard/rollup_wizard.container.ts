@@ -8,11 +8,13 @@
 import { connect } from 'react-redux';
 import { RollupWizard as RollupWizardView } from './rollup_wizard';
 
+// @ts-ignore
 import { isSaving, getCreateJobError, getCloneJobConfig } from './store/selectors';
 
+// @ts-ignore
 import { createJob, clearCreateJobErrors, clearCloneJob } from './store/actions';
 
-const mapStateToProps = (state) => {
+const mapStateToProps = (state: any) => {
   return {
     isSaving: isSaving(state),
     saveError: getCreateJobError(state),
@@ -20,9 +22,9 @@ const mapStateToProps = (state) => {
   };
 };
 
-const mapDispatchToProps = (dispatch) => {
+const mapDispatchToProps = (dispatch: any) => {
   return {
-    createJob: (jobConfig) => {
+    createJob: (jobConfig: any) => {
       dispatch(createJob(jobConfig));
     },
     clearCreateJobErrors: () => {

@@ -17,18 +17,18 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import PropTypes from 'prop-types';
-import { cloneDeep, debounce, first, mapValues } from 'lodash';
+import { cloneDeep, mapValues } from 'lodash';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { withKibana } from '../../../../../../../src/plugins/kibana_react/public';
 
-const createBreadcrumb = {
-  text: i18n.translate('xpack.rollupJobs.createBreadcrumbTitle', {
-    defaultMessage: 'Create',
-  }),
-};
+// const createBreadcrumb = {
+//   text: i18n.translate('xpack.rollupJobs.createBreadcrumbTitle', {
+//     defaultMessage: 'Create',
+//   }),
+// };
 
 // @ts-ignore
 import { Navigation } from './navigation';
@@ -121,6 +121,7 @@ export class RollupWizardUi extends Component<any, any> {
   };
 
   lastIndexPatternValidationTime: number;
+  // @ts-ignore
   private _isMounted = false;
 
   constructor(props: any) {
