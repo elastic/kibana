@@ -45,6 +45,11 @@ export const DEFAULT_RULE_REFRESH_INTERVAL_VALUE = 60000; // ms
 export const DEFAULT_RULE_REFRESH_IDLE_VALUE = 2700000; // ms
 export const DEFAULT_RULE_NOTIFICATION_QUERY_SIZE = 100;
 
+// Document path where threat indicator fields are expected. Used as
+// both the source of enrichment fields and the destination for enrichment in
+// the generated detection alert
+export const DEFAULT_INDICATOR_PATH = 'threat.indicator';
+
 export enum SecurityPageName {
   detections = 'detections',
   overview = 'overview',
