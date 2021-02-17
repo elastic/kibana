@@ -7,8 +7,11 @@
 
 import { kea, MakeLogicType } from 'kea';
 
+import { formatApiName } from '../../utils/format_api_name';
+
 interface MetaEngineCreationValues {
   indexedEngineNames: string[];
+  name: string;
   rawName: string;
   selectedIndexedEngineNames: string[];
 }
@@ -53,6 +56,8 @@ export const MetaEngineCreationLogic = kea<
       },
     ],
   },
-  selectors: ({ selectors }) => ({}),
+  selectors: ({ selectors }) => ({
+    name: [() => [selectors.rawName], (rawName: string) => formatApiName(rawName)],
+  }),
   listeners: ({ values, actions }) => ({}),
 });

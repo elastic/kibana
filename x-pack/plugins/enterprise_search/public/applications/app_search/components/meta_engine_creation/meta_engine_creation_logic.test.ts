@@ -14,6 +14,7 @@ describe('MetaEngineCreationLogic', () => {
 
   const DEFAULT_VALUES = {
     indexedEngineNames: [],
+    name: '',
     rawName: '',
     selectedIndexedEngineNames: [],
   };
@@ -25,12 +26,23 @@ describe('MetaEngineCreationLogic', () => {
 
   describe('actions', () => {
     describe('setRawName', () => {
-      it('should set rawName to provided value', () => {
+      beforeAll(() => {
         mount();
         MetaEngineCreationLogic.actions.setRawName('Name__With#$&*%Special--Characters');
+      });
+
+      afterAll(() => {
+        jest.clearAllMocks();
+      });
+
+      it('should set rawName to provided value', () => {
         expect(MetaEngineCreationLogic.values.rawName).toEqual(
           'Name__With#$&*%Special--Characters'
         );
+      });
+
+      it('should set name to a sanitized value', () => {
+        expect(MetaEngineCreationLogic.values.name).toEqual('name-with-special-characters');
       });
     });
 
