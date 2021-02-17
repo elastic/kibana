@@ -12,7 +12,7 @@ import {
   DropIdentifier,
   DraggingIdentifier,
   DragDropIdentifier,
-  DropTargets,
+  RegisteredDropTargets,
   DragContextState,
 } from './types';
 
@@ -29,6 +29,7 @@ export const DragContext = React.createContext<DragContextState>({
   activeDropTarget: undefined,
   setActiveDropTarget: () => {},
   setA11yMessage: () => {},
+  dropTargetsByOrder: undefined,
   registerDropTarget: () => {},
 });
 
@@ -55,13 +56,11 @@ export function RootDragDropProvider({ children }: { children: React.ReactNode }
   });
   const [keyboardModeState, setKeyboardModeState] = useState(false);
   const [a11yMessageState, setA11yMessageState] = useState('');
-  const [activeDropTargetState, setActiveDropTargetState] = useState<{
-    activeDropTarget?: DropIdentifier;
-    dropTargetsByOrder: Record<string, DropIdentifier | undefined>;
-  }>({
-    activeDropTarget: undefined,
-    dropTargetsByOrder: {},
-  });
+  const [activeDropTargetState, setActiveDropTargetState] = useState<DropIdentifier | undefined>(
+    undefined
+  );
+
+  const [dropTargetsByOrderState, setDropTargetsByOrderState] = useState<RegisteredDropTargets>({});
 
   const setDragging = useMemo(
     () => (dragging?: DraggingIdentifier) => setDraggingState({ dragging }),
@@ -73,24 +72,20 @@ export function RootDragDropProvider({ children }: { children: React.ReactNode }
   ]);
 
   const setActiveDropTarget = useMemo(
-    () => (activeDropTarget?: DropIdentifier) =>
-      setActiveDropTargetState((s) => ({ ...s, activeDropTarget })),
+    () => (activeDropTarget?: DropIdentifier) => setActiveDropTargetState(activeDropTarget),
     [setActiveDropTargetState]
   );
 
   const registerDropTarget = useMemo(
     () => (order: number[], dropTarget?: DropIdentifier) => {
-      return setActiveDropTargetState((s) => {
+      return setDropTargetsByOrderState((s) => {
         return {
           ...s,
-          dropTargetsByOrder: {
-            ...s.dropTargetsByOrder,
-            [order.join(',')]: dropTarget,
-          },
+          [order.join(',')]: dropTarget,
         };
       });
     },
-    [setActiveDropTargetState]
+    [setDropTargetsByOrderState]
   );
 
   return (
@@ -104,6 +99,7 @@ export function RootDragDropProvider({ children }: { children: React.ReactNode }
         activeDropTarget={activeDropTargetState}
         setActiveDropTarget={setActiveDropTarget}
         registerDropTarget={registerDropTarget}
+        dropTargetsByOrder={dropTargetsByOrderState}
       >
         {children}
       </ChildDragDropProvider>
@@ -131,16 +127,17 @@ export function RootDragDropProvider({ children }: { children: React.ReactNode }
 }
 
 export function nextValidDropTarget(
-  activeDropTarget: DropTargets | undefined,
+  dropTargetsByOrder: RegisteredDropTargets,
+  activeDropTarget: DropIdentifier | undefined,
   draggingOrder: [string],
   filterElements: (el: DragDropIdentifier) => boolean = () => true,
   reverse = false
 ) {
-  if (!activeDropTarget) {
+  if (!dropTargetsByOrder) {
     return;
   }
 
-  const filteredTargets = [...Object.entries(activeDropTarget.dropTargetsByOrder)].filter(
+  const filteredTargets = [...Object.entries(dropTargetsByOrder)].filter(
     ([, dropTarget]) => dropTarget && filterElements(dropTarget)
   );
 
@@ -153,7 +150,7 @@ export function nextValidDropTarget(
   });
 
   let currentActiveDropIndex = nextDropTargets.findIndex(
-    ([_, dropTarget]) => dropTarget?.id === activeDropTarget?.activeDropTarget?.id
+    ([_, dropTarget]) => dropTarget?.id === activeDropTarget?.id
   );
 
   if (currentActiveDropIndex === -1) {
@@ -185,6 +182,7 @@ export function ChildDragDropProvider({
   setActiveDropTarget,
   setA11yMessage,
   registerDropTarget,
+  dropTargetsByOrder,
   children,
 }: ProviderProps) {
   const value = useMemo(
@@ -196,6 +194,7 @@ export function ChildDragDropProvider({
       activeDropTarget,
       setActiveDropTarget,
       setA11yMessage,
+      dropTargetsByOrder,
       registerDropTarget,
     }),
     [
@@ -206,6 +205,7 @@ export function ChildDragDropProvider({
       setKeyboardMode,
       keyboardMode,
       setA11yMessage,
+      dropTargetsByOrder,
       registerDropTarget,
     ]
   );

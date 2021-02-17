@@ -88,7 +88,23 @@ const dropProps = {
 };
 
 // Exported for testing purposes only.
-export const WorkspacePanel = React.memo(function WorkspacePanel({
+export const WorkspacePanel = React.memo(function WorkspacePanel(props: WorkspacePanelProps) {
+  const { getSuggestionForField, ...restProps } = props;
+
+  const dragDropContext = useContext(DragContext);
+
+  const suggestionForDraggedField = useMemo(
+    () => dragDropContext.dragging && getSuggestionForField(dragDropContext.dragging),
+    [dragDropContext.dragging, getSuggestionForField]
+  );
+
+  return (
+    <InnerWorkspacePanel {...restProps} suggestionForDraggedField={suggestionForDraggedField} />
+  );
+});
+
+// Exported for testing purposes only.
+export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
   activeDatasourceId,
   activeVisualizationId,
   visualizationMap,
@@ -102,15 +118,10 @@ export const WorkspacePanel = React.memo(function WorkspacePanel({
   ExpressionRenderer: ExpressionRendererComponent,
   title,
   visualizeTriggerFieldContext,
-  getSuggestionForField,
-}: WorkspacePanelProps) {
-  const dragDropContext = useContext(DragContext);
-
-  const suggestionForDraggedField = useMemo(
-    () => dragDropContext.dragging && getSuggestionForField(dragDropContext.dragging),
-    [dragDropContext.dragging, getSuggestionForField]
-  );
-
+  suggestionForDraggedField,
+}: Omit<WorkspacePanelProps, 'getSuggestionForField'> & {
+  suggestionForDraggedField: Suggestion | undefined;
+}) {
   const [localState, setLocalState] = useState<WorkspaceState>({
     expressionBuildError: undefined,
     expandError: false,

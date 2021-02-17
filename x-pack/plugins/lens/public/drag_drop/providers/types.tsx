@@ -39,14 +39,12 @@ export type DropIdentifier = DragDropIdentifier & {
  */
 export type DropHandler = (dropped: DragDropIdentifier, dropType?: DropType) => void;
 
-export interface DropTargets {
-  activeDropTarget?: DropIdentifier;
-  dropTargetsByOrder: Record<string, DropIdentifier | undefined>;
-}
+export type RegisteredDropTargets = Record<string, DropIdentifier | undefined> | undefined;
 
 /**
  * The shape of the drag / drop context.
  */
+
 export interface DragContextState {
   /**
    * The item being dragged or undefined.
@@ -66,7 +64,9 @@ export interface DragContextState {
    */
   setDragging: (dragging?: DraggingIdentifier) => void;
 
-  activeDropTarget?: DropTargets;
+  activeDropTarget?: DropIdentifier;
+
+  dropTargetsByOrder: RegisteredDropTargets;
 
   setActiveDropTarget: (newTarget?: DropIdentifier) => void;
 

@@ -92,13 +92,18 @@ export function EmptyDimensionButton({
     itemIndex,
   ]);
 
+  const handleOnDrop = React.useCallback(
+    (droppedItem, selectedDropType) => onDrop(droppedItem, value, selectedDropType),
+    [value, onDrop]
+  );
+
   return (
     <div className="lnsLayerPanel__dimensionContainer" data-test-subj={group.dataTestSubj}>
       <DragDrop
         getAdditionalClassesOnDroppable={getAdditionalClassesOnDroppable}
         value={value}
         order={order}
-        onDrop={(droppedItem, selectedDropType) => onDrop(droppedItem, value, selectedDropType)}
+        onDrop={handleOnDrop}
         dropType={dropType}
       >
         <div className="lnsLayerPanel__dimension lnsLayerPanel__dimension--empty">

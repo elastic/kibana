@@ -114,6 +114,11 @@ export function DraggableDimensionButton({
     accessorIndex,
   ]);
 
+  const handleOnDrop = React.useCallback(
+    (droppedItem, selectedDropType) => onDrop(droppedItem, value, selectedDropType),
+    [value, onDrop]
+  );
+
   return (
     <div
       ref={registerNewButtonRefMemoized}
@@ -129,9 +134,7 @@ export function DraggableDimensionButton({
         dropType={dropType}
         reorderableGroup={reorderableGroup.length > 1 ? reorderableGroup : undefined}
         value={value}
-        onDrop={(drag: DragDropIdentifier, selectedDropType?: DropType) =>
-          onDrop(drag, value, selectedDropType)
-        }
+        onDrop={handleOnDrop}
       >
         {children}
       </DragDrop>

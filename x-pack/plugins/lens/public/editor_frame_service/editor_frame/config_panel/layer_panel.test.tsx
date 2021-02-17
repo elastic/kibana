@@ -28,6 +28,7 @@ const defaultContext = {
   setDragging: jest.fn(),
   setActiveDropTarget: () => {},
   activeDropTarget: undefined,
+  dropTargetsByOrder: undefined,
   keyboardMode: false,
   setKeyboardMode: () => {},
   setA11yMessage: jest.fn(),
