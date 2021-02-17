@@ -1,4 +1,7 @@
 {
+  "compilerOptions": {
+    "preserveSymlinks": true
+  },
   "include": [],
   "references": [
     { "path": "./src/core/tsconfig.json" },
