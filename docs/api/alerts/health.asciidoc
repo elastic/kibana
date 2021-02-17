@@ -64,7 +64,7 @@ Health API response contains the following properties:
 | Return the state true if Encryption Saved Object plugin has a permanent encryption Key
 
 | `alertingFrameworkHeath`
-| This state property includes three different substates: `decryptionHealth`, `executionHealth`, `readHealth` which identify the alerting framework API health.
+| This state property has three substates that identify the health of the alerting framework API: `decryptionHealth`, `executionHealth`, and `readHealth`.
 
 |===
 
