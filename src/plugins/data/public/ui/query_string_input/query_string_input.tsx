@@ -26,6 +26,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 import { debounce, compact, isEqual, isFunction } from 'lodash';
 import { Toast } from 'src/core/public';
+import { METRIC_TYPE } from '@kbn/analytics';
 import { IDataPluginServices, IIndexPattern, Query } from '../..';
 import { QuerySuggestion, QuerySuggestionTypes } from '../../autocomplete';
 
@@ -107,6 +108,10 @@ export default class QueryStringInputUI extends Component<Props, State> {
   private abortController?: AbortController;
   private fetchIndexPatternsAbortController?: AbortController;
   private services = this.props.kibana.services;
+  private reportUiCounter = this.services.usageCollection?.reportUiCounter.bind(
+    this.services.usageCollection,
+    this.services.appName
+  );
   private componentIsUnmounting = false;
   private queryBarInputDivRefInstance: RefObject<HTMLDivElement> = createRef();
 
@@ -180,12 +185,14 @@ export default class QueryStringInputUI extends Component<Props, State> {
           selectionEnd,
           signal: this.abortController.signal,
         })) || [];
-
       return [...suggestions, ...recentSearchSuggestions];
     } catch (e) {
       // TODO: Waiting on https://github.com/elastic/kibana/issues/51406 for a properly typed error
       // Ignore aborted requests
       if (e.message === 'The user aborted a request.') return;
+
+      this.reportUiCounter?.(METRIC_TYPE.LOADED, `query_string:suggestions_error`);
+
       throw e;
     }
   };
@@ -304,7 +311,7 @@ export default class QueryStringInputUI extends Component<Props, State> {
           }
           if (isSuggestionsVisible && index !== null && this.state.suggestions[index]) {
             event.preventDefault();
-            this.selectSuggestion(this.state.suggestions[index]);
+            this.selectSuggestion(this.state.suggestions[index], index);
           } else {
             this.onSubmit(this.props.query);
             this.setState({
@@ -337,7 +344,7 @@ export default class QueryStringInputUI extends Component<Props, State> {
     }
   };
 
-  private selectSuggestion = (suggestion: QuerySuggestion) => {
+  private selectSuggestion = (suggestion: QuerySuggestion, listIndex: number) => {
     if (!this.inputRef) {
       return;
     }
@@ -353,6 +360,17 @@ export default class QueryStringInputUI extends Component<Props, State> {
 
     const value = query.substr(0, selectionStart) + query.substr(selectionEnd);
     const newQueryString = value.substr(0, start) + text + value.substr(end);
+
+    this.reportUiCounter?.(
+      METRIC_TYPE.LOADED,
+      `query_string:${type}:suggestions_select_position`,
+      listIndex
+    );
+    this.reportUiCounter?.(
+      METRIC_TYPE.LOADED,
+      `query_string:${type}:suggestions_select_q_length`,
+      end - start
+    );
 
     this.onQueryStringChange(newQueryString);
 
@@ -460,6 +478,7 @@ export default class QueryStringInputUI extends Component<Props, State> {
     const newQuery = { query: '', language };
     this.onChange(newQuery);
     this.onSubmit(newQuery);
+    this.reportUiCounter?.(METRIC_TYPE.LOADED, `query_string:language:${language}`);
   };
 
   private onOutsideClick = () => {
@@ -482,11 +501,11 @@ export default class QueryStringInputUI extends Component<Props, State> {
     }
   };
 
-  private onClickSuggestion = (suggestion: QuerySuggestion) => {
+  private onClickSuggestion = (suggestion: QuerySuggestion, index: number) => {
     if (!this.inputRef) {
       return;
     }
-    this.selectSuggestion(suggestion);
+    this.selectSuggestion(suggestion, index);
     this.inputRef.focus();
   };
 
@@ -590,6 +609,7 @@ export default class QueryStringInputUI extends Component<Props, State> {
     if (this.props.onChangeQueryInputFocus) {
       this.props.onChangeQueryInputFocus(true);
     }
+
     requestAnimationFrame(() => {
       this.handleAutoHeight();
     });
