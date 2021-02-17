@@ -57,7 +57,7 @@ export function ServiceOverview({
   return (
     <AnnotationsContextProvider>
       <ChartPointerEventContextProvider>
-        <SearchBar prepend={transactionTypeLabel} />
+        <SearchBar prepend={transactionTypeLabel} showCorrelations />
         <EuiPage>
           <EuiFlexGroup direction="column" gutterSize="s">
             <EuiFlexItem>

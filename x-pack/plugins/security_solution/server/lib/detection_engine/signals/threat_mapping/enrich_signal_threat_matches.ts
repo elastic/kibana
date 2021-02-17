@@ -16,7 +16,6 @@ import type {
 } from './types';
 import { extractNamedQueries } from './utils';
 
-const DEFAULT_INDICATOR_PATH = 'threat.indicator';
 const getSignalId = (signal: SignalSourceHit): string => signal._id;
 
 export const groupAndMergeSignalMatches = (signalHits: SignalSourceHit[]): SignalSourceHit[] => {
@@ -43,11 +42,11 @@ export const groupAndMergeSignalMatches = (signalHits: SignalSourceHit[]): Signa
 export const buildMatchedIndicator = ({
   queries,
   threats,
-  indicatorPath = DEFAULT_INDICATOR_PATH,
+  indicatorPath,
 }: {
   queries: ThreatMatchNamedQuery[];
   threats: ThreatListItem[];
-  indicatorPath?: string;
+  indicatorPath: string;
 }): ThreatIndicator[] =>
   queries.map((query) => {
     const matchedThreat = threats.find((threat) => threat._id === query.id);
@@ -67,7 +66,8 @@ export const buildMatchedIndicator = ({
 
 export const enrichSignalThreatMatches = async (
   signals: SignalSearchResponse,
-  getMatchedThreats: GetMatchedThreats
+  getMatchedThreats: GetMatchedThreats,
+  indicatorPath: string
 ): Promise<SignalSearchResponse> => {
   const signalHits = signals.hits.hits;
   if (signalHits.length === 0) {
@@ -79,7 +79,11 @@ export const enrichSignalThreatMatches = async (
   const matchedThreatIds = [...new Set(signalMatches.flat().map(({ id }) => id))];
   const matchedThreats = await getMatchedThreats(matchedThreatIds);
   const matchedIndicators = signalMatches.map((queries) =>
-    buildMatchedIndicator({ queries, threats: matchedThreats })
+    buildMatchedIndicator({
+      indicatorPath,
+      queries,
+      threats: matchedThreats,
+    })
   );
 
   const enrichedSignals: SignalSourceHit[] = uniqueHits.map((signalHit, i) => {
