@@ -34,8 +34,67 @@ Object {
     },
     Object {
       "arguments": Object {
-        "visConfig": Array [
-          "{\\"perPage\\":20,\\"percentageCol\\":\\"Count\\",\\"showMetricsAtAllLevels\\":true,\\"showPartialRows\\":true,\\"showTotal\\":true,\\"showToolbar\\":false,\\"totalFunc\\":\\"sum\\",\\"dimensions\\":{\\"metrics\\":[{\\"accessor\\":1,\\"format\\":{\\"id\\":\\"number\\"},\\"params\\":{},\\"label\\":\\"Count\\",\\"aggType\\":\\"count\\"}],\\"buckets\\":[{\\"accessor\\":0,\\"format\\":{\\"id\\":\\"date\\",\\"params\\":{\\"pattern\\":\\"YYYY-MM-DD HH:mm\\"}},\\"params\\":{},\\"label\\":\\"order_date per 3 hours\\",\\"aggType\\":\\"date_histogram\\"}]}}",
+        "buckets": Array [
+          Object {
+            "chain": Array [
+              Object {
+                "arguments": Object {
+                  "accessor": Array [
+                    0,
+                  ],
+                  "format": Array [
+                    "date",
+                  ],
+                  "formatParams": Array [
+                    "{\\"pattern\\":\\"YYYY-MM-DD HH:mm\\"}",
+                  ],
+                },
+                "function": "visdimension",
+                "type": "function",
+              },
+            ],
+            "type": "expression",
+          },
+        ],
+        "metrics": Array [
+          Object {
+            "chain": Array [
+              Object {
+                "arguments": Object {
+                  "accessor": Array [
+                    1,
+                  ],
+                  "format": Array [
+                    "number",
+                  ],
+                },
+                "function": "visdimension",
+                "type": "function",
+              },
+            ],
+            "type": "expression",
+          },
+        ],
+        "perPage": Array [
+          20,
+        ],
+        "percentageCol": Array [
+          "Count",
+        ],
+        "showMetricsAtAllLevels": Array [
+          true,
+        ],
+        "showPartialRows": Array [
+          true,
+        ],
+        "showToolbar": Array [
+          false,
+        ],
+        "showTotal": Array [
+          true,
+        ],
+        "totalFunc": Array [
+          "sum",
         ],
       },
       "function": "kibana_table",
@@ -77,8 +136,49 @@ Object {
     },
     Object {
       "arguments": Object {
-        "visConfig": Array [
-          "{\\"showLabel\\":false,\\"dimensions\\":{\\"metrics\\":[{\\"accessor\\":1,\\"format\\":{\\"id\\":\\"number\\"},\\"params\\":{},\\"label\\":\\"Count\\",\\"aggType\\":\\"count\\"}],\\"buckets\\":[{\\"accessor\\":0,\\"format\\":{\\"id\\":\\"date\\",\\"params\\":{\\"pattern\\":\\"YYYY-MM-DD HH:mm\\"}},\\"params\\":{},\\"label\\":\\"order_date per 3 hours\\",\\"aggType\\":\\"date_histogram\\"}]}}",
+        "buckets": Array [
+          Object {
+            "chain": Array [
+              Object {
+                "arguments": Object {
+                  "accessor": Array [
+                    0,
+                  ],
+                  "format": Array [
+                    "date",
+                  ],
+                  "formatParams": Array [
+                    "{\\"pattern\\":\\"YYYY-MM-DD HH:mm\\"}",
+                  ],
+                },
+                "function": "visdimension",
+                "type": "function",
+              },
+            ],
+            "type": "expression",
+          },
+        ],
+        "metrics": Array [
+          Object {
+            "chain": Array [
+              Object {
+                "arguments": Object {
+                  "accessor": Array [
+                    1,
+                  ],
+                  "format": Array [
+                    "number",
+                  ],
+                },
+                "function": "visdimension",
+                "type": "function",
+              },
+            ],
+            "type": "expression",
+          },
+        ],
+        "showLabel": Array [
+          false,
         ],
       },
       "function": "kibana_table",
