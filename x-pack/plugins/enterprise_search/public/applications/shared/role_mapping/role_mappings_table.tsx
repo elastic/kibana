@@ -6,7 +6,6 @@
  */
 
 import React, { Fragment, useState } from 'react';
-import { Link } from 'react-router-dom';
 
 import {
   EuiFieldSearch,
@@ -24,8 +23,9 @@ import {
 } from '@elastic/eui';
 
 import { ASRoleMapping } from '../../app_search/types';
-import { RoleRules } from '../../shared/types';
 import { WSRoleMapping } from '../../workplace_search/types';
+import { EuiLinkTo } from '../react_router_helpers';
+import { RoleRules } from '../types';
 
 import { ANY_AUTH_PROVIDER, ANY_AUTH_PROVIDER_LABEL } from './constants';
 
@@ -136,7 +136,7 @@ export const RoleMappingsTable: React.FC<IRoleMappingsTableProps> = ({
                     </EuiTableRowCell>
                   )}
                   <EuiTableRowCell>
-                    {id && <Link to={getRoleMappingPath(id)}>Manage</Link>}
+                    {id && <EuiLinkTo to={getRoleMappingPath(id)}>Manage</EuiLinkTo>}
                     {toolTip && <EuiIconTip position="left" content={toolTip.content} />}
                   </EuiTableRowCell>
                 </EuiTableRow>

@@ -7,18 +7,14 @@
 
 import React from 'react';
 
-import { Link } from 'react-router-dom';
-
-import { EuiButton } from '@elastic/eui';
+import { EuiButtonTo } from '../react_router_helpers';
 
 interface IAddRoleMappingButtonProps {
   path: string;
 }
 
 export const AddRoleMappingButton: React.FC<IAddRoleMappingButtonProps> = ({ path }) => (
-  <Link to={path}>
-    <EuiButton fill color="secondary" onClick={() => null}>
-      Add mapping
-    </EuiButton>
-  </Link>
+  <EuiButtonTo to={path} fill color="secondary">
+    Add mapping
+  </EuiButtonTo>
 );
