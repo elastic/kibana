@@ -224,7 +224,8 @@ describe('PATCH cases', () => {
             "syncAlerts": true,
           },
           "status": "in-progress",
-          "subCases": [],
+          "subCaseIds": Array [],
+          "subCases": undefined,
           "tags": Array [
             "defacement",
           ],

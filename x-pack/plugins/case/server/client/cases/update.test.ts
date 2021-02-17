@@ -71,7 +71,8 @@ describe('update', () => {
               "syncAlerts": true,
             },
             "status": "closed",
-            "subCases": [],
+            "subCaseIds": Array [],
+            "subCases": undefined,
             "tags": Array [
               "defacement",
             ],
@@ -166,6 +167,7 @@ describe('update', () => {
               "syncAlerts": true,
             },
             "status": "open",
+            "subCaseIds": Array [],
             "subCases": undefined,
             "tags": Array [
               "defacement",

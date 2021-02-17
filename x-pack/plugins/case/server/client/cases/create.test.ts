@@ -241,7 +241,8 @@ describe('create', () => {
             "syncAlerts": true,
           },
           "status": "open",
-          "subCases": [],
+          "subCaseIds": Array [],
+          "subCases": undefined,
           "tags": Array [
             "defacement",
           ],
