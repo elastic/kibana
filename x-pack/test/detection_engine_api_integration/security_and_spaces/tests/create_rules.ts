@@ -31,8 +31,6 @@ import {
   getRuleForSignalTesting,
   getRuleForSignalTestingWithTimestampOverride,
 } from '../../utils';
-import { ROLES } from '../../../../plugins/security_solution/common/test';
-import { createUserAndRole, deleteUserAndRole } from '../roles_users_utils';
 import { RuleStatusResponse } from '../../../../plugins/security_solution/server/lib/detection_engine/rules/types';
 
 // eslint-disable-next-line import/no-default-export
