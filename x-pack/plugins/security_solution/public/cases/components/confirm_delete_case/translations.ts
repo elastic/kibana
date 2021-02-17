@@ -15,7 +15,7 @@ export const DELETE_TITLE = (caseTitle: string) =>
   });
 
 export const DELETE_THIS_CASE = (caseTitle: string) =>
-  i18n.translate('xpack.securitySolution.case.confirmDeleteCase.deleteTitle', {
+  i18n.translate('xpack.securitySolution.case.confirmDeleteCase.deleteThisCase', {
     defaultMessage: 'Delete this case',
   });
 

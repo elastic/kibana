@@ -12,23 +12,12 @@ import { TestProviders } from '../../../common/mock';
 import { useKibana } from '../../../common/lib/kibana';
 import { AlertCommentEvent } from './user_action_alert_comment_event';
 import { CommentType } from '../../../../../case/common/api';
-import { RuleEcs } from '../../../../common/ecs/rule';
 
 const props = {
   alertId: 'alert-id-1',
-  alert: {
-    _id: 'alert-id-1',
-    _index: 'alert-index-1',
-    '@timestamp': '2021-01-07T13:58:31.487Z',
-    signal: {
-      rule: ({
-        id: ['rule-id-1'],
-        name: ['Awesome rule'],
-        from: ['2021-01-07T13:58:31.487Z'],
-        to: ['2021-01-07T14:58:31.487Z'],
-      } as unknown) as RuleEcs,
-    },
-  },
+  ruleId: 'rule-id-1',
+  ruleName: 'Awesome rule',
+  alertsCount: 1,
   commentType: CommentType.alert,
 };
 
@@ -69,13 +58,13 @@ describe('UserActionAvatar ', () => {
       wrapper.find(`[data-test-subj="alert-rule-link-alert-id-1"]`).first().exists()
     ).toBeFalsy();
 
-    expect(wrapper.text()).toBe('added an alert');
+    expect(wrapper.text()).toBe('added an alert from ');
   });
 
   it('does NOT render the link when the rule is undefined', async () => {
     const alert = {
-      _id: 'alert-id-1',
-      _index: 'alert-index-1',
+      alertId: 'alert-id-1',
+      commentType: CommentType.alert,
     };
 
     const wrapper = mount(
@@ -89,7 +78,7 @@ describe('UserActionAvatar ', () => {
       wrapper.find(`[data-test-subj="alert-rule-link-alert-id-1"]`).first().exists()
     ).toBeFalsy();
 
-    expect(wrapper.text()).toBe('added an alert');
+    expect(wrapper.text()).toBe('added an alert from ');
   });
 
   it('navigate to app on link click', async () => {

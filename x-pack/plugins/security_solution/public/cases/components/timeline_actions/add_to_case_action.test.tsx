@@ -167,6 +167,10 @@ describe('AddToCaseAction', () => {
     expect(postComment.mock.calls[0][0].data).toEqual({
       alertId: 'test-id',
       index: 'test-index',
+      rule: {
+        id: null,
+        name: null,
+      },
       type: 'alert',
     });
   });
@@ -200,6 +204,10 @@ describe('AddToCaseAction', () => {
     expect(postComment.mock.calls[0][0].data).toEqual({
       alertId: 'test-id',
       index: 'test-index',
+      rule: {
+        id: null,
+        name: null,
+      },
       type: 'alert',
     });
   });

@@ -268,7 +268,11 @@ export const useGetCaseUserActions = (
               ? uniqBy('actionBy.username', response).map((cau) => cau.actionBy)
               : [];
 
-            const caseUserActions = !isEmpty(response) ? response.slice(1) : [];
+            const caseUserActions = !isEmpty(response)
+              ? thisSubCaseId
+                ? response
+                : response.slice(1)
+              : [];
             setCaseUserActionsState({
               caseUserActions,
               ...getPushedInfo(caseUserActions, caseConnectorId),
