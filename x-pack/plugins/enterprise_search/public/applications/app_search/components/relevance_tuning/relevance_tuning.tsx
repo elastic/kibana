@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+
 import {
   EuiPageHeader,
   EuiPageHeaderSection,
@@ -14,8 +15,8 @@ import {
   EuiPageContent,
 } from '@elastic/eui';
 
-import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
 import { FlashMessages } from '../../../shared/flash_messages';
+import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
 
 import { RELEVANCE_TUNING_TITLE } from './constants';
 

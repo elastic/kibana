@@ -40,14 +40,10 @@ export function SavedObjectSaveModalDashboard(props: SaveModalDashboardProps) {
   const initialCopyOnSave = !Boolean(documentId);
 
   const { capabilities } = pluginServices.getHooks();
-  const {
-    canAccessDashboards,
-    canCreateNewDashboards,
-    canEditDashboards,
-  } = capabilities.useService();
+  const { canAccessDashboards, canCreateNewDashboards } = capabilities.useService();
 
-  const disableDashboardOptions =
-    !canAccessDashboards() || (!canCreateNewDashboards && !canEditDashboards);
+  // Disable the dashboard options if the user can't access dashboards or if they're read-only
+  const disableDashboardOptions = !canAccessDashboards() || !canCreateNewDashboards();
 
   const [dashboardOption, setDashboardOption] = useState<'new' | 'existing' | null>(
     documentId || disableDashboardOptions ? null : 'existing'

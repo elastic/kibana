@@ -48005,6 +48005,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "getBazelRepositoryCacheFolder", function() { return _get_cache_folders__WEBPACK_IMPORTED_MODULE_0__["getBazelRepositoryCacheFolder"]; });
 
 /* harmony import */ var _install_tools__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(373);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "isBazelBinAvailable", function() { return _install_tools__WEBPACK_IMPORTED_MODULE_1__["isBazelBinAvailable"]; });
+
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "installBazelTools", function() { return _install_tools__WEBPACK_IMPORTED_MODULE_1__["installBazelTools"]; });
 
 /* harmony import */ var _run__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(374);
@@ -48064,6 +48066,7 @@ async function getBazelRepositoryCacheFolder() {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "isBazelBinAvailable", function() { return isBazelBinAvailable; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "installBazelTools", function() { return installBazelTools; });
 /* harmony import */ var dedent__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(2);
 /* harmony import */ var dedent__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(dedent__WEBPACK_IMPORTED_MODULE_0__);
@@ -48147,13 +48150,13 @@ async function installBazelTools(repoRootPath) {
   const bazeliskVersion = await readBazelToolsVersionFile(repoRootPath, '.bazeliskversion');
   const bazelVersion = await readBazelToolsVersionFile(repoRootPath, '.bazelversion'); // Check what globals are installed
 
-  _log__WEBPACK_IMPORTED_MODULE_4__["log"].debug(`[bazel_tools] verify if bazelisk is installed`); // Test if bazelisk is already installed in the correct version
+  _log__WEBPACK_IMPORTED_MODULE_4__["log"].debug(`[bazel_tools] verify if bazelisk is installed`); // Check if we need to remove bazelisk from yarn
+
+  await tryRemoveBazeliskFromYarnGlobal(); // Test if bazelisk is already installed in the correct version
 
   const isBazeliskPkgInstalled = await isBazeliskInstalled(bazeliskVersion); // Test if bazel bin is available
 
-  const isBazelBinAlreadyAvailable = await isBazelBinAvailable(); // Check if we need to remove bazelisk from yarn
-
-  await tryRemoveBazeliskFromYarnGlobal(); // Install bazelisk if not installed
+  const isBazelBinAlreadyAvailable = await isBazelBinAvailable(); // Install bazelisk if not installed
 
   if (!isBazeliskPkgInstalled || !isBazelBinAlreadyAvailable) {
     _log__WEBPACK_IMPORTED_MODULE_4__["log"].info(`[bazel_tools] installing Bazel tools`);
@@ -54434,8 +54437,10 @@ const CleanCommand = {
     } // Runs Bazel soft clean
 
 
-    await Object(_utils_bazel__WEBPACK_IMPORTED_MODULE_4__["runBazel"])(['clean']);
-    _utils_log__WEBPACK_IMPORTED_MODULE_6__["log"].success('Soft cleaned bazel');
+    if (await Object(_utils_bazel__WEBPACK_IMPORTED_MODULE_4__["isBazelBinAvailable"])()) {
+      await Object(_utils_bazel__WEBPACK_IMPORTED_MODULE_4__["runBazel"])(['clean']);
+      _utils_log__WEBPACK_IMPORTED_MODULE_6__["log"].success('Soft cleaned bazel');
+    }
 
     if (toDelete.length === 0) {
       _utils_log__WEBPACK_IMPORTED_MODULE_6__["log"].success('Nothing to delete');
@@ -59124,16 +59129,19 @@ const ResetCommand = {
           pattern: extraPatterns
         });
       }
-    } // Runs Bazel hard clean
+    } // Runs Bazel hard clean and deletes Bazel Cache Folders
 
 
-    await Object(_utils_bazel__WEBPACK_IMPORTED_MODULE_4__["runBazel"])(['clean', '--expunge']);
-    _utils_log__WEBPACK_IMPORTED_MODULE_6__["log"].success('Hard cleaned bazel'); // Deletes Bazel Cache Folders
+    if (await Object(_utils_bazel__WEBPACK_IMPORTED_MODULE_4__["isBazelBinAvailable"])()) {
+      // Hard cleaning bazel
+      await Object(_utils_bazel__WEBPACK_IMPORTED_MODULE_4__["runBazel"])(['clean', '--expunge']);
+      _utils_log__WEBPACK_IMPORTED_MODULE_6__["log"].success('Hard cleaned bazel'); // Deletes Bazel Cache Folders
 
-    await del__WEBPACK_IMPORTED_MODULE_1___default()([await Object(_utils_bazel__WEBPACK_IMPORTED_MODULE_4__["getBazelDiskCacheFolder"])(), await Object(_utils_bazel__WEBPACK_IMPORTED_MODULE_4__["getBazelRepositoryCacheFolder"])()], {
-      force: true
-    });
-    _utils_log__WEBPACK_IMPORTED_MODULE_6__["log"].success('Removed disk caches');
+      await del__WEBPACK_IMPORTED_MODULE_1___default()([await Object(_utils_bazel__WEBPACK_IMPORTED_MODULE_4__["getBazelDiskCacheFolder"])(), await Object(_utils_bazel__WEBPACK_IMPORTED_MODULE_4__["getBazelRepositoryCacheFolder"])()], {
+        force: true
+      });
+      _utils_log__WEBPACK_IMPORTED_MODULE_6__["log"].success('Removed disk caches');
+    }
 
     if (toDelete.length === 0) {
       return;

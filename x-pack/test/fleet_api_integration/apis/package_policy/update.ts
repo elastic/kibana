@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
 
@@ -21,6 +21,7 @@ export default function (providerContext: FtrProviderContext) {
   describe('Package Policy - update', async function () {
     skipIfNoDockerRegistry(providerContext);
     let agentPolicyId: string;
+    let managedAgentPolicyId: string;
     let packagePolicyId: string;
     let packagePolicyId2: string;
 
@@ -35,7 +36,29 @@ export default function (providerContext: FtrProviderContext) {
           name: 'Test policy',
           namespace: 'default',
         });
+
       agentPolicyId = agentPolicyResponse.item.id;
+
+      const { body: managedAgentPolicyResponse } = await supertest
+        .post(`/api/fleet/agent_policies`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({
+          name: 'Test managed policy',
+          namespace: 'default',
+          is_managed: true,
+        });
+
+      // if one already exists, re-use that
+      const managedExists = managedAgentPolicyResponse.statusCode === 409;
+      if (managedExists) {
+        const errorRegex = /^agent policy \'(?<id>[\w,\-]+)\' already exists/i;
+        const result = errorRegex.exec(managedAgentPolicyResponse.message);
+        if (result?.groups?.id) {
+          managedAgentPolicyId = result.groups.id;
+        }
+      } else {
+        managedAgentPolicyId = managedAgentPolicyResponse.item.id;
+      }
 
       const { body: packagePolicyResponse } = await supertest
         .post(`/api/fleet/package_policies`)
@@ -81,6 +104,29 @@ export default function (providerContext: FtrProviderContext) {
         .post(`/api/fleet/agent_policies/delete`)
         .set('kbn-xsrf', 'xxxx')
         .send({ agentPolicyId });
+    });
+
+    it('should fail on managed agent policies', async function () {
+      const { body } = await supertest
+        .put(`/api/fleet/package_policies/${packagePolicyId}`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({
+          name: 'filetest-1',
+          description: '',
+          namespace: 'updated_namespace',
+          policy_id: managedAgentPolicyId,
+          enabled: true,
+          output_id: '',
+          inputs: [],
+          package: {
+            name: 'filetest',
+            title: 'For File Tests',
+            version: '0.1.0',
+          },
+        })
+        .expect(400);
+
+      expect(body.message).to.contain('Cannot update integrations of managed policy');
     });
 
     it('should work with valid values', async function () {

@@ -153,10 +153,17 @@ describe('alert actions', () => {
             },
             deletedEventIds: [],
             description: 'This is a sample rule description',
+            eqlOptions: {
+              eventCategoryField: 'event.category',
+              query: '',
+              size: 100,
+              tiebreakerField: 'event.sequence',
+              timestampField: '@timestamp',
+            },
             eventIdToNoteIds: {},
             eventType: 'all',
             excludedRowRendererIds: [],
-            expandedEvent: {},
+            expandedDetail: {},
             filters: [
               {
                 $state: {

@@ -19,12 +19,11 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import { EuiButtonEmptyTo } from '../../../../shared/react_router_helpers';
 import { Loading } from '../../../../shared/loading';
-import { SourceIcon } from '../../../components/shared/source_icon';
+import { EuiButtonEmptyTo } from '../../../../shared/react_router_helpers';
 import { LicenseCallout } from '../../../components/shared/license_callout';
+import { SourceIcon } from '../../../components/shared/source_icon';
 import { ViewContentHeader } from '../../../components/shared/view_content_header';
-
 import {
   CONFIGURE_BUTTON,
   CONNECTORS_HEADER_TITLE,
@@ -36,9 +35,7 @@ import {
 } from '../../../constants';
 import { getSourcesPath } from '../../../routes';
 import { SourceDataItem } from '../../../types';
-
 import { staticSourceData } from '../../content_sources/source_data';
-
 import { SettingsLogic } from '../settings_logic';
 
 export const Connectors: React.FC = () => {

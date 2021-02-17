@@ -177,10 +177,8 @@ Read more at https://github.com/elastic/kibana/blob/master/src/plugins/kibana_re
         hasMoreBeforeStart={hasMoreBefore}
         hasMoreAfterEnd={hasMoreAfter}
         isStreaming={false}
-        lastLoadedTime={null}
         jumpToTarget={noop}
         reportVisibleInterval={handlePagination}
-        loadNewerItems={noop}
         reloadItems={fetchEntries}
         highlightedItem={highlight ?? null}
         currentHighlightKey={null}
