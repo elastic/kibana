@@ -25,7 +25,7 @@ const securityDeepLinks: SecurityDeepLinks = {
         path: '/rules',
       },
     ],
-    // TODO: In ticket, but can't find
+    // The tabs in the detections subPlugin are not their own route as they are in other subplugins. If they were, add metadata here to enable search.
     // premium: [
     //   {
     //     id: 'siemDetectionRuleAnomalies',
@@ -135,6 +135,15 @@ const securityDeepLinks: SecurityDeepLinks = {
   },
   case: {
     base: [],
+    premium: [
+      {
+        id: 'configure',
+        title: i18n.translate('xpack.securitySolution.search.cases.configure', {
+          defaultMessage: 'Configure Cases',
+        }),
+        path: '/configure',
+      },
+    ],
   },
   administration: {
     base: [
@@ -149,15 +158,42 @@ const securityDeepLinks: SecurityDeepLinks = {
   },
 };
 
-// TODO: Find more approriate keywords to use for these
 const subpluginKeywords: { [key in SecuritySubPluginNames]: string[] } = {
-  detections: ['detections'],
-  hosts: ['hosts'],
-  network: ['network'],
-  timelines: ['timeline'],
-  overview: ['overview'],
-  case: ['case'],
-  administration: ['administration'],
+  detections: [
+    i18n.translate('xpack.securitySolution.search.detections', {
+      defaultMessage: 'Detections',
+    }),
+  ],
+  hosts: [
+    i18n.translate('xpack.securitySolution.search.hosts', {
+      defaultMessage: 'Hosts',
+    }),
+  ],
+  network: [
+    i18n.translate('xpack.securitySolution.search.network', {
+      defaultMessage: 'Network',
+    }),
+  ],
+  timelines: [
+    i18n.translate('xpack.securitySolution.search.timelines', {
+      defaultMessage: 'Timelines',
+    }),
+  ],
+  overview: [
+    i18n.translate('xpack.securitySolution.search.overview', {
+      defaultMessage: 'Overview',
+    }),
+  ],
+  case: [
+    i18n.translate('xpack.securitySolution.search.cases', {
+      defaultMessage: 'Cases',
+    }),
+  ],
+  administration: [
+    i18n.translate('xpack.securitySolution.search.administration', {
+      defaultMessage: 'Endpoint Administration',
+    }),
+  ],
 };
 
 /**

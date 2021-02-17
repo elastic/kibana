@@ -14,20 +14,6 @@ export const caseSavedObjectType: SavedObjectsType = {
   name: CASE_SAVED_OBJECT,
   hidden: false,
   namespaceType: 'single',
-  management: {
-    icon: 'logoSecurity',
-    defaultSearchField: 'description',
-    importableAndExportable: true,
-    getTitle(obj) {
-      return obj.attributes.description;
-    },
-    getInAppUrl(obj) {
-      return {
-        path: `/app/security/cases/${encodeURIComponent(obj.id)}`,
-        uiCapabilitiesPath: 'siem.show',
-      };
-    },
-  },
   mappings: {
     properties: {
       closed_at: {
@@ -124,12 +110,7 @@ export const caseSavedObjectType: SavedObjectsType = {
         },
       },
       title: {
-        type: 'text',
-        fields: {
-          keyword: {
-            type: 'keyword',
-          },
-        },
+        type: 'keyword',
       },
       status: {
         type: 'keyword',
