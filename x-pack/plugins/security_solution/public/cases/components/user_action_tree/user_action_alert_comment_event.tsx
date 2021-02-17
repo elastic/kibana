@@ -41,10 +41,10 @@ const AlertCommentEventComponent: React.FC<Props> = ({
     (ev: { preventDefault: () => void }) => {
       ev.preventDefault();
       navigateToApp(`${APP_ID}:${SecurityPageName.detections}`, {
-        path: getRuleDetailsUrl(ruleId ?? '', urlSearch),
+        path: getRuleDetailsUrl(ruleId ?? ''),
       });
     },
-    [ruleId, navigateToApp, urlSearch]
+    [ruleId, navigateToApp]
   );
 
   return commentType !== CommentType.generatedAlert ? (

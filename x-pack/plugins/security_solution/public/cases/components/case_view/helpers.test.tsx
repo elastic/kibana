@@ -8,7 +8,7 @@
 import { AssociationType, CommentType } from '../../../../../case/common/api';
 import { Comment } from '../../containers/types';
 
-import { getAlertIdsFromComments, buildAlertsQuery } from './helpers';
+import { getManualAlertIdsWithNoRuleId, buildAlertsQuery } from './helpers';
 
 const comments: Comment[] = [
   {
@@ -19,12 +19,12 @@ const comments: Comment[] = [
     id: 'comment-id',
     createdAt: '2020-02-19T23:06:33.798Z',
     createdBy: { username: 'elastic' },
+    rule: {
+      id: null,
+      name: null,
+    },
     pushedAt: null,
     pushedBy: null,
-    rule: {
-      id: 'rule-id-1',
-      name: 'rule-name-1',
-    },
     updatedAt: null,
     updatedBy: null,
     version: 'WzQ3LDFc',
@@ -51,8 +51,8 @@ const comments: Comment[] = [
 
 describe('Case view helpers', () => {
   describe('getAlertIdsFromComments', () => {
-    it('it returns the rules ids from the comments', () => {
-      expect(getAlertIdsFromComments(comments)).toEqual(['alert-id-1', 'alert-id-2']);
+    it('it returns the alert id from the comments where rule is not defined', () => {
+      expect(getManualAlertIdsWithNoRuleId(comments)).toEqual(['alert-id-1']);
     });
   });
 
