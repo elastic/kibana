@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { addSystemApiHeader } from 'ui/system_api';
+
 export class SettingsChecker {
   constructor($http) {
     this.$http = $http;
@@ -43,7 +45,9 @@ export class SettingsChecker {
 
   async executeCheck() {
     try {
-      const { data } = await this.$http.get(this.getApi());
+      const { data } = await this.$http.get(this.getApi(), {
+        headers: addSystemApiHeader({}),
+      });
       const { found, reason } = data;
 
       return { found, reason };

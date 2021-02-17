@@ -7,6 +7,7 @@
 import { uiModules } from 'ui/modules';
 import { ajaxErrorHandlersProvider } from 'plugins/monitoring/lib/ajax_error_handler';
 import { timefilter } from 'ui/timefilter';
+import { addSystemApiHeader } from 'ui/system_api';
 import { STANDALONE_CLUSTER_CLUSTER_UUID } from '../../common/constants';
 
 function formatClusters(clusters) {
@@ -32,13 +33,18 @@ uiModule.service('monitoringClusters', ($injector) => {
     }
 
     const $http = $injector.get('$http');
-    return $http.post(url, {
-      ccs,
-      timeRange: {
-        min: min.toISOString(),
-        max: max.toISOString()
-      }
-    })
+    return $http
+      .post(
+        url,
+        {
+          ccs,
+          timeRange: {
+            min: min.toISOString(),
+            max: max.toISOString(),
+          },
+        },
+        { headers: addSystemApiHeader({}) }
+      )
       .then(response => response.data)
       .then(data => {
         if (clusterUuid) {
