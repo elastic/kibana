@@ -8,7 +8,7 @@ The following alerts APIs are available:
 
 * <<alerts-api-update, Update alert API>> to update the attributes for existing alerts
 
-* <<alerts-api-get, Get object API>> to retrieve a single {kib} alert by ID
+* <<alerts-api-get, Get object API>> to retrieve a single alert by ID
 
 * <<alerts-api-delete, Delete alert API>> to permanently remove an alert
 
