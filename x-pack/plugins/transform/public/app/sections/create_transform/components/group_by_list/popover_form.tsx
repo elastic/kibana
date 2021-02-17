@@ -17,12 +17,15 @@ import {
   EuiFieldText,
   EuiForm,
   EuiFormRow,
+  EuiLink,
   EuiSelect,
   EuiSpacer,
 } from '@elastic/eui';
 
 import { AggName } from '../../../../../../common/types/aggregations';
 import { dictionaryToArray } from '../../../../../../common/types/common';
+
+import { useDocumentationLinks } from '../../../../hooks/use_documentation_links';
 
 import {
   dateHistogramIntervalFormatRegex,
@@ -96,6 +99,8 @@ interface Props {
 }
 
 export const PopoverForm: React.FC<Props> = ({ defaultData, otherAggNames, onChange, options }) => {
+  const { esAggsCompositeMissingBucket } = useDocumentationLinks();
+
   const isUnsupportedAgg = !isPivotGroupByConfigWithUiSupport(defaultData);
 
   const [agg, setAgg] = useState(defaultData.agg);
@@ -258,15 +263,38 @@ export const PopoverForm: React.FC<Props> = ({ defaultData, otherAggNames, onCha
           </>
         </EuiFormRow>
       )}
-      <EuiSpacer size="m" />
-      <EuiCheckbox
-        id={missingBucketSwitchId}
-        label={i18n.translate('xpack.transform.groupby.popoverForm.missingBucketCheckboxLabel', {
-          defaultMessage: 'Missing bucket',
-        })}
-        checked={missingBucket}
-        onChange={() => setMissingBucket(!missingBucket)}
-      />
+      {!isUnsupportedAgg && (
+        <EuiFormRow
+          helpText={
+            <>
+              {i18n.translate('xpack.transform.groupBy.popoverForm.missingBucketCheckboxHelpText', {
+                defaultMessage: 'Select to include documents without a value.',
+              })}
+              <br />
+              <EuiLink href={esAggsCompositeMissingBucket} target="_blank">
+                {i18n.translate(
+                  'xpack.transform.stepDetailsForm.missingBucketCheckboxHelpTextLink',
+                  {
+                    defaultMessage: `Learn more`,
+                  }
+                )}
+              </EuiLink>
+            </>
+          }
+        >
+          <EuiCheckbox
+            id={missingBucketSwitchId}
+            label={i18n.translate(
+              'xpack.transform.groupby.popoverForm.missingBucketCheckboxLabel',
+              {
+                defaultMessage: 'Include missing buckets',
+              }
+            )}
+            checked={missingBucket}
+            onChange={() => setMissingBucket(!missingBucket)}
+          />
+        </EuiFormRow>
+      )}
       {isUnsupportedAgg && (
         <>
           <EuiSpacer size="m" />
