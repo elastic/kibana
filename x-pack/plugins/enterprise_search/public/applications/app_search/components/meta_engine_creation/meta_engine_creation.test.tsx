@@ -37,6 +37,11 @@ describe('MetaEngineCreation', () => {
     expect(wrapper.find('[data-test-subj="MetaEngineCreation"]')).toHaveLength(1);
   });
 
+  it('calls fetchIndexedEngineNames on first render', () => {
+    const wrapper = shallow(<MetaEngineCreation />);
+    throw Error('TODO');
+  });
+
   describe('MetaEngineCreationNameInput', () => {
     it('uses rawName as its value', () => {
       setMockValues({

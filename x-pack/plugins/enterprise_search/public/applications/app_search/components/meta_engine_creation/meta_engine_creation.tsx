@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 
 import { useActions, useValues } from 'kea';
 
@@ -42,8 +42,12 @@ import {
 import { MetaEngineCreationLogic } from './meta_engine_creation_logic';
 
 export const MetaEngineCreation: React.FC = () => {
-  const { setRawName } = useActions(MetaEngineCreationLogic);
+  const { fetchIndexedEngineNames, setRawName } = useActions(MetaEngineCreationLogic);
   const { rawName, name } = useValues(MetaEngineCreationLogic);
+
+  useEffect(() => {
+    fetchIndexedEngineNames();
+  }, []);
 
   return (
     <div data-test-subj="MetaEngineCreation">
