@@ -13,6 +13,11 @@ RUN apt-get update && \
       libxtst6 ca-certificates fonts-liberation libappindicator1 libnss3 lsb-release xdg-utils wget openjdk-8-jre && \
     rm -rf /var/lib/apt/lists/*
 
+RUN curl https://download.docker.com/linux/static/stable/x86_64/docker-20.10.3.tgz -o docker-20.10.3.tgz \
+  && tar xzf docker-20.10.3.tgz \
+  && cp docker/* /usr/bin/ \
+  && rm -rf docker && rm docker-20.10.3.tgz
+
 RUN curl -sSL https://dl.google.com/linux/linux_signing_key.pub | apt-key add - \
   && sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list' \
   && apt-get update \
