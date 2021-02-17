@@ -15,7 +15,7 @@ The most common problems encountered by customers can be addressed by tweaking t
 
 For details on the settings that can influence the performance and throughput of Task Manager, see <<task-manager-settings-kb, Task Manager Settings>>.
 
-For details on diagnosing issues using the Task Manager Health endpoint, see <<task-manager-health-endpoint, Task Manager Health Monitoring>>.
+For details on diagnosing issues using the Task Manager Health endpoint, see <<task-manager-health-monitoring>>.
 
 ==============================================
 
@@ -49,4 +49,4 @@ As each and every Alert or Action is backed by a task, it is possible under cert
 For details on diagnosing the underlying causes of such delays, please see <<task-manager-health-tasks-run-late>>.
 Keep in mind that in order to diagnose issues specific to Alerting, a subset of tasks is of interest, which is those whose `type` begins with `alerting:`. For example, task whose type is `alerting:.index-threshold`, which denotes the tasks backing the <<alert-type-index-threshold, Index Threshold Stack Alert>>.
 
-For broader details on diagnosing task execution using the Task Manager Health endpoint, see <<task-manager-health-endpoint, Task Manager Health Monitoring>>.
+For broader details on diagnosing task execution using the Task Manager Health endpoint, see <<task-manager-health-monitoring>>.

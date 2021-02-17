@@ -33,7 +33,7 @@ Task Manager runs background tasks by polling for work on an interval.  You can 
 [[task-manager-health-settings]]
 ==== Task Manager Health settings 
 
-Settings that configure the <<task-manager-health-endpoint, Task Manager Health Monitoring>> endpoint.
+Settings that configure the <<task-manager-health-monitoring>> endpoint.
 
 [cols="2*<"]
 |===
