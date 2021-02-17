@@ -128,5 +128,4 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
   'securitySolution:rulesTableRefresh': { type: 'text' },
   'apm:enableSignificantTerms': { type: 'boolean' },
   'apm:enableServiceOverview': { type: 'boolean' },
-  'apm:enableCorrelations': { type: 'boolean' },
 };
