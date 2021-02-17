@@ -32,6 +32,7 @@ import { EndpointDocGenerator } from '../../../../../common/endpoint/generate_da
 import { isFailedResourceState, isLoadedResourceState } from '../state';
 import { forceHTMLElementOffsetWidth } from './components/effected_policy_select/test_utils';
 import { resolvePathVariables } from '../service/utils';
+import { toUpdateTrustedApp } from '../../../../../common/endpoint/service/trusted_apps/to_update_trusted_app';
 
 jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
   htmlIdGenerator: () => () => 'mockId',
@@ -512,37 +513,20 @@ describe('When on the Trusted Apps Page', () => {
     });
 
     describe('and when the form data is valid', () => {
-      const fillInCreateForm = async ({
-        getByTestId,
-      }: ReturnType<AppContextTestRender['render']>) => {
-        await reactTestingLibrary.act(async () => {
-          const stateUpdated = waitForAction('trustedAppCreationDialogFormStateUpdated');
-          fireEvent.change(getByTestId('addTrustedAppFlyout-createForm-nameTextField'), {
-            target: { value: 'trusted app A' },
-          });
-          await stateUpdated;
-        });
-        await reactTestingLibrary.act(async () => {
-          const stateUpdated = waitForAction('trustedAppCreationDialogFormStateUpdated');
-          fireEvent.change(
-            getByTestId('addTrustedAppFlyout-createForm-conditionsBuilder-group1-entry0-value'),
-            { target: { value: 'SOME$HASH#HERE' } }
-          );
-          await stateUpdated;
-        });
-        await reactTestingLibrary.act(async () => {
-          const stateUpdated = waitForAction('trustedAppCreationDialogFormStateUpdated');
-          fireEvent.change(getByTestId('addTrustedAppFlyout-createForm-descriptionField'), {
-            target: { value: 'let this be' },
-          });
-          await stateUpdated;
+      const fillInCreateForm = async () => {
+        mockedContext.store.dispatch({
+          type: 'trustedAppCreationDialogFormStateUpdated',
+          payload: {
+            isValid: true,
+            entry: toUpdateTrustedApp<TrustedApp>(getFakeTrustedApp()),
+          },
         });
       };
 
       it('should enable the Flyout Add button', async () => {
         const renderResult = await renderAndClickAddButton();
 
-        await fillInCreateForm(renderResult);
+        await fillInCreateForm();
 
         const flyoutAddButton = renderResult.getByTestId(
           'addTrustedAppFlyout-createButton'
@@ -573,7 +557,7 @@ describe('When on the Trusted Apps Page', () => {
           );
 
           renderResult = await renderAndClickAddButton();
-          await fillInCreateForm(renderResult);
+          await fillInCreateForm();
           const userClickedSaveActionWatcher = waitForAction('trustedAppCreationDialogConfirmed');
           reactTestingLibrary.act(() => {
             fireEvent.click(renderResult.getByTestId('addTrustedAppFlyout-createButton'), {
@@ -642,7 +626,7 @@ describe('When on the Trusted Apps Page', () => {
 
           it('should show success toast notification', async () => {
             expect(coreStart.notifications.toasts.addSuccess.mock.calls[0][0]).toEqual(
-              '"trusted app A" has been added to the Trusted Applications list.'
+              '"one app" has been added to the Trusted Applications list.'
             );
           });
 
