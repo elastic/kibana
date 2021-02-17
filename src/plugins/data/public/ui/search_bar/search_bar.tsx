@@ -70,6 +70,9 @@ export interface SearchBarOwnProps {
   indicateNoData?: boolean;
   // Track UI Metrics
   trackUiMetric?: (metricType: UiCounterMetricType, eventName: string | string[]) => void;
+
+  nonKqlMode?: 'lucene' | 'text';
+  nonKqlModeHelpText?: string;
 }
 
 export type SearchBarProps = SearchBarOwnProps & SearchBarInjectedDeps;
@@ -399,6 +402,8 @@ class SearchBarUI extends Component<SearchBarProps, State> {
           }
           dataTestSubj={this.props.dataTestSubj}
           indicateNoData={this.props.indicateNoData}
+          nonKqlMode={this.props.nonKqlMode}
+          nonKqlModeHelpText={this.props.nonKqlModeHelpText}
         />
       );
     }

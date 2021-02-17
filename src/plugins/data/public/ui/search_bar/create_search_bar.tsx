@@ -189,6 +189,8 @@ export function createSearchBar({ core, storage, data, trackUiMetric }: Stateful
           onSavedQueryUpdated={defaultOnSavedQueryUpdated(props, setSavedQuery)}
           onSaved={defaultOnSavedQueryUpdated(props, setSavedQuery)}
           trackUiMetric={trackUiMetric}
+          nonKqlMode={props.nonKqlMode}
+          nonKqlModeHelpText={props.nonKqlModeHelpText}
           {...overrideDefaultBehaviors(props)}
         />
       </KibanaContextProvider>

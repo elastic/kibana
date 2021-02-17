@@ -56,6 +56,8 @@ export interface QueryStringInputProps {
   className?: string;
   isInvalid?: boolean;
   iconType?: string;
+  nonKqlMode?: 'lucene' | 'text';
+  nonKqlModeHelpText?: string;
 }
 
 interface Props extends QueryStringInputProps {
@@ -702,6 +704,8 @@ export default class QueryStringInputUI extends Component<Props, State> {
             language={this.props.query.language}
             anchorPosition={this.props.languageSwitcherPopoverAnchorPosition}
             onSelectLanguage={this.onSelectLanguage}
+            nonKqlMode={this.props.nonKqlMode}
+            nonKqlModeHelpText={this.props.nonKqlModeHelpText}
           />
         )}
       </div>
