@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { shallow } from 'enzyme';
+import { shallow, ShallowWrapper } from 'enzyme';
 
 import { AttributeSelector } from './attribute_selector';
 
@@ -28,18 +28,18 @@ const baseProps = {
 describe('<AttributeSelector />', () => {
   it('renders', () => {
     const wrapper = shallow(<AttributeSelector {...baseProps} />);
-    expect(wrapper.find('[data-test-subj="attributeSelector"]')).toExist();
+    expect(wrapper.find('[data-test-subj="attributeSelector"]')).toBeDefined();
   });
 
   describe('Auth Providers', () => {
-    const findAuthProvidersSelect = (wrapper) =>
+    const findAuthProvidersSelect = (wrapper: ShallowWrapper) =>
       wrapper.find('[data-test-subj="authProviderSelect"]');
 
     it('will not render if "availableAuthProviders" prop has not been provided', () => {
       const wrapper = shallow(
         <AttributeSelector {...baseProps} availableAuthProviders={undefined} />
       );
-      expect(wrapper.find('[data-test-subj="authProviderSelect"]')).not.toExist();
+      expect(wrapper.find('[data-test-subj="authProviderSelect"]')).toBeUndefined();
     });
 
     it('renders a list of auth providers from the "availableAuthProviders" prop including an "Any" option', () => {
@@ -47,7 +47,7 @@ describe('<AttributeSelector />', () => {
         <AttributeSelector {...baseProps} availableAuthProviders={['ees_saml', 'kbn_saml']} />
       );
 
-      const select = findAuthProvidersSelect(wrapper);
+      const select = findAuthProvidersSelect(wrapper) as any;
       expect(select.props().options).toEqual([
         {
           label: expect.any(String),
@@ -72,7 +72,7 @@ describe('<AttributeSelector />', () => {
         />
       );
 
-      const select = findAuthProvidersSelect(wrapper);
+      const select = findAuthProvidersSelect(wrapper) as any;
       expect(select.props().selectedOptions).toEqual([{ label: 'kbn_saml', value: 'kbn_saml' }]);
     });
 
