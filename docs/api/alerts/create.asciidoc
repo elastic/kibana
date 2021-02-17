@@ -33,7 +33,7 @@ Create {kib} alerts.
   (Required, string) The condition for throttling the notification: `onActionGroupChange`, `onActiveAlert`, or `onThrottleInterval`.
 
 `enabled`::
-  (Optional, boolean) Indicate if you want the alert to start executing on an interval basis after it has been created.
+  (Optional, boolean) Indicates if you want to run the alert on an interval basis after it is created.
 
 `consumer`::
   (Required, string) A name of the application which owns the alert.
