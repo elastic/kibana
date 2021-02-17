@@ -28,6 +28,7 @@ export interface ProcessHashData {
 
 export interface ProcessParentData {
   name?: string[];
+  pid?: number[];
 }
 
 export interface Thread {

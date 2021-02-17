@@ -59,7 +59,7 @@
  */
 
 import { setWith } from '@elastic/safer-lodash-set';
-import { uniqueId, keyBy, pick, difference, omit, isFunction, isEqual } from 'lodash';
+import { uniqueId, keyBy, pick, difference, omit, isFunction, isEqual, uniqWith } from 'lodash';
 import { map, switchMap, tap } from 'rxjs/operators';
 import { defer, from } from 'rxjs';
 import { isObject } from 'rxjs/internal-compatibility';
@@ -297,6 +297,9 @@ export class SearchSource {
       switchMap(() => {
         const searchRequest = this.flatten();
         this.history = [searchRequest];
+        if (searchRequest.index) {
+          options.indexPattern = searchRequest.index;
+        }
 
         return getConfig(UI_SETTINGS.COURIER_BATCH_SEARCHES)
           ? from(this.legacyFetch(searchRequest, options))
@@ -545,6 +548,37 @@ export class SearchSource {
       }));
   }
 
+  private getFieldFromDocValueFieldsOrIndexPattern(
+    docvaluesIndex: Record<string, object>,
+    fld: SearchFieldValue,
+    index?: IndexPattern
+  ) {
+    if (typeof fld === 'string') {
+      return fld;
+    }
+    const fieldName = this.getFieldName(fld);
+    const field = {
+      ...docvaluesIndex[fieldName],
+      ...fld,
+    };
+    if (!index) {
+      return field;
+    }
+    const { fields } = index;
+    const dateFields = fields.getByType('date');
+    const dateField = dateFields.find((indexPatternField) => indexPatternField.name === fieldName);
+    if (!dateField) {
+      return field;
+    }
+    const { esTypes } = dateField;
+    if (esTypes?.includes('date_nanos')) {
+      field.format = 'strict_date_optional_time_nanos';
+    } else if (esTypes?.includes('date')) {
+      field.format = 'strict_date_optional_time';
+    }
+    return field;
+  }
+
   private flatten() {
     const { getConfig } = this.dependencies;
     const searchRequest = this.mergeProps();
@@ -654,22 +688,25 @@ export class SearchSource {
         // if items that are in the docvalueFields are provided, we should
         // inject the format from the computed fields if one isn't given
         const docvaluesIndex = keyBy(filteredDocvalueFields, 'field');
-        body.fields = this.getFieldsWithoutSourceFilters(index, body.fields).map(
-          (fld: SearchFieldValue) => {
-            const fieldName = this.getFieldName(fld);
-            if (Object.keys(docvaluesIndex).includes(fieldName)) {
-              // either provide the field object from computed docvalues,
-              // or merge the user-provided field with the one in docvalues
-              return typeof fld === 'string'
-                ? docvaluesIndex[fld]
-                : {
-                    ...docvaluesIndex[fieldName],
-                    ...fld,
-                  };
-            }
-            return fld;
+        const bodyFields = this.getFieldsWithoutSourceFilters(index, body.fields);
+        body.fields = uniqWith(
+          bodyFields.concat(filteredDocvalueFields),
+          (fld1: SearchFieldValue, fld2: SearchFieldValue) => {
+            const field1Name = this.getFieldName(fld1);
+            const field2Name = this.getFieldName(fld2);
+            return field1Name === field2Name;
           }
-        );
+        ).map((fld: SearchFieldValue) => {
+          const fieldName = this.getFieldName(fld);
+          if (Object.keys(docvaluesIndex).includes(fieldName)) {
+            // either provide the field object from computed docvalues,
+            // or merge the user-provided field with the one in docvalues
+            return typeof fld === 'string'
+              ? docvaluesIndex[fld]
+              : this.getFieldFromDocValueFieldsOrIndexPattern(docvaluesIndex, fld, index);
+          }
+          return fld;
+        });
       }
     } else {
       body.fields = filteredDocvalueFields;

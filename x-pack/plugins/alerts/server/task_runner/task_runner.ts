@@ -160,6 +160,7 @@ export class TaskRunner<
     tags: string[] | undefined,
     spaceId: string,
     apiKey: RawAlert['apiKey'],
+    kibanaBaseUrl: string | undefined,
     actions: Alert<Params>['actions'],
     alertParams: Params
   ) {
@@ -180,6 +181,7 @@ export class TaskRunner<
       actions,
       spaceId,
       alertType: this.alertType,
+      kibanaBaseUrl,
       eventLogger: this.context.eventLogger,
       request: this.getFakeKibanaRequest(spaceId, apiKey),
       alertParams,
@@ -388,6 +390,7 @@ export class TaskRunner<
       alert.tags,
       spaceId,
       apiKey,
+      this.context.kibanaBaseUrl,
       alert.actions,
       alert.params
     );

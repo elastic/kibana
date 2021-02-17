@@ -28,6 +28,8 @@ import { ReAuthenticate } from './re_authenticate';
 import { SaveConfig } from './save_config';
 import { SaveCustom } from './save_custom';
 
+import './add_source.scss';
+
 export const AddSource: React.FC<AddSourceProps> = (props) => {
   const {
     initializeAddSource,

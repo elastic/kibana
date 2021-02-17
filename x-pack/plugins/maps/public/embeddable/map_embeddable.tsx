@@ -29,6 +29,7 @@ import {
 } from '../../../../../src/plugins/data/public';
 import {
   replaceLayerList,
+  setMapSettings,
   setQuery,
   setRefreshConfig,
   disableScrollZoom,
@@ -79,6 +80,14 @@ import {
 } from './types';
 export { MapEmbeddableInput, MapEmbeddableOutput };
 
+function getIsRestore(searchSessionId?: string) {
+  if (!searchSessionId) {
+    return false;
+  }
+  const searchSessionOptions = getSearchService().session.getSearchOptions(searchSessionId);
+  return searchSessionOptions ? searchSessionOptions.isRestore : false;
+}
+
 export class MapEmbeddable
   extends Embeddable<MapEmbeddableInput, MapEmbeddableOutput>
   implements ReferenceOrValueEmbeddable<MapByValueInput, MapByReferenceInput> {
@@ -87,6 +96,7 @@ export class MapEmbeddable
   private _savedMap: SavedMap;
   private _renderTooltipContent?: RenderToolTipContent;
   private _subscription: Subscription;
+  private _prevIsRestore: boolean = false;
   private _prevTimeRange?: TimeRange;
   private _prevQuery?: Query;
   private _prevRefreshConfig?: RefreshInterval;
@@ -228,6 +238,17 @@ export class MapEmbeddable
     if (this.input.syncColors !== this._prevSyncColors) {
       this._dispatchSetChartsPaletteServiceGetColor(this.input.syncColors);
     }
+
+    const isRestore = getIsRestore(this.input.searchSessionId);
+    if (isRestore !== this._prevIsRestore) {
+      this._prevIsRestore = isRestore;
+      this._savedMap.getStore().dispatch(
+        setMapSettings({
+          disableInteractive: isRestore,
+          hideToolbarOverlay: isRestore,
+        })
+      );
+    }
   }
 
   _dispatchSetQuery({ forceRefresh }: { forceRefresh: boolean }) {
@@ -245,11 +266,9 @@ export class MapEmbeddable
         timeFilters: this.input.timeRange,
         forceRefresh,
         searchSessionId: this.input.searchSessionId,
-        searchSessionMapBuffer:
-          this.input.searchSessionId &&
-          getSearchService().session.getSearchOptions(this.input.searchSessionId).isRestore
-            ? this.input.mapBuffer
-            : undefined,
+        searchSessionMapBuffer: getIsRestore(this.input.searchSessionId)
+          ? this.input.mapBuffer
+          : undefined,
       })
     );
   }

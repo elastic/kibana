@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ES_FIELD_TYPES, RuntimeField } from '../../../../../src/plugins/data/common';
+import { ES_FIELD_TYPES } from '../../../../../src/plugins/data/common';
 import {
   ML_JOB_AGGREGATION,
   KIBANA_AGGREGATION,
@@ -106,4 +106,18 @@ export interface AggCardinality {
 }
 
 export type RollupFields = Record<FieldId, [Record<'agg', ES_AGGREGATION>]>;
+
+// Replace this with import once #88995 is merged
+const RUNTIME_FIELD_TYPES = ['keyword', 'long', 'double', 'date', 'ip', 'boolean'] as const;
+type RuntimeType = typeof RUNTIME_FIELD_TYPES[number];
+
+export interface RuntimeField {
+  type: RuntimeType;
+  script?:
+    | string
+    | {
+        source: string;
+      };
+}
+
 export type RuntimeMappings = Record<string, RuntimeField>;
