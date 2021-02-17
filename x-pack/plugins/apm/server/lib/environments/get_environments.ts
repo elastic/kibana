@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { ESFilter } from '../../../../../typings/elasticsearch';
 import {
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
@@ -37,7 +36,7 @@ export async function getEnvironments({
   return withApmSpan(spanName, async () => {
     const { start, end, apmEventClient, config } = setup;
 
-    const filter: ESFilter[] = [...rangeQuery(start, end)];
+    const filter = rangeQuery(start, end);
 
     if (serviceName) {
       filter.push({

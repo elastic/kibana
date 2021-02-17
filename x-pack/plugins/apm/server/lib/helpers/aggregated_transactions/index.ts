@@ -35,7 +35,7 @@ export async function getHasAggregatedTransactions({
           bool: {
             filter: [
               { exists: { field: TRANSACTION_DURATION_HISTOGRAM } },
-              ...(start && end ? [...rangeQuery(start, end)] : []),
+              ...(start && end ? rangeQuery(start, end) : []),
             ],
           },
         },

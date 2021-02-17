@@ -17,7 +17,6 @@ import { getGcTimeChart } from './gc/get_gc_time_chart';
 
 export function getJavaMetricsCharts({
   environment,
-
   setup,
   serviceName,
   serviceNodeName,
