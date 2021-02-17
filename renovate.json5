@@ -13,6 +13,8 @@
     'master',
     '7.x',
   ],
+  prConcurrentLimit: 0,
+  prHourlyLimit: 0,
   separateMajorMinor: false,
   masterIssue: true,
   rangeStrategy: 'bump',
