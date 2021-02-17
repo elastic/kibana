@@ -204,7 +204,7 @@ export function RootDragDropProvider({ children }: { children: React.ReactNode }
             </p>
             <p id={`lnsDragDrop-keyboardInstructionsWithReorder`}>
               {i18n.translate('xpack.lens.dragDrop.keyboardInstructionsReorder', {
-                defaultMessage: `Press space or enter to dragging. When dragging, use the up/down arrow keys to reorder items in the group and left/right arrow keys to choose drop targets outside of the group. Press space or enter again to finish.`,
+                defaultMessage: `Press space or enter to start dragging. When dragging, use the up/down arrow keys to reorder items in the group and left/right arrow keys to choose drop targets outside of the group. Press space or enter again to finish.`,
               })}
             </p>
             <p id={`lnsDragDrop-keyboardInstructions`}>
