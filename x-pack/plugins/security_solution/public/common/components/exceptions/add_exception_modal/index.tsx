@@ -140,7 +140,7 @@ export const AddExceptionModal = memo(function AddExceptionModal({
 
   const alert = useMemo(() => {
     if (isLoadingAlertData === false && ecsData != null) {
-      const { _id, _index, _source } = alertData?.hits.hits[0] || {};
+      const { _id, _index, _source } = alertData?.hits.hits[0] ?? {};
       return { _id: _id || ecsData._id, _index, ..._source };
     }
   }, [alertData?.hits.hits, isLoadingAlertData, ecsData]);

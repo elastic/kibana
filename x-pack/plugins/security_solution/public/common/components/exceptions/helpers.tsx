@@ -387,7 +387,6 @@ export const getProcessCodeSignature = (
 ): Array<{ subjectName: string; trusted: string }> => {
   const { process } = alertData;
   const codeSignature = process && process.Ext && process.Ext.code_signature;
-
   return getCodeSignatureValue(codeSignature);
 };
 
@@ -400,25 +399,20 @@ export const getCodeSignatureValue = (
 ): Array<{ subjectName: string; trusted: string }> => {
   if (Array.isArray(codeSignature) && codeSignature.length > 0) {
     return codeSignature.map((signature) => {
-      const subjectName = signature.subject_name ?? '';
-      const trusted = signature.trusted ?? '';
-
       return {
-        subjectName: Array.isArray(subjectName) ? subjectName[0] : subjectName,
-        trusted: Array.isArray(trusted) ? trusted[0] : trusted,
+        subjectName: signature.subject_name ?? '',
+        trusted: signature.trusted ?? '',
       };
     });
   } else {
     const signature: FlattenType<CodeSignature> | undefined = !Array.isArray(codeSignature)
       ? codeSignature
       : undefined;
-    const subjectName = signature?.subject_name ?? '';
-    const trusted = signature?.trusted ?? '';
 
     return [
       {
-        subjectName: Array.isArray(subjectName) ? subjectName[0] : subjectName,
-        trusted: Array.isArray(trusted) ? trusted[0] : trusted,
+        subjectName: signature?.subject_name ?? '',
+        trusted: signature?.trusted ?? '',
       },
     ];
   }
