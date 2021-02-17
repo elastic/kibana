@@ -89,4 +89,5 @@ export type MlAnomalyDetectionAlertParams = {
   };
   severity: number;
   resultType: AnomalyResultType;
+  includeInterim: boolean;
 } & AlertTypeParams;

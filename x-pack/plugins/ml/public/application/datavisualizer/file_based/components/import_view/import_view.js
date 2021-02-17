@@ -582,6 +582,7 @@ export class ImportView extends Component {
                     <EuiSpacer size="l" />
 
                     <ResultsLinks
+                      fieldStats={this.props.results?.field_stats}
                       index={index}
                       indexPatternId={indexPatternId}
                       timeFieldName={timeFieldName}

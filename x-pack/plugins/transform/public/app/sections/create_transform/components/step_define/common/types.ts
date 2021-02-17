@@ -9,7 +9,11 @@ import { KBN_FIELD_TYPES } from '../../../../../../../../../../src/plugins/data/
 
 import { EsFieldName } from '../../../../../../../common/types/fields';
 
-import { PivotAggsConfigDict, PivotGroupByConfigDict } from '../../../../../common';
+import {
+  PivotAggsConfigDict,
+  PivotGroupByConfigDict,
+  PivotGroupByConfigWithUiSupportDict,
+} from '../../../../../common';
 import { SavedSearchQuery } from '../../../../../hooks/use_search_items';
 
 import { QUERY_LANGUAGE } from './constants';
@@ -30,10 +34,24 @@ export interface Field {
   type: KBN_FIELD_TYPES;
 }
 
+// Replace this with import once #88995 is merged
+const RUNTIME_FIELD_TYPES = ['keyword', 'long', 'double', 'date', 'ip', 'boolean'] as const;
+type RuntimeType = typeof RUNTIME_FIELD_TYPES[number];
+
+export interface RuntimeField {
+  type: RuntimeType;
+  script:
+    | string
+    | {
+        source: string;
+      };
+}
+
+export type RuntimeMappings = Record<string, RuntimeField>;
 export interface StepDefineExposedState {
   transformFunction: TransformFunction;
   aggList: PivotAggsConfigDict;
-  groupByList: PivotGroupByConfigDict;
+  groupByList: PivotGroupByConfigDict | PivotGroupByConfigWithUiSupportDict;
   latestConfig: LatestFunctionConfigUI;
   isAdvancedPivotEditorEnabled: boolean;
   isAdvancedSourceEditorEnabled: boolean;
@@ -47,6 +65,9 @@ export interface StepDefineExposedState {
    * Undefined when the form is incomplete or invalid
    */
   previewRequest: { latest: LatestFunctionConfig } | { pivot: PivotConfigDefinition } | undefined;
+  runtimeMappings?: RuntimeMappings;
+  runtimeMappingsUpdated: boolean;
+  isRuntimeMappingsEditorEnabled: boolean;
 }
 
 export function isPivotPartialRequest(arg: any): arg is { pivot: PivotConfigDefinition } {

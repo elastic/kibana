@@ -2677,9 +2677,16 @@
         "inputFields": null,
         "interfaces": null,
         "enumValues": [
+          { "name": "alerts", "description": "", "isDeprecated": false, "deprecationReason": null },
           { "name": "auditd", "description": "", "isDeprecated": false, "deprecationReason": null },
           {
             "name": "auditd_file",
+            "description": "",
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "library",
             "description": "",
             "isDeprecated": false,
             "deprecationReason": null
@@ -2691,6 +2698,12 @@
             "deprecationReason": null
           },
           { "name": "plain", "description": "", "isDeprecated": false, "deprecationReason": null },
+          {
+            "name": "registry",
+            "description": "",
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
           {
             "name": "suricata",
             "description": "",
