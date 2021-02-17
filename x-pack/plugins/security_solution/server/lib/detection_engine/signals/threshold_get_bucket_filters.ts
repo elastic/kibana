@@ -11,6 +11,7 @@ import { isEmpty } from 'lodash';
 import { Filter } from 'src/plugins/data/common';
 import { ESFilter } from '../../../../../../typings/elasticsearch';
 
+import { RulesSchema } from '../../../../common/detection_engine/schemas/response/rules_schema';
 import { TimestampOverrideOrUndefined } from '../../../../common/detection_engine/schemas/common/schemas';
 import {
   AlertInstanceContext,
@@ -67,12 +68,25 @@ export const getThresholdBucketFilters = async ({
       }
 
       const terms = bucketByFields.map((field) => {
-        const result = hit._source.signal?.threshold_result?.terms?.filter((resultField) => {
+        let signalTerms = hit._source.signal?.threshold_result?.terms;
+
+        // Handle pre-7.12 signals
+        if (signalTerms == null) {
+          signalTerms = [
+            {
+              field: (((hit._source.rule as RulesSchema).threshold as unknown) as { field: string })
+                .field,
+              value: ((hit._source.signal?.threshold_result as unknown) as { value: string }).value,
+            },
+          ];
+        } else if (isEmpty(signalTerms)) {
+          signalTerms = [];
+        }
+
+        const result = signalTerms.filter((resultField) => {
           return resultField.field === field;
         });
-        if (result == null) {
-          throw new Error('bad things happened');
-        }
+
         return {
           field,
           value: result[0].value,
