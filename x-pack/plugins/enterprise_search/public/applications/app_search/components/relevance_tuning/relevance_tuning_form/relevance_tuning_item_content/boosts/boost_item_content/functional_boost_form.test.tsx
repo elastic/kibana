@@ -7,17 +7,62 @@
 
 import React from 'react';
 
-import { shallow } from 'enzyme';
+import { shallow, ShallowWrapper } from 'enzyme';
+
+import { EuiSelect } from '@elastic/eui';
+
+import { setMockActions } from '../../../../../../../__mocks__/kea.mock';
+
+import { Boost, BoostOperation, BoostType, FunctionalBoostFunction } from '../../../../types';
 
 import { FunctionalBoostForm } from './functional_boost_form';
 
 describe('FunctionalBoostForm', () => {
+  const boost: Boost = {
+    factor: 2,
+    type: 'functional' as BoostType,
+    function: 'logarithmic' as FunctionalBoostFunction,
+    operation: 'multiply' as BoostOperation,
+  };
+
+  const actions = {
+    updateBoostSelectOption: jest.fn(),
+  };
+
   beforeEach(() => {
     jest.clearAllMocks();
+    setMockActions(actions);
   });
 
-  it('renders', () => {
-    const wrapper = shallow(<FunctionalBoostForm />);
-    expect(wrapper.isEmptyRender()).toBe(false);
+  const functionSelect = (wrapper: ShallowWrapper) => wrapper.find(EuiSelect).at(0);
+  const operationSelect = (wrapper: ShallowWrapper) => wrapper.find(EuiSelect).at(1);
+
+  it('renders select boxes with values from the provided boost selected', () => {
+    const wrapper = shallow(<FunctionalBoostForm boost={boost} index={3} name="foo" />);
+    expect(functionSelect(wrapper).prop('value')).toEqual('logarithmic');
+    expect(operationSelect(wrapper).prop('value')).toEqual('multiply');
+  });
+
+  it('will update state when a user makes a selection', () => {
+    const wrapper = shallow(<FunctionalBoostForm boost={boost} index={3} name="foo" />);
+
+    functionSelect(wrapper).simulate('change', {
+      target: {
+        value: 'exponential',
+      },
+    });
+    expect(actions.updateBoostSelectOption).toHaveBeenCalledWith(
+      'foo',
+      3,
+      'function',
+      'exponential'
+    );
+
+    operationSelect(wrapper).simulate('change', {
+      target: {
+        value: 'add',
+      },
+    });
+    expect(actions.updateBoostSelectOption).toHaveBeenCalledWith('foo', 3, 'operation', 'add');
   });
 });
