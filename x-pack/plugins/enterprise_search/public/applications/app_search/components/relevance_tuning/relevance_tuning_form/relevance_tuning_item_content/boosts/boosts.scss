@@ -1,18 +1,18 @@
 .boosts {
-  .boosts__select {
+  &__select {
     min-width: $euiSizeXXL * 4;
   }
 
-  .boosts__itemContent {
+  &__itemContent {
     width: 100%;
   }
 
-  .boosts__item {
+  &__item {
     margin-top: $euiSize;
-  }
 
-  .boosts__item + .boosts__item {
-    margin-top: $euiSizeS;
+    & + & {
+      margin-top: $euiSizeS;
+    }
   }
 }
 
