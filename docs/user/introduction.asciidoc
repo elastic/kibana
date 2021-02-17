@@ -284,7 +284,7 @@ users’ behavior. For more information, see <<xpack-security-audit-logging,{kib
 [[kibana-navigation-search]]
 === Quickly find apps and objects
 
-Using the Search field in the global header, you can
+Using the search field in the global header, you can
 search for applications and objects, such as
 dashboards and visualizations. Search suggestions include deep links into applications,
 allowing you to directly navigate to the views you need most.
