@@ -685,9 +685,9 @@ export class SearchSource {
         // if items that are in the docvalueFields are provided, we should
         // inject the format from the computed fields if one isn't given
         const docvaluesIndex = keyBy(filteredDocvalueFields, 'field');
-        body.fields = this.getFieldsWithoutSourceFilters(index, body.fields);
+        const bodyFields = this.getFieldsWithoutSourceFilters(index, body.fields);
         body.fields = uniqWith(
-          body.fields.concat(filteredDocvalueFields),
+          bodyFields.concat(filteredDocvalueFields),
           (fld1: SearchFieldValue, fld2: SearchFieldValue) => {
             const field1Name = this.getFieldName(fld1);
             const field2Name = this.getFieldName(fld2);
