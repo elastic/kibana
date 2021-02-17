@@ -304,6 +304,7 @@ export const serviceErrorGroupsRoute = createRoute({
         transactionType,
       },
     } = context.params;
+
     return getServiceErrorGroups({
       serviceName,
       setup,
