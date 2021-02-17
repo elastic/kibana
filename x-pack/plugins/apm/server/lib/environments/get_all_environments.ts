@@ -15,6 +15,10 @@ import { ENVIRONMENT_NOT_DEFINED } from '../../../common/environment_filter_valu
 import { getProcessorEventForAggregatedTransactions } from '../helpers/aggregated_transactions';
 import { withApmSpan } from '../../utils/with_apm_span';
 
+/**
+ * This is used for getting *all* environments, and does not filter by range.
+ * It's used in places where we get the list of all possible environments.
+ */
 export async function getAllEnvironments({
   serviceName,
   setup,
