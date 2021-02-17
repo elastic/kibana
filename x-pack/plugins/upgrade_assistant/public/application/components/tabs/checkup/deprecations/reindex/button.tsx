@@ -179,7 +179,6 @@ export class ReindexButton extends React.Component<ReindexButtonProps, ReindexBu
 
         {flyoutVisible && (
           <ReindexFlyout
-            http={this.props.http}
             reindexBlocker={reindexBlocker}
             docLinks={docLinks}
             indexName={indexName}

@@ -26,8 +26,7 @@ exports[`WarningsFlyoutStep renders 1`] = `
     <WarningCheckbox
       checkedIds={
         Object {
-          "reindexWarning-2": false,
-          "reindexWarning-3": false,
+          "reindexWarning-0": false,
         }
       }
       description={
@@ -58,32 +57,7 @@ exports[`WarningsFlyoutStep renders 1`] = `
         />
       }
       onChange={[Function]}
-      warning={3}
-    />
-    <WarningCheckbox
-      checkedIds={
-        Object {
-          "reindexWarning-2": false,
-          "reindexWarning-3": false,
-        }
-      }
-      description={
-        <FormattedMessage
-          defaultMessage="Starting in version 7.0.0, APM data will be represented in the Elastic Common Schema. Historical APM data will not visible until it's reindexed."
-          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.apmReindexWarningDetail"
-          values={Object {}}
-        />
-      }
-      documentationUrl="https://www.elastic.co/guide/en/observability/master/whats-new.html"
-      label={
-        <FormattedMessage
-          defaultMessage="This index will be converted to ECS format"
-          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.apmReindexWarningTitle"
-          values={Object {}}
-        />
-      }
-      onChange={[Function]}
-      warning={2}
+      warning={0}
     />
   </EuiFlyoutBody>
   <EuiFlyoutFooter>

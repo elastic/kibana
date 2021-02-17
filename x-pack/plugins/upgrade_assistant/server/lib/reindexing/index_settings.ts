@@ -7,7 +7,6 @@
 
 import { flow, omit } from 'lodash';
 import { ReindexWarning } from '../../../common/types';
-import { isLegacyApmIndex } from '../apm';
 import { versionService } from '../version';
 import { FlatSettings, FlatSettingsWithTypeName } from './types';
 
@@ -76,23 +75,12 @@ export const generateNewIndexName = (indexName: string): string => {
  * Returns an array of warnings that should be displayed to user before reindexing begins.
  * @param flatSettings
  */
-export const getReindexWarnings = (
-  flatSettings: FlatSettingsWithTypeName,
-  apmIndexPatterns: string[] = []
-): ReindexWarning[] => {
-  const indexName = flatSettings.settings['index.provided_name'];
-  const typeName = Object.getOwnPropertyNames(flatSettings.mappings)[0];
-  const apmReindexWarning = isLegacyApmIndex(
-    indexName,
-    apmIndexPatterns,
-    flatSettings.mappings[typeName]
-  );
+export const getReindexWarnings = (flatSettings: FlatSettingsWithTypeName): ReindexWarning[] => {
   const typeNameWarning = usesCustomTypeName(flatSettings);
 
-  const warnings = [
-    [ReindexWarning.apmReindex, apmReindexWarning],
-    [ReindexWarning.customTypeName, typeNameWarning],
-  ] as Array<[ReindexWarning, boolean]>;
+  const warnings = [[ReindexWarning.customTypeName, typeNameWarning]] as Array<
+    [ReindexWarning, boolean]
+  >;
 
   return warnings.filter(([_, applies]) => applies).map(([warning, _]) => warning);
 };
