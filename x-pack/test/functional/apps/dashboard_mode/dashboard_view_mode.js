@@ -48,10 +48,10 @@ export default function ({ getService, getPageObjects }) {
 
       await PageObjects.common.navigateToApp('dashboard');
       await PageObjects.dashboard.clickNewDashboard();
+      await dashboardAddPanel.addSavedSearch(savedSearchName);
       await PageObjects.dashboard.addVisualizations(
         PageObjects.dashboard.getTestVisualizationNames()
       );
-      await dashboardAddPanel.addSavedSearch(savedSearchName);
       await PageObjects.dashboard.saveDashboard(dashboardName);
     });
 
@@ -188,6 +188,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('can paginate on a saved search', async () => {
+        await PageObjects.common.sleep(100000000);
         await PageObjects.dashboard.expectToolbarPaginationDisplayed({ displayed: true });
       });
 
