@@ -8,7 +8,7 @@
 import { isEmpty } from 'lodash/fp';
 import { HostLastFirstSeenRequestOptions } from './types';
 
-export const buildLastSeenHostQuery = ({
+export const buildFirstSeenHostQuery = ({
   hostName,
   defaultIndex,
   docValueFields,
@@ -27,7 +27,7 @@ export const buildLastSeenHostQuery = ({
       sort: [
         {
           '@timestamp': {
-            order: 'desc',
+            order: 'asc',
           },
         },
       ],

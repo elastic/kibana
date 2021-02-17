@@ -30,7 +30,7 @@ export const timelineEventsLastEventTime: SecuritySolutionTimelineFactory<Timeli
 
     return {
       ...response,
-      lastSeen: getOr(null, 'aggregations.last_seen_event.value_as_string', response.rawResponse),
+      lastSeen: getOr(null, 'hits.hits[0].fields.@timestamp[0]', response.rawResponse),
       inspect,
     };
   },

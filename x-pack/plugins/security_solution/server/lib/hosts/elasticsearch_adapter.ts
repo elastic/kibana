@@ -21,7 +21,7 @@ import { FrameworkAdapter, FrameworkRequest } from '../framework';
 import { TermAggregation } from '../types';
 import { buildHostOverviewQuery } from './query.detail_host.dsl';
 import { buildHostsQuery } from './query.hosts.dsl';
-import { buildLastFirstSeenHostQuery } from './query.last_first_seen_host.dsl';
+import { buildLastSeenHostQuery } from './query.last_first_seen_host.dsl';
 import {
   HostAggEsData,
   HostAggEsItem,
@@ -36,6 +36,7 @@ import {
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../common/constants';
 import { EndpointAppContext } from '../../endpoint/types';
 import { getHostData } from '../../endpoint/routes/metadata/handlers';
+import { buildFirstSeenHostQuery } from './query.first_seen_host.dsl';
 
 export class ElasticsearchHostsAdapter implements HostsAdapter {
   constructor(
@@ -142,13 +143,21 @@ export class ElasticsearchHostsAdapter implements HostsAdapter {
     request: FrameworkRequest,
     options: HostLastFirstSeenRequestOptions
   ): Promise<FirstLastSeenHost> {
-    const dsl = buildLastFirstSeenHostQuery(options);
-    const response = await this.framework.callWithRequest<HostAggEsData, TermAggregation>(
-      request,
-      'search',
-      dsl
-    );
-    const aggregations: HostAggEsItem = get('aggregations', response) || {};
+    const lastSeenDsl = buildLastSeenHostQuery(options);
+    const firstSeenDsl = buildFirstSeenHostQuery(options);
+    const [lastSeenResponse, firstSeenResponse] = await Promise.all([
+      this.framework.callWithRequest<HostAggEsData, TermAggregation>(
+        request,
+        'search',
+        lastSeenDsl
+      ),
+      this.framework.callWithRequest<HostAggEsData, TermAggregation>(
+        request,
+        'search',
+        firstSeenDsl
+      ),
+    ]);
+    const hits: HostAggEsItem = get('aggregations', response) || {};
     const inspect = {
       dsl: [inspectStringifyObject(dsl)],
       response: [inspectStringifyObject(response)],

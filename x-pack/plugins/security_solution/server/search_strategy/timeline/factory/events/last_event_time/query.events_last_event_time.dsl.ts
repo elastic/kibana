@@ -43,11 +43,17 @@ export const buildLastEventTimeQuery = ({
             track_total_hits: false,
             body: {
               ...(!isEmpty(docValueFields) ? { docvalue_fields: docValueFields } : {}),
-              aggregations: {
-                last_seen_event: { max: { field: '@timestamp' } },
-              },
               query: { bool: { should: getIpDetailsFilter(details.ip) } },
-              size: 0,
+              fields: ['@timestamp'],
+              size: 1,
+              sort: [
+                {
+                  '@timestamp': {
+                    order: 'desc',
+                  },
+                },
+              ],
+              _source: false,
             },
           };
         }
@@ -61,11 +67,17 @@ export const buildLastEventTimeQuery = ({
             track_total_hits: false,
             body: {
               ...(!isEmpty(docValueFields) ? { docvalue_fields: docValueFields } : {}),
-              aggregations: {
-                last_seen_event: { max: { field: '@timestamp' } },
-              },
               query: { bool: { filter: getHostDetailsFilter(details.hostName) } },
-              size: 0,
+              fields: ['@timestamp'],
+              size: 1,
+              sort: [
+                {
+                  '@timestamp': {
+                    order: 'desc',
+                  },
+                },
+              ],
+              _source: false,
             },
           };
         }
@@ -79,11 +91,17 @@ export const buildLastEventTimeQuery = ({
           track_total_hits: false,
           body: {
             ...(!isEmpty(docValueFields) ? { docvalue_fields: docValueFields } : {}),
-            aggregations: {
-              last_seen_event: { max: { field: '@timestamp' } },
-            },
             query: { match_all: {} },
-            size: 0,
+            fields: ['@timestamp'],
+            size: 1,
+            sort: [
+              {
+                '@timestamp': {
+                  order: 'desc',
+                },
+              },
+            ],
+            _source: false,
           },
         };
       default:
