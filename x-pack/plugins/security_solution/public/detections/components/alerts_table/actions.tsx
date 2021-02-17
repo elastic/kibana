@@ -276,7 +276,7 @@ export const buildEqlDataProviderOrFilter = (
         {
           and: [],
           id: `send-alert-to-timeline-action-default-draggable-event-details-value-formatted-field-value-${TimelineId.active}-alert-id-${signalGroupId}`,
-          name: signalGroupId,
+          name: ecs._id,
           enabled: true,
           excluded: false,
           kqlQuery: '',

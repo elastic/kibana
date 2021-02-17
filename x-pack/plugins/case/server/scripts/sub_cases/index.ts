@@ -16,8 +16,29 @@ import {
 import { CommentType } from '../../../common/api/cases/comment';
 import { CASES_URL } from '../../../common/constants';
 import { ActionResult, ActionTypeExecutorResult } from '../../../../actions/common';
+import { ContextTypeGeneratedAlertType } from '../../connectors';
+
+/**
+ * Separator field for the case connector alerts string parser.
+ */
+const separator = '__SEPARATOR__';
+
+interface AlertIDIndex {
+  _id: string;
+  _index: string;
+}
 
 main();
+
+/**
+ * Creates the format that the connector's parser is expecting, it should result in something like this:
+ * [{"_id":"1","_index":"index1"}__SEPARATOR__{"_id":"id2","_index":"index2"}__SEPARATOR__]
+ */
+function createAlertsString(alerts: AlertIDIndex[]) {
+  return `[${alerts.reduce((acc, alert) => {
+    return `${acc}${JSON.stringify(alert)}${separator}`;
+  }, '')}]`;
+}
 
 function createClient(argv: any): KbnClient {
   return new KbnClient({
@@ -105,6 +126,13 @@ async function handleGenGroupAlerts(argv: any) {
     }
 
     console.log('Case id: ', caseID);
+    const comment: ContextTypeGeneratedAlertType = {
+      type: CommentType.generatedAlert,
+      alerts: createAlertsString(
+        argv.ids.map((id: string) => ({ _id: id, _index: argv.signalsIndex }))
+      ),
+    };
+
     const executeResp = await client.request<
       ActionTypeExecutorResult<CollectionWithSubCaseResponse>
     >({
@@ -115,11 +143,7 @@ async function handleGenGroupAlerts(argv: any) {
           subAction: 'addComment',
           subActionParams: {
             caseId: caseID,
-            comment: {
-              type: CommentType.generatedAlert,
-              alerts: argv.ids.map((id: string) => ({ _id: id })),
-              index: argv.signalsIndex,
-            },
+            comment,
           },
         },
       },
@@ -149,7 +173,7 @@ async function main() {
       kibana: {
         alias: 'k',
         describe: 'kibana url',
-        default: 'http://XavierM:Ry4t9RHeCXEwPzj@localhost:5601',
+        default: 'http://elastic:changeme@localhost:5601',
         type: 'string',
       },
     })

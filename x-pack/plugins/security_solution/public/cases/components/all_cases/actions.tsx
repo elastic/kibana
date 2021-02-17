@@ -28,7 +28,6 @@ export const getActions = ({
   deleteCaseOnClick,
 }: GetActions): Array<DefaultItemIconButtonAction<Case>> => [
   {
-    available: (item) => !hasSubCases(item.subCases),
     description: i18n.DELETE_CASE,
     icon: 'trash',
     name: i18n.DELETE_CASE,
