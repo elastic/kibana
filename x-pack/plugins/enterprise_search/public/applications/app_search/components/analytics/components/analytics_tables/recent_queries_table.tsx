@@ -7,11 +7,12 @@
 
 import React from 'react';
 
+import { EuiBasicTable, EuiBasicTableColumn, EuiEmptyPrompt } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedDate, FormattedTime } from '@kbn/i18n/react';
-import { EuiBasicTable, EuiBasicTableColumn, EuiEmptyPrompt } from '@elastic/eui';
 
 import { RecentQuery } from '../../types';
+
 import {
   TERM_COLUMN_PROPS,
   TAGS_COLUMN,

@@ -10,7 +10,8 @@ import { LogicMounter, mockHttpValues, mockFlashMessageHelpers } from '../../../
 import { nextTick } from '@kbn/test/jest';
 
 import { LogRetentionOptions } from './types';
-import { LogRetentionLogic } from './log_retention_logic';
+
+import { LogRetentionLogic } from './';
 
 describe('LogRetentionLogic', () => {
   const { mount } = new LogicMounter(LogRetentionLogic);

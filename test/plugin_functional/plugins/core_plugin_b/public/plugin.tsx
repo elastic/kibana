@@ -16,7 +16,7 @@ declare global {
 }
 
 export interface CorePluginBDeps {
-  core_plugin_a: CorePluginAPluginSetup;
+  corePluginA: CorePluginAPluginSetup;
 }
 
 export class CorePluginBPlugin
@@ -37,12 +37,12 @@ export class CorePluginBPlugin
 
     return {
       sayHi() {
-        return `Plugin A said: ${deps.core_plugin_a.getGreeting()}`;
+        return `Plugin A said: ${deps.corePluginA.getGreeting()}`;
       },
     };
   }
 
-  public async start(core: CoreStart, deps: {}) {
+  public start(core: CoreStart, deps: {}) {
     return {
       sendSystemRequest: async (asSystemRequest: boolean) => {
         const response = await core.http.post<string>('/core_plugin_b/system_request', {

@@ -26,7 +26,7 @@ export function registerDocumentsRoutes({
       },
     },
     enterpriseSearchRequestHandler.createRequest({
-      path: `/as/engines/:engineName/documents/new`,
+      path: '/as/engines/:engineName/documents/new',
     })
   );
 }
@@ -46,7 +46,7 @@ export function registerDocumentRoutes({
       },
     },
     enterpriseSearchRequestHandler.createRequest({
-      path: `/as/engines/:engineName/documents/:documentId`,
+      path: '/as/engines/:engineName/documents/:documentId',
     })
   );
   router.delete(
@@ -60,7 +60,7 @@ export function registerDocumentRoutes({
       },
     },
     enterpriseSearchRequestHandler.createRequest({
-      path: `/as/engines/:engineName/documents/:documentId`,
+      path: '/as/engines/:engineName/documents/:documentId',
     })
   );
 }

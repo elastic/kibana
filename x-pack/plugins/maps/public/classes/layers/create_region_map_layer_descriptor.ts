@@ -22,8 +22,7 @@ import {
 } from '../../../common/constants';
 import { VectorStyle } from '../styles/vector/vector_style';
 import { EMSFileSource } from '../sources/ems_file_source';
-// @ts-ignore
-import { VectorLayer } from './vector_layer/vector_layer';
+import { VectorLayer } from './vector_layer';
 import { getDefaultDynamicProperties } from '../styles/vector/vector_style_defaults';
 import { NUMERICAL_COLOR_PALETTES } from '../styles/color_palettes';
 import { getJoinAggKey } from '../../../common/get_agg_key';

@@ -8,7 +8,7 @@
 
 import { getDefaultSort } from './get_default_sort';
 // @ts-ignore
-import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+import FixturesStubbedLogstashIndexPatternProvider from '../../../../__fixtures__/stubbed_logstash_index_pattern';
 import { IndexPattern } from '../../../../kibana_services';
 
 describe('getDefaultSort function', function () {

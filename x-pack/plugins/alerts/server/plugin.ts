@@ -153,7 +153,7 @@ export class AlertingPlugin {
   private alertTypeRegistry?: AlertTypeRegistry;
   private readonly taskRunnerFactory: TaskRunnerFactory;
   private licenseState: ILicenseState | null = null;
-  private isESOUsingEphemeralEncryptionKey?: boolean;
+  private isESOCanEncrypt?: boolean;
   private security?: SecurityPluginSetup;
   private readonly alertsClientFactory: AlertsClientFactory;
   private readonly telemetryLogger: Logger;
@@ -161,6 +161,7 @@ export class AlertingPlugin {
   private eventLogService?: IEventLogService;
   private eventLogger?: IEventLogger;
   private readonly kibanaIndexConfig: Observable<{ kibana: { index: string } }>;
+  private kibanaBaseUrl: string | undefined;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.create<AlertsConfig>().pipe(first()).toPromise();
@@ -176,6 +177,7 @@ export class AlertingPlugin {
     core: CoreSetup<AlertingPluginsStart, unknown>,
     plugins: AlertingPluginsSetup
   ): PluginSetupContract {
+    this.kibanaBaseUrl = core.http.basePath.publicBaseUrl;
     this.licenseState = new LicenseState(plugins.licensing.license$);
     this.security = plugins.security;
 
@@ -189,12 +191,11 @@ export class AlertingPlugin {
       };
     });
 
-    this.isESOUsingEphemeralEncryptionKey =
-      plugins.encryptedSavedObjects.usingEphemeralEncryptionKey;
+    this.isESOCanEncrypt = plugins.encryptedSavedObjects.canEncrypt;
 
-    if (this.isESOUsingEphemeralEncryptionKey) {
+    if (!this.isESOCanEncrypt) {
       this.logger.warn(
-        'APIs are disabled because the Encrypted Saved Objects plugin uses an ephemeral encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.'
+        'APIs are disabled because the Encrypted Saved Objects plugin is missing encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.'
       );
     }
 
@@ -311,7 +312,7 @@ export class AlertingPlugin {
 
   public start(core: CoreStart, plugins: AlertingPluginsStart): PluginStartContract {
     const {
-      isESOUsingEphemeralEncryptionKey,
+      isESOCanEncrypt,
       logger,
       taskRunnerFactory,
       alertTypeRegistry,
@@ -353,9 +354,9 @@ export class AlertingPlugin {
     });
 
     const getAlertsClientWithRequest = (request: KibanaRequest) => {
-      if (isESOUsingEphemeralEncryptionKey === true) {
+      if (isESOCanEncrypt !== true) {
         throw new Error(
-          `Unable to create alerts client because the Encrypted Saved Objects plugin uses an ephemeral encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.`
+          `Unable to create alerts client because the Encrypted Saved Objects plugin is missing encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.`
         );
       }
       return alertsClientFactory!.create(request, core.savedObjects);
@@ -372,6 +373,7 @@ export class AlertingPlugin {
       eventLogger: this.eventLogger!,
       internalSavedObjectsRepository: core.savedObjects.createInternalRepository(['alert']),
       alertTypeRegistry: this.alertTypeRegistry!,
+      kibanaBaseUrl: this.kibanaBaseUrl,
     });
 
     this.eventLogService!.registerSavedObjectProvider('alert', (request) => {

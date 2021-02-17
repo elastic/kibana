@@ -10,19 +10,24 @@ import React, { Fragment, FC } from 'react';
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { JobType } from '../../../../common/types/saved_objects';
+import { lazyMlNodesAvailable } from '../../ml_nodes_check';
 
 interface Props {
   jobType: JobType;
 }
 
 export const NewJobAwaitingNodeWarning: FC<Props> = () => {
+  if (lazyMlNodesAvailable() === false) {
+    return null;
+  }
+
   return (
     <Fragment>
       <EuiCallOut
         title={
           <FormattedMessage
             id="xpack.ml.jobsAwaitingNodeWarning.title"
-            defaultMessage="Awaiting ML node provisioning"
+            defaultMessage="Awaiting machine learning node"
           />
         }
         color="primary"
@@ -31,7 +36,7 @@ export const NewJobAwaitingNodeWarning: FC<Props> = () => {
         <div>
           <FormattedMessage
             id="xpack.ml.newJobAwaitingNodeWarning.noMLNodesAvailableDescription"
-            defaultMessage="Job cannot be started straight away, an ML node needs to be started. This will happen automatically."
+            defaultMessage="There are currently no nodes that can run the job, therefore it will remain in OPENING state until an appropriate node becomes available."
           />
         </div>
       </EuiCallOut>

@@ -9,7 +9,9 @@ import { setMockValues, rerender } from '../../../__mocks__';
 import { mockEngineValues } from '../../__mocks__';
 
 import React from 'react';
+
 import { shallow } from 'enzyme';
+
 import { EuiBadge, EuiIcon } from '@elastic/eui';
 
 import { EngineNav } from './engine_nav';

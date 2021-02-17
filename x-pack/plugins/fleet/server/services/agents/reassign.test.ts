@@ -107,6 +107,9 @@ function createClientMock() {
       saved_objects: [await soClientMock.create(type, attributes)],
     };
   });
+  soClientMock.bulkUpdate.mockResolvedValue({
+    saved_objects: [],
+  });
 
   soClientMock.get.mockImplementation(async (_, id) => {
     switch (id) {

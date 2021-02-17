@@ -9,8 +9,9 @@ import { Location } from 'history';
 import { LatencyAggregationType } from '../../../common/latency_aggregation_types';
 import { pickKeys } from '../../../common/utils/pick_keys';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { localUIFilterNames } from '../../../server/lib/ui_filters/local_ui_filters/config';
+import { localUIFilterNames } from '../../../server/lib/rum_client/ui_filters/local_ui_filters/config';
 import { toQuery } from '../../components/shared/Links/url_helpers';
+import { TimeRangeComparisonType } from '../../components/shared/time_comparison/get_time_range_comparison';
 import {
   getDateRange,
   removeUndefinedProps,
@@ -80,12 +81,11 @@ export function resolveUrlParams(location: Location, state: TimeUrlParams) {
     transactionType,
     searchTerm: toString(searchTerm),
     percentile: toNumber(percentile),
-    latencyAggregationType,
+    latencyAggregationType: latencyAggregationType as LatencyAggregationType,
     comparisonEnabled: comparisonEnabled
       ? toBoolean(comparisonEnabled)
       : undefined,
-    comparisonType,
-
+    comparisonType: comparisonType as TimeRangeComparisonType | undefined,
     // ui filters
     environment,
     ...localUIFilters,
