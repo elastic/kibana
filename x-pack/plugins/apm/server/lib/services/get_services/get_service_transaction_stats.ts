@@ -98,10 +98,12 @@ export async function getServiceTransactionStats({
                       missing: '',
                     },
                   },
-                  agentName: {
-                    top_hits: {
-                      docvalue_fields: [AGENT_NAME] as const,
-                      size: 1,
+                  sample: {
+                    top_metrics: {
+                      metrics: { field: AGENT_NAME } as const,
+                      sort: {
+                        '@timestamp': 'desc',
+                      },
                     },
                   },
                   timeseries: {
@@ -139,9 +141,9 @@ export async function getServiceTransactionStats({
           environments: topTransactionTypeBucket.environments.buckets
             .map((environmentBucket) => environmentBucket.key as string)
             .filter(Boolean),
-          agentName: topTransactionTypeBucket.agentName.hits.hits[0].fields[
-            'agent.name'
-          ]?.[0] as AgentName,
+          agentName: topTransactionTypeBucket.sample.top[0].metrics[
+            AGENT_NAME
+          ] as AgentName,
           avgResponseTime: {
             value: topTransactionTypeBucket.avg_duration.value,
             timeseries: topTransactionTypeBucket.timeseries.buckets.map(
