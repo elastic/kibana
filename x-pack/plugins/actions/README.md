@@ -26,13 +26,6 @@ Table of Contents
     - [Executor](#executor)
     - [Example](#example)
   - [RESTful API](#restful-api)
-    - [`POST /api/actions/action`: Create action](#post-apiactionsaction-create-action)
-    - [`DELETE /api/actions/action/{id}`: Delete action](#delete-apiactionsactionid-delete-action)
-    - [`GET /api/actions`: Get all actions](#get-apiactions-get-all-actions)
-    - [`GET /api/actions/action/{id}`: Get action](#get-apiactionsactionid-get-action)
-    - [`GET /api/actions/list_action_types`: List action types](#get-apiactionslist_action_types-list-action-types)
-    - [`PUT /api/actions/action/{id}`: Update action](#put-apiactionsactionid-update-action)
-    - [`POST /api/actions/action/{id}/_execute`: Execute action](#post-apiactionsactionid_execute-execute-action)
   - [Firing actions](#firing-actions)
   - [Accessing a scoped ActionsClient](#accessing-a-scoped-actionsclient)
     - [actionsClient.enqueueExecution(options)](#actionsclientenqueueexecutionoptions)
@@ -119,14 +112,18 @@ Implemented under the [Actions Config](./server/actions_config.ts).
 
 ### Configuration Options
 
-Built-In-Actions are configured using the _xpack.actions_ namespoace under _kibana.yml_, and have the following configuration options:
+Built-In-Actions are configured using the _xpack.actions_ namespace under _kibana.yml_, and have the following configuration options:
 
 | Namespaced Key                         | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                               | Type          |
 | -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------- |
-| _xpack.actions._**enabled**            | Feature toggle which enabled Actions in Kibana.                                                                                                                                                                                                                                                                                                                                                                                                                           | boolean       |
+| _xpack.actions._**enabled**            | Feature toggle which enables Actions in Kibana.                                                                                                                                                                                                                                                                                                                                                                                                                           | boolean       |
 | _xpack.actions._**allowedHosts**       | Which _hostnames_ are allowed for the Built-In-Action? This list should contain hostnames of every external service you wish to interact with using Webhooks, Email or any other built in Action. Note that you may use the string "\*" in place of a specific hostname to enable Kibana to target any URL, but keep in mind the potential use of such a feature to execute [SSRF](https://www.owasp.org/index.php/Server_Side_Request_Forgery) attacks from your server. | Array<String> |
-| _xpack.actions._**enabledActionTypes** | A list of _actionTypes_ id's that are enabled. A "\*" may be used as an element to indicate all registered actionTypes should be enabled. The actionTypes registered for Kibana are `.server-log`, `.slack`, `.email`, `.index`, `.pagerduty`, `.webhook`. Default: `["*"]`                                                                                                                                                                                               | Array<String> |
+| _xpack.actions._**enabledActionTypes** | A list of _actionTypes_ IDs that are enabled. A "\*" may be used as an element to indicate all registered actionTypes should be enabled. The actionTypes registered for Kibana are `.email`, `.index`, `.jira`, `.pagerduty`, `.resilient`, `.server-log`, `.servicenow`, `.servicenow-sir`, `.slack`,   `.teams`, `.webhook`. Default: `["*"]`                                                                                                                                                                                               | Array<String> |
 | _xpack.actions._**preconfigured**      | A object of action id / preconfigured actions. Default: `{}`                                                                                                                                                                                                                                                                                                                                                                                                              | Array<Object> |
+| _xpack.actions._**proxyUrl**      | Specifies the proxy URL to use, if using a proxy for actions.                                                                                                                                                                                                                                                                                                                                                                                                              | String |
+| _xpack.actions._**proxyHeaders**      | Specifies HTTP headers for proxy, if using a proxy for actions.                                                                                                                                                                                                                                                                                                                                                                                                              | Object |
+| _xpack.actions._**proxyRejectUnauthorizedCertificates**      | Set to `false` to bypass certificate validation for proxy, if using a proxy for actions.                                                                                                                                                                                                                                                                                                                                                                                                              | Boolean |
+| _xpack.actions._**rejectUnauthorized**      | Set to `false` to bypass certificate validation for actions.                                                                                                                                                                                                                                                                                                                                                                                                              | Boolean |
 
 #### Adding Built-in Action Types to allowedHosts
 
@@ -189,76 +186,7 @@ The built-in email action type provides a good example of creating an action typ
 
 ## RESTful API
 
-Using an action type requires an action to be created that will contain and encrypt configuration for a given action type. See below for CRUD operations using the API.
-
-### `POST /api/actions/action`: Create action
-
-Payload:
-
-| Property     | Description                                                                                                                                                                              | Type   |
-| ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ |
-| name         | A name to reference and search in the future. This value will be used to populate dropdowns.                                                                                             | string |
-| actionTypeId | The id value of the action type you want to call when the action executes.                                                                                                               | string |
-| config       | The configuration the action type expects. See related action type to see what attributes are expected. This will also validate against the action type if config validation is defined. | object |
-| secrets      | The secrets the action type expects. See related action type to see what attributes are expected. This will also validate against the action type if secrets validation is defined.      | object |
-
-### `DELETE /api/actions/action/{id}`: Delete action
-
-Params:
-
-| Property | Description                                   | Type   |
-| -------- | --------------------------------------------- | ------ |
-| id       | The id of the action you're trying to delete. | string |
-
-### `GET /api/actions`: Get all actions
-
-No parameters.
-
-Return all actions from saved objects merged with predefined list.
-Use the [saved objects API for find](https://www.elastic.co/guide/en/kibana/master/saved-objects-api-find.html) with the proprties: `type: 'action'` and `perPage: 10000`.
-List of predefined actions should be set up in Kibana.yaml.
-
-### `GET /api/actions/action/{id}`: Get action
-
-Params:
-
-| Property | Description                                | Type   |
-| -------- | ------------------------------------------ | ------ |
-| id       | The id of the action you're trying to get. | string |
-
-### `GET /api/actions/list_action_types`: List action types
-
-No parameters.
-
-### `PUT /api/actions/action/{id}`: Update action
-
-Params:
-
-| Property | Description                                   | Type   |
-| -------- | --------------------------------------------- | ------ |
-| id       | The id of the action you're trying to update. | string |
-
-Payload:
-
-| Property | Description                                                                                                                                                                              | Type   |
-| -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ |
-| name     | A name to reference and search in the future. This value will be used to populate dropdowns.                                                                                             | string |
-| config   | The configuration the action type expects. See related action type to see what attributes are expected. This will also validate against the action type if config validation is defined. | object |
-| secrets  | The secrets the action type expects. See related action type to see what attributes are expected. This will also validate against the action type if secrets validation is defined.      | object |
-
-### `POST /api/actions/action/{id}/_execute`: Execute action
-
-Params:
-
-| Property | Description                                    | Type   |
-| -------- | ---------------------------------------------- | ------ |
-| id       | The id of the action you're trying to execute. | string |
-
-Payload:
-
-| Property | Description                                                | Type   |
-| -------- | ---------------------------------------------------------- | ------ |
-| params   | The parameters the action type requires for the execution. | object |
+Using an action type requires an action to be created that will contain and encrypt configuration for a given action type. See the [REST API Documentation](https://www.elastic.co/guide/en/kibana/master/actions-and-connectors-api.html) API for CRUD operations for Actions.
 
 ## Firing actions
 
