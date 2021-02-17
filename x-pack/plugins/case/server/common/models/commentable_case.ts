@@ -11,6 +11,7 @@ import {
   SavedObjectReference,
   SavedObjectsClientContract,
   SavedObjectsUpdateResponse,
+  Logger,
 } from 'src/core/server';
 import {
   AssociationType,
@@ -35,6 +36,7 @@ import {
 } from '../../routes/api/utils';
 import { CASE_SAVED_OBJECT, SUB_CASE_SAVED_OBJECT } from '../../saved_object_types';
 import { CaseServiceSetup } from '../../services';
+import { CaseError } from '../error';
 import { countAlertsForID } from '../index';
 
 interface UpdateCommentResp {
@@ -52,6 +54,7 @@ interface CommentableCaseParams {
   subCase?: SavedObject<SubCaseAttributes>;
   soClient: SavedObjectsClientContract;
   service: CaseServiceSetup;
+  logger: Logger;
 }
 
 /**
@@ -63,11 +66,14 @@ export class CommentableCase {
   private readonly subCase?: SavedObject<SubCaseAttributes>;
   private readonly soClient: SavedObjectsClientContract;
   private readonly service: CaseServiceSetup;
-  constructor({ collection, subCase, soClient, service }: CommentableCaseParams) {
+  private readonly logger: Logger;
+
+  constructor({ collection, subCase, soClient, service, logger }: CommentableCaseParams) {
     this.collection = collection;
     this.subCase = subCase;
     this.soClient = soClient;
     this.service = service;
+    this.logger = logger;
   }
 
   public get status(): CaseStatuses {
@@ -119,55 +125,65 @@ export class CommentableCase {
   }
 
   private async update({ date, user }: { date: string; user: User }): Promise<CommentableCase> {
-    let updatedSubCaseAttributes: SavedObject<SubCaseAttributes> | undefined;
+    try {
+      let updatedSubCaseAttributes: SavedObject<SubCaseAttributes> | undefined;
 
-    if (this.subCase) {
-      const updatedSubCase = await this.service.patchSubCase({
+      if (this.subCase) {
+        const updatedSubCase = await this.service.patchSubCase({
+          client: this.soClient,
+          subCaseId: this.subCase.id,
+          updatedAttributes: {
+            updated_at: date,
+            updated_by: {
+              ...user,
+            },
+          },
+          version: this.subCase.version,
+        });
+
+        updatedSubCaseAttributes = {
+          ...this.subCase,
+          attributes: {
+            ...this.subCase.attributes,
+            ...updatedSubCase.attributes,
+          },
+          version: updatedSubCase.version ?? this.subCase.version,
+        };
+      }
+
+      const updatedCase = await this.service.patchCase({
         client: this.soClient,
-        subCaseId: this.subCase.id,
+        caseId: this.collection.id,
         updatedAttributes: {
           updated_at: date,
-          updated_by: {
-            ...user,
-          },
+          updated_by: { ...user },
         },
-        version: this.subCase.version,
+        version: this.collection.version,
       });
 
-      updatedSubCaseAttributes = {
-        ...this.subCase,
-        attributes: {
-          ...this.subCase.attributes,
-          ...updatedSubCase.attributes,
+      // this will contain the updated sub case information if the sub case was defined initially
+      return new CommentableCase({
+        collection: {
+          ...this.collection,
+          attributes: {
+            ...this.collection.attributes,
+            ...updatedCase.attributes,
+          },
+          version: updatedCase.version ?? this.collection.version,
         },
-        version: updatedSubCase.version ?? this.subCase.version,
-      };
+        subCase: updatedSubCaseAttributes,
+        soClient: this.soClient,
+        service: this.service,
+        logger: this.logger,
+      });
+    } catch (error) {
+      const caseErr = new CaseError(
+        `Failed to update commentable case, sub case id: ${this.subCaseId} case id: ${this.caseId}: ${error}`,
+        error
+      );
+      this.logger.error(caseErr);
+      throw caseErr;
     }
-
-    const updatedCase = await this.service.patchCase({
-      client: this.soClient,
-      caseId: this.collection.id,
-      updatedAttributes: {
-        updated_at: date,
-        updated_by: { ...user },
-      },
-      version: this.collection.version,
-    });
-
-    // this will contain the updated sub case information if the sub case was defined initially
-    return new CommentableCase({
-      collection: {
-        ...this.collection,
-        attributes: {
-          ...this.collection.attributes,
-          ...updatedCase.attributes,
-        },
-        version: updatedCase.version ?? this.collection.version,
-      },
-      subCase: updatedSubCaseAttributes,
-      soClient: this.soClient,
-      service: this.service,
-    });
   }
 
   /**
@@ -182,25 +198,34 @@ export class CommentableCase {
     updatedAt: string;
     user: User;
   }): Promise<UpdateCommentResp> {
-    const { id, version, ...queryRestAttributes } = updateRequest;
+    try {
+      const { id, version, ...queryRestAttributes } = updateRequest;
 
-    const [comment, commentableCase] = await Promise.all([
-      this.service.patchComment({
-        client: this.soClient,
-        commentId: id,
-        updatedAttributes: {
-          ...queryRestAttributes,
-          updated_at: updatedAt,
-          updated_by: user,
-        },
-        version,
-      }),
-      this.update({ date: updatedAt, user }),
-    ]);
-    return {
-      comment,
-      commentableCase,
-    };
+      const [comment, commentableCase] = await Promise.all([
+        this.service.patchComment({
+          client: this.soClient,
+          commentId: id,
+          updatedAttributes: {
+            ...queryRestAttributes,
+            updated_at: updatedAt,
+            updated_by: user,
+          },
+          version,
+        }),
+        this.update({ date: updatedAt, user }),
+      ]);
+      return {
+        comment,
+        commentableCase,
+      };
+    } catch (error) {
+      const caseErr = new CaseError(
+        `Failed to update comment in commentable case, sub case id: ${this.subCaseId} case id: ${this.caseId}: ${error}`,
+        error
+      );
+      this.logger.error(caseErr);
+      throw caseErr;
+    }
   }
 
   /**
@@ -215,33 +240,42 @@ export class CommentableCase {
     user: User;
     commentReq: CommentRequest;
   }): Promise<NewCommentResp> {
-    if (commentReq.type === CommentType.alert) {
-      if (this.status === CaseStatuses.closed) {
-        throw Boom.badRequest('Alert cannot be attached to a closed case');
+    try {
+      if (commentReq.type === CommentType.alert) {
+        if (this.status === CaseStatuses.closed) {
+          throw Boom.badRequest('Alert cannot be attached to a closed case');
+        }
+
+        if (!this.subCase && this.collection.attributes.type === CaseType.collection) {
+          throw Boom.badRequest('Alert cannot be attached to a collection case');
+        }
       }
 
-      if (!this.subCase && this.collection.attributes.type === CaseType.collection) {
-        throw Boom.badRequest('Alert cannot be attached to a collection case');
-      }
-    }
-
-    const [comment, commentableCase] = await Promise.all([
-      this.service.postNewComment({
-        client: this.soClient,
-        attributes: transformNewComment({
-          associationType: this.subCase ? AssociationType.subCase : AssociationType.case,
-          createdDate,
-          ...commentReq,
-          ...user,
+      const [comment, commentableCase] = await Promise.all([
+        this.service.postNewComment({
+          client: this.soClient,
+          attributes: transformNewComment({
+            associationType: this.subCase ? AssociationType.subCase : AssociationType.case,
+            createdDate,
+            ...commentReq,
+            ...user,
+          }),
+          references: this.buildRefsToCase(),
         }),
-        references: this.buildRefsToCase(),
-      }),
-      this.update({ date: createdDate, user }),
-    ]);
-    return {
-      comment,
-      commentableCase,
-    };
+        this.update({ date: createdDate, user }),
+      ]);
+      return {
+        comment,
+        commentableCase,
+      };
+    } catch (error) {
+      const caseErr = new CaseError(
+        `Failed creating a comment on a commentable case, sub case id: ${this.subCaseId} case id: ${this.caseId}: ${error}`,
+        error
+      );
+      this.logger.error(caseErr);
+      throw caseErr;
+    }
   }
 
   private formatCollectionForEncoding(totalComment: number) {
@@ -255,46 +289,55 @@ export class CommentableCase {
   }
 
   public async encode(): Promise<CollectionWithSubCaseResponse> {
-    const collectionCommentStats = await this.service.getAllCaseComments({
-      client: this.soClient,
-      id: this.collection.id,
-      options: {
-        fields: [],
-        page: 1,
-        perPage: 1,
-      },
-    });
-
-    if (this.subCase) {
-      const subCaseComments = await this.service.getAllSubCaseComments({
+    try {
+      const collectionCommentStats = await this.service.getAllCaseComments({
         client: this.soClient,
-        id: this.subCase.id,
+        id: this.collection.id,
+        options: {
+          fields: [],
+          page: 1,
+          perPage: 1,
+        },
+      });
+
+      if (this.subCase) {
+        const subCaseComments = await this.service.getAllSubCaseComments({
+          client: this.soClient,
+          id: this.subCase.id,
+        });
+
+        return CollectWithSubCaseResponseRt.encode({
+          subCase: flattenSubCaseSavedObject({
+            savedObject: this.subCase,
+            comments: subCaseComments.saved_objects,
+            totalAlerts: countAlertsForID({ comments: subCaseComments, id: this.subCase.id }),
+          }),
+          ...this.formatCollectionForEncoding(collectionCommentStats.total),
+        });
+      }
+
+      const collectionComments = await this.service.getAllCaseComments({
+        client: this.soClient,
+        id: this.collection.id,
+        options: {
+          fields: [],
+          page: 1,
+          perPage: collectionCommentStats.total,
+        },
       });
 
       return CollectWithSubCaseResponseRt.encode({
-        subCase: flattenSubCaseSavedObject({
-          savedObject: this.subCase,
-          comments: subCaseComments.saved_objects,
-          totalAlerts: countAlertsForID({ comments: subCaseComments, id: this.subCase.id }),
-        }),
+        comments: flattenCommentSavedObjects(collectionComments.saved_objects),
+        totalAlerts: countAlertsForID({ comments: collectionComments, id: this.collection.id }),
         ...this.formatCollectionForEncoding(collectionCommentStats.total),
       });
+    } catch (error) {
+      const caseErr = new CaseError(
+        `Failed encoding the commentable case, sub case id: ${this.subCaseId} case id: ${this.caseId}: ${error}`,
+        error
+      );
+      this.logger.error(caseErr);
+      throw caseErr;
     }
-
-    const collectionComments = await this.service.getAllCaseComments({
-      client: this.soClient,
-      id: this.collection.id,
-      options: {
-        fields: [],
-        page: 1,
-        perPage: collectionCommentStats.total,
-      },
-    });
-
-    return CollectWithSubCaseResponseRt.encode({
-      comments: flattenCommentSavedObjects(collectionComments.saved_objects),
-      totalAlerts: countAlertsForID({ comments: collectionComments, id: this.collection.id }),
-      ...this.formatCollectionForEncoding(collectionCommentStats.total),
-    });
   }
 }

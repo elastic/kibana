@@ -103,6 +103,7 @@ export class CasePlugin {
 
     const router = core.http.createRouter<CasesRequestHandlerContext>();
     initCaseApi({
+      logger: this.log,
       caseService: this.caseService,
       caseConfigureService: this.caseConfigureService,
       connectorMappingsService: this.connectorMappingsService,

@@ -94,21 +94,31 @@ async function executor(
   }
 
   if (subAction === 'create') {
-    data = await caseClient.create({
-      ...(subActionParams as CasePostRequest),
-    });
+    try {
+      data = await caseClient.create({
+        ...(subActionParams as CasePostRequest),
+      });
+    } catch (error) {
+      logger.error(`Failed to create a case using connector: ${error}`);
+      throw error;
+    }
   }
 
   if (subAction === 'update') {
-    const updateParamsWithoutNullValues = Object.entries(subActionParams).reduce(
-      (acc, [key, value]) => ({
-        ...acc,
-        ...(value != null ? { [key]: value } : {}),
-      }),
-      {} as CasePatchRequest
-    );
+    try {
+      const updateParamsWithoutNullValues = Object.entries(subActionParams).reduce(
+        (acc, [key, value]) => ({
+          ...acc,
+          ...(value != null ? { [key]: value } : {}),
+        }),
+        {} as CasePatchRequest
+      );
 
-    data = await caseClient.update({ cases: [updateParamsWithoutNullValues] });
+      data = await caseClient.update({ cases: [updateParamsWithoutNullValues] });
+    } catch (error) {
+      logger.error(`Failed to update case using connector ${error}`);
+      throw error;
+    }
   }
 
   if (subAction === 'addComment') {

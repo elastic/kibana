@@ -64,94 +64,158 @@ export class CaseClientHandler implements CaseClient {
   }
 
   public async create(caseInfo: CasePostRequest) {
-    return create({
-      savedObjectsClient: this._savedObjectsClient,
-      caseService: this._caseService,
-      caseConfigureService: this._caseConfigureService,
-      userActionService: this._userActionService,
-      user: this.user,
-      theCase: caseInfo,
-    });
+    try {
+      return create({
+        savedObjectsClient: this._savedObjectsClient,
+        caseService: this._caseService,
+        caseConfigureService: this._caseConfigureService,
+        userActionService: this._userActionService,
+        user: this.user,
+        theCase: caseInfo,
+      });
+    } catch (error) {
+      this.logger.error(`Failed to create a new case using client: ${error}`);
+      throw error;
+    }
   }
 
   public async update(cases: CasesPatchRequest) {
-    return update({
-      savedObjectsClient: this._savedObjectsClient,
-      caseService: this._caseService,
-      userActionService: this._userActionService,
-      user: this.user,
-      cases,
-      caseClient: this,
-    });
+    try {
+      return update({
+        savedObjectsClient: this._savedObjectsClient,
+        caseService: this._caseService,
+        userActionService: this._userActionService,
+        user: this.user,
+        cases,
+        caseClient: this,
+      });
+    } catch (error) {
+      const caseIDVersions = cases.cases.map((caseInfo) => ({
+        id: caseInfo.id,
+        version: caseInfo.version,
+      }));
+      this.logger.error(
+        `Failed to update cases using client: ${JSON.stringify(caseIDVersions)}: ${error}`
+      );
+      throw error;
+    }
   }
 
   public async addComment({ caseId, comment }: CaseClientAddComment) {
-    return addComment({
-      savedObjectsClient: this._savedObjectsClient,
-      caseService: this._caseService,
-      userActionService: this._userActionService,
-      caseClient: this,
-      caseId,
-      comment,
-      user: this.user,
-      logger: this.logger,
-    });
+    try {
+      return addComment({
+        savedObjectsClient: this._savedObjectsClient,
+        caseService: this._caseService,
+        userActionService: this._userActionService,
+        caseClient: this,
+        caseId,
+        comment,
+        user: this.user,
+        logger: this.logger,
+      });
+    } catch (error) {
+      this.logger.error(`Failed to add comment using client case id: ${caseId}: ${error}`);
+      throw error;
+    }
   }
 
   public async getFields(fields: ConfigureFields) {
-    return getFields(fields);
+    try {
+      return getFields(fields);
+    } catch (error) {
+      this.logger.error(`Failed to retrieve fields using client: ${error}`);
+      throw error;
+    }
   }
 
   public async getMappings(args: MappingsClient) {
-    return getMappings({
-      ...args,
-      savedObjectsClient: this._savedObjectsClient,
-      connectorMappingsService: this._connectorMappingsService,
-      caseClient: this,
-    });
+    try {
+      return getMappings({
+        ...args,
+        savedObjectsClient: this._savedObjectsClient,
+        connectorMappingsService: this._connectorMappingsService,
+        caseClient: this,
+      });
+    } catch (error) {
+      this.logger.error(`Failed to get mappings using client: ${error}`);
+      throw error;
+    }
   }
 
   public async updateAlertsStatus(args: CaseClientUpdateAlertsStatus) {
-    return updateAlertsStatus({
-      ...args,
-      alertsService: this._alertsService,
-      scopedClusterClient: this._scopedClusterClient,
-    });
+    try {
+      return updateAlertsStatus({
+        ...args,
+        alertsService: this._alertsService,
+        scopedClusterClient: this._scopedClusterClient,
+      });
+    } catch (error) {
+      this.logger.error(
+        `Failed to update alerts status using client ids: ${JSON.stringify(
+          args.ids
+        )} indices: ${JSON.stringify([...args.indices])} status: ${args.status} ${error}`
+      );
+      throw error;
+    }
   }
 
   public async get(args: CaseClientGet) {
-    return get({
-      ...args,
-      caseService: this._caseService,
-      savedObjectsClient: this._savedObjectsClient,
-    });
+    try {
+      return get({
+        ...args,
+        caseService: this._caseService,
+        savedObjectsClient: this._savedObjectsClient,
+      });
+    } catch (error) {
+      this.logger.error(`Failed to get case using client id: ${args.id}: ${error}`);
+      throw error;
+    }
   }
 
   public async getUserActions(args: CaseClientGetUserActions) {
-    return getUserActions({
-      ...args,
-      savedObjectsClient: this._savedObjectsClient,
-      userActionService: this._userActionService,
-    });
+    try {
+      return getUserActions({
+        ...args,
+        savedObjectsClient: this._savedObjectsClient,
+        userActionService: this._userActionService,
+      });
+    } catch (error) {
+      this.logger.error(`Failed to get user actions using client id: ${args.caseId}: ${error}`);
+      throw error;
+    }
   }
 
   public async getAlerts(args: CaseClientGetAlerts) {
-    return getAlerts({
-      ...args,
-      alertsService: this._alertsService,
-      scopedClusterClient: this._scopedClusterClient,
-    });
+    try {
+      return getAlerts({
+        ...args,
+        alertsService: this._alertsService,
+        scopedClusterClient: this._scopedClusterClient,
+      });
+    } catch (error) {
+      this.logger.error(
+        `FAiled to get alerts using client ids: ${JSON.stringify(
+          args.ids
+        )} indices: ${JSON.stringify([...args.indices])}: ${error}`
+      );
+      throw error;
+    }
   }
 
   public async push(args: CaseClientPush) {
-    return push({
-      ...args,
-      savedObjectsClient: this._savedObjectsClient,
-      caseService: this._caseService,
-      userActionService: this._userActionService,
-      user: this.user,
-      caseClient: this,
-      caseConfigureService: this._caseConfigureService,
-    });
+    try {
+      return push({
+        ...args,
+        savedObjectsClient: this._savedObjectsClient,
+        caseService: this._caseService,
+        userActionService: this._userActionService,
+        user: this.user,
+        caseClient: this,
+        caseConfigureService: this._caseConfigureService,
+      });
+    } catch (error) {
+      this.logger.error(`Failed to push case using client id: ${args.caseId}: ${error}`);
+      throw error;
+    }
   }
 }
