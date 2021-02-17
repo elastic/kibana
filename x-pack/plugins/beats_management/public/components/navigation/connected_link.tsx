@@ -9,7 +9,7 @@ import { get } from 'lodash';
 import React from 'react';
 
 import { EuiLink } from '@elastic/eui';
-import { Link, withRouter, RouteComponentProps } from 'react-router-dom';
+import { Link, withRouter, RouteComponentProps } from 'react-router';
 
 interface ConnectedLinkComponent extends RouteComponentProps {
   location: any;

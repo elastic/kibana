@@ -8,7 +8,7 @@
 
 import { filter } from 'lodash';
 import React, { useEffect, useState, useCallback } from 'react';
-import { withRouter, RouteComponentProps } from 'react-router-dom';
+import { withRouter, RouteComponentProps } from 'react-router';
 import {
   EuiFlexGroup,
   EuiFlexItem,

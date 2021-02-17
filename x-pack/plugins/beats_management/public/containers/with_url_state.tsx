@@ -7,7 +7,7 @@
 
 import { parse, stringify } from 'query-string';
 import React from 'react';
-import { withRouter, RouteComponentProps } from 'react-router-dom';
+import { withRouter, RouteComponentProps } from 'react-router';
 import { FlatObject } from '../frontend_types';
 import { RendererFunction } from '../utils/typed_react';
 

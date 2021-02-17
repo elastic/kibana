@@ -7,7 +7,7 @@
 
 import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiPageContent } from '@elastic/eui';
 import React from 'react';
-import { withRouter, RouteComponentProps } from 'react-router-dom';
+import { withRouter, RouteComponentProps } from 'react-router';
 
 interface LayoutProps extends RouteComponentProps {
   children: React.ReactNode;
