@@ -19,7 +19,8 @@ import type {
 
 import type { SavedSearchQuery } from '../hooks/use_search_items';
 import type { StepDefineExposedState } from '../sections/create_transform/components/step_define';
-import type { StepDetailsExposedState } from '../sections/create_transform/components/step_details/step_details_form';
+import type { StepDetailsExposedState } from '../sections/create_transform/components/step_details';
+import { isPopulatedObject } from './utils/object_utils';
 
 export interface SimpleQuery {
   query_string: {
@@ -57,10 +58,34 @@ export function isDefaultQuery(query: PivotQuery): boolean {
   return isSimpleQuery(query) && query.query_string.query === '*';
 }
 
+export function getCombinedRuntimeMappings(
+  indexPattern: IndexPattern | undefined,
+  runtimeMappings?: StepDefineExposedState['runtimeMappings']
+): StepDefineExposedState['runtimeMappings'] | undefined {
+  let combinedRuntimeMappings = {};
+
+  // Use runtime field mappings defined inline from API
+  if (isPopulatedObject(runtimeMappings)) {
+    combinedRuntimeMappings = { ...combinedRuntimeMappings, ...runtimeMappings };
+  }
+
+  // And runtime field mappings defined by index pattern
+  if (indexPattern !== undefined) {
+    const ipRuntimeMappings = indexPattern.getComputedFields().runtimeFields;
+    combinedRuntimeMappings = { ...combinedRuntimeMappings, ...ipRuntimeMappings };
+  }
+
+  if (isPopulatedObject(combinedRuntimeMappings)) {
+    return combinedRuntimeMappings;
+  }
+  return undefined;
+}
+
 export function getPreviewTransformRequestBody(
   indexPatternTitle: IndexPattern['title'],
   query: PivotQuery,
-  partialRequest?: StepDefineExposedState['previewRequest'] | undefined
+  partialRequest?: StepDefineExposedState['previewRequest'] | undefined,
+  runtimeMappings?: StepDefineExposedState['runtimeMappings']
 ): PostTransformsPreviewRequestSchema {
   const index = indexPatternTitle.split(',').map((name: string) => name.trim());
 
@@ -68,6 +93,7 @@ export function getPreviewTransformRequestBody(
     source: {
       index,
       ...(!isDefaultQuery(query) && !isMatchAllQuery(query) ? { query } : {}),
+      ...(isPopulatedObject(runtimeMappings) ? { runtime_mappings: runtimeMappings } : {}),
     },
     ...(partialRequest ?? {}),
   };
@@ -95,7 +121,8 @@ export const getCreateTransformRequestBody = (
   ...getPreviewTransformRequestBody(
     indexPatternTitle,
     getPivotQuery(pivotState.searchQuery),
-    pivotState.previewRequest
+    pivotState.previewRequest,
+    pivotState.runtimeMappings
   ),
   // conditionally add optional description
   ...(transformDetailsState.transformDescription !== ''
@@ -115,6 +142,17 @@ export const getCreateTransformRequestBody = (
           time: {
             field: transformDetailsState.continuousModeDateField,
             delay: transformDetailsState.continuousModeDelay,
+          },
+        },
+      }
+    : {}),
+  // conditionally add retention policy settings
+  ...(transformDetailsState.isRetentionPolicyEnabled
+    ? {
+        retention_policy: {
+          time: {
+            field: transformDetailsState.retentionPolicyDateField,
+            max_age: transformDetailsState.retentionPolicyMaxAge,
           },
         },
       }
