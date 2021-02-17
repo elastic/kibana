@@ -122,6 +122,11 @@ async function executor(
 /**
  * This converts a connector style generated alert ({_id: string} | {_id: string}[]) to the expected format of addComment.
  */
+interface AttachmentAlerts {
+  ids: string[];
+  indices: string[];
+  rule: { id: string | null; name: string | null };
+}
 export const transformConnectorComment = (comment: CommentSchemaType): CommentRequest => {
   if (isCommentGeneratedAlert(comment)) {
     try {
@@ -137,7 +142,7 @@ export const transformConnectorComment = (comment: CommentSchemaType): CommentRe
         )
       );
 
-      const { ids, indices, rule } = genAlerts.reduce(
+      const { ids, indices, rule } = genAlerts.reduce<AttachmentAlerts>(
         (acc, { _id, _index, ruleId, ruleName }) => {
           // Mutation is faster than destructing.
           // Mutation usually leads to side effects but for this scenario it's ok to do it.
@@ -147,11 +152,7 @@ export const transformConnectorComment = (comment: CommentSchemaType): CommentRe
           acc.rule = { id: ruleId ?? null, name: ruleName ?? null };
           return acc;
         },
-        { ids: [], indices: [], rule: { id: null, name: null } } as {
-          ids: string[];
-          indices: string[];
-          rule: { id: string | null; name: string | null };
-        }
+        { ids: [], indices: [], rule: { id: null, name: null } }
       );
 
       return {

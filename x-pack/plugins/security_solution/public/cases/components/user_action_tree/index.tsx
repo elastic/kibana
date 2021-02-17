@@ -42,12 +42,14 @@ import {
   getUpdateAction,
   getAlertAttachment,
   getGeneratedAlertsAttachment,
+  useFetchAlertData,
 } from './helpers';
 import { UserActionAvatar } from './user_action_avatar';
 import { UserActionMarkdown } from './user_action_markdown';
 import { UserActionTimestamp } from './user_action_timestamp';
 import { UserActionUsername } from './user_action_username';
 import { UserActionContentToolbar } from './user_action_content_toolbar';
+import { getManualAlertIdsWithNoRuleId } from '../case_view/helpers';
 
 export interface UserActionTreeProps {
   caseServices: CaseServices;
@@ -128,6 +130,10 @@ export const UserActionTree = React.memo(
     const { isLoadingIds, patchComment } = useUpdateComment();
     const currentUser = useCurrentUser();
     const [manageMarkdownEditIds, setManangeMardownEditIds] = useState<string[]>([]);
+
+    const [loadingAlertData, manualAlertsData] = useFetchAlertData(
+      getManualAlertIdsWithNoRuleId(caseData.comments)
+    );
 
     const handleManageMarkdownEditId = useCallback(
       (id: string) => {
@@ -368,14 +374,21 @@ export const UserActionTree = React.memo(
                   return comments;
                 }
 
+                const ruleId = comment?.rule?.id ?? manualAlertsData[alertId]?.rule?.id?.[0] ?? '';
+                const ruleName =
+                  comment?.rule?.name ??
+                  manualAlertsData[alertId]?.rule?.name?.[0] ??
+                  i18n.UNKNOWN_RULE;
+
                 return [
                   ...comments,
                   getAlertAttachment({
                     action,
                     alertId,
                     index: alertIndex,
-                    ruleId: comment.rule.id,
-                    ruleName: comment.rule.name,
+                    loadingAlertData,
+                    ruleId,
+                    ruleName,
                     onShowAlertDetails,
                   }),
                 ];
@@ -394,8 +407,8 @@ export const UserActionTree = React.memo(
                   getGeneratedAlertsAttachment({
                     action,
                     alertIds,
-                    ruleId: comment.rule.id,
-                    ruleName: comment.rule.name,
+                    ruleId: comment.rule?.id ?? '',
+                    ruleName: comment.rule?.name ?? i18n.UNKNOWN_RULE,
                   }),
                 ];
               }
@@ -491,6 +504,8 @@ export const UserActionTree = React.memo(
         handleManageQuote,
         handleSaveComment,
         isLoadingIds,
+        loadingAlertData,
+        manualAlertsData,
         manageMarkdownEditIds,
         selectedOutlineCommentId,
         userCanCrud,
