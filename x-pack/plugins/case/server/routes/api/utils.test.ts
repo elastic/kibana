@@ -401,7 +401,7 @@ describe('Utils', () => {
                 "syncAlerts": true,
               },
               "status": "open",
-              "subCaseIds": Array [],
+              "subCaseIds": undefined,
               "subCases": undefined,
               "tags": Array [
                 "defacement",
@@ -441,7 +441,7 @@ describe('Utils', () => {
                 "syncAlerts": true,
               },
               "status": "open",
-              "subCaseIds": Array [],
+              "subCaseIds": undefined,
               "subCases": undefined,
               "tags": Array [
                 "Data Destruction",
@@ -485,7 +485,7 @@ describe('Utils', () => {
                 "syncAlerts": true,
               },
               "status": "open",
-              "subCaseIds": Array [],
+              "subCaseIds": undefined,
               "subCases": undefined,
               "tags": Array [
                 "LOLBins",
@@ -533,7 +533,7 @@ describe('Utils', () => {
                 "syncAlerts": true,
               },
               "status": "closed",
-              "subCaseIds": Array [],
+              "subCaseIds": undefined,
               "subCases": undefined,
               "tags": Array [
                 "LOLBins",
@@ -598,7 +598,7 @@ describe('Utils', () => {
             "syncAlerts": true,
           },
           "status": "open",
-          "subCaseIds": Array [],
+          "subCaseIds": undefined,
           "subCases": undefined,
           "tags": Array [
             "LOLBins",
@@ -654,7 +654,7 @@ describe('Utils', () => {
             "syncAlerts": true,
           },
           "status": "open",
-          "subCaseIds": Array [],
+          "subCaseIds": undefined,
           "subCases": undefined,
           "tags": Array [
             "LOLBins",
@@ -733,7 +733,7 @@ describe('Utils', () => {
             "syncAlerts": true,
           },
           "status": "open",
-          "subCaseIds": Array [],
+          "subCaseIds": undefined,
           "subCases": undefined,
           "tags": Array [
             "LOLBins",
@@ -788,7 +788,7 @@ describe('Utils', () => {
             "syncAlerts": true,
           },
           "status": "open",
-          "subCaseIds": Array [],
+          "subCaseIds": undefined,
           "subCases": undefined,
           "tags": Array [
             "defacement",

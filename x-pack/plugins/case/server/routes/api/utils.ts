@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { isEmpty } from 'lodash';
 import { badRequest, boomify, isBoom } from '@hapi/boom';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
@@ -250,7 +251,7 @@ export const flattenCaseSavedObject = ({
   totalComment = comments.length,
   totalAlerts = 0,
   subCases,
-  subCaseIds = [],
+  subCaseIds,
 }: {
   savedObject: SavedObject<ESCaseAttributes>;
   comments?: Array<SavedObject<CommentAttributes>>;
@@ -267,7 +268,7 @@ export const flattenCaseSavedObject = ({
   ...savedObject.attributes,
   connector: transformESConnectorToCaseConnector(savedObject.attributes.connector),
   subCases,
-  subCaseIds,
+  subCaseIds: !isEmpty(subCaseIds) ? subCaseIds : undefined,
 });
 
 export const flattenSubCaseSavedObject = ({
