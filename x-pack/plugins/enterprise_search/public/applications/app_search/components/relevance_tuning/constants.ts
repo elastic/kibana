@@ -7,7 +7,12 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { BoostOperation, BoostType, FunctionalBoostFunction } from './types';
+import {
+  BoostOperation,
+  BoostType,
+  FunctionalBoostFunction,
+  ProximityBoostFunction,
+} from './types';
 
 export const FIELD_FILTER_CUTOFF = 10;
 
@@ -118,6 +123,12 @@ export const LINEAR_DISPLAY = i18n.translate(
     defaultMessage: 'Linear',
   }
 );
+
+export const PROXIMITY_BOOST_FUNCTION_DISPLAY_MAP = {
+  [ProximityBoostFunction.Gaussian]: GAUSSIAN_DISPLAY,
+  [ProximityBoostFunction.Exponential]: EXPONENTIAL_DISPLAY,
+  [ProximityBoostFunction.Linear]: LINEAR_DISPLAY,
+};
 
 export const FUNCTIONAL_BOOST_FUNCTION_DISPLAY_MAP = {
   [FunctionalBoostFunction.Logarithmic]: LOGARITHMIC_DISPLAY,

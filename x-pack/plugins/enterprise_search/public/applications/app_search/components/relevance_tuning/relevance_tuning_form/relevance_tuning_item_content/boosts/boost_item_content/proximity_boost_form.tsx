@@ -7,6 +7,73 @@
 
 import React from 'react';
 
-export const ProximityBoostForm: React.FC = () => {
-  return <div>ProximityBoostForm</div>;
+import { useActions } from 'kea';
+
+import { EuiFieldText, EuiFormRow, EuiSelect } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+
+import { RelevanceTuningLogic } from '../../../..';
+import { PROXIMITY_BOOST_FUNCTION_DISPLAY_MAP } from '../../../../constants';
+import { Boost, BoostType, ProximityBoostFunction } from '../../../../types';
+
+interface Props {
+  boost: Boost;
+  index: number;
+  name: string;
+}
+
+export const ProximityBoostForm: React.FC<Props> = ({ boost, index, name }) => {
+  const { updateBoostSelectOption, updateBoostCenter } = useActions(RelevanceTuningLogic);
+
+  const currentBoostCenter = boost.center !== undefined ? boost.center.toString() : '';
+  const currentBoostFunction = boost.function || ProximityBoostFunction.Gaussian;
+
+  const functionOptions = Object.values(ProximityBoostFunction).map((boostFunction) => ({
+    value: boostFunction,
+    text: PROXIMITY_BOOST_FUNCTION_DISPLAY_MAP[boostFunction as ProximityBoostFunction],
+  }));
+
+  return (
+    <>
+      <EuiFormRow
+        label={i18n.translate(
+          'xpack.enterpriseSearch.appSearch.engine.relevanceTuning.boosts.proximity.functionDropDownLabel',
+          {
+            defaultMessage: 'Function',
+          }
+        )}
+        fullWidth
+      >
+        <EuiSelect
+          name={`proximity-${BoostType.Proximity}${index}`}
+          options={functionOptions}
+          value={currentBoostFunction}
+          onChange={(e) =>
+            updateBoostSelectOption(
+              name,
+              index,
+              'function',
+              e.target.value as ProximityBoostFunction
+            )
+          }
+          fullWidth
+        />
+      </EuiFormRow>
+      <EuiFormRow
+        label={i18n.translate(
+          'xpack.enterpriseSearch.appSearch.engine.relevanceTuning.boosts.proximity.centerLabel',
+          {
+            defaultMessage: 'Center',
+          }
+        )}
+        fullWidth
+      >
+        <EuiFieldText
+          defaultValue={currentBoostCenter}
+          onChange={(e) => updateBoostCenter(name, index, e.target.value)}
+          fullWidth
+        />
+      </EuiFormRow>
+    </>
+  );
 };
