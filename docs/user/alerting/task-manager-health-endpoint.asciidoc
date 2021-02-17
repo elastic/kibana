@@ -149,6 +149,499 @@ Tweak the *Max Workers* via the <<task-manager-settings,`xpack.task_manager.max_
 Tweak the *Poll Interval* via the <<task-manager-settings,`xpack.task_manager.poll_interval`>> setting, which would allow each {kib} to pull scheduled tasks at a higher rate, but keep in mind that this could impact the performance of the {es} cluster as their workload would be higher.
 
 [float]
-==== Diagnosing A Preferred Strategy
+==== Diagnosing A Root Cause
 
-...
+The following is a step-by-step guide to making sense of the output from the Task Manager Health endpoint. 
+
+Retrieve the latest monitored health stats of a {kib} instance Task Manager:
+
+[source,sh]
+--------------------------------------------------
+$ curl -X GET api/task_manager/_health
+--------------------------------------------------
+// KIBANA
+
+The API returns the following:
+
+[source,json]
+--------------------------------------------------
+{
+	"id": "15415ecf-cdb0-4fef-950a-f824bd277fe4",
+	"timestamp": "2021-02-16T11:38:10.077Z",
+	"status": "OK",
+	"last_update": "2021-02-16T11:38:09.934Z",
+	"stats": {
+		"configuration": {
+			"timestamp": "2021-02-16T11:29:05.055Z",
+			"value": {
+				"request_capacity": 1000,
+				"max_poll_inactivity_cycles": 10,
+				"monitored_aggregated_stats_refresh_rate": 60000,
+				"monitored_stats_running_average_window": 50,
+				"monitored_task_execution_thresholds": {
+					"default": {
+						"error_threshold": 90,
+						"warn_threshold": 80
+					},
+					"custom": {}
+				},
+				"poll_interval": 3000,
+				"max_workers": 10
+			},
+			"status": "OK"
+		},
+		"runtime": {
+			"timestamp": "2021-02-16T11:38:09.934Z",
+			"value": {
+				"polling": {
+					"last_successful_poll": "2021-02-16T11:38:09.934Z",
+					"last_polling_delay": "2021-02-16T11:29:05.053Z",
+					"duration": {
+						"p50": 13,
+						"p90": 128,
+						"p95": 143,
+						"p99": 168
+					},
+					"claim_conflicts": {
+						"p50": 0,
+						"p90": 0,
+						"p95": 0,
+						"p99": 0
+					},
+					"claim_mismatches": {
+						"p50": 0,
+						"p90": 0,
+						"p95": 0,
+						"p99": 0
+					},
+					"result_frequency_percent_as_number": {
+						"Failed": 0,
+						"NoAvailableWorkers": 0,
+						"NoTasksClaimed": 80,
+						"RanOutOfCapacity": 0,
+						"RunningAtCapacity": 0,
+						"PoolFilled": 20
+					}
+				},
+				"drift": {
+					"p50": 99,
+					"p90": 1245,
+					"p95": 1845,
+					"p99": 2878
+				},
+				"load": {
+					"p50": 0,
+					"p90": 0,
+					"p95": 10,
+					"p99": 20
+				},
+				"execution": {
+					"duration": {
+						"alerting:.index-threshold": {
+							"p50": 95,
+							"p90": 1725,
+							"p95": 2761,
+							"p99": 2761
+						},
+						"alerting:xpack.uptime.alerts.monitorStatus": {
+							"p50": 149,
+							"p90": 1071,
+							"p95": 1171,
+							"p99": 1171
+						},
+						"actions:.index": {
+							"p50": 166,
+							"p90": 166,
+							"p95": 166,
+							"p99": 166
+						}
+					},
+					"result_frequency_percent_as_number": {
+						"alerting:.index-threshold": {
+							"Success": 100,
+							"RetryScheduled": 0,
+							"Failed": 0,
+							"status": "OK"
+						},
+						"alerting:xpack.uptime.alerts.monitorStatus": {
+							"Success": 100,
+							"RetryScheduled": 0,
+							"Failed": 0,
+							"status": "OK"
+						},
+						"actions:.index": {
+							"Success": 10,
+							"RetryScheduled": 0,
+							"Failed": 90,
+							"status": "error"
+						}
+					}
+				}
+			},
+			"status": "OK"
+		},
+		"workload": {
+			"timestamp": "2021-02-16T11:38:05.826Z",
+			"value": {
+				"count": 26,
+				"task_types": {
+					"alerting:.index-threshold": {
+						"count": 2,
+						"status": {
+							"idle": 2
+						}
+					},
+					"actions:.index": {
+						"count": 14,
+						"status": {
+							"idle": 2,
+							"running": 2,
+							"failed": 10
+						}
+					},
+					"alerting:xpack.uptime.alerts.monitorStatus": {
+						"count": 10,
+						"status": {
+							"idle": 10
+						}
+					},
+				},
+				"schedule": [
+					["10s", 2],
+					["1m", 2],
+					["60s", 2],
+					["5m", 2],
+					["60m", 4]
+				],
+				"overdue": 0,
+				"estimated_schedule_density": [0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 1, 1, 1, 0, 0, 3, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 1, 1, 1, 0]
+			},
+			"status": "OK"
+		}
+	}
+}
+--------------------------------------------------
+
+[float]
+[[task-manager-health-evaluate-the-configuration]]
+===== Evaluate the Configuration
+
+*Theory*:
+Perhaps {kib} is configured to poll for tasks at a reduced rate?
+
+*Diagnosis*:
+Evaluating the health stats above, we can see the following output under `stats.configuration.value`:
+
+[source,json]
+--------------------------------------------------
+{
+    "request_capacity": 1000,
+    "max_poll_inactivity_cycles": 10,
+    "monitored_aggregated_stats_refresh_rate": 60000,
+    "monitored_stats_running_average_window": 50,
+    "monitored_task_execution_thresholds": {
+        "default": {
+            "error_threshold": 90,
+            "warn_threshold": 80
+        },
+        "custom": {}
+    },
+    "poll_interval": 3000, # <1>
+    "max_workers": 10 # <2>
+}
+--------------------------------------------------
+<1> the `poll_interval` setting is configured to the default of value of 3000 milliseconds
+<2> the `max_workers` setting is configured to the default of value of 10 workers
+
+We can infer from this output that the {kib} instance is polling for work every 3 seconds and has the capacity to run 10 concurrent tasks.
+
+Hypothetically, lets suppose the output under `stats.configuration.value` was the following:
+
+[source,json]
+--------------------------------------------------
+{
+    "request_capacity": 1000,
+    "max_poll_inactivity_cycles": 10,
+    "monitored_aggregated_stats_refresh_rate": 60000,
+    "monitored_stats_running_average_window": 50,
+    "monitored_task_execution_thresholds": {
+        "default": {
+            "error_threshold": 90,
+            "warn_threshold": 80
+        },
+        "custom": {}
+    },
+    "poll_interval": 60000, # <1>
+    "max_workers": 1 # <2>
+}
+--------------------------------------------------
+<1> the `poll_interval` setting is configured to the an high value of 60000 milliseconds
+<2> the `max_workers` setting is configured to the low value of 1 worker
+
+We can infer from this output that the {kib} instance is only polling for work once a minute and even then, it will only pick up one task at a time. This throughput is unlikely to support a healthy Alerting system, as it means tasks will usually run late.
+
+There are two possible reasons for such a configuration:
+
+The first, is that these settings have been configured manually, which can be resolved by reconfiguring these settings.
+For details on reconfiguring these settings, see <<task-manager-settings-kb, Task Manager Settings>>.
+
+The second, is that {kib} has reduced its own throughput in reaction to excessive load on the {es} cluster.
+{kib} Task Manager is equipped with a reactive self-healing mechanism, where by it reduces the rate at which it polls for work in response to an increase in errors caused by queries against {es}.
+
+This scenario can be validated by evaluating the {kib} Server Log and looking for messages such as:
+> Max workers configuration is temporarily reduced after Elasticsearch returned 25 "too many request" error(s).
+
+In such a case a deeper investigation into the high error rate experienced by the {es} cluster is required.
+
+[float]
+[[task-manager-health-evaluate-the-runtime]]
+===== Evaluate the Runtime
+
+[[task-manager-health-evaluate-the-runtime-polling]]
+*Theory*:
+Perhaps {kib} is not actually polling as frequently as it should?
+
+*Diagnosis*:
+Evaluating the health stats above, we can see the following output under `stats.runtime.value.polling`:
+
+[source,json]
+--------------------------------------------------
+{
+    "last_successful_poll": "2021-02-16T11:38:09.934Z", # <1>
+    "last_polling_delay": "2021-02-16T11:29:05.053Z",
+    "duration": { # <2>
+        "p50": 13,
+        "p90": 128,
+        "p95": 143,
+        "p99": 168
+    },
+    "claim_conflicts": { # <3>
+        "p50": 0,
+        "p90": 0,
+        "p95": 0,
+        "p99": 2
+    },
+    "claim_mismatches": {
+        "p50": 0,
+        "p90": 0,
+        "p95": 0,
+        "p99": 0
+    },
+    "result_frequency_percent_as_number": { # <4>
+        "Failed": 0,
+        "NoAvailableWorkers": 0,
+        "NoTasksClaimed": 80,
+        "RanOutOfCapacity": 0,
+        "RunningAtCapacity": 0,
+        "PoolFilled": 20
+    }
+}
+--------------------------------------------------
+<1> ensure the last successful polling cycle was completed recently, no more than a couple of `poll_interval`s in the past
+<2> ensure the duration of pollingcycles remains below the 100ms most of the time
+<3> ensure multiple {kib} instances in the cluster don't encounter a high rate of version conflicts
+<4> ensure the majority of polling cycles result in positive outcomes, such as `RunningAtCapacity` or `PoolFilled`
+
+We can infer from this output that the {kib} instance is polling regularly.
+
+We can assess this by comparing the `last_successful_poll` to the `timestamp` (value of `2021-02-16T11:38:10.077Z`) at the root, where we can see the last polling cycle took place 1 second before the health api was consumed.
+Additionally, the `p50` of the `duration`, shows us that at least 50% of polling cycles take, at most, 13 millisconds to complete.
+
+Evaluating the `result_frequency_percent_as_number`, we can tell that 80% of the polling cycles completed without claiming any tasks (suggesting that there aren't any overdue tasks) and 20% completed with Task manager claiming tasks which were then executed.
+We can also see that there have never been any pollign cycles that have occupied all of the available workers, as `RunningAtCapacity` has a frequency of 0%.
+
+It is worth noting that all of these stats are tracked as a running average, which means that they give us a snapshot of a period of time (by default we track up to 50 values), rather than a complete history throughout time.
+
+Hypothetically, lets suppose the output under `stats.runtime.value.polling.result_frequency_percent_as_number` was the following:
+
+[source,json]
+--------------------------------------------------
+{
+    "Failed": 30, # <1>
+    "NoAvailableWorkers": 20, # <2>
+    "NoTasksClaimed": 10,
+    "RanOutOfCapacity": 10, # <3>
+    "RunningAtCapacity": 10, # <4>
+    "PoolFilled": 20
+}
+--------------------------------------------------
+<1> a high failure rate of 30%
+<2> 20% of polling cycles are skipped as Task Manager has no capacity left to run tasks
+<3> 10% of polling cycles result in Task Manager claiming more tasks than it has capacity to run
+<4> 10% of polling cycles result in Task Manager claming precisely as many tasks as it has capacity to run
+
+We can infer from this output that {kib} Task Manager is not healthy, as the failur rate is high, and Task Manager is fetching tasks it has no capacity to run.
+Analyzing the {kib} Server Log should reveal the underlying issue causing the high error rate and capacity issues.
+
+The high `NoAvailableWorkers` rate of 20% suggests that there are many tasks running for durations longer than the `poll_interval`.
+For details on analyzing long task execution durations, see the <<task-manager-health-evaluate-the-runtime-long-running-task,"Perhaps tasks are running for too long?">> theory.
+
+[[task-manager-health-evaluate-the-runtime-insufficient-workload]]
+*Theory*:
+Perhaps {kib} is polling as frequently as it should, but that isn't often enough to keep up with the workload?
+
+*Diagnosis*:
+Evaluating the health stats above, we can see the following output of `drift` and `load` under `stats.runtime.value`:
+
+[source,json]
+--------------------------------------------------
+{
+    "drift": { # <1>
+        "p50": 99,
+        "p90": 1245,
+        "p95": 1845,
+        "p99": 2878
+    },
+    "load": { # <2>
+        "p50": 0,
+        "p90": 0,
+        "p95": 10,
+        "p99": 20
+    },
+}
+--------------------------------------------------
+<1> drift shows us that at least 95% tasks are running within 2 seconds of their scheduled time
+<2> load shows us that Task Manager is idle at least 90% of the time, and never uses more than 20% of it's available workers
+
+We can infer from these stats that this {kib} has more capacity than it needs, and hence any delays we might be experiencing are not due to capacity concerns.
+
+Hypothetically, lets suppose the output of `drift` and `load` was the following:
+
+[source,json]
+--------------------------------------------------
+{
+    "drift": { # <1>
+        "p50": 2999,
+        "p90": 3845,
+        "p95": 3845.75,
+        "p99": 4078
+    },
+    "load": { # <2>
+        "p50": 80,
+        "p90": 100,
+        "p95": 100,
+        "p99": 100
+    }
+}
+--------------------------------------------------
+<1> drift shows us that all tasks are running 3 to 4 seconds after their scheduled time
+<2> load shows us that at least half of the time Task Manager is running at a load of 80%
+
+We can infer from these stats that this {kib} is running at capacity most of the time, as indicated by the fact that the `p90` of `load` is at 100%, and the `p50` is also quite high at 80%.
+That said, it also reveals that tasks are not being run much after their scheduled time, as a `poll_interval` of `3000` milliseconds is expected to experience a consistent _drift_ of somewhere in between `0` and `3000` milliseconds.
+
+Seeing a `p50 drift` of `2999` suggests that there is room for improvmenet, and we could benefit from a higher throughput.
+This could be achieved by scaling either <<task-manager-health-resolution-scale-horizontally, horizontally>> or <<task-manager-health-resolution-scale-vertically, vertically>>.
+
+In the above hypothetical scenario, it would be worth experimenting with both options.
+If your {kib} instances have the capacity for higher resource utilization, for instance, it might be easiest to start by scaling vertically.
+If, on the other hand, your {kib} instances are already experiencing high resource utilization, then it might be better to scale horizontally by provisioning an additional {kib} instance.
+
+[[task-manager-health-evaluate-the-runtime-long-running-task]]
+*Theory*:
+Perhaps tasks aren't "running late" so much as "running for too long"?
+
+*Diagnosis*:
+
+Diagnosing the theory that {kib} Task Manager has <<task-manager-health-evaluate-the-runtime-insufficient-workload,insufficient throughtput to handle the scheduled workload>> theorized a hypothetical scenario where both _drift_ and _load_ are unusually high.
+
+Suppose an alternate scenario, where `drift` is high, but `load` is not, such as the following:
+
+[source,json]
+--------------------------------------------------
+{
+    "drift": { # <1>
+        "p50": 32999,
+        "p90": 83845,
+        "p95": 90328,
+        "p99": 123845
+    },
+    "load": { # <2>
+        "p50": 40,
+        "p90": 75,
+        "p95": 80,
+        "p99": 100
+    }
+}
+--------------------------------------------------
+<1> drift shows us that most (if not all) tasks are running at least 32 seconds too late
+<2> load shows us that, for the most part, we have capacity to run more concurrent tasks than we are
+
+In the scenario above we can see that tasks are in fact being run far too late, but we have sufficient capacity to run more concurrent tasks.
+A high capacity allows {kib} to run multiple different tasks concurrently, but it does not allow {kib} to run multiple instances of the same task concurrently.
+
+This means that if a task is configured to run at a specified schedule, but executing the tasks takes longer than the cadence of that schedule, then that task will always overrun its schedule and experience a high _drift_.
+
+Evaluating the health stats in out hypothetical scenario, we can see the following output under `stats.runtime.value.execution.duration`:
+
+[source,json]
+--------------------------------------------------
+{
+	"alerting:.index-threshold": { # <1>
+		"p50": 95,
+		"p90": 1725,
+		"p95": 2761,
+		"p99": 2761
+	},
+	"alerting:.es-query": { # <2>
+		"p50": 7149,
+		"p90": 40071,
+		"p95": 45282,
+		"p99": 121845
+	},
+	"actions:.index": {
+		"p50": 166,
+		"p90": 166,
+		"p95": 166,
+		"p99": 166
+	}
+}
+--------------------------------------------------
+<1> 50% of the tasks backing `Index Threshold Alerts` complete in less than 100 milliseconds
+<2> 50% of the tasks backing `ES Query Alerts` complete in 7 seconds, but at least 10% take longer than 40 seconds!
+
+We can infer from these stats that the high _drift_ the {kib} Task Manager is experiencing is most likely due to long running ES Query Alerts that are running for a long time.
+
+Resolving this issue is context dependent and would change from case to case.
+In the hypothetical example above, most likely, this would be resolved by replacing the ES Query in the Alert with a faster one, or improving the {es} throughput to speed up the exiting query.
+
+[[task-manager-health-evaluate-the-runtime-fail-rate]]
+*Theory*:
+Perhaps tasks aren't "running late" so much as "take multiple attempts to succeed"?
+
+*Diagnosis*:
+
+A high error rate could cause a task to appear to run late, when in fact it runs on time, but experiences a high failure rate.
+
+Evaluating the health stats above, we can see the following output under `stats.runtime.value.execution.result_frequency_percent_as_number`:
+
+[source,json]
+--------------------------------------------------
+{
+	"alerting:.index-threshold": { # <1>
+		"Success": 100,
+		"RetryScheduled": 0,
+		"Failed": 0,
+		"status": "OK"
+	},
+	"alerting:xpack.uptime.alerts.monitorStatus": {
+		"Success": 100,
+		"RetryScheduled": 0,
+		"Failed": 0,
+		"status": "OK"
+	},
+	"actions:.index": { # <2>
+		"Success": 8,
+		"RetryScheduled": 0,
+		"Failed": 92,
+		"status": "error" # <3>
+	}
+}
+--------------------------------------------------
+<1> 100% of the tasks backing `Index Threshold Alerts` successfully complete
+<2> 92% of the tasks backing `ES Index Actions` fail to complete
+<3> the tasks backing `ES Index Actions` have exceeded the default `monitored_task_execution_thresholds` _error_ configuration
+
+We can infer from these stats that most `actions:.index` tasks, which back the `ES Index` {kib} action, are failing a lot.
+Resolving that would require deeper investigation into the {kib} Server Log, where the exact errors would be logged, and addressing the specific errors identified in the logs.
+
