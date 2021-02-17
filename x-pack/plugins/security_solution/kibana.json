@@ -21,7 +21,6 @@
   "optionalPlugins": [
     "encryptedSavedObjects",
     "fleet",
-    "globalSearch",
     "ml",
     "newsfeed",
     "security",
