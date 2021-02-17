@@ -21,6 +21,10 @@ const comments: Comment[] = [
     createdBy: { username: 'elastic' },
     pushedAt: null,
     pushedBy: null,
+    rule: {
+      id: 'rule-id-1',
+      name: 'rule-name-1',
+    },
     updatedAt: null,
     updatedBy: null,
     version: 'WzQ3LDFc',
@@ -35,6 +39,10 @@ const comments: Comment[] = [
     createdBy: { username: 'elastic' },
     pushedAt: null,
     pushedBy: null,
+    rule: {
+      id: 'rule-id-2',
+      name: 'rule-name-2',
+    },
     updatedAt: null,
     updatedBy: null,
     version: 'WzQ3LDFc',

@@ -293,7 +293,11 @@ export const UserActionTree = React.memo(
             // Comment creation
             if (action.commentId != null && action.action === 'create') {
               const comment = caseData.comments.find((c) => c.id === action.commentId);
-              if (comment != null && isRight(ContextTypeUserRt.decode(comment))) {
+              if (
+                comment != null &&
+                isRight(ContextTypeUserRt.decode(comment)) &&
+                comment.type === CommentType.user
+              ) {
                 return [
                   ...comments,
                   {
@@ -345,7 +349,11 @@ export const UserActionTree = React.memo(
                     ),
                   },
                 ];
-              } else if (comment != null && isRight(AlertCommentRequestRt.decode(comment))) {
+              } else if (
+                comment != null &&
+                isRight(AlertCommentRequestRt.decode(comment)) &&
+                comment.type === CommentType.alert
+              ) {
                 // TODO: clean this up
                 const alertId = Array.isArray(comment.alertId)
                   ? comment.alertId.length > 0
