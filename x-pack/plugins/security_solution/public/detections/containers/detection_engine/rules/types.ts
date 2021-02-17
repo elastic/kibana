@@ -78,6 +78,7 @@ const StatusTypes = t.union([
   t.literal('failed'),
   t.literal('going to run'),
   t.literal('partial failure'),
+  t.literal('warning'),
 ]);
 
 // TODO: make a ticket
@@ -254,7 +255,13 @@ export interface RuleStatus {
   failures: RuleInfoStatus[];
 }
 
-export type RuleStatusType = 'executing' | 'failed' | 'going to run' | 'succeeded';
+export type RuleStatusType =
+  | 'executing'
+  | 'failed'
+  | 'going to run'
+  | 'succeeded'
+  | 'partial failure'
+  | 'warning';
 export interface RuleInfoStatus {
   alert_id: string;
   status_date: string;
