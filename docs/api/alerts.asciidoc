@@ -18,7 +18,7 @@ The following alerts APIs are available:
 
 * <<alerts-api-enable, Enable alert API>> to enable a single alert by ID
 
-* <<alerts-api-disable, Disable alert API>> to disable a single {kib} alert by ID
+* <<alerts-api-disable, Disable alert API>> to disable a single alert by ID
 
 * <<alerts-api-mute-all, Mute all alert instances API>> to mute all alert instances for a single {kib} alert by ID
 
