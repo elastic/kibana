@@ -214,49 +214,6 @@
           "dynamic": "false",
           "type": "object"
         },
-        "search-session": {
-          "properties": {
-            "appId": {
-              "type": "keyword"
-            },
-            "created": {
-              "type": "date"
-            },
-            "touched": {
-              "type": "date"
-            },
-            "expires": {
-              "type": "date"
-            },
-            "idMapping": {
-              "enabled": false,
-              "type": "object"
-            },
-            "initialState": {
-              "enabled": false,
-              "type": "object"
-            },
-            "name": {
-              "type": "keyword"
-            },
-            "persisted": {
-              "type": "boolean"
-            },
-            "restoreState": {
-              "enabled": false,
-              "type": "object"
-            },
-            "sessionId": {
-              "type": "keyword"
-            },
-            "status": {
-              "type": "keyword"
-            },
-            "urlGeneratorId": {
-              "type": "keyword"
-            }
-          }
-        },
         "canvas-element": {
           "dynamic": "false",
           "properties": {
@@ -431,6 +388,13 @@
                 }
               }
             },
+            "settings": {
+              "properties": {
+                "syncAlerts": {
+                  "type": "boolean"
+                }
+              }
+            },
             "status": {
               "type": "keyword"
             },
@@ -438,6 +402,9 @@
               "type": "keyword"
             },
             "title": {
+              "type": "keyword"
+            },
+            "type": {
               "type": "keyword"
             },
             "updated_at": {
@@ -461,6 +428,9 @@
         "cases-comments": {
           "properties": {
             "alertId": {
+              "type": "keyword"
+            },
+            "associationType": {
               "type": "keyword"
             },
             "comment": {
@@ -565,6 +535,78 @@
                   "type": "keyword"
                 }
               }
+            },
+            "updated_at": {
+              "type": "date"
+            },
+            "updated_by": {
+              "properties": {
+                "email": {
+                  "type": "keyword"
+                },
+                "full_name": {
+                  "type": "keyword"
+                },
+                "username": {
+                  "type": "keyword"
+                }
+              }
+            }
+          }
+        },
+        "cases-connector-mappings": {
+          "properties": {
+            "mappings": {
+              "properties": {
+                "action_type": {
+                  "type": "keyword"
+                },
+                "source": {
+                  "type": "keyword"
+                },
+                "target": {
+                  "type": "keyword"
+                }
+              }
+            }
+          }
+        },
+        "cases-sub-case": {
+          "properties": {
+            "closed_at": {
+              "type": "date"
+            },
+            "closed_by": {
+              "properties": {
+                "email": {
+                  "type": "keyword"
+                },
+                "full_name": {
+                  "type": "keyword"
+                },
+                "username": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "created_at": {
+              "type": "date"
+            },
+            "created_by": {
+              "properties": {
+                "email": {
+                  "type": "keyword"
+                },
+                "full_name": {
+                  "type": "keyword"
+                },
+                "username": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "status": {
+              "type": "keyword"
             },
             "updated_at": {
               "type": "date"
@@ -740,6 +782,19 @@
         },
         "endpoint:user-artifact-manifest": {
           "properties": {
+            "artifacts": {
+              "properties": {
+                "artifactId": {
+                  "index": false,
+                  "type": "keyword"
+                },
+                "policyId": {
+                  "index": false,
+                  "type": "keyword"
+                }
+              },
+              "type": "nested"
+            },
             "created": {
               "index": false,
               "type": "date"
@@ -750,19 +805,6 @@
             "semanticVersion": {
               "index": false,
               "type": "keyword"
-            },
-            "artifacts": {
-              "type": "nested",
-              "properties": {
-                "policyId": {
-                  "type": "keyword",
-                  "index": false
-                },
-                "artifactId": {
-                  "type": "keyword",
-                  "index": false
-                }
-              }
             }
           }
         },
@@ -965,12 +1007,22 @@
               "type": "keyword"
             },
             "name": {
+              "fields": {
+                "text": {
+                  "type": "text"
+                }
+              },
               "type": "keyword"
             },
             "os_types": {
               "type": "keyword"
             },
             "tags": {
+              "fields": {
+                "text": {
+                  "type": "text"
+                }
+              },
               "type": "keyword"
             },
             "tie_breaker_id": {
@@ -1091,12 +1143,22 @@
               "type": "keyword"
             },
             "name": {
+              "fields": {
+                "text": {
+                  "type": "text"
+                }
+              },
               "type": "keyword"
             },
             "os_types": {
               "type": "keyword"
             },
             "tags": {
+              "fields": {
+                "text": {
+                  "type": "text"
+                }
+              },
               "type": "keyword"
             },
             "tie_breaker_id": {
@@ -1113,10 +1175,14 @@
             }
           }
         },
-        "file-upload-telemetry": {
+        "file-upload-usage-collection-telemetry": {
           "properties": {
-            "filesUploadedTotalCount": {
-              "type": "long"
+            "file_upload": {
+              "properties": {
+                "index_creation_count": {
+                  "type": "long"
+                }
+              }
             }
           }
         },
@@ -1223,9 +1289,6 @@
             },
             "policy_revision": {
               "type": "integer"
-            },
-            "shared_id": {
-              "type": "keyword"
             },
             "type": {
               "type": "keyword"
@@ -1338,6 +1401,12 @@
               "type": "text"
             },
             "is_default": {
+              "type": "boolean"
+            },
+            "is_default_fleet_server": {
+              "type": "boolean"
+            },
+            "is_managed": {
               "type": "boolean"
             },
             "monitoring_enabled": {
@@ -1534,6 +1603,10 @@
             }
           }
         },
+        "legacy-url-alias": {
+          "dynamic": "false",
+          "type": "object"
+        },
         "lens": {
           "properties": {
             "description": {
@@ -1573,6 +1646,10 @@
         },
         "map": {
           "properties": {
+            "bounds": {
+              "dynamic": "false",
+              "type": "object"
+            },
             "description": {
               "type": "text"
             },
@@ -1621,17 +1698,6 @@
             },
             "type": {
               "type": "keyword"
-            }
-          }
-        },
-        "ml-telemetry": {
-          "properties": {
-            "file_data_visualizer": {
-              "properties": {
-                "index_creation_count": {
-                  "type": "long"
-                }
-              }
             }
           }
         },
@@ -1714,6 +1780,15 @@
             "description": {
               "type": "text"
             },
+            "grid": {
+              "enabled": false,
+              "type": "object"
+            },
+            "hideChart": {
+              "doc_values": false,
+              "index": false,
+              "type": "boolean"
+            },
             "hits": {
               "doc_values": false,
               "index": false,
@@ -1727,6 +1802,9 @@
                 }
               }
             },
+            "pre712": {
+              "type": "boolean"
+            },
             "sort": {
               "doc_values": false,
               "index": false,
@@ -1737,6 +1815,58 @@
             },
             "version": {
               "type": "integer"
+            }
+          }
+        },
+        "search-session": {
+          "properties": {
+            "appId": {
+              "type": "keyword"
+            },
+            "created": {
+              "type": "date"
+            },
+            "expires": {
+              "type": "date"
+            },
+            "idMapping": {
+              "enabled": false,
+              "type": "object"
+            },
+            "initialState": {
+              "enabled": false,
+              "type": "object"
+            },
+            "name": {
+              "type": "keyword"
+            },
+            "persisted": {
+              "type": "boolean"
+            },
+            "realmName": {
+              "type": "keyword"
+            },
+            "realmType": {
+              "type": "keyword"
+            },
+            "restoreState": {
+              "enabled": false,
+              "type": "object"
+            },
+            "sessionId": {
+              "type": "keyword"
+            },
+            "status": {
+              "type": "keyword"
+            },
+            "touched": {
+              "type": "date"
+            },
+            "urlGeneratorId": {
+              "type": "keyword"
+            },
+            "username": {
+              "type": "keyword"
             }
           }
         },
@@ -2063,8 +2193,12 @@
               "type": "keyword"
             },
             "sort": {
+              "dynamic": "false",
               "properties": {
                 "columnId": {
+                  "type": "keyword"
+                },
+                "columnType": {
                   "type": "keyword"
                 },
                 "sortDirection": {
@@ -2257,13 +2391,6 @@
             },
             "version": {
               "type": "integer"
-            }
-          }
-        },
-        "tsvb-validation-telemetry": {
-          "properties": {
-            "failedRequests": {
-              "type": "long"
             }
           }
         },
@@ -2475,7 +2602,9 @@
       "index": {
         "auto_expand_replicas": "0-1",
         "number_of_replicas": "0",
-        "number_of_shards": "1"
+        "number_of_shards": "1",
+        "priority": "10",
+        "refresh_interval": "1s"
       }
     }
   }

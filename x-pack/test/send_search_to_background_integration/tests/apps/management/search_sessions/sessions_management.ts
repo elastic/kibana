@@ -129,31 +129,34 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         expect(searchSessionList.length).to.be(10);
 
-        expect(searchSessionList.map((ss) => ss.created)).to.eql([
-          '25 Dec, 2020, 00:00:00',
-          '24 Dec, 2020, 00:00:00',
-          '23 Dec, 2020, 00:00:00',
-          '22 Dec, 2020, 00:00:00',
-          '21 Dec, 2020, 00:00:00',
-          '20 Dec, 2020, 00:00:00',
-          '19 Dec, 2020, 00:00:00',
-          '18 Dec, 2020, 00:00:00',
-          '17 Dec, 2020, 00:00:00',
-          '16 Dec, 2020, 00:00:00',
-        ]);
-
-        expect(searchSessionList.map((ss) => ss.expires)).to.eql([
-          '--',
-          '--',
-          '--',
-          '23 Dec, 2020, 00:00:00',
-          '22 Dec, 2020, 00:00:00',
-          '--',
-          '--',
-          '--',
-          '18 Dec, 2020, 00:00:00',
-          '17 Dec, 2020, 00:00:00',
-        ]);
+        expectSnapshot(searchSessionList.map((ss) => ss.created)).toMatchInline(`
+          Array [
+            "16 Feb, 2021, 00:00:00",
+            "15 Feb, 2021, 00:00:00",
+            "14 Feb, 2021, 00:00:00",
+            "13 Feb, 2021, 00:00:00",
+            "12 Feb, 2021, 00:00:00",
+            "11 Feb, 2021, 00:00:00",
+            "10 Feb, 2021, 00:00:00",
+            "9 Feb, 2021, 00:00:00",
+            "8 Feb, 2021, 00:00:00",
+            "7 Feb, 2021, 00:00:00",
+          ]
+        `);
+        expectSnapshot(searchSessionList.map((ss) => ss.expires)).toMatchInline(`
+          Array [
+            "--",
+            "24 Feb, 2021, 00:00:00",
+            "24 Feb, 2021, 00:00:00",
+            "24 Feb, 2021, 00:00:00",
+            "24 Feb, 2021, 00:00:00",
+            "24 Feb, 2021, 00:00:00",
+            "24 Feb, 2021, 00:00:00",
+            "24 Feb, 2021, 00:00:00",
+            "--",
+            "24 Feb, 2021, 00:00:00",
+          ]
+        `);
 
         await esArchiver.unload('data/search_sessions');
       });
