@@ -190,7 +190,7 @@ internal {kib} navigations with carrying over current filters.
 | Current query string.
 
 |
-| context.panel.query.lang
+| context.panel.query.language
 | Current query language.
 
 |
@@ -200,8 +200,8 @@ context.panel.timeRange.to
 Tip: Use in combination with <<helpers, date>> helper to format date.
 
 |
-| context.panel.timeRange.indexPatternId +
-context.panel.timeRange.indexPatternIds
+| context.panel.indexPatternId +
+context.panel.indexPatternIds
 |Index pattern ids used by a panel.
 
 |
@@ -256,7 +256,7 @@ Note:
 | *Range selection*
 | event.from +
 event.to
-| `from` and `to` values of selected range. Depending on your data, could be either a date or number. +
+| `from` and `to` values of the selected range as numbers. +
 Tip: Consider using <<helpers, date>> helper for date formatting.
 
 |
