@@ -28,6 +28,7 @@ const baseProps = {
 describe('<AttributeSelector />', () => {
   it('renders', () => {
     const wrapper = shallow(<AttributeSelector {...baseProps} />);
+
     expect(wrapper.find('[data-test-subj="attributeSelector"]')).toBeDefined();
   });
 
@@ -39,7 +40,8 @@ describe('<AttributeSelector />', () => {
       const wrapper = shallow(
         <AttributeSelector {...baseProps} availableAuthProviders={undefined} />
       );
-      expect(wrapper.find('[data-test-subj="authProviderSelect"]')).toBeUndefined();
+
+      expect(wrapper.find('[data-test-subj="authProviderSelect"]')).toHaveLength(0);
     });
 
     it('renders a list of auth providers from the "availableAuthProviders" prop including an "Any" option', () => {
@@ -48,6 +50,7 @@ describe('<AttributeSelector />', () => {
       );
 
       const select = findAuthProvidersSelect(wrapper) as any;
+
       expect(select.props().options).toEqual([
         {
           label: expect.any(String),
@@ -73,6 +76,7 @@ describe('<AttributeSelector />', () => {
       );
 
       const select = findAuthProvidersSelect(wrapper) as any;
+
       expect(select.props().selectedOptions).toEqual([{ label: 'kbn_saml', value: 'kbn_saml' }]);
     });
 
@@ -84,6 +88,7 @@ describe('<AttributeSelector />', () => {
 
       const select = findAuthProvidersSelect(wrapper);
       select.simulate('change', [{ label: 'kbn_saml', value: 'kbn_saml' }]);
+
       expect(handleAuthProviderChangeMock).toHaveBeenCalledWith(['kbn_saml']);
     });
   });
