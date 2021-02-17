@@ -12,6 +12,7 @@ import { getServiceInstanceSystemMetricStats } from './get_service_instance_syst
 import { getServiceInstanceTransactionStats } from './get_service_instance_transaction_stats';
 
 export interface ServiceInstanceParams {
+  environment?: string;
   setup: Setup & SetupTimeRange;
   serviceName: string;
   transactionType: string;
