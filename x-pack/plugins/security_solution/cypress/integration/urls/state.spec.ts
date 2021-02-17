@@ -75,11 +75,7 @@ describe('url state', () => {
 
     cy.url().should(
       'include',
-      `(global:(linkTo:!(timeline),timerange:(from:%27${new Date(
-        ABSOLUTE_DATE.newStartTimeTyped
-      ).toISOString()}%27,kind:absolute,to:%27${new Date(
-        ABSOLUTE_DATE.newEndTimeTyped
-      ).toISOString()}%27))`
+      `(global:(linkTo:!(timeline),timerange:(from:%272019-08-01T12:33:29.186Z%27,kind:absolute,to:%272019-08-01T13:03:29.186Z%27))`
     );
   });
 
@@ -132,11 +128,7 @@ describe('url state', () => {
 
     cy.url().should(
       'include',
-      `timeline:(linkTo:!(),timerange:(from:%27${new Date(
-        ABSOLUTE_DATE.newStartTimeTyped
-      ).toISOString()}%27,kind:absolute,to:%27${new Date(
-        ABSOLUTE_DATE.newEndTimeTyped
-      ).toISOString()}%27))`
+      `(global:(linkTo:!(),timerange:(from:%272019-08-01T20:03:29.186Z%27,kind:absolute,to:%272019-08-01T20:33:29.186Z%27))`
     );
   });
 
