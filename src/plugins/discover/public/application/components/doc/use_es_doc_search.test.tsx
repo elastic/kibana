@@ -6,13 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
-import { buildSearchBody, useEsDocSearch, ElasticRequestState } from './use_es_doc_search';
-import { DocProps } from './doc';
-import { Observable } from 'rxjs';
-
-const mockSearchResult = new Observable();
-
 jest.mock('../../../kibana_services', () => ({
   getServices: () => ({
     data: {
@@ -22,19 +15,59 @@ jest.mock('../../../kibana_services', () => ({
         }),
       },
     },
+    uiSettings: {
+      get: (key: string) => {
+        if (key === mockSearchFieldsFromSource) {
+          return false;
+        }
+      },
+    },
   }),
 }));
+import { renderHook, act } from '@testing-library/react-hooks';
+import { buildSearchBody, useEsDocSearch, ElasticRequestState } from './use_es_doc_search';
+import { DocProps } from './doc';
+import { Observable } from 'rxjs';
+import { SEARCH_FIELDS_FROM_SOURCE as mockSearchFieldsFromSource } from '../../../../common';
+
+const mockSearchResult = new Observable();
 
 describe('Test of <Doc /> helper / hook', () => {
-  test('buildSearchBody', () => {
+  test('buildSearchBody with _source', () => {
     const indexPattern = {
       getComputedFields: () => ({ storedFields: [], scriptFields: [], docvalueFields: [] }),
     } as any;
-    const actual = buildSearchBody('1', indexPattern);
+    const actual = buildSearchBody('1', indexPattern, false);
     expect(actual).toMatchInlineSnapshot(`
       Object {
         "_source": true,
         "docvalue_fields": Array [],
+        "fields": undefined,
+        "query": Object {
+          "ids": Object {
+            "values": Array [
+              "1",
+            ],
+          },
+        },
+        "script_fields": Array [],
+        "stored_fields": Array [],
+      }
+    `);
+  });
+
+  test('buildSearchBody with fields', () => {
+    const indexPattern = {
+      getComputedFields: () => ({ storedFields: [], scriptFields: [], docvalueFields: [] }),
+    } as any;
+    const actual = buildSearchBody('1', indexPattern, true);
+    expect(actual).toMatchInlineSnapshot(`
+      Object {
+        "_source": false,
+        "docvalue_fields": Array [],
+        "fields": Array [
+          "*",
+        ],
         "query": Object {
           "ids": Object {
             "values": Array [
