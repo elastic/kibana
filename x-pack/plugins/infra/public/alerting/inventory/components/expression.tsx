@@ -71,6 +71,7 @@ import {
 import { validateMetricThreshold } from './validation';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 
+import { ExpressionChart } from './expression_chart';
 const FILTER_TYPING_DEBOUNCE_MS = 500;
 
 export interface AlertContextMeta {
@@ -302,18 +303,26 @@ export const Expressions: React.FC<Props> = (props) => {
       {alertParams.criteria &&
         alertParams.criteria.map((e, idx) => {
           return (
-            <ExpressionRow
-              nodeType={alertParams.nodeType}
-              canDelete={alertParams.criteria.length > 1}
-              remove={removeExpression}
-              addExpression={addExpression}
-              key={idx} // idx's don't usually make good key's but here the index has semantic meaning
-              expressionId={idx}
-              setAlertParams={updateParams}
-              errors={(errors[idx] as IErrorObject) || emptyError}
-              expression={e || {}}
-              fields={derivedIndexPattern.fields}
-            />
+            <>
+              <ExpressionRow
+                nodeType={alertParams.nodeType}
+                canDelete={alertParams.criteria.length > 1}
+                remove={removeExpression}
+                addExpression={addExpression}
+                key={idx} // idx's don't usually make good key's but here the index has semantic meaning
+                expressionId={idx}
+                setAlertParams={updateParams}
+                errors={(errors[idx] as IErrorObject) || emptyError}
+                expression={e || {}}
+                fields={derivedIndexPattern.fields}
+              />
+              <ExpressionChart
+                expression={e}
+                filterQuery={alertParams.filterQueryText}
+                nodeType={alertParams.nodeType}
+                sourceId={alertParams.sourceId}
+              />
+            </>
           );
         })}
 
