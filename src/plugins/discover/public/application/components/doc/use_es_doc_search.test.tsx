@@ -6,6 +6,14 @@
  * Side Public License, v 1.
  */
 
+import { renderHook, act } from '@testing-library/react-hooks';
+import { buildSearchBody, useEsDocSearch, ElasticRequestState } from './use_es_doc_search';
+import { DocProps } from './doc';
+import { Observable } from 'rxjs';
+import { SEARCH_FIELDS_FROM_SOURCE as mockSearchFieldsFromSource } from '../../../../common';
+
+const mockSearchResult = new Observable();
+
 jest.mock('../../../kibana_services', () => ({
   getServices: () => ({
     data: {
@@ -24,16 +32,9 @@ jest.mock('../../../kibana_services', () => ({
     },
   }),
 }));
-import { renderHook, act } from '@testing-library/react-hooks';
-import { buildSearchBody, useEsDocSearch, ElasticRequestState } from './use_es_doc_search';
-import { DocProps } from './doc';
-import { Observable } from 'rxjs';
-import { SEARCH_FIELDS_FROM_SOURCE as mockSearchFieldsFromSource } from '../../../../common';
-
-const mockSearchResult = new Observable();
 
 describe('Test of <Doc /> helper / hook', () => {
-  test('buildSearchBody with _source', () => {
+  test('buildSearchBody given useNewFieldsApi is false', () => {
     const indexPattern = {
       getComputedFields: () => ({ storedFields: [], scriptFields: [], docvalueFields: [] }),
     } as any;
@@ -56,7 +57,7 @@ describe('Test of <Doc /> helper / hook', () => {
     `);
   });
 
-  test('buildSearchBody with fields', () => {
+  test('buildSearchBody useNewFieldsApi is true', () => {
     const indexPattern = {
       getComputedFields: () => ({ storedFields: [], scriptFields: [], docvalueFields: [] }),
     } as any;
