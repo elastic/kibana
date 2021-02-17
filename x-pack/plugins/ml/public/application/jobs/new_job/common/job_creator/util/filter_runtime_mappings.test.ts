@@ -101,31 +101,31 @@ describe('filter_runtime_mappings', () => {
 
     test('returns no runtime mappings, no mappings in aggs', async () => {
       const resp = filterRuntimeMappings(job, datafeed);
-      expect(Object.keys(resp?.runtime_mappings ?? {}).length).toEqual(0);
+      expect(Object.keys(resp.runtime_mappings).length).toEqual(0);
 
-      expect(Object.keys(resp?.discarded_mappings ?? {}).length).toEqual(2);
-      expect(resp?.discarded_mappings.responsetime_big).not.toEqual(undefined);
-      expect(resp?.discarded_mappings.airline_lower).not.toEqual(undefined);
+      expect(Object.keys(resp.discarded_mappings).length).toEqual(2);
+      expect(resp.discarded_mappings.responsetime_big).not.toEqual(undefined);
+      expect(resp.discarded_mappings.airline_lower).not.toEqual(undefined);
     });
 
     test('returns no runtime mappings, no runtime mappings in datafeed', async () => {
       datafeed.runtime_mappings = undefined;
       const resp = filterRuntimeMappings(job, datafeed);
-      expect(Object.keys(resp?.runtime_mappings ?? {}).length).toEqual(0);
-      expect(resp?.runtime_mappings.responsetime_big).toEqual(undefined);
+      expect(Object.keys(resp.runtime_mappings).length).toEqual(0);
+      expect(resp.runtime_mappings.responsetime_big).toEqual(undefined);
 
-      expect(Object.keys(resp?.discarded_mappings ?? {}).length).toEqual(0);
-      expect(resp?.discarded_mappings.airline_lower).toEqual(undefined);
+      expect(Object.keys(resp.discarded_mappings).length).toEqual(0);
+      expect(resp.discarded_mappings.airline_lower).toEqual(undefined);
     });
 
     test('return one runtime mapping and one unused mapping, mappings in aggs', async () => {
       datafeed.aggregations = getAggs();
       const resp = filterRuntimeMappings(job, datafeed);
-      expect(Object.keys(resp?.runtime_mappings ?? {}).length).toEqual(1);
-      expect(resp?.runtime_mappings.responsetime_big).not.toEqual(undefined);
+      expect(Object.keys(resp.runtime_mappings).length).toEqual(1);
+      expect(resp.runtime_mappings.responsetime_big).not.toEqual(undefined);
 
-      expect(Object.keys(resp?.discarded_mappings ?? {}).length).toEqual(1);
-      expect(resp?.discarded_mappings.airline_lower).not.toEqual(undefined);
+      expect(Object.keys(resp.discarded_mappings).length).toEqual(1);
+      expect(resp.discarded_mappings.airline_lower).not.toEqual(undefined);
     });
 
     test('return no runtime mappings, no mappings in aggs', async () => {
@@ -133,22 +133,22 @@ describe('filter_runtime_mappings', () => {
       datafeed.aggregations!.buckets!.aggregations!.responsetime!.avg!.field! = 'responsetime';
 
       const resp = filterRuntimeMappings(job, datafeed);
-      expect(Object.keys(resp?.runtime_mappings ?? {}).length).toEqual(0);
+      expect(Object.keys(resp.runtime_mappings).length).toEqual(0);
 
-      expect(Object.keys(resp?.discarded_mappings ?? {}).length).toEqual(2);
-      expect(resp?.discarded_mappings.responsetime_big).not.toEqual(undefined);
-      expect(resp?.discarded_mappings.airline_lower).not.toEqual(undefined);
+      expect(Object.keys(resp.discarded_mappings).length).toEqual(2);
+      expect(resp.discarded_mappings.responsetime_big).not.toEqual(undefined);
+      expect(resp.discarded_mappings.airline_lower).not.toEqual(undefined);
     });
 
     test('return one runtime mapping and one unused mapping, no mappings in aggs', async () => {
       // set the detector field to be a runtime mapping
       job.analysis_config.detectors[0].field_name = 'responsetime_big';
       const resp = filterRuntimeMappings(job, datafeed);
-      expect(Object.keys(resp?.runtime_mappings ?? {}).length).toEqual(1);
-      expect(resp?.runtime_mappings.responsetime_big).not.toEqual(undefined);
+      expect(Object.keys(resp.runtime_mappings).length).toEqual(1);
+      expect(resp.runtime_mappings.responsetime_big).not.toEqual(undefined);
 
-      expect(Object.keys(resp?.discarded_mappings ?? {}).length).toEqual(1);
-      expect(resp?.discarded_mappings.airline_lower).not.toEqual(undefined);
+      expect(Object.keys(resp.discarded_mappings).length).toEqual(1);
+      expect(resp.discarded_mappings.airline_lower).not.toEqual(undefined);
     });
 
     test('return two runtime mappings, no mappings in aggs', async () => {
@@ -157,11 +157,11 @@ describe('filter_runtime_mappings', () => {
       // set the detector by field to be a runtime mapping
       job.analysis_config.detectors[0].by_field_name = 'airline_lower';
       const resp = filterRuntimeMappings(job, datafeed);
-      expect(Object.keys(resp?.runtime_mappings ?? {}).length).toEqual(2);
-      expect(resp?.runtime_mappings.responsetime_big).not.toEqual(undefined);
-      expect(resp?.runtime_mappings.airline_lower).not.toEqual(undefined);
+      expect(Object.keys(resp.runtime_mappings).length).toEqual(2);
+      expect(resp.runtime_mappings.responsetime_big).not.toEqual(undefined);
+      expect(resp.runtime_mappings.airline_lower).not.toEqual(undefined);
 
-      expect(Object.keys(resp?.discarded_mappings ?? {}).length).toEqual(0);
+      expect(Object.keys(resp.discarded_mappings).length).toEqual(0);
     });
 
     test('return two runtime mappings, no mappings in aggs, categorization job', async () => {
@@ -173,11 +173,11 @@ describe('filter_runtime_mappings', () => {
       job.analysis_config.categorization_field_name = 'airline_lower';
 
       const resp = filterRuntimeMappings(job, datafeed);
-      expect(Object.keys(resp?.runtime_mappings ?? {}).length).toEqual(1);
-      expect(resp?.runtime_mappings.airline_lower).not.toEqual(undefined);
+      expect(Object.keys(resp.runtime_mappings).length).toEqual(1);
+      expect(resp.runtime_mappings.airline_lower).not.toEqual(undefined);
 
-      expect(Object.keys(resp?.discarded_mappings ?? {}).length).toEqual(1);
-      expect(resp?.discarded_mappings.responsetime_big).not.toEqual(undefined);
+      expect(Object.keys(resp.discarded_mappings).length).toEqual(1);
+      expect(resp.discarded_mappings.responsetime_big).not.toEqual(undefined);
     });
   });
 });
