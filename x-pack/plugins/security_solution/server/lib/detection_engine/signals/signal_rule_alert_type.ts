@@ -170,7 +170,7 @@ export const signalRulesAlertType = ({
 
       logger.debug(buildRuleMessage('[+] Starting Signal Rule execution'));
       logger.debug(buildRuleMessage(`interval: ${interval}`));
-      let wrotePartialFailureStatus = false;
+      let wroteWarningStatus = false;
       await ruleStatusService.goingToRun();
 
       // check if rule has permissions to access given index pattern
@@ -191,7 +191,7 @@ export const signalRulesAlertType = ({
             }),
           ]);
 
-          wrotePartialFailureStatus = await flow(
+          wroteWarningStatus = await flow(
             () =>
               tryCatch(
                 () =>
@@ -647,7 +647,7 @@ export const signalRulesAlertType = ({
               `[+] Finished indexing ${result.createdSignalsCount} signals into ${outputIndex}`
             )
           );
-          if (!hasError && !wrotePartialFailureStatus) {
+          if (!hasError && !wroteWarningStatus) {
             await ruleStatusService.success('succeeded', {
               bulkCreateTimeDurations: result.bulkCreateTimes,
               searchAfterTimeDurations: result.searchAfterTimes,

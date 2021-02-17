@@ -307,7 +307,11 @@ export const getMonitoringColumns = (
             }}
             href={formatUrl(getRuleDetailsUrl(item.id))}
           >
-            {value}
+            {/* Temporary fix if on upgrade a rule has a status of 'partial failure' we want to display that text as 'warning' */}
+            {/* On the next subsequent rule run, that 'partial failure' status will be re-written as a 'warning' status */}
+            {/* and this code will no longer be necessary */}
+            {/* TODO: remove this code in 8.0.0 */}
+            {value === 'partial failure' ? 'warning' : value}
           </LinkAnchor>
         );
       },
