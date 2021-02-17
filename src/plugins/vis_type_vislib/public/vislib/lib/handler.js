@@ -9,6 +9,7 @@
 import d3 from 'd3';
 import _ from 'lodash';
 import MarkdownIt from 'markdown-it';
+import moment from 'moment';
 
 import { NoResults } from '../errors';
 import { Layout } from './layout/layout';
@@ -24,6 +25,10 @@ const markdownIt = new MarkdownIt({
   html: false,
   linkify: true,
 });
+
+const convertToTimestamp = (date) => {
+  return parseInt(moment(date).format('x'));
+};
 
 /**
  * Handles building all the components of the visualization
@@ -79,11 +84,13 @@ export class Handler {
           case 'brush':
             const xRaw = _.get(eventPayload.data, 'series[0].values[0].xRaw');
             if (!xRaw) return; // not sure if this is possible?
+            const [start, end] = eventPayload.range;
+            const range = [convertToTimestamp(start), convertToTimestamp(end)];
             return self.vis.emit(eventType, {
               name: 'brush',
               data: {
                 table: xRaw.table,
-                range: eventPayload.range,
+                range,
                 column: xRaw.column,
               },
             });
