@@ -377,6 +377,33 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
+      it('should return top values for index pattern runtime string fields', async () => {
+        const { body } = await supertest
+          .post('/api/lens/index_stats/logstash-2015.09.22/field')
+          .set(COMMON_HEADERS)
+          .send({
+            dslQuery: { match_all: {} },
+            fromDate: TEST_START_TIME,
+            toDate: TEST_END_TIME,
+            fieldName: 'runtime_string_field',
+          })
+          .expect(200);
+
+        expect(body).to.eql({
+          totalDocuments: 4634,
+          sampledDocuments: 4634,
+          sampledValues: 4634,
+          topValues: {
+            buckets: [
+              {
+                count: 4634,
+                key: 'hello world!',
+              },
+            ],
+          },
+        });
+      });
+
       it('should apply filters and queries', async () => {
         const { body } = await supertest
           .post('/api/lens/index_stats/logstash-2015.09.22/field')

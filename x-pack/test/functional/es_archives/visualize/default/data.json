@@ -156,7 +156,8 @@
       "index-pattern": {
         "timeFieldName": "@timestamp",
         "title": "logstash-2015.09.22",
-        "fields":"[{\"name\":\"scripted_date\",\"type\":\"date\",\"count\":0,\"scripted\":true,\"script\":\"1234\",\"lang\":\"painless\",\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":false},{\"name\":\"scripted_string\",\"type\":\"string\",\"count\":0,\"scripted\":true,\"script\":\"return 'hello'\",\"lang\":\"painless\",\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":false}]"
+        "fields":"[{\"name\":\"scripted_date\",\"type\":\"date\",\"count\":0,\"scripted\":true,\"script\":\"1234\",\"lang\":\"painless\",\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":false},{\"name\":\"scripted_string\",\"type\":\"string\",\"count\":0,\"scripted\":true,\"script\":\"return 'hello'\",\"lang\":\"painless\",\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":false}]",
+        "runtimeFieldMap":"{\"runtime_string_field\":{\"type\":\"keyword\",\"script\":{\"source\":\"emit('hello world!')\"}}}"
       },
       "migrationVersion": {
         "index-pattern": "7.11.0"
