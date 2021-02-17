@@ -8,10 +8,6 @@
 import { i18n } from '@kbn/i18n';
 import { AppMountParameters, PluginInitializerContext } from 'kibana/public';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
-import { createMetricThresholdAlertType } from './alerting/metric_threshold';
-import { createInventoryMetricAlertType } from './alerting/inventory';
-import { createMetricAnomalyAlertType } from './alerting/metric_anomaly';
-import { getAlertType as getLogsAlertType } from './alerting/log_threshold';
 import { registerFeatures } from './register_feature';
 import {
   InfraClientSetupDeps,
@@ -33,10 +29,18 @@ export class Plugin implements InfraClientPluginClass {
       registerFeatures(pluginsSetup.home);
     }
 
-    pluginsSetup.triggersActionsUi.alertTypeRegistry.register(createInventoryMetricAlertType());
-    pluginsSetup.triggersActionsUi.alertTypeRegistry.register(getLogsAlertType());
-    pluginsSetup.triggersActionsUi.alertTypeRegistry.register(createMetricThresholdAlertType());
-    pluginsSetup.triggersActionsUi.alertTypeRegistry.register(createMetricAnomalyAlertType());
+    import('./alerting/log_threshold').then(({ getAlertType: getLogsAlertType }) =>
+      pluginsSetup.triggersActionsUi.alertTypeRegistry.register(getLogsAlertType())
+    );
+    import('./alerting/inventory').then(({ createInventoryMetricAlertType }) =>
+      pluginsSetup.triggersActionsUi.alertTypeRegistry.register(createInventoryMetricAlertType())
+    );
+    import('./alerting/metric_threshold').then(({ createMetricThresholdAlertType }) =>
+      pluginsSetup.triggersActionsUi.alertTypeRegistry.register(createMetricThresholdAlertType())
+    );
+    import('./alerting/metric_anomaly').then(({ createMetricAnomalyAlertType }) =>
+      pluginsSetup.triggersActionsUi.alertTypeRegistry.register(createMetricAnomalyAlertType())
+    );
 
     if (pluginsSetup.observability) {
       pluginsSetup.observability.dashboard.register({
