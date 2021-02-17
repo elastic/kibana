@@ -6,6 +6,7 @@
  */
 
 import { useReducer, useCallback, useRef, useEffect } from 'react';
+
 import { CasePostRequest } from '../../../../case/common/api';
 import { errorToToaster, useStateToaster } from '../../common/components/toasters';
 import { postCase } from './api';
@@ -16,6 +17,7 @@ interface NewCaseState {
   isError: boolean;
 }
 type Action = { type: 'FETCH_INIT' } | { type: 'FETCH_SUCCESS' } | { type: 'FETCH_FAILURE' };
+
 const dataFetchReducer = (state: NewCaseState, action: Action): NewCaseState => {
   switch (action.type) {
     case 'FETCH_INIT':
@@ -76,6 +78,7 @@ export const usePostCase = (): UsePostCase => {
     },
     [dispatchToaster]
   );
+
   useEffect(() => {
     return () => {
       abortCtrl.current.abort();

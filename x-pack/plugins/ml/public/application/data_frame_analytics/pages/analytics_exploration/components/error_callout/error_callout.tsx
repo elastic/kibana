@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiCallOut } from '@elastic/eui';
 
 interface Props {
-  error: string;
+  error: string | JSX.Element;
 }
 
 export const ErrorCallout: FC<Props> = ({ error }) => {
@@ -26,7 +26,7 @@ export const ErrorCallout: FC<Props> = ({ error }) => {
     </EuiCallOut>
   );
   // Job was created but not started so the destination index has not been created
-  if (error.includes('index_not_found')) {
+  if (typeof error === 'string' && error.includes('index_not_found')) {
     errorCallout = (
       <EuiCallOut
         title={i18n.translate('xpack.ml.dataframe.analytics.errorCallout.evaluateErrorTitle', {
@@ -43,7 +43,7 @@ export const ErrorCallout: FC<Props> = ({ error }) => {
         </p>
       </EuiCallOut>
     );
-  } else if (error.includes('No documents found')) {
+  } else if (typeof error === 'string' && error.includes('No documents found')) {
     // Job was started but no results have been written yet
     errorCallout = (
       <EuiCallOut
@@ -60,7 +60,7 @@ export const ErrorCallout: FC<Props> = ({ error }) => {
         </p>
       </EuiCallOut>
     );
-  } else if (error.includes('userProvidedQueryBuilder')) {
+  } else if (typeof error === 'string' && error.includes('userProvidedQueryBuilder')) {
     // query bar syntax is incorrect
     errorCallout = (
       <EuiCallOut
