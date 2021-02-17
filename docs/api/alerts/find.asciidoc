@@ -33,10 +33,7 @@ Retrieve a paginated set of alerts based on condition.
   (Optional, array|string) The fields to return in the `attributes` key of the response.
 
 `sort_field`::
-  (Optional, string) Sorts the response. Includes "root" and "type" fields. "root" fields exist for all saved objects, such as "updated_at".
-  "type" fields are specific to an object type, such as fields returned in the `attributes` key of the response. When a single type is
-  defined in the `type` parameter, the "root" and "type" fields are allowed, and validity checks are made in that order. When multiple types
-  are defined in the `type` parameter, only "root" fields are allowed.
+  (Optional, string) Sorts the response. Could be an alert fields returned in the `attributes` key of the response.
 
 `sort_order`::
   (Optional, string) Sort direction, either `asc` or `desc`.
@@ -45,7 +42,7 @@ Retrieve a paginated set of alerts based on condition.
   (Optional, object) Filters the alerts that have a relations with the reference objects with the specific "type" and "ID".
 
 `filter`::
-  (Optional, string) A KQL string that you filter with an attribute from your saved object.
+  (Optional, string) A <<kuery-query, KQL>> string that you filter with an attribute from your saved object.
   It should look like savedObjectType.attributes.title: "myTitle". However, If you used a direct attribute of a saved object, such as `updatedAt`,
   you will have to define your filter, for example, savedObjectType.updatedAt > 2018-12-22.
 
@@ -118,3 +115,5 @@ query parameter for each value:
 $ curl -X GET api/alerts/_find?fields=id&fields=name
 --------------------------------------------------
 // KIBANA
+
+include::discover/kuery.asciidoc[]

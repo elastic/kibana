@@ -42,7 +42,24 @@ Create {kib} alerts.
   (Required, object) The parameters to pass to the alert type executor `params` value. This will also validate against the alert type params validator, if defined.
 
 `actions`::
-  (Optional, object array) An array of the following:<br> - `group` (string): We support grouping actions in the scenario of escalations or different types of alert instances. If you don't need this, feel free to use `default` as a value.<br>- `id` (string): The id of the action saved object to execute.<br>- `params` (object): The map to the `params` the action type will receive. In order to help apply context to strings, we handle them as mustache templates and pass in a default set of context. (see templating actions).
+  (Optional, object array) An array of the following action objects:
++
+.Properties of `objects`
+[%collapsible%open]
+=====
+  `group`:::
+    (Required, string) We support grouping actions in the scenario of escalations or different types of alert instances. If you don't need this, feel free to use `default` as a value.
+
+  `id`:::
+    (Required, string) The id of the action saved object to execute.
+
+  `actionTypeId`:::
+    (Required, string) The id of the action type.
+
+  `params`:::
+    (Required, object) The map to the `params` the action type will receive. In order to help apply context to strings, we handle them as mustache templates and pass in a default set of context.
+=====
+
 
 [[alerts-api-create-request-codes]]
 ==== Response code
