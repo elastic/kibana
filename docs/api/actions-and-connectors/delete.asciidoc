@@ -4,9 +4,9 @@
 <titleabbrev>Delete action API</titleabbrev>
 ++++
 
-Remove a {kib} action by ID
+Deletes an action by ID.
 
-WARNING: Once you delete an action, _it cannot be recovered_.
+WARNING: When you delete an action, _it cannot be recovered_.
 
 [[actions-and-connectors-api-delete-request]]
 ==== Request
@@ -17,7 +17,7 @@ WARNING: Once you delete an action, _it cannot be recovered_.
 ==== Path parameters
 
 `id`::
-  (Required, string) The ID of the action to remove.
+  (Required, string) The ID of the action.
 
 [[actions-and-connectors-api-delete-response-codes]]
 ==== Response code

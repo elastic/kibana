@@ -4,7 +4,7 @@
 <titleabbrev>Get all actions API</titleabbrev>
 ++++
 
-Retrieve all {kib} actions
+Retrieves all actions.
 
 [[actions-and-connectors-api-get-all-request]]
 ==== Request

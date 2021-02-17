@@ -4,7 +4,7 @@
 <titleabbrev>Create action API</titleabbrev>
 ++++
 
-Create {kib} actions.
+Creates an actions.
 
 [[actions-and-connectors-api-create-request]]
 ==== Request
@@ -21,12 +21,12 @@ Create {kib} actions.
   (Required, string) The action type ID for the action.
 
 `config`::
-  (Required, object) The action configuration. Configuration properties vary depending on
-  the action type. Some action types will have no configuration properties. See the specific action type to determine required fields.
+  (Required, object) The configuration for the action. Configuration properties vary depending on
+  the action type. For information about the configuration properties, refer to <<action-types,Action and connector types>>.
 
 `secrets`::
-  (Required, object) The secrets configuration for the action. Secrets properties vary
-  depending on the action type. Some action types will have no secrets properties. See the specific ation type to determine required fields.
+  (Required, object) The secrets configuration for the action. Secrets configuration properties vary
+  depending on the action type. For information about the secrets configuration properties, refer to <<action-types,Action and connector types>>.
 
 [[actions-and-connectors-api-create-request-codes]]
 ==== Response code
@@ -66,52 +66,3 @@ The API returns the following:
   "isPreconfigured": false
 }
 --------------------------------------------------
-
-==== Action type configuration and secrets
-
-[options="header"]
-|===
-
-| Type | Id | Config
-
-| Email
-| `.email`
-| <<email-connector-config-properties, Email config and secrets properties>>
-
-| Index
-| `.index`
-| <<index-connector-config-properties, Index config and secrets properties>>
-
-| Jira
-| `.jira`
-| <<jira-connector-config-properties, Jira config and secrets properties>>
-
-| PagerDuty
-| `.pagerduty`
-| <<pagerduty-connector-config-properties, PagerDuty config and secrets properties>>
-
-| IBM Resilient
-| `.resilient`
-| <<resilient-connector-config-properties, IBM Resilient config and secrets properties>>
-
-| Server log
-| `.server-log`
-| <<server-log-connector-configuration, Server log config and secrets properties>>
-
-| ServiceNow ITSM
-| `.servicenow`
-| <<servicenow-connector-config-properties, ServiceNow ITSM config and secrets properties>>
-
-| Slack
-| `.slack`
-| <<slack-connector-config-properties, Slack config and secrets properties>>
-
-| Microsoft Teams
-| `.teams`
-| <<teams-connector-config-properties, Microsoft Teams config and secrets properties>>
-
-| Webhook
-| `.webhook`
-| <<webhook-connector-config-properties, Webhook config and secrets properties>>
-
-|===

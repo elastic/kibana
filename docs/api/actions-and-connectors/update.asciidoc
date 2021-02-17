@@ -4,7 +4,7 @@
 <titleabbrev>Update action API</titleabbrev>
 ++++
 
-Update the attributes for an existing {kib} action
+Updates the attributes for an existing action.
 
 [[actions-and-connectors-api-update-request]]
 ==== Request
@@ -15,19 +15,19 @@ Update the attributes for an existing {kib} action
 ==== Path parameters
 
 `id`::
-  (Required, string) The ID of the action to update.
+  (Required, string) The ID of the action.
 
 [[actions-and-connectors-api-update-request-body]]
 ==== Request body
 
 `name`::
-  (Required, string) The updated display name for the action.
+  (Required, string) The new name of the action.
 
 `config`::
-  (Required, object) The updated action configuration. Configuration properties vary depending on the action type. Some action types will have no configuration properties. See the specific action type to determine required fields.
+  (Required, object) The new action configuration. Configuration properties vary depending on the action type. For information about the configuration properties, refer to <<action-types,Action and connector types>>.
 
 `secrets`::
-  (Required, object) The updated secrets configuration for the action. Secrets properties vary depending on the action type. Some action types will have no secrets properties. See the specific ation type to determine required fields.
+  (Required, object) The updated secrets configuration for the action. Secrets properties vary depending on the action type. For information about the secrets configuration properties, refer to <<action-types,Action and connector types>>.
 
 [[actions-and-connectors-api-update-codes]]
 ==== Response code
