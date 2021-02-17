@@ -18,7 +18,7 @@ Create {kib} alerts.
   (Required, string) A name to reference and search.
 
 `tags`::
-  (Optional, string array) A list of keywords to reference and search in the future.
+  (Optional, string array) A list of keywords to reference and search.
 
 `alertTypeId`::
   (Required, string) The ID of the alert type that you want to call when the alert is scheduled to run.
