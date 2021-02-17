@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import React, { useMemo, useCallback } from 'react';
-import { DragDrop, DragDropIdentifier, DragContextState } from '../../../drag_drop';
+import React, { useMemo, useCallback, useContext } from 'react';
+import { DragDrop, DragDropIdentifier, DragContext } from '../../../drag_drop';
+
 import {
   Datasource,
   VisualizationDimensionGroupConfig,
@@ -41,12 +42,10 @@ export function DraggableDimensionButton({
   group,
   onDrop,
   children,
-  dragDropContext,
   layerDatasourceDropProps,
   layerDatasource,
   registerNewButtonRef,
 }: {
-  dragDropContext: DragContextState;
   layerId: string;
   groupIndex: number;
   layerIndex: number;
@@ -64,8 +63,11 @@ export function DraggableDimensionButton({
   columnId: string;
   registerNewButtonRef: (id: string, instance: HTMLDivElement | null) => void;
 }) {
+  const { dragging } = useContext(DragContext);
+
   const dropProps = layerDatasource.getDropProps({
     ...layerDatasourceDropProps,
+    dragging,
     columnId,
     filterOperations: group.filterOperations,
     groupId: group.groupId,
@@ -105,6 +107,13 @@ export function DraggableDimensionButton({
     columnId,
   ]);
 
+  /* 2 to leave room for data panel and workspace, then go by layer index, then by group index */
+  const order = useMemo(() => [2, layerIndex, groupIndex, accessorIndex], [
+    layerIndex,
+    groupIndex,
+    accessorIndex,
+  ]);
+
   return (
     <div
       ref={registerNewButtonRefMemoized}
@@ -114,9 +123,9 @@ export function DraggableDimensionButton({
       <DragDrop
         getAdditionalClassesOnEnter={getAdditionalClassesOnEnter}
         getAdditionalClassesOnDroppable={getAdditionalClassesOnDroppable}
-        order={[2, layerIndex, groupIndex, accessorIndex]}
+        order={order}
         draggable
-        dragType={isDraggedOperation(dragDropContext.dragging) ? 'move' : 'copy'}
+        dragType={isDraggedOperation(dragging) ? 'move' : 'copy'}
         dropType={dropType}
         reorderableGroup={reorderableGroup.length > 1 ? reorderableGroup : undefined}
         value={value}
