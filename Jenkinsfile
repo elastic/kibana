@@ -3,19 +3,26 @@
 library 'kibana-pipeline-library'
 kibanaLibrary.load()
 
-kibanaPipeline(timeoutMinutes: 155, checkPrChanges: true, setCommitStatus: true) {
-  slackNotifications.onFailure(disabled: !params.NOTIFY_ON_FAILURE) {
+kibanaPipeline(timeoutMinutes: 300) {
+  slackNotifications.onFailure(disabled: true) {
     githubPr.withDefaultPrComments {
       ciStats.trackBuild {
-        catchError {
-          retryable.enable()
-          kibanaPipeline.allCiTasks()
+        def packageTypes = ['deb', 'docker', 'rpm']
+        def workers = [:]
+        packageTypes.each { type ->
+          workers["package-${type}"] = {
+            testPackage(type)
+          }
         }
+
+        parallel(workers)
       }
     }
   }
+}
 
-  if (params.NOTIFY_ON_FAILURE) {
-    kibanaPipeline.sendMail()
+def testPackage(packageType) {
+  workers.ci(ramDisk: false, name: "package-${packageType}", size: 's') {
+    runbld("test/scripts/jenkins_xpack_package_${packageType}.sh", "Execute package testing for ${packageType}")
   }
 }
