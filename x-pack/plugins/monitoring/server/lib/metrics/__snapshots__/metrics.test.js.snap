@@ -457,7 +457,6 @@ Object {
     "quotaField": "cpu.cfs.quota.us",
     "timestampField": "beats_stats.timestamp",
     "title": "CPU Utilization",
-    "type": "node",
     "units": "%",
     "usageField": "cpuacct.total.ns",
     "uuidField": "beats_stats.beat.uuid",

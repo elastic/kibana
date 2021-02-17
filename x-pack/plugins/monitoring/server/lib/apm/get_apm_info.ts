@@ -65,7 +65,6 @@ export function handleResponse(
     bytesWritten: getDiffCalculation(bytesWrittenLast, bytesWrittenFirst),
     config: {
       container: config.get('monitoring.ui.container.apm.enabled'),
-      agentMode: config.get('monitoring.ui.apm.agent_mode'),
     },
   };
 }

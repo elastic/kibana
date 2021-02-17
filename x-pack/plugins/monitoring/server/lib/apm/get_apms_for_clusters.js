@@ -75,7 +75,6 @@ export function getApmsForClusters(req, apmIndexPattern, clusters) {
         ...formattedResponse,
         config: {
           container: config.get('monitoring.ui.container.apm.enabled'),
-          agentMode: config.get('monitoring.ui.apm.agent_mode'),
         },
         stats: {
           ...formattedResponse.stats,

@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { ApmMetrics } from '../apm_metrics';
 
 const title = i18n.translate('xpack.monitoring.apm.instance.panels.title', {
-  defaultMessage: 'APM Server - Custom Metrics',
+  defaultMessage: 'APM Server - Metrics',
 });
 
 export function ApmServerInstance(props) {

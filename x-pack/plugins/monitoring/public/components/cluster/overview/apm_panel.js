@@ -31,30 +31,8 @@ import { getSafeForExternalLink } from '../../../lib/get_safe_for_external_link'
 import { isSetupModeFeatureEnabled } from '../../../lib/setup_mode';
 import { SetupModeFeature } from '../../../../common/enums';
 
-const linkLabel = (config, total) => {
-  const apmsTotal = <span data-test-subj="apmsTotal">{total}</span>;
-
-  if (config && config.container && config.agentMode) {
-    return (
-      <FormattedMessage
-        id="xpack.monitoring.cluster.overview.apmPanel.agentServersTotalLinkLabel"
-        defaultMessage="Elastic Agent group servers: {apmsTotal}"
-        values={{ apmsTotal }}
-      />
-    );
-  }
-
-  return (
-    <FormattedMessage
-      id="xpack.monitoring.cluster.overview.apmPanel.serversTotalLinkLabel"
-      defaultMessage="APM servers: {apmsTotal}"
-      values={{ apmsTotal }}
-    />
-  );
-};
-
 export function ApmPanel(props) {
-  const { setupMode, config } = props;
+  const { setupMode } = props;
   const apmsTotal = get(props, 'apms.total') || 0;
   // Do not show if we are not in setup mode
   if (apmsTotal === 0 && !setupMode.enabled) {
@@ -154,7 +132,11 @@ export function ApmPanel(props) {
                       )}
                       data-test-subj="apmListing"
                     >
-                      {linkLabel(config, apmsTotal)}
+                      <FormattedMessage
+                        id="xpack.monitoring.cluster.overview.apmPanel.serversTotalLinkLabel"
+                        defaultMessage="APM servers: {apmsTotal}"
+                        values={{ apmsTotal }}
+                      />
                     </EuiLink>
                   </h3>
                 </EuiTitle>

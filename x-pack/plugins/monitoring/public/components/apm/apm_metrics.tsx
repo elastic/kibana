@@ -19,10 +19,20 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+
+// @ts-ignore could not find declaration file
 import { MonitoringTimeseriesContainer } from '../chart';
+// @ts-ignore could not find declaration file
 import { Status } from './instance/status';
 
-const createCharts = (series: unknown[], props: any) => {
+interface Props {
+  stats: unknown;
+  metrics: { [key: string]: unknown };
+  seriesToShow: unknown[];
+  title: string;
+}
+
+const createCharts = (series: unknown[], props: Partial<Props>) => {
   return series.map((data, index) => {
     return (
       <EuiFlexItem style={{ minWidth: '45%' }} key={index}>
@@ -32,17 +42,8 @@ const createCharts = (series: unknown[], props: any) => {
   });
 };
 
-export const ApmMetrics = ({ stats, metrics, seriesToShow, title, ...props }) => {
+export const ApmMetrics = ({ stats, metrics, seriesToShow, title, ...props }: Props) => {
   const topSeries = [metrics.apm_cpu, metrics.apm_memory, metrics.apm_os_load];
-  const inAgent = stats.config?.container && stats.config?.agentMode;
-
-  const topChartsTitle = inAgent
-    ? i18n.translate('xpack.monitoring.apm.metrics.topCharts.agentTitle', {
-        defaultMessage: 'Elastic Agent Group - Resource Usage',
-      })
-    : i18n.translate('xpack.monitoring.apm.metrics.topCharts.nonAgentTitle', {
-        defaultMessage: 'APM Server - Resource Usage',
-      });
 
   return (
     <EuiPage>
@@ -61,7 +62,11 @@ export const ApmMetrics = ({ stats, metrics, seriesToShow, title, ...props }) =>
         <EuiSpacer size="m" />
         <EuiPanel>
           <EuiTitle>
-            <h3>{topChartsTitle}</h3>
+            <h3>
+              {i18n.translate('xpack.monitoring.apm.metrics.topCharts.nonAgentTitle', {
+                defaultMessage: 'APM Server - Resource Usage',
+              })}
+            </h3>
           </EuiTitle>
           <EuiSpacer size="m" />
           <EuiFlexGroup wrap>{createCharts(topSeries, props)}</EuiFlexGroup>

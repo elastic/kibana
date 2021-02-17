@@ -52,9 +52,6 @@ describe('config schema', () => {
           },
         },
         "ui": Object {
-          "apm": Object {
-            "agent_mode": false,
-          },
           "ccs": Object {
             "enabled": true,
           },

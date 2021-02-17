@@ -64,7 +64,6 @@ export const metrics = {
           'CPU Usage time compared to the CPU quota shown in percentage. If CPU quotas are not set, then no data will be shown.',
       }
     ),
-    type: 'node',
   }),
   apm_system_os_load_1: new ApmMetric({
     field: 'beats_stats.metrics.system.load.1',
