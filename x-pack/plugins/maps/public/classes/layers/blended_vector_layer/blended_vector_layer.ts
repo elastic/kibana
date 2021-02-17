@@ -22,6 +22,7 @@ import {
   LAYER_STYLE_TYPE,
   FIELD_ORIGIN,
 } from '../../../../common/constants';
+import { isTotalHitsGreaterThan } from '../../../../common/elasticsearch_util';
 import { ESGeoGridSource } from '../../sources/es_geo_grid_source/es_geo_grid_source';
 import { canSkipSourceUpdate } from '../../util/can_skip_fetch';
 import { IESSource } from '../../sources/es_source';
@@ -321,13 +322,15 @@ export class BlendedVectorLayer extends VectorLayer implements IVectorLayer {
         syncContext.startLoading(dataRequestId, requestToken, searchFilters);
         const abortController = new AbortController();
         syncContext.registerCancelCallback(requestToken, () => abortController.abort());
+        const maxResultWindow = await this._documentSource.getMaxResultWindow();
         const searchSource = await this._documentSource.makeSearchSource(searchFilters, 0);
+        searchSource.setField('track_total_hits', maxResultWindow);
         const resp = await searchSource.fetch({
           abortSignal: abortController.signal,
           sessionId: syncContext.dataFilters.searchSessionId,
+          legacyHitsTotal: false,
         });
-        const maxResultWindow = await this._documentSource.getMaxResultWindow();
-        isSyncClustered = resp.hits.total > maxResultWindow;
+        isSyncClustered = isTotalHitsGreaterThan(resp.hits.total, maxResultWindow);
         const countData = { isSyncClustered } as CountData;
         syncContext.stopLoading(dataRequestId, requestToken, countData, searchFilters);
       } catch (error) {
