@@ -144,10 +144,13 @@ export const timelineSchema = gql`
   }
 
   enum RowRendererId {
+    alerts
     auditd
     auditd_file
+    library
     netflow
     plain
+    registry
     suricata
     system
     system_dns
