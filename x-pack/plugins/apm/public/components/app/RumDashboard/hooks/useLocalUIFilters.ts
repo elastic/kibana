@@ -10,11 +10,11 @@ import { useHistory } from 'react-router-dom';
 import { LocalUIFilterName } from '../../../../../common/ui_filter';
 import { pickKeys } from '../../../../../common/utils/pick_keys';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { LocalUIFiltersAPIResponse } from '../../../../../server/lib/ui_filters/local_ui_filters';
+import { LocalUIFiltersAPIResponse } from '../../../../../server/lib/rum_client/ui_filters/local_ui_filters';
 import {
   localUIFilters,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../../../../../server/lib/ui_filters/local_ui_filters/config';
+} from '../../../../../server/lib/rum_client/ui_filters/local_ui_filters/config';
 import {
   fromQuery,
   toQuery,
@@ -72,7 +72,7 @@ export function useLocalUIFilters({
     (callApmApi) => {
       if (shouldFetch && urlParams.start && urlParams.end) {
         return callApmApi({
-          endpoint: `GET /api/apm/ui_filters/local_filters/rumOverview`,
+          endpoint: 'GET /api/apm/rum/local_filters',
           params: {
             query: {
               uiFilters: JSON.stringify(uiFilters),

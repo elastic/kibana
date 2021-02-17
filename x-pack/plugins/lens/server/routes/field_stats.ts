@@ -86,7 +86,11 @@ export async function initFieldsRoute(setup: CoreSetup<PluginStartContract>) {
           return result;
         };
 
-        if (field.type === 'number') {
+        if (field.type === 'histogram') {
+          return res.ok({
+            body: await getNumberHistogram(search, field, false),
+          });
+        } else if (field.type === 'number') {
           return res.ok({
             body: await getNumberHistogram(search, field),
           });
@@ -120,21 +124,31 @@ export async function initFieldsRoute(setup: CoreSetup<PluginStartContract>) {
 
 export async function getNumberHistogram(
   aggSearchWithBody: (body: unknown) => Promise<unknown>,
-  field: IFieldType
+  field: IFieldType,
+  useTopHits = true
 ): Promise<FieldStatsResponse> {
   const fieldRef = getFieldRef(field);
 
-  const searchBody = {
+  const baseAggs = {
+    min_value: {
+      min: { field: field.name },
+    },
+    max_value: {
+      max: { field: field.name },
+    },
+    sample_count: { value_count: { ...fieldRef } },
+  };
+  const searchWithoutHits = {
+    sample: {
+      sampler: { shard_size: SHARD_SIZE },
+      aggs: { ...baseAggs },
+    },
+  };
+  const searchWithHits = {
     sample: {
       sampler: { shard_size: SHARD_SIZE },
       aggs: {
-        min_value: {
-          min: { field: field.name },
-        },
-        max_value: {
-          max: { field: field.name },
-        },
-        sample_count: { value_count: { ...fieldRef } },
+        ...baseAggs,
         top_values: {
           terms: { ...fieldRef, size: 10 },
         },
@@ -142,14 +156,18 @@ export async function getNumberHistogram(
     },
   };
 
-  const minMaxResult = (await aggSearchWithBody(searchBody)) as ESSearchResponse<
-    unknown,
-    { body: { aggs: typeof searchBody } }
-  >;
+  const minMaxResult = (await aggSearchWithBody(
+    useTopHits ? searchWithHits : searchWithoutHits
+  )) as
+    | ESSearchResponse<unknown, { body: { aggs: typeof searchWithHits } }>
+    | ESSearchResponse<unknown, { body: { aggs: typeof searchWithoutHits } }>;
 
   const minValue = minMaxResult.aggregations!.sample.min_value.value;
   const maxValue = minMaxResult.aggregations!.sample.max_value.value;
-  const terms = minMaxResult.aggregations!.sample.top_values;
+  const terms =
+    'top_values' in minMaxResult.aggregations!.sample
+      ? minMaxResult.aggregations!.sample.top_values
+      : { buckets: [] };
   const topValuesBuckets = {
     buckets: terms.buckets.map((bucket) => ({
       count: bucket.doc_count,
@@ -169,7 +187,12 @@ export async function getNumberHistogram(
       sampledValues: minMaxResult.aggregations!.sample.sample_count.value!,
       sampledDocuments: minMaxResult.aggregations!.sample.doc_count,
       topValues: topValuesBuckets,
-      histogram: { buckets: [] },
+      histogram: useTopHits
+        ? { buckets: [] }
+        : {
+            // Insert a fake bucket for a single-value histogram
+            buckets: [{ count: minMaxResult.aggregations!.sample.doc_count, key: minValue }],
+          },
     };
   }
 
