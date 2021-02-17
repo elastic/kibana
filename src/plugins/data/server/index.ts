@@ -147,6 +147,7 @@ export {
   IndexPattern,
   IndexPatternLoadExpressionFunctionDefinition,
   IndexPatternsService,
+  IndexPatternsService as IndexPatternsCommonService,
 } from '../common';
 
 /**
