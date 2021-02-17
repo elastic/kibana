@@ -82,6 +82,8 @@ export interface TimelineInput {
 
   description?: Maybe<string>;
 
+  eqlOptions?: Maybe<EqlOptionsInput>;
+
   eventType?: Maybe<string>;
 
   excludedRowRendererIds?: Maybe<RowRendererId[]>;
@@ -163,6 +165,18 @@ export interface QueryMatchInput {
   displayValue?: Maybe<string>;
 
   operator?: Maybe<string>;
+}
+
+export interface EqlOptionsInput {
+  eventCategoryField?: Maybe<string>;
+
+  tiebreakerField?: Maybe<string>;
+
+  timestampField?: Maybe<string>;
+
+  query?: Maybe<string>;
+
+  size?: Maybe<ToAny>;
 }
 
 export interface FilterTimelineInput {
@@ -611,6 +625,8 @@ export interface TimelineResult {
 
   description?: Maybe<string>;
 
+  eqlOptions?: Maybe<EqlOptionsResult>;
+
   eventIdToNoteIds?: Maybe<NoteResult[]>;
 
   eventType?: Maybe<string>;
@@ -716,6 +732,18 @@ export interface DateRangePickerResult {
   start?: Maybe<ToAny>;
 
   end?: Maybe<ToAny>;
+}
+
+export interface EqlOptionsResult {
+  eventCategoryField?: Maybe<string>;
+
+  tiebreakerField?: Maybe<string>;
+
+  timestampField?: Maybe<string>;
+
+  query?: Maybe<string>;
+
+  size?: Maybe<ToAny>;
 }
 
 export interface FavoriteTimelineResult {
@@ -2639,6 +2667,8 @@ export namespace TimelineResultResolvers {
 
     description?: DescriptionResolver<Maybe<string>, TypeParent, TContext>;
 
+    eqlOptions?: EqlOptionsResolver<Maybe<EqlOptionsResult>, TypeParent, TContext>;
+
     eventIdToNoteIds?: EventIdToNoteIdsResolver<Maybe<NoteResult[]>, TypeParent, TContext>;
 
     eventType?: EventTypeResolver<Maybe<string>, TypeParent, TContext>;
@@ -2721,6 +2751,11 @@ export namespace TimelineResultResolvers {
   > = Resolver<R, Parent, TContext>;
   export type DescriptionResolver<
     R = Maybe<string>,
+    Parent = TimelineResult,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type EqlOptionsResolver<
+    R = Maybe<EqlOptionsResult>,
     Parent = TimelineResult,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
@@ -3039,6 +3074,46 @@ export namespace DateRangePickerResultResolvers {
   export type EndResolver<
     R = Maybe<ToAny>,
     Parent = DateRangePickerResult,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+}
+
+export namespace EqlOptionsResultResolvers {
+  export interface Resolvers<TContext = SiemContext, TypeParent = EqlOptionsResult> {
+    eventCategoryField?: EventCategoryFieldResolver<Maybe<string>, TypeParent, TContext>;
+
+    tiebreakerField?: TiebreakerFieldResolver<Maybe<string>, TypeParent, TContext>;
+
+    timestampField?: TimestampFieldResolver<Maybe<string>, TypeParent, TContext>;
+
+    query?: QueryResolver<Maybe<string>, TypeParent, TContext>;
+
+    size?: SizeResolver<Maybe<ToAny>, TypeParent, TContext>;
+  }
+
+  export type EventCategoryFieldResolver<
+    R = Maybe<string>,
+    Parent = EqlOptionsResult,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type TiebreakerFieldResolver<
+    R = Maybe<string>,
+    Parent = EqlOptionsResult,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type TimestampFieldResolver<
+    R = Maybe<string>,
+    Parent = EqlOptionsResult,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type QueryResolver<
+    R = Maybe<string>,
+    Parent = EqlOptionsResult,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type SizeResolver<
+    R = Maybe<ToAny>,
+    Parent = EqlOptionsResult,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
 }
@@ -6103,6 +6178,7 @@ export type IResolvers<TContext = SiemContext> = {
   DataProviderResult?: DataProviderResultResolvers.Resolvers<TContext>;
   QueryMatchResult?: QueryMatchResultResolvers.Resolvers<TContext>;
   DateRangePickerResult?: DateRangePickerResultResolvers.Resolvers<TContext>;
+  EqlOptionsResult?: EqlOptionsResultResolvers.Resolvers<TContext>;
   FavoriteTimelineResult?: FavoriteTimelineResultResolvers.Resolvers<TContext>;
   FilterTimelineResult?: FilterTimelineResultResolvers.Resolvers<TContext>;
   FilterMetaTimelineResult?: FilterMetaTimelineResultResolvers.Resolvers<TContext>;
