@@ -125,7 +125,12 @@ async function executor(
 export const transformConnectorComment = (comment: CommentSchemaType): CommentRequest => {
   if (isCommentGeneratedAlert(comment)) {
     try {
-      const genAlerts: Array<{ _id: string; _index: string }> = JSON.parse(
+      const genAlerts: Array<{
+        _id: string;
+        _index: string;
+        ruleId: string;
+        ruleName: string;
+      }> = JSON.parse(
         `${comment.alerts.substring(0, comment.alerts.lastIndexOf('__SEPARATOR__'))}]`.replace(
           /__SEPARATOR__/gi,
           ','
@@ -134,8 +139,12 @@ export const transformConnectorComment = (comment: CommentSchemaType): CommentRe
 
       return {
         type: CommentType.generatedAlert,
-        alertId: genAlerts.map((ga) => ga._id),
-        index: genAlerts.map((ga) => ga._index),
+        alerts: genAlerts.map(({ _id, _index, ruleId, ruleName }) => ({
+          alertId: _id,
+          index: _index,
+          ruleId,
+          ruleName,
+        })),
       };
     } catch (e) {
       throw new Error(`Error parsing generated alert in case connector -> ${e.message}`);
