@@ -77,6 +77,7 @@ export const initialData: Case = {
   updatedAt: null,
   updatedBy: null,
   version: '',
+  subCaseIds: [],
   settings: {
     syncAlerts: true,
   },
