@@ -24,7 +24,7 @@ Kibana logging system has three main components: _loggers_, _appenders_ and _lay
 messages according to message type and level, and to control how these messages are formatted and where the final logs
 will be displayed or stored.
 
-__Loggers__ define what logging settings should be applied at the particular context.
+__Loggers__ define what logging settings should be applied at the particular context name.
 
 __Appenders__ define where log messages are displayed (eg. stdout or console) and stored (eg. file on the disk).
 
@@ -33,17 +33,17 @@ __Layouts__ define how log messages are formatted and what type of information t
 
 ## Logger hierarchy
 
-Every logger has its unique name or context that follows hierarchical naming rule. The logger is considered to be an 
+Every logger has its unique context name that follows hierarchical naming rule. The logger is considered to be an 
 ancestor of another logger if its name followed by a `.` is a prefix of the descendant logger name. For example logger
-with `a.b` context is an ancestor of logger with `a.b.c` context. All top-level loggers are descendants of special
-logger with `root` context that resides at the top of the logger hierarchy. This logger always exists and 
+with `a.b` context name is an ancestor of logger with `a.b.c` context name. All top-level loggers are descendants of special
+logger with `root` context name that resides at the top of the logger hierarchy. This logger always exists and 
 fully configured.
 
-Developer can configure _log level_ and _appenders_ that should be used within particular context. If logger configuration
+Developer can configure _log level_ and _appenders_ that should be used within particular context name. If logger configuration
 specifies only _log level_ then _appenders_ configuration will be inherited from the ancestor logger. 
 
 __Note:__ in the current implementation log messages are only forwarded to appenders configured for a particular logger 
-context or to appenders of the closest ancestor if current logger doesn't have any appenders configured. That means that
+context name or to appenders of the closest ancestor if current logger doesn't have any appenders configured. That means that
 we __don't support__ so called _appender additivity_ when log messages are forwarded to _every_ distinct appender within
 ancestor chain including `root`.
 
@@ -55,7 +55,7 @@ A log record is being logged by the logger if its level is higher than or equal 
 the log record is ignored.
 
 The _all_ and _off_ levels can be used only in configuration and are just handy shortcuts that allow developer to log every
-log record or disable logging entirely for the specific context.
+log record or disable logging entirely for the specific context name.
 
 ## Layouts
 
@@ -129,7 +129,7 @@ Example of `%date` output:
 Outputs the process ID.
 
 ### JSON layout
-With `json` layout log messages will be formatted as JSON strings that include timestamp, log level, context, message 
+With `json` layout log messages will be formatted as JSON strings that include timestamp, log level, context name, message 
 text and any other metadata that may be associated with the log message itself.
 
 ## Appenders
@@ -153,15 +153,15 @@ This policy will rotate the file when it reaches a predetermined size.
 logging:
   appenders:
     rolling-file:
-      kind: rolling-file
-      path: /var/logs/kibana.log
+      type: rolling-file
+      fileName: /var/logs/kibana.log
       policy:
-        kind: size-limit
+        type: size-limit
         size: 50mb
       strategy:
         //... 
       layout:
-        kind: pattern
+        type: pattern
 ```
 
 The options are:
@@ -180,16 +180,16 @@ This policy will rotate the file every given interval of time.
 logging:
   appenders:
     rolling-file:
-      kind: rolling-file
-      path: /var/logs/kibana.log
+      type: rolling-file
+      fileName: /var/logs/kibana.log
       policy:
-        kind: time-interval
+        type: time-interval
         interval: 10s
         modulate: true
       strategy:
         //... 
       layout:
-        kind: pattern
+        type: pattern
 ```
 
 The options are:
@@ -225,16 +225,16 @@ and will retains a fixed amount of rolled files.
 logging:
   appenders:
     rolling-file:
-      kind: rolling-file
-      path: /var/logs/kibana.log
+      type: rolling-file
+      fileName: /var/logs/kibana.log
       policy:
         // ...
       strategy:
-        kind: numeric
+        type: numeric
         pattern: '-%i'
         max: 2
       layout:
-        kind: pattern
+        type: pattern
 ```
 
 For example, with this configuration:
@@ -253,7 +253,7 @@ The options are:
 The suffix to append to the file path when rolling. Must include `%i`, as this is the value
 that will be converted to the file index.
 
-for example, with `path: /var/logs/kibana.log` and `pattern: '-%i'`, the created rolling files
+for example, with `fileName: /var/logs/kibana.log` and `pattern: '-%i'`, the created rolling files
 will be `/var/logs/kibana-1.log`, `/var/logs/kibana-2.log`, and so on.
 
 The default value is `-%i`
@@ -278,49 +278,49 @@ Here is the configuration example that can be used to configure _loggers_, _appe
 logging:
   appenders:
     console:
-      kind: console
+      type: console
       layout:
-        kind: pattern
+        type: pattern
         highlight: true
     file:
-      kind: file
-      path: /var/log/kibana.log
+      type: file
+      fileName: /var/log/kibana.log
       layout:
-        kind: pattern
+        type: pattern
     custom:
-      kind: console
+      type: console
       layout:
-        kind: pattern
+        type: pattern
         pattern: "[%date][%level] %message"
     json-file-appender:
-      kind: file
-      path: /var/log/kibana-json.log
+      type: file
+      fileName: /var/log/kibana-json.log
 
   root:
     appenders: [console, file]
     level: error
 
   loggers:
-    - context: plugins
+    - name: plugins
       appenders: [custom]
       level: warn
-    - context: plugins.myPlugin
+    - name: plugins.myPlugin
       level: info
-    - context: server
+    - name: server
       level: fatal
-    - context: optimize
+    - name: optimize
       appenders: [console]
-    - context: telemetry
+    - name: telemetry
       level: all
       appenders: [json-file-appender]
-    - context: metrics.ops
+    - name: metrics.ops
       level: debug
       appenders: [console]
 ```
 
 Here is what we get with the config above:
 
-| Context          | Appenders                | Level |
+| Context name     | Appenders                | Level |
 | ---------------- |:------------------------:| -----:|
 | root             | console, file            | error |
 | plugins          | custom                   | warn  |
@@ -331,7 +331,7 @@ Here is what we get with the config above:
 | metrics.ops      | console                  | debug |
 
 
-The `root` logger has a dedicated configuration node since this context is special and should always exist. By 
+The `root` logger has a dedicated configuration node since this context name is special and should always exist. By 
 default `root` is configured with `info` level and `default` appender that is also always available. This is the 
 configuration that all custom loggers will use unless they're re-configured explicitly.
 
@@ -391,7 +391,7 @@ The message contains some high-level information, and the corresponding log meta
 
 ## Usage
 
-Usage is very straightforward, one should just get a logger for a specific context and use it to log messages with 
+Usage is very straightforward, one should just get a logger for a specific context name and use it to log messages with 
 different log level. 
 
 ```typescript
@@ -409,7 +409,7 @@ loggerWithNestedContext.trace('Message with `trace` log level.');
 loggerWithNestedContext.debug('Message with `debug` log level.');
 ```
 
-And assuming logger for `server` context with `console` appender and `trace` level was used, console output will look like this:
+And assuming logger for `server` name with `console` appender and `trace` level was used, console output will look like this:
 ```bash
 [2017-07-25T11:54:41.639-07:00][TRACE][server] Message with `trace` log level.
 [2017-07-25T11:54:41.639-07:00][DEBUG][server] Message with `debug` log level.
@@ -422,7 +422,7 @@ And assuming logger for `server` context with `console` appender and `trace` lev
 [2017-07-25T11:54:41.639-07:00][DEBUG][server.http] Message with `debug` log level.
 ```
 
-The log will be less verbose with `warn` level for the `server` context:
+The log will be less verbose with `warn` level for the `server` context name:
 ```bash
 [2017-07-25T11:54:41.639-07:00][WARN ][server] Message with `warn` log level.
 [2017-07-25T11:54:41.639-07:00][ERROR][server] Message with `error` log level.
@@ -433,7 +433,7 @@ The log will be less verbose with `warn` level for the `server` context:
 Compatibility with the legacy logging system is assured until the end of the `v7` version.
 All log messages handled by `root` context are forwarded to the legacy logging service. If you re-write
 root appenders, make sure that it contains `default` appender to provide backward compatibility.
-**Note**: If you define an appender for a context, the log messages aren't handled by the
+**Note**: If you define an appender for a context name, the log messages aren't handled by the
 `root` context anymore and not forwarded to the legacy logging service.
  
 #### logging.dest
@@ -442,21 +442,21 @@ define a custom one.
 ```yaml
 logging:
   loggers:
-    - context: plugins.myPlugin
+    - name: plugins.myPlugin
       appenders: [console]
 ```
-Logs in a *file* if given file path. You should define a custom appender with `kind: file` 
+Logs in a *file* if given file path. You should define a custom appender with `type: file` 
 ```yaml
 
 logging:
   appenders:
     file:
-      kind: file
-      path: /var/log/kibana.log
+      type: file
+      fileName: /var/log/kibana.log
       layout:
-        kind: pattern
+        type: pattern
   loggers:
-    - context: plugins.myPlugin
+    - name: plugins.myPlugin
       appenders: [file]
 ``` 
 #### logging.json
@@ -468,7 +468,7 @@ Suppresses all logging output other than error messages. With new logging, confi
 with adjusting minimum required [logging level](#log-level).
 ```yaml
   loggers:
-    - context: plugins.myPlugin
+    - name: plugins.myPlugin
       appenders: [console]
       level: error
 # or for all output
@@ -494,32 +494,32 @@ to [specify timezone](#date) for `layout: pattern`. Defaults to host timezone wh
 logging:
   appenders:
     custom-console:
-      kind: console
+      type: console
       layout:
-        kind: pattern
+        type: pattern
         highlight: true
         pattern: "[%level] [%date{ISO8601_TZ}{America/Los_Angeles}][%logger] %message"
 ```
 
 #### logging.events
-Define a custom logger for a specific context.
+Define a custom logger for a specific context name.
 
 **`logging.events.ops`** outputs sample system and process information at a regular interval.
-With the new logging config, these are provided by a dedicated [context](#logger-hierarchy),
+With the new logging config, these are provided by a dedicated [context name](#logger-hierarchy),
 and you can enable them by adjusting the minimum required [logging level](#log-level) to `debug`:
 ```yaml
   loggers:
-    - context: metrics.ops
+    - name: metrics.ops
       appenders: [console]
       level: debug
 ```
 
 **`logging.events.request` and `logging.events.response`** provide logs for each request handled
-by the http service. With the new logging config, these are provided by a dedicated [context](#logger-hierarchy),
+by the http service. With the new logging config, these are provided by a dedicated [context name](#logger-hierarchy),
 and you can enable them by adjusting the minimum required [logging level](#log-level) to `debug`:
 ```yaml
   loggers:
-    - context: http.server.response
+    - name: http.server.response
       appenders: [console]
       level: debug
 ```
@@ -532,7 +532,7 @@ TBD
 | Parameter       | Platform log record in **pattern** format  | Legacy Platform log record **text** format |
 | --------------- | ------------------------------------------ | ------------------------------------------ |
 | @timestamp      | ISO8601_TZ `2012-01-31T23:33:22.011-05:00` | Absolute `23:33:22.011`                    |
-| context         | `parent.child`                             | `['parent', 'child']`                      |
+| context name    | `parent.child`                             | `['parent', 'child']`                      |
 | level           | `DEBUG`                                    | `['debug']`                                |
 | meta            | stringified JSON object `{"to": "v8"}`     | N/A                                        |
 | pid             | can be configured as `%pid`                | N/A                                        |
@@ -540,9 +540,9 @@ TBD
 | Parameter       | Platform log record in **json** format     | Legacy Platform log record **json** format   |
 | --------------- | ------------------------------------------ | -------------------------------------------- |
 | @timestamp      | ISO8601_TZ `2012-01-31T23:33:22.011-05:00` | ISO8601 `2012-01-31T23:33:22.011Z`           |
-| context         | `context: parent.child`                    | `tags: ['parent', 'child']`                  |
-| level           | `level: DEBUG`                             | `tags: ['debug']`                            |
+| context name    | `log.logger: parent.child`                 | `tags: ['parent', 'child']`                  |
+| level           | `log.level: DEBUG`                         | `tags: ['debug']`                            |
 | meta            | separate property `"meta": {"to": "v8"}`   | merged in log record  `{... "to": "v8"}`     |
-| pid             | `pid: 12345`                               | `pid: 12345`                                 |
+| pid             | `process.pid: 12345`                       | `pid: 12345`                                 |
 | type            | N/A                                        | `type: log`                                  |
 | error           | `{ message, name, stack }`                 | `{ message, name, stack, code, signal }`     |
