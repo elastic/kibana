@@ -105,7 +105,7 @@ aggregation-based data to time series data.
 <<dashboard, *Dashboard*>> is your starting point to create visualizations,
 and then pulling them together to show your data from multiple perspectives.
 
-| *4.*
+| *4*
 | *Present.*  With <<canvas, *Canvas*>>, you can display your data on a visually
 compelling, pixel-perfect workpad. **Canvas** can give your data
 the “wow” factor needed to impress your CEO and captivate coworkers with a big-screen display.
