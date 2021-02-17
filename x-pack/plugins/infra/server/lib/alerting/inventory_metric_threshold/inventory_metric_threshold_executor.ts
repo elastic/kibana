@@ -59,8 +59,6 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
 
   const inventoryItems = Object.keys(first(results)!);
   for (const item of inventoryItems) {
-    const alertInstance = services.alertInstanceFactory(`${item}`);
-    const prevState = alertInstance.getState();
     // AND logic; all criteria must be across the threshold
     const shouldAlertFire = results.every((result) =>
       // Grab the result of the most recent bucket
@@ -85,12 +83,12 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
       reason = results
         .map((result) => buildReasonWithVerboseMetricName(result[item], buildFiredAlertReason))
         .join('\n');
-    } else if (nextState === AlertStates.OK && prevState?.alertState === AlertStates.ALERT) {
       /*
        * Custom recovery actions aren't yet available in the alerting framework
        * Uncomment the code below once they've been implemented
        * Reference: https://github.com/elastic/kibana/issues/87048
        */
+      // } else if (nextState === AlertStates.OK && prevState?.alertState === AlertStates.ALERT) {
       // reason = results
       //   .map((result) => buildReasonWithVerboseMetricName(result[item], buildRecoveredAlertReason))
       //   .join('\n');
@@ -108,9 +106,11 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
           .join('\n');
       }
     }
+
     if (reason) {
       const actionGroupId =
         nextState === AlertStates.OK ? RecoveredActionGroup.id : FIRED_ACTIONS.id;
+      const alertInstance = services.alertInstanceFactory(`${item}`);
       alertInstance.scheduleActions(actionGroupId, {
         group: item,
         alertState: stateToAlertMessage[nextState],
@@ -123,10 +123,6 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
         metric: mapToConditionsLookup(criteria, (c) => c.metric),
       });
     }
-
-    alertInstance.replaceState({
-      alertState: nextState,
-    });
   }
 };
 

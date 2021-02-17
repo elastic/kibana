@@ -143,6 +143,10 @@ export interface DatasourceSuggestion<T = unknown> {
 
 export type StateSetter<T> = (newState: T | ((prevState: T) => T)) => void;
 
+export interface InitializationOptions {
+  isFullEditor?: boolean;
+}
+
 /**
  * Interface for the datasource registry
  */
@@ -155,7 +159,8 @@ export interface Datasource<T = unknown, P = unknown> {
   initialize: (
     state?: P,
     savedObjectReferences?: SavedObjectReference[],
-    initialContext?: VisualizeFieldContext
+    initialContext?: VisualizeFieldContext,
+    options?: InitializationOptions
   ) => Promise<T>;
 
   // Given the current state, which parts should be saved?

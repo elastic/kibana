@@ -100,6 +100,20 @@ Choose the type of panel you want to create, then save the panel to the dashboar
 
 .. Click *Save and return*.
 
+++++
+<script type="text/javascript" async 
+src="https://play.vidyard.com/embed/v4.js"></script>
+<img
+style="width: 100%; margin: auto; display: block;"
+class="vidyard-player-embed"
+src="https://play.vidyard.com/C7ntuVpdg7tFeR7LjTfELr.jpg"
+data-uuid="C7ntuVpdg7tFeR7LjTfELr"
+data-v="4"
+data-type="inline"
+/>
+</br>
+++++
+
 TIP: To access your saved panels, open the main menu, then click *Visualize*.
 
 [float]

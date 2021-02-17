@@ -10,7 +10,9 @@
 
 This section summarizes the changes in each release.
 
+* <<release-notes-7.11.1>>
 * <<release-notes-7.11.0>>
+* <<release-notes-7.10.2>>
 * <<release-notes-7.10.1>>
 * <<release-notes-7.10.0>>
 * <<release-notes-7.9.3>>
@@ -89,14 +91,47 @@ For detailed information about the n.n.n release, review the following sections.
 
 --
 
+[[release-notes-7.11.1]]
+== {kib} 7.11.1
+
+The 7.11.1 release includes the following enhancements and bug fixes. For information on the breaking changes, refer to <<breaking-changes-7.11,Breaking changes in 7.11>>.
+
+[float]
+[[enhancement-v7.11.1]]
+=== Enhancements
+Machine Learning::
+* Improves the lazy ML node UI {kibana-pull}90455[#90455]
+Security::
+* Prevent autocompleting the username field {kibana-pull}88682[#88682]
+
+[float]
+[[bug-v7.11.1]]
+=== Bug fixes
+Dashboard::
+* Fixes a 7.11.0 regression where pending dashboard searches aren't canceled when navigating to another app {kibana-pull}90306[#90306]
+* Sync tooltip legend values {kibana-pull}90036[#90036]
+Discover::
+* Fixes 'auto' collapsing of documents {kibana-pull}89712[#89712]
+Elastic Security Solution::
+For the Elastic Security Solution 7.11.1 bug fixes, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+Lens and visualizations::
+* *Lens* visualizations now load faster on dashboards {kibana-pull}88953[#88953]
+* Advanced input now works for aggregation-based visualizations {kibana-pull}88154[#88154]
+Maps::
+* Always check license at plugin startup {kibana-pull}87873[#87873]
+Monitoring::
+* Fully control the in memory table pagination and sorting properties {kibana-pull}85862[#85862]
+* Tweak timeout for failing cloud test {kibana-pull}86671[#86671]
+* Stop using constructor.name for logstash pipelines {kibana-pull}87386[#87386]
+* Make sure we use the right duration for messaging on this alert {kibana-pull}87579[#87579]
+* Avoid spamming toast messages {kibana-pull}89930[#89930]
+
+
 [[release-notes-7.11.0]]
 == {kib} 7.11.0 
 
-coming::[7.11.0]
-
-For detailed information about the 7.11.0 release, review the <<deprecation-v7.11.0,Deprecations>>, <<enhancement-v7.11.0,Enhancements>>, and <<bug-v7.11.0,Bug fixes>>.
-
-//For the 7.11.0 breaking changes, refer to <<breaking-changes-7.11,breaking changes in 7.11>>.
+For detailed information about the 7.11.0 release, review the <<deprecation-v7.11.0,Deprecations>>, <<enhancement-v7.11.0,Enhancements>>, and <<bug-v7.11.0,Bug fixes>>. 
+For the 7.11.0 breaking changes, refer to <<breaking-changes-7.11,breaking changes in 7.11>>.
 
 [float]
 [[deprecation-v7.11.0]]
@@ -461,6 +496,54 @@ Uptime::
 * UX use replace history instead of push on first load {kibana-pull}88586[#88586]
 * Fixes impacted page load errors {kibana-pull}88597[#88597]
 
+[[release-notes-7.10.2]]
+== {kib} 7.10.2
+
+For detailed information about the 7.10.2 release, review the following bug fixes. For the breaking changes, refer to the <<breaking-changes-7.10,breaking changes in 7.10>>.
+
+[float]
+[[security-update-v7.10.2]]
+=== Security update
+*Vega* visualizations are susceptible to stored and reflected XSS via a vulnerable version of the Vega library. When you create *Vega* visualizations or create a vulnerable URL that describes the visualization, an arbitrary JavaScript can execute in your browser.
+
+[float]
+[[affected-versions-v7.10.2]]
+==== Affected versions
+Affected versions include 7.10.1 and earlier.
+
+[float]
+[[solution-v7.10.2]]
+==== Solution
+Verify if you use *Vega* visualizations, then complete the following:
+
+* If you use *Vega* visualizations, upgrade to 7.10.2.
+* If you do not use *Vega* visualizations, open your kibana.yml file, then change `vega.enabled: true` to `vega.enabled: false`. 
+
+[float]
+[[bug-v7.10.2]]
+=== Bug fixes
+Alerting::
+* Don't reset server log level if level is defined {kibana-pull}83651[#83651]
+Dashboard::
+* Fixes Duplicated Create New Modal {kibana-pull}86489[#86489]
+Logs::
+* Fixes value completion in the logs stream query bar {kibana-pull}85772[#85772]
+Machine Learning::
+* Fixes watcher URL to the Anomaly Explorer page {kibana-pull}85123[#85123]
+* Fixes Anomaly Explorer data refresh with relative time bounds  {kibana-pull}86142[#86142]
+* Fixes zoom missing in Anomaly detection URLs {kibana-pull}86182[#86182] and {kibana-pull}86400[#86400]
+* Fixes charts grid on the Anomaly Explorer page {kibana-pull}86904[#86904]
+Management::
+* When number of replicas is set to zero, it is now correctly displayed in Index Lifecycle Management policies {kibana-pull}85251[#85251]
+* The list of data streams in Index Management now sorts numerically by the raw bytes value, which renders them in the correct order {kibana-pull}86204[#86204]
+* Fixes a bug where the enterprise level subscription displayed as platinum {kibana-pull}85849[#85849]
+* From table actions in the Cross-Cluster Replication app, you can now pause/resume index replication, unfollow leader index, or delete an auto-follow pattern {kibana-pull}84433[#84433]
+* Accessibility fix in Rollup Jobs app: when selecting a row in the jobs table, a screen reader pronounces the job's name {kibana-pull}84567[#84567]
+Monitoring::
+* Makes alert status fetching more resilient {kibana-pull}84676[#84676]
+* Adds unmapped_type to additional queries {kibana-pull}85837[#85837]
+Security::
+* Fixes 500 error when using PKI authentication with an incomplete certificate chain {kibana-pull}86700[#86700]
 
 [[release-notes-7.10.1]]
 == {kib} 7.10.1
