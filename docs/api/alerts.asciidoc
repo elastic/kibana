@@ -20,7 +20,7 @@ The following alerts APIs are available:
 
 * <<alerts-api-disable, Disable alert API>> to disable a single alert by ID
 
-* <<alerts-api-mute-all, Mute all alert instances API>> to mute all alert instances for a single {kib} alert by ID
+* <<alerts-api-mute-all, Mute all alert instances API>> to mute all alert instances for a single alert by ID
 
 * <<alerts-api-mute, Mute alert instance API>> to mute alert instance for a single {kib} alert by ID
 
