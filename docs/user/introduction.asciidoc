@@ -110,7 +110,7 @@ and then pulling them together to show your data from multiple perspectives.
 compelling, pixel-perfect workpad. **Canvas** can give your data
 the “wow” factor needed to impress your CEO and captivate coworkers with a big-screen display.
 
-| *5.*
+| *5*
 | *Share.* Ready to <<reporting-getting-started, share>> your findings with a larger audience? {kib} offers many options&mdash;embed
 a dashboard, share a link, export to PDF, and more.
 |===
