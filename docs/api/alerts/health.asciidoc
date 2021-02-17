@@ -68,7 +68,7 @@ Health API response contains the following properties:
 
 |===
 
-alertingFrameworkHeath itself consists from the next properties:
+alertingFrameworkHeath itself consists from the following properties:
 
 [cols="2*<"]
 |===
