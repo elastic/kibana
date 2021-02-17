@@ -67,7 +67,6 @@ export const ConfirmEnableUsers: FunctionComponent<ConfirmEnableUsersProps> = ({
         }
       )}
       isLoading={state.loading}
-      ownFocus
     >
       <EuiText>
         <p>

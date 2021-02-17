@@ -31,7 +31,7 @@ import { toExpression } from './to_expression';
 import {
   IndexPatternDimensionTrigger,
   IndexPatternDimensionEditor,
-  getDropTypes,
+  getDropProps,
   onDrop,
 } from './dimension_panel';
 import { IndexPatternDataPanel } from './datapanel';
@@ -308,7 +308,7 @@ export function getIndexPatternDatasource({
         domElement
       );
     },
-    getDropTypes,
+    getDropProps,
     onDrop,
 
     // Reset the temporary invalid state when closing the editor, but don't
