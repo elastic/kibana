@@ -15,17 +15,22 @@ import { SecurityPageName } from '../../../app/types';
 
 import * as i18n from './translations';
 import { CommentType } from '../../../../../case/common/api';
-import { Ecs } from '../../../../common/ecs';
 
 interface Props {
-  alert: Ecs | undefined;
-  alertsCount?: number;
+  alertId: string;
   commentType: CommentType;
+  ruleId?: string | null;
+  ruleName?: string | null;
+  alertsCount?: number;
 }
 
-const AlertCommentEventComponent: React.FC<Props> = ({ alert, alertsCount, commentType }) => {
-  const ruleName = alert?.signal?.rule?.name ? alert?.signal?.rule?.name[0] : null;
-  const ruleId = alert?.signal?.rule?.id ? alert?.signal?.rule?.id[0] : null;
+const AlertCommentEventComponent: React.FC<Props> = ({
+  alertId,
+  ruleId,
+  ruleName,
+  alertsCount,
+  commentType,
+}) => {
   const { navigateToApp } = useKibana().services.application;
 
   const onLinkClick = useCallback(
@@ -42,10 +47,7 @@ const AlertCommentEventComponent: React.FC<Props> = ({ alert, alertsCount, comme
     commentType !== CommentType.generatedAlert ? (
       <>
         {`${i18n.ALERT_COMMENT_LABEL_TITLE} `}
-        <EuiLink
-          onClick={onLinkClick}
-          data-test-subj={`alert-rule-link-${alert?._id ?? 'deleted'}`}
-        >
+        <EuiLink onClick={onLinkClick} data-test-subj={`alert-rule-link-${alertId ?? 'deleted'}`}>
           {ruleName}
         </EuiLink>
       </>
@@ -53,10 +55,7 @@ const AlertCommentEventComponent: React.FC<Props> = ({ alert, alertsCount, comme
       <>
         <b>{i18n.GENERATED_ALERT_COUNT_COMMENT_LABEL_TITLE(alertsCount ?? 0)}</b>{' '}
         {i18n.GENERATED_ALERT_COMMENT_LABEL_TITLE}{' '}
-        <EuiLink
-          onClick={onLinkClick}
-          data-test-subj={`alert-rule-link-${alert?._id ?? 'deleted'}`}
-        >
+        <EuiLink onClick={onLinkClick} data-test-subj={`alert-rule-link-${alertId ?? 'deleted'}`}>
           {ruleName}
         </EuiLink>
       </>

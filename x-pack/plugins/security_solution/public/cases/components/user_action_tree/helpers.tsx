@@ -207,12 +207,18 @@ export const getUpdateAction = ({
 
 export const getAlertAttachment = ({
   action,
-  alert,
+  alertId,
+  index,
+  ruleId,
+  ruleName,
   onShowAlertDetails,
 }: {
   action: CaseUserActions;
-  alert: Ecs | undefined;
   onShowAlertDetails: (alertId: string, index: string) => void;
+  alertId: string;
+  index: string;
+  ruleId: string | null;
+  ruleName: string | null;
 }): EuiCommentProps => {
   return {
     username: (
@@ -223,7 +229,14 @@ export const getAlertAttachment = ({
     ),
     className: 'comment-alert',
     type: 'update',
-    event: <AlertCommentEvent alert={alert} commentType={CommentType.alert} />,
+    event: (
+      <AlertCommentEvent
+        alertId={alertId}
+        ruleId={ruleId}
+        ruleName={ruleName}
+        commentType={CommentType.alert}
+      />
+    ),
     'data-test-subj': `${action.actionField[0]}-${action.action}-action-${action.actionId}`,
     timestamp: <UserActionTimestamp createdAt={action.actionAt} />,
     timelineIcon: 'bell',
@@ -233,21 +246,12 @@ export const getAlertAttachment = ({
           <UserActionCopyLink id={action.actionId} />
         </EuiFlexItem>
         <EuiFlexItem>
-          {alert != null ? (
-            <UserActionShowAlert
-              id={action.actionId}
-              alert={alert}
-              onShowAlertDetails={onShowAlertDetails}
-            />
-          ) : (
-            <EuiIconTip
-              aria-label={i18n.ALERT_NOT_FOUND_TOOLTIP}
-              size="l"
-              type="alert"
-              color="danger"
-              content={i18n.ALERT_NOT_FOUND_TOOLTIP}
-            />
-          )}
+          <UserActionShowAlert
+            id={action.actionId}
+            alertId={alertId}
+            index={index}
+            onShowAlertDetails={onShowAlertDetails}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
     ),
@@ -303,22 +307,25 @@ export const formatAlertToEcsSignal = (alert: {}): Ecs =>
 const EMPTY_ARRAY: TimelineNonEcsData[] = [];
 export const getGeneratedAlertsAttachment = ({
   action,
-  alerts,
   alertIds,
+  ruleId,
+  ruleName,
 }: {
   action: CaseUserActions;
-  alerts: Record<string, Ecs>;
   alertIds: string[];
+  ruleId: string | null;
+  ruleName: string | null;
 }): EuiCommentProps => {
-  const alert = alerts[alertIds[0]];
-  const ecsData: Ecs[] = Object.values(alerts);
+  // const ecsData: Ecs[] = Object.values(alerts);
   return {
     username: <EuiIcon type="logoSecurity" size="m" />,
     className: 'comment-alert',
     type: 'update',
     event: (
       <AlertCommentEvent
-        alert={alert}
+        alertId={alertIds[0]}
+        ruleId={ruleId}
+        ruleName={ruleName}
         alertsCount={alertIds.length}
         commentType={CommentType.generatedAlert}
       />
@@ -336,7 +343,7 @@ export const getGeneratedAlertsAttachment = ({
             ariaLabel={i18n.SEND_ALERT_TO_TIMELINE}
             alertIds={alertIds}
             key="investigate-in-timeline"
-            ecsRowData={ecsData}
+            ecsRowData={[]}
             nonEcsRowData={EMPTY_ARRAY}
           />
         </EuiFlexItem>

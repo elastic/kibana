@@ -54,8 +54,8 @@ export const AlertCommentRequestRt = rt.type({
   alertId: rt.union([rt.array(rt.string), rt.string]),
   index: rt.union([rt.array(rt.string), rt.string]),
   rule: rt.type({
-    id: rt.string,
-    name: rt.string,
+    id: rt.union([rt.string, rt.null]),
+    name: rt.union([rt.string, rt.null]),
   }),
 });
 

@@ -147,10 +147,10 @@ export const transformConnectorComment = (comment: CommentSchemaType): CommentRe
           acc.rule = { id: ruleId, name: ruleName };
           return acc;
         },
-        { ids: [], indices: [], rule: { id: '', name: '' } } as {
+        { ids: [], indices: [], rule: { id: null, name: null } } as {
           ids: string[];
           indices: string[];
-          rule: { id: string; name: string };
+          rule: { id: string | null; name: string | null };
         }
       );
 

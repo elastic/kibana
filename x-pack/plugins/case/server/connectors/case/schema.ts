@@ -30,8 +30,8 @@ const ContextTypeAlertSchema = schema.object({
   alertId: schema.oneOf([schema.arrayOf(schema.string()), schema.string()]),
   index: schema.string(),
   rule: schema.object({
-    id: schema.string(),
-    name: schema.string(),
+    id: schema.nullable(schema.string()),
+    name: schema.nullable(schema.string()),
   }),
 });
 
