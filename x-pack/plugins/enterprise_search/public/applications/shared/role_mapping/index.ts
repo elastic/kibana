@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-export { AddRoleMappingButton } from './AddRoleMappingButton';
-export { AttributeSelector } from './AttributeSelector';
-export { DeleteMappingCallout } from './DeleteMappingCallout';
-export { RoleMappingsTable } from './RoleMappingsTable';
-export { RoleSelector } from './RoleSelector';
+export { AddRoleMappingButton } from './add_role_mapping_button';
+export { AttributeSelector } from './attribute_selector';
+export { DeleteMappingCallout } from './delete_mapping_callout';
+export { RoleMappingsTable } from './role_mappings_table';
+export { RoleSelector } from './role_selector';

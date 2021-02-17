@@ -7,8 +7,6 @@
 
 import React from 'react';
 
-import { ANY_AUTH_PROVIDER, ANY_AUTH_PROVIDER_LABEL } from 'shared/constants/role_mappings';
-
 import {
   EuiComboBox,
   EuiComboBoxOptionOption,
@@ -21,6 +19,8 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
+
+import { ANY_AUTH_PROVIDER, ANY_AUTH_PROVIDER_LABEL } from './constants';
 
 interface IAttributeSelectorProps {
   attributeName: string;

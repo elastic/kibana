@@ -9,7 +9,7 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { AttributeSelector } from './AttributeSelector';
+import { AttributeSelector } from './attribute_selector';
 
 const baseProps = {
   attributeName: 'An Attribute',

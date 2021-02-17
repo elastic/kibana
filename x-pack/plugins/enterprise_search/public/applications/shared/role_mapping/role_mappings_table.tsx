@@ -8,11 +8,6 @@
 import React, { Fragment, useState } from 'react';
 import { Link } from 'react-router-dom';
 
-import { IRole, IASRoleMapping } from 'app_search/types';
-import { ANY_AUTH_PROVIDER, ANY_AUTH_PROVIDER_LABEL } from 'shared/constants/role_mappings';
-import { IObject } from 'shared/types';
-import { WSRoleMapping } from 'workplace_search/types';
-
 import {
   EuiFieldSearch,
   EuiFlexGroup,
@@ -28,18 +23,24 @@ import {
   EuiTextColor,
 } from '@elastic/eui';
 
+import { ASRoleMapping } from '../../app_search/types';
+import { RoleRules } from '../../shared/types';
+import { WSRoleMapping } from '../../workplace_search/types';
+
+import { ANY_AUTH_PROVIDER, ANY_AUTH_PROVIDER_LABEL } from './constants';
+
 interface IAccessItem {
   name: string;
 }
 
-interface ISharedRoleMapping extends IASRoleMapping, WSRoleMapping {
+interface SharedRoleMapping extends ASRoleMapping, WSRoleMapping {
   accessItems: IAccessItem[];
 }
 
 interface IRoleMappingsTableProps {
   accessItemKey: 'groups' | 'engines';
   accessHeader: string;
-  roleMappings: IObject[];
+  roleMappings: SharedRoleMapping[];
   addMappingButton: React.ReactNode;
   accessAllEngines?: boolean;
   myRole?: IRole;
@@ -70,7 +71,7 @@ export const RoleMappingsTable: React.FC<IRoleMappingsTableProps> = ({
     const _rm = { ...rm } as IObject;
     _rm.accessItems = rm[accessItemKey];
     return _rm;
-  }) as ISharedRoleMapping[];
+  }) as SharedRoleMapping[];
 
   const filterResults = (result) => {
     const values = Object.values(result) as string[];
