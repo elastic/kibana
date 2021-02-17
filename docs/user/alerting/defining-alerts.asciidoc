@@ -83,6 +83,7 @@ Actions are not required on alerts. In some cases you may want to run an alert w
 ==============================================
 
 [float]
+[[actions-configuration]]
 === Global actions configuration
 Some actions configuration options apply to all actions.
 If you are using an *on-prem* Elastic Stack deployment, you can set these in the kibana.yml file.
