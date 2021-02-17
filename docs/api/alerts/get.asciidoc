@@ -4,7 +4,7 @@
 <titleabbrev>Get alert</titleabbrev>
 ++++
 
-Retrieve a single {kib} alert by ID.
+Retrieve an alert by ID.
 
 [[alerts-api-get-request]]
 ==== Request
