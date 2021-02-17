@@ -104,7 +104,7 @@ interface DragInnerProps extends BaseProps {
   setActiveDropTarget: DragContextState['setActiveDropTarget'];
   setA11yMessage: DragContextState['setA11yMessage'];
   activeDraggingProps?: {
-    keyboardMode: boolean;
+    keyboardMode: DragContextState['keyboardMode'];
     activeDropTarget: DragContextState['activeDropTarget'];
     dropTargetsByOrder: DragContextState['dropTargetsByOrder'];
   };
@@ -123,6 +123,7 @@ interface DragInnerProps extends BaseProps {
  */
 interface DropInnerProps extends BaseProps {
   dragging: DragContextState['dragging'];
+  keyboardMode: DragContextState['keyboardMode'];
   setKeyboardMode: DragContextState['setKeyboardMode'];
   setDragging: DragContextState['setDragging'];
   setActiveDropTarget: DragContextState['setActiveDropTarget'];
@@ -387,19 +388,20 @@ const DropInner = memo(function DropInner(props: DropInnerProps) {
     isActiveDropTarget,
     registerDropTarget,
     setActiveDropTarget,
+    keyboardMode,
     setKeyboardMode,
     setDragging,
     setA11yMessage,
   } = props;
 
   useShallowCompareEffect(() => {
-    if (dropType && value && onDrop) {
+    if (dropType && onDrop && keyboardMode) {
       registerDropTarget(order, { ...value, onDrop, dropType });
       return () => {
         registerDropTarget(order, undefined);
       };
     }
-  }, [order, value, registerDropTarget, dropType]);
+  }, [order, value, registerDropTarget, dropType, keyboardMode]);
 
   const classesOnEnter = getAdditionalClassesOnEnter?.(dropType);
   const classesOnDroppable = getAdditionalClassesOnDroppable?.(dropType);
