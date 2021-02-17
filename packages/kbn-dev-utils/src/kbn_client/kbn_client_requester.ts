@@ -52,6 +52,7 @@ export interface ReqOptions {
   method: 'GET' | 'POST' | 'PUT' | 'DELETE';
   body?: any;
   retries?: number;
+  headers?: Record<string, string>;
 }
 
 const delay = (ms: number) =>
@@ -102,6 +103,7 @@ export class KbnClientRequester {
           data: options.body,
           params: options.query,
           headers: {
+            ...options.headers,
             'kbn-xsrf': 'kbn-client',
           },
           httpsAgent: this.httpsAgent,

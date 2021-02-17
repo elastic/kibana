@@ -13,12 +13,14 @@ import { KbnClientPlugins } from './kbn_client_plugins';
 import { KbnClientVersion } from './kbn_client_version';
 import { KbnClientSavedObjects } from './kbn_client_saved_objects';
 import { KbnClientUiSettings, UiSettingValues } from './kbn_client_ui_settings';
+import { KbnClientImportExport } from './kbn_client_import_export';
 
 export interface KbnClientOptions {
   url: string;
   certificateAuthorities?: Buffer[];
   log: ToolingLog;
   uiSettingDefaults?: UiSettingValues;
+  importExportDir?: string;
 }
 
 export class KbnClient {
@@ -27,6 +29,7 @@ export class KbnClient {
   readonly version: KbnClientVersion;
   readonly savedObjects: KbnClientSavedObjects;
   readonly uiSettings: KbnClientUiSettings;
+  readonly importExport: KbnClientImportExport;
 
   private readonly requester: KbnClientRequester;
   private readonly log: ToolingLog;
@@ -56,6 +59,11 @@ export class KbnClient {
     this.version = new KbnClientVersion(this.status);
     this.savedObjects = new KbnClientSavedObjects(this.log, this.requester);
     this.uiSettings = new KbnClientUiSettings(this.log, this.requester, this.uiSettingDefaults);
+    this.importExport = new KbnClientImportExport(
+      this.log,
+      this.requester,
+      options.importExportDir
+    );
   }
 
   /**
