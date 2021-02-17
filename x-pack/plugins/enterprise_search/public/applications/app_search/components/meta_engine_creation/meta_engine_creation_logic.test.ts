@@ -71,5 +71,23 @@ describe('MetaEngineCreationLogic', () => {
     });
   });
 
-  describe('listeners', () => {});
+  describe('listeners', () => {
+    describe('fetchIndexedEngineNames', () => {
+      it('should call flashApiErrors if the API throws an error', () => {
+        throw Error('TODO');
+      });
+
+      it('should call setIndexedEngineNames with the current value.indexedEngineNames plus the results from the API request', () => {
+        throw Error('TODO');
+      });
+
+      it('if there are remaining pages it should call fetchIndexedEngineNames recursively with an incremented page', () => {
+        throw Error('TODO');
+      });
+
+      it('if there are no remaining pages it should end without calling recursively', () => {
+        throw Error('TODO');
+      });
+    });
+  });
 });
