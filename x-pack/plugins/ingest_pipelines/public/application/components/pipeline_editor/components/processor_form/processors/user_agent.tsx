@@ -66,7 +66,7 @@ export const UserAgent: FunctionComponent = () => {
             id="xpack.ingestPipelines.pipelineEditor.userAgentForm.targetFieldHelpText"
             defaultMessage="Output field. Defaults to {defaultField}."
             values={{
-              defaultField: <EuiCode inline>{'user_agent'}</EuiCode>,
+              defaultField: <EuiCode>{'user_agent'}</EuiCode>,
             }}
           />
         }

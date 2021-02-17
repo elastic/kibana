@@ -284,7 +284,7 @@ export enum TimelineId {
   active = 'timeline-1',
   casePage = 'timeline-case',
   test = 'test', // Reserved for testing purposes
-  test2 = 'test2',
+  alternateTest = 'alternateTest',
 }
 
 export const TimelineIdLiteralRt = runtimeTypes.union([
