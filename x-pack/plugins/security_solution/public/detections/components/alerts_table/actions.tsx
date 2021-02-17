@@ -38,7 +38,10 @@ import {
   replaceTemplateFieldFromDataProviders,
 } from './helpers';
 import { KueryFilterQueryKind } from '../../../common/store';
-import { DataProvider, QueryOperator } from '../../../timelines/components/timeline/data_providers/data_provider';
+import {
+  DataProvider,
+  QueryOperator,
+} from '../../../timelines/components/timeline/data_providers/data_provider';
 
 export const getUpdateAlertsQuery = (eventIds: Readonly<string[]>) => {
   return {
@@ -139,7 +142,7 @@ export const getThresholdAggregationDataProvider = (
 
   return aggregationFields.reduce<DataProvider[]>((acc, aggregationField, i) => {
     const aggregationValue = thresholdResult.terms.filter(
-      (term: { field: string, value: string }) => term.field === aggregationField
+      (term: { field: string; value: string }) => term.field === aggregationField
     )[0].value;
     const dataProviderValue = Array.isArray(aggregationValue)
       ? aggregationValue[0]

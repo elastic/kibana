@@ -98,7 +98,11 @@ const getTransformedHits = (
     return [
       {
         _index: inputIndex,
-        _id: calculateThresholdSignalUuid(ruleId, startedAt, threshold.field as string[]),
+        _id: calculateThresholdSignalUuid(
+          ruleId,
+          startedAt,
+          Array.isArray(threshold.field) ? threshold.field : [threshold.field]
+        ),
         _source: source,
       },
     ];
@@ -147,7 +151,9 @@ const getTransformedHits = (
             threshold.cardinality_field != null
               ? [
                   {
-                    field: Array.isArray(threshold.cardinality_field) ? threshold.cardinality_field[0] : threshold.cardinality_field,
+                    field: Array.isArray(threshold.cardinality_field)
+                      ? threshold.cardinality_field[0]
+                      : threshold.cardinality_field,
                     value: bucket.cardinality_count!.value,
                   },
                 ]
@@ -203,7 +209,7 @@ const getTransformedHits = (
         _id: calculateThresholdSignalUuid(
           ruleId,
           startedAt,
-          threshold.field as string[],
+          Array.isArray(threshold.field) ? threshold.field : [threshold.field],
           bucket.terms.map((term) => term.value).join(',')
         ),
         _source: source,
