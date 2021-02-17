@@ -595,6 +595,8 @@ The following table describes the properties of the `incident` object.
 | severity          | The name of the severity in ServiceNow.                                                                                   | string _(optional)_ |
 | urgency           | The name of the urgency in ServiceNow.                                                                                    | string _(optional)_ |
 | impact            | The name of the impact in ServiceNow.                                                                                     | string _(optional)_ |
+| category          | The name of the category in ServiceNow.                                                                                   | string _(optional)_ |
+| subcategory       | The name of the subcategory in ServiceNow.                                                                                | string _(optional)_ |
 
 #### `subActionParams (getFields)`
 
@@ -657,7 +659,7 @@ The following table describes the properties of the `incident` object.
 | externalId  | The id of the issue in Jira. If presented the incident will be update. Otherwise a new incident will be created. | string _(optional)_   |
 | issueType   | The id of the issue type in Jira.                                                                                | string _(optional)_   |
 | priority    | The name of the priority in Jira. Example: `Medium`.                                                             | string _(optional)_   |
-| labels      | An array of labels.                                                                                              | string[] _(optional)_ |
+| labels      | An array of labels. Labels cannot contain spaces.                                                                | string[] _(optional)_ |
 | parent      | The parent issue id or key. Only for `Sub-task` issue types.                                                     | string _(optional)_   |
 
 #### `subActionParams (getIncident)`

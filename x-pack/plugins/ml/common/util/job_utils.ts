@@ -28,6 +28,7 @@ import {
   getDatafeedAggregations,
 } from './datafeed_utils';
 import { findAggField } from './validation_utils';
+import { isPopulatedObject } from './object_utils';
 
 export interface ValidationResults {
   valid: boolean;
@@ -51,17 +52,9 @@ export function calculateDatafeedFrequencyDefaultSeconds(bucketSpanSeconds: numb
 }
 
 export function hasRuntimeMappings(job: CombinedJob): boolean {
-  const hasDatafeed =
-    typeof job.datafeed_config === 'object' && Object.keys(job.datafeed_config).length > 0;
+  const hasDatafeed = isPopulatedObject(job.datafeed_config);
   if (hasDatafeed) {
-    const runtimeMappings =
-      typeof job.datafeed_config.runtime_mappings === 'object'
-        ? Object.keys(job.datafeed_config.runtime_mappings)
-        : undefined;
-
-    if (Array.isArray(runtimeMappings) && runtimeMappings.length > 0) {
-      return true;
-    }
+    return isPopulatedObject(job.datafeed_config.runtime_mappings);
   }
   return false;
 }
@@ -114,7 +107,11 @@ export function isSourceDataChartableForDetector(job: CombinedJob, detectorIndex
     // If the datafeed uses script fields, we can only plot the time series if
     // model plot is enabled. Without model plot it will be very difficult or impossible
     // to invert to a reverse search of the underlying metric data.
-    if (isSourceDataChartable === true && typeof job.datafeed_config?.script_fields === 'object') {
+    if (
+      isSourceDataChartable === true &&
+      job.datafeed_config?.script_fields !== null &&
+      typeof job.datafeed_config?.script_fields === 'object'
+    ) {
       // Perform extra check to see if the detector is using a scripted field.
       const scriptFields = Object.keys(job.datafeed_config.script_fields);
       isSourceDataChartable =
@@ -123,8 +120,7 @@ export function isSourceDataChartableForDetector(job: CombinedJob, detectorIndex
         scriptFields.indexOf(dtr.over_field_name!) === -1;
     }
 
-    const hasDatafeed =
-      typeof job.datafeed_config === 'object' && Object.keys(job.datafeed_config).length > 0;
+    const hasDatafeed = isPopulatedObject(job.datafeed_config);
     if (hasDatafeed) {
       // We cannot plot the source data for some specific aggregation configurations
       const aggs = getDatafeedAggregations(job.datafeed_config);

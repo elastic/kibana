@@ -9,14 +9,15 @@ import { setMockValues } from '../../../../__mocks__';
 import { groups } from '../../../__mocks__/groups.mock';
 
 import React from 'react';
+
 import { shallow } from 'enzyme';
 
+import { EuiTable, EuiTablePagination } from '@elastic/eui';
+
+import { TableHeader } from '../../../../shared/table_header';
 import { User } from '../../../types';
 
 import { GroupUsersTable } from './group_users_table';
-import { TableHeader } from '../../../../shared/table_header';
-
-import { EuiTable, EuiTablePagination } from '@elastic/eui';
 
 const group = groups[0];
 

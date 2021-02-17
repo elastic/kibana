@@ -36,10 +36,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('saved search filters', function () {
       it('are added when a cell filter is clicked', async function () {
         await dashboardAddPanel.addSavedSearch('Rendering-Test:-saved-search');
-        await find.clickByCssSelector(`[role="gridcell"]:nth-child(2)`);
+        await find.clickByCssSelector(`[role="gridcell"]:nth-child(3)`);
+        // needs a short delay between becoming visible & being clickable
+        await PageObjects.common.sleep(250);
         await find.clickByCssSelector(`[data-test-subj="filterOutButton"]`);
         await PageObjects.header.waitUntilLoadingHasFinished();
-        await find.clickByCssSelector(`[role="gridcell"]:nth-child(2)`);
+        await find.clickByCssSelector(`[role="gridcell"]:nth-child(3)`);
+        await PageObjects.common.sleep(250);
         await find.clickByCssSelector(`[data-test-subj="filterForButton"]`);
         const filterCount = await filterBar.getFilterCount();
         expect(filterCount).to.equal(2);

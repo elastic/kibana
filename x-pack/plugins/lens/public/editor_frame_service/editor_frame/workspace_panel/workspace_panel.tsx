@@ -10,16 +10,7 @@ import classNames from 'classnames';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { Ast } from '@kbn/interpreter/common';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiText,
-  EuiTextColor,
-  EuiButtonEmpty,
-  EuiLink,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText, EuiButtonEmpty, EuiLink } from '@elastic/eui';
 import { CoreStart, CoreSetup } from 'kibana/public';
 import {
   DataPublicPluginStart,
@@ -84,7 +75,17 @@ interface WorkspaceState {
   expandError: boolean;
 }
 
-const workspaceDropValue = { id: 'lnsWorkspace' };
+const dropProps = {
+  value: {
+    id: 'lnsWorkspace',
+    humanData: {
+      label: i18n.translate('xpack.lens.editorFrame.workspaceLabel', {
+        defaultMessage: 'Workspace',
+      }),
+    },
+  },
+  order: [1, 0, 0, 0],
+};
 
 // Exported for testing purposes only.
 export const WorkspacePanel = React.memo(function WorkspacePanel({
@@ -145,10 +146,7 @@ export const WorkspacePanel = React.memo(function WorkspacePanel({
             datasourceLayers: framePublicAPI.datasourceLayers,
           });
         } catch (e) {
-          const buildMessages = activeVisualization?.getErrorMessages(
-            visualizationState,
-            framePublicAPI
-          );
+          const buildMessages = activeVisualization?.getErrorMessages(visualizationState);
           const defaultMessage = {
             shortMessage: i18n.translate('xpack.lens.editorFrame.buildExpressionError', {
               defaultMessage: 'An unexpected error occurred while preparing the chart',
@@ -302,9 +300,10 @@ export const WorkspacePanel = React.memo(function WorkspacePanel({
         className="lnsWorkspacePanel__dragDrop"
         dataTestSubj="lnsWorkspace"
         draggable={false}
-        droppable={Boolean(suggestionForDraggedField)}
+        dropType={suggestionForDraggedField ? 'field_add' : undefined}
         onDrop={onDrop}
-        value={workspaceDropValue}
+        value={dropProps.value}
+        order={dropProps.order}
       >
         <div>
           {renderVisualization()}
@@ -411,16 +410,6 @@ export const InnerVisualizationWrapper = ({
       >
         <EuiFlexItem>
           <EuiIcon type="alert" size="xl" color="danger" />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiTitle size="s">
-            <EuiTextColor color="danger">
-              <FormattedMessage
-                id="xpack.lens.editorFrame.configurationFailure"
-                defaultMessage="Invalid configuration"
-              />
-            </EuiTextColor>
-          </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem className="eui-textBreakAll" data-test-subj="configuration-failure-error">
           {localState.configurationValidationError[0].longMessage}

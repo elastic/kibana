@@ -22,8 +22,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   };
 
   describe('discover data grid doc table', function describeIndexTests() {
-    const defaultRowsLimit = 25;
-
     before(async function () {
       log.debug('load kibana index with default index pattern');
       await esArchiver.load('discover');
@@ -38,10 +36,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.uiSettings.replace({});
     });
 
-    it('should show the first 50 rows by default', async function () {
+    it('should show the first 12 rows by default', async function () {
       // with the default range the number of hits is ~14000
       const rows = await dataGrid.getDocTableRows();
-      expect(rows.length).to.be(defaultRowsLimit);
+      expect(rows.length).to.be(12);
     });
 
     it('should refresh the table content when changing time window', async function () {

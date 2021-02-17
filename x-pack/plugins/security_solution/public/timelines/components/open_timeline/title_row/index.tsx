@@ -24,7 +24,7 @@ type Props = Pick<OpenTimelineProps, 'onAddTimelinesToFavorites' | 'title'> & {
  */
 export const TitleRow = React.memo<Props>(
   ({ children, onAddTimelinesToFavorites, selectedTimelinesCount, title }) => (
-    <HeaderSection title={title} split={true}>
+    <HeaderSection title={title} split={true} height={40}>
       <EuiFlexGroup gutterSize="s" responsive={false}>
         {onAddTimelinesToFavorites && (
           <EuiFlexItem grow={false}>

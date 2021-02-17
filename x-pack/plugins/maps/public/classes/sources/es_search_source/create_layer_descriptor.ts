@@ -9,7 +9,7 @@ import { Query } from 'src/plugins/data/public';
 import { LayerDescriptor } from '../../../../common/descriptor_types';
 import { ES_GEO_FIELD_TYPE, SCALING_TYPES } from '../../../../common/constants';
 import { ESSearchSource } from './es_search_source';
-import { VectorLayer } from '../../layers/vector_layer/vector_layer';
+import { VectorLayer } from '../../layers/vector_layer';
 import { getIsGoldPlus } from '../../../licensed_features';
 
 export interface CreateLayerDescriptorParams {

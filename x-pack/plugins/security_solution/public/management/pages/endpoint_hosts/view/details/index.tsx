@@ -20,6 +20,7 @@ import {
 import { useHistory } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
+import styled from 'styled-components';
 import { useToasts } from '../../../../../common/lib/kibana';
 import { useEndpointSelector } from '../hooks';
 import { urlFromQueryParams } from '../url_from_query_params';
@@ -36,6 +37,7 @@ import {
   policyResponseLoading,
   policyResponseTimestamp,
   policyVersionInfo,
+  hostStatusInfo,
 } from '../../store/selectors';
 import { EndpointDetails } from './endpoint_details';
 import { PolicyResponse } from './policy_response';
@@ -57,6 +59,7 @@ export const EndpointDetailsFlyout = memo(() => {
   } = queryParams;
   const details = useEndpointSelector(detailsData);
   const policyInfo = useEndpointSelector(policyVersionInfo);
+  const hostStatus = useEndpointSelector(hostStatusInfo);
   const loading = useEndpointSelector(detailsLoading);
   const error = useEndpointSelector(detailsError);
   const show = useEndpointSelector(showView);
@@ -83,7 +86,7 @@ export const EndpointDetailsFlyout = memo(() => {
       onClose={handleFlyoutClose}
       style={{ zIndex: 4001 }}
       data-test-subj="endpointDetailsFlyout"
-      size="s"
+      size="m"
     >
       <EuiFlyoutHeader hasBorder>
         {loading ? (
@@ -112,7 +115,11 @@ export const EndpointDetailsFlyout = memo(() => {
           {show === 'details' && (
             <>
               <EuiFlyoutBody data-test-subj="endpointDetailsFlyoutBody">
-                <EndpointDetails details={details} policyInfo={policyInfo} />
+                <EndpointDetails
+                  details={details}
+                  policyInfo={policyInfo}
+                  hostStatus={hostStatus}
+                />
               </EuiFlyoutBody>
             </>
           )}
@@ -124,6 +131,14 @@ export const EndpointDetailsFlyout = memo(() => {
 });
 
 EndpointDetailsFlyout.displayName = 'EndpointDetailsFlyout';
+
+const PolicyResponseFlyout = styled.div`
+  .endpointDetailsPolicyResponseFlyoutBody {
+    .euiFlyoutBody__overflowContent {
+      padding-top: 0;
+    }
+  }
+`;
 
 const PolicyResponseFlyoutPanel = memo<{
   hostMeta: HostMetadata;
@@ -165,12 +180,15 @@ const PolicyResponseFlyoutPanel = memo<{
   }, [backToDetailsClickHandler, detailsUri]);
 
   return (
-    <>
+    <PolicyResponseFlyout>
       <FlyoutSubHeader
         backButton={backButtonProp}
         data-test-subj="endpointDetailsPolicyResponseFlyoutHeader"
       />
-      <EuiFlyoutBody data-test-subj="endpointDetailsPolicyResponseFlyoutBody">
+      <EuiFlyoutBody
+        data-test-subj="endpointDetailsPolicyResponseFlyoutBody"
+        className="endpointDetailsPolicyResponseFlyoutBody"
+      >
         <EuiText data-test-subj="endpointDetailsPolicyResponseFlyoutTitle">
           <h4>
             <FormattedMessage
@@ -203,7 +221,7 @@ const PolicyResponseFlyoutPanel = memo<{
           />
         )}
       </EuiFlyoutBody>
-    </>
+    </PolicyResponseFlyout>
   );
 });
 

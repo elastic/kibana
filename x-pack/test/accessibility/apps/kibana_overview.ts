@@ -11,8 +11,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'home']);
   const a11y = getService('a11y');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/82226
-  describe.skip('Kibana overview', () => {
+  describe('Kibana overview', () => {
     const esArchiver = getService('esArchiver');
 
     before(async () => {
@@ -21,23 +20,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     after(async () => {
-      await PageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
-        useActualUrl: true,
-      });
-      await PageObjects.home.removeSampleDataSet('flights');
       await esArchiver.unload('empty_kibana');
     });
 
-    it('Getting started view', async () => {
-      await a11y.testAppSnapshot();
-    });
-
-    it('Overview view', async () => {
-      await PageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
-        useActualUrl: true,
-      });
-      await PageObjects.home.addSampleDataSet('flights');
-      await PageObjects.common.navigateToApp('kibanaOverview');
+    it('Kibana overview', async () => {
       await a11y.testAppSnapshot();
     });
   });

@@ -17,3 +17,5 @@ export const FIXED_AXIS_HEIGHT = 32;
 
 // number of items to display in canvas, since canvas can only have limited size
 export const CANVAS_MAX_ITEMS = 150;
+
+export const CHART_LEGEND_PADDING = 62;
