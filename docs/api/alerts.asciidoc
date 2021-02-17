@@ -4,7 +4,7 @@
 Manage {kib} alerts.
 The following alerts APIs are available:
 
-* <<alerts-api-create, Create alert API>> to create {kib} alert
+* <<alerts-api-create, Create alert API>> to create an alert
 
 * <<alerts-api-update, Update alert API>> to update the attributes for existing {kib} alerts
 
