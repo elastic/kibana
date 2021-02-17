@@ -25,7 +25,7 @@ interface IRoleSelectorProps {
   roleType?: string;
   roleTypeOption: string;
   description: string;
-  onChange(roleTypeOption: string);
+  onChange(roleTypeOption: string): void;
 }
 
 export const RoleSelector: React.FC<IRoleSelectorProps> = ({

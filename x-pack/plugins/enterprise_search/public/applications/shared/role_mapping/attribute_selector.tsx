@@ -31,9 +31,15 @@ interface IAttributeSelectorProps {
   elasticsearchRoles: string[];
   disabled: boolean;
   multipleAuthProvidersConfig: boolean;
-  handleAttributeSelectorChange(value: string, elasticsearchRole: string);
-  handleAttributeValueChange(value: string);
-  handleAuthProviderChange?(value: string[]);
+  handleAttributeSelectorChange(value: string, elasticsearchRole: string): void;
+  handleAttributeValueChange(value: string): void;
+  handleAuthProviderChange?(value: string[]): void;
+}
+
+interface AttributeExamples {
+  username: string;
+  email: string;
+  metadata: string;
 }
 
 const attributeValueExamples = {
@@ -157,7 +163,7 @@ export const AttributeSelector: React.FC<IAttributeSelectorProps> = ({
               <EuiFieldText
                 value={attributeValue}
                 name="attribute-value"
-                placeholder={attributeValueExamples[attributeName]}
+                placeholder={attributeValueExamples[attributeName as keyof AttributeExamples]}
                 onChange={(e) => {
                   handleAttributeValueChange(e.target.value);
                 }}

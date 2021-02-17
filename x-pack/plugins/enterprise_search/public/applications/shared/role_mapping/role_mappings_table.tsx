@@ -43,16 +43,15 @@ interface IRoleMappingsTableProps {
   roleMappings: SharedRoleMapping[];
   addMappingButton: React.ReactNode;
   accessAllEngines?: boolean;
-  myRole?: IRole;
   shouldShowAuthProvider?: boolean;
-  getRoleMappingPath(roleId: string);
+  getRoleMappingPath(roleId: string): string;
 }
 
 const MAX_CELL_WIDTH = 24;
 
 const noItemsPlaceholder = <EuiTextColor color="subdued">&mdash;</EuiTextColor>;
 
-const getAuthProviderDisplayValue = (authProvider) =>
+const getAuthProviderDisplayValue = (authProvider: string) =>
   authProvider === ANY_AUTH_PROVIDER ? ANY_AUTH_PROVIDER_LABEL : authProvider;
 
 export const RoleMappingsTable: React.FC<IRoleMappingsTableProps> = ({
@@ -61,27 +60,27 @@ export const RoleMappingsTable: React.FC<IRoleMappingsTableProps> = ({
   roleMappings,
   addMappingButton,
   getRoleMappingPath,
-  myRole,
   shouldShowAuthProvider,
 }) => {
   const [filterValue, updateValue] = useState('');
 
   // This is needed because SMAS has `engines` and SMES has `groups`.
   const standardizeRoleMapping = roleMappings.map((rm) => {
-    const _rm = { ...rm } as IObject;
+    const _rm = { ...rm } as SharedRoleMapping;
     _rm.accessItems = rm[accessItemKey];
     return _rm;
   }) as SharedRoleMapping[];
 
-  const filterResults = (result) => {
+  const filterResults = (result: SharedRoleMapping) => {
     const values = Object.values(result) as string[];
     const regexp = new RegExp(filterValue, 'i');
     return values.filter((x) => regexp.test(x)).length > 0;
   };
 
-  const filteredResults = standardizeRoleMapping.filter(filterResults) as ISharedRoleMapping[];
-  const getFirstAttributeName = (rules): string => Object.entries(rules)[0][0];
-  const getFirstAttributeValue = (rules): string => Object.entries(rules)[0][1] as string;
+  const filteredResults = standardizeRoleMapping.filter(filterResults) as SharedRoleMapping[];
+  const getFirstAttributeName = (rules: RoleRules): string => Object.entries(rules)[0][0];
+  const getFirstAttributeValue = (rules: RoleRules): string =>
+    Object.entries(rules)[0][1] as string;
 
   return (
     <>

@@ -10,7 +10,7 @@ import React from 'react';
 import { EuiButton, EuiCallOut } from '@elastic/eui';
 
 interface IDeleteMappingCalloutProps {
-  handleDeleteMapping();
+  handleDeleteMapping(): void;
 }
 
 export const DeleteMappingCallout: React.FC<IDeleteMappingCalloutProps> = ({
