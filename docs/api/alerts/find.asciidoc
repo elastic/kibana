@@ -115,5 +115,3 @@ query parameter for each value:
 $ curl -X GET api/alerts/_find?fields=id&fields=name
 --------------------------------------------------
 // KIBANA
-
-include::discover/kuery.asciidoc[]

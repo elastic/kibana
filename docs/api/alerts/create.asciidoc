@@ -57,7 +57,7 @@ Create {kib} alerts.
     (Required, string) The id of the action type.
 
   `params`:::
-    (Required, object) The map to the `params` the action type will receive. In order to help apply context to strings, we handle them as mustache templates and pass in a default set of context.
+    (Required, object) The map to the `params` the <<action-types,action type>> will receive. In order to help apply context to strings, we handle them as mustache templates and pass in a default set of context.
 =====
 
 
