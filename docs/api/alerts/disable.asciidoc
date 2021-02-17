@@ -4,7 +4,7 @@
 <titleabbrev>Disable alert</titleabbrev>
 ++++
 
-Disable {kib} alerts.
+Disable an alert.
 
 [[alerts-api-disable-request]]
 ==== Request
