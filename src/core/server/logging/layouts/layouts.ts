@@ -27,7 +27,7 @@ export class Layouts {
    * @returns Fully constructed `Layout` instance.
    */
   public static create(config: LayoutConfigType): Layout {
-    switch (config.kind) {
+    switch (config.type) {
       case 'json':
         return new JsonLayout();
 
