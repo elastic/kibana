@@ -9,42 +9,51 @@ import { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const a11y = getService('a11y');
-  const { click, exists } = getService('testSubjects');
+  const testSubjects = getService('testSubjects');
+  const esArchiver = getService('esArchiver');
+  const retry = getService('retry');
   const { common } = getPageObjects(['common']);
-  const { load } = getService('esArchiver');
-  const { waitFor } = getService('retry');
 
   describe('Canvas', () => {
     before(async () => {
-      await load('canvas/default');
+      await esArchiver.load('canvas/default');
       await common.navigateToApp('canvas');
     });
 
     it('loads workpads', async function () {
-      await waitFor(
+      await retry.waitFor(
         'canvas workpads visible',
-        async () => await exists('canvasWorkpadLoaderTable')
+        async () => await testSubjects.exists('canvasWorkpadLoaderTable')
       );
       await a11y.testAppSnapshot();
     });
 
     it('provides bulk actions', async function () {
-      await click('checkboxSelectAll');
-      await waitFor('canvas bulk actions visible', async () => await exists('deleteWorkpadButton'));
+      await testSubjects.click('checkboxSelectAll');
+      await retry.waitFor(
+        'canvas bulk actions visible',
+        async () => await testSubjects.exists('deleteWorkpadButton')
+      );
       await a11y.testAppSnapshot();
     });
 
     it('can delete workpads', async function () {
-      await click('deleteWorkpadButton');
-      await waitFor('canvas delete modal visible', async () => await exists('canvasConfirmModal'));
+      await testSubjects.click('deleteWorkpadButton');
+      await retry.waitFor(
+        'canvas delete modal visible',
+        async () => await testSubjects.exists('canvasConfirmModal')
+      );
       await a11y.testAppSnapshot();
     });
 
     it('can navigate to templates', async function () {
-      await click('confirmModalCancelButton'); // close modal from previous test
+      await testSubjects.click('confirmModalCancelButton'); // close modal from previous test
 
-      await click('workpadTemplates');
-      await waitFor('canvas templates visible', async () => await exists('canvasTemplatesTable'));
+      await testSubjects.click('workpadTemplates');
+      await retry.waitFor(
+        'canvas templates visible',
+        async () => await testSubjects.exists('canvasTemplatesTable')
+      );
       await a11y.testAppSnapshot();
     });
   });
