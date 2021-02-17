@@ -24,6 +24,6 @@ export const POLICY_STATUS = i18n.translate(
 export const SENSORVERSION = i18n.translate(
   'xpack.securitySolution.host.details.endpoint.sensorversion',
   {
-    defaultMessage: 'Sensorversion',
+    defaultMessage: 'Sensor Version',
   }
 );

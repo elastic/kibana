@@ -109,8 +109,14 @@ const StatefulEventComponent: React.FC<Props> = ({
   }, [event?.data]);
 
   const hostIPAddresses = useMemo(() => {
-    const ipList = getMappedNonEcsValue({ data: event?.data, fieldName: 'host.ip' });
-    return ipList;
+    const hostIpList = getMappedNonEcsValue({ data: event?.data, fieldName: 'host.ip' }) ?? [];
+    const sourceIpList = getMappedNonEcsValue({ data: event?.data, fieldName: 'source.ip' }) ?? [];
+    const destinationIpList =
+      getMappedNonEcsValue({
+        data: event?.data,
+        fieldName: 'destination.ip',
+      }) ?? [];
+    return new Set([...hostIpList, ...sourceIpList, ...destinationIpList]);
   }, [event?.data]);
 
   const activeTab = tabType ?? TimelineTabs.query;
@@ -123,7 +129,7 @@ const StatefulEventComponent: React.FC<Props> = ({
       activeExpandedDetail?.params?.hostName === hostName) ||
     (activeExpandedDetail?.panelView === 'networkDetail' &&
       activeExpandedDetail?.params?.ip &&
-      hostIPAddresses?.includes(activeExpandedDetail?.params?.ip)) ||
+      hostIPAddresses?.has(activeExpandedDetail?.params?.ip)) ||
     false;
 
   const getNotesByIds = useMemo(() => appSelectors.notesByIdsSelector(), []);
