@@ -19,8 +19,8 @@ import {
   ReorderContext,
   ReorderState,
   DropHandler,
+  announce,
 } from './providers';
-import { announce } from './announcements';
 import { trackUiEvent } from '../lens_ui_telemetry';
 import { DropType } from '../types';
 

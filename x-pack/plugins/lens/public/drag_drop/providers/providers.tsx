@@ -6,70 +6,15 @@
  */
 
 import React, { useState, useMemo } from 'react';
-import classNames from 'classnames';
 import { EuiScreenReaderOnly, EuiPortal } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { HumanData } from './announcements';
-import { DropType } from '../types';
-
-/**
- * A function that handles a drop event.
- */
-export type DropHandler = (dropped: DragDropIdentifier, dropType?: DropType) => void;
-
-export type DragDropIdentifier = Record<string, unknown> & {
-  id: string;
-  /**
-   * The data for accessibility, consists of required label and not required groupLabel and position in group
-   */
-  humanData: HumanData;
-};
-
-export type DraggingIdentifier = DragDropIdentifier & {
-  ghost?: {
-    children: React.ReactElement;
-    style: React.CSSProperties;
-  };
-};
-
-export type DropIdentifier = DragDropIdentifier & {
-  dropType: DropType;
-  onDrop: DropHandler;
-};
-
-export interface DropTargets {
-  activeDropTarget?: DropIdentifier;
-  dropTargetsByOrder: Record<string, DropIdentifier | undefined>;
-}
-/**
- * The shape of the drag / drop context.
- */
-export interface DragContextState {
-  /**
-   * The item being dragged or undefined.
-   */
-  dragging?: DraggingIdentifier;
-
-  /**
-   * keyboard mode
-   */
-  keyboardMode: boolean;
-  /**
-   * keyboard mode
-   */
-  setKeyboardMode: (mode: boolean) => void;
-  /**
-   * Set the item being dragged.
-   */
-  setDragging: (dragging?: DraggingIdentifier) => void;
-
-  activeDropTarget?: DropTargets;
-
-  setActiveDropTarget: (newTarget?: DropIdentifier) => void;
-
-  setA11yMessage: (message: string) => void;
-  registerDropTarget: (order: number[], dropTarget?: DropIdentifier) => void;
-}
+import {
+  DropIdentifier,
+  DraggingIdentifier,
+  DragDropIdentifier,
+  DropTargets,
+  DragContextState,
+} from './types';
 
 /**
  * The drag / drop context singleton, used like so:
@@ -90,45 +35,11 @@ export const DragContext = React.createContext<DragContextState>({
 /**
  * The argument to DragDropProvider.
  */
-export interface ProviderProps {
-  /**
-   * keyboard mode
-   */
-  keyboardMode: boolean;
-  /**
-   * keyboard mode
-   */
-  setKeyboardMode: (mode: boolean) => void;
-  /**
-   * Set the item being dragged.
-   */
-  /**
-   * The item being dragged. If unspecified, the provider will
-   * behave as if it is the root provider.
-   */
-  dragging?: DraggingIdentifier;
-
-  /**
-   * Sets the item being dragged. If unspecified, the provider
-   * will behave as if it is the root provider.
-   */
-  setDragging: (dragging?: DraggingIdentifier) => void;
-
-  activeDropTarget?: {
-    activeDropTarget?: DropIdentifier;
-    dropTargetsByOrder: Record<string, DropIdentifier | undefined>;
-  };
-
-  setActiveDropTarget: (newTarget?: DropIdentifier) => void;
-
-  registerDropTarget: (order: number[], dropTarget?: DropIdentifier) => void;
-
+export interface ProviderProps extends DragContextState {
   /**
    * The React children.
    */
   children: React.ReactNode;
-
-  setA11yMessage: (message: string) => void;
 }
 
 /**
@@ -299,80 +210,4 @@ export function ChildDragDropProvider({
     ]
   );
   return <DragContext.Provider value={value}>{children}</DragContext.Provider>;
-}
-
-export interface ReorderState {
-  /**
-   * Ids of the elements that are translated up or down
-   */
-  reorderedItems: Array<{ id: string; height?: number }>;
-
-  /**
-   * Direction of the move of dragged element in the reordered list
-   */
-  direction: '-' | '+';
-  /**
-   * height of the dragged element
-   */
-  draggingHeight: number;
-  /**
-   * indicates that user is in keyboard mode
-   */
-  isReorderOn: boolean;
-  /**
-   * reorder group needed for screen reader aria-described-by attribute
-   */
-  groupId: string;
-}
-
-type SetReorderStateDispatch = (prevState: ReorderState) => ReorderState;
-
-export interface ReorderContextState {
-  reorderState: ReorderState;
-  setReorderState: (dispatch: SetReorderStateDispatch) => void;
-}
-
-export const ReorderContext = React.createContext<ReorderContextState>({
-  reorderState: {
-    reorderedItems: [],
-    direction: '-',
-    draggingHeight: 40,
-    isReorderOn: false,
-    groupId: '',
-  },
-  setReorderState: () => () => {},
-});
-
-export function ReorderProvider({
-  id,
-  children,
-  className,
-}: {
-  id: string;
-  children: React.ReactNode;
-  className?: string;
-}) {
-  const [state, setState] = useState<ReorderContextState['reorderState']>({
-    reorderedItems: [],
-    direction: '-',
-    draggingHeight: 40,
-    isReorderOn: false,
-    groupId: id,
-  });
-
-  const setReorderState = useMemo(() => (dispatch: SetReorderStateDispatch) => setState(dispatch), [
-    setState,
-  ]);
-  return (
-    <div
-      data-test-subj="lnsDragDrop-reorderableGroup"
-      className={classNames(className, {
-        'lnsDragDrop-isActiveGroup': state.isReorderOn && React.Children.count(children) > 1,
-      })}
-    >
-      <ReorderContext.Provider value={{ reorderState: state, setReorderState }}>
-        {children}
-      </ReorderContext.Provider>
-    </div>
-  );
 }
