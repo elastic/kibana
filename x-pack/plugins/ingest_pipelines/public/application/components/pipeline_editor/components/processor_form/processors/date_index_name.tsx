@@ -82,7 +82,7 @@ const fieldsConfig: FieldsConfig = {
       <FormattedMessage
         id="xpack.ingestPipelines.pipelineEditor.dateIndexNameForm.indexNameFormatFieldHelpText"
         defaultMessage="Date format used to print the parsed date into the index name. Defaults to {value}."
-        values={{ value: <EuiCode inline>{'yyyy-MM-dd'}</EuiCode> }}
+        values={{ value: <EuiCode>{'yyyy-MM-dd'}</EuiCode> }}
       />
     ),
   },
@@ -102,7 +102,7 @@ const fieldsConfig: FieldsConfig = {
       <FormattedMessage
         id="xpack.ingestPipelines.pipelineEditor.dateIndexNameForm.dateFormatsHelpText"
         defaultMessage="Expected date formats. Provided formats are applied sequentially. Accepts a Java time pattern, ISO8601, UNIX, UNIX_MS, or TAI64N formats. Defaults to {value}."
-        values={{ value: <EuiCode inline>{"yyyy-MM-dd'T'HH:mm:ss.SSSXX"}</EuiCode> }}
+        values={{ value: <EuiCode>{"yyyy-MM-dd'T'HH:mm:ss.SSSXX"}</EuiCode> }}
       />
     ),
   },
@@ -119,7 +119,7 @@ const fieldsConfig: FieldsConfig = {
       <FormattedMessage
         id="xpack.ingestPipelines.pipelineEditor.dateIndexNameForm.timezoneHelpText"
         defaultMessage="Timezone used when parsing the date and constructing the index name expression. Defaults to {timezone}."
-        values={{ timezone: <EuiCode inline>{'UTC'}</EuiCode> }}
+        values={{ timezone: <EuiCode>{'UTC'}</EuiCode> }}
       />
     ),
   },
@@ -136,7 +136,7 @@ const fieldsConfig: FieldsConfig = {
       <FormattedMessage
         id="xpack.ingestPipelines.pipelineEditor.dateIndexForm.localeHelpText"
         defaultMessage="Locale to use when parsing the date. Useful when parsing month or day names. Defaults to {locale}."
-        values={{ locale: <EuiCode inline>{'ENGLISH'}</EuiCode> }}
+        values={{ locale: <EuiCode>{'ENGLISH'}</EuiCode> }}
       />
     ),
   },
