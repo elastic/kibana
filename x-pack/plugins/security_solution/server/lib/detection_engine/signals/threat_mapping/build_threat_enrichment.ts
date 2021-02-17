@@ -10,6 +10,8 @@ import { enrichSignalThreatMatches } from './enrich_signal_threat_matches';
 import { getThreatList } from './get_threat_list';
 import { BuildThreatEnrichmentOptions, GetMatchedThreats } from './types';
 
+const DEFAULT_INDICATOR_PATH = 'threat.indicator';
+
 export const buildThreatEnrichment = ({
   buildRuleMessage,
   exceptionItems,
@@ -18,6 +20,7 @@ export const buildThreatEnrichment = ({
   services,
   threatFilters,
   threatIndex,
+  threatIndicatorPath,
   threatLanguage,
   threatQuery,
 }: BuildThreatEnrichmentOptions): SignalsEnrichment => {
@@ -50,6 +53,7 @@ export const buildThreatEnrichment = ({
     return threatResponse.hits.hits;
   };
 
+  const defaultedIndicatorPath = threatIndicatorPath ? threatIndicatorPath : DEFAULT_INDICATOR_PATH;
   return (signals: SignalSearchResponse): Promise<SignalSearchResponse> =>
-    enrichSignalThreatMatches(signals, getMatchedThreats);
+    enrichSignalThreatMatches(signals, getMatchedThreats, defaultedIndicatorPath);
 };
