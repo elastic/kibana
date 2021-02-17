@@ -4,7 +4,7 @@
 <titleabbrev>List all alert types API</titleabbrev>
 ++++
 
-Retrieve a list of all {kib} alert types.
+Retrieve a list of all alert types.
 
 [[alerts-api-list-request]]
 ==== Request
@@ -89,7 +89,7 @@ The API returns the following:
 ]
 --------------------------------------------------
 
-Each alert type object contains the following properties:
+Each alert type contains the following properties:
 
 [cols="2*<"]
 |===
@@ -104,24 +104,24 @@ Each alert type object contains the following properties:
 | The license required to use the alert type.
 
 | `enabledInLicense`
-| Whether the alert type is enabled or disabled due to license.
+| Whether the alert type is enabled or disabled based on the license.
 
 | `actionGroups`
-| An explicit list of groups the alert type may schedule actions for, each specifying the ActionGroup's unique ID and human readable name. Alert `actions` validation will use this configuartion to ensure groups are valid. We highly encourage using `kbn-i18n` to translate the names of actionGroup  when registering the AlertType.
+| An explicit list of groups for which the alert type can schedule actions, each with the action group's unique ID and human readable name. Alert `actions` validation will use this configuration to ensure that groups are valid. Use `kbn-i18n` to translate the names of the action group when registering the alert type.
 
 | `recoveryActionGroup`
-| An action group to use when an alert instance goes from an active state, to an inactive one. This action group should not be specified under the `actionGroups` property. If no recoveryActionGroup is specified, the default `recovered` action group will be used.
+| An action group to use when an alert instance goes from an active state, to an inactive one. Do not specify this action group under the `actionGroups` property. If `recoveryActionGroup` is not specified, the default `recovered` action group is used.
 
 | `defaultActionGroupId`
-| Default ID value for the group of the alert type.
+| The default ID for the alert type group.
 
 | `actionVariables`
-| An explicit list of action variables the alert type makes available via context and state in action parameter templates, and a short human readable description. Alert UI  will use this to display prompts for the users for these variables, in action parameter editors. We highly encourage using `kbn-i18n` to translate the descriptions.
+| An explicit list of action variables that the alert type makes available via context and state in action parameter templates, and a short human readable description. The Alert UI  will use this information to prompt users for these variables in action parameter editors. Use `kbn-i18n` to translate the descriptions.
 
 | `producer`
-| The id of the application producing this alert type.
+| The ID of the application producing this alert type.
 
 | `authorizedConsumers`
-| The list of the plugins ids which has access for the alert type.
+| The list of the plugins IDs that have access to the alert type.
 
 |===

@@ -6,7 +6,7 @@
 
 Permanently remove an alert.
 
-WARNING: Once you delete an alert, _it cannot be recovered_.
+WARNING: Once you delete an alert, you cannot recover it.
 
 [[alerts-api-delete-request]]
 ==== Request
@@ -17,7 +17,7 @@ WARNING: Once you delete an alert, _it cannot be recovered_.
 ==== Path parameters
 
 `id`::
-  (Required, string) The alert ID that you want to remove.
+  (Required, string) The ID of the alert that you want to remove.
 
 [[alerts-api-delete-response-codes]]
 ==== Response code

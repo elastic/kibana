@@ -52,19 +52,19 @@ The API returns the following:
 }
 --------------------------------------------------
 
-Health API response contains the following properties:
+The health API response contains the following properties:
 
 [cols="2*<"]
 |===
 
 | `isSufficientlySecure`
-| Return the state false if the security is enabled but TLS is not.
+| Returns`false` if security is enabled, but TLS is not.
 
 | `hasPermanentEncryptionKey`
 | Return the state true if Encryption Saved Object plugin has a permanent encryption Key
 
 | `alertingFrameworkHeath`
-| This state property includes three different substates: `decryptionHealth`, `executionHealth`, `readHealth` which identify the alerting framework API health.
+| This state property has three substates that identify the health of the alerting framework API: `decryptionHealth`, `executionHealth`, and `readHealth`.
 
 |===
 
@@ -74,12 +74,12 @@ Health API response contains the following properties:
 |===
 
 | `decryptionHealth`
-| Return the latest status `ok`, `warn` or `error` with the timestamp, which identify if the alerts have the decryption errors.
+| Returns the timestamp and status  of the alert decryption: `ok`, `warn` or `error` .
 
 | `executionHealth`
-| Return the latest status `ok`, `warn` or `error` with the timestamp, which identify if the alerts executions have results with the errors.
+| Returns the timestamp and status of the alert execution: `ok`, `warn` or `error`.
 
 | `readHealth`
-| Return the latest status `ok`, `warn` or `error` with the timestamp, which identify if the alerts read events have any errors.
+| Returns the timestamp and status of the alert reading events: `ok`, `warn` or `error`.
 
 |===

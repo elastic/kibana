@@ -4,7 +4,7 @@
 <titleabbrev>Enable alert</titleabbrev>
 ++++
 
-Enable {kib} alerts.
+Enable an alert.
 
 [[alerts-api-enable-request]]
 ==== Request
@@ -15,7 +15,7 @@ Enable {kib} alerts.
 ==== Path parameters
 
 `id`::
-  (Required, string) The alert ID that you want to enable.
+  (Required, string) The ID of the alert that you want to enable.
 
 [[alerts-api-enable-response-codes]]
 ==== Response code

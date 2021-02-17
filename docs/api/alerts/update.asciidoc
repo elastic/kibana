@@ -4,7 +4,7 @@
 <titleabbrev>Update alert</titleabbrev>
 ++++
 
-Update the attributes for existing {kib} alerts.
+Update the attributes for an existing alert.
 
 [[alerts-api-update-request]]
 ==== Request
@@ -15,28 +15,28 @@ Update the attributes for existing {kib} alerts.
 ==== Path parameters
 
 `id`::
-  (Required, string) The alert ID to update.
+  (Required, string) The ID of the alert that you want to update.
 
 [[alerts-api-update-request-body]]
 ==== Request body
 
 `name`::
-  (Required, string) A name to reference and search in the future.
+  (Required, string) A name to reference and search.
 
 `tags`::
-  (Optional, string array) A list of keywords to reference and search in the future.
+  (Optional, string array) A list of keywords to reference and search.
 
 `schedule`::
   (Required, object) The schedule specifying when this alert should be run, using one of the available schedule formats specified under _Schedule Formats_ below.
 
 `throttle`::
-  (Optional, string) A Duration specifying how often this alert should fire the same actions. This will prevent the alert from sending out the same notification over and over. For example, if an alert with a `schedule` of 1 minute stays in a triggered state for 90 minutes, setting a `throttle` of `10m` or `1h` will prevent it from sending 90 notifications over this period.
+  (Optional, string) How often this alert should fire the same actions. This will prevent the alert from sending out the same notification over and over. For example, if an alert with a `schedule` of 1 minute stays in a triggered state for 90 minutes, setting a `throttle` of `10m` or `1h` will prevent it from sending 90 notifications during this period.
 
 `notifyWhen`::
-  (Required, string) Defines the conditions for notifications thottling from the three available option types 'onActionGroupChange', 'onActiveAlert', 'onThrottleInterval'.
+  (Required, string) The condition for throttling the notification: `onActionGroupChange`, `onActiveAlert`,  or `onThrottleInterval`.
 
 `params`::
-  (Required, object) The parameters to pass in to the alert type executor `params` value. This will also validate against the alert type params validator if defined.
+  (Required, object) The parameters to pass to the alert type executor `params` value. This will also validate against the alert type params validator, if defined.
 
 `actions`::
   (Optional, object array) An array of the following:<br> - `group` (string): We support grouping actions in the scenario of escalations or different types of alert instances. If you don't need this, feel free to use `default` as a value.<br>- `id` (string): The id of the action saved object to execute.<br>- `params` (object): The map to the `params` the action type will receive. In order to help apply context to strings, we handle them as mustache templates and pass in a default set of context. (see templating actions).
@@ -60,7 +60,7 @@ There are plans to support multiple other schedule formats in the near future.
 [[alerts-api-update-example]]
 ==== Example
 
-Update an existing alert with ID `ac4e6b90-6be7-11eb-ba0d-9b1c1f912d74`, with a different name:
+Update an alert with ID `ac4e6b90-6be7-11eb-ba0d-9b1c1f912d74` with a different name:
 
 [source,sh]
 --------------------------------------------------

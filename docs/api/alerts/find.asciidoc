@@ -4,7 +4,7 @@
 <titleabbrev>Find alerts</titleabbrev>
 ++++
 
-Retrieve a paginated set of {kib} alerts by various conditions.
+Retrieve a paginated set of alerts based on condition.
 
 [[alerts-api-find-request]]
 ==== Request
@@ -24,7 +24,7 @@ Retrieve a paginated set of {kib} alerts by various conditions.
   (Optional, string) An Elasticsearch {ref}/query-dsl-simple-query-string-query.html[simple_query_string] query that filters the alerts in the response.
 
 `default_search_operator`::
-  (Optional, string) The default operator to use for the `simple_query_string`. By default is 'OR'.
+  (Optional, string) The operator to use for the `simple_query_string`. The default is 'OR'.
 
 `search_fields`::
   (Optional, array|string) The fields to perform the `simple_query_string` parsed query against.
@@ -39,15 +39,15 @@ Retrieve a paginated set of {kib} alerts by various conditions.
   are defined in the `type` parameter, only "root" fields are allowed.
 
 `sort_order`::
-  (Optional, string) Sort directions. Could be two values 'asc' or 'desc'.
+  (Optional, string) Sort direction, either `asc` or `desc`.
 
 `has_reference`::
   (Optional, object) Filters the alerts that have a relations with the reference objects with the specific "type" and "ID".
 
 `filter`::
-  (Optional, string) The filter is a KQL string with the caveat that if you filter with an attribute from your type saved object.
-  It should look like that savedObjectType.attributes.title: "myTitle". However, If you used a direct attribute of a saved object like `updatedAt`,
-  you will have to define your filter like that savedObjectType.updatedAt > 2018-12-22.
+  (Optional, string) A KQL string that you filter with an attribute from your saved object.
+  It should look like savedObjectType.attributes.title: "myTitle". However, If you used a direct attribute of a saved object, such as `updatedAt`,
+  you will have to define your filter, for example, savedObjectType.updatedAt > 2018-12-22.
 
 NOTE: As alerts change in {kib}, the results on each page of the response also
 change. Use the find API for traditional paginated results, but avoid using it to export large amounts of data.
