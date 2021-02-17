@@ -26,7 +26,7 @@ Retrieve an alert by ID.
 [[alerts-api-get-example]]
 ==== Example
 
-Retrieve the alert object with the `41893910-6bca-11eb-9e0d-85d233e3ee35` ID:
+Retrieve the alert object with the ID `41893910-6bca-11eb-9e0d-85d233e3ee35`:
 
 [source,sh]
 --------------------------------------------------
