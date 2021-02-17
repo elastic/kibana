@@ -12,7 +12,7 @@ The following alerts APIs are available:
 
 * <<alerts-api-delete, Delete alert API>> to permanently remove an alert
 
-* <<alerts-api-find, Find alerts API>> to retrieve a paginated set of {kib} alerts by various conditions
+* <<alerts-api-find, Find alerts API>> to retrieve a paginated set of alerts by condition
 
 * <<alerts-api-list, List all alert types API>> to retrieve a list of all {kib} alert types
 
