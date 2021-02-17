@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { BehaviorSubject, Subject } from 'rxjs';
+import { BehaviorSubject, Subject, Subscription } from 'rxjs';
 import { pluck } from 'rxjs/operators';
 import {
   PluginSetup,
@@ -80,6 +80,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   private networkUpdater$ = new Subject<AppUpdater>();
 
   private storage = new Storage(localStorage);
+  private licensingSubscription: Subscription | null = null;
 
   /**
    * Lazily instantiated subPlugins.
@@ -370,7 +371,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
      * Register searchDeepLinks and pass an appUpdater for each subPlugin, to change searchDeepLinks as needed when licensing changes.
      */
     if (licensing !== null) {
-      licensing.subscribe((currentLicense) => {
+      this.licensingSubscription = licensing.subscribe((currentLicense) => {
         if (currentLicense.type !== undefined) {
           registerSearchLinks(SecurityPageName.network, this.networkUpdater$, currentLicense.type);
           registerSearchLinks(
@@ -386,6 +387,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   }
 
   public stop() {
+    if (this.licensingSubscription !== null) {
+      this.licensingSubscription.unsubscribe();
+    }
     return {};
   }
 
