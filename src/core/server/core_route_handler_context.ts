@@ -13,8 +13,7 @@ import { SavedObjectsClientContract } from './saved_objects/types';
 import {
   InternalSavedObjectsServiceStart,
   ISavedObjectTypeRegistry,
-  ISavedObjectsExporter,
-  ISavedObjectsImporter,
+  SavedObjectsClientProviderOptions,
 } from './saved_objects';
 import {
   InternalElasticsearchServiceStart,
@@ -58,8 +57,6 @@ class CoreSavedObjectsRouteHandlerContext {
   ) {}
   #scopedSavedObjectsClient?: SavedObjectsClientContract;
   #typeRegistry?: ISavedObjectTypeRegistry;
-  #exporter?: ISavedObjectsExporter;
-  #importer?: ISavedObjectsImporter;
 
   public get client() {
     if (this.#scopedSavedObjectsClient == null) {
@@ -75,19 +72,18 @@ class CoreSavedObjectsRouteHandlerContext {
     return this.#typeRegistry;
   }
 
-  public get exporter() {
-    if (this.#exporter == null) {
-      this.#exporter = this.savedObjectsStart.createExporter(this.client);
-    }
-    return this.#exporter;
-  }
+  public getClient = (options?: SavedObjectsClientProviderOptions) => {
+    if (!options) return this.client;
+    return this.savedObjectsStart.getScopedClient(this.request, options);
+  };
 
-  public get importer() {
-    if (this.#importer == null) {
-      this.#importer = this.savedObjectsStart.createImporter(this.client);
-    }
-    return this.#importer;
-  }
+  public getExporter = (client: SavedObjectsClientContract) => {
+    return this.savedObjectsStart.createExporter(client);
+  };
+
+  public getImporter = (client: SavedObjectsClientContract) => {
+    return this.savedObjectsStart.createImporter(client);
+  };
 }
 
 class CoreUiSettingsRouteHandlerContext {

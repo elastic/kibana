@@ -237,7 +237,9 @@ export const setup = async (arg?: { appServicesContext: Partial<AppServicesConte
         exists(`${fieldSelector}.searchableSnapshotDisabledDueToLicense`),
       toggleSearchableSnapshot,
       setSearchableSnapshot: async (value: string) => {
-        await toggleSearchableSnapshot(true);
+        if (!exists(`searchableSnapshotField-${phase}.searchableSnapshotCombobox`)) {
+          await toggleSearchableSnapshot(true);
+        }
         act(() => {
           find(`searchableSnapshotField-${phase}.searchableSnapshotCombobox`).simulate('change', [
             { label: value },
@@ -268,6 +270,9 @@ export const setup = async (arg?: { appServicesContext: Partial<AppServicesConte
       disablePhase,
     };
   };
+
+  const hasRolloverTipOnMinAge = (phase: Phases) => (): boolean =>
+    exists(`${phase}-rolloverMinAgeInputIconTip`);
 
   return {
     ...testBed,
@@ -304,6 +309,7 @@ export const setup = async (arg?: { appServicesContext: Partial<AppServicesConte
         setSelectedNodeAttribute: setSelectedNodeAttribute('warm'),
         setReplicas: setReplicas('warm'),
         hasErrorIndicator: () => exists('phaseErrorIndicator-warm'),
+        hasRolloverTipOnMinAge: hasRolloverTipOnMinAge('warm'),
         ...createShrinkActions('warm'),
         ...createForceMergeActions('warm'),
         setReadonly: setReadonly('warm'),
@@ -319,11 +325,13 @@ export const setup = async (arg?: { appServicesContext: Partial<AppServicesConte
         setFreeze,
         freezeExists,
         hasErrorIndicator: () => exists('phaseErrorIndicator-cold'),
+        hasRolloverTipOnMinAge: hasRolloverTipOnMinAge('cold'),
         ...createIndexPriorityActions('cold'),
         ...createSearchableSnapshotActions('cold'),
       },
       delete: {
         ...createToggleDeletePhaseActions(),
+        hasRolloverTipOnMinAge: hasRolloverTipOnMinAge('delete'),
         setMinAgeValue: setMinAgeValue('delete'),
         setMinAgeUnits: setMinAgeUnits('delete'),
       },
