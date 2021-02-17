@@ -13,7 +13,7 @@ import { RuleEcs } from '../../../../common/ecs/rule';
 const props = {
   id: 'action-id',
   alertId: 'alert-id',
-  index: 'index',
+  index: 'alert-index',
   alert: {
     _id: 'alert-id',
     _index: 'alert-index',
