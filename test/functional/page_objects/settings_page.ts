@@ -494,11 +494,6 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
         await this.setFieldScript(script);
       }
       await this.clickSaveField();
-      // eslint-disable-next-line
-      console.log('save field clicked');
-      // await new Promise((resolve) => setTimeout(resolve, 1000 * 30 * 5));
-      // console.log('30s timeout passed');
-
       await this.closeIndexPatternFieldEditor();
     }
 
@@ -530,22 +525,11 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
 
     async setFieldScript(script: string) {
       log.debug('set script = ' + script);
-      await (await testSubjects.findAll('formRowToggle'))[1].click();
       await (
         await (await testSubjects.find('formatRow')).findAllByCssSelector(
           '[data-test-subj="toggle"]'
         )
       )[0].click();
-      // await new Promise((resolve) => setTimeout(resolve, 1000 * 5));
-      // await (await testSubjects.find('valueRowToggle')).click();
-      // await new Promise((resolve) => setTimeout(resolve, 1000 * 5 * 60));
-
-      /*
-      await retry.waitFor('script editor to be visible', async () => {
-        return await find.existsByCssSelector('.monaco-editor');
-      });
-      */
-
       await browser.pressKeys(browser.keys.TAB);
       await new Promise((resolve) => setTimeout(resolve, 1000 * 5));
       browser.pressKeys(script);
