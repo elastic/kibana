@@ -228,6 +228,7 @@ const FieldEditorComponent = ({
         title={i18nTexts.customLabel.title}
         description={i18nTexts.customLabel.description}
         formFieldPath="__meta__.isCustomLabelVisible"
+        data-test-subj="customLabelRow"
         withDividerRule
       >
         <CustomLabelField />
@@ -239,6 +240,7 @@ const FieldEditorComponent = ({
           title={i18nTexts.value.title}
           description={i18nTexts.value.description}
           formFieldPath="__meta__.isValueVisible"
+          data-test-subj="valueRow"
           withDividerRule
         >
           <ScriptField
@@ -254,6 +256,7 @@ const FieldEditorComponent = ({
         title={i18nTexts.format.title}
         description={i18nTexts.format.description}
         formFieldPath="__meta__.isFormatVisible"
+        data-test-subj="formatRow"
         withDividerRule
       >
         <FormatField
@@ -270,6 +273,7 @@ const FieldEditorComponent = ({
           title={i18nTexts.popularity.title}
           description={i18nTexts.popularity.description}
           formFieldPath="__meta__.isPopularityVisible"
+          data-test-subj="popularityRow"
           withDividerRule
         >
           <PopularityField />
