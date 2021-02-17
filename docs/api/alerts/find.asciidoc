@@ -24,7 +24,7 @@ Retrieve a paginated set of alerts based on condition.
   (Optional, string) An Elasticsearch {ref}/query-dsl-simple-query-string-query.html[simple_query_string] query that filters the alerts in the response.
 
 `default_search_operator`::
-  (Optional, string) The default operator to use for the `simple_query_string`. By default is 'OR'.
+  (Optional, string) The operator to use for the `simple_query_string`. The default is 'OR'.
 
 `search_fields`::
   (Optional, array|string) The fields to perform the `simple_query_string` parsed query against.
