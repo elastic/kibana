@@ -135,14 +135,36 @@ export const getThresholdAggregationDataProvider = (
   nonEcsData: TimelineNonEcsData[]
 ): DataProvider[] => {
   const threshold = ecsData.signal?.rule?.threshold as string[];
-  const thresholdResult = JSON.parse((ecsData.signal?.threshold_result as string[])[0]);
 
-  const aggField = JSON.parse(threshold[0]).field;
+  let aggField: string[] = [];
+  let thresholdResult: {
+    terms?: Array<{
+      field?: string;
+      value: string;
+    }>;
+    count: number;
+  };
+
+  try {
+    thresholdResult = JSON.parse((ecsData.signal?.threshold_result as string[])[0]);
+    aggField = JSON.parse(threshold[0]).field;
+  } catch (err) {
+    thresholdResult = {
+      terms: [
+        {
+          field: (ecsData.rule?.threshold as { field: string }).field,
+          value: (ecsData.signal?.threshold_result as { value: string }).value,
+        },
+      ],
+      count: (ecsData.signal?.threshold_result as { count: number }).count,
+    };
+  }
+
   const aggregationFields = Array.isArray(aggField) ? aggField : [aggField];
 
   return aggregationFields.reduce<DataProvider[]>((acc, aggregationField, i) => {
-    const aggregationValue = thresholdResult.terms.filter(
-      (term: { field: string; value: string }) => term.field === aggregationField
+    const aggregationValue = (thresholdResult.terms ?? []).filter(
+      (term: { field?: string | undefined; value: string }) => term.field === aggregationField
     )[0].value;
     const dataProviderValue = Array.isArray(aggregationValue)
       ? aggregationValue[0]
