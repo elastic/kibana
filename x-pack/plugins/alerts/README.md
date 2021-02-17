@@ -48,7 +48,7 @@ A Kibana alert detects a condition and executes one or more actions when that co
 
 1. Develop and register an alert type (see alert types -> example).
 2. Configure feature level privileges using RBAC 
-3. Create an alert using the RESTful API (see alerts -> create).
+3. Create an alert using the RESTful API [Documentation](https://www.elastic.co/guide/en/kibana/master/alerts-api-update.html) (see alerts -> create).
 
 ## Limitations
 
@@ -83,6 +83,7 @@ The following table describes the properties of the `options` object.
 |validate.params|When developing an alert type, you can choose to accept a series of parameters. You may also have the parameters validated before they are passed to the `executor` function or created as an alert saved object. In order to do this, provide a `@kbn/config-schema` schema that we will use to validate the `params` attribute.|@kbn/config-schema|
 |executor|This is where the code of the alert type lives. This is a function to be called when executing an alert on an interval basis. For full details, see executor section below.|Function|
 |producer|The id of the application producing this alert type.|string|
+|minimumLicenseRequired|The value of a minimum license. Most of the alerts are licensed as "basic".|string|
 
 ### Executor
 
@@ -414,7 +415,7 @@ You can use the `registerNavigation` api to specify as many AlertType specific h
 
 ## Experimental RESTful API
 
-Using an alert type requires you to create an alert that will contain parameters and actions for a given alert type. API for CRUD operations is a part of ascii [Documentation](https://www.elastic.co/guide/en/kibana/master/alerts-api-update.html).
+Using of the alert type requires you to create an alert that will contain parameters and actions for a given alert type. API description for CRUD operations is a part of the [user documentation](https://www.elastic.co/guide/en/kibana/master/alerts-api-update.html).
 API listed below is experimental and could be changed or removed in the future.
 
 ### `GET /api/alerts/alert/{id}/state`: Get alert state
