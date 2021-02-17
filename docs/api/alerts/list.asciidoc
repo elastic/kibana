@@ -107,7 +107,7 @@ Each alert type contains the following properties:
 | Whether the alert type is enabled or disabled based on the license.
 
 | `actionGroups`
-| An explicit list of groups the alert type may schedule actions for, each specifying the ActionGroup's unique ID and human readable name. Alert `actions` validation will use this configuartion to ensure groups are valid. We highly encourage using `kbn-i18n` to translate the names of actionGroup  when registering the AlertType.
+| An explicit list of groups for which the alert type can schedule actions, each with the action group's unique ID and human readable name. Alert `actions` validation will use this configuration to ensure that groups are valid. Use `kbn-i18n` to translate the names of the action group when registering the alert type.
 
 | `recoveryActionGroup`
 | An action group to use when an alert instance goes from an active state, to an inactive one. This action group should not be specified under the `actionGroups` property. If no recoveryActionGroup is specified, the default `recovered` action group will be used.
