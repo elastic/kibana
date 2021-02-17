@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -44,8 +45,8 @@ export default ({ getService }: FtrProviderContext) => {
       },
       // Note that the jobs and datafeeds are loaded async so the actual error message is not deterministic.
       expected: {
-        responseCode: 404,
-        error: 'Not Found',
+        responseCode: 403,
+        error: 'Forbidden',
       },
     },
     {
@@ -56,8 +57,8 @@ export default ({ getService }: FtrProviderContext) => {
       },
       // Note that the jobs and datafeeds are loaded async so the actual error message is not deterministic.
       expected: {
-        responseCode: 404,
-        error: 'Not Found',
+        responseCode: 403,
+        error: 'Forbidden',
       },
     },
   ];

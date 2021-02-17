@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { RowRendererId } from '../../../../common/types/timeline';
@@ -165,7 +166,9 @@ export const alertsDefaultModel: SubsetTimelineModel = {
 export const requiredFieldsForActions = [
   '@timestamp',
   'signal.status',
+  'signal.group.id',
   'signal.original_time',
+  'signal.rule.building_block_type',
   'signal.rule.filters',
   'signal.rule.from',
   'signal.rule.language',
@@ -177,7 +180,6 @@ export const requiredFieldsForActions = [
   'signal.rule.type',
   'signal.original_event.kind',
   'signal.original_event.module',
-
   // Endpoint exception fields
   'file.path',
   'file.Ext.code_signature.subject_name',

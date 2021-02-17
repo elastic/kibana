@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useCallback, useState } from 'react';
@@ -16,6 +17,7 @@ import {
   EuiInMemoryTable,
   EuiFlexGroup,
   EuiButton,
+  EuiPortal,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -157,34 +159,36 @@ export function SavedViewManageViewsFlyout<ViewState>({
   ];
 
   return (
-    <EuiFlyout onClose={close} data-test-subj="loadViewsFlyout">
-      <EuiFlyoutHeader>
-        <EuiTitle size="m">
-          <h2>
-            <FormattedMessage
-              defaultMessage="Manage saved views"
-              id="xpack.infra.openView.flyoutHeader"
-            />
-          </h2>
-        </EuiTitle>
-      </EuiFlyoutHeader>
+    <EuiPortal>
+      <EuiFlyout onClose={close} data-test-subj="loadViewsFlyout">
+        <EuiFlyoutHeader>
+          <EuiTitle size="m">
+            <h2>
+              <FormattedMessage
+                defaultMessage="Manage saved views"
+                id="xpack.infra.openView.flyoutHeader"
+              />
+            </h2>
+          </EuiTitle>
+        </EuiFlyoutHeader>
 
-      <EuiFlyoutBody>
-        <EuiInMemoryTable
-          items={views}
-          columns={columns}
-          loading={loading}
-          search={true}
-          pagination={true}
-          sorting={true}
-        />
-      </EuiFlyoutBody>
+        <EuiFlyoutBody>
+          <EuiInMemoryTable
+            items={views}
+            columns={columns}
+            loading={loading}
+            search={true}
+            pagination={true}
+            sorting={true}
+          />
+        </EuiFlyoutBody>
 
-      <EuiModalFooter>
-        <EuiButtonEmpty data-test-subj="cancelSavedViewModal" onClick={close}>
-          <FormattedMessage defaultMessage="Cancel" id="xpack.infra.openView.cancelButton" />
-        </EuiButtonEmpty>
-      </EuiModalFooter>
-    </EuiFlyout>
+        <EuiModalFooter>
+          <EuiButtonEmpty data-test-subj="cancelSavedViewModal" onClick={close}>
+            <FormattedMessage defaultMessage="Cancel" id="xpack.infra.openView.cancelButton" />
+          </EuiButtonEmpty>
+        </EuiModalFooter>
+      </EuiFlyout>
+    </EuiPortal>
   );
 }

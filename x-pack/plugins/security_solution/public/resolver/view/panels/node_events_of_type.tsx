@@ -1,16 +1,27 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
+/* eslint-disable react/display-name */
 
 import React, { memo, useCallback, Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiSpacer, EuiText, EuiButtonEmpty, EuiHorizontalRule } from '@elastic/eui';
+import {
+  EuiSpacer,
+  EuiText,
+  EuiButtonEmpty,
+  EuiHorizontalRule,
+  EuiFlexItem,
+  EuiButton,
+  EuiCallOut,
+} from '@elastic/eui';
 import { useSelector } from 'react-redux';
-import { FormattedMessage } from 'react-intl';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { StyledPanel } from '../styles';
-import { BoldCode, noTimestampRetrievedText, StyledTime } from './panel_content_utilities';
+import { BoldCode, StyledTime } from './styles';
 import { Breadcrumbs } from './breadcrumbs';
 import * as eventModel from '../../../../common/endpoint/models/event';
 import { SafeResolverEvent } from '../../../../common/endpoint/types';
@@ -19,55 +30,64 @@ import { ResolverState } from '../../types';
 import { PanelLoading } from './panel_loading';
 import { DescriptiveName } from './descriptive_name';
 import { useLinkProps } from '../use_link_props';
+import { useResolverDispatch } from '../use_resolver_dispatch';
 import { useFormattedDate } from './use_formatted_date';
 
 /**
  * Render a list of events that are related to `nodeID` and that have a category of `eventType`.
  */
-export const NodeEventsOfType = memo(function NodeEventsOfType({
+export const NodeEventsInCategory = memo(function ({
   nodeID,
-  eventType,
+  eventCategory,
 }: {
   nodeID: string;
-  eventType: string;
+  eventCategory: string;
 }) {
-  const processEvent = useSelector((state: ResolverState) =>
-    selectors.processEventForID(state)(nodeID)
-  );
-  const eventCount = useSelector(
-    (state: ResolverState) => selectors.relatedEventsStats(state)(nodeID)?.events.total
-  );
-  const eventsInCategoryCount = useSelector(
-    (state: ResolverState) =>
-      selectors.relatedEventsStats(state)(nodeID)?.events.byCategory[eventType]
-  );
-  const events = useSelector(
-    useCallback(
-      (state: ResolverState) => {
-        return selectors.relatedEventsByCategory(state)(nodeID, eventType);
-      },
-      [eventType, nodeID]
-    )
-  );
+  const node = useSelector((state: ResolverState) => selectors.graphNodeForID(state)(nodeID));
+  const isLoading = useSelector(selectors.isLoadingNodeEventsInCategory);
+  const hasError = useSelector(selectors.hadErrorLoadingNodeEventsInCategory);
 
   return (
-    <StyledPanel>
-      {eventCount === undefined || processEvent === null ? (
-        <PanelLoading />
+    <>
+      {isLoading ? (
+        <StyledPanel>
+          <PanelLoading />
+        </StyledPanel>
       ) : (
-        <>
-          <NodeEventsOfTypeBreadcrumbs
-            nodeName={eventModel.processNameSafeVersion(processEvent)}
-            eventType={eventType}
-            eventCount={eventCount}
-            nodeID={nodeID}
-            eventsInCategoryCount={eventsInCategoryCount}
-          />
-          <EuiSpacer size="l" />
-          <NodeEventList eventType={eventType} nodeID={nodeID} events={events} />
-        </>
+        <StyledPanel data-test-subj="resolver:panel:events-in-category">
+          {hasError || !node ? (
+            <EuiCallOut
+              title={i18n.translate(
+                'xpack.securitySolution.endpoint.resolver.panel.nodeEventsByType.errorPrimary',
+                {
+                  defaultMessage: 'Unable to load events.',
+                }
+              )}
+              color="danger"
+              iconType="alert"
+              data-test-subj="resolver:nodeEventsInCategory:error"
+            >
+              <p>
+                <FormattedMessage
+                  id="xpack.securitySolution.endpoint.resolver.panel.nodeEventsByType.errorSecondary"
+                  defaultMessage="An error occurred when fetching the events."
+                />
+              </p>
+            </EuiCallOut>
+          ) : (
+            <>
+              <NodeEventsInCategoryBreadcrumbs
+                nodeName={node.name}
+                eventCategory={eventCategory}
+                nodeID={nodeID}
+              />
+              <EuiSpacer size="l" />
+              <NodeEventList eventCategory={eventCategory} nodeID={nodeID} />
+            </>
+          )}
+        </StyledPanel>
       )}
-    </StyledPanel>
+    </>
   );
 });
 
@@ -77,20 +97,28 @@ export const NodeEventsOfType = memo(function NodeEventsOfType({
 const NodeEventsListItem = memo(function ({
   event,
   nodeID,
-  eventType,
+  eventCategory,
 }: {
   event: SafeResolverEvent;
   nodeID: string;
-  eventType: string;
+  eventCategory: string;
 }) {
   const timestamp = eventModel.eventTimestamp(event);
-  const date = useFormattedDate(timestamp) || noTimestampRetrievedText;
+  const eventID = eventModel.eventID(event);
+  const winlogRecordID = eventModel.winlogRecordID(event);
+  const date =
+    useFormattedDate(timestamp) ||
+    i18n.translate('xpack.securitySolution.enpdoint.resolver.panelutils.noTimestampRetrieved', {
+      defaultMessage: 'No timestamp retrieved',
+    });
   const linkProps = useLinkProps({
     panelView: 'eventDetail',
     panelParameters: {
       nodeID,
-      eventType,
-      eventID: String(eventModel.eventID(event)),
+      eventCategory,
+      eventID,
+      eventTimestamp: String(timestamp),
+      winlogRecordID: String(winlogRecordID),
     },
   });
   return (
@@ -115,7 +143,10 @@ const NodeEventsListItem = memo(function ({
         </StyledTime>
       </EuiText>
       <EuiSpacer size="xs" />
-      <EuiButtonEmpty {...linkProps}>
+      <EuiButtonEmpty
+        data-test-subj="resolver:panel:node-events-in-category:event-link"
+        {...linkProps}
+      >
         <DescriptiveName event={event} />
       </EuiButtonEmpty>
     </>
@@ -126,25 +157,46 @@ const NodeEventsListItem = memo(function ({
  * Renders a list of events with a separator in between.
  */
 const NodeEventList = memo(function NodeEventList({
-  eventType,
-  events,
+  eventCategory,
   nodeID,
 }: {
-  eventType: string;
-  /**
-   * The events to list.
-   */
-  events: SafeResolverEvent[];
+  eventCategory: string;
   nodeID: string;
 }) {
+  const events = useSelector(selectors.nodeEventsInCategory);
+  const dispatch = useResolverDispatch();
+  const handleLoadMore = useCallback(() => {
+    dispatch({
+      type: 'userRequestedAdditionalRelatedEvents',
+    });
+  }, [dispatch]);
+  const isLoading = useSelector(selectors.isLoadingMoreNodeEventsInCategory);
+  const hasMore = useSelector(selectors.lastRelatedEventResponseContainsCursor);
   return (
     <>
       {events.map((event, index) => (
         <Fragment key={index}>
-          <NodeEventsListItem nodeID={nodeID} eventType={eventType} event={event} />
+          <NodeEventsListItem nodeID={nodeID} eventCategory={eventCategory} event={event} />
           {index === events.length - 1 ? null : <EuiHorizontalRule margin="m" />}
         </Fragment>
       ))}
+      {hasMore && (
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            color={'primary'}
+            size="s"
+            fill
+            onClick={handleLoadMore}
+            isLoading={isLoading}
+            data-test-subj="resolver:nodeEventsInCategory:loadMore"
+          >
+            <FormattedMessage
+              id="xpack.securitySolution.endpoint.resolver.panel.nodeEventsByType.loadMore"
+              defaultMessage="Load More Data"
+            />
+          </EuiButton>
+        </EuiFlexItem>
+      )}
     </>
   );
 });
@@ -152,28 +204,23 @@ const NodeEventList = memo(function NodeEventList({
 /**
  * Renders `Breadcrumbs`.
  */
-const NodeEventsOfTypeBreadcrumbs = memo(function ({
+const NodeEventsInCategoryBreadcrumbs = memo(function ({
   nodeName,
-  eventType,
-  eventCount,
+  eventCategory,
   nodeID,
-  /**
-   * The count of events in the category that this list is showing.
-   */
-  eventsInCategoryCount,
 }: {
   nodeName: React.ReactNode;
-  eventType: string;
-  /**
-   * The events to list.
-   */
-  eventCount: number;
+  eventCategory: string;
   nodeID: string;
-  /**
-   * The count of events in the category that this list is showing.
-   */
-  eventsInCategoryCount: number | undefined;
 }) {
+  const eventCount = useSelector((state: ResolverState) =>
+    selectors.totalRelatedEventCountForNode(state)(nodeID)
+  );
+
+  const eventsInCategoryCount = useSelector((state: ResolverState) =>
+    selectors.relatedEventCountOfTypeForNode(state)(nodeID, eventCategory)
+  );
+
   const nodesLinkNavProps = useLinkProps({
     panelView: 'nodes',
   });
@@ -198,6 +245,7 @@ const NodeEventsOfTypeBreadcrumbs = memo(function ({
               defaultMessage: 'Events',
             }
           ),
+          'data-test-subj': 'resolver:node-events-in-category:breadcrumbs:node-list-link',
           ...nodesLinkNavProps,
         },
         {
@@ -218,7 +266,7 @@ const NodeEventsOfTypeBreadcrumbs = memo(function ({
           text: (
             <FormattedMessage
               id="xpack.securitySolution.endpoint.resolver.panel.relatedEventList.countByCategory"
-              values={{ count: eventsInCategoryCount, category: eventType }}
+              values={{ count: eventsInCategoryCount, category: eventCategory }}
               defaultMessage="{count} {category}"
             />
           ),

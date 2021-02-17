@@ -1,18 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 /* eslint-disable max-classes-per-file */
 
-import { DependencyList, useEffect, useMemo, useRef, useState } from 'react';
+import { DependencyList, useEffect, useMemo, useRef, useState, useCallback } from 'react';
+import useMountedState from 'react-use/lib/useMountedState';
 
 interface UseTrackedPromiseArgs<Arguments extends any[], Result> {
   createPromise: (...args: Arguments) => Promise<Result>;
   onResolve?: (result: Result) => void;
   onReject?: (value: unknown) => void;
   cancelPreviousOn?: 'creation' | 'settlement' | 'resolution' | 'rejection' | 'never';
+  triggerOrThrow?: 'always' | 'whenMounted';
 }
 
 /**
@@ -64,6 +67,16 @@ interface UseTrackedPromiseArgs<Arguments extends any[], Result> {
  * The last argument is a normal React hook dependency list that indicates
  * under which conditions a new reference to the configuration object should be
  * used.
+ *
+ * The `onResolve`, `onReject` and possible uncatched errors are only triggered
+ * if the underlying component is mounted. To ensure they always trigger (i.e.
+ * if the promise is called in a `useLayoutEffect`) use the `triggerOrThrow`
+ * attribute:
+ *
+ * 'whenMounted': (default) they are called only if the component is mounted.
+ *
+ * 'always': they always call. The consumer is then responsible of ensuring no
+ * side effects happen if the underlying component is not mounted.
  */
 export const useTrackedPromise = <Arguments extends any[], Result>(
   {
@@ -71,9 +84,20 @@ export const useTrackedPromise = <Arguments extends any[], Result>(
     onResolve = noOp,
     onReject = noOp,
     cancelPreviousOn = 'never',
+    triggerOrThrow = 'whenMounted',
   }: UseTrackedPromiseArgs<Arguments, Result>,
   dependencies: DependencyList
 ) => {
+  const isComponentMounted = useMountedState();
+  const shouldTriggerOrThrow = useCallback(() => {
+    switch (triggerOrThrow) {
+      case 'always':
+        return true;
+      case 'whenMounted':
+        return isComponentMounted();
+    }
+  }, [isComponentMounted, triggerOrThrow]);
+
   /**
    * If a promise is currently pending, this holds a reference to it and its
    * cancellation function.
@@ -144,7 +168,7 @@ export const useTrackedPromise = <Arguments extends any[], Result>(
               (pendingPromise) => pendingPromise.promise !== newPendingPromise.promise
             );
 
-            if (onResolve) {
+            if (onResolve && shouldTriggerOrThrow()) {
               onResolve(value);
             }
 
@@ -173,11 +197,13 @@ export const useTrackedPromise = <Arguments extends any[], Result>(
               (pendingPromise) => pendingPromise.promise !== newPendingPromise.promise
             );
 
-            if (onReject) {
-              onReject(value);
-            }
+            if (shouldTriggerOrThrow()) {
+              if (onReject) {
+                onReject(value);
+              }
 
-            throw value;
+              throw value;
+            }
           }
         ),
       };
@@ -209,22 +235,22 @@ export const useTrackedPromise = <Arguments extends any[], Result>(
   return [promiseState, execute] as [typeof promiseState, typeof execute];
 };
 
-interface UninitializedPromiseState {
+export interface UninitializedPromiseState {
   state: 'uninitialized';
 }
 
-interface PendingPromiseState<ResolvedValue> {
+export interface PendingPromiseState<ResolvedValue> {
   state: 'pending';
   promise: Promise<ResolvedValue>;
 }
 
-interface ResolvedPromiseState<ResolvedValue> {
+export interface ResolvedPromiseState<ResolvedValue> {
   state: 'resolved';
   promise: Promise<ResolvedValue>;
   value: ResolvedValue;
 }
 
-interface RejectedPromiseState<ResolvedValue, RejectedValue> {
+export interface RejectedPromiseState<ResolvedValue, RejectedValue> {
   state: 'rejected';
   promise: Promise<ResolvedValue>;
   value: RejectedValue;

@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
@@ -26,7 +28,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     describe('no management privileges', () => {
       before(async () => {
-        await security.testUser.setRoles(['global_dashboard_all'], true);
+        await security.testUser.setRoles(['global_dashboard_read'], true);
       });
       after(async () => {
         await security.testUser.restoreDefaults();
@@ -34,7 +36,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('should not show the Stack Management nav link', async () => {
         const links = await appsMenu.readLinks();
-        expect(links.map((link) => link.text)).to.eql(['Dashboard']);
+        expect(links.map((link) => link.text)).to.eql(['Overview', 'Dashboard']);
       });
 
       it('should render the "application not found" view when navigating to management directly', async () => {
@@ -66,7 +68,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         });
         expect(sections[1]).to.eql({
           sectionId: 'kibana',
-          sectionLinks: ['indexPatterns', 'objects', 'spaces', 'settings'],
+          sectionLinks: [
+            'indexPatterns',
+            'objects',
+            'tags',
+            'search_sessions',
+            'spaces',
+            'settings',
+          ],
         });
       });
     });

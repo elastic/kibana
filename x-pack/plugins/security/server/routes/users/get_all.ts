@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { RouteDefinitionParams } from '../index';
 import { wrapIntoCustomErrorResponse } from '../../errors';
 import { createLicensedRouteHandler } from '../licensed_route_handler';
 
-export function defineGetAllUsersRoutes({ router, clusterClient }: RouteDefinitionParams) {
+export function defineGetAllUsersRoutes({ router }: RouteDefinitionParams) {
   router.get(
     { path: '/internal/security/users', validate: false },
     createLicensedRouteHandler(async (context, request, response) => {
@@ -16,7 +17,7 @@ export function defineGetAllUsersRoutes({ router, clusterClient }: RouteDefiniti
         return response.ok({
           // Return only values since keys (user names) are already duplicated there.
           body: Object.values(
-            await clusterClient.asScoped(request).callAsCurrentUser('shield.getUser')
+            (await context.core.elasticsearch.client.asCurrentUser.security.getUser()).body
           ),
         });
       } catch (error) {

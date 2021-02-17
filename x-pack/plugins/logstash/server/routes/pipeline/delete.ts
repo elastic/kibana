@@ -1,16 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-import { schema } from '@kbn/config-schema';
-import { IRouter } from 'src/core/server';
-import { INDEX_NAMES } from '../../../common/constants';
-import { wrapRouteWithLicenseCheck } from '../../../../licensing/server';
 
+import { schema } from '@kbn/config-schema';
+import { wrapRouteWithLicenseCheck } from '../../../../licensing/server';
+import type { LogstashPluginRouter } from '../../types';
 import { checkLicense } from '../../lib/check_license';
 
-export function registerPipelineDeleteRoute(router: IRouter) {
+export function registerPipelineDeleteRoute(router: LogstashPluginRouter) {
   router.delete(
     {
       path: '/api/logstash/pipeline/{id}',
@@ -25,10 +25,9 @@ export function registerPipelineDeleteRoute(router: IRouter) {
       router.handleLegacyErrors(async (context, request, response) => {
         const client = context.logstash!.esClient;
 
-        await client.callAsCurrentUser('delete', {
-          index: INDEX_NAMES.PIPELINES,
-          id: request.params.id,
-          refresh: 'wait_for',
+        await client.callAsCurrentUser('transport.request', {
+          path: '/_logstash/pipeline/' + encodeURIComponent(request.params.id),
+          method: 'DELETE',
         });
 
         return response.noContent();

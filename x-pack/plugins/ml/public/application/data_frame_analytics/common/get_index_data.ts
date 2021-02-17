@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import type { SearchResponse7 } from '../../../../common/types/es_client';
 import { extractErrorMessage } from '../../../../common/util/errors';
 
-import { EsSorting, UseDataGridReturnType } from '../../components/data_grid';
+import { EsSorting, UseDataGridReturnType, getProcessedFields } from '../../components/data_grid';
 import { ml } from '../../services/ml_api_service';
 
 import { isKeywordAndTextType } from '../common/fields';
@@ -19,7 +20,8 @@ import { DataFrameAnalyticsConfig } from '../../../../common/types/data_frame_an
 export const getIndexData = async (
   jobConfig: DataFrameAnalyticsConfig | undefined,
   dataGrid: UseDataGridReturnType,
-  searchQuery: SavedSearchQuery
+  searchQuery: SavedSearchQuery,
+  options: { didCancel: boolean }
 ) => {
   if (jobConfig !== undefined) {
     const {
@@ -47,9 +49,12 @@ export const getIndexData = async (
         }, {} as EsSorting);
 
       const { pageIndex, pageSize } = pagination;
+      // TODO: remove results_field from `fields` when possible
       const resp: SearchResponse7 = await ml.esSearch({
         index: jobConfig.dest.index,
         body: {
+          fields: ['*'],
+          _source: false,
           query: searchQuery,
           from: pageIndex * pageSize,
           size: pageSize,
@@ -57,11 +62,17 @@ export const getIndexData = async (
         },
       });
 
-      setRowCount(resp.hits.total.value);
-
-      const docs = resp.hits.hits.map((d) => d._source);
-      setTableItems(docs);
-      setStatus(INDEX_STATUS.LOADED);
+      if (!options.didCancel) {
+        setRowCount(resp.hits.total.value);
+        setTableItems(
+          resp.hits.hits.map((d) =>
+            getProcessedFields(d.fields, (key: string) =>
+              key.startsWith(`${jobConfig.dest.results_field}.feature_importance`)
+            )
+          )
+        );
+        setStatus(INDEX_STATUS.LOADED);
+      }
     } catch (e) {
       setErrorMessage(extractErrorMessage(e));
       setStatus(INDEX_STATUS.ERROR);

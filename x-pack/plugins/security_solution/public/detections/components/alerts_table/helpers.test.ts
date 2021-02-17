@@ -1,11 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { TimelineType } from '../../../../common/types/timeline';
-import { Filter } from '../../../../../../../src/plugins/data/public';
+import { esFilters, Filter } from '../../../../../../../src/plugins/data/public';
 import {
   DataProvider,
   DataProviderType,
@@ -17,6 +18,7 @@ import {
   replaceTemplateFieldFromQuery,
   replaceTemplateFieldFromMatchFilters,
   reformatDataProviderWithNewValue,
+  buildTimeRangeFilter,
 } from './helpers';
 import { mockTimelineDetails } from '../../../common/mock';
 
@@ -528,6 +530,40 @@ describe('helpers', () => {
           type: DataProviderType.default,
         });
       });
+    });
+  });
+
+  describe('buildTimeRangeFilter', () => {
+    test('time range filter is created with from and to', () => {
+      const from = '2020-10-29T21:06:10.192Z';
+      const to = '2020-10-29T21:07:38.774Z';
+      const timeRangeFilter = buildTimeRangeFilter(from, to);
+      expect(timeRangeFilter).toEqual([
+        {
+          range: {
+            '@timestamp': {
+              gte: '2020-10-29T21:06:10.192Z',
+              lt: '2020-10-29T21:07:38.774Z',
+              format: 'strict_date_optional_time',
+            },
+          },
+          meta: {
+            type: 'range',
+            disabled: false,
+            negate: false,
+            alias: null,
+            key: '@timestamp',
+            params: {
+              gte: from,
+              lt: to,
+              format: 'strict_date_optional_time',
+            },
+          },
+          $state: {
+            store: esFilters.FilterStateStore.APP_STATE,
+          },
+        },
+      ]);
     });
   });
 });

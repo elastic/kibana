@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -14,14 +15,16 @@ import {
   PluginInitializerContext,
   CapabilitiesStart,
   IClusterClient,
+  SavedObjectsServiceStart,
 } from 'kibana/server';
+import type { SecurityPluginSetup } from '../../security/server';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
-import { PluginsSetup, RouteInitialization } from './types';
-import { PLUGIN_ID, PLUGIN_ICON } from '../common/constants/app';
+import { PluginsSetup, PluginsStart, RouteInitialization } from './types';
+import { SpacesPluginSetup } from '../../spaces/server';
+import { PLUGIN_ID } from '../common/constants/app';
 import { MlCapabilities } from '../common/types/capabilities';
 
-import { initMlTelemetry } from './lib/telemetry';
-import { initMlServerLog } from './client/log';
+import { initMlServerLog } from './lib/log';
 import { initSampleDataSets } from './lib/sample_data_sets';
 
 import { annotationRoutes } from './routes/annotations';
@@ -37,35 +40,53 @@ import { indicesRoutes } from './routes/indices';
 import { jobAuditMessagesRoutes } from './routes/job_audit_messages';
 import { jobRoutes } from './routes/anomaly_detectors';
 import { jobServiceRoutes } from './routes/job_service';
+import { savedObjectsRoutes } from './routes/saved_objects';
 import { jobValidationRoutes } from './routes/job_validation';
 import { notificationRoutes } from './routes/notification_settings';
 import { resultsServiceRoutes } from './routes/results_service';
 import { systemRoutes } from './routes/system';
 import { MlLicense } from '../common/license';
-import { MlServerLicense } from './lib/license';
 import { createSharedServices, SharedServices } from './shared_services';
 import { getPluginPrivileges } from '../common/types/capabilities';
 import { setupCapabilitiesSwitcher } from './lib/capabilities';
 import { registerKibanaSettings } from './lib/register_settings';
-import { inferenceRoutes } from './routes/inference';
+import { trainedModelsRoutes } from './routes/trained_models';
+import {
+  setupSavedObjects,
+  jobSavedObjectsInitializationFactory,
+  savedObjectClientsFactory,
+} from './saved_objects';
+import { RouteGuard } from './lib/route_guard';
+import { registerMlAlerts } from './lib/alerts/register_ml_alerts';
+import { ML_ALERT_TYPES } from '../common/constants/alerts';
+import { alertingRoutes } from './routes/alerting';
 
 export type MlPluginSetup = SharedServices;
 export type MlPluginStart = void;
 
-export class MlServerPlugin implements Plugin<MlPluginSetup, MlPluginStart, PluginsSetup> {
+export class MlServerPlugin
+  implements Plugin<MlPluginSetup, MlPluginStart, PluginsSetup, PluginsStart> {
   private log: Logger;
   private version: string;
-  private mlLicense: MlServerLicense;
+  private mlLicense: MlLicense;
   private capabilities: CapabilitiesStart | null = null;
   private clusterClient: IClusterClient | null = null;
+  private savedObjectsStart: SavedObjectsServiceStart | null = null;
+  private spacesPlugin: SpacesPluginSetup | undefined;
+  private security: SecurityPluginSetup | undefined;
+  private isMlReady: Promise<void>;
+  private setMlReady: () => void = () => {};
 
   constructor(ctx: PluginInitializerContext) {
     this.log = ctx.logger.get();
     this.version = ctx.env.packageInfo.branch;
-    this.mlLicense = new MlServerLicense();
+    this.mlLicense = new MlLicense();
+    this.isMlReady = new Promise((resolve) => (this.setMlReady = resolve));
   }
 
-  public setup(coreSetup: CoreSetup, plugins: PluginsSetup): MlPluginSetup {
+  public setup(coreSetup: CoreSetup<PluginsStart>, plugins: PluginsSetup): MlPluginSetup {
+    this.spacesPlugin = plugins.spaces;
+    this.security = plugins.security;
     const { admin, user, apmUser } = getPluginPrivileges();
 
     plugins.features.registerKibanaFeature({
@@ -73,15 +94,14 @@ export class MlServerPlugin implements Plugin<MlPluginSetup, MlPluginStart, Plug
       name: i18n.translate('xpack.ml.featureRegistry.mlFeatureName', {
         defaultMessage: 'Machine Learning',
       }),
-      icon: PLUGIN_ICON,
       order: 500,
       category: DEFAULT_APP_CATEGORIES.kibana,
-      navLinkId: PLUGIN_ID,
       app: [PLUGIN_ID, 'kibana'],
       catalogue: [PLUGIN_ID, `${PLUGIN_ID}_file_data_visualizer`],
       management: {
         insightsAndAlerting: ['jobsListLink'],
       },
+      alerting: Object.values(ML_ALERT_TYPES),
       privileges: {
         all: admin,
         read: user,
@@ -107,6 +127,7 @@ export class MlServerPlugin implements Plugin<MlPluginSetup, MlPluginStart, Plug
         ],
       },
     });
+
     registerKibanaSettings(coreSetup);
 
     this.mlLicense.setup(plugins.licensing.license$, [
@@ -115,9 +136,22 @@ export class MlServerPlugin implements Plugin<MlPluginSetup, MlPluginStart, Plug
 
     // initialize capabilities switcher to add license filter to ml capabilities
     setupCapabilitiesSwitcher(coreSetup, plugins.licensing.license$, this.log);
+    setupSavedObjects(coreSetup.savedObjects);
+
+    const { getInternalSavedObjectsClient, getMlSavedObjectsClient } = savedObjectClientsFactory(
+      () => this.savedObjectsStart
+    );
 
     const routeInit: RouteInitialization = {
       router: coreSetup.http.createRouter(),
+      routeGuard: new RouteGuard(
+        this.mlLicense,
+        getMlSavedObjectsClient,
+        getInternalSavedObjectsClient,
+        plugins.spaces,
+        plugins.security?.authz,
+        () => this.isMlReady
+      ),
       mlLicense: this.mlLicense,
     };
 
@@ -128,6 +162,10 @@ export class MlServerPlugin implements Plugin<MlPluginSetup, MlPluginStart, Plug
       const capabilities = await this.capabilities.resolveCapabilities(request);
       return capabilities.ml as MlCapabilities;
     };
+
+    const getSpaces = plugins.spaces
+      ? () => coreSetup.getStartServices().then(([, { spaces }]) => spaces!)
+      : undefined;
 
     annotationRoutes(routeInit, plugins.security);
     calendars(routeInit);
@@ -145,30 +183,57 @@ export class MlServerPlugin implements Plugin<MlPluginSetup, MlPluginStart, Plug
     notificationRoutes(routeInit);
     resultsServiceRoutes(routeInit);
     jobValidationRoutes(routeInit, this.version);
+    savedObjectsRoutes(routeInit, {
+      getSpaces,
+      resolveMlCapabilities,
+    });
     systemRoutes(routeInit, {
-      spaces: plugins.spaces,
+      getSpaces,
       cloud: plugins.cloud,
       resolveMlCapabilities,
     });
+    trainedModelsRoutes(routeInit);
+    alertingRoutes(routeInit);
+
     initMlServerLog({ log: this.log });
-    initMlTelemetry(coreSetup, plugins.usageCollection);
 
-    inferenceRoutes(routeInit);
+    const sharedServices = createSharedServices(
+      this.mlLicense,
+      getSpaces,
+      plugins.cloud,
+      plugins.security?.authz,
+      resolveMlCapabilities,
+      () => this.clusterClient,
+      () => getInternalSavedObjectsClient(),
+      () => this.isMlReady
+    );
 
-    return {
-      ...createSharedServices(
-        this.mlLicense,
-        plugins.spaces,
-        plugins.cloud,
-        resolveMlCapabilities,
-        () => this.clusterClient
-      ),
-    };
+    if (plugins.alerts) {
+      registerMlAlerts({
+        alerts: plugins.alerts,
+        mlSharedServices: sharedServices,
+        publicBaseUrl: coreSetup.http.basePath.publicBaseUrl,
+      });
+    }
+
+    return { ...sharedServices };
   }
 
   public start(coreStart: CoreStart): MlPluginStart {
     this.capabilities = coreStart.capabilities;
     this.clusterClient = coreStart.elasticsearch.client;
+    this.savedObjectsStart = coreStart.savedObjects;
+
+    // check whether the job saved objects exist
+    // and create them if needed.
+    const { initializeJobs } = jobSavedObjectsInitializationFactory(
+      coreStart,
+      this.security,
+      this.spacesPlugin !== undefined
+    );
+    initializeJobs().finally(() => {
+      this.setMlReady();
+    });
   }
 
   public stop() {

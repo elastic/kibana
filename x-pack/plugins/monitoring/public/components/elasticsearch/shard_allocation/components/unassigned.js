@@ -1,10 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import _ from 'lodash';
+import { sortBy } from 'lodash';
 import React from 'react';
 import { Shard } from './shard';
 import { i18n } from '@kbn/i18n';
@@ -36,7 +37,7 @@ export class Unassigned extends React.Component {
   };
 
   render() {
-    const shards = _.sortBy(this.props.shards, 'shard').map(this.createShard);
+    const shards = sortBy(this.props.shards, 'shard').map(this.createShard);
     return (
       <td className="monUnassigned" data-test-subj="clusterView-Unassigned">
         <EuiFlexGroup wrap className="monUnassigned__children">

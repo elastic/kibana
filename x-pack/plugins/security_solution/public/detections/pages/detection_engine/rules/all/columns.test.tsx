@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import uuid from 'uuid';
@@ -27,6 +28,7 @@ describe('AllRulesTable Columns', () => {
     const dispatch = jest.fn();
     const dispatchToaster = jest.fn();
     const reFetchRules = jest.fn();
+    const refetchPrePackagedRulesStatus = jest.fn();
 
     beforeEach(() => {
       results = [];
@@ -40,7 +42,7 @@ describe('AllRulesTable Columns', () => {
     test('duplicate rule onClick should call refetch after the rule is duplicated', async () => {
       (duplicateRulesAction as jest.Mock).mockImplementation(
         () =>
-          new Promise((resolve) =>
+          new Promise<void>((resolve) =>
             setTimeout(() => {
               results.push('duplicateRulesAction');
               resolve();
@@ -52,7 +54,9 @@ describe('AllRulesTable Columns', () => {
         dispatch,
         dispatchToaster,
         history,
-        reFetchRules
+        reFetchRules,
+        refetchPrePackagedRulesStatus,
+        true
       )[1];
       await duplicateRulesActionObject.onClick(rule);
       expect(results).toEqual(['duplicateRulesAction', 'reFetchRules']);
@@ -61,7 +65,7 @@ describe('AllRulesTable Columns', () => {
     test('delete rule onClick should call refetch after the rule is deleted', async () => {
       (deleteRulesAction as jest.Mock).mockImplementation(
         () =>
-          new Promise((resolve) =>
+          new Promise<void>((resolve) =>
             setTimeout(() => {
               results.push('deleteRulesAction');
               resolve();
@@ -73,7 +77,9 @@ describe('AllRulesTable Columns', () => {
         dispatch,
         dispatchToaster,
         history,
-        reFetchRules
+        reFetchRules,
+        refetchPrePackagedRulesStatus,
+        true
       )[3];
       await deleteRulesActionObject.onClick(rule);
       expect(results).toEqual(['deleteRulesAction', 'reFetchRules']);

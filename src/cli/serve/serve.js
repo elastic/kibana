@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { set as lodashSet } from '@elastic/safer-lodash-set';
@@ -27,7 +16,7 @@ import { getConfigPath } from '@kbn/utils';
 import { IS_KIBANA_DISTRIBUTABLE } from '../../legacy/utils';
 import { fromRoot } from '../../core/server/utils';
 import { bootstrap } from '../../core/server';
-import { readKeystore } from './read_keystore';
+import { readKeystore } from '../keystore/read_keystore';
 
 function canRequire(path) {
   try {
@@ -42,11 +31,8 @@ function canRequire(path) {
   }
 }
 
-const CLUSTER_MANAGER_PATH = resolve(__dirname, '../cluster/cluster_manager');
-const CAN_CLUSTER = canRequire(CLUSTER_MANAGER_PATH);
-
-const REPL_PATH = resolve(__dirname, '../repl');
-const CAN_REPL = canRequire(REPL_PATH);
+const DEV_MODE_PATH = resolve(__dirname, '../../dev/cli_dev_mode');
+const DEV_MODE_SUPPORTED = canRequire(DEV_MODE_PATH);
 
 const pathCollector = function () {
   const paths = [];
@@ -176,10 +162,6 @@ export default function (program) {
     .option('--plugins <path>', 'an alias for --plugin-dir', pluginDirCollector)
     .option('--optimize', 'Deprecated, running the optimizer is no longer required');
 
-  if (CAN_REPL) {
-    command.option('--repl', 'Run the server with a REPL prompt and access to the server object');
-  }
-
   if (!IS_KIBANA_DISTRIBUTABLE) {
     command
       .option('--oss', 'Start Kibana without X-Pack')
@@ -189,10 +171,9 @@ export default function (program) {
       );
   }
 
-  if (CAN_CLUSTER) {
+  if (DEV_MODE_SUPPORTED) {
     command
       .option('--dev', 'Run the server with development mode defaults')
-      .option('--open', 'Open a browser window to the base url after the server is started')
       .option('--ssl', 'Run the dev server using HTTPS')
       .option('--dist', 'Use production assets from kbn/optimizer')
       .option(
@@ -222,12 +203,10 @@ export default function (program) {
       configs: [].concat(opts.config || []),
       cliArgs: {
         dev: !!opts.dev,
-        open: !!opts.open,
         envName: unknownOptions.env ? unknownOptions.env.name : undefined,
         quiet: !!opts.quiet,
         silent: !!opts.silent,
         watch: !!opts.watch,
-        repl: !!opts.repl,
         runExamples: !!opts.runExamples,
         // We want to run without base path when the `--run-examples` flag is given so that we can use local
         // links in other documentation sources, like "View this tutorial [here](http://localhost:5601/app/tutorial/xyz)".
@@ -242,8 +221,7 @@ export default function (program) {
         dist: !!opts.dist,
       },
       features: {
-        isClusterModeSupported: CAN_CLUSTER,
-        isReplModeSupported: CAN_REPL,
+        isCliDevModeSupported: DEV_MODE_SUPPORTED,
       },
       applyConfigOverrides: (rawConfig) => applyConfigOverrides(rawConfig, opts, unknownOptions),
     });

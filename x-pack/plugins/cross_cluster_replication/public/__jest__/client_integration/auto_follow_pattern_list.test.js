@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { getAutoFollowPatternMock } from './fixtures/auto_follow_pattern';
 import './mocks';
-import { setupEnvironment, pageHelpers, nextTick, getRandomString } from './helpers';
+import { setupEnvironment, pageHelpers, nextTick, delay, getRandomString } from './helpers';
 
 const { setup } = pageHelpers.autoFollowPatternList;
 
@@ -146,7 +147,7 @@ describe('<AutoFollowPatternList />', () => {
     afterEach(async () => {
       // The <EuiPopover /> updates are not all synchronouse
       // We need to wait for all the updates to ran before unmounting our component
-      await nextTick(100);
+      await delay(100);
     });
 
     test('should not display the empty prompt', () => {

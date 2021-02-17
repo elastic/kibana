@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { cloneDeep } from 'lodash';
@@ -23,11 +12,6 @@ import { VegaParser } from './vega_parser';
 import { bypassExternalUrlCheck } from '../vega_view/vega_base_view';
 
 jest.mock('../services');
-
-jest.mock('../lib/vega', () => ({
-  vega: jest.requireActual('vega'),
-  vegaLite: jest.requireActual('vega-lite'),
-}));
 
 describe(`VegaParser.parseAsync`, () => {
   test(`should throw an error in case of $spec is not defined`, async () => {
@@ -185,21 +169,21 @@ describe('VegaParser._resolveEsQueries', () => {
     'es',
     check(
       { data: { name: 'requestId', url: { index: 'a' }, x: 1 } },
-      { data: { name: 'requestId', values: [42], x: 1 } }
+      { data: { name: 'requestId', url: { index: 'a', body: {} }, values: [42], x: 1 } }
     )
   );
   test(
     'es 2',
     check(
       { data: { name: 'requestId', url: { '%type%': 'elasticsearch', index: 'a' } } },
-      { data: { name: 'requestId', values: [42] } }
+      { data: { name: 'requestId', url: { index: 'a', body: {} }, values: [42] } }
     )
   );
   test(
     'es arr',
     check(
       { arr: [{ data: { name: 'requestId', url: { index: 'a' }, x: 1 } }] },
-      { arr: [{ data: { name: 'requestId', values: [42], x: 1 } }] }
+      { arr: [{ data: { name: 'requestId', url: { index: 'a', body: {} }, values: [42], x: 1 } }] }
     )
   );
   test(
@@ -243,7 +227,7 @@ describe('VegaParser.parseSchema', () => {
 });
 
 describe('VegaParser._parseTooltips', () => {
-  function check(tooltips, position, padding, centerOnMark) {
+  function check(tooltips, position, padding, centerOnMark, textTruncate = false) {
     return () => {
       const vp = new VegaParser(tooltips !== undefined ? { config: { kibana: { tooltips } } } : {});
       vp._config = vp._parseConfig();
@@ -253,7 +237,7 @@ describe('VegaParser._parseTooltips', () => {
       } else if (position === false) {
         expect(vp._parseTooltips()).toEqual(false);
       } else {
-        expect(vp._parseTooltips()).toEqual({ position, padding, centerOnMark });
+        expect(vp._parseTooltips()).toEqual({ position, padding, centerOnMark, textTruncate });
       }
     };
   }
@@ -267,6 +251,7 @@ describe('VegaParser._parseTooltips', () => {
   test('centerOnMark=10', check({ centerOnMark: 10 }, 'top', 16, 10));
   test('centerOnMark=true', check({ centerOnMark: true }, 'top', 16, Number.MAX_VALUE));
   test('centerOnMark=false', check({ centerOnMark: false }, 'top', 16, -1));
+  test('textTruncate=false', check({ textTruncate: true }, 'top', 16, 50, true));
 
   test('false', check(false, false));
 
@@ -294,7 +279,27 @@ describe('VegaParser._parseMapConfig', () => {
         delayRepaint: true,
         latitude: 0,
         longitude: 0,
-        mapStyle: 'default',
+        mapStyle: true,
+        zoomControl: true,
+        scrollWheelZoom: false,
+      },
+      0
+    )
+  );
+
+  test(
+    'emsTileServiceId',
+    check(
+      {
+        mapStyle: true,
+        emsTileServiceId: 'dark_map',
+      },
+      {
+        delayRepaint: true,
+        latitude: 0,
+        longitude: 0,
+        mapStyle: true,
+        emsTileServiceId: 'dark_map',
         zoomControl: true,
         scrollWheelZoom: false,
       },
@@ -309,7 +314,7 @@ describe('VegaParser._parseMapConfig', () => {
         delayRepaint: true,
         latitude: 0,
         longitude: 0,
-        mapStyle: 'default',
+        mapStyle: true,
         zoomControl: true,
         scrollWheelZoom: false,
         maxBounds: [1, 2, 3, 4],
@@ -318,37 +323,12 @@ describe('VegaParser._parseMapConfig', () => {
         delayRepaint: true,
         latitude: 0,
         longitude: 0,
-        mapStyle: 'default',
+        mapStyle: true,
         zoomControl: true,
         scrollWheelZoom: false,
         maxBounds: [1, 2, 3, 4],
       },
       0
-    )
-  );
-
-  test(
-    'warnings',
-    check(
-      {
-        delayRepaint: true,
-        latitude: 0,
-        longitude: 0,
-        zoom: 'abc', // ignored
-        mapStyle: 'abc',
-        zoomControl: 'abc',
-        scrollWheelZoom: 'abc',
-        maxBounds: [2, 3, 4],
-      },
-      {
-        delayRepaint: true,
-        latitude: 0,
-        longitude: 0,
-        mapStyle: 'default',
-        zoomControl: true,
-        scrollWheelZoom: false,
-      },
-      5
     )
   );
 });
@@ -371,43 +351,95 @@ describe('VegaParser._parseConfig', () => {
   test('_hostConfig', check({ _hostConfig: { a: 1 } }, { a: 1 }, {}, 1));
 });
 
-describe('VegaParser._calcSizing', () => {
-  function check(
-    spec,
-    useResize,
-    paddingWidth,
-    paddingHeight,
-    isVegaLite,
-    expectedSpec,
-    warnCount
-  ) {
+describe('VegaParser._compileWithAutosize', () => {
+  function check(spec, useResize, expectedSpec, warnCount) {
     return async () => {
       expectedSpec = expectedSpec || cloneDeep(spec);
       const vp = new VegaParser(spec);
-      vp.isVegaLite = !!isVegaLite;
-      vp._calcSizing();
+      vp._compileWithAutosize();
       expect(vp.useResize).toEqual(useResize);
-      expect(vp.paddingWidth).toEqual(paddingWidth);
-      expect(vp.paddingHeight).toEqual(paddingHeight);
       expect(vp.spec).toEqual(expectedSpec);
       expect(vp.warnings).toHaveLength(warnCount || 0);
     };
   }
 
-  test('no size', check({ autosize: {} }, false, 0, 0));
-  test('fit', check({ autosize: 'fit' }, true, 0, 0));
-  test('fit obj', check({ autosize: { type: 'fit' } }, true, 0, 0));
-  test('padding const', check({ autosize: 'fit', padding: 10 }, true, 20, 20));
   test(
-    'padding obj',
-    check({ autosize: 'fit', padding: { left: 5, bottom: 7, right: 6, top: 8 } }, true, 11, 15)
+    'empty config',
+    check({}, true, {
+      autosize: { type: 'fit', contains: 'padding' },
+      width: 'container',
+      height: 'container',
+    })
   );
   test(
-    'width height',
-    check({ autosize: 'fit', width: 1, height: 2 }, true, 0, 0, false, false, 1)
+    'no warnings for default config',
+    check({ width: 'container', height: 'container' }, true, {
+      autosize: { type: 'fit', contains: 'padding' },
+      width: 'container',
+      height: 'container',
+    })
   );
   test(
-    'VL width height',
-    check({ autosize: 'fit', width: 1, height: 2 }, true, 0, 0, true, { autosize: 'fit' }, 0)
+    'warning when attempting to use invalid setting',
+    check(
+      { width: '300', height: '300' },
+      true,
+      {
+        autosize: { type: 'fit', contains: 'padding' },
+        width: 'container',
+        height: 'container',
+      },
+      1
+    )
   );
+  test(
+    'autosize none',
+    check({ autosize: 'none' }, false, { autosize: { type: 'none', contains: 'padding' } })
+  );
+  test(
+    'autosize=fit',
+    check({ autosize: 'fit' }, true, {
+      autosize: { type: 'fit', contains: 'padding' },
+      width: 'container',
+      height: 'container',
+    })
+  );
+  test(
+    'autosize=pad',
+    check({ autosize: 'pad' }, true, {
+      autosize: { type: 'pad', contains: 'padding' },
+      width: 'container',
+      height: 'container',
+    })
+  );
+  test(
+    'empty autosize object',
+    check({ autosize: {} }, true, {
+      autosize: { type: 'fit', contains: 'padding' },
+      height: 'container',
+      width: 'container',
+    })
+  );
+  test(
+    'warning on falsy arguments',
+    check(
+      { autosize: false },
+      true,
+      {
+        autosize: { type: 'fit', contains: 'padding' },
+        height: 'container',
+        width: 'container',
+      },
+      1
+    )
+  );
+  test(
+    'partial autosize object',
+    check({ autosize: { contains: 'content' } }, true, {
+      autosize: { contains: 'content', type: 'fit' },
+      height: 'container',
+      width: 'container',
+    })
+  );
+  test('autosize signals are ignored', check({ autosize: { signal: 'asdf' } }, undefined));
 });

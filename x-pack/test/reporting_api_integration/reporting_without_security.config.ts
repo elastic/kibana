@@ -1,25 +1,26 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { esTestConfig, kbnTestConfig } from '@kbn/test';
 import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
 import { format as formatUrl } from 'url';
-import { ReportingAPIProvider } from './services';
+import { pageObjects } from '../functional/page_objects'; // Reporting APIs depend on UI functionality
+import { services } from './services';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const apiConfig = await readConfigFile(require.resolve('../api_integration/config'));
 
   return {
+    apps: { reporting: { pathname: '/app/management/insightsAndAlerting/reporting' } },
     servers: apiConfig.get('servers'),
     junit: { reportName: 'X-Pack Reporting Without Security API Integration Tests' },
     testFiles: [require.resolve('./reporting_without_security')],
-    services: {
-      ...apiConfig.get('services'),
-      reportingAPI: ReportingAPIProvider,
-    },
+    services,
+    pageObjects,
     esArchiver: apiConfig.get('esArchiver'),
     esTestCluster: {
       ...apiConfig.get('esTestCluster'),

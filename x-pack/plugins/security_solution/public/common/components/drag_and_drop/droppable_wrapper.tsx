@@ -1,11 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { rgba } from 'polished';
-import React from 'react';
+import React, { useCallback } from 'react';
 import { Droppable, DraggableChildrenFn } from 'react-beautiful-dnd';
 import styled from 'styled-components';
 
@@ -96,15 +97,9 @@ export const DroppableWrapper = React.memo<Props>(
     type,
     render = null,
     renderClone,
-  }) => (
-    <Droppable
-      isDropDisabled={isDropDisabled}
-      droppableId={droppableId}
-      direction={'horizontal'}
-      type={type}
-      renderClone={renderClone}
-    >
-      {(provided, snapshot) => (
+  }) => {
+    const DroppableContent = useCallback(
+      (provided, snapshot) => (
         <ReactDndDropTarget
           height={height}
           ref={provided.innerRef}
@@ -114,8 +109,21 @@ export const DroppableWrapper = React.memo<Props>(
           {render == null ? children : render({ isDraggingOver: snapshot.isDraggingOver })}
           {provided.placeholder}
         </ReactDndDropTarget>
-      )}
-    </Droppable>
-  )
+      ),
+      [children, height, render]
+    );
+
+    return (
+      <Droppable
+        isDropDisabled={isDropDisabled}
+        droppableId={droppableId}
+        direction={'horizontal'}
+        type={type}
+        renderClone={renderClone}
+      >
+        {DroppableContent}
+      </Droppable>
+    );
+  }
 );
 DroppableWrapper.displayName = 'DroppableWrapper';

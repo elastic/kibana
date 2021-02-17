@@ -1,10 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { RequestHandlerContext } from 'kibana/server';
 import { InventoryCloudAccount } from '../../../../common/http_api/inventory_meta_api';
 import {
   InfraMetadataAggregationResponse,
@@ -14,6 +14,7 @@ import { InfraSourceConfiguration } from '../../../lib/sources';
 import { KibanaFramework } from '../../../lib/adapters/framework/kibana_framework_adapter';
 import { InventoryItemType } from '../../../../common/inventory_models/types';
 import { findInventoryModel } from '../../../../common/inventory_models';
+import type { InfraPluginRequestHandlerContext } from '../../../types';
 
 export interface CloudMetaData {
   accounts: InventoryCloudAccount[];
@@ -23,11 +24,20 @@ export interface CloudMetaData {
 
 export const getCloudMetadata = async (
   framework: KibanaFramework,
-  req: RequestHandlerContext,
+  req: InfraPluginRequestHandlerContext,
   sourceConfiguration: InfraSourceConfiguration,
-  nodeType: InventoryItemType
+  nodeType: InventoryItemType,
+  currentTime: number
 ): Promise<CloudMetaData> => {
   const model = findInventoryModel(nodeType);
+  // Only run this for AWS modules, eventually we might have more.
+  if (model.requiredModule !== 'aws') {
+    return {
+      accounts: [],
+      projects: [],
+      regions: [],
+    };
+  }
 
   const metricQuery = {
     allowNoIndices: true,
@@ -36,7 +46,18 @@ export const getCloudMetadata = async (
     body: {
       query: {
         bool: {
-          must: [{ match: { 'event.module': model.requiredModule } }],
+          must: [
+            {
+              range: {
+                [sourceConfiguration.fields.timestamp]: {
+                  gte: currentTime - 86400000, // 24 hours ago
+                  lte: currentTime,
+                  format: 'epoch_millis',
+                },
+              },
+            },
+            { match: { 'event.module': model.requiredModule } },
+          ],
         },
       },
       size: 0,

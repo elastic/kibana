@@ -1,17 +1,25 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { sampleDocNoSortId } from './__mocks__/es_results';
-import { buildSignal, buildParent, buildAncestors, additionalSignalFields } from './build_signal';
-import { Signal, Ancestor } from './types';
+import {
+  buildSignal,
+  buildParent,
+  buildAncestors,
+  additionalSignalFields,
+  removeClashes,
+} from './build_signal';
+import { Signal, Ancestor, BaseSignalHit } from './types';
 import {
   getRulesSchemaMock,
   ANCHOR_DATE,
 } from '../../../../common/detection_engine/schemas/response/rules_schema.mocks';
 import { getListArrayMock } from '../../../../common/detection_engine/schemas/types/lists.mock';
+import { SIGNALS_TEMPLATE_VERSION } from '../routes/index/get_signals_template';
 
 describe('buildSignal', () => {
   beforeEach(() => {
@@ -27,6 +35,9 @@ describe('buildSignal', () => {
       ...additionalSignalFields(doc),
     };
     const expected: Signal = {
+      _meta: {
+        version: SIGNALS_TEMPLATE_VERSION,
+      },
       parent: {
         id: 'd5e8eb51-a6a0-456d-8a15-4b79bfec3d71',
         type: 'event',
@@ -105,6 +116,9 @@ describe('buildSignal', () => {
       ...additionalSignalFields(doc),
     };
     const expected: Signal = {
+      _meta: {
+        version: SIGNALS_TEMPLATE_VERSION,
+      },
       parent: {
         id: 'd5e8eb51-a6a0-456d-8a15-4b79bfec3d71',
         type: 'event',
@@ -301,5 +315,65 @@ describe('buildSignal', () => {
       },
     ];
     expect(signal).toEqual(expected);
+  });
+
+  describe('removeClashes', () => {
+    test('it will call renameClashes with a regular doc and not mutate it if it does not have a signal clash', () => {
+      const doc = sampleDocNoSortId('d5e8eb51-a6a0-456d-8a15-4b79bfec3d71');
+      const output = removeClashes(doc);
+      expect(output).toBe(doc); // reference check
+    });
+
+    test('it will call renameClashes with a regular doc and not change anything', () => {
+      const doc = sampleDocNoSortId('d5e8eb51-a6a0-456d-8a15-4b79bfec3d71');
+      const output = removeClashes(doc);
+      expect(output).toEqual(doc); // deep equal check
+    });
+
+    test('it will remove a "signal" numeric clash', () => {
+      const sampleDoc = sampleDocNoSortId('d5e8eb51-a6a0-456d-8a15-4b79bfec3d71');
+      const doc = ({
+        ...sampleDoc,
+        _source: {
+          ...sampleDoc._source,
+          signal: 127,
+        },
+      } as unknown) as BaseSignalHit;
+      const output = removeClashes(doc);
+      expect(output).toEqual(sampleDocNoSortId('d5e8eb51-a6a0-456d-8a15-4b79bfec3d71'));
+    });
+
+    test('it will remove a "signal" object clash', () => {
+      const sampleDoc = sampleDocNoSortId('d5e8eb51-a6a0-456d-8a15-4b79bfec3d71');
+      const doc = ({
+        ...sampleDoc,
+        _source: {
+          ...sampleDoc._source,
+          signal: { child_1: { child_2: 'Test nesting' } },
+        },
+      } as unknown) as BaseSignalHit;
+      const output = removeClashes(doc);
+      expect(output).toEqual(sampleDocNoSortId('d5e8eb51-a6a0-456d-8a15-4b79bfec3d71'));
+    });
+
+    test('it will not remove a "signal" if that is signal is one of our signals', () => {
+      const sampleDoc = sampleDocNoSortId('d5e8eb51-a6a0-456d-8a15-4b79bfec3d71');
+      const doc = ({
+        ...sampleDoc,
+        _source: {
+          ...sampleDoc._source,
+          signal: { rule: { id: '123' } },
+        },
+      } as unknown) as BaseSignalHit;
+      const output = removeClashes(doc);
+      const expected = {
+        ...sampleDocNoSortId('d5e8eb51-a6a0-456d-8a15-4b79bfec3d71'),
+        _source: {
+          ...sampleDocNoSortId('d5e8eb51-a6a0-456d-8a15-4b79bfec3d71')._source,
+          signal: { rule: { id: '123' } },
+        },
+      };
+      expect(output).toEqual(expected);
+    });
   });
 });

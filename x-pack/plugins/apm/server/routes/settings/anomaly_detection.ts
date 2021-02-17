@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import * as t from 'io-ts';
-import Boom from 'boom';
-import { isActivePlatinumLicense } from '../../../common/service_map';
+import Boom from '@hapi/boom';
+import { isActivePlatinumLicense } from '../../../common/license_check';
 import { ML_ERRORS } from '../../../common/anomaly_detection';
 import { createRoute } from '../create_route';
 import { getAnomalyDetectionJobs } from '../../lib/anomaly_detection/get_anomaly_detection_jobs';
@@ -16,11 +17,11 @@ import { getAllEnvironments } from '../../lib/environments/get_all_environments'
 import { hasLegacyJobs } from '../../lib/anomaly_detection/has_legacy_jobs';
 import { getSearchAggregatedTransactions } from '../../lib/helpers/aggregated_transactions';
 import { notifyFeatureUsage } from '../../feature';
+import { withApmSpan } from '../../utils/with_apm_span';
 
 // get ML anomaly detection jobs for each environment
-export const anomalyDetectionJobsRoute = createRoute(() => ({
-  method: 'GET',
-  path: '/api/apm/settings/anomaly-detection',
+export const anomalyDetectionJobsRoute = createRoute({
+  endpoint: 'GET /api/apm/settings/anomaly-detection/jobs',
   options: {
     tags: ['access:apm', 'access:ml:canGetJobs'],
   },
@@ -31,29 +32,31 @@ export const anomalyDetectionJobsRoute = createRoute(() => ({
       throw Boom.forbidden(ML_ERRORS.INVALID_LICENSE);
     }
 
-    const [jobs, legacyJobs] = await Promise.all([
-      getAnomalyDetectionJobs(setup, context.logger),
-      hasLegacyJobs(setup),
-    ]);
+    const [jobs, legacyJobs] = await withApmSpan('get_available_ml_jobs', () =>
+      Promise.all([
+        getAnomalyDetectionJobs(setup, context.logger),
+        hasLegacyJobs(setup),
+      ])
+    );
+
     return {
       jobs,
       hasLegacyJobs: legacyJobs,
     };
   },
-}));
+});
 
 // create new ML anomaly detection jobs for each given environment
-export const createAnomalyDetectionJobsRoute = createRoute(() => ({
-  method: 'POST',
-  path: '/api/apm/settings/anomaly-detection/jobs',
+export const createAnomalyDetectionJobsRoute = createRoute({
+  endpoint: 'POST /api/apm/settings/anomaly-detection/jobs',
   options: {
     tags: ['access:apm', 'access:apm_write', 'access:ml:canCreateJob'],
   },
-  params: {
+  params: t.type({
     body: t.type({
       environments: t.array(t.string),
     }),
-  },
+  }),
   handler: async ({ context, request }) => {
     const { environments } = context.params.body;
     const setup = await setupRequest(context, request);
@@ -68,12 +71,12 @@ export const createAnomalyDetectionJobsRoute = createRoute(() => ({
       featureName: 'ml',
     });
   },
-}));
+});
 
 // get all available environments to create anomaly detection jobs for
-export const anomalyDetectionEnvironmentsRoute = createRoute(() => ({
-  method: 'GET',
-  path: '/api/apm/settings/anomaly-detection/environments',
+export const anomalyDetectionEnvironmentsRoute = createRoute({
+  endpoint: 'GET /api/apm/settings/anomaly-detection/environments',
+  options: { tags: ['access:apm'] },
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
 
@@ -87,4 +90,4 @@ export const anomalyDetectionEnvironmentsRoute = createRoute(() => ({
       includeMissing: true,
     });
   },
-}));
+});

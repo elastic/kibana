@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -9,6 +10,8 @@ import {
   dynamicIndexPatternRoute,
   apmIndexPatternTitleRoute,
 } from './index_pattern';
+import { createApi } from './create_api';
+import { environmentsRoute } from './environments';
 import {
   errorDistributionRoute,
   errorGroupsRoute,
@@ -21,6 +24,12 @@ import {
   serviceNodeMetadataRoute,
   serviceAnnotationsRoute,
   serviceAnnotationsCreateRoute,
+  serviceErrorGroupsRoute,
+  serviceThroughputRoute,
+  serviceDependenciesRoute,
+  serviceMetadataDetailsRoute,
+  serviceMetadataIconsRoute,
+  serviceInstancesRoute,
 } from './services';
 import {
   agentConfigurationRoute,
@@ -39,28 +48,25 @@ import {
 } from './settings/apm_indices';
 import { metricsChartsRoute } from './metrics';
 import { serviceNodesRoute } from './service_nodes';
-import { tracesRoute, tracesByIdRoute } from './traces';
-import { transactionByTraceIdRoute } from './transaction';
 import {
-  transactionGroupsBreakdownRoute,
-  transactionGroupsChartsRoute,
-  transactionGroupsDistributionRoute,
+  tracesRoute,
+  tracesByIdRoute,
+  rootTransactionByTraceIdRoute,
+} from './traces';
+import {
+  correlationsForSlowTransactionsRoute,
+  correlationsForFailedTransactionsRoute,
+} from './correlations';
+import {
+  transactionChartsBreakdownRoute,
+  transactionChartsDistributionRoute,
+  transactionChartsErrorRateRoute,
   transactionGroupsRoute,
-  transactionSampleForGroupRoute,
-  transactionGroupsErrorRateRoute,
-} from './transaction_groups';
-import {
-  errorGroupsLocalFiltersRoute,
-  metricsLocalFiltersRoute,
-  servicesLocalFiltersRoute,
-  tracesLocalFiltersRoute,
-  transactionGroupsLocalFiltersRoute,
-  transactionsLocalFiltersRoute,
-  serviceNodesLocalFiltersRoute,
-  uiFiltersEnvironmentsRoute,
-  rumOverviewLocalFiltersRoute,
-} from './ui_filters';
-import { createApi } from './create_api';
+  transactionGroupsPrimaryStatisticsRoute,
+  transactionLatencyChatsRoute,
+  transactionThroughputChatsRoute,
+  transactionGroupsComparisonStatisticsRoute,
+} from './transactions';
 import { serviceMapRoute, serviceMapServiceNodeRoute } from './service_map';
 import {
   createCustomLinkRoute,
@@ -79,9 +85,11 @@ import {
   anomalyDetectionEnvironmentsRoute,
 } from './settings/anomaly_detection';
 import {
+  rumHasDataRoute,
   rumClientMetricsRoute,
   rumJSErrors,
   rumLongTaskMetrics,
+  rumOverviewLocalFiltersRoute,
   rumPageLoadDistBreakdownRoute,
   rumPageLoadDistributionRoute,
   rumPageViewsTrendRoute,
@@ -90,6 +98,11 @@ import {
   rumVisitorsBreakdownRoute,
   rumWebCoreVitals,
 } from './rum_client';
+import {
+  transactionErrorRateChartPreview,
+  transactionErrorCountChartPreview,
+  transactionDurationChartPreview,
+} from './alerts/chart_preview';
 
 const createApmApi = () => {
   const api = createApi()
@@ -97,6 +110,9 @@ const createApmApi = () => {
     .add(staticIndexPatternRoute)
     .add(dynamicIndexPatternRoute)
     .add(apmIndexPatternTitleRoute)
+
+    // Environments
+    .add(environmentsRoute)
 
     // Errors
     .add(errorDistributionRoute)
@@ -110,6 +126,12 @@ const createApmApi = () => {
     .add(serviceNodeMetadataRoute)
     .add(serviceAnnotationsRoute)
     .add(serviceAnnotationsCreateRoute)
+    .add(serviceErrorGroupsRoute)
+    .add(serviceThroughputRoute)
+    .add(serviceDependenciesRoute)
+    .add(serviceMetadataDetailsRoute)
+    .add(serviceMetadataIconsRoute)
+    .add(serviceInstancesRoute)
 
     // Agent configuration
     .add(getSingleAgentConfigurationRoute)
@@ -120,6 +142,10 @@ const createApmApi = () => {
     .add(listAgentConfigurationEnvironmentsRoute)
     .add(listAgentConfigurationServicesRoute)
     .add(createOrUpdateAgentConfigurationRoute)
+
+    // Correlations
+    .add(correlationsForSlowTransactionsRoute)
+    .add(correlationsForFailedTransactionsRoute)
 
     // APM indices
     .add(apmIndexSettingsRoute)
@@ -133,27 +159,17 @@ const createApmApi = () => {
     // Traces
     .add(tracesRoute)
     .add(tracesByIdRoute)
+    .add(rootTransactionByTraceIdRoute)
 
-    // Transaction groups
-    .add(transactionGroupsBreakdownRoute)
-    .add(transactionGroupsChartsRoute)
-    .add(transactionGroupsDistributionRoute)
+    // Transactions
+    .add(transactionChartsBreakdownRoute)
+    .add(transactionChartsDistributionRoute)
+    .add(transactionChartsErrorRateRoute)
     .add(transactionGroupsRoute)
-    .add(transactionSampleForGroupRoute)
-    .add(transactionGroupsErrorRateRoute)
-
-    // UI filters
-    .add(errorGroupsLocalFiltersRoute)
-    .add(metricsLocalFiltersRoute)
-    .add(servicesLocalFiltersRoute)
-    .add(tracesLocalFiltersRoute)
-    .add(transactionGroupsLocalFiltersRoute)
-    .add(transactionsLocalFiltersRoute)
-    .add(serviceNodesLocalFiltersRoute)
-    .add(uiFiltersEnvironmentsRoute)
-
-    // Transaction
-    .add(transactionByTraceIdRoute)
+    .add(transactionGroupsPrimaryStatisticsRoute)
+    .add(transactionLatencyChatsRoute)
+    .add(transactionThroughputChatsRoute)
+    .add(transactionGroupsComparisonStatisticsRoute)
 
     // Service map
     .add(serviceMapRoute)
@@ -186,7 +202,13 @@ const createApmApi = () => {
     .add(rumWebCoreVitals)
     .add(rumJSErrors)
     .add(rumUrlSearch)
-    .add(rumLongTaskMetrics);
+    .add(rumLongTaskMetrics)
+    .add(rumHasDataRoute)
+
+    // Alerting
+    .add(transactionErrorCountChartPreview)
+    .add(transactionDurationChartPreview)
+    .add(transactionErrorRateChartPreview);
 
   return api;
 };

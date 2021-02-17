@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React from 'react';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from '@kbn/test/jest';
 import { SpaceColumnHeader } from './space_column_header';
 import { SpacesPopoverList } from '../../../spaces_popover_list';
 import { SpaceAvatar } from '../../../../../../../../spaces/public';
@@ -43,7 +45,7 @@ const spaces = [
 ];
 
 describe('SpaceColumnHeader', () => {
-  it('renders the Global privilege definition with a special label and popover control', () => {
+  it('renders the Global privilege definition with a special label', () => {
     const wrapper = mountWithIntl(
       <SpaceColumnHeader
         spaces={spaces}
@@ -55,10 +57,9 @@ describe('SpaceColumnHeader', () => {
       />
     );
 
-    expect(wrapper.find(SpacesPopoverList)).toHaveLength(1);
     // Snapshot includes space avatar (The first "G"), followed by the "Global" label,
     // followed by the (all spaces) text as part of the SpacesPopoverList
-    expect(wrapper.text()).toMatchInlineSnapshot(`"G Global(all spaces)"`);
+    expect(wrapper.text()).toMatchInlineSnapshot(`"G All Spaces"`);
   });
 
   it('renders a placeholder space when the requested space no longer exists', () => {

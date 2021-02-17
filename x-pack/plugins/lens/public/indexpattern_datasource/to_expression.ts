@@ -1,94 +1,153 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { Ast, ExpressionFunctionAST } from '@kbn/interpreter/common';
+import type { IUiSettingsClient } from 'kibana/public';
+import {
+  EsaggsExpressionFunctionDefinition,
+  IndexPatternLoadExpressionFunctionDefinition,
+} from '../../../../../src/plugins/data/public';
+import {
+  buildExpression,
+  buildExpressionFunction,
+  ExpressionAstExpression,
+  ExpressionAstExpressionBuilder,
+  ExpressionAstFunction,
+} from '../../../../../src/plugins/expressions/public';
 import { IndexPatternColumn } from './indexpattern';
 import { operationDefinitionMap } from './operations';
-import { IndexPattern, IndexPatternPrivateState } from './types';
+import { IndexPattern, IndexPatternPrivateState, IndexPatternLayer } from './types';
 import { OriginalColumn } from './rename_columns';
 import { dateHistogramOperation } from './operations/definitions';
+import { getEsAggsSuffix } from './operations/definitions/helpers';
 
 function getExpressionForLayer(
+  layer: IndexPatternLayer,
   indexPattern: IndexPattern,
-  columns: Record<string, IndexPatternColumn>,
-  columnOrder: string[]
-): Ast | null {
+  uiSettings: IUiSettingsClient
+): ExpressionAstExpression | null {
+  const { columns, columnOrder } = layer;
   if (columnOrder.length === 0) {
     return null;
   }
 
-  function getEsAggsConfig<C extends IndexPatternColumn>(column: C, columnId: string) {
-    return operationDefinitionMap[column.operationType].toEsAggsConfig(
-      column,
-      columnId,
-      indexPattern
-    );
-  }
-
   const columnEntries = columnOrder.map((colId) => [colId, columns[colId]] as const);
-  const bucketsCount = columnEntries.filter(([, entry]) => entry.isBucketed).length;
-  const metricsCount = columnEntries.length - bucketsCount;
 
   if (columnEntries.length) {
-    const aggs = columnEntries.map(([colId, col]) => {
-      return getEsAggsConfig(col, colId);
+    const aggs: ExpressionAstExpressionBuilder[] = [];
+    const expressions: ExpressionAstFunction[] = [];
+    columnEntries.forEach(([colId, col]) => {
+      const def = operationDefinitionMap[col.operationType];
+      if (def.input === 'fullReference') {
+        expressions.push(...def.toExpression(layer, colId, indexPattern));
+      } else {
+        aggs.push(
+          buildExpression({
+            type: 'expression',
+            chain: [def.toEsAggsFn(col, colId, indexPattern, layer, uiSettings)],
+          })
+        );
+      }
     });
 
-    /**
-     * Because we are turning on metrics at all levels, the sequence generation
-     * logic here is more complicated. Examples follow:
-     *
-     * Example 1: [Count]
-     * Output: [`col-0-count`]
-     *
-     * Example 2: [Terms, Terms, Count]
-     * Output: [`col-0-terms0`, `col-2-terms1`, `col-3-count`]
-     *
-     * Example 3: [Terms, Terms, Count, Max]
-     * Output: [`col-0-terms0`, `col-3-terms1`, `col-4-count`, `col-5-max`]
-     */
     const idMap = columnEntries.reduce((currentIdMap, [colId, column], index) => {
-      const newIndex = column.isBucketed
-        ? index * (metricsCount + 1) // Buckets are spaced apart by N + 1
-        : (index ? index + 1 : 0) - bucketsCount + (bucketsCount - 1) * (metricsCount + 1);
+      const esAggsId = `col-${columnEntries.length === 1 ? 0 : index}-${colId}`;
+      const suffix = getEsAggsSuffix(column);
       return {
         ...currentIdMap,
-        [`col-${columnEntries.length === 1 ? 0 : newIndex}-${colId}`]: {
+        [`${esAggsId}${suffix}`]: {
           ...column,
           id: colId,
         },
       };
     }, {} as Record<string, OriginalColumn>);
 
-    type FormattedColumn = Required<Extract<IndexPatternColumn, { params?: { format: unknown } }>>;
-
+    type FormattedColumn = Required<
+      Extract<
+        IndexPatternColumn,
+        | {
+            params?: {
+              format: unknown;
+            };
+          }
+        // when formatters are nested there's a slightly different format
+        | {
+            params: {
+              format?: unknown;
+              parentFormat?: unknown;
+            };
+          }
+      >
+    >;
     const columnsWithFormatters = columnEntries.filter(
-      ([, col]) => col.params && 'format' in col.params && col.params.format
+      ([, col]) =>
+        col.params &&
+        (('format' in col.params && col.params.format) ||
+          ('parentFormat' in col.params && col.params.parentFormat))
     ) as Array<[string, FormattedColumn]>;
-    const formatterOverrides: ExpressionFunctionAST[] = columnsWithFormatters.map(([id, col]) => {
-      const format = (col as FormattedColumn).params!.format;
-      const base: ExpressionFunctionAST = {
-        type: 'function',
-        function: 'lens_format_column',
-        arguments: {
-          format: [format.id],
-          columnId: [id],
-        },
-      };
-      if (typeof format.params?.decimals === 'number') {
-        return {
-          ...base,
+    const formatterOverrides: ExpressionAstFunction[] = columnsWithFormatters.map(
+      ([id, col]: [string, FormattedColumn]) => {
+        // TODO: improve the type handling here
+        const parentFormat = 'parentFormat' in col.params ? col.params!.parentFormat! : undefined;
+        const format = (col as FormattedColumn).params!.format;
+
+        const base: ExpressionAstFunction = {
+          type: 'function',
+          function: 'lens_format_column',
           arguments: {
-            ...base.arguments,
-            decimals: [format.params.decimals],
+            format: format ? [format.id] : [''],
+            columnId: [id],
+            decimals: typeof format?.params?.decimals === 'number' ? [format.params.decimals] : [],
+            parentFormat: parentFormat ? [JSON.stringify(parentFormat)] : [],
           },
         };
+
+        return base;
       }
-      return base;
-    });
+    );
+
+    const firstDateHistogramColumn = columnEntries.find(
+      ([, col]) => col.operationType === 'date_histogram'
+    );
+
+    const columnsWithTimeScale = firstDateHistogramColumn
+      ? columnEntries.filter(
+          ([, col]) =>
+            col.timeScale &&
+            operationDefinitionMap[col.operationType].timeScalingMode &&
+            operationDefinitionMap[col.operationType].timeScalingMode !== 'disabled'
+        )
+      : [];
+    const timeScaleFunctions: ExpressionAstFunction[] = columnsWithTimeScale.flatMap(
+      ([id, col]) => {
+        const scalingCall: ExpressionAstFunction = {
+          type: 'function',
+          function: 'lens_time_scale',
+          arguments: {
+            dateColumnId: [firstDateHistogramColumn![0]],
+            inputColumnId: [id],
+            outputColumnId: [id],
+            outputColumnName: [col.label],
+            targetUnit: [col.timeScale!],
+          },
+        };
+
+        const formatCall: ExpressionAstFunction = {
+          type: 'function',
+          function: 'lens_format_column',
+          arguments: {
+            format: [''],
+            columnId: [id],
+            parentFormat: [JSON.stringify({ id: 'suffix', params: { unit: col.timeScale } })],
+          },
+        };
+
+        return [scalingCall, formatCall];
+      }
+    );
 
     const allDateHistogramFields = Object.values(columns)
       .map((column) =>
@@ -99,18 +158,18 @@ function getExpressionForLayer(
     return {
       type: 'expression',
       chain: [
-        {
-          type: 'function',
-          function: 'esaggs',
-          arguments: {
-            index: [indexPattern.id],
-            metricsAtAllLevels: [true],
-            partialRows: [true],
-            includeFormatHints: [true],
-            timeFields: allDateHistogramFields,
-            aggConfigs: [JSON.stringify(aggs)],
-          },
-        },
+        buildExpressionFunction<EsaggsExpressionFunctionDefinition>('esaggs', {
+          index: buildExpression([
+            buildExpressionFunction<IndexPatternLoadExpressionFunctionDefinition>(
+              'indexPatternLoad',
+              { id: indexPattern.id }
+            ),
+          ]),
+          aggs,
+          metricsAtAllLevels: false,
+          partialRows: false,
+          timeFields: allDateHistogramFields,
+        }).toAst(),
         {
           type: 'function',
           function: 'lens_rename_columns',
@@ -119,6 +178,8 @@ function getExpressionForLayer(
           },
         },
         ...formatterOverrides,
+        ...expressions,
+        ...timeScaleFunctions,
       ],
     };
   }
@@ -126,12 +187,16 @@ function getExpressionForLayer(
   return null;
 }
 
-export function toExpression(state: IndexPatternPrivateState, layerId: string) {
+export function toExpression(
+  state: IndexPatternPrivateState,
+  layerId: string,
+  uiSettings: IUiSettingsClient
+) {
   if (state.layers[layerId]) {
     return getExpressionForLayer(
+      state.layers[layerId],
       state.indexPatterns[state.layers[layerId].indexPatternId],
-      state.layers[layerId].columns,
-      state.layers[layerId].columnOrder
+      uiSettings
     );
   }
 

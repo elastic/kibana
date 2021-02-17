@@ -1,29 +1,60 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { Map as MbMap } from 'mapbox-gl';
 import React from 'react';
 import { EuiTextColor } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { DynamicStyleProperty } from './dynamic_style_property';
 import { makeMbClampedNumberExpression, dynamicRound } from '../style_util';
-import { getOrdinalMbColorRampStops, getColorPalette } from '../../color_palettes';
-import { COLOR_MAP_TYPE } from '../../../../../common/constants';
+import {
+  getOrdinalMbColorRampStops,
+  getPercentilesMbColorRampStops,
+  getColorPalette,
+} from '../../color_palettes';
+import {
+  COLOR_MAP_TYPE,
+  DATA_MAPPING_FUNCTION,
+  FieldFormatter,
+  VECTOR_STYLES,
+} from '../../../../../common/constants';
 import {
   isCategoricalStopsInvalid,
   getOtherCategoryLabel,
   // @ts-expect-error
 } from '../components/color/color_stops_utils';
-import { BreakedLegend } from '../components/legend/breaked_legend';
+import { Break, BreakedLegend } from '../components/legend/breaked_legend';
 import { ColorDynamicOptions, OrdinalColorStop } from '../../../../../common/descriptor_types';
 import { LegendProps } from './style_property';
+import { getOrdinalSuffix } from '../../../util/ordinal_suffix';
+import { IField } from '../../../fields/field';
+import { IVectorLayer } from '../../../layers/vector_layer/vector_layer';
 
+const UP_TO = i18n.translate('xpack.maps.legend.upto', {
+  defaultMessage: 'up to',
+});
 const EMPTY_STOPS = { stops: [], defaultColor: null };
 const RGBA_0000 = 'rgba(0,0,0,0)';
 
 export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptions> {
+  private readonly _chartsPaletteServiceGetColor?: (value: string) => string | null;
+
+  constructor(
+    options: ColorDynamicOptions,
+    styleName: VECTOR_STYLES,
+    field: IField | null,
+    vectorLayer: IVectorLayer,
+    getFieldFormatter: (fieldName: string) => null | FieldFormatter,
+    chartsPaletteServiceGetColor?: (value: string) => string | null
+  ) {
+    super(options, styleName, field, vectorLayer, getFieldFormatter);
+    this._chartsPaletteServiceGetColor = chartsPaletteServiceGetColor;
+  }
+
   syncCircleColorWithMb(mbLayerId: string, mbMap: MbMap, alpha: number) {
     const color = this._getMbColor();
     mbMap.setPaintProperty(mbLayerId, 'circle-color', color);
@@ -99,6 +130,10 @@ export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptio
     return colors ? colors.length : 0;
   }
 
+  _getSupportedDataMappingFunctions(): DATA_MAPPING_FUNCTION[] {
+    return [DATA_MAPPING_FUNCTION.INTERPOLATE, DATA_MAPPING_FUNCTION.PERCENTILES];
+  }
+
   _getMbColor() {
     if (!this.getFieldName()) {
       return null;
@@ -123,45 +158,88 @@ export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptio
         },
         []
       );
-      const firstStopValue = colorStops[0] as number;
-      const lessThanFirstStopValue = firstStopValue - 1;
       return [
         'step',
-        ['coalesce', [this.getMbLookupFunction(), targetName], lessThanFirstStopValue],
+        makeMbClampedNumberExpression({
+          minValue: colorStops[0] as number,
+          maxValue: colorStops[colorStops.length - 2] as number,
+          lookupFunction: this.getMbLookupFunction(),
+          fallback: (colorStops[0] as number) - 1,
+          fieldName: targetName,
+        }),
         RGBA_0000, // MB will assign the base value to any features that is below the first stop value
         ...colorStops,
       ];
-    } else {
-      const rangeFieldMeta = this.getRangeFieldMeta();
-      if (!rangeFieldMeta) {
+    }
+
+    if (this.getDataMappingFunction() === DATA_MAPPING_FUNCTION.PERCENTILES) {
+      const percentilesFieldMeta = this.getPercentilesFieldMeta();
+      if (!percentilesFieldMeta || !percentilesFieldMeta.length) {
         return null;
       }
 
-      const colorStops = getOrdinalMbColorRampStops(
+      const colorStops = getPercentilesMbColorRampStops(
         this._options.color ? this._options.color : null,
-        rangeFieldMeta.min,
-        rangeFieldMeta.max
+        percentilesFieldMeta
       );
       if (!colorStops) {
         return null;
       }
 
-      const lessThanFirstStopValue = rangeFieldMeta.min - 1;
       return [
-        'interpolate',
-        ['linear'],
+        'step',
         makeMbClampedNumberExpression({
-          minValue: rangeFieldMeta.min,
-          maxValue: rangeFieldMeta.max,
+          minValue: colorStops[0] as number,
+          maxValue: colorStops[colorStops.length - 2] as number,
           lookupFunction: this.getMbLookupFunction(),
-          fallback: lessThanFirstStopValue,
+          fallback: (colorStops[0] as number) - 1,
           fieldName: targetName,
         }),
-        lessThanFirstStopValue,
         RGBA_0000,
         ...colorStops,
       ];
     }
+
+    const rangeFieldMeta = this.getRangeFieldMeta();
+    if (!rangeFieldMeta) {
+      return null;
+    }
+
+    const colorStops = getOrdinalMbColorRampStops(
+      this._options.color ? this._options.color : null,
+      rangeFieldMeta.min,
+      rangeFieldMeta.max
+    );
+    if (!colorStops) {
+      return null;
+    }
+
+    const lessThanFirstStopValue = rangeFieldMeta.min - 1;
+    return [
+      'interpolate',
+      ['linear'],
+      makeMbClampedNumberExpression({
+        minValue: rangeFieldMeta.min,
+        maxValue: rangeFieldMeta.max,
+        lookupFunction: this.getMbLookupFunction(),
+        fallback: lessThanFirstStopValue,
+        fieldName: targetName,
+      }),
+      lessThanFirstStopValue,
+      RGBA_0000,
+      ...colorStops,
+    ];
+  }
+
+  _getCustomRampColorStops(): Array<number | string> {
+    return this._options.customColorRamp
+      ? this._options.customColorRamp.reduce(
+          (accumulatedStops: Array<number | string>, nextStop: OrdinalColorStop) => {
+            return [...accumulatedStops, nextStop.stop, nextStop.color];
+          },
+          []
+        )
+      : [];
   }
 
   _getColorPaletteStops() {
@@ -203,12 +281,16 @@ export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptio
     for (let i = 0; i < maxLength - 1; i++) {
       stops.push({
         stop: fieldMeta.categories[i].key,
-        color: colors[i],
+        color: this._chartsPaletteServiceGetColor
+          ? this._chartsPaletteServiceGetColor(fieldMeta.categories[i].key)
+          : colors[i],
       });
     }
     return {
       stops,
-      defaultColor: colors[maxLength - 1],
+      defaultColor: this._chartsPaletteServiceGetColor
+        ? this._chartsPaletteServiceGetColor('__other__')
+        : colors[maxLength - 1],
     };
   }
 
@@ -242,59 +324,97 @@ export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptio
     return ['match', ['to-string', ['get', this.getFieldName()]], ...mbStops];
   }
 
-  _getColorRampStops() {
-    if (this._options.useCustomColorRamp && this._options.customColorRamp) {
-      return this._options.customColorRamp;
-    }
+  _getOrdinalBreaks(symbolId?: string): Break[] {
+    let colorStops: Array<number | string> | null = null;
+    let getValuePrefix: ((i: number, isNext: boolean) => string) | null = null;
+    if (this._options.useCustomColorRamp) {
+      if (!this._options.customColorRamp) {
+        return [];
+      }
+      colorStops = this._getCustomRampColorStops();
+    } else if (this.getDataMappingFunction() === DATA_MAPPING_FUNCTION.PERCENTILES) {
+      const percentilesFieldMeta = this.getPercentilesFieldMeta();
+      if (!percentilesFieldMeta) {
+        return [];
+      }
+      colorStops = getPercentilesMbColorRampStops(
+        this._options.color ? this._options.color : null,
+        percentilesFieldMeta
+      );
+      getValuePrefix = function (i: number, isNext: boolean) {
+        const percentile = isNext
+          ? parseFloat(percentilesFieldMeta[i / 2 + 1].percentile)
+          : parseFloat(percentilesFieldMeta[i / 2].percentile);
 
-    if (!this._options.color) {
-      return [];
-    }
-
-    const rangeFieldMeta = this.getRangeFieldMeta();
-    if (!rangeFieldMeta) {
-      return [];
-    }
-
-    const colors = getColorPalette(this._options.color);
-
-    if (rangeFieldMeta.delta === 0) {
-      // map to last color.
-      return [
-        {
-          color: colors[colors.length - 1],
-          stop: dynamicRound(rangeFieldMeta.max),
-        },
-      ];
-    }
-
-    return colors.map((color, index) => {
-      const rawStopValue = rangeFieldMeta.min + rangeFieldMeta.delta * (index / colors.length);
-      return {
-        color,
-        stop: dynamicRound(rawStopValue),
+        return `${percentile}${getOrdinalSuffix(percentile)}: `;
       };
-    });
-  }
-
-  _getColorStops() {
-    if (this.isOrdinal()) {
-      return {
-        stops: this._getColorRampStops(),
-        defaultColor: null,
-      };
-    } else if (this.isCategorical()) {
-      return this._getColorPaletteStops();
     } else {
-      return EMPTY_STOPS;
+      const rangeFieldMeta = this.getRangeFieldMeta();
+      if (!rangeFieldMeta || !this._options.color) {
+        return [];
+      }
+      if (rangeFieldMeta.delta === 0) {
+        const colors = getColorPalette(this._options.color);
+        // map to last color.
+        return [
+          {
+            color: colors[colors.length - 1],
+            label: this.formatField(dynamicRound(rangeFieldMeta.max)),
+            symbolId,
+          },
+        ];
+      }
+      colorStops = getOrdinalMbColorRampStops(
+        this._options.color ? this._options.color : null,
+        rangeFieldMeta.min,
+        rangeFieldMeta.max
+      );
     }
+
+    if (!colorStops || colorStops.length <= 2) {
+      return [];
+    }
+
+    const breaks = [];
+    const lastStopIndex = colorStops.length - 2;
+    for (let i = 0; i < colorStops.length; i += 2) {
+      const hasNext = i < lastStopIndex;
+      const stopValue = colorStops[i];
+      const formattedStopValue = this.formatField(dynamicRound(stopValue));
+      const color = colorStops[i + 1] as string;
+      const valuePrefix = getValuePrefix ? getValuePrefix(i, false) : '';
+
+      let label = '';
+      if (!hasNext) {
+        label = `>= ${valuePrefix}${formattedStopValue}`;
+      } else {
+        const nextStopValue = colorStops[i + 2];
+        const formattedNextStopValue = this.formatField(dynamicRound(nextStopValue));
+        const nextValuePrefix = getValuePrefix ? getValuePrefix(i, true) : '';
+
+        if (i === 0) {
+          label = `< ${nextValuePrefix}${formattedNextStopValue}`;
+        } else {
+          const begin = `${valuePrefix}${formattedStopValue}`;
+          const end = `${nextValuePrefix}${formattedNextStopValue}`;
+          label = `${begin} ${UP_TO} ${end}`;
+        }
+      }
+
+      breaks.push({
+        color,
+        label,
+        symbolId,
+      });
+    }
+    return breaks;
   }
 
-  renderLegendDetailRow({ isPointsOnly, isLinesOnly, symbolId }: LegendProps) {
-    const { stops, defaultColor } = this._getColorStops();
-    const breaks = [];
-    stops.forEach(({ stop, color }: { stop: string | number | null; color: string }) => {
-      if (stop !== null) {
+  _getCategoricalBreaks(symbolId?: string): Break[] {
+    const breaks: Break[] = [];
+    const { stops, defaultColor } = this._getColorPaletteStops();
+    stops.forEach(({ stop, color }: { stop: string | number | null; color: string | null }) => {
+      if (stop !== null && color != null) {
         breaks.push({
           color,
           symbolId,
@@ -309,7 +429,16 @@ export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptio
         symbolId,
       });
     }
+    return breaks;
+  }
 
+  renderLegendDetailRow({ isPointsOnly, isLinesOnly, symbolId }: LegendProps) {
+    let breaks: Break[] = [];
+    if (this.isOrdinal()) {
+      breaks = this._getOrdinalBreaks(symbolId);
+    } else if (this.isCategorical()) {
+      breaks = this._getCategoricalBreaks(symbolId);
+    }
     return (
       <BreakedLegend
         style={this}

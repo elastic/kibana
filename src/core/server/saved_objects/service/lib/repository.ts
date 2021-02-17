@@ -1,24 +1,12 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import { omit } from 'lodash';
-import uuid from 'uuid';
+import { omit, isObject } from 'lodash';
 import {
   ElasticsearchClient,
   DeleteDocumentResponse,
@@ -48,6 +36,10 @@ import {
   SavedObjectsCreateOptions,
   SavedObjectsFindResponse,
   SavedObjectsFindResult,
+  SavedObjectsClosePointInTimeOptions,
+  SavedObjectsClosePointInTimeResponse,
+  SavedObjectsOpenPointInTimeOptions,
+  SavedObjectsOpenPointInTimeResponse,
   SavedObjectsUpdateOptions,
   SavedObjectsUpdateResponse,
   SavedObjectsBulkUpdateObject,
@@ -57,6 +49,9 @@ import {
   SavedObjectsAddToNamespacesResponse,
   SavedObjectsDeleteFromNamespacesOptions,
   SavedObjectsDeleteFromNamespacesResponse,
+  SavedObjectsRemoveReferencesToOptions,
+  SavedObjectsRemoveReferencesToResponse,
+  SavedObjectsResolveResponse,
 } from '../saved_objects_client';
 import {
   SavedObject,
@@ -65,9 +60,15 @@ import {
   SavedObjectsMigrationVersion,
   MutatingOperationRefreshSetting,
 } from '../../types';
+import { LegacyUrlAlias, LEGACY_URL_ALIAS_TYPE } from '../../object_types';
 import { SavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 import { validateConvertFilterToKueryNode } from './filter_utils';
-import { FIND_DEFAULT_PAGE, FIND_DEFAULT_PER_PAGE, SavedObjectsUtils } from './utils';
+import {
+  ALL_NAMESPACES_STRING,
+  FIND_DEFAULT_PAGE,
+  FIND_DEFAULT_PER_PAGE,
+  SavedObjectsUtils,
+} from './utils';
 
 // BEWARE: The SavedObjectClient depends on the implementation details of the SavedObjectsRepository
 // so any breaking changes to this repository are considered breaking changes to the SavedObjectsClient.
@@ -94,8 +95,17 @@ export interface SavedObjectsRepositoryOptions {
  * @public
  */
 export interface SavedObjectsIncrementCounterOptions extends SavedObjectsBaseOptions {
+  /**
+   * (default=false) If true, sets all the counter fields to 0 if they don't
+   * already exist. Existing fields will be left as-is and won't be incremented.
+   */
+  initialize?: boolean;
+  /** {@link SavedObjectsMigrationVersion} */
   migrationVersion?: SavedObjectsMigrationVersion;
-  /** The Elasticsearch Refresh setting for this operation */
+  /**
+   * (default='wait_for') The Elasticsearch refresh setting for this
+   * operation. See {@link MutatingOperationRefreshSetting}
+   */
   refresh?: MutatingOperationRefreshSetting;
 }
 
@@ -116,6 +126,16 @@ const DEFAULT_REFRESH_SETTING = 'wait_for';
  * @public
  */
 export type ISavedObjectsRepository = Pick<SavedObjectsRepository, keyof SavedObjectsRepository>;
+
+/**
+ * @public
+ */
+export interface SavedObjectsIncrementCounterField {
+  /** The field name to increment the counter by.*/
+  fieldName: string;
+  /** The number to increment the field by (defaults to 1).*/
+  incrementBy?: number;
+}
 
 /**
  * @public
@@ -219,15 +239,28 @@ export class SavedObjectsRepository {
     options: SavedObjectsCreateOptions = {}
   ): Promise<SavedObject<T>> {
     const {
-      id,
+      id = SavedObjectsUtils.generateId(),
       migrationVersion,
       overwrite = false,
       references = [],
       refresh = DEFAULT_REFRESH_SETTING,
       originId,
+      initialNamespaces,
       version,
     } = options;
     const namespace = normalizeNamespace(options.namespace);
+
+    if (initialNamespaces) {
+      if (!this._registry.isShareable(type)) {
+        throw SavedObjectsErrorHelpers.createBadRequestError(
+          '"options.initialNamespaces" can only be used on multi-namespace types'
+        );
+      } else if (!initialNamespaces.length) {
+        throw SavedObjectsErrorHelpers.createBadRequestError(
+          '"options.initialNamespaces" must be a non-empty array of strings'
+        );
+      }
+    }
 
     if (!this._allowedTypes.includes(type)) {
       throw SavedObjectsErrorHelpers.createUnsupportedTypeError(type);
@@ -242,9 +275,11 @@ export class SavedObjectsRepository {
     } else if (this._registry.isMultiNamespace(type)) {
       if (id && overwrite) {
         // we will overwrite a multi-namespace saved object if it exists; if that happens, ensure we preserve its included namespaces
-        savedObjectNamespaces = await this.preflightGetNamespaces(type, id, namespace);
+        // note: this check throws an error if the object is found but does not exist in this namespace
+        const existingNamespaces = await this.preflightGetNamespaces(type, id, namespace);
+        savedObjectNamespaces = initialNamespaces || existingNamespaces;
       } else {
-        savedObjectNamespaces = getSavedObjectNamespaces(namespace);
+        savedObjectNamespaces = initialNamespaces || getSavedObjectNamespaces(namespace);
       }
     }
 
@@ -268,6 +303,7 @@ export class SavedObjectsRepository {
       refresh,
       body: raw._source,
       ...(overwrite && version ? decodeRequestVersion(version) : {}),
+      require_alias: true,
     };
 
     const { body } =
@@ -300,21 +336,34 @@ export class SavedObjectsRepository {
 
     let bulkGetRequestIndexCounter = 0;
     const expectedResults: Either[] = objects.map((object) => {
+      let error: DecoratedError | undefined;
       if (!this._allowedTypes.includes(object.type)) {
+        error = SavedObjectsErrorHelpers.createUnsupportedTypeError(object.type);
+      } else if (object.initialNamespaces) {
+        if (!this._registry.isShareable(object.type)) {
+          error = SavedObjectsErrorHelpers.createBadRequestError(
+            '"initialNamespaces" can only be used on multi-namespace types'
+          );
+        } else if (!object.initialNamespaces.length) {
+          error = SavedObjectsErrorHelpers.createBadRequestError(
+            '"initialNamespaces" must be a non-empty array of strings'
+          );
+        }
+      }
+
+      if (error) {
         return {
           tag: 'Left' as 'Left',
-          error: {
-            id: object.id,
-            type: object.type,
-            error: errorContent(SavedObjectsErrorHelpers.createUnsupportedTypeError(object.type)),
-          },
+          error: { id: object.id, type: object.type, error: errorContent(error) },
         };
       }
 
       const method = object.id && overwrite ? 'index' : 'create';
       const requiresNamespacesCheck = object.id && this._registry.isMultiNamespace(object.type);
 
-      if (object.id == null) object.id = uuid.v1();
+      if (object.id == null) {
+        object.id = SavedObjectsUtils.generateId();
+      }
 
       return {
         tag: 'Right' as 'Right',
@@ -357,7 +406,7 @@ export class SavedObjectsRepository {
       let versionProperties;
       const {
         esRequestIndex,
-        object: { version, ...object },
+        object: { initialNamespaces, version, ...object },
         method,
       } = expectedBulkGetResult.value;
       if (esRequestIndex !== undefined) {
@@ -378,13 +427,14 @@ export class SavedObjectsRepository {
             },
           };
         }
-        savedObjectNamespaces = getSavedObjectNamespaces(namespace, docFound && actualResult);
+        savedObjectNamespaces =
+          initialNamespaces || getSavedObjectNamespaces(namespace, docFound && actualResult);
         versionProperties = getExpectedVersionProperties(version, actualResult);
       } else {
         if (this._registry.isSingleNamespace(object.type)) {
           savedObjectNamespace = namespace;
         } else if (this._registry.isMultiNamespace(object.type)) {
-          savedObjectNamespaces = getSavedObjectNamespaces(namespace);
+          savedObjectNamespaces = initialNamespaces || getSavedObjectNamespaces(namespace);
         }
         versionProperties = getExpectedVersionProperties(version);
       }
@@ -424,6 +474,7 @@ export class SavedObjectsRepository {
     const bulkResponse = bulkCreateParams.length
       ? await this.client.bulk({
           refresh,
+          require_alias: true,
           body: bulkCreateParams,
         })
       : undefined;
@@ -553,7 +604,7 @@ export class SavedObjectsRepository {
       throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
     }
 
-    const { refresh = DEFAULT_REFRESH_SETTING } = options;
+    const { refresh = DEFAULT_REFRESH_SETTING, force } = options;
     const namespace = normalizeNamespace(options.namespace);
 
     const rawId = this._serializer.generateRawId(namespace, type, id);
@@ -561,38 +612,14 @@ export class SavedObjectsRepository {
 
     if (this._registry.isMultiNamespace(type)) {
       preflightResult = await this.preflightCheckIncludesNamespace(type, id, namespace);
-      const existingNamespaces = getSavedObjectNamespaces(undefined, preflightResult);
-      const remainingNamespaces = existingNamespaces?.filter(
-        (x) => x !== SavedObjectsUtils.namespaceIdToString(namespace)
-      );
-
-      if (remainingNamespaces?.length) {
-        // if there is 1 or more namespace remaining, update the saved object
-        const time = this._getCurrentTime();
-
-        const doc = {
-          updated_at: time,
-          namespaces: remainingNamespaces,
-        };
-
-        const { statusCode } = await this.client.update(
-          {
-            id: rawId,
-            index: this.getIndexForType(type),
-            ...getExpectedVersionProperties(undefined, preflightResult),
-            refresh,
-            body: {
-              doc,
-            },
-          },
-          { ignore: [404] }
+      const existingNamespaces = getSavedObjectNamespaces(undefined, preflightResult) ?? [];
+      if (
+        !force &&
+        (existingNamespaces.length > 1 || existingNamespaces.includes(ALL_NAMESPACES_STRING))
+      ) {
+        throw SavedObjectsErrorHelpers.createBadRequestError(
+          'Unable to delete saved object that exists in multiple namespaces, use the `force` option to delete it anyway'
         );
-
-        if (statusCode === 404) {
-          // see "404s from missing index" above
-          throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
-        }
-        return {};
       }
     }
 
@@ -637,8 +664,8 @@ export class SavedObjectsRepository {
     namespace: string,
     options: SavedObjectsDeleteByNamespaceOptions = {}
   ): Promise<any> {
-    if (!namespace || typeof namespace !== 'string') {
-      throw new TypeError(`namespace is required, and must be a string`);
+    if (!namespace || typeof namespace !== 'string' || namespace === '*') {
+      throw new TypeError(`namespace is required, and must be a string that is not equal to '*'`);
     }
 
     const allTypes = Object.keys(getRootPropertiesObjects(this._mappings));
@@ -685,11 +712,13 @@ export class SavedObjectsRepository {
    *                                        Query field argument for more information
    * @property {integer} [options.page=1]
    * @property {integer} [options.perPage=20]
+   * @property {Array<unknown>} [options.searchAfter]
    * @property {string} [options.sortField]
    * @property {string} [options.sortOrder]
    * @property {Array<string>} [options.fields]
    * @property {string} [options.namespace]
    * @property {object} [options.hasReference] - { type, id }
+   * @property {string} [options.pit]
    * @property {string} [options.preference]
    * @returns {promise} - { saved_objects: [{ id, type, version, attributes }], total, per_page, page }
    */
@@ -700,8 +729,11 @@ export class SavedObjectsRepository {
       searchFields,
       rootSearchFields,
       hasReference,
+      hasReferenceOperator,
       page = FIND_DEFAULT_PAGE,
       perPage = FIND_DEFAULT_PER_PAGE,
+      pit,
+      searchAfter,
       sortField,
       sortOrder,
       fields,
@@ -727,6 +759,10 @@ export class SavedObjectsRepository {
     } else if ((!namespaces || namespaces?.length) && typeToNamespacesMap) {
       throw SavedObjectsErrorHelpers.createBadRequestError(
         'options.namespaces must be an empty array when options.typeToNamespacesMap is used'
+      );
+    } else if (preference?.length && pit) {
+      throw SavedObjectsErrorHelpers.createBadRequestError(
+        'options.preference must be excluded when options.pit is used'
       );
     }
 
@@ -763,25 +799,30 @@ export class SavedObjectsRepository {
     }
 
     const esOptions = {
-      index: this.getIndicesForTypes(allowedTypes),
-      size: perPage,
-      from: perPage * (page - 1),
+      // If `pit` is provided, we drop the `index`, otherwise ES returns 400.
+      ...(pit ? {} : { index: this.getIndicesForTypes(allowedTypes) }),
+      // If `searchAfter` is provided, we drop `from` as it will not be used for pagination.
+      ...(searchAfter ? {} : { from: perPage * (page - 1) }),
       _source: includedFields(type, fields),
-      rest_total_hits_as_int: true,
       preference,
+      rest_total_hits_as_int: true,
+      size: perPage,
       body: {
         seq_no_primary_term: true,
         ...getSearchDsl(this._mappings, this._registry, {
           search,
           defaultSearchOperator,
           searchFields,
+          pit,
           rootSearchFields,
           type: allowedTypes,
+          searchAfter,
           sortField,
           sortOrder,
           namespaces,
           typeToNamespacesMap,
           hasReference,
+          hasReferenceOperator,
           kueryNode,
         }),
       },
@@ -809,8 +850,10 @@ export class SavedObjectsRepository {
         (hit: SavedObjectsRawDoc): SavedObjectsFindResult => ({
           ...this._rawToSavedObject(hit),
           score: (hit as any)._score,
+          ...((hit as any).sort && { sort: (hit as any).sort }),
         })
       ),
+      ...(body.pit_id && { pit_id: body.pit_id }),
     } as SavedObjectsFindResponse<T>;
   }
 
@@ -899,25 +942,7 @@ export class SavedObjectsRepository {
           } as any) as SavedObject<T>;
         }
 
-        const { originId, updated_at: updatedAt } = doc._source;
-        let namespaces = [];
-        if (!this._registry.isNamespaceAgnostic(type)) {
-          namespaces = doc._source.namespaces ?? [
-            SavedObjectsUtils.namespaceIdToString(doc._source.namespace),
-          ];
-        }
-
-        return {
-          id,
-          type,
-          namespaces,
-          ...(originId && { originId }),
-          ...(updatedAt && { updated_at: updatedAt }),
-          version: encodeHitVersion(doc),
-          attributes: doc._source[type],
-          references: doc._source.references || [],
-          migrationVersion: doc._source.migrationVersion,
-        };
+        return this.getSavedObjectFromSource(type, id, doc);
       }),
     };
   }
@@ -957,26 +982,124 @@ export class SavedObjectsRepository {
       throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
     }
 
-    const { originId, updated_at: updatedAt } = body._source;
+    return this.getSavedObjectFromSource(type, id, body);
+  }
 
-    let namespaces: string[] = [];
-    if (!this._registry.isNamespaceAgnostic(type)) {
-      namespaces = body._source.namespaces ?? [
-        SavedObjectsUtils.namespaceIdToString(body._source.namespace),
-      ];
+  /**
+   * Resolves a single object, using any legacy URL alias if it exists
+   *
+   * @param {string} type
+   * @param {string} id
+   * @param {object} [options={}]
+   * @property {string} [options.namespace]
+   * @returns {promise} - { saved_object, outcome }
+   */
+  async resolve<T = unknown>(
+    type: string,
+    id: string,
+    options: SavedObjectsBaseOptions = {}
+  ): Promise<SavedObjectsResolveResponse<T>> {
+    if (!this._allowedTypes.includes(type)) {
+      throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
     }
 
-    return {
-      id,
-      type,
-      namespaces,
-      ...(originId && { originId }),
-      ...(updatedAt && { updated_at: updatedAt }),
-      version: encodeHitVersion(body),
-      attributes: body._source[type],
-      references: body._source.references || [],
-      migrationVersion: body._source.migrationVersion,
-    };
+    const namespace = normalizeNamespace(options.namespace);
+    if (namespace === undefined) {
+      // legacy URL aliases cannot exist for the default namespace; just attempt to get the object
+      return this.resolveExactMatch(type, id, options);
+    }
+
+    const rawAliasId = this._serializer.generateRawLegacyUrlAliasId(namespace, type, id);
+    const time = this._getCurrentTime();
+
+    // retrieve the alias, and if it is not disabled, update it
+    const aliasResponse = await this.client.update(
+      {
+        id: rawAliasId,
+        index: this.getIndexForType(LEGACY_URL_ALIAS_TYPE),
+        refresh: false,
+        _source: 'true',
+        body: {
+          script: {
+            source: `
+              if (ctx._source[params.type].disabled != true) {
+                if (ctx._source[params.type].resolveCounter == null) {
+                  ctx._source[params.type].resolveCounter = 1;
+                }
+                else {
+                  ctx._source[params.type].resolveCounter += 1;
+                }
+                ctx._source[params.type].lastResolved = params.time;
+                ctx._source.updated_at = params.time;
+              }
+            `,
+            lang: 'painless',
+            params: {
+              type: LEGACY_URL_ALIAS_TYPE,
+              time,
+            },
+          },
+        },
+      },
+      { ignore: [404] }
+    );
+
+    if (
+      aliasResponse.statusCode === 404 ||
+      aliasResponse.body.get.found === false ||
+      aliasResponse.body.get._source[LEGACY_URL_ALIAS_TYPE]?.disabled === true
+    ) {
+      // no legacy URL alias exists, or one exists but it's disabled; just attempt to get the object
+      return this.resolveExactMatch(type, id, options);
+    }
+    const legacyUrlAlias: LegacyUrlAlias = aliasResponse.body.get._source[LEGACY_URL_ALIAS_TYPE];
+    const objectIndex = this.getIndexForType(type);
+    const bulkGetResponse = await this.client.mget(
+      {
+        body: {
+          docs: [
+            {
+              // attempt to find an exact match for the given ID
+              _id: this._serializer.generateRawId(namespace, type, id),
+              _index: objectIndex,
+            },
+            {
+              // also attempt to find a match for the legacy URL alias target ID
+              _id: this._serializer.generateRawId(namespace, type, legacyUrlAlias.targetId),
+              _index: objectIndex,
+            },
+          ],
+        },
+      },
+      { ignore: [404] }
+    );
+
+    const exactMatchDoc = bulkGetResponse?.body.docs[0];
+    const aliasMatchDoc = bulkGetResponse?.body.docs[1];
+    const foundExactMatch =
+      exactMatchDoc.found && this.rawDocExistsInNamespace(exactMatchDoc, namespace);
+    const foundAliasMatch =
+      aliasMatchDoc.found && this.rawDocExistsInNamespace(aliasMatchDoc, namespace);
+
+    if (foundExactMatch && foundAliasMatch) {
+      return {
+        saved_object: this.getSavedObjectFromSource(type, id, exactMatchDoc),
+        outcome: 'conflict',
+        aliasTargetId: legacyUrlAlias.targetId,
+      };
+    } else if (foundExactMatch) {
+      return {
+        saved_object: this.getSavedObjectFromSource(type, id, exactMatchDoc),
+        outcome: 'exactMatch',
+      };
+    } else if (foundAliasMatch) {
+      return {
+        saved_object: this.getSavedObjectFromSource(type, legacyUrlAlias.targetId, aliasMatchDoc),
+        outcome: 'aliasMatch',
+        aliasTargetId: legacyUrlAlias.targetId,
+      };
+    }
+    throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
   }
 
   /**
@@ -1016,8 +1139,8 @@ export class SavedObjectsRepository {
       ...(Array.isArray(references) && { references }),
     };
 
-    const { body, statusCode } = await this.client.update(
-      {
+    const { body } = await this.client
+      .update({
         id: this._serializer.generateRawId(namespace, type, id),
         index: this.getIndexForType(type),
         ...getExpectedVersionProperties(version, preflightResult),
@@ -1027,14 +1150,15 @@ export class SavedObjectsRepository {
           doc,
         },
         _source_includes: ['namespace', 'namespaces', 'originId'],
-      },
-      { ignore: [404] }
-    );
-
-    if (statusCode === 404) {
-      // see "404s from missing index" above
-      throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
-    }
+        require_alias: true,
+      })
+      .catch((err) => {
+        if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
+          // see "404s from missing index" above
+          throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
+        }
+        throw err;
+      });
 
     const { originId } = body.get._source;
     let namespaces = [];
@@ -1072,7 +1196,7 @@ export class SavedObjectsRepository {
       throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
     }
 
-    if (!this._registry.isMultiNamespace(type)) {
+    if (!this._registry.isShareable(type)) {
       throw SavedObjectsErrorHelpers.createBadRequestError(
         `${type} doesn't support multiple namespaces`
       );
@@ -1135,7 +1259,7 @@ export class SavedObjectsRepository {
       throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
     }
 
-    if (!this._registry.isMultiNamespace(type)) {
+    if (!this._registry.isShareable(type)) {
       throw SavedObjectsErrorHelpers.createBadRequestError(
         `${type} doesn't support multiple namespaces`
       );
@@ -1253,6 +1377,19 @@ export class SavedObjectsRepository {
       }
 
       const { attributes, references, version, namespace: objectNamespace } = object;
+
+      if (objectNamespace === ALL_NAMESPACES_STRING) {
+        return {
+          tag: 'Left' as 'Left',
+          error: {
+            id,
+            type,
+            error: errorContent(
+              SavedObjectsErrorHelpers.createBadRequestError('"namespace" cannot be "*"')
+            ),
+          },
+        };
+      }
       // `objectNamespace` is a namespace string, while `namespace` is a namespace ID.
       // The object namespace string, if defined, will supersede the operation's namespace ID.
 
@@ -1382,6 +1519,7 @@ export class SavedObjectsRepository {
           refresh,
           body: bulkUpdateParams,
           _source_includes: ['originId'],
+          require_alias: true,
         })
       : undefined;
 
@@ -1425,32 +1563,146 @@ export class SavedObjectsRepository {
   }
 
   /**
-   * Increases a counter field by one. Creates the document if one doesn't exist for the given id.
+   * Updates all objects containing a reference to the given {type, id} tuple to remove the said reference.
    *
-   * @param {string} type
-   * @param {string} id
-   * @param {string} counterFieldName
-   * @param {object} [options={}]
-   * @property {object} [options.migrationVersion=undefined]
-   * @returns {promise}
+   * @remarks Will throw a conflict error if the `update_by_query` operation returns any failure. In that case
+   *          some references might have been removed, and some were not. It is the caller's responsibility
+   *          to handle and fix this situation if it was to happen.
    */
-  async incrementCounter(
+  async removeReferencesTo(
     type: string,
     id: string,
-    counterFieldName: string,
+    options: SavedObjectsRemoveReferencesToOptions = {}
+  ): Promise<SavedObjectsRemoveReferencesToResponse> {
+    const { namespace, refresh = true } = options;
+    const allTypes = this._registry.getAllTypes().map((t) => t.name);
+
+    // we need to target all SO indices as all types of objects may have references to the given SO.
+    const targetIndices = this.getIndicesForTypes(allTypes);
+
+    const { body } = await this.client.updateByQuery(
+      {
+        index: targetIndices,
+        refresh,
+        body: {
+          script: {
+            source: `
+              if (ctx._source.containsKey('references')) {
+                def items_to_remove = [];
+                for (item in ctx._source.references) {
+                  if ( (item['type'] == params['type']) && (item['id'] == params['id']) ) {
+                    items_to_remove.add(item);
+                  }
+                }
+                ctx._source.references.removeAll(items_to_remove);
+              }
+            `,
+            params: {
+              type,
+              id,
+            },
+            lang: 'painless',
+          },
+          conflicts: 'proceed',
+          ...getSearchDsl(this._mappings, this._registry, {
+            namespaces: namespace ? [namespace] : undefined,
+            type: allTypes,
+            hasReference: { type, id },
+          }),
+        },
+      },
+      { ignore: [404] }
+    );
+
+    if (body.failures?.length) {
+      throw SavedObjectsErrorHelpers.createConflictError(
+        type,
+        id,
+        `${body.failures.length} references could not be removed`
+      );
+    }
+
+    return {
+      updated: body.updated,
+    };
+  }
+
+  /**
+   * Increments all the specified counter fields (by one by default). Creates the document
+   * if one doesn't exist for the given id.
+   *
+   * @remarks
+   * When supplying a field name like `stats.api.counter` the field name will
+   * be used as-is to create a document like:
+   *   `{attributes: {'stats.api.counter': 1}}`
+   * It will not create a nested structure like:
+   *   `{attributes: {stats: {api: {counter: 1}}}}`
+   *
+   * When using incrementCounter for collecting usage data, you need to ensure
+   * that usage collection happens on a best-effort basis and doesn't
+   * negatively affect your plugin or users. See https://github.com/elastic/kibana/blob/master/src/plugins/usage_collection/README.md#tracking-interactions-with-incrementcounter)
+   *
+   * @example
+   * ```ts
+   * const repository = coreStart.savedObjects.createInternalRepository();
+   *
+   * // Initialize all fields to 0
+   * repository
+   *   .incrementCounter('dashboard_counter_type', 'counter_id', [
+   *     'stats.apiCalls',
+   *     'stats.sampleDataInstalled',
+   *   ], {initialize: true});
+   *
+   * // Increment the apiCalls field counter
+   * repository
+   *   .incrementCounter('dashboard_counter_type', 'counter_id', [
+   *     'stats.apiCalls',
+   *   ])
+   * ```
+   *
+   * @param type - The type of saved object whose fields should be incremented
+   * @param id - The id of the document whose fields should be incremented
+   * @param counterFields - An array of field names to increment or an array of {@link SavedObjectsIncrementCounterField}
+   * @param options - {@link SavedObjectsIncrementCounterOptions}
+   * @returns The saved object after the specified fields were incremented
+   */
+  async incrementCounter<T = unknown>(
+    type: string,
+    id: string,
+    counterFields: Array<string | SavedObjectsIncrementCounterField>,
     options: SavedObjectsIncrementCounterOptions = {}
-  ): Promise<SavedObject> {
+  ): Promise<SavedObject<T>> {
     if (typeof type !== 'string') {
       throw new Error('"type" argument must be a string');
     }
-    if (typeof counterFieldName !== 'string') {
-      throw new Error('"counterFieldName" argument must be a string');
+
+    const isArrayOfCounterFields =
+      Array.isArray(counterFields) &&
+      counterFields.every(
+        (field) =>
+          typeof field === 'string' || (isObject(field) && typeof field.fieldName === 'string')
+      );
+
+    if (!isArrayOfCounterFields) {
+      throw new Error(
+        '"counterFields" argument must be of type Array<string | { incrementBy?: number; fieldName: string }>'
+      );
     }
     if (!this._allowedTypes.includes(type)) {
       throw SavedObjectsErrorHelpers.createUnsupportedTypeError(type);
     }
 
-    const { migrationVersion, refresh = DEFAULT_REFRESH_SETTING } = options;
+    const { migrationVersion, refresh = DEFAULT_REFRESH_SETTING, initialize = false } = options;
+
+    const normalizedCounterFields = counterFields.map((counterField) => {
+      const fieldName = typeof counterField === 'string' ? counterField : counterField.fieldName;
+      const incrementBy = typeof counterField === 'string' ? 1 : counterField.incrementBy || 1;
+
+      return {
+        fieldName,
+        incrementBy: initialize ? 0 : incrementBy,
+      };
+    });
     const namespace = normalizeNamespace(options.namespace);
 
     const time = this._getCurrentTime();
@@ -1463,12 +1715,17 @@ export class SavedObjectsRepository {
       savedObjectNamespaces = await this.preflightGetNamespaces(type, id, namespace);
     }
 
+    // attributes: { [counterFieldName]: incrementBy },
     const migrated = this._migrator.migrateDocument({
       id,
       type,
       ...(savedObjectNamespace && { namespace: savedObjectNamespace }),
       ...(savedObjectNamespaces && { namespaces: savedObjectNamespaces }),
-      attributes: { [counterFieldName]: 1 },
+      attributes: normalizedCounterFields.reduce((acc, counterField) => {
+        const { fieldName, incrementBy } = counterField;
+        acc[fieldName] = incrementBy;
+        return acc;
+      }, {} as Record<string, number>),
       migrationVersion,
       updated_at: time,
     });
@@ -1479,24 +1736,34 @@ export class SavedObjectsRepository {
       id: raw._id,
       index: this.getIndexForType(type),
       refresh,
+      require_alias: true,
       _source: 'true',
       body: {
         script: {
           source: `
-              if (ctx._source[params.type][params.counterFieldName] == null) {
-                ctx._source[params.type][params.counterFieldName] = params.count;
-              }
-              else {
-                ctx._source[params.type][params.counterFieldName] += params.count;
+              for (int i = 0; i < params.counterFieldNames.length; i++) {
+                def counterFieldName = params.counterFieldNames[i];
+                def count = params.counts[i];
+
+                if (ctx._source[params.type][counterFieldName] == null) {
+                  ctx._source[params.type][counterFieldName] = count;
+                }
+                else {
+                  ctx._source[params.type][counterFieldName] += count;
+                }
               }
               ctx._source.updated_at = params.time;
             `,
           lang: 'painless',
           params: {
-            count: 1,
+            counts: normalizedCounterFields.map(
+              (normalizedCounterField) => normalizedCounterField.incrementBy
+            ),
+            counterFieldNames: normalizedCounterFields.map(
+              (normalizedCounterField) => normalizedCounterField.fieldName
+            ),
             time,
             type,
-            counterFieldName,
           },
         },
         upsert: raw._source,
@@ -1518,12 +1785,133 @@ export class SavedObjectsRepository {
   }
 
   /**
+   * Opens a Point In Time (PIT) against the indices for the specified Saved Object types.
+   * The returned `id` can then be passed to `SavedObjects.find` to search against that PIT.
+   *
+   * @example
+   * ```ts
+   * const { id } = await savedObjectsClient.openPointInTimeForType(
+   *   type: 'visualization',
+   *   { keepAlive: '5m' },
+   * );
+   * const page1 = await savedObjectsClient.find({
+   *   type: 'visualization',
+   *   sortField: 'updated_at',
+   *   sortOrder: 'asc',
+   *   pit: { id, keepAlive: '2m' },
+   * });
+   * const lastHit = page1.saved_objects[page1.saved_objects.length - 1];
+   * const page2 = await savedObjectsClient.find({
+   *   type: 'visualization',
+   *   sortField: 'updated_at',
+   *   sortOrder: 'asc',
+   *   pit: { id: page1.pit_id },
+   *   searchAfter: lastHit.sort,
+   * });
+   * await savedObjectsClient.closePointInTime(page2.pit_id);
+   * ```
+   *
+   * @param {string|Array<string>} type
+   * @param {object} [options] - {@link SavedObjectsOpenPointInTimeOptions}
+   * @property {string} [options.keepAlive]
+   * @property {string} [options.preference]
+   * @returns {promise} - { id: string }
+   */
+  async openPointInTimeForType(
+    type: string | string[],
+    { keepAlive = '5m', preference }: SavedObjectsOpenPointInTimeOptions = {}
+  ): Promise<SavedObjectsOpenPointInTimeResponse> {
+    const types = Array.isArray(type) ? type : [type];
+    const allowedTypes = types.filter((t) => this._allowedTypes.includes(t));
+    if (allowedTypes.length === 0) {
+      throw SavedObjectsErrorHelpers.createGenericNotFoundError();
+    }
+
+    const esOptions = {
+      index: this.getIndicesForTypes(allowedTypes),
+      keep_alive: keepAlive,
+      ...(preference ? { preference } : {}),
+    };
+
+    const {
+      body,
+      statusCode,
+    } = await this.client.openPointInTime<SavedObjectsOpenPointInTimeResponse>(esOptions, {
+      ignore: [404],
+    });
+    if (statusCode === 404) {
+      throw SavedObjectsErrorHelpers.createGenericNotFoundError();
+    }
+
+    return {
+      id: body.id,
+    };
+  }
+
+  /**
+   * Closes a Point In Time (PIT) by ID. This simply proxies the request to ES
+   * via the Elasticsearch client, and is included in the Saved Objects Client
+   * as a convenience for consumers who are using `openPointInTimeForType`.
+   *
+   * @remarks
+   * While the `keepAlive` that is provided will cause a PIT to automatically close,
+   * it is highly recommended to explicitly close a PIT when you are done with it
+   * in order to avoid consuming unneeded resources in Elasticsearch.
+   *
+   * @example
+   * ```ts
+   * const repository = coreStart.savedObjects.createInternalRepository();
+   *
+   * const { id } = await repository.openPointInTimeForType(
+   *   type: 'index-pattern',
+   *   { keepAlive: '2m' },
+   * );
+   *
+   * const response = await repository.find({
+   *   type: 'index-pattern',
+   *   search: 'foo*',
+   *   sortField: 'name',
+   *   sortOrder: 'desc',
+   *   pit: {
+   *     id: 'abc123',
+   *     keepAlive: '2m',
+   *   },
+   *   searchAfter: [1234, 'abcd'],
+   * });
+   *
+   * await repository.closePointInTime(response.pit_id);
+   * ```
+   *
+   * @param {string} id
+   * @param {object} [options] - {@link SavedObjectsClosePointInTimeOptions}
+   * @returns {promise} - {@link SavedObjectsClosePointInTimeResponse}
+   */
+  async closePointInTime(
+    id: string,
+    options?: SavedObjectsClosePointInTimeOptions
+  ): Promise<SavedObjectsClosePointInTimeResponse> {
+    const { body } = await this.client.closePointInTime<SavedObjectsClosePointInTimeResponse>({
+      body: { id },
+    });
+    return body;
+  }
+
+  /**
    * Returns index specified by the given type or the default index
    *
    * @param type - the type
    */
   private getIndexForType(type: string) {
-    return this._registry.getIndex(type) || this._index;
+    // TODO migrationsV2: Remove once we release migrations v2
+    //   This is a hacky, but it required the least amount of changes to
+    //   existing code to support a migrations v2 index. Long term we would
+    //   want to always use the type registry to resolve a type's index
+    //   (including the default index).
+    if (this._migrator.savedObjectsConfig.enableV2) {
+      return `${this._registry.getIndex(type) || this._index}_${this._migrator.kibanaVersion}`;
+    } else {
+      return this._registry.getIndex(type) || this._index;
+    }
   }
 
   /**
@@ -1547,7 +1935,7 @@ export class SavedObjectsRepository {
     if (this._registry.isSingleNamespace(type)) {
       savedObject.namespaces = [SavedObjectsUtils.namespaceIdToString(namespace)];
     }
-    return omit(savedObject, 'namespace') as SavedObject<T>;
+    return omit(savedObject, ['namespace']) as SavedObject<T>;
   }
 
   /**
@@ -1568,7 +1956,10 @@ export class SavedObjectsRepository {
     }
 
     const namespaces = raw._source.namespaces;
-    return namespaces?.includes(SavedObjectsUtils.namespaceIdToString(namespace)) ?? false;
+    const existsInNamespace =
+      namespaces?.includes(SavedObjectsUtils.namespaceIdToString(namespace)) ||
+      namespaces?.includes('*');
+    return existsInNamespace ?? false;
   }
 
   /**
@@ -1640,14 +2031,57 @@ export class SavedObjectsRepository {
     }
     return body as SavedObjectsRawDoc;
   }
+
+  private getSavedObjectFromSource<T>(
+    type: string,
+    id: string,
+    doc: { _seq_no: number; _primary_term: number; _source: SavedObjectsRawDocSource }
+  ): SavedObject<T> {
+    const { originId, updated_at: updatedAt } = doc._source;
+
+    let namespaces: string[] = [];
+    if (!this._registry.isNamespaceAgnostic(type)) {
+      namespaces = doc._source.namespaces ?? [
+        SavedObjectsUtils.namespaceIdToString(doc._source.namespace),
+      ];
+    }
+
+    return {
+      id,
+      type,
+      namespaces,
+      ...(originId && { originId }),
+      ...(updatedAt && { updated_at: updatedAt }),
+      version: encodeHitVersion(doc),
+      attributes: doc._source[type],
+      references: doc._source.references || [],
+      migrationVersion: doc._source.migrationVersion,
+      coreMigrationVersion: doc._source.coreMigrationVersion,
+    };
+  }
+
+  private async resolveExactMatch<T>(
+    type: string,
+    id: string,
+    options: SavedObjectsBaseOptions
+  ): Promise<SavedObjectsResolveResponse<T>> {
+    const object = await this.get<T>(type, id, options);
+    return { saved_object: object, outcome: 'exactMatch' };
+  }
 }
 
-function getBulkOperationError(error: { type: string; reason?: string }, type: string, id: string) {
+function getBulkOperationError(
+  error: { type: string; reason?: string; index?: string },
+  type: string,
+  id: string
+) {
   switch (error.type) {
     case 'version_conflict_engine_exception':
       return errorContent(SavedObjectsErrorHelpers.createConflictError(type, id));
     case 'document_missing_exception':
       return errorContent(SavedObjectsErrorHelpers.createGenericNotFoundError(type, id));
+    case 'index_not_found_exception':
+      return errorContent(SavedObjectsErrorHelpers.createIndexAliasNotFoundError(error.index!));
     default:
       return {
         message: error.reason || JSON.stringify(error),
@@ -1695,8 +2129,15 @@ function getSavedObjectNamespaces(
  * Ensure that a namespace is always in its namespace ID representation.
  * This allows `'default'` to be used interchangeably with `undefined`.
  */
-const normalizeNamespace = (namespace?: string) =>
-  namespace === undefined ? namespace : SavedObjectsUtils.namespaceStringToId(namespace);
+const normalizeNamespace = (namespace?: string) => {
+  if (namespace === ALL_NAMESPACES_STRING) {
+    throw SavedObjectsErrorHelpers.createBadRequestError('"options.namespace" cannot be "*"');
+  } else if (namespace === undefined) {
+    return namespace;
+  } else {
+    return SavedObjectsUtils.namespaceStringToId(namespace);
+  }
+};
 
 /**
  * Extracts the contents of a decorated error to return the attributes for bulk operations.

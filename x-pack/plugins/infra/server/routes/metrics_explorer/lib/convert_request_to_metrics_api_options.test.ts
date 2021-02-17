@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { MetricsExplorerRequestBody, MetricsAPIRequest } from '../../../../common/http_api';
@@ -114,6 +115,18 @@ describe('convertRequestToMetricsAPIOptions', () => {
       convertRequestToMetricsAPIOptions({
         ...BASE_REQUEST,
         metrics: [],
+      })
+    ).toEqual({
+      ...BASE_METRICS_UI_OPTIONS,
+      metrics: [],
+    });
+  });
+
+  it('should work with empty field', () => {
+    expect(
+      convertRequestToMetricsAPIOptions({
+        ...BASE_REQUEST,
+        metrics: [{ aggregation: 'avg' }],
       })
     ).toEqual({
       ...BASE_METRICS_UI_OPTIONS,

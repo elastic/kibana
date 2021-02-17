@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { fold } from 'fp-ts/lib/Either';
@@ -31,7 +32,8 @@ export function useSnapshot(
   currentTime: number,
   accountId: string,
   region: string,
-  sendRequestImmediatly = true
+  sendRequestImmediatly = true,
+  timerange?: InfraTimerangeInput
 ) {
   const decodeResponse = (response: any) => {
     return pipe(
@@ -40,11 +42,11 @@ export function useSnapshot(
     );
   };
 
-  const timerange: InfraTimerangeInput = {
+  timerange = timerange || {
     interval: '1m',
     to: currentTime,
     from: currentTime - 1200 * 1000,
-    lookbackSize: 20,
+    lookbackSize: 5,
   };
 
   const { error, loading, response, makeRequest } = useHTTPRequest<SnapshotNodeResponse>(

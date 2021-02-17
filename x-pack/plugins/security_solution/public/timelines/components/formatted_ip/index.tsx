@@ -1,25 +1,38 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { isArray, isEmpty, isString, uniq } from 'lodash/fp';
-import React from 'react';
+import React, { useCallback, useMemo, useContext } from 'react';
+import { useDispatch } from 'react-redux';
+import deepEqual from 'fast-deep-equal';
 
+import { FlowTarget } from '../../../../common/search_strategy/security_solution/network';
 import {
   DragEffects,
   DraggableWrapper,
 } from '../../../common/components/drag_and_drop/draggable_wrapper';
 import { escapeDataProviderId } from '../../../common/components/drag_and_drop/helpers';
+import { Content } from '../../../common/components/draggables';
 import { getOrEmptyTagFromValue } from '../../../common/components/empty_value';
-import { NetworkDetailsLink } from '../../../common/components/links';
 import { parseQueryValue } from '../../../timelines/components/timeline/body/renderers/parse_query_value';
 import {
   DataProvider,
   IS_OPERATOR,
 } from '../../../timelines/components/timeline/data_providers/data_provider';
 import { Provider } from '../../../timelines/components/timeline/data_providers/provider';
+import {
+  TimelineExpandedDetailType,
+  TimelineId,
+  TimelineTabs,
+} from '../../../../common/types/timeline';
+import { activeTimeline } from '../../containers/active_timeline_context';
+import { timelineActions } from '../../store/timeline';
+import { StatefulEventContext } from '../timeline/body/events/stateful_event_context';
+import { LinkAnchor } from '../../../common/components/links';
 
 const getUniqueId = ({
   contextId,
@@ -71,16 +84,25 @@ const NonDecoratedIpComponent: React.FC<{
   fieldName: string;
   truncate?: boolean;
   value: string | object | null | undefined;
-}> = ({ contextId, eventId, fieldName, truncate, value }) => (
-  <DraggableWrapper
-    dataProvider={getDataProvider({ contextId, eventId, fieldName, address: value })}
-    key={`non-decorated-ip-draggable-wrapper-${getUniqueId({
-      contextId,
-      eventId,
-      fieldName,
-      address: value,
-    })}`}
-    render={(dataProvider, _, snapshot) =>
+}> = ({ contextId, eventId, fieldName, truncate, value }) => {
+  const key = useMemo(
+    () =>
+      `non-decorated-ip-draggable-wrapper-${getUniqueId({
+        contextId,
+        eventId,
+        fieldName,
+        address: value,
+      })}`,
+    [contextId, eventId, fieldName, value]
+  );
+
+  const dataProviderProp = useMemo(
+    () => getDataProvider({ contextId, eventId, fieldName, address: value }),
+    [contextId, eventId, fieldName, value]
+  );
+
+  const render = useCallback(
+    (dataProvider, _, snapshot) =>
       snapshot.isDragging ? (
         <DragEffects>
           <Provider dataProvider={dataProvider} />
@@ -89,49 +111,155 @@ const NonDecoratedIpComponent: React.FC<{
         getOrEmptyTagFromValue(value)
       ) : (
         getOrEmptyTagFromValue(tryStringify(value))
-      )
-    }
-    truncate={truncate}
-  />
-);
+      ),
+    [value]
+  );
+
+  return (
+    <DraggableWrapper
+      dataProvider={dataProviderProp}
+      key={key}
+      render={render}
+      truncate={truncate}
+    />
+  );
+};
 
 const NonDecoratedIp = React.memo(NonDecoratedIpComponent);
 
-const AddressLinksComponent: React.FC<{
+interface AddressLinksItemProps extends Omit<AddressLinksProps, 'addresses'> {
+  address: string;
+}
+
+const AddressLinksItemComponent: React.FC<AddressLinksItemProps> = ({
+  address,
+  contextId,
+  eventId,
+  fieldName,
+  truncate,
+}) => {
+  const key = `address-links-draggable-wrapper-${getUniqueId({
+    contextId,
+    eventId,
+    fieldName,
+    address,
+  })}`;
+
+  const dataProviderProp = useMemo(
+    () => getDataProvider({ contextId, eventId, fieldName, address }),
+    [address, contextId, eventId, fieldName]
+  );
+
+  const dispatch = useDispatch();
+  const eventContext = useContext(StatefulEventContext);
+
+  const openNetworkDetailsSidePanel = useCallback(
+    (e) => {
+      e.preventDefault();
+      if (address && eventContext?.timelineID && eventContext?.tabType) {
+        const { tabType, timelineID } = eventContext;
+        const updatedExpandedDetail: TimelineExpandedDetailType = {
+          panelView: 'networkDetail',
+          params: {
+            ip: address,
+            flowTarget: fieldName.includes(FlowTarget.destination)
+              ? FlowTarget.destination
+              : FlowTarget.source,
+          },
+        };
+
+        dispatch(
+          timelineActions.toggleDetailPanel({
+            ...updatedExpandedDetail,
+            tabType,
+            timelineId: timelineID,
+          })
+        );
+
+        if (timelineID === TimelineId.active && tabType === TimelineTabs.query) {
+          activeTimeline.toggleExpandedDetail({ ...updatedExpandedDetail });
+        }
+      }
+    },
+    [dispatch, eventContext, address, fieldName]
+  );
+
+  const render = useCallback(
+    (_props, _provided, snapshot) =>
+      snapshot.isDragging ? (
+        <DragEffects>
+          <Provider dataProvider={dataProviderProp} />
+        </DragEffects>
+      ) : (
+        <Content field={fieldName} tooltipContent={address}>
+          <LinkAnchor
+            href="#"
+            data-test-subj="network-details"
+            onClick={openNetworkDetailsSidePanel}
+          >
+            {address}
+          </LinkAnchor>
+        </Content>
+      ),
+    [address, dataProviderProp, openNetworkDetailsSidePanel, fieldName]
+  );
+
+  return (
+    <DraggableWrapper
+      dataProvider={dataProviderProp}
+      key={key}
+      render={render}
+      truncate={truncate}
+    />
+  );
+};
+
+const AddressLinksItem = React.memo(AddressLinksItemComponent);
+
+interface AddressLinksProps {
   addresses: string[];
   contextId: string;
   eventId: string;
   fieldName: string;
   truncate?: boolean;
-}> = ({ addresses, contextId, eventId, fieldName, truncate }) => (
-  <>
-    {uniq(addresses).map((address) => (
-      <DraggableWrapper
-        dataProvider={getDataProvider({ contextId, eventId, fieldName, address })}
-        key={`address-links-draggable-wrapper-${getUniqueId({
-          contextId,
-          eventId,
-          fieldName,
-          address,
-        })}`}
-        render={(_props, _provided, snapshot) =>
-          snapshot.isDragging ? (
-            <DragEffects>
-              <Provider
-                dataProvider={getDataProvider({ contextId, eventId, fieldName, address })}
-              />
-            </DragEffects>
-          ) : (
-            <NetworkDetailsLink data-test-subj="network-details" ip={address} />
-          )
-        }
-        truncate={truncate}
-      />
-    ))}
-  </>
-);
+}
 
-const AddressLinks = React.memo(AddressLinksComponent);
+const AddressLinksComponent: React.FC<AddressLinksProps> = ({
+  addresses,
+  contextId,
+  eventId,
+  fieldName,
+  truncate,
+}) => {
+  const uniqAddresses = useMemo(() => uniq(addresses), [addresses]);
+
+  const content = useMemo(
+    () =>
+      uniqAddresses.map((address) => (
+        <AddressLinksItem
+          key={address}
+          address={address}
+          contextId={contextId}
+          eventId={eventId}
+          fieldName={fieldName}
+          truncate={truncate}
+        />
+      )),
+    [contextId, eventId, fieldName, truncate, uniqAddresses]
+  );
+
+  return <>{content}</>;
+};
+
+const AddressLinks = React.memo(
+  AddressLinksComponent,
+  (prevProps, nextProps) =>
+    prevProps.contextId === nextProps.contextId &&
+    prevProps.eventId === nextProps.eventId &&
+    prevProps.fieldName === nextProps.fieldName &&
+    prevProps.truncate === nextProps.truncate &&
+    deepEqual(prevProps.addresses, nextProps.addresses)
+);
 
 const FormattedIpComponent: React.FC<{
   contextId: string;
@@ -181,4 +309,12 @@ const FormattedIpComponent: React.FC<{
   }
 };
 
-export const FormattedIp = React.memo(FormattedIpComponent);
+export const FormattedIp = React.memo(
+  FormattedIpComponent,
+  (prevProps, nextProps) =>
+    prevProps.contextId === nextProps.contextId &&
+    prevProps.eventId === nextProps.eventId &&
+    prevProps.fieldName === nextProps.fieldName &&
+    prevProps.truncate === nextProps.truncate &&
+    deepEqual(prevProps.value, nextProps.value)
+);

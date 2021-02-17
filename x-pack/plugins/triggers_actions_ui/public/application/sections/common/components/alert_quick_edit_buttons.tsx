@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -9,16 +10,16 @@ import React, { useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiButtonEmpty, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 
-import { Alert } from '../../../../types';
-import { useAppDependencies } from '../../../app_context';
+import { AlertTableItem } from '../../../../types';
 import {
   withBulkAlertOperations,
   ComponentOpts as BulkOperationsComponentOpts,
 } from './with_bulk_alert_api_operations';
 import './alert_quick_edit_buttons.scss';
+import { useKibana } from '../../../../common/lib/kibana';
 
 export type ComponentOpts = {
-  selectedItems: Alert[];
+  selectedItems: AlertTableItem[];
   onPerformingAction?: () => void;
   onActionPerformed?: () => void;
   setAlertsToDelete: React.Dispatch<React.SetStateAction<string[]>>;
@@ -34,7 +35,9 @@ export const AlertQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
   disableAlerts,
   setAlertsToDelete,
 }: ComponentOpts) => {
-  const { toastNotifications } = useAppDependencies();
+  const {
+    notifications: { toasts },
+  } = useKibana().services;
 
   const [isMutingAlerts, setIsMutingAlerts] = useState<boolean>(false);
   const [isUnmutingAlerts, setIsUnmutingAlerts] = useState<boolean>(false);
@@ -47,13 +50,17 @@ export const AlertQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
   const isPerformingAction =
     isMutingAlerts || isUnmutingAlerts || isEnablingAlerts || isDisablingAlerts || isDeletingAlerts;
 
+  const hasDisabledByLicenseAlertTypes = !!selectedItems.find(
+    (alertItem) => !alertItem.enabledInLicense
+  );
+
   async function onmMuteAllClick() {
     onPerformingAction();
     setIsMutingAlerts(true);
     try {
       await muteAlerts(selectedItems);
     } catch (e) {
-      toastNotifications.addDanger({
+      toasts.addDanger({
         title: i18n.translate(
           'xpack.triggersActionsUI.sections.alertsList.bulkActionPopover.failedToMuteAlertsMessage',
           {
@@ -73,7 +80,7 @@ export const AlertQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
     try {
       await unmuteAlerts(selectedItems);
     } catch (e) {
-      toastNotifications.addDanger({
+      toasts.addDanger({
         title: i18n.translate(
           'xpack.triggersActionsUI.sections.alertsList.bulkActionPopover.failedToUnmuteAlertsMessage',
           {
@@ -93,7 +100,7 @@ export const AlertQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
     try {
       await enableAlerts(selectedItems);
     } catch (e) {
-      toastNotifications.addDanger({
+      toasts.addDanger({
         title: i18n.translate(
           'xpack.triggersActionsUI.sections.alertsList.bulkActionPopover.failedToEnableAlertsMessage',
           {
@@ -113,7 +120,7 @@ export const AlertQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
     try {
       await disableAlerts(selectedItems);
     } catch (e) {
-      toastNotifications.addDanger({
+      toasts.addDanger({
         title: i18n.translate(
           'xpack.triggersActionsUI.sections.alertsList.bulkActionPopover.failedToDisableAlertsMessage',
           {
@@ -133,7 +140,7 @@ export const AlertQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
     try {
       setAlertsToDelete(selectedItems.map((selected: any) => selected.id));
     } catch (e) {
-      toastNotifications.addDanger({
+      toasts.addDanger({
         title: i18n.translate(
           'xpack.triggersActionsUI.sections.alertsList.bulkActionPopover.failedToDeleteAlertsMessage',
           {
@@ -154,7 +161,7 @@ export const AlertQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
           <EuiButtonEmpty
             onClick={onmMuteAllClick}
             isLoading={isMutingAlerts}
-            isDisabled={isPerformingAction}
+            isDisabled={isPerformingAction || hasDisabledByLicenseAlertTypes}
             data-test-subj="muteAll"
           >
             <FormattedMessage
@@ -169,7 +176,7 @@ export const AlertQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
           <EuiButtonEmpty
             onClick={onUnmuteAllClick}
             isLoading={isUnmutingAlerts}
-            isDisabled={isPerformingAction}
+            isDisabled={isPerformingAction || hasDisabledByLicenseAlertTypes}
             data-test-subj="unmuteAll"
           >
             <FormattedMessage
@@ -184,7 +191,7 @@ export const AlertQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
           <EuiButtonEmpty
             onClick={onEnableAllClick}
             isLoading={isEnablingAlerts}
-            isDisabled={isPerformingAction}
+            isDisabled={isPerformingAction || hasDisabledByLicenseAlertTypes}
             data-test-subj="enableAll"
           >
             <FormattedMessage
@@ -199,7 +206,7 @@ export const AlertQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
           <EuiButtonEmpty
             onClick={onDisableAllClick}
             isLoading={isDisablingAlerts}
-            isDisabled={isPerformingAction}
+            isDisabled={isPerformingAction || hasDisabledByLicenseAlertTypes}
             data-test-subj="disableAll"
           >
             <FormattedMessage
@@ -231,11 +238,11 @@ export const AlertQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
 
 export const AlertQuickEditButtonsWithApi = withBulkAlertOperations(AlertQuickEditButtons);
 
-function isAlertDisabled(alert: Alert) {
+function isAlertDisabled(alert: AlertTableItem) {
   return alert.enabled === false;
 }
 
-function isAlertMuted(alert: Alert) {
+function isAlertMuted(alert: AlertTableItem) {
   return alert.muteAll === true;
 }
 

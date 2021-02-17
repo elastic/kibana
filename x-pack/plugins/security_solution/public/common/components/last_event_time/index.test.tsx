@@ -1,11 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
-
+import '../../../common/mock/formatted_relative';
 import { getEmptyValue } from '../empty_value';
 import { LastEventIndexKey } from '../../../../common/search_strategy';
 import { mockLastEventTimeQuery } from '../../containers/events/last_event_time/mock';
@@ -57,7 +58,7 @@ describe('Last Event Time Stat', () => {
         <LastEventTime docValueFields={[]} indexKey={LastEventIndexKey.hosts} indexNames={[]} />
       </TestProviders>
     );
-    expect(wrapper.html()).toBe('Last event: <span class="euiToolTipAnchor">12 minutes ago</span>');
+    expect(wrapper.html()).toBe('Last event: <span class="euiToolTipAnchor">20 hours ago</span>');
   });
   test('Bad date time string', async () => {
     (useTimelineLastEventTime as jest.Mock).mockReturnValue([

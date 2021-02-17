@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FC } from 'react';
@@ -12,7 +13,10 @@ import { AppMountParameters, CoreStart, HttpStart } from 'kibana/public';
 
 import { Storage } from '../../../../../src/plugins/kibana_utils/public';
 
-import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
+import {
+  KibanaContextProvider,
+  RedirectAppLinks,
+} from '../../../../../src/plugins/kibana_react/public';
 import { setDependencyCache, clearCache } from './util/dependency_cache';
 import { setLicenseCache } from './license';
 import { MlSetupDependencies, MlStartDependencies } from '../plugin';
@@ -21,7 +25,6 @@ import { MlRouter } from './routing';
 import { mlApiServicesProvider } from './services/ml_api_service';
 import { HttpService } from './services/http_service';
 import { ML_APP_URL_GENERATOR, ML_PAGES } from '../../common/constants/ml_url_generator';
-
 export type MlDependencies = Omit<MlSetupDependencies, 'share' | 'indexPatternManagement'> &
   MlStartDependencies;
 
@@ -74,19 +77,27 @@ const App: FC<AppProps> = ({ coreStart, deps, appMountParams }) => {
     data: deps.data,
     security: deps.security,
     licenseManagement: deps.licenseManagement,
+    lens: deps.lens,
     storage: localStorage,
+    embeddable: deps.embeddable,
+    maps: deps.maps,
+    triggersActionsUi: deps.triggersActionsUi,
     ...coreStart,
   };
 
   const I18nContext = coreStart.i18n.Context;
   return (
-    <I18nContext>
-      <KibanaContextProvider
-        services={{ ...services, mlServices: getMlGlobalServices(coreStart.http) }}
-      >
-        <MlRouter pageDeps={pageDeps} />
-      </KibanaContextProvider>
-    </I18nContext>
+    /** RedirectAppLinks intercepts all <a> tags to use navigateToUrl
+     * avoiding full page reload **/
+    <RedirectAppLinks application={coreStart.application}>
+      <I18nContext>
+        <KibanaContextProvider
+          services={{ ...services, mlServices: getMlGlobalServices(coreStart.http) }}
+        >
+          <MlRouter pageDeps={pageDeps} />
+        </KibanaContextProvider>
+      </I18nContext>
+    </RedirectAppLinks>
   );
 };
 
@@ -112,9 +123,8 @@ export const renderApp = (
     http: coreStart.http,
     security: deps.security,
     urlGenerators: deps.share.urlGenerators,
+    maps: deps.maps,
   });
-
-  deps.kibanaLegacy.loadFontAwesome();
 
   appMountParams.onAppLeave((actions) => actions.default());
 

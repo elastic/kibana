@@ -1,12 +1,23 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { schema } from '@kbn/config-schema';
+import { i18n } from '@kbn/i18n';
+import {
+  AlertType,
+  AlertInstanceState,
+  AlertInstanceContext,
+  ActionGroupIdsOf,
+} from '../../../../../alerts/server';
 import {
   createInventoryMetricThresholdExecutor,
   FIRED_ACTIONS,
+  FIRED_ACTIONS_ID,
+  WARNING_ACTIONS,
 } from './inventory_metric_threshold_executor';
 import { METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID, Comparator } from './types';
 import { InfraBackendLibs } from '../../infra_types';
@@ -27,6 +38,8 @@ const condition = schema.object({
   timeUnit: schema.string(),
   timeSize: schema.number(),
   metric: schema.string(),
+  warningThreshold: schema.maybe(schema.arrayOf(schema.number())),
+  warningComparator: schema.maybe(oneOfLiterals(Object.values(Comparator))),
   customMetric: schema.maybe(
     schema.object({
       type: schema.literal('custom'),
@@ -38,9 +51,26 @@ const condition = schema.object({
   ),
 });
 
-export const registerMetricInventoryThresholdAlertType = (libs: InfraBackendLibs) => ({
+export type InventoryMetricThresholdAllowedActionGroups = ActionGroupIdsOf<
+  typeof FIRED_ACTIONS | typeof WARNING_ACTIONS
+>;
+
+export const registerMetricInventoryThresholdAlertType = (
+  libs: InfraBackendLibs
+): AlertType<
+  /**
+   * TODO: Remove this use of `any` by utilizing a proper type
+   */
+  Record<string, any>,
+  Record<string, any>,
+  AlertInstanceState,
+  AlertInstanceContext,
+  InventoryMetricThresholdAllowedActionGroups
+> => ({
   id: METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
-  name: 'Inventory',
+  name: i18n.translate('xpack.infra.metrics.inventory.alertName', {
+    defaultMessage: 'Inventory',
+  }),
   validate: {
     params: schema.object(
       {
@@ -55,9 +85,10 @@ export const registerMetricInventoryThresholdAlertType = (libs: InfraBackendLibs
       { unknowns: 'allow' }
     ),
   },
-  defaultActionGroupId: FIRED_ACTIONS.id,
-  actionGroups: [FIRED_ACTIONS],
+  defaultActionGroupId: FIRED_ACTIONS_ID,
+  actionGroups: [FIRED_ACTIONS, WARNING_ACTIONS],
   producer: 'infrastructure',
+  minimumLicenseRequired: 'basic',
   executor: createInventoryMetricThresholdExecutor(libs),
   actionVariables: {
     context: [

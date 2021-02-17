@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { useState, useEffect, useRef } from 'react';
@@ -65,6 +66,7 @@ export const useGetIncidentTypes = ({
         }
       } catch (error) {
         if (!didCancel) {
+          setIsLoading(false);
           toastNotifications.addDanger({
             title: i18n.INCIDENT_TYPES_API_ERROR,
             text: error.message,

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -32,7 +33,7 @@ export function AlertDetailsPageProvider({ getService }: FtrProviderContext) {
       const $ = await table.parseDomContent();
       return $.findTestSubjects('alert-instance-row')
         .toArray()
-        .map((row) => {
+        .map((row: CheerioElement) => {
           return {
             instance: $(row)
               .findTestSubject('alertInstancesTableCell-instance')
@@ -86,7 +87,7 @@ export function AlertDetailsPageProvider({ getService }: FtrProviderContext) {
           $.findTestSubjects('alert-instance-row')
             .toArray()
             .filter(
-              (row) =>
+              (row: CheerioElement) =>
                 $(row)
                   .findTestSubject('alertInstancesTableCell-instance')
                   .find('.euiTableCellContent')

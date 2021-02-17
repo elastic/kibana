@@ -18,7 +18,10 @@
   "severity": "low",
   "tags": [
     "Elastic",
-    "Linux"
+    "Host",
+    "Linux",
+    "Threat Detection",
+    "Privilege Escalation"
   ],
   "threat": [
     {
@@ -30,28 +33,30 @@
       },
       "technique": [
         {
-          "id": "T1166",
-          "name": "Setuid and Setgid",
-          "reference": "https://attack.mitre.org/techniques/T1166/"
+          "id": "T1548",
+          "name": "Abuse Elevation Control Mechanism",
+          "reference": "https://attack.mitre.org/techniques/T1548/",
+          "subtechnique": [
+            {
+              "id": "T1548.001",
+              "name": "Setuid and Setgid",
+              "reference": "https://attack.mitre.org/techniques/T1548/001/"
+            }
+          ]
         }
       ]
     },
     {
       "framework": "MITRE ATT&CK",
       "tactic": {
-        "id": "TA0004",
+        "id": "TA0003",
         "name": "Persistence",
-        "reference": "https://attack.mitre.org/tactics/TA0004/"
+        "reference": "https://attack.mitre.org/tactics/TA0003/"
       },
-      "technique": [
-        {
-          "id": "T1166",
-          "name": "Setuid and Setgid",
-          "reference": "https://attack.mitre.org/techniques/T1166/"
-        }
-      ]
+      "technique": []
     }
   ],
+  "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 3
+  "version": 6
 }

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -14,10 +15,10 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
   const security = getService('security');
   const spaces = getService('spaces');
 
-  const expect404 = (result: any) => {
+  const expect403 = (result: any) => {
     expect(result.error).to.be(undefined);
     expect(result.response).not.to.be(undefined);
-    expect(result.response).to.have.property('statusCode', 404);
+    expect(result.response).to.have.property('statusCode', 403);
   };
 
   const expectResponse = (result: any) => {
@@ -62,7 +63,7 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
         });
 
         const pingsResult = await executePingsRequest(username, password);
-        expect404(pingsResult);
+        expect403(pingsResult);
       } finally {
         await security.role.delete(roleName);
         await security.user.delete(username);
@@ -137,7 +138,7 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
         });
 
         const pingsResult = await executePingsRequest(username, password);
-        expect404(pingsResult);
+        expect403(pingsResult);
       } finally {
         await security.role.delete(roleName);
         await security.user.delete(username);
@@ -208,7 +209,7 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
 
       it(`user_1 can't access APIs in space_2`, async () => {
         const pingsResult = await executePingsRequest(username, password);
-        expect404(pingsResult);
+        expect403(pingsResult);
       });
     });
   });

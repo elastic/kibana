@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -13,16 +14,13 @@ export const healthStatusMessageAriaLabel = i18n.translate(
   }
 );
 
-export const upLabel = i18n.translate('xpack.uptime.monitorStatusBar.healthStatusMessage.upLabel', {
-  defaultMessage: 'Up',
+export const typeLabel = i18n.translate('xpack.uptime.monitorStatusBar.type.label', {
+  defaultMessage: 'Type',
 });
 
-export const downLabel = i18n.translate(
-  'xpack.uptime.monitorStatusBar.healthStatusMessage.downLabel',
-  {
-    defaultMessage: 'Down',
-  }
-);
+export const typeAriaLabel = i18n.translate('xpack.uptime.monitorStatusBar.type.ariaLabel', {
+  defaultMessage: 'Monitor type',
+});
 
 export const monitorUrlLinkAriaLabel = i18n.translate(
   'xpack.uptime.monitorStatusBar.monitorUrlLinkAriaLabel',

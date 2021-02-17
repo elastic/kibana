@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { Observable } from 'rxjs';
@@ -180,12 +181,14 @@ describe('Transaction duration anomaly alert', () => {
                     transaction_types: {
                       buckets: [{ key: 'type-foo' }],
                     },
+                    record_avg: { value: 80 },
                   },
                   {
                     key: 'bar',
                     transaction_types: {
                       buckets: [{ key: 'type-bar' }],
                     },
+                    record_avg: { value: 20 },
                   },
                 ],
               },
@@ -223,11 +226,15 @@ describe('Transaction duration anomaly alert', () => {
         serviceName: 'foo',
         transactionType: 'type-foo',
         environment: 'production',
+        threshold: 'minor',
+        thresholdValue: 'critical',
       });
       expect(scheduleActions).toHaveBeenCalledWith('threshold_met', {
         serviceName: 'bar',
         transactionType: 'type-bar',
         environment: 'production',
+        threshold: 'minor',
+        thresholdValue: 'warning',
       });
     });
 
@@ -267,7 +274,10 @@ describe('Transaction duration anomaly alert', () => {
             hits: { total: { value: 2 } },
             aggregations: {
               services: {
-                buckets: [{ key: 'foo' }, { key: 'bar' }],
+                buckets: [
+                  { key: 'foo', record_avg: { value: 80 } },
+                  { key: 'bar', record_avg: { value: 20 } },
+                ],
               },
             },
           }),
@@ -305,21 +315,29 @@ describe('Transaction duration anomaly alert', () => {
         serviceName: 'foo',
         transactionType: undefined,
         environment: 'production',
+        threshold: 'minor',
+        thresholdValue: 'critical',
       });
       expect(scheduleActions).toHaveBeenCalledWith('threshold_met', {
         serviceName: 'bar',
         transactionType: undefined,
         environment: 'production',
+        threshold: 'minor',
+        thresholdValue: 'warning',
       });
       expect(scheduleActions).toHaveBeenCalledWith('threshold_met', {
         serviceName: 'foo',
         transactionType: undefined,
         environment: 'testing',
+        threshold: 'minor',
+        thresholdValue: 'critical',
       });
       expect(scheduleActions).toHaveBeenCalledWith('threshold_met', {
         serviceName: 'bar',
         transactionType: undefined,
         environment: 'testing',
+        threshold: 'minor',
+        thresholdValue: 'warning',
       });
     });
   });

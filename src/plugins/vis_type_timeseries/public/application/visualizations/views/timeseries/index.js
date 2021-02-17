@@ -1,25 +1,16 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React, { useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
+import { i18n } from '@kbn/i18n';
+import { labelDateFormatter } from '../../../components/lib/label_date_formatter';
 
 import {
   Axis,
@@ -33,7 +24,7 @@ import {
 } from '@elastic/charts';
 import { EuiIcon } from '@elastic/eui';
 import { getTimezone } from '../../../lib/get_timezone';
-import { eventBus, ACTIVE_CURSOR } from '../../lib/active_cursor';
+import { activeCursor$ } from '../../lib/active_cursor';
 import { getUISettings, getChartsSetup } from '../../../../services';
 import { GRID_LINE_CONFIG, ICON_TYPES_MAP, STACKED_OPTIONS } from '../../constants';
 import { AreaSeriesDecorator } from './decorators/area_decorator';
@@ -53,7 +44,7 @@ const generateAnnotationData = (values, formatter) =>
 const decorateFormatter = (formatter) => ({ value }) => formatter(value);
 
 const handleCursorUpdate = (cursor) => {
-  eventBus.trigger(ACTIVE_CURSOR, cursor);
+  activeCursor$.next(cursor);
 };
 
 export const TimeSeries = ({
@@ -70,19 +61,20 @@ export const TimeSeries = ({
   annotations,
 }) => {
   const chartRef = useRef();
-  const updateCursor = (_, cursor) => {
-    if (chartRef.current) {
-      chartRef.current.dispatchExternalPointerEvent(cursor);
-    }
-  };
 
   useEffect(() => {
-    eventBus.on(ACTIVE_CURSOR, updateCursor);
+    const updateCursor = (cursor) => {
+      if (chartRef.current) {
+        chartRef.current.dispatchExternalPointerEvent(cursor);
+      }
+    };
+
+    const subscription = activeCursor$.subscribe(updateCursor);
 
     return () => {
-      eventBus.off(ACTIVE_CURSOR, undefined, updateCursor);
+      subscription.unsubscribe();
     };
-  }, []); // eslint-disable-line
+  }, []);
 
   const tooltipFormatter = decorateFormatter(xAxisFormatter);
   const uiSettings = getUISettings();
@@ -95,7 +87,7 @@ export const TimeSeries = ({
   // If the color isn't configured by the user, use the color mapping service
   // to assign a color from the Kibana palette. Colors will be shared across the
   // session, including dashboards.
-  const { colors, theme: themeService } = getChartsSetup();
+  const { legacyColors: colors, theme: themeService } = getChartsSetup();
   const baseTheme = getBaseTheme(themeService.useChartsBaseTheme(), backgroundColor);
 
   colors.mappedColors.mapKeys(series.filter(({ color }) => !color).map(({ label }) => label));
@@ -139,6 +131,7 @@ export const TimeSeries = ({
           type: tooltipMode === 'show_focused' ? TooltipType.Follow : TooltipType.VerticalCursor,
           headerFormatter: tooltipFormatter,
         }}
+        externalPointerEvents={{ tooltip: { visible: false } }}
       />
 
       {annotations.map(({ id, data, icon, color }) => {
@@ -163,6 +156,7 @@ export const TimeSeries = ({
           {
             id,
             label,
+            labelFormatted,
             bars,
             lines,
             data,
@@ -173,9 +167,9 @@ export const TimeSeries = ({
             color,
             stack,
             points,
-            useDefaultGroupDomain,
             y1AccessorFormat,
             y0AccessorFormat,
+            tickFormat,
           },
           sortIndex
         ) => {
@@ -185,14 +179,22 @@ export const TimeSeries = ({
           const key = `${id}-${label}`;
           // Only use color mapping if there is no color from the server
           const finalColor = color ?? colors.mappedColors.mapping[label];
-
+          let seriesName = label.toString();
+          if (labelFormatted) {
+            seriesName = labelDateFormatter(labelFormatted);
+          }
           if (bars?.show) {
             return (
               <BarSeriesDecorator
                 key={key}
                 seriesId={id}
                 seriesGroupId={groupId}
-                name={label.toString()}
+                name={
+                  seriesName ||
+                  i18n.translate('visTypeTimeseries.emptyTextValue', {
+                    defaultMessage: '(empty)',
+                  })
+                }
                 data={data}
                 hideInLegend={hideInLegend}
                 bars={bars}
@@ -203,10 +205,10 @@ export const TimeSeries = ({
                 yScaleType={yScaleType}
                 timeZone={timeZone}
                 enableHistogramMode={isStacked}
-                useDefaultGroupDomain={useDefaultGroupDomain}
                 sortIndex={sortIndex}
                 y1AccessorFormat={y1AccessorFormat}
                 y0AccessorFormat={y0AccessorFormat}
+                tickFormat={tickFormat}
               />
             );
           }
@@ -217,7 +219,12 @@ export const TimeSeries = ({
                 key={key}
                 seriesId={id}
                 seriesGroupId={groupId}
-                name={label.toString()}
+                name={
+                  seriesName ||
+                  i18n.translate('visTypeTimeseries.emptyTextValue', {
+                    defaultMessage: '(empty)',
+                  })
+                }
                 data={data}
                 hideInLegend={hideInLegend}
                 lines={lines}
@@ -229,10 +236,10 @@ export const TimeSeries = ({
                 yScaleType={yScaleType}
                 timeZone={timeZone}
                 enableHistogramMode={isStacked}
-                useDefaultGroupDomain={useDefaultGroupDomain}
                 sortIndex={sortIndex}
                 y1AccessorFormat={y1AccessorFormat}
                 y0AccessorFormat={y0AccessorFormat}
+                tickFormat={tickFormat}
               />
             );
           }

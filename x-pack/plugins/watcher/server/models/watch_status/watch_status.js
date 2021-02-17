@@ -1,11 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { get, map, forEach, max } from 'lodash';
-import { badRequest } from 'boom';
+import { get, map, forEach, maxBy } from 'lodash';
+import { badRequest } from '@hapi/boom';
 import { getMoment } from '../../../common/lib/get_moment';
 import { ActionStatus } from '../action_status';
 import { ACTION_STATES, WATCH_STATES, WATCH_STATE_COMMENTS } from '../../../common/constants';
@@ -119,7 +120,7 @@ export class WatchStatus {
   }
 
   get lastFired() {
-    const actionStatus = max(this.actionStatuses, 'lastExecution');
+    const actionStatus = maxBy(this.actionStatuses, 'lastExecution');
     if (actionStatus) {
       return actionStatus.lastExecution;
     }

@@ -1,54 +1,72 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { ByteSizeValue, schema, TypeOf } from '@kbn/config-schema';
 import { hostname } from 'os';
+import url from 'url';
 
 import { CspConfigType, CspConfig, ICspConfig } from '../csp';
+import { ExternalUrlConfig, IExternalUrlConfig } from '../external_url';
 import { SslConfig, sslSchema } from './ssl_config';
 
 const validBasePathRegex = /^\/.*[^\/]$/;
 const uuidRegexp = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-
+const hostURISchema = schema.uri({ scheme: ['http', 'https'] });
 const match = (regex: RegExp, errorMsg: string) => (str: string) =>
   regex.test(str) ? undefined : errorMsg;
 
 // before update to make sure it's in sync with validation rules in Legacy
 // https://github.com/elastic/kibana/blob/master/src/legacy/server/config/schema.js
 export const config = {
-  path: 'server',
+  path: 'server' as const,
   schema: schema.object(
     {
       name: schema.string({ defaultValue: () => hostname() }),
       autoListen: schema.boolean({ defaultValue: true }),
+      publicBaseUrl: schema.maybe(schema.uri({ scheme: ['http', 'https'] })),
       basePath: schema.maybe(
         schema.string({
           validate: match(validBasePathRegex, "must start with a slash, don't end with one"),
         })
       ),
-      cors: schema.boolean({ defaultValue: false }),
+      cors: schema.object(
+        {
+          enabled: schema.boolean({ defaultValue: false }),
+          allowCredentials: schema.boolean({ defaultValue: false }),
+          allowOrigin: schema.oneOf(
+            [
+              schema.arrayOf(hostURISchema, { minSize: 1 }),
+              schema.arrayOf(schema.literal('*'), { minSize: 1, maxSize: 1 }),
+            ],
+            {
+              defaultValue: ['*'],
+            }
+          ),
+        },
+        {
+          validate(value) {
+            if (value.allowCredentials === true && value.allowOrigin.includes('*')) {
+              return 'Cannot specify wildcard origin "*" with "credentials: true". Please provide a list of allowed origins.';
+            }
+          },
+        }
+      ),
       customResponseHeaders: schema.recordOf(schema.string(), schema.any(), {
         defaultValue: {},
       }),
       host: schema.string({
         defaultValue: 'localhost',
         hostname: true,
+        validate(value) {
+          if (value === '0') {
+            return 'value 0 is not a valid hostname (use "0.0.0.0" to bind to all interfaces)';
+          }
+        },
       }),
       maxPayload: schema.byteSize({
         defaultValue: '1048576b',
@@ -82,7 +100,7 @@ export const config = {
       ),
       xsrf: schema.object({
         disableProtection: schema.boolean({ defaultValue: false }),
-        whitelist: schema.arrayOf(
+        allowlist: schema.arrayOf(
           schema.string({ validate: match(/^\//, 'must start with a slash') }),
           { defaultValue: [] }
         ),
@@ -106,6 +124,17 @@ export const config = {
         if (!rawConfig.basePath && rawConfig.rewriteBasePath) {
           return 'cannot use [rewriteBasePath] when [basePath] is not specified';
         }
+
+        if (rawConfig.publicBaseUrl) {
+          const parsedUrl = url.parse(rawConfig.publicBaseUrl);
+          if (parsedUrl.query || parsedUrl.hash || parsedUrl.auth) {
+            return `[publicBaseUrl] may only contain a protocol, host, port, and pathname`;
+          }
+          if (parsedUrl.path !== (rawConfig.basePath ?? '/')) {
+            return `[publicBaseUrl] must contain the [basePath]: ${parsedUrl.path} !== ${rawConfig.basePath}`;
+          }
+        }
+
         if (!rawConfig.compression.enabled && rawConfig.compression.referrerWhitelist) {
           return 'cannot use [compression.referrerWhitelist] when [compression.enabled] is set to false';
         }
@@ -134,21 +163,31 @@ export class HttpConfig {
   public keepaliveTimeout: number;
   public socketTimeout: number;
   public port: number;
-  public cors: boolean | { origin: string[] };
+  public cors: {
+    enabled: boolean;
+    allowCredentials: boolean;
+    allowOrigin: string[];
+  };
   public customResponseHeaders: Record<string, string | string[]>;
   public maxPayload: ByteSizeValue;
   public basePath?: string;
+  public publicBaseUrl?: string;
   public rewriteBasePath: boolean;
   public ssl: SslConfig;
   public compression: { enabled: boolean; referrerWhitelist?: string[] };
   public csp: ICspConfig;
-  public xsrf: { disableProtection: boolean; whitelist: string[] };
+  public externalUrl: IExternalUrlConfig;
+  public xsrf: { disableProtection: boolean; allowlist: string[] };
   public requestId: { allowFromAnyIp: boolean; ipAllowlist: string[] };
 
   /**
    * @internal
    */
-  constructor(rawHttpConfig: HttpConfigType, rawCspConfig: CspConfigType) {
+  constructor(
+    rawHttpConfig: HttpConfigType,
+    rawCspConfig: CspConfigType,
+    rawExternalUrlConfig: ExternalUrlConfig
+  ) {
     this.autoListen = rawHttpConfig.autoListen;
     this.host = rawHttpConfig.host;
     this.port = rawHttpConfig.port;
@@ -165,12 +204,14 @@ export class HttpConfig {
     this.maxPayload = rawHttpConfig.maxPayload;
     this.name = rawHttpConfig.name;
     this.basePath = rawHttpConfig.basePath;
+    this.publicBaseUrl = rawHttpConfig.publicBaseUrl;
     this.keepaliveTimeout = rawHttpConfig.keepaliveTimeout;
     this.socketTimeout = rawHttpConfig.socketTimeout;
     this.rewriteBasePath = rawHttpConfig.rewriteBasePath;
     this.ssl = new SslConfig(rawHttpConfig.ssl || {});
     this.compression = rawHttpConfig.compression;
     this.csp = new CspConfig(rawCspConfig);
+    this.externalUrl = rawExternalUrlConfig;
     this.xsrf = rawHttpConfig.xsrf;
     this.requestId = rawHttpConfig.requestId;
   }

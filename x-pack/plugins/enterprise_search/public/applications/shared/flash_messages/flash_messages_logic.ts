@@ -1,25 +1,22 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { kea, MakeLogicType } from 'kea';
-import { ReactNode } from 'react';
-import { History } from 'history';
 
-export interface IFlashMessage {
-  type: 'success' | 'info' | 'warning' | 'error';
-  message: ReactNode;
-  description?: ReactNode;
-}
+import { KibanaLogic } from '../kibana';
 
-export interface IFlashMessagesValues {
+import { IFlashMessage } from './types';
+
+interface FlashMessagesValues {
   messages: IFlashMessage[];
   queuedMessages: IFlashMessage[];
   historyListener: Function | null;
 }
-export interface IFlashMessagesActions {
+interface FlashMessagesActions {
   setFlashMessages(messages: IFlashMessage | IFlashMessage[]): { messages: IFlashMessage[] };
   clearFlashMessages(): void;
   setQueuedMessages(messages: IFlashMessage | IFlashMessage[]): { messages: IFlashMessage[] };
@@ -30,7 +27,7 @@ export interface IFlashMessagesActions {
 const convertToArray = (messages: IFlashMessage | IFlashMessage[]) =>
   !Array.isArray(messages) ? [messages] : messages;
 
-export const FlashMessagesLogic = kea<MakeLogicType<IFlashMessagesValues, IFlashMessagesActions>>({
+export const FlashMessagesLogic = kea<MakeLogicType<FlashMessagesValues, FlashMessagesActions>>({
   path: ['enterprise_search', 'flash_messages_logic'],
   actions: {
     setFlashMessages: (messages) => ({ messages: convertToArray(messages) }),
@@ -61,10 +58,10 @@ export const FlashMessagesLogic = kea<MakeLogicType<IFlashMessagesValues, IFlash
       },
     ],
   },
-  events: ({ props, values, actions }) => ({
+  events: ({ values, actions }) => ({
     afterMount: () => {
       // On React Router navigation, clear previous flash messages and load any queued messages
-      const unlisten = props.history.listen(() => {
+      const unlisten = KibanaLogic.values.history.listen(() => {
         actions.clearFlashMessages();
         actions.setFlashMessages(values.queuedMessages);
         actions.clearQueuedMessages();
@@ -81,11 +78,7 @@ export const FlashMessagesLogic = kea<MakeLogicType<IFlashMessagesValues, IFlash
 /**
  * Mount/props helper
  */
-interface IFlashMessagesLogicProps {
-  history: History;
-}
-export const mountFlashMessagesLogic = (props: IFlashMessagesLogicProps) => {
-  FlashMessagesLogic(props);
+export const mountFlashMessagesLogic = () => {
   const unmount = FlashMessagesLogic.mount();
   return unmount;
 };

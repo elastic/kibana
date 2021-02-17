@@ -1,14 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { act } from 'react-dom/test-utils';
 
 import { INVALID_NAME_CHARS } from '../../public/application/services/validation/validate_repository';
 import { getRepository } from '../../test/fixtures';
 import { RepositoryType } from '../../common/types';
-import { setupEnvironment, pageHelpers, nextTick } from './helpers';
+import { setupEnvironment, pageHelpers, nextTick, delay } from './helpers';
 import { RepositoryAddTestBed } from './helpers/repository_add.helpers';
 
 const { setup } = pageHelpers.repositoryAdd;
@@ -176,7 +178,7 @@ describe('<RepositoryAdd />', () => {
 
           await act(async () => {
             actions.clickBackButton();
-            await nextTick(100);
+            await delay(100);
             component.update();
           });
         };

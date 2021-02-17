@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useState, FC } from 'react';
@@ -81,7 +82,6 @@ export const SettingsComponent: FC<Props> = ({ refs }) => {
           isOpen={isPopoverOpen}
           button={button}
           panelPaddingSize="none"
-          withTitle
           anchorPosition="upRight"
           insert={
             refs.stage.current ? { sibling: refs.stage.current, position: 'after' } : undefined

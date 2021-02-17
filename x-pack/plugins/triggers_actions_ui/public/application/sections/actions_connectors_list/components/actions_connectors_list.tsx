@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { Fragment, useState, useEffect } from 'react';
@@ -10,7 +11,6 @@ import {
   EuiSpacer,
   EuiButton,
   EuiLink,
-  EuiLoadingSpinner,
   EuiIconTip,
   EuiFlexGroup,
   EuiFlexItem,
@@ -18,47 +18,52 @@ import {
   EuiToolTip,
   EuiButtonIcon,
   EuiEmptyPrompt,
+  Criteria,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { omit } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { useAppDependencies } from '../../../app_context';
 import { loadAllActions, loadActionTypes, deleteActions } from '../../../lib/action_connector_api';
 import ConnectorAddFlyout from '../../action_connector_form/connector_add_flyout';
-import ConnectorEditFlyout from '../../action_connector_form/connector_edit_flyout';
-
-import { hasDeleteActionsCapability, hasSaveActionsCapability } from '../../../lib/capabilities';
+import ConnectorEditFlyout, {
+  EditConectorTabs,
+} from '../../action_connector_form/connector_edit_flyout';
+import {
+  hasDeleteActionsCapability,
+  hasSaveActionsCapability,
+  hasExecuteActionsCapability,
+} from '../../../lib/capabilities';
 import { DeleteModalConfirmation } from '../../../components/delete_modal_confirmation';
-import { ActionsConnectorsContextProvider } from '../../../context/actions_connectors_context';
 import { checkActionTypeEnabled } from '../../../lib/check_action_type_enabled';
 import './actions_connectors_list.scss';
 import { ActionConnector, ActionConnectorTableItem, ActionTypeIndex } from '../../../../types';
 import { EmptyConnectorsPrompt } from '../../../components/prompts/empty_connectors_prompt';
+import { useKibana } from '../../../../common/lib/kibana';
+import { DEFAULT_HIDDEN_ACTION_TYPES } from '../../../../';
+import { CenterJustifiedSpinner } from '../../../components/center_justified_spinner';
 
 export const ActionsConnectorsList: React.FunctionComponent = () => {
   const {
     http,
-    toastNotifications,
-    capabilities,
+    notifications: { toasts },
+    application: { capabilities },
     actionTypeRegistry,
-    docLinks,
-  } = useAppDependencies();
+  } = useKibana().services;
   const canDelete = hasDeleteActionsCapability(capabilities);
+  const canExecute = hasExecuteActionsCapability(capabilities);
   const canSave = hasSaveActionsCapability(capabilities);
 
   const [actionTypesIndex, setActionTypesIndex] = useState<ActionTypeIndex | undefined>(undefined);
   const [actions, setActions] = useState<ActionConnector[]>([]);
-  const [data, setData] = useState<ActionConnectorTableItem[]>([]);
+  const [pageIndex, setPageIndex] = useState<number>(0);
   const [selectedItems, setSelectedItems] = useState<ActionConnectorTableItem[]>([]);
   const [isLoadingActionTypes, setIsLoadingActionTypes] = useState<boolean>(false);
   const [isLoadingActions, setIsLoadingActions] = useState<boolean>(false);
-  const [editFlyoutVisible, setEditFlyoutVisibility] = useState<boolean>(false);
   const [addFlyoutVisible, setAddFlyoutVisibility] = useState<boolean>(false);
-  const [actionTypesList, setActionTypesList] = useState<Array<{ value: string; name: string }>>(
-    []
-  );
-  const [editedConnectorItem, setEditedConnectorItem] = useState<
-    ActionConnectorTableItem | undefined
-  >(undefined);
+  const [editConnectorProps, setEditConnectorProps] = useState<{
+    initialConnector?: ActionConnector;
+    tab?: EditConectorTabs;
+  }>({});
   const [connectorsToDelete, setConnectorsToDelete] = useState<string[]>([]);
 
   useEffect(() => {
@@ -77,7 +82,7 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
         }
         setActionTypesIndex(index);
       } catch (e) {
-        toastNotifications.addDanger({
+        toasts.addDanger({
           title: i18n.translate(
             'xpack.triggersActionsUI.sections.actionsConnectorsList.unableToLoadActionTypesMessage',
             { defaultMessage: 'Unable to load action types' }
@@ -90,30 +95,30 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  useEffect(() => {
-    // Avoid flickering before action types load
-    if (typeof actionTypesIndex === 'undefined') {
-      return;
-    }
-    // Update the data for the table
-    const updatedData = actions.map((action) => {
-      return {
-        ...action,
-        actionType: actionTypesIndex[action.actionTypeId]
-          ? actionTypesIndex[action.actionTypeId].name
-          : action.actionTypeId,
-      };
-    });
-    setData(updatedData);
-    // Update the action types list for the filter
-    const actionTypes = Object.values(actionTypesIndex)
-      .map((actionType) => ({
-        value: actionType.id,
-        name: `${actionType.name} (${getActionsCountByActionType(actions, actionType.id)})`,
-      }))
-      .sort((a, b) => a.name.localeCompare(b.name));
-    setActionTypesList(actionTypes);
-  }, [actions, actionTypesIndex]);
+  const actionConnectorTableItems: ActionConnectorTableItem[] = actionTypesIndex
+    ? actions
+        // TODO: Remove when cases connector is available across Kibana. Issue: https://github.com/elastic/kibana/issues/82502.
+        .filter((action) => !DEFAULT_HIDDEN_ACTION_TYPES.includes(action.actionTypeId))
+        .map((action) => {
+          return {
+            ...action,
+            actionType: actionTypesIndex[action.actionTypeId]
+              ? actionTypesIndex[action.actionTypeId].name
+              : action.actionTypeId,
+          };
+        })
+    : [];
+
+  const actionTypesList: Array<{ value: string; name: string }> = actionTypesIndex
+    ? Object.values(actionTypesIndex)
+        // TODO: Remove when cases connector is available across Kibana. Issue: https://github.com/elastic/kibana/issues/82502.
+        .filter((actionType) => !DEFAULT_HIDDEN_ACTION_TYPES.includes(actionType.id))
+        .map((actionType) => ({
+          value: actionType.id,
+          name: `${actionType.name} (${getActionsCountByActionType(actions, actionType.id)})`,
+        }))
+        .sort((a, b) => a.name.localeCompare(b.name))
+    : [];
 
   async function loadActions() {
     setIsLoadingActions(true);
@@ -121,7 +126,7 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
       const actionsResponse = await loadAllActions({ http });
       setActions(actionsResponse);
     } catch (e) {
-      toastNotifications.addDanger({
+      toasts.addDanger({
         title: i18n.translate(
           'xpack.triggersActionsUI.sections.actionsConnectorsList.unableToLoadActionsMessage',
           {
@@ -134,9 +139,8 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
     }
   }
 
-  async function editItem(connectorTableItem: ActionConnectorTableItem) {
-    setEditedConnectorItem(connectorTableItem);
-    setEditFlyoutVisibility(true);
+  async function editItem(actionConnector: ActionConnector, tab: EditConectorTabs) {
+    setEditConnectorProps({ initialConnector: actionConnector, tab });
   }
 
   const actionsTableColumns = [
@@ -159,9 +163,9 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
         const link = (
           <EuiLink
             data-test-subj={`edit${item.id}`}
-            onClick={() => editItem(item)}
+            onClick={() => editItem(item, EditConectorTabs.Configuration)}
             key={item.id}
-            disabled={actionTypesIndex ? !actionTypesIndex[item.actionTypeId].enabled : true}
+            disabled={actionTypesIndex ? !actionTypesIndex[item.actionTypeId]?.enabled : true}
           >
             {value}
           </EuiLink>
@@ -203,6 +207,11 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
               item={item}
               onDelete={() => setConnectorsToDelete([item.id])}
             />
+            <RunOperation
+              canExecute={canExecute && actionTypesIndex && actionTypesIndex[item.actionTypeId]}
+              item={item}
+              onRun={() => editItem(item, EditConectorTabs.Test)}
+            />
           </EuiFlexGroup>
         );
       },
@@ -212,13 +221,13 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
   const table = (
     <EuiInMemoryTable
       loading={isLoadingActions || isLoadingActionTypes}
-      items={data}
+      items={actionConnectorTableItems}
       sorting={true}
       itemId="id"
       columns={actionsTableColumns}
       rowProps={(item: ActionConnectorTableItem) => ({
         className:
-          !actionTypesIndex || !actionTypesIndex[item.actionTypeId].enabled
+          !actionTypesIndex || !actionTypesIndex[item.actionTypeId]?.enabled
             ? 'actConnectorsList__tableRowDisabled'
             : '',
         'data-test-subj': 'connectors-row',
@@ -226,12 +235,20 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
       cellProps={(item: ActionConnectorTableItem) => ({
         'data-test-subj': 'cell',
         className:
-          !actionTypesIndex || !actionTypesIndex[item.actionTypeId].enabled
+          !actionTypesIndex || !actionTypesIndex[item.actionTypeId]?.enabled
             ? 'actConnectorsList__tableCellDisabled'
             : '',
       })}
       data-test-subj="actionsTable"
-      pagination={true}
+      pagination={{
+        initialPageIndex: 0,
+        pageIndex,
+      }}
+      onTableChange={({ page }: Criteria<ActionConnectorTableItem>) => {
+        if (page) {
+          setPageIndex(page.index);
+        }
+      }}
       selection={
         canDelete
           ? {
@@ -339,41 +356,39 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
       />
       <EuiSpacer size="m" />
       {/* Render the view based on if there's data or if they can save */}
-      {(isLoadingActions || isLoadingActionTypes) && (
-        <EuiFlexGroup justifyContent="center" alignItems="center">
-          <EuiFlexItem grow={false}>
-            <EuiLoadingSpinner size="xl" />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      )}
-      {data.length !== 0 && table}
-      {data.length === 0 && canSave && !isLoadingActions && !isLoadingActionTypes && (
-        <EmptyConnectorsPrompt onCTAClicked={() => setAddFlyoutVisibility(true)} />
-      )}
-      {data.length === 0 && !canSave && <NoPermissionPrompt />}
-      <ActionsConnectorsContextProvider
-        value={{
-          actionTypeRegistry,
-          http,
-          capabilities,
-          toastNotifications,
-          reloadConnectors: loadActions,
-          docLinks,
-        }}
-      >
+      {(isLoadingActions || isLoadingActionTypes) && <CenterJustifiedSpinner />}
+      {actionConnectorTableItems.length !== 0 && table}
+      {actionConnectorTableItems.length === 0 &&
+        canSave &&
+        !isLoadingActions &&
+        !isLoadingActionTypes && (
+          <EmptyConnectorsPrompt onCTAClicked={() => setAddFlyoutVisibility(true)} />
+        )}
+      {actionConnectorTableItems.length === 0 && !canSave && <NoPermissionPrompt />}
+      {addFlyoutVisible ? (
         <ConnectorAddFlyout
-          addFlyoutVisible={addFlyoutVisible}
-          setAddFlyoutVisibility={setAddFlyoutVisibility}
+          onClose={() => {
+            setAddFlyoutVisibility(false);
+          }}
+          onTestConnector={(connector) => editItem(connector, EditConectorTabs.Test)}
+          reloadConnectors={loadActions}
+          actionTypeRegistry={actionTypeRegistry}
         />
-        {editedConnectorItem ? (
-          <ConnectorEditFlyout
-            key={editedConnectorItem.id}
-            initialConnector={editedConnectorItem}
-            editFlyoutVisible={editFlyoutVisible}
-            setEditFlyoutVisibility={setEditFlyoutVisibility}
-          />
-        ) : null}
-      </ActionsConnectorsContextProvider>
+      ) : null}
+      {editConnectorProps.initialConnector ? (
+        <ConnectorEditFlyout
+          key={`${editConnectorProps.initialConnector.id}${
+            editConnectorProps.tab ? `:${editConnectorProps.tab}` : ``
+          }`}
+          initialConnector={editConnectorProps.initialConnector}
+          tab={editConnectorProps.tab}
+          onClose={() => {
+            setEditConnectorProps(omit(editConnectorProps, 'initialConnector'));
+          }}
+          reloadConnectors={loadActions}
+          actionTypeRegistry={actionTypeRegistry}
+        />
+      ) : null}
     </section>
   );
 };
@@ -427,6 +442,41 @@ const DeleteOperation: React.FunctionComponent<{
           )}
           onClick={onDelete}
           iconType={'trash'}
+        />
+      </EuiToolTip>
+    </EuiFlexItem>
+  );
+};
+
+const RunOperation: React.FunctionComponent<{
+  item: ActionConnectorTableItem;
+  canExecute: boolean;
+  onRun: () => void;
+}> = ({ item, canExecute, onRun }) => {
+  return (
+    <EuiFlexItem grow={false}>
+      <EuiToolTip
+        content={
+          canExecute
+            ? i18n.translate(
+                'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.runConnectorDescription',
+                { defaultMessage: 'Run this connector' }
+              )
+            : i18n.translate(
+                'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.runConnectorDisabledDescription',
+                { defaultMessage: 'Unable to run connectors' }
+              )
+        }
+      >
+        <EuiButtonIcon
+          isDisabled={!canExecute}
+          data-test-subj="runConnector"
+          aria-label={i18n.translate(
+            'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.runConnectorName',
+            { defaultMessage: 'Run' }
+          )}
+          onClick={onRun}
+          iconType={'play'}
         />
       </EuiToolTip>
     </EuiFlexItem>

@@ -1,24 +1,12 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { intersection, isObject } from 'lodash';
-import { Auditor } from '../../audit_trail';
 import { Headers } from '../../http/router';
 import { LegacyAPICaller, LegacyCallAPIOptions } from './api_types';
 
@@ -47,8 +35,7 @@ export class LegacyScopedClusterClient implements ILegacyScopedClusterClient {
   constructor(
     private readonly internalAPICaller: LegacyAPICaller,
     private readonly scopedAPICaller: LegacyAPICaller,
-    private readonly headers?: Headers,
-    private readonly auditor?: Auditor
+    private readonly headers?: Headers
   ) {
     this.callAsCurrentUser = this.callAsCurrentUser.bind(this);
     this.callAsInternalUser = this.callAsInternalUser.bind(this);
@@ -58,6 +45,7 @@ export class LegacyScopedClusterClient implements ILegacyScopedClusterClient {
    * Calls specified `endpoint` with provided `clientParams` on behalf of the
    * Kibana internal user.
    * See {@link LegacyAPICaller}.
+   * @deprecated Use {@link IScopedClusterClient.asInternalUser}.
    *
    * @param endpoint - String descriptor of the endpoint e.g. `cluster.getSettings` or `ping`.
    * @param clientParams - A dictionary of parameters that will be passed directly to the Elasticsearch JS client.
@@ -68,13 +56,6 @@ export class LegacyScopedClusterClient implements ILegacyScopedClusterClient {
     clientParams: Record<string, any> = {},
     options?: LegacyCallAPIOptions
   ) {
-    if (this.auditor) {
-      this.auditor.add({
-        message: endpoint,
-        type: 'elasticsearch.call.internalUser',
-      });
-    }
-
     return this.internalAPICaller(endpoint, clientParams, options);
   }
 
@@ -82,6 +63,7 @@ export class LegacyScopedClusterClient implements ILegacyScopedClusterClient {
    * Calls specified `endpoint` with provided `clientParams` on behalf of the
    * user initiated request to the Kibana server (via HTTP request headers).
    * See {@link LegacyAPICaller}.
+   * @deprecated Use {@link IScopedClusterClient.asCurrentUser}.
    *
    * @param endpoint - String descriptor of the endpoint e.g. `cluster.getSettings` or `ping`.
    * @param clientParams - A dictionary of parameters that will be passed directly to the Elasticsearch JS client.
@@ -105,13 +87,6 @@ export class LegacyScopedClusterClient implements ILegacyScopedClusterClient {
       }
 
       clientParams.headers = Object.assign({}, clientParams.headers, this.headers);
-    }
-
-    if (this.auditor) {
-      this.auditor.add({
-        message: endpoint,
-        type: 'elasticsearch.call.currentUser',
-      });
     }
 
     return this.scopedAPICaller(endpoint, clientParams, options);

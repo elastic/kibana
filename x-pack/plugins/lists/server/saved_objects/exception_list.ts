@@ -1,14 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { SavedObjectsType } from 'kibana/server';
 
-export const exceptionListSavedObjectType = 'exception-list';
-export const exceptionListAgnosticSavedObjectType = 'exception-list-agnostic';
-export type SavedObjectType = 'exception-list' | 'exception-list-agnostic';
+import {
+  exceptionListAgnosticSavedObjectType,
+  exceptionListSavedObjectType,
+} from '../../common/types';
+
+import { migrations } from './migrations';
 
 /**
  * This is a super set of exception list and exception list items. The switch
@@ -43,9 +47,19 @@ export const commonMapping: SavedObjectsType['mappings'] = {
       type: 'keyword',
     },
     name: {
+      fields: {
+        text: {
+          type: 'text',
+        },
+      },
       type: 'keyword',
     },
     tags: {
+      fields: {
+        text: {
+          type: 'text',
+        },
+      },
       type: 'keyword',
     },
     tie_breaker_id: {
@@ -149,6 +163,9 @@ export const exceptionListItemMapping: SavedObjectsType['mappings'] = {
     item_id: {
       type: 'keyword',
     },
+    os_types: {
+      type: 'keyword',
+    },
   },
 };
 
@@ -163,6 +180,7 @@ const combinedMappings: SavedObjectsType['mappings'] = {
 export const exceptionListType: SavedObjectsType = {
   hidden: false,
   mappings: combinedMappings,
+  migrations,
   name: exceptionListSavedObjectType,
   namespaceType: 'single',
 };
@@ -170,6 +188,7 @@ export const exceptionListType: SavedObjectsType = {
 export const exceptionListAgnosticType: SavedObjectsType = {
   hidden: false,
   mappings: combinedMappings,
+  migrations,
   name: exceptionListAgnosticSavedObjectType,
   namespaceType: 'agnostic',
 };

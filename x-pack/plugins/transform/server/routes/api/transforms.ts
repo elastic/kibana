@@ -1,20 +1,25 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { schema } from '@kbn/config-schema';
 
 import {
+  ElasticsearchClient,
   KibanaResponseFactory,
   RequestHandler,
   RequestHandlerContext,
   SavedObjectsClientContract,
-  LegacyAPICaller,
 } from 'kibana/server';
 
+import {
+  TransformGetTransform,
+  TransformGetTransformStats,
+} from '@elastic/elasticsearch/api/requestParams';
 import { TRANSFORM_STATE } from '../../../common/constants';
-import { TransformId } from '../../../common/types/transform';
 import {
   transformIdParamSchema,
   ResponseStatus,
@@ -38,10 +43,8 @@ import {
 import {
   postTransformsUpdateRequestSchema,
   PostTransformsUpdateRequestSchema,
-  PostTransformsUpdateResponseSchema,
 } from '../../../common/api_schemas/update_transforms';
 import {
-  GetTransformsResponseSchema,
   postTransformsPreviewRequestSchema,
   PostTransformsPreviewRequestSchema,
   putTransformsRequestSchema,
@@ -56,17 +59,12 @@ import { addBasePath } from '../index';
 import { isRequestTimeout, fillResultsWithTimeouts, wrapError, wrapEsError } from './error_utils';
 import { registerTransformsAuditMessagesRoutes } from './transforms_audit_messages';
 import { IIndexPattern } from '../../../../../../src/plugins/data/common/index_patterns';
+import { isLatestTransform } from '../../../common/types/transform';
 
 enum TRANSFORM_ACTIONS {
   STOP = 'stop',
   START = 'start',
   DELETE = 'delete',
-}
-
-interface StopOptions {
-  transformId: TransformId;
-  force: boolean;
-  waitForCompletion?: boolean;
 }
 
 export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
@@ -83,14 +81,13 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
    */
   router.get(
     { path: addBasePath('transforms'), validate: false },
-    license.guardApiRoute(async (ctx, req, res) => {
-      const options = {};
+    license.guardApiRoute<TransformGetTransform, undefined, undefined>(async (ctx, req, res) => {
       try {
-        const transforms = await getTransforms(
-          options,
-          ctx.transform!.dataClient.callAsCurrentUser
-        );
-        return res.ok({ body: transforms });
+        const { body } = await ctx.core.elasticsearch.client.asCurrentUser.transform.getTransform({
+          size: 1000,
+          ...req.params,
+        });
+        return res.ok({ body });
       } catch (e) {
         return res.customError(wrapError(wrapEsError(e)));
       }
@@ -113,13 +110,11 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
     },
     license.guardApiRoute<TransformIdParamSchema, undefined, undefined>(async (ctx, req, res) => {
       const { transformId } = req.params;
-      const options = transformId !== undefined ? { transformId } : {};
       try {
-        const transforms = await getTransforms(
-          options,
-          ctx.transform!.dataClient.callAsCurrentUser
-        );
-        return res.ok({ body: transforms });
+        const { body } = await ctx.core.elasticsearch.client.asCurrentUser.transform.getTransform({
+          transform_id: transformId,
+        });
+        return res.ok({ body });
       } catch (e) {
         return res.customError(wrapError(wrapEsError(e)));
       }
@@ -135,18 +130,21 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
    */
   router.get(
     { path: addBasePath('transforms/_stats'), validate: false },
-    license.guardApiRoute(async (ctx, req, res) => {
-      const options = {};
-      try {
-        const stats = await ctx.transform!.dataClient.callAsCurrentUser(
-          'transform.getTransformsStats',
-          options
-        );
-        return res.ok({ body: stats });
-      } catch (e) {
-        return res.customError(wrapError(wrapEsError(e)));
+    license.guardApiRoute<TransformGetTransformStats, undefined, undefined>(
+      async (ctx, req, res) => {
+        try {
+          const {
+            body,
+          } = await ctx.core.elasticsearch.client.asCurrentUser.transform.getTransformStats({
+            size: 1000,
+            transform_id: '_all',
+          });
+          return res.ok({ body });
+        } catch (e) {
+          return res.customError(wrapError(wrapEsError(e)));
+        }
       }
-    })
+    )
   );
 
   /**
@@ -165,15 +163,13 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
     },
     license.guardApiRoute<TransformIdParamSchema, undefined, undefined>(async (ctx, req, res) => {
       const { transformId } = req.params;
-      const options = {
-        ...(transformId !== undefined ? { transformId } : {}),
-      };
       try {
-        const stats = await ctx.transform!.dataClient.callAsCurrentUser(
-          'transform.getTransformsStats',
-          options
-        );
-        return res.ok({ body: stats });
+        const {
+          body,
+        } = await ctx.core.elasticsearch.client.asCurrentUser.transform.getTransformStats({
+          transform_id: transformId,
+        });
+        return res.ok({ body });
       } catch (e) {
         return res.customError(wrapError(wrapEsError(e)));
       }
@@ -208,12 +204,14 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
           errors: [],
         };
 
-        await ctx
-          .transform!.dataClient.callAsCurrentUser('transform.createTransform', {
+        await ctx.core.elasticsearch.client.asCurrentUser.transform
+          .putTransform({
             body: req.body,
-            transformId,
+            transform_id: transformId,
           })
-          .then(() => response.transformsCreated.push({ transform: transformId }))
+          .then(() => {
+            response.transformsCreated.push({ transform: transformId });
+          })
           .catch((e) =>
             response.errors.push({
               id: transformId,
@@ -249,11 +247,14 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
         const { transformId } = req.params;
 
         try {
+          const {
+            body,
+          } = await ctx.core.elasticsearch.client.asCurrentUser.transform.updateTransform({
+            body: req.body,
+            transform_id: transformId,
+          });
           return res.ok({
-            body: (await ctx.transform!.dataClient.callAsCurrentUser('transform.updateTransform', {
-              body: req.body,
-              transformId,
-            })) as PostTransformsUpdateResponseSchema,
+            body,
           });
         } catch (e) {
           return res.customError(wrapError(e));
@@ -381,22 +382,14 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
     },
     license.guardApiRoute(async (ctx, req, res) => {
       try {
-        return res.ok({
-          body: await ctx.transform!.dataClient.callAsCurrentUser('search', req.body),
-        });
+        const { body } = await ctx.core.elasticsearch.client.asCurrentUser.search(req.body);
+        return res.ok({ body });
       } catch (e) {
         return res.customError(wrapError(wrapEsError(e)));
       }
     })
   );
 }
-
-const getTransforms = async (
-  options: { transformId?: string },
-  callAsCurrentUser: LegacyAPICaller
-): Promise<GetTransformsResponseSchema> => {
-  return await callAsCurrentUser('transform.getTransforms', options);
-};
 
 async function getIndexPatternId(
   indexName: string,
@@ -452,22 +445,22 @@ async function deleteTransforms(
       }
       // Grab destination index info to delete
       try {
-        const transformConfigs = await getTransforms(
-          { transformId },
-          ctx.transform!.dataClient.callAsCurrentUser
-        );
-        const transformConfig = transformConfigs.transforms[0];
+        const { body } = await ctx.core.elasticsearch.client.asCurrentUser.transform.getTransform({
+          transform_id: transformId,
+        });
+        const transformConfig = body.transforms[0];
         destinationIndex = Array.isArray(transformConfig.dest.index)
           ? transformConfig.dest.index[0]
           : transformConfig.dest.index;
       } catch (getTransformConfigError) {
-        transformDeleted.error = wrapError(getTransformConfigError);
+        transformDeleted.error = getTransformConfigError.meta.body.error;
         results[transformId] = {
           transformDeleted,
           destIndexDeleted,
           destIndexPatternDeleted,
           destinationIndex,
         };
+        // No need to perform further delete attempts
         continue;
       }
 
@@ -476,12 +469,12 @@ async function deleteTransforms(
         try {
           // If user does have privilege to delete the index, then delete the index
           // if no permission then return 403 forbidden
-          await ctx.transform!.dataClient.callAsCurrentUser('indices.delete', {
+          await ctx.core.elasticsearch.client.asCurrentUser.indices.delete({
             index: destinationIndex,
           });
           destIndexDeleted.success = true;
         } catch (deleteIndexError) {
-          destIndexDeleted.error = wrapError(deleteIndexError);
+          destIndexDeleted.error = deleteIndexError.meta.body.error;
         }
       }
 
@@ -497,19 +490,19 @@ async function deleteTransforms(
             destIndexPatternDeleted.success = true;
           }
         } catch (deleteDestIndexPatternError) {
-          destIndexPatternDeleted.error = wrapError(deleteDestIndexPatternError);
+          destIndexPatternDeleted.error = deleteDestIndexPatternError.meta.body.error;
         }
       }
 
       try {
-        await ctx.transform!.dataClient.callAsCurrentUser('transform.deleteTransform', {
-          transformId,
+        await ctx.core.elasticsearch.client.asCurrentUser.transform.deleteTransform({
+          transform_id: transformId,
           force: shouldForceDelete && needToForceDelete,
         });
         transformDeleted.success = true;
       } catch (deleteTransformJobError) {
-        transformDeleted.error = wrapError(deleteTransformJobError);
-        if (transformDeleted.error.statusCode === 403) {
+        transformDeleted.error = deleteTransformJobError.meta.body.error;
+        if (deleteTransformJobError.statusCode === 403) {
           return response.forbidden();
         }
       }
@@ -529,7 +522,7 @@ async function deleteTransforms(
           action: TRANSFORM_ACTIONS.DELETE,
         });
       }
-      results[transformId] = { transformDeleted: { success: false, error: JSON.stringify(e) } };
+      results[transformId] = { transformDeleted: { success: false, error: e.meta.body.error } };
     }
   }
   return results;
@@ -541,11 +534,37 @@ const previewTransformHandler: RequestHandler<
   PostTransformsPreviewRequestSchema
 > = async (ctx, req, res) => {
   try {
-    return res.ok({
-      body: await ctx.transform!.dataClient.callAsCurrentUser('transform.getTransformsPreview', {
-        body: req.body,
-      }),
+    const reqBody = req.body;
+    const { body } = await ctx.core.elasticsearch.client.asCurrentUser.transform.previewTransform({
+      body: reqBody,
     });
+    if (isLatestTransform(reqBody)) {
+      // for the latest transform mappings properties have to be retrieved from the source
+      const fieldCapsResponse = await ctx.core.elasticsearch.client.asCurrentUser.fieldCaps({
+        index: reqBody.source.index,
+        fields: '*',
+        include_unmapped: false,
+      });
+
+      const fieldNamesSet = new Set(Object.keys(fieldCapsResponse.body.fields));
+
+      const fields = Object.entries(
+        fieldCapsResponse.body.fields as Record<string, Record<string, { type: string }>>
+      ).reduce((acc, [fieldName, fieldCaps]) => {
+        const fieldDefinition = Object.values(fieldCaps)[0];
+        const isMetaField = fieldDefinition.type.startsWith('_') || fieldName === '_doc_count';
+        const isKeywordDuplicate =
+          fieldName.endsWith('.keyword') && fieldNamesSet.has(fieldName.split('.keyword')[0]);
+        if (isMetaField || isKeywordDuplicate) {
+          return acc;
+        }
+        acc[fieldName] = { ...fieldDefinition };
+        return acc;
+      }, {} as Record<string, { type: string }>);
+
+      body.generated_dest_index.mappings.properties = fields;
+    }
+    return res.ok({ body });
   } catch (e) {
     return res.customError(wrapError(wrapEsError(e)));
   }
@@ -559,8 +578,9 @@ const startTransformsHandler: RequestHandler<
   const transformsInfo = req.body;
 
   try {
+    const body = await startTransforms(transformsInfo, ctx.core.elasticsearch.client.asCurrentUser);
     return res.ok({
-      body: await startTransforms(transformsInfo, ctx.transform!.dataClient.callAsCurrentUser),
+      body,
     });
   } catch (e) {
     return res.customError(wrapError(wrapEsError(e)));
@@ -569,14 +589,16 @@ const startTransformsHandler: RequestHandler<
 
 async function startTransforms(
   transformsInfo: StartTransformsRequestSchema,
-  callAsCurrentUser: LegacyAPICaller
+  esClient: ElasticsearchClient
 ) {
   const results: StartTransformsResponseSchema = {};
 
   for (const transformInfo of transformsInfo) {
     const transformId = transformInfo.id;
     try {
-      await callAsCurrentUser('transform.startTransform', { transformId });
+      await esClient.transform.startTransform({
+        transform_id: transformId,
+      });
       results[transformId] = { success: true };
     } catch (e) {
       if (isRequestTimeout(e)) {
@@ -587,7 +609,7 @@ async function startTransforms(
           action: TRANSFORM_ACTIONS.START,
         });
       }
-      results[transformId] = { success: false, error: JSON.stringify(e) };
+      results[transformId] = { success: false, error: e.meta.body.error };
     }
   }
   return results;
@@ -602,7 +624,7 @@ const stopTransformsHandler: RequestHandler<
 
   try {
     return res.ok({
-      body: await stopTransforms(transformsInfo, ctx.transform!.dataClient.callAsCurrentUser),
+      body: await stopTransforms(transformsInfo, ctx.core.elasticsearch.client.asCurrentUser),
     });
   } catch (e) {
     return res.customError(wrapError(wrapEsError(e)));
@@ -611,21 +633,21 @@ const stopTransformsHandler: RequestHandler<
 
 async function stopTransforms(
   transformsInfo: StopTransformsRequestSchema,
-  callAsCurrentUser: LegacyAPICaller
+  esClient: ElasticsearchClient
 ) {
   const results: StopTransformsResponseSchema = {};
 
   for (const transformInfo of transformsInfo) {
     const transformId = transformInfo.id;
     try {
-      await callAsCurrentUser('transform.stopTransform', {
-        transformId,
+      await esClient.transform.stopTransform({
+        transform_id: transformId,
         force:
           transformInfo.state !== undefined
             ? transformInfo.state === TRANSFORM_STATE.FAILED
             : false,
-        waitForCompletion: true,
-      } as StopOptions);
+        wait_for_completion: true,
+      });
       results[transformId] = { success: true };
     } catch (e) {
       if (isRequestTimeout(e)) {
@@ -636,7 +658,7 @@ async function stopTransforms(
           action: TRANSFORM_ACTIONS.STOP,
         });
       }
-      results[transformId] = { success: false, error: JSON.stringify(e) };
+      results[transformId] = { success: false, error: e.meta.body.error };
     }
   }
   return results;

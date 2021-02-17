@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { map, last } from 'lodash';
@@ -23,44 +12,34 @@ import { IndexPattern } from './index_pattern';
 
 import { DuplicateField } from '../../../../kibana_utils/common';
 // @ts-expect-error
-import mockLogStashFields from '../../../../../fixtures/logstash_fields';
-import { stubbedSavedObjectIndexPattern } from '../../../../../fixtures/stubbed_saved_object_index_pattern';
+import mockLogStashFields from './fixtures/logstash_fields';
+import { stubbedSavedObjectIndexPattern } from './fixtures/stubbed_saved_object_index_pattern';
 import { IndexPatternField } from '../fields';
 
 import { fieldFormatsMock } from '../../field_formats/mocks';
 import { FieldFormat } from '../..';
+import { RuntimeField } from '../types';
 
 class MockFieldFormatter {}
 
+const runtimeFieldScript = {
+  type: 'keyword' as RuntimeField['type'],
+  script: {
+    source: "emit('hello world')",
+  },
+};
+
+const runtimeFieldMap = {
+  runtime_field: runtimeFieldScript,
+};
+
+const runtimeField = {
+  name: 'runtime_field',
+  runtimeField: runtimeFieldScript,
+  scripted: false,
+};
+
 fieldFormatsMock.getInstance = jest.fn().mockImplementation(() => new MockFieldFormatter()) as any;
-
-jest.mock('../../field_mapping', () => {
-  const originalModule = jest.requireActual('../../field_mapping');
-
-  return {
-    ...originalModule,
-    expandShorthand: jest.fn(() => ({
-      id: true,
-      title: true,
-      fieldFormatMap: {
-        _serialize: jest.fn().mockImplementation(() => {}),
-        _deserialize: jest.fn().mockImplementation(() => []),
-      },
-      fields: {
-        _serialize: jest.fn().mockImplementation(() => {}),
-        _deserialize: jest.fn().mockImplementation((fields) => fields),
-      },
-      sourceFilters: {
-        _serialize: jest.fn().mockImplementation(() => {}),
-        _deserialize: jest.fn().mockImplementation(() => undefined),
-      },
-      typeMeta: {
-        _serialize: jest.fn().mockImplementation(() => {}),
-        _deserialize: jest.fn().mockImplementation(() => undefined),
-      },
-    })),
-  };
-});
 
 // helper function to create index patterns
 function create(id: string) {
@@ -71,8 +50,15 @@ function create(id: string) {
   } = stubbedSavedObjectIndexPattern(id);
 
   return new IndexPattern({
-    spec: { id, type, version, timeFieldName, fields, title },
-    savedObjectsClient: {} as any,
+    spec: {
+      id,
+      type,
+      version,
+      timeFieldName,
+      fields: { ...fields, runtime_field: runtimeField },
+      title,
+      runtimeFieldMap,
+    },
     fieldFormats: fieldFormatsMock,
     shortDotsEnable: false,
     metaFields: [],
@@ -89,11 +75,14 @@ describe('IndexPattern', () => {
 
   describe('api', () => {
     test('should have expected properties', () => {
-      expect(indexPattern).toHaveProperty('popularizeField');
       expect(indexPattern).toHaveProperty('getScriptedFields');
       expect(indexPattern).toHaveProperty('getNonScriptedFields');
       expect(indexPattern).toHaveProperty('addScriptedField');
       expect(indexPattern).toHaveProperty('removeScriptedField');
+      expect(indexPattern).toHaveProperty('addScriptedField');
+      expect(indexPattern).toHaveProperty('removeScriptedField');
+      expect(indexPattern).toHaveProperty('addRuntimeField');
+      expect(indexPattern).toHaveProperty('removeRuntimeField');
 
       // properties
       expect(indexPattern).toHaveProperty('fields');
@@ -106,6 +95,7 @@ describe('IndexPattern', () => {
       expect(indexPattern.fields[0]).toHaveProperty('filterable');
       expect(indexPattern.fields[0]).toHaveProperty('sortable');
       expect(indexPattern.fields[0]).toHaveProperty('scripted');
+      expect(indexPattern.fields[0]).toHaveProperty('isMapped');
     });
   });
 
@@ -139,6 +129,12 @@ describe('IndexPattern', () => {
       expect(docValueFieldNames).toContain('utc_time');
     });
 
+    test('should return runtimeField', () => {
+      expect(indexPattern.getComputedFields().runtimeFields).toEqual({
+        runtime_field: runtimeFieldScript,
+      });
+    });
+
     test('should request date field doc values in date_time format', () => {
       const { docvalueFields } = indexPattern.getComputedFields();
       const timestampField = docvalueFields.find((field) => field.field === '@timestamp');
@@ -158,6 +154,7 @@ describe('IndexPattern', () => {
       const notScriptedNames = mockLogStashFields()
         .filter((item: IndexPatternField) => item.scripted === false)
         .map((item: IndexPatternField) => item.name);
+      notScriptedNames.push('runtime_field');
       const respNames = map(indexPattern.getNonScriptedFields(), 'name');
 
       expect(respNames).toEqual(notScriptedNames);
@@ -179,8 +176,7 @@ describe('IndexPattern', () => {
       await indexPattern.addScriptedField(
         scriptedField.name,
         scriptedField.script,
-        scriptedField.type,
-        'lang'
+        scriptedField.type
       );
 
       const scriptedFields = indexPattern.getScriptedFields();
@@ -206,10 +202,88 @@ describe('IndexPattern', () => {
       const scriptedField = last(scriptedFields) as any;
       expect.assertions(1);
       try {
-        await indexPattern.addScriptedField(scriptedField.name, "'new script'", 'string', 'lang');
+        await indexPattern.addScriptedField(scriptedField.name, "'new script'", 'string');
       } catch (e) {
         expect(e).toBeInstanceOf(DuplicateField);
       }
+    });
+  });
+
+  describe('setFieldFormat and deleteFieldFormaat', () => {
+    test('should persist changes', () => {
+      const formatter = {
+        toJSON: () => ({ id: 'bytes' }),
+      } as FieldFormat;
+      indexPattern.getFormatterForField = () => formatter;
+      indexPattern.setFieldFormat('bytes', { id: 'bytes' });
+      expect(indexPattern.toSpec().fieldFormats).toEqual({ bytes: { id: 'bytes' } });
+
+      indexPattern.deleteFieldFormat('bytes');
+      expect(indexPattern.toSpec().fieldFormats).toEqual({});
+    });
+  });
+
+  describe('addRuntimeField and removeRuntimeField', () => {
+    const runtime = {
+      type: 'keyword' as RuntimeField['type'],
+      script: {
+        source: "emit('hello world');",
+      },
+    };
+
+    beforeEach(() => {
+      const formatter = {
+        toJSON: () => ({ id: 'bytes' }),
+      } as FieldFormat;
+      indexPattern.getFormatterForField = () => formatter;
+    });
+
+    test('add and remove runtime field to existing field', () => {
+      indexPattern.addRuntimeField('@tags', runtime);
+      expect(indexPattern.toSpec().runtimeFieldMap).toEqual({
+        '@tags': runtime,
+        runtime_field: runtimeField.runtimeField,
+      });
+      expect(indexPattern.toSpec()!.fields!['@tags'].runtimeField).toEqual(runtime);
+
+      indexPattern.removeRuntimeField('@tags');
+      expect(indexPattern.toSpec().runtimeFieldMap).toEqual({
+        runtime_field: runtimeField.runtimeField,
+      });
+      expect(indexPattern.toSpec()!.fields!['@tags'].runtimeField).toBeUndefined();
+    });
+
+    test('add and remove runtime field as new field', () => {
+      indexPattern.addRuntimeField('new_field', runtime);
+      expect(indexPattern.toSpec().runtimeFieldMap).toEqual({
+        runtime_field: runtimeField.runtimeField,
+        new_field: runtime,
+      });
+      expect(indexPattern.toSpec()!.fields!.new_field.runtimeField).toEqual(runtime);
+
+      indexPattern.removeRuntimeField('new_field');
+      expect(indexPattern.toSpec().runtimeFieldMap).toEqual({
+        runtime_field: runtimeField.runtimeField,
+      });
+      expect(indexPattern.toSpec()!.fields!.new_field).toBeUndefined();
+    });
+  });
+
+  describe('getFormatterForField', () => {
+    test('should return the default one for empty objects', () => {
+      indexPattern.setFieldFormat('scriptedFieldWithEmptyFormatter', {});
+      expect(
+        indexPattern.getFormatterForField({
+          name: 'scriptedFieldWithEmptyFormatter',
+          type: 'number',
+          esTypes: ['long'],
+        })
+      ).toEqual(
+        expect.objectContaining({
+          convert: expect.any(Function),
+          getConverterFor: expect.any(Function),
+        })
+      );
     });
   });
 
@@ -230,7 +304,6 @@ describe('IndexPattern', () => {
       const spec = indexPattern.toSpec();
       const restoredPattern = new IndexPattern({
         spec,
-        savedObjectsClient: {} as any,
         fieldFormats: fieldFormatsMock,
         shortDotsEnable: false,
         metaFields: [],
@@ -239,53 +312,6 @@ describe('IndexPattern', () => {
       expect(restoredPattern.title).toEqual(indexPattern.title);
       expect(restoredPattern.timeFieldName).toEqual(indexPattern.timeFieldName);
       expect(restoredPattern.fields.length).toEqual(indexPattern.fields.length);
-      expect(restoredPattern.fieldFormatMap.bytes instanceof MockFieldFormatter).toEqual(true);
-    });
-  });
-
-  describe('popularizeField', () => {
-    test('should increment the popularity count by default', () => {
-      indexPattern.fields.forEach(async (field) => {
-        const oldCount = field.count || 0;
-
-        await indexPattern.popularizeField(field.name);
-
-        expect(field.count).toEqual(oldCount + 1);
-      });
-    });
-
-    test('should increment the popularity count', () => {
-      indexPattern.fields.forEach(async (field) => {
-        const oldCount = field.count || 0;
-        const incrementAmount = 4;
-
-        await indexPattern.popularizeField(field.name, incrementAmount);
-
-        expect(field.count).toEqual(oldCount + incrementAmount);
-      });
-    });
-
-    test('should decrement the popularity count', () => {
-      indexPattern.fields.forEach(async (field) => {
-        const oldCount = field.count || 0;
-        const incrementAmount = 4;
-        const decrementAmount = -2;
-
-        await indexPattern.popularizeField(field.name, incrementAmount);
-        await indexPattern.popularizeField(field.name, decrementAmount);
-
-        expect(field.count).toEqual(oldCount + incrementAmount + decrementAmount);
-      });
-    });
-
-    test('should not go below 0', () => {
-      indexPattern.fields.forEach(async (field) => {
-        const decrementAmount = -Number.MAX_VALUE;
-
-        await indexPattern.popularizeField(field.name, decrementAmount);
-
-        expect(field.count).toEqual(0);
-      });
     });
   });
 });

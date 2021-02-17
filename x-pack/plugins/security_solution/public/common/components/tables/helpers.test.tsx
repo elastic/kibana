@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -17,7 +18,6 @@ import {
 import { TestProviders } from '../../mock';
 import { getEmptyValue } from '../empty_value';
 import { useMountAppended } from '../../utils/use_mount_appended';
-
 describe('Table Helpers', () => {
   const items = ['item1', 'item2', 'item3'];
   const mount = useMountAppended();

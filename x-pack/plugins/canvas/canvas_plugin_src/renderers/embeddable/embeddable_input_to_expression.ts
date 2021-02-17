@@ -1,9 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+import { PaletteRegistry } from 'src/plugins/charts/public';
 import { EmbeddableTypes, EmbeddableInput } from '../../expression_types';
 import { toExpression as mapToExpression } from './input_type_to_expression/map';
 import { toExpression as visualizationToExpression } from './input_type_to_expression/visualization';
@@ -20,9 +22,10 @@ export const inputToExpressionTypeMap = {
 */
 export function embeddableInputToExpression(
   input: EmbeddableInput,
-  embeddableType: string
+  embeddableType: string,
+  palettes: PaletteRegistry
 ): string | undefined {
   if (inputToExpressionTypeMap[embeddableType]) {
-    return inputToExpressionTypeMap[embeddableType](input as any);
+    return inputToExpressionTypeMap[embeddableType](input as any, palettes);
   }
 }

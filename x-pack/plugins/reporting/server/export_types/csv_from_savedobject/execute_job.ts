@@ -1,10 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { KibanaRequest, RequestHandlerContext } from 'src/core/server';
+import { KibanaRequest } from 'src/core/server';
 import { CancellationToken } from '../../../common';
 import { CONTENT_TYPE_CSV, CSV_FROM_SAVEDOBJECT_JOB_TYPE } from '../../../common/constants';
 import { TaskRunResult } from '../../lib/tasks';
@@ -12,6 +13,7 @@ import { RunTaskFnFactory } from '../../types';
 import { createGenerateCsv } from '../csv/generate_csv';
 import { getGenerateCsvParams } from './lib/get_csv_job';
 import { JobPayloadPanelCsv } from './types';
+import type { ReportingRequestHandlerContext } from '../../types';
 
 /*
  * ImmediateExecuteFn receives the job doc payload because the payload was
@@ -20,7 +22,7 @@ import { JobPayloadPanelCsv } from './types';
 export type ImmediateExecuteFn = (
   jobId: null,
   job: JobPayloadPanelCsv,
-  context: RequestHandlerContext,
+  context: ReportingRequestHandlerContext,
   req: KibanaRequest
 ) => Promise<TaskRunResult>;
 
@@ -32,11 +34,10 @@ export const runTaskFnFactory: RunTaskFnFactory<ImmediateExecuteFn> = function e
   const logger = parentLogger.clone([CSV_FROM_SAVEDOBJECT_JOB_TYPE, 'execute-job']);
 
   return async function runTask(jobId, jobPayload, context, req) {
-    const jobLogger = logger.clone(['immediate']);
-    const generateCsv = createGenerateCsv(jobLogger);
+    const generateCsv = createGenerateCsv(logger);
     const { panel, visType } = jobPayload;
 
-    jobLogger.debug(`Execute job generating [${visType}] csv`);
+    logger.debug(`Execute job generating [${visType}] csv`);
 
     const savedObjectsClient = context.core.savedObjects.client;
     const uiSettingsClient = await reporting.getUiSettingsServiceFactory(savedObjectsClient);
@@ -54,11 +55,11 @@ export const runTaskFnFactory: RunTaskFnFactory<ImmediateExecuteFn> = function e
     );
 
     if (csvContainsFormulas) {
-      jobLogger.warn(`CSV may contain formulas whose values have been escaped`);
+      logger.warn(`CSV may contain formulas whose values have been escaped`);
     }
 
     if (maxSizeReached) {
-      jobLogger.warn(`Max size reached: CSV output truncated to ${size} bytes`);
+      logger.warn(`Max size reached: CSV output truncated to ${size} bytes`);
     }
 
     return {

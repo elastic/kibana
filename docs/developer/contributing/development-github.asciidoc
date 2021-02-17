@@ -25,7 +25,7 @@ Pull requests are made into the `master` branch and then backported when it is s
 * Breaking changes do not get backported and only go into `master`.
 * All non-breaking changes can be backported to the `<major>.x` branch.
 * Features should not be backported to a `<major>.<minor>` branch.
-* Bugs can be backported to a `<major>.<minor>` branch if the changes are safe and appropriate. Safety is a judgment call you make based on factors like the bug's severity, test coverage, confidence in the changes, etc. Your reasoning should be included in the pull request description.
+* Bug fixes can be backported to a `<major>.<minor>` branch if the changes are safe and appropriate. Safety is a judgment call you make based on factors like the bug's severity, test coverage, confidence in the changes, etc. Your reasoning should be included in the pull request description.
 * Documentation changes can be backported to any branch at any time.
 
 [discrete]

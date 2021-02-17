@@ -1,31 +1,21 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React from 'react';
 import { shallow } from 'enzyme';
 import { SolutionsSection } from './solutions_section';
+import { FeatureCatalogueCategory } from '../../../services';
 
 const solutionEntry1 = {
   id: 'kibana',
   title: 'Kibana',
   subtitle: 'Visualize & analyze',
-  descriptions: ['Analyze data in dashboards'],
+  appDescriptions: ['Analyze data in dashboards'],
   icon: 'logoKibana',
   path: 'kibana_landing_page',
   order: 1,
@@ -34,7 +24,8 @@ const solutionEntry2 = {
   id: 'solution-2',
   title: 'Solution two',
   subtitle: 'Subtitle for solution two',
-  descriptions: ['Example use case'],
+  description: 'Description for solution two',
+  appDescriptions: ['Example use case'],
   icon: 'empty',
   path: 'path-to-solution-two',
   order: 2,
@@ -43,7 +34,8 @@ const solutionEntry3 = {
   id: 'solution-3',
   title: 'Solution three',
   subtitle: 'Subtitle for solution three',
-  descriptions: ['Example use case'],
+  description: 'Description for solution three',
+  appDescriptions: ['Example use case'],
   icon: 'empty',
   path: 'path-to-solution-three',
   order: 3,
@@ -52,23 +44,64 @@ const solutionEntry4 = {
   id: 'solution-4',
   title: 'Solution four',
   subtitle: 'Subtitle for solution four',
-  descriptions: ['Example use case'],
+  description: 'Description for solution four',
+  appDescriptions: ['Example use case'],
   icon: 'empty',
   path: 'path-to-solution-four',
   order: 4,
 };
 
+const mockDirectories = [
+  {
+    id: 'dashboard',
+    title: 'Dashboard',
+    description: 'Description of dashboard',
+    icon: 'dashboardApp',
+    path: 'dashboard_landing_page',
+    showOnHomePage: false,
+    category: FeatureCatalogueCategory.DATA,
+  },
+  {
+    id: 'discover',
+    title: 'Discover',
+    description: 'Description of discover',
+    icon: 'discoverApp',
+    path: 'discover_landing_page',
+    showOnHomePage: false,
+    category: FeatureCatalogueCategory.DATA,
+  },
+  {
+    id: 'canvas',
+    title: 'Canvas',
+    description: 'Description of canvas',
+    icon: 'canvasApp',
+    path: 'canvas_landing_page',
+    showOnHomePage: false,
+    category: FeatureCatalogueCategory.DATA,
+  },
+];
+
 const addBasePathMock = (path: string) => (path ? path : 'path');
 
 describe('SolutionsSection', () => {
   test('only renders a spacer if no solutions are available', () => {
-    const component = shallow(<SolutionsSection addBasePath={addBasePathMock} solutions={[]} />);
+    const component = shallow(
+      <SolutionsSection
+        addBasePath={addBasePathMock}
+        solutions={[]}
+        directories={mockDirectories}
+      />
+    );
     expect(component).toMatchSnapshot();
   });
 
   test('renders a single solution', () => {
     const component = shallow(
-      <SolutionsSection addBasePath={addBasePathMock} solutions={[solutionEntry1]} />
+      <SolutionsSection
+        addBasePath={addBasePathMock}
+        solutions={[solutionEntry1]}
+        directories={mockDirectories}
+      />
     );
     expect(component).toMatchSnapshot();
   });
@@ -78,6 +111,7 @@ describe('SolutionsSection', () => {
       <SolutionsSection
         addBasePath={addBasePathMock}
         solutions={[solutionEntry1, solutionEntry2, solutionEntry3, solutionEntry4]}
+        directories={mockDirectories}
       />
     );
     expect(component).toMatchSnapshot();
@@ -87,6 +121,7 @@ describe('SolutionsSection', () => {
       <SolutionsSection
         addBasePath={addBasePathMock}
         solutions={[solutionEntry2, solutionEntry3, solutionEntry4]}
+        directories={mockDirectories}
       />
     );
     expect(component).toMatchSnapshot();

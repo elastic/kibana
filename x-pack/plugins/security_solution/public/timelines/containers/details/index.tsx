@@ -1,10 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { noop } from 'lodash/fp';
+import { isEmpty, noop } from 'lodash/fp';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import deepEqual from 'fast-deep-equal';
 
@@ -18,6 +19,7 @@ import {
   TimelineEventsDetailsStrategyResponse,
 } from '../../../../common/search_strategy';
 import { isCompleteResponse, isErrorResponse } from '../../../../../../../src/plugins/data/public';
+import { AbortError } from '../../../../../../../src/plugins/kibana_utils/common';
 export interface EventsArgs {
   detailsData: TimelineEventsDetailsItem[] | null;
 }
@@ -49,7 +51,11 @@ export const useTimelineEventsDetails = ({
   );
 
   const timelineDetailsSearch = useCallback(
-    (request: TimelineEventsDetailsRequestOptions) => {
+    (request: TimelineEventsDetailsRequestOptions | null) => {
+      if (request == null || skip || isEmpty(request.eventId)) {
+        return;
+      }
+
       let didCancel = false;
       const asyncSearch = async () => {
         abortCtrl.current = new AbortController();
@@ -80,8 +86,13 @@ export const useTimelineEventsDetails = ({
                 searchSubscription$.unsubscribe();
               }
             },
-            error: () => {
-              notifications.toasts.addDanger('Failed to run search');
+            error: (msg) => {
+              if (!didCancel) {
+                setLoading(false);
+              }
+              if (!(msg instanceof AbortError)) {
+                notifications.toasts.addDanger('Failed to run search');
+              }
             },
           });
       };
@@ -93,7 +104,7 @@ export const useTimelineEventsDetails = ({
         abortCtrl.current.abort();
       };
     },
-    [data.search, notifications.toasts]
+    [data.search, notifications.toasts, skip]
   );
 
   useEffect(() => {
@@ -105,17 +116,15 @@ export const useTimelineEventsDetails = ({
         eventId,
         factoryQueryType: TimelineEventsQueries.details,
       };
-      if (!skip && !deepEqual(prevRequest, myRequest)) {
+      if (!deepEqual(prevRequest, myRequest)) {
         return myRequest;
       }
       return prevRequest;
     });
-  }, [docValueFields, eventId, indexName, skip]);
+  }, [docValueFields, eventId, indexName]);
 
   useEffect(() => {
-    if (timelineDetailsRequest) {
-      timelineDetailsSearch(timelineDetailsRequest);
-    }
+    timelineDetailsSearch(timelineDetailsRequest);
   }, [timelineDetailsRequest, timelineDetailsSearch]);
 
   return [loading, timelineDetailsResponse];

@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import _ from 'lodash';
@@ -142,6 +131,17 @@ export class ListControl extends Control<PhraseFilterManager> {
       timeout: `${settings.autocompleteTimeout}ms`,
       terminate_after: Number(settings.autocompleteTerminateAfter),
     };
+
+    // dynamic options are only allowed on String fields but the setting defaults to true so it could
+    // be enabled for non-string fields (since UI input is hidden for non-string fields).
+    // If field is not string, then disable dynamic options.
+    const field = indexPattern?.fields
+      .getAll()
+      .find(({ name }) => name === this.controlParams.fieldName);
+    if (field && field.type !== 'string') {
+      this.options.dynamicOptions = false;
+    }
+
     const aggs = termsAgg({
       field: indexPattern.fields.getByName(fieldName),
       size: this.options.dynamicOptions ? null : _.get(this.options, 'size', 5),
@@ -213,27 +213,20 @@ export async function listControlFactory(
   deps: InputControlVisDependencies
 ) {
   const [, { data: dataPluginStart }] = await deps.core.getStartServices();
-  const indexPattern = await dataPluginStart.indexPatterns.get(controlParams.indexPattern);
-
-  // dynamic options are only allowed on String fields but the setting defaults to true so it could
-  // be enabled for non-string fields (since UI input is hidden for non-string fields).
-  // If field is not string, then disable dynamic options.
-  const field = indexPattern.fields.getAll().find(({ name }) => name === controlParams.fieldName);
-  if (field && field.type !== 'string') {
-    controlParams.options.dynamicOptions = false;
-  }
 
   const listControl = new ListControl(
     controlParams,
     new PhraseFilterManager(
       controlParams.id,
       controlParams.fieldName,
-      indexPattern,
+      controlParams.indexPattern,
+      dataPluginStart.indexPatterns,
       deps.data.query.filterManager
     ),
     useTimeFilter,
     dataPluginStart.search.searchSource,
     deps
   );
+  await listControl.filterManager.init();
   return listControl;
 }

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -37,7 +38,7 @@ export const getSavedObjectAttributesFromRepo = async (
  * Set saved objection attributes - used by telemetry route
  */
 
-interface IIncrementUICounter {
+interface IncrementUICounter {
   id: string; // Telemetry name
   savedObjects: SavedObjectsServiceStart;
   uiAction: string;
@@ -49,13 +50,13 @@ export async function incrementUICounter({
   savedObjects,
   uiAction,
   metric,
-}: IIncrementUICounter) {
+}: IncrementUICounter) {
   const internalRepository = savedObjects.createInternalRepository();
 
   await internalRepository.incrementCounter(
     id,
     id,
-    `${uiAction}.${metric}` // e.g., ui_viewed.setup_guide
+    [`${uiAction}.${metric}`] // e.g., ui_viewed.setup_guide
   );
 
   return { success: true };

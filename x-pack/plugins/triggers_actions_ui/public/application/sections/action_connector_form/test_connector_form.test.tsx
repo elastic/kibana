@@ -1,18 +1,23 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React, { lazy } from 'react';
 import { I18nProvider } from '@kbn/i18n/react';
-import { coreMock } from '../../../../../../../src/core/public/mocks';
 import TestConnectorForm from './test_connector_form';
 import { none, some } from 'fp-ts/lib/Option';
-import { ActionConnector, ValidationResult } from '../../../types';
+import {
+  ActionConnector,
+  ConnectorValidationResult,
+  GenericValidationResult,
+} from '../../../types';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
-import { ActionsConnectorsContextProvider } from '../../context/actions_connectors_context';
 import { EuiFormRow, EuiFieldText, EuiText, EuiLink, EuiForm, EuiSelect } from '@elastic/eui';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from '@kbn/test/jest';
+jest.mock('../../../common/lib/kibana');
 
 const mockedActionParamsFields = lazy(async () => ({
   default() {
@@ -48,39 +53,20 @@ const actionType = {
   id: 'my-action-type',
   iconClass: 'test',
   selectMessage: 'test',
-  validateConnector: (): ValidationResult => {
-    return { errors: {} };
+  validateConnector: (): ConnectorValidationResult<unknown, unknown> => {
+    return {};
   },
-  validateParams: (): ValidationResult => {
+  validateParams: (): GenericValidationResult<unknown> => {
     const validationResult = { errors: {} };
     return validationResult;
   },
   actionConnectorFields: null,
   actionParamsFields: mockedActionParamsFields,
 };
+const actionTypeRegistry = actionTypeRegistryMock.create();
+actionTypeRegistry.get.mockReturnValue(actionType);
 
 describe('test_connector_form', () => {
-  let deps: any;
-  let actionTypeRegistry;
-  beforeAll(async () => {
-    actionTypeRegistry = actionTypeRegistryMock.create();
-
-    const mocks = coreMock.createSetup();
-    const [
-      {
-        application: { capabilities },
-      },
-    ] = await mocks.getStartServices();
-    deps = {
-      http: mocks.http,
-      toastNotifications: mocks.notifications.toasts,
-      docLinks: { ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' },
-      actionTypeRegistry,
-      capabilities,
-    };
-    actionTypeRegistry.get.mockReturnValue(actionType);
-  });
-
   it('renders initially as the action form and execute button and no result', async () => {
     const connector = {
       actionTypeId: actionType.id,
@@ -89,31 +75,19 @@ describe('test_connector_form', () => {
     } as ActionConnector;
     const wrapper = mountWithIntl(
       <I18nProvider>
-        <ActionsConnectorsContextProvider
-          value={{
-            http: deps!.http,
-            actionTypeRegistry: deps!.actionTypeRegistry,
-            capabilities: deps!.capabilities,
-            toastNotifications: deps!.toastNotifications,
-            reloadConnectors: () => {
-              return new Promise<void>(() => {});
-            },
-            docLinks: deps!.docLinks,
-          }}
-        >
-          <TestConnectorForm
-            connector={connector}
-            executeEnabled={true}
-            actionParams={{}}
-            setActionParams={() => {}}
-            isExecutingAction={false}
-            onExecutAction={async () => ({
-              actionId: '',
-              status: 'ok',
-            })}
-            executionResult={none}
-          />
-        </ActionsConnectorsContextProvider>
+        <TestConnectorForm
+          connector={connector}
+          executeEnabled={true}
+          actionParams={{}}
+          setActionParams={() => {}}
+          isExecutingAction={false}
+          onExecutAction={async () => ({
+            actionId: '',
+            status: 'ok',
+          })}
+          executionResult={none}
+          actionTypeRegistry={actionTypeRegistry}
+        />
       </I18nProvider>
     );
     const executeActionButton = wrapper?.find('[data-test-subj="executeActionButton"]');
@@ -132,34 +106,22 @@ describe('test_connector_form', () => {
     } as ActionConnector;
     const wrapper = mountWithIntl(
       <I18nProvider>
-        <ActionsConnectorsContextProvider
-          value={{
-            http: deps!.http,
-            actionTypeRegistry: deps!.actionTypeRegistry,
-            capabilities: deps!.capabilities,
-            toastNotifications: deps!.toastNotifications,
-            reloadConnectors: () => {
-              return new Promise<void>(() => {});
-            },
-            docLinks: deps!.docLinks,
-          }}
-        >
-          <TestConnectorForm
-            connector={connector}
-            executeEnabled={true}
-            actionParams={{}}
-            setActionParams={() => {}}
-            isExecutingAction={false}
-            onExecutAction={async () => ({
-              actionId: '',
-              status: 'ok',
-            })}
-            executionResult={some({
-              actionId: '',
-              status: 'ok',
-            })}
-          />
-        </ActionsConnectorsContextProvider>
+        <TestConnectorForm
+          connector={connector}
+          executeEnabled={true}
+          actionParams={{}}
+          setActionParams={() => {}}
+          isExecutingAction={false}
+          onExecutAction={async () => ({
+            actionId: '',
+            status: 'ok',
+          })}
+          executionResult={some({
+            actionId: '',
+            status: 'ok',
+          })}
+          actionTypeRegistry={actionTypeRegistry}
+        />
       </I18nProvider>
     );
     const result = wrapper?.find('[data-test-subj="executionSuccessfulResult"]');
@@ -174,36 +136,24 @@ describe('test_connector_form', () => {
     } as ActionConnector;
     const wrapper = mountWithIntl(
       <I18nProvider>
-        <ActionsConnectorsContextProvider
-          value={{
-            http: deps!.http,
-            actionTypeRegistry: deps!.actionTypeRegistry,
-            capabilities: deps!.capabilities,
-            toastNotifications: deps!.toastNotifications,
-            reloadConnectors: () => {
-              return new Promise<void>(() => {});
-            },
-            docLinks: deps!.docLinks,
-          }}
-        >
-          <TestConnectorForm
-            connector={connector}
-            executeEnabled={true}
-            actionParams={{}}
-            setActionParams={() => {}}
-            isExecutingAction={false}
-            onExecutAction={async () => ({
-              actionId: '',
-              status: 'error',
-              message: 'Error Message',
-            })}
-            executionResult={some({
-              actionId: '',
-              status: 'error',
-              message: 'Error Message',
-            })}
-          />
-        </ActionsConnectorsContextProvider>
+        <TestConnectorForm
+          connector={connector}
+          executeEnabled={true}
+          actionParams={{}}
+          setActionParams={() => {}}
+          isExecutingAction={false}
+          onExecutAction={async () => ({
+            actionId: '',
+            status: 'error',
+            message: 'Error Message',
+          })}
+          executionResult={some({
+            actionId: '',
+            status: 'error',
+            message: 'Error Message',
+          })}
+          actionTypeRegistry={actionTypeRegistry}
+        />
       </I18nProvider>
     );
     const result = wrapper?.find('[data-test-subj="executionFailureResult"]');

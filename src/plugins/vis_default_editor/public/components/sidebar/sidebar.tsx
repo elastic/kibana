@@ -1,24 +1,13 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React, { useMemo, useState, useCallback, KeyboardEventHandler, useEffect } from 'react';
-import { get, isEqual } from 'lodash';
+import { isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { keys, EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { EventEmitter } from 'events';
@@ -28,20 +17,20 @@ import {
   PersistedState,
   VisualizeEmbeddableContract,
 } from 'src/plugins/visualizations/public';
+import type { Schema } from 'src/plugins/visualizations/public';
 import { TimeRange } from 'src/plugins/data/public';
 import { SavedObject } from 'src/plugins/saved_objects/public';
-import { DefaultEditorNavBar, OptionTab } from './navbar';
+import { DefaultEditorNavBar } from './navbar';
 import { DefaultEditorControls } from './controls';
 import { setStateParamValue, useEditorReducer, useEditorFormState, discardChanges } from './state';
 import { DefaultEditorAggCommonProps } from '../agg_common_props';
 import { SidebarTitle } from './sidebar_title';
-import { Schema } from '../../schemas';
+import { useOptionTabs } from './use_option_tabs';
 
 interface DefaultEditorSideBarProps {
   embeddableHandler: VisualizeEmbeddableContract;
   isCollapsed: boolean;
   onClickCollapse: () => void;
-  optionTabs: OptionTab[];
   uiState: PersistedState;
   vis: Vis;
   isLinkedSearch: boolean;
@@ -54,7 +43,6 @@ function DefaultEditorSideBar({
   embeddableHandler,
   isCollapsed,
   onClickCollapse,
-  optionTabs,
   uiState,
   vis,
   isLinkedSearch,
@@ -62,17 +50,17 @@ function DefaultEditorSideBar({
   savedSearch,
   timeRange,
 }: DefaultEditorSideBarProps) {
-  const [selectedTab, setSelectedTab] = useState(optionTabs[0].name);
   const [isDirty, setDirty] = useState(false);
   const [state, dispatch] = useEditorReducer(vis, eventEmitter);
   const { formState, setTouched, setValidity, resetValidity } = useEditorFormState();
+  const [optionTabs, setSelectedTab] = useOptionTabs(vis);
 
   const responseAggs = useMemo(() => (state.data.aggs ? state.data.aggs.getResponseAggs() : []), [
     state.data.aggs,
   ]);
   const metricSchemas = (vis.type.schemas.metrics || []).map((s: Schema) => s.name);
   const metricAggs = useMemo(
-    () => responseAggs.filter((agg) => metricSchemas.includes(get(agg, 'schema'))),
+    () => responseAggs.filter((agg) => agg.schema && metricSchemas.includes(agg.schema)),
     [responseAggs, metricSchemas]
   );
   const hasHistogramAgg = useMemo(() => responseAggs.some((agg) => agg.type.name === 'histogram'), [
@@ -201,31 +189,23 @@ function DefaultEditorSideBar({
             )}
 
             {optionTabs.length > 1 && (
-              <DefaultEditorNavBar
-                optionTabs={optionTabs}
-                selectedTab={selectedTab}
-                setSelectedTab={setSelectedTab}
-              />
+              <DefaultEditorNavBar optionTabs={optionTabs} setSelectedTab={setSelectedTab} />
             )}
 
-            {optionTabs.map(({ editor: Editor, name }) => {
-              const isTabSelected = selectedTab === name;
-
-              return (
-                <div
-                  key={name}
-                  className={`visEditorSidebar__config ${
-                    isTabSelected ? '' : 'visEditorSidebar__config-isHidden'
-                  }`}
-                >
-                  <Editor
-                    isTabSelected={isTabSelected}
-                    {...(name === 'data' ? dataTabProps : optionTabProps)}
-                    timeRange={timeRange}
-                  />
-                </div>
-              );
-            })}
+            {optionTabs.map(({ editor: Editor, name, isSelected = false }) => (
+              <div
+                key={name}
+                className={`visEditorSidebar__config ${
+                  isSelected ? '' : 'visEditorSidebar__config-isHidden'
+                }`}
+              >
+                <Editor
+                  isTabSelected={isSelected}
+                  {...(name === 'data' ? dataTabProps : optionTabProps)}
+                  timeRange={timeRange}
+                />
+              </div>
+            ))}
           </form>
         </EuiFlexItem>
 

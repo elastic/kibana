@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -20,9 +21,10 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { MapSettings } from '../../reducers/map';
 import { NavigationPanel } from './navigation_panel';
 import { SpatialFiltersPanel } from './spatial_filters_panel';
+import { DisplayPanel } from './display_panel';
 import { MapCenter } from '../../../common/descriptor_types';
 
-interface Props {
+export interface Props {
   cancelChanges: () => void;
   center: MapCenter;
   hasMapSettingsChanges: boolean;
@@ -65,6 +67,8 @@ export function MapSettingsPanel({
 
       <div className="mapLayerPanel__body">
         <div className="mapLayerPanel__bodyOverflow">
+          <DisplayPanel settings={settings} updateMapSetting={updateMapSetting} />
+          <EuiSpacer size="s" />
           <NavigationPanel
             center={center}
             settings={settings}

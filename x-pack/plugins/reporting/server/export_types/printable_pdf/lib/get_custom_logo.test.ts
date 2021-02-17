@@ -1,13 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { ReportingConfig, ReportingCore } from '../../../';
 import {
   createMockConfig,
   createMockConfigSchema,
+  createMockLevelLogger,
   createMockReportingCore,
 } from '../../../test_helpers';
 import { getConditionalHeaders } from '../../common';
@@ -15,6 +17,8 @@ import { getCustomLogo } from './get_custom_logo';
 
 let mockConfig: ReportingConfig;
 let mockReportingPlugin: ReportingCore;
+
+const logger = createMockLevelLogger();
 
 beforeEach(async () => {
   mockConfig = createMockConfig(createMockConfigSchema());
@@ -28,7 +32,7 @@ test(`gets logo from uiSettings`, async () => {
   };
 
   const mockGet = jest.fn();
-  mockGet.mockImplementationOnce((...args: any[]) => {
+  mockGet.mockImplementationOnce((...args: string[]) => {
     if (args[0] === 'xpackReporting:customPdfLogo') {
       return 'purple pony';
     }
@@ -40,7 +44,12 @@ test(`gets logo from uiSettings`, async () => {
 
   const conditionalHeaders = getConditionalHeaders(mockConfig, permittedHeaders);
 
-  const { logo } = await getCustomLogo(mockReportingPlugin, conditionalHeaders);
+  const { logo } = await getCustomLogo(
+    mockReportingPlugin,
+    conditionalHeaders,
+    'spaceyMcSpaceIdFace',
+    logger
+  );
 
   expect(mockGet).toBeCalledWith('xpackReporting:customPdfLogo');
   expect(logo).toBe('purple pony');

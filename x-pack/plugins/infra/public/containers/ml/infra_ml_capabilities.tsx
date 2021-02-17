@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import createContainer from 'constate';
@@ -10,14 +11,15 @@ import { fold } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { identity } from 'fp-ts/lib/function';
 import { useTrackedPromise } from '../../utils/use_tracked_promise';
-import { npStart } from '../../legacy_singletons';
 import {
   getMlCapabilitiesResponsePayloadRT,
   GetMlCapabilitiesResponsePayload,
 } from './api/ml_api_types';
 import { throwErrors, createPlainError } from '../../../common/runtime_types';
+import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
 
 export const useInfraMLCapabilities = () => {
+  const { services } = useKibanaContextForPlugin();
   const [mlCapabilities, setMlCapabilities] = useState<GetMlCapabilitiesResponsePayload>(
     initialMlCapabilities
   );
@@ -26,7 +28,7 @@ export const useInfraMLCapabilities = () => {
     {
       cancelPreviousOn: 'resolution',
       createPromise: async () => {
-        const rawResponse = await npStart.http.fetch('/api/ml/ml_capabilities');
+        const rawResponse = await services.http.fetch('/api/ml/ml_capabilities');
 
         return pipe(
           getMlCapabilitiesResponsePayloadRT.decode(rawResponse),
@@ -50,11 +52,11 @@ export const useInfraMLCapabilities = () => {
 
   const hasInfraMLSetupCapabilities = mlCapabilities.capabilities.canCreateJob;
   const hasInfraMLReadCapabilities = mlCapabilities.capabilities.canGetJobs;
-  const hasInfraMLCapabilites =
+  const hasInfraMLCapabilities =
     mlCapabilities.isPlatinumOrTrialLicense && mlCapabilities.mlFeatureEnabledInSpace;
 
   return {
-    hasInfraMLCapabilites,
+    hasInfraMLCapabilities,
     hasInfraMLReadCapabilities,
     hasInfraMLSetupCapabilities,
     isLoading,

@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import Child from 'child_process';
@@ -82,7 +71,8 @@ function createConfigManager(configPath: string) {
   };
 }
 
-describe('Server logging configuration', function () {
+// Failing: See https://github.com/elastic/kibana/issues/77279
+describe.skip('Server logging configuration', function () {
   let child: undefined | Child.ChildProcess;
 
   beforeEach(() => {
@@ -121,14 +111,15 @@ describe('Server logging configuration', function () {
           '--verbose',
         ]);
 
-        const message$ = Rx.fromEvent(child.stdout, 'data').pipe(
+        // TypeScript note: As long as the child stdio[1] is 'pipe', then stdout will not be null
+        const message$ = Rx.fromEvent(child.stdout!, 'data').pipe(
           map((messages) => String(messages).split('\n').filter(Boolean))
         );
 
         await message$
           .pipe(
             // We know the sighup handler will be registered before this message logged
-            filter((messages) => messages.some((m) => m.includes('setting up root'))),
+            filter((messages: string[]) => messages.some((m) => m.includes('setting up root'))),
             take(1)
           )
           .toPromise();
@@ -189,14 +180,15 @@ describe('Server logging configuration', function () {
 
         child = Child.spawn(process.execPath, [kibanaPath, '--oss', '--config', configFilePath]);
 
-        const message$ = Rx.fromEvent(child.stdout, 'data').pipe(
+        // TypeScript note: As long as the child stdio[1] is 'pipe', then stdout will not be null
+        const message$ = Rx.fromEvent(child.stdout!, 'data').pipe(
           map((messages) => String(messages).split('\n').filter(Boolean))
         );
 
         await message$
           .pipe(
             // We know the sighup handler will be registered before this message logged
-            filter((messages) => messages.some((m) => m.includes('setting up root'))),
+            filter((messages: string[]) => messages.some((m) => m.includes('setting up root'))),
             take(1)
           )
           .toPromise();

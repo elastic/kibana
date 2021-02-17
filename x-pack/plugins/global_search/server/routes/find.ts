@@ -1,21 +1,26 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { reduce, map } from 'rxjs/operators';
 import { schema } from '@kbn/config-schema';
-import { IRouter } from 'src/core/server';
+import { GlobalSearchRouter } from '../types';
 import { GlobalSearchFindError } from '../../common/errors';
 
-export const registerInternalFindRoute = (router: IRouter) => {
+export const registerInternalFindRoute = (router: GlobalSearchRouter) => {
   router.post(
     {
       path: '/internal/global_search/find',
       validate: {
         body: schema.object({
-          term: schema.string(),
+          params: schema.object({
+            term: schema.maybe(schema.string()),
+            types: schema.maybe(schema.arrayOf(schema.string())),
+            tags: schema.maybe(schema.arrayOf(schema.string())),
+          }),
           options: schema.maybe(
             schema.object({
               preference: schema.maybe(schema.string()),
@@ -25,10 +30,10 @@ export const registerInternalFindRoute = (router: IRouter) => {
       },
     },
     async (ctx, req, res) => {
-      const { term, options } = req.body;
+      const { params, options } = req.body;
       try {
         const allResults = await ctx
-          .globalSearch!.find(term, { ...options, aborted$: req.events.aborted$ })
+          .globalSearch!.find(params, { ...options, aborted$: req.events.aborted$ })
           .pipe(
             map((batch) => batch.results),
             reduce((acc, results) => [...acc, ...results])

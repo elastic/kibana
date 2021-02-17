@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import moment from 'moment-timezone';
 
 import { getFormattedEntries, formatEntry, getDescriptionListContent } from './helpers';
@@ -100,7 +102,7 @@ describe('Exception viewer helpers', () => {
           value: undefined,
         },
         {
-          fieldName: 'host.name',
+          fieldName: 'parent.field',
           isNested: false,
           operator: undefined,
           value: undefined,
@@ -175,10 +177,13 @@ describe('Exception viewer helpers', () => {
 
     test('it returns formatted description list with a description if one specified', () => {
       const payload = getExceptionListItemSchemaMock();
-      payload._tags = [];
       payload.description = 'Im a description';
       const result = getDescriptionListContent(payload);
       const expected: DescriptionListItem[] = [
+        {
+          description: 'Linux',
+          title: 'OS',
+        },
         {
           description: 'April 20th 2020 @ 15:25:31',
           title: 'Date created',
@@ -198,10 +203,13 @@ describe('Exception viewer helpers', () => {
 
     test('it returns just user and date created if no other fields specified', () => {
       const payload = getExceptionListItemSchemaMock();
-      payload._tags = [];
       payload.description = '';
       const result = getDescriptionListContent(payload);
       const expected: DescriptionListItem[] = [
+        {
+          description: 'Linux',
+          title: 'OS',
+        },
         {
           description: 'April 20th 2020 @ 15:25:31',
           title: 'Date created',

@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiToolTip } from '@elastic/eui';
 import React, { FC } from 'react';
-import { isEqual, cloneDeep } from 'lodash';
+import { cloneDeep, isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { IIndexPattern } from 'src/plugins/data/common';
 import { DeepReadonly } from '../../../../../../../common/types/common';
@@ -116,6 +117,34 @@ const getAnalyticsJobMeta = (config: CloneDataFrameAnalyticsConfig): AnalyticsJo
               optional: true,
               defaultValue: 'maximize_minimum_recall',
             },
+            early_stopping_enabled: {
+              optional: true,
+              ignore: true,
+            },
+            alpha: {
+              optional: true,
+              formKey: 'alpha',
+            },
+            downsample_factor: {
+              optional: true,
+              formKey: 'downsampleFactor',
+            },
+            eta_growth_rate_per_tree: {
+              optional: true,
+              formKey: 'etaGrowthRatePerTree',
+            },
+            max_optimization_rounds_per_hyperparameter: {
+              optional: true,
+              formKey: 'maxOptimizationRoundsPerHyperparameter',
+            },
+            soft_tree_depth_limit: {
+              optional: true,
+              formKey: 'softTreeDepthLimit',
+            },
+            soft_tree_depth_tolerance: {
+              optional: true,
+              formKey: 'softTreeDepthTolerance',
+            },
           },
         }
       : {}),
@@ -205,6 +234,34 @@ const getAnalyticsJobMeta = (config: CloneDataFrameAnalyticsConfig): AnalyticsJo
             },
             loss_function_parameter: {
               optional: true,
+            },
+            early_stopping_enabled: {
+              optional: true,
+              ignore: true,
+            },
+            alpha: {
+              optional: true,
+              formKey: 'alpha',
+            },
+            downsample_factor: {
+              optional: true,
+              formKey: 'downsampleFactor',
+            },
+            eta_growth_rate_per_tree: {
+              optional: true,
+              formKey: 'etaGrowthRatePerTree',
+            },
+            max_optimization_rounds_per_hyperparameter: {
+              optional: true,
+              formKey: 'maxOptimizationRoundsPerHyperparameter',
+            },
+            soft_tree_depth_limit: {
+              optional: true,
+              formKey: 'softTreeDepthLimit',
+            },
+            soft_tree_depth_tolerance: {
+              optional: true,
+              formKey: 'softTreeDepthTolerance',
             },
           },
         }
@@ -310,9 +367,6 @@ export type CloneDataFrameAnalyticsConfig = Omit<
  */
 export function extractCloningConfig({
   id,
-  version,
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  create_time,
   ...configToClone
 }: DeepReadonly<DataFrameAnalyticsConfig>): CloneDataFrameAnalyticsConfig {
   return (cloneDeep({
@@ -343,9 +397,9 @@ export const useNavigateToWizardWithClonedJob = () => {
 
   const savedObjectsClient = savedObjects.client;
 
-  return async (item: DataFrameAnalyticsListRow) => {
+  return async (item: Pick<DataFrameAnalyticsListRow, 'config' | 'stats'>) => {
     const sourceIndex = Array.isArray(item.config.source.index)
-      ? item.config.source.index[0]
+      ? item.config.source.index.join(',')
       : item.config.source.index;
     let sourceIndexId;
 
@@ -363,6 +417,14 @@ export const useNavigateToWizardWithClonedJob = () => {
       );
       if (ip !== undefined) {
         sourceIndexId = ip.id;
+      } else {
+        toasts.addDanger(
+          i18n.translate('xpack.ml.dataframe.analyticsList.noSourceIndexPatternForClone', {
+            defaultMessage:
+              'Unable to clone the analytics job. No index pattern exists for index {indexPattern}.',
+            values: { indexPattern: sourceIndex },
+          })
+        );
       }
     } catch (e) {
       const error = extractErrorMessage(e);

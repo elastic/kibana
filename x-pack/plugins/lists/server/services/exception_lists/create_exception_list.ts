@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { SavedObjectsClientContract } from 'kibana/server';
@@ -19,13 +20,11 @@ import {
   NamespaceType,
   Tags,
   Version,
-  _Tags,
 } from '../../../common/schemas';
 
 import { getSavedObjectType, transformSavedObjectToExceptionList } from './utils';
 
 interface CreateExceptionListOptions {
-  _tags: _Tags;
   listId: ListId;
   savedObjectsClient: SavedObjectsClientContract;
   namespaceType: NamespaceType;
@@ -41,7 +40,6 @@ interface CreateExceptionListOptions {
 }
 
 export const createExceptionList = async ({
-  _tags,
   listId,
   immutable,
   savedObjectsClient,
@@ -58,7 +56,6 @@ export const createExceptionList = async ({
   const savedObjectType = getSavedObjectType({ namespaceType });
   const dateNow = new Date().toISOString();
   const savedObject = await savedObjectsClient.create<ExceptionListSoSchema>(savedObjectType, {
-    _tags,
     comments: undefined,
     created_at: dateNow,
     created_by: user,
@@ -70,6 +67,7 @@ export const createExceptionList = async ({
     list_type: 'list',
     meta,
     name,
+    os_types: [],
     tags,
     tie_breaker_id: tieBreaker ?? uuid.v4(),
     type,

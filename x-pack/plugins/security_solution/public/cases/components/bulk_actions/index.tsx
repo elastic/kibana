@@ -1,11 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
 import { EuiContextMenuItem } from '@elastic/eui';
+
+import { CaseStatuses } from '../../../../../case/common/api';
 import * as i18n from './translations';
 
 interface GetBulkItems {
@@ -24,7 +27,7 @@ export const getBulkItems = ({
   updateCaseStatus,
 }: GetBulkItems) => {
   return [
-    caseStatus === 'open' ? (
+    caseStatus === CaseStatuses.open ? (
       <EuiContextMenuItem
         data-test-subj="cases-bulk-close-button"
         disabled={selectedCaseIds.length === 0}
@@ -32,7 +35,7 @@ export const getBulkItems = ({
         icon="folderCheck"
         onClick={() => {
           closePopover();
-          updateCaseStatus('closed');
+          updateCaseStatus(CaseStatuses.closed);
         }}
       >
         {i18n.BULK_ACTION_CLOSE_SELECTED}
@@ -45,7 +48,7 @@ export const getBulkItems = ({
         icon="folderExclamation"
         onClick={() => {
           closePopover();
-          updateCaseStatus('open');
+          updateCaseStatus(CaseStatuses.open);
         }}
       >
         {i18n.BULK_ACTION_OPEN_SELECTED}

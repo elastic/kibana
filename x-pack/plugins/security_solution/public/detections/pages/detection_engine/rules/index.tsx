@@ -1,11 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 
 import { usePrePackagedRules, importRules } from '../../../containers/detection_engine/rules';
@@ -21,7 +22,7 @@ import { SpyRoute } from '../../../../common/utils/route/spy_routes';
 import { useUserData } from '../../../components/user_info';
 import { AllRules } from './all';
 import { ImportDataModal } from '../../../../common/components/import_data_modal';
-import { ReadOnlyCallOut } from '../../../components/rules/read_only_callout';
+import { ReadOnlyRulesCallOut } from '../../../components/callouts/read_only_rules_callout';
 import { ValueListsModal } from '../../../components/value_lists_management_modal';
 import { UpdatePrePackagedRulesCallOut } from '../../../components/rules/pre_packaged_rules/update_callout';
 import {
@@ -34,8 +35,9 @@ import * as i18n from './translations';
 import { SecurityPageName } from '../../../../app/types';
 import { LinkButton } from '../../../../common/components/links';
 import { useFormatUrl } from '../../../../common/components/link_to';
+import { NeedAdminForUpdateRulesCallOut } from '../../../components/callouts/need_admin_for_update_callout';
 
-type Func = (refreshPrePackagedRule?: boolean) => void;
+type Func = () => Promise<void>;
 
 const RulesPageComponent: React.FC = () => {
   const history = useHistory();
@@ -70,6 +72,8 @@ const RulesPageComponent: React.FC = () => {
     timelinesInstalled,
     timelinesNotInstalled,
     timelinesNotUpdated,
+    getLoadPrebuiltRulesAndTemplatesButton,
+    getReloadPrebuiltRulesAndTemplatesButton,
   } = usePrePackagedRules({
     canUserCRUD,
     hasIndexWrite,
@@ -92,20 +96,22 @@ const RulesPageComponent: React.FC = () => {
 
   const handleRefreshRules = useCallback(async () => {
     if (refreshRulesData.current != null) {
-      refreshRulesData.current(true);
+      await refreshRulesData.current();
     }
   }, [refreshRulesData]);
 
   const handleCreatePrePackagedRules = useCallback(async () => {
     if (createPrePackagedRules != null) {
       await createPrePackagedRules();
-      handleRefreshRules();
+      return handleRefreshRules();
     }
   }, [createPrePackagedRules, handleRefreshRules]);
 
   const handleRefetchPrePackagedRulesStatus = useCallback(() => {
     if (refetchPrePackagedRulesStatus != null) {
-      refetchPrePackagedRulesStatus();
+      return refetchPrePackagedRulesStatus();
+    } else {
+      return Promise.resolve();
     }
   }, [refetchPrePackagedRulesStatus]);
 
@@ -113,24 +119,30 @@ const RulesPageComponent: React.FC = () => {
     refreshRulesData.current = refreshRule;
   }, []);
 
-  const getMissingRulesOrTimelinesButtonTitle = useCallback(
-    (missingRules: number, missingTimelines: number) => {
-      if (missingRules > 0 && missingTimelines === 0)
-        return i18n.RELOAD_MISSING_PREPACKAGED_RULES(missingRules);
-      else if (missingRules === 0 && missingTimelines > 0)
-        return i18n.RELOAD_MISSING_PREPACKAGED_TIMELINES(missingTimelines);
-      else if (missingRules > 0 && missingTimelines > 0)
-        return i18n.RELOAD_MISSING_PREPACKAGED_RULES_AND_TIMELINES(missingRules, missingTimelines);
-    },
-    []
-  );
-
   const goToNewRule = useCallback(
     (ev) => {
       ev.preventDefault();
       history.push(getCreateRuleUrl());
     },
     [history]
+  );
+
+  const loadPrebuiltRulesAndTemplatesButton = useMemo(
+    () =>
+      getLoadPrebuiltRulesAndTemplatesButton({
+        isDisabled: userHasNoPermissions(canUserCRUD) || loading,
+        onClick: handleCreatePrePackagedRules,
+      }),
+    [canUserCRUD, getLoadPrebuiltRulesAndTemplatesButton, handleCreatePrePackagedRules, loading]
+  );
+
+  const reloadPrebuiltRulesAndTemplatesButton = useMemo(
+    () =>
+      getReloadPrebuiltRulesAndTemplatesButton({
+        isDisabled: userHasNoPermissions(canUserCRUD) || loading,
+        onClick: handleCreatePrePackagedRules,
+      }),
+    [canUserCRUD, getReloadPrebuiltRulesAndTemplatesButton, handleCreatePrePackagedRules, loading]
   );
 
   if (
@@ -147,7 +159,8 @@ const RulesPageComponent: React.FC = () => {
 
   return (
     <>
-      {userHasNoPermissions(canUserCRUD) && <ReadOnlyCallOut />}
+      <NeedAdminForUpdateRulesCallOut />
+      <ReadOnlyRulesCallOut />
       <ValueListsModal
         showModal={showValueListsModal}
         onClose={() => setShowValueListsModal(false)}
@@ -177,35 +190,11 @@ const RulesPageComponent: React.FC = () => {
           title={i18n.PAGE_TITLE}
         >
           <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={true}>
-            {(prePackagedRuleStatus === 'ruleNotInstalled' ||
-              prePackagedTimelineStatus === 'timelinesNotInstalled') && (
-              <EuiFlexItem grow={false}>
-                <EuiButton
-                  iconType="indexOpen"
-                  isLoading={loadingCreatePrePackagedRules}
-                  isDisabled={userHasNoPermissions(canUserCRUD) || loading}
-                  onClick={handleCreatePrePackagedRules}
-                >
-                  {i18n.LOAD_PREPACKAGED_RULES}
-                </EuiButton>
-              </EuiFlexItem>
+            {loadPrebuiltRulesAndTemplatesButton && (
+              <EuiFlexItem grow={false}>{loadPrebuiltRulesAndTemplatesButton}</EuiFlexItem>
             )}
-            {(prePackagedRuleStatus === 'someRuleUninstall' ||
-              prePackagedTimelineStatus === 'someTimelineUninstall') && (
-              <EuiFlexItem grow={false}>
-                <EuiButton
-                  data-test-subj="reloadPrebuiltRulesBtn"
-                  iconType="plusInCircle"
-                  isLoading={loadingCreatePrePackagedRules}
-                  isDisabled={userHasNoPermissions(canUserCRUD) || loading}
-                  onClick={handleCreatePrePackagedRules}
-                >
-                  {getMissingRulesOrTimelinesButtonTitle(
-                    rulesNotInstalled ?? 0,
-                    timelinesNotInstalled ?? 0
-                  )}
-                </EuiButton>
-              </EuiFlexItem>
+            {reloadPrebuiltRulesAndTemplatesButton && (
+              <EuiFlexItem grow={false}>{reloadPrebuiltRulesAndTemplatesButton}</EuiFlexItem>
             )}
             <EuiFlexItem grow={false}>
               <EuiToolTip position="top" content={i18n.UPLOAD_VALUE_LISTS_TOOLTIP}>
@@ -247,6 +236,7 @@ const RulesPageComponent: React.FC = () => {
         {(prePackagedRuleStatus === 'ruleNeedUpdate' ||
           prePackagedTimelineStatus === 'timelineNeedUpdate') && (
           <UpdatePrePackagedRulesCallOut
+            data-test-subj="update-callout-button"
             loading={loadingCreatePrePackagedRules}
             numberOfUpdatedRules={rulesNotUpdated ?? 0}
             numberOfUpdatedTimelines={timelinesNotUpdated ?? 0}
@@ -255,6 +245,7 @@ const RulesPageComponent: React.FC = () => {
         )}
         <AllRules
           createPrePackagedRules={createPrePackagedRules}
+          data-test-subj="all-rules"
           loading={loading || prePackagedRuleLoading}
           loadingCreatePrePackagedRules={loadingCreatePrePackagedRules}
           hasNoPermissions={userHasNoPermissions(canUserCRUD)}

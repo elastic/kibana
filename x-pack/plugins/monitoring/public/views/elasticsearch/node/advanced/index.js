@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 /**
@@ -17,7 +18,15 @@ import template from './index.html';
 import { Legacy } from '../../../../legacy_shims';
 import { AdvancedNode } from '../../../../components/elasticsearch/node/advanced';
 import { MonitoringViewBaseController } from '../../../base_controller';
-import { CODE_PATH_ELASTICSEARCH, ALERT_CPU_USAGE } from '../../../../../common/constants';
+import {
+  CODE_PATH_ELASTICSEARCH,
+  ALERT_CPU_USAGE,
+  ALERT_THREAD_POOL_SEARCH_REJECTIONS,
+  ALERT_THREAD_POOL_WRITE_REJECTIONS,
+  ALERT_MISSING_MONITORING_DATA,
+  ALERT_DISK_USAGE,
+  ALERT_MEMORY_USAGE,
+} from '../../../../../common/constants';
 
 function getPageData($injector) {
   const $http = $injector.get('$http');
@@ -67,7 +76,14 @@ uiRoutes.when('/elasticsearch/nodes/:node/advanced', {
         alerts: {
           shouldFetch: true,
           options: {
-            alertTypeIds: [ALERT_CPU_USAGE],
+            alertTypeIds: [
+              ALERT_CPU_USAGE,
+              ALERT_DISK_USAGE,
+              ALERT_THREAD_POOL_SEARCH_REJECTIONS,
+              ALERT_THREAD_POOL_WRITE_REJECTIONS,
+              ALERT_MEMORY_USAGE,
+              ALERT_MISSING_MONITORING_DATA,
+            ],
             filters: [
               {
                 nodeUuid: nodeName,
@@ -106,6 +122,7 @@ uiRoutes.when('/elasticsearch/nodes/:node/advanced', {
             <AdvancedNode
               nodeSummary={data.nodeSummary}
               alerts={this.alerts}
+              nodeId={data.nodeSummary.resolver}
               metrics={data.metrics}
               onBrush={this.onBrush}
               zoomInfo={this.zoomInfo}

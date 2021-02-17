@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { Index as IndexInterface } from '../../../index_management/common/types';
@@ -20,6 +21,8 @@ export interface Phases {
   delete?: SerializedDeletePhase;
 }
 
+export type PhasesExceptDelete = keyof Omit<Phases, 'delete'>;
+
 export interface PolicyFromES {
   modified_date: string;
   name: string;
@@ -35,35 +38,61 @@ export interface SerializedPhase {
   };
 }
 
+export interface MigrateAction {
+  /**
+   * If enabled is ever set it will probably only be set to `false` because the default value
+   * for this is `true`. Rather leave unspecified for true when serialising.
+   */
+  enabled: boolean;
+}
+
+export interface SerializedActionWithAllocation {
+  allocate?: AllocateAction;
+  migrate?: MigrateAction;
+}
+
+export interface SearchableSnapshotAction {
+  snapshot_repository: string;
+  /**
+   * We do not configure this value in the UI as it is an advanced setting that will
+   * not suit the vast majority of cases.
+   */
+  force_merge_index?: boolean;
+}
+
+export interface RolloverAction {
+  max_size?: string;
+  max_age?: string;
+  max_docs?: number;
+}
+
 export interface SerializedHotPhase extends SerializedPhase {
   actions: {
-    rollover?: {
-      max_size?: string;
-      max_age?: string;
-      max_docs?: number;
-    };
-    forcemerge?: {
-      max_num_segments: number;
-    };
+    rollover?: RolloverAction;
+    forcemerge?: ForcemergeAction;
+    readonly?: {};
+    shrink?: ShrinkAction;
+
     set_priority?: {
       priority: number | null;
     };
+    /**
+     * Only available on enterprise license
+     */
+    searchable_snapshot?: SearchableSnapshotAction;
   };
 }
 
 export interface SerializedWarmPhase extends SerializedPhase {
   actions: {
     allocate?: AllocateAction;
-    shrink?: {
-      number_of_shards: number;
-    };
-    forcemerge?: {
-      max_num_segments: number;
-    };
+    shrink?: ShrinkAction;
+    forcemerge?: ForcemergeAction;
+    readonly?: {};
     set_priority?: {
       priority: number | null;
     };
-    migrate?: { enabled: boolean };
+    migrate?: MigrateAction;
   };
 }
 
@@ -74,7 +103,11 @@ export interface SerializedColdPhase extends SerializedPhase {
     set_priority?: {
       priority: number | null;
     };
-    migrate?: { enabled: boolean };
+    migrate?: MigrateAction;
+    /**
+     * Only available on enterprise license
+     */
+    searchable_snapshot?: SearchableSnapshotAction;
   };
 }
 
@@ -84,33 +117,33 @@ export interface SerializedDeletePhase extends SerializedPhase {
       policy: string;
     };
     delete?: {
-      delete_searchable_snapshot: boolean;
+      delete_searchable_snapshot?: boolean;
     };
   };
 }
 
 export interface AllocateAction {
   number_of_replicas?: number;
-  include: {};
-  exclude: {};
+  include?: {};
+  exclude?: {};
   require?: {
     [attribute: string]: string;
   };
-  migrate?: {
-    /**
-     * If enabled is ever set it will only be set to `false` because the default value
-     * for this is `true`. Rather leave unspecified for true.
-     */
-    enabled: false;
-  };
 }
 
-export interface Policy {
+export interface ShrinkAction {
+  number_of_shards: number;
+}
+
+export interface ForcemergeAction {
+  max_num_segments: number;
+  // only accepted value for index_codec
+  index_codec?: 'best_compression';
+}
+
+export interface LegacyPolicy {
   name: string;
   phases: {
-    hot: HotPhase;
-    warm: WarmPhase;
-    cold: ColdPhase;
     delete: DeletePhase;
   };
 }
@@ -124,25 +157,6 @@ export interface PhaseWithMinAge {
   selectedMinimumAgeUnits: string;
 }
 
-/**
- * Different types of allocation markers we use in deserialized policies.
- *
- * default - use data tier based data allocation based on node roles -- this is ES best practice mode.
- * custom - use node_attrs to allocate data to specific nodes
- * none - do not move data anywhere when entering a phase
- */
-export type DataTierAllocationType = 'default' | 'custom' | 'none';
-
-export interface PhaseWithAllocationAction {
-  selectedNodeAttrs: string;
-  selectedReplicaCount: string;
-  /**
-   * A string value indicating allocation type. If unspecified we assume the user
-   * wants to use default allocation.
-   */
-  dataTierAllocationType: DataTierAllocationType;
-}
-
 export interface PhaseWithIndexPriority {
   phaseIndexPriority: string;
 }
@@ -150,37 +164,7 @@ export interface PhaseWithIndexPriority {
 export interface PhaseWithForcemergeAction {
   forceMergeEnabled: boolean;
   selectedForceMergeSegments: string;
-}
-
-export interface HotPhase
-  extends CommonPhaseSettings,
-    PhaseWithIndexPriority,
-    PhaseWithForcemergeAction {
-  rolloverEnabled: boolean;
-  selectedMaxSizeStored: string;
-  selectedMaxSizeStoredUnits: string;
-  selectedMaxDocuments: string;
-  selectedMaxAge: string;
-  selectedMaxAgeUnits: string;
-}
-
-export interface WarmPhase
-  extends CommonPhaseSettings,
-    PhaseWithMinAge,
-    PhaseWithAllocationAction,
-    PhaseWithIndexPriority,
-    PhaseWithForcemergeAction {
-  warmPhaseOnRollover: boolean;
-  shrinkEnabled: boolean;
-  selectedPrimaryShardCount: string;
-}
-
-export interface ColdPhase
-  extends CommonPhaseSettings,
-    PhaseWithMinAge,
-    PhaseWithAllocationAction,
-    PhaseWithIndexPriority {
-  freezeEnabled: boolean;
+  bestCompressionEnabled: boolean;
 }
 
 export interface DeletePhase extends CommonPhaseSettings, PhaseWithMinAge {

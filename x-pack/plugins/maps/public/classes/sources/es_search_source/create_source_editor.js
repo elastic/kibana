@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { Fragment, Component } from 'react';
@@ -19,8 +20,6 @@ import {
   getTermsFields,
   getGeoTileAggNotSupportedReason,
   supportsGeoTileAgg,
-  supportsMvt,
-  getMvtDisabledReason,
 } from '../../../index_pattern_util';
 
 function doesGeoFieldSupportGeoTileAgg(indexPattern, geoFieldName) {
@@ -149,7 +148,6 @@ export class CreateSourceEditor extends Component {
       return null;
     }
 
-    const mvtSupported = supportsMvt(this.state.indexPattern, this.state.geoFieldName);
     return (
       <Fragment>
         <EuiSpacer size="m" />
@@ -162,8 +160,6 @@ export class CreateSourceEditor extends Component {
             this.state.indexPattern,
             this.state.geoFieldName
           )}
-          supportsMvt={mvtSupported}
-          mvtDisabledReason={mvtSupported ? null : getMvtDisabledReason()}
           clusteringDisabledReason={
             this.state.indexPattern
               ? getGeoTileAggNotSupportedReason(

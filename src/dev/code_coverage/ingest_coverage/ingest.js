@@ -1,25 +1,14 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 const { Client } = require('@elastic/elasticsearch');
 import { createFailError } from '@kbn/dev-utils';
-import { RESEARCH_CI_JOB_NAME, TEAM_ASSIGNMENT_PIPELINE_NAME } from './constants';
+import { RESEARCH_CI_JOB_NAME } from './constants';
 import { errMsg, redact, whichIndex } from './ingest_helpers';
 import { pretty, green } from './utils';
 import { right, left } from './either';
@@ -34,14 +23,10 @@ const isResearchJob = process.env.COVERAGE_JOB_NAME === RESEARCH_CI_JOB_NAME ? t
 export const ingest = (log) => async (body) => {
   const isTotal = !!body.isTotal;
   const index = whichIndex(isResearchJob)(isTotal);
-  const isACoverageIndex = isTotal ? false : true;
 
   const stringified = pretty(body);
-  const pipeline = TEAM_ASSIGNMENT_PIPELINE_NAME;
 
-  const finalPayload = isACoverageIndex
-    ? { index, body: stringified, pipeline }
-    : { index, body: stringified };
+  const finalPayload = { index, body: stringified };
 
   const justLog = dontSendButLog(log);
   const doSendToIndex = doSend(index);
@@ -77,11 +62,11 @@ async function send(logF, idx, redactedEsHostUrl, client, requestBody) {
 const sendMsg = (actuallySent, redactedEsHostUrl, payload) => {
   const { index, body } = payload;
   return `### ${actuallySent ? 'Sent' : 'Fake Sent'}:
-${payload.pipeline ? `\t### Team Assignment Pipeline: ${green(payload.pipeline)}` : ''}
 ${redactedEsHostUrl ? `\t### ES Host: ${redactedEsHostUrl}` : ''}
+
 \t### Index: ${green(index)}
+
 \t### payload.body: ${body}
-${process.env.NODE_ENV === 'integration_test' ? `ingest-pipe=>${payload.pipeline}` : ''}
 `;
 };
 

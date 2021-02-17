@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { flatten, isObject, mapValues } from 'lodash';
@@ -28,7 +29,6 @@ export function disableUICapabilitiesFactory(
 ) {
   // nav links are sourced from the apps property.
   // The Kibana Platform associates nav links to the app which registers it, in a 1:1 relationship.
-  // This behavior is replacing the `navLinkId` property.
   const featureNavLinkIds = features
     .flatMap((feature) => feature.app)
     .filter((navLinkId) => navLinkId != null);

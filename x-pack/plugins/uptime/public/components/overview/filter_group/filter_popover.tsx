@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiFieldSearch, EuiFilterSelectItem, EuiPopover, EuiPopoverTitle } from '@elastic/eui';
@@ -54,6 +55,7 @@ export const FilterPopover = ({
     const mItems = selectedItems.concat(allItems ?? []);
     const newItems = mItems.filter((item, index) => mItems.indexOf(item) === index);
     setItems(newItems);
+    setTempSelectedItems(selectedItems);
   }, [allItems, selectedItems]);
 
   useEffect(() => {
@@ -73,10 +75,13 @@ export const FilterPopover = ({
             isDisabled={disabled && selectedItems.length === 0}
             isSelected={tempSelectedItems.length > 0}
             numFilters={items.length}
-            numActiveFilters={tempSelectedItems.length}
+            numActiveFilters={isOpen ? tempSelectedItems.length : selectedItems.length}
             onClick={() => {
+              if (isOpen) {
+                // only update these values on close
+                onFilterFieldChange(fieldName, tempSelectedItems);
+              }
               setIsOpen(!isOpen);
-              onFilterFieldChange(fieldName, tempSelectedItems);
             }}
             title={title}
           />
@@ -93,7 +98,6 @@ export const FilterPopover = ({
       id={id}
       isOpen={isOpen || forceOpen}
       ownFocus={true}
-      withTitle
       zIndex={10000}
     >
       <EuiPopoverTitle>
@@ -101,6 +105,12 @@ export const FilterPopover = ({
           incremental={true}
           disabled={items.length === 0}
           onSearch={(query) => setSearchQuery(query)}
+          aria-label={i18n.translate('xpack.uptime.filterPopout.searchMessage.ariaLabel', {
+            defaultMessage: 'Search for {title}',
+            values: {
+              title: title.toLowerCase(),
+            },
+          })}
           placeholder={
             loading
               ? i18n.translate('xpack.uptime.filterPopout.loadingMessage', {
@@ -109,7 +119,7 @@ export const FilterPopover = ({
               : i18n.translate('xpack.uptime.filterPopout.searchMessage', {
                   defaultMessage: 'Search {title}',
                   values: {
-                    title,
+                    title: title.toLowerCase(),
                   },
                 })
           }
@@ -118,6 +128,10 @@ export const FilterPopover = ({
       {!loading &&
         itemsToDisplay.map((item) => (
           <EuiFilterSelectItem
+            aria-label={i18n.translate('xpack.uptime.filterPopover.filterItem.label', {
+              defaultMessage: 'Filter by {title} {item}.',
+              values: { item, title },
+            })}
             checked={isItemSelected(tempSelectedItems, item)}
             data-test-subj={`filter-popover-item_${item}`}
             key={item}

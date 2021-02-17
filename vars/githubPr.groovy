@@ -87,15 +87,6 @@ def getLatestBuildInfo(comment) {
   return comment ? getBuildInfoFromComment(comment.body) : null
 }
 
-def createBuildInfo() {
-  return [
-    status: buildUtils.getBuildStatus(),
-    url: env.BUILD_URL,
-    number: env.BUILD_NUMBER,
-    commit: getCommitHash()
-  ]
-}
-
 def getHistoryText(builds) {
   if (!builds || builds.size() < 1) {
     return ""
@@ -155,6 +146,16 @@ def getTestFailuresMessage() {
   return messages.join("\n")
 }
 
+def getBuildStatusIncludingMetrics() {
+  def status = buildUtils.getBuildStatus()
+
+  if (status == 'SUCCESS' && shouldCheckCiMetricSuccess() && !ciStats.getMetricsSuccess()) {
+    return 'FAILURE'
+  }
+
+  return status
+}
+
 def getNextCommentMessage(previousCommentInfo = [:], isFinal = false) {
   def info = previousCommentInfo ?: [:]
   info.builds = previousCommentInfo.builds ?: []
@@ -163,7 +164,10 @@ def getNextCommentMessage(previousCommentInfo = [:], isFinal = false) {
   info.builds = info.builds.findAll { it.number != env.BUILD_NUMBER }
 
   def messages = []
-  def status = buildUtils.getBuildStatus()
+
+  def status = isFinal
+    ? getBuildStatusIncludingMetrics()
+    : buildUtils.getBuildStatus()
 
   if (!isFinal) {
     def failuresPart = status != 'SUCCESS' ? ', with failures' : ''
@@ -178,12 +182,14 @@ def getNextCommentMessage(previousCommentInfo = [:], isFinal = false) {
       ## :green_heart: Build Succeeded
       * [continuous-integration/kibana-ci/pull-request](${env.BUILD_URL})
       * Commit: ${getCommitHash()}
+      ${getDocsChangesLink()}
     """
   } else if(status == 'UNSTABLE') {
     def message = """
       ## :yellow_heart: Build succeeded, but was flaky
       * [continuous-integration/kibana-ci/pull-request](${env.BUILD_URL})
       * Commit: ${getCommitHash()}
+      ${getDocsChangesLink()}
     """.stripIndent()
 
     def failures = retryable.getFlakyFailures()
@@ -200,6 +206,7 @@ def getNextCommentMessage(previousCommentInfo = [:], isFinal = false) {
       * Commit: ${getCommitHash()}
       * [Pipeline Steps](${env.BUILD_URL}flowGraphTable) (look for red circles / failed steps)
       * [Interpreting CI Failures](https://www.elastic.co/guide/en/kibana/current/interpreting-ci-failures.html)
+      ${getDocsChangesLink()}
     """
   }
 
@@ -228,7 +235,12 @@ def getNextCommentMessage(previousCommentInfo = [:], isFinal = false) {
 
   messages << "To update your PR or re-run it, just comment with:\n`@elasticmachine merge upstream`"
 
-  info.builds << createBuildInfo()
+  info.builds << [
+    status: status,
+    url: env.BUILD_URL,
+    number: env.BUILD_NUMBER,
+    commit: getCommitHash()
+  ]
 
   messages << """
     <!--PIPELINE
@@ -283,8 +295,37 @@ def getCommitHash() {
   return env.ghprbActualCommit
 }
 
+def getDocsChangesLink() {
+  def url = "https://kibana_${env.ghprbPullId}.docs-preview.app.elstc.co/diff"
+
+  try {
+    // httpRequest throws on status codes >400 and failures
+    def resp = httpRequest([ method: "GET", url: url ])
+
+    if (resp.contains("There aren't any differences!")) {
+      return ""
+    }
+
+    return "* [Documentation Changes](${url})"
+  } catch (ex) {
+    print "Failed to reach ${url}"
+    buildUtils.printStacktrace(ex)
+  }
+
+  return ""
+}
+
 def getFailedSteps() {
   return jenkinsApi.getFailedSteps()?.findAll { step ->
     step.displayName != 'Check out from version control'
   }
+}
+
+def shouldCheckCiMetricSuccess() {
+  // disable ciMetrics success check when a PR is targetting a non-tracked branch
+  if (buildState.has('checkoutInfo') && !buildState.get('checkoutInfo').targetsTrackedBranch) {
+    return false
+  }
+
+  return true
 }

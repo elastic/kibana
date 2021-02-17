@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { memo, useEffect, useState } from 'react';
@@ -9,6 +10,13 @@ import { isEmpty } from 'lodash/fp';
 import { EuiToolTip } from '@elastic/eui';
 import countries from 'i18n-iso-countries';
 import countryJson from 'i18n-iso-countries/langs/en.json';
+import styled from 'styled-components';
+
+// Fixes vertical alignment of the flag
+const FlagWrapper = styled.span`
+  position: relative;
+  top: 1px;
+`;
 
 /**
  * Returns the flag for the specified country code, or null if the specified
@@ -38,10 +46,10 @@ export const CountryFlag = memo<{
   if (flag !== null) {
     return displayCountryNameOnHover ? (
       <EuiToolTip position="top" content={countries.getName(countryCode, 'en')}>
-        <span data-test-subj="country-flag">{flag}</span>
+        <FlagWrapper data-test-subj="country-flag">{flag}</FlagWrapper>
       </EuiToolTip>
     ) : (
-      <span data-test-subj="country-flag">{flag}</span>
+      <FlagWrapper data-test-subj="country-flag">{flag}</FlagWrapper>
     );
   }
   return null;
@@ -49,7 +57,7 @@ export const CountryFlag = memo<{
 
 CountryFlag.displayName = 'CountryFlag';
 
-/** Renders an emjoi flag with country name for the specified country code */
+/** Renders an emoji flag with country name for the specified country code */
 export const CountryFlagAndName = memo<{
   countryCode: string;
   displayCountryNameOnHover?: boolean;
@@ -67,10 +75,13 @@ export const CountryFlagAndName = memo<{
   if (flag !== null && localesLoaded) {
     return displayCountryNameOnHover ? (
       <EuiToolTip position="top" content={countries.getName(countryCode, 'en')}>
-        <span data-test-subj="country-flag">{flag}</span>
+        <FlagWrapper data-test-subj="country-flag">{flag}</FlagWrapper>
       </EuiToolTip>
     ) : (
-      <span data-test-subj="country-flag">{`${flag} ${countries.getName(countryCode, 'en')}`}</span>
+      <>
+        <FlagWrapper data-test-subj="country-flag">{flag}</FlagWrapper>
+        {` ${countries.getName(countryCode, 'en')}`}
+      </>
     );
   }
   return null;

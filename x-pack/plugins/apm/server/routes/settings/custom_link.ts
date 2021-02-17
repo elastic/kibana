@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import * as t from 'io-ts';
 import { pick } from 'lodash';
+import { isActiveGoldLicense } from '../../../common/license_check';
 import { INVALID_LICENSE } from '../../../common/custom_link';
-import { ILicense } from '../../../../licensing/common/types';
 import { FILTER_OPTIONS } from '../../../common/custom_link/custom_link_filter_options';
 import { notifyFeatureUsage } from '../../feature';
 import { setupRequest } from '../../lib/helpers/setup_request';
@@ -22,15 +23,12 @@ import { getTransaction } from '../../lib/settings/custom_link/get_transaction';
 import { listCustomLinks } from '../../lib/settings/custom_link/list_custom_links';
 import { createRoute } from '../create_route';
 
-function isActiveGoldLicense(license: ILicense) {
-  return license.isActive && license.hasAtLeast('gold');
-}
-
-export const customLinkTransactionRoute = createRoute(() => ({
-  path: '/api/apm/settings/custom_links/transaction',
-  params: {
+export const customLinkTransactionRoute = createRoute({
+  endpoint: 'GET /api/apm/settings/custom_links/transaction',
+  options: { tags: ['access:apm'] },
+  params: t.partial({
     query: filterOptionsRt,
-  },
+  }),
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
     const { query } = context.params;
@@ -38,13 +36,14 @@ export const customLinkTransactionRoute = createRoute(() => ({
     const filters = pick(query, FILTER_OPTIONS);
     return await getTransaction({ setup, filters });
   },
-}));
+});
 
-export const listCustomLinksRoute = createRoute(() => ({
-  path: '/api/apm/settings/custom_links',
-  params: {
+export const listCustomLinksRoute = createRoute({
+  endpoint: 'GET /api/apm/settings/custom_links',
+  options: { tags: ['access:apm'] },
+  params: t.partial({
     query: filterOptionsRt,
-  },
+  }),
   handler: async ({ context, request }) => {
     if (!isActiveGoldLicense(context.licensing.license)) {
       throw Boom.forbidden(INVALID_LICENSE);
@@ -55,17 +54,14 @@ export const listCustomLinksRoute = createRoute(() => ({
     const filters = pick(query, FILTER_OPTIONS);
     return await listCustomLinks({ setup, filters });
   },
-}));
+});
 
-export const createCustomLinkRoute = createRoute(() => ({
-  method: 'POST',
-  path: '/api/apm/settings/custom_links',
-  params: {
+export const createCustomLinkRoute = createRoute({
+  endpoint: 'POST /api/apm/settings/custom_links',
+  params: t.type({
     body: payloadRt,
-  },
-  options: {
-    tags: ['access:apm', 'access:apm_write'],
-  },
+  }),
+  options: { tags: ['access:apm', 'access:apm_write'] },
   handler: async ({ context, request }) => {
     if (!isActiveGoldLicense(context.licensing.license)) {
       throw Boom.forbidden(INVALID_LICENSE);
@@ -80,17 +76,16 @@ export const createCustomLinkRoute = createRoute(() => ({
     });
     return res;
   },
-}));
+});
 
-export const updateCustomLinkRoute = createRoute(() => ({
-  method: 'PUT',
-  path: '/api/apm/settings/custom_links/{id}',
-  params: {
+export const updateCustomLinkRoute = createRoute({
+  endpoint: 'PUT /api/apm/settings/custom_links/{id}',
+  params: t.type({
     path: t.type({
       id: t.string,
     }),
     body: payloadRt,
-  },
+  }),
   options: {
     tags: ['access:apm', 'access:apm_write'],
   },
@@ -108,16 +103,15 @@ export const updateCustomLinkRoute = createRoute(() => ({
     });
     return res;
   },
-}));
+});
 
-export const deleteCustomLinkRoute = createRoute(() => ({
-  method: 'DELETE',
-  path: '/api/apm/settings/custom_links/{id}',
-  params: {
+export const deleteCustomLinkRoute = createRoute({
+  endpoint: 'DELETE /api/apm/settings/custom_links/{id}',
+  params: t.type({
     path: t.type({
       id: t.string,
     }),
-  },
+  }),
   options: {
     tags: ['access:apm', 'access:apm_write'],
   },
@@ -133,4 +127,4 @@ export const deleteCustomLinkRoute = createRoute(() => ({
     });
     return res;
   },
-}));
+});

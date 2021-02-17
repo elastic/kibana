@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -35,12 +36,12 @@ export default function ({ getService }: FtrProviderContext) {
         .post('/internal/search/securitySolutionIndexFields/')
         .set('kbn-xsrf', 'true')
         .send({
-          indices: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+          indices: ['auditbeat-*', 'filebeat-*'],
           onlyCheckIfIndicesExist: false,
         })
         .expect(200);
 
-      expect(sourceStatus.indicesExist).to.eql(['auditbeat-*', 'winlogbeat-*']);
+      expect(sourceStatus.indicesExist).to.eql(['auditbeat-*']);
     });
 
     it('should not find indexes as existing when there is an empty array of them', async () => {

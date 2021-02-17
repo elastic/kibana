@@ -1,11 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
-import { SeriesType, visualizationTypes, LayerConfig, YConfig } from './types';
+import { FramePublicAPI, DatasourcePublicAPI } from '../types';
+import { SeriesType, visualizationTypes, XYLayerConfig, YConfig, ValidLayer } from './types';
 
 export function isHorizontalSeries(seriesType: SeriesType) {
   return (
@@ -29,7 +31,7 @@ export function getIconForSeries(type: SeriesType): EuiIconType {
   return (definition.icon as EuiIconType) || 'empty';
 }
 
-export const getSeriesColor = (layer: LayerConfig, accessor: string) => {
+export const getSeriesColor = (layer: XYLayerConfig, accessor: string) => {
   if (layer.splitAccessor) {
     return null;
   }
@@ -37,3 +39,35 @@ export const getSeriesColor = (layer: LayerConfig, accessor: string) => {
     layer?.yConfig?.find((yConfig: YConfig) => yConfig.forAccessor === accessor)?.color || null
   );
 };
+
+export const getColumnToLabelMap = (layer: XYLayerConfig, datasource: DatasourcePublicAPI) => {
+  const columnToLabel: Record<string, string> = {};
+
+  layer.accessors.concat(layer.splitAccessor ? [layer.splitAccessor] : []).forEach((accessor) => {
+    const operation = datasource.getOperationForColumnId(accessor);
+    if (operation?.label) {
+      columnToLabel[accessor] = operation.label;
+    }
+  });
+  return columnToLabel;
+};
+
+export function hasHistogramSeries(
+  layers: ValidLayer[] = [],
+  datasourceLayers?: FramePublicAPI['datasourceLayers']
+) {
+  if (!datasourceLayers) {
+    return false;
+  }
+  const validLayers = layers.filter(({ accessors }) => accessors.length);
+
+  return validLayers.some(({ layerId, xAccessor }: ValidLayer) => {
+    const xAxisOperation = datasourceLayers[layerId].getOperationForColumnId(xAccessor);
+    return (
+      xAxisOperation &&
+      xAxisOperation.isBucketed &&
+      xAxisOperation.scale &&
+      xAxisOperation.scale !== 'ordinal'
+    );
+  });
+}

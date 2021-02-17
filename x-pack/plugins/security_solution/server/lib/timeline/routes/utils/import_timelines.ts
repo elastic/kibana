@@ -1,12 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { has, chunk, omit } from 'lodash/fp';
 import { Readable } from 'stream';
 import uuid from 'uuid';
+import { createPromiseFromStreams } from '@kbn/utils';
 
 import {
   TimelineStatus,
@@ -21,7 +23,6 @@ import { createBulkErrorObject, BulkError } from '../../../detection_engine/rout
 import { createTimelines } from './create_timelines';
 import { FrameworkRequest } from '../../../framework';
 import { createTimelinesStreamFromNdJson } from '../../create_timelines_stream_from_ndjson';
-import { createPromiseFromStreams } from '../../../../../../../../src/core/server/utils';
 
 import { getTupleDuplicateErrorsAndUniqueTimeline } from './get_timelines_from_stream';
 import { CompareTimelinesStatus } from './compare_timelines_status';

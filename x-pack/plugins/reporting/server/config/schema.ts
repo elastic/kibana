@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { ByteSizeValue, schema, TypeOf } from '@kbn/config-schema';
@@ -45,7 +46,15 @@ const QueueSchema = schema.object({
 const RulesSchema = schema.object({
   allow: schema.boolean(),
   host: schema.maybe(schema.string()),
-  protocol: schema.maybe(schema.string()),
+  protocol: schema.maybe(
+    schema.string({
+      validate(value) {
+        if (!/:$/.test(value)) {
+          return 'must end in colon';
+        }
+      },
+    })
+  ),
 });
 
 const CaptureSchema = schema.object({

@@ -1,11 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
-import { ReactElement } from 'react';
+import { ReactElement, FunctionComponent } from 'react';
 import { LayerDescriptor } from '../../../common/descriptor_types';
 import { LAYER_WIZARD_CATEGORY } from '../../../common/constants';
 
@@ -28,10 +30,17 @@ export type LayerWizard = {
   categories: LAYER_WIZARD_CATEGORY[];
   checkVisibility?: () => Promise<boolean>;
   description: string;
-  icon: string;
+  disabledReason?: string;
+  getIsDisabled?: () => Promise<boolean> | boolean;
+  icon: string | FunctionComponent<any>;
   prerequisiteSteps?: Array<{ id: string; label: string }>;
   renderWizard(renderWizardArguments: RenderWizardArguments): ReactElement<any>;
   title: string;
+};
+
+export type LayerWizardWithMeta = LayerWizard & {
+  isVisible: boolean;
+  isDisabled: boolean;
 };
 
 const registry: LayerWizard[] = [];
@@ -41,16 +50,19 @@ export function registerLayerWizard(layerWizard: LayerWizard) {
     checkVisibility: async () => {
       return true;
     },
+    getIsDisabled: async () => {
+      return false;
+    },
     ...layerWizard,
   });
 }
 
-export async function getLayerWizards(): Promise<LayerWizard[]> {
-  const promises = registry.map(async (layerWizard) => {
+export async function getLayerWizards(): Promise<LayerWizardWithMeta[]> {
+  const promises = registry.map(async (layerWizard: LayerWizard) => {
     return {
       ...layerWizard,
-      // @ts-ignore
-      isVisible: await layerWizard.checkVisibility(),
+      isVisible: await layerWizard.checkVisibility!(),
+      isDisabled: await layerWizard.getIsDisabled!(),
     };
   });
   return (await Promise.all(promises)).filter(({ isVisible }) => {

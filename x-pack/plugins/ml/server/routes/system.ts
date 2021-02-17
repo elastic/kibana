@@ -1,45 +1,26 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { schema } from '@kbn/config-schema';
 
-import { Request } from 'hapi';
-import { IScopedClusterClient } from 'kibana/server';
 import { wrapError } from '../client/error_wrapper';
-import { mlLog } from '../client/log';
+import { mlLog } from '../lib/log';
 import { capabilitiesProvider } from '../lib/capabilities';
 import { spacesUtilsProvider } from '../lib/spaces_utils';
 import { RouteInitialization, SystemRouteDeps } from '../types';
+import { getMlNodeCount } from '../lib/node_utils';
 
 /**
  * System routes
  */
 export function systemRoutes(
-  { router, mlLicense }: RouteInitialization,
-  { spaces, cloud, resolveMlCapabilities }: SystemRouteDeps
+  { router, mlLicense, routeGuard }: RouteInitialization,
+  { getSpaces, cloud, resolveMlCapabilities }: SystemRouteDeps
 ) {
-  async function getNodeCount(client: IScopedClusterClient) {
-    const { body } = await client.asInternalUser.nodes.info({
-      filter_path: 'nodes.*.attributes',
-    });
-
-    let count = 0;
-    if (typeof body.nodes === 'object') {
-      Object.keys(body.nodes).forEach((k) => {
-        if (body.nodes[k].attributes !== undefined) {
-          const maxOpenJobs = body.nodes[k].attributes['ml.max_open_jobs'];
-          if (maxOpenJobs !== null && maxOpenJobs > 0) {
-            count++;
-          }
-        }
-      });
-    }
-    return { count };
-  }
-
   /**
    * @apiGroup SystemRoutes
    *
@@ -57,12 +38,12 @@ export function systemRoutes(
         tags: ['access:ml:canAccessML'],
       },
     },
-    mlLicense.basicLicenseAPIGuard(async ({ client, request, response }) => {
+    routeGuard.basicLicenseAPIGuard(async ({ mlClient, client, request, response }) => {
       try {
-        const { asCurrentUser, asInternalUser } = client;
+        const { asCurrentUser } = client;
         let upgradeInProgress = false;
         try {
-          const { body } = await asInternalUser.ml.info();
+          const { body } = await mlClient.info();
           // if ml indices are currently being migrated, upgrade_mode will be set to true
           // pass this back with the privileges to allow for the disabling of UI controls.
           upgradeInProgress = body.upgrade_mode === true;
@@ -115,13 +96,9 @@ export function systemRoutes(
       path: '/api/ml/ml_capabilities',
       validate: false,
     },
-    mlLicense.basicLicenseAPIGuard(async ({ client, request, response }) => {
+    routeGuard.basicLicenseAPIGuard(async ({ mlClient, request, response }) => {
       try {
-        // if spaces is disabled force isMlEnabledInSpace to be true
-        const { isMlEnabledInSpace } =
-          spaces !== undefined
-            ? spacesUtilsProvider(spaces, (request as unknown) as Request)
-            : { isMlEnabledInSpace: async () => true };
+        const { isMlEnabledInSpace } = spacesUtilsProvider(getSpaces, request);
 
         const mlCapabilities = await resolveMlCapabilities(request);
         if (mlCapabilities === null) {
@@ -129,7 +106,7 @@ export function systemRoutes(
         }
 
         const { getCapabilities } = capabilitiesProvider(
-          client,
+          mlClient,
           mlCapabilities,
           mlLicense,
           isMlEnabledInSpace
@@ -159,10 +136,10 @@ export function systemRoutes(
       },
     },
 
-    mlLicense.basicLicenseAPIGuard(async ({ client, request, response }) => {
+    routeGuard.basicLicenseAPIGuard(async ({ client, response }) => {
       try {
         return response.ok({
-          body: await getNodeCount(client),
+          body: await getMlNodeCount(client),
         });
       } catch (e) {
         return response.customError(wrapError(e));
@@ -185,9 +162,9 @@ export function systemRoutes(
         tags: ['access:ml:canAccessML'],
       },
     },
-    mlLicense.basicLicenseAPIGuard(async ({ client, request, response }) => {
+    routeGuard.basicLicenseAPIGuard(async ({ mlClient, response }) => {
       try {
-        const { body } = await client.asInternalUser.ml.info();
+        const { body } = await mlClient.info();
         const cloudId = cloud && cloud.cloudId;
         return response.ok({
           body: { ...body, cloudId },
@@ -216,7 +193,7 @@ export function systemRoutes(
         tags: ['access:ml:canGetJobs'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
+    routeGuard.fullLicenseAPIGuard(async ({ client, request, response }) => {
       try {
         const { body } = await client.asCurrentUser.search(request.body);
         return response.ok({
@@ -244,7 +221,7 @@ export function systemRoutes(
         tags: ['access:ml:canAccessML'],
       },
     },
-    mlLicense.basicLicenseAPIGuard(async ({ client, request, response }) => {
+    routeGuard.basicLicenseAPIGuard(async ({ client, request, response }) => {
       try {
         const { index } = request.body;
 

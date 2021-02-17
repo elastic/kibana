@@ -1,32 +1,25 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { Router, Switch, Route } from 'react-router-dom';
+import { Router, Switch, Route, Redirect, RouteChildrenProps } from 'react-router-dom';
 
 import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n/react';
-import { StartServicesAccessor } from 'src/core/public';
 
-import { AdvancedSettings } from './advanced_settings';
+import { LocationDescriptor } from 'history';
+import { url } from '../../../kibana_utils/public';
 import { ManagementAppMountParams } from '../../../management/public';
+import { UsageCollectionSetup } from '../../../usage_collection/public';
+import { StartServicesAccessor } from '../../../../core/public';
+
+import { AdvancedSettings, QUERY } from './advanced_settings';
 import { ComponentRegistry } from '../types';
 
 import './index.scss';
@@ -46,15 +39,29 @@ const readOnlyBadge = {
   iconType: 'glasses',
 };
 
+const redirectUrl = ({
+  match,
+  location,
+}: RouteChildrenProps<{ [QUERY]: string }>): LocationDescriptor => {
+  const search = url.addQueryParam(location.search, QUERY, match?.params[QUERY]);
+
+  return {
+    pathname: '/',
+    search,
+  };
+};
+
 export async function mountManagementSection(
   getStartServices: StartServicesAccessor,
   params: ManagementAppMountParams,
-  componentRegistry: ComponentRegistry['start']
+  componentRegistry: ComponentRegistry['start'],
+  usageCollection?: UsageCollectionSetup
 ) {
   params.setBreadcrumbs(crumb);
   const [{ uiSettings, notifications, docLinks, application, chrome }] = await getStartServices();
 
   const canSave = application.capabilities.advancedSettings.save as boolean;
+  const trackUiMetric = usageCollection?.reportUiCounter.bind(usageCollection, 'advanced_settings');
 
   if (!canSave) {
     chrome.setBadge(readOnlyBadge);
@@ -64,13 +71,17 @@ export async function mountManagementSection(
     <I18nProvider>
       <Router history={params.history}>
         <Switch>
-          <Route path={['/:query', '/']}>
+          {/* TODO: remove route param (`query`) in 7.13 */}
+          <Route path={`/:${QUERY}`}>{(props) => <Redirect to={redirectUrl(props)} />}</Route>
+          <Route path="/">
             <AdvancedSettings
+              history={params.history}
               enableSaving={canSave}
               toasts={notifications.toasts}
               dockLinks={docLinks.links}
               uiSettings={uiSettings}
               componentRegistry={componentRegistry}
+              trackUiMetric={trackUiMetric}
             />
           </Route>
         </Switch>

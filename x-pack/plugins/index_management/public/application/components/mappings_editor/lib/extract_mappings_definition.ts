@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { isPlainObject } from 'lodash';
 
 import { GenericObject } from '../types';
@@ -15,16 +17,22 @@ const isMappingDefinition = (obj: GenericObject): boolean => {
     return false;
   }
 
-  const { properties, dynamic_templates: dynamicTemplates, ...mappingsConfiguration } = obj;
+  const {
+    properties,
+    dynamic_templates: dynamicTemplates,
+    runtime,
+    ...mappingsConfiguration
+  } = obj;
 
   const { errors } = validateMappingsConfiguration(mappingsConfiguration);
   const isConfigurationValid = errors.length === 0;
   const isPropertiesValid = properties === undefined || isPlainObject(properties);
   const isDynamicTemplatesValid = dynamicTemplates === undefined || Array.isArray(dynamicTemplates);
+  const isRuntimeValid = runtime === undefined || isPlainObject(runtime);
 
-  // If the configuration, the properties and the dynamic templates are valid
+  // If the configuration, the properties, the dynamic templates and runtime are valid
   // we can assume that the mapping is declared at root level (no types)
-  return isConfigurationValid && isPropertiesValid && isDynamicTemplatesValid;
+  return isConfigurationValid && isPropertiesValid && isDynamicTemplatesValid && isRuntimeValid;
 };
 
 /**

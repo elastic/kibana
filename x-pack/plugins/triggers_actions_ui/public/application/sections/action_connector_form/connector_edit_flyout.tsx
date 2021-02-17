@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React, { useCallback, useReducer, useState, Fragment } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
@@ -24,48 +26,75 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Option, none, some } from 'fp-ts/lib/Option';
-import { ActionConnectorForm, validateBaseProperties } from './action_connector_form';
+import { ActionConnectorForm, getConnectorErrors } from './action_connector_form';
 import { TestConnectorForm } from './test_connector_form';
-import { ActionConnectorTableItem, ActionConnector, IErrorObject } from '../../../types';
-import { connectorReducer } from './connector_reducer';
+import {
+  ActionConnector,
+  ActionTypeRegistryContract,
+  UserConfiguredActionConnector,
+} from '../../../types';
+import { ConnectorReducer, createConnectorReducer } from './connector_reducer';
 import { updateActionConnector, executeAction } from '../../lib/action_connector_api';
 import { hasSaveActionsCapability } from '../../lib/capabilities';
-import { useActionsConnectorsContext } from '../../context/actions_connectors_context';
-import { PLUGIN } from '../../constants/plugin';
-import { ActionTypeExecutorResult } from '../../../../../actions/common';
+import {
+  ActionTypeExecutorResult,
+  isActionTypeExecutorResult,
+} from '../../../../../actions/common';
 import './connector_edit_flyout.scss';
+import { useKibana } from '../../../common/lib/kibana';
+import { getConnectorWithInvalidatedFields } from '../../lib/value_validators';
 
-export interface ConnectorEditProps {
-  initialConnector: ActionConnectorTableItem;
-  editFlyoutVisible: boolean;
-  setEditFlyoutVisibility: React.Dispatch<React.SetStateAction<boolean>>;
+export interface ConnectorEditFlyoutProps {
+  initialConnector: ActionConnector;
+  onClose: () => void;
+  tab?: EditConectorTabs;
+  reloadConnectors?: () => Promise<ActionConnector[] | void>;
+  consumer?: string;
+  actionTypeRegistry: ActionTypeRegistryContract;
+}
+
+export enum EditConectorTabs {
+  Configuration = 'configuration',
+  Test = 'test',
 }
 
 export const ConnectorEditFlyout = ({
   initialConnector,
-  editFlyoutVisible,
-  setEditFlyoutVisibility,
-}: ConnectorEditProps) => {
+  onClose,
+  tab = EditConectorTabs.Configuration,
+  reloadConnectors,
+  consumer,
+  actionTypeRegistry,
+}: ConnectorEditFlyoutProps) => {
   const {
     http,
-    toastNotifications,
-    capabilities,
-    actionTypeRegistry,
-    reloadConnectors,
+    notifications: { toasts },
     docLinks,
-    consumer,
-  } = useActionsConnectorsContext();
+    application: { capabilities },
+  } = useKibana().services;
+  const getConnectorWithoutSecrets = () => ({
+    ...(initialConnector as UserConfiguredActionConnector<
+      Record<string, unknown>,
+      Record<string, unknown>
+    >),
+    secrets: {},
+  });
   const canSave = hasSaveActionsCapability(capabilities);
 
-  const [{ connector }, dispatch] = useReducer(connectorReducer, {
-    connector: { ...initialConnector, secrets: {} },
+  const reducer: ConnectorReducer<
+    Record<string, unknown>,
+    Record<string, unknown>
+  > = createConnectorReducer<Record<string, unknown>, Record<string, unknown>>();
+  const [{ connector }, dispatch] = useReducer(reducer, {
+    connector: getConnectorWithoutSecrets(),
   });
   const [isSaving, setIsSaving] = useState<boolean>(false);
-  const [selectedTab, setTab] = useState<'config' | 'test'>('config');
+  const [selectedTab, setTab] = useState<EditConectorTabs>(tab);
 
   const [hasChanges, setHasChanges] = useState<boolean>(false);
-  const setConnector = (key: string, value: any) => {
-    dispatch({ command: { type: 'setConnector' }, payload: { key, value } });
+
+  const setConnector = (value: any) => {
+    dispatch({ command: { type: 'setConnector' }, payload: { key: 'connector', value } });
   };
 
   const [testExecutionActionParams, setTestExecutionActionParams] = useState<
@@ -75,32 +104,51 @@ export const ConnectorEditFlyout = ({
     Option<ActionTypeExecutorResult<unknown>>
   >(none);
   const [isExecutingAction, setIsExecutinAction] = useState<boolean>(false);
+  const handleSetTab = useCallback(
+    () =>
+      setTab((prevTab) => {
+        if (prevTab === EditConectorTabs.Configuration) {
+          return EditConectorTabs.Test;
+        }
+        if (testExecutionResult !== none) {
+          setTestExecutionResult(none);
+        }
+        return EditConectorTabs.Configuration;
+      }),
+    [testExecutionResult]
+  );
 
   const closeFlyout = useCallback(() => {
-    setEditFlyoutVisibility(false);
-    setConnector('connector', { ...initialConnector, secrets: {} });
+    setConnector(getConnectorWithoutSecrets());
     setHasChanges(false);
     setTestExecutionResult(none);
+    onClose();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [setEditFlyoutVisibility]);
-
-  if (!editFlyoutVisible) {
-    return null;
-  }
+  }, [onClose]);
 
   const actionTypeModel = actionTypeRegistry.get(connector.actionTypeId);
-  const errorsInConnectorConfig = {
-    ...actionTypeModel?.validateConnector(connector).errors,
-    ...validateBaseProperties(connector).errors,
-  } as IErrorObject;
-  const hasErrorsInConnectorConfig = !!Object.keys(errorsInConnectorConfig).find(
-    (errorKey) => errorsInConnectorConfig[errorKey].length >= 1
+  const {
+    configErrors,
+    connectorBaseErrors,
+    connectorErrors,
+    secretsErrors,
+  } = !connector.isPreconfigured
+    ? getConnectorErrors(connector, actionTypeModel)
+    : {
+        configErrors: {},
+        connectorBaseErrors: {},
+        connectorErrors: {},
+        secretsErrors: {},
+      };
+
+  const hasErrors = !!Object.keys(connectorErrors).find(
+    (errorKey) => connectorErrors[errorKey].length >= 1
   );
 
   const onActionConnectorSave = async (): Promise<ActionConnector | undefined> =>
     await updateActionConnector({ http, connector, id: connector.id })
       .then((savedConnector) => {
-        toastNotifications.addSuccess(
+        toasts.addSuccess(
           i18n.translate(
             'xpack.triggersActionsUI.sections.editConnectorForm.updateSuccessNotificationText',
             {
@@ -114,7 +162,7 @@ export const ConnectorEditFlyout = ({
         return savedConnector;
       })
       .catch((errorRes) => {
-        toastNotifications.addDanger(
+        toasts.addDanger(
           errorRes.body?.message ??
             i18n.translate(
               'xpack.triggersActionsUI.sections.editConnectorForm.updateErrorNotificationText',
@@ -144,20 +192,6 @@ export const ConnectorEditFlyout = ({
               }
             )}
           />
-          &emsp;
-          <EuiBetaBadge
-            label="Beta"
-            tooltipContent={i18n.translate(
-              'xpack.triggersActionsUI.sections.preconfiguredConnectorForm.betaBadgeTooltipContent',
-              {
-                defaultMessage:
-                  '{pluginName} is in beta and is subject to change. The design and code is less mature than official GA features and is being provided as-is with no warranties. Beta features are not subject to the support SLA of official GA features.',
-                values: {
-                  pluginName: PLUGIN.getI18nName(i18n),
-                },
-              }
-            )}
-          />
         </h3>
       </EuiTitle>
       <EuiText size="s">
@@ -175,36 +209,44 @@ export const ConnectorEditFlyout = ({
           defaultMessage="Edit connector"
           id="xpack.triggersActionsUI.sections.editConnectorForm.flyoutPreconfiguredTitle"
         />
-        &emsp;
-        <EuiBetaBadge
-          label="Beta"
-          tooltipContent={i18n.translate(
-            'xpack.triggersActionsUI.sections.editConnectorForm.betaBadgeTooltipContent',
-            {
-              defaultMessage:
-                '{pluginName} is in beta and is subject to change. The design and code is less mature than official GA features and is being provided as-is with no warranties. Beta features are not subject to the support SLA of official GA features.',
-              values: {
-                pluginName: PLUGIN.getI18nName(i18n),
-              },
-            }
-          )}
-        />
       </h3>
     </EuiTitle>
   );
 
   const onExecutAction = () => {
     setIsExecutinAction(true);
-    return executeAction({ id: connector.id, params: testExecutionActionParams, http }).then(
-      (result) => {
+    return executeAction({ id: connector.id, params: testExecutionActionParams, http })
+      .then((result) => {
         setIsExecutinAction(false);
         setTestExecutionResult(some(result));
         return result;
-      }
-    );
+      })
+      .catch((ex: Error | ActionTypeExecutorResult<unknown>) => {
+        const result: ActionTypeExecutorResult<unknown> = isActionTypeExecutorResult(ex)
+          ? ex
+          : {
+              actionId: connector.id,
+              status: 'error',
+              message: ex.message,
+            };
+        setIsExecutinAction(false);
+        setTestExecutionResult(some(result));
+        return result;
+      });
   };
 
   const onSaveClicked = async (closeAfterSave: boolean = true) => {
+    if (hasErrors) {
+      setConnector(
+        getConnectorWithInvalidatedFields(
+          connector,
+          configErrors,
+          secretsErrors,
+          connectorBaseErrors
+        )
+      );
+      return;
+    }
     setIsSaving(true);
     const savedAction = await onActionConnectorSave();
     setIsSaving(false);
@@ -232,18 +274,18 @@ export const ConnectorEditFlyout = ({
         </EuiFlexGroup>
         <EuiTabs className="connectorEditFlyoutTabs">
           <EuiTab
-            onClick={() => setTab('config')}
+            onClick={handleSetTab}
             data-test-subj="configureConnectorTab"
-            isSelected={'config' === selectedTab}
+            isSelected={EditConectorTabs.Configuration === selectedTab}
           >
             {i18n.translate('xpack.triggersActionsUI.sections.editConnectorForm.tabText', {
               defaultMessage: 'Configuration',
             })}
           </EuiTab>
           <EuiTab
-            onClick={() => setTab('test')}
+            onClick={handleSetTab}
             data-test-subj="testConnectorTab"
-            isSelected={'test' === selectedTab}
+            isSelected={EditConectorTabs.Test === selectedTab}
           >
             {i18n.translate('xpack.triggersActionsUI.sections.testConnectorForm.tabText', {
               defaultMessage: 'Test',
@@ -252,12 +294,11 @@ export const ConnectorEditFlyout = ({
         </EuiTabs>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        {selectedTab === 'config' ? (
+        {selectedTab === EditConectorTabs.Configuration ? (
           !connector.isPreconfigured ? (
             <ActionConnectorForm
               connector={connector}
-              errors={errorsInConnectorConfig}
-              actionTypeName={connector.actionType}
+              errors={connectorErrors}
               dispatch={(changes) => {
                 setHasChanges(true);
                 // if the user changes the connector, "forget" the last execution
@@ -266,9 +307,6 @@ export const ConnectorEditFlyout = ({
                 dispatch(changes);
               }}
               actionTypeRegistry={actionTypeRegistry}
-              http={http}
-              docLinks={docLinks}
-              capabilities={capabilities}
               consumer={consumer}
             />
           ) : (
@@ -301,6 +339,7 @@ export const ConnectorEditFlyout = ({
             onExecutAction={onExecutAction}
             isExecutingAction={isExecutingAction}
             executionResult={testExecutionResult}
+            actionTypeRegistry={actionTypeRegistry}
           />
         )}
       </EuiFlyoutBody>
@@ -324,7 +363,6 @@ export const ConnectorEditFlyout = ({
                     <EuiButton
                       color="secondary"
                       data-test-subj="saveEditedActionButton"
-                      isDisabled={hasErrorsInConnectorConfig || !hasChanges}
                       isLoading={isSaving || isExecutingAction}
                       onClick={async () => {
                         await onSaveClicked(false);
@@ -342,7 +380,6 @@ export const ConnectorEditFlyout = ({
                       color="secondary"
                       data-test-subj="saveAndCloseEditedActionButton"
                       type="submit"
-                      isDisabled={hasErrorsInConnectorConfig || !hasChanges}
                       isLoading={isSaving || isExecutingAction}
                       onClick={async () => {
                         await onSaveClicked();
@@ -350,7 +387,7 @@ export const ConnectorEditFlyout = ({
                     >
                       <FormattedMessage
                         id="xpack.triggersActionsUI.sections.editConnectorForm.saveAndCloseButtonLabel"
-                        defaultMessage="Save & Close"
+                        defaultMessage="Save & close"
                       />
                     </EuiButton>
                   </EuiFlexItem>

@@ -1,20 +1,24 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import React, { useContext } from 'react';
+import React from 'react';
+
+import { useValues } from 'kea';
+
 import { EuiEmptyPrompt, EuiCode } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { EuiButton } from '../react_router_helpers';
-import { KibanaContext, IKibanaContext } from '../../index';
+import { KibanaLogic } from '../../shared/kibana';
+import { EuiButtonTo } from '../react_router_helpers';
 
 import './error_state_prompt.scss';
 
 export const ErrorStatePrompt: React.FC = () => {
-  const { config } = useContext(KibanaContext) as IKibanaContext;
+  const { config } = useValues(KibanaLogic);
 
   return (
     <EuiEmptyPrompt
@@ -89,12 +93,12 @@ export const ErrorStatePrompt: React.FC = () => {
         </>
       }
       actions={
-        <EuiButton iconType="help" fill to="/setup_guide">
+        <EuiButtonTo iconType="help" fill to="/setup_guide">
           <FormattedMessage
             id="xpack.enterpriseSearch.errorConnectingState.setupGuideCta"
             defaultMessage="Review setup guide"
           />
-        </EuiButton>
+        </EuiButtonTo>
       }
     />
   );

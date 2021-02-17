@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -9,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 export const DESC = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.resilient.selectMessageText',
   {
-    defaultMessage: 'Push or update data to a new incident in Resilient.',
+    defaultMessage: 'Create an incident in IBM Resilient.',
   }
 );
 
@@ -41,6 +42,13 @@ export const API_URL_INVALID = i18n.translate(
   }
 );
 
+export const API_URL_REQUIRE_HTTPS = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.resilient.requireHttpsApiUrlTextField',
+  {
+    defaultMessage: 'URL must start with https://.',
+  }
+);
+
 export const ORG_ID_LABEL = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.resilient.orgId',
   {
@@ -55,31 +63,53 @@ export const ORG_ID_REQUIRED = i18n.translate(
   }
 );
 
+export const API_KEY_LABEL = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.resilient.apiKey',
+  {
+    defaultMessage: 'API key',
+  }
+);
+
+export const REMEMBER_VALUES_LABEL = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.resilient.rememberValuesLabel',
+  {
+    defaultMessage:
+      'Remember these values. You must reenter them each time you edit the connector.',
+  }
+);
+
+export const REENTER_VALUES_LABEL = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.resilient.reenterValuesLabel',
+  {
+    defaultMessage: 'ID and secret are encrypted. Please reenter values for these fields.',
+  }
+);
+
 export const API_KEY_ID_LABEL = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.resilient.apiKeyId',
   {
-    defaultMessage: 'API key ID',
+    defaultMessage: 'ID',
   }
 );
 
 export const API_KEY_ID_REQUIRED = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.resilient.requiredApiKeyIdTextField',
   {
-    defaultMessage: 'API key ID is required',
+    defaultMessage: 'ID is required',
   }
 );
 
 export const API_KEY_SECRET_LABEL = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.resilient.apiKeySecret',
   {
-    defaultMessage: 'API key secret',
+    defaultMessage: 'Secret',
   }
 );
 
 export const API_KEY_SECRET_REQUIRED = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.resilient.requiredApiKeySecretTextField',
   {
-    defaultMessage: 'API key secret is required',
+    defaultMessage: 'Secret is required',
   }
 );
 
@@ -105,16 +135,16 @@ export const MAPPING_FIELD_COMMENTS = i18n.translate(
 );
 
 export const DESCRIPTION_REQUIRED = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.common.requiredDescriptionTextField',
+  'xpack.triggersActionsUI.components.builtinActionTypes.resilient.requiredDescriptionTextField',
   {
     defaultMessage: 'Description is required.',
   }
 );
 
-export const TITLE_REQUIRED = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.common.requiredTitleTextField',
+export const NAME_REQUIRED = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.resilient.requiredNameTextField',
   {
-    defaultMessage: 'Title is required.',
+    defaultMessage: 'Name is required.',
   }
 );
 

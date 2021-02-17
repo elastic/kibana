@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { Component, Fragment } from 'react';
@@ -19,7 +20,6 @@ import {
   EuiPopover,
   EuiSpacer,
   EuiConfirmModal,
-  EuiOverlayMask,
   EuiCheckbox,
 } from '@elastic/eui';
 
@@ -300,101 +300,97 @@ export class IndexActionsContextMenu extends Component {
     const selectedIndexCount = indexNames.length;
 
     return (
-      <EuiOverlayMask>
-        <EuiConfirmModal
-          title={i18n.translate(
-            'xpack.idxMgmt.indexActionsMenu.forceMerge.confirmModal.modalTitle',
-            {
-              defaultMessage: 'Force merge',
-            }
-          )}
-          onCancel={this.closeConfirmModal}
-          onConfirm={() => {
-            if (!this.forcemergeSegmentsError()) {
-              this.closePopoverAndExecute(() => {
-                forcemergeIndices(this.state.forcemergeSegments);
-                this.setState({
-                  forcemergeSegments: null,
-                  showForcemergeSegmentsModal: null,
-                });
+      <EuiConfirmModal
+        title={i18n.translate('xpack.idxMgmt.indexActionsMenu.forceMerge.confirmModal.modalTitle', {
+          defaultMessage: 'Force merge',
+        })}
+        onCancel={this.closeConfirmModal}
+        onConfirm={() => {
+          if (!this.forcemergeSegmentsError()) {
+            this.closePopoverAndExecute(() => {
+              forcemergeIndices(this.state.forcemergeSegments);
+              this.setState({
+                forcemergeSegments: null,
+                showForcemergeSegmentsModal: null,
               });
-            }
-          }}
-          cancelButtonText={i18n.translate(
-            'xpack.idxMgmt.indexActionsMenu.forceMerge.confirmModal.cancelButtonText',
+            });
+          }
+        }}
+        cancelButtonText={i18n.translate(
+          'xpack.idxMgmt.indexActionsMenu.forceMerge.confirmModal.cancelButtonText',
+          {
+            defaultMessage: 'Cancel',
+          }
+        )}
+        confirmButtonText={i18n.translate(
+          'xpack.idxMgmt.indexActionsMenu.forceMerge.confirmModal.confirmButtonText',
+          {
+            defaultMessage: 'Force merge',
+          }
+        )}
+      >
+        <p>
+          <FormattedMessage
+            id="xpack.idxMgmt.indexActionsMenu.forceMerge.forceMergeDescription"
+            defaultMessage="You are about to force merge {selectedIndexCount, plural, one {this index} other {these indices} }:"
+            values={{ selectedIndexCount }}
+          />
+        </p>
+
+        <ul>
+          {indexNames.map((indexName) => (
+            <li key={indexName}>{indexName}</li>
+          ))}
+        </ul>
+
+        <EuiCallOut
+          title={i18n.translate(
+            'xpack.idxMgmt.indexActionsMenu.forceMerge.proceedWithCautionCallOutTitle',
             {
-              defaultMessage: 'Cancel',
+              defaultMessage: 'Proceed with caution!',
             }
           )}
-          confirmButtonText={i18n.translate(
-            'xpack.idxMgmt.indexActionsMenu.forceMerge.confirmModal.confirmButtonText',
-            {
-              defaultMessage: 'Force merge',
-            }
-          )}
+          color="warning"
+          iconType="help"
         >
           <p>
             <FormattedMessage
-              id="xpack.idxMgmt.indexActionsMenu.forceMerge.forceMergeDescription"
-              defaultMessage="You are about to force merge {selectedIndexCount, plural, one {this index} other {these indices} }:"
-              values={{ selectedIndexCount }}
+              id="xpack.idxMgmt.indexActionsMenu.forceMerge.forceMergeWarningDescription"
+              defaultMessage="
+                  Don't force-merge indices to which you're still writing, or to which you'll write
+                  again in the future. Instead, rely on the automatic background merge process to
+                  perform merges as needed to keep the index running smoothly. If you write to
+                  a force-merged index then its performance may become much worse.
+                "
             />
           </p>
+        </EuiCallOut>
 
-          <ul>
-            {indexNames.map((indexName) => (
-              <li key={indexName}>{indexName}</li>
-            ))}
-          </ul>
+        <EuiSpacer size="m" />
 
-          <EuiCallOut
-            title={i18n.translate(
-              'xpack.idxMgmt.indexActionsMenu.forceMerge.proceedWithCautionCallOutTitle',
+        <EuiForm
+          isInvalid={!!this.forcemergeSegmentsError()}
+          error={this.forcemergeSegmentsError()}
+        >
+          <EuiFormRow
+            label={i18n.translate(
+              'xpack.idxMgmt.indexActionsMenu.forceMerge.maximumNumberOfSegmentsFormRowLabel',
               {
-                defaultMessage: 'Proceed with caution!',
+                defaultMessage: 'Maximum number of segments per shard',
               }
             )}
-            color="warning"
-            iconType="help"
+            helpText={helpText}
           >
-            <p>
-              <FormattedMessage
-                id="xpack.idxMgmt.indexActionsMenu.forceMerge.forceMergeWarningDescription"
-                defaultMessage="
-                  Force merging a large index or an index that is not read-only can
-                  potentially cause performance and stability issues in the cluster
-                  if it is not run properly (run against non-read-only indices) or run during peak hours.
-                "
-              />
-            </p>
-          </EuiCallOut>
-
-          <EuiSpacer size="m" />
-
-          <EuiForm
-            isInvalid={!!this.forcemergeSegmentsError()}
-            error={this.forcemergeSegmentsError()}
-          >
-            <EuiFormRow
-              label={i18n.translate(
-                'xpack.idxMgmt.indexActionsMenu.forceMerge.maximumNumberOfSegmentsFormRowLabel',
-                {
-                  defaultMessage: 'Maximum number of segments per shard',
-                }
-              )}
-              helpText={helpText}
-            >
-              <EuiFieldNumber
-                onChange={(event) => {
-                  this.setState({ forcemergeSegments: event.target.value });
-                }}
-                min={1}
-                name="maxNumberSegments"
-              />
-            </EuiFormRow>
-          </EuiForm>
-        </EuiConfirmModal>
-      </EuiOverlayMask>
+            <EuiFieldNumber
+              onChange={(event) => {
+                this.setState({ forcemergeSegments: event.target.value });
+              }}
+              min={1}
+              name="maxNumberSegments"
+            />
+          </EuiFormRow>
+        </EuiForm>
+      </EuiConfirmModal>
     );
   };
 
@@ -492,39 +488,37 @@ export class IndexActionsContextMenu extends Component {
     );
 
     return (
-      <EuiOverlayMask>
-        <EuiConfirmModal
-          title={i18n.translate(
-            'xpack.idxMgmt.indexActionsMenu.deleteIndex.confirmModal.modalTitle',
-            {
-              defaultMessage: 'Delete {selectedIndexCount, plural, one {index} other {# indices} }',
-              values: { selectedIndexCount },
-            }
-          )}
-          onCancel={() => {
-            this.confirmAction(false);
-            this.closeConfirmModal();
-          }}
-          onConfirm={() => this.closePopoverAndExecute(deleteIndices)}
-          buttonColor="danger"
-          confirmButtonDisabled={hasSystemIndex ? !isActionConfirmed : false}
-          cancelButtonText={i18n.translate(
-            'xpack.idxMgmt.indexActionsMenu.deleteIndex.confirmModal.cancelButtonText',
-            {
-              defaultMessage: 'Cancel',
-            }
-          )}
-          confirmButtonText={i18n.translate(
-            'xpack.idxMgmt.indexActionsMenu.deleteIndex.confirmModal.confirmButtonText',
-            {
-              defaultMessage: 'Delete {selectedIndexCount, plural, one {index} other {indices} }',
-              values: { selectedIndexCount },
-            }
-          )}
-        >
-          {hasSystemIndex ? systemIndexModalBody : standardIndexModalBody}
-        </EuiConfirmModal>
-      </EuiOverlayMask>
+      <EuiConfirmModal
+        title={i18n.translate(
+          'xpack.idxMgmt.indexActionsMenu.deleteIndex.confirmModal.modalTitle',
+          {
+            defaultMessage: 'Delete {selectedIndexCount, plural, one {index} other {# indices} }',
+            values: { selectedIndexCount },
+          }
+        )}
+        onCancel={() => {
+          this.confirmAction(false);
+          this.closeConfirmModal();
+        }}
+        onConfirm={() => this.closePopoverAndExecute(deleteIndices)}
+        buttonColor="danger"
+        confirmButtonDisabled={hasSystemIndex ? !isActionConfirmed : false}
+        cancelButtonText={i18n.translate(
+          'xpack.idxMgmt.indexActionsMenu.deleteIndex.confirmModal.cancelButtonText',
+          {
+            defaultMessage: 'Cancel',
+          }
+        )}
+        confirmButtonText={i18n.translate(
+          'xpack.idxMgmt.indexActionsMenu.deleteIndex.confirmModal.confirmButtonText',
+          {
+            defaultMessage: 'Delete {selectedIndexCount, plural, one {index} other {indices} }',
+            values: { selectedIndexCount },
+          }
+        )}
+      >
+        {hasSystemIndex ? systemIndexModalBody : standardIndexModalBody}
+      </EuiConfirmModal>
     );
   };
 
@@ -534,96 +528,91 @@ export class IndexActionsContextMenu extends Component {
     const selectedIndexCount = indexNames.length;
 
     return (
-      <EuiOverlayMask>
-        <EuiConfirmModal
+      <EuiConfirmModal
+        title={i18n.translate('xpack.idxMgmt.indexActionsMenu.closeIndex.confirmModal.modalTitle', {
+          defaultMessage: 'Close {selectedIndexCount, plural, one {index} other {# indices} }',
+          values: { selectedIndexCount },
+        })}
+        onCancel={() => {
+          this.confirmAction(false);
+          this.closeConfirmModal();
+        }}
+        onConfirm={() => this.closePopoverAndExecute(closeIndices)}
+        buttonColor="danger"
+        confirmButtonDisabled={!isActionConfirmed}
+        cancelButtonText={i18n.translate(
+          'xpack.idxMgmt.indexActionsMenu.deleteIndex.confirmModal.cancelButtonText',
+          {
+            defaultMessage: 'Cancel',
+          }
+        )}
+        confirmButtonText={i18n.translate(
+          'xpack.idxMgmt.indexActionsMenu.closeIndex.confirmModal.confirmButtonText',
+          {
+            defaultMessage: 'Close {selectedIndexCount, plural, one {index} other {indices} }',
+            values: { selectedIndexCount },
+          }
+        )}
+      >
+        <p>
+          <FormattedMessage
+            id="xpack.idxMgmt.indexActionsMenu.closeIndex.closeDescription"
+            defaultMessage="You are about to close {selectedIndexCount, plural, one {this index} other {these indices} }:"
+            values={{ selectedIndexCount }}
+          />
+        </p>
+
+        <ul>
+          {indexNames.map((indexName) => (
+            <li key={indexName}>
+              {indexName}
+              {isSystemIndexByName[indexName] ? (
+                <Fragment>
+                  {' '}
+                  <EuiBadge iconType="alert" color="hollow">
+                    <FormattedMessage
+                      id="xpack.idxMgmt.indexActionsMenu.closeIndex.systemIndexLabel"
+                      defaultMessage="System index"
+                    />
+                  </EuiBadge>
+                </Fragment>
+              ) : (
+                ''
+              )}
+            </li>
+          ))}
+        </ul>
+
+        <EuiCallOut
           title={i18n.translate(
-            'xpack.idxMgmt.indexActionsMenu.closeIndex.confirmModal.modalTitle',
+            'xpack.idxMgmt.indexActionsMenu.closeIndex.proceedWithCautionCallOutTitle',
             {
-              defaultMessage: 'Close {selectedIndexCount, plural, one {index} other {# indices} }',
-              values: { selectedIndexCount },
+              defaultMessage: 'Closing a system index can break Kibana',
             }
           )}
-          onCancel={() => {
-            this.confirmAction(false);
-            this.closeConfirmModal();
-          }}
-          onConfirm={() => this.closePopoverAndExecute(closeIndices)}
-          buttonColor="danger"
-          confirmButtonDisabled={!isActionConfirmed}
-          cancelButtonText={i18n.translate(
-            'xpack.idxMgmt.indexActionsMenu.deleteIndex.confirmModal.cancelButtonText',
-            {
-              defaultMessage: 'Cancel',
-            }
-          )}
-          confirmButtonText={i18n.translate(
-            'xpack.idxMgmt.indexActionsMenu.closeIndex.confirmModal.confirmButtonText',
-            {
-              defaultMessage: 'Close {selectedIndexCount, plural, one {index} other {indices} }',
-              values: { selectedIndexCount },
-            }
-          )}
+          color="danger"
+          iconType="alert"
         >
           <p>
             <FormattedMessage
-              id="xpack.idxMgmt.indexActionsMenu.closeIndex.closeDescription"
-              defaultMessage="You are about to close {selectedIndexCount, plural, one {this index} other {these indices} }:"
-              values={{ selectedIndexCount }}
+              id="xpack.idxMgmt.indexActionsMenu.closeIndex.proceedWithCautionCallOutDescription"
+              defaultMessage="System indices are critical for internal operations.
+                  You can reopen the index using the Open Index API."
             />
           </p>
-
-          <ul>
-            {indexNames.map((indexName) => (
-              <li key={indexName}>
-                {indexName}
-                {isSystemIndexByName[indexName] ? (
-                  <Fragment>
-                    {' '}
-                    <EuiBadge iconType="alert" color="hollow">
-                      <FormattedMessage
-                        id="xpack.idxMgmt.indexActionsMenu.closeIndex.systemIndexLabel"
-                        defaultMessage="System index"
-                      />
-                    </EuiBadge>
-                  </Fragment>
-                ) : (
-                  ''
-                )}
-              </li>
-            ))}
-          </ul>
-
-          <EuiCallOut
-            title={i18n.translate(
-              'xpack.idxMgmt.indexActionsMenu.closeIndex.proceedWithCautionCallOutTitle',
-              {
-                defaultMessage: 'Closing a system index can break Kibana',
-              }
-            )}
-            color="danger"
-            iconType="alert"
-          >
-            <p>
+          <EuiCheckbox
+            id="confirmCloseIndicesCheckbox"
+            label={
               <FormattedMessage
-                id="xpack.idxMgmt.indexActionsMenu.closeIndex.proceedWithCautionCallOutDescription"
-                defaultMessage="System indices are critical for internal operations.
-                  You can reopen the index using the Open Index API."
+                id="xpack.idxMgmt.indexActionsMenu.closeIndex.checkboxLabel"
+                defaultMessage="I understand the consequences of closing a system index"
               />
-            </p>
-            <EuiCheckbox
-              id="confirmCloseIndicesCheckbox"
-              label={
-                <FormattedMessage
-                  id="xpack.idxMgmt.indexActionsMenu.closeIndex.checkboxLabel"
-                  defaultMessage="I understand the consequences of closing a system index"
-                />
-              }
-              checked={isActionConfirmed}
-              onChange={(e) => this.confirmAction(e.target.checked)}
-            />
-          </EuiCallOut>
-        </EuiConfirmModal>
-      </EuiOverlayMask>
+            }
+            checked={isActionConfirmed}
+            onChange={(e) => this.confirmAction(e.target.checked)}
+          />
+        </EuiCallOut>
+      </EuiConfirmModal>
     );
   };
 
@@ -631,71 +620,69 @@ export class IndexActionsContextMenu extends Component {
     const { freezeIndices, indexNames } = this.props;
 
     return (
-      <EuiOverlayMask>
-        <EuiConfirmModal
+      <EuiConfirmModal
+        title={i18n.translate(
+          'xpack.idxMgmt.indexActionsMenu.freezeEntity.confirmModal.modalTitle',
+          {
+            defaultMessage: 'Confirm freeze {count, plural, one {index} other {indices}}',
+            values: {
+              count: indexNames.length,
+            },
+          }
+        )}
+        onCancel={this.closeConfirmModal}
+        onConfirm={() => this.closePopoverAndExecute(freezeIndices)}
+        cancelButtonText={i18n.translate(
+          'xpack.idxMgmt.indexActionsMenu.freezeEntity.confirmModal.cancelButtonText',
+          {
+            defaultMessage: 'Cancel',
+          }
+        )}
+        confirmButtonText={i18n.translate(
+          'xpack.idxMgmt.indexActionsMenu.freezeEntity.confirmModal.confirmButtonText',
+          {
+            defaultMessage: 'Freeze {count, plural, one {index} other {indices}}',
+            values: {
+              count: indexNames.length,
+            },
+          }
+        )}
+      >
+        <p>
+          <FormattedMessage
+            id="xpack.idxMgmt.indexActionsMenu.freezeEntity.freezeDescription"
+            defaultMessage="You are about to freeze {count, plural, one {this index} other {these indices}}:"
+            values={{ count: indexNames.length }}
+          />
+        </p>
+
+        <ul>
+          {indexNames.map((indexName) => (
+            <li key={indexName}>{indexName}</li>
+          ))}
+        </ul>
+
+        <EuiCallOut
           title={i18n.translate(
-            'xpack.idxMgmt.indexActionsMenu.freezeEntity.confirmModal.modalTitle',
+            'xpack.idxMgmt.indexActionsMenu.freezeEntity.proceedWithCautionCallOutTitle',
             {
-              defaultMessage: 'Confirm freeze {count, plural, one {index} other {indices}}',
-              values: {
-                count: indexNames.length,
-              },
+              defaultMessage: 'Proceed with caution',
             }
           )}
-          onCancel={this.closeConfirmModal}
-          onConfirm={() => this.closePopoverAndExecute(freezeIndices)}
-          cancelButtonText={i18n.translate(
-            'xpack.idxMgmt.indexActionsMenu.freezeEntity.confirmModal.cancelButtonText',
-            {
-              defaultMessage: 'Cancel',
-            }
-          )}
-          confirmButtonText={i18n.translate(
-            'xpack.idxMgmt.indexActionsMenu.freezeEntity.confirmModal.confirmButtonText',
-            {
-              defaultMessage: 'Freeze {count, plural, one {index} other {indices}}',
-              values: {
-                count: indexNames.length,
-              },
-            }
-          )}
+          color="warning"
+          iconType="help"
         >
           <p>
             <FormattedMessage
-              id="xpack.idxMgmt.indexActionsMenu.freezeEntity.freezeDescription"
-              defaultMessage="You are about to freeze {count, plural, one {this index} other {these indices}}:"
-              values={{ count: indexNames.length }}
-            />
-          </p>
-
-          <ul>
-            {indexNames.map((indexName) => (
-              <li key={indexName}>{indexName}</li>
-            ))}
-          </ul>
-
-          <EuiCallOut
-            title={i18n.translate(
-              'xpack.idxMgmt.indexActionsMenu.freezeEntity.proceedWithCautionCallOutTitle',
-              {
-                defaultMessage: 'Proceed with caution',
-              }
-            )}
-            color="warning"
-            iconType="help"
-          >
-            <p>
-              <FormattedMessage
-                id="xpack.idxMgmt.indexActionsMenu.freezeEntity.freezeEntityWarningDescription"
-                defaultMessage="
+              id="xpack.idxMgmt.indexActionsMenu.freezeEntity.freezeEntityWarningDescription"
+              defaultMessage="
                   A frozen index has little overhead on the cluster and is blocked for write operations.
                   You can search a frozen index, but expect queries to be slower.
                 "
-              />
-            </p>
-          </EuiCallOut>
-        </EuiConfirmModal>
-      </EuiOverlayMask>
+            />
+          </p>
+        </EuiCallOut>
+      </EuiConfirmModal>
     );
   };
 
@@ -745,7 +732,6 @@ export class IndexActionsContextMenu extends Component {
                 isOpen={this.state.isPopoverOpen}
                 closePopover={this.closePopover}
                 panelPaddingSize="none"
-                withTitle
                 anchorPosition={anchorPosition}
                 repositionOnScroll
               >

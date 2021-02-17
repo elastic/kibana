@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiProgress } from '@elastic/eui';
@@ -71,6 +72,8 @@ interface BackOptions {
 
 export interface HeaderPageProps extends HeaderProps {
   backOptions?: BackOptions;
+  /** A component to be displayed as the back button. Used only if `backOption` is not defined */
+  backComponent?: React.ReactNode;
   badgeOptions?: BadgeOptions;
   children?: React.ReactNode;
   draggableArguments?: DraggableArguments;
@@ -83,6 +86,7 @@ export interface HeaderPageProps extends HeaderProps {
 
 const HeaderPageComponent: React.FC<HeaderPageProps> = ({
   backOptions,
+  backComponent,
   badgeOptions,
   border,
   children,
@@ -122,6 +126,8 @@ const HeaderPageComponent: React.FC<HeaderPageProps> = ({
               </LinkIcon>
             </LinkBack>
           )}
+
+          {!backOptions && backComponent && <>{backComponent}</>}
 
           {titleNode || (
             <Title

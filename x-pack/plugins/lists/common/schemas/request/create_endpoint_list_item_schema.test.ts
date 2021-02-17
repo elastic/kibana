@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { left } from 'fp-ts/lib/Either';
@@ -166,19 +167,6 @@ describe('create_endpoint_list_item_schema', () => {
     const outputPayload = getCreateEndpointListItemSchemaMock();
     delete inputPayload.tags;
     outputPayload.tags = [];
-    const decoded = createEndpointListItemSchema.decode(inputPayload);
-    const checked = exactCheck(inputPayload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    delete (message.schema as CreateEndpointListItemSchema).item_id;
-    expect(getPaths(left(message.errors))).toEqual([]);
-    expect(message.schema).toEqual(outputPayload);
-  });
-
-  test('it should pass validation when supplied an undefined for "_tags" but return an array and generate a correct body not counting the auto generated uuid', () => {
-    const inputPayload = getCreateEndpointListItemSchemaMock();
-    const outputPayload = getCreateEndpointListItemSchemaMock();
-    delete inputPayload._tags;
-    outputPayload._tags = [];
     const decoded = createEndpointListItemSchema.decode(inputPayload);
     const checked = exactCheck(inputPayload, decoded);
     const message = pipe(checked, foldLeftRight);

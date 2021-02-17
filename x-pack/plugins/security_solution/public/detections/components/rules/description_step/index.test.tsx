@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React from 'react';
 import { shallow, mount } from 'enzyme';
 
@@ -315,8 +317,10 @@ describe('description_step', () => {
           mockFilterManager
         );
 
-        expect(result[0].title).toEqual(<>{i18n.QUERY_LABEL} </>);
-        expect(result[0].description).toEqual(<>{mockQueryBar.queryBar.query.query} </>);
+        expect(result[0].title).toEqual(<>{i18n.QUERY_LABEL}</>);
+        expect(shallow(result[0].description as React.ReactElement).text()).toEqual(
+          mockQueryBar.queryBar.query.query
+        );
       });
     });
 

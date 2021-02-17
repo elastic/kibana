@@ -1,6 +1,5 @@
 {
   "list_id": "detection_list",
-  "_tags": ["detection"],
   "tags": ["test_tag", "detection", "no_more_bad_guys"],
   "type": "simple",
   "description": "This is a sample detection type exception that has no item_id so it creates a new id each time",

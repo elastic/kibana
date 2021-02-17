@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import 'source-map-support/register';
@@ -22,12 +11,13 @@ import 'source-map-support/register';
 import Path from 'path';
 
 import { REPO_ROOT } from '@kbn/utils';
-import { run, createFlagError, CiStatsReporter } from '@kbn/dev-utils';
+import { lastValueFrom } from '@kbn/std';
+import { run, createFlagError } from '@kbn/dev-utils';
 
 import { logOptimizerState } from './log_optimizer_state';
 import { OptimizerConfig } from './optimizer';
-import { reportOptimizerStats } from './report_optimizer_stats';
 import { runOptimizer } from './run_optimizer';
+import { validateLimitsForAllBundles, updateBundleLimits } from './limits';
 
 run(
   async ({ log, flags }) => {
@@ -93,34 +83,53 @@ run(
       throw createFlagError('expected --filter to be one or more strings');
     }
 
+    const focus = typeof flags.focus === 'string' ? [flags.focus] : flags.focus;
+    if (!Array.isArray(focus) || !focus.every((f) => typeof f === 'string')) {
+      throw createFlagError('expected --focus to be one or more strings');
+    }
+
+    const validateLimits = flags['validate-limits'] ?? false;
+    if (typeof validateLimits !== 'boolean') {
+      throw createFlagError('expected --validate-limits to have no value');
+    }
+
+    const updateLimits = flags['update-limits'] ?? false;
+    if (typeof updateLimits !== 'boolean') {
+      throw createFlagError('expected --update-limits to have no value');
+    }
+
     const config = OptimizerConfig.create({
       repoRoot: REPO_ROOT,
       watch,
       maxWorkerCount,
-      oss,
-      dist,
+      oss: oss && !(validateLimits || updateLimits),
+      dist: dist || updateLimits,
       cache,
-      examples,
+      examples: examples && !(validateLimits || updateLimits),
       profileWebpack,
       extraPluginScanDirs,
       inspectWorkers,
       includeCoreBundle,
       filter,
+      focus,
     });
 
-    let update$ = runOptimizer(config);
-
-    if (reportStats) {
-      const reporter = CiStatsReporter.fromEnv(log);
-
-      if (!reporter.isEnabled()) {
-        log.warning('Unable to initialize CiStatsReporter from env');
-      }
-
-      update$ = update$.pipe(reportOptimizerStats(reporter, config, log));
+    if (validateLimits) {
+      validateLimitsForAllBundles(log, config);
+      return;
     }
 
-    await update$.pipe(logOptimizerState(log, config)).toPromise();
+    const update$ = runOptimizer(config);
+
+    await lastValueFrom(update$.pipe(logOptimizerState(log, config)));
+
+    if (updateLimits) {
+      updateBundleLimits({
+        log,
+        config,
+        dropMissing: !(focus || filter),
+      });
+    }
   },
   {
     flags: {
@@ -133,7 +142,8 @@ run(
         'cache',
         'profile',
         'inspect-workers',
-        'report-stats',
+        'validate-limits',
+        'update-limits',
       ],
       string: ['workers', 'scan-dir', 'filter'],
       default: {
@@ -142,6 +152,7 @@ run(
         cache: true,
         'inspect-workers': true,
         filter: [],
+        focus: [],
       },
       help: `
         --watch            run the optimizer in watch mode
@@ -150,12 +161,14 @@ run(
         --profile          profile the webpack builds and write stats.json files to build outputs
         --no-core          disable generating the core bundle
         --no-cache         disable the cache
+        --focus            just like --filter, except dependencies are automatically included, --filter applies to result
         --filter           comma-separated list of bundle id filters, results from multiple flags are merged, * and ! are supported
         --no-examples      don't build the example plugins
-        --dist             create bundles that are suitable for inclusion in the Kibana distributable
+        --dist             create bundles that are suitable for inclusion in the Kibana distributable, enabled when running with --update-limits
         --scan-dir         add a directory to the list of directories scanned for plugins (specify as many times as necessary)
         --no-inspect-workers  when inspecting the parent process, don't inspect the workers
-        --report-stats     attempt to report stats about this execution of the build to the kibana-ci-stats service using this name
+        --validate-limits  validate the limits.yml config to ensure that there are limits defined for every bundle
+        --update-limits    run a build and rewrite the limits file to include the current bundle sizes +5kb
       `,
     },
   }

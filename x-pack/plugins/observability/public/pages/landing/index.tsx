@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -18,19 +19,20 @@ import {
 import { i18n } from '@kbn/i18n';
 import React, { useContext } from 'react';
 import styled, { ThemeContext } from 'styled-components';
-import { IngestManagerPanel } from '../../components/app/ingest_manager_panel';
+import { FleetPanel } from '../../components/app/fleet_panel';
 import { WithHeaderLayout } from '../../components/app/layout/with_header';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useTrackPageview } from '../../hooks/use_track_metric';
 import { appsSection } from '../home/section';
+import './styles.scss';
 
 const EuiCardWithoutPadding = styled(EuiCard)`
   padding: 0;
 `;
 
 export function LandingPage() {
-  useTrackPageview({ app: 'observability', path: 'landing' });
-  useTrackPageview({ app: 'observability', path: 'landing', delay: 15000 });
+  useTrackPageview({ app: 'observability-overview', path: 'landing' });
+  useTrackPageview({ app: 'observability-overview', path: 'landing', delay: 15000 });
 
   const { core } = usePluginContext();
   const theme = useContext(ThemeContext);
@@ -43,7 +45,7 @@ export function LandingPage() {
     >
       <EuiFlexGroup direction="column">
         {/* title and description */}
-        <EuiFlexItem style={{ maxWidth: '50%' }}>
+        <EuiFlexItem className="obsLanding__title">
           <EuiTitle size="s">
             <h2>
               {i18n.translate('xpack.observability.home.sectionTitle', {
@@ -65,7 +67,7 @@ export function LandingPage() {
           <EuiSpacer size="s" />
           <EuiFlexGroup>
             <EuiFlexItem>
-              <EuiFlexGrid columns={2}>
+              <EuiFlexGrid columns={2} className="obsLanding__appSection">
                 {appsSection.map((app) => (
                   <EuiFlexItem key={app.id}>
                     <EuiCardWithoutPadding
@@ -121,7 +123,7 @@ export function LandingPage() {
         <EuiFlexItem>
           <EuiFlexGroup justifyContent="spaceAround">
             <EuiFlexItem grow={false}>
-              <IngestManagerPanel />
+              <FleetPanel />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>

@@ -1,69 +1,59 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import React, { useRef, useState } from 'react';
+import React, { useRef } from 'react';
 import {
-  EuiCheckbox,
   EuiFormRow,
-  EuiIcon,
   EuiLink,
-  EuiPopover,
-  EuiPopoverFooter,
-  EuiPopoverTitle,
-  EuiSelectable,
-  EuiText,
-  EuiTextArea,
-  EuiSelectableOption,
+  EuiSwitch,
+  EuiAccordion,
+  EuiSpacer,
+  EuiPanel,
+  EuiTextColor,
 } from '@elastic/eui';
-import { UrlDrilldownConfig, UrlDrilldownScope } from '../../types';
-import { compile } from '../../url_template';
-import { validateUrlTemplate } from '../../url_validation';
-import { buildScopeSuggestions } from '../../url_drilldown_scope';
+import { monaco } from '@kbn/monaco';
+import { UrlDrilldownConfig } from '../../types';
 import './index.scss';
 import {
-  txtAddVariableButtonTitle,
-  txtUrlPreviewHelpText,
   txtUrlTemplateSyntaxHelpLinkText,
-  txtUrlTemplateVariablesHelpLinkText,
-  txtUrlTemplateVariablesFilterPlaceholderText,
   txtUrlTemplateLabel,
   txtUrlTemplateOpenInNewTab,
-  txtUrlTemplatePlaceholder,
-  txtUrlTemplatePreviewLabel,
-  txtUrlTemplatePreviewLinkText,
+  txtUrlTemplateAdditionalOptions,
+  txtUrlTemplateEncodeUrl,
+  txtUrlTemplateEncodeDescription,
 } from './i18n';
+import { VariablePopover } from '../variable_popover';
+import {
+  UrlTemplateEditor,
+  UrlTemplateEditorVariable,
+} from '../../../../../../../../src/plugins/kibana_react/public';
 
-export interface UrlDrilldownCollectConfig {
+export interface UrlDrilldownCollectConfigProps {
   config: UrlDrilldownConfig;
+  variables: UrlTemplateEditorVariable[];
   onConfig: (newConfig: UrlDrilldownConfig) => void;
-  scope: UrlDrilldownScope;
   syntaxHelpDocsLink?: string;
   variablesHelpDocsLink?: string;
 }
 
-export const UrlDrilldownCollectConfig: React.FC<UrlDrilldownCollectConfig> = ({
+export const UrlDrilldownCollectConfig: React.FC<UrlDrilldownCollectConfigProps> = ({
   config,
+  variables,
   onConfig,
-  scope,
   syntaxHelpDocsLink,
   variablesHelpDocsLink,
 }) => {
-  const textAreaRef = useRef<HTMLTextAreaElement>(null);
+  const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
+  const [showUrlError, setShowUrlError] = React.useState(false);
   const urlTemplate = config.url.template ?? '';
-  const compiledUrl = React.useMemo(() => {
-    try {
-      return compile(urlTemplate, scope);
-    } catch {
-      return urlTemplate;
-    }
-  }, [urlTemplate, scope]);
-  const scopeVariables = React.useMemo(() => buildScopeSuggestions(scope), [scope]);
 
   function updateUrlTemplate(newUrlTemplate: string) {
     if (config.url.template !== newUrlTemplate) {
+      setShowUrlError(true);
       onConfig({
         ...config,
         url: {
@@ -73,18 +63,28 @@ export const UrlDrilldownCollectConfig: React.FC<UrlDrilldownCollectConfig> = ({
       });
     }
   }
-  const { error, isValid } = React.useMemo(
-    () => validateUrlTemplate({ template: urlTemplate }, scope),
-    [urlTemplate, scope]
-  );
   const isEmpty = !urlTemplate;
-  const isInvalid = !isValid && !isEmpty;
+  const isInvalid = showUrlError && isEmpty;
+  const variablesDropdown = (
+    <VariablePopover
+      variables={variables}
+      variablesHelpLink={variablesHelpDocsLink}
+      onSelect={(variable: string) => {
+        const editor = editorRef.current;
+        if (!editor) return;
+
+        editor.trigger('keyboard', 'type', {
+          text: '{{' + variable + '}}',
+        });
+      }}
+    />
+  );
+
   return (
     <>
       <EuiFormRow
         fullWidth
         isInvalid={isInvalid}
-        error={error}
         className={'uaeUrlDrilldownCollectConfig__urlTemplateFormRow'}
         label={txtUrlTemplateLabel}
         helpText={
@@ -94,135 +94,52 @@ export const UrlDrilldownCollectConfig: React.FC<UrlDrilldownCollectConfig> = ({
             </EuiLink>
           )
         }
-        labelAppend={
-          <AddVariableButton
-            variables={scopeVariables}
-            variablesHelpLink={variablesHelpDocsLink}
-            onSelect={(variable: string) => {
-              if (textAreaRef.current) {
-                updateUrlTemplate(
-                  urlTemplate.substr(0, textAreaRef.current!.selectionStart) +
-                    `{{${variable}}}` +
-                    urlTemplate.substr(textAreaRef.current!.selectionEnd)
-                );
-              } else {
-                updateUrlTemplate(urlTemplate + `{{${variable}}}`);
-              }
-            }}
-          />
-        }
+        labelAppend={variablesDropdown}
       >
-        <EuiTextArea
-          fullWidth
-          isInvalid={isInvalid}
-          name="url"
-          data-test-subj="urlInput"
+        <UrlTemplateEditor
+          variables={variables}
           value={urlTemplate}
-          placeholder={txtUrlTemplatePlaceholder}
-          onChange={(event) => updateUrlTemplate(event.target.value)}
-          rows={3}
-          inputRef={textAreaRef}
+          onChange={(newUrlTemplate) => updateUrlTemplate(newUrlTemplate)}
+          onEditor={(editor) => {
+            editorRef.current = editor;
+          }}
         />
       </EuiFormRow>
-      <EuiFormRow
-        fullWidth
-        label={txtUrlTemplatePreviewLabel}
-        labelAppend={
-          <EuiText size="xs">
-            <EuiLink href={compiledUrl} target="_blank" external>
-              {txtUrlTemplatePreviewLinkText}
-            </EuiLink>
-          </EuiText>
-        }
-        helpText={txtUrlPreviewHelpText}
+      <EuiSpacer size={'l'} />
+      <EuiAccordion
+        id="accordion_url_drilldown_additional_options"
+        buttonContent={txtUrlTemplateAdditionalOptions}
+        data-test-subj="urlDrilldownAdditionalOptions"
       >
-        <EuiTextArea
-          fullWidth
-          name="urlPreview"
-          data-test-subj="urlPreview"
-          value={compiledUrl}
-          disabled={true}
-          rows={3}
-        />
-      </EuiFormRow>
-      <EuiFormRow hasChildLabel={false}>
-        <EuiCheckbox
-          id="openInNewTab"
-          name="openInNewTab"
-          label={txtUrlTemplateOpenInNewTab}
-          checked={config.openInNewTab}
-          onChange={() => onConfig({ ...config, openInNewTab: !config.openInNewTab })}
-        />
-      </EuiFormRow>
+        <EuiSpacer size={'s'} />
+        <EuiPanel color="subdued" borderRadius="none" hasShadow={false} style={{ border: 'none' }}>
+          <EuiFormRow hasChildLabel={false}>
+            <EuiSwitch
+              id="openInNewTab"
+              name="openInNewTab"
+              label={txtUrlTemplateOpenInNewTab}
+              checked={config.openInNewTab}
+              onChange={() => onConfig({ ...config, openInNewTab: !config.openInNewTab })}
+              data-test-subj="urlDrilldownOpenInNewTab"
+            />
+          </EuiFormRow>
+          <EuiFormRow hasChildLabel={false} fullWidth>
+            <EuiSwitch
+              id="encodeUrl"
+              name="encodeUrl"
+              label={
+                <>
+                  {txtUrlTemplateEncodeUrl}
+                  <EuiSpacer size={'s'} />
+                  <EuiTextColor color="subdued">{txtUrlTemplateEncodeDescription}</EuiTextColor>
+                </>
+              }
+              checked={config.encodeUrl ?? true}
+              onChange={() => onConfig({ ...config, encodeUrl: !(config.encodeUrl ?? true) })}
+            />
+          </EuiFormRow>
+        </EuiPanel>
+      </EuiAccordion>
     </>
   );
 };
-
-function AddVariableButton({
-  variables,
-  onSelect,
-  variablesHelpLink,
-}: {
-  variables: string[];
-  onSelect: (variable: string) => void;
-  variablesHelpLink?: string;
-}) {
-  const [isVariablesPopoverOpen, setIsVariablesPopoverOpen] = useState<boolean>(false);
-  const closePopover = () => setIsVariablesPopoverOpen(false);
-
-  const options: EuiSelectableOption[] = variables.map((variable: string) => ({
-    key: variable,
-    label: variable,
-  }));
-
-  return (
-    <EuiPopover
-      ownFocus={true}
-      button={
-        <EuiText size="xs">
-          <EuiLink onClick={() => setIsVariablesPopoverOpen(true)}>
-            {txtAddVariableButtonTitle} <EuiIcon type="indexOpen" />
-          </EuiLink>
-        </EuiText>
-      }
-      isOpen={isVariablesPopoverOpen}
-      closePopover={closePopover}
-      panelPaddingSize="none"
-      anchorPosition="downLeft"
-      withTitle
-    >
-      <EuiSelectable
-        singleSelection={true}
-        searchable
-        searchProps={{
-          placeholder: txtUrlTemplateVariablesFilterPlaceholderText,
-          compressed: true,
-        }}
-        options={options}
-        onChange={(newOptions) => {
-          const selected = newOptions.find((o) => o.checked === 'on');
-          if (!selected) return;
-          onSelect(selected.key!);
-          closePopover();
-        }}
-        listProps={{
-          showIcons: false,
-        }}
-      >
-        {(list, search) => (
-          <div style={{ width: 320 }}>
-            <EuiPopoverTitle>{search}</EuiPopoverTitle>
-            {list}
-            {variablesHelpLink && (
-              <EuiPopoverFooter className={'eui-textRight'}>
-                <EuiLink external href={variablesHelpLink} target="_blank">
-                  {txtUrlTemplateVariablesHelpLinkText}
-                </EuiLink>
-              </EuiPopoverFooter>
-            )}
-          </div>
-        )}
-      </EuiSelectable>
-    </EuiPopover>
-  );
-}

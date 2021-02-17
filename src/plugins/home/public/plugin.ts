@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import {
@@ -58,7 +47,12 @@ export interface HomePluginSetupDependencies {
 
 export class HomePublicPlugin
   implements
-    Plugin<HomePublicPluginSetup, void, HomePluginSetupDependencies, HomePluginStartDependencies> {
+    Plugin<
+      HomePublicPluginSetup,
+      HomePublicPluginStart,
+      HomePluginSetupDependencies,
+      HomePluginStartDependencies
+    > {
   private readonly featuresCatalogueRegistry = new FeatureCatalogueRegistry();
   private readonly environmentService = new EnvironmentService();
   private readonly tutorialService = new TutorialService();
@@ -75,7 +69,7 @@ export class HomePublicPlugin
       navLinkStatus: AppNavLinkStatus.hidden,
       mount: async (params: AppMountParameters) => {
         const trackUiMetric = usageCollection
-          ? usageCollection.reportUiStats.bind(usageCollection, 'Kibana_home')
+          ? usageCollection.reportUiCounter.bind(usageCollection, 'Kibana_home')
           : () => {};
         const [
           coreStart,
@@ -128,39 +122,6 @@ export class HomePublicPlugin
       order: 500,
     });
 
-    featureCatalogue.registerSolution({
-      id: 'kibana',
-      title: i18n.translate('home.kibana.featureCatalogue.title', {
-        defaultMessage: 'Kibana',
-      }),
-      subtitle: i18n.translate('home.kibana.featureCatalogue.subtitle', {
-        defaultMessage: 'Visualize & analyze',
-      }),
-      descriptions: [
-        i18n.translate('home.kibana.featureCatalogueDescription1', {
-          defaultMessage: 'Analyze data in dashboards.',
-        }),
-        i18n.translate('home.kibana.featureCatalogueDescription2', {
-          defaultMessage: 'Search and find insights.',
-        }),
-        i18n.translate('home.kibana.featureCatalogueDescription3', {
-          defaultMessage: 'Design pixel-perfect reports.',
-        }),
-        i18n.translate('home.kibana.featureCatalogueDescription4', {
-          defaultMessage: 'Plot geographic data.',
-        }),
-        i18n.translate('home.kibana.featureCatalogueDescription5', {
-          defaultMessage: 'Model, predict, and detect.',
-        }),
-        i18n.translate('home.kibana.featureCatalogueDescription6', {
-          defaultMessage: 'Reveal patterns and relationships.',
-        }),
-      ],
-      icon: 'logoKibana',
-      path: '/app/dashboards',
-      order: 400,
-    });
-
     return {
       featureCatalogue,
       environment: { ...this.environmentService.setup() },
@@ -188,6 +149,8 @@ export class HomePublicPlugin
         }
       });
     }
+
+    return { featureCatalogue: this.featuresCatalogueRegistry };
   }
 }
 
@@ -211,4 +174,7 @@ export interface HomePublicPluginSetup {
    */
 
   environment: EnvironmentSetup;
+}
+export interface HomePublicPluginStart {
+  featureCatalogue: FeatureCatalogueRegistry;
 }

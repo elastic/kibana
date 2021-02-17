@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { Component } from 'react';
@@ -17,6 +18,7 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
+import { isEqual } from 'lodash';
 
 import { ml } from '../../../../services/ml_api_service';
 import { checkForAutoStartDatafeed, filterJobs, loadFullJob } from '../utils';
@@ -26,17 +28,18 @@ import { JobFilterBar } from '../job_filter_bar';
 import { EditJobFlyout } from '../edit_job_flyout';
 import { DeleteJobModal } from '../delete_job_modal';
 import { StartDatafeedModal } from '../start_datafeed_modal';
-import { CreateWatchFlyout } from '../create_watch_flyout';
 import { MultiJobActions } from '../multi_job_actions';
 import { NewJobButton } from '../new_job_button';
 import { JobStatsBar } from '../jobs_stats_bar';
 import { NodeAvailableWarning } from '../../../../components/node_available_warning';
+import { JobsAwaitingNodeWarning } from '../../../../components/jobs_awaiting_node_warning';
+import { SavedObjectsWarning } from '../../../../components/saved_objects_warning';
 import { DatePickerWrapper } from '../../../../components/navigation_menu/date_picker_wrapper';
 import { UpgradeWarning } from '../../../../components/upgrade';
 import { RefreshJobsListButton } from '../refresh_jobs_list_button';
-import { isEqual } from 'lodash';
 
 import { DELETING_JOBS_REFRESH_INTERVAL_MS } from '../../../../../../common/constants/jobs_list';
+import { JobListMlAnomalyAlertFlyout } from '../../../../../alerting/ml_alerting_flyout';
 
 let deletingJobsRefreshTimeout = null;
 
@@ -55,6 +58,7 @@ export class JobsListView extends Component {
       itemIdToExpandedRowMap: {},
       filterClauses: [],
       deletingJobIds: [],
+      jobsAwaitingNodeCount: 0,
     };
 
     this.updateFunctions = {};
@@ -62,11 +66,17 @@ export class JobsListView extends Component {
     this.showEditJobFlyout = () => {};
     this.showDeleteJobModal = () => {};
     this.showStartDatafeedModal = () => {};
-    this.showCreateWatchFlyout = () => {};
+    this.showCreateAlertFlyout = () => {};
     // work around to keep track of whether the component is mounted
     // used to block timeouts for results polling
     // which can run after unmounting
     this._isMounted = false;
+    /**
+     * Indicates if the filters has been initialized by {@link JobFilterBar} component
+     * @type {boolean}
+     * @private
+     */
+    this._isFiltersSet = false;
   }
 
   componentDidMount() {
@@ -195,14 +205,14 @@ export class JobsListView extends Component {
     this.showStartDatafeedModal = () => {};
   };
 
-  setShowCreateWatchFlyoutFunction = (func) => {
-    this.showCreateWatchFlyout = func;
+  setShowCreateAlertFlyoutFunction = (func) => {
+    this.showCreateAlertFlyout = func;
   };
-  unsetShowCreateWatchFlyoutFunction = () => {
-    this.showCreateWatchFlyout = () => {};
+  unsetShowCreateAlertFlyoutFunction = () => {
+    this.showCreateAlertFlyout = () => {};
   };
-  getShowCreateWatchFlyoutFunction = () => {
-    return this.showCreateWatchFlyout;
+  getShowCreateAlertFlyoutFunction = () => {
+    return this.showCreateAlertFlyout;
   };
 
   selectJobChange = (selectedJobs) => {
@@ -222,8 +232,20 @@ export class JobsListView extends Component {
     this.setState({ selectedJobs });
   }
 
-  setFilters = (filterClauses) => {
+  setFilters = (query) => {
+    const filterClauses = (query && query.ast && query.ast.clauses) || [];
     const filteredJobsSummaryList = filterJobs(this.state.jobsSummaryList, filterClauses);
+
+    this.props.onJobsViewStateUpdate(
+      {
+        queryText: query?.text,
+      },
+      // Replace the URL state on filters initialization
+      this._isFiltersSet === false
+    );
+
+    this._isFiltersSet = true;
+
     this.setState({ filteredJobsSummaryList, filterClauses }, () => {
       this.refreshSelectedJobs();
     });
@@ -246,6 +268,13 @@ export class JobsListView extends Component {
 
       const expandedJobsIds = Object.keys(this.state.itemIdToExpandedRowMap);
       try {
+        let jobsSpaces = {};
+        if (this.props.spacesApi && this.props.isManagementTable) {
+          const allSpaces = await ml.savedObjects.jobsSpaces();
+          jobsSpaces = allSpaces['anomaly-detector'];
+        }
+
+        let jobsAwaitingNodeCount = 0;
         const jobs = await ml.jobs.jobsSummary(expandedJobsIds);
         const fullJobsList = {};
         const jobsSummaryList = jobs.map((job) => {
@@ -254,11 +283,28 @@ export class JobsListView extends Component {
             delete job.fullJob;
           }
           job.latestTimestampSortValue = job.latestTimestampMs || 0;
+          job.spaceIds =
+            this.props.spacesApi &&
+            this.props.isManagementTable &&
+            jobsSpaces &&
+            jobsSpaces[job.id] !== undefined
+              ? jobsSpaces[job.id]
+              : [];
+
+          if (job.awaitingNodeAssignment === true) {
+            jobsAwaitingNodeCount++;
+          }
           return job;
         });
         const filteredJobsSummaryList = filterJobs(jobsSummaryList, this.state.filterClauses);
         this.setState(
-          { jobsSummaryList, filteredJobsSummaryList, fullJobsList, loading: false },
+          {
+            jobsSummaryList,
+            filteredJobsSummaryList,
+            fullJobsList,
+            loading: false,
+            jobsAwaitingNodeCount,
+          },
           () => {
             this.refreshSelectedJobs();
           }
@@ -348,7 +394,10 @@ export class JobsListView extends Component {
         <EuiSpacer size="s" />
         <div className="managementJobsList">
           <div>
-            <JobFilterBar setFilters={this.setFilters} />
+            <JobFilterBar
+              setFilters={this.setFilters}
+              queryText={this.props.jobsViewState.queryText}
+            />
           </div>
           <JobsList
             jobsSummaryList={filteredJobsSummaryList}
@@ -360,6 +409,10 @@ export class JobsListView extends Component {
             loading={loading}
             isManagementTable={true}
             isMlEnabledInSpace={this.props.isMlEnabledInSpace}
+            spacesApi={this.props.spacesApi}
+            jobsViewState={this.props.jobsViewState}
+            onJobsViewStateUpdate={this.props.onJobsViewStateUpdate}
+            refreshJobs={() => this.refreshJobSummaryList(true)}
           />
         </div>
       </div>
@@ -367,7 +420,7 @@ export class JobsListView extends Component {
   }
 
   renderJobsListComponents() {
-    const { isRefreshing, loading, jobsSummaryList } = this.state;
+    const { isRefreshing, loading, jobsSummaryList, jobsAwaitingNodeCount } = this.state;
     const jobIds = jobsSummaryList.map((j) => j.id);
 
     return (
@@ -400,6 +453,8 @@ export class JobsListView extends Component {
           </EuiPageHeader>
 
           <NodeAvailableWarning />
+          <JobsAwaitingNodeWarning jobCount={jobsAwaitingNodeCount} />
+          <SavedObjectsWarning jobType="anomaly-detector" />
 
           <UpgradeWarning />
 
@@ -422,9 +477,13 @@ export class JobsListView extends Component {
                   allJobIds={jobIds}
                   showStartDatafeedModal={this.showStartDatafeedModal}
                   showDeleteJobModal={this.showDeleteJobModal}
+                  showCreateAlertFlyout={this.showCreateAlertFlyout}
                   refreshJobs={() => this.refreshJobSummaryList(true)}
                 />
-                <JobFilterBar setFilters={this.setFilters} />
+                <JobFilterBar
+                  setFilters={this.setFilters}
+                  queryText={this.props.jobsViewState.queryText}
+                />
               </div>
               <JobsList
                 jobsSummaryList={this.state.filteredJobsSummaryList}
@@ -436,7 +495,10 @@ export class JobsListView extends Component {
                 showDeleteJobModal={this.showDeleteJobModal}
                 showStartDatafeedModal={this.showStartDatafeedModal}
                 refreshJobs={() => this.refreshJobSummaryList(true)}
+                jobsViewState={this.props.jobsViewState}
+                onJobsViewStateUpdate={this.props.onJobsViewStateUpdate}
                 selectedJobsCount={this.state.selectedJobs.length}
+                showCreateAlertFlyout={this.showCreateAlertFlyout}
                 loading={loading}
               />
               <EditJobFlyout
@@ -453,12 +515,12 @@ export class JobsListView extends Component {
               <StartDatafeedModal
                 setShowFunction={this.setShowStartDatafeedModalFunction}
                 unsetShowFunction={this.unsetShowDeleteJobModalFunction}
-                getShowCreateWatchFlyoutFunction={this.getShowCreateWatchFlyoutFunction}
+                getShowCreateAlertFlyoutFunction={this.getShowCreateAlertFlyoutFunction}
                 refreshJobs={() => this.refreshJobSummaryList(true)}
               />
-              <CreateWatchFlyout
-                setShowFunction={this.setShowCreateWatchFlyoutFunction}
-                unsetShowFunction={this.unsetShowCreateWatchFlyoutFunction}
+              <JobListMlAnomalyAlertFlyout
+                setShowFunction={this.setShowCreateAlertFlyoutFunction}
+                unsetShowFunction={this.unsetShowCreateAlertFlyoutFunction}
               />
             </div>
           </EuiPageContent>

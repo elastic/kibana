@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { getListItemResponseMock } from '../../../common/schemas/response/list_item_schema.mock';
@@ -47,7 +48,15 @@ describe('delete_list_item_by_value', () => {
       body: {
         query: {
           bool: {
-            filter: [{ term: { list_id: 'some-list-id' } }, { terms: { ip: ['127.0.0.1'] } }],
+            filter: [
+              { term: { list_id: 'some-list-id' } },
+              {
+                bool: {
+                  minimum_should_match: 1,
+                  should: [{ term: { ip: { _name: '0.0', value: '127.0.0.1' } } }],
+                },
+              },
+            ],
           },
         },
       },

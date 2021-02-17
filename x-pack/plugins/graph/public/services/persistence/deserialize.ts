@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -61,19 +62,39 @@ function deserializeUrlTemplate({
   return template;
 }
 
-// returns the id of the index pattern, lookup is done in app.js
-export function lookupIndexPattern(
+/**
+ * Migrates `savedWorkspace` to use the id instead of the title of the referenced index pattern.
+ * Returns a status indicating successful migration or failure to look up the index pattern by title.
+ * If the workspace is migrated already, a success status is returned as well.
+ * @param savedWorkspace The workspace saved object to migrate. The migration will happen in-place and mutate the passed in object
+ * @param indexPatterns All index patterns existing in the current space
+ */
+export function migrateLegacyIndexPatternRef(
   savedWorkspace: GraphWorkspaceSavedObject,
   indexPatterns: IndexPatternSavedObject[]
-) {
-  const serializedWorkspaceState: SerializedWorkspaceState = JSON.parse(savedWorkspace.wsState);
-  const indexPattern = indexPatterns.find(
-    (pattern) => pattern.attributes.title === serializedWorkspaceState.indexPattern
-  );
-
-  if (indexPattern) {
-    return indexPattern;
+): { success: true } | { success: false; missingIndexPattern: string } {
+  const legacyIndexPatternRef = savedWorkspace.legacyIndexPatternRef;
+  if (!legacyIndexPatternRef) {
+    return { success: true };
   }
+  const indexPatternId = indexPatterns.find(
+    (pattern) => pattern.attributes.title === legacyIndexPatternRef
+  )?.id;
+  if (!indexPatternId) {
+    return { success: false, missingIndexPattern: legacyIndexPatternRef };
+  }
+  const serializedWorkspaceState: SerializedWorkspaceState = JSON.parse(savedWorkspace.wsState);
+  serializedWorkspaceState.indexPattern = indexPatternId!;
+  savedWorkspace.wsState = JSON.stringify(serializedWorkspaceState);
+  delete savedWorkspace.legacyIndexPatternRef;
+  return { success: true };
+}
+
+// returns the id of the index pattern, lookup is done in app.js
+export function lookupIndexPatternId(savedWorkspace: GraphWorkspaceSavedObject) {
+  const serializedWorkspaceState: SerializedWorkspaceState = JSON.parse(savedWorkspace.wsState);
+
+  return serializedWorkspaceState.indexPattern;
 }
 
 // returns all graph fields mapped out of the index pattern
@@ -84,7 +105,11 @@ export function mapFields(indexPattern: IndexPattern): WorkspaceField[] {
   return indexPattern
     .getNonScriptedFields()
     .filter(
-      (field) => !blockedFieldNames.includes(field.name) && !indexPatternsUtils.isNestedField(field)
+      (field) =>
+        // Make sure to only include mapped fields, e.g. no index pattern runtime fields
+        field.isMapped &&
+        !blockedFieldNames.includes(field.name) &&
+        !indexPatternsUtils.isNestedField(field)
     )
     .map((field, index) => ({
       name: field.name,

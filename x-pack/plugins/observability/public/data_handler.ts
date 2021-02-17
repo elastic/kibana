@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { DataHandler, ObservabilityFetchDataPlugins } from './typings/fetch_overview_data';
@@ -29,28 +30,4 @@ export function getDataHandler<T extends ObservabilityFetchDataPlugins>(appName:
   if (dataHandler) {
     return dataHandler as DataHandler<T>;
   }
-}
-
-export async function fetchHasData(): Promise<Record<ObservabilityFetchDataPlugins, boolean>> {
-  const apps: ObservabilityFetchDataPlugins[] = ['apm', 'uptime', 'infra_logs', 'infra_metrics'];
-
-  const promises = apps.map(async (app) => getDataHandler(app)?.hasData() || false);
-
-  const results = await Promise.allSettled(promises);
-
-  const [apm, uptime, logs, metrics] = results.map((result) => {
-    if (result.status === 'fulfilled') {
-      return result.value;
-    }
-
-    console.error('Error while fetching has data', result.reason);
-    return false;
-  });
-
-  return {
-    apm,
-    uptime,
-    infra_logs: logs,
-    infra_metrics: metrics,
-  };
 }

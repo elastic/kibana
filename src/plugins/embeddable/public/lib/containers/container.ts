@@ -1,24 +1,14 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import uuid from 'uuid';
 import { merge, Subscription } from 'rxjs';
+import { startWith, pairwise } from 'rxjs/operators';
 import {
   Embeddable,
   EmbeddableInput,
@@ -30,7 +20,7 @@ import {
 import { IContainer, ContainerInput, ContainerOutput, PanelState } from './i_container';
 import { PanelNotFoundError, EmbeddableFactoryNotFoundError } from '../errors';
 import { EmbeddableStart } from '../../plugin';
-import { isSavedObjectEmbeddableInput } from '../embeddables/saved_object_embeddable';
+import { isSavedObjectEmbeddableInput } from '../../../common/lib/saved_object_embeddable';
 
 const getKeys = <T extends {}>(o: T): Array<keyof T> => Object.keys(o) as Array<keyof T>;
 
@@ -55,7 +45,12 @@ export abstract class Container<
     parent?: Container
   ) {
     super(input, output, parent);
-    this.subscription = this.getInput$().subscribe(() => this.maybeUpdateChildren());
+    this.subscription = this.getInput$()
+      // At each update event, get both the previous and current state
+      .pipe(startWith(input), pairwise())
+      .subscribe(([{ panels: prevPanels }, { panels: currentPanels }]) => {
+        this.maybeUpdateChildren(currentPanels, prevPanels);
+      });
   }
 
   public updateInputForChild<EEI extends EmbeddableInput = EmbeddableInput>(
@@ -165,7 +160,7 @@ export abstract class Container<
       return this.children[id] as TEmbeddable;
     }
 
-    return new Promise((resolve, reject) => {
+    return new Promise<TEmbeddable>((resolve, reject) => {
       const subscription = merge(this.getOutput$(), this.getInput$()).subscribe(() => {
         if (this.output.embeddableLoaded[id]) {
           subscription.unsubscribe();
@@ -175,6 +170,7 @@ export abstract class Container<
         // If we hit this, the panel was removed before the embeddable finished loading.
         if (this.input.panels[id] === undefined) {
           subscription.unsubscribe();
+          // @ts-expect-error undefined in not assignable to TEmbeddable | ErrorEmbeddable
           resolve(undefined);
         }
       });
@@ -238,9 +234,10 @@ export abstract class Container<
 
   private createNewExplicitEmbeddableInput<
     TEmbeddableInput extends EmbeddableInput = EmbeddableInput,
-    TEmbeddable extends IEmbeddable<TEmbeddableInput, EmbeddableOutput> = IEmbeddable<
-      TEmbeddableInput
-    >
+    TEmbeddable extends IEmbeddable<
+      TEmbeddableInput,
+      EmbeddableOutput
+    > = IEmbeddable<TEmbeddableInput>
   >(
     id: string,
     factory: EmbeddableFactory<TEmbeddableInput, any, TEmbeddable>,
@@ -329,16 +326,30 @@ export abstract class Container<
     return embeddable;
   }
 
-  private maybeUpdateChildren() {
-    const allIds = Object.keys({ ...this.input.panels, ...this.output.embeddableLoaded });
+  private panelHasChanged(currentPanel: PanelState, prevPanel: PanelState) {
+    if (currentPanel.type !== prevPanel.type) {
+      return true;
+    }
+  }
+
+  private maybeUpdateChildren(
+    currentPanels: TContainerInput['panels'],
+    prevPanels: TContainerInput['panels']
+  ) {
+    const allIds = Object.keys({ ...currentPanels, ...this.output.embeddableLoaded });
     allIds.forEach((id) => {
-      if (this.input.panels[id] !== undefined && this.output.embeddableLoaded[id] === undefined) {
-        this.onPanelAdded(this.input.panels[id]);
-      } else if (
-        this.input.panels[id] === undefined &&
-        this.output.embeddableLoaded[id] !== undefined
-      ) {
-        this.onPanelRemoved(id);
+      if (currentPanels[id] !== undefined && this.output.embeddableLoaded[id] === undefined) {
+        return this.onPanelAdded(currentPanels[id]);
+      }
+      if (currentPanels[id] === undefined && this.output.embeddableLoaded[id] !== undefined) {
+        return this.onPanelRemoved(id);
+      }
+      // In case of type change, remove and add a panel with the same id
+      if (currentPanels[id] && prevPanels[id]) {
+        if (this.panelHasChanged(currentPanels[id], prevPanels[id])) {
+          this.onPanelRemoved(id);
+          this.onPanelAdded(currentPanels[id]);
+        }
       }
     });
   }

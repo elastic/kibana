@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useState, ChangeEvent } from 'react';
@@ -42,7 +43,7 @@ export const CustomInterval = ({ gutterSize, buttonSize, onSubmit, defaultValue 
           <EuiFormRow
             label={strings.getFormLabel()}
             helpText={strings.getFormDescription()}
-            compressed
+            display="rowCompressed"
           >
             <EuiFieldText
               isInvalid={isInvalid}
@@ -54,7 +55,7 @@ export const CustomInterval = ({ gutterSize, buttonSize, onSubmit, defaultValue 
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
-          <EuiFormRow hasEmptyLabelSpace={true} compressed>
+          <EuiFormRow hasEmptyLabelSpace={true} display="rowCompressed">
             <EuiButton
               disabled={isInvalid}
               size={buttonSize}

@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import expect from '@kbn/expect';
 import { USER } from '../../../../functional/services/ml/security_common';
 import { FtrProviderContext } from '../../../ftr_provider_context';
@@ -76,7 +78,7 @@ export default ({ getService }: FtrProviderContext) => {
         .expect(200);
 
       expect(body.interval).to.eql('hour');
-      expect(body.anomalies.length).to.eql(12);
+      expect(body.anomalies.length).to.eql(13);
     });
 
     it('should validate request body', async () => {
@@ -123,10 +125,10 @@ export default ({ getService }: FtrProviderContext) => {
         .auth(USER.ML_UNAUTHORIZED, ml.securityCommon.getPasswordForUser(USER.ML_UNAUTHORIZED))
         .set(COMMON_REQUEST_HEADERS)
         .send(requestBody)
-        .expect(404);
+        .expect(403);
 
-      expect(body.error).to.eql('Not Found');
-      expect(body.message).to.eql('Not Found');
+      expect(body.error).to.eql('Forbidden');
+      expect(body.message).to.eql('Forbidden');
     });
   });
 };

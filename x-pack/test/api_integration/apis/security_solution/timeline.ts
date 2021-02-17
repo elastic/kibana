@@ -1,18 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
 
+import { Direction } from '../../../../plugins/security_solution/common/search_strategy';
 // @ts-expect-error
 import { timelineQuery } from '../../../../plugins/security_solution/public/timelines/containers/index.gql_query';
-import {
-  Direction,
-  // @ts-expect-error
-  GetTimelineQuery,
-} from '../../../../plugins/security_solution/public/graphql/types';
+// @ts-expect-error
+import { GetTimelineQuery } from '../../../../plugins/security_solution/public/graphql/types';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 const TO = '3000-01-01T00:00:00.000Z';

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import numeral from '@elastic/numeral';
@@ -9,6 +10,7 @@ import { shallow } from 'enzyme';
 import { get } from 'lodash/fp';
 import React from 'react';
 
+import { removeExternalLinkText } from '../../../../common/test_utils';
 import { asArrayIfExists } from '../../../common/lib/helpers';
 import { getMockNetflowData } from '../../../common/mock';
 import '../../../common/mock/match_media';
@@ -46,6 +48,15 @@ import {
   NETWORK_PROTOCOL_FIELD_NAME,
   NETWORK_TRANSPORT_FIELD_NAME,
 } from './field_names';
+
+jest.mock('@elastic/eui', () => {
+  const original = jest.requireActual('@elastic/eui');
+  return {
+    ...original,
+    // eslint-disable-next-line react/display-name
+    EuiScreenReaderOnly: () => <></>,
+  };
+});
 
 const getSourceDestinationInstance = () => (
   <SourceDestination
@@ -189,9 +200,11 @@ describe('SourceDestination', () => {
   test('it renders the destination ip and port, separated with a colon', () => {
     const wrapper = mount(<TestProviders>{getSourceDestinationInstance()}</TestProviders>);
 
-    expect(wrapper.find('[data-test-subj="destination-ip-and-port"]').first().text()).toEqual(
-      '10.1.2.3:80'
-    );
+    expect(
+      removeExternalLinkText(
+        wrapper.find('[data-test-subj="destination-ip-and-port"]').first().text()
+      )
+    ).toEqual('10.1.2.3:80');
   });
 
   test('it renders destination.packets', () => {
@@ -313,9 +326,9 @@ describe('SourceDestination', () => {
   test('it renders the source ip and port, separated with a colon', () => {
     const wrapper = mount(<TestProviders>{getSourceDestinationInstance()}</TestProviders>);
 
-    expect(wrapper.find('[data-test-subj="source-ip-and-port"]').first().text()).toEqual(
-      '192.168.1.2:9987'
-    );
+    expect(
+      removeExternalLinkText(wrapper.find('[data-test-subj="source-ip-and-port"]').first().text())
+    ).toEqual('192.168.1.2:9987');
   });
 
   test('it renders source.packets', () => {

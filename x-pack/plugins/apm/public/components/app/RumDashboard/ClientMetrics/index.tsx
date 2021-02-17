@@ -1,16 +1,25 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import * as React from 'react';
 import numeral from '@elastic/numeral';
 import styled from 'styled-components';
 import { useContext, useEffect } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiStat, EuiToolTip } from '@elastic/eui';
-import { useFetcher } from '../../../../hooks/useFetcher';
-import { useUrlParams } from '../../../../hooks/useUrlParams';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiStat,
+  EuiToolTip,
+  EuiIconTip,
+} from '@elastic/eui';
+import { useFetcher } from '../../../../hooks/use_fetcher';
 import { I18LABELS } from '../translations';
+import { useUxQuery } from '../hooks/useUxQuery';
+import { formatToSec } from '../UXMetrics/KeyUXMetrics';
 import { CsmSharedContext } from '../CsmSharedContext';
 
 const ClFlexGroup = styled(EuiFlexGroup)`
@@ -21,30 +30,42 @@ const ClFlexGroup = styled(EuiFlexGroup)`
   }
 `;
 
-export function ClientMetrics() {
-  const { urlParams, uiFilters } = useUrlParams();
+function formatTitle(unit: string, value?: number) {
+  if (typeof value === 'undefined') return I18LABELS.dataMissing;
+  return formatToSec(value, unit);
+}
 
-  const { start, end, searchTerm } = urlParams;
+function PageViewsTotalTitle({ pageViews }: { pageViews?: number }) {
+  if (typeof pageViews === 'undefined') {
+    return <>{I18LABELS.dataMissing}</>;
+  }
+  return pageViews < 10000 ? (
+    <>{numeral(pageViews).format('0,0')}</>
+  ) : (
+    <EuiToolTip content={numeral(pageViews).format('0,0')}>
+      <>{numeral(pageViews).format('0 a')}</>
+    </EuiToolTip>
+  );
+}
+
+export function ClientMetrics() {
+  const uxQuery = useUxQuery();
 
   const { data, status } = useFetcher(
     (callApmApi) => {
-      const { serviceName } = uiFilters;
-      if (start && end && serviceName) {
+      if (uxQuery) {
         return callApmApi({
-          pathname: '/api/apm/rum/client-metrics',
+          endpoint: 'GET /api/apm/rum/client-metrics',
           params: {
             query: {
-              start,
-              end,
-              uiFilters: JSON.stringify(uiFilters),
-              urlQuery: searchTerm,
+              ...uxQuery,
             },
           },
         });
       }
       return Promise.resolve(null);
     },
-    [start, end, uiFilters, searchTerm]
+    [uxQuery]
   );
 
   const { setSharedData } = useContext(CsmSharedContext);
@@ -60,29 +81,55 @@ export function ClientMetrics() {
       <EuiFlexItem grow={false} style={STAT_STYLE}>
         <EuiStat
           titleSize="l"
-          title={
-            (((data?.backEnd?.value ?? 0) * 1000).toFixed(0) ?? '-') + ' ms'
+          title={formatTitle('ms', data?.totalPageLoadDuration?.value)}
+          description={
+            <>
+              {I18LABELS.totalPageLoad}
+              <EuiIconTip
+                content={I18LABELS.totalPageLoadTooltip}
+                type="questionInCircle"
+              />
+            </>
           }
-          description={I18LABELS.backEnd}
           isLoading={status !== 'success'}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false} style={STAT_STYLE}>
         <EuiStat
           titleSize="l"
-          title={((data?.frontEnd?.value ?? 0)?.toFixed(2) ?? '-') + ' s'}
-          description={I18LABELS.frontEnd}
+          title={formatTitle('ms', data?.backEnd?.value)}
+          description={
+            <>
+              {I18LABELS.backEnd}
+              <EuiIconTip
+                content={I18LABELS.backEndTooltip}
+                type="questionInCircle"
+              />
+            </>
+          }
           isLoading={status !== 'success'}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false} style={STAT_STYLE}>
         <EuiStat
           titleSize="l"
-          title={
-            <EuiToolTip content={data?.pageViews?.value}>
-              <>{numeral(data?.pageViews?.value).format('0 a') ?? '-'}</>
-            </EuiToolTip>
+          title={formatTitle('ms', data?.frontEnd?.value)}
+          description={
+            <>
+              {I18LABELS.frontEnd}
+              <EuiIconTip
+                content={I18LABELS.frontEndTooltip}
+                type="questionInCircle"
+              />
+            </>
           }
+          isLoading={status !== 'success'}
+        />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false} style={STAT_STYLE}>
+        <EuiStat
+          titleSize="l"
+          title={<PageViewsTotalTitle pageViews={data?.pageViews?.value} />}
           description={I18LABELS.pageViews}
           isLoading={status !== 'success'}
         />

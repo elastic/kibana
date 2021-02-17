@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { checkSavedObjectsPrivilegesWithRequestFactory } from './check_saved_objects_privileges';
@@ -95,6 +96,38 @@ describe('#checkSavedObjectsPrivileges', () => {
       ];
       expect(mockCheckPrivileges.atSpaces).toHaveBeenCalledWith(spaceIds, { kibana: actions });
     });
+
+    test(`uses checkPrivileges.globally when checking for "all spaces" (*)`, async () => {
+      const expectedResult = Symbol();
+      mockCheckPrivileges.globally.mockReturnValue(expectedResult as any);
+      mockSpacesService = undefined;
+      const checkSavedObjectsPrivileges = createFactory();
+
+      const namespaces = [undefined, 'default', namespace1, namespace1, '*'];
+      const result = await checkSavedObjectsPrivileges(actions, namespaces);
+
+      expect(result).toBe(expectedResult);
+      expect(mockCheckPrivilegesWithRequest).toHaveBeenCalledTimes(1);
+      expect(mockCheckPrivilegesWithRequest).toHaveBeenCalledWith(request);
+      expect(mockCheckPrivileges.globally).toHaveBeenCalledTimes(1);
+      expect(mockCheckPrivileges.globally).toHaveBeenCalledWith({ kibana: actions });
+    });
+
+    test(`uses checkPrivileges.globally when Spaces is disabled`, async () => {
+      const expectedResult = Symbol();
+      mockCheckPrivileges.globally.mockReturnValue(expectedResult as any);
+      mockSpacesService = undefined;
+      const checkSavedObjectsPrivileges = createFactory();
+
+      const namespaces = [undefined, 'default', namespace1, namespace1, '*'];
+      const result = await checkSavedObjectsPrivileges(actions, namespaces);
+
+      expect(result).toBe(expectedResult);
+      expect(mockCheckPrivilegesWithRequest).toHaveBeenCalledTimes(1);
+      expect(mockCheckPrivilegesWithRequest).toHaveBeenCalledWith(request);
+      expect(mockCheckPrivileges.globally).toHaveBeenCalledTimes(1);
+      expect(mockCheckPrivileges.globally).toHaveBeenCalledWith({ kibana: actions });
+    });
   });
 
   describe('when checking a single namespace', () => {
@@ -113,6 +146,21 @@ describe('#checkSavedObjectsPrivileges', () => {
       expect(mockCheckPrivileges.atSpace).toHaveBeenCalledTimes(1);
       const spaceId = mockSpacesService!.namespaceToSpaceId.mock.results[0].value;
       expect(mockCheckPrivileges.atSpace).toHaveBeenCalledWith(spaceId, { kibana: actions });
+    });
+
+    test(`uses checkPrivileges.globally when checking for "all spaces" (*)`, async () => {
+      const expectedResult = Symbol();
+      mockCheckPrivileges.globally.mockReturnValue(expectedResult as any);
+      mockSpacesService = undefined;
+      const checkSavedObjectsPrivileges = createFactory();
+
+      const result = await checkSavedObjectsPrivileges(actions, '*');
+
+      expect(result).toBe(expectedResult);
+      expect(mockCheckPrivilegesWithRequest).toHaveBeenCalledTimes(1);
+      expect(mockCheckPrivilegesWithRequest).toHaveBeenCalledWith(request);
+      expect(mockCheckPrivileges.globally).toHaveBeenCalledTimes(1);
+      expect(mockCheckPrivileges.globally).toHaveBeenCalledWith({ kibana: actions });
     });
 
     test(`uses checkPrivileges.globally when Spaces is disabled`, async () => {

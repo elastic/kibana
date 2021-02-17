@@ -1,21 +1,11 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
+
 import React, { useEffect } from 'react';
 import { act } from 'react-dom/test-utils';
 
@@ -196,7 +186,9 @@ describe('useForm() hook', () => {
       });
 
       expect(isValid).toBe(false);
-      expect(data).toEqual({}); // Don't build the object (and call the serializers()) when invalid
+      // If the form is not valid, we don't build the final object to avoid
+      // calling the serializer(s) with invalid values.
+      expect(data).toEqual({});
     });
   });
 
@@ -209,7 +201,13 @@ describe('useForm() hook', () => {
 
     test('should allow subscribing to the form data changes and provide a handler to build the form data', async () => {
       const TestComp = ({ onData }: { onData: OnUpdateHandler }) => {
-        const { form } = useForm();
+        const { form } = useForm({
+          serializer: (value) => ({
+            user: {
+              name: value.user.name.toUpperCase(),
+            },
+          }),
+        });
         const { subscribe } = form;
 
         useEffect(() => {
@@ -247,12 +245,13 @@ describe('useForm() hook', () => {
         setInputValue('usernameField', 'John');
       });
 
-      [{ data, isValid }] = onFormData.mock.calls[onFormData.mock.calls.length - 1] as Parameters<
-        OnUpdateHandler
-      >;
+      [{ data, isValid }] = onFormData.mock.calls[
+        onFormData.mock.calls.length - 1
+      ] as Parameters<OnUpdateHandler>;
 
-      expect(data.raw).toEqual({ 'user.name': 'John' });
-      expect(data.format()).toEqual({ user: { name: 'John' } });
+      expect(data.internal).toEqual({ user: { name: 'John' } });
+      // Transform name to uppercase as decalred in our serializer func
+      expect(data.format()).toEqual({ user: { name: 'JOHN' } });
       // As we have touched all fields, the validity went from "undefined" to "true"
       expect(isValid).toBe(true);
     });
@@ -296,14 +295,16 @@ describe('useForm() hook', () => {
 
       expect(onFormData.mock.calls.length).toBe(1);
 
-      const [{ data }] = onFormData.mock.calls[onFormData.mock.calls.length - 1] as Parameters<
-        OnUpdateHandler
-      >;
+      const [{ data }] = onFormData.mock.calls[
+        onFormData.mock.calls.length - 1
+      ] as Parameters<OnUpdateHandler>;
 
-      expect(data.raw).toEqual({
+      expect(data.internal).toEqual({
         title: defaultValue.title,
         subTitle: 'hasBeenOverridden',
-        'user.name': defaultValue.user.name,
+        user: {
+          name: defaultValue.user.name,
+        },
       });
     });
   });

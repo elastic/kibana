@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -71,14 +72,12 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('should add new user customer1 ', async function () {
-      await PageObjects.security.clickElasticsearchUsers();
-      await PageObjects.security.addUser({
+      await PageObjects.security.createUser({
         username: 'customer1',
         password: 'changeme',
-        confirmPassword: 'changeme',
-        fullname: 'customer one',
+        confirm_password: 'changeme',
+        full_name: 'customer one',
         email: 'flstest@elastic.com',
-        save: true,
         roles: ['kibana_admin', 'a_viewssnrole'],
       });
       const users = keyBy(await PageObjects.security.getElasticsearchUsers(), 'username');
@@ -87,14 +86,12 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('should add new user customer2 ', async function () {
-      await PageObjects.security.clickElasticsearchUsers();
-      await PageObjects.security.addUser({
+      await PageObjects.security.createUser({
         username: 'customer2',
         password: 'changeme',
-        confirmPassword: 'changeme',
-        fullname: 'customer two',
+        confirm_password: 'changeme',
+        full_name: 'customer two',
         email: 'flstest@elastic.com',
-        save: true,
         roles: ['kibana_admin', 'a_view_no_ssn_role'],
       });
       const users = keyBy(await PageObjects.security.getElasticsearchUsers(), 'username');
@@ -112,7 +109,7 @@ export default function ({ getService, getPageObjects }) {
       });
       const rowData = await PageObjects.discover.getDocTableIndex(1);
       expect(rowData).to.be(
-        'customer_ssn:444.555.6666 customer_name:ABC Company customer_region:WEST _id:2 _type: - _index:flstest _score:0'
+        '_id:2 _type: - _index:flstest _score:0 customer_name.keyword:ABC Company customer_ssn:444.555.6666 customer_region.keyword:WEST runtime_customer_ssn:444.555.6666 calculated at runtime customer_region:WEST customer_name:ABC Company customer_ssn.keyword:444.555.6666'
       );
     });
 
@@ -126,7 +123,7 @@ export default function ({ getService, getPageObjects }) {
       });
       const rowData = await PageObjects.discover.getDocTableIndex(1);
       expect(rowData).to.be(
-        'customer_name:ABC Company customer_region:WEST _id:2 _type: - _index:flstest _score:0'
+        '_id:2 _type: - _index:flstest _score:0 customer_name.keyword:ABC Company customer_region.keyword:WEST customer_region:WEST customer_name:ABC Company'
       );
     });
 

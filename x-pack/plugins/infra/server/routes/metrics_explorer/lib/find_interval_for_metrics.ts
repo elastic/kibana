@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { uniq } from 'lodash';
@@ -34,7 +35,8 @@ export const findIntervalForMetrics = async (
 
   const modules = await Promise.all(
     fields.map(
-      async (field) => await getDatasetForField(client, field as string, options.indexPattern)
+      async (field) =>
+        await getDatasetForField(client, field as string, options.indexPattern, options.timerange)
     )
   );
 

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 /* eslint-disable no-console */
@@ -122,11 +123,69 @@ async function init() {
   });
   await createRole({
     roleName: KIBANA_READ_ROLE,
-    kibanaPrivileges: { base: ['read'] },
+    kibanaPrivileges: {
+      feature: {
+        // core
+        discover: ['read'],
+        dashboard: ['read'],
+        canvas: ['read'],
+        ml: ['read'],
+        maps: ['read'],
+        graph: ['read'],
+        visualize: ['read'],
+
+        // observability
+        logs: ['read'],
+        infrastructure: ['read'],
+        apm: ['read'],
+        uptime: ['read'],
+
+        // security
+        siem: ['read'],
+
+        // management
+        dev_tools: ['read'],
+        advancedSettings: ['read'],
+        indexPatterns: ['read'],
+        savedObjectsManagement: ['read'],
+        stackAlerts: ['read'],
+        fleet: ['read'],
+        actions: ['read'],
+      },
+    },
   });
   await createRole({
     roleName: KIBANA_WRITE_ROLE,
-    kibanaPrivileges: { base: ['all'] },
+    kibanaPrivileges: {
+      feature: {
+        // core
+        discover: ['all'],
+        dashboard: ['all'],
+        canvas: ['all'],
+        ml: ['all'],
+        maps: ['all'],
+        graph: ['all'],
+        visualize: ['all'],
+
+        // observability
+        logs: ['all'],
+        infrastructure: ['all'],
+        apm: ['all'],
+        uptime: ['all'],
+
+        // security
+        siem: ['all'],
+
+        // management
+        dev_tools: ['all'],
+        advancedSettings: ['all'],
+        indexPatterns: ['all'],
+        savedObjectsManagement: ['all'],
+        stackAlerts: ['all'],
+        fleet: ['all'],
+        actions: ['all'],
+      },
+    },
   });
 
   // read access only to APM + apm index access

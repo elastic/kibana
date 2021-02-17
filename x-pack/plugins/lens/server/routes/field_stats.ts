@@ -1,20 +1,23 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import Boom from 'boom';
+import Boom from '@hapi/boom';
+import { errors } from '@elastic/elasticsearch';
 import DateMath from '@elastic/datemath';
 import { schema } from '@kbn/config-schema';
 import { CoreSetup } from 'src/core/server';
 import { IFieldType } from 'src/plugins/data/common';
-import { ESSearchResponse } from '../../../apm/typings/elasticsearch';
+import { ESSearchResponse } from '../../../../typings/elasticsearch';
 import { FieldStatsResponse, BASE_API_URL } from '../../common';
+import { PluginStartContract } from '../plugin';
 
 const SHARD_SIZE = 5000;
 
-export async function initFieldsRoute(setup: CoreSetup) {
+export async function initFieldsRoute(setup: CoreSetup<PluginStartContract>) {
   const router = setup.http.createRouter();
   router.post(
     {
@@ -46,7 +49,7 @@ export async function initFieldsRoute(setup: CoreSetup) {
       },
     },
     async (context, req, res) => {
-      const requestClient = context.core.elasticsearch.legacy.client;
+      const requestClient = context.core.elasticsearch.client.asCurrentUser;
       const { fromDate, toDate, timeFieldName, field, dslQuery } = req.body;
 
       try {
@@ -70,20 +73,24 @@ export async function initFieldsRoute(setup: CoreSetup) {
           },
         };
 
-        const search = (aggs: unknown) =>
-          requestClient.callAsCurrentUser('search', {
+        const search = async (aggs: unknown) => {
+          const { body: result } = await requestClient.search({
             index: req.params.indexPatternTitle,
+            track_total_hits: true,
             body: {
               query,
               aggs,
             },
-            // The hits total changed in 7.0 from number to object, unless this flag is set
-            // this is a workaround for elasticsearch response types that are from 6.x
-            restTotalHitsAsInt: true,
             size: 0,
           });
+          return result;
+        };
 
-        if (field.type === 'number') {
+        if (field.type === 'histogram') {
+          return res.ok({
+            body: await getNumberHistogram(search, field, false),
+          });
+        } else if (field.type === 'number') {
           return res.ok({
             body: await getNumberHistogram(search, field),
           });
@@ -97,7 +104,7 @@ export async function initFieldsRoute(setup: CoreSetup) {
           body: await getStringSamples(search, field),
         });
       } catch (e) {
-        if (e.status === 404) {
+        if (e instanceof errors.ResponseError && e.statusCode === 404) {
           return res.notFound();
         }
         if (e.isBoom) {
@@ -117,21 +124,31 @@ export async function initFieldsRoute(setup: CoreSetup) {
 
 export async function getNumberHistogram(
   aggSearchWithBody: (body: unknown) => Promise<unknown>,
-  field: IFieldType
+  field: IFieldType,
+  useTopHits = true
 ): Promise<FieldStatsResponse> {
   const fieldRef = getFieldRef(field);
 
-  const searchBody = {
+  const baseAggs = {
+    min_value: {
+      min: { field: field.name },
+    },
+    max_value: {
+      max: { field: field.name },
+    },
+    sample_count: { value_count: { ...fieldRef } },
+  };
+  const searchWithoutHits = {
+    sample: {
+      sampler: { shard_size: SHARD_SIZE },
+      aggs: { ...baseAggs },
+    },
+  };
+  const searchWithHits = {
     sample: {
       sampler: { shard_size: SHARD_SIZE },
       aggs: {
-        min_value: {
-          min: { field: field.name },
-        },
-        max_value: {
-          max: { field: field.name },
-        },
-        sample_count: { value_count: { ...fieldRef } },
+        ...baseAggs,
         top_values: {
           terms: { ...fieldRef, size: 10 },
         },
@@ -139,15 +156,18 @@ export async function getNumberHistogram(
     },
   };
 
-  const minMaxResult = (await aggSearchWithBody(searchBody)) as ESSearchResponse<
-    unknown,
-    { body: { aggs: typeof searchBody } },
-    { restTotalHitsAsInt: true }
-  >;
+  const minMaxResult = (await aggSearchWithBody(
+    useTopHits ? searchWithHits : searchWithoutHits
+  )) as
+    | ESSearchResponse<unknown, { body: { aggs: typeof searchWithHits } }>
+    | ESSearchResponse<unknown, { body: { aggs: typeof searchWithoutHits } }>;
 
   const minValue = minMaxResult.aggregations!.sample.min_value.value;
   const maxValue = minMaxResult.aggregations!.sample.max_value.value;
-  const terms = minMaxResult.aggregations!.sample.top_values;
+  const terms =
+    'top_values' in minMaxResult.aggregations!.sample
+      ? minMaxResult.aggregations!.sample.top_values
+      : { buckets: [] };
   const topValuesBuckets = {
     buckets: terms.buckets.map((bucket) => ({
       count: bucket.doc_count,
@@ -163,11 +183,16 @@ export async function getNumberHistogram(
 
   if (histogramInterval === 0) {
     return {
-      totalDocuments: minMaxResult.hits.total,
+      totalDocuments: minMaxResult.hits.total.value,
       sampledValues: minMaxResult.aggregations!.sample.sample_count.value!,
       sampledDocuments: minMaxResult.aggregations!.sample.doc_count,
       topValues: topValuesBuckets,
-      histogram: { buckets: [] },
+      histogram: useTopHits
+        ? { buckets: [] }
+        : {
+            // Insert a fake bucket for a single-value histogram
+            buckets: [{ count: minMaxResult.aggregations!.sample.doc_count, key: minValue }],
+          },
     };
   }
 
@@ -186,12 +211,11 @@ export async function getNumberHistogram(
   };
   const histogramResult = (await aggSearchWithBody(histogramBody)) as ESSearchResponse<
     unknown,
-    { body: { aggs: typeof histogramBody } },
-    { restTotalHitsAsInt: true }
+    { body: { aggs: typeof histogramBody } }
   >;
 
   return {
-    totalDocuments: minMaxResult.hits.total,
+    totalDocuments: minMaxResult.hits.total.value,
     sampledDocuments: minMaxResult.aggregations!.sample.doc_count,
     sampledValues: minMaxResult.aggregations!.sample.sample_count.value!,
     histogram: {
@@ -226,12 +250,11 @@ export async function getStringSamples(
   };
   const topValuesResult = (await aggSearchWithBody(topValuesBody)) as ESSearchResponse<
     unknown,
-    { body: { aggs: typeof topValuesBody } },
-    { restTotalHitsAsInt: true }
+    { body: { aggs: typeof topValuesBody } }
   >;
 
   return {
-    totalDocuments: topValuesResult.hits.total,
+    totalDocuments: topValuesResult.hits.total.value,
     sampledDocuments: topValuesResult.aggregations!.sample.doc_count,
     sampledValues: topValuesResult.aggregations!.sample.sample_count.value!,
     topValues: {
@@ -274,12 +297,11 @@ export async function getDateHistogram(
   };
   const results = (await aggSearchWithBody(histogramBody)) as ESSearchResponse<
     unknown,
-    { body: { aggs: typeof histogramBody } },
-    { restTotalHitsAsInt: true }
+    { body: { aggs: typeof histogramBody } }
   >;
 
   return {
-    totalDocuments: results.hits.total,
+    totalDocuments: results.hits.total.value,
     histogram: {
       buckets: results.aggregations!.histo.buckets.map((bucket) => ({
         count: bucket.doc_count,

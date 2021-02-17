@@ -1,15 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiButtonIcon, EuiLink, EuiScreenReaderOnly } from '@elastic/eui';
 
 import React from 'react';
-// Prefer importing entire lodash library, e.g. import { get } from "lodash"
-// eslint-disable-next-line no-restricted-imports
-import get from 'lodash/get';
+import { get } from 'lodash';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -18,7 +17,7 @@ import {
   formatHumanReadableDate,
   formatHumanReadableDateTime,
   formatHumanReadableDateTimeSeconds,
-} from '../../util/date_utils';
+} from '../../../../common/util/date_utils';
 
 import { DescriptionCell } from './description_cell';
 import { DetectorCell } from './detector_cell';
@@ -250,7 +249,6 @@ export function getColumns(
       name: i18n.translate('xpack.ml.anomaliesTable.categoryExamplesColumnName', {
         defaultMessage: 'category examples',
       }),
-      sortable: false,
       truncateText: true,
       render: (item) => {
         const examples = get(examplesByJobId, [item.jobId, item.entityValue], []);
@@ -269,7 +267,6 @@ export function getColumns(
           </EuiLink>
         );
       },
-      textOnly: true,
       width: '13%',
     });
   }

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { act } from 'react-dom/test-utils';
@@ -127,7 +128,7 @@ describe('Index Templates tab', () => {
         const indexTemplate = templates[i];
         const { name, indexPatterns, ilmPolicy, composedOf, template } = indexTemplate;
 
-        const hasContent = !!template.settings || !!template.mappings || !!template.aliases;
+        const hasContent = !!template?.settings || !!template?.mappings || !!template?.aliases;
         const ilmPolicyName = ilmPolicy && ilmPolicy.name ? ilmPolicy.name : '';
         const composedOfString = composedOf ? composedOf.join(',') : '';
 
@@ -152,7 +153,7 @@ describe('Index Templates tab', () => {
         const legacyIndexTemplate = legacyTemplates[i];
         const { name, indexPatterns, ilmPolicy, template } = legacyIndexTemplate;
 
-        const hasContent = !!template.settings || !!template.mappings || !!template.aliases;
+        const hasContent = !!template?.settings || !!template?.mappings || !!template?.aliases;
         const ilmPolicyName = ilmPolicy && ilmPolicy.name ? ilmPolicy.name : '';
 
         try {

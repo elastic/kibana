@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiInputPopover, EuiSelectableOption, EuiFieldText } from '@elastic/eui';
@@ -106,14 +107,16 @@ const SearchTimelineSuperSelectComponent: React.FC<SearchTimelineSuperSelectProp
               description: t.description,
               favorite: t.favorite,
               label: t.title,
-              id: t.savedObjectId,
+              id: timelineType === TimelineType.template ? t.templateTimelineId : t.savedObjectId,
               key: `${t.title}-${index}`,
               title: t.title,
-              checked: t.savedObjectId === timelineId ? 'on' : undefined,
+              checked: [t.savedObjectId, t.templateTimelineId].includes(timelineId)
+                ? 'on'
+                : undefined,
             } as EuiSelectableOption)
         ),
     ],
-    [hideUntitled, timelineId]
+    [hideUntitled, timelineId, timelineType]
   );
 
   return (

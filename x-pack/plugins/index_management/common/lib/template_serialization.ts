@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import {
   TemplateDeserialized,
   LegacyTemplateSerialized,
@@ -85,7 +87,7 @@ export function deserializeTemplateList(
 ): TemplateListItem[] {
   return indexTemplates.map(({ name, index_template: templateSerialized }) => {
     const {
-      template: { mappings, settings, aliases },
+      template: { mappings, settings, aliases } = {},
       ...deserializedTemplate
     } = deserializeTemplate({ name, ...templateSerialized }, cloudManagedTemplatePrefix);
 
@@ -149,7 +151,7 @@ export function deserializeLegacyTemplateList(
 ): TemplateListItem[] {
   return Object.entries(indexTemplatesByName).map(([name, templateSerialized]) => {
     const {
-      template: { mappings, settings, aliases },
+      template: { mappings, settings, aliases } = {},
       ...deserializedTemplate
     } = deserializeLegacyTemplate({ name, ...templateSerialized }, cloudManagedTemplatePrefix);
 

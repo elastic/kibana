@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -9,6 +10,7 @@ import expect from '@kbn/expect';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../plugins/security_solution/common/constants';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
+  createRule,
   createSignalsIndex,
   deleteAllAlerts,
   deleteSignalsIndex,
@@ -22,7 +24,6 @@ import {
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
-  const es = getService('es');
 
   describe('find_rules', () => {
     beforeEach(async () => {
@@ -31,7 +32,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
     afterEach(async () => {
       await deleteSignalsIndex(supertest);
-      await deleteAllAlerts(es);
+      await deleteAllAlerts(supertest);
     });
 
     it('should return an empty find body correctly if no rules are loaded', async () => {
@@ -50,12 +51,7 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     it('should return a single rule when a single rule is loaded from a find with defaults added', async () => {
-      // add a single rule
-      await supertest
-        .post(DETECTION_ENGINE_RULES_URL)
-        .set('kbn-xsrf', 'true')
-        .send(getSimpleRule())
-        .expect(200);
+      await createRule(supertest, getSimpleRule());
 
       // query the single rule from _find
       const { body } = await supertest

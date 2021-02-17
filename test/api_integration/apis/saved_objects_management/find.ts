@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import expect from '@kbn/expect';
@@ -22,11 +11,20 @@ import { Response } from 'supertest';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
-  const es = getService('legacyEs');
+  const esDeleteAllIndices = getService('esDeleteAllIndices');
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
 
   describe('find', () => {
+    let KIBANA_VERSION: string;
+
+    before(async () => {
+      KIBANA_VERSION = await kibanaServer.version.get();
+      expect(typeof KIBANA_VERSION).to.eql('string');
+      expect(KIBANA_VERSION.length).to.be.greaterThan(0);
+    });
+
     describe('with kibana index', () => {
       before(() => esArchiver.load('saved_objects/basic'));
       after(() => esArchiver.unload('saved_objects/basic'));
@@ -44,11 +42,12 @@ export default function ({ getService }: FtrProviderContext) {
                 {
                   type: 'visualization',
                   id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
-                  version: 'WzIsMV0=',
+                  version: 'WzE4LDJd',
                   attributes: {
                     title: 'Count of requests',
                   },
                   migrationVersion: resp.body.saved_objects[0].migrationVersion,
+                  coreMigrationVersion: KIBANA_VERSION,
                   namespaces: ['default'],
                   references: [
                     {
@@ -120,16 +119,72 @@ export default function ({ getService }: FtrProviderContext) {
               });
             }));
       });
+
+      describe('`hasReference` and `hasReferenceOperator` parameters', () => {
+        before(() => esArchiver.load('saved_objects/references'));
+        after(() => esArchiver.unload('saved_objects/references'));
+
+        it('search for a reference', async () => {
+          await supertest
+            .get('/api/kibana/management/saved_objects/_find')
+            .query({
+              type: 'visualization',
+              hasReference: JSON.stringify({ type: 'ref-type', id: 'ref-1' }),
+            })
+            .expect(200)
+            .then((resp) => {
+              const objects = resp.body.saved_objects;
+              expect(objects.map((obj: any) => obj.id)).to.eql(['only-ref-1', 'ref-1-and-ref-2']);
+            });
+        });
+
+        it('search for multiple references with OR operator', async () => {
+          await supertest
+            .get('/api/kibana/management/saved_objects/_find')
+            .query({
+              type: 'visualization',
+              hasReference: JSON.stringify([
+                { type: 'ref-type', id: 'ref-1' },
+                { type: 'ref-type', id: 'ref-2' },
+              ]),
+              hasReferenceOperator: 'OR',
+            })
+            .expect(200)
+            .then((resp) => {
+              const objects = resp.body.saved_objects;
+              expect(objects.map((obj: any) => obj.id)).to.eql([
+                'only-ref-1',
+                'ref-1-and-ref-2',
+                'only-ref-2',
+              ]);
+            });
+        });
+
+        it('search for multiple references with AND operator', async () => {
+          await supertest
+            .get('/api/kibana/management/saved_objects/_find')
+            .query({
+              type: 'visualization',
+              hasReference: JSON.stringify([
+                { type: 'ref-type', id: 'ref-1' },
+                { type: 'ref-type', id: 'ref-2' },
+              ]),
+              hasReferenceOperator: 'AND',
+            })
+            .expect(200)
+            .then((resp) => {
+              const objects = resp.body.saved_objects;
+              expect(objects.map((obj: any) => obj.id)).to.eql(['ref-1-and-ref-2']);
+            });
+        });
+      });
     });
 
     describe('without kibana index', () => {
       before(
         async () =>
           // just in case the kibana server has recreated it
-          await es.indices.delete({
-            index: '.kibana',
-            ignore: [404],
-          })
+          await esDeleteAllIndices('.kibana*')
       );
 
       it('should return 200 with empty response', async () =>

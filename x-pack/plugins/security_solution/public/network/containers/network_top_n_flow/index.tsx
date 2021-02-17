@@ -1,16 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { noop } from 'lodash/fp';
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import deepEqual from 'fast-deep-equal';
 
 import { ESTermQuery } from '../../../../common/typed_json';
 import { inputsModel } from '../../../common/store';
-import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
+import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { useKibana } from '../../../common/lib/kibana';
 import { createFilter } from '../../../common/containers/helpers';
 import { generateTablePaginationOptions } from '../../../common/components/paginated_table/helpers';
@@ -23,11 +24,8 @@ import {
   NetworkTopNFlowStrategyResponse,
   PageInfoPaginated,
 } from '../../../../common/search_strategy';
-import {
-  AbortError,
-  isCompleteResponse,
-  isErrorResponse,
-} from '../../../../../../../src/plugins/data/common';
+import { isCompleteResponse, isErrorResponse } from '../../../../../../../src/plugins/data/common';
+import { AbortError } from '../../../../../../../src/plugins/kibana_utils/common';
 import { getInspectResponse } from '../../../helpers';
 import { InspectResponse } from '../../../types';
 import * as i18n from './translations';
@@ -61,12 +59,13 @@ export const useNetworkTopNFlow = ({
   filterQuery,
   flowTarget,
   indexNames,
+  ip,
   skip,
   startDate,
   type,
 }: UseNetworkTopNFlow): [boolean, NetworkTopNFlowArgs] => {
-  const getTopNFlowSelector = networkSelectors.topNFlowSelector();
-  const { activePage, limit, sort } = useShallowEqualSelector((state) =>
+  const getTopNFlowSelector = useMemo(() => networkSelectors.topNFlowSelector(), []);
+  const { activePage, limit, sort } = useDeepEqualSelector((state) =>
     getTopNFlowSelector(state, type, flowTarget)
   );
   const { data, notifications } = useKibana().services;
@@ -74,26 +73,23 @@ export const useNetworkTopNFlow = ({
   const abortCtrl = useRef(new AbortController());
   const [loading, setLoading] = useState(false);
 
-  const [networkTopNFlowRequest, setTopNFlowRequest] = useState<NetworkTopNFlowRequestOptions>({
-    defaultIndex: indexNames,
-    factoryQueryType: NetworkQueries.topNFlow,
-    filterQuery: createFilter(filterQuery),
-    flowTarget,
-    pagination: generateTablePaginationOptions(activePage, limit),
-    sort,
-    timerange: {
-      interval: '12h',
-      from: startDate ? startDate : '',
-      to: endDate ? endDate : new Date(Date.now()).toISOString(),
-    },
-  });
+  const [
+    networkTopNFlowRequest,
+    setTopNFlowRequest,
+  ] = useState<NetworkTopNFlowRequestOptions | null>(null);
 
   const wrappedLoadMore = useCallback(
     (newActivePage: number) => {
-      setTopNFlowRequest((prevRequest) => ({
-        ...prevRequest,
-        pagination: generateTablePaginationOptions(newActivePage, limit),
-      }));
+      setTopNFlowRequest((prevRequest) => {
+        if (!prevRequest) {
+          return prevRequest;
+        }
+
+        return {
+          ...prevRequest,
+          pagination: generateTablePaginationOptions(newActivePage, limit),
+        };
+      });
     },
     [limit]
   );
@@ -117,7 +113,11 @@ export const useNetworkTopNFlow = ({
   });
 
   const networkTopNFlowSearch = useCallback(
-    (request: NetworkTopNFlowRequestOptions) => {
+    (request: NetworkTopNFlowRequestOptions | null) => {
+      if (request == null || skip) {
+        return;
+      }
+
       let didCancel = false;
       const asyncSearch = async () => {
         abortCtrl.current = new AbortController();
@@ -170,15 +170,18 @@ export const useNetworkTopNFlow = ({
         abortCtrl.current.abort();
       };
     },
-    [data.search, notifications.toasts]
+    [data.search, notifications.toasts, skip]
   );
 
   useEffect(() => {
     setTopNFlowRequest((prevRequest) => {
       const myRequest = {
-        ...prevRequest,
+        ...(prevRequest ?? {}),
         defaultIndex: indexNames,
+        factoryQueryType: NetworkQueries.topNFlow,
         filterQuery: createFilter(filterQuery),
+        flowTarget,
+        ip,
         pagination: generateTablePaginationOptions(activePage, limit),
         timerange: {
           interval: '12h',
@@ -187,12 +190,12 @@ export const useNetworkTopNFlow = ({
         },
         sort,
       };
-      if (!skip && !deepEqual(prevRequest, myRequest)) {
+      if (!deepEqual(prevRequest, myRequest)) {
         return myRequest;
       }
       return prevRequest;
     });
-  }, [activePage, indexNames, endDate, filterQuery, limit, startDate, sort, skip]);
+  }, [activePage, endDate, filterQuery, indexNames, ip, limit, startDate, sort, flowTarget]);
 
   useEffect(() => {
     networkTopNFlowSearch(networkTopNFlowRequest);

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { isEqual } from 'lodash';
@@ -27,13 +28,23 @@ import { DEFAULT_SAMPLER_SHARD_SIZE } from '../../../../common/constants/field_h
 
 import { ANALYSIS_CONFIG_TYPE, INDEX_STATUS } from '../../data_frame_analytics/common';
 
-import { euiDataGridStyle, euiDataGridToolbarSettings } from './common';
+import {
+  euiDataGridStyle,
+  euiDataGridToolbarSettings,
+  getFeatureImportance,
+  getTopClasses,
+} from './common';
 import { UseIndexDataReturnType } from './types';
-import { DecisionPathPopover } from './feature_importance/decision_path_popover';
-import { TopClasses } from '../../../../common/types/feature_importance';
+import { DecisionPathPopover } from '../../data_frame_analytics/pages/analytics_exploration/components/feature_importance/decision_path_popover';
+import {
+  FeatureImportanceBaseline,
+  FeatureImportance,
+  TopClasses,
+} from '../../../../common/types/feature_importance';
 import { DEFAULT_RESULTS_FIELD } from '../../../../common/constants/data_frame_analytics';
 import { DataFrameAnalysisConfigType } from '../../../../common/types/data_frame_analytics';
 
+import './data_grid.scss';
 // TODO Fix row hovering + bar highlighting
 // import { hoveredRow$ } from './column_chart';
 
@@ -44,8 +55,8 @@ export const DataGridTitle: FC<{ title: string }> = ({ title }) => (
 );
 
 interface PropsWithoutHeader extends UseIndexDataReturnType {
-  baseline?: number;
-  analysisType?: DataFrameAnalysisConfigType;
+  baseline?: FeatureImportanceBaseline;
+  analysisType?: DataFrameAnalysisConfigType | 'unknown';
   resultsField?: string;
   dataTestSubj: string;
   toastNotifications: CoreSetup['notifications']['toasts'];
@@ -99,6 +110,14 @@ export const DataGrid: FC<Props> = memo(
     //   };
     // };
 
+    // If the charts are visible, hide the column actions icon.
+    const columnsWithChartsActionized = columnsWithCharts.map((d) => {
+      if (chartsVisible === true) {
+        d.actions = false;
+      }
+      return d;
+    });
+
     const popOverContent = useMemo(() => {
       return analysisType === ANALYSIS_CONFIG_TYPE.REGRESSION ||
         analysisType === ANALYSIS_CONFIG_TYPE.CLASSIFICATION
@@ -109,22 +128,35 @@ export const DataGrid: FC<Props> = memo(
               if (!row) return <div />;
               // if resultsField for some reason is not available then use ml
               const mlResultsField = resultsField ?? DEFAULT_RESULTS_FIELD;
-              const parsedFIArray = row[mlResultsField].feature_importance;
               let predictedValue: string | number | undefined;
+              let predictedProbability: number | undefined;
               let topClasses: TopClasses = [];
               if (
                 predictionFieldName !== undefined &&
                 row &&
-                row[mlResultsField][predictionFieldName] !== undefined
+                row[`${mlResultsField}.${predictionFieldName}`] !== undefined
               ) {
-                predictedValue = row[mlResultsField][predictionFieldName];
-                topClasses = row[mlResultsField].top_classes;
+                predictedValue = row[`${mlResultsField}.${predictionFieldName}`];
+                topClasses = getTopClasses(row, mlResultsField);
+                predictedProbability = row[`${mlResultsField}.prediction_probability`];
               }
+
+              const isClassTypeBoolean = topClasses.reduce(
+                (p, c) => typeof c.class_name === 'boolean' || p,
+                false
+              );
+
+              const parsedFIArray: FeatureImportance[] = getFeatureImportance(
+                row,
+                mlResultsField,
+                isClassTypeBoolean
+              );
 
               return (
                 <DecisionPathPopover
                   analysisType={analysisType}
                   predictedValue={predictedValue}
+                  predictedProbability={predictedProbability}
                   baseline={baseline}
                   featureImportance={parsedFIArray}
                   topClasses={topClasses}
@@ -229,20 +261,22 @@ export const DataGrid: FC<Props> = memo(
             <EuiFlexItem>
               <DataGridTitle title={props.title} />
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiCopy
-                beforeMessage={props.copyToClipboardDescription}
-                textToCopy={props.copyToClipboard}
-              >
-                {(copy: () => void) => (
-                  <EuiButtonIcon
-                    onClick={copy}
-                    iconType="copyClipboard"
-                    aria-label={props.copyToClipboardDescription}
-                  />
-                )}
-              </EuiCopy>
-            </EuiFlexItem>
+            {props.copyToClipboard && props.copyToClipboardDescription && (
+              <EuiFlexItem grow={false}>
+                <EuiCopy
+                  beforeMessage={props.copyToClipboardDescription}
+                  textToCopy={props.copyToClipboard}
+                >
+                  {(copy: () => void) => (
+                    <EuiButtonIcon
+                      onClick={copy}
+                      iconType="copyClipboard"
+                      aria-label={props.copyToClipboardDescription}
+                    />
+                  )}
+                </EuiCopy>
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
         )}
         {errorCallout !== undefined && (
@@ -254,7 +288,7 @@ export const DataGrid: FC<Props> = memo(
         <div className="mlDataGrid">
           <EuiDataGrid
             aria-label={isWithHeader(props) ? props.title : ''}
-            columns={columnsWithCharts.map((c) => {
+            columns={columnsWithChartsActionized.map((c) => {
               c.initialWidth = 165;
               return c;
             })}
@@ -278,7 +312,7 @@ export const DataGrid: FC<Props> = memo(
                         })}
                       >
                         <EuiButtonEmpty
-                          aria-checked={chartsVisible}
+                          aria-pressed={chartsVisible}
                           className={`euiDataGrid__controlBtn${
                             chartsVisible ? ' euiDataGrid__controlBtn--active' : ''
                           }`}

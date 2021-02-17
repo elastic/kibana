@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FC, useCallback, useState, useEffect } from 'react';
@@ -85,10 +86,11 @@ export const EmbeddableSwimLaneContainer: FC<ExplorerSwimlaneContainerProps> = (
         uiActions.getTrigger(SWIM_LANE_SELECTION_TRIGGER).exec({
           embeddable: embeddableContext,
           data: update,
+          updateCallback: setSelectedCells.bind(null, undefined),
         });
       }
     },
-    [swimlaneData, perPage, fromPage]
+    [swimlaneData, perPage, fromPage, setSelectedCells]
   );
 
   if (error) {
@@ -115,6 +117,7 @@ export const EmbeddableSwimLaneContainer: FC<ExplorerSwimlaneContainerProps> = (
       data-test-subj="mlAnomalySwimlaneEmbeddableWrapper"
     >
       <SwimlaneContainer
+        id={id}
         data-test-subj={`mlSwimLaneEmbeddable_${embeddableContext.id}`}
         timeBuckets={timeBuckets}
         swimlaneData={swimlaneData!}
@@ -145,3 +148,7 @@ export const EmbeddableSwimLaneContainer: FC<ExplorerSwimlaneContainerProps> = (
     </div>
   );
 };
+
+// required for dynamic import using React.lazy()
+// eslint-disable-next-line import/no-default-export
+export default EmbeddableSwimLaneContainer;

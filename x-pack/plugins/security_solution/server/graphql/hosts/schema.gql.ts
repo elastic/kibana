@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import gql from 'graphql-tag';
@@ -26,6 +27,10 @@ export const hostsSchema = gql`
     type: String
   }
 
+  type AgentFields {
+    id: String
+  }
+
   type CloudInstance {
     id: [String]
   }
@@ -45,6 +50,7 @@ export const hostsSchema = gql`
     success
     failure
     warning
+    unsupported
   }
 
   type EndpointFields {
@@ -55,6 +61,7 @@ export const hostsSchema = gql`
 
   type HostItem {
     _id: String
+    agent: AgentFields
     cloud: CloudFields
     endpoint: EndpointFields
     host: HostEcsFields

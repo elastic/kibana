@@ -1,22 +1,12 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
+import Url from 'url';
 import { readFileSync } from 'fs';
 import { CA_CERT_PATH, KBN_CERT_PATH, KBN_KEY_PATH } from '@kbn/dev-utils';
 
@@ -24,22 +14,22 @@ import { createKibanaSupertestProvider } from '../../services';
 
 export default async function ({ readConfigFile }) {
   const httpConfig = await readConfigFile(require.resolve('../../config'));
+  const certificateAuthorities = [readFileSync(CA_CERT_PATH)];
 
-  const redirectPort = httpConfig.get('servers.kibana.port') + 1;
-  const supertestOptions = {
-    ...httpConfig.get('servers.kibana'),
-    port: redirectPort,
-    // test with non ssl protocol
-    protocol: 'http',
-  };
+  const redirectPort = httpConfig.get('servers.kibana.port') + 1234;
 
   return {
     testFiles: [require.resolve('./')],
     services: {
       ...httpConfig.get('services'),
       supertest: createKibanaSupertestProvider({
-        certificateAuthorities: [readFileSync(CA_CERT_PATH)],
-        options: supertestOptions,
+        certificateAuthorities,
+        kibanaUrl: Url.format({
+          ...httpConfig.get('servers.kibana'),
+          port: redirectPort,
+          // test with non ssl protocol
+          protocol: 'http',
+        }),
       }),
     },
     servers: {
@@ -48,12 +38,16 @@ export default async function ({ readConfigFile }) {
         ...httpConfig.get('servers.kibana'),
         // start the server with https
         protocol: 'https',
+        certificateAuthorities,
       },
     },
     junit: {
       reportName: 'Http SSL Integration Tests',
     },
-    esTestCluster: httpConfig.get('esTestCluster'),
+    esTestCluster: {
+      ...httpConfig.get('esTestCluster'),
+      serverArgs: ['xpack.security.enabled=false'],
+    },
     kbnTestServer: {
       ...httpConfig.get('kbnTestServer'),
       serverArgs: [

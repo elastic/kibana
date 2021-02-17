@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -15,22 +16,22 @@ export type Start = void;
 
 export interface AlertingExamplePublicSetupDeps {
   alerts: AlertingSetup;
-  triggers_actions_ui: TriggersAndActionsUIPublicPluginSetup;
+  triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
 }
 
 export class AlertingFixturePlugin implements Plugin<Setup, Start, AlertingExamplePublicSetupDeps> {
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  public setup(core: CoreSetup, { alerts, triggers_actions_ui }: AlertingExamplePublicSetupDeps) {
+  public setup(core: CoreSetup, { alerts, triggersActionsUi }: AlertingExamplePublicSetupDeps) {
     alerts.registerNavigation(
       'alerting_fixture',
       'test.noop',
       (alert: SanitizedAlert, alertType: AlertType) => `/alert/${alert.id}`
     );
 
-    triggers_actions_ui.alertTypeRegistry.register({
+    triggersActionsUi.alertTypeRegistry.register({
       id: 'test.always-firing',
-      name: 'Test Always Firing',
+      description: 'Always fires',
       iconClass: 'alert',
+      documentationUrl: null,
       alertParamsExpression: () => React.createElement('div', null, 'Test Always Firing'),
       validate: () => {
         return { errors: {} };
@@ -38,10 +39,11 @@ export class AlertingFixturePlugin implements Plugin<Setup, Start, AlertingExamp
       requiresAppContext: false,
     });
 
-    triggers_actions_ui.alertTypeRegistry.register({
+    triggersActionsUi.alertTypeRegistry.register({
       id: 'test.noop',
-      name: 'Test Noop',
+      description: `Doesn't do anything`,
       iconClass: 'alert',
+      documentationUrl: null,
       alertParamsExpression: () => React.createElement('div', null, 'Test Noop'),
       validate: () => {
         return { errors: {} };

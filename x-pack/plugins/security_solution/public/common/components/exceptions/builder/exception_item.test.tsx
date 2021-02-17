@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -58,6 +59,7 @@ describe('BuilderExceptionListItemComponent', () => {
             andLogicIncluded={true}
             isOnlyItem={false}
             listType="detection"
+            setErrorsExist={jest.fn()}
             onDeleteExceptionItem={jest.fn()}
             onChangeExceptionItem={jest.fn()}
           />
@@ -86,6 +88,7 @@ describe('BuilderExceptionListItemComponent', () => {
             andLogicIncluded={true}
             isOnlyItem={false}
             listType="detection"
+            setErrorsExist={jest.fn()}
             onDeleteExceptionItem={jest.fn()}
             onChangeExceptionItem={jest.fn()}
           />
@@ -112,6 +115,7 @@ describe('BuilderExceptionListItemComponent', () => {
             andLogicIncluded={true}
             isOnlyItem={false}
             listType="detection"
+            setErrorsExist={jest.fn()}
             onDeleteExceptionItem={jest.fn()}
             onChangeExceptionItem={jest.fn()}
           />
@@ -140,6 +144,7 @@ describe('BuilderExceptionListItemComponent', () => {
             andLogicIncluded={false}
             isOnlyItem={false}
             listType="detection"
+            setErrorsExist={jest.fn()}
             onDeleteExceptionItem={jest.fn()}
             onChangeExceptionItem={jest.fn()}
           />
@@ -175,6 +180,7 @@ describe('BuilderExceptionListItemComponent', () => {
           andLogicIncluded={false}
           isOnlyItem={true}
           listType="detection"
+          setErrorsExist={jest.fn()}
           onDeleteExceptionItem={jest.fn()}
           onChangeExceptionItem={jest.fn()}
         />
@@ -202,6 +208,7 @@ describe('BuilderExceptionListItemComponent', () => {
           andLogicIncluded={false}
           isOnlyItem={false}
           listType="detection"
+          setErrorsExist={jest.fn()}
           onDeleteExceptionItem={jest.fn()}
           onChangeExceptionItem={jest.fn()}
         />
@@ -230,6 +237,7 @@ describe('BuilderExceptionListItemComponent', () => {
           // this to be true, but done for testing purposes
           isOnlyItem={true}
           listType="detection"
+          setErrorsExist={jest.fn()}
           onDeleteExceptionItem={jest.fn()}
           onChangeExceptionItem={jest.fn()}
         />
@@ -256,6 +264,7 @@ describe('BuilderExceptionListItemComponent', () => {
           andLogicIncluded={false}
           isOnlyItem={true}
           listType="detection"
+          setErrorsExist={jest.fn()}
           onDeleteExceptionItem={jest.fn()}
           onChangeExceptionItem={jest.fn()}
         />
@@ -284,6 +293,7 @@ describe('BuilderExceptionListItemComponent', () => {
           andLogicIncluded={false}
           isOnlyItem={true}
           listType="detection"
+          setErrorsExist={jest.fn()}
           onDeleteExceptionItem={mockOnDeleteExceptionItem}
           onChangeExceptionItem={jest.fn()}
         />

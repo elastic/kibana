@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { extractReferences } from '../../common/migrations/references';
@@ -13,6 +14,8 @@ import { migrateSymbolStyleDescriptor } from '../../common/migrations/migrate_sy
 import { migrateUseTopHitsToScalingType } from '../../common/migrations/scaling_type';
 import { migrateJoinAggKey } from '../../common/migrations/join_agg_key';
 import { removeBoundsFromSavedObject } from '../../common/migrations/remove_bounds';
+import { setDefaultAutoFitToBounds } from '../../common/migrations/set_default_auto_fit_to_bounds';
+import { addTypeToTermJoin } from '../../common/migrations/add_type_to_termjoin';
 
 export const migrations = {
   map: {
@@ -69,6 +72,22 @@ export const migrations = {
     },
     '7.9.0': (doc) => {
       const attributes = removeBoundsFromSavedObject(doc);
+
+      return {
+        ...doc,
+        attributes,
+      };
+    },
+    '7.10.0': (doc) => {
+      const attributes = setDefaultAutoFitToBounds(doc);
+
+      return {
+        ...doc,
+        attributes,
+      };
+    },
+    '7.12.0': (doc) => {
+      const attributes = addTypeToTermJoin(doc);
 
       return {
         ...doc,

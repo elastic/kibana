@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiBadge, EuiToolTip, IconType } from '@elastic/eui';
@@ -53,7 +54,7 @@ export const getDefaultWhenTooltipIsUnspecified = ({
 /**
  * Renders the content of the draggable, wrapped in a tooltip
  */
-const Content = React.memo<{
+export const Content = React.memo<{
   children?: React.ReactNode;
   field: string;
   tooltipContent?: React.ReactNode;
@@ -135,7 +136,7 @@ DefaultDraggable.displayName = 'DefaultDraggable';
 
 export const Badge = styled(EuiBadge)`
   vertical-align: top;
-` as any; // eslint-disable-line @typescript-eslint/no-explicit-any
+`;
 
 Badge.displayName = 'Badge';
 

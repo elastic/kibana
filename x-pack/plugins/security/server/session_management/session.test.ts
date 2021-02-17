@@ -1,11 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import crypto from 'crypto';
 import nodeCrypto from '@elastic/node-crypto';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import { ConfigSchema, createConfig } from '../config';
 import { Session, SessionValueContentToEncrypt } from './session';
 import { SessionIndex } from './session_index';
@@ -52,6 +54,20 @@ describe('Session', () => {
       ),
       sessionCookie: mockSessionCookie,
       sessionIndex: mockSessionIndex,
+    });
+  });
+
+  describe('#getSID', () => {
+    const mockRequest = httpServerMock.createKibanaRequest();
+
+    it('returns `undefined` if session cookie does not exist', async () => {
+      mockSessionCookie.get.mockResolvedValue(null);
+      await expect(session.getSID(mockRequest)).resolves.toBeUndefined();
+    });
+
+    it('returns session id', async () => {
+      mockSessionCookie.get.mockResolvedValue(sessionCookieMock.createValue());
+      await expect(session.getSID(mockRequest)).resolves.toEqual('some-long-sid');
     });
   });
 

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { IEsSearchResponse } from '../../../../../../../../../../src/plugins/data/common';
@@ -146,10 +147,23 @@ export const formattedSearchStrategyResponse = {
               dns_name_query_count: {
                 terms: {
                   field: 'dns.question.registered_domain',
-                  size: 10,
-                  order: { unique_domains: 'desc' },
+                  size: 1000000,
                 },
                 aggs: {
+                  bucket_sort: {
+                    bucket_sort: {
+                      sort: [
+                        {
+                          unique_domains: {
+                            order: 'desc',
+                          },
+                        },
+                        { _key: { order: 'asc' } },
+                      ],
+                      from: 0,
+                      size: 10,
+                    },
+                  },
                   unique_domains: { cardinality: { field: 'dns.question.name' } },
                   dns_bytes_in: { sum: { field: 'source.bytes' } },
                   dns_bytes_out: { sum: { field: 'destination.bytes' } },
@@ -204,10 +218,23 @@ export const expectedDsl = {
       dns_name_query_count: {
         terms: {
           field: 'dns.question.registered_domain',
-          size: 10,
-          order: { unique_domains: 'desc' },
+          size: 1000000,
         },
         aggs: {
+          bucket_sort: {
+            bucket_sort: {
+              sort: [
+                {
+                  unique_domains: {
+                    order: 'desc',
+                  },
+                },
+                { _key: { order: 'asc' } },
+              ],
+              from: 0,
+              size: 10,
+            },
+          },
           unique_domains: { cardinality: { field: 'dns.question.name' } },
           dns_bytes_in: { sum: { field: 'source.bytes' } },
           dns_bytes_out: { sum: { field: 'destination.bytes' } },

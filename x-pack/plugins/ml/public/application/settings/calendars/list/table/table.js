@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import PropTypes from 'prop-types';
@@ -142,7 +143,7 @@ export const CalendarsListTable = ({
         loading={loading}
         selection={tableSelection}
         isSelectable={true}
-        data-test-subj="mlCalendarTable"
+        data-test-subj={loading ? 'mlCalendarTable loading' : 'mlCalendarTable loaded'}
         rowProps={(item) => ({
           'data-test-subj': `mlCalendarListRow row-${item.calendar_id}`,
         })}

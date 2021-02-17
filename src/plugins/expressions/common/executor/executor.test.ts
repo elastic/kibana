@@ -1,27 +1,17 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { Executor } from './executor';
 import * as expressionTypes from '../expression_types';
 import * as expressionFunctions from '../expression_functions';
 import { Execution } from '../execution';
-import { parseExpression } from '../ast';
+import { ExpressionAstFunction, parseExpression } from '../ast';
+import { MigrateFunction } from '../../../kibana_utils/common/persistable_state';
 
 describe('Executor', () => {
   test('can instantiate', () => {
@@ -149,6 +139,68 @@ describe('Executor', () => {
         const execution = executor.createExecution('foo bar="baz"');
 
         expect((execution.context as any).foo).toBe(foo);
+      });
+    });
+  });
+
+  describe('.inject', () => {
+    const executor = new Executor();
+
+    const injectFn = jest.fn().mockImplementation((args, references) => args);
+    const extractFn = jest.fn().mockReturnValue({ args: {}, references: [] });
+    const migrateFn = jest.fn().mockImplementation((args) => args);
+
+    const fooFn = {
+      name: 'foo',
+      help: 'test',
+      args: {
+        bar: {
+          types: ['string'],
+          help: 'test',
+        },
+      },
+      extract: (state: ExpressionAstFunction['arguments']) => {
+        return extractFn(state);
+      },
+      inject: (state: ExpressionAstFunction['arguments']) => {
+        return injectFn(state);
+      },
+      migrations: {
+        '7.10.0': (((state: ExpressionAstFunction, version: string): ExpressionAstFunction => {
+          return migrateFn(state, version);
+        }) as any) as MigrateFunction,
+        '7.10.1': (((state: ExpressionAstFunction, version: string): ExpressionAstFunction => {
+          return migrateFn(state, version);
+        }) as any) as MigrateFunction,
+      },
+      fn: jest.fn(),
+    };
+    executor.registerFunction(fooFn);
+
+    test('calls inject function for every expression function in expression', () => {
+      executor.inject(
+        parseExpression('foo bar="baz" | foo bar={foo bar="baz" | foo bar={foo bar="baz"}}'),
+        []
+      );
+      expect(injectFn).toBeCalledTimes(5);
+    });
+
+    describe('.extract', () => {
+      test('calls extract function for every expression function in expression', () => {
+        executor.extract(
+          parseExpression('foo bar="baz" | foo bar={foo bar="baz" | foo bar={foo bar="baz"}}')
+        );
+        expect(extractFn).toBeCalledTimes(5);
+      });
+    });
+
+    describe('.migrate', () => {
+      test('calls migrate function for every expression function in expression', () => {
+        executor.migrate(
+          parseExpression('foo bar="baz" | foo bar={foo bar="baz" | foo bar={foo bar="baz"}}'),
+          '7.10.0'
+        );
+        expect(migrateFn).toBeCalledTimes(5);
       });
     });
   });

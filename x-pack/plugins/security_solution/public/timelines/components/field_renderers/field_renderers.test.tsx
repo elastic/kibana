@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { shallow } from 'enzyme';
@@ -20,12 +21,22 @@ import {
   reputationRenderer,
   DefaultFieldRenderer,
   DEFAULT_MORE_MAX_HEIGHT,
+  DefaultFieldRendererOverflow,
   MoreContainer,
 } from './field_renderers';
 import { mockData } from '../../../network/components/details/mock';
 import { useMountAppended } from '../../../common/utils/use_mount_appended';
 import { AutonomousSystem, FlowTarget } from '../../../../common/search_strategy';
 import { HostEcs } from '../../../../common/ecs/host';
+
+jest.mock('@elastic/eui', () => {
+  const original = jest.requireActual('@elastic/eui');
+  return {
+    ...original,
+    // eslint-disable-next-line react/display-name
+    EuiScreenReaderOnly: () => <></>,
+  };
+});
 
 describe('Field Renderers', () => {
   const mount = useMountAppended();
@@ -328,6 +339,47 @@ describe('Field Renderers', () => {
       );
 
       expect(render).toHaveBeenCalledTimes(2);
+    });
+  });
+
+  describe('DefaultFieldRendererOverflow', () => {
+    const idPrefix = 'prefix-1';
+    const rowItems = ['item1', 'item2', 'item3', 'item4', 'item5', 'item6', 'item7'];
+
+    test('it should render the length of items after the overflowIndexStart', () => {
+      const wrapper = mount(
+        <TestProviders>
+          <DefaultFieldRendererOverflow
+            idPrefix={idPrefix}
+            rowItems={rowItems}
+            moreMaxHeight={DEFAULT_MORE_MAX_HEIGHT}
+            overflowIndexStart={5}
+          />
+        </TestProviders>
+      );
+
+      expect(wrapper.text()).toEqual(' ,+2 More');
+      expect(wrapper.find('[data-test-subj="more-container"]').first().exists()).toBe(false);
+    });
+
+    test('it should render the items after overflowIndexStart in the popover', () => {
+      const wrapper = mount(
+        <TestProviders>
+          <DefaultFieldRendererOverflow
+            idPrefix={idPrefix}
+            rowItems={rowItems}
+            moreMaxHeight={DEFAULT_MORE_MAX_HEIGHT}
+            overflowIndexStart={5}
+          />
+        </TestProviders>
+      );
+
+      wrapper.find('button').first().simulate('click');
+      wrapper.update();
+      expect(wrapper.find('.euiPopover').first().exists()).toBe(true);
+      expect(wrapper.find('[data-test-subj="more-container"]').first().text()).toEqual(
+        'item6item7'
+      );
     });
   });
 });

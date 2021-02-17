@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { getImportTimelinesRequest } from './__mocks__/request_responses';
@@ -79,7 +80,7 @@ describe('import timelines', () => {
       };
     });
 
-    jest.doMock('../../../../../../../src/core/server/utils', () => {
+    jest.doMock('@kbn/utils', () => {
       return {
         createPromiseFromStreams: jest.fn().mockReturnValue(mockParsedObjects),
       };
@@ -545,7 +546,7 @@ describe('import timeline templates', () => {
       };
     });
 
-    jest.doMock('../../../../../../../src/core/server/utils', () => {
+    jest.doMock('@kbn/utils', () => {
       return {
         createPromiseFromStreams: jest.fn().mockReturnValue(mockParsedTemplateTimelineObjects),
       };

@@ -1,32 +1,24 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { resolve } from 'path';
 import { prok } from './process';
 import { run, createFlagError } from '@kbn/dev-utils';
+import { pathExists } from './team_assignment/enumeration_helpers';
+import { id, reThrow } from './utils';
 
 const ROOT = resolve(__dirname, '../../../..');
 const flags = {
-  string: ['path', 'verbose', 'vcsInfoPath'],
+  string: ['path', 'verbose', 'vcsInfoPath', 'teamAssignmentsPath'],
   help: `
 --path             Required, path to the file to extract coverage data
 --vcsInfoPath      Required, path to the git info file (branch, sha, author, & commit msg)
+--teamAssignmentsPath  Required, path to the team assignments data file
         `,
 };
 
@@ -36,12 +28,18 @@ export function runCoverageIngestionCli() {
       if (flags.path === '') throw createFlagError('please provide a single --path flag');
       if (flags.vcsInfoPath === '')
         throw createFlagError('please provide a single --vcsInfoPath flag');
+      if (flags.teamAssignmentsPath === '')
+        throw createFlagError('please provide a single --teamAssignments flag');
       if (flags.verbose) log.verbose(`Verbose logging enabled`);
 
       const resolveRoot = resolve.bind(null, ROOT);
       const jsonSummaryPath = resolveRoot(flags.path);
       const vcsInfoFilePath = resolveRoot(flags.vcsInfoPath);
-      prok({ jsonSummaryPath, vcsInfoFilePath }, log);
+      const { teamAssignmentsPath } = flags;
+
+      pathExists(teamAssignmentsPath).fold(reThrow, id);
+
+      prok({ jsonSummaryPath, vcsInfoFilePath, teamAssignmentsPath }, log);
     },
     {
       description: `

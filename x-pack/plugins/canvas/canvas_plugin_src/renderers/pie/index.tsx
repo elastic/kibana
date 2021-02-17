@@ -1,18 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 // This bit of hackiness is required because this isn't part of the main kibana bundle
 import 'jquery';
-import '../../lib/flot-charts';
 
-import { debounce, includes } from 'lodash';
+import { debounce } from 'lodash';
 import { RendererStrings } from '../../../i18n';
-// @ts-expect-error Untyped local: Will not convert
-import { pie as piePlugin } from './plugins/pie';
-import { Pie } from '../../functions/common/pie';
+import { Pie } from '../../../public/functions/pie';
 import { RendererFactory } from '../../../types';
 
 const { pie: strings } = RendererStrings;
@@ -22,11 +20,7 @@ export const pie: RendererFactory<Pie> = () => ({
   displayName: strings.getDisplayName(),
   help: strings.getHelpDescription(),
   reuseDomNode: false,
-  render(domNode, config, handlers) {
-    if (!includes($.plot.plugins, piePlugin)) {
-      $.plot.plugins.push(piePlugin);
-    }
-
+  render: async (domNode, config, handlers) => {
     config.options.legend.labelBoxBorderColor = 'transparent';
 
     if (config.font) {

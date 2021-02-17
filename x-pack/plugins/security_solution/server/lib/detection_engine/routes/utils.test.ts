@@ -1,13 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import Boom from 'boom';
+import Boom from '@hapi/boom';
+import { errors } from '@elastic/elasticsearch';
 
 import { SavedObjectsFindResponse } from 'kibana/server';
-import { IRuleSavedAttributesSavedObjectAttributes, IRuleStatusAttributes } from '../rules/types';
+
+import { alertsClientMock } from '../../../../../alerts/server/mocks';
+import { IRuleSavedAttributesSavedObjectAttributes, IRuleStatusSOAttributes } from '../rules/types';
 import { BadRequestError } from '../errors/bad_request_error';
 import {
   transformError,
@@ -19,13 +23,20 @@ import {
   transformImportError,
   convertToSnakeCase,
   SiemResponseFactory,
+  mergeStatuses,
+  getFailingRules,
 } from './utils';
 import { responseMock } from './__mocks__';
+import { exampleRuleStatus, exampleFindRuleStatusResponse } from '../signals/__mocks__/es_results';
+import { getResult } from './__mocks__/request_responses';
+import { AlertExecutionStatusErrorReasons } from '../../../../../alerts/common';
+
+let alertsClient: ReturnType<typeof alertsClientMock.create>;
 
 describe('utils', () => {
   describe('transformError', () => {
     test('returns transformed output error from boom object with a 500 and payload of internal server error', () => {
-      const boom = new Boom('some boom message');
+      const boom = new Boom.Boom('some boom message');
       const transformed = transformError(boom);
       expect(transformed).toEqual({
         message: 'An internal server error occurred',
@@ -88,11 +99,33 @@ describe('utils', () => {
         statusCode: 400,
       });
     });
+
+    it('transforms a ResponseError returned by the elasticsearch client', () => {
+      const error: errors.ResponseError = {
+        name: 'ResponseError',
+        message: 'illegal_argument_exception',
+        headers: {},
+        body: {
+          error: {
+            type: 'illegal_argument_exception',
+            reason: 'detailed explanation',
+          },
+        },
+        meta: ({} as unknown) as errors.ResponseError['meta'],
+        statusCode: 400,
+      };
+      const transformed = transformError(error);
+
+      expect(transformed).toEqual({
+        message: 'illegal_argument_exception: detailed explanation',
+        statusCode: 400,
+      });
+    });
   });
 
   describe('transformBulkError', () => {
     test('returns transformed object if it is a boom object', () => {
-      const boom = new Boom('some boom message', { statusCode: 400 });
+      const boom = new Boom.Boom('some boom message', { statusCode: 400 });
       const transformed = transformBulkError('rule-1', boom);
       const expected: BulkError = {
         rule_id: 'rule-1',
@@ -220,7 +253,7 @@ describe('utils', () => {
 
   describe('transformImportError', () => {
     test('returns transformed object if it is a boom object', () => {
-      const boom = new Boom('some boom message', { statusCode: 400 });
+      const boom = new Boom.Boom('some boom message', { statusCode: 400 });
       const transformed = transformImportError('rule-1', boom, {
         success_count: 1,
         success: false,
@@ -319,7 +352,7 @@ describe('utils', () => {
         saved_objects: [],
       };
       expect(
-        convertToSnakeCase<IRuleStatusAttributes>(values.saved_objects[0]?.attributes) // this is undefined, but it says it's not
+        convertToSnakeCase<IRuleStatusSOAttributes>(values.saved_objects[0]?.attributes) // this is undefined, but it says it's not
       ).toEqual(null);
     });
   });
@@ -347,6 +380,135 @@ describe('utils', () => {
           message: 'Bad Request',
           status_code: 400,
         })
+      );
+    });
+  });
+
+  describe('mergeStatuses', () => {
+    it('merges statuses and converts from camelCase saved object to snake_case HTTP response', () => {
+      const statusOne = exampleRuleStatus();
+      statusOne.attributes.status = 'failed';
+      const statusTwo = exampleRuleStatus();
+      statusTwo.attributes.status = 'failed';
+      const currentStatus = exampleRuleStatus();
+      const foundRules = exampleFindRuleStatusResponse([currentStatus, statusOne, statusTwo]);
+      const res = mergeStatuses(currentStatus.attributes.alertId, foundRules.saved_objects, {
+        'myfakealertid-8cfac': {
+          current_status: {
+            alert_id: 'myfakealertid-8cfac',
+            status_date: '2020-03-27T22:55:59.517Z',
+            status: 'succeeded',
+            last_failure_at: null,
+            last_success_at: '2020-03-27T22:55:59.517Z',
+            last_failure_message: null,
+            last_success_message: 'succeeded',
+            gap: null,
+            bulk_create_time_durations: [],
+            search_after_time_durations: [],
+            last_look_back_date: null,
+          },
+          failures: [],
+        },
+      });
+      expect(res).toEqual({
+        'myfakealertid-8cfac': {
+          current_status: {
+            alert_id: 'myfakealertid-8cfac',
+            status_date: '2020-03-27T22:55:59.517Z',
+            status: 'succeeded',
+            last_failure_at: null,
+            last_success_at: '2020-03-27T22:55:59.517Z',
+            last_failure_message: null,
+            last_success_message: 'succeeded',
+            gap: null,
+            bulk_create_time_durations: [],
+            search_after_time_durations: [],
+            last_look_back_date: null,
+          },
+          failures: [],
+        },
+        'f4b8e31d-cf93-4bde-a265-298bde885cd7': {
+          current_status: {
+            alert_id: 'f4b8e31d-cf93-4bde-a265-298bde885cd7',
+            status_date: '2020-03-27T22:55:59.517Z',
+            status: 'succeeded',
+            last_failure_at: null,
+            last_success_at: '2020-03-27T22:55:59.517Z',
+            last_failure_message: null,
+            last_success_message: 'succeeded',
+            gap: null,
+            bulk_create_time_durations: [],
+            search_after_time_durations: [],
+            last_look_back_date: null,
+          },
+          failures: [
+            {
+              alert_id: 'f4b8e31d-cf93-4bde-a265-298bde885cd7',
+              status_date: '2020-03-27T22:55:59.517Z',
+              status: 'failed',
+              last_failure_at: null,
+              last_success_at: '2020-03-27T22:55:59.517Z',
+              last_failure_message: null,
+              last_success_message: 'succeeded',
+              gap: null,
+              bulk_create_time_durations: [],
+              search_after_time_durations: [],
+              last_look_back_date: null,
+            },
+            {
+              alert_id: 'f4b8e31d-cf93-4bde-a265-298bde885cd7',
+              status_date: '2020-03-27T22:55:59.517Z',
+              status: 'failed',
+              last_failure_at: null,
+              last_success_at: '2020-03-27T22:55:59.517Z',
+              last_failure_message: null,
+              last_success_message: 'succeeded',
+              gap: null,
+              bulk_create_time_durations: [],
+              search_after_time_durations: [],
+              last_look_back_date: null,
+            },
+          ],
+        },
+      });
+    });
+  });
+
+  describe('getFailingRules', () => {
+    beforeEach(() => {
+      alertsClient = alertsClientMock.create();
+    });
+    it('getFailingRules finds no failing rules', async () => {
+      alertsClient.get.mockResolvedValue(getResult());
+      const res = await getFailingRules(['my-fake-id'], alertsClient);
+      expect(res).toEqual({});
+    });
+    it('getFailingRules finds a failing rule', async () => {
+      const foundRule = getResult();
+      foundRule.executionStatus = {
+        status: 'error',
+        lastExecutionDate: foundRule.executionStatus.lastExecutionDate,
+        error: {
+          reason: AlertExecutionStatusErrorReasons.Read,
+          message: 'oops',
+        },
+      };
+      alertsClient.get.mockResolvedValue(foundRule);
+      const res = await getFailingRules([foundRule.id], alertsClient);
+      expect(res).toEqual({ [foundRule.id]: foundRule });
+    });
+    it('getFailingRules throws an error', async () => {
+      alertsClient.get.mockImplementation(() => {
+        throw new Error('my test error');
+      });
+      let error;
+      try {
+        await getFailingRules(['my-fake-id'], alertsClient);
+      } catch (exc) {
+        error = exc;
+      }
+      expect(error.message).toEqual(
+        'Failed to get executionStatus with AlertsClient: my test error'
       );
     });
   });

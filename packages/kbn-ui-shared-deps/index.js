@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 const Path = require('path');
@@ -39,7 +28,6 @@ exports.externals = {
   react: '__kbnSharedDeps__.React',
   'react-dom': '__kbnSharedDeps__.ReactDom',
   'react-dom/server': '__kbnSharedDeps__.ReactDomServer',
-  'react-intl': '__kbnSharedDeps__.ReactIntl',
   'react-router': '__kbnSharedDeps__.ReactRouter',
   'react-router-dom': '__kbnSharedDeps__.ReactRouterDom',
   'styled-components': '__kbnSharedDeps__.StyledComponents',
@@ -64,5 +52,10 @@ exports.externals = {
   '@elastic/eui/dist/eui_theme_dark.json': '__kbnSharedDeps__.Theme.euiDarkVars',
   lodash: '__kbnSharedDeps__.Lodash',
   'lodash/fp': '__kbnSharedDeps__.LodashFp',
+
+  /**
+   * runtime deps which don't need to be copied across all bundles
+   */
+  tslib: '__kbnSharedDeps__.TsLib',
 };
 exports.publicPathLoader = require.resolve('./public_path_loader');

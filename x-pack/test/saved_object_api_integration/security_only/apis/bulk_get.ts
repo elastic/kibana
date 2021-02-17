@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { testCaseFailures, getTestScenarios } from '../../common/lib/saved_object_test_utils';
@@ -22,9 +23,12 @@ const createTestCases = () => {
     CASES.SINGLE_NAMESPACE_DEFAULT_SPACE,
     { ...CASES.SINGLE_NAMESPACE_SPACE_1, ...fail404() },
     { ...CASES.SINGLE_NAMESPACE_SPACE_2, ...fail404() },
+    CASES.MULTI_NAMESPACE_ALL_SPACES,
     CASES.MULTI_NAMESPACE_DEFAULT_AND_SPACE_1,
     { ...CASES.MULTI_NAMESPACE_ONLY_SPACE_1, ...fail404() },
     { ...CASES.MULTI_NAMESPACE_ONLY_SPACE_2, ...fail404() },
+    { ...CASES.MULTI_NAMESPACE_ISOLATED_ONLY_DEFAULT_SPACE },
+    { ...CASES.MULTI_NAMESPACE_ISOLATED_ONLY_SPACE_1, ...fail404() },
     CASES.NAMESPACE_AGNOSTIC,
     { ...CASES.DOES_NOT_EXIST, ...fail404() },
   ];
@@ -37,7 +41,7 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertestWithoutAuth');
   const esArchiver = getService('esArchiver');
 
-  const { addTests, createTestDefinitions, expectForbidden } = bulkGetTestSuiteFactory(
+  const { addTests, createTestDefinitions, expectSavedObjectForbidden } = bulkGetTestSuiteFactory(
     esArchiver,
     supertest
   );
@@ -51,7 +55,7 @@ export default function ({ getService }: FtrProviderContext) {
         createTestDefinitions(hiddenType, true),
         createTestDefinitions(allTypes, true, {
           singleRequest: true,
-          responseBodyOverride: expectForbidden(['hiddentype']),
+          responseBodyOverride: expectSavedObjectForbidden(['hiddentype']),
         }),
       ].flat(),
       superuser: createTestDefinitions(allTypes, false, { singleRequest: true }),

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import path from 'path';
@@ -43,6 +44,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         '--xpack.eventLog.enabled=true',
         '--xpack.eventLog.logEntries=true',
         '--xpack.eventLog.indexEntries=true',
+        '--xpack.task_manager.monitored_aggregated_stats_refresh_rate=5000',
         ...plugins.map(
           (pluginDir) => `--plugin-path=${path.resolve(__dirname, 'plugins', pluginDir)}`
         ),

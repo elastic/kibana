@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -26,7 +27,8 @@ export default ({ getService }: FtrProviderContext): void => {
       await supertest
         .post(CASES_URL)
         .set('kbn-xsrf', 'true')
-        .send({ ...postCaseReq, tags: ['unique'] });
+        .send({ ...postCaseReq, tags: ['unique'] })
+        .expect(200);
 
       const { body } = await supertest
         .get(CASE_TAGS_URL)

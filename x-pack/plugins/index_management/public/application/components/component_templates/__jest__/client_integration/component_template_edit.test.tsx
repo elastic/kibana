@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -81,7 +82,8 @@ describe('<ComponentTemplateEdit />', () => {
     expect(nameInput.props().disabled).toEqual(true);
   });
 
-  describe('form payload', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/84906
+  describe.skip('form payload', () => {
     it('should send the correct payload with changed values', async () => {
       const { actions, component, form } = testBed;
 

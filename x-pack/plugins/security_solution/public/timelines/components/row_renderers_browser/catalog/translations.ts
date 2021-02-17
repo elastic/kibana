@@ -1,10 +1,22 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
+
+export const ALERTS_NAME = i18n.translate('xpack.securitySolution.eventRenderers.alertsName', {
+  defaultMessage: 'Alerts',
+});
+
+export const ALERTS_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.eventRenderers.alertsDescription',
+  {
+    defaultMessage: 'Alerts are displayed when malware or ransomware is prevented and detected',
+  }
+);
 
 export const AUDITD_NAME = i18n.translate('xpack.securitySolution.eventRenderers.auditdName', {
   defaultMessage: 'Auditd',
@@ -111,6 +123,18 @@ export const FLOW_DESCRIPTION_PART2 = i18n.translate(
   }
 );
 
+export const LIBRARY_NAME = i18n.translate('xpack.securitySolution.eventRenderers.libraryName', {
+  defaultMessage: 'Library',
+});
+
+export const LIBRARY_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.eventRenderers.libraryDescription',
+  {
+    defaultMessage:
+      'Library events display a Dynamically Linked Library (DLL) being loaded by a process',
+  }
+);
+
 export const PROCESS = i18n.translate('xpack.securitySolution.eventRenderers.processName', {
   defaultMessage: 'Process',
 });
@@ -128,6 +152,17 @@ export const PROCESS_DESCRIPTION_PART2 = i18n.translate(
   {
     defaultMessage:
       'Details including the command line arguments, parent process, and if applicable, file hashes are displayed when available.',
+  }
+);
+
+export const REGISTRY_NAME = i18n.translate('xpack.securitySolution.eventRenderers.registryName', {
+  defaultMessage: 'Registry',
+});
+
+export const REGISTRY_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.eventRenderers.registryDescription',
+  {
+    defaultMessage: 'Registry events show updates to the Windows Registry',
   }
 );
 

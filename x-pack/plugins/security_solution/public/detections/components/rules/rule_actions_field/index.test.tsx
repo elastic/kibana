@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -17,7 +18,7 @@ describe('RuleActionsField', () => {
   it('should not render ActionForm if no actions are supported', () => {
     (useKibana as jest.Mock).mockReturnValue({
       services: {
-        triggers_actions_ui: {
+        triggersActionsUi: {
           actionTypeRegistry: {},
         },
         application: {
@@ -31,13 +32,20 @@ describe('RuleActionsField', () => {
         },
       },
     });
+
+    const messageVariables = {
+      context: [],
+      state: [],
+      params: [],
+    };
+
     const Component = () => {
       const field = useFormFieldMock();
       const { form } = useForm();
 
       return (
         <Form form={form}>
-          <RuleActionsField euiFieldProps={{ options: [] }} field={field} />
+          <RuleActionsField field={field} messageVariables={messageVariables} />
         </Form>
       );
     };

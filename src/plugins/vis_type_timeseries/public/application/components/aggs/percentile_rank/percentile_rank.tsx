@@ -1,30 +1,19 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React from 'react';
 import {
   htmlIdGenerator,
-  EuiFlexGroup,
   EuiFlexItem,
   EuiFormLabel,
   EuiFormRow,
   EuiSpacer,
+  EuiFlexGrid,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { AggSelect } from '../agg_select';
@@ -34,21 +23,25 @@ import { FieldSelect } from '../field_select';
 import { createChangeHandler } from '../../lib/create_change_handler';
 // @ts-ignore
 import { createSelectHandler } from '../../lib/create_select_handler';
+// @ts-ignore
+import { createNumberHandler } from '../../lib/create_number_handler';
+
 import { AggRow } from '../agg_row';
 import { PercentileRankValues } from './percentile_rank_values';
 
-import { IFieldType, KBN_FIELD_TYPES } from '../../../../../../../plugins/data/public';
-import { MetricsItemsSchema, PanelSchema, SeriesItemsSchema } from '../../../../../common/types';
+import { KBN_FIELD_TYPES } from '../../../../../../../plugins/data/public';
+import { MetricsItemsSchema, PanelSchema, SanitizedFieldType } from '../../../../../common/types';
 import { DragHandleProps } from '../../../../types';
+import { PercentileHdr } from '../percentile_hdr';
 
 const RESTRICT_FIELDS = [KBN_FIELD_TYPES.NUMBER, KBN_FIELD_TYPES.HISTOGRAM];
 
 interface PercentileRankAggProps {
   disableDelete: boolean;
-  fields: IFieldType[];
+  fields: Record<string, SanitizedFieldType[]>;
+  indexPattern: string;
   model: MetricsItemsSchema;
   panel: PanelSchema;
-  series: SeriesItemsSchema;
   siblings: MetricsItemsSchema[];
   dragHandleProps: DragHandleProps;
   onAdd(): void;
@@ -57,16 +50,15 @@ interface PercentileRankAggProps {
 }
 
 export const PercentileRankAgg = (props: PercentileRankAggProps) => {
-  const { series, panel, fields } = props;
+  const { panel, fields, indexPattern } = props;
   const defaults = { values: [''] };
   const model = { ...defaults, ...props.model };
 
-  const indexPattern =
-    (series.override_index_pattern && series.series_index_pattern) || panel.index_pattern;
   const htmlId = htmlIdGenerator();
   const isTablePanel = panel.type === 'table';
   const handleChange = createChangeHandler(props.onChange, model);
   const handleSelectChange = createSelectHandler(handleChange);
+  const handleNumberChange = createNumberHandler(handleChange);
 
   const handlePercentileRankValuesChange = (values: MetricsItemsSchema['values']) => {
     handleChange({
@@ -74,7 +66,6 @@ export const PercentileRankAgg = (props: PercentileRankAggProps) => {
       values,
     });
   };
-
   return (
     <AggRow
       disableDelete={props.disableDelete}
@@ -84,7 +75,7 @@ export const PercentileRankAgg = (props: PercentileRankAggProps) => {
       siblings={props.siblings}
       dragHandleProps={props.dragHandleProps}
     >
-      <EuiFlexGroup gutterSize="s">
+      <EuiFlexGrid gutterSize="s" columns={2}>
         <EuiFlexItem>
           <EuiFormLabel htmlFor={htmlId('aggregation')}>
             <FormattedMessage
@@ -116,22 +107,37 @@ export const PercentileRankAgg = (props: PercentileRankAggProps) => {
               type={model.type}
               restrict={RESTRICT_FIELDS}
               indexPattern={indexPattern}
-              value={model.field}
+              value={model.field ?? ''}
               onChange={handleSelectChange('field')}
             />
           </EuiFormRow>
         </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer />
-      {model.values && (
-        <PercentileRankValues
-          disableAdd={isTablePanel}
-          disableDelete={isTablePanel}
-          showOnlyLastRow={isTablePanel}
-          model={model.values}
-          onChange={handlePercentileRankValuesChange}
-        />
-      )}
+
+        <EuiFlexItem>
+          <EuiFormRow
+            label={
+              <FormattedMessage
+                id="visTypeTimeseries.percentileRank.values"
+                defaultMessage="Values"
+              />
+            }
+          >
+            <PercentileRankValues
+              disableAdd={isTablePanel}
+              disableDelete={isTablePanel}
+              showOnlyLastRow={isTablePanel}
+              model={model.values!}
+              onChange={handlePercentileRankValuesChange}
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <PercentileHdr
+            value={model.numberOfSignificantValueDigits}
+            onChange={handleNumberChange('numberOfSignificantValueDigits')}
+          />
+        </EuiFlexItem>
+      </EuiFlexGrid>
     </AggRow>
   );
 };

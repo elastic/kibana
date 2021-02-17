@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -12,10 +13,11 @@ import {
   createMockDatasource,
 } from '../../mocks';
 import { EuiKeyPadMenuItem } from '@elastic/eui';
-import { mountWithIntl as mount } from 'test_utils/enzyme_helpers';
+import { mountWithIntl as mount } from '@kbn/test/jest';
 import { Visualization, FramePublicAPI, DatasourcePublicAPI } from '../../../types';
 import { Action } from '../state_management';
 import { ChartSwitch } from './chart_switch';
+import { PaletteOutput } from 'src/plugins/charts/public';
 
 describe('chart_switch', () => {
   function generateVisualization(id: string): jest.Mocked<Visualization> {
@@ -445,6 +447,39 @@ describe('chart_switch', () => {
       expect.objectContaining({
         type: 'SWITCH_VISUALIZATION',
         initialState: 'visB initial state',
+      })
+    );
+  });
+
+  it('should query main palette from active chart and pass into suggestions', () => {
+    const dispatch = jest.fn();
+    const visualizations = mockVisualizations();
+    const mockPalette: PaletteOutput = { type: 'palette', name: 'mock' };
+    visualizations.visA.getMainPalette = jest.fn(() => mockPalette);
+    visualizations.visB.getSuggestions.mockReturnValueOnce([]);
+    const frame = mockFrame(['a', 'b', 'c']);
+    const currentVisState = {};
+
+    const component = mount(
+      <ChartSwitch
+        visualizationId="visA"
+        visualizationState={currentVisState}
+        visualizationMap={visualizations}
+        dispatch={dispatch}
+        framePublicAPI={frame}
+        datasourceMap={mockDatasourceMap()}
+        datasourceStates={mockDatasourceStates()}
+      />
+    );
+
+    switchTo('visB', component);
+
+    expect(visualizations.visA.getMainPalette).toHaveBeenCalledWith(currentVisState);
+
+    expect(visualizations.visB.getSuggestions).toHaveBeenCalledWith(
+      expect.objectContaining({
+        keptLayerIds: ['a'],
+        mainPalette: mockPalette,
       })
     );
   });

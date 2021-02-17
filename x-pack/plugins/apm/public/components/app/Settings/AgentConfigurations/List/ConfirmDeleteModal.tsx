@@ -1,20 +1,22 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useState } from 'react';
-import { EuiConfirmModal, EuiOverlayMask } from '@elastic/eui';
+import { EuiConfirmModal } from '@elastic/eui';
 import { NotificationsStart } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { AgentConfigurationListAPIResponse } from '../../../../../../server/lib/settings/agent_configuration/list_configurations';
 import { getOptionLabel } from '../../../../../../common/agent_configuration/all_option';
-import { callApmApi } from '../../../../../services/rest/createCallApmApi';
-import { useApmPluginContext } from '../../../../../hooks/useApmPluginContext';
+import {
+  APIReturnType,
+  callApmApi,
+} from '../../../../../services/rest/createCallApmApi';
+import { useApmPluginContext } from '../../../../../context/apm_plugin/use_apm_plugin_context';
 
-type Config = AgentConfigurationListAPIResponse[0];
+type Config = APIReturnType<'GET /api/apm/settings/agent-configuration'>[0];
 
 interface Props {
   config: Config;
@@ -27,41 +29,39 @@ export function ConfirmDeleteModal({ config, onCancel, onConfirm }: Props) {
   const { toasts } = useApmPluginContext().core.notifications;
 
   return (
-    <EuiOverlayMask>
-      <EuiConfirmModal
-        title={i18n.translate('xpack.apm.agentConfig.deleteModal.title', {
-          defaultMessage: `Delete configuration`,
+    <EuiConfirmModal
+      title={i18n.translate('xpack.apm.agentConfig.deleteModal.title', {
+        defaultMessage: `Delete configuration`,
+      })}
+      onCancel={onCancel}
+      onConfirm={async () => {
+        setIsDeleting(true);
+        await deleteConfig(config, toasts);
+        setIsDeleting(false);
+        onConfirm();
+      }}
+      cancelButtonText={i18n.translate(
+        'xpack.apm.agentConfig.deleteModal.cancel',
+        { defaultMessage: `Cancel` }
+      )}
+      confirmButtonText={i18n.translate(
+        'xpack.apm.agentConfig.deleteModal.confirm',
+        { defaultMessage: `Delete` }
+      )}
+      confirmButtonDisabled={isDeleting}
+      buttonColor="danger"
+      defaultFocusedButton="confirm"
+    >
+      <p>
+        {i18n.translate('xpack.apm.agentConfig.deleteModal.text', {
+          defaultMessage: `You are about to delete the configuration for service "{serviceName}" and environment "{environment}".`,
+          values: {
+            serviceName: getOptionLabel(config.service.name),
+            environment: getOptionLabel(config.service.environment),
+          },
         })}
-        onCancel={onCancel}
-        onConfirm={async () => {
-          setIsDeleting(true);
-          await deleteConfig(config, toasts);
-          setIsDeleting(false);
-          onConfirm();
-        }}
-        cancelButtonText={i18n.translate(
-          'xpack.apm.agentConfig.deleteModal.cancel',
-          { defaultMessage: `Cancel` }
-        )}
-        confirmButtonText={i18n.translate(
-          'xpack.apm.agentConfig.deleteModal.confirm',
-          { defaultMessage: `Delete` }
-        )}
-        confirmButtonDisabled={isDeleting}
-        buttonColor="danger"
-        defaultFocusedButton="confirm"
-      >
-        <p>
-          {i18n.translate('xpack.apm.agentConfig.deleteModal.text', {
-            defaultMessage: `You are about to delete the configuration for service "{serviceName}" and environment "{environment}".`,
-            values: {
-              serviceName: getOptionLabel(config.service.name),
-              environment: getOptionLabel(config.service.environment),
-            },
-          })}
-        </p>
-      </EuiConfirmModal>
-    </EuiOverlayMask>
+      </p>
+    </EuiConfirmModal>
   );
 }
 
@@ -71,8 +71,8 @@ async function deleteConfig(
 ) {
   try {
     await callApmApi({
-      pathname: '/api/apm/settings/agent-configuration',
-      method: 'DELETE',
+      endpoint: 'DELETE /api/apm/settings/agent-configuration',
+      signal: null,
       params: {
         body: {
           service: {

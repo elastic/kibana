@@ -1,14 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { IFieldType, IndexPattern } from 'src/plugins/data/public';
 import { i18n } from '@kbn/i18n';
-import { getIndexPatternService, getIsGoldPlus } from './kibana_services';
+import { getIndexPatternService } from './kibana_services';
 import { indexPatterns } from '../../../../src/plugins/data/public';
 import { ES_GEO_FIELD_TYPE, ES_GEO_FIELD_TYPES } from '../common/constants';
+import { getIsGoldPlus } from './licensed_features';
 
 export function getGeoTileAggNotSupportedReason(field: IFieldType): string | null {
   if (!field.aggregatable) {
@@ -68,6 +70,12 @@ export function getGeoFields(fields: IFieldType[]): IFieldType[] {
   });
 }
 
+export function getGeoPointFields(fields: IFieldType[]): IFieldType[] {
+  return fields.filter((field) => {
+    return !indexPatterns.isNestedField(field) && ES_GEO_FIELD_TYPE.GEO_POINT === field.type;
+  });
+}
+
 export function getFieldsWithGeoTileAgg(fields: IFieldType[]): IFieldType[] {
   return fields.filter(supportsGeoTileAgg);
 }
@@ -81,17 +89,6 @@ export function supportsGeoTileAgg(field?: IFieldType): boolean {
   );
 }
 
-export function supportsMvt(indexPattern: IndexPattern, geoFieldName: string): boolean {
-  const field = indexPattern.fields.getByName(geoFieldName);
-  return !!field && field.type === ES_GEO_FIELD_TYPE.GEO_SHAPE;
-}
-
-export function getMvtDisabledReason() {
-  return i18n.translate('xpack.maps.mbt.disabled', {
-    defaultMessage: 'Display as vector tiles is only supported for geo_shape field-types.',
-  });
-}
-// Returns filtered fields list containing only fields that exist in _source.
 export function getSourceFields(fields: IFieldType[]): IFieldType[] {
   return fields.filter((field) => {
     // Multi fields are not stored in _source and only exist in index.

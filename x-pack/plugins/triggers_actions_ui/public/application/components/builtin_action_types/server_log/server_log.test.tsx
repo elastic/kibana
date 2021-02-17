@@ -1,11 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { TypeRegistry } from '../../../type_registry';
 import { registerBuiltInActionTypes } from '.././index';
-import { ActionTypeModel, ActionConnector } from '../../../../types';
+import { ActionTypeModel, UserConfiguredActionConnector } from '../../../../types';
 
 const ACTION_TYPE_ID = '.server-log';
 let actionTypeModel: ActionTypeModel;
@@ -28,16 +30,22 @@ describe('actionTypeRegistry.get() works', () => {
 
 describe('server-log connector validation', () => {
   test('connector validation succeeds when connector config is valid', () => {
-    const actionConnector = {
+    const actionConnector: UserConfiguredActionConnector<{}, {}> = {
       secrets: {},
       id: 'test',
       actionTypeId: '.server-log',
       name: 'server-log',
       config: {},
-    } as ActionConnector;
+      isPreconfigured: false,
+    };
 
     expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
-      errors: {},
+      config: {
+        errors: {},
+      },
+      secrets: {
+        errors: {},
+      },
     });
   });
 });

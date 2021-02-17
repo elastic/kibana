@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -33,13 +34,13 @@ export interface ClientPluginsSetup {
   data: DataPublicPluginSetup;
   home?: HomePublicPluginSetup;
   observability: ObservabilityPluginSetup;
-  triggers_actions_ui: TriggersAndActionsUIPublicPluginSetup;
+  triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
 }
 
 export interface ClientPluginsStart {
   embeddable: EmbeddableStart;
   data: DataPublicPluginStart;
-  triggers_actions_ui: TriggersAndActionsUIPublicPluginStart;
+  triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
 }
 
 export type ClientSetup = void;
@@ -49,10 +50,7 @@ export class UptimePlugin
   implements Plugin<ClientSetup, ClientStart, ClientPluginsSetup, ClientPluginsStart> {
   constructor(_context: PluginInitializerContext) {}
 
-  public async setup(
-    core: CoreSetup<ClientPluginsStart, unknown>,
-    plugins: ClientPluginsSetup
-  ): Promise<void> {
+  public setup(core: CoreSetup<ClientPluginsStart, unknown>, plugins: ClientPluginsSetup): void {
     if (plugins.home) {
       plugins.home.featureCatalogue.register({
         id: PLUGIN.ID,
@@ -89,6 +87,28 @@ export class UptimePlugin
       order: 8400,
       title: PLUGIN.TITLE,
       category: DEFAULT_APP_CATEGORIES.observability,
+      meta: {
+        keywords: [
+          'Synthetics',
+          'pings',
+          'checks',
+          'availability',
+          'response duration',
+          'response time',
+          'outside in',
+          'reachability',
+          'reachable',
+          'digital',
+          'performance',
+          'web performance',
+          'web perf',
+        ],
+        searchDeepLinks: [
+          { id: 'Down monitors', title: 'Down monitors', path: '/?statusFilter=down' },
+          { id: 'Certificates', title: 'TLS Certificates', path: '/certificates' },
+          { id: 'Settings', title: 'Settings', path: '/settings' },
+        ],
+      },
       mount: async (params: AppMountParameters) => {
         const [coreStart, corePlugins] = await core.getStartServices();
 
@@ -106,10 +126,10 @@ export class UptimePlugin
         plugins,
       });
       if (
-        plugins.triggers_actions_ui &&
-        !plugins.triggers_actions_ui.alertTypeRegistry.has(alertInitializer.id)
+        plugins.triggersActionsUi &&
+        !plugins.triggersActionsUi.alertTypeRegistry.has(alertInitializer.id)
       ) {
-        plugins.triggers_actions_ui.alertTypeRegistry.register(alertInitializer);
+        plugins.triggersActionsUi.alertTypeRegistry.register(alertInitializer);
       }
     });
   }

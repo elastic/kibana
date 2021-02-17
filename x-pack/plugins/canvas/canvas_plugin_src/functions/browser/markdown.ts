@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -10,8 +11,6 @@ import {
   Style,
   ExpressionFunctionDefinition,
 } from 'src/plugins/expressions/common';
-// @ts-expect-error untyped local
-import { Handlebars } from '../../../common/lib/handlebars';
 import { getFunctionHelp } from '../../../i18n';
 
 type Context = Datatable | null;
@@ -32,7 +31,7 @@ export function markdown(): ExpressionFunctionDefinition<
   'markdown',
   Context,
   Arguments,
-  Render<Return>
+  Promise<Render<Return>>
 > {
   const { help, args: argHelp } = getFunctionHelp().markdown;
 
@@ -61,7 +60,9 @@ export function markdown(): ExpressionFunctionDefinition<
         default: false,
       },
     },
-    fn: (input, args) => {
+    fn: async (input, args) => {
+      // @ts-expect-error untyped local
+      const { Handlebars } = await import('../../../common/lib/handlebars');
       const compileFunctions = args.content.map((str) =>
         Handlebars.compile(String(str), { knownHelpersOnly: true })
       );

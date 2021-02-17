@@ -1,21 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
- */
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { sum, round } from 'lodash';
 import theme from '@elastic/eui/dist/eui_theme_light.json';
-import {
-  Setup,
-  SetupTimeRange,
-  SetupUIFilters,
-} from '../../../../helpers/setup_request';
+import { Setup, SetupTimeRange } from '../../../../helpers/setup_request';
 import { getMetricsDateHistogramParams } from '../../../../helpers/metrics';
 import { ChartBase } from '../../../types';
 import { getMetricsProjection } from '../../../../../projections/metrics';
@@ -36,7 +28,7 @@ export async function fetchAndTransformGcMetrics({
   chartBase,
   fieldName,
 }: {
-  setup: Setup & SetupTimeRange & SetupUIFilters;
+  setup: Setup & SetupTimeRange;
   serviceName: string;
   serviceNodeName?: string;
   chartBase: ChartBase;
@@ -44,7 +36,7 @@ export async function fetchAndTransformGcMetrics({
 }) {
   const { start, end, apmEventClient, config } = setup;
 
-  const { bucketSize } = getBucketSize(start, end);
+  const { bucketSize } = getBucketSize({ start, end });
 
   const projection = getMetricsProjection({
     setup,

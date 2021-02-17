@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FC, Fragment } from 'react';
@@ -22,7 +23,7 @@ import { ANALYSIS_CONFIG_TYPE } from '../../../../common/analytics';
 import { ANALYTICS_STEPS } from '../../page';
 
 function getStringValue(value: number | undefined) {
-  return value !== undefined ? `${value}` : UNSET_CONFIG_ITEM;
+  return typeof value === 'number' ? `${value}` : UNSET_CONFIG_ITEM;
 }
 
 export interface ListItems {
@@ -135,7 +136,12 @@ export const AdvancedStepDetails: FC<{ setCurrentStep: any; state: State }> = ({
         title: i18n.translate('xpack.ml.dataframe.analytics.create.configDetails.numTopClasses', {
           defaultMessage: 'Top classes',
         }),
-        description: `${numTopClasses}`,
+        description:
+          numTopClasses === -1
+            ? i18n.translate('xpack.ml.dataframe.analytics.create.configDetails.allClasses', {
+                defaultMessage: 'All classes',
+              })
+            : getStringValue(numTopClasses),
       });
     }
 

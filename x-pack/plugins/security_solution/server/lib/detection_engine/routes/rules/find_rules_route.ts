@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { findRuleValidateTypeDependents } from '../../../../../common/detection_engine/schemas/request/find_rules_type_dependents';
@@ -9,7 +10,7 @@ import {
   findRulesSchema,
   FindRulesSchemaDecoded,
 } from '../../../../../common/detection_engine/schemas/request/find_rules_schema';
-import { IRouter } from '../../../../../../../../src/core/server';
+import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { findRules } from '../../rules/find_rules';
 import { transformValidateFindAlerts } from './validate';
@@ -18,7 +19,7 @@ import { getRuleActionsSavedObject } from '../../rule_actions/get_rule_actions_s
 import { ruleStatusSavedObjectsClientFactory } from '../../signals/rule_status_saved_objects_client';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
 
-export const findRulesRoute = (router: IRouter) => {
+export const findRulesRoute = (router: SecuritySolutionPluginRouter) => {
   router.get(
     {
       path: `${DETECTION_ENGINE_RULES_URL}/_find`,
@@ -28,7 +29,7 @@ export const findRulesRoute = (router: IRouter) => {
         ),
       },
       options: {
-        tags: ['access'],
+        tags: ['access:securitySolution'],
       },
     },
     async (context, request, response) => {
@@ -57,6 +58,15 @@ export const findRulesRoute = (router: IRouter) => {
           filter: query.filter,
           fields: query.fields,
         });
+
+        // if any rules attempted to execute but failed before the rule executor is called,
+        // an execution status will be written directly onto the rule via the kibana alerting framework,
+        // which we are filtering on and will write a failure status
+        // for any rules found to be in a failing state into our rule status saved objects
+        const failingRules = rules.data.filter(
+          (rule) => rule.executionStatus != null && rule.executionStatus.status === 'error'
+        );
+
         const ruleStatuses = await Promise.all(
           rules.data.map(async (rule) => {
             const results = await ruleStatusClient.find({
@@ -66,6 +76,13 @@ export const findRulesRoute = (router: IRouter) => {
               search: rule.id,
               searchFields: ['alertId'],
             });
+            const failingRule = failingRules.find((badRule) => badRule.id === rule.id);
+            if (failingRule != null) {
+              if (results.saved_objects.length > 0) {
+                results.saved_objects[0].attributes.status = 'failed';
+                results.saved_objects[0].attributes.lastFailureAt = failingRule.executionStatus.lastExecutionDate.toISOString();
+              }
+            }
             return results;
           })
         );

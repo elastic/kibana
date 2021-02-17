@@ -1,8 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
+/* eslint-disable react/display-name */
 import { mount } from 'enzyme';
 import React from 'react';
 import '../../../common/mock/match_media';
@@ -10,10 +13,19 @@ import { AllCasesModal } from './all_cases_modal';
 import { TestProviders } from '../../../common/mock';
 
 jest.mock('../all_cases', () => {
-  const AllCases = () => {
-    return <></>;
+  return {
+    AllCases: ({ onRowClick }: { onRowClick: ({ id }: { id: string }) => void }) => {
+      return (
+        <button
+          type="button"
+          data-test-subj="all-cases-row"
+          onClick={() => onRowClick({ id: 'case-id' })}
+        >
+          {'case-row'}
+        </button>
+      );
+    },
   };
-  return { AllCases };
 });
 
 jest.mock('../../../common/lib/kibana', () => {
@@ -27,6 +39,7 @@ jest.mock('../../../common/lib/kibana', () => {
 const onCloseCaseModal = jest.fn();
 const onRowClick = jest.fn();
 const defaultProps = {
+  isModalOpen: true,
   onCloseCaseModal,
   onRowClick,
 };
@@ -44,6 +57,16 @@ describe('AllCasesModal', () => {
     );
 
     expect(wrapper.find(`[data-test-subj='all-cases-modal']`).exists()).toBeTruthy();
+  });
+
+  it('it does not render the modal isModalOpen=false ', () => {
+    const wrapper = mount(
+      <TestProviders>
+        <AllCasesModal {...defaultProps} isModalOpen={false} />
+      </TestProviders>
+    );
+
+    expect(wrapper.find(`[data-test-subj='all-cases-modal']`).exists()).toBeFalsy();
   });
 
   it('Closing modal calls onCloseCaseModal', () => {
@@ -70,5 +93,16 @@ describe('AllCasesModal', () => {
       onRowClick,
       isModal: true,
     });
+  });
+
+  it('onRowClick called when row is clicked', () => {
+    const wrapper = mount(
+      <TestProviders>
+        <AllCasesModal {...defaultProps} />
+      </TestProviders>
+    );
+
+    wrapper.find(`[data-test-subj='all-cases-row']`).first().simulate('click');
+    expect(onRowClick).toHaveBeenCalledWith({ id: 'case-id' });
   });
 });

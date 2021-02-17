@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { Plugin, CoreSetup, Logger, PluginInitializerContext } from 'kibana/server';
@@ -11,7 +12,6 @@ import {
   registerProviderActionsRoute,
   isProviderActionRegisteredRoute,
   getProviderActionsRoute,
-  getLoggerRoute,
   isIndexingEntriesRoute,
   isEventLogServiceLoggingEntriesRoute,
   isEventLogServiceEnabledRoute,
@@ -56,7 +56,6 @@ export class EventLogFixturePlugin
     registerProviderActionsRoute(router, eventLog, this.logger);
     isProviderActionRegisteredRoute(router, eventLog, this.logger);
     getProviderActionsRoute(router, eventLog, this.logger);
-    getLoggerRoute(router, eventLog, this.logger);
     isIndexingEntriesRoute(router, eventLog, this.logger);
     isEventLogServiceLoggingEntriesRoute(router, eventLog, this.logger);
     isEventLogServiceEnabledRoute(router, eventLog, this.logger);

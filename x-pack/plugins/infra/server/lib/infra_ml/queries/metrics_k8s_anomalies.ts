@@ -1,17 +1,22 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import * as rt from 'io-ts';
+import { ANOMALY_THRESHOLD } from '../../../../common/infra_ml';
 import { commonSearchSuccessResponseFieldsRT } from '../../../utils/elasticsearch_runtime_types';
 import {
   createJobIdsFilters,
   createTimeRangeFilters,
   createResultTypeFilters,
   defaultRequestParameters,
+  createAnomalyScoreFilter,
+  createInfluencerFilter,
 } from './common';
+import { InfluencerFilter } from '../common';
 import { Sort, Pagination } from '../../../../common/http_api/infra_ml';
 
 // TODO: Reassess validity of this against ML docs
@@ -23,21 +28,36 @@ const sortToMlFieldMap = {
   startTime: 'timestamp',
 };
 
-export const createMetricsK8sAnomaliesQuery = (
-  jobIds: string[],
-  startTime: number,
-  endTime: number,
-  sort: Sort,
-  pagination: Pagination
-) => {
+export const createMetricsK8sAnomaliesQuery = ({
+  jobIds,
+  anomalyThreshold,
+  startTime,
+  endTime,
+  sort,
+  pagination,
+  influencerFilter,
+}: {
+  jobIds: string[];
+  anomalyThreshold: ANOMALY_THRESHOLD;
+  startTime: number;
+  endTime: number;
+  sort: Sort;
+  pagination: Pagination;
+  influencerFilter?: InfluencerFilter;
+}) => {
   const { field } = sort;
   const { pageSize } = pagination;
 
   const filters = [
     ...createJobIdsFilters(jobIds),
+    ...createAnomalyScoreFilter(anomalyThreshold),
     ...createTimeRangeFilters(startTime, endTime),
     ...createResultTypeFilters(['record']),
   ];
+
+  const influencerQuery = influencerFilter
+    ? { must: createInfluencerFilter(influencerFilter) }
+    : {};
 
   const sourceFields = [
     'job_id',
@@ -48,6 +68,8 @@ export const createMetricsK8sAnomaliesQuery = (
     'timestamp',
     'bucket_span',
     'by_field_value',
+    'influencers.influencer_field_name',
+    'influencers.influencer_field_values',
   ];
 
   const { querySortDirection, queryCursor } = parsePaginationCursor(sort, pagination);
@@ -63,6 +85,7 @@ export const createMetricsK8sAnomaliesQuery = (
       query: {
         bool: {
           filter: filters,
+          ...influencerQuery,
         },
       },
       search_after: queryCursor,
@@ -83,7 +106,12 @@ export const metricsK8sAnomalyHitRT = rt.type({
       record_score: rt.number,
       typical: rt.array(rt.number),
       actual: rt.array(rt.number),
-      // partition_field_value: rt.string,
+      influencers: rt.array(
+        rt.type({
+          influencer_field_name: rt.string,
+          influencer_field_values: rt.array(rt.string),
+        })
+      ),
       bucket_span: rt.number,
       timestamp: rt.number,
     }),

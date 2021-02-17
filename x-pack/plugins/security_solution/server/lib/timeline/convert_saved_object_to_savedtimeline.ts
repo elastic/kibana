@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { intersection, type, partial, literal, union, string } from 'io-ts/lib/index';
@@ -60,6 +61,12 @@ export const convertSavedObjectToSavedTimeline = (savedObject: unknown): Timelin
           savedTimeline.attributes.timelineType,
           savedTimeline.attributes.status
         ),
+        sort:
+          savedTimeline.attributes.sort != null
+            ? Array.isArray(savedTimeline.attributes.sort)
+              ? savedTimeline.attributes.sort
+              : [savedTimeline.attributes.sort]
+            : [],
       };
       return {
         savedObjectId: savedTimeline.id,

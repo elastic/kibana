@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiLink, EuiPopover, EuiToolTip, EuiText, EuiTextColor } from '@elastic/eui';
@@ -12,7 +13,7 @@ import styled from 'styled-components';
 import { DragEffects, DraggableWrapper } from '../drag_and_drop/draggable_wrapper';
 import { escapeDataProviderId } from '../drag_and_drop/helpers';
 import { defaultToEmptyTag, getEmptyTagValue } from '../empty_value';
-import { MoreRowItems, Spacer } from '../page';
+import { MoreRowItems } from '../page';
 import { IS_OPERATOR } from '../../../timelines/components/timeline/data_providers/data_provider';
 import { Provider } from '../../../timelines/components/timeline/data_providers/provider';
 
@@ -92,12 +93,6 @@ export const getRowItemDraggables = ({
       const id = escapeDataProviderId(`${idPrefix}-${attrName}-${rowItem}-${index}`);
       return (
         <React.Fragment key={id}>
-          {index !== 0 && (
-            <>
-              {','}
-              <Spacer />
-            </>
-          )}
           <DraggableWrapper
             key={id}
             dataProvider={{

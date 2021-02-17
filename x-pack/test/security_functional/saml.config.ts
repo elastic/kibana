@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { resolve } from 'path';
@@ -20,8 +21,14 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   );
 
   const kibanaPort = kibanaFunctionalConfig.get('servers.kibana.port');
-  const idpPath = resolve(__dirname, '../saml_api_integration/fixtures/saml_provider/metadata.xml');
-  const samlIdPPlugin = resolve(__dirname, '../saml_api_integration/fixtures/saml_provider');
+  const idpPath = resolve(
+    __dirname,
+    '../security_api_integration/fixtures/saml/saml_provider/metadata.xml'
+  );
+  const samlIdPPlugin = resolve(
+    __dirname,
+    '../security_api_integration/fixtures/saml/saml_provider'
+  );
 
   return {
     testFiles: [resolve(__dirname, './tests/saml')],

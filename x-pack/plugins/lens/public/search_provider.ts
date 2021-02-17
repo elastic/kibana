@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import levenshtein from 'js-levenshtein';
 import { ApplicationStart } from 'kibana/public';
-import { from } from 'rxjs';
+import { from, of } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
 import { GlobalSearchResultProvider } from '../../global_search/public';
@@ -26,7 +27,10 @@ export const getSearchProvider: (
   uiCapabilities: Promise<ApplicationStart['capabilities']>
 ) => GlobalSearchResultProvider = (uiCapabilities) => ({
   id: 'lens',
-  find: (term) => {
+  find: ({ term = '', types, tags }) => {
+    if (tags || (types && !types.includes('application'))) {
+      return of([]);
+    }
     return from(
       uiCapabilities.then(({ navLinks: { visualize: visualizeNavLink } }) => {
         if (!visualizeNavLink) {
@@ -76,4 +80,5 @@ export const getSearchProvider: (
       })
     );
   },
+  getSearchableTypes: () => ['application'],
 });

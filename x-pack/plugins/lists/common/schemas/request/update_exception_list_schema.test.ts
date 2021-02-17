@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { left } from 'fp-ts/lib/Either';
@@ -93,18 +94,6 @@ describe('update_exception_list_schema', () => {
     const outputPayload = getUpdateExceptionListSchemaMock();
     delete inputPayload.tags;
     outputPayload.tags = [];
-    const decoded = updateExceptionListSchema.decode(inputPayload);
-    const checked = exactCheck(inputPayload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([]);
-    expect(message.schema).toEqual(outputPayload);
-  });
-
-  test('it should accept an undefined for "_tags" but return an array', () => {
-    const inputPayload = getUpdateExceptionListSchemaMock();
-    const outputPayload = getUpdateExceptionListSchemaMock();
-    delete inputPayload._tags;
-    outputPayload._tags = [];
     const decoded = updateExceptionListSchema.decode(inputPayload);
     const checked = exactCheck(inputPayload, decoded);
     const message = pipe(checked, foldLeftRight);

@@ -1,0 +1,19 @@
+.source-row {
+  &__icon {
+    width: 24px;
+    height: 24px;
+  }
+
+  &__name {
+    font-weight: 500;
+  }
+
+  &__actions {
+    width: 100px;
+  }
+
+  &__actions a {
+    opacity: 1.0;
+    pointer-events: auto;
+  }
+}

@@ -1,12 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { get, getOr, isEmpty } from 'lodash/fp';
 import { set } from '@elastic/safer-lodash-set/fp';
 import { mergeFieldsWithHit } from '../../../../../utils/build_query';
-import { toArray } from '../../../../helpers/to_array';
+import { toStringArray } from '../../../../helpers/to_array';
 import {
   AuthenticationsEdges,
   AuthenticationHit,
@@ -53,7 +55,7 @@ export const formatAuthenticationData = (
       const fieldPath = `node.${fieldName}`;
       const fieldValue = get(fieldPath, mergedResult);
       if (!isEmpty(fieldValue)) {
-        return set(fieldPath, toArray(fieldValue), mergedResult);
+        return set(fieldPath, toStringArray(fieldValue), mergedResult);
       } else {
         return mergedResult;
       }

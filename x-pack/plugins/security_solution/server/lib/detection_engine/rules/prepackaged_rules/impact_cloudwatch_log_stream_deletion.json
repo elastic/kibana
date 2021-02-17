@@ -8,7 +8,8 @@
   ],
   "from": "now-60m",
   "index": [
-    "filebeat-*"
+    "filebeat-*",
+    "logs-aws*"
   ],
   "interval": "10m",
   "language": "kuery",
@@ -24,11 +25,12 @@
   "rule_id": "d624f0ae-3dd1-4856-9aad-ccfe4d4bfa17",
   "severity": "medium",
   "tags": [
-    "AWS",
     "Elastic",
+    "Cloud",
+    "AWS",
+    "Continuous Monitoring",
     "SecOps",
-    "Logging",
-    "Continuous Monitoring"
+    "Log Auditing"
   ],
   "threat": [
     {
@@ -55,13 +57,21 @@
       },
       "technique": [
         {
-          "id": "T1089",
-          "name": "Disabling Security Tools",
-          "reference": "https://attack.mitre.org/techniques/T1089/"
+          "id": "T1562",
+          "name": "Impair Defenses",
+          "reference": "https://attack.mitre.org/techniques/T1562/",
+          "subtechnique": [
+            {
+              "id": "T1562.001",
+              "name": "Disable or Modify Tools",
+              "reference": "https://attack.mitre.org/techniques/T1562/001/"
+            }
+          ]
         }
       ]
     }
   ],
+  "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 1
+  "version": 4
 }

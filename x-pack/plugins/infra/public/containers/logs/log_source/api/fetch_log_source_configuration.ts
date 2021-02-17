@@ -1,20 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { HttpSetup } from 'src/core/public';
+import type { HttpHandler } from 'src/core/public';
 import {
   getLogSourceConfigurationPath,
   getLogSourceConfigurationSuccessResponsePayloadRT,
 } from '../../../../../common/http_api/log_sources';
 import { decodeOrThrow } from '../../../../../common/runtime_types';
 
-export const callFetchLogSourceConfigurationAPI = async (
-  sourceId: string,
-  fetch: HttpSetup['fetch']
-) => {
+export const callFetchLogSourceConfigurationAPI = async (sourceId: string, fetch: HttpHandler) => {
   const response = await fetch(getLogSourceConfigurationPath(sourceId), {
     method: 'GET',
   });

@@ -1,12 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { eventType, orderByTime, userInfoForProcess } from './process_event';
 
 import { mockProcessEvent } from './process_event_test_helpers';
-import { LegacyEndpointEvent, SafeResolverEvent } from '../../../common/endpoint/types';
+import { LegacyEndpointEvent, ResolverNode } from '../../../common/endpoint/types';
 
 describe('process event', () => {
   describe('eventType', () => {
@@ -41,17 +43,19 @@ describe('process event', () => {
     });
   });
   describe('orderByTime', () => {
-    let mock: (time: number, eventID: string) => SafeResolverEvent;
-    let events: SafeResolverEvent[];
+    let mock: (time: number, nodeID: string) => ResolverNode;
+    let events: ResolverNode[];
     beforeEach(() => {
-      mock = (time, eventID) => {
-        return {
+      mock = (time, nodeID) => ({
+        data: {
           '@timestamp': time,
-          event: {
-            id: eventID,
-          },
-        };
-      };
+        },
+        id: nodeID,
+        stats: {
+          total: 0,
+          byCategory: {},
+        },
+      });
       // 2 events each for numbers -1, 0, 1, and NaN
       // each event has a unique id, a through h
       // order is arbitrary
@@ -71,51 +75,83 @@ describe('process event', () => {
       expect(events).toMatchInlineSnapshot(`
         Array [
           Object {
-            "@timestamp": -1,
-            "event": Object {
-              "id": "a",
+            "data": Object {
+              "@timestamp": -1,
+            },
+            "id": "a",
+            "stats": Object {
+              "byCategory": Object {},
+              "total": 0,
             },
           },
           Object {
-            "@timestamp": -1,
-            "event": Object {
-              "id": "b",
+            "data": Object {
+              "@timestamp": -1,
+            },
+            "id": "b",
+            "stats": Object {
+              "byCategory": Object {},
+              "total": 0,
             },
           },
           Object {
-            "@timestamp": 0,
-            "event": Object {
-              "id": "c",
+            "data": Object {
+              "@timestamp": 0,
+            },
+            "id": "c",
+            "stats": Object {
+              "byCategory": Object {},
+              "total": 0,
             },
           },
           Object {
-            "@timestamp": 0,
-            "event": Object {
-              "id": "d",
+            "data": Object {
+              "@timestamp": 0,
+            },
+            "id": "d",
+            "stats": Object {
+              "byCategory": Object {},
+              "total": 0,
             },
           },
           Object {
-            "@timestamp": 1,
-            "event": Object {
-              "id": "e",
+            "data": Object {
+              "@timestamp": 1,
+            },
+            "id": "e",
+            "stats": Object {
+              "byCategory": Object {},
+              "total": 0,
             },
           },
           Object {
-            "@timestamp": 1,
-            "event": Object {
-              "id": "f",
+            "data": Object {
+              "@timestamp": 1,
+            },
+            "id": "f",
+            "stats": Object {
+              "byCategory": Object {},
+              "total": 0,
             },
           },
           Object {
-            "@timestamp": NaN,
-            "event": Object {
-              "id": "g",
+            "data": Object {
+              "@timestamp": NaN,
+            },
+            "id": "g",
+            "stats": Object {
+              "byCategory": Object {},
+              "total": 0,
             },
           },
           Object {
-            "@timestamp": NaN,
-            "event": Object {
-              "id": "h",
+            "data": Object {
+              "@timestamp": NaN,
+            },
+            "id": "h",
+            "stats": Object {
+              "byCategory": Object {},
+              "total": 0,
             },
           },
         ]

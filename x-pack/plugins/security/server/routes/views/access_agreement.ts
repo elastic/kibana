@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { ConfigType } from '../../config';
@@ -12,7 +13,7 @@ import { RouteDefinitionParams } from '..';
  * Defines routes required for the Access Agreement view.
  */
 export function defineAccessAgreementRoutes({
-  session,
+  getSession,
   httpResources,
   license,
   config,
@@ -46,7 +47,7 @@ export function defineAccessAgreementRoutes({
       // authenticated with the help of HTTP authentication), that means we should safely check if
       // we have it and can get a corresponding configuration.
       try {
-        const sessionValue = await session.get(request);
+        const sessionValue = await getSession().get(request);
         const accessAgreement =
           (sessionValue &&
             config.authc.providers[

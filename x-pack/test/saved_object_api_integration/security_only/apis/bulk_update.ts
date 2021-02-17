@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { SPACES } from '../../common/lib/spaces';
@@ -28,9 +29,12 @@ const createTestCases = () => {
     CASES.SINGLE_NAMESPACE_DEFAULT_SPACE,
     { ...CASES.SINGLE_NAMESPACE_SPACE_1, ...fail404() },
     { ...CASES.SINGLE_NAMESPACE_SPACE_2, ...fail404() },
+    CASES.MULTI_NAMESPACE_ALL_SPACES,
     CASES.MULTI_NAMESPACE_DEFAULT_AND_SPACE_1,
     { ...CASES.MULTI_NAMESPACE_ONLY_SPACE_1, ...fail404() },
     { ...CASES.MULTI_NAMESPACE_ONLY_SPACE_2, ...fail404() },
+    { ...CASES.MULTI_NAMESPACE_ISOLATED_ONLY_DEFAULT_SPACE },
+    { ...CASES.MULTI_NAMESPACE_ISOLATED_ONLY_SPACE_1, ...fail404() },
     CASES.NAMESPACE_AGNOSTIC,
     { ...CASES.DOES_NOT_EXIST, ...fail404() },
   ];
@@ -42,6 +46,7 @@ const createTestCases = () => {
     { ...CASES.SINGLE_NAMESPACE_DEFAULT_SPACE, namespace: DEFAULT_SPACE_ID },
     { ...CASES.SINGLE_NAMESPACE_SPACE_1, namespace: SPACE_1_ID },
     { ...CASES.SINGLE_NAMESPACE_SPACE_2, namespace: SPACE_1_ID, ...fail404() }, // intentional 404 test case
+    { ...CASES.MULTI_NAMESPACE_ALL_SPACES, namespace: DEFAULT_SPACE_ID }, // any spaceId will work (not '*')
     { ...CASES.MULTI_NAMESPACE_DEFAULT_AND_SPACE_1, namespace: DEFAULT_SPACE_ID }, // SPACE_1_ID would also work
     { ...CASES.MULTI_NAMESPACE_ONLY_SPACE_1, namespace: SPACE_2_ID, ...fail404() }, // intentional 404 test case
     { ...CASES.MULTI_NAMESPACE_ONLY_SPACE_2, namespace: SPACE_2_ID },
@@ -55,10 +60,11 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertestWithoutAuth');
   const esArchiver = getService('esArchiver');
 
-  const { addTests, createTestDefinitions, expectForbidden } = bulkUpdateTestSuiteFactory(
-    esArchiver,
-    supertest
-  );
+  const {
+    addTests,
+    createTestDefinitions,
+    expectSavedObjectForbidden,
+  } = bulkUpdateTestSuiteFactory(esArchiver, supertest);
   const createTests = () => {
     const { normalTypes, hiddenType, allTypes, withObjectNamespaces } = createTestCases();
     // use singleRequest to reduce execution time and/or test combined cases
@@ -72,7 +78,7 @@ export default function ({ getService }: FtrProviderContext) {
         createTestDefinitions(hiddenType, true),
         createTestDefinitions(allTypes, true, {
           singleRequest: true,
-          responseBodyOverride: expectForbidden(['hiddentype']),
+          responseBodyOverride: expectSavedObjectForbidden(['hiddentype']),
         }),
         createTestDefinitions(withObjectNamespaces, false, { singleRequest: true }),
       ].flat(),

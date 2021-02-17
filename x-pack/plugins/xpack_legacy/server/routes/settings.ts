@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -42,6 +43,11 @@ export function registerSettingsRoute({
     },
     async (context, req, res) => {
       const { callAsCurrentUser } = context.core.elasticsearch.legacy.client;
+      const collectorFetchContext = {
+        callCluster: callAsCurrentUser,
+        esClient: context.core.elasticsearch.client.asCurrentUser,
+        soClient: context.core.savedObjects.client,
+      };
 
       const settingsCollector = usageCollection.getCollectorByType(KIBANA_SETTINGS_TYPE) as
         | KibanaSettingsCollector
@@ -51,11 +57,11 @@ export function registerSettingsRoute({
       }
 
       const settings =
-        (await settingsCollector.fetch(callAsCurrentUser)) ??
+        (await settingsCollector.fetch(collectorFetchContext)) ??
         settingsCollector.getEmailValueStructure(null);
-      const { cluster_uuid: uuid } = await callAsCurrentUser('info', {
-        filterPath: 'cluster_uuid',
-      });
+
+      const { body } = await collectorFetchContext.esClient.info({ filter_path: 'cluster_uuid' });
+      const uuid: string = body.cluster_uuid;
 
       const overallStatus = await overallStatus$.pipe(first()).toPromise();
 
@@ -71,7 +77,6 @@ export function registerSettingsRoute({
         snapshot: SNAPSHOT_REGEX.test(config.kibanaVersion),
         status: ServiceStatusToLegacyState[overallStatus.level.toString()],
       };
-
       return res.ok({
         body: {
           cluster_uuid: uuid,

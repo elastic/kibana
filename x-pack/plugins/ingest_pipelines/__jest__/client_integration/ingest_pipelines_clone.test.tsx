@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 
@@ -28,8 +30,7 @@ jest.mock('@elastic/eui', () => {
   };
 });
 
-// FLAKY: https://github.com/elastic/kibana/issues/66856
-describe.skip('<PipelinesClone />', () => {
+describe('<PipelinesClone />', () => {
   let testBed: PipelinesCloneTestBed;
 
   const { server, httpRequestsMockHelpers } = setupEnvironment();
@@ -38,13 +39,14 @@ describe.skip('<PipelinesClone />', () => {
     server.restore();
   });
 
-  beforeEach(async () => {
-    httpRequestsMockHelpers.setLoadPipelineResponse(PIPELINE_TO_CLONE);
+  httpRequestsMockHelpers.setLoadPipelineResponse(PIPELINE_TO_CLONE);
 
+  beforeEach(async () => {
     await act(async () => {
       testBed = await setup();
-      await testBed.waitFor('pipelineForm');
     });
+
+    testBed.component.update();
   });
 
   test('should render the correct page header', () => {
@@ -61,12 +63,9 @@ describe.skip('<PipelinesClone />', () => {
 
   describe('form submission', () => {
     it('should send the correct payload', async () => {
-      const { actions, waitFor } = testBed;
+      const { actions } = testBed;
 
-      await act(async () => {
-        actions.clickSubmitButton();
-        await waitFor('pipelineForm', 0);
-      });
+      await actions.clickSubmitButton();
 
       const latestRequest = server.requests[server.requests.length - 1];
 
@@ -75,7 +74,7 @@ describe.skip('<PipelinesClone />', () => {
         name: `${PIPELINE_TO_CLONE.name}-copy`,
       };
 
-      expect(JSON.parse(latestRequest.requestBody)).toEqual(expected);
+      expect(JSON.parse(JSON.parse(latestRequest.requestBody).body)).toEqual(expected);
     });
   });
 });

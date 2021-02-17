@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -15,14 +16,13 @@ import {
   META,
   NAME,
   NAMESPACE_TYPE,
+  OS_TYPES,
   TAGS,
-  _TAGS,
 } from '../../constants.mock';
 
 import { UpdateExceptionListItemSchema } from './update_exception_list_item_schema';
 
 export const getUpdateExceptionListItemSchemaMock = (): UpdateExceptionListItemSchema => ({
-  _tags: _TAGS,
   _version: undefined,
   comments: COMMENTS,
   description: DESCRIPTION,
@@ -32,6 +32,7 @@ export const getUpdateExceptionListItemSchemaMock = (): UpdateExceptionListItemS
   meta: META,
   name: NAME,
   namespace_type: NAMESPACE_TYPE,
+  os_types: ['linux'],
   tags: TAGS,
   type: ITEM_TYPE,
 });
@@ -45,5 +46,6 @@ export const getUpdateMinimalExceptionListItemSchemaMock = (): UpdateExceptionLi
   entries: ENTRIES,
   item_id: ITEM_ID,
   name: NAME,
+  os_types: OS_TYPES,
   type: ITEM_TYPE,
 });

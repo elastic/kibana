@@ -1,21 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-// Prefer importing entire lodash library, e.g. import { get } from "lodash"
-// eslint-disable-next-line no-restricted-imports
-import each from 'lodash/each';
-// Prefer importing entire lodash library, e.g. import { get } from "lodash"
-// eslint-disable-next-line no-restricted-imports
-import find from 'lodash/find';
-// Prefer importing entire lodash library, e.g. import { get } from "lodash"
-// eslint-disable-next-line no-restricted-imports
-import get from 'lodash/get';
-// Prefer importing entire lodash library, e.g. import { get } from "lodash"
-// eslint-disable-next-line no-restricted-imports
-import filter from 'lodash/filter';
+import { each, find, get, filter } from 'lodash';
 
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -29,7 +19,7 @@ import { buildConfigFromDetector } from '../util/chart_config_builder';
 import { mlResultsService } from '../services/results_service';
 import { ModelPlotOutput } from '../services/results_service/result_service_rx';
 import { Job } from '../../../common/types/anomaly_detection_jobs';
-import { EntityField } from '../..';
+import { EntityField } from '../../../common/util/anomaly_utils';
 
 function getMetricData(
   job: Job,
@@ -37,7 +27,8 @@ function getMetricData(
   entityFields: EntityField[],
   earliestMs: number,
   latestMs: number,
-  intervalMs: number
+  intervalMs: number,
+  esMetricFunction?: string
 ): Observable<ModelPlotOutput> {
   if (
     isModelPlotChartableForDetector(job, detectorIndex) &&
@@ -99,12 +90,14 @@ function getMetricData(
         chartConfig.datafeedConfig.indices,
         entityFields,
         chartConfig.datafeedConfig.query,
-        chartConfig.metricFunction,
+        esMetricFunction ?? chartConfig.metricFunction,
         chartConfig.metricFieldName,
+        chartConfig.summaryCountFieldName,
         chartConfig.timeField,
         earliestMs,
         latestMs,
-        intervalMs
+        intervalMs,
+        chartConfig?.datafeedConfig
       )
       .pipe(
         map((resp) => {

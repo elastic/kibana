@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import moment from 'moment';
@@ -48,7 +49,7 @@ export function formatTimestampToDuration(timestamp, calculationFlag, initialTim
   }
 
   return duration
-    .replace(/ 0 mins$/, '')
-    .replace(/ 0 hrs$/, '')
-    .replace(/ 0 days$/, ''); // See https://github.com/jsmreese/moment-duration-format/issues/64
+    .replace(/ -?0 mins$/, '')
+    .replace(/ -?0 hrs$/, '')
+    .replace(/ -?0 days$/, ''); // See https://github.com/jsmreese/moment-duration-format/issues/64
 }

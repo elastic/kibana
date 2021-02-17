@@ -1,10 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { Request, Server } from 'hapi';
+import { Request, Server } from '@hapi/hapi';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
 import { PLUGIN } from '../common/constants/plugin';
 import { compose } from './lib/compose/kibana';
@@ -33,8 +34,6 @@ export const initServerWithKibana = (server: UptimeCoreSetup, plugins: UptimeCor
     name: PLUGIN.NAME,
     order: 1000,
     category: DEFAULT_APP_CATEGORIES.observability,
-    navLinkId: PLUGIN.ID,
-    icon: 'uptimeApp',
     app: ['uptime', 'kibana'],
     catalogue: ['uptime'],
     management: {
@@ -67,7 +66,7 @@ export const initServerWithKibana = (server: UptimeCoreSetup, plugins: UptimeCor
           read: [umDynamicSettings.name],
         },
         alerting: {
-          all: ['xpack.uptime.alerts.tls', 'xpack.uptime.alerts.monitorStatus'],
+          read: ['xpack.uptime.alerts.tls', 'xpack.uptime.alerts.monitorStatus'],
         },
         management: {
           insightsAndAlerting: ['triggersActions'],

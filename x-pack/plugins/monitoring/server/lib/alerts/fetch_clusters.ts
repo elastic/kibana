@@ -1,12 +1,25 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-import { get } from 'lodash';
-import { AlertCluster } from '../../alerts/types';
 
-export async function fetchClusters(callCluster: any, index: string): Promise<AlertCluster[]> {
+import { get } from 'lodash';
+import { AlertCluster } from '../../../common/types/alerts';
+
+interface RangeFilter {
+  [field: string]: {
+    format?: string;
+    gte: string | number;
+  };
+}
+
+export async function fetchClusters(
+  callCluster: any,
+  index: string,
+  rangeFilter: RangeFilter = { timestamp: { gte: 'now-2m' } }
+): Promise<AlertCluster[]> {
   const params = {
     index,
     filterPath: [
@@ -25,11 +38,7 @@ export async function fetchClusters(callCluster: any, index: string): Promise<Al
               },
             },
             {
-              range: {
-                timestamp: {
-                  gte: 'now-2m',
-                },
-              },
+              range: rangeFilter,
             },
           ],
         },

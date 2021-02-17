@@ -1,10 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl, shallowWithIntl } from '@kbn/test/jest';
 import React from 'react';
 
 import { Overrides } from './overrides';
@@ -26,8 +27,11 @@ function getProps() {
     kibana: {
       services: {
         docLinks: {
-          ELASTIC_WEBSITE_URL: 'https://www.elastic.co/',
-          DOC_LINK_VERSION: 'jest-metadata-mock-branch',
+          links: {
+            aggs: {
+              date_format_pattern: 'jest-metadata-mock-url',
+            },
+          },
         },
       },
     },

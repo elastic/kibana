@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -85,17 +86,16 @@ export default function alertTests({ getService }: FtrProviderContext) {
       const docs = await waitForDocs(2);
       for (const doc of docs) {
         const { group } = doc._source;
-        const { name, value, title, message } = doc._source.params;
+        const { name, title, message } = doc._source.params;
 
         expect(name).to.be('always fire');
         expect(group).to.be('all documents');
 
         // we'll check title and message in this test, but not subsequent ones
-        expect(title).to.be('alert always fire group all documents exceeded threshold');
+        expect(title).to.be('alert always fire group all documents met threshold');
 
-        const expectedPrefix = `alert always fire group all documents value ${value} exceeded threshold count > -1 over`;
-        const messagePrefix = message.substr(0, expectedPrefix.length);
-        expect(messagePrefix).to.be(expectedPrefix);
+        const messagePattern = /alert 'always fire' is active for group \'all documents\':\n\n- Value: \d+\n- Conditions Met: count is greater than -1 over 15s\n- Timestamp: \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/;
+        expect(message).to.match(messagePattern);
       }
     });
 
@@ -128,10 +128,13 @@ export default function alertTests({ getService }: FtrProviderContext) {
 
       for (const doc of docs) {
         const { group } = doc._source;
-        const { name } = doc._source.params;
+        const { name, message } = doc._source.params;
 
         expect(name).to.be('always fire');
         if (group === 'group-0') inGroup0++;
+
+        const messagePattern = /alert 'always fire' is active for group \'group-\d\':\n\n- Value: \d+\n- Conditions Met: count is greater than or equal to 0 over 15s\n- Timestamp: \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/;
+        expect(message).to.match(messagePattern);
       }
 
       // there should be 2 docs in group-0, rando split between others
@@ -163,9 +166,12 @@ export default function alertTests({ getService }: FtrProviderContext) {
 
       const docs = await waitForDocs(2);
       for (const doc of docs) {
-        const { name } = doc._source.params;
+        const { name, message } = doc._source.params;
 
         expect(name).to.be('always fire');
+
+        const messagePattern = /alert 'always fire' is active for group \'all documents\':\n\n- Value: \d+\n- Conditions Met: sum\(testedValue\) is between 0 and 1000000 over 15s\n- Timestamp: \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/;
+        expect(message).to.match(messagePattern);
       }
     });
 
@@ -195,9 +201,12 @@ export default function alertTests({ getService }: FtrProviderContext) {
 
       const docs = await waitForDocs(4);
       for (const doc of docs) {
-        const { name } = doc._source.params;
+        const { name, message } = doc._source.params;
 
         expect(name).to.be('always fire');
+
+        const messagePattern = /alert 'always fire' is active for group \'all documents\':\n\n- Value: .*\n- Conditions Met: avg\(testedValue\) is greater than or equal to 0 over 15s\n- Timestamp: \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/;
+        expect(message).to.match(messagePattern);
       }
     });
 
@@ -232,10 +241,13 @@ export default function alertTests({ getService }: FtrProviderContext) {
 
       for (const doc of docs) {
         const { group } = doc._source;
-        const { name } = doc._source.params;
+        const { name, message } = doc._source.params;
 
         expect(name).to.be('always fire');
         if (group === 'group-2') inGroup2++;
+
+        const messagePattern = /alert 'always fire' is active for group \'group-\d\':\n\n- Value: \d+\n- Conditions Met: max\(testedValue\) is greater than or equal to 0 over 15s\n- Timestamp: \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/;
+        expect(message).to.match(messagePattern);
       }
 
       // there should be 2 docs in group-2, rando split between others
@@ -274,10 +286,13 @@ export default function alertTests({ getService }: FtrProviderContext) {
 
       for (const doc of docs) {
         const { group } = doc._source;
-        const { name } = doc._source.params;
+        const { name, message } = doc._source.params;
 
         expect(name).to.be('always fire');
         if (group === 'group-0') inGroup0++;
+
+        const messagePattern = /alert 'always fire' is active for group \'group-\d\':\n\n- Value: \d+\n- Conditions Met: min\(testedValue\) is greater than or equal to 0 over 15s\n- Timestamp: \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/;
+        expect(message).to.match(messagePattern);
       }
 
       // there should be 2 docs in group-0, rando split between others

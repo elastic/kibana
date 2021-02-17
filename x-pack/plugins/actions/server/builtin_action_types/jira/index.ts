@@ -1,11 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { curry } from 'lodash';
-import { schema } from '@kbn/config-schema';
+import { schema, TypeOf } from '@kbn/config-schema';
 
 import { validate } from './validators';
 import {
@@ -25,20 +26,30 @@ import {
   JiraExecutorResultData,
   ExecutorSubActionGetFieldsByIssueTypeParams,
   ExecutorSubActionGetIssueTypesParams,
+  ExecutorSubActionGetIssuesParams,
+  ExecutorSubActionGetIssueParams,
+  ExecutorSubActionGetIncidentParams,
 } from './types';
 import * as i18n from './translations';
 import { Logger } from '../../../../../../src/core/server';
 
-// TODO: to remove, need to support Case
-import { buildMap, mapParams } from '../case/utils';
-
+export type ActionParamsType = TypeOf<typeof ExecutorParamsSchema>;
 interface GetActionTypeParams {
   logger: Logger;
   configurationUtilities: ActionsConfigurationUtilities;
 }
 
-const supportedSubActions: string[] = ['pushToService', 'issueTypes', 'fieldsByIssueType'];
+const supportedSubActions: string[] = [
+  'getFields',
+  'getIncident',
+  'pushToService',
+  'issueTypes',
+  'fieldsByIssueType',
+  'issues',
+  'issue',
+];
 
+export const ActionTypeId = '.jira';
 // action type definition
 export function getActionType(
   params: GetActionTypeParams
@@ -50,7 +61,7 @@ export function getActionType(
 > {
   const { logger, configurationUtilities } = params;
   return {
-    id: '.jira',
+    id: ActionTypeId,
     minimumLicenseRequired: 'gold',
     name: i18n.NAME,
     validate: {
@@ -62,13 +73,16 @@ export function getActionType(
       }),
       params: ExecutorParamsSchema,
     },
-    executor: curry(executor)({ logger }),
+    executor: curry(executor)({ logger, configurationUtilities }),
   };
 }
 
 // action executor
 async function executor(
-  { logger }: { logger: Logger },
+  {
+    logger,
+    configurationUtilities,
+  }: { logger: Logger; configurationUtilities: ActionsConfigurationUtilities },
   execOptions: ActionTypeExecutorOptions<
     JiraPublicConfigurationType,
     JiraSecretConfigurationType,
@@ -85,7 +99,7 @@ async function executor(
       secrets,
     },
     logger,
-    execOptions.proxySettings
+    configurationUtilities
   );
 
   if (!api[subAction]) {
@@ -100,21 +114,22 @@ async function executor(
     throw new Error(errorMessage);
   }
 
+  if (subAction === 'getIncident') {
+    const getIncidentParams = subActionParams as ExecutorSubActionGetIncidentParams;
+    const res = await api.getIncident({
+      externalService,
+      params: getIncidentParams,
+    });
+    if (res != null) {
+      data = res;
+    }
+  }
   if (subAction === 'pushToService') {
     const pushToServiceParams = subActionParams as ExecutorSubActionPushParams;
 
-    const { comments, externalId, ...restParams } = pushToServiceParams;
-    const incidentConfiguration = config.incidentConfiguration;
-    const mapping = incidentConfiguration ? buildMap(incidentConfiguration.mapping) : null;
-    const externalObject =
-      config.incidentConfiguration && mapping
-        ? mapParams<ExecutorSubActionPushParams>(restParams as ExecutorSubActionPushParams, mapping)
-        : {};
-
     data = await api.pushToService({
       externalService,
-      mapping,
-      params: { ...pushToServiceParams, externalObject },
+      params: pushToServiceParams,
       logger,
     });
 
@@ -134,6 +149,29 @@ async function executor(
     data = await api.fieldsByIssueType({
       externalService,
       params: getFieldsByIssueTypeParams,
+    });
+  }
+
+  if (subAction === 'getFields') {
+    data = await api.getFields({
+      externalService,
+      params: subActionParams,
+    });
+  }
+
+  if (subAction === 'issues') {
+    const getIssuesParams = subActionParams as ExecutorSubActionGetIssuesParams;
+    data = await api.issues({
+      externalService,
+      params: getIssuesParams,
+    });
+  }
+
+  if (subAction === 'issue') {
+    const getIssueParams = subActionParams as ExecutorSubActionGetIssueParams;
+    data = await api.issue({
+      externalService,
+      params: getIssueParams,
     });
   }
 

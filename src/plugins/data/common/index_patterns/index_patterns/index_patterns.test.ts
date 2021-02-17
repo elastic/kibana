@@ -1,26 +1,15 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { defaults } from 'lodash';
 import { IndexPatternsService, IndexPattern } from '.';
 import { fieldFormatsMock } from '../../field_formats/mocks';
-import { stubbedSavedObjectIndexPattern } from '../../../../../fixtures/stubbed_saved_object_index_pattern';
+import { stubbedSavedObjectIndexPattern } from './fixtures/stubbed_saved_object_index_pattern';
 import { UiSettingsCommon, SavedObjectsClientCommon, SavedObject } from '../types';
 
 const createFieldsFetcher = jest.fn().mockImplementation(() => ({
@@ -40,6 +29,7 @@ function setDocsourcePayload(id: string | null, providedPayload: any) {
 describe('IndexPatterns', () => {
   let indexPatterns: IndexPatternsService;
   let savedObjectsClient: SavedObjectsClientCommon;
+  let SOClientGetDelay = 0;
 
   beforeEach(() => {
     const indexPatternObj = { id: 'id', version: 'a', attributes: { title: 'title' } };
@@ -49,11 +39,14 @@ describe('IndexPatterns', () => {
     );
     savedObjectsClient.delete = jest.fn(() => Promise.resolve({}) as Promise<any>);
     savedObjectsClient.create = jest.fn();
-    savedObjectsClient.get = jest.fn().mockImplementation(async (type, id) => ({
-      id: object.id,
-      version: object.version,
-      attributes: object.attributes,
-    }));
+    savedObjectsClient.get = jest.fn().mockImplementation(async (type, id) => {
+      await new Promise((resolve) => setTimeout(resolve, SOClientGetDelay));
+      return {
+        id: object.id,
+        version: object.version,
+        attributes: object.attributes,
+      };
+    });
     savedObjectsClient.update = jest
       .fn()
       .mockImplementation(async (type, id, body, { version }) => {
@@ -87,6 +80,7 @@ describe('IndexPatterns', () => {
   });
 
   test('does cache gets for the same id', async () => {
+    SOClientGetDelay = 1000;
     const id = '1';
     setDocsourcePayload(id, {
       id: 'foo',
@@ -96,10 +90,32 @@ describe('IndexPatterns', () => {
       },
     });
 
-    const indexPattern = await indexPatterns.get(id);
+    // make two requests before first can complete
+    const indexPatternPromise = indexPatterns.get(id);
+    indexPatterns.get(id);
 
-    expect(indexPattern).toBeDefined();
-    expect(indexPattern).toBe(await indexPatterns.get(id));
+    indexPatternPromise.then((indexPattern) => {
+      expect(savedObjectsClient.get).toBeCalledTimes(1);
+      expect(indexPattern).toBeDefined();
+    });
+
+    expect(await indexPatternPromise).toBe(await indexPatterns.get(id));
+    SOClientGetDelay = 0;
+  });
+
+  test('allowNoIndex flag preserves existing fields when index is missing', async () => {
+    const id = '2';
+    setDocsourcePayload(id, {
+      id: 'foo',
+      version: 'foo',
+      attributes: {
+        title: 'something',
+        allowNoIndex: true,
+        fields: '[{"name":"field"}]',
+      },
+    });
+
+    expect((await indexPatterns.get(id)).fields.length).toBe(1);
   });
 
   test('savedObjectCache pre-fetches only title', async () => {
@@ -143,14 +159,10 @@ describe('IndexPatterns', () => {
 
     // Create a normal index patterns
     const pattern = await indexPatterns.get('foo');
-
-    expect(pattern.version).toBe('fooa');
     indexPatterns.clearCache();
 
     // Create the same one - we're going to handle concurrency
     const samePattern = await indexPatterns.get('foo');
-
-    expect(samePattern.version).toBe('fooaa');
 
     // This will conflict because samePattern did a save (from refreshFields)
     // but the resave should work fine
@@ -183,6 +195,20 @@ describe('IndexPatterns', () => {
     expect(indexPatterns.refreshFields).toBeCalled();
   });
 
+  test('find', async () => {
+    const search = 'kibana*';
+    const size = 10;
+    await indexPatterns.find('kibana*', size);
+
+    expect(savedObjectsClient.find).lastCalledWith({
+      type: 'index-pattern',
+      fields: ['title'],
+      search,
+      searchFields: ['title'],
+      perPage: size,
+    });
+  });
+
   test('createAndSave', async () => {
     const title = 'kibana-*';
     indexPatterns.createSavedObject = jest.fn();
@@ -210,5 +236,26 @@ describe('IndexPatterns', () => {
     };
 
     expect(indexPatterns.savedObjectToSpec(savedObject)).toMatchSnapshot();
+  });
+
+  test('failed requests are not cached', async () => {
+    savedObjectsClient.get = jest
+      .fn()
+      .mockImplementation(async (type, id) => {
+        return {
+          id: object.id,
+          version: object.version,
+          attributes: object.attributes,
+        };
+      })
+      .mockRejectedValueOnce({});
+
+    const id = '1';
+
+    // failed request!
+    expect(indexPatterns.get(id)).rejects.toBeDefined();
+
+    // successful subsequent request
+    expect(async () => await indexPatterns.get(id)).toBeDefined();
   });
 });

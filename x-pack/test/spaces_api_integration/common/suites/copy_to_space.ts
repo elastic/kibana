@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -124,7 +125,15 @@ export function copyToSpaceTestSuiteFactory(
     });
   };
 
-  const expectNotFoundResponse = async (resp: TestResponse) => {
+  const expectRouteForbiddenResponse = async (resp: TestResponse) => {
+    expect(resp.body).to.eql({
+      statusCode: 403,
+      error: 'Forbidden',
+      message: 'Forbidden',
+    });
+  };
+
+  const expectRouteNotFoundResponse = async (resp: TestResponse) => {
     expect(resp.body).to.eql({
       statusCode: 404,
       error: 'Not Found',
@@ -419,16 +428,16 @@ export function copyToSpaceTestSuiteFactory(
   ) => (overwrite: boolean): CopyToSpaceMultiNamespaceTest[] => {
     // the status code of the HTTP response differs depending on the error type
     // a 403 error actually comes back as an HTTP 200 response
-    const statusCode = outcome === 'noAccess' ? 404 : 200;
+    const statusCode = outcome === 'noAccess' ? 403 : 200;
     const type = 'sharedtype';
     const v4 = new RegExp(/^[0-9A-F]{8}-[0-9A-F]{4}-4[0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i);
     const noConflictId = `${spaceId}_only`;
-    const exactMatchId = 'all_spaces';
+    const exactMatchId = 'each_space';
     const inexactMatchId = `conflict_1_${spaceId}`;
     const ambiguousConflictId = `conflict_2_${spaceId}`;
 
     const getResult = (response: TestResponse) => (response.body as CopyResponse).space_2;
-    const expectForbiddenResponse = (response: TestResponse) => {
+    const expectSavedObjectForbiddenResponse = (response: TestResponse) => {
       expect(response.body).to.eql({
         space_2: {
           success: false,
@@ -456,10 +465,10 @@ export function copyToSpaceTestSuiteFactory(
             expect(successResults).to.eql([{ type, id: noConflictId, meta, destinationId }]);
             expect(errors).to.be(undefined);
           } else if (outcome === 'noAccess') {
-            expectNotFoundResponse(response);
+            expectRouteForbiddenResponse(response);
           } else {
             // unauthorized read/write
-            expectForbiddenResponse(response);
+            expectSavedObjectForbiddenResponse(response);
           }
         },
       },
@@ -486,10 +495,10 @@ export function copyToSpaceTestSuiteFactory(
               ]);
             }
           } else if (outcome === 'noAccess') {
-            expectNotFoundResponse(response);
+            expectRouteForbiddenResponse(response);
           } else {
             // unauthorized read/write
-            expectForbiddenResponse(response);
+            expectSavedObjectForbiddenResponse(response);
           }
         },
       },
@@ -525,10 +534,10 @@ export function copyToSpaceTestSuiteFactory(
               ]);
             }
           } else if (outcome === 'noAccess') {
-            expectNotFoundResponse(response);
+            expectRouteForbiddenResponse(response);
           } else {
             // unauthorized read/write
-            expectForbiddenResponse(response);
+            expectSavedObjectForbiddenResponse(response);
           }
         },
       },
@@ -561,10 +570,10 @@ export function copyToSpaceTestSuiteFactory(
               },
             ]);
           } else if (outcome === 'noAccess') {
-            expectNotFoundResponse(response);
+            expectRouteForbiddenResponse(response);
           } else {
             // unauthorized read/write
-            expectForbiddenResponse(response);
+            expectSavedObjectForbiddenResponse(response);
           }
         },
       },
@@ -599,6 +608,7 @@ export function copyToSpaceTestSuiteFactory(
               objects: [dashboardObject],
               spaces: [destination],
               includeReferences: false,
+              createNewCopies: false,
               overwrite: false,
             })
             .expect(tests.noConflictsWithoutReferences.statusCode)
@@ -617,6 +627,7 @@ export function copyToSpaceTestSuiteFactory(
               objects: [dashboardObject],
               spaces: [destination],
               includeReferences: true,
+              createNewCopies: false,
               overwrite: false,
             })
             .expect(tests.noConflictsWithReferences.statusCode)
@@ -635,6 +646,7 @@ export function copyToSpaceTestSuiteFactory(
               objects: [dashboardObject],
               spaces: [destination],
               includeReferences: true,
+              createNewCopies: false,
               overwrite: true,
             })
             .expect(tests.withConflictsOverwriting.statusCode)
@@ -653,6 +665,7 @@ export function copyToSpaceTestSuiteFactory(
               objects: [dashboardObject],
               spaces: [destination],
               includeReferences: true,
+              createNewCopies: false,
               overwrite: false,
             })
             .expect(tests.withConflictsWithoutOverwriting.statusCode)
@@ -670,6 +683,7 @@ export function copyToSpaceTestSuiteFactory(
               objects: [dashboardObject],
               spaces: [conflictDestination, noConflictDestination],
               includeReferences: true,
+              createNewCopies: false,
               overwrite: true,
             })
             .expect(tests.multipleSpaces.statusCode)
@@ -702,6 +716,7 @@ export function copyToSpaceTestSuiteFactory(
               objects: [dashboardObject],
               spaces: ['non_existent_space'],
               includeReferences: false,
+              createNewCopies: false,
               overwrite: true,
             })
             .expect(tests.nonExistentSpace.statusCode)
@@ -712,6 +727,7 @@ export function copyToSpaceTestSuiteFactory(
       [false, true].forEach((overwrite) => {
         const spaces = ['space_2'];
         const includeReferences = false;
+        const createNewCopies = false;
         describe(`multi-namespace types with overwrite=${overwrite}`, () => {
           before(() => esArchiver.load('saved_objects/spaces'));
           after(() => esArchiver.unload('saved_objects/spaces'));
@@ -722,7 +738,7 @@ export function copyToSpaceTestSuiteFactory(
               return supertest
                 .post(`${getUrlPrefix(spaceId)}/api/spaces/_copy_saved_objects`)
                 .auth(user.username, user.password)
-                .send({ objects, spaces, includeReferences, overwrite })
+                .send({ objects, spaces, includeReferences, createNewCopies, overwrite })
                 .expect(statusCode)
                 .then(response);
             });
@@ -743,7 +759,8 @@ export function copyToSpaceTestSuiteFactory(
     expectNoConflictsForNonExistentSpaceResult,
     createExpectWithConflictsOverwritingResult,
     createExpectWithConflictsWithoutOverwritingResult,
-    expectNotFoundResponse,
+    expectRouteForbiddenResponse,
+    expectRouteNotFoundResponse,
     createExpectUnauthorizedAtSpaceWithReferencesResult,
     createExpectUnauthorizedAtSpaceWithoutReferencesResult,
     createMultiNamespaceTestCases,

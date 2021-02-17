@@ -9,43 +9,16 @@ returns all search source fields
 <b>Signature:</b>
 
 ```typescript
-getFields(): {
-        type?: string | undefined;
-        query?: import("../..").Query | undefined;
-        filter?: Filter | Filter[] | (() => Filter | Filter[] | undefined) | undefined;
-        sort?: Record<string, import("./types").SortDirection | import("./types").SortDirectionNumeric> | Record<string, import("./types").SortDirection | import("./types").SortDirectionNumeric>[] | undefined;
-        highlight?: any;
-        highlightAll?: boolean | undefined;
-        aggs?: any;
-        from?: number | undefined;
-        size?: number | undefined;
-        source?: string | boolean | string[] | undefined;
-        version?: boolean | undefined;
-        fields?: string | boolean | string[] | undefined;
-        index?: import("../..").IndexPattern | undefined;
-        searchAfter?: import("./types").EsQuerySearchAfter | undefined;
-        timeout?: string | undefined;
-        terminate_after?: number | undefined;
-    };
+getFields(recurse?: boolean): SearchSourceFields;
 ```
+
+## Parameters
+
+|  Parameter | Type | Description |
+|  --- | --- | --- |
+|  recurse | <code>boolean</code> |  |
+
 <b>Returns:</b>
 
-`{
-        type?: string | undefined;
-        query?: import("../..").Query | undefined;
-        filter?: Filter | Filter[] | (() => Filter | Filter[] | undefined) | undefined;
-        sort?: Record<string, import("./types").SortDirection | import("./types").SortDirectionNumeric> | Record<string, import("./types").SortDirection | import("./types").SortDirectionNumeric>[] | undefined;
-        highlight?: any;
-        highlightAll?: boolean | undefined;
-        aggs?: any;
-        from?: number | undefined;
-        size?: number | undefined;
-        source?: string | boolean | string[] | undefined;
-        version?: boolean | undefined;
-        fields?: string | boolean | string[] | undefined;
-        index?: import("../..").IndexPattern | undefined;
-        searchAfter?: import("./types").EsQuerySearchAfter | undefined;
-        timeout?: string | undefined;
-        terminate_after?: number | undefined;
-    }`
+`SearchSourceFields`
 

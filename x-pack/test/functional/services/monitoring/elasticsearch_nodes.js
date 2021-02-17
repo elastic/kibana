@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { range } from 'lodash';
@@ -86,6 +87,7 @@ export function MonitoringElasticsearchNodesProvider({ getService, getPageObject
     }
     async clickDiskCol() {
       await find.clickByCssSelector(`[data-test-subj="${SUBJ_TABLE_SORT_DISK_COL}"] > button`);
+      await this.waitForTableToFinishLoading();
     }
 
     async clickShardsCol() {

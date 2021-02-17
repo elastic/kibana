@@ -1,30 +1,42 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { fold } from 'fp-ts/lib/Either';
-import { identity } from 'fp-ts/lib/function';
-import { pipe } from 'fp-ts/lib/pipeable';
 import * as rt from 'io-ts';
-import { npStart } from '../../../../legacy_singletons';
+import type { HttpHandler } from 'src/core/public';
 
 import { getJobIdPrefix, jobCustomSettingsRT } from '../../../../../common/log_analysis';
-import { createPlainError, throwErrors } from '../../../../../common/runtime_types';
+import { decodeOrThrow } from '../../../../../common/runtime_types';
 
-export const callSetupMlModuleAPI = async (
-  moduleId: string,
-  start: number | undefined,
-  end: number | undefined,
-  spaceId: string,
-  sourceId: string,
-  indexPattern: string,
-  jobOverrides: SetupMlModuleJobOverrides[] = [],
-  datafeedOverrides: SetupMlModuleDatafeedOverrides[] = [],
-  query?: object
-) => {
-  const response = await npStart.http.fetch(`/api/ml/modules/setup/${moduleId}`, {
+interface RequestArgs {
+  moduleId: string;
+  start?: number;
+  end?: number;
+  spaceId: string;
+  sourceId: string;
+  indexPattern: string;
+  jobOverrides?: SetupMlModuleJobOverrides[];
+  datafeedOverrides?: SetupMlModuleDatafeedOverrides[];
+  query?: object;
+}
+
+export const callSetupMlModuleAPI = async (requestArgs: RequestArgs, fetch: HttpHandler) => {
+  const {
+    moduleId,
+    start,
+    end,
+    spaceId,
+    sourceId,
+    indexPattern,
+    jobOverrides = [],
+    datafeedOverrides = [],
+    query,
+  } = requestArgs;
+
+  const response = await fetch(`/api/ml/modules/setup/${moduleId}`, {
     method: 'POST',
     body: JSON.stringify(
       setupMlModuleRequestPayloadRT.encode({
@@ -40,10 +52,7 @@ export const callSetupMlModuleAPI = async (
     ),
   });
 
-  return pipe(
-    setupMlModuleResponsePayloadRT.decode(response),
-    fold(throwErrors(createPlainError), identity)
-  );
+  return decodeOrThrow(setupMlModuleResponsePayloadRT)(response);
 };
 
 const setupMlModuleTimeParamsRT = rt.partial({
@@ -82,8 +91,19 @@ const setupMlModuleRequestPayloadRT = rt.intersection([
   setupMlModuleRequestParamsRT,
 ]);
 
+const setupErrorRT = rt.type({
+  reason: rt.string,
+  type: rt.string,
+});
+
 const setupErrorResponseRT = rt.type({
-  msg: rt.string,
+  status: rt.number,
+  error: rt.intersection([
+    setupErrorRT,
+    rt.type({
+      root_cause: rt.array(setupErrorRT),
+    }),
+  ]),
 });
 
 const datafeedSetupResponseRT = rt.intersection([

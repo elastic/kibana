@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { act } from 'react-dom/test-utils';
@@ -15,7 +16,7 @@ import { HomeTestBed, setup } from './home.helpers';
       Could not load worker ReferenceError: Worker is not defined
           at createWorker (/<path-to-repo>/node_modules/brace/index.js:17992:5)
  */
-import { stubWebWorker } from '../../../../../test_utils/stub_web_worker';
+import { stubWebWorker } from '@kbn/test/jest';
 stubWebWorker();
 
 describe('<IndexManagementHome />', () => {

@@ -1,14 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import cytoscape from 'cytoscape';
 import dagre from 'cytoscape-dagre';
-// Prefer importing entire lodash library, e.g. import { get } from "lodash"
-// eslint-disable-next-line no-restricted-imports
-import isEqual from 'lodash/isEqual';
+import { isEqual } from 'lodash';
 import React, {
   createContext,
   CSSProperties,
@@ -18,8 +17,8 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import { useTheme } from '../../../hooks/useTheme';
-import { getCytoscapeOptions } from './cytoscapeOptions';
+import { useTheme } from '../../../hooks/use_theme';
+import { getCytoscapeOptions } from './cytoscape_options';
 import { useCytoscapeEventHandlers } from './use_cytoscape_event_handlers';
 
 cytoscape.use(dagre);
@@ -28,7 +27,7 @@ export const CytoscapeContext = createContext<cytoscape.Core | undefined>(
   undefined
 );
 
-interface CytoscapeProps {
+export interface CytoscapeProps {
   children?: ReactNode;
   elements: cytoscape.ElementDefinition[];
   height: number;
@@ -86,6 +85,11 @@ function CytoscapeComponent({
       cy.elements().forEach((element) => {
         if (!elementIds.includes(element.data('id'))) {
           cy.remove(element);
+        } else {
+          // Doing an "add" with an element with the same id will keep the original
+          // element. Set the data with the new element data.
+          const newElement = elements.find((el) => el.data.id === element.id());
+          element.data(newElement?.data ?? element.data());
         }
       });
       cy.trigger('custom:data', [fit]);

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { ChangeEvent, Component } from 'react';
@@ -17,7 +18,7 @@ import {
   isValidHex,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Space } from '../../../../common/model/space';
+import { Space } from '../../../../../../../src/plugins/spaces_oss/common';
 import { imageTypes, encode } from '../../../../common/lib/dataurl';
 import { getSpaceColor, getSpaceInitials } from '../../../space_avatar';
 import { MAX_SPACE_INITIALS } from '../../../../common';

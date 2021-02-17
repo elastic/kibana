@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { kea, MakeLogicType } from 'kea';
@@ -10,20 +11,20 @@ import { HttpSetup, HttpInterceptorResponseError, HttpResponse } from 'src/core/
 
 import { READ_ONLY_MODE_HEADER } from '../../../../common/constants';
 
-export interface IHttpValues {
+interface HttpValues {
   http: HttpSetup;
   httpInterceptors: Function[];
   errorConnecting: boolean;
   readOnlyMode: boolean;
 }
-export interface IHttpActions {
+interface HttpActions {
   initializeHttpInterceptors(): void;
   setHttpInterceptors(httpInterceptors: Function[]): { httpInterceptors: Function[] };
   setErrorConnecting(errorConnecting: boolean): { errorConnecting: boolean };
   setReadOnlyMode(readOnlyMode: boolean): { readOnlyMode: boolean };
 }
 
-export const HttpLogic = kea<MakeLogicType<IHttpValues, IHttpActions>>({
+export const HttpLogic = kea<MakeLogicType<HttpValues, HttpActions>>({
   path: ['enterprise_search', 'http_logic'],
   actions: {
     initializeHttpInterceptors: () => null,
@@ -108,12 +109,12 @@ export const HttpLogic = kea<MakeLogicType<IHttpValues, IHttpActions>>({
 /**
  * Mount/props helper
  */
-interface IHttpLogicProps {
+interface HttpLogicProps {
   http: HttpSetup;
   errorConnecting?: boolean;
   readOnlyMode?: boolean;
 }
-export const mountHttpLogic = (props: IHttpLogicProps) => {
+export const mountHttpLogic = (props: HttpLogicProps) => {
   HttpLogic(props);
   const unmount = HttpLogic.mount();
   return unmount;

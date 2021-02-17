@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import PropTypes from 'prop-types';
@@ -16,10 +17,9 @@ import {
   EuiLink,
   EuiLoadingSpinner,
 } from '@elastic/eui';
-import { formatDate, formatNumber } from '@elastic/eui/lib/services/format';
+import { formatNumber } from '@elastic/eui/lib/services/format';
 
 import { FORECAST_REQUEST_STATE } from '../../../../../../../common/constants/states';
-import { TIME_FORMAT } from '../../../../../../../common/constants/time_format';
 import { addItemToRecentlyAccessed } from '../../../../../util/recently_accessed';
 import { mlForecastService } from '../../../../../services/forecast_service';
 import { i18n } from '@kbn/i18n';
@@ -34,6 +34,7 @@ import {
   ML_PAGES,
 } from '../../../../../../../common/constants/ml_url_generator';
 import { PLUGIN_ID } from '../../../../../../../common/constants/app';
+import { timeFormatter } from '../../../../../../../common/util/date_utils';
 
 const MAX_FORECASTS = 500;
 
@@ -136,7 +137,7 @@ export class ForecastsTableUI extends Component {
         },
         refreshInterval: {
           display: 'Off',
-          pause: false,
+          pause: true,
           value: 0,
         },
         jobIds: [this.props.job.job_id],
@@ -218,7 +219,7 @@ export class ForecastsTableUI extends Component {
           defaultMessage: 'Created',
         }),
         dataType: 'date',
-        render: (date) => formatDate(date, TIME_FORMAT),
+        render: timeFormatter,
         textOnly: true,
         sortable: true,
         scope: 'row',
@@ -229,7 +230,7 @@ export class ForecastsTableUI extends Component {
           defaultMessage: 'From',
         }),
         dataType: 'date',
-        render: (date) => formatDate(date, TIME_FORMAT),
+        render: timeFormatter,
         textOnly: true,
         sortable: true,
       },
@@ -239,7 +240,7 @@ export class ForecastsTableUI extends Component {
           defaultMessage: 'To',
         }),
         dataType: 'date',
-        render: (date) => formatDate(date, TIME_FORMAT),
+        render: timeFormatter,
         textOnly: true,
         sortable: true,
       },
@@ -277,7 +278,7 @@ export class ForecastsTableUI extends Component {
         name: i18n.translate('xpack.ml.jobsList.jobDetails.forecastsTable.expiresLabel', {
           defaultMessage: 'Expires',
         }),
-        render: (date) => formatDate(date, TIME_FORMAT),
+        render: timeFormatter,
         textOnly: true,
         sortable: true,
       },
@@ -309,7 +310,7 @@ export class ForecastsTableUI extends Component {
             {
               defaultMessage: 'View forecast created at {createdDate}',
               values: {
-                createdDate: formatDate(forecast.forecast_create_timestamp, TIME_FORMAT),
+                createdDate: timeFormatter(forecast.forecast_create_timestamp),
               },
             }
           );

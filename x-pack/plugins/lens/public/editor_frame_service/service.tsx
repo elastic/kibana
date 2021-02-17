@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -22,20 +23,18 @@ import {
   EditorFrameStart,
 } from '../types';
 import { Document } from '../persistence/saved_object_store';
-import { EditorFrame } from './editor_frame';
 import { mergeTables } from './merge_tables';
-import { formatColumn } from './format_column';
 import { EmbeddableFactory, LensEmbeddableStartServices } from './embeddable/embeddable_factory';
-import { getActiveDatasourceIdFromDoc } from './editor_frame/state_management';
 import { UiActionsStart } from '../../../../../src/plugins/ui_actions/public';
+import { ChartsPluginSetup } from '../../../../../src/plugins/charts/public';
 import { DashboardStart } from '../../../../../src/plugins/dashboard/public';
-import { persistedStateToExpression } from './editor_frame/state_helpers';
 import { LensAttributeService } from '../lens_attribute_service';
 
 export interface EditorFrameSetupPlugins {
   data: DataPublicPluginSetup;
   embeddable?: EmbeddableSetup;
   expressions: ExpressionsSetup;
+  charts: ChartsPluginSetup;
 }
 
 export interface EditorFrameStartPlugins {
@@ -44,12 +43,15 @@ export interface EditorFrameStartPlugins {
   dashboard?: DashboardStart;
   expressions: ExpressionsStart;
   uiActions?: UiActionsStart;
+  charts: ChartsPluginSetup;
 }
 
 async function collectAsyncDefinitions<T extends { id: string }>(
-  definitions: Array<T | Promise<T>>
+  definitions: Array<T | (() => Promise<T>)>
 ) {
-  const resolvedDefinitions = await Promise.all(definitions);
+  const resolvedDefinitions = await Promise.all(
+    definitions.map((definition) => (typeof definition === 'function' ? definition() : definition))
+  );
   const definitionMap: Record<string, T> = {};
   resolvedDefinitions.forEach((definition) => {
     definitionMap[definition.id] = definition;
@@ -61,8 +63,8 @@ async function collectAsyncDefinitions<T extends { id: string }>(
 export class EditorFrameService {
   constructor() {}
 
-  private readonly datasources: Array<Datasource | Promise<Datasource>> = [];
-  private readonly visualizations: Array<Visualization | Promise<Visualization>> = [];
+  private readonly datasources: Array<Datasource | (() => Promise<Datasource>)> = [];
+  private readonly visualizations: Array<Visualization | (() => Promise<Visualization>)> = [];
 
   /**
    * This method takes a Lens saved object as returned from the persistence helper,
@@ -70,32 +72,33 @@ export class EditorFrameService {
    * This is an asynchronous process and should only be triggered once for a saved object.
    * @param doc parsed Lens saved object
    */
-  private async documentToExpression(doc: Document) {
+  private documentToExpression = async (doc: Document) => {
     const [resolvedDatasources, resolvedVisualizations] = await Promise.all([
       collectAsyncDefinitions(this.datasources),
       collectAsyncDefinitions(this.visualizations),
     ]);
 
+    const { persistedStateToExpression } = await import('../async_services');
+
     return await persistedStateToExpression(resolvedDatasources, resolvedVisualizations, doc);
-  }
+  };
 
   public setup(
     core: CoreSetup<EditorFrameStartPlugins>,
     plugins: EditorFrameSetupPlugins,
-    getAttributeService: () => LensAttributeService
+    getAttributeService: () => Promise<LensAttributeService>
   ): EditorFrameSetup {
     plugins.expressions.registerFunction(() => mergeTables);
-    plugins.expressions.registerFunction(() => formatColumn);
 
     const getStartServices = async (): Promise<LensEmbeddableStartServices> => {
       const [coreStart, deps] = await core.getStartServices();
       return {
-        attributeService: getAttributeService(),
+        attributeService: await getAttributeService(),
         capabilities: coreStart.application.capabilities,
         coreHttp: coreStart.http,
         timefilter: deps.data.query.timefilter.timefilter,
         expressionRenderer: deps.expressions.ReactExpressionRenderer,
-        documentToExpression: this.documentToExpression.bind(this),
+        documentToExpression: this.documentToExpression,
         indexPatternService: deps.data.indexPatterns,
         uiActions: deps.uiActions,
       };
@@ -123,14 +126,38 @@ export class EditorFrameService {
         collectAsyncDefinitions(this.visualizations),
       ]);
 
+      const unmount = () => {
+        if (domElement) {
+          unmountComponentAtNode(domElement);
+        }
+      };
+
       return {
-        mount: (
+        mount: async (
           element,
-          { doc, onError, dateRange, query, filters, savedQuery, onChange, showNoDataPopover }
+          {
+            doc,
+            onError,
+            dateRange,
+            query,
+            filters,
+            savedQuery,
+            onChange,
+            showNoDataPopover,
+            initialContext,
+            searchSessionId,
+          }
         ) => {
+          if (domElement !== element) {
+            unmount();
+          }
           domElement = element;
           const firstDatasourceId = Object.keys(resolvedDatasources)[0];
           const firstVisualizationId = Object.keys(resolvedVisualizations)[0];
+
+          const { EditorFrame, getActiveDatasourceIdFromDoc } = await import('../async_services');
+
+          const palettes = await plugins.charts.palettes.getPalettes();
 
           render(
             <I18nProvider>
@@ -143,9 +170,11 @@ export class EditorFrameService {
                 initialVisualizationId={
                   (doc && doc.visualizationType) || firstVisualizationId || null
                 }
+                key={doc?.savedObjectId} // ensures rerendering when switching to another visualization inside of lens (eg global search)
                 core={core}
                 plugins={plugins}
                 ExpressionRenderer={plugins.expressions.ReactExpressionRenderer}
+                palettes={palettes}
                 doc={doc}
                 dateRange={dateRange}
                 query={query}
@@ -153,16 +182,14 @@ export class EditorFrameService {
                 savedQuery={savedQuery}
                 onChange={onChange}
                 showNoDataPopover={showNoDataPopover}
+                initialContext={initialContext}
+                searchSessionId={searchSessionId}
               />
             </I18nProvider>,
             domElement
           );
         },
-        unmount() {
-          if (domElement) {
-            unmountComponentAtNode(domElement);
-          }
-        },
+        unmount,
       };
     };
 

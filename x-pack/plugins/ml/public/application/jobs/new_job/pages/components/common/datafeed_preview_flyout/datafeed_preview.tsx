@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FC, useState, useEffect, useMemo, useCallback } from 'react';
@@ -20,6 +21,7 @@ import { CombinedJob } from '../../../../../../../../common/types/anomaly_detect
 import { MLJobEditor } from '../../../../../jobs_list/components/ml_job_editor';
 import { mlJobService } from '../../../../../../services/job_service';
 import { ML_DATA_PREVIEW_COUNT } from '../../../../../../../../common/util/job_utils';
+import { isPopulatedObject } from '../../../../../../../../common/util/object_utils';
 
 export const DatafeedPreview: FC<{
   combinedJob: CombinedJob | null;
@@ -61,9 +63,12 @@ export const DatafeedPreview: FC<{
     if (combinedJob.datafeed_config && combinedJob.datafeed_config.indices.length) {
       try {
         const resp = await mlJobService.searchPreview(combinedJob);
-        const data = resp.aggregations
-          ? resp.aggregations.buckets.buckets.slice(0, ML_DATA_PREVIEW_COUNT)
-          : resp.hits.hits;
+        let data = resp.hits.hits;
+        // the first item under aggregations can be any name
+        if (isPopulatedObject(resp.aggregations)) {
+          const accessor = Object.keys(resp.aggregations)[0];
+          data = resp.aggregations[accessor].buckets.slice(0, ML_DATA_PREVIEW_COUNT);
+        }
 
         setPreviewJsonString(JSON.stringify(data, null, 2));
       } catch (error) {

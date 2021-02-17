@@ -1,23 +1,23 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { Logger, LegacyClusterClient } from 'src/core/server';
+import { Logger, ElasticsearchClient } from 'src/core/server';
 
 import { EsNames, getEsNames } from './names';
 import { initializeEs } from './init';
 import { ClusterClientAdapter, IClusterClientAdapter } from './cluster_client_adapter';
 import { createReadySignal, ReadySignal } from '../lib/ready_signal';
 
-export type EsClusterClient = Pick<LegacyClusterClient, 'callAsInternalUser' | 'asScoped'>;
-
 export interface EsContext {
   logger: Logger;
   esNames: EsNames;
   esAdapter: IClusterClientAdapter;
   initialize(): void;
+  shutdown(): Promise<void>;
   waitTillReady(): Promise<boolean>;
   initialized: boolean;
 }
@@ -33,8 +33,9 @@ export function createEsContext(params: EsContextCtorParams): EsContext {
 
 export interface EsContextCtorParams {
   logger: Logger;
-  clusterClientPromise: Promise<EsClusterClient>;
   indexNameRoot: string;
+  kibanaVersion: string;
+  elasticsearchClientPromise: Promise<ElasticsearchClient>;
 }
 
 class EsContextImpl implements EsContext {
@@ -46,12 +47,13 @@ class EsContextImpl implements EsContext {
 
   constructor(params: EsContextCtorParams) {
     this.logger = params.logger;
-    this.esNames = getEsNames(params.indexNameRoot);
+    this.esNames = getEsNames(params.indexNameRoot, params.kibanaVersion);
     this.readySignal = createReadySignal();
     this.initialized = false;
     this.esAdapter = new ClusterClientAdapter({
       logger: params.logger,
-      clusterClientPromise: params.clusterClientPromise,
+      elasticsearchClientPromise: params.elasticsearchClientPromise,
+      context: this,
     });
   }
 
@@ -72,6 +74,10 @@ class EsContextImpl implements EsContext {
         this.readySignal.signal(false);
       }
     });
+  }
+
+  async shutdown() {
+    await this.esAdapter.shutdown();
   }
 
   // waits till the ES initialization is done, returns true if it was successful,

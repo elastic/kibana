@@ -1,35 +1,22 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
-import crypto from 'crypto';
+import { constants as cryptoConstants } from 'crypto';
 import { readFileSync } from 'fs';
 import { readPkcs12Keystore, readPkcs12Truststore } from '../utils';
-
-// `crypto` type definitions doesn't currently include `crypto.constants`, see
-// https://github.com/DefinitelyTyped/DefinitelyTyped/blob/fa5baf1733f49cf26228a4e509914572c1b74adf/types/node/v6/index.d.ts#L3412
-const cryptoConstants = (crypto as any).constants;
 
 const protocolMap = new Map<string, number>([
   ['TLSv1', cryptoConstants.SSL_OP_NO_TLSv1],
   ['TLSv1.1', cryptoConstants.SSL_OP_NO_TLSv1_1],
   ['TLSv1.2', cryptoConstants.SSL_OP_NO_TLSv1_2],
+  // @ts-expect-error According to the docs SSL_OP_NO_TLSv1_3 should exist (https://nodejs.org/docs/latest-v12.x/api/crypto.html)
+  ['TLSv1.3', cryptoConstants.SSL_OP_NO_TLSv1_3],
 ]);
 
 export const sslSchema = schema.object(
@@ -56,8 +43,13 @@ export const sslSchema = schema.object(
     }),
     redirectHttpFromPort: schema.maybe(schema.number()),
     supportedProtocols: schema.arrayOf(
-      schema.oneOf([schema.literal('TLSv1'), schema.literal('TLSv1.1'), schema.literal('TLSv1.2')]),
-      { defaultValue: ['TLSv1.1', 'TLSv1.2'], minSize: 1 }
+      schema.oneOf([
+        schema.literal('TLSv1'),
+        schema.literal('TLSv1.1'),
+        schema.literal('TLSv1.2'),
+        schema.literal('TLSv1.3'),
+      ]),
+      { defaultValue: ['TLSv1.1', 'TLSv1.2', 'TLSv1.3'], minSize: 1 }
     ),
     clientAuthentication: schema.oneOf(
       [schema.literal('none'), schema.literal('optional'), schema.literal('required')],

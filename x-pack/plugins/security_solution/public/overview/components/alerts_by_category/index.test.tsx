@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
@@ -10,9 +11,9 @@ import React from 'react';
 import { ThemeProvider } from 'styled-components';
 
 import '../../../common/mock/match_media';
+import '../../../common/mock/react_beautiful_dnd';
 import { useMatrixHistogram } from '../../../common/containers/matrix_histogram';
-// we don't have the types for waitFor just yet, so using "as waitFor" until when we do
-import { wait as waitFor } from '@testing-library/react';
+import { waitFor } from '@testing-library/react';
 import { mockIndexPattern, TestProviders } from '../../../common/mock';
 
 import { AlertsByCategory } from '.';
@@ -37,6 +38,10 @@ describe('Alerts by category', () => {
     indexPattern: mockIndexPattern,
     setQuery: jest.fn(),
     to,
+    query: {
+      query: '',
+      language: 'kuery',
+    },
   };
   describe('before loading data', () => {
     beforeAll(async () => {

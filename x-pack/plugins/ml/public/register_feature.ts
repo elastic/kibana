@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -22,6 +23,9 @@ export const registerFeature = (home: HomePublicPluginSetup) => {
     title: i18n.translate('xpack.ml.machineLearningTitle', {
       defaultMessage: 'Machine Learning',
     }),
+    subtitle: i18n.translate('xpack.ml.machineLearningSubtitle', {
+      defaultMessage: 'Model, predict, and detect.',
+    }),
     description: i18n.translate('xpack.ml.machineLearningDescription', {
       defaultMessage:
         'Automatically model the normal behavior of your time series data to detect anomalies.',
@@ -30,6 +34,8 @@ export const registerFeature = (home: HomePublicPluginSetup) => {
     path: '/app/ml',
     showOnHomePage: false,
     category: FeatureCatalogueCategory.DATA,
+    solutionId: 'kibana',
+    order: 500,
   });
 
   home.featureCatalogue.register({

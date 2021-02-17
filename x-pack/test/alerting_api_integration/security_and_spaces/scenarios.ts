@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { Space, User } from '../common/types';
 import { ES_TEST_INDEX_NAME } from '../common/lib';
 
@@ -13,8 +15,6 @@ const NoKibanaPrivileges: User = {
   role: {
     name: 'no_kibana_privileges',
     elasticsearch: {
-      // TODO: Remove once Elasticsearch doesn't require the permission for own keys
-      cluster: ['manage_api_key'],
       indices: [
         {
           names: ['foo'],
@@ -56,8 +56,6 @@ const GlobalRead: User = {
       },
     ],
     elasticsearch: {
-      // TODO: Remove once Elasticsearch doesn't require the permission for own keys
-      cluster: ['manage_api_key'],
       indices: [
         {
           names: [`${ES_TEST_INDEX_NAME}*`],
@@ -85,8 +83,6 @@ const Space1All: User = {
       },
     ],
     elasticsearch: {
-      // TODO: Remove once Elasticsearch doesn't require the permission for own keys
-      cluster: ['manage_api_key'],
       indices: [
         {
           names: [`${ES_TEST_INDEX_NAME}*`],
@@ -113,8 +109,6 @@ const Space1AllAlertingNoneActions: User = {
       },
     ],
     elasticsearch: {
-      // TODO: Remove once Elasticsearch doesn't require the permission for own keys
-      cluster: ['manage_api_key'],
       indices: [
         {
           names: [`${ES_TEST_INDEX_NAME}*`],
@@ -142,8 +136,6 @@ const Space1AllWithRestrictedFixture: User = {
       },
     ],
     elasticsearch: {
-      // TODO: Remove once Elasticsearch doesn't require the permission for own keys
-      cluster: ['manage_api_key'],
       indices: [
         {
           names: [`${ES_TEST_INDEX_NAME}*`],

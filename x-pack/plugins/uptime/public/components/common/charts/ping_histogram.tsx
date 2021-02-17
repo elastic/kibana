@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -12,6 +13,8 @@ import {
   Settings,
   timeFormatter,
   BrushEndListener,
+  XYChartElementEvent,
+  ElementClickListener,
 } from '@elastic/charts';
 import { EuiTitle, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -25,6 +28,8 @@ import { UptimeThemeContext } from '../../../contexts';
 import { HistogramResult } from '../../../../common/runtime_types';
 import { useUrlParams } from '../../../hooks';
 import { ChartEmptyState } from './chart_empty_state';
+import { getDateRangeFromChartElement } from './utils';
+import { STATUS_DOWN_LABEL, STATUS_UP_LABEL } from '../translations';
 
 export interface PingHistogramComponentProps {
   /**
@@ -79,15 +84,7 @@ export const PingHistogramComponent: React.FC<PingHistogramComponentProps> = ({
       />
     );
   } else {
-    const { histogram } = data;
-
-    const downSpecId = i18n.translate('xpack.uptime.snapshotHistogram.series.downLabel', {
-      defaultMessage: 'Down',
-    });
-
-    const upMonitorsId = i18n.translate('xpack.uptime.snapshotHistogram.series.upLabel', {
-      defaultMessage: 'Up',
-    });
+    const { histogram, minInterval } = data;
 
     const onBrushEnd: BrushEndListener = ({ x }) => {
       if (!x) {
@@ -100,12 +97,18 @@ export const PingHistogramComponent: React.FC<PingHistogramComponentProps> = ({
       });
     };
 
+    const onBarClicked: ElementClickListener = ([elementData]) => {
+      updateUrlParams(
+        getDateRangeFromChartElement(elementData as XYChartElementEvent, minInterval)
+      );
+    };
+
     const barData: BarPoint[] = [];
 
     histogram.forEach(({ x, upCount, downCount }) => {
       barData.push(
-        { x, y: downCount ?? 0, type: downSpecId },
-        { x, y: upCount ?? 0, type: upMonitorsId }
+        { x, y: downCount ?? 0, type: STATUS_DOWN_LABEL },
+        { x, y: upCount ?? 0, type: STATUS_UP_LABEL }
       );
     });
 
@@ -125,11 +128,13 @@ export const PingHistogramComponent: React.FC<PingHistogramComponentProps> = ({
         <Chart>
           <Settings
             xDomain={{
+              minInterval,
               min: absoluteStartDate,
               max: absoluteEndDate,
             }}
             showLegend={false}
             onBrushEnd={onBrushEnd}
+            onElementClick={onBarClicked}
             {...chartTheme}
           />
           <Axis
@@ -157,7 +162,7 @@ export const PingHistogramComponent: React.FC<PingHistogramComponentProps> = ({
           <BarSeries
             color={[danger, gray]}
             data={barData}
-            id={downSpecId}
+            id={STATUS_DOWN_LABEL}
             name={i18n.translate('xpack.uptime.snapshotHistogram.series.pings', {
               defaultMessage: 'Monitor Pings',
             })}

@@ -1,14 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { ValuesType } from 'utility-types';
 import { flatten, merge, sortBy, sum, pickBy } from 'lodash';
-import { AggregationOptionsByType } from '../../../../typings/elasticsearch/aggregations';
+import { AggregationOptionsByType } from '../../../../../../typings/elasticsearch/aggregations';
 import { ProcessorEvent } from '../../../../common/processor_event';
 import { TelemetryTask } from '.';
-import { AGENT_NAMES, RUM_AGENTS } from '../../../../common/agent_name';
+import { AGENT_NAMES, RUM_AGENT_NAMES } from '../../../../common/agent_name';
 import {
   AGENT_NAME,
   AGENT_VERSION,
@@ -1020,7 +1022,7 @@ export const tasks: TelemetryTask[] = [
           timeout,
           query: {
             bool: {
-              filter: [range1d, { terms: { [AGENT_NAME]: RUM_AGENTS } }],
+              filter: [range1d, { terms: { [AGENT_NAME]: RUM_AGENT_NAMES } }],
             },
           },
           aggs: {

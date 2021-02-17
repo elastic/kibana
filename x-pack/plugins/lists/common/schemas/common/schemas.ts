@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 /* eslint-disable @typescript-eslint/naming-convention */
@@ -9,7 +10,7 @@
 import * as t from 'io-ts';
 
 import { DefaultNamespace } from '../types/default_namespace';
-import { DefaultStringArray, NonEmptyString } from '../../shared_imports';
+import { DefaultArray, DefaultStringArray, NonEmptyString } from '../../shared_imports';
 
 export const name = t.string;
 export type Name = t.TypeOf<typeof name>;
@@ -211,11 +212,6 @@ export type Tags = t.TypeOf<typeof tags>;
 export const tagsOrUndefined = t.union([tags, t.undefined]);
 export type TagsOrUndefined = t.TypeOf<typeof tagsOrUndefined>;
 
-export const _tags = DefaultStringArray;
-export type _Tags = t.TypeOf<typeof _tags>;
-export const _tagsOrUndefined = t.union([_tags, t.undefined]);
-export type _TagsOrUndefined = t.TypeOf<typeof _tagsOrUndefined>;
-
 export const exceptionListType = t.keyof({ detection: null, endpoint: null });
 export const exceptionListTypeOrUndefined = t.union([exceptionListType, t.undefined]);
 export type ExceptionListType = t.TypeOf<typeof exceptionListType>;
@@ -317,3 +313,16 @@ export type Immutable = t.TypeOf<typeof immutable>;
 
 export const immutableOrUndefined = t.union([immutable, t.undefined]);
 export type ImmutableOrUndefined = t.TypeOf<typeof immutableOrUndefined>;
+
+export const osType = t.keyof({
+  linux: null,
+  macos: null,
+  windows: null,
+});
+export type OsType = t.TypeOf<typeof osType>;
+
+export const osTypeArray = DefaultArray(osType);
+export type OsTypeArray = t.TypeOf<typeof osTypeArray>;
+
+export const osTypeArrayOrUndefined = t.union([osTypeArray, t.undefined]);
+export type OsTypeArrayOrUndefined = t.OutputOf<typeof osTypeArray>;

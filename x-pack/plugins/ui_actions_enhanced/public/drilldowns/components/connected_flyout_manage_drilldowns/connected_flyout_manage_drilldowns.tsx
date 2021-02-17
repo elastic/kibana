@@ -1,38 +1,29 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import { ToastsStart } from 'kibana/public';
-import useMountedState from 'react-use/lib/useMountedState';
-// Prefer importing entire lodash library, e.g. import { get } from "lodash"
-// eslint-disable-next-line no-restricted-imports
-import intersection from 'lodash/intersection';
+import { intersection } from 'lodash';
 import { DrilldownWizardConfig, FlyoutDrilldownWizard } from '../flyout_drilldown_wizard';
 import { FlyoutListManageDrilldowns } from '../flyout_list_manage_drilldowns';
 import { IStorageWrapper } from '../../../../../../../src/plugins/kibana_utils/public';
-import { Trigger, TriggerId } from '../../../../../../../src/plugins/ui_actions/public';
-import { useContainerState } from '../../../../../../../src/plugins/kibana_utils/public';
+import { Trigger } from '../../../../../../../src/plugins/ui_actions/public';
 import { DrilldownListItem } from '../list_manage_drilldowns';
-import {
-  insufficientLicenseLevel,
-  invalidDrilldownType,
-  toastDrilldownCreated,
-  toastDrilldownDeleted,
-  toastDrilldownEdited,
-  toastDrilldownsCRUDError,
-  toastDrilldownsDeleted,
-} from './i18n';
+import { insufficientLicenseLevel, invalidDrilldownType } from './i18n';
 import {
   ActionFactory,
   BaseActionConfig,
   BaseActionFactoryContext,
   DynamicActionManager,
-  SerializedAction,
   SerializedEvent,
 } from '../../../dynamic_actions';
+import { useWelcomeMessage } from '../../hooks/use_welcome_message';
+import { useCompatibleActionFactoriesForCurrentContext } from '../../hooks/use_compatible_action_factories_for_current_context';
+import { useDrilldownsStateManager } from '../../hooks/use_drilldown_state_manager';
 import { ActionFactoryPlaceContext } from '../types';
 
 interface ConnectedFlyoutManageDrilldownsProps<
@@ -45,7 +36,7 @@ interface ConnectedFlyoutManageDrilldownsProps<
   /**
    * List of possible triggers in current context
    */
-  supportedTriggers: TriggerId[];
+  triggers: string[];
 
   /**
    * Extra action factory context passed into action factories CollectConfig, getIconType, getDisplayName and etc...
@@ -71,12 +62,12 @@ export function createFlyoutManageDrilldowns({
   getTrigger,
 }: {
   actionFactories: ActionFactory[];
-  getTrigger: (triggerId: TriggerId) => Trigger;
+  getTrigger: (triggerId: string) => Trigger;
   storage: IStorageWrapper;
   toastService: ToastsStart;
   docsLink?: string;
   triggerPickerDocsLink?: string;
-}) {
+}): React.FC<ConnectedFlyoutManageDrilldownsProps> {
   const allActionFactoriesById = allActionFactories.reduce((acc, next) => {
     acc[next.id] = next;
     return acc;
@@ -86,8 +77,8 @@ export function createFlyoutManageDrilldowns({
     const isCreateOnly = props.viewMode === 'create';
 
     const factoryContext: BaseActionFactoryContext = useMemo(
-      () => ({ ...props.placeContext, triggers: props.supportedTriggers }),
-      [props.placeContext, props.supportedTriggers]
+      () => ({ ...props.placeContext, triggers: props.triggers }),
+      [props.placeContext, props.triggers]
     );
     const actionFactories = useCompatibleActionFactoriesForCurrentContext(
       allActionFactories,
@@ -132,7 +123,7 @@ export function createFlyoutManageDrilldowns({
         actionFactory: allActionFactoriesById[drilldownToEdit.action.factoryId],
         actionConfig: drilldownToEdit.action.config as BaseActionConfig,
         name: drilldownToEdit.action.name,
-        selectedTriggers: (drilldownToEdit.triggers ?? []) as TriggerId[],
+        selectedTriggers: (drilldownToEdit.triggers ?? []) as string[],
       };
     }
 
@@ -143,7 +134,7 @@ export function createFlyoutManageDrilldowns({
       const actionFactory = allActionFactoriesById[drilldown.action.factoryId];
       const drilldownFactoryContext: BaseActionFactoryContext = {
         ...props.placeContext,
-        triggers: drilldown.triggers as TriggerId[],
+        triggers: drilldown.triggers as string[],
       };
       return {
         id: drilldown.eventId,
@@ -156,7 +147,7 @@ export function createFlyoutManageDrilldowns({
           : !actionFactory.isCompatibleLicense()
           ? insufficientLicenseLevel
           : undefined,
-        triggers: drilldown.triggers.map((trigger) => getTrigger(trigger as TriggerId)),
+        triggers: drilldown.triggers.map((trigger) => getTrigger(trigger as string)),
       };
     }
 
@@ -212,7 +203,7 @@ export function createFlyoutManageDrilldowns({
             }}
             actionFactoryPlaceContext={props.placeContext}
             initialDrilldownWizardConfig={resolveInitialDrilldownWizardConfig()}
-            supportedTriggers={props.supportedTriggers}
+            supportedTriggers={props.triggers}
             getTrigger={getTrigger}
           />
         );
@@ -222,7 +213,7 @@ export function createFlyoutManageDrilldowns({
         // show trigger column in case if there is more then 1 possible trigger in current context
         const showTriggerColumn =
           intersection(
-            props.supportedTriggers,
+            props.triggers,
             actionFactories
               .map((factory) => factory.supportedTriggers())
               .reduce((res, next) => res.concat(next), [])
@@ -251,109 +242,4 @@ export function createFlyoutManageDrilldowns({
         );
     }
   };
-}
-
-function useCompatibleActionFactoriesForCurrentContext<
-  Context extends BaseActionFactoryContext = BaseActionFactoryContext
->(actionFactories: ActionFactory[], context: Context) {
-  const [compatibleActionFactories, setCompatibleActionFactories] = useState<ActionFactory[]>();
-  useEffect(() => {
-    let canceled = false;
-    async function updateCompatibleFactoriesForContext() {
-      const compatibility = await Promise.all(
-        actionFactories.map((factory) => factory.isCompatible(context))
-      );
-      if (canceled) return;
-
-      const compatibleFactories = actionFactories.filter((_, i) => compatibility[i]);
-      const triggerSupportedFactories = compatibleFactories.filter((factory) =>
-        factory.supportedTriggers().some((trigger) => context.triggers.includes(trigger))
-      );
-      setCompatibleActionFactories(triggerSupportedFactories);
-    }
-    updateCompatibleFactoriesForContext();
-    return () => {
-      canceled = true;
-    };
-  }, [context, actionFactories, context.triggers]);
-
-  return compatibleActionFactories;
-}
-
-function useWelcomeMessage(storage: IStorageWrapper): [boolean, () => void] {
-  const key = `drilldowns:hidWelcomeMessage`;
-  const [hidWelcomeMessage, setHidWelcomeMessage] = useState<boolean>(storage.get(key) ?? false);
-
-  return [
-    !hidWelcomeMessage,
-    () => {
-      if (hidWelcomeMessage) return;
-      setHidWelcomeMessage(true);
-      storage.set(key, true);
-    },
-  ];
-}
-
-function useDrilldownsStateManager(actionManager: DynamicActionManager, toastService: ToastsStart) {
-  const { events: drilldowns } = useContainerState(actionManager.state);
-  const [isLoading, setIsLoading] = useState(false);
-  const isMounted = useMountedState();
-
-  async function run(op: () => Promise<void>) {
-    setIsLoading(true);
-    try {
-      await op();
-    } catch (e) {
-      toastService.addError(e, {
-        title: toastDrilldownsCRUDError,
-      });
-      if (!isMounted) return;
-      setIsLoading(false);
-      return;
-    }
-  }
-
-  async function createDrilldown(action: SerializedAction, selectedTriggers: TriggerId[]) {
-    await run(async () => {
-      await actionManager.createEvent(action, selectedTriggers);
-      toastService.addSuccess({
-        title: toastDrilldownCreated.title(action.name),
-        text: toastDrilldownCreated.text,
-      });
-    });
-  }
-
-  async function editDrilldown(
-    drilldownId: string,
-    action: SerializedAction,
-    selectedTriggers: TriggerId[]
-  ) {
-    await run(async () => {
-      await actionManager.updateEvent(drilldownId, action, selectedTriggers);
-      toastService.addSuccess({
-        title: toastDrilldownEdited.title(action.name),
-        text: toastDrilldownEdited.text,
-      });
-    });
-  }
-
-  async function deleteDrilldown(drilldownIds: string | string[]) {
-    await run(async () => {
-      drilldownIds = Array.isArray(drilldownIds) ? drilldownIds : [drilldownIds];
-      await actionManager.deleteEvents(drilldownIds);
-      toastService.addSuccess(
-        drilldownIds.length === 1
-          ? {
-              title: toastDrilldownDeleted.title,
-              text: toastDrilldownDeleted.text,
-            }
-          : {
-              title: toastDrilldownsDeleted.title(drilldownIds.length),
-              text: toastDrilldownsDeleted.text,
-            }
-      );
-    });
-  }
-
-  return { drilldowns, isLoading, createDrilldown, editDrilldown, deleteDrilldown };
 }

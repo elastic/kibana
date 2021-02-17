@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import {
   EuiButton,
   EuiCallOut,
@@ -50,7 +52,7 @@ export class SpaceAwarePrivilegeSection extends Component<Props, State> {
     name: i18n.translate(
       'xpack.security.management.editRole.spaceAwarePrivilegeForm.globalSpacesName',
       {
-        defaultMessage: '* Global (all spaces)',
+        defaultMessage: '* All Spaces',
       }
     ),
     color: '#D3DAE6',
@@ -198,7 +200,7 @@ export class SpaceAwarePrivilegeSection extends Component<Props, State> {
       >
         <FormattedMessage
           id="xpack.security.management.editRole.spacePrivilegeSection.addSpacePrivilegeButton"
-          defaultMessage="Add space privilege"
+          defaultMessage="Add Kibana privilege"
         />
       </EuiButton>
     );

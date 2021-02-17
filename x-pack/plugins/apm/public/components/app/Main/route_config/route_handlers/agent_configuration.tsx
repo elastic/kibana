@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
 import { RouteComponentProps } from 'react-router-dom';
-import { useFetcher } from '../../../../../hooks/useFetcher';
+import { useFetcher } from '../../../../../hooks/use_fetcher';
 import { toQuery } from '../../../../shared/Links/url_helpers';
 import { Settings } from '../../../Settings';
 import { AgentConfigurationCreateEdit } from '../../../Settings/AgentConfigurations/AgentConfigurationCreateEdit';
@@ -26,7 +27,7 @@ export function EditAgentConfigurationRouteHandler(
   const res = useFetcher(
     (callApmApi) => {
       return callApmApi({
-        pathname: '/api/apm/settings/agent-configuration/view',
+        endpoint: 'GET /api/apm/settings/agent-configuration/view',
         params: { query: { name, environment } },
       });
     },

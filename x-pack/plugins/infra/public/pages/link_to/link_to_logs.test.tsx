@@ -1,12 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
- */
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { render } from '@testing-library/react';
@@ -14,7 +10,6 @@ import { createMemoryHistory } from 'history';
 import React from 'react';
 import { Route, Router, Switch } from 'react-router-dom';
 import { httpServiceMock } from 'src/core/public/mocks';
-// import { HttpSetup } from 'src/core/public';
 import { KibanaContextProvider } from 'src/plugins/kibana_react/public';
 import { useLogSource } from '../../containers/logs/log_source';
 import {

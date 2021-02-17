@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { CoreStart, HttpSetup } from 'kibana/public';
@@ -26,6 +27,10 @@ import {
 } from '../../../../common/store/test_utils';
 import { getEndpointListPath } from '../../../common/routing';
 
+jest.mock('../../policy/store/services/ingest', () => ({
+  sendGetAgentPolicyList: () => Promise.resolve({ items: [] }),
+  sendGetEndpointSecurityPackage: () => Promise.resolve({}),
+}));
 describe('endpoint list pagination: ', () => {
   let fakeCoreStart: jest.Mocked<CoreStart>;
   let depsStart: DepsStartMock;

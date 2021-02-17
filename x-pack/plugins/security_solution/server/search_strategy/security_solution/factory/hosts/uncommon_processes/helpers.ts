@@ -1,9 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-import { get, getOr } from 'lodash/fp';
+
+import { get } from 'lodash/fp';
 import { set } from '@elastic/safer-lodash-set/fp';
 
 import { mergeFieldsWithHit } from '../../../../../utils/build_query';
@@ -12,7 +14,7 @@ import {
   HostsUncommonProcessesEdges,
   HostsUncommonProcessHit,
 } from '../../../../../../common/search_strategy/security_solution/hosts/uncommon_processes';
-import { toArray } from '../../../../helpers/to_array';
+import { toStringArray } from '../../../../helpers/to_array';
 import { HostHits } from '../../../../../../common/search_strategy';
 
 export const uncommonProcessesFields = [
@@ -64,8 +66,9 @@ export const formatUncommonProcessesData = (
 ): HostsUncommonProcessesEdges =>
   fields.reduce<HostsUncommonProcessesEdges>(
     (flattenedFields, fieldName) => {
+      const instancesCount = typeof hit.total === 'number' ? hit.total : hit.total.value;
       flattenedFields.node._id = hit._id;
-      flattenedFields.node.instances = getOr(0, 'total.value', hit);
+      flattenedFields.node.instances = instancesCount;
       flattenedFields.node.hosts = hit.host;
 
       if (hit.cursor) {
@@ -79,7 +82,7 @@ export const formatUncommonProcessesData = (
         fieldPath = `node.hosts.0.name`;
         fieldValue = get(fieldPath, mergedResult);
       }
-      return set(fieldPath, toArray(fieldValue), mergedResult);
+      return set(fieldPath, toStringArray(fieldValue), mergedResult);
     },
     {
       node: {

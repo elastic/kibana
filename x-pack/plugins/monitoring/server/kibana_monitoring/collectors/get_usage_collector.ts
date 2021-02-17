@@ -1,11 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { LegacyAPICaller } from 'src/core/server';
+import { ILegacyClusterClient } from 'src/core/server';
 import { MonitoringConfig } from '../../config';
 import { fetchAvailableCcs } from '../../lib/alerts/fetch_available_ccs';
 import { getStackProductsUsage } from './lib/get_stack_products_usage';
@@ -18,9 +19,9 @@ import { fetchClusters } from '../../lib/alerts/fetch_clusters';
 export function getMonitoringUsageCollector(
   usageCollection: UsageCollectionSetup,
   config: MonitoringConfig,
-  callCluster: LegacyAPICaller
+  legacyEsClient: ILegacyClusterClient
 ) {
-  return usageCollection.makeUsageCollector<MonitoringUsage>({
+  return usageCollection.makeUsageCollector<MonitoringUsage, true>({
     type: 'monitoring',
     isReady: () => true,
     schema: {
@@ -28,73 +29,82 @@ export function getMonitoringUsageCollector(
         type: 'boolean',
       },
       clusters: {
-        license: {
-          type: 'keyword',
-        },
-        clusterUuid: {
-          type: 'keyword',
-        },
-        metricbeatUsed: {
-          type: 'boolean',
-        },
-        elasticsearch: {
-          enabled: {
-            type: 'boolean',
+        type: 'array',
+        items: {
+          license: {
+            type: 'keyword',
           },
-          count: {
-            type: 'long',
+          clusterUuid: {
+            type: 'keyword',
           },
           metricbeatUsed: {
             type: 'boolean',
           },
-        },
-        kibana: {
-          enabled: {
-            type: 'boolean',
+          elasticsearch: {
+            enabled: {
+              type: 'boolean',
+            },
+            count: {
+              type: 'long',
+            },
+            metricbeatUsed: {
+              type: 'boolean',
+            },
           },
-          count: {
-            type: 'long',
+          kibana: {
+            enabled: {
+              type: 'boolean',
+            },
+            count: {
+              type: 'long',
+            },
+            metricbeatUsed: {
+              type: 'boolean',
+            },
           },
-          metricbeatUsed: {
-            type: 'boolean',
+          logstash: {
+            enabled: {
+              type: 'boolean',
+            },
+            count: {
+              type: 'long',
+            },
+            metricbeatUsed: {
+              type: 'boolean',
+            },
           },
-        },
-        logstash: {
-          enabled: {
-            type: 'boolean',
+          beats: {
+            enabled: {
+              type: 'boolean',
+            },
+            count: {
+              type: 'long',
+            },
+            metricbeatUsed: {
+              type: 'boolean',
+            },
           },
-          count: {
-            type: 'long',
-          },
-          metricbeatUsed: {
-            type: 'boolean',
-          },
-        },
-        beats: {
-          enabled: {
-            type: 'boolean',
-          },
-          count: {
-            type: 'long',
-          },
-          metricbeatUsed: {
-            type: 'boolean',
-          },
-        },
-        apm: {
-          enabled: {
-            type: 'boolean',
-          },
-          count: {
-            type: 'long',
-          },
-          metricbeatUsed: {
-            type: 'boolean',
+          apm: {
+            enabled: {
+              type: 'boolean',
+            },
+            count: {
+              type: 'long',
+            },
+            metricbeatUsed: {
+              type: 'boolean',
+            },
           },
         },
       },
     },
-    fetch: async () => {
+    extendFetchContext: {
+      kibanaRequest: true,
+    },
+    fetch: async ({ kibanaRequest }) => {
+      const callCluster = kibanaRequest
+        ? legacyEsClient.asScoped(kibanaRequest).callAsCurrentUser
+        : legacyEsClient.callAsInternalUser;
       const usageClusters: MonitoringClusterStackProductUsage[] = [];
       const availableCcs = config.ui.ccs.enabled ? await fetchAvailableCcs(callCluster) : [];
       const elasticsearchIndex = getCcsIndexPattern(INDEX_PATTERN_ELASTICSEARCH, availableCcs);

@@ -1,24 +1,25 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import React, { useContext } from 'react';
-import { useValues } from 'kea';
+import React from 'react';
+
+import { useValues, useActions } from 'kea';
 import { snakeCase } from 'lodash';
-import { i18n } from '@kbn/i18n';
+
 import { EuiCard, EuiTextColor } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
-import { KibanaContext, IKibanaContext } from '../../../index';
-
-import { EuiButton } from '../../../shared/react_router_helpers';
-import { sendTelemetry } from '../../../shared/telemetry';
-import { HttpLogic } from '../../../shared/http';
+import { KibanaLogic } from '../../../shared/kibana';
+import { EuiButtonTo } from '../../../shared/react_router_helpers';
+import { TelemetryLogic } from '../../../shared/telemetry';
 
 import './product_card.scss';
 
-interface IProductCard {
+interface ProductCardProps {
   // Expects product plugin constants (@see common/constants.ts)
   product: {
     ID: string;
@@ -29,11 +30,9 @@ interface IProductCard {
   image: string;
 }
 
-export const ProductCard: React.FC<IProductCard> = ({ product, image }) => {
-  const { http } = useValues(HttpLogic);
-  const {
-    config: { host },
-  } = useContext(KibanaContext) as IKibanaContext;
+export const ProductCard: React.FC<ProductCardProps> = ({ product, image }) => {
+  const { sendEnterpriseSearchTelemetry } = useActions(TelemetryLogic);
+  const { config } = useValues(KibanaLogic);
 
   const LAUNCH_BUTTON_TEXT = i18n.translate(
     'xpack.enterpriseSearch.overview.productCard.launchButton',
@@ -56,7 +55,7 @@ export const ProductCard: React.FC<IProductCard> = ({ product, image }) => {
       className="productCard"
       titleElement="h2"
       title={i18n.translate('xpack.enterpriseSearch.overview.productCard.heading', {
-        defaultMessage: `Elastic {productName}`,
+        defaultMessage: 'Elastic {productName}',
         values: { productName: product.NAME },
       })}
       image={
@@ -67,21 +66,19 @@ export const ProductCard: React.FC<IProductCard> = ({ product, image }) => {
       paddingSize="l"
       description={<EuiTextColor color="subdued">{product.CARD_DESCRIPTION}</EuiTextColor>}
       footer={
-        <EuiButton
+        <EuiButtonTo
           fill
           to={product.URL}
-          shouldNotCreateHref={true}
+          shouldNotCreateHref
           onClick={() =>
-            sendTelemetry({
-              http,
-              product: 'enterprise_search',
+            sendEnterpriseSearchTelemetry({
               action: 'clicked',
               metric: snakeCase(product.ID),
             })
           }
         >
-          {host ? LAUNCH_BUTTON_TEXT : SETUP_BUTTON_TEXT}
-        </EuiButton>
+          {config.host ? LAUNCH_BUTTON_TEXT : SETUP_BUTTON_TEXT}
+        </EuiButtonTo>
       }
     />
   );

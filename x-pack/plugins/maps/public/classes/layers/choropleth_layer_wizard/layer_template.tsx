@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { Component } from 'react';
@@ -60,7 +61,7 @@ interface State {
   leftGeoField: string | null;
   leftEmsJoinField: string | null;
   leftElasticsearchJoinField: string | null;
-  rightIndexPatternId: string | null;
+  rightIndexPatternId: string;
   rightIndexPatternTitle: string | null;
   rightTermsFields: IFieldType[];
   rightJoinField: string | null;
@@ -79,7 +80,7 @@ export class LayerTemplate extends Component<RenderWizardArguments, State> {
     leftGeoField: null,
     leftEmsJoinField: null,
     leftElasticsearchJoinField: null,
-    rightIndexPatternId: null,
+    rightIndexPatternId: '',
     rightIndexPatternTitle: null,
     rightTermsFields: [],
     rightJoinField: null,
@@ -201,7 +202,7 @@ export class LayerTemplate extends Component<RenderWizardArguments, State> {
     this.setState({ leftEmsJoinField: selectedOptions[0].value! }, this._previewLayer);
   };
 
-  _onRightIndexPatternChange = (indexPatternId: string) => {
+  _onRightIndexPatternChange = (indexPatternId?: string) => {
     if (!indexPatternId) {
       return;
     }
@@ -254,14 +255,14 @@ export class LayerTemplate extends Component<RenderWizardArguments, State> {
             leftIndexPatternId: this.state.leftIndexPattern!.id,
             leftGeoField: this.state.leftGeoField!,
             leftJoinField: this.state.leftElasticsearchJoinField!,
-            rightIndexPatternId: this.state.rightIndexPatternId!,
+            rightIndexPatternId: this.state.rightIndexPatternId,
             rightIndexPatternTitle: this.state.rightIndexPatternTitle!,
             rightTermField: this.state.rightJoinField!,
           })
         : createEmsChoroplethLayerDescriptor({
             leftEmsFileId: this.state.leftEmsFileId!,
             leftEmsField: this.state.leftEmsJoinField!,
-            rightIndexPatternId: this.state.rightIndexPatternId!,
+            rightIndexPatternId: this.state.rightIndexPatternId,
             rightIndexPatternTitle: this.state.rightIndexPatternTitle!,
             rightTermField: this.state.rightJoinField!,
           });

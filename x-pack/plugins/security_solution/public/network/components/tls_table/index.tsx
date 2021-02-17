@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useCallback, useMemo } from 'react';
@@ -15,7 +16,7 @@ import {
   NetworkTlsFields,
   SortField,
 } from '../../../../common/search_strategy';
-import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
+import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import {
   Criteria,
   ItemsPerRow,
@@ -62,10 +63,8 @@ const TlsTableComponent: React.FC<TlsTableProps> = ({
   type,
 }) => {
   const dispatch = useDispatch();
-  const getTlsSelector = networkSelectors.tlsSelector();
-  const { activePage, limit, sort } = useShallowEqualSelector((state) =>
-    getTlsSelector(state, type)
-  );
+  const getTlsSelector = useMemo(() => networkSelectors.tlsSelector(), []);
+  const { activePage, limit, sort } = useDeepEqualSelector((state) => getTlsSelector(state, type));
   const tableType: networkModel.TopTlsTableType =
     type === networkModel.NetworkType.page
       ? networkModel.NetworkTableType.tls

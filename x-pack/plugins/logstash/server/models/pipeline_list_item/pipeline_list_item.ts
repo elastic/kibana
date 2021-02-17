@@ -1,11 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { get } from 'lodash';
-import { Hit, PipelineListItemOptions } from '../../types';
+import { PipelineListItemOptions } from '../../types';
 
 export class PipelineListItem {
   public readonly id: string;
@@ -34,12 +35,12 @@ export class PipelineListItem {
    * Takes the json GET response from ES and constructs a pipeline model to be used
    * in Kibana downstream
    */
-  static fromUpstreamJSON(pipeline: Hit) {
+  static fromUpstreamJSON(id: string, pipeline: Record<string, any>) {
     const opts = {
-      id: pipeline._id,
-      description: get(pipeline, '_source.description') as string,
-      last_modified: get(pipeline, '_source.last_modified') as string,
-      username: get(pipeline, '_source.username') as string,
+      id,
+      description: get(pipeline, id + '.description') as string,
+      last_modified: get(pipeline, id + '.last_modified') as string,
+      username: get(pipeline, id + '.username') as string,
     };
 
     return new PipelineListItem(opts);

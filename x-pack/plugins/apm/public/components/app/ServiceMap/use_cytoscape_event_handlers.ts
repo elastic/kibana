@@ -1,16 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import cytoscape from 'cytoscape';
-// Prefer importing entire lodash library, e.g. import { get } from "lodash"
-// eslint-disable-next-line no-restricted-imports
-import debounce from 'lodash/debounce';
+import { debounce } from 'lodash';
 import { useEffect } from 'react';
-import { EuiTheme, useUiTracker } from '../../../../../observability/public';
-import { getAnimationOptions, getNodeHeight } from './cytoscapeOptions';
+import { EuiTheme } from '../../../../../../../src/plugins/kibana_react/common';
+import { useUiTracker } from '../../../../../observability/public';
+import { getAnimationOptions, getNodeHeight } from './cytoscape_options';
 
 /*
  * @notice
@@ -68,6 +68,24 @@ function getLayoutOptions({
   };
 }
 
+function setCursor(cursor: string, event: cytoscape.EventObjectCore) {
+  const container = event.cy.container();
+
+  if (container) {
+    container.style.cursor = cursor;
+  }
+}
+
+function resetConnectedEdgeStyle(
+  cytoscapeInstance: cytoscape.Core,
+  node?: cytoscape.NodeSingular
+) {
+  cytoscapeInstance.edges().removeClass('highlight');
+  if (node) {
+    node.connectedEdges().addClass('highlight');
+  }
+}
+
 export function useCytoscapeEventHandlers({
   cy,
   serviceName,
@@ -81,16 +99,6 @@ export function useCytoscapeEventHandlers({
 
   useEffect(() => {
     const nodeHeight = getNodeHeight(theme);
-
-    const resetConnectedEdgeStyle = (
-      cytoscapeInstance: cytoscape.Core,
-      node?: cytoscape.NodeSingular
-    ) => {
-      cytoscapeInstance.edges().removeClass('highlight');
-      if (node) {
-        node.connectedEdges().addClass('highlight');
-      }
-    };
 
     const dataHandler: cytoscape.EventHandler = (event, fit) => {
       if (serviceName) {
@@ -125,17 +133,23 @@ export function useCytoscapeEventHandlers({
     );
 
     const mouseoverHandler: cytoscape.EventHandler = (event) => {
+      if (event.target.isNode()) {
+        setCursor('pointer', event);
+      }
+
       trackNodeEdgeHover();
       event.target.addClass('hover');
       event.target.connectedEdges().addClass('nodeHover');
     };
     const mouseoutHandler: cytoscape.EventHandler = (event) => {
+      setCursor('grab', event);
+
       event.target.removeClass('hover');
       event.target.connectedEdges().removeClass('nodeHover');
     };
     const selectHandler: cytoscape.EventHandler = (event) => {
       trackApmEvent({ metric: 'service_map_node_select' });
-      resetConnectedEdgeStyle(event.target);
+      resetConnectedEdgeStyle(event.cy, event.target);
     };
     const unselectHandler: cytoscape.EventHandler = (event) => {
       resetConnectedEdgeStyle(
@@ -150,17 +164,37 @@ export function useCytoscapeEventHandlers({
         console.debug('cytoscape:', event);
       }
     };
-
     const dragHandler: cytoscape.EventHandler = (event) => {
+      setCursor('grabbing', event);
+
       applyCubicBezierStyles(event.target.connectedEdges());
 
       if (!event.target.data('hasBeenDragged')) {
         event.target.data('hasBeenDragged', true);
       }
     };
+    const dragfreeHandler: cytoscape.EventHandler = (event) => {
+      setCursor('pointer', event);
+    };
+    const tapstartHandler: cytoscape.EventHandler = (event) => {
+      // Onle set cursot to "grabbing" if the target doesn't have an "isNode"
+      // property (meaning it's the canvas) or if "isNode" is false (meaning
+      // it's an edge.)
+      if (!event.target.isNode || !event.target.isNode()) {
+        setCursor('grabbing', event);
+      }
+    };
+    const tapendHandler: cytoscape.EventHandler = (event) => {
+      if (!event.target.isNode || !event.target.isNode()) {
+        setCursor('grab', event);
+      }
+    };
 
     if (cy) {
-      cy.on('custom:data drag layoutstop select unselect', debugHandler);
+      cy.on(
+        'custom:data drag dragfree layoutstop select tapstart tapend unselect',
+        debugHandler
+      );
       cy.on('custom:data', dataHandler);
       cy.on('layoutstop', layoutstopHandler);
       cy.on('mouseover', 'edge, node', mouseoverHandler);
@@ -168,12 +202,15 @@ export function useCytoscapeEventHandlers({
       cy.on('select', 'node', selectHandler);
       cy.on('unselect', 'node', unselectHandler);
       cy.on('drag', 'node', dragHandler);
+      cy.on('dragfree', 'node', dragfreeHandler);
+      cy.on('tapstart', tapstartHandler);
+      cy.on('tapend', tapendHandler);
     }
 
     return () => {
       if (cy) {
         cy.removeListener(
-          'custom:data drag layoutstop select unselect',
+          'custom:data drag dragfree layoutstop select tapstart tapend unselect',
           undefined,
           debugHandler
         );
@@ -184,6 +221,9 @@ export function useCytoscapeEventHandlers({
         cy.removeListener('select', 'node', selectHandler);
         cy.removeListener('unselect', 'node', unselectHandler);
         cy.removeListener('drag', 'node', dragHandler);
+        cy.removeListener('dragfree', 'node', dragfreeHandler);
+        cy.removeListener('tapstart', undefined, tapstartHandler);
+        cy.removeListener('tapend', undefined, tapendHandler);
       }
     };
   }, [cy, serviceName, trackApmEvent, theme]);

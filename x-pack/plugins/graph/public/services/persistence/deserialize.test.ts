@@ -1,11 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { GraphWorkspaceSavedObject, Workspace } from '../../types';
-import { savedWorkspaceToAppState } from './deserialize';
+import { GraphWorkspaceSavedObject, IndexPatternSavedObject, Workspace } from '../../types';
+import { migrateLegacyIndexPatternRef, savedWorkspaceToAppState, mapFields } from './deserialize';
 import { createWorkspace } from '../../angular/graph_client_workspace';
 import { outlinkEncoders } from '../../helpers/outlink_encoders';
 import { IndexPattern } from '../../../../../../src/plugins/data/public';
@@ -21,7 +22,7 @@ describe('deserialize', () => {
       numLinks: 2,
       numVertices: 4,
       wsState: JSON.stringify({
-        indexPattern: 'Testindexpattern',
+        indexPattern: '123',
         selectedFields: [
           { color: 'black', name: 'field1', selected: true, iconClass: 'a' },
           { color: 'black', name: 'field2', selected: true, iconClass: 'b' },
@@ -119,9 +120,9 @@ describe('deserialize', () => {
       savedWorkspace,
       {
         getNonScriptedFields: () => [
-          { name: 'field1', type: 'string', aggregatable: true },
-          { name: 'field2', type: 'string', aggregatable: true },
-          { name: 'field3', type: 'string', aggregatable: true },
+          { name: 'field1', type: 'string', aggregatable: true, isMapped: true },
+          { name: 'field2', type: 'string', aggregatable: true, isMapped: true },
+          { name: 'field3', type: 'string', aggregatable: true, isMapped: true },
         ],
       } as IndexPattern,
       workspace
@@ -207,5 +208,51 @@ describe('deserialize', () => {
     // C <-> E
     expect(workspace.edges[1].source).toBe(workspace.nodes[2]);
     expect(workspace.edges[1].target).toBe(workspace.nodes[4]);
+  });
+
+  describe('migrateLegacyIndexPatternRef', () => {
+    it('should migrate legacy index pattern ref', () => {
+      const workspacePayload = { ...savedWorkspace, legacyIndexPatternRef: 'Testpattern' };
+      const success = migrateLegacyIndexPatternRef(workspacePayload, [
+        { id: '678', attributes: { title: 'Testpattern' } } as IndexPatternSavedObject,
+        { id: '123', attributes: { title: 'otherpattern' } } as IndexPatternSavedObject,
+      ]);
+      expect(success).toEqual({ success: true });
+      expect(workspacePayload.legacyIndexPatternRef).toBeUndefined();
+      expect(JSON.parse(workspacePayload.wsState).indexPattern).toBe('678');
+    });
+
+    it('should return false if migration fails', () => {
+      const workspacePayload = { ...savedWorkspace, legacyIndexPatternRef: 'Testpattern' };
+      const success = migrateLegacyIndexPatternRef(workspacePayload, [
+        { id: '123', attributes: { title: 'otherpattern' } } as IndexPatternSavedObject,
+      ]);
+      expect(success).toEqual({ success: false, missingIndexPattern: 'Testpattern' });
+    });
+
+    it('should not modify migrated workspaces', () => {
+      const workspacePayload = { ...savedWorkspace };
+      const success = migrateLegacyIndexPatternRef(workspacePayload, []);
+      expect(success).toEqual({ success: true });
+      expect(workspacePayload).toEqual(savedWorkspace);
+    });
+  });
+
+  describe('mapFields', () => {
+    it('should not include unmapped fields', () => {
+      const indexPattern = {
+        getNonScriptedFields: () => [
+          { name: 'field1', type: 'string', aggregatable: true, isMapped: true },
+          { name: 'field2', type: 'string', aggregatable: true, isMapped: true },
+          { name: 'runtimeField', type: 'string', aggregatable: true, isMapped: false },
+          { name: 'field3', type: 'string', aggregatable: true, isMapped: true },
+        ],
+      } as IndexPattern;
+      expect(mapFields(indexPattern).map(({ name }) => name)).toEqual([
+        'field1',
+        'field2',
+        'field3',
+      ]);
+    });
   });
 });

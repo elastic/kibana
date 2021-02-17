@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 jest.mock('../../../classes/layers/layer_wizard_registry', () => ({}));
@@ -23,6 +24,7 @@ describe('LayerWizardSelect', () => {
         {
           categories: [LAYER_WIZARD_CATEGORY.ELASTICSEARCH],
           description: 'mock wizard without icon',
+          isDisabled: false,
           renderWizard: () => {
             return <div />;
           },
@@ -31,6 +33,7 @@ describe('LayerWizardSelect', () => {
         {
           categories: [LAYER_WIZARD_CATEGORY.SOLUTIONS],
           description: 'mock wizard with icon',
+          isDisabled: false,
           icon: 'logoObservability',
           renderWizard: () => {
             return <div />;

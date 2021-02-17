@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { HttpStart } from 'kibana/public';
@@ -18,12 +19,14 @@ import {
   INGEST_API_AGENT_POLICIES,
   INGEST_API_EPM_PACKAGES,
   INGEST_API_PACKAGE_POLICIES,
-} from '../../policy/store/policy_list/services/ingest';
+  INGEST_API_FLEET_AGENTS,
+} from '../../policy/store/services/ingest';
 import {
   GetAgentPoliciesResponse,
   GetAgentPoliciesResponseItem,
   GetPackagesResponse,
-} from '../../../../../../ingest_manager/common/types/rest_spec';
+  GetAgentsResponse,
+} from '../../../../../../fleet/common/types/rest_spec';
 import { GetPolicyListResponse } from '../../policy/types';
 
 const generator = new EndpointDocGenerator('seed');
@@ -87,6 +90,7 @@ const endpointListApiPathHandlerMocks = ({
   policyResponse = generator.generatePolicyResponse(),
   agentPolicy = generator.generateAgentPolicy(),
   queryStrategyVersion = MetadataQueryStrategyVersions.VERSION_2,
+  totalAgentsUsingEndpoint = 0,
 }: {
   /** route handlers will be setup for each individual host in this array */
   endpointsResults?: HostResultList['hosts'];
@@ -95,6 +99,7 @@ const endpointListApiPathHandlerMocks = ({
   policyResponse?: HostPolicyResponse;
   agentPolicy?: GetAgentPoliciesResponseItem;
   queryStrategyVersion?: MetadataQueryStrategyVersions;
+  totalAgentsUsingEndpoint?: number;
 } = {}) => {
   const apiHandlers = {
     // endpoint package info
@@ -143,13 +148,24 @@ const endpointListApiPathHandlerMocks = ({
         total: endpointPackagePolicies?.length,
       };
     },
+
+    // List of Agents using Endpoint
+    [INGEST_API_FLEET_AGENTS]: (): GetAgentsResponse => {
+      return {
+        total: totalAgentsUsingEndpoint,
+        list: [],
+        totalInactive: 0,
+        page: 1,
+        perPage: 10,
+      };
+    },
   };
 
   // Build a GET route handler for each endpoint details based on the list of Endpoints passed on input
   if (endpointsResults) {
     endpointsResults.forEach((host) => {
       // @ts-expect-error
-      apiHandlers[`/api/endpoint/metadata/${host.metadata.host.id}`] = () => host;
+      apiHandlers[`/api/endpoint/metadata/${host.metadata.agent.id}`] = () => host;
     });
   }
 
@@ -187,9 +203,13 @@ export const setEndpointListApiMockImplementation: (
     // First time called, return list of endpoints
     .mockImplementationOnce(async () => {
       return apiHandlers['/api/endpoint/metadata']();
+    })
+    // Metadata is called a second time to get the full total of Endpoints regardless of filters.
+    .mockImplementationOnce(async () => {
+      return apiHandlers['/api/endpoint/metadata']();
     });
 
-  // If the endpoints list results is zero, then mock the second call to `/metadata` to return
+  // If the endpoints list results is zero, then mock the third call to `/metadata` to return
   // empty list - indicating there are no endpoints currently present on the system
   if (!endpointsResults.length) {
     mockedHttpService.post.mockImplementationOnce(async () => {

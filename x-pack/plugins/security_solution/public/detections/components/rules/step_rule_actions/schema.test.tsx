@@ -1,11 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { validateSingleAction, validateRuleActionsField } from './schema';
-import { isUuidv4, getActionTypeName, validateMustache, validateActionParams } from './utils';
+import { isUuid, getActionTypeName, validateMustache, validateActionParams } from './utils';
 import { actionTypeRegistryMock } from '../../../../../../triggers_actions_ui/public/application/action_type_registry.mock';
 import { FormHook } from '../../../../shared_imports';
 jest.mock('./utils');
@@ -15,7 +16,7 @@ describe('stepRuleActions schema', () => {
 
   describe('validateSingleAction', () => {
     it('should validate single action', () => {
-      (isUuidv4 as jest.Mock).mockReturnValue(true);
+      (isUuid as jest.Mock).mockReturnValue(true);
       (validateActionParams as jest.Mock).mockReturnValue([]);
       (validateMustache as jest.Mock).mockReturnValue([]);
 
@@ -33,7 +34,7 @@ describe('stepRuleActions schema', () => {
     });
 
     it('should validate single action with invalid mustache template', () => {
-      (isUuidv4 as jest.Mock).mockReturnValue(true);
+      (isUuid as jest.Mock).mockReturnValue(true);
       (validateActionParams as jest.Mock).mockReturnValue([]);
       (validateMustache as jest.Mock).mockReturnValue(['Message is not valid mustache template']);
 
@@ -54,7 +55,7 @@ describe('stepRuleActions schema', () => {
     });
 
     it('should validate single action with incorrect id', () => {
-      (isUuidv4 as jest.Mock).mockReturnValue(false);
+      (isUuid as jest.Mock).mockReturnValue(false);
       (validateMustache as jest.Mock).mockReturnValue([]);
       (validateActionParams as jest.Mock).mockReturnValue([]);
 
@@ -117,9 +118,9 @@ describe('stepRuleActions schema', () => {
     });
 
     it('should validate multiple incorrect rule actions field', () => {
-      (isUuidv4 as jest.Mock).mockReturnValueOnce(false);
+      (isUuid as jest.Mock).mockReturnValueOnce(false);
       (getActionTypeName as jest.Mock).mockReturnValueOnce('Slack');
-      (isUuidv4 as jest.Mock).mockReturnValueOnce(true);
+      (isUuid as jest.Mock).mockReturnValueOnce(true);
       (getActionTypeName as jest.Mock).mockReturnValueOnce('Pagerduty');
       (validateActionParams as jest.Mock).mockReturnValue(['Summary is required']);
       (validateMustache as jest.Mock).mockReturnValue(['Component is not valid mustache template']);

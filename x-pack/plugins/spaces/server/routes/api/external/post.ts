@@ -1,9 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-import Boom from 'boom';
+
+import Boom from '@hapi/boom';
 import { SavedObjectsErrorHelpers } from '../../../../../../../src/core/server';
 import { wrapError } from '../../../lib/errors';
 import { spaceSchema } from '../../../lib/space_schema';
@@ -11,7 +13,7 @@ import { ExternalRouteDeps } from '.';
 import { createLicensedRouteHandler } from '../../lib';
 
 export function initPostSpacesApi(deps: ExternalRouteDeps) {
-  const { externalRouter, log, spacesService } = deps;
+  const { externalRouter, log, getSpacesService } = deps;
 
   externalRouter.post(
     {
@@ -22,7 +24,7 @@ export function initPostSpacesApi(deps: ExternalRouteDeps) {
     },
     createLicensedRouteHandler(async (context, request, response) => {
       log.debug(`Inside POST /api/spaces/space`);
-      const spacesClient = await spacesService.scopedClient(request);
+      const spacesClient = getSpacesService().createSpacesClient(request);
 
       const space = request.body;
 

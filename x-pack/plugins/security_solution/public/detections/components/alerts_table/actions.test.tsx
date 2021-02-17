@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { get } from 'lodash/fp';
@@ -19,8 +20,14 @@ import {
 } from '../../../common/mock/';
 import { CreateTimeline, UpdateTimelineLoading } from './types';
 import { Ecs } from '../../../../common/ecs';
-import { TimelineId, TimelineType, TimelineStatus } from '../../../../common/types/timeline';
+import {
+  TimelineId,
+  TimelineType,
+  TimelineStatus,
+  TimelineTabs,
+} from '../../../../common/types/timeline';
 import { ISearchStart } from '../../../../../../../src/plugins/data/public';
+import { dataPluginMock } from '../../../../../../../src/plugins/data/public/mocks';
 
 jest.mock('apollo-client');
 
@@ -29,7 +36,7 @@ describe('alert actions', () => {
   const unix = moment(anchor).valueOf();
   let createTimeline: CreateTimeline;
   let updateTimelineIsLoading: UpdateTimelineLoading;
-  let searchStrategyClient: ISearchStart;
+  let searchStrategyClient: jest.Mocked<ISearchStart>;
   let clock: sinon.SinonFakeTimers;
 
   beforeEach(() => {
@@ -42,9 +49,14 @@ describe('alert actions', () => {
 
     createTimeline = jest.fn() as jest.Mocked<CreateTimeline>;
     updateTimelineIsLoading = jest.fn() as jest.Mocked<UpdateTimelineLoading>;
+
     searchStrategyClient = {
+      ...dataPluginMock.createStartContract().search,
       aggs: {} as ISearchStart['aggs'],
-      search: jest.fn().mockResolvedValue({ data: mockTimelineDetails }),
+      showError: jest.fn(),
+      search: jest
+        .fn()
+        .mockImplementation(() => ({ toPromise: () => ({ data: mockTimelineDetails }) })),
       searchSource: {} as ISearchStart['searchSource'],
     };
 
@@ -95,82 +107,42 @@ describe('alert actions', () => {
           from: '2018-11-05T18:58:25.937Z',
           notes: null,
           timeline: {
+            activeTab: TimelineTabs.query,
             columns: [
               {
-                aggregatable: undefined,
-                category: undefined,
                 columnHeaderType: 'not-filtered',
-                description: undefined,
-                example: undefined,
                 id: '@timestamp',
-                placeholder: undefined,
-                type: undefined,
+                type: 'number',
                 width: 190,
               },
               {
-                aggregatable: undefined,
-                category: undefined,
                 columnHeaderType: 'not-filtered',
-                description: undefined,
-                example: undefined,
                 id: 'message',
-                placeholder: undefined,
-                type: undefined,
                 width: 180,
               },
               {
-                aggregatable: undefined,
-                category: undefined,
                 columnHeaderType: 'not-filtered',
-                description: undefined,
-                example: undefined,
                 id: 'event.category',
-                placeholder: undefined,
-                type: undefined,
                 width: 180,
               },
               {
-                aggregatable: undefined,
-                category: undefined,
                 columnHeaderType: 'not-filtered',
-                description: undefined,
-                example: undefined,
                 id: 'host.name',
-                placeholder: undefined,
-                type: undefined,
                 width: 180,
               },
               {
-                aggregatable: undefined,
-                category: undefined,
                 columnHeaderType: 'not-filtered',
-                description: undefined,
-                example: undefined,
                 id: 'source.ip',
-                placeholder: undefined,
-                type: undefined,
                 width: 180,
               },
               {
-                aggregatable: undefined,
-                category: undefined,
                 columnHeaderType: 'not-filtered',
-                description: undefined,
-                example: undefined,
                 id: 'destination.ip',
-                placeholder: undefined,
-                type: undefined,
                 width: 180,
               },
               {
-                aggregatable: undefined,
-                category: undefined,
                 columnHeaderType: 'not-filtered',
-                description: undefined,
-                example: undefined,
                 id: 'user.name',
-                placeholder: undefined,
-                type: undefined,
                 width: 180,
               },
             ],
@@ -181,9 +153,17 @@ describe('alert actions', () => {
             },
             deletedEventIds: [],
             description: 'This is a sample rule description',
+            eqlOptions: {
+              eventCategoryField: 'event.category',
+              query: '',
+              size: 100,
+              tiebreakerField: 'event.sequence',
+              timestampField: '@timestamp',
+            },
             eventIdToNoteIds: {},
             eventType: 'all',
             excludedRowRendererIds: [],
+            expandedDetail: {},
             filters: [
               {
                 $state: {
@@ -224,10 +204,6 @@ describe('alert actions', () => {
                 },
                 serializedQuery: '',
               },
-              filterQueryDraft: {
-                expression: '',
-                kind: 'kuery',
-              },
             },
             loadingEventIds: [],
             noteIds: [],
@@ -237,17 +213,19 @@ describe('alert actions', () => {
             selectedEventIds: {},
             show: true,
             showCheckboxes: false,
-            sort: {
-              columnId: '@timestamp',
-              sortDirection: 'desc',
-            },
+            sort: [
+              {
+                columnId: '@timestamp',
+                columnType: 'number',
+                sortDirection: 'desc',
+              },
+            ],
             status: TimelineStatus.draft,
             title: '',
             timelineType: TimelineType.default,
             templateTimelineId: null,
             templateTimelineVersion: null,
             version: null,
-            width: 1100,
           },
           to: '2018-11-05T19:03:25.937Z',
           ruleNote: '# this is some markdown documentation',
@@ -265,9 +243,6 @@ describe('alert actions', () => {
                 expression: [''],
               },
             },
-            filterQueryDraft: {
-              expression: [''],
-            },
           },
         };
         jest.spyOn(apolloClient, 'query').mockResolvedValue(mockTimelineApolloResultModified);
@@ -284,36 +259,6 @@ describe('alert actions', () => {
 
         expect(createTimeline).toHaveBeenCalledTimes(1);
         expect(createTimelineArg.timeline.kqlQuery.filterQuery.kuery.kind).toEqual('kuery');
-      });
-
-      test('it invokes createTimeline with kqlQuery.filterQueryDraft.kuery.kind as "kuery" if not specified in returned timeline template', async () => {
-        const mockTimelineApolloResultModified = {
-          ...mockTimelineApolloResult,
-          kqlQuery: {
-            filterQuery: {
-              kuery: {
-                expression: [''],
-              },
-            },
-            filterQueryDraft: {
-              expression: [''],
-            },
-          },
-        };
-        jest.spyOn(apolloClient, 'query').mockResolvedValue(mockTimelineApolloResultModified);
-
-        await sendAlertToTimelineAction({
-          apolloClient,
-          createTimeline,
-          ecsData: mockEcsDataWithAlert,
-          nonEcsData: [],
-          updateTimelineIsLoading,
-          searchStrategyClient,
-        });
-        const createTimelineArg = (createTimeline as jest.Mock).mock.calls[0][0];
-
-        expect(createTimeline).toHaveBeenCalledTimes(1);
-        expect(createTimelineArg.timeline.kqlQuery.filterQueryDraft.kind).toEqual('kuery');
       });
 
       test('it invokes createTimeline with default timeline if apolloClient throws', async () => {
@@ -378,6 +323,78 @@ describe('alert actions', () => {
           signal: {
             rule: {
               ...mockEcsDataWithAlert.signal?.rule!,
+              timeline_id: [''],
+            },
+          },
+        };
+
+        await sendAlertToTimelineAction({
+          createTimeline,
+          ecsData: ecsDataMock,
+          nonEcsData: [],
+          updateTimelineIsLoading,
+          searchStrategyClient,
+        });
+
+        expect(updateTimelineIsLoading).not.toHaveBeenCalled();
+        expect(createTimeline).toHaveBeenCalledTimes(1);
+        expect(createTimeline).toHaveBeenCalledWith(defaultTimelineProps);
+      });
+    });
+
+    describe('Eql', () => {
+      test(' with signal.group.id', async () => {
+        const ecsDataMock: Ecs = {
+          ...mockEcsDataWithAlert,
+          signal: {
+            rule: {
+              ...mockEcsDataWithAlert.signal?.rule!,
+              type: ['eql'],
+              timeline_id: [''],
+            },
+            group: {
+              id: ['my-group-id'],
+            },
+          },
+        };
+
+        await sendAlertToTimelineAction({
+          createTimeline,
+          ecsData: ecsDataMock,
+          nonEcsData: [],
+          updateTimelineIsLoading,
+          searchStrategyClient,
+        });
+
+        expect(updateTimelineIsLoading).not.toHaveBeenCalled();
+        expect(createTimeline).toHaveBeenCalledTimes(1);
+        expect(createTimeline).toHaveBeenCalledWith({
+          ...defaultTimelineProps,
+          timeline: {
+            ...defaultTimelineProps.timeline,
+            dataProviders: [
+              {
+                and: [],
+                enabled: true,
+                excluded: false,
+                id:
+                  'send-alert-to-timeline-action-default-draggable-event-details-value-formatted-field-value-timeline-1-alert-id-my-group-id',
+                kqlQuery: '',
+                name: '1',
+                queryMatch: { field: 'signal.group.id', operator: ':', value: 'my-group-id' },
+              },
+            ],
+          },
+        });
+      });
+
+      test(' with NO  signal.group.id', async () => {
+        const ecsDataMock: Ecs = {
+          ...mockEcsDataWithAlert,
+          signal: {
+            rule: {
+              ...mockEcsDataWithAlert.signal?.rule!,
+              type: ['eql'],
               timeline_id: [''],
             },
           },

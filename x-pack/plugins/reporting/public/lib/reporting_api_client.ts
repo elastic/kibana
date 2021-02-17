@@ -1,20 +1,27 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { stringify } from 'query-string';
 import rison from 'rison-node';
 import { HttpSetup } from 'src/core/public';
-import { DownloadReportFn, ManagementLinkFn } from '../';
-import { JobId, ReportApiJSON, ReportDocument, ReportSource } from '../../common/types';
 import {
   API_BASE_GENERATE,
   API_BASE_URL,
   API_LIST_URL,
   REPORTING_MANAGEMENT_HOME,
-} from '../../constants';
+} from '../../common/constants';
+import {
+  DownloadReportFn,
+  JobId,
+  ManagementLinkFn,
+  ReportApiJSON,
+  ReportDocument,
+  ReportSource,
+} from '../../common/types';
 import { add } from './job_completion_notifications';
 
 export interface JobQueueEntry {

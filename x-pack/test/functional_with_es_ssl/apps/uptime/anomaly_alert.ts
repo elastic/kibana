@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -79,6 +80,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     it('can save alert', async () => {
       await alerts.clickSaveAlertButton();
+      await alerts.clickSaveAlertsConfirmButton();
       await pageObjects.common.closeToast();
     });
 
@@ -111,7 +113,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     it('change button to disable anomaly alert', async () => {
       await uptime.ml.openMLManageMenu();
-      expect(uptime.ml.disableAnomalyAlertIsVisible()).to.eql(true);
+      expect(uptime.ml.manageAnomalyAlertIsVisible()).to.eql(true);
     });
 
     it('can delete job successfully', async () => {

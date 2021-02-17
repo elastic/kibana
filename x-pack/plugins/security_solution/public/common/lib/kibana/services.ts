@@ -1,12 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { CoreStart } from '../../../../../../../src/core/public';
+import { StartPlugins } from '../../../types';
 
-type GlobalServices = Pick<CoreStart, 'http' | 'uiSettings'>;
+type GlobalServices = Pick<CoreStart, 'http' | 'uiSettings'> & Pick<StartPlugins, 'data'>;
 
 export class KibanaServices {
   private static kibanaVersion?: string;
@@ -14,10 +16,11 @@ export class KibanaServices {
 
   public static init({
     http,
+    data,
     kibanaVersion,
     uiSettings,
   }: GlobalServices & { kibanaVersion: string }) {
-    this.services = { http, uiSettings };
+    this.services = { data, http, uiSettings };
     this.kibanaVersion = kibanaVersion;
   }
 

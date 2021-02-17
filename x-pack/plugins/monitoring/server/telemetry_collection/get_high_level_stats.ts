@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { get } from 'lodash';
 import { SearchResponse } from 'elasticsearch';
-import { StatsCollectionConfig } from 'src/plugins/telemetry_collection_manager/server';
+import { LegacyAPICaller } from 'kibana/server';
 import { createQuery } from './create_query';
 import {
   INDEX_PATTERN_KIBANA,
@@ -247,10 +248,10 @@ function getIndexPatternForStackProduct(product: string) {
  * Returns an object keyed by the cluster UUIDs to make grouping easier.
  */
 export async function getHighLevelStats(
-  callCluster: StatsCollectionConfig['callCluster'],
+  callCluster: LegacyAPICaller,
   clusterUuids: string[],
-  start: StatsCollectionConfig['start'],
-  end: StatsCollectionConfig['end'],
+  start: string,
+  end: string,
   product: string,
   maxBucketSize: number
 ) {
@@ -268,10 +269,10 @@ export async function getHighLevelStats(
 export async function fetchHighLevelStats<
   T extends { cluster_uuid?: string } = { cluster_uuid?: string }
 >(
-  callCluster: StatsCollectionConfig['callCluster'],
+  callCluster: LegacyAPICaller,
   clusterUuids: string[],
-  start: StatsCollectionConfig['start'] | undefined,
-  end: StatsCollectionConfig['end'] | undefined,
+  start: string,
+  end: string,
   product: string,
   maxBucketSize: number
 ): Promise<SearchResponse<T>> {
@@ -347,7 +348,7 @@ export async function fetchHighLevelStats<
 export function handleHighLevelStatsResponse(
   response: SearchResponse<{ cluster_uuid?: string }>,
   product: string
-) {
+): ClustersHighLevelStats {
   const instances = response.hits?.hits || [];
   const clusterMap = groupInstancesByCluster(instances, product);
 

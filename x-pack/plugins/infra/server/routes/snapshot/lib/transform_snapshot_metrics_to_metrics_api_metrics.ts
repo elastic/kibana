@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { networkTraffic } from '../../../../common/inventory_models/shared/metrics/snapshot/network_traffic';
@@ -18,7 +19,10 @@ export const transformSnapshotMetricsToMetricsAPIMetrics = (
   return snapshotRequest.metrics.map((metric, index) => {
     const inventoryModel = findInventoryModel(snapshotRequest.nodeType);
     if (SnapshotCustomMetricInputRT.is(metric)) {
-      const customId = `custom_${index}`;
+      const isUniqueId = snapshotRequest.metrics.findIndex((m) =>
+        SnapshotCustomMetricInputRT.is(m) ? m.id === metric.id : false
+      );
+      const customId = isUniqueId ? metric.id : `custom_${index}`;
       if (metric.aggregation === 'rate') {
         return { id: customId, aggregations: networkTraffic(customId, metric.field) };
       }

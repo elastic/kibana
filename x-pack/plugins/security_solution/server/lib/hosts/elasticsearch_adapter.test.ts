@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { FirstLastSeenHost, HostItem, HostsData, HostsEdges } from '../../graphql/types';
@@ -34,8 +35,8 @@ import {
   createMockEndpointAppContextServiceStartContract,
   createMockPackageService,
 } from '../../endpoint/mocks';
-import { PackageService } from '../../../../ingest_manager/server/services';
-import { ElasticsearchAssetType } from '../../../../ingest_manager/common/types/models';
+import { PackageService } from '../../../../fleet/server/services';
+import { ElasticsearchAssetType } from '../../../../fleet/common/types/models';
 
 jest.mock('./query.hosts.dsl', () => {
   return {

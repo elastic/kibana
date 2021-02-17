@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -31,7 +20,7 @@ import {
 
 export function corednsLogsSpecProvider(context: TutorialContext): TutorialSchema {
   const moduleName = 'coredns';
-  const platforms = ['OSX', 'DEB', 'RPM'] as const;
+  const platforms = ['OSX', 'DEB', 'RPM', 'WINDOWS'] as const;
   return {
     id: 'corednsLogs',
     name: i18n.translate('home.tutorials.corednsLogs.nameTitle', {
@@ -40,12 +29,11 @@ export function corednsLogsSpecProvider(context: TutorialContext): TutorialSchem
     moduleName,
     category: TutorialsCategory.SECURITY_SOLUTION,
     shortDescription: i18n.translate('home.tutorials.corednsLogs.shortDescription', {
-      defaultMessage: 'Collect the logs created by Coredns.',
+      defaultMessage: 'Collect CoreDNS logs.',
     }),
     longDescription: i18n.translate('home.tutorials.corednsLogs.longDescription', {
       defaultMessage:
-        'The `coredns` Filebeat module collects the logs from \
-[CoreDNS](https://coredns.io/manual/toc/). \
+        'This is a filebeat module for CoreDNS. It supports both standalone CoreDNS deployment and CoreDNS deployment in Kubernetes. \
 [Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-coredns.html',
@@ -57,7 +45,7 @@ export function corednsLogsSpecProvider(context: TutorialContext): TutorialSchem
         {
           id: '53aa1f70-443e-11e9-8548-ab7fbe04f038',
           linkLabel: i18n.translate('home.tutorials.corednsLogs.artifacts.dashboards.linkLabel', {
-            defaultMessage: 'CoreDNS logs dashboard',
+            defaultMessage: '[Filebeat CoreDNS] Overview',
           }),
           isOverview: true,
         },
@@ -67,7 +55,7 @@ export function corednsLogsSpecProvider(context: TutorialContext): TutorialSchem
       },
     },
     completionTimeMinutes: 10,
-    previewImagePath: '/plugins/home/assets/coredns_logs/screenshot.jpg',
+    previewImagePath: '/plugins/home/assets/coredns_logs/screenshot.png',
     onPrem: onPremInstructions(moduleName, platforms, context),
     elasticCloud: cloudInstructions(moduleName, platforms),
     onPremElasticCloud: onPremCloudInstructions(moduleName, platforms),

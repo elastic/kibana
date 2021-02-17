@@ -1,7 +1,0 @@
-{
-  "id": "oidc_provider_plugin",
-  "version": "8.0.0",
-  "kibanaVersion": "kibana",
-  "server": true,
-  "ui": false
-}

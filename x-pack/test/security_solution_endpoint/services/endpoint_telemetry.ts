@@ -1,14 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import fs from 'fs';
 import Path from 'path';
+import { KIBANA_ROOT } from '@kbn/test';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 const TELEMETRY_API_ROOT = '/api/stats?extended=true';
-const TELEMETRY_DATA_ROOT = 'test/functional/es_archives/endpoint/telemetry/';
+const TELEMETRY_DATA_ROOT = Path.join(
+  KIBANA_ROOT,
+  'x-pack/test/functional/es_archives/endpoint/telemetry/'
+);
 
 interface EndpointTelemetry {
   total_installed: number;

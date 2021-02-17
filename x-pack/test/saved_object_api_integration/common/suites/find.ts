@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
 import { SuperTest } from 'supertest';
 import querystring from 'querystring';
 import { SAVED_OBJECT_TEST_CASES, CONFLICT_TEST_CASES } from '../lib/saved_object_test_cases';
-import { SPACES } from '../lib/spaces';
+import { SPACES, ALL_SPACES_ID } from '../lib/spaces';
 import {
   getUrlPrefix,
   isUserAuthorizedAtSpace,
@@ -75,13 +76,16 @@ export const getTestCases = (
       return TEST_CASES.filter((t) => {
         const hasOtherNamespaces =
           !t.expectedNamespaces || // namespace-agnostic types do not have an expectedNamespaces field
-          t.expectedNamespaces.some((ns) => ns !== (currentSpace ?? DEFAULT_SPACE_ID));
+          t.expectedNamespaces.some(
+            (ns) => ns === ALL_SPACES_ID || ns !== (currentSpace ?? DEFAULT_SPACE_ID)
+          );
         return hasOtherNamespaces && predicate(t);
       });
     }
     return TEST_CASES.filter(
       (t) =>
         (!t.expectedNamespaces ||
+          t.expectedNamespaces.includes(ALL_SPACES_ID) ||
           t.expectedNamespaces.includes(currentSpace ?? DEFAULT_SPACE_ID)) &&
         predicate(t)
     );
@@ -101,6 +105,13 @@ export const getTestCases = (
       successResult: {
         // expected depends on which spaces the user is authorized against...
         savedObjects: getExpectedSavedObjects((t) => t.type === 'sharedtype'),
+      },
+    } as FindTestCase,
+    multiNamespaceIsolatedType: {
+      title: buildTitle('find multi-namespace isolated type'),
+      query: `type=sharecapabletype&fields=title${namespacesQueryParam}`,
+      successResult: {
+        savedObjects: getExpectedSavedObjects((t) => t.type === 'sharecapabletype'),
       },
     } as FindTestCase,
     namespaceAgnosticType: {

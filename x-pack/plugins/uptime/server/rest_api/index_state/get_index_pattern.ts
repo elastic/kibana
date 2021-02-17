@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { UMServerLibs } from '../../lib/lib';
@@ -12,15 +13,9 @@ export const createGetIndexPatternRoute: UMRestApiRouteFactory = (libs: UMServer
   method: 'GET',
   path: API_URLS.INDEX_PATTERN,
   validate: false,
-  handler: async ({ callES, dynamicSettings }, _context, _request, response): Promise<any> => {
-    try {
-      return response.ok({
-        body: {
-          ...(await libs.requests.getIndexPattern({ callES, dynamicSettings })),
-        },
-      });
-    } catch (e) {
-      return response.internalError({ body: { message: e.message } });
-    }
+  handler: async ({ uptimeEsClient }): Promise<any> => {
+    return await libs.requests.getIndexPattern({
+      uptimeEsClient,
+    });
   },
 });

@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { mockConfig, mockLogger } from '../__mocks__';
+
 import { JSON_HEADER, READ_ONLY_MODE_HEADER } from '../../common/constants';
 
 import { EnterpriseSearchRequestHandler } from './enterprise_search_request_handler';
@@ -12,6 +14,7 @@ import { EnterpriseSearchRequestHandler } from './enterprise_search_request_hand
 jest.mock('node-fetch');
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const fetchMock = require('node-fetch') as jest.Mock;
+
 const { Response } = jest.requireActual('node-fetch');
 
 const responseMock = {
@@ -93,6 +96,17 @@ describe('EnterpriseSearchRequestHandler', () => {
         });
       });
 
+      it('passes request params', async () => {
+        const requestHandler = enterpriseSearchRequestHandler.createRequest({
+          path: '/api/example',
+        });
+        await makeAPICall(requestHandler, { query: { someQuery: false } });
+
+        EnterpriseSearchAPI.shouldHaveBeenCalledWith(
+          'http://localhost:3002/api/example?someQuery=false'
+        );
+      });
+
       it('passes custom params set by the handler, which override request params', async () => {
         const requestHandler = enterpriseSearchRequestHandler.createRequest({
           path: '/api/example',
@@ -103,6 +117,41 @@ describe('EnterpriseSearchRequestHandler', () => {
         EnterpriseSearchAPI.shouldHaveBeenCalledWith(
           'http://localhost:3002/api/example?someQuery=true'
         );
+      });
+
+      it('correctly encodes query string parameters', async () => {
+        const requestHandler = enterpriseSearchRequestHandler.createRequest({
+          path: '/api/example',
+        });
+        await makeAPICall(requestHandler, { query: { 'page[current]': 1 } });
+
+        EnterpriseSearchAPI.shouldHaveBeenCalledWith(
+          'http://localhost:3002/api/example?page%5Bcurrent%5D=1'
+        );
+      });
+
+      describe('encodePathParams', () => {
+        it('correctly replaces :pathVariables with request.params', async () => {
+          const requestHandler = enterpriseSearchRequestHandler.createRequest({
+            path: '/api/examples/:example/some/:id',
+          });
+          await makeAPICall(requestHandler, { params: { example: 'hello', id: 'world' } });
+
+          EnterpriseSearchAPI.shouldHaveBeenCalledWith(
+            'http://localhost:3002/api/examples/hello/some/world'
+          );
+        });
+
+        it('correctly encodes path params as URI components', async () => {
+          const requestHandler = enterpriseSearchRequestHandler.createRequest({
+            path: '/api/examples/:example',
+          });
+          await makeAPICall(requestHandler, { params: { example: 'hello#@/$%^/&[]{}/";world' } });
+
+          EnterpriseSearchAPI.shouldHaveBeenCalledWith(
+            'http://localhost:3002/api/examples/hello%23%40%2F%24%25%5E%2F%26%5B%5D%7B%7D%2F%22%3Bworld'
+          );
+        });
       });
     });
 
@@ -301,6 +350,10 @@ describe('EnterpriseSearchRequestHandler', () => {
           headers: mockExpectedResponseHeaders,
         });
         expect(mockLogger.error).toHaveBeenCalled();
+      });
+
+      it('errors when receiving a 401 response', async () => {
+        EnterpriseSearchAPI.mockReturn({}, { status: 401 });
       });
 
       it('errors when redirected to /login', async () => {

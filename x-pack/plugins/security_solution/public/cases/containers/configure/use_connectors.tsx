@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { useState, useEffect, useCallback } from 'react';
@@ -9,18 +10,18 @@ import { useState, useEffect, useCallback } from 'react';
 import { useStateToaster, errorToToaster } from '../../../common/components/toasters';
 import * as i18n from '../translations';
 import { fetchConnectors } from './api';
-import { Connector } from './types';
+import { ActionConnector } from './types';
 
-export interface ReturnConnectors {
+export interface UseConnectorsResponse {
   loading: boolean;
-  connectors: Connector[];
+  connectors: ActionConnector[];
   refetchConnectors: () => void;
 }
 
-export const useConnectors = (): ReturnConnectors => {
+export const useConnectors = (): UseConnectorsResponse => {
   const [, dispatchToaster] = useStateToaster();
   const [loading, setLoading] = useState(true);
-  const [connectors, setConnectors] = useState<Connector[]>([]);
+  const [connectors, setConnectors] = useState<ActionConnector[]>([]);
 
   const refetchConnectors = useCallback(() => {
     let didCancel = false;

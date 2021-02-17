@@ -1,11 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
-import { registerTestBed } from '../../../../../../test_utils';
+import { registerTestBed } from '@kbn/test/jest';
 import { rollupJobsStore } from '../../store';
 import { JobList } from './job_list';
 
@@ -14,7 +15,7 @@ import { coreMock } from '../../../../../../../src/core/public/mocks';
 const startMock = coreMock.createStart();
 
 jest.mock('../../services', () => {
-  const services = require.requireActual('../../services');
+  const services = jest.requireActual('../../services');
   return {
     ...services,
     getRouterLinkProps: (link) => ({ href: link }),

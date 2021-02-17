@@ -1,30 +1,42 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import { RequestHandlerContext } from '../../../../core/server';
-import { ISearchOptions, IKibanaSearchRequest, IKibanaSearchResponse } from '../../common/search';
+import { Observable } from 'rxjs';
+import type {
+  IRouter,
+  IScopedClusterClient,
+  IUiSettingsClient,
+  SavedObjectsClientContract,
+  KibanaRequest,
+  RequestHandlerContext,
+} from 'src/core/server';
+import {
+  ISearchOptions,
+  ISearchStartSearchSource,
+  IKibanaSearchRequest,
+  IKibanaSearchResponse,
+  ISearchClient,
+} from '../../common/search';
 import { AggsSetup, AggsStart } from './aggs';
 import { SearchUsage } from './collectors';
 import { IEsSearchRequest, IEsSearchResponse } from './es_search';
+import { IScopedSearchSessionsClient, ISearchSessionService } from './session';
 
 export interface SearchEnhancements {
   defaultStrategy: string;
+  sessionService: ISearchSessionService;
+}
+
+export interface SearchStrategyDependencies {
+  savedObjectsClient: SavedObjectsClientContract;
+  esClient: IScopedClusterClient;
+  uiSettingsClient: IUiSettingsClient;
+  searchSessionsClient: IScopedSearchSessionsClient;
 }
 
 export interface ISearchSetup {
@@ -52,25 +64,6 @@ export interface ISearchSetup {
   __enhance: (enhancements: SearchEnhancements) => void;
 }
 
-export interface ISearchStart<
-  SearchStrategyRequest extends IKibanaSearchRequest = IEsSearchRequest,
-  SearchStrategyResponse extends IKibanaSearchResponse = IEsSearchResponse
-> {
-  aggs: AggsStart;
-  /**
-   * Get other registered search strategies. For example, if a new strategy needs to use the
-   * already-registered ES search strategy, it can use this function to accomplish that.
-   */
-  getSearchStrategy: (
-    name: string
-  ) => ISearchStrategy<SearchStrategyRequest, SearchStrategyResponse>;
-  search: (
-    context: RequestHandlerContext,
-    request: SearchStrategyRequest,
-    options: ISearchOptions
-  ) => Promise<SearchStrategyResponse>;
-}
-
 /**
  * Search strategy interface contains a search method that takes in a request and returns a promise
  * that resolves to a response.
@@ -80,9 +73,55 @@ export interface ISearchStrategy<
   SearchStrategyResponse extends IKibanaSearchResponse = IEsSearchResponse
 > {
   search: (
-    context: RequestHandlerContext,
     request: SearchStrategyRequest,
-    options?: ISearchOptions
-  ) => Promise<SearchStrategyResponse>;
-  cancel?: (context: RequestHandlerContext, id: string) => Promise<void>;
+    options: ISearchOptions,
+    deps: SearchStrategyDependencies
+  ) => Observable<SearchStrategyResponse>;
+  cancel?: (id: string, options: ISearchOptions, deps: SearchStrategyDependencies) => Promise<void>;
+  extend?: (
+    id: string,
+    keepAlive: string,
+    options: ISearchOptions,
+    deps: SearchStrategyDependencies
+  ) => Promise<void>;
 }
+
+export interface IScopedSearchClient extends ISearchClient {
+  saveSession: IScopedSearchSessionsClient['save'];
+  getSession: IScopedSearchSessionsClient['get'];
+  findSessions: IScopedSearchSessionsClient['find'];
+  updateSession: IScopedSearchSessionsClient['update'];
+  cancelSession: IScopedSearchSessionsClient['cancel'];
+  deleteSession: IScopedSearchSessionsClient['delete'];
+  extendSession: IScopedSearchSessionsClient['extend'];
+}
+
+export interface ISearchStart<
+  SearchStrategyRequest extends IKibanaSearchRequest = IEsSearchRequest,
+  SearchStrategyResponse extends IKibanaSearchResponse = IEsSearchResponse
+> {
+  aggs: AggsStart;
+  /**
+   * Get other registered search strategies by name (or, by default, the Elasticsearch strategy).
+   * For example, if a new strategy needs to use the already-registered ES search strategy, it can
+   * use this function to accomplish that.
+   */
+  getSearchStrategy: (
+    name?: string // Name of the search strategy (defaults to the Elasticsearch strategy)
+  ) => ISearchStrategy<SearchStrategyRequest, SearchStrategyResponse>;
+  asScoped: (request: KibanaRequest) => IScopedSearchClient;
+  searchSource: {
+    asScoped: (request: KibanaRequest) => Promise<ISearchStartSearchSource>;
+  };
+}
+
+export type SearchRequestHandlerContext = IScopedSearchClient;
+
+/**
+ * @internal
+ */
+export interface DataRequestHandlerContext extends RequestHandlerContext {
+  search: SearchRequestHandlerContext;
+}
+
+export type DataPluginRouter = IRouter<DataRequestHandlerContext>;

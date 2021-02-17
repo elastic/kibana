@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React, { Fragment, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
@@ -23,7 +25,7 @@ import {
 } from '@elastic/eui';
 
 import { Repository } from '../../../../../common/types';
-import { CronEditor, SectionError } from '../../../../shared_imports';
+import { Frequency, CronEditor, SectionError } from '../../../../shared_imports';
 import { useServices } from '../../../app_context';
 import { DEFAULT_POLICY_SCHEDULE, DEFAULT_POLICY_FREQUENCY } from '../../../constants';
 import { useLoadRepositories } from '../../../services/http';
@@ -71,7 +73,7 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
   // State for cron editor
   const [simpleCron, setSimpleCron] = useState<{
     expression: string;
-    frequency: string;
+    frequency: Frequency;
   }>({
     expression: DEFAULT_POLICY_SCHEDULE,
     frequency: DEFAULT_POLICY_FREQUENCY,
@@ -480,6 +482,7 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
       ) : (
         <Fragment>
           <CronEditor
+            frequencyBlockList={['MINUTE']} // ES disallows a frequency faster than 15m
             fieldToPreferredValueMap={fieldToPreferredValueMap}
             cronExpression={simpleCron.expression}
             frequency={simpleCron.frequency}
@@ -487,10 +490,6 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
               cronExpression: expression,
               frequency,
               fieldToPreferredValueMap: newFieldToPreferredValueMap,
-            }: {
-              cronExpression: string;
-              frequency: string;
-              fieldToPreferredValueMap: any;
             }) => {
               setSimpleCron({
                 expression,

@@ -33,7 +33,7 @@ exports[`CalendarsListTable renders the table with all calendars 1`] = `
         },
       ]
     }
-    data-test-subj="mlCalendarTable"
+    data-test-subj="mlCalendarTable loaded"
     isSelectable={true}
     itemId="calendar_id"
     items={

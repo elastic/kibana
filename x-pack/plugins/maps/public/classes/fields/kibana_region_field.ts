@@ -1,16 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { IField, AbstractField } from './field';
-import { IKibanaRegionSource } from '../sources/kibana_regionmap_source/kibana_regionmap_source';
+import { KibanaRegionmapSource } from '../sources/kibana_regionmap_source/kibana_regionmap_source';
 import { FIELD_ORIGIN } from '../../../common/constants';
 import { IVectorSource } from '../sources/vector_source';
 
 export class KibanaRegionField extends AbstractField implements IField {
-  private readonly _source: IKibanaRegionSource;
+  private readonly _source: KibanaRegionmapSource;
 
   constructor({
     fieldName,
@@ -18,7 +19,7 @@ export class KibanaRegionField extends AbstractField implements IField {
     origin,
   }: {
     fieldName: string;
-    source: IKibanaRegionSource;
+    source: KibanaRegionmapSource;
     origin: FIELD_ORIGIN;
   }) {
     super({ fieldName, origin });

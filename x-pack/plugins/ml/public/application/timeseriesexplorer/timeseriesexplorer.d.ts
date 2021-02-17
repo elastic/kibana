@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { FC } from 'react';
+import React from 'react';
 
-import { getDateFormatTz, TimeRangeBounds } from '../explorer/explorer_utils';
+import { TimeRangeBounds } from '../explorer/explorer_utils';
 
-declare const TimeSeriesExplorer: FC<{
+interface Props {
   appStateHandler: (action: string, payload: any) => void;
   autoZoomDuration: number;
   bounds: TimeRangeBounds;
@@ -16,9 +17,12 @@ declare const TimeSeriesExplorer: FC<{
   lastRefresh: number;
   selectedJobId: string;
   selectedDetectorIndex: number;
-  selectedEntities: any[];
+  selectedEntities: Record<string, string> | undefined;
   selectedForecastId?: string;
   tableInterval: string;
   tableSeverity: number;
-  zoom?: { from: string; to: string };
-}>;
+  zoom?: { from?: string; to?: string };
+}
+
+// eslint-disable-next-line react/prefer-stateless-function
+declare class TimeSeriesExplorer extends React.Component<Props, any> {}

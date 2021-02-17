@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { IndexSettings } from './indices';
@@ -13,7 +14,7 @@ import { Mappings } from './mappings';
  */
 export interface TemplateSerialized {
   index_patterns: string[];
-  template: {
+  template?: {
     settings?: IndexSettings;
     aliases?: Aliases;
     mappings?: Mappings;
@@ -33,7 +34,7 @@ export interface TemplateSerialized {
 export interface TemplateDeserialized {
   name: string;
   indexPatterns: string[];
-  template: {
+  template?: {
     settings?: IndexSettings;
     aliases?: Aliases;
     mappings?: Mappings;
@@ -46,7 +47,11 @@ export interface TemplateDeserialized {
     name: string;
   };
   _meta?: { [key: string]: any }; // Composable template only
-  dataStream?: {}; // Composable template only
+  // Composable template only
+  dataStream?: {
+    hidden?: boolean;
+    [key: string]: any;
+  };
   _kbnMeta: {
     type: TemplateType;
     hasDatastream: boolean;

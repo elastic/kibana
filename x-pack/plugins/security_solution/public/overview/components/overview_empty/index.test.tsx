@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React from 'react';
 import { shallow, ShallowWrapper } from 'enzyme';
 import { OverviewEmpty } from '.';
@@ -53,7 +55,7 @@ describe('OverviewEmpty', () => {
           description:
             'Protect your hosts with threat prevention, detection, and deep security data visibility.',
           fill: false,
-          label: 'Add Elastic Endpoint Security',
+          label: 'Add Endpoint Security',
           onClick: undefined,
           url: '/app/home#/tutorial_directory/security',
         },

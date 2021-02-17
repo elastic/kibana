@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { IScopedClusterClient } from 'kibana/server';
@@ -13,6 +14,7 @@ import {
   CategorizationAnalyzer,
   CategoryFieldExample,
 } from '../../../../../common/types/categories';
+import { RuntimeMappings } from '../../../../../common/types/fields';
 import { ValidationResults } from './validation_results';
 
 const CHUNK_SIZE = 100;
@@ -31,7 +33,8 @@ export function categorizationExamplesProvider({
     timeField: string | undefined,
     start: number,
     end: number,
-    analyzer: CategorizationAnalyzer
+    analyzer: CategorizationAnalyzer,
+    runtimeMappings: RuntimeMappings | undefined
   ): Promise<{ examples: CategoryFieldExample[]; error?: any }> {
     if (timeField !== undefined) {
       const range = {
@@ -56,18 +59,26 @@ export function categorizationExamplesProvider({
         }
       }
     }
-
     const { body } = await asCurrentUser.search<SearchResponse<{ [id: string]: string }>>({
       index: indexPatternTitle,
       size,
       body: {
-        _source: categorizationFieldName,
+        fields: [categorizationFieldName],
+        _source: false,
         query,
         sort: ['_doc'],
+        ...(runtimeMappings !== undefined ? { runtime_mappings: runtimeMappings } : {}),
       },
     });
 
-    const tempExamples = body.hits.hits.map(({ _source }) => _source[categorizationFieldName]);
+    // hit.fields can be undefined if value is originally null
+    const tempExamples = body.hits.hits.map(({ fields }) =>
+      fields &&
+      Array.isArray(fields[categorizationFieldName]) &&
+      fields[categorizationFieldName].length > 0
+        ? fields[categorizationFieldName][0]
+        : null
+    );
 
     validationResults.createNullValueResult(tempExamples);
 
@@ -81,7 +92,6 @@ export function categorizationExamplesProvider({
       const examplesWithTokens = await getTokens(CHUNK_SIZE, allExamples, analyzer);
       return { examples: examplesWithTokens };
     } catch (err) {
-      // console.log('dropping to 50 chunk size');
       // if an error is thrown when loading the tokens, lower the chunk size by half and try again
       // the error may have been caused by too many tokens being found.
       // the _analyze endpoint has a maximum of 10000 tokens.
@@ -158,7 +168,8 @@ export function categorizationExamplesProvider({
     timeField: string | undefined,
     start: number,
     end: number,
-    analyzer: CategorizationAnalyzer
+    analyzer: CategorizationAnalyzer,
+    runtimeMappings: RuntimeMappings | undefined
   ) {
     const resp = await categorizationExamples(
       indexPatternTitle,
@@ -168,7 +179,8 @@ export function categorizationExamplesProvider({
       timeField,
       start,
       end,
-      analyzer
+      analyzer,
+      runtimeMappings
     );
 
     const { examples } = resp;

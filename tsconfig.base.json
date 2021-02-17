@@ -5,12 +5,7 @@
       // Allows for importing from `kibana` package for the exported types.
       "kibana": ["./kibana"],
       "kibana/public": ["src/core/public"],
-      "kibana/server": ["src/core/server"],
-      "plugins/*": ["src/legacy/core_plugins/*/public/"],
-      "test_utils/*": [
-        "src/test_utils/public/*"
-      ],
-      "fixtures/*": ["src/fixtures/*"]
+      "kibana/server": ["src/core/server"]
     },
     // Support .tsx files and transform JSX into calls to React.createElement
     "jsx": "react",
@@ -18,6 +13,8 @@
     "strict": true,
     // save information about the project graph on disk
     "incremental": true,
+    // Do not check d.ts files by default
+    "skipLibCheck": true,
     // enables "core language features"
     "lib": [
       "esnext",
@@ -39,6 +36,8 @@
     // Resolve modules in the same way as Node.js. Aka make `require` works the
     // same in TypeScript as it does in Node.js.
     "moduleResolution": "node",
+    // "resolveJsonModule" allows for importing, extracting types from and generating .json files.
+    "resolveJsonModule": true,
     // Disallow inconsistently-cased references to the same file.
     "forceConsistentCasingInFileNames": true,
     // Forbid unused local variables as the rule was deprecated by ts-lint
@@ -51,7 +50,6 @@
     "types": [
       "node",
       "jest",
-      "react",
       "flot",
       "jest-styled-components",
       "@testing-library/jest-dom"

@@ -1,31 +1,20 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import { calculateAuto } from './calculate_auto';
 import {
   getUnitValue,
   parseInterval,
   convertIntervalToUnit,
   ASCENDING_UNIT_ORDER,
 } from './unit_to_seconds';
-import { getTimerangeDuration } from './get_timerange';
+import { getTimerange } from './get_timerange';
 import { INTERVAL_STRING_RE, GTE_INTERVAL_RE } from '../../../../common/interval_regexp';
+import { search } from '../../../../../data/server';
 
 const calculateBucketData = (timeInterval, capabilities) => {
   let intervalString = capabilities
@@ -42,14 +31,18 @@ const calculateBucketData = (timeInterval, capabilities) => {
   }
 
   // Check decimal
-  if (parsedInterval.value % 1 !== 0) {
+  if (parsedInterval && parsedInterval.value % 1 !== 0) {
     if (parsedInterval.unit !== 'ms') {
-      const { value, unit } = convertIntervalToUnit(
+      const converted = convertIntervalToUnit(
         intervalString,
         ASCENDING_UNIT_ORDER[ASCENDING_UNIT_ORDER.indexOf(parsedInterval.unit) - 1]
       );
 
-      intervalString = value + unit;
+      if (converted) {
+        intervalString = converted.value + converted.unit;
+      }
+
+      intervalString = undefined;
     } else {
       intervalString = '1ms';
     }
@@ -61,14 +54,15 @@ const calculateBucketData = (timeInterval, capabilities) => {
   };
 };
 
-const calculateBucketSizeForAutoInterval = (req) => {
-  const duration = getTimerangeDuration(req);
+const calculateBucketSizeForAutoInterval = (req, maxBars) => {
+  const { from, to } = getTimerange(req);
+  const timerange = to.valueOf() - from.valueOf();
 
-  return calculateAuto.near(100, duration).asSeconds();
+  return search.aggs.calcAutoIntervalLessThan(maxBars, timerange).asSeconds();
 };
 
-export const getBucketSize = (req, interval, capabilities) => {
-  const bucketSize = calculateBucketSizeForAutoInterval(req);
+export const getBucketSize = (req, interval, capabilities, maxBars) => {
+  const bucketSize = calculateBucketSizeForAutoInterval(req, maxBars);
   let intervalString = `${bucketSize}s`;
 
   const gteAutoMatch = Boolean(interval) && interval.match(GTE_INTERVAL_RE);

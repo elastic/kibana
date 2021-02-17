@@ -1,16 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { noop } from 'lodash/fp';
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import deepEqual from 'fast-deep-equal';
 
 import { ESTermQuery } from '../../../../common/typed_json';
 import { inputsModel } from '../../../common/store';
-import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
+import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { useKibana } from '../../../common/lib/kibana';
 import { createFilter } from '../../../common/containers/helpers';
 import { PageInfoPaginated, FlowTargetSourceDest } from '../../../graphql/types';
@@ -21,11 +22,8 @@ import {
   NetworkTlsRequestOptions,
   NetworkTlsStrategyResponse,
 } from '../../../../common/search_strategy/security_solution/network';
-import {
-  AbortError,
-  isCompleteResponse,
-  isErrorResponse,
-} from '../../../../../../../src/plugins/data/common';
+import { isCompleteResponse, isErrorResponse } from '../../../../../../../src/plugins/data/common';
+import { AbortError } from '../../../../../../../src/plugins/kibana_utils/common';
 
 import * as i18n from './translations';
 import { getInspectResponse } from '../../../helpers';
@@ -66,8 +64,8 @@ export const useNetworkTls = ({
   startDate,
   type,
 }: UseNetworkTls): [boolean, NetworkTlsArgs] => {
-  const getTlsSelector = networkSelectors.tlsSelector();
-  const { activePage, limit, sort } = useShallowEqualSelector((state) =>
+  const getTlsSelector = useMemo(() => networkSelectors.tlsSelector(), []);
+  const { activePage, limit, sort } = useDeepEqualSelector((state) =>
     getTlsSelector(state, type, flowTarget)
   );
   const { data, notifications } = useKibana().services;
@@ -75,28 +73,20 @@ export const useNetworkTls = ({
   const abortCtrl = useRef(new AbortController());
   const [loading, setLoading] = useState(false);
 
-  const [networkTlsRequest, setHostRequest] = useState<NetworkTlsRequestOptions>({
-    defaultIndex: indexNames,
-    factoryQueryType: NetworkQueries.tls,
-    filterQuery: createFilter(filterQuery),
-    flowTarget,
-    id,
-    ip,
-    pagination: generateTablePaginationOptions(activePage, limit),
-    sort,
-    timerange: {
-      interval: '12h',
-      from: startDate ? startDate : '',
-      to: endDate ? endDate : new Date(Date.now()).toISOString(),
-    },
-  });
+  const [networkTlsRequest, setHostRequest] = useState<NetworkTlsRequestOptions | null>(null);
 
   const wrappedLoadMore = useCallback(
     (newActivePage: number) => {
-      setHostRequest((prevRequest) => ({
-        ...prevRequest,
-        pagination: generateTablePaginationOptions(newActivePage, limit),
-      }));
+      setHostRequest((prevRequest) => {
+        if (!prevRequest) {
+          return prevRequest;
+        }
+
+        return {
+          ...prevRequest,
+          pagination: generateTablePaginationOptions(newActivePage, limit),
+        };
+      });
     },
     [limit]
   );
@@ -120,7 +110,11 @@ export const useNetworkTls = ({
   });
 
   const networkTlsSearch = useCallback(
-    (request: NetworkTlsRequestOptions) => {
+    (request: NetworkTlsRequestOptions | null) => {
+      if (request == null || skip) {
+        return;
+      }
+
       let didCancel = false;
       const asyncSearch = async () => {
         abortCtrl.current = new AbortController();
@@ -170,15 +164,18 @@ export const useNetworkTls = ({
         abortCtrl.current.abort();
       };
     },
-    [data.search, notifications.toasts]
+    [data.search, notifications.toasts, skip]
   );
 
   useEffect(() => {
     setHostRequest((prevRequest) => {
       const myRequest = {
-        ...prevRequest,
+        ...(prevRequest ?? {}),
         defaultIndex: indexNames,
+        factoryQueryType: NetworkQueries.tls,
         filterQuery: createFilter(filterQuery),
+        flowTarget,
+        ip,
         pagination: generateTablePaginationOptions(activePage, limit),
         timerange: {
           interval: '12h',
@@ -187,12 +184,12 @@ export const useNetworkTls = ({
         },
         sort,
       };
-      if (!skip && !deepEqual(prevRequest, myRequest)) {
+      if (!deepEqual(prevRequest, myRequest)) {
         return myRequest;
       }
       return prevRequest;
     });
-  }, [activePage, indexNames, endDate, filterQuery, limit, startDate, sort, skip]);
+  }, [activePage, indexNames, endDate, filterQuery, limit, startDate, sort, flowTarget, ip, id]);
 
   useEffect(() => {
     networkTlsSearch(networkTlsRequest);

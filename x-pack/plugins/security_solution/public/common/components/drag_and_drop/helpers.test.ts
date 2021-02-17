@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { omit } from 'lodash/fp';
@@ -22,7 +23,7 @@ import {
   draggableIsField,
   droppableIdPrefix,
   droppableTimelineColumnsPrefix,
-  droppableTimelineFlyoutButtonPrefix,
+  droppableTimelineFlyoutBottomBarPrefix,
   droppableTimelineProvidersPrefix,
   escapeDataProviderId,
   escapeFieldId,
@@ -338,7 +339,7 @@ describe('helpers', () => {
       expect(
         destinationIsTimelineButton({
           destination: {
-            droppableId: `${droppableTimelineFlyoutButtonPrefix}.timeline`,
+            droppableId: `${droppableTimelineFlyoutBottomBarPrefix}.timeline`,
             index: 0,
           },
           draggableId: getDraggableId('685260508808089'),

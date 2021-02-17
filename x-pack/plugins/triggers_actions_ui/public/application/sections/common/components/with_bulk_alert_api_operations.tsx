@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -13,7 +14,6 @@ import {
   AlertInstanceSummary,
   AlertingFrameworkHealth,
 } from '../../../../types';
-import { useAppDependencies } from '../../../app_context';
 import {
   deleteAlerts,
   disableAlerts,
@@ -30,8 +30,9 @@ import {
   loadAlertState,
   loadAlertInstanceSummary,
   loadAlertTypes,
-  health,
+  alertingFrameworkHealth,
 } from '../../../lib/alert_api';
+import { useKibana } from '../../../../common/lib/kibana';
 
 export interface ComponentOpts {
   muteAlerts: (alerts: Alert[]) => Promise<void>;
@@ -69,7 +70,7 @@ export function withBulkAlertOperations<T>(
   WrappedComponent: React.ComponentType<T & ComponentOpts>
 ): React.FunctionComponent<PropsWithOptionalApiHandlers<T>> {
   return (props: PropsWithOptionalApiHandlers<T>) => {
-    const { http } = useAppDependencies();
+    const { http } = useKibana().services;
     return (
       <WrappedComponent
         {...(props as T)}
@@ -131,7 +132,7 @@ export function withBulkAlertOperations<T>(
           loadAlertInstanceSummary({ http, alertId })
         }
         loadAlertTypes={async () => loadAlertTypes({ http })}
-        getHealth={async () => health({ http })}
+        getHealth={async () => alertingFrameworkHealth({ http })}
       />
     );
   };

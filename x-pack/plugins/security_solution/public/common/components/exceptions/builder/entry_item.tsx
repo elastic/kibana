@@ -1,12 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React, { useCallback } from 'react';
 import { EuiFormRow, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
 
+import { isEqlRule, isThresholdRule } from '../../../../../common/detection_engine/utils';
+import { Type } from '../../../../../common/detection_engine/schemas/common/schemas';
 import { IFieldType, IIndexPattern } from '../../../../../../../../src/plugins/data/common';
 import { FieldComponent } from '../../autocomplete/field';
 import { OperatorComponent } from '../../autocomplete/operator';
@@ -40,7 +44,9 @@ interface EntryItemProps {
   showLabel: boolean;
   listType: ExceptionListType;
   onChange: (arg: BuilderEntry, i: number) => void;
+  setErrorsExist: (arg: boolean) => void;
   onlyShowListOperators?: boolean;
+  ruleType?: Type;
 }
 
 export const BuilderEntryItem: React.FC<EntryItemProps> = ({
@@ -49,8 +55,17 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
   listType,
   showLabel,
   onChange,
+  setErrorsExist,
   onlyShowListOperators = false,
+  ruleType,
 }): JSX.Element => {
+  const handleError = useCallback(
+    (err: boolean): void => {
+      setErrorsExist(err);
+    },
+    [setErrorsExist]
+  );
+
   const handleFieldChange = useCallback(
     ([newField]: IFieldType[]): void => {
       const { updatedEntry, index } = getEntryOnFieldChange(entry, newField);
@@ -136,7 +151,7 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
           entry,
           listType,
           entry.field != null && entry.field.type === 'boolean',
-          isFirst
+          isFirst && !isEqlRule(ruleType) && !isThresholdRule(ruleType)
         );
     const comboBox = (
       <OperatorComponent
@@ -165,18 +180,15 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
     }
   };
 
-  const getFieldValueComboBox = (type: OperatorTypeEnum): JSX.Element => {
+  const getFieldValueComboBox = (type: OperatorTypeEnum, isFirst: boolean): JSX.Element => {
     switch (type) {
       case OperatorTypeEnum.MATCH:
         const value = typeof entry.value === 'string' ? entry.value : undefined;
         return (
           <AutocompleteFieldMatchComponent
+            rowLabel={isFirst ? i18n.VALUE : undefined}
             placeholder={i18n.EXCEPTION_FIELD_VALUE_PLACEHOLDER}
-            selectedField={
-              entry.correspondingKeywordField != null
-                ? entry.correspondingKeywordField
-                : entry.field
-            }
+            selectedField={entry.correspondingKeywordField ?? entry.field}
             selectedValue={value}
             isDisabled={
               indexPattern == null || (indexPattern != null && indexPattern.fields.length === 0)
@@ -184,6 +196,7 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
             isLoading={false}
             isClearable={false}
             indexPattern={indexPattern}
+            onError={handleError}
             onChange={handleFieldMatchValueChange}
             isRequired
             data-test-subj="exceptionBuilderEntryFieldMatch"
@@ -193,6 +206,7 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
         const values: string[] = Array.isArray(entry.value) ? entry.value : [];
         return (
           <AutocompleteFieldMatchAnyComponent
+            rowLabel={isFirst ? i18n.VALUE : undefined}
             placeholder={i18n.EXCEPTION_FIELD_VALUE_PLACEHOLDER}
             selectedField={
               entry.correspondingKeywordField != null
@@ -206,6 +220,7 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
             isLoading={false}
             isClearable={false}
             indexPattern={indexPattern}
+            onError={handleError}
             onChange={handleFieldMatchAnyValueChange}
             isRequired
             data-test-subj="exceptionBuilderEntryFieldMatchAny"
@@ -215,6 +230,7 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
         const id = typeof entry.value === 'string' ? entry.value : undefined;
         return (
           <AutocompleteFieldListsComponent
+            rowLabel={isFirst ? i18n.VALUE : undefined}
             selectedField={entry.field}
             placeholder={i18n.EXCEPTION_FIELD_LISTS_PLACEHOLDER}
             selectedValue={id}
@@ -231,6 +247,7 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
       case OperatorTypeEnum.EXISTS:
         return (
           <AutocompleteFieldExistsComponent
+            rowLabel={isFirst ? i18n.VALUE : undefined}
             placeholder={getEmptyValue()}
             data-test-subj="exceptionBuilderEntryFieldExists"
           />
@@ -240,23 +257,14 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
     }
   };
 
-  const renderFieldValueInput = (isFirst: boolean, entryType: OperatorTypeEnum): JSX.Element => {
-    if (isFirst) {
-      return (
-        <EuiFormRow label={i18n.VALUE} fullWidth data-test-subj="exceptionBuilderEntryFieldFormRow">
-          {getFieldValueComboBox(entryType)}
-        </EuiFormRow>
-      );
-    } else {
-      return getFieldValueComboBox(entryType);
-    }
-  };
+  const renderFieldValueInput = (isFirst: boolean, entryType: OperatorTypeEnum): JSX.Element =>
+    getFieldValueComboBox(entryType, isFirst);
 
   return (
     <EuiFlexGroup
       direction="row"
       gutterSize="s"
-      alignItems="center"
+      alignItems="flexStart"
       className="exceptionItemEntryContainer"
       data-test-subj="exceptionItemEntryContainer"
     >

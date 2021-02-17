@@ -1,11 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React from 'react';
 
-import { euiStyled } from '../../../../../../../observability/public';
+import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common';
 import { nodesToWaffleMap } from '../../lib/nodes_to_wafflemap';
 import { isWaffleMapGroupWithGroups, isWaffleMapGroupWithNodes } from '../../lib/type_guards';
 import { InfraWaffleMapBounds, InfraWaffleMapOptions } from '../../../../../lib/lib';
@@ -27,6 +29,7 @@ interface Props {
   bounds: InfraWaffleMapBounds;
   dataBounds: InfraWaffleMapBounds;
   bottomMargin: number;
+  staticHeight: boolean;
 }
 
 export const Map: React.FC<Props> = ({
@@ -39,18 +42,20 @@ export const Map: React.FC<Props> = ({
   nodeType,
   dataBounds,
   bottomMargin,
+  staticHeight,
 }) => {
   const sortedNodes = sortNodes(options.sort, nodes);
   const map = nodesToWaffleMap(sortedNodes);
   return (
-    <AutoSizer content>
-      {({ measureRef, content: { width = 0, height = 0 } }) => {
+    <AutoSizer bounds>
+      {({ measureRef, bounds: { width = 0, height = 0 } }) => {
         const groupsWithLayout = applyWaffleMapLayout(map, width, height);
         return (
           <WaffleMapOuterContainer
             ref={(el: any) => measureRef(el)}
             bottomMargin={bottomMargin}
             data-test-subj="waffleMap"
+            staticHeight={staticHeight}
           >
             <WaffleMapInnerContainer>
               {groupsWithLayout.map((group) => {
@@ -92,7 +97,7 @@ export const Map: React.FC<Props> = ({
   );
 };
 
-const WaffleMapOuterContainer = euiStyled.div<{ bottomMargin: number }>`
+const WaffleMapOuterContainer = euiStyled.div<{ bottomMargin: number; staticHeight: boolean }>`
   flex: 1 0 0%;
   display: flex;
   justify-content: flex-start;
@@ -100,6 +105,7 @@ const WaffleMapOuterContainer = euiStyled.div<{ bottomMargin: number }>`
   overflow-x: hidden;
   overflow-y: auto;
   margin-bottom: ${(props) => props.bottomMargin}px;
+  ${(props) => props.staticHeight && 'min-height: 300px;'}
 `;
 
 const WaffleMapInnerContainer = euiStyled.div`

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { fold } from 'fp-ts/lib/Either';
@@ -81,10 +82,12 @@ export function useTimeline(
   ]);
   const { timeLength, intervalInSeconds } = timeLengthResult;
 
+  const endTime = currentTime + intervalInSeconds * 1000;
+  const startTime = currentTime - timeLength * 1000;
   const timerange: InfraTimerangeInput = {
     interval: displayInterval ?? '',
-    to: currentTime + intervalInSeconds * 1000,
-    from: currentTime - timeLength * 1000,
+    to: endTime,
+    from: startTime,
     ignoreLookback: true,
     forceInterval: true,
   };
@@ -127,6 +130,8 @@ export function useTimeline(
     error: (error && error.message) || null,
     loading: !interval ? true : loading,
     timeseries,
+    startTime,
+    endTime,
     reload: makeRequest,
   };
 }

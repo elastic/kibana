@@ -1,11 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { migrations } from './migrations';
-import { SavedObjectMigrationContext } from 'src/core/server';
+import { migrations, LensDocShape } from './migrations';
+import { SavedObjectMigrationContext, SavedObjectMigrationFn } from 'src/core/server';
 
 describe('Lens migrations', () => {
   describe('7.7.0 missing dimensions in XY', () => {
@@ -13,6 +14,7 @@ describe('Lens migrations', () => {
 
     const example = {
       type: 'lens',
+      id: 'mock-saved-object-id',
       attributes: {
         expression:
           'kibana\n| kibana_context  query="{\\"language\\":\\"kuery\\",\\"query\\":\\"\\"}" \n| lens_merge_tables layerIds="c61a8afb-a185-4fae-a064-fb3846f6c451" \n  tables={esaggs index="logstash-*" metricsAtAllLevels=false partialRows=false includeFormatHints=true aggConfigs="[{\\"id\\":\\"2cd09808-3915-49f4-b3b0-82767eba23f7\\",\\"enabled\\":true,\\"type\\":\\"max\\",\\"schema\\":\\"metric\\",\\"params\\":{\\"field\\":\\"bytes\\"}}]" | lens_rename_columns idMap="{\\"col-0-2cd09808-3915-49f4-b3b0-82767eba23f7\\":\\"2cd09808-3915-49f4-b3b0-82767eba23f7\\"}"}\n| lens_metric_chart title="Maximum of bytes" accessor="2cd09808-3915-49f4-b3b0-82767eba23f7"',
@@ -164,6 +166,7 @@ describe('Lens migrations', () => {
 
     const example = {
       type: 'lens',
+      id: 'mock-saved-object-id',
       attributes: {
         expression: `kibana
   | kibana_context query="{\\"query\\":\\"\\",\\"language\\":\\"kuery\\"}" filters="[]"
@@ -265,6 +268,7 @@ describe('Lens migrations', () => {
     it('should handle pre-migrated expression', () => {
       const input = {
         type: 'lens',
+        id: 'mock-saved-object-id',
         attributes: {
           ...example.attributes,
           expression: `kibana
@@ -283,6 +287,7 @@ describe('Lens migrations', () => {
     const context = {} as SavedObjectMigrationContext;
 
     const example = {
+      id: 'mock-saved-object-id',
       attributes: {
         description: '',
         expression:
@@ -505,6 +510,164 @@ describe('Lens migrations', () => {
       // changes to the outcome of this are critical - this test is a safe guard to not introduce changes accidentally
       // if this test fails, make extra sure it's expected
       expect(result).toMatchSnapshot();
+    });
+  });
+
+  describe('7.11.0 remove suggested priority', () => {
+    const context = ({ log: { warning: () => {} } } as unknown) as SavedObjectMigrationContext;
+
+    const example = {
+      type: 'lens',
+      id: 'mock-saved-object-id',
+      attributes: {
+        state: {
+          datasourceStates: {
+            indexpattern: {
+              currentIndexPatternId: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',
+              layers: {
+                'bd09dc71-a7e2-42d0-83bd-85df8291f03c': {
+                  indexPatternId: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',
+                  columns: {
+                    '1d9cc16c-1460-41de-88f8-471932ecbc97': {
+                      label: 'products.created_on',
+                      dataType: 'date',
+                      operationType: 'date_histogram',
+                      sourceField: 'products.created_on',
+                      isBucketed: true,
+                      scale: 'interval',
+                      params: { interval: 'auto' },
+                      suggestedPriority: 0,
+                    },
+                    '66115819-8481-4917-a6dc-8ffb10dd02df': {
+                      label: 'Count of records',
+                      dataType: 'number',
+                      operationType: 'count',
+                      suggestedPriority: 1,
+                      isBucketed: false,
+                      scale: 'ratio',
+                      sourceField: 'Records',
+                    },
+                  },
+                  columnOrder: [
+                    '1d9cc16c-1460-41de-88f8-471932ecbc97',
+                    '66115819-8481-4917-a6dc-8ffb10dd02df',
+                  ],
+                },
+              },
+            },
+          },
+          datasourceMetaData: {
+            filterableIndexPatterns: [
+              { id: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f', title: 'kibana_sample_data_ecommerce' },
+            ],
+          },
+          visualization: {
+            legend: { isVisible: true, position: 'right' },
+            preferredSeriesType: 'bar_stacked',
+            layers: [
+              {
+                layerId: 'bd09dc71-a7e2-42d0-83bd-85df8291f03c',
+                accessors: ['66115819-8481-4917-a6dc-8ffb10dd02df'],
+                position: 'top',
+                seriesType: 'bar_stacked',
+                showGridlines: false,
+                xAccessor: '1d9cc16c-1460-41de-88f8-471932ecbc97',
+              },
+            ],
+          },
+          query: { query: '', language: 'kuery' },
+          filters: [],
+        },
+        title: 'Bar chart',
+        visualizationType: 'lnsXY',
+      },
+    };
+
+    it('should remove the suggested priority from all columns', () => {
+      const result = migrations['7.11.0'](example, context) as ReturnType<
+        SavedObjectMigrationFn<LensDocShape, LensDocShape>
+      >;
+      const resultLayers = result.attributes.state.datasourceStates.indexpattern.layers;
+      const layersWithSuggestedPriority = Object.values(resultLayers).reduce(
+        (count, layer) =>
+          count + Object.values(layer.columns).filter((col) => 'suggestedPriority' in col).length,
+        0
+      );
+
+      expect(layersWithSuggestedPriority).toEqual(0);
+    });
+  });
+
+  describe('7.12.0 restructure datatable state', () => {
+    const context = ({ log: { warning: () => {} } } as unknown) as SavedObjectMigrationContext;
+    const example = {
+      type: 'lens',
+      id: 'mock-saved-object-id',
+      attributes: {
+        state: {
+          datasourceStates: {
+            indexpattern: {},
+          },
+          visualization: {
+            layers: [
+              {
+                layerId: 'first',
+                columns: ['a', 'b', 'c'],
+              },
+            ],
+            sorting: {
+              columnId: 'a',
+              direction: 'asc',
+            },
+          },
+          query: { query: '', language: 'kuery' },
+          filters: [],
+        },
+        title: 'Table',
+        visualizationType: 'lnsDatatable',
+      },
+    };
+
+    it('should not touch non datatable visualization', () => {
+      const xyChart = {
+        ...example,
+        attributes: { ...example.attributes, visualizationType: 'xy' },
+      };
+      const result = migrations['7.12.0'](xyChart, context) as ReturnType<
+        SavedObjectMigrationFn<LensDocShape, LensDocShape>
+      >;
+      expect(result).toBe(xyChart);
+    });
+
+    it('should remove layer array and reshape state', () => {
+      const result = migrations['7.12.0'](example, context) as ReturnType<
+        SavedObjectMigrationFn<LensDocShape, LensDocShape>
+      >;
+      expect(result.attributes.state.visualization).toEqual({
+        layerId: 'first',
+        columns: [
+          {
+            columnId: 'a',
+          },
+          {
+            columnId: 'b',
+          },
+          {
+            columnId: 'c',
+          },
+        ],
+        sorting: {
+          columnId: 'a',
+          direction: 'asc',
+        },
+      });
+      // should leave other parts alone
+      expect(result.attributes.state.datasourceStates).toEqual(
+        example.attributes.state.datasourceStates
+      );
+      expect(result.attributes.state.query).toEqual(example.attributes.state.query);
+      expect(result.attributes.state.filters).toEqual(example.attributes.state.filters);
+      expect(result.attributes.title).toEqual(example.attributes.title);
     });
   });
 });

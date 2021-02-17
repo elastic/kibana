@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { chain, fromEither, map, tryCatch } from 'fp-ts/lib/TaskEither';
@@ -87,9 +88,9 @@ const importList = async ({
   list_id,
   type,
   signal,
-}: ApiParams & ImportListItemSchemaEncoded & ImportListItemQuerySchemaEncoded): Promise<
-  ListSchema
-> => {
+}: ApiParams &
+  ImportListItemSchemaEncoded &
+  ImportListItemQuerySchemaEncoded): Promise<ListSchema> => {
   const formData = new FormData();
   formData.append('file', file as Blob);
 
@@ -123,29 +124,33 @@ const importListWithValidation = async ({
     ),
     chain((payload) => tryCatch(() => importList({ http, signal, ...payload }), toError)),
     chain((response) => fromEither(validateEither(listSchema, response))),
-    flow(toPromise)
+    toPromise
   );
 
 export { importListWithValidation as importList };
 
 const deleteList = async ({
+  deleteReferences = false,
   http,
   id,
+  ignoreReferences = false,
   signal,
 }: ApiParams & DeleteListSchemaEncoded): Promise<ListSchema> =>
   http.fetch<ListSchema>(LIST_URL, {
     method: 'DELETE',
-    query: { id },
+    query: { deleteReferences, id, ignoreReferences },
     signal,
   });
 
 const deleteListWithValidation = async ({
+  deleteReferences,
   http,
   id,
+  ignoreReferences,
   signal,
 }: DeleteListParams): Promise<ListSchema> =>
   pipe(
-    { id },
+    { deleteReferences, id, ignoreReferences },
     (payload) => fromEither(validateEither(deleteListSchema, payload)),
     chain((payload) => tryCatch(() => deleteList({ http, signal, ...payload }), toError)),
     chain((response) => fromEither(validateEither(listSchema, response))),

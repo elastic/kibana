@@ -1,23 +1,28 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { CoreStart } from 'kibana/public';
-import { JobId } from '../../common/types/anomaly_detection_jobs';
-import { SwimlaneType } from '../application/explorer/explorer_constants';
-import { Filter } from '../../../../../src/plugins/data/common/es_query/filters';
-import { Query, RefreshInterval, TimeRange } from '../../../../../src/plugins/data/common/query';
-import {
+import type { CoreStart } from 'kibana/public';
+import type { JobId } from '../../common/types/anomaly_detection_jobs';
+import type { SwimlaneType } from '../application/explorer/explorer_constants';
+import type { Filter } from '../../../../../src/plugins/data/common/es_query/filters';
+import type {
+  Query,
+  RefreshInterval,
+  TimeRange,
+} from '../../../../../src/plugins/data/common/query';
+import type {
   EmbeddableInput,
   EmbeddableOutput,
   IEmbeddable,
 } from '../../../../../src/plugins/embeddable/public';
-import { AnomalyDetectorService } from '../application/services/anomaly_detector_service';
-import { AnomalyTimelineService } from '../application/services/anomaly_timeline_service';
-import { MlDependencies } from '../application/app';
-import { AppStateSelectedCells } from '../application/explorer/explorer_utils';
+import type { AnomalyDetectorService } from '../application/services/anomaly_detector_service';
+import type { AnomalyTimelineService } from '../application/services/anomaly_timeline_service';
+import type { MlDependencies } from '../application/app';
+import type { AppStateSelectedCells } from '../application/explorer/explorer_utils';
 
 export interface AnomalySwimlaneEmbeddableCustomInput {
   jobIds: JobId[];

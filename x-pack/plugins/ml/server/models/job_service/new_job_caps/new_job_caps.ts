@@ -1,14 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { IScopedClusterClient, SavedObjectsClientContract } from 'kibana/server';
+import { _DOC_COUNT } from '../../../../common/constants/field_types';
 import { Aggregation, Field, NewJobCaps } from '../../../../common/types/fields';
 import { fieldServiceProvider } from './field_service';
 
-interface NewJobCapsResponse {
+export interface NewJobCapsResponse {
   [indexPattern: string]: NewJobCaps;
 }
 
@@ -22,10 +24,12 @@ export function newJobCapsProvider(client: IScopedClusterClient) {
     const { aggs, fields } = await fieldService.getData();
     convertForStringify(aggs, fields);
 
+    // Remove the _doc_count field as we don't want to display this in the fields lists in the UI
+    const fieldsWithoutDocCount = fields.filter(({ id }) => id !== _DOC_COUNT);
     return {
       [indexPattern]: {
         aggs,
-        fields,
+        fields: fieldsWithoutDocCount,
       },
     };
   }

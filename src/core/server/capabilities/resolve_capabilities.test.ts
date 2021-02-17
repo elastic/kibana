@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { Capabilities } from './types';
@@ -36,7 +25,7 @@ describe('resolveCapabilities', () => {
   });
 
   it('returns the initial capabilities if no switcher are used', async () => {
-    const result = await resolveCapabilities(defaultCaps, [], request, []);
+    const result = await resolveCapabilities(defaultCaps, [], request, [], true);
     expect(result).toEqual(defaultCaps);
   });
 
@@ -55,7 +44,7 @@ describe('resolveCapabilities', () => {
         A: false,
       },
     });
-    const result = await resolveCapabilities(caps, [switcher], request, []);
+    const result = await resolveCapabilities(caps, [switcher], request, [], true);
     expect(result).toMatchInlineSnapshot(`
       Object {
         "catalogue": Object {
@@ -83,7 +72,7 @@ describe('resolveCapabilities', () => {
         A: false,
       },
     });
-    await resolveCapabilities(caps, [switcher], request, []);
+    await resolveCapabilities(caps, [switcher], request, [], true);
     expect(caps.catalogue).toEqual({
       A: true,
       B: true,
@@ -105,7 +94,7 @@ describe('resolveCapabilities', () => {
         C: false,
       },
     });
-    const result = await resolveCapabilities(caps, [switcher], request, []);
+    const result = await resolveCapabilities(caps, [switcher], request, [], true);
     expect(result.catalogue).toEqual({
       A: true,
       B: true,
@@ -127,7 +116,7 @@ describe('resolveCapabilities', () => {
         .filter(([key]) => key !== 'B')
         .reduce((acc, [key, value]) => ({ ...acc, [key]: value }), {}),
     });
-    const result = await resolveCapabilities(caps, [switcher], request, []);
+    const result = await resolveCapabilities(caps, [switcher], request, [], true);
     expect(result.catalogue).toEqual({
       A: true,
       B: true,
@@ -153,7 +142,7 @@ describe('resolveCapabilities', () => {
         record: false,
       },
     });
-    const result = await resolveCapabilities(caps, [switcher], request, []);
+    const result = await resolveCapabilities(caps, [switcher], request, [], true);
     expect(result.section).toEqual({
       boolean: true,
       record: {

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -21,7 +22,7 @@ import { FieldHook, getFieldValidityAndErrorMessage } from '../../../../shared_i
 import * as I18n from './translations';
 
 interface ScheduleItemProps {
-  field: FieldHook;
+  field: FieldHook<string>;
   dataTestSubj: string;
   idAria: string;
   isDisabled: boolean;
@@ -62,6 +63,15 @@ const MyEuiSelect = styled(EuiSelect)`
   width: auto;
 `;
 
+const getNumberFromUserInput = (input: string, defaultValue = 0): number => {
+  const number = parseInt(input, 10);
+  if (Number.isNaN(number)) {
+    return defaultValue;
+  } else {
+    return Math.min(number, Number.MAX_SAFE_INTEGER);
+  }
+};
+
 export const ScheduleItem = ({
   dataTestSubj,
   field,
@@ -72,30 +82,29 @@ export const ScheduleItem = ({
   const [timeType, setTimeType] = useState('s');
   const [timeVal, setTimeVal] = useState<number>(0);
   const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
+  const { value, setValue } = field;
 
   const onChangeTimeType = useCallback(
     (e) => {
       setTimeType(e.target.value);
-      field.setValue(`${timeVal}${e.target.value}`);
+      setValue(`${timeVal}${e.target.value}`);
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [timeVal]
+    [setValue, timeVal]
   );
 
   const onChangeTimeVal = useCallback(
     (e) => {
-      const sanitizedValue: number = parseInt(e.target.value, 10);
+      const sanitizedValue = getNumberFromUserInput(e.target.value, minimumValue);
       setTimeVal(sanitizedValue);
-      field.setValue(`${sanitizedValue}${timeType}`);
+      setValue(`${sanitizedValue}${timeType}`);
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [timeType]
+    [minimumValue, setValue, timeType]
   );
 
   useEffect(() => {
-    if (field.value !== `${timeVal}${timeType}`) {
-      const filterTimeVal = (field.value as string).match(/\d+/g);
-      const filterTimeType = (field.value as string).match(/[a-zA-Z]+/g);
+    if (value !== `${timeVal}${timeType}`) {
+      const filterTimeVal = value.match(/\d+/g);
+      const filterTimeType = value.match(/[a-zA-Z]+/g);
       if (
         !isEmpty(filterTimeVal) &&
         filterTimeVal != null &&
@@ -113,8 +122,7 @@ export const ScheduleItem = ({
         setTimeType(filterTimeType[0]);
       }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [field.value]);
+  }, [timeType, timeVal, value]);
 
   // EUI missing some props
   const rest = { disabled: isDisabled };
@@ -145,21 +153,22 @@ export const ScheduleItem = ({
       <EuiFormControlLayout
         append={
           <MyEuiSelect
-            data-test-subj="schedule-units-input"
             fullWidth={false}
             options={timeTypeOptions}
             onChange={onChangeTimeType}
             value={timeType}
+            data-test-subj="timeType"
             {...rest}
           />
         }
       >
         <EuiFieldNumber
-          data-test-subj="schedule-amount-input"
           fullWidth
           min={minimumValue}
+          max={Number.MAX_SAFE_INTEGER}
           onChange={onChangeTimeVal}
           value={timeVal}
+          data-test-subj="interval"
           {...rest}
         />
       </EuiFormControlLayout>

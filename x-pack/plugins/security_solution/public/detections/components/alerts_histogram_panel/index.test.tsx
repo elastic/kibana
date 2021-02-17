@@ -1,13 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
+import { waitFor } from '@testing-library/react';
+import { shallow, mount } from 'enzyme';
 
 import '../../../common/mock/match_media';
+import { esQuery } from '../../../../../../../src/plugins/data/public';
+import { TestProviders } from '../../../common/mock';
 import { AlertsHistogramPanel } from './index';
 
 jest.mock('react-router-dom', () => {
@@ -31,12 +35,16 @@ jest.mock('../../../common/lib/kibana', () => {
           navigateToApp: mockNavigateToApp,
           getUrlForApp: jest.fn(),
         },
+        uiSettings: {
+          get: jest.fn(),
+        },
       },
     }),
     useUiSetting$: jest.fn().mockReturnValue([]),
     useGetUserSavedObjectPermissions: jest.fn(),
   };
 });
+
 jest.mock('../../../common/components/navigation/use_get_url_search');
 
 describe('AlertsHistogramPanel', () => {
@@ -75,6 +83,25 @@ describe('AlertsHistogramPanel', () => {
         });
 
       expect(mockNavigateToApp).toBeCalledWith('securitySolution:detections', { path: '' });
+    });
+  });
+
+  describe('Query', () => {
+    it('it render with a illegal KQL', async () => {
+      const spyOnBuildEsQuery = jest.spyOn(esQuery, 'buildEsQuery');
+      spyOnBuildEsQuery.mockImplementation(() => {
+        throw new Error('Something went wrong');
+      });
+      const props = { ...defaultProps, query: { query: 'host.name: "', language: 'kql' } };
+      const wrapper = mount(
+        <TestProviders>
+          <AlertsHistogramPanel {...props} />
+        </TestProviders>
+      );
+
+      await waitFor(() => {
+        expect(wrapper.find('[id="detections-histogram"]')).toBeTruthy();
+      });
     });
   });
 });

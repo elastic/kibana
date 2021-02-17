@@ -1,25 +1,13 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { loggingSystemMock } from '../../../../core/server/mocks';
 import { Collector } from './collector';
-import { UsageCollector } from './usage_collector';
 
 const logger = loggingSystemMock.createLogger();
 
@@ -88,48 +76,6 @@ describe('collector', () => {
     });
   });
 
-  describe('formatForBulkUpload', () => {
-    it('should use the default formatter', () => {
-      const fetchOutput = { testPass: 100 };
-      const collector = new Collector(logger, {
-        type: 'my_test_collector',
-        isReady: () => false,
-        fetch: () => fetchOutput,
-      });
-      expect(collector.formatForBulkUpload(fetchOutput)).toStrictEqual({
-        type: 'my_test_collector',
-        payload: fetchOutput,
-      });
-    });
-
-    it('should use a custom formatter', () => {
-      const fetchOutput = { testPass: 100 };
-      const collector = new Collector(logger, {
-        type: 'my_test_collector',
-        isReady: () => false,
-        fetch: () => fetchOutput,
-        formatForBulkUpload: (a) => ({ type: 'other_value', payload: { nested: a } }),
-      });
-      expect(collector.formatForBulkUpload(fetchOutput)).toStrictEqual({
-        type: 'other_value',
-        payload: { nested: fetchOutput },
-      });
-    });
-
-    it("should use UsageCollector's default formatter", () => {
-      const fetchOutput = { testPass: 100 };
-      const collector = new UsageCollector(logger, {
-        type: 'my_test_collector',
-        isReady: () => false,
-        fetch: () => fetchOutput,
-      });
-      expect(collector.formatForBulkUpload(fetchOutput)).toStrictEqual({
-        type: 'kibana_stats',
-        payload: { usage: { my_test_collector: fetchOutput } },
-      });
-    });
-  });
-
   describe('schema TS validations', () => {
     // These tests below are used to ensure types inference is working as expected.
     // We don't intend to test any logic as such, just the relation between the types in `fetch` and `schema`.
@@ -153,7 +99,10 @@ describe('collector', () => {
         isReady: () => false,
         fetch: () => ({ testPass: [{ name: 'a', value: 100 }] }),
         schema: {
-          testPass: { name: { type: 'keyword' }, value: { type: 'long' } },
+          testPass: {
+            type: 'array',
+            items: { name: { type: 'keyword' }, value: { type: 'long' } },
+          },
         },
       });
       expect(collector).toBeDefined();
@@ -166,7 +115,10 @@ describe('collector', () => {
         fetch: () => ({ testPass: [{ name: 'a', value: 100 }], otherProp: 1 }),
         // @ts-expect-error
         schema: {
-          testPass: { name: { type: 'keyword' }, value: { type: 'long' } },
+          testPass: {
+            type: 'array',
+            items: { name: { type: 'keyword' }, value: { type: 'long' } },
+          },
         },
       });
       expect(collector).toBeDefined();
@@ -185,7 +137,10 @@ describe('collector', () => {
         },
         // @ts-expect-error
         schema: {
-          testPass: { name: { type: 'keyword' }, value: { type: 'long' } },
+          testPass: {
+            type: 'array',
+            items: { name: { type: 'keyword' }, value: { type: 'long' } },
+          },
         },
       });
       expect(collector).toBeDefined();
@@ -203,7 +158,10 @@ describe('collector', () => {
           return { otherProp: 1 };
         },
         schema: {
-          testPass: { name: { type: 'keyword' }, value: { type: 'long' } },
+          testPass: {
+            type: 'array',
+            items: { name: { type: 'keyword' }, value: { type: 'long' } },
+          },
           otherProp: { type: 'long' },
         },
       });

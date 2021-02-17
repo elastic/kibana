@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { getRouter, setHttp } from '../../crud_app/services';
@@ -10,7 +11,7 @@ import { JOBS } from './helpers/constants';
 import { coreMock } from '../../../../../../src/core/public/mocks';
 
 jest.mock('../../crud_app/services', () => {
-  const services = require.requireActual('../../crud_app/services');
+  const services = jest.requireActual('../../crud_app/services');
   return {
     ...services,
     getRouterLinkProps: (link) => ({ href: link }),
@@ -18,7 +19,7 @@ jest.mock('../../crud_app/services', () => {
 });
 
 jest.mock('../../kibana_services', () => {
-  const services = require.requireActual('../../kibana_services');
+  const services = jest.requireActual('../../kibana_services');
   return {
     ...services,
     getUiStatsReporter: jest.fn(() => () => {}),

@@ -1,15 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiAccordion, EuiFlexItem, EuiSpacer, EuiFormRow } from '@elastic/eui';
 import React, { FC, memo, useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
 
-import { isMlRule } from '../../../../../common/machine_learning/helpers';
-import { isThresholdRule } from '../../../../../common/detection_engine/utils';
 import {
   RuleStepProps,
   RuleStep,
@@ -18,7 +17,7 @@ import {
 } from '../../../pages/detection_engine/rules/types';
 import { AddItem } from '../add_item_form';
 import { StepRuleDescription } from '../description_step';
-import { AddMitreThreat } from '../mitre';
+import { AddMitreAttackThreat } from '../mitre';
 import {
   Field,
   Form,
@@ -41,6 +40,7 @@ import { SeverityField } from '../severity_mapping';
 import { RiskScoreField } from '../risk_score_mapping';
 import { AutocompleteField } from '../autocomplete_field';
 import { useFetchIndex } from '../../../../common/containers/source';
+import { isThreatMatchRule } from '../../../../../common/detection_engine/utils';
 
 const CommonUseField = getUseField({ component: Field });
 
@@ -76,21 +76,16 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
   const [severityValue, setSeverityValue] = useState<string>(initialState.severity.value);
   const [indexPatternLoading, { indexPatterns }] = useFetchIndex(defineRuleData?.index ?? []);
 
-  const canUseExceptions =
-    defineRuleData?.ruleType &&
-    !isMlRule(defineRuleData.ruleType) &&
-    !isThresholdRule(defineRuleData.ruleType);
-
   const { form } = useForm<AboutStepRule>({
     defaultValue: initialState,
     options: { stripEmptyFields: false },
     schema,
   });
   const { getFields, getFormData, submit } = form;
-  const [{ severity: formSeverity }] = (useFormData({
+  const [{ severity: formSeverity }] = useFormData<AboutStepRule>({
     form,
     watch: ['severity'],
-  }) as unknown) as [Partial<AboutStepRule>];
+  });
 
   useEffect(() => {
     const formSeverityValue = formSeverity?.value;
@@ -122,9 +117,13 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
   }, [onSubmit]);
 
   useEffect(() => {
-    if (setForm) {
+    let didCancel = false;
+    if (setForm && !didCancel) {
       setForm(RuleStep.aboutRule, getData);
     }
+    return () => {
+      didCancel = true;
+    };
   }, [getData, setForm]);
 
   return isReadOnlyView ? (
@@ -230,7 +229,7 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
             />
             <UseField
               path="threat"
-              component={AddMitreThreat}
+              component={AddMitreAttackThreat}
               componentProps={{
                 idAria: 'detectionEngineStepAboutRuleMitreThreat',
                 isDisabled: isLoading,
@@ -269,7 +268,7 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
                 'data-test-subj': 'detectionEngineStepAboutRuleLicense',
                 euiFieldProps: {
                   fullWidth: true,
-                  isDisabled: isLoading,
+                  disabled: isLoading,
                   placeholder: '',
                 },
               }}
@@ -282,7 +281,7 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
                   idAria: 'detectionEngineStepAboutRuleAssociatedToEndpointList',
                   'data-test-subj': 'detectionEngineStepAboutRuleAssociatedToEndpointList',
                   euiFieldProps: {
-                    disabled: isLoading || !canUseExceptions,
+                    disabled: isLoading,
                   },
                 }}
               />
@@ -299,6 +298,23 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
                 }}
               />
             </EuiFormRow>
+            <EuiSpacer size="l" />
+            {isThreatMatchRule(defineRuleData?.ruleType) && (
+              <>
+                <CommonUseField
+                  path="threatIndicatorPath"
+                  componentProps={{
+                    idAria: 'detectionEngineStepAboutThreatIndicatorPath',
+                    'data-test-subj': 'detectionEngineStepAboutThreatIndicatorPath',
+                    euiFieldProps: {
+                      fullWidth: true,
+                      disabled: isLoading,
+                      placeholder: 'threat.indicator',
+                    },
+                  }}
+                />
+              </>
+            )}
             <EuiSpacer size="l" />
             <UseField
               path="ruleNameOverride"

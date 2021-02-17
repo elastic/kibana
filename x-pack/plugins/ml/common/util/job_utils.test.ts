@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -188,8 +189,8 @@ describe('ML - job utils', () => {
       expect(isTimeSeriesViewDetector(job, 3)).toBe(false);
     });
 
-    test('returns false for a detector using a script field as a metric field_name', () => {
-      expect(isTimeSeriesViewDetector(job, 4)).toBe(false);
+    test('returns true for a detector using a script field as a metric field_name', () => {
+      expect(isTimeSeriesViewDetector(job, 4)).toBe(true);
     });
   });
 
@@ -281,6 +282,7 @@ describe('ML - job utils', () => {
       expect(isSourceDataChartableForDetector(job, 22)).toBe(true);
       expect(isSourceDataChartableForDetector(job, 23)).toBe(true);
       expect(isSourceDataChartableForDetector(job, 24)).toBe(true);
+      expect(isSourceDataChartableForDetector(job, 37)).toBe(true);
     });
 
     test('returns false for expected detectors', () => {
@@ -296,7 +298,6 @@ describe('ML - job utils', () => {
       expect(isSourceDataChartableForDetector(job, 34)).toBe(false);
       expect(isSourceDataChartableForDetector(job, 35)).toBe(false);
       expect(isSourceDataChartableForDetector(job, 36)).toBe(false);
-      expect(isSourceDataChartableForDetector(job, 37)).toBe(false);
     });
   });
 

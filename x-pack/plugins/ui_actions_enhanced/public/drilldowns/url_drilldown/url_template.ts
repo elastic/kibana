@@ -1,13 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { create as createHandlebars, HelperDelegate, HelperOptions } from 'handlebars';
 import { encode, RisonValue } from 'rison-node';
 import dateMath from '@elastic/datemath';
 import moment, { Moment } from 'moment';
+import numeral from '@elastic/numeral';
+import { url } from '../../../../../../src/plugins/kibana_utils/public';
 
 const handlebars = createHandlebars();
 
@@ -69,7 +72,68 @@ handlebars.registerHelper('date', (...args) => {
   return format ? momentDate.format(format) : momentDate.toISOString();
 });
 
-export function compile(url: string, context: object): string {
-  const template = handlebars.compile(url, { strict: true, noEscape: true });
-  return encodeURI(template(context));
+handlebars.registerHelper('formatNumber', (rawValue: unknown, pattern: string) => {
+  if (!pattern || typeof pattern !== 'string')
+    throw new Error(`[formatNumber]: pattern string is required`);
+  const value = Number(rawValue);
+  if (rawValue == null || Number.isNaN(value)) return rawValue;
+  return numeral(value).format(pattern);
+});
+
+handlebars.registerHelper('lowercase', (rawValue: unknown) => String(rawValue).toLowerCase());
+handlebars.registerHelper('uppercase', (rawValue: unknown) => String(rawValue).toUpperCase());
+handlebars.registerHelper('trim', (rawValue: unknown) => String(rawValue).trim());
+handlebars.registerHelper('trimLeft', (rawValue: unknown) => String(rawValue).trimLeft());
+handlebars.registerHelper('trimRight', (rawValue: unknown) => String(rawValue).trimRight());
+handlebars.registerHelper('left', (rawValue: unknown, numberOfChars: number) => {
+  if (typeof numberOfChars !== 'number')
+    throw new Error('[left]: expected "number of characters to extract" to be a number');
+  return String(rawValue).slice(0, numberOfChars);
+});
+handlebars.registerHelper('right', (rawValue: unknown, numberOfChars: number) => {
+  if (typeof numberOfChars !== 'number')
+    throw new Error('[left]: expected "number of characters to extract" to be a number');
+  return String(rawValue).slice(-numberOfChars);
+});
+handlebars.registerHelper('mid', (rawValue: unknown, start: number, length: number) => {
+  if (typeof start !== 'number') throw new Error('[left]: expected "start" to be a number');
+  if (typeof length !== 'number') throw new Error('[left]: expected "length" to be a number');
+  return String(rawValue).substr(start, length);
+});
+handlebars.registerHelper('concat', (...args) => {
+  const values = args.slice(0, -1) as unknown[];
+  return values.join('');
+});
+handlebars.registerHelper('split', (...args) => {
+  const [str, splitter] = args.slice(0, -1) as [string, string];
+  if (typeof splitter !== 'string') throw new Error('[split] "splitter" expected to be a string');
+  return String(str).split(splitter);
+});
+handlebars.registerHelper('replace', (...args) => {
+  const [str, searchString, valueString] = args.slice(0, -1) as [string, string, string];
+  if (typeof searchString !== 'string' || typeof valueString !== 'string')
+    throw new Error(
+      '[replace]: "searchString" and "valueString" parameters expected to be strings, but not a string or missing'
+    );
+  return String(str).split(searchString).join(valueString);
+});
+
+handlebars.registerHelper('encodeURIComponent', (component: unknown) => {
+  const str = String(component);
+  return encodeURIComponent(str);
+});
+handlebars.registerHelper('encodeURIQuery', (component: unknown) => {
+  const str = String(component);
+  return url.encodeUriQuery(str);
+});
+
+export function compile(urlTemplate: string, context: object, doEncode: boolean = true): string {
+  const handlebarsTemplate = handlebars.compile(urlTemplate, { strict: true, noEscape: true });
+  let processedUrl: string = handlebarsTemplate(context);
+
+  if (doEncode) {
+    processedUrl = encodeURI(processedUrl);
+  }
+
+  return processedUrl;
 }

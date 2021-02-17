@@ -1,10 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 import { getPreviewTransformRequestBody } from '../../../../../common';
 
@@ -16,6 +17,9 @@ import { useAdvancedPivotEditor } from './use_advanced_pivot_editor';
 import { useAdvancedSourceEditor } from './use_advanced_source_editor';
 import { usePivotConfig } from './use_pivot_config';
 import { useSearchBar } from './use_search_bar';
+import { useLatestFunctionConfig } from './use_latest_function_config';
+import { TRANSFORM_FUNCTION } from '../../../../../../../common/constants';
+import { useAdvancedRuntimeMappingsEditor } from './use_advanced_runtime_mappings_editor';
 
 export type StepDefineFormHook = ReturnType<typeof useStepDefineForm>;
 
@@ -23,14 +27,22 @@ export const useStepDefineForm = ({ overrides, onChange, searchItems }: StepDefi
   const defaults = { ...getDefaultStepDefineState(searchItems), ...overrides };
   const { indexPattern } = searchItems;
 
+  const [transformFunction, setTransformFunction] = useState(defaults.transformFunction);
+
   const searchBar = useSearchBar(defaults, indexPattern);
   const pivotConfig = usePivotConfig(defaults, indexPattern);
+
+  const latestFunctionConfig = useLatestFunctionConfig(
+    defaults.latestConfig,
+    indexPattern,
+    defaults?.runtimeMappings
+  );
 
   const previewRequest = getPreviewTransformRequestBody(
     indexPattern.title,
     searchBar.state.pivotQuery,
-    pivotConfig.state.pivotGroupByArr,
-    pivotConfig.state.pivotAggsArr
+    pivotConfig.state.requestPayload,
+    defaults?.runtimeMappings
   );
 
   // pivot config hook
@@ -39,13 +51,17 @@ export const useStepDefineForm = ({ overrides, onChange, searchItems }: StepDefi
   // source config hook
   const advancedSourceEditor = useAdvancedSourceEditor(defaults, previewRequest);
 
+  // runtime mappings config hook
+  const runtimeMappingsEditor = useAdvancedRuntimeMappingsEditor(defaults);
+
   useEffect(() => {
+    const runtimeMappings = runtimeMappingsEditor.state.runtimeMappings;
     if (!advancedSourceEditor.state.isAdvancedSourceEditorEnabled) {
       const previewRequestUpdate = getPreviewTransformRequestBody(
         indexPattern.title,
         searchBar.state.pivotQuery,
-        pivotConfig.state.pivotGroupByArr,
-        pivotConfig.state.pivotAggsArr
+        pivotConfig.state.requestPayload,
+        runtimeMappings
       );
 
       const stringifiedSourceConfigUpdate = JSON.stringify(
@@ -56,8 +72,9 @@ export const useStepDefineForm = ({ overrides, onChange, searchItems }: StepDefi
 
       advancedSourceEditor.actions.setAdvancedEditorSourceConfig(stringifiedSourceConfigUpdate);
     }
-
     onChange({
+      transformFunction,
+      latestConfig: latestFunctionConfig.config,
       aggList: pivotConfig.state.aggList,
       groupByList: pivotConfig.state.groupByList,
       isAdvancedPivotEditorEnabled: advancedPivotEditor.state.isAdvancedPivotEditorEnabled,
@@ -66,7 +83,21 @@ export const useStepDefineForm = ({ overrides, onChange, searchItems }: StepDefi
       searchString: searchBar.state.searchString,
       searchQuery: searchBar.state.searchQuery,
       sourceConfigUpdated: advancedSourceEditor.state.sourceConfigUpdated,
-      valid: pivotConfig.state.valid,
+      valid:
+        transformFunction === TRANSFORM_FUNCTION.PIVOT
+          ? pivotConfig.state.validationStatus.isValid
+          : latestFunctionConfig.validationStatus.isValid,
+      validationStatus:
+        transformFunction === TRANSFORM_FUNCTION.PIVOT
+          ? pivotConfig.state.validationStatus
+          : latestFunctionConfig.validationStatus,
+      previewRequest:
+        transformFunction === TRANSFORM_FUNCTION.PIVOT
+          ? pivotConfig.state.requestPayload
+          : latestFunctionConfig.requestPayload,
+      runtimeMappings,
+      runtimeMappingsUpdated: runtimeMappingsEditor.state.runtimeMappingsUpdated,
+      isRuntimeMappingsEditorEnabled: runtimeMappingsEditor.state.isRuntimeMappingsEditorEnabled,
     });
     // custom comparison
     /* eslint-disable react-hooks/exhaustive-deps */
@@ -75,13 +106,23 @@ export const useStepDefineForm = ({ overrides, onChange, searchItems }: StepDefi
     JSON.stringify(advancedSourceEditor.state),
     pivotConfig.state,
     JSON.stringify(searchBar.state),
-    /* eslint-enable react-hooks/exhaustive-deps */
+    JSON.stringify([
+      runtimeMappingsEditor.state.runtimeMappings,
+      runtimeMappingsEditor.state.runtimeMappingsUpdated,
+      runtimeMappingsEditor.state.isRuntimeMappingsEditorEnabled,
+    ]),
+    latestFunctionConfig.config,
+    transformFunction,
   ]);
 
   return {
+    transformFunction,
+    setTransformFunction,
     advancedPivotEditor,
     advancedSourceEditor,
+    runtimeMappingsEditor,
     pivotConfig,
+    latestFunctionConfig,
     searchBar,
   };
 };

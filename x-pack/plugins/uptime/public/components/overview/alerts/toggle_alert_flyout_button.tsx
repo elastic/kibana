@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -93,7 +94,6 @@ export const ToggleAlertFlyoutButtonComponent: React.FC<Props> = ({
     panels = [
       {
         id: ALERT_CONTEXT_MAIN_PANEL_ID,
-        title: 'main panel',
         items: [...selectionItems, managementContextItem],
       },
     ];
@@ -101,7 +101,6 @@ export const ToggleAlertFlyoutButtonComponent: React.FC<Props> = ({
     panels = [
       {
         id: ALERT_CONTEXT_MAIN_PANEL_ID,
-        title: 'main panel',
         items: [
           {
             'aria-label': ToggleFlyoutTranslations.openAlertContextPanelAriaLabel,
@@ -140,6 +139,7 @@ export const ToggleAlertFlyoutButtonComponent: React.FC<Props> = ({
       closePopover={() => setIsOpen(false)}
       isOpen={isOpen}
       ownFocus
+      panelPaddingSize="none"
     >
       <EuiContextMenu initialPanelId={0} panels={panels} />
     </EuiPopover>

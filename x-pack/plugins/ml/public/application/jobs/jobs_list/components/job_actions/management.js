@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { checkPermission } from '../../../../capabilities/check_capabilities';
@@ -9,13 +10,15 @@ import { mlNodesAvailable } from '../../../../ml_nodes_check/check_ml_nodes';
 import { getIndexPatternNames } from '../../../../util/index_utils';
 
 import { stopDatafeeds, cloneJob, closeJobs, isStartable, isStoppable, isClosable } from '../utils';
+import { getToastNotifications } from '../../../../util/dependency_cache';
 import { i18n } from '@kbn/i18n';
 
 export function actionsMenuContent(
   showEditJobFlyout,
   showDeleteJobModal,
   showStartDatafeedModal,
-  refreshJobs
+  refreshJobs,
+  showCreateAlertFlyout
 ) {
   const canCreateJob = checkPermission('canCreateJob') && mlNodesAvailable();
   const canUpdateJob = checkPermission('canUpdateJob');
@@ -23,6 +26,7 @@ export function actionsMenuContent(
   const canUpdateDatafeed = checkPermission('canUpdateDatafeed');
   const canStartStopDatafeed = checkPermission('canStartStopDatafeed') && mlNodesAvailable();
   const canCloseJob = checkPermission('canCloseJob') && mlNodesAvailable();
+  const canCreateMlAlerts = checkPermission('canCreateMlAlerts');
 
   return [
     {
@@ -58,6 +62,22 @@ export function actionsMenuContent(
       'data-test-subj': 'mlActionButtonStopDatafeed',
     },
     {
+      name: i18n.translate('xpack.ml.jobsList.managementActions.createAlertLabel', {
+        defaultMessage: 'Create alert',
+      }),
+      description: i18n.translate('xpack.ml.jobsList.managementActions.createAlertLabel', {
+        defaultMessage: 'Create alert',
+      }),
+      icon: 'bell',
+      enabled: (item) => item.deleting !== true,
+      available: () => canCreateMlAlerts,
+      onClick: (item) => {
+        showCreateAlertFlyout([item.id]);
+        closeMenu(true);
+      },
+      'data-test-subj': 'mlActionButtonCreateAlert',
+    },
+    {
       name: i18n.translate('xpack.ml.jobsList.managementActions.closeJobLabel', {
         defaultMessage: 'Close job',
       }),
@@ -86,15 +106,24 @@ export function actionsMenuContent(
         // the indexPattern the job was created for. An indexPattern could either have been deleted
         // since the the job was created or the current user doesn't have the required permissions to
         // access the indexPattern.
-        const indexPatternNames = getIndexPatternNames();
-        const jobIndicesAvailable = item.datafeedIndices.every((dfiName) => {
-          return indexPatternNames.some((ipName) => ipName === dfiName);
-        });
-
-        return item.deleting !== true && canCreateJob && jobIndicesAvailable;
+        return item.deleting !== true && canCreateJob;
       },
       onClick: (item) => {
-        cloneJob(item.id);
+        const indexPatternNames = getIndexPatternNames();
+        const indexPatternTitle = item.datafeedIndices.join(',');
+        const jobIndicesAvailable = indexPatternNames.includes(indexPatternTitle);
+
+        if (!jobIndicesAvailable) {
+          getToastNotifications().addDanger(
+            i18n.translate('xpack.ml.jobsList.managementActions.noSourceIndexPatternForClone', {
+              defaultMessage:
+                'Unable to clone the anomaly detection job {jobId}. No index pattern exists for index {indexPatternTitle}.',
+              values: { jobId: item.id, indexPatternTitle },
+            })
+          );
+        } else {
+          cloneJob(item.id);
+        }
         closeMenu(true);
       },
       'data-test-subj': 'mlActionButtonCloneJob',

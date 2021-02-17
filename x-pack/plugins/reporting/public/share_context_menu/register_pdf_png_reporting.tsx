@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -13,7 +14,7 @@ import { LicensingPluginSetup } from '../../../licensing/public';
 import { LayoutParams } from '../../common/types';
 import { JobParamsPNG } from '../../server/export_types/png/types';
 import { JobParamsPDF } from '../../server/export_types/printable_pdf/types';
-import { ScreenCapturePanelContent } from '../components/screen_capture_panel_content';
+import { ScreenCapturePanelContent } from '../components/screen_capture_panel_content_lazy';
 import { checkLicense } from '../lib/license_check';
 import { ReportingAPIClient } from '../lib/reporting_api_client';
 
@@ -135,7 +136,6 @@ export const reportingPDFPNGProvider = ({
               apiClient={apiClient}
               toasts={toasts}
               reportType="png"
-              objectType={objectType}
               objectId={objectId}
               getJobParams={getPngJobParams}
               isDirty={isDirty}
@@ -162,7 +162,6 @@ export const reportingPDFPNGProvider = ({
               apiClient={apiClient}
               toasts={toasts}
               reportType="printablePdf"
-              objectType={objectType}
               objectId={objectId}
               getJobParams={getPdfJobParams}
               isDirty={isDirty}

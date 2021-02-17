@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { transformIdParamSchema, TransformIdParamSchema } from '../../../common/api_schemas/common';
@@ -77,10 +78,9 @@ export function registerTransformsAuditMessagesRoutes({ router, license }: Route
       }
 
       try {
-        const resp = await ctx.transform!.dataClient.callAsCurrentUser('search', {
+        const { body: resp } = await ctx.core.elasticsearch.client.asCurrentUser.search({
           index: ML_DF_NOTIFICATION_INDEX_PATTERN,
           ignore_unavailable: true,
-          rest_total_hits_as_int: true,
           size: SIZE,
           body: {
             sort: [{ timestamp: { order: 'desc' } }, { transform_id: { order: 'asc' } }],
@@ -89,7 +89,7 @@ export function registerTransformsAuditMessagesRoutes({ router, license }: Route
         });
 
         let messages: TransformMessage[] = [];
-        if (resp.hits.total !== 0) {
+        if (resp.hits.total.value > 0) {
           messages = resp.hits.hits.map((hit: AuditMessage) => hit._source);
           messages.reverse();
         }

@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import execa from 'execa';
@@ -91,9 +80,9 @@ export function startProc(name: string, options: ProcOptions, log: ToolingLog) {
   });
 
   if (stdin) {
-    childProcess.stdin.end(stdin, 'utf8');
+    childProcess.stdin!.end(stdin, 'utf8'); // TypeScript note: As long as the proc stdio[1] is 'pipe', then stdin will not be null
   } else {
-    childProcess.stdin.end();
+    childProcess.stdin!.end(); // TypeScript note: As long as the proc stdio[1] is 'pipe', then stdin will not be null
   }
 
   let stopCalled = false;
@@ -123,8 +112,8 @@ export function startProc(name: string, options: ProcOptions, log: ToolingLog) {
   ).pipe(share());
 
   const lines$ = Rx.merge(
-    observeLines(childProcess.stdout),
-    observeLines(childProcess.stderr)
+    observeLines(childProcess.stdout!), // TypeScript note: As long as the proc stdio[1] is 'pipe', then stdout will not be null
+    observeLines(childProcess.stderr!) // TypeScript note: As long as the proc stdio[1] is 'pipe', then stderr will not be null
   ).pipe(
     tap((line) => log.write(` ${chalk.gray('proc')} [${chalk.gray(name)}] ${line}`)),
     share()

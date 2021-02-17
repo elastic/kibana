@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -12,9 +13,21 @@ import '../../../../common/mock/match_media.ts';
 import { EndpointDocGenerator } from '../../../../../common/endpoint/generate_data';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../../../common/mock/endpoint';
 import { getPolicyDetailPath, getEndpointListPath } from '../../../common/routing';
-import { policyListApiPathHandlers } from '../store/policy_list/test_mock_utils';
+import { policyListApiPathHandlers } from '../store/test_mock_utils';
+import { licenseService } from '../../../../common/hooks/use_license';
 
 jest.mock('../../../../common/components/link_to');
+jest.mock('../../../../common/hooks/use_license', () => {
+  const licenseServiceInstance = {
+    isPlatinumPlus: jest.fn(),
+  };
+  return {
+    licenseService: licenseServiceInstance,
+    useLicense: () => {
+      return licenseServiceInstance;
+    },
+  };
+});
 
 describe('Policy Details', () => {
   type FindReactWrapperResponse = ReturnType<ReturnType<typeof render>['find']>;
@@ -87,7 +100,7 @@ describe('Policy Details', () => {
         const [path] = args;
         if (typeof path === 'string') {
           // GET datasouce
-          if (path === '/api/ingest_manager/package_policies/1') {
+          if (path === '/api/fleet/package_policies/1') {
             asyncActions = asyncActions.then<unknown>(async (): Promise<unknown> => sleep());
             return Promise.resolve({
               item: policyPackagePolicy,
@@ -96,7 +109,7 @@ describe('Policy Details', () => {
           }
 
           // GET Agent status for agent policy
-          if (path === '/api/ingest_manager/fleet/agent-status') {
+          if (path === '/api/fleet/agent-status') {
             asyncActions = asyncActions.then(async () => sleep());
             return Promise.resolve({
               results: { events: 0, total: 5, online: 3, error: 1, offline: 1 },
@@ -203,7 +216,7 @@ describe('Policy Details', () => {
           asyncActions = asyncActions.then(async () => sleep());
           const [path] = args;
           if (typeof path === 'string') {
-            if (path === '/api/ingest_manager/package_policies/1') {
+            if (path === '/api/fleet/package_policies/1') {
               return Promise.resolve({
                 item: policyPackagePolicy,
                 success: true,
@@ -248,7 +261,7 @@ describe('Policy Details', () => {
 
         // API should be called
         await asyncActions;
-        expect(http.put.mock.calls[0][0]).toEqual(`/api/ingest_manager/package_policies/1`);
+        expect(http.put.mock.calls[0][0]).toEqual(`/api/fleet/package_policies/1`);
         policyView.update();
 
         // Toast notification should be shown
@@ -273,6 +286,60 @@ describe('Policy Details', () => {
           title: 'Failed!',
           text: expect.any(String),
         });
+      });
+    });
+    describe('when the subscription tier is platinum or higher', () => {
+      beforeEach(() => {
+        (licenseService.isPlatinumPlus as jest.Mock).mockReturnValue(true);
+        policyView = render(<PolicyDetails />);
+      });
+
+      it('malware popup, message customization options and tooltip are shown', () => {
+        // use query for finding stuff, if it doesn't find it, just returns null
+        const userNotificationCheckbox = policyView.find(
+          'EuiCheckbox[data-test-subj="malwareUserNotificationCheckbox"]'
+        );
+        const userNotificationCustomMessageTextArea = policyView.find(
+          'EuiTextArea[data-test-subj="malwareUserNotificationCustomMessage"]'
+        );
+        const tooltip = policyView.find('EuiIconTip[data-test-subj="malwareTooltip"]');
+        expect(userNotificationCheckbox).toHaveLength(1);
+        expect(userNotificationCustomMessageTextArea).toHaveLength(1);
+        expect(tooltip).toHaveLength(1);
+      });
+
+      it('ransomware card is shown', () => {
+        const ransomware = policyView.find('EuiPanel[data-test-subj="ransomwareProtectionsForm"]');
+        expect(ransomware).toHaveLength(1);
+      });
+    });
+    describe('when the subscription tier is gold or lower', () => {
+      beforeEach(() => {
+        (licenseService.isPlatinumPlus as jest.Mock).mockReturnValue(false);
+        policyView = render(<PolicyDetails />);
+      });
+
+      it('malware popup, message customization options, and tooltip are hidden', () => {
+        const userNotificationCheckbox = policyView.find(
+          'EuiCheckbox[data-test-subj="malwareUserNotificationCheckbox"]'
+        );
+        const userNotificationCustomMessageTextArea = policyView.find(
+          'EuiTextArea[data-test-subj="malwareUserNotificationCustomMessage"]'
+        );
+        const tooltip = policyView.find('EuiIconTip');
+        expect(userNotificationCheckbox).toHaveLength(0);
+        expect(userNotificationCustomMessageTextArea).toHaveLength(0);
+        expect(tooltip).toHaveLength(0);
+      });
+
+      it('ransomware card is hidden', () => {
+        const ransomware = policyView.find('EuiPanel[data-test-subj="ransomwareProtectionsForm"]');
+        expect(ransomware).toHaveLength(0);
+      });
+
+      it('shows the locked card in place of 1 paid feature', () => {
+        const lockedCard = policyView.find('EuiCard[data-test-subj="lockedPolicyCard"]');
+        expect(lockedCard).toHaveLength(1);
       });
     });
   });

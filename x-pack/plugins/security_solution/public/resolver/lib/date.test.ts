@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { getFriendlyElapsedTime, getUnixTime } from './date';
 
 describe('date', () => {
@@ -57,8 +59,8 @@ describe('date', () => {
     const almostAYear = new Date(initialTime + 11.9 * month).getTime();
     const threeYears = new Date(initialTime + 3 * year).getTime();
 
-    it('should return null if invalid times are given', () => {
-      expect(getFriendlyElapsedTime(initialTime, 'ImTimeless')).toEqual(null);
+    it('should return undefined if invalid times are given', () => {
+      expect(getFriendlyElapsedTime(initialTime, 'ImTimeless')).toEqual(undefined);
     });
 
     it('should return the correct singular relative time', () => {

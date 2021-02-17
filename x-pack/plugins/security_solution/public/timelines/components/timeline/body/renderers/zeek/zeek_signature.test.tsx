@@ -1,13 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { shallow } from 'enzyme';
 import { cloneDeep } from 'lodash/fp';
 import React from 'react';
 
+import { removeExternalLinkText } from '../../../../../../../common/test_utils';
 import '../../../../../../common/mock/match_media';
 import { Ecs } from '../../../../../../../common/ecs';
 import { mockTimelineData, TestProviders } from '../../../../../../common/mock';
@@ -25,6 +27,15 @@ import {
   moduleStringRenderer,
   defaultStringRenderer,
 } from './zeek_signature';
+
+jest.mock('@elastic/eui', () => {
+  const original = jest.requireActual('@elastic/eui');
+  return {
+    ...original,
+    // eslint-disable-next-line react/display-name
+    EuiScreenReaderOnly: () => <></>,
+  };
+});
 
 describe('ZeekSignature', () => {
   const mount = useMountAppended();
@@ -89,7 +100,7 @@ describe('ZeekSignature', () => {
 
     test('should render value', () => {
       const wrapper = mount(<Link value={'abc'} />);
-      expect(wrapper.text()).toEqual('abc');
+      expect(removeExternalLinkText(wrapper.text())).toEqual('abc');
     });
 
     test('should render value and link', () => {

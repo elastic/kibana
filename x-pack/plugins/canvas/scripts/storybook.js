@@ -1,13 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 const path = require('path');
 const fs = require('fs');
 const del = require('del');
 const { run } = require('@kbn/dev-utils');
+// This is included in the main Kibana package.json
+// eslint-disable-next-line import/no-extraneous-dependencies
 const storybook = require('@storybook/react/standalone');
 const execa = require('execa');
 const { DLL_OUTPUT } = require('./../storybook/constants');

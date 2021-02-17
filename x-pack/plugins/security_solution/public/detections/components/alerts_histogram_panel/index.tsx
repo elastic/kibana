@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { Position } from '@elastic/charts';
 import { EuiFlexGroup, EuiFlexItem, EuiSelect, EuiPanel } from '@elastic/eui';
 import numeral from '@elastic/numeral';
@@ -171,7 +173,6 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
               value: bucket.key,
             }))
           : NO_LEGEND_DATA,
-      // eslint-disable-next-line react-hooks/exhaustive-deps
       [alertsData, selectedStackByOption.value, timelineId]
     );
 
@@ -221,24 +222,28 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
     }, [alertsData]);
 
     useEffect(() => {
-      const converted = esQuery.buildEsQuery(
-        undefined,
-        query != null ? [query] : [],
-        filters?.filter((f) => f.meta.disabled === false) ?? [],
-        {
-          ...esQuery.getEsQueryConfig(kibana.services.uiSettings),
-          dateFormatTZ: undefined,
-        }
-      );
+      try {
+        const converted = esQuery.buildEsQuery(
+          undefined,
+          query != null ? [query] : [],
+          filters?.filter((f) => f.meta.disabled === false) ?? [],
+          {
+            ...esQuery.getEsQueryConfig(kibana.services.uiSettings),
+            dateFormatTZ: undefined,
+          }
+        );
 
-      setAlertsQuery(
-        getAlertsHistogramQuery(
-          selectedStackByOption.value,
-          from,
-          to,
-          !isEmpty(converted) ? [converted] : []
-        )
-      );
+        setAlertsQuery(
+          getAlertsHistogramQuery(
+            selectedStackByOption.value,
+            from,
+            to,
+            !isEmpty(converted) ? [converted] : []
+          )
+        );
+      } catch (e) {
+        setAlertsQuery(getAlertsHistogramQuery(selectedStackByOption.value, from, to, []));
+      }
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [selectedStackByOption.value, from, to, query, filters]);
 

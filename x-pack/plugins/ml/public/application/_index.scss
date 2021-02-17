@@ -23,7 +23,6 @@
   @import 'components/controls/index';
   @import 'components/entity_cell/index';
   @import 'components/field_title_bar/index';
-  @import 'components/field_type_icon/index';
   @import 'components/influencers_list/index';
   @import 'components/items_grid/index';
   @import 'components/job_selector/index';
@@ -31,6 +30,7 @@
   @import 'components/navigation_menu/index';
   @import 'components/rule_editor/index'; // SASSTODO: This file overwrites EUI directly
   @import 'components/stats_bar/index';
+  @import 'components/ml_embedded_map/index';
 
   // Hacks are last so they can overwrite anything above if needed
   @import 'hacks';

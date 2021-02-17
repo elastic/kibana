@@ -1,17 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import {
-  MINUTE,
-  HOUR,
-  DAY,
-  WEEK,
-  MONTH,
-  YEAR,
-} from '../../../../../../src/plugins/es_ui_shared/public';
 import { indexPatterns } from '../../../../../../src/plugins/data/public';
 import { setHttp } from '../../crud_app/services';
 import { mockHttpRequest, pageHelpers } from './helpers';
@@ -190,14 +183,14 @@ describe('Create Rollup Job, step 1: Logistics', () => {
 
         describe('every minute', () => {
           it('should not have any additional configuration', () => {
-            changeFrequency(MINUTE);
+            changeFrequency('MINUTE');
             expect(find('cronFrequencyConfiguration').length).toBe(0);
           });
         });
 
         describe('hourly', () => {
           beforeEach(() => {
-            changeFrequency(HOUR);
+            changeFrequency('HOUR');
           });
 
           it('should have 1 additional configuration', () => {
@@ -214,7 +207,7 @@ describe('Create Rollup Job, step 1: Logistics', () => {
 
         describe('daily', () => {
           beforeEach(() => {
-            changeFrequency(DAY);
+            changeFrequency('DAY');
           });
 
           it('should have 1 additional configuration with hour and minute selects', () => {
@@ -238,7 +231,7 @@ describe('Create Rollup Job, step 1: Logistics', () => {
 
         describe('weekly', () => {
           beforeEach(() => {
-            changeFrequency(WEEK);
+            changeFrequency('WEEK');
           });
 
           it('should have 2 additional configurations with day, hour and minute selects', () => {
@@ -277,7 +270,7 @@ describe('Create Rollup Job, step 1: Logistics', () => {
 
         describe('monthly', () => {
           beforeEach(() => {
-            changeFrequency(MONTH);
+            changeFrequency('MONTH');
           });
 
           it('should have 2 additional configurations with date, hour and minute selects', () => {
@@ -308,7 +301,7 @@ describe('Create Rollup Job, step 1: Logistics', () => {
 
         describe('yearly', () => {
           beforeEach(() => {
-            changeFrequency(YEAR);
+            changeFrequency('YEAR');
           });
 
           it('should have 3 additional configurations with month, date, hour and minute selects', () => {

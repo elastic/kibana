@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -37,7 +38,9 @@ describe('AnomalyResultsViewSelector', () => {
     // Check the Single Metric Viewer element exists in the selector, and that it is checked.
     expect(getByTestId('mlAnomalyResultsViewSelectorSingleMetricViewer')).toBeInTheDocument();
     expect(
-      getByTestId('mlAnomalyResultsViewSelectorSingleMetricViewer').hasAttribute('checked')
+      getByTestId('mlAnomalyResultsViewSelectorSingleMetricViewer')
+        .querySelector('input')!
+        .hasAttribute('checked')
     ).toBe(true);
   });
 });

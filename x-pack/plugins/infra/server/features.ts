@@ -1,11 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
-import { LOG_DOCUMENT_COUNT_ALERT_TYPE_ID } from '../common/alerting/logs/types';
+import { LOG_DOCUMENT_COUNT_ALERT_TYPE_ID } from '../common/alerting/logs/log_threshold/types';
 import { METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID } from './lib/alerting/inventory_metric_threshold/types';
 import { METRIC_THRESHOLD_ALERT_TYPE_ID } from './lib/alerting/metric_threshold/types';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
@@ -17,8 +18,6 @@ export const METRICS_FEATURE = {
   }),
   order: 800,
   category: DEFAULT_APP_CATEGORIES.observability,
-  icon: 'metricsApp',
-  navLinkId: 'metrics',
   app: ['infra', 'metrics', 'kibana'],
   catalogue: ['infraops', 'metrics'],
   management: {
@@ -51,7 +50,7 @@ export const METRICS_FEATURE = {
         read: ['infrastructure-ui-source', 'index-pattern'],
       },
       alerting: {
-        all: [METRIC_THRESHOLD_ALERT_TYPE_ID, METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID],
+        read: [METRIC_THRESHOLD_ALERT_TYPE_ID, METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID],
       },
       management: {
         insightsAndAlerting: ['triggersActions'],
@@ -68,10 +67,11 @@ export const LOGS_FEATURE = {
   }),
   order: 700,
   category: DEFAULT_APP_CATEGORIES.observability,
-  icon: 'logsApp',
-  navLinkId: 'logs',
   app: ['infra', 'logs', 'kibana'],
   catalogue: ['infralogging', 'logs'],
+  management: {
+    insightsAndAlerting: ['triggersActions'],
+  },
   alerting: [LOG_DOCUMENT_COUNT_ALERT_TYPE_ID],
   privileges: {
     all: {
@@ -85,6 +85,9 @@ export const LOGS_FEATURE = {
       alerting: {
         all: [LOG_DOCUMENT_COUNT_ALERT_TYPE_ID],
       },
+      management: {
+        insightsAndAlerting: ['triggersActions'],
+      },
       ui: ['show', 'configureSource', 'save'],
     },
     read: {
@@ -92,7 +95,10 @@ export const LOGS_FEATURE = {
       catalogue: ['infralogging', 'logs'],
       api: ['infra'],
       alerting: {
-        all: [LOG_DOCUMENT_COUNT_ALERT_TYPE_ID],
+        read: [LOG_DOCUMENT_COUNT_ALERT_TYPE_ID],
+      },
+      management: {
+        insightsAndAlerting: ['triggersActions'],
       },
       savedObject: {
         all: [],

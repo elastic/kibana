@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -12,11 +13,11 @@ import {
   EuiHorizontalRule,
   EuiListGroupItem,
   EuiPopoverProps,
+  EuiListGroupItemProps,
 } from '@elastic/eui';
-
 import React, { HTMLAttributes, ReactNode } from 'react';
-import { EuiListGroupItemProps } from '@elastic/eui/src/components/list_group/list_group_item';
 import styled from 'styled-components';
+import { EuiListGroupProps } from '@elastic/eui';
 
 type Props = EuiPopoverProps & HTMLAttributes<HTMLDivElement>;
 
@@ -26,7 +27,7 @@ export function SectionTitle({ children }: { children?: ReactNode }) {
       <EuiText size={'s'} grow={false}>
         <h5>{children}</h5>
       </EuiText>
-      <EuiSpacer size={'s'} />
+      <EuiSpacer size={'xs'} />
     </>
   );
 }
@@ -42,9 +43,9 @@ export function SectionSubtitle({ children }: { children?: ReactNode }) {
   );
 }
 
-export function SectionLinks({ children }: { children?: ReactNode }) {
+export function SectionLinks({ children, ...props }: { children?: ReactNode } & EuiListGroupProps) {
   return (
-    <EuiListGroup flush={true} bordered={false}>
+    <EuiListGroup {...props} flush={true} bordered={false}>
       {children}
     </EuiListGroup>
   );
@@ -55,7 +56,7 @@ export function SectionSpacer() {
 }
 
 export const Section = styled.div`
-  margin-bottom: 24px;
+  margin-bottom: 16px;
   &:last-of-type {
     margin-bottom: 0;
   }
@@ -63,7 +64,7 @@ export const Section = styled.div`
 
 export type SectionLinkProps = EuiListGroupItemProps;
 export function SectionLink(props: SectionLinkProps) {
-  return <EuiListGroupItem style={{ padding: 0 }} size={'s'} {...props} />;
+  return <EuiListGroupItem style={{ padding: 0 }} size={'xs'} {...props} />;
 }
 
 export function ActionMenuDivider() {

@@ -1,20 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiPage, EuiPageBody, EuiPageProps } from '@elastic/eui';
-import React from 'react';
+import React, { ReactNode } from 'react';
 import styled from 'styled-components';
 import { Header } from '../header/index';
 
-const getPaddingSize = (props: EuiPageProps) => (props.restrictWidth ? 0 : '24px');
-
 const Page = styled(EuiPage)<EuiPageProps>`
   background: transparent;
-  padding-right: ${getPaddingSize};
-  padding-left: ${getPaddingSize};
 `;
 
 const Container = styled.div<{ color?: string }>`
@@ -24,30 +21,23 @@ const Container = styled.div<{ color?: string }>`
 `;
 
 interface Props {
+  datePicker?: ReactNode;
   headerColor: string;
   bodyColor: string;
-  children?: React.ReactNode;
+  children?: ReactNode;
   restrictWidth?: number;
-  showAddData?: boolean;
-  showGiveFeedback?: boolean;
 }
 
 export function WithHeaderLayout({
+  datePicker,
   headerColor,
   bodyColor,
   children,
   restrictWidth,
-  showAddData,
-  showGiveFeedback,
 }: Props) {
   return (
     <Container color={bodyColor}>
-      <Header
-        color={headerColor}
-        restrictWidth={restrictWidth}
-        showAddData={showAddData}
-        showGiveFeedback={showGiveFeedback}
-      />
+      <Header color={headerColor} datePicker={datePicker} restrictWidth={restrictWidth} />
       <Page restrictWidth={restrictWidth}>
         <EuiPageBody>{children}</EuiPageBody>
       </Page>

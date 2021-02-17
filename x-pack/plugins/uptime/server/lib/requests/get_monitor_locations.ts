@@ -1,12 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { UMElasticsearchQueryFn } from '../adapters';
 import { MonitorLocations, MonitorLocation } from '../../../common/runtime_types';
 import { UNNAMED_LOCATION } from '../../../common/constants';
+import { SortOptions } from '../../../../../typings/elasticsearch';
 
 /**
  * Fetch data for the monitor page title.
@@ -23,64 +25,65 @@ export interface GetMonitorLocationsParams {
 export const getMonitorLocations: UMElasticsearchQueryFn<
   GetMonitorLocationsParams,
   MonitorLocations
-> = async ({ callES, dynamicSettings, monitorId, dateStart, dateEnd }) => {
-  const params = {
-    index: dynamicSettings.heartbeatIndices,
-    body: {
-      size: 0,
-      query: {
-        bool: {
-          filter: [
-            {
-              term: {
-                'monitor.id': monitorId,
-              },
-            },
-            {
-              exists: {
-                field: 'summary',
-              },
-            },
-            {
-              range: {
-                '@timestamp': {
-                  gte: dateStart,
-                  lte: dateEnd,
-                },
-              },
-            },
-          ],
-        },
+> = async ({ uptimeEsClient, monitorId, dateStart, dateEnd }) => {
+  const sortOptions: SortOptions = [
+    {
+      '@timestamp': {
+        order: 'desc',
       },
-      aggs: {
-        location: {
-          terms: {
-            field: 'observer.geo.name',
-            missing: '__location_missing__',
+    },
+  ];
+
+  const params = {
+    size: 0,
+    query: {
+      bool: {
+        filter: [
+          {
+            term: {
+              'monitor.id': monitorId,
+            },
           },
-          aggs: {
-            most_recent: {
-              top_hits: {
-                size: 1,
-                sort: {
-                  '@timestamp': {
-                    order: 'desc',
-                  },
-                },
-                _source: ['monitor', 'summary', 'observer', '@timestamp'],
+          {
+            exists: {
+              field: 'summary',
+            },
+          },
+          {
+            range: {
+              '@timestamp': {
+                gte: dateStart,
+                lte: dateEnd,
               },
             },
-            down_history: {
-              sum: {
-                field: 'summary.down',
-                missing: 0,
-              },
+          },
+        ],
+      },
+    },
+    aggs: {
+      location: {
+        terms: {
+          field: 'observer.geo.name',
+          missing: '__location_missing__',
+        },
+        aggs: {
+          most_recent: {
+            top_hits: {
+              size: 1,
+              sort: sortOptions,
+              _source: ['monitor', 'summary', 'observer', '@timestamp'],
             },
-            up_history: {
-              sum: {
-                field: 'summary.up',
-                missing: 0,
-              },
+          },
+          down_history: {
+            sum: {
+              field: 'summary.down',
+              missing: 0,
+            },
+          },
+          up_history: {
+            sum: {
+              field: 'summary.up',
+              missing: 0,
             },
           },
         },
@@ -88,7 +91,8 @@ export const getMonitorLocations: UMElasticsearchQueryFn<
     },
   };
 
-  const result = await callES('search', params);
+  const { body: result } = await uptimeEsClient.search({ body: params });
+
   const locations = result?.aggregations?.location?.buckets ?? [];
 
   const getGeo = (locGeo: { name: string; location?: string }) => {

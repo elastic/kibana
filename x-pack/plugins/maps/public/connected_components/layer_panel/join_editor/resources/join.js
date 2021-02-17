@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import _ from 'lodash';
@@ -12,10 +13,12 @@ import { JoinExpression } from './join_expression';
 import { MetricsExpression } from './metrics_expression';
 import { WhereExpression } from './where_expression';
 import { GlobalFilterCheckbox } from '../../../../components/global_filter_checkbox';
+import { GlobalTimeCheckbox } from '../../../../components/global_time_checkbox';
 
 import { indexPatterns } from '../../../../../../../../src/plugins/data/public';
 
 import { getIndexPatternService } from '../../../../kibana_services';
+import { SOURCE_TYPES } from '../../../../../common/constants';
 
 export class Join extends Component {
   state = {
@@ -76,12 +79,15 @@ export class Join extends Component {
       loadError: undefined,
     });
     this._loadRightFields(indexPatternId);
+    // eslint-disable-next-line no-unused-vars
+    const { term, ...restOfRight } = this.props.join.right;
     this.props.onChange({
       leftField: this.props.join.leftField,
       right: {
-        id: this.props.join.right.id,
+        ...restOfRight,
         indexPatternId,
         indexPatternTitle,
+        type: SOURCE_TYPES.ES_TERM_SOURCE,
       },
     });
   };
@@ -92,6 +98,16 @@ export class Join extends Component {
       right: {
         ...this.props.join.right,
         term,
+      },
+    });
+  };
+
+  _onRightSizeChange = (size) => {
+    this.props.onChange({
+      leftField: this.props.join.leftField,
+      right: {
+        ...this.props.join.right,
+        size,
       },
     });
   };
@@ -126,6 +142,16 @@ export class Join extends Component {
     });
   };
 
+  _onApplyGlobalTimeChange = (applyGlobalTime) => {
+    this.props.onChange({
+      leftField: this.props.join.leftField,
+      right: {
+        ...this.props.join.right,
+        applyGlobalTime,
+      },
+    });
+  };
+
   render() {
     const { join, onRemove, leftFields, leftSourceName } = this.props;
     const { rightFields, indexPattern } = this.state;
@@ -137,6 +163,7 @@ export class Join extends Component {
 
     let metricsExpression;
     let globalFilterCheckbox;
+    let globalTimeCheckbox;
     if (isJoinConfigComplete) {
       metricsExpression = (
         <EuiFlexItem grow={false}>
@@ -148,16 +175,27 @@ export class Join extends Component {
         </EuiFlexItem>
       );
       globalFilterCheckbox = (
-        <EuiFlexItem>
-          <GlobalFilterCheckbox
-            applyGlobalQuery={right.applyGlobalQuery}
-            setApplyGlobalQuery={this._onApplyGlobalQueryChange}
-            label={i18n.translate('xpack.maps.layerPanel.join.applyGlobalQueryCheckboxLabel', {
-              defaultMessage: `Apply global filter to join`,
+        <GlobalFilterCheckbox
+          applyGlobalQuery={right.applyGlobalQuery === 'undefined' ? true : right.applyGlobalQuery}
+          setApplyGlobalQuery={this._onApplyGlobalQueryChange}
+          label={i18n.translate('xpack.maps.layerPanel.join.applyGlobalQueryCheckboxLabel', {
+            defaultMessage: `Apply global filter to join`,
+          })}
+        />
+      );
+      if (this.state.indexPattern && this.state.indexPattern.timeFieldName) {
+        globalTimeCheckbox = (
+          <GlobalTimeCheckbox
+            applyGlobalTime={
+              typeof right.applyGlobalTime === 'undefined' ? true : right.applyGlobalTime
+            }
+            setApplyGlobalTime={this._onApplyGlobalTimeChange}
+            label={i18n.translate('xpack.maps.layerPanel.join.applyGlobalTimeCheckboxLabel', {
+              defaultMessage: `Apply global time to join`,
             })}
           />
-        </EuiFlexItem>
-      );
+        );
+      }
     }
 
     let whereExpression;
@@ -186,30 +224,34 @@ export class Join extends Component {
               rightSourceName={rightSourceName}
               onRightSourceChange={this._onRightSourceChange}
               rightValue={right.term}
+              rightSize={right.size}
               rightFields={rightFields}
               onRightFieldChange={this._onRightFieldChange}
+              onRightSizeChange={this._onRightSizeChange}
             />
           </EuiFlexItem>
 
           {metricsExpression}
 
           {whereExpression}
-
-          {globalFilterCheckbox}
-
-          <EuiButtonIcon
-            className="mapJoinItem__delete"
-            iconType="trash"
-            color="danger"
-            aria-label={i18n.translate('xpack.maps.layerPanel.join.deleteJoinAriaLabel', {
-              defaultMessage: 'Delete join',
-            })}
-            title={i18n.translate('xpack.maps.layerPanel.join.deleteJoinTitle', {
-              defaultMessage: 'Delete join',
-            })}
-            onClick={onRemove}
-          />
         </EuiFlexGroup>
+
+        {globalFilterCheckbox}
+
+        {globalTimeCheckbox}
+
+        <EuiButtonIcon
+          className="mapJoinItem__delete"
+          iconType="trash"
+          color="danger"
+          aria-label={i18n.translate('xpack.maps.layerPanel.join.deleteJoinAriaLabel', {
+            defaultMessage: 'Delete join',
+          })}
+          title={i18n.translate('xpack.maps.layerPanel.join.deleteJoinTitle', {
+            defaultMessage: 'Delete join',
+          })}
+          onClick={onRemove}
+        />
       </div>
     );
   }

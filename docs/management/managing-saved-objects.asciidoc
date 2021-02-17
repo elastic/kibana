@@ -5,16 +5,20 @@ The *Saved Objects* UI helps you keep track of and manage your saved objects. Th
 store data for later use, including dashboards, visualizations, maps, index patterns,
 Canvas workpads, and more.
 
-To get started, open the menu, then go to *Stack Management > {kib} > Saved Objects*. With this UI, you can:
-
-* <<managing-saved-objects-view, View&#44; edit&#44; and delete saved objects>>
-* <<managing-saved-objects-export-objects, Import and export saved objects>>
-* <<managing-saved-objects-copy-to-space, Copy saved objects to another {kib} space>>
-* <<managing-saved-objects-object-definition, Edit the object definition>>
-
+To get started, open the main menu, then click *Stack Management > Saved Objects*. 
 
 [role="screenshot"]
 image::images/management-saved-objects.png[Saved Objects]
+
+[float]
+=== Required permissions
+
+The `Saved Objects Management` {kib} privilege is required to access the *Saved Objects* UI.
+
+To add the privilege, open the menu, then click *Stack Management > Roles*.
+
+NOTE:
+Granting access to Saved Objects Management will authorize users to manage all saved objects in {kib}, including objects that are managed by applications they may not otherwise be authorized to access.
 
 
 [float]
@@ -56,8 +60,8 @@ You have two options for exporting saved objects.
 * Select the checkboxes of objects that you want to export, and then click *Export*.
 * Click *Export x objects*, and export objects by type.
 
-This action creates an NDJSON with all your saved objects.  By default,
-the NDJSON includes related objects. Exported dashboards include their associated index patterns.
+This action creates an NDJSON with all your saved objects. By default, the NDJSON includes child objects that are related to the saved
+objects. Exported dashboards include their associated index patterns.
 
 [float]
 [role="xpack"]
@@ -69,8 +73,8 @@ and select *Copy to space*. From here, you can select the spaces in which to cop
 You can also select whether to automatically overwrite any conflicts in the target spaces, or
 resolve them manually.
 
-WARNING: The copy operation automatically includes related objects. If you don't want this behavior,
-use the <<spaces-api-copy-saved-objects, copy saved objects to space API>> instead.
+WARNING: The copy operation automatically includes child objects that are related to the saved objects. If you don't want this behavior, use
+the <<spaces-api-copy-saved-objects, copy saved objects to space API>> instead.
 
 
 [float]

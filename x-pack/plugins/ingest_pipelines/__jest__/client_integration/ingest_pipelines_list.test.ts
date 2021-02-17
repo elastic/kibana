@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { act } from 'react-dom/test-utils';
 
 import { API_BASE_PATH } from '../../common/constants';
 
-import { setupEnvironment, pageHelpers, nextTick } from './helpers';
+import { setupEnvironment, pageHelpers } from './helpers';
 import { PipelineListTestBed } from './helpers/pipelines_list.helpers';
 
 const { setup } = pageHelpers.pipelinesList;
@@ -22,6 +23,14 @@ describe('<PipelinesList />', () => {
   });
 
   describe('With pipelines', () => {
+    beforeEach(async () => {
+      await act(async () => {
+        testBed = await setup();
+      });
+
+      testBed.component.update();
+    });
+
     const pipeline1 = {
       name: 'test_pipeline1',
       description: 'test_pipeline1 description',
@@ -37,16 +46,6 @@ describe('<PipelinesList />', () => {
     const pipelines = [pipeline1, pipeline2];
 
     httpRequestsMockHelpers.setLoadPipelinesResponse(pipelines);
-
-    beforeEach(async () => {
-      testBed = await setup();
-
-      await act(async () => {
-        const { waitFor } = testBed;
-
-        await waitFor('pipelinesTable');
-      });
-    });
 
     test('should render the list view', async () => {
       const { exists, find, table } = testBed;
@@ -72,14 +71,10 @@ describe('<PipelinesList />', () => {
     });
 
     test('should reload the pipeline data', async () => {
-      const { component, actions } = testBed;
+      const { actions } = testBed;
       const totalRequests = server.requests.length;
 
-      await act(async () => {
-        actions.clickReloadButton();
-        await nextTick(100);
-        component.update();
-      });
+      await actions.clickReloadButton();
 
       expect(server.requests.length).toBe(totalRequests + 1);
       expect(server.requests[server.requests.length - 1].url).toBe(API_BASE_PATH);
@@ -118,33 +113,27 @@ describe('<PipelinesList />', () => {
 
       await act(async () => {
         confirmButton!.click();
-        await nextTick();
-        component.update();
       });
 
-      const latestRequest = server.requests[server.requests.length - 1];
+      component.update();
 
-      expect(latestRequest.method).toBe('DELETE');
-      expect(latestRequest.url).toBe(`${API_BASE_PATH}/${pipelineName}`);
-      expect(latestRequest.status).toEqual(200);
+      const deleteRequest = server.requests[server.requests.length - 2];
+
+      expect(deleteRequest.method).toBe('DELETE');
+      expect(deleteRequest.url).toBe(`${API_BASE_PATH}/${pipelineName}`);
+      expect(deleteRequest.status).toEqual(200);
     });
   });
 
   describe('No pipelines', () => {
-    beforeEach(async () => {
+    test('should display an empty prompt', async () => {
       httpRequestsMockHelpers.setLoadPipelinesResponse([]);
 
-      testBed = await setup();
-
       await act(async () => {
-        const { waitFor } = testBed;
-
-        await waitFor('emptyList');
+        testBed = await setup();
       });
-    });
-
-    test('should display an empty prompt', async () => {
-      const { exists, find } = testBed;
+      const { exists, component, find } = testBed;
+      component.update();
 
       expect(exists('sectionLoading')).toBe(false);
       expect(exists('emptyList')).toBe(true);
@@ -162,13 +151,11 @@ describe('<PipelinesList />', () => {
 
       httpRequestsMockHelpers.setLoadPipelinesResponse(undefined, { body: error });
 
-      testBed = await setup();
-
       await act(async () => {
-        const { waitFor } = testBed;
-
-        await waitFor('pipelineLoadError');
+        testBed = await setup();
       });
+
+      testBed.component.update();
     });
 
     test('should render an error message if error fetching pipelines', async () => {

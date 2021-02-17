@@ -1,10 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { AuditLogger } from '../../../security/server';
+import { LegacyAuditLogger } from '../../../security/server';
 
 export enum AuthorizationResult {
   Unauthorized = 'Unauthorized',
@@ -12,9 +13,9 @@ export enum AuthorizationResult {
 }
 
 export class ActionsAuthorizationAuditLogger {
-  private readonly auditLogger: AuditLogger;
+  private readonly auditLogger: LegacyAuditLogger;
 
-  constructor(auditLogger: AuditLogger = { log() {} }) {
+  constructor(auditLogger: LegacyAuditLogger = { log() {} }) {
     this.auditLogger = auditLogger;
   }
 

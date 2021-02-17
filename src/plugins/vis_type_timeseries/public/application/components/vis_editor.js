@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import PropTypes from 'prop-types';
@@ -23,12 +12,10 @@ import * as Rx from 'rxjs';
 import { share } from 'rxjs/operators';
 import { isEqual, isEmpty, debounce } from 'lodash';
 import { VisEditorVisualization } from './vis_editor_visualization';
-import { Visualization } from './visualization';
 import { VisPicker } from './vis_picker';
 import { PanelConfig } from './panel_config';
-import { createBrushHandler } from '../lib/create_brush_handler';
 import { fetchFields } from '../lib/fetch_fields';
-import { extractIndexPatterns } from '../../../../../plugins/vis_type_timeseries/common/extract_index_patterns';
+import { extractIndexPatterns } from '../../../common/extract_index_patterns';
 import { getSavedObjectsClient, getUISettings, getDataStart, getCoreStart } from '../../services';
 
 import { CoreStartContextProvider } from '../contexts/query_input_bar_context';
@@ -42,14 +29,8 @@ export class VisEditor extends Component {
   constructor(props) {
     super(props);
     this.localStorage = new Storage(window.localStorage);
-    this.state = {
-      model: props.visParams,
-      dirty: false,
-      autoApply: true,
-      visFields: props.visFields,
-      extractedIndexPatterns: [''],
-    };
-    this.onBrush = createBrushHandler((data) => props.vis.API.events.applyFilter(data));
+    this.state = {};
+
     this.visDataSubject = new Rx.BehaviorSubject(this.props.visData);
     this.visData$ = this.visDataSubject.asObservable().pipe(share());
 
@@ -71,19 +52,35 @@ export class VisEditor extends Component {
     return this.props.config.get(...args);
   };
 
-  handleUiState = (field, value) => {
-    this.props.vis.uiState.set(field, value);
-    // reload visualization because data might need to be re-fetched
-    this.props.vis.uiState.emit('reload');
-  };
-
   updateVisState = debounce(() => {
     this.props.vis.params = this.state.model;
     this.props.embeddableHandler.reload();
     this.props.eventEmitter.emit('dirtyStateChange', {
       isDirty: false,
     });
+
+    const extractedIndexPatterns = extractIndexPatterns(
+      this.state.model,
+      this.state.model.default_index_pattern
+    );
+    if (!isEqual(this.state.extractedIndexPatterns, extractedIndexPatterns)) {
+      this.abortableFetchFields(extractedIndexPatterns).then((visFields) => {
+        this.setState({
+          visFields,
+          extractedIndexPatterns,
+        });
+      });
+    }
   }, VIS_STATE_DEBOUNCE_DELAY);
+
+  abortableFetchFields = (extractedIndexPatterns) => {
+    if (this.abortControllerFetchFields) {
+      this.abortControllerFetchFields.abort();
+    }
+    this.abortControllerFetchFields = new AbortController();
+
+    return fetchFields(extractedIndexPatterns, this.abortControllerFetchFields.signal);
+  };
 
   handleChange = (partialModel) => {
     if (isEmpty(partialModel)) {
@@ -99,18 +96,6 @@ export class VisEditor extends Component {
       this.updateVisState();
 
       dirty = false;
-    }
-
-    if (this.props.isEditorMode) {
-      const extractedIndexPatterns = extractIndexPatterns(nextModel);
-      if (!isEqual(this.state.extractedIndexPatterns, extractedIndexPatterns)) {
-        fetchFields(extractedIndexPatterns).then((visFields) =>
-          this.setState({
-            visFields,
-            extractedIndexPatterns,
-          })
-        );
-      }
     }
 
     this.setState({
@@ -141,23 +126,6 @@ export class VisEditor extends Component {
   };
 
   render() {
-    if (!this.props.isEditorMode) {
-      if (!this.props.visParams || !this.props.visData) {
-        return null;
-      }
-      return (
-        <Visualization
-          dateFormat={this.props.config.get('dateFormat')}
-          onBrush={this.onBrush}
-          onUiState={this.handleUiState}
-          uiState={this.uiState}
-          model={this.props.visParams}
-          visData={this.props.visData}
-          getConfig={this.getConfig}
-        />
-      );
-    }
-
     const { model } = this.state;
 
     if (model) {
@@ -196,7 +164,6 @@ export class VisEditor extends Component {
                   fields={this.state.visFields}
                   model={model}
                   visData$={this.visData$}
-                  dateFormat={this.props.config.get('dateFormat')}
                   onChange={this.handleChange}
                   getConfig={this.getConfig}
                 />
@@ -211,23 +178,37 @@ export class VisEditor extends Component {
   }
 
   componentDidMount() {
-    this.props.renderComplete();
+    const dataStart = getDataStart();
 
-    if (this.props.isEditorMode && this.props.eventEmitter) {
-      this.props.eventEmitter.on('updateEditor', this.updateModel);
-    }
-  }
+    dataStart.indexPatterns.getDefault().then(async (index) => {
+      const defaultIndexTitle = index?.title ?? '';
+      const indexPatterns = extractIndexPatterns(this.props.visParams, defaultIndexTitle);
 
-  componentDidUpdate() {
-    this.props.renderComplete();
+      this.setState({
+        model: {
+          ...this.props.visParams,
+          /** @legacy
+           *  please use IndexPatterns service instead
+           * **/
+          default_index_pattern: defaultIndexTitle,
+          /** @legacy
+           *  please use IndexPatterns service instead
+           * **/
+          default_timefield: index?.timeFieldName ?? '',
+        },
+        dirty: false,
+        autoApply: true,
+        visFields: await fetchFields(indexPatterns),
+        extractedIndexPatterns: [''],
+      });
+    });
+
+    this.props.eventEmitter.on('updateEditor', this.updateModel);
   }
 
   componentWillUnmount() {
     this.updateVisState.cancel();
-
-    if (this.props.isEditorMode && this.props.eventEmitter) {
-      this.props.eventEmitter.off('updateEditor', this.updateModel);
-    }
+    this.props.eventEmitter.off('updateEditor', this.updateModel);
   }
 }
 
@@ -238,11 +219,8 @@ VisEditor.defaultProps = {
 VisEditor.propTypes = {
   vis: PropTypes.object,
   visData: PropTypes.object,
-  visFields: PropTypes.object,
   renderComplete: PropTypes.func,
   config: PropTypes.object,
-  isEditorMode: PropTypes.bool,
-  savedObj: PropTypes.object,
   timeRange: PropTypes.object,
   appState: PropTypes.object,
 };

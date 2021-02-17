@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -13,25 +14,6 @@ import { documentationService } from '../../../services/documentation';
 import { MainType, SubType, DataType, DataTypeDefinition } from '../types';
 
 export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
-  runtime: {
-    value: 'runtime',
-    isBeta: true,
-    label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.runtimeFieldDescription', {
-      defaultMessage: 'Runtime',
-    }),
-    // TODO: Add this once the page exists.
-    // documentation: {
-    //   main: '/runtime_field.html',
-    // },
-    description: () => (
-      <p>
-        <FormattedMessage
-          id="xpack.idxMgmt.mappingsEditor.dataType.runtimeFieldLongDescription"
-          defaultMessage="Runtime fields define scripts that calculate field values at runtime."
-        />
-      </p>
-    ),
-  },
   text: {
     value: 'text',
     label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.textDescription', {
@@ -104,7 +86,7 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
           id="xpack.idxMgmt.mappingsEditor.dataType.constantKeywordLongDescription"
           defaultMessage="Constant keyword fields are a special type of keyword fields for fields that contain the same keyword across all documents in the index. Supports the same queries and aggregations as {keyword} fields."
           values={{
-            keyword: <EuiCode inline>{'keyword'}</EuiCode>,
+            keyword: <EuiCode>{'keyword'}</EuiCode>,
           }}
         />
       </p>
@@ -854,7 +836,36 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
           id="xpack.idxMgmt.mappingsEditor.dataType.pointLongDescription"
           defaultMessage="Point fields enable searching of {code} pairs that fall in a 2-dimensional planar coordinate system."
           values={{
-            code: <EuiCode inline>{'x,y'}</EuiCode>,
+            code: <EuiCode>{'x,y'}</EuiCode>,
+          }}
+        />
+      </p>
+    ),
+  },
+  version: {
+    label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.versionDescription', {
+      defaultMessage: 'Version',
+    }),
+    value: 'version',
+    documentation: {
+      main: '/version.html',
+    },
+    description: () => (
+      <p>
+        <FormattedMessage
+          id="xpack.idxMgmt.mappingsEditor.dataType.versionLongDescription"
+          defaultMessage="Version fields are helpful to handle software version values. This field isn’t optimized for heavy wildcard, regex, or fuzzy searches. For these query types, use the {keywordType}."
+          values={{
+            keywordType: (
+              <EuiLink href={documentationService.getTypeDocLink('keyword')} target="_blank">
+                {i18n.translate(
+                  'xpack.idxMgmt.mappingsEditor.dataType.versionLongDescription.keywordTypeLink',
+                  {
+                    defaultMessage: 'keyword data type',
+                  }
+                )}
+              </EuiLink>
+            ),
           }}
         />
       </p>
@@ -915,7 +926,6 @@ export const MAIN_TYPES: MainType[] = [
   'range',
   'rank_feature',
   'rank_features',
-  'runtime',
   'search_as_you_type',
   'shape',
   'text',
@@ -923,6 +933,7 @@ export const MAIN_TYPES: MainType[] = [
   'histogram',
   'wildcard',
   'point',
+  'version',
   'other',
 ];
 

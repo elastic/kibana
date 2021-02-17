@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { schema } from '@kbn/config-schema';
@@ -30,7 +31,7 @@ export const createGetCertsRoute: UMRestApiRouteFactory = (libs: UMServerLibs) =
       direction: schema.maybe(schema.string()),
     }),
   },
-  handler: async ({ callES, dynamicSettings }, _context, request, response): Promise<any> => {
+  handler: async ({ uptimeEsClient, request }): Promise<any> => {
     const index = request.query?.index ?? 0;
     const size = request.query?.size ?? DEFAULT_SIZE;
     const from = request.query?.from ?? DEFAULT_FROM;
@@ -38,9 +39,9 @@ export const createGetCertsRoute: UMRestApiRouteFactory = (libs: UMServerLibs) =
     const sortBy = request.query?.sortBy ?? DEFAULT_SORT;
     const direction = request.query?.direction ?? DEFAULT_DIRECTION;
     const { search } = request.query;
-    const result = await libs.requests.getCerts({
-      callES,
-      dynamicSettings,
+
+    return await libs.requests.getCerts({
+      uptimeEsClient,
       index,
       search,
       size,
@@ -48,12 +49,6 @@ export const createGetCertsRoute: UMRestApiRouteFactory = (libs: UMServerLibs) =
       to,
       sortBy,
       direction,
-    });
-    return response.ok({
-      body: {
-        certs: result.certs,
-        total: result.total,
-      },
     });
   },
 });

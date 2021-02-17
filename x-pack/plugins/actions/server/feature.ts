@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -11,10 +12,8 @@ import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
 export const ACTIONS_FEATURE = {
   id: 'actions',
   name: i18n.translate('xpack.actions.featureRegistry.actionsFeatureName', {
-    defaultMessage: 'Actions',
+    defaultMessage: 'Actions and Connectors',
   }),
-  icon: 'bell',
-  navLinkId: 'actions',
   category: DEFAULT_APP_CATEGORIES.management,
   app: [],
   management: {

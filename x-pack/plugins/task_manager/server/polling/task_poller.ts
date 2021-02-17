@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 /*
@@ -10,11 +11,12 @@
 
 import { performance } from 'perf_hooks';
 import { after } from 'lodash';
-import { Subject, merge, interval, of, Observable } from 'rxjs';
-import { mapTo, filter, scan, concatMap, tap, catchError } from 'rxjs/operators';
+import { Subject, merge, of, Observable, combineLatest, timer } from 'rxjs';
+import { mapTo, filter, scan, concatMap, tap, catchError, switchMap } from 'rxjs/operators';
 
 import { pipe } from 'fp-ts/lib/pipeable';
 import { Option, none, map as mapOptional, getOrElse } from 'fp-ts/lib/Option';
+import { Logger } from '../../../../../src/core/server';
 import { pullFromSet } from '../lib/pull_from_set';
 import {
   Result,
@@ -30,12 +32,14 @@ import { timeoutPromiseAfter } from './timeout_promise_after';
 type WorkFn<T, H> = (...params: T[]) => Promise<H>;
 
 interface Opts<T, H> {
-  pollInterval: number;
+  logger: Logger;
+  pollInterval$: Observable<number>;
+  pollIntervalDelay$: Observable<number>;
   bufferCapacity: number;
   getCapacity: () => number;
   pollRequests$: Observable<Option<T>>;
   work: WorkFn<T, H>;
-  workTimeout?: number;
+  workTimeout: number;
 }
 
 /**
@@ -52,7 +56,9 @@ interface Opts<T, H> {
  *  of unique request argumets of type T. The queue holds all the buffered request arguments streamed in via pollRequests$
  */
 export function createTaskPoller<T, H>({
-  pollInterval,
+  logger,
+  pollInterval$,
+  pollIntervalDelay$,
   getCapacity,
   pollRequests$,
   bufferCapacity,
@@ -67,7 +73,24 @@ export function createTaskPoller<T, H>({
     // emit a polling event on demand
     pollRequests$,
     // emit a polling event on a fixed interval
-    interval(pollInterval).pipe(mapTo(none))
+    combineLatest([
+      pollInterval$.pipe(
+        tap((period) => {
+          logger.debug(`Task poller now using interval of ${period}ms`);
+        })
+      ),
+      pollIntervalDelay$.pipe(
+        tap((pollDelay) => {
+          logger.debug(`Task poller now delaying emission by ${pollDelay}ms`);
+        })
+      ),
+    ]).pipe(
+      // We don't have control over `pollDelay` in the poller, and a change to `delayOnClaimConflicts` could accidentally cause us to pause Task Manager
+      // polling for a far longer duration that we intended.
+      // Since the goal is to shift it within the range of `period`, we use modulo as a safe guard to ensure this doesn't happen.
+      switchMap(([period, pollDelay]) => timer(period + (pollDelay % period), period)),
+      mapTo(none)
+    )
   ).pipe(
     // buffer all requests in a single set (to remove duplicates) as we don't want
     // work to take place in parallel (it could cause Task Manager to pull in the same
@@ -95,7 +118,7 @@ export function createTaskPoller<T, H>({
         await promiseResult<H, Error>(
           timeoutPromiseAfter<H, Error>(
             work(...pullFromSet(set, getCapacity())),
-            workTimeout ?? pollInterval,
+            workTimeout,
             () => new Error(`work has timed out`)
           )
         ),

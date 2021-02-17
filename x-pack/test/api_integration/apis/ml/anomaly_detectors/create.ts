@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -87,11 +88,11 @@ export default ({ getService }: FtrProviderContext) => {
         model_plot_config: { enabled: true },
       },
       expected: {
-        responseCode: 404,
+        responseCode: 403,
         responseBody: {
-          statusCode: 404,
-          error: 'Not Found',
-          message: 'Not Found',
+          statusCode: 403,
+          error: 'Forbidden',
+          message: 'Forbidden',
         },
       },
     },

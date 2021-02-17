@@ -1,19 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React from 'react';
 import { FeatureTable } from './feature_table';
 import { Role } from '../../../../../../../common/model';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from '@kbn/test/jest';
 import { KibanaFeature, SubFeatureConfig } from '../../../../../../../../features/public';
 import { kibanaFeatures, createFeature } from '../../../../__fixtures__/kibana_features';
 import { createKibanaPrivileges } from '../../../../__fixtures__/kibana_privileges';
 import { PrivilegeFormCalculator } from '../privilege_form_calculator';
 import { getDisplayedFeaturePrivileges } from './__fixtures__';
-import { findTestSubject } from 'test_utils/find_test_subject';
-import { FeatureTableExpandedRow } from './feature_table_expanded_row';
+import { findTestSubject } from '@kbn/test/jest';
+import { EuiAccordion } from '@elastic/eui';
 
 const createRole = (kibana: Role['kibana'] = []): Role => {
   return {
@@ -86,18 +88,19 @@ describe('FeatureTable', () => {
         expect(displayedPrivileges).toEqual({
           excluded_from_base: {
             primaryFeaturePrivilege: 'none',
-            ...(canCustomizeSubFeaturePrivileges ? { subFeaturePrivileges: [] } : {}),
+            subFeaturePrivileges: [],
           },
           no_sub_features: {
             primaryFeaturePrivilege: 'none',
+            subFeaturePrivileges: [],
           },
           with_excluded_sub_features: {
             primaryFeaturePrivilege: 'none',
-            ...(canCustomizeSubFeaturePrivileges ? { subFeaturePrivileges: [] } : {}),
+            subFeaturePrivileges: [],
           },
           with_sub_features: {
             primaryFeaturePrivilege: 'none',
-            ...(canCustomizeSubFeaturePrivileges ? { subFeaturePrivileges: [] } : {}),
+            subFeaturePrivileges: [],
           },
         });
       });
@@ -125,14 +128,15 @@ describe('FeatureTable', () => {
         expect(displayedPrivileges).toEqual({
           excluded_from_base: {
             primaryFeaturePrivilege: 'none',
-            ...(canCustomizeSubFeaturePrivileges ? { subFeaturePrivileges: [] } : {}),
+            subFeaturePrivileges: [],
           },
           no_sub_features: {
             primaryFeaturePrivilege: 'all',
+            subFeaturePrivileges: [],
           },
           with_excluded_sub_features: {
             primaryFeaturePrivilege: 'all',
-            ...(canCustomizeSubFeaturePrivileges ? { subFeaturePrivileges: [] } : {}),
+            subFeaturePrivileges: [],
           },
           with_sub_features: {
             primaryFeaturePrivilege: 'all',
@@ -144,7 +148,7 @@ describe('FeatureTable', () => {
                     'cool_all',
                   ],
                 }
-              : {}),
+              : { subFeaturePrivileges: [] }),
           },
         });
       });
@@ -175,14 +179,15 @@ describe('FeatureTable', () => {
         expect(displayedPrivileges).toEqual({
           excluded_from_base: {
             primaryFeaturePrivilege: 'none',
-            ...(canCustomizeSubFeaturePrivileges ? { subFeaturePrivileges: [] } : {}),
+            subFeaturePrivileges: [],
           },
           no_sub_features: {
             primaryFeaturePrivilege: 'none',
+            subFeaturePrivileges: [],
           },
           with_excluded_sub_features: {
             primaryFeaturePrivilege: 'none',
-            ...(canCustomizeSubFeaturePrivileges ? { subFeaturePrivileges: [] } : {}),
+            subFeaturePrivileges: [],
           },
           with_sub_features: {
             primaryFeaturePrivilege: 'all',
@@ -194,7 +199,7 @@ describe('FeatureTable', () => {
                     'cool_all',
                   ],
                 }
-              : {}),
+              : { subFeaturePrivileges: [] }),
           },
         });
       });
@@ -279,6 +284,7 @@ describe('FeatureTable', () => {
       },
       no_sub_features: {
         primaryFeaturePrivilege: 'none',
+        subFeaturePrivileges: [],
       },
       with_excluded_sub_features: {
         primaryFeaturePrivilege: 'none',
@@ -313,41 +319,16 @@ describe('FeatureTable', () => {
     });
 
     kibanaFeatures.forEach((feature) => {
-      const rowExpander = findTestSubject(wrapper, `expandFeaturePrivilegeRow-${feature.id}`);
+      const { arrowDisplay } = wrapper
+        .find(EuiAccordion)
+        .filter(`#featurePrivilegeControls_${feature.id}`)
+        .props();
       if (!feature.subFeatures || feature.subFeatures.length === 0) {
-        expect(rowExpander).toHaveLength(0);
+        expect(arrowDisplay).toEqual('none');
       } else {
-        expect(rowExpander).toHaveLength(1);
+        expect(arrowDisplay).toEqual('left');
       }
     });
-  });
-
-  it('renders the <FeatureTableExpandedRow> when the row is expanded', () => {
-    const role = createRole([
-      {
-        spaces: ['*'],
-        base: ['read'],
-        feature: {},
-      },
-      {
-        spaces: ['foo'],
-        base: [],
-        feature: {},
-      },
-    ]);
-    const { wrapper } = setup({
-      role,
-      features: kibanaFeatures,
-      privilegeIndex: 1,
-      calculateDisplayedPrivileges: false,
-      canCustomizeSubFeaturePrivileges: true,
-    });
-
-    expect(wrapper.find(FeatureTableExpandedRow)).toHaveLength(0);
-
-    findTestSubject(wrapper, 'expandFeaturePrivilegeRow').first().simulate('click');
-
-    expect(wrapper.find(FeatureTableExpandedRow)).toHaveLength(1);
   });
 
   it('renders with sub-feature privileges granted when primary feature privilege is "all"', () => {
@@ -679,6 +660,7 @@ describe('FeatureTable', () => {
       },
       no_sub_features: {
         primaryFeaturePrivilege: 'none',
+        subFeaturePrivileges: [],
       },
       with_excluded_sub_features: {
         primaryFeaturePrivilege: 'none',
@@ -716,15 +698,19 @@ describe('FeatureTable', () => {
     expect(displayedPrivileges).toEqual({
       excluded_from_base: {
         primaryFeaturePrivilege: 'none',
+        subFeaturePrivileges: [],
       },
       no_sub_features: {
         primaryFeaturePrivilege: 'none',
+        subFeaturePrivileges: [],
       },
       with_excluded_sub_features: {
         primaryFeaturePrivilege: 'none',
+        subFeaturePrivileges: [],
       },
       with_sub_features: {
         primaryFeaturePrivilege: 'none',
+        subFeaturePrivileges: [],
       },
     });
   });
@@ -750,15 +736,19 @@ describe('FeatureTable', () => {
     expect(displayedPrivileges).toEqual({
       excluded_from_base: {
         primaryFeaturePrivilege: 'none',
+        subFeaturePrivileges: [],
       },
       no_sub_features: {
         primaryFeaturePrivilege: 'none',
+        subFeaturePrivileges: [],
       },
       with_excluded_sub_features: {
         primaryFeaturePrivilege: 'none',
+        subFeaturePrivileges: [],
       },
       with_sub_features: {
         primaryFeaturePrivilege: 'none',
+        subFeaturePrivileges: [],
       },
     });
   });
@@ -843,6 +833,7 @@ describe('FeatureTable', () => {
     expect(displayedPrivileges).toEqual({
       reserved_feature: {
         primaryFeaturePrivilege: 'none',
+        subFeaturePrivileges: [],
       },
     });
   });
@@ -873,16 +864,79 @@ describe('FeatureTable', () => {
     expect(displayedPrivileges).toEqual({
       excluded_from_base: {
         primaryFeaturePrivilege: 'none',
+        subFeaturePrivileges: [],
       },
       no_sub_features: {
         primaryFeaturePrivilege: 'none',
+        subFeaturePrivileges: [],
       },
       with_excluded_sub_features: {
         primaryFeaturePrivilege: 'none',
+        subFeaturePrivileges: [],
       },
       with_sub_features: {
         primaryFeaturePrivilege: 'none',
+        subFeaturePrivileges: [],
       },
     });
+  });
+
+  it('renders features by category, indicating how many features are granted within', async () => {
+    const role = createRole([
+      {
+        spaces: ['foo'],
+        base: [],
+        feature: {
+          feature_1: ['all'],
+          feature_3: ['all'],
+          feature_4: ['all'],
+        },
+      },
+    ]);
+
+    const features = [
+      createFeature({
+        id: 'feature_1',
+        name: 'Feature1',
+        category: { id: 'foo', label: 'foo' },
+      }),
+      createFeature({
+        id: 'feature_2',
+        name: 'Feature2',
+        category: { id: 'foo', label: 'foo' },
+      }),
+      createFeature({
+        id: 'feature_3',
+        name: 'Feature3',
+        category: { id: 'bar', label: 'bar' },
+      }),
+      createFeature({
+        id: 'feature_4',
+        name: 'Feature4',
+        category: { id: 'bar', label: 'bar' },
+      }),
+    ];
+
+    const { wrapper } = setup({
+      role,
+      features,
+      privilegeIndex: 0,
+      calculateDisplayedPrivileges: false,
+      canCustomizeSubFeaturePrivileges: false,
+    });
+
+    const fooCategory = findTestSubject(wrapper, 'featureCategory_foo');
+    const barCategory = findTestSubject(wrapper, 'featureCategory_bar');
+
+    expect(fooCategory).toHaveLength(1);
+    expect(barCategory).toHaveLength(1);
+
+    expect(findTestSubject(fooCategory, 'categoryLabel').text()).toMatchInlineSnapshot(
+      `"1 / 2 features granted"`
+    );
+
+    expect(findTestSubject(barCategory, 'categoryLabel').text()).toMatchInlineSnapshot(
+      `"2 / 2 features granted"`
+    );
   });
 });

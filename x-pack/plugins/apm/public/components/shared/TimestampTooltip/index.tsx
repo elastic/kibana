@@ -1,12 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React from 'react';
 import { EuiToolTip } from '@elastic/eui';
 import moment from 'moment-timezone';
-import { asAbsoluteDateTime, TimeUnit } from '../../../utils/formatters';
+import {
+  asAbsoluteDateTime,
+  TimeUnit,
+} from '../../../../common/utils/formatters';
 
 interface Props {
   /**

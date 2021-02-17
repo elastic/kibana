@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import * as React from 'react';
@@ -22,12 +11,9 @@ import * as React from 'react';
 import {
   EuiCallOut,
   EuiCodeBlock,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiFlyout,
   EuiFlyoutHeader,
   EuiFlyoutBody,
-  EuiLoadingSpinner,
   EuiPortal, // EuiPortal is a temporary requirement to use EuiFlyout with "ownFocus"
   EuiText,
   EuiTextColor,
@@ -35,6 +21,7 @@ import {
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
+import { loadingSpinner } from './loading_spinner';
 
 interface Props {
   fetchExample: () => Promise<any[]>;
@@ -51,6 +38,8 @@ interface State {
  * React component for displaying the example data associated with the Telemetry opt-in banner.
  */
 export class OptInExampleFlyout extends React.PureComponent<Props, State> {
+  _isMounted = false;
+
   public readonly state: State = {
     data: null,
     isLoading: true,
@@ -58,14 +47,18 @@ export class OptInExampleFlyout extends React.PureComponent<Props, State> {
   };
 
   async componentDidMount() {
+    this._isMounted = true;
+
     try {
       const { fetchExample } = this.props;
       const clusters = await fetchExample();
-      this.setState({
-        data: Array.isArray(clusters) ? clusters : null,
-        isLoading: false,
-        hasPrivilegeToRead: true,
-      });
+      if (this._isMounted) {
+        this.setState({
+          data: Array.isArray(clusters) ? clusters : null,
+          isLoading: false,
+          hasPrivilegeToRead: true,
+        });
+      }
     } catch (err) {
       this.setState({
         isLoading: false,
@@ -74,15 +67,13 @@ export class OptInExampleFlyout extends React.PureComponent<Props, State> {
     }
   }
 
+  componentWillUnmount() {
+    this._isMounted = false;
+  }
+
   renderBody({ data, isLoading, hasPrivilegeToRead }: State) {
     if (isLoading) {
-      return (
-        <EuiFlexGroup justifyContent="spaceAround">
-          <EuiFlexItem grow={false}>
-            <EuiLoadingSpinner size="xl" />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      );
+      return loadingSpinner;
     }
 
     if (!hasPrivilegeToRead) {

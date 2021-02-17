@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -84,6 +85,7 @@ export function BeatsOverview({
   latestVersions,
   stats,
   metrics,
+  alerts,
   ...props
 }) {
   const seriesToShow = [
@@ -113,7 +115,7 @@ export function BeatsOverview({
           </h1>
         </EuiScreenReaderOnly>
         <EuiPanel>
-          <Stats stats={stats} />
+          <Stats stats={stats} alerts={alerts} />
         </EuiPanel>
         <EuiSpacer size="m" />
         <EuiPanel>{renderLatestActive(latestActive, latestTypes, latestVersions)}</EuiPanel>

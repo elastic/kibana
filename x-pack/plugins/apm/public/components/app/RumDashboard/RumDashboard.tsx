@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -13,23 +14,31 @@ import {
 } from '@elastic/eui';
 import React from 'react';
 import { ClientMetrics } from './ClientMetrics';
-import { PageViewsTrend } from './PageViewsTrend';
-import { PageLoadDistribution } from './PageLoadDistribution';
 import { I18LABELS } from './translations';
-import { VisitorBreakdown } from './VisitorBreakdown';
 import { UXMetrics } from './UXMetrics';
-import { VisitorBreakdownMap } from './VisitorBreakdownMap';
 import { ImpactfulMetrics } from './ImpactfulMetrics';
+import { PageLoadAndViews } from './Panels/PageLoadAndViews';
+import { VisitorBreakdownsPanel } from './Panels/VisitorBreakdowns';
+import { useBreakPoints } from '../../../hooks/use_break_points';
+import { getPercentileLabel } from './UXMetrics/translations';
+import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 
 export function RumDashboard() {
+  const {
+    urlParams: { percentile },
+  } = useUrlParams();
+  const { isSmall } = useBreakPoints();
+
   return (
-    <EuiFlexGroup direction="column" gutterSize="s">
+    <EuiFlexGroup direction={isSmall ? 'row' : 'column'} gutterSize="s">
       <EuiFlexItem>
         <EuiPanel>
           <EuiFlexGroup justifyContent="spaceBetween">
             <EuiFlexItem grow={1} data-cy={`client-metrics`}>
               <EuiTitle size="xs">
-                <h3>{I18LABELS.pageLoadDuration}</h3>
+                <h3>
+                  {I18LABELS.pageLoad} ({getPercentileLabel(percentile!)})
+                </h3>
               </EuiTitle>
               <EuiSpacer size="s" />
               <ClientMetrics />
@@ -41,31 +50,10 @@ export function RumDashboard() {
         <UXMetrics />
       </EuiFlexItem>
       <EuiFlexItem>
-        <EuiFlexGroup gutterSize="s" wrap>
-          <EuiFlexItem style={{ flexBasis: 650 }}>
-            <EuiPanel>
-              <PageLoadDistribution />
-            </EuiPanel>
-          </EuiFlexItem>
-          <EuiFlexItem style={{ flexBasis: 650 }}>
-            <EuiPanel>
-              <PageViewsTrend />
-            </EuiPanel>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiSpacer size="s" />
-        <EuiFlexGroup gutterSize="s">
-          <EuiFlexItem grow={3}>
-            <EuiPanel>
-              <VisitorBreakdown />
-            </EuiPanel>
-          </EuiFlexItem>
-          <EuiFlexItem grow={3}>
-            <EuiPanel>
-              <VisitorBreakdownMap />
-            </EuiPanel>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <PageLoadAndViews />
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <VisitorBreakdownsPanel />
       </EuiFlexItem>
       <EuiFlexItem>
         <ImpactfulMetrics />

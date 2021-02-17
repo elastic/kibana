@@ -1,13 +1,24 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import http from 'http';
 
 export async function initPlugin() {
+  const messages: string[] = [];
+
   return http.createServer((request, response) => {
+    // return the messages that were posted to be remembered
+    if (request.method === 'GET') {
+      response.statusCode = 200;
+      response.setHeader('Content-Type', 'application/json');
+      response.end(JSON.stringify(messages, null, 4));
+      return;
+    }
+
     if (request.method === 'POST') {
       let data = '';
       request.on('data', (chunk) => {
@@ -15,11 +26,20 @@ export async function initPlugin() {
       });
       request.on('end', () => {
         const body = JSON.parse(data);
-        const text = body && body.text;
+        const text: string = body && body.text;
 
         if (text == null) {
           response.statusCode = 400;
           response.end('bad request to slack simulator');
+          return;
+        }
+
+        // store a message that was posted to be remembered
+        const match = text.match(/^message (.*)$/);
+        if (match) {
+          messages.push(match[1]);
+          response.statusCode = 200;
+          response.end('ok');
           return;
         }
 

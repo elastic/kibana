@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -26,7 +27,11 @@ uiRoutes
     resolve: {
       clusters: (Private) => {
         const routeInit = Private(routeInitProvider);
-        return routeInit({ codePaths: CODE_PATHS, fetchAllClusters: true }).then((clusters) => {
+        return routeInit({
+          codePaths: CODE_PATHS,
+          fetchAllClusters: true,
+          unsetGlobalState: true,
+        }).then((clusters) => {
           if (!clusters || !clusters.length) {
             window.location.hash = '#/no-data';
             return Promise.reject();

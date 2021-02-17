@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -87,5 +88,13 @@ export const VERSION_CONFLICT_ERROR_DESCRIPTION = i18n.translate(
   {
     defaultMessage:
       "It appears this exception was updated since you first selected to edit it. Try clicking 'Cancel' and editing the exception again.",
+  }
+);
+
+export const EDIT_EXCEPTION_SEQUENCE_WARNING = i18n.translate(
+  'xpack.securitySolution.exceptions.editException.sequenceWarning',
+  {
+    defaultMessage:
+      "This rule's query contains an EQL sequence statement. The exception modified will apply to all events in the sequence.",
   }
 );

@@ -1,10 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { RequestHandlerContext } from '../../../../../../../../src/core/server';
+import type { SecuritySolutionRequestHandlerContext } from '../../../../types';
 import {
   coreMock,
   elasticsearchServiceMock,
@@ -18,6 +19,7 @@ const createMockClients = () => ({
   alertsClient: alertsClientMock.create(),
   clusterClient: elasticsearchServiceMock.createLegacyScopedClusterClient(),
   licensing: { license: licensingMock.createLicenseMock() },
+  newClusterClient: elasticsearchServiceMock.createScopedClusterClient(),
   savedObjectsClient: savedObjectsClientMock.create(),
   appClient: siemMock.createClient(),
 });
@@ -31,13 +33,15 @@ const createRequestContextMock = (
     core: {
       ...coreContext,
       elasticsearch: {
-        legacy: { ...coreContext.elasticsearch, client: clients.clusterClient },
+        ...coreContext.elasticsearch,
+        client: clients.newClusterClient,
+        legacy: { ...coreContext.elasticsearch.legacy, client: clients.clusterClient },
       },
       savedObjects: { client: clients.savedObjectsClient },
     },
     licensing: clients.licensing,
     securitySolution: { getAppClient: jest.fn(() => clients.appClient) },
-  } as unknown) as RequestHandlerContext;
+  } as unknown) as SecuritySolutionRequestHandlerContext;
 };
 
 const createTools = () => {

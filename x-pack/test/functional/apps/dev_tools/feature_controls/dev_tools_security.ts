@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
@@ -228,31 +230,31 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(navLinks.map((navLink: any) => navLink.text)).to.not.contain(['Dev Tools']);
       });
 
-      it(`navigating to console shows 404`, async () => {
+      it(`navigating to console shows 403`, async () => {
         await PageObjects.common.navigateToUrl('console', '', {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
           useActualUrl: true,
         });
-        await PageObjects.error.expectNotFound();
+        await PageObjects.error.expectForbidden();
       });
 
-      it(`navigating to search profiler shows 404`, async () => {
+      it(`navigating to search profiler shows 403`, async () => {
         await PageObjects.common.navigateToUrl('searchProfiler', '', {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
           useActualUrl: true,
         });
-        await PageObjects.error.expectNotFound();
+        await PageObjects.error.expectForbidden();
       });
 
-      it(`navigating to grok debugger shows 404`, async () => {
+      it(`navigating to grok debugger shows 403`, async () => {
         await PageObjects.common.navigateToUrl('grokDebugger', '', {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
           useActualUrl: true,
         });
-        await PageObjects.error.expectNotFound();
+        await PageObjects.error.expectForbidden();
       });
     });
   });

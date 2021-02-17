@@ -101,8 +101,11 @@ exports[`Flyout conflicts should allow conflict resolution 1`] = `
           },
         ]
       }
+      onTableChange={[Function]}
       pagination={
         Object {
+          "pageIndex": 0,
+          "pageSize": 5,
           "pageSizeOptions": Array [
             5,
             10,
@@ -172,10 +175,14 @@ exports[`Flyout conflicts should allow conflict resolution 2`] = `
             "basePath": "",
             "get": [Function],
             "prepend": [Function],
+            "publicBaseUrl": undefined,
             "remove": [Function],
             "serverBasePath": "",
           },
           "delete": [MockFunction],
+          "externalUrl": Object {
+            "validateUrl": [MockFunction],
+          },
           "fetch": [MockFunction],
           "get": [MockFunction],
           "getLoadingCount$": [MockFunction],
@@ -219,6 +226,7 @@ exports[`Flyout conflicts should allow conflict resolution 2`] = `
             "createNewCopies": false,
             "overwrite": true,
           },
+          "importWarnings": undefined,
           "indexPatterns": Array [
             Object {
               "id": "1",
@@ -246,6 +254,10 @@ exports[`Flyout conflicts should allow conflict resolution 2`] = `
               "newIndexPatternId": "2",
             },
           ],
+          "unmatchedReferencesTablePagination": Object {
+            "pageIndex": 0,
+            "pageSize": 5,
+          },
         },
       },
     ],
@@ -403,8 +415,11 @@ exports[`Flyout legacy conflicts should allow conflict resolution 1`] = `
           },
         ]
       }
+      onTableChange={[Function]}
       pagination={
         Object {
+          "pageIndex": 0,
+          "pageSize": 5,
           "pageSizeOptions": Array [
             5,
             10,
@@ -458,7 +473,7 @@ exports[`Flyout legacy conflicts should allow conflict resolution 1`] = `
 </EuiFlyout>
 `;
 
-exports[`Flyout legacy conflicts should handle errors 1`] = `
+exports[`Flyout legacy conflicts should handle errors 2`] = `
 Array [
   <EuiCallOut
     color="warning"
@@ -522,8 +537,10 @@ Array [
       />
     }
   >
-    <p>
-      foobar
+    <p
+      data-test-subj="importSavedObjectsErrorText"
+    >
+      The file could not be processed due to error: "foobar"
     </p>
   </EuiCallOut>,
 ]
@@ -558,15 +575,22 @@ exports[`Flyout should render import step 1`] = `
         hasChildLabel={true}
         hasEmptyLabelSpace={false}
         label={
-          <FormattedMessage
-            defaultMessage="Select a file to import"
-            id="savedObjectsManagement.objectsTable.flyout.selectFileToImportFormRowLabel"
-            values={Object {}}
-          />
+          <EuiTitle
+            size="xs"
+          >
+            <span>
+              <FormattedMessage
+                defaultMessage="Select a file to import"
+                id="savedObjectsManagement.objectsTable.flyout.selectFileToImportFormRowLabel"
+                values={Object {}}
+              />
+            </span>
+          </EuiTitle>
         }
         labelType="label"
       >
         <EuiFilePicker
+          accept=".ndjson, .json"
           compressed={false}
           display="large"
           fullWidth={true}
@@ -645,7 +669,18 @@ exports[`Flyout should render import step 1`] = `
 
 exports[`Flyout summary should display summary when import is complete 1`] = `
 <ImportSummary
+  basePath={
+    BasePath {
+      "basePath": "",
+      "get": [Function],
+      "prepend": [Function],
+      "publicBaseUrl": undefined,
+      "remove": [Function],
+      "serverBasePath": "",
+    }
+  }
   failedImports={Symbol()}
+  importWarnings={Array []}
   successfulImports={Symbol()}
 />
 `;

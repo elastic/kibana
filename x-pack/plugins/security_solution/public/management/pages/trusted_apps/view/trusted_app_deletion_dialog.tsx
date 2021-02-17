@@ -1,22 +1,24 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import React, { memo, useCallback, useMemo } from 'react';
+import React, { FC, memo, useCallback, useEffect, useMemo, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 import { Dispatch } from 'redux';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiButtonProps,
+  PropsForButton,
   EuiModal,
   EuiModalBody,
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
-  EuiOverlayMask,
   EuiText,
 } from '@elastic/eui';
 
@@ -66,6 +68,21 @@ const getTranslations = (entry: Immutable<TrustedApp> | undefined) => ({
   ),
 });
 
+const AutoFocusButton: FC<PropsForButton<EuiButtonProps>> = memo((props) => {
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const button = <EuiButton buttonRef={buttonRef} {...props} />;
+
+  useEffect(() => {
+    if (buttonRef.current) {
+      buttonRef.current.focus();
+    }
+  }, []);
+
+  return button;
+});
+
+AutoFocusButton.displayName = 'AutoFocusButton';
+
 export const TrustedAppDeletionDialog = memo(() => {
   const dispatch = useDispatch<Dispatch<AppAction>>();
   const isBusy = useTrustedAppsSelector(isDeletionInProgress);
@@ -82,30 +99,34 @@ export const TrustedAppDeletionDialog = memo(() => {
 
   if (useTrustedAppsSelector(isDeletionDialogOpen)) {
     return (
-      <EuiOverlayMask>
-        <EuiModal onClose={onCancel}>
-          <EuiModalHeader>
-            <EuiModalHeaderTitle>{translations.title}</EuiModalHeaderTitle>
-          </EuiModalHeader>
+      <EuiModal onClose={onCancel}>
+        <EuiModalHeader>
+          <EuiModalHeaderTitle>{translations.title}</EuiModalHeaderTitle>
+        </EuiModalHeader>
 
-          <EuiModalBody>
-            <EuiText>
-              <p>{translations.mainMessage}</p>
-              <p>{translations.subMessage}</p>
-            </EuiText>
-          </EuiModalBody>
+        <EuiModalBody>
+          <EuiText>
+            <p>{translations.mainMessage}</p>
+            <p>{translations.subMessage}</p>
+          </EuiText>
+        </EuiModalBody>
 
-          <EuiModalFooter>
-            <EuiButtonEmpty onClick={onCancel} isDisabled={isBusy} data-test-subj={CANCEL_SUBJ}>
-              {translations.cancelButton}
-            </EuiButtonEmpty>
+        <EuiModalFooter>
+          <EuiButtonEmpty onClick={onCancel} isDisabled={isBusy} data-test-subj={CANCEL_SUBJ}>
+            {translations.cancelButton}
+          </EuiButtonEmpty>
 
-            <EuiButton fill onClick={onConfirm} isLoading={isBusy} data-test-subj={CONFIRM_SUBJ}>
-              {translations.confirmButton}
-            </EuiButton>
-          </EuiModalFooter>
-        </EuiModal>
-      </EuiOverlayMask>
+          <AutoFocusButton
+            fill
+            color="danger"
+            onClick={onConfirm}
+            isLoading={isBusy}
+            data-test-subj={CONFIRM_SUBJ}
+          >
+            {translations.confirmButton}
+          </AutoFocusButton>
+        </EuiModalFooter>
+      </EuiModal>
     );
   } else {
     return <></>;

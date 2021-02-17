@@ -1,13 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
+import { MlCommonUI } from './common_ui';
 
-export function MachineLearningSingleMetricViewerProvider({ getService }: FtrProviderContext) {
+export function MachineLearningSingleMetricViewerProvider(
+  { getService }: FtrProviderContext,
+  mlCommonUI: MlCommonUI
+) {
   const comboBox = getService('comboBox');
   const testSubjects = getService('testSubjects');
 
@@ -34,7 +40,7 @@ export function MachineLearningSingleMetricViewerProvider({ getService }: FtrPro
       );
     },
 
-    async assertDetectorInputExsist() {
+    async assertDetectorInputExist() {
       await testSubjects.existOrFail(
         'mlSingleMetricViewerSeriesControls > mlSingleMetricViewerDetectorSelect'
       );
@@ -59,7 +65,7 @@ export function MachineLearningSingleMetricViewerProvider({ getService }: FtrPro
       await this.assertDetectorInputValue(detectorOptionValue);
     },
 
-    async assertEntityInputExsist(entityFieldName: string) {
+    async assertEntityInputExist(entityFieldName: string) {
       await testSubjects.existOrFail(`mlSingleMetricViewerEntitySelection ${entityFieldName}`);
     },
 
@@ -81,7 +87,7 @@ export function MachineLearningSingleMetricViewerProvider({ getService }: FtrPro
       await this.assertEntityInputSelection(entityFieldName, [entityFieldValue]);
     },
 
-    async assertChartExsist() {
+    async assertChartExist() {
       await testSubjects.existOrFail('mlSingleMetricViewerChart');
     },
 
@@ -116,6 +122,80 @@ export function MachineLearningSingleMetricViewerProvider({ getService }: FtrPro
     async openAnomalyExplorer() {
       await testSubjects.click('mlAnomalyResultsViewSelectorExplorer');
       await testSubjects.existOrFail('mlPageAnomalyExplorer');
+    },
+
+    async openConfigForControl(entityFieldName: string) {
+      const isPopoverOpened = await testSubjects.exists(
+        `mlSingleMetricViewerEntitySelectionConfigPopover_${entityFieldName}`
+      );
+
+      if (isPopoverOpened) {
+        return;
+      }
+
+      await testSubjects.click(
+        `mlSingleMetricViewerEntitySelectionConfigButton_${entityFieldName}`
+      );
+      await testSubjects.existOrFail(
+        `mlSingleMetricViewerEntitySelectionConfigPopover_${entityFieldName}`
+      );
+    },
+
+    async assertEntityConfig(
+      entityFieldName: string,
+      anomalousOnly: boolean,
+      sortBy: 'anomaly_score' | 'name',
+      order: 'asc' | 'desc'
+    ) {
+      await this.openConfigForControl(entityFieldName);
+      expect(
+        await testSubjects.isEuiSwitchChecked(
+          `mlSingleMetricViewerEntitySelectionConfigAnomalousOnly_${entityFieldName}`
+        )
+      ).to.eql(
+        anomalousOnly,
+        `Expected the "Anomalous only" control for "${entityFieldName}" to be ${
+          anomalousOnly ? 'enabled' : 'disabled'
+        }`
+      );
+      await mlCommonUI.assertRadioGroupValue(
+        `mlSingleMetricViewerEntitySelectionConfigSortBy_${entityFieldName}`,
+        sortBy
+      );
+      await mlCommonUI.assertRadioGroupValue(
+        `mlSingleMetricViewerEntitySelectionConfigOrder_${entityFieldName}`,
+        order
+      );
+    },
+
+    async setEntityConfig(
+      entityFieldName: string,
+      anomalousOnly: boolean,
+      sortBy: 'anomaly_score' | 'name',
+      order: 'asc' | 'desc'
+    ) {
+      await this.openConfigForControl(entityFieldName);
+      await testSubjects.setEuiSwitch(
+        `mlSingleMetricViewerEntitySelectionConfigAnomalousOnly_${entityFieldName}`,
+        anomalousOnly ? 'check' : 'uncheck'
+      );
+      await mlCommonUI.selectRadioGroupValue(
+        `mlSingleMetricViewerEntitySelectionConfigSortBy_${entityFieldName}`,
+        sortBy
+      );
+      await mlCommonUI.selectRadioGroupValue(
+        `mlSingleMetricViewerEntitySelectionConfigOrder_${entityFieldName}`,
+        order
+      );
+      await this.assertEntityConfig(entityFieldName, anomalousOnly, sortBy, order);
+    },
+
+    async assertToastMessageExists(dataTestSubj: string) {
+      const toast = await testSubjects.find(dataTestSubj);
+      expect(toast).not.to.be(undefined);
+    },
+    async assertDisabledJobReasonWarningToastExist() {
+      await this.assertToastMessageExists('mlTimeSeriesExplorerDisabledJobReasonWarningToast');
     },
   };
 }

@@ -1,26 +1,15 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { IndexPatternField } from './index_pattern_field';
 import { IndexPattern } from '../index_patterns';
 import { KBN_FIELD_TYPES, FieldFormat } from '../../../common';
-import { FieldSpec } from '../types';
+import { FieldSpec, RuntimeField } from '../types';
 
 describe('Field', function () {
   function flatten(obj: Record<string, any>) {
@@ -28,7 +17,7 @@ describe('Field', function () {
   }
 
   function getField(values = {}) {
-    return new IndexPatternField({ ...fieldValues, ...values }, 'displayName');
+    return new IndexPatternField({ ...fieldValues, ...values });
   }
 
   const fieldValues = {
@@ -53,6 +42,12 @@ describe('Field', function () {
     } as unknown) as IndexPattern,
     $$spec: ({} as unknown) as FieldSpec,
     conflictDescriptions: { a: ['b', 'c'], d: ['e'] },
+    runtimeField: {
+      type: 'keyword' as RuntimeField['type'],
+      script: {
+        source: "emit('hello world')",
+      },
+    },
   };
 
   it('the correct properties are writable', () => {
@@ -89,6 +84,17 @@ describe('Field', function () {
 
     const fieldC = getField({ searchable: false, scripted: false });
     expect(fieldC.searchable).toEqual(false);
+  });
+
+  it('calculates visualizable', () => {
+    const field = getField({ type: 'unknown' });
+    expect(field.visualizable).toEqual(false);
+
+    const fieldB = getField({ type: 'conflict' });
+    expect(fieldB.visualizable).toEqual(false);
+
+    const fieldC = getField({ aggregatable: false, scripted: false });
+    expect(fieldC.visualizable).toEqual(false);
   });
 
   it('calculates aggregatable', () => {
@@ -139,12 +145,12 @@ describe('Field', function () {
   });
 
   it('exports the property to JSON', () => {
-    const field = new IndexPatternField(fieldValues, 'displayName');
+    const field = new IndexPatternField(fieldValues);
     expect(flatten(field)).toMatchSnapshot();
   });
 
   it('spec snapshot', () => {
-    const field = new IndexPatternField(fieldValues, 'displayName');
+    const field = new IndexPatternField(fieldValues);
     const getFormatterForField = () =>
       ({
         toJSON: () => ({

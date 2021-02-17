@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
+import { waitFor } from '@testing-library/react';
 import { ThemeProvider } from 'styled-components';
 import { mount, ReactWrapper } from 'enzyme';
 import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
-import { act } from 'react-dom/test-utils';
 
 import { EditExceptionModal } from './';
 import { useCurrentUser } from '../../../../common/lib/kibana';
@@ -22,6 +23,11 @@ import { useSignalIndex } from '../../../../detections/containers/detection_engi
 import { getExceptionListItemSchemaMock } from '../../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
 import { EntriesArray } from '../../../../../../lists/common/schemas/types';
 import * as builder from '../builder';
+import {
+  getRulesEqlSchemaMock,
+  getRulesSchemaMock,
+} from '../../../../../common/detection_engine/schemas/response/rules_schema.mocks';
+import { useRuleAsync } from '../../../../detections/containers/detection_engine/rules/use_rule_async';
 
 jest.mock('../../../../common/lib/kibana');
 jest.mock('../../../../detections/containers/detection_engine/rules');
@@ -30,13 +36,14 @@ jest.mock('../../../containers/source');
 jest.mock('../use_fetch_or_create_rule_exception_list');
 jest.mock('../../../../detections/containers/detection_engine/alerts/use_signal_index');
 jest.mock('../builder');
+jest.mock('../../../../detections/containers/detection_engine/rules/use_rule_async');
 
 describe('When the edit exception modal is opened', () => {
   const ruleName = 'test rule';
 
-  let ExceptionBuilderComponent: jest.SpyInstance<ReturnType<
-    typeof builder.ExceptionBuilderComponent
-  >>;
+  let ExceptionBuilderComponent: jest.SpyInstance<
+    ReturnType<typeof builder.ExceptionBuilderComponent>
+  >;
 
   beforeEach(() => {
     ExceptionBuilderComponent = jest
@@ -58,6 +65,9 @@ describe('When the edit exception modal is opened', () => {
       },
     ]);
     (useCurrentUser as jest.Mock).mockReturnValue({ username: 'test-username' });
+    (useRuleAsync as jest.Mock).mockImplementation(() => ({
+      rule: getRulesSchemaMock(),
+    }));
   });
 
   afterEach(() => {
@@ -66,15 +76,14 @@ describe('When the edit exception modal is opened', () => {
   });
 
   describe('when the modal is loading', () => {
-    let wrapper: ReactWrapper;
-    beforeEach(() => {
+    it('renders the loading spinner', async () => {
       (useFetchIndex as jest.Mock).mockImplementation(() => [
         true,
         {
           indexPatterns: stubIndexPattern,
         },
       ]);
-      wrapper = mount(
+      const wrapper = mount(
         <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
           <EditExceptionModal
             ruleIndices={[]}
@@ -87,16 +96,16 @@ describe('When the edit exception modal is opened', () => {
           />
         </ThemeProvider>
       );
-    });
-    it('renders the loading spinner', () => {
-      expect(wrapper.find('[data-test-subj="loadingEditExceptionModal"]').exists()).toBeTruthy();
+      await waitFor(() => {
+        expect(wrapper.find('[data-test-subj="loadingEditExceptionModal"]').exists()).toBeTruthy();
+      });
     });
   });
 
   describe('when an endpoint exception with exception data is passed', () => {
     describe('when exception entry fields are included in the index pattern', () => {
       let wrapper: ReactWrapper;
-      beforeEach(() => {
+      beforeEach(async () => {
         const exceptionItemMock = {
           ...getExceptionListItemSchemaMock(),
           entries: [
@@ -117,7 +126,9 @@ describe('When the edit exception modal is opened', () => {
           </ThemeProvider>
         );
         const callProps = ExceptionBuilderComponent.mock.calls[0][0];
-        act(() => callProps.onChange({ exceptionItems: [...callProps.exceptionListItems] }));
+        await waitFor(() => {
+          callProps.onChange({ exceptionItems: [...callProps.exceptionListItems] });
+        });
       });
       it('has the edit exception button enabled', () => {
         expect(
@@ -145,7 +156,7 @@ describe('When the edit exception modal is opened', () => {
 
     describe("when exception entry fields aren't included in the index pattern", () => {
       let wrapper: ReactWrapper;
-      beforeEach(() => {
+      beforeEach(async () => {
         wrapper = mount(
           <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
             <EditExceptionModal
@@ -160,7 +171,9 @@ describe('When the edit exception modal is opened', () => {
           </ThemeProvider>
         );
         const callProps = ExceptionBuilderComponent.mock.calls[0][0];
-        act(() => callProps.onChange({ exceptionItems: [...callProps.exceptionListItems] }));
+        await waitFor(() => {
+          callProps.onChange({ exceptionItems: [...callProps.exceptionListItems] });
+        });
       });
       it('has the edit exception button enabled', () => {
         expect(
@@ -187,9 +200,16 @@ describe('When the edit exception modal is opened', () => {
     });
   });
 
-  describe('when an detection exception with entries is passed', () => {
+  describe('when an exception assigned to a sequence eql rule type is passed', () => {
     let wrapper: ReactWrapper;
-    beforeEach(() => {
+    beforeEach(async () => {
+      (useRuleAsync as jest.Mock).mockImplementation(() => ({
+        rule: {
+          ...getRulesEqlSchemaMock(),
+          query:
+            'sequence [process where process.name = "test.exe"] [process where process.name = "explorer.exe"]',
+        },
+      }));
       wrapper = mount(
         <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
           <EditExceptionModal
@@ -204,7 +224,9 @@ describe('When the edit exception modal is opened', () => {
         </ThemeProvider>
       );
       const callProps = ExceptionBuilderComponent.mock.calls[0][0];
-      act(() => callProps.onChange({ exceptionItems: [...callProps.exceptionListItems] }));
+      await waitFor(() => {
+        callProps.onChange({ exceptionItems: [...callProps.exceptionListItems] });
+      });
     });
     it('has the edit exception button enabled', () => {
       expect(
@@ -224,11 +246,58 @@ describe('When the edit exception modal is opened', () => {
           .getDOMNode()
       ).toBeDisabled();
     });
+    it('should display the eql sequence callout', () => {
+      expect(wrapper.find('[data-test-subj="eql-sequence-callout"]').exists()).toBeTruthy();
+    });
+  });
+
+  describe('when a detection exception with entries is passed', () => {
+    let wrapper: ReactWrapper;
+    beforeEach(async () => {
+      wrapper = mount(
+        <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
+          <EditExceptionModal
+            ruleIndices={['filebeat-*']}
+            ruleId="123"
+            ruleName={ruleName}
+            exceptionListType={'detection'}
+            onCancel={jest.fn()}
+            onConfirm={jest.fn()}
+            exceptionItem={getExceptionListItemSchemaMock()}
+          />
+        </ThemeProvider>
+      );
+      const callProps = ExceptionBuilderComponent.mock.calls[0][0];
+      await waitFor(() => {
+        callProps.onChange({ exceptionItems: [...callProps.exceptionListItems] });
+      });
+    });
+    it('has the edit exception button enabled', () => {
+      expect(
+        wrapper.find('button[data-test-subj="edit-exception-confirm-button"]').getDOMNode()
+      ).not.toBeDisabled();
+    });
+    it('renders the exceptions builder', () => {
+      expect(wrapper.find('[data-test-subj="edit-exception-modal-builder"]').exists()).toBeTruthy();
+    });
+    it('should not contain the endpoint specific documentation text', () => {
+      expect(wrapper.find('[data-test-subj="edit-exception-endpoint-text"]').exists()).toBeFalsy();
+    });
+    it('should have the bulk close checkbox disabled', () => {
+      expect(
+        wrapper
+          .find('input[data-test-subj="close-alert-on-add-edit-exception-checkbox"]')
+          .getDOMNode()
+      ).toBeDisabled();
+    });
+    it('should not display the eql sequence callout', () => {
+      expect(wrapper.find('[data-test-subj="eql-sequence-callout"]').exists()).not.toBeTruthy();
+    });
   });
 
   describe('when an exception with no entries is passed', () => {
     let wrapper: ReactWrapper;
-    beforeEach(() => {
+    beforeEach(async () => {
       const exceptionItemMock = { ...getExceptionListItemSchemaMock(), entries: [] };
       wrapper = mount(
         <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
@@ -244,7 +313,9 @@ describe('When the edit exception modal is opened', () => {
         </ThemeProvider>
       );
       const callProps = ExceptionBuilderComponent.mock.calls[0][0];
-      act(() => callProps.onChange({ exceptionItems: [...callProps.exceptionListItems] }));
+      await waitFor(() => {
+        callProps.onChange({ exceptionItems: [...callProps.exceptionListItems] });
+      });
     });
     it('has the edit exception button disabled', () => {
       expect(
@@ -261,5 +332,27 @@ describe('When the edit exception modal is opened', () => {
           .getDOMNode()
       ).toBeDisabled();
     });
+  });
+
+  test('when there are exception builder errors has the add exception button disabled', async () => {
+    const wrapper = mount(
+      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
+        <EditExceptionModal
+          ruleId="123"
+          ruleIndices={['filebeat-*']}
+          ruleName={ruleName}
+          exceptionListType={'endpoint'}
+          exceptionItem={{ ...getExceptionListItemSchemaMock(), entries: [] }}
+          onCancel={jest.fn()}
+          onConfirm={jest.fn()}
+        />
+      </ThemeProvider>
+    );
+    const callProps = ExceptionBuilderComponent.mock.calls[0][0];
+    await waitFor(() => callProps.onChange({ exceptionItems: [], errorExists: true }));
+
+    expect(
+      wrapper.find('button[data-test-subj="edit-exception-confirm-button"]').getDOMNode()
+    ).toBeDisabled();
   });
 });

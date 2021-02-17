@@ -1,45 +1,35 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { ReactNode } from 'react';
-import styled from 'styled-components';
-import { DatePicker } from '../DatePicker';
+import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
+import { HeaderMenuPortal } from '../../../../../observability/public';
+import { ActionMenu } from '../../../application/action_menu';
+import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { EnvironmentFilter } from '../EnvironmentFilter';
-import { KueryBar } from '../KueryBar';
 
-// Header titles with long, unbroken words, like you would see for a long URL in
-// a transaction name, with the default `work-break`, don't break, and that ends
-// up pushing the date picker off of the screen. Setting `break-all` here lets
-// it wrap even if it has a long, unbroken work. The wrapped result is not great
-// looking, since it wraps, but it doesn't push any controls off of the screen.
-const ChildrenContainerFlexItem = styled(EuiFlexItem)`
-  word-break: break-all;
+const HeaderFlexGroup = euiStyled(EuiFlexGroup)`
+  padding: ${({ theme }) => theme.eui.gutterTypes.gutterMedium};
+  background: ${({ theme }) => theme.eui.euiColorEmptyShade};
 `;
 
 export function ApmHeader({ children }: { children: ReactNode }) {
+  const { setHeaderActionMenu } = useApmPluginContext().appMountParameters;
+
   return (
-    <>
-      <EuiFlexGroup alignItems="center" gutterSize="s">
-        <ChildrenContainerFlexItem>{children}</ChildrenContainerFlexItem>
-        <EuiFlexItem grow={false}>
-          <DatePicker />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-
-      <EuiSpacer />
-
-      <EuiFlexGroup alignItems="flexStart" gutterSize="s">
-        <EuiFlexItem grow={3}>
-          <KueryBar />
-        </EuiFlexItem>
-        <EuiFlexItem grow={1}>
-          <EnvironmentFilter />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </>
+    <HeaderFlexGroup alignItems="center" gutterSize="s" wrap={true}>
+      <HeaderMenuPortal setHeaderActionMenu={setHeaderActionMenu}>
+        <ActionMenu />
+      </HeaderMenuPortal>
+      <EuiFlexItem>{children}</EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EnvironmentFilter />
+      </EuiFlexItem>
+    </HeaderFlexGroup>
   );
 }

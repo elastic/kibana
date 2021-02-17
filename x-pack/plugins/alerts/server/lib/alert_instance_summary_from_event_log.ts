@@ -1,15 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { SanitizedAlert, AlertInstanceSummary, AlertInstanceStatus } from '../types';
 import { IEvent } from '../../../event_log/server';
-import { EVENT_LOG_ACTIONS, EVENT_LOG_PROVIDER } from '../plugin';
+import { EVENT_LOG_ACTIONS, EVENT_LOG_PROVIDER, LEGACY_EVENT_LOG_ACTIONS } from '../plugin';
 
 export interface AlertInstanceSummaryFromEventLogParams {
-  alert: SanitizedAlert;
+  alert: SanitizedAlert<{ bar: boolean }>;
   events: IEvent[];
   dateStart: string;
   dateEnd: string;
@@ -78,10 +79,15 @@ export function alertInstanceSummaryFromEventLog(
       // intentionally no break here
       case EVENT_LOG_ACTIONS.activeInstance:
         status.status = 'Active';
+        status.actionGroupId = event?.kibana?.alerting?.action_group_id;
+        status.actionSubgroup = event?.kibana?.alerting?.action_subgroup;
         break;
-      case EVENT_LOG_ACTIONS.resolvedInstance:
+      case LEGACY_EVENT_LOG_ACTIONS.resolvedInstance:
+      case EVENT_LOG_ACTIONS.recoveredInstance:
         status.status = 'OK';
         status.activeStartDate = undefined;
+        status.actionGroupId = undefined;
+        status.actionSubgroup = undefined;
     }
   }
 
@@ -118,6 +124,8 @@ function getAlertInstanceStatus(
   const status: AlertInstanceStatus = {
     status: 'OK',
     muted: false,
+    actionGroupId: undefined,
+    actionSubgroup: undefined,
     activeStartDate: undefined,
   };
   instances.set(instanceId, status);

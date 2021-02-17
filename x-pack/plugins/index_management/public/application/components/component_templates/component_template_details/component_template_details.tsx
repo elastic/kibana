@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useState } from 'react';
@@ -20,12 +21,17 @@ import {
   EuiBadge,
 } from '@elastic/eui';
 
-import { SectionLoading, TabSettings, TabAliases, TabMappings } from '../shared_imports';
+import {
+  SectionLoading,
+  TabSettings,
+  TabAliases,
+  TabMappings,
+  attemptToURIDecode,
+} from '../shared_imports';
 import { useComponentTemplatesContext } from '../component_templates_context';
 import { TabSummary } from './tab_summary';
 import { ComponentTemplateTabs, TabType } from './tabs';
 import { ManageButton, ManageAction } from './manage_button';
-import { attemptToDecodeURI } from '../lib';
 
 export interface Props {
   componentTemplateName: string;
@@ -47,7 +53,7 @@ export const ComponentTemplateDetailsFlyoutContent: React.FunctionComponent<Prop
 }) => {
   const { api } = useComponentTemplatesContext();
 
-  const decodedComponentTemplateName = attemptToDecodeURI(componentTemplateName);
+  const decodedComponentTemplateName = attemptToURIDecode(componentTemplateName)!;
 
   const { data: componentTemplateDetails, isLoading, error } = api.useLoadComponentTemplate(
     decodedComponentTemplateName

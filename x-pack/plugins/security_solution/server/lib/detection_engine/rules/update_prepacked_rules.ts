@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { SavedObjectsClientContract } from 'kibana/server';
@@ -47,6 +48,13 @@ export const updatePrepackagedRules = async (
         type,
         threat,
         threshold,
+        threat_filters: threatFilters,
+        threat_index: threatIndex,
+        threat_query: threatQuery,
+        threat_mapping: threatMapping,
+        threat_language: threatLanguage,
+        concurrent_searches: concurrentSearches,
+        items_per_search: itemsPerSearch,
         timestamp_override: timestampOverride,
         references,
         version,
@@ -97,6 +105,13 @@ export const updatePrepackagedRules = async (
         type,
         threat,
         threshold,
+        threatFilters,
+        threatIndex,
+        threatQuery,
+        threatMapping,
+        threatLanguage,
+        concurrentSearches,
+        itemsPerSearch,
         references,
         version,
         note,

@@ -1,16 +1,24 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiTableActionsColumnType, Query, Ast } from '@elastic/eui';
 
-import { DATA_FRAME_TASK_STATE } from './data_frame_task_state';
+import { DATA_FRAME_TASK_STATE } from '../../../../../../../common/constants/data_frame_analytics';
+import { DataFrameTaskStateType } from '../../../../../../../common/types/data_frame_analytics';
 export { DATA_FRAME_TASK_STATE };
+export { DataFrameTaskStateType };
 
 import { DataFrameAnalyticsId, DataFrameAnalyticsConfig } from '../../../../common';
-import { DataFrameAnalysisConfigType } from '../../../../../../../common/types/data_frame_analytics';
+import {
+  DataFrameAnalysisConfigType,
+  DataFrameAnalyticsStats,
+} from '../../../../../../../common/types/data_frame_analytics';
+
+export { DataFrameAnalyticsStats } from '../../../../../../../common/types/data_frame_analytics';
 
 export enum DATA_FRAME_MODE {
   BATCH = 'batch',
@@ -25,36 +33,11 @@ export type TermClause = ExtractClauseType<typeof Ast['Term']['isInstance']>;
 export type FieldClause = ExtractClauseType<typeof Ast['Field']['isInstance']>;
 export type Value = Parameters<typeof Ast['Term']['must']>[0];
 
-interface ProgressSection {
-  phase: string;
-  progress_percent: number;
-}
-
-export interface DataFrameAnalyticsStats {
-  assignment_explanation?: string;
-  id: DataFrameAnalyticsId;
-  memory_usage?: {
-    timestamp?: string;
-    peak_usage_bytes: number;
-    status: string;
-  };
-  node?: {
-    attributes: Record<string, any>;
-    ephemeral_id: string;
-    id: string;
-    name: string;
-    transport_address: string;
-  };
-  progress: ProgressSection[];
-  failure_reason?: string;
-  state: DATA_FRAME_TASK_STATE;
-}
-
-export function isDataFrameAnalyticsFailed(state: DATA_FRAME_TASK_STATE) {
+export function isDataFrameAnalyticsFailed(state: DataFrameTaskStateType) {
   return state === DATA_FRAME_TASK_STATE.FAILED;
 }
 
-export function isDataFrameAnalyticsRunning(state: DATA_FRAME_TASK_STATE) {
+export function isDataFrameAnalyticsRunning(state: DataFrameTaskStateType) {
   return (
     state === DATA_FRAME_TASK_STATE.ANALYZING ||
     state === DATA_FRAME_TASK_STATE.REINDEXING ||
@@ -63,7 +46,7 @@ export function isDataFrameAnalyticsRunning(state: DATA_FRAME_TASK_STATE) {
   );
 }
 
-export function isDataFrameAnalyticsStopped(state: DATA_FRAME_TASK_STATE) {
+export function isDataFrameAnalyticsStopped(state: DataFrameTaskStateType) {
   return state === DATA_FRAME_TASK_STATE.STOPPED;
 }
 
@@ -112,17 +95,18 @@ export interface DataFrameAnalyticsListRow {
   mode: string;
   state: DataFrameAnalyticsStats['state'];
   stats: DataFrameAnalyticsStats;
+  spaceIds?: string[];
 }
 
 // Used to pass on attribute names to table columns
-export enum DataFrameAnalyticsListColumn {
-  configDestIndex = 'config.dest.index',
-  configSourceIndex = 'config.source.index',
-  configCreateTime = 'config.create_time',
-  description = 'config.description',
-  id = 'id',
-  memoryStatus = 'stats.memory_usage.status',
-}
+export const DataFrameAnalyticsListColumn = {
+  configDestIndex: 'config.dest.index',
+  configSourceIndex: 'config.source.index',
+  configCreateTime: 'config.create_time',
+  description: 'config.description',
+  id: 'id',
+  memoryStatus: 'stats.memory_usage.status',
+} as const;
 
 export type ItemIdToExpandedRowMap = Record<string, JSX.Element>;
 

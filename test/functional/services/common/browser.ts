@@ -1,22 +1,12 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
+import { delay } from 'bluebird';
 import { cloneDeepWith } from 'lodash';
 import { Key, Origin } from 'selenium-webdriver';
 // @ts-ignore internal modules are not typed
@@ -192,6 +182,18 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
     }
 
     /**
+     * Retrieves the cookie with the given name. Returns null if there is no such cookie. The cookie will be returned as
+     * a JSON object as described by the WebDriver wire protocol.
+     * https://www.selenium.dev/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_Options.html
+     *
+     * @param {string} cookieName
+     * @return {Promise<IWebDriverCookie>}
+     */
+    public async getCookie(cookieName: string) {
+      return await driver.manage().getCookie(cookieName);
+    }
+
+    /**
      * Pauses the execution in the browser, similar to setting a breakpoint for debugging.
      * @return {Promise<void>}
      */
@@ -216,13 +218,17 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
      * Does a drag-and-drop action from one point to another
      * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/input_exports_Actions.html#dragAndDrop
      *
-     * @param {{element: WebElementWrapper | {x: number, y: number}, offset: {x: number, y: number}}} from
-     * @param {{element: WebElementWrapper | {x: number, y: number}, offset: {x: number, y: number}}} to
      * @return {Promise<void>}
      */
     public async dragAndDrop(
-      from: { offset?: { x: any; y: any }; location: any },
-      to: { offset?: { x: any; y: any }; location: any }
+      from: {
+        location: WebElementWrapper | { x?: number; y?: number };
+        offset?: { x?: number; y?: number };
+      },
+      to: {
+        location: WebElementWrapper | { x?: number; y?: number };
+        offset?: { x?: number; y?: number };
+      }
     ) {
       // The offset should be specified in pixels relative to the center of the element's bounding box
       const getW3CPoint = (data: any) => {
@@ -230,7 +236,11 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
           data.offset = {};
         }
         return data.location instanceof WebElementWrapper
-          ? { x: data.offset.x || 0, y: data.offset.y || 0, origin: data.location._webElement }
+          ? {
+              x: data.offset.x || 0,
+              y: data.offset.y || 0,
+              origin: data.location._webElement,
+            }
           : { x: data.location.x, y: data.location.y, origin: Origin.POINTER };
       };
 
@@ -238,6 +248,64 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
       const endPoint = getW3CPoint(to);
       await this.getActions().move({ x: 0, y: 0 }).perform();
       return await this.getActions().move(startPoint).press().move(endPoint).release().perform();
+    }
+
+    /**
+     * Performs drag and drop for html5 native drag and drop implementation
+     * There's a bug in Chromedriver for html5 dnd that doesn't allow to use the method `dragAndDrop` defined above
+     * https://github.com/SeleniumHQ/selenium/issues/6235
+     * This implementation simulates user's action by calling the drag and drop specific events directly.
+     *
+     * @param {string} from html selector
+     * @param {string} to html selector
+     * @return {Promise<void>}
+     */
+    public async html5DragAndDrop(from: string, to: string) {
+      await this.execute(
+        `
+          function createEvent(typeOfEvent) {
+            const event = document.createEvent("CustomEvent");
+            event.initCustomEvent(typeOfEvent, true, true, null);
+            event.dataTransfer = {
+              data: {},
+              setData: function (key, value) {
+                this.data[key] = value;
+              },
+              getData: function (key) {
+                return this.data[key];
+              }
+            };
+            return event;
+          }
+          function dispatchEvent(element, event, transferData) {
+            if (transferData !== undefined) {
+              event.dataTransfer = transferData;
+            }
+            if (element.dispatchEvent) {
+              element.dispatchEvent(event);
+            } else if (element.fireEvent) {
+              element.fireEvent("on" + event.type, event);
+            }
+          }
+
+          const origin = document.querySelector(arguments[0]);
+
+          const dragStartEvent = createEvent('dragstart');
+          dispatchEvent(origin, dragStartEvent);
+
+          setTimeout(() => {
+            const dropEvent = createEvent('drop');
+            const target = document.querySelector(arguments[1]);
+            dispatchEvent(target, dropEvent, dragStartEvent.dataTransfer);
+            const dragEndEvent = createEvent('dragend');
+            dispatchEvent(origin, dragEndEvent, dropEvent.dataTransfer);
+          }, 100);
+      `,
+        from,
+        to
+      );
+      // wait for 150ms to make sure the script has run
+      await delay(150);
     }
 
     /**
@@ -391,6 +459,16 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
         key,
         value
       );
+    }
+
+    /**
+     * Removes a value in local storage for the focused window/frame.
+     *
+     * @param {string} key
+     * @return {Promise<void>}
+     */
+    public async removeLocalStorageItem(key: string): Promise<void> {
+      await driver.executeScript('return window.localStorage.removeItem(arguments[0]);', key);
     }
 
     /**

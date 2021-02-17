@@ -1,25 +1,30 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import * as rt from 'io-ts';
-import { pipe } from 'fp-ts/lib/pipeable';
-import { fold } from 'fp-ts/lib/Either';
-import { identity } from 'fp-ts/lib/function';
-import { npStart } from '../../../../legacy_singletons';
+import type { HttpHandler } from 'src/core/public';
 
 import { getDatafeedId, getJobId } from '../../../../../common/log_analysis';
-import { throwErrors, createPlainError } from '../../../../../common/runtime_types';
+import { decodeOrThrow } from '../../../../../common/runtime_types';
+
+interface DeleteJobsRequestArgs<JobType extends string> {
+  spaceId: string;
+  sourceId: string;
+  jobTypes: JobType[];
+}
 
 export const callDeleteJobs = async <JobType extends string>(
-  spaceId: string,
-  sourceId: string,
-  jobTypes: JobType[]
+  requestArgs: DeleteJobsRequestArgs<JobType>,
+  fetch: HttpHandler
 ) => {
+  const { spaceId, sourceId, jobTypes } = requestArgs;
+
   // NOTE: Deleting the jobs via this API will delete the datafeeds at the same time
-  const deleteJobsResponse = await npStart.http.fetch('/api/ml/jobs/delete_jobs', {
+  const deleteJobsResponse = await fetch('/api/ml/jobs/delete_jobs', {
     method: 'POST',
     body: JSON.stringify(
       deleteJobsRequestPayloadRT.encode({
@@ -28,28 +33,29 @@ export const callDeleteJobs = async <JobType extends string>(
     ),
   });
 
-  return pipe(
-    deleteJobsResponsePayloadRT.decode(deleteJobsResponse),
-    fold(throwErrors(createPlainError), identity)
-  );
+  return decodeOrThrow(deleteJobsResponsePayloadRT)(deleteJobsResponse);
 };
 
-export const callGetJobDeletionTasks = async () => {
-  const jobDeletionTasksResponse = await npStart.http.fetch('/api/ml/jobs/deleting_jobs_tasks');
+export const callGetJobDeletionTasks = async (fetch: HttpHandler) => {
+  const jobDeletionTasksResponse = await fetch('/api/ml/jobs/deleting_jobs_tasks');
 
-  return pipe(
-    getJobDeletionTasksResponsePayloadRT.decode(jobDeletionTasksResponse),
-    fold(throwErrors(createPlainError), identity)
-  );
+  return decodeOrThrow(getJobDeletionTasksResponsePayloadRT)(jobDeletionTasksResponse);
 };
+
+interface StopDatafeedsRequestArgs<JobType extends string> {
+  spaceId: string;
+  sourceId: string;
+  jobTypes: JobType[];
+}
 
 export const callStopDatafeeds = async <JobType extends string>(
-  spaceId: string,
-  sourceId: string,
-  jobTypes: JobType[]
+  requestArgs: StopDatafeedsRequestArgs<JobType>,
+  fetch: HttpHandler
 ) => {
+  const { spaceId, sourceId, jobTypes } = requestArgs;
+
   // Stop datafeed due to https://github.com/elastic/kibana/issues/44652
-  const stopDatafeedResponse = await npStart.http.fetch('/api/ml/jobs/stop_datafeeds', {
+  const stopDatafeedResponse = await fetch('/api/ml/jobs/stop_datafeeds', {
     method: 'POST',
     body: JSON.stringify(
       stopDatafeedsRequestPayloadRT.encode({
@@ -58,10 +64,7 @@ export const callStopDatafeeds = async <JobType extends string>(
     ),
   });
 
-  return pipe(
-    stopDatafeedsResponsePayloadRT.decode(stopDatafeedResponse),
-    fold(throwErrors(createPlainError), identity)
-  );
+  return decodeOrThrow(stopDatafeedsResponsePayloadRT)(stopDatafeedResponse);
 };
 
 export const deleteJobsRequestPayloadRT = rt.type({

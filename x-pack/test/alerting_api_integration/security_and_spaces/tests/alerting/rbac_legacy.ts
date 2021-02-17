@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -16,8 +17,6 @@ export default function alertTests({ getService }: FtrProviderContext) {
   const es = getService('legacyEs');
   const retry = getService('retry');
   const esArchiver = getService('esArchiver');
-  const securityService = getService('security');
-  const spacesService = getService('spaces');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const esTestIndexTool = new ESTestIndexTool(es, retry);
 
@@ -39,7 +38,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
       await esArchiver.load('alerts_legacy');
       await esTestIndexTool.setup();
       await es.indices.create({ index: authorizationIndex });
-      await setupSpacesAndUsers(spacesService, securityService);
+      await setupSpacesAndUsers(getService);
     });
 
     after(async () => {

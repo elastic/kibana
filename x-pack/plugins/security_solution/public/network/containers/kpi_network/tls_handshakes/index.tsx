@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import deepEqual from 'fast-deep-equal';
@@ -20,10 +21,10 @@ import { ESTermQuery } from '../../../../../common/typed_json';
 
 import * as i18n from './translations';
 import {
-  AbortError,
   isCompleteResponse,
   isErrorResponse,
 } from '../../../../../../../../src/plugins/data/common';
+import { AbortError } from '../../../../../../../../src/plugins/kibana_utils/common';
 import { getInspectResponse } from '../../../../helpers';
 import { InspectResponse } from '../../../../types';
 
@@ -56,23 +57,15 @@ export const useNetworkKpiTlsHandshakes = ({
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
   const [loading, setLoading] = useState(false);
-  const [networkKpiTlsHandshakesRequest, setNetworkKpiTlsHandshakesRequest] = useState<
-    NetworkKpiTlsHandshakesRequestOptions
-  >({
-    defaultIndex: indexNames,
-    factoryQueryType: NetworkKpiQueries.tlsHandshakes,
-    filterQuery: createFilter(filterQuery),
-    id: ID,
-    timerange: {
-      interval: '12h',
-      from: startDate,
-      to: endDate,
-    },
-  });
+  const [
+    networkKpiTlsHandshakesRequest,
+    setNetworkKpiTlsHandshakesRequest,
+  ] = useState<NetworkKpiTlsHandshakesRequestOptions | null>(null);
 
-  const [networkKpiTlsHandshakesResponse, setNetworkKpiTlsHandshakesResponse] = useState<
-    NetworkKpiTlsHandshakesArgs
-  >({
+  const [
+    networkKpiTlsHandshakesResponse,
+    setNetworkKpiTlsHandshakesResponse,
+  ] = useState<NetworkKpiTlsHandshakesArgs>({
     tlsHandshakes: 0,
     id: ID,
     inspect: {
@@ -84,7 +77,10 @@ export const useNetworkKpiTlsHandshakes = ({
   });
 
   const networkKpiTlsHandshakesSearch = useCallback(
-    (request: NetworkKpiTlsHandshakesRequestOptions) => {
+    (request: NetworkKpiTlsHandshakesRequestOptions | null) => {
+      if (request == null || skip) {
+        return;
+      }
       let didCancel = false;
       const asyncSearch = async () => {
         abortCtrl.current = new AbortController();
@@ -138,14 +134,15 @@ export const useNetworkKpiTlsHandshakes = ({
         abortCtrl.current.abort();
       };
     },
-    [data.search, notifications.toasts]
+    [data.search, notifications.toasts, skip]
   );
 
   useEffect(() => {
     setNetworkKpiTlsHandshakesRequest((prevRequest) => {
       const myRequest = {
-        ...prevRequest,
+        ...(prevRequest ?? {}),
         defaultIndex: indexNames,
+        factoryQueryType: NetworkKpiQueries.tlsHandshakes,
         filterQuery: createFilter(filterQuery),
         timerange: {
           interval: '12h',
@@ -153,12 +150,12 @@ export const useNetworkKpiTlsHandshakes = ({
           to: endDate,
         },
       };
-      if (!skip && !deepEqual(prevRequest, myRequest)) {
+      if (!deepEqual(prevRequest, myRequest)) {
         return myRequest;
       }
       return prevRequest;
     });
-  }, [indexNames, endDate, filterQuery, skip, startDate]);
+  }, [indexNames, endDate, filterQuery, startDate]);
 
   useEffect(() => {
     networkKpiTlsHandshakesSearch(networkKpiTlsHandshakesRequest);

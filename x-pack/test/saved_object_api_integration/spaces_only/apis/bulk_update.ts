@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { SPACES } from '../../common/lib/spaces';
@@ -23,12 +24,18 @@ const createTestCases = (spaceId: string) => {
     { ...CASES.SINGLE_NAMESPACE_DEFAULT_SPACE, ...fail404(spaceId !== DEFAULT_SPACE_ID) },
     { ...CASES.SINGLE_NAMESPACE_SPACE_1, ...fail404(spaceId !== SPACE_1_ID) },
     { ...CASES.SINGLE_NAMESPACE_SPACE_2, ...fail404(spaceId !== SPACE_2_ID) },
+    CASES.MULTI_NAMESPACE_ALL_SPACES,
     {
       ...CASES.MULTI_NAMESPACE_DEFAULT_AND_SPACE_1,
       ...fail404(spaceId !== DEFAULT_SPACE_ID && spaceId !== SPACE_1_ID),
     },
     { ...CASES.MULTI_NAMESPACE_ONLY_SPACE_1, ...fail404(spaceId !== SPACE_1_ID) },
     { ...CASES.MULTI_NAMESPACE_ONLY_SPACE_2, ...fail404(spaceId !== SPACE_2_ID) },
+    {
+      ...CASES.MULTI_NAMESPACE_ISOLATED_ONLY_DEFAULT_SPACE,
+      ...fail404(spaceId !== DEFAULT_SPACE_ID),
+    },
+    { ...CASES.MULTI_NAMESPACE_ISOLATED_ONLY_SPACE_1, ...fail404(spaceId !== SPACE_1_ID) },
     CASES.NAMESPACE_AGNOSTIC,
     { ...CASES.HIDDEN, ...fail404() },
     { ...CASES.DOES_NOT_EXIST, ...fail404() },
@@ -39,6 +46,7 @@ const createTestCases = (spaceId: string) => {
     { ...CASES.SINGLE_NAMESPACE_DEFAULT_SPACE, namespace: DEFAULT_SPACE_ID },
     { ...CASES.SINGLE_NAMESPACE_SPACE_1, namespace: SPACE_1_ID },
     { ...CASES.SINGLE_NAMESPACE_SPACE_2, namespace: SPACE_1_ID, ...fail404() }, // intentional 404 test case
+    { ...CASES.MULTI_NAMESPACE_ALL_SPACES, namespace: spaceId }, // any spaceId will work (not '*')
     { ...CASES.MULTI_NAMESPACE_DEFAULT_AND_SPACE_1, namespace: DEFAULT_SPACE_ID }, // SPACE_1_ID would also work
     { ...CASES.MULTI_NAMESPACE_ONLY_SPACE_1, namespace: SPACE_2_ID, ...fail404() }, // intentional 404 test case
     { ...CASES.MULTI_NAMESPACE_ONLY_SPACE_2, namespace: SPACE_2_ID },

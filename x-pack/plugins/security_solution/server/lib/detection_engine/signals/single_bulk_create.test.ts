@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { generateId } from './utils';
@@ -19,7 +20,14 @@ import {
 import { DEFAULT_SIGNALS_INDEX } from '../../../../common/constants';
 import { singleBulkCreate, filterDuplicateRules } from './single_bulk_create';
 import { alertsMock, AlertServicesMock } from '../../../../../alerts/server/mocks';
+import { buildRuleMessageFactory } from './rule_messages';
 
+const buildRuleMessage = buildRuleMessageFactory({
+  id: 'fake id',
+  ruleId: 'fake rule id',
+  index: 'fakeindex',
+  name: 'fake name',
+});
 describe('singleBulkCreate', () => {
   const mockService: AlertServicesMock = alertsMock.createAlertServices();
 
@@ -158,6 +166,7 @@ describe('singleBulkCreate', () => {
       refresh: false,
       tags: ['some fake tag 1', 'some fake tag 2'],
       throttle: 'no_actions',
+      buildRuleMessage,
     });
     expect(success).toEqual(true);
     expect(createdItemsCount).toEqual(0);
@@ -192,6 +201,7 @@ describe('singleBulkCreate', () => {
       refresh: false,
       tags: ['some fake tag 1', 'some fake tag 2'],
       throttle: 'no_actions',
+      buildRuleMessage,
     });
     expect(success).toEqual(true);
     expect(createdItemsCount).toEqual(0);
@@ -218,6 +228,7 @@ describe('singleBulkCreate', () => {
       refresh: false,
       tags: ['some fake tag 1', 'some fake tag 2'],
       throttle: 'no_actions',
+      buildRuleMessage,
     });
     expect(success).toEqual(true);
     expect(createdItemsCount).toEqual(0);
@@ -245,6 +256,7 @@ describe('singleBulkCreate', () => {
       refresh: false,
       tags: ['some fake tag 1', 'some fake tag 2'],
       throttle: 'no_actions',
+      buildRuleMessage,
     });
 
     expect(mockLogger.error).not.toHaveBeenCalled();
@@ -274,6 +286,7 @@ describe('singleBulkCreate', () => {
       refresh: false,
       tags: ['some fake tag 1', 'some fake tag 2'],
       throttle: 'no_actions',
+      buildRuleMessage,
     });
     expect(mockLogger.error).toHaveBeenCalled();
     expect(errors).toEqual(['[4]: internal server error']);
@@ -303,19 +316,21 @@ describe('singleBulkCreate', () => {
   });
 
   test('filter duplicate rules will return back search responses if they do not have a signal and will NOT filter the source out', () => {
-    const ancestors = sampleDocWithAncestors();
-    ancestors.hits.hits[0]._source = { '@timestamp': '2020-04-20T21:27:45+0000' };
+    const ancestors = sampleDocSearchResultsNoSortId();
     const filtered = filterDuplicateRules('04128c15-0d1b-4716-a4c5-46997ac7f3bd', ancestors);
-    expect(filtered).toEqual([
-      {
-        _index: 'myFakeSignalIndex',
-        _type: 'doc',
-        _score: 100,
-        _version: 1,
-        _id: 'e1e08ddc-5e37-49ff-a258-5393aa44435a',
-        _source: { '@timestamp': '2020-04-20T21:27:45+0000' },
-      },
-    ]);
+    expect(filtered).toEqual(ancestors.hits.hits);
+  });
+
+  test('filter duplicate rules does not attempt filters when the signal is not an event type of signal but rather a "clash" from the source index having its own numeric signal type', () => {
+    const doc = { ...sampleDocWithAncestors(), _source: { signal: 1234 } };
+    const filtered = filterDuplicateRules('04128c15-0d1b-4716-a4c5-46997ac7f3bd', doc);
+    expect(filtered).toEqual([]);
+  });
+
+  test('filter duplicate rules does not attempt filters when the signal is not an event type of signal but rather a "clash" from the source index having its own object signal type', () => {
+    const doc = { ...sampleDocWithAncestors(), _source: { signal: {} } };
+    const filtered = filterDuplicateRules('04128c15-0d1b-4716-a4c5-46997ac7f3bd', doc);
+    expect(filtered).toEqual([]);
   });
 
   test('create successful and returns proper createdItemsCount', async () => {
@@ -339,6 +354,7 @@ describe('singleBulkCreate', () => {
       refresh: false,
       tags: ['some fake tag 1', 'some fake tag 2'],
       throttle: 'no_actions',
+      buildRuleMessage,
     });
     expect(success).toEqual(true);
     expect(createdItemsCount).toEqual(1);

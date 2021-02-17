@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { uiCapabilitiesForFeatures } from './ui_capabilities_for_features';
@@ -92,7 +93,6 @@ describe('populateUICapabilities', () => {
           new KibanaFeature({
             id: 'newFeature',
             name: 'my new feature',
-            navLinkId: 'newFeatureNavLink',
             app: ['bar-app'],
             category: { id: 'foo', label: 'foo' },
             privileges: {
@@ -146,7 +146,6 @@ describe('populateUICapabilities', () => {
           new KibanaFeature({
             id: 'newFeature',
             name: 'my new feature',
-            navLinkId: 'newFeatureNavLink',
             app: ['bar-app'],
             category: { id: 'foo', label: 'foo' },
             catalogue: ['anotherFooEntry', 'anotherBarEntry'],
@@ -216,7 +215,6 @@ describe('populateUICapabilities', () => {
           new KibanaFeature({
             id: 'newFeature',
             name: 'my new feature',
-            navLinkId: 'newFeatureNavLink',
             app: ['bar-app'],
             category: { id: 'foo', label: 'foo' },
             privileges: {
@@ -247,7 +245,6 @@ describe('populateUICapabilities', () => {
           new KibanaFeature({
             id: 'newFeature',
             name: 'my new feature',
-            navLinkId: 'newFeatureNavLink',
             app: ['bar-app'],
             category: { id: 'foo', label: 'foo' },
             privileges: null,
@@ -292,7 +289,6 @@ describe('populateUICapabilities', () => {
           new KibanaFeature({
             id: 'newFeature',
             name: 'my new feature',
-            navLinkId: 'newFeatureNavLink',
             app: ['bar-app'],
             category: { id: 'foo', label: 'foo' },
             privileges: {
@@ -364,7 +360,6 @@ describe('populateUICapabilities', () => {
           new KibanaFeature({
             id: 'newFeature',
             name: 'my new feature',
-            navLinkId: 'newFeatureNavLink',
             app: ['bar-app'],
             category: { id: 'foo', label: 'foo' },
             privileges: {
@@ -385,7 +380,6 @@ describe('populateUICapabilities', () => {
           new KibanaFeature({
             id: 'yetAnotherNewFeature',
             name: 'yet another new feature',
-            navLinkId: 'yetAnotherNavLink',
             app: ['bar-app'],
             category: { id: 'foo', label: 'foo' },
             privileges: {

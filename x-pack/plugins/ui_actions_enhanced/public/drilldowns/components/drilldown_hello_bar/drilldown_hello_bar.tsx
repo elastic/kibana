@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -31,11 +32,9 @@ export const DrilldownHelloBar: React.FC<DrilldownHelloBarProps> = ({
 }) => {
   return (
     <EuiCallOut data-test-subj={WELCOME_MESSAGE_TEST_SUBJ}>
-      <EuiFlexGroup>
+      <EuiFlexGroup responsive={false}>
         <EuiFlexItem grow={false}>
-          <div style={{ marginLeft: '8px' }}>
-            <EuiIcon type="help" />
-          </div>
+          <EuiIcon type="help" />
         </EuiFlexItem>
         <EuiFlexItem grow={1}>
           <EuiText size={'s'}>

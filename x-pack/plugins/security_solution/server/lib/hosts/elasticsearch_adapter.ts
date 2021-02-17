@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { set } from '@elastic/safer-lodash-set/fp';
@@ -95,19 +96,19 @@ export class ElasticsearchHostsAdapter implements HostsAdapter {
       response: [inspectStringifyObject(response)],
     };
     const formattedHostItem = formatHostItem(options.fields, aggregations);
-    const hostId =
-      formattedHostItem.host && formattedHostItem.host.id
-        ? Array.isArray(formattedHostItem.host.id)
-          ? formattedHostItem.host.id[0]
-          : formattedHostItem.host.id
+    const ident = // endpoint-generated ID, NOT elastic-agent-id
+      formattedHostItem.agent && formattedHostItem.agent.id
+        ? Array.isArray(formattedHostItem.agent.id)
+          ? formattedHostItem.agent.id[0]
+          : formattedHostItem.agent.id
         : null;
-    const endpoint: EndpointFields | null = await this.getHostEndpoint(request, hostId);
+    const endpoint: EndpointFields | null = await this.getHostEndpoint(request, ident);
     return { inspect, _id: options.hostName, ...formattedHostItem, endpoint };
   }
 
   public async getHostEndpoint(
     request: FrameworkRequest,
-    hostId: string | null
+    id: string | null
   ): Promise<EndpointFields | null> {
     const logger = this.endpointContext.logFactory.get('metadata');
     try {
@@ -121,8 +122,8 @@ export class ElasticsearchHostsAdapter implements HostsAdapter {
         requestHandlerContext: request.context,
       };
       const endpointData =
-        hostId != null && metadataRequestContext.endpointAppContextService.getAgentService() != null
-          ? await getHostData(metadataRequestContext, hostId)
+        id != null && metadataRequestContext.endpointAppContextService.getAgentService() != null
+          ? await getHostData(metadataRequestContext, id)
           : null;
       return endpointData != null && endpointData.metadata
         ? {

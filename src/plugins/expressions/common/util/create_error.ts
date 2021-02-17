@@ -1,25 +1,22 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { ExpressionValueError } from '../../common';
 
-type ErrorLike = Partial<Pick<Error, 'name' | 'message' | 'stack'>>;
+export type SerializedError = {
+  name: string;
+  message: string;
+  stack?: string;
+};
+
+export type ErrorLike = SerializedError & {
+  original?: SerializedError;
+};
 
 export const createError = (err: string | ErrorLike): ExpressionValueError => ({
   type: 'error',
@@ -32,5 +29,11 @@ export const createError = (err: string | ErrorLike): ExpressionValueError => ({
         : undefined,
     message: typeof err === 'string' ? err : String(err.message),
     name: typeof err === 'object' ? err.name || 'Error' : 'Error',
+    original:
+      err instanceof Error
+        ? err
+        : typeof err === 'object' && 'original' in err && err.original instanceof Error
+        ? err.original
+        : undefined,
   },
 });

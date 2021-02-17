@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 /*
@@ -26,8 +27,7 @@ import {
 import { withKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 
 function FilterListsHeaderUI({ totalCount, refreshFilterLists, kibana }) {
-  const { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } = kibana.services.docLinks;
-  const docsUrl = `${ELASTIC_WEBSITE_URL}guide/en/machine-learning/${DOC_LINK_VERSION}/ml-rules.html`;
+  const docsUrl = kibana.services.docLinks.links.ml.customRules;
   return (
     <React.Fragment>
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="baseline">

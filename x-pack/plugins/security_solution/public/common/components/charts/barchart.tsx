@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
@@ -11,6 +12,7 @@ import { getOr, get, isNumber } from 'lodash/fp';
 import deepmerge from 'deepmerge';
 import uuid from 'uuid';
 import styled from 'styled-components';
+import deepEqual from 'fast-deep-equal';
 
 import { escapeDataProviderId } from '../drag_and_drop/helpers';
 import { useTimeZone } from '../../lib/kibana';
@@ -47,15 +49,20 @@ const checkIfAnyValidSeriesExist = (
   !checkIfAllValuesAreZero(data) &&
   data.some(checkIfAllTheDataInTheSeriesAreValid);
 
+const yAccessors = ['y'];
+const splitSeriesAccessors = ['g'];
+
 // Bar chart rotation: https://ela.st/chart-rotations
 export const BarChartBaseComponent = ({
   data,
   forceHiddenLegend = false,
+  yAxisTitle,
   ...chartConfigs
 }: {
   data: ChartSeriesData[];
   width: string | null | undefined;
   height: string | null | undefined;
+  yAxisTitle?: string | undefined;
   configs?: ChartSeriesConfigs | undefined;
   forceHiddenLegend?: boolean;
 }) => {
@@ -84,9 +91,9 @@ export const BarChartBaseComponent = ({
             xScaleType={getOr(ScaleType.Linear, 'configs.series.xScaleType', chartConfigs)}
             yScaleType={getOr(ScaleType.Linear, 'configs.series.yScaleType', chartConfigs)}
             xAccessor="x"
-            yAccessors={['y']}
+            yAccessors={yAccessors}
             timeZone={timeZone}
-            splitSeriesAccessors={['g']}
+            splitSeriesAccessors={splitSeriesAccessors}
             data={series.value!}
             stackAccessors={get('configs.series.stackAccessors', chartConfigs)}
             color={series.color ? series.color : undefined}
@@ -115,6 +122,7 @@ export const BarChartBaseComponent = ({
           },
         }}
         tickFormat={yTickFormatter}
+        title={yAxisTitle}
       />
     </Chart>
   ) : null;
@@ -158,6 +166,7 @@ export const BarChartComponent: React.FC<BarChartComponentProps> = ({
     [barChart, stackByField, timelineId]
   );
 
+  const yAxisTitle = get('yAxisTitle', configs);
   const customHeight = get('customHeight', configs);
   const customWidth = get('customWidth', configs);
   const chartHeight = getChartHeight(customHeight, height);
@@ -170,6 +179,7 @@ export const BarChartComponent: React.FC<BarChartComponentProps> = ({
           <BarChartBase
             configs={configs}
             data={barChart}
+            yAxisTitle={yAxisTitle}
             forceHiddenLegend={stackByField != null}
             height={chartHeight}
             width={chartHeight}
@@ -185,4 +195,11 @@ export const BarChartComponent: React.FC<BarChartComponentProps> = ({
   );
 };
 
-export const BarChart = React.memo(BarChartComponent);
+export const BarChart = React.memo(
+  BarChartComponent,
+  (prevProps, nextProps) =>
+    prevProps.stackByField === nextProps.stackByField &&
+    prevProps.timelineId === nextProps.timelineId &&
+    deepEqual(prevProps.configs, nextProps.configs) &&
+    deepEqual(prevProps.barChart, nextProps.barChart)
+);

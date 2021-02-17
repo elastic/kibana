@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { AUTHENTICATION } from '../../common/lib/authentication';
@@ -21,7 +22,7 @@ export default function resolveCopyToSpaceConflictsTestSuite({ getService }: Tes
     createExpectNonOverriddenResponseWithoutReferences,
     createExpectOverriddenResponseWithReferences,
     createExpectOverriddenResponseWithoutReferences,
-    expectNotFoundResponse,
+    expectRouteForbiddenResponse,
     createExpectUnauthorizedAtSpaceWithReferencesResult,
     createExpectReadonlyAtSpaceWithReferencesResult,
     createExpectUnauthorizedAtSpaceWithoutReferencesResult,
@@ -63,24 +64,24 @@ export default function resolveCopyToSpaceConflictsTestSuite({ getService }: Tes
         user,
         tests: {
           withReferencesNotOverwriting: {
-            statusCode: 404,
-            response: expectNotFoundResponse,
+            statusCode: 403,
+            response: expectRouteForbiddenResponse,
           },
           withReferencesOverwriting: {
-            statusCode: 404,
-            response: expectNotFoundResponse,
+            statusCode: 403,
+            response: expectRouteForbiddenResponse,
           },
           withoutReferencesOverwriting: {
-            statusCode: 404,
-            response: expectNotFoundResponse,
+            statusCode: 403,
+            response: expectRouteForbiddenResponse,
           },
           withoutReferencesNotOverwriting: {
-            statusCode: 404,
-            response: expectNotFoundResponse,
+            statusCode: 403,
+            response: expectRouteForbiddenResponse,
           },
           nonExistentSpace: {
-            statusCode: 404,
-            response: expectNotFoundResponse,
+            statusCode: 403,
+            response: expectRouteForbiddenResponse,
           },
           multiNamespaceTestCases: createMultiNamespaceTestCases(spaceId, 'noAccess'),
         },

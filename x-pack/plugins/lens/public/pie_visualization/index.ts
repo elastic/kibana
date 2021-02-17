@@ -1,13 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { CoreSetup } from 'src/core/public';
 import { ExpressionsSetup } from 'src/plugins/expressions/public';
-import { pieVisualization } from './pie_visualization';
-import { pie, getPieRenderer } from './register_expression';
 import { EditorFrameSetup, FormatFactory } from '../types';
 import { UiActionsStart } from '../../../../../src/plugins/ui_actions/public';
 import { ChartsPluginSetup } from '../../../../../src/plugins/charts/public';
@@ -30,15 +29,20 @@ export class PieVisualization {
     core: CoreSetup,
     { expressions, formatFactory, editorFrame, charts }: PieVisualizationPluginSetupPlugins
   ) {
-    expressions.registerFunction(() => pie);
+    editorFrame.registerVisualization(async () => {
+      const { getPieVisualization, pie, getPieRenderer } = await import('../async_services');
+      const palettes = await charts.palettes.getPalettes();
 
-    expressions.registerRenderer(
-      getPieRenderer({
-        formatFactory,
-        chartsThemeService: charts.theme,
-      })
-    );
+      expressions.registerFunction(() => pie);
 
-    editorFrame.registerVisualization(pieVisualization);
+      expressions.registerRenderer(
+        getPieRenderer({
+          formatFactory,
+          chartsThemeService: charts.theme,
+          paletteService: palettes,
+        })
+      );
+      return getPieVisualization({ paletteService: palettes });
+    });
   }
 }

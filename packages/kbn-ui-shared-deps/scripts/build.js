@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 const Path = require('path');
@@ -26,10 +15,12 @@ const del = require('del');
 
 const { getWebpackConfig } = require('../webpack.config');
 
+const DIST_DIR = Path.resolve(__dirname, '../target');
+
 run(
   async ({ log, flags }) => {
     log.info('cleaning previous build output');
-    await del(Path.resolve(__dirname, '../target'));
+    await del(DIST_DIR);
 
     const compiler = webpack(
       getWebpackConfig({
@@ -38,7 +29,7 @@ run(
     );
 
     /** @param {webpack.Stats} stats */
-    const onCompilationComplete = (stats) => {
+    const onCompilationComplete = async (stats) => {
       const took = Math.round((stats.endTime - stats.startTime) / 1000);
 
       if (!stats.hasErrors() && !stats.hasWarnings()) {
@@ -56,11 +47,9 @@ run(
 
     if (flags.watch) {
       compiler.hooks.done.tap('report on stats', (stats) => {
-        try {
-          onCompilationComplete(stats);
-        } catch (error) {
+        onCompilationComplete(stats).catch((error) => {
           log.error(error.message);
-        }
+        });
       });
 
       compiler.hooks.watchRun.tap('report on start', () => {
@@ -83,7 +72,8 @@ run(
       return;
     }
 
-    onCompilationComplete(
+    log.info('running webpack');
+    await onCompilationComplete(
       await new Promise((resolve, reject) => {
         compiler.run((error, stats) => {
           if (error) {

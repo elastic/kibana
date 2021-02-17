@@ -1,14 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { RequestHandlerContext } from 'src/core/server';
 import { InfraRequestHandlerContext } from '../../types';
 import { TracingSpan, startTracingSpan } from '../../../common/performance_tracing';
-import { fetchMlJob, getLogEntryDatasets } from './common';
-import { getJobId, metricsK8SJobTypes } from '../../../common/infra_ml';
+import { fetchMlJob, MappedAnomalyHit, InfluencerFilter } from './common';
+import { getJobId, metricsK8SJobTypes, ANOMALY_THRESHOLD } from '../../../common/infra_ml';
 import { Sort, Pagination } from '../../../common/http_api/infra_ml';
 import type { MlSystem, MlAnomalyDetectors } from '../../types';
 import { InsufficientAnomalyMlJobsConfigured, isMlPrivilegesError } from './errors';
@@ -18,39 +18,34 @@ import {
   createMetricsK8sAnomaliesQuery,
 } from './queries/metrics_k8s_anomalies';
 
-interface MappedAnomalyHit {
-  id: string;
-  anomalyScore: number;
-  // dataset: string;
-  typical: number;
-  actual: number;
-  jobId: string;
-  startTime: number;
-  duration: number;
-  categoryId?: string;
-}
-
 async function getCompatibleAnomaliesJobIds(
   spaceId: string,
   sourceId: string,
+  metric: 'memory_usage' | 'network_in' | 'network_out' | undefined,
   mlAnomalyDetectors: MlAnomalyDetectors
 ) {
-  const metricsK8sJobIds = metricsK8SJobTypes.map((jt) => getJobId(spaceId, sourceId, jt));
+  let metricsK8sJobIds = metricsK8SJobTypes;
+
+  if (metric) {
+    metricsK8sJobIds = metricsK8sJobIds.filter((jt) => jt === `k8s_${metric}`);
+  }
 
   const jobIds: string[] = [];
   let jobSpans: TracingSpan[] = [];
 
   try {
     await Promise.all(
-      metricsK8sJobIds.map((id) => {
-        return (async () => {
-          const {
-            timing: { spans },
-          } = await fetchMlJob(mlAnomalyDetectors, id);
-          jobIds.push(id);
-          jobSpans = [...jobSpans, ...spans];
-        })();
-      })
+      metricsK8sJobIds
+        .map((jt) => getJobId(spaceId, sourceId, jt))
+        .map((id) => {
+          return (async () => {
+            const {
+              timing: { spans },
+            } = await fetchMlJob(mlAnomalyDetectors, id);
+            jobIds.push(id);
+            jobSpans = [...jobSpans, ...spans];
+          })();
+        })
     );
   } catch (e) {
     if (isMlPrivilegesError(e)) {
@@ -66,12 +61,15 @@ async function getCompatibleAnomaliesJobIds(
 }
 
 export async function getMetricK8sAnomalies(
-  context: RequestHandlerContext & { infra: Required<InfraRequestHandlerContext> },
+  context: Required<InfraRequestHandlerContext>,
   sourceId: string,
+  anomalyThreshold: ANOMALY_THRESHOLD,
   startTime: number,
   endTime: number,
+  metric: 'memory_usage' | 'network_in' | 'network_out' | undefined,
   sort: Sort,
-  pagination: Pagination
+  pagination: Pagination,
+  influencerFilter?: InfluencerFilter
 ) {
   const finalizeMetricsK8sAnomaliesSpan = startTracingSpan('get metrics k8s entry anomalies');
 
@@ -79,9 +77,10 @@ export async function getMetricK8sAnomalies(
     jobIds,
     timing: { spans: jobSpans },
   } = await getCompatibleAnomaliesJobIds(
-    context.infra.spaceId,
+    context.spaceId,
     sourceId,
-    context.infra.mlAnomalyDetectors
+    metric,
+    context.mlAnomalyDetectors
   );
 
   if (jobIds.length === 0) {
@@ -96,12 +95,14 @@ export async function getMetricK8sAnomalies(
     hasMoreEntries,
     timing: { spans: fetchLogEntryAnomaliesSpans },
   } = await fetchMetricK8sAnomalies(
-    context.infra.mlSystem,
+    context.mlSystem,
+    anomalyThreshold,
     jobIds,
     startTime,
     endTime,
     sort,
-    pagination
+    pagination,
+    influencerFilter
   );
 
   const data = anomalies.map((anomaly) => {
@@ -126,21 +127,21 @@ const parseAnomalyResult = (anomaly: MappedAnomalyHit, jobId: string) => {
   const {
     id,
     anomalyScore,
-    // dataset,
     typical,
     actual,
     duration,
+    influencers,
     startTime: anomalyStartTime,
   } = anomaly;
 
   return {
     id,
     anomalyScore,
-    // dataset,
     typical,
     actual,
     duration,
     startTime: anomalyStartTime,
+    influencers,
     type: 'metrics_k8s' as const,
     jobId,
   };
@@ -148,11 +149,13 @@ const parseAnomalyResult = (anomaly: MappedAnomalyHit, jobId: string) => {
 
 async function fetchMetricK8sAnomalies(
   mlSystem: MlSystem,
+  anomalyThreshold: ANOMALY_THRESHOLD,
   jobIds: string[],
   startTime: number,
   endTime: number,
   sort: Sort,
-  pagination: Pagination
+  pagination: Pagination,
+  influencerFilter?: InfluencerFilter | undefined
 ) {
   // We'll request 1 extra entry on top of our pageSize to determine if there are
   // more entries to be fetched. This avoids scenarios where the client side can't
@@ -164,7 +167,16 @@ async function fetchMetricK8sAnomalies(
 
   const results = decodeOrThrow(metricsK8sAnomaliesResponseRT)(
     await mlSystem.mlAnomalySearch(
-      createMetricsK8sAnomaliesQuery(jobIds, startTime, endTime, sort, expandedPagination)
+      createMetricsK8sAnomaliesQuery({
+        jobIds,
+        anomalyThreshold,
+        startTime,
+        endTime,
+        sort,
+        pagination: expandedPagination,
+        influencerFilter,
+      }),
+      jobIds
     )
   );
 
@@ -199,19 +211,25 @@ async function fetchMetricK8sAnomalies(
       record_score: anomalyScore,
       typical,
       actual,
-      // partition_field_value: dataset,
       bucket_span: duration,
       timestamp: anomalyStartTime,
       by_field_value: categoryId,
+      influencers,
     } = result._source;
 
+    const podInfluencers = influencers.filter(
+      (i) => i.influencer_field_name === 'kubernetes.pod.uid'
+    );
     return {
       id: result._id,
       anomalyScore,
-      // dataset,
       typical: typical[0],
       actual: actual[0],
       jobId: job_id,
+      influencers: podInfluencers.reduce(
+        (acc: string[], i) => [...acc, ...i.influencer_field_values],
+        []
+      ),
       startTime: anomalyStartTime,
       duration: duration * 1000,
       categoryId,
@@ -226,47 +244,6 @@ async function fetchMetricK8sAnomalies(
     hasMoreEntries,
     timing: {
       spans: [fetchLogEntryAnomaliesSpan],
-    },
-  };
-}
-
-// TODO: FIgure out why we need datasets
-export async function getMetricK8sAnomaliesDatasets(
-  context: {
-    infra: {
-      mlSystem: MlSystem;
-      mlAnomalyDetectors: MlAnomalyDetectors;
-      spaceId: string;
-    };
-  },
-  sourceId: string,
-  startTime: number,
-  endTime: number
-) {
-  const {
-    jobIds,
-    timing: { spans: jobSpans },
-  } = await getCompatibleAnomaliesJobIds(
-    context.infra.spaceId,
-    sourceId,
-    context.infra.mlAnomalyDetectors
-  );
-
-  if (jobIds.length === 0) {
-    throw new InsufficientAnomalyMlJobsConfigured(
-      'Log rate or categorisation ML jobs need to be configured to search for anomaly datasets'
-    );
-  }
-
-  const {
-    data: datasets,
-    timing: { spans: datasetsSpans },
-  } = await getLogEntryDatasets(context.infra.mlSystem, startTime, endTime, jobIds);
-
-  return {
-    datasets,
-    timing: {
-      spans: [...jobSpans, ...datasetsSpans],
     },
   };
 }

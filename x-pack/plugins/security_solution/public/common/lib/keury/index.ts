@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { isEmpty, isString, flow } from 'lodash/fp';
+
 import {
   EsQueryConfig,
   Query,
@@ -13,10 +15,7 @@ import {
   esKuery,
   IIndexPattern,
 } from '../../../../../../../src/plugins/data/public';
-
 import { JsonObject } from '../../../../../../../src/plugins/kibana_utils/public';
-
-import { KueryFilterQuery } from '../../store';
 
 export const convertKueryToElasticSearchQuery = (
   kueryExpression: string,
@@ -55,17 +54,6 @@ export const escapeQueryValue = (val: number | string = ''): string | number => 
   }
 
   return val;
-};
-
-export const isFromKueryExpressionValid = (kqlFilterQuery: KueryFilterQuery | null): boolean => {
-  if (kqlFilterQuery && kqlFilterQuery.kind === 'kuery') {
-    try {
-      esKuery.fromKueryExpression(kqlFilterQuery.expression);
-    } catch (err) {
-      return false;
-    }
-  }
-  return true;
 };
 
 const escapeWhitespace = (val: string) =>

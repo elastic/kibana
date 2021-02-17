@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import {
   RequestHandlerContext,
   KibanaRequest,
@@ -135,33 +137,6 @@ export const getProviderActionsRoute = (
       logger.info(`test if get all provider actions is registered`);
       return res.ok({
         body: { actions: [...(eventLogService.getProviderActions().get(provider) ?? [])] },
-      });
-    }
-  );
-};
-
-export const getLoggerRoute = (
-  router: IRouter,
-  eventLogService: IEventLogService,
-  logger: Logger
-) => {
-  router.get(
-    {
-      path: `/api/log_event_fixture/getEventLogger/{event}`,
-      validate: {
-        params: (value: any, { ok }: RouteValidationResultFactory) => ok(value),
-      },
-    },
-    async function (
-      context: RequestHandlerContext,
-      req: KibanaRequest<any, any, any, any>,
-      res: KibanaResponseFactory
-    ): Promise<IKibanaResponse<any>> {
-      const { event } = req.params as { event: string };
-      logger.info(`test get event logger for event: ${event}`);
-
-      return res.ok({
-        body: { eventLogger: eventLogService.getLogger({ event: { provider: event } }) },
       });
     }
   );

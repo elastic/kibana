@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -10,7 +11,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const security = getService('security');
-  const PageObjects = getPageObjects(['common', 'infraHome', 'security']);
+  const PageObjects = getPageObjects(['common', 'error', 'infraHome', 'security']);
   const testSubjects = getService('testSubjects');
   const appsMenu = getService('appsMenu');
   const globalNav = getService('globalNav');
@@ -58,7 +59,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('shows logs navlink', async () => {
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
-        expect(navLinks).to.eql(['Overview', 'Logs']);
+        expect(navLinks).to.eql(['Overview', 'Logs', 'Stack Management']);
       });
 
       describe('logs landing page without data', () => {
@@ -121,7 +122,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('shows logs navlink', async () => {
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
-        expect(navLinks).to.eql(['Overview', 'Logs']);
+        expect(navLinks).to.eql(['Overview', 'Logs', 'Stack Management']);
       });
 
       describe('logs landing page without data', () => {
@@ -187,19 +188,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(navLinks).to.not.contain('Logs');
       });
 
-      it(`logs app is inaccessible and returns a 404`, async () => {
+      it(`logs app is inaccessible and returns a 403`, async () => {
         await PageObjects.common.navigateToActualUrl('infraLogs', '', {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
-        const messageText = await PageObjects.common.getBodyText();
-        expect(messageText).to.eql(
-          JSON.stringify({
-            statusCode: 404,
-            error: 'Not Found',
-            message: 'Not Found',
-          })
-        );
+        PageObjects.error.expectForbidden();
       });
     });
   });

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { HttpHandler, SavedObjectsClientContract } from 'kibana/public';
@@ -24,8 +25,6 @@ import {
 } from './types';
 import { createMockedRestrictedIndexPattern, createMockedIndexPattern } from './mocks';
 import { documentField } from './document_field';
-
-jest.mock('./operations');
 
 const createMockStorage = (lastData?: Record<string, string>) => {
   return {
@@ -117,6 +116,7 @@ const indexPattern2 = ({
   title: 'my-fake-restricted-pattern',
   timeFieldName: 'timestamp',
   hasRestrictions: true,
+  fieldFormatMap: { bytes: { id: 'bytes', params: { pattern: '0.0' } } },
   fields: [
     {
       name: 'timestamp',
@@ -284,15 +284,10 @@ describe('loader', () => {
         } as unknown) as Pick<IndexPatternsContract, 'get'>,
       });
 
-      expect(
-        cache.foo.fields.find((f: IndexPatternField) => f.name === 'bytes')!.aggregationRestrictions
-      ).toEqual({
+      expect(cache.foo.getFieldByName('bytes')!.aggregationRestrictions).toEqual({
         sum: { agg: 'sum' },
       });
-      expect(
-        cache.foo.fields.find((f: IndexPatternField) => f.name === 'timestamp')!
-          .aggregationRestrictions
-      ).toEqual({
+      expect(cache.foo.getFieldByName('timestamp')!.aggregationRestrictions).toEqual({
         date_histogram: { agg: 'date_histogram', fixed_interval: 'm' },
       });
     });
@@ -341,9 +336,7 @@ describe('loader', () => {
         } as unknown) as Pick<IndexPatternsContract, 'get'>,
       });
 
-      expect(cache.foo.fields.find((f: IndexPatternField) => f.name === 'timestamp')!.meta).toEqual(
-        true
-      );
+      expect(cache.foo.getFieldByName('timestamp')!.meta).toEqual(true);
     });
   });
 
@@ -354,6 +347,7 @@ describe('loader', () => {
         savedObjectsClient: mockClient(),
         indexPatternsService: mockIndexPatternsService(),
         storage,
+        options: { isFullEditor: true },
       });
 
       expect(state).toMatchObject({
@@ -372,12 +366,35 @@ describe('loader', () => {
       });
     });
 
+    it('should load a default state without loading the indexPatterns when embedded', async () => {
+      const storage = createMockStorage();
+      const savedObjectsClient = mockClient();
+      const state = await loadInitialState({
+        savedObjectsClient,
+        indexPatternsService: mockIndexPatternsService(),
+        storage,
+        options: { isFullEditor: false },
+      });
+
+      expect(state).toMatchObject({
+        currentIndexPatternId: undefined,
+        indexPatternRefs: [],
+        indexPatterns: {},
+        layers: {},
+      });
+
+      expect(storage.set).not.toHaveBeenCalled();
+
+      expect(savedObjectsClient.find).not.toHaveBeenCalled();
+    });
+
     it('should load a default state when lastUsedIndexPatternId is not found in indexPatternRefs', async () => {
       const storage = createMockStorage({ indexPatternId: 'c' });
       const state = await loadInitialState({
         savedObjectsClient: mockClient(),
         indexPatternsService: mockIndexPatternsService(),
         storage,
+        options: { isFullEditor: true },
       });
 
       expect(state).toMatchObject({
@@ -401,6 +418,7 @@ describe('loader', () => {
         savedObjectsClient: mockClient(),
         indexPatternsService: mockIndexPatternsService(),
         storage: createMockStorage({ indexPatternId: '2' }),
+        options: { isFullEditor: true },
       });
 
       expect(state).toMatchObject({
@@ -423,6 +441,7 @@ describe('loader', () => {
         savedObjectsClient: mockClient(),
         indexPatternsService: mockIndexPatternsService(),
         storage,
+        options: { isFullEditor: true },
       });
 
       expect(state).toMatchObject({
@@ -438,6 +457,35 @@ describe('loader', () => {
       });
       expect(storage.set).toHaveBeenCalledWith('lens-settings', {
         indexPatternId: '2',
+      });
+    });
+
+    it('should use the indexPatternId of the visualize trigger field, if provided', async () => {
+      const storage = createMockStorage();
+      const state = await loadInitialState({
+        savedObjectsClient: mockClient(),
+        indexPatternsService: mockIndexPatternsService(),
+        storage,
+        initialContext: {
+          indexPatternId: '1',
+          fieldName: '',
+        },
+        options: { isFullEditor: true },
+      });
+
+      expect(state).toMatchObject({
+        currentIndexPatternId: '1',
+        indexPatternRefs: [
+          { id: '1', title: sampleIndexPatterns['1'].title },
+          { id: '2', title: sampleIndexPatterns['2'].title },
+        ],
+        indexPatterns: {
+          '1': sampleIndexPatterns['1'],
+        },
+        layers: {},
+      });
+      expect(storage.set).toHaveBeenCalledWith('lens-settings', {
+        indexPatternId: '1',
       });
     });
 
@@ -479,6 +527,7 @@ describe('loader', () => {
         savedObjectsClient: mockClient(),
         indexPatternsService: mockIndexPatternsService(),
         storage,
+        options: { isFullEditor: true },
       });
 
       expect(state).toMatchObject({

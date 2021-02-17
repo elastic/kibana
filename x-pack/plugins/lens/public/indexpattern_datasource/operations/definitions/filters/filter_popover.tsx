@@ -1,12 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import './filter_popover.scss';
 
-import React, { MouseEventHandler, useState } from 'react';
-import { useDebounce } from 'react-use';
+import React, { MouseEventHandler, useEffect, useState } from 'react';
+import useDebounce from 'react-use/lib/useDebounce';
 import { EuiPopover, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FilterValue, defaultLabel, isQueryValid } from '.';
@@ -19,22 +21,27 @@ export const FilterPopover = ({
   setFilter,
   indexPattern,
   Button,
-  isOpenByCreation,
-  setIsOpenByCreation,
+  initiallyOpen,
 }: {
   filter: FilterValue;
   setFilter: Function;
   indexPattern: IndexPattern;
   Button: React.FunctionComponent<{ onClick: MouseEventHandler }>;
-  isOpenByCreation: boolean;
-  setIsOpenByCreation: Function;
+  initiallyOpen: boolean;
 }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const inputRef = React.useRef<HTMLInputElement>();
 
-  const setPopoverOpen = (isOpen: boolean) => {
-    setIsPopoverOpen(isOpen);
-    setIsOpenByCreation(isOpen);
+  // set popover open on start to work around EUI bug
+  useEffect(() => {
+    setIsPopoverOpen(initiallyOpen);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const closePopover = () => {
+    if (isPopoverOpen) {
+      setIsPopoverOpen(false);
+    }
   };
 
   const setFilterLabel = (label: string) => setFilter({ ...filter, label });
@@ -55,16 +62,13 @@ export const FilterPopover = ({
       data-test-subj="indexPattern-filters-existingFilterContainer"
       anchorClassName="eui-fullWidth"
       panelClassName="lnsIndexPatternDimensionEditor__filtersEditor"
-      isOpen={isOpenByCreation || isPopoverOpen}
+      isOpen={isPopoverOpen}
       ownFocus
-      closePopover={() => {
-        setPopoverOpen(false);
-      }}
+      closePopover={() => closePopover()}
       button={
         <Button
           onClick={() => {
             setIsPopoverOpen((open) => !open);
-            setIsOpenByCreation(false);
           }}
         />
       }
@@ -84,7 +88,7 @@ export const FilterPopover = ({
         onChange={setFilterLabel}
         placeholder={getPlaceholder(filter.input.query)}
         inputRef={inputRef}
-        onSubmit={() => setPopoverOpen(false)}
+        onSubmit={() => closePopover()}
         dataTestSubj="indexPattern-filters-label"
       />
     </EuiPopover>
@@ -105,10 +109,6 @@ export const QueryInput = ({
   onSubmit: () => void;
 }) => {
   const [inputValue, setInputValue] = useState(value);
-
-  React.useEffect(() => {
-    setInputValue(value);
-  }, [value, setInputValue]);
 
   useDebounce(() => onChange(inputValue), 256, [inputValue]);
 

@@ -1,28 +1,28 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { DataPublicPluginSetup } from 'src/plugins/data/public';
-import {
+import type { DataPublicPluginSetup } from 'src/plugins/data/public';
+import type {
   IUiSettingsClient,
   ChromeStart,
   SavedObjectsClientContract,
   ApplicationStart,
   HttpStart,
   I18nStart,
-} from 'kibana/public';
-import { IndexPatternsContract, DataPublicPluginStart } from 'src/plugins/data/public';
-import {
   DocLinksStart,
   ToastsStart,
   OverlayStart,
   ChromeRecentlyAccessed,
   IBasePath,
 } from 'kibana/public';
-import { SharePluginStart } from 'src/plugins/share/public';
-import { SecurityPluginSetup } from '../../../../security/public';
+import type { IndexPatternsContract, DataPublicPluginStart } from 'src/plugins/data/public';
+import type { SharePluginStart } from 'src/plugins/share/public';
+import type { SecurityPluginSetup } from '../../../../security/public';
+import type { MapsStartApi } from '../../../../maps/public';
 
 export interface DependencyCache {
   timefilter: DataPublicPluginSetup['query']['timefilter'] | null;
@@ -42,6 +42,7 @@ export interface DependencyCache {
   security: SecurityPluginSetup | undefined | null;
   i18n: I18nStart | null;
   urlGenerators: SharePluginStart['urlGenerators'] | null;
+  maps: MapsStartApi | null;
 }
 
 const cache: DependencyCache = {
@@ -62,6 +63,7 @@ const cache: DependencyCache = {
   security: null,
   i18n: null,
   urlGenerators: null,
+  maps: null,
 };
 
 export function setDependencyCache(deps: Partial<DependencyCache>) {
@@ -203,7 +205,6 @@ export function getGetUrlGenerator() {
 }
 
 export function clearCache() {
-  console.log('clearing dependency cache'); // eslint-disable-line no-console
   Object.keys(cache).forEach((k) => {
     cache[k as keyof DependencyCache] = null;
   });

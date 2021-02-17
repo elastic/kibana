@@ -1,24 +1,14 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import * as Rx from 'rxjs';
-import { mergeMap, tap, debounceTime, map } from 'rxjs/operators';
+import { mergeMap, tap, debounceTime, map, toArray } from 'rxjs/operators';
+import { firstValueFrom } from '@kbn/std';
 
 type Operator<T1, T2> = (source: Rx.Observable<T1>) => Rx.Observable<T2>;
 type MapFn<T1, T2> = (item: T1, index: number) => T2;
@@ -73,3 +63,6 @@ export const debounceTimeBuffer = <T>(ms: number) =>
       })
     );
   });
+
+export const allValuesFrom = <T>(observable: Rx.Observable<T>) =>
+  firstValueFrom(observable.pipe(toArray()));

@@ -1,17 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { DeepRequired } from 'utility-types';
 import {
   CoreSetup,
   Logger,
   SavedObjectsErrorHelpers,
 } from '../../../../../../src/core/server';
+import { unwrapEsResponse } from '../../../../observability/server';
 import { APMConfig } from '../..';
 import {
   TaskManagerSetupContract,
@@ -21,14 +23,14 @@ import {
   APM_TELEMETRY_SAVED_OBJECT_ID,
   APM_TELEMETRY_SAVED_OBJECT_TYPE,
 } from '../../../common/apm_saved_object_constants';
-import { getApmTelemetryMapping } from '../../../common/apm_telemetry';
 import { getInternalSavedObjectsClient } from '../helpers/get_internal_saved_objects_client';
 import { getApmIndices } from '../settings/apm_indices/get_apm_indices';
 import {
   collectDataTelemetry,
   CollectTelemetryParams,
 } from './collect_data_telemetry';
-import { APMDataTelemetry } from './types';
+import { APMUsage } from './types';
+import { apmSchema } from './schema';
 
 const APM_TELEMETRY_TASK_NAME = 'apm-telemetry-task';
 
@@ -49,8 +51,7 @@ export async function createApmTelemetry({
 }) {
   taskManager.registerTaskDefinitions({
     [APM_TELEMETRY_TASK_NAME]: {
-      title: 'Collect APM telemetry',
-      type: APM_TELEMETRY_TASK_NAME,
+      title: 'Collect APM usage',
       createTaskRunner: () => {
         return {
           run: async () => {
@@ -67,27 +68,22 @@ export async function createApmTelemetry({
   const collectAndStore = async () => {
     const config = await config$.pipe(take(1)).toPromise();
     const [{ elasticsearch }] = await core.getStartServices();
-    const esClient = elasticsearch.legacy.client;
+    const esClient = elasticsearch.client;
 
     const indices = await getApmIndices({
       config,
       savedObjectsClient,
     });
 
-    const search = esClient.callAsInternalUser.bind(
-      esClient,
-      'search'
-    ) as CollectTelemetryParams['search'];
+    const search: CollectTelemetryParams['search'] = (params) =>
+      unwrapEsResponse(esClient.asInternalUser.search<any>(params));
 
-    const indicesStats = esClient.callAsInternalUser.bind(
-      esClient,
-      'indices.stats'
-    ) as CollectTelemetryParams['indicesStats'];
+    const indicesStats: CollectTelemetryParams['indicesStats'] = (params) =>
+      unwrapEsResponse(esClient.asInternalUser.indices.stats(params));
 
-    const transportRequest = esClient.callAsInternalUser.bind(
-      esClient,
-      'transport.request'
-    ) as CollectTelemetryParams['transportRequest'];
+    const transportRequest: CollectTelemetryParams['transportRequest'] = (
+      params
+    ) => unwrapEsResponse(esClient.asInternalUser.transport.request(params));
 
     const dataTelemetry = await collectDataTelemetry({
       search,
@@ -107,9 +103,9 @@ export async function createApmTelemetry({
     );
   };
 
-  const collector = usageCollector.makeUsageCollector({
+  const collector = usageCollector.makeUsageCollector<APMUsage | {}>({
     type: 'apm',
-    schema: getApmTelemetryMapping(),
+    schema: apmSchema,
     fetch: async () => {
       try {
         const { kibanaVersion: storedKibanaVersion, ...data } = (
@@ -117,9 +113,7 @@ export async function createApmTelemetry({
             APM_TELEMETRY_SAVED_OBJECT_TYPE,
             APM_TELEMETRY_SAVED_OBJECT_ID
           )
-        ).attributes as { kibanaVersion: string } & DeepRequired<
-          APMDataTelemetry
-        >;
+        ).attributes as { kibanaVersion: string } & APMUsage;
 
         return data;
       } catch (err) {
@@ -163,7 +157,7 @@ export async function createApmTelemetry({
         logger.debug(
           `Stored telemetry is out of date. Task will run immediately. Stored: ${currentData.kibanaVersion}, expected: ${kibanaVersion}`
         );
-        taskManagerStart.runNow(APM_TELEMETRY_TASK_NAME);
+        await taskManagerStart.runNow(APM_TELEMETRY_TASK_NAME);
       }
     } catch (err) {
       if (!SavedObjectsErrorHelpers.isNotFoundError(err)) {

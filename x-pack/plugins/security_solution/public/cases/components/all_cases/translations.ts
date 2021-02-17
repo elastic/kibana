@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -69,12 +70,6 @@ export const SEARCH_PLACEHOLDER = i18n.translate(
     defaultMessage: 'e.g. case name',
   }
 );
-export const OPEN_CASES = i18n.translate('xpack.securitySolution.case.caseTable.openCases', {
-  defaultMessage: 'Open cases',
-});
-export const CLOSED_CASES = i18n.translate('xpack.securitySolution.case.caseTable.closedCases', {
-  defaultMessage: 'Closed cases',
-});
 
 export const CLOSED = i18n.translate('xpack.securitySolution.case.caseTable.closed', {
   defaultMessage: 'Closed',

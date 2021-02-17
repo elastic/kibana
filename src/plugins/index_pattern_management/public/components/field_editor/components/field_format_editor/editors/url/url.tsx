@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React, { Fragment } from 'react';
@@ -36,6 +25,8 @@ import { FormatEditorSamples } from '../../samples';
 import { LabelTemplateFlyout } from './label_template_flyout';
 
 import { UrlTemplateFlyout } from './url_template_flyout';
+import type { IndexPatternManagmentContextValue } from '../../../../../../types';
+import { context as contextType } from '../../../../../../../../kibana_react/public';
 
 interface OnChangeParam {
   type: string;
@@ -66,13 +57,20 @@ export class UrlFormatEditor extends DefaultFormatEditor<
   UrlFormatEditorFormatParams,
   UrlFormatEditorFormatState
 > {
+  static contextType = contextType;
   static formatId = 'url';
-  iconPattern: string;
+  // TODO: @kbn/optimizer can't compile this
+  // declare context: IndexPatternManagmentContextValue;
+  context: IndexPatternManagmentContextValue | undefined;
+  private get sampleIconPath() {
+    const sampleIconPath = `/plugins/indexPatternManagement/assets/icons/{{value}}.png`;
+    return this.context?.services.http
+      ? this.context.services.http.basePath.prepend(sampleIconPath)
+      : sampleIconPath;
+  }
 
   constructor(props: FormatEditorProps<UrlFormatEditorFormatParams>) {
     super(props);
-
-    this.iconPattern = `/plugins/indexPatternManagement/assets/icons/{{value}}.png`;
 
     this.state = {
       ...this.state,
@@ -104,9 +102,9 @@ export class UrlFormatEditor extends DefaultFormatEditor<
       params.width = width;
       params.height = height;
       if (!urlTemplate) {
-        params.urlTemplate = this.iconPattern;
+        params.urlTemplate = this.sampleIconPath;
       }
-    } else if (newType !== 'img' && urlTemplate === this.iconPattern) {
+    } else if (newType !== 'img' && urlTemplate === this.sampleIconPath) {
       params.urlTemplate = undefined;
     }
     this.onChange(params);

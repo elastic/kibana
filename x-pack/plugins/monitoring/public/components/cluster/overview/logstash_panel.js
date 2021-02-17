@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -39,6 +40,7 @@ import { AlertsBadge } from '../../../alerts/badge';
 import { shouldShowAlertBadge } from '../../../alerts/lib/should_show_alert_badge';
 import { isSetupModeFeatureEnabled } from '../../../lib/setup_mode';
 import { SetupModeFeature } from '../../../../common/enums';
+import { SetupModeContext } from '../../setup_mode/setup_mode_context';
 
 const NODES_PANEL_ALERTS = [ALERT_LOGSTASH_VERSION_MISMATCH];
 
@@ -47,6 +49,7 @@ export function LogstashPanel(props) {
   const nodesCount = props.node_count || 0;
   const queueTypes = props.queue_types || {};
   const alerts = props.alerts;
+  const setupModeContext = React.useContext(SetupModeContext);
 
   // Do not show if we are not in setup mode
   if (!nodesCount && !setupMode.enabled) {
@@ -69,7 +72,7 @@ export function LogstashPanel(props) {
   ) : null;
 
   let nodesAlertStatus = null;
-  if (shouldShowAlertBadge(alerts, NODES_PANEL_ALERTS)) {
+  if (shouldShowAlertBadge(alerts, NODES_PANEL_ALERTS, setupModeContext)) {
     const alertsList = NODES_PANEL_ALERTS.map((alertType) => alerts[alertType]);
     nodesAlertStatus = (
       <EuiFlexItem grow={false}>

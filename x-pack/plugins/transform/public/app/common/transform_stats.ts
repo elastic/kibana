@@ -1,14 +1,26 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { TRANSFORM_STATE } from '../../../common/constants';
 
 import { TransformListRow } from './transform_list';
+import {
+  PutTransformsLatestRequestSchema,
+  PutTransformsPivotRequestSchema,
+} from '../../../common/api_schemas/transforms';
 
-export function getTransformProgress(item: TransformListRow) {
+type TransformItem = Omit<TransformListRow, 'config'> & {
+  config:
+    | TransformListRow['config']
+    | PutTransformsLatestRequestSchema
+    | PutTransformsPivotRequestSchema;
+};
+
+export function getTransformProgress(item: TransformItem) {
   if (isCompletedBatchTransform(item)) {
     return 100;
   }
@@ -17,7 +29,7 @@ export function getTransformProgress(item: TransformListRow) {
   return progress !== undefined ? Math.round(progress) : undefined;
 }
 
-export function isCompletedBatchTransform(item: TransformListRow) {
+export function isCompletedBatchTransform(item: TransformItem) {
   // If `checkpoint=1`, `sync` is missing from the config and state is stopped,
   // then this is a completed batch transform.
   return (

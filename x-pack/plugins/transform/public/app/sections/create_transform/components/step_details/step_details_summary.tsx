@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FC } from 'react';
@@ -10,13 +11,16 @@ import { i18n } from '@kbn/i18n';
 
 import { EuiAccordion, EuiFormRow, EuiSpacer } from '@elastic/eui';
 
-import { StepDetailsExposedState } from './step_details_form';
+import { StepDetailsExposedState } from './common';
 
 export const StepDetailsSummary: FC<StepDetailsExposedState> = React.memo((props) => {
   const {
     continuousModeDateField,
     createIndexPattern,
     isContinuousModeEnabled,
+    isRetentionPolicyEnabled,
+    retentionPolicyDateField,
+    retentionPolicyMaxAge,
     transformId,
     transformDescription,
     transformFrequency,
@@ -84,6 +88,28 @@ export const StepDetailsSummary: FC<StepDetailsExposedState> = React.memo((props
         </EuiFormRow>
       )}
 
+      {isRetentionPolicyEnabled && (
+        <>
+          <EuiFormRow
+            label={i18n.translate(
+              'xpack.transform.stepDetailsSummary.retentionPolicyDateFieldLabel',
+              {
+                defaultMessage: 'Retention policy date field',
+              }
+            )}
+          >
+            <span>{retentionPolicyDateField}</span>
+          </EuiFormRow>
+          <EuiFormRow
+            label={i18n.translate('xpack.transform.stepDetailsSummary.retentionPolicyMaxAgeLabel', {
+              defaultMessage: 'Retention policy max age',
+            })}
+          >
+            <span>{retentionPolicyMaxAge}</span>
+          </EuiFormRow>
+        </>
+      )}
+
       <EuiSpacer size="l" />
 
       <EuiAccordion
@@ -98,6 +124,7 @@ export const StepDetailsSummary: FC<StepDetailsExposedState> = React.memo((props
         paddingSize="s"
       >
         <EuiFormRow
+          data-test-subj={'transformWizardAdvancedSettingsFrequencyLabel'}
           label={i18n.translate('xpack.transform.stepDetailsSummary.frequencyLabel', {
             defaultMessage: 'Frequency',
           })}
@@ -105,6 +132,7 @@ export const StepDetailsSummary: FC<StepDetailsExposedState> = React.memo((props
           <span>{transformFrequency}</span>
         </EuiFormRow>
         <EuiFormRow
+          data-test-subj={'transformWizardAdvancedSettingsMaxPageSearchSizeLabel'}
           label={i18n.translate('xpack.transform.stepDetailsSummary.maxPageSearchSizeLabel', {
             defaultMessage: 'Maximum page search size',
           })}

@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 
@@ -32,7 +34,7 @@ jest.mock('lodash', () => {
   };
 });
 
-import { registerTestBed, TestBed } from '../../../../../../../../test_utils';
+import { registerTestBed, TestBed } from '@kbn/test/jest';
 import { LoadMappingsProvider } from './load_mappings_provider';
 
 const ComponentToTest = ({ onJson }: { onJson: () => void }) => (

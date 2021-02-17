@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -39,7 +40,7 @@ export const ColorStopsOrdinal = ({
     return error;
   };
 
-  const renderStopInput = (stop, onStopChange) => {
+  const renderStopInput = (stop, onStopChange, index) => {
     function handleOnChangeEvent(event) {
       const sanitizedValue = parseFloat(event.target.value);
       const newStopValue = isNaN(sanitizedValue) ? '' : sanitizedValue;
@@ -50,9 +51,10 @@ export const ColorStopsOrdinal = ({
         aria-label={i18n.translate('xpack.maps.styles.colorStops.ordinalStop.stopLabel', {
           defaultMessage: 'Stop',
         })}
-        value={stop}
+        value={index === 0 ? '' : stop}
         onChange={handleOnChangeEvent}
         compressed
+        disabled={index === 0}
       />
     );
   };

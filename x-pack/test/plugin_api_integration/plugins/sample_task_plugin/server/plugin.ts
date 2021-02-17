@@ -1,9 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+import _ from 'lodash';
 import { Plugin, CoreSetup, CoreStart } from 'src/core/server';
 import { EventEmitter } from 'events';
 import { Subject } from 'rxjs';
@@ -92,18 +94,64 @@ export class SampleTaskManagerFixturePlugin
     taskManager.registerTaskDefinitions({
       sampleTask: {
         ...defaultSampleTaskConfig,
-        type: 'sampleTask',
         title: 'Sample Task',
         description: 'A sample task for testing the task_manager.',
       },
       singleAttemptSampleTask: {
         ...defaultSampleTaskConfig,
-        type: 'singleAttemptSampleTask',
         title: 'Failing Sample Task',
         description:
           'A sample task for testing the task_manager that fails on the first attempt to run.',
         // fail after the first failed run
         maxAttempts: 1,
+      },
+      sampleTaskWithSingleConcurrency: {
+        ...defaultSampleTaskConfig,
+        title: 'Sample Task With Single Concurrency',
+        maxConcurrency: 1,
+        timeout: '60s',
+        description: 'A sample task that can only have one concurrent instance.',
+      },
+      sampleTaskWithLimitedConcurrency: {
+        ...defaultSampleTaskConfig,
+        title: 'Sample Task With Max Concurrency of 2',
+        maxConcurrency: 2,
+        timeout: '60s',
+        description: 'A sample task that can only have two concurrent instance.',
+      },
+      sampleRecurringTaskTimingOut: {
+        title: 'Sample Recurring Task that Times Out',
+        description: 'A sample task that times out each run.',
+        maxAttempts: 3,
+        timeout: '1s',
+        createTaskRunner: () => ({
+          async run() {
+            return await new Promise((resolve) => {});
+          },
+        }),
+      },
+      sampleRecurringTaskWhichHangs: {
+        title: 'Sample Recurring Task that Hangs for a minute',
+        description: 'A sample task that Hangs for a minute on each run.',
+        maxAttempts: 3,
+        timeout: '60s',
+        createTaskRunner: () => ({
+          async run() {
+            return await new Promise((resolve) => {});
+          },
+        }),
+      },
+      sampleOneTimeTaskTimingOut: {
+        title: 'Sample One-Time Task that Times Out',
+        description: 'A sample task that times out each run.',
+        maxAttempts: 3,
+        timeout: '1s',
+        getRetry: (attempts: number, error: object) => new Date(Date.now() + _.random(2, 5) * 1000),
+        createTaskRunner: () => ({
+          async run() {
+            return await new Promise((resolve) => {});
+          },
+        }),
       },
     });
 
@@ -134,6 +182,9 @@ export class SampleTaskManagerFixturePlugin
       },
 
       async beforeMarkRunning(context) {
+        if (context.taskInstance?.params?.originalParams?.throwOnMarkAsRunning) {
+          throw new Error(`Sample task ${context.taskInstance.id} threw on MarkAsRunning`);
+        }
         return context;
       },
     });

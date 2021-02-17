@@ -3,7 +3,7 @@
     {
       "data": {
         "id": "opbeans-rum",
-        "service.environment": "testing",
+        "service.environment": "test",
         "service.name": "opbeans-rum",
         "agent.name": "rum-js"
       }
@@ -18,7 +18,7 @@
     {
       "data": {
         "id": "opbeans-node",
-        "service.environment": "testing",
+        "service.environment": "test",
         "service.name": "opbeans-node",
         "agent.name": "nodejs"
       }

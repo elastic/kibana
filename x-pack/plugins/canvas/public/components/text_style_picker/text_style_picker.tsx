@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FC, useState } from 'react';
@@ -162,6 +163,7 @@ export const TextStylePicker: FC<Props> = ({
             type="multi"
             isIconOnly
             className="canvasSidebar__buttonGroup"
+            legend={strings.getStyleOptionsControlLegend()}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
@@ -172,6 +174,7 @@ export const TextStylePicker: FC<Props> = ({
             idSelected={align}
             onChange={(optionId: string) => doChange('align', optionId)}
             className="canvasSidebar__buttonGroup"
+            legend={strings.getAlignmentOptionsControlLegend()}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

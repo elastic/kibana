@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { set } from '@elastic/safer-lodash-set/fp';
@@ -132,7 +133,7 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
 
         if (!isStateUpdated) {
           // That mean we are doing a refresh!
-          if (isQuickSelection) {
+          if (isQuickSelection && payload.dateRange.to !== payload.dateRange.from) {
             updateSearchBar.updateTime = true;
             updateSearchBar.end = payload.dateRange.to;
             updateSearchBar.start = payload.dateRange.from;
@@ -294,7 +295,22 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
         />
       </SearchBarContainer>
     );
-  }
+  },
+  (prevProps, nextProps) =>
+    prevProps.end === nextProps.end &&
+    prevProps.filterQuery === nextProps.filterQuery &&
+    prevProps.fromStr === nextProps.fromStr &&
+    prevProps.id === nextProps.id &&
+    prevProps.isLoading === nextProps.isLoading &&
+    prevProps.savedQuery === nextProps.savedQuery &&
+    prevProps.setSavedQuery === nextProps.setSavedQuery &&
+    prevProps.setSearchBarFilter === nextProps.setSearchBarFilter &&
+    prevProps.start === nextProps.start &&
+    prevProps.toStr === nextProps.toStr &&
+    prevProps.updateSearch === nextProps.updateSearch &&
+    prevProps.dataTestSubj === nextProps.dataTestSubj &&
+    deepEqual(prevProps.indexPattern, nextProps.indexPattern) &&
+    deepEqual(prevProps.queries, nextProps.queries)
 );
 
 const makeMapStateToProps = () => {
@@ -313,7 +329,7 @@ const makeMapStateToProps = () => {
       fromStr: getFromStrSelector(inputsRange),
       filterQuery: getFilterQuerySelector(inputsRange),
       isLoading: getIsLoadingSelector(inputsRange),
-      queries: getQueriesSelector(inputsRange),
+      queries: getQueriesSelector(state, id),
       savedQuery: getSavedQuerySelector(inputsRange),
       start: getStartSelector(inputsRange),
       toStr: getToStrSelector(inputsRange),
@@ -351,15 +367,27 @@ export const dispatchUpdateSearch = (dispatch: Dispatch) => ({
     const fromDate = formatDate(start);
     let toDate = formatDate(end, { roundUp: true });
     if (isQuickSelection) {
-      dispatch(
-        inputsActions.setRelativeRangeDatePicker({
-          id,
-          fromStr: start,
-          toStr: end,
-          from: fromDate,
-          to: toDate,
-        })
-      );
+      if (end === start) {
+        dispatch(
+          inputsActions.setAbsoluteRangeDatePicker({
+            id,
+            fromStr: start,
+            toStr: end,
+            from: fromDate,
+            to: toDate,
+          })
+        );
+      } else {
+        dispatch(
+          inputsActions.setRelativeRangeDatePicker({
+            id,
+            fromStr: start,
+            toStr: end,
+            from: fromDate,
+            to: toDate,
+          })
+        );
+      }
     } else {
       toDate = formatDate(end);
       dispatch(

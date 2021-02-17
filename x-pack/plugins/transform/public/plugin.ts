@@ -1,13 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { i18n as kbnI18n } from '@kbn/i18n';
 
 import { CoreSetup } from 'src/core/public';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { HomePublicPluginSetup } from 'src/plugins/home/public';
+import { SavedObjectsStart } from 'src/plugins/saved_objects/public';
 import { ManagementSetup } from '../../../../src/plugins/management/public';
 import { registerFeature } from './register_feature';
 
@@ -15,6 +18,7 @@ export interface PluginsDependencies {
   data: DataPublicPluginStart;
   management: ManagementSetup;
   home: HomePublicPluginSetup;
+  savedObjects: SavedObjectsStart;
 }
 
 export class TransformUiPlugin {

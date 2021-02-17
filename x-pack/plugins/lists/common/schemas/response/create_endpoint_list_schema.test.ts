@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { left } from 'fp-ts/lib/Either';
@@ -42,7 +43,7 @@ describe('create_endpoint_list_schema', () => {
     const message = pipe(checked, foldLeftRight);
 
     expect(getPaths(left(message.errors))).toEqual([
-      'invalid keys "_tags,["endpoint","process","malware","os:linux"],_version,created_at,created_by,description,id,immutable,meta,{},name,namespace_type,tags,["user added string for a tag","malware"],tie_breaker_id,type,updated_at,updated_by,version"',
+      'invalid keys "_version,created_at,created_by,description,id,immutable,meta,{},name,namespace_type,os_types,["linux"],tags,["user added string for a tag","malware"],tie_breaker_id,type,updated_at,updated_by,version"',
     ]);
     expect(message.schema).toEqual({});
   });

@@ -1,13 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 jest.mock('../../../../kibana_services', () => {
   return {
     getIsDarkMode() {
       return false;
+    },
+    getEMSSettings() {
+      return {
+        isEMSUrlSet() {
+          return false;
+        },
+      };
     },
   };
 });
@@ -21,7 +29,7 @@ jest.mock('uuid/v4', () => {
 import { createSecurityLayerDescriptors } from './create_layer_descriptors';
 
 describe('createLayerDescriptor', () => {
-  test('amp index', () => {
+  test('apm index', () => {
     expect(createSecurityLayerDescriptors('id', 'apm-*-transaction*')).toEqual([
       {
         __dataRequests: [],
@@ -32,6 +40,8 @@ describe('createLayerDescriptor', () => {
         maxZoom: 24,
         minZoom: 0,
         sourceDescriptor: {
+          applyGlobalQuery: true,
+          applyGlobalTime: true,
           filterByMapBounds: true,
           geoField: 'client.geo.location',
           id: '12345',
@@ -138,6 +148,8 @@ describe('createLayerDescriptor', () => {
         maxZoom: 24,
         minZoom: 0,
         sourceDescriptor: {
+          applyGlobalQuery: true,
+          applyGlobalTime: true,
           filterByMapBounds: true,
           geoField: 'server.geo.location',
           id: '12345',
@@ -244,6 +256,8 @@ describe('createLayerDescriptor', () => {
         maxZoom: 24,
         minZoom: 0,
         sourceDescriptor: {
+          applyGlobalQuery: true,
+          applyGlobalTime: true,
           destGeoField: 'server.geo.location',
           id: '12345',
           indexPatternId: 'id',
@@ -362,6 +376,8 @@ describe('createLayerDescriptor', () => {
         maxZoom: 24,
         minZoom: 0,
         sourceDescriptor: {
+          applyGlobalQuery: true,
+          applyGlobalTime: true,
           filterByMapBounds: true,
           geoField: 'source.geo.location',
           id: '12345',
@@ -468,6 +484,8 @@ describe('createLayerDescriptor', () => {
         maxZoom: 24,
         minZoom: 0,
         sourceDescriptor: {
+          applyGlobalQuery: true,
+          applyGlobalTime: true,
           filterByMapBounds: true,
           geoField: 'destination.geo.location',
           id: '12345',
@@ -574,6 +592,8 @@ describe('createLayerDescriptor', () => {
         maxZoom: 24,
         minZoom: 0,
         sourceDescriptor: {
+          applyGlobalQuery: true,
+          applyGlobalTime: true,
           destGeoField: 'destination.geo.location',
           id: '12345',
           indexPatternId: 'id',

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import get from 'lodash/get';
@@ -50,7 +51,11 @@ export const mapToResult = (
     // so we are forced to cast the attributes to any to access the properties associated with it.
     title: (object.attributes as any)[defaultSearchField],
     type: object.type,
+    icon: type.management?.icon ?? undefined,
     url: getInAppUrl(object).path,
     score: object.score,
+    meta: {
+      tagIds: object.references.filter((ref) => ref.type === 'tag').map(({ id }) => id),
+    },
   };
 };

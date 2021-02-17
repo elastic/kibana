@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
-import styled from 'styled-components';
-import { useTheme } from '../../../../hooks/useTheme';
+import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
+import { useTheme } from '../../../../hooks/use_theme';
 import { fontSizes, px, units } from '../../../../style/variables';
 
 export enum Shape {
@@ -21,7 +22,7 @@ interface ContainerProps {
   disabled: boolean;
 }
 
-const Container = styled.div<ContainerProps>`
+const Container = euiStyled.div<ContainerProps>`
   display: flex;
   align-items: center;
   font-size: ${(props) => props.fontSize};
@@ -38,7 +39,7 @@ interface IndicatorProps {
   withMargin: boolean;
 }
 
-export const Indicator = styled.span<IndicatorProps>`
+export const Indicator = euiStyled.span<IndicatorProps>`
   width: ${(props) => px(props.radius)};
   height: ${(props) => px(props.radius)};
   margin-right: ${(props) => (props.withMargin ? px(props.radius / 2) : 0)};

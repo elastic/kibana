@@ -1,13 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { cloneDeep } from 'lodash';
 import { ISavedObjectsRepository } from 'src/core/server';
 import { SavedObject } from './../../../../../../src/core/types/saved_objects';
-import { Agent, NewAgentEvent } from './../../../../ingest_manager/common/types/models/agent';
-import { AgentMetadata } from '../../../../ingest_manager/common/types/models/agent';
+import { Agent, NewAgentEvent } from './../../../../fleet/common/types/models/agent';
+import { AgentMetadata } from '../../../../fleet/common/types/models/agent';
 import { getFleetSavedObjectsMetadata, getLatestFleetEndpointEvent } from './fleet_saved_objects';
 
 export interface AgentOSMetadataTelemetry {

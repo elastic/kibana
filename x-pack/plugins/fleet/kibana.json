@@ -1,0 +1,17 @@
+{
+  "id": "fleet",
+  "version": "kibana",
+  "server": true,
+  "ui": true,
+  "configPath": ["xpack", "fleet"],
+  "requiredPlugins": ["licensing", "data", "encryptedSavedObjects"],
+  "optionalPlugins": [
+    "security",
+    "features",
+    "cloud",
+    "usageCollection",
+    "home"
+  ],
+  "extraPublicDirs": ["common"],
+  "requiredBundles": ["kibanaReact", "esUiShared", "home", "infra", "kibanaUtils"]
+}

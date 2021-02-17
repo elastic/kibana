@@ -1,27 +1,28 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { SavedObjectsClientContract } from 'kibana/server';
 
+import { NamespaceTypeArray } from '../../../common/schemas/types/default_namespace_array';
+import { SavedObjectType } from '../../../common/types';
 import {
   ExceptionListSoSchema,
   FilterOrUndefined,
   FoundExceptionListSchema,
-  NamespaceType,
   PageOrUndefined,
   PerPageOrUndefined,
   SortFieldOrUndefined,
   SortOrderOrUndefined,
 } from '../../../common/schemas';
-import { SavedObjectType } from '../../saved_objects';
 
-import { getSavedObjectType, transformSavedObjectsToFoundExceptionList } from './utils';
+import { getSavedObjectTypes, transformSavedObjectsToFoundExceptionList } from './utils';
 
 interface FindExceptionListOptions {
-  namespaceType: NamespaceType;
+  namespaceType: NamespaceTypeArray;
   savedObjectsClient: SavedObjectsClientContract;
   filter: FilterOrUndefined;
   perPage: PerPageOrUndefined;
@@ -39,28 +40,31 @@ export const findExceptionList = async ({
   sortField,
   sortOrder,
 }: FindExceptionListOptions): Promise<FoundExceptionListSchema> => {
-  const savedObjectType = getSavedObjectType({ namespaceType });
+  const savedObjectTypes = getSavedObjectTypes({ namespaceType });
   const savedObjectsFindResponse = await savedObjectsClient.find<ExceptionListSoSchema>({
-    filter: getExceptionListFilter({ filter, savedObjectType }),
+    filter: getExceptionListFilter({ filter, savedObjectTypes }),
     page,
     perPage,
     sortField,
     sortOrder,
-    type: savedObjectType,
+    type: savedObjectTypes,
   });
+
   return transformSavedObjectsToFoundExceptionList({ savedObjectsFindResponse });
 };
 
 export const getExceptionListFilter = ({
   filter,
-  savedObjectType,
+  savedObjectTypes,
 }: {
   filter: FilterOrUndefined;
-  savedObjectType: SavedObjectType;
+  savedObjectTypes: SavedObjectType[];
 }): string => {
-  if (filter == null) {
-    return `${savedObjectType}.attributes.list_type: list`;
-  } else {
-    return `${savedObjectType}.attributes.list_type: list AND ${filter}`;
-  }
+  const listTypesFilter = savedObjectTypes
+    .map((type) => `${type}.attributes.list_type: list`)
+    .join(' OR ');
+
+  if (filter != null) {
+    return `(${listTypesFilter}) AND ${filter}`;
+  } else return `(${listTypesFilter})`;
 };

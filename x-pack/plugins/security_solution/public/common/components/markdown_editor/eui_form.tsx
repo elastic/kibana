@@ -1,23 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import React, { useState, useCallback } from 'react';
+import React from 'react';
 import styled from 'styled-components';
-import {
-  EuiMarkdownEditor,
-  EuiMarkdownEditorProps,
-  EuiFormRow,
-  EuiFlexItem,
-  EuiFlexGroup,
-  getDefaultEuiMarkdownParsingPlugins,
-  getDefaultEuiMarkdownProcessingPlugins,
-} from '@elastic/eui';
+import { EuiMarkdownEditorProps, EuiFormRow, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import { FieldHook, getFieldValidityAndErrorMessage } from '../../../shared_imports';
 
-import * as timelineMarkdownPlugin from './plugins/timeline';
+import { MarkdownEditor } from './editor';
 
 type MarkdownEditorFormProps = EuiMarkdownEditorProps & {
   id: string;
@@ -34,12 +27,6 @@ const BottomContentWrapper = styled(EuiFlexGroup)`
   `}
 `;
 
-export const parsingPlugins = getDefaultEuiMarkdownParsingPlugins();
-parsingPlugins.push(timelineMarkdownPlugin.parser);
-
-export const processingPlugins = getDefaultEuiMarkdownProcessingPlugins();
-processingPlugins[1][1].components.timeline = timelineMarkdownPlugin.renderer;
-
 export const MarkdownEditorForm: React.FC<MarkdownEditorFormProps> = ({
   id,
   field,
@@ -48,10 +35,6 @@ export const MarkdownEditorForm: React.FC<MarkdownEditorFormProps> = ({
   bottomRightContent,
 }) => {
   const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
-  const [markdownErrorMessages, setMarkdownErrorMessages] = useState([]);
-  const onParse = useCallback((err, { messages }) => {
-    setMarkdownErrorMessages(err ? [err] : messages);
-  }, []);
 
   return (
     <EuiFormRow
@@ -65,16 +48,12 @@ export const MarkdownEditorForm: React.FC<MarkdownEditorFormProps> = ({
       labelAppend={field.labelAppend}
     >
       <>
-        <EuiMarkdownEditor
-          aria-label={idAria}
+        <MarkdownEditor
+          ariaLabel={idAria}
           editorId={id}
           onChange={field.setValue}
           value={field.value as string}
-          uiPlugins={[timelineMarkdownPlugin.plugin]}
-          parsingPluginList={parsingPlugins}
-          processingPluginList={processingPlugins}
-          onParse={onParse}
-          errors={markdownErrorMessages}
+          data-test-subj={`${dataTestSubj}-markdown-editor`}
         />
         {bottomRightContent && (
           <BottomContentWrapper justifyContent={'flexEnd'}>

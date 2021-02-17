@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import mockTransformListRow from './__mocks__/transform_list_row.json';
@@ -12,11 +13,12 @@ import { getTransformProgress, isCompletedBatchTransform } from './transform_sta
 
 const getRow = (statsId: string) => {
   return {
+    // @ts-expect-error mock data does not actually match TransformListRow type
     ...(mockTransformListRow as TransformListRow),
     stats: {
-      ...mockTransformStats.transforms.find(
-        (stats: TransformListRow['stats']) => stats.id === statsId
-      ),
+      ...(mockTransformStats.transforms as Array<TransformListRow['stats']>).find(
+        (stats) => stats.id === statsId
+      )!,
     },
   };
 };

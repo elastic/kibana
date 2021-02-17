@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { IEsSearchResponse } from '../../../../../../../../src/plugins/data/common';
 import { Ecs } from '../../../../ecs';
-import { CursorType, Inspect, Maybe } from '../../../common';
+import { CursorType, Inspect, Maybe, PaginationInputPaginated } from '../../../common';
 import { TimelineRequestOptionsPaginated } from '../..';
 
 export interface TimelineEdges {
@@ -29,14 +30,12 @@ export interface TimelineNonEcsData {
 export interface TimelineEventsAllStrategyResponse extends IEsSearchResponse {
   edges: TimelineEdges[];
   totalCount: number;
-  pageInfo: {
-    activePage: number;
-    totalPages: number;
-  };
+  pageInfo: Pick<PaginationInputPaginated, 'activePage' | 'querySize'>;
   inspect?: Maybe<Inspect>;
 }
 
 export interface TimelineEventsAllRequestOptions extends TimelineRequestOptionsPaginated {
   fields: string[];
   fieldRequested: string[];
+  language: 'eql' | 'kuery' | 'lucene';
 }

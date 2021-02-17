@@ -1,18 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
- */
-
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FC, useState, useCallback, useMemo, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import {} from 'lodash';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiFlyout,
@@ -28,12 +22,10 @@ import {
   EuiFormRow,
   EuiSwitch,
   EuiConfirmModal,
-  EuiOverlayMask,
   EuiCallOut,
   EuiHorizontalRule,
   EuiSuperSelect,
   EuiText,
-  formatDate,
 } from '@elastic/eui';
 
 import {
@@ -48,17 +40,24 @@ import { LineChartPoint } from '../../../jobs/new_job/common/chart_loader';
 import { EventRateChart } from '../../../jobs/new_job/pages/components/charts/event_rate_chart/event_rate_chart';
 import { Anomaly } from '../../../jobs/new_job/common/results_loader/results_loader';
 import { parseInterval } from '../../../../../common/util/parse_interval';
-import { TIME_FORMAT } from '../../../../../common/constants/time_format';
 import { CreateCalendar, CalendarEvent } from './create_calendar';
+import { timeFormatter } from '../../../../../common/util/date_utils';
 
 interface Props {
   snapshot: ModelSnapshot;
   snapshots: ModelSnapshot[];
   job: CombinedJobWithStats;
-  closeFlyout(reload: boolean): void;
+  closeFlyout(): void;
+  refresh(): void;
 }
 
-export const RevertModelSnapshotFlyout: FC<Props> = ({ snapshot, snapshots, job, closeFlyout }) => {
+export const RevertModelSnapshotFlyout: FC<Props> = ({
+  snapshot,
+  snapshots,
+  job,
+  closeFlyout,
+  refresh,
+}) => {
   const { toasts } = useNotifications();
   const { loadAnomalyDataForJob, loadEventRateForJob } = useMemo(
     () => chartLoaderProvider(mlResultsService),
@@ -75,7 +74,6 @@ export const RevertModelSnapshotFlyout: FC<Props> = ({ snapshot, snapshots, job,
   const [eventRateData, setEventRateData] = useState<LineChartPoint[]>([]);
   const [anomalies, setAnomalies] = useState<Anomaly[]>([]);
   const [chartReady, setChartReady] = useState(false);
-  const [applying, setApplying] = useState(false);
 
   useEffect(() => {
     createChartData();
@@ -112,13 +110,6 @@ export const RevertModelSnapshotFlyout: FC<Props> = ({ snapshot, snapshots, job,
     setChartReady(true);
   }, [job]);
 
-  function closeWithReload() {
-    closeFlyout(true);
-  }
-  function closeWithoutReload() {
-    closeFlyout(false);
-  }
-
   function showRevertModal() {
     setRevertModalVisible(true);
   }
@@ -127,7 +118,6 @@ export const RevertModelSnapshotFlyout: FC<Props> = ({ snapshot, snapshots, job,
   }
 
   async function applyRevert() {
-    setApplying(true);
     const end =
       replay && runInRealTime === false ? job.data_counts.latest_record_timestamp : undefined;
     try {
@@ -140,17 +130,19 @@ export const RevertModelSnapshotFlyout: FC<Props> = ({ snapshot, snapshots, job,
             }))
           : undefined;
 
-      await ml.jobs.revertModelSnapshot(
-        job.job_id,
-        currentSnapshot.snapshot_id,
-        replay,
-        end,
-        events
-      );
+      ml.jobs
+        .revertModelSnapshot(job.job_id, currentSnapshot.snapshot_id, replay, end, events)
+        .then(() => {
+          toasts.addSuccess(
+            i18n.translate('xpack.ml.revertModelSnapshotFlyout.revertSuccessTitle', {
+              defaultMessage: 'Model snapshot revert successful',
+            })
+          );
+          refresh();
+        });
       hideRevertModal();
-      closeWithReload();
+      closeFlyout();
     } catch (error) {
-      setApplying(false);
       toasts.addError(new Error(error.body.message), {
         title: i18n.translate('xpack.ml.revertModelSnapshotFlyout.revertErrorTitle', {
           defaultMessage: 'Model snapshot revert failed',
@@ -168,7 +160,7 @@ export const RevertModelSnapshotFlyout: FC<Props> = ({ snapshot, snapshots, job,
 
   return (
     <>
-      <EuiFlyout onClose={closeWithoutReload} hideCloseButton size="m">
+      <EuiFlyout onClose={closeFlyout} hideCloseButton size="m">
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="s">
             <h5>
@@ -256,7 +248,7 @@ export const RevertModelSnapshotFlyout: FC<Props> = ({ snapshot, snapshots, job,
             <FormattedMessage
               id="xpack.ml.newJob.wizard.revertModelSnapshotFlyout.warningCallout.contents"
               defaultMessage="All anomaly detection results after {date} will be deleted."
-              values={{ date: formatDate(currentSnapshot.latest_record_time_stamp, TIME_FORMAT) }}
+              values={{ date: timeFormatter(currentSnapshot.latest_record_time_stamp) }}
             />
           </EuiCallOut>
 
@@ -349,7 +341,7 @@ export const RevertModelSnapshotFlyout: FC<Props> = ({ snapshot, snapshots, job,
         <EuiFlyoutFooter>
           <EuiFlexGroup justifyContent="spaceBetween">
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty iconType="cross" onClick={closeWithoutReload} flush="left">
+              <EuiButtonEmpty iconType="cross" onClick={closeFlyout} flush="left">
                 <FormattedMessage
                   id="xpack.ml.newJob.wizard.revertModelSnapshotFlyout.closeButton"
                   defaultMessage="Close"
@@ -375,30 +367,32 @@ export const RevertModelSnapshotFlyout: FC<Props> = ({ snapshot, snapshots, job,
       </EuiFlyout>
 
       {revertModalVisible && (
-        <EuiOverlayMask>
-          <EuiConfirmModal
-            title={i18n.translate('xpack.ml.newJob.wizard.revertModelSnapshotFlyout.deleteTitle', {
-              defaultMessage: 'Apply snapshot revert',
-            })}
-            onCancel={hideRevertModal}
-            onConfirm={applyRevert}
-            cancelButtonText={i18n.translate(
-              'xpack.ml.newJob.wizard.revertModelSnapshotFlyout.cancelButton',
-              {
-                defaultMessage: 'Cancel',
-              }
-            )}
-            confirmButtonText={i18n.translate(
-              'xpack.ml.newJob.wizard.revertModelSnapshotFlyout.deleteButton',
-              {
-                defaultMessage: 'Apply',
-              }
-            )}
-            confirmButtonDisabled={applying}
-            buttonColor="danger"
-            defaultFocusedButton="confirm"
+        <EuiConfirmModal
+          title={i18n.translate('xpack.ml.newJob.wizard.revertModelSnapshotFlyout.deleteTitle', {
+            defaultMessage: 'Apply snapshot revert',
+          })}
+          onCancel={hideRevertModal}
+          onConfirm={applyRevert}
+          cancelButtonText={i18n.translate(
+            'xpack.ml.newJob.wizard.revertModelSnapshotFlyout.cancelButton',
+            {
+              defaultMessage: 'Cancel',
+            }
+          )}
+          confirmButtonText={i18n.translate(
+            'xpack.ml.newJob.wizard.revertModelSnapshotFlyout.deleteButton',
+            {
+              defaultMessage: 'Apply',
+            }
+          )}
+          buttonColor="danger"
+          defaultFocusedButton="confirm"
+        >
+          <FormattedMessage
+            id="xpack.ml.newJob.wizard.revertModelSnapshotFlyout.modalBody"
+            defaultMessage="The snapshot revert will be carried out in the background and may take some time."
           />
-        </EuiOverlayMask>
+        </EuiConfirmModal>
       )}
     </>
   );

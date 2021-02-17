@@ -1,4 +1,12 @@
-.kbnTopNavMenu > * > * {
-  // TEMP fix to adjust spacing between EuiHeaderList__list items
-  margin: 0 $euiSizeXS;
+.kbnTopNavMenu {
+  margin-right: $euiSizeXS;
+}
+
+.kbnTopNavMenu__badgeWrapper {
+  display: flex;
+  align-items: baseline;
+}
+
+.kbnTopNavMenu__badgeGroup {
+  margin-right: $euiSizeM;
 }

@@ -1,52 +1,45 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { ExpressionFunctionDefinition, Render } from 'src/plugins/expressions/public';
 import {
-  ExpressionFunctionDefinition,
-  KibanaContext,
-  Render,
-} from 'src/plugins/expressions/public';
-import { getTimelionRequestHandler } from './helpers/timelion_request_handler';
+  getTimelionRequestHandler,
+  TimelionSuccessResponse,
+} from './helpers/timelion_request_handler';
 import { TIMELION_VIS_NAME } from './timelion_vis_type';
 import { TimelionVisDependencies } from './plugin';
-import { Filter, Query, TimeRange } from '../../data/common';
+import { KibanaContext, Filter, Query, TimeRange } from '../../data/public';
 
 type Input = KibanaContext | null;
-type Output = Promise<Render<RenderValue>>;
-interface Arguments {
+type Output = Promise<Render<TimelionRenderValue>>;
+export interface TimelionRenderValue {
+  visData: TimelionSuccessResponse;
+  visType: 'timelion';
+  visParams: TimelionVisParams;
+}
+
+export interface TimelionVisParams {
   expression: string;
   interval: string;
 }
 
-interface RenderValue {
-  visData: Input;
-  visType: 'timelion';
-  visParams: VisParams;
-}
-
-export type VisParams = Arguments;
+export type TimelionExpressionFunctionDefinition = ExpressionFunctionDefinition<
+  'timelion_vis',
+  Input,
+  TimelionVisParams,
+  Output
+>;
 
 export const getTimelionVisualizationConfig = (
   dependencies: TimelionVisDependencies
-): ExpressionFunctionDefinition<'timelion_vis', Input, Arguments, Output> => ({
+): TimelionExpressionFunctionDefinition => ({
   name: 'timelion_vis',
   type: 'render',
   inputTypes: ['kibana_context', 'null'],
@@ -66,7 +59,7 @@ export const getTimelionVisualizationConfig = (
       help: '',
     },
   },
-  async fn(input, args) {
+  async fn(input, args, { getSearchSessionId }) {
     const timelionRequestHandler = getTimelionRequestHandler(dependencies);
 
     const visParams = { expression: args.expression, interval: args.interval };
@@ -76,13 +69,14 @@ export const getTimelionVisualizationConfig = (
       query: get(input, 'query') as Query,
       filters: get(input, 'filters') as Filter[],
       visParams,
+      searchSessionId: getSearchSessionId(),
     });
 
     response.visType = TIMELION_VIS_NAME;
 
     return {
       type: 'render',
-      as: 'visualization',
+      as: 'timelion_vis',
       value: {
         visParams,
         visType: TIMELION_VIS_NAME,

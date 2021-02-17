@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { renderHook, act } from '@testing-library/react-hooks';
@@ -14,6 +15,11 @@ import {
   resp,
   createSeries,
 } from '../../../../utils/fixtures/metrics_explorer';
+
+jest.mock('../../../../hooks/use_kibana_timefilter_time', () => ({
+  useKibanaTimefilterTime: (defaults: { from: string; to: string }) => [() => defaults],
+  useSyncKibanaTimeFilterTime: () => [() => {}],
+}));
 
 const renderUseMetricsExplorerStateHook = () =>
   renderHook((props) => useMetricsExplorerState(props.source, props.derivedIndexPattern), {

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -17,7 +18,8 @@ import {
   DocValueFieldsInput,
 } from '../../graphql/types';
 import { FrameworkRequest, RequestOptionsPaginated } from '../framework';
-import { Hit, Hits, SearchHit, TotalValue } from '../types';
+import { Hit, Hits, SearchHit } from '../types';
+import { TotalValue } from '../../../common/detection_engine/types';
 
 export interface HostsAdapter {
   getHosts(req: FrameworkRequest, options: HostsRequestOptions): Promise<HostsData>;

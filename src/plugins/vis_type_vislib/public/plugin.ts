@@ -1,63 +1,35 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import './index.scss';
+import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'kibana/public';
 
-import {
-  CoreSetup,
-  CoreStart,
-  Plugin,
-  IUiSettingsClient,
-  PluginInitializerContext,
-} from 'kibana/public';
-
-import { VisTypeXyPluginSetup } from 'src/plugins/vis_type_xy/public';
 import { Plugin as ExpressionsPublicPlugin } from '../../expressions/public';
 import { VisualizationsSetup } from '../../visualizations/public';
+import { ChartsPluginSetup } from '../../charts/public';
+import { DataPublicPluginStart } from '../../data/public';
+import { KibanaLegacyStart } from '../../kibana_legacy/public';
+import { LEGACY_CHARTS_LIBRARY } from '../../vis_type_xy/public';
+
 import { createVisTypeVislibVisFn } from './vis_type_vislib_vis_fn';
 import { createPieVisFn } from './pie_fn';
 import {
-  createHistogramVisTypeDefinition,
-  createLineVisTypeDefinition,
-  createPieVisTypeDefinition,
-  createAreaVisTypeDefinition,
-  createHeatmapVisTypeDefinition,
-  createHorizontalBarVisTypeDefinition,
-  createGaugeVisTypeDefinition,
-  createGoalVisTypeDefinition,
+  convertedTypeDefinitions,
+  pieVisTypeDefinition,
+  visLibVisTypeDefinitions,
 } from './vis_type_vislib_vis_types';
-import { ChartsPluginSetup } from '../../charts/public';
-import { DataPublicPluginStart } from '../../data/public';
-import { setFormatService, setDataActions, setKibanaLegacy } from './services';
-import { KibanaLegacyStart } from '../../kibana_legacy/public';
-
-export interface VisTypeVislibDependencies {
-  uiSettings: IUiSettingsClient;
-  charts: ChartsPluginSetup;
-}
+import { setFormatService, setDataActions } from './services';
+import { getVislibVisRenderer } from './vis_renderer';
 
 /** @internal */
 export interface VisTypeVislibPluginSetupDependencies {
   expressions: ReturnType<ExpressionsPublicPlugin['setup']>;
   visualizations: VisualizationsSetup;
   charts: ChartsPluginSetup;
-  visTypeXy?: VisTypeXyPluginSetup;
 }
 
 /** @internal */
@@ -66,54 +38,35 @@ export interface VisTypeVislibPluginStartDependencies {
   kibanaLegacy: KibanaLegacyStart;
 }
 
-type VisTypeVislibCoreSetup = CoreSetup<VisTypeVislibPluginStartDependencies, void>;
+export type VisTypeVislibCoreSetup = CoreSetup<VisTypeVislibPluginStartDependencies, void>;
 
 /** @internal */
-export class VisTypeVislibPlugin implements Plugin<void, void> {
+export class VisTypeVislibPlugin
+  implements
+    Plugin<void, void, VisTypeVislibPluginSetupDependencies, VisTypeVislibPluginStartDependencies> {
   constructor(public initializerContext: PluginInitializerContext) {}
 
-  public async setup(
+  public setup(
     core: VisTypeVislibCoreSetup,
-    { expressions, visualizations, charts, visTypeXy }: VisTypeVislibPluginSetupDependencies
+    { expressions, visualizations, charts }: VisTypeVislibPluginSetupDependencies
   ) {
-    const visualizationDependencies: Readonly<VisTypeVislibDependencies> = {
-      uiSettings: core.uiSettings,
-      charts,
-    };
-    const vislibTypes = [
-      createHistogramVisTypeDefinition,
-      createLineVisTypeDefinition,
-      createPieVisTypeDefinition,
-      createAreaVisTypeDefinition,
-      createHeatmapVisTypeDefinition,
-      createHorizontalBarVisTypeDefinition,
-      createGaugeVisTypeDefinition,
-      createGoalVisTypeDefinition,
-    ];
-    const vislibFns = [createVisTypeVislibVisFn(), createPieVisFn()];
-
-    // if visTypeXy plugin is disabled it's config will be undefined
-    if (!visTypeXy) {
-      const convertedTypes: any[] = [];
-      const convertedFns: any[] = [];
-
-      // Register legacy vislib types that have been converted
-      convertedFns.forEach(expressions.registerFunction);
-      convertedTypes.forEach((vis) =>
-        visualizations.createBaseVisualization(vis(visualizationDependencies))
-      );
+    if (!core.uiSettings.get(LEGACY_CHARTS_LIBRARY, false)) {
+      // Register only non-replaced vis types
+      convertedTypeDefinitions.forEach(visualizations.createBaseVisualization);
+      visualizations.createBaseVisualization(pieVisTypeDefinition);
+      expressions.registerRenderer(getVislibVisRenderer(core, charts));
+      [createVisTypeVislibVisFn(), createPieVisFn()].forEach(expressions.registerFunction);
+    } else {
+      // Register all vis types
+      visLibVisTypeDefinitions.forEach(visualizations.createBaseVisualization);
+      visualizations.createBaseVisualization(pieVisTypeDefinition);
+      expressions.registerRenderer(getVislibVisRenderer(core, charts));
+      [createVisTypeVislibVisFn(), createPieVisFn()].forEach(expressions.registerFunction);
     }
-
-    // Register non-converted types
-    vislibFns.forEach(expressions.registerFunction);
-    vislibTypes.forEach((vis) =>
-      visualizations.createBaseVisualization(vis(visualizationDependencies))
-    );
   }
 
-  public start(core: CoreStart, { data, kibanaLegacy }: VisTypeVislibPluginStartDependencies) {
+  public start(core: CoreStart, { data }: VisTypeVislibPluginStartDependencies) {
     setFormatService(data.fieldFormats);
     setDataActions(data.actions);
-    setKibanaLegacy(kibanaLegacy);
   }
 }

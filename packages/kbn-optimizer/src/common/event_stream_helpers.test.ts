@@ -1,37 +1,27 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import * as Rx from 'rxjs';
-import { toArray, take } from 'rxjs/operators';
+import { take } from 'rxjs/operators';
+import { allValuesFrom } from './rxjs_helpers';
 
 import { summarizeEventStream } from './event_stream_helpers';
 
 it('emits each state with each event, ignoring events when summarizer returns undefined', async () => {
   const event$ = Rx.of(1, 2, 3, 4, 5);
   const initial = 0;
-  const values = await summarizeEventStream(event$, initial, (state, event) => {
-    if (event % 2) {
-      return state + event;
-    }
-  })
-    .pipe(toArray())
-    .toPromise();
+  const values = await allValuesFrom(
+    summarizeEventStream(event$, initial, (state, event) => {
+      if (event % 2) {
+        return state + event;
+      }
+    })
+  );
 
   expect(values).toMatchInlineSnapshot(`
     Array [
@@ -57,15 +47,15 @@ it('emits each state with each event, ignoring events when summarizer returns un
 it('interleaves injected events when source is synchronous', async () => {
   const event$ = Rx.of(1, 7);
   const initial = 0;
-  const values = await summarizeEventStream(event$, initial, (state, event, injectEvent) => {
-    if (event < 5) {
-      injectEvent(event + 2);
-    }
+  const values = await allValuesFrom(
+    summarizeEventStream(event$, initial, (state, event, injectEvent) => {
+      if (event < 5) {
+        injectEvent(event + 2);
+      }
 
-    return state + event;
-  })
-    .pipe(toArray())
-    .toPromise();
+      return state + event;
+    })
+  );
 
   expect(values).toMatchInlineSnapshot(`
     Array [
@@ -95,15 +85,15 @@ it('interleaves injected events when source is synchronous', async () => {
 it('interleaves injected events when source is asynchronous', async () => {
   const event$ = Rx.of(1, 7, Rx.asyncScheduler);
   const initial = 0;
-  const values = await summarizeEventStream(event$, initial, (state, event, injectEvent) => {
-    if (event < 5) {
-      injectEvent(event + 2);
-    }
+  const values = await allValuesFrom(
+    summarizeEventStream(event$, initial, (state, event, injectEvent) => {
+      if (event < 5) {
+        injectEvent(event + 2);
+      }
 
-    return state + event;
-  })
-    .pipe(toArray())
-    .toPromise();
+      return state + event;
+    })
+  );
 
   expect(values).toMatchInlineSnapshot(`
     Array [
@@ -133,17 +123,17 @@ it('interleaves injected events when source is asynchronous', async () => {
 it('interleaves mulitple injected events in order', async () => {
   const event$ = Rx.of(1);
   const initial = 0;
-  const values = await summarizeEventStream(event$, initial, (state, event, injectEvent) => {
-    if (event < 10) {
-      injectEvent(10);
-      injectEvent(20);
-      injectEvent(30);
-    }
+  const values = await allValuesFrom(
+    summarizeEventStream(event$, initial, (state, event, injectEvent) => {
+      if (event < 10) {
+        injectEvent(10);
+        injectEvent(20);
+        injectEvent(30);
+      }
 
-    return state + event;
-  })
-    .pipe(toArray())
-    .toPromise();
+      return state + event;
+    })
+  );
 
   expect(values).toMatchInlineSnapshot(`
     Array [
@@ -179,9 +169,9 @@ it('stops an infinite stream when unsubscribed', async () => {
     return prev + event;
   });
 
-  const values = await summarizeEventStream(event$, initial, summarize)
-    .pipe(take(11), toArray())
-    .toPromise();
+  const values = await allValuesFrom(
+    summarizeEventStream(event$, initial, summarize).pipe(take(11))
+  );
 
   expect(values).toMatchInlineSnapshot(`
     Array [

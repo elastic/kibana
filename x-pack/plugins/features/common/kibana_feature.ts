@@ -1,11 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { RecursiveReadonly } from '@kbn/utility-types';
 import { AppCategory } from 'src/core/types';
+import { LicenseType } from '../../licensing/common/types';
 import { FeatureKibanaPrivileges } from './feature_kibana_privileges';
 import { SubFeatureConfig, SubFeature as KibanaSubFeature } from './sub_feature';
 import { ReservedKibanaPrivilege } from './reserved_kibana_privilege';
@@ -52,25 +54,12 @@ export interface KibanaFeatureConfig {
   excludeFromBasePrivileges?: boolean;
 
   /**
-   * Optional array of supported licenses.
+   * Optional minimum supported license.
    * If omitted, all licenses are allowed.
    * This does not restrict access to your feature based on license.
    * Its only purpose is to inform the space and roles UIs on which features to display.
    */
-  validLicenses?: ReadonlyArray<
-    'basic' | 'standard' | 'gold' | 'platinum' | 'enterprise' | 'trial'
-  >;
-
-  /**
-   * An optional EUI Icon to be used when displaying your feature.
-   */
-  icon?: string;
-
-  /**
-   * The optional Nav Link ID for feature.
-   * If specified, your link will be automatically hidden if needed based on the current space and user permissions.
-   */
-  navLinkId?: string;
+  minimumLicense?: LicenseType;
 
   /**
    * An array of app ids that are enabled when this feature is enabled.
@@ -170,10 +159,6 @@ export class KibanaFeature {
     return this.config.category;
   }
 
-  public get navLinkId() {
-    return this.config.navLinkId;
-  }
-
   public get app() {
     return this.config.app;
   }
@@ -186,12 +171,8 @@ export class KibanaFeature {
     return this.config.management;
   }
 
-  public get icon() {
-    return this.config.icon;
-  }
-
-  public get validLicenses() {
-    return this.config.validLicenses;
+  public get minimumLicense() {
+    return this.config.minimumLicense;
   }
 
   public get privileges() {

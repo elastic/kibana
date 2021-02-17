@@ -1,13 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { schema } from '@kbn/config-schema';
 import { getClustersFromRequest } from '../../../../lib/cluster/get_clusters_from_request';
 import { verifyMonitoringAuth } from '../../../../lib/elasticsearch/verify_monitoring_auth';
-import { verifyCcsAvailability } from '../../../../lib/elasticsearch/verify_ccs_availability';
 import { handleError } from '../../../../lib/errors';
 import { getIndexPatterns } from '../../../../lib/cluster/get_index_patterns';
 
@@ -39,7 +39,6 @@ export function clustersRoute(server) {
       // the monitoring data. `try/catch` makes it a little more explicit.
       try {
         await verifyMonitoringAuth(req);
-        await verifyCcsAvailability(req);
         const indexPatterns = getIndexPatterns(server, {
           filebeatIndexPattern: config.get('monitoring.ui.logs.index'),
         });

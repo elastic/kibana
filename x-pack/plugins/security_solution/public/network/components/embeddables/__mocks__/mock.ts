@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { IndexPatternMapping } from '../types';
@@ -482,5 +483,32 @@ export const mockCCSGlobIndexPattern: IndexPatternSavedObject = {
   _version: 'abc',
   attributes: {
     title: '*:*',
+  },
+};
+
+export const mockCommaFilebeatAuditbeatGlobIndexPattern: IndexPatternSavedObject = {
+  id: 'filebeat-*,auditbeat-*',
+  type: 'index-pattern',
+  _version: 'abc',
+  attributes: {
+    title: 'filebeat-*,auditbeat-*',
+  },
+};
+
+export const mockCommaFilebeatAuditbeatCCSGlobIndexPattern: IndexPatternSavedObject = {
+  id: '*:filebeat-*,*:auditbeat-*',
+  type: 'index-pattern',
+  _version: 'abc',
+  attributes: {
+    title: '*:filebeat-*,*:auditbeat-*',
+  },
+};
+
+export const mockCommaFilebeatExclusionGlobIndexPattern: IndexPatternSavedObject = {
+  id: 'filebeat-*,-filebeat-7.6.0*',
+  type: 'index-pattern',
+  _version: 'abc',
+  attributes: {
+    title: 'filebeat-*,-filebeat-7.6.0*',
   },
 };

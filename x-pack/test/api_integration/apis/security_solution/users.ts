@@ -1,20 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
-// @ts-expect-error
-import { usersQuery } from '../../../../plugins/security_solution/public/network/containers/users/index.gql_query';
 import {
+  NetworkQueries,
   Direction,
-  // @ts-expect-error
-  UsersFields,
+  NetworkUsersFields,
   FlowTarget,
-  // @ts-expect-error
-  GetUsersQuery,
-} from '../../../../plugins/security_solution/public/graphql/types';
+} from '../../../../plugins/security_solution/common/search_strategy';
+
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 const FROM = '2000-01-01T00:00:00.000Z';
@@ -23,47 +21,48 @@ const IP = '0.0.0.0';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
-  const client = getService('securitySolutionGraphQLClient');
-  describe('Users', () => {
+  const supertest = getService('supertest');
+  // Failing: See https://github.com/elastic/kibana/issues/90135
+  // Failing: See https://github.com/elastic/kibana/issues/90136
+  describe.skip('Users', () => {
     describe('With auditbeat', () => {
       before(() => esArchiver.load('auditbeat/default'));
       after(() => esArchiver.unload('auditbeat/default'));
 
-      it('Ensure data is returned from auditbeat', () => {
-        return client
-          .query<GetUsersQuery.Query>({
-            query: usersQuery,
-            variables: {
-              sourceId: 'default',
-              timerange: {
-                interval: '12h',
-                to: TO,
-                from: FROM,
-              },
-              defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
-              docValueFields: [],
-              ip: IP,
-              flowTarget: FlowTarget.destination,
-              sort: { field: UsersFields.name, direction: Direction.asc },
-              pagination: {
-                activePage: 0,
-                cursorStart: 0,
-                fakePossibleCount: 30,
-                querySize: 10,
-              },
-              inspect: false,
+      it('Ensure data is returned from auditbeat', async () => {
+        const { body: users } = await supertest
+          .post('/internal/search/securitySolutionSearchStrategy/')
+          .set('kbn-xsrf', 'true')
+          .send({
+            factoryQueryType: NetworkQueries.users,
+            sourceId: 'default',
+            timerange: {
+              interval: '12h',
+              to: TO,
+              from: FROM,
             },
+            defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+            docValueFields: [],
+            ip: IP,
+            flowTarget: FlowTarget.destination,
+            sort: { field: NetworkUsersFields.name, direction: Direction.asc },
+            pagination: {
+              activePage: 0,
+              cursorStart: 0,
+              fakePossibleCount: 30,
+              querySize: 10,
+            },
+            inspect: false,
           })
-          .then((resp) => {
-            const users = resp.data.source.Users;
-            expect(users.edges.length).to.be(1);
-            expect(users.totalCount).to.be(1);
-            expect(users.edges[0].node.user!.id).to.eql(['0']);
-            expect(users.edges[0].node.user!.name).to.be('root');
-            expect(users.edges[0].node.user!.groupId).to.eql(['0']);
-            expect(users.edges[0].node.user!.groupName).to.eql(['root']);
-            expect(users.edges[0].node.user!.count).to.be(1);
-          });
+          .expect(200);
+
+        expect(users.edges.length).to.be(1);
+        expect(users.totalCount).to.be(1);
+        expect(users.edges[0].node.user!.id).to.eql(['0']);
+        expect(users.edges[0].node.user!.name).to.be('root');
+        expect(users.edges[0].node.user!.groupId).to.eql(['0']);
+        expect(users.edges[0].node.user!.groupName).to.eql(['root']);
+        expect(users.edges[0].node.user!.count).to.be(1);
       });
     });
   });

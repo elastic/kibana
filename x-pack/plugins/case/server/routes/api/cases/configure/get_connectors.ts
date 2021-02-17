@@ -1,26 +1,34 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import { RouteDeps } from '../../types';
 import { wrapError } from '../../utils';
+import { ActionType } from '../../../../../../actions/common';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { FindActionResult } from '../../../../../../actions/server/types';
 
 import {
   CASE_CONFIGURE_CONNECTORS_URL,
   SUPPORTED_CONNECTORS,
-  SERVICENOW_ACTION_TYPE_ID,
-  JIRA_ACTION_TYPE_ID,
-  RESILIENT_ACTION_TYPE_ID,
 } from '../../../../../common/constants';
+
+const isConnectorSupported = (
+  action: FindActionResult,
+  actionTypes: Record<string, ActionType>
+): boolean =>
+  SUPPORTED_CONNECTORS.includes(action.actionTypeId) &&
+  actionTypes[action.actionTypeId]?.enabledInLicense;
 
 /*
  * Be aware that this api will only return 20 connectors
  */
 
-export function initCaseConfigureGetActionConnector({ caseService, router }: RouteDeps) {
+export function initCaseConfigureGetActionConnector({ router }: RouteDeps) {
   router.get(
     {
       path: `${CASE_CONFIGURE_CONNECTORS_URL}/_find`,
@@ -28,23 +36,19 @@ export function initCaseConfigureGetActionConnector({ caseService, router }: Rou
     },
     async (context, request, response) => {
       try {
-        const actionsClient = await context.actions?.getActionsClient();
+        const actionsClient = context.actions?.getActionsClient();
 
         if (actionsClient == null) {
-          throw Boom.notFound('Action client have not been found');
+          throw Boom.notFound('Action client not found');
         }
 
-        const results = (await actionsClient.getAll()).filter(
-          (action) =>
-            SUPPORTED_CONNECTORS.includes(action.actionTypeId) &&
-            // Need this filtering temporary to display only Case owned ServiceNow connectors
-            (![SERVICENOW_ACTION_TYPE_ID, JIRA_ACTION_TYPE_ID, RESILIENT_ACTION_TYPE_ID].includes(
-              action.actionTypeId
-            ) ||
-              ([SERVICENOW_ACTION_TYPE_ID, JIRA_ACTION_TYPE_ID, RESILIENT_ACTION_TYPE_ID].includes(
-                action.actionTypeId
-              ) &&
-                action.config?.isCaseOwned === true))
+        const actionTypes = (await actionsClient.listTypes()).reduce(
+          (types, type) => ({ ...types, [type.id]: type }),
+          {}
+        );
+
+        const results = (await actionsClient.getAll()).filter((action) =>
+          isConnectorSupported(action, actionTypes)
         );
         return response.ok({ body: results });
       } catch (error) {

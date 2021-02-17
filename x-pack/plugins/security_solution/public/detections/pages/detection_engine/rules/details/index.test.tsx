@@ -1,11 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
 import { mount } from 'enzyme';
+import { waitFor } from '@testing-library/react';
 
 import '../../../../../common/mock/match_media';
 import {
@@ -16,9 +18,8 @@ import {
   TestProviders,
   SUB_PLUGINS_REDUCER,
 } from '../../../../../common/mock';
-import { RuleDetailsPageComponent } from './index';
+import { RuleDetailsPage } from './index';
 import { createStore, State } from '../../../../../common/store';
-import { setAbsoluteRangeDatePicker } from '../../../../../common/store/inputs/actions';
 import { useUserData } from '../../../../components/user_info';
 import { useSourcererScope } from '../../../../../common/containers/sourcerer';
 import { useParams } from 'react-router-dom';
@@ -77,23 +78,16 @@ describe('RuleDetailsPageComponent', () => {
     });
   });
 
-  it('renders correctly', () => {
+  it('renders correctly', async () => {
     const wrapper = mount(
       <TestProviders store={store}>
         <Router history={mockHistory}>
-          <RuleDetailsPageComponent
-            graphEventId={undefined}
-            query={{ query: '', language: 'language' }}
-            filters={[]}
-            setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker}
-          />
+          <RuleDetailsPage />
         </Router>
-      </TestProviders>,
-      {
-        wrappingComponent: TestProviders,
-      }
+      </TestProviders>
     );
-
-    expect(wrapper.find('[data-test-subj="header-page-title"]').exists()).toBe(true);
+    await waitFor(() => {
+      expect(wrapper.find('[data-test-subj="header-page-title"]').exists()).toBe(true);
+    });
   });
 });

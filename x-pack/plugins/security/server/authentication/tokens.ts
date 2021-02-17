@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { ILegacyClusterClient, Logger } from '../../../../../src/core/server';
+import type { ElasticsearchClient, Logger } from '../../../../../src/core/server';
+import type { AuthenticationInfo } from '../elasticsearch';
 import { getErrorStatusCode } from '../errors';
 
 /**
@@ -25,6 +27,13 @@ export interface TokenPair {
 }
 
 /**
+ * Represents the result of the token refresh operation.
+ */
+export interface RefreshTokenResult extends TokenPair {
+  authenticationInfo: AuthenticationInfo;
+}
+
+/**
  * Class responsible for managing access and refresh tokens (refresh, invalidate, etc.) used by
  * various authentication providers.
  */
@@ -34,9 +43,7 @@ export class Tokens {
    */
   private readonly logger: Logger;
 
-  constructor(
-    private readonly options: Readonly<{ client: ILegacyClusterClient; logger: Logger }>
-  ) {
+  constructor(private readonly options: Readonly<{ client: ElasticsearchClient; logger: Logger }>) {
     this.logger = options.logger;
   }
 
@@ -44,19 +51,24 @@ export class Tokens {
    * Tries to exchange provided refresh token to a new pair of access and refresh tokens.
    * @param existingRefreshToken Refresh token to send to the refresh token API.
    */
-  public async refresh(existingRefreshToken: string): Promise<TokenPair | null> {
+  public async refresh(existingRefreshToken: string): Promise<RefreshTokenResult | null> {
     try {
       // Token should be refreshed by the same user that obtained that token.
       const {
         access_token: accessToken,
         refresh_token: refreshToken,
-      } = await this.options.client.callAsInternalUser('shield.getAccessToken', {
-        body: { grant_type: 'refresh_token', refresh_token: existingRefreshToken },
-      });
+        authentication: authenticationInfo,
+      } = (
+        await this.options.client.security.getToken<{
+          access_token: string;
+          refresh_token: string;
+          authentication: AuthenticationInfo;
+        }>({ body: { grant_type: 'refresh_token', refresh_token: existingRefreshToken } })
+      ).body;
 
       this.logger.debug('Access token has been successfully refreshed.');
 
-      return { accessToken, refreshToken };
+      return { accessToken, refreshToken, authenticationInfo };
     } catch (err) {
       this.logger.debug(`Failed to refresh access token: ${err.message}`);
 
@@ -99,10 +111,10 @@ export class Tokens {
       let invalidatedTokensCount;
       try {
         invalidatedTokensCount = (
-          await this.options.client.callAsInternalUser('shield.deleteAccessToken', {
+          await this.options.client.security.invalidateToken<{ invalidated_tokens: number }>({
             body: { refresh_token: refreshToken },
           })
-        ).invalidated_tokens;
+        ).body.invalidated_tokens;
       } catch (err) {
         this.logger.debug(`Failed to invalidate refresh token: ${err.message}`);
 
@@ -131,10 +143,10 @@ export class Tokens {
       let invalidatedTokensCount;
       try {
         invalidatedTokensCount = (
-          await this.options.client.callAsInternalUser('shield.deleteAccessToken', {
+          await this.options.client.security.invalidateToken<{ invalidated_tokens: number }>({
             body: { token: accessToken },
           })
-        ).invalidated_tokens;
+        ).body.invalidated_tokens;
       } catch (err) {
         this.logger.debug(`Failed to invalidate access token: ${err.message}`);
 

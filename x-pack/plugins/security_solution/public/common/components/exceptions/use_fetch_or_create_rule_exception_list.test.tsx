@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { act, renderHook, RenderHookResult } from '@testing-library/react-hooks';
@@ -27,9 +28,9 @@ describe('useFetchOrCreateRuleExceptionList', () => {
   let fetchRuleById: jest.SpyInstance<ReturnType<typeof rulesApi.fetchRuleById>>;
   let patchRule: jest.SpyInstance<ReturnType<typeof rulesApi.patchRule>>;
   let addExceptionList: jest.SpyInstance<ReturnType<typeof listsApi.addExceptionList>>;
-  let addEndpointExceptionList: jest.SpyInstance<ReturnType<
-    typeof listsApi.addEndpointExceptionList
-  >>;
+  let addEndpointExceptionList: jest.SpyInstance<
+    ReturnType<typeof listsApi.addEndpointExceptionList>
+  >;
   let fetchExceptionListById: jest.SpyInstance<ReturnType<typeof listsApi.fetchExceptionListById>>;
   let render: (
     listType?: UseFetchOrCreateRuleExceptionListProps['exceptionListType']

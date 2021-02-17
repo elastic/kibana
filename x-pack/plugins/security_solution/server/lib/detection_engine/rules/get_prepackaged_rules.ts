@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import * as t from 'io-ts';
@@ -15,6 +16,8 @@ import {
   AddPrepackagedRulesSchemaDecoded,
 } from '../../../../common/detection_engine/schemas/request/add_prepackaged_rules_schema';
 import { BadRequestError } from '../errors/bad_request_error';
+
+// TODO: convert rules files to TS and add explicit type definitions
 import { rawRules } from './prepackaged_rules';
 
 /**
@@ -49,5 +52,7 @@ export const validateAllPrepackagedRules = (
   });
 };
 
-export const getPrepackagedRules = (rules = rawRules): AddPrepackagedRulesSchemaDecoded[] =>
-  validateAllPrepackagedRules(rules);
+export const getPrepackagedRules = (
+  // @ts-expect-error mock data is too loosely typed
+  rules: AddPrepackagedRulesSchema[] = rawRules
+): AddPrepackagedRulesSchemaDecoded[] => validateAllPrepackagedRules(rules);

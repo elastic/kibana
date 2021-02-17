@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import execa from 'execa';
@@ -73,9 +74,10 @@ async function copySourceAndBabelify() {
           '**/*.{test,test.mocks,mock,mocks}.*',
           '**/*.d.ts',
           '**/node_modules/**',
-          '**/public/**',
+          '**/public/**/*.{js,ts,tsx,json}',
           '**/{__tests__,__mocks__,__snapshots__}/**',
           'plugins/canvas/shareable_runtime/test/**',
+          'plugins/telemetry_collection_xpack/schema/**', // Skip telemetry schemas
         ],
         allowEmpty: true,
       }

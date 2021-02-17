@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { DynamicActionManager } from './dynamic_action_manager';
@@ -13,6 +14,7 @@ import { UiActionsServiceEnhancements } from '../services';
 import { ActionFactoryDefinition } from './action_factory_definition';
 import { SerializedAction, SerializedEvent } from './types';
 import { licensingMock } from '../../../licensing/public/mocks';
+import { dynamicActionGrouping } from './dynamic_action_grouping';
 
 const actionFactoryDefinition1: ActionFactoryDefinition = {
   id: 'ACTION_FACTORY_1',
@@ -292,6 +294,27 @@ describe('DynamicActionManager', () => {
         await manager.createEvent(action, ['VALUE_CLICK_TRIGGER']);
 
         expect(manager.state.get().events.length).toBe(1);
+      });
+
+      test('adds revived actiosn to "dynamic action" grouping', async () => {
+        const { manager, uiActions, actions } = setup([]);
+        const action: SerializedAction = {
+          factoryId: actionFactoryDefinition1.id,
+          name: 'foo',
+          config: {},
+        };
+
+        uiActions.registerActionFactory(actionFactoryDefinition1);
+
+        await manager.start();
+
+        expect(manager.state.get().events.length).toBe(0);
+
+        await manager.createEvent(action, ['VALUE_CLICK_TRIGGER']);
+
+        const createdAction = actions.values().next().value;
+
+        expect(createdAction.grouping).toBe(dynamicActionGrouping);
       });
 
       test('optimistically adds event to UI state', async () => {

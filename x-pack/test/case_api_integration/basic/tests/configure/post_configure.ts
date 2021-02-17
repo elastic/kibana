@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -40,7 +41,7 @@ export default ({ getService }: FtrProviderContext): void => {
       await supertest
         .post(CASE_CONFIGURE_URL)
         .set('kbn-xsrf', 'true')
-        .send(getConfiguration('connector-2'))
+        .send(getConfiguration({ id: 'connector-2' }))
         .expect(200);
 
       await supertest
@@ -57,6 +58,24 @@ export default ({ getService }: FtrProviderContext): void => {
 
       const data = removeServerGeneratedPropertiesFromConfigure(body);
       expect(data).to.eql(getConfigurationOutput());
+    });
+
+    it('should not create a configuration with unsupported connector type', async () => {
+      await supertest
+        .post(CASE_CONFIGURE_URL)
+        .set('kbn-xsrf', 'true')
+        // @ts-ignore We need it to test unsupported types
+        .send(getConfiguration({ type: '.unsupported' }))
+        .expect(400);
+    });
+
+    it('should not create a configuration with unsupported connector fields', async () => {
+      await supertest
+        .post(CASE_CONFIGURE_URL)
+        .set('kbn-xsrf', 'true')
+        // @ts-ignore We need it to test unsupported types
+        .send(getConfiguration({ type: '.jira', fields: { unsupported: 'value' } }))
+        .expect(400);
     });
   });
 };

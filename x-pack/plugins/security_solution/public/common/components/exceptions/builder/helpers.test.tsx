@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import {
   fields,
   getField,
@@ -90,9 +92,9 @@ const getMockNestedParentBuilderEntry = (): FormattedBuilderEntry => ({
 
 const mockEndpointFields = [
   {
-    name: 'file.path.text',
+    name: 'file.path.caseless',
     type: 'string',
-    esTypes: ['text'],
+    esTypes: ['keyword'],
     count: 0,
     scripted: false,
     searchable: true,
@@ -303,8 +305,8 @@ describe('Exception builder helpers', () => {
             {
               aggregatable: false,
               count: 0,
-              esTypes: ['text'],
-              name: 'file.path.text',
+              esTypes: ['keyword'],
+              name: 'file.path.caseless',
               readFromDocValues: false,
               scripted: false,
               searchable: true,
@@ -855,7 +857,7 @@ describe('Exception builder helpers', () => {
   });
 
   describe('#getOperatorOptions', () => {
-    test('it returns "isOperator" if "item.nested" is "parent"', () => {
+    test('it returns "isOperator" when field type is nested but field itself has not yet been selected', () => {
       const payloadItem: FormattedBuilderEntry = getMockNestedParentBuilderEntry();
       const output = getOperatorOptions(payloadItem, 'endpoint', false);
       const expected: OperatorOption[] = [isOperator];
@@ -883,7 +885,7 @@ describe('Exception builder helpers', () => {
       expect(output).toEqual(expected);
     });
 
-    test('it returns "isOperator"  if "listType" is "endpoint" and field type is boolean', () => {
+    test('it returns "isOperator" if "listType" is "endpoint" and field type is boolean', () => {
       const payloadItem: FormattedBuilderEntry = getMockBuilderEntry();
       const output = getOperatorOptions(payloadItem, 'endpoint', true);
       const expected: OperatorOption[] = [isOperator];
@@ -911,10 +913,15 @@ describe('Exception builder helpers', () => {
       expect(output).toEqual(expected);
     });
 
-    test('it returns "isOperator" and "existsOperator" if field type is boolean', () => {
+    test('it returns "isOperator", "isNotOperator", "doesNotExistOperator" and "existsOperator" if field type is boolean', () => {
       const payloadItem: FormattedBuilderEntry = getMockBuilderEntry();
       const output = getOperatorOptions(payloadItem, 'detection', true);
-      const expected: OperatorOption[] = [isOperator, existsOperator];
+      const expected: OperatorOption[] = [
+        isOperator,
+        isNotOperator,
+        existsOperator,
+        doesNotExistOperator,
+      ];
       expect(output).toEqual(expected);
     });
 

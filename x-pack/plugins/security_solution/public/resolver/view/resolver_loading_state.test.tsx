@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { Simulator } from '../test_utilities/simulator';
@@ -27,6 +28,8 @@ describe('Resolver: data loading and resolution states', () => {
         databaseDocumentID,
         resolverComponentInstanceID,
         indices: [],
+        shouldUpdate: false,
+        filters: {},
       });
     });
 
@@ -35,12 +38,12 @@ describe('Resolver: data loading and resolution states', () => {
         simulator.map(() => ({
           resolverGraphLoading: simulator.testSubject('resolver:graph:loading').length,
           resolverGraphError: simulator.testSubject('resolver:graph:error').length,
-          resolverGraph: simulator.testSubject('resolver:graph').length,
+          resolverTree: simulator.testSubject('resolver:graph').length,
         }))
       ).toYieldEqualTo({
         resolverGraphLoading: 1,
         resolverGraphError: 0,
-        resolverGraph: 0,
+        resolverTree: 0,
       });
     });
   });
@@ -58,6 +61,8 @@ describe('Resolver: data loading and resolution states', () => {
         databaseDocumentID,
         resolverComponentInstanceID,
         indices: [],
+        shouldUpdate: false,
+        filters: {},
       });
     });
 
@@ -66,12 +71,12 @@ describe('Resolver: data loading and resolution states', () => {
         simulator.map(() => ({
           resolverGraphLoading: simulator.testSubject('resolver:graph:loading').length,
           resolverGraphError: simulator.testSubject('resolver:graph:error').length,
-          resolverGraph: simulator.testSubject('resolver:graph').length,
+          resolverTree: simulator.testSubject('resolver:graph').length,
         }))
       ).toYieldEqualTo({
         resolverGraphLoading: 1,
         resolverGraphError: 0,
-        resolverGraph: 0,
+        resolverTree: 0,
       });
     });
   });
@@ -88,6 +93,8 @@ describe('Resolver: data loading and resolution states', () => {
         databaseDocumentID,
         resolverComponentInstanceID,
         indices: [],
+        shouldUpdate: false,
+        filters: {},
       });
     });
 
@@ -96,12 +103,12 @@ describe('Resolver: data loading and resolution states', () => {
         simulator.map(() => ({
           resolverGraphLoading: simulator.testSubject('resolver:graph:loading').length,
           resolverGraphError: simulator.testSubject('resolver:graph:error').length,
-          resolverGraph: simulator.testSubject('resolver:graph').length,
+          resolverTree: simulator.testSubject('resolver:graph').length,
         }))
       ).toYieldEqualTo({
         resolverGraphLoading: 0,
         resolverGraphError: 1,
-        resolverGraph: 0,
+        resolverTree: 0,
       });
     });
   });
@@ -118,6 +125,8 @@ describe('Resolver: data loading and resolution states', () => {
         databaseDocumentID,
         resolverComponentInstanceID,
         indices: [],
+        shouldUpdate: false,
+        filters: {},
       });
     });
 
@@ -126,13 +135,13 @@ describe('Resolver: data loading and resolution states', () => {
         simulator.map(() => ({
           resolverGraphLoading: simulator.testSubject('resolver:graph:loading').length,
           resolverGraphError: simulator.testSubject('resolver:graph:error').length,
-          resolverGraph: simulator.testSubject('resolver:graph').length,
+          resolverTree: simulator.testSubject('resolver:graph').length,
           resolverGraphNodes: simulator.testSubject('resolver:node').length,
         }))
       ).toYieldEqualTo({
         resolverGraphLoading: 0,
         resolverGraphError: 0,
-        resolverGraph: 1,
+        resolverTree: 1,
         resolverGraphNodes: 0,
       });
     });
@@ -150,6 +159,8 @@ describe('Resolver: data loading and resolution states', () => {
         databaseDocumentID,
         resolverComponentInstanceID,
         indices: [],
+        shouldUpdate: false,
+        filters: {},
       });
     });
 
@@ -158,13 +169,13 @@ describe('Resolver: data loading and resolution states', () => {
         simulator.map(() => ({
           resolverGraphLoading: simulator.testSubject('resolver:graph:loading').length,
           resolverGraphError: simulator.testSubject('resolver:graph:error').length,
-          resolverGraph: simulator.testSubject('resolver:graph').length,
+          resolverTree: simulator.testSubject('resolver:graph').length,
           resolverGraphNodes: simulator.testSubject('resolver:node').length,
         }))
       ).toYieldEqualTo({
         resolverGraphLoading: 0,
         resolverGraphError: 0,
-        resolverGraph: 1,
+        resolverTree: 1,
         resolverGraphNodes: 3,
       });
     });

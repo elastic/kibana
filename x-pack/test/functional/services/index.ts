@@ -1,11 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { services as kibanaFunctionalServices } from '../../../../test/functional/services';
 import { services as kibanaApiIntegrationServices } from '../../../../test/api_integration/services';
+import { services as kibanaXPackApiIntegrationServices } from '../../api_integration/services';
 import { services as commonServices } from '../../common/services';
 
 import {
@@ -41,6 +43,7 @@ import { PipelineEditorProvider } from './pipeline_editor';
 import { RandomProvider } from './random';
 // @ts-ignore not ts yet
 import { AceEditorProvider } from './ace_editor';
+import { CanvasElementProvider } from './canvas_element';
 // @ts-ignore not ts yet
 import { GrokDebuggerProvider } from './grok_debugger';
 // @ts-ignore not ts yet
@@ -64,6 +67,7 @@ export const services = {
   ...commonServices,
 
   supertest: kibanaApiIntegrationServices.supertest,
+  supertestWithoutAuth: kibanaXPackApiIntegrationServices.supertestWithoutAuth,
   esSupertest: kibanaApiIntegrationServices.esSupertest,
   monitoringNoData: MonitoringNoDataProvider,
   monitoringClusterList: MonitoringClusterListProvider,
@@ -91,6 +95,7 @@ export const services = {
   pipelineEditor: PipelineEditorProvider,
   random: RandomProvider,
   aceEditor: AceEditorProvider,
+  canvasElement: CanvasElementProvider,
   grokDebugger: GrokDebuggerProvider,
   userMenu: UserMenuProvider,
   uptime: UptimeProvider,

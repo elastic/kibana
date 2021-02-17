@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { wrapError } from '../client/error_wrapper';
@@ -10,7 +11,7 @@ import { RouteInitialization } from '../types';
 /**
  * Routes for notification settings
  */
-export function notificationRoutes({ router, mlLicense }: RouteInitialization) {
+export function notificationRoutes({ router, routeGuard }: RouteInitialization) {
   /**
    * @apiGroup NotificationSettings
    *
@@ -26,7 +27,7 @@ export function notificationRoutes({ router, mlLicense }: RouteInitialization) {
         tags: ['access:ml:canAccessML'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ client, response }) => {
+    routeGuard.fullLicenseAPIGuard(async ({ client, response }) => {
       try {
         const { body } = await client.asCurrentUser.cluster.getSettings({
           include_defaults: true,

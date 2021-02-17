@@ -1,15 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import { cloneDeep } from 'lodash/fp';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from '@kbn/test/jest';
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
-import { act } from '@testing-library/react';
+import { waitFor } from '@testing-library/react';
 
 import '../../../common/mock/match_media';
 import { DEFAULT_SEARCH_RESULTS_PER_PAGE } from '../../pages/timelines_page';
@@ -21,6 +22,15 @@ import { DEFAULT_SORT_DIRECTION, DEFAULT_SORT_FIELD } from './constants';
 import { TimelineType, TimelineStatus } from '../../../../common/types/timeline';
 
 jest.mock('../../../common/lib/kibana');
+
+jest.mock('react-router-dom', () => {
+  const actual = jest.requireActual('react-router-dom');
+
+  return {
+    ...actual,
+    useParams: jest.fn().mockReturnValue({ tabName: 'default' }),
+  };
+});
 
 describe('OpenTimeline', () => {
   const theme = () => ({ eui: euiDarkVars, darkMode: true });
@@ -293,7 +303,7 @@ describe('OpenTimeline', () => {
     );
 
     wrapper.find('[data-test-subj="utility-bar-action"]').find('EuiLink').simulate('click');
-    await act(async () => {
+    await waitFor(() => {
       expect(
         wrapper.find('[data-test-subj="export-timeline-action"]').first().prop('disabled')
       ).toEqual(true);
@@ -313,7 +323,7 @@ describe('OpenTimeline', () => {
     );
 
     wrapper.find('[data-test-subj="utility-bar-action"]').find('EuiLink').simulate('click');
-    await act(async () => {
+    await waitFor(() => {
       expect(
         wrapper.find('[data-test-subj="delete-timeline-action"]').first().prop('disabled')
       ).toEqual(true);
@@ -333,7 +343,7 @@ describe('OpenTimeline', () => {
     );
 
     wrapper.find('[data-test-subj="utility-bar-action"]').find('EuiLink').simulate('click');
-    await act(async () => {
+    await waitFor(() => {
       expect(
         wrapper.find('[data-test-subj="export-timeline-action"]').first().prop('disabled')
       ).toEqual(false);
@@ -353,7 +363,7 @@ describe('OpenTimeline', () => {
     );
 
     wrapper.find('[data-test-subj="utility-bar-action"]').find('EuiLink').simulate('click');
-    await act(async () => {
+    await waitFor(() => {
       expect(
         wrapper.find('[data-test-subj="delete-timeline-action"]').first().prop('disabled')
       ).toEqual(false);

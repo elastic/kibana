@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -14,23 +15,27 @@ import {
   deleteSignalsIndex,
   deleteAllRulesStatuses,
   getSimpleRule,
-  waitFor,
+  waitForRuleSuccessOrStatus,
+  createRule,
 } from '../../utils';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const es = getService('es');
+  const esArchiver = getService('esArchiver');
 
   describe('find_statuses', () => {
     beforeEach(async () => {
       await createSignalsIndex(supertest);
+      await esArchiver.load('auditbeat/hosts');
     });
 
     afterEach(async () => {
       await deleteSignalsIndex(supertest);
-      await deleteAllAlerts(es);
+      await deleteAllAlerts(supertest);
       await deleteAllRulesStatuses(es);
+      await esArchiver.unload('auditbeat/hosts');
     });
 
     it('should return an empty find statuses body correctly if no statuses are loaded', async () => {
@@ -63,22 +68,9 @@ export default ({ getService }: FtrProviderContext): void => {
        this pops up again elsewhere.
       */
     it('should return a single rule status when a single rule is loaded from a find status with defaults added', async () => {
-      // add a single rule
-      const { body: resBody } = await supertest
-        .post(DETECTION_ENGINE_RULES_URL)
-        .set('kbn-xsrf', 'true')
-        .send(getSimpleRule())
-        .expect(200);
+      const resBody = await createRule(supertest, getSimpleRule('rule-1', true));
 
-      // wait for Task Manager to execute the rule and update status
-      await waitFor(async () => {
-        const { body } = await supertest
-          .post(`${DETECTION_ENGINE_RULES_URL}/_find_statuses`)
-          .set('kbn-xsrf', 'true')
-          .send({ ids: [resBody.id] })
-          .expect(200);
-        return body[resBody.id].current_status?.status === 'succeeded';
-      });
+      await waitForRuleSuccessOrStatus(supertest, resBody.id);
 
       // query the single rule from _find
       const { body } = await supertest

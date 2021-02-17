@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React, { FC, memo } from 'react';
 import { EuiPanel, EuiSpacer, CommonProps } from '@elastic/eui';
 import styled from 'styled-components';
@@ -27,10 +29,11 @@ interface AdministrationListPageProps {
   title: React.ReactNode;
   subtitle: React.ReactNode;
   actions?: React.ReactNode;
+  headerBackComponent?: React.ReactNode;
 }
 
 export const AdministrationListPage: FC<AdministrationListPageProps & CommonProps> = memo(
-  ({ beta, title, subtitle, actions, children, ...otherProps }) => {
+  ({ beta, title, subtitle, actions, children, headerBackComponent, ...otherProps }) => {
     const badgeOptions = !beta ? undefined : { beta: true, text: BETA_BADGE_LABEL };
 
     return (
@@ -39,6 +42,7 @@ export const AdministrationListPage: FC<AdministrationListPageProps & CommonProp
           hideSourcerer={true}
           title={title}
           subtitle={subtitle}
+          backComponent={headerBackComponent}
           badgeOptions={badgeOptions}
         >
           {actions}

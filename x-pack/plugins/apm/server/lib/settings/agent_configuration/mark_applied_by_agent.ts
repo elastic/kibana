@@ -1,12 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { Setup } from '../../helpers/setup_request';
 import { AgentConfiguration } from '../../../../common/agent_configuration/configuration_types';
 
+// We're not wrapping this function with a span as it is not blocking the request
 export async function markAppliedByAgent({
   id,
   body,

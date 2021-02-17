@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { pipe } from 'fp-ts/lib/pipeable';
@@ -27,6 +28,8 @@ import {
   esDataTypeUnion,
   exceptionListType,
   operator,
+  osType,
+  osTypeArrayOrUndefined,
   type,
 } from './schemas';
 
@@ -377,6 +380,37 @@ describe('Common schemas', () => {
       const message = pipe(checked, foldLeftRight);
       expect(getPaths(left(message.errors))).toEqual(['invalid keys "madeupValue"']);
       expect(message.schema).toEqual({});
+    });
+  });
+
+  describe('osType', () => {
+    test('it will validate a correct osType', () => {
+      const payload = 'windows';
+      const decoded = osType.decode(payload);
+      const checked = exactCheck(payload, decoded);
+      const message = pipe(checked, foldLeftRight);
+      expect(getPaths(left(message.errors))).toEqual([]);
+      expect(message.schema).toEqual(payload);
+    });
+
+    test('it will fail to validate an incorrect osType', () => {
+      const payload = 'foo';
+      const decoded = osType.decode(payload);
+      const checked = exactCheck(payload, decoded);
+      const message = pipe(checked, foldLeftRight);
+      expect(getPaths(left(message.errors))).toEqual([
+        'Invalid value "foo" supplied to ""linux" | "macos" | "windows""',
+      ]);
+      expect(message.schema).toEqual({});
+    });
+
+    test('it will default to an empty array when osTypeArrayOrUndefined is used', () => {
+      const payload = undefined;
+      const decoded = osTypeArrayOrUndefined.decode(payload);
+      const checked = exactCheck(payload, decoded);
+      const message = pipe(checked, foldLeftRight);
+      expect(getPaths(left(message.errors))).toEqual([]);
+      expect(message.schema).toEqual([]);
     });
   });
 });

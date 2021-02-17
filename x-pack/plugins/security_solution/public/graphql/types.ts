@@ -2,8 +2,9 @@
 /* eslint-disable */
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 export type Maybe<T> = T | null;
@@ -79,6 +80,8 @@ export interface TimelineInput {
 
   description?: Maybe<string>;
 
+  eqlOptions?: Maybe<EqlOptionsInput>;
+
   eventType?: Maybe<string>;
 
   excludedRowRendererIds?: Maybe<RowRendererId[]>;
@@ -103,7 +106,7 @@ export interface TimelineInput {
 
   savedQueryId?: Maybe<string>;
 
-  sort?: Maybe<SortTimelineInput>;
+  sort?: Maybe<SortTimelineInput[]>;
 
   status?: Maybe<TimelineStatus>;
 }
@@ -160,6 +163,18 @@ export interface QueryMatchInput {
   displayValue?: Maybe<string>;
 
   operator?: Maybe<string>;
+}
+
+export interface EqlOptionsInput {
+  eventCategoryField?: Maybe<string>;
+
+  tiebreakerField?: Maybe<string>;
+
+  timestampField?: Maybe<string>;
+
+  query?: Maybe<string>;
+
+  size?: Maybe<ToAny>;
 }
 
 export interface FilterTimelineInput {
@@ -272,6 +287,12 @@ export enum HostPolicyResponseActionStatus {
   success = 'success',
   failure = 'failure',
   warning = 'warning',
+  unsupported = 'unsupported',
+}
+
+export enum TimelineType {
+  default = 'default',
+  template = 'template',
 }
 
 export enum DataProviderType {
@@ -280,10 +301,13 @@ export enum DataProviderType {
 }
 
 export enum RowRendererId {
+  alerts = 'alerts',
   auditd = 'auditd',
   auditd_file = 'auditd_file',
+  library = 'library',
   netflow = 'netflow',
   plain = 'plain',
+  registry = 'registry',
   suricata = 'suricata',
   system = 'system',
   system_dns = 'system_dns',
@@ -299,11 +323,6 @@ export enum TimelineStatus {
   active = 'active',
   draft = 'draft',
   immutable = 'immutable',
-}
-
-export enum TimelineType {
-  default = 'default',
-  template = 'template',
 }
 
 export enum SortFieldTimeline {
@@ -490,6 +509,8 @@ export interface HostsEdges {
 export interface HostItem {
   _id?: Maybe<string>;
 
+  agent?: Maybe<AgentFields>;
+
   cloud?: Maybe<CloudFields>;
 
   endpoint?: Maybe<EndpointFields>;
@@ -499,6 +520,10 @@ export interface HostItem {
   inspect?: Maybe<Inspect>;
 
   lastSeen?: Maybe<string>;
+}
+
+export interface AgentFields {
+  id?: Maybe<string>;
 }
 
 export interface CloudFields {
@@ -598,6 +623,8 @@ export interface TimelineResult {
 
   description?: Maybe<string>;
 
+  eqlOptions?: Maybe<EqlOptionsResult>;
+
   eventIdToNoteIds?: Maybe<NoteResult[]>;
 
   eventType?: Maybe<string>;
@@ -626,7 +653,7 @@ export interface TimelineResult {
 
   savedObjectId: string;
 
-  sort?: Maybe<SortTimelineResult>;
+  sort?: Maybe<ToAny>;
 
   status?: Maybe<TimelineStatus>;
 
@@ -705,6 +732,18 @@ export interface DateRangePickerResult {
   end?: Maybe<ToAny>;
 }
 
+export interface EqlOptionsResult {
+  eventCategoryField?: Maybe<string>;
+
+  tiebreakerField?: Maybe<string>;
+
+  timestampField?: Maybe<string>;
+
+  query?: Maybe<string>;
+
+  size?: Maybe<ToAny>;
+}
+
 export interface FavoriteTimelineResult {
   fullName?: Maybe<string>;
 
@@ -769,12 +808,6 @@ export interface KueryFilterQueryResult {
   expression?: Maybe<string>;
 }
 
-export interface SortTimelineResult {
-  columnId?: Maybe<string>;
-
-  sortDirection?: Maybe<string>;
-}
-
 export interface ResponseTimelines {
   timeline: (Maybe<TimelineResult>)[];
 
@@ -834,6 +867,12 @@ export interface ResponseFavoriteTimeline {
   message?: Maybe<string>;
 
   savedObjectId: string;
+
+  templateTimelineId?: Maybe<string>;
+
+  templateTimelineVersion?: Maybe<number>;
+
+  timelineType?: Maybe<TimelineType>;
 
   version: string;
 
@@ -1599,6 +1638,8 @@ export interface SourceQueryArgs {
 }
 export interface GetOneTimelineQueryArgs {
   id: string;
+
+  timelineType?: Maybe<TimelineType>;
 }
 export interface GetAllTimelineQueryArgs {
   pageInfo: PageInfoTimeline;
@@ -1689,6 +1730,12 @@ export interface PersistTimelineMutationArgs {
 }
 export interface PersistFavoriteMutationArgs {
   timelineId?: Maybe<string>;
+
+  templateTimelineId?: Maybe<string>;
+
+  templateTimelineVersion?: Maybe<number>;
+
+  timelineType?: Maybe<TimelineType>;
 }
 export interface DeleteTimelineMutationArgs {
   id: string[];
@@ -1726,6 +1773,8 @@ export namespace GetHostOverviewQuery {
 
     _id: Maybe<string>;
 
+    agent: Maybe<Agent>;
+
     host: Maybe<Host>;
 
     cloud: Maybe<Cloud>;
@@ -1733,6 +1782,12 @@ export namespace GetHostOverviewQuery {
     inspect: Maybe<Inspect>;
 
     endpoint: Maybe<Endpoint>;
+  };
+
+  export type Agent = {
+    __typename?: 'AgentFields';
+
+    id: Maybe<string>;
   };
 
   export type Host = {
@@ -2086,6 +2141,9 @@ export namespace DeleteTimelineMutation {
 export namespace PersistTimelineFavoriteMutation {
   export type Variables = {
     timelineId?: Maybe<string>;
+    templateTimelineId?: Maybe<string>;
+    templateTimelineVersion?: Maybe<number>;
+    timelineType: TimelineType;
   };
 
   export type Mutation = {
@@ -2102,6 +2160,12 @@ export namespace PersistTimelineFavoriteMutation {
     version: string;
 
     favorite: Maybe<Favorite[]>;
+
+    templateTimelineId: Maybe<string>;
+
+    templateTimelineVersion: Maybe<number>;
+
+    timelineType: Maybe<TimelineType>;
   };
 
   export type Favorite = {
@@ -2166,6 +2230,7 @@ export namespace PersistTimelineNoteMutation {
 export namespace GetOneTimeline {
   export type Variables = {
     id: string;
+    timelineType?: Maybe<TimelineType>;
   };
 
   export type Query = {
@@ -2186,6 +2251,8 @@ export namespace GetOneTimeline {
     dateRange: Maybe<DateRange>;
 
     description: Maybe<string>;
+
+    eqlOptions: Maybe<EqlOptions>;
 
     eventType: Maybe<string>;
 
@@ -2223,7 +2290,7 @@ export namespace GetOneTimeline {
 
     savedQueryId: Maybe<string>;
 
-    sort: Maybe<Sort>;
+    sort: Maybe<ToAny>;
 
     created: Maybe<number>;
 
@@ -2332,6 +2399,20 @@ export namespace GetOneTimeline {
     start: Maybe<ToAny>;
 
     end: Maybe<ToAny>;
+  };
+
+  export type EqlOptions = {
+    __typename?: 'EqlOptionsResult';
+
+    eventCategoryField: Maybe<string>;
+
+    tiebreakerField: Maybe<string>;
+
+    timestampField: Maybe<string>;
+
+    query: Maybe<string>;
+
+    size: Maybe<ToAny>;
   };
 
   export type EventIdToNoteIds = {
@@ -2477,14 +2558,6 @@ export namespace GetOneTimeline {
 
     version: Maybe<string>;
   };
-
-  export type Sort = {
-    __typename?: 'SortTimelineResult';
-
-    columnId: Maybe<string>;
-
-    sortDirection: Maybe<string>;
-  };
 }
 
 export namespace PersistTimelineMutation {
@@ -2543,7 +2616,7 @@ export namespace PersistTimelineMutation {
 
     savedQueryId: Maybe<string>;
 
-    sort: Maybe<Sort>;
+    sort: Maybe<ToAny>;
 
     created: Maybe<number>;
 
@@ -2726,14 +2799,6 @@ export namespace PersistTimelineMutation {
     start: Maybe<ToAny>;
 
     end: Maybe<ToAny>;
-  };
-
-  export type Sort = {
-    __typename?: 'SortTimelineResult';
-
-    columnId: Maybe<string>;
-
-    sortDirection: Maybe<string>;
   };
 }
 

@@ -5,6 +5,7 @@ exports[`ReportInfoButton handles button click flyout on click 1`] = `
   aria-label="Show report info"
   className="euiButtonIcon euiButtonIcon--primary"
   data-test-subj="reportInfoButton"
+  disabled={false}
   onClick={[Function]}
   type="button"
 >
@@ -14,7 +15,7 @@ exports[`ReportInfoButton handles button click flyout on click 1`] = `
     size="m"
     type="iInCircle"
   >
-    <div
+    <span
       aria-hidden="true"
       className="euiButtonIcon__icon"
       data-euiicon-type="iInCircle"
@@ -50,14 +51,14 @@ Array [
       />
     </EuiOverlayMask>
     <EuiFocusTrap
-      clickOutsideDisables={true}
+      clickOutsideDisables={false}
     >
       <div
         data-eui="EuiFocusTrap"
       >
         <div
           aria-labelledby="flyoutTitle"
-          className="euiFlyout euiFlyout--small"
+          className="euiFlyout euiFlyout--small euiFlyout--paddingLarge"
           data-test-subj="reportInfoFlyout"
           role="dialog"
           tabIndex={0}
@@ -78,6 +79,7 @@ Array [
                 aria-label="Close this dialog"
                 className="euiButtonIcon euiButtonIcon--text euiFlyout__closeButton"
                 data-test-subj="euiFlyoutCloseButton"
+                disabled={false}
                 onClick={[Function]}
                 type="button"
               >
@@ -87,7 +89,7 @@ Array [
                   size="m"
                   type="cross"
                 >
-                  <div
+                  <span
                     aria-hidden="true"
                     className="euiButtonIcon__icon"
                     data-euiicon-type="cross"
@@ -142,7 +144,7 @@ Array [
   </EuiFlyout>,
   <div
     aria-labelledby="flyoutTitle"
-    className="euiFlyout euiFlyout--small"
+    className="euiFlyout euiFlyout--small euiFlyout--paddingLarge"
     data-test-subj="reportInfoFlyout"
     role="dialog"
     tabIndex={0}
@@ -163,6 +165,7 @@ Array [
           aria-label="Close this dialog"
           className="euiButtonIcon euiButtonIcon--text euiFlyout__closeButton"
           data-test-subj="euiFlyoutCloseButton"
+          disabled={false}
           onClick={[Function]}
           type="button"
         >
@@ -172,7 +175,7 @@ Array [
             size="m"
             type="cross"
           >
-            <div
+            <span
               aria-hidden="true"
               className="euiButtonIcon__icon"
               data-euiicon-type="cross"
@@ -251,14 +254,14 @@ Array [
       />
     </EuiOverlayMask>
     <EuiFocusTrap
-      clickOutsideDisables={true}
+      clickOutsideDisables={false}
     >
       <div
         data-eui="EuiFocusTrap"
       >
         <div
           aria-labelledby="flyoutTitle"
-          className="euiFlyout euiFlyout--small"
+          className="euiFlyout euiFlyout--small euiFlyout--paddingLarge"
           data-test-subj="reportInfoFlyout"
           role="dialog"
           tabIndex={0}
@@ -279,6 +282,7 @@ Array [
                 aria-label="Close this dialog"
                 className="euiButtonIcon euiButtonIcon--text euiFlyout__closeButton"
                 data-test-subj="euiFlyoutCloseButton"
+                disabled={false}
                 onClick={[Function]}
                 type="button"
               >
@@ -288,7 +292,7 @@ Array [
                   size="m"
                   type="cross"
                 >
-                  <div
+                  <span
                     aria-hidden="true"
                     className="euiButtonIcon__icon"
                     data-euiicon-type="cross"
@@ -341,7 +345,7 @@ Array [
   </EuiFlyout>,
   <div
     aria-labelledby="flyoutTitle"
-    className="euiFlyout euiFlyout--small"
+    className="euiFlyout euiFlyout--small euiFlyout--paddingLarge"
     data-test-subj="reportInfoFlyout"
     role="dialog"
     tabIndex={0}
@@ -362,6 +366,7 @@ Array [
           aria-label="Close this dialog"
           className="euiButtonIcon euiButtonIcon--text euiFlyout__closeButton"
           data-test-subj="euiFlyoutCloseButton"
+          disabled={false}
           onClick={[Function]}
           type="button"
         >
@@ -371,7 +376,7 @@ Array [
             size="m"
             type="cross"
           >
-            <div
+            <span
               aria-hidden="true"
               className="euiButtonIcon__icon"
               data-euiicon-type="cross"

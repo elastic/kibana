@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import _ from 'lodash';
@@ -82,7 +83,7 @@ export function migrateJoinAggKey({
         _.get(joinDescriptor, 'right.metrics', []).forEach((aggDescriptor: AggDescriptor) => {
           const legacyAggKey = getLegacyAggKey({
             aggType: aggDescriptor.type,
-            aggFieldName: aggDescriptor.field,
+            aggFieldName: 'field' in aggDescriptor ? aggDescriptor.field : undefined,
             indexPatternTitle: _.get(joinDescriptor, 'right.indexPatternTitle', ''),
             termFieldName: _.get(joinDescriptor, 'right.term', ''),
           });

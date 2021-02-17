@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { memo } from 'react';
@@ -33,7 +34,7 @@ export const EndpointNotice = memo<{ onDismiss: () => void }>(({ onDismiss }) =>
           </b>
           <FormattedMessage
             id="xpack.securitySolution.overview.endpointNotice.title"
-            defaultMessage="Elastic Endpoint Security (beta)"
+            defaultMessage="Endpoint Security (beta)"
           />
         </>
       }
@@ -49,7 +50,7 @@ export const EndpointNotice = memo<{ onDismiss: () => void }>(({ onDismiss }) =>
         <EuiButton onClick={handleGetStartedClick} href={endpointsLink}>
           <FormattedMessage
             id="xpack.securitySolution.overview.endpointNotice.tryButton"
-            defaultMessage="Try Elastic Endpoint Security (beta)"
+            defaultMessage="Try Endpoint Security (beta)"
           />
         </EuiButton>
         <EuiButtonEmpty onClick={onDismiss}>

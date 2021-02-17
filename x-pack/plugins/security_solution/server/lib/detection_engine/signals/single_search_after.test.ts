@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -12,7 +13,14 @@ import {
 import { singleSearchAfter } from './single_search_after';
 import { alertsMock, AlertServicesMock } from '../../../../../alerts/server/mocks';
 import { ShardError } from '../../types';
+import { buildRuleMessageFactory } from './rule_messages';
 
+const buildRuleMessage = buildRuleMessageFactory({
+  id: 'fake id',
+  ruleId: 'fake rule id',
+  index: 'fakeindex',
+  name: 'fake name',
+});
 describe('singleSearchAfter', () => {
   const mockService: AlertServicesMock = alertsMock.createAlertServices();
 
@@ -32,6 +40,8 @@ describe('singleSearchAfter', () => {
       pageSize: 1,
       filter: undefined,
       timestampOverride: undefined,
+      buildRuleMessage,
+      excludeDocsWithTimestampOverride: false,
     });
     expect(searchResult).toEqual(sampleDocSearchResultsNoSortId());
   });
@@ -47,6 +57,8 @@ describe('singleSearchAfter', () => {
       pageSize: 1,
       filter: undefined,
       timestampOverride: undefined,
+      buildRuleMessage,
+      excludeDocsWithTimestampOverride: false,
     });
     expect(searchErrors).toEqual([]);
   });
@@ -94,8 +106,12 @@ describe('singleSearchAfter', () => {
       pageSize: 1,
       filter: undefined,
       timestampOverride: undefined,
+      buildRuleMessage,
+      excludeDocsWithTimestampOverride: false,
     });
-    expect(searchErrors).toEqual(['reason: some reason, type: some type, caused by: some reason']);
+    expect(searchErrors).toEqual([
+      'index: "index-123" reason: "some reason" type: "some type" caused by reason: "some reason" caused by type: "some type"',
+    ]);
   });
   test('if singleSearchAfter works with a given sort id', async () => {
     const searchAfterSortId = '1234567891111';
@@ -110,6 +126,8 @@ describe('singleSearchAfter', () => {
       pageSize: 1,
       filter: undefined,
       timestampOverride: undefined,
+      buildRuleMessage,
+      excludeDocsWithTimestampOverride: false,
     });
     expect(searchResult).toEqual(sampleDocSearchResultsWithSortId());
   });
@@ -129,6 +147,8 @@ describe('singleSearchAfter', () => {
         pageSize: 1,
         filter: undefined,
         timestampOverride: undefined,
+        buildRuleMessage,
+        excludeDocsWithTimestampOverride: false,
       })
     ).rejects.toThrow('Fake Error');
   });

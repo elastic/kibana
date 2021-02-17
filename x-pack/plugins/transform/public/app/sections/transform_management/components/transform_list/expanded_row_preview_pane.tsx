@@ -1,15 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useMemo, FC } from 'react';
 
-import { TransformPivotConfig } from '../../../../../../common/types/transform';
-import { DataGrid } from '../../../../../shared_imports';
+import { TransformConfigUnion } from '../../../../../../common/types/transform';
 
-import { useToastNotifications } from '../../../../app_dependencies';
+import { useAppDependencies, useToastNotifications } from '../../../../app_dependencies';
 import { getPivotQuery } from '../../../../common';
 import { usePivotData } from '../../../../hooks/use_pivot_data';
 import { SearchItems } from '../../../../hooks/use_search_items';
@@ -20,13 +20,16 @@ import {
 } from '../../../create_transform/components/step_define/';
 
 interface ExpandedRowPreviewPaneProps {
-  transformConfig: TransformPivotConfig;
+  transformConfig: TransformConfigUnion;
 }
 
 export const ExpandedRowPreviewPane: FC<ExpandedRowPreviewPaneProps> = ({ transformConfig }) => {
+  const {
+    ml: { DataGrid },
+  } = useAppDependencies();
   const toastNotifications = useToastNotifications();
 
-  const { aggList, groupByList, searchQuery } = useMemo(
+  const { searchQuery, validationStatus, previewRequest, runtimeMappings } = useMemo(
     () =>
       applyTransformConfigToDefineState(
         getDefaultStepDefineState({} as SearchItems),
@@ -41,7 +44,13 @@ export const ExpandedRowPreviewPane: FC<ExpandedRowPreviewPaneProps> = ({ transf
     ? transformConfig.source.index.join(',')
     : transformConfig.source.index;
 
-  const pivotPreviewProps = usePivotData(indexPatternTitle, pivotQuery, aggList, groupByList);
+  const pivotPreviewProps = usePivotData(
+    indexPatternTitle,
+    pivotQuery,
+    validationStatus,
+    previewRequest,
+    runtimeMappings
+  );
 
   return (
     <DataGrid

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { BehaviorSubject } from 'rxjs';
@@ -13,21 +14,31 @@ import {
   ServiceStatus,
   ServiceStatusLevels,
 } from '../../../../../src/core/server';
-import { contextServiceMock } from '../../../../../src/core/server/mocks';
+import {
+  contextServiceMock,
+  elasticsearchServiceMock,
+  savedObjectsServiceMock,
+} from '../../../../../src/core/server/mocks';
 import { createHttpServer } from '../../../../../src/core/server/test_utils';
 import { registerSettingsRoute } from './settings';
 
 type HttpService = ReturnType<typeof createHttpServer>;
 type HttpSetup = UnwrapPromise<ReturnType<HttpService['setup']>>;
 
-describe('/api/stats', () => {
+export function mockGetClusterInfo(clusterInfo: any) {
+  const esClient = elasticsearchServiceMock.createScopedClusterClient().asCurrentUser;
+  // @ts-ignore we only care about the response body
+  esClient.info.mockResolvedValue({ body: { ...clusterInfo } });
+  return esClient;
+}
+describe('/api/settings', () => {
   let server: HttpService;
   let httpSetup: HttpSetup;
   let overallStatus$: BehaviorSubject<ServiceStatus>;
   let mockApiCaller: jest.Mocked<LegacyAPICaller>;
 
   beforeEach(async () => {
-    mockApiCaller = jest.fn().mockResolvedValue({ cluster_uuid: 'yyy-yyyyy' });
+    mockApiCaller = jest.fn();
     server = createHttpServer();
     httpSetup = await server.setup({
       context: contextServiceMock.createSetupContract({
@@ -38,6 +49,12 @@ describe('/api/stats', () => {
                 callAsCurrentUser: mockApiCaller,
               },
             },
+            client: {
+              asCurrentUser: mockGetClusterInfo({ cluster_uuid: 'yyy-yyyyy' }),
+            },
+          },
+          savedObjects: {
+            client: savedObjectsServiceMock.create(),
           },
         },
       }),

@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { createDashboardUrlGenerator } from './url_generator';
@@ -118,6 +107,60 @@ describe('dashboard url generator', () => {
     });
     expect(url).toMatchInlineSnapshot(
       `"xyz/app/dashboards#/view/123?_a=(filters:!((meta:(alias:!n,disabled:!f,negate:!f),query:(query:hi))),query:(language:kuery,query:bye))&_g=(filters:!(('$state':(store:globalState),meta:(alias:!n,disabled:!f,negate:!f),query:(query:hi))),refreshInterval:(pause:!f,value:300),time:(from:now-15m,mode:relative,to:now))"`
+    );
+  });
+
+  test('searchSessionId', async () => {
+    const generator = createDashboardUrlGenerator(() =>
+      Promise.resolve({
+        appBasePath: APP_BASE_PATH,
+        useHashedUrl: false,
+        savedDashboardLoader: createMockDashboardLoader(),
+      })
+    );
+    const url = await generator.createUrl!({
+      timeRange: { to: 'now', from: 'now-15m', mode: 'relative' },
+      refreshInterval: { pause: false, value: 300 },
+      dashboardId: '123',
+      filters: [],
+      query: { query: 'bye', language: 'kuery' },
+      searchSessionId: '__sessionSearchId__',
+    });
+    expect(url).toMatchInlineSnapshot(
+      `"xyz/app/dashboards#/view/123?_a=(filters:!(),query:(language:kuery,query:bye))&_g=(filters:!(),refreshInterval:(pause:!f,value:300),time:(from:now-15m,mode:relative,to:now))&searchSessionId=__sessionSearchId__"`
+    );
+  });
+
+  test('savedQuery', async () => {
+    const generator = createDashboardUrlGenerator(() =>
+      Promise.resolve({
+        appBasePath: APP_BASE_PATH,
+        useHashedUrl: false,
+        savedDashboardLoader: createMockDashboardLoader(),
+      })
+    );
+    const url = await generator.createUrl!({
+      savedQuery: '__savedQueryId__',
+    });
+    expect(url).toMatchInlineSnapshot(
+      `"xyz/app/dashboards#/create?_a=(savedQuery:__savedQueryId__)&_g=()"`
+    );
+    expect(url).toContain('__savedQueryId__');
+  });
+
+  test('panels', async () => {
+    const generator = createDashboardUrlGenerator(() =>
+      Promise.resolve({
+        appBasePath: APP_BASE_PATH,
+        useHashedUrl: false,
+        savedDashboardLoader: createMockDashboardLoader(),
+      })
+    );
+    const url = await generator.createUrl!({
+      panels: [{ fakePanelContent: 'fakePanelContent' } as any],
+    });
+    expect(url).toMatchInlineSnapshot(
+      `"xyz/app/dashboards#/create?_a=(panels:!((fakePanelContent:fakePanelContent)))&_g=()"`
     );
   });
 

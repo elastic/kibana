@@ -15,7 +15,7 @@ exports[`Field for array setting should render as read only if saving is disable
     </React.Fragment>
   }
   fullWidth={true}
-  id="array:test:setting"
+  id="array:test:setting-group"
   title={
     <h3>
       <span
@@ -88,7 +88,7 @@ exports[`Field for array setting should render as read only with help text if ov
     </React.Fragment>
   }
   fullWidth={true}
-  id="array:test:setting"
+  id="array:test:setting-group"
   title={
     <h3>
       <span
@@ -149,7 +149,7 @@ exports[`Field for array setting should render custom setting icon if it is cust
     </React.Fragment>
   }
   fullWidth={true}
-  id="array:test:setting"
+  id="array:test:setting-group"
   title={
     <h3>
       <span
@@ -211,7 +211,7 @@ exports[`Field for array setting should render default value if there is no user
     </React.Fragment>
   }
   fullWidth={true}
-  id="array:test:setting"
+  id="array:test:setting-group"
   title={
     <h3>
       <span
@@ -262,7 +262,7 @@ exports[`Field for array setting should render unsaved value if there are unsave
     </React.Fragment>
   }
   fullWidth={true}
-  id="array:test:setting"
+  id="array:test:setting-group"
   title={
     <h3>
       <span
@@ -304,7 +304,7 @@ exports[`Field for array setting should render unsaved value if there are unsave
     labelType="label"
   >
     <EuiFieldText
-      aria-describedby="array:test:setting"
+      aria-describedby="array:test:setting-group array:test:setting-unsaved"
       aria-label="array test setting"
       data-test-subj="advancedSetting-editField-array:test:setting"
       disabled={false}
@@ -318,7 +318,7 @@ exports[`Field for array setting should render unsaved value if there are unsave
     />
     <EuiScreenReaderOnly>
       <p
-        id="array:test:setting"
+        id="array:test:setting-unsaved"
       >
         Setting is currently not saved.
       </p>
@@ -364,7 +364,7 @@ exports[`Field for array setting should render user value if there is user value
     </React.Fragment>
   }
   fullWidth={true}
-  id="array:test:setting"
+  id="array:test:setting-group"
   title={
     <h3>
       <span
@@ -432,7 +432,7 @@ exports[`Field for boolean setting should render as read only if saving is disab
     </React.Fragment>
   }
   fullWidth={true}
-  id="boolean:test:setting"
+  id="boolean:test:setting-group"
   title={
     <h3>
       <span
@@ -511,7 +511,7 @@ exports[`Field for boolean setting should render as read only with help text if 
     </React.Fragment>
   }
   fullWidth={true}
-  id="boolean:test:setting"
+  id="boolean:test:setting-group"
   title={
     <h3>
       <span
@@ -578,7 +578,7 @@ exports[`Field for boolean setting should render custom setting icon if it is cu
     </React.Fragment>
   }
   fullWidth={true}
-  id="boolean:test:setting"
+  id="boolean:test:setting-group"
   title={
     <h3>
       <span
@@ -646,7 +646,7 @@ exports[`Field for boolean setting should render default value if there is no us
     </React.Fragment>
   }
   fullWidth={true}
-  id="boolean:test:setting"
+  id="boolean:test:setting-group"
   title={
     <h3>
       <span
@@ -703,7 +703,7 @@ exports[`Field for boolean setting should render unsaved value if there are unsa
     </React.Fragment>
   }
   fullWidth={true}
-  id="boolean:test:setting"
+  id="boolean:test:setting-group"
   title={
     <h3>
       <span
@@ -745,7 +745,7 @@ exports[`Field for boolean setting should render unsaved value if there are unsa
     labelType="label"
   >
     <EuiSwitch
-      aria-describedby="boolean:test:setting"
+      aria-describedby="boolean:test:setting-group boolean:test:setting-unsaved"
       aria-label="boolean test setting"
       checked={false}
       data-test-subj="advancedSetting-editField-boolean:test:setting"
@@ -761,7 +761,7 @@ exports[`Field for boolean setting should render unsaved value if there are unsa
     />
     <EuiScreenReaderOnly>
       <p
-        id="boolean:test:setting"
+        id="boolean:test:setting-unsaved"
       >
         Setting is currently not saved.
       </p>
@@ -807,7 +807,7 @@ exports[`Field for boolean setting should render user value if there is user val
     </React.Fragment>
   }
   fullWidth={true}
-  id="boolean:test:setting"
+  id="boolean:test:setting-group"
   title={
     <h3>
       <span
@@ -866,6 +866,419 @@ exports[`Field for boolean setting should render user value if there is user val
 </EuiDescribedFormGroup>
 `;
 
+exports[`Field for color setting should render as read only if saving is disabled 1`] = `
+<EuiDescribedFormGroup
+  className="mgtAdvancedSettings__field"
+  description={
+    <React.Fragment>
+      <div
+        dangerouslySetInnerHTML={
+          Object {
+            "__html": "Description for Color test setting",
+          }
+        }
+      />
+    </React.Fragment>
+  }
+  fullWidth={true}
+  id="color:test:setting-group"
+  title={
+    <h3>
+      <span
+        className="mgtAdvancedSettings__fieldTitle"
+      >
+        Color test setting
+      </span>
+      
+      
+    </h3>
+  }
+>
+  <EuiFormRow
+    className="mgtAdvancedSettings__fieldRow"
+    describedByIds={Array []}
+    display="row"
+    fullWidth={true}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    helpText={null}
+    label="color:test:setting"
+    labelType="label"
+  >
+    <EuiColorPicker
+      aria-label="color test setting"
+      color=""
+      data-test-subj="advancedSetting-editField-color:test:setting"
+      disabled={true}
+      format="hex"
+      onChange={[Function]}
+    />
+  </EuiFormRow>
+</EuiDescribedFormGroup>
+`;
+
+exports[`Field for color setting should render as read only with help text if overridden 1`] = `
+<EuiDescribedFormGroup
+  className="mgtAdvancedSettings__field"
+  description={
+    <React.Fragment>
+      <div
+        dangerouslySetInnerHTML={
+          Object {
+            "__html": "Description for Color test setting",
+          }
+        }
+      />
+      <React.Fragment>
+        <EuiSpacer
+          size="s"
+        />
+        <EuiText
+          size="xs"
+        >
+          <React.Fragment>
+            <FormattedMessage
+              defaultMessage="Default: {value}"
+              id="advancedSettings.field.defaultValueText"
+              values={
+                Object {
+                  "value": <EuiCode>
+                    null
+                  </EuiCode>,
+                }
+              }
+            />
+          </React.Fragment>
+        </EuiText>
+      </React.Fragment>
+    </React.Fragment>
+  }
+  fullWidth={true}
+  id="color:test:setting-group"
+  title={
+    <h3>
+      <span
+        className="mgtAdvancedSettings__fieldTitle"
+      >
+        Color test setting
+      </span>
+      
+      
+    </h3>
+  }
+>
+  <EuiFormRow
+    className="mgtAdvancedSettings__fieldRow"
+    describedByIds={Array []}
+    display="row"
+    fullWidth={true}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    helpText={
+      <EuiText
+        size="xs"
+      >
+        <FormattedMessage
+          defaultMessage="This setting is overridden by the Kibana server and can not be changed."
+          id="advancedSettings.field.helpText"
+          values={Object {}}
+        />
+      </EuiText>
+    }
+    label="color:test:setting"
+    labelType="label"
+  >
+    <EuiColorPicker
+      aria-label="color test setting"
+      color="#FACF0C"
+      data-test-subj="advancedSetting-editField-color:test:setting"
+      disabled={true}
+      format="hex"
+      onChange={[Function]}
+    />
+  </EuiFormRow>
+</EuiDescribedFormGroup>
+`;
+
+exports[`Field for color setting should render custom setting icon if it is custom 1`] = `
+<EuiDescribedFormGroup
+  className="mgtAdvancedSettings__field"
+  description={
+    <React.Fragment>
+      <div
+        dangerouslySetInnerHTML={
+          Object {
+            "__html": "Description for Color test setting",
+          }
+        }
+      />
+    </React.Fragment>
+  }
+  fullWidth={true}
+  id="color:test:setting-group"
+  title={
+    <h3>
+      <span
+        className="mgtAdvancedSettings__fieldTitle"
+      >
+        Color test setting
+      </span>
+      <EuiIconTip
+        aria-label="Custom setting"
+        color="primary"
+        content={
+          <FormattedMessage
+            defaultMessage="Custom setting"
+            id="advancedSettings.field.customSettingTooltip"
+            values={Object {}}
+          />
+        }
+        type="asterisk"
+      />
+      
+    </h3>
+  }
+>
+  <EuiFormRow
+    className="mgtAdvancedSettings__fieldRow"
+    describedByIds={Array []}
+    display="row"
+    fullWidth={true}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    helpText={null}
+    label="color:test:setting"
+    labelType="label"
+  >
+    <EuiColorPicker
+      aria-label="color test setting"
+      color=""
+      data-test-subj="advancedSetting-editField-color:test:setting"
+      disabled={false}
+      format="hex"
+      onChange={[Function]}
+    />
+  </EuiFormRow>
+</EuiDescribedFormGroup>
+`;
+
+exports[`Field for color setting should render default value if there is no user value set 1`] = `
+<EuiDescribedFormGroup
+  className="mgtAdvancedSettings__field"
+  description={
+    <React.Fragment>
+      <div
+        dangerouslySetInnerHTML={
+          Object {
+            "__html": "Description for Color test setting",
+          }
+        }
+      />
+    </React.Fragment>
+  }
+  fullWidth={true}
+  id="color:test:setting-group"
+  title={
+    <h3>
+      <span
+        className="mgtAdvancedSettings__fieldTitle"
+      >
+        Color test setting
+      </span>
+      
+      
+    </h3>
+  }
+>
+  <EuiFormRow
+    className="mgtAdvancedSettings__fieldRow"
+    describedByIds={Array []}
+    display="row"
+    fullWidth={true}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    helpText={null}
+    label="color:test:setting"
+    labelType="label"
+  >
+    <EuiColorPicker
+      aria-label="color test setting"
+      color=""
+      data-test-subj="advancedSetting-editField-color:test:setting"
+      disabled={false}
+      format="hex"
+      onChange={[Function]}
+    />
+  </EuiFormRow>
+</EuiDescribedFormGroup>
+`;
+
+exports[`Field for color setting should render unsaved value if there are unsaved changes 1`] = `
+<EuiDescribedFormGroup
+  className="mgtAdvancedSettings__field mgtAdvancedSettings__field--unsaved"
+  description={
+    <React.Fragment>
+      <div
+        dangerouslySetInnerHTML={
+          Object {
+            "__html": "Description for Color test setting",
+          }
+        }
+      />
+    </React.Fragment>
+  }
+  fullWidth={true}
+  id="color:test:setting-group"
+  title={
+    <h3>
+      <span
+        className="mgtAdvancedSettings__fieldTitle"
+      >
+        Color test setting
+      </span>
+      <EuiIconTip
+        aria-label="Custom setting"
+        color="primary"
+        content={
+          <FormattedMessage
+            defaultMessage="Custom setting"
+            id="advancedSettings.field.customSettingTooltip"
+            values={Object {}}
+          />
+        }
+        type="asterisk"
+      />
+      <EuiIconTip
+        anchorClassName="mgtAdvancedSettings__fieldTitleUnsavedIcon"
+        aria-label="Unsaved"
+        color="warning"
+        content="Unsaved"
+        type="dot"
+      />
+    </h3>
+  }
+>
+  <EuiFormRow
+    className="mgtAdvancedSettings__fieldRow"
+    describedByIds={Array []}
+    display="row"
+    fullWidth={true}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    helpText={null}
+    label="color:test:setting"
+    labelType="label"
+  >
+    <EuiColorPicker
+      aria-describedby="color:test:setting-group color:test:setting-unsaved"
+      aria-label="color test setting"
+      color="#FF00CC"
+      data-test-subj="advancedSetting-editField-color:test:setting"
+      disabled={false}
+      format="hex"
+      onChange={[Function]}
+    />
+    <EuiScreenReaderOnly>
+      <p
+        id="color:test:setting-unsaved"
+      >
+        Setting is currently not saved.
+      </p>
+    </EuiScreenReaderOnly>
+  </EuiFormRow>
+</EuiDescribedFormGroup>
+`;
+
+exports[`Field for color setting should render user value if there is user value is set 1`] = `
+<EuiDescribedFormGroup
+  className="mgtAdvancedSettings__field"
+  description={
+    <React.Fragment>
+      <div
+        dangerouslySetInnerHTML={
+          Object {
+            "__html": "Description for Color test setting",
+          }
+        }
+      />
+      <React.Fragment>
+        <EuiSpacer
+          size="s"
+        />
+        <EuiText
+          size="xs"
+        >
+          <React.Fragment>
+            <FormattedMessage
+              defaultMessage="Default: {value}"
+              id="advancedSettings.field.defaultValueText"
+              values={
+                Object {
+                  "value": <EuiCode>
+                    null
+                  </EuiCode>,
+                }
+              }
+            />
+          </React.Fragment>
+        </EuiText>
+      </React.Fragment>
+    </React.Fragment>
+  }
+  fullWidth={true}
+  id="color:test:setting-group"
+  title={
+    <h3>
+      <span
+        className="mgtAdvancedSettings__fieldTitle"
+      >
+        Color test setting
+      </span>
+      
+      
+    </h3>
+  }
+>
+  <EuiFormRow
+    className="mgtAdvancedSettings__fieldRow"
+    describedByIds={Array []}
+    display="row"
+    fullWidth={true}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    helpText={
+      <span>
+        <span>
+          <EuiLink
+            aria-label="Reset color test setting to default"
+            data-test-subj="advancedSetting-resetField-color:test:setting"
+            onClick={[Function]}
+          >
+            <FormattedMessage
+              defaultMessage="Reset to default"
+              id="advancedSettings.field.resetToDefaultLinkText"
+              values={Object {}}
+            />
+          </EuiLink>
+             
+        </span>
+      </span>
+    }
+    label="color:test:setting"
+    labelType="label"
+  >
+    <EuiColorPicker
+      aria-label="color test setting"
+      color="#FACF0C"
+      data-test-subj="advancedSetting-editField-color:test:setting"
+      disabled={false}
+      format="hex"
+      onChange={[Function]}
+    />
+  </EuiFormRow>
+</EuiDescribedFormGroup>
+`;
+
 exports[`Field for image setting should render as read only if saving is disabled 1`] = `
 <EuiDescribedFormGroup
   className="mgtAdvancedSettings__field"
@@ -881,7 +1294,7 @@ exports[`Field for image setting should render as read only if saving is disable
     </React.Fragment>
   }
   fullWidth={true}
-  id="image:test:setting"
+  id="image:test:setting-group"
   title={
     <h3>
       <span
@@ -907,6 +1320,7 @@ exports[`Field for image setting should render as read only if saving is disable
   >
     <EuiFilePicker
       accept=".jpg,.jpeg,.png"
+      aria-label="image:test:setting"
       compressed={false}
       data-test-subj="advancedSetting-editField-image:test:setting"
       disabled={true}
@@ -956,7 +1370,7 @@ exports[`Field for image setting should render as read only with help text if ov
     </React.Fragment>
   }
   fullWidth={true}
-  id="image:test:setting"
+  id="image:test:setting-group"
   title={
     <h3>
       <span
@@ -1015,7 +1429,7 @@ exports[`Field for image setting should render custom setting icon if it is cust
     </React.Fragment>
   }
   fullWidth={true}
-  id="image:test:setting"
+  id="image:test:setting-group"
   title={
     <h3>
       <span
@@ -1052,6 +1466,7 @@ exports[`Field for image setting should render custom setting icon if it is cust
   >
     <EuiFilePicker
       accept=".jpg,.jpeg,.png"
+      aria-label="image:test:setting"
       compressed={false}
       data-test-subj="advancedSetting-editField-image:test:setting"
       disabled={false}
@@ -1079,7 +1494,7 @@ exports[`Field for image setting should render default value if there is no user
     </React.Fragment>
   }
   fullWidth={true}
-  id="image:test:setting"
+  id="image:test:setting-group"
   title={
     <h3>
       <span
@@ -1105,6 +1520,7 @@ exports[`Field for image setting should render default value if there is no user
   >
     <EuiFilePicker
       accept=".jpg,.jpeg,.png"
+      aria-label="image:test:setting"
       compressed={false}
       data-test-subj="advancedSetting-editField-image:test:setting"
       disabled={false}
@@ -1132,7 +1548,7 @@ exports[`Field for image setting should render unsaved value if there are unsave
     </React.Fragment>
   }
   fullWidth={true}
-  id="image:test:setting"
+  id="image:test:setting-group"
   title={
     <h3>
       <span
@@ -1175,6 +1591,7 @@ exports[`Field for image setting should render unsaved value if there are unsave
   >
     <EuiFilePicker
       accept=".jpg,.jpeg,.png"
+      aria-label="image:test:setting"
       compressed={false}
       data-test-subj="advancedSetting-editField-image:test:setting"
       disabled={false}
@@ -1185,7 +1602,7 @@ exports[`Field for image setting should render unsaved value if there are unsave
     />
     <EuiScreenReaderOnly>
       <p
-        id="image:test:setting"
+        id="image:test:setting-unsaved"
       >
         Setting is currently not saved.
       </p>
@@ -1231,7 +1648,7 @@ exports[`Field for image setting should render user value if there is user value
     </React.Fragment>
   }
   fullWidth={true}
-  id="image:test:setting"
+  id="image:test:setting-group"
   title={
     <h3>
       <span
@@ -1335,7 +1752,7 @@ exports[`Field for json setting should render as read only if saving is disabled
     </React.Fragment>
   }
   fullWidth={true}
-  id="json:test:setting"
+  id="json:test:setting-group"
   title={
     <h3>
       <span
@@ -1431,7 +1848,7 @@ exports[`Field for json setting should render as read only with help text if ove
     </React.Fragment>
   }
   fullWidth={true}
-  id="json:test:setting"
+  id="json:test:setting-group"
   title={
     <h3>
       <span
@@ -1512,7 +1929,7 @@ exports[`Field for json setting should render custom setting icon if it is custo
     </React.Fragment>
   }
   fullWidth={true}
-  id="json:test:setting"
+  id="json:test:setting-group"
   title={
     <h3>
       <span
@@ -1619,7 +2036,7 @@ exports[`Field for json setting should render default value if there is no user 
     </React.Fragment>
   }
   fullWidth={true}
-  id="json:test:setting"
+  id="json:test:setting-group"
   title={
     <h3>
       <span
@@ -1707,7 +2124,7 @@ exports[`Field for json setting should render unsaved value if there are unsaved
     </React.Fragment>
   }
   fullWidth={true}
-  id="json:test:setting"
+  id="json:test:setting-group"
   title={
     <h3>
       <span
@@ -1752,7 +2169,7 @@ exports[`Field for json setting should render unsaved value if there are unsaved
       data-test-subj="advancedSetting-editField-json:test:setting"
     >
       <EuiCodeEditor
-        aria-describedby="json:test:setting"
+        aria-describedby="json:test:setting-group json:test:setting-unsaved"
         aria-label="json test setting"
         editorProps={
           Object {
@@ -1783,7 +2200,7 @@ exports[`Field for json setting should render unsaved value if there are unsaved
     </div>
     <EuiScreenReaderOnly>
       <p
-        id="json:test:setting"
+        id="json:test:setting-unsaved"
       >
         Setting is currently not saved.
       </p>
@@ -1832,7 +2249,7 @@ exports[`Field for json setting should render user value if there is user value 
     </React.Fragment>
   }
   fullWidth={true}
-  id="json:test:setting"
+  id="json:test:setting-group"
   title={
     <h3>
       <span
@@ -1920,7 +2337,7 @@ exports[`Field for markdown setting should render as read only if saving is disa
     </React.Fragment>
   }
   fullWidth={true}
-  id="markdown:test:setting"
+  id="markdown:test:setting-group"
   title={
     <h3>
       <span
@@ -2013,7 +2430,7 @@ exports[`Field for markdown setting should render as read only with help text if
     </React.Fragment>
   }
   fullWidth={true}
-  id="markdown:test:setting"
+  id="markdown:test:setting-group"
   title={
     <h3>
       <span
@@ -2094,7 +2511,7 @@ exports[`Field for markdown setting should render custom setting icon if it is c
     </React.Fragment>
   }
   fullWidth={true}
-  id="markdown:test:setting"
+  id="markdown:test:setting-group"
   title={
     <h3>
       <span
@@ -2176,7 +2593,7 @@ exports[`Field for markdown setting should render default value if there is no u
     </React.Fragment>
   }
   fullWidth={true}
-  id="markdown:test:setting"
+  id="markdown:test:setting-group"
   title={
     <h3>
       <span
@@ -2247,7 +2664,7 @@ exports[`Field for markdown setting should render unsaved value if there are uns
     </React.Fragment>
   }
   fullWidth={true}
-  id="markdown:test:setting"
+  id="markdown:test:setting-group"
   title={
     <h3>
       <span
@@ -2292,7 +2709,7 @@ exports[`Field for markdown setting should render unsaved value if there are uns
       data-test-subj="advancedSetting-editField-markdown:test:setting"
     >
       <EuiCodeEditor
-        aria-describedby="markdown:test:setting"
+        aria-describedby="markdown:test:setting-group markdown:test:setting-unsaved"
         aria-label="markdown test setting"
         editorProps={
           Object {
@@ -2319,7 +2736,7 @@ exports[`Field for markdown setting should render unsaved value if there are uns
     </div>
     <EuiScreenReaderOnly>
       <p
-        id="markdown:test:setting"
+        id="markdown:test:setting-unsaved"
       >
         Setting is currently not saved.
       </p>
@@ -2365,7 +2782,7 @@ exports[`Field for markdown setting should render user value if there is user va
     </React.Fragment>
   }
   fullWidth={true}
-  id="markdown:test:setting"
+  id="markdown:test:setting-group"
   title={
     <h3>
       <span
@@ -2453,7 +2870,7 @@ exports[`Field for number setting should render as read only if saving is disabl
     </React.Fragment>
   }
   fullWidth={true}
-  id="number:test:setting"
+  id="number:test:setting-group"
   title={
     <h3>
       <span
@@ -2526,7 +2943,7 @@ exports[`Field for number setting should render as read only with help text if o
     </React.Fragment>
   }
   fullWidth={true}
-  id="number:test:setting"
+  id="number:test:setting-group"
   title={
     <h3>
       <span
@@ -2587,7 +3004,7 @@ exports[`Field for number setting should render custom setting icon if it is cus
     </React.Fragment>
   }
   fullWidth={true}
-  id="number:test:setting"
+  id="number:test:setting-group"
   title={
     <h3>
       <span
@@ -2649,7 +3066,7 @@ exports[`Field for number setting should render default value if there is no use
     </React.Fragment>
   }
   fullWidth={true}
-  id="number:test:setting"
+  id="number:test:setting-group"
   title={
     <h3>
       <span
@@ -2700,7 +3117,7 @@ exports[`Field for number setting should render unsaved value if there are unsav
     </React.Fragment>
   }
   fullWidth={true}
-  id="number:test:setting"
+  id="number:test:setting-group"
   title={
     <h3>
       <span
@@ -2742,7 +3159,7 @@ exports[`Field for number setting should render unsaved value if there are unsav
     labelType="label"
   >
     <EuiFieldNumber
-      aria-describedby="number:test:setting"
+      aria-describedby="number:test:setting-group number:test:setting-unsaved"
       aria-label="number test setting"
       data-test-subj="advancedSetting-editField-number:test:setting"
       disabled={false}
@@ -2752,7 +3169,7 @@ exports[`Field for number setting should render unsaved value if there are unsav
     />
     <EuiScreenReaderOnly>
       <p
-        id="number:test:setting"
+        id="number:test:setting-unsaved"
       >
         Setting is currently not saved.
       </p>
@@ -2798,7 +3215,7 @@ exports[`Field for number setting should render user value if there is user valu
     </React.Fragment>
   }
   fullWidth={true}
-  id="number:test:setting"
+  id="number:test:setting-group"
   title={
     <h3>
       <span
@@ -2866,7 +3283,7 @@ exports[`Field for select setting should render as read only if saving is disabl
     </React.Fragment>
   }
   fullWidth={true}
-  id="select:test:setting"
+  id="select:test:setting-group"
   title={
     <h3>
       <span
@@ -2955,7 +3372,7 @@ exports[`Field for select setting should render as read only with help text if o
     </React.Fragment>
   }
   fullWidth={true}
-  id="select:test:setting"
+  id="select:test:setting-group"
   title={
     <h3>
       <span
@@ -3032,7 +3449,7 @@ exports[`Field for select setting should render custom setting icon if it is cus
     </React.Fragment>
   }
   fullWidth={true}
-  id="select:test:setting"
+  id="select:test:setting-group"
   title={
     <h3>
       <span
@@ -3110,7 +3527,7 @@ exports[`Field for select setting should render default value if there is no use
     </React.Fragment>
   }
   fullWidth={true}
-  id="select:test:setting"
+  id="select:test:setting-group"
   title={
     <h3>
       <span
@@ -3177,7 +3594,7 @@ exports[`Field for select setting should render unsaved value if there are unsav
     </React.Fragment>
   }
   fullWidth={true}
-  id="select:test:setting"
+  id="select:test:setting-group"
   title={
     <h3>
       <span
@@ -3219,7 +3636,7 @@ exports[`Field for select setting should render unsaved value if there are unsav
     labelType="label"
   >
     <EuiSelect
-      aria-describedby="select:test:setting"
+      aria-describedby="select:test:setting-group select:test:setting-unsaved"
       aria-label="select test setting"
       data-test-subj="advancedSetting-editField-select:test:setting"
       disabled={false}
@@ -3245,7 +3662,7 @@ exports[`Field for select setting should render unsaved value if there are unsav
     />
     <EuiScreenReaderOnly>
       <p
-        id="select:test:setting"
+        id="select:test:setting-unsaved"
       >
         Setting is currently not saved.
       </p>
@@ -3291,7 +3708,7 @@ exports[`Field for select setting should render user value if there is user valu
     </React.Fragment>
   }
   fullWidth={true}
-  id="select:test:setting"
+  id="select:test:setting-group"
   title={
     <h3>
       <span
@@ -3375,7 +3792,7 @@ exports[`Field for string setting should render as read only if saving is disabl
     </React.Fragment>
   }
   fullWidth={true}
-  id="string:test:setting"
+  id="string:test:setting-group"
   title={
     <h3>
       <span
@@ -3448,7 +3865,7 @@ exports[`Field for string setting should render as read only with help text if o
     </React.Fragment>
   }
   fullWidth={true}
-  id="string:test:setting"
+  id="string:test:setting-group"
   title={
     <h3>
       <span
@@ -3509,7 +3926,7 @@ exports[`Field for string setting should render custom setting icon if it is cus
     </React.Fragment>
   }
   fullWidth={true}
-  id="string:test:setting"
+  id="string:test:setting-group"
   title={
     <h3>
       <span
@@ -3571,7 +3988,7 @@ exports[`Field for string setting should render default value if there is no use
     </React.Fragment>
   }
   fullWidth={true}
-  id="string:test:setting"
+  id="string:test:setting-group"
   title={
     <h3>
       <span
@@ -3622,7 +4039,7 @@ exports[`Field for string setting should render unsaved value if there are unsav
     </React.Fragment>
   }
   fullWidth={true}
-  id="string:test:setting"
+  id="string:test:setting-group"
   title={
     <h3>
       <span
@@ -3664,7 +4081,7 @@ exports[`Field for string setting should render unsaved value if there are unsav
     labelType="label"
   >
     <EuiFieldText
-      aria-describedby="string:test:setting"
+      aria-describedby="string:test:setting-group string:test:setting-unsaved"
       aria-label="string test setting"
       data-test-subj="advancedSetting-editField-string:test:setting"
       disabled={false}
@@ -3674,7 +4091,7 @@ exports[`Field for string setting should render unsaved value if there are unsav
     />
     <EuiScreenReaderOnly>
       <p
-        id="string:test:setting"
+        id="string:test:setting-unsaved"
       >
         Setting is currently not saved.
       </p>
@@ -3720,7 +4137,7 @@ exports[`Field for string setting should render user value if there is user valu
     </React.Fragment>
   }
   fullWidth={true}
-  id="string:test:setting"
+  id="string:test:setting-group"
   title={
     <h3>
       <span
@@ -3788,7 +4205,7 @@ exports[`Field for stringWithValidation setting should render as read only if sa
     </React.Fragment>
   }
   fullWidth={true}
-  id="string:test-validation:setting"
+  id="string:test-validation:setting-group"
   title={
     <h3>
       <span
@@ -3861,7 +4278,7 @@ exports[`Field for stringWithValidation setting should render as read only with 
     </React.Fragment>
   }
   fullWidth={true}
-  id="string:test-validation:setting"
+  id="string:test-validation:setting-group"
   title={
     <h3>
       <span
@@ -3922,7 +4339,7 @@ exports[`Field for stringWithValidation setting should render custom setting ico
     </React.Fragment>
   }
   fullWidth={true}
-  id="string:test-validation:setting"
+  id="string:test-validation:setting-group"
   title={
     <h3>
       <span
@@ -3984,7 +4401,7 @@ exports[`Field for stringWithValidation setting should render default value if t
     </React.Fragment>
   }
   fullWidth={true}
-  id="string:test-validation:setting"
+  id="string:test-validation:setting-group"
   title={
     <h3>
       <span
@@ -4035,7 +4452,7 @@ exports[`Field for stringWithValidation setting should render unsaved value if t
     </React.Fragment>
   }
   fullWidth={true}
-  id="string:test-validation:setting"
+  id="string:test-validation:setting-group"
   title={
     <h3>
       <span
@@ -4077,7 +4494,7 @@ exports[`Field for stringWithValidation setting should render unsaved value if t
     labelType="label"
   >
     <EuiFieldText
-      aria-describedby="string:test-validation:setting"
+      aria-describedby="string:test-validation:setting-group string:test-validation:setting-unsaved"
       aria-label="string test validation setting"
       data-test-subj="advancedSetting-editField-string:test-validation:setting"
       disabled={false}
@@ -4087,7 +4504,7 @@ exports[`Field for stringWithValidation setting should render unsaved value if t
     />
     <EuiScreenReaderOnly>
       <p
-        id="string:test-validation:setting"
+        id="string:test-validation:setting-unsaved"
       >
         Setting is currently not saved.
       </p>
@@ -4133,7 +4550,7 @@ exports[`Field for stringWithValidation setting should render user value if ther
     </React.Fragment>
   }
   fullWidth={true}
-  id="string:test-validation:setting"
+  id="string:test-validation:setting-group"
   title={
     <h3>
       <span

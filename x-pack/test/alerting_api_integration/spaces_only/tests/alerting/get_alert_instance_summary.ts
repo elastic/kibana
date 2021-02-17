@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -216,7 +217,7 @@ export default function createGetAlertInstanceSummaryTests({ getService }: FtrPr
 
       await alertUtils.muteInstance(createdAlert.id, 'instanceC');
       await alertUtils.muteInstance(createdAlert.id, 'instanceD');
-      await waitForEvents(createdAlert.id, ['new-instance', 'resolved-instance']);
+      await waitForEvents(createdAlert.id, ['new-instance', 'recovered-instance']);
       const response = await supertest.get(
         `${getUrlPrefix(Spaces.space1.id)}/api/alerts/alert/${createdAlert.id}/_instance_summary`
       );
@@ -226,6 +227,7 @@ export default function createGetAlertInstanceSummaryTests({ getService }: FtrPr
         instanceA: {
           status: 'Active',
           muted: false,
+          actionGroupId: 'default',
           activeStartDate: actualInstances.instanceA.activeStartDate,
         },
         instanceB: {
@@ -235,6 +237,7 @@ export default function createGetAlertInstanceSummaryTests({ getService }: FtrPr
         instanceC: {
           status: 'Active',
           muted: true,
+          actionGroupId: 'default',
           activeStartDate: actualInstances.instanceC.activeStartDate,
         },
         instanceD: {
@@ -254,7 +257,7 @@ export default function createGetAlertInstanceSummaryTests({ getService }: FtrPr
         type: 'alert',
         id,
         provider: 'alerting',
-        actions,
+        actions: new Map(actions.map((action) => [action, { gte: 1 }])),
       });
     });
   }

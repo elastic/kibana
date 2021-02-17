@@ -1,11 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import Chance from 'chance';
-import { getRandomString } from '../../../../../../test_utils';
+import { getRandomString } from '@kbn/test/jest';
 import { FollowerIndex } from '../../../../common/types';
 
 const chance = new Chance();

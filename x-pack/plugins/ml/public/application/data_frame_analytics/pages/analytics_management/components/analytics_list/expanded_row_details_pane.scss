@@ -1,0 +1,8 @@
+.mlExpandedRowDetails {
+  padding: 0 $euiSizeS $euiSizeS $euiSizeS;
+}
+
+/* Hide the basic table's header */
+.mlExpandedRowDetailsSection thead {
+  display: none;
+}

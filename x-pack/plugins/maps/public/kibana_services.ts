@@ -1,21 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import _ from 'lodash';
+import { CoreStart } from 'kibana/public';
 import { MapsLegacyConfig } from '../../../../src/plugins/maps_legacy/config';
 import { MapsConfigType } from '../config';
 import { MapsPluginStartDependencies } from './plugin';
-import { CoreStart } from '../../../../src/core/public';
-
-let licenseId: string | undefined;
-export const setLicenseId = (latestLicenseId: string | undefined) => (licenseId = latestLicenseId);
-export const getLicenseId = () => licenseId;
-let isGoldPlus: boolean = false;
-export const setIsGoldPlus = (igp: boolean) => (isGoldPlus = igp);
-export const getIsGoldPlus = () => isGoldPlus;
+import { EMSSettings } from '../common/ems_settings';
+import { PaletteRegistry } from '../../../../src/plugins/charts/public';
 
 let kibanaVersion: string;
 export const setKibanaVersion = (version: string) => (kibanaVersion = version);
@@ -35,7 +31,7 @@ export const getFileUploadComponent = async () => {
 };
 export const getUiSettings = () => coreStart.uiSettings;
 export const getIsDarkMode = () => getUiSettings().get('theme:darkMode', false);
-export const getIndexPatternSelectComponent = (): any => pluginsStart.data.ui.IndexPatternSelect;
+export const getIndexPatternSelectComponent = () => pluginsStart.data.ui.IndexPatternSelect;
 export const getHttp = () => coreStart.http;
 export const getTimeFilter = () => pluginsStart.data.query.timefilter.timefilter;
 export const getToasts = () => coreStart.notifications.toasts;
@@ -46,6 +42,7 @@ export const getVisualizeCapabilities = () => coreStart.application.capabilities
 export const getDocLinks = () => coreStart.docLinks;
 export const getCoreOverlays = () => coreStart.overlays;
 export const getData = () => pluginsStart.data;
+export const getSavedObjects = () => pluginsStart.savedObjects;
 export const getUiActions = () => pluginsStart.uiActions;
 export const getCore = () => coreStart;
 export const getNavigation = () => pluginsStart.navigation;
@@ -53,6 +50,8 @@ export const getCoreI18n = () => coreStart.i18n;
 export const getSearchService = () => pluginsStart.data.search;
 export const getEmbeddableService = () => pluginsStart.embeddable;
 export const getNavigateToApp = () => coreStart.application.navigateToApp;
+export const getSavedObjectsTagging = () => pluginsStart.savedObjectsTagging;
+export const getPresentationUtilContext = () => pluginsStart.presentationUtil.ContextProvider;
 
 // xpack.maps.* kibana.yml settings from this plugin
 let mapAppConfig: MapsConfigType;
@@ -68,15 +67,39 @@ let kibanaCommonConfig: MapsLegacyConfig;
 export const setKibanaCommonConfig = (config: MapsLegacyConfig) => (kibanaCommonConfig = config);
 export const getKibanaCommonConfig = () => kibanaCommonConfig;
 
-export const getIsEmsEnabled = () => getKibanaCommonConfig().includeElasticMapsService;
-export const getEmsFontLibraryUrl = () => getKibanaCommonConfig().emsFontLibraryUrl;
+let emsSettings: EMSSettings;
+export const setEMSSettings = (value: EMSSettings) => {
+  emsSettings = value;
+};
+export const getEMSSettings = () => {
+  return emsSettings;
+};
+
 export const getEmsTileLayerId = () => getKibanaCommonConfig().emsTileLayerId;
-export const getEmsFileApiUrl = () => getKibanaCommonConfig().emsFileApiUrl;
-export const getEmsTileApiUrl = () => getKibanaCommonConfig().emsTileApiUrl;
-export const getEmsLandingPageUrl = () => getKibanaCommonConfig().emsLandingPageUrl;
-export const getProxyElasticMapsServiceInMaps = () =>
-  getKibanaCommonConfig().proxyElasticMapsServiceInMaps;
+
 export const getRegionmapLayers = () => _.get(getKibanaCommonConfig(), 'regionmap.layers', []);
 export const getTilemap = () => _.get(getKibanaCommonConfig(), 'tilemap', []);
 
 export const getShareService = () => pluginsStart.share;
+
+export const getIsAllowByValueEmbeddables = () =>
+  pluginsStart.dashboard.dashboardFeatureFlagConfig.allowByValueEmbeddables;
+
+export async function getChartsPaletteServiceGetColor(): Promise<
+  ((value: string) => string) | null
+> {
+  const paletteRegistry: PaletteRegistry | null = pluginsStart.charts
+    ? await pluginsStart.charts.palettes.getPalettes()
+    : null;
+  if (!paletteRegistry) {
+    return null;
+  }
+
+  const paletteDefinition = paletteRegistry.get('default');
+  const chartConfiguration = { syncColors: true };
+  return (value: string) => {
+    const series = [{ name: value, rankAtDepth: 0, totalSeriesAtDepth: 1 }];
+    const color = paletteDefinition.getColor(series, chartConfiguration);
+    return color ? color : '#3d3d3d';
+  };
+}

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { SavedObject } from 'src/core/types';
@@ -12,14 +13,14 @@ import {
   RuleAlertAttributes,
   BaseSignalHit,
   SignalSource,
+  WrappedSignalHit,
 } from './types';
-import { buildRule, buildRuleWithoutOverrides } from './build_rule';
+import { buildRule, buildRuleWithoutOverrides, buildRuleWithOverrides } from './build_rule';
 import { additionalSignalFields, buildSignal } from './build_signal';
 import { buildEventTypeSignal } from './build_event_type_signal';
-import { RuleAlertAction } from '../../../../common/detection_engine/types';
+import { EqlSequence, RuleAlertAction } from '../../../../common/detection_engine/types';
 import { RuleTypeParams } from '../types';
 import { generateSignalId, wrapBuildingBlocks, wrapSignal } from './utils';
-import { EqlSequence } from '../../types';
 
 interface BuildBulkBodyParams {
   doc: SignalSourceHit;
@@ -72,6 +73,7 @@ export const buildBulkBody = ({
     ...buildSignal([doc], rule),
     ...additionalSignalFields(doc),
   };
+  delete doc._source.threshold_result;
   const event = buildEventTypeSignal(doc);
   const signalHit: SignalHit = {
     ...doc._source,
@@ -94,15 +96,23 @@ export const buildSignalGroupFromSequence = (
   sequence: EqlSequence<SignalSource>,
   ruleSO: SavedObject<RuleAlertAttributes>,
   outputIndex: string
-): BaseSignalHit[] => {
+): WrappedSignalHit[] => {
   const wrappedBuildingBlocks = wrapBuildingBlocks(
     sequence.events.map((event) => {
-      const signal = buildSignalFromEvent(event, ruleSO);
+      const signal = buildSignalFromEvent(event, ruleSO, false);
       signal.signal.rule.building_block_type = 'default';
       return signal;
     }),
     outputIndex
   );
+
+  if (
+    wrappedBuildingBlocks.some((block) =>
+      block._source.signal?.ancestors.some((ancestor) => ancestor.rule === ruleSO.id)
+    )
+  ) {
+    return [];
+  }
 
   // Now that we have an array of building blocks for the events in the sequence,
   // we can build the signal that links the building blocks together
@@ -124,12 +134,14 @@ export const buildSignalGroupFromSequence = (
 };
 
 export const buildSignalFromSequence = (
-  events: BaseSignalHit[],
+  events: WrappedSignalHit[],
   ruleSO: SavedObject<RuleAlertAttributes>
 ): SignalHit => {
   const rule = buildRuleWithoutOverrides(ruleSO);
   const signal: Signal = buildSignal(events, rule);
+  const mergedEvents = objectArrayIntersection(events.map((event) => event._source));
   return {
+    ...mergedEvents,
     '@timestamp': new Date().toISOString(),
     event: {
       kind: 'signal',
@@ -147,10 +159,13 @@ export const buildSignalFromSequence = (
 
 export const buildSignalFromEvent = (
   event: BaseSignalHit,
-  ruleSO: SavedObject<RuleAlertAttributes>
+  ruleSO: SavedObject<RuleAlertAttributes>,
+  applyOverrides: boolean
 ): SignalHit => {
-  const rule = buildRuleWithoutOverrides(ruleSO);
-  const signal = {
+  const rule = applyOverrides
+    ? buildRuleWithOverrides(ruleSO, event._source)
+    : buildRuleWithoutOverrides(ruleSO);
+  const signal: Signal = {
     ...buildSignal([event], rule),
     ...additionalSignalFields(event),
   };
@@ -163,4 +178,55 @@ export const buildSignalFromEvent = (
     signal,
   };
   return signalHit;
+};
+
+export const objectArrayIntersection = (objects: object[]) => {
+  if (objects.length === 0) {
+    return undefined;
+  } else if (objects.length === 1) {
+    return objects[0];
+  } else {
+    return objects
+      .slice(1)
+      .reduce(
+        (acc: object | undefined, obj): object | undefined => objectPairIntersection(acc, obj),
+        objects[0]
+      );
+  }
+};
+
+export const objectPairIntersection = (a: object | undefined, b: object | undefined) => {
+  if (a === undefined || b === undefined) {
+    return undefined;
+  }
+  const intersection: Record<string, unknown> = {};
+  Object.entries(a).forEach(([key, aVal]) => {
+    if (key in b) {
+      const bVal = (b as Record<string, unknown>)[key];
+      if (
+        typeof aVal === 'object' &&
+        !(aVal instanceof Array) &&
+        aVal !== null &&
+        typeof bVal === 'object' &&
+        !(bVal instanceof Array) &&
+        bVal !== null
+      ) {
+        intersection[key] = objectPairIntersection(aVal, bVal);
+      } else if (aVal === bVal) {
+        intersection[key] = aVal;
+      }
+    }
+  });
+  // Count up the number of entries that are NOT undefined in the intersection
+  // If there are no keys OR all entries are undefined, return undefined
+  if (
+    Object.values(intersection).reduce(
+      (acc: number, value) => (value !== undefined ? acc + 1 : acc),
+      0
+    ) === 0
+  ) {
+    return undefined;
+  } else {
+    return intersection;
+  }
 };

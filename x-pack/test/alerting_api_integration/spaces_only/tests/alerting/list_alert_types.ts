@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -23,7 +24,10 @@ export default function listAlertTypes({ getService }: FtrProviderContext) {
         (alertType: any) => alertType.id === 'test.noop'
       );
       expect(fixtureAlertType).to.eql({
-        actionGroups: [{ id: 'default', name: 'Default' }],
+        actionGroups: [
+          { id: 'default', name: 'Default' },
+          { id: 'recovered', name: 'Recovered' },
+        ],
         defaultActionGroupId: 'default',
         id: 'test.noop',
         name: 'Test: Noop',
@@ -32,7 +36,13 @@ export default function listAlertTypes({ getService }: FtrProviderContext) {
           params: [],
           context: [],
         },
+        recoveryActionGroup: {
+          id: 'recovered',
+          name: 'Recovered',
+        },
         producer: 'alertsFixture',
+        minimumLicenseRequired: 'basic',
+        enabledInLicense: true,
       });
       expect(Object.keys(authorizedConsumers)).to.contain('alertsFixture');
     });

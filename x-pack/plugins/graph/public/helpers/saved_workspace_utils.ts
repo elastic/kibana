@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { cloneDeep, assign, defaults, forOwn } from 'lodash';
@@ -18,7 +19,6 @@ import {
   checkForDuplicateTitle,
   saveWithConfirmation,
   isErrorNonFatal,
-  SavedObjectKibanaServices,
 } from '../../../../../src/plugins/saved_objects/public';
 import {
   injectReferences,
@@ -176,7 +176,7 @@ export async function saveSavedWorkspace(
       savedObject as any,
       isTitleDuplicateConfirmed,
       onTitleDuplicate,
-      services as SavedObjectKibanaServices
+      services
     );
     savedObject.isSaving = true;
 

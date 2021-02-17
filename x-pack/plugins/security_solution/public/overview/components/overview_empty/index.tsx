@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useMemo } from 'react';
@@ -63,7 +64,7 @@ const OverviewEmptyComponent: React.FC = () => {
         <>
           <FormattedMessage
             id="xpack.securitySolution.emptyMessage"
-            defaultMessage="Elastic Security integrates the free and open Elastic SIEM with Elastic Endpoint Security to prevent, detect, and respond to threats. To begin, you’ll need to add security solution related data to the Elastic Stack. For additional information, you can view our "
+            defaultMessage="Elastic Security integrates the free and open Elastic SIEM with Endpoint Security to prevent, detect, and respond to threats. To begin, you’ll need to add security solution related data to the Elastic Stack. For additional information, you can view our "
           />
           <EuiLink href={docLinks.links.siem.gettingStarted} target="_blank">
             {i18nCommon.EMPTY_ACTION_SECONDARY}
@@ -80,7 +81,7 @@ const OverviewEmptyComponent: React.FC = () => {
         <>
           <FormattedMessage
             id="xpack.securitySolution.emptyMessage"
-            defaultMessage="Elastic Security integrates the free and open Elastic SIEM with Elastic Endpoint Security to prevent, detect, and respond to threats. To begin, you’ll need to add security solution related data to the Elastic Stack. For additional information, you can view our "
+            defaultMessage="Elastic Security integrates the free and open Elastic SIEM with Endpoint Security to prevent, detect, and respond to threats. To begin, you’ll need to add security solution related data to the Elastic Stack. For additional information, you can view our "
           />
           <EuiLink href={docLinks.links.siem.gettingStarted} target="_blank">
             {i18nCommon.EMPTY_ACTION_SECONDARY}

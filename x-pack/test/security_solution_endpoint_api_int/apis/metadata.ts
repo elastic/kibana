@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import expect from '@kbn/expect/expect.js';
 import { FtrProviderContext } from '../ftr_provider_context';
 import {
   deleteAllDocsFromMetadataCurrentIndex,
-  deleteMetadataCurrentStream,
   deleteAllDocsFromMetadataIndex,
   deleteMetadataStream,
 } from './data_stream_helper';
@@ -23,13 +24,11 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
 
-  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/72102
-  describe.skip('test metadata api', () => {
+  describe('test metadata api', () => {
     describe(`POST ${METADATA_REQUEST_ROUTE} when index is empty`, () => {
       it('metadata api should return empty result when index is empty', async () => {
         await deleteMetadataStream(getService);
         await deleteAllDocsFromMetadataIndex(getService);
-        await deleteMetadataCurrentStream(getService);
         await deleteAllDocsFromMetadataCurrentIndex(getService);
         const { body } = await supertest
           .post(`${METADATA_REQUEST_ROUTE}`)
@@ -54,7 +53,6 @@ export default function ({ getService }: FtrProviderContext) {
       after(async () => {
         await deleteMetadataStream(getService);
         await deleteAllDocsFromMetadataIndex(getService);
-        await deleteMetadataCurrentStream(getService);
         await deleteAllDocsFromMetadataCurrentIndex(getService);
       });
       it('metadata api should return one entry for each host with default paging', async () => {
@@ -140,7 +138,7 @@ export default function ({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'xxx')
           .send({
             filters: {
-              kql: 'not HostDetails.host.ip:10.46.229.234',
+              kql: 'not (HostDetails.host.ip:10.46.229.234 or host.ip:10.46.229.234)',
             },
           })
           .expect(200);
@@ -166,7 +164,7 @@ export default function ({ getService }: FtrProviderContext) {
               },
             ],
             filters: {
-              kql: `not HostDetails.host.ip:${notIncludedIp}`,
+              kql: `not (HostDetails.host.ip:${notIncludedIp} or host.ip:${notIncludedIp})`,
             },
           })
           .expect(200);
@@ -196,7 +194,7 @@ export default function ({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'xxx')
           .send({
             filters: {
-              kql: `HostDetails.host.os.Ext.variant:${variantValue}`,
+              kql: `HostDetails.host.os.Ext.variant:${variantValue} or host.os.Ext.variant:${variantValue}`,
             },
           })
           .expect(200);
@@ -218,7 +216,7 @@ export default function ({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'xxx')
           .send({
             filters: {
-              kql: `HostDetails.host.ip:${targetEndpointIp}`,
+              kql: `HostDetails.host.ip:${targetEndpointIp} or host.ip:${targetEndpointIp}`,
             },
           })
           .expect(200);
@@ -240,7 +238,7 @@ export default function ({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'xxx')
           .send({
             filters: {
-              kql: `not HostDetails.Endpoint.policy.applied.status:success`,
+              kql: `not (HostDetails.Endpoint.policy.applied.status:success or Endpoint.policy.applied.status:success)`,
             },
           })
           .expect(200);
@@ -261,7 +259,7 @@ export default function ({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'xxx')
           .send({
             filters: {
-              kql: `HostDetails.elastic.agent.id:${targetElasticAgentId}`,
+              kql: `HostDetails.elastic.agent.id:${targetElasticAgentId} or elastic.agent.id:${targetElasticAgentId}`,
             },
           })
           .expect(200);

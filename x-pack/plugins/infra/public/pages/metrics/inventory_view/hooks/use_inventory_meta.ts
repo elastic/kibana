@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
@@ -15,7 +17,11 @@ import {
 } from '../../../../../common/http_api/inventory_meta_api';
 import { InventoryItemType } from '../../../../../common/inventory_models/types';
 
-export function useInventoryMeta(sourceId: string, nodeType: InventoryItemType) {
+export function useInventoryMeta(
+  sourceId: string,
+  nodeType: InventoryItemType,
+  currentTime: number
+) {
   const decodeResponse = (response: any) => {
     return pipe(
       InventoryMetaResponseRT.decode(response),
@@ -29,6 +35,7 @@ export function useInventoryMeta(sourceId: string, nodeType: InventoryItemType) 
     JSON.stringify({
       sourceId,
       nodeType,
+      currentTime,
     }),
     decodeResponse
   );

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { useState, useEffect } from 'react';
@@ -23,7 +24,7 @@ export function useSavedSearch() {
 
     if (currentSavedSearch !== null) {
       const { query } = getQueryFromSavedSearch(currentSavedSearch);
-      const queryLanguage = query.language as SEARCH_QUERY_LANGUAGE;
+      const queryLanguage = query.language;
       qryString = query.query;
 
       if (queryLanguage === SEARCH_QUERY_LANGUAGE.KUERY) {

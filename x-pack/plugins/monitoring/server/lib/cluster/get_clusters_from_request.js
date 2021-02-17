@@ -1,10 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { notFound } from 'boom';
+import { notFound } from '@hapi/boom';
 import { set } from '@elastic/safer-lodash-set';
 import { findIndex } from 'lodash';
 import { getClustersStats } from './get_clusters_stats';
@@ -151,20 +152,29 @@ export async function getClustersFromRequest(
           'production'
         );
         if (prodLicenseInfo.clusterAlerts.enabled) {
-          cluster.alerts = {
-            list: await fetchStatus(
-              alertsClient,
-              req.server.plugins.monitoring.info,
-              undefined,
-              cluster.cluster_uuid,
-              start,
-              end,
-              []
-            ),
-            alertsMeta: {
-              enabled: true,
-            },
-          };
+          try {
+            cluster.alerts = {
+              list: await fetchStatus(
+                alertsClient,
+                req.server.plugins.monitoring.info,
+                undefined,
+                cluster.cluster_uuid
+              ),
+              alertsMeta: {
+                enabled: true,
+              },
+            };
+          } catch (err) {
+            req.logger.warn(
+              `Unable to fetch alert status because '${err.message}'. Alerts may not properly show up in the UI.`
+            );
+            cluster.alerts = {
+              list: {},
+              alertsMeta: {
+                enabled: true,
+              },
+            };
+          }
           continue;
         }
 

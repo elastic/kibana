@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { AgentName } from '../typings/es_schemas/ui/fields/agent';
@@ -14,6 +15,20 @@ import { AgentName } from '../typings/es_schemas/ui/fields/agent';
  * AGENT_NAMES array.
  */
 
+export const OPEN_TELEMETRY_AGENT_NAMES: AgentName[] = [
+  'otlp',
+  'opentelemetry/cpp',
+  'opentelemetry/dotnet',
+  'opentelemetry/erlang',
+  'opentelemetry/go',
+  'opentelemetry/java',
+  'opentelemetry/nodejs',
+  'opentelemetry/php',
+  'opentelemetry/python',
+  'opentelemetry/ruby',
+  'opentelemetry/webjs',
+];
+
 export const AGENT_NAMES: AgentName[] = [
   'dotnet',
   'go',
@@ -23,19 +38,14 @@ export const AGENT_NAMES: AgentName[] = [
   'python',
   'ruby',
   'rum-js',
+  ...OPEN_TELEMETRY_AGENT_NAMES,
 ];
 
-export function isAgentName(agentName: string): agentName is AgentName {
-  return AGENT_NAMES.includes(agentName as AgentName);
-}
-
-export const RUM_AGENTS = ['js-base', 'rum-js'];
-
-export function isRumAgentName(
-  agentName?: string
-): agentName is 'js-base' | 'rum-js' {
-  return RUM_AGENTS.includes(agentName!);
-}
+export const RUM_AGENT_NAMES: AgentName[] = [
+  'js-base',
+  'rum-js',
+  'opentelemetry/webjs',
+];
 
 export function isJavaAgentName(
   agentName: string | undefined
@@ -43,15 +53,8 @@ export function isJavaAgentName(
   return agentName === 'java';
 }
 
-/**
- * "Normalizes" and agent name by:
- *
- * * Converting to lowercase
- * * Converting "rum-js" to "js-base"
- *
- * This helps dealing with some older agent versions
- */
-export function getNormalizedAgentName(agentName?: string) {
-  const lowercased = agentName && agentName.toLowerCase();
-  return isRumAgentName(lowercased) ? 'js-base' : lowercased;
+export function isRumAgentName(
+  agentName?: string
+): agentName is 'js-base' | 'rum-js' | 'opentelemetry/webjs' {
+  return RUM_AGENT_NAMES.includes(agentName! as AgentName);
 }

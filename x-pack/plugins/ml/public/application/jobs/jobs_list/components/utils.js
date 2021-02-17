@@ -1,12 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { each } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import rison from 'rison-node';
 
 import { mlJobService } from '../../../services/job_service';
 import {
@@ -19,6 +19,7 @@ import { stringMatch } from '../../../util/string_utils';
 import { JOB_STATE, DATAFEED_STATE } from '../../../../../common/constants/states';
 import { parseInterval } from '../../../../../common/util/parse_interval';
 import { mlCalendarService } from '../../../services/calendar_service';
+import { isPopulatedObject } from '../../../../../common/util/object_utils';
 
 export function loadFullJob(jobId) {
   return new Promise((resolve, reject) => {
@@ -37,8 +38,27 @@ export function loadFullJob(jobId) {
   });
 }
 
+export function loadJobForCloning(jobId) {
+  return new Promise((resolve, reject) => {
+    ml.jobs
+      .jobForCloning(jobId)
+      .then((resp) => {
+        if (resp) {
+          resolve(resp);
+        } else {
+          throw new Error(`Could not find job ${jobId}`);
+        }
+      })
+      .catch((error) => {
+        reject(error);
+      });
+  });
+}
+
 export function isStartable(jobs) {
-  return jobs.some((j) => j.datafeedState === DATAFEED_STATE.STOPPED);
+  return jobs.some(
+    (j) => j.datafeedState === DATAFEED_STATE.STOPPED && j.jobState !== JOB_STATE.CLOSING
+  );
 }
 
 export function isStoppable(jobs) {
@@ -49,7 +69,10 @@ export function isStoppable(jobs) {
 
 export function isClosable(jobs) {
   return jobs.some(
-    (j) => j.datafeedState === DATAFEED_STATE.STOPPED && j.jobState !== JOB_STATE.CLOSED
+    (j) =>
+      j.datafeedState === DATAFEED_STATE.STOPPED &&
+      j.jobState !== JOB_STATE.CLOSED &&
+      j.jobState !== JOB_STATE.CLOSING
   );
 }
 
@@ -176,31 +199,38 @@ function showResults(resp, action) {
 
 export async function cloneJob(jobId) {
   try {
-    const job = await loadFullJob(jobId);
-    if (job.custom_settings && job.custom_settings.created_by) {
+    const [{ job: cloneableJob, datafeed }, originalJob] = await Promise.all([
+      loadJobForCloning(jobId),
+      loadFullJob(jobId, false),
+    ]);
+    if (cloneableJob !== undefined && originalJob?.custom_settings?.created_by !== undefined) {
       // if the job is from a wizards, i.e. contains a created_by property
       // use tempJobCloningObjects to temporarily store the job
-      mlJobService.tempJobCloningObjects.job = job;
+      mlJobService.tempJobCloningObjects.createdBy = originalJob?.custom_settings?.created_by;
+      mlJobService.tempJobCloningObjects.job = cloneableJob;
 
       if (
-        job.data_counts.earliest_record_timestamp !== undefined &&
-        job.data_counts.latest_record_timestamp !== undefined &&
-        job.data_counts.latest_bucket_timestamp !== undefined
+        originalJob.data_counts.earliest_record_timestamp !== undefined &&
+        originalJob.data_counts.latest_record_timestamp !== undefined &&
+        originalJob.data_counts.latest_bucket_timestamp !== undefined
       ) {
         // if the job has run before, use the earliest and latest record timestamp
         // as the cloned job's time range
-        let start = job.data_counts.earliest_record_timestamp;
-        let end = job.data_counts.latest_record_timestamp;
+        let start = originalJob.data_counts.earliest_record_timestamp;
+        let end = originalJob.data_counts.latest_record_timestamp;
 
-        if (job.datafeed_config.aggregations !== undefined) {
+        if (originalJob.datafeed_config.aggregations !== undefined) {
           // if the datafeed uses aggregations the earliest and latest record timestamps may not be the same
           // as the start and end of the data in the index.
-          const bucketSpanMs = parseInterval(job.analysis_config.bucket_span).asMilliseconds();
+          const bucketSpanMs = parseInterval(
+            originalJob.analysis_config.bucket_span
+          ).asMilliseconds();
           // round down to the start of the nearest bucket
           start =
-            Math.floor(job.data_counts.earliest_record_timestamp / bucketSpanMs) * bucketSpanMs;
+            Math.floor(originalJob.data_counts.earliest_record_timestamp / bucketSpanMs) *
+            bucketSpanMs;
           // use latest_bucket_timestamp and add two bucket spans minus one ms
-          end = job.data_counts.latest_bucket_timestamp + bucketSpanMs * 2 - 1;
+          end = originalJob.data_counts.latest_bucket_timestamp + bucketSpanMs * 2 - 1;
         }
 
         mlJobService.tempJobCloningObjects.start = start;
@@ -208,12 +238,17 @@ export async function cloneJob(jobId) {
       }
     } else {
       // otherwise use the tempJobCloningObjects
-      mlJobService.tempJobCloningObjects.job = job;
+      mlJobService.tempJobCloningObjects.job = cloneableJob;
+      // resets the createdBy field in case it still retains previous settings
+      mlJobService.tempJobCloningObjects.createdBy = undefined;
+    }
+    if (datafeed !== undefined) {
+      mlJobService.tempJobCloningObjects.datafeed = datafeed;
     }
 
-    if (job.calendars) {
+    if (originalJob.calendars) {
       mlJobService.tempJobCloningObjects.calendars = await mlCalendarService.fetchCalendarsByIds(
-        job.calendars
+        originalJob.calendars
       );
     }
 
@@ -309,8 +344,13 @@ export function filterJobs(jobs, clauses) {
     } else {
       // filter other clauses, i.e. the toggle group buttons
       if (Array.isArray(c.value)) {
-        // the groups value is an array of group ids
-        js = jobs.filter((job) => jobProperty(job, c.field).some((g) => c.value.indexOf(g) >= 0));
+        // if it's an array of job ids
+        if (c.field === 'id') {
+          js = jobs.filter((job) => c.value.indexOf(jobProperty(job, c.field)) >= 0);
+        } else {
+          // the groups value is an array of group ids
+          js = jobs.filter((job) => jobProperty(job, c.field).some((g) => c.value.indexOf(g) >= 0));
+        }
       } else {
         js = jobs.filter((job) => jobProperty(job, c.field) === c.value);
       }
@@ -334,11 +374,14 @@ export function filterJobs(jobs, clauses) {
 // start datafeed modal.
 export function checkForAutoStartDatafeed() {
   const job = mlJobService.tempJobCloningObjects.job;
+  const datafeed = mlJobService.tempJobCloningObjects.datafeed;
   if (job !== undefined) {
     mlJobService.tempJobCloningObjects.job = undefined;
-    const hasDatafeed =
-      typeof job.datafeed_config === 'object' && Object.keys(job.datafeed_config).length > 0;
-    const datafeedId = hasDatafeed ? job.datafeed_config.datafeed_id : '';
+    mlJobService.tempJobCloningObjects.datafeed = undefined;
+    mlJobService.tempJobCloningObjects.createdBy = undefined;
+
+    const hasDatafeed = isPopulatedObject(datafeed);
+    const datafeedId = hasDatafeed ? datafeed.datafeed_id : '';
     return {
       id: job.job_id,
       hasDatafeed,
@@ -353,49 +396,7 @@ function jobProperty(job, prop) {
     job_state: 'jobState',
     datafeed_state: 'datafeedState',
     groups: 'groups',
+    id: 'id',
   };
   return job[propMap[prop]];
-}
-
-function getUrlVars(url) {
-  const vars = {};
-  url.replace(/[?&]+([^=&]+)=([^&]*)/gi, function (_, key, value) {
-    vars[key] = value;
-  });
-  return vars;
-}
-
-export function getSelectedIdFromUrl(url) {
-  const result = {};
-  if (typeof url === 'string') {
-    const isGroup = url.includes('groupIds');
-    url = decodeURIComponent(url);
-
-    if (url.includes('mlManagement')) {
-      const urlParams = getUrlVars(url);
-      const decodedJson = rison.decode(urlParams.mlManagement);
-
-      if (isGroup) {
-        result.groupIds = decodedJson.groupIds;
-      } else {
-        result.jobId = decodedJson.jobId;
-      }
-    }
-  }
-  return result;
-}
-
-export function getGroupQueryText(groupIds) {
-  return `groups:(${groupIds.join(' or ')})`;
-}
-
-export function clearSelectedJobIdFromUrl(url) {
-  if (typeof url === 'string') {
-    url = decodeURIComponent(url);
-    if (url.includes('mlManagement') && (url.includes('jobId') || url.includes('groupIds'))) {
-      const urlParams = getUrlVars(url);
-      const clearedParams = `jobs?_g=${urlParams._g}`;
-      window.history.replaceState({}, document.title, clearedParams);
-    }
-  }
 }

@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { useRef, useEffect } from 'react';
 import { useLocation, useHistory } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import * as selectors from '../store/selectors';
-import { parameterName } from '../store/ui/selectors';
+import { parameterName } from '../store/parameter_name';
 /**
  * Cleanup any query string keys that were added by this Resolver instance.
  * This works by having a React effect that just has behavior in the 'cleanup' function.

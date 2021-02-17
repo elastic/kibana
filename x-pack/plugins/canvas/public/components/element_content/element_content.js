@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -12,7 +13,6 @@ import { getType } from '@kbn/interpreter/common';
 import { Loading } from '../loading';
 import { RenderWithFn } from '../render_with_fn';
 import { ElementShareContainer } from '../element_share_container';
-import { assignHandlers } from '../../lib/create_handlers';
 import { InvalidExpression } from './invalid_expression';
 import { InvalidElementType } from './invalid_element_type';
 
@@ -48,15 +48,7 @@ export const ElementContent = compose(
   pure,
   ...branches
 )(({ renderable, renderFunction, width, height, handlers }) => {
-  const {
-    getFilter,
-    setFilter,
-    done,
-    onComplete,
-    onEmbeddableInputChange,
-    onEmbeddableDestroyed,
-    getElementId,
-  } = handlers;
+  const { onComplete } = handlers;
 
   return Style.it(
     renderable.css,
@@ -79,14 +71,7 @@ export const ElementContent = compose(
           css={renderable.css} // This is an actual CSS stylesheet string, it will be scoped by RenderElement
           width={width}
           height={height}
-          handlers={assignHandlers({
-            getFilter,
-            setFilter,
-            done,
-            onEmbeddableInputChange,
-            onEmbeddableDestroyed,
-            getElementId,
-          })}
+          handlers={handlers}
         />
       </ElementShareContainer>
     </div>

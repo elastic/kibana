@@ -1,18 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-import { isEmpty } from 'lodash/fp';
 
-import { IMitreAttack } from '../../../pages/detection_engine/rules/types';
+import { ThreatTechnique } from '../../../../../common/detection_engine/schemas/common/schemas';
+import { subtechniquesOptions } from '../../../mitre/mitre_tactics_techniques';
 
-export const isMitreAttackInvalid = (
-  tacticName: string | null | undefined,
-  technique: IMitreAttack[] | null | undefined
-) => {
-  if (isEmpty(tacticName) || (tacticName !== 'none' && isEmpty(technique))) {
-    return true;
-  }
-  return false;
+/**
+ * Returns true if the given mitre technique has any subtechniques
+ */
+export const hasSubtechniqueOptions = (technique: ThreatTechnique) => {
+  return subtechniquesOptions.some((subtechnique) => subtechnique.techniqueId === technique.id);
 };

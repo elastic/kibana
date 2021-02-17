@@ -1,19 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import {
-  EuiHorizontalRule,
-  EuiSelect,
-  EuiSpacer,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
-import { useUrlParams } from '../../../../../hooks/useUrlParams';
+import { useUrlParams } from '../../../../../context/url_params_context/use_url_params';
 import { fromQuery, toQuery } from '../../../../shared/Links/url_helpers';
 
 interface Props {
@@ -33,7 +29,7 @@ function ServiceNameFilter({ loading, serviceNames }: Props) {
   }));
 
   const updateServiceName = useCallback(
-    (serviceN: string) => {
+    (serviceN: string, replaceHistory?: boolean) => {
       const newLocation = {
         ...history.location,
         search: fromQuery({
@@ -41,7 +37,11 @@ function ServiceNameFilter({ loading, serviceNames }: Props) {
           serviceName: serviceN,
         }),
       };
-      history.push(newLocation);
+      if (replaceHistory) {
+        history.replace(newLocation);
+      } else {
+        history.push(newLocation);
+      }
     },
     [history]
   );
@@ -50,12 +50,12 @@ function ServiceNameFilter({ loading, serviceNames }: Props) {
     if (serviceNames?.length > 0) {
       // select first from the list
       if (!selectedServiceName) {
-        updateServiceName(serviceNames[0]);
+        updateServiceName(serviceNames[0], true);
       }
 
       // in case serviceName is cached from url and isn't present in current list
       if (selectedServiceName && !serviceNames.includes(selectedServiceName)) {
-        updateServiceName(serviceNames[0]);
+        updateServiceName(serviceNames[0], true);
       }
     }
 
@@ -66,22 +66,17 @@ function ServiceNameFilter({ loading, serviceNames }: Props) {
 
   return (
     <>
-      <EuiTitle size="xxxs" textTransform="uppercase">
-        <h4>
-          {i18n.translate('xpack.apm.localFilters.titles.serviceName', {
-            defaultMessage: 'Service name',
-          })}
-        </h4>
-      </EuiTitle>
-      <EuiSpacer size="s" />
-      <EuiHorizontalRule margin="none" />
-      <EuiSpacer size="s" />
       <EuiSelect
+        prepend={i18n.translate(
+          'xpack.apm.ux.localFilters.titles.webApplication',
+          {
+            defaultMessage: 'Web application',
+          }
+        )}
         isLoading={loading}
         data-cy="serviceNameFilter"
         options={options}
         value={selectedServiceName}
-        compressed={true}
         onChange={(event) => {
           updateServiceName(event.target.value);
         }}

@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { renderHook, act } from '@testing-library/react-hooks';
+import { CaseStatuses } from '../../../../case/common/api';
 import { useUpdateCases, UseUpdateCases } from './use_bulk_update_case';
 import { basicCase } from './mock';
 import * as api from './api';
@@ -43,12 +45,12 @@ describe('useUpdateCases', () => {
       );
       await waitForNextUpdate();
 
-      result.current.updateBulkStatus([basicCase], 'closed');
+      result.current.updateBulkStatus([basicCase], CaseStatuses.closed);
       await waitForNextUpdate();
       expect(spyOnPatchCases).toBeCalledWith(
         [
           {
-            status: 'closed',
+            status: CaseStatuses.closed,
             id: basicCase.id,
             version: basicCase.version,
           },
@@ -64,7 +66,7 @@ describe('useUpdateCases', () => {
         useUpdateCases()
       );
       await waitForNextUpdate();
-      result.current.updateBulkStatus([basicCase], 'closed');
+      result.current.updateBulkStatus([basicCase], CaseStatuses.closed);
       await waitForNextUpdate();
       expect(result.current).toEqual({
         isUpdated: true,
@@ -82,7 +84,7 @@ describe('useUpdateCases', () => {
         useUpdateCases()
       );
       await waitForNextUpdate();
-      result.current.updateBulkStatus([basicCase], 'closed');
+      result.current.updateBulkStatus([basicCase], CaseStatuses.closed);
 
       expect(result.current.isLoading).toBe(true);
     });
@@ -95,7 +97,7 @@ describe('useUpdateCases', () => {
       );
 
       await waitForNextUpdate();
-      result.current.updateBulkStatus([basicCase], 'closed');
+      result.current.updateBulkStatus([basicCase], CaseStatuses.closed);
       await waitForNextUpdate();
       expect(result.current.isUpdated).toBeTruthy();
       result.current.dispatchResetIsUpdated();
@@ -114,7 +116,7 @@ describe('useUpdateCases', () => {
         useUpdateCases()
       );
       await waitForNextUpdate();
-      result.current.updateBulkStatus([basicCase], 'closed');
+      result.current.updateBulkStatus([basicCase], CaseStatuses.closed);
 
       expect(result.current).toEqual({
         isUpdated: false,

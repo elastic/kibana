@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 /**
@@ -24,17 +13,20 @@
  *
  * NOTE: It's a type of SavedObject, but specific to visualizations.
  */
-import {
-  createSavedObjectClass,
-  SavedObject,
-  SavedObjectKibanaServices,
-} from '../../../../plugins/saved_objects/public';
+import { SavedObjectsStart, SavedObject } from '../../../../plugins/saved_objects/public';
 // @ts-ignore
 import { updateOldState } from '../legacy/vis_update_state';
 import { extractReferences, injectReferences } from './saved_visualization_references';
-import { IIndexPattern } from '../../../../plugins/data/public';
+import { IIndexPattern, IndexPatternsContract } from '../../../../plugins/data/public';
 import { ISavedVis, SerializedVis } from '../types';
 import { createSavedSearchesLoader } from '../../../discover/public';
+import { SavedObjectsClientContract } from '../../../../core/public';
+
+export interface SavedVisServices {
+  savedObjectsClient: SavedObjectsClientContract;
+  savedObjects: SavedObjectsStart;
+  indexPatterns: IndexPatternsContract;
+}
 
 export const convertToSerializedVis = (savedVis: ISavedVis): SerializedVis => {
   const { id, title, description, visState, uiStateJSON, searchSourceFields } = savedVis;
@@ -73,11 +65,10 @@ export const convertFromSerializedVis = (vis: SerializedVis): ISavedVis => {
   };
 };
 
-export function createSavedVisClass(services: SavedObjectKibanaServices) {
-  const SavedObjectClass = createSavedObjectClass(services);
+export function createSavedVisClass(services: SavedVisServices) {
   const savedSearch = createSavedSearchesLoader(services);
 
-  class SavedVis extends SavedObjectClass {
+  class SavedVis extends services.savedObjects.SavedObjectClass {
     public static type: string = 'visualization';
     public static mapping: Record<string, string> = {
       title: 'text',
@@ -130,5 +121,5 @@ export function createSavedVisClass(services: SavedObjectKibanaServices) {
     }
   }
 
-  return SavedVis as new (opts: Record<string, unknown> | string) => SavedObject;
+  return (SavedVis as unknown) as new (opts: Record<string, unknown> | string) => SavedObject;
 }

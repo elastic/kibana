@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { wrapError } from '../../../lib/errors';
@@ -9,7 +10,7 @@ import { InternalRouteDeps } from '.';
 import { createLicensedRouteHandler } from '../../lib';
 
 export function initGetActiveSpaceApi(deps: InternalRouteDeps) {
-  const { internalRouter, spacesService } = deps;
+  const { internalRouter, getSpacesService } = deps;
 
   internalRouter.get(
     {
@@ -18,7 +19,7 @@ export function initGetActiveSpaceApi(deps: InternalRouteDeps) {
     },
     createLicensedRouteHandler(async (context, request, response) => {
       try {
-        const space = await spacesService.getActiveSpace(request);
+        const space = await getSpacesService().getActiveSpace(request);
         return response.ok({ body: space });
       } catch (error) {
         return response.customError(wrapError(error));

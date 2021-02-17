@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { getOr } from 'lodash/fp';
@@ -48,7 +49,7 @@ export const matrixHistogram: SecuritySolutionFactory<typeof MatrixHistogramQuer
     if (myConfig == null) {
       throw new Error(`This histogram type ${options.histogramType} is unknown to the server side`);
     }
-    const totalCount = getOr(0, 'hits.total.value', response.rawResponse);
+    const totalCount = response.rawResponse.hits.total || 0;
     const matrixHistogramData = getOr([], myConfig.aggName, response.rawResponse);
     const inspect = {
       dsl: [inspectStringifyObject(myConfig.buildDsl(options))],

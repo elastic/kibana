@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { KibanaRequest } from '../../../../../src/core/server';
@@ -16,7 +17,7 @@ import { ActionType } from '../types';
 import { actionsMock, actionsClientMock } from '../mocks';
 import { pick } from 'lodash';
 
-const actionExecutor = new ActionExecutor({ isESOUsingEphemeralEncryptionKey: false });
+const actionExecutor = new ActionExecutor({ isESOCanEncrypt: true });
 const services = actionsMock.createServices();
 
 const actionsClient = actionsClientMock.create();
@@ -31,10 +32,11 @@ const executeParams = {
   request: {} as KibanaRequest,
 };
 
-const spacesMock = spacesServiceMock.createSetupContract();
+const spacesMock = spacesServiceMock.createStartContract();
+const loggerMock = loggingSystemMock.create().get();
 const getActionsClientWithRequest = jest.fn();
 actionExecutor.initialize({
-  logger: loggingSystemMock.create().get(),
+  logger: loggerMock,
   spaces: spacesMock,
   getServices: () => services,
   getActionsClientWithRequest,
@@ -89,6 +91,9 @@ test('successfully executes', async () => {
   );
 
   expect(actionTypeRegistry.get).toHaveBeenCalledWith('test');
+  expect(actionTypeRegistry.isActionExecutable).toHaveBeenCalledWith('1', 'test', {
+    notifyUsage: true,
+  });
 
   expect(actionType.executor).toHaveBeenCalledWith({
     actionId: '1',
@@ -101,6 +106,8 @@ test('successfully executes', async () => {
     },
     params: { foo: true },
   });
+
+  expect(loggerMock.debug).toBeCalledWith('executing action test:1: 1');
 });
 
 test('provides empty config when config and / or secrets is empty', async () => {
@@ -303,8 +310,8 @@ test('should not throws an error if actionType is preconfigured', async () => {
   });
 });
 
-test('throws an error when passing isESOUsingEphemeralEncryptionKey with value of true', async () => {
-  const customActionExecutor = new ActionExecutor({ isESOUsingEphemeralEncryptionKey: true });
+test('throws an error when passing isESOCanEncrypt with value of false', async () => {
+  const customActionExecutor = new ActionExecutor({ isESOCanEncrypt: false });
   customActionExecutor.initialize({
     logger: loggingSystemMock.create().get(),
     spaces: spacesMock,
@@ -318,6 +325,90 @@ test('throws an error when passing isESOUsingEphemeralEncryptionKey with value o
   await expect(
     customActionExecutor.execute(executeParams)
   ).rejects.toThrowErrorMatchingInlineSnapshot(
-    `"Unable to execute action due to the Encrypted Saved Objects plugin using an ephemeral encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in kibana.yml"`
+    `"Unable to execute action because the Encrypted Saved Objects plugin is missing encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command."`
   );
 });
+
+test('does not log warning when alert executor succeeds', async () => {
+  const executorMock = setupActionExecutorMock();
+  executorMock.mockResolvedValue({
+    actionId: '1',
+    status: 'ok',
+  });
+  await actionExecutor.execute(executeParams);
+  expect(loggerMock.warn).not.toBeCalled();
+});
+
+test('logs a warning when alert executor has an error', async () => {
+  const executorMock = setupActionExecutorMock();
+  executorMock.mockResolvedValue({
+    actionId: '1',
+    status: 'error',
+    message: 'message for action execution error',
+    serviceMessage: 'serviceMessage for action execution error',
+  });
+  await actionExecutor.execute(executeParams);
+  expect(loggerMock.warn).toBeCalledWith(
+    'action execution failure: test:1: action-1: message for action execution error: serviceMessage for action execution error'
+  );
+});
+
+test('logs a warning when alert executor throws an error', async () => {
+  const executorMock = setupActionExecutorMock();
+  executorMock.mockRejectedValue(new Error('this action execution is intended to fail'));
+  await actionExecutor.execute(executeParams);
+  expect(loggerMock.warn).toBeCalledWith(
+    'action execution failure: test:1: action-1: an error occurred while running the action executor: this action execution is intended to fail'
+  );
+});
+
+test('logs a warning when alert executor returns invalid status', async () => {
+  const executorMock = setupActionExecutorMock();
+  // object typed as any as it has an invalid status value, but we want to test that
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const alertExecutionStatus: any = {
+    actionId: '1',
+    status: 'invalid-status',
+    message: 'message for action execution error',
+    serviceMessage: 'serviceMessage for action execution error',
+  };
+  executorMock.mockResolvedValue(alertExecutionStatus);
+  await actionExecutor.execute(executeParams);
+  expect(loggerMock.warn).toBeCalledWith(
+    'action execution failure: test:1: action-1: returned unexpected result "invalid-status"'
+  );
+});
+
+function setupActionExecutorMock() {
+  const actionType: jest.Mocked<ActionType> = {
+    id: 'test',
+    name: 'Test',
+    minimumLicenseRequired: 'basic',
+    executor: jest.fn(),
+  };
+  const actionSavedObject = {
+    id: '1',
+    type: 'action',
+    name: 'action-1',
+    attributes: {
+      actionTypeId: 'test',
+      config: {
+        bar: true,
+      },
+      secrets: {
+        baz: true,
+      },
+    },
+    references: [],
+  };
+  const actionResult = {
+    id: actionSavedObject.id,
+    name: actionSavedObject.name,
+    ...pick(actionSavedObject.attributes, 'actionTypeId', 'config'),
+    isPreconfigured: false,
+  };
+  actionsClient.get.mockResolvedValueOnce(actionResult);
+  encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(actionSavedObject);
+  actionTypeRegistry.get.mockReturnValueOnce(actionType);
+  return actionType.executor;
+}

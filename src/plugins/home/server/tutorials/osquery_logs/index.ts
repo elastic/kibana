@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -40,23 +29,27 @@ export function osqueryLogsSpecProvider(context: TutorialContext): TutorialSchem
     moduleName,
     category: TutorialsCategory.SECURITY_SOLUTION,
     shortDescription: i18n.translate('home.tutorials.osqueryLogs.shortDescription', {
-      defaultMessage: 'Collect the result logs created by osqueryd.',
+      defaultMessage: 'Collect osquery logs in JSON format.',
     }),
     longDescription: i18n.translate('home.tutorials.osqueryLogs.longDescription', {
       defaultMessage:
-        'The `osquery` Filebeat module collects the JSON result logs collected by `osqueryd`. \
-[Learn more]({learnMoreLink}).',
+        'The  module collects and decodes the result logs written by \
+        [osqueryd](https://osquery.readthedocs.io/en/latest/introduction/using-osqueryd/) in \
+        the JSON format. To set up osqueryd follow the osquery installation instructions for \
+        your operating system and configure the `filesystem` logging driver (the default). \
+        Make sure UTC timestamps are enabled. \
+        [Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-osquery.html',
       },
     }),
-    euiIconType: 'logoOsquery',
+    euiIconType: '/plugins/home/assets/logos/osquery.svg',
     artifacts: {
       dashboards: [
         {
           id: '69f5ae20-eb02-11e7-8f04-51231daa5b05-ecs',
           linkLabel: i18n.translate('home.tutorials.osqueryLogs.artifacts.dashboards.linkLabel', {
-            defaultMessage: 'Osquery logs dashboard',
+            defaultMessage: 'Osquery Compliance Pack',
           }),
           isOverview: true,
         },
@@ -66,7 +59,6 @@ export function osqueryLogsSpecProvider(context: TutorialContext): TutorialSchem
       },
     },
     completionTimeMinutes: 10,
-    previewImagePath: '/plugins/home/assets/osquery_logs/screenshot.png',
     onPrem: onPremInstructions(moduleName, platforms, context),
     elasticCloud: cloudInstructions(moduleName, platforms),
     onPremElasticCloud: onPremCloudInstructions(moduleName, platforms),

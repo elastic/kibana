@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React from 'react';
 
 import { i18n } from '@kbn/i18n';
@@ -54,9 +56,7 @@ export const DynamicMappingSection = () => (
     <FormDataProvider pathsToWatch={['dynamicMapping.enabled', 'dynamicMapping.date_detection']}>
       {(formData) => {
         const {
-          'dynamicMapping.enabled': enabled,
-          // eslint-disable-next-line @typescript-eslint/naming-convention
-          'dynamicMapping.date_detection': dateDetection,
+          dynamicMapping: { enabled, date_detection: dateDetection },
         } = formData;
 
         if (enabled === undefined) {

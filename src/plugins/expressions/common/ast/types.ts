@@ -1,36 +1,24 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { ExpressionValue, ExpressionValueError } from '../expression_types';
-import { ExpressionFunction } from '../../common';
 
 export type ExpressionAstNode =
   | ExpressionAstExpression
   | ExpressionAstFunction
   | ExpressionAstArgument;
 
-export interface ExpressionAstExpression {
+export type ExpressionAstExpression = {
   type: 'expression';
   chain: ExpressionAstFunction[];
-}
+};
 
-export interface ExpressionAstFunction {
+export type ExpressionAstFunction = {
   type: 'function';
   function: string;
   arguments: Record<string, ExpressionAstArgument[]>;
@@ -39,18 +27,18 @@ export interface ExpressionAstFunction {
    * Debug information added to each function when expression is executed in *debug mode*.
    */
   debug?: ExpressionAstFunctionDebug;
-}
+};
 
-export interface ExpressionAstFunctionDebug {
+export type ExpressionAstFunctionDebug = {
   /**
    * True if function successfully returned output, false if function threw.
    */
   success: boolean;
 
   /**
-   * Reference to the expression function this AST node represents.
+   * Id of expression function.
    */
-  fn: ExpressionFunction;
+  fn: string;
 
   /**
    * Input that expression function received as its first argument.
@@ -84,6 +72,6 @@ export interface ExpressionAstFunctionDebug {
    * timing starts after the arguments have been resolved.
    */
   duration: number | undefined;
-}
+};
 
 export type ExpressionAstArgument = string | boolean | number | ExpressionAstExpression;

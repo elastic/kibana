@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { ISavedObjectTypeRegistry, SavedObjectsUtils } from '../../../../../src/core/server';
@@ -9,9 +10,13 @@ import { ISavedObjectTypeRegistry, SavedObjectsUtils } from '../../../../../src/
 export const getDescriptorNamespace = (
   typeRegistry: ISavedObjectTypeRegistry,
   type: string,
-  namespace?: string
+  namespace?: string | string[]
 ) => {
-  const descriptorNamespace = typeRegistry.isSingleNamespace(type) ? namespace : undefined;
+  const descriptorNamespace = typeRegistry.isSingleNamespace(type)
+    ? Array.isArray(namespace)
+      ? namespace[0]
+      : namespace
+    : undefined;
   return normalizeNamespace(descriptorNamespace);
 };
 
@@ -19,5 +24,5 @@ export const getDescriptorNamespace = (
  * Ensure that a namespace is always in its namespace ID representation.
  * This allows `'default'` to be used interchangeably with `undefined`.
  */
-const normalizeNamespace = (namespace?: string) =>
+export const normalizeNamespace = (namespace?: string) =>
   namespace === undefined ? namespace : SavedObjectsUtils.namespaceStringToId(namespace);

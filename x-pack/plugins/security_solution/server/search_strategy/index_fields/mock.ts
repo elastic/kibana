@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
@@ -42,6 +43,22 @@ export const mockAuditbeatIndexField: FieldDescriptor[] = [
   },
   {
     name: 'agent.version',
+    searchable: true,
+    type: 'string',
+    aggregatable: true,
+    readFromDocValues: false,
+    esTypes: [],
+  },
+  {
+    name: 'agent.user.name',
+    searchable: true,
+    type: 'string',
+    aggregatable: true,
+    readFromDocValues: false,
+    esTypes: [],
+  },
+  {
+    name: 'client.as.number.text',
     searchable: true,
     type: 'string',
     aggregatable: true,

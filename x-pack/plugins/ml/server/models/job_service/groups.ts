@@ -1,37 +1,37 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { IScopedClusterClient } from 'kibana/server';
 import { CalendarManager } from '../calendar';
 import { GLOBAL_CALENDAR } from '../../../common/constants/calendars';
 import { Job } from '../../../common/types/anomaly_detection_jobs';
-import { MlJobsResponse } from './jobs';
+import { MlJobsResponse } from '../../../common/types/job_service';
+import type { MlClient } from '../../lib/ml_client';
 
-interface Group {
+export interface Group {
   id: string;
   jobIds: string[];
   calendarIds: string[];
 }
 
-interface Results {
+export interface Results {
   [id: string]: {
     success: boolean;
     error?: any;
   };
 }
 
-export function groupsProvider(client: IScopedClusterClient) {
-  const calMngr = new CalendarManager(client);
-  const { asInternalUser } = client;
+export function groupsProvider(mlClient: MlClient) {
+  const calMngr = new CalendarManager(mlClient);
 
   async function getAllGroups() {
     const groups: { [id: string]: Group } = {};
     const jobIds: { [id: string]: undefined | null } = {};
     const [{ body }, calendars] = await Promise.all([
-      asInternalUser.ml.getJobs<MlJobsResponse>(),
+      mlClient.getJobs<MlJobsResponse>(),
       calMngr.getAllCalendars(),
     ]);
 
@@ -73,7 +73,9 @@ export function groupsProvider(client: IScopedClusterClient) {
       });
     }
 
-    return Object.keys(groups).map((g) => groups[g]);
+    return Object.keys(groups)
+      .sort()
+      .map((g) => groups[g]);
   }
 
   async function updateGroups(jobs: Job[]) {
@@ -81,7 +83,7 @@ export function groupsProvider(client: IScopedClusterClient) {
     for (const job of jobs) {
       const { job_id: jobId, groups } = job;
       try {
-        await asInternalUser.ml.updateJob({ job_id: jobId, body: { groups } });
+        await mlClient.updateJob({ job_id: jobId, body: { groups } });
         results[jobId] = { success: true };
       } catch ({ body }) {
         results[jobId] = { success: false, error: body };

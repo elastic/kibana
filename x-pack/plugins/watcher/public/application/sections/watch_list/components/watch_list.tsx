@@ -1,12 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useState, useMemo, useEffect, Fragment } from 'react';
 
 import {
+  CriteriaWithPagination,
   EuiButton,
   EuiButtonEmpty,
   EuiFlexGroup,
@@ -57,6 +59,11 @@ export const WatchList = () => {
   // Filter out deleted watches on the client, because the API will return 200 even though some watches
   // may not really be deleted until after they're done firing and this could take some time.
   const [deletedWatches, setDeletedWatches] = useState<string[]>([]);
+  const [pagination, setPagination] = useState({
+    pageIndex: 0,
+    pageSize: PAGINATION.initialPageSize,
+  });
+  const [query, setQuery] = useState('');
 
   useEffect(() => {
     setBreadcrumbs([listBreadcrumb]);
@@ -379,7 +386,14 @@ export const WatchList = () => {
           : '',
     };
 
+    const handleOnChange = (search: { queryText: string }) => {
+      setQuery(search.queryText);
+      return true;
+    };
+
     const searchConfig = {
+      query,
+      onChange: handleOnChange,
       box: {
         incremental: true,
       },
@@ -409,29 +423,43 @@ export const WatchList = () => {
     };
 
     content = (
-      <EuiInMemoryTable
-        items={availableWatches}
-        itemId="id"
-        columns={columns}
-        search={searchConfig}
-        pagination={PAGINATION}
-        sorting={true}
-        selection={selectionConfig}
-        isSelectable={true}
-        message={
-          <FormattedMessage
-            id="xpack.watcher.sections.watchList.watchTable.noWatchesMessage"
-            defaultMessage="No watches to show"
-          />
-        }
-        rowProps={() => ({
-          'data-test-subj': 'row',
-        })}
-        cellProps={() => ({
-          'data-test-subj': 'cell',
-        })}
-        data-test-subj="watchesTable"
-      />
+      <div data-test-subj="watchesTableContainer">
+        <EuiInMemoryTable
+          onTableChange={({ page: { index, size } }: CriteriaWithPagination<never>) =>
+            setPagination({ pageIndex: index, pageSize: size })
+          }
+          items={availableWatches}
+          itemId="id"
+          columns={columns}
+          search={searchConfig}
+          pagination={{
+            ...PAGINATION,
+            pageIndex: pagination.pageIndex,
+            pageSize: pagination.pageSize,
+          }}
+          sorting={{
+            sort: {
+              field: 'name',
+              direction: 'asc',
+            },
+          }}
+          selection={selectionConfig}
+          isSelectable={true}
+          message={
+            <FormattedMessage
+              id="xpack.watcher.sections.watchList.watchTable.noWatchesMessage"
+              defaultMessage="No watches to show"
+            />
+          }
+          rowProps={() => ({
+            'data-test-subj': 'row',
+          })}
+          cellProps={() => ({
+            'data-test-subj': 'cell',
+          })}
+          data-test-subj="watchesTable"
+        />
+      </div>
     );
   }
 

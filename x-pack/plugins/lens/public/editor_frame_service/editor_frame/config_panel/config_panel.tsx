@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import './config_panel.scss';
 
 import React, { useMemo, memo } from 'react';
@@ -14,18 +16,18 @@ import { trackUiEvent } from '../../../lens_ui_telemetry';
 import { generateId } from '../../../id_generator';
 import { removeLayer, appendLayer } from './layer_actions';
 import { ConfigPanelWrapperProps } from './types';
+import { useFocusUpdate } from './use_focus_update';
 
 export const ConfigPanelWrapper = memo(function ConfigPanelWrapper(props: ConfigPanelWrapperProps) {
   const activeVisualization = props.visualizationMap[props.activeVisualizationId || ''];
   const { visualizationState } = props;
 
-  return (
-    activeVisualization &&
-    visualizationState && <LayerPanels {...props} activeVisualization={activeVisualization} />
-  );
+  return activeVisualization && visualizationState ? (
+    <LayerPanels {...props} activeVisualization={activeVisualization} />
+  ) : null;
 });
 
-function LayerPanels(
+export function LayerPanels(
   props: ConfigPanelWrapperProps & {
     activeDatasourceId: string;
     activeVisualization: Visualization;
@@ -38,12 +40,20 @@ function LayerPanels(
     activeDatasourceId,
     datasourceMap,
   } = props;
+
+  const layerIds = activeVisualization.getLayerIds(visualizationState);
+  const {
+    setNextFocusedId: setNextFocusedLayerId,
+    removeRef: removeLayerRef,
+    registerNewRef: registerNewLayerRef,
+  } = useFocusUpdate(layerIds);
+
   const setVisualizationState = useMemo(
     () => (newState: unknown) => {
       dispatch({
         type: 'UPDATE_VISUALIZATION_STATE',
         visualizationId: activeVisualization.id,
-        newState,
+        updater: newState,
         clearStagedPreview: false,
       });
     },
@@ -86,41 +96,50 @@ function LayerPanels(
     },
     [dispatch]
   );
-  const layerIds = activeVisualization.getLayerIds(visualizationState);
+
+  const datasourcePublicAPIs = props.framePublicAPI.datasourceLayers;
 
   return (
     <EuiForm className="lnsConfigPanel">
-      {layerIds.map((layerId, index) => (
-        <LayerPanel
-          {...props}
-          key={layerId}
-          layerId={layerId}
-          dataTestSubj={`lns-layerPanel-${index}`}
-          visualizationState={visualizationState}
-          updateVisualization={setVisualizationState}
-          updateDatasource={updateDatasource}
-          updateAll={updateAll}
-          isOnlyLayer={layerIds.length === 1}
-          onRemoveLayer={() => {
-            dispatch({
-              type: 'UPDATE_STATE',
-              subType: 'REMOVE_OR_CLEAR_LAYER',
-              updater: (state) =>
-                removeLayer({
-                  activeVisualization,
-                  layerId,
-                  trackUiEvent,
-                  datasourceMap,
-                  state,
-                }),
-            });
-          }}
-        />
-      ))}
+      {layerIds.map((layerId, layerIndex) =>
+        datasourcePublicAPIs[layerId] ? (
+          <LayerPanel
+            {...props}
+            activeVisualization={activeVisualization}
+            registerNewLayerRef={registerNewLayerRef}
+            key={layerId}
+            layerId={layerId}
+            layerIndex={layerIndex}
+            visualizationState={visualizationState}
+            updateVisualization={setVisualizationState}
+            updateDatasource={updateDatasource}
+            updateAll={updateAll}
+            isOnlyLayer={layerIds.length === 1}
+            onRemoveLayer={() => {
+              dispatch({
+                type: 'UPDATE_STATE',
+                subType: 'REMOVE_OR_CLEAR_LAYER',
+                updater: (state) =>
+                  removeLayer({
+                    activeVisualization,
+                    layerId,
+                    trackUiEvent,
+                    datasourceMap,
+                    state,
+                  }),
+              });
+              removeLayerRef(layerId);
+            }}
+          />
+        ) : null
+      )}
       {activeVisualization.appendLayer && visualizationState && (
         <EuiFlexItem grow={true}>
           <EuiToolTip
             className="eui-fullWidth"
+            title={i18n.translate('xpack.lens.xyChart.addLayer', {
+              defaultMessage: 'Add a layer',
+            })}
             content={i18n.translate('xpack.lens.xyChart.addLayerTooltip', {
               defaultMessage:
                 'Use multiple layers to combine chart types or visualize different index patterns.',
@@ -135,22 +154,21 @@ function LayerPanels(
               aria-label={i18n.translate('xpack.lens.xyChart.addLayerButton', {
                 defaultMessage: 'Add layer',
               })}
-              title={i18n.translate('xpack.lens.xyChart.addLayerButton', {
-                defaultMessage: 'Add layer',
-              })}
               onClick={() => {
+                const id = generateId();
                 dispatch({
                   type: 'UPDATE_STATE',
                   subType: 'ADD_LAYER',
                   updater: (state) =>
                     appendLayer({
                       activeVisualization,
-                      generateId,
+                      generateId: () => id,
                       trackUiEvent,
                       activeDatasource: datasourceMap[activeDatasourceId],
                       state,
                     }),
                 });
+                setNextFocusedLayerId(id);
               }}
               iconType="plusInCircleFilled"
             />

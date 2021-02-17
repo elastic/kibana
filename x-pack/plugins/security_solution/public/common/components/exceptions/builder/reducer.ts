@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { ExceptionsBuilderExceptionItem } from '../types';
 import { ExceptionListItemSchema, OperatorTypeEnum } from '../../../../../public/lists_plugin_deps';
 import { getDefaultEmptyEntry } from './helpers';
@@ -17,6 +19,7 @@ export interface State {
   addNested: boolean;
   exceptions: ExceptionsBuilderExceptionItem[];
   exceptionsToDelete: ExceptionListItemSchema[];
+  errorExists: number;
 }
 
 export type Action =
@@ -44,6 +47,10 @@ export type Action =
   | {
       type: 'setAddNested';
       addNested: boolean;
+    }
+  | {
+      type: 'setErrorsExist';
+      errorExists: boolean;
     };
 
 export const exceptionsBuilderReducer = () => (state: State, action: Action): State => {
@@ -103,6 +110,15 @@ export const exceptionsBuilderReducer = () => (state: State, action: Action): St
       return {
         ...state,
         addNested: action.addNested,
+      };
+    }
+    case 'setErrorsExist': {
+      const { errorExists } = state;
+      const errTotal = action.errorExists ? errorExists + 1 : errorExists - 1;
+
+      return {
+        ...state,
+        errorExists: errTotal < 0 ? 0 : errTotal,
       };
     }
     default:

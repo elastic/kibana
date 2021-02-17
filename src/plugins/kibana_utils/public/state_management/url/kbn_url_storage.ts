@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { format as formatUrl } from 'url';
@@ -238,7 +227,8 @@ export const createKbnUrlControls = (
  * 4. Hash history with base path
  */
 export function getRelativeToHistoryPath(absoluteUrl: string, history: History): History.Path {
-  function stripBasename(path: string = '') {
+  function stripBasename(path: string | null) {
+    if (path === null) path = '';
     const stripLeadingHash = (_: string) => (_.charAt(0) === '#' ? _.substr(1) : _);
     const stripTrailingSlash = (_: string) =>
       _.charAt(_.length - 1) === '/' ? _.substr(0, _.length - 1) : _;
@@ -250,11 +240,17 @@ export function getRelativeToHistoryPath(absoluteUrl: string, history: History):
   const parsedHash = isHashHistory ? null : parseUrlHash(absoluteUrl);
 
   return formatUrl({
-    pathname: stripBasename(parsedUrl.pathname),
+    pathname: stripBasename(parsedUrl.pathname ?? null),
+    // @ts-expect-error `urlUtils.encodeQuery` expects key/value pairs with values of type `string | string[] | null`,
+    // however `@types/node` says that `url.query` has values of type `string | string[] | undefined`.
+    // After investigating this, it seems that no matter what the values will be of type `string | string[]`
     search: stringify(urlUtils.encodeQuery(parsedUrl.query), { sort: false, encode: false }),
     hash: parsedHash
       ? formatUrl({
           pathname: parsedHash.pathname,
+          // @ts-expect-error `urlUtils.encodeQuery` expects key/value pairs with values of type `string | string[] | null`,
+          // however `@types/node` says that `url.query` has values of type `string | string[] | undefined`.
+          // After investigating this, it seems that no matter what the values will be of type `string | string[]`
           search: stringify(urlUtils.encodeQuery(parsedHash.query), { sort: false, encode: false }),
         })
       : parsedUrl.hash,

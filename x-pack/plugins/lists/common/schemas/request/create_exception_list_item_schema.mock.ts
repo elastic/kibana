@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -14,14 +15,13 @@ import {
   META,
   NAME,
   NAMESPACE_TYPE,
+  OS_TYPES,
   TAGS,
-  _TAGS,
 } from '../../constants.mock';
 
 import { CreateExceptionListItemSchema } from './create_exception_list_item_schema';
 
 export const getCreateExceptionListItemSchemaMock = (): CreateExceptionListItemSchema => ({
-  _tags: _TAGS,
   comments: COMMENTS,
   description: DESCRIPTION,
   entries: ENTRIES,
@@ -30,6 +30,7 @@ export const getCreateExceptionListItemSchemaMock = (): CreateExceptionListItemS
   meta: META,
   name: NAME,
   namespace_type: NAMESPACE_TYPE,
+  os_types: OS_TYPES,
   tags: TAGS,
   type: ITEM_TYPE,
 });
@@ -43,6 +44,7 @@ export const getCreateExceptionListItemMinimalSchemaMock = (): CreateExceptionLi
   item_id: ITEM_ID,
   list_id: LIST_ID,
   name: NAME,
+  os_types: OS_TYPES,
   type: ITEM_TYPE,
 });
 
@@ -54,5 +56,6 @@ export const getCreateExceptionListItemMinimalSchemaMockWithoutId = (): CreateEx
   entries: ENTRIES,
   list_id: LIST_ID,
   name: NAME,
+  os_types: OS_TYPES,
   type: ITEM_TYPE,
 });

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import fs from 'fs';
@@ -101,11 +102,17 @@ if (!fs.existsSync(cssDir)) {
   fs.mkdirSync(cssDir, { recursive: true });
 }
 
+// Mock index for datasource stories
+jest.mock('../public/lib/es_service', () => ({
+  getDefaultIndex: () => Promise.resolve('test index'),
+}));
+
 addSerializer(styleSheetSerializer);
 
 // Initialize Storyshots and build the Jest Snapshots
 initStoryshots({
   configPath: path.resolve(__dirname, './../storybook'),
+  framework: 'react',
   test: multiSnapshotWithOptions({}),
   // Don't snapshot tests that start with 'redux'
   storyNameRegex: /^((?!.*?redux).)*$/,

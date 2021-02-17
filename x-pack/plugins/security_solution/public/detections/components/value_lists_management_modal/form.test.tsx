@@ -1,11 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React, { FormEvent } from 'react';
 import { mount, ReactWrapper } from 'enzyme';
-import { act } from 'react-dom/test-utils';
+import { waitFor } from '@testing-library/react';
 
 import { TestProviders } from '../../../common/mock';
 import { ValueListsForm } from './form';
@@ -24,7 +26,7 @@ const mockSelectFile: <P>(container: ReactWrapper<P>, file: File) => Promise<voi
   file
 ) => {
   const fileChange = container.find('EuiFilePicker').prop('onChange');
-  act(() => {
+  await waitFor(() => {
     if (fileChange) {
       fileChange(({ item: () => file } as unknown) as FormEvent);
     }

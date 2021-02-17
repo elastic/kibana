@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -96,7 +97,13 @@ export const DraggableBucketContainer = ({
   children: React.ReactNode;
 } & BucketContainerProps) => {
   return (
-    <EuiDraggable spacing="m" index={idx} draggableId={id} disableInteractiveElementBlocking>
+    <EuiDraggable
+      style={{ marginBottom: 4 }}
+      spacing="none"
+      index={idx}
+      draggableId={id}
+      disableInteractiveElementBlocking
+    >
       {(provided) => <BucketContainer {...bucketContainerProps}>{children}</BucketContainer>}
     </EuiDraggable>
   );
@@ -134,7 +141,7 @@ export const DragDropBuckets = ({
   };
   return (
     <EuiDragDropContext onDragEnd={handleDragEnd} onDragStart={onDragStart}>
-      <EuiDroppable droppableId={droppableId} spacing="s">
+      <EuiDroppable droppableId={droppableId} spacing="none">
         {children}
       </EuiDroppable>
     </EuiDragDropContext>

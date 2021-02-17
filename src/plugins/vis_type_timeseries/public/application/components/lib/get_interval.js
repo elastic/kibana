@@ -1,29 +1,18 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
+
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
 import { search } from '../../../../../../plugins/data/public';
 const { parseEsInterval } = search.aggs;
-import { GTE_INTERVAL_RE } from '../../../../../../plugins/vis_type_timeseries/common/interval_regexp';
-
-export const AUTO_INTERVAL = 'auto';
+import { GTE_INTERVAL_RE } from '../../../../common/interval_regexp';
+import { AUTO_INTERVAL } from '../../../../common/constants';
 
 export const unitLookup = {
   s: i18n.translate('visTypeTimeseries.getInterval.secondsLabel', { defaultMessage: 'seconds' }),

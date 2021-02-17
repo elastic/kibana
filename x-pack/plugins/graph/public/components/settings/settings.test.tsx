@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
 import { EuiTab, EuiListGroupItem, EuiButton, EuiAccordion, EuiFieldText } from '@elastic/eui';
 import * as Rx from 'rxjs';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from '@kbn/test/jest';
 import { Settings, AngularProps } from './settings';
 import { act } from '@testing-library/react';
 import { ReactWrapper } from 'enzyme';
@@ -164,9 +165,9 @@ describe('settings', () => {
     });
 
     it('should set advanced settings', () => {
-      input('Sample size').prop('onChange')!({ target: { valueAsNumber: 13 } } as React.ChangeEvent<
-        HTMLInputElement
-      >);
+      input('Sample size').prop('onChange')!({
+        target: { valueAsNumber: 13 },
+      } as React.ChangeEvent<HTMLInputElement>);
 
       expect(dispatchSpy).toHaveBeenCalledWith(
         updateSettings(

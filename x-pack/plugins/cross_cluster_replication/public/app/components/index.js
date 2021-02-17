@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 export { SectionLoading } from './section_loading';
@@ -12,9 +13,10 @@ export { AutoFollowPatternForm } from './auto_follow_pattern_form';
 export { AutoFollowPatternDeleteProvider } from './auto_follow_pattern_delete_provider';
 export { AutoFollowPatternPageTitle } from './auto_follow_pattern_page_title';
 export { AutoFollowPatternIndicesPreview } from './auto_follow_pattern_indices_preview';
-export { FollowerIndexPauseProvider } from './follower_index_pause_provider';
-export { FollowerIndexResumeProvider } from './follower_index_resume_provider';
-export { FollowerIndexUnfollowProvider } from './follower_index_unfollow_provider';
+export { FollowerIndexPauseProvider } from './follower_index_actions_providers';
+export { FollowerIndexResumeProvider } from './follower_index_actions_providers';
+export { FollowerIndexUnfollowProvider } from './follower_index_actions_providers';
+export { FollowerIndexActionsProvider } from './follower_index_actions_providers';
 export { FollowerIndexForm } from './follower_index_form';
 export { FollowerIndexPageTitle } from './follower_index_page_title';
 export { FormEntryRow } from './form_entry_row';

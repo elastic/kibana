@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
@@ -82,7 +84,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('shows discover navlink', async () => {
         const navLinks = await appsMenu.readLinks();
-        expect(navLinks.map((link) => link.text)).to.eql(['Discover']);
+        expect(navLinks.map((link) => link.text)).to.eql([
+          'Overview',
+          'Discover',
+          'Stack Management', // because `global_discover_all_role` enables search sessions
+        ]);
       });
 
       it('shows save button', async () => {
@@ -184,7 +190,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('shows discover navlink', async () => {
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
-        expect(navLinks).to.eql(['Discover']);
+        expect(navLinks).to.eql(['Overview', 'Discover']);
       });
 
       it(`doesn't show save button`, async () => {
@@ -275,7 +281,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('shows discover navlink', async () => {
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
-        expect(navLinks).to.eql(['Discover']);
+        expect(navLinks).to.eql(['Overview', 'Discover']);
       });
 
       it(`doesn't show save button`, async () => {
@@ -412,12 +418,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await security.user.delete('no_discover_privileges_user');
       });
 
-      it(`shows 404`, async () => {
+      it(`shows 403`, async () => {
         await PageObjects.common.navigateToUrl('discover', '', {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
-        await PageObjects.error.expectNotFound();
+        await PageObjects.error.expectForbidden();
       });
     });
   });

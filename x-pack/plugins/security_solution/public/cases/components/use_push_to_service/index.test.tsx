@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 /* eslint-disable react/display-name */
 import React from 'react';
 import { renderHook, act } from '@testing-library/react-hooks';
@@ -10,10 +12,13 @@ import { renderHook, act } from '@testing-library/react-hooks';
 import '../../../common/mock/match_media';
 import { usePushToService, ReturnUsePushToService, UsePushToService } from '.';
 import { TestProviders } from '../../../common/mock';
+
+import { CaseStatuses } from '../../../../../case/common/api';
 import { usePostPushToService } from '../../containers/use_post_push_to_service';
 import { basicPush, actionLicenses } from '../../containers/mock';
 import { useGetActionLicense } from '../../containers/use_get_action_license';
 import { connectorsMock } from '../../containers/configure/mock';
+import { ConnectorTypes } from '../../../../../case/common/api/connectors';
 
 jest.mock('react-router-dom', () => {
   const original = jest.requireActual('react-router-dom');
@@ -34,11 +39,12 @@ jest.mock('../../containers/configure/api');
 describe('usePushToService', () => {
   const caseId = '12345';
   const updateCase = jest.fn();
-  const postPushToService = jest.fn();
+  const pushCaseToExternalService = jest.fn();
   const mockPostPush = {
     isLoading: false,
-    postPushToService,
+    pushCaseToExternalService,
   };
+
   const mockConnector = connectorsMock[0];
   const actionLicense = actionLicenses[0];
   const caseServices = {
@@ -50,12 +56,17 @@ describe('usePushToService', () => {
       hasDataToPush: true,
     },
   };
+
   const defaultArgs = {
-    caseConnectorId: mockConnector.id,
-    caseConnectorName: mockConnector.name,
+    connector: {
+      id: mockConnector.id,
+      name: mockConnector.name,
+      type: ConnectorTypes.serviceNowITSM,
+      fields: null,
+    },
     caseId,
     caseServices,
-    caseStatus: 'open',
+    caseStatus: CaseStatuses.open,
     connectors: connectorsMock,
     updateCase,
     userCanCrud: true,
@@ -81,12 +92,14 @@ describe('usePushToService', () => {
       );
       await waitForNextUpdate();
       result.current.pushButton.props.children.props.onClick();
-      expect(postPushToService).toBeCalledWith({
+      expect(pushCaseToExternalService).toBeCalledWith({
         caseId,
-        caseServices,
-        connectorId: mockConnector.id,
-        connectorName: mockConnector.name,
-        updateCase,
+        connector: {
+          fields: null,
+          id: 'servicenow-1',
+          name: 'My Connector',
+          type: ConnectorTypes.serviceNowITSM,
+        },
       });
       expect(result.current.pushCallouts).toBeNull();
     });
@@ -143,7 +156,12 @@ describe('usePushToService', () => {
           usePushToService({
             ...defaultArgs,
             connectors: [],
-            caseConnectorId: 'none',
+            connector: {
+              id: 'none',
+              name: 'none',
+              type: ConnectorTypes.none,
+              fields: null,
+            },
           }),
         {
           wrapper: ({ children }) => <TestProviders> {children}</TestProviders>,
@@ -162,7 +180,12 @@ describe('usePushToService', () => {
         () =>
           usePushToService({
             ...defaultArgs,
-            caseConnectorId: 'none',
+            connector: {
+              id: 'none',
+              name: 'none',
+              type: ConnectorTypes.none,
+              fields: null,
+            },
           }),
         {
           wrapper: ({ children }) => <TestProviders> {children}</TestProviders>,
@@ -181,7 +204,12 @@ describe('usePushToService', () => {
         () =>
           usePushToService({
             ...defaultArgs,
-            caseConnectorId: 'not-exist',
+            connector: {
+              id: 'not-exist',
+              name: 'not-exist',
+              type: ConnectorTypes.none,
+              fields: null,
+            },
             isValidConnector: false,
           }),
         {
@@ -202,7 +230,12 @@ describe('usePushToService', () => {
           usePushToService({
             ...defaultArgs,
             connectors: [],
-            caseConnectorId: 'not-exist',
+            connector: {
+              id: 'not-exist',
+              name: 'not-exist',
+              type: ConnectorTypes.none,
+              fields: null,
+            },
             isValidConnector: false,
           }),
         {
@@ -222,7 +255,7 @@ describe('usePushToService', () => {
         () =>
           usePushToService({
             ...defaultArgs,
-            caseStatus: 'closed',
+            caseStatus: CaseStatuses.closed,
           }),
         {
           wrapper: ({ children }) => <TestProviders> {children}</TestProviders>,

@@ -1,58 +1,60 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import { run } from '@kbn/dev-utils';
-import { TEAM_ASSIGNMENT_PIPELINE_NAME } from '../constants';
-import { fetch } from './get_data';
-import { update } from './update_ingest_pipeline';
-
-const updatePipeline = update(TEAM_ASSIGNMENT_PIPELINE_NAME);
-
-const execute = ({ flags, log }) => {
-  if (flags.verbose) log.verbose(`### Verbose logging enabled`);
-
-  const logLeft = handleErr(log);
-  const updateAndLog = updatePipeline(log);
-
-  const { path } = flags;
-
-  fetch(path).fold(logLeft, updateAndLog);
-};
-
-function handleErr(log) {
-  return (msg) => log.error(msg);
-}
-
-const description = `
-
-Upload the latest team assignment pipeline def from src,
-to the cluster.
-
-      `;
+import { run, createFlagError, REPO_ROOT } from '@kbn/dev-utils';
+import { parse } from './parse_owners';
+import { flush } from './flush';
+import { enumeratePatterns } from './enumerate_patterns';
+import { pipe } from '../utils';
+import { reduce } from 'rxjs/operators';
 
 const flags = {
-  string: ['path', 'verbose'],
+  string: ['src', 'dest'],
   help: `
---path             Required, path to painless definition for team assignment.
+--src              Required, path to CODEOWNERS file.
+--dest             Required, destination path of the assignments.
         `,
 };
 
-const usage = 'node scripts/load_team_assignment.js --verbose --path PATH_TO_PAINLESS_SCRIPT.json';
+export const generateTeamAssignments = () => {
+  run(
+    ({ flags, log }) => {
+      if (flags.src === '') throw createFlagError('please provide a single --src flag');
+      if (flags.dest === '') throw createFlagError('please provide a single --dest flag');
 
-export const uploadTeamAssignmentJson = () => run(execute, { description, flags, usage });
+      const logCreepAndFlush = pipe(
+        logSuccess(flags.src, log),
+        enumeratePatterns(REPO_ROOT)(log),
+        flush(flags.dest)(log)
+      );
+
+      parse(flags.src).pipe(reduce(toMap, new Map())).subscribe(logCreepAndFlush);
+    },
+    {
+      description: `
+
+Create a file defining the team assignments,
+ parsed from .github/CODEOWNERS
+
+      `,
+      flags,
+    }
+  );
+};
+
+function toMap(acc, x) {
+  acc.set(x[0], x[1][0]);
+  return acc;
+}
+
+function logSuccess(src, log) {
+  return (dataObj) => {
+    log.verbose(`\n### Parsing [${src}] Complete`);
+    return dataObj;
+  };
+}

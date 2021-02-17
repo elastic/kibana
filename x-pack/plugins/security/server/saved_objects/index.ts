@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -12,11 +13,12 @@ import {
 } from '../../../../../src/core/server';
 import { SecureSavedObjectsClientWrapper } from './secure_saved_objects_client_wrapper';
 import { AuthorizationServiceSetup } from '../authorization';
-import { SecurityAuditLogger } from '../audit';
+import { SecurityAuditLogger, AuditServiceSetup } from '../audit';
 import { SpacesService } from '../plugin';
 
 interface SetupSavedObjectsParams {
-  auditLogger: SecurityAuditLogger;
+  legacyAuditLogger: SecurityAuditLogger;
+  audit: AuditServiceSetup;
   authz: Pick<
     AuthorizationServiceSetup,
     'mode' | 'actions' | 'checkSavedObjectsPrivilegesWithRequest'
@@ -26,7 +28,8 @@ interface SetupSavedObjectsParams {
 }
 
 export function setupSavedObjects({
-  auditLogger,
+  legacyAuditLogger,
+  audit,
   authz,
   savedObjects,
   getSpacesService,
@@ -50,7 +53,8 @@ export function setupSavedObjects({
     return authz.mode.useRbacForRequest(kibanaRequest)
       ? new SecureSavedObjectsClientWrapper({
           actions: authz.actions,
-          auditLogger,
+          legacyAuditLogger,
+          auditLogger: audit.asScoped(kibanaRequest),
           baseClient: client,
           checkSavedObjectsPrivilegesAsCurrentUser: authz.checkSavedObjectsPrivilegesWithRequest(
             kibanaRequest

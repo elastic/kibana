@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FC, Fragment, useMemo, useState } from 'react';
@@ -22,24 +23,51 @@ import {
 } from '@elastic/eui';
 
 import { useLocation } from 'react-router-dom';
+import { useUrlState } from '../../../util/url_state';
 import { NavigationMenu } from '../../../components/navigation_menu';
 import { DatePickerWrapper } from '../../../components/navigation_menu/date_picker_wrapper';
 import { DataFrameAnalyticsList } from './components/analytics_list';
 import { useRefreshInterval } from './components/analytics_list/use_refresh_interval';
 import { RefreshAnalyticsListButton } from './components/refresh_analytics_list_button';
 import { NodeAvailableWarning } from '../../../components/node_available_warning';
+import { SavedObjectsWarning } from '../../../components/saved_objects_warning';
 import { UpgradeWarning } from '../../../components/upgrade';
 import { AnalyticsNavigationBar } from './components/analytics_navigation_bar';
 import { ModelsList } from './components/models_management';
+import { JobMap } from '../job_map';
+import { usePageUrlState } from '../../../util/url_state';
+import { ListingPageUrlState } from '../../../../../common/types/common';
+import { DataFrameAnalyticsListColumn } from './components/analytics_list/common';
+import { ML_PAGES } from '../../../../../common/constants/ml_url_generator';
+import { HelpMenu } from '../../../components/help_menu';
+import { useMlKibana } from '../../../contexts/kibana';
+
+export const getDefaultDFAListState = (): ListingPageUrlState => ({
+  pageIndex: 0,
+  pageSize: 10,
+  sortField: DataFrameAnalyticsListColumn.id,
+  sortDirection: 'asc',
+});
 
 export const Page: FC = () => {
   const [blockRefresh, setBlockRefresh] = useState(false);
+  const [globalState] = useUrlState('_g');
+
+  const [dfaPageState, setDfaPageState] = usePageUrlState(
+    ML_PAGES.DATA_FRAME_ANALYTICS_JOBS_MANAGE,
+    getDefaultDFAListState()
+  );
 
   useRefreshInterval(setBlockRefresh);
 
   const location = useLocation();
   const selectedTabId = useMemo(() => location.pathname.split('/').pop(), [location]);
-
+  const mapJobId = globalState?.ml?.jobId;
+  const mapModelId = globalState?.ml?.modelId;
+  const {
+    services: { docLinks },
+  } = useMlKibana();
+  const helpLink = docLinks.links.ml.dataFrameAnalytics;
   return (
     <Fragment>
       <NavigationMenu tabId="data_frame_analytics" />
@@ -55,16 +83,13 @@ export const Page: FC = () => {
                   />
                   <span>&nbsp;</span>
                   <EuiBetaBadge
-                    label={i18n.translate(
-                      'xpack.ml.dataframe.analyticsList.experimentalBadgeLabel',
-                      {
-                        defaultMessage: 'Experimental',
-                      }
-                    )}
+                    label={i18n.translate('xpack.ml.dataframe.analyticsList.betaBadgeLabel', {
+                      defaultMessage: 'Beta',
+                    })}
                     tooltipContent={i18n.translate(
-                      'xpack.ml.dataframe.analyticsList.experimentalBadgeTooltipContent',
+                      'xpack.ml.dataframe.analyticsList.betaBadgeTooltipContent',
                       {
-                        defaultMessage: `Data frame analytics are an experimental feature. We'd love to hear your feedback.`,
+                        defaultMessage: `Data frame analytics are a beta feature. We'd love to hear your feedback.`,
                       }
                     )}
                   />
@@ -73,29 +98,45 @@ export const Page: FC = () => {
             </EuiPageHeaderSection>
             <EuiPageHeaderSection>
               <EuiFlexGroup alignItems="center" gutterSize="s">
-                <EuiFlexItem grow={false}>
-                  <RefreshAnalyticsListButton />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <DatePickerWrapper />
-                </EuiFlexItem>
+                {selectedTabId !== 'map' && (
+                  <>
+                    <EuiFlexItem grow={false}>
+                      <RefreshAnalyticsListButton />
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <DatePickerWrapper />
+                    </EuiFlexItem>
+                  </>
+                )}
               </EuiFlexGroup>
             </EuiPageHeaderSection>
           </EuiPageHeader>
 
           <NodeAvailableWarning />
+          <SavedObjectsWarning jobType="data-frame-analytics" />
           <UpgradeWarning />
 
           <EuiPageContent>
-            <AnalyticsNavigationBar selectedTabId={selectedTabId} />
-
+            <AnalyticsNavigationBar
+              selectedTabId={selectedTabId}
+              jobId={mapJobId}
+              modelId={mapModelId}
+            />
+            {selectedTabId === 'map' && (mapJobId || mapModelId) && (
+              <JobMap analyticsId={mapJobId} modelId={mapModelId} />
+            )}
             {selectedTabId === 'data_frame_analytics' && (
-              <DataFrameAnalyticsList blockRefresh={blockRefresh} />
+              <DataFrameAnalyticsList
+                blockRefresh={blockRefresh}
+                pageState={dfaPageState}
+                updatePageState={setDfaPageState}
+              />
             )}
             {selectedTabId === 'models' && <ModelsList />}
           </EuiPageContent>
         </EuiPageBody>
       </EuiPage>
+      <HelpMenu docLink={helpLink} />
     </Fragment>
   );
 };

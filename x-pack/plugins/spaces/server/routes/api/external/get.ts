@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { schema } from '@kbn/config-schema';
@@ -11,7 +12,7 @@ import { ExternalRouteDeps } from '.';
 import { createLicensedRouteHandler } from '../../lib';
 
 export function initGetSpaceApi(deps: ExternalRouteDeps) {
-  const { externalRouter, spacesService } = deps;
+  const { externalRouter, getSpacesService } = deps;
 
   externalRouter.get(
     {
@@ -24,7 +25,7 @@ export function initGetSpaceApi(deps: ExternalRouteDeps) {
     },
     createLicensedRouteHandler(async (context, request, response) => {
       const spaceId = request.params.id;
-      const spacesClient = await spacesService.scopedClient(request);
+      const spacesClient = getSpacesService().createSpacesClient(request);
 
       try {
         const space = await spacesClient.get(spaceId);

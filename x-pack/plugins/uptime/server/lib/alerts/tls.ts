@@ -1,21 +1,23 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import moment from 'moment';
 import { schema } from '@kbn/config-schema';
 import { UptimeAlertTypeFactory } from './types';
-import { savedObjectsAdapter } from '../saved_objects';
 import { updateState } from './common';
-import { ACTION_GROUP_DEFINITIONS } from '../../../common/constants/alerts';
+import { TLS } from '../../../common/constants/alerts';
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../common/constants';
 import { Cert, CertResult } from '../../../common/runtime_types';
 import { commonStateTranslations, tlsTranslations } from './translations';
 import { DEFAULT_FROM, DEFAULT_TO } from '../../rest_api/certs/certs';
+import { uptimeAlertWrapper } from './uptime_alert_wrapper';
+import { ActionGroupIdsOf } from '../../../../alerts/common';
 
-const { TLS } = ACTION_GROUP_DEFINITIONS;
+export type ActionGroupIds = ActionGroupIdsOf<typeof TLS>;
 
 const DEFAULT_SIZE = 20;
 
@@ -82,74 +84,73 @@ export const getCertSummary = (
   };
 };
 
-export const tlsAlertFactory: UptimeAlertTypeFactory = (_server, libs) => ({
-  id: 'xpack.uptime.alerts.tls',
-  name: tlsTranslations.alertFactoryName,
-  validate: {
-    params: schema.object({}),
-  },
-  defaultActionGroupId: TLS.id,
-  actionGroups: [
-    {
-      id: TLS.id,
-      name: TLS.name,
+export const tlsAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (_server, libs) =>
+  uptimeAlertWrapper<ActionGroupIds>({
+    id: 'xpack.uptime.alerts.tls',
+    name: tlsTranslations.alertFactoryName,
+    validate: {
+      params: schema.object({}),
     },
-  ],
-  actionVariables: {
-    context: [],
-    state: [...tlsTranslations.actionVariables, ...commonStateTranslations],
-  },
-  producer: 'uptime',
-  async executor(options) {
-    const {
-      services: { alertInstanceFactory, callCluster, savedObjectsClient },
-      state,
-    } = options;
-    const dynamicSettings = await savedObjectsAdapter.getUptimeDynamicSettings(savedObjectsClient);
+    defaultActionGroupId: TLS.id,
+    actionGroups: [
+      {
+        id: TLS.id,
+        name: TLS.name,
+      },
+    ],
+    actionVariables: {
+      context: [],
+      state: [...tlsTranslations.actionVariables, ...commonStateTranslations],
+    },
+    minimumLicenseRequired: 'basic',
+    async executor({ options, dynamicSettings, uptimeEsClient }) {
+      const {
+        services: { alertInstanceFactory },
+        state,
+      } = options;
 
-    const { certs, total }: CertResult = await libs.requests.getCerts({
-      callES: callCluster,
-      dynamicSettings,
-      from: DEFAULT_FROM,
-      to: DEFAULT_TO,
-      index: 0,
-      size: DEFAULT_SIZE,
-      notValidAfter: `now+${
-        dynamicSettings?.certExpirationThreshold ??
-        DYNAMIC_SETTINGS_DEFAULTS.certExpirationThreshold
-      }d`,
-      notValidBefore: `now-${
-        dynamicSettings?.certAgeThreshold ?? DYNAMIC_SETTINGS_DEFAULTS.certAgeThreshold
-      }d`,
-      sortBy: 'common_name',
-      direction: 'desc',
-    });
-
-    const foundCerts = total > 0;
-
-    if (foundCerts) {
-      const absoluteExpirationThreshold = moment()
-        .add(
-          dynamicSettings.certExpirationThreshold ??
-            DYNAMIC_SETTINGS_DEFAULTS.certExpirationThreshold,
-          'd'
-        )
-        .valueOf();
-      const absoluteAgeThreshold = moment()
-        .subtract(
-          dynamicSettings.certAgeThreshold ?? DYNAMIC_SETTINGS_DEFAULTS.certAgeThreshold,
-          'd'
-        )
-        .valueOf();
-      const alertInstance = alertInstanceFactory(TLS.id);
-      const summary = getCertSummary(certs, absoluteExpirationThreshold, absoluteAgeThreshold);
-      alertInstance.replaceState({
-        ...updateState(state, foundCerts),
-        ...summary,
+      const { certs, total }: CertResult = await libs.requests.getCerts({
+        uptimeEsClient,
+        from: DEFAULT_FROM,
+        to: DEFAULT_TO,
+        index: 0,
+        size: DEFAULT_SIZE,
+        notValidAfter: `now+${
+          dynamicSettings?.certExpirationThreshold ??
+          DYNAMIC_SETTINGS_DEFAULTS.certExpirationThreshold
+        }d`,
+        notValidBefore: `now-${
+          dynamicSettings?.certAgeThreshold ?? DYNAMIC_SETTINGS_DEFAULTS.certAgeThreshold
+        }d`,
+        sortBy: 'common_name',
+        direction: 'desc',
       });
-      alertInstance.scheduleActions(TLS.id);
-    }
 
-    return updateState(state, foundCerts);
-  },
-});
+      const foundCerts = total > 0;
+
+      if (foundCerts) {
+        const absoluteExpirationThreshold = moment()
+          .add(
+            dynamicSettings.certExpirationThreshold ??
+              DYNAMIC_SETTINGS_DEFAULTS.certExpirationThreshold,
+            'd'
+          )
+          .valueOf();
+        const absoluteAgeThreshold = moment()
+          .subtract(
+            dynamicSettings.certAgeThreshold ?? DYNAMIC_SETTINGS_DEFAULTS.certAgeThreshold,
+            'd'
+          )
+          .valueOf();
+        const alertInstance = alertInstanceFactory(TLS.id);
+        const summary = getCertSummary(certs, absoluteExpirationThreshold, absoluteAgeThreshold);
+        alertInstance.replaceState({
+          ...updateState(state, foundCerts),
+          ...summary,
+        });
+        alertInstance.scheduleActions(TLS.id);
+      }
+
+      return updateState(state, foundCerts);
+    },
+  });

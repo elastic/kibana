@@ -1,6 +1,8 @@
 # Index Lifecycle Management
 
-## Quick steps for testing ILM in Index Management
+## Testing
+
+### Quick steps for testing ILM in Index Management
 
 You can test that the `Frozen` badge, phase filtering, and lifecycle information is surfaced in
 Index Management by running this series of requests in Console:
@@ -93,3 +95,25 @@ ILM information in the detail panel as well as an error. You can dismiss the err
 `Manage > Retry lifecycle step`.
 
 ![image](https://user-images.githubusercontent.com/1238659/78087984-a6811000-7377-11ea-880e-1a7b182c14f1.png)
+
+### Data tier notifications
+
+When creating or editing an ILM policy the UI should notify users that under certain conditions their data will not be
+moved to a tier corresponding to a phase. For instance, when a cluster only has hot-tier nodes. We test the UI
+with this cluster state by starting an ES node with the `data_hot` role. Using this command:
+
+```bash
+yarn es snapshot --license=trial -E node.roles=data_hot,master,data_content
+```
+
+This will create a cluster where we have a single node that belongs to the hot-tier. In the data allocation section of
+both the warm and cold phase you should see notice like the following:
+
+![image](https://user-images.githubusercontent.com/8155004/94132944-4b306600-fe60-11ea-9c3d-02229e3055b8.png)
+
+Default configuration for a node is that it belongs to all tiers, in which case you should not see this notice. Test
+this by running:
+
+```bash
+yarn es snapshot --license=trial
+```

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
@@ -14,6 +15,17 @@ interface InfraopsSum {
   logs: number;
 }
 
+interface Usage {
+  last_24_hours: {
+    hits: {
+      infraops_hosts: number;
+      infraops_docker: number;
+      infraops_kubernetes: number;
+      logs: number;
+    };
+  };
+}
+
 export class UsageCollector {
   public static registerUsageCollector(usageCollection: UsageCollectionSetup): void {
     const collector = UsageCollector.getUsageCollector(usageCollection);
@@ -21,11 +33,21 @@ export class UsageCollector {
   }
 
   public static getUsageCollector(usageCollection: UsageCollectionSetup) {
-    return usageCollection.makeUsageCollector({
+    return usageCollection.makeUsageCollector<Usage>({
       type: 'infraops',
       isReady: () => true,
       fetch: async () => {
         return this.getReport();
+      },
+      schema: {
+        last_24_hours: {
+          hits: {
+            infraops_hosts: { type: 'long' },
+            infraops_docker: { type: 'long' },
+            infraops_kubernetes: { type: 'long' },
+            logs: { type: 'long' },
+          },
+        },
       },
     });
   }

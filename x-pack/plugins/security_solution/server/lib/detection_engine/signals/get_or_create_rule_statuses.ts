@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { SavedObject } from 'src/core/server';
 
-import { IRuleStatusAttributes } from '../rules/types';
+import { IRuleStatusSOAttributes } from '../rules/types';
 import { RuleStatusSavedObjectsClient } from './rule_status_saved_objects_client';
 import { getRuleStatusSavedObjects } from './get_rule_status_saved_objects';
 
@@ -18,7 +19,7 @@ interface RuleStatusParams {
 export const createNewRuleStatus = async ({
   alertId,
   ruleStatusClient,
-}: RuleStatusParams): Promise<SavedObject<IRuleStatusAttributes>> => {
+}: RuleStatusParams): Promise<SavedObject<IRuleStatusSOAttributes>> => {
   const now = new Date().toISOString();
   return ruleStatusClient.create({
     alertId,
@@ -38,7 +39,7 @@ export const createNewRuleStatus = async ({
 export const getOrCreateRuleStatuses = async ({
   alertId,
   ruleStatusClient,
-}: RuleStatusParams): Promise<Array<SavedObject<IRuleStatusAttributes>>> => {
+}: RuleStatusParams): Promise<Array<SavedObject<IRuleStatusSOAttributes>>> => {
   const ruleStatuses = await getRuleStatusSavedObjects({
     alertId,
     ruleStatusClient,

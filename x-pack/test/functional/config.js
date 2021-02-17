@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { resolve } from 'path';
@@ -88,12 +89,14 @@ export default async function ({ readConfigFile }) {
         '--xpack.security.encryptionKey="wuGNaIhoMpk5sO4UBxgr3NyW1sFcLgIf"', // server restarts should not invalidate active sessions
         '--xpack.encryptedSavedObjects.encryptionKey="DkdXazszSCYexXqz4YktBGHCRkV6hyNK"',
         '--timelion.ui.enabled=true',
+        '--savedObjects.maxImportPayloadBytes=10485760', // for OSS test management/_import_objects
       ],
     },
     uiSettings: {
       defaults: {
         'accessibility:disableAnimations': true,
         'dateFormat:tz': 'UTC',
+        'visualization:visualize:legacyChartsLibrary': true,
       },
     },
     // the apps section defines the urls that
@@ -230,6 +233,7 @@ export default async function ({ readConfigFile }) {
             {
               feature: {
                 canvas: ['all'],
+                visualize: ['all'],
               },
               spaces: ['*'],
             },
@@ -373,6 +377,28 @@ export default async function ({ readConfigFile }) {
           },
         },
 
+        geoall_data_writer: {
+          elasticsearch: {
+            indices: [
+              {
+                names: ['*'],
+                privileges: ['create', 'read', 'view_index_metadata', 'monitor', 'create_index'],
+              },
+            ],
+          },
+        },
+
+        global_index_pattern_management_all: {
+          kibana: [
+            {
+              feature: {
+                indexPatterns: ['all'],
+              },
+              spaces: ['*'],
+            },
+          ],
+        },
+
         global_devtools_read: {
           kibana: [
             {
@@ -402,6 +428,25 @@ export default async function ({ readConfigFile }) {
         global_ccr_role: {
           elasticsearch: {
             cluster: ['manage', 'manage_ccr'],
+          },
+          kibana: [
+            {
+              feature: {
+                discover: ['read'],
+              },
+              spaces: ['*'],
+            },
+          ],
+        },
+        manage_rollups_role: {
+          elasticsearch: {
+            cluster: ['manage', 'manage_rollup'],
+            indices: [
+              {
+                names: ['*'],
+                privileges: ['read', 'delete', 'create_index', 'view_index_metadata'],
+              },
+            ],
           },
           kibana: [
             {
@@ -472,12 +517,7 @@ export default async function ({ readConfigFile }) {
 
         logstash_read_user: {
           elasticsearch: {
-            indices: [
-              {
-                names: ['.logstash*'],
-                privileges: ['read'],
-              },
-            ],
+            cluster: ['manage_logstash_pipelines'],
           },
         },
 

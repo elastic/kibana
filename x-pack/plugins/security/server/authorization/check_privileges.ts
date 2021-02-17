@@ -1,11 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { pick, transform, uniq } from 'lodash';
-import { ILegacyClusterClient, KibanaRequest } from '../../../../../src/core/server';
+import { IClusterClient, KibanaRequest } from '../../../../../src/core/server';
 import { GLOBAL_RESOURCE } from '../../common/constants';
 import { ResourceSerializer } from './resource_serializer';
 import {
@@ -24,7 +25,7 @@ interface CheckPrivilegesActions {
 
 export function checkPrivilegesWithRequestFactory(
   actions: CheckPrivilegesActions,
-  clusterClient: ILegacyClusterClient,
+  getClusterClient: () => Promise<IClusterClient>,
   applicationName: string
 ) {
   const hasIncompatibleVersion = (
@@ -47,9 +48,10 @@ export function checkPrivilegesWithRequestFactory(
         : [];
       const allApplicationPrivileges = uniq([actions.version, actions.login, ...kibanaPrivileges]);
 
-      const hasPrivilegesResponse = (await clusterClient
+      const clusterClient = await getClusterClient();
+      const { body: hasPrivilegesResponse } = await clusterClient
         .asScoped(request)
-        .callAsCurrentUser('shield.hasPrivileges', {
+        .asCurrentUser.security.hasPrivileges<HasPrivilegesResponse>({
           body: {
             cluster: privileges.elasticsearch?.cluster,
             index: Object.entries(privileges.elasticsearch?.index ?? {}).map(
@@ -62,7 +64,7 @@ export function checkPrivilegesWithRequestFactory(
               { application: applicationName, resources, privileges: allApplicationPrivileges },
             ],
           },
-        })) as HasPrivilegesResponse;
+        });
 
       validateEsPrivilegeResponse(
         hasPrivilegesResponse,

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import moment from 'moment';
@@ -19,6 +20,7 @@ export const buildEventsHistogramQuery = ({
   timerange: { from, to },
   defaultIndex,
   stackByField = 'event.action',
+  threshold,
 }: MatrixHistogramRequestOptions) => {
   const filter = [
     ...createQueryFilterClauses(filterQuery),
@@ -55,6 +57,25 @@ export const buildEventsHistogramQuery = ({
           }
         : {};
 
+    if (threshold != null) {
+      return {
+        eventActionGroup: {
+          terms: {
+            field: threshold.field ?? stackByField,
+            ...(threshold.field != null ? {} : missing),
+            order: {
+              _count: 'desc',
+            },
+            size: 10,
+            min_doc_count: threshold.value,
+          },
+          aggs: {
+            events: dateHistogram,
+          },
+        },
+      };
+    }
+
     return {
       eventActionGroup: {
         terms: {
@@ -76,6 +97,7 @@ export const buildEventsHistogramQuery = ({
     index: defaultIndex,
     allowNoIndices: true,
     ignoreUnavailable: true,
+    track_total_hits: true,
     body: {
       aggregations: getHistogramAggregation(),
       query: {
@@ -84,7 +106,6 @@ export const buildEventsHistogramQuery = ({
         },
       },
       size: 0,
-      track_total_hits: true,
     },
   };
 

@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
@@ -64,7 +66,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('shows graph navlink', async () => {
         const navLinks = await appsMenu.readLinks();
-        expect(navLinks.map((link) => link.text)).to.eql(['Graph']);
+        expect(navLinks.map((link) => link.text)).to.eql(['Overview', 'Graph']);
       });
 
       it('landing page shows "Create new graph" button', async () => {
@@ -127,7 +129,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('shows graph navlink', async () => {
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
-        expect(navLinks).to.eql(['Graph']);
+        expect(navLinks).to.eql(['Overview', 'Graph']);
       });
 
       it('does not show a "Create new Workspace" button', async () => {
@@ -182,13 +184,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(navLinks).not.to.contain('Graph');
       });
 
-      it(`navigating to app displays a 404`, async () => {
+      it(`navigating to app displays a 403`, async () => {
         await PageObjects.common.navigateToUrl('graph', '', {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
 
-        await PageObjects.error.expectNotFound();
+        await PageObjects.error.expectForbidden();
       });
     });
   });

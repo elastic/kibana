@@ -1,21 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { memo, useCallback } from 'react';
-import { EuiButton, CommonProps, EuiText, EuiSpacer, EuiPanel } from '@elastic/eui';
+import { CommonProps, EuiText, EuiPanel } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { ConditionGroup, ConditionGroupProps } from './components/condition_group';
+import { ConditionGroup, ConditionGroupProps } from '../condition_group';
 
-const BUTTON_MIN_WIDTH = Object.freeze({ minWidth: '95px' });
-
-export type LogicalConditionBuilderProps = CommonProps &
-  ConditionGroupProps & {
-    onAndClicked: () => void;
-    isAndDisabled?: boolean;
-  };
+export type LogicalConditionBuilderProps = CommonProps & ConditionGroupProps;
 export const LogicalConditionBuilder = memo<LogicalConditionBuilderProps>(
   ({
     entries,
@@ -47,26 +42,13 @@ export const LogicalConditionBuilder = memo<LogicalConditionBuilderProps>(
               entries={entries}
               onEntryRemove={onEntryRemove}
               onEntryChange={onEntryChange}
+              onAndClicked={onAndClicked}
+              isAndDisabled={isAndDisabled}
               onVisited={onVisited}
               data-test-subj={getTestId('group1')}
             />
           )}
         </div>
-        <EuiSpacer size="s" />
-        <EuiButton
-          fill
-          size="s"
-          iconType="plusInCircle"
-          onClick={onAndClicked}
-          data-test-subj={getTestId('AndButton')}
-          isDisabled={isAndDisabled}
-          style={BUTTON_MIN_WIDTH}
-        >
-          <FormattedMessage
-            id="xpack.securitySolution.trustedapps.logicalConditionBuilder.andOperator"
-            defaultMessage="AND"
-          />
-        </EuiButton>
       </div>
     );
   }

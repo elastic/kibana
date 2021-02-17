@@ -1,101 +1,138 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { EuiLink, EuiTabbedContent, EuiTabbedContentTab } from '@elastic/eui';
-import React, { useMemo } from 'react';
+import { EuiTabbedContent, EuiTabbedContentTab, EuiSpacer } from '@elastic/eui';
+import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 
 import { BrowserFields } from '../../containers/source';
 import { TimelineEventsDetailsItem } from '../../../../common/search_strategy/timeline';
-import { ColumnHeaderOptions } from '../../../timelines/store/timeline/model';
-import { OnUpdateColumns } from '../../../timelines/components/timeline/events';
 import { EventFieldsBrowser } from './event_fields_browser';
 import { JsonView } from './json_view';
 import * as i18n from './translations';
-import { COLLAPSE, COLLAPSE_EVENT } from '../../../timelines/components/timeline/body/translations';
+import { SummaryView } from './summary_view';
+import { TimelineTabs } from '../../../../common/types/timeline';
 
-export type View = 'table-view' | 'json-view';
-
-const CollapseLink = styled(EuiLink)`
-  margin: 20px 0;
-`;
-
-CollapseLink.displayName = 'CollapseLink';
+export type View = EventsViewType.tableView | EventsViewType.jsonView | EventsViewType.summaryView;
+export enum EventsViewType {
+  tableView = 'table-view',
+  jsonView = 'json-view',
+  summaryView = 'summary-view',
+}
 
 interface Props {
   browserFields: BrowserFields;
-  columnHeaders: ColumnHeaderOptions[];
   data: TimelineEventsDetailsItem[];
   id: string;
-  view: View;
-  onEventToggled: () => void;
-  onUpdateColumns: OnUpdateColumns;
-  onViewSelected: (selected: View) => void;
+  isAlert: boolean;
+  view: EventsViewType;
+  onViewSelected: (selected: EventsViewType) => void;
+  timelineTabType: TimelineTabs | 'flyout';
   timelineId: string;
-  toggleColumn: (column: ColumnHeaderOptions) => void;
 }
 
-const Details = styled.div`
-  user-select: none;
+const StyledEuiTabbedContent = styled(EuiTabbedContent)`
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  overflow: hidden;
+
+  > [role='tabpanel'] {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    overflow: hidden;
+  }
 `;
 
-Details.displayName = 'Details';
+const TabContentWrapper = styled.div`
+  height: 100%;
+  position: relative;
+`;
 
-export const EventDetails = React.memo<Props>(
-  ({
-    browserFields,
-    columnHeaders,
-    data,
-    id,
-    view,
-    onEventToggled,
-    onUpdateColumns,
-    onViewSelected,
-    timelineId,
-    toggleColumn,
-  }) => {
-    const tabs: EuiTabbedContentTab[] = useMemo(
-      () => [
-        {
-          id: 'table-view',
-          name: i18n.TABLE,
-          content: (
-            <EventFieldsBrowser
-              browserFields={browserFields}
-              columnHeaders={columnHeaders}
+const EventDetailsComponent: React.FC<Props> = ({
+  browserFields,
+  data,
+  id,
+  view,
+  onViewSelected,
+  timelineTabType,
+  timelineId,
+  isAlert,
+}) => {
+  const handleTabClick = useCallback((e) => onViewSelected(e.id), [onViewSelected]);
+
+  const alerts = useMemo(
+    () => [
+      {
+        id: EventsViewType.summaryView,
+        name: i18n.SUMMARY,
+        content: (
+          <>
+            <EuiSpacer size="l" />
+            <SummaryView
               data={data}
               eventId={id}
-              onUpdateColumns={onUpdateColumns}
+              browserFields={browserFields}
               timelineId={timelineId}
-              toggleColumn={toggleColumn}
             />
-          ),
-        },
-        {
-          id: 'json-view',
-          name: i18n.JSON_VIEW,
-          content: <JsonView data={data} />,
-        },
-      ],
-      [browserFields, columnHeaders, data, id, onUpdateColumns, timelineId, toggleColumn]
-    );
+          </>
+        ),
+      },
+    ],
+    [data, id, browserFields, timelineId]
+  );
+  const tabs: EuiTabbedContentTab[] = useMemo(
+    () => [
+      ...(isAlert ? alerts : []),
+      {
+        id: EventsViewType.tableView,
+        name: i18n.TABLE,
+        content: (
+          <>
+            <EuiSpacer size="l" />
+            <EventFieldsBrowser
+              browserFields={browserFields}
+              data={data}
+              eventId={id}
+              timelineId={timelineId}
+              timelineTabType={timelineTabType}
+            />
+          </>
+        ),
+      },
+      {
+        id: EventsViewType.jsonView,
+        name: i18n.JSON_VIEW,
+        content: (
+          <>
+            <EuiSpacer size="m" />
+            <TabContentWrapper>
+              <JsonView data={data} />
+            </TabContentWrapper>
+          </>
+        ),
+      },
+    ],
+    [alerts, browserFields, data, id, isAlert, timelineId, timelineTabType]
+  );
 
-    return (
-      <Details data-test-subj="eventDetails">
-        <EuiTabbedContent
-          tabs={tabs}
-          selectedTab={view === 'table-view' ? tabs[0] : tabs[1]}
-          onTabClick={(e) => onViewSelected(e.id as View)}
-        />
-        <CollapseLink aria-label={COLLAPSE} data-test-subj="collapse" onClick={onEventToggled}>
-          {COLLAPSE_EVENT}
-        </CollapseLink>
-      </Details>
-    );
-  }
-);
+  const selectedTab = useMemo(() => tabs.find((t) => t.id === view) ?? tabs[0], [tabs, view]);
 
-EventDetails.displayName = 'EventDetails';
+  return (
+    <StyledEuiTabbedContent
+      data-test-subj="eventDetails"
+      tabs={tabs}
+      selectedTab={selectedTab}
+      onTabClick={handleTabClick}
+    />
+  );
+};
+
+EventDetailsComponent.displayName = 'EventDetailsComponent';
+
+export const EventDetails = React.memo(EventDetailsComponent);

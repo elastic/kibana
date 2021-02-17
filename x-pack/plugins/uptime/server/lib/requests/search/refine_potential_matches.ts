@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { QueryContext } from './query_context';
@@ -23,7 +24,7 @@ export const refinePotentialMatches = async (
     return [];
   }
 
-  const queryResult = await query(queryContext, potentialMatchMonitorIDs);
+  const { body: queryResult } = await query(queryContext, potentialMatchMonitorIDs);
   return await fullyMatchingIds(queryResult, queryContext.statusFilter);
 };
 
@@ -38,6 +39,12 @@ export const fullyMatchingIds = (queryResult: any, statusFilter?: string): Monit
 
     for (const locBucket of monBucket.location.buckets) {
       const latest = locBucket.summaries.latest.hits.hits[0];
+      // It is possible for no latest summary to exist in this bucket if only partial
+      // non-summary docs exist
+      if (!latest) {
+        continue;
+      }
+
       const latestStillMatching = locBucket.latest_matching.top.hits.hits[0];
       // If the most recent document still matches the most recent document matching the current filters
       // we can include this in the result
@@ -80,6 +87,7 @@ export const summaryPingsToSummary = (summaryPings: Ping[]): MonitorSummary => {
       timestamp: latest.timestamp,
       monitor: {
         name: latest.monitor?.name,
+        type: latest.monitor?.type,
       },
       url: latest.url ?? {},
       summary: {
@@ -103,7 +111,6 @@ export const query = async (
   potentialMatchMonitorIDs: string[]
 ): Promise<any> => {
   const params = {
-    index: queryContext.heartbeatIndices,
     body: {
       size: 0,
       query: {

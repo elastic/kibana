@@ -1,15 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { listAlertTypesRoute } from './list_alert_types';
 import { httpServiceMock } from 'src/core/server/mocks';
-import { mockLicenseState } from '../lib/license_state.mock';
+import { licenseStateMock } from '../lib/license_state.mock';
 import { verifyApiAccess } from '../lib/license_api_access';
 import { mockHandlerArguments } from './_mock_handler_arguments';
 import { alertsClientMock } from '../alerts_client.mock';
+import { RecoveredActionGroup } from '../../common';
+import { RegistryAlertTypeWithAuth } from '../authorization';
 
 const alertsClient = alertsClientMock.create();
 
@@ -23,7 +26,7 @@ beforeEach(() => {
 
 describe('listAlertTypesRoute', () => {
   it('lists alert types with proper parameters', async () => {
-    const licenseState = mockLicenseState();
+    const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
     listAlertTypesRoute(router, licenseState);
@@ -43,13 +46,16 @@ describe('listAlertTypesRoute', () => {
           },
         ],
         defaultActionGroupId: 'default',
+        minimumLicenseRequired: 'basic',
+        recoveryActionGroup: RecoveredActionGroup,
         authorizedConsumers: {},
         actionVariables: {
           context: [],
           state: [],
         },
         producer: 'test',
-      },
+        enabledInLicense: true,
+      } as RegistryAlertTypeWithAuth,
     ];
     alertsClient.listAlertTypes.mockResolvedValueOnce(new Set(listTypes));
 
@@ -71,9 +77,15 @@ describe('listAlertTypesRoute', () => {
             },
             "authorizedConsumers": Object {},
             "defaultActionGroupId": "default",
+            "enabledInLicense": true,
             "id": "1",
+            "minimumLicenseRequired": "basic",
             "name": "name",
             "producer": "test",
+            "recoveryActionGroup": Object {
+              "id": "recovered",
+              "name": "Recovered",
+            },
           },
         ],
       }
@@ -87,7 +99,7 @@ describe('listAlertTypesRoute', () => {
   });
 
   it('ensures the license allows listing alert types', async () => {
-    const licenseState = mockLicenseState();
+    const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
     listAlertTypesRoute(router, licenseState);
@@ -107,13 +119,16 @@ describe('listAlertTypesRoute', () => {
           },
         ],
         defaultActionGroupId: 'default',
+        minimumLicenseRequired: 'basic',
+        recoveryActionGroup: RecoveredActionGroup,
         authorizedConsumers: {},
         actionVariables: {
           context: [],
           state: [],
         },
         producer: 'alerts',
-      },
+        enabledInLicense: true,
+      } as RegistryAlertTypeWithAuth,
     ];
 
     alertsClient.listAlertTypes.mockResolvedValueOnce(new Set(listTypes));
@@ -132,7 +147,7 @@ describe('listAlertTypesRoute', () => {
   });
 
   it('ensures the license check prevents listing alert types', async () => {
-    const licenseState = mockLicenseState();
+    const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
     (verifyApiAccess as jest.Mock).mockImplementation(() => {
@@ -156,13 +171,16 @@ describe('listAlertTypesRoute', () => {
           },
         ],
         defaultActionGroupId: 'default',
+        minimumLicenseRequired: 'basic',
+        recoveryActionGroup: RecoveredActionGroup,
         authorizedConsumers: {},
         actionVariables: {
           context: [],
           state: [],
         },
         producer: 'alerts',
-      },
+        enabledInLicense: true,
+      } as RegistryAlertTypeWithAuth,
     ];
 
     alertsClient.listAlertTypes.mockResolvedValueOnce(new Set(listTypes));

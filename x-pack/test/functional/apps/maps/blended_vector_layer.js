@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -27,7 +28,8 @@ export default function ({ getPageObjects, getService }) {
 
     it('should request documents when zoomed to smaller regions showing less data', async () => {
       const hits = await PageObjects.maps.getHits();
-      expect(hits).to.equal('33');
+      // Allow a range of hits to account for variances in browser window size.
+      expect(parseInt(hits)).to.be.within(30, 40);
     });
 
     it('should request clusters when zoomed to larger regions showing lots of data', async () => {

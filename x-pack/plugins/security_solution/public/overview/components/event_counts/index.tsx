@@ -1,11 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import React from 'react';
+import React, { useMemo } from 'react';
 import styled from 'styled-components';
 
 import { OverviewHost } from '../overview_host';
@@ -26,38 +27,52 @@ const HorizontalSpacer = styled(EuiFlexItem)`
   width: 24px;
 `;
 
-const NO_FILTERS: Filter[] = [];
-const DEFAULT_QUERY: Query = { query: '', language: 'kuery' };
-
 interface Props extends Pick<GlobalTimeArgs, 'from' | 'to' | 'setQuery'> {
-  filters?: Filter[];
+  filters: Filter[];
   indexNames: string[];
   indexPattern: IIndexPattern;
-  query?: Query;
+  query: Query;
 }
 
 const EventCountsComponent: React.FC<Props> = ({
-  filters = NO_FILTERS,
+  filters,
   from,
   indexNames,
   indexPattern,
-  query = DEFAULT_QUERY,
+  query,
   setQuery,
   to,
 }) => {
-  const kibana = useKibana();
+  const { uiSettings } = useKibana().services;
+
+  const hostFilterQuery = useMemo(
+    () =>
+      convertToBuildEsQuery({
+        config: esQuery.getEsQueryConfig(uiSettings),
+        indexPattern,
+        queries: [query],
+        filters: [...filters, ...filterHostData],
+      }),
+    [filters, indexPattern, query, uiSettings]
+  );
+
+  const networkFilterQuery = useMemo(
+    () =>
+      convertToBuildEsQuery({
+        config: esQuery.getEsQueryConfig(uiSettings),
+        indexPattern,
+        queries: [query],
+        filters: [...filters, ...filterNetworkData],
+      }),
+    [filters, indexPattern, uiSettings, query]
+  );
 
   return (
     <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween">
       <EuiFlexItem grow={true}>
         <OverviewHost
           endDate={to}
-          filterQuery={convertToBuildEsQuery({
-            config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
-            indexPattern,
-            queries: [query],
-            filters: [...filters, ...filterHostData],
-          })}
+          filterQuery={hostFilterQuery}
           indexNames={indexNames}
           startDate={from}
           setQuery={setQuery}
@@ -69,12 +84,7 @@ const EventCountsComponent: React.FC<Props> = ({
       <EuiFlexItem grow={true}>
         <OverviewNetwork
           endDate={to}
-          filterQuery={convertToBuildEsQuery({
-            config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
-            indexPattern,
-            queries: [query],
-            filters: [...filters, ...filterNetworkData],
-          })}
+          filterQuery={networkFilterQuery}
           indexNames={indexNames}
           startDate={from}
           setQuery={setQuery}

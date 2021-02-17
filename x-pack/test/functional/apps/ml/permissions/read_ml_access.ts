@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import path from 'path';
@@ -14,16 +15,19 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
 
-  const testUsers = [USER.ML_VIEWER, USER.ML_VIEWER_SPACES];
+  const testUsers = [
+    { user: USER.ML_VIEWER, discoverAvailable: true },
+    { user: USER.ML_VIEWER_SPACES, discoverAvailable: false },
+  ];
 
   describe('for user with read ML access', function () {
     this.tags(['skipFirefox', 'mlqa']);
 
     describe('with no data loaded', function () {
-      for (const user of testUsers) {
-        describe(`(${user})`, function () {
+      for (const testUser of testUsers) {
+        describe(`(${testUser.user})`, function () {
           before(async () => {
-            await ml.securityUI.loginAs(user);
+            await ml.securityUI.loginAs(testUser.user);
             await ml.api.cleanMlIndices();
           });
 
@@ -47,6 +51,30 @@ export default function ({ getService }: FtrProviderContext) {
             await ml.navigation.assertKibanaNavMLEntryExists();
           });
 
+          it('should display tabs in the ML app correctly', async () => {
+            await ml.testExecution.logTestStep('should load the ML app');
+            await ml.navigation.navigateToMl();
+
+            await ml.testExecution.logTestStep('should display the enabled "Overview" tab');
+            await ml.navigation.assertOverviewTabEnabled(true);
+
+            await ml.testExecution.logTestStep(
+              'should display the enabled "Anomaly Detection" tab'
+            );
+            await ml.navigation.assertAnomalyDetectionTabEnabled(true);
+
+            await ml.testExecution.logTestStep(
+              'should display the enabled "Data Frame Analytics" tab'
+            );
+            await ml.navigation.assertDataFrameAnalyticsTabEnabled(true);
+
+            await ml.testExecution.logTestStep('should display the enabled "Data Visualizer" tab');
+            await ml.navigation.assertDataVisualizerTabEnabled(true);
+
+            await ml.testExecution.logTestStep('should display the enabled "Settings" tab');
+            await ml.navigation.assertSettingsTabEnabled(true);
+          });
+
           it('should display elements on ML Overview page correctly', async () => {
             await ml.testExecution.logTestStep('should load the ML overview page');
             await ml.navigation.navigateToMl();
@@ -64,7 +92,7 @@ export default function ({ getService }: FtrProviderContext) {
       }
     });
 
-    describe('with no data loaded', function () {
+    describe('with data loaded', function () {
       const adJobId = 'fq_single_permission';
       const dfaJobId = 'iph_outlier_permission';
       const calendarId = 'calendar_permission';
@@ -73,8 +101,8 @@ export default function ({ getService }: FtrProviderContext) {
       const filterItems = ['filter_item_permission'];
 
       const ecIndexPattern = 'ft_module_sample_ecommerce';
-      const ecExpectedTotalCount = 287;
-      const ecExpectedFieldPanelCount = 2;
+      const ecExpectedTotalCount = '287';
+      const ecExpectedModuleId = 'sample_data_ecommerce';
 
       const uploadFilePath = path.join(
         __dirname,
@@ -129,10 +157,10 @@ export default function ({ getService }: FtrProviderContext) {
         await ml.api.deleteFilter(filterId);
       });
 
-      for (const user of testUsers) {
-        describe(`(${user})`, function () {
+      for (const testUser of testUsers) {
+        describe(`(${testUser.user})`, function () {
           before(async () => {
-            await ml.securityUI.loginAs(user);
+            await ml.securityUI.loginAs(testUser.user);
           });
 
           after(async () => {
@@ -185,16 +213,16 @@ export default function ({ getService }: FtrProviderContext) {
             await ml.jobSelection.assertJobSelection([adJobId]);
 
             await ml.testExecution.logTestStep('should pre-fill the detector input');
-            await ml.singleMetricViewer.assertDetectorInputExsist();
+            await ml.singleMetricViewer.assertDetectorInputExist();
             await ml.singleMetricViewer.assertDetectorInputValue('0');
 
             await ml.testExecution.logTestStep('should input the airline entity value');
-            await ml.singleMetricViewer.assertEntityInputExsist('airline');
+            await ml.singleMetricViewer.assertEntityInputExist('airline');
             await ml.singleMetricViewer.assertEntityInputSelection('airline', []);
             await ml.singleMetricViewer.selectEntityValue('airline', 'AAL');
 
             await ml.testExecution.logTestStep('should display the chart');
-            await ml.singleMetricViewer.assertChartExsist();
+            await ml.singleMetricViewer.assertChartExist();
 
             await ml.testExecution.logTestStep('should display the annotations section');
             await ml.singleMetricViewer.assertAnnotationsExists('loaded');
@@ -322,11 +350,21 @@ export default function ({ getService }: FtrProviderContext) {
             await ml.testExecution.logTestStep('should load data for full time range');
             await ml.dataVisualizerIndexBased.clickUseFullDataButton(ecExpectedTotalCount);
 
-            await ml.testExecution.logTestStep('should display the panels of fields');
-            await ml.dataVisualizerIndexBased.assertFieldsPanelsExist(ecExpectedFieldPanelCount);
+            await ml.testExecution.logTestStep('should display the data visualizer table');
+            await ml.dataVisualizerIndexBased.assertDataVisualizerTableExist();
 
-            await ml.testExecution.logTestStep('should not display the actions panel');
-            await ml.dataVisualizerIndexBased.assertActionsPanelNotExists();
+            await ml.testExecution.logTestStep(
+              `should display the actions panel ${
+                testUser.discoverAvailable ? 'with' : 'without'
+              } Discover card`
+            );
+            await ml.dataVisualizerIndexBased.assertActionsPanelExists();
+            await ml.dataVisualizerIndexBased.assertViewInDiscoverCard(testUser.discoverAvailable);
+
+            await ml.testExecution.logTestStep('should not display job cards');
+            await ml.dataVisualizerIndexBased.assertCreateAdvancedJobCardNotExists();
+            await ml.dataVisualizerIndexBased.assertRecognizerCardNotExists(ecExpectedModuleId);
+            await ml.dataVisualizerIndexBased.assertCreateDataFrameAnalyticsCardNotExists();
           });
 
           it('should display elements on File Data Visualizer page correctly', async () => {
@@ -342,7 +380,7 @@ export default function ({ getService }: FtrProviderContext) {
             await ml.dataVisualizerFileBased.selectFile(uploadFilePath);
 
             await ml.testExecution.logTestStep(
-              'should displays components of the file details page'
+              'should display components of the file details page'
             );
             await ml.dataVisualizerFileBased.assertFileTitle(expectedUploadFileTitle);
             await ml.dataVisualizerFileBased.assertFileContentPanelExists();

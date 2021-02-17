@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { storiesOf } from '@storybook/react';
 import React, { ReactNode } from 'react';
 import { ThemeProvider } from 'styled-components';
@@ -18,7 +20,7 @@ const withTheme = (storyFn: () => ReactNode) => (
   <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: true })}>{storyFn()}</ThemeProvider>
 );
 
-storiesOf('components/AndOrBadge', module)
+storiesOf('Components/AndOrBadge', module)
   .addDecorator(withTheme)
   .add('and', () => <AndOrBadge type="and" />)
   .add('or', () => <AndOrBadge type="or" />)

@@ -1,139 +1,275 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { loggingSystemMock } from 'src/core/server/mocks';
-import { createNewPackagePolicyMock } from '../../../ingest_manager/common/mocks';
-import { factory as policyConfigFactory } from '../../common/endpoint/models/policy_config';
+import { httpServerMock, loggingSystemMock } from 'src/core/server/mocks';
+import { createNewPackagePolicyMock } from '../../../fleet/common/mocks';
 import {
-  getManifestManagerMock,
-  ManifestManagerMockType,
-} from './services/artifacts/manifest_manager/manifest_manager.mock';
-import { getPackagePolicyCreateCallback } from './ingest_integration';
+  policyFactory,
+  policyFactoryWithoutPaidFeatures,
+} from '../../common/endpoint/models/policy_config';
+import { buildManifestManagerMock } from './services/artifacts/manifest_manager/manifest_manager.mock';
+import {
+  getPackagePolicyCreateCallback,
+  getPackagePolicyUpdateCallback,
+} from './ingest_integration';
+import { KibanaRequest } from 'kibana/server';
+import { createMockConfig, requestContextMock } from '../lib/detection_engine/routes/__mocks__';
+import { EndpointAppContextServiceStartContract } from './endpoint_app_context_services';
+import { createMockEndpointAppContextServiceStartContract } from './mocks';
+import { licenseMock } from '../../../licensing/common/licensing.mock';
+import { LicenseService } from '../../common/license/license';
+import { Subject } from 'rxjs';
+import { ILicense } from '../../../licensing/common/types';
+import { EndpointDocGenerator } from '../../common/endpoint/generate_data';
+import { ProtectionModes } from '../../common/endpoint/types';
+import type { SecuritySolutionRequestHandlerContext } from '../types';
+import { getExceptionListClientMock } from '../../../lists/server/services/exception_lists/exception_list_client.mock';
+import { ExceptionListClient } from '../../../lists/server';
+import { InternalArtifactCompleteSchema } from './schemas/artifacts';
+import { ManifestManager } from './services/artifacts/manifest_manager';
+import { getMockArtifacts, toArtifactRecords } from './lib/artifacts/mocks';
+import { Manifest } from './lib/artifacts';
+import { NewPackagePolicy } from '../../../fleet/common/types/models';
+import { ManifestSchema } from '../../common/endpoint/schema/manifest';
 
 describe('ingest_integration tests ', () => {
-  describe('ingest_integration sanity checks', () => {
-    test('policy is updated with initial manifest', async () => {
-      const logger = loggingSystemMock.create().get('ingest_integration.test');
-      const manifestManager = getManifestManagerMock({
-        mockType: ManifestManagerMockType.InitialSystemState,
-      });
+  let endpointAppContextMock: EndpointAppContextServiceStartContract;
+  let req: KibanaRequest;
+  let ctx: SecuritySolutionRequestHandlerContext;
+  const exceptionListClient: ExceptionListClient = getExceptionListClientMock();
+  const maxTimelineImportExportSize = createMockConfig().maxTimelineImportExportSize;
+  let licenseEmitter: Subject<ILicense>;
+  let licenseService: LicenseService;
+  const Platinum = licenseMock.createLicense({ license: { type: 'platinum', mode: 'platinum' } });
+  const Gold = licenseMock.createLicense({ license: { type: 'gold', mode: 'gold' } });
+  const generator = new EndpointDocGenerator();
 
-      const callback = getPackagePolicyCreateCallback(logger, manifestManager);
-      const policyConfig = createNewPackagePolicyMock(); // policy config without manifest
-      const newPolicyConfig = await callback(policyConfig); // policy config WITH manifest
+  beforeEach(() => {
+    endpointAppContextMock = createMockEndpointAppContextServiceStartContract();
+    ctx = requestContextMock.createTools().context;
+    req = httpServerMock.createKibanaRequest();
+    licenseEmitter = new Subject();
+    licenseService = new LicenseService();
+    licenseService.start(licenseEmitter);
+  });
 
-      expect(newPolicyConfig.inputs[0]!.type).toEqual('endpoint');
-      expect(newPolicyConfig.inputs[0]!.config!.policy.value).toEqual(policyConfigFactory());
-      expect(newPolicyConfig.inputs[0]!.config!.artifact_manifest.value).toEqual({
-        artifacts: {
-          'endpoint-exceptionlist-macos-v1': {
-            compression_algorithm: 'zlib',
-            decoded_sha256: 'd801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
-            decoded_size: 14,
-            encoded_sha256: 'f8e6afa1d5662f5b37f83337af774b5785b5b7f1daee08b7b00c2d6813874cda',
-            encoded_size: 22,
-            encryption_algorithm: 'none',
-            relative_url:
-              '/api/endpoint/artifacts/download/endpoint-exceptionlist-macos-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
-          },
-          'endpoint-exceptionlist-windows-v1': {
-            compression_algorithm: 'zlib',
-            decoded_sha256: 'd801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
-            decoded_size: 14,
-            encoded_sha256: 'f8e6afa1d5662f5b37f83337af774b5785b5b7f1daee08b7b00c2d6813874cda',
-            encoded_size: 22,
-            encryption_algorithm: 'none',
-            relative_url:
-              '/api/endpoint/artifacts/download/endpoint-exceptionlist-windows-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
-          },
-          'endpoint-trustlist-linux-v1': {
-            compression_algorithm: 'zlib',
-            decoded_sha256: '1a8295e6ccb93022c6f5ceb8997b29f2912389b3b38f52a8f5a2ff7b0154b1bc',
-            decoded_size: 287,
-            encoded_sha256: 'c3dec543df1177561ab2aa74a37997ea3c1d748d532a597884f5a5c16670d56c',
-            encoded_size: 133,
-            encryption_algorithm: 'none',
-            relative_url:
-              '/api/endpoint/artifacts/download/endpoint-trustlist-linux-v1/1a8295e6ccb93022c6f5ceb8997b29f2912389b3b38f52a8f5a2ff7b0154b1bc',
-          },
-          'endpoint-trustlist-macos-v1': {
-            compression_algorithm: 'zlib',
-            decoded_sha256: '1a8295e6ccb93022c6f5ceb8997b29f2912389b3b38f52a8f5a2ff7b0154b1bc',
-            decoded_size: 287,
-            encoded_sha256: 'c3dec543df1177561ab2aa74a37997ea3c1d748d532a597884f5a5c16670d56c',
-            encoded_size: 133,
-            encryption_algorithm: 'none',
-            relative_url:
-              '/api/endpoint/artifacts/download/endpoint-trustlist-macos-v1/1a8295e6ccb93022c6f5ceb8997b29f2912389b3b38f52a8f5a2ff7b0154b1bc',
-          },
-          'endpoint-trustlist-windows-v1': {
-            compression_algorithm: 'zlib',
-            decoded_sha256: '1a8295e6ccb93022c6f5ceb8997b29f2912389b3b38f52a8f5a2ff7b0154b1bc',
-            decoded_size: 287,
-            encoded_sha256: 'c3dec543df1177561ab2aa74a37997ea3c1d748d532a597884f5a5c16670d56c',
-            encoded_size: 133,
-            encryption_algorithm: 'none',
-            relative_url:
-              '/api/endpoint/artifacts/download/endpoint-trustlist-windows-v1/1a8295e6ccb93022c6f5ceb8997b29f2912389b3b38f52a8f5a2ff7b0154b1bc',
-          },
-        },
-        manifest_version: '1.0.0',
-        schema_version: 'v1',
-      });
+  afterEach(() => {
+    licenseService.stop();
+    licenseEmitter.complete();
+  });
+
+  describe('package policy init callback (atifacts manifest initialisation tests)', () => {
+    const createNewEndpointPolicyInput = (manifest: ManifestSchema) => ({
+      type: 'endpoint',
+      enabled: true,
+      streams: [],
+      config: {
+        policy: { value: policyFactory() },
+        artifact_manifest: { value: manifest },
+      },
     });
 
-    test('policy is returned even if error is encountered during artifact creation', async () => {
+    const invokeCallback = async (manifestManager: ManifestManager): Promise<NewPackagePolicy> => {
       const logger = loggingSystemMock.create().get('ingest_integration.test');
-      const manifestManager = getManifestManagerMock();
-      manifestManager.pushArtifacts = jest.fn().mockResolvedValue([new Error('error updating')]);
-      const lastComputed = await manifestManager.getLastComputedManifest();
+      const callback = getPackagePolicyCreateCallback(
+        logger,
+        manifestManager,
+        endpointAppContextMock.appClientFactory,
+        maxTimelineImportExportSize,
+        endpointAppContextMock.security,
+        endpointAppContextMock.alerts,
+        licenseService,
+        exceptionListClient
+      );
 
-      const callback = getPackagePolicyCreateCallback(logger, manifestManager);
-      const policyConfig = createNewPackagePolicyMock();
-      const newPolicyConfig = await callback(policyConfig);
+      return callback(createNewPackagePolicyMock(), ctx, req);
+    };
 
-      expect(newPolicyConfig.inputs[0]!.type).toEqual('endpoint');
-      expect(newPolicyConfig.inputs[0]!.config!.policy.value).toEqual(policyConfigFactory());
-      expect(newPolicyConfig.inputs[0]!.config!.artifact_manifest.value).toEqual(
-        lastComputed!.toEndpointFormat()
+    const TEST_POLICY_ID_1 = 'c6d16e42-c32d-4dce-8a88-113cfe276ad1';
+    const TEST_POLICY_ID_2 = '93c46720-c217-11ea-9906-b5b8a21b268e';
+    const ARTIFACT_NAME_EXCEPTIONS_MACOS = 'endpoint-exceptionlist-macos-v1';
+    const ARTIFACT_NAME_TRUSTED_APPS_MACOS = 'endpoint-trustlist-macos-v1';
+    const ARTIFACT_NAME_TRUSTED_APPS_WINDOWS = 'endpoint-trustlist-windows-v1';
+    let ARTIFACT_EXCEPTIONS_MACOS: InternalArtifactCompleteSchema;
+    let ARTIFACT_EXCEPTIONS_WINDOWS: InternalArtifactCompleteSchema;
+    let ARTIFACT_TRUSTED_APPS_MACOS: InternalArtifactCompleteSchema;
+    let ARTIFACT_TRUSTED_APPS_WINDOWS: InternalArtifactCompleteSchema;
+
+    beforeAll(async () => {
+      const artifacts = await getMockArtifacts({ compress: true });
+      ARTIFACT_EXCEPTIONS_MACOS = artifacts[0];
+      ARTIFACT_EXCEPTIONS_WINDOWS = artifacts[1];
+      ARTIFACT_TRUSTED_APPS_MACOS = artifacts[2];
+      ARTIFACT_TRUSTED_APPS_WINDOWS = artifacts[3];
+    });
+
+    beforeEach(() => {
+      licenseEmitter.next(Platinum); // set license level to platinum
+    });
+
+    test('default manifest is taken when there is none and there are errors building new one', async () => {
+      const manifestManager = buildManifestManagerMock();
+      manifestManager.getLastComputedManifest = jest.fn().mockResolvedValue(null);
+      manifestManager.buildNewManifest = jest.fn().mockRejectedValue(new Error());
+
+      expect((await invokeCallback(manifestManager)).inputs[0]).toStrictEqual(
+        createNewEndpointPolicyInput({
+          artifacts: {},
+          manifest_version: '1.0.0',
+          schema_version: 'v1',
+        })
+      );
+
+      expect(manifestManager.buildNewManifest).toHaveBeenCalledWith();
+      expect(manifestManager.pushArtifacts).not.toHaveBeenCalled();
+      expect(manifestManager.commit).not.toHaveBeenCalled();
+    });
+
+    test('default manifest is taken when there is none and there are errors pushing artifacts', async () => {
+      const newManifest = Manifest.getDefault();
+      newManifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS);
+
+      const manifestManager = buildManifestManagerMock();
+      manifestManager.getLastComputedManifest = jest.fn().mockResolvedValue(null);
+      manifestManager.buildNewManifest = jest.fn().mockResolvedValue(newManifest);
+      manifestManager.pushArtifacts = jest.fn().mockResolvedValue([new Error()]);
+
+      expect((await invokeCallback(manifestManager)).inputs[0]).toStrictEqual(
+        createNewEndpointPolicyInput({
+          artifacts: {},
+          manifest_version: '1.0.0',
+          schema_version: 'v1',
+        })
+      );
+
+      expect(manifestManager.buildNewManifest).toHaveBeenCalledWith();
+      expect(manifestManager.pushArtifacts).toHaveBeenCalledWith([ARTIFACT_EXCEPTIONS_MACOS]);
+      expect(manifestManager.commit).not.toHaveBeenCalled();
+    });
+
+    test('default manifest is taken when there is none and there are errors commiting manifest', async () => {
+      const newManifest = Manifest.getDefault();
+      newManifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS);
+
+      const manifestManager = buildManifestManagerMock();
+      manifestManager.getLastComputedManifest = jest.fn().mockResolvedValue(null);
+      manifestManager.buildNewManifest = jest.fn().mockResolvedValue(newManifest);
+      manifestManager.pushArtifacts = jest.fn().mockResolvedValue([]);
+      manifestManager.commit = jest.fn().mockRejectedValue(new Error());
+
+      expect((await invokeCallback(manifestManager)).inputs[0]).toStrictEqual(
+        createNewEndpointPolicyInput({
+          artifacts: {},
+          manifest_version: '1.0.0',
+          schema_version: 'v1',
+        })
+      );
+
+      expect(manifestManager.buildNewManifest).toHaveBeenCalledWith();
+      expect(manifestManager.pushArtifacts).toHaveBeenCalledWith([ARTIFACT_EXCEPTIONS_MACOS]);
+      expect(manifestManager.commit).toHaveBeenCalledWith(newManifest);
+    });
+
+    test('manifest is created successfuly when there is none', async () => {
+      const newManifest = Manifest.getDefault();
+      newManifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS);
+      newManifest.addEntry(ARTIFACT_TRUSTED_APPS_MACOS);
+
+      const manifestManager = buildManifestManagerMock();
+      manifestManager.getLastComputedManifest = jest.fn().mockResolvedValue(null);
+      manifestManager.buildNewManifest = jest.fn().mockResolvedValue(newManifest);
+      manifestManager.pushArtifacts = jest.fn().mockResolvedValue([]);
+      manifestManager.commit = jest.fn().mockResolvedValue(null);
+
+      expect((await invokeCallback(manifestManager)).inputs[0]).toStrictEqual(
+        createNewEndpointPolicyInput({
+          artifacts: toArtifactRecords({
+            [ARTIFACT_NAME_EXCEPTIONS_MACOS]: ARTIFACT_EXCEPTIONS_MACOS,
+            [ARTIFACT_NAME_TRUSTED_APPS_MACOS]: ARTIFACT_TRUSTED_APPS_MACOS,
+          }),
+          manifest_version: '1.0.0',
+          schema_version: 'v1',
+        })
+      );
+
+      expect(manifestManager.buildNewManifest).toHaveBeenCalledWith();
+      expect(manifestManager.pushArtifacts).toHaveBeenCalledWith([
+        ARTIFACT_EXCEPTIONS_MACOS,
+        ARTIFACT_TRUSTED_APPS_MACOS,
+      ]);
+      expect(manifestManager.commit).toHaveBeenCalledWith(newManifest);
+    });
+
+    test('policy is updated with only default entries from manifest', async () => {
+      const manifest = new Manifest({ soVersion: '1.0.1', semanticVersion: '1.0.1' });
+      manifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS);
+      manifest.addEntry(ARTIFACT_EXCEPTIONS_WINDOWS, TEST_POLICY_ID_1);
+      manifest.addEntry(ARTIFACT_TRUSTED_APPS_MACOS, TEST_POLICY_ID_2);
+      manifest.addEntry(ARTIFACT_TRUSTED_APPS_WINDOWS);
+
+      const manifestManager = buildManifestManagerMock();
+      manifestManager.getLastComputedManifest = jest.fn().mockResolvedValue(manifest);
+
+      expect((await invokeCallback(manifestManager)).inputs[0]).toStrictEqual(
+        createNewEndpointPolicyInput({
+          artifacts: toArtifactRecords({
+            [ARTIFACT_NAME_EXCEPTIONS_MACOS]: ARTIFACT_EXCEPTIONS_MACOS,
+            [ARTIFACT_NAME_TRUSTED_APPS_WINDOWS]: ARTIFACT_TRUSTED_APPS_WINDOWS,
+          }),
+          manifest_version: '1.0.1',
+          schema_version: 'v1',
+        })
+      );
+
+      expect(manifestManager.buildNewManifest).not.toHaveBeenCalled();
+      expect(manifestManager.pushArtifacts).not.toHaveBeenCalled();
+      expect(manifestManager.commit).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('package policy update callback (when the license is below platinum)', () => {
+    beforeEach(() => {
+      licenseEmitter.next(Gold); // set license level to gold
+    });
+    it('returns an error if paid features are turned on in the policy', async () => {
+      const mockPolicy = policyFactory(); // defaults with paid features on
+      const logger = loggingSystemMock.create().get('ingest_integration.test');
+      const callback = getPackagePolicyUpdateCallback(logger, licenseService);
+      const policyConfig = generator.generatePolicyPackagePolicy();
+      policyConfig.inputs[0]!.config!.policy.value = mockPolicy;
+      await expect(() => callback(policyConfig, ctx, req)).rejects.toThrow(
+        'Requires Platinum license'
       );
     });
-
-    test('initial policy creation succeeds if manifest retrieval fails', async () => {
+    it('updates successfully if no paid features are turned on in the policy', async () => {
+      const mockPolicy = policyFactoryWithoutPaidFeatures();
+      mockPolicy.windows.malware.mode = ProtectionModes.detect;
       const logger = loggingSystemMock.create().get('ingest_integration.test');
-      const manifestManager = getManifestManagerMock({
-        mockType: ManifestManagerMockType.InitialSystemState,
-      });
-      const lastComputed = await manifestManager.getLastComputedManifest();
-      expect(lastComputed).toEqual(null);
-
-      manifestManager.buildNewManifest = jest.fn().mockRejectedValue(new Error('abcd'));
-      const callback = getPackagePolicyCreateCallback(logger, manifestManager);
-      const policyConfig = createNewPackagePolicyMock();
-      const newPolicyConfig = await callback(policyConfig);
-
-      expect(newPolicyConfig.inputs[0]!.type).toEqual('endpoint');
-      expect(newPolicyConfig.inputs[0]!.config!.policy.value).toEqual(policyConfigFactory());
+      const callback = getPackagePolicyUpdateCallback(logger, licenseService);
+      const policyConfig = generator.generatePolicyPackagePolicy();
+      policyConfig.inputs[0]!.config!.policy.value = mockPolicy;
+      const updatedPolicyConfig = await callback(policyConfig, ctx, req);
+      expect(updatedPolicyConfig.inputs[0]!.config!.policy.value).toEqual(mockPolicy);
     });
+  });
 
-    test('subsequent policy creations succeed', async () => {
+  describe('package policy update callback (when the license is at least platinum)', () => {
+    beforeEach(() => {
+      licenseEmitter.next(Platinum); // set license level to platinum
+    });
+    it('updates successfully when paid features are turned on', async () => {
+      const mockPolicy = policyFactory();
+      mockPolicy.windows.popup.malware.message = 'paid feature';
       const logger = loggingSystemMock.create().get('ingest_integration.test');
-      const manifestManager = getManifestManagerMock();
-      const lastComputed = await manifestManager.getLastComputedManifest();
-
-      manifestManager.buildNewManifest = jest.fn().mockResolvedValue(lastComputed); // no diffs
-      const callback = getPackagePolicyCreateCallback(logger, manifestManager);
-      const policyConfig = createNewPackagePolicyMock();
-      const newPolicyConfig = await callback(policyConfig);
-
-      expect(newPolicyConfig.inputs[0]!.type).toEqual('endpoint');
-      expect(newPolicyConfig.inputs[0]!.config!.policy.value).toEqual(policyConfigFactory());
-      expect(newPolicyConfig.inputs[0]!.config!.artifact_manifest.value).toEqual(
-        lastComputed!.toEndpointFormat()
-      );
+      const callback = getPackagePolicyUpdateCallback(logger, licenseService);
+      const policyConfig = generator.generatePolicyPackagePolicy();
+      policyConfig.inputs[0]!.config!.policy.value = mockPolicy;
+      const updatedPolicyConfig = await callback(policyConfig, ctx, req);
+      expect(updatedPolicyConfig.inputs[0]!.config!.policy.value).toEqual(mockPolicy);
     });
   });
 });

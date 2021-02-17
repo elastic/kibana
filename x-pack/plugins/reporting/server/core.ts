@@ -1,16 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import Hapi from 'hapi';
+import Hapi from '@hapi/hapi';
 import * as Rx from 'rxjs';
 import { first, map, take } from 'rxjs/operators';
 import {
   BasePath,
   ElasticsearchServiceSetup,
-  IRouter,
   KibanaRequest,
   SavedObjectsClientContract,
   SavedObjectsServiceStart,
@@ -27,10 +27,11 @@ import { checkLicense, getExportTypesRegistry, LevelLogger } from './lib';
 import { ESQueueInstance } from './lib/create_queue';
 import { screenshotsObservableFactory, ScreenshotsObservableFn } from './lib/screenshots';
 import { ReportingStore } from './lib/store';
+import { ReportingPluginRouter } from './types';
 
 export interface ReportingInternalSetup {
   basePath: Pick<BasePath, 'set'>;
-  router: IRouter;
+  router: ReportingPluginRouter;
   features: FeaturesPluginSetup;
   elasticsearch: ElasticsearchServiceSetup;
   licensing: LicensingPluginSetup;
@@ -195,21 +196,21 @@ export class ReportingCore {
     return scopedUiSettingsService;
   }
 
-  public getSpaceId(request: KibanaRequest): string | undefined {
+  public getSpaceId(request: KibanaRequest, logger = this.logger): string | undefined {
     const spacesService = this.getPluginSetupDeps().spaces?.spacesService;
     if (spacesService) {
       const spaceId = spacesService?.getSpaceId(request);
 
       if (spaceId !== DEFAULT_SPACE_ID) {
-        this.logger.info(`Request uses Space ID: ` + spaceId);
+        logger.info(`Request uses Space ID: ${spaceId}`);
         return spaceId;
       } else {
-        this.logger.info(`Request uses default Space`);
+        logger.debug(`Request uses default Space`);
       }
     }
   }
 
-  public getFakeRequest(baseRequest: object, spaceId?: string) {
+  public getFakeRequest(baseRequest: object, spaceId: string | undefined, logger = this.logger) {
     const fakeRequest = KibanaRequest.from({
       path: '/',
       route: { settings: {} },
@@ -221,7 +222,7 @@ export class ReportingCore {
     const spacesService = this.getPluginSetupDeps().spaces?.spacesService;
     if (spacesService) {
       if (spaceId && spaceId !== DEFAULT_SPACE_ID) {
-        this.logger.info(`Generating request for space: ` + spaceId);
+        logger.info(`Generating request for space: ${spaceId}`);
         this.getPluginSetupDeps().basePath.set(fakeRequest, `/s/${spaceId}`);
       }
     }
@@ -229,11 +230,11 @@ export class ReportingCore {
     return fakeRequest;
   }
 
-  public async getUiSettingsClient(request: KibanaRequest) {
+  public async getUiSettingsClient(request: KibanaRequest, logger = this.logger) {
     const spacesService = this.getPluginSetupDeps().spaces?.spacesService;
-    const spaceId = this.getSpaceId(request);
+    const spaceId = this.getSpaceId(request, logger);
     if (spacesService && spaceId) {
-      this.logger.info(`Creating UI Settings Client for space: ${spaceId}`);
+      logger.info(`Creating UI Settings Client for space: ${spaceId}`);
     }
     const savedObjectsClient = await this.getSavedObjectsClient(request);
     return await this.getUiSettingsServiceFactory(savedObjectsClient);

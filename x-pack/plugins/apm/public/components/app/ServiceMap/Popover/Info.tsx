@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import {
   EuiDescriptionList,
   EuiDescriptionListTitle,
@@ -10,25 +12,25 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import cytoscape from 'cytoscape';
-import React from 'react';
-import styled from 'styled-components';
+import React, { Fragment } from 'react';
+import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
 import {
   SPAN_SUBTYPE,
   SPAN_TYPE,
 } from '../../../../../common/elasticsearch_fieldnames';
 import { ExternalConnectionNode } from '../../../../../common/service_map';
 
-const ItemRow = styled.div`
+const ItemRow = euiStyled.div`
   line-height: 2;
 `;
 
-const SubduedDescriptionListTitle = styled(EuiDescriptionListTitle)`
+const SubduedDescriptionListTitle = euiStyled(EuiDescriptionListTitle)`
   &&& {
-    color: ${({ theme }) => theme.eui.textColors.subdued};
+    color: ${({ theme }) => theme.eui.euiTextSubduedColor};
   }
 `;
 
-const ExternalResourcesList = styled.section`
+const ExternalResourcesList = euiStyled.section`
   max-height: 360px;
   overflow: auto;
 `;
@@ -71,7 +73,7 @@ export function Info(data: InfoProps) {
               resource.label || resource['span.destination.service.resource'];
             const desc = `${resource['span.type']} (${resource['span.subtype']})`;
             return (
-              <>
+              <Fragment key={resource.id}>
                 <EuiDescriptionListTitle
                   className="eui-textTruncate"
                   title={title}
@@ -84,7 +86,7 @@ export function Info(data: InfoProps) {
                 >
                   {desc}
                 </EuiDescriptionListDescription>
-              </>
+              </Fragment>
             );
           })}
         </EuiDescriptionList>
@@ -97,8 +99,8 @@ export function Info(data: InfoProps) {
       {listItems.map(
         ({ title, description }) =>
           description && (
-            <div>
-              <ItemRow key={title}>
+            <div key={title}>
+              <ItemRow>
                 <SubduedDescriptionListTitle>
                   {title}
                 </SubduedDescriptionListTitle>

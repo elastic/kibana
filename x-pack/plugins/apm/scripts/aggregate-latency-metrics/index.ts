@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { argv } from 'yargs';
@@ -23,7 +24,6 @@ import {
   TRANSACTION_RESULT,
   PROCESSOR_EVENT,
 } from '../../common/elasticsearch_fieldnames';
-import { stampLogger } from '../shared/stamp-logger';
 import { createOrUpdateIndex } from '../shared/create-or-update-index';
 import { parseIndexUrl } from '../shared/parse_index_url';
 import { ESClient, getEsClient } from '../shared/get_es_client';
@@ -48,8 +48,6 @@ import { ESClient, getEsClient } from '../shared/get_es_client';
 // - include: comma-separated list of fields that should be aggregated on, in addition to the
 // default ones.
 // - exclude: comma-separated list of fields that should be not be aggregated on.
-
-stampLogger();
 
 export async function aggregateLatencyMetrics() {
   const interval = parseInt(String(argv.interval), 10) || 1;

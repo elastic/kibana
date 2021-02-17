@@ -72,4 +72,17 @@ Password::  An optional password. If set, HTTP basic authentication is used. Cur
 
 Webhook actions have the following properties:
 
-Body::      A json payload sent to the request URL.
+Body::      A JSON payload sent to the request URL. For example: 
++
+[source,text]
+--
+{
+  "short_description": "{{context.rule.name}}",
+  "description": "{{context.rule.description}}",
+  ...
+}
+--
+
+Mustache template variables (the text enclosed in double braces, for example, `context.rule.name`) have
+their values escaped, so that the final JSON will be valid (escaping double quote characters).
+For more information on Mustache template variables, refer to <<defining-alerts-actions-details>>.

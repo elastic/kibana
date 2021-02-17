@@ -1,14 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-jest.mock('crypto', () => ({ randomBytes: jest.fn() }));
-
-import { first } from 'rxjs/operators';
-import { loggingSystemMock, coreMock } from 'src/core/server/mocks';
-import { createConfig$, ConfigSchema } from './config';
+import { ConfigSchema } from './config';
 
 describe('config schema', () => {
   it('generates proper defaults', () => {
@@ -16,6 +13,9 @@ describe('config schema', () => {
       Object {
         "enabled": true,
         "encryptionKey": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "keyRotation": Object {
+          "decryptionOnlyKeys": Array [],
+        },
       }
     `);
 
@@ -23,12 +23,52 @@ describe('config schema', () => {
       Object {
         "enabled": true,
         "encryptionKey": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "keyRotation": Object {
+          "decryptionOnlyKeys": Array [],
+        },
+      }
+    `);
+
+    expect(ConfigSchema.validate({ encryptionKey: 'z'.repeat(32) }, { dist: true }))
+      .toMatchInlineSnapshot(`
+      Object {
+        "enabled": true,
+        "encryptionKey": "zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz",
+        "keyRotation": Object {
+          "decryptionOnlyKeys": Array [],
+        },
       }
     `);
 
     expect(ConfigSchema.validate({}, { dist: true })).toMatchInlineSnapshot(`
       Object {
         "enabled": true,
+        "keyRotation": Object {
+          "decryptionOnlyKeys": Array [],
+        },
+      }
+    `);
+  });
+
+  it('properly validates config', () => {
+    expect(
+      ConfigSchema.validate(
+        {
+          encryptionKey: 'a'.repeat(32),
+          keyRotation: { decryptionOnlyKeys: ['b'.repeat(32), 'c'.repeat(32)] },
+        },
+        { dist: true }
+      )
+    ).toMatchInlineSnapshot(`
+      Object {
+        "enabled": true,
+        "encryptionKey": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "keyRotation": Object {
+          "decryptionOnlyKeys": Array [
+            "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+            "cccccccccccccccccccccccccccccccc",
+          ],
+        },
       }
     `);
   });
@@ -46,39 +86,58 @@ describe('config schema', () => {
       `"[encryptionKey]: value has length [3] but it must have a minimum length of [32]."`
     );
   });
-});
 
-describe('createConfig$()', () => {
-  it('should log a warning, set xpack.encryptedSavedObjects.encryptionKey and usingEphemeralEncryptionKey=true when encryptionKey is not set', async () => {
-    const mockRandomBytes = jest.requireMock('crypto').randomBytes;
-    mockRandomBytes.mockReturnValue('ab'.repeat(16));
+  it('should not allow `null` value for the encryption key', () => {
+    expect(() => ConfigSchema.validate({ encryptionKey: null })).toThrowErrorMatchingInlineSnapshot(
+      `"[encryptionKey]: expected value of type [string] but got [null]"`
+    );
 
-    const contextMock = coreMock.createPluginInitializerContext({});
-    const config = await createConfig$(contextMock).pipe(first()).toPromise();
-    expect(config).toEqual({
-      config: { encryptionKey: 'ab'.repeat(16) },
-      usingEphemeralEncryptionKey: true,
-    });
-
-    expect(loggingSystemMock.collect(contextMock.logger).warn).toMatchInlineSnapshot(`
-      Array [
-        Array [
-          "Generating a random key for xpack.encryptedSavedObjects.encryptionKey. To be able to decrypt encrypted saved objects attributes after restart, please set xpack.encryptedSavedObjects.encryptionKey in kibana.yml",
-        ],
-      ]
-    `);
+    expect(() =>
+      ConfigSchema.validate({ encryptionKey: null }, { dist: true })
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"[encryptionKey]: expected value of type [string] but got [null]"`
+    );
   });
 
-  it('should not log a warning and set usingEphemeralEncryptionKey=false when encryptionKey is set', async () => {
-    const contextMock = coreMock.createPluginInitializerContext({
-      encryptionKey: 'supersecret',
-    });
-    const config = await createConfig$(contextMock).pipe(first()).toPromise();
-    expect(config).toEqual({
-      config: { encryptionKey: 'supersecret' },
-      usingEphemeralEncryptionKey: false,
-    });
+  it('should throw error if any of the xpack.encryptedSavedObjects.keyRotation.decryptionOnlyKeys is less than 32 characters', () => {
+    expect(() =>
+      ConfigSchema.validate({
+        keyRotation: { decryptionOnlyKeys: ['a'.repeat(32), 'b'.repeat(31)] },
+      })
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"[keyRotation.decryptionOnlyKeys.1]: value has length [31] but it must have a minimum length of [32]."`
+    );
 
-    expect(loggingSystemMock.collect(contextMock.logger).warn).toEqual([]);
+    expect(() =>
+      ConfigSchema.validate(
+        { keyRotation: { decryptionOnlyKeys: ['a'.repeat(32), 'b'.repeat(31)] } },
+        { dist: true }
+      )
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"[keyRotation.decryptionOnlyKeys.1]: value has length [31] but it must have a minimum length of [32]."`
+    );
+  });
+
+  it('should throw error if any of the xpack.encryptedSavedObjects.keyRotation.decryptionOnlyKeys is equal to xpack.encryptedSavedObjects.encryptionKey', () => {
+    expect(() =>
+      ConfigSchema.validate({
+        encryptionKey: 'a'.repeat(32),
+        keyRotation: { decryptionOnlyKeys: ['a'.repeat(32)] },
+      })
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"\`keyRotation.decryptionOnlyKeys\` cannot contain primary encryption key specified in \`encryptionKey\`."`
+    );
+
+    expect(() =>
+      ConfigSchema.validate(
+        {
+          encryptionKey: 'a'.repeat(32),
+          keyRotation: { decryptionOnlyKeys: ['a'.repeat(32)] },
+        },
+        { dist: true }
+      )
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"\`keyRotation.decryptionOnlyKeys\` cannot contain primary encryption key specified in \`encryptionKey\`."`
+    );
   });
 });

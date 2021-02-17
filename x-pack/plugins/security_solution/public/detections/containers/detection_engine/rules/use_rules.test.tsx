@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { renderHook, act } from '@testing-library/react-hooks';
@@ -27,6 +28,9 @@ describe('useRules', () => {
             filter: '',
             sortField: 'created_at',
             sortOrder: 'desc',
+            tags: [],
+            showCustomRules: false,
+            showElasticRules: false,
           },
         })
       );
@@ -48,6 +52,9 @@ describe('useRules', () => {
             filter: '',
             sortField: 'created_at',
             sortOrder: 'desc',
+            tags: [],
+            showCustomRules: false,
+            showElasticRules: false,
           },
         })
       );
@@ -153,6 +160,9 @@ describe('useRules', () => {
             filter: '',
             sortField: 'created_at',
             sortOrder: 'desc',
+            tags: [],
+            showCustomRules: false,
+            showElasticRules: false,
           },
         })
       );
@@ -182,6 +192,9 @@ describe('useRules', () => {
               filter: '',
               sortField: 'created_at',
               sortOrder: 'desc',
+              tags: [],
+              showCustomRules: false,
+              showElasticRules: false,
             },
           },
         }
@@ -198,6 +211,9 @@ describe('useRules', () => {
           filter: 'hello world',
           sortField: 'created_at',
           sortOrder: 'desc',
+          tags: [],
+          showCustomRules: false,
+          showElasticRules: false,
         },
       });
       await waitForNextUpdate();

@@ -1,9 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
+
+import { getMapsCapabilities } from '../kibana_services';
 
 import {
   UPDATE_FLYOUT,
@@ -38,7 +42,7 @@ export const DEFAULT_IS_LAYER_TOC_OPEN = true;
 export const DEFAULT_MAP_UI_STATE = {
   flyoutDisplay: FLYOUT_STATE.NONE,
   isFullScreen: false,
-  isReadOnly: false,
+  isReadOnly: !getMapsCapabilities().save,
   isLayerTOCOpen: DEFAULT_IS_LAYER_TOC_OPEN,
   isSetViewOpen: false,
   // storing TOC detail visibility outside of map.layerList because its UI state and not map rendering state.

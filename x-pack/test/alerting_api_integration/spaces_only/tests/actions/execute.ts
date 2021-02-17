@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -216,6 +217,40 @@ export default function ({ getService }: FtrProviderContext) {
         },
       });
     });
+
+    it('should notify feature usage when executing a gold action type', async () => {
+      const { body: createdAction } = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/action`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          name: 'Noop action type',
+          actionTypeId: 'test.noop',
+          secrets: {},
+          config: {},
+        })
+        .expect(200);
+      objectRemover.add(Spaces.space1.id, createdAction.id, 'action', 'actions');
+
+      const executionStart = new Date();
+      await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/action/${createdAction.id}/_execute`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          params: {},
+        })
+        .expect(200);
+
+      const {
+        body: { features },
+      } = await supertest.get(`${getUrlPrefix(Spaces.space1.id)}/api/licensing/feature_usage`);
+      expect(features).to.be.an(Array);
+      const noopFeature = features.find(
+        (feature: { name: string }) => feature.name === 'Connector: Test: Noop'
+      );
+      expect(noopFeature).to.be.ok();
+      expect(noopFeature.last_used).to.be.a('string');
+      expect(new Date(noopFeature.last_used).getTime()).to.be.greaterThan(executionStart.getTime());
+    });
   });
 
   interface ValidateEventLogParams {
@@ -236,11 +271,9 @@ export default function ({ getService }: FtrProviderContext) {
         type: 'action',
         id: actionId,
         provider: 'actions',
-        actions: ['execute'],
+        actions: new Map([['execute', { equal: 1 }]]),
       });
     });
-
-    expect(events.length).to.equal(1);
 
     const event = events[0];
 

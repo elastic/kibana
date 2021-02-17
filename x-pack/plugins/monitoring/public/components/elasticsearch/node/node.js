@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -70,14 +71,10 @@ export const Node = ({
           </h1>
         </EuiScreenReaderOnly>
         <EuiPanel>
-          <NodeDetailStatus
-            stats={nodeSummary}
-            alerts={alerts}
-            alertsStateFilter={(state) => state.nodeId === nodeId}
-          />
+          <NodeDetailStatus stats={nodeSummary} alerts={alerts} />
         </EuiPanel>
         <EuiSpacer size="m" />
-        <AlertsCallout alerts={alerts} stateFilter={(state) => state.nodeId === nodeId} />
+        <AlertsCallout alerts={alerts} />
         <EuiPageContent>
           <EuiFlexGrid columns={2} gutterSize="s">
             {metricsToShow.map((metric, index) => (

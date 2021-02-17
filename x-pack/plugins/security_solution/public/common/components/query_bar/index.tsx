@@ -1,10 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import React, { memo, useState, useEffect, useMemo, useCallback } from 'react';
+import React, { memo, useMemo, useCallback } from 'react';
 import deepEqual from 'fast-deep-equal';
 
 import {
@@ -19,7 +20,6 @@ import {
   SavedQueryTimeFilter,
 } from '../../../../../../../src/plugins/data/public';
 import { Storage } from '../../../../../../../src/plugins/kibana_utils/public';
-import { KueryFilterQuery } from '../../store';
 
 export interface QueryBarComponentProps {
   dataTestSubj?: string;
@@ -30,14 +30,13 @@ export interface QueryBarComponentProps {
   isLoading?: boolean;
   isRefreshPaused?: boolean;
   filterQuery: Query;
-  filterQueryDraft?: KueryFilterQuery;
   filterManager: FilterManager;
   filters: Filter[];
-  onChangedQuery: (query: Query) => void;
+  onChangedQuery?: (query: Query) => void;
   onSubmitQuery: (query: Query, timefilter?: SavedQueryTimeFilter) => void;
   refreshInterval?: number;
-  savedQuery?: SavedQuery | null;
-  onSavedQuery: (savedQuery: SavedQuery | null) => void;
+  savedQuery?: SavedQuery;
+  onSavedQuery: (savedQuery: SavedQuery | undefined) => void;
 }
 
 export const QueryBar = memo<QueryBarComponentProps>(
@@ -49,7 +48,6 @@ export const QueryBar = memo<QueryBarComponentProps>(
     isLoading = false,
     isRefreshPaused,
     filterQuery,
-    filterQueryDraft,
     filterManager,
     filters,
     onChangedQuery,
@@ -59,15 +57,6 @@ export const QueryBar = memo<QueryBarComponentProps>(
     onSavedQuery,
     dataTestSubj,
   }) => {
-    const [draftQuery, setDraftQuery] = useState(filterQuery);
-
-    useEffect(() => {
-      // Reset draftQuery when `Create new timeline` is clicked
-      if (filterQueryDraft == null) {
-        setDraftQuery(filterQuery);
-      }
-    }, [filterQuery, filterQueryDraft]);
-
     const onQuerySubmit = useCallback(
       (payload: { dateRange: TimeRange; query?: Query }) => {
         if (payload.query != null && !deepEqual(payload.query, filterQuery)) {
@@ -79,19 +68,11 @@ export const QueryBar = memo<QueryBarComponentProps>(
 
     const onQueryChange = useCallback(
       (payload: { dateRange: TimeRange; query?: Query }) => {
-        if (payload.query != null && !deepEqual(payload.query, draftQuery)) {
-          setDraftQuery(payload.query);
+        if (onChangedQuery && payload.query != null && !deepEqual(payload.query, filterQuery)) {
           onChangedQuery(payload.query);
         }
       },
-      [draftQuery, onChangedQuery, setDraftQuery]
-    );
-
-    const onSaved = useCallback(
-      (newSavedQuery: SavedQuery) => {
-        onSavedQuery(newSavedQuery);
-      },
-      [onSavedQuery]
+      [filterQuery, onChangedQuery]
     );
 
     const onSavedQueryUpdated = useCallback(
@@ -111,7 +92,7 @@ export const QueryBar = memo<QueryBarComponentProps>(
           language: savedQuery.attributes.query.language,
         });
         filterManager.setFilters([]);
-        onSavedQuery(null);
+        onSavedQuery(undefined);
       }
     }, [filterManager, onSubmitQuery, onSavedQuery, savedQuery]);
 
@@ -125,8 +106,6 @@ export const QueryBar = memo<QueryBarComponentProps>(
     const CustomButton = <>{null}</>;
     const indexPatterns = useMemo(() => [indexPattern], [indexPattern]);
 
-    const searchBarProps = savedQuery != null ? { savedQuery } : {};
-
     return (
       <SearchBar
         customSubmitButton={CustomButton}
@@ -136,12 +115,12 @@ export const QueryBar = memo<QueryBarComponentProps>(
         indexPatterns={indexPatterns}
         isLoading={isLoading}
         isRefreshPaused={isRefreshPaused}
-        query={draftQuery}
+        query={filterQuery}
         onClearSavedQuery={onClearSavedQuery}
         onFiltersUpdated={onFiltersUpdated}
         onQueryChange={onQueryChange}
         onQuerySubmit={onQuerySubmit}
-        onSaved={onSaved}
+        onSaved={onSavedQuery}
         onSavedQueryUpdated={onSavedQueryUpdated}
         refreshInterval={refreshInterval}
         showAutoRefreshOnly={false}
@@ -152,8 +131,10 @@ export const QueryBar = memo<QueryBarComponentProps>(
         showSaveQuery={true}
         timeHistory={new TimeHistory(new Storage(localStorage))}
         dataTestSubj={dataTestSubj}
-        {...searchBarProps}
+        savedQuery={savedQuery}
       />
     );
   }
 );
+
+QueryBar.displayName = 'QueryBar';

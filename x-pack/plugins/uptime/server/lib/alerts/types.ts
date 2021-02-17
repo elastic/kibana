@@ -1,15 +1,24 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { UptimeCorePlugins, UptimeCoreSetup } from '../adapters';
 import { UMServerLibs } from '../lib';
-import { AlertType } from '../../../../alerts/server';
+import { AlertType, AlertInstanceState, AlertInstanceContext } from '../../../../alerts/server';
 
-export type UptimeAlertTypeFactory = (
+export type UptimeAlertTypeParam = Record<string, any>;
+export type UptimeAlertTypeState = Record<string, any>;
+export type UptimeAlertTypeFactory<ActionGroupIds extends string> = (
   server: UptimeCoreSetup,
   libs: UMServerLibs,
   plugins: UptimeCorePlugins
-) => AlertType;
+) => AlertType<
+  UptimeAlertTypeParam,
+  UptimeAlertTypeState,
+  AlertInstanceState,
+  AlertInstanceContext,
+  ActionGroupIds
+>;

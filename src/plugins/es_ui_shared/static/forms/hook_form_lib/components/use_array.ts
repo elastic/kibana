@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { useEffect, useRef, useCallback, useMemo } from 'react';
@@ -28,21 +17,23 @@ interface Props {
   path: string;
   initialNumberOfItems?: number;
   readDefaultValueOnForm?: boolean;
-  validations?: FieldConfig<any, ArrayItem[]>['validations'];
-  children: (args: {
-    items: ArrayItem[];
-    error: string | null;
-    addItem: () => void;
-    removeItem: (id: number) => void;
-    moveItem: (sourceIdx: number, destinationIdx: number) => void;
-    form: FormHook;
-  }) => JSX.Element;
+  validations?: FieldConfig<ArrayItem[]>['validations'];
+  children: (formFieldArray: FormArrayField) => JSX.Element;
 }
 
 export interface ArrayItem {
   id: number;
   path: string;
   isNew: boolean;
+}
+
+export interface FormArrayField {
+  items: ArrayItem[];
+  error: string | null;
+  addItem: () => void;
+  removeItem: (id: number) => void;
+  moveItem: (sourceIdx: number, destinationIdx: number) => void;
+  form: FormHook;
 }
 
 /**
@@ -71,7 +62,7 @@ export const UseArray = ({
   const uniqueId = useRef(0);
 
   const form = useFormContext();
-  const { getFieldDefaultValue } = form;
+  const { __getFieldDefaultValue } = form;
 
   const getNewItemAtIndex = useCallback(
     (index: number): ArrayItem => ({
@@ -84,7 +75,7 @@ export const UseArray = ({
 
   const fieldDefaultValue = useMemo<ArrayItem[]>(() => {
     const defaultValues = readDefaultValueOnForm
-      ? (getFieldDefaultValue(path) as any[])
+      ? (__getFieldDefaultValue(path) as any[])
       : undefined;
 
     const getInitialItemsFromValues = (values: any[]): ArrayItem[] =>
@@ -97,17 +88,23 @@ export const UseArray = ({
     return defaultValues
       ? getInitialItemsFromValues(defaultValues)
       : new Array(initialNumberOfItems).fill('').map((_, i) => getNewItemAtIndex(i));
-  }, [path, initialNumberOfItems, readDefaultValueOnForm, getFieldDefaultValue, getNewItemAtIndex]);
+  }, [
+    path,
+    initialNumberOfItems,
+    readDefaultValueOnForm,
+    __getFieldDefaultValue,
+    getNewItemAtIndex,
+  ]);
 
-  // Create a new hook field with the "hasValue" set to false so we don't use its value to build the final form data.
+  // Create a new hook field with the "isIncludedInOutput" set to false so we don't use its value to build the final form data.
   // Apart from that the field behaves like a normal field and is hooked into the form validation lifecycle.
-  const fieldConfigBase: FieldConfig<any, ArrayItem[]> & InternalFieldConfig<ArrayItem[]> = {
+  const fieldConfigBase: FieldConfig<ArrayItem[]> & InternalFieldConfig<ArrayItem[]> = {
     defaultValue: fieldDefaultValue,
-    errorDisplayDelay: 0,
+    valueChangeDebounceTime: 0,
     isIncludedInOutput: false,
   };
 
-  const fieldConfig: FieldConfig<any, ArrayItem[]> & InternalFieldConfig<ArrayItem[]> = validations
+  const fieldConfig: FieldConfig<ArrayItem[]> & InternalFieldConfig<ArrayItem[]> = validations
     ? { validations, ...fieldConfigBase }
     : fieldConfigBase;
 

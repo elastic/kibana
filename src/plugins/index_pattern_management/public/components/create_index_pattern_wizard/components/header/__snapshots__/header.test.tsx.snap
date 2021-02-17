@@ -104,6 +104,7 @@ exports[`Header should render a different name, prompt, and beta tag if provided
           >
             <button
               className="euiLink euiLink--primary"
+              disabled={false}
               type="button"
             >
               <FormattedMessage
@@ -221,6 +222,7 @@ exports[`Header should render normally 1`] = `
           >
             <button
               className="euiLink euiLink--primary"
+              disabled={false}
               type="button"
             >
               <FormattedMessage
@@ -328,6 +330,7 @@ exports[`Header should render without including system indices 1`] = `
           >
             <button
               className="euiLink euiLink--primary"
+              disabled={false}
               type="button"
             >
               <FormattedMessage

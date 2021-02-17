@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { Fragment } from 'react';
@@ -14,7 +15,7 @@ import { CALCULATE_DURATION_SINCE } from '../../../../common/constants';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
-export function Status({ stats }) {
+export function Status({ alerts, stats }) {
   const {
     apms: { total },
     totalEvents,
@@ -68,6 +69,7 @@ export function Status({ stats }) {
   return (
     <SummaryStatus
       metrics={metrics}
+      alerts={alerts}
       IconComponent={IconComponent}
       data-test-subj="apmDetailStatus"
     />

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import '../../../mock/match_media';
@@ -16,7 +17,6 @@ import { useMountAppended } from '../../../utils/use_mount_appended';
 
 const startDate = new Date(2001).toISOString();
 const endDate = new Date(3000).toISOString();
-
 describe('get_anomalies_network_table_columns', () => {
   const mount = useMountAppended();
 

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { isEmpty } from 'lodash/fp';
@@ -12,7 +13,7 @@ import { navTabs } from '../../../app/home/home_navigations';
 import { APP_ID } from '../../../../common/constants';
 import { useKibana } from '../../lib/kibana';
 
-export { getDetectionEngineUrl } from './redirect_to_detection_engine';
+export { getDetectionEngineUrl, getRuleDetailsUrl } from './redirect_to_detection_engine';
 export { getAppOverviewUrl } from './redirect_to_overview';
 export { getHostDetailsUrl, getHostsUrl } from './redirect_to_hosts';
 export { getNetworkUrl, getNetworkDetailsUrl } from './redirect_to_network';
@@ -30,7 +31,7 @@ interface FormatUrlOptions {
   skipSearch: boolean;
 }
 
-type FormatUrl = (path: string, options?: Partial<FormatUrlOptions>) => string;
+export type FormatUrl = (path: string, options?: Partial<FormatUrlOptions>) => string;
 
 export const useFormatUrl = (page: SecurityPageName) => {
   const { getUrlForApp } = useKibana().services.application;

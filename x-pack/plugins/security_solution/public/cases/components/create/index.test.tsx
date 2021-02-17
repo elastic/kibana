@@ -1,105 +1,95 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
-import { mount } from 'enzyme';
+import { mount, ReactWrapper } from 'enzyme';
+import { act, waitFor } from '@testing-library/react';
+import { noop } from 'lodash/fp';
+import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 
-import { Create } from '.';
 import { TestProviders } from '../../../common/mock';
-import { getFormMock } from '../__mock__/form';
-import { Router, routeData, mockHistory, mockLocation } from '../__mock__/router';
-
-import { useInsertTimeline } from '../../../timelines/components/timeline/insert_timeline_popover/use_insert_timeline';
-import { usePostCase } from '../../containers/use_post_case';
 import { useGetTags } from '../../containers/use_get_tags';
+import { useConnectors } from '../../containers/configure/use_connectors';
+import { useCaseConfigure } from '../../containers/configure/use_configure';
+import { Router, routeData, mockHistory, mockLocation } from '../__mock__/router';
+import { useGetIncidentTypes } from '../connectors/resilient/use_get_incident_types';
+import { useGetSeverity } from '../connectors/resilient/use_get_severity';
+import { useGetIssueTypes } from '../connectors/jira/use_get_issue_types';
+import { useGetFieldsByIssueType } from '../connectors/jira/use_get_fields_by_issue_type';
+import { useCaseConfigureResponse } from '../configure_cases/__mock__';
+import { useInsertTimeline } from '../use_insert_timeline';
+import {
+  sampleConnectorData,
+  sampleData,
+  sampleTags,
+  useGetIncidentTypesResponse,
+  useGetSeverityResponse,
+  useGetIssueTypesResponse,
+  useGetFieldsByIssueTypeResponse,
+} from './mock';
+import { Create } from '.';
 
-import { useForm } from '../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib/hooks/use_form';
-import { useFormData } from '../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib/hooks/use_form_data';
-
-// we don't have the types for waitFor just yet, so using "as waitFor" until when we do
-import { wait as waitFor } from '@testing-library/react';
-
-jest.mock('../../../timelines/components/timeline/insert_timeline_popover/use_insert_timeline');
-jest.mock('../../containers/use_post_case');
-
-jest.mock(
-  '../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib/hooks/use_form'
-);
-
-jest.mock(
-  '../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib/hooks/use_form_data'
-);
-
+jest.mock('../../containers/api');
 jest.mock('../../containers/use_get_tags');
-jest.mock(
-  '../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib/components/form_data_provider',
-  () => ({
-    FormDataProvider: ({ children }: { children: ({ tags }: { tags: string[] }) => void }) =>
-      children({ tags: ['rad', 'dude'] }),
-  })
-);
+jest.mock('../../containers/configure/use_connectors');
+jest.mock('../../containers/configure/use_configure');
+jest.mock('../connectors/resilient/use_get_incident_types');
+jest.mock('../connectors/resilient/use_get_severity');
+jest.mock('../connectors/jira/use_get_issue_types');
+jest.mock('../connectors/jira/use_get_fields_by_issue_type');
+jest.mock('../connectors/jira/use_get_single_issue');
+jest.mock('../connectors/jira/use_get_issues');
+jest.mock('../use_insert_timeline');
 
-const useFormMock = useForm as jest.Mock;
-const useFormDataMock = useFormData as jest.Mock;
-
+const useConnectorsMock = useConnectors as jest.Mock;
+const useCaseConfigureMock = useCaseConfigure as jest.Mock;
+const useGetTagsMock = useGetTags as jest.Mock;
+const useGetIncidentTypesMock = useGetIncidentTypes as jest.Mock;
+const useGetSeverityMock = useGetSeverity as jest.Mock;
+const useGetIssueTypesMock = useGetIssueTypes as jest.Mock;
+const useGetFieldsByIssueTypeMock = useGetFieldsByIssueType as jest.Mock;
 const useInsertTimelineMock = useInsertTimeline as jest.Mock;
-const usePostCaseMock = usePostCase as jest.Mock;
+const fetchTags = jest.fn();
 
-const postCase = jest.fn();
-const handleCursorChange = jest.fn();
-const handleOnTimelineChange = jest.fn();
+const fillForm = (wrapper: ReactWrapper) => {
+  wrapper
+    .find(`[data-test-subj="caseTitle"] input`)
+    .first()
+    .simulate('change', { target: { value: sampleData.title } });
 
-const defaultInsertTimeline = {
-  cursorPosition: {
-    start: 0,
-    end: 0,
-  },
-  handleCursorChange,
-  handleOnTimelineChange,
+  wrapper
+    .find(`[data-test-subj="caseDescription"] textarea`)
+    .first()
+    .simulate('change', { target: { value: sampleData.description } });
+
+  act(() => {
+    ((wrapper.find(EuiComboBox).props() as unknown) as {
+      onChange: (a: EuiComboBoxOptionOption[]) => void;
+    }).onChange(sampleTags.map((tag) => ({ label: tag })));
+  });
 };
 
-const sampleTags = ['coke', 'pepsi'];
-const sampleData = {
-  description: 'what a great description',
-  tags: sampleTags,
-  title: 'what a cool title',
-};
-const defaultPostCase = {
-  isLoading: false,
-  isError: false,
-  caseData: null,
-  postCase,
-};
 describe('Create case', () => {
-  // Suppress warnings about "noSuggestions" prop
-  /* eslint-disable no-console */
-  const originalError = console.error;
-  beforeAll(() => {
-    console.error = jest.fn();
-  });
-  afterAll(() => {
-    console.error = originalError;
-  });
-  /* eslint-enable no-console */
-  const fetchTags = jest.fn();
-  const formHookMock = getFormMock(sampleData);
   beforeEach(() => {
     jest.resetAllMocks();
-    useInsertTimelineMock.mockImplementation(() => defaultInsertTimeline);
-    usePostCaseMock.mockImplementation(() => defaultPostCase);
-    useFormMock.mockImplementation(() => ({ form: formHookMock }));
-    useFormDataMock.mockImplementation(() => [{ description: sampleData.description }]);
     jest.spyOn(routeData, 'useLocation').mockReturnValue(mockLocation);
-    (useGetTags as jest.Mock).mockImplementation(() => ({
+    useConnectorsMock.mockReturnValue(sampleConnectorData);
+    useCaseConfigureMock.mockImplementation(() => useCaseConfigureResponse);
+    useGetIncidentTypesMock.mockReturnValue(useGetIncidentTypesResponse);
+    useGetSeverityMock.mockReturnValue(useGetSeverityResponse);
+    useGetIssueTypesMock.mockReturnValue(useGetIssueTypesResponse);
+    useGetFieldsByIssueTypeMock.mockReturnValue(useGetFieldsByIssueTypeResponse);
+    useGetTagsMock.mockImplementation(() => ({
       tags: sampleTags,
       fetchTags,
     }));
   });
 
-  it('should post case on submit click', async () => {
+  it('it renders', async () => {
     const wrapper = mount(
       <TestProviders>
         <Router history={mockHistory}>
@@ -107,11 +97,12 @@ describe('Create case', () => {
         </Router>
       </TestProviders>
     );
-    wrapper.find(`[data-test-subj="create-case-submit"]`).first().simulate('click');
-    await waitFor(() => expect(postCase).toBeCalledWith(sampleData));
+
+    expect(wrapper.find(`[data-test-subj="create-case-submit"]`).exists()).toBeTruthy();
+    expect(wrapper.find(`[data-test-subj="create-case-cancel"]`).exists()).toBeTruthy();
   });
 
-  it('should redirect to all cases on cancel click', () => {
+  it('should redirect to all cases on cancel click', async () => {
     const wrapper = mount(
       <TestProviders>
         <Router history={mockHistory}>
@@ -119,24 +110,12 @@ describe('Create case', () => {
         </Router>
       </TestProviders>
     );
+
     wrapper.find(`[data-test-subj="create-case-cancel"]`).first().simulate('click');
-    expect(mockHistory.push).toHaveBeenCalledWith('/');
-  });
-  it('should redirect to new case when caseData is there', () => {
-    const sampleId = '777777';
-    usePostCaseMock.mockImplementation(() => ({ ...defaultPostCase, caseData: { id: sampleId } }));
-    mount(
-      <TestProviders>
-        <Router history={mockHistory}>
-          <Create />
-        </Router>
-      </TestProviders>
-    );
-    expect(mockHistory.push).toHaveBeenNthCalledWith(1, '/777777');
+    await waitFor(() => expect(mockHistory.push).toHaveBeenCalledWith('/'));
   });
 
-  it('should render spinner when loading', () => {
-    usePostCaseMock.mockImplementation(() => ({ ...defaultPostCase, isLoading: true }));
+  it('should redirect to new case when posting the case', async () => {
     const wrapper = mount(
       <TestProviders>
         <Router history={mockHistory}>
@@ -144,9 +123,19 @@ describe('Create case', () => {
         </Router>
       </TestProviders>
     );
-    expect(wrapper.find(`[data-test-subj="create-case-loading-spinner"]`).exists()).toBeTruthy();
+
+    fillForm(wrapper);
+    wrapper.find(`[data-test-subj="create-case-submit"]`).first().simulate('click');
+
+    await waitFor(() => expect(mockHistory.push).toHaveBeenNthCalledWith(1, '/basic-case-id'));
   });
-  it('Tag options render with new tags added', () => {
+
+  it('it should insert a timeline', async () => {
+    let attachTimeline = noop;
+    useInsertTimelineMock.mockImplementation((value, onTimelineAttached) => {
+      attachTimeline = onTimelineAttached;
+    });
+
     const wrapper = mount(
       <TestProviders>
         <Router history={mockHistory}>
@@ -154,8 +143,15 @@ describe('Create case', () => {
         </Router>
       </TestProviders>
     );
-    expect(
-      wrapper.find(`[data-test-subj="caseTags"] [data-test-subj="input"]`).first().prop('options')
-    ).toEqual([{ label: 'coke' }, { label: 'pepsi' }, { label: 'rad' }, { label: 'dude' }]);
+
+    act(() => {
+      attachTimeline('[title](url)');
+    });
+
+    await waitFor(() => {
+      expect(wrapper.find(`[data-test-subj="caseDescription"] textarea`).text()).toBe(
+        '[title](url)'
+      );
+    });
   });
 });

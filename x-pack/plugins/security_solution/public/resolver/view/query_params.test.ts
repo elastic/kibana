@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { noAncestorsTwoChildren } from '../data_access_layer/mocks/no_ancestors_two_children';
@@ -34,6 +35,8 @@ describe('Resolver, when analyzing a tree that has no ancestors and 2 children',
       dataAccessLayer,
       resolverComponentInstanceID,
       indices: [],
+      shouldUpdate: false,
+      filters: {},
     });
   });
 

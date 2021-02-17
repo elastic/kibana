@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useCallback, useEffect, useState } from 'react';
@@ -12,7 +13,6 @@ import type {
   DeleteTransformsRequestSchema,
 } from '../../../common/api_schemas/delete_transforms';
 import { isDeleteTransformsResponseSchema } from '../../../common/api_schemas/type_guards';
-import { extractErrorMessage } from '../../shared_imports';
 import { getErrorMessage } from '../../../common/utils/errors';
 import { useAppDependencies, useToastNotifications } from '../app_dependencies';
 import { REFRESH_TRANSFORM_LIST_STATE, refreshTransformList$, TransformListRow } from '../common';
@@ -21,7 +21,11 @@ import { useApi } from './use_api';
 import { indexService } from '../services/es_index_service';
 
 export const useDeleteIndexAndTargetIndex = (items: TransformListRow[]) => {
-  const { http, savedObjects } = useAppDependencies();
+  const {
+    http,
+    savedObjects,
+    ml: { extractErrorMessage },
+  } = useAppDependencies();
   const toastNotifications = useToastNotifications();
 
   const [deleteDestIndex, setDeleteDestIndex] = useState<boolean>(true);
@@ -56,7 +60,7 @@ export const useDeleteIndexAndTargetIndex = (items: TransformListRow[]) => {
         );
       }
     },
-    [savedObjects.client, toastNotifications]
+    [savedObjects.client, toastNotifications, extractErrorMessage]
   );
 
   const checkUserIndexPermission = useCallback(async () => {
@@ -182,7 +186,7 @@ export const useDeleteTransforms = () => {
           });
         }
         if (status.transformDeleted?.error) {
-          const error = extractErrorMessage(status.transformDeleted.error);
+          const error = status.transformDeleted.error.reason;
           toastNotifications.addDanger({
             title: i18n.translate('xpack.transform.transformList.deleteTransformErrorMessage', {
               defaultMessage: 'An error occurred deleting the transform {transformId}',
@@ -195,7 +199,7 @@ export const useDeleteTransforms = () => {
         }
 
         if (status.destIndexDeleted?.error) {
-          const error = extractErrorMessage(status.destIndexDeleted.error);
+          const error = status.destIndexDeleted.error.reason;
           toastNotifications.addDanger({
             title: i18n.translate(
               'xpack.transform.deleteTransform.deleteAnalyticsWithIndexErrorMessage',
@@ -211,7 +215,7 @@ export const useDeleteTransforms = () => {
         }
 
         if (status.destIndexPatternDeleted?.error) {
-          const error = extractErrorMessage(status.destIndexPatternDeleted.error);
+          const error = status.destIndexPatternDeleted.error.reason;
           toastNotifications.addDanger({
             title: i18n.translate(
               'xpack.transform.deleteTransform.deleteAnalyticsWithIndexPatternErrorMessage',

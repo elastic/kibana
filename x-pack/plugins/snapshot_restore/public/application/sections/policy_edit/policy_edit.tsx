@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React, { useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { RouteComponentProps } from 'react-router-dom';
@@ -64,8 +66,22 @@ export const PolicyEdit: React.FunctionComponent<RouteComponentProps<MatchParams
 
   // Update policy state when data is loaded
   useEffect(() => {
-    if (policyData && policyData.policy) {
-      setPolicy(policyData.policy);
+    if (policyData?.policy) {
+      const { policy: policyToEdit } = policyData;
+
+      // The policy response includes data not pertinent to the form
+      // that we need to remove, e.g., lastSuccess, lastFailure, stats
+      const policyFormData: SlmPolicyPayload = {
+        name: policyToEdit.name,
+        snapshotName: policyToEdit.snapshotName,
+        schedule: policyToEdit.schedule,
+        repository: policyToEdit.repository,
+        config: policyToEdit.config,
+        retention: policyToEdit.retention,
+        isManagedPolicy: policyToEdit.isManagedPolicy,
+      };
+
+      setPolicy(policyFormData);
     }
   }, [policyData]);
 

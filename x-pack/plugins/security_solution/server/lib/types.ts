@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { AuthenticatedUser } from '../../../security/common/model';
-import { RequestHandlerContext } from '../../../../../src/core/server';
 export { ConfigType as Configuration } from '../config';
+import type { SecuritySolutionRequestHandlerContext } from '../types';
 
 import { FrameworkAdapter, FrameworkRequest } from './framework';
 import { Hosts } from './hosts';
@@ -16,7 +17,7 @@ import { Sources } from './sources';
 import { Note } from './note/saved_object';
 import { PinnedEvent } from './pinned_event/saved_object';
 import { Timeline } from './timeline/saved_object';
-import { SearchTypes } from './detection_engine/signals/types';
+import { TotalValue, BaseHit, Explanation } from '../../common/detection_engine/types';
 
 export * from './hosts';
 
@@ -36,64 +37,8 @@ export interface AppBackendLibs extends AppDomainLibs {
 
 export interface SiemContext {
   req: FrameworkRequest;
-  context: RequestHandlerContext;
+  context: SecuritySolutionRequestHandlerContext;
   user: AuthenticatedUser | null;
-}
-
-export interface TotalValue {
-  value: number;
-  relation: string;
-}
-
-export interface BaseHit<T> {
-  _index: string;
-  _id: string;
-  _source: T;
-}
-
-export interface SearchResponse<T> {
-  took: number;
-  timed_out: boolean;
-  _scroll_id?: string;
-  _shards: ShardsResponse;
-  hits: {
-    total: TotalValue | number;
-    max_score: number;
-    hits: Array<
-      BaseHit<T> & {
-        _type: string;
-        _score: number;
-        _version?: number;
-        _explanation?: Explanation;
-        fields?: string[];
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        highlight?: any;
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        inner_hits?: any;
-        matched_queries?: string[];
-        sort?: string[];
-      }
-    >;
-  };
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  aggregations?: any;
-}
-
-export interface EqlSequence<T> {
-  join_keys: SearchTypes[];
-  events: Array<BaseHit<T>>;
-}
-
-export interface EqlSearchResponse<T> {
-  is_partial: boolean;
-  is_running: boolean;
-  took: number;
-  timed_out: boolean;
-  hits: {
-    total: TotalValue;
-    sequences?: Array<EqlSequence<T>>;
-    events?: Array<BaseHit<T>>;
-  };
 }
 
 export interface ShardsResponse {
@@ -104,36 +49,69 @@ export interface ShardsResponse {
   failures?: ShardError[];
 }
 
-export interface ShardError {
+/**
+ * This type is being very conservative with the partials to not expect anything to
+ * be guaranteed on the type as we don't have regular and proper types of ShardError.
+ * Once we do, remove this type for the regular ShardError type from the elastic library.
+ */
+export type ShardError = Partial<{
   shard: number;
   index: string;
   node: string;
-  reason: {
+  reason: Partial<{
     type: string;
     reason: string;
     index_uuid: string;
     index: string;
-    caused_by: {
+    caused_by: Partial<{
       type: string;
       reason: string;
-    };
-  };
+    }>;
+  }>;
+}>;
+
+export interface SearchHits<T> {
+  total: TotalValue | number;
+  max_score: number;
+  hits: Array<
+    BaseHit<T> & {
+      _type: string;
+      _score: number;
+      _version?: number;
+      _explanation?: Explanation;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      highlight?: any;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      inner_hits?: any;
+      matched_queries?: string[];
+      sort?: string[];
+    }
+  >;
 }
 
-export interface Explanation {
-  value: number;
-  description: string;
-  details: Explanation[];
+export interface BaseSearchResponse<T> {
+  hits: SearchHits<T>;
+}
+
+export interface SearchResponse<T> extends BaseSearchResponse<T> {
+  took: number;
+  timed_out: boolean;
+  _scroll_id?: string;
+  _shards: ShardsResponse;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  aggregations?: any;
 }
 
 export type SearchHit = SearchResponse<object>['hits']['hits'][0];
 
+export interface TermAggregationBucket {
+  key: string;
+  doc_count: number;
+}
+
 export interface TermAggregation {
   [agg: string]: {
-    buckets: Array<{
-      key: string;
-      doc_count: number;
-    }>;
+    buckets: TermAggregationBucket[];
   };
 }
 
@@ -173,8 +151,13 @@ export interface MSearchHeader {
 export interface AggregationRequest {
   [aggField: string]: {
     terms?: {
-      field: string;
+      field?: string;
+      missing?: string;
       size?: number;
+      script?: {
+        source: string;
+        lang: string;
+      };
       order?: {
         [aggSortField: string]: SortRequestDirection;
       };

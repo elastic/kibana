@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 exports.EcsKibanaExtensionsMappings = {
@@ -15,6 +16,18 @@ exports.EcsKibanaExtensionsMappings = {
     alerting: {
       properties: {
         instance_id: {
+          type: 'keyword',
+          ignore_above: 1024,
+        },
+        action_group_id: {
+          type: 'keyword',
+          ignore_above: 1024,
+        },
+        action_subgroup: {
+          type: 'keyword',
+          ignore_above: 1024,
+        },
+        status: {
           type: 'keyword',
           ignore_above: 1024,
         },
@@ -59,10 +72,14 @@ exports.EcsEventLogProperties = [
   'event.duration',
   'event.end',
   'event.outcome', // optional, but one of failure, success, unknown
+  'event.reason',
   'error.message',
   'user.name',
   'kibana.server_uuid',
   'kibana.alerting.instance_id',
+  'kibana.alerting.action_group_id',
+  'kibana.alerting.action_subgroup',
+  'kibana.alerting.status',
   'kibana.saved_objects.rel',
   'kibana.saved_objects.namespace',
   'kibana.saved_objects.id',

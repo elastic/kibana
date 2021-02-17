@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -9,7 +10,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
-  const testSubjects = getService('testSubjects');
+  const toasts = getService('toasts');
   const PageObjects = getPageObjects(['common', 'discover', 'timePicker']);
 
   describe('errors', function describeIndexTests() {
@@ -23,11 +24,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     after(async function () {
       await esArchiver.unload('invalid_scripted_field');
     });
+
     // this is the same test as in OSS but it catches different error message issue in different licences
     describe('invalid scripted field error', () => {
       it('is rendered', async () => {
-        const isFetchErrorVisible = await testSubjects.exists('discoverFetchError');
-        expect(isFetchErrorVisible).to.be(true);
+        const toast = await toasts.getToastElement(1);
+        const painlessStackTrace = await toast.findByTestSubject('painlessStackTrace');
+        expect(painlessStackTrace).not.to.be(undefined);
       });
     });
   });

@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 jest.mock('./kibana_services', () => ({}));
+jest.mock('./licensed_features', () => ({}));
 
 import {
   getSourceFields,
@@ -69,7 +71,7 @@ describe('Gold+ licensing', () => {
   describe('basic license', () => {
     beforeEach(() => {
       // eslint-disable-next-line @typescript-eslint/no-var-requires
-      require('./kibana_services').getIsGoldPlus = () => false;
+      require('./licensed_features').getIsGoldPlus = () => false;
     });
 
     describe('getAggregatableGeoFieldTypes', () => {
@@ -92,7 +94,7 @@ describe('Gold+ licensing', () => {
   describe('gold license', () => {
     beforeEach(() => {
       // eslint-disable-next-line @typescript-eslint/no-var-requires
-      require('./kibana_services').getIsGoldPlus = () => true;
+      require('./licensed_features').getIsGoldPlus = () => true;
     });
     describe('getAggregatableGeoFieldTypes', () => {
       test('Should add geo_shape field', () => {

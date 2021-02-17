@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 export const APP_ID = 'securitySolution';
@@ -39,6 +40,10 @@ export const FILTERS_GLOBAL_HEIGHT = 109; // px
 export const FULL_SCREEN_TOGGLED_CLASS_NAME = 'fullScreenToggled';
 export const NO_ALERT_INDEX = 'no-alert-index-049FC71A-4C2C-446F-9901-37XMC5024C51';
 export const ENDPOINT_METADATA_INDEX = 'metrics-endpoint.metadata-*';
+export const DEFAULT_RULE_REFRESH_INTERVAL_ON = true;
+export const DEFAULT_RULE_REFRESH_INTERVAL_VALUE = 60000; // ms
+export const DEFAULT_RULE_REFRESH_IDLE_VALUE = 2700000; // ms
+export const DEFAULT_RULE_NOTIFICATION_QUERY_SIZE = 100;
 
 export enum SecurityPageName {
   detections = 'detections',
@@ -73,6 +78,9 @@ export const DEFAULT_INDEX_PATTERN = [
 
 /** This Kibana Advanced Setting enables the `Security news` feed widget */
 export const ENABLE_NEWS_FEED_SETTING = 'securitySolution:enableNewsFeed';
+
+/** This Kibana Advanced Setting sets the auto refresh interval for the detections all rules table */
+export const DEFAULT_RULES_TABLE_REFRESH_SETTING = 'securitySolution:rulesTableRefresh';
 
 /** This Kibana Advanced Setting specifies the URL of the News feed widget */
 export const NEWS_FEED_URL_SETTING = 'securitySolution:newsFeedUrl';
@@ -130,9 +138,13 @@ export const TIMELINE_PREPACKAGED_URL = `${TIMELINE_URL}/_prepackaged`;
  * Default signals index key for kibana.dev.yml
  */
 export const SIGNALS_INDEX_KEY = 'signalsIndex';
+
 export const DETECTION_ENGINE_SIGNALS_URL = `${DETECTION_ENGINE_URL}/signals`;
 export const DETECTION_ENGINE_SIGNALS_STATUS_URL = `${DETECTION_ENGINE_SIGNALS_URL}/status`;
 export const DETECTION_ENGINE_QUERY_SIGNALS_URL = `${DETECTION_ENGINE_SIGNALS_URL}/search`;
+export const DETECTION_ENGINE_SIGNALS_MIGRATION_URL = `${DETECTION_ENGINE_SIGNALS_URL}/migration`;
+export const DETECTION_ENGINE_SIGNALS_MIGRATION_STATUS_URL = `${DETECTION_ENGINE_SIGNALS_URL}/migration_status`;
+export const DETECTION_ENGINE_SIGNALS_FINALIZE_MIGRATION_URL = `${DETECTION_ENGINE_SIGNALS_URL}/finalize_migration`;
 
 /**
  * Common naming convention for an unauthenticated user
@@ -154,12 +166,21 @@ export const ML_GROUP_IDS = [ML_GROUP_ID, LEGACY_ML_GROUP_ID];
 /*
   Rule notifications options
 */
+export const ENABLE_CASE_CONNECTOR = false;
 export const NOTIFICATION_SUPPORTED_ACTION_TYPES_IDS = [
   '.email',
   '.slack',
   '.pagerduty',
   '.webhook',
+  '.servicenow',
+  '.jira',
+  '.resilient',
 ];
+
+if (ENABLE_CASE_CONNECTOR) {
+  NOTIFICATION_SUPPORTED_ACTION_TYPES_IDS.push('.case');
+}
+
 export const NOTIFICATION_THROTTLE_NO_ACTIONS = 'no_actions';
 export const NOTIFICATION_THROTTLE_RULE = 'rule';
 

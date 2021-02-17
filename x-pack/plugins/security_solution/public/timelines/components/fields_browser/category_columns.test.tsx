@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { mount } from 'enzyme';
@@ -23,20 +24,20 @@ describe('getCategoryColumns', () => {
       const wrapper = mount(
         <ThemeProvider theme={theme}>
           <CategoriesPane
-            browserFields={mockBrowserFields}
             filteredBrowserFields={mockBrowserFields}
             width={CATEGORY_PANE_WIDTH}
             onCategorySelected={jest.fn()}
-            onUpdateColumns={jest.fn()}
             selectedCategoryId={''}
             timelineId={timelineId}
           />
         </ThemeProvider>
       );
 
+      const fieldCount = Object.keys(mockBrowserFields[categoryId].fields ?? {}).length;
+
       expect(
         wrapper.find(`.field-browser-category-pane-${categoryId}-${timelineId}`).first().text()
-      ).toEqual(categoryId);
+      ).toEqual(`${categoryId}${fieldCount}`);
     });
   });
 
@@ -45,11 +46,9 @@ describe('getCategoryColumns', () => {
       const wrapper = mount(
         <ThemeProvider theme={theme}>
           <CategoriesPane
-            browserFields={mockBrowserFields}
             filteredBrowserFields={mockBrowserFields}
             width={CATEGORY_PANE_WIDTH}
             onCategorySelected={jest.fn()}
-            onUpdateColumns={jest.fn()}
             selectedCategoryId={''}
             timelineId={timelineId}
           />
@@ -68,11 +67,9 @@ describe('getCategoryColumns', () => {
     const wrapper = mount(
       <ThemeProvider theme={theme}>
         <CategoriesPane
-          browserFields={mockBrowserFields}
           filteredBrowserFields={mockBrowserFields}
           width={CATEGORY_PANE_WIDTH}
           onCategorySelected={jest.fn()}
-          onUpdateColumns={jest.fn()}
           selectedCategoryId={selectedCategoryId}
           timelineId={timelineId}
         />
@@ -80,7 +77,10 @@ describe('getCategoryColumns', () => {
     );
 
     expect(
-      wrapper.find(`.field-browser-category-pane-${selectedCategoryId}-${timelineId}`).at(1)
+      wrapper
+        .find(`.field-browser-category-pane-${selectedCategoryId}-${timelineId}`)
+        .find('[data-test-subj="categoryName"]')
+        .at(1)
     ).toHaveStyleRule('font-weight', 'bold', { modifier: '.euiText' });
   });
 
@@ -91,11 +91,9 @@ describe('getCategoryColumns', () => {
     const wrapper = mount(
       <ThemeProvider theme={theme}>
         <CategoriesPane
-          browserFields={mockBrowserFields}
           filteredBrowserFields={mockBrowserFields}
           width={CATEGORY_PANE_WIDTH}
           onCategorySelected={jest.fn()}
-          onUpdateColumns={jest.fn()}
           selectedCategoryId={selectedCategoryId}
           timelineId={timelineId}
         />
@@ -103,7 +101,10 @@ describe('getCategoryColumns', () => {
     );
 
     expect(
-      wrapper.find(`.field-browser-category-pane-${notTheSelectedCategoryId}-${timelineId}`).at(1)
+      wrapper
+        .find(`.field-browser-category-pane-${notTheSelectedCategoryId}-${timelineId}`)
+        .find('[data-test-subj="categoryName"]')
+        .at(1)
     ).toHaveStyleRule('font-weight', 'normal', { modifier: '.euiText' });
   });
 
@@ -116,11 +117,9 @@ describe('getCategoryColumns', () => {
     const wrapper = mount(
       <ThemeProvider theme={theme}>
         <CategoriesPane
-          browserFields={mockBrowserFields}
           filteredBrowserFields={mockBrowserFields}
           width={CATEGORY_PANE_WIDTH}
           onCategorySelected={onCategorySelected}
-          onUpdateColumns={jest.fn()}
           selectedCategoryId={selectedCategoryId}
           timelineId={timelineId}
         />

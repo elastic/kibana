@@ -1,27 +1,43 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { Observable } from 'rxjs';
-import {
+import type {
   ISavedObjectTypeRegistry,
   ILegacyScopedClusterClient,
   IUiSettingsClient,
   SavedObjectsClientContract,
   Capabilities,
+  IRouter,
+  RequestHandlerContext,
 } from 'src/core/server';
 import {
   GlobalSearchBatchedResults,
   GlobalSearchProviderFindOptions,
   GlobalSearchProviderResult,
+  GlobalSearchProviderFindParams,
+  GlobalSearchFindParams,
 } from '../common/types';
 import { SearchServiceSetup, SearchServiceStart } from './services';
 
 export type GlobalSearchPluginSetup = Pick<SearchServiceSetup, 'registerResultProvider'>;
-export type GlobalSearchPluginStart = Pick<SearchServiceStart, 'find'>;
+export type GlobalSearchPluginStart = Pick<SearchServiceStart, 'find' | 'getSearchableTypes'>;
 
+/**
+ * @internal
+ */
+export interface GlobalSearchRequestHandlerContext extends RequestHandlerContext {
+  globalSearch: RouteHandlerGlobalSearchContext;
+}
+
+/**
+ * @internal
+ */
+export type GlobalSearchRouter = IRouter<GlobalSearchRequestHandlerContext>;
 /**
  * globalSearch route handler context.
  *
@@ -31,7 +47,14 @@ export interface RouteHandlerGlobalSearchContext {
   /**
    * See {@link SearchServiceStart.find | the find API}
    */
-  find(term: string, options: GlobalSearchFindOptions): Observable<GlobalSearchBatchedResults>;
+  find(
+    params: GlobalSearchFindParams,
+    options: GlobalSearchFindOptions
+  ): Observable<GlobalSearchBatchedResults>;
+  /**
+   * See {@link SearchServiceStart.getSearchableTypes | the getSearchableTypes API}
+   */
+  getSearchableTypes: () => Promise<string[]>;
 }
 
 /**
@@ -97,7 +120,7 @@ export interface GlobalSearchResultProvider {
    * // returning all results in a single batch
    * setupDeps.globalSearch.registerResultProvider({
    *   id: 'my_provider',
-   *   find: (term, { aborted$, preference, maxResults }, context) => {
+   *   find: ({term, filters }, { aborted$, preference, maxResults }, context) => {
    *     const resultPromise = myService.search(term, { preference, maxResults }, context.core.savedObjects.client);
    *     return from(resultPromise).pipe(takeUntil(aborted$));
    *   },
@@ -105,8 +128,14 @@ export interface GlobalSearchResultProvider {
    * ```
    */
   find(
-    term: string,
+    search: GlobalSearchProviderFindParams,
     options: GlobalSearchProviderFindOptions,
     context: GlobalSearchProviderContext
   ): Observable<GlobalSearchProviderResult[]>;
+
+  /**
+   * Method that should return all the possible {@link GlobalSearchProviderResult.type | type} of results that
+   * this provider can return.
+   */
+  getSearchableTypes: (context: GlobalSearchProviderContext) => string[] | Promise<string[]>;
 }

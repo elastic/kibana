@@ -1,12 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import './change_all_privileges.scss';
 
-import { EuiContextMenuItem, EuiContextMenuPanel, EuiLink, EuiPopover } from '@elastic/eui';
+import {
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
+  EuiLink,
+  EuiPopover,
+  EuiIcon,
+  EuiText,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import _ from 'lodash';
 import React, { Component } from 'react';
@@ -34,10 +42,13 @@ export class ChangeAllPrivilegesControl extends Component<Props, State> {
         className={'secPrivilegeFeatureChangeAllLink'}
         data-test-subj="changeAllPrivilegesButton"
       >
-        <FormattedMessage
-          id="xpack.security.management.editRole.changeAllPrivilegesLink"
-          defaultMessage="(change all)"
-        />
+        <EuiText size="xs">
+          <FormattedMessage
+            id="xpack.security.management.editRole.changeAllPrivilegesLink"
+            defaultMessage="Bulk actions"
+          />{' '}
+          <EuiIcon size="s" type="arrowDown" />
+        </EuiText>
       </EuiLink>
     );
 

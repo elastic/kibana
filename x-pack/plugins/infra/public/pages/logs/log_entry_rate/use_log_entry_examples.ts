@@ -1,12 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { useMemo, useState } from 'react';
 
-import { LogEntryExample } from '../../../../common/http_api';
+import { LogEntryExample } from '../../../../common/log_analysis';
+import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { useTrackedPromise } from '../../../utils/use_tracked_promise';
 import { callGetLogEntryExamplesAPI } from './service_calls/get_log_entry_examples';
 
@@ -25,6 +27,7 @@ export const useLogEntryExamples = ({
   startTime: number;
   categoryId?: string;
 }) => {
+  const { services } = useKibanaContextForPlugin();
   const [logEntryExamples, setLogEntryExamples] = useState<LogEntryExample[]>([]);
 
   const [getLogEntryExamplesRequest, getLogEntryExamples] = useTrackedPromise(
@@ -32,12 +35,15 @@ export const useLogEntryExamples = ({
       cancelPreviousOn: 'creation',
       createPromise: async () => {
         return await callGetLogEntryExamplesAPI(
-          sourceId,
-          startTime,
-          endTime,
-          dataset,
-          exampleCount,
-          categoryId
+          {
+            sourceId,
+            startTime,
+            endTime,
+            dataset,
+            exampleCount,
+            categoryId,
+          },
+          services.http.fetch
         );
       },
       onResolve: ({ data: { examples } }) => {

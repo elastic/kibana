@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -24,7 +25,6 @@ import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
 
 import * as i18n from './translations';
-import { SOURCERER_FEATURE_FLAG_ON } from '../../containers/sourcerer/constants';
 import { sourcererActions, sourcererModel } from '../../store/sourcerer';
 import { State } from '../../store';
 import { getSourcererScopeSelector, SourcererScopeSelector } from './selectors';
@@ -40,7 +40,7 @@ interface SourcererComponentProps {
   scope: sourcererModel.SourcererScopeName;
 }
 
-export const SourcererComponent = React.memo<SourcererComponentProps>(({ scope: scopeId }) => {
+export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }) => {
   const dispatch = useDispatch();
   const sourcererScopeSelector = useMemo(getSourcererScopeSelector, []);
   const { configIndexPatterns, kibanaIndexPatterns, sourcererScope } = useSelector<
@@ -55,6 +55,7 @@ export const SourcererComponent = React.memo<SourcererComponentProps>(({ scope: 
       value: indexSelected,
     }))
   );
+  const isSavingDisabled = useMemo(() => selectedOptions.length === 0, [selectedOptions]);
 
   const setPopoverIsOpenCb = useCallback(() => setPopoverIsOpen((prevState) => !prevState), []);
 
@@ -71,17 +72,14 @@ export const SourcererComponent = React.memo<SourcererComponentProps>(({ scope: 
   );
 
   const renderOption = useCallback(
-    (option) => {
-      const { value } = option;
-      if (kibanaIndexPatterns.some((kip) => kip.title === value)) {
-        return (
-          <>
-            <EuiIcon type="logoKibana" size="s" /> {value}
-          </>
-        );
-      }
-      return <>{value}</>;
-    },
+    ({ value }) =>
+      kibanaIndexPatterns.some((kip) => kip.title === value) ? (
+        <span data-test-subj="kip-option">
+          <EuiIcon type="logoKibana" size="s" /> {value}
+        </span>
+      ) : (
+        <span data-test-subj="config-option">{value}</span>
+      ),
     [kibanaIndexPatterns]
   );
 
@@ -175,11 +173,13 @@ export const SourcererComponent = React.memo<SourcererComponentProps>(({ scope: 
   return (
     <EuiToolTip position="top" content={tooltipContent}>
       <EuiPopover
+        data-test-subj="sourcerer-popover"
         button={trigger}
         isOpen={isPopoverOpen}
         closePopover={handleClosePopOver}
         display="block"
         panelPaddingSize="s"
+        repositionOnScroll
         ownFocus
       >
         <PopoverContent>
@@ -207,6 +207,7 @@ export const SourcererComponent = React.memo<SourcererComponentProps>(({ scope: 
             <EuiFlexItem grow={false}>
               <EuiButton
                 onClick={handleSaveIndices}
+                disabled={isSavingDisabled}
                 data-test-subj="add-index"
                 fill
                 fullWidth
@@ -221,6 +222,4 @@ export const SourcererComponent = React.memo<SourcererComponentProps>(({ scope: 
     </EuiToolTip>
   );
 });
-SourcererComponent.displayName = 'Sourcerer';
-
-export const Sourcerer = SOURCERER_FEATURE_FLAG_ON ? SourcererComponent : () => null;
+Sourcerer.displayName = 'Sourcerer';

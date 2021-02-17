@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 /**
@@ -44,10 +45,10 @@ export const ENDPOINT_LIST_ITEM_URL = '/api/endpoint_list/items';
 export const ENDPOINT_LIST_ID = 'endpoint_list';
 
 /** The name of the single global space agnostic endpoint list */
-export const ENDPOINT_LIST_NAME = 'Elastic Endpoint Security Exception List';
+export const ENDPOINT_LIST_NAME = 'Endpoint Security Exception List';
 
 /** The description of the single global space agnostic endpoint list */
-export const ENDPOINT_LIST_DESCRIPTION = 'Elastic Endpoint Security Exception List';
+export const ENDPOINT_LIST_DESCRIPTION = 'Endpoint Security Exception List';
 
 export const MAX_EXCEPTION_LIST_SIZE = 10000;
 
@@ -55,7 +56,7 @@ export const MAX_EXCEPTION_LIST_SIZE = 10000;
 export const ENDPOINT_TRUSTED_APPS_LIST_ID = 'endpoint_trusted_apps';
 
 /** Name of trusted apps agnostic list */
-export const ENDPOINT_TRUSTED_APPS_LIST_NAME = 'Elastic Endpoint Security Trusted Apps List';
+export const ENDPOINT_TRUSTED_APPS_LIST_NAME = 'Endpoint Security Trusted Apps List';
 
 /** Description of trusted apps agnostic list */
-export const ENDPOINT_TRUSTED_APPS_LIST_DESCRIPTION = 'Elastic Endpoint Security Trusted Apps List';
+export const ENDPOINT_TRUSTED_APPS_LIST_DESCRIPTION = 'Endpoint Security Trusted Apps List';

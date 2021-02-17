@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import getAnnotationsRequestMock from './__mocks__/get_annotations_request.json';
@@ -35,7 +36,7 @@ describe('annotation_service', () => {
   });
 
   describe('deleteAnnotation()', () => {
-    it('should delete annotation', async (done) => {
+    it('should delete annotation', async () => {
       const { deleteAnnotation } = annotationServiceProvider(mlClusterClientSpy);
       const mockFunct = mlClusterClientSpy;
 
@@ -50,12 +51,11 @@ describe('annotation_service', () => {
 
       expect(mockFunct.asInternalUser.delete.mock.calls[0][0]).toStrictEqual(deleteParamsMock);
       expect(response).toBe(acknowledgedResponseMock);
-      done();
     });
   });
 
   describe('getAnnotation()', () => {
-    it('should get annotations for specific job', async (done) => {
+    it('should get annotations for specific job', async () => {
       const { getAnnotations } = annotationServiceProvider(mlClusterClientSpy);
       const mockFunct = mlClusterClientSpy;
 
@@ -74,7 +74,6 @@ describe('annotation_service', () => {
       expect(Object.keys(response.annotations)).toHaveLength(1);
       expect(response.annotations[jobIdMock]).toHaveLength(2);
       expect(isAnnotations(response.annotations[jobIdMock])).toBeTruthy();
-      done();
     });
 
     it('should throw and catch an error', async () => {
@@ -106,7 +105,7 @@ describe('annotation_service', () => {
   });
 
   describe('indexAnnotation()', () => {
-    it('should index annotation', async (done) => {
+    it('should index annotation', async () => {
       const { indexAnnotation } = annotationServiceProvider(mlClusterClientSpy);
       const mockFunct = mlClusterClientSpy;
 
@@ -129,10 +128,9 @@ describe('annotation_service', () => {
       expect(typeof annotation.modified_time).toBe('number');
 
       expect(response).toBe(acknowledgedResponseMock);
-      done();
     });
 
-    it('should remove ._id and .key before updating annotation', async (done) => {
+    it('should remove ._id and .key before updating annotation', async () => {
       const { indexAnnotation } = annotationServiceProvider(mlClusterClientSpy);
       const mockFunct = mlClusterClientSpy;
 
@@ -159,10 +157,9 @@ describe('annotation_service', () => {
       expect(typeof annotation.key).toBe('undefined');
 
       expect(response).toBe(acknowledgedResponseMock);
-      done();
     });
 
-    it('should update annotation text and the username for modified_username', async (done) => {
+    it('should update annotation text and the username for modified_username', async () => {
       const { getAnnotations, indexAnnotation } = annotationServiceProvider(mlClusterClientSpy);
       const mockFunct = mlClusterClientSpy;
 
@@ -196,7 +193,6 @@ describe('annotation_service', () => {
       expect(modifiedAnnotation.modified_username).toBe(modifiedUsernameMock);
       expect(typeof modifiedAnnotation.create_time).toBe('number');
       expect(typeof modifiedAnnotation.modified_time).toBe('number');
-      done();
     });
   });
 });

@@ -1,20 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
-import { cleanup, fireEvent, render } from '@testing-library/react/pure';
+import { fireEvent, render } from '@testing-library/react';
 import {
   DrilldownListItem,
   ListManageDrilldowns,
   TEST_SUBJ_DRILLDOWN_ITEM,
 } from './list_manage_drilldowns';
-
-// TODO: for some reason global cleanup from RTL doesn't work
-// afterEach is not available for it globally during setup
-afterEach(cleanup);
 
 const drilldowns: DrilldownListItem[] = [
   { id: '1', actionName: 'Dashboard', drilldownName: 'Drilldown 1' },

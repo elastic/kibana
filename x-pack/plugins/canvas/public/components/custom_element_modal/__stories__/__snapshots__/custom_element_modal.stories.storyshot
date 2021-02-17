@@ -18,10 +18,11 @@ exports[`Storyshots components/Elements/CustomElementModal with description 1`] 
     <button
       aria-label="Closes this modal window"
       className="euiButtonIcon euiButtonIcon--text euiModal__closeIcon"
+      disabled={false}
       onClick={[Function]}
       type="button"
     >
-      <div
+      <span
         aria-hidden="true"
         className="euiButtonIcon__icon"
         data-euiicon-type="cross"
@@ -175,7 +176,7 @@ exports[`Storyshots components/Elements/CustomElementModal with description 1`] 
                         className="euiFilePicker__prompt"
                         id="generated-id-filePicker__prompt"
                       >
-                        <div
+                        <span
                           aria-hidden="true"
                           className="euiFilePicker__icon"
                           data-euiicon-type="importAction"
@@ -211,13 +212,13 @@ exports[`Storyshots components/Elements/CustomElementModal with description 1`] 
                 className="euiSpacer euiSpacer--s"
               />
               <div
-                className="euiCard euiCard--paddingMedium euiCard--leftAligned euiCard--hasIcon canvasElementCard canvasElementCard--hasIcon"
+                className="euiCard euiCard--shadow euiCard--borderRadiusMedium euiCard--paddingMedium euiCard--leftAligned euiCard--hasIcon canvasElementCard canvasElementCard--hasIcon"
                 onClick={[Function]}
               >
                 <div
                   className="euiCard__top"
                 >
-                  <div
+                  <span
                     className="euiCard__icon"
                     data-euiicon-type="canvasApp"
                     size="xxl"
@@ -260,6 +261,7 @@ exports[`Storyshots components/Elements/CustomElementModal with description 1`] 
           >
             <button
               className="euiButtonEmpty euiButtonEmpty--primary"
+              disabled={false}
               onClick={[Function]}
               type="button"
             >
@@ -280,7 +282,13 @@ exports[`Storyshots components/Elements/CustomElementModal with description 1`] 
             <button
               className="euiButton euiButton--primary euiButton--fill"
               data-test-subj="canvasCustomElementForm-submit"
+              disabled={false}
               onClick={[Function]}
+              style={
+                Object {
+                  "minWidth": undefined,
+                }
+              }
               type="button"
             >
               <span
@@ -319,10 +327,11 @@ exports[`Storyshots components/Elements/CustomElementModal with image 1`] = `
     <button
       aria-label="Closes this modal window"
       className="euiButtonIcon euiButtonIcon--text euiModal__closeIcon"
+      disabled={false}
       onClick={[Function]}
       type="button"
     >
-      <div
+      <span
         aria-hidden="true"
         className="euiButtonIcon__icon"
         data-euiicon-type="cross"
@@ -476,7 +485,7 @@ exports[`Storyshots components/Elements/CustomElementModal with image 1`] = `
                         className="euiFilePicker__prompt"
                         id="generated-id-filePicker__prompt"
                       >
-                        <div
+                        <span
                           aria-hidden="true"
                           className="euiFilePicker__icon"
                           data-euiicon-type="importAction"
@@ -512,7 +521,7 @@ exports[`Storyshots components/Elements/CustomElementModal with image 1`] = `
                 className="euiSpacer euiSpacer--s"
               />
               <div
-                className="euiCard euiCard--paddingMedium euiCard--leftAligned canvasElementCard"
+                className="euiCard euiCard--shadow euiCard--borderRadiusMedium euiCard--paddingMedium euiCard--leftAligned canvasElementCard"
                 onClick={[Function]}
               >
                 <div
@@ -564,6 +573,7 @@ exports[`Storyshots components/Elements/CustomElementModal with image 1`] = `
           >
             <button
               className="euiButtonEmpty euiButtonEmpty--primary"
+              disabled={false}
               onClick={[Function]}
               type="button"
             >
@@ -584,7 +594,13 @@ exports[`Storyshots components/Elements/CustomElementModal with image 1`] = `
             <button
               className="euiButton euiButton--primary euiButton--fill"
               data-test-subj="canvasCustomElementForm-submit"
+              disabled={false}
               onClick={[Function]}
+              style={
+                Object {
+                  "minWidth": undefined,
+                }
+              }
               type="button"
             >
               <span
@@ -624,10 +640,11 @@ exports[`Storyshots components/Elements/CustomElementModal with name 1`] = `
     <button
       aria-label="Closes this modal window"
       className="euiButtonIcon euiButtonIcon--text euiModal__closeIcon"
+      disabled={false}
       onClick={[Function]}
       type="button"
     >
-      <div
+      <span
         aria-hidden="true"
         className="euiButtonIcon__icon"
         data-euiicon-type="cross"
@@ -781,7 +798,7 @@ exports[`Storyshots components/Elements/CustomElementModal with name 1`] = `
                         className="euiFilePicker__prompt"
                         id="generated-id-filePicker__prompt"
                       >
-                        <div
+                        <span
                           aria-hidden="true"
                           className="euiFilePicker__icon"
                           data-euiicon-type="importAction"
@@ -817,13 +834,13 @@ exports[`Storyshots components/Elements/CustomElementModal with name 1`] = `
                 className="euiSpacer euiSpacer--s"
               />
               <div
-                className="euiCard euiCard--paddingMedium euiCard--leftAligned euiCard--hasIcon canvasElementCard canvasElementCard--hasIcon"
+                className="euiCard euiCard--shadow euiCard--borderRadiusMedium euiCard--paddingMedium euiCard--leftAligned euiCard--hasIcon canvasElementCard canvasElementCard--hasIcon"
                 onClick={[Function]}
               >
                 <div
                   className="euiCard__top"
                 >
-                  <div
+                  <span
                     className="euiCard__icon"
                     data-euiicon-type="canvasApp"
                     size="xxl"
@@ -866,6 +883,7 @@ exports[`Storyshots components/Elements/CustomElementModal with name 1`] = `
           >
             <button
               className="euiButtonEmpty euiButtonEmpty--primary"
+              disabled={false}
               onClick={[Function]}
               type="button"
             >
@@ -886,7 +904,13 @@ exports[`Storyshots components/Elements/CustomElementModal with name 1`] = `
             <button
               className="euiButton euiButton--primary euiButton--fill"
               data-test-subj="canvasCustomElementForm-submit"
+              disabled={false}
               onClick={[Function]}
+              style={
+                Object {
+                  "minWidth": undefined,
+                }
+              }
               type="button"
             >
               <span
@@ -924,10 +948,11 @@ exports[`Storyshots components/Elements/CustomElementModal with title 1`] = `
     <button
       aria-label="Closes this modal window"
       className="euiButtonIcon euiButtonIcon--text euiModal__closeIcon"
+      disabled={false}
       onClick={[Function]}
       type="button"
     >
-      <div
+      <span
         aria-hidden="true"
         className="euiButtonIcon__icon"
         data-euiicon-type="cross"
@@ -1081,7 +1106,7 @@ exports[`Storyshots components/Elements/CustomElementModal with title 1`] = `
                         className="euiFilePicker__prompt"
                         id="generated-id-filePicker__prompt"
                       >
-                        <div
+                        <span
                           aria-hidden="true"
                           className="euiFilePicker__icon"
                           data-euiicon-type="importAction"
@@ -1117,13 +1142,13 @@ exports[`Storyshots components/Elements/CustomElementModal with title 1`] = `
                 className="euiSpacer euiSpacer--s"
               />
               <div
-                className="euiCard euiCard--paddingMedium euiCard--leftAligned euiCard--hasIcon canvasElementCard canvasElementCard--hasIcon"
+                className="euiCard euiCard--shadow euiCard--borderRadiusMedium euiCard--paddingMedium euiCard--leftAligned euiCard--hasIcon canvasElementCard canvasElementCard--hasIcon"
                 onClick={[Function]}
               >
                 <div
                   className="euiCard__top"
                 >
-                  <div
+                  <span
                     className="euiCard__icon"
                     data-euiicon-type="canvasApp"
                     size="xxl"
@@ -1166,6 +1191,7 @@ exports[`Storyshots components/Elements/CustomElementModal with title 1`] = `
           >
             <button
               className="euiButtonEmpty euiButtonEmpty--primary"
+              disabled={false}
               onClick={[Function]}
               type="button"
             >
@@ -1186,7 +1212,13 @@ exports[`Storyshots components/Elements/CustomElementModal with title 1`] = `
             <button
               className="euiButton euiButton--primary euiButton--fill"
               data-test-subj="canvasCustomElementForm-submit"
+              disabled={false}
               onClick={[Function]}
+              style={
+                Object {
+                  "minWidth": undefined,
+                }
+              }
               type="button"
             >
               <span

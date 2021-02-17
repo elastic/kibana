@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { Observable } from 'rxjs';
@@ -78,7 +79,7 @@ describe('Transaction error rate alert', () => {
           },
         },
         aggregations: {
-          erroneous_transactions: {
+          failed_transactions: {
             doc_count: 2,
           },
           services: {
@@ -115,7 +116,7 @@ describe('Transaction error rate alert', () => {
       })),
       alertInstanceFactory: jest.fn(() => ({ scheduleActions })),
     };
-    const params = { threshold: 10 };
+    const params = { threshold: 10, windowSize: 5, windowUnit: 'm' };
 
     await alertExecutor!({ services, params });
     [
@@ -132,28 +133,32 @@ describe('Transaction error rate alert', () => {
       transactionType: 'type-foo',
       environment: 'env-foo',
       threshold: 10,
-      triggerValue: 50,
+      triggerValue: '50',
+      interval: '5m',
     });
     expect(scheduleActions).toHaveBeenCalledWith('threshold_met', {
       serviceName: 'foo',
       transactionType: 'type-foo',
       environment: 'env-foo-2',
       threshold: 10,
-      triggerValue: 50,
+      triggerValue: '50',
+      interval: '5m',
     });
     expect(scheduleActions).toHaveBeenCalledWith('threshold_met', {
       serviceName: 'bar',
       transactionType: 'type-bar',
       environment: 'env-bar',
       threshold: 10,
-      triggerValue: 50,
+      triggerValue: '50',
+      interval: '5m',
     });
     expect(scheduleActions).toHaveBeenCalledWith('threshold_met', {
       serviceName: 'bar',
       transactionType: 'type-bar',
       environment: 'env-bar-2',
       threshold: 10,
-      triggerValue: 50,
+      triggerValue: '50',
+      interval: '5m',
     });
   });
   it('sends alerts with service name and transaction type', async () => {
@@ -179,7 +184,7 @@ describe('Transaction error rate alert', () => {
           },
         },
         aggregations: {
-          erroneous_transactions: {
+          failed_transactions: {
             doc_count: 2,
           },
           services: {
@@ -202,7 +207,7 @@ describe('Transaction error rate alert', () => {
       })),
       alertInstanceFactory: jest.fn(() => ({ scheduleActions })),
     };
-    const params = { threshold: 10 };
+    const params = { threshold: 10, windowSize: 5, windowUnit: 'm' };
 
     await alertExecutor!({ services, params });
     [
@@ -217,14 +222,16 @@ describe('Transaction error rate alert', () => {
       transactionType: 'type-foo',
       environment: undefined,
       threshold: 10,
-      triggerValue: 50,
+      triggerValue: '50',
+      interval: '5m',
     });
     expect(scheduleActions).toHaveBeenCalledWith('threshold_met', {
       serviceName: 'bar',
       transactionType: 'type-bar',
       environment: undefined,
       threshold: 10,
-      triggerValue: 50,
+      triggerValue: '50',
+      interval: '5m',
     });
   });
 
@@ -251,7 +258,7 @@ describe('Transaction error rate alert', () => {
           },
         },
         aggregations: {
-          erroneous_transactions: {
+          failed_transactions: {
             doc_count: 2,
           },
           services: {
@@ -261,7 +268,7 @@ describe('Transaction error rate alert', () => {
       })),
       alertInstanceFactory: jest.fn(() => ({ scheduleActions })),
     };
-    const params = { threshold: 10 };
+    const params = { threshold: 10, windowSize: 5, windowUnit: 'm' };
 
     await alertExecutor!({ services, params });
     [
@@ -276,14 +283,16 @@ describe('Transaction error rate alert', () => {
       transactionType: undefined,
       environment: undefined,
       threshold: 10,
-      triggerValue: 50,
+      triggerValue: '50',
+      interval: '5m',
     });
     expect(scheduleActions).toHaveBeenCalledWith('threshold_met', {
       serviceName: 'bar',
       transactionType: undefined,
       environment: undefined,
       threshold: 10,
-      triggerValue: 50,
+      triggerValue: '50',
+      interval: '5m',
     });
   });
 });

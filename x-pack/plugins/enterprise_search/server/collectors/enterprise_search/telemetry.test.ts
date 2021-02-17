@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { mockLogger } from '../../__mocks__';
@@ -20,6 +21,8 @@ describe('Enterprise Search Telemetry Usage Collector', () => {
     get: () => ({
       attributes: {
         'ui_viewed.overview': 10,
+        'ui_viewed.setup_guide': 5,
+        'ui_error.cannot_connect': 1,
         'ui_clicked.app_search': 2,
         'ui_clicked.workplace_search': 3,
       },
@@ -53,6 +56,10 @@ describe('Enterprise Search Telemetry Usage Collector', () => {
       expect(savedObjectsCounts).toEqual({
         ui_viewed: {
           overview: 10,
+          setup_guide: 5,
+        },
+        ui_error: {
+          cannot_connect: 1,
         },
         ui_clicked: {
           app_search: 2,
@@ -74,6 +81,10 @@ describe('Enterprise Search Telemetry Usage Collector', () => {
       expect(savedObjectsCounts).toEqual({
         ui_viewed: {
           overview: 0,
+          setup_guide: 0,
+        },
+        ui_error: {
+          cannot_connect: 0,
         },
         ui_clicked: {
           app_search: 0,

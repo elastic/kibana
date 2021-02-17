@@ -15,16 +15,19 @@ export interface SavedObjectsFindOptions
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [defaultSearchOperator](./kibana-plugin-core-public.savedobjectsfindoptions.defaultsearchoperator.md) | <code>'AND' &#124; 'OR'</code> |  |
+|  [defaultSearchOperator](./kibana-plugin-core-public.savedobjectsfindoptions.defaultsearchoperator.md) | <code>'AND' &#124; 'OR'</code> | The search operator to use with the provided filter. Defaults to <code>OR</code> |
 |  [fields](./kibana-plugin-core-public.savedobjectsfindoptions.fields.md) | <code>string[]</code> | An array of fields to include in the results |
 |  [filter](./kibana-plugin-core-public.savedobjectsfindoptions.filter.md) | <code>string &#124; KueryNode</code> |  |
-|  [hasReference](./kibana-plugin-core-public.savedobjectsfindoptions.hasreference.md) | <code>{</code><br/><code>        type: string;</code><br/><code>        id: string;</code><br/><code>    }</code> |  |
+|  [hasReference](./kibana-plugin-core-public.savedobjectsfindoptions.hasreference.md) | <code>SavedObjectsFindOptionsReference &#124; SavedObjectsFindOptionsReference[]</code> | Search for documents having a reference to the specified objects. Use <code>hasReferenceOperator</code> to specify the operator to use when searching for multiple references. |
+|  [hasReferenceOperator](./kibana-plugin-core-public.savedobjectsfindoptions.hasreferenceoperator.md) | <code>'AND' &#124; 'OR'</code> | The operator to use when searching by multiple references using the <code>hasReference</code> option. Defaults to <code>OR</code> |
 |  [namespaces](./kibana-plugin-core-public.savedobjectsfindoptions.namespaces.md) | <code>string[]</code> |  |
 |  [page](./kibana-plugin-core-public.savedobjectsfindoptions.page.md) | <code>number</code> |  |
 |  [perPage](./kibana-plugin-core-public.savedobjectsfindoptions.perpage.md) | <code>number</code> |  |
+|  [pit](./kibana-plugin-core-public.savedobjectsfindoptions.pit.md) | <code>SavedObjectsPitParams</code> | Search against a specific Point In Time (PIT) that you've opened with . |
 |  [preference](./kibana-plugin-core-public.savedobjectsfindoptions.preference.md) | <code>string</code> | An optional ES preference value to be used for the query \* |
 |  [rootSearchFields](./kibana-plugin-core-public.savedobjectsfindoptions.rootsearchfields.md) | <code>string[]</code> | The fields to perform the parsed query against. Unlike the <code>searchFields</code> argument, these are expected to be root fields and will not be modified. If used in conjunction with <code>searchFields</code>, both are concatenated together. |
 |  [search](./kibana-plugin-core-public.savedobjectsfindoptions.search.md) | <code>string</code> | Search documents using the Elasticsearch Simple Query String syntax. See Elasticsearch Simple Query String <code>query</code> argument for more information |
+|  [searchAfter](./kibana-plugin-core-public.savedobjectsfindoptions.searchafter.md) | <code>unknown[]</code> | Use the sort values from the previous page to retrieve the next page of results. |
 |  [searchFields](./kibana-plugin-core-public.savedobjectsfindoptions.searchfields.md) | <code>string[]</code> | The fields to perform the parsed query against. See Elasticsearch Simple Query String <code>fields</code> argument for more information |
 |  [sortField](./kibana-plugin-core-public.savedobjectsfindoptions.sortfield.md) | <code>string</code> |  |
 |  [sortOrder](./kibana-plugin-core-public.savedobjectsfindoptions.sortorder.md) | <code>string</code> |  |

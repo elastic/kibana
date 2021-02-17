@@ -1,27 +1,18 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 interface ComboBoxOption<T> {
+  key?: string;
   label: string;
   target: T;
 }
 interface ComboBoxGroupedOption<T> {
+  key?: string;
   label: string;
   options: Array<ComboBoxOption<T>>;
 }
@@ -40,15 +31,22 @@ export type ComboBoxGroupedOptions<T> = Array<GroupOrOption<T>>;
  * @returns An array of grouped and sorted alphabetically `objects` that are compatible with EuiComboBox options.
  */
 export function groupAndSortBy<
-  T extends Record<TGroupBy | TLabelName, string>,
+  T extends Record<TGroupBy | TLabelName | TKeyName, string>,
   TGroupBy extends string = 'type',
-  TLabelName extends string = 'title'
->(objects: T[], groupBy: TGroupBy, labelName: TLabelName): ComboBoxGroupedOptions<T> {
+  TLabelName extends string = 'title',
+  TKeyName extends string = never
+>(
+  objects: T[],
+  groupBy: TGroupBy,
+  labelName: TLabelName,
+  keyName?: TKeyName
+): ComboBoxGroupedOptions<T> {
   const groupedOptions = objects.reduce((array, obj) => {
     const group = array.find((element) => element.label === obj[groupBy]);
     const option = {
       label: obj[labelName],
       target: obj,
+      ...(keyName ? { key: obj[keyName] } : {}),
     };
 
     if (group && group.options) {

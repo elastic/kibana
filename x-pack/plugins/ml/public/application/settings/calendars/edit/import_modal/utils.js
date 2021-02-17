@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import icalendar from 'icalendar';
@@ -42,7 +43,10 @@ export function filterEvents(events) {
 }
 
 export function parseICSFile(data) {
-  const cal = icalendar.parse_calendar(data);
+  // force a new line char on the end of the data
+  // icalendar must split on new lines and so parsing fails
+  // if there isn't at least one new line at the end.
+  const cal = icalendar.parse_calendar(data + '\n');
   return createEvents(cal);
 }
 

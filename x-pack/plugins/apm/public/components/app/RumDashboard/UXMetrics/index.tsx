@@ -1,10 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import React from 'react';
+import React, { useContext, useMemo } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -14,68 +15,72 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { I18LABELS } from '../translations';
-import { CoreVitals } from '../CoreVitals';
 import { KeyUXMetrics } from './KeyUXMetrics';
-import { useUrlParams } from '../../../../hooks/useUrlParams';
-import { useFetcher } from '../../../../hooks/useFetcher';
-
-export interface UXMetrics {
-  cls: string;
-  fid: string;
-  lcp: string;
-  tbt: number;
-  fcp: number;
-  lcpRanks: number[];
-  fidRanks: number[];
-  clsRanks: number[];
-}
+import { useFetcher } from '../../../../hooks/use_fetcher';
+import { useUxQuery } from '../hooks/useUxQuery';
+import { getCoreVitalsComponent } from '../../../../../../observability/public';
+import { CsmSharedContext } from '../CsmSharedContext';
+import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
+import { getPercentileLabel } from './translations';
 
 export function UXMetrics() {
-  const { urlParams, uiFilters } = useUrlParams();
+  const {
+    urlParams: { percentile },
+  } = useUrlParams();
 
-  const { start, end, searchTerm } = urlParams;
+  const uxQuery = useUxQuery();
 
   const { data, status } = useFetcher(
     (callApmApi) => {
-      const { serviceName } = uiFilters;
-      if (start && end && serviceName) {
+      if (uxQuery) {
         return callApmApi({
-          pathname: '/api/apm/rum-client/web-core-vitals',
+          endpoint: 'GET /api/apm/rum-client/web-core-vitals',
           params: {
-            query: {
-              start,
-              end,
-              uiFilters: JSON.stringify(uiFilters),
-              urlQuery: searchTerm,
-            },
+            query: uxQuery,
           },
         });
       }
       return Promise.resolve(null);
     },
-    [start, end, uiFilters, searchTerm]
+    [uxQuery]
+  );
+
+  const {
+    sharedData: { totalPageViews },
+  } = useContext(CsmSharedContext);
+
+  const CoreVitals = useMemo(
+    () =>
+      getCoreVitalsComponent({
+        data,
+        totalPageViews,
+        loading: status !== 'success',
+        displayTrafficMetric: true,
+      }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [status]
   );
 
   return (
     <EuiPanel>
-      <EuiFlexGroup justifyContent="spaceBetween">
+      <EuiFlexGroup justifyContent="spaceBetween" wrap>
         <EuiFlexItem grow={1} data-cy={`client-metrics`}>
-          <EuiTitle size="s">
-            <h2>{I18LABELS.userExperienceMetrics}</h2>
+          <EuiTitle size="xs">
+            <h3>
+              {I18LABELS.metrics} ({getPercentileLabel(percentile!)})
+            </h3>
           </EuiTitle>
           <EuiSpacer size="s" />
           <KeyUXMetrics data={data} loading={status !== 'success'} />
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiHorizontalRule />
+      <EuiSpacer size="xs" />
+      <EuiHorizontalRule margin="xs" />
 
-      <EuiFlexGroup justifyContent="spaceBetween">
+      <EuiFlexGroup justifyContent="spaceBetween" wrap>
         <EuiFlexItem grow={1} data-cy={`client-metrics`}>
-          <EuiTitle size="xs">
-            <h3>{I18LABELS.coreWebVitals}</h3>
-          </EuiTitle>
           <EuiSpacer size="s" />
-          <CoreVitals data={data} loading={status !== 'success'} />
+          {CoreVitals}
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPanel>

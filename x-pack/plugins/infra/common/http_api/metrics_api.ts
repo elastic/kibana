@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import * as rt from 'io-ts';
@@ -30,6 +31,7 @@ export const MetricsAPIRequestRT = rt.intersection([
   }),
   rt.partial({
     groupBy: rt.array(groupByRT),
+    modules: rt.array(rt.string),
     afterKey: rt.union([rt.null, afterKeyObjectRT]),
     limit: rt.union([rt.number, rt.null, rt.undefined]),
     filters: rt.array(rt.object),

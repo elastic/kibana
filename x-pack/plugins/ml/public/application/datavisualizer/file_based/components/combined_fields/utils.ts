@@ -1,18 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
-import _ from 'lodash';
+import { cloneDeep } from 'lodash';
 import uuid from 'uuid/v4';
 import { CombinedField } from './types';
-import {
-  FindFileStructureResponse,
-  IngestPipeline,
-  Mappings,
-} from '../../../../../../common/types/file_datavisualizer';
+import { FindFileStructureResponse } from '../../../../../../common/types/file_datavisualizer';
+import { IngestPipeline, Mappings } from '../../../../../../../file_upload/common';
 
 const COMMON_LAT_NAMES = ['latitude', 'lat'];
 const COMMON_LON_NAMES = ['longitude', 'long', 'lon'];
@@ -54,7 +52,7 @@ export function addCombinedFieldsToPipeline(
   pipeline: IngestPipeline,
   combinedFields: CombinedField[]
 ) {
-  const updatedPipeline = _.cloneDeep(pipeline);
+  const updatedPipeline = cloneDeep(pipeline);
   combinedFields.forEach((combinedField) => {
     updatedPipeline.processors.push({
       set: {

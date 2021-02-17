@@ -1,10 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import React, { FC, useEffect, useCallback, useState } from 'react';
+import React, { FC, useEffect, useCallback, useState, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import {
@@ -13,7 +14,6 @@ import {
   EuiInMemoryTable,
   EuiLoadingSpinner,
   EuiBasicTableColumn,
-  formatDate,
 } from '@elastic/eui';
 
 import { checkPermission } from '../../capabilities/check_capabilities';
@@ -21,12 +21,12 @@ import { EditModelSnapshotFlyout } from './edit_model_snapshot_flyout';
 import { RevertModelSnapshotFlyout } from './revert_model_snapshot_flyout';
 import { ml } from '../../services/ml_api_service';
 import { JOB_STATE, DATAFEED_STATE } from '../../../../common/constants/states';
-import { TIME_FORMAT } from '../../../../common/constants/time_format';
 import { CloseJobConfirm } from './close_job_confirm';
 import {
   ModelSnapshot,
   CombinedJobWithStats,
 } from '../../../../common/types/anomaly_detection_jobs';
+import { timeFormatter } from '../../../../common/util/date_utils';
 
 interface Props {
   job: CombinedJobWithStats;
@@ -51,15 +51,24 @@ export const ModelSnapshotTable: FC<Props> = ({ job, refreshJobList }) => {
   const [closeJobModalVisible, setCloseJobModalVisible] = useState<ModelSnapshot | null>(null);
   const [combinedJobState, setCombinedJobState] = useState<COMBINED_JOB_STATE | null>(null);
 
+  const isMounted = useRef(true);
   useEffect(() => {
     loadModelSnapshots();
+    return () => {
+      isMounted.current = false;
+    };
   }, []);
 
-  const loadModelSnapshots = useCallback(async () => {
+  async function loadModelSnapshots() {
+    if (isMounted.current === false) {
+      // table refresh can be triggered a while after a snapshot revert has been triggered.
+      // ensure the table is still visible before attempted to refresh it.
+      return;
+    }
     const { model_snapshots: ms } = await ml.getModelSnapshots(job.job_id);
     setSnapshots(ms);
     setSnapshotsLoaded(true);
-  }, [job]);
+  }
 
   const checkJobIsClosed = useCallback(
     async (snapshot: ModelSnapshot) => {
@@ -108,13 +117,14 @@ export const ModelSnapshotTable: FC<Props> = ({ job, refreshJobList }) => {
     }
   }, []);
 
-  const closeRevertFlyout = useCallback((reload: boolean) => {
+  const closeRevertFlyout = useCallback(() => {
     setRevertSnapshot(null);
-    if (reload) {
-      loadModelSnapshots();
-      // wait half a second before refreshing the jobs list
-      setTimeout(refreshJobList, 500);
-    }
+  }, []);
+
+  const refresh = useCallback(() => {
+    loadModelSnapshots();
+    // wait half a second before refreshing the jobs list
+    setTimeout(refreshJobList, 500);
   }, []);
 
   const columns: Array<EuiBasicTableColumn<any>> = [
@@ -138,7 +148,7 @@ export const ModelSnapshotTable: FC<Props> = ({ job, refreshJobList }) => {
         defaultMessage: 'Date created',
       }),
       dataType: 'date',
-      render: renderDate,
+      render: timeFormatter,
       sortable: true,
     },
     {
@@ -147,7 +157,7 @@ export const ModelSnapshotTable: FC<Props> = ({ job, refreshJobList }) => {
         defaultMessage: 'Latest timestamp',
       }),
       dataType: 'date',
-      render: renderDate,
+      render: timeFormatter,
       sortable: true,
     },
     {
@@ -232,6 +242,7 @@ export const ModelSnapshotTable: FC<Props> = ({ job, refreshJobList }) => {
           snapshots={snapshots}
           job={job}
           closeFlyout={closeRevertFlyout}
+          refresh={refresh}
         />
       )}
 
@@ -245,10 +256,6 @@ export const ModelSnapshotTable: FC<Props> = ({ job, refreshJobList }) => {
     </>
   );
 };
-
-function renderDate(date: number) {
-  return formatDate(date, TIME_FORMAT);
-}
 
 async function getCombinedJobState(jobId: string) {
   const jobs = await ml.jobs.jobs([jobId]);

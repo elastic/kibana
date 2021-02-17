@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { Observable } from 'rxjs';
@@ -32,6 +21,8 @@ export interface HttpSetup {
    * APIs for denoting certain paths for not requiring authentication
    */
   anonymousPaths: IAnonymousPaths;
+
+  externalUrl: IExternalUrl;
 
   /**
    * Adds a new {@link HttpInterceptor} to the global HTTP client.
@@ -102,6 +93,32 @@ export interface IBasePath {
    * See {@link BasePath.get} for getting the basePath value for a specific request
    */
   readonly serverBasePath: string;
+
+  /**
+   * The server's publicly exposed base URL, if configured. Includes protocol, host, port (optional) and the
+   * {@link IBasePath.serverBasePath}.
+   *
+   * @remarks
+   * Should be used for generating external URL links back to this Kibana instance.
+   */
+  readonly publicBaseUrl?: string;
+}
+/**
+ * APIs for working with external URLs.
+ *
+ * @public
+ */
+export interface IExternalUrl {
+  /**
+   * Determines if the provided URL is a valid location to send users.
+   * Validation is based on the configured allow list in kibana.yml.
+   *
+   * If the URL is valid, then a URL will be returned.
+   * Otherwise, this will return null.
+   *
+   * @param relativeOrAbsoluteUrl
+   */
+  validateUrl(relativeOrAbsoluteUrl: string): URL | null;
 }
 
 /**
@@ -206,12 +223,19 @@ export interface HttpRequestInit {
 
 /** @public */
 export interface HttpFetchQuery {
-  [key: string]:
-    | string
-    | number
-    | boolean
-    | undefined
-    | Array<string | number | boolean | undefined>;
+  /**
+   * TypeScript note: Technically we should use this interface instead, but @types/node uses the below stricter
+   * definition, so to avoid TypeScript errors, we'll restrict our version.
+   *
+   * [key: string]:
+   *   | string
+   *   | number
+   *   | boolean
+   *   | Array<string | number | boolean>
+   *   | undefined
+   *   | null;
+   */
+  [key: string]: string | number | boolean | string[] | number[] | boolean[] | undefined | null;
 }
 
 /**

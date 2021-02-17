@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText } from '@elastic/eui';
@@ -52,6 +53,7 @@ export const DurationEventStartEnd = React.memo<{
               data-test-subj="event-duration"
               field={EVENT_DURATION_FIELD_NAME}
               id={`duration-event-start-end-default-draggable-${contextId}-${eventId}-${EVENT_DURATION_FIELD_NAME}-${duration}`}
+              // @ts-expect-error
               name={name}
               tooltipContent={null}
               value={duration}

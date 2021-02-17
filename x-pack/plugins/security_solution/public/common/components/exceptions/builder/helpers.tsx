@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { IIndexPattern, IFieldType } from '../../../../../../../../src/plugins/data/common';
@@ -23,6 +24,8 @@ import {
   isOneOfOperator,
   EXCEPTION_OPERATORS,
   EXCEPTION_OPERATORS_SANS_LISTS,
+  isNotOperator,
+  doesNotExistOperator,
 } from '../../autocomplete/operators';
 import { OperatorOption } from '../../autocomplete/types';
 import {
@@ -371,7 +374,7 @@ export const getOperatorOptions = (
     return isBoolean ? [isOperator, existsOperator] : [isOperator, isOneOfOperator, existsOperator];
   } else {
     return isBoolean
-      ? [isOperator, existsOperator]
+      ? [isOperator, isNotOperator, existsOperator, doesNotExistOperator]
       : includeValueListOperators
       ? EXCEPTION_OPERATORS
       : EXCEPTION_OPERATORS_SANS_LISTS;

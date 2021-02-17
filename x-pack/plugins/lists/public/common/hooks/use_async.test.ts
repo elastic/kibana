@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { act, renderHook } from '@testing-library/react-hooks';
@@ -80,7 +81,7 @@ describe('useAsync', () => {
 
   it('populates the loading state while the function is pending', async () => {
     let resolve: () => void;
-    fn.mockImplementation(() => new Promise((_resolve) => (resolve = _resolve)));
+    fn.mockImplementation(() => new Promise<void>((_resolve) => (resolve = _resolve)));
 
     const { result, waitForNextUpdate } = renderHook(() => useAsync(fn));
 

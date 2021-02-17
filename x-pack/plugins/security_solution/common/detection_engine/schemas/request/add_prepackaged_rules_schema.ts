@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import * as t from 'io-ts';
@@ -23,7 +24,7 @@ import {
   Tags,
   To,
   type,
-  Threat,
+  Threats,
   threshold,
   ThrottleOrNull,
   note,
@@ -48,9 +49,13 @@ import {
 } from '../common/schemas';
 import {
   threat_index,
+  concurrent_searches,
+  items_per_search,
   threat_query,
   threat_filters,
   threat_mapping,
+  threat_language,
+  threat_indicator_path,
 } from '../types/threat_mapping';
 
 import {
@@ -128,6 +133,10 @@ export const addPrepackagedRulesSchema = t.intersection([
       threat_mapping, // defaults to "undefined" if not set during decode
       threat_query, // defaults to "undefined" if not set during decode
       threat_index, // defaults to "undefined" if not set during decode
+      threat_language, // defaults "undefined" if not set during decode
+      threat_indicator_path, // defaults "undefined" if not set during decode
+      concurrent_searches, // defaults to "undefined" if not set during decode
+      items_per_search, // defaults to "undefined" if not set during decode
     })
   ),
 ]);
@@ -165,7 +174,7 @@ export type AddPrepackagedRulesSchemaDecoded = Omit<
   severity_mapping: SeverityMapping;
   tags: Tags;
   to: To;
-  threat: Threat;
+  threat: Threats;
   throttle: ThrottleOrNull;
   exceptions_list: ListArray;
 };

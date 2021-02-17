@@ -1,10 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
+import { schema, TypeOf } from '@kbn/config-schema';
 
 const criteriaFieldSchema = schema.object({
   fieldType: schema.maybe(schema.string()),
@@ -26,6 +27,7 @@ export const anomaliesTableDataSchema = schema.object({
   maxRecords: schema.number(),
   maxExamples: schema.maybe(schema.number()),
   influencersFilterQuery: schema.maybe(schema.any()),
+  functionDescription: schema.maybe(schema.nullable(schema.string())),
 });
 
 export const categoryDefinitionSchema = schema.object({
@@ -45,13 +47,39 @@ export const categoryExamplesSchema = schema.object({
   maxExamples: schema.number(),
 });
 
+export const anomalySearchSchema = schema.object({
+  jobIds: schema.arrayOf(schema.string()),
+  query: schema.any(),
+});
+
+const fieldConfig = schema.maybe(
+  schema.object({
+    applyTimeRange: schema.maybe(schema.boolean()),
+    anomalousOnly: schema.maybe(schema.boolean()),
+    sort: schema.object({
+      by: schema.string(),
+      order: schema.maybe(schema.string()),
+    }),
+  })
+);
+
 export const partitionFieldValuesSchema = schema.object({
   jobId: schema.string(),
   searchTerm: schema.maybe(schema.any()),
   criteriaFields: schema.arrayOf(criteriaFieldSchema),
   earliestMs: schema.number(),
   latestMs: schema.number(),
+  fieldsConfig: schema.maybe(
+    schema.object({
+      partition_field: fieldConfig,
+      over_field: fieldConfig,
+      by_field: fieldConfig,
+    })
+  ),
 });
+
+export type FieldsConfig = TypeOf<typeof partitionFieldValuesSchema>['fieldsConfig'];
+export type FieldConfig = TypeOf<typeof fieldConfig>;
 
 export const getCategorizerStatsSchema = schema.nullable(
   schema.object({

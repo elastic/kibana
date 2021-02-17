@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import apm from 'elastic-apm-node';
@@ -20,15 +21,14 @@ import { generatePdfObservableFactory } from '../lib/generate_pdf';
 import { getCustomLogo } from '../lib/get_custom_logo';
 import { TaskPayloadPDF } from '../types';
 
-export const runTaskFnFactory: RunTaskFnFactory<RunTaskFn<
-  TaskPayloadPDF
->> = function executeJobFactoryFn(reporting, parentLogger) {
+export const runTaskFnFactory: RunTaskFnFactory<
+  RunTaskFn<TaskPayloadPDF>
+> = function executeJobFactoryFn(reporting, parentLogger) {
   const config = reporting.getConfig();
   const encryptionKey = config.get('encryptionKey');
 
-  const logger = parentLogger.clone([PDF_JOB_TYPE, 'execute']);
-
   return async function runTask(jobId, job, cancellationToken) {
+    const logger = parentLogger.clone([PDF_JOB_TYPE, 'execute-job', jobId]);
     const apmTrans = apm.startTransaction('reporting execute_job pdf', 'reporting');
     const apmGetAssets = apmTrans?.startSpan('get_assets', 'setup');
     let apmGeneratePdf: { end: () => void } | null | undefined;
@@ -40,7 +40,9 @@ export const runTaskFnFactory: RunTaskFnFactory<RunTaskFn<
       mergeMap(() => decryptJobHeaders(encryptionKey, job.headers, logger)),
       map((decryptedHeaders) => omitBlockedHeaders(decryptedHeaders)),
       map((filteredHeaders) => getConditionalHeaders(config, filteredHeaders)),
-      mergeMap((conditionalHeaders) => getCustomLogo(reporting, conditionalHeaders, job.spaceId)),
+      mergeMap((conditionalHeaders) =>
+        getCustomLogo(reporting, conditionalHeaders, job.spaceId, logger)
+      ),
       mergeMap(({ logo, conditionalHeaders }) => {
         const urls = getFullUrls(config, job);
 

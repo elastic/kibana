@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 jest.mock('./assign_bundles_to_workers.ts');
@@ -22,6 +11,8 @@ jest.mock('./kibana_platform_plugins.ts');
 jest.mock('./get_plugin_bundles.ts');
 jest.mock('../common/theme_tags.ts');
 jest.mock('./filter_by_id.ts');
+jest.mock('./focus_bundles');
+jest.mock('../limits.ts');
 
 jest.mock('os', () => {
   const realOs = jest.requireActual('os');
@@ -120,6 +111,7 @@ describe('OptimizerConfig::parseOptions()', () => {
         "cache": true,
         "dist": false,
         "filters": Array [],
+        "focus": Array [],
         "includeCoreBundle": false,
         "inspectWorkers": false,
         "maxWorkerCount": 2,
@@ -148,6 +140,7 @@ describe('OptimizerConfig::parseOptions()', () => {
         "cache": false,
         "dist": false,
         "filters": Array [],
+        "focus": Array [],
         "includeCoreBundle": false,
         "inspectWorkers": false,
         "maxWorkerCount": 2,
@@ -176,6 +169,7 @@ describe('OptimizerConfig::parseOptions()', () => {
         "cache": true,
         "dist": false,
         "filters": Array [],
+        "focus": Array [],
         "includeCoreBundle": false,
         "inspectWorkers": false,
         "maxWorkerCount": 2,
@@ -206,6 +200,7 @@ describe('OptimizerConfig::parseOptions()', () => {
         "cache": true,
         "dist": false,
         "filters": Array [],
+        "focus": Array [],
         "includeCoreBundle": false,
         "inspectWorkers": false,
         "maxWorkerCount": 2,
@@ -233,6 +228,7 @@ describe('OptimizerConfig::parseOptions()', () => {
         "cache": true,
         "dist": false,
         "filters": Array [],
+        "focus": Array [],
         "includeCoreBundle": false,
         "inspectWorkers": false,
         "maxWorkerCount": 2,
@@ -260,6 +256,7 @@ describe('OptimizerConfig::parseOptions()', () => {
         "cache": true,
         "dist": false,
         "filters": Array [],
+        "focus": Array [],
         "includeCoreBundle": false,
         "inspectWorkers": false,
         "maxWorkerCount": 100,
@@ -284,6 +281,7 @@ describe('OptimizerConfig::parseOptions()', () => {
         "cache": false,
         "dist": false,
         "filters": Array [],
+        "focus": Array [],
         "includeCoreBundle": false,
         "inspectWorkers": false,
         "maxWorkerCount": 100,
@@ -308,6 +306,7 @@ describe('OptimizerConfig::parseOptions()', () => {
         "cache": false,
         "dist": false,
         "filters": Array [],
+        "focus": Array [],
         "includeCoreBundle": false,
         "inspectWorkers": false,
         "maxWorkerCount": 100,
@@ -333,6 +332,7 @@ describe('OptimizerConfig::parseOptions()', () => {
         "cache": false,
         "dist": false,
         "filters": Array [],
+        "focus": Array [],
         "includeCoreBundle": false,
         "inspectWorkers": false,
         "maxWorkerCount": 100,
@@ -358,6 +358,7 @@ describe('OptimizerConfig::parseOptions()', () => {
         "cache": true,
         "dist": false,
         "filters": Array [],
+        "focus": Array [],
         "includeCoreBundle": false,
         "inspectWorkers": false,
         "maxWorkerCount": 100,
@@ -385,6 +386,8 @@ describe('OptimizerConfig::create()', () => {
     .findKibanaPlatformPlugins;
   const getPluginBundles: jest.Mock = jest.requireMock('./get_plugin_bundles.ts').getPluginBundles;
   const filterById: jest.Mock = jest.requireMock('./filter_by_id.ts').filterById;
+  const focusBundles: jest.Mock = jest.requireMock('./focus_bundles').focusBundles;
+  const readLimits: jest.Mock = jest.requireMock('../limits.ts').readLimits;
 
   beforeEach(() => {
     if ('mock' in OptimizerConfig.parseOptions) {
@@ -398,6 +401,8 @@ describe('OptimizerConfig::create()', () => {
     findKibanaPlatformPlugins.mockReturnValue(Symbol('new platform plugins'));
     getPluginBundles.mockReturnValue([Symbol('bundle1'), Symbol('bundle2')]);
     filterById.mockReturnValue(Symbol('filtered bundles'));
+    focusBundles.mockReturnValue(Symbol('focused bundles'));
+    readLimits.mockReturnValue(Symbol('limits'));
 
     jest.spyOn(OptimizerConfig, 'parseOptions').mockImplementation((): {
       [key in keyof ParsedOptions]: any;
@@ -414,6 +419,7 @@ describe('OptimizerConfig::create()', () => {
       inspectWorkers: Symbol('parsed inspect workers'),
       profileWebpack: Symbol('parsed profile webpack'),
       filters: [],
+      focus: [],
       includeCoreBundle: false,
     }));
   });
@@ -450,7 +456,7 @@ describe('OptimizerConfig::create()', () => {
           [Window],
         ],
         "invocationCallOrder": Array [
-          21,
+          22,
         ],
         "results": Array [
           Object {
@@ -466,17 +472,14 @@ describe('OptimizerConfig::create()', () => {
         "calls": Array [
           Array [
             Array [],
-            Array [
-              Symbol(bundle1),
-              Symbol(bundle2),
-            ],
+            Symbol(focused bundles),
           ],
         ],
         "instances": Array [
           [Window],
         ],
         "invocationCallOrder": Array [
-          23,
+          25,
         ],
         "results": Array [
           Object {
@@ -494,13 +497,14 @@ describe('OptimizerConfig::create()', () => {
             Symbol(new platform plugins),
             Symbol(parsed repo root),
             Symbol(parsed output root),
+            Symbol(limits),
           ],
         ],
         "instances": Array [
           [Window],
         ],
         "invocationCallOrder": Array [
-          22,
+          23,
         ],
         "results": Array [
           Object {

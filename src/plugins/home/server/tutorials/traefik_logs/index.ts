@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -38,13 +27,13 @@ export function traefikLogsSpecProvider(context: TutorialContext): TutorialSchem
       defaultMessage: 'Traefik logs',
     }),
     moduleName,
-    category: TutorialsCategory.LOGGING,
+    category: TutorialsCategory.SECURITY_SOLUTION,
     shortDescription: i18n.translate('home.tutorials.traefikLogs.shortDescription', {
-      defaultMessage: 'Collect and parse access logs created by the Traefik Proxy.',
+      defaultMessage: 'Collect Traefik access logs.',
     }),
     longDescription: i18n.translate('home.tutorials.traefikLogs.longDescription', {
       defaultMessage:
-        'The `traefik` Filebeat module parses access logs created by Traefik. \
+        'The  module parses access logs created by [Træfik](https://traefik.io/). \
 [Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-traefik.html',
@@ -56,7 +45,7 @@ export function traefikLogsSpecProvider(context: TutorialContext): TutorialSchem
         {
           id: 'Filebeat-Traefik-Dashboard-ecs',
           linkLabel: i18n.translate('home.tutorials.traefikLogs.artifacts.dashboards.linkLabel', {
-            defaultMessage: 'Traefik logs dashboard',
+            defaultMessage: 'Traefik Access Logs',
           }),
           isOverview: true,
         },
@@ -66,7 +55,6 @@ export function traefikLogsSpecProvider(context: TutorialContext): TutorialSchem
       },
     },
     completionTimeMinutes: 10,
-    previewImagePath: '/plugins/home/assets/traefik_logs/screenshot.png',
     onPrem: onPremInstructions(moduleName, platforms, context),
     elasticCloud: cloudInstructions(moduleName, platforms),
     onPremElasticCloud: onPremCloudInstructions(moduleName, platforms),

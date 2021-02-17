@@ -1,11 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { MouseEventHandler } from 'react';
-import { shallow } from 'enzyme';
+import { shallow, mount } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { EuiPopover, EuiLink } from '@elastic/eui';
 import { createMockedIndexPattern } from '../../../mocks';
@@ -28,8 +29,7 @@ const defaultProps = {
   Button: ({ onClick }: { onClick: MouseEventHandler }) => (
     <EuiLink onClick={onClick}>trigger</EuiLink>
   ),
-  isOpenByCreation: true,
-  setIsOpenByCreation: jest.fn(),
+  initiallyOpen: true,
 };
 
 describe('filter popover', () => {
@@ -39,16 +39,14 @@ describe('filter popover', () => {
     },
   }));
   it('should be open if is open by creation', () => {
-    const setIsOpenByCreation = jest.fn();
-    const instance = shallow(
-      <FilterPopover {...defaultProps} setIsOpenByCreation={setIsOpenByCreation} />
-    );
+    const instance = mount(<FilterPopover {...defaultProps} />);
+    instance.update();
     expect(instance.find(EuiPopover).prop('isOpen')).toEqual(true);
     act(() => {
       instance.find(EuiPopover).prop('closePopover')!();
     });
     instance.update();
-    expect(setIsOpenByCreation).toHaveBeenCalledWith(false);
+    expect(instance.find(EuiPopover).prop('isOpen')).toEqual(false);
   });
   it('should call setFilter when modifying QueryInput', () => {
     const setFilter = jest.fn();

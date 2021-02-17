@@ -1,34 +1,50 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { mount, shallow } from 'enzyme';
+import { mount } from 'enzyme';
 import React from 'react';
 
+import { TestProviders } from '../../../../common/mock';
 import { AddNote } from '.';
-import { TimelineStatus } from '../../../../../common/types/timeline';
+
+const mockDispatch = jest.fn();
+jest.mock('react-redux', () => {
+  const original = jest.requireActual('react-redux');
+
+  return {
+    ...original,
+    useDispatch: () => mockDispatch,
+  };
+});
 
 describe('AddNote', () => {
   const note = 'The contents of a new note';
   const props = {
     associateNote: jest.fn(),
-    getNewNoteId: jest.fn(),
     newNote: note,
     onCancelAddNote: jest.fn(),
     updateNewNote: jest.fn(),
-    updateNote: jest.fn(),
-    status: TimelineStatus.active,
   };
 
   test('renders correctly', () => {
-    const wrapper = shallow(<AddNote {...props} />);
-    expect(wrapper).toMatchSnapshot();
+    const wrapper = mount(
+      <TestProviders>
+        <AddNote {...props} />
+      </TestProviders>
+    );
+    expect(wrapper.find('AddNote').exists()).toBeTruthy();
   });
 
   test('it renders the Cancel button when onCancelAddNote is provided', () => {
-    const wrapper = mount(<AddNote {...props} />);
+    const wrapper = mount(
+      <TestProviders>
+        <AddNote {...props} />
+      </TestProviders>
+    );
 
     expect(wrapper.find('[data-test-subj="cancel"]').exists()).toEqual(true);
   });
@@ -40,7 +56,11 @@ describe('AddNote', () => {
       onCancelAddNote,
     };
 
-    const wrapper = mount(<AddNote {...testProps} />);
+    const wrapper = mount(
+      <TestProviders>
+        <AddNote {...testProps} />
+      </TestProviders>
+    );
 
     wrapper.find('[data-test-subj="cancel"]').first().simulate('click');
 
@@ -54,7 +74,11 @@ describe('AddNote', () => {
       associateNote,
     };
 
-    const wrapper = mount(<AddNote {...testProps} />);
+    const wrapper = mount(
+      <TestProviders>
+        <AddNote {...testProps} />
+      </TestProviders>
+    );
 
     wrapper.find('[data-test-subj="cancel"]').first().simulate('click');
 
@@ -66,15 +90,25 @@ describe('AddNote', () => {
       ...props,
       onCancelAddNote: undefined,
     };
-    const wrapper = mount(<AddNote {...testProps} />);
+    const wrapper = mount(
+      <TestProviders>
+        <AddNote {...testProps} />
+      </TestProviders>
+    );
 
     expect(wrapper.find('[data-test-subj="cancel"]').exists()).toEqual(false);
   });
 
   test('it renders the contents of the note', () => {
-    const wrapper = mount(<AddNote {...props} />);
+    const wrapper = mount(
+      <TestProviders>
+        <AddNote {...props} />
+      </TestProviders>
+    );
 
-    expect(wrapper.find('[data-test-subj="add-a-note"]').first().text()).toEqual(note);
+    expect(
+      wrapper.find('[data-test-subj="add-a-note"] .euiMarkdownEditorDropZone').first().text()
+    ).toEqual(note);
   });
 
   test('it invokes associateNote when the Add Note button is clicked', () => {
@@ -84,26 +118,30 @@ describe('AddNote', () => {
       newNote: note,
       associateNote,
     };
-    const wrapper = mount(<AddNote {...testProps} />);
+    const wrapper = mount(
+      <TestProviders>
+        <AddNote {...testProps} />
+      </TestProviders>
+    );
 
     wrapper.find('[data-test-subj="add-note"]').first().simulate('click');
 
     expect(associateNote).toBeCalled();
   });
 
-  test('it invokes getNewNoteId when the Add Note button is clicked', () => {
-    const getNewNoteId = jest.fn();
-    const testProps = {
-      ...props,
-      getNewNoteId,
-    };
+  // test('it invokes getNewNoteId when the Add Note button is clicked', () => {
+  //   const getNewNoteId = jest.fn();
+  //   const testProps = {
+  //     ...props,
+  //     getNewNoteId,
+  //   };
 
-    const wrapper = mount(<AddNote {...testProps} />);
+  //   const wrapper = mount(<AddNote {...testProps} />);
 
-    wrapper.find('[data-test-subj="add-note"]').first().simulate('click');
+  //   wrapper.find('[data-test-subj="add-note"]').first().simulate('click');
 
-    expect(getNewNoteId).toBeCalled();
-  });
+  //   expect(getNewNoteId).toBeCalled();
+  // });
 
   test('it invokes updateNewNote when the Add Note button is clicked', () => {
     const updateNewNote = jest.fn();
@@ -112,7 +150,11 @@ describe('AddNote', () => {
       updateNewNote,
     };
 
-    const wrapper = mount(<AddNote {...testProps} />);
+    const wrapper = mount(
+      <TestProviders>
+        <AddNote {...testProps} />
+      </TestProviders>
+    );
 
     wrapper.find('[data-test-subj="add-note"]').first().simulate('click');
 
@@ -120,41 +162,14 @@ describe('AddNote', () => {
   });
 
   test('it invokes updateNote when the Add Note button is clicked', () => {
-    const updateNote = jest.fn();
-    const testProps = {
-      ...props,
-      updateNote,
-    };
-    const wrapper = mount(<AddNote {...testProps} />);
+    const wrapper = mount(
+      <TestProviders>
+        <AddNote {...props} />
+      </TestProviders>
+    );
 
     wrapper.find('[data-test-subj="add-note"]').first().simulate('click');
 
-    expect(updateNote).toBeCalled();
-  });
-
-  test('it does NOT display the markdown formatting hint when a note has NOT been entered', () => {
-    const testProps = {
-      ...props,
-      newNote: '',
-    };
-    const wrapper = mount(<AddNote {...testProps} />);
-
-    expect(wrapper.find('[data-test-subj="markdown-hint"]').first()).toHaveStyleRule(
-      'visibility',
-      'hidden'
-    );
-  });
-
-  test('it displays the markdown formatting hint when a note has been entered', () => {
-    const testProps = {
-      ...props,
-      newNote: 'We should see a formatting hint now',
-    };
-    const wrapper = mount(<AddNote {...testProps} />);
-
-    expect(wrapper.find('[data-test-subj="markdown-hint"]').first()).toHaveStyleRule(
-      'visibility',
-      'inline'
-    );
+    expect(mockDispatch).toBeCalled();
   });
 });

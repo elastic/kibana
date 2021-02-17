@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -52,4 +53,9 @@ const UseUrlStateComponent: React.FC<UrlStateProps> = (props) => {
   return <UrlStateRedux {...urlStateReduxProps} />;
 };
 
-export const UseUrlState = React.memo(UseUrlStateComponent);
+export const UseUrlState = React.memo(
+  UseUrlStateComponent,
+  (prevProps, nextProps) =>
+    deepEqual(prevProps.indexPattern, nextProps.indexPattern) &&
+    deepEqual(prevProps.navTabs, nextProps.navTabs)
+);

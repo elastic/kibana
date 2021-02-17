@@ -1,11 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { BehaviorSubject } from 'rxjs';
 import { i18n } from '@kbn/i18n';
+import { DataPublicPluginSetup } from '../../../../src/plugins/data/public';
 import {
   AppMountParameters,
   AppUpdater,
@@ -25,6 +27,7 @@ export interface ObservabilityPluginSetup {
 
 export interface ObservabilityPluginSetupDeps {
   home?: HomePublicPluginSetup;
+  data: DataPublicPluginSetup;
 }
 
 export type ObservabilityPluginStart = void;
@@ -63,7 +66,11 @@ export class Plugin implements PluginClass<ObservabilityPluginSetup, Observabili
         subtitle: i18n.translate('xpack.observability.featureCatalogueSubtitle', {
           defaultMessage: 'Centralize & monitor',
         }),
-        descriptions: [
+        description: i18n.translate('xpack.observability.featureCatalogueDescription', {
+          defaultMessage:
+            'Consolidate your logs, metrics, application traces, and system availability with purpose-built UIs.',
+        }),
+        appDescriptions: [
           i18n.translate('xpack.observability.featureCatalogueDescription1', {
             defaultMessage: 'Monitor infrastructure metrics.',
           }),
@@ -75,7 +82,7 @@ export class Plugin implements PluginClass<ObservabilityPluginSetup, Observabili
           }),
         ],
         icon: 'logoObservability',
-        path: '/app/observability',
+        path: '/app/observability/',
         order: 200,
       });
     }

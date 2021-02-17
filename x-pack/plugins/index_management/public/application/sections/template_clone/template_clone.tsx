@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React, { useEffect, useState } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -11,9 +13,10 @@ import { EuiPageBody, EuiPageContent, EuiTitle } from '@elastic/eui';
 import { TemplateDeserialized } from '../../../../common';
 import { TemplateForm, SectionLoading, SectionError, Error } from '../../components';
 import { breadcrumbService } from '../../services/breadcrumbs';
-import { decodePathFromReactRouter, getTemplateDetailsLink } from '../../services/routing';
+import { getTemplateDetailsLink } from '../../services/routing';
 import { saveTemplate, useLoadIndexTemplate } from '../../services/api';
 import { getIsLegacyFromQueryParams } from '../../lib/index_templates';
+import { attemptToURIDecode } from '../../../shared_imports';
 
 interface MatchParams {
   name: string;
@@ -26,7 +29,7 @@ export const TemplateClone: React.FunctionComponent<RouteComponentProps<MatchPar
   location,
   history,
 }) => {
-  const decodedTemplateName = decodePathFromReactRouter(name);
+  const decodedTemplateName = attemptToURIDecode(name)!;
   const isLegacy = getIsLegacyFromQueryParams(location);
 
   const [isSaving, setIsSaving] = useState<boolean>(false);

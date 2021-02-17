@@ -1,16 +1,25 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { performance } from 'perf_hooks';
-import { AlertServices } from '../../../../../alerts/server';
+import {
+  AlertInstanceContext,
+  AlertInstanceState,
+  AlertServices,
+} from '../../../../../alerts/server';
 import { Logger } from '../../../../../../../src/core/server';
 import { SignalSearchResponse } from './types';
+import { BuildRuleMessage } from './rule_messages';
 import { buildEventsSearchQuery } from './build_events_query';
 import { createErrorsFromShard, makeFloatString } from './utils';
-import { TimestampOverrideOrUndefined } from '../../../../common/detection_engine/schemas/common/schemas';
+import {
+  SortOrderOrUndefined,
+  TimestampOverrideOrUndefined,
+} from '../../../../common/detection_engine/schemas/common/schemas';
 
 interface SingleSearchAfterParams {
   aggregations?: unknown;
@@ -18,11 +27,14 @@ interface SingleSearchAfterParams {
   index: string[];
   from: string;
   to: string;
-  services: AlertServices;
+  services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   logger: Logger;
   pageSize: number;
+  sortOrder?: SortOrderOrUndefined;
   filter: unknown;
   timestampOverride: TimestampOverrideOrUndefined;
+  buildRuleMessage: BuildRuleMessage;
+  excludeDocsWithTimestampOverride: boolean;
 }
 
 // utilize search_after for paging results into bulk.
@@ -36,7 +48,10 @@ export const singleSearchAfter = async ({
   filter,
   logger,
   pageSize,
+  sortOrder,
   timestampOverride,
+  buildRuleMessage,
+  excludeDocsWithTimestampOverride,
 }: SingleSearchAfterParams): Promise<{
   searchResult: SignalSearchResponse;
   searchDuration: string;
@@ -50,8 +65,10 @@ export const singleSearchAfter = async ({
       to,
       filter,
       size: pageSize,
+      sortOrder,
       searchAfterSortId,
       timestampOverride,
+      excludeDocsWithTimestampOverride,
     });
 
     const start = performance.now();
@@ -69,7 +86,7 @@ export const singleSearchAfter = async ({
       searchErrors,
     };
   } catch (exc) {
-    logger.error(`[-] nextSearchAfter threw an error ${exc}`);
+    logger.error(buildRuleMessage(`[-] nextSearchAfter threw an error ${exc}`));
     throw exc;
   }
 };

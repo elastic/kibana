@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 /*
@@ -19,7 +20,7 @@ import { DeepPartial } from '../../../common/types/common';
 import { jobSelectionActionCreator } from './actions';
 import { ExplorerChartsData } from './explorer_charts/explorer_charts_container_service';
 import { EXPLORER_ACTION } from './explorer_constants';
-import { AppStateSelectedCells, TimeRangeBounds } from './explorer_utils';
+import { AppStateSelectedCells } from './explorer_utils';
 import { explorerReducer, getExplorerDefaultState, ExplorerState } from './reducers';
 import { ExplorerAppState } from '../../../common/types/ml_url_generator';
 
@@ -95,7 +96,9 @@ const setExplorerDataActionCreator = (payload: DeepPartial<ExplorerState>) => ({
   type: EXPLORER_ACTION.SET_EXPLORER_DATA,
   payload,
 });
-const setFilterDataActionCreator = (payload: DeepPartial<ExplorerState>) => ({
+const setFilterDataActionCreator = (
+  payload: Partial<Exclude<ExplorerAppState['mlExplorerFilter'], undefined>>
+) => ({
   type: EXPLORER_ACTION.SET_FILTER_DATA,
   payload,
 });
@@ -112,9 +115,6 @@ export const explorerService = {
   },
   updateJobSelection: (selectedJobIds: string[]) => {
     explorerAction$.next(jobSelectionActionCreator(selectedJobIds));
-  },
-  setBounds: (payload: TimeRangeBounds) => {
-    explorerAction$.next({ type: EXPLORER_ACTION.SET_BOUNDS, payload });
   },
   setCharts: (payload: ExplorerChartsData) => {
     explorerAction$.next({ type: EXPLORER_ACTION.SET_CHARTS, payload });
@@ -134,7 +134,7 @@ export const explorerService = {
   setExplorerData: (payload: DeepPartial<ExplorerState>) => {
     explorerAction$.next(setExplorerDataActionCreator(payload));
   },
-  setFilterData: (payload: DeepPartial<ExplorerState>) => {
+  setFilterData: (payload: Partial<Exclude<ExplorerAppState['mlExplorerFilter'], undefined>>) => {
     explorerAction$.next(setFilterDataActionCreator(payload));
   },
   setSwimlaneContainerWidth: (payload: number) => {

@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { PaginationBuilder } from './pagination';
 import { EndpointDocGenerator } from '../../../../../common/endpoint/generate_data';
 import { SafeEndpointEvent } from '../../../../../common/endpoint/types';
@@ -20,7 +22,7 @@ describe('Pagination', () => {
   };
   describe('cursor', () => {
     const root = generator.generateEvent();
-    const events = Array.from(generator.relatedEventsGenerator(root, 5));
+    const events = Array.from(generator.relatedEventsGenerator({ node: root, relatedEvents: 5 }));
 
     it('does build a cursor when received the same number of events as was requested', () => {
       expect(PaginationBuilder.buildCursorRequestLimit(4, events)).not.toBeNull();

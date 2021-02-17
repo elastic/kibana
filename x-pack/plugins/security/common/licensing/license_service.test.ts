@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { of, BehaviorSubject } from 'rxjs';
@@ -26,6 +27,7 @@ describe('license features', function () {
       allowRbac: false,
       allowSubFeaturePrivileges: false,
       allowAuditLogging: false,
+      allowLegacyAuditLogging: false,
     });
   });
 
@@ -48,6 +50,7 @@ describe('license features', function () {
       allowRbac: false,
       allowSubFeaturePrivileges: false,
       allowAuditLogging: false,
+      allowLegacyAuditLogging: false,
     });
   });
 
@@ -69,6 +72,7 @@ describe('license features', function () {
           Object {
             "allowAccessAgreement": false,
             "allowAuditLogging": false,
+            "allowLegacyAuditLogging": false,
             "allowLogin": false,
             "allowRbac": false,
             "allowRoleDocumentLevelSecurity": false,
@@ -90,6 +94,7 @@ describe('license features', function () {
           Object {
             "allowAccessAgreement": true,
             "allowAuditLogging": true,
+            "allowLegacyAuditLogging": true,
             "allowLogin": true,
             "allowRbac": true,
             "allowRoleDocumentLevelSecurity": true,
@@ -128,6 +133,7 @@ describe('license features', function () {
       allowRbac: true,
       allowSubFeaturePrivileges: false,
       allowAuditLogging: false,
+      allowLegacyAuditLogging: false,
     });
     expect(getFeatureSpy).toHaveBeenCalledTimes(1);
     expect(getFeatureSpy).toHaveBeenCalledWith('security');
@@ -153,10 +159,36 @@ describe('license features', function () {
       allowRbac: false,
       allowSubFeaturePrivileges: false,
       allowAuditLogging: false,
+      allowLegacyAuditLogging: false,
     });
   });
 
-  it('should allow role mappings, access agreement and sub-feature privileges, but not DLS/FLS if license = gold', () => {
+  it('should allow all basic features for standard license', () => {
+    const mockRawLicense = licenseMock.createLicense({
+      license: { mode: 'standard', type: 'standard' },
+      features: { security: { isEnabled: true, isAvailable: true } },
+    });
+
+    const serviceSetup = new SecurityLicenseService().setup({
+      license$: of(mockRawLicense),
+    });
+    expect(serviceSetup.license.isLicenseAvailable()).toEqual(true);
+    expect(serviceSetup.license.getFeatures()).toEqual({
+      showLogin: true,
+      allowLogin: true,
+      showLinks: true,
+      showRoleMappingsManagement: false,
+      allowAccessAgreement: false,
+      allowRoleDocumentLevelSecurity: false,
+      allowRoleFieldLevelSecurity: false,
+      allowRbac: true,
+      allowSubFeaturePrivileges: false,
+      allowAuditLogging: false,
+      allowLegacyAuditLogging: true,
+    });
+  });
+
+  it('should allow role mappings, access agreement, sub-feature privileges and audit logging, but not DLS/FLS if license = gold', () => {
     const mockRawLicense = licenseMock.createLicense({
       license: { mode: 'gold', type: 'gold' },
       features: { security: { isEnabled: true, isAvailable: true } },
@@ -177,6 +209,7 @@ describe('license features', function () {
       allowRbac: true,
       allowSubFeaturePrivileges: true,
       allowAuditLogging: true,
+      allowLegacyAuditLogging: true,
     });
   });
 
@@ -201,30 +234,7 @@ describe('license features', function () {
       allowRbac: true,
       allowSubFeaturePrivileges: true,
       allowAuditLogging: true,
-    });
-  });
-
-  it('should allow all basic features + audit logging for standard license', () => {
-    const mockRawLicense = licenseMock.createLicense({
-      license: { mode: 'standard', type: 'standard' },
-      features: { security: { isEnabled: true, isAvailable: true } },
-    });
-
-    const serviceSetup = new SecurityLicenseService().setup({
-      license$: of(mockRawLicense),
-    });
-    expect(serviceSetup.license.isLicenseAvailable()).toEqual(true);
-    expect(serviceSetup.license.getFeatures()).toEqual({
-      showLogin: true,
-      allowLogin: true,
-      showLinks: true,
-      showRoleMappingsManagement: false,
-      allowAccessAgreement: false,
-      allowRoleDocumentLevelSecurity: false,
-      allowRoleFieldLevelSecurity: false,
-      allowRbac: true,
-      allowSubFeaturePrivileges: false,
-      allowAuditLogging: true,
+      allowLegacyAuditLogging: true,
     });
   });
 });

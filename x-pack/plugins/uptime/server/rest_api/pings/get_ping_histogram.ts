@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { schema } from '@kbn/config-schema';
@@ -19,25 +20,19 @@ export const createGetPingHistogramRoute: UMRestApiRouteFactory = (libs: UMServe
       monitorId: schema.maybe(schema.string()),
       filters: schema.maybe(schema.string()),
       bucketSize: schema.maybe(schema.string()),
+      _debug: schema.maybe(schema.boolean()),
     }),
   },
-  handler: async ({ callES, dynamicSettings }, _context, request, response): Promise<any> => {
+  handler: async ({ uptimeEsClient, request }): Promise<any> => {
     const { dateStart, dateEnd, monitorId, filters, bucketSize } = request.query;
 
-    const result = await libs.requests.getPingHistogram({
-      callES,
-      dynamicSettings,
+    return await libs.requests.getPingHistogram({
+      uptimeEsClient,
       from: dateStart,
       to: dateEnd,
       monitorId,
       filters,
       bucketSize,
-    });
-
-    return response.ok({
-      body: {
-        ...result,
-      },
     });
   },
 });

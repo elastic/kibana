@@ -1,27 +1,16 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 jest.mock('uuid', () => ({
   v4: jest.fn().mockReturnValue('xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'),
 }));
 
-import { RouteOptions } from 'hapi';
+import { RouteOptions } from '@hapi/hapi';
 import { KibanaRequest } from './request';
 import { httpServerMock } from '../http_server.mocks';
 import { schema } from '@kbn/config-schema';
@@ -198,6 +187,7 @@ describe('KibanaRequest', () => {
       const request = httpServerMock.createRawRequest({
         route: {
           settings: {
+            // @ts-expect-error According to types/hapi__hapi, `auth` can't be a boolean, but it can according to the @hapi/hapi source (https://github.com/hapijs/hapi/blob/v18.4.2/lib/route.js#L139)
             auth,
           },
         },
@@ -207,11 +197,10 @@ describe('KibanaRequest', () => {
       expect(kibanaRequest.route.options.authRequired).toBe(false);
     });
     it('handles required auth: { mode: "required" }', () => {
-      const auth: RouteOptions['auth'] = { mode: 'required' };
       const request = httpServerMock.createRawRequest({
         route: {
           settings: {
-            auth,
+            auth: { mode: 'required' },
           },
         },
       });
@@ -221,11 +210,10 @@ describe('KibanaRequest', () => {
     });
 
     it('handles required auth: { mode: "optional" }', () => {
-      const auth: RouteOptions['auth'] = { mode: 'optional' };
       const request = httpServerMock.createRawRequest({
         route: {
           settings: {
-            auth,
+            auth: { mode: 'optional' },
           },
         },
       });
@@ -235,11 +223,10 @@ describe('KibanaRequest', () => {
     });
 
     it('handles required auth: { mode: "try" } as "optional"', () => {
-      const auth: RouteOptions['auth'] = { mode: 'try' };
       const request = httpServerMock.createRawRequest({
         route: {
           settings: {
-            auth,
+            auth: { mode: 'try' },
           },
         },
       });
@@ -249,26 +236,24 @@ describe('KibanaRequest', () => {
     });
 
     it('throws on auth: strategy name', () => {
-      const auth: RouteOptions['auth'] = 'session';
       const request = httpServerMock.createRawRequest({
         route: {
           settings: {
-            auth,
+            auth: { strategies: ['session'] },
           },
         },
       });
 
       expect(() => KibanaRequest.from(request)).toThrowErrorMatchingInlineSnapshot(
-        `"unexpected authentication options: \\"session\\" for route: /"`
+        `"unexpected authentication options: {\\"strategies\\":[\\"session\\"]} for route: /"`
       );
     });
 
     it('throws on auth: { mode: unexpected mode }', () => {
-      const auth: RouteOptions['auth'] = { mode: undefined };
       const request = httpServerMock.createRawRequest({
         route: {
           settings: {
-            auth,
+            auth: { mode: undefined },
           },
         },
       });

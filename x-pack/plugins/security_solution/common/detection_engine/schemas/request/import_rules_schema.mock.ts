@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { ImportRulesSchema, ImportRulesSchemaDecoded } from './import_rules_schema';
@@ -86,7 +87,7 @@ export const getImportThreatMatchRulesSchemaMock = (ruleId = 'rule-1'): ImportRu
   risk_score: 55,
   language: 'kuery',
   rule_id: ruleId,
-  threat_index: 'index-123',
+  threat_index: ['index-123'],
   threat_mapping: [{ entries: [{ field: 'host.name', type: 'mapping', value: 'host.name' }] }],
   threat_query: '*:*',
   threat_filters: [
@@ -136,7 +137,7 @@ export const getImportThreatMatchRulesSchemaDecodedMock = (): ImportRulesSchemaD
   rule_id: 'rule-1',
   immutable: false,
   threat_query: '*:*',
-  threat_index: 'index-123',
+  threat_index: ['index-123'],
   threat_mapping: [
     {
       entries: [

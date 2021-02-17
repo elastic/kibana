@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
@@ -20,8 +21,7 @@ export default function ({ getService }: FtrProviderContext) {
   const jobConfigs = [createJobConfig('test_calendar_ad_1'), createJobConfig('test_calendar_ad_2')];
   const newJobGroups = ['farequote'];
 
-  // FLAKY: https://github.com/elastic/kibana/issues/78288
-  describe.skip('calendar edit', function () {
+  describe('calendar edit', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('ml/farequote');
       await ml.testResources.createIndexPatternIfNeeded('ft_farequote', '@timestamp');
@@ -56,6 +56,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       await ml.testExecution.logTestStep('calendar edit opens existing calendar');
       await ml.settingsCalendar.openCalendarEditForm(calendarId);
+      await ml.settingsCalendar.assertCalendarTitleValue(calendarId);
 
       await ml.testExecution.logTestStep(
         'calendar edit deselects previous job selection and assigns new job groups'
@@ -85,14 +86,19 @@ export default function ({ getService }: FtrProviderContext) {
 
       await ml.testExecution.logTestStep('calendar edit re-opens the updated calendar');
       await ml.settingsCalendar.openCalendarEditForm(calendarId);
+      await ml.settingsCalendar.assertCalendarTitleValue(calendarId);
+
       await ml.testExecution.logTestStep('calendar edit verifies the job selection is empty');
       await ml.settingsCalendar.assertJobSelection([]);
+
       await ml.testExecution.logTestStep(
         'calendar edit verifies the job group selection was updated'
       );
       await ml.settingsCalendar.assertJobGroupSelection(newJobGroups);
 
-      await ml.testExecution.logTestStep('calendar edit verifies calendar updated correctly');
+      await ml.testExecution.logTestStep(
+        'calendar edit verifies calendar events updated correctly'
+      );
       await asyncForEach(testEvents, async ({ description }) => {
         await ml.settingsCalendar.assertEventRowMissing(description);
       });

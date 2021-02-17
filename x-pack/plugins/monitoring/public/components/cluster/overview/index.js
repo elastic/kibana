@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { Fragment } from 'react';
@@ -53,9 +54,9 @@ export function Overview(props) {
           alerts={props.alerts}
         />
 
-        <BeatsPanel {...props.cluster.beats} setupMode={props.setupMode} />
+        <BeatsPanel {...props.cluster.beats} setupMode={props.setupMode} alerts={props.alerts} />
 
-        <ApmPanel {...props.cluster.apm} setupMode={props.setupMode} />
+        <ApmPanel {...props.cluster.apm} setupMode={props.setupMode} alerts={props.alerts} />
       </EuiPageBody>
     </EuiPage>
   );

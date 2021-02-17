@@ -1,31 +1,26 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React from 'react';
 import { ManageData } from './manage_data';
-import { shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { shallowWithIntl } from '@kbn/test/jest';
 
 jest.mock('../app_navigation_handler', () => {
   return {
     createAppNavigationHandler: jest.fn(() => () => {}),
   };
 });
+
+jest.mock('../../kibana_services', () => ({
+  getServices: () => ({
+    trackUiMetric: jest.fn(),
+  }),
+}));
 
 beforeEach(() => {
   jest.clearAllMocks();
@@ -37,7 +32,6 @@ const mockFeatures = [
   {
     category: 'admin',
     description: 'Control who has access and what tasks they can perform.',
-    homePageSection: 'manage_data',
     icon: 'securityApp',
     id: 'security',
     order: 600,
@@ -48,7 +42,6 @@ const mockFeatures = [
   {
     category: 'admin',
     description: 'Track the real-time health and performance of your deployment.',
-    homePageSection: 'manage_data',
     icon: 'monitoringApp',
     id: 'monitoring',
     order: 610,
@@ -60,7 +53,6 @@ const mockFeatures = [
     category: 'admin',
     description:
       'Save snapshots to a backup repository, and restore to recover index and cluster state.',
-    homePageSection: 'manage_data',
     icon: 'storage',
     id: 'snapshot_restore',
     order: 630,
@@ -71,7 +63,6 @@ const mockFeatures = [
   {
     category: 'admin',
     description: 'Define lifecycle policies to automatically perform operations as an index ages.',
-    homePageSection: 'manage_data',
     icon: 'indexSettings',
     id: 'index_lifecycle_management',
     order: 640,

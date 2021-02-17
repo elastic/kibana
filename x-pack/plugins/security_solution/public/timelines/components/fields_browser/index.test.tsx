@@ -1,13 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { mount } from 'enzyme';
 import React from 'react';
+import { waitFor } from '@testing-library/react';
 
 import '../../../common/mock/match_media';
+import '../../../common/mock/react_beautiful_dnd';
 import { mockBrowserFields } from '../../../common/containers/source/mock';
 import { TestProviders } from '../../../common/mock';
 
@@ -15,21 +18,12 @@ import { FIELD_BROWSER_HEIGHT, FIELD_BROWSER_WIDTH } from './helpers';
 
 import { StatefulFieldsBrowserComponent } from '.';
 
-// Suppress warnings about "react-beautiful-dnd" until we migrate to @testing-library/react
-/* eslint-disable no-console */
-const originalError = console.error;
-const originalWarn = console.warn;
-beforeAll(() => {
-  console.warn = jest.fn();
-  console.error = jest.fn();
-});
-afterAll(() => {
-  console.error = originalError;
-  console.warn = originalWarn;
-});
-
 describe('StatefulFieldsBrowser', () => {
   const timelineId = 'test';
+
+  beforeEach(() => {
+    window.HTMLElement.prototype.scrollIntoView = jest.fn();
+  });
 
   test('it renders the Fields button, which displays the fields browser on click', () => {
     const wrapper = mount(
@@ -38,9 +32,7 @@ describe('StatefulFieldsBrowser', () => {
           browserFields={mockBrowserFields}
           columnHeaders={[]}
           height={FIELD_BROWSER_HEIGHT}
-          onUpdateColumns={jest.fn()}
           timelineId={timelineId}
-          toggleColumn={jest.fn()}
           width={FIELD_BROWSER_WIDTH}
         />
       </TestProviders>
@@ -57,9 +49,7 @@ describe('StatefulFieldsBrowser', () => {
             browserFields={mockBrowserFields}
             columnHeaders={[]}
             height={FIELD_BROWSER_HEIGHT}
-            onUpdateColumns={jest.fn()}
             timelineId={timelineId}
-            toggleColumn={jest.fn()}
             width={FIELD_BROWSER_WIDTH}
           />
         </TestProviders>
@@ -75,9 +65,7 @@ describe('StatefulFieldsBrowser', () => {
             browserFields={mockBrowserFields}
             columnHeaders={[]}
             height={FIELD_BROWSER_HEIGHT}
-            onUpdateColumns={jest.fn()}
             timelineId={timelineId}
-            toggleColumn={jest.fn()}
             width={FIELD_BROWSER_WIDTH}
           />
         </TestProviders>
@@ -93,16 +81,14 @@ describe('StatefulFieldsBrowser', () => {
     beforeEach(() => {
       jest.useFakeTimers();
     });
-    test('it updates the selectedCategoryId state, which makes the category bold, when the user clicks a category name in the left hand side of the field browser', () => {
+    test('it updates the selectedCategoryId state, which makes the category bold, when the user clicks a category name in the left hand side of the field browser', async () => {
       const wrapper = mount(
         <TestProviders>
           <StatefulFieldsBrowserComponent
             browserFields={mockBrowserFields}
             columnHeaders={[]}
             height={FIELD_BROWSER_HEIGHT}
-            onUpdateColumns={jest.fn()}
             timelineId={timelineId}
-            toggleColumn={jest.fn()}
             width={FIELD_BROWSER_WIDTH}
           />
         </TestProviders>
@@ -111,42 +97,58 @@ describe('StatefulFieldsBrowser', () => {
       wrapper.find('[data-test-subj="show-field-browser"]').first().simulate('click');
 
       wrapper.find(`.field-browser-category-pane-auditd-${timelineId}`).first().simulate('click');
-
-      wrapper.update();
-      expect(
-        wrapper.find(`.field-browser-category-pane-auditd-${timelineId}`).at(1)
-      ).toHaveStyleRule('font-weight', 'bold', { modifier: '.euiText' });
+      await waitFor(() => {
+        wrapper.update();
+        expect(
+          wrapper
+            .find(`.field-browser-category-pane-auditd-${timelineId}`)
+            .find('[data-test-subj="categoryName"]')
+            .at(1)
+        ).toHaveStyleRule('font-weight', 'bold', { modifier: '.euiText' });
+      });
     });
 
-    test('it updates the selectedCategoryId state according to most fields returned', () => {
+    test('it updates the selectedCategoryId state according to most fields returned', async () => {
       const wrapper = mount(
         <TestProviders>
           <StatefulFieldsBrowserComponent
             browserFields={mockBrowserFields}
             columnHeaders={[]}
             height={FIELD_BROWSER_HEIGHT}
-            onUpdateColumns={jest.fn()}
             timelineId={timelineId}
-            toggleColumn={jest.fn()}
             width={FIELD_BROWSER_WIDTH}
           />
         </TestProviders>
       );
 
-      wrapper.find('[data-test-subj="show-field-browser"]').first().simulate('click');
-      expect(
-        wrapper.find(`.field-browser-category-pane-cloud-${timelineId}`).at(1)
-      ).toHaveStyleRule('font-weight', 'normal', { modifier: '.euiText' });
-      wrapper
-        .find('[data-test-subj="field-search"]')
-        .last()
-        .simulate('change', { target: { value: 'cloud' } });
+      await waitFor(() => {
+        wrapper.find('[data-test-subj="show-field-browser"]').first().simulate('click');
+        jest.runOnlyPendingTimers();
+        wrapper.update();
 
-      jest.runOnlyPendingTimers();
-      wrapper.update();
-      expect(
-        wrapper.find(`.field-browser-category-pane-cloud-${timelineId}`).at(1)
-      ).toHaveStyleRule('font-weight', 'bold', { modifier: '.euiText' });
+        expect(
+          wrapper
+            .find(`.field-browser-category-pane-cloud-${timelineId}`)
+            .find('[data-test-subj="categoryName"]')
+            .at(1)
+        ).toHaveStyleRule('font-weight', 'normal', { modifier: '.euiText' });
+      });
+
+      await waitFor(() => {
+        wrapper
+          .find('[data-test-subj="field-search"]')
+          .last()
+          .simulate('change', { target: { value: 'cloud' } });
+
+        jest.runOnlyPendingTimers();
+        wrapper.update();
+        expect(
+          wrapper
+            .find(`.field-browser-category-pane-cloud-${timelineId}`)
+            .find('[data-test-subj="categoryName"]')
+            .at(1)
+        ).toHaveStyleRule('font-weight', 'bold', { modifier: '.euiText' });
+      });
     });
   });
 
@@ -160,9 +162,7 @@ describe('StatefulFieldsBrowser', () => {
           columnHeaders={[]}
           height={FIELD_BROWSER_HEIGHT}
           isEventViewer={isEventViewer}
-          onUpdateColumns={jest.fn()}
           timelineId={timelineId}
-          toggleColumn={jest.fn()}
           width={FIELD_BROWSER_WIDTH}
         />
       </TestProviders>
@@ -181,9 +181,7 @@ describe('StatefulFieldsBrowser', () => {
           columnHeaders={[]}
           height={FIELD_BROWSER_HEIGHT}
           isEventViewer={isEventViewer}
-          onUpdateColumns={jest.fn()}
           timelineId={timelineId}
-          toggleColumn={jest.fn()}
           width={FIELD_BROWSER_WIDTH}
         />
       </TestProviders>

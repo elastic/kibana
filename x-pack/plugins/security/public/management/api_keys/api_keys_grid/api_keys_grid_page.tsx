@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { Component } from 'react';
@@ -26,12 +27,12 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import moment from 'moment-timezone';
-import { ApplicationStart, NotificationsStart } from 'src/core/public';
+import type { NotificationsStart } from 'src/core/public';
 import { SectionLoading } from '../../../../../../../src/plugins/es_ui_shared/public';
 import { ApiKey, ApiKeyToInvalidate } from '../../../../common/model';
 import { APIKeysAPIClient } from '../api_keys_api_client';
-import { DocumentationLinksService } from '../documentation_links';
 import { PermissionDenied } from './permission_denied';
 import { EmptyPrompt } from './empty_prompt';
 import { NotEnabled } from './not_enabled';
@@ -39,9 +40,7 @@ import { InvalidateProvider } from './invalidate_provider';
 
 interface Props {
   notifications: NotificationsStart;
-  docLinks: DocumentationLinksService;
   apiKeysAPIClient: PublicMethodsOf<APIKeysAPIClient>;
-  navigateToApp: ApplicationStart['navigateToApp'];
 }
 
 interface State {
@@ -131,7 +130,7 @@ export class APIKeysGridPage extends Component<Props, State> {
     if (!areApiKeysEnabled) {
       return (
         <EuiPageContent>
-          <NotEnabled docLinks={this.props.docLinks} />
+          <NotEnabled />
         </EuiPageContent>
       );
     }
@@ -139,11 +138,7 @@ export class APIKeysGridPage extends Component<Props, State> {
     if (!isLoadingTable && apiKeys && apiKeys.length === 0) {
       return (
         <EuiPageContent>
-          <EmptyPrompt
-            isAdmin={isAdmin}
-            docLinks={this.props.docLinks}
-            navigateToApp={this.props.navigateToApp}
-          />
+          <EmptyPrompt isAdmin={isAdmin} />
         </EuiPageContent>
       );
     }

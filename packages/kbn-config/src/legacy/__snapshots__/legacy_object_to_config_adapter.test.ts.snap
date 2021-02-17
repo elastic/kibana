@@ -16,6 +16,7 @@ Object {
   "maxPayload": 1000,
   "name": "kibana-hostname",
   "port": 1234,
+  "publicBaseUrl": "https://myhost.com/abc",
   "rewriteBasePath": false,
   "socketTimeout": 2000,
   "ssl": Object {
@@ -25,8 +26,8 @@ Object {
   },
   "uuid": undefined,
   "xsrf": Object {
+    "allowlist": Array [],
     "disableProtection": false,
-    "whitelist": Array [],
   },
 }
 `;
@@ -47,6 +48,7 @@ Object {
   "maxPayload": 1000,
   "name": "kibana-hostname",
   "port": 1234,
+  "publicBaseUrl": "http://myhost.com/abc",
   "rewriteBasePath": false,
   "socketTimeout": 2000,
   "ssl": Object {
@@ -56,8 +58,8 @@ Object {
   },
   "uuid": undefined,
   "xsrf": Object {
+    "allowlist": Array [],
     "disableProtection": false,
-    "whitelist": Array [],
   },
 }
 `;
@@ -66,10 +68,10 @@ exports[`#get correctly handles silent logging config. 1`] = `
 Object {
   "appenders": Object {
     "default": Object {
-      "kind": "legacy-appender",
       "legacyLoggingConfig": Object {
         "silent": true,
       },
+      "type": "legacy-appender",
     },
   },
   "loggers": undefined,
@@ -83,12 +85,12 @@ exports[`#get correctly handles verbose file logging config with json format. 1`
 Object {
   "appenders": Object {
     "default": Object {
-      "kind": "legacy-appender",
       "legacyLoggingConfig": Object {
         "dest": "/some/path.log",
         "json": true,
         "verbose": true,
       },
+      "type": "legacy-appender",
     },
   },
   "loggers": undefined,

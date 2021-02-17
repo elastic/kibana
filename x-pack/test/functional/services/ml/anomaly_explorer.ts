@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
@@ -88,7 +90,7 @@ export function MachineLearningAnomalyExplorerProvider({ getService }: FtrProvid
       );
       await testSubjects.clickWhenNotDisabled('mlAddAndEditDashboardButton');
       const embeddable = await testSubjects.find('mlAnomalySwimlaneEmbeddableWrapper');
-      const swimlane = await embeddable.findByClassName('ml-swimlanes');
+      const swimlane = await embeddable.findByClassName('mlSwimLaneContainer');
       expect(await swimlane.isDisplayed()).to.eql(
         true,
         'Anomaly swimlane should be displayed in dashboard'

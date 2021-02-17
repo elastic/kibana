@@ -1,29 +1,31 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { kea, MakeLogicType } from 'kea';
 
-import { IInitialAppData } from '../../../common/types';
-import { IConfiguredLimits, IAccount, IRole } from './types';
+import { InitialAppData } from '../../../common/types';
+
+import { ConfiguredLimits, Account, Role } from './types';
 
 import { getRoleAbilities } from './utils/role';
 
-export interface IAppValues {
+interface AppValues {
   hasInitialized: boolean;
   ilmEnabled: boolean;
-  configuredLimits: Partial<IConfiguredLimits>;
-  account: Partial<IAccount>;
-  myRole: Partial<IRole>;
+  configuredLimits: Partial<ConfiguredLimits>;
+  account: Partial<Account>;
+  myRole: Partial<Role>;
 }
-export interface IAppActions {
-  initializeAppData(props: IInitialAppData): Required<IInitialAppData>;
+interface AppActions {
+  initializeAppData(props: InitialAppData): Required<InitialAppData>;
   setOnboardingComplete(): boolean;
 }
 
-export const AppLogic = kea<MakeLogicType<IAppValues, IAppActions>>({
+export const AppLogic = kea<MakeLogicType<AppValues, AppActions>>({
   path: ['enterprise_search', 'app_search', 'app_logic'],
   actions: {
     initializeAppData: (props) => props,

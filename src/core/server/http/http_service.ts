@@ -1,27 +1,17 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { Observable, Subscription, combineLatest } from 'rxjs';
 import { first, map } from 'rxjs/operators';
-import { Server } from 'hapi';
+import { Server } from '@hapi/hapi';
 import { pick } from '@kbn/std';
 
+import type { RequestHandlerContext } from 'src/core/server';
 import { CoreService } from '../../types';
 import { Logger, LoggerFactory } from '../logging';
 import { ContextSetup } from '../context';
@@ -42,8 +32,12 @@ import {
   InternalHttpServiceStart,
 } from './types';
 
-import { RequestHandlerContext } from '../../server';
 import { registerCoreHandlers } from './lifecycle_handlers';
+import {
+  ExternalUrlConfigType,
+  config as externalUrlConfig,
+  ExternalUrlConfig,
+} from '../external_url';
 
 interface SetupDeps {
   context: ContextSetup;
@@ -73,7 +67,8 @@ export class HttpService
     this.config$ = combineLatest([
       configService.atPath<HttpConfigType>(httpConfig.path),
       configService.atPath<CspConfigType>(cspConfig.path),
-    ]).pipe(map(([http, csp]) => new HttpConfig(http, csp)));
+      configService.atPath<ExternalUrlConfigType>(externalUrlConfig.path),
+    ]).pipe(map(([http, csp, externalUrl]) => new HttpConfig(http, csp, externalUrl)));
     this.httpServer = new HttpServer(logger, 'Kibana');
     this.httpsRedirectServer = new HttpsRedirectServer(logger.get('http', 'redirect', 'server'));
   }
@@ -103,17 +98,25 @@ export class HttpService
     this.internalSetup = {
       ...serverContract,
 
-      createRouter: (path: string, pluginId: PluginOpaqueId = this.coreContext.coreId) => {
+      externalUrl: new ExternalUrlConfig(config.externalUrl),
+
+      createRouter: <Context extends RequestHandlerContext = RequestHandlerContext>(
+        path: string,
+        pluginId: PluginOpaqueId = this.coreContext.coreId
+      ) => {
         const enhanceHandler = this.requestHandlerContext!.createHandler.bind(null, pluginId);
-        const router = new Router(path, this.log, enhanceHandler);
+        const router = new Router<Context>(path, this.log, enhanceHandler);
         registerRouter(router);
         return router;
       },
 
-      registerRouteHandlerContext: <T extends keyof RequestHandlerContext>(
+      registerRouteHandlerContext: <
+        Context extends RequestHandlerContext,
+        ContextName extends keyof Context
+      >(
         pluginOpaqueId: PluginOpaqueId,
-        contextName: T,
-        provider: RequestHandlerContextProvider<T>
+        contextName: ContextName,
+        provider: RequestHandlerContextProvider<Context, ContextName>
       ) => this.requestHandlerContext!.registerContext(pluginOpaqueId, contextName, provider),
     };
 
@@ -158,7 +161,7 @@ export class HttpService
    * @internal
    * */
   private shouldListen(config: HttpConfig) {
-    return !this.coreContext.env.isDevClusterMaster && config.autoListen;
+    return !this.coreContext.env.isDevCliParent && config.autoListen;
   }
 
   public async stop() {

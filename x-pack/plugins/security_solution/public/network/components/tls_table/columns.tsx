@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 /* eslint-disable react/display-name */
@@ -64,7 +65,7 @@ export const getTlsColumns = (tableId: string): TlsColumns => [
     render: (sha1) =>
       getRowItemDraggable({
         rowItem: sha1,
-        attrName: 'tls.server_certificate.fingerprint.sha1',
+        attrName: 'tls.server.hash.sha1',
         idPrefix: `${tableId}-${sha1}-table-sha1`,
       }),
   },
@@ -77,7 +78,7 @@ export const getTlsColumns = (tableId: string): TlsColumns => [
     render: ({ _id, ja3 }) =>
       getRowItemDraggables({
         rowItems: ja3,
-        attrName: 'tls.fingerprints.ja3.hash',
+        attrName: 'tls.server.ja3s',
         idPrefix: `${tableId}-${_id}-table-ja3`,
       }),
   },
@@ -90,7 +91,7 @@ export const getTlsColumns = (tableId: string): TlsColumns => [
     render: ({ _id, notAfter }) =>
       getRowItemDraggables({
         rowItems: notAfter,
-        attrName: 'tls.server_certificate.not_after',
+        attrName: 'tls.server.not_after',
         idPrefix: `${tableId}-${_id}-table-notAfter`,
         render: (validUntil) => (
           <LocalizedDateTooltip date={moment(new Date(validUntil)).toDate()}>

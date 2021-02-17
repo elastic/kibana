@@ -1,53 +1,58 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import moment from 'moment';
 
 import { createFiltersFromRangeSelectAction } from './create_filters_from_range_select';
 
-import { IndexPatternsContract, RangeFilter } from '../../../public';
+import {
+  fieldFormats,
+  FieldFormatsGetConfigFn,
+  IndexPatternsContract,
+  RangeFilter,
+} from '../../../public';
 import { dataPluginMock } from '../../../public/mocks';
 import { setIndexPatterns, setSearchService } from '../../../public/services';
-import { TriggerContextMapping } from '../../../../ui_actions/public';
 
 describe('brushEvent', () => {
   const DAY_IN_MS = 24 * 60 * 60 * 1000;
   const JAN_01_2014 = 1388559600000;
-  let baseEvent: TriggerContextMapping['SELECT_RANGE_TRIGGER']['data'];
+  let baseEvent: {
+    table: any;
+    column: number;
+    range: number[];
+    timeFieldName?: string;
+  };
+
+  const mockField = {
+    name: 'time',
+    indexPattern: {
+      id: 'logstash-*',
+    },
+    filterable: true,
+    format: new fieldFormats.DateFormat({}, (() => {}) as FieldFormatsGetConfigFn),
+  };
 
   const indexPattern = {
     id: 'indexPatternId',
     timeFieldName: 'time',
     fields: {
-      getByName: () => undefined,
-      filter: () => [],
+      getByName: () => mockField,
+      filter: () => [mockField],
     },
   };
 
-  const aggConfigs = [
-    {
-      params: {
-        field: {},
-      },
-      getIndexPattern: () => indexPattern,
+  const serializedAggConfig = {
+    type: 'date_histogram',
+    params: {
+      field: {},
     },
-  ];
+  };
 
   beforeEach(() => {
     const dataStart = dataPluginMock.createStartContract();
@@ -60,15 +65,18 @@ describe('brushEvent', () => {
     baseEvent = {
       column: 0,
       table: {
-        type: 'kibana_datatable',
+        type: 'datatable',
         columns: [
           {
             id: '1',
             name: '1',
             meta: {
-              type: 'histogram',
-              indexPatternId: 'indexPatternId',
-              aggConfigParams: aggConfigs[0].params,
+              type: 'date',
+              sourceParams: {
+                indexPatternId: 'indexPatternId',
+                ...serializedAggConfig,
+              },
+              source: 'esaggs',
             },
           },
         ],
@@ -90,7 +98,7 @@ describe('brushEvent', () => {
   describe('handles an event when the x-axis field is a date field', () => {
     describe('date field is index pattern timefield', () => {
       beforeEach(() => {
-        aggConfigs[0].params.field = {
+        serializedAggConfig.params.field = {
           name: 'time',
           type: 'date',
         };
@@ -98,7 +106,7 @@ describe('brushEvent', () => {
 
       afterAll(() => {
         baseEvent.range = [];
-        aggConfigs[0].params.field = {};
+        serializedAggConfig.params.field = {};
       });
 
       test('by ignoring the event when range spans zero time', async () => {
@@ -123,7 +131,7 @@ describe('brushEvent', () => {
 
     describe('date field is not index pattern timefield', () => {
       beforeEach(() => {
-        aggConfigs[0].params.field = {
+        serializedAggConfig.params.field = {
           name: 'anotherTimeField',
           type: 'date',
         };
@@ -131,7 +139,7 @@ describe('brushEvent', () => {
 
       afterAll(() => {
         baseEvent.range = [];
-        aggConfigs[0].params.field = {};
+        serializedAggConfig.params.field = {};
       });
 
       test('creates a new range filter', async () => {
@@ -157,7 +165,7 @@ describe('brushEvent', () => {
 
   describe('handles an event when the x-axis field is a number', () => {
     beforeAll(() => {
-      aggConfigs[0].params.field = {
+      serializedAggConfig.params.field = {
         name: 'numberField',
         type: 'number',
       };

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FC, useMemo } from 'react';
@@ -10,7 +11,6 @@ import { EuiCallOut, EuiLink, EuiPanel, EuiSpacer } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
-import { ExplorationTitle } from '../exploration_title';
 import { useMlKibana } from '../../../../../contexts/kibana';
 
 const jobConfigErrorTitle = i18n.translate('xpack.ml.dataframe.analytics.jobConfig.errorTitle', {
@@ -63,7 +63,6 @@ export const JobConfigErrorCallout: FC<Props> = ({
 
   return (
     <EuiPanel grow={false}>
-      <ExplorationTitle title={title} />
       <EuiSpacer />
       <EuiCallOut
         title={jobConfigErrorMessage ? jobConfigErrorTitle : jobCapsErrorTitle}

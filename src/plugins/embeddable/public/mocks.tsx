@@ -1,21 +1,11 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
+
 import React from 'react';
 import {
   EmbeddableStart,
@@ -34,11 +24,11 @@ import { coreMock } from '../../../core/public/mocks';
 import { UiActionsService } from './lib/ui_actions';
 import { CoreStart } from '../../../core/public';
 import { Start as InspectorStart } from '../../inspector/public';
-import { dataPluginMock } from '../../data/public/mocks';
 
 import { inspectorPluginMock } from '../../inspector/public/mocks';
 import { uiActionsPluginMock } from '../../ui_actions/public/mocks';
 
+export { mockAttributeService } from './lib/attribute_service/attribute_service.mock';
 export type Setup = jest.Mocked<EmbeddableSetup>;
 export type Start = jest.Mocked<EmbeddableStart>;
 
@@ -80,6 +70,7 @@ export const createEmbeddablePanelMock = ({
 
 export const createEmbeddableStateTransferMock = (): Partial<EmbeddableStateTransfer> => {
   return {
+    clearEditorState: jest.fn(),
     getIncomingEditorState: jest.fn(),
     getIncomingEmbeddablePackage: jest.fn(),
     navigateToEditor: jest.fn(),
@@ -122,9 +113,10 @@ const createStartContract = (): Start => {
     telemetry: jest.fn(),
     extract: jest.fn(),
     inject: jest.fn(),
+    migrate: jest.fn(),
     EmbeddablePanel: jest.fn(),
-    getEmbeddablePanel: jest.fn(),
     getStateTransfer: jest.fn(() => createEmbeddableStateTransferMock() as EmbeddableStateTransfer),
+    getAttributeService: jest.fn(),
   };
   return startContract;
 };
@@ -133,13 +125,11 @@ const createInstance = (setupPlugins: Partial<EmbeddableSetupDependencies> = {})
   const plugin = new EmbeddablePublicPlugin({} as any);
   const setup = plugin.setup(coreMock.createSetup(), {
     uiActions: setupPlugins.uiActions || uiActionsPluginMock.createSetupContract(),
-    data: dataPluginMock.createSetupContract(),
   });
   const doStart = (startPlugins: Partial<EmbeddableStartDependencies> = {}) =>
     plugin.start(coreMock.createStart(), {
       uiActions: startPlugins.uiActions || uiActionsPluginMock.createStartContract(),
       inspector: inspectorPluginMock.createStartContract(),
-      data: dataPluginMock.createStartContract(),
     });
   return {
     plugin,

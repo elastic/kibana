@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { get } from 'lodash';
 import { SearchResponse } from 'elasticsearch';
-import { StatsCollectionConfig } from 'src/plugins/telemetry_collection_manager/server';
+import { LegacyAPICaller } from 'kibana/server';
 import { createQuery } from './create_query';
 import { INDEX_PATTERN_BEATS } from '../../common/constants';
 
@@ -318,10 +319,10 @@ export function processResults(
  * @return {Promise}
  */
 async function fetchBeatsByType(
-  callCluster: StatsCollectionConfig['callCluster'],
+  callCluster: LegacyAPICaller,
   clusterUuids: string[],
-  start: StatsCollectionConfig['start'],
-  end: StatsCollectionConfig['end'],
+  start: string,
+  end: string,
   { page = 0, ...options }: { page?: number } & BeatsProcessOptions,
   type: string
 ): Promise<void> {
@@ -382,23 +383,27 @@ async function fetchBeatsByType(
 }
 
 export async function fetchBeatsStats(
-  callCluster: StatsCollectionConfig['callCluster'],
+  callCluster: LegacyAPICaller,
   clusterUuids: string[],
-  start: StatsCollectionConfig['start'],
-  end: StatsCollectionConfig['end'],
+  start: string,
+  end: string,
   options: { page?: number } & BeatsProcessOptions
 ) {
   return fetchBeatsByType(callCluster, clusterUuids, start, end, options, 'beats_stats');
 }
 
 export async function fetchBeatsStates(
-  callCluster: StatsCollectionConfig['callCluster'],
+  callCluster: LegacyAPICaller,
   clusterUuids: string[],
-  start: StatsCollectionConfig['start'],
-  end: StatsCollectionConfig['end'],
+  start: string,
+  end: string,
   options: { page?: number } & BeatsProcessOptions
 ) {
   return fetchBeatsByType(callCluster, clusterUuids, start, end, options, 'beats_state');
+}
+
+export interface BeatsStatsByClusterUuid {
+  [clusterUuid: string]: BeatsBaseStats;
 }
 
 /*
@@ -406,11 +411,11 @@ export async function fetchBeatsStates(
  * @return {Object} - Beats stats in an object keyed by the cluster UUIDs
  */
 export async function getBeatsStats(
-  callCluster: StatsCollectionConfig['callCluster'],
+  callCluster: LegacyAPICaller,
   clusterUuids: string[],
-  start: StatsCollectionConfig['start'],
-  end: StatsCollectionConfig['end']
-) {
+  start: string,
+  end: string
+): Promise<BeatsStatsByClusterUuid> {
   const options: BeatsProcessOptions = {
     clusters: {}, // the result object to be built up
     clusterHostSets: {}, // passed to processResults for tracking state in the results generation

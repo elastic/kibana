@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 /**
@@ -10,11 +11,11 @@
       Could not load worker ReferenceError: Worker is not defined
           at createWorker (/<path-to-repo>/node_modules/brace/index.js:17992:5)
  */
-import * as stubWebWorker from '../../../../../test_utils/stub_web_worker'; // eslint-disable-line no-unused-vars
+import { stubWebWorker } from '@kbn/test/jest'; // eslint-disable-line no-unused-vars
 
 import { getFollowerIndexMock } from './fixtures/follower_index';
 import './mocks';
-import { setupEnvironment, pageHelpers, nextTick, getRandomString } from './helpers';
+import { setupEnvironment, pageHelpers, nextTick, delay, getRandomString } from './helpers';
 
 const { setup } = pageHelpers.followerIndexList;
 
@@ -147,7 +148,7 @@ describe('<FollowerIndicesList />', () => {
     afterEach(async () => {
       // The <EuiPopover /> updates are not all synchronouse
       // We need to wait for all the updates to ran before unmounting our component
-      await nextTick(100);
+      await delay(100);
     });
 
     test('should not display the empty prompt', () => {

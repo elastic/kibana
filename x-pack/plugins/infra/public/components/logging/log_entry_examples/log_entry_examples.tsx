@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
 
-import { euiStyled } from '../../../../../observability/public';
+import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
 import { LogEntryExampleMessagesEmptyIndicator } from './log_entry_examples_empty_indicator';
 import { LogEntryExampleMessagesFailureIndicator } from './log_entry_examples_failure_indicator';
 import { LogEntryExampleMessagesLoadingIndicator } from './log_entry_examples_loading_indicator';
@@ -46,4 +47,5 @@ const Wrapper = euiStyled.div`
   flex-direction: column;
   flex: 1 0 0%;
   overflow: hidden;
+  padding-top: 1px; // Buffer for the "Reload" buttons' hover state
 `;

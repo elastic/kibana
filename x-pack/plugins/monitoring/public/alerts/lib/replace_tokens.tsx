@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React, { Fragment } from 'react';
 import moment from 'moment';
 import { EuiLink } from '@elastic/eui';
@@ -11,12 +13,13 @@ import {
   AlertMessageTimeToken,
   AlertMessageLinkToken,
   AlertMessageDocLinkToken,
-} from '../../../server/alerts/types';
+} from '../../../common/types/alerts';
 // @ts-ignore
 import { formatTimestampToDuration } from '../../../common';
 import { CALCULATE_DURATION_UNTIL } from '../../../common/constants';
 import { AlertMessageTokenType } from '../../../common/enums';
 import { Legacy } from '../../legacy_shims';
+import { getSafeForExternalLink } from '../../lib/get_safe_for_external_link';
 
 export function replaceTokens(alertMessage: AlertMessage): JSX.Element | string | null {
   if (!alertMessage) {
@@ -58,10 +61,11 @@ export function replaceTokens(alertMessage: AlertMessage): JSX.Element | string 
     const index = text.indexOf(linkPart[0]);
     const preString = text.substring(0, index);
     const postString = text.substring(index + linkPart[0].length);
+    const safeLink = getSafeForExternalLink(`#/${linkToken.url}`);
     element = (
       <Fragment>
         {preString}
-        <EuiLink href={`#${linkToken.url}`}>{linkPart[1]}</EuiLink>
+        <EuiLink href={safeLink}>{linkPart[1]}</EuiLink>
         {postString}
       </Fragment>
     );
@@ -75,6 +79,7 @@ export function replaceTokens(alertMessage: AlertMessage): JSX.Element | string 
     }
 
     const url = linkToken.partialUrl
+      .replace('{basePath}', Legacy.shims.getBasePath())
       .replace('{elasticWebsiteUrl}', Legacy.shims.docLinks.ELASTIC_WEBSITE_URL)
       .replace('{docLinkVersion}', Legacy.shims.docLinks.DOC_LINK_VERSION);
     const index = text.indexOf(linkPart[0]);
@@ -83,7 +88,9 @@ export function replaceTokens(alertMessage: AlertMessage): JSX.Element | string 
     element = (
       <Fragment>
         {preString}
-        <EuiLink href={url}>{linkPart[1]}</EuiLink>
+        <EuiLink href={url} target="_blank" external>
+          {linkPart[1]}
+        </EuiLink>
         {postString}
       </Fragment>
     );

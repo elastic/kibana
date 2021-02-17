@@ -1,11 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
-import { cleanup, fireEvent, render } from '@testing-library/react/pure';
+import { fireEvent, render } from '@testing-library/react';
 import { TEST_SUBJ_ACTION_FACTORY_ITEM, TEST_SUBJ_SELECTED_ACTION_FACTORY } from './action_wizard';
 import {
   dashboardFactory,
@@ -16,10 +17,6 @@ import {
 } from './test_data';
 import { ActionFactory } from '../../dynamic_actions';
 import { licensingMock } from '../../../../licensing/public/mocks';
-
-// TODO: afterEach is not available for it globally during setup
-// https://github.com/elastic/kibana/issues/59469
-afterEach(cleanup);
 
 test('Pick and configure action', () => {
   const screen = render(<Demo actionFactories={[dashboardFactory, urlFactory]} />);

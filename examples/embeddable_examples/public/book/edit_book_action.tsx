@@ -1,28 +1,22 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
+
 import React from 'react';
 import { OverlayStart } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 import { BookSavedObjectAttributes, BOOK_SAVED_OBJECT } from '../../common';
 import { createAction } from '../../../../src/plugins/ui_actions/public';
 import { toMountPoint } from '../../../../src/plugins/kibana_react/public';
-import { ViewMode, SavedObjectEmbeddableInput } from '../../../../src/plugins/embeddable/public';
+import {
+  ViewMode,
+  SavedObjectEmbeddableInput,
+  EmbeddableStart,
+} from '../../../../src/plugins/embeddable/public';
 import {
   BookEmbeddable,
   BOOK_EMBEDDABLE,
@@ -30,11 +24,13 @@ import {
   BookByValueInput,
 } from './book_embeddable';
 import { CreateEditBookComponent } from './create_edit_book_component';
-import { DashboardStart } from '../../../../src/plugins/dashboard/public';
+import { OnSaveProps } from '../../../../src/plugins/saved_objects/public';
+import { SavedObjectsClientContract } from '../../../../src/core/target/types/public/saved_objects';
 
 interface StartServices {
   openModal: OverlayStart['openModal'];
-  getAttributeService: DashboardStart['getAttributeService'];
+  getAttributeService: EmbeddableStart['getAttributeService'];
+  savedObjectsClient: SavedObjectsClientContract;
 }
 
 interface ActionContext {
@@ -47,6 +43,7 @@ export const createEditBookAction = (getStartServices: () => Promise<StartServic
   createAction({
     getDisplayName: () =>
       i18n.translate('embeddableExamples.book.edit', { defaultMessage: 'Edit Book' }),
+    id: ACTION_EDIT_BOOK,
     type: ACTION_EDIT_BOOK,
     order: 100,
     getIconType: () => 'documents',
@@ -56,8 +53,20 @@ export const createEditBookAction = (getStartServices: () => Promise<StartServic
       );
     },
     execute: async ({ embeddable }: ActionContext) => {
-      const { openModal, getAttributeService } = await getStartServices();
-      const attributeService = getAttributeService<BookSavedObjectAttributes>(BOOK_SAVED_OBJECT);
+      const { openModal, getAttributeService, savedObjectsClient } = await getStartServices();
+      const attributeService = getAttributeService<BookSavedObjectAttributes>(BOOK_SAVED_OBJECT, {
+        saveMethod: async (attributes: BookSavedObjectAttributes, savedObjectId?: string) => {
+          if (savedObjectId) {
+            return savedObjectsClient.update(BOOK_EMBEDDABLE, savedObjectId, attributes);
+          }
+          return savedObjectsClient.create(BOOK_EMBEDDABLE, attributes);
+        },
+        checkForDuplicateTitle: (props: OnSaveProps) => {
+          return new Promise(() => {
+            return true;
+          });
+        },
+      });
       const onSave = async (attributes: BookSavedObjectAttributes, useRefType: boolean) => {
         const newInput = await attributeService.wrapAttributes(
           attributes,

@@ -1,11 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
-import { mountWithIntl as mount } from 'test_utils/enzyme_helpers';
+import { mountWithIntl as mount } from '@kbn/test/jest';
 import { Visualization } from '../../types';
 import {
   createMockVisualization,
@@ -98,7 +99,7 @@ describe('suggestion_panel', () => {
         .find('[data-test-subj="lnsSuggestion"]')
         .find(EuiPanel)
         .map((el) => el.parents(EuiToolTip).prop('content'))
-    ).toEqual(['Current', 'Suggestion1', 'Suggestion2']);
+    ).toEqual(['Current visualization', 'Suggestion1', 'Suggestion2']);
   });
 
   describe('uncommitted suggestions', () => {

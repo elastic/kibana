@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import {
@@ -22,7 +11,7 @@ import {
   EmbeddableStart,
   CONTEXT_MENU_TRIGGER,
 } from '../../../src/plugins/embeddable/public';
-import { Plugin, CoreSetup, CoreStart } from '../../../src/core/public';
+import { Plugin, CoreSetup, CoreStart, SavedObjectsClient } from '../../../src/core/public';
 import {
   HelloWorldEmbeddableFactory,
   HELLO_WORLD_EMBEDDABLE,
@@ -51,22 +40,15 @@ import {
   TodoRefEmbeddableFactory,
   TodoRefEmbeddableFactoryDefinition,
 } from './todo/todo_ref_embeddable_factory';
-import { ACTION_EDIT_BOOK, createEditBookAction } from './book/edit_book_action';
-import { BookEmbeddable, BOOK_EMBEDDABLE } from './book/book_embeddable';
+import { createEditBookAction } from './book/edit_book_action';
+import { BOOK_EMBEDDABLE } from './book/book_embeddable';
 import {
   BookEmbeddableFactory,
   BookEmbeddableFactoryDefinition,
 } from './book/book_embeddable_factory';
 import { UiActionsStart } from '../../../src/plugins/ui_actions/public';
-import {
-  ACTION_ADD_BOOK_TO_LIBRARY,
-  createAddBookToLibraryAction,
-} from './book/add_book_to_library_action';
-import { DashboardStart } from '../../../src/plugins/dashboard/public';
-import {
-  ACTION_UNLINK_BOOK_FROM_LIBRARY,
-  createUnlinkBookFromLibraryAction,
-} from './book/unlink_book_from_library_action';
+import { createAddBookToLibraryAction } from './book/add_book_to_library_action';
+import { createUnlinkBookFromLibraryAction } from './book/unlink_book_from_library_action';
 
 export interface EmbeddableExamplesSetupDependencies {
   embeddable: EmbeddableSetup;
@@ -75,7 +57,7 @@ export interface EmbeddableExamplesSetupDependencies {
 
 export interface EmbeddableExamplesStartDependencies {
   embeddable: EmbeddableStart;
-  dashboard: DashboardStart;
+  savedObjectsClient: SavedObjectsClient;
 }
 
 interface ExampleEmbeddableFactories {
@@ -91,14 +73,6 @@ interface ExampleEmbeddableFactories {
 export interface EmbeddableExamplesStart {
   createSampleData: () => Promise<void>;
   factories: ExampleEmbeddableFactories;
-}
-
-declare module '../../../src/plugins/ui_actions/public' {
-  export interface ActionContextMapping {
-    [ACTION_EDIT_BOOK]: { embeddable: BookEmbeddable };
-    [ACTION_ADD_BOOK_TO_LIBRARY]: { embeddable: BookEmbeddable };
-    [ACTION_UNLINK_BOOK_FROM_LIBRARY]: { embeddable: BookEmbeddable };
-  }
 }
 
 export class EmbeddableExamplesPlugin
@@ -156,14 +130,17 @@ export class EmbeddableExamplesPlugin
     this.exampleEmbeddableFactories.getBookEmbeddableFactory = deps.embeddable.registerEmbeddableFactory(
       BOOK_EMBEDDABLE,
       new BookEmbeddableFactoryDefinition(async () => ({
-        getAttributeService: (await core.getStartServices())[1].dashboard.getAttributeService,
+        getAttributeService: (await core.getStartServices())[1].embeddable.getAttributeService,
         openModal: (await core.getStartServices())[0].overlays.openModal,
+        savedObjectsClient: (await core.getStartServices())[0].savedObjects.client,
+        overlays: (await core.getStartServices())[0].overlays,
       }))
     );
 
     const editBookAction = createEditBookAction(async () => ({
-      getAttributeService: (await core.getStartServices())[1].dashboard.getAttributeService,
+      getAttributeService: (await core.getStartServices())[1].embeddable.getAttributeService,
       openModal: (await core.getStartServices())[0].overlays.openModal,
+      savedObjectsClient: (await core.getStartServices())[0].savedObjects.client,
     }));
     deps.uiActions.registerAction(editBookAction);
     deps.uiActions.attachAction(CONTEXT_MENU_TRIGGER, editBookAction.id);

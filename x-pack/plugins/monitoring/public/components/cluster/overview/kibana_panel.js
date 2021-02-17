@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -34,12 +35,14 @@ import { AlertsBadge } from '../../../alerts/badge';
 import { shouldShowAlertBadge } from '../../../alerts/lib/should_show_alert_badge';
 import { isSetupModeFeatureEnabled } from '../../../lib/setup_mode';
 import { SetupModeFeature } from '../../../../common/enums';
+import { SetupModeContext } from '../../setup_mode/setup_mode_context';
 
 const INSTANCES_PANEL_ALERTS = [ALERT_KIBANA_VERSION_MISMATCH];
 
 export function KibanaPanel(props) {
   const setupMode = props.setupMode;
   const alerts = props.alerts;
+  const setupModeContext = React.useContext(SetupModeContext);
   const showDetectedKibanas =
     setupMode.enabled && get(setupMode.data, 'kibana.detected.doesExist', false);
   if (!props.count && !showDetectedKibanas) {
@@ -63,7 +66,7 @@ export function KibanaPanel(props) {
   ) : null;
 
   let instancesAlertStatus = null;
-  if (shouldShowAlertBadge(alerts, INSTANCES_PANEL_ALERTS)) {
+  if (shouldShowAlertBadge(alerts, INSTANCES_PANEL_ALERTS, setupModeContext)) {
     const alertsList = INSTANCES_PANEL_ALERTS.map((alertType) => alerts[alertType]);
     instancesAlertStatus = (
       <EuiFlexItem grow={false}>

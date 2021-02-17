@@ -1,12 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { BrowserFields } from '../../../common/containers/source';
 import { ColumnHeaderOptions } from '../../../timelines/store/timeline/model';
-import { OnUpdateColumns } from '../timeline/events';
 
 export type OnFieldSelected = (fieldId: string) => void;
 export type OnHideFieldBrowser = () => void;
@@ -26,12 +26,8 @@ export interface FieldBrowserProps {
    * instead of dragging it to the timeline
    */
   onFieldSelected?: OnFieldSelected;
-  /** Invoked when a user chooses to view a new set of columns in the timeline */
-  onUpdateColumns: OnUpdateColumns;
   /** The timeline associated with this field browser */
   timelineId: string;
-  /** Adds or removes a column to / from the timeline */
-  toggleColumn: (column: ColumnHeaderOptions) => void;
   /** The width of the field browser */
   width: number;
 }

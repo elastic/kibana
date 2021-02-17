@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { UnwrapPromiseOrReturn } from '@kbn/utility-types';
@@ -24,12 +13,15 @@ import { ExecutionContext } from '../execution/types';
 import {
   ExpressionFunctionClog,
   ExpressionFunctionFont,
-  ExpressionFunctionKibanaContext,
-  ExpressionFunctionKibana,
   ExpressionFunctionVarSet,
   ExpressionFunctionVar,
   ExpressionFunctionTheme,
+  ExpressionFunctionCumulativeSum,
+  ExpressionFunctionDerivative,
+  ExpressionFunctionMovingAverage,
 } from './specs';
+import { ExpressionAstFunction } from '../ast';
+import { PersistableStateDefinition } from '../../../kibana_utils/common';
 
 /**
  * `ExpressionFunctionDefinition` is the interface plugins have to implement to
@@ -41,11 +33,16 @@ export interface ExpressionFunctionDefinition<
   Arguments extends Record<string, any>,
   Output,
   Context extends ExecutionContext = ExecutionContext
-> {
+> extends PersistableStateDefinition<ExpressionAstFunction['arguments']> {
   /**
    * The name of the function, as will be used in expression.
    */
   name: Name;
+
+  /**
+   * if set to true function will be disabled (but its migrate function will still be available)
+   */
+  disabled?: boolean;
 
   /**
    * Name of type of value this function outputs.
@@ -119,9 +116,10 @@ export type AnyExpressionFunctionDefinition = ExpressionFunctionDefinition<
 export interface ExpressionFunctionDefinitions {
   clog: ExpressionFunctionClog;
   font: ExpressionFunctionFont;
-  kibana_context: ExpressionFunctionKibanaContext;
-  kibana: ExpressionFunctionKibana;
   var_set: ExpressionFunctionVarSet;
   var: ExpressionFunctionVar;
   theme: ExpressionFunctionTheme;
+  cumulative_sum: ExpressionFunctionCumulativeSum;
+  derivative: ExpressionFunctionDerivative;
+  moving_average: ExpressionFunctionMovingAverage;
 }

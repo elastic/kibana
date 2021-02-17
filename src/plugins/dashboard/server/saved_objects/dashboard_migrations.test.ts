@@ -1,25 +1,21 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { SavedObjectUnsanitizedDoc } from 'kibana/server';
 import { savedObjectsServiceMock } from '../../../../core/server/mocks';
-import { dashboardSavedObjectTypeMigrations as migrations } from './dashboard_migrations';
+import { createEmbeddableSetupMock } from '../../../embeddable/server/mocks';
+import { createDashboardSavedObjectTypeMigrations } from './dashboard_migrations';
+import { DashboardDoc730ToLatest } from '../../common';
+
+const embeddableSetupMock = createEmbeddableSetupMock();
+const migrations = createDashboardSavedObjectTypeMigrations({
+  embeddable: embeddableSetupMock,
+});
 
 const contextMock = savedObjectsServiceMock.createMigrationContext();
 
@@ -446,6 +442,52 @@ Object {
   ],
 }
 `);
+    });
+  });
+
+  describe('7.11.0 - embeddable persistable state extraction', () => {
+    const migration = migrations['7.11.0'];
+    const doc: DashboardDoc730ToLatest = {
+      attributes: {
+        description: '',
+        kibanaSavedObjectMeta: {
+          searchSourceJSON:
+            '{"query":{"language":"kuery","query":""},"filter":[{"query":{"match_phrase":{"machine.os.keyword":"osx"}},"$state":{"store":"appState"},"meta":{"type":"phrase","key":"machine.os.keyword","params":{"query":"osx"},"disabled":false,"negate":false,"alias":null,"indexRefName":"kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index"}}]}',
+        },
+        optionsJSON: '{"useMargins":true,"hidePanelTitles":false}',
+        panelsJSON:
+          '[{"version":"7.9.3","gridData":{"x":0,"y":0,"w":24,"h":15,"i":"82fa0882-9f9e-476a-bbb9-03555e5ced91"},"panelIndex":"82fa0882-9f9e-476a-bbb9-03555e5ced91","embeddableConfig":{"enhancements":{"dynamicActions":{"events":[]}}},"panelRefName":"panel_0"}]',
+        timeRestore: false,
+        title: 'Dashboard A',
+        version: 1,
+      },
+      id: '376e6260-1f5e-11eb-91aa-7b6d5f8a61d6',
+      references: [
+        {
+          id: '90943e30-9a47-11e8-b64d-95841ca0b247',
+          name: 'kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index',
+          type: 'index-pattern',
+        },
+        { id: '14e2e710-4258-11e8-b3aa-73fdaf54bfc9', name: 'panel_0', type: 'visualization' },
+      ],
+      type: 'dashboard',
+    };
+
+    test('should migrate 7.3.0 doc without embeddable state to extract', () => {
+      const newDoc = migration(doc, contextMock);
+      expect(newDoc).toEqual(doc);
+    });
+
+    test('should migrate 7.3.0 doc and extract embeddable state', () => {
+      embeddableSetupMock.extract.mockImplementationOnce((state) => ({
+        state: { ...state, __extracted: true },
+        references: [{ id: '__new', name: '__newRefName', type: '__newType' }],
+      }));
+
+      const newDoc = migration(doc, contextMock);
+      expect(newDoc).not.toEqual(doc);
+      expect(newDoc.references).toHaveLength(doc.references.length + 1);
+      expect(JSON.parse(newDoc.attributes.panelsJSON)[0].embeddableConfig.__extracted).toBe(true);
     });
   });
 });

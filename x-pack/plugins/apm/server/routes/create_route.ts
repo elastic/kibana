@@ -1,15 +1,29 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-import { RouteFactoryFn, HttpMethod, Params } from './typings';
+
+import { CoreSetup } from 'src/core/server';
+import { Route, RouteParamsRT } from './typings';
 
 export function createRoute<
-  TName extends string,
-  TReturn,
-  TMethod extends HttpMethod = 'GET',
-  TParams extends Params = {}
->(fn: RouteFactoryFn<TName, TMethod, TParams, TReturn>) {
-  return fn;
+  TEndpoint extends string,
+  TRouteParamsRT extends RouteParamsRT | undefined = undefined,
+  TReturn = unknown
+>(
+  route: Route<TEndpoint, TRouteParamsRT, TReturn>
+): Route<TEndpoint, TRouteParamsRT, TReturn>;
+
+export function createRoute<
+  TEndpoint extends string,
+  TRouteParamsRT extends RouteParamsRT | undefined = undefined,
+  TReturn = unknown
+>(
+  route: (core: CoreSetup) => Route<TEndpoint, TRouteParamsRT, TReturn>
+): (core: CoreSetup) => Route<TEndpoint, TRouteParamsRT, TReturn>;
+
+export function createRoute(routeOrFactoryFn: Function | object) {
+  return routeOrFactoryFn;
 }

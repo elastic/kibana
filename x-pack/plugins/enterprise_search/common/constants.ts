@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -17,7 +18,10 @@ export const ENTERPRISE_SEARCH_PLUGIN = {
   SUBTITLE: i18n.translate('xpack.enterpriseSearch.featureCatalogue.subtitle', {
     defaultMessage: 'Search everything',
   }),
-  DESCRIPTIONS: [
+  DESCRIPTION: i18n.translate('xpack.enterpriseSearch.FeatureCatalogue.description', {
+    defaultMessage: 'Create search experiences with a refined set of APIs and tools.',
+  }),
+  APP_DESCRIPTIONS: [
     i18n.translate('xpack.enterpriseSearch.featureCatalogueDescription1', {
       defaultMessage: 'Build a powerful search experience.',
     }),

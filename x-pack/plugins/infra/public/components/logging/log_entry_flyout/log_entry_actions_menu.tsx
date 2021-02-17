@@ -1,28 +1,27 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import * as rt from 'io-ts';
-import { EuiButtonEmpty, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
+import { EuiButton, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useMemo } from 'react';
 import { useVisibilityState } from '../../../utils/use_visibility_state';
-import { getTraceUrl } from '../../../../../apm/public';
-import { LogEntriesItem } from '../../../../common/http_api';
+import { getApmTraceUrl } from '../../../../../observability/public';
 import { useLinkProps, LinkDescriptor } from '../../../hooks/use_link_props';
-import { decodeOrThrow } from '../../../../common/runtime_types';
+import { LogEntry } from '../../../../common/search_strategies/log_entries/log_entry';
 
 const UPTIME_FIELDS = ['container.id', 'host.ip', 'kubernetes.pod.uid'];
 
 export const LogEntryActionsMenu: React.FunctionComponent<{
-  logItem: LogEntriesItem;
-}> = ({ logItem }) => {
+  logEntry: LogEntry;
+}> = ({ logEntry }) => {
   const { hide, isVisible, show } = useVisibilityState(false);
 
-  const apmLinkDescriptor = useMemo(() => getAPMLink(logItem), [logItem]);
-  const uptimeLinkDescriptor = useMemo(() => getUptimeLink(logItem), [logItem]);
+  const apmLinkDescriptor = useMemo(() => getAPMLink(logEntry), [logEntry]);
+  const uptimeLinkDescriptor = useMemo(() => getUptimeLink(logEntry), [logEntry]);
 
   const uptimeLinkProps = useLinkProps({
     app: 'uptime',
@@ -69,7 +68,7 @@ export const LogEntryActionsMenu: React.FunctionComponent<{
     <EuiPopover
       anchorPosition="downRight"
       button={
-        <EuiButtonEmpty
+        <EuiButton
           data-test-subj="logEntryActionsMenuButton"
           disabled={!hasMenuItems}
           iconSide="right"
@@ -78,9 +77,9 @@ export const LogEntryActionsMenu: React.FunctionComponent<{
         >
           <FormattedMessage
             id="xpack.infra.logEntryActionsMenu.buttonLabel"
-            defaultMessage="Actions"
+            defaultMessage="Investigate"
           />
-        </EuiButtonEmpty>
+        </EuiButton>
       }
       closePopover={hide}
       id="logEntryActionsMenu"
@@ -92,17 +91,12 @@ export const LogEntryActionsMenu: React.FunctionComponent<{
   );
 };
 
-const getUptimeLink = (logItem: LogEntriesItem): LinkDescriptor | undefined => {
-  const searchExpressions = logItem.fields
+const getUptimeLink = (logEntry: LogEntry): LinkDescriptor | undefined => {
+  const searchExpressions = logEntry.fields
     .filter(({ field, value }) => value != null && UPTIME_FIELDS.includes(field))
     .reduce<string[]>((acc, fieldItem) => {
       const { field, value } = fieldItem;
-      try {
-        const parsedValue = decodeOrThrow(rt.array(rt.string))(JSON.parse(value));
-        return acc.concat(parsedValue.map((val) => `${field}:${val}`));
-      } catch (e) {
-        return acc.concat([`${field}:${value}`]);
-      }
+      return acc.concat(value.map((val) => `${field}:${val}`));
     }, []);
 
   if (searchExpressions.length === 0) {
@@ -117,31 +111,32 @@ const getUptimeLink = (logItem: LogEntriesItem): LinkDescriptor | undefined => {
   };
 };
 
-const getAPMLink = (logItem: LogEntriesItem): LinkDescriptor | undefined => {
-  const traceIdEntry = logItem.fields.find(
-    ({ field, value }) => value != null && field === 'trace.id'
-  );
+const getAPMLink = (logEntry: LogEntry): LinkDescriptor | undefined => {
+  const traceId = logEntry.fields.find(
+    ({ field, value }) => typeof value[0] === 'string' && field === 'trace.id'
+  )?.value?.[0];
 
-  if (!traceIdEntry) {
+  if (typeof traceId !== 'string') {
     return undefined;
   }
 
-  const timestampField = logItem.fields.find(({ field }) => field === '@timestamp');
-  const timestamp = timestampField ? timestampField.value : null;
-  const { rangeFrom, rangeTo } = timestamp
-    ? (() => {
-        const from = new Date(timestamp);
-        const to = new Date(timestamp);
+  const timestampField = logEntry.fields.find(({ field }) => field === '@timestamp');
+  const timestamp = timestampField ? timestampField.value[0] : null;
+  const { rangeFrom, rangeTo } =
+    typeof timestamp === 'number'
+      ? (() => {
+          const from = new Date(timestamp);
+          const to = new Date(timestamp);
 
-        from.setMinutes(from.getMinutes() - 10);
-        to.setMinutes(to.getMinutes() + 10);
+          from.setMinutes(from.getMinutes() - 10);
+          to.setMinutes(to.getMinutes() + 10);
 
-        return { rangeFrom: from.toISOString(), rangeTo: to.toISOString() };
-      })()
-    : { rangeFrom: 'now-1y', rangeTo: 'now' };
+          return { rangeFrom: from.toISOString(), rangeTo: to.toISOString() };
+        })()
+      : { rangeFrom: 'now-1y', rangeTo: 'now' };
 
   return {
     app: 'apm',
-    hash: getTraceUrl({ traceId: traceIdEntry.value, rangeFrom, rangeTo }),
+    pathname: getApmTraceUrl({ traceId, rangeFrom, rangeTo }),
   };
 };

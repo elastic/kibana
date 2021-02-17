@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { MockRouter, mockRequestHandler, mockDependencies } from '../../__mocks__';
 
-import { registerWSOverviewRoute } from './overview';
+import { registerOverviewRoute } from './overview';
 
 describe('Overview route', () => {
   describe('GET /api/workplace_search/overview', () => {
@@ -14,9 +15,12 @@ describe('Overview route', () => {
 
     beforeEach(() => {
       jest.clearAllMocks();
-      mockRouter = new MockRouter({ method: 'get', payload: 'query' });
+      mockRouter = new MockRouter({
+        method: 'get',
+        path: '/api/workplace_search/overview',
+      });
 
-      registerWSOverviewRoute({
+      registerOverviewRoute({
         ...mockDependencies,
         router: mockRouter.router,
       });

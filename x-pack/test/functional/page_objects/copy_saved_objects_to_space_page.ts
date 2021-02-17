@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { FtrProviderContext } from '../ftr_provider_context';
@@ -28,18 +29,30 @@ export function CopySavedObjectsToSpacePageProvider({
     },
 
     async setupForm({
+      createNewCopies,
       overwrite,
       destinationSpaceId,
     }: {
+      createNewCopies?: boolean;
       overwrite?: boolean;
       destinationSpaceId: string;
     }) {
+      if (createNewCopies && overwrite) {
+        throw new Error('createNewCopies and overwrite options cannot be used together');
+      }
+      if (!createNewCopies) {
+        const form = await testSubjects.find('copy-to-space-form');
+        // a radio button consists of a div tag that contains an input, a div, and a label
+        // we can't click the input directly, need to click the label
+        const label = await form.findByCssSelector('label[for="createNewCopiesDisabled"]');
+        await label.click();
+      }
       if (!overwrite) {
         const radio = await testSubjects.find('cts-copyModeControl-overwriteRadioGroup');
         // a radio button consists of a div tag that contains an input, a div, and a label
-        // we can't click the input directly, need to go up one level and click the parent div
-        const div = await radio.findByXpath("//div[input[@id='overwriteDisabled']]");
-        await div.click();
+        // we can't click the input directly, need to click the label
+        const label = await radio.findByCssSelector('label[for="overwriteDisabled"]');
+        await label.click();
       }
       await testSubjects.click(`cts-space-selector-row-${destinationSpaceId}`);
     },

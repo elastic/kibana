@@ -27,6 +27,9 @@ Object {
             "type": "expression",
           },
         ],
+        "description": Array [
+          "",
+        ],
         "fittingFunction": Array [
           "Carry",
         ],
@@ -138,6 +141,12 @@ Object {
             ],
             "type": "expression",
           },
+        ],
+        "title": Array [
+          "",
+        ],
+        "valueLabels": Array [
+          "hide",
         ],
         "xTitle": Array [
           "",

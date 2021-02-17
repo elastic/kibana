@@ -1,93 +1,62 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { KibanaDatatable } from 'src/plugins/expressions/public';
-import { getSliceValueWithFallback, getFilterContext } from './render_helpers';
+import { Datatable } from 'src/plugins/expressions/public';
+import { getSliceValue, getFilterContext } from './render_helpers';
 
 describe('render helpers', () => {
-  describe('#getSliceValueWithFallback', () => {
-    describe('without fallback', () => {
-      const columnGroups = [
-        { col: { id: 'a', name: 'A' }, metrics: [] },
-        { col: { id: 'b', name: 'C' }, metrics: [] },
-      ];
-
-      it('returns the metric when positive number', () => {
-        expect(
-          getSliceValueWithFallback({ a: 'Cat', b: 'Home', c: 5 }, columnGroups, {
+  describe('#getSliceValue', () => {
+    it('returns the metric when positive number', () => {
+      expect(
+        getSliceValue(
+          { a: 'Cat', b: 'Home', c: 5 },
+          {
             id: 'c',
             name: 'C',
-          })
-        ).toEqual(5);
-      });
-
-      it('returns the metric when negative number', () => {
-        expect(
-          getSliceValueWithFallback({ a: 'Cat', b: 'Home', c: -100 }, columnGroups, {
-            id: 'c',
-            name: 'C',
-          })
-        ).toEqual(-100);
-      });
-
-      it('returns epsilon when metric is 0 without fallback', () => {
-        expect(
-          getSliceValueWithFallback({ a: 'Cat', b: 'Home', c: 0 }, columnGroups, {
-            id: 'c',
-            name: 'C',
-          })
-        ).toEqual(Number.EPSILON);
-      });
+            meta: { type: 'number' },
+          }
+        )
+      ).toEqual(5);
     });
 
-    describe('fallback behavior', () => {
-      const columnGroups = [
-        { col: { id: 'a', name: 'A' }, metrics: [{ id: 'a_subtotal', name: '' }] },
-        { col: { id: 'b', name: 'C' }, metrics: [] },
-      ];
+    it('returns the metric when negative number', () => {
+      expect(
+        getSliceValue(
+          { a: 'Cat', b: 'Home', c: -100 },
+          {
+            id: 'c',
+            name: 'C',
+            meta: { type: 'number' },
+          }
+        )
+      ).toEqual(-100);
+    });
 
-      it('falls back to metric from previous column if available', () => {
-        expect(
-          getSliceValueWithFallback(
-            { a: 'Cat', a_subtotal: 5, b: 'Home', c: undefined },
-            columnGroups,
-            { id: 'c', name: 'C' }
-          )
-        ).toEqual(5);
-      });
-
-      it('uses epsilon if fallback is 0', () => {
-        expect(
-          getSliceValueWithFallback(
-            { a: 'Cat', a_subtotal: 0, b: 'Home', c: undefined },
-            columnGroups,
-            { id: 'c', name: 'C' }
-          )
-        ).toEqual(Number.EPSILON);
-      });
-
-      it('uses epsilon if fallback is missing', () => {
-        expect(
-          getSliceValueWithFallback(
-            { a: 'Cat', a_subtotal: undefined, b: 'Home', c: undefined },
-            columnGroups,
-            { id: 'c', name: 'C' }
-          )
-        ).toEqual(Number.EPSILON);
-      });
+    it('returns epsilon when metric is 0 without fallback', () => {
+      expect(
+        getSliceValue(
+          { a: 'Cat', b: 'Home', c: 0 },
+          {
+            id: 'c',
+            name: 'C',
+            meta: { type: 'number' },
+          }
+        )
+      ).toEqual(Number.EPSILON);
     });
   });
 
   describe('#getFilterContext', () => {
     it('handles single slice click for single ring', () => {
-      const table: KibanaDatatable = {
-        type: 'kibana_datatable',
+      const table: Datatable = {
+        type: 'datatable',
         columns: [
-          { id: 'a', name: 'A' },
-          { id: 'b', name: 'B' },
+          { id: 'a', name: 'A', meta: { type: 'string' } },
+          { id: 'b', name: 'B', meta: { type: 'number' } },
         ],
         rows: [
           { a: 'Hi', b: 2 },
@@ -95,7 +64,13 @@ describe('render helpers', () => {
           { a: 'Foo', b: 6 },
         ],
       };
-      expect(getFilterContext([{ groupByRollup: 'Test', value: 100 }], ['a'], table)).toEqual({
+      expect(
+        getFilterContext(
+          [{ groupByRollup: 'Test', value: 100, depth: 1, path: [], sortIndex: 1 }],
+          ['a'],
+          table
+        )
+      ).toEqual({
         data: [
           {
             row: 1,
@@ -108,12 +83,12 @@ describe('render helpers', () => {
     });
 
     it('handles single slice click with 2 rings', () => {
-      const table: KibanaDatatable = {
-        type: 'kibana_datatable',
+      const table: Datatable = {
+        type: 'datatable',
         columns: [
-          { id: 'a', name: 'A' },
-          { id: 'b', name: 'B' },
-          { id: 'c', name: 'C' },
+          { id: 'a', name: 'A', meta: { type: 'string' } },
+          { id: 'b', name: 'B', meta: { type: 'string' } },
+          { id: 'c', name: 'C', meta: { type: 'number' } },
         ],
         rows: [
           { a: 'Hi', b: 'Two', c: 2 },
@@ -121,7 +96,13 @@ describe('render helpers', () => {
           { a: 'Foo', b: 'Three', c: 6 },
         ],
       };
-      expect(getFilterContext([{ groupByRollup: 'Test', value: 100 }], ['a', 'b'], table)).toEqual({
+      expect(
+        getFilterContext(
+          [{ groupByRollup: 'Test', value: 100, depth: 1, path: [], sortIndex: 1 }],
+          ['a', 'b'],
+          table
+        )
+      ).toEqual({
         data: [
           {
             row: 1,
@@ -134,12 +115,12 @@ describe('render helpers', () => {
     });
 
     it('finds right row for multi slice click', () => {
-      const table: KibanaDatatable = {
-        type: 'kibana_datatable',
+      const table: Datatable = {
+        type: 'datatable',
         columns: [
-          { id: 'a', name: 'A' },
-          { id: 'b', name: 'B' },
-          { id: 'c', name: 'C' },
+          { id: 'a', name: 'A', meta: { type: 'string' } },
+          { id: 'b', name: 'B', meta: { type: 'string' } },
+          { id: 'c', name: 'C', meta: { type: 'number' } },
         ],
         rows: [
           { a: 'Hi', b: 'Two', c: 2 },
@@ -150,8 +131,8 @@ describe('render helpers', () => {
       expect(
         getFilterContext(
           [
-            { groupByRollup: 'Test', value: 100 },
-            { groupByRollup: 'Two', value: 5 },
+            { groupByRollup: 'Test', value: 100, depth: 1, path: [], sortIndex: 1 },
+            { groupByRollup: 'Two', value: 5, depth: 1, path: [], sortIndex: 1 },
           ],
           ['a', 'b'],
           table

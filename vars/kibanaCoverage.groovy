@@ -60,7 +60,6 @@ def uploadCoverageHtmls(prefix) {
   [
     'target/kibana-coverage/functional-combined',
     'target/kibana-coverage/jest-combined',
-    'target/kibana-coverage/mocha-combined',
   ].each { uploadWithVault(prefix, it) }
 }
 
@@ -78,7 +77,6 @@ def prokLinks(title) {
   kibanaPipeline.bash('''
 cat << EOF > src/dev/code_coverage/www/index_partial_2.html
         <a class="nav-link" href="https://kibana-coverage.elastic.dev/${TIME_STAMP}/jest-combined/index.html">Latest Jest</a>
-        <a class="nav-link" href="https://kibana-coverage.elastic.dev/${TIME_STAMP}/mocha-combined/index.html">Latest Mocha</a>
         <a class="nav-link" href="https://kibana-coverage.elastic.dev/${TIME_STAMP}/functional-combined/index.html">Latest FTR</a>
       </nav>
     </div>
@@ -145,15 +143,15 @@ def generateReports(title) {
     source src/dev/ci_setup/setup_env.sh true
     # bootstrap from x-pack folder
     cd x-pack
-    yarn kbn bootstrap --prefer-offline
+    yarn kbn bootstrap
     # Return to project root
     cd ..
     . src/dev/code_coverage/shell_scripts/extract_archives.sh
     . src/dev/code_coverage/shell_scripts/fix_html_reports_parallel.sh
-    . src/dev/code_coverage/shell_scripts/merge_jest_and_functional.sh
-    . src/dev/code_coverage/shell_scripts/copy_mocha_reports.sh
-    # zip combined reports
-    tar -czf kibana-coverage.tar.gz target/kibana-coverage/**/*
+    . src/dev/code_coverage/shell_scripts/merge_functional.sh
+    . src/dev/code_coverage/shell_scripts/copy_jest_report.sh
+    # zip functional combined report
+    tar -czf kibana-functional-coverage.tar.gz target/kibana-coverage/functional-combined/*
   """, title)
 }
 
@@ -165,48 +163,41 @@ def uploadCombinedReports() {
 
   kibanaPipeline.uploadGcsArtifact(
     "kibana-ci-artifacts/jobs/${env.JOB_NAME}/${BUILD_NUMBER}/coverage/combined",
-    'kibana-coverage.tar.gz'
+    'kibana-functional-coverage.tar.gz'
   )
 }
 
-def ingestData(jobName, buildNum, buildUrl, previousSha, title) {
+def ingestData(jobName, buildNum, buildUrl, previousSha, teamAssignmentsPath, title) {
   kibanaPipeline.bash("""
     source src/dev/ci_setup/setup_env.sh
-    yarn kbn bootstrap --prefer-offline
+    yarn kbn bootstrap
     # Using existing target/kibana-coverage folder
-    . src/dev/code_coverage/shell_scripts/ingest_coverage.sh '${jobName}' ${buildNum} '${buildUrl}' ${previousSha}
+    . src/dev/code_coverage/shell_scripts/generate_team_assignments_and_ingest_coverage.sh '${jobName}' ${buildNum} '${buildUrl}' '${previousSha}' '${teamAssignmentsPath}'
   """, title)
 }
 
-def ingestWithVault(jobName, buildNum, buildUrl, previousSha, title) {
+def ingestWithVault(jobName, buildNum, buildUrl, previousSha, teamAssignmentsPath, title) {
   def vaultSecret = 'secret/kibana-issues/prod/coverage/elasticsearch'
   withVaultSecret(secret: vaultSecret, secret_field: 'host', variable_name: 'HOST_FROM_VAULT') {
     withVaultSecret(secret: vaultSecret, secret_field: 'username', variable_name: 'USER_FROM_VAULT') {
       withVaultSecret(secret: vaultSecret, secret_field: 'password', variable_name: 'PASS_FROM_VAULT') {
-        ingestData(jobName, buildNum, buildUrl, previousSha, title)
+        ingestData(jobName, buildNum, buildUrl, previousSha, teamAssignmentsPath, title)
       }
     }
   }
 }
 
-def ingest(jobName, buildNumber, buildUrl, timestamp, previousSha, title) {
+def ingest(jobName, buildNumber, buildUrl, timestamp, previousSha, teamAssignmentsPath, title) {
   withEnv([
     "TIME_STAMP=${timestamp}",
   ]) {
-    ingestWithVault(jobName, buildNumber, buildUrl, previousSha, title)
+    ingestWithVault(jobName, buildNumber, buildUrl, previousSha, teamAssignmentsPath, title)
   }
 }
 
 def runTests() {
   parallel([
     'kibana-intake-agent': workers.intake('kibana-intake', './test/scripts/jenkins_unit.sh'),
-    'x-pack-intake-agent': {
-      withEnv([
-        'NODE_ENV=test' // Needed for jest tests only
-      ]) {
-        workers.intake('x-pack-intake', './test/scripts/jenkins_xpack.sh')()
-      }
-    },
     'kibana-oss-agent'   : workers.functional(
       'kibana-oss-tests',
       { kibanaPipeline.buildOss() },
@@ -249,6 +240,9 @@ def xpackProks() {
     'xpack-ciGroup8' : kibanaPipeline.xpackCiGroupProcess(8),
     'xpack-ciGroup9' : kibanaPipeline.xpackCiGroupProcess(9),
     'xpack-ciGroup10': kibanaPipeline.xpackCiGroupProcess(10),
+    'xpack-ciGroup11': kibanaPipeline.xpackCiGroupProcess(11),
+    'xpack-ciGroup12': kibanaPipeline.xpackCiGroupProcess(12),
+    'xpack-ciGroup13': kibanaPipeline.xpackCiGroupProcess(13),
   ]
 }
 

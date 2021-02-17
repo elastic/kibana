@@ -1,24 +1,38 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
+
 import { NameList } from 'elasticsearch';
-import { IndexPattern, Query } from '../..';
-import { Filter } from '../../../common';
+import { Query } from '../..';
+import { Filter } from '../../es_query';
+import { IndexPattern } from '../../index_patterns';
+import { SearchSource } from './search_source';
+
+/**
+ * search source interface
+ * @public
+ */
+export type ISearchSource = Pick<SearchSource, keyof SearchSource>;
+
+/**
+ * high level search service
+ * @public
+ */
+export interface ISearchStartSearchSource {
+  /**
+   * creates {@link SearchSource} based on provided serialized {@link SearchSourceFields}
+   * @param fields
+   */
+  create: (fields?: SearchSourceFields) => Promise<ISearchSource>;
+  /**
+   * creates empty {@link SearchSource}
+   */
+  createEmpty: () => ISearchSource;
+}
 
 export type EsQuerySearchAfter = [string | number, string | number];
 
@@ -33,6 +47,13 @@ export interface SortDirectionNumeric {
 }
 
 export type EsQuerySortValue = Record<string, SortDirection | SortDirectionNumeric>;
+
+interface SearchField {
+  [key: string]: SearchFieldValue;
+}
+
+// @internal
+export type SearchFieldValue = string | SearchField;
 
 /**
  * search source fields
@@ -61,7 +82,16 @@ export interface SearchSourceFields {
   size?: number;
   source?: NameList;
   version?: boolean;
-  fields?: NameList;
+  /**
+   * Retrieve fields via the search Fields API
+   */
+  fields?: SearchFieldValue[];
+  /**
+   * Retreive fields directly from _source (legacy behavior)
+   *
+   * @deprecated It is recommended to use `fields` wherever possible.
+   */
+  fieldsFromSource?: NameList;
   /**
    * {@link IndexPatternService}
    */
@@ -74,8 +104,6 @@ export interface SearchSourceFields {
 export interface SearchSourceOptions {
   callParentStartHandlers?: boolean;
 }
-
-export { ISearchSource } from './search_source';
 
 export interface SortOptions {
   mode?: 'min' | 'max' | 'sum' | 'avg' | 'median';

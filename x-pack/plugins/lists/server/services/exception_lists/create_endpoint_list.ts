@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { SavedObjectsClientContract } from 'kibana/server';
@@ -35,7 +36,6 @@ export const createEndpointList = async ({
     const savedObject = await savedObjectsClient.create<ExceptionListSoSchema>(
       savedObjectType,
       {
-        _tags: [],
         comments: undefined,
         created_at: dateNow,
         created_by: user,
@@ -47,6 +47,7 @@ export const createEndpointList = async ({
         list_type: 'list',
         meta: undefined,
         name: ENDPOINT_LIST_NAME,
+        os_types: [],
         tags: [],
         tie_breaker_id: tieBreaker ?? uuid.v4(),
         type: 'endpoint',

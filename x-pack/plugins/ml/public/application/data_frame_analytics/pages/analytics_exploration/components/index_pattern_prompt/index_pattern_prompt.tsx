@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FC } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiLink, EuiText } from '@elastic/eui';
 import { useMlKibana } from '../../../../../contexts/kibana';
 
 interface Props {
@@ -42,7 +43,6 @@ export const IndexPatternPrompt: FC<Props> = ({ destIndex }) => {
           }}
         />
       </EuiText>
-      <EuiSpacer size="m" />
     </>
   );
 };

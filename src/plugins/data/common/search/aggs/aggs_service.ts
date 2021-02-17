@@ -1,24 +1,13 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { ExpressionsServiceSetup } from 'src/plugins/expressions/common';
-import { UI_SETTINGS } from '../../../common';
+import { CreateAggConfigParams, IndexPattern, UI_SETTINGS } from '../../../common';
 import { GetConfigFn } from '../../types';
 import {
   AggConfigs,
@@ -28,6 +17,8 @@ import {
   getCalculateAutoTimeExpression,
 } from './';
 import { AggsCommonSetup, AggsCommonStart } from './types';
+import { getDateMetaByDatatableColumn } from './utils/time_column_meta';
+import { getDatatableColumnUtilities } from './utils/datatable_column_meta';
 
 /** @internal */
 export const aggsRequiredUiSettings = [
@@ -50,6 +41,8 @@ export interface AggsCommonSetupDependencies {
 /** @internal */
 export interface AggsCommonStartDependencies {
   getConfig: GetConfigFn;
+  getIndexPattern(id: string): Promise<IndexPattern>;
+  isDefaultTimezone: () => boolean;
 }
 
 /**
@@ -77,16 +70,37 @@ export class AggsCommonService {
     };
   }
 
-  public start({ getConfig }: AggsCommonStartDependencies): AggsCommonStart {
+  public start({
+    getConfig,
+    getIndexPattern,
+    isDefaultTimezone,
+  }: AggsCommonStartDependencies): AggsCommonStart {
     const aggTypesStart = this.aggTypesRegistry.start();
+    const calculateAutoTimeExpression = getCalculateAutoTimeExpression(getConfig);
+
+    const createAggConfigs = (
+      indexPattern: IndexPattern,
+      configStates?: CreateAggConfigParams[]
+    ) => {
+      return new AggConfigs(indexPattern, configStates, {
+        typesRegistry: aggTypesStart,
+      });
+    };
 
     return {
-      calculateAutoTimeExpression: getCalculateAutoTimeExpression(getConfig),
-      createAggConfigs: (indexPattern, configStates = [], schemas) => {
-        return new AggConfigs(indexPattern, configStates, {
-          typesRegistry: aggTypesStart,
-        });
-      },
+      calculateAutoTimeExpression,
+      getDateMetaByDatatableColumn: getDateMetaByDatatableColumn({
+        calculateAutoTimeExpression,
+        getIndexPattern,
+        getConfig,
+        isDefaultTimezone,
+      }),
+      datatableUtilities: getDatatableColumnUtilities({
+        getIndexPattern,
+        createAggConfigs,
+        aggTypesStart,
+      }),
+      createAggConfigs,
       types: aggTypesStart,
     };
   }

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -53,6 +54,32 @@ export default function createActionTests({ getService }: FtrProviderContext) {
         type: 'action',
         id: response.body.id,
       });
+    });
+
+    it('should notify feature usage when creating a gold action type', async () => {
+      const testStart = new Date();
+      const response = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/action`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          name: 'Noop action type',
+          actionTypeId: 'test.noop',
+          secrets: {},
+          config: {},
+        })
+        .expect(200);
+      objectRemover.add(Spaces.space1.id, response.body.id, 'action', 'actions');
+
+      const {
+        body: { features },
+      } = await supertest.get(`${getUrlPrefix(Spaces.space1.id)}/api/licensing/feature_usage`);
+      expect(features).to.be.an(Array);
+      const noopFeature = features.find(
+        (feature: { name: string }) => feature.name === 'Connector: Test: Noop'
+      );
+      expect(noopFeature).to.be.ok();
+      expect(noopFeature.last_used).to.be.a('string');
+      expect(new Date(noopFeature.last_used).getTime()).to.be.greaterThan(testStart.getTime());
     });
   });
 }

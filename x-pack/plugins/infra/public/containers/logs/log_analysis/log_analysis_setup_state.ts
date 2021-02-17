@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { isEqual } from 'lodash';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { usePrevious } from 'react-use';
+import usePrevious from 'react-use/lib/usePrevious';
 import {
   combineDatasetFilters,
   DatasetFilter,
@@ -18,6 +19,7 @@ import {
   ValidationIndicesError,
   ValidationUIError,
 } from '../../../components/logging/log_analysis_setup/initial_configuration_step';
+import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { useTrackedPromise } from '../../../utils/use_tracked_promise';
 import { ModuleDescriptor, ModuleSourceConfiguration } from './log_analysis_module_types';
 
@@ -43,6 +45,7 @@ export const useAnalysisSetupState = <JobType extends string>({
   setUpModule,
   sourceConfiguration,
 }: AnalysisSetupStateArguments<JobType>) => {
+  const { services } = useKibanaContextForPlugin();
   const [startTime, setStartTime] = useState<number | undefined>(Date.now() - fourWeeksInMs);
   const [endTime, setEndTime] = useState<number | undefined>(undefined);
 
@@ -158,7 +161,8 @@ export const useAnalysisSetupState = <JobType extends string>({
       createPromise: async () => {
         return await validateSetupIndices(
           sourceConfiguration.indices,
-          sourceConfiguration.timestampField
+          sourceConfiguration.timestampField,
+          services.http.fetch
         );
       },
       onResolve: ({ data: { errors } }) => {
@@ -183,7 +187,8 @@ export const useAnalysisSetupState = <JobType extends string>({
           validIndexNames,
           sourceConfiguration.timestampField,
           startTime ?? 0,
-          endTime ?? Date.now()
+          endTime ?? Date.now(),
+          services.http.fetch
         );
       },
       onResolve: ({ data: { datasets } }) => {

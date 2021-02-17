@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
@@ -46,7 +47,7 @@ export const kibanaObservable = new BehaviorSubject(createStartServicesMock());
 Object.defineProperty(window, 'localStorage', {
   value: localStorageMock(),
 });
-
+window.scrollTo = jest.fn();
 const MockKibanaContextProvider = createKibanaContextProviderMock();
 const { storage } = createSecuritySolutionStorageMock();
 

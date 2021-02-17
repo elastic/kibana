@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { SearchHit } from '../../../common';
@@ -28,6 +29,7 @@ export interface EventsActionGroupData {
 export interface EventHit extends SearchHit {
   sort: string[];
   _source: EventSource;
+  fields: Record<string, unknown[]>;
   aggregations: {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     [agg: string]: any;

@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import _ from 'lodash';
@@ -44,6 +33,7 @@ import { initSavedObjectSaveAsCheckBoxDirective } from './directives/saved_objec
 import { initSavedObjectFinderDirective } from './directives/saved_object_finder';
 import { initTimelionTabsDirective } from './components/timelionhelp_tabs_directive';
 import { initTimelionTDeprecationDirective } from './components/timelion_deprecation_directive';
+import { initTimelionTopNavDirective } from './components/timelion_top_nav_directive';
 import { initInputFocusDirective } from './directives/input_focus';
 import { Chart } from './directives/chart/chart';
 import { TimelionInterval } from './directives/timelion_interval/timelion_interval';
@@ -86,6 +76,7 @@ export function initTimelionApp(app, deps) {
   initInputFocusDirective(app);
   initTimelionTabsDirective(app, deps);
   initTimelionTDeprecationDirective(app, deps);
+  initTimelionTopNavDirective(app, deps);
   initSavedObjectFinderDirective(app, savedSheetLoader, deps.core.uiSettings);
   initSavedObjectSaveAsCheckBoxDirective(app);
   initCellsDirective(app);

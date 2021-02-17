@@ -1,26 +1,26 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
- */
+import { EuiLink } from '@elastic/eui';
 import React from 'react';
-import { APMLink, APMLinkExtendProps } from './APMLink';
+import { APMLinkExtendProps, useAPMHref } from './APMLink';
+
+export function useServiceMapHref(serviceName?: string) {
+  const path = serviceName
+    ? `/services/${serviceName}/service-map`
+    : '/service-map';
+  return useAPMHref({ path });
+}
 
 interface ServiceMapLinkProps extends APMLinkExtendProps {
   serviceName?: string;
 }
 
-function ServiceMapLink({ serviceName, ...rest }: ServiceMapLinkProps) {
-  const path = serviceName
-    ? `/services/${serviceName}/service-map`
-    : '/service-map';
-  return <APMLink path={path} {...rest} />;
+export function ServiceMapLink({ serviceName, ...rest }: ServiceMapLinkProps) {
+  const href = useServiceMapHref(serviceName);
+  return <EuiLink href={href} {...rest} />;
 }
-
-export { ServiceMapLink };

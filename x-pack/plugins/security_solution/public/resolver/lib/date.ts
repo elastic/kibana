@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { DurationDetails, DurationTypes } from '../types';
@@ -9,7 +10,7 @@ import { DurationDetails, DurationTypes } from '../types';
 /**
  * Given a time, it will convert it to a unix timestamp if not one already. If it is unable to do so, it will return NaN
  */
-export const getUnixTime = (time: number | string): number | typeof NaN => {
+export const getUnixTime = (time: number | string): number => {
   if (!time) {
     return NaN;
   }
@@ -30,16 +31,17 @@ export const getUnixTime = (time: number | string): number | typeof NaN => {
  * Given two unix timestamps, it will return an object containing the time difference and properly pluralized friendly version of the time difference.
  * i.e. a time difference of 1000ms will yield => { duration: 1, durationType: 'second' } and 10000ms will yield => { duration: 10, durationType: 'seconds' }
  *
+ * If `from` or `to` cannot be parsed, `undefined` will be returned.
  */
 export const getFriendlyElapsedTime = (
   from: number | string,
   to: number | string
-): DurationDetails | null => {
+): DurationDetails | undefined => {
   const startTime = getUnixTime(from);
   const endTime = getUnixTime(to);
 
   if (Number.isNaN(startTime) || Number.isNaN(endTime)) {
-    return null;
+    return undefined;
   }
   const elapsedTimeInMs = endTime - startTime;
 

@@ -30,8 +30,9 @@ export declare class KibanaRequest<Params = unknown, Query = unknown, Body = unk
 |  [isSystemRequest](./kibana-plugin-core-server.kibanarequest.issystemrequest.md) |  | <code>boolean</code> | Whether or not the request is a "system request" rather than an application-level request. Can be set on the client using the <code>HttpFetchOptions#asSystemRequest</code> option. |
 |  [params](./kibana-plugin-core-server.kibanarequest.params.md) |  | <code>Params</code> |  |
 |  [query](./kibana-plugin-core-server.kibanarequest.query.md) |  | <code>Query</code> |  |
+|  [rewrittenUrl](./kibana-plugin-core-server.kibanarequest.rewrittenurl.md) |  | <code>URL</code> | URL rewritten in onPreRouting request interceptor. |
 |  [route](./kibana-plugin-core-server.kibanarequest.route.md) |  | <code>RecursiveReadonly&lt;KibanaRequestRoute&lt;Method&gt;&gt;</code> | matched route details |
 |  [socket](./kibana-plugin-core-server.kibanarequest.socket.md) |  | <code>IKibanaSocket</code> | [IKibanaSocket](./kibana-plugin-core-server.ikibanasocket.md) |
-|  [url](./kibana-plugin-core-server.kibanarequest.url.md) |  | <code>Url</code> | a WHATWG URL standard object. |
+|  [url](./kibana-plugin-core-server.kibanarequest.url.md) |  | <code>URL</code> | a WHATWG URL standard object. |
 |  [uuid](./kibana-plugin-core-server.kibanarequest.uuid.md) |  | <code>string</code> | A UUID to identify this request. |
 

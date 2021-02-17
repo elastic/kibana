@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { LegacyAPICaller } from 'kibana/server';
@@ -12,6 +13,7 @@ import {
   ListItemArraySchema,
   ListItemSchema,
   ListSchema,
+  SearchListItemArraySchema,
 } from '../../../common/schemas';
 import { ConfigType } from '../../config';
 import {
@@ -35,6 +37,7 @@ import {
   getListItemIndex,
   getListItemTemplate,
   importListItemsToStream,
+  searchListItemByValues,
   updateListItem,
 } from '../../services/items';
 import {
@@ -67,6 +70,7 @@ import {
   GetListItemsByValueOptions,
   GetListOptions,
   ImportListItemsToStreamOptions,
+  SearchListItemByValuesOptions,
   UpdateListItemOptions,
   UpdateListOptions,
 } from './list_client_types';
@@ -464,6 +468,22 @@ export class ListClient {
     const { callCluster } = this;
     const listItemIndex = this.getListItemIndex();
     return getListItemByValues({
+      callCluster,
+      listId,
+      listItemIndex,
+      type,
+      value,
+    });
+  };
+
+  public searchListItemByValues = async ({
+    type,
+    listId,
+    value,
+  }: SearchListItemByValuesOptions): Promise<SearchListItemArraySchema> => {
+    const { callCluster } = this;
+    const listItemIndex = this.getListItemIndex();
+    return searchListItemByValues({
       callCluster,
       listId,
       listItemIndex,

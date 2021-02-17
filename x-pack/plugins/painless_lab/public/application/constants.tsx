@@ -1,13 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
 
 import { EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { PainlessContext } from '@kbn/monaco';
+import { EuiSuperSelectOption } from '@elastic/eui';
 
 const defaultLabel = i18n.translate('xpack.painlessLab.contextDefaultLabel', {
   defaultMessage: 'Basic',
@@ -21,7 +24,7 @@ const scoreLabel = i18n.translate('xpack.painlessLab.contextScoreLabel', {
   defaultMessage: 'Score',
 });
 
-export const painlessContextOptions = [
+export const painlessContextOptions: Array<EuiSuperSelectOption<PainlessContext>> = [
   {
     value: 'painless_test',
     inputDisplay: defaultLabel,

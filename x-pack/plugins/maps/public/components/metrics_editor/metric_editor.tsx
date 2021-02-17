@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { ChangeEvent, Fragment } from 'react';
@@ -13,9 +14,10 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { MetricSelect } from './metric_select';
 import { SingleFieldSelect } from '../single_field_select';
 import { AggDescriptor } from '../../../common/descriptor_types';
-import { AGG_TYPE } from '../../../common/constants';
+import { AGG_TYPE, DEFAULT_PERCENTILE } from '../../../common/constants';
 import { getTermsFields } from '../../index_pattern_util';
 import { IFieldType } from '../../../../../../src/plugins/data/public';
+import { ValidatedNumberInput } from '../validated_number_input';
 
 function filterFieldsForAgg(fields: IFieldType[], aggType: AGG_TYPE) {
   if (!fields) {
@@ -57,31 +59,50 @@ export function MetricEditor({
     if (!metricAggregationType) {
       return;
     }
-    const newMetricProps = {
-      ...metric,
+
+    const descriptor = {
       type: metricAggregationType,
+      label: metric.label,
     };
 
-    // unset field when new agg type does not support currently selected field.
-    if (metric.field && metricAggregationType !== AGG_TYPE.COUNT) {
-      const fieldsForNewAggType = filterFieldsForAgg(fields, metricAggregationType);
-      const found = fieldsForNewAggType.find((field) => {
-        return field.name === metric.field;
-      });
-      if (!found) {
-        newMetricProps.field = undefined;
-      }
+    if (metricAggregationType === AGG_TYPE.COUNT || !('field' in metric) || !metric.field) {
+      onChange(descriptor);
+      return;
     }
 
-    onChange(newMetricProps);
+    const fieldsForNewAggType = filterFieldsForAgg(fields, metricAggregationType);
+    const found = fieldsForNewAggType.find((field) => field.name === metric.field);
+    const newDescriptor = {
+      ...descriptor,
+      field: found ? metric.field : undefined,
+    };
+    if (metricAggregationType === AGG_TYPE.PERCENTILE) {
+      onChange({
+        ...newDescriptor,
+        percentile: 'percentile' in metric ? metric.percentile : DEFAULT_PERCENTILE,
+      });
+    } else {
+      onChange(newDescriptor);
+    }
   };
   const onFieldChange = (fieldName?: string) => {
-    if (!fieldName) {
+    if (!fieldName || metric.type === AGG_TYPE.COUNT) {
+      return;
+    }
+    onChange({
+      label: metric.label,
+      type: metric.type,
+      field: fieldName,
+    });
+  };
+
+  const onPercentileChange = (percentile: number) => {
+    if (metric.type !== AGG_TYPE.PERCENTILE) {
       return;
     }
     onChange({
       ...metric,
-      field: fieldName,
+      percentile,
     });
   };
   const onLabelChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -93,12 +114,17 @@ export function MetricEditor({
 
   let fieldSelect;
   if (metric.type && metric.type !== AGG_TYPE.COUNT) {
+    const showErrors = metric.field === undefined;
     fieldSelect = (
       <EuiFormRow
         label={i18n.translate('xpack.maps.metricsEditor.selectFieldLabel', {
           defaultMessage: 'Field',
         })}
         display="columnCompressed"
+        isInvalid={showErrors}
+        error={i18n.translate('xpack.maps.metricsEditor.selectFieldError', {
+          defaultMessage: 'Field required for aggregation',
+        })}
       >
         <SingleFieldSelect
           placeholder={i18n.translate('xpack.maps.metricsEditor.selectFieldPlaceholder', {
@@ -108,9 +134,29 @@ export function MetricEditor({
           onChange={onFieldChange}
           fields={filterFieldsForAgg(fields, metric.type)}
           isClearable={false}
+          isInvalid={showErrors}
           compressed
         />
       </EuiFormRow>
+    );
+  }
+
+  let percentileSelect;
+  if (metric.type === AGG_TYPE.PERCENTILE) {
+    const label = i18n.translate('xpack.maps.metricsEditor.selectPercentileLabel', {
+      defaultMessage: 'Percentile',
+    });
+    percentileSelect = (
+      <ValidatedNumberInput
+        min={0}
+        max={100}
+        onChange={onPercentileChange}
+        label={label}
+        initialValue={
+          typeof metric.percentile === 'number' ? metric.percentile : DEFAULT_PERCENTILE
+        }
+        display="columnCompressed"
+      />
     );
   }
 
@@ -171,6 +217,7 @@ export function MetricEditor({
       </EuiFormRow>
 
       {fieldSelect}
+      {percentileSelect}
       {labelInput}
       {removeButton}
     </Fragment>

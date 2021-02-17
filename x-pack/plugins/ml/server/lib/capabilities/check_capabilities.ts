@@ -1,11 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { IScopedClusterClient, KibanaRequest } from 'kibana/server';
-import { mlLog } from '../../client/log';
+import { KibanaRequest } from 'kibana/server';
+import type { MlClient } from '../../lib/ml_client';
+import { mlLog } from '../../lib/log';
 import {
   MlCapabilities,
   adminMlCapabilities,
@@ -22,12 +24,12 @@ import {
 } from './errors';
 
 export function capabilitiesProvider(
-  client: IScopedClusterClient,
+  mlClient: MlClient,
   capabilities: MlCapabilities,
   mlLicense: MlLicense,
   isMlEnabledInSpace: () => Promise<boolean>
 ) {
-  const { isUpgradeInProgress } = upgradeCheckProvider(client);
+  const { isUpgradeInProgress } = upgradeCheckProvider(mlClient);
   async function getCapabilities(): Promise<MlCapabilitiesResponse> {
     const upgradeInProgress = await isUpgradeInProgress();
     const isPlatinumOrTrialLicense = mlLicense.isFullLicense();

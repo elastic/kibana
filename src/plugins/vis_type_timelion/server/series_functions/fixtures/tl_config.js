@@ -1,24 +1,13 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import moment from 'moment';
-import sinon from 'sinon';
+import { of } from 'rxjs';
 import timelionDefaults from '../../lib/get_namespaced_settings';
 import esResponse from './es_response';
 
@@ -30,14 +19,6 @@ export default function () {
       if (!functions[name]) throw new Error('No such function: ' + name);
       return functions[name];
     },
-    getStartServices: sinon
-      .stub()
-      .returns(
-        Promise.resolve([
-          {},
-          { data: { search: { search: () => Promise.resolve({ rawResponse: esResponse }) } } },
-        ])
-      ),
 
     esShardTimeout: moment.duration(30000),
     allowedGraphiteUrls: ['https://www.hostedgraphite.com/UID/ACCESS_KEY/graphite'],
@@ -53,6 +34,10 @@ export default function () {
   tlConfig.settings = timelionDefaults();
 
   tlConfig.setTargetSeries();
+
+  tlConfig.context = {
+    search: { search: () => of({ rawResponse: esResponse }) },
+  };
 
   return tlConfig;
 }

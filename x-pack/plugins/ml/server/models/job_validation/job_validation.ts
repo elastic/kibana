@@ -1,11 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import { IScopedClusterClient } from 'kibana/server';
 import { TypeOf } from '@kbn/config-schema';
 import { fieldsServiceProvider } from '../fields_service';
@@ -26,6 +27,8 @@ import { validateModelMemoryLimit } from './validate_model_memory_limit';
 import { validateTimeRange, isValidTimeField } from './validate_time_range';
 import { validateJobSchema } from '../../routes/schemas/job_validation_schema';
 import { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
+import type { MlClient } from '../../lib/ml_client';
+import { getDatafeedAggregations } from '../../../common/util/datafeed_utils';
 
 export type ValidateJobPayload = TypeOf<typeof validateJobSchema>;
 
@@ -35,6 +38,7 @@ export type ValidateJobPayload = TypeOf<typeof validateJobSchema>;
  */
 export async function validateJob(
   client: IScopedClusterClient,
+  mlClient: MlClient,
   payload: ValidateJobPayload,
   kbnVersion = 'current',
   isSecurityDisabled?: boolean
@@ -94,7 +98,15 @@ export async function validateJob(
       // if cardinality checks didn't return a message with an error level
       if (cardinalityError === false) {
         validationMessages.push(...(await validateInfluencers(job)));
-        validationMessages.push(...(await validateModelMemoryLimit(client, job, duration)));
+        validationMessages.push(
+          ...(await validateModelMemoryLimit(client, mlClient, job, duration))
+        );
+      }
+
+      // if datafeed has aggregation, require job config to include a valid summary_doc_field_name
+      const datafeedAggregations = getDatafeedAggregations(job.datafeed_config);
+      if (datafeedAggregations !== undefined && !job.analysis_config?.summary_count_field_name) {
+        validationMessages.push({ id: 'missing_summary_count_field_name' });
       }
     } else {
       validationMessages = basicValidation.messages;

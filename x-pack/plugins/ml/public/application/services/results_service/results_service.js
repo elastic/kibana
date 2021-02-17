@@ -1,15 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-// Prefer importing entire lodash library, e.g. import { get } from "lodash"
-// eslint-disable-next-line no-restricted-imports
-import each from 'lodash/each';
-// Prefer importing entire lodash library, e.g. import { get } from "lodash"
-// eslint-disable-next-line no-restricted-imports
-import get from 'lodash/get';
+import { each, get } from 'lodash';
 
 import { ML_MEDIAN_PERCENTS } from '../../../../common/util/job_utils';
 import { escapeForElasticsearchQuery } from '../../util/string_utils';
@@ -17,6 +13,7 @@ import {
   ANOMALY_SWIM_LANE_HARD_LIMIT,
   SWIM_LANE_DEFAULT_PAGE_SIZE,
 } from '../../explorer/explorer_constants';
+import { aggregationTypeTransform } from '../../../../common/util/anomaly_utils';
 
 /**
  * Service for carrying out Elasticsearch queries to obtain data for the Ml Results dashboards.
@@ -71,66 +68,68 @@ export function resultsServiceProvider(mlApiServices) {
         }
 
         mlApiServices.results
-          .anomalySearch({
-            size: 0,
-            body: {
-              query: {
-                bool: {
-                  filter: [
-                    {
-                      query_string: {
-                        query: 'result_type:bucket',
-                        analyze_wildcard: false,
-                      },
-                    },
-                    {
-                      bool: {
-                        must: boolCriteria,
-                      },
-                    },
-                  ],
-                },
-              },
-              aggs: {
-                jobsCardinality: {
-                  cardinality: {
-                    field: 'job_id',
-                  },
-                },
-                jobId: {
-                  terms: {
-                    field: 'job_id',
-                    size: jobIds?.length ?? 1,
-                    order: {
-                      anomalyScore: 'desc',
-                    },
-                  },
-                  aggs: {
-                    anomalyScore: {
-                      max: {
-                        field: 'anomaly_score',
-                      },
-                    },
-                    bucketTruncate: {
-                      bucket_sort: {
-                        from: (fromPage - 1) * perPage,
-                        size: perPage === 0 ? 1 : perPage,
-                      },
-                    },
-                    byTime: {
-                      date_histogram: {
-                        field: 'timestamp',
-                        fixed_interval: `${intervalMs}ms`,
-                        min_doc_count: 1,
-                        extended_bounds: {
-                          min: earliestMs,
-                          max: latestMs,
+          .anomalySearch(
+            {
+              size: 0,
+              body: {
+                query: {
+                  bool: {
+                    filter: [
+                      {
+                        query_string: {
+                          query: 'result_type:bucket',
+                          analyze_wildcard: false,
                         },
                       },
-                      aggs: {
-                        anomalyScore: {
-                          max: {
-                            field: 'anomaly_score',
+                      {
+                        bool: {
+                          must: boolCriteria,
+                        },
+                      },
+                    ],
+                  },
+                },
+                aggs: {
+                  jobsCardinality: {
+                    cardinality: {
+                      field: 'job_id',
+                    },
+                  },
+                  jobId: {
+                    terms: {
+                      field: 'job_id',
+                      size: jobIds?.length ?? 1,
+                      order: {
+                        anomalyScore: 'desc',
+                      },
+                    },
+                    aggs: {
+                      anomalyScore: {
+                        max: {
+                          field: 'anomaly_score',
+                        },
+                      },
+                      bucketTruncate: {
+                        bucket_sort: {
+                          from: (fromPage - 1) * perPage,
+                          size: perPage === 0 ? 1 : perPage,
+                        },
+                      },
+                      byTime: {
+                        date_histogram: {
+                          field: 'timestamp',
+                          fixed_interval: `${intervalMs}ms`,
+                          min_doc_count: 1,
+                          extended_bounds: {
+                            min: earliestMs,
+                            max: latestMs,
+                          },
+                        },
+                        aggs: {
+                          anomalyScore: {
+                            max: {
+                              field: 'anomaly_score',
+                            },
                           },
                         },
                       },
@@ -139,7 +138,8 @@ export function resultsServiceProvider(mlApiServices) {
                 },
               },
             },
-          })
+            jobIds
+          )
           .then((resp) => {
             const dataByJobId = get(resp, ['aggregations', 'jobId', 'buckets'], []);
             each(dataByJobId, (dataForJob) => {
@@ -248,64 +248,66 @@ export function resultsServiceProvider(mlApiServices) {
         }
 
         mlApiServices.results
-          .anomalySearch({
-            size: 0,
-            body: {
-              query: {
-                bool: {
-                  filter: [
-                    {
-                      query_string: {
-                        query: 'result_type:influencer',
-                        analyze_wildcard: false,
+          .anomalySearch(
+            {
+              size: 0,
+              body: {
+                query: {
+                  bool: {
+                    filter: [
+                      {
+                        query_string: {
+                          query: 'result_type:influencer',
+                          analyze_wildcard: false,
+                        },
                       },
-                    },
-                    {
-                      bool: {
-                        must: boolCriteria,
+                      {
+                        bool: {
+                          must: boolCriteria,
+                        },
                       },
-                    },
-                  ],
-                },
-              },
-              aggs: {
-                influencerFieldNames: {
-                  terms: {
-                    field: 'influencer_field_name',
-                    size: 5,
-                    order: {
-                      maxAnomalyScore: 'desc',
-                    },
+                    ],
                   },
-                  aggs: {
-                    maxAnomalyScore: {
-                      max: {
-                        field: 'influencer_score',
+                },
+                aggs: {
+                  influencerFieldNames: {
+                    terms: {
+                      field: 'influencer_field_name',
+                      size: 5,
+                      order: {
+                        maxAnomalyScore: 'desc',
                       },
                     },
-                    influencerFieldValues: {
-                      terms: {
-                        field: 'influencer_field_value',
-                        size: maxFieldValues,
-                        order: {
-                          maxAnomalyScore: 'desc',
+                    aggs: {
+                      maxAnomalyScore: {
+                        max: {
+                          field: 'influencer_score',
                         },
                       },
-                      aggs: {
-                        bucketTruncate: {
-                          bucket_sort: {
-                            from: (fromPage - 1) * perPage,
-                            size: perPage,
+                      influencerFieldValues: {
+                        terms: {
+                          field: 'influencer_field_value',
+                          size: !!maxFieldValues ? maxFieldValues : ANOMALY_SWIM_LANE_HARD_LIMIT,
+                          order: {
+                            maxAnomalyScore: 'desc',
                           },
                         },
-                        maxAnomalyScore: {
-                          max: {
-                            field: 'influencer_score',
+                        aggs: {
+                          bucketTruncate: {
+                            bucket_sort: {
+                              from: (fromPage - 1) * perPage,
+                              size: perPage,
+                            },
                           },
-                        },
-                        sumAnomalyScore: {
-                          sum: {
-                            field: 'influencer_score',
+                          maxAnomalyScore: {
+                            max: {
+                              field: 'influencer_score',
+                            },
+                          },
+                          sumAnomalyScore: {
+                            sum: {
+                              field: 'influencer_score',
+                            },
                           },
                         },
                       },
@@ -314,7 +316,8 @@ export function resultsServiceProvider(mlApiServices) {
                 },
               },
             },
-          })
+            jobIds
+          )
           .then((resp) => {
             const fieldNameBuckets = get(
               resp,
@@ -387,53 +390,56 @@ export function resultsServiceProvider(mlApiServices) {
         }
 
         mlApiServices.results
-          .anomalySearch({
-            size: 0,
-            body: {
-              query: {
-                bool: {
-                  filter: [
-                    {
-                      query_string: {
-                        query: `result_type:influencer AND influencer_field_name: ${escapeForElasticsearchQuery(
-                          influencerFieldName
-                        )}`,
-                        analyze_wildcard: false,
+          .anomalySearch(
+            {
+              size: 0,
+              body: {
+                query: {
+                  bool: {
+                    filter: [
+                      {
+                        query_string: {
+                          query: `result_type:influencer AND influencer_field_name: ${escapeForElasticsearchQuery(
+                            influencerFieldName
+                          )}`,
+                          analyze_wildcard: false,
+                        },
                       },
-                    },
-                    {
-                      bool: {
-                        must: boolCriteria,
+                      {
+                        bool: {
+                          must: boolCriteria,
+                        },
                       },
-                    },
-                  ],
-                },
-              },
-              aggs: {
-                influencerFieldValues: {
-                  terms: {
-                    field: 'influencer_field_value',
-                    size: maxResults !== undefined ? maxResults : 2,
-                    order: {
-                      maxAnomalyScore: 'desc',
-                    },
+                    ],
                   },
-                  aggs: {
-                    maxAnomalyScore: {
-                      max: {
-                        field: 'influencer_score',
+                },
+                aggs: {
+                  influencerFieldValues: {
+                    terms: {
+                      field: 'influencer_field_value',
+                      size: !!maxResults ? maxResults : 2,
+                      order: {
+                        maxAnomalyScore: 'desc',
                       },
                     },
-                    sumAnomalyScore: {
-                      sum: {
-                        field: 'influencer_score',
+                    aggs: {
+                      maxAnomalyScore: {
+                        max: {
+                          field: 'influencer_score',
+                        },
+                      },
+                      sumAnomalyScore: {
+                        sum: {
+                          field: 'influencer_score',
+                        },
                       },
                     },
                   },
                 },
               },
             },
-          })
+            jobIds
+          )
           .then((resp) => {
             const buckets = get(resp, ['aggregations', 'influencerFieldValues', 'buckets'], []);
             each(buckets, (bucket) => {
@@ -568,64 +574,66 @@ export function resultsServiceProvider(mlApiServices) {
         }
 
         mlApiServices.results
-          .anomalySearch({
-            size: 0,
-            body: {
-              query: {
-                bool: {
-                  filter: [
-                    {
-                      query_string: {
-                        query: `result_type:influencer AND influencer_field_name: ${escapeForElasticsearchQuery(
-                          influencerFieldName
-                        )}`,
-                        analyze_wildcard: false,
+          .anomalySearch(
+            {
+              size: 0,
+              body: {
+                query: {
+                  bool: {
+                    filter: [
+                      {
+                        query_string: {
+                          query: `result_type:influencer AND influencer_field_name: ${escapeForElasticsearchQuery(
+                            influencerFieldName
+                          )}`,
+                          analyze_wildcard: false,
+                        },
                       },
-                    },
-                    {
-                      bool: {
-                        must: boolCriteria,
+                      {
+                        bool: {
+                          must: boolCriteria,
+                        },
                       },
-                    },
-                  ],
-                },
-              },
-              aggs: {
-                influencerValuesCardinality: {
-                  cardinality: {
-                    field: 'influencer_field_value',
+                    ],
                   },
                 },
-                influencerFieldValues: {
-                  terms: {
-                    field: 'influencer_field_value',
-                    size: !!maxResults ? maxResults : ANOMALY_SWIM_LANE_HARD_LIMIT,
-                    order: {
-                      maxAnomalyScore: 'desc',
+                aggs: {
+                  influencerValuesCardinality: {
+                    cardinality: {
+                      field: 'influencer_field_value',
                     },
                   },
-                  aggs: {
-                    maxAnomalyScore: {
-                      max: {
-                        field: 'influencer_score',
+                  influencerFieldValues: {
+                    terms: {
+                      field: 'influencer_field_value',
+                      size: !!maxResults ? maxResults : ANOMALY_SWIM_LANE_HARD_LIMIT,
+                      order: {
+                        maxAnomalyScore: 'desc',
                       },
                     },
-                    bucketTruncate: {
-                      bucket_sort: {
-                        from: (fromPage - 1) * perPage,
-                        size: perPage,
+                    aggs: {
+                      maxAnomalyScore: {
+                        max: {
+                          field: 'influencer_score',
+                        },
                       },
-                    },
-                    byTime: {
-                      date_histogram: {
-                        field: 'timestamp',
-                        fixed_interval: `${intervalMs}ms`,
-                        min_doc_count: 1,
+                      bucketTruncate: {
+                        bucket_sort: {
+                          from: (fromPage - 1) * perPage,
+                          size: perPage,
+                        },
                       },
-                      aggs: {
-                        maxAnomalyScore: {
-                          max: {
-                            field: 'influencer_score',
+                      byTime: {
+                        date_histogram: {
+                          field: 'timestamp',
+                          fixed_interval: `${intervalMs}ms`,
+                          min_doc_count: 1,
+                        },
+                        aggs: {
+                          maxAnomalyScore: {
+                            max: {
+                              field: 'influencer_score',
+                            },
                           },
                         },
                       },
@@ -634,7 +642,8 @@ export function resultsServiceProvider(mlApiServices) {
                 },
               },
             },
-          })
+            jobIds
+          )
           .then((resp) => {
             const fieldValueBuckets = get(
               resp,
@@ -728,33 +737,35 @@ export function resultsServiceProvider(mlApiServices) {
         }
 
         mlApiServices.results
-          .anomalySearch({
-            size: maxResults !== undefined ? maxResults : 100,
-            rest_total_hits_as_int: true,
-            body: {
-              _source: ['job_id', 'detector_index', 'influencers', 'record_score'],
-              query: {
-                bool: {
-                  filter: [
-                    {
-                      query_string: {
-                        query: 'result_type:record',
-                        analyze_wildcard: false,
+          .anomalySearch(
+            {
+              size: maxResults !== undefined ? maxResults : 100,
+              body: {
+                _source: ['job_id', 'detector_index', 'influencers', 'record_score'],
+                query: {
+                  bool: {
+                    filter: [
+                      {
+                        query_string: {
+                          query: 'result_type:record',
+                          analyze_wildcard: false,
+                        },
                       },
-                    },
-                    {
-                      bool: {
-                        must: boolCriteria,
+                      {
+                        bool: {
+                          must: boolCriteria,
+                        },
                       },
-                    },
-                  ],
+                    ],
+                  },
                 },
+                sort: [{ record_score: { order: 'desc' } }],
               },
-              sort: [{ record_score: { order: 'desc' } }],
             },
-          })
+            jobIds
+          )
           .then((resp) => {
-            if (resp.hits.total !== 0) {
+            if (resp.hits.total.value > 0) {
               each(resp.hits.hits, (hit) => {
                 obj.records.push(hit._source);
               });
@@ -860,32 +871,34 @@ export function resultsServiceProvider(mlApiServices) {
         }
 
         mlApiServices.results
-          .anomalySearch({
-            size: maxResults !== undefined ? maxResults : 100,
-            rest_total_hits_as_int: true,
-            body: {
-              query: {
-                bool: {
-                  filter: [
-                    {
-                      query_string: {
-                        query: 'result_type:record',
-                        analyze_wildcard: false,
+          .anomalySearch(
+            {
+              size: maxResults !== undefined ? maxResults : 100,
+              body: {
+                query: {
+                  bool: {
+                    filter: [
+                      {
+                        query_string: {
+                          query: 'result_type:record',
+                          analyze_wildcard: false,
+                        },
                       },
-                    },
-                    {
-                      bool: {
-                        must: boolCriteria,
+                      {
+                        bool: {
+                          must: boolCriteria,
+                        },
                       },
-                    },
-                  ],
+                    ],
+                  },
                 },
+                sort: [{ record_score: { order: 'desc' } }],
               },
-              sort: [{ record_score: { order: 'desc' } }],
             },
-          })
+            jobIds
+          )
           .then((resp) => {
-            if (resp.hits.total !== 0) {
+            if (resp.hits.total.value > 0) {
               each(resp.hits.hits, (hit) => {
                 obj.records.push(hit._source);
               });
@@ -985,32 +998,34 @@ export function resultsServiceProvider(mlApiServices) {
         }
 
         mlApiServices.results
-          .anomalySearch({
-            size: maxResults !== undefined ? maxResults : 100,
-            rest_total_hits_as_int: true,
-            body: {
-              query: {
-                bool: {
-                  filter: [
-                    {
-                      query_string: {
-                        query: 'result_type:record',
-                        analyze_wildcard: false,
+          .anomalySearch(
+            {
+              size: maxResults !== undefined ? maxResults : 100,
+              body: {
+                query: {
+                  bool: {
+                    filter: [
+                      {
+                        query_string: {
+                          query: 'result_type:record',
+                          analyze_wildcard: false,
+                        },
                       },
-                    },
-                    {
-                      bool: {
-                        must: boolCriteria,
+                      {
+                        bool: {
+                          must: boolCriteria,
+                        },
                       },
-                    },
-                  ],
+                    ],
+                  },
                 },
+                sort: [{ record_score: { order: 'desc' } }],
               },
-              sort: [{ record_score: { order: 'desc' } }],
             },
-          })
+            [jobId]
+          )
           .then((resp) => {
-            if (resp.hits.total !== 0) {
+            if (resp.hits.total.value > 0) {
               each(resp.hits.hits, (hit) => {
                 obj.records.push(hit._source);
               });
@@ -1063,7 +1078,6 @@ export function resultsServiceProvider(mlApiServices) {
         mlApiServices
           .esSearch({
             index,
-            rest_total_hits_as_int: true,
             size: 0,
             body: {
               query: {
@@ -1095,7 +1109,7 @@ export function resultsServiceProvider(mlApiServices) {
               const time = dataForTime.key;
               obj.results[time] = dataForTime.doc_count;
             });
-            obj.total = resp.hits.total;
+            obj.total = resp.hits.total.value;
 
             resolve(obj);
           })
@@ -1232,13 +1246,13 @@ export function resultsServiceProvider(mlApiServices) {
           .esSearch({
             index,
             body,
-            rest_total_hits_as_int: true,
+            track_total_hits: true,
           })
           .then((resp) => {
             // Because of the sampling, results of metricFunctions which use sum or count
             // can be significantly skewed. Taking into account totalHits we calculate a
             // a factor to normalize results for these metricFunctions.
-            const totalHits = get(resp, ['hits', 'total'], 0);
+            const totalHits = resp.hits.total.value;
             const successfulShards = get(resp, ['_shards', 'successful'], 0);
 
             let normalizeFactor = 1;
@@ -1281,7 +1295,14 @@ export function resultsServiceProvider(mlApiServices) {
     // criteria, time range, and aggregation interval.
     // criteriaFields parameter must be an array, with each object in the array having 'fieldName'
     // 'fieldValue' properties.
-    getRecordMaxScoreByTime(jobId, criteriaFields, earliestMs, latestMs, intervalMs) {
+    getRecordMaxScoreByTime(
+      jobId,
+      criteriaFields,
+      earliestMs,
+      latestMs,
+      intervalMs,
+      actualPlotFunctionIfMetric
+    ) {
       return new Promise((resolve, reject) => {
         const obj = {
           success: true,
@@ -1309,46 +1330,60 @@ export function resultsServiceProvider(mlApiServices) {
             },
           });
         });
+        if (actualPlotFunctionIfMetric !== undefined) {
+          const mlFunctionToPlotIfMetric =
+            actualPlotFunctionIfMetric !== undefined
+              ? aggregationTypeTransform.toML(actualPlotFunctionIfMetric)
+              : actualPlotFunctionIfMetric;
 
+          mustCriteria.push({
+            term: {
+              function_description: mlFunctionToPlotIfMetric,
+            },
+          });
+        }
         mlApiServices.results
-          .anomalySearch({
-            size: 0,
-            body: {
-              query: {
-                bool: {
-                  filter: [
-                    {
-                      query_string: {
-                        query: 'result_type:record',
-                        analyze_wildcard: true,
+          .anomalySearch(
+            {
+              size: 0,
+              body: {
+                query: {
+                  bool: {
+                    filter: [
+                      {
+                        query_string: {
+                          query: 'result_type:record',
+                          analyze_wildcard: true,
+                        },
                       },
-                    },
-                    {
-                      bool: {
-                        must: mustCriteria,
+                      {
+                        bool: {
+                          must: mustCriteria,
+                        },
                       },
-                    },
-                  ],
-                },
-              },
-              aggs: {
-                times: {
-                  date_histogram: {
-                    field: 'timestamp',
-                    fixed_interval: `${intervalMs}ms`,
-                    min_doc_count: 1,
+                    ],
                   },
-                  aggs: {
-                    recordScore: {
-                      max: {
-                        field: 'record_score',
+                },
+                aggs: {
+                  times: {
+                    date_histogram: {
+                      field: 'timestamp',
+                      fixed_interval: `${intervalMs}ms`,
+                      min_doc_count: 1,
+                    },
+                    aggs: {
+                      recordScore: {
+                        max: {
+                          field: 'record_score',
+                        },
                       },
                     },
                   },
                 },
               },
             },
-          })
+            [jobId]
+          )
           .then((resp) => {
             const aggregationsByTime = get(resp, ['aggregations', 'times', 'buckets'], []);
             each(aggregationsByTime, (dataForTime) => {

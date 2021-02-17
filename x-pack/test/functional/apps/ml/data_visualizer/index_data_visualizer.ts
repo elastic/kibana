@@ -1,41 +1,49 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { ML_JOB_FIELD_TYPES } from '../../../../../plugins/ml/common/constants/field_types';
-import { FieldVisConfig } from '../../../../../plugins/ml/public/application/datavisualizer/index_based/common';
+import { FieldVisConfig } from '../../../../../plugins/ml/public/application/datavisualizer/stats_table/types';
+
+interface MetricFieldVisConfig extends FieldVisConfig {
+  statsMaxDecimalPlaces: number;
+  docCountFormatted: string;
+  topValuesCount: number;
+  viewableInLens: boolean;
+}
+
+interface NonMetricFieldVisConfig extends FieldVisConfig {
+  docCountFormatted: string;
+  exampleCount: number;
+  viewableInLens: boolean;
+}
 
 interface TestData {
   suiteTitle: string;
   sourceIndexOrSavedSearch: string;
-  advancedJobWizardDatafeedQuery: string;
-  metricFieldsFilter: string;
-  nonMetricFieldsFilter: string;
-  nonMetricFieldsTypeFilter: string;
+  fieldNameFilters: string[];
+  fieldTypeFilters: string[];
+  rowsPerPage?: 10 | 25 | 50;
+  sampleSizeValidations: Array<{
+    size: number;
+    expected: { field: string; docCountFormatted: string };
+  }>;
   expected: {
-    totalDocCount: number;
-    fieldsPanelCount: number;
-    metricCards?: FieldVisConfig[];
-    nonMetricCards?: FieldVisConfig[];
-    nonMetricFieldsTypeFilterCardCount: number;
-    metricFieldsFilterCardCount: number;
-    nonMetricFieldsFilterCardCount: number;
+    totalDocCountFormatted: string;
+    metricFields?: MetricFieldVisConfig[];
+    nonMetricFields?: NonMetricFieldVisConfig[];
+    emptyFields: string[];
+    visibleMetricFieldsCount: number;
+    totalMetricFieldsCount: number;
+    populatedFieldsCount: number;
+    totalFieldsCount: number;
+    fieldNameFiltersResultCount: number;
+    fieldTypeFiltersResultCount: number;
   };
-}
-
-function getFieldTypes(cards: FieldVisConfig[]) {
-  const fieldTypes: ML_JOB_FIELD_TYPES[] = [];
-  cards.forEach((card) => {
-    const fieldType = card.type;
-    if (fieldTypes.includes(fieldType) === false) {
-      fieldTypes.push(fieldType);
-    }
-  });
-
-  return fieldTypes.sort();
 }
 
 export default function ({ getService }: FtrProviderContext) {
@@ -45,43 +53,37 @@ export default function ({ getService }: FtrProviderContext) {
   const farequoteIndexPatternTestData: TestData = {
     suiteTitle: 'index pattern',
     sourceIndexOrSavedSearch: 'ft_farequote',
-    advancedJobWizardDatafeedQuery: `{
-  "bool": {
-    "must": [
-      {
-        "match_all": {}
-      }
-    ]
-  }
-}`,
-    metricFieldsFilter: 'document',
-    nonMetricFieldsFilter: 'airline',
-    nonMetricFieldsTypeFilter: 'keyword',
+    fieldNameFilters: ['airline', '@timestamp'],
+    fieldTypeFilters: [ML_JOB_FIELD_TYPES.KEYWORD],
+    sampleSizeValidations: [
+      { size: 1000, expected: { field: 'airline', docCountFormatted: '1000 (100%)' } },
+      { size: 5000, expected: { field: '@timestamp', docCountFormatted: '5000 (100%)' } },
+    ],
     expected: {
-      totalDocCount: 86274,
-      fieldsPanelCount: 2, // Metrics panel and Fields panel
-      metricCards: [
-        {
-          type: ML_JOB_FIELD_TYPES.NUMBER, // document count card
-          existsInDocs: true,
-          aggregatable: true,
-          loading: false,
-        },
+      totalDocCountFormatted: '86,274',
+      metricFields: [
         {
           fieldName: 'responsetime',
           type: ML_JOB_FIELD_TYPES.NUMBER,
           existsInDocs: true,
           aggregatable: true,
           loading: false,
+          docCountFormatted: '5000 (100%)',
+          statsMaxDecimalPlaces: 3,
+          topValuesCount: 10,
+          viewableInLens: true,
         },
       ],
-      nonMetricCards: [
+      nonMetricFields: [
         {
           fieldName: '@timestamp',
           type: ML_JOB_FIELD_TYPES.DATE,
           existsInDocs: true,
           aggregatable: true,
           loading: false,
+          docCountFormatted: '5000 (100%)',
+          exampleCount: 2,
+          viewableInLens: true,
         },
         {
           fieldName: '@version',
@@ -89,6 +91,9 @@ export default function ({ getService }: FtrProviderContext) {
           existsInDocs: true,
           aggregatable: false,
           loading: false,
+          exampleCount: 1,
+          docCountFormatted: '',
+          viewableInLens: false,
         },
         {
           fieldName: '@version.keyword',
@@ -96,6 +101,9 @@ export default function ({ getService }: FtrProviderContext) {
           existsInDocs: true,
           aggregatable: true,
           loading: false,
+          exampleCount: 1,
+          docCountFormatted: '5000 (100%)',
+          viewableInLens: true,
         },
         {
           fieldName: 'airline',
@@ -103,6 +111,9 @@ export default function ({ getService }: FtrProviderContext) {
           existsInDocs: true,
           aggregatable: true,
           loading: false,
+          exampleCount: 10,
+          docCountFormatted: '5000 (100%)',
+          viewableInLens: true,
         },
         {
           fieldName: 'type',
@@ -110,6 +121,9 @@ export default function ({ getService }: FtrProviderContext) {
           existsInDocs: true,
           aggregatable: false,
           loading: false,
+          exampleCount: 1,
+          docCountFormatted: '',
+          viewableInLens: false,
         },
         {
           fieldName: 'type.keyword',
@@ -117,54 +131,55 @@ export default function ({ getService }: FtrProviderContext) {
           existsInDocs: true,
           aggregatable: true,
           loading: false,
+          exampleCount: 1,
+          docCountFormatted: '5000 (100%)',
+          viewableInLens: true,
         },
       ],
-      nonMetricFieldsTypeFilterCardCount: 3,
-      metricFieldsFilterCardCount: 1,
-      nonMetricFieldsFilterCardCount: 1,
+      emptyFields: ['sourcetype'],
+      visibleMetricFieldsCount: 1,
+      totalMetricFieldsCount: 1,
+      populatedFieldsCount: 7,
+      totalFieldsCount: 8,
+      fieldNameFiltersResultCount: 2,
+      fieldTypeFiltersResultCount: 3,
     },
   };
 
   const farequoteKQLSearchTestData: TestData = {
     suiteTitle: 'KQL saved search',
     sourceIndexOrSavedSearch: 'ft_farequote_kuery',
-    advancedJobWizardDatafeedQuery: `{
-  "bool": {
-    "must": [
-      {
-        "match_all": {}
-      }
-    ]
-  }
-}`, // Note query is not currently passed to the wizard
-    metricFieldsFilter: 'responsetime',
-    nonMetricFieldsFilter: 'airline',
-    nonMetricFieldsTypeFilter: 'keyword',
+    fieldNameFilters: ['@version'],
+    fieldTypeFilters: [ML_JOB_FIELD_TYPES.DATE, ML_JOB_FIELD_TYPES.TEXT],
+    sampleSizeValidations: [
+      { size: 1000, expected: { field: 'airline', docCountFormatted: '1000 (100%)' } },
+      { size: 5000, expected: { field: '@timestamp', docCountFormatted: '5000 (100%)' } },
+    ],
     expected: {
-      totalDocCount: 34415,
-      fieldsPanelCount: 2, // Metrics panel and Fields panel
-      metricCards: [
-        {
-          type: ML_JOB_FIELD_TYPES.NUMBER, // document count card
-          existsInDocs: true,
-          aggregatable: true,
-          loading: false,
-        },
+      totalDocCountFormatted: '34,415',
+      metricFields: [
         {
           fieldName: 'responsetime',
           type: ML_JOB_FIELD_TYPES.NUMBER,
           existsInDocs: true,
           aggregatable: true,
           loading: false,
+          docCountFormatted: '5000 (100%)',
+          statsMaxDecimalPlaces: 3,
+          topValuesCount: 10,
+          viewableInLens: true,
         },
       ],
-      nonMetricCards: [
+      nonMetricFields: [
         {
           fieldName: '@timestamp',
           type: ML_JOB_FIELD_TYPES.DATE,
           existsInDocs: true,
           aggregatable: true,
           loading: false,
+          docCountFormatted: '5000 (100%)',
+          exampleCount: 2,
+          viewableInLens: true,
         },
         {
           fieldName: '@version',
@@ -172,6 +187,9 @@ export default function ({ getService }: FtrProviderContext) {
           existsInDocs: true,
           aggregatable: false,
           loading: false,
+          exampleCount: 1,
+          docCountFormatted: '',
+          viewableInLens: false,
         },
         {
           fieldName: '@version.keyword',
@@ -179,6 +197,9 @@ export default function ({ getService }: FtrProviderContext) {
           existsInDocs: true,
           aggregatable: true,
           loading: false,
+          exampleCount: 1,
+          docCountFormatted: '5000 (100%)',
+          viewableInLens: true,
         },
         {
           fieldName: 'airline',
@@ -186,6 +207,9 @@ export default function ({ getService }: FtrProviderContext) {
           existsInDocs: true,
           aggregatable: true,
           loading: false,
+          exampleCount: 5,
+          docCountFormatted: '5000 (100%)',
+          viewableInLens: true,
         },
         {
           fieldName: 'type',
@@ -193,6 +217,9 @@ export default function ({ getService }: FtrProviderContext) {
           existsInDocs: true,
           aggregatable: false,
           loading: false,
+          exampleCount: 1,
+          docCountFormatted: '',
+          viewableInLens: false,
         },
         {
           fieldName: 'type.keyword',
@@ -200,54 +227,55 @@ export default function ({ getService }: FtrProviderContext) {
           existsInDocs: true,
           aggregatable: true,
           loading: false,
+          exampleCount: 1,
+          docCountFormatted: '5000 (100%)',
+          viewableInLens: true,
         },
       ],
-      nonMetricFieldsTypeFilterCardCount: 3,
-      metricFieldsFilterCardCount: 2,
-      nonMetricFieldsFilterCardCount: 1,
+      emptyFields: ['sourcetype'],
+      visibleMetricFieldsCount: 1,
+      totalMetricFieldsCount: 1,
+      populatedFieldsCount: 7,
+      totalFieldsCount: 8,
+      fieldNameFiltersResultCount: 1,
+      fieldTypeFiltersResultCount: 3,
     },
   };
 
   const farequoteLuceneSearchTestData: TestData = {
     suiteTitle: 'lucene saved search',
     sourceIndexOrSavedSearch: 'ft_farequote_lucene',
-    advancedJobWizardDatafeedQuery: `{
-  "bool": {
-    "must": [
-      {
-        "match_all": {}
-      }
-    ]
-  }
-}`, // Note query is not currently passed to the wizard
-    metricFieldsFilter: 'responsetime',
-    nonMetricFieldsFilter: 'version',
-    nonMetricFieldsTypeFilter: 'keyword',
+    fieldNameFilters: ['@version.keyword', 'type'],
+    fieldTypeFilters: [ML_JOB_FIELD_TYPES.NUMBER],
+    sampleSizeValidations: [
+      { size: 1000, expected: { field: 'airline', docCountFormatted: '1000 (100%)' } },
+      { size: 5000, expected: { field: '@timestamp', docCountFormatted: '5000 (100%)' } },
+    ],
     expected: {
-      totalDocCount: 34416,
-      fieldsPanelCount: 2, // Metrics panel and Fields panel
-      metricCards: [
-        {
-          type: ML_JOB_FIELD_TYPES.NUMBER, // document count card
-          existsInDocs: true,
-          aggregatable: true,
-          loading: false,
-        },
+      totalDocCountFormatted: '34,416',
+      metricFields: [
         {
           fieldName: 'responsetime',
           type: ML_JOB_FIELD_TYPES.NUMBER,
           existsInDocs: true,
           aggregatable: true,
           loading: false,
+          docCountFormatted: '5000 (100%)',
+          statsMaxDecimalPlaces: 3,
+          topValuesCount: 10,
+          viewableInLens: true,
         },
       ],
-      nonMetricCards: [
+      nonMetricFields: [
         {
           fieldName: '@timestamp',
           type: ML_JOB_FIELD_TYPES.DATE,
           existsInDocs: true,
           aggregatable: true,
           loading: false,
+          docCountFormatted: '5000 (100%)',
+          exampleCount: 2,
+          viewableInLens: true,
         },
         {
           fieldName: '@version',
@@ -255,6 +283,9 @@ export default function ({ getService }: FtrProviderContext) {
           existsInDocs: true,
           aggregatable: false,
           loading: false,
+          exampleCount: 1,
+          docCountFormatted: '',
+          viewableInLens: false,
         },
         {
           fieldName: '@version.keyword',
@@ -262,6 +293,9 @@ export default function ({ getService }: FtrProviderContext) {
           existsInDocs: true,
           aggregatable: true,
           loading: false,
+          exampleCount: 1,
+          docCountFormatted: '5000 (100%)',
+          viewableInLens: true,
         },
         {
           fieldName: 'airline',
@@ -269,6 +303,9 @@ export default function ({ getService }: FtrProviderContext) {
           existsInDocs: true,
           aggregatable: true,
           loading: false,
+          exampleCount: 5,
+          docCountFormatted: '5000 (100%)',
+          viewableInLens: true,
         },
         {
           fieldName: 'type',
@@ -276,6 +313,9 @@ export default function ({ getService }: FtrProviderContext) {
           existsInDocs: true,
           aggregatable: false,
           loading: false,
+          exampleCount: 1,
+          docCountFormatted: '',
+          viewableInLens: false,
         },
         {
           fieldName: 'type.keyword',
@@ -283,12 +323,55 @@ export default function ({ getService }: FtrProviderContext) {
           existsInDocs: true,
           aggregatable: true,
           loading: false,
+          exampleCount: 1,
+          docCountFormatted: '5000 (100%)',
+          viewableInLens: true,
         },
       ],
-      nonMetricFieldsTypeFilterCardCount: 3,
-      metricFieldsFilterCardCount: 2,
-      nonMetricFieldsFilterCardCount: 1,
+      emptyFields: ['sourcetype'],
+      visibleMetricFieldsCount: 1,
+      totalMetricFieldsCount: 1,
+      populatedFieldsCount: 7,
+      totalFieldsCount: 8,
+      fieldNameFiltersResultCount: 2,
+      fieldTypeFiltersResultCount: 1,
     },
+  };
+
+  const sampleLogTestData: TestData = {
+    suiteTitle: 'geo point field',
+    sourceIndexOrSavedSearch: 'ft_module_sample_logs',
+    fieldNameFilters: ['geo.coordinates'],
+    fieldTypeFilters: [ML_JOB_FIELD_TYPES.GEO_POINT],
+    rowsPerPage: 50,
+    expected: {
+      totalDocCountFormatted: '408',
+      metricFields: [],
+      // only testing the geo_point fields
+      nonMetricFields: [
+        {
+          fieldName: 'geo.coordinates',
+          type: ML_JOB_FIELD_TYPES.GEO_POINT,
+          existsInDocs: true,
+          aggregatable: true,
+          loading: false,
+          docCountFormatted: '408 (100%)',
+          exampleCount: 10,
+          viewableInLens: false,
+        },
+      ],
+      emptyFields: [],
+      visibleMetricFieldsCount: 4,
+      totalMetricFieldsCount: 5,
+      populatedFieldsCount: 35,
+      totalFieldsCount: 36,
+      fieldNameFiltersResultCount: 1,
+      fieldTypeFiltersResultCount: 1,
+    },
+    sampleSizeValidations: [
+      { size: 1000, expected: { field: 'geo.coordinates', docCountFormatted: '408 (100%)' } },
+      { size: 5000, expected: { field: '@timestamp', docCountFormatted: '408 (100%)' } },
+    ],
   };
 
   function runTests(testData: TestData) {
@@ -311,74 +394,105 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.dataVisualizerIndexBased.assertTimeRangeSelectorSectionExists();
 
       await ml.testExecution.logTestStep(`${testData.suiteTitle} loads data for full time range`);
-      await ml.dataVisualizerIndexBased.clickUseFullDataButton(testData.expected.totalDocCount);
+      await ml.dataVisualizerIndexBased.clickUseFullDataButton(
+        testData.expected.totalDocCountFormatted
+      );
 
-      await ml.testExecution.logTestStep(`${testData.suiteTitle} displays the panels of fields`);
-      await ml.dataVisualizerIndexBased.assertFieldsPanelsExist(testData.expected.fieldsPanelCount);
+      await ml.testExecution.logTestStep(
+        `${testData.suiteTitle} displays elements in the doc count panel correctly`
+      );
+      await ml.dataVisualizerIndexBased.assertTotalDocCountHeaderExist();
+      await ml.dataVisualizerIndexBased.assertTotalDocCountChartExist();
 
-      if (testData.expected.metricCards !== undefined && testData.expected.metricCards.length > 0) {
-        await ml.testExecution.logTestStep(`${testData.suiteTitle} displays the Metrics panel`);
-        await ml.dataVisualizerIndexBased.assertFieldsPanelForTypesExist([
-          ML_JOB_FIELD_TYPES.NUMBER,
-        ]); // document_count not exposed as a type in the panel
+      await ml.testExecution.logTestStep(
+        `${testData.suiteTitle} displays elements in the data visualizer table correctly`
+      );
+      await ml.dataVisualizerIndexBased.assertDataVisualizerTableExist();
 
-        await ml.testExecution.logTestStep(
-          `${testData.suiteTitle} displays the expected metric field cards`
-        );
-        for (const fieldCard of testData.expected.metricCards as FieldVisConfig[]) {
-          await ml.dataVisualizerIndexBased.assertCardExists(fieldCard.type, fieldCard.fieldName);
-        }
+      if (testData.rowsPerPage) {
+        await ml.dataVisualizerTable.ensureNumRowsPerPage(testData.rowsPerPage);
+      }
 
-        await ml.testExecution.logTestStep(
-          `${testData.suiteTitle} filters metric fields cards with search`
-        );
-        await ml.dataVisualizerIndexBased.filterFieldsPanelWithSearchString(
-          ['number'],
-          testData.metricFieldsFilter,
-          testData.expected.metricFieldsFilterCardCount
+      await ml.dataVisualizerTable.assertSearchPanelExist();
+      await ml.dataVisualizerTable.assertSampleSizeInputExists();
+      await ml.dataVisualizerTable.assertFieldTypeInputExists();
+      await ml.dataVisualizerTable.assertFieldNameInputExists();
+
+      await ml.dataVisualizerIndexBased.assertFieldCountPanelExist();
+      await ml.dataVisualizerIndexBased.assertMetricFieldsSummaryExist();
+      await ml.dataVisualizerIndexBased.assertFieldsSummaryExist();
+      await ml.dataVisualizerIndexBased.assertVisibleMetricFieldsCount(
+        testData.expected.visibleMetricFieldsCount
+      );
+      await ml.dataVisualizerIndexBased.assertTotalMetricFieldsCount(
+        testData.expected.totalMetricFieldsCount
+      );
+      await ml.dataVisualizerIndexBased.assertVisibleFieldsCount(
+        testData.expected.populatedFieldsCount
+      );
+      await ml.dataVisualizerIndexBased.assertTotalFieldsCount(testData.expected.totalFieldsCount);
+
+      await ml.testExecution.logTestStep(
+        'displays details for metric fields and non-metric fields correctly'
+      );
+      for (const fieldRow of testData.expected.metricFields as Array<
+        Required<MetricFieldVisConfig>
+      >) {
+        await ml.dataVisualizerTable.assertNumberFieldContents(
+          fieldRow.fieldName,
+          fieldRow.docCountFormatted,
+          fieldRow.topValuesCount,
+          fieldRow.viewableInLens
         );
       }
 
-      if (
-        testData.expected.nonMetricCards !== undefined &&
-        testData.expected.nonMetricCards.length > 0
-      ) {
-        await ml.testExecution.logTestStep(
-          `${testData.suiteTitle} displays the non-metric Fields panel`
-        );
-        await ml.dataVisualizerIndexBased.assertFieldsPanelForTypesExist(
-          getFieldTypes(testData.expected.nonMetricCards as FieldVisConfig[])
-        );
-
-        await ml.testExecution.logTestStep(
-          `${testData.suiteTitle} displays the expected non-metric field cards`
-        );
-        for (const fieldCard of testData.expected.nonMetricCards!) {
-          await ml.dataVisualizerIndexBased.assertCardExists(fieldCard.type, fieldCard.fieldName);
-        }
-
-        await ml.testExecution.logTestStep(
-          `${testData.suiteTitle} sets the non metric field types input`
-        );
-        const fieldTypes: ML_JOB_FIELD_TYPES[] = getFieldTypes(
-          testData.expected.nonMetricCards as FieldVisConfig[]
-        );
-        await ml.dataVisualizerIndexBased.assertFieldsPanelTypeInputExists(fieldTypes);
-        await ml.dataVisualizerIndexBased.setFieldsPanelTypeInputValue(
-          fieldTypes,
-          testData.nonMetricFieldsTypeFilter,
-          testData.expected.nonMetricFieldsTypeFilterCardCount
-        );
-
-        await ml.testExecution.logTestStep(
-          `${testData.suiteTitle} filters non-metric fields cards with search`
-        );
-        await ml.dataVisualizerIndexBased.filterFieldsPanelWithSearchString(
-          getFieldTypes(testData.expected.nonMetricCards as FieldVisConfig[]),
-          testData.nonMetricFieldsFilter,
-          testData.expected.nonMetricFieldsFilterCardCount
+      for (const fieldRow of testData.expected.nonMetricFields!) {
+        await ml.dataVisualizerTable.assertNonMetricFieldContents(
+          fieldRow.type,
+          fieldRow.fieldName!,
+          fieldRow.docCountFormatted,
+          fieldRow.exampleCount,
+          fieldRow.viewableInLens
         );
       }
+
+      await ml.testExecution.logTestStep(
+        `${testData.suiteTitle} sample size control changes non-metric fields`
+      );
+      for (const sampleSizeCase of testData.sampleSizeValidations) {
+        const { size, expected } = sampleSizeCase;
+        await ml.dataVisualizerTable.setSampleSizeInputValue(
+          size,
+          expected.field,
+          expected.docCountFormatted
+        );
+      }
+
+      await ml.testExecution.logTestStep('sets and resets field type filter correctly');
+      await ml.dataVisualizerTable.setFieldTypeFilter(
+        testData.fieldTypeFilters,
+        testData.expected.fieldTypeFiltersResultCount
+      );
+      await ml.dataVisualizerTable.removeFieldTypeFilter(
+        testData.fieldTypeFilters,
+        testData.expected.populatedFieldsCount
+      );
+
+      await ml.testExecution.logTestStep('sets and resets field name filter correctly');
+      await ml.dataVisualizerTable.setFieldNameFilter(
+        testData.fieldNameFilters,
+        testData.expected.fieldNameFiltersResultCount
+      );
+      await ml.dataVisualizerTable.removeFieldNameFilter(
+        testData.fieldNameFilters,
+        testData.expected.populatedFieldsCount
+      );
+
+      await ml.testExecution.logTestStep('displays unpopulated fields correctly');
+      await ml.dataVisualizerTable.setShowEmptyFieldsSwitchState(
+        true,
+        testData.expected.emptyFields
+      );
     });
   }
 
@@ -386,17 +500,16 @@ export default function ({ getService }: FtrProviderContext) {
     this.tags(['mlqa']);
     before(async () => {
       await esArchiver.loadIfNeeded('ml/farequote');
+      await esArchiver.loadIfNeeded('ml/module_sample_logs');
+
       await ml.testResources.createIndexPatternIfNeeded('ft_farequote', '@timestamp');
+      await ml.testResources.createIndexPatternIfNeeded('ft_module_sample_logs', '@timestamp');
       await ml.testResources.createSavedSearchFarequoteLuceneIfNeeded();
       await ml.testResources.createSavedSearchFarequoteKueryIfNeeded();
       await ml.testResources.setKibanaTimeZoneToUTC();
 
       await ml.securityUI.loginAsMlPowerUser();
     });
-
-    // TODO - add tests for
-    //  - validating metrics displayed inside the cards
-    //  - selecting a document sample size
 
     describe('with farequote', function () {
       // Run tests on full farequote index.
@@ -425,17 +538,16 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       runTests(farequoteLuceneSearchTestData);
+    });
 
-      // Test the Create advanced job button.
-      // Note the search is not currently passed to the wizard, just the index.
-      it(`${farequoteLuceneSearchTestData.suiteTitle} opens the advanced job wizard`, async () => {
-        await ml.dataVisualizerIndexBased.clickCreateAdvancedJobButton();
-        await ml.jobTypeSelection.assertAdvancedJobWizardOpen();
-        await ml.jobWizardAdvanced.assertDatafeedQueryEditorExists();
-        await ml.jobWizardAdvanced.assertDatafeedQueryEditorValue(
-          farequoteLuceneSearchTestData.advancedJobWizardDatafeedQuery
-        );
+    describe('with module_sample_logs ', function () {
+      // Run tests on full farequote index.
+      it(`${sampleLogTestData.suiteTitle} loads the data visualizer selector page`, async () => {
+        // Start navigation from the base of the ML app.
+        await ml.navigation.navigateToMl();
+        await ml.navigation.navigateToDataVisualizer();
       });
+      runTests(sampleLogTestData);
     });
   });
 }

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { cleanGeometry, geoJsonCleanAndValidate } from './geo_json_clean_and_validate';
@@ -134,18 +135,13 @@ describe('geo_json_clean_and_validate', () => {
     expect(clockwiseGeoJson).toEqual(clockwiseGeoJson2);
   });
 
-  it('error out on invalid object', () => {
+  it('return same object if not cleanable', () => {
     const invalidGeoJson = {
       type: 'notMyType',
       geometry: 'shmeometry',
     };
 
-    const notEvenCloseToGeoJson = [1, 2, 3, 4];
-
-    const badObjectPassed = () => geoJsonCleanAndValidate(invalidGeoJson);
-    expect(badObjectPassed).toThrow();
-
-    const worseObjectPassed = () => geoJsonCleanAndValidate(notEvenCloseToGeoJson);
-    expect(worseObjectPassed).toThrow();
+    const uncleanableJson = geoJsonCleanAndValidate(invalidGeoJson);
+    expect(uncleanableJson).toEqual(invalidGeoJson);
   });
 });

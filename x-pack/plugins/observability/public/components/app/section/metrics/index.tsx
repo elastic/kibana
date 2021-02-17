@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-import { AreaSeries, ScaleType, Settings } from '@elastic/charts';
+
 import { EuiFlexGroup, EuiFlexItem, EuiProgress, EuiSpacer } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
@@ -11,15 +12,12 @@ import React, { useContext } from 'react';
 import styled, { ThemeContext } from 'styled-components';
 import { SectionContainer } from '../';
 import { getDataHandler } from '../../../../data_handler';
-import { useChartTheme } from '../../../../hooks/use_chart_theme';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
-import { Series } from '../../../../typings';
-import { ChartContainer } from '../../chart_container';
+import { useHasData } from '../../../../hooks/use_has_data';
+import { useTimeRange } from '../../../../hooks/use_time_range';
 import { StyledStat } from '../../styled_stat';
 
 interface Props {
-  absoluteTime: { start?: number; end?: number };
-  relativeTime: { start: string; end: string };
   bucketSize?: string;
 }
 
@@ -46,28 +44,36 @@ const StyledProgress = styled.div<{ color?: string }>`
   }
 `;
 
-export function MetricsSection({ absoluteTime, relativeTime, bucketSize }: Props) {
+export function MetricsSection({ bucketSize }: Props) {
   const theme = useContext(ThemeContext);
+  const { forceUpdate, hasData } = useHasData();
+  const { relativeStart, relativeEnd, absoluteStart, absoluteEnd } = useTimeRange();
 
-  const { start, end } = absoluteTime;
-  const { data, status } = useFetcher(() => {
-    if (start && end && bucketSize) {
-      return getDataHandler('infra_metrics')?.fetchData({
-        absoluteTime: { start, end },
-        relativeTime,
-        bucketSize,
-      });
-    }
-  }, [start, end, bucketSize, relativeTime]);
+  const { data, status } = useFetcher(
+    () => {
+      if (bucketSize) {
+        return getDataHandler('infra_metrics')?.fetchData({
+          absoluteTime: { start: absoluteStart, end: absoluteEnd },
+          relativeTime: { start: relativeStart, end: relativeEnd },
+          bucketSize,
+        });
+      }
+    },
+    // Absolute times shouldn't be used here, since it would refetch on every render
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [bucketSize, relativeStart, relativeEnd, forceUpdate]
+  );
+
+  if (!hasData.infra_metrics?.hasData) {
+    return null;
+  }
 
   const isLoading = status === FETCH_STATUS.LOADING;
 
-  const { appLink, stats, series } = data || {};
+  const { appLink, stats } = data || {};
 
   const cpuColor = theme.eui.euiColorVis7;
   const memoryColor = theme.eui.euiColorVis0;
-  const inboundTrafficColor = theme.eui.euiColorVis3;
-  const outboundTrafficColor = theme.eui.euiColorVis2;
 
   return (
     <SectionContainer
@@ -96,7 +102,7 @@ export function MetricsSection({ absoluteTime, relativeTime, bucketSize }: Props
           <StyledStat
             title={numeral(stats?.cpu.value).format('0.0%')}
             description={i18n.translate('xpack.observability.overview.metrics.cpuUsage', {
-              defaultMessage: 'CPU Usage',
+              defaultMessage: 'CPU usage',
             })}
             isLoading={isLoading}
             color={cpuColor}
@@ -127,68 +133,7 @@ export function MetricsSection({ absoluteTime, relativeTime, bucketSize }: Props
             </StyledProgress>
           </StyledStat>
         </EuiFlexItem>
-        <EuiFlexItem>
-          <StyledStat
-            title={`${numeral(stats?.inboundTraffic.value).format('0.0b')}/s`}
-            description={i18n.translate('xpack.observability.overview.metrics.inboundTraffic', {
-              defaultMessage: 'Inbound traffic',
-            })}
-            isLoading={isLoading}
-            color={inboundTrafficColor}
-          >
-            <AreaChart
-              serie={series?.inboundTraffic}
-              isLoading={isLoading}
-              color={inboundTrafficColor}
-            />
-          </StyledStat>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <StyledStat
-            title={`${numeral(stats?.outboundTraffic.value).format('0.0b')}/s`}
-            description={i18n.translate('xpack.observability.overview.metrics.outboundTraffic', {
-              defaultMessage: 'Outbound traffic',
-            })}
-            isLoading={isLoading}
-            color={outboundTrafficColor}
-          >
-            <AreaChart
-              serie={series?.outboundTraffic}
-              isLoading={isLoading}
-              color={outboundTrafficColor}
-            />
-          </StyledStat>
-        </EuiFlexItem>
       </EuiFlexGroup>
     </SectionContainer>
-  );
-}
-
-function AreaChart({
-  serie,
-  isLoading,
-  color,
-}: {
-  serie?: Series;
-  isLoading: boolean;
-  color: string;
-}) {
-  const chartTheme = useChartTheme();
-
-  return (
-    <ChartContainer height={30} isInitialLoad={isLoading && !serie} iconSize="m">
-      <Settings theme={chartTheme} showLegend={false} tooltip="none" />
-      {serie && (
-        <AreaSeries
-          id="area"
-          xScaleType={ScaleType.Time}
-          yScaleType={ScaleType.Linear}
-          xAccessor={'x'}
-          yAccessors={['y']}
-          data={serie.coordinates}
-          color={color}
-        />
-      )}
-    </ChartContainer>
   );
 }

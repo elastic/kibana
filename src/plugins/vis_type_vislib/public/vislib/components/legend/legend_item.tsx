@@ -1,27 +1,14 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import React, { memo, BaseSyntheticEvent, KeyboardEvent } from 'react';
-import classNames from 'classnames';
+import React, { memo, useState, BaseSyntheticEvent, KeyboardEvent } from 'react';
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiPopover,
   keys,
@@ -30,10 +17,11 @@ import {
   EuiButtonEmpty,
   EuiPopoverProps,
   EuiButtonGroup,
-  EuiButtonGroupOption,
+  EuiButtonGroupOptionProps,
 } from '@elastic/eui';
 
-import { legendColors, LegendItem } from './models';
+import { LegendItem } from './models';
+import { ColorPicker } from '../../../../../charts/public';
 
 interface Props {
   item: LegendItem;
@@ -45,7 +33,7 @@ interface Props {
   onSelect: (label: string | null) => (event?: BaseSyntheticEvent) => void;
   onHighlight: (event: BaseSyntheticEvent) => void;
   onUnhighlight: (event: BaseSyntheticEvent) => void;
-  setColor: (label: string, color: string) => (event: BaseSyntheticEvent) => void;
+  setColor: (label: string, color: string | null, event: BaseSyntheticEvent) => void;
   getColor: (label: string) => string;
 }
 
@@ -62,6 +50,7 @@ const VisLegendItemComponent = ({
   setColor,
   getColor,
 }: Props) => {
+  const [idToSelectedMap, setIdToSelectedMap] = useState({});
   /**
    * Keydown listener for a legend entry.
    * This will close the details panel of this legend entry when pressing Escape.
@@ -74,7 +63,7 @@ const VisLegendItemComponent = ({
     }
   };
 
-  const filterOptions: EuiButtonGroupOption[] = [
+  const filterOptions: EuiButtonGroupOptionProps[] = [
     {
       id: 'filterIn',
       label: i18n.translate('visTypeVislib.vislib.legend.filterForValueButtonAriaLabel', {
@@ -96,6 +85,7 @@ const VisLegendItemComponent = ({
   ];
 
   const handleFilterChange = (id: string) => {
+    setIdToSelectedMap({ filterIn: id === 'filterIn', filterOut: id === 'filterOut' });
     onFilter(item, id !== 'filterIn');
   };
 
@@ -112,6 +102,7 @@ const VisLegendItemComponent = ({
         options={filterOptions}
         onChange={handleFilterChange}
         data-test-subj={`legend-${item.label}-filters`}
+        idToSelectedMap={idToSelectedMap}
       />
       <EuiSpacer size="s" />
     </>
@@ -149,7 +140,6 @@ const VisLegendItemComponent = ({
 
   const renderDetails = () => (
     <EuiPopover
-      ownFocus
       display="block"
       button={button}
       isOpen={selected}
@@ -157,40 +147,14 @@ const VisLegendItemComponent = ({
       closePopover={onSelect(null)}
       panelPaddingSize="s"
     >
-      <div className="visLegend__valueDetails">
-        {canFilter && renderFilterBar()}
+      {canFilter && renderFilterBar()}
 
-        <div className="visLegend__valueColorPicker" role="listbox">
-          <span id={`${legendId}ColorPickerDesc`} className="euiScreenReaderOnly">
-            <FormattedMessage
-              id="visTypeVislib.vislib.legend.setColorScreenReaderDescription"
-              defaultMessage="Set color for value {legendDataLabel}"
-              values={{ legendDataLabel: item.label }}
-            />
-          </span>
-          {legendColors.map((color) => (
-            <EuiIcon
-              role="option"
-              tabIndex={0}
-              type="dot"
-              size="l"
-              color={getColor(item.label)}
-              key={color}
-              aria-label={color}
-              aria-describedby={`${legendId}ColorPickerDesc`}
-              aria-selected={color === getColor(item.label)}
-              onClick={setColor(item.label, color)}
-              onKeyPress={setColor(item.label, color)}
-              className={classNames('visLegend__valueColorPickerDot', {
-                // eslint-disable-next-line @typescript-eslint/naming-convention
-                'visLegend__valueColorPickerDot-isSelected': color === getColor(item.label),
-              })}
-              style={{ color }}
-              data-test-subj={`legendSelectColor-${color}`}
-            />
-          ))}
-        </div>
-      </div>
+      <ColorPicker
+        id={legendId}
+        label={item.label}
+        color={getColor(item.label)}
+        onChange={(c, e) => setColor(item.label, c, e)}
+      />
     </EuiPopover>
   );
 

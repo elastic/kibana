@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useEffect, useRef } from 'react';
@@ -71,9 +72,11 @@ export const GenericDownloaderComponent = ({
               anchorRef.current.href = objectURL; // eslint-disable-line require-atomic-updates
               anchorRef.current.download = filename; // eslint-disable-line require-atomic-updates
               anchorRef.current.click();
-              window.URL.revokeObjectURL(objectURL);
-            }
 
+              if (typeof window.URL.revokeObjectURL === 'function') {
+                window.URL.revokeObjectURL(objectURL);
+              }
+            }
             if (onExportSuccess != null) {
               onExportSuccess(ids.length);
             }

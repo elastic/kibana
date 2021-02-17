@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FC, useMemo, useState } from 'react';
@@ -18,6 +19,7 @@ import {
   EuiTitle,
   EuiSpacer,
   EuiContextMenuItem,
+  EuiButtonEmpty,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -156,6 +158,16 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
                     />
                   </EuiFormRow>
                 </EuiFlexItem>
+                {selectedCells ? (
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonEmpty size="xs" onClick={setSelectedCells.bind(null, undefined)}>
+                      <FormattedMessage
+                        id="xpack.ml.explorer.clearSelectionLabel"
+                        defaultMessage="Clear selection"
+                      />
+                    </EuiButtonEmpty>
+                  </EuiFlexItem>
+                ) : null}
                 <EuiFlexItem grow={false} style={{ alignSelf: 'center' }}>
                   <div className="panel-sub-title">
                     {viewByLoadedForTimeFormatted && (
@@ -211,6 +223,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
           <EuiSpacer size="m" />
 
           <SwimlaneContainer
+            id="overall"
             data-test-subj="mlAnomalyExplorerSwimlaneOverall"
             filterActive={filterActive}
             maskAll={maskAll}
@@ -222,12 +235,14 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
             onResize={explorerService.setSwimlaneContainerWidth}
             isLoading={loading}
             noDataWarning={<NoOverallData />}
+            showTimeline={false}
           />
 
           <EuiSpacer size="m" />
 
           {viewBySwimlaneOptions.length > 0 && (
             <SwimlaneContainer
+              id="view_by"
               data-test-subj="mlAnomalyExplorerSwimlaneViewBy"
               filterActive={filterActive}
               maskAll={

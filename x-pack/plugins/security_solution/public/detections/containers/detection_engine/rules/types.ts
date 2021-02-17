@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import * as t from 'io-ts';
@@ -17,8 +18,17 @@ import {
   timestamp_override,
   threshold,
   type,
+  threats,
 } from '../../../../../common/detection_engine/schemas/common/schemas';
-import { listArray } from '../../../../../common/detection_engine/schemas/types';
+import {
+  listArray,
+  threat_query,
+  threat_index,
+  threat_indicator_path,
+  threat_mapping,
+  threat_language,
+  threat_filters,
+} from '../../../../../common/detection_engine/schemas/types';
 import {
   CreateRulesSchema,
   PatchRulesSchema,
@@ -63,6 +73,15 @@ const MetaRule = t.intersection([
   }),
 ]);
 
+const StatusTypes = t.union([
+  t.literal('succeeded'),
+  t.literal('failed'),
+  t.literal('going to run'),
+  t.literal('partial failure'),
+  t.literal('warning'),
+]);
+
+// TODO: make a ticket
 export const RuleSchema = t.intersection([
   t.type({
     author,
@@ -86,7 +105,7 @@ export const RuleSchema = t.intersection([
     tags: t.array(t.string),
     type,
     to: t.string,
-    threat: t.array(t.unknown),
+    threat: threats,
     updated_at: t.string,
     updated_by: t.string,
     actions: t.array(action),
@@ -101,15 +120,23 @@ export const RuleSchema = t.intersection([
     license,
     last_failure_at: t.string,
     last_failure_message: t.string,
+    last_success_message: t.string,
+    last_success_at: t.string,
     meta: MetaRule,
     machine_learning_job_id: t.string,
     output_index: t.string,
     query: t.string,
     rule_name_override,
     saved_id: t.string,
-    status: t.string,
+    status: StatusTypes,
     status_date: t.string,
     threshold,
+    threat_query,
+    threat_filters,
+    threat_index,
+    threat_indicator_path,
+    threat_mapping,
+    threat_language,
     timeline_id: t.string,
     timeline_title: t.string,
     timestamp_override,
@@ -154,9 +181,9 @@ export interface FilterOptions {
   filter: string;
   sortField: RulesSortingFields;
   sortOrder: SortOrder;
-  showCustomRules?: boolean;
-  showElasticRules?: boolean;
-  tags?: string[];
+  showCustomRules: boolean;
+  showElasticRules: boolean;
+  tags: string[];
 }
 
 export interface FetchRulesResponse {
@@ -228,7 +255,13 @@ export interface RuleStatus {
   failures: RuleInfoStatus[];
 }
 
-export type RuleStatusType = 'executing' | 'failed' | 'going to run' | 'succeeded';
+export type RuleStatusType =
+  | 'executing'
+  | 'failed'
+  | 'going to run'
+  | 'succeeded'
+  | 'partial failure'
+  | 'warning';
 export interface RuleInfoStatus {
   alert_id: string;
   status_date: string;

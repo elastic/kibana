@@ -1,24 +1,13 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { i18n } from '@kbn/i18n';
-import { SavedObjectMetaData } from 'src/plugins/saved_objects/public';
+import { SavedObjectMetaData, OnSaveProps } from 'src/plugins/saved_objects/public';
 import { first } from 'rxjs/operators';
 import { SavedObjectAttributes } from '../../../../core/public';
 import {
@@ -26,6 +15,7 @@ import {
   EmbeddableOutput,
   ErrorEmbeddable,
   IContainer,
+  AttributeService,
 } from '../../../embeddable/public';
 import { DisabledLabEmbeddable } from './disabled_lab_embeddable';
 import {
@@ -50,7 +40,7 @@ import { createVisEmbeddableFromObject } from './create_vis_embeddable_from_obje
 import { StartServicesGetter } from '../../../kibana_utils/public';
 import { VisualizationsStartDeps } from '../plugin';
 import { VISUALIZE_ENABLE_LABS_SETTING } from '../../common/constants';
-import { AttributeService } from '../../../dashboard/public';
+import { checkForDuplicateTitle } from '../../../saved_objects/public';
 
 interface VisualizationAttributes extends SavedObjectAttributes {
   visState: string;
@@ -58,7 +48,7 @@ interface VisualizationAttributes extends SavedObjectAttributes {
 
 export interface VisualizeEmbeddableFactoryDeps {
   start: StartServicesGetter<
-    Pick<VisualizationsStartDeps, 'inspector' | 'embeddable' | 'dashboard'>
+    Pick<VisualizationsStartDeps, 'inspector' | 'embeddable' | 'dashboard' | 'savedObjectsClient'>
   >;
 }
 
@@ -84,12 +74,12 @@ export class VisualizeEmbeddableFactory
     type: 'visualization',
     getIconForSavedObject: (savedObject) => {
       return (
-        getTypes().get(JSON.parse(savedObject.attributes.visState).type).icon || 'visualizeApp'
+        getTypes().get(JSON.parse(savedObject.attributes.visState).type)?.icon || 'visualizeApp'
       );
     },
     getTooltipForSavedObject: (savedObject) => {
       return `${savedObject.attributes.title} (${
-        getTypes().get(JSON.parse(savedObject.attributes.visState).type).title
+        getTypes().get(JSON.parse(savedObject.attributes.visState).type)?.title
       })`;
     },
     showSavedObject: (savedObject) => {
@@ -125,11 +115,14 @@ export class VisualizeEmbeddableFactory
     if (!this.attributeService) {
       this.attributeService = await this.deps
         .start()
-        .plugins.dashboard.getAttributeService<
+        .plugins.embeddable.getAttributeService<
           VisualizeSavedObjectAttributes,
           VisualizeByValueInput,
           VisualizeByReferenceInput
-        >(this.type, { customSaveMethod: this.onSave });
+        >(this.type, {
+          saveMethod: this.saveMethod.bind(this),
+          checkForDuplicateTitle: this.checkTitle.bind(this),
+        });
     }
     return this.attributeService!;
   }
@@ -183,10 +176,7 @@ export class VisualizeEmbeddableFactory
     }
   }
 
-  private async onSave(
-    type: string,
-    attributes: VisualizeSavedObjectAttributes
-  ): Promise<{ id: string }> {
+  private async saveMethod(attributes: VisualizeSavedObjectAttributes): Promise<{ id: string }> {
     try {
       const { title, savedVis } = attributes;
       const visObj = attributes.vis;
@@ -196,6 +186,7 @@ export class VisualizeEmbeddableFactory
       const saveOptions = {
         confirmOverwrite: false,
         returnToOrigin: true,
+        isTitleDuplicateConfirmed: true,
       };
       savedVis.title = title;
       savedVis.copyOnSave = false;
@@ -224,5 +215,25 @@ export class VisualizeEmbeddableFactory
     } catch (error) {
       throw error;
     }
+  }
+
+  public async checkTitle(props: OnSaveProps): Promise<true> {
+    const savedObjectsClient = await this.deps.start().core.savedObjects.client;
+    const overlays = await this.deps.start().core.overlays;
+    return checkForDuplicateTitle(
+      {
+        title: props.newTitle,
+        copyOnSave: false,
+        lastSavedTitle: '',
+        getEsType: () => this.type,
+        getDisplayName: this.getDisplayName || (() => this.type),
+      },
+      props.isTitleDuplicateConfirmed,
+      props.onTitleDuplicate,
+      {
+        savedObjectsClient,
+        overlays,
+      }
+    );
   }
 }

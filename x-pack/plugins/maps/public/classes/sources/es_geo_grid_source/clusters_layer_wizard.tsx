@@ -1,17 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 // @ts-ignore
 import { CreateSourceEditor } from './create_source_editor';
-// @ts-ignore
 import { ESGeoGridSource, clustersTitle } from './es_geo_grid_source';
 import { LayerWizard, RenderWizardArguments } from '../../layers/layer_wizard_registry';
-import { VectorLayer } from '../../layers/vector_layer/vector_layer';
+import { VectorLayer } from '../../layers/vector_layer';
 import {
   ESGeoGridSourceDescriptor,
   ColorDynamicOptions,
@@ -29,13 +29,14 @@ import {
   STYLE_TYPE,
 } from '../../../../common/constants';
 import { NUMERICAL_COLOR_PALETTES } from '../../styles/color_palettes';
+import { ClustersLayerIcon } from '../../layers/icons/clusters_layer_icon';
 
 export const clustersLayerWizardConfig: LayerWizard = {
   categories: [LAYER_WIZARD_CATEGORY.ELASTICSEARCH],
   description: i18n.translate('xpack.maps.source.esGridClustersDescription', {
     defaultMessage: 'Geospatial data grouped in grids with metrics for each gridded cell',
   }),
-  icon: 'logoElasticsearch',
+  icon: ClustersLayerIcon,
   renderWizard: ({ previewLayers }: RenderWizardArguments) => {
     const onSourceConfigChange = (sourceConfig: Partial<ESGeoGridSourceDescriptor>) => {
       if (!sourceConfig) {
@@ -76,7 +77,7 @@ export const clustersLayerWizardConfig: LayerWizard = {
           [VECTOR_STYLES.ICON_SIZE]: {
             type: STYLE_TYPE.DYNAMIC,
             options: {
-              ...(defaultDynamicProperties[VECTOR_STYLES.ICON_SIZE]!.options as SizeDynamicOptions),
+              ...(defaultDynamicProperties[VECTOR_STYLES.ICON_SIZE].options as SizeDynamicOptions),
               field: {
                 name: COUNT_PROP_NAME,
                 origin: FIELD_ORIGIN.SOURCE,
@@ -86,7 +87,7 @@ export const clustersLayerWizardConfig: LayerWizard = {
           [VECTOR_STYLES.LABEL_TEXT]: {
             type: STYLE_TYPE.DYNAMIC,
             options: {
-              ...defaultDynamicProperties[VECTOR_STYLES.LABEL_TEXT]!.options,
+              ...defaultDynamicProperties[VECTOR_STYLES.LABEL_TEXT].options,
               field: {
                 name: COUNT_PROP_NAME,
                 origin: FIELD_ORIGIN.SOURCE,

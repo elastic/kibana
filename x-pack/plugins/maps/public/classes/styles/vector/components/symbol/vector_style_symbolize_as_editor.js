@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -47,13 +48,11 @@ export function VectorStyleSymbolizeAsEditor({
     handlePropertyChange(VECTOR_STYLES.SYMBOLIZE_AS, styleDescriptor);
   };
 
+  const symbolLabel = i18n.translate('xpack.maps.vector.symbolLabel', {
+    defaultMessage: 'Symbol type',
+  });
   const symbolizeAsForm = (
-    <EuiFormRow
-      label={i18n.translate('xpack.maps.vector.symbolLabel', {
-        defaultMessage: 'Symbol type',
-      })}
-      display="columnCompressed"
-    >
+    <EuiFormRow label={symbolLabel} display="columnCompressed">
       <EuiButtonGroup
         isDisabled={disabled}
         buttonSize="compressed"
@@ -61,6 +60,7 @@ export function VectorStyleSymbolizeAsEditor({
         idSelected={selectedOption ? selectedOption.id : undefined}
         onChange={onSymbolizeAsChange}
         isFullWidth
+        legend={symbolLabel}
       />
     </EuiFormRow>
   );

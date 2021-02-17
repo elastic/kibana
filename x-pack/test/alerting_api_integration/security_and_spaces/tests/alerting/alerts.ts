@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -168,6 +169,7 @@ alertName: abc,
 spaceId: ${space.id},
 tags: tag-A,tag-B,
 alertInstanceId: 1,
+alertActionGroup: default,
 instanceContextValue: true,
 instanceStateValue: true
 `.trim(),
@@ -282,6 +284,7 @@ alertName: abc,
 spaceId: ${space.id},
 tags: tag-A,tag-B,
 alertInstanceId: 1,
+alertActionGroup: default,
 instanceContextValue: true,
 instanceStateValue: true
 `.trim(),
@@ -839,6 +842,80 @@ instanceStateValue: true
           }
         });
 
+        it('should not throttle when changing subgroups', async () => {
+          const testStart = new Date();
+          const reference = alertUtils.generateReference();
+          const response = await alertUtils.createAlwaysFiringAction({
+            reference,
+            overwrites: {
+              schedule: { interval: '1s' },
+              params: {
+                index: ES_TEST_INDEX_NAME,
+                reference,
+                groupsToScheduleActionsInSeries: ['default:prev', 'default:next'],
+              },
+              actions: [
+                {
+                  group: 'default',
+                  id: indexRecordActionId,
+                  params: {
+                    index: ES_TEST_INDEX_NAME,
+                    reference,
+                    message: 'from:{{alertActionGroup}}:{{alertActionSubgroup}}',
+                  },
+                },
+              ],
+            },
+          });
+
+          switch (scenario.id) {
+            case 'no_kibana_privileges at space1':
+            case 'space_1_all at space2':
+            case 'global_read at space1':
+              expect(response.statusCode).to.eql(403);
+              expect(response.body).to.eql({
+                error: 'Forbidden',
+                message: getConsumerUnauthorizedErrorMessage(
+                  'create',
+                  'test.always-firing',
+                  'alertsFixture'
+                ),
+                statusCode: 403,
+              });
+              break;
+            case 'space_1_all_alerts_none_actions at space1':
+              expect(response.statusCode).to.eql(403);
+              expect(response.body).to.eql({
+                error: 'Forbidden',
+                message: `Unauthorized to get actions`,
+                statusCode: 403,
+              });
+              break;
+            case 'space_1_all at space1':
+            case 'space_1_all_with_restricted_fixture at space1':
+            case 'superuser at space1':
+              expect(response.statusCode).to.eql(200);
+              // Wait for actions to execute twice before disabling the alert and waiting for tasks to finish
+              await esTestIndexTool.waitForDocs('action:test.index-record', reference, 2);
+              await alertUtils.disable(response.body.id);
+              await taskManagerUtils.waitForEmpty(testStart);
+
+              // Ensure only 2 actions with proper params exists
+              const searchResult = await esTestIndexTool.search(
+                'action:test.index-record',
+                reference
+              );
+              expect(searchResult.hits.total.value).to.eql(2);
+              const messages: string[] = searchResult.hits.hits.map(
+                (hit: { _source: { params: { message: string } } }) => hit._source.params.message
+              );
+              expect(messages.sort()).to.eql(['from:default:next', 'from:default:prev']);
+              break;
+            default:
+              throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
+          }
+        });
+
         it('should reset throttle window when not firing', async () => {
           const testStart = new Date();
           const reference = alertUtils.generateReference();
@@ -1094,11 +1171,9 @@ instanceStateValue: true
         type: 'alert',
         id: alertId,
         provider: 'alerting',
-        actions: ['execute'],
+        actions: new Map([['execute', { gte: 1 }]]),
       });
     });
-
-    expect(events.length).to.be.greaterThan(0);
 
     const event = events[0];
 

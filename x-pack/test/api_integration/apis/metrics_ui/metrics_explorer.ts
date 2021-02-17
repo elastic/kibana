@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -239,13 +240,7 @@ export default function ({ getService }: FtrProviderContext) {
           .send(postBody)
           .expect(200);
         const body = decodeOrThrow(metricsExplorerResponseRT)(response.body);
-        expect(body.series).length(1);
-        expect(body.series[0]!).to.have.property('rows');
-        expect(body.series[0]!.rows).length(0);
-        expect(body.pageInfo).to.eql({
-          afterKey: null,
-          total: 0,
-        });
+        expect(body.series).length(0);
       });
       it('should work when there is no data with groupBy', async () => {
         const postBody = {

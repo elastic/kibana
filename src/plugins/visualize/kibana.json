@@ -11,14 +11,17 @@
     "visualizations",
     "embeddable",
     "dashboard",
-    "uiActions"
+    "presentationUtil"
   ],
-  "optionalPlugins": ["home", "share"],
+  "optionalPlugins": [
+    "home",
+    "share",
+    "savedObjectsTaggingOss"
+  ],
   "requiredBundles": [
     "kibanaUtils",
     "kibanaReact",
     "home",
-    "discover",
-    "visDefaultEditor"
+    "discover"
   ]
 }

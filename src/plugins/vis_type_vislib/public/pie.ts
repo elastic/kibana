@@ -1,36 +1,23 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { i18n } from '@kbn/i18n';
+import { Position } from '@elastic/charts';
 
 import { AggGroupNames } from '../../data/public';
-import { Schemas } from '../../vis_default_editor/public';
-import { PieOptions } from './components/options';
-import { getPositions, Positions } from './utils/collections';
-import { createVislibVisController } from './vis_controller';
+import { VisTypeDefinition, VIS_EVENT_TO_TRIGGER } from '../../visualizations/public';
+
 import { CommonVislibParams } from './types';
-import { VisTypeVislibDependencies } from './plugin';
-import { VIS_EVENT_TO_TRIGGER } from '../../../plugins/visualizations/public';
+import { PieOptions } from './editor';
+import { toExpressionAst } from './to_ast_pie';
 
 export interface PieVisParams extends CommonVislibParams {
   type: 'pie';
-  addLegend: boolean;
   isDonut: boolean;
   labels: {
     show: boolean;
@@ -40,23 +27,21 @@ export interface PieVisParams extends CommonVislibParams {
   };
 }
 
-export const createPieVisTypeDefinition = (deps: VisTypeVislibDependencies) => ({
+export const pieVisTypeDefinition: VisTypeDefinition<PieVisParams> = {
   name: 'pie',
   title: i18n.translate('visTypeVislib.pie.pieTitle', { defaultMessage: 'Pie' }),
   icon: 'visPie',
   description: i18n.translate('visTypeVislib.pie.pieDescription', {
-    defaultMessage: 'Compare parts of a whole',
+    defaultMessage: 'Compare data in proportion to a whole.',
   }),
-  visualization: createVislibVisController(deps),
-  getSupportedTriggers: () => {
-    return [VIS_EVENT_TO_TRIGGER.filter];
-  },
+  getSupportedTriggers: () => [VIS_EVENT_TO_TRIGGER.filter],
+  toExpressionAst,
   visConfig: {
     defaults: {
       type: 'pie',
       addTooltip: true,
       addLegend: true,
-      legendPosition: Positions.RIGHT,
+      legendPosition: Position.Right,
       isDonut: true,
       labels: {
         show: false,
@@ -67,11 +52,8 @@ export const createPieVisTypeDefinition = (deps: VisTypeVislibDependencies) => (
     },
   },
   editorConfig: {
-    collections: {
-      legendPositions: getPositions(),
-    },
     optionsTemplate: PieOptions,
-    schemas: new Schemas([
+    schemas: [
       {
         group: AggGroupNames.Metrics,
         name: 'metric',
@@ -104,8 +86,8 @@ export const createPieVisTypeDefinition = (deps: VisTypeVislibDependencies) => (
         max: 1,
         aggFilter: ['!geohash_grid', '!geotile_grid', '!filter'],
       },
-    ]),
+    ],
   },
   hierarchicalData: true,
-  responseHandler: 'vislib_slices',
-});
+  requiresSearch: true,
+};

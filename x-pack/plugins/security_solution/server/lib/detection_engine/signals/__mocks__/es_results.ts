@@ -1,9 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+import { set } from '@elastic/safer-lodash-set';
 import {
   SignalSourceHit,
   SignalSearchResponse,
@@ -11,17 +13,15 @@ import {
   BulkItem,
   RuleAlertAttributes,
   SignalHit,
+  WrappedSignalHit,
 } from '../types';
-import {
-  Logger,
-  SavedObject,
-  SavedObjectsFindResponse,
-} from '../../../../../../../../src/core/server';
+import { SavedObject, SavedObjectsFindResponse } from '../../../../../../../../src/core/server';
 import { loggingSystemMock } from '../../../../../../../../src/core/server/mocks';
 import { RuleTypeParams } from '../../types';
-import { IRuleStatusAttributes } from '../../rules/types';
+import { IRuleStatusSOAttributes } from '../../rules/types';
 import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
 import { getListArrayMock } from '../../../../../common/detection_engine/schemas/types/lists.mock';
+import { RulesSchema } from '../../../../../common/detection_engine/schemas/response';
 
 export const sampleRuleAlertParams = (
   maxSignals?: number | undefined,
@@ -59,6 +59,8 @@ export const sampleRuleAlertParams = (
   threatQuery: undefined,
   threatMapping: undefined,
   threatIndex: undefined,
+  threatIndicatorPath: undefined,
+  threatLanguage: undefined,
   timelineId: undefined,
   timelineTitle: undefined,
   timestampOverride: undefined,
@@ -66,6 +68,8 @@ export const sampleRuleAlertParams = (
   threat: undefined,
   version: 1,
   exceptionsList: getListArrayMock(),
+  concurrentSearches: undefined,
+  itemsPerSearch: undefined,
 });
 
 export const sampleRuleSO = (): SavedObject<RuleAlertAttributes> => {
@@ -92,6 +96,46 @@ export const sampleRuleSO = (): SavedObject<RuleAlertAttributes> => {
   };
 };
 
+export const expectedRule = (): RulesSchema => {
+  return {
+    actions: [],
+    author: ['Elastic'],
+    building_block_type: 'default',
+    id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
+    rule_id: 'rule-1',
+    false_positives: [],
+    max_signals: 10000,
+    risk_score: 50,
+    risk_score_mapping: [],
+    output_index: '.siem-signals',
+    description: 'Detecting root and admin users',
+    from: 'now-6m',
+    immutable: false,
+    index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+    interval: '5m',
+    language: 'kuery',
+    license: 'Elastic License',
+    name: 'rule-name',
+    query: 'user.name: root or user.name: admin',
+    references: ['http://google.com'],
+    severity: 'high',
+    severity_mapping: [],
+    tags: ['some fake tag 1', 'some fake tag 2'],
+    threat: [],
+    type: 'query',
+    to: 'now',
+    note: '',
+    enabled: true,
+    created_by: 'sample user',
+    updated_by: 'sample user',
+    version: 1,
+    updated_at: '2020-03-27T22:55:59.577Z',
+    created_at: '2020-03-27T22:55:59.577Z',
+    throttle: 'no_actions',
+    exceptions_list: getListArrayMock(),
+  };
+};
+
 export const sampleDocNoSortIdNoVersion = (someUuid: string = sampleIdGuid): SignalSourceHit => ({
   _index: 'myFakeSignalIndex',
   _type: 'doc',
@@ -105,8 +149,8 @@ export const sampleDocNoSortIdNoVersion = (someUuid: string = sampleIdGuid): Sig
 
 export const sampleDocWithSortId = (
   someUuid: string = sampleIdGuid,
-  ip?: string,
-  destIp?: string
+  ip?: string | string[],
+  destIp?: string | string[]
 ): SignalSourceHit => ({
   _index: 'myFakeSignalIndex',
   _type: 'doc',
@@ -122,6 +166,12 @@ export const sampleDocWithSortId = (
     destination: {
       ip: destIp ?? '127.0.0.1',
     },
+  },
+  fields: {
+    someKey: ['someValue'],
+    '@timestamp': ['2020-04-20T21:27:45+0000'],
+    'source.ip': ip ? (Array.isArray(ip) ? ip : [ip]) : ['127.0.0.1'],
+    'destination.ip': destIp ? (Array.isArray(destIp) ? destIp : [destIp]) : ['127.0.0.1'],
   },
   sort: ['1234567891111'],
 });
@@ -142,12 +192,33 @@ export const sampleDocNoSortId = (
       ip: ip ?? '127.0.0.1',
     },
   },
+  fields: {
+    someKey: ['someValue'],
+    '@timestamp': ['2020-04-20T21:27:45+0000'],
+    'source.ip': [ip ?? '127.0.0.1'],
+  },
   sort: [],
 });
 
-export const sampleDocSeverity = (
-  severity?: Array<string | number | null> | string | number | null
-): SignalSourceHit => ({
+export const sampleDocSeverity = (severity?: unknown, fieldName?: string): SignalSourceHit => {
+  const doc = {
+    _index: 'myFakeSignalIndex',
+    _type: 'doc',
+    _score: 100,
+    _version: 1,
+    _id: sampleIdGuid,
+    _source: {
+      someKey: 'someValue',
+      '@timestamp': '2020-04-20T21:27:45+0000',
+    },
+    sort: [],
+  };
+
+  set(doc._source, fieldName ?? 'event.severity', severity);
+  return doc;
+};
+
+export const sampleDocRiskScore = (riskScore?: unknown): SignalSourceHit => ({
   _index: 'myFakeSignalIndex',
   _type: 'doc',
   _score: 100,
@@ -157,7 +228,7 @@ export const sampleDocSeverity = (
     someKey: 'someValue',
     '@timestamp': '2020-04-20T21:27:45+0000',
     event: {
-      severity: severity ?? 100,
+      risk: riskScore,
     },
   },
   sort: [],
@@ -178,6 +249,14 @@ export const sampleEmptyDocSearchResults = (): SignalSearchResponse => ({
     hits: [],
   },
 });
+
+export const sampleWrappedSignalHit = (): WrappedSignalHit => {
+  return {
+    _index: 'myFakeSignalIndex',
+    _id: sampleIdGuid,
+    _source: sampleSignalHit(),
+  };
+};
 
 export const sampleDocWithAncestors = (): SignalSearchResponse => {
   const sampleDoc = sampleDocNoSortId();
@@ -441,8 +520,8 @@ export const repeatedSearchResultsWithSortId = (
   total: number,
   pageSize: number,
   guids: string[],
-  ips?: string[],
-  destIps?: string[]
+  ips?: Array<string | string[]>,
+  destIps?: Array<string | string[]>
 ): SignalSearchResponse => ({
   took: 10,
   timed_out: false,
@@ -513,7 +592,7 @@ export const sampleDocSearchResultsWithSortId = (
 export const sampleRuleGuid = '04128c15-0d1b-4716-a4c5-46997ac7f3bd';
 export const sampleIdGuid = 'e1e08ddc-5e37-49ff-a258-5393aa44435a';
 
-export const exampleRuleStatus: () => SavedObject<IRuleStatusAttributes> = () => ({
+export const exampleRuleStatus: () => SavedObject<IRuleStatusSOAttributes> = () => ({
   type: ruleStatusSavedObjectType,
   id: '042e6d90-7069-11ea-af8b-0f8ae4fa817e',
   attributes: {
@@ -535,15 +614,17 @@ export const exampleRuleStatus: () => SavedObject<IRuleStatusAttributes> = () =>
 });
 
 export const exampleFindRuleStatusResponse: (
-  mockStatuses: Array<SavedObject<IRuleStatusAttributes>>
-) => SavedObjectsFindResponse<IRuleStatusAttributes> = (mockStatuses = [exampleRuleStatus()]) => ({
+  mockStatuses: Array<SavedObject<IRuleStatusSOAttributes>>
+) => SavedObjectsFindResponse<IRuleStatusSOAttributes> = (
+  mockStatuses = [exampleRuleStatus()]
+) => ({
   total: 1,
   per_page: 6,
   page: 1,
   saved_objects: mockStatuses.map((obj) => ({ ...obj, score: 1 })),
 });
 
-export const mockLogger: Logger = loggingSystemMock.createLogger();
+export const mockLogger = loggingSystemMock.createLogger();
 
 export const sampleBulkErrorItem = (
   {

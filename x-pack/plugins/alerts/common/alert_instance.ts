@@ -1,16 +1,23 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import * as t from 'io-ts';
 import { DateFromString } from './date_from_string';
 
 const metaSchema = t.partial({
-  lastScheduledActions: t.type({
-    group: t.string,
-    date: DateFromString,
-  }),
+  lastScheduledActions: t.intersection([
+    t.partial({
+      subgroup: t.string,
+    }),
+    t.type({
+      group: t.string,
+      date: DateFromString,
+    }),
+  ]),
 });
 export type AlertInstanceMeta = t.TypeOf<typeof metaSchema>;
 

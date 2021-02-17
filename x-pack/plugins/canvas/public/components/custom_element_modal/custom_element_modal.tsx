@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { PureComponent } from 'react';
@@ -129,7 +130,7 @@ export class CustomElementModal extends PureComponent<Props, State> {
               <EuiFormRow
                 label={strings.getNameInputLabel()}
                 helpText={strings.getCharactersRemainingDescription(MAX_NAME_LENGTH - name.length)}
-                compressed
+                display="rowCompressed"
               >
                 <EuiFieldText
                   value={name}
@@ -161,7 +162,7 @@ export class CustomElementModal extends PureComponent<Props, State> {
               <EuiFormRow
                 className="canvasCustomElementForm__thumbnail"
                 label={strings.getImageInputLabel()}
-                compressed
+                display="rowCompressed"
               >
                 <EuiFilePicker
                   initialPromptText={strings.getImageFilePickerPlaceholder()}

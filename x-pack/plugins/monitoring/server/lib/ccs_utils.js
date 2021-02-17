@@ -1,11 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { isFunction, get } from 'lodash';
 
-export function appendMetricbeatIndex(config, indexPattern) {
+export function appendMetricbeatIndex(config, indexPattern, bypass = false) {
+  if (bypass) {
+    return indexPattern;
+  }
   // Leverage this function to also append the dynamic metricbeat index too
   let mbIndex = null;
   // TODO: NP
@@ -16,8 +21,7 @@ export function appendMetricbeatIndex(config, indexPattern) {
     mbIndex = get(config, 'ui.metricbeat.index');
   }
 
-  const newIndexPattern = `${indexPattern},${mbIndex}`;
-  return newIndexPattern;
+  return `${indexPattern},${mbIndex}`;
 }
 
 /**
@@ -31,18 +35,18 @@ export function appendMetricbeatIndex(config, indexPattern) {
  * @param  {String} ccs The optional cluster-prefix to prepend.
  * @return {String} The index pattern with the {@code cluster} prefix appropriately prepended.
  */
-export function prefixIndexPattern(config, indexPattern, ccs) {
+export function prefixIndexPattern(config, indexPattern, ccs, monitoringIndicesOnly = false) {
   let ccsEnabled = false;
   // TODO: NP
   // This function is called with both NP config and LP config
   if (isFunction(config.get)) {
     ccsEnabled = config.get('monitoring.ui.ccs.enabled');
   } else {
-    ccsEnabled = get(config, 'monitoring.ui.ccs.enabled');
+    ccsEnabled = get(config, 'ui.ccs.enabled');
   }
 
   if (!ccsEnabled || !ccs) {
-    return appendMetricbeatIndex(config, indexPattern);
+    return appendMetricbeatIndex(config, indexPattern, monitoringIndicesOnly);
   }
 
   const patterns = indexPattern.split(',');
@@ -50,10 +54,14 @@ export function prefixIndexPattern(config, indexPattern, ccs) {
 
   // if a wildcard is used, then we also want to search the local indices
   if (ccs === '*') {
-    return appendMetricbeatIndex(config, `${prefixedPattern},${indexPattern}`);
+    return appendMetricbeatIndex(
+      config,
+      `${prefixedPattern},${indexPattern}`,
+      monitoringIndicesOnly
+    );
   }
 
-  return appendMetricbeatIndex(config, prefixedPattern);
+  return appendMetricbeatIndex(config, prefixedPattern, monitoringIndicesOnly);
 }
 
 /**

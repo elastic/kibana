@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { TestScheduler } from 'rxjs/testing';
@@ -33,11 +34,18 @@ describe('fetchServerResults', () => {
   it('perform a POST request to the endpoint with valid options', () => {
     http.post.mockResolvedValue({ results: [] });
 
-    fetchServerResults(http, 'some term', { preference: 'pref' });
+    fetchServerResults(
+      http,
+      { term: 'some term', types: ['dashboard', 'map'] },
+      { preference: 'pref' }
+    );
 
     expect(http.post).toHaveBeenCalledTimes(1);
     expect(http.post).toHaveBeenCalledWith('/internal/global_search/find', {
-      body: JSON.stringify({ term: 'some term', options: { preference: 'pref' } }),
+      body: JSON.stringify({
+        params: { term: 'some term', types: ['dashboard', 'map'] },
+        options: { preference: 'pref' },
+      }),
     });
   });
 
@@ -47,7 +55,11 @@ describe('fetchServerResults', () => {
 
     http.post.mockResolvedValue({ results: [resultA, resultB] });
 
-    const results = await fetchServerResults(http, 'some term', { preference: 'pref' }).toPromise();
+    const results = await fetchServerResults(
+      http,
+      { term: 'some term' },
+      { preference: 'pref' }
+    ).toPromise();
 
     expect(http.post).toHaveBeenCalledTimes(1);
     expect(results).toHaveLength(2);
@@ -65,7 +77,7 @@ describe('fetchServerResults', () => {
       getTestScheduler().run(({ expectObservable, hot }) => {
         http.post.mockReturnValue(hot('---(a|)', { a: { results: [] } }) as any);
 
-        const results = fetchServerResults(http, 'term', {});
+        const results = fetchServerResults(http, { term: 'term' }, {});
 
         expectObservable(results).toBe('---(a|)', {
           a: [],
@@ -77,7 +89,7 @@ describe('fetchServerResults', () => {
       getTestScheduler().run(({ expectObservable, hot }) => {
         http.post.mockReturnValue(hot('---(a|)', { a: { results: [] } }) as any);
         const aborted$ = hot('-(a|)', { a: undefined });
-        const results = fetchServerResults(http, 'term', { aborted$ });
+        const results = fetchServerResults(http, { term: 'term' }, { aborted$ });
 
         expectObservable(results).toBe('-|', {
           a: [],

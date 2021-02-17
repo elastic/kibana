@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { difference } from 'lodash';
-import { IScopedClusterClient } from 'kibana/server';
 import { EventManager, CalendarEvent } from './event_manager';
+import type { MlClient } from '../../lib/ml_client';
 
 interface BasicCalendar {
   job_ids: string[];
@@ -23,16 +24,16 @@ export interface FormCalendar extends BasicCalendar {
 }
 
 export class CalendarManager {
-  private _asInternalUser: IScopedClusterClient['asInternalUser'];
+  private _mlClient: MlClient;
   private _eventManager: EventManager;
 
-  constructor(client: IScopedClusterClient) {
-    this._asInternalUser = client.asInternalUser;
-    this._eventManager = new EventManager(client);
+  constructor(mlClient: MlClient) {
+    this._mlClient = mlClient;
+    this._eventManager = new EventManager(mlClient);
   }
 
   async getCalendar(calendarId: string) {
-    const { body } = await this._asInternalUser.ml.getCalendars({
+    const { body } = await this._mlClient.getCalendars({
       calendar_id: calendarId,
     });
 
@@ -43,7 +44,7 @@ export class CalendarManager {
   }
 
   async getAllCalendars() {
-    const { body } = await this._asInternalUser.ml.getCalendars({ size: 1000 });
+    const { body } = await this._mlClient.getCalendars({ size: 1000 });
 
     const events: CalendarEvent[] = await this._eventManager.getAllEvents();
     const calendars: Calendar[] = body.calendars;
@@ -71,7 +72,7 @@ export class CalendarManager {
 
   async newCalendar(calendar: FormCalendar) {
     const { calendarId, events, ...newCalendar } = calendar;
-    await this._asInternalUser.ml.putCalendar({
+    await this._mlClient.putCalendar({
       calendar_id: calendarId,
       body: newCalendar,
     });
@@ -106,7 +107,7 @@ export class CalendarManager {
 
     // add all new jobs
     if (jobsToAdd.length) {
-      await this._asInternalUser.ml.putCalendarJob({
+      await this._mlClient.putCalendarJob({
         calendar_id: calendarId,
         job_id: jobsToAdd.join(','),
       });
@@ -114,7 +115,7 @@ export class CalendarManager {
 
     // remove all removed jobs
     if (jobsToRemove.length) {
-      await this._asInternalUser.ml.deleteCalendarJob({
+      await this._mlClient.deleteCalendarJob({
         calendar_id: calendarId,
         job_id: jobsToRemove.join(','),
       });
@@ -137,7 +138,7 @@ export class CalendarManager {
   }
 
   async deleteCalendar(calendarId: string) {
-    const { body } = await this._asInternalUser.ml.deleteCalendar({ calendar_id: calendarId });
+    const { body } = await this._mlClient.deleteCalendar({ calendar_id: calendarId });
     return body;
   }
 }

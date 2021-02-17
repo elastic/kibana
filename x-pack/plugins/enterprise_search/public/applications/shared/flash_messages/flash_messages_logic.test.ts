@@ -1,17 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
+import { mockKibanaValues } from '../../__mocks__/kibana_logic.mock';
 
 import { resetContext } from 'kea';
 
-import { mockHistory } from '../../__mocks__';
+const { history } = mockKibanaValues;
 
-import { FlashMessagesLogic, mountFlashMessagesLogic, IFlashMessage } from './';
+import { FlashMessagesLogic, mountFlashMessagesLogic } from './flash_messages_logic';
+import { IFlashMessage } from './types';
 
 describe('FlashMessagesLogic', () => {
-  const mount = () => mountFlashMessagesLogic({ history: mockHistory as any });
+  const mount = () => mountFlashMessagesLogic();
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -95,7 +99,7 @@ describe('FlashMessagesLogic', () => {
     describe('on mount', () => {
       it('listens for history changes and clears messages on change', () => {
         mount();
-        expect(mockHistory.listen).toHaveBeenCalled();
+        expect(history.listen).toHaveBeenCalled();
 
         FlashMessagesLogic.actions.setQueuedMessages(['queuedMessages'] as any);
         jest.spyOn(FlashMessagesLogic.actions, 'clearFlashMessages');
@@ -103,7 +107,7 @@ describe('FlashMessagesLogic', () => {
         jest.spyOn(FlashMessagesLogic.actions, 'clearQueuedMessages');
         jest.spyOn(FlashMessagesLogic.actions, 'setHistoryListener');
 
-        const mockHistoryChange = (mockHistory.listen.mock.calls[0] as any)[0];
+        const mockHistoryChange = (history.listen.mock.calls[0] as any)[0];
         mockHistoryChange();
         expect(FlashMessagesLogic.actions.clearFlashMessages).toHaveBeenCalled();
         expect(FlashMessagesLogic.actions.setFlashMessages).toHaveBeenCalledWith([
@@ -116,7 +120,7 @@ describe('FlashMessagesLogic', () => {
     describe('on unmount', () => {
       it('removes history listener', () => {
         const mockUnlistener = jest.fn();
-        mockHistory.listen.mockReturnValueOnce(mockUnlistener);
+        history.listen.mockReturnValueOnce(mockUnlistener);
 
         const unmount = mount();
         unmount();

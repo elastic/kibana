@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { getOr } from 'lodash/fp';
@@ -58,7 +59,11 @@ export interface ResponseTemplateTimeline {
 }
 
 export interface Timeline {
-  getTimeline: (request: FrameworkRequest, timelineId: string) => Promise<TimelineSavedObject>;
+  getTimeline: (
+    request: FrameworkRequest,
+    timelineId: string,
+    timelineType?: TimelineTypeLiteralWithNull
+  ) => Promise<TimelineSavedObject>;
 
   getAllTimeline: (
     request: FrameworkRequest,
@@ -72,7 +77,10 @@ export interface Timeline {
 
   persistFavorite: (
     request: FrameworkRequest,
-    timelineId: string | null
+    timelineId: string | null,
+    templateTimelineId: string | null,
+    templateTimelineVersion: number | null,
+    timelineType: TimelineType
   ) => Promise<ResponseFavoriteTimeline>;
 
   persistTimeline: (
@@ -95,9 +103,27 @@ export interface Timeline {
 
 export const getTimeline = async (
   request: FrameworkRequest,
-  timelineId: string
+  timelineId: string,
+  timelineType: TimelineTypeLiteralWithNull = TimelineType.default
 ): Promise<TimelineSavedObject> => {
-  return getSavedTimeline(request, timelineId);
+  let timelineIdToUse = timelineId;
+  try {
+    if (timelineType === TimelineType.template) {
+      const options = {
+        type: timelineSavedObjectType,
+        perPage: 1,
+        page: 1,
+        filter: `siem-ui-timeline.attributes.templateTimelineId: ${timelineId}`,
+      };
+      const result = await getAllSavedTimeline(request, options);
+      if (result.totalCount === 1) {
+        timelineIdToUse = result.timeline[0].savedObjectId;
+      }
+    }
+  } catch {
+    // TO DO, we need to bring the logger here
+  }
+  return getSavedTimeline(request, timelineIdToUse);
 };
 
 export const getTimelineByTemplateTimelineId = async (
@@ -259,7 +285,10 @@ export const getDraftTimeline = async (
 
 export const persistFavorite = async (
   request: FrameworkRequest,
-  timelineId: string | null
+  timelineId: string | null,
+  templateTimelineId: string | null,
+  templateTimelineVersion: number | null,
+  timelineType: TimelineType
 ): Promise<ResponseFavoriteTimeline> => {
   const userName = request.user?.username ?? UNAUTHENTICATED_USER;
   const fullName = request.user?.full_name ?? '';
@@ -302,7 +331,12 @@ export const persistFavorite = async (
       timeline.favorite = [userFavoriteTimeline];
     }
 
-    const persistResponse = await persistTimeline(request, timelineId, null, timeline);
+    const persistResponse = await persistTimeline(request, timelineId, null, {
+      ...timeline,
+      templateTimelineId,
+      templateTimelineVersion,
+      timelineType,
+    });
     return {
       savedObjectId: persistResponse.timeline.savedObjectId,
       version: persistResponse.timeline.version,
@@ -310,6 +344,9 @@ export const persistFavorite = async (
         persistResponse.timeline.favorite != null
           ? persistResponse.timeline.favorite.filter((fav) => fav.userName === userName)
           : [],
+      templateTimelineId,
+      templateTimelineVersion,
+      timelineType,
     };
   } catch (err) {
     if (getOr(null, 'output.statusCode', err) === 403) {

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { AbstractLayer } from '../layer';
@@ -21,7 +22,20 @@ export class TileLayer extends AbstractLayer {
   }
 
   constructor({ source, layerDescriptor }) {
-    super({ source, layerDescriptor, style: new TileStyle() });
+    super({ source, layerDescriptor });
+    this._style = new TileStyle();
+  }
+
+  getStyleForEditing() {
+    return this._style;
+  }
+
+  getStyle() {
+    return this._style;
+  }
+
+  getCurrentStyle() {
+    return this._style;
   }
 
   async syncData({ startLoading, stopLoading, onLoadError, dataFilters }) {

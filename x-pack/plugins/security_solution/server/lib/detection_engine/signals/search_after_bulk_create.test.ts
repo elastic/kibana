@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import moment from 'moment';
@@ -13,16 +14,18 @@ import {
   repeatedSearchResultsWithSortId,
   repeatedSearchResultsWithNoSortId,
   sampleDocSearchResultsNoSortIdNoHits,
+  sampleDocWithSortId,
 } from './__mocks__/es_results';
 import { searchAfterAndBulkCreate } from './search_after_bulk_create';
 import { buildRuleMessageFactory } from './rule_messages';
 import { DEFAULT_SIGNALS_INDEX } from '../../../../common/constants';
 import { alertsMock, AlertServicesMock } from '../../../../../alerts/server/mocks';
 import uuid from 'uuid';
-import { getListItemResponseMock } from '../../../../../lists/common/schemas/response/list_item_schema.mock';
 import { listMock } from '../../../../../lists/server/mocks';
 import { getExceptionListItemSchemaMock } from '../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
 import { BulkResponse } from './types';
+import { SearchListItemArraySchema } from '../../../../../lists/common/schemas';
+import { getSearchListItemResponseMock } from '../../../../../lists/common/schemas/response/search_list_item_schema.mock';
 
 const buildRuleMessage = buildRuleMessageFactory({
   id: 'fake id',
@@ -39,7 +42,7 @@ describe('searchAfterAndBulkCreate', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     listClient = listMock.getListClient();
-    listClient.getListItemByValues = jest.fn().mockResolvedValue([]);
+    listClient.searchListItemByValues = jest.fn().mockResolvedValue([]);
     inputIndexPattern = ['auditbeat-*'];
     mockService = alertsMock.createAlertServices();
   });
@@ -53,9 +56,6 @@ describe('searchAfterAndBulkCreate', () => {
         errors: false,
         items: [
           {
-            fakeItemValue: 'fakeItemKey',
-          },
-          {
             create: {
               status: 201,
             },
@@ -67,9 +67,6 @@ describe('searchAfterAndBulkCreate', () => {
         took: 100,
         errors: false,
         items: [
-          {
-            fakeItemValue: 'fakeItemKey',
-          },
           {
             create: {
               status: 201,
@@ -83,9 +80,6 @@ describe('searchAfterAndBulkCreate', () => {
         errors: false,
         items: [
           {
-            fakeItemValue: 'fakeItemKey',
-          },
-          {
             create: {
               status: 201,
             },
@@ -97,9 +91,6 @@ describe('searchAfterAndBulkCreate', () => {
         took: 100,
         errors: false,
         items: [
-          {
-            fakeItemValue: 'fakeItemKey',
-          },
           {
             create: {
               status: 201,
@@ -130,6 +121,7 @@ describe('searchAfterAndBulkCreate', () => {
       exceptionsList: [exceptionItem],
       services: mockService,
       logger: mockLogger,
+      eventsTelemetry: undefined,
       id: sampleRuleGuid,
       inputIndexPattern,
       signalsIndex: DEFAULT_SIGNALS_INDEX,
@@ -163,9 +155,6 @@ describe('searchAfterAndBulkCreate', () => {
         errors: false,
         items: [
           {
-            fakeItemValue: 'fakeItemKey',
-          },
-          {
             create: {
               status: 201,
             },
@@ -178,9 +167,6 @@ describe('searchAfterAndBulkCreate', () => {
         errors: false,
         items: [
           {
-            fakeItemValue: 'fakeItemKey',
-          },
-          {
             create: {
               status: 201,
             },
@@ -192,40 +178,6 @@ describe('searchAfterAndBulkCreate', () => {
         took: 100,
         errors: false,
         items: [
-          {
-            fakeItemValue: 'fakeItemKey',
-          },
-          {
-            create: {
-              status: 201,
-            },
-          },
-        ],
-      })
-      .mockResolvedValueOnce(sampleDocSearchResultsNoSortIdNoHits())
-      .mockResolvedValueOnce(repeatedSearchResultsWithSortId(4, 1, someGuids.slice(9, 12)))
-      .mockResolvedValueOnce({
-        took: 100,
-        errors: false,
-        items: [
-          {
-            fakeItemValue: 'fakeItemKey',
-          },
-          {
-            create: {
-              status: 201,
-            },
-          },
-        ],
-      })
-      .mockResolvedValueOnce(repeatedSearchResultsWithSortId(4, 1, someGuids.slice(0, 3)))
-      .mockResolvedValueOnce({
-        took: 100,
-        errors: false,
-        items: [
-          {
-            fakeItemValue: 'fakeItemKey',
-          },
           {
             create: {
               status: 201,
@@ -255,6 +207,7 @@ describe('searchAfterAndBulkCreate', () => {
       exceptionsList: [exceptionItem],
       services: mockService,
       logger: mockLogger,
+      eventsTelemetry: undefined,
       id: sampleRuleGuid,
       inputIndexPattern,
       signalsIndex: DEFAULT_SIGNALS_INDEX,
@@ -274,8 +227,8 @@ describe('searchAfterAndBulkCreate', () => {
       buildRuleMessage,
     });
     expect(success).toEqual(true);
-    expect(mockService.callCluster).toHaveBeenCalledTimes(12);
-    expect(createdSignalsCount).toEqual(5);
+    expect(mockService.callCluster).toHaveBeenCalledTimes(7);
+    expect(createdSignalsCount).toEqual(3);
     expect(lastLookBackDate).toEqual(new Date('2020-04-20T21:27:45+0000'));
   });
 
@@ -287,9 +240,6 @@ describe('searchAfterAndBulkCreate', () => {
         took: 100,
         errors: false,
         items: [
-          {
-            fakeItemValue: 'fakeItemKey',
-          },
           {
             create: {
               status: 201,
@@ -334,6 +284,7 @@ describe('searchAfterAndBulkCreate', () => {
       exceptionsList: [exceptionItem],
       services: mockService,
       logger: mockLogger,
+      eventsTelemetry: undefined,
       id: sampleRuleGuid,
       inputIndexPattern,
       signalsIndex: DEFAULT_SIGNALS_INDEX,
@@ -359,9 +310,12 @@ describe('searchAfterAndBulkCreate', () => {
   });
 
   test('should return success when all search results are in the allowlist and with sortId present', async () => {
-    listClient.getListItemByValues = jest
-      .fn()
-      .mockResolvedValue([{ value: '1.1.1.1' }, { value: '2.2.2.2' }, { value: '3.3.3.3' }]);
+    const searchListItems: SearchListItemArraySchema = [
+      { ...getSearchListItemResponseMock(), value: ['1.1.1.1'] },
+      { ...getSearchListItemResponseMock(), value: ['2.2.2.2'] },
+      { ...getSearchListItemResponseMock(), value: ['3.3.3.3'] },
+    ];
+    listClient.searchListItemByValues = jest.fn().mockResolvedValue(searchListItems);
     const sampleParams = sampleRuleAlertParams(30);
     mockService.callCluster
       .mockResolvedValueOnce(
@@ -394,6 +348,7 @@ describe('searchAfterAndBulkCreate', () => {
       exceptionsList: [exceptionItem],
       services: mockService,
       logger: mockLogger,
+      eventsTelemetry: undefined,
       id: sampleRuleGuid,
       inputIndexPattern,
       signalsIndex: DEFAULT_SIGNALS_INDEX,
@@ -419,9 +374,14 @@ describe('searchAfterAndBulkCreate', () => {
   });
 
   test('should return success when all search results are in the allowlist and no sortId present', async () => {
-    listClient.getListItemByValues = jest
-      .fn()
-      .mockResolvedValue([{ value: '1.1.1.1' }, { value: '2.2.2.2' }, { value: '3.3.3.3' }]);
+    const searchListItems: SearchListItemArraySchema = [
+      { ...getSearchListItemResponseMock(), value: ['1.1.1.1'] },
+      { ...getSearchListItemResponseMock(), value: ['2.2.2.2'] },
+      { ...getSearchListItemResponseMock(), value: ['2.2.2.2'] },
+      { ...getSearchListItemResponseMock(), value: ['2.2.2.2'] },
+    ];
+
+    listClient.searchListItemByValues = jest.fn().mockResolvedValue(searchListItems);
     const sampleParams = sampleRuleAlertParams(30);
     mockService.callCluster.mockResolvedValueOnce(
       repeatedSearchResultsWithNoSortId(4, 4, someGuids.slice(0, 3), [
@@ -452,6 +412,7 @@ describe('searchAfterAndBulkCreate', () => {
       exceptionsList: [exceptionItem],
       services: mockService,
       logger: mockLogger,
+      eventsTelemetry: undefined,
       id: sampleRuleGuid,
       inputIndexPattern,
       signalsIndex: DEFAULT_SIGNALS_INDEX,
@@ -477,7 +438,7 @@ describe('searchAfterAndBulkCreate', () => {
     // I don't like testing log statements since logs change but this is the best
     // way I can think of to ensure this section is getting hit with this test case.
     expect(((mockLogger.debug as unknown) as jest.Mock).mock.calls[8][0]).toContain(
-      'sortIds was empty on searchResult'
+      'ran out of sort ids to sort on name: "fake name" id: "fake id" rule id: "fake rule id" signals index: "fakeindex"'
     );
   });
 
@@ -489,9 +450,6 @@ describe('searchAfterAndBulkCreate', () => {
         took: 100,
         errors: false,
         items: [
-          {
-            fakeItemValue: 'fakeItemKey',
-          },
           {
             create: {
               status: 201,
@@ -535,6 +493,7 @@ describe('searchAfterAndBulkCreate', () => {
       exceptionsList: [exceptionItem],
       services: mockService,
       logger: mockLogger,
+      eventsTelemetry: undefined,
       id: sampleRuleGuid,
       inputIndexPattern,
       signalsIndex: DEFAULT_SIGNALS_INDEX,
@@ -560,7 +519,7 @@ describe('searchAfterAndBulkCreate', () => {
     // I don't like testing log statements since logs change but this is the best
     // way I can think of to ensure this section is getting hit with this test case.
     expect(((mockLogger.debug as unknown) as jest.Mock).mock.calls[15][0]).toContain(
-      'sortIds was empty on searchResult name: "fake name" id: "fake id" rule id: "fake rule id" signals index: "fakeindex"'
+      'ran out of sort ids to sort on name: "fake name" id: "fake id" rule id: "fake rule id" signals index: "fakeindex"'
     );
   });
 
@@ -572,9 +531,6 @@ describe('searchAfterAndBulkCreate', () => {
         took: 100,
         errors: false,
         items: [
-          {
-            fakeItemValue: 'fakeItemKey',
-          },
           {
             create: {
               status: 201,
@@ -599,10 +555,10 @@ describe('searchAfterAndBulkCreate', () => {
       })
       .mockResolvedValueOnce(sampleDocSearchResultsNoSortIdNoHits());
 
-    listClient.getListItemByValues = jest.fn(({ value }) =>
+    listClient.searchListItemByValues = jest.fn(({ value }) =>
       Promise.resolve(
         value.slice(0, 2).map((item) => ({
-          ...getListItemResponseMock(),
+          ...getSearchListItemResponseMock(),
           value: item,
         }))
       )
@@ -615,6 +571,7 @@ describe('searchAfterAndBulkCreate', () => {
       exceptionsList: [],
       services: mockService,
       logger: mockLogger,
+      eventsTelemetry: undefined,
       id: sampleRuleGuid,
       inputIndexPattern,
       signalsIndex: DEFAULT_SIGNALS_INDEX,
@@ -664,6 +621,7 @@ describe('searchAfterAndBulkCreate', () => {
       ruleParams: sampleParams,
       services: mockService,
       logger: mockLogger,
+      eventsTelemetry: undefined,
       id: sampleRuleGuid,
       inputIndexPattern,
       signalsIndex: DEFAULT_SIGNALS_INDEX,
@@ -703,10 +661,10 @@ describe('searchAfterAndBulkCreate', () => {
     ];
     const sampleParams = sampleRuleAlertParams(30);
     mockService.callCluster.mockResolvedValueOnce(sampleEmptyDocSearchResults());
-    listClient.getListItemByValues = jest.fn(({ value }) =>
+    listClient.searchListItemByValues = jest.fn(({ value }) =>
       Promise.resolve(
         value.slice(0, 2).map((item) => ({
-          ...getListItemResponseMock(),
+          ...getSearchListItemResponseMock(),
           value: item,
         }))
       )
@@ -719,6 +677,7 @@ describe('searchAfterAndBulkCreate', () => {
       ruleParams: sampleParams,
       services: mockService,
       logger: mockLogger,
+      eventsTelemetry: undefined,
       id: sampleRuleGuid,
       inputIndexPattern,
       signalsIndex: DEFAULT_SIGNALS_INDEX,
@@ -750,9 +709,6 @@ describe('searchAfterAndBulkCreate', () => {
         errors: false,
         items: [
           {
-            fakeItemValue: 'fakeItemKey',
-          },
-          {
             create: {
               status: 201,
             },
@@ -762,10 +718,10 @@ describe('searchAfterAndBulkCreate', () => {
       .mockImplementation(() => {
         throw Error('Fake Error'); // throws the exception we are testing
       });
-    listClient.getListItemByValues = jest.fn(({ value }) =>
+    listClient.searchListItemByValues = jest.fn(({ value }) =>
       Promise.resolve(
         value.slice(0, 2).map((item) => ({
-          ...getListItemResponseMock(),
+          ...getSearchListItemResponseMock(),
           value: item,
         }))
       )
@@ -790,6 +746,7 @@ describe('searchAfterAndBulkCreate', () => {
       ruleParams: sampleParams,
       services: mockService,
       logger: mockLogger,
+      eventsTelemetry: undefined,
       id: sampleRuleGuid,
       inputIndexPattern,
       signalsIndex: DEFAULT_SIGNALS_INDEX,
@@ -844,9 +801,6 @@ describe('searchAfterAndBulkCreate', () => {
         errors: false,
         items: [
           {
-            fakeItemValue: 'fakeItemKey',
-          },
-          {
             create: {
               status: 201,
             },
@@ -859,9 +813,6 @@ describe('searchAfterAndBulkCreate', () => {
         errors: false,
         items: [
           {
-            fakeItemValue: 'fakeItemKey',
-          },
-          {
             create: {
               status: 201,
             },
@@ -873,9 +824,6 @@ describe('searchAfterAndBulkCreate', () => {
         took: 100,
         errors: false,
         items: [
-          {
-            fakeItemValue: 'fakeItemKey',
-          },
           {
             create: {
               status: 201,
@@ -898,6 +846,7 @@ describe('searchAfterAndBulkCreate', () => {
       exceptionsList: [],
       services: mockService,
       logger: mockLogger,
+      eventsTelemetry: undefined,
       id: sampleRuleGuid,
       inputIndexPattern,
       signalsIndex: DEFAULT_SIGNALS_INDEX,
@@ -920,6 +869,95 @@ describe('searchAfterAndBulkCreate', () => {
     expect(errors).toEqual(['error on creation']);
     expect(mockService.callCluster).toHaveBeenCalledTimes(9);
     expect(createdSignalsCount).toEqual(4);
+    expect(lastLookBackDate).toEqual(new Date('2020-04-20T21:27:45+0000'));
+  });
+
+  it('invokes the enrichment callback with signal search results', async () => {
+    const sampleParams = sampleRuleAlertParams(30);
+    mockService.callCluster
+      .mockResolvedValueOnce(repeatedSearchResultsWithSortId(4, 1, someGuids.slice(0, 3)))
+      .mockResolvedValueOnce({
+        took: 100,
+        errors: false,
+        items: [
+          {
+            create: {
+              status: 201,
+            },
+          },
+        ],
+      })
+      .mockResolvedValueOnce(repeatedSearchResultsWithSortId(4, 1, someGuids.slice(3, 6)))
+      .mockResolvedValueOnce({
+        took: 100,
+        errors: false,
+        items: [
+          {
+            create: {
+              status: 201,
+            },
+          },
+        ],
+      })
+      .mockResolvedValueOnce(repeatedSearchResultsWithSortId(4, 1, someGuids.slice(6, 9)))
+      .mockResolvedValueOnce({
+        took: 100,
+        errors: false,
+        items: [
+          {
+            create: {
+              status: 201,
+            },
+          },
+        ],
+      })
+      .mockResolvedValueOnce(sampleDocSearchResultsNoSortIdNoHits());
+
+    const mockEnrichment = jest.fn((a) => a);
+    const { success, createdSignalsCount, lastLookBackDate } = await searchAfterAndBulkCreate({
+      enrichment: mockEnrichment,
+      ruleParams: sampleParams,
+      gap: moment.duration(2, 'm'),
+      previousStartedAt: moment().subtract(10, 'm').toDate(),
+      listClient,
+      exceptionsList: [],
+      services: mockService,
+      logger: mockLogger,
+      eventsTelemetry: undefined,
+      id: sampleRuleGuid,
+      inputIndexPattern,
+      signalsIndex: DEFAULT_SIGNALS_INDEX,
+      name: 'rule-name',
+      actions: [],
+      createdAt: '2020-01-28T15:58:34.810Z',
+      updatedAt: '2020-01-28T15:59:14.004Z',
+      createdBy: 'elastic',
+      updatedBy: 'elastic',
+      interval: '5m',
+      enabled: true,
+      pageSize: 1,
+      filter: undefined,
+      refresh: false,
+      tags: ['some fake tag 1', 'some fake tag 2'],
+      throttle: 'no_actions',
+      buildRuleMessage,
+    });
+
+    expect(mockEnrichment).toHaveBeenCalledWith(
+      expect.objectContaining({
+        hits: expect.objectContaining({
+          hits: expect.arrayContaining([
+            expect.objectContaining({
+              ...sampleDocWithSortId(),
+              _id: expect.any(String),
+            }),
+          ]),
+        }),
+      })
+    );
+    expect(success).toEqual(true);
+    expect(mockService.callCluster).toHaveBeenCalledTimes(7);
+    expect(createdSignalsCount).toEqual(3);
     expect(lastLookBackDate).toEqual(new Date('2020-04-20T21:27:45+0000'));
   });
 });

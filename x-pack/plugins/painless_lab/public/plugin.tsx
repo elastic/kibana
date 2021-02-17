@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -16,7 +17,6 @@ import { PLUGIN } from '../common/constants';
 
 import { PluginDependencies } from './types';
 import { getLinks } from './links';
-import { LanguageService } from './services';
 import { ILicense } from '../../licensing/common/types';
 
 const checkLicenseStatus = (license: ILicense) => {
@@ -25,8 +25,6 @@ const checkLicenseStatus = (license: ILicense) => {
 };
 
 export class PainlessLabUIPlugin implements Plugin<void, void, PluginDependencies> {
-  languageService = new LanguageService();
-
   public setup(
     { http, getStartServices, uiSettings }: CoreSetup,
     { devTools, home, licensing }: PluginDependencies
@@ -80,8 +78,6 @@ export class PainlessLabUIPlugin implements Plugin<void, void, PluginDependencie
           chrome,
         } = core;
 
-        this.languageService.setup();
-
         const license = await licensing.license$.pipe(first()).toPromise();
         const licenseStatus = checkLicenseStatus(license);
 
@@ -117,7 +113,5 @@ export class PainlessLabUIPlugin implements Plugin<void, void, PluginDependencie
 
   public start() {}
 
-  public stop() {
-    this.languageService.stop();
-  }
+  public stop() {}
 }

@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { createUsersAndRoles } from '../../common/lib/create_users_and_roles';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 export default function ({ getService, loadTestFile }: FtrProviderContext) {
-  const es = getService('legacyEs');
+  const es = getService('es');
   const supertest = getService('supertest');
 
   describe('saved objects security only enabled', function () {
@@ -28,6 +29,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./get'));
     loadTestFile(require.resolve('./import'));
     loadTestFile(require.resolve('./resolve_import_errors'));
+    loadTestFile(require.resolve('./resolve'));
     loadTestFile(require.resolve('./update'));
   });
 }

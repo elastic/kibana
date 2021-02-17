@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { renderHook } from '@testing-library/react-hooks';
@@ -129,7 +130,7 @@ describe('useLinkProps hook', () => {
     it('Provides the correct props with hash options', () => {
       const { result } = renderUseLinkPropsHook({
         app: 'ml',
-        hash: '/explorer',
+        pathname: '/explorer',
         search: {
           type: 'host',
           id: 'some-id',
@@ -137,7 +138,7 @@ describe('useLinkProps hook', () => {
         },
       });
       expect(result.current.href).toBe(
-        '/test-basepath/s/test-space/app/ml#/explorer?type=host&id=some-id&count=12345'
+        '/test-basepath/s/test-space/app/ml/explorer?type=host&id=some-id&count=12345'
       );
       expect(result.current.onClick).toBeDefined();
     });
@@ -145,7 +146,7 @@ describe('useLinkProps hook', () => {
     it('Provides the correct props with more complex encoding', () => {
       const { result } = renderUseLinkPropsHook({
         app: 'ml',
-        hash: '/explorer',
+        pathname: '/explorer',
         search: {
           type: 'host + host',
           name: 'this name has spaces and ** and %',
@@ -155,7 +156,7 @@ describe('useLinkProps hook', () => {
         },
       });
       expect(result.current.href).toBe(
-        '/test-basepath/s/test-space/app/ml#/explorer?type=host%20%2B%20host&name=this%20name%20has%20spaces%20and%20**%20and%20%25&id=some-id&count=12345&animals=dog,cat,bear'
+        '/test-basepath/s/test-space/app/ml/explorer?type=host%20%2B%20host&name=this%20name%20has%20spaces%20and%20**%20and%20%25&id=some-id&count=12345&animals=dog,cat,bear'
       );
       expect(result.current.onClick).toBeDefined();
     });

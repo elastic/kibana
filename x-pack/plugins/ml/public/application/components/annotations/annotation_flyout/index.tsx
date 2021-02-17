@@ -1,10 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import React, { Component, FC, ReactNode, useCallback } from 'react';
+import React, { Component, FC, ReactNode, useCallback, useContext } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import * as Rx from 'rxjs';
 import { cloneDeep } from 'lodash';
@@ -28,15 +29,14 @@ import {
 import { CommonProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { distinctUntilChanged } from 'rxjs/operators';
 import {
   ANNOTATION_MAX_LENGTH_CHARS,
   ANNOTATION_EVENT_USER,
 } from '../../../../../common/constants/annotations';
 import {
-  annotation$,
   annotationsRefreshed,
   AnnotationState,
+  AnnotationUpdatesService,
 } from '../../../services/annotations_service';
 import { AnnotationDescriptionList } from '../annotation_description_list';
 import { DeleteAnnotationModal } from '../delete_annotation_modal';
@@ -48,6 +48,7 @@ import {
 } from '../../../../../common/types/annotations';
 import { PartitionFieldsType } from '../../../../../common/types/anomalies';
 import { PARTITION_FIELDS } from '../../../../../common/constants/anomalies';
+import { MlAnnotationUpdatesContext } from '../../../contexts/ml/ml_annotation_updates_context';
 
 interface ViewableDetector {
   index: number;
@@ -67,6 +68,7 @@ interface Props {
   };
   detectorIndex: number;
   detectors: ViewableDetector[];
+  annotationUpdatesService: AnnotationUpdatesService;
 }
 
 interface State {
@@ -85,7 +87,8 @@ export class AnnotationFlyoutUI extends Component<CommonProps & Props> {
   public annotationSub: Rx.Subscription | null = null;
 
   componentDidMount() {
-    this.annotationSub = annotation$.subscribe((v) => {
+    const { annotationUpdatesService } = this.props;
+    this.annotationSub = annotationUpdatesService.update$().subscribe((v) => {
       this.setState({
         annotationState: v,
       });
@@ -100,15 +103,17 @@ export class AnnotationFlyoutUI extends Component<CommonProps & Props> {
     if (this.state.annotationState === null) {
       return;
     }
+    const { annotationUpdatesService } = this.props;
 
-    annotation$.next({
+    annotationUpdatesService.setValue({
       ...this.state.annotationState,
       annotation: e.target.value,
     });
   };
 
   public cancelEditingHandler = () => {
-    annotation$.next(null);
+    const { annotationUpdatesService } = this.props;
+    annotationUpdatesService.setValue(null);
   };
 
   public deleteConfirmHandler = () => {
@@ -148,7 +153,10 @@ export class AnnotationFlyoutUI extends Component<CommonProps & Props> {
     }
 
     this.closeDeleteModal();
-    annotation$.next(null);
+
+    const { annotationUpdatesService } = this.props;
+
+    annotationUpdatesService.setValue(null);
     annotationsRefreshed();
   };
 
@@ -193,7 +201,8 @@ export class AnnotationFlyoutUI extends Component<CommonProps & Props> {
 
   public saveOrUpdateAnnotation = () => {
     const { annotationState: originalAnnotation } = this.state;
-    const { chartDetails, detectorIndex } = this.props;
+    const { chartDetails, detectorIndex, annotationUpdatesService } = this.props;
+
     if (originalAnnotation === null) {
       return;
     }
@@ -218,8 +227,7 @@ export class AnnotationFlyoutUI extends Component<CommonProps & Props> {
     }
     // Mark the annotation created by `user` if and only if annotation is being created, not updated
     annotation.event = annotation.event ?? ANNOTATION_EVENT_USER;
-
-    annotation$.next(null);
+    annotationUpdatesService.setValue(null);
 
     ml.annotations
       .indexAnnotation(annotation)
@@ -356,16 +364,16 @@ export class AnnotationFlyoutUI extends Component<CommonProps & Props> {
           </EuiFormRow>
         </EuiFlyoutBody>
         <EuiFlyoutFooter>
-          <EuiFlexGroup justifyContent="spaceBetween">
+          <EuiFlexGroup>
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty iconType="cross" onClick={this.cancelEditingHandler} flush="left">
+              <EuiButtonEmpty onClick={this.cancelEditingHandler} flush="left">
                 <FormattedMessage
                   id="xpack.ml.timeSeriesExplorer.annotationFlyout.cancelButtonLabel"
                   defaultMessage="Cancel"
                 />
               </EuiButtonEmpty>
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
+            <EuiFlexItem grow={false} style={{ marginLeft: 'auto' }}>
               {isExistingAnnotation && (
                 <EuiButtonEmpty color="danger" onClick={this.deleteConfirmHandler}>
                   <FormattedMessage
@@ -376,7 +384,12 @@ export class AnnotationFlyoutUI extends Component<CommonProps & Props> {
               )}
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButton fill isDisabled={isInvalid === true} onClick={this.saveOrUpdateAnnotation}>
+              <EuiButton
+                fill
+                isDisabled={isInvalid === true}
+                onClick={this.saveOrUpdateAnnotation}
+                data-test-subj={'annotationFlyoutUpdateButton'}
+              >
                 {isExistingAnnotation ? (
                   <FormattedMessage
                     id="xpack.ml.timeSeriesExplorer.annotationFlyout.updateButtonLabel"
@@ -403,17 +416,11 @@ export class AnnotationFlyoutUI extends Component<CommonProps & Props> {
 }
 
 export const AnnotationFlyout: FC<any> = (props) => {
-  const annotationProp = useObservable(
-    annotation$.pipe(
-      distinctUntilChanged((prev, curr) => {
-        // prevent re-rendering
-        return prev !== null && curr !== null;
-      })
-    )
-  );
+  const annotationUpdatesService = useContext(MlAnnotationUpdatesContext);
+  const annotationProp = useObservable(annotationUpdatesService.isAnnotationInitialized$());
 
   const cancelEditingHandler = useCallback(() => {
-    annotation$.next(null);
+    annotationUpdatesService.setValue(null);
   }, []);
 
   if (annotationProp === undefined || annotationProp === null) {
@@ -423,7 +430,12 @@ export const AnnotationFlyout: FC<any> = (props) => {
   const isExistingAnnotation = typeof annotationProp._id !== 'undefined';
 
   return (
-    <EuiFlyout onClose={cancelEditingHandler} size="m" aria-labelledby="Add annotation">
+    <EuiFlyout
+      onClose={cancelEditingHandler}
+      size="m"
+      aria-labelledby="Add annotation"
+      data-test-subj={'mlAnnotationFlyout'}
+    >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="s">
           <h2 id="mlAnnotationFlyoutTitle">
@@ -441,7 +453,7 @@ export const AnnotationFlyout: FC<any> = (props) => {
           </h2>
         </EuiTitle>
       </EuiFlyoutHeader>
-      <AnnotationFlyoutUI {...props} />
+      <AnnotationFlyoutUI {...props} annotationUpdatesService={annotationUpdatesService} />
     </EuiFlyout>
   );
 };

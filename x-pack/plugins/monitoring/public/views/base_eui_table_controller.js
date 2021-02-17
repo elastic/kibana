@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { MonitoringViewBaseController } from './';
@@ -61,15 +62,21 @@ export class MonitoringViewBaseEuiTableController extends MonitoringViewBaseCont
     this.setSorting(sort);
 
     this.onTableChange = ({ page, sort }) => {
+      this.setPagination(page);
+      this.setSorting({ sort });
       setLocalStorageData(storage, {
         page,
         sort: {
           sort,
         },
       });
+      if (this.onTableChangeRender) {
+        this.onTableChangeRender();
+      }
     };
 
-    this.updateData();
+    // For pages where we do not fetch immediately, we want to fetch after pagination is applied
+    args.fetchDataImmediately === false && this.updateData();
   }
 
   setPagination(page) {

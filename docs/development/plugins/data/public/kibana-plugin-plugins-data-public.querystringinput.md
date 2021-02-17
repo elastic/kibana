@@ -7,5 +7,5 @@
 <b>Signature:</b>
 
 ```typescript
-QueryStringInput: React.FC<QueryStringInputProps>
+QueryStringInput: (props: QueryStringInputProps) => JSX.Element
 ```

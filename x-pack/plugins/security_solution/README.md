@@ -28,7 +28,7 @@ The endpoint functional tests are located [here](../../test/security_solution_en
 ### Using Docker
 
 To run the tests using the recommended docker image version you must have `docker` installed. The testing infrastructure
-will stand up a docker container using the image defined [here](../../test/ingest_manager_api_integration/config.ts#L15)
+will stand up a docker container using the image defined [here](../../test/fleet_api_integration/config.ts#L15)
 
 Make sure you're in the Kibana root directory.
 
@@ -37,13 +37,13 @@ Make sure you're in the Kibana root directory.
 In one terminal, run:
 
 ```bash
-INGEST_MANAGEMENT_PACKAGE_REGISTRY_PORT=12345 yarn test:ftr:server --config x-pack/test/security_solution_endpoint_api_int/config.ts
+FLEET_PACKAGE_REGISTRY_PORT=12345 yarn test:ftr:server --config x-pack/test/security_solution_endpoint_api_int/config.ts
 ```
 
 In another terminal, run:
 
 ```bash
-INGEST_MANAGEMENT_PACKAGE_REGISTRY_PORT=12345 yarn test:ftr:runner --config x-pack/test/security_solution_endpoint_api_int/config.ts
+FLEET_PACKAGE_REGISTRY_PORT=12345 yarn test:ftr:runner --config x-pack/test/security_solution_endpoint_api_int/config.ts
 ```
 
 #### Endpoint Functional Tests
@@ -51,13 +51,13 @@ INGEST_MANAGEMENT_PACKAGE_REGISTRY_PORT=12345 yarn test:ftr:runner --config x-pa
 In one terminal, run:
 
 ```bash
-INGEST_MANAGEMENT_PACKAGE_REGISTRY_PORT=12345 yarn test:ftr:server --config x-pack/test/security_solution_endpoint/config.ts
+FLEET_PACKAGE_REGISTRY_PORT=12345 yarn test:ftr:server --config x-pack/test/security_solution_endpoint/config.ts
 ```
 
 In another terminal, run:
 
 ```bash
-INGEST_MANAGEMENT_PACKAGE_REGISTRY_PORT=12345 yarn test:ftr:runner --config x-pack/test/security_solution_endpoint/config.ts
+FLEET_PACKAGE_REGISTRY_PORT=12345 yarn test:ftr:runner --config x-pack/test/security_solution_endpoint/config.ts
 ```
 
 ### Running your own package registry
@@ -97,7 +97,7 @@ PACKAGE_REGISTRY_URL_OVERRIDE=<url to your package registry like http://localhos
 
 ### Using the default public registry
 
-If you don't have docker installed and don't want to run your own registry, you can run the tests using the ingest manager's default public package registry. The actual package registry used is [here](../../plugins/ingest_manager/common/constants/epm.ts#L9)
+If you don't have docker installed and don't want to run your own registry, you can run the tests using the ingest manager's default public package registry. The actual package registry used is [here](../../plugins/fleet/common/constants/epm.ts#L9)
 
 Make sure you're in the Kibana root directory.
 

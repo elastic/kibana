@@ -1,15 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { promisify } from 'bluebird';
-import fs from 'fs';
+import { promises as fs } from 'fs';
 import path from 'path';
 import { comparePngs } from '../../../../../../../test/functional/services/lib/compare_pngs';
-
-const mkdirAsync = promisify<void, fs.PathLike, { recursive: boolean }>(fs.mkdir);
 
 export async function checkIfPngsMatch(
   actualpngPath: string,
@@ -23,8 +21,8 @@ export async function checkIfPngsMatch(
   const sessionDirectoryPath = path.resolve(screenshotsDirectory, 'session');
   const failureDirectoryPath = path.resolve(screenshotsDirectory, 'failure');
 
-  await mkdirAsync(sessionDirectoryPath, { recursive: true });
-  await mkdirAsync(failureDirectoryPath, { recursive: true });
+  await fs.mkdir(sessionDirectoryPath, { recursive: true });
+  await fs.mkdir(failureDirectoryPath, { recursive: true });
 
   const actualpngFileName = path.basename(actualpngPath, '.png');
   const baselinepngFileName = path.basename(baselinepngPath, '.png');
@@ -39,14 +37,14 @@ export async function checkIfPngsMatch(
   // don't want to start causing failures for other devs working on OS's which are lacking snapshots.  We have
   // mac and linux covered which is better than nothing for now.
   try {
-    log.debug(`writeFileSync: ${baselineCopyPath}`);
-    fs.writeFileSync(baselineCopyPath, fs.readFileSync(baselinepngPath));
+    log.debug(`writeFile: ${baselineCopyPath}`);
+    await fs.writeFile(baselineCopyPath, await fs.readFile(baselinepngPath));
   } catch (error) {
     log.error(`No baseline png found at ${baselinepngPath}`);
     return 0;
   }
-  log.debug(`writeFileSync: ${actualCopyPath}`);
-  fs.writeFileSync(actualCopyPath, fs.readFileSync(actualpngPath));
+  log.debug(`writeFile: ${actualCopyPath}`);
+  await fs.writeFile(actualCopyPath, await fs.readFile(actualpngPath));
 
   let diffTotal = 0;
 

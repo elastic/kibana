@@ -20,7 +20,10 @@
   "severity": "medium",
   "tags": [
     "Elastic",
-    "Linux"
+    "Host",
+    "Linux",
+    "Threat Detection",
+    "Discovery"
   ],
   "threat": [
     {
@@ -39,6 +42,7 @@
       ]
     }
   ],
+  "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 3
+  "version": 5
 }

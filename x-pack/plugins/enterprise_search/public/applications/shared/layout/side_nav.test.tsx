@@ -1,20 +1,23 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import '../../__mocks__/react_router_history.mock';
 
 import React from 'react';
 import { useLocation } from 'react-router-dom';
+
 import { shallow } from 'enzyme';
 
-import { EuiLink as EuiLinkExternal } from '@elastic/eui';
-import { EuiLink } from '../react_router_helpers';
-import { ENTERPRISE_SEARCH_PLUGIN, APP_SEARCH_PLUGIN } from '../../../../common/constants';
+import { EuiLink } from '@elastic/eui';
 
-import { SideNav, SideNavLink } from './';
+import { ENTERPRISE_SEARCH_PLUGIN, APP_SEARCH_PLUGIN } from '../../../../common/constants';
+import { EuiLinkTo } from '../react_router_helpers';
+
+import { SideNav, SideNavLink, SideNavItem } from './';
 
 describe('SideNav', () => {
   it('renders link children', () => {
@@ -42,7 +45,7 @@ describe('SideNavLink', () => {
     const wrapper = shallow(<SideNavLink to="/">Link</SideNavLink>);
 
     expect(wrapper.type()).toEqual('li');
-    expect(wrapper.find(EuiLink)).toHaveLength(1);
+    expect(wrapper.find(EuiLinkTo)).toHaveLength(1);
     expect(wrapper.find('.enterpriseSearchNavLinks__item')).toHaveLength(1);
   });
 
@@ -52,7 +55,7 @@ describe('SideNavLink', () => {
         Link
       </SideNavLink>
     );
-    const externalLink = wrapper.find(EuiLinkExternal);
+    const externalLink = wrapper.find(EuiLink);
 
     expect(externalLink).toHaveLength(1);
     expect(externalLink.prop('href')).toEqual('http://website.com');
@@ -104,5 +107,61 @@ describe('SideNavLink', () => {
 
     expect(wrapper.find('.enterpriseSearchNavLinks__subNav')).toHaveLength(1);
     expect(wrapper.find('[data-test-subj="subNav"]')).toHaveLength(1);
+  });
+
+  describe('shouldShowActiveForSubroutes', () => {
+    it("won't set an active class when route is a subroute of 'to'", () => {
+      (useLocation as jest.Mock).mockImplementationOnce(() => ({ pathname: '/documents/1234' }));
+
+      const wrapper = shallow(
+        <SideNavLink to="/documents" isRoot>
+          Link
+        </SideNavLink>
+      );
+
+      expect(wrapper.find('.enterpriseSearchNavLinks__item--isActive')).toHaveLength(0);
+    });
+
+    it('sets an active class if the current path is a subRoute of "to", and shouldShowActiveForSubroutes is true', () => {
+      (useLocation as jest.Mock).mockImplementationOnce(() => ({ pathname: '/documents/1234' }));
+
+      const wrapper = shallow(
+        <SideNavLink to="/documents" isRoot shouldShowActiveForSubroutes>
+          Link
+        </SideNavLink>
+      );
+
+      expect(wrapper.find('.enterpriseSearchNavLinks__item--isActive')).toHaveLength(1);
+    });
+  });
+});
+
+describe('SideNavItem', () => {
+  it('renders', () => {
+    const wrapper = shallow(<SideNavItem>Test</SideNavItem>);
+
+    expect(wrapper.type()).toEqual('li');
+    expect(wrapper.find('.enterpriseSearchNavLinks__item')).toHaveLength(1);
+  });
+
+  it('renders children', () => {
+    const wrapper = shallow(
+      <SideNavItem>
+        <span data-test-subj="hello">World</span>
+      </SideNavItem>
+    );
+
+    expect(wrapper.find('[data-test-subj="hello"]').text()).toEqual('World');
+  });
+
+  it('passes down custom classes and props', () => {
+    const wrapper = shallow(
+      <SideNavItem className="testing" data-test-subj="testing">
+        Test
+      </SideNavItem>
+    );
+
+    expect(wrapper.find('.testing')).toHaveLength(1);
+    expect(wrapper.find('[data-test-subj="testing"]')).toHaveLength(1);
   });
 });

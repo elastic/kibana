@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 /*
@@ -26,7 +27,11 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 import { MonitoringTimeseriesContainer } from '../../../../components/chart';
-import { CODE_PATH_LOGSTASH } from '../../../../../common/constants';
+import {
+  CODE_PATH_LOGSTASH,
+  ALERT_LOGSTASH_VERSION_MISMATCH,
+} from '../../../../../common/constants';
+import { AlertsCallout } from '../../../../alerts/callout';
 
 function getPageData($injector) {
   const $http = $injector.get('$http');
@@ -69,6 +74,12 @@ uiRoutes.when('/logstash/node/:uuid/advanced', {
         reactNodeId: 'monitoringLogstashNodeAdvancedApp',
         $scope,
         $injector,
+        alerts: {
+          shouldFetch: true,
+          options: {
+            alertTypeIds: [ALERT_LOGSTASH_VERSION_MISMATCH],
+          },
+        },
         telemetryPageViewTitle: 'logstash_node_advanced',
       });
 
@@ -112,6 +123,7 @@ uiRoutes.when('/logstash/node/:uuid/advanced', {
                   <DetailStatus stats={data.nodeSummary} />
                 </EuiPanel>
                 <EuiSpacer size="m" />
+                <AlertsCallout alerts={this.alerts} />
                 <EuiPageContent>
                   <EuiFlexGrid columns={2} gutterSize="s">
                     {metricsToShow.map((metric, index) => (

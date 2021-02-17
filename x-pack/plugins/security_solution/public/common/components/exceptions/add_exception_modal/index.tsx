@@ -1,8 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
+/* eslint complexity: ["error", 30]*/
 
 import React, { memo, useEffect, useState, useCallback, useMemo } from 'react';
 import styled, { css } from 'styled-components';
@@ -11,7 +14,6 @@ import {
   EuiModalHeader,
   EuiModalHeaderTitle,
   EuiModalFooter,
-  EuiOverlayMask,
   EuiButton,
   EuiButtonEmpty,
   EuiHorizontalRule,
@@ -19,7 +21,9 @@ import {
   EuiSpacer,
   EuiFormRow,
   EuiText,
+  EuiCallOut,
 } from '@elastic/eui';
+import { hasEqlSequenceQuery, isEqlRule } from '../../../../../common/detection_engine/utils';
 import { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
 import {
   ExceptionListItemSchema,
@@ -30,7 +34,7 @@ import * as i18nCommon from '../../../translations';
 import * as i18n from './translations';
 import * as sharedI18n from '../translations';
 import { Ecs } from '../../../../../common/ecs';
-import { TimelineNonEcsData } from '../../../../../common/search_strategy/timeline';
+import { osTypeArray, OsTypeArray } from '../../../../../common/shared_imports';
 import { useAppToasts } from '../../../hooks/use_app_toasts';
 import { useKibana } from '../../../lib/kibana';
 import { ExceptionBuilderComponent } from '../builder';
@@ -47,28 +51,22 @@ import {
   defaultEndpointExceptionItems,
   entryHasListType,
   entryHasNonEcsType,
-  getMappedNonEcsValue,
 } from '../helpers';
 import { ErrorInfo, ErrorCallout } from '../error_callout';
 import { ExceptionsBuilderExceptionItem } from '../types';
 import { useFetchIndex } from '../../../containers/source';
+import { useGetInstalledJob } from '../../ml/hooks/use_get_jobs';
 
-export interface AddExceptionModalBaseProps {
+export interface AddExceptionModalProps {
   ruleName: string;
   ruleId: string;
   exceptionListType: ExceptionListType;
   ruleIndices: string[];
-  alertData?: {
-    ecsData: Ecs;
-    nonEcsData: TimelineNonEcsData[];
-  };
-}
-
-export interface AddExceptionModalProps extends AddExceptionModalBaseProps {
+  alertData?: Ecs;
+  alertStatus?: Status;
   onCancel: () => void;
   onConfirm: (didCloseAlert: boolean, didBulkCloseAlert: boolean) => void;
   onRuleChange?: () => void;
-  alertStatus?: Status;
 }
 
 const Modal = styled(EuiModal)`
@@ -111,8 +109,9 @@ export const AddExceptionModal = memo(function AddExceptionModal({
   alertStatus,
 }: AddExceptionModalProps) {
   const { http } = useKibana().services;
+  const [errorsExist, setErrorExists] = useState(false);
   const [comment, setComment] = useState('');
-  const { rule: maybeRule } = useRuleAsync(ruleId);
+  const { rule: maybeRule, loading: isRuleLoading } = useRuleAsync(ruleId);
   const [shouldCloseAlert, setShouldCloseAlert] = useState(false);
   const [shouldBulkCloseAlert, setShouldBulkCloseAlert] = useState(false);
   const [shouldDisableBulkClose, setShouldDisableBulkClose] = useState(false);
@@ -128,8 +127,22 @@ export const AddExceptionModal = memo(function AddExceptionModal({
   const [isSignalIndexPatternLoading, { indexPatterns: signalIndexPatterns }] = useFetchIndex(
     memoSignalIndexName
   );
-  const [isIndexPatternLoading, { indexPatterns }] = useFetchIndex(ruleIndices);
 
+  const memoMlJobIds = useMemo(
+    () => (maybeRule?.machine_learning_job_id != null ? [maybeRule.machine_learning_job_id] : []),
+    [maybeRule]
+  );
+  const { loading: mlJobLoading, jobs } = useGetInstalledJob(memoMlJobIds);
+
+  const memoRuleIndices = useMemo(() => {
+    if (jobs.length > 0) {
+      return jobs[0].results_index_name ? [`.ml-anomalies-${jobs[0].results_index_name}`] : [];
+    } else {
+      return ruleIndices;
+    }
+  }, [jobs, ruleIndices]);
+
+  const [isIndexPatternLoading, { indexPatterns }] = useFetchIndex(memoRuleIndices);
   const onError = useCallback(
     (error: Error): void => {
       addError(error, { title: i18n.ADD_EXCEPTION_ERROR });
@@ -163,10 +176,13 @@ export const AddExceptionModal = memo(function AddExceptionModal({
   const handleBuilderOnChange = useCallback(
     ({
       exceptionItems,
+      errorExists,
     }: {
       exceptionItems: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>;
-    }): void => {
+      errorExists: boolean;
+    }) => {
       setExceptionItemsToAdd(exceptionItems);
+      setErrorExists(errorExists);
     },
     [setExceptionItemsToAdd]
   );
@@ -218,13 +234,8 @@ export const AddExceptionModal = memo(function AddExceptionModal({
   });
 
   const initialExceptionItems = useMemo((): ExceptionsBuilderExceptionItem[] => {
-    if (exceptionListType === 'endpoint' && alertData !== undefined && ruleExceptionList) {
-      return defaultEndpointExceptionItems(
-        exceptionListType,
-        ruleExceptionList.list_id,
-        ruleName,
-        alertData.nonEcsData
-      );
+    if (exceptionListType === 'endpoint' && alertData != null && ruleExceptionList) {
+      return defaultEndpointExceptionItems(ruleExceptionList.list_id, ruleName, alertData);
     } else {
       return [];
     }
@@ -273,17 +284,14 @@ export const AddExceptionModal = memo(function AddExceptionModal({
     [setShouldBulkCloseAlert]
   );
 
-  const retrieveAlertOsTypes = useCallback((): string[] => {
-    const osDefaults = ['windows', 'macos'];
-    if (alertData) {
-      const osTypes = getMappedNonEcsValue({
-        data: alertData.nonEcsData,
-        fieldName: 'host.os.family',
-      });
-      if (osTypes.length === 0) {
-        return osDefaults;
+  const retrieveAlertOsTypes = useCallback((): OsTypeArray => {
+    const osDefaults: OsTypeArray = ['windows', 'macos'];
+    if (alertData != null) {
+      const osTypes = alertData.host && alertData.host.os && alertData.host.os.family;
+      if (osTypeArray.is(osTypes) && osTypes != null && osTypes.length > 0) {
+        return osTypes;
       }
-      return osTypes;
+      return osDefaults;
     }
     return osDefaults;
   }, [alertData]);
@@ -304,10 +312,10 @@ export const AddExceptionModal = memo(function AddExceptionModal({
   }, [comment, exceptionItemsToAdd, exceptionListType, retrieveAlertOsTypes]);
 
   const onAddExceptionConfirm = useCallback((): void => {
-    if (addOrUpdateExceptionItems !== null) {
-      const alertIdToClose = shouldCloseAlert && alertData ? alertData.ecsData._id : undefined;
+    if (addOrUpdateExceptionItems != null) {
+      const alertIdToClose = shouldCloseAlert && alertData ? alertData._id : undefined;
       const bulkCloseIndex =
-        shouldBulkCloseAlert && signalIndexName !== null ? [signalIndexName] : undefined;
+        shouldBulkCloseAlert && signalIndexName != null ? [signalIndexName] : undefined;
       addOrUpdateExceptionItems(ruleId, enrichExceptionItems(), alertIdToClose, bulkCloseIndex);
     }
   }, [
@@ -323,128 +331,145 @@ export const AddExceptionModal = memo(function AddExceptionModal({
   const isSubmitButtonDisabled = useMemo(
     (): boolean =>
       fetchOrCreateListError != null ||
-      exceptionItemsToAdd.every((item) => item.entries.length === 0),
-    [fetchOrCreateListError, exceptionItemsToAdd]
+      exceptionItemsToAdd.every((item) => item.entries.length === 0) ||
+      errorsExist,
+    [fetchOrCreateListError, exceptionItemsToAdd, errorsExist]
   );
 
+  const addExceptionMessage =
+    exceptionListType === 'endpoint' ? i18n.ADD_ENDPOINT_EXCEPTION : i18n.ADD_EXCEPTION;
+
+  const isRuleEQLSequenceStatement = useMemo((): boolean => {
+    if (maybeRule != null) {
+      return isEqlRule(maybeRule.type) && hasEqlSequenceQuery(maybeRule.query);
+    }
+    return false;
+  }, [maybeRule]);
+
   return (
-    <EuiOverlayMask onClick={onCancel}>
-      <Modal onClose={onCancel} data-test-subj="add-exception-modal">
-        <ModalHeader>
-          <EuiModalHeaderTitle>
-            {exceptionListType === 'endpoint' ? i18n.ADD_ENDPOINT_EXCEPTION : i18n.ADD_EXCEPTION}
-          </EuiModalHeaderTitle>
-          <ModalHeaderSubtitle className="eui-textTruncate" title={ruleName}>
-            {ruleName}
-          </ModalHeaderSubtitle>
-        </ModalHeader>
+    <Modal onClose={onCancel} data-test-subj="add-exception-modal">
+      <ModalHeader>
+        <EuiModalHeaderTitle>{addExceptionMessage}</EuiModalHeaderTitle>
+        <ModalHeaderSubtitle className="eui-textTruncate" title={ruleName}>
+          {ruleName}
+        </ModalHeaderSubtitle>
+      </ModalHeader>
 
-        {fetchOrCreateListError != null && (
-          <EuiModalFooter>
-            <ErrorCallout
-              http={http}
-              errorInfo={fetchOrCreateListError}
-              rule={maybeRule}
-              onCancel={onCancel}
-              onSuccess={handleDissasociationSuccess}
-              onError={handleDissasociationError}
-              data-test-subj="addExceptionModalErrorCallout"
-            />
-          </EuiModalFooter>
+      {fetchOrCreateListError != null && (
+        <EuiModalFooter>
+          <ErrorCallout
+            http={http}
+            errorInfo={fetchOrCreateListError}
+            rule={maybeRule}
+            onCancel={onCancel}
+            onSuccess={handleDissasociationSuccess}
+            onError={handleDissasociationError}
+            data-test-subj="addExceptionModalErrorCallout"
+          />
+        </EuiModalFooter>
+      )}
+      {fetchOrCreateListError == null &&
+        (isLoadingExceptionList ||
+          isIndexPatternLoading ||
+          isSignalIndexLoading ||
+          isSignalIndexPatternLoading) && (
+          <Loader data-test-subj="loadingAddExceptionModal" size="xl" />
         )}
-        {fetchOrCreateListError == null &&
-          (isLoadingExceptionList ||
-            isIndexPatternLoading ||
-            isSignalIndexLoading ||
-            isSignalIndexPatternLoading) && (
-            <Loader data-test-subj="loadingAddExceptionModal" size="xl" />
-          )}
-        {fetchOrCreateListError == null &&
-          !isSignalIndexLoading &&
-          !isSignalIndexPatternLoading &&
-          !isLoadingExceptionList &&
-          !isIndexPatternLoading &&
-          ruleExceptionList && (
-            <>
-              <ModalBodySection className="builder-section">
-                <EuiText>{i18n.EXCEPTION_BUILDER_INFO}</EuiText>
-                <EuiSpacer />
-                <ExceptionBuilderComponent
-                  exceptionListItems={initialExceptionItems}
-                  listType={exceptionListType}
-                  listId={ruleExceptionList.list_id}
-                  listNamespaceType={ruleExceptionList.namespace_type}
-                  ruleName={ruleName}
-                  indexPatterns={indexPatterns}
-                  isOrDisabled={false}
-                  isAndDisabled={false}
-                  isNestedDisabled={false}
-                  data-test-subj="alert-exception-builder"
-                  id-aria="alert-exception-builder"
-                  onChange={handleBuilderOnChange}
-                />
+      {fetchOrCreateListError == null &&
+        !isSignalIndexLoading &&
+        !isSignalIndexPatternLoading &&
+        !isLoadingExceptionList &&
+        !isIndexPatternLoading &&
+        !isRuleLoading &&
+        !mlJobLoading &&
+        ruleExceptionList && (
+          <>
+            <ModalBodySection className="builder-section">
+              {isRuleEQLSequenceStatement && (
+                <>
+                  <EuiCallOut
+                    data-test-subj="eql-sequence-callout"
+                    title={i18n.ADD_EXCEPTION_SEQUENCE_WARNING}
+                  />
+                  <EuiSpacer />
+                </>
+              )}
+              <EuiText>{i18n.EXCEPTION_BUILDER_INFO}</EuiText>
+              <EuiSpacer />
+              <ExceptionBuilderComponent
+                exceptionListItems={initialExceptionItems}
+                listType={exceptionListType}
+                listId={ruleExceptionList.list_id}
+                listNamespaceType={ruleExceptionList.namespace_type}
+                ruleName={ruleName}
+                indexPatterns={indexPatterns}
+                isOrDisabled={false}
+                isAndDisabled={false}
+                isNestedDisabled={false}
+                data-test-subj="alert-exception-builder"
+                id-aria="alert-exception-builder"
+                onChange={handleBuilderOnChange}
+                ruleType={maybeRule?.type}
+              />
 
-                <EuiSpacer />
+              <EuiSpacer />
 
-                <AddExceptionComments
-                  newCommentValue={comment}
-                  newCommentOnChange={onCommentChange}
-                />
-              </ModalBodySection>
-              <EuiHorizontalRule />
-              <ModalBodySection>
-                {alertData !== undefined && alertStatus !== 'closed' && (
-                  <EuiFormRow fullWidth>
-                    <EuiCheckbox
-                      data-test-subj="close-alert-on-add-add-exception-checkbox"
-                      id="close-alert-on-add-add-exception-checkbox"
-                      label="Close this alert"
-                      checked={shouldCloseAlert}
-                      onChange={onCloseAlertCheckboxChange}
-                    />
-                  </EuiFormRow>
-                )}
+              <AddExceptionComments
+                newCommentValue={comment}
+                newCommentOnChange={onCommentChange}
+              />
+            </ModalBodySection>
+            <EuiHorizontalRule />
+            <ModalBodySection>
+              {alertData !== undefined && alertStatus !== 'closed' && (
                 <EuiFormRow fullWidth>
                   <EuiCheckbox
-                    data-test-subj="bulk-close-alert-on-add-add-exception-checkbox"
-                    id="bulk-close-alert-on-add-add-exception-checkbox"
-                    label={
-                      shouldDisableBulkClose
-                        ? i18n.BULK_CLOSE_LABEL_DISABLED
-                        : i18n.BULK_CLOSE_LABEL
-                    }
-                    checked={shouldBulkCloseAlert}
-                    onChange={onBulkCloseAlertCheckboxChange}
-                    disabled={shouldDisableBulkClose}
+                    data-test-subj="close-alert-on-add-add-exception-checkbox"
+                    id="close-alert-on-add-add-exception-checkbox"
+                    label="Close this alert"
+                    checked={shouldCloseAlert}
+                    onChange={onCloseAlertCheckboxChange}
                   />
                 </EuiFormRow>
-                {exceptionListType === 'endpoint' && (
-                  <>
-                    <EuiSpacer />
-                    <EuiText data-test-subj="add-exception-endpoint-text" color="subdued" size="s">
-                      {i18n.ENDPOINT_QUARANTINE_TEXT}
-                    </EuiText>
-                  </>
-                )}
-              </ModalBodySection>
-            </>
-          )}
-        {fetchOrCreateListError == null && (
-          <EuiModalFooter>
-            <EuiButtonEmpty onClick={onCancel}>{i18n.CANCEL}</EuiButtonEmpty>
-
-            <EuiButton
-              data-test-subj="add-exception-confirm-button"
-              onClick={onAddExceptionConfirm}
-              isLoading={addExceptionIsLoading}
-              isDisabled={isSubmitButtonDisabled}
-              fill
-            >
-              {i18n.ADD_EXCEPTION}
-            </EuiButton>
-          </EuiModalFooter>
+              )}
+              <EuiFormRow fullWidth>
+                <EuiCheckbox
+                  data-test-subj="bulk-close-alert-on-add-add-exception-checkbox"
+                  id="bulk-close-alert-on-add-add-exception-checkbox"
+                  label={
+                    shouldDisableBulkClose ? i18n.BULK_CLOSE_LABEL_DISABLED : i18n.BULK_CLOSE_LABEL
+                  }
+                  checked={shouldBulkCloseAlert}
+                  onChange={onBulkCloseAlertCheckboxChange}
+                  disabled={shouldDisableBulkClose}
+                />
+              </EuiFormRow>
+              {exceptionListType === 'endpoint' && (
+                <>
+                  <EuiSpacer />
+                  <EuiText data-test-subj="add-exception-endpoint-text" color="subdued" size="s">
+                    {i18n.ENDPOINT_QUARANTINE_TEXT}
+                  </EuiText>
+                </>
+              )}
+            </ModalBodySection>
+          </>
         )}
-      </Modal>
-    </EuiOverlayMask>
+      {fetchOrCreateListError == null && (
+        <EuiModalFooter>
+          <EuiButtonEmpty onClick={onCancel}>{i18n.CANCEL}</EuiButtonEmpty>
+
+          <EuiButton
+            data-test-subj="add-exception-confirm-button"
+            onClick={onAddExceptionConfirm}
+            isLoading={addExceptionIsLoading}
+            isDisabled={isSubmitButtonDisabled}
+            fill
+          >
+            {addExceptionMessage}
+          </EuiButton>
+        </EuiModalFooter>
+      )}
+    </Modal>
   );
 });

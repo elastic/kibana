@@ -1,9 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+import uuid from 'uuid';
 import { set } from '@elastic/safer-lodash-set';
 import { camelCase, isArray, isObject } from 'lodash';
 import { fold } from 'fp-ts/lib/Either';
@@ -24,11 +26,12 @@ import {
   CaseConfigureResponseRt,
   CaseUserActionsResponse,
   CaseUserActionsResponseRt,
-  ServiceConnectorCaseResponseRt,
-  ServiceConnectorCaseResponse,
+  CommentType,
+  CasePatchRequest,
 } from '../../../../case/common/api';
-import { ToasterError } from '../../common/components/toasters';
-import { AllCases, Case } from './types';
+import { AppToast, ToasterError } from '../../common/components/toasters';
+import { AllCases, Case, UpdateByKey } from './types';
+import * as i18n from './translations';
 
 export const getTypedPayload = <T>(a: unknown): T => a as T;
 
@@ -65,8 +68,9 @@ export const convertToCamelCase = <T, U extends {}>(snakeCase: T): U =>
 
 export const convertAllCasesToCamel = (snakeCases: CasesFindResponse): AllCases => ({
   cases: snakeCases.cases.map((snakeCase) => convertToCamelCase<CaseResponse, Case>(snakeCase)),
-  countClosedCases: snakeCases.count_closed_cases,
   countOpenCases: snakeCases.count_open_cases,
+  countInProgressCases: snakeCases.count_in_progress_cases,
+  countClosedCases: snakeCases.count_closed_cases,
   page: snakeCases.page,
   perPage: snakeCases.per_page,
   total: snakeCases.total,
@@ -101,8 +105,46 @@ export const decodeCaseUserActionsResponse = (respUserActions?: CaseUserActionsR
     fold(throwErrors(createToasterPlainError), identity)
   );
 
-export const decodeServiceConnectorCaseResponse = (respPushCase?: ServiceConnectorCaseResponse) =>
-  pipe(
-    ServiceConnectorCaseResponseRt.decode(respPushCase),
-    fold(throwErrors(createToasterPlainError), identity)
+export const valueToUpdateIsSettings = (
+  key: UpdateByKey['updateKey'],
+  value: UpdateByKey['updateValue']
+): value is CasePatchRequest['settings'] => key === 'settings';
+
+export const valueToUpdateIsStatus = (
+  key: UpdateByKey['updateKey'],
+  value: UpdateByKey['updateValue']
+): value is CasePatchRequest['status'] => key === 'status';
+
+export const createUpdateSuccessToaster = (
+  caseBeforeUpdate: Case,
+  caseAfterUpdate: Case,
+  key: UpdateByKey['updateKey'],
+  value: UpdateByKey['updateValue']
+): AppToast => {
+  const caseHasAlerts = caseBeforeUpdate.comments.some(
+    (comment) => comment.type === CommentType.alert
   );
+
+  const toast: AppToast = {
+    id: uuid.v4(),
+    color: 'success',
+    iconType: 'check',
+    title: i18n.UPDATED_CASE(caseAfterUpdate.title),
+  };
+
+  if (valueToUpdateIsSettings(key, value) && value?.syncAlerts && caseHasAlerts) {
+    return {
+      ...toast,
+      title: i18n.SYNC_CASE(caseAfterUpdate.title),
+    };
+  }
+
+  if (valueToUpdateIsStatus(key, value) && caseHasAlerts && caseBeforeUpdate.settings.syncAlerts) {
+    return {
+      ...toast,
+      text: i18n.STATUS_CHANGED_TOASTER_TEXT,
+    };
+  }
+
+  return toast;
+};

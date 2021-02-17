@@ -1,14 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 /* eslint-disable max-classes-per-file */
 
 import { AbstractLayer } from './layer';
 import { ISource } from '../sources/source';
-import { IStyle } from '../styles/style';
-import { AGG_TYPE, FIELD_ORIGIN, LAYER_STYLE_TYPE, VECTOR_STYLES } from '../../../common/constants';
+import {
+  AGG_TYPE,
+  FIELD_ORIGIN,
+  LAYER_STYLE_TYPE,
+  SOURCE_TYPES,
+  VECTOR_STYLES,
+} from '../../../common/constants';
 import { ESTermSourceDescriptor, VectorStyleDescriptor } from '../../../common/descriptor_types';
 import { getDefaultDynamicProperties } from '../styles/vector/vector_style_defaults';
 
@@ -37,8 +44,6 @@ class MockSource {
     return this._fitToBounds;
   }
 }
-
-class MockStyle {}
 
 describe('cloneDescriptor', () => {
   describe('with joins', () => {
@@ -76,7 +81,9 @@ describe('cloneDescriptor', () => {
               indexPatternTitle: 'logs-*',
               metrics: [{ type: AGG_TYPE.COUNT }],
               term: 'myTermField',
-              type: 'joinSource',
+              type: SOURCE_TYPES.ES_TERM_SOURCE,
+              applyGlobalQuery: true,
+              applyGlobalTime: true,
             },
           },
         ],
@@ -84,7 +91,6 @@ describe('cloneDescriptor', () => {
       const layer = new MockLayer({
         layerDescriptor,
         source: (new MockSource() as unknown) as ISource,
-        style: (new MockStyle() as unknown) as IStyle,
       });
       const clonedDescriptor = await layer.cloneDescriptor();
       const clonedStyleProps = (clonedDescriptor.style as VectorStyleDescriptor).properties;
@@ -122,7 +128,6 @@ describe('cloneDescriptor', () => {
       const layer = new MockLayer({
         layerDescriptor,
         source: (new MockSource() as unknown) as ISource,
-        style: (new MockStyle() as unknown) as IStyle,
       });
       const clonedDescriptor = await layer.cloneDescriptor();
       const clonedStyleProps = (clonedDescriptor.style as VectorStyleDescriptor).properties;
@@ -165,7 +170,6 @@ describe('isFittable', () => {
       const layer = new MockLayer({
         layerDescriptor,
         source: (new MockSource({ fitToBounds: test.fitToBounds }) as unknown) as ISource,
-        style: (new MockStyle() as unknown) as IStyle,
       });
       expect(await layer.isFittable()).toBe(test.canFit);
     });

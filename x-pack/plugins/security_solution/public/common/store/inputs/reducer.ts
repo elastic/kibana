@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { get } from 'lodash/fp';
@@ -149,16 +150,19 @@ export const inputsReducer = reducerWithInitialState(initialInputsState)
       },
     };
   })
-  .case(setAbsoluteRangeDatePicker, (state, { id, from, to }) => {
-    const timerange: TimeRange = {
-      kind: 'absolute',
-      fromStr: undefined,
-      toStr: undefined,
-      from,
-      to,
-    };
-    return updateInputTimerange(id, timerange, state);
-  })
+  .case(
+    setAbsoluteRangeDatePicker,
+    (state, { id, from, to, fromStr = undefined, toStr = undefined }) => {
+      const timerange: TimeRange = {
+        kind: 'absolute',
+        fromStr,
+        toStr,
+        from,
+        to,
+      };
+      return updateInputTimerange(id, timerange, state);
+    }
+  )
   .case(setRelativeRangeDatePicker, (state, { id, fromStr, from, to, toStr }) => {
     const timerange: TimeRange = {
       kind: 'relative',

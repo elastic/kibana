@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -94,7 +95,7 @@ export function resolveImportErrorsTestSuiteFactory(
   esArchiver: any,
   supertest: SuperTest<any>
 ) {
-  const expectForbidden = expectResponses.forbiddenTypes('bulk_create');
+  const expectSavedObjectForbidden = expectResponses.forbiddenTypes('bulk_create');
   const expectResponseBody = (
     testCases: ResolveImportErrorsTestCase | ResolveImportErrorsTestCase[],
     statusCode: 200 | 403,
@@ -106,7 +107,7 @@ export function resolveImportErrorsTestSuiteFactory(
     const testCaseArray = Array.isArray(testCases) ? testCases : [testCases];
     if (statusCode === 403) {
       const types = testCaseArray.map((x) => x.type);
-      await expectForbidden(types)(response);
+      await expectSavedObjectForbidden(types)(response);
     } else {
       // permitted
       const { success, successCount, successResults, errors } = response.body;
@@ -273,6 +274,6 @@ export function resolveImportErrorsTestSuiteFactory(
   return {
     addTests,
     createTestDefinitions,
-    expectForbidden,
+    expectSavedObjectForbidden,
   };
 }

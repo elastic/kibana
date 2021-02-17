@@ -1,12 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { useMemo, useState, useCallback, useEffect, useReducer } from 'react';
+import { HttpHandler } from 'src/core/public';
 import {
   INFA_ML_GET_METRICS_HOSTS_ANOMALIES_PATH,
+  Metric,
   Sort,
   Pagination,
   PaginationCursor,
@@ -15,8 +18,8 @@ import {
   getMetricsHostsAnomaliesSuccessReponsePayloadRT,
 } from '../../../../../common/http_api/infra_ml';
 import { useTrackedPromise } from '../../../../utils/use_tracked_promise';
-import { npStart } from '../../../../legacy_singletons';
 import { decodeOrThrow } from '../../../../../common/runtime_types';
+import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 
 export type SortOptions = Sort;
 export type PaginationOptions = Pick<Pagination, 'pageSize'>;
@@ -135,6 +138,7 @@ export const useMetricsHostsAnomaliesResults = ({
   endTime,
   startTime,
   sourceId,
+  anomalyThreshold,
   defaultSortOptions,
   defaultPaginationOptions,
   onGetMetricsHostsAnomaliesDatasetsError,
@@ -143,11 +147,13 @@ export const useMetricsHostsAnomaliesResults = ({
   endTime: number;
   startTime: number;
   sourceId: string;
+  anomalyThreshold: number;
   defaultSortOptions: Sort;
   defaultPaginationOptions: Pick<Pagination, 'pageSize'>;
   onGetMetricsHostsAnomaliesDatasetsError?: (error: Error) => void;
   filteredDatasets?: string[];
 }) => {
+  const { services } = useKibanaContextForPlugin();
   const initStateReducer = (stateDefaults: ReducerStateDefaults): ReducerState => {
     return {
       ...stateDefaults,
@@ -168,7 +174,7 @@ export const useMetricsHostsAnomaliesResults = ({
   const [getMetricsHostsAnomaliesRequest, getMetricsHostsAnomalies] = useTrackedPromise(
     {
       cancelPreviousOn: 'creation',
-      createPromise: async () => {
+      createPromise: async (metric: Metric) => {
         const {
           timeRange: { start: queryStartTime, end: queryEndTime },
           sortOptions,
@@ -176,14 +182,19 @@ export const useMetricsHostsAnomaliesResults = ({
           paginationCursor,
         } = reducerState;
         return await callGetMetricHostsAnomaliesAPI(
-          sourceId,
-          queryStartTime,
-          queryEndTime,
-          sortOptions,
           {
-            ...paginationOptions,
-            cursor: paginationCursor,
-          }
+            sourceId,
+            anomalyThreshold,
+            startTime: queryStartTime,
+            endTime: queryEndTime,
+            metric,
+            sort: sortOptions,
+            pagination: {
+              ...paginationOptions,
+              cursor: paginationCursor,
+            },
+          },
+          services.http.fetch
         );
       },
       onResolve: ({ data: { anomalies, paginationCursors: requestCursors, hasMoreEntries } }) => {
@@ -207,6 +218,7 @@ export const useMetricsHostsAnomaliesResults = ({
     },
     [
       sourceId,
+      anomalyThreshold,
       dispatch,
       reducerState.timeRange,
       reducerState.sortOptions,
@@ -249,10 +261,6 @@ export const useMetricsHostsAnomaliesResults = ({
     });
   }, [filteredDatasets]);
 
-  useEffect(() => {
-    getMetricsHostsAnomalies();
-  }, [getMetricsHostsAnomalies]); // TODO: FIgure out the deps here.
-
   const handleFetchNextPage = useCallback(() => {
     if (reducerState.lastReceivedCursors) {
       dispatch({ type: 'fetchNextPage' });
@@ -290,23 +298,33 @@ export const useMetricsHostsAnomaliesResults = ({
   };
 };
 
+interface RequestArgs {
+  sourceId: string;
+  anomalyThreshold: number;
+  startTime: number;
+  endTime: number;
+  metric: Metric;
+  sort: Sort;
+  pagination: Pagination;
+}
+
 export const callGetMetricHostsAnomaliesAPI = async (
-  sourceId: string,
-  startTime: number,
-  endTime: number,
-  sort: Sort,
-  pagination: Pagination
+  requestArgs: RequestArgs,
+  fetch: HttpHandler
 ) => {
-  const response = await npStart.http.fetch(INFA_ML_GET_METRICS_HOSTS_ANOMALIES_PATH, {
+  const { sourceId, anomalyThreshold, startTime, endTime, metric, sort, pagination } = requestArgs;
+  const response = await fetch(INFA_ML_GET_METRICS_HOSTS_ANOMALIES_PATH, {
     method: 'POST',
     body: JSON.stringify(
       getMetricsHostsAnomaliesRequestPayloadRT.encode({
         data: {
           sourceId,
+          anomalyThreshold,
           timeRange: {
             startTime,
             endTime,
           },
+          metric,
           sort,
           pagination,
         },

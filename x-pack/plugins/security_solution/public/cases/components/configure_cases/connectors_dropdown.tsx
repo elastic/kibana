@@ -1,19 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSuperSelect } from '@elastic/eui';
 import styled from 'styled-components';
 
-import { Connector } from '../../containers/configure/types';
-import { connectorsConfiguration } from '../../../common/lib/connectors/config';
+import { ActionConnector } from '../../containers/configure/types';
+import { connectorsConfiguration } from '../connectors';
 import * as i18n from './translations';
 
 export interface Props {
-  connectors: Connector[];
+  connectors: ActionConnector[];
   disabled: boolean;
   isLoading: boolean;
   onChange: (id: string) => void;
@@ -96,13 +97,14 @@ const ConnectorsDropdownComponent: React.FC<Props> = ({
 
   return (
     <EuiSuperSelect
+      aria-label={i18n.INCIDENT_MANAGEMENT_SYSTEM_LABEL}
+      data-test-subj="dropdown-connectors"
       disabled={disabled}
+      fullWidth
       isLoading={isLoading}
+      onChange={onChange}
       options={connectorsAsOptions}
       valueOfSelected={selectedConnector}
-      fullWidth
-      onChange={onChange}
-      data-test-subj="dropdown-connectors"
     />
   );
 };

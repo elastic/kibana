@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React, { PureComponent, Fragment } from 'react';
@@ -36,7 +25,6 @@ import {
   EuiFormRow,
   EuiIcon,
   EuiLink,
-  EuiOverlayMask,
   EuiSelect,
   EuiSpacer,
   EuiText,
@@ -126,6 +114,7 @@ export interface FieldEditorState {
   errors?: string[];
   format: any;
   spec: IndexPatternField['spec'];
+  customLabel: string;
 }
 
 export interface FieldEdiorProps {
@@ -133,7 +122,7 @@ export interface FieldEdiorProps {
   spec: IndexPatternField['spec'];
   services: {
     redirectAway: () => void;
-    saveIndexPattern: DataPublicPluginStart['indexPatterns']['updateSavedObject'];
+    indexPatternService: DataPublicPluginStart['indexPatterns'];
   };
 }
 
@@ -166,6 +155,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
       isSaving: false,
       format: props.indexPattern.getFormatterForField(spec),
       spec: { ...spec },
+      customLabel: '',
     };
     this.supportedLangs = getSupportedScriptingLanguages();
     this.deprecatedLangs = getDeprecatedScriptingLanguages();
@@ -208,7 +198,8 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
         DefaultFieldFormat as FieldFormatInstanceType,
         data.fieldFormats
       ),
-      fieldFormatId: get(indexPattern, ['fieldFormatMap', spec.name, 'type', 'id']),
+      fieldFormatId: indexPattern.getFormatterForFieldNoDefault(spec.name)?.type?.id,
+      customLabel: spec.customLabel || '',
       fieldFormatParams: format.params(),
     });
   }
@@ -220,13 +211,11 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
   };
 
   onTypeChange = (type: KBN_FIELD_TYPES) => {
-    const { uiSettings, data } = this.context.services;
+    const { data } = this.context.services;
     const { spec, format } = this.state;
     const DefaultFieldFormat = data.fieldFormats.getDefaultType(type) as FieldFormatInstanceType;
 
     spec.type = type;
-
-    spec.format = new DefaultFieldFormat(null, (key) => uiSettings.get(key));
 
     this.setState({
       fieldTypeFormats: getFieldTypeFormatsList(spec, DefaultFieldFormat, data.fieldFormats),
@@ -247,7 +236,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
   };
 
   onFormatChange = (formatId: string, params?: any) => {
-    const { spec, fieldTypeFormats } = this.state;
+    const { fieldTypeFormats } = this.state;
     const { uiSettings, data } = this.context.services;
 
     const FieldFormat = data.fieldFormats.getType(
@@ -255,11 +244,10 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
     ) as FieldFormatInstanceType;
 
     const newFormat = new FieldFormat(params, (key) => uiSettings.get(key));
-    spec.format = newFormat;
 
     this.setState({
-      fieldFormatId: FieldFormat.id,
-      fieldFormatParams: newFormat.params(),
+      fieldFormatId: formatId,
+      fieldFormatParams: params,
       format: newFormat,
     });
   };
@@ -414,6 +402,33 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
     );
   }
 
+  renderCustomLabel() {
+    const { customLabel, spec } = this.state;
+
+    return (
+      <EuiFormRow
+        label={i18n.translate('indexPatternManagement.customLabel', {
+          defaultMessage: 'Custom label',
+        })}
+        helpText={
+          <FormattedMessage
+            id="indexPatternManagement.labelHelpText"
+            defaultMessage="Set a custom label to use when this field is displayed in Discover, Maps, and Visualize. Queries and filters don't currently support a custom label and will use the original field name."
+          />
+        }
+      >
+        <EuiFieldText
+          value={customLabel || ''}
+          placeholder={spec.name}
+          data-test-subj="editorFieldCustomLabel"
+          onChange={(e) => {
+            this.setState({ customLabel: e.target.value });
+          }}
+        />
+      </EuiFormRow>
+    );
+  }
+
   /**
    * renders a warning and a table of conflicting indices
    * in case there are indices with different types
@@ -515,7 +530,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
             fieldType={spec.type}
             fieldFormat={format}
             fieldFormatId={fieldFormatId}
-            fieldFormatParams={fieldFormatParams}
+            fieldFormatParams={fieldFormatParams || {}}
             fieldFormatEditors={indexPatternManagementStart.fieldFormatEditors}
             onChange={this.onFormatParamsChange}
             onError={this.onFormatParamsError}
@@ -627,42 +642,40 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
     const { spec } = this.state;
 
     return this.state.showDeleteModal ? (
-      <EuiOverlayMask>
-        <EuiConfirmModal
-          title={i18n.translate('indexPatternManagement.deleteFieldHeader', {
-            defaultMessage: "Delete field '{fieldName}'",
-            values: { fieldName: spec.name },
-          })}
-          onCancel={this.hideDeleteModal}
-          onConfirm={() => {
-            this.hideDeleteModal();
-            this.deleteField();
-          }}
-          cancelButtonText={i18n.translate('indexPatternManagement.deleteField.cancelButton', {
-            defaultMessage: 'Cancel',
-          })}
-          confirmButtonText={i18n.translate('indexPatternManagement.deleteField.deleteButton', {
-            defaultMessage: 'Delete',
-          })}
-          buttonColor="danger"
-          defaultFocusedButton={EUI_MODAL_CONFIRM_BUTTON}
-        >
-          <p>
-            <FormattedMessage
-              id="indexPatternManagement.deleteFieldLabel"
-              defaultMessage="You can't recover a deleted field.{separator}Are you sure you want to do this?"
-              values={{
-                separator: (
-                  <span>
-                    <br />
-                    <br />
-                  </span>
-                ),
-              }}
-            />
-          </p>
-        </EuiConfirmModal>
-      </EuiOverlayMask>
+      <EuiConfirmModal
+        title={i18n.translate('indexPatternManagement.deleteFieldHeader', {
+          defaultMessage: "Delete field '{fieldName}'",
+          values: { fieldName: spec.name },
+        })}
+        onCancel={this.hideDeleteModal}
+        onConfirm={() => {
+          this.hideDeleteModal();
+          this.deleteField();
+        }}
+        cancelButtonText={i18n.translate('indexPatternManagement.deleteField.cancelButton', {
+          defaultMessage: 'Cancel',
+        })}
+        confirmButtonText={i18n.translate('indexPatternManagement.deleteField.deleteButton', {
+          defaultMessage: 'Delete',
+        })}
+        buttonColor="danger"
+        defaultFocusedButton={EUI_MODAL_CONFIRM_BUTTON}
+      >
+        <p>
+          <FormattedMessage
+            id="indexPatternManagement.deleteFieldLabel"
+            defaultMessage="You can't recover a deleted field.{separator}Are you sure you want to do this?"
+            values={{
+              separator: (
+                <span>
+                  <br />
+                  <br />
+                </span>
+              ),
+            }}
+          />
+        </p>
+      </EuiConfirmModal>
     ) : null;
   };
 
@@ -758,11 +771,11 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
   };
 
   deleteField = () => {
-    const { redirectAway, saveIndexPattern } = this.props.services;
+    const { redirectAway, indexPatternService } = this.props.services;
     const { indexPattern } = this.props;
     const { spec } = this.state;
     indexPattern.removeScriptedField(spec.name);
-    saveIndexPattern(indexPattern).then(() => {
+    indexPatternService.updateSavedObject(indexPattern).then(() => {
       const message = i18n.translate('indexPatternManagement.deleteField.deletedHeader', {
         defaultMessage: "Deleted '{fieldName}'",
         values: { fieldName: spec.name },
@@ -775,7 +788,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
   saveField = async () => {
     const field = this.state.spec;
     const { indexPattern } = this.props;
-    const { fieldFormatId } = this.state;
+    const { fieldFormatId, fieldFormatParams, customLabel } = this.state;
 
     if (field.scripted) {
       this.setState({
@@ -798,7 +811,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
       }
     }
 
-    const { redirectAway, saveIndexPattern } = this.props.services;
+    const { redirectAway, indexPatternService } = this.props.services;
     const fieldExists = !!indexPattern.fields.getByName(field.name);
 
     let oldField: IndexPatternField['spec'];
@@ -810,13 +823,19 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
       indexPattern.fields.add(field);
     }
 
-    if (!fieldFormatId) {
-      indexPattern.fieldFormatMap[field.name] = undefined;
+    if (fieldFormatId) {
+      indexPattern.setFieldFormat(field.name, { id: fieldFormatId, params: fieldFormatParams });
     } else {
-      indexPattern.fieldFormatMap[field.name] = field.format;
+      indexPattern.deleteFieldFormat(field.name);
     }
 
-    return saveIndexPattern(indexPattern)
+    if (field.customLabel !== customLabel) {
+      field.customLabel = customLabel;
+      indexPattern.fields.update(field);
+    }
+
+    return indexPatternService
+      .updateSavedObject(indexPattern)
       .then(() => {
         const message = i18n.translate('indexPatternManagement.deleteField.savedHeader', {
           defaultMessage: "Saved '{fieldName}'",
@@ -875,6 +894,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
         <EuiForm>
           {this.renderScriptingPanels()}
           {this.renderName()}
+          {this.renderCustomLabel()}
           {this.renderLanguage()}
           {this.renderType()}
           {this.renderTypeConflict()}

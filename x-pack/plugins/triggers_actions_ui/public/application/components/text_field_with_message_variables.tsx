@@ -1,13 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React, { useState } from 'react';
 import { EuiFieldText } from '@elastic/eui';
 import './add_message_variables.scss';
 import { AddMessageVariables } from './add_message_variables';
 import { ActionVariable } from '../../types';
+import { templateActionVariable } from '../lib';
 
 interface Props {
   messageVariables?: ActionVariable[];
@@ -16,6 +19,7 @@ interface Props {
   inputTargetValue?: string;
   editAction: (property: string, value: any, index: number) => void;
   errors?: string[];
+  defaultValue?: string | number | string[];
 }
 
 export const TextFieldWithMessageVariables: React.FunctionComponent<Props> = ({
@@ -25,11 +29,12 @@ export const TextFieldWithMessageVariables: React.FunctionComponent<Props> = ({
   inputTargetValue,
   editAction,
   errors,
+  defaultValue,
 }) => {
   const [currentTextElement, setCurrentTextElement] = useState<HTMLInputElement | null>(null);
 
-  const onSelectMessageVariable = (variable: string) => {
-    const templatedVar = `{{${variable}}}`;
+  const onSelectMessageVariable = (variable: ActionVariable) => {
+    const templatedVar = templateActionVariable(variable);
     const startPosition = currentTextElement?.selectionStart ?? 0;
     const endPosition = currentTextElement?.selectionEnd ?? 0;
     const newValue =
@@ -50,7 +55,8 @@ export const TextFieldWithMessageVariables: React.FunctionComponent<Props> = ({
       id={`${paramsProperty}Id`}
       isInvalid={errors && errors.length > 0 && inputTargetValue !== undefined}
       data-test-subj={`${paramsProperty}Input`}
-      value={inputTargetValue}
+      value={inputTargetValue || ''}
+      defaultValue={defaultValue}
       onChange={(e: React.ChangeEvent<HTMLInputElement>) => onChangeWithMessageVariable(e)}
       onFocus={(e: React.FocusEvent<HTMLInputElement>) => {
         setCurrentTextElement(e.target);
@@ -63,7 +69,7 @@ export const TextFieldWithMessageVariables: React.FunctionComponent<Props> = ({
       append={
         <AddMessageVariables
           messageVariables={messageVariables}
-          onSelectEventHandler={(variable: string) => onSelectMessageVariable(variable)}
+          onSelectEventHandler={onSelectMessageVariable}
           paramsProperty={paramsProperty}
         />
       }

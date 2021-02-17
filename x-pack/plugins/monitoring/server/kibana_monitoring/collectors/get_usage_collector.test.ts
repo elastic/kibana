@@ -1,11 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { getMonitoringUsageCollector } from './get_usage_collector';
 import { fetchClusters } from '../../lib/alerts/fetch_clusters';
+import { elasticsearchServiceMock } from '../../../../../../src/core/server/mocks';
 
 jest.mock('../../lib/alerts/fetch_clusters', () => ({
   fetchClusters: jest.fn().mockImplementation(() => {
@@ -57,7 +59,7 @@ jest.mock('./lib/fetch_license_type', () => ({
 }));
 
 describe('getMonitoringUsageCollector', () => {
-  const callCluster = jest.fn();
+  const esClient = elasticsearchServiceMock.createLegacyClusterClient();
   const config: any = {
     ui: {
       ccs: {
@@ -70,7 +72,7 @@ describe('getMonitoringUsageCollector', () => {
     const usageCollection: any = {
       makeUsageCollector: jest.fn(),
     };
-    await getMonitoringUsageCollector(usageCollection, config, callCluster);
+    await getMonitoringUsageCollector(usageCollection, config, esClient);
 
     const mock = (usageCollection.makeUsageCollector as jest.Mock).mock;
 
@@ -80,33 +82,36 @@ describe('getMonitoringUsageCollector', () => {
     expect(args[0].schema).toStrictEqual({
       hasMonitoringData: { type: 'boolean' },
       clusters: {
-        license: { type: 'keyword' },
-        clusterUuid: { type: 'keyword' },
-        metricbeatUsed: { type: 'boolean' },
-        elasticsearch: {
-          enabled: { type: 'boolean' },
-          count: { type: 'long' },
+        type: 'array',
+        items: {
+          license: { type: 'keyword' },
+          clusterUuid: { type: 'keyword' },
           metricbeatUsed: { type: 'boolean' },
-        },
-        kibana: {
-          enabled: { type: 'boolean' },
-          count: { type: 'long' },
-          metricbeatUsed: { type: 'boolean' },
-        },
-        logstash: {
-          enabled: { type: 'boolean' },
-          count: { type: 'long' },
-          metricbeatUsed: { type: 'boolean' },
-        },
-        beats: {
-          enabled: { type: 'boolean' },
-          count: { type: 'long' },
-          metricbeatUsed: { type: 'boolean' },
-        },
-        apm: {
-          enabled: { type: 'boolean' },
-          count: { type: 'long' },
-          metricbeatUsed: { type: 'boolean' },
+          elasticsearch: {
+            enabled: { type: 'boolean' },
+            count: { type: 'long' },
+            metricbeatUsed: { type: 'boolean' },
+          },
+          kibana: {
+            enabled: { type: 'boolean' },
+            count: { type: 'long' },
+            metricbeatUsed: { type: 'boolean' },
+          },
+          logstash: {
+            enabled: { type: 'boolean' },
+            count: { type: 'long' },
+            metricbeatUsed: { type: 'boolean' },
+          },
+          beats: {
+            enabled: { type: 'boolean' },
+            count: { type: 'long' },
+            metricbeatUsed: { type: 'boolean' },
+          },
+          apm: {
+            enabled: { type: 'boolean' },
+            count: { type: 'long' },
+            metricbeatUsed: { type: 'boolean' },
+          },
         },
       },
     });
@@ -117,11 +122,11 @@ describe('getMonitoringUsageCollector', () => {
       makeUsageCollector: jest.fn(),
     };
 
-    await getMonitoringUsageCollector(usageCollection, config, callCluster);
+    await getMonitoringUsageCollector(usageCollection, config, esClient);
     const mock = (usageCollection.makeUsageCollector as jest.Mock).mock;
     const args = mock.calls[0];
 
-    const result = await args[0].fetch();
+    const result = await args[0].fetch({});
     expect(result).toStrictEqual({
       hasMonitoringData: true,
       clusters: [
@@ -144,7 +149,7 @@ describe('getMonitoringUsageCollector', () => {
       makeUsageCollector: jest.fn(),
     };
 
-    await getMonitoringUsageCollector(usageCollection, config, callCluster);
+    await getMonitoringUsageCollector(usageCollection, config, esClient);
     const mock = (usageCollection.makeUsageCollector as jest.Mock).mock;
     const args = mock.calls[0];
 
@@ -152,7 +157,27 @@ describe('getMonitoringUsageCollector', () => {
       return [];
     });
 
-    const result = await args[0].fetch();
+    const result = await args[0].fetch({});
+    expect(result).toStrictEqual({
+      hasMonitoringData: false,
+      clusters: [],
+    });
+  });
+
+  it('should handle scoped data', async () => {
+    const usageCollection: any = {
+      makeUsageCollector: jest.fn(),
+    };
+
+    await getMonitoringUsageCollector(usageCollection, config, esClient);
+    const mock = (usageCollection.makeUsageCollector as jest.Mock).mock;
+    const args = mock.calls[0];
+
+    (fetchClusters as jest.Mock).mockImplementation(() => {
+      return [];
+    });
+
+    const result = await args[0].fetch({ kibanaRequest: {} });
     expect(result).toStrictEqual({
       hasMonitoringData: false,
       clusters: [],

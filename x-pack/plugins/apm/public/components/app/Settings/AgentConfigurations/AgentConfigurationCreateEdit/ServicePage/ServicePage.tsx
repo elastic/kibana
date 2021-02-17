@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -21,7 +22,7 @@ import {
   omitAllOption,
   getOptionLabel,
 } from '../../../../../../../common/agent_configuration/all_option';
-import { useFetcher, FETCH_STATUS } from '../../../../../../hooks/useFetcher';
+import { useFetcher, FETCH_STATUS } from '../../../../../../hooks/use_fetcher';
 import { FormRowSelect } from './FormRowSelect';
 import { APMLink } from '../../../../../shared/Links/apm/APMLink';
 
@@ -35,7 +36,7 @@ export function ServicePage({ newConfig, setNewConfig, onClickNext }: Props) {
   const { data: serviceNames = [], status: serviceNamesStatus } = useFetcher(
     (callApmApi) => {
       return callApmApi({
-        pathname: '/api/apm/settings/agent-configuration/services',
+        endpoint: 'GET /api/apm/settings/agent-configuration/services',
         isCachable: true,
       });
     },
@@ -47,7 +48,7 @@ export function ServicePage({ newConfig, setNewConfig, onClickNext }: Props) {
     (callApmApi) => {
       if (newConfig.service.name) {
         return callApmApi({
-          pathname: '/api/apm/settings/agent-configuration/environments',
+          endpoint: 'GET /api/apm/settings/agent-configuration/environments',
           params: {
             query: { serviceName: omitAllOption(newConfig.service.name) },
           },
@@ -67,7 +68,7 @@ export function ServicePage({ newConfig, setNewConfig, onClickNext }: Props) {
       }
 
       const { agentName } = await callApmApi({
-        pathname: '/api/apm/settings/agent-configuration/agent_name',
+        endpoint: 'GET /api/apm/settings/agent-configuration/agent_name',
         params: { query: { serviceName } },
       });
 

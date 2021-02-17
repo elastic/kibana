@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useEffect, FC } from 'react';
@@ -117,7 +118,7 @@ export const MlRouter: FC<{
   <Router history={pageDeps.history}>
     <LegacyHashUrlRedirect>
       <UrlStateProvider>
-        <div className="ml-app">
+        <div className="ml-app" data-test-subj="mlApp">
           <MlRoutes pageDeps={pageDeps} />
         </div>
       </UrlStateProvider>

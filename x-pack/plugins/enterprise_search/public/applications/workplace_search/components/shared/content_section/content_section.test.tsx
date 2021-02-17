@@ -1,14 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import '../../../../__mocks__/shallow_usecontext.mock';
-
 import React from 'react';
+
 import { shallow } from 'enzyme';
-import { EuiTitle, EuiSpacer } from '@elastic/eui';
+
+import { EuiSpacer } from '@elastic/eui';
+
+import { ViewContentHeader } from '../view_content_header';
 
 import { ContentSection } from './';
 
@@ -22,15 +25,16 @@ describe('ContentSection', () => {
     const wrapper = shallow(<ContentSection {...props} className="test" />);
 
     expect(wrapper.prop('data-test-subj')).toEqual('contentSection');
-    expect(wrapper.prop('className')).toEqual('test');
+    expect(wrapper.prop('className')).toEqual('test content-section');
     expect(wrapper.find('.children')).toHaveLength(1);
   });
 
   it('displays title and description', () => {
     const wrapper = shallow(<ContentSection {...props} title="foo" description="bar" />);
 
-    expect(wrapper.find(EuiTitle)).toHaveLength(1);
-    expect(wrapper.find('p').text()).toEqual('bar');
+    expect(wrapper.find(ViewContentHeader)).toHaveLength(1);
+    expect(wrapper.find(ViewContentHeader).prop('title')).toEqual('foo');
+    expect(wrapper.find(ViewContentHeader).prop('description')).toEqual('bar');
   });
 
   it('displays header content', () => {
@@ -43,7 +47,8 @@ describe('ContentSection', () => {
       />
     );
 
-    expect(wrapper.find(EuiSpacer).prop('size')).toEqual('s');
+    expect(wrapper.find(EuiSpacer).first().prop('size')).toEqual('s');
+    expect(wrapper.find(EuiSpacer)).toHaveLength(1);
     expect(wrapper.find('.header')).toHaveLength(1);
   });
 });

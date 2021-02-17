@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import _ from 'lodash';
 import turfBboxPolygon from '@turf/bbox-polygon';
 import turfBooleanContains from '@turf/boolean-contains';
@@ -84,9 +86,13 @@ export async function canSkipSourceUpdate({
     return false;
   }
 
+  let updateDueToApplyGlobalTime = false;
   let updateDueToTime = false;
   if (timeAware) {
-    updateDueToTime = !_.isEqual(prevMeta.timeFilters, nextMeta.timeFilters);
+    updateDueToApplyGlobalTime = prevMeta.applyGlobalTime !== nextMeta.applyGlobalTime;
+    if (nextMeta.applyGlobalTime) {
+      updateDueToTime = !_.isEqual(prevMeta.timeFilters, nextMeta.timeFilters);
+    }
   }
 
   let updateDueToRefreshTimer = false;
@@ -109,6 +115,7 @@ export async function canSkipSourceUpdate({
   if (isQueryAware) {
     updateDueToApplyGlobalQuery = prevMeta.applyGlobalQuery !== nextMeta.applyGlobalQuery;
     updateDueToSourceQuery = !_.isEqual(prevMeta.sourceQuery, nextMeta.sourceQuery);
+
     if (nextMeta.applyGlobalQuery) {
       updateDueToQuery = !_.isEqual(prevMeta.query, nextMeta.query);
       updateDueToFilters = !_.isEqual(prevMeta.filters, nextMeta.filters);
@@ -117,6 +124,11 @@ export async function canSkipSourceUpdate({
       // Exception is "Refresh" query.
       updateDueToQuery = isRefreshOnlyQuery(prevMeta.query, nextMeta.query);
     }
+  }
+
+  let updateDueToSearchSessionId = false;
+  if (timeAware || isQueryAware) {
+    updateDueToSearchSessionId = prevMeta.searchSessionId !== nextMeta.searchSessionId;
   }
 
   let updateDueToPrecisionChange = false;
@@ -132,6 +144,7 @@ export async function canSkipSourceUpdate({
   const updateDueToSourceMetaChange = !_.isEqual(prevMeta.sourceMeta, nextMeta.sourceMeta);
 
   return (
+    !updateDueToApplyGlobalTime &&
     !updateDueToTime &&
     !updateDueToRefreshTimer &&
     !updateDueToExtentChange &&
@@ -141,7 +154,8 @@ export async function canSkipSourceUpdate({
     !updateDueToSourceQuery &&
     !updateDueToApplyGlobalQuery &&
     !updateDueToPrecisionChange &&
-    !updateDueToSourceMetaChange
+    !updateDueToSourceMetaChange &&
+    !updateDueToSearchSessionId
   );
 }
 
@@ -169,8 +183,14 @@ export function canSkipStyleMetaUpdate({
     ? !_.isEqual(prevMeta.timeFilters, nextMeta.timeFilters)
     : false;
 
+  const updateDueToSearchSessionId = prevMeta.searchSessionId !== nextMeta.searchSessionId;
+
   return (
-    !updateDueToFields && !updateDueToSourceQuery && !updateDueToIsTimeAware && !updateDueToTime
+    !updateDueToFields &&
+    !updateDueToSourceQuery &&
+    !updateDueToIsTimeAware &&
+    !updateDueToTime &&
+    !updateDueToSearchSessionId
   );
 }
 

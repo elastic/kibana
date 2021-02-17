@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React, { useState, useEffect } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -18,11 +20,10 @@ import {
 
 import { EuiCallOut } from '@elastic/eui';
 import { Pipeline } from '../../../../common/types';
-import { useKibana, SectionLoading } from '../../../shared_imports';
+import { useKibana, SectionLoading, attemptToURIDecode } from '../../../shared_imports';
 
 import { getListPath } from '../../services/navigation';
 import { PipelineForm } from '../../components';
-import { attemptToURIDecode } from '../shared';
 
 interface MatchParams {
   name: string;
@@ -39,7 +40,7 @@ export const PipelinesEdit: React.FunctionComponent<RouteComponentProps<MatchPar
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [saveError, setSaveError] = useState<any>(null);
 
-  const decodedPipelineName = attemptToURIDecode(name);
+  const decodedPipelineName = attemptToURIDecode(name)!;
 
   const { error, data: pipeline, isLoading } = services.api.useLoadPipeline(decodedPipelineName);
 

@@ -1,10 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import React, { useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 
 import { TimelineId } from '../../../common/types/timeline';
@@ -21,7 +22,9 @@ import { useInitSourcerer, useSourcererScope } from '../../common/containers/sou
 import { useKibana } from '../../common/lib/kibana';
 import { DETECTIONS_SUB_PLUGIN_ID } from '../../../common/constants';
 import { SourcererScopeName } from '../../common/store/sourcerer/model';
+import { useUpgradeEndpointPackage } from '../../common/hooks/endpoint/upgrade';
 import { useThrottledResizeObserver } from '../../common/components/utils';
+import { AppLeaveHandler } from '../../../../../../src/core/public';
 
 const Main = styled.main.attrs<{ paddingTop: number }>(({ paddingTop }) => ({
   style: {
@@ -36,16 +39,24 @@ const Main = styled.main.attrs<{ paddingTop: number }>(({ paddingTop }) => ({
 
 Main.displayName = 'Main';
 
-const usersViewing = ['elastic']; // TODO: get the users viewing this timeline from Elasticsearch (persistance)
-
 interface HomePageProps {
   children: React.ReactNode;
+  onAppLeave: (handler: AppLeaveHandler) => void;
 }
 
-const HomePageComponent: React.FC<HomePageProps> = ({ children }) => {
-  const { application } = useKibana().services;
+const HomePageComponent: React.FC<HomePageProps> = ({ children, onAppLeave }) => {
+  const { application, overlays } = useKibana().services;
   const subPluginId = useRef<string>('');
   const { ref, height = 0 } = useThrottledResizeObserver(300);
+  const banners$ = overlays.banners.get$();
+  const [headerFixed, setHeaderFixed] = useState<boolean>(true);
+  const mainPaddingTop = headerFixed ? height : 0;
+
+  useEffect(() => {
+    const subscription = banners$.subscribe((banners) => setHeaderFixed(!banners.length));
+    return () => subscription.unsubscribe();
+  }, [banners$]); // Only un/re-subscribe if the Observable changes
+
   application.currentAppId$.subscribe((appId) => {
     subPluginId.current = appId ?? '';
   });
@@ -57,19 +68,29 @@ const HomePageComponent: React.FC<HomePageProps> = ({ children }) => {
   );
   const [showTimeline] = useShowTimeline();
 
-  const { browserFields, indexPattern, indicesExist } = useSourcererScope();
+  const { browserFields, indexPattern, indicesExist } = useSourcererScope(
+    subPluginId.current === DETECTIONS_SUB_PLUGIN_ID
+      ? SourcererScopeName.detections
+      : SourcererScopeName.default
+  );
+  // side effect: this will attempt to upgrade the endpoint package if it is not up to date
+  // this will run when a user navigates to the Security Solution app and when they navigate between
+  // tabs in the app. This is useful for keeping the endpoint package as up to date as possible until
+  // a background task solution can be built on the server side. Once a background task solution is available we
+  // can remove this.
+  useUpgradeEndpointPackage();
 
   return (
     <SecuritySolutionAppWrapper>
-      <HeaderGlobal ref={ref} />
+      <HeaderGlobal ref={ref} isFixed={headerFixed} />
 
-      <Main paddingTop={height} data-test-subj="pageContainer">
+      <Main paddingTop={mainPaddingTop} data-test-subj="pageContainer">
         <DragDropContextWrapper browserFields={browserFields}>
           <UseUrlState indexPattern={indexPattern} navTabs={navTabs} />
           {indicesExist && showTimeline && (
             <>
               <AutoSaveWarningMsg />
-              <Flyout timelineId={TimelineId.active} usersViewing={usersViewing} />
+              <Flyout timelineId={TimelineId.active} onAppLeave={onAppLeave} />
             </>
           )}
 

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { InMemoryCache, IntrospectionFragmentMatcher } from 'apollo-cache-inmemory';
@@ -17,6 +18,7 @@ export function composeLibs(core: CoreStart): AppFrontendLibs {
   const cache = new InMemoryCache({
     dataIdFromObject: () => null,
     fragmentMatcher: new IntrospectionFragmentMatcher({
+      // @ts-expect-error apollo-cache-inmemory types don't match actual introspection data
       introspectionQueryResultData,
     }),
   });

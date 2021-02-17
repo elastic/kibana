@@ -1,13 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiButtonIcon, EuiSuperSelect } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
-import { ActionCreator } from 'typescript-fsa';
 
 import { GlobalTimeArgs } from '../../containers/use_global_time';
 import { EventsByDataset } from '../../../overview/components/events_by_dataset';
@@ -52,11 +52,6 @@ export interface Props extends Pick<GlobalTimeArgs, 'from' | 'to' | 'deleteQuery
   indexNames: string[];
   options: TopNOption[];
   query: Query;
-  setAbsoluteRangeDatePicker: ActionCreator<{
-    id: InputsModelId;
-    from: string;
-    to: string;
-  }>;
   setAbsoluteRangeDatePickerTarget: InputsModelId;
   timelineId?: string;
   toggleTopN: () => void;
@@ -64,21 +59,17 @@ export interface Props extends Pick<GlobalTimeArgs, 'from' | 'to' | 'deleteQuery
   value?: string[] | string | null;
 }
 
-const NO_FILTERS: Filter[] = [];
-const DEFAULT_QUERY: Query = { query: '', language: 'kuery' };
-
 const TopNComponent: React.FC<Props> = ({
   combinedQueries,
   defaultView,
   deleteQuery,
-  filters = NO_FILTERS,
+  filters,
   field,
   from,
   indexPattern,
   indexNames,
   options,
-  query = DEFAULT_QUERY,
-  setAbsoluteRangeDatePicker,
+  query,
   setAbsoluteRangeDatePickerTarget,
   setQuery,
   timelineId,
@@ -139,10 +130,8 @@ const TopNComponent: React.FC<Props> = ({
             filters={filters}
             from={from}
             headerChildren={headerChildren}
-            indexPattern={indexPattern}
             onlyField={field}
             query={query}
-            setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker}
             setAbsoluteRangeDatePickerTarget={setAbsoluteRangeDatePickerTarget}
             setQuery={setQuery}
             timelineId={timelineId}

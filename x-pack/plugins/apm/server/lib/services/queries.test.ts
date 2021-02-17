@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { getServiceAgentName } from './get_service_agent_name';
@@ -47,7 +48,11 @@ describe('services queries', () => {
 
   it('fetches the service items', async () => {
     mock = await inspectSearchParams((setup) =>
-      getServicesItems({ setup, searchAggregatedTransactions: false })
+      getServicesItems({
+        setup,
+        searchAggregatedTransactions: false,
+        logger: {} as any,
+      })
     );
 
     const allParams = mock.spy.mock.calls.map((call) => call[0]);

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { SavedObjectsClientContract } from 'kibana/server';
@@ -19,8 +20,8 @@ import {
   MetaOrUndefined,
   Name,
   NamespaceType,
+  OsTypeArray,
   Tags,
-  _Tags,
 } from '../../../common/schemas';
 
 import {
@@ -30,7 +31,6 @@ import {
 } from './utils';
 
 interface CreateExceptionListItemOptions {
-  _tags: _Tags;
   comments: CreateCommentsArray;
   listId: ListId;
   itemId: ItemId;
@@ -44,10 +44,10 @@ interface CreateExceptionListItemOptions {
   tags: Tags;
   tieBreaker?: string;
   type: ExceptionListItemType;
+  osTypes: OsTypeArray;
 }
 
 export const createExceptionListItem = async ({
-  _tags,
   comments,
   entries,
   itemId,
@@ -55,6 +55,7 @@ export const createExceptionListItem = async ({
   savedObjectsClient,
   namespaceType,
   name,
+  osTypes,
   description,
   meta,
   user,
@@ -69,7 +70,6 @@ export const createExceptionListItem = async ({
     user,
   });
   const savedObject = await savedObjectsClient.create<ExceptionListSoSchema>(savedObjectType, {
-    _tags,
     comments: transformedComments,
     created_at: dateNow,
     created_by: user,
@@ -81,6 +81,7 @@ export const createExceptionListItem = async ({
     list_type: 'item',
     meta,
     name,
+    os_types: osTypes as OsTypeArray,
     tags,
     tie_breaker_id: tieBreaker ?? uuid.v4(),
     type,

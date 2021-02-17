@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -22,6 +23,7 @@ import {
 } from '@elastic/eui/dist/eui_charts_theme';
 import { useUiSetting$ } from '../../../../../../../../src/plugins/kibana_react/public';
 import { ChartWrapper } from '../ChartWrapper';
+import { I18LABELS } from '../translations';
 
 const StyleChart = styled.div`
   height: 100%;
@@ -59,7 +61,9 @@ export function VisitorBreakdownChart({ loading, options }: Props) {
           />
           <Partition
             id="spec_1"
-            data={options || []}
+            data={
+              options?.length ? options : [{ count: 1, name: I18LABELS.noData }]
+            }
             valueAccessor={(d: Datum) => d.count as number}
             valueGetter="percent"
             percentFormatter={(d: number) =>

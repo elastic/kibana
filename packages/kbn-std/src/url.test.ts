@@ -1,23 +1,12 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import { modifyUrl, isRelativeUrl } from './url';
+import { modifyUrl, isRelativeUrl, getUrlOrigin } from './url';
 
 describe('modifyUrl()', () => {
   test('throws an error with invalid input', () => {
@@ -81,5 +70,29 @@ describe('isRelativeUrl()', () => {
     expect(isRelativeUrl('//evil.com')).toBe(false);
     expect(isRelativeUrl('///evil.com')).toBe(false);
     expect(isRelativeUrl(' //evil.com')).toBe(false);
+  });
+});
+
+describe('getOrigin', () => {
+  describe('when passing an absolute url', () => {
+    it('return origin without port when the url does not have a port', () => {
+      expect(getUrlOrigin('https://example.com/file/to/path?example')).toEqual(
+        'https://example.com'
+      );
+    });
+    it('return origin with port when the url does have a port', () => {
+      expect(getUrlOrigin('http://example.com:80/path/to/file')).toEqual('http://example.com:80');
+    });
+  });
+  describe('when passing a non absolute url', () => {
+    it('returns null for relative url', () => {
+      expect(getUrlOrigin('./path/to/file')).toBeNull();
+    });
+    it('returns null for absolute path', () => {
+      expect(getUrlOrigin('/path/to/file')).toBeNull();
+    });
+    it('returns null for empty url', () => {
+      expect(getUrlOrigin('')).toBeNull();
+    });
   });
 });

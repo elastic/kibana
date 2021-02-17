@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import {
   CoreSetup,
   RequestHandlerContext,
@@ -11,14 +13,12 @@ import {
   IKibanaResponse,
 } from 'kibana/server';
 import { schema } from '@kbn/config-schema';
+import { InvalidatePendingApiKey } from '../../../../../../../plugins/alerts/server/types';
 import { RawAlert } from '../../../../../../../plugins/alerts/server/types';
 import { TaskInstance } from '../../../../../../../plugins/task_manager/server';
-import { FixtureSetupDeps, FixtureStartDeps } from './plugin';
+import { FixtureStartDeps } from './plugin';
 
-export function defineRoutes(
-  core: CoreSetup<FixtureStartDeps>,
-  { spaces, security }: Partial<FixtureSetupDeps>
-) {
+export function defineRoutes(core: CoreSetup<FixtureStartDeps>) {
   const router = core.http.createRouter();
   router.put(
     {
@@ -39,13 +39,16 @@ export function defineRoutes(
     ): Promise<IKibanaResponse<any>> => {
       const { id } = req.params;
 
+      const [
+        { savedObjects },
+        { encryptedSavedObjects, security, spaces },
+      ] = await core.getStartServices();
       if (!security) {
         return res.ok({
           body: {},
         });
       }
 
-      const [{ savedObjects }, { encryptedSavedObjects }] = await core.getStartServices();
       const encryptedSavedObjectsWithAlerts = await encryptedSavedObjects.getClient({
         includedHiddenTypes: ['alert'],
       });
@@ -69,7 +72,7 @@ export function defineRoutes(
       // Create an API key using the new grant API - in this case the Kibana system user is creating the
       // API key for the user, instead of having the user create it themselves, which requires api_key
       // privileges
-      const createAPIKeyResult = await security.authc.grantAPIKeyAsInternalUser(req, {
+      const createAPIKeyResult = await security.authc.apiKeys.grantAsInternalUser(req, {
         name: `alert:migrated-to-7.10:${user.username}`,
         role_descriptors: {},
       });
@@ -182,6 +185,33 @@ export function defineRoutes(
         { runAt }
       );
       return res.ok({ body: result });
+    }
+  );
+
+  router.get(
+    {
+      path: '/api/alerts_fixture/api_keys_pending_invalidation',
+      validate: {},
+    },
+    async (
+      context: RequestHandlerContext,
+      req: KibanaRequest<any, any, any, any>,
+      res: KibanaResponseFactory
+    ): Promise<IKibanaResponse<any>> => {
+      try {
+        const [{ savedObjects }] = await core.getStartServices();
+        const savedObjectsWithTasksAndAlerts = await savedObjects.getScopedClient(req, {
+          includedHiddenTypes: ['api_key_pending_invalidation'],
+        });
+        const findResult = await savedObjectsWithTasksAndAlerts.find<InvalidatePendingApiKey>({
+          type: 'api_key_pending_invalidation',
+        });
+        return res.ok({
+          body: { apiKeysToInvalidate: findResult.saved_objects },
+        });
+      } catch (err) {
+        return res.badRequest({ body: err });
+      }
     }
   );
 }

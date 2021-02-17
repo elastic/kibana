@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { getExceptionListItemSchemaMock } from '../../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
@@ -21,6 +22,7 @@ const initialState: State = {
   addNested: false,
   exceptions: [],
   exceptionsToDelete: [],
+  errorExists: 0,
 };
 
 describe('exceptionsBuilderReducer', () => {
@@ -45,6 +47,7 @@ describe('exceptionsBuilderReducer', () => {
         addNested: false,
         exceptions: [],
         exceptionsToDelete: [],
+        errorExists: 0,
       });
     });
 
@@ -244,6 +247,7 @@ describe('exceptionsBuilderReducer', () => {
           addNested: false,
           exceptions: [getExceptionListItemSchemaMock()],
           exceptionsToDelete: [],
+          errorExists: 0,
         },
         {
           type: 'setDefault',
@@ -290,6 +294,7 @@ describe('exceptionsBuilderReducer', () => {
           addNested: false,
           exceptions,
           exceptionsToDelete: [],
+          errorExists: 0,
         },
         {
           type: 'setExceptionsToDelete',
@@ -324,6 +329,7 @@ describe('exceptionsBuilderReducer', () => {
           addNested: false,
           exceptions: [getExceptionListItemSchemaMock()],
           exceptionsToDelete: [],
+          errorExists: 0,
         },
         {
           type: 'setDisableAnd',
@@ -344,6 +350,7 @@ describe('exceptionsBuilderReducer', () => {
           addNested: false,
           exceptions: [getExceptionListItemSchemaMock()],
           exceptionsToDelete: [],
+          errorExists: 0,
         },
         {
           type: 'setDisableAnd',
@@ -366,6 +373,7 @@ describe('exceptionsBuilderReducer', () => {
           addNested: false,
           exceptions: [getExceptionListItemSchemaMock()],
           exceptionsToDelete: [],
+          errorExists: 0,
         },
         {
           type: 'setDisableOr',
@@ -386,6 +394,7 @@ describe('exceptionsBuilderReducer', () => {
           addNested: false,
           exceptions: [getExceptionListItemSchemaMock()],
           exceptionsToDelete: [],
+          errorExists: 0,
         },
         {
           type: 'setDisableOr',
@@ -408,6 +417,7 @@ describe('exceptionsBuilderReducer', () => {
           addNested: true,
           exceptions: [getExceptionListItemSchemaMock()],
           exceptionsToDelete: [],
+          errorExists: 0,
         },
         {
           type: 'setAddNested',
@@ -428,6 +438,7 @@ describe('exceptionsBuilderReducer', () => {
           addNested: false,
           exceptions: [getExceptionListItemSchemaMock()],
           exceptionsToDelete: [],
+          errorExists: 0,
         },
         {
           type: 'setAddNested',
@@ -436,6 +447,71 @@ describe('exceptionsBuilderReducer', () => {
       );
 
       expect(addNested).toBeTruthy();
+    });
+  });
+
+  describe('#setErrorsExist', () => {
+    test('should increase "errorExists" by one if payload is "true"', () => {
+      const { errorExists } = reducer(
+        {
+          disableAnd: false,
+          disableNested: true,
+          disableOr: false,
+          andLogicIncluded: true,
+          addNested: true,
+          exceptions: [getExceptionListItemSchemaMock()],
+          exceptionsToDelete: [],
+          errorExists: 0,
+        },
+        {
+          type: 'setErrorsExist',
+          errorExists: true,
+        }
+      );
+
+      expect(errorExists).toEqual(1);
+    });
+
+    test('should decrease "errorExists" by one if payload is "false"', () => {
+      const { errorExists } = reducer(
+        {
+          disableAnd: false,
+          disableNested: false,
+          disableOr: false,
+          andLogicIncluded: true,
+          addNested: false,
+          exceptions: [getExceptionListItemSchemaMock()],
+          exceptionsToDelete: [],
+          errorExists: 1,
+        },
+        {
+          type: 'setErrorsExist',
+          errorExists: false,
+        }
+      );
+
+      expect(errorExists).toEqual(0);
+    });
+
+    test('should not decrease "errorExists" if decreasing would dip into negative numbers', () => {
+      const { errorExists } = reducer(
+        {
+          disableAnd: false,
+          disableNested: false,
+          disableOr: false,
+          andLogicIncluded: true,
+          addNested: false,
+          exceptions: [getExceptionListItemSchemaMock()],
+          exceptionsToDelete: [],
+          errorExists: 0,
+        },
+        {
+          type: 'setErrorsExist',
+          errorExists: false,
+        }
+      );
+
+      expect(errorExists).toEqual(0);
     });
   });
 });

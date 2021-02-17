@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { mount } from 'enzyme';
@@ -14,6 +15,7 @@ import { navTabs } from '../../../app/home/home_navigations';
 import { HostsTableType } from '../../../hosts/store/model';
 import { RouteSpyState } from '../../utils/route/types';
 import { SiemNavigationProps, SiemNavigationComponentProps } from './types';
+import { TimelineTabs } from '../../../../common/types/timeline';
 
 jest.mock('react-router-dom', () => {
   const original = jest.requireActual('react-router-dom');
@@ -80,6 +82,7 @@ describe('SIEM Navigation', () => {
       [CONSTANTS.filters]: [],
       [CONSTANTS.sourcerer]: {},
       [CONSTANTS.timeline]: {
+        activeTab: TimelineTabs.query,
         id: '',
         isOpen: false,
         graphEventId: '',
@@ -154,6 +157,7 @@ describe('SIEM Navigation', () => {
         flowTarget: undefined,
         savedQuery: undefined,
         timeline: {
+          activeTab: TimelineTabs.query,
           id: '',
           isOpen: false,
           graphEventId: '',
@@ -257,7 +261,7 @@ describe('SIEM Navigation', () => {
         sourcerer: {},
         state: undefined,
         tabName: 'authentications',
-        timeline: { id: '', isOpen: false, graphEventId: '' },
+        timeline: { id: '', isOpen: false, activeTab: TimelineTabs.query, graphEventId: '' },
         timerange: {
           global: {
             linkTo: ['timeline'],

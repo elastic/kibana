@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React from 'react';
@@ -25,6 +14,8 @@ import {
   EmbeddableFactoryDefinition,
   IContainer,
   EmbeddableFactory,
+  EmbeddableStart,
+  AttributeService,
 } from '../../../../src/plugins/embeddable/public';
 import {
   BookEmbeddable,
@@ -33,12 +24,18 @@ import {
   BookEmbeddableOutput,
 } from './book_embeddable';
 import { CreateEditBookComponent } from './create_edit_book_component';
-import { OverlayStart } from '../../../../src/core/public';
-import { DashboardStart, AttributeService } from '../../../../src/plugins/dashboard/public';
+import {
+  OverlayStart,
+  SavedObjectsClientContract,
+  SimpleSavedObject,
+} from '../../../../src/core/public';
+import { checkForDuplicateTitle, OnSaveProps } from '../../../../src/plugins/saved_objects/public';
 
 interface StartServices {
-  getAttributeService: DashboardStart['getAttributeService'];
+  getAttributeService: EmbeddableStart['getAttributeService'];
   openModal: OverlayStart['openModal'];
+  savedObjectsClient: SavedObjectsClientContract;
+  overlays: OverlayStart;
 }
 
 export type BookEmbeddableFactory = EmbeddableFactory<
@@ -117,11 +114,52 @@ export class BookEmbeddableFactoryDefinition
     });
   }
 
+  private async unwrapMethod(savedObjectId: string): Promise<BookSavedObjectAttributes> {
+    const { savedObjectsClient } = await this.getStartServices();
+    const savedObject: SimpleSavedObject<BookSavedObjectAttributes> = await savedObjectsClient.get<BookSavedObjectAttributes>(
+      this.type,
+      savedObjectId
+    );
+    return { ...savedObject.attributes };
+  }
+
+  private async saveMethod(attributes: BookSavedObjectAttributes, savedObjectId?: string) {
+    const { savedObjectsClient } = await this.getStartServices();
+    if (savedObjectId) {
+      return savedObjectsClient.update(this.type, savedObjectId, attributes);
+    }
+    return savedObjectsClient.create(this.type, attributes);
+  }
+
+  private async checkForDuplicateTitleMethod(props: OnSaveProps): Promise<true> {
+    const start = await this.getStartServices();
+    const { savedObjectsClient, overlays } = start;
+    return checkForDuplicateTitle(
+      {
+        title: props.newTitle,
+        copyOnSave: false,
+        lastSavedTitle: '',
+        getEsType: () => this.type,
+        getDisplayName: this.getDisplayName || (() => this.type),
+      },
+      props.isTitleDuplicateConfirmed,
+      props.onTitleDuplicate,
+      {
+        savedObjectsClient,
+        overlays,
+      }
+    );
+  }
+
   private async getAttributeService() {
     if (!this.attributeService) {
-      this.attributeService = await (await this.getStartServices()).getAttributeService<
-        BookSavedObjectAttributes
-      >(this.type);
+      this.attributeService = (
+        await this.getStartServices()
+      ).getAttributeService<BookSavedObjectAttributes>(this.type, {
+        saveMethod: this.saveMethod.bind(this),
+        unwrapMethod: this.unwrapMethod.bind(this),
+        checkForDuplicateTitle: this.checkForDuplicateTitleMethod.bind(this),
+      });
     }
     return this.attributeService!;
   }

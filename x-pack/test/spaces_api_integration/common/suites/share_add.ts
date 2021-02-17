@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -26,8 +27,6 @@ export interface ShareAddTestCase {
   id: string;
   namespaces: string[];
   failure?: 400 | 403 | 404;
-  fail400Param?: string;
-  fail403Param?: string;
 }
 
 const TYPE = 'sharedtype';
@@ -39,22 +38,16 @@ const getTestTitle = ({ id, namespaces }: ShareAddTestCase) =>
   `{id: ${id}, namespaces: [${namespaces.join(',')}]}`;
 
 export function shareAddTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) {
+  const expectForbidden = expectResponses.forbiddenTypes('share_to_space');
   const expectResponseBody = (testCase: ShareAddTestCase): ExpectResponseBody => async (
     response: Record<string, any>
   ) => {
-    const { id, failure, fail400Param, fail403Param } = testCase;
+    const { id, failure } = testCase;
     const object = response.body;
     if (failure === 403) {
-      await expectResponses.forbiddenTypes(fail403Param!)(TYPE)(response);
-    } else if (failure) {
-      let error: any;
-      if (failure === 400) {
-        error = SavedObjectsErrorHelpers.createBadRequestError(
-          `${id} already exists in the following namespace(s): ${fail400Param}`
-        );
-      } else if (failure === 404) {
-        error = SavedObjectsErrorHelpers.createGenericNotFoundError(TYPE, id);
-      }
+      await expectForbidden(TYPE)(response);
+    } else if (failure === 404) {
+      const error = SavedObjectsErrorHelpers.createGenericNotFoundError(TYPE, id);
       expect(object.error).to.eql(error.output.payload.error);
       expect(object.statusCode).to.eql(error.output.payload.statusCode);
     } else {
@@ -67,13 +60,12 @@ export function shareAddTestSuiteFactory(esArchiver: any, supertest: SuperTest<a
     forbidden: boolean,
     options?: {
       responseBodyOverride?: ExpectResponseBody;
-      fail403Param?: string;
     }
   ): ShareAddTestDefinition[] => {
     let cases = Array.isArray(testCases) ? testCases : [testCases];
     if (forbidden) {
       // override the expected result in each test case
-      cases = cases.map((x) => ({ ...x, failure: 403, fail403Param: options?.fail403Param }));
+      cases = cases.map((x) => ({ ...x, failure: 403 }));
     }
     return cases.map((x) => ({
       title: getTestTitle(x),

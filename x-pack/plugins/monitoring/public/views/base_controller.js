@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -13,6 +14,7 @@ import { Legacy } from '../legacy_shims';
 import { PromiseWithCancel } from '../../common/cancel_promise';
 import { SetupModeFeature } from '../../common/enums';
 import { updateSetupModeData, isSetupModeFeatureEnabled } from '../lib/setup_mode';
+import { AlertsContext } from '../alerts/context';
 import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
 
 /**
@@ -163,12 +165,12 @@ export class MonitoringViewBaseController {
       if (isSetupModeFeatureEnabled(SetupModeFeature.MetricbeatMigration)) {
         promises.push(updateSetupModeData());
       }
-      this.updateDataPromise = new PromiseWithCancel(Promise.all(promises));
+      this.updateDataPromise = new PromiseWithCancel(Promise.allSettled(promises));
       return this.updateDataPromise.promise().then(([pageData, alerts]) => {
         $scope.$apply(() => {
           this._isDataInitialized = true; // render will replace loading screen with the react component
-          $scope.pageData = this.data = pageData; // update the view's data with the fetch result
-          $scope.alerts = this.alerts = alerts;
+          $scope.pageData = this.data = pageData.value; // update the view's data with the fetch result
+          $scope.alerts = this.alerts = alerts && alerts.value ? alerts.value : {};
         });
       });
     };
@@ -239,18 +241,17 @@ export class MonitoringViewBaseController {
       console.warn(`"#${this.reactNodeId}" element has not been added to the DOM yet`);
       return;
     }
-    const services = {
-      usageCollection: Legacy.shims.usageCollection,
-    };
     const I18nContext = Legacy.shims.I18nContext;
     const wrappedComponent = (
-      <KibanaContextProvider services={services}>
+      <KibanaContextProvider services={Legacy.shims.kibanaServices}>
         <I18nContext>
-          {!this._isDataInitialized ? (
-            <PageLoading pageViewTitle={trackPageView ? this.telemetryPageViewTitle : null} />
-          ) : (
-            component
-          )}
+          <AlertsContext.Provider value={{ allAlerts: this.alerts }}>
+            {!this._isDataInitialized ? (
+              <PageLoading pageViewTitle={trackPageView ? this.telemetryPageViewTitle : null} />
+            ) : (
+              component
+            )}
+          </AlertsContext.Provider>
         </I18nContext>
       </KibanaContextProvider>
     );

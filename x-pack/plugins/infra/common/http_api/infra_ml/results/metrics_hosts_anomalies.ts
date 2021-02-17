@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import * as rt from 'io-ts';
 
 import { timeRangeRT, routeTimingMetadataRT } from '../../shared';
-import { anomalyTypeRT, paginationCursorRT, sortRT, paginationRT } from './common';
+import { anomalyTypeRT, paginationCursorRT, sortRT, paginationRT, metricRT } from './common';
 
 export const INFA_ML_GET_METRICS_HOSTS_ANOMALIES_PATH =
   '/api/infra/infra_ml/results/metrics_hosts_anomalies';
@@ -18,6 +19,7 @@ const metricsHostAnomalyCommonFieldsRT = rt.type({
   typical: rt.number,
   actual: rt.number,
   type: anomalyTypeRT,
+  influencers: rt.array(rt.string),
   duration: rt.number,
   startTime: rt.number,
   jobId: rt.string,
@@ -60,16 +62,16 @@ export const getMetricsHostsAnomaliesRequestPayloadRT = rt.type({
     rt.type({
       // the ID of the source configuration
       sourceId: rt.string,
+      anomalyThreshold: rt.number,
       // the time range to fetch the log entry anomalies from
       timeRange: timeRangeRT,
     }),
     rt.partial({
+      metric: metricRT,
       // Pagination properties
       pagination: paginationRT,
       // Sort properties
       sort: sortRT,
-      // // Dataset filters
-      // datasets: rt.array(rt.string),
     }),
   ]),
 });

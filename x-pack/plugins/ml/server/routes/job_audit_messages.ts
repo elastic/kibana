@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { wrapError } from '../client/error_wrapper';
@@ -15,7 +16,7 @@ import {
 /**
  * Routes for job audit message routes
  */
-export function jobAuditMessagesRoutes({ router, mlLicense }: RouteInitialization) {
+export function jobAuditMessagesRoutes({ router, routeGuard }: RouteInitialization) {
   /**
    * @apiGroup JobAuditMessages
    *
@@ -37,20 +38,22 @@ export function jobAuditMessagesRoutes({ router, mlLicense }: RouteInitializatio
         tags: ['access:ml:canGetJobs'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
-      try {
-        const { getJobAuditMessages } = jobAuditMessagesProvider(client);
-        const { jobId } = request.params;
-        const { from } = request.query;
-        const resp = await getJobAuditMessages(jobId, from);
+    routeGuard.fullLicenseAPIGuard(
+      async ({ client, mlClient, request, response, jobSavedObjectService }) => {
+        try {
+          const { getJobAuditMessages } = jobAuditMessagesProvider(client, mlClient);
+          const { jobId } = request.params;
+          const { from } = request.query;
+          const resp = await getJobAuditMessages(jobSavedObjectService, jobId, from);
 
-        return response.ok({
-          body: resp,
-        });
-      } catch (e) {
-        return response.customError(wrapError(e));
+          return response.ok({
+            body: resp,
+          });
+        } catch (e) {
+          return response.customError(wrapError(e));
+        }
       }
-    })
+    )
   );
 
   /**
@@ -72,18 +75,20 @@ export function jobAuditMessagesRoutes({ router, mlLicense }: RouteInitializatio
         tags: ['access:ml:canGetJobs'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
-      try {
-        const { getJobAuditMessages } = jobAuditMessagesProvider(client);
-        const { from } = request.query;
-        const resp = await getJobAuditMessages(undefined, from);
+    routeGuard.fullLicenseAPIGuard(
+      async ({ client, mlClient, request, response, jobSavedObjectService }) => {
+        try {
+          const { getJobAuditMessages } = jobAuditMessagesProvider(client, mlClient);
+          const { from } = request.query;
+          const resp = await getJobAuditMessages(jobSavedObjectService, undefined, from);
 
-        return response.ok({
-          body: resp,
-        });
-      } catch (e) {
-        return response.customError(wrapError(e));
+          return response.ok({
+            body: resp,
+          });
+        } catch (e) {
+          return response.customError(wrapError(e));
+        }
       }
-    })
+    )
   );
 }
