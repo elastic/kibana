@@ -7,8 +7,14 @@
 
 import React from 'react';
 
+import { useActions, useValues } from 'kea';
+
 import {
   EuiForm,
+  EuiFlexGroup,
+  EuiFormRow,
+  EuiFlexItem,
+  EuiFieldText,
   EuiPageBody,
   EuiPageHeader,
   EuiPageHeaderSection,
@@ -23,14 +29,22 @@ import { FlashMessages } from '../../../shared/flash_messages';
 import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
 
 import {
+  ALLOWED_CHARS_NOTE,
   META_ENGINE_CREATION_FORM_DOCUMENTATION_DESCRIPTION,
+  META_ENGINE_CREATION_FORM_ENGINE_NAME_LABEL,
+  META_ENGINE_CREATION_FORM_ENGINE_NAME_PLACEHOLDER,
   META_ENGINE_CREATION_FORM_META_ENGINE_DESCRIPTION,
   META_ENGINE_CREATION_FORM_SUBMIT_BUTTON_LABEL,
   META_ENGINE_CREATION_FORM_TITLE,
   META_ENGINE_CREATION_TITLE,
+  SANITIZED_NAME_NOTE,
 } from './constants';
+import { MetaEngineCreationLogic } from './meta_engine_creation_logic';
 
 export const MetaEngineCreation: React.FC = () => {
+  const { setRawName } = useActions(MetaEngineCreationLogic);
+  const { rawName, name } = useValues(MetaEngineCreationLogic);
+
   return (
     <div data-test-subj="MetaEngineCreation">
       <SetPageChrome trail={[META_ENGINE_CREATION_TITLE]} />
@@ -56,6 +70,36 @@ export const MetaEngineCreation: React.FC = () => {
               <EuiTitle>
                 <EuiText>{META_ENGINE_CREATION_FORM_TITLE}</EuiText>
               </EuiTitle>
+              <EuiSpacer />
+              <EuiFlexGroup>
+                <EuiFlexItem>
+                  <EuiFormRow
+                    data-test-subj="MetaEngineCreationNameFormRow"
+                    label={META_ENGINE_CREATION_FORM_ENGINE_NAME_LABEL}
+                    helpText={
+                      name.length > 0 && rawName !== name ? (
+                        <>
+                          {SANITIZED_NAME_NOTE} <strong>{name}</strong>
+                        </>
+                      ) : (
+                        ALLOWED_CHARS_NOTE
+                      )
+                    }
+                    fullWidth
+                  >
+                    <EuiFieldText
+                      name="engine-name"
+                      value={rawName}
+                      onChange={(event) => setRawName(event.currentTarget.value)}
+                      autoComplete="off"
+                      fullWidth
+                      data-test-subj="MetaEngineCreationNameInput"
+                      placeholder={META_ENGINE_CREATION_FORM_ENGINE_NAME_PLACEHOLDER}
+                      autoFocus
+                    />
+                  </EuiFormRow>
+                </EuiFlexItem>
+              </EuiFlexGroup>
               <EuiSpacer />
               <EuiButton
                 disabled

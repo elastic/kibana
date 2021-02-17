@@ -64,3 +64,31 @@ export const META_ENGINE_CREATION_FORM_DOCUMENTATION_DESCRIPTION = (
     }}
   />
 );
+
+export const META_ENGINE_CREATION_FORM_ENGINE_NAME_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.appSearch.metaEngineCreation.form.engineName.label',
+  {
+    defaultMessage: 'Engine name',
+  }
+);
+
+export const ALLOWED_CHARS_NOTE = i18n.translate(
+  'xpack.enterpriseSearch.appSearch.metaEngineCreation.form.engineName.allowedCharactersHelpText',
+  {
+    defaultMessage: 'Meta engine names can only contain lowercase letters, numbers, and hyphens',
+  }
+);
+
+export const SANITIZED_NAME_NOTE = i18n.translate(
+  'xpack.enterpriseSearch.appSearch.metaEngineCreation.form.engineName.sanitizedNameHelpText',
+  {
+    defaultMessage: 'Your meta engine will be named',
+  }
+);
+
+export const META_ENGINE_CREATION_FORM_ENGINE_NAME_PLACEHOLDER = i18n.translate(
+  'xpack.enterpriseSearch.appSearch.metaEngineCreation.form.engineName.placeholder',
+  {
+    defaultMessage: 'i.e., my-search-engine',
+  }
+);
