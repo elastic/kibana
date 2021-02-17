@@ -16,6 +16,11 @@ import { useUrlParams } from '../../../context/url_params_context/use_url_params
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { TimeseriesChart } from '../../shared/charts/timeseries_chart';
 
+const INITIAL_STATE = {
+  currentPeriod: [],
+  previousPeriod: [],
+};
+
 export function ServiceOverviewThroughputChart({
   height,
 }: {
@@ -27,7 +32,7 @@ export function ServiceOverviewThroughputChart({
   const { transactionType } = useApmServiceContext();
   const { start, end } = urlParams;
 
-  const { data, status } = useFetcher(
+  const { data = INITIAL_STATE, status } = useFetcher(
     (callApmApi) => {
       if (serviceName && transactionType && start && end) {
         return callApmApi({
@@ -65,7 +70,7 @@ export function ServiceOverviewThroughputChart({
         fetchStatus={status}
         timeseries={[
           {
-            data: data?.throughput ?? [],
+            data: data.currentPeriod,
             type: 'linemark',
             color: theme.eui.euiColorVis0,
             title: i18n.translate(

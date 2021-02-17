@@ -7,13 +7,7 @@
 
 import React, { memo } from 'react';
 import styled from 'styled-components';
-import {
-  EuiModal,
-  EuiModalBody,
-  EuiModalHeader,
-  EuiModalHeaderTitle,
-  EuiOverlayMask,
-} from '@elastic/eui';
+import { EuiModal, EuiModalBody, EuiModalHeader, EuiModalHeaderTitle } from '@elastic/eui';
 
 import { FormContext } from '../create/form_context';
 import { CreateCaseForm } from '../create/form';
@@ -40,21 +34,19 @@ const CreateModalComponent: React.FC<CreateCaseModalProps> = ({
   onSuccess,
 }) => {
   return isModalOpen ? (
-    <EuiOverlayMask data-test-subj="all-cases-modal">
-      <EuiModal onClose={onCloseCaseModal}>
-        <EuiModalHeader>
-          <EuiModalHeaderTitle>{i18n.CREATE_TITLE}</EuiModalHeaderTitle>
-        </EuiModalHeader>
-        <EuiModalBody>
-          <FormContext onSuccess={onSuccess}>
-            <CreateCaseForm withSteps={false} />
-            <Container>
-              <SubmitCaseButton />
-            </Container>
-          </FormContext>
-        </EuiModalBody>
-      </EuiModal>
-    </EuiOverlayMask>
+    <EuiModal onClose={onCloseCaseModal} data-test-subj="all-cases-modal">
+      <EuiModalHeader>
+        <EuiModalHeaderTitle>{i18n.CREATE_TITLE}</EuiModalHeaderTitle>
+      </EuiModalHeader>
+      <EuiModalBody>
+        <FormContext onSuccess={onSuccess}>
+          <CreateCaseForm withSteps={false} />
+          <Container>
+            <SubmitCaseButton />
+          </Container>
+        </FormContext>
+      </EuiModalBody>
+    </EuiModal>
   ) : null;
 };
 

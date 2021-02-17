@@ -99,7 +99,7 @@ export const goToQueryTab = () => {
 export const addNotesToTimeline = (notes: string) => {
   goToNotesTab();
   cy.get(NOTES_TEXT_AREA).type(notes);
-  cy.get(ADD_NOTE_BUTTON).click();
+  cy.get(ADD_NOTE_BUTTON).click({ force: true });
   cy.get(QUERY_TAB_BUTTON).click();
 };
 

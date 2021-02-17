@@ -51,6 +51,7 @@ export const registerMetricAnomalyAlertType = (
           schema.string({ validate: validateIsStringElasticsearchJSONFilter })
         ),
         sourceId: schema.string(),
+        spaceId: schema.string(),
       },
       { unknowns: 'allow' }
     ),

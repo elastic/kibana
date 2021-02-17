@@ -79,6 +79,11 @@ describe('searchDsl/getSortParams', () => {
           ],
         });
       });
+      it('appends tiebreaker when PIT is provided', () => {
+        expect(getSortingParams(MAPPINGS, 'saved', 'title', undefined, { id: 'abc' }).sort).toEqual(
+          expect.arrayContaining([{ _shard_doc: 'asc' }])
+        );
+      });
     });
     describe('sortField is simple root property with multiple types', () => {
       it('returns correct params', () => {
@@ -92,6 +97,11 @@ describe('searchDsl/getSortParams', () => {
             },
           ],
         });
+      });
+      it('appends tiebreaker when PIT is provided', () => {
+        expect(
+          getSortingParams(MAPPINGS, ['saved', 'pending'], 'type', undefined, { id: 'abc' }).sort
+        ).toEqual(expect.arrayContaining([{ _shard_doc: 'asc' }]));
       });
     });
     describe('sortField is simple non-root property with multiple types', () => {
@@ -114,6 +124,11 @@ describe('searchDsl/getSortParams', () => {
           ],
         });
       });
+      it('appends tiebreaker when PIT is provided', () => {
+        expect(
+          getSortingParams(MAPPINGS, 'saved', 'title.raw', undefined, { id: 'abc' }).sort
+        ).toEqual(expect.arrayContaining([{ _shard_doc: 'asc' }]));
+      });
     });
     describe('sortField is multi-field with single type as array', () => {
       it('returns correct params', () => {
@@ -128,6 +143,11 @@ describe('searchDsl/getSortParams', () => {
           ],
         });
       });
+      it('appends tiebreaker when PIT is provided', () => {
+        expect(
+          getSortingParams(MAPPINGS, ['saved'], 'title.raw', undefined, { id: 'abc' }).sort
+        ).toEqual(expect.arrayContaining([{ _shard_doc: 'asc' }]));
+      });
     });
     describe('sortField is root multi-field with multiple types', () => {
       it('returns correct params', () => {
@@ -141,6 +161,12 @@ describe('searchDsl/getSortParams', () => {
             },
           ],
         });
+      });
+      it('appends tiebreaker when PIT is provided', () => {
+        expect(
+          getSortingParams(MAPPINGS, ['saved', 'pending'], 'type.raw', undefined, { id: 'abc' })
+            .sort
+        ).toEqual(expect.arrayContaining([{ _shard_doc: 'asc' }]));
       });
     });
     describe('sortField is not-root multi-field with multiple types', () => {
