@@ -11,15 +11,15 @@
         "delimited",
         "semi_structured_text"
       ],
-      "has_header_row": "__flag__",
+      "has_header_row": false,
       "column_names": [],
       "delimiter": "",
       "quote": "",
-      "should_trim_fields": "__flag__",
+      "should_trim_fields": false,
       "grok_pattern": "",
       "timestamp_field": "",
       "timestamp_format": "",
-      "explain": "__flag__"
+      "explain": false
     }
   }
 }
