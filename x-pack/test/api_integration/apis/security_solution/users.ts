@@ -22,7 +22,9 @@ const IP = '0.0.0.0';
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
-  describe('Users', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/90135
+  // Failing: See https://github.com/elastic/kibana/issues/90136
+  describe.skip('Users', () => {
     describe('With auditbeat', () => {
       before(() => esArchiver.load('auditbeat/default'));
       after(() => esArchiver.unload('auditbeat/default'));

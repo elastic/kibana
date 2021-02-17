@@ -29,7 +29,7 @@ export async function unenrollForAgentPolicyId(
       hasMore = false;
     }
     for (const agent of agents) {
-      await unenrollAgent(soClient, agent.id);
+      await unenrollAgent(soClient, esClient, agent.id);
     }
   }
 }

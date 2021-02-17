@@ -16,7 +16,6 @@ import {
   EuiSelect,
   EuiForm,
   EuiFormRow,
-  EuiOverlayMask,
   EuiConfirmModal,
   EuiModal,
   EuiModalBody,
@@ -246,63 +245,59 @@ export class AddLifecyclePolicyConfirmModal extends Component<Props, State> {
     );
     if (!policies.length) {
       return (
-        <EuiOverlayMask>
-          <EuiModal onClose={closeModal}>
-            <EuiModalHeader>
-              <EuiModalHeaderTitle>{title}</EuiModalHeaderTitle>
-            </EuiModalHeader>
+        <EuiModal onClose={closeModal}>
+          <EuiModalHeader>
+            <EuiModalHeaderTitle>{title}</EuiModalHeaderTitle>
+          </EuiModalHeader>
 
-            <EuiModalBody>
-              <EuiCallOut
-                style={{ maxWidth: 400 }}
-                title={
+          <EuiModalBody>
+            <EuiCallOut
+              style={{ maxWidth: 400 }}
+              title={
+                <FormattedMessage
+                  id="xpack.indexLifecycleMgmt.indexManagementTable.addLifecyclePolicyConfirmModal.noPoliciesWarningTitle"
+                  defaultMessage="No index lifecycle policies defined"
+                />
+              }
+              color="warning"
+            >
+              <p>
+                <EuiLink
+                  href={getUrlForApp('management', {
+                    path: `data/index_lifecycle_management/policies/edit`,
+                  })}
+                >
                   <FormattedMessage
-                    id="xpack.indexLifecycleMgmt.indexManagementTable.addLifecyclePolicyConfirmModal.noPoliciesWarningTitle"
-                    defaultMessage="No index lifecycle policies defined"
+                    id="xpack.indexLifecycleMgmt.indexManagementTable.addLifecyclePolicyConfirmModal.defineLifecyclePolicyLinkText"
+                    defaultMessage="Define lifecycle policy"
                   />
-                }
-                color="warning"
-              >
-                <p>
-                  <EuiLink
-                    href={getUrlForApp('management', {
-                      path: `data/index_lifecycle_management/policies/edit`,
-                    })}
-                  >
-                    <FormattedMessage
-                      id="xpack.indexLifecycleMgmt.indexManagementTable.addLifecyclePolicyConfirmModal.defineLifecyclePolicyLinkText"
-                      defaultMessage="Define lifecycle policy"
-                    />
-                  </EuiLink>
-                </p>
-              </EuiCallOut>
-            </EuiModalBody>
-          </EuiModal>
-        </EuiOverlayMask>
+                </EuiLink>
+              </p>
+            </EuiCallOut>
+          </EuiModalBody>
+        </EuiModal>
       );
     }
     return (
-      <EuiOverlayMask>
-        <EuiConfirmModal
-          title={title}
-          onCancel={closeModal}
-          onConfirm={this.addPolicy}
-          cancelButtonText={
-            <FormattedMessage
-              id="xpack.indexLifecycleMgmt.indexManagementTable.addLifecyclePolicyConfirmModal.cancelButtonText"
-              defaultMessage="Cancel"
-            />
-          }
-          confirmButtonText={
-            <FormattedMessage
-              id="xpack.indexLifecycleMgmt.indexManagementTable.addLifecyclePolicyConfirmModal.addPolicyButtonText"
-              defaultMessage="Add policy"
-            />
-          }
-        >
-          {this.renderForm()}
-        </EuiConfirmModal>
-      </EuiOverlayMask>
+      <EuiConfirmModal
+        title={title}
+        onCancel={closeModal}
+        onConfirm={this.addPolicy}
+        cancelButtonText={
+          <FormattedMessage
+            id="xpack.indexLifecycleMgmt.indexManagementTable.addLifecyclePolicyConfirmModal.cancelButtonText"
+            defaultMessage="Cancel"
+          />
+        }
+        confirmButtonText={
+          <FormattedMessage
+            id="xpack.indexLifecycleMgmt.indexManagementTable.addLifecyclePolicyConfirmModal.addPolicyButtonText"
+            defaultMessage="Add policy"
+          />
+        }
+      >
+        {this.renderForm()}
+      </EuiConfirmModal>
     );
   }
 }

@@ -440,7 +440,7 @@ export default ({ getService }: FtrProviderContext) => {
         },
         {
           ...BAR_TYPE,
-          namespaceType: 'multiple',
+          namespaceType: 'multiple-isolated',
           convertToMultiNamespaceTypeVersion: '2.0.0',
         },
         BAZ_TYPE, // must be registered for reference transforms to be applied to objects of this type

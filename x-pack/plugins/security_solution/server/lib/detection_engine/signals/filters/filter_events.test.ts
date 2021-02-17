@@ -40,7 +40,7 @@ describe('filterEvents', () => {
       {
         field: 'source.ip',
         operator: 'included',
-        matchedSet: new Set([JSON.stringify('1.1.1.1')]),
+        matchedSet: new Set([JSON.stringify(['1.1.1.1'])]),
       },
     ];
     const field = filterEvents({
@@ -56,7 +56,7 @@ describe('filterEvents', () => {
       {
         field: 'source.ip',
         operator: 'excluded',
-        matchedSet: new Set([JSON.stringify('1.1.1.1')]),
+        matchedSet: new Set([JSON.stringify(['1.1.1.1'])]),
       },
     ];
     const field = filterEvents({
@@ -72,7 +72,7 @@ describe('filterEvents', () => {
       {
         field: 'madeup.nonexistent', // field does not exist
         operator: 'included',
-        matchedSet: new Set([JSON.stringify('1.1.1.1')]),
+        matchedSet: new Set([JSON.stringify(['1.1.1.1'])]),
       },
     ];
     const field = filterEvents({
@@ -88,12 +88,12 @@ describe('filterEvents', () => {
       {
         field: 'source.ip',
         operator: 'included',
-        matchedSet: new Set([JSON.stringify('1.1.1.1')]),
+        matchedSet: new Set([JSON.stringify(['1.1.1.1'])]),
       },
       {
         field: 'source.ip',
         operator: 'excluded',
-        matchedSet: new Set([JSON.stringify('1.1.1.1')]),
+        matchedSet: new Set([JSON.stringify(['1.1.1.1'])]),
       },
     ];
 

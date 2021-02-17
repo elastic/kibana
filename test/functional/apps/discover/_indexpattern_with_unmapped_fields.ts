@@ -22,8 +22,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     before(async () => {
       await esArchiver.loadIfNeeded('unmapped_fields');
-      await kibanaServer.uiSettings.replace({ defaultIndex: 'test-index-unmapped-fields' });
-      await kibanaServer.uiSettings.update({
+      await kibanaServer.uiSettings.replace({
+        defaultIndex: 'test-index-unmapped-fields',
         'discover:searchFieldsFromSource': false,
       });
       log.debug('discover');

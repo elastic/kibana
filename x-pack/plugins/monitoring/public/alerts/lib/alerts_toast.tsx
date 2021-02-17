@@ -19,7 +19,7 @@ export interface EnableAlertResponse {
 }
 
 const showTlsAndEncryptionError = () => {
-  const { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } = Legacy.shims.docLinks;
+  const settingsUrl = Legacy.shims.docLinks.links.alerting.generalSettings;
 
   Legacy.shims.toastNotifications.addWarning({
     title: toMountPoint(
@@ -36,11 +36,7 @@ const showTlsAndEncryptionError = () => {
           })}
         </p>
         <EuiSpacer size="xs" />
-        <EuiLink
-          href={`${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/alert-action-settings-kb.html#general-alert-action-settings`}
-          external
-          target="_blank"
-        >
+        <EuiLink href={settingsUrl} external target="_blank">
           {i18n.translate('xpack.monitoring.healthCheck.encryptionErrorAction', {
             defaultMessage: 'Learn how.',
           })}
@@ -51,7 +47,7 @@ const showTlsAndEncryptionError = () => {
 };
 
 const showUnableToDisableWatcherClusterAlertsError = () => {
-  const { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } = Legacy.shims.docLinks;
+  const settingsUrl = Legacy.shims.docLinks.links.alerting.generalSettings;
 
   Legacy.shims.toastNotifications.addWarning({
     title: toMountPoint(
@@ -68,11 +64,7 @@ const showUnableToDisableWatcherClusterAlertsError = () => {
           })}
         </p>
         <EuiSpacer size="xs" />
-        <EuiLink
-          href={`${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/alert-action-settings-kb.html#general-alert-action-settings`}
-          external
-          target="_blank"
-        >
+        <EuiLink href={settingsUrl} external target="_blank">
           {i18n.translate('xpack.monitoring.healthCheck.unableToDisableWatches.action', {
             defaultMessage: 'Learn more.',
           })}

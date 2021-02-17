@@ -7,9 +7,11 @@
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
-export default function ({ loadTestFile, getService }: FtrProviderContext) {
+export default function ({ loadTestFile, getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const esArchiver = getService('esArchiver');
+  const PageObjects = getPageObjects(['common']);
+  const searchSessions = getService('searchSessions');
 
   describe('async search', function () {
     this.tags('ciGroup3');
@@ -17,6 +19,11 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
     before(async () => {
       await esArchiver.loadIfNeeded('logstash_functional');
       await kibanaServer.uiSettings.replace({ defaultIndex: 'logstash-*' });
+      await PageObjects.common.navigateToApp('discover');
+    });
+
+    beforeEach(async () => {
+      await searchSessions.markTourDone();
     });
 
     loadTestFile(require.resolve('./async_search'));

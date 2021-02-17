@@ -59,6 +59,7 @@ export const sampleRuleAlertParams = (
   threatQuery: undefined,
   threatMapping: undefined,
   threatIndex: undefined,
+  threatIndicatorPath: undefined,
   threatLanguage: undefined,
   timelineId: undefined,
   timelineTitle: undefined,
@@ -166,6 +167,12 @@ export const sampleDocWithSortId = (
       ip: destIp ?? '127.0.0.1',
     },
   },
+  fields: {
+    someKey: ['someValue'],
+    '@timestamp': ['2020-04-20T21:27:45+0000'],
+    'source.ip': ip ? (Array.isArray(ip) ? ip : [ip]) : ['127.0.0.1'],
+    'destination.ip': destIp ? (Array.isArray(destIp) ? destIp : [destIp]) : ['127.0.0.1'],
+  },
   sort: ['1234567891111'],
 });
 
@@ -184,6 +191,11 @@ export const sampleDocNoSortId = (
     source: {
       ip: ip ?? '127.0.0.1',
     },
+  },
+  fields: {
+    someKey: ['someValue'],
+    '@timestamp': ['2020-04-20T21:27:45+0000'],
+    'source.ip': [ip ?? '127.0.0.1'],
   },
   sort: [],
 });

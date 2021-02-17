@@ -54,14 +54,14 @@ export interface VegaPluginStartDependencies {
 }
 
 /** @internal */
-export class VegaPlugin implements Plugin<Promise<void>, void> {
+export class VegaPlugin implements Plugin<void, void> {
   initializerContext: PluginInitializerContext<ConfigSchema>;
 
   constructor(initializerContext: PluginInitializerContext<ConfigSchema>) {
     this.initializerContext = initializerContext;
   }
 
-  public async setup(
+  public setup(
     core: CoreSetup,
     { inspector, data, expressions, visualizations, mapsLegacy }: VegaPluginSetupDependencies
   ) {

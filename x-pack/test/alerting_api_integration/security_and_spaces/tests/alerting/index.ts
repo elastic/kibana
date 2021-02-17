@@ -50,6 +50,7 @@ export default function alertingTests({ loadTestFile, getService }: FtrProviderC
       loadTestFile(require.resolve('./update_api_key'));
       loadTestFile(require.resolve('./alerts'));
       loadTestFile(require.resolve('./event_log'));
+      loadTestFile(require.resolve('./mustache_templates'));
     });
   });
 }

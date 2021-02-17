@@ -25,10 +25,7 @@ export type {
   PieLayerState,
   SharedPieLayerState,
 } from './pie_visualization/types';
-export type {
-  DatatableVisualizationState,
-  DatatableLayerState,
-} from './datatable_visualization/visualization';
+export type { DatatableVisualizationState } from './datatable_visualization/visualization';
 export type { MetricState } from './metric_visualization/types';
 export type {
   IndexPatternPersistedState,

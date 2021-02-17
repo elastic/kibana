@@ -7,6 +7,7 @@
  */
 
 import { initVegaLayer } from './vega_layer';
+import type { View } from 'vega';
 
 type InitVegaLayerParams = Parameters<typeof initVegaLayer>[0];
 
@@ -32,9 +33,9 @@ describe('vega_map_view/tms_raster_layer', () => {
       addLayer: jest.fn(),
     } as unknown) as MapType;
     context = {
-      vegaView: {
+      vegaView: ({
         initialize: jest.fn(),
-      },
+      } as unknown) as View,
       updateVegaView: jest.fn(),
     };
   });

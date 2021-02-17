@@ -19,19 +19,17 @@ import type {
 import { getSortingCriteria } from './sorting';
 
 import { DatatableComponent } from './components/table_basic';
+import { ColumnState } from './visualization';
 
 import type { FormatFactory, ILensInterpreterRenderHandlers, LensMultiTable } from '../types';
-import type {
-  DatatableRender,
-  DatatableColumns,
-  DatatableColumnWidth,
-  DatatableColumnWidthResult,
-} from './components/types';
+import type { DatatableRender } from './components/types';
 
 interface Args {
   title: string;
   description?: string;
-  columns: DatatableColumns & { type: 'lens_datatable_columns' };
+  columns: Array<ColumnState & { type: 'lens_datatable_column' }>;
+  sortingColumnId: string | undefined;
+  sortingDirection: 'asc' | 'desc' | 'none';
 }
 
 export interface DatatableProps {
@@ -66,7 +64,16 @@ export const getDatatable = ({
       help: '',
     },
     columns: {
-      types: ['lens_datatable_columns'],
+      types: ['lens_datatable_column'],
+      help: '',
+      multi: true,
+    },
+    sortingColumnId: {
+      types: ['string'],
+      help: '',
+    },
+    sortingDirection: {
+      types: ['string'],
       help: '',
     },
   },
@@ -79,7 +86,7 @@ export const getDatatable = ({
     firstTable.columns.forEach((column) => {
       formatters[column.id] = formatFactory(column.meta?.params);
     });
-    const { sortBy, sortDirection } = args.columns;
+    const { sortingColumnId: sortBy, sortingDirection: sortDirection } = args;
 
     const columnsReverseLookup = firstTable.columns.reduce<
       Record<string, { name: string; index: number; meta?: DatatableColumnMeta }>
@@ -116,65 +123,27 @@ export const getDatatable = ({
   },
 });
 
-type DatatableColumnsResult = DatatableColumns & { type: 'lens_datatable_columns' };
+type DatatableColumnResult = ColumnState & { type: 'lens_datatable_column' };
 
-export const datatableColumns: ExpressionFunctionDefinition<
-  'lens_datatable_columns',
+export const datatableColumn: ExpressionFunctionDefinition<
+  'lens_datatable_column',
   null,
-  DatatableColumns,
-  DatatableColumnsResult
+  ColumnState,
+  DatatableColumnResult
 > = {
-  name: 'lens_datatable_columns',
+  name: 'lens_datatable_column',
   aliases: [],
-  type: 'lens_datatable_columns',
+  type: 'lens_datatable_column',
   help: '',
   inputTypes: ['null'],
   args: {
-    sortBy: { types: ['string'], help: '' },
-    sortDirection: { types: ['string'], help: '' },
-    columnIds: {
-      types: ['string'],
-      multi: true,
-      help: '',
-    },
-    columnWidth: {
-      types: ['lens_datatable_column_width'],
-      multi: true,
-      help: '',
-    },
+    columnId: { types: ['string'], help: '' },
+    hidden: { types: ['boolean'], help: '' },
+    width: { types: ['number'], help: '' },
   },
-  fn: function fn(input: unknown, args: DatatableColumns) {
+  fn: function fn(input: unknown, args: ColumnState) {
     return {
-      type: 'lens_datatable_columns',
-      ...args,
-    };
-  },
-};
-
-export const datatableColumnWidth: ExpressionFunctionDefinition<
-  'lens_datatable_column_width',
-  null,
-  DatatableColumnWidth,
-  DatatableColumnWidthResult
-> = {
-  name: 'lens_datatable_column_width',
-  aliases: [],
-  type: 'lens_datatable_column_width',
-  help: '',
-  inputTypes: ['null'],
-  args: {
-    columnId: {
-      types: ['string'],
-      help: '',
-    },
-    width: {
-      types: ['number'],
-      help: '',
-    },
-  },
-  fn: function fn(input: unknown, args: DatatableColumnWidth) {
-    return {
-      type: 'lens_datatable_column_width',
+      type: 'lens_datatable_column',
       ...args,
     };
   },
@@ -213,7 +182,7 @@ export const getDatatableRenderer = (dependencies: {
                 data: {
                   rowIndex,
                   table,
-                  columns: config.args.columns.columnIds,
+                  columns: config.args.columns.map((column) => column.columnId),
                 },
               });
 

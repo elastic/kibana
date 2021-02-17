@@ -28,11 +28,14 @@ storiesOf('components/SearchSessionIndicator', module).add('default', () => (
       <SearchSessionIndicator state={SearchSessionState.Restored} />
     </div>
     <div>
+      <SearchSessionIndicator state={SearchSessionState.Canceled} />
+    </div>
+    <div>
       <SearchSessionIndicator
         state={SearchSessionState.Completed}
-        disabled={true}
-        disabledReasonText={
-          'Send to background capability is unavailable when auto-refresh is enabled'
+        saveDisabled={true}
+        saveDisabledReasonText={
+          'Search results have expired and it is no longer possible to save this search session'
         }
       />
     </div>

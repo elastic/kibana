@@ -36,7 +36,7 @@ export const AddSourceHeader: React.FC<AddSourceHeaderProps> = ({
         <EuiFlexItem grow={false}>
           <SourceIcon
             serviceType={serviceType}
-            fullBleed={true}
+            fullBleed
             name={name}
             className="adding-a-source__icon"
           />

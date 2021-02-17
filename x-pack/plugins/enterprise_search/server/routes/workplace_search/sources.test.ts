@@ -154,7 +154,6 @@ describe('sources routes', () => {
       mockRouter = new MockRouter({
         method: 'post',
         path: '/api/workplace_search/account/create_source',
-        payload: 'body',
       });
 
       registerAccountCreateSourceRoute({
@@ -194,7 +193,6 @@ describe('sources routes', () => {
       mockRouter = new MockRouter({
         method: 'post',
         path: '/api/workplace_search/account/sources/{id}/documents',
-        payload: 'body',
       });
 
       registerAccountSourceDocumentsRoute({
@@ -281,7 +279,6 @@ describe('sources routes', () => {
       mockRouter = new MockRouter({
         method: 'patch',
         path: '/api/workplace_search/account/sources/{id}/settings',
-        payload: 'body',
       });
 
       registerAccountSourceSettingsRoute({
@@ -364,7 +361,6 @@ describe('sources routes', () => {
       mockRouter = new MockRouter({
         method: 'put',
         path: '/api/workplace_search/account/sources/{id}/searchable',
-        payload: 'body',
       });
 
       registerAccountSourceSearchableRoute({
@@ -422,7 +418,6 @@ describe('sources routes', () => {
       mockRouter = new MockRouter({
         method: 'post',
         path: '/api/workplace_search/account/sources/{id}/display_settings/config',
-        payload: 'body',
       });
 
       registerAccountSourceDisplaySettingsConfig({
@@ -489,7 +484,6 @@ describe('sources routes', () => {
       mockRouter = new MockRouter({
         method: 'post',
         path: '/api/workplace_search/account/sources/{id}/schemas',
-        payload: 'body',
       });
 
       registerAccountSourceSchemasRoute({
@@ -667,7 +661,6 @@ describe('sources routes', () => {
       mockRouter = new MockRouter({
         method: 'post',
         path: '/api/workplace_search/org/create_source',
-        payload: 'body',
       });
 
       registerOrgCreateSourceRoute({
@@ -707,7 +700,6 @@ describe('sources routes', () => {
       mockRouter = new MockRouter({
         method: 'post',
         path: '/api/workplace_search/org/sources/{id}/documents',
-        payload: 'body',
       });
 
       registerOrgSourceDocumentsRoute({
@@ -794,7 +786,6 @@ describe('sources routes', () => {
       mockRouter = new MockRouter({
         method: 'patch',
         path: '/api/workplace_search/org/sources/{id}/settings',
-        payload: 'body',
       });
 
       registerOrgSourceSettingsRoute({
@@ -877,7 +868,6 @@ describe('sources routes', () => {
       mockRouter = new MockRouter({
         method: 'put',
         path: '/api/workplace_search/org/sources/{id}/searchable',
-        payload: 'body',
       });
 
       registerOrgSourceSearchableRoute({
@@ -935,7 +925,6 @@ describe('sources routes', () => {
       mockRouter = new MockRouter({
         method: 'post',
         path: '/api/workplace_search/org/sources/{id}/display_settings/config',
-        payload: 'body',
       });
 
       registerOrgSourceDisplaySettingsConfig({
@@ -1002,7 +991,6 @@ describe('sources routes', () => {
       mockRouter = new MockRouter({
         method: 'post',
         path: '/api/workplace_search/org/sources/{id}/schemas',
-        payload: 'body',
       });
 
       registerOrgSourceSchemasRoute({
@@ -1102,7 +1090,6 @@ describe('sources routes', () => {
       mockRouter = new MockRouter({
         method: 'post',
         path: '/api/workplace_search/org/settings/connectors',
-        payload: 'body',
       });
 
       registerOrgSourceOauthConfigurationsRoute({
@@ -1133,7 +1120,6 @@ describe('sources routes', () => {
       mockRouter = new MockRouter({
         method: 'put',
         path: '/api/workplace_search/org/settings/connectors',
-        payload: 'body',
       });
 
       registerOrgSourceOauthConfigurationsRoute({
@@ -1187,7 +1173,6 @@ describe('sources routes', () => {
       mockRouter = new MockRouter({
         method: 'post',
         path: '/api/workplace_search/org/settings/connectors/{serviceType}',
-        payload: 'body',
       });
 
       registerOrgSourceOauthConfigurationRoute({
@@ -1218,7 +1203,6 @@ describe('sources routes', () => {
       mockRouter = new MockRouter({
         method: 'put',
         path: '/api/workplace_search/org/settings/connectors/{serviceType}',
-        payload: 'body',
       });
 
       registerOrgSourceOauthConfigurationRoute({
@@ -1272,7 +1256,6 @@ describe('sources routes', () => {
       mockRouter = new MockRouter({
         method: 'get',
         path: '/api/workplace_search/sources/create',
-        payload: 'query',
       });
 
       registerOauthConnectorParamsRoute({

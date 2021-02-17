@@ -10,16 +10,17 @@ import React, { Fragment } from 'react';
 import { EuiSpacer, EuiCodeBlock, EuiLink, EuiCallOut, EuiText } from '@elastic/eui';
 import { Monospace } from '../components/monospace';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { UNDETECTED_BEAT_TYPE, DEFAULT_BEAT_FOR_URLS } from './common_beats_instructions';
+import { UNDETECTED_BEAT_TYPE } from './common_beats_instructions';
 import { Legacy } from '../../../../legacy_shims';
 import { getMigrationStatusStep, getSecurityStep } from '../common_instructions';
 
 export function getBeatsInstructionsForEnablingMetricbeat(product, _meta, { esMonitoringUrl }) {
-  const { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } = Legacy.shims.docLinks;
+  const metricbeatConfigUrl = Legacy.shims.docLinks.links.metricbeat.configure;
+  const metricbeatInstallUrl = Legacy.shims.docLinks.links.metricbeat.install;
+  const metricbeatStartUrl = Legacy.shims.docLinks.links.metricbeat.start;
+  const httpEndpointUrl = Legacy.shims.docLinks.links.metricbeat.httpEndpoint;
   const beatType = product.beatType;
-  const securitySetup = getSecurityStep(
-    `${ELASTIC_WEBSITE_URL}guide/en/beats/metricbeat/${DOC_LINK_VERSION}/configuring-howto-metricbeat.html`
-  );
+  const securitySetup = getSecurityStep(metricbeatConfigUrl);
 
   const installMetricbeatStep = {
     title: i18n.translate(
@@ -34,10 +35,7 @@ export function getBeatsInstructionsForEnablingMetricbeat(product, _meta, { esMo
     children: (
       <EuiText>
         <p>
-          <EuiLink
-            href={`${ELASTIC_WEBSITE_URL}guide/en/beats/metricbeat/${DOC_LINK_VERSION}/metricbeat-installation-configuration.html`}
-            target="_blank"
-          >
+          <EuiLink href={metricbeatInstallUrl} target="_blank">
             <FormattedMessage
               id="xpack.monitoring.metricbeatMigration.beatsInstructions.installMetricbeatLinkText"
               defaultMessage="Follow the instructions here."
@@ -47,10 +45,6 @@ export function getBeatsInstructionsForEnablingMetricbeat(product, _meta, { esMo
       </EuiText>
     ),
   };
-
-  const httpEndpointUrl =
-    `${ELASTIC_WEBSITE_URL}guide/en/beats/${beatType || DEFAULT_BEAT_FOR_URLS}` +
-    `/${DOC_LINK_VERSION}/http-endpoint.html`;
 
   const enableMetricbeatModuleStep = {
     title: i18n.translate(
@@ -156,10 +150,7 @@ export function getBeatsInstructionsForEnablingMetricbeat(product, _meta, { esMo
     children: (
       <EuiText>
         <p>
-          <EuiLink
-            href={`${ELASTIC_WEBSITE_URL}guide/en/beats/metricbeat/${DOC_LINK_VERSION}/metricbeat-starting.html`}
-            target="_blank"
-          >
+          <EuiLink href={metricbeatStartUrl} target="_blank">
             <FormattedMessage
               id="xpack.monitoring.metricbeatMigration.beatsInstructions.startMetricbeatLinkText"
               defaultMessage="Follow the instructions here."

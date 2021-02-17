@@ -58,37 +58,43 @@ function getDateFormat(dateUnit: DateUnit) {
   }
 }
 
-export const getDateDifference = (
-  start: moment.Moment,
-  end: moment.Moment,
-  unitOfTime: DateUnit | TimeUnit
-) => end.diff(start, unitOfTime);
+export const getDateDifference = ({
+  start,
+  end,
+  unitOfTime,
+  precise,
+}: {
+  start: moment.Moment;
+  end: moment.Moment;
+  unitOfTime: DateUnit | TimeUnit;
+  precise?: boolean;
+}) => end.diff(start, unitOfTime, precise);
 
 function getFormatsAccordingToDateDifference(
   start: moment.Moment,
   end: moment.Moment
 ) {
-  if (getDateDifference(start, end, 'years') >= 5) {
+  if (getDateDifference({ start, end, unitOfTime: 'years' }) >= 5) {
     return { dateFormat: getDateFormat('years') };
   }
 
-  if (getDateDifference(start, end, 'months') >= 5) {
+  if (getDateDifference({ start, end, unitOfTime: 'months' }) >= 5) {
     return { dateFormat: getDateFormat('months') };
   }
 
   const dateFormatWithDays = getDateFormat('days');
-  if (getDateDifference(start, end, 'days') > 1) {
+  if (getDateDifference({ start, end, unitOfTime: 'days' }) > 1) {
     return { dateFormat: dateFormatWithDays };
   }
 
-  if (getDateDifference(start, end, 'minutes') >= 1) {
+  if (getDateDifference({ start, end, unitOfTime: 'minutes' }) >= 1) {
     return {
       dateFormat: dateFormatWithDays,
       timeFormat: getTimeFormat('minutes'),
     };
   }
 
-  if (getDateDifference(start, end, 'seconds') >= 10) {
+  if (getDateDifference({ start, end, unitOfTime: 'seconds' }) >= 10) {
     return {
       dateFormat: dateFormatWithDays,
       timeFormat: getTimeFormat('seconds'),

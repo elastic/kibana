@@ -18,7 +18,7 @@ export function singleSeriesCheckerFactory({ asCurrentUser }) {
   const REF_DATA_INTERVAL = { name: '1h', ms: 3600000 };
 
   class SingleSeriesChecker {
-    constructor(index, timeField, aggType, field, duration, query, thresholds) {
+    constructor(index, timeField, aggType, field, duration, query, thresholds, runtimeMappings) {
       this.index = index;
       this.timeField = timeField;
       this.aggType = aggType;
@@ -31,7 +31,7 @@ export function singleSeriesCheckerFactory({ asCurrentUser }) {
         varDiff: 0,
         created: false,
       };
-
+      this.runtimeMappings = runtimeMappings;
       this.interval = null;
     }
 
@@ -171,6 +171,7 @@ export function singleSeriesCheckerFactory({ asCurrentUser }) {
             },
           },
         },
+        ...this.runtimeMappings,
       };
 
       if (this.field !== null) {

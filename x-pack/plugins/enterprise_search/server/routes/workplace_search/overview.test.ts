@@ -18,7 +18,6 @@ describe('Overview route', () => {
       mockRouter = new MockRouter({
         method: 'get',
         path: '/api/workplace_search/overview',
-        payload: 'query',
       });
 
       registerOverviewRoute({

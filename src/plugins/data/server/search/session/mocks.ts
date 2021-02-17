@@ -21,5 +21,6 @@ export function createSearchSessionsClientMock<T = unknown>(): jest.Mocked<
     update: jest.fn(),
     cancel: jest.fn(),
     extend: jest.fn(),
+    delete: jest.fn(),
   };
 }

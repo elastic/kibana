@@ -267,14 +267,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should apply correct filter', async () => {
-        await PageObjects.visChart.filterOnTableCell(1, 3);
-        await PageObjects.visChart.waitForVisualizationRenderingStabilized();
-        const data = await PageObjects.visChart.getTableVisContent();
-        expect(data).to.be.eql([
-          ['png', '1,373'],
-          ['gif', '918'],
-          ['Other', '445'],
-        ]);
+        await retry.try(async () => {
+          await PageObjects.visChart.filterOnTableCell(1, 3);
+          await PageObjects.visChart.waitForVisualizationRenderingStabilized();
+          const data = await PageObjects.visChart.getTableVisContent();
+          expect(data).to.be.eql([
+            ['png', '1,373'],
+            ['gif', '918'],
+            ['Other', '445'],
+          ]);
+        });
       });
     });
 

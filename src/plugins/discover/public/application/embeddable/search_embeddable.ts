@@ -308,9 +308,9 @@ export class SearchEmbeddable
     );
     if (useNewFieldsApi) {
       searchSource.removeField('fieldsFromSource');
-      const fields: Record<string, any> = { field: '*' };
+      const fields: Record<string, string> = { field: '*' };
       if (pre712) {
-        fields.include_unmapped = true;
+        fields.include_unmapped = 'true';
       }
       searchSource.setField('fields', [fields]);
     } else {

@@ -90,7 +90,7 @@ export const PopoverActionsMenu = ({ api, onActionComplete, session }: PopoverAc
 
       // add a line above the delete action (when there are multiple)
       // NOTE: Delete action MUST be the final action[] item
-      if (actions.length > 1 && actionType === ACTION.CANCEL) {
+      if (actions.length > 1 && actionType === ACTION.DELETE) {
         itemSet.push({ isSeparator: true, key: 'separadorable' });
       }
 

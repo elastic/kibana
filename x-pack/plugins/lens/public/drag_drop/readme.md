@@ -56,7 +56,7 @@ const { dragging } = useContext(DragContext);
 return (
   <DragDrop
     className="axis"
-    droppable={dragging && canHandleDrop(dragging)}
+    dropType={getDropTypes(dragging)}
     onDrop={(item) => onChange([...items, item])}
   >
     {items.map((x) => (
@@ -86,11 +86,14 @@ The children `DragDrop` components must have props defined as in the example:
         key={f.id}
         draggable
         droppable
-        dragType="reorder"
+        dragType="move"
         dropType="reorder"
         reorderableGroup={fields} // consists all reorderable elements in the group, eg. [{id:'3'}, {id:'5'}, {id:'1'}]
         value={{
           id: f.id,
+          humanData: {
+            label: 'Label'
+          }
         }}
         onDrop={/*handler*/}
       >

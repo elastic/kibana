@@ -8,6 +8,7 @@
 // TODO: Remove EuiPage & EuiPageBody before exposing full app
 
 import React from 'react';
+
 import { EuiPage, EuiPageBody, EuiPageContent } from '@elastic/eui';
 
 import { WORKPLACE_SEARCH_PLUGIN } from '../../../../../common/constants';

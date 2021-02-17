@@ -7,8 +7,6 @@
 
 import { getPieVisualization } from './visualization';
 import { PieVisualizationState } from './types';
-import { createMockDatasource, createMockFramePublicAPI } from '../editor_frame_service/mocks';
-import { DatasourcePublicAPI, FramePublicAPI } from '../types';
 import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
 
 jest.mock('../id_generator');
@@ -36,37 +34,11 @@ function exampleState(): PieVisualizationState {
   };
 }
 
-function mockFrame(): FramePublicAPI {
-  return {
-    ...createMockFramePublicAPI(),
-    addNewLayer: () => LAYER_ID,
-    datasourceLayers: {
-      [LAYER_ID]: createMockDatasource(LAYER_ID).publicAPIMock,
-    },
-  };
-}
-
 // Just a basic bootstrap here to kickstart the tests
 describe('pie_visualization', () => {
   describe('#getErrorMessages', () => {
     it('returns undefined if no error is raised', () => {
-      const datasource: DatasourcePublicAPI = {
-        ...createMockDatasource('l1').publicAPIMock,
-        getOperationForColumnId(_: string) {
-          return {
-            id: 'a',
-            dataType: 'number',
-            isBucketed: false,
-            label: 'shazm',
-          };
-        },
-      };
-      const frame = {
-        ...mockFrame(),
-        datasourceLayers: { l1: datasource },
-      };
-
-      const error = pieVisualization.getErrorMessages(exampleState(), frame);
+      const error = pieVisualization.getErrorMessages(exampleState());
 
       expect(error).not.toBeDefined();
     });

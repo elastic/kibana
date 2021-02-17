@@ -9,12 +9,15 @@ import { setMockValues, setMockActions } from '../../../__mocks__/kea.mock';
 import { unmountHandler } from '../../../__mocks__/shallow_useeffect.mock';
 
 import React from 'react';
+
 import { shallow } from 'enzyme';
 
-import { Credentials } from './credentials';
 import { EuiCopy, EuiLoadingContent, EuiPageContentBody } from '@elastic/eui';
 
 import { externalUrl } from '../../../shared/enterprise_search_url';
+
+import { Credentials } from './credentials';
+
 import { CredentialsFlyout } from './credentials_flyout';
 
 describe('Credentials', () => {

@@ -6,7 +6,9 @@
  */
 
 import React from 'react';
+
 import { shallow } from 'enzyme';
+
 import { EuiBadge, EuiToolTip } from '@elastic/eui';
 
 import { InlineTagsList } from './inline_tags_list';

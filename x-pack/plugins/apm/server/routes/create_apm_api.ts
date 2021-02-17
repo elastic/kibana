@@ -11,6 +11,7 @@ import {
   apmIndexPatternTitleRoute,
 } from './index_pattern';
 import { createApi } from './create_api';
+import { environmentsRoute } from './environments';
 import {
   errorDistributionRoute,
   errorGroupsRoute,
@@ -61,21 +62,11 @@ import {
   transactionChartsDistributionRoute,
   transactionChartsErrorRateRoute,
   transactionGroupsRoute,
-  transactionGroupsOverviewRoute,
+  transactionGroupsPrimaryStatisticsRoute,
   transactionLatencyChatsRoute,
   transactionThroughputChatsRoute,
+  transactionGroupsComparisonStatisticsRoute,
 } from './transactions';
-import {
-  errorGroupsLocalFiltersRoute,
-  metricsLocalFiltersRoute,
-  servicesLocalFiltersRoute,
-  tracesLocalFiltersRoute,
-  transactionGroupsLocalFiltersRoute,
-  transactionsLocalFiltersRoute,
-  serviceNodesLocalFiltersRoute,
-  uiFiltersEnvironmentsRoute,
-  rumOverviewLocalFiltersRoute,
-} from './ui_filters';
 import { serviceMapRoute, serviceMapServiceNodeRoute } from './service_map';
 import {
   createCustomLinkRoute,
@@ -98,6 +89,7 @@ import {
   rumClientMetricsRoute,
   rumJSErrors,
   rumLongTaskMetrics,
+  rumOverviewLocalFiltersRoute,
   rumPageLoadDistBreakdownRoute,
   rumPageLoadDistributionRoute,
   rumPageViewsTrendRoute,
@@ -118,6 +110,9 @@ const createApmApi = () => {
     .add(staticIndexPatternRoute)
     .add(dynamicIndexPatternRoute)
     .add(apmIndexPatternTitleRoute)
+
+    // Environments
+    .add(environmentsRoute)
 
     // Errors
     .add(errorDistributionRoute)
@@ -171,19 +166,10 @@ const createApmApi = () => {
     .add(transactionChartsDistributionRoute)
     .add(transactionChartsErrorRateRoute)
     .add(transactionGroupsRoute)
-    .add(transactionGroupsOverviewRoute)
+    .add(transactionGroupsPrimaryStatisticsRoute)
     .add(transactionLatencyChatsRoute)
     .add(transactionThroughputChatsRoute)
-
-    // UI filters
-    .add(errorGroupsLocalFiltersRoute)
-    .add(metricsLocalFiltersRoute)
-    .add(servicesLocalFiltersRoute)
-    .add(tracesLocalFiltersRoute)
-    .add(transactionGroupsLocalFiltersRoute)
-    .add(transactionsLocalFiltersRoute)
-    .add(serviceNodesLocalFiltersRoute)
-    .add(uiFiltersEnvironmentsRoute)
+    .add(transactionGroupsComparisonStatisticsRoute)
 
     // Service map
     .add(serviceMapRoute)

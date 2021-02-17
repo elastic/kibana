@@ -40,5 +40,6 @@ export function createSearchRequestHandlerContext() {
     updateSession: jest.fn(),
     extendSession: jest.fn(),
     cancelSession: jest.fn(),
+    deleteSession: jest.fn(),
   };
 }

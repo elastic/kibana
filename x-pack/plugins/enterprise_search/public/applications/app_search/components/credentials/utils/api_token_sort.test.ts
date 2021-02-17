@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { apiTokenSort } from '.';
 import { ApiTokenTypes } from '../constants';
 
 import { ApiToken } from '../types';
+
+import { apiTokenSort } from '.';
 
 describe('apiTokenSort', () => {
   const apiToken: ApiToken = {

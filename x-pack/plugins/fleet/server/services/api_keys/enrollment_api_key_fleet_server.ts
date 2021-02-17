@@ -7,41 +7,15 @@
 
 import uuid from 'uuid';
 import Boom from '@hapi/boom';
+import { GetResponse } from 'elasticsearch';
 import { ResponseError } from '@elastic/elasticsearch/lib/errors';
 import { SavedObjectsClientContract, ElasticsearchClient } from 'src/core/server';
+import { ESSearchResponse as SearchResponse } from '../../../../../typings/elasticsearch';
 import { EnrollmentAPIKey, FleetServerEnrollmentAPIKey } from '../../types';
 import { ENROLLMENT_API_KEYS_INDEX } from '../../constants';
 import { createAPIKey, invalidateAPIKeys } from './security';
 import { agentPolicyService } from '../agent_policy';
-
-// TODO Move these types to another file
-interface SearchResponse<T> {
-  took: number;
-  timed_out: boolean;
-  _scroll_id?: string;
-  hits: {
-    total: {
-      value: number;
-      relation: string;
-    };
-    max_score: number;
-    hits: Array<{
-      _index: string;
-      _type: string;
-      _id: string;
-      _score: number;
-      _source: T;
-      _version?: number;
-      fields?: any;
-      highlight?: any;
-      inner_hits?: any;
-      matched_queries?: string[];
-      sort?: string[];
-    }>;
-  };
-}
-
-type SearchHit<T> = SearchResponse<T>['hits']['hits'][0];
+import { escapeSearchQueryPhrase } from '../saved_object';
 
 export async function listEnrollmentApiKeys(
   esClient: ElasticsearchClient,
@@ -54,7 +28,7 @@ export async function listEnrollmentApiKeys(
 ): Promise<{ items: EnrollmentAPIKey[]; total: any; page: any; perPage: any }> {
   const { page = 1, perPage = 20, kuery } = options;
 
-  const res = await esClient.search<SearchResponse<FleetServerEnrollmentAPIKey>>({
+  const res = await esClient.search<SearchResponse<FleetServerEnrollmentAPIKey, {}>>({
     index: ENROLLMENT_API_KEYS_INDEX,
     from: (page - 1) * perPage,
     size: perPage,
@@ -78,7 +52,7 @@ export async function getEnrollmentAPIKey(
   id: string
 ): Promise<EnrollmentAPIKey> {
   try {
-    const res = await esClient.get<SearchHit<FleetServerEnrollmentAPIKey>>({
+    const res = await esClient.get<GetResponse<FleetServerEnrollmentAPIKey>>({
       index: ENROLLMENT_API_KEYS_INDEX,
       id,
     });
@@ -185,6 +159,21 @@ export async function generateEnrollmentAPIKey(
   };
 }
 
+export async function getEnrollmentAPIKeyById(esClient: ElasticsearchClient, apiKeyId: string) {
+  const res = await esClient.search<SearchResponse<FleetServerEnrollmentAPIKey, {}>>({
+    index: ENROLLMENT_API_KEYS_INDEX,
+    q: `api_key_id:${escapeSearchQueryPhrase(apiKeyId)}`,
+  });
+
+  const [enrollmentAPIKey] = res.body.hits.hits.map(esDocToEnrollmentApiKey);
+
+  if (enrollmentAPIKey?.api_key_id !== apiKeyId) {
+    throw new Error('find enrollmentKeyById returned an incorrect key');
+  }
+
+  return enrollmentAPIKey;
+}
+
 async function validateAgentPolicyId(soClient: SavedObjectsClientContract, agentPolicyId: string) {
   try {
     await agentPolicyService.get(soClient, agentPolicyId);
@@ -196,7 +185,10 @@ async function validateAgentPolicyId(soClient: SavedObjectsClientContract, agent
   }
 }
 
-function esDocToEnrollmentApiKey(doc: SearchHit<FleetServerEnrollmentAPIKey>): EnrollmentAPIKey {
+function esDocToEnrollmentApiKey(doc: {
+  _id: string;
+  _source: FleetServerEnrollmentAPIKey;
+}): EnrollmentAPIKey {
   return {
     id: doc._id,
     ...doc._source,

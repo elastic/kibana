@@ -51,6 +51,10 @@ export interface DiscoverGridProps {
    */
   columns: string[];
   /**
+   * If set, the given document is displayed in a flyout
+   */
+  expandedDoc?: ElasticSearchHit;
+  /**
    * The used index pattern
    */
   indexPattern: IndexPattern;
@@ -88,6 +92,10 @@ export interface DiscoverGridProps {
    */
   sampleSize: number;
   /**
+   * Function to set the expanded document, which is displayed in a flyout
+   */
+  setExpandedDoc: (doc: ElasticSearchHit | undefined) => void;
+  /**
    * Grid display settings persisted in Elasticsearch (e.g. column width)
    */
   settings?: DiscoverGridSettings;
@@ -121,6 +129,7 @@ export const DiscoverGrid = ({
   ariaLabelledBy,
   columns,
   indexPattern,
+  expandedDoc,
   onAddColumn,
   onFilter,
   onRemoveColumn,
@@ -132,11 +141,11 @@ export const DiscoverGrid = ({
   searchDescription,
   searchTitle,
   services,
+  setExpandedDoc,
   settings,
   showTimeCol,
   sort,
 }: DiscoverGridProps) => {
-  const [expanded, setExpanded] = useState<ElasticSearchHit | undefined>(undefined);
   const defaultColumns = columns.includes('_source');
 
   /**
@@ -233,8 +242,8 @@ export const DiscoverGrid = ({
   return (
     <DiscoverGridContext.Provider
       value={{
-        expanded,
-        setExpanded,
+        expanded: expandedDoc,
+        setExpanded: setExpandedDoc,
         rows: rows || [],
         onFilter,
         indexPattern,
@@ -302,15 +311,15 @@ export const DiscoverGrid = ({
             </p>
           </EuiScreenReaderOnly>
         )}
-        {expanded && (
+        {expandedDoc && (
           <DiscoverGridFlyout
             indexPattern={indexPattern}
-            hit={expanded}
+            hit={expandedDoc}
             columns={columns}
             onFilter={onFilter}
             onRemoveColumn={onRemoveColumn}
             onAddColumn={onAddColumn}
-            onClose={() => setExpanded(undefined)}
+            onClose={() => setExpandedDoc(undefined)}
             services={services}
           />
         )}
