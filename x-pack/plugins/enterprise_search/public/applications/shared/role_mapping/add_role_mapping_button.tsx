@@ -9,12 +9,14 @@ import React from 'react';
 
 import { EuiButtonTo } from '../react_router_helpers';
 
+import { ADD_ROLE_MAPPING_BUTTON } from './constants';
+
 interface IAddRoleMappingButtonProps {
   path: string;
 }
 
 export const AddRoleMappingButton: React.FC<IAddRoleMappingButtonProps> = ({ path }) => (
   <EuiButtonTo to={path} fill color="secondary">
-    Add mapping
+    {ADD_ROLE_MAPPING_BUTTON}
   </EuiButtonTo>
 );

@@ -21,13 +21,24 @@ import {
   EuiTableRowCell,
   EuiTextColor,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 import { ASRoleMapping } from '../../app_search/types';
 import { WSRoleMapping } from '../../workplace_search/types';
 import { EuiLinkTo } from '../react_router_helpers';
 import { RoleRules } from '../types';
 
-import { ANY_AUTH_PROVIDER, ANY_AUTH_PROVIDER_LABEL } from './constants';
+import {
+  ANY_AUTH_PROVIDER,
+  ANY_AUTH_PROVIDER_OPTION_LABEL,
+  ROLE_LABEL,
+  ALL_LABEL,
+  AUTH_PROVIDER_LABEL,
+  EXTERNAL_ATTRIBUTE_LABEL,
+  ATTRIBUTE_VALUE_LABEL,
+  FILTER_ROLE_MAPPINGS_PLACEHOLDER,
+  MANAGE_ROLE_MAPPING_BUTTON,
+} from './constants';
 
 interface IAccessItem {
   name: string;
@@ -52,7 +63,7 @@ const MAX_CELL_WIDTH = 24;
 const noItemsPlaceholder = <EuiTextColor color="subdued">&mdash;</EuiTextColor>;
 
 const getAuthProviderDisplayValue = (authProvider: string) =>
-  authProvider === ANY_AUTH_PROVIDER ? ANY_AUTH_PROVIDER_LABEL : authProvider;
+  authProvider === ANY_AUTH_PROVIDER ? ANY_AUTH_PROVIDER_OPTION_LABEL : authProvider;
 
 export const RoleMappingsTable: React.FC<IRoleMappingsTableProps> = ({
   accessItemKey,
@@ -88,7 +99,7 @@ export const RoleMappingsTable: React.FC<IRoleMappingsTableProps> = ({
         <EuiFlexItem>
           <EuiFieldSearch
             value={filterValue}
-            placeholder="Filter roles..."
+            placeholder={FILTER_ROLE_MAPPINGS_PLACEHOLDER}
             onChange={(e) => updateValue(e.target.value)}
           />
         </EuiFlexItem>
@@ -98,11 +109,13 @@ export const RoleMappingsTable: React.FC<IRoleMappingsTableProps> = ({
       {filteredResults.length > 0 ? (
         <EuiTable>
           <EuiTableHeader>
-            <EuiTableHeaderCell>External Attribute</EuiTableHeaderCell>
-            <EuiTableHeaderCell>Attribute Value</EuiTableHeaderCell>
-            <EuiTableHeaderCell>Role</EuiTableHeaderCell>
+            <EuiTableHeaderCell>{EXTERNAL_ATTRIBUTE_LABEL}</EuiTableHeaderCell>
+            <EuiTableHeaderCell>{ATTRIBUTE_VALUE_LABEL}</EuiTableHeaderCell>
+            <EuiTableHeaderCell>{ROLE_LABEL}</EuiTableHeaderCell>
             <EuiTableHeaderCell>{accessHeader}</EuiTableHeaderCell>
-            {shouldShowAuthProvider && <EuiTableHeaderCell>Auth Provider</EuiTableHeaderCell>}
+            {shouldShowAuthProvider && (
+              <EuiTableHeaderCell>{AUTH_PROVIDER_LABEL}</EuiTableHeaderCell>
+            )}
             <EuiTableHeaderCell />
           </EuiTableHeader>
           <EuiTableBody>
@@ -116,7 +129,7 @@ export const RoleMappingsTable: React.FC<IRoleMappingsTableProps> = ({
                   <EuiTableRowCell>{roleType}</EuiTableRowCell>
                   <EuiTableRowCell style={{ maxWidth: MAX_CELL_WIDTH }}>
                     {accessAllEngines ? (
-                      'All'
+                      ALL_LABEL
                     ) : (
                       <>
                         {accessItems.length === 0
@@ -136,7 +149,11 @@ export const RoleMappingsTable: React.FC<IRoleMappingsTableProps> = ({
                     </EuiTableRowCell>
                   )}
                   <EuiTableRowCell>
-                    {id && <EuiLinkTo to={getRoleMappingPath(id)}>Manage</EuiLinkTo>}
+                    {id && (
+                      <EuiLinkTo to={getRoleMappingPath(id)}>
+                        {MANAGE_ROLE_MAPPING_BUTTON}
+                      </EuiLinkTo>
+                    )}
                     {toolTip && <EuiIconTip position="left" content={toolTip.content} />}
                   </EuiTableRowCell>
                 </EuiTableRow>
@@ -145,7 +162,12 @@ export const RoleMappingsTable: React.FC<IRoleMappingsTableProps> = ({
           </EuiTableBody>
         </EuiTable>
       ) : (
-        <p>No results found for &apos;{filterValue}&apos;</p>
+        <p>
+          {i18n.translate('xpack.enterpriseSearch.roleMapping.moResults.message', {
+            defaultMessage: "No results found for '{filterValue}'",
+            values: { filterValue },
+          })}
+        </p>
       )}
     </>
   );

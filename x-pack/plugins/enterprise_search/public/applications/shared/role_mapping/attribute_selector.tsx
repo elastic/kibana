@@ -20,7 +20,16 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import { ANY_AUTH_PROVIDER, ANY_AUTH_PROVIDER_LABEL } from './constants';
+import {
+  ANY_AUTH_PROVIDER,
+  ANY_AUTH_PROVIDER_OPTION_LABEL,
+  AUTH_ANY_PROVIDER_LABEL,
+  AUTH_INDIVIDUAL_PROVIDER_LABEL,
+  ATTRIBUTE_SELECTOR_TITLE,
+  AUTH_PROVIDER_LABEL,
+  EXTERNAL_ATTRIBUTE_LABEL,
+  ATTRIBUTE_VALUE_LABEL,
+} from './constants';
 
 interface IAttributeSelectorProps {
   attributeName: string;
@@ -53,11 +62,11 @@ const getAuthProviderOptions = (
 ): Array<EuiComboBoxOptionOption<string>> => {
   return [
     {
-      label: 'Any current or future Auth Provider',
-      options: [{ value: ANY_AUTH_PROVIDER, label: ANY_AUTH_PROVIDER_LABEL }],
+      label: AUTH_ANY_PROVIDER_LABEL,
+      options: [{ value: ANY_AUTH_PROVIDER, label: ANY_AUTH_PROVIDER_OPTION_LABEL }],
     },
     {
-      label: 'Select individual Auth Providers',
+      label: AUTH_INDIVIDUAL_PROVIDER_LABEL,
       options: availableAuthProviders.map((authProvider) => ({
         value: authProvider,
         label: authProvider,
@@ -103,13 +112,13 @@ export const AttributeSelector: React.FC<IAttributeSelectorProps> = ({
       className={disabled ? 'euiPanel--disabled' : ''}
     >
       <EuiTitle size="s">
-        <h3>Attribute mapping</h3>
+        <h3>{ATTRIBUTE_SELECTOR_TITLE}</h3>
       </EuiTitle>
       <EuiSpacer />
       {availableAuthProviders && multipleAuthProvidersConfig && (
         <EuiFlexGroup alignItems="stretch">
           <EuiFlexItem>
-            <EuiFormRow label="Auth Provider" fullWidth>
+            <EuiFormRow label={AUTH_PROVIDER_LABEL} fullWidth>
               <EuiComboBox
                 data-test-subj="authProviderSelect"
                 selectedOptions={getSelectedOptions(selectedAuthProviders, availableAuthProviders)}
@@ -127,7 +136,7 @@ export const AttributeSelector: React.FC<IAttributeSelectorProps> = ({
       )}
       <EuiFlexGroup alignItems="stretch">
         <EuiFlexItem>
-          <EuiFormRow label="External Attribute" fullWidth>
+          <EuiFormRow label={EXTERNAL_ATTRIBUTE_LABEL} fullWidth>
             <EuiSelect
               name="external-attribute"
               value={attributeName}
@@ -142,7 +151,7 @@ export const AttributeSelector: React.FC<IAttributeSelectorProps> = ({
           </EuiFormRow>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFormRow label="Attribute Value" fullWidth>
+          <EuiFormRow label={ATTRIBUTE_VALUE_LABEL} fullWidth>
             {attributeName === 'role' ? (
               <EuiSelect
                 value={attributeValue}

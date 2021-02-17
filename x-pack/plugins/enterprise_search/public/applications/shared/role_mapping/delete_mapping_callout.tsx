@@ -9,6 +9,12 @@ import React from 'react';
 
 import { EuiButton, EuiCallOut } from '@elastic/eui';
 
+import {
+  DELETE_ROLE_MAPPING_TITLE,
+  DELETE_ROLE_MAPPING_DESCRIPTION,
+  DELETE_ROLE_MAPPING_BUTTON,
+} from './constants';
+
 interface IDeleteMappingCalloutProps {
   handleDeleteMapping(): void;
 }
@@ -16,10 +22,10 @@ interface IDeleteMappingCalloutProps {
 export const DeleteMappingCallout: React.FC<IDeleteMappingCalloutProps> = ({
   handleDeleteMapping,
 }) => (
-  <EuiCallOut color="danger" iconType="alert" title="Remove this role mapping">
-    <p>Please note that deleting a mapping is permanent and cannot be undone</p>
+  <EuiCallOut color="danger" iconType="alert" title={DELETE_ROLE_MAPPING_TITLE}>
+    <p>{DELETE_ROLE_MAPPING_DESCRIPTION}</p>
     <EuiButton color="danger" fill onClick={handleDeleteMapping}>
-      Delete Mapping
+      {DELETE_ROLE_MAPPING_BUTTON}
     </EuiButton>
   </EuiCallOut>
 );
