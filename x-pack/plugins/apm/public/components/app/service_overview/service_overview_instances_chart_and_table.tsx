@@ -31,7 +31,7 @@ export function ServiceOverviewInstancesChartAndTable({
 
   const { data = [], status } = useFetcher(
     (callApmApi) => {
-      if (!start || !end || !transactionType) {
+      if (!start || !end || !transactionType || !latencyAggregationType) {
         return;
       }
 
