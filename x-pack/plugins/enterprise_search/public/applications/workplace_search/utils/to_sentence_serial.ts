@@ -9,7 +9,7 @@ import { AND } from '../constants';
 
 export const toSentenceSerial = (array: string[]) =>
   array.length === 1
-    ? `${array}`
+    ? array[0]
     : `${array.slice(0, array.length - 1).join(', ')}${
         array.length === 2 ? '' : ','
       } ${AND} ${array.slice(-1)}`;
