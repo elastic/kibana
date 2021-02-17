@@ -1,0 +1,25 @@
+{
+  "text_structure.find_structure": {
+    "data_autocomplete_rules": {
+      "lines_to_sample": 0,
+      "line_merge_size_limit": 0,
+      "timeout": "",
+      "charset": "",
+      "format": [
+        "ndjson",
+        "xml",
+        "delimited",
+        "semi_structured_text"
+      ],
+      "has_header_row": false,
+      "column_names": [],
+      "delimiter": "",
+      "quote": "",
+      "should_trim_fields": false,
+      "grok_pattern": "",
+      "timestamp_field": "",
+      "timestamp_format": "",
+      "explain": false
+    }
+  }
+}
