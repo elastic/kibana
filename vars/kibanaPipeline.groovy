@@ -414,7 +414,7 @@ def withDocker(Closure closure) {
   docker
     .image('kibana-ci')
     .inside(
-      "-v /etc/runbld:/etc/runbld:ro -v '${env.JENKINS_HOME}:${env.JENKINS_HOME}' -v '/dev/shm/workspace:/dev/shm/workspace' --shm-size 2GB --cpus 4",
+      "-v /var/run/docker.sock:/var/run/docker.sock -v /etc/runbld:/etc/runbld:ro -v '${env.JENKINS_HOME}:${env.JENKINS_HOME}' -v '/dev/shm/workspace:/dev/shm/workspace' --shm-size 2GB --cpus 4",
       closure
     )
 }
