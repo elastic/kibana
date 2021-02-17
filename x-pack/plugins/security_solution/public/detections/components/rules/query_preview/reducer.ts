@@ -67,6 +67,7 @@ export type Action =
       type: 'setToFrom';
     };
 
+/* eslint-disable-next-line complexity */
 export const queryPreviewReducer = () => (state: State, action: Action): State => {
   switch (action.type) {
     case 'setQueryInfo': {
