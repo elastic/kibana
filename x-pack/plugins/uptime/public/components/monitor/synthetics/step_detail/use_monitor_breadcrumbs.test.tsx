@@ -76,7 +76,7 @@ describe('useMonitorBreadcrumbs', () => {
         Object {
           "href": "/app/uptime/journey/fake-test-group/steps",
           "onClick": [Function],
-          "text": "Jan 4, 2021 @ 06:25:19.104",
+          "text": "Jan 4, 2021 6:25:19 AM",
         },
       ]
     `);
@@ -142,7 +142,7 @@ describe('useMonitorBreadcrumbs', () => {
         Object {
           "href": "/app/uptime/journey/fake-test-group/steps",
           "onClick": [Function],
-          "text": "Jan 4, 2021 @ 06:25:19.104",
+          "text": "Jan 4, 2021 6:25:19 AM",
         },
         Object {
           "text": "Performance breakdown",
