@@ -417,7 +417,14 @@ describe('When on the Trusted Apps Page', () => {
     > => {
       const renderResult = render();
       await act(async () => {
-        await waitForAction('trustedAppsListResourceStateChanged');
+        await Promise.all([
+          waitForAction('trustedAppsListResourceStateChanged'),
+          waitForAction('trustedAppsExistStateChanged', {
+            validate({ payload }) {
+              return isLoadedResourceState(payload);
+            },
+          }),
+        ]);
       });
 
       act(() => {
@@ -485,50 +492,62 @@ describe('When on the Trusted Apps Page', () => {
     it('should close flyout if cancel button is clicked', async () => {
       const { getByTestId, queryByTestId } = await renderAndClickAddButton();
       const cancelButton = getByTestId('addTrustedAppFlyout-cancelButton');
-      reactTestingLibrary.act(() => {
+      await reactTestingLibrary.act(async () => {
         fireEvent.click(cancelButton, { button: 1 });
+        await waitForAction('trustedAppCreationDialogClosed');
       });
-      expect(queryByTestId('addTrustedAppFlyout')).toBeNull();
       expect(history.location.search).toBe('');
+      expect(queryByTestId('addTrustedAppFlyout')).toBeNull();
     });
 
     it('should close flyout if flyout close button is clicked', async () => {
       const { getByTestId, queryByTestId } = await renderAndClickAddButton();
       const flyoutCloseButton = getByTestId('euiFlyoutCloseButton');
-      reactTestingLibrary.act(() => {
+      await reactTestingLibrary.act(async () => {
         fireEvent.click(flyoutCloseButton, { button: 1 });
+        await waitForAction('trustedAppCreationDialogClosed');
       });
       expect(queryByTestId('addTrustedAppFlyout')).toBeNull();
       expect(history.location.search).toBe('');
     });
 
     describe('and when the form data is valid', () => {
-      const fillInCreateForm = ({ getByTestId }: ReturnType<AppContextTestRender['render']>) => {
-        reactTestingLibrary.act(() => {
+      const fillInCreateForm = async ({
+        getByTestId,
+      }: ReturnType<AppContextTestRender['render']>) => {
+        await reactTestingLibrary.act(async () => {
+          const stateUpdated = waitForAction('trustedAppCreationDialogFormStateUpdated');
           fireEvent.change(getByTestId('addTrustedAppFlyout-createForm-nameTextField'), {
             target: { value: 'trusted app A' },
           });
+          await stateUpdated;
         });
-        reactTestingLibrary.act(() => {
+        await reactTestingLibrary.act(async () => {
+          const stateUpdated = waitForAction('trustedAppCreationDialogFormStateUpdated');
           fireEvent.change(
             getByTestId('addTrustedAppFlyout-createForm-conditionsBuilder-group1-entry0-value'),
             { target: { value: 'SOME$HASH#HERE' } }
           );
+          await stateUpdated;
         });
-        reactTestingLibrary.act(() => {
+        await reactTestingLibrary.act(async () => {
+          const stateUpdated = waitForAction('trustedAppCreationDialogFormStateUpdated');
           fireEvent.change(getByTestId('addTrustedAppFlyout-createForm-descriptionField'), {
             target: { value: 'let this be' },
           });
+          await stateUpdated;
         });
       };
 
       it('should enable the Flyout Add button', async () => {
         const renderResult = await renderAndClickAddButton();
-        const { getByTestId } = renderResult;
-        fillInCreateForm(renderResult);
-        const flyoutAddButton = getByTestId(
+
+        await fillInCreateForm(renderResult);
+
+        const flyoutAddButton = renderResult.getByTestId(
           'addTrustedAppFlyout-createButton'
         ) as HTMLButtonElement;
+
         expect(flyoutAddButton.disabled).toBe(false);
       });
 
@@ -554,7 +573,7 @@ describe('When on the Trusted Apps Page', () => {
           );
 
           renderResult = await renderAndClickAddButton();
-          fillInCreateForm(renderResult);
+          await fillInCreateForm(renderResult);
           const userClickedSaveActionWatcher = waitForAction('trustedAppCreationDialogConfirmed');
           reactTestingLibrary.act(() => {
             fireEvent.click(renderResult.getByTestId('addTrustedAppFlyout-createButton'), {
