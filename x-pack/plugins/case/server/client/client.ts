@@ -36,6 +36,7 @@ import { get } from './cases/get';
 import { get as getUserActions } from './user_actions/get';
 import { get as getAlerts } from './alerts/get';
 import { push } from './cases/push';
+import { createCaseError } from '../common/error';
 
 /**
  * This class is a pass through for common case functionality (like creating, get a case).
@@ -74,8 +75,11 @@ export class CaseClientHandler implements CaseClient {
         theCase: caseInfo,
       });
     } catch (error) {
-      this.logger.error(`Failed to create a new case using client: ${error}`);
-      throw error;
+      throw createCaseError({
+        message: `Failed to create a new case using client: ${error}`,
+        error,
+        logger: this.logger,
+      });
     }
   }
 
@@ -94,10 +98,11 @@ export class CaseClientHandler implements CaseClient {
         id: caseInfo.id,
         version: caseInfo.version,
       }));
-      this.logger.error(
-        `Failed to update cases using client: ${JSON.stringify(caseIDVersions)}: ${error}`
-      );
-      throw error;
+      throw createCaseError({
+        message: `Failed to update cases using client: ${JSON.stringify(caseIDVersions)}: ${error}`,
+        error,
+        logger: this.logger,
+      });
     }
   }
 
@@ -114,8 +119,11 @@ export class CaseClientHandler implements CaseClient {
         logger: this.logger,
       });
     } catch (error) {
-      this.logger.error(`Failed to add comment using client case id: ${caseId}: ${error}`);
-      throw error;
+      throw createCaseError({
+        message: `Failed to add comment using client case id: ${caseId}: ${error}`,
+        error,
+        logger: this.logger,
+      });
     }
   }
 
@@ -123,8 +131,11 @@ export class CaseClientHandler implements CaseClient {
     try {
       return getFields(fields);
     } catch (error) {
-      this.logger.error(`Failed to retrieve fields using client: ${error}`);
-      throw error;
+      throw createCaseError({
+        message: `Failed to retrieve fields using client: ${error}`,
+        error,
+        logger: this.logger,
+      });
     }
   }
 
@@ -137,8 +148,11 @@ export class CaseClientHandler implements CaseClient {
         caseClient: this,
       });
     } catch (error) {
-      this.logger.error(`Failed to get mappings using client: ${error}`);
-      throw error;
+      throw createCaseError({
+        message: `Failed to get mappings using client: ${error}`,
+        error,
+        logger: this.logger,
+      });
     }
   }
 
@@ -150,12 +164,13 @@ export class CaseClientHandler implements CaseClient {
         scopedClusterClient: this._scopedClusterClient,
       });
     } catch (error) {
-      this.logger.error(
-        `Failed to update alerts status using client ids: ${JSON.stringify(
+      throw createCaseError({
+        message: `Failed to update alerts status using client ids: ${JSON.stringify(
           args.ids
-        )} indices: ${JSON.stringify([...args.indices])} status: ${args.status} ${error}`
-      );
-      throw error;
+        )} indices: ${JSON.stringify([...args.indices])} status: ${args.status} ${error}`,
+        error,
+        logger: this.logger,
+      });
     }
   }
 
@@ -180,8 +195,11 @@ export class CaseClientHandler implements CaseClient {
         userActionService: this._userActionService,
       });
     } catch (error) {
-      this.logger.error(`Failed to get user actions using client id: ${args.caseId}: ${error}`);
-      throw error;
+      throw createCaseError({
+        message: `Failed to get user actions using client id: ${args.caseId}: ${error}`,
+        error,
+        logger: this.logger,
+      });
     }
   }
 
@@ -193,12 +211,13 @@ export class CaseClientHandler implements CaseClient {
         scopedClusterClient: this._scopedClusterClient,
       });
     } catch (error) {
-      this.logger.error(
-        `FAiled to get alerts using client ids: ${JSON.stringify(
+      throw createCaseError({
+        message: `Failed to get alerts using client ids: ${JSON.stringify(
           args.ids
-        )} indices: ${JSON.stringify([...args.indices])}: ${error}`
-      );
-      throw error;
+        )} indices: ${JSON.stringify([...args.indices])}: ${error}`,
+        error,
+        logger: this.logger,
+      });
     }
   }
 
@@ -214,8 +233,11 @@ export class CaseClientHandler implements CaseClient {
         caseConfigureService: this._caseConfigureService,
       });
     } catch (error) {
-      this.logger.error(`Failed to push case using client id: ${args.caseId}: ${error}`);
-      throw error;
+      throw createCaseError({
+        message: `Failed to push case using client id: ${args.caseId}: ${error}`,
+        error,
+        logger: this.logger,
+      });
     }
   }
 }

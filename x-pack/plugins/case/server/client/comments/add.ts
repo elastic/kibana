@@ -38,7 +38,7 @@ import {
 import { CaseServiceSetup, CaseUserActionServiceSetup } from '../../services';
 import { CommentableCase } from '../../common';
 import { CaseClientHandler } from '..';
-import { CaseError } from '../../common/error';
+import { createCaseError } from '../../common/error';
 
 async function getSubCase({
   caseService,
@@ -188,12 +188,11 @@ const addGeneratedAlerts = async ({
 
     return updatedCase.encode();
   } catch (error) {
-    const caseErr = new CaseError(
-      `Failed while adding a generated alert to case id: ${caseId} error: ${error}`,
-      error
-    );
-    logger.error(caseErr);
-    throw caseErr;
+    throw createCaseError({
+      message: `Failed while adding a generated alert to case id: ${caseId} error: ${error}`,
+      error,
+      logger,
+    });
   }
 };
 
@@ -339,11 +338,10 @@ export const addComment = async ({
 
     return updatedCase.encode();
   } catch (error) {
-    const caseErr = new CaseError(
-      `Failed while adding a comment to case id: ${caseId} error: ${error}`,
-      error
-    );
-    logger.error(caseErr);
-    throw caseErr;
+    throw createCaseError({
+      message: `Failed while adding a comment to case id: ${caseId} error: ${error}`,
+      error,
+      logger,
+    });
   }
 };

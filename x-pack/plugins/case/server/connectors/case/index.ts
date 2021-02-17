@@ -26,6 +26,7 @@ import * as i18n from './translations';
 
 import { GetActionTypeParams, isCommentGeneratedAlert } from '..';
 import { nullUser } from '../../common';
+import { createCaseError } from '../../common/error';
 
 const supportedSubActions: string[] = ['create', 'update', 'addComment'];
 
@@ -99,32 +100,46 @@ async function executor(
         ...(subActionParams as CasePostRequest),
       });
     } catch (error) {
-      logger.error(`Failed to create a case using connector: ${error}`);
-      throw error;
+      throw createCaseError({
+        message: `Failed to create a case using connector: ${error}`,
+        error,
+        logger,
+      });
     }
   }
 
   if (subAction === 'update') {
-    try {
-      const updateParamsWithoutNullValues = Object.entries(subActionParams).reduce(
-        (acc, [key, value]) => ({
-          ...acc,
-          ...(value != null ? { [key]: value } : {}),
-        }),
-        {} as CasePatchRequest
-      );
+    const updateParamsWithoutNullValues = Object.entries(subActionParams).reduce(
+      (acc, [key, value]) => ({
+        ...acc,
+        ...(value != null ? { [key]: value } : {}),
+      }),
+      {} as CasePatchRequest
+    );
 
+    try {
       data = await caseClient.update({ cases: [updateParamsWithoutNullValues] });
     } catch (error) {
-      logger.error(`Failed to update case using connector ${error}`);
-      throw error;
+      throw createCaseError({
+        message: `Failed to update case using connector id: ${updateParamsWithoutNullValues?.id} version: ${updateParamsWithoutNullValues?.version}: ${error}`,
+        error,
+        logger,
+      });
     }
   }
 
   if (subAction === 'addComment') {
     const { caseId, comment } = subActionParams as ExecutorSubActionAddCommentParams;
-    const formattedComment = transformConnectorComment(comment);
-    data = await caseClient.addComment({ caseId, comment: formattedComment });
+    try {
+      const formattedComment = transformConnectorComment(comment);
+      data = await caseClient.addComment({ caseId, comment: formattedComment });
+    } catch (error) {
+      throw createCaseError({
+        message: `Failed to create comment using connector case id: ${caseId}: ${error}`,
+        error,
+        logger,
+      });
+    }
   }
 
   return { status: 'ok', data: data ?? {}, actionId };

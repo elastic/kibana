@@ -36,7 +36,7 @@ import {
 } from '../../routes/api/utils';
 import { CASE_SAVED_OBJECT, SUB_CASE_SAVED_OBJECT } from '../../saved_object_types';
 import { CaseServiceSetup } from '../../services';
-import { CaseError } from '../error';
+import { createCaseError } from '../error';
 import { countAlertsForID } from '../index';
 
 interface UpdateCommentResp {
@@ -177,12 +177,11 @@ export class CommentableCase {
         logger: this.logger,
       });
     } catch (error) {
-      const caseErr = new CaseError(
-        `Failed to update commentable case, sub case id: ${this.subCaseId} case id: ${this.caseId}: ${error}`,
-        error
-      );
-      this.logger.error(caseErr);
-      throw caseErr;
+      throw createCaseError({
+        message: `Failed to update commentable case, sub case id: ${this.subCaseId} case id: ${this.caseId}: ${error}`,
+        error,
+        logger: this.logger,
+      });
     }
   }
 
@@ -219,12 +218,11 @@ export class CommentableCase {
         commentableCase,
       };
     } catch (error) {
-      const caseErr = new CaseError(
-        `Failed to update comment in commentable case, sub case id: ${this.subCaseId} case id: ${this.caseId}: ${error}`,
-        error
-      );
-      this.logger.error(caseErr);
-      throw caseErr;
+      throw createCaseError({
+        message: `Failed to update comment in commentable case, sub case id: ${this.subCaseId} case id: ${this.caseId}: ${error}`,
+        error,
+        logger: this.logger,
+      });
     }
   }
 
@@ -269,12 +267,11 @@ export class CommentableCase {
         commentableCase,
       };
     } catch (error) {
-      const caseErr = new CaseError(
-        `Failed creating a comment on a commentable case, sub case id: ${this.subCaseId} case id: ${this.caseId}: ${error}`,
-        error
-      );
-      this.logger.error(caseErr);
-      throw caseErr;
+      throw createCaseError({
+        message: `Failed creating a comment on a commentable case, sub case id: ${this.subCaseId} case id: ${this.caseId}: ${error}`,
+        error,
+        logger: this.logger,
+      });
     }
   }
 
@@ -332,12 +329,11 @@ export class CommentableCase {
         ...this.formatCollectionForEncoding(collectionCommentStats.total),
       });
     } catch (error) {
-      const caseErr = new CaseError(
-        `Failed encoding the commentable case, sub case id: ${this.subCaseId} case id: ${this.caseId}: ${error}`,
-        error
-      );
-      this.logger.error(caseErr);
-      throw caseErr;
+      throw createCaseError({
+        message: `Failed encoding the commentable case, sub case id: ${this.subCaseId} case id: ${this.caseId}: ${error}`,
+        error,
+        logger: this.logger,
+      });
     }
   }
 }

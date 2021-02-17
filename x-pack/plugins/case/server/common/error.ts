@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+import { Logger } from 'src/core/server';
+
 /**
  * Helper class for wrapping errors while preserving the original thrown error.
  */
-export class CaseError extends Error {
+class CaseError extends Error {
   public readonly wrappedError?: Error;
   constructor(message?: string, originalError?: Error) {
     super(message);
@@ -19,4 +21,23 @@ export class CaseError extends Error {
       this.wrappedError = originalError;
     }
   }
+}
+
+/**
+ * Create a CaseError that wraps the original thrown error. This also logs the message that will be placed in the CaseError.
+ */
+export function createCaseError({
+  message,
+  error,
+  logger,
+}: {
+  message?: string;
+  error?: Error;
+  logger: Logger;
+}) {
+  if (message !== undefined) {
+    logger.error(message);
+  }
+
+  return new CaseError(message, error);
 }
