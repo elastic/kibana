@@ -43,6 +43,7 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
 }) => {
   const eventId = ecsRowData._id;
   const eventIndex = ecsRowData._index;
+  const rule = ecsRowData.signal?.rule;
 
   const { navigateToApp } = useKibana().services.application;
   const [, dispatchToaster] = useStateToaster();
@@ -69,6 +70,11 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
           type: CommentType.alert,
           alertId: eventId,
           index: eventIndex ?? '',
+          rule: {
+            // Rule id and name are a string
+            id: ((rule?.id as unknown) as string) ?? '',
+            name: ((rule?.name as unknown) as string) ?? '',
+          },
         },
         updateCase: () =>
           dispatchToaster({
@@ -77,7 +83,7 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
           }),
       });
     },
-    [postComment, eventId, eventIndex, dispatchToaster, onViewCaseClick]
+    [postComment, eventId, eventIndex, rule, dispatchToaster, onViewCaseClick]
   );
 
   const { modal: createCaseModal, openModal: openCreateCaseModal } = useCreateCaseModal({

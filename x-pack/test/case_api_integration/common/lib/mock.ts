@@ -70,6 +70,7 @@ export const postCommentUserReq: CommentRequestUserType = {
 export const postCommentAlertReq: CommentRequestAlertType = {
   alertId: 'test-id',
   index: 'test-index',
+  rule: { id: 'test-rule-id', name: 'test-index-id' },
   type: CommentType.alert,
 };
 
