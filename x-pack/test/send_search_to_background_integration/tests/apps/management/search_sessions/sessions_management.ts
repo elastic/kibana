@@ -126,35 +126,103 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await esArchiver.load('data/search_sessions');
 
         const searchSessionList = await PageObjects.searchSessionsManagement.getList();
-
         expect(searchSessionList.length).to.be(10);
-
-        expectSnapshot(searchSessionList.map((ss) => ss.created)).toMatchInline(`
+        expectSnapshot(searchSessionList.map((ss) => [ss.app, ss.name, ss.created, ss.expires]))
+          .toMatchInline(`
           Array [
-            "16 Feb, 2021, 00:00:00",
-            "15 Feb, 2021, 00:00:00",
-            "14 Feb, 2021, 00:00:00",
-            "13 Feb, 2021, 00:00:00",
-            "12 Feb, 2021, 00:00:00",
-            "11 Feb, 2021, 00:00:00",
-            "10 Feb, 2021, 00:00:00",
-            "9 Feb, 2021, 00:00:00",
-            "8 Feb, 2021, 00:00:00",
-            "7 Feb, 2021, 00:00:00",
+            Array [
+              "graph",
+              "[eCommerce] Orders Test 6 ",
+              "16 Feb, 2021, 00:00:00",
+              "--",
+            ],
+            Array [
+              "lens",
+              "[eCommerce] Orders Test 7",
+              "15 Feb, 2021, 00:00:00",
+              "24 Feb, 2021, 00:00:00",
+            ],
+            Array [
+              "apm",
+              "[eCommerce] Orders Test 8",
+              "14 Feb, 2021, 00:00:00",
+              "24 Feb, 2021, 00:00:00",
+            ],
+            Array [
+              "appSearch",
+              "[eCommerce] Orders Test 9",
+              "13 Feb, 2021, 00:00:00",
+              "24 Feb, 2021, 00:00:00",
+            ],
+            Array [
+              "auditbeat",
+              "[eCommerce] Orders Test 10",
+              "12 Feb, 2021, 00:00:00",
+              "24 Feb, 2021, 00:00:00",
+            ],
+            Array [
+              "code",
+              "[eCommerce] Orders Test 11",
+              "11 Feb, 2021, 00:00:00",
+              "24 Feb, 2021, 00:00:00",
+            ],
+            Array [
+              "console",
+              "[eCommerce] Orders Test 12",
+              "10 Feb, 2021, 00:00:00",
+              "24 Feb, 2021, 00:00:00",
+            ],
+            Array [
+              "security",
+              "[eCommerce] Orders Test 5 ",
+              "9 Feb, 2021, 00:00:00",
+              "24 Feb, 2021, 00:00:00",
+            ],
+            Array [
+              "visualize",
+              "[eCommerce] Orders Test 4 ",
+              "8 Feb, 2021, 00:00:00",
+              "--",
+            ],
+            Array [
+              "canvas",
+              "[eCommerce] Orders Test 3",
+              "7 Feb, 2021, 00:00:00",
+              "24 Feb, 2021, 00:00:00",
+            ],
           ]
         `);
-        expectSnapshot(searchSessionList.map((ss) => ss.expires)).toMatchInline(`
+
+        await esArchiver.unload('data/search_sessions');
+      });
+
+      it('has working pagination controls', async () => {
+        await esArchiver.load('data/search_sessions');
+
+        retry.try(async () => {
+          const searchSessionList = await PageObjects.searchSessionsManagement.getList();
+          expect(searchSessionList.length).to.be(10);
+        });
+
+        await testSubjects.click('pagination-button-next');
+
+        const searchSessionList = await PageObjects.searchSessionsManagement.getList();
+        expect(searchSessionList.length).to.be(2);
+        expectSnapshot(searchSessionList.map((ss) => [ss.app, ss.name, ss.created, ss.expires]))
+          .toMatchInline(`
           Array [
-            "--",
-            "24 Feb, 2021, 00:00:00",
-            "24 Feb, 2021, 00:00:00",
-            "24 Feb, 2021, 00:00:00",
-            "24 Feb, 2021, 00:00:00",
-            "24 Feb, 2021, 00:00:00",
-            "24 Feb, 2021, 00:00:00",
-            "24 Feb, 2021, 00:00:00",
-            "--",
-            "24 Feb, 2021, 00:00:00",
+            Array [
+              "discover",
+              "[eCommerce] Orders Test 2",
+              "6 Feb, 2021, 00:00:00",
+              "24 Feb, 2021, 00:00:00",
+            ],
+            Array [
+              "dashboard",
+              "[eCommerce] Revenue Dashboard",
+              "5 Feb, 2021, 00:00:00",
+              "24 Feb, 2021, 00:00:00",
+            ],
           ]
         `);
 
