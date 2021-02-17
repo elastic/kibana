@@ -388,6 +388,9 @@ export const TableContent: React.FunctionComponent<Props> = ({
                     ]}
                     items={[{ name: 'Rollup alpha' }, { name: 'Rollup beta' }]}
                   />
+                  <EuiButtonEmpty iconType="plusInACircle" onClick={() => {}}>
+                    Add rollup
+                  </EuiButtonEmpty>
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiTableRowCell>

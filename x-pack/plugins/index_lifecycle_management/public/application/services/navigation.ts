@@ -8,12 +8,16 @@
 export const ROUTES = {
   list: '/policies',
   edit: '/policies/edit/:policyName?',
-  rollupWizard: '/policies/edit/:policyName/rollups',
+  rollupWizard: '/policies/edit/rollup',
   create: '/policies/edit',
 };
 
 export const getPolicyEditPath = (policyName: string): string => {
   return encodeURI(`/policies/edit/${encodeURIComponent(policyName)}`);
+};
+
+export const getPolicyRollupWizardPath = () => {
+  return ROUTES.rollupWizard;
 };
 
 export const getPolicyCreatePath = () => {

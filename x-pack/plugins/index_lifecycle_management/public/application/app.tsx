@@ -17,6 +17,8 @@ import { RollupWizard } from './sections/rollup_wizard';
 import { trackUiMetric } from './services/ui_metric';
 import { ROUTES } from './services/navigation';
 
+import { AppContext } from './app_context';
+
 export const AppWithRouter = ({
   history,
   navigateToApp,
@@ -41,18 +43,20 @@ export const App = ({
   useEffect(() => trackUiMetric(METRIC_TYPE.LOADED, UIM_APP_LOAD), []);
 
   return (
-    <Switch>
-      <Redirect exact from="/" to={ROUTES.list} />
-      <Route
-        exact
-        path={ROUTES.list}
-        render={(props) => <PolicyTable {...props} navigateToApp={navigateToApp} />}
-      />
-      <Route
-        path={ROUTES.edit}
-        render={(props) => <EditPolicy {...props} getUrlForApp={getUrlForApp} />}
-      />
-      <Route path={ROUTES.rollupWizard} render={(props) => <RollupWizard {...props} />} />
-    </Switch>
+    <AppContext>
+      <Switch>
+        <Redirect exact from="/" to={ROUTES.list} />
+        <Route
+          exact
+          path={ROUTES.list}
+          render={(props) => <PolicyTable {...props} navigateToApp={navigateToApp} />}
+        />
+        <Route
+          path={ROUTES.edit}
+          render={(props) => <EditPolicy {...props} getUrlForApp={getUrlForApp} />}
+        />
+        <Route path={ROUTES.rollupWizard} render={(props) => <RollupWizard {...props} />} />
+      </Switch>
+    </AppContext>
   );
 };
