@@ -53,16 +53,19 @@ const chartBase: ChartBase = {
 };
 
 export function getHeapMemoryChart({
+  environment,
   setup,
   serviceName,
   serviceNodeName,
 }: {
+  environment?: string;
   setup: Setup & SetupTimeRange;
   serviceName: string;
   serviceNodeName?: string;
 }) {
   return withApmSpan('get_heap_memory_charts', () =>
     fetchAndTransformMetrics({
+      environment,
       setup,
       serviceName,
       serviceNodeName,
