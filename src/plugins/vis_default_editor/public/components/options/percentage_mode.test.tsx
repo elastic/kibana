@@ -11,7 +11,7 @@ import { mountWithIntl } from '@kbn/test/jest';
 import { PercentageModeOption, PercentageModeOptionProps } from './percentage_mode';
 import { EuiFieldText } from '@elastic/eui';
 
-describe('PercentageModeOption', function () {
+describe('PercentageModeOption', () => {
   let props: PercentageModeOptionProps;
   let component;
   beforeAll(() => {
