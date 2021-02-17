@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { isTotalHitsGreaterThan } from './total_hits';
+import { isTotalHitsGreaterThan, TotalHits } from './total_hits';
 
 describe('total.relation: eq', () => {
   const totalHits = {
     value: 100,
-    relation: 'eq',
+    relation: 'eq' as TotalHits['relation'],
   };
 
   test('total.value: 100 should be more than 90', () => {
@@ -29,7 +29,7 @@ describe('total.relation: eq', () => {
 describe('total.relation: gte', () => {
   const totalHits = {
     value: 100,
-    relation: 'gte',
+    relation: 'gte' as TotalHits['relation'],
   };
 
   test('total.value: 100 should be more than 90', () => {

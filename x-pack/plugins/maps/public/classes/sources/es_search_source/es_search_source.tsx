@@ -382,7 +382,7 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
       maxResultWindow,
       initialSearchContext
     );
-    searchSource.setField('track_total_hits', maxResultWindow);
+    searchSource.setField('track_total_hits', maxResultWindow + 1);
     searchSource.setField('fieldsFromSource', searchFilters.fieldNames); // Setting "fields" filters out unused scripted fields
     if (sourceOnlyFields.length === 0) {
       searchSource.setField('source', false); // do not need anything from _source

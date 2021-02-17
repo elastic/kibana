@@ -99,6 +99,7 @@ export interface SearchSourceFields {
   searchAfter?: EsQuerySearchAfter;
   timeout?: string;
   terminate_after?: number;
+  track_total_hits?: boolean | number;
 }
 
 export interface SearchSourceOptions {

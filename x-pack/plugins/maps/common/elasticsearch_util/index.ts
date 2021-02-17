@@ -8,4 +8,4 @@
 export * from './es_agg_utils';
 export * from './convert_to_geojson';
 export * from './elasticsearch_geo_utils';
-export { isTotalHitsGreaterThan } from './total_hits';
+export { isTotalHitsGreaterThan, TotalHits } from './total_hits';
