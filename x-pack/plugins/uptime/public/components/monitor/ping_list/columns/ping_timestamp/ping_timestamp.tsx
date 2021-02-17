@@ -8,6 +8,7 @@
 import React, { useContext, useEffect, useState } from 'react';
 import useIntersection from 'react-use/lib/useIntersection';
 import styled from 'styled-components';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { Ping } from '../../../../../../common/runtime_types/ping';
 import { useFetcher, FETCH_STATUS } from '../../../../../../../observability/public';
 import { getJourneyScreenshot } from '../../../../../state/api/journey';
@@ -25,11 +26,6 @@ const StepDiv = styled.div`
     }
   }
 
-  figure.euiImage-isFullScreen {
-    div.stepArrowsFullScreen {
-      display: flex;
-    }
-  }
   position: relative;
   div.stepArrows {
     display: none;
@@ -92,33 +88,40 @@ export const PingTimestamp = ({ label, ping, showNavBtn = true }: Props) => {
   );
 
   return (
-    <StepDiv
-      onMouseEnter={() => setIsImagePopoverOpen(true)}
-      onMouseLeave={() => setIsImagePopoverOpen(false)}
-      ref={intersectionRef}
-    >
-      {imgSrc ? (
-        <StepImagePopover
-          captionContent={captionContent}
-          imageCaption={ImageCaption}
-          imgSrc={imgSrc}
-          isImagePopoverOpen={isImagePopoverOpen}
-        />
-      ) : (
-        <NoImageDisplay
-          imageCaption={ImageCaption}
-          isLoading={status === FETCH_STATUS.LOADING}
-          isPending={status === FETCH_STATUS.PENDING}
-        />
-      )}
-      {showNavBtn && (
-        <NavButtons
-          maxSteps={data?.maxSteps}
-          setIsImagePopoverOpen={setIsImagePopoverOpen}
-          setStepNumber={setStepNumber}
-          stepNumber={stepNumber}
-        />
-      )}
-    </StepDiv>
+    <EuiFlexGroup alignItems="center">
+      <EuiFlexItem grow={false}>
+        <StepDiv
+          onMouseEnter={() => setIsImagePopoverOpen(true)}
+          onMouseLeave={() => setIsImagePopoverOpen(false)}
+          ref={intersectionRef}
+        >
+          {imgSrc ? (
+            <StepImagePopover
+              captionContent={captionContent}
+              imageCaption={ImageCaption}
+              imgSrc={imgSrc}
+              isImagePopoverOpen={isImagePopoverOpen}
+            />
+          ) : (
+            <NoImageDisplay
+              imageCaption={ImageCaption}
+              isLoading={status === FETCH_STATUS.LOADING}
+              isPending={status === FETCH_STATUS.PENDING}
+            />
+          )}
+          {showNavBtn && (
+            <NavButtons
+              maxSteps={data?.maxSteps}
+              setIsImagePopoverOpen={setIsImagePopoverOpen}
+              setStepNumber={setStepNumber}
+              stepNumber={stepNumber}
+            />
+          )}
+        </StepDiv>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <span className="eui-textNoWrap">{label}</span>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };

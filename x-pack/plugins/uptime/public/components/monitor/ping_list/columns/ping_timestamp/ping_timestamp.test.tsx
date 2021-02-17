@@ -106,17 +106,17 @@ describe('Ping Timestamp component', () => {
       data: { src },
       refetch: () => null,
     });
-    const { getByAltText, getByText, queryByAltText } = render(
+    const { getByAltText, getAllByText, queryByAltText } = render(
       <PingTimestamp ping={response} label={getShortTimeStamp(moment(response.timestamp))} />
     );
-    const caption = getByText('Nov 26, 2020 10:28:56 AM');
-    fireEvent.mouseEnter(caption);
+    const caption = getAllByText('Nov 26, 2020 10:28:56 AM');
+    fireEvent.mouseEnter(caption[0]);
 
     const altText = `A larger version of the screenshot for this journey step's thumbnail.`;
 
     await waitFor(() => getByAltText(altText));
 
-    fireEvent.mouseLeave(caption);
+    fireEvent.mouseLeave(caption[0]);
 
     await waitFor(() => expect(queryByAltText(altText)).toBeNull());
   });
