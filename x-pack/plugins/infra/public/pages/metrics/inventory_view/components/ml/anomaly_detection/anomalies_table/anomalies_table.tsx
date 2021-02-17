@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { ChangeEvent, useCallback, useMemo, useState } from 'react';
+import React, { ChangeEvent, useCallback, useEffect, useMemo, useState } from 'react';
 import DateMath from '@elastic/datemath';
 import { EuiSuperDatePicker } from '@elastic/eui';
 import moment from 'moment';
@@ -21,12 +21,14 @@ import {
   Criteria,
   EuiContextMenuItem,
   EuiComboBox,
+  EuiButtonIcon,
+  EuiPopover,
+  EuiContextMenuPanel,
+  EuiIcon,
+  EuiText,
 } from '@elastic/eui';
-import useDebounce from 'react-use/lib/useDebounce';
 import { FormattedDate, FormattedMessage } from 'react-intl';
-import { EuiPopover } from '@elastic/eui';
-import { EuiButtonIcon } from '@elastic/eui';
-import { EuiContextMenuPanel } from '@elastic/eui';
+import { withTheme } from '../../../../../../../../../../../src/plugins/kibana_react/common';
 import { PrefilledAnomalyAlertFlyout } from '../../../../../../../alerting/metric_anomaly/components/alert_flyout';
 import { useLinkProps } from '../../../../../../../hooks/use_link_props';
 import { useSorting } from '../../../../../../../hooks/use_sorting';
@@ -44,8 +46,6 @@ import { createResultsUrl } from '../flyout_home';
 import { useWaffleViewState, WaffleViewState } from '../../../../hooks/use_waffle_view_state';
 type JobType = 'k8s' | 'hosts';
 type SortField = 'anomalyScore' | 'startTime';
-
-const FETCH_ANOMALIES_DEBOUNCE_MS = 500;
 interface JobOption {
   id: JobType;
   label: string;
@@ -148,6 +148,27 @@ const AnomalyActionMenu = React.memo<{
     </>
   );
 });
+export const NoAnomaliesFound = withTheme(({ theme }) => (
+  <EuiText>
+    <EuiSpacer size="xl" />
+    <p>
+      <EuiIcon type="eyeClosed" size="xl" color={theme.eui.euiColorMediumShade} />
+    </p>
+    <h3>
+      <FormattedMessage
+        id="xpack.infra.ml.anomalyFlyout.anomalyTable.noAnomaliesFound"
+        defaultMessage="No anomalies found"
+      />
+    </h3>
+    <EuiSpacer size="m" />
+    <EuiText color="subdued">
+      <FormattedMessage
+        id="xpack.infra.ml.anomalyFlyout.anomalyTable.noAnomaliesSuggestion"
+        defaultMessage="Try modifying your search or selected time range."
+      />
+    </EuiText>
+  </EuiText>
+));
 export const AnomaliesTable = () => {
   const [search, setSearch] = useState('');
   const [start, setStart] = useState('now-30d');
@@ -222,7 +243,6 @@ export const AnomaliesTable = () => {
     fetchPreviousPage: k8sPreviousPage,
     isLoadingMetricsK8sAnomalies: k8sLoading,
   } = useMetricsK8sAnomaliesResults(anomalyParams);
-
   const page = useMemo(() => (jobType === 'hosts' ? hostPage : k8sPage), [
     jobType,
     hostPage,
@@ -286,15 +306,11 @@ export const AnomaliesTable = () => {
     });
   };
 
-  useDebounce(
-    () => {
-      if (getAnomalies) {
-        getAnomalies(undefined, search);
-      }
-    },
-    FETCH_ANOMALIES_DEBOUNCE_MS,
-    [getAnomalies, search]
-  );
+  useEffect(() => {
+    if (getAnomalies) {
+      getAnomalies(undefined, search);
+    }
+  }, [getAnomalies, search]);
 
   return (
     <div>
@@ -343,6 +359,17 @@ export const AnomaliesTable = () => {
         sorting={{ sort: sorting }}
         onChange={onTableChange}
         hasActions={true}
+        loading={isLoading}
+        noItemsMessage={
+          isLoading ? (
+            <FormattedMessage
+              id="xpack.infra.ml.anomalyFlyout.anomalyTable.loading"
+              defaultMessage="Loading anomalies"
+            />
+          ) : (
+            <NoAnomaliesFound />
+          )
+        }
       />
       <EuiSpacer size="l" />
       <PaginationControls
