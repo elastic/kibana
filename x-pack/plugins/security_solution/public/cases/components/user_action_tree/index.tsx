@@ -17,6 +17,7 @@ import { isEmpty } from 'lodash';
 import React, { useCallback, useMemo, useRef, useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
+import { isRight } from 'fp-ts/Either';
 
 import * as i18n from './translations';
 
@@ -25,7 +26,12 @@ import { Case, CaseUserActions } from '../../containers/types';
 import { useUpdateComment } from '../../containers/use_update_comment';
 import { useCurrentUser } from '../../../common/lib/kibana';
 import { AddComment, AddCommentRefObject } from '../add_comment';
-import { ActionConnector, CommentType } from '../../../../../case/common/api';
+import {
+  ActionConnector,
+  AlertCommentRequestRt,
+  CommentType,
+  ContextTypeUserRt,
+} from '../../../../../case/common/api';
 import { CaseServices } from '../../containers/use_get_case_user_actions';
 import { parseString } from '../../containers/utils';
 import { OnUpdateFields } from '../case_view';
@@ -287,7 +293,7 @@ export const UserActionTree = React.memo(
             // Comment creation
             if (action.commentId != null && action.action === 'create') {
               const comment = caseData.comments.find((c) => c.id === action.commentId);
-              if (comment != null && comment.type === CommentType.user) {
+              if (comment != null && isRight(ContextTypeUserRt.decode(comment))) {
                 return [
                   ...comments,
                   {
@@ -339,7 +345,7 @@ export const UserActionTree = React.memo(
                     ),
                   },
                 ];
-              } else if (comment != null && comment.type === CommentType.alert) {
+              } else if (comment != null && isRight(AlertCommentRequestRt.decode(comment))) {
                 // TODO: clean this up
                 const alertId = Array.isArray(comment.alertId)
                   ? comment.alertId.length > 0
@@ -351,7 +357,11 @@ export const UserActionTree = React.memo(
                 }
                 const alert = alerts[alertId];
                 return [...comments, getAlertAttachment({ action, alert, onShowAlertDetails })];
-              } else if (comment != null && comment.type === CommentType.generatedAlert) {
+              } else if (
+                comment != null &&
+                isRight(AlertCommentRequestRt.decode(comment)) &&
+                comment.type === CommentType.generatedAlert
+              ) {
                 // TODO: clean this up
                 const alertIds = Array.isArray(comment.alertId)
                   ? comment.alertId
