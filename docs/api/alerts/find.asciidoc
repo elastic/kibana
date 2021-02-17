@@ -4,7 +4,7 @@
 <titleabbrev>Find alerts</titleabbrev>
 ++++
 
-Retrieve a paginated set of {kib} alerts by various conditions.
+Retrieve a paginated set of alerts based on condition.
 
 [[alerts-api-find-request]]
 ==== Request
