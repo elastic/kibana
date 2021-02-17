@@ -1882,14 +1882,6 @@
     pirates "^4.0.0"
     source-map-support "^0.5.16"
 
-"@babel/runtime-corejs2@^7.2.0":
-  version "7.11.2"
-  resolved "https://registry.yarnpkg.com/@babel/runtime-corejs2/-/runtime-corejs2-7.11.2.tgz#700a03945ebad0d31ba6690fc8a6bcc9040faa47"
-  integrity sha512-AC/ciV28adSSpEkBglONBWq4/Lvm6GAZuxIoyVtsnUpZMl0bxLtoChEnYAkP+47KyOCayZanojtflUEUJtR/6Q==
-  dependencies:
-    core-js "^2.6.5"
-    regenerator-runtime "^0.13.4"
-
 "@babel/runtime-corejs3@^7.10.2":
   version "7.11.2"
   resolved "https://registry.yarnpkg.com/@babel/runtime-corejs3/-/runtime-corejs3-7.11.2.tgz#02c3029743150188edeb66541195f54600278419"
@@ -2146,10 +2138,10 @@
   dependencies:
     object-hash "^1.3.0"
 
-"@elastic/charts@24.6.0":
-  version "24.6.0"
-  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-24.6.0.tgz#2123c72e69e1e4557be41ae55c085a5a9f75d3b6"
-  integrity sha512-fL0301EcHxJEYRzdlD4JIA3VXY4qwRPSkRrk8hvJNryTlQWEdyXZF3HNczk0IrgST5cfCOGAWG8IVtO59HxUJw==
+"@elastic/charts@25.0.1":
+  version "25.0.1"
+  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-25.0.1.tgz#7c61fc22887b7b1feba3e52fc1b44f21a9c1d0bc"
+  integrity sha512-UYGO9Yg2+cdJOOs9DjlYeB2Oy/3UMXTtF6/yWZt2iXh7mmW9jI5DqfjgG/9BFSCwQZHUKBZ58d5ZCQfe72maGA==
   dependencies:
     "@popperjs/core" "^2.4.0"
     chroma-js "^2.1.0"
@@ -11120,7 +11112,7 @@ core-js@^1.0.0:
   resolved "https://registry.yarnpkg.com/core-js/-/core-js-1.2.7.tgz#652294c14651db28fa93bd2d5ff2983a4f08c636"
   integrity sha1-ZSKUwUZR2yj6k70tX/KYOk8IxjY=
 
-core-js@^2.4.0, core-js@^2.5.0, core-js@^2.5.3, core-js@^2.6.5, core-js@^2.6.9:
+core-js@^2.4.0, core-js@^2.5.0, core-js@^2.5.3, core-js@^2.6.9:
   version "2.6.9"
   resolved "https://registry.yarnpkg.com/core-js/-/core-js-2.6.9.tgz#6b4b214620c834152e179323727fc19741b084f2"
   integrity sha512-HOpZf6eXmnl7la+cUdMnLvUxKNqLUzJvgIziQ0DiF3JwSImNphIqdGqzj6hIKyX04MmV0poclQ7+wjWvxQyR2A==
@@ -30799,13 +30791,6 @@ xpath@0.0.27:
   version "0.0.27"
   resolved "https://registry.yarnpkg.com/xpath/-/xpath-0.0.27.tgz#dd3421fbdcc5646ac32c48531b4d7e9d0c2cfa92"
   integrity sha512-fg03WRxtkCV6ohClePNAECYsmpKKTv5L8y/X3Dn1hQrec3POx2jHZ/0P2qQ6HvsrU1BmeqXcof3NGGueG6LxwQ==
-
-xregexp@4.2.4:
-  version "4.2.4"
-  resolved "https://registry.yarnpkg.com/xregexp/-/xregexp-4.2.4.tgz#02a4aea056d65a42632c02f0233eab8e4d7e57ed"
-  integrity sha512-sO0bYdYeJAJBcJA8g7MJJX7UrOZIfJPd8U2SC7B2Dd/J24U0aQNoGp33shCaBSWeb0rD5rh6VBUIXOkGal1TZA==
-  dependencies:
-    "@babel/runtime-corejs2" "^7.2.0"
 
 "xtend@>=4.0.0 <4.1.0-0", xtend@^4.0.0, xtend@^4.0.1, xtend@^4.0.2, xtend@~4.0.0, xtend@~4.0.1:
   version "4.0.2"

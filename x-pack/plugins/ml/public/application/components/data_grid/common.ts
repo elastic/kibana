@@ -27,7 +27,11 @@ import {
 
 import { DEFAULT_RESULTS_FIELD } from '../../../../common/constants/data_frame_analytics';
 import { extractErrorMessage } from '../../../../common/util/errors';
-import { FeatureImportance, TopClasses } from '../../../../common/types/feature_importance';
+import {
+  FeatureImportance,
+  FeatureImportanceClassName,
+  TopClasses,
+} from '../../../../common/types/feature_importance';
 
 import {
   BASIC_NUMERICAL_TYPES,
@@ -44,6 +48,9 @@ import { getNestedProperty } from '../../util/object_utils';
 import { mlFieldFormatService } from '../../services/field_format_service';
 
 import { DataGridItem, IndexPagination, RenderCellValue } from './types';
+import type { RuntimeField } from '../../../../../../../src/plugins/data/common/index_patterns';
+import { RuntimeMappings } from '../../../../common/types/fields';
+import { isPopulatedObject } from '../../../../common/util/object_utils';
 
 export const INIT_MAX_COLUMNS = 10;
 
@@ -80,6 +87,37 @@ export const getFieldsFromKibanaIndexPattern = (indexPattern: IndexPattern): str
   });
 
   return indexPatternFields;
+};
+
+/**
+ * Return a map of runtime_mappings for each of the index pattern field provided
+ * to provide in ES search queries
+ * @param indexPatternFields
+ * @param indexPattern
+ * @param clonedRuntimeMappings
+ */
+export const getRuntimeFieldsMapping = (
+  indexPatternFields: string[] | undefined,
+  indexPattern: IndexPattern | undefined,
+  clonedRuntimeMappings?: RuntimeMappings
+) => {
+  if (!Array.isArray(indexPatternFields) || indexPattern === undefined) return {};
+  const ipRuntimeMappings = indexPattern.getComputedFields().runtimeFields;
+  let combinedRuntimeMappings: RuntimeMappings = {};
+
+  if (isPopulatedObject(ipRuntimeMappings)) {
+    indexPatternFields.forEach((ipField) => {
+      if (ipRuntimeMappings.hasOwnProperty(ipField)) {
+        combinedRuntimeMappings[ipField] = ipRuntimeMappings[ipField];
+      }
+    });
+  }
+  if (isPopulatedObject(clonedRuntimeMappings)) {
+    combinedRuntimeMappings = { ...combinedRuntimeMappings, ...clonedRuntimeMappings };
+  }
+  return Object.keys(combinedRuntimeMappings).length > 0
+    ? { runtime_mappings: combinedRuntimeMappings }
+    : {};
 };
 
 export interface FieldTypes {
@@ -131,6 +169,45 @@ export const getDataGridSchemasFromFieldTypes = (fieldTypes: FieldTypes, results
 };
 
 export const NON_AGGREGATABLE = 'non-aggregatable';
+
+export const getDataGridSchemaFromESFieldType = (
+  fieldType: ES_FIELD_TYPES | undefined | RuntimeField['type']
+): string | undefined => {
+  // Built-in values are ['boolean', 'currency', 'datetime', 'numeric', 'json']
+  // To fall back to the default string schema it needs to be undefined.
+  let schema;
+
+  switch (fieldType) {
+    case ES_FIELD_TYPES.GEO_POINT:
+    case ES_FIELD_TYPES.GEO_SHAPE:
+      schema = 'json';
+      break;
+    case ES_FIELD_TYPES.BOOLEAN:
+      schema = 'boolean';
+      break;
+    case ES_FIELD_TYPES.DATE:
+    case ES_FIELD_TYPES.DATE_NANOS:
+      schema = 'datetime';
+      break;
+    case ES_FIELD_TYPES.BYTE:
+    case ES_FIELD_TYPES.DOUBLE:
+    case ES_FIELD_TYPES.FLOAT:
+    case ES_FIELD_TYPES.HALF_FLOAT:
+    case ES_FIELD_TYPES.INTEGER:
+    case ES_FIELD_TYPES.LONG:
+    case ES_FIELD_TYPES.SCALED_FLOAT:
+    case ES_FIELD_TYPES.SHORT:
+      schema = 'numeric';
+      break;
+    // keep schema undefined for text based columns
+    case ES_FIELD_TYPES.KEYWORD:
+    case ES_FIELD_TYPES.TEXT:
+      break;
+  }
+
+  return schema;
+};
+
 export const getDataGridSchemaFromKibanaFieldType = (
   field: IFieldType | undefined
 ): string | undefined => {
@@ -168,8 +245,9 @@ const getClassName = (className: string, isClassTypeBoolean: boolean) => {
 
   return className;
 };
+
 /**
- * Helper to transform feature importance flattened fields with arrays back to object structure
+ * Helper to transform feature importance fields with arrays back to primitive value
  *
  * @param row - EUI data grid data row
  * @param mlResultsField - Data frame analytics results field
@@ -180,69 +258,44 @@ export const getFeatureImportance = (
   mlResultsField: string,
   isClassTypeBoolean = false
 ): FeatureImportance[] => {
-  const featureNames: string[] | undefined =
-    row[`${mlResultsField}.feature_importance.feature_name`];
-  const classNames: string[] | undefined =
-    row[`${mlResultsField}.feature_importance.classes.class_name`];
-  const classImportance: number[] | undefined =
-    row[`${mlResultsField}.feature_importance.classes.importance`];
+  const featureImportance: Array<{
+    feature_name: string[];
+    classes?: Array<{ class_name: FeatureImportanceClassName[]; importance: number[] }>;
+    importance?: number | number[];
+  }> = row[`${mlResultsField}.feature_importance`];
+  if (featureImportance === undefined) return [];
 
-  if (featureNames === undefined) {
-    return [];
-  }
-
-  // return object structure for classification job
-  if (classNames !== undefined && classImportance !== undefined) {
-    const overallClassNames = classNames?.slice(0, classNames.length / featureNames.length);
-
-    return featureNames.map((fName, index) => {
-      const offset = overallClassNames.length * index;
-      const featureClassImportance = classImportance.slice(
-        offset,
-        offset + overallClassNames.length
-      );
-      return {
-        feature_name: fName,
-        classes: overallClassNames.map((fClassName, fIndex) => {
+  return featureImportance.map((fi) => ({
+    feature_name: Array.isArray(fi.feature_name) ? fi.feature_name[0] : fi.feature_name,
+    classes: Array.isArray(fi.classes)
+      ? fi.classes.map((c) => {
+          const processedClass = getProcessedFields(c);
           return {
-            class_name: getClassName(fClassName, isClassTypeBoolean),
-            importance: featureClassImportance[fIndex],
+            importance: processedClass.importance,
+            class_name: getClassName(processedClass.class_name, isClassTypeBoolean),
           };
-        }),
-      };
-    });
-  }
-
-  // return object structure for regression job
-  const importance: number[] = row[`${mlResultsField}.feature_importance.importance`];
-  return featureNames.map((fName, index) => ({
-    feature_name: fName,
-    importance: importance[index],
+        })
+      : fi.classes,
+    importance: Array.isArray(fi.importance) ? fi.importance[0] : fi.importance,
   }));
 };
 
 /**
- * Helper to transforms top classes flattened fields with arrays back to object structure
+ * Helper to transforms top classes fields with arrays back to original primitive value
  *
  * @param row - EUI data grid data row
  * @param mlResultsField - Data frame analytics results field
  * @returns nested object structure of feature importance values
  */
 export const getTopClasses = (row: Record<string, any>, mlResultsField: string): TopClasses => {
-  const classNames: string[] | undefined = row[`${mlResultsField}.top_classes.class_name`];
-  const classProbabilities: number[] | undefined =
-    row[`${mlResultsField}.top_classes.class_probability`];
-  const classScores: number[] | undefined = row[`${mlResultsField}.top_classes.class_score`];
+  const topClasses: Array<{
+    class_name: FeatureImportanceClassName[];
+    class_probability: number[];
+    class_score: number[];
+  }> = row[`${mlResultsField}.top_classes`];
 
-  if (classNames === undefined || classProbabilities === undefined || classScores === undefined) {
-    return [];
-  }
-
-  return classNames.map((className, index) => ({
-    class_name: className,
-    class_probability: classProbabilities[index],
-    class_score: classScores[index],
-  }));
+  if (topClasses === undefined) return [];
+  return topClasses.map((tc) => getProcessedFields(tc)) as TopClasses;
 };
 
 export const useRenderCellValue = (
