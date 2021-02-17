@@ -8,6 +8,8 @@
 import Boom from '@hapi/boom';
 import rison from 'rison-node';
 import { ElasticsearchClient } from 'kibana/server';
+import moment from 'moment';
+import { Duration } from 'moment/moment';
 import { MlClient } from '../ml_client';
 import {
   MlAnomalyDetectionAlertParams,
@@ -27,6 +29,7 @@ import { parseInterval } from '../../../common/util/parse_interval';
 import { AnomalyDetectionAlertContext } from './register_anomaly_detection_alert_type';
 import { MlJobsResponse } from '../../../common/types/job_service';
 import { ANOMALY_SCORE_MATCH_GROUP_ID } from '../../../common/constants/alerts';
+import { getEntityFieldName, getEntityFieldValue } from '../../../common/util/anomaly_utils';
 
 function isDefined<T>(argument: T | undefined | null): argument is T {
   return argument !== undefined && argument !== null;
@@ -36,15 +39,15 @@ function isDefined<T>(argument: T | undefined | null): argument is T {
  * Resolves the longest bucket span from the list and multiply it by 2.
  * @param bucketSpans Collection of bucket spans
  */
-export function resolveTimeInterval(bucketSpans: string[]): string {
-  return `${
+export function resolveBucketSpanInSeconds(bucketSpans: string[]): number {
+  return (
     Math.max(
       ...bucketSpans
         .map((b) => parseInterval(b))
         .filter(isDefined)
         .map((v) => v.asSeconds())
     ) * 2
-  }s`;
+  );
 }
 
 /**
@@ -271,13 +274,8 @@ export function alertingServiceProvider(mlClient: MlClient, esClient: Elasticsea
     if (source.result_type === ANOMALY_RESULT_TYPE.INFLUENCER) {
       alertInstanceKey += `_${source.influencer_field_name}_${source.influencer_field_value}`;
     } else if (source.result_type === ANOMALY_RESULT_TYPE.RECORD) {
-      const fieldName =
-        source.field_name ??
-        source.by_field_name ??
-        source.over_field_name ??
-        source.partition_field_name;
-      const fieldValue =
-        source.by_field_value ?? source.over_field_value ?? source.partition_field_value;
+      const fieldName = getEntityFieldName(source);
+      const fieldValue = getEntityFieldValue(source);
       alertInstanceKey += `_${source.function}_${fieldName}_${fieldValue}`;
     }
     return alertInstanceKey;
@@ -285,12 +283,14 @@ export function alertingServiceProvider(mlClient: MlClient, esClient: Elasticsea
 
   /**
    * Builds a request body
-   * @param params
-   * @param previewTimeInterval
+   * @param params - Alert params
+   * @param previewTimeInterval - Relative time interval to test the alert condition
+   * @param checkIntervalGap - Interval between alert executions
    */
   const fetchAnomalies = async (
     params: MlAnomalyDetectionAlertParams,
-    previewTimeInterval?: string
+    previewTimeInterval?: string,
+    checkIntervalGap?: Duration
   ): Promise<AlertExecutionResult[] | undefined> => {
     const jobAndGroupIds = [
       ...(params.jobSelection.jobIds ?? []),
@@ -307,9 +307,14 @@ export function alertingServiceProvider(mlClient: MlClient, esClient: Elasticsea
       return;
     }
 
-    const lookBackTimeInterval = resolveTimeInterval(
-      jobsResponse.map((v) => v.analysis_config.bucket_span)
-    );
+    /**
+     * The check interval might be bigger than the 2x bucket span.
+     * We need to check the biggest time range to make sure anomalies are not missed.
+     */
+    const lookBackTimeInterval = `${Math.max(
+      resolveBucketSpanInSeconds(jobsResponse.map((v) => v.analysis_config.bucket_span)),
+      checkIntervalGap ? checkIntervalGap.asSeconds() : 0
+    )}s`;
 
     const jobIds = jobsResponse.map((v) => v.job_id);
 
@@ -511,13 +516,21 @@ export function alertingServiceProvider(mlClient: MlClient, esClient: Elasticsea
      * @param params - Alert params
      * @param publicBaseUrl
      * @param alertId - Alert ID
+     * @param startedAt
+     * @param previousStartedAt
      */
     execute: async (
       params: MlAnomalyDetectionAlertParams,
       publicBaseUrl: string | undefined,
-      alertId: string
+      alertId: string,
+      startedAt: Date,
+      previousStartedAt: Date | null
     ): Promise<AnomalyDetectionAlertContext | undefined> => {
-      const res = await fetchAnomalies(params);
+      const checkIntervalGap = previousStartedAt
+        ? moment.duration(moment(startedAt).diff(previousStartedAt))
+        : undefined;
+
+      const res = await fetchAnomalies(params, undefined, checkIntervalGap);
 
       if (!res) {
         throw new Error('No results found');
