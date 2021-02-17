@@ -87,7 +87,7 @@ export const Boosts: React.FC<Props> = ({ name, type, boosts = [] }) => {
 
   return (
     <EuiPanel className="boosts">
-      <EuiFlexGroup className="boosts__header" responsive={false} alignItems="center">
+      <EuiFlexGroup responsive={false} alignItems="center">
         <EuiFlexItem>
           <EuiTitle size="xxs">
             <h4>
