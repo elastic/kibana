@@ -26,9 +26,10 @@ import { url as urlUtils } from '../../../common';
  */
 export function getStatesFromKbnUrl(
   url: string = window.location.href,
-  keys?: string[]
+  keys?: string[],
+  { getFromHashQuery = true }: { getFromHashQuery: boolean } = { getFromHashQuery: true }
 ): Record<string, unknown> {
-  const query = parseUrlHash(url)?.query;
+  const query = getFromHashQuery ? parseUrlHash(url)?.query : parseUrl(url).query;
 
   if (!query) return {};
   const decoded: Record<string, unknown> = {};

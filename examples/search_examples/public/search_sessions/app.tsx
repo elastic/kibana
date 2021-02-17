@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
 import useObservable from 'react-use/lib/useObservable';
 import {
   EuiAccordion,
   EuiButtonEmpty,
+  EuiCallOut,
   EuiCode,
   EuiCodeBlock,
   EuiComboBox,
@@ -53,8 +53,15 @@ import {
 } from '../../../../src/plugins/data/public';
 import {
   createStateContainer,
+  getStatesFromKbnUrl,
   useContainerState,
 } from '../../../../src/plugins/kibana_utils/public';
+import {
+  AppUrlState,
+  GlobalUrlState,
+  SEARCH_SESSIONS_EXAMPLES_APP_URL_GENERATOR,
+  SearchSessionExamplesUrlGeneratorState,
+} from './url_generator';
 
 interface SearchSessionsExampleAppDeps {
   notifications: CoreStart['notifications'];
@@ -79,21 +86,29 @@ enum DemoStep {
 interface State extends QueryState {
   indexPatternId?: string;
   numericFieldName?: string;
+
+  /**
+   * If landed into the app with restore URL
+   */
+  restoreSessionId?: string;
 }
 
 export const SearchSessionsExampleApp = ({
   notifications,
   navigation,
   data,
-  shardDelayEnabled,
 }: SearchSessionsExampleAppDeps) => {
   const { IndexPatternSelect } = data.ui;
 
   const [isSearching, setIsSearching] = useState<boolean>(false);
   const [request, setRequest] = useState<IEsSearchRequest | null>(null);
   const [response, setResponse] = useState<IEsSearchResponse | null>(null);
+  const [tookMs, setTookMs] = useState<number | null>(null);
+  const nextRequestIdRef = useRef<number>(0);
+
   const [restoreRequest, setRestoreRequest] = useState<IEsSearchRequest | null>(null);
   const [restoreResponse, setRestoreResponse] = useState<IEsSearchResponse | null>(null);
+  const [restoreTookMs, setRestoreTookMs] = useState<number | null>(null);
 
   const sessionState = useObservable(data.search.session.state$) || SearchSessionState.None;
 
@@ -113,25 +128,60 @@ export const SearchSessionsExampleApp = ({
     }
   })();
 
+  const {
+    numericFieldName,
+    indexPattern,
+    selectedField,
+    fields,
+    setIndexPattern,
+    setNumericFieldName,
+    state,
+  } = useAppState({ data });
+
+  const isRestoring = !!state.restoreSessionId;
+
   const enableSessionStorage = useCallback(() => {
     data.search.session.enableStorage({
       getName: async () => 'Search sessions example',
       getUrlGeneratorData: async () => ({
-        initialState: {},
-        restoreState: {},
-        urlGeneratorId: 'searchSessionExample',
+        initialState: {
+          time: data.query.timefilter.timefilter.getTime(),
+          filters: data.query.filterManager.getFilters(),
+          query: data.query.queryString.getQuery(),
+          indexPatternId: indexPattern?.id,
+          numericFieldName,
+        } as SearchSessionExamplesUrlGeneratorState,
+        restoreState: {
+          time: data.query.timefilter.timefilter.getAbsoluteTime(),
+          filters: data.query.filterManager.getFilters(),
+          query: data.query.queryString.getQuery(),
+          indexPatternId: indexPattern?.id,
+          numericFieldName,
+          searchSessionId: data.search.session.getSessionId(),
+        } as SearchSessionExamplesUrlGeneratorState,
+        urlGeneratorId: SEARCH_SESSIONS_EXAMPLES_APP_URL_GENERATOR,
       }),
     });
-  }, [data.search.session]);
+  }, [
+    data.query.filterManager,
+    data.query.queryString,
+    data.query.timefilter.timefilter,
+    data.search.session,
+    indexPattern?.id,
+    numericFieldName,
+  ]);
 
   const reset = useCallback(() => {
     setRequest(null);
     setResponse(null);
     setRestoreRequest(null);
     setRestoreResponse(null);
+    setTookMs(null);
+    setRestoreTookMs(null);
     setIsSearching(false);
     data.search.session.clear();
     enableSessionStorage();
+    nextRequestIdRef.current = 0;
   }, [
     setRequest,
     setResponse,
@@ -149,16 +199,6 @@ export const SearchSessionsExampleApp = ({
     };
   }, [data.search.session, enableSessionStorage]);
 
-  const {
-    numericFieldName,
-    indexPattern,
-    selectedField,
-    fields,
-    setIndexPattern,
-    setNumericFieldName,
-    state,
-  } = useAppState({ data });
-
   useEffect(() => {
     reset();
   }, [reset, state]);
@@ -168,22 +208,33 @@ export const SearchSessionsExampleApp = ({
       if (!indexPattern) return;
       if (!numericFieldName) return;
       setIsSearching(true);
+      const requestId = ++nextRequestIdRef.current;
       doSearch({ indexPattern, numericFieldName, restoreSearchSessionId }, { data, notifications })
-        .then(({ response: res, request: req }) => {
+        .then(({ response: res, request: req, tookMs: _tookMs }) => {
+          if (requestId !== nextRequestIdRef.current) return; // no longer interested in this result
           if (restoreSearchSessionId) {
             setRestoreRequest(req);
             setRestoreResponse(res);
+            setRestoreTookMs(_tookMs ?? null);
           } else {
             setRequest(req);
             setResponse(res);
+            setTookMs(_tookMs ?? null);
           }
         })
         .finally(() => {
+          if (requestId !== nextRequestIdRef.current) return; // no longer interested in this result
           setIsSearching(false);
         });
     },
     [data, notifications, indexPattern, numericFieldName]
   );
+
+  useEffect(() => {
+    if (state.restoreSessionId) {
+      search(state.restoreSessionId);
+    }
+  }, [search, state.restoreSessionId]);
 
   return (
     <EuiPageBody>
@@ -193,6 +244,12 @@ export const SearchSessionsExampleApp = ({
             <h1>Basic search session example</h1>
           </EuiTitle>
           <EuiSpacer />
+          {!isShardDelayEnabled(data) && (
+            <>
+              <NoShardDelayCallout />
+              <EuiSpacer />
+            </>
+          )}
           <EuiText>
             <p>
               This example shows how you can use <EuiCode>data.search.session</EuiCode> service to
@@ -206,137 +263,212 @@ export const SearchSessionsExampleApp = ({
       </EuiPageHeader>
       <EuiPageContent>
         <EuiPageContentBody>
-          <EuiTitle size="s">
-            <h2>1. Configure the search query</h2>
-          </EuiTitle>
-          <navigation.ui.TopNavMenu
-            appName={PLUGIN_ID}
-            showSearchBar={true}
-            useDefaultBehaviors={true}
-            indexPatterns={indexPattern ? [indexPattern] : undefined}
-          />
-          <EuiFlexGroup justifyContent={'flexStart'}>
-            <EuiFlexItem grow={false}>
-              <EuiFormLabel>Index Pattern</EuiFormLabel>
-              <IndexPatternSelect
-                placeholder={i18n.translate('searchSessionExample.selectIndexPatternPlaceholder', {
-                  defaultMessage: 'Select index pattern',
-                })}
-                indexPatternId={indexPattern?.id ?? ''}
-                onChange={(id) => {
-                  if (!id) return;
-                  setIndexPattern(id);
-                }}
-                isClearable={false}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiFormLabel>Numeric Field to Aggregate</EuiFormLabel>
-              <EuiComboBox
-                options={formatFieldsToComboBox(getNumeric(fields))}
-                selectedOptions={formatFieldToComboBox(selectedField)}
-                singleSelection={true}
-                onChange={(option) => {
-                  const fld = indexPattern?.getFieldByName(option[0].label);
-                  if (!fld) return;
-                  setNumericFieldName(fld?.name);
-                }}
-                sortMatchesBy="startsWith"
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          <EuiSpacer size={'xl'} />
-          <EuiTitle size="s">
-            <h2>
-              2. Start the search using <EuiCode>data.search</EuiCode> service
-            </h2>
-          </EuiTitle>
-          <EuiText style={{ maxWidth: 600 }}>
-            In this example each search creates a new session by calling{' '}
-            <EuiCode>data.search.session.start()</EuiCode> that returns a{' '}
-            <EuiCode>searchSessionId</EuiCode>. Then this <EuiCode>searchSessionId</EuiCode> is
-            passed into a search request.
-            <EuiSpacer />
-            <div>
-              {demoStep === DemoStep.ConfigureQuery && (
-                <EuiButtonEmpty
-                  size="xs"
-                  onClick={() => search()}
-                  iconType="play"
-                  disabled={isSearching}
-                >
-                  Start the search from low-level client (data.search.search)
-                </EuiButtonEmpty>
-              )}
-              {isSearching && <EuiLoadingSpinner />}
-
-              {response && request && (
-                <SearchInspector accordionId={'1'} request={request} response={response} />
-              )}
-            </div>
-          </EuiText>
-          <EuiSpacer size={'xl'} />
-          {(demoStep === DemoStep.RunSession ||
-            demoStep === DemoStep.RestoreSessionOnScreen ||
-            demoStep === DemoStep.SaveSession) && (
+          {!isRestoring && (
             <>
               <EuiTitle size="s">
-                <h2>3. Save your session</h2>
+                <h2>1. Configure the search query</h2>
               </EuiTitle>
-              <EuiText style={{ maxWidth: 600 }}>
-                Use the search session indicator in the Kibana header to save the search session.
-                <div>
-                  <EuiButtonEmpty
-                    size="xs"
-                    iconType={'save'}
-                    onClick={() => {
-                      // hack for demo purposes:
-                      document
-                        .querySelector('[data-test-subj="searchSessionIndicator"]')
-                        ?.querySelector('button')
-                        ?.click();
+              <navigation.ui.TopNavMenu
+                appName={PLUGIN_ID}
+                showSearchBar={true}
+                useDefaultBehaviors={true}
+                indexPatterns={indexPattern ? [indexPattern] : undefined}
+                onQuerySubmit={() => reset()}
+              />
+              <EuiFlexGroup justifyContent={'flexStart'}>
+                <EuiFlexItem grow={false}>
+                  <EuiFormLabel>Index Pattern</EuiFormLabel>
+                  <IndexPatternSelect
+                    placeholder={i18n.translate(
+                      'searchSessionExample.selectIndexPatternPlaceholder',
+                      {
+                        defaultMessage: 'Select index pattern',
+                      }
+                    )}
+                    indexPatternId={indexPattern?.id ?? ''}
+                    onChange={(id) => {
+                      if (!id) return;
+                      setIndexPattern(id);
                     }}
-                  >
-                    Try saving the session using the search session indicator in the header.
-                  </EuiButtonEmpty>
-                </div>
-              </EuiText>
-            </>
-          )}
-          {(demoStep === DemoStep.RestoreSessionOnScreen || demoStep === DemoStep.SaveSession) && (
-            <>
+                    isClearable={false}
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiFormLabel>Numeric Field to Aggregate</EuiFormLabel>
+                  <EuiComboBox
+                    options={formatFieldsToComboBox(getNumeric(fields))}
+                    selectedOptions={formatFieldToComboBox(selectedField)}
+                    singleSelection={true}
+                    onChange={(option) => {
+                      const fld = indexPattern?.getFieldByName(option[0].label);
+                      if (!fld) return;
+                      setNumericFieldName(fld?.name);
+                    }}
+                    sortMatchesBy="startsWith"
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
               <EuiSpacer size={'xl'} />
               <EuiTitle size="s">
-                <h2>4. Restore the session</h2>
+                <h2>
+                  2. Start the search using <EuiCode>data.search</EuiCode> service
+                </h2>
               </EuiTitle>
               <EuiText style={{ maxWidth: 600 }}>
-                Now you can restore your saved session. The same search request completes
-                significantly faster because it reuses stored results.
+                In this example each search creates a new session by calling{' '}
+                <EuiCode>data.search.session.start()</EuiCode> that returns a{' '}
+                <EuiCode>searchSessionId</EuiCode>. Then this <EuiCode>searchSessionId</EuiCode> is
+                passed into a search request.
+                <EuiSpacer />
                 <div>
-                  {!isSearching && (
+                  {demoStep === DemoStep.ConfigureQuery && (
                     <EuiButtonEmpty
                       size="xs"
-                      iconType={'refresh'}
-                      onClick={() => {
-                        search(data.search.session.getSessionId());
-                      }}
+                      onClick={() => search()}
+                      iconType="play"
+                      disabled={isSearching}
                     >
-                      Restore the search session
+                      Start the search from low-level client (data.search.search)
                     </EuiButtonEmpty>
                   )}
                   {isSearching && <EuiLoadingSpinner />}
 
-                  {restoreRequest && restoreResponse && (
+                  {response && request && (
                     <SearchInspector
-                      accordionId={'2'}
-                      request={restoreRequest}
-                      response={restoreResponse}
+                      accordionId={'1'}
+                      request={request}
+                      response={response}
+                      tookMs={tookMs}
                     />
                   )}
                 </div>
               </EuiText>
+              <EuiSpacer size={'xl'} />
+              {(demoStep === DemoStep.RunSession ||
+                demoStep === DemoStep.RestoreSessionOnScreen ||
+                demoStep === DemoStep.SaveSession) && (
+                <>
+                  <EuiTitle size="s">
+                    <h2>3. Save your session</h2>
+                  </EuiTitle>
+                  <EuiText style={{ maxWidth: 600 }}>
+                    Use the search session indicator in the Kibana header to save the search
+                    session.
+                    <div>
+                      <EuiButtonEmpty
+                        size="xs"
+                        iconType={'save'}
+                        onClick={() => {
+                          // hack for demo purposes:
+                          document
+                            .querySelector('[data-test-subj="searchSessionIndicator"]')
+                            ?.querySelector('button')
+                            ?.click();
+                        }}
+                        isDisabled={
+                          demoStep === DemoStep.RestoreSessionOnScreen ||
+                          demoStep === DemoStep.SaveSession
+                        }
+                      >
+                        Try saving the session using the search session indicator in the header.
+                      </EuiButtonEmpty>
+                    </div>
+                  </EuiText>
+                </>
+              )}
+              {(demoStep === DemoStep.RestoreSessionOnScreen ||
+                demoStep === DemoStep.SaveSession) && (
+                <>
+                  <EuiSpacer size={'xl'} />
+                  <EuiTitle size="s">
+                    <h2>4. Restore the session</h2>
+                  </EuiTitle>
+                  <EuiText style={{ maxWidth: 600 }}>
+                    Now you can restore your saved session. The same search request completes
+                    significantly faster because it reuses stored results.
+                    <EuiSpacer />
+                    <div>
+                      {!isSearching && !restoreResponse && (
+                        <EuiButtonEmpty
+                          size="xs"
+                          iconType={'refresh'}
+                          onClick={() => {
+                            search(data.search.session.getSessionId());
+                          }}
+                        >
+                          Restore the search session
+                        </EuiButtonEmpty>
+                      )}
+                      {isSearching && <EuiLoadingSpinner />}
+
+                      {restoreRequest && restoreResponse && (
+                        <SearchInspector
+                          accordionId={'2'}
+                          request={restoreRequest}
+                          response={restoreResponse}
+                          tookMs={restoreTookMs}
+                        />
+                      )}
+                    </div>
+                  </EuiText>
+                </>
+              )}
+              {demoStep === DemoStep.RestoreSessionOnScreen && (
+                <>
+                  <EuiSpacer size={'xl'} />
+                  <EuiTitle size="s">
+                    <h2>5. Restore from Management</h2>
+                  </EuiTitle>
+                  <EuiText style={{ maxWidth: 600 }}>
+                    You can also get back to your session from the Search Session Management.
+                    <div>
+                      <EuiButtonEmpty
+                        size="xs"
+                        onClick={() => {
+                          // hack for demo purposes:
+                          document
+                            .querySelector('[data-test-subj="searchSessionIndicator"]')
+                            ?.querySelector('button')
+                            ?.click();
+                        }}
+                      >
+                        Use Search Session indicator to navigate to management
+                      </EuiButtonEmpty>
+                    </div>
+                  </EuiText>
+                </>
+              )}
             </>
           )}
+          {isRestoring && (
+            <>
+              <EuiTitle size="s">
+                <h2>You restored the search session!</h2>
+              </EuiTitle>
+              <EuiSpacer />
+              <EuiText style={{ maxWidth: 600 }}>
+                {isSearching && <EuiLoadingSpinner />}
+
+                {restoreRequest && restoreResponse && (
+                  <SearchInspector
+                    accordionId={'2'}
+                    request={restoreRequest}
+                    response={restoreResponse}
+                    tookMs={restoreTookMs}
+                  />
+                )}
+              </EuiText>
+            </>
+          )}
+          <EuiSpacer size={'xl'} />
+          <EuiButtonEmpty
+            onClick={() => {
+              // hack to quickly reset all the state and remove state stuff from the URL
+              window.location.assign(window.location.href.split('?')[0]);
+            }}
+          >
+            Start again
+          </EuiButtonEmpty>
         </EuiPageContentBody>
       </EuiPageContent>
     </EuiPageBody>
@@ -347,14 +479,16 @@ function SearchInspector({
   accordionId,
   response,
   request,
+  tookMs,
 }: {
   accordionId: string;
   response: IEsSearchResponse;
   request: IEsSearchRequest;
+  tookMs: number | null;
 }) {
   return (
     <div>
-      The search took: {response.rawResponse.took}ms
+      The search took: {tookMs ? Math.round(tookMs) : 'unknown'}ms
       <EuiAccordion id={accordionId} buttonContent="Request / response">
         <EuiFlexGroup>
           <EuiFlexItem>
@@ -376,13 +510,6 @@ function SearchInspector({
             <EuiTitle size="xs">
               <h4>Response</h4>
             </EuiTitle>
-            <EuiText size="xs">
-              <FormattedMessage
-                id="searchExamples.timestampText"
-                defaultMessage="Took: {time} ms"
-                values={{ time: response.rawResponse.took ?? 'Unknown' }}
-              />
-            </EuiText>
             <EuiCodeBlock
               language="json"
               fontSize="s"
@@ -401,8 +528,35 @@ function SearchInspector({
 
 function useAppState({ data }: { data: DataPublicPluginStart }) {
   const stateContainer = useMemo(() => {
-    return createStateContainer<State>({});
-  }, []);
+    // get state to restore from the URL and use it as initial state
+    const { _a, _g } = getStatesFromKbnUrl(window.location.href, ['_a', '_g'], {
+      getFromHashQuery: false,
+    }) as { _a: AppUrlState | null; _g: GlobalUrlState | null };
+
+    if (_a) {
+      if (_a.filters) {
+        data.query.filterManager.setAppFilters(_a.filters);
+      }
+      if (_a.query) {
+        data.query.queryString.setQuery(_a.query);
+      }
+    }
+
+    if (_g) {
+      if (_g.filters) {
+        data.query.filterManager.setGlobalFilters(_g.filters);
+      }
+      if (_g.time) {
+        data.query.timefilter.timefilter.setTime(_g.time);
+      }
+    }
+
+    return createStateContainer<State>({
+      indexPatternId: _a?.indexPatternId,
+      numericFieldName: _a?.numericFieldName,
+      restoreSessionId: _a?.searchSessionId,
+    });
+  }, [data.query.filterManager, data.query.queryString, data.query.timefilter.timefilter]);
   const setState = useCallback(
     (state: Partial<State>) => stateContainer.set({ ...stateContainer.get(), ...state }),
     [stateContainer]
@@ -449,8 +603,9 @@ function useAppState({ data }: { data: DataPublicPluginStart }) {
     setFields(indexPattern?.fields);
   }, [indexPattern]);
   useEffect(() => {
+    if (state.numericFieldName) return;
     setState({ numericFieldName: fields?.length ? getNumeric(fields)[0]?.name : undefined });
-  }, [setState, fields]);
+  }, [setState, fields, state.numericFieldName]);
 
   const selectedField: IndexPatternField | undefined = useMemo(
     () => indexPattern?.fields.find((field) => field.name === state.numericFieldName),
@@ -482,7 +637,7 @@ function doSearch(
     data,
     notifications,
   }: { data: DataPublicPluginStart; notifications: CoreStart['notifications'] }
-): Promise<{ request: IEsSearchRequest; response: IEsSearchResponse }> {
+): Promise<{ request: IEsSearchRequest; response: IEsSearchResponse; tookMs?: number }> {
   if (!indexPattern) return Promise.reject('Select an index patten');
   if (!numericFieldName) return Promise.reject('Select a field to aggregate on');
 
@@ -499,7 +654,14 @@ function doSearch(
   const query = data.query.getEsQuery(indexPattern, restoreTimeRange);
 
   // Construct the aggregations portion of the search request by using the `data.search.aggs` service.
-  const aggs = [{ type: 'avg', params: { field: numericFieldName } }];
+
+  const aggs = isShardDelayEnabled(data)
+    ? [
+        { type: 'avg', params: { field: numericFieldName } },
+        { type: 'shard_delay', params: { delay: '5s' } },
+      ]
+    : [{ type: 'avg', params: { field: numericFieldName } }];
+
   const aggsDsl = data.search.aggs.createAggConfigs(indexPattern, aggs).toDsl();
 
   const req = {
@@ -512,6 +674,8 @@ function doSearch(
     },
   };
 
+  const startTs = performance.now();
+
   // Submit the search request using the `data.search` service.
   return data.search
     .search(req, { sessionId })
@@ -519,7 +683,7 @@ function doSearch(
       tap((res) => {
         if (isCompleteResponse(res)) {
           const avgResult: number | undefined = res.rawResponse.aggregations
-            ? res.rawResponse.aggregations[1].value
+            ? res.rawResponse.aggregations[1]?.value ?? res.rawResponse.aggregations[2]?.value
             : undefined;
           const message = (
             <EuiText>
@@ -537,7 +701,7 @@ function doSearch(
           notifications.toasts.addWarning('An error has occurred');
         }
       }),
-      map((res) => ({ response: res, request: req })),
+      map((res) => ({ response: res, request: req, tookMs: performance.now() - startTs })),
       catchError((e) => {
         notifications.toasts.addDanger('Failed to run search');
         return of({ request: req, response: e });
@@ -564,4 +728,37 @@ function formatFieldsToComboBox(fields?: IndexPatternField[]) {
       label: field.displayName || field.name,
     };
   });
+}
+
+/**
+ * To make this demo more convincing it uses `shardDelay` agg which adds artificial delay to a search request,
+ * to enable `shardDelay` make sure to set `data.search.aggs.shardDelay.enabled: true` in your kibana.dev.yml
+ */
+function isShardDelayEnabled(data: DataPublicPluginStart): boolean {
+  try {
+    return !!data.search.aggs.types.get('shard_delay');
+  } catch (e) {
+    return false;
+  }
+}
+
+function NoShardDelayCallout() {
+  return (
+    <EuiCallOut
+      title={
+        <>
+          <EuiCode>shardDelay</EuiCode> is missing!
+        </>
+      }
+      color="warning"
+      iconType="help"
+    >
+      <p>
+        This demo works best with <EuiCode>shardDelay</EuiCode> aggregation which simulates slow
+        queries. <br />
+        We recommend to enable it in your <EuiCode>kibana.dev.yml</EuiCode>:
+      </p>
+      <EuiCodeBlock isCopyable={true}>data.search.aggs.shardDelay.enabled: true</EuiCodeBlock>
+    </EuiCallOut>
+  );
 }

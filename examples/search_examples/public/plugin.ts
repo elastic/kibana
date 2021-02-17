@@ -12,7 +12,6 @@ import {
   CoreStart,
   Plugin,
   AppNavLinkStatus,
-  PluginInitializerContext,
 } from '../../../src/core/public';
 import {
   SearchExamplesPluginSetup,
@@ -20,8 +19,8 @@ import {
   AppPluginSetupDependencies,
   AppPluginStartDependencies,
 } from './types';
+import { createSearchSessionsExampleUrlGenerator } from './search_sessions/url_generator';
 import { PLUGIN_NAME } from '../common';
-import type { ConfigSchema } from '../../../src/plugins/data/config';
 
 export class SearchExamplesPlugin
   implements
@@ -31,14 +30,9 @@ export class SearchExamplesPlugin
       AppPluginSetupDependencies,
       AppPluginStartDependencies
     > {
-  private readonly shardDelayEnabled: boolean = false;
-  constructor(initializerContext: PluginInitializerContext<ConfigSchema>) {
-    this.shardDelayEnabled = initializerContext.config.get().search.aggs.shardDelay.enabled;
-  }
-
   public setup(
     core: CoreSetup<AppPluginStartDependencies>,
-    { developerExamples }: AppPluginSetupDependencies
+    { developerExamples, share }: AppPluginSetupDependencies
   ): SearchExamplesPluginSetup {
     // Register an application into the side navigation menu
     core.application.register({
@@ -51,9 +45,7 @@ export class SearchExamplesPlugin
         // Get start services as specified in kibana.json
         const [coreStart, depsStart] = await core.getStartServices();
         // Render the application
-        return renderApp(coreStart, depsStart, params, {
-          shardDelayEnabled: this.shardDelayEnabled,
-        });
+        return renderApp(coreStart, depsStart, params);
       },
     });
 
@@ -62,6 +54,14 @@ export class SearchExamplesPlugin
       title: 'Search Examples',
       description: `Search Examples`,
     });
+
+    share.urlGenerators.registerUrlGenerator(
+      createSearchSessionsExampleUrlGenerator(() => {
+        return core
+          .getStartServices()
+          .then(([coreStart]) => ({ appBasePath: coreStart.http.basePath.get() }));
+      })
+    );
 
     return {};
   }
