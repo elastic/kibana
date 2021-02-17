@@ -405,9 +405,14 @@ export async function getLogstashStats(
   await Promise.all(
     clusterUuids.map(async (clusterUuid) => {
       if (options.clusters[clusterUuid] !== undefined) {
-        await fetchLogstashState(callCluster, clusterUuid, options.allEphemeralIds[clusterUuid], options);
+        await fetchLogstashState(
+          callCluster,
+          clusterUuid,
+          options.allEphemeralIds[clusterUuid],
+          options
+        );
       }
-    }),
+    })
   );
   return options.clusters;
 }
