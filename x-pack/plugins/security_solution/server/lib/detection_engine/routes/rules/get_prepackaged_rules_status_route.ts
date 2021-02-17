@@ -24,7 +24,7 @@ import { SetupPlugins } from '../../../../plugin';
 import { checkTimelinesStatus } from '../../../timeline/routes/utils/check_timelines_status';
 import { checkTimelineStatusRt } from '../../../timeline/routes/schemas/check_timelines_status_schema';
 
-export const getPrepackagedRulesStatusRoute = (
+export const getPrepackagedRulesStatusRoute = async (
   router: SecuritySolutionPluginRouter,
   config: ConfigType,
   security: SetupPlugins['security']
@@ -46,7 +46,7 @@ export const getPrepackagedRulesStatusRoute = (
       }
 
       try {
-        const rulesFromFileSystem = getPrepackagedRules();
+        const rulesFromFileSystem = await getPrepackagedRules();
         const customRules = await findRules({
           alertsClient,
           perPage: 1,

@@ -31,6 +31,7 @@ export const AssetTitleMap: Record<AssetType, string> = {
   map: 'Map',
   data_stream_ilm_policy: 'Data Stream ILM Policy',
   lens: 'Lens',
+  rules: 'Detection Rules'
 };
 
 export const ServiceTitleMap: Record<ServiceName, string> = {

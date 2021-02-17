@@ -112,7 +112,7 @@ export const createPrepackagedRules = async (
     await exceptionsListClient.createEndpointList();
   }
 
-  const rulesFromFileSystem = getPrepackagedRules();
+  const rulesFromFileSystem = await getPrepackagedRules();
   const prepackagedRules = await getExistingPrepackagedRules({ alertsClient });
   const rulesToInstall = getRulesToInstall(rulesFromFileSystem, prepackagedRules);
   const rulesToUpdate = getRulesToUpdate(rulesFromFileSystem, prepackagedRules);

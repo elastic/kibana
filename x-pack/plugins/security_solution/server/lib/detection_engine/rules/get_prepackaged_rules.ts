@@ -16,9 +16,13 @@ import {
   AddPrepackagedRulesSchemaDecoded,
 } from '../../../../common/detection_engine/schemas/request/add_prepackaged_rules_schema';
 import { BadRequestError } from '../errors/bad_request_error';
+import * as Registry from '../../../../../fleet/server/services/epm/registry';
+import { getAsset, getPathParts } from '../../../../../fleet/server/services/epm/archive';
+import {
+  KibanaAssetType,
+} from '../../../../../fleet/server/types';
 
-// TODO: convert rules files to TS and add explicit type definitions
-import { rawRules } from './prepackaged_rules';
+const DetectionRulesPackage = "detection_rules";
 
 /**
  * Validate the rules from the file system and throw any errors indicating to the developer
@@ -52,7 +56,27 @@ export const validateAllPrepackagedRules = (
   });
 };
 
-export const getPrepackagedRules = (
+const isRuleTemplate = (path: string) => {
+  const pathParts = getPathParts(path);
+  return pathParts.type === 'rules' && pathParts.file !== 'CHANGELOG.json';
+};
+
+export const getPrepackagedRules = async (
   // @ts-expect-error mock data is too loosely typed
-  rules: AddPrepackagedRulesSchema[] = rawRules
-): AddPrepackagedRulesSchemaDecoded[] => validateAllPrepackagedRules(rules);
+  rules: AddPrepackagedRulesSchema[] = []
+): Promise<AddPrepackagedRulesSchemaDecoded[]> => {
+  if (!rules || rules.length == 0) {
+    const registryPackage = await Registry.fetchFindLatestPackage(DetectionRulesPackage);
+    const {paths} = await Registry.getRegistryPackage(registryPackage.name, registryPackage.version);
+
+    const rulePaths = paths.filter(isRuleTemplate);
+    const rulePromises = rulePaths.map(async (path) => {
+      const content = JSON.parse(getAsset(path).toString('utf8'));
+      return content as AddPrepackagedRulesSchema
+    });
+
+    rules = await Promise.all(rulePromises);
+  }
+
+  return validateAllPrepackagedRules(rules)
+}
