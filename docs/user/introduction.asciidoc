@@ -99,7 +99,7 @@ file, or add a sample data set.
 insights and relationships. Ask your questions, and then filter the results to just the data you want.
 You can limit your results to the most recent documents added to {es}.
 
-| *3.*
+| *3*
 | *Visualize.* {kib} provides many options to create visualizations of your data, from
 aggregation-based data to time series data.
 <<dashboard, *Dashboard*>> is your starting point to create visualizations,
