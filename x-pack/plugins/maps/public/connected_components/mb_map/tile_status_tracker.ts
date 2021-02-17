@@ -68,7 +68,7 @@ export class TileStatusTracker {
     });
 
     mbMap.on('error', (e) => {
-      if (e.sourceId && e.sourceId !== 'SPATIAL_FILTERS_LAYER_ID' && e.tile) {
+      if (e.sourceId && e.sourceId !== SPATIAL_FILTERS_LAYER_ID && e.tile) {
         this._removeTileFromCache(e.sourceId, e.tile.tileID.key);
       }
     });
@@ -76,7 +76,7 @@ export class TileStatusTracker {
     mbMap.on('sourcedata', (e: MapDataEvent & { sourceId: string }) => {
       if (
         e.sourceId &&
-        e.sourceId !== 'SPATIAL_FILTERS_LAYER_ID' &&
+        e.sourceId !== SPATIAL_FILTERS_LAYER_ID &&
         e.dataType === 'source' &&
         e.tile
       ) {
