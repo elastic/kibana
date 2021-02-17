@@ -169,10 +169,10 @@ function discoverController($route, $scope, Promise) {
   let inspectorRequest;
   let isChangingIndexPattern = false;
   const savedSearch = $route.current.locals.savedObjects.savedSearch;
-  $scope.persistentSearchSource = savedSearch.searchSource;
+  const persistentSearchSource = savedSearch.searchSource;
   $scope.indexPattern = resolveIndexPattern(
     $route.current.locals.savedObjects.ip,
-    $scope.persistentSearchSource,
+    persistentSearchSource,
     toastNotifications
   );
   $scope.useNewFieldsApi = !config.get(SEARCH_FIELDS_FROM_SOURCE);
@@ -370,7 +370,7 @@ function discoverController($route, $scope, Promise) {
     });
   };
 
-  $scope.persistentSearchSource.setField('index', $scope.indexPattern);
+  persistentSearchSource.setField('index', $scope.indexPattern);
 
   // searchSource which applies time range
   const volatileSearchSource = savedSearch.searchSource.create();
@@ -381,7 +381,7 @@ function discoverController($route, $scope, Promise) {
     });
   }
 
-  volatileSearchSource.setParent($scope.persistentSearchSource);
+  volatileSearchSource.setParent(persistentSearchSource);
   $scope.volatileSearchSource = volatileSearchSource;
 
   const pageTitleSuffix = savedSearch.id && savedSearch.title ? `: ${savedSearch.title}` : '';
@@ -398,7 +398,7 @@ function discoverController($route, $scope, Promise) {
 
   function getStateDefaults() {
     const query =
-      $scope.persistentSearchSource.getField('query') || data.query.queryString.getDefaultQuery();
+      persistentSearchSource.getField('query') || data.query.queryString.getDefaultQuery();
     const sort = getSortArray(savedSearch.sort, $scope.indexPattern);
     const columns = getDefaultColumns();
 
@@ -410,7 +410,7 @@ function discoverController($route, $scope, Promise) {
       columns,
       index: $scope.indexPattern.id,
       interval: 'auto',
-      filters: _.cloneDeep($scope.persistentSearchSource.getOwnField('filter')),
+      filters: _.cloneDeep(persistentSearchSource.getOwnField('filter')),
     };
     if (savedSearch.grid) {
       defaultState.grid = savedSearch.grid;
@@ -692,7 +692,9 @@ function discoverController($route, $scope, Promise) {
   $scope.updateDataSource = () => {
     const { indexPattern, useNewFieldsApi } = $scope;
     const { columns, sort } = $scope.state;
-    updateSearchSource($scope.persistentSearchSource, $scope.volatileSearchSource, {
+    updateSearchSource({
+      persistentSearchSource,
+      volatileSearchSource: $scope.volatileSearchSource,
       indexPattern,
       services,
       sort,

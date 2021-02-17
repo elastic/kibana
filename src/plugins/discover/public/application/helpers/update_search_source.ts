@@ -15,25 +15,25 @@ import { DiscoverServices } from '../../build_services';
 /**
  * Helper function to update the given searchSource before fetching/sharing/persisting
  */
-export function updateSearchSource(
-  persistentSearchSource: ISearchSource,
-  volatileSearchSource: ISearchSource | undefined,
-  {
-    indexPattern,
-    services,
-    sort,
-    columns,
-    useNewFieldsApi,
-    showUnmappedFields,
-  }: {
-    indexPattern: IndexPattern;
-    services: DiscoverServices;
-    sort: SortOrder[];
-    columns: string[];
-    useNewFieldsApi: boolean;
-    showUnmappedFields?: boolean;
-  }
-) {
+export function updateSearchSource({
+  indexPattern,
+  services,
+  sort,
+  columns,
+  useNewFieldsApi,
+  showUnmappedFields,
+  persistentSearchSource,
+  volatileSearchSource,
+}: {
+  indexPattern: IndexPattern;
+  services: DiscoverServices;
+  sort: SortOrder[];
+  columns: string[];
+  useNewFieldsApi: boolean;
+  showUnmappedFields?: boolean;
+  persistentSearchSource: ISearchSource;
+  volatileSearchSource?: ISearchSource;
+}) {
   const { uiSettings, data } = services;
   const usedSort = getSortForSearchSource(
     sort,

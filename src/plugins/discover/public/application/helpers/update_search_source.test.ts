@@ -20,7 +20,9 @@ describe('updateSearchSource', () => {
     const persistentSearchSourceMock = createSearchSourceMock({});
     const volatileSearchSourceMock = createSearchSourceMock({});
     const sampleSize = 250;
-    updateSearchSource(persistentSearchSourceMock, volatileSearchSourceMock, {
+    updateSearchSource({
+      persistentSearchSource: persistentSearchSourceMock,
+      volatileSearchSource: volatileSearchSourceMock,
       indexPattern: indexPatternMock,
       services: ({
         data: dataPluginMock.createStartContract(),
@@ -46,7 +48,9 @@ describe('updateSearchSource', () => {
     const persistentSearchSourceMock = createSearchSourceMock({});
     const volatileSearchSourceMock = createSearchSourceMock({});
     const sampleSize = 250;
-    updateSearchSource(persistentSearchSourceMock, volatileSearchSourceMock, {
+    updateSearchSource({
+      persistentSearchSource: persistentSearchSourceMock,
+      volatileSearchSource: volatileSearchSourceMock,
       indexPattern: indexPatternMock,
       services: ({
         data: dataPluginMock.createStartContract(),
@@ -73,7 +77,9 @@ describe('updateSearchSource', () => {
     const persistentSearchSourceMock = createSearchSourceMock({});
     const volatileSearchSourceMock = createSearchSourceMock({});
     const sampleSize = 250;
-    updateSearchSource(persistentSearchSourceMock, volatileSearchSourceMock, {
+    updateSearchSource({
+      persistentSearchSource: persistentSearchSourceMock,
+      volatileSearchSource: volatileSearchSourceMock,
       indexPattern: indexPatternMock,
       services: ({
         data: dataPluginMock.createStartContract(),
@@ -103,7 +109,9 @@ describe('updateSearchSource', () => {
     const persistentSearchSourceMock = createSearchSourceMock({});
     const volatileSearchSourceMock = createSearchSourceMock({});
     const sampleSize = 250;
-    updateSearchSource(persistentSearchSourceMock, volatileSearchSourceMock, {
+    updateSearchSource({
+      persistentSearchSource: persistentSearchSourceMock,
+      volatileSearchSource: volatileSearchSourceMock,
       indexPattern: indexPatternMock,
       services: ({
         data: dataPluginMock.createStartContract(),
