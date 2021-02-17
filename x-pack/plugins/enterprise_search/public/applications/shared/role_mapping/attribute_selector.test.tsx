@@ -9,7 +9,14 @@ import React from 'react';
 
 import { shallow, ShallowWrapper } from 'enzyme';
 
+import { EuiComboBox, EuiFieldText } from '@elastic/eui';
+
 import { AttributeSelector } from './attribute_selector';
+import { ANY_AUTH_PROVIDER, ANY_AUTH_PROVIDER_OPTION_LABEL } from './constants';
+
+const handleAttributeSelectorChange = jest.fn();
+const handleAttributeValueChange = jest.fn();
+const handleAuthProviderChange = jest.fn();
 
 const baseProps = {
   attributeName: 'An Attribute',
@@ -20,16 +27,24 @@ const baseProps = {
   elasticsearchRoles: ['whatever'],
   multipleAuthProvidersConfig: true,
   disabled: false,
-  handleAttributeSelectorChange: () => {},
-  handleAttributeValueChange: () => {},
-  handleAuthProviderChange: () => {},
+  handleAttributeSelectorChange,
+  handleAttributeValueChange,
+  handleAuthProviderChange,
 };
 
-describe('<AttributeSelector />', () => {
+describe('AttributeSelector', () => {
   it('renders', () => {
     const wrapper = shallow(<AttributeSelector {...baseProps} />);
 
     expect(wrapper.find('[data-test-subj="attributeSelector"]')).toBeDefined();
+  });
+
+  it('renders disabled panel with className', () => {
+    const wrapper = shallow(<AttributeSelector {...baseProps} disabled />);
+
+    expect(wrapper.find('[data-test-subj="attributeSelector"]').prop('className')).toEqual(
+      'euiPanel--disabled'
+    );
   });
 
   describe('Auth Providers', () => {
@@ -44,11 +59,29 @@ describe('<AttributeSelector />', () => {
       expect(wrapper.find('[data-test-subj="authProviderSelect"]')).toHaveLength(0);
     });
 
+    it('handles fallback props', () => {
+      const wrapper = shallow(
+        <AttributeSelector
+          {...baseProps}
+          attributeValue={undefined}
+          selectedAuthProviders={undefined}
+        />
+      );
+
+      const select = findAuthProvidersSelect(wrapper) as any;
+
+      expect(select.prop('selectedOptions')).toEqual([
+        {
+          label: ANY_AUTH_PROVIDER_OPTION_LABEL,
+          value: ANY_AUTH_PROVIDER,
+        },
+      ]);
+    });
+
     it('renders a list of auth providers from the "availableAuthProviders" prop including an "Any" option', () => {
       const wrapper = shallow(
         <AttributeSelector {...baseProps} availableAuthProviders={['ees_saml', 'kbn_saml']} />
       );
-
       const select = findAuthProvidersSelect(wrapper) as any;
 
       expect(select.props().options).toEqual([
@@ -74,22 +107,61 @@ describe('<AttributeSelector />', () => {
           selectedAuthProviders={['kbn_saml']}
         />
       );
-
       const select = findAuthProvidersSelect(wrapper) as any;
 
       expect(select.props().selectedOptions).toEqual([{ label: 'kbn_saml', value: 'kbn_saml' }]);
     });
 
     it('should call the "handleAuthProviderChange" prop when a value is selected', () => {
-      const handleAuthProviderChangeMock = jest.fn();
-      const wrapper = shallow(
-        <AttributeSelector {...baseProps} handleAuthProviderChange={handleAuthProviderChangeMock} />
-      );
-
+      const wrapper = shallow(<AttributeSelector {...baseProps} />);
       const select = findAuthProvidersSelect(wrapper);
       select.simulate('change', [{ label: 'kbn_saml', value: 'kbn_saml' }]);
 
-      expect(handleAuthProviderChangeMock).toHaveBeenCalledWith(['kbn_saml']);
+      expect(handleAuthProviderChange).toHaveBeenCalledWith(['kbn_saml']);
+    });
+
+    it('should call the "handleAttributeSelectorChange" prop when a value is selected', () => {
+      const wrapper = shallow(<AttributeSelector {...baseProps} />);
+      const select = wrapper.find('[data-test-subj="ExternalAttributeSelect"]');
+      const event = { target: { value: 'kbn_saml' } };
+      select.simulate('change', event);
+
+      expect(handleAttributeSelectorChange).toHaveBeenCalledWith(
+        'kbn_saml',
+        baseProps.elasticsearchRoles[0]
+      );
+    });
+
+    it('handles fallback when no "handleAuthProviderChange" provided', () => {
+      const wrapper = shallow(
+        <AttributeSelector {...baseProps} handleAuthProviderChange={undefined} />
+      );
+
+      expect(wrapper.find(EuiComboBox).prop('onChange')!([])).toEqual(undefined);
+    });
+
+    it('should call the "handleAttributeSelectorChange" prop when field text value is changed', () => {
+      const wrapper = shallow(<AttributeSelector {...baseProps} />);
+      const input = wrapper.find(EuiFieldText);
+      const event = { target: { value: 'kbn_saml' } };
+      input.simulate('change', event);
+
+      expect(handleAttributeSelectorChange).toHaveBeenCalledWith(
+        'kbn_saml',
+        baseProps.elasticsearchRoles[0]
+      );
+    });
+
+    it('should call the "handleAttributeSelectorChange" prop when attribute value is selected', () => {
+      const wrapper = shallow(<AttributeSelector {...baseProps} attributeName="role" />);
+      const select = wrapper.find('[data-test-subj="ElasticsearchRoleSelect"]');
+      const event = { target: { value: 'kbn_saml' } };
+      select.simulate('change', event);
+
+      expect(handleAttributeSelectorChange).toHaveBeenCalledWith(
+        'kbn_saml',
+        baseProps.elasticsearchRoles[0]
+      );
     });
   });
 });

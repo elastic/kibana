@@ -139,6 +139,7 @@ export const AttributeSelector: React.FC<IAttributeSelectorProps> = ({
           <EuiFormRow label={EXTERNAL_ATTRIBUTE_LABEL} fullWidth>
             <EuiSelect
               name="external-attribute"
+              data-test-subj="ExternalAttributeSelect"
               value={attributeName}
               required
               options={attributes.map((attribute) => ({ value: attribute, text: attribute }))}
@@ -156,6 +157,7 @@ export const AttributeSelector: React.FC<IAttributeSelectorProps> = ({
               <EuiSelect
                 value={attributeValue}
                 name="elasticsearch-role"
+                data-test-subj="ElasticsearchRoleSelect"
                 required
                 options={elasticsearchRoles.map((elasticsearchRole) => ({
                   value: elasticsearchRole,
