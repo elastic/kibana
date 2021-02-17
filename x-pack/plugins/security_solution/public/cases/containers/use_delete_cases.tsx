@@ -87,7 +87,8 @@ export const useDeleteCases = (): UseDeleteCase => {
       try {
         dispatch({ type: 'FETCH_INIT' });
         const caseIds = cases.map((theCase) => theCase.id);
-        if (cases[0].type != null) {
+        // We don't allow user batch delete sub cases on UI at the moment.
+        if (cases[0].type != null || cases.length > 1) {
           await deleteCases(caseIds, abortCtrl.signal);
         } else {
           await deleteSubCases(caseIds, abortCtrl.signal);
