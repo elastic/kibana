@@ -15,7 +15,7 @@ Disable {kib} alerts.
 ==== Path parameters
 
 `id`::
-  (Required, string) The alert ID that you want to disable.
+  (Required, string) The ID of the alert that you want to disable.
 
 [[alerts-api-disable-response-codes]]
 ==== Response code
