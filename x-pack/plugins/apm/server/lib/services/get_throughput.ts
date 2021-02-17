@@ -10,7 +10,7 @@ import {
   SERVICE_NAME,
   TRANSACTION_TYPE,
 } from '../../../common/elasticsearch_fieldnames';
-import { rangeFilter } from '../../../common/utils/range_filter';
+import { environmentQuery, rangeQuery } from '../../../common/utils/queries';
 import {
   getDocumentTypeFilterForAggregatedTransactions,
   getProcessorEventForAggregatedTransactions,
@@ -20,6 +20,7 @@ import { Setup } from '../helpers/setup_request';
 import { withApmSpan } from '../../utils/with_apm_span';
 
 interface Options {
+  environment?: string;
   searchAggregatedTransactions: boolean;
   serviceName: string;
   setup: Setup;
@@ -29,6 +30,7 @@ interface Options {
 }
 
 function fetcher({
+  environment,
   searchAggregatedTransactions,
   serviceName,
   setup,
@@ -36,16 +38,17 @@ function fetcher({
   start,
   end,
 }: Options) {
-  const { apmEventClient } = setup;
+  const { esFilter, apmEventClient } = setup;
   const { intervalString } = getBucketSize({ start, end });
   const filter: ESFilter[] = [
     { term: { [SERVICE_NAME]: serviceName } },
     { term: { [TRANSACTION_TYPE]: transactionType } },
-    { range: rangeFilter(start, end) },
     ...getDocumentTypeFilterForAggregatedTransactions(
       searchAggregatedTransactions
     ),
-    ...setup.esFilter,
+    ...rangeQuery(start, end),
+    ...environmentQuery(environment),
+    ...esFilter,
   ];
 
   const params = {

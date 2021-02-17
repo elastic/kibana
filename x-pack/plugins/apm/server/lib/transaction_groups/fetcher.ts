@@ -27,6 +27,7 @@ import {
 } from './get_transaction_group_stats';
 
 interface TopTransactionOptions {
+  environment?: string;
   type: 'top_transactions';
   serviceName: string;
   transactionType: string;
@@ -35,6 +36,7 @@ interface TopTransactionOptions {
 }
 
 interface TopTraceOptions {
+  environment?: string;
   type: 'top_traces';
   transactionName?: string;
   searchAggregatedTransactions: boolean;
