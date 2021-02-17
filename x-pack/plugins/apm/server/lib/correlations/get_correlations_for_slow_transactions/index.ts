@@ -13,6 +13,7 @@ import {
   TRANSACTION_DURATION,
   TRANSACTION_NAME,
   TRANSACTION_TYPE,
+  PROCESSOR_EVENT,
 } from '../../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../../common/processor_event';
 import { Setup, SetupTimeRange } from '../../helpers/setup_request';
@@ -42,6 +43,7 @@ export async function getCorrelationsForSlowTransactions({
     const { start, end, esFilter, apmEventClient } = setup;
 
     const backgroundFilters: ESFilter[] = [
+      { term: { [PROCESSOR_EVENT]: ProcessorEvent.transaction } },
       ...rangeQuery(start, end),
       ...environmentQuery(environment),
       ...esFilter,
@@ -73,14 +75,21 @@ export async function getCorrelationsForSlowTransactions({
           query: {
             bool: {
               // foreground filters
-              filter: [
-                ...backgroundFilters,
-                {
-                  range: {
-                    [TRANSACTION_DURATION]: { gte: durationForPercentile },
+              filter: backgroundFilters,
+              must: {
+                function_score: {
+                  query: {
+                    range: {
+                      [TRANSACTION_DURATION]: { gte: durationForPercentile },
+                    },
+                  },
+                  script_score: {
+                    script: {
+                      source: `Math.log(2 + doc['${TRANSACTION_DURATION}'].value)`,
+                    },
                   },
                 },
-              ],
+              },
             },
           },
           aggs: fieldNames.reduce((acc, fieldName) => {
@@ -90,7 +99,20 @@ export async function getCorrelationsForSlowTransactions({
                 significant_terms: {
                   size: 10,
                   field: fieldName,
-                  background_filter: { bool: { filter: backgroundFilters } },
+                  background_filter: {
+                    bool: {
+                      filter: [
+                        ...backgroundFilters,
+                        {
+                          range: {
+                            [TRANSACTION_DURATION]: {
+                              lt: durationForPercentile,
+                            },
+                          },
+                        },
+                      ],
+                    },
+                  },
                 },
               },
             };
@@ -105,7 +127,6 @@ export async function getCorrelationsForSlowTransactions({
 
     const topSigTerms = processSignificantTermAggs({
       sigTermAggs: response.aggregations,
-      thresholdPercentage: 100 - durationPercentile,
     });
 
     return getLatencyDistribution({

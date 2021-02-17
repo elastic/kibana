@@ -19,6 +19,7 @@ import {
   SERVICE_NAME,
   TRANSACTION_NAME,
   TRANSACTION_TYPE,
+  PROCESSOR_EVENT,
 } from '../../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../../common/processor_event';
 import { Setup, SetupTimeRange } from '../../helpers/setup_request';
@@ -48,6 +49,7 @@ export async function getCorrelationsForFailedTransactions({
     const { start, end, esFilter, apmEventClient } = setup;
 
     const backgroundFilters: ESFilter[] = [
+      { term: { [PROCESSOR_EVENT]: ProcessorEvent.transaction } },
       ...rangeQuery(start, end),
       ...environmentQuery(environment),
       ...esFilter,
@@ -85,7 +87,14 @@ export async function getCorrelationsForFailedTransactions({
                   significant_terms: {
                     size: 10,
                     field: fieldName,
-                    background_filter: { bool: { filter: backgroundFilters } },
+                    background_filter: {
+                      bool: {
+                        filter: backgroundFilters,
+                        must_not: {
+                          term: { [EVENT_OUTCOME]: EventOutcome.failure },
+                        },
+                      },
+                    },
                   },
                 },
               };
@@ -100,19 +109,12 @@ export async function getCorrelationsForFailedTransactions({
       return {};
     }
 
-    const failedTransactionCount =
-      response.aggregations?.failed_transactions.doc_count;
-    const totalTransactionCount = response.hits.total.value;
-    const avgErrorRate = (failedTransactionCount / totalTransactionCount) * 100;
     const sigTermAggs = omit(
       response.aggregations?.failed_transactions,
       'doc_count'
     );
 
-    const topSigTerms = processSignificantTermAggs({
-      sigTermAggs,
-      thresholdPercentage: avgErrorRate,
-    });
+    const topSigTerms = processSignificantTermAggs({ sigTermAggs });
     return getErrorRateTimeSeries({ setup, backgroundFilters, topSigTerms });
   });
 }
@@ -128,7 +130,7 @@ export async function getErrorRateTimeSeries({
 }) {
   return withApmSpan('get_error_rate_timeseries', async () => {
     const { start, end, apmEventClient } = setup;
-    const { intervalString } = getBucketSize({ start, end, numBuckets: 30 });
+    const { intervalString } = getBucketSize({ start, end, numBuckets: 15 });
 
     if (isEmpty(topSigTerms)) {
       return {};

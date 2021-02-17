@@ -9,7 +9,7 @@
 import { Capabilities, IUiSettingsClient } from 'kibana/public';
 import { DOC_HIDE_TIME_COLUMN_SETTING, SORT_DEFAULT_ORDER_SETTING } from '../../../common';
 import { getSortForSearchSource } from '../angular/doc_table';
-import { SearchSource } from '../../../../data/common';
+import { ISearchSource } from '../../../../data/common';
 import { AppState } from '../angular/discover_state';
 import { SortOrder } from '../../saved_searches/types';
 
@@ -39,7 +39,7 @@ const getSharingDataFields = async (
  * Preparing data to share the current state as link or CSV/Report
  */
 export async function getSharingData(
-  currentSearchSource: SearchSource,
+  currentSearchSource: ISearchSource,
   state: AppState,
   config: IUiSettingsClient,
   getFieldCounts: () => Promise<Record<string, number>>

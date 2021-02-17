@@ -10,7 +10,7 @@ import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
 import { LatencyAggregationType } from '../../../common/latency_aggregation_types';
 import { pickKeys } from '../../../common/utils/pick_keys';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { localUIFilterNames } from '../../../server/lib/ui_filters/local_ui_filters/config';
+import { localUIFilterNames } from '../../../server/lib/rum_client/ui_filters/local_ui_filters/config';
 import { toQuery } from '../../components/shared/Links/url_helpers';
 import { TimeRangeComparisonType } from '../../components/shared/time_comparison/get_time_range_comparison';
 import {
