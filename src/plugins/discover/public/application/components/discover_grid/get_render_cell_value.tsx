@@ -7,7 +7,6 @@
  */
 
 import React, { Fragment, useContext, useEffect } from 'react';
-import { i18n } from '@kbn/i18n';
 import themeLight from '@elastic/eui/dist/eui_theme_light.json';
 import themeDark from '@elastic/eui/dist/eui_theme_dark.json';
 
@@ -81,57 +80,6 @@ export const getRenderCellValueFn = (
     }
 
     return <span>{JSON.stringify(rowFlattened[columnId])}</span>;
-  }
-
-  if (field?.type === 'geo_point' && rowFlattened && rowFlattened[columnId]) {
-    const valueFormatted = rowFlattened[columnId] as {
-      lat?: number;
-      lon?: number;
-      coordinates?: number[];
-      type?: 'string';
-    };
-
-    const getLatLon = () => {
-      /**
-       * That's usually provided when using _source as source
-       */
-      if (typeof valueFormatted.lat === 'number' && typeof valueFormatted.lon === 'number') {
-        return {
-          lat: valueFormatted.lat,
-          lon: valueFormatted.lon,
-        };
-      }
-      /**
-       * That's provided when using fields as source
-       */
-      if (valueFormatted.coordinates && typeof valueFormatted.type) {
-        return {
-          lat: valueFormatted.coordinates[0],
-          lon: valueFormatted.coordinates[1],
-        };
-      }
-      /**
-       * For any other cases, to display the value
-       */
-      return { custom: valueFormatted };
-    };
-    const { lat, lon, custom } = getLatLon();
-
-    if (custom) {
-      return <div>{JSON.stringify(custom)}</div>;
-    }
-
-    return (
-      <div>
-        {i18n.translate('discover.latitudeAndLongitude', {
-          defaultMessage: 'Lat: {lat} Lon: {lon}',
-          values: {
-            lat,
-            lon,
-          },
-        })}
-      </div>
-    );
   }
 
   const valueFormatted = indexPattern.formatField(row, columnId);
