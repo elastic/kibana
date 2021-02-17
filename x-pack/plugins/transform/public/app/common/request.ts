@@ -11,15 +11,28 @@ import { HttpFetchError } from '../../../../../../src/core/public';
 import type { IndexPattern } from '../../../../../../src/plugins/data/public';
 
 import type {
+  PivotTransformPreviewRequestSchema,
   PostTransformsPreviewRequestSchema,
   PutTransformsLatestRequestSchema,
   PutTransformsPivotRequestSchema,
   PutTransformsRequestSchema,
 } from '../../../common/api_schemas/transforms';
+import { DateHistogramAgg, HistogramAgg, TermsAgg } from '../../../common/types/pivot_group_by';
 
 import type { SavedSearchQuery } from '../hooks/use_search_items';
 import type { StepDefineExposedState } from '../sections/create_transform/components/step_define';
 import type { StepDetailsExposedState } from '../sections/create_transform/components/step_details/step_details_form';
+
+import {
+  getEsAggFromAggConfig,
+  getEsAggFromGroupByConfig,
+  isGroupByDateHistogram,
+  isGroupByHistogram,
+  isGroupByTerms,
+  GroupByConfigWithUiSupport,
+  PivotAggsConfig,
+  PivotGroupByConfig,
+} from './';
 
 export interface SimpleQuery {
   query_string: {
@@ -56,6 +69,66 @@ export const defaultQuery: PivotQuery = { query_string: { query: '*' } };
 export function isDefaultQuery(query: PivotQuery): boolean {
   return isSimpleQuery(query) && query.query_string.query === '*';
 }
+
+export const getMissingBucketConfig = (
+  g: GroupByConfigWithUiSupport
+): { missing_bucket?: boolean } => {
+  return g.missing_bucket !== undefined ? { missing_bucket: g.missing_bucket } : {};
+};
+
+export const getRequestPayload = (
+  pivotAggsArr: PivotAggsConfig[],
+  pivotGroupByArr: PivotGroupByConfig[]
+) => {
+  const request = {
+    pivot: {
+      group_by: {},
+      aggregations: {},
+    } as PivotTransformPreviewRequestSchema['pivot'],
+  };
+
+  pivotGroupByArr.forEach((g) => {
+    if (isGroupByTerms(g)) {
+      const termsAgg: TermsAgg = {
+        terms: {
+          field: g.field,
+          ...getMissingBucketConfig(g),
+        },
+      };
+      request.pivot.group_by[g.aggName] = termsAgg;
+    } else if (isGroupByHistogram(g)) {
+      const histogramAgg: HistogramAgg = {
+        histogram: {
+          field: g.field,
+          interval: g.interval,
+          ...getMissingBucketConfig(g),
+        },
+      };
+      request.pivot.group_by[g.aggName] = histogramAgg;
+    } else if (isGroupByDateHistogram(g)) {
+      const dateHistogramAgg: DateHistogramAgg = {
+        date_histogram: {
+          field: g.field,
+          calendar_interval: g.calendar_interval,
+          ...getMissingBucketConfig(g),
+        },
+      };
+      request.pivot.group_by[g.aggName] = dateHistogramAgg;
+    } else {
+      request.pivot.group_by[g.aggName] = getEsAggFromGroupByConfig(g);
+    }
+  });
+
+  pivotAggsArr.forEach((agg) => {
+    const result = getEsAggFromAggConfig(agg);
+    if (result === null) {
+      return;
+    }
+    request.pivot.aggregations[agg.aggName] = result;
+  });
+
+  return request;
+};
 
 export function getPreviewTransformRequestBody(
   indexPatternTitle: IndexPattern['title'],

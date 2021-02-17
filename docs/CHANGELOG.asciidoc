@@ -8,43 +8,57 @@
 :issue: https://github.com/elastic/kibana/issues/
 :pull: https://github.com/elastic/kibana/pull/
 
-Review important information about {kib} releases. 
+Review important information about {kib} 7.x.x releases. 
 
 * <<release-notes-7.12.0>>
+
 * <<release-notes-7.11.0>>
-* <<release-notes-7.10.1>>
+** <<release-notes-7.11.1>>
+
 * <<release-notes-7.10.0>>
-* <<release-notes-7.9.3>>
-* <<release-notes-7.9.2>>
-* <<release-notes-7.9.1>>
+** <<release-notes-7.10.1>>
+** <<release-notes-7.10.2>> 
+
 * <<release-notes-7.9.0>>
-* <<release-notes-7.8.1>>
+** <<release-notes-7.9.1>>
+** <<release-notes-7.9.2>>
+** <<release-notes-7.9.3>>
+
 * <<release-notes-7.8.0>>
-* <<release-notes-7.7.1>>
+** <<release-notes-7.8.1>>
+
 * <<release-notes-7.7.0>>
-* <<release-notes-7.6.2>>
-* <<release-notes-7.6.1>>
+** <<release-notes-7.7.1>>
+
 * <<release-notes-7.6.0>>
-* <<release-notes-7.5.2>>
-* <<release-notes-7.5.1>>
+** <<release-notes-7.6.1>>
+** <<release-notes-7.6.2>>
+
 * <<release-notes-7.5.0>>
-* <<release-notes-7.4.2>>
-* <<release-notes-7.4.1>>
+** <<release-notes-7.5.1>>
+** <<release-notes-7.5.2>>
+
 * <<release-notes-7.4.0>>
-* <<release-notes-7.3.2>>
-* <<release-notes-7.3.1>>
+** <<release-notes-7.4.1>>
+** <<release-notes-7.4.2>>
+
 * <<release-notes-7.3.0>>
-* <<release-notes-7.2.1>>
+** <<release-notes-7.3.1>>
+** <<release-notes-7.3.2>>
+
 * <<release-notes-7.2.0>>
-* <<release-notes-7.1.1>>
+** <<release-notes-7.2.1>>
+
 * <<release-notes-7.1.0>>
-* <<release-notes-7.0.1>>
-* <<release-notes-7.0.0>>
-* <<release-notes-7.0.0-rc2>>
-* <<release-notes-7.0.0-rc1>>
-* <<release-notes-7.0.0-beta1>>
-* <<release-notes-7.0.0-alpha2>>
+** <<release-notes-7.1.1>>
+
 * <<release-notes-7.0.0-alpha1>>
+** <<release-notes-7.0.0-alpha2>>
+** <<release-notes-7.0.0-beta1>>
+** <<release-notes-7.0.0-rc1>>
+** <<release-notes-7.0.0-rc2>>
+** <<release-notes-7.0.0>>
+** <<release-notes-7.0.1>>
 
 ////
 // To add a release, copy and paste the following text, uncomment the relevant
@@ -93,13 +107,15 @@ Review important information about {kib} releases.
 [[release-notes-7.12.0]]
 == {kib} 7.12.0
 
+coming::[7.12.0]
+
 For detailed information about the {kib} 7.12.0 release, review the following information. 
 
 [float]
 [[breaking-changes-7.12.0]]
 === Breaking changes
 
-The 7.12.0 breaking changes can prevent your application from optimal operation and performance. Before you upgrade to 7.12.0, review the breaking changes, then mitigate the
+The {kib} 7.12.0 breaking changes can prevent your application from optimal operation and performance. Before you upgrade to 7.12.0, review the breaking changes, then mitigate the
 impact to your application.
 
 // The following section is re-used in the Installation and Upgrade Guide
@@ -107,36 +123,41 @@ impact to your application.
 // tag::notable-breaking-changes[]
 
 [discrete]
-[[breaking-change-title-1]]
-==== Application changes
-.Information about the breaking change.
+[[ingest-manager-plugin-renamed-fleet]]
+==== Fleet changes
+.Ingest Manager plugin renamed Fleet
 [%collapsible]
 ====
 *Details:* +
-Details about the breaking change.
+The `ingestManager` plugin has been renamed `fleet`.
 
 *Impact* +
-Impact from the breaking change.
+* The app url change from /app/ingestManager to /app/fleet.
+* The privilege `feature_ingestManager.*` is not valid anymore and should be replaced by `feature_fleet.*`.
 
 For more information, refer to https://github.com/elastic/kibana/pull/83200[#83200].
 ====
 
 [discrete]
-[[breaking-change-title-2]]
-==== Application changes
-.Information about the breaking change.
+[[reporting_plugin_added_new_validation_for_protocol]]
+==== Reporting changes
+.Reporting plugin added new validation for protocol.
 [%collapsible]
 ====
 *Details:* +
-Details about the breking change. 
+The Reporting plugin added new validation for protocol strings in Network Policy configurations. 
 
 *Impact* +
-Impact from the breaking change.
+Refer to {kibana-ref}/reporting-network-policy.html[Restrict requests with a Reporting network policy].
+If the kibana.yml has a *Reporting* network policy before upgrade,
+the protocol strings must end with a colon. Otherwise, config validation
+will fail and {kib} will not start.
 
 For more information, refer to https://github.com/elastic/kibana/pull/80766[#80766].
 ====
 
 // end::notable-breaking-changes[]
+
 
 [float]
 [[deprecation-v7.12.0]]
@@ -146,36 +167,52 @@ The following functionality is deprecated in 7.12.0, and will be removed in 8.0.
 we strongly recommend you make the necessary updates after you upgrade to 7.12.0. 
 
 [discrete]
-[[deprecation-title-1]]
-==== Application deprecation
-.Information about the deprecation.
+[[lens-and-visualizations-deprecations]]
+==== Lens and visualizations deprecation
+.Deprecates the `visualization:colorMapping` advanced setting
 [%collapsible]
 ====
 *Details* +
-Details about the deprecation.
+The `visualization:colorMapping` advanced setting is deprecated in the 7.12.0 release. For more information, refer to {kibana-pull}83372[#83372].
 
 *Impact* +
-Impact from the deprecation.
+The `visualization:colorMapping` advanced setting is no longer available in kibana.yml.
 ====
 
 [discrete]
-[[deprecation-title-2]]
-==== Application deprecation
-.Information about the deprecation.
+[[management-deprecations]]
+==== Management deprecations
+.Deprecates three Stack Management settings
 [%collapsible]
 ====
 *Details* +
-Details about the deprecation.
+* Deprecates the `kibana.index` setting. For more information, refer to {kibana-pull}83988[#83988].
+* Deprecates the `reporting.index` setting. For more information, refer to {kibana-pull}84005[#84005].
+* Deprecates the `xpack.task_manager.index` setting. For more information, refer to {kibana-pull}84155[#84155].
 
 *Impact* +
-Impact from the deprecation.
+The `kibana.index`, `reporting.index`, and `xpack.task_manager.index` settings are no longer available in kibana.yml.
+====
+
+[discrete]
+[[security-deprecations]]
+==== Security deprecations
+.Deprecates two Security settings
+[%collapsible]
+====
+*Details* +
+* Deprecates disabling the spaces plugin. For more information, refer to {kibana-pull}83984[#83984].
+* Deprecates disabling the security plugin. For more information, refer to {kibana-pull}85159[#85159].
+
+*Impact* +
+The space and security plugins are enabled.
 ====
 
 [float]
 [[feaatures-v7.12.0]]
 === Features
 
-The 7.12.0 release includes the following new and notable features. 
+{kib} 7.12.0 adds the following new and notable features. 
 
 Alerting::
 * Adds ECS audit events for alerts and actions plugins {kibana-pull}84113[#84113]
@@ -550,11 +587,47 @@ Uptime::
 * UX use replace history instead of push on first load {kibana-pull}88586[#88586]
 * Fixes impacted page load errors {kibana-pull}88597[#88597]
 
+
+[[release-notes-7.11.1]]
+== {kib} 7.11.1
+
+The 7.11.1 release includes the following enhancements and bug fixes. For information on the breaking changes, refer to breaking changes.
+
+[float]
+[[enhancement-v7.11.1]]
+=== Enhancements
+Machine Learning::
+* Improves the lazy ML node UI {kibana-pull}90455[#90455]
+Security::
+* Prevent autocompleting the username field {kibana-pull}88682[#88682]
+
+[float]
+[[bug-v7.11.1]]
+=== Bug fixes
+Dashboard::
+* Fixes a 7.11.0 regression where pending dashboard searches aren't canceled when navigating to another app {kibana-pull}90306[#90306]
+* Sync tooltip legend values {kibana-pull}90036[#90036]
+Discover::
+* Fixes 'auto' collapsing of documents {kibana-pull}89712[#89712]
+Elastic Security Solution::
+For the Elastic Security Solution 7.11.1 bug fixes, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+Lens and visualizations::
+* *Lens* visualizations now load faster on dashboards {kibana-pull}88953[#88953]
+* Advanced input now works for aggregation-based visualizations {kibana-pull}88154[#88154]
+Maps::
+* Always check license at plugin startup {kibana-pull}87873[#87873]
+Monitoring::
+* Fully control the in memory table pagination and sorting properties {kibana-pull}85862[#85862]
+* Tweak timeout for failing cloud test {kibana-pull}86671[#86671]
+* Stop using constructor.name for logstash pipelines {kibana-pull}87386[#87386]
+* Make sure we use the right duration for messaging on this alert {kibana-pull}87579[#87579]
+* Avoid spamming toast messages {kibana-pull}89930[#89930]
+
 [[release-notes-7.11.0]]
 == {kib} 7.11.0 
 
 For detailed information about the 7.11.0 release, review the <<deprecation-v7.11.0,Deprecations>>, <<enhancement-v7.11.0,Enhancements>>, and <<bug-v7.11.0,Bug fixes>>. 
-For the 7.11.0 breaking changes, refer to <<breaking-changes-7.11,breaking changes in 7.11>>.
+For the 7.11.0 breaking changes, refer to breaking changes.
 
 [float]
 [[deprecation-v7.11.0]]
@@ -919,13 +992,61 @@ Uptime::
 * UX use replace history instead of push on first load {kibana-pull}88586[#88586]
 * Fixes impacted page load errors {kibana-pull}88597[#88597]
 
+[[release-notes-7.10.2]]
+== {kib} 7.10.2
+
+For detailed information about the 7.10.2 release, review the following bug fixes. For the breaking changes, refer to the breaking changes in 7.10.
+
+[float]
+[[security-update-v7.10.2]]
+=== Security update
+*Vega* visualizations are susceptible to stored and reflected XSS via a vulnerable version of the Vega library. When you create *Vega* visualizations or create a vulnerable URL that describes the visualization, an arbitrary JavaScript can execute in your browser.
+
+[float]
+[[affected-versions-v7.10.2]]
+==== Affected versions
+Affected versions include 7.10.1 and earlier.
+
+[float]
+[[solution-v7.10.2]]
+==== Solution
+Verify if you use *Vega* visualizations, then complete the following:
+
+* If you use *Vega* visualizations, upgrade to 7.10.2.
+* If you do not use *Vega* visualizations, open your kibana.yml file, then change `vega.enabled: true` to `vega.enabled: false`. 
+
+[float]
+[[bug-v7.10.2]]
+=== Bug fixes
+Alerting::
+* Don't reset server log level if level is defined {kibana-pull}83651[#83651]
+Dashboard::
+* Fixes Duplicated Create New Modal {kibana-pull}86489[#86489]
+Logs::
+* Fixes value completion in the logs stream query bar {kibana-pull}85772[#85772]
+Machine Learning::
+* Fixes watcher URL to the Anomaly Explorer page {kibana-pull}85123[#85123]
+* Fixes Anomaly Explorer data refresh with relative time bounds  {kibana-pull}86142[#86142]
+* Fixes zoom missing in Anomaly detection URLs {kibana-pull}86182[#86182] and {kibana-pull}86400[#86400]
+* Fixes charts grid on the Anomaly Explorer page {kibana-pull}86904[#86904]
+Management::
+* When number of replicas is set to zero, it is now correctly displayed in Index Lifecycle Management policies {kibana-pull}85251[#85251]
+* The list of data streams in Index Management now sorts numerically by the raw bytes value, which renders them in the correct order {kibana-pull}86204[#86204]
+* Fixes a bug where the enterprise level subscription displayed as platinum {kibana-pull}85849[#85849]
+* From table actions in the Cross-Cluster Replication app, you can now pause/resume index replication, unfollow leader index, or delete an auto-follow pattern {kibana-pull}84433[#84433]
+* Accessibility fix in Rollup Jobs app: when selecting a row in the jobs table, a screen reader pronounces the job's name {kibana-pull}84567[#84567]
+Monitoring::
+* Makes alert status fetching more resilient {kibana-pull}84676[#84676]
+* Adds unmapped_type to additional queries {kibana-pull}85837[#85837]
+Security::
+* Fixes 500 error when using PKI authentication with an incomplete certificate chain {kibana-pull}86700[#86700]
 
 [[release-notes-7.10.1]]
 == {kib} 7.10.1
 
 For detailed information about the 7.10.1 release, review the following enhancements and bug fixes.
 
-For the breaking changes, refer to the <<breaking-changes-7.10,breaking changes in 7.10>>.
+For the breaking changes, refer to the breaking changes.
 
 [float]
 [[enhancement-v7.10.1]]
@@ -1482,12 +1603,12 @@ Operations::
 Platform::
 * The legacy plugin system and the legacy plugin API have been removed. It is no longer possible to use third parties legacy Kibana plugins. Legacy plugin owners should migrate their plugins to the Kibana Platform plugin API {kibana-pull}77599[#77599]
 
-For more information, refer to <<breaking-changes-7.10,breaking changes in 7.10>>.
+For more information, refer to breaking changes.
 
 [[release-notes-7.9.3]]
 == {kib} 7.9.3
 
-For breaking changes, refer to <<breaking-changes-7.9,breaking changes in 7.9>>.
+For breaking changes, refer to breaking changes.
 
 [float]
 [[enhancement-v7.9.3]]
@@ -1520,7 +1641,7 @@ Security::
 [[release-notes-7.9.2]]
 == {kib} 7.9.2
 
-See also <<breaking-changes-7.9,breaking changes in 7.9>>.
+See also breaking changes.
 
 [float]
 [[enhancement-v7.9.2]]
@@ -1566,7 +1687,7 @@ Uptime::
 [[release-notes-7.9.1]]
 == {kib} 7.9.1
 
-See also <<breaking-changes-7.9,breaking changes in 7.9>>.
+See also breaking changes.
 
 [float]
 [[bug-v7.9.1]]
@@ -1616,7 +1737,7 @@ Uptime::
 [[release-notes-7.9.0]]
 == {kib} 7.9.0
 
-See also <<breaking-changes-7.9,breaking changes in 7.9>>.
+See also breaking changes.
 
 Operations::
 * Moves kibana-keystore from data/ to config/ {kibana-pull}57856[#57856]
@@ -1921,7 +2042,7 @@ Platform::
 [[release-notes-7.8.1]]
 == {kib} 7.8.1
 
-See also <<breaking-changes-7.8,breaking changes in 7.8>>.
+See also breaking changes.
 
 [float]
 [[security-update-7.8.1]]
@@ -1994,7 +2115,7 @@ SIEM::
 [[breaking-changes-7.8.0]]
 === Breaking changes
 
-See also <<breaking-changes-7.8,breaking changes in 7.8>>.
+See also breaking changes.
 
 Dashboard::
 * Fixes back button by removing panels from url in dashboard in view mode {kib-pull}62415[#62415]
@@ -2262,7 +2383,7 @@ Security::
 [[release-notes-7.7.1]]
 == {kib} 7.7.1
 
-See <<breaking-changes-7.7,breaking changes in 7.7>>.
+See breaking changes.
 
 [float]
 [[security-update-7.1.1]]
@@ -2346,7 +2467,7 @@ Uptime::
 [[release-notes-7.7.0]]
 == {kib} 7.7.0
 
-See <<breaking-changes-7.7,breaking changes in 7.7>>.
+See breaking changes.
 
 [float]
 [[security-update-7.7.0]]
@@ -2678,7 +2799,7 @@ Platform::
 [[release-notes-7.6.2]]
 == {kib} 7.6.2
 
-See <<breaking-changes-7.6,breaking changes in 7.6>>.
+See breaking changes.
 
 [float]
 [[known-issue-7.6.2]]
@@ -2729,7 +2850,7 @@ Visualizations::
 [[release-notes-7.6.1]]
 == {kib} 7.6.1
 
-See <<breaking-changes-7.6,breaking changes in 7.6>>.
+See breaking changes.
 
 [float]
 [[known-issue-7.6.1]]
@@ -2815,7 +2936,7 @@ Uptime::
 [[release-notes-7.6.0]]
 == {kib} 7.6.0
 
-See also <<breaking-changes-7.6,breaking changes in 7.6>>.
+See also breaking changes.
 
 [float]
 [[known-issue-7.6.0]]
@@ -3192,7 +3313,7 @@ Security::
 [[release-notes-7.5.2]]
 == {kib} 7.5.2
 
-See <<breaking-changes-7.5, breaking changes in 7.5>>.
+See breaking changes.
 
 [float]
 [[bug-7.5.2]]
@@ -3250,7 +3371,7 @@ image::images/rn_7.5.2.png[]
 [[breaking-7.5.1]]
 === Breaking changes
 
-See <<breaking-changes-7.5, breaking changes in 7.5>>.
+See breaking changes.
 
 [float]
 [[enhancement-7.5.1]]
@@ -3308,7 +3429,7 @@ Lens::
 [float]
 [[breaking-7.5.0]]
 === Breaking changes
-See also <<breaking-changes-7.5, breaking changes in 7.5>>.
+See also breaking changes.
 
 Code::
 * Removes experimental code app {kib-pull}49404[#49404]
@@ -3608,7 +3729,7 @@ Visualizations::
 [[release-notes-7.4.2]]
 == {kib} 7.4.2
 
-Also see <<breaking-changes-7.4, breaking changes in 7.4>>.
+Also see breaking changes.
 
 [float]
 [[bug-7.4.2]]
@@ -3623,7 +3744,7 @@ Visualizations::
 [[release-notes-7.4.1]]
 == {kib} 7.4.1
 
-See also <<breaking-changes-7.4, breaking changes in 7.4>>.
+See also breaking changes.
 
 
 [float]
@@ -3674,7 +3795,7 @@ Uptime::
 [float]
 [[breaking-7.4.0]]
 === Breaking Changes
-See also <<breaking-changes-7.4, breaking changes in 7.4>>.
+See also breaking changes.
 
 Platform::
 * Use search instead of msearch when batching is disabled in courier {kib-pull}43923[#43923]
@@ -3945,7 +4066,7 @@ Visualizations::
 [[release-notes-7.3.2]]
 == {kib} 7.3.2
 
-See also <<breaking-changes-7.3, breaking changes in 7.3>>.
+See also breaking changes.
 
 [float]
 [[bug-7.3.2]]
@@ -3973,7 +4094,7 @@ Platform::
 [[breaking-7.3.1]]
 === Breaking Changes
 
-See also <<breaking-changes-7.3, breaking changes in 7.3>>.
+See also breaking changes.
 
 Platform::
 * Fixes import API so it doesn't override SavedObjectClient errors {kib-pull}41125[#41125]
@@ -4033,7 +4154,7 @@ Visualizations::
 [[breaking-7.3.0]]
 === Breaking Changes
 
-See also <<breaking-changes-7.3, breaking changes in 7.3>>.
+See also breaking changes.
 
 Machine Learning::
 * Data Frame: Remove format from date_histogram configs. {kib-pull}39811[#39811]
@@ -4274,7 +4395,7 @@ Visualize::
 [[release-notes-7.2.1]]
 == {kib} 7.2.1
 
-See also <<breaking-changes-7.2, breaking changes in 7.2>>.
+See also breaking changes.
 
 [float]
 [[enhancement-7.2.1]]
@@ -4329,7 +4450,7 @@ Visualize::
 [[breaking-7.2.0]]
 === Breaking Changes
 
-See <<breaking-changes-7.2, breaking changes in 7.2>> for more information.
+See breaking changes for more information.
 
 Index Patterns::
 * Removes support for time-based interval index patterns with migration {kib-pull}35262[#35262]
@@ -4695,7 +4816,7 @@ Monitoring::
 == {kib} 7.0.1
 
 
-See <<breaking-changes, breaking changes>> for the changes to be aware of when migrating your application
+See breaking changes for the changes to be aware of when migrating your application
 from one version of Kibana to another.
 
 
@@ -4791,7 +4912,7 @@ cluster and {kib} version 6.7.0 or 6.7.1, you cannot see the monitoring data in
 === Breaking changes
 
 For more details about breaking changes in this release, see
-<<breaking-changes-7.0, Breaking changes in 7.0>>.
+breaking changes.
 
 Discover::
 * Allows user to use advanced query DSL directly, and does not apply `query:queryString:options` to `query_string` filters automatically {kib-pull}15640[#15640]
@@ -5329,7 +5450,7 @@ cluster and {kib} version 6.7.0 or 6.7.1, you cannot see the monitoring data in
 === Breaking changes
 
 For more details about breaking changes in this release, see
-<<breaking-changes-7.0, Breaking changes in 7.0>>.
+breaking changes.
 
 Discover::
 * Allows user to use advanced query DSL directly, and does not apply `query:queryString:options` to `query_string` filters automatically {kib-pull}15640[#15640]
@@ -5850,7 +5971,7 @@ if the field is switched, and then switched back to the previous field {kib-pull
 === Breaking changes
 
 For more details about breaking changes in this release, see
-<<breaking-changes-7.0, Breaking changes in 7.0>>.
+breaking changes.
 
 Discover::
 * Allows user to use advanced query DSL directly, and does not apply `query:queryString:options` to `query_string` filters automatically {kib-pull}15640[#15640]
@@ -6367,7 +6488,7 @@ if the field is switched, and then switched back to the previous field {kib-pull
 === Breaking changes
 
 For more details about breaking changes in this release, see
-<<breaking-changes-7.0, Breaking changes in 7.0>>.
+breaking changes.
 
 Design::
 * Removes references to K6 EUI, using the default UI theme in its place {kib-pull}29152[#29152]
@@ -6565,7 +6686,7 @@ Visualizations::
 === Breaking changes
 
 For more details about breaking changes in this release, see
-<<breaking-changes-7.0, Breaking changes in 7.0>>.
+breaking changes.
 
 [float]
 [[highlight-7.0.0-alpha2]]
@@ -6760,7 +6881,7 @@ formatter {kib-pull}25654[#25654]
 === Breaking changes
 
 For more details about breaking changes in this release, see
-<<breaking-changes-7.0, Breaking changes in 7.0>>.
+breaking changes.
 
 Discover::
 * Does not apply `query:queryString:options` to `query_string` filters {kib-pull}15640[#15640]

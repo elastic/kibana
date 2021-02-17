@@ -188,8 +188,12 @@ describe('editor_frame', () => {
           />
         );
       });
-      expect(mockDatasource.initialize).toHaveBeenCalledWith(datasource1State, [], undefined);
-      expect(mockDatasource2.initialize).toHaveBeenCalledWith(datasource2State, [], undefined);
+      expect(mockDatasource.initialize).toHaveBeenCalledWith(datasource1State, [], undefined, {
+        isFullEditor: true,
+      });
+      expect(mockDatasource2.initialize).toHaveBeenCalledWith(datasource2State, [], undefined, {
+        isFullEditor: true,
+      });
       expect(mockDatasource3.initialize).not.toHaveBeenCalled();
     });
 

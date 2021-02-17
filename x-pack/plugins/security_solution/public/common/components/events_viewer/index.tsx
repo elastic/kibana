@@ -12,6 +12,7 @@ import styled from 'styled-components';
 
 import { inputsModel, inputsSelectors, State } from '../../store';
 import { inputsActions } from '../../store/actions';
+import { TimelineId } from '../../../../common/types/timeline';
 import { timelineSelectors, timelineActions } from '../../../timelines/store/timeline';
 import { SubsetTimelineModel, TimelineModel } from '../../../timelines/store/timeline/model';
 import { Filter } from '../../../../../../../src/plugins/data/public';
@@ -34,7 +35,7 @@ const FullScreenContainer = styled.div<{ $isFullScreen: boolean }>`
 export interface OwnProps {
   defaultModel: SubsetTimelineModel;
   end: string;
-  id: string;
+  id: TimelineId;
   scopeId: SourcererScopeName;
   start: string;
   headerFilterGroup?: React.ReactNode;
