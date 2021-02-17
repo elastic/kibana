@@ -291,9 +291,6 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should create a single rule which has a timestamp override for an index pattern that does not exist and write a warning status', async () => {
-        // should be a failing status because one of the indices in the index pattern is missing
-        // the timestamp override field.
-
         // defaults to event.ingested timestamp override.
         // event.ingested is one of the timestamp fields set on the es archive data
         // inside of x-pack/test/functional/es_archives/security_solution/timestamp_override/data.json.gz
@@ -314,8 +311,6 @@ export default ({ getService }: FtrProviderContext) => {
           .send({ ids: [bodyId] })
           .expect(200);
 
-        // set to "failed" for now. Will update this with a partial failure
-        // once I figure out the logic
         expect((statusBody as RuleStatusResponse)[bodyId].current_status?.status).to.eql('warning');
         expect(
           (statusBody as RuleStatusResponse)[bodyId].current_status?.last_success_message
@@ -325,9 +320,6 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should create a single rule which has a timestamp override and generates two signals with a "warning" status', async () => {
-        // should be a failing status because one of the indices in the index pattern is missing
-        // the timestamp override field.
-
         // defaults to event.ingested timestamp override.
         // event.ingested is one of the timestamp fields set on the es archive data
         // inside of x-pack/test/functional/es_archives/security_solution/timestamp_override/data.json.gz
