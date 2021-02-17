@@ -21,7 +21,7 @@ Create {kib} alerts.
   (Optional, string array) A list of keywords to reference and search in the future.
 
 `alertTypeId`::
-  (Required, string) The id value of the alert type you want to call when the alert is scheduled to execute.
+  (Required, string) The ID of the alert type that you want to call when the alert is scheduled to run.
 
 `schedule`::
   (Required, object) The schedule specifying when this alert should be run, using one of the available schedule formats specified under _Schedule Formats_ below.
