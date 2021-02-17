@@ -11,6 +11,7 @@ export interface HumanData {
   label: string;
   groupLabel?: string;
   position?: number;
+  nextLabel?: string;
 }
 
 type AnnouncementFunction = (draggedElement: HumanData, dropElement: HumanData) => string;
@@ -25,7 +26,7 @@ const selectedTargetReplace = (
   { label: dropLabel, groupLabel, position }: HumanData
 ) =>
   i18n.translate('xpack.lens.dragDrop.announce.selectedTarget.replace', {
-    defaultMessage: `Selected {dropLabel} in {groupLabel} group at position {position}. Press space or enter to replace {dropLabel} with {label}.`,
+    defaultMessage: `Replace {dropLabel} in {groupLabel} group at position {position} with {label}. Press space or enter to replace`,
     values: {
       label,
       dropLabel,
@@ -34,65 +35,103 @@ const selectedTargetReplace = (
     },
   });
 
-const droppedReplace = ({ label }: HumanData, { label: dropLabel, groupLabel }: HumanData) =>
+const droppedReplace = (
+  { label }: HumanData,
+  { label: dropLabel, groupLabel, position }: HumanData
+) =>
   i18n.translate('xpack.lens.dragDrop.announce.duplicated.replace', {
-    defaultMessage:
-      'You have dropped the item. You have replaced {dropLabel} with {label} in {groupLabel} group.',
+    defaultMessage: 'Replaced {dropLabel} with {label} in {groupLabel} at position {position}',
     values: {
       label,
       dropLabel,
       groupLabel,
+      position,
     },
   });
 
 export const announcements: CustomAnnouncementsType = {
   selectedTarget: {
-    reorder: ({ label, position: prevPosition }, { position }) =>
+    reorder: ({ label, groupLabel, position: prevPosition }, { position }) =>
       prevPosition === position
         ? i18n.translate('xpack.lens.dragDrop.announce.selectedTarget.reorderedBack', {
-            defaultMessage: `You have moved the item {label} back to position {prevPosition}`,
+            defaultMessage: `{label} returned to its initial position {prevPosition}`,
             values: {
               label,
               prevPosition,
             },
           })
         : i18n.translate('xpack.lens.dragDrop.announce.selectedTarget.reordered', {
-            defaultMessage: `You have moved the item {label} from position {prevPosition} to position {position}`,
+            defaultMessage: `Reorder {label} in {groupLabel} group from position {prevPosition} to position {position}. Press space or enter to reorder`,
             values: {
+              groupLabel,
               label,
               position,
               prevPosition,
             },
           }),
-    duplicate_in_group: ({ label }, { label: dropLabel, groupLabel, position }) =>
+    duplicate_in_group: ({ label }, { groupLabel, position }) =>
       i18n.translate('xpack.lens.dragDrop.announce.selectedTarget.duplicated', {
-        defaultMessage: `Selected {dropLabel} in {groupLabel} group at position {position}. Press space or enter to duplicate {label}.`,
+        defaultMessage: `Duplicate {label} to {groupLabel} group at position {position}. Press space or enter to duplicate`,
         values: {
           label,
-          dropLabel,
           groupLabel,
           position,
         },
       }),
     field_replace: selectedTargetReplace,
     replace_compatible: selectedTargetReplace,
-    replace_incompatible: selectedTargetReplace,
-  },
-  dropped: {
-    reorder: ({ label, position: prevPosition }, { position }) =>
-      i18n.translate('xpack.lens.dragDrop.announce.dropped.reordered', {
-        defaultMessage:
-          'You have dropped the item {label}. You have moved the item from position {prevPosition} to positon {position}',
+    replace_incompatible: (
+      { label }: HumanData,
+      { label: dropLabel, groupLabel, position, nextLabel }: HumanData
+    ) =>
+      i18n.translate('xpack.lens.dragDrop.announce.selectedTarget.replaceIncompatible', {
+        defaultMessage: `Convert {label} to {nextLabel} and replace {dropLabel} in {groupLabel} group at position {position}. Press space or enter to replace`,
         values: {
           label,
+          nextLabel,
+          dropLabel,
+          groupLabel,
+          position,
+        },
+      }),
+    move_incompatible: (
+      { label }: HumanData,
+      { label: groupLabel, position, nextLabel }: HumanData
+    ) =>
+      i18n.translate('xpack.lens.dragDrop.announce.selectedTarget.moveIncompatible', {
+        defaultMessage: `Convert {label} to {nextLabel} and move to {groupLabel} group at position {position}. Press space or enter to move`,
+        values: {
+          label,
+          nextLabel,
+          groupLabel,
+          position,
+        },
+      }),
+    move_compatible: ({ label }: HumanData, { groupLabel, position }: HumanData) =>
+      i18n.translate('xpack.lens.dragDrop.announce.selectedTarget.moveCompatible', {
+        defaultMessage: `Move {label} to {groupLabel} group at position {position}. Press space or enter to move`,
+        values: {
+          label,
+          groupLabel,
+          position,
+        },
+      }),
+  },
+  dropped: {
+    reorder: ({ label, groupLabel, position: prevPosition }, { position }) =>
+      i18n.translate('xpack.lens.dragDrop.announce.dropped.reordered', {
+        defaultMessage:
+          'Reordered {label} in {groupLabel} group from position {prevPosition} to positon {position}',
+        values: {
+          label,
+          groupLabel,
           position,
           prevPosition,
         },
       }),
     duplicate_in_group: ({ label }, { groupLabel, position }) =>
       i18n.translate('xpack.lens.dragDrop.announce.dropped.duplicated', {
-        defaultMessage:
-          'You have dropped the item. You have duplicated {label} in {groupLabel} group at position {position}',
+        defaultMessage: 'Duplicated {label} in {groupLabel} group at position {position}',
         values: {
           label,
           groupLabel,
@@ -101,7 +140,42 @@ export const announcements: CustomAnnouncementsType = {
       }),
     field_replace: droppedReplace,
     replace_compatible: droppedReplace,
-    replace_incompatible: droppedReplace,
+    replace_incompatible: (
+      { label }: HumanData,
+      { label: dropLabel, groupLabel, position, nextLabel }: HumanData
+    ) =>
+      i18n.translate('xpack.lens.dragDrop.announce.dropped.replaceIncompatible', {
+        defaultMessage:
+          'Converted {label} to {nextLabel} and replaced {dropLabel} in {groupLabel} group at position {position}',
+        values: {
+          label,
+          nextLabel,
+          dropLabel,
+          groupLabel,
+          position,
+        },
+      }),
+    move_incompatible: ({ label }: HumanData, { groupLabel, position, nextLabel }: HumanData) =>
+      i18n.translate('xpack.lens.dragDrop.announce.dropped.moveIncompatible', {
+        defaultMessage:
+          'Converted {label} to {nextLabel} and moved to {groupLabel} group at position {position}',
+        values: {
+          label,
+          nextLabel,
+          groupLabel,
+          position,
+        },
+      }),
+
+    move_compatible: ({ label }: HumanData, { groupLabel, position }: HumanData) =>
+      i18n.translate('xpack.lens.dragDrop.announce.dropped.moveCompatible', {
+        defaultMessage: 'Moved {label} to {groupLabel} group at position {position}',
+        values: {
+          label,
+          groupLabel,
+          position,
+        },
+      }),
   },
 };
 
@@ -113,13 +187,29 @@ const defaultAnnouncements = {
         label,
       },
     }),
-  cancelled: () =>
-    i18n.translate('xpack.lens.dragDrop.announce.cancelled', {
-      defaultMessage: 'Movement cancelled',
-    }),
+  cancelled: ({ label, groupLabel, position }: HumanData) => {
+    if (!groupLabel || !position) {
+      return i18n.translate('xpack.lens.dragDrop.announce.cancelled', {
+        defaultMessage: 'Movement cancelled. {label} returned to its initial position',
+        values: {
+          label,
+        },
+      });
+    }
+    return i18n.translate('xpack.lens.dragDrop.announce.cancelledItem', {
+      defaultMessage:
+        'Movement cancelled. {label} returned to {groupLabel} group at position {position}',
+      values: {
+        label,
+        groupLabel,
+        position,
+      },
+    });
+  },
+
   noTarget: () => {
     return i18n.translate('xpack.lens.dragDrop.announce.selectedTarget.noSelected', {
-      defaultMessage: `No target selected. Use arrow keys to select a target.`,
+      defaultMessage: `No target selected. Use arrow keys to select a target`,
     });
   },
 
@@ -129,17 +219,15 @@ const defaultAnnouncements = {
   ) =>
     dropGroupLabel && position
       ? i18n.translate('xpack.lens.dragDrop.announce.droppedDefault', {
-          defaultMessage:
-            'You have dropped {label} to {dropLabel} in {dropGroupLabel} group at position {position}',
+          defaultMessage: 'Added {label} in {dropGroupLabel} group at position {position}',
           values: {
             label,
             dropGroupLabel,
             position,
-            dropLabel,
           },
         })
       : i18n.translate('xpack.lens.dragDrop.announce.droppedNoPosition', {
-          defaultMessage: 'You have dropped {label} to {dropLabel}',
+          defaultMessage: 'Added {label} to {dropLabel}',
           values: {
             label,
             dropLabel,
@@ -151,16 +239,15 @@ const defaultAnnouncements = {
   ) => {
     return dropGroupLabel && position
       ? i18n.translate('xpack.lens.dragDrop.announce.selectedTarget.default', {
-          defaultMessage: `Selected {dropLabel} in {dropGroupLabel} group at position {position}. Press space or enter to drop {label}`,
+          defaultMessage: `Add {label} to {dropGroupLabel} group at position {position}. Press space or enter to add`,
           values: {
-            dropLabel,
             label,
             dropGroupLabel,
             position,
           },
         })
       : i18n.translate('xpack.lens.dragDrop.announce.selectedTarget.defaultNoPosition', {
-          defaultMessage: `Selected {dropLabel}. Press space or enter to drop {label}`,
+          defaultMessage: `Add {label} to {dropLabel}. Press space or enter to add`,
           values: {
             dropLabel,
             label,

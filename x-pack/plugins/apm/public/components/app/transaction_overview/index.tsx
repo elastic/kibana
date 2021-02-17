@@ -82,7 +82,7 @@ export function TransactionOverview({ serviceName }: TransactionOverviewProps) {
 
   return (
     <>
-      <SearchBar showTimeComparison showCorrelations />
+      <SearchBar showCorrelations />
 
       <EuiPage>
         <EuiFlexGroup direction="column" gutterSize="s">
