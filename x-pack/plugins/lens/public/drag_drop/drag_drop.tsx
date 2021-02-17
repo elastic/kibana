@@ -267,7 +267,7 @@ const DragInner = memo(function DragInner({
     setDragging(undefined);
     setActiveDropTarget(undefined);
     setKeyboardMode(false);
-    setA11yMessage(announce.cancelled());
+    setA11yMessage(announce.cancelled(value.humanData));
     if (onDragEnd) {
       onDragEnd();
     }

@@ -16,6 +16,7 @@ import {
   DataFrameAnalyticsId,
   DataFrameAnalysisConfigType,
 } from '../../../../../../../common/types/data_frame_analytics';
+import { isClassificationAnalysis } from '../../../../../../../common/util/analytics_utils';
 import { ANALYSIS_CONFIG_TYPE } from '../../../../../../../common/constants/data_frame_analytics';
 export enum DEFAULT_MODEL_MEMORY_LIMIT {
   regression = '100mb',
@@ -50,6 +51,7 @@ export interface State {
     alpha: undefined | number;
     computeFeatureInfluence: string;
     createIndexPattern: boolean;
+    classAssignmentObjective: undefined | string;
     dependentVariable: DependentVariable;
     description: string;
     destinationIndex: EsIndexName;
@@ -126,6 +128,7 @@ export const getInitialState = (): State => ({
     alpha: undefined,
     computeFeatureInfluence: 'true',
     createIndexPattern: true,
+    classAssignmentObjective: undefined,
     dependentVariable: '',
     description: '',
     destinationIndex: '',
@@ -278,13 +281,14 @@ export const getJobConfigFromFormState = (
     };
   }
 
-  if (
-    formState.jobType === ANALYSIS_CONFIG_TYPE.CLASSIFICATION &&
-    jobConfig?.analysis?.classification !== undefined &&
-    formState.numTopClasses !== undefined
-  ) {
-    // @ts-ignore
-    jobConfig.analysis.classification.num_top_classes = formState.numTopClasses;
+  if (jobConfig?.analysis !== undefined && isClassificationAnalysis(jobConfig?.analysis)) {
+    if (formState.numTopClasses !== undefined) {
+      jobConfig.analysis.classification.num_top_classes = formState.numTopClasses;
+    }
+    if (formState.classAssignmentObjective !== undefined) {
+      jobConfig.analysis.classification.class_assignment_objective =
+        formState.classAssignmentObjective;
+    }
   }
 
   if (formState.jobType === ANALYSIS_CONFIG_TYPE.OUTLIER_DETECTION) {

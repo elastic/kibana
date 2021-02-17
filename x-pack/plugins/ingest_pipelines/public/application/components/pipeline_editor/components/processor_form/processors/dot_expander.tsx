@@ -12,9 +12,12 @@ import { FieldConfig, FIELD_TYPES, UseField, Field } from '../../../../../../sha
 
 import { FieldNameField } from './common_fields/field_name_field';
 
+import { from } from './shared';
+
 const fieldsConfig: Record<string, FieldConfig> = {
   path: {
     type: FIELD_TYPES.TEXT,
+    serializer: from.emptyStringToUndefined,
     label: i18n.translate('xpack.ingestPipelines.pipelineEditor.dotExpanderForm.pathFieldLabel', {
       defaultMessage: 'Path',
     }),
