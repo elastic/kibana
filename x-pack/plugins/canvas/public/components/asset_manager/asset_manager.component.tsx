@@ -19,7 +19,6 @@ import {
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
-  EuiOverlayMask,
   EuiPanel,
   EuiProgress,
   EuiSpacer,
@@ -75,71 +74,69 @@ export const AssetManager: FC<Props> = (props) => {
   };
 
   return (
-    <EuiOverlayMask>
-      <EuiModal
-        onClose={() => onClose()}
-        className="canvasAssetManager canvasModal--fixedSize"
-        maxWidth="1000px"
-      >
-        <EuiModalHeader className="canvasAssetManager__modalHeader">
-          <EuiModalHeaderTitle className="canvasAssetManager__modalHeaderTitle">
-            {strings.getModalTitle()}
-          </EuiModalHeaderTitle>
-          <EuiFlexGroup className="canvasAssetManager__fileUploadWrapper">
-            <EuiFlexItem grow={false}>
-              {isLoading ? (
-                <Loading animated text={strings.getLoadingText()} />
-              ) : (
-                <EuiFilePicker
-                  initialPromptText={strings.getFilePickerPromptText()}
-                  compressed
-                  display="default"
-                  multiple
-                  onChange={onFileUpload}
-                  accept="image/*"
-                />
-              )}
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiModalHeader>
-        <EuiModalBody>
-          <EuiText size="s" color="subdued">
-            <p>{strings.getDescription()}</p>
-          </EuiText>
-          <EuiSpacer />
-          {assets.length ? (
-            <EuiFlexGrid columns={4}>
-              {assets.map((asset) => (
-                <Asset asset={asset} key={asset.id} />
-              ))}
-            </EuiFlexGrid>
-          ) : (
-            emptyAssets
-          )}
-        </EuiModalBody>
-        <EuiModalFooter className="canvasAssetManager__modalFooter">
-          <EuiFlexGroup className="canvasAssetManager__meterWrapper" responsive={false}>
-            <EuiFlexItem>
-              <EuiProgress
-                value={assetsTotal}
-                max={ASSET_MAX_SIZE}
-                color={percentageUsed < 90 ? 'secondary' : 'danger'}
-                size="s"
-                aria-labelledby="CanvasAssetManagerLabel"
+    <EuiModal
+      onClose={() => onClose()}
+      className="canvasAssetManager canvasModal--fixedSize"
+      maxWidth="1000px"
+    >
+      <EuiModalHeader className="canvasAssetManager__modalHeader">
+        <EuiModalHeaderTitle className="canvasAssetManager__modalHeaderTitle">
+          {strings.getModalTitle()}
+        </EuiModalHeaderTitle>
+        <EuiFlexGroup className="canvasAssetManager__fileUploadWrapper">
+          <EuiFlexItem grow={false}>
+            {isLoading ? (
+              <Loading animated text={strings.getLoadingText()} />
+            ) : (
+              <EuiFilePicker
+                initialPromptText={strings.getFilePickerPromptText()}
+                compressed
+                display="default"
+                multiple
+                onChange={onFileUpload}
+                accept="image/*"
               />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false} className="eui-textNoWrap">
-              <EuiText id="CanvasAssetManagerLabel">
-                {strings.getSpaceUsedText(percentageUsed)}
-              </EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          <EuiButton size="s" onClick={() => onClose()}>
-            {strings.getModalCloseButtonLabel()}
-          </EuiButton>
-        </EuiModalFooter>
-      </EuiModal>
-    </EuiOverlayMask>
+            )}
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiModalHeader>
+      <EuiModalBody>
+        <EuiText size="s" color="subdued">
+          <p>{strings.getDescription()}</p>
+        </EuiText>
+        <EuiSpacer />
+        {assets.length ? (
+          <EuiFlexGrid columns={4}>
+            {assets.map((asset) => (
+              <Asset asset={asset} key={asset.id} />
+            ))}
+          </EuiFlexGrid>
+        ) : (
+          emptyAssets
+        )}
+      </EuiModalBody>
+      <EuiModalFooter className="canvasAssetManager__modalFooter">
+        <EuiFlexGroup className="canvasAssetManager__meterWrapper" responsive={false}>
+          <EuiFlexItem>
+            <EuiProgress
+              value={assetsTotal}
+              max={ASSET_MAX_SIZE}
+              color={percentageUsed < 90 ? 'secondary' : 'danger'}
+              size="s"
+              aria-labelledby="CanvasAssetManagerLabel"
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false} className="eui-textNoWrap">
+            <EuiText id="CanvasAssetManagerLabel">
+              {strings.getSpaceUsedText(percentageUsed)}
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiButton size="s" onClick={() => onClose()}>
+          {strings.getModalCloseButtonLabel()}
+        </EuiButton>
+      </EuiModalFooter>
+    </EuiModal>
   );
 };
 
