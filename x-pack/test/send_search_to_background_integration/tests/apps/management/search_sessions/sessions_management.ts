@@ -77,7 +77,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       // NOTE: this test depends on the previous one passing
-      it('Reloads as new session from management', async () => {
+      it.skip('Reloads as new session from management', async () => {
         await PageObjects.searchSessionsManagement.goTo();
 
         const searchSessionList = await PageObjects.searchSessionsManagement.getList();
