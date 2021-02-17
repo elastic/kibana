@@ -2175,10 +2175,10 @@
   version "0.0.0"
   uid ""
 
-"@elastic/elasticsearch@npm:@elastic/elasticsearch-canary@^7.12.0-canary":
-  version "7.12.0-canary.1"
-  resolved "https://registry.yarnpkg.com/@elastic/elasticsearch-canary/-/elasticsearch-canary-7.12.0-canary.1.tgz#e283d96fb621984da9c39da6e0e8a17d430f5960"
-  integrity sha512-FiyR0/wSe1dEBpLRr7/M08V/aDQHSTZ1LvKUO4fbHeJI/pr3Jfy2mXbZFiNkNpcOYTVatZCCcCVUEi9sFnRyEw==
+"@elastic/elasticsearch@npm:@elastic/elasticsearch-canary@^7.12.0-canary.2":
+  version "7.12.0-canary.2"
+  resolved "https://registry.yarnpkg.com/@elastic/elasticsearch-canary/-/elasticsearch-canary-7.12.0-canary.2.tgz#e7269d49c0cdb8e28313b8e219b63a4d5b882469"
+  integrity sha512-m41mMkWE3ef0Vk6VJtqfwU/CuaI/GcAQ+Fu6vhy0b0o6NFexgzsjcxKHbOBorJinADskklZVSTZjtxF0AzSdFw==
   dependencies:
     debug "^4.1.1"
     hpagent "^0.1.1"
