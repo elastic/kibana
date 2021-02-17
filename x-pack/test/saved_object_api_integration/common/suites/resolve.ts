@@ -30,6 +30,7 @@ export type ResolveTestSuite = TestSuite<ResolveTestDefinition>;
 export interface ResolveTestCase extends TestCase {
   expectedOutcome?: 'exactMatch' | 'aliasMatch' | 'conflict';
   expectedId?: string;
+  expectedAliasTargetId?: string;
 }
 
 const EACH_SPACE = [DEFAULT_SPACE_ID, SPACE_1_ID, SPACE_2_ID];
@@ -48,6 +49,7 @@ export const TEST_CASES = Object.freeze({
     expectedNamespaces: EACH_SPACE,
     expectedOutcome: 'aliasMatch' as 'aliasMatch',
     expectedId: 'alias-match-newid',
+    expectedAliasTargetId: 'alias-match-newid',
   }),
   CONFLICT: Object.freeze({
     type: 'resolvetype',
@@ -55,6 +57,7 @@ export const TEST_CASES = Object.freeze({
     expectedNamespaces: EACH_SPACE,
     expectedOutcome: 'conflict' as 'conflict', // only in space 1, where the alias exists
     expectedId: 'conflict',
+    expectedAliasTargetId: 'conflict-newid',
   }),
   DISABLED: Object.freeze({
     type: 'resolvetype',
@@ -77,10 +80,15 @@ export function resolveTestSuiteFactory(esArchiver: any, supertest: SuperTest<an
     } else {
       // permitted
       const object = response.body.saved_object || response.body; // errors do not have a saved_object field
-      const { expectedId: id, expectedOutcome } = testCase;
+      const { expectedId: id, expectedOutcome, expectedAliasTargetId } = testCase;
       await expectResponses.permitted(object, { ...testCase, ...(id && { id }) });
-      if (expectedOutcome && !testCase.failure) {
+      if (!testCase.failure) {
         expect(response.body.outcome).to.eql(expectedOutcome);
+        if (expectedOutcome === 'conflict' || expectedOutcome === 'aliasMatch') {
+          expect(response.body.aliasTargetId).to.eql(expectedAliasTargetId);
+        } else {
+          expect(response.body.aliasTargetId).to.eql(undefined);
+        }
       }
     }
   };
