@@ -42,6 +42,8 @@ else
   echo "Chrome not detected, installing default chromedriver binary for the package version"
 fi
 
+export GCS_UPLOAD_PREFIX=iahsuidhaoshjdlkajhsoifjhasi
+
 ################
 
 echo "### Setup Node"
