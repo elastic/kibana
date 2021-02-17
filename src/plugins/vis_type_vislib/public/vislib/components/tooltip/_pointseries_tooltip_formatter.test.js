@@ -63,15 +63,16 @@ describe('tooltipFormatter', function () {
           }),
         }),
       },
-      uiSettings: {
-        get: () => '',
-      },
     },
+  };
+
+  const uiSettings = {
+    get: () => '',
   };
 
   it('returns html based on the mouse event', function () {
     const event = _.cloneDeep(baseEvent);
-    const $el = $(tooltipFormatter(event));
+    const $el = $(tooltipFormatter(event, uiSettings));
     const $rows = $el.find('tr');
     expect($rows.length).toBe(3);
 
@@ -91,7 +92,7 @@ describe('tooltipFormatter', function () {
   it('renders correctly on missing extraMetrics in datum', function () {
     const event = _.cloneDeep(baseEvent);
     delete event.datum.extraMetrics;
-    const $el = $(tooltipFormatter(event));
+    const $el = $(tooltipFormatter(event, uiSettings));
     const $rows = $el.find('tr');
     expect($rows.length).toBe(3);
   });

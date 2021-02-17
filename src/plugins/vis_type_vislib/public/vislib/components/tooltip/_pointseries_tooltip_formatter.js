@@ -26,7 +26,7 @@ function getMax(handler, config, isGauge) {
 }
 
 export function pointSeriesTooltipFormatter() {
-  return function tooltipFormatter({ datum, data, config, handler }) {
+  return function tooltipFormatter({ datum, data, config, handler }, uiSettings) {
     if (!datum) return '';
 
     const details = [];
@@ -53,7 +53,7 @@ export function pointSeriesTooltipFormatter() {
       if (isPercentageMode && !isSetColorRange) {
         const percentageFormatPattern = config.get(
           isGauge ? 'gauge.percentageFormatPattern' : 'percentageFormatPattern',
-          handler.uiSettings.get(UI_SETTINGS.FORMAT_PERCENT_DEFAULT_PATTERN)
+          uiSettings.get(UI_SETTINGS.FORMAT_PERCENT_DEFAULT_PATTERN)
         );
         value = getValueForPercentageMode(
           value / getMax(handler, config, isGauge),

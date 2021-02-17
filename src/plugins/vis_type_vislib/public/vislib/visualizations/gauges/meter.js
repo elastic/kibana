@@ -49,9 +49,10 @@ const defaultConfig = {
 };
 
 export class MeterGauge {
-  constructor(gaugeChart) {
+  constructor(gaugeChart, uiSettings) {
     this.gaugeChart = gaugeChart;
     this.gaugeConfig = gaugeChart.gaugeConfig;
+    this.uiSettings = uiSettings;
     this.gaugeConfig = _.defaultsDeep(this.gaugeConfig, defaultConfig);
 
     this.gaugeChart.handler.visConfig.set('legend', {
@@ -72,7 +73,7 @@ export class MeterGauge {
     const isPercentageMode = this.gaugeConfig.percentageMode;
     const percentageFormatPattern =
       this.gaugeConfig.percentageFormatPattern ||
-      this.gaugeChart.handler.uiSettings.get(UI_SETTINGS.FORMAT_PERCENT_DEFAULT_PATTERN);
+      this.uiSettings.get(UI_SETTINGS.FORMAT_PERCENT_DEFAULT_PATTERN);
     const colorsRange = this.gaugeConfig.colorsRange;
     const max = _.last(colorsRange).to;
     const labels = [];
