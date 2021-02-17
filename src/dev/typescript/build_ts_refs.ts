@@ -22,7 +22,7 @@ export async function buildAllTsRefs(log: ToolingLog) {
       [
         '--preserve-symlinks',
         '--preserve-symlinks-main',
-        './node_modules/.bin/tsc',
+        './node_modules/typescript/bin/tsc',
         '-b',
         relative,
         '--pretty',
