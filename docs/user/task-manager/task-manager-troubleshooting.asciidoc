@@ -18,9 +18,11 @@ Or post in the https://discuss.elastic.co/[Elastic forum].
 === Scheduled Tasks with Small Schedule Intervals Run Late
 
 *Symptom*:
+
 Tasks are scheduled to run every 2 seconds but they seem to be running too late
 
 *Resolution*:
+
 Task Manager polls for tasks at the cadence specified by the <<task-manager-settings,`xpack.task_manager.poll_interval`>> setting, which is 3 seconds by default. This means that a Task could run late if it uses a schedule which is smaller than this setting.
 
 This can be addressed by adjusting the <<task-manager-settings,`xpack.task_manager.poll_interval`>> setting, though this will add additional load to both {kib} and {es} instances in the cluster, as they will peform more queries.
@@ -31,10 +33,12 @@ This can be addressed by adjusting the <<task-manager-settings,`xpack.task_manag
 === Tasks Run Late
 
 *Symptoms*:
-By far the most common symptom of an underlying problem in Task manager is that tasks areperceived as running late.
+
+By far the most common symptom of an underlying problem in Task manager is that tasks appear to be running late.
 For instance, recurring Tasks might run at an inconsistent cadence, or long after their scheduled time.
 
 *Resolution*:
+
 By default {kib} polls for tasks at a rate of 10 tasks every 3 seconds.
 
 This means that if there are many tasks that have been scheduled to run at the same time, pending tasks will queue in {es}, and be pulled 10 at a time from the queue at 3 second intervals. The consequence of which is that only 10 tasks can be run concurrently per {kib} instance.
@@ -83,159 +87,159 @@ The API returns the following:
 [source,json]
 --------------------------------------------------
 {
-	"id": "15415ecf-cdb0-4fef-950a-f824bd277fe4",
-	"timestamp": "2021-02-16T11:38:10.077Z",
-	"status": "OK",
-	"last_update": "2021-02-16T11:38:09.934Z",
-	"stats": {
-		"configuration": {
-			"timestamp": "2021-02-16T11:29:05.055Z",
-			"value": {
-				"request_capacity": 1000,
-				"max_poll_inactivity_cycles": 10,
-				"monitored_aggregated_stats_refresh_rate": 60000,
-				"monitored_stats_running_average_window": 50,
-				"monitored_task_execution_thresholds": {
-					"default": {
-						"error_threshold": 90,
-						"warn_threshold": 80
-					},
-					"custom": {}
-				},
-				"poll_interval": 3000,
-				"max_workers": 10
-			},
-			"status": "OK"
-		},
-		"runtime": {
-			"timestamp": "2021-02-16T11:38:09.934Z",
-			"value": {
-				"polling": {
-					"last_successful_poll": "2021-02-16T11:38:09.934Z",
-					"last_polling_delay": "2021-02-16T11:29:05.053Z",
-					"duration": {
-						"p50": 13,
-						"p90": 128,
-						"p95": 143,
-						"p99": 168
-					},
-					"claim_conflicts": {
-						"p50": 0,
-						"p90": 0,
-						"p95": 0,
-						"p99": 0
-					},
-					"claim_mismatches": {
-						"p50": 0,
-						"p90": 0,
-						"p95": 0,
-						"p99": 0
-					},
-					"result_frequency_percent_as_number": {
-						"Failed": 0,
-						"NoAvailableWorkers": 0,
-						"NoTasksClaimed": 80,
-						"RanOutOfCapacity": 0,
-						"RunningAtCapacity": 0,
-						"PoolFilled": 20
-					}
-				},
-				"drift": {
-					"p50": 99,
-					"p90": 1245,
-					"p95": 1845,
-					"p99": 2878
-				},
-				"load": {
-					"p50": 0,
-					"p90": 0,
-					"p95": 10,
-					"p99": 20
-				},
-				"execution": {
-					"duration": {
-						"alerting:.index-threshold": {
-							"p50": 95,
-							"p90": 1725,
-							"p95": 2761,
-							"p99": 2761
-						},
-						"alerting:xpack.uptime.alerts.monitorStatus": {
-							"p50": 149,
-							"p90": 1071,
-							"p95": 1171,
-							"p99": 1171
-						},
-						"actions:.index": {
-							"p50": 166,
-							"p90": 166,
-							"p95": 166,
-							"p99": 166
-						}
-					},
-					"result_frequency_percent_as_number": {
-						"alerting:.index-threshold": {
-							"Success": 100,
-							"RetryScheduled": 0,
-							"Failed": 0,
-							"status": "OK"
-						},
-						"alerting:xpack.uptime.alerts.monitorStatus": {
-							"Success": 100,
-							"RetryScheduled": 0,
-							"Failed": 0,
-							"status": "OK"
-						},
-						"actions:.index": {
-							"Success": 10,
-							"RetryScheduled": 0,
-							"Failed": 90,
-							"status": "error"
-						}
-					}
-				}
-			},
-			"status": "OK"
-		},
-		"workload": {
-			"timestamp": "2021-02-16T11:38:05.826Z",
-			"value": {
-				"count": 26,
-				"task_types": {
-					"alerting:.index-threshold": {
-						"count": 2,
-						"status": {
-							"idle": 2
-						}
-					},
-					"actions:.index": {
-						"count": 14,
-						"status": {
-							"idle": 2,
-							"running": 2,
-							"failed": 10
-						}
-					},
-					"alerting:xpack.uptime.alerts.monitorStatus": {
-						"count": 10,
-						"status": {
-							"idle": 10
-						}
-					},
-				},
-				"schedule": [
-					["10s", 2],
-					["1m", 2],
-					["60s", 2],
-					["5m", 2],
-					["60m", 4]
-				],
-				"overdue": 0,
-				"estimated_schedule_density": [0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 1, 1, 1, 0, 0, 3, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 1, 1, 1, 0]
-			},
-			"status": "OK"
-		}
-	}
+  "id": "15415ecf-cdb0-4fef-950a-f824bd277fe4",
+  "timestamp": "2021-02-16T11:38:10.077Z",
+  "status": "OK",
+  "last_update": "2021-02-16T11:38:09.934Z",
+  "stats": {
+    "configuration": {
+      "timestamp": "2021-02-16T11:29:05.055Z",
+      "value": {
+        "request_capacity": 1000,
+        "max_poll_inactivity_cycles": 10,
+        "monitored_aggregated_stats_refresh_rate": 60000,
+        "monitored_stats_running_average_window": 50,
+        "monitored_task_execution_thresholds": {
+          "default": {
+            "error_threshold": 90,
+            "warn_threshold": 80
+          },
+          "custom": {}
+        },
+        "poll_interval": 3000,
+        "max_workers": 10
+      },
+      "status": "OK"
+    },
+    "runtime": {
+      "timestamp": "2021-02-16T11:38:09.934Z",
+      "value": {
+        "polling": {
+          "last_successful_poll": "2021-02-16T11:38:09.934Z",
+          "last_polling_delay": "2021-02-16T11:29:05.053Z",
+          "duration": {
+            "p50": 13,
+            "p90": 128,
+            "p95": 143,
+            "p99": 168
+          },
+          "claim_conflicts": {
+            "p50": 0,
+            "p90": 0,
+            "p95": 0,
+            "p99": 0
+          },
+          "claim_mismatches": {
+            "p50": 0,
+            "p90": 0,
+            "p95": 0,
+            "p99": 0
+          },
+          "result_frequency_percent_as_number": {
+            "Failed": 0,
+            "NoAvailableWorkers": 0,
+            "NoTasksClaimed": 80,
+            "RanOutOfCapacity": 0,
+            "RunningAtCapacity": 0,
+            "PoolFilled": 20
+          }
+        },
+        "drift": {
+          "p50": 99,
+          "p90": 1245,
+          "p95": 1845,
+          "p99": 2878
+        },
+        "load": {
+          "p50": 0,
+          "p90": 0,
+          "p95": 10,
+          "p99": 20
+        },
+        "execution": {
+          "duration": {
+            "alerting:.index-threshold": {
+              "p50": 95,
+              "p90": 1725,
+              "p95": 2761,
+              "p99": 2761
+            },
+            "alerting:xpack.uptime.alerts.monitorStatus": {
+              "p50": 149,
+              "p90": 1071,
+              "p95": 1171,
+              "p99": 1171
+            },
+            "actions:.index": {
+              "p50": 166,
+              "p90": 166,
+              "p95": 166,
+              "p99": 166
+            }
+          },
+          "result_frequency_percent_as_number": {
+            "alerting:.index-threshold": {
+              "Success": 100,
+              "RetryScheduled": 0,
+              "Failed": 0,
+              "status": "OK"
+            },
+            "alerting:xpack.uptime.alerts.monitorStatus": {
+              "Success": 100,
+              "RetryScheduled": 0,
+              "Failed": 0,
+              "status": "OK"
+            },
+            "actions:.index": {
+              "Success": 10,
+              "RetryScheduled": 0,
+              "Failed": 90,
+              "status": "error"
+            }
+          }
+        }
+      },
+      "status": "OK"
+    },
+    "workload": {
+      "timestamp": "2021-02-16T11:38:05.826Z",
+      "value": {
+        "count": 26,
+        "task_types": {
+          "alerting:.index-threshold": {
+            "count": 2,
+            "status": {
+              "idle": 2
+            }
+          },
+          "actions:.index": {
+            "count": 14,
+            "status": {
+              "idle": 2,
+              "running": 2,
+              "failed": 10
+            }
+          },
+          "alerting:xpack.uptime.alerts.monitorStatus": {
+            "count": 10,
+            "status": {
+              "idle": 10
+            }
+          },
+        },
+        "schedule": [
+          ["10s", 2],
+          ["1m", 2],
+          ["60s", 2],
+          ["5m", 2],
+          ["60m", 4]
+        ],
+        "overdue": 0,
+        "estimated_schedule_density": [0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 1, 1, 1, 0, 0, 3, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 1, 1, 1, 0]
+      },
+      "status": "OK"
+    }
+  }
 }
 --------------------------------------------------
 
@@ -378,12 +382,12 @@ Hypothetically, lets suppose the output under `stats.runtime.value.polling.resul
 [source,json]
 --------------------------------------------------
 {
-    "Failed": 30, # <1>
-    "NoAvailableWorkers": 20, # <2>
-    "NoTasksClaimed": 10,
-    "RanOutOfCapacity": 10, # <3>
-    "RunningAtCapacity": 10, # <4>
-    "PoolFilled": 20
+  "Failed": 30, # <1>
+  "NoAvailableWorkers": 20, # <2>
+  "NoTasksClaimed": 10,
+  "RanOutOfCapacity": 10, # <3>
+  "RunningAtCapacity": 10, # <4>
+  "PoolFilled": 20
 }
 --------------------------------------------------
 <1> 30% of polling cycles failed, which is a high rate
@@ -407,18 +411,18 @@ Evaluating the health stats above, we can see the following output of `drift` an
 [source,json]
 --------------------------------------------------
 {
-    "drift": { # <1>
-        "p50": 99,
-        "p90": 1245,
-        "p95": 1845,
-        "p99": 2878
-    },
-    "load": { # <2>
-        "p50": 0,
-        "p90": 0,
-        "p95": 10,
-        "p99": 20
-    },
+  "drift": { # <1>
+    "p50": 99,
+    "p90": 1245,
+    "p95": 1845,
+    "p99": 2878
+  },
+  "load": { # <2>
+    "p50": 0,
+    "p90": 0,
+    "p95": 10,
+    "p99": 20
+  },
 }
 --------------------------------------------------
 <1> drift shows us that at least 95% tasks are running within 2 seconds of their scheduled time
@@ -431,18 +435,18 @@ Hypothetically, lets suppose the output of `drift` and `load` was the following:
 [source,json]
 --------------------------------------------------
 {
-    "drift": { # <1>
-        "p50": 2999,
-        "p90": 3845,
-        "p95": 3845.75,
-        "p99": 4078
-    },
-    "load": { # <2>
-        "p50": 80,
-        "p90": 100,
-        "p95": 100,
-        "p99": 100
-    }
+  "drift": { # <1>
+    "p50": 2999,
+    "p90": 3845,
+    "p95": 3845.75,
+    "p99": 4078
+  },
+  "load": { # <2>
+    "p50": 80,
+    "p90": 100,
+    "p95": 100,
+    "p99": 100
+  }
 }
 --------------------------------------------------
 <1> drift shows us that all tasks are running 3 to 4 seconds after their scheduled time
@@ -500,24 +504,24 @@ Evaluating the health stats in out hypothetical scenario, we can see the followi
 [source,json]
 --------------------------------------------------
 {
-	"alerting:.index-threshold": { # <1>
-		"p50": 95,
-		"p90": 1725,
-		"p95": 2761,
-		"p99": 2761
-	},
-	"alerting:.es-query": { # <2>
-		"p50": 7149,
-		"p90": 40071,
-		"p95": 45282,
-		"p99": 121845
-	},
-	"actions:.index": {
-		"p50": 166,
-		"p90": 166,
-		"p95": 166,
-		"p99": 166
-	}
+  "alerting:.index-threshold": { # <1>
+    "p50": 95,
+    "p90": 1725,
+    "p95": 2761,
+    "p99": 2761
+  },
+  "alerting:.es-query": { # <2>
+    "p50": 7149,
+    "p90": 40071,
+    "p95": 45282,
+    "p99": 121845
+  },
+  "actions:.index": {
+    "p50": 166,
+    "p90": 166,
+    "p95": 166,
+    "p99": 166
+  }
 }
 --------------------------------------------------
 <1> 50% of the tasks backing `Index Threshold Alerts` complete in less than 100 milliseconds
@@ -541,24 +545,24 @@ Evaluating the health stats above, we can see the following output under `stats.
 [source,json]
 --------------------------------------------------
 {
-	"alerting:.index-threshold": { # <1>
-		"Success": 100,
-		"RetryScheduled": 0,
-		"Failed": 0,
-		"status": "OK"
-	},
-	"alerting:xpack.uptime.alerts.monitorStatus": {
-		"Success": 100,
-		"RetryScheduled": 0,
-		"Failed": 0,
-		"status": "OK"
-	},
-	"actions:.index": { # <2>
-		"Success": 8,
-		"RetryScheduled": 0,
-		"Failed": 92,
-		"status": "error" # <3>
-	}
+  "alerting:.index-threshold": { # <1>
+    "Success": 100,
+    "RetryScheduled": 0,
+    "Failed": 0,
+    "status": "OK"
+  },
+  "alerting:xpack.uptime.alerts.monitorStatus": {
+    "Success": 100,
+    "RetryScheduled": 0,
+    "Failed": 0,
+    "status": "OK"
+  },
+  "actions:.index": { # <2>
+    "Success": 8,
+    "RetryScheduled": 0,
+    "Failed": 92,
+    "status": "error" # <3>
+  }
 }
 --------------------------------------------------
 <1> 100% of the tasks backing `Index Threshold Alerts` successfully complete
@@ -572,7 +576,7 @@ Resolving that would require deeper investigation into the {kib} Server Log, whe
 [[task-manager-health-evaluate-the-workload]]
 ==== Evaluate the Workload
 
-Predicting the required throughout a deplyment might need ti support {kib} Task Management is difficult, as features such as Alerting can schedule an unpredictable number of tasks with a variety of scheduled cadence.
+Predicting the required throughout a deplyment might need to support {kib} Task Management is difficult, as features can schedule an unpredictable number of tasks at a variety of scheduled cadences.
 
 That said, <<task-manager-health-monitoring>> provies statistics that make it easier to monitor the adequecy of the existing throughput.
 By evaluating the workload estimates can be made about the required throughput, and these can be used to estimate the required scale.
@@ -582,47 +586,47 @@ Evaluating the health stats above, we can see the following output under `stats.
 [source,json]
 --------------------------------------------------
 {
-	"count": 26, # <1>
-	"task_types": {
-		"alerting:.index-threshold": {
-			"count": 2, # <2>
-			"status": {
-				"idle": 2
-			}
-		},
-		"actions:.index": {
-			"count": 14,
-			"status": {
-				"idle": 2,
-				"running": 2,
-				"failed": 10 # <3>
-			}
-		},
-		"alerting:xpack.uptime.alerts.monitorStatus": {
-			"count": 10,
-			"status": {
-				"idle": 10
-			}
-		},
-	},
-	"schedule": [ # <4>
-		["10s", 2],
-		["1m", 2],
-		["90s", 2],
-		["5m", 8]
-	],
-	"overdue": 0, # <5>
-	"estimated_schedule_density": [  # <6>
-		0, 1, 0, 0, 0, 1, 0, 1, 0, 1,
-		0, 0, 0, 1, 0, 0, 1, 1, 1, 0,
-		0, 3, 0, 0, 0, 1, 0, 1, 0, 1,
-		0, 0, 0, 1, 0, 0, 1, 1, 1, 0
-	]
+  "count": 26, # <1>
+  "task_types": {
+    "alerting:.index-threshold": {
+      "count": 2, # <2>
+      "status": {
+        "idle": 2
+      }
+    },
+    "actions:.index": {
+      "count": 14,
+      "status": {
+        "idle": 2,
+        "running": 2,
+        "failed": 10 # <3>
+      }
+    },
+    "alerting:xpack.uptime.alerts.monitorStatus": {
+      "count": 10,
+      "status": {
+        "idle": 10
+      }
+    },
+  },
+  "schedule": [ # <4>
+    ["10s", 2],
+    ["1m", 2],
+    ["90s", 2],
+    ["5m", 8]
+  ],
+  "overdue": 0, # <5>
+  "estimated_schedule_density": [  # <6>
+    0, 1, 0, 0, 0, 1, 0, 1, 0, 1,
+    0, 0, 0, 1, 0, 0, 1, 1, 1, 0,
+    0, 3, 0, 0, 0, 1, 0, 1, 0, 1,
+    0, 0, 0, 1, 0, 0, 1, 1, 1, 0
+  ]
 }
 --------------------------------------------------
 <1> there are 26 tasks in the system, including regular tasks, recurring tasks and failed tasks
-<2> there are 2 of the tasks backing `Index Threshold Alerts` which are both `idle`, meaning they are scheduled at some time in the future
-<3> of the 14 tasks backing the `ES Index Action`, 10 have failed and 2 are running at this very moment
+<2> there are 2 of the tasks backing `Index Threshold Alerts` both of which are `idle`, meaning they are scheduled to run at some point in the future
+<3> of the 14 tasks backing the `ES Index` Action, 10 have failed and 2 are running at this very moment
 <4> a histogram of all scheduled recuring tasks shows that there are 2 tasks runing every 10 seconds, 2 once a minute etc.
 <5> there are no tasks _overdue_, which means all that task that _should_ have run by now have ran
 <6> a histogram of the tasks scheduled to run in the next 20 polling cycles, across the entire cluster
@@ -636,54 +640,54 @@ Hypothetically, lets suppose the output of `stats.workload.value` looked somethi
 [source,json]
 --------------------------------------------------
 {
-	"count": 2191, # <1>
-	"task_types": {
-		"alerting:.index-threshold": {
-			"count": 202,
-			"status": {
-				"idle": 183,
-				"claiming": 2,
-				"running": 19
-			}
-		},
-		"alerting:.es-query": {
-			"count": 225,
-			"status": {
-				"idle": 225,
-			}
-		},
-		"actions:.index": {
-			"count": 89,
-			"status": {
-				"idle": 24,
-				"running": 2,
-				"failed": 63
-			}
-		},
-		"alerting:xpack.uptime.alerts.monitorStatus": {
-			"count": 87,
-			"status": {
-				"idle": 74,
-				"running": 13
-			}
-		},
-	},
-	"schedule": [ # <2>
-		["10s", 38],
-		["1m", 101],
-		["90s", 55],
-		["5m", 89],
-		["20m", 62],
-		["60m", 106],
-		["1d", 61]
-	],
-	"overdue": 0, # <5>
-	"estimated_schedule_density": [  # <3>
-		10, 1, 0, 10, 0, 20, 0, 1, 0, 1,
-		9, 0, 3, 10, 0, 0, 10, 10, 7, 0,
-		0, 31, 0, 12, 16, 31, 0, 10, 0, 10,
-		3, 22, 0, 10, 0, 2, 10, 10, 1, 0
-	]
+  "count": 2191, # <1>
+  "task_types": {
+    "alerting:.index-threshold": {
+      "count": 202,
+      "status": {
+        "idle": 183,
+        "claiming": 2,
+        "running": 19
+      }
+    },
+    "alerting:.es-query": {
+      "count": 225,
+      "status": {
+        "idle": 225,
+      }
+    },
+    "actions:.index": {
+      "count": 89,
+      "status": {
+        "idle": 24,
+        "running": 2,
+        "failed": 63
+      }
+    },
+    "alerting:xpack.uptime.alerts.monitorStatus": {
+      "count": 87,
+      "status": {
+        "idle": 74,
+        "running": 13
+      }
+    },
+  },
+  "schedule": [ # <2>
+    ["10s", 38],
+    ["1m", 101],
+    ["90s", 55],
+    ["5m", 89],
+    ["20m", 62],
+    ["60m", 106],
+    ["1d", 61]
+  ],
+  "overdue": 0, # <5>
+  "estimated_schedule_density": [  # <3>
+    10, 1, 0, 10, 0, 20, 0, 1, 0, 1,
+    9, 0, 3, 10, 0, 0, 10, 10, 7, 0,
+    0, 31, 0, 12, 16, 31, 0, 10, 0, 10,
+    3, 22, 0, 10, 0, 2, 10, 10, 1, 0
+  ]
 }
 --------------------------------------------------
 <1> there are 2191 tasks in the system

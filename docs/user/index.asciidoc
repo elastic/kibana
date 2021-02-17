@@ -43,6 +43,8 @@ include::reporting/index.asciidoc[]
 
 include::alerting/index.asciidoc[]
 
+include::task-manager/index.asciidoc[]
+
 include::api.asciidoc[]
 
 include::plugins.asciidoc[]
