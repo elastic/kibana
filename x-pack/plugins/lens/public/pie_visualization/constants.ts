@@ -16,17 +16,28 @@ export const CHART_NAMES = {
     label: i18n.translate('xpack.lens.pie.donutLabel', {
       defaultMessage: 'Donut',
     }),
+    groupLabel: i18n.translate('xpack.lens.pie.groupLabel', {
+      defaultMessage: 'Proportion',
+    }),
   },
   pie: {
     icon: LensIconChartPie,
     label: i18n.translate('xpack.lens.pie.pielabel', {
       defaultMessage: 'Pie',
     }),
+
+    groupLabel: i18n.translate('xpack.lens.pie.groupLabel', {
+      defaultMessage: 'Proportion',
+    }),
   },
   treemap: {
     icon: LensIconChartTreemap,
     label: i18n.translate('xpack.lens.pie.treemaplabel', {
       defaultMessage: 'Treemap',
+    }),
+
+    groupLabel: i18n.translate('xpack.lens.pie.groupLabel', {
+      defaultMessage: 'Proportion',
     }),
   },
 };

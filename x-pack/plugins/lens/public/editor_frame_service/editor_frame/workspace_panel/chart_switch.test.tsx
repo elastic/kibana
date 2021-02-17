@@ -30,6 +30,7 @@ describe('chart_switch', () => {
           icon: 'empty',
           id,
           label: `Label ${id}`,
+          groupLabel: `${id}Group`,
         },
       ],
       initialize: jest.fn((_frame, state?: unknown) => {
@@ -70,16 +71,19 @@ describe('chart_switch', () => {
             icon: 'empty',
             id: 'subvisC1',
             label: 'C1',
+            groupLabel: 'visCGroup',
           },
           {
             icon: 'empty',
             id: 'subvisC2',
             label: 'C2',
+            groupLabel: 'visCGroup',
           },
           {
             icon: 'empty',
             id: 'subvisC3',
             label: 'C3',
+            groupLabel: 'visCGroup',
           },
         ],
         getVisualizationTypeId: jest.fn((state) => state.type),

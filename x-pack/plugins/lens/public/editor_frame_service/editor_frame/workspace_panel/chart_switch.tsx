@@ -11,17 +11,14 @@ import {
   EuiIcon,
   EuiPopover,
   EuiPopoverTitle,
-  EuiKeyPadMenu,
-  EuiKeyPadMenuItem,
-  EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiSelectableMessage,
+  EuiSelectable,
+  EuiIconTip,
 } from '@elastic/eui';
-import { flatten } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { Visualization, FramePublicAPI, Datasource } from '../../../types';
+import { Visualization, FramePublicAPI, Datasource, VisualizationType } from '../../../types';
 import { Action } from '../state_management';
 import { getSuggestions, switchToSuggestion, Suggestion } from '../suggestion_helpers';
 import { trackUiEvent } from '../../../lens_ui_telemetry';
@@ -52,6 +49,18 @@ interface Props {
       state: unknown;
     }
   >;
+}
+
+interface SelectableEntry {
+  'aria-label'?: string;
+  checked?: 'on';
+  isGroupLabel: boolean;
+  key: string;
+  value?: string;
+  'data-test-subj'?: string;
+  label: string;
+  prepend?: React.ReactNode;
+  append?: React.ReactNode;
 }
 
 function VisualizationSummary(props: Props) {
@@ -189,28 +198,94 @@ export function ChartSwitch(props: Props) {
 
   const [searchTerm, setSearchTerm] = useState('');
 
-  const visualizationTypes = useMemo(
-    () =>
-      flyoutOpen &&
-      flatten(
-        Object.values(props.visualizationMap).map((v) =>
-          v.visualizationTypes.map((t) => ({
-            visualizationId: v.id,
-            ...t,
-            icon: t.icon,
-          }))
-        )
-      )
-        .filter(
-          (visualizationType) =>
-            visualizationType.label.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            (visualizationType.fullLabel &&
-              visualizationType.fullLabel.toLowerCase().includes(searchTerm.toLowerCase()))
-        )
-        .map((visualizationType) => ({
-          ...visualizationType,
-          selection: getSelection(visualizationType.visualizationId, visualizationType.id),
-        })),
+  const { visualizationTypes, visualizationsLookup } = useMemo(
+    () => {
+      if (!flyoutOpen) {
+        return { visualizationTypes: [], visualizationsLookup: {} };
+      }
+      const activeVisualization = props.visualizationMap[props.visualizationId || ''];
+      const subVisualizationId = activeVisualization.getVisualizationTypeId(
+        props.visualizationState
+      );
+      const lowercasedSearchTerm = searchTerm.toLowerCase();
+      // reorganize visualizations in groups
+      const grouped: Record<
+        string,
+        Array<
+          VisualizationType & {
+            visualizationId: string;
+            selection: VisualizationSelection;
+          }
+        >
+      > = {};
+      // Will need it later on to quickly pick up the metadata from it
+      const lookup: Record<
+        string,
+        VisualizationType & {
+          visualizationId: string;
+          selection: VisualizationSelection;
+        }
+      > = {};
+      Object.entries(props.visualizationMap).forEach(([visualizationId, v]) => {
+        for (const visualizationType of v.visualizationTypes) {
+          const isSearchMatch =
+            visualizationType.label.toLowerCase().includes(lowercasedSearchTerm) ||
+            visualizationType.fullLabel?.toLowerCase().includes(lowercasedSearchTerm);
+          if (isSearchMatch) {
+            grouped[visualizationType.groupLabel] = grouped[visualizationType.groupLabel] || [];
+            const visualizationEntry = {
+              ...visualizationType,
+              visualizationId,
+              selection: getSelection(visualizationId, visualizationType.id),
+            };
+            grouped[visualizationType.groupLabel].push(visualizationEntry);
+            lookup[`${visualizationId}:${visualizationType.id}`] = visualizationEntry;
+          }
+        }
+      });
+
+      return {
+        visualizationTypes: Object.keys(grouped)
+          .sort()
+          .flatMap((group): SelectableEntry[] => {
+            const visualizations = grouped[group];
+            if (visualizations.length === 0) {
+              return [];
+            }
+            return [{ key: group, label: group, isGroupLabel: true }].concat(
+              visualizations.map((v) => ({
+                'aria-label': v.label,
+                checked: subVisualizationId === v.id ? 'on' : null,
+                isGroupLabel: false,
+                key: `${v.visualizationId}:${v.id}`,
+                value: `${v.visualizationId}:${v.id}`,
+                'data-test-subj': `lnsChartSwitchPopover_${v.id}`,
+                label: v.label,
+                prepend: <EuiIcon className="lnsChartSwitch__chartIcon" type={v.icon || 'empty'} />,
+                append:
+                  v.selection.dataLoss !== 'nothing' ? (
+                    <EuiIconTip
+                      aria-label={i18n.translate('xpack.lens.chartSwitch.dataLossLabel', {
+                        defaultMessage: 'Data loss',
+                      })}
+                      type="alert"
+                      color="warning"
+                      title={i18n.translate('xpack.lens.chartSwitch.dataLossLabel', {
+                        defaultMessage: 'Data loss',
+                      })}
+                      content={i18n.translate('xpack.lens.chartSwitch.dataLossDescription', {
+                        defaultMessage:
+                          'Switching to this chart will lose some of the configuration',
+                      })}
+                      iconProps={{ className: 'lnsChartSwitch__chartIcon' }}
+                    />
+                  ) : null,
+              }))
+            );
+          }),
+        visualizationsLookup: lookup,
+      };
+    },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [
       flyoutOpen,
@@ -222,89 +297,72 @@ export function ChartSwitch(props: Props) {
     ]
   );
 
-  const popover = (
-    <EuiPopover
-      id="lnsChartSwitchPopover"
-      ownFocus
-      initialFocus=".lnsChartSwitch__popoverPanel"
-      panelClassName="lnsChartSwitch__popoverPanel"
-      panelPaddingSize="s"
-      button={
-        <ToolbarButton
-          onClick={() => setFlyoutOpen(!flyoutOpen)}
-          data-test-subj="lnsChartSwitchPopover"
-          fontWeight="bold"
-        >
-          <VisualizationSummary {...props} />
-        </ToolbarButton>
-      }
-      isOpen={flyoutOpen}
-      closePopover={() => setFlyoutOpen(false)}
-      anchorPosition="downLeft"
-    >
-      <EuiPopoverTitle>
-        <EuiFlexGroup alignItems="center" responsive={false}>
-          <EuiFlexItem>
-            {i18n.translate('xpack.lens.configPanel.chartType', {
-              defaultMessage: 'Chart type',
-            })}
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiFieldSearch
-              compressed
-              fullWidth={false}
-              className="lnsChartSwitch__search"
-              value={searchTerm}
-              data-test-subj="lnsChartSwitchSearch"
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiPopoverTitle>
-      <EuiKeyPadMenu>
-        {(visualizationTypes || []).map((v) => (
-          <EuiKeyPadMenuItem
-            key={`${v.visualizationId}:${v.id}`}
-            label={<span data-test-subj="visTypeTitle">{v.label}</span>}
-            title={v.fullLabel}
-            role="menuitem"
-            data-test-subj={`lnsChartSwitchPopover_${v.id}`}
-            onClick={() => commitSelection(v.selection)}
-            betaBadgeLabel={
-              v.selection.dataLoss !== 'nothing'
-                ? i18n.translate('xpack.lens.chartSwitch.dataLossLabel', {
-                    defaultMessage: 'Data loss',
-                  })
-                : undefined
-            }
-            betaBadgeTooltipContent={
-              v.selection.dataLoss !== 'nothing'
-                ? i18n.translate('xpack.lens.chartSwitch.dataLossDescription', {
-                    defaultMessage: 'Switching to this chart will lose some of the configuration',
-                  })
-                : undefined
-            }
-            betaBadgeIconType={v.selection.dataLoss !== 'nothing' ? 'alert' : undefined}
+  return (
+    <div className="lnsChartSwitch__header">
+      <EuiPopover
+        id="lnsChartSwitchPopover"
+        ownFocus
+        initialFocus=".lnsChartSwitch__popoverPanel"
+        panelClassName="lnsChartSwitch__popoverPanel"
+        panelPaddingSize="s"
+        button={
+          <ToolbarButton
+            onClick={() => setFlyoutOpen(!flyoutOpen)}
+            data-test-subj="lnsChartSwitchPopover"
+            fontWeight="bold"
           >
-            <EuiIcon className="lnsChartSwitch__chartIcon" type={v.icon || 'empty'} size="l" />
-          </EuiKeyPadMenuItem>
-        ))}
-      </EuiKeyPadMenu>
-      {searchTerm && (visualizationTypes || []).length === 0 && (
-        <EuiSelectableMessage>
-          <FormattedMessage
-            id="xpack.lens.chartSwitch.noResults"
-            defaultMessage="No results found for {term}."
-            values={{
-              term: <strong>{searchTerm}</strong>,
-            }}
-          />
-        </EuiSelectableMessage>
-      )}
-    </EuiPopover>
+            <VisualizationSummary {...props} />
+          </ToolbarButton>
+        }
+        isOpen={flyoutOpen}
+        closePopover={() => setFlyoutOpen(false)}
+        anchorPosition="downLeft"
+      >
+        <EuiPopoverTitle>
+          <EuiFlexGroup alignItems="center" responsive={false}>
+            <EuiFlexItem>
+              {i18n.translate('xpack.lens.configPanel.chartType', {
+                defaultMessage: 'Chart type',
+              })}
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiPopoverTitle>
+        <EuiSelectable
+          height={380}
+          searchable
+          singleSelection
+          isPreFiltered
+          searchProps={{
+            incremental: true,
+            className: 'lnsChartSwitch__search',
+            'data-test-subj': 'lnsChartSwitchSearch',
+            onSearch: (value) => setSearchTerm(value),
+          }}
+          options={visualizationTypes}
+          onChange={(newOptions) => {
+            const id = newOptions.find(({ checked }) => checked === 'on')!.value!;
+            commitSelection(visualizationsLookup[id].selection);
+          }}
+          noMatchesMessage={
+            <FormattedMessage
+              id="xpack.lens.chartSwitch.noResults"
+              defaultMessage="No results found for {term}."
+              values={{
+                term: <strong>{searchTerm}</strong>,
+              }}
+            />
+          }
+        >
+          {(list, search) => (
+            <>
+              {search}
+              {list}
+            </>
+          )}
+        </EuiSelectable>
+      </EuiPopover>
+    </div>
   );
-
-  return <div className="lnsChartSwitch__header">{popover}</div>;
 }
 
 function getTopSuggestion(

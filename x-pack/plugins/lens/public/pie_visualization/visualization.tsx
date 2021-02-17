@@ -45,16 +45,19 @@ export const getPieVisualization = ({
       id: 'donut',
       icon: CHART_NAMES.donut.icon,
       label: CHART_NAMES.donut.label,
+      groupLabel: CHART_NAMES.donut.groupLabel,
     },
     {
       id: 'pie',
       icon: CHART_NAMES.pie.icon,
       label: CHART_NAMES.pie.label,
+      groupLabel: CHART_NAMES.pie.groupLabel,
     },
     {
       id: 'treemap',
       icon: CHART_NAMES.treemap.icon,
       label: CHART_NAMES.treemap.label,
+      groupLabel: CHART_NAMES.treemap.groupLabel,
     },
   ],
 

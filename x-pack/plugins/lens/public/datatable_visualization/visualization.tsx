@@ -10,7 +10,7 @@ import { render } from 'react-dom';
 import { Ast } from '@kbn/interpreter/common';
 import { I18nProvider } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import type {
+import {
   SuggestionRequest,
   Visualization,
   VisualizationSuggestion,
@@ -45,6 +45,9 @@ export const datatableVisualization: Visualization<DatatableVisualizationState> 
       icon: LensIconChartDatatable,
       label: i18n.translate('xpack.lens.datatable.label', {
         defaultMessage: 'Data table',
+      }),
+      groupLabel: i18n.translate('xpack.lens.datatable.groupLabel', {
+        defaultMessage: 'Tabular and single value',
       }),
     },
   ],
