@@ -13,6 +13,7 @@ export function MachineLearningDataFrameAnalyticsCanvasElementProvider({
   getService,
 }: FtrProviderContext) {
   const canvasElement = getService('canvasElement');
+  const retry = getService('retry');
   const testSubjects = getService('testSubjects');
 
   return new (class AnalyticsCanvasElement {
@@ -25,32 +26,34 @@ export function MachineLearningDataFrameAnalyticsCanvasElementProvider({
       exclude?: string[],
       percentageThreshold = 1
     ) {
-      await testSubjects.existOrFail(dataTestSubj);
+      await retry.tryForTime(5000, async () => {
+        await testSubjects.existOrFail(dataTestSubj);
 
-      const sortedExpectedColorStats = [...expectedColorStats].sort((a, b) =>
-        a.key.localeCompare(b.key)
-      );
+        const sortedExpectedColorStats = [...expectedColorStats].sort((a, b) =>
+          a.key.localeCompare(b.key)
+        );
 
-      const actualColorStats = await canvasElement.getColorStats(
-        `[data-test-subj="${dataTestSubj}"] canvas`,
-        sortedExpectedColorStats,
-        exclude,
-        percentageThreshold
-      );
-      expect(actualColorStats.length).to.eql(
-        sortedExpectedColorStats.length,
-        `Expected and actual color stats for '${dataTestSubj}' should have the same amount of elements. Expected: ${
-          sortedExpectedColorStats.length
-        } ${JSON.stringify(sortedExpectedColorStats)} (got ${
-          actualColorStats.length
-        } ${JSON.stringify(actualColorStats)})`
-      );
-      expect(actualColorStats.every((d) => d.withinTolerance)).to.eql(
-        true,
-        `Color stats for '${dataTestSubj}' should be within tolerance. Expected: '${JSON.stringify(
-          sortedExpectedColorStats
-        )}' (got '${JSON.stringify(actualColorStats)}')`
-      );
+        const actualColorStats = await canvasElement.getColorStats(
+          `[data-test-subj="${dataTestSubj}"] canvas`,
+          sortedExpectedColorStats,
+          exclude,
+          percentageThreshold
+        );
+        expect(actualColorStats.length).to.eql(
+          sortedExpectedColorStats.length,
+          `Expected and actual color stats for '${dataTestSubj}' should have the same amount of elements. Expected: ${
+            sortedExpectedColorStats.length
+          } ${JSON.stringify(sortedExpectedColorStats)} (got ${
+            actualColorStats.length
+          } ${JSON.stringify(actualColorStats)})`
+        );
+        expect(actualColorStats.every((d) => d.withinTolerance)).to.eql(
+          true,
+          `Color stats for '${dataTestSubj}' should be within tolerance. Expected: '${JSON.stringify(
+            sortedExpectedColorStats
+          )}' (got '${JSON.stringify(actualColorStats)}')`
+        );
+      });
     }
   })();
 }
