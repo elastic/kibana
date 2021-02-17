@@ -409,7 +409,6 @@ export class ClusterClientAdapter {
         index,
         body,
       });
-      // console.log(JSON.stringify(result));
       return result.body.aggregations.saved_objects.saved_object.ids.buckets.map(
         (savedObject: Record<string, unknown>) => ({
           savedObjectId: savedObject.key,
@@ -417,7 +416,6 @@ export class ClusterClientAdapter {
         })
       );
     } catch (err) {
-      console.log(err.meta.body.error);
       throw new Error(
         `querying for Event Log alerts instances summaries by alert ids "${ids}" failed with: ${err.message}`
       );
