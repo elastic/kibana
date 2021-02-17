@@ -13,11 +13,13 @@ Array [
         "transaction_groups": Object {
           "aggs": Object {
             "transaction_type": Object {
-              "top_hits": Object {
-                "_source": Array [
-                  "transaction.type",
-                ],
-                "size": 1,
+              "top_metrics": Object {
+                "metrics": Object {
+                  "field": "transaction.type",
+                },
+                "sort": Object {
+                  "@timestamp": "desc",
+                },
               },
             },
           },
@@ -222,11 +224,13 @@ Array [
         "transaction_groups": Object {
           "aggs": Object {
             "transaction_type": Object {
-              "top_hits": Object {
-                "_source": Array [
-                  "transaction.type",
-                ],
-                "size": 1,
+              "top_metrics": Object {
+                "metrics": Object {
+                  "field": "transaction.type",
+                },
+                "sort": Object {
+                  "@timestamp": "desc",
+                },
               },
             },
           },

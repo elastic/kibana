@@ -109,8 +109,11 @@ export async function getBuckets({
                     }),
                     aggs: {
                       samples: {
-                        top_hits: {
-                          _source: [TRANSACTION_ID, TRACE_ID],
+                        top_metrics: {
+                          metrics: [
+                            { field: TRANSACTION_ID },
+                            { field: TRACE_ID },
+                          ] as const,
                           size: 10,
                           sort: {
                             _score: 'desc',
@@ -128,9 +131,9 @@ export async function getBuckets({
           response.aggregations?.distribution.buckets.map((bucket) => {
             return {
               key: bucket.key,
-              samples: bucket.samples.hits.hits.map((hit) => ({
-                traceId: hit._source.trace.id,
-                transactionId: hit._source.transaction.id,
+              samples: bucket.samples.top.map((sample) => ({
+                traceId: sample.metrics[TRACE_ID] as string,
+                transactionId: sample.metrics[TRANSACTION_ID] as string,
               })),
             };
           }) ?? []
