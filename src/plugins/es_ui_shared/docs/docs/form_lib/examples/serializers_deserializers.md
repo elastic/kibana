@@ -4,69 +4,52 @@ title: Serializers & Deserializers
 sidebar_label: Serializers & Deserializers
 ---
 
-* **Deserializer**: A function that converts the form default value provided to the internal state object.
-* **Serializer**: A function that converts the internal state object to the expected form interface.
+Forms help users edit data. This data is often persisted, for example saved in Elasticsearch. When it's persisted, the shape of the data typically reflects the concerns of the domain or the persistence medium. When it's edited in a form, the shape of the data reflects different concerns, such as UI state. Data is **deserialized** from its persisted shape to its form-editable shape and **serialized** from its form-editable shape to its persisted shape.
+
+With that in mind, you can pass the following handlers to the form
+
+* **deserializer**: A function that converts the persisted shape to the form-editable shape.
+* **serializer**: A function that converts the form-editable shape to the persisted shape.
+
+Let's see it through an example.
 
 ```js
+// This is the persisted shape of our data
 interface MyForm {
   name: string;
-  // The "dynamic" parameter can have 3 values (true, false, "strict").
-  // Ww¡e will use a toggle field + a checkbox to help the user define it
-  dynamic: boolean | 'strict'; 
-  _meta?: { [key: string]: any };
+  customLabel: string;
 }
 
 // This is the internal fields we will need in our form
 interface MyFormUI {
-  name: MyForm['name'];
-  _meta?: string; // the JSON editor work with string and not objects
-  isStrict: boolean; // New field
-  isDynamic: boolean; // New field
-  showAdvancedSettings: boolean; // New field
+  name: string;
+  customLabel: string;
+  showAdvancedSettings: boolean;
 }
 
-const formDeserializer = ({ name, _meta, dynamic }: MyForm): MyFormUI => {
-  const isDynamic = dynamic !== false;
-  const isStrict = dynamic === 'strict';
-  const showAdvancedSettings = _meta !== undefined;
+const formDeserializer = ({ name, customLabel }: MyForm): MyFormUI => {
+  // Show the advanced settings if a custom label is provided
+  const showAdvancedSettings = Boolean(customLabel);
 
   return {
     name,
-    _meta: _meta === undefined ? undefined : JSON.stringify(_meta, null, 2),
-    isDynamic,
-    isStrict,
+    customLabel,
     showAdvancedSettings,
   };
 };
 
-const formSerializer = ({ name, isStrict, isDynamic, _meta }: MyFormUI): MyForm => {
-  const dynamic = isStrict ? 'strict' : isDynamic;
-
-  return { name, dynamic, _meta: _meta === undefined ? undefined : JSON.parse(_meta) };
+const formSerializer = ({ name, customLabel }: MyFormUI): MyForm => {
+  // We don't forward the "showAdvancedSettings" field
+  return { name, customLabel };
 };
 
-const { isJsonField } = fieldValidators;
 
 const schema: FormSchema<MyFormUI> = {
   name: { label: 'Name' },
-  isDynamic: { label: 'Dyamic fields' },
-  isStrict: {
-    label: 'Strict',
-    helpText: 'Throw an exception when a document contains an unmapped field',
-  },
-  _meta: {
-    label: 'Meta',
-    defaultValue: '{\n\n}',
-    validations: [
-      {
-        // Make sure to add the validation so the serializer above
-        // receives a valid JSON to be able to parse it.
-        validator: isJsonField('The JSON is invalid'),
-      },
-    ],
-  },
+  customLabel: { label: 'CustomLabel' },
   showAdvancedSettings: {
     label: 'Show advanced settings',
+    defaultValue: false,
   },
 };
 
@@ -74,8 +57,7 @@ export const SerializersAndDeserializers = () => {
   // Data coming from the server
   const fetchedData: MyForm = {
     name: 'My resource',
-    dynamic: 'strict',
-    _meta: { foo: 'bar' },
+    customLabel: 'My custom label',
   };
 
   const { form } = useForm<MyForm, MyFormUI>({
@@ -85,9 +67,9 @@ export const SerializersAndDeserializers = () => {
     serializer: formSerializer,
   });
 
-  const [{ isDynamic, showAdvancedSettings }] = useFormData({
+  const [{ showAdvancedSettings }] = useFormData({
     form,
-    watch: ['isDynamic', 'showAdvancedSettings'],
+    watch: ['showAdvancedSettings'],
   });
 
   const submitForm = async () => {
@@ -100,23 +82,13 @@ export const SerializersAndDeserializers = () => {
   return (
     <Form form={form}>
       <UseField path="name" component={TextField} />
-      <UseField path="isDynamic" component={ToggleField} />
-      {isDynamic !== false && <UseField path="isStrict" component={CheckBoxField} />}
-
       <UseField path="showAdvancedSettings" component={ToggleField} />
 
       <EuiSpacer />
+
       {/* We don't remove it from the DOM as we would lose the value entered in the field. */}
       <div style={{ display: showAdvancedSettings ? 'block' : 'none' }}>
-        <UseField
-          path="_meta"
-          component={JsonEditorField}
-          componentProps={{
-            euiCodeEditorProps: {
-              height: '200px',
-            },
-          }}
-        />
+        <UseField path="customLabel" component={TextField} />
       </div>
       <EuiSpacer />
 
