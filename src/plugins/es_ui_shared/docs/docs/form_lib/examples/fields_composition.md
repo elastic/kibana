@@ -4,147 +4,147 @@ title: Field composition
 sidebar_label: Field composition
 ---
 
-If you need to swap your form fields according to one field value (e.g. the "type" has changed), you can leverage the power of field composition with the form lib.
+If you need to swap your form fields according to one field value (e.g. the "model" has changed), you can leverage the power of field composition with the form lib. It let's you swap fields in your form whenever needed. Any field that **is not in the DOM** is automatically cleared when unmounting and its value won't be returned in the form data.  
+If you _do_ need to keep a field value, but hide the field in the UI, then you need to use CSS (`<div style={{ display: isVisible ? 'block' : 'none' }}>...</div>`)
 
-Let's imagine that we need to build a form to declare a _value_ configuration. This value can either be of type `text`, `float` or `boolean`, and each type has an additional parameter that can be configured.  
-We will build a form with a dropdown to select the value **type**, and then accordinglty to the chosen type we will add to the form different configuration fields.
+Imagine you're building an app that lets people buy a car online. You want to build a form that lets the user select the model of the car (`sedan`, `golf cart`, `clown mobile`), and based on their selection you'll show a different form for configuring the selected model's options.
 
-Those are the 3 type of values that the form can generate:
+Those are the 3 car configurations that the form can output:
 
 ```js
-const textType = {
-  type: 'text',
-  index: true,
-  analyzer: 'standard', // specific to this type
+// sedan
+{
+  model: 'sedan',
+  used: true,
+  plate: 'UIES2021', // unique config for this car
 };
 
-const floatType = {
-  type: 'float',
-  index: true,
-  coerce: true, // specific to this type
+// golf cart
+{
+  model: 'golf_cart',
+  used: false,
+  forRent: true, // unique config for this car
 };
 
-const booleanType = {
-  type: 'boolean',
-  index: true,
-  boost: 1.0, // specific to this type
-} 
+// clown mobile
+{
+  model: 'clown_mobile',
+  used: true,
+  miles: 1.0, // unique config for this car
+}
 ```
 
-We can see that we have a common "index" field in all three configuration, which is a boolean. We will create a reusable component for that field. And then each value has one specific parameter.
+We can see that we have a common `used` field in all three configuration, which is a boolean. We will create a reusable component for that field. And then each car has one specific config parameter.
 
-Let's start by creating our reusable "index" parameter field.
+Let's start by creating our reusable `used` parameter field.
 
 ```js
-// index_parameter.tsx
-const indexConfig = {
-  label: 'Index',
-  defaultValue: true,
+// used_parameter.tsx
+
+const usedConfig = {
+  label: 'Car has been used',
+  defaultValue: false,
 };
 
-export const IndexParameter = () => {
-  return <UseField path="index" config={indexConfig} component={ToggleField} />;
+export const UsedParameter = () => {
+  return <UseField path="used" config={usedConfig} component={ToggleField} />;
 };
 ```
 
-Now let's create one component for each value type that will expose its parameters. Those components won't have to declare the "type" parameter it is common to all three values and we will put it at the root of the form.
+Now let's create one component for each car that will expose its unique parameter(s). Those components won't have to declare the `model` and the `used` params as they are common to all three cars and we will put them at the root level of the form.
 
 ```js
-// text_type.tsx
-import { IndexParameter } from './index_parameter';
+// sedan_car.tsx
 
-const analyzerConfig = {
-  label: 'Analyzer',
-  defaultValue: 'standard',
+const plateConfig = {
+  label: 'Plate number',
+  // no need to declare the defaultValue as '' _is_ the default
+  // defaultValue: '',
 };
 
-export const TextType = () => {
+export const SedanCar = () => {
   return (
     <>
-      <IndexParameter />
-      <UseField path="analyzer" config={analyzerConfig} component={TextField} />
+      <UseField path="plate" config={plateConfig} component={TextField} />
     </>
   );
 };
 ```
 
 ```js
-// float_type.tsx
-import { IndexParameter } from './index_parameter';
+// golf_cart_car.tsx
 
-const coerceConfig = {
-  label: 'Coerce',
+const forRentConfig = {
+  label: 'The cart is for rent',
   defaultValue: true,
 };
 
-export const FloatType = () => {
+export const GolfCartCar = () => {
   return (
     <>
-      <IndexParameter />
-      <UseField path="corece" config={coerceConfig} component={ToggleField} />
+      <UseField path="forRent" config={forRentConfig} component={ToggleField} />
     </>
   );
 };
 ```
 
 ```js
-// boolean_type.tsx
-import { IndexParameter } from './index_parameter';
+// clown_mobile_car.tsx
 
-const boostConfig = {
-  label: 'Boost',
+const milesConfig = {
+  label: 'Current miles',
   defaultValue: 1.0,
   serializer: parseFloat,
 };
 
-export const BooleanType = () => {
+export const ClownMobileCar = () => {
   return (
     <>
-      <IndexParameter />
-      <UseField path="boost" config={boostConfig} component={NumericField} />
+      <UseField path="miles" config={milesConfig} component={NumericField} />
     </>
   );
 };
 ```
 
-And finally, let's build our form which will swap those component according to the "type" selected.
+And finally, let's build our form which will swap those components according to the selected `model`.
 
 ```js
-import { TextType } from './text_type';
-import { FloatType } from './float_type';
-import { BooleanType } from './boolean_type';
+import { UsedParameter } from './used_parameter';
+import { SedanCar } from './sedan_car';
+import { GolfCartCar } from './golf_cart_car';
+import { ClownMobileCar } from './clown_mobile_car';
 
-const typeToCompMap: { [key: string]: React.FunctionComponent } = {
-  text: TextType,
-  float: FloatType,
-  boolean: BooleanType,
+const modelToComponentMap: { [key: string]: React.FunctionComponent } = {
+  sedan: SedanCar,
+  'golf_cart': GolfCartCar,
+  'clown_mobile': ClownMobileCar,
 };
 
-const typeConfig = {
-  label: 'Type',
-  defaultValue: 'text',
+const modelConfig = {
+  label: 'Car model',
+  defaultValue: 'sedan',
 };
 
-const typeOptions = [
+const modelOptions = [
   {
-    text: 'text',
+    text: 'sedan',
   },
   {
-    text: 'float',
+    text: 'golf_cart',
   },
   {
-    text: 'boolean',
+    text: 'clown_mobile',
   },
 ];
 
-export const FieldsComposition = () => {
+export const CarConfigurator = () => {
   const { form } = useForm();
-  const [{ type }] = useFormData({ form, watch: 'type' });
+  const [{ model }] = useFormData<{ model: string }>({ form, watch: 'model' });
 
-  const renderTypeFields = () => {
-    // Swap form fields according to the chosen type.
-    const FieldsForType = typeToCompMap[type as string];
-    return <FieldsForType />;
+  const renderCarConfiguration = () => {
+    // Select the car configuration according to the chosen model.
+    const CarConfiguration = modelToComponentMap[model];
+    return <CarConfiguration />;
   };
 
   const submitForm = () => {
@@ -154,15 +154,18 @@ export const FieldsComposition = () => {
   return (
     <Form form={form}>
       <UseField
-        path="type"
-        config={typeConfig}
+        path="model"
+        config={modelConfig}
         component={SelectField}
         componentProps={{
-          euiFieldProps: { options: typeOptions },
+          euiFieldProps: { options: modelOptions },
         }}
       />
-      {type !== undefined ? renderTypeFields() : null}
+      <UsedParameter />
+      {model !== undefined ? renderCarConfiguration() : null}
+
       <EuiSpacer />
+
       <EuiButton onClick={submitForm} fill>
         Submit
       </EuiButton>
