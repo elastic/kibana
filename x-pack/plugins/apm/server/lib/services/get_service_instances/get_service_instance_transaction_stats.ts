@@ -22,8 +22,13 @@ import {
 } from '../../helpers/aggregated_transactions';
 import { calculateThroughput } from '../../helpers/calculate_throughput';
 import { withApmSpan } from '../../../utils/with_apm_span';
+import {
+  getLatencyAggregation,
+  getLatencyValue,
+} from '../../helpers/latency_aggregation_type';
 
 export async function getServiceInstanceTransactionStats({
+  latencyAggregationType,
   setup,
   transactionType,
   serviceName,
@@ -45,11 +50,7 @@ export async function getServiceInstanceTransactionStats({
     );
 
     const subAggs = {
-      avg_transaction_duration: {
-        avg: {
-          field,
-        },
-      },
+      ...getLatencyAggregation(latencyAggregationType, field),
       failures: {
         filter: {
           term: {
@@ -115,7 +116,7 @@ export async function getServiceInstanceTransactionStats({
         (serviceNodeBucket) => {
           const {
             doc_count: count,
-            avg_transaction_duration: avgTransactionDuration,
+            latency,
             key,
             failures,
             timeseries,
@@ -138,10 +139,16 @@ export async function getServiceInstanceTransactionStats({
               })),
             },
             latency: {
-              value: avgTransactionDuration.value,
+              value: getLatencyValue({
+                aggregation: latency,
+                latencyAggregationType,
+              }),
               timeseries: timeseries.buckets.map((dateBucket) => ({
                 x: dateBucket.key,
-                y: dateBucket.avg_transaction_duration.value,
+                y: getLatencyValue({
+                  aggregation: dateBucket.latency,
+                  latencyAggregationType,
+                }),
               })),
             },
           };

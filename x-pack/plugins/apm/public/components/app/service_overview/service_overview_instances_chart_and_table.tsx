@@ -25,7 +25,7 @@ export function ServiceOverviewInstancesChartAndTable({
   const { transactionType } = useApmServiceContext();
 
   const {
-    urlParams: { start, end },
+    urlParams: { latencyAggregationType, start, end },
     uiFilters,
   } = useUrlParams();
 
@@ -43,6 +43,7 @@ export function ServiceOverviewInstancesChartAndTable({
             serviceName,
           },
           query: {
+            latencyAggregationType,
             start,
             end,
             transactionType,
@@ -52,7 +53,14 @@ export function ServiceOverviewInstancesChartAndTable({
         },
       });
     },
-    [start, end, serviceName, transactionType, uiFilters]
+    [
+      latencyAggregationType,
+      start,
+      end,
+      serviceName,
+      transactionType,
+      uiFilters,
+    ]
   );
 
   return (
