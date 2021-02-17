@@ -8,71 +8,94 @@
 import { DocLinksStart } from '../../../../../../../src/core/public';
 import { REPOSITORY_TYPES } from '../../../../common/constants';
 import { RepositoryType } from '../../../../common/types';
-import { REPOSITORY_DOC_PATHS } from '../../constants';
 
 class DocumentationLinksService {
-  private esDocBasePath: string = '';
-  private esPluginDocBasePath: string = '';
-
+  private pluginLink: string = '';
+  private fsLink: string = '';
+  private urlLink: string = '';
+  private sourceLink: string = '';
+  private s3Link: string = '';
+  private hdfsLink: string = '';
+  private azureLink: string = '';
+  private gcsLink: string = '';
+  private defaultLink: string = '';
+  private createSnapshotLink: string = '';
+  private restoreSnapshotLink: string = '';
+  private indexSettingsLink: string = '';
+  private indexModulesLink: string = '';
+  private dateMathLink: string = '';
+  private slmLink: string = '';
+  private cronLink: string = '';
   public setup(docLinks: DocLinksStart): void {
-    const { DOC_LINK_VERSION, ELASTIC_WEBSITE_URL } = docLinks;
-    const docsBase = `${ELASTIC_WEBSITE_URL}guide/en`;
-
-    this.esDocBasePath = `${docsBase}/elasticsearch/reference/${DOC_LINK_VERSION}/`;
-    this.esPluginDocBasePath = `${docsBase}/elasticsearch/plugins/${DOC_LINK_VERSION}/`;
+    this.pluginLink = `${docLinks.links.plugins.snapshotRestoreRepos}`;
+    this.fsLink = `${docLinks.links.snapshotRestore.registerSharedFileSystem}`;
+    this.urlLink = `${docLinks.links.snapshotRestore.registerUrl}`;
+    this.sourceLink = `${docLinks.links.snapshotRestore.registerSourceOnly}`;
+    this.s3Link = `${docLinks.links.plugins.s3Repo}`;
+    this.hdfsLink = `${docLinks.links.plugins.hdfsRepo}`;
+    this.azureLink = `${docLinks.links.plugins.azureRepo}`;
+    this.gcsLink = `${docLinks.links.plugins.gcsRepo}`;
+    this.defaultLink = `${docLinks.links.snapshotRestore.guide}`;
+    this.createSnapshotLink = `${docLinks.links.snapshotRestore.createSnapshot}`;
+    this.restoreSnapshotLink = `${docLinks.links.snapshotRestore.restoreSnapshot}`;
+    this.indexSettingsLink = `${docLinks.links.snapshotRestore.changeIndexSettings}`;
+    this.indexModulesLink = `${docLinks.links.elasticsearch.indexModules}`;
+    this.dateMathLink = `${docLinks.links.elasticsearch.dateMathIndexNames}`;
+    this.slmLink = `${docLinks.links.apis.putSnapshotLifecyclePolicy}`;
+    this.cronLink = `${docLinks.links.watcher.cronSchedule}`;
   }
 
   public getRepositoryPluginDocUrl() {
-    return `${this.esPluginDocBasePath}${REPOSITORY_DOC_PATHS.plugins}`;
+    return `${this.pluginLink}`;
   }
 
   public getRepositoryTypeDocUrl(type?: RepositoryType) {
     switch (type) {
       case REPOSITORY_TYPES.fs:
-        return `${this.esDocBasePath}${REPOSITORY_DOC_PATHS.fs}`;
+        return `${this.fsLink}`;
       case REPOSITORY_TYPES.url:
-        return `${this.esDocBasePath}${REPOSITORY_DOC_PATHS.url}`;
+        return `${this.urlLink}`;
       case REPOSITORY_TYPES.source:
-        return `${this.esDocBasePath}${REPOSITORY_DOC_PATHS.source}`;
+        return `${this.sourceLink}`;
       case REPOSITORY_TYPES.s3:
-        return `${this.esPluginDocBasePath}${REPOSITORY_DOC_PATHS.s3}`;
+        return `${this.s3Link}`;
       case REPOSITORY_TYPES.hdfs:
-        return `${this.esPluginDocBasePath}${REPOSITORY_DOC_PATHS.hdfs}`;
+        return `${this.hdfsLink}`;
       case REPOSITORY_TYPES.azure:
-        return `${this.esPluginDocBasePath}${REPOSITORY_DOC_PATHS.azure}`;
+        return `${this.azureLink}`;
       case REPOSITORY_TYPES.gcs:
-        return `${this.esPluginDocBasePath}${REPOSITORY_DOC_PATHS.gcs}`;
+        return `${this.gcsLink}`;
       default:
-        return `${this.esDocBasePath}${REPOSITORY_DOC_PATHS.default}`;
+        return `${this.defaultLink}`;
     }
   }
 
   public getSnapshotDocUrl() {
-    return `${this.esDocBasePath}snapshots-take-snapshot.html`;
+    return `${this.createSnapshotLink}`;
   }
 
   public getRestoreDocUrl() {
-    return `${this.esDocBasePath}snapshots-restore-snapshot.html`;
+    return `${this.restoreSnapshotLink}`;
   }
 
   public getRestoreIndexSettingsUrl() {
-    return `${this.esDocBasePath}snapshots-restore-snapshot.html#_changing_index_settings_during_restore`;
+    return `${this.indexSettingsLink}`;
   }
 
   public getIndexSettingsUrl() {
-    return `${this.esDocBasePath}index-modules.html`;
+    return `${this.indexModulesLink}`;
   }
 
   public getDateMathIndexNamesUrl() {
-    return `${this.esDocBasePath}date-math-index-names.html`;
+    return `${this.dateMathLink}`;
   }
 
   public getSlmUrl() {
-    return `${this.esDocBasePath}slm-api-put.html`;
+    return `${this.slmLink}`;
   }
 
   public getCronUrl() {
-    return `${this.esDocBasePath}trigger-schedule.html#schedule-cron`;
+    return `${this.cronLink}`;
   }
 }
 

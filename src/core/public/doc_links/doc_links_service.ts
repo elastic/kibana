@@ -20,6 +20,7 @@ export class DocLinksService {
     const DOC_LINK_VERSION = injectedMetadata.getKibanaBranch();
     const ELASTIC_WEBSITE_URL = 'https://www.elastic.co/';
     const ELASTICSEARCH_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/${DOC_LINK_VERSION}/`;
+    const PLUGIN_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/plugins/${DOC_LINK_VERSION}/`;
 
     return deepFreeze({
       DOC_LINK_VERSION,
@@ -126,6 +127,8 @@ export class DocLinksService {
         addData: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/connect-to-elasticsearch.html`,
         kibana: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/index.html`,
         elasticsearch: {
+          dateMathIndexNames: `${ELASTICSEARCH_DOCS}date-math-index-names.html`,
+          indexModules: `${ELASTICSEARCH_DOCS}index-modules.html`,
           mapping: `${ELASTICSEARCH_DOCS}mapping.html`,
           remoteClusters: `${ELASTICSEARCH_DOCS}modules-remote-clusters.html`,
           remoteClustersProxy: `${ELASTICSEARCH_DOCS}modules-remote-clusters.html#proxy-mode`,
@@ -223,6 +226,7 @@ export class DocLinksService {
           runAsPrivilege: `${ELASTICSEARCH_DOCS}security-privileges.html#_run_as_privilege`,
         },
         watcher: {
+          cronSchedule: `${ELASTICSEARCH_DOCS}trigger-schedule.html#schedule-cron`,
           jiraAction: `${ELASTICSEARCH_DOCS}actions-jira.html`,
           pagerDutyAction: `${ELASTICSEARCH_DOCS}actions-pagerduty.html`,
           slackAction: `${ELASTICSEARCH_DOCS}actions-slack.html`,
@@ -246,8 +250,25 @@ export class DocLinksService {
           painlessExecute: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/painless/${DOC_LINK_VERSION}/painless-execute-api.html`,
           painlessExecuteAPIContexts: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/painless/${DOC_LINK_VERSION}/painless-execute-api.html#_contexts`,
           putComponentTemplateMetadata: `${ELASTICSEARCH_DOCS}indices-component-template.html#component-templates-metadata`,
+          putSnapshotLifecyclePolicy: `${ELASTICSEARCH_DOCS}slm-api-put-policy.html`,
           putWatch: `${ELASTICSEARCH_DOCS}/watcher-api-put-watch.html`,
           updateTransform: `${ELASTICSEARCH_DOCS}update-transform.html`,
+        },
+        plugins: {
+          azureRepo: `${PLUGIN_DOCS}repository-azure.html`,
+          gcsRepo: `${PLUGIN_DOCS}repository-gcs.html`,
+          hdfsRepo: `${PLUGIN_DOCS}repository-hdfs.html`,
+          s3Repo: `${PLUGIN_DOCS}repository-s3.html`,
+          snapshotRestoreRepos: `${PLUGIN_DOCS}repository.html`,
+        },
+        snapshotRestore: {
+          guide: `${ELASTICSEARCH_DOCS}snapshot-restore.html`,
+          changeIndexSettings: `${ELASTICSEARCH_DOCS}snapshots-restore-snapshot.html#change-index-settings-during-restore`,
+          createSnapshot: `${ELASTICSEARCH_DOCS}snapshots-take-snapshot.html`,
+          registerSharedFileSystem: `${ELASTICSEARCH_DOCS}snapshots-register-repository.html#snapshots-filesystem-repository`,
+          registerSourceOnly: `${ELASTICSEARCH_DOCS}snapshots-register-repository.html#snapshots-source-only-repository`,
+          registerUrl: `${ELASTICSEARCH_DOCS}snapshots-register-repository.html#snapshots-read-only-repository`,
+          restoreSnapshot: `${ELASTICSEARCH_DOCS}snapshots-restore-snapshot.html`,
         },
       },
     });
@@ -388,6 +409,7 @@ export interface DocLinksStart {
       painlessExecute: string;
       painlessExecuteAPIContexts: string;
       putComponentTemplateMetadata: string;
+      putSnapshotLifecyclePolicy: string;
       putWatch: string;
       updateTransform: string;
     }>;
@@ -409,5 +431,7 @@ export interface DocLinksStart {
     }>;
     readonly watcher: Record<string, string>;
     readonly ccs: Record<string, string>;
+    readonly plugins: Record<string, string>;
+    readonly snapshotRestore: Record<string, string>;
   };
 }

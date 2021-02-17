@@ -607,6 +607,7 @@ export interface DocLinksStart {
             painlessExecute: string;
             painlessExecuteAPIContexts: string;
             putComponentTemplateMetadata: string;
+            putSnapshotLifecyclePolicy: string;
             putWatch: string;
             updateTransform: string;
         }>;
@@ -628,6 +629,8 @@ export interface DocLinksStart {
         }>;
         readonly watcher: Record<string, string>;
         readonly ccs: Record<string, string>;
+        readonly plugins: Record<string, string>;
+        readonly snapshotRestore: Record<string, string>;
     };
 }
 
