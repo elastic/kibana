@@ -137,14 +137,28 @@ export const transformConnectorComment = (comment: CommentSchemaType): CommentRe
         )
       );
 
+      const { ids, indices, rule } = genAlerts.reduce(
+        (acc, { _id, _index, ruleId, ruleName }) => {
+          // Mutation is faster than destructing.
+          // Mutation usually leads to side effects but for this scenario it's ok to do it.
+          acc.ids.push(_id);
+          acc.indices.push(_index);
+          // We assume one rule per batch of alerts
+          acc.rule = { id: ruleId, name: ruleName };
+          return acc;
+        },
+        { ids: [], indices: [], rule: { id: '', name: '' } } as {
+          ids: string[];
+          indices: string[];
+          rule: { id: string; name: string };
+        }
+      );
+
       return {
         type: CommentType.generatedAlert,
-        alerts: genAlerts.map(({ _id, _index, ruleId, ruleName }) => ({
-          alertId: _id,
-          index: _index,
-          ruleId,
-          ruleName,
-        })),
+        alertId: ids,
+        index: indices,
+        rule,
       };
     } catch (e) {
       throw new Error(`Error parsing generated alert in case connector -> ${e.message}`);
