@@ -79,7 +79,7 @@ export interface MatrixHistogramQueryProps {
         field: string | string[] | undefined;
         value: number;
         cardinality_field?: string | undefined;
-        cardinality_value?: number;
+        cardinality_value?: number | undefined;
       }
     | undefined;
   skip?: boolean;
