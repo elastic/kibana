@@ -13,7 +13,14 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
+import { EuiCallOut, EuiEmptyPrompt } from '@elastic/eui';
+
+import { Loading } from '../../../shared/loading';
+import { ContentSection } from '../../components/shared/content_section';
+import { SourcesTable } from '../../components/shared/sources_table';
+
 import { PrivateSources } from './private_sources';
+import { SourcesView } from './sources_view';
 
 describe('PrivateSources', () => {
   const mockValues = {
@@ -33,28 +40,28 @@ describe('PrivateSources', () => {
   it('renders', () => {
     const wrapper = shallow(<PrivateSources />);
 
-    expect(wrapper.find('SourcesView')).toHaveLength(1);
+    expect(wrapper.find(SourcesView)).toHaveLength(1);
   });
 
   it('renders Loading when loading', () => {
     setMockValues({ ...mockValues, dataLoading: true });
     const wrapper = shallow(<PrivateSources />);
 
-    expect(wrapper.find('Loading')).toHaveLength(1);
+    expect(wrapper.find(Loading)).toHaveLength(1);
   });
 
   it('renders only shared sources section when canCreatePersonalSources is false', () => {
     setMockValues({ ...mockValues });
     const wrapper = shallow(<PrivateSources />);
 
-    expect(wrapper.find('ContentSection')).toHaveLength(1);
+    expect(wrapper.find(ContentSection)).toHaveLength(1);
   });
 
   it('renders both shared and private sources sections when canCreatePersonalSources is true', () => {
     setMockValues({ ...mockValues, account: { canCreatePersonalSources: true, groups: [] } });
     const wrapper = shallow(<PrivateSources />);
 
-    expect(wrapper.find('ContentSection')).toHaveLength(2);
+    expect(wrapper.find(ContentSection)).toHaveLength(2);
   });
 
   it('renders license callout when has private sources with non-Platinum license', () => {
@@ -66,7 +73,7 @@ describe('PrivateSources', () => {
     });
     const wrapper = shallow(<PrivateSources />);
 
-    expect(wrapper.find('EuiCallOut')).toHaveLength(1);
+    expect(wrapper.find(EuiCallOut)).toHaveLength(1);
   });
 
   it('renders an action button when user can add private sources', () => {
@@ -77,7 +84,7 @@ describe('PrivateSources', () => {
     });
     const wrapper = shallow(<PrivateSources />);
 
-    expect(wrapper.find('ContentSection').first().prop('action')).toBeTruthy();
+    expect(wrapper.find(ContentSection).first().prop('action')).toBeTruthy();
   });
 
   it('renders empty prompts if no sources are available', () => {
@@ -87,7 +94,7 @@ describe('PrivateSources', () => {
     });
     const wrapper = shallow(<PrivateSources />);
 
-    expect(wrapper.find('EuiEmptyPrompt')).toHaveLength(2);
+    expect(wrapper.find(EuiEmptyPrompt)).toHaveLength(2);
   });
 
   it('renders SourcesTable if sources are available', () => {
@@ -99,6 +106,6 @@ describe('PrivateSources', () => {
     });
     const wrapper = shallow(<PrivateSources />);
 
-    expect(wrapper.find('SourcesTable')).toHaveLength(2);
+    expect(wrapper.find(SourcesTable)).toHaveLength(2);
   });
 });
