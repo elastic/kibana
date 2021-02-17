@@ -9,11 +9,11 @@ import React, { FC, useMemo } from 'react';
 import { EuiCallOut } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import d3 from 'd3';
-import {
+import type {
   FeatureImportance,
   FeatureImportanceBaseline,
   TopClasses,
-} from '../../../../../common/types/feature_importance';
+} from '../../../../../../../common/types/feature_importance';
 import { useDecisionPathData, isDecisionPathData } from './use_classification_path_data';
 import { DecisionPathChart } from './decision_path_chart';
 import { MissingDecisionPathCallout } from './missing_decision_path_callout';
