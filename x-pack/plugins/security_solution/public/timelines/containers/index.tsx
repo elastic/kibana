@@ -208,8 +208,13 @@ export const useTimelineEvents = ({
                       if (id === TimelineId.active) {
                         activeTimeline.setExpandedDetail({});
                         activeTimeline.setPageName(pageName);
-                        activeTimeline.setRequest(request);
-                        activeTimeline.setResponse(newTimelineResponse);
+                        if (request.language === 'eql') {
+                          activeTimeline.setEqlRequest(request as TimelineEqlRequestOptions);
+                          activeTimeline.setEqlResponse(newTimelineResponse);
+                        } else {
+                          activeTimeline.setRequest(request);
+                          activeTimeline.setResponse(newTimelineResponse);
+                        }
                       }
                       return newTimelineResponse;
                     });
@@ -245,10 +250,20 @@ export const useTimelineEvents = ({
         activeTimeline.setPageName(pageName);
         abortCtrl.current.abort();
         setLoading(false);
-        prevTimelineRequest.current = activeTimeline.getRequest();
-        refetch.current = asyncSearch.bind(null, activeTimeline.getRequest());
+
+        if (request.language === 'eql') {
+          prevTimelineRequest.current = activeTimeline.getEqlRequest();
+          refetch.current = asyncSearch.bind(null, activeTimeline.getEqlRequest());
+        } else {
+          prevTimelineRequest.current = activeTimeline.getRequest();
+          refetch.current = asyncSearch.bind(null, activeTimeline.getRequest());
+        }
+
         setTimelineResponse((prevResp) => {
-          const resp = activeTimeline.getResponse();
+          const resp =
+            request.language === 'eql'
+              ? activeTimeline.getEqlResponse()
+              : activeTimeline.getResponse();
           if (resp != null) {
             return {
               ...resp,
@@ -258,7 +273,9 @@ export const useTimelineEvents = ({
           }
           return prevResp;
         });
-        if (activeTimeline.getResponse() != null) {
+        if (request.language !== 'eql' && activeTimeline.getResponse() != null) {
+          return;
+        } else if (request.language === 'eql' && activeTimeline.getEqlResponse() != null) {
           return;
         }
       }
@@ -379,11 +396,11 @@ export const useTimelineEvents = ({
     if (
       id !== TimelineId.active ||
       timerangeKind === 'absolute' ||
-      !deepEqual(prevTimelineRequest, timelineRequest)
+      !deepEqual(prevTimelineRequest.current, timelineRequest)
     ) {
       timelineSearch(timelineRequest);
     }
-  }, [id, prevTimelineRequest, timelineRequest, timelineSearch, timerangeKind]);
+  }, [id, timelineRequest, timelineSearch, timerangeKind]);
 
   /*
     cleanup timeline events response when the filters were removed completely

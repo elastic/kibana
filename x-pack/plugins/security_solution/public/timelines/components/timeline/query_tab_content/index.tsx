@@ -266,7 +266,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
         {totalCount >= 0 ? <EventsCountBadge>{totalCount}</EventsCountBadge> : null}
       </InPortal>
       <TimelineRefetch
-        id={`${timelineId}-${activeTab}`}
+        id={`${timelineId}-${TimelineTabs.query}`}
         inputId="timeline"
         inspect={inspect}
         loading={isQueryLoading}

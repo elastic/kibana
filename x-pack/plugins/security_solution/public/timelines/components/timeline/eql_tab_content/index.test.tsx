@@ -222,7 +222,7 @@ describe('Timeline', () => {
       expect(wrapper.find('[data-test-subj="timeline-footer"]').exists()).toEqual(false);
     });
 
-    it('it shows the timeline footer when query is empty', () => {
+    it('it shows the timeline footer when query is non-empty', () => {
       const wrapper = mount(
         <TestProviders>
           <EqlTabContentComponent {...{ ...props, eqlOptions: { query: 'query' } }} />
