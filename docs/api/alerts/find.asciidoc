@@ -46,7 +46,7 @@ Retrieve a paginated set of alerts based on condition.
 
 `filter`::
   (Optional, string) A KQL string that you filter with an attribute from your saved object.
-  It should look like that savedObjectType.attributes.title: "myTitle". However, If you used a direct attribute of a saved object like `updatedAt`,
+  It should look like savedObjectType.attributes.title: "myTitle". However, If you used a direct attribute of a saved object, such as `updatedAt`,
   you will have to define your filter like that savedObjectType.updatedAt > 2018-12-22.
 
 NOTE: As alerts change in {kib}, the results on each page of the response also
