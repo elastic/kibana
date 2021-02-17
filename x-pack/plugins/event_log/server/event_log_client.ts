@@ -101,4 +101,33 @@ export class EventLogClient implements IEventLogClient {
       findOptions
     );
   }
+
+  async getEventsSummaryBySavedObjectIds<T>(
+    type: string,
+    ids: string[],
+    aggs: Record<string, unknown>,
+    start?: string,
+    end?: string
+  ): Promise<
+    Array<{
+      savedObjectId: string;
+      summary: T;
+    }>
+  > {
+    const space = await this.spacesService?.getActiveSpace(this.request);
+    const namespace = space && this.spacesService?.spaceIdToNamespace(space.id);
+
+    // verify the user has the required permissions to view this saved objects
+    await this.savedObjectGetter(type, ids);
+
+    return await this.esContext.esAdapter.queryEventsSummaryBySavedObjectIds<T>(
+      this.esContext.esNames.indexPattern,
+      namespace,
+      type,
+      ids,
+      aggs,
+      start,
+      end
+    );
+  }
 }

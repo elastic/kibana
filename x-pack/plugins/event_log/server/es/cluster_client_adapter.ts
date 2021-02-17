@@ -17,6 +17,7 @@ import { esKuery } from '../../../../../src/plugins/data/server';
 
 export const EVENT_BUFFER_TIME = 1000; // milliseconds
 export const EVENT_BUFFER_LENGTH = 100;
+const MAX_BUCKETS_LIMIT = 65535;
 
 export type IClusterClientAdapter = PublicMethodsOf<ClusterClientAdapter>;
 
@@ -197,24 +198,7 @@ export class ClusterClientAdapter {
     // eslint-disable-next-line @typescript-eslint/naming-convention
     { page, per_page: perPage, start, end, sort_field, sort_order, filter }: FindOptionsType
   ): Promise<QueryEventsBySavedObjectResult> {
-    const defaultNamespaceQuery = {
-      bool: {
-        must_not: {
-          exists: {
-            field: 'kibana.saved_objects.namespace',
-          },
-        },
-      },
-    };
-    const namedNamespaceQuery = {
-      term: {
-        'kibana.saved_objects.namespace': {
-          value: namespace,
-        },
-      },
-    };
-    const namespaceQuery = namespace === undefined ? defaultNamespaceQuery : namedNamespaceQuery;
-
+    const namespaceQuery = getNamespaceQuery(namespace);
     const esClient = await this.elasticsearchClientPromise;
     let dslFilterQuery;
     try {
@@ -313,8 +297,155 @@ export class ClusterClientAdapter {
     }
   }
 
+  public async queryEventsSummaryBySavedObjectIds<T>(
+    index: string,
+    namespace: string | undefined,
+    type: string,
+    ids: string[],
+    aggs: Record<string, unknown>,
+    start?: string,
+    end?: string
+  ): Promise<
+    Array<{
+      savedObjectId: string;
+      summary: T;
+    }>
+  > {
+    const namespaceQuery = getNamespaceQuery(namespace);
+    const esClient = await this.elasticsearchClientPromise;
+    const body = {
+      size: 0,
+      sort: { ['@timestamp']: { order: 'desc' } },
+      query: {
+        bool: {
+          must: reject(
+            [
+              {
+                nested: {
+                  path: 'kibana.saved_objects',
+                  query: {
+                    bool: {
+                      must: [
+                        {
+                          term: {
+                            'kibana.saved_objects.rel': {
+                              value: SAVED_OBJECT_REL_PRIMARY,
+                            },
+                          },
+                        },
+                        {
+                          term: {
+                            'kibana.saved_objects.type': {
+                              value: type,
+                            },
+                          },
+                        },
+                        {
+                          terms: {
+                            // default maximum of 65,536 terms, configurable by index.max_terms_count
+                            'kibana.saved_objects.id': ids,
+                          },
+                        },
+                        namespaceQuery,
+                      ],
+                    },
+                  },
+                },
+              },
+              start && {
+                range: {
+                  '@timestamp': {
+                    gte: start,
+                  },
+                },
+              },
+              end && {
+                range: {
+                  '@timestamp': {
+                    lte: end,
+                  },
+                },
+              },
+            ],
+            isUndefined
+          ),
+        },
+      },
+      aggs: {
+        saved_objects: {
+          nested: {
+            path: 'kibana.saved_objects',
+          },
+          aggs: {
+            saved_object: {
+              filter: {
+                terms: {
+                  'kibana.saved_objects.id': ids,
+                },
+              },
+              aggs: {
+                ids: {
+                  // use 'terms' with size of MAX_BUCKETS_LIMIT instead of 'composite', because of filter
+                  terms: {
+                    field: 'kibana.saved_objects.id',
+                    size: MAX_BUCKETS_LIMIT,
+                  },
+                  aggs: {
+                    summary: {
+                      reverse_nested: {},
+                      aggs,
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    };
+
+    try {
+      const result = await esClient.search({
+        index,
+        body,
+      });
+      // console.log(JSON.stringify(result));
+      return result.body.aggregations.saved_objects.saved_object.ids.buckets.map(
+        (savedObject: Record<string, unknown>) => ({
+          savedObjectId: savedObject.key,
+          summary: savedObject.summary,
+        })
+      );
+    } catch (err) {
+      console.log(err.meta.body.error);
+      throw new Error(
+        `querying for Event Log alerts instances summaries by alert ids "${ids}" failed with: ${err.message}`
+      );
+    }
+  }
+
   private debug(message: string, object?: unknown) {
     const objectString = object == null ? '' : JSON.stringify(object);
     this.logger.debug(`esContext: ${message} ${objectString}`);
   }
+}
+
+function getNamespaceQuery(namespace?: string) {
+  const defaultNamespaceQuery = {
+    bool: {
+      must_not: {
+        exists: {
+          field: 'kibana.saved_objects.namespace',
+        },
+      },
+    },
+  };
+  const namedNamespaceQuery = {
+    term: {
+      'kibana.saved_objects.namespace': {
+        value: namespace,
+      },
+    },
+  };
+  return namespace === undefined ? defaultNamespaceQuery : namedNamespaceQuery;
 }

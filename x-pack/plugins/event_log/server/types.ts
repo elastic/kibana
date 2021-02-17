@@ -47,6 +47,19 @@ export interface IEventLogClient {
     ids: string[],
     options?: Partial<FindOptionsType>
   ): Promise<QueryEventsBySavedObjectResult>;
+
+  getEventsSummaryBySavedObjectIds<T>(
+    type: string,
+    ids: string[],
+    aggs: Record<string, unknown>,
+    start?: string,
+    end?: string
+  ): Promise<
+    Array<{
+      savedObjectId: string;
+      summary: T;
+    }>
+  >;
 }
 
 export interface IEventLogger {

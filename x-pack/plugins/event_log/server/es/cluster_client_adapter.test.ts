@@ -703,6 +703,217 @@ describe('queryEventsBySavedObject', () => {
   });
 });
 
+describe('queryEventsSummaryBySavedObjectIds', () => {
+  test('should call cluster with proper aggregations and with default namespace', async () => {
+    const start = '2020-07-08T00:52:28.350Z';
+    const end = '2020-07-08T00:00:00.000Z';
+    clusterClient.search.mockResolvedValue(
+      asApiResponse({
+        aggregations: {
+          saved_objects: {
+            doc_count: 42,
+            saved_object: {
+              doc_count: 42,
+              ids: {
+                doc_count_error_upper_bound: 0,
+                sum_other_doc_count: 0,
+                buckets: [
+                  {
+                    key: 'saved-object-id',
+                    doc_count: 42,
+                    summary: {
+                      doc_count: 42,
+                      instances: {
+                        doc_count_error_upper_bound: 0,
+                        sum_other_doc_count: 0,
+                        buckets: [
+                          {
+                            key: '*',
+                            doc_count: 21,
+                            instance_created: {
+                              doc_count: 0,
+                              max_timestamp: {
+                                value: null,
+                              },
+                            },
+                          },
+                        ],
+                      },
+                    },
+                  },
+                ],
+              },
+            },
+          },
+        },
+      })
+    );
+    await clusterClientAdapter.queryEventsSummaryBySavedObjectIds(
+      'index-name',
+      undefined,
+      'saved-object-type',
+      ['saved-object-id'],
+      {
+        instances: {
+          terms: {
+            field: 'saved-object-type.instance_id',
+            order: {
+              _key: 'asc',
+            },
+            size: 65535,
+          },
+          aggs: {
+            instance_created: {
+              filter: {
+                term: {
+                  'event.action': 'new-instance',
+                },
+              },
+              aggs: {
+                max_timestamp: {
+                  max: {
+                    field: '@timestamp',
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+      start,
+      end
+    );
+
+    const [query] = clusterClient.search.mock.calls[0];
+    expect(query).toMatchObject({
+      body: {
+        aggs: {
+          saved_objects: {
+            aggs: {
+              saved_object: {
+                aggs: {
+                  ids: {
+                    aggs: {
+                      summary: {
+                        aggs: {
+                          instances: {
+                            aggs: {
+                              instance_created: {
+                                aggs: {
+                                  max_timestamp: {
+                                    max: {
+                                      field: '@timestamp',
+                                    },
+                                  },
+                                },
+                                filter: {
+                                  term: {
+                                    'event.action': 'new-instance',
+                                  },
+                                },
+                              },
+                            },
+                            terms: {
+                              field: 'saved-object-type.instance_id',
+                              order: {
+                                _key: 'asc',
+                              },
+                              size: 65535,
+                            },
+                          },
+                        },
+                        reverse_nested: {},
+                      },
+                    },
+                    terms: {
+                      field: 'kibana.saved_objects.id',
+                      size: 65535,
+                    },
+                  },
+                },
+                filter: {
+                  terms: {
+                    'kibana.saved_objects.id': ['saved-object-id'],
+                  },
+                },
+              },
+            },
+            nested: {
+              path: 'kibana.saved_objects',
+            },
+          },
+        },
+        query: {
+          bool: {
+            must: [
+              {
+                nested: {
+                  path: 'kibana.saved_objects',
+                  query: {
+                    bool: {
+                      must: [
+                        {
+                          term: {
+                            'kibana.saved_objects.rel': {
+                              value: 'primary',
+                            },
+                          },
+                        },
+                        {
+                          term: {
+                            'kibana.saved_objects.type': {
+                              value: 'saved-object-type',
+                            },
+                          },
+                        },
+                        {
+                          terms: {
+                            'kibana.saved_objects.id': ['saved-object-id'],
+                          },
+                        },
+                        {
+                          bool: {
+                            must_not: {
+                              exists: {
+                                field: 'kibana.saved_objects.namespace',
+                              },
+                            },
+                          },
+                        },
+                      ],
+                    },
+                  },
+                },
+              },
+              {
+                range: {
+                  '@timestamp': {
+                    gte: '2020-07-08T00:52:28.350Z',
+                  },
+                },
+              },
+              {
+                range: {
+                  '@timestamp': {
+                    lte: '2020-07-08T00:00:00.000Z',
+                  },
+                },
+              },
+            ],
+          },
+        },
+        size: 0,
+        sort: {
+          '@timestamp': {
+            order: 'desc',
+          },
+        },
+      },
+      index: 'index-name',
+    });
+  });
+});
+
 type RetryableFunction = () => boolean;
 
 const RETRY_UNTIL_DEFAULT_COUNT = 20;
@@ -734,3 +945,11 @@ async function retryUntil(
 
   return false;
 }
+
+export const EVENT_LOG_ACTIONS = {
+  execute: 'execute',
+  executeAction: 'execute-action',
+  newInstance: 'new-instance',
+  recoveredInstance: 'recovered-instance',
+  activeInstance: 'active-instance',
+};

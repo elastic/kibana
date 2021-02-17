@@ -275,6 +275,69 @@ describe('EventLogStart', () => {
       ).rejects.toMatchInlineSnapshot(`[Error: [end]: Invalid Date]`);
     });
   });
+
+  describe('getEventsSummaryBySavedObjectIds', () => {
+    test('get summary for all events that referenced to the saved object', async () => {
+      const esContext = contextMock.create();
+
+      const savedObjectGetter = jest.fn();
+
+      const eventLogClient = new EventLogClient({
+        esContext,
+        savedObjectGetter,
+        request: FakeRequest(),
+      });
+
+      savedObjectGetter.mockResolvedValueOnce({
+        id: 'saved-object-id',
+        type: 'saved-object-type',
+        attributes: {},
+        references: [],
+      });
+
+      const result = [
+        {
+          savedObjectId: 'saved-object-id',
+          summary: {
+            sub_objects: {},
+          },
+        },
+      ];
+      esContext.esAdapter.queryEventsSummaryBySavedObjectIds.mockResolvedValue(result);
+
+      expect(
+        await eventLogClient.getEventsSummaryBySavedObjectIds(
+          'saved-object-type',
+          ['saved-object-id'],
+          {
+            sub_objects: {
+              terms: {
+                field: 'sub_object.id',
+              },
+            },
+          },
+          '2020-03-30T14:55:47.054Z',
+          '2020-03-30T15:55:47.054Z'
+        )
+      ).toEqual(result);
+
+      expect(esContext.esAdapter.queryEventsSummaryBySavedObjectIds).toHaveBeenCalledWith(
+        esContext.esNames.indexPattern,
+        undefined,
+        'saved-object-type',
+        ['saved-object-id'],
+        {
+          sub_objects: {
+            terms: {
+              field: 'sub_object.id',
+            },
+          },
+        },
+        '2020-03-30T14:55:47.054Z',
+        '2020-03-30T15:55:47.054Z'
+      );
+    });
+  });
 });
 
 function fakeEvent(overrides = {}) {
