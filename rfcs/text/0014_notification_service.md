@@ -227,9 +227,10 @@ interface  NotificationState {
   is_pinned: boolean;
 }
 ``` 
-This option consumes less storage space but might lead to expensive read operations due to an additional JOIN call to 
-search for notification state objects. We don’t expect Kibana to read more than 10-20 notifications at once, so the overhead might be acceptable.
-- Create a copy for every notification in a user-specific list of notifications. It’s [the recommended way to store data](https://www.elastic.co/guide/en/elasticsearch/reference/current/joining-queries.html),
+This option consumes less storage space but might lead to expensive read operations due to an additional JOIN call to search for notification state objects. We don’t expect Kibana to read more than 10-20 notifications at once, so the overhead might be acceptable. Also, this option doesn't rely on built-in ES functionality, which can simplify migration to SavedObject storage later.
+- Store user-specific `NotificationState` as [nested](https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-nested-query.html) field of `Notification`. This option can affect ES performance since it reindexes the whole document on every `nested` object update. It can lead to conflicts when several users update the notification state at the same time (see [Best suited for data that does not change frequently](https://www.elastic.co/blog/managing-relations-inside-elasticsearch))
+- Store user-specific `NotificationState` as [child](https://www.elastic.co/guide/en/elasticsearch/reference/current/parent-join.html) of `Notification` object. This option doesn't have the reindexing problem typical of the previous option. But [you cannot sort the results of a has_child/has_parent query using standard sort options.](https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-has-parent-query.html).
+- Create a copy for every notification in a user-specific list of notifications. Denormalization is [the recommended way to manage relationships](https://www.elastic.co/blog/managing-relations-inside-elasticsearch),
 but it leads to duplicating notification messages. 
 
 Stale notifications and their states must be removed from the storage. There should be a dedicated task performing
