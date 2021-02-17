@@ -12,7 +12,6 @@ import {
   EuiConfirmModal,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiOverlayMask,
   EuiSpacer,
   EuiSwitch,
 } from '@elastic/eui';
@@ -123,22 +122,20 @@ export const DeleteActionModal: FC<DeleteAction> = ({
   );
 
   return (
-    <EuiOverlayMask>
-      <EuiConfirmModal
-        title={isBulkAction === true ? bulkDeleteModalTitle : deleteModalTitle}
-        onCancel={closeModal}
-        onConfirm={deleteAndCloseModal}
-        cancelButtonText={i18n.translate('xpack.transform.transformList.deleteModalCancelButton', {
-          defaultMessage: 'Cancel',
-        })}
-        confirmButtonText={i18n.translate('xpack.transform.transformList.deleteModalDeleteButton', {
-          defaultMessage: 'Delete',
-        })}
-        defaultFocusedButton={EUI_MODAL_CONFIRM_BUTTON}
-        buttonColor="danger"
-      >
-        {isBulkAction ? bulkDeleteModalContent : deleteModalContent}
-      </EuiConfirmModal>
-    </EuiOverlayMask>
+    <EuiConfirmModal
+      title={isBulkAction === true ? bulkDeleteModalTitle : deleteModalTitle}
+      onCancel={closeModal}
+      onConfirm={deleteAndCloseModal}
+      cancelButtonText={i18n.translate('xpack.transform.transformList.deleteModalCancelButton', {
+        defaultMessage: 'Cancel',
+      })}
+      confirmButtonText={i18n.translate('xpack.transform.transformList.deleteModalDeleteButton', {
+        defaultMessage: 'Delete',
+      })}
+      defaultFocusedButton={EUI_MODAL_CONFIRM_BUTTON}
+      buttonColor="danger"
+    >
+      {isBulkAction ? bulkDeleteModalContent : deleteModalContent}
+    </EuiConfirmModal>
   );
 };
