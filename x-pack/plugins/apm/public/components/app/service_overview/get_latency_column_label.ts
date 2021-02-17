@@ -12,17 +12,17 @@ export function getLatencyColumnLabel(
   latencyAggregationType?: LatencyAggregationType
 ) {
   switch (latencyAggregationType) {
-    case 'avg':
+    case LatencyAggregationType.avg:
       return i18n.translate('xpack.apm.serviceOverview.latencyColumnAvgLabel', {
         defaultMessage: 'Latency (avg.)',
       });
 
-    case 'p95':
+    case LatencyAggregationType.p95:
       return i18n.translate('xpack.apm.serviceOverview.latencyColumnP95Label', {
         defaultMessage: 'Latency (95th)',
       });
 
-    case 'p99':
+    case LatencyAggregationType.p99:
       return i18n.translate('xpack.apm.serviceOverview.latencyColumnP99Label', {
         defaultMessage: 'Latency (99th)',
       });
