@@ -30,7 +30,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       log.debug('load kibana index with default index pattern');
 
       await esArchiver.load('empty_kibana');
-      await kibanaServer.importExport.import('discover');
+      await kibanaServer.importExport.load('discover');
 
       // and load a set of makelogs data
       await esArchiver.loadIfNeeded('logstash_functional');

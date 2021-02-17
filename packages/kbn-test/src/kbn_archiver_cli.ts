@@ -122,7 +122,7 @@ export function runKbnArchiverCli() {
         `,
       },
       async run({ kbnClient, flags }) {
-        await kbnClient.importExport.export(getSinglePositionalArg(flags), {
+        await kbnClient.importExport.save(getSinglePositionalArg(flags), {
           savedObjectTypes: parseTypesFlag(flags),
         });
       },
@@ -132,7 +132,7 @@ export function runKbnArchiverCli() {
       usage: 'load <name>',
       description: 'import a saved export to Kibana',
       async run({ kbnClient, flags }) {
-        await kbnClient.importExport.import(getSinglePositionalArg(flags));
+        await kbnClient.importExport.load(getSinglePositionalArg(flags));
       },
     })
     .execute();

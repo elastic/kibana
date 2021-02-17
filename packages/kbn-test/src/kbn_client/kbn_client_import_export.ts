@@ -39,7 +39,7 @@ export class KbnClientImportExport {
     return this.dir ? Path.resolve(this.dir, path) : path;
   }
 
-  async import(name: string, options?: { space?: string }) {
+  async load(name: string, options?: { space?: string }) {
     const src = this.resolvePath(name);
     this.log.debug('resolved import for', name, 'to', src);
 
@@ -87,7 +87,7 @@ export class KbnClientImportExport {
     }
   }
 
-  async export(name: string, options?: { savedObjectTypes?: string[]; space?: string }) {
+  async save(name: string, options?: { savedObjectTypes?: string[]; space?: string }) {
     const dest = this.resolvePath(name);
 
     let resp;
