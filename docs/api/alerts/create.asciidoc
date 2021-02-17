@@ -15,7 +15,7 @@ Create {kib} alerts.
 ==== Request body
 
 `name`::
-  (Required, string) A name to reference and search in the future.
+  (Required, string) A name to reference and search.
 
 `tags`::
   (Optional, string array) A list of keywords to reference and search in the future.
