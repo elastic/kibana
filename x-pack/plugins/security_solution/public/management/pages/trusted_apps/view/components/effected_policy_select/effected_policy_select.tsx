@@ -13,6 +13,7 @@ import {
   EuiSelectableProps,
   EuiSwitch,
   EuiSwitchProps,
+  EuiText,
   htmlIdGenerator,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -139,12 +140,16 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
       <>
         <EuiFormRow
           fullWidth
-          label={i18n.translate(
-            'xpack.securitySolution.trustedapps.policySelect.globalSectionTitle',
-            {
-              defaultMessage: 'Global application',
-            }
-          )}
+          label={
+            <EuiText size="s">
+              <h3>
+                <FormattedMessage
+                  id="xpack.securitySolution.trustedapps.policySelect.globalSectionTitle"
+                  defaultMessage="Assignment"
+                />
+              </h3>
+            </EuiText>
+          }
         >
           <EuiSwitch
             label={i18n.translate(
