@@ -104,7 +104,7 @@ Each alert type contains the following properties:
 | The license required to use the alert type.
 
 | `enabledInLicense`
-| Whether the alert type is enabled or disabled due to license.
+| Whether the alert type is enabled or disabled based on the license.
 
 | `actionGroups`
 | An explicit list of groups the alert type may schedule actions for, each specifying the ActionGroup's unique ID and human readable name. Alert `actions` validation will use this configuartion to ensure groups are valid. We highly encourage using `kbn-i18n` to translate the names of actionGroup  when registering the AlertType.
