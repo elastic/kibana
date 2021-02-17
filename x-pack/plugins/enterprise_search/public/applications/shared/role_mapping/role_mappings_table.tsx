@@ -64,7 +64,7 @@ export const RoleMappingsTable: React.FC<IRoleMappingsTableProps> = ({
 }) => {
   const [filterValue, updateValue] = useState('');
 
-  // This is needed because SMAS has `engines` and SMES has `groups`.
+  // This is needed because App Search has `engines` and Workplace Search has `groups`.
   const standardizeRoleMapping = roleMappings.map((rm) => {
     const _rm = { ...rm } as SharedRoleMapping;
     _rm.accessItems = rm[accessItemKey];

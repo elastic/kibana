@@ -94,7 +94,6 @@ export const AttributeSelector: React.FC<IAttributeSelectorProps> = ({
   multipleAuthProvidersConfig,
   handleAttributeSelectorChange,
   handleAttributeValueChange,
-  // tslint:disable-next-line:no-empty
   handleAuthProviderChange = () => null,
 }) => {
   return (
