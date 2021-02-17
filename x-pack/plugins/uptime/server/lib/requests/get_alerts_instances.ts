@@ -6,37 +6,39 @@
  */
 
 import { UMElasticsearchQueryFn } from '../adapters';
-import { MonitorDetails, Ping } from '../../../common/runtime_types';
+import { MonitorDetails } from '../../../common/runtime_types';
 
 export interface GetAlertsInstancesParams {
   consumers: string[];
   dateStart: string;
   dateEnd: string;
   alertsClient: any;
-  active: boolean;
+  status?: string;
 }
 
 const getAlerts = async ({
   consumers,
   alertsClient,
-  active,
+  status,
   dateStart,
   dateEnd,
 }: {
   consumers: string[];
   alertsClient: any;
-  active: boolean;
+  status?: string;
   dateStart?: string;
   dateEnd?: string;
 }) => {
+  const consumersFilter = consumers
+    .map((consumer) => `alert.attributes.consumer:(${consumer})`)
+    .join(' or ');
   const options: any = {
     page: 1,
     perPage: 500,
-    filter:
-      consumers.map((consumer) => `alert.attributes.consumer:(${consumer})`) +
-      `and alert.attributes.executionStatus.status:${active ? 'active' : 'ok'}`,
+    filter: consumersFilter,
+    // + (status ? ` and alert.attributes.executionStatus.status:(${status})` : ''),
     defaultSearchOperator: 'OR',
-    sortField: 'name.keyword',
+    // sortField: 'name.keyword',
   };
 
   const { data } = await alertsClient.find({ options });
@@ -45,23 +47,31 @@ const getAlerts = async ({
     dateStart,
     dateEnd
   );
-  return summaryAlertsInstances.map((activeInstances: any) => ({
-    ...activeInstances,
-    instances: activeInstances.filter(
-      (instance: any) =>
-        (active && instance.status === 'active') || (!active && instance.status === 'ok')
-    ),
-  }));
+
+  return summaryAlertsInstances.reduce(
+    (alerts: unknown[], activeInstances: Record<string, unknown>) => {
+      const activeInstancesFiltered = Object.entries(activeInstances);
+      alerts.push({
+        ...activeInstances,
+        instances:
+          status && activeInstances
+            ? activeInstancesFiltered.filter((instance: any) => instance.status === status)
+            : activeInstances,
+      });
+      return alerts;
+    },
+    []
+  );
 };
 
 export const getAlertsInstances: UMElasticsearchQueryFn<
   GetAlertsInstancesParams,
   MonitorDetails
-> = async ({ consumers, active, dateStart, dateEnd, alertsClient }) => {
+> = async ({ consumers, status, dateStart, dateEnd, alertsClient }) => {
   return await getAlerts({
     consumers,
     alertsClient,
-    active,
+    status,
     dateStart,
     dateEnd,
   });

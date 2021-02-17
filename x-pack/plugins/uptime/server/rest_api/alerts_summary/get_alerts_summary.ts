@@ -14,7 +14,7 @@ export const createGetAlertsInstancesRoute: UMRestApiRouteFactory = (libs: UMSer
   path: '/api/uptime/alerts_instances',
   validate: {
     body: schema.object({
-      active: schema.boolean(),
+      status: schema.maybe(schema.string()),
       consumers: schema.arrayOf(schema.string()),
     }),
     query: schema.object({
@@ -22,15 +22,15 @@ export const createGetAlertsInstancesRoute: UMRestApiRouteFactory = (libs: UMSer
       dateEnd: schema.maybe(schema.string()),
     }),
   },
-  handler: async ({ context, request }): Promise<any> => {
-    const { uptimeEsClient, dateStart, dateEnd } = request.query;
-    const { active, consumers } = request.body;
+  handler: async ({ uptimeEsClient, request, context }): Promise<any> => {
+    const { dateStart, dateEnd } = request.query;
+    const { status, consumers } = request.body;
     const alertsClient = context.alerting?.getAlertsClient();
 
     return await libs.requests.getAlertsInstances({
       uptimeEsClient,
       consumers,
-      active,
+      status,
       dateStart,
       dateEnd,
       alertsClient,
