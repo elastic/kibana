@@ -2,7 +2,7 @@
 
 exports[`returns the \`JsonCodeEditor\` component 1`] = `
 <EuiFlexGroup
-  className="jsonCodeEditor"
+  className="dscJsonCodeEditor"
   direction="column"
   gutterSize="s"
 >

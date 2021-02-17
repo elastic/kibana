@@ -42,7 +42,7 @@ export const JsonCodeEditor = ({ hit }: DocViewRenderProps) => {
   }, []);
 
   return (
-    <EuiFlexGroup className="jsonCodeEditor" direction="column" gutterSize="s">
+    <EuiFlexGroup className="dscJsonCodeEditor" direction="column" gutterSize="s">
       <EuiFlexItem grow={true}>
         <EuiSpacer size="s" />
         <div className="eui-textRight">
