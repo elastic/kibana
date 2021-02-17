@@ -268,6 +268,7 @@ export function ChartSwitch(props: Props) {
                       aria-label={i18n.translate('xpack.lens.chartSwitch.dataLossLabel', {
                         defaultMessage: 'Data loss',
                       })}
+                      data-test-subj={`lnsChartSwitchPopoverAlert_${v.id}`}
                       type="alert"
                       color="warning"
                       title={i18n.translate('xpack.lens.chartSwitch.dataLossLabel', {
@@ -332,6 +333,7 @@ export function ChartSwitch(props: Props) {
           searchable
           singleSelection
           isPreFiltered
+          data-test-subj="lnsChartSwitchList"
           searchProps={{
             incremental: true,
             className: 'lnsChartSwitch__search',

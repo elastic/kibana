@@ -12,7 +12,17 @@ import {
   createMockFramePublicAPI,
   createMockDatasource,
 } from '../../mocks';
-import { EuiKeyPadMenuItem } from '@elastic/eui';
+
+// Mock the AutoSizer inside EuiSelectable (Chart Switch) and return some dimensions > 0
+jest.mock('react-virtualized-auto-sizer', () => {
+  return function (props: {
+    children: (dimensions: { width: number; height: number }) => React.ReactNode;
+  }) {
+    const { children } = props;
+    return <div>{children({ width: 100, height: 100 })}</div>;
+  };
+});
+
 import { mountWithIntl as mount } from '@kbn/test/jest';
 import { Visualization, FramePublicAPI, DatasourcePublicAPI } from '../../../types';
 import { Action } from '../state_management';
@@ -170,10 +180,7 @@ describe('chart_switch', () => {
 
   function getMenuItem(subType: string, component: ReactWrapper) {
     showFlyout(component);
-    return component
-      .find(EuiKeyPadMenuItem)
-      .find(`[data-test-subj="lnsChartSwitchPopover_${subType}"]`)
-      .first();
+    return component.find(`[data-test-subj="lnsChartSwitchPopover_${subType}"]`).first();
   }
 
   it('should use suggested state if there is a suggestion from the target visualization', () => {
@@ -285,7 +292,12 @@ describe('chart_switch', () => {
       />
     );
 
-    expect(getMenuItem('visB', component).prop('betaBadgeIconType')).toEqual('alert');
+    expect(
+      getMenuItem('visB', component)
+        .find('[data-test-subj="lnsChartSwitchPopoverAlert_visB"]')
+        .first()
+        .props().type
+    ).toEqual('alert');
   });
 
   it('should indicate data loss if not all layers will be used', () => {
@@ -305,7 +317,12 @@ describe('chart_switch', () => {
       />
     );
 
-    expect(getMenuItem('visB', component).prop('betaBadgeIconType')).toEqual('alert');
+    expect(
+      getMenuItem('visB', component)
+        .find('[data-test-subj="lnsChartSwitchPopoverAlert_visB"]')
+        .first()
+        .props().type
+    ).toEqual('alert');
   });
 
   it('should support multi-layer suggestions without data loss', () => {
@@ -348,7 +365,9 @@ describe('chart_switch', () => {
       />
     );
 
-    expect(getMenuItem('visB', component).prop('betaBadgeIconType')).toBeUndefined();
+    expect(
+      getMenuItem('visB', component).find('[data-test-subj="lnsChartSwitchPopoverAlert_visB"]')
+    ).toHaveLength(0);
   });
 
   it('should indicate data loss if no data will be used', () => {
@@ -369,7 +388,12 @@ describe('chart_switch', () => {
       />
     );
 
-    expect(getMenuItem('visB', component).prop('betaBadgeIconType')).toEqual('alert');
+    expect(
+      getMenuItem('visB', component)
+        .find('[data-test-subj="lnsChartSwitchPopoverAlert_visB"]')
+        .first()
+        .props().type
+    ).toEqual('alert');
   });
 
   it('should not indicate data loss if there is no data', () => {
@@ -391,7 +415,9 @@ describe('chart_switch', () => {
       />
     );
 
-    expect(getMenuItem('visB', component).prop('betaBadgeIconType')).toBeUndefined();
+    expect(
+      getMenuItem('visB', component).find('[data-test-subj="lnsChartSwitchPopoverAlert_visB"]')
+    ).toHaveLength(0);
   });
 
   it('should not show a warning when the subvisualization is the same', () => {
@@ -415,7 +441,11 @@ describe('chart_switch', () => {
       />
     );
 
-    expect(getMenuItem('subvisC2', component).prop('betaBadgeIconType')).not.toBeDefined();
+    expect(
+      getMenuItem('subvisC2', component).find(
+        '[data-test-subj="lnsChartSwitchPopoverAlert_subvisC2"]'
+      )
+    ).toHaveLength(0);
   });
 
   it('should get suggestions when switching subvisualization', () => {

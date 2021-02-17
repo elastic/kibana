@@ -7,6 +7,17 @@
 
 import React, { ReactElement } from 'react';
 import { ReactWrapper } from 'enzyme';
+
+// Mock the AutoSizer inside EuiSelectable (Chart Switch) and return some dimensions > 0
+jest.mock('react-virtualized-auto-sizer', () => {
+  return function (props: {
+    children: (dimensions: { width: number; height: number }) => React.ReactNode;
+  }) {
+    const { children, ...otherProps } = props;
+    return <div {...otherProps}>{children({ width: 100, height: 100 })}</div>;
+  };
+});
+
 import { EuiPanel, EuiToolTip } from '@elastic/eui';
 import { mountWithIntl as mount } from '@kbn/test/jest';
 import { EditorFrame } from './editor_frame';
