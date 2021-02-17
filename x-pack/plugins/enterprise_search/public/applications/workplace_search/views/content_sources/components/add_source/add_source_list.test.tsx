@@ -19,7 +19,7 @@ import { shallow } from 'enzyme';
 
 import { EuiEmptyPrompt, EuiFieldSearch } from '@elastic/eui';
 
-import { Loading } from '../../../../../../applications/shared/loading';
+import { Loading } from '../../../../../shared/loading';
 import { ViewContentHeader } from '../../../../components/shared/view_content_header';
 
 import { AddSourceList } from './add_source_list';

@@ -78,6 +78,7 @@ export const buildAuthenticationsHistogramQuery = ({
     index: defaultIndex,
     allowNoIndices: true,
     ignoreUnavailable: true,
+    track_total_hits: true,
     body: {
       aggregations: getHistogramAggregation(),
       query: {
@@ -86,7 +87,6 @@ export const buildAuthenticationsHistogramQuery = ({
         },
       },
       size: 0,
-      track_total_hits: true,
     },
   };
 

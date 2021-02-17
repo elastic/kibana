@@ -7,4 +7,4 @@
  */
 
 require('../src/setup_node_env');
-require('../src/dev/typescript/build_refs').runBuildRefs();
+require('../src/dev/typescript').runBuildRefsCli();

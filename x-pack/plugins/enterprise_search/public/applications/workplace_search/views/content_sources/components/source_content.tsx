@@ -31,7 +31,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { Loading } from '../../../../../applications/shared/loading';
+import { Loading } from '../../../../shared/loading';
 import { TruncatedContent } from '../../../../shared/truncate';
 import { ComponentLoader } from '../../../components/shared/component_loader';
 import { TablePaginationBar } from '../../../components/shared/table_pagination_bar';

@@ -78,6 +78,7 @@ export const buildNetworkTlsQuery = ({
     allowNoIndices: true,
     index: defaultIndex,
     ignoreUnavailable: true,
+    track_total_hits: false,
     body: {
       aggs: {
         ...getAggs(querySize, sort),
@@ -88,7 +89,6 @@ export const buildNetworkTlsQuery = ({
         },
       },
       size: 0,
-      track_total_hits: false,
     },
   };
 
