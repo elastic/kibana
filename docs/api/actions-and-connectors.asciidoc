@@ -1,5 +1,5 @@
 [[actions-and-connectors-api]]
-== Action and Connector APIs
+== Action and connector APIs
 
 Manage Actions and Connectors.
 
