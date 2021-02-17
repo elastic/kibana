@@ -106,7 +106,7 @@ const isThresholdResult = (thresholdResult: SearchTypes): thresholdResult is Thr
  */
 export const additionalSignalFields = (doc: BaseSignalHit) => {
   const thresholdResult = doc._source.threshold_result;
-  if (!isThresholdResult(thresholdResult)) {
+  if (thresholdResult != null && !isThresholdResult(thresholdResult)) {
     throw new Error(`threshold_result failed to validate: ${thresholdResult}`);
   }
   return {
