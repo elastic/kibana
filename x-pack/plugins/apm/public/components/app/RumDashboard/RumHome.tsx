@@ -20,7 +20,7 @@ export const UX_LABEL = i18n.translate('xpack.apm.ux.title', {
 export function RumHome() {
   return (
     <CsmSharedContextProvider>
-      <EuiFlexGroup wrap justifyContent={'flexEnd'} responsive={false}>
+      <EuiFlexGroup wrap justifyContent={'flexEnd'} responsive={true}>
         <EuiFlexItem>
           <EuiTitle>
             <h1 className="eui-textNoWrap">{UX_LABEL}</h1>
