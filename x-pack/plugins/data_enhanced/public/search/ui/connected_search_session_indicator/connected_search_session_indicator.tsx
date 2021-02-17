@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
-import { debounce, distinctUntilChanged, map, mapTo, switchMap } from 'rxjs/operators';
+import React, { useCallback, useEffect, useState } from 'react';
+import { debounce, distinctUntilChanged, map, mapTo, switchMap, tap } from 'rxjs/operators';
 import { merge, of, timer } from 'rxjs';
 import useObservable from 'react-use/lib/useObservable';
 import { i18n } from '@kbn/i18n';
@@ -15,7 +15,8 @@ import {
   ISessionService,
   SearchSessionState,
   TimefilterContract,
-} from '../../../../../../../src/plugins/data/public/';
+  SearchUsageCollector,
+} from '../../../../../../../src/plugins/data/public';
 import { RedirectAppLinks } from '../../../../../../../src/plugins/kibana_react/public';
 import { ApplicationStart } from '../../../../../../../src/core/public';
 import { IStorageWrapper } from '../../../../../../../src/plugins/kibana_utils/public';
@@ -31,6 +32,7 @@ export interface SearchSessionIndicatorDeps {
    * after the last search in the session has completed
    */
   disableSaveAfterSessionCompletesTimeout: number;
+  usageCollector?: SearchUsageCollector;
 }
 
 export const createConnectedSearchSessionIndicator = ({
@@ -39,6 +41,7 @@ export const createConnectedSearchSessionIndicator = ({
   timeFilter,
   storage,
   disableSaveAfterSessionCompletesTimeout,
+  usageCollector,
 }: SearchSessionIndicatorDeps): React.FC => {
   const isAutoRefreshEnabled = () => !timeFilter.getRefreshInterval().pause;
   const isAutoRefreshEnabled$ = timeFilter
@@ -55,7 +58,10 @@ export const createConnectedSearchSessionIndicator = ({
         ? merge(of(false), timer(disableSaveAfterSessionCompletesTimeout).pipe(mapTo(true)))
         : of(false)
     ),
-    distinctUntilChanged()
+    distinctUntilChanged(),
+    tap((value) => {
+      if (value) usageCollector?.trackSessionIndicatorSaveDisabled();
+    })
   );
 
   return () => {
@@ -123,7 +129,8 @@ export const createConnectedSearchSessionIndicator = ({
       storage,
       searchSessionIndicator,
       state,
-      saveDisabled
+      saveDisabled,
+      usageCollector
     );
 
     const onOpened = useCallback(
@@ -138,17 +145,30 @@ export const createConnectedSearchSessionIndicator = ({
 
     const onContinueInBackground = useCallback(() => {
       if (saveDisabled) return;
+      usageCollector?.trackSessionSentToBackground();
       sessionService.save();
     }, [saveDisabled]);
 
     const onSaveResults = useCallback(() => {
       if (saveDisabled) return;
+      usageCollector?.trackSessionSavedResults();
       sessionService.save();
     }, [saveDisabled]);
 
     const onCancel = useCallback(() => {
+      usageCollector?.trackSessionCancelled();
       sessionService.cancel();
     }, []);
+
+    const onViewSearchSessions = useCallback(() => {
+      usageCollector?.trackViewSessionsList();
+    }, []);
+
+    useEffect(() => {
+      if (state === SearchSessionState.Restored) {
+        usageCollector?.trackSessionIsRestored();
+      }
+    }, [state]);
 
     if (!sessionService.isSessionStorageReady()) return null;
     return (
@@ -164,6 +184,7 @@ export const createConnectedSearchSessionIndicator = ({
           onSaveResults={onSaveResults}
           onCancel={onCancel}
           onOpened={onOpened}
+          onViewSearchSessions={onViewSearchSessions}
         />
       </RedirectAppLinks>
     );
