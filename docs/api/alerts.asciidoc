@@ -10,7 +10,7 @@ The following alerts APIs are available:
 
 * <<alerts-api-get, Get object API>> to retrieve a single {kib} alert by ID
 
-* <<alerts-api-delete, Delete alert API>> to remove {kib} alert
+* <<alerts-api-delete, Delete alert API>> to permanently remove an alert
 
 * <<alerts-api-find, Find alerts API>> to retrieve a paginated set of {kib} alerts by various conditions
 
