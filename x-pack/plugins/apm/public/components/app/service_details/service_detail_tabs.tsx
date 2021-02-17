@@ -31,6 +31,7 @@ import { ServiceMetrics } from '../service_metrics';
 import { ServiceOverview } from '../service_overview';
 import { TransactionOverview } from '../transaction_overview';
 import { ServiceProfiling } from '../service_profiling';
+import { Correlations } from '../correlations';
 
 interface Tab {
   key: string;
@@ -156,6 +157,9 @@ export function ServiceDetailTabs({ serviceName, tab }: Props) {
             {text}
           </EuiTab>
         ))}
+        <div style={{ marginLeft: 'auto' }}>
+          <Correlations />
+        </div>
       </MainTabs>
       {selectedTab ? selectedTab.render() : null}
     </>
