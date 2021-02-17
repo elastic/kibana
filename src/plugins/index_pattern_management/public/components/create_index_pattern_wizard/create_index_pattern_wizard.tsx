@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { withRouter, RouteComponentProps } from 'react-router-dom';
+import * as ReactRouterDom from 'react-router-dom';
 import { DocLinksStart } from 'src/core/public';
 import { StepIndexPattern } from './components/step_index_pattern';
 import { StepTimeField } from './components/step_time_field';
@@ -44,14 +44,17 @@ interface CreateIndexPatternWizardState {
 }
 
 export class CreateIndexPatternWizard extends Component<
-  RouteComponentProps,
+  ReactRouterDom.RouteComponentProps,
   CreateIndexPatternWizardState
 > {
   static contextType = contextType;
 
   public readonly context!: IndexPatternManagmentContextValue;
 
-  constructor(props: RouteComponentProps, context: IndexPatternManagmentContextValue) {
+  constructor(
+    props: ReactRouterDom.RouteComponentProps,
+    context: IndexPatternManagmentContextValue
+  ) {
     super(props, context);
 
     context.services.setBreadcrumbs(getCreateBreadcrumbs());
@@ -285,4 +288,6 @@ export class CreateIndexPatternWizard extends Component<
   }
 }
 
-export const CreateIndexPatternWizardWithRouter = withRouter(CreateIndexPatternWizard);
+export const CreateIndexPatternWizardWithRouter = ReactRouterDom.withRouter(
+  CreateIndexPatternWizard
+);
