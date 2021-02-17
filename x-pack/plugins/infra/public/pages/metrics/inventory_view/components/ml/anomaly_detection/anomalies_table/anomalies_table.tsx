@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { ChangeEvent, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { ChangeEvent, useCallback, useMemo, useState } from 'react';
 import DateMath from '@elastic/datemath';
 import { EuiSuperDatePicker } from '@elastic/eui';
 import moment from 'moment';
@@ -22,6 +22,7 @@ import {
   EuiContextMenuItem,
   EuiComboBox,
 } from '@elastic/eui';
+import useDebounce from 'react-use/lib/useDebounce';
 import { FormattedDate, FormattedMessage } from 'react-intl';
 import { EuiPopover } from '@elastic/eui';
 import { EuiButtonIcon } from '@elastic/eui';
@@ -43,6 +44,8 @@ import { createResultsUrl } from '../flyout_home';
 import { useWaffleViewState, WaffleViewState } from '../../../../hooks/use_waffle_view_state';
 type JobType = 'k8s' | 'hosts';
 type SortField = 'anomalyScore' | 'startTime';
+
+const FETCH_ANOMALIES_DEBOUNCE_MS = 500;
 interface JobOption {
   id: JobType;
   label: string;
@@ -283,11 +286,15 @@ export const AnomaliesTable = () => {
     });
   };
 
-  useEffect(() => {
-    if (getAnomalies) {
-      getAnomalies(undefined, search);
-    }
-  }, [getAnomalies, search]);
+  useDebounce(
+    () => {
+      if (getAnomalies) {
+        getAnomalies(undefined, search);
+      }
+    },
+    FETCH_ANOMALIES_DEBOUNCE_MS,
+    [getAnomalies, search]
+  );
 
   return (
     <div>
