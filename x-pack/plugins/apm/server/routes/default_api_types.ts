@@ -18,4 +18,6 @@ export const comparisonRangeRt = t.partial({
   comparisonEnd: isoToEpochRt,
 });
 
+export const environmentRt = t.partial({ environment: t.string });
+
 export const uiFiltersRt = t.type({ uiFilters: t.string });
