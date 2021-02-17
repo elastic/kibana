@@ -6,9 +6,13 @@ sidebar_label: React to changes
 
 ## Basic
 
+### Access the form data from the root component
+
+You can access the form data by using the `useFormData()` hook. This hook has an optional `form` option that you must provide if you need to access the data in the root component.
+
 ```js
 // From the root component (where the "form" is declared)
-export const ReactToChangesBasic = () => {
+export const MyComponent = () => {
   const { form } = useForm();
 
   const [formData] = useFormData({ form });
@@ -21,8 +25,12 @@ export const ReactToChangesBasic = () => {
     </Form>
   );
 };
+```
+### Access the form data from a child component
 
-// Inside a child component (no need to pass the form object, it is read from context)
+To access the form data from inside a child component you also use the `useFormData()` hook, but this time you don't need to provide the `form` as it is read from context.
+
+```js
 const FormFields = () => {
   const [formData] = useFormData();
 
@@ -35,7 +43,7 @@ const FormFields = () => {
   )
 };
 
-export const ReactToChangesBasic = () => {
+export const MyComponent = () => {
   const { form } = useForm();
 
   return (

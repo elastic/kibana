@@ -34,7 +34,7 @@ Those are the 3 car configurations that the form can output:
 }
 ```
 
-Let's create one component for each car that will expose its unique parameter(s). Those components won't have to declare the `model` and the `used` params as they are common to all three cars and we will put them at the root level of the form.
+Let's create one component for each car that will expose its unique parameter(s). Those components won't have to render the `model` and the `used` form fields as they are common to all three cars and we will put them at the root level of the form.
 
 ```js
 // sedan_car.tsx
