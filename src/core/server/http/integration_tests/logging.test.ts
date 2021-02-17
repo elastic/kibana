@@ -251,7 +251,42 @@ describe('request logging', () => {
           expect(JSON.parse(meta).http.response.headers.bar).toBe('world');
         });
 
-        it('filters sensitive request headers', async () => {
+        it('filters sensitive request headers when RewriteAppender is configured', async () => {
+          root = kbnTestServer.createRoot({
+            logging: {
+              silent: true,
+              appenders: {
+                'test-console': {
+                  type: 'console',
+                  layout: {
+                    type: 'pattern',
+                    pattern: '%level|%logger|%message|%meta',
+                  },
+                },
+                rewrite: {
+                  type: 'rewrite',
+                  appenders: ['test-console'],
+                  policy: {
+                    type: 'meta',
+                    mode: 'update',
+                    properties: [
+                      { path: 'http.request.headers.authorization', value: '[REDACTED]' },
+                    ],
+                  },
+                },
+              },
+              loggers: [
+                {
+                  name: 'http.server.response',
+                  appenders: ['rewrite'],
+                  level: 'debug',
+                },
+              ],
+            },
+            plugins: {
+              initialize: false,
+            },
+          });
           const { http } = await root.setup();
 
           http.createRouter('/').post(
@@ -283,7 +318,40 @@ describe('request logging', () => {
           expect(JSON.parse(meta).http.request.headers.authorization).toBe('[REDACTED]');
         });
 
-        it('filters sensitive response headers', async () => {
+        it('filters sensitive response headers when RewriteAppender is configured', async () => {
+          root = kbnTestServer.createRoot({
+            logging: {
+              silent: true,
+              appenders: {
+                'test-console': {
+                  type: 'console',
+                  layout: {
+                    type: 'pattern',
+                    pattern: '%level|%logger|%message|%meta',
+                  },
+                },
+                rewrite: {
+                  type: 'rewrite',
+                  appenders: ['test-console'],
+                  policy: {
+                    type: 'meta',
+                    mode: 'update',
+                    properties: [{ path: 'http.response.headers.set-cookie', value: '[REDACTED]' }],
+                  },
+                },
+              },
+              loggers: [
+                {
+                  name: 'http.server.response',
+                  appenders: ['rewrite'],
+                  level: 'debug',
+                },
+              ],
+            },
+            plugins: {
+              initialize: false,
+            },
+          });
           const { http } = await root.setup();
 
           http.createRouter('/').post(

@@ -19,21 +19,7 @@ export { RewritePolicy };
  */
 export type RewritePolicyConfig = MetaRewritePolicyConfig;
 
-const REDACTED_HEADER_TEXT = '[REDACTED]';
-
-const defaultPolicy: MetaRewritePolicyConfig = {
-  type: 'meta',
-  mode: 'update',
-  properties: [
-    { path: 'http.request.headers.authorization', value: REDACTED_HEADER_TEXT },
-    { path: 'http.request.headers.cookie', value: REDACTED_HEADER_TEXT },
-    { path: 'http.response.headers.set-cookie', value: REDACTED_HEADER_TEXT },
-  ],
-};
-
-export const rewritePolicyConfigSchema = schema.oneOf([metaRewritePolicyConfigSchema], {
-  defaultValue: defaultPolicy,
-});
+export const rewritePolicyConfigSchema = schema.oneOf([metaRewritePolicyConfigSchema]);
 
 export const createRewritePolicy = (config: RewritePolicyConfig): RewritePolicy => {
   switch (config.type) {

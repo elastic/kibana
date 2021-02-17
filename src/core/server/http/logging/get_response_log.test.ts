@@ -148,54 +148,6 @@ describe('getEcsResponseLog', () => {
     expect(result.http.response.status_code).toBe(400);
   });
 
-  describe('filters sensitive headers', () => {
-    test('redacts Authorization and Cookie headers by default', () => {
-      const req = createMockHapiRequest({
-        headers: { authorization: 'a', cookie: 'b', 'user-agent': 'hi' },
-        response: { headers: { 'content-length': 123, 'set-cookie': 'c' } },
-      });
-      const result = getEcsResponseLog(req, logger);
-      expect(result.http.request.headers).toMatchInlineSnapshot(`
-        Object {
-          "authorization": "[REDACTED]",
-          "cookie": "[REDACTED]",
-          "user-agent": "hi",
-        }
-      `);
-      expect(result.http.response.headers).toMatchInlineSnapshot(`
-        Object {
-          "content-length": 123,
-          "set-cookie": "[REDACTED]",
-        }
-      `);
-    });
-
-    test('does not mutate original headers', () => {
-      const reqHeaders = { authorization: 'a', cookie: 'b', 'user-agent': 'hi' };
-      const resHeaders = { headers: { 'content-length': 123, 'set-cookie': 'c' } };
-      const req = createMockHapiRequest({
-        headers: reqHeaders,
-        response: { headers: resHeaders },
-      });
-      getEcsResponseLog(req, logger);
-      expect(reqHeaders).toMatchInlineSnapshot(`
-        Object {
-          "authorization": "a",
-          "cookie": "b",
-          "user-agent": "hi",
-        }
-      `);
-      expect(resHeaders).toMatchInlineSnapshot(`
-        Object {
-          "headers": Object {
-            "content-length": 123,
-            "set-cookie": "c",
-          },
-        }
-      `);
-    });
-  });
-
   describe('ecs', () => {
     test('specifies correct ECS version', () => {
       const req = createMockHapiRequest();
