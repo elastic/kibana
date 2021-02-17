@@ -89,7 +89,7 @@ image::images/visualization-journey.png[User data analysis journey]
 [cols=2*]
 |===
 
-| *1.*
+| *1*
 | *Add data.* The best way to add {es} data to {kib} is to use one of our guided processes,
 available from the <<kibana-home-page,home page>>. You can collect data from an app or service, upload a
 file, or add a sample data set.
