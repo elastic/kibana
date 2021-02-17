@@ -26,6 +26,11 @@ const loadPageAsReadOnlyUser = (url: string) => {
   waitForPageTitleToBeShown();
 };
 
+const loadPageAsPlatformEngineer = (url: string) => {
+  waitForPageWithoutDateRange(url, ROLES.platform_engineer);
+  waitForPageTitleToBeShown();
+};
+
 const reloadPage = () => {
   cy.reload();
   waitForPageTitleToBeShown();
@@ -35,10 +40,9 @@ const waitForPageTitleToBeShown = () => {
   cy.get(PAGE_TITLE).should('be.visible');
 };
 
-describe('Detections > Callouts indicating read-only access to resources', () => {
+describe('Detections > Callouts', () => {
   const ALERTS_CALLOUT = 'read-only-access-to-alerts';
   const RULES_CALLOUT = 'read-only-access-to-rules';
-  const NEED_ADMIN_FOR_UPDATE_CALLOUT = 'need-admin-for-update-rules';
 
   before(() => {
     // First, we have to open the app on behalf of a privileged user in order to initialize it.
@@ -51,83 +55,121 @@ describe('Detections > Callouts indicating read-only access to resources', () =>
     login(ROLES.reader);
   });
 
-  context('On Detections home page', () => {
-    beforeEach(() => {
-      loadPageAsReadOnlyUser(DETECTIONS_URL);
-    });
+  context('indicating read-only access to resources', () => {
+    context('On Detections home page', () => {
+      beforeEach(() => {
+        loadPageAsReadOnlyUser(DETECTIONS_URL);
+      });
 
-    it('We show one primary callout', () => {
-      waitForCallOutToBeShown(ALERTS_CALLOUT, 'primary');
-      getCallOut(NEED_ADMIN_FOR_UPDATE_CALLOUT).should('not.exist');
-    });
-
-    context('When a user clicks Dismiss on the callout', () => {
-      it('We hide it and persist the dismissal', () => {
+      it('We show one primary callout', () => {
         waitForCallOutToBeShown(ALERTS_CALLOUT, 'primary');
-        dismissCallOut(ALERTS_CALLOUT);
-        reloadPage();
-        getCallOut(ALERTS_CALLOUT).should('not.exist');
+      });
+
+      context('When a user clicks Dismiss on the callout', () => {
+        it('We hide it and persist the dismissal', () => {
+          waitForCallOutToBeShown(ALERTS_CALLOUT, 'primary');
+          dismissCallOut(ALERTS_CALLOUT);
+          reloadPage();
+          getCallOut(ALERTS_CALLOUT).should('not.exist');
+        });
+      });
+    });
+
+    context('On Rules Management page', () => {
+      beforeEach(() => {
+        loadPageAsReadOnlyUser(DETECTIONS_RULE_MANAGEMENT_URL);
+      });
+
+      it('We show one primary callout', () => {
+        waitForCallOutToBeShown(RULES_CALLOUT, 'primary');
+      });
+
+      context('When a user clicks Dismiss on the callout', () => {
+        it('We hide it and persist the dismissal', () => {
+          waitForCallOutToBeShown(RULES_CALLOUT, 'primary');
+          dismissCallOut(RULES_CALLOUT);
+          reloadPage();
+          getCallOut(RULES_CALLOUT).should('not.exist');
+        });
+      });
+    });
+
+    context('On Rule Details page', () => {
+      beforeEach(() => {
+        createCustomRule(newRule);
+        loadPageAsReadOnlyUser(DETECTIONS_RULE_MANAGEMENT_URL);
+        waitForPageTitleToBeShown();
+        goToRuleDetails();
+      });
+
+      afterEach(() => {
+        deleteCustomRule();
+      });
+
+      it('We show two primary callouts', () => {
+        waitForCallOutToBeShown(ALERTS_CALLOUT, 'primary');
+        waitForCallOutToBeShown(RULES_CALLOUT, 'primary');
+      });
+
+      context('When a user clicks Dismiss on the callouts', () => {
+        it('We hide them and persist the dismissal', () => {
+          waitForCallOutToBeShown(ALERTS_CALLOUT, 'primary');
+          waitForCallOutToBeShown(RULES_CALLOUT, 'primary');
+
+          dismissCallOut(ALERTS_CALLOUT);
+          reloadPage();
+
+          getCallOut(ALERTS_CALLOUT).should('not.exist');
+          getCallOut(RULES_CALLOUT).should('be.visible');
+
+          dismissCallOut(RULES_CALLOUT);
+          reloadPage();
+
+          getCallOut(ALERTS_CALLOUT).should('not.exist');
+          getCallOut(RULES_CALLOUT).should('not.exist');
+        });
       });
     });
   });
 
-  context('On Rules Management page', () => {
-    beforeEach(() => {
-      loadPageAsReadOnlyUser(DETECTIONS_RULE_MANAGEMENT_URL);
-    });
+  context('indicating read-write access to resources', () => {
+    context('On Detections home page', () => {
+      beforeEach(() => {
+        loadPageAsPlatformEngineer(DETECTIONS_URL);
+      });
 
-    it('We show one primary callout', () => {
-      waitForCallOutToBeShown(RULES_CALLOUT, 'primary');
-      getCallOut(NEED_ADMIN_FOR_UPDATE_CALLOUT).should('not.exist');
-    });
-
-    context('When a user clicks Dismiss on the callout', () => {
-      it('We hide it and persist the dismissal', () => {
-        waitForCallOutToBeShown(RULES_CALLOUT, 'primary');
-        dismissCallOut(RULES_CALLOUT);
-        reloadPage();
+      it('We show no callout', () => {
+        getCallOut(ALERTS_CALLOUT).should('not.exist');
         getCallOut(RULES_CALLOUT).should('not.exist');
       });
     });
-  });
 
-  context('On Rule Details page', () => {
-    beforeEach(() => {
-      createCustomRule(newRule);
-      loadPageAsReadOnlyUser(DETECTIONS_RULE_MANAGEMENT_URL);
-      waitForPageTitleToBeShown();
-      goToRuleDetails();
-    });
+    context('On Rules Management page', () => {
+      beforeEach(() => {
+        loadPageAsPlatformEngineer(DETECTIONS_RULE_MANAGEMENT_URL);
+      });
 
-    afterEach(() => {
-      deleteCustomRule();
-    });
-
-    it('We show two primary callouts', () => {
-      waitForCallOutToBeShown(ALERTS_CALLOUT, 'primary');
-      waitForCallOutToBeShown(RULES_CALLOUT, 'primary');
-      getCallOut(NEED_ADMIN_FOR_UPDATE_CALLOUT).should('not.exist');
-    });
-
-    context('When a user clicks Dismiss on the callouts', () => {
-      it('We hide them and persist the dismissal', () => {
-        waitForCallOutToBeShown(ALERTS_CALLOUT, 'primary');
-        waitForCallOutToBeShown(RULES_CALLOUT, 'primary');
-        getCallOut(NEED_ADMIN_FOR_UPDATE_CALLOUT).should('not.exist');
-
-        dismissCallOut(ALERTS_CALLOUT);
-        reloadPage();
-
-        getCallOut(ALERTS_CALLOUT).should('not.exist');
-        getCallOut(RULES_CALLOUT).should('be.visible');
-        getCallOut(NEED_ADMIN_FOR_UPDATE_CALLOUT).should('not.exist');
-
-        dismissCallOut(RULES_CALLOUT);
-        reloadPage();
-
+      it('We show no callout', () => {
         getCallOut(ALERTS_CALLOUT).should('not.exist');
         getCallOut(RULES_CALLOUT).should('not.exist');
-        getCallOut(NEED_ADMIN_FOR_UPDATE_CALLOUT).should('not.exist');
+      });
+    });
+
+    context('On Rule Details page', () => {
+      beforeEach(() => {
+        createCustomRule(newRule);
+        loadPageAsPlatformEngineer(DETECTIONS_RULE_MANAGEMENT_URL);
+        waitForPageTitleToBeShown();
+        goToRuleDetails();
+      });
+
+      afterEach(() => {
+        deleteCustomRule();
+      });
+
+      it('We show no callouts', () => {
+        getCallOut(ALERTS_CALLOUT).should('not.exist');
+        getCallOut(RULES_CALLOUT).should('not.exist');
       });
     });
   });
