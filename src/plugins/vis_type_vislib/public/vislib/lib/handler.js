@@ -27,8 +27,8 @@ const markdownIt = new MarkdownIt({
   linkify: true,
 });
 
-const convertToTimestamp = (dateString) => {
-  return parseInt(moment(dateString).format('x'));
+const convertToTimestamp = (date) => {
+  return parseInt(moment(date).format('x'));
 };
 
 /**
