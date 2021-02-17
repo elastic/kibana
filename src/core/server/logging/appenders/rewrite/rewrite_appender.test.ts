@@ -118,7 +118,7 @@ describe('RewriteAppender', () => {
       expect(appenderMocks.get('mock2')!.append).toHaveBeenCalledWith(log2);
     });
 
-    it('calls `transform` on the configured policy', () => {
+    it('calls `rewrite` on the configured policy', () => {
       const config = createConfig(['mock1']);
       const appenderMocks = new Map([createAppenderMock('mock1')]);
 
@@ -130,13 +130,13 @@ describe('RewriteAppender', () => {
 
       appender.append(log1);
 
-      expect(policy.transform).toHaveBeenCalledTimes(1);
-      expect(policy.transform.mock.calls).toEqual([[log1]]);
+      expect(policy.rewrite).toHaveBeenCalledTimes(1);
+      expect(policy.rewrite.mock.calls).toEqual([[log1]]);
 
       appender.append(log2);
 
-      expect(policy.transform).toHaveBeenCalledTimes(2);
-      expect(policy.transform.mock.calls).toEqual([[log1], [log2]]);
+      expect(policy.rewrite).toHaveBeenCalledTimes(2);
+      expect(policy.rewrite.mock.calls).toEqual([[log1], [log2]]);
     });
 
     it('throws if an appender key cannot be found', () => {

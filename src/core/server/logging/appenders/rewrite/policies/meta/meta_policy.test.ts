@@ -28,7 +28,7 @@ describe('MetaRewritePolicy', () => {
     it('adds new properties to LogMeta', () => {
       const policy = createPolicy('add', [{ path: 'foo', value: 'bar' }]);
       const log = createLogRecord();
-      expect(policy.transform(log).meta).toMatchInlineSnapshot(`
+      expect(policy.rewrite(log).meta).toMatchInlineSnapshot(`
         Object {
           "foo": "bar",
         }
@@ -41,7 +41,7 @@ describe('MetaRewritePolicy', () => {
         { path: 'a.c[1]', value: 'bar' },
       ]);
       const log = createLogRecord();
-      expect(policy.transform(log).meta).toMatchInlineSnapshot(`
+      expect(policy.rewrite(log).meta).toMatchInlineSnapshot(`
         Object {
           "a": Object {
             "b": "foo",
@@ -62,7 +62,7 @@ describe('MetaRewritePolicy', () => {
         { path: 'string', value: 'hi' },
       ]);
       const log = createLogRecord();
-      expect(policy.transform(log).meta).toMatchInlineSnapshot(`
+      expect(policy.rewrite(log).meta).toMatchInlineSnapshot(`
         Object {
           "boolean": false,
           "null": null,
@@ -78,7 +78,7 @@ describe('MetaRewritePolicy', () => {
         { path: 'a.c', value: 'bar' },
       ]);
       const log = createLogRecord({ a: { b: 'existing meta' } });
-      const { meta } = policy.transform(log);
+      const { meta } = policy.rewrite(log);
       expect(meta!.a.b).toBe('existing meta');
       expect(meta!.a.c).toBe('bar');
     });
@@ -86,8 +86,8 @@ describe('MetaRewritePolicy', () => {
     it('does not touch anything outside of LogMeta', () => {
       const policy = createPolicy('add', [{ path: 'foo', value: 'bar' }]);
       const message = Symbol();
-      expect(policy.transform(({ message } as unknown) as LogRecord).message).toBe(message);
-      expect(policy.transform(({ message } as unknown) as LogRecord)).toMatchInlineSnapshot(`
+      expect(policy.rewrite(({ message } as unknown) as LogRecord).message).toBe(message);
+      expect(policy.rewrite(({ message } as unknown) as LogRecord)).toMatchInlineSnapshot(`
         Object {
           "message": Symbol(),
           "meta": Object {
@@ -102,7 +102,7 @@ describe('MetaRewritePolicy', () => {
     it('updates existing properties in LogMeta', () => {
       const log = createLogRecord({ a: 'before' });
       const policy = createPolicy('update', [{ path: 'a', value: 'after' }]);
-      expect(policy.transform(log).meta!.a).toBe('after');
+      expect(policy.rewrite(log).meta!.a).toBe('after');
     });
 
     it('updates nested properties in LogMeta', () => {
@@ -112,7 +112,7 @@ describe('MetaRewritePolicy', () => {
         { path: 'b.c', value: 'after b.c' },
         { path: 'd[1]', value: 2 },
       ]);
-      expect(policy.transform(log).meta).toMatchInlineSnapshot(`
+      expect(policy.rewrite(log).meta).toMatchInlineSnapshot(`
         Object {
           "a": "after a",
           "b": Object {
@@ -139,7 +139,7 @@ describe('MetaRewritePolicy', () => {
         c: 'c',
         d: 'd',
       });
-      expect(policy.transform(log).meta).toMatchInlineSnapshot(`
+      expect(policy.rewrite(log).meta).toMatchInlineSnapshot(`
         Object {
           "a": false,
           "b": null,
@@ -155,7 +155,7 @@ describe('MetaRewritePolicy', () => {
         { path: 'a.c', value: 'bar' },
       ]);
       const log = createLogRecord({ a: { b: 'existing meta' } });
-      const { meta } = policy.transform(log);
+      const { meta } = policy.rewrite(log);
       expect(meta!.a.b).toBe('foo');
       expect(meta!.a.c).toBeUndefined();
     });
@@ -164,9 +164,9 @@ describe('MetaRewritePolicy', () => {
       const policy = createPolicy('update', [{ path: 'a', value: 'bar' }]);
       const message = Symbol();
       expect(
-        policy.transform(({ message, meta: { a: 'foo' } } as unknown) as LogRecord).message
+        policy.rewrite(({ message, meta: { a: 'foo' } } as unknown) as LogRecord).message
       ).toBe(message);
-      expect(policy.transform(({ message, meta: { a: 'foo' } } as unknown) as LogRecord))
+      expect(policy.rewrite(({ message, meta: { a: 'foo' } } as unknown) as LogRecord))
         .toMatchInlineSnapshot(`
         Object {
           "message": Symbol(),
@@ -182,13 +182,13 @@ describe('MetaRewritePolicy', () => {
     it('removes existing properties in LogMeta', () => {
       const log = createLogRecord({ a: 'goodbye' });
       const policy = createPolicy('remove', [{ path: 'a' }]);
-      expect(policy.transform(log).meta!.a).toBeUndefined();
+      expect(policy.rewrite(log).meta!.a).toBeUndefined();
     });
 
     it('removes nested properties in LogMeta', () => {
       const log = createLogRecord({ a: 'a', b: { c: 'b.c' }, d: [0, 1] });
       const policy = createPolicy('remove', [{ path: 'b.c' }, { path: 'd[1]' }]);
-      expect(policy.transform(log).meta).toMatchInlineSnapshot(`
+      expect(policy.rewrite(log).meta).toMatchInlineSnapshot(`
         Object {
           "a": "a",
           "b": Object {},
@@ -203,7 +203,7 @@ describe('MetaRewritePolicy', () => {
     it('has no effect if property does not exist', () => {
       const log = createLogRecord({ a: 'a' });
       const policy = createPolicy('remove', [{ path: 'b' }]);
-      expect(policy.transform(log).meta).toMatchInlineSnapshot(`
+      expect(policy.rewrite(log).meta).toMatchInlineSnapshot(`
         Object {
           "a": "a",
         }
@@ -214,9 +214,9 @@ describe('MetaRewritePolicy', () => {
       const policy = createPolicy('remove', [{ path: 'a' }]);
       const message = Symbol();
       expect(
-        policy.transform(({ message, meta: { a: 'foo' } } as unknown) as LogRecord).message
+        policy.rewrite(({ message, meta: { a: 'foo' } } as unknown) as LogRecord).message
       ).toBe(message);
-      expect(policy.transform(({ message, meta: { a: 'foo' } } as unknown) as LogRecord))
+      expect(policy.rewrite(({ message, meta: { a: 'foo' } } as unknown) as LogRecord))
         .toMatchInlineSnapshot(`
         Object {
           "message": Symbol(),

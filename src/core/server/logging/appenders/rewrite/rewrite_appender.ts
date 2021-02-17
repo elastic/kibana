@@ -52,7 +52,7 @@ export class RewriteAppender implements DisposableAppender {
    * @param record `LogRecord` instance to be logged.
    */
   public append(record: LogRecord) {
-    const transformedRecord = this.policy.transform(record);
+    const rewriteedRecord = this.policy.rewrite(record);
     this.config.appenders.forEach((appenderName) => {
       const appender = this.appenders.get(appenderName);
       if (!appender) {
@@ -61,7 +61,7 @@ export class RewriteAppender implements DisposableAppender {
             'Be sure `appender.update()` is called before `appender.append()`.'
         );
       }
-      appender.append(transformedRecord);
+      appender.append(rewriteedRecord);
     });
   }
 

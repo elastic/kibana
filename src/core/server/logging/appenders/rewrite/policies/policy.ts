@@ -9,11 +9,11 @@
 import { LogRecord } from '@kbn/logging';
 
 /**
- * A policy used to determine how to transform the provided {@link LogRecord}.
+ * A policy used to determine how to rewrite the provided {@link LogRecord}.
  */
 export interface RewritePolicy {
   /**
    * Transforms a {@link LogRecord} based on the policy's configuration.
    **/
-  transform(record: LogRecord): LogRecord;
+  rewrite(record: LogRecord): LogRecord;
 }

@@ -10,7 +10,7 @@ import type { RewritePolicy } from './policies/policy';
 
 const createPolicyMock = () => {
   const mock: jest.Mocked<RewritePolicy> = {
-    transform: jest.fn((x) => x),
+    rewrite: jest.fn((x) => x),
   };
   return mock;
 };

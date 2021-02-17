@@ -61,7 +61,7 @@ export const metaRewritePolicyConfigSchema = schema.object({
 export class MetaRewritePolicy implements RewritePolicy {
   constructor(private readonly config: MetaRewritePolicyConfig) {}
 
-  transform(record: LogRecord): LogRecord {
+  rewrite(record: LogRecord): LogRecord {
     switch (this.config.mode) {
       case 'add':
         return this.add(record);
