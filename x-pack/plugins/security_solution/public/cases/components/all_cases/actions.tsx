@@ -9,7 +9,7 @@ import { Dispatch } from 'react';
 import { DefaultItemIconButtonAction } from '@elastic/eui/src/components/basic_table/action_types';
 
 import { CaseStatuses } from '../../../../../case/common/api';
-import { Case } from '../../containers/types';
+import { Case, SubCase } from '../../containers/types';
 import { UpdateCase } from '../../containers/use_get_cases';
 import * as i18n from './translations';
 
@@ -19,7 +19,7 @@ interface GetActions {
   deleteCaseOnClick: (deleteCase: Case) => void;
 }
 
-const hasSubCases = (subCases: Case[] | null | undefined) =>
+const hasSubCases = (subCases: SubCase[] | null | undefined) =>
   subCases != null && subCases?.length > 0;
 
 export const getActions = ({

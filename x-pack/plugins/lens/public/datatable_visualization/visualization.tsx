@@ -23,6 +23,7 @@ export interface ColumnState {
   columnId: string;
   width?: number;
   hidden?: boolean;
+  alignment?: 'left' | 'right' | 'center';
 }
 
 export interface SortingState {
@@ -264,6 +265,7 @@ export const datatableVisualization: Visualization<DatatableVisualizationState> 
                     columnId: [column.columnId],
                     hidden: typeof column.hidden === 'undefined' ? [] : [column.hidden],
                     width: typeof column.width === 'undefined' ? [] : [column.width],
+                    alignment: typeof column.alignment === 'undefined' ? [] : [column.alignment],
                   },
                 },
               ],

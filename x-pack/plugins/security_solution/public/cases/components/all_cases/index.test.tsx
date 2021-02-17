@@ -545,6 +545,7 @@ describe('AllCases', () => {
         },
         id: '1',
         status: 'open',
+        subCaseIds: [],
         tags: ['coke', 'pepsi'],
         title: 'Another horrible breach!!',
         totalAlerts: 0,

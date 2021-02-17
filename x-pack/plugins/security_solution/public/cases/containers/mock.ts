@@ -100,6 +100,7 @@ export const basicCase: Case = {
   settings: {
     syncAlerts: true,
   },
+  subCaseIds: [],
 };
 
 export const basicCasePost: Case = {

@@ -60,30 +60,31 @@ interface BasicCase {
   closedAt: string | null;
   closedBy: ElasticUser | null;
   comments: Comment[];
-  connector: CaseConnector;
   createdAt: string;
   createdBy: ElasticUser;
-  description: string;
-  externalService: CaseExternalService | null;
   status: CaseStatuses;
-  tags: string[];
   title: string;
   totalAlerts: number;
   totalComment: number;
-  type: CaseType;
   updatedAt: string | null;
   updatedBy: ElasticUser | null;
   version: string;
-  settings: CaseAttributes['settings'];
 }
 
 export interface SubCase extends BasicCase {
-  caseParentId: string;
   associationType: AssociationType;
+  caseParentId: string;
 }
 
 export interface Case extends BasicCase {
+  connector: CaseConnector;
+  description: string;
+  externalService: CaseExternalService | null;
   subCases?: SubCase[] | null;
+  subCaseIds: string[];
+  settings: CaseAttributes['settings'];
+  tags: string[];
+  type: CaseType;
 }
 
 export interface QueryParams {

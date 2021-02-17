@@ -77,6 +77,7 @@ export const initialData: Case = {
   updatedAt: null,
   updatedBy: null,
   version: '',
+  subCaseIds: [],
   settings: {
     syncAlerts: true,
   },
@@ -126,7 +127,8 @@ export const useGetCase = (caseId: string, subCaseId?: string): UseGetCase => {
     abortCtrl.current.abort();
     abortCtrl.current = new AbortController();
     fetchData();
-  }, [caseId, subCaseId, dispatch, dispatchToaster]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [caseId, subCaseId]);
 
   useEffect(() => {
     callFetch();

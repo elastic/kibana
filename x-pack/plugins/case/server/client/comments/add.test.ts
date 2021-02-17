@@ -98,6 +98,10 @@ describe('addComment', () => {
           "index": "test-index",
           "pushed_at": null,
           "pushed_by": null,
+          "rule": Object {
+            "id": "test-rule1",
+            "name": "test-rule",
+          },
           "type": "alert",
           "updated_at": null,
           "updated_by": null,

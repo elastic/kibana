@@ -3,7 +3,7 @@
 library 'kibana-pipeline-library'
 kibanaLibrary.load() // load from the Jenkins instance
 
-kibanaPipeline(timeoutMinutes: 240) {
+kibanaPipeline(timeoutMinutes: 300) {
   catchErrors {
     def timestamp = new Date(currentBuild.startTimeInMillis).format("yyyy-MM-dd'T'HH:mm:ss'Z'", TimeZone.getTimeZone("UTC"))
     withEnv([
