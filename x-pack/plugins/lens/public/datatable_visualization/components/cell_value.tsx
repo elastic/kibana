@@ -20,14 +20,6 @@ export const createGridCell = (
   const currentAlignment = alignments && alignments[columnId];
   const alignmentClassName = `lnsTableCell--${currentAlignment}`;
 
-  useEffect(() => {
-    setCellProps({
-      style: {
-        textAlign: currentAlignment,
-      },
-    });
-  }, [currentAlignment, setCellProps]);
-
   return (
     <div
       /*
