@@ -1,14 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
   EuiBasicTable,
   EuiLoadingContent,
   EuiProgress,
-  EuiOverlayMask,
   EuiConfirmModal,
   EuiWindowEvent,
 } from '@elastic/eui';
@@ -489,18 +489,16 @@ export const RulesTables = React.memo<RulesTableProps>(
               <EuiLoadingContent data-test-subj="initialLoadingPanelAllRulesTable" lines={10} />
             )}
             {showIdleModal && (
-              <EuiOverlayMask>
-                <EuiConfirmModal
-                  title={i18n.REFRESH_PROMPT_TITLE}
-                  onCancel={handleIdleModalContinue}
-                  onConfirm={handleIdleModalContinue}
-                  confirmButtonText={i18n.REFRESH_PROMPT_CONFIRM}
-                  defaultFocusedButton="confirm"
-                  data-test-subj="allRulesIdleModal"
-                >
-                  <p>{i18n.REFRESH_PROMPT_BODY}</p>
-                </EuiConfirmModal>
-              </EuiOverlayMask>
+              <EuiConfirmModal
+                title={i18n.REFRESH_PROMPT_TITLE}
+                onCancel={handleIdleModalContinue}
+                onConfirm={handleIdleModalContinue}
+                confirmButtonText={i18n.REFRESH_PROMPT_CONFIRM}
+                defaultFocusedButton="confirm"
+                data-test-subj="allRulesIdleModal"
+              >
+                <p>{i18n.REFRESH_PROMPT_BODY}</p>
+              </EuiConfirmModal>
             )}
             {shouldShowRulesTable && (
               <>

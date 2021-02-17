@@ -1,11 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import fetch, { Response } from 'node-fetch';
 import querystring from 'querystring';
+
 import {
   RequestHandler,
   RequestHandlerContext,
@@ -13,8 +15,9 @@ import {
   KibanaResponseFactory,
   Logger,
 } from 'src/core/server';
-import { ConfigType } from '../index';
+
 import { JSON_HEADER, READ_ONLY_MODE_HEADER } from '../../common/constants';
+import { ConfigType } from '../index';
 
 interface ConstructorDependencies {
   config: ConfigType;

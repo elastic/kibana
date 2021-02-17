@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { ESFilter } from '../../../../../../typings/elasticsearch';
@@ -10,7 +11,7 @@ import { getEnvironmentUiFilterES } from './get_environment_ui_filter_es';
 import {
   localUIFilters,
   localUIFilterNames,
-} from '../../ui_filters/local_ui_filters/config';
+} from '../../rum_client/ui_filters/local_ui_filters/config';
 import { esKuery } from '../../../../../../../src/plugins/data/server';
 
 export function getEsFilter(uiFilters: UIFilters) {

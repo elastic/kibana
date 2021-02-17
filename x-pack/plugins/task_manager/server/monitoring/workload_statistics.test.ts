@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { first, take, bufferCount } from 'rxjs/operators';
@@ -774,6 +775,125 @@ describe('padBuckets', () => {
         },
       })
     ).toEqual([0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
+  });
+
+  test('supports histogram buckets that begin in the past when tasks are overdue', async () => {
+    expect(
+      padBuckets(20, 3000, {
+        key: '2021-02-02T10:08:32.161Z-2021-02-02T10:09:32.161Z',
+        from: 1612260512161,
+        from_as_string: '2021-02-02T10:08:32.161Z',
+        to: 1612260572161,
+        to_as_string: '2021-02-02T10:09:32.161Z',
+        doc_count: 2,
+        histogram: {
+          buckets: [
+            {
+              key_as_string: '2021-02-02T10:08:30.000Z',
+              key: 1612260510000,
+              doc_count: 1,
+              interval: {
+                doc_count_error_upper_bound: 0,
+                sum_other_doc_count: 0,
+                buckets: [
+                  {
+                    key: '2s',
+                    doc_count: 1,
+                  },
+                ],
+              },
+            },
+            {
+              key_as_string: '2021-02-02T10:08:33.000Z',
+              key: 1612260513000,
+              doc_count: 0,
+              interval: {
+                doc_count_error_upper_bound: 0,
+                sum_other_doc_count: 0,
+                buckets: [],
+              },
+            },
+            {
+              key_as_string: '2021-02-02T10:08:36.000Z',
+              key: 1612260516000,
+              doc_count: 0,
+              interval: {
+                doc_count_error_upper_bound: 0,
+                sum_other_doc_count: 0,
+                buckets: [],
+              },
+            },
+            {
+              key_as_string: '2021-02-02T10:08:39.000Z',
+              key: 1612260519000,
+              doc_count: 0,
+              interval: {
+                doc_count_error_upper_bound: 0,
+                sum_other_doc_count: 0,
+                buckets: [],
+              },
+            },
+            {
+              key_as_string: '2021-02-02T10:08:42.000Z',
+              key: 1612260522000,
+              doc_count: 0,
+              interval: {
+                doc_count_error_upper_bound: 0,
+                sum_other_doc_count: 0,
+                buckets: [],
+              },
+            },
+            {
+              key_as_string: '2021-02-02T10:08:45.000Z',
+              key: 1612260525000,
+              doc_count: 0,
+              interval: {
+                doc_count_error_upper_bound: 0,
+                sum_other_doc_count: 0,
+                buckets: [],
+              },
+            },
+            {
+              key_as_string: '2021-02-02T10:08:48.000Z',
+              key: 1612260528000,
+              doc_count: 0,
+              interval: {
+                doc_count_error_upper_bound: 0,
+                sum_other_doc_count: 0,
+                buckets: [],
+              },
+            },
+            {
+              key_as_string: '2021-02-02T10:08:51.000Z',
+              key: 1612260531000,
+              doc_count: 0,
+              interval: {
+                doc_count_error_upper_bound: 0,
+                sum_other_doc_count: 0,
+                buckets: [],
+              },
+            },
+            {
+              key_as_string: '2021-02-02T10:08:54.000Z',
+              key: 1612260534000,
+              doc_count: 1,
+              interval: {
+                doc_count_error_upper_bound: 0,
+                sum_other_doc_count: 0,
+                buckets: [
+                  {
+                    key: '60s',
+                    doc_count: 1,
+                  },
+                ],
+              },
+            },
+          ],
+        },
+      }).length
+      // we need to ensure overdue buckets don't cause us to over pad the timeline by adding additional
+      // buckets before and after the reported timeline
+    ).toEqual(20);
   });
 });
 

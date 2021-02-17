@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import './space_result.scss';
@@ -14,7 +15,6 @@ import {
   EuiSpacer,
   EuiLoadingSpinner,
 } from '@elastic/eui';
-import { SavedObjectsManagementRecord } from '../../../../../../src/plugins/saved_objects_management/public';
 import { Space } from '../../../../../../src/plugins/spaces_oss/common';
 import { SummarizedCopyToSpaceResult } from '../index';
 import { SpaceAvatar } from '../../space_avatar';
@@ -23,7 +23,6 @@ import { SpaceCopyResultDetails } from './space_result_details';
 import { ImportRetry } from '../types';
 
 interface Props {
-  savedObject: SavedObjectsManagementRecord;
   space: Space;
   summarizedCopyResult: SummarizedCopyToSpaceResult;
   retries: ImportRetry[];
@@ -70,7 +69,6 @@ export const SpaceResult = (props: Props) => {
     summarizedCopyResult,
     retries,
     onRetriesChange,
-    savedObject,
     conflictResolutionInProgress,
   } = props;
   const { objects } = summarizedCopyResult;
@@ -108,7 +106,6 @@ export const SpaceResult = (props: Props) => {
     >
       <EuiSpacer size="s" />
       <SpaceCopyResultDetails
-        savedObject={savedObject}
         summarizedCopyResult={summarizedCopyResult}
         space={space}
         retries={retries}

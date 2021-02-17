@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { IRouter, Logger, CoreSetup } from 'kibana/server';
@@ -18,6 +18,7 @@ import getNamespacesSettings from '../lib/get_namespaced_settings';
 import getTlConfig from '../handlers/lib/tl_config';
 import { TimelionFunctionInterface } from '../types';
 import { ConfigManager } from '../lib/config_manager';
+import { TimelionPluginStartDeps } from '../plugin';
 
 const timelionDefaults = getNamespacesSettings();
 
@@ -32,7 +33,7 @@ export function runRoute(
     logger: Logger;
     getFunction: (name: string) => TimelionFunctionInterface;
     configManager: ConfigManager;
-    core: CoreSetup;
+    core: CoreSetup<TimelionPluginStartDeps>;
   }
 ) {
   router.post(
@@ -77,17 +78,22 @@ export function runRoute(
     },
     router.handleLegacyErrors(async (context, request, response) => {
       try {
+        const [, { data }] = await core.getStartServices();
         const uiSettings = await context.core.uiSettings.client.getAll();
+        const indexPatternsService = await data.indexPatterns.indexPatternsServiceFactory(
+          context.core.savedObjects.client,
+          context.core.elasticsearch.client.asCurrentUser
+        );
 
         const tlConfig = getTlConfig({
           context,
           request,
           settings: _.defaults(uiSettings, timelionDefaults), // Just in case they delete some setting.
           getFunction,
+          getIndexPatternsService: () => indexPatternsService,
           getStartServices: core.getStartServices,
           allowedGraphiteUrls: configManager.getGraphiteUrls(),
           esShardTimeout: configManager.getEsShardTimeout(),
-          savedObjectsClient: context.core.savedObjects.client,
         });
         const chainRunner = chainRunnerFn(tlConfig);
         const sheet = await Bluebird.all(chainRunner.processRequest(request.body));

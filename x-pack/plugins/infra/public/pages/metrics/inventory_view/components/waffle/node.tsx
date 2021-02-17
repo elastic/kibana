@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { darken, readableColor } from 'polished';
@@ -43,7 +44,7 @@ interface Props {
   currentTime: number;
 }
 
-export const Node = class extends React.PureComponent<Props, State> {
+export class Node extends React.PureComponent<Props, State> {
   public readonly state: State = initialState;
   public render() {
     const { nodeType, node, options, squareSize, bounds, formatter, currentTime } = this.props;
@@ -163,7 +164,7 @@ export const Node = class extends React.PureComponent<Props, State> {
       this.setState({ isPopoverOpen: false });
     }
   };
-};
+}
 
 const NodeContainer = euiStyled.div`
   position: relative;

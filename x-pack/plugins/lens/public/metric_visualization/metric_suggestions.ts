@@ -1,11 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { SuggestionRequest, VisualizationSuggestion, TableSuggestion } from '../types';
-import { State } from './types';
+import { MetricState } from './types';
 import { LensIconChartMetric } from '../assets/chart_metric';
 
 /**
@@ -17,7 +18,7 @@ export function getSuggestions({
   table,
   state,
   keptLayerIds,
-}: SuggestionRequest<State>): Array<VisualizationSuggestion<State>> {
+}: SuggestionRequest<MetricState>): Array<VisualizationSuggestion<MetricState>> {
   // We only render metric charts for single-row queries. We require a single, numeric column.
   if (
     table.isMultiRow ||
@@ -37,7 +38,7 @@ export function getSuggestions({
   return [getSuggestion(table)];
 }
 
-function getSuggestion(table: TableSuggestion): VisualizationSuggestion<State> {
+function getSuggestion(table: TableSuggestion): VisualizationSuggestion<MetricState> {
   const col = table.columns[0];
   const title = table.label || col.operation.label;
 

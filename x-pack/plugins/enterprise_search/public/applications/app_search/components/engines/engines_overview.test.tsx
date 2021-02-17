@@ -1,13 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import '../../../__mocks__/shallow_useeffect.mock';
 import { setMockValues, setMockActions, rerender } from '../../../__mocks__';
 
 import React from 'react';
+
 import { shallow, ShallowWrapper } from 'enzyme';
 
 import { LoadingState, EmptyState } from './components';
@@ -73,6 +75,14 @@ describe('EnginesOverview', () => {
 
       expect(wrapper.find(EnginesTable)).toHaveLength(1);
       expect(actions.loadEngines).toHaveBeenCalled();
+    });
+
+    it('renders a create engine button which takes users to the create engine page', () => {
+      const wrapper = shallow(<EnginesOverview />);
+
+      expect(
+        wrapper.find('[data-test-subj="appSearchEnginesEngineCreationButton"]').prop('to')
+      ).toEqual('/engine_creation');
     });
 
     describe('when on a platinum license', () => {

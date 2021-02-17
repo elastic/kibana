@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 // @ts-ignore
@@ -9,13 +10,14 @@ import { compile } from 'vega-lite/build-es5/vega-lite';
 
 import euiThemeLight from '@elastic/eui/dist/eui_theme_light.json';
 
+import { LEGEND_TYPES } from '../vega_chart/common';
+
 import {
   getColorSpec,
   getScatterplotMatrixVegaLiteSpec,
   COLOR_OUTLIER,
   COLOR_RANGE_NOMINAL,
   DEFAULT_COLOR,
-  LEGEND_TYPES,
 } from './scatterplot_matrix_vega_lite_spec';
 
 describe('getColorSpec()', () => {
@@ -163,6 +165,7 @@ describe('getScatterplotMatrixVegaLiteSpec()', () => {
       type: 'nominal',
     });
     expect(vegaLiteSpec.spec.encoding.tooltip).toEqual([
+      { field: 'the-color-field', type: 'nominal' },
       { field: 'x', type: 'quantitative' },
       { field: 'y', type: 'quantitative' },
     ]);

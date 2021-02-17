@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -21,7 +22,6 @@ import useSet from 'react-use/lib/useSet';
 import { TimeRange } from '../../../../../../common/time/time_range';
 import {
   AnomalyType,
-  formatAnomalyScore,
   getFriendlyNameForPartitionId,
   formatOneDecimalPlace,
   isCategoryAnomaly,
@@ -46,7 +46,6 @@ import { LoadingOverlayWrapper } from '../../../../../components/loading_overlay
 interface TableItem {
   id: string;
   dataset: string;
-  datasetName: string;
   anomalyScore: number;
   startTime: number;
   typical: number;
@@ -85,7 +84,6 @@ const datasetColumnName = i18n.translate(
 
 export const AnomaliesTable: React.FunctionComponent<{
   results: LogEntryAnomalies;
-  setTimeRange: (timeRange: TimeRange) => void;
   timeRange: TimeRange;
   changeSortOptions: ChangeSortOptions;
   changePaginationOptions: ChangePaginationOptions;
@@ -98,7 +96,6 @@ export const AnomaliesTable: React.FunctionComponent<{
 }> = ({
   results,
   timeRange,
-  setTimeRange,
   changeSortOptions,
   sortOptions,
   changePaginationOptions,
@@ -121,8 +118,7 @@ export const AnomaliesTable: React.FunctionComponent<{
       return {
         id: anomaly.id,
         dataset: anomaly.dataset,
-        datasetName: getFriendlyNameForPartitionId(anomaly.dataset),
-        anomalyScore: formatAnomalyScore(anomaly.anomalyScore),
+        anomalyScore: anomaly.anomalyScore,
         startTime: anomaly.startTime,
         type: anomaly.type,
         typical: anomaly.typical,
@@ -181,11 +177,12 @@ export const AnomaliesTable: React.FunctionComponent<{
         render: (startTime: number) => moment(startTime).format(dateFormat),
       },
       {
-        field: 'datasetName',
+        field: 'dataset',
         name: datasetColumnName,
         sortable: true,
         truncateText: true,
         width: '200px',
+        render: (dataset: string) => getFriendlyNameForPartitionId(dataset),
       },
       {
         align: RIGHT_ALIGNMENT,

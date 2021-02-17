@@ -1,16 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { isEmpty } from 'lodash';
 import { IAggConfigs } from '../aggs';
 import { tabifyGetColumns } from './get_columns';
 
-import { TabbedResponseWriterOptions, TabbedAggColumn, TabbedAggRow, TabbedTable } from './types';
+import { TabbedResponseWriterOptions, TabbedAggColumn, TabbedAggRow } from './types';
+import { Datatable, DatatableColumn } from '../../../../expressions/common/expression_types/specs';
 
 interface BufferColumn {
   id: string;
@@ -28,19 +29,18 @@ export class TabbedAggResponseWriter {
   metricBuffer: BufferColumn[] = [];
 
   private readonly partialRows: boolean;
+  private readonly params: Partial<TabbedResponseWriterOptions>;
 
   /**
    * @param {AggConfigs} aggs - the agg configs object to which the aggregation response correlates
    * @param {boolean} metricsAtAllLevels - setting to true will produce metrics for every bucket
    * @param {boolean} partialRows - setting to true will not remove rows with missing values
    */
-  constructor(
-    aggs: IAggConfigs,
-    { metricsAtAllLevels = false, partialRows = false }: Partial<TabbedResponseWriterOptions>
-  ) {
-    this.partialRows = partialRows;
+  constructor(aggs: IAggConfigs, params: Partial<TabbedResponseWriterOptions>) {
+    this.partialRows = params.partialRows || false;
+    this.params = params;
 
-    this.columns = tabifyGetColumns(aggs.getResponseAggs(), !metricsAtAllLevels);
+    this.columns = tabifyGetColumns(aggs.getResponseAggs(), !params.metricsAtAllLevels);
     this.rows = [];
   }
 
@@ -65,9 +65,38 @@ export class TabbedAggResponseWriter {
     }
   }
 
-  response(): TabbedTable {
+  response(): Datatable {
     return {
-      columns: this.columns,
+      type: 'datatable',
+      columns: this.columns.map((column) => {
+        const cleanedColumn: DatatableColumn = {
+          id: column.id,
+          name: column.name,
+          meta: {
+            type:
+              column.aggConfig.type.valueType || column.aggConfig.params.field?.type || 'number',
+            field: column.aggConfig.params.field?.name,
+            index: column.aggConfig.getIndexPattern()?.title,
+            params: column.aggConfig.toSerializedFieldFormat(),
+            source: 'esaggs',
+            sourceParams: {
+              indexPatternId: column.aggConfig.getIndexPattern()?.id,
+              appliedTimeRange:
+                column.aggConfig.params.field?.name &&
+                this.params.timeRange &&
+                this.params.timeRange.timeFields &&
+                this.params.timeRange.timeFields.includes(column.aggConfig.params.field?.name)
+                  ? {
+                      from: this.params.timeRange?.from?.toISOString(),
+                      to: this.params.timeRange?.to?.toISOString(),
+                    }
+                  : undefined,
+              ...column.aggConfig.serialize(),
+            },
+          },
+        };
+        return cleanedColumn;
+      }),
       rows: this.rows,
     };
   }

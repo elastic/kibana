@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -121,6 +121,13 @@ export class Execution<
   private readonly firstResultFuture = new Defer<Output | ExpressionValueError>();
 
   /**
+   * Keeping track of any child executions
+   * Needed to cancel child executions in case parent execution is canceled
+   * @private
+   */
+  private readonly childExecutions: Execution[] = [];
+
+  /**
    * Contract is a public representation of `Execution` instances. Contract we
    * can return to other plugins for their consumption.
    */
@@ -203,8 +210,10 @@ export class Execution<
     const chainPromise = this.invokeChain(this.state.get().ast.chain, input);
 
     this.race(chainPromise).then(resolve, (error) => {
-      if (this.abortController.signal.aborted) resolve(createAbortErrorValue());
-      else reject(error);
+      if (this.abortController.signal.aborted) {
+        this.childExecutions.forEach((ex) => ex.cancel());
+        resolve(createAbortErrorValue());
+      } else reject(error);
     });
 
     this.firstResultFuture.promise
@@ -460,6 +469,7 @@ export class Execution<
           ast as ExpressionAstExpression,
           this.execution.params
         );
+        this.childExecutions.push(execution);
         execution.start(input);
         return await execution.result;
       case 'string':

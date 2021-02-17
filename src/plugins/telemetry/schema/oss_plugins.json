@@ -3660,6 +3660,9 @@
             },
             "savedObjects": {
               "properties": {
+                "customIndex": {
+                  "type": "boolean"
+                },
                 "maxImportPayloadBytes": {
                   "type": "long"
                 },
@@ -3702,7 +3705,7 @@
                         "type": "long"
                       },
                       "alias": {
-                        "type": "text"
+                        "type": "keyword"
                       },
                       "primaryStoreSizeBytes": {
                         "type": "long"
@@ -4097,6 +4100,9 @@
         "xpackDashboardMode:roles": {
           "type": "keyword"
         },
+        "securitySolution:ipReputationLinks": {
+          "type": "keyword"
+        },
         "visualize:enableLabs": {
           "type": "boolean"
         },
@@ -4114,9 +4120,6 @@
         },
         "visualization:tileMap:maxPrecision": {
           "type": "long"
-        },
-        "securitySolution:ipReputationLinks": {
-          "type": "keyword"
         },
         "csv:separator": {
           "type": "keyword"
@@ -4380,9 +4383,6 @@
           "type": "boolean"
         },
         "apm:enableServiceOverview": {
-          "type": "boolean"
-        },
-        "apm:enableCorrelations": {
           "type": "boolean"
         }
       }

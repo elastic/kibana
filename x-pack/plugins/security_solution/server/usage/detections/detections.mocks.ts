@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { INTERNAL_IMMUTABLE_KEY } from '../../../common/constants';
 
 export const getMockJobSummaryResponse = () => [
@@ -172,4 +174,131 @@ export const getMockRulesResponse = () => ({
       { _source: { alert: { enabled: false, tags: [`${INTERNAL_IMMUTABLE_KEY}:true`] } } },
     ],
   },
+});
+
+export const getMockMlJobDetailsResponse = () => ({
+  count: 20,
+  jobs: [
+    {
+      job_id: 'high_distinct_count_error_message',
+      job_type: 'anomaly_detector',
+      job_version: '8.0.0',
+      create_time: 1603838214983,
+      finished_time: 1611739871669,
+      model_snapshot_id: '1611740107',
+      custom_settings: {
+        created_by: undefined,
+      },
+      groups: ['cloudtrail', 'security'],
+      description:
+        'Security: Cloudtrail - Looks for a spike in the rate of an error message which may simply indicate an impending service failure but these can also be byproducts of attempted or successful persistence, privilege escalation, defense evasion, discovery, lateral movement, or collection activity by a threat actor.',
+      analysis_config: {
+        bucket_span: '15m',
+        detectors: [
+          {
+            detector_description: 'high_distinct_count("aws.cloudtrail.error_message")',
+            function: 'high_distinct_count',
+            field_name: 'aws.cloudtrail.error_message',
+            detector_index: 0,
+          },
+        ],
+        influencers: ['aws.cloudtrail.user_identity.arn', 'source.ip', 'source.geo.city_name'],
+      },
+      analysis_limits: {
+        model_memory_limit: '16mb',
+        categorization_examples_limit: 4,
+      },
+      data_description: {
+        time_field: '@timestamp',
+        time_format: 'epoch_ms',
+      },
+      model_snapshot_retention_days: 10,
+      daily_model_snapshot_retention_after_days: 1,
+      results_index_name: 'custom-high_distinct_count_error_message',
+    },
+  ],
+});
+
+export const getMockMlJobStatsResponse = () => ({
+  count: 1,
+  jobs: [
+    {
+      job_id: 'high_distinct_count_error_message',
+      data_counts: {
+        job_id: 'high_distinct_count_error_message',
+        processed_record_count: 162,
+        processed_field_count: 476,
+        input_bytes: 45957,
+        input_field_count: 476,
+        invalid_date_count: 0,
+        missing_field_count: 172,
+        out_of_order_timestamp_count: 0,
+        empty_bucket_count: 8590,
+        sparse_bucket_count: 0,
+        bucket_count: 8612,
+        earliest_record_timestamp: 1602648289000,
+        latest_record_timestamp: 1610399348000,
+        last_data_time: 1610470367123,
+        latest_empty_bucket_timestamp: 1610397900000,
+        input_record_count: 162,
+        log_time: 1610470367123,
+      },
+      model_size_stats: {
+        job_id: 'high_distinct_count_error_message',
+        result_type: 'model_size_stats',
+        model_bytes: 72574,
+        peak_model_bytes: 78682,
+        model_bytes_exceeded: 0,
+        model_bytes_memory_limit: 16777216,
+        total_by_field_count: 4,
+        total_over_field_count: 0,
+        total_partition_field_count: 3,
+        bucket_allocation_failures_count: 0,
+        memory_status: 'ok',
+        assignment_memory_basis: 'current_model_bytes',
+        categorized_doc_count: 0,
+        total_category_count: 0,
+        frequent_category_count: 0,
+        rare_category_count: 0,
+        dead_category_count: 0,
+        failed_category_count: 0,
+        categorization_status: 'ok',
+        log_time: 1611740107843,
+        timestamp: 1611738900000,
+      },
+      forecasts_stats: {
+        total: 0,
+        forecasted_jobs: 0,
+      },
+      state: 'closed',
+      timing_stats: {
+        job_id: 'high_distinct_count_error_message',
+        bucket_count: 16236,
+        total_bucket_processing_time_ms: 7957.00000000008,
+        minimum_bucket_processing_time_ms: 0,
+        maximum_bucket_processing_time_ms: 392,
+        average_bucket_processing_time_ms: 0.4900837644740133,
+        exponential_average_bucket_processing_time_ms: 0.23614068552903306,
+        exponential_average_bucket_processing_time_per_hour_ms: 1.5551298175461634,
+      },
+    },
+  ],
+});
+
+export const getMockMlDatafeedStatsResponse = () => ({
+  count: 1,
+  datafeeds: [
+    {
+      datafeed_id: 'datafeed-high_distinct_count_error_message',
+      state: 'stopped',
+      timing_stats: {
+        job_id: 'high_distinct_count_error_message',
+        search_count: 7202,
+        bucket_count: 8612,
+        total_search_time_ms: 3107147,
+        average_search_time_per_bucket_ms: 360.7927310729215,
+        exponential_average_search_time_per_hour_ms: 86145.39799630083,
+      },
+    },
+  ],
 });

@@ -52,6 +52,7 @@ exports[`OverviewPageHeader render 1`] = `
             >
               <EuiButtonEmpty
                 className="kbnOverviewPageHeader__actionButton"
+                data-test-subj="homeAddData"
                 flush="both"
                 href="/app/home#/tutorial_directory"
                 iconType="indexOpen"

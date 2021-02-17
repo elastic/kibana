@@ -1,15 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 export const storybookAliases = {
   apm: 'x-pack/plugins/apm/.storybook',
   canvas: 'x-pack/plugins/canvas/storybook',
   codeeditor: 'src/plugins/kibana_react/public/code_editor/.storybook',
+  url_template_editor: 'src/plugins/kibana_react/public/url_template_editor/.storybook',
   dashboard: 'src/plugins/dashboard/.storybook',
   dashboard_enhanced: 'x-pack/plugins/dashboard_enhanced/.storybook',
   data_enhanced: 'x-pack/plugins/data_enhanced/.storybook',

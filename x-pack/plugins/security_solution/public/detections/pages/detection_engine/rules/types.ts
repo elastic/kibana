@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { RuleAlertAction } from '../../../../../common/detection_engine/types';
@@ -100,6 +101,7 @@ export interface AboutStepRule {
   ruleNameOverride: string;
   tags: string[];
   timestampOverride: string;
+  threatIndicatorPath?: string;
   threat: Threats;
   note: string;
 }
@@ -185,6 +187,7 @@ export interface AboutStepRuleJson {
   rule_name_override?: RuleNameOverride;
   tags: string[];
   threat: Threats;
+  threat_indicator_path?: string;
   timestamp_override?: TimestampOverride;
   note?: string;
 }

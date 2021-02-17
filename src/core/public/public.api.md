@@ -194,6 +194,16 @@ export type AppUpdatableFields = Pick<App, 'status' | 'navLinkStatus' | 'tooltip
 // @public
 export type AppUpdater = (app: App) => Partial<AppUpdatableFields> | undefined;
 
+// @public @deprecated
+export interface AsyncPlugin<TSetup = void, TStart = void, TPluginsSetup extends object = object, TPluginsStart extends object = object> {
+    // (undocumented)
+    setup(core: CoreSetup<TPluginsStart, TStart>, plugins: TPluginsSetup): TSetup | Promise<TSetup>;
+    // (undocumented)
+    start(core: CoreStart, plugins: TPluginsStart): TStart | Promise<TStart>;
+    // (undocumented)
+    stop?(): void;
+}
+
 // @public
 export interface Capabilities {
     [key: string]: Record<string, boolean | Record<string, boolean>>;
@@ -368,9 +378,16 @@ export interface ChromeStart {
     setBreadcrumbs(newBreadcrumbs: ChromeBreadcrumb[]): void;
     setBreadcrumbsAppendExtension(breadcrumbsAppendExtension?: ChromeBreadcrumbsAppendExtension): void;
     setCustomNavLink(newCustomNavLink?: Partial<ChromeNavLink>): void;
+    setHeaderBanner(headerBanner?: ChromeUserBanner): void;
     setHelpExtension(helpExtension?: ChromeHelpExtension): void;
     setHelpSupportUrl(url: string): void;
     setIsVisible(isVisible: boolean): void;
+}
+
+// @public (undocumented)
+export interface ChromeUserBanner {
+    // (undocumented)
+    content: MountPoint<HTMLDivElement>;
 }
 
 // @internal (undocumented)
@@ -474,6 +491,7 @@ export interface DocLinksStart {
             readonly installation: string;
             readonly configuration: string;
             readonly elasticsearchOutput: string;
+            readonly elasticsearchModule: string;
             readonly startup: string;
             readonly exportedFields: string;
         };
@@ -482,6 +500,10 @@ export interface DocLinksStart {
         };
         readonly metricbeat: {
             readonly base: string;
+            readonly configure: string;
+            readonly httpEndpoint: string;
+            readonly install: string;
+            readonly start: string;
         };
         readonly enterpriseSearch: {
             readonly base: string;
@@ -539,7 +561,9 @@ export interface DocLinksStart {
             readonly scriptAggs: string;
             readonly painless: string;
             readonly painlessApi: string;
+            readonly painlessLangSpec: string;
             readonly painlessSyntax: string;
+            readonly painlessWalkthrough: string;
             readonly luceneExpressions: string;
         };
         readonly indexPatterns: {
@@ -575,9 +599,11 @@ export interface DocLinksStart {
             createPipeline: string;
             createTransformRequest: string;
             executeWatchActionModes: string;
+            indexExists: string;
             openIndex: string;
             putComponentTemplate: string;
             painlessExecute: string;
+            painlessExecuteAPIContexts: string;
             putComponentTemplateMetadata: string;
             putWatch: string;
             updateTransform: string;
@@ -953,6 +979,8 @@ export interface OverlayModalOpenOptions {
     className?: string;
     // (undocumented)
     closeButtonAriaLabel?: string;
+    // (undocumented)
+    maxWidth?: boolean | number | string;
 }
 
 // @public
@@ -984,15 +1012,15 @@ export { PackageInfo }
 // @public
 export interface Plugin<TSetup = void, TStart = void, TPluginsSetup extends object = object, TPluginsStart extends object = object> {
     // (undocumented)
-    setup(core: CoreSetup<TPluginsStart, TStart>, plugins: TPluginsSetup): TSetup | Promise<TSetup>;
+    setup(core: CoreSetup<TPluginsStart, TStart>, plugins: TPluginsSetup): TSetup;
     // (undocumented)
-    start(core: CoreStart, plugins: TPluginsStart): TStart | Promise<TStart>;
+    start(core: CoreStart, plugins: TPluginsStart): TStart;
     // (undocumented)
     stop?(): void;
 }
 
 // @public
-export type PluginInitializer<TSetup, TStart, TPluginsSetup extends object = object, TPluginsStart extends object = object> = (core: PluginInitializerContext) => Plugin<TSetup, TStart, TPluginsSetup, TPluginsStart>;
+export type PluginInitializer<TSetup, TStart, TPluginsSetup extends object = object, TPluginsStart extends object = object> = (core: PluginInitializerContext) => Plugin<TSetup, TStart, TPluginsSetup, TPluginsStart> | AsyncPlugin<TSetup, TStart, TPluginsSetup, TPluginsStart>;
 
 // @public
 export interface PluginInitializerContext<ConfigSchema extends object = object> {
@@ -1181,9 +1209,13 @@ export interface SavedObjectsFindOptions {
     page?: number;
     // (undocumented)
     perPage?: number;
+    // Warning: (ae-forgotten-export) The symbol "SavedObjectsPitParams" needs to be exported by the entry point index.d.ts
+    // Warning: (ae-unresolved-link) The @link reference could not be resolved: No member was found with name "openPointInTimeForType"
+    pit?: SavedObjectsPitParams;
     preference?: string;
     rootSearchFields?: string[];
     search?: string;
+    searchAfter?: unknown[];
     searchFields?: string[];
     // (undocumented)
     sortField?: string;
@@ -1353,7 +1385,7 @@ export interface SavedObjectsMigrationVersion {
 }
 
 // @public
-export type SavedObjectsNamespaceType = 'single' | 'multiple' | 'agnostic';
+export type SavedObjectsNamespaceType = 'single' | 'multiple' | 'multiple-isolated' | 'agnostic';
 
 // @public (undocumented)
 export interface SavedObjectsStart {
@@ -1503,6 +1535,7 @@ export interface UiSettingsParams<T = unknown> {
     name?: string;
     optionLabels?: Record<string, string>;
     options?: string[];
+    order?: number;
     readonly?: boolean;
     requiresPageReload?: boolean;
     // (undocumented)
@@ -1521,7 +1554,7 @@ export interface UiSettingsState {
 }
 
 // @public
-export type UiSettingsType = 'undefined' | 'json' | 'markdown' | 'number' | 'select' | 'boolean' | 'string' | 'array' | 'image';
+export type UiSettingsType = 'undefined' | 'json' | 'markdown' | 'number' | 'select' | 'boolean' | 'string' | 'array' | 'image' | 'color';
 
 // @public
 export type UnmountCallback = () => void;

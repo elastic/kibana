@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -22,16 +23,19 @@ import {
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const es = getService('es');
+  const esArchiver = getService('esArchiver');
 
   describe('find_statuses', () => {
     beforeEach(async () => {
       await createSignalsIndex(supertest);
+      await esArchiver.load('auditbeat/hosts');
     });
 
     afterEach(async () => {
       await deleteSignalsIndex(supertest);
       await deleteAllAlerts(supertest);
       await deleteAllRulesStatuses(es);
+      await esArchiver.unload('auditbeat/hosts');
     });
 
     it('should return an empty find statuses body correctly if no statuses are loaded', async () => {

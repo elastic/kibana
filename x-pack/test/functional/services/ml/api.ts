@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import expect from '@kbn/expect';
 import { ProvidedType } from '@kbn/test/types/ftr';
 import { IndexDocumentParams } from 'elasticsearch';
@@ -38,6 +40,7 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
   const retry = getService('retry');
   const esSupertest = getService('esSupertest');
   const kbnSupertest = getService('supertest');
+  const esDeleteAllIndices = getService('esDeleteAllIndices');
 
   return {
     async hasJobResults(jobId: string): Promise<boolean> {
@@ -163,7 +166,7 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
     },
 
     async cleanMlIndices() {
-      await this.deleteIndices('.ml-*');
+      await esDeleteAllIndices('.ml-*');
     },
 
     async getJobState(jobId: string): Promise<JOB_STATE> {

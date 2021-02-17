@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { KibanaContext } from '../../data/public';
@@ -48,6 +48,7 @@ export const metricsRequestHandler = async ({
       });
 
     try {
+      const searchSessionOptions = dataSearch.session.getSearchOptions(searchSessionId);
       return await getCoreStart().http.post(ROUTES.VIS_DATA, {
         body: JSON.stringify({
           timerange: {
@@ -58,8 +59,8 @@ export const metricsRequestHandler = async ({
           filters: input?.filters,
           panels: [visParams],
           state: uiStateObj,
-          ...(searchSessionId && {
-            searchSession: dataSearch.session.getSearchOptions(searchSessionId),
+          ...(searchSessionOptions && {
+            searchSession: searchSessionOptions,
           }),
         }),
       });

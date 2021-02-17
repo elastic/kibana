@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 // eslint-disable-next-line max-classes-per-file
@@ -23,6 +23,7 @@ import { FormatFactory } from './utils';
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '../kbn_field_types/types';
 import { UI_SETTINGS } from '../constants';
 import { FieldFormatNotFoundError } from '../field_formats';
+import { SerializedFieldFormat } from '../../../expressions/common/types';
 
 export class FieldFormatsRegistry {
   protected fieldFormats: Map<FieldFormatId, FieldFormatInstanceType> = new Map();
@@ -30,7 +31,20 @@ export class FieldFormatsRegistry {
   protected metaParamsOptions: Record<string, any> = {};
   protected getConfig?: FieldFormatsGetConfigFn;
   // overriden on the public contract
-  public deserialize: FormatFactory = () => {
+  public deserialize: FormatFactory = (mapping?: SerializedFieldFormat) => {
+    if (!mapping) {
+      return new (FieldFormat.from(identity))();
+    }
+
+    const { id, params = {} } = mapping;
+    if (id) {
+      const Format = this.getType(id);
+
+      if (Format) {
+        return new Format(params, this.getConfig);
+      }
+    }
+
     return new (FieldFormat.from(identity))();
   };
 

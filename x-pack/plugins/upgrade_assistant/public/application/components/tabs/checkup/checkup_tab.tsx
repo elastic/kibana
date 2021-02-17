@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { find } from 'lodash';
@@ -18,7 +19,6 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { NEXT_MAJOR_VERSION } from '../../../../../common/version';
 import { LoadingErrorBanner } from '../../error_banner';
 import { useAppContext } from '../../../app_context';
 import {
@@ -53,10 +53,12 @@ export const CheckupTab: FunctionComponent<CheckupTabProps> = ({
   const [search, setSearch] = useState<string>('');
   const [currentGroupBy, setCurrentGroupBy] = useState<GroupByOption>(GroupByOption.message);
 
-  const { docLinks } = useAppContext();
+  const { docLinks, kibanaVersionInfo } = useAppContext();
 
   const { DOC_LINK_VERSION, ELASTIC_WEBSITE_URL } = docLinks;
   const esDocBasePath = `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/${DOC_LINK_VERSION}`;
+
+  const { nextMajor } = kibanaVersionInfo;
 
   const changeFilter = (filter: LevelFilterOption) => {
     setCurrentFilter(filter);
@@ -93,13 +95,17 @@ export const CheckupTab: FunctionComponent<CheckupTabProps> = ({
     <>
       <EuiSpacer />
       <EuiText grow={false}>
-        <p>
+        <p
+          data-test-subj={`upgradeAssistant${
+            checkupLabel.charAt(0).toUpperCase() + checkupLabel.slice(1)
+          }TabDetail`}
+        >
           <FormattedMessage
             id="xpack.upgradeAssistant.checkupTab.tabDetail"
             defaultMessage="These {strongCheckupLabel} issues need your attention. Resolve them before upgrading to Elasticsearch {nextEsVersion}."
             values={{
               strongCheckupLabel: <strong>{checkupLabel}</strong>,
-              nextEsVersion: `${NEXT_MAJOR_VERSION}.x`,
+              nextEsVersion: `${nextMajor}.x`,
             }}
           />
         </p>

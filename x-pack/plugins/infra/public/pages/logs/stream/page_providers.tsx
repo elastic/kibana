@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useContext } from 'react';
@@ -11,9 +12,9 @@ import { LogViewConfiguration } from '../../../containers/logs/log_view_configur
 import { LogHighlightsState } from '../../../containers/logs/log_highlights/log_highlights';
 import { LogPositionState, WithLogPositionUrlState } from '../../../containers/logs/log_position';
 import { LogFilterState, WithLogFilterUrlState } from '../../../containers/logs/log_filter';
-import { LogEntriesState } from '../../../containers/logs/log_entries';
 import { useLogSourceContext } from '../../../containers/logs/log_source';
 import { ViewLogInContext } from '../../../containers/logs/view_log_in_context';
+import { LogStreamProvider, useLogStreamContext } from '../../../containers/logs/log_stream';
 
 const LogFilterStateProvider: React.FC = ({ children }) => {
   const { derivedIndexPattern } = useLogSourceContext();
@@ -46,35 +47,22 @@ const ViewLogInContextProvider: React.FC = ({ children }) => {
 
 const LogEntriesStateProvider: React.FC = ({ children }) => {
   const { sourceId } = useLogSourceContext();
-  const {
-    startTimestamp,
-    endTimestamp,
-    timestampsLastUpdate,
-    targetPosition,
-    pagesBeforeStart,
-    pagesAfterEnd,
-    isStreaming,
-    jumpToTargetPosition,
-    isInitialized,
-  } = useContext(LogPositionState.Context);
-  const { filterQuery } = useContext(LogFilterState.Context);
+  const { startTimestamp, endTimestamp, targetPosition, isInitialized } = useContext(
+    LogPositionState.Context
+  );
+  const { filterQueryAsKuery } = useContext(LogFilterState.Context);
 
   // Don't render anything if the date range is incorrect.
   if (!startTimestamp || !endTimestamp) {
     return null;
   }
 
-  const entriesProps = {
+  const logStreamProps = {
+    sourceId,
     startTimestamp,
     endTimestamp,
-    timestampsLastUpdate,
-    timeKey: targetPosition,
-    pagesBeforeStart,
-    pagesAfterEnd,
-    filterQuery,
-    sourceId,
-    isStreaming,
-    jumpToTargetPosition,
+    query: filterQueryAsKuery?.expression ?? undefined,
+    center: targetPosition ?? undefined,
   };
 
   // Don't initialize the entries until the position has been fully intialized.
@@ -83,12 +71,12 @@ const LogEntriesStateProvider: React.FC = ({ children }) => {
     return null;
   }
 
-  return <LogEntriesState.Provider {...entriesProps}>{children}</LogEntriesState.Provider>;
+  return <LogStreamProvider {...logStreamProps}>{children}</LogStreamProvider>;
 };
 
 const LogHighlightsStateProvider: React.FC = ({ children }) => {
   const { sourceId, sourceConfiguration } = useLogSourceContext();
-  const [{ topCursor, bottomCursor, centerCursor, entries }] = useContext(LogEntriesState.Context);
+  const { topCursor, bottomCursor, entries } = useLogStreamContext();
   const { filterQuery } = useContext(LogFilterState.Context);
 
   const highlightsProps = {
@@ -96,7 +84,7 @@ const LogHighlightsStateProvider: React.FC = ({ children }) => {
     sourceVersion: sourceConfiguration?.version,
     entriesStart: topCursor,
     entriesEnd: bottomCursor,
-    centerCursor,
+    centerCursor: entries.length > 0 ? entries[Math.floor(entries.length / 2)].cursor : null,
     size: entries.length,
     filterQuery,
   };

@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React, { useState, useEffect } from 'react';
@@ -123,10 +123,13 @@ export const createUseRequestHelpers = (): UseRequestHelpers => {
 
   // Set up successful request helpers.
   sendRequestSpy
-    .withArgs(successRequest.path, {
-      body: JSON.stringify(successRequest.body),
-      query: undefined,
-    })
+    .withArgs(
+      successRequest.path,
+      sinon.match({
+        body: JSON.stringify(successRequest.body),
+        query: undefined,
+      })
+    )
     .resolves(successResponse);
   const setupSuccessRequest = (overrides = {}, requestTimings?: number[]) =>
     setupUseRequest({ ...successRequest, ...overrides }, requestTimings);
@@ -134,10 +137,13 @@ export const createUseRequestHelpers = (): UseRequestHelpers => {
 
   // Set up failed request helpers.
   sendRequestSpy
-    .withArgs(errorRequest.path, {
-      body: JSON.stringify(errorRequest.body),
-      query: undefined,
-    })
+    .withArgs(
+      errorRequest.path,
+      sinon.match({
+        body: JSON.stringify(errorRequest.body),
+        query: undefined,
+      })
+    )
     .rejects(errorResponse);
   const setupErrorRequest = (overrides = {}, requestTimings?: number[]) =>
     setupUseRequest({ ...errorRequest, ...overrides }, requestTimings);
@@ -152,10 +158,13 @@ export const createUseRequestHelpers = (): UseRequestHelpers => {
 
   // Set up failed request helpers with the alternative error shape.
   sendRequestSpy
-    .withArgs(errorWithBodyRequest.path, {
-      body: JSON.stringify(errorWithBodyRequest.body),
-      query: undefined,
-    })
+    .withArgs(
+      errorWithBodyRequest.path,
+      sinon.match({
+        body: JSON.stringify(errorWithBodyRequest.body),
+        query: undefined,
+      })
+    )
     .rejects(errorWithBodyResponse);
   const setupErrorWithBodyRequest = (overrides = {}) =>
     setupUseRequest({ ...errorWithBodyRequest, ...overrides });

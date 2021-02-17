@@ -1,11 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { i18n } from '@kbn/i18n';
+import { withApmSpan } from '../../../../../utils/with_apm_span';
 import {
   METRIC_JAVA_THREAD_COUNT,
   AGENT_NAME,
@@ -48,15 +50,17 @@ export async function getThreadCountChart({
   serviceName: string;
   serviceNodeName?: string;
 }) {
-  return fetchAndTransformMetrics({
-    setup,
-    serviceName,
-    serviceNodeName,
-    chartBase,
-    aggs: {
-      threadCount: { avg: { field: METRIC_JAVA_THREAD_COUNT } },
-      threadCountMax: { max: { field: METRIC_JAVA_THREAD_COUNT } },
-    },
-    additionalFilters: [{ term: { [AGENT_NAME]: 'java' } }],
-  });
+  return withApmSpan('get_thread_count_charts', () =>
+    fetchAndTransformMetrics({
+      setup,
+      serviceName,
+      serviceNodeName,
+      chartBase,
+      aggs: {
+        threadCount: { avg: { field: METRIC_JAVA_THREAD_COUNT } },
+        threadCountMax: { max: { field: METRIC_JAVA_THREAD_COUNT } },
+      },
+      additionalFilters: [{ term: { [AGENT_NAME]: 'java' } }],
+    })
+  );
 }

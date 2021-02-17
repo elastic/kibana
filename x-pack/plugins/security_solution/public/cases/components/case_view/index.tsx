@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
@@ -43,7 +44,7 @@ import {
 } from '../configure_cases/utils';
 import { useQueryAlerts } from '../../../detections/containers/detection_engine/alerts/use_query';
 import { buildAlertsQuery, getRuleIdsFromComments } from './helpers';
-import { EventDetailsFlyout } from '../../../common/components/events_viewer/event_details_flyout';
+import { DetailsPanel } from '../../../timelines/components/side_panel';
 import { useSourcererScope } from '../../../common/containers/sourcerer';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import { TimelineId } from '../../../../common/types/timeline';
@@ -295,8 +296,7 @@ export const CaseComponent = React.memo<CaseProps>(
       connectors,
       updateCase: handleUpdateCase,
       userCanCrud,
-      isValidConnector,
-      alerts,
+      isValidConnector: isLoadingConnectors ? true : isValidConnector,
     });
 
     const onSubmitConnector = useCallback(
@@ -368,9 +368,10 @@ export const CaseComponent = React.memo<CaseProps>(
     const showAlert = useCallback(
       (alertId: string, index: string) => {
         dispatch(
-          timelineActions.toggleExpandedEvent({
+          timelineActions.toggleDetailPanel({
+            panelView: 'eventDetail',
             timelineId: TimelineId.casePage,
-            event: {
+            params: {
               eventId: alertId,
               indexName: index,
             },
@@ -390,13 +391,12 @@ export const CaseComponent = React.memo<CaseProps>(
             id: TimelineId.casePage,
             columns: [],
             indexNames: [],
-            expandedEvent: {},
+            expandedDetail: {},
             show: false,
           })
         );
       }
     }, [dispatch]);
-
     return (
       <>
         <HeaderWrapper>
@@ -501,9 +501,10 @@ export const CaseComponent = React.memo<CaseProps>(
             </EuiFlexGroup>
           </MyWrapper>
         </WhitePageWrapper>
-        <EventDetailsFlyout
+        <DetailsPanel
           browserFields={browserFields}
           docValueFields={docValueFields}
+          isFlyoutView
           timelineId={TimelineId.casePage}
         />
         <SpyRoute state={spyState} pageName={SecurityPageName.case} />

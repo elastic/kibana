@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { PluginInitializerContext, PluginInitializer } from 'kibana/public';
@@ -22,6 +23,7 @@ export { getCoreVitalsComponent, HeaderMenuPortal } from './components/shared/';
 export {
   useTrackPageview,
   useUiTracker,
+  useTrackMetric,
   UiTracker,
   TrackMetricOptions,
   METRIC_TYPE,
@@ -33,3 +35,4 @@ export * from './typings';
 
 export { useChartTheme } from './hooks/use_chart_theme';
 export { useTheme } from './hooks/use_theme';
+export { getApmTraceUrl } from './utils/get_apm_trace_url';

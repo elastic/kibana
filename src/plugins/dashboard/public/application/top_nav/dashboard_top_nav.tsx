@@ -1,12 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
-
-import { EUI_MODAL_CANCEL_BUTTON } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import angular from 'angular';
@@ -31,7 +29,6 @@ import {
 import { NavAction } from '../../types';
 import { DashboardSavedObject } from '../..';
 import { DashboardStateManager } from '../dashboard_state_manager';
-import { leaveConfirmStrings } from '../../dashboard_strings';
 import { saveDashboard } from '../lib';
 import {
   DashboardAppServices,
@@ -46,7 +43,10 @@ import { showOptionsPopover } from './show_options_popover';
 import { TopNavIds } from './top_nav_ids';
 import { ShowShareModal } from './show_share_modal';
 import { PanelToolbar } from './panel_toolbar';
+import { confirmDiscardOrKeepUnsavedChanges } from '../listing/confirm_overlays';
 import { OverlayRef } from '../../../../../core/public';
+import { getNewDashboardTitle, unsavedChangesBadge } from '../../dashboard_strings';
+import { DASHBOARD_PANELS_UNSAVED_ID } from '../lib/dashboard_panel_storage';
 import { DashboardContainer } from '..';
 
 export interface DashboardTopNavState {
@@ -64,6 +64,7 @@ export interface DashboardTopNavProps {
   timefilter: TimefilterContract;
   indexPatterns: IndexPattern[];
   redirectTo: DashboardRedirect;
+  unsavedChanges?: boolean;
   lastDashboardId?: string;
   viewMode: ViewMode;
 }
@@ -72,6 +73,7 @@ export function DashboardTopNav({
   dashboardStateManager,
   dashboardContainer,
   lastDashboardId,
+  unsavedChanges,
   savedDashboard,
   onQuerySubmit,
   embedSettings,
@@ -91,6 +93,8 @@ export function DashboardTopNav({
     setHeaderActionMenu,
     savedObjectsTagging,
     dashboardCapabilities,
+    dashboardPanelStorage,
+    allowByValueEmbeddables,
   } = useKibana<DashboardAppServices>().services;
 
   const [state, setState] = useState<DashboardTopNavState>({ chromeIsVisible: false });
@@ -99,8 +103,16 @@ export function DashboardTopNav({
     const visibleSubscription = chrome.getIsVisible$().subscribe((chromeIsVisible) => {
       setState((s) => ({ ...s, chromeIsVisible }));
     });
+    const { id, title, getFullEditPath } = savedDashboard;
+    if (id || allowByValueEmbeddables) {
+      chrome.recentlyAccessed.add(
+        getFullEditPath(dashboardStateManager.getIsEditMode()),
+        title || getNewDashboardTitle(),
+        id || DASHBOARD_PANELS_UNSAVED_ID
+      );
+    }
     return () => visibleSubscription.unsubscribe();
-  }, [chrome]);
+  }, [chrome, allowByValueEmbeddables, dashboardStateManager, savedDashboard]);
 
   const addFromLibrary = useCallback(() => {
     if (!isErrorEmbeddable(dashboardContainer)) {
@@ -149,15 +161,24 @@ export function DashboardTopNav({
       const isLeavingEditMode = !isPageRefresh && newMode === ViewMode.VIEW;
       const willLoseChanges = isLeavingEditMode && dashboardStateManager.getIsDirty(timefilter);
 
-      if (!willLoseChanges) {
+      function switchViewMode() {
         dashboardStateManager.switchViewMode(newMode);
+        dashboardStateManager.restorePanels();
+
+        if (savedDashboard?.id && allowByValueEmbeddables) {
+          const { getFullEditPath, title, id } = savedDashboard;
+          chrome.recentlyAccessed.add(getFullEditPath(newMode === ViewMode.EDIT), title, id);
+        }
+      }
+
+      if (!willLoseChanges) {
+        switchViewMode();
         return;
       }
 
-      function revertChangesAndExitEditMode() {
+      function discardChanges() {
         dashboardStateManager.resetState();
-        // This is only necessary for new dashboards, which will default to Edit mode.
-        dashboardStateManager.switchViewMode(ViewMode.VIEW);
+        dashboardStateManager.clearUnsavedPanels();
 
         // We need to do a hard reset of the timepicker. appState will not reload like
         // it does on 'open' because it's been saved to the url and the getAppState.previouslyStored() check on
@@ -166,23 +187,26 @@ export function DashboardTopNav({
           dashboardStateManager.syncTimefilterWithDashboardTime(timefilter);
           dashboardStateManager.syncTimefilterWithDashboardRefreshInterval(timefilter);
         }
-        redirectTo({ destination: 'dashboard', id: savedDashboard.id });
+        dashboardStateManager.switchViewMode(ViewMode.VIEW);
       }
-
-      core.overlays
-        .openConfirm(leaveConfirmStrings.getDiscardSubtitle(), {
-          confirmButtonText: leaveConfirmStrings.getConfirmButtonText(),
-          cancelButtonText: leaveConfirmStrings.getCancelButtonText(),
-          defaultFocusedButton: EUI_MODAL_CANCEL_BUTTON,
-          title: leaveConfirmStrings.getDiscardTitle(),
-        })
-        .then((isConfirmed) => {
-          if (isConfirmed) {
-            revertChangesAndExitEditMode();
-          }
-        });
+      confirmDiscardOrKeepUnsavedChanges(core.overlays).then((selection) => {
+        if (selection === 'discard') {
+          discardChanges();
+        }
+        if (selection !== 'cancel') {
+          switchViewMode();
+        }
+      });
     },
-    [redirectTo, timefilter, core.overlays, savedDashboard.id, dashboardStateManager, clearAddPanel]
+    [
+      timefilter,
+      core.overlays,
+      clearAddPanel,
+      savedDashboard,
+      dashboardStateManager,
+      allowByValueEmbeddables,
+      chrome.recentlyAccessed,
+    ]
   );
 
   /**
@@ -210,8 +234,9 @@ export function DashboardTopNav({
               'data-test-subj': 'saveDashboardSuccess',
             });
 
+            dashboardPanelStorage.clearPanels(lastDashboardId);
             if (id !== lastDashboardId) {
-              redirectTo({ destination: 'dashboard', id });
+              redirectTo({ destination: 'dashboard', id, useReplace: !lastDashboardId });
             } else {
               chrome.docTitle.change(dashboardStateManager.savedDashboard.lastSavedTitle);
               dashboardStateManager.switchViewMode(ViewMode.VIEW);
@@ -236,6 +261,7 @@ export function DashboardTopNav({
     [
       core.notifications.toasts,
       dashboardStateManager,
+      dashboardPanelStorage,
       lastDashboardId,
       chrome.docTitle,
       redirectTo,
@@ -316,6 +342,33 @@ export function DashboardTopNav({
     dashboardStateManager,
   ]);
 
+  const runQuickSave = useCallback(async () => {
+    const currentTitle = dashboardStateManager.getTitle();
+    const currentDescription = dashboardStateManager.getDescription();
+    const currentTimeRestore = dashboardStateManager.getTimeRestore();
+
+    let currentTags: string[] = [];
+    if (savedObjectsTagging) {
+      const dashboard = dashboardStateManager.savedDashboard;
+      if (savedObjectsTagging.ui.hasTagDecoration(dashboard)) {
+        currentTags = dashboard.getTags();
+      }
+    }
+
+    save({}).then((response: SaveResult) => {
+      // If the save wasn't successful, put the original values back.
+      if (!(response as { id: string }).id) {
+        dashboardStateManager.setTitle(currentTitle);
+        dashboardStateManager.setDescription(currentDescription);
+        dashboardStateManager.setTimeRestore(currentTimeRestore);
+        if (savedObjectsTagging) {
+          dashboardStateManager.setTags(currentTags);
+        }
+      }
+      return response;
+    });
+  }, [save, savedObjectsTagging, dashboardStateManager]);
+
   const runClone = useCallback(() => {
     const currentTitle = dashboardStateManager.getTitle();
     const onClone = async (
@@ -350,9 +403,8 @@ export function DashboardTopNav({
       [TopNavIds.EXIT_EDIT_MODE]: () => onChangeViewMode(ViewMode.VIEW),
       [TopNavIds.ENTER_EDIT_MODE]: () => onChangeViewMode(ViewMode.EDIT),
       [TopNavIds.SAVE]: runSave,
+      [TopNavIds.QUICK_SAVE]: runQuickSave,
       [TopNavIds.CLONE]: runClone,
-      [TopNavIds.ADD_EXISTING]: addFromLibrary,
-      [TopNavIds.VISUALIZE]: createNew,
       [TopNavIds.OPTIONS]: (anchorElement) => {
         showOptionsPopover({
           anchorElement,
@@ -387,10 +439,9 @@ export function DashboardTopNav({
     dashboardStateManager,
     onChangeViewMode,
     savedDashboard,
-    addFromLibrary,
-    createNew,
     runClone,
     runSave,
+    runQuickSave,
     share,
   ]);
 
@@ -412,13 +463,24 @@ export function DashboardTopNav({
     const showFilterBar = shouldShowFilterBar(Boolean(embedSettings?.forceHideFilterBar));
     const showSearchBar = showQueryBar || showFilterBar;
 
-    const topNav = getTopNavConfig(
-      viewMode,
-      dashboardTopNavActions,
-      dashboardCapabilities.hideWriteControls
-    );
+    const topNav = getTopNavConfig(viewMode, dashboardTopNavActions, {
+      hideWriteControls: dashboardCapabilities.hideWriteControls,
+      isNewDashboard: !savedDashboard.id,
+      isDirty: dashboardStateManager.isDirty,
+    });
+
+    const badges = unsavedChanges
+      ? [
+          {
+            'data-test-subj': 'dashboardUnsavedChangesBadge',
+            badgeText: unsavedChangesBadge.getUnsavedChangedBadgeText(),
+            color: 'secondary',
+          },
+        ]
+      : undefined;
 
     return {
+      badges,
       appName: 'dashboard',
       config: showTopNavMenu ? topNav : undefined,
       className: isFullScreenMode ? 'kbnTopNavMenu-isFullScreen' : undefined,

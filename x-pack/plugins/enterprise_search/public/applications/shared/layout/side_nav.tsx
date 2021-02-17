@@ -1,19 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useContext } from 'react';
 import { useLocation } from 'react-router-dom';
+
 import classNames from 'classnames';
 
-import { i18n } from '@kbn/i18n';
 import { EuiIcon, EuiTitle, EuiText, EuiLink } from '@elastic/eui'; // TODO: Remove EuiLink after full Kibana transition
-import { EuiLinkTo } from '../react_router_helpers';
+import { i18n } from '@kbn/i18n';
 
 import { ENTERPRISE_SEARCH_PLUGIN } from '../../../../common/constants';
 import { stripTrailingSlash } from '../../../../common/strip_slashes';
+import { EuiLinkTo } from '../react_router_helpers';
 
 import { NavContext, INavContext } from './layout';
 

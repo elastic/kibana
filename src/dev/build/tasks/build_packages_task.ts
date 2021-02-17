@@ -1,12 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import { buildProductionProjects } from '@kbn/pm';
+import { buildBazelProductionProjects, buildNonBazelProductionProjects } from '@kbn/pm';
 
 import { mkdirp, Task } from '../lib';
 
@@ -56,11 +56,23 @@ import { mkdirp, Task } from '../lib';
  *   in some way by Kibana itself in production, as it won't otherwise be
  *   included in the production build.
  */
+
+export const BuildBazelPackages: Task = {
+  description: 'Building distributable versions of Bazel packages',
+  async run(config, log, build) {
+    await buildBazelProductionProjects({
+      kibanaRoot: config.resolveFromRepo(),
+      buildRoot: build.resolvePath(),
+      onlyOSS: build.isOss(),
+    });
+  },
+};
+
 export const BuildPackages: Task = {
-  description: 'Building distributable versions of packages',
+  description: 'Building distributable versions of non Bazel packages',
   async run(config, log, build) {
     await mkdirp(config.resolveFromRepo('target'));
-    await buildProductionProjects({
+    await buildNonBazelProductionProjects({
       kibanaRoot: config.resolveFromRepo(),
       buildRoot: build.resolvePath(),
       onlyOSS: build.isOss(),

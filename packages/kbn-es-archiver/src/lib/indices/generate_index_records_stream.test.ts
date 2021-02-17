@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import sinon from 'sinon';
@@ -44,8 +44,8 @@ describe('esArchiver: createGenerateIndexRecordsStream()', () => {
     ]);
 
     const params = (client.indices.get as sinon.SinonSpy).args[0][0];
-    expect(params).toHaveProperty('filterPath');
-    const filters: string[] = params.filterPath;
+    expect(params).toHaveProperty('filter_path');
+    const filters: string[] = params.filter_path;
     expect(filters.some((path) => path.includes('index.creation_date'))).toBe(true);
     expect(filters.some((path) => path.includes('index.uuid'))).toBe(true);
     expect(filters.some((path) => path.includes('index.version'))).toBe(true);

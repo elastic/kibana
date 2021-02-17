@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
@@ -124,6 +125,16 @@ export const taskDefinitionSchema = schema.object(
     maxAttempts: schema.maybe(
       schema.number({
         min: 1,
+      })
+    ),
+    /**
+     * The maximum number tasks of this type that can be run concurrently per Kibana instance.
+     * Setting this value will force Task Manager to poll for this task type seperatly from other task types
+     * which can add significant load to the ES cluster, so please use this configuration only when absolutly necesery.
+     */
+    maxConcurrency: schema.maybe(
+      schema.number({
+        min: 0,
       })
     ),
   },

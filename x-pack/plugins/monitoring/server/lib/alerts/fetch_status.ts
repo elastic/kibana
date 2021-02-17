@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { AlertInstanceState } from '../../../common/types/alerts';
@@ -27,7 +28,7 @@ export async function fetchStatus(
   await Promise.all(
     (alertTypes || ALERTS).map(async (type) => {
       const alert = await AlertsFactory.getByType(type, alertsClient);
-      if (!alert || !alert.isEnabled(licenseService) || !alert.rawAlert) {
+      if (!alert || !alert.rawAlert) {
         return;
       }
 

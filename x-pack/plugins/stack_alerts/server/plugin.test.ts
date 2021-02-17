@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { AlertingBuiltinsPlugin } from './plugin';
@@ -27,7 +28,7 @@ describe('AlertingBuiltins Plugin', () => {
       const featuresSetup = featuresPluginMock.createSetup();
       await plugin.setup(coreSetup, { alerts: alertingSetup, features: featuresSetup });
 
-      expect(alertingSetup.registerType).toHaveBeenCalledTimes(4);
+      expect(alertingSetup.registerType).toHaveBeenCalledTimes(3);
 
       const indexThresholdArgs = alertingSetup.registerType.mock.calls[0][0];
       const testedIndexThresholdArgs = {
@@ -58,16 +59,16 @@ describe('AlertingBuiltins Plugin', () => {
         Object {
           "actionGroups": Array [
             Object {
-              "id": "tracking threshold met",
-              "name": "Tracking threshold met",
+              "id": "Tracked entity contained",
+              "name": "Tracking containment met",
             },
           ],
-          "id": ".geo-threshold",
-          "name": "Tracking threshold",
+          "id": ".geo-containment",
+          "name": "Tracking containment",
         }
       `);
 
-      const esQueryArgs = alertingSetup.registerType.mock.calls[3][0];
+      const esQueryArgs = alertingSetup.registerType.mock.calls[2][0];
       const testedEsQueryArgs = {
         id: esQueryArgs.id,
         name: esQueryArgs.name,

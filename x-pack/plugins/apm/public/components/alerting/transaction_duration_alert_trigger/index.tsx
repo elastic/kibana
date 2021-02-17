@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { map } from 'lodash';
 import React from 'react';
 import { useParams } from 'react-router-dom';
-import { useFetcher } from '../../../../../observability/public';
 import { ForLastExpression } from '../../../../../triggers_actions_ui/public';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import { getDurationFormatter } from '../../../../common/utils/formatters';
@@ -16,7 +17,7 @@ import { TimeSeries } from '../../../../typings/timeseries';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useEnvironmentsFetcher } from '../../../hooks/use_environments_fetcher';
-import { callApmApi } from '../../../services/rest/createCallApmApi';
+import { useFetcher } from '../../../hooks/use_fetcher';
 import {
   getMaxY,
   getResponseTimeTickFormatter,
@@ -88,29 +89,32 @@ export function TransactionDurationAlertTrigger(props: Props) {
     windowUnit,
   } = alertParams;
 
-  const { data } = useFetcher(() => {
-    if (windowSize && windowUnit) {
-      return callApmApi({
-        endpoint: 'GET /api/apm/alerts/chart_preview/transaction_duration',
-        params: {
-          query: {
-            ...getAbsoluteTimeRange(windowSize, windowUnit),
-            aggregationType,
-            environment,
-            serviceName,
-            transactionType: alertParams.transactionType,
+  const { data } = useFetcher(
+    (callApmApi) => {
+      if (windowSize && windowUnit) {
+        return callApmApi({
+          endpoint: 'GET /api/apm/alerts/chart_preview/transaction_duration',
+          params: {
+            query: {
+              ...getAbsoluteTimeRange(windowSize, windowUnit),
+              aggregationType,
+              environment,
+              serviceName,
+              transactionType: alertParams.transactionType,
+            },
           },
-        },
-      });
-    }
-  }, [
-    aggregationType,
-    environment,
-    serviceName,
-    alertParams.transactionType,
-    windowSize,
-    windowUnit,
-  ]);
+        });
+      }
+    },
+    [
+      aggregationType,
+      environment,
+      serviceName,
+      alertParams.transactionType,
+      windowSize,
+      windowUnit,
+    ]
+  );
 
   const maxY = getMaxY([
     { data: data ?? [] } as TimeSeries<{ x: number; y: number | null }>,

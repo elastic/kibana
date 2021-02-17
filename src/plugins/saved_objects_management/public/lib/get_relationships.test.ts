@@ -1,11 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
+import { SavedObjectGetRelationshipsResponse } from '../types';
 import { httpServiceMock } from '../../../../core/public/mocks';
 import { getRelationships } from './get_relationships';
 
@@ -22,13 +23,17 @@ describe('getRelationships', () => {
   });
 
   it('should handle successful responses', async () => {
-    httpMock.get.mockResolvedValue([1, 2]);
+    const serverResponse: SavedObjectGetRelationshipsResponse = {
+      relations: [],
+      invalidRelations: [],
+    };
+    httpMock.get.mockResolvedValue(serverResponse);
 
     const response = await getRelationships(httpMock, 'dashboard', '1', [
       'search',
       'index-pattern',
     ]);
-    expect(response).toEqual([1, 2]);
+    expect(response).toEqual(serverResponse);
   });
 
   it('should handle errors', async () => {

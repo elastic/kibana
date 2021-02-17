@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { http } from '../http_service';
 
 import { basePath } from './index';
-import { ImportResponse } from '../../../../common/types/file_datavisualizer';
+import { ImportResponse } from '../../../../../file_upload/common';
 
 export const fileDatavisualizer = {
   analyzeFile(file: string, params: Record<string, string> = {}) {
@@ -45,7 +46,7 @@ export const fileDatavisualizer = {
     });
 
     return http<ImportResponse>({
-      path: `${basePath()}/file_data_visualizer/import`,
+      path: `/api/file_upload/import`,
       method: 'POST',
       query,
       body,

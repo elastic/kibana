@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import angular from 'angular';
@@ -12,8 +12,8 @@ import 'angular-mocks';
 import 'angular-sanitize';
 import 'angular-route';
 import { createBrowserHistory } from 'history';
-import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
-import hits from 'fixtures/real_hits';
+import FixturesStubbedLogstashIndexPatternProvider from '../../../__fixtures__/stubbed_logstash_index_pattern';
+import hits from '../../../__fixtures__/real_hits';
 import { coreMock } from '../../../../../../core/public/mocks';
 import { dataPluginMock } from '../../../../../data/public/mocks';
 import { navigationPluginMock } from '../../../../../navigation/public/mocks';

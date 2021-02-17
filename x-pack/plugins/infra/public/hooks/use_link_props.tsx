@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { useMemo } from 'react';
@@ -68,9 +69,10 @@ export const useLinkProps = (
 
   const onClick = useMemo(() => {
     return (e: React.MouseEvent | React.MouseEvent<HTMLAnchorElement | HTMLButtonElement>) => {
-      if (e.defaultPrevented || isModifiedEvent(e)) {
+      if (!shouldHandleLinkEvent(e)) {
         return;
       }
+
       e.preventDefault();
 
       const navigate = () => {
@@ -118,3 +120,7 @@ const validateParams = ({ app, pathname, hash, search }: LinkDescriptor) => {
 
 const isModifiedEvent = (event: any) =>
   !!(event.metaKey || event.altKey || event.ctrlKey || event.shiftKey);
+
+export const shouldHandleLinkEvent = (
+  e: React.MouseEvent | React.MouseEvent<HTMLAnchorElement | HTMLButtonElement>
+) => !e.defaultPrevented && !isModifiedEvent(e);

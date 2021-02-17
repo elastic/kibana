@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiButtonEmpty, EuiSpacer, EuiText } from '@elastic/eui';
@@ -12,6 +13,7 @@ import { LinuxEvents, MacEvents, WindowsEvents } from './policy_forms/events';
 import { AdvancedPolicyForms } from './policy_advanced';
 import { AntivirusRegistrationForm } from './components/antivirus_registration_form';
 import { Ransomware } from './policy_forms/protections/ransomware';
+import { LockedPolicyCard } from './policy_forms/locked_card';
 import { useLicense } from '../../../../common/hooks/use_license';
 
 export const PolicyDetailsForm = memo(() => {
@@ -35,7 +37,7 @@ export const PolicyDetailsForm = memo(() => {
       <EuiSpacer size="xs" />
       <MalwareProtections />
       <EuiSpacer size="m" />
-      {isPlatinumPlus && <Ransomware />}
+      {isPlatinumPlus ? <Ransomware /> : <LockedPolicyCard />}
       <EuiSpacer size="l" />
 
       <EuiText size="xs" color="subdued">

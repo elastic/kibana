@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -197,7 +198,9 @@ export const setup = async (arg?: { appServicesContext: Partial<AppServicesConte
     createFormSetValueAction(`${phase}-selectedNodeAttrs`);
 
   const setReplicas = (phase: Phases) => async (value: string) => {
-    await createFormToggleAction(`${phase}-setReplicasSwitch`)(true);
+    if (!exists(`${phase}-selectedReplicaCount`)) {
+      await createFormToggleAction(`${phase}-setReplicasSwitch`)(true);
+    }
     await createFormSetValueAction(`${phase}-selectedReplicaCount`)(value);
   };
 
@@ -234,7 +237,9 @@ export const setup = async (arg?: { appServicesContext: Partial<AppServicesConte
         exists(`${fieldSelector}.searchableSnapshotDisabledDueToLicense`),
       toggleSearchableSnapshot,
       setSearchableSnapshot: async (value: string) => {
-        await toggleSearchableSnapshot(true);
+        if (!exists(`searchableSnapshotField-${phase}.searchableSnapshotCombobox`)) {
+          await toggleSearchableSnapshot(true);
+        }
         act(() => {
           find(`searchableSnapshotField-${phase}.searchableSnapshotCombobox`).simulate('change', [
             { label: value },
@@ -245,11 +250,38 @@ export const setup = async (arg?: { appServicesContext: Partial<AppServicesConte
     };
   };
 
+  const createToggleDeletePhaseActions = () => {
+    const enablePhase = async () => {
+      await act(async () => {
+        find('enableDeletePhaseButton').simulate('click');
+      });
+      component.update();
+    };
+
+    const disablePhase = async () => {
+      await act(async () => {
+        find('disableDeletePhaseButton').simulate('click');
+      });
+      component.update();
+    };
+
+    return {
+      enablePhase,
+      disablePhase,
+    };
+  };
+
+  const hasRolloverTipOnMinAge = (phase: Phases) => (): boolean =>
+    exists(`${phase}-rolloverMinAgeInputIconTip`);
+
   return {
     ...testBed,
     actions: {
+      saveAsNewPolicy: createFormToggleAction('saveAsNewSwitch'),
+      setPolicyName: createFormSetValueAction('policyNameField'),
       setWaitForSnapshotPolicy,
       savePolicy,
+      hasGlobalErrorCallout: () => exists('policyFormErrorsCallout'),
       timeline: {
         hasHotPhase: () => exists('ilmTimelineHotPhase'),
         hasWarmPhase: () => exists('ilmTimelineWarmPhase'),
@@ -262,6 +294,7 @@ export const setup = async (arg?: { appServicesContext: Partial<AppServicesConte
         setMaxAge,
         toggleRollover,
         toggleDefaultRollover,
+        hasErrorIndicator: () => exists('phaseErrorIndicator-hot'),
         ...createForceMergeActions('hot'),
         ...createIndexPriorityActions('hot'),
         ...createShrinkActions('hot'),
@@ -275,6 +308,8 @@ export const setup = async (arg?: { appServicesContext: Partial<AppServicesConte
         setDataAllocation: setDataAllocation('warm'),
         setSelectedNodeAttribute: setSelectedNodeAttribute('warm'),
         setReplicas: setReplicas('warm'),
+        hasErrorIndicator: () => exists('phaseErrorIndicator-warm'),
+        hasRolloverTipOnMinAge: hasRolloverTipOnMinAge('warm'),
         ...createShrinkActions('warm'),
         ...createForceMergeActions('warm'),
         setReadonly: setReadonly('warm'),
@@ -289,11 +324,14 @@ export const setup = async (arg?: { appServicesContext: Partial<AppServicesConte
         setReplicas: setReplicas('cold'),
         setFreeze,
         freezeExists,
+        hasErrorIndicator: () => exists('phaseErrorIndicator-cold'),
+        hasRolloverTipOnMinAge: hasRolloverTipOnMinAge('cold'),
         ...createIndexPriorityActions('cold'),
         ...createSearchableSnapshotActions('cold'),
       },
       delete: {
-        enable: enable('delete'),
+        ...createToggleDeletePhaseActions(),
+        hasRolloverTipOnMinAge: hasRolloverTipOnMinAge('delete'),
         setMinAgeValue: setMinAgeValue('delete'),
         setMinAgeUnits: setMinAgeUnits('delete'),
       },

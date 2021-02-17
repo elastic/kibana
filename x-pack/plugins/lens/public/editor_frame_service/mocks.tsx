@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -53,7 +54,7 @@ export function createMockVisualization(): jest.Mocked<Visualization> {
 
     setDimension: jest.fn(),
     removeDimension: jest.fn(),
-    getErrorMessages: jest.fn((_state, _frame) => undefined),
+    getErrorMessages: jest.fn((_state) => undefined),
   };
 }
 
@@ -87,7 +88,7 @@ export function createMockDatasource(id: string): DatasourceMock {
     uniqueLabels: jest.fn((_state) => ({})),
     renderDimensionTrigger: jest.fn(),
     renderDimensionEditor: jest.fn(),
-    canHandleDrop: jest.fn(),
+    getDropProps: jest.fn(),
     onDrop: jest.fn(),
 
     // this is an additional property which doesn't exist on real datasources

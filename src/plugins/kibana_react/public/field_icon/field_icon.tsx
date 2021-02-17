@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React from 'react';
@@ -34,7 +34,7 @@ const defaultIcon = { iconType: 'questionInCircle', color: 'gray' };
 export const typeToEuiIconMap: Partial<Record<string, EuiTokenProps>> = {
   boolean: { iconType: 'tokenBoolean' },
   // icon for an index pattern mapping conflict in discover
-  conflict: { iconType: 'alert', color: 'euiVisColor9' },
+  conflict: { iconType: 'alert', color: 'euiColorVis9', shape: 'square' },
   date: { iconType: 'tokenDate' },
   geo_point: { iconType: 'tokenGeo' },
   geo_shape: { iconType: 'tokenGeo' },

@@ -1,13 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { bisector } from 'd3-array';
-
 import { compareToTimeKey, getIndexAtTimeKey, TimeKey, UniqueTimeKey } from '../../../common/time';
-import { InfraLogEntryFields } from '../../graphql/types';
 import {
   LogEntry,
   LogColumn,
@@ -18,10 +17,6 @@ import {
   LogMessageFieldPart,
   LogMessageConstantPart,
 } from '../../../common/log_entry';
-
-export type LogEntryMessageSegment = InfraLogEntryFields.Message;
-export type LogEntryConstantMessageSegment = InfraLogEntryFields.InfraLogMessageConstantSegmentInlineFragment;
-export type LogEntryFieldMessageSegment = InfraLogEntryFields.InfraLogMessageFieldSegmentInlineFragment;
 
 export const getLogEntryKey = (entry: { cursor: TimeKey }) => entry.cursor;
 

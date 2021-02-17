@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiPage, EuiPanel } from '@elastic/eui';
@@ -17,7 +18,6 @@ import { LatencyChart } from '../../shared/charts/latency_chart';
 import { TransactionBreakdownChart } from '../../shared/charts/transaction_breakdown_chart';
 import { TransactionErrorRateChart } from '../../shared/charts/transaction_error_rate_chart';
 import { SearchBar } from '../../shared/search_bar';
-import { UserExperienceCallout } from '../transaction_overview/user_experience_callout';
 import { ServiceOverviewDependenciesTable } from './service_overview_dependencies_table';
 import { ServiceOverviewErrorsTable } from './service_overview_errors_table';
 import { ServiceOverviewInstancesChartAndTable } from './service_overview_instances_chart_and_table';
@@ -57,14 +57,9 @@ export function ServiceOverview({
   return (
     <AnnotationsContextProvider>
       <ChartPointerEventContextProvider>
-        <SearchBar prepend={transactionTypeLabel} showTimeComparison />
+        <SearchBar prepend={transactionTypeLabel} showCorrelations />
         <EuiPage>
           <EuiFlexGroup direction="column" gutterSize="s">
-            {isRumAgent && (
-              <EuiFlexItem>
-                <UserExperienceCallout serviceName={serviceName} />
-              </EuiFlexItem>
-            )}
             <EuiFlexItem>
               <EuiPanel>
                 <LatencyChart height={200} />

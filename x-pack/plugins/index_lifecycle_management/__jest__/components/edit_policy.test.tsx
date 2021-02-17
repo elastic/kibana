@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { ReactElement } from 'react';
@@ -93,6 +94,13 @@ jest.mock('@elastic/eui', () => {
 let component: ReactElement;
 const activatePhase = async (rendered: ReactWrapper, phase: string) => {
   const testSubject = `enablePhaseSwitch-${phase}`;
+  await act(async () => {
+    await findTestSubject(rendered, testSubject).simulate('click');
+  });
+  rendered.update();
+};
+const activateDeletePhase = async (rendered: ReactWrapper) => {
+  const testSubject = `enableDeletePhaseButton`;
   await act(async () => {
     await findTestSubject(rendered, testSubject).simulate('click');
   });
@@ -453,6 +461,11 @@ describe('edit policy', () => {
       waitForFormLibValidation(rendered);
       expectedErrorMessages(rendered, [i18nTexts.editPolicy.errors.nonNegativeNumberRequired]);
     });
+
+    test("doesn't show min age input", async () => {
+      const rendered = mountWithIntl(component);
+      expect(findTestSubject(rendered, 'hot-selectedMinimumAge').exists()).toBeFalsy();
+    });
   });
   describe('warm phase', () => {
     beforeEach(() => {
@@ -669,6 +682,13 @@ describe('edit policy', () => {
       expect(rendered.find('.euiLoadingSpinner').exists()).toBeFalsy();
       expect(findTestSubject(rendered, 'defaultAllocationNotice').exists()).toBeFalsy();
     });
+
+    test('shows min age input only when enabled', async () => {
+      const rendered = mountWithIntl(component);
+      expect(findTestSubject(rendered, 'warm-selectedMinimumAge').exists()).toBeFalsy();
+      await activatePhase(rendered, 'warm');
+      expect(findTestSubject(rendered, 'warm-selectedMinimumAge').exists()).toBeTruthy();
+    });
   });
   describe('cold phase', () => {
     beforeEach(() => {
@@ -806,13 +826,20 @@ describe('edit policy', () => {
       expect(rendered.find('.euiLoadingSpinner').exists()).toBeFalsy();
       expect(findTestSubject(rendered, 'defaultAllocationNotice').exists()).toBeFalsy();
     });
+
+    test('shows min age input only when enabled', async () => {
+      const rendered = mountWithIntl(component);
+      expect(findTestSubject(rendered, 'cold-selectedMinimumAge').exists()).toBeFalsy();
+      await activatePhase(rendered, 'cold');
+      expect(findTestSubject(rendered, 'cold-selectedMinimumAge').exists()).toBeTruthy();
+    });
   });
   describe('delete phase', () => {
     test('should allow 0 for phase timing', async () => {
       const rendered = mountWithIntl(component);
       await noRollover(rendered);
       await setPolicyName(rendered, 'mypolicy');
-      await activatePhase(rendered, 'delete');
+      await activateDeletePhase(rendered);
       await setPhaseAfter(rendered, 'delete', '0');
       waitForFormLibValidation(rendered);
       expectedErrorMessages(rendered, []);
@@ -821,10 +848,17 @@ describe('edit policy', () => {
       const rendered = mountWithIntl(component);
       await noRollover(rendered);
       await setPolicyName(rendered, 'mypolicy');
-      await activatePhase(rendered, 'delete');
+      await activateDeletePhase(rendered);
       await setPhaseAfter(rendered, 'delete', '-1');
       waitForFormLibValidation(rendered);
       expectedErrorMessages(rendered, [i18nTexts.editPolicy.errors.nonNegativeNumberRequired]);
+    });
+
+    test('is hidden when disabled', async () => {
+      const rendered = mountWithIntl(component);
+      expect(findTestSubject(rendered, 'delete-phaseContent').exists()).toBeFalsy();
+      await activateDeletePhase(rendered);
+      expect(findTestSubject(rendered, 'delete-phaseContent').exists()).toBeTruthy();
     });
   });
   describe('not on cloud', () => {

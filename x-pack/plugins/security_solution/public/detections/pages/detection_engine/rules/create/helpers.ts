@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { has, isEmpty } from 'lodash/fp';
@@ -287,6 +288,7 @@ export const formatAboutStepData = (
     isBuildingBlock,
     note,
     ruleNameOverride,
+    threatIndicatorPath,
     timestampOverride,
     ...rest
   } = aboutStepData;
@@ -329,6 +331,7 @@ export const formatAboutStepData = (
       ...singleThreat,
       framework: 'MITRE ATT&CK',
     })),
+    threat_indicator_path: threatIndicatorPath,
     timestamp_override: timestampOverride !== '' ? timestampOverride : undefined,
     ...(!isEmpty(note) ? { note } : {}),
     ...rest,

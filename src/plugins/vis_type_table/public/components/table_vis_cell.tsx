@@ -1,25 +1,23 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React from 'react';
 import { EuiDataGridCellValueElementProps } from '@elastic/eui';
 
-import { Table } from '../table_vis_response_handler';
-import { FormattedColumn } from '../types';
+import { DatatableRow } from 'src/plugins/expressions';
+import { FormattedColumns } from '../types';
 
-export const createTableVisCell = (formattedColumns: FormattedColumn[], rows: Table['rows']) => ({
-  // @ts-expect-error
-  colIndex,
+export const createTableVisCell = (rows: DatatableRow[], formattedColumns: FormattedColumns) => ({
   rowIndex,
   columnId,
 }: EuiDataGridCellValueElementProps) => {
   const rowValue = rows[rowIndex][columnId];
-  const column = formattedColumns[colIndex];
+  const column = formattedColumns[columnId];
   const content = column.formatter.convert(rowValue, 'html');
 
   const cellContent = (
