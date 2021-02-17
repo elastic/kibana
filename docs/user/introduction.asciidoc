@@ -78,7 +78,7 @@ image::siem/images/detections-ui.png[Detections view in Elastic Security]
 [[visualize-and-analyze]]
 === Visualize and analyze
 
-Data analysis is the core functionality of {kib}.
+Data analysis is a core functionality of {kib}.
 You can quickly search through large amounts of data, explore fields and values,
 and then use {kib}’s drag-and-drop interface to rapidly build charts, tables, metrics, and more.
 
@@ -97,7 +97,7 @@ file, or add a sample data set.
 | *2.*
 | *Explore.* With <<discover,*Discover*>>, you can search your data for hidden
 insights and relationships. Ask your questions, and then filter the results to just the data you want.
-You can also limit your results to the most recent documents added to {es}.
+You can limit your results to the most recent documents added to {es}.
 
 | *3.*
 | *Visualize.* {kib} provides many options to create visualizations of your data, from
@@ -127,7 +127,7 @@ You can also visualize and track movement over space and through time.
 [float]
 ==== Model data behavior
 
-To model the behavior of your data, you'll want to use
+To model the behavior of your data, you'll use
 <<xpack-ml, *{ml-cap}*>>.
 This app can help you extract insights from your data that you might otherwise miss.
 You can forecast unusual behavior in your time series data.
@@ -176,8 +176,8 @@ that exists in almost every use case. For example, you might set an alert to not
 * System resources, such as memory, CPU and disk space, take a dip.
 * An unusually high number of service requests, suspicious processes, and login attempts occurs.
 
-An alert is triggered when a specified condition is met. For example,
-an alert might trigger when the average or max of one of
+An alert triggers when a specified condition is met. For example,
+you can trigger an alert when the average or max of one of
 your metrics exceeds a threshold within a specified time frame.
 
 When the alert triggers, you can send a notification to a system that is part of
@@ -286,9 +286,7 @@ users’ behavior. For more information, see <<xpack-security-audit-logging,{kib
 
 Using the Search field in the global header, you can
 search for applications and objects, such as
-dashboards and visualizations.
-
-Search suggestions include deep links into applications,
+dashboards and visualizations. Search suggestions include deep links into applications,
 allowing you to directly navigate to the views you need most.
 
 [role="screenshot"]
