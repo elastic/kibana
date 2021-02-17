@@ -246,6 +246,12 @@ exports[`Paginated Table Component rendering it renders the default load more ta
         },
         "euiFilePickerTallHeight": "128px",
         "euiFlyoutBorder": "1px solid #343741",
+        "euiFlyoutPaddingModifiers": Object {
+          "paddingLarge": "24px",
+          "paddingMedium": "16px",
+          "paddingNone": 0,
+          "paddingSmall": "8px",
+        },
         "euiFocusBackgroundColor": "#08334a",
         "euiFocusRingAnimStartColor": "rgba(27, 169, 245, 0)",
         "euiFocusRingAnimStartSize": "6px",
@@ -357,6 +363,7 @@ exports[`Paginated Table Component rendering it renders the default load more ta
         },
         "euiMarkdownEditorMinHeight": "150px",
         "euiPageBackgroundColor": "#1a1b20",
+        "euiPageDefaultMaxWidth": "1000px",
         "euiPaletteColorBlind": Object {
           "euiColorVis0": Object {
             "behindText": "#6dccb1",
@@ -534,6 +541,7 @@ exports[`Paginated Table Component rendering it renders the default load more ta
         "euiSwitchWidthCompressed": "28px",
         "euiSwitchWidthMini": "22px",
         "euiTabFontSize": "16px",
+        "euiTabFontSizeL": "18px",
         "euiTabFontSizeS": "14px",
         "euiTableActionsAreaWidth": "40px",
         "euiTableActionsBorderColor": "rgba(83, 89, 102, 0.09999999999999998)",
