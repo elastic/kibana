@@ -52,7 +52,7 @@ The API returns the following:
 }
 --------------------------------------------------
 
-Health API response contains the following properties:
+The health API response contains the following properties:
 
 [cols="2*<"]
 |===
