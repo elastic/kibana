@@ -75,6 +75,10 @@ describe('addComment', () => {
           type: CommentType.alert,
           alertId: 'test-id',
           index: 'test-index',
+          rule: {
+            id: 'test-rule1',
+            name: 'test-rule',
+          },
         },
       });
 
@@ -231,6 +235,10 @@ describe('addComment', () => {
           type: CommentType.alert,
           alertId: 'test-alert',
           index: 'test-index',
+          rule: {
+            id: 'test-rule1',
+            name: 'test-rule',
+          },
         },
       });
 
@@ -265,6 +273,10 @@ describe('addComment', () => {
           type: CommentType.alert,
           alertId: 'test-alert',
           index: 'test-index',
+          rule: {
+            id: 'test-rule1',
+            name: 'test-rule',
+          },
         },
       });
 
@@ -406,6 +418,10 @@ describe('addComment', () => {
               type: CommentType.alert,
               index: 'test-index',
               alertId: 'test-id',
+              rule: {
+                id: 'test-rule1',
+                name: 'test-rule',
+              },
             },
           })
           .catch((e) => {
@@ -478,6 +494,10 @@ describe('addComment', () => {
             type: CommentType.alert,
             alertId: 'test-alert',
             index: 'test-index',
+            rule: {
+              id: 'test-rule1',
+              name: 'test-rule',
+            },
           },
         })
         .catch((e) => {

@@ -64,6 +64,10 @@ export const alertComment: Comment = {
   createdBy: elasticUser,
   pushedAt: null,
   pushedBy: null,
+  rule: {
+    id: 'rule-id-1',
+    name: 'rule-name-1',
+  },
   updatedAt: null,
   updatedBy: null,
   version: 'WzQ3LDFc',
@@ -218,7 +222,7 @@ export const basicCaseSnake: CaseResponse = {
   external_service: null,
   updated_at: basicUpdatedAt,
   updated_by: elasticUserSnake,
-};
+} as CaseResponse;
 
 export const casesStatusSnake: CasesStatusResponse = {
   count_closed_cases: 130,
