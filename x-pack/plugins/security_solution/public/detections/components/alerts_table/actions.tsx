@@ -197,8 +197,11 @@ export const buildAlertsKqlFilter = (
     {
       query: {
         bool: {
-          should: alertIds.map((id) => ({ match_phrase: { _id: id } })),
-          minimum_should_match: 1,
+          filter: {
+            ids: {
+              values: alertIds,
+            },
+          },
         },
       },
       meta: {
@@ -295,7 +298,6 @@ export const buildEqlDataProviderOrFilter = (
 
 export const sendAlertToTimelineAction = async ({
   apolloClient,
-  alertIds,
   createTimeline,
   ecsData: ecs,
   nonEcsData,
@@ -307,6 +309,7 @@ export const sendAlertToTimelineAction = async ({
    * but we still want to determine the filter for each alerts
    */
   const ecsData: Ecs = Array.isArray(ecs) && ecs.length > 0 ? ecs[0] : (ecs as Ecs);
+  const alertIds = Array.isArray(ecs) ? ecs.map((d) => d._id) : [];
   const noteContent = ecsData.signal?.rule?.note != null ? ecsData.signal?.rule?.note[0] : '';
   const timelineId =
     ecsData.signal?.rule?.timeline_id != null ? ecsData.signal?.rule?.timeline_id[0] : '';

@@ -5,12 +5,13 @@
  * 2.0.
  */
 
+import { isEmpty } from 'lodash';
 import { CommentType } from '../../../../../case/common/api';
 import { Comment } from '../../containers/types';
 
-export const getAlertIdsFromComments = (comments: Comment[]): string[] => {
+export const getManualAlertIdsWithNoRuleId = (comments: Comment[]): string[] => {
   const dedupeAlerts = comments.reduce((alertIds, comment: Comment) => {
-    if (comment.type === CommentType.alert || comment.type === CommentType.generatedAlert) {
+    if (comment.type === CommentType.alert && isEmpty(comment.rule.id)) {
       const ids = Array.isArray(comment.alertId) ? comment.alertId : [comment.alertId];
       ids.forEach((id) => alertIds.add(id));
       return alertIds;
@@ -21,15 +22,20 @@ export const getAlertIdsFromComments = (comments: Comment[]): string[] => {
 };
 
 // TODO we need to allow ->  docValueFields: [{ field: "@timestamp" }],
-export const buildAlertsQuery = (alertIds: string[]) => ({
-  query: {
-    bool: {
-      filter: {
-        ids: {
-          values: alertIds,
+export const buildAlertsQuery = (alertIds: string[]) => {
+  if (alertIds.length === 0) {
+    return {};
+  }
+  return {
+    query: {
+      bool: {
+        filter: {
+          ids: {
+            values: alertIds,
+          },
         },
       },
     },
-  },
-  size: 10000,
-});
+    size: 10000,
+  };
+};

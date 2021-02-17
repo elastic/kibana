@@ -75,3 +75,10 @@ export const SEND_ALERT_TO_TIMELINE = i18n.translate(
     defaultMessage: 'Investigate in timeline',
   }
 );
+
+export const UNKNOWN_RULE = i18n.translate(
+  'xpack.securitySolution.case.caseView.unknownRule.label',
+  {
+    defaultMessage: 'Unknown rule',
+  }
+);

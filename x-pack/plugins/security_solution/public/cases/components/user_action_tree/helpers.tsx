@@ -6,9 +6,10 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiCommentProps } from '@elastic/eui';
-import { isObject, get, isString, isNumber } from 'lodash';
-import React from 'react';
+import { isObject, get, isString, isNumber, isEmpty } from 'lodash';
+import React, { useMemo } from 'react';
 
+import { SearchResponse } from 'elasticsearch';
 import {
   CaseFullExternalService,
   ActionConnector,
@@ -30,6 +31,12 @@ import { AlertCommentEvent } from './user_action_alert_comment_event';
 import { InvestigateInTimelineAction } from '../../../detections/components/alerts_table/timeline_actions/investigate_in_timeline_action';
 import { Ecs } from '../../../../common/ecs';
 import { TimelineNonEcsData } from '../../../../common/search_strategy';
+import { useSourcererScope } from '../../../common/containers/sourcerer';
+import { SourcererScopeName } from '../../../common/store/sourcerer/model';
+import { buildAlertsQuery } from '../case_view/helpers';
+import { useQueryAlerts } from '../../../detections/containers/detection_engine/alerts/use_query';
+import { KibanaServices } from '../../../common/lib/kibana';
+import { DETECTION_ENGINE_QUERY_SIGNALS_URL } from '../../../../common/constants';
 
 interface LabelTitle {
   action: CaseUserActions;
@@ -202,6 +209,7 @@ export const getAlertAttachment = ({
   action,
   alertId,
   index,
+  loadingAlertData,
   ruleId,
   ruleName,
   onShowAlertDetails,
@@ -210,8 +218,9 @@ export const getAlertAttachment = ({
   onShowAlertDetails: (alertId: string, index: string) => void;
   alertId: string;
   index: string;
-  ruleId: string | null;
-  ruleName: string | null;
+  loadingAlertData: boolean;
+  ruleId: string;
+  ruleName: string;
 }): EuiCommentProps => {
   return {
     username: (
@@ -225,6 +234,7 @@ export const getAlertAttachment = ({
     event: (
       <AlertCommentEvent
         alertId={alertId}
+        loadingAlertData={loadingAlertData}
         ruleId={ruleId}
         ruleName={ruleName}
         commentType={CommentType.alert}
@@ -306,10 +316,34 @@ export const getGeneratedAlertsAttachment = ({
 }: {
   action: CaseUserActions;
   alertIds: string[];
-  ruleId: string | null;
-  ruleName: string | null;
+  ruleId: string;
+  ruleName: string;
 }): EuiCommentProps => {
-  // const ecsData: Ecs[] = Object.values(alerts);
+  const fetchEcsAlertsData = async (fetchAlertIds?: string[]): Promise<Ecs[]> => {
+    if (isEmpty(fetchAlertIds)) {
+      return [];
+    }
+    const alertResponse = await KibanaServices.get().http.fetch<
+      SearchResponse<{ '@timestamp': string; [key: string]: unknown }>
+    >(DETECTION_ENGINE_QUERY_SIGNALS_URL, {
+      method: 'POST',
+      body: JSON.stringify(buildAlertsQuery(fetchAlertIds ?? [])),
+    });
+    return (
+      alertResponse?.hits.hits.reduce<Ecs[]>(
+        (acc, { _id, _index, _source }) => [
+          ...acc,
+          {
+            ...formatAlertToEcsSignal(_source as {}),
+            _id,
+            _index,
+            timestamp: _source['@timestamp'],
+          },
+        ],
+        []
+      ) ?? []
+    );
+  };
   return {
     username: <EuiIcon type="logoSecurity" size="m" />,
     className: 'comment-alert',
@@ -336,11 +370,67 @@ export const getGeneratedAlertsAttachment = ({
             ariaLabel={i18n.SEND_ALERT_TO_TIMELINE}
             alertIds={alertIds}
             key="investigate-in-timeline"
-            ecsRowData={[]}
+            ecsRowData={null}
+            fetchEcsAlertsData={fetchEcsAlertsData}
             nonEcsRowData={EMPTY_ARRAY}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
     ),
   };
+};
+
+interface Signal {
+  rule: {
+    id: string;
+    name: string;
+    to: string;
+    from: string;
+  };
+}
+
+interface SignalHit {
+  _id: string;
+  _index: string;
+  _source: {
+    '@timestamp': string;
+    signal: Signal;
+  };
+}
+
+export interface Alert {
+  _id: string;
+  _index: string;
+  '@timestamp': string;
+  signal: Signal;
+  [key: string]: unknown;
+}
+
+export const useFetchAlertData = (alertIds: string[]): [boolean, Record<string, Ecs>] => {
+  const { selectedPatterns } = useSourcererScope(SourcererScopeName.detections);
+  const alertsQuery = useMemo(() => buildAlertsQuery(alertIds), [alertIds]);
+
+  const { loading: isLoadingAlerts, data: alertsData } = useQueryAlerts<SignalHit, unknown>(
+    alertsQuery,
+    selectedPatterns[0]
+  );
+
+  const alerts = useMemo(
+    () =>
+      alertsData?.hits.hits.reduce<Record<string, Ecs>>(
+        (acc, { _id, _index, _source }) => ({
+          ...acc,
+          [_id]: {
+            ...formatAlertToEcsSignal(_source),
+            _id,
+            _index,
+            timestamp: _source['@timestamp'],
+          },
+        }),
+        {}
+      ) ?? {},
+    [alertsData?.hits.hits]
+  );
+
+  return [isLoadingAlerts, alerts];
 };
