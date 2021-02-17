@@ -15,7 +15,7 @@ export const isSubCase = (theCase: Case | SubCase): theCase is SubCase =>
   (theCase as SubCase).associationType === AssociationType.subCase;
 
 export const getSubCasesStatusCountsBadges = (
-  subCases: Case[]
+  subCases: SubCase[]
 ): Array<{ name: CaseStatuses; color: string; count: number }> => {
   return [
     {

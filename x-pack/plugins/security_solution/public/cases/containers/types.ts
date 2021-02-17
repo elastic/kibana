@@ -63,6 +63,7 @@ interface BasicCase {
   createdAt: string;
   createdBy: ElasticUser;
   status: CaseStatuses;
+  title: string;
   totalAlerts: number;
   totalComment: number;
   updatedAt: string | null;
@@ -83,7 +84,6 @@ export interface Case extends BasicCase {
   subCaseIds: string[];
   settings: CaseAttributes['settings'];
   tags: string[];
-  title: string;
   type: CaseType;
 }
 
