@@ -345,8 +345,13 @@ describe('SearchSource', () => {
       });
 
       test('allows you to override computed fields if you provide a format', async () => {
+        const indexPatternFields = indexPattern.fields;
+        indexPatternFields.getByType = (type) => {
+          return [];
+        };
         searchSource.setField('index', ({
           ...indexPattern,
+          fields: indexPatternFields,
           getComputedFields: () => ({
             storedFields: [],
             scriptFields: {},
@@ -379,6 +384,11 @@ describe('SearchSource', () => {
       test('injects a date format for computed docvalue fields while merging other properties', async () => {
         searchSource.setField('index', ({
           ...indexPattern,
+          fields: {
+            getByType: () => {
+              return [];
+            },
+          },
           getComputedFields: () => ({
             storedFields: [],
             scriptFields: {},
@@ -625,7 +635,7 @@ describe('SearchSource', () => {
         searchSource.setField('fields', ['hello', '@timestamp', 'foo-a', 'bar']);
 
         const request = await searchSource.getSearchRequestBody();
-        expect(request.fields).toEqual(['hello', '@timestamp', 'bar']);
+        expect(request.fields).toEqual(['hello', '@timestamp', 'bar', 'date']);
         expect(request.script_fields).toEqual({ hello: {} });
         expect(request.stored_fields).toEqual(['@timestamp', 'bar']);
       });
@@ -678,6 +688,60 @@ describe('SearchSource', () => {
         expect(request.fields).toEqual(['hello', '@timestamp', 'bar', 'date']);
         expect(request.script_fields).toEqual({ hello: {} });
         expect(request.stored_fields).toEqual(['@timestamp', 'bar', 'date', 'baz']);
+      });
+    });
+
+    describe('handling date fields', () => {
+      test('adds date format to any date field', async () => {
+        searchSource.setField('index', ({
+          ...indexPattern,
+          getComputedFields: () => ({
+            storedFields: [],
+            scriptFields: {},
+            docvalueFields: [{ field: '@timestamp' }],
+          }),
+          fields: {
+            getByType: () => [{ name: '@timestamp', esTypes: ['date_nanos'] }],
+          },
+          getSourceFiltering: () => ({ excludes: [] }),
+        } as unknown) as IndexPattern);
+        searchSource.setField('fields', ['*']);
+
+        const request = await searchSource.getSearchRequestBody();
+        expect(request.fields).toEqual([
+          '*',
+          { field: '@timestamp', format: 'strict_date_optional_time_nanos' },
+        ]);
+      });
+
+      test('adds date format to any date field except the one excluded by source filters', async () => {
+        const indexPatternFields = indexPattern.fields;
+        // @ts-ignore
+        indexPatternFields.getByType = (type) => {
+          return [
+            { name: '@timestamp', esTypes: ['date_nanos'] },
+            { name: 'custom_date', esTypes: ['date'] },
+          ];
+        };
+        searchSource.setField('index', ({
+          ...indexPattern,
+          getComputedFields: () => ({
+            storedFields: [],
+            scriptFields: {},
+            docvalueFields: [{ field: '@timestamp' }, { field: 'custom_date' }],
+          }),
+          fields: indexPatternFields,
+          getSourceFiltering: () => ({ excludes: ['custom_date'] }),
+        } as unknown) as IndexPattern);
+        searchSource.setField('fields', ['*']);
+
+        const request = await searchSource.getSearchRequestBody();
+        expect(request.fields).toEqual([
+          { field: 'foo-bar' },
+          { field: 'field1' },
+          { field: 'field2' },
+          { field: '@timestamp', format: 'strict_date_optional_time_nanos' },
+        ]);
       });
     });
 
