@@ -11,7 +11,7 @@ import { TestProviders } from '../../../../../common/mock';
 import '../../../../../common/mock/match_media';
 import { useMountAppended } from '../../../../../common/utils/use_mount_appended';
 
-import { ProcessHash } from './process_hash';
+import { FileHash } from './file_hash';
 
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
@@ -22,37 +22,37 @@ jest.mock('@elastic/eui', () => {
   };
 });
 
-const allProps = {
-  contextId: 'test',
-  eventId: '1',
-  processHashSha256: undefined,
-};
-
-describe('ProcessHash', () => {
+describe('FileHash', () => {
   const mount = useMountAppended();
 
-  test('displays the processHashSha256 when provided', () => {
+  const allProps = {
+    contextId: 'test',
+    eventId: '1',
+    fileHashSha256: undefined,
+  };
+
+  test('displays the fileHashSha256 when provided', () => {
     const wrapper = mount(
       <TestProviders>
-        <ProcessHash {...allProps} processHashSha256="[processHashSha256]" />
+        <FileHash {...allProps} fileHashSha256="[fileHashSha256]" />
       </TestProviders>
     );
-    expect(wrapper.text()).toEqual('[processHashSha256]');
+    expect(wrapper.text()).toEqual('[fileHashSha256]');
   });
 
-  test('displays nothing when processHashSha256 is null', () => {
+  test('displays nothing when fileHashSha256 is null', () => {
     const wrapper = mount(
       <TestProviders>
-        <ProcessHash {...allProps} processHashSha256={null} />
+        <FileHash {...allProps} fileHashSha256={null} />
       </TestProviders>
     );
     expect(wrapper.text()).toEqual('');
   });
 
-  test('displays nothing when processHashSha256 is undefined', () => {
+  test('displays nothing when fileHashSha256 is undefined', () => {
     const wrapper = mount(
       <TestProviders>
-        <ProcessHash {...allProps} />
+        <FileHash {...allProps} />
       </TestProviders>
     );
     expect(wrapper.text()).toEqual('');
