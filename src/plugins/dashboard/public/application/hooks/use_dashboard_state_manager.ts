@@ -87,6 +87,7 @@ export const useDashboardStateManager = (
     });
 
     const stateManager = new DashboardStateManager({
+      toasts: core.notifications.toasts,
       hasTaggingCapabilities,
       dashboardPanelStorage,
       hideWriteControls,
@@ -160,7 +161,6 @@ export const useDashboardStateManager = (
     const dashboardTitle = getDashboardTitle(
       stateManager.getTitle(),
       stateManager.getViewMode(),
-      stateManager.getIsDirty(timefilter),
       stateManager.isNew()
     );
 
@@ -213,6 +213,7 @@ export const useDashboardStateManager = (
     uiSettings,
     usageCollection,
     allowByValueEmbeddables,
+    core.notifications.toasts,
     dashboardCapabilities.storeSearchSession,
   ]);
 

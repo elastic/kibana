@@ -79,12 +79,12 @@ export const hasReadIndexPrivileges = async (
 
   if (indexesWithReadPrivileges.length > 0 && indexesWithNoReadPrivileges.length > 0) {
     // some indices have read privileges others do not.
-    // set a partial failure status
+    // set a warning status
     const errorString = `Missing required read privileges on the following indices: ${JSON.stringify(
       indexesWithNoReadPrivileges
     )}`;
     logger.error(buildRuleMessage(errorString));
-    await ruleStatusService.partialFailure(errorString);
+    await ruleStatusService.warning(errorString);
     return true;
   } else if (
     indexesWithReadPrivileges.length === 0 &&
@@ -96,7 +96,7 @@ export const hasReadIndexPrivileges = async (
       indexesWithNoReadPrivileges
     )}`;
     logger.error(buildRuleMessage(errorString));
-    await ruleStatusService.partialFailure(errorString);
+    await ruleStatusService.warning(errorString);
     return true;
   }
   return false;
@@ -119,7 +119,7 @@ export const hasTimestampFields = async (
       inputIndices
     )}`;
     logger.error(buildRuleMessage(errorString));
-    await ruleStatusService.error(errorString);
+    await ruleStatusService.warning(errorString);
     return true;
   } else if (
     !wroteStatus &&
@@ -128,18 +128,19 @@ export const hasTimestampFields = async (
       timestampFieldCapsResponse.body.fields[timestampField]?.unmapped?.indices != null)
   ) {
     // if there is a timestamp override and the unmapped array for the timestamp override key is not empty,
-    // partial failure
+    // warning
     const errorString = `The following indices are missing the ${
       timestampField === '@timestamp'
         ? 'timestamp field "@timestamp"'
         : `timestamp override field "${timestampField}"`
     }: ${JSON.stringify(
-      isEmpty(timestampFieldCapsResponse.body.fields)
+      isEmpty(timestampFieldCapsResponse.body.fields) ||
+        isEmpty(timestampFieldCapsResponse.body.fields[timestampField])
         ? timestampFieldCapsResponse.body.indices
-        : timestampFieldCapsResponse.body.fields[timestampField].unmapped.indices
+        : timestampFieldCapsResponse.body.fields[timestampField]?.unmapped?.indices
     )}`;
     logger.error(buildRuleMessage(errorString));
-    await ruleStatusService.partialFailure(errorString);
+    await ruleStatusService.warning(errorString);
     return true;
   }
   return wroteStatus;
@@ -698,9 +699,12 @@ export const createSearchAfterReturnTypeFromResponse = ({
       searchResult._shards.failed === 0 ||
       searchResult._shards.failures?.every((failure) => {
         return (
-          failure.reason?.reason === 'No mapping found for [@timestamp] in order to sort on' ||
-          failure.reason?.reason ===
+          failure.reason?.reason?.includes(
+            'No mapping found for [@timestamp] in order to sort on'
+          ) ||
+          failure.reason?.reason?.includes(
             `No mapping found for [${timestampOverride}] in order to sort on`
+          )
         );
       }),
     lastLookBackDate: lastValidDate({ searchResult, timestampOverride }),

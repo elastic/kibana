@@ -52,7 +52,7 @@ export const ERROR_CALLOUT_TITLE = i18n.translate(
 export const PARTIAL_FAILURE_CALLOUT_TITLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.partialErrorCalloutTitle',
   {
-    defaultMessage: 'Partial rule failure at',
+    defaultMessage: 'Warning at',
   }
 );
 
