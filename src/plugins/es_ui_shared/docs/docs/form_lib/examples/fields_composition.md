@@ -34,24 +34,7 @@ Those are the 3 car configurations that the form can output:
 }
 ```
 
-We can see that we have a common `used` field in all three configuration, which is a boolean. We will create a reusable component for that field. And then each car has one specific config parameter.
-
-Let's start by creating our reusable `used` parameter field.
-
-```js
-// used_parameter.tsx
-
-const usedConfig = {
-  label: 'Car has been used',
-  defaultValue: false,
-};
-
-export const UsedParameter = () => {
-  return <UseField path="used" config={usedConfig} component={ToggleField} />;
-};
-```
-
-Now let's create one component for each car that will expose its unique parameter(s). Those components won't have to declare the `model` and the `used` params as they are common to all three cars and we will put them at the root level of the form.
+Let's create one component for each car that will expose its unique parameter(s). Those components won't have to declare the `model` and the `used` params as they are common to all three cars and we will put them at the root level of the form.
 
 ```js
 // sedan_car.tsx
@@ -120,9 +103,17 @@ const modelToComponentMap: { [key: string]: React.FunctionComponent } = {
   'clown_mobile': ClownMobileCar,
 };
 
-const modelConfig = {
-  label: 'Car model',
-  defaultValue: 'sedan',
+// We create a schema so we don't need to manually add the config
+// to the component through props
+const formSchema = {
+  model: {
+    label: 'Car model',
+    defaultValue: 'sedan',
+  },
+  used: {
+    label: 'Car has been used',
+    defaultValue: false,
+  }
 };
 
 const modelOptions = [
@@ -138,7 +129,7 @@ const modelOptions = [
 ];
 
 export const CarConfigurator = () => {
-  const { form } = useForm();
+  const { form } = useForm({ schema: formSchema });
   const [{ model }] = useFormData<{ model: string }>({ form, watch: 'model' });
 
   const renderCarConfiguration = () => {
@@ -155,13 +146,13 @@ export const CarConfigurator = () => {
     <Form form={form}>
       <UseField
         path="model"
-        config={modelConfig}
         component={SelectField}
         componentProps={{
           euiFieldProps: { options: modelOptions },
         }}
       />
-      <UsedParameter />
+      <UseField path="used" component={ToggleField} />
+
       {model !== undefined ? renderCarConfiguration() : null}
 
       <EuiSpacer />
