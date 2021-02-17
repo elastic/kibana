@@ -86,6 +86,8 @@ export class MBMap extends Component<Props, State> {
   private _checker?: ResizeChecker;
   private _isMounted: boolean = false;
   private _containerRef: HTMLDivElement | null = null;
+  private _prevDisableInteractive?: boolean;
+  private _navigationControl = new mapboxgl.NavigationControl({ showCompass: false });
   private _tileStatusTracker?: TileStatusTracker;
 
   state: State = {
@@ -187,7 +189,6 @@ export class MBMap extends Component<Props, State> {
         style: mbStyle,
         scrollZoom: this.props.scrollZoom,
         preserveDrawingBuffer: getPreserveDrawingBuffer(),
-        interactive: !this.props.settings.disableInteractive,
         maxZoom: this.props.settings.maxZoom,
         minZoom: this.props.settings.minZoom,
       };
@@ -203,9 +204,6 @@ export class MBMap extends Component<Props, State> {
       const mbMap = new mapboxgl.Map(options);
       mbMap.dragRotate.disable();
       mbMap.touchZoomRotate.disableRotation();
-      if (!this.props.settings.disableInteractive) {
-        mbMap.addControl(new mapboxgl.NavigationControl({ showCompass: false }), 'top-left');
-      }
 
       this._tileStatusTracker = new TileStatusTracker({
         mbMap,
@@ -369,6 +367,28 @@ export class MBMap extends Component<Props, State> {
   _syncSettings() {
     if (!this.state.mbMap) {
       return;
+    }
+
+    if (
+      this._prevDisableInteractive === undefined ||
+      this._prevDisableInteractive !== this.props.settings.disableInteractive
+    ) {
+      this._prevDisableInteractive = this.props.settings.disableInteractive;
+      if (this.props.settings.disableInteractive) {
+        this.state.mbMap.boxZoom.disable();
+        this.state.mbMap.doubleClickZoom.disable();
+        this.state.mbMap.dragPan.disable();
+        try {
+          this.state.mbMap.removeControl(this._navigationControl);
+        } catch (error) {
+          // ignore removeControl errors
+        }
+      } else {
+        this.state.mbMap.boxZoom.enable();
+        this.state.mbMap.doubleClickZoom.enable();
+        this.state.mbMap.dragPan.enable();
+        this.state.mbMap.addControl(this._navigationControl, 'top-left');
+      }
     }
 
     let zoomRangeChanged = false;

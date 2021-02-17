@@ -131,7 +131,7 @@ describe('TransactionOverview', () => {
       });
 
       expect(history.location.search).toEqual(
-        '?transactionType=secondType&rangeFrom=now-15m&rangeTo=now&comparisonEnabled=true&comparisonType=day'
+        '?transactionType=secondType&rangeFrom=now-15m&rangeTo=now'
       );
       expect(getByText(container, 'firstType')).toBeInTheDocument();
       expect(getByText(container, 'secondType')).toBeInTheDocument();
@@ -142,7 +142,7 @@ describe('TransactionOverview', () => {
 
       expect(history.push).toHaveBeenCalled();
       expect(history.location.search).toEqual(
-        '?transactionType=firstType&rangeFrom=now-15m&rangeTo=now&comparisonEnabled=true&comparisonType=day'
+        '?transactionType=firstType&rangeFrom=now-15m&rangeTo=now'
       );
     });
   });

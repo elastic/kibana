@@ -150,6 +150,7 @@ export const getThreatMatchingSchemaPartialMock = (enabled = false): Partial<Rul
     language: 'kuery',
     threat_query: '*:*',
     threat_index: ['list-index'],
+    threat_indicator_path: 'threat.indicator',
     threat_mapping: [
       {
         entries: [

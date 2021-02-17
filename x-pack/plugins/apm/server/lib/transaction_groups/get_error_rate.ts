@@ -14,7 +14,7 @@ import {
   TRANSACTION_TYPE,
 } from '../../../common/elasticsearch_fieldnames';
 import { EventOutcome } from '../../../common/event_outcome';
-import { rangeFilter } from '../../../common/utils/range_filter';
+import { environmentQuery, rangeQuery } from '../../../common/utils/queries';
 import {
   getDocumentTypeFilterForAggregatedTransactions,
   getProcessorEventForAggregatedTransactions,
@@ -29,12 +29,14 @@ import {
 import { withApmSpan } from '../../utils/with_apm_span';
 
 export async function getErrorRate({
+  environment,
   serviceName,
   transactionType,
   transactionName,
   setup,
   searchAggregatedTransactions,
 }: {
+  environment?: string;
   serviceName: string;
   transactionType?: string;
   transactionName?: string;
@@ -57,17 +59,18 @@ export async function getErrorRate({
 
     const filter = [
       { term: { [SERVICE_NAME]: serviceName } },
-      { range: rangeFilter(start, end) },
       {
         terms: {
           [EVENT_OUTCOME]: [EventOutcome.failure, EventOutcome.success],
         },
       },
+      ...transactionNamefilter,
+      ...transactionTypefilter,
       ...getDocumentTypeFilterForAggregatedTransactions(
         searchAggregatedTransactions
       ),
-      ...transactionNamefilter,
-      ...transactionTypefilter,
+      ...rangeQuery(start, end),
+      ...environmentQuery(environment),
       ...esFilter,
     ];
 

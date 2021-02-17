@@ -21,6 +21,7 @@ import {
   ThreatLanguageOrUndefined,
   ConcurrentSearches,
   ItemsPerSearch,
+  ThreatIndicatorPathOrUndefined,
 } from '../../../../../common/detection_engine/schemas/types/threat_mapping';
 import { PartialFilter, RuleTypeParams } from '../../types';
 import {
@@ -70,6 +71,7 @@ export interface CreateThreatSignalsOptions {
   threatQuery: ThreatQuery;
   buildRuleMessage: BuildRuleMessage;
   threatIndex: ThreatIndex;
+  threatIndicatorPath: ThreatIndicatorPathOrUndefined;
   threatLanguage: ThreatLanguageOrUndefined;
   name: string;
   concurrentSearches: ConcurrentSearches;
@@ -214,6 +216,7 @@ export interface BuildThreatEnrichmentOptions {
   services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   threatFilters: PartialFilter[];
   threatIndex: ThreatIndex;
+  threatIndicatorPath: ThreatIndicatorPathOrUndefined;
   threatLanguage: ThreatLanguageOrUndefined;
   threatQuery: ThreatQuery;
 }
