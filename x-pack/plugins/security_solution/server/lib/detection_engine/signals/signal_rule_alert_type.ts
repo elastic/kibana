@@ -137,6 +137,7 @@ export const signalRulesAlertType = ({
         threatFilters,
         threatQuery,
         threatIndex,
+        threatIndicatorPath,
         threatMapping,
         threatLanguage,
         timestampOverride,
@@ -508,6 +509,7 @@ export const signalRulesAlertType = ({
             threatLanguage,
             buildRuleMessage,
             threatIndex,
+            threatIndicatorPath,
             concurrentSearches: concurrentSearches ?? 1,
             itemsPerSearch: itemsPerSearch ?? 9000,
           });

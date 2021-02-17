@@ -393,6 +393,7 @@ export const getResult = (): RuleAlertType => ({
     threatMapping: undefined,
     threatLanguage: undefined,
     threatIndex: undefined,
+    threatIndicatorPath: undefined,
     threatQuery: undefined,
     references: ['http://www.example.com', 'https://ww.example.com'],
     note: '# Investigative notes',
