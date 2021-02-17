@@ -32,12 +32,12 @@ The API returns the following:
 --------------------------------------------------
 [
   {
-    "id": ".email",
-    "name": "Email",
-    "minimumLicenseRequired": "gold",
-    "enabled": false,
-    "enabledInConfig": true,
-    "enabledInLicense": false
+    "id": ".email", <1>
+    "name": "Email", <2>
+    "minimumLicenseRequired": "gold", <3>
+    "enabled": false, <4>
+    "enabledInConfig": true, <5>
+    "enabledInLicense": false <6>
   },
   {
     "id": ".index",
@@ -50,27 +50,10 @@ The API returns the following:
 ]
 --------------------------------------------------
 
-Each action type object contains the following properties:
 
-[cols="2*<"]
-|===
-
-| `name`
-| The descriptive name of the action type.
-
-| `id`
-| The unique ID of the action type.
-
-| `minimumLicenseRequired`
-| The license required to use the action type.
-
-| `enabled`
-| Whether the action type is enabled or disabled in {kib}.
-
-| `enabledInConfig`
-| Whether the action type is enabled or disabled in the {kib} configuration `yml`.
-
-| `enabledInLicense`
-| Whether the action type is enabled or disabled due to license.
-
-|===
+<1> `id` - The unique ID of the action type.
+<2> `name` - The name of the action type.
+<3> `minimumLicenseRequired` - The license required to use the action type.
+<4> `enabled` - Specifies if the action type is enabled or disabled in {kib}.
+<5> `enabledInConfig` - Specifies if the action type is enabled or enabled in the {kib} .yml file.
+<6> `enabledInLicense` - Specifies if the action type is enabled or disabled in the license.
