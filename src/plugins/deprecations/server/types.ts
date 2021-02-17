@@ -18,12 +18,20 @@ export interface DeprecationDependencies {
   esClient: IScopedClusterClient;
   savedObjectsClient: SavedObjectsClientContract;
 }
-
 export interface DeprecationInfo {
   message: string;
   level: 'warning' | 'critical';
   documentationUrl?: string;
-  correctionAction?: () => void;
+  correctionActions: {
+    api?: {
+      path: string;
+      method: 'POST' | 'PUT';
+      body?: {
+        [key: string]: any;
+      };
+    };
+    manualSteps?: string[];
+  };
 }
 export interface DeprecationContext {
   pluginId: string;

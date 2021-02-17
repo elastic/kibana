@@ -27,6 +27,16 @@ export const getDeprecations = async ({ savedObjectsClient }: DeprecationDepende
       documentationUrl:
         'https://www.elastic.co/guide/en/kibana/master/dashboard.html#timelion-deprecation',
       level: 'warning',
+      correctiveActions: {
+        manualSteps: [
+          'Navigate to the Kibana Dashboard and click "Create dashboard".',
+          'Select Timelion from the "New Visualization" window.',
+          'Open a new tab, open the Timelion app, select the chart you want to copy, then copy the chart expression.',
+          'Go to Timelion, paste the chart expression in the Timelion expression field, then click Update.',
+          'In the toolbar, click Save.',
+          'On the Save visualization window, enter the visualization Title, then click Save and return.',
+        ],
+      },
     });
   }
 
