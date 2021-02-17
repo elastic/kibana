@@ -314,7 +314,7 @@ const RuleDetailsPageComponent = () => {
         />
       );
     } else if (
-      rule?.status === 'partial failure' &&
+      (rule?.status === 'warning' || rule?.status === 'partial failure') &&
       ruleDetailTab === RuleDetailTabs.alerts &&
       rule?.last_success_at != null
     ) {

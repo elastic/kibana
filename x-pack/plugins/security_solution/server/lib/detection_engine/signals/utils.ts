@@ -74,12 +74,12 @@ export const hasReadIndexPrivileges = async (
 
   if (indexesWithReadPrivileges.length > 0 && indexesWithNoReadPrivileges.length > 0) {
     // some indices have read privileges others do not.
-    // set a partial failure status
+    // set a warning status
     const errorString = `Missing required read privileges on the following indices: ${JSON.stringify(
       indexesWithNoReadPrivileges
     )}`;
     logger.error(buildRuleMessage(errorString));
-    await ruleStatusService.partialFailure(errorString);
+    await ruleStatusService.warning(errorString);
     return true;
   } else if (
     indexesWithReadPrivileges.length === 0 &&
@@ -91,7 +91,7 @@ export const hasReadIndexPrivileges = async (
       indexesWithNoReadPrivileges
     )}`;
     logger.error(buildRuleMessage(errorString));
-    await ruleStatusService.partialFailure(errorString);
+    await ruleStatusService.warning(errorString);
     return true;
   }
   return false;
@@ -114,7 +114,7 @@ export const hasTimestampFields = async (
       inputIndices
     )}`;
     logger.error(buildRuleMessage(errorString));
-    await ruleStatusService.error(errorString);
+    await ruleStatusService.warning(errorString);
     return true;
   } else if (
     !wroteStatus &&
@@ -123,7 +123,7 @@ export const hasTimestampFields = async (
       timestampFieldCapsResponse.body.fields[timestampField]?.unmapped?.indices != null)
   ) {
     // if there is a timestamp override and the unmapped array for the timestamp override key is not empty,
-    // partial failure
+    // warning
     const errorString = `The following indices are missing the ${
       timestampField === '@timestamp'
         ? 'timestamp field "@timestamp"'
@@ -134,7 +134,7 @@ export const hasTimestampFields = async (
         : timestampFieldCapsResponse.body.fields[timestampField].unmapped.indices
     )}`;
     logger.error(buildRuleMessage(errorString));
-    await ruleStatusService.partialFailure(errorString);
+    await ruleStatusService.warning(errorString);
     return true;
   }
   return wroteStatus;
