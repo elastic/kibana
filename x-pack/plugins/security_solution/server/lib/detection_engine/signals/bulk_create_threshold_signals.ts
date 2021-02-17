@@ -147,17 +147,16 @@ const getTransformedHits = (
               value: bucket.key,
             },
           ],
-          cardinality:
-            threshold.cardinality_field != null
-              ? [
-                  {
-                    field: Array.isArray(threshold.cardinality_field)
-                      ? threshold.cardinality_field[0]
-                      : threshold.cardinality_field,
-                    value: bucket.cardinality_count!.value,
-                  },
-                ]
-              : undefined,
+          cardinality: !isEmpty(threshold.cardinality_field)
+            ? [
+                {
+                  field: Array.isArray(threshold.cardinality_field)
+                    ? threshold.cardinality_field[0]
+                    : threshold.cardinality_field!,
+                  value: bucket.cardinality_count!.value,
+                },
+              ]
+            : undefined,
           topThresholdHits: bucket.top_threshold_hits,
           docCount: bucket.doc_count,
         };
