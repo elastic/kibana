@@ -85,13 +85,11 @@ export class MonitorReportsTask implements ReportingTask {
 
           try {
             const results = await reportingStore.findLongPendingReports();
-            if (!results || results.length < 1) {
-              return;
-            }
-            if (results.length) {
+            if (results && results.length) {
               this.logger.info(`Found ${results.length} pending reports to reschedule.`);
             } else {
               this.logger.debug(`Found 0 pending reports.`);
+              return;
             }
 
             for (const pending of results) {
