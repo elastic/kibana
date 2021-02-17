@@ -138,7 +138,7 @@ describe('send_email module', () => {
           "port": 1025,
           "secure": false,
           "tls": Object {
-            "rejectUnauthorized": true,
+            "rejectUnauthorized": false,
           },
         },
       ]
@@ -187,6 +187,9 @@ describe('send_email module', () => {
           "host": "example.com",
           "port": 1025,
           "secure": true,
+          "tls": Object {
+            "rejectUnauthorized": true,
+          },
         },
       ]
     `);
