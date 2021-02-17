@@ -172,18 +172,21 @@ export const createIncident = async ({
     }, 0) ?? 0;
 
   let comments: ExternalServiceComment[] = [];
+
   if (commentsToBeUpdated && Array.isArray(commentsToBeUpdated) && commentsToBeUpdated.length > 0) {
     const commentsMapping = mappings.find((m) => m.source === 'comments');
     if (commentsMapping?.action_type !== 'nothing') {
       comments = transformComments(commentsToBeUpdated, ['informationAdded']);
-      if (totalAlerts > 0) {
-        comments.push({
-          comment: `Elastic Security Alerts attached to the case: ${totalAlerts}`,
-          commentId: '',
-        });
-      }
     }
   }
+
+  if (totalAlerts > 0) {
+    comments.push({
+      comment: `Elastic Security Alerts attached to the case: ${totalAlerts}`,
+      commentId: '',
+    });
+  }
+
   return { incident, comments };
 };
 
