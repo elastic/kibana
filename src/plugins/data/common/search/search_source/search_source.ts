@@ -59,7 +59,7 @@
  */
 
 import { setWith } from '@elastic/safer-lodash-set';
-import { uniqueId, keyBy, pick, difference, omit, isFunction, isEqual } from 'lodash';
+import { uniqueId, keyBy, pick, difference, isFunction, isEqual } from 'lodash';
 import { map, switchMap, tap } from 'rxjs/operators';
 import { defer, from } from 'rxjs';
 import { isObject } from 'rxjs/internal-compatibility';
@@ -114,12 +114,12 @@ export class SearchSource {
   private readonly dependencies: SearchSourceDependencies;
 
   constructor(fields: SearchSourceFields = {}, dependencies: SearchSourceDependencies) {
-    this.fields = fields;
+    const { parent, ...currentFields } = fields;
+    this.fields = currentFields;
     this.dependencies = dependencies;
 
-    if (fields.parent) {
-      this.setParent(new SearchSource(fields.parent, dependencies));
-      delete this.fields.parent;
+    if (parent) {
+      this.setParent(new SearchSource(parent, dependencies));
     }
   }
 
@@ -656,7 +656,7 @@ export class SearchSource {
    * serializes search source fields (which can later be passed to {@link ISearchStartSearchSource})
    */
   public getSerializedFields(recurse = false) {
-    const { filter: originalFilters, ...searchSourceFields } = omit(this.getFields(), ['size']);
+    const { filter: originalFilters, size: omit, ...searchSourceFields } = this.getFields();
     let serializedSearchSourceFields: SearchSourceFields = {
       ...searchSourceFields,
       index: (searchSourceFields.index ? searchSourceFields.index.id : undefined) as any,
