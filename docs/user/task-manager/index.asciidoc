@@ -1,2 +1,6 @@
+[role="xpack"]
+[[task-manager]]
+= Task Manager
+
 include::task-manager-health-monitoring.asciidoc[]
 include::task-manager-troubleshooting.asciidoc[]
