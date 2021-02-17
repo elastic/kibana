@@ -26,7 +26,6 @@ import { EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
-import d3 from 'd3';
 import { useChartTheme } from '../../../../../observability/public';
 import { asAbsoluteDateTime } from '../../../../common/utils/formatters';
 import { RectCoordinate, TimeSeries } from '../../../../typings/timeseries';
@@ -80,12 +79,10 @@ export function TimeseriesChart({
   const theme = useTheme();
   const chartTheme = useChartTheme();
 
-  const xValues = timeseries
-    .map(({ data }) => data.map(({ x }) => x))
-    .flatMap((_) => _);
+  const xValues = timeseries.flatMap(({ data }) => data.map(({ x }) => x));
 
-  const min = d3.min(xValues);
-  const max = d3.max(xValues);
+  const min = Math.min(...xValues);
+  const max = Math.max(...xValues);
 
   const xFormatter = niceTimeFormatter([min, max]);
 
