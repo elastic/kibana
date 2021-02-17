@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import React from 'react';
 import moment from 'moment';
 import { nextAriaLabel, prevAriaLabel } from './translations';
 import { getShortTimeStamp } from '../../../../overview/monitor_list/columns/monitor_status_column';
+import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common';
 
 export interface StepImageCaptionProps {
   captionContent: string;
@@ -20,6 +21,13 @@ export interface StepImageCaptionProps {
   timestamp: string;
 }
 
+const ImageCaption = euiStyled.div`
+  background-color: ${(props) => props.theme.eui.euiColorLightestShade};
+  display: inline-block;
+  width: 100%;
+  text-decoration: none;
+`;
+
 export const StepImageCaption: React.FC<StepImageCaptionProps> = ({
   captionContent,
   imgSrc,
@@ -29,41 +37,42 @@ export const StepImageCaption: React.FC<StepImageCaptionProps> = ({
   timestamp,
 }) => {
   return (
-    <>
+    <ImageCaption>
       <div className="stepArrowsFullScreen">
         {imgSrc && (
-          <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="center">
+          <EuiFlexGroup alignItems="center" justifyContent="center">
             <EuiFlexItem grow={false}>
-              <EuiButtonIcon
+              <EuiButtonEmpty
                 disabled={stepNumber === 1}
-                size="m"
                 onClick={() => {
                   setStepNumber(stepNumber - 1);
                 }}
                 iconType="arrowLeft"
                 aria-label={prevAriaLabel}
-              />
+              >
+                {prevAriaLabel}
+              </EuiButtonEmpty>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiText>{captionContent}</EuiText>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButtonIcon
+              <EuiButtonEmpty
                 disabled={stepNumber === maxSteps}
-                size="m"
                 onClick={() => {
                   setStepNumber(stepNumber + 1);
                 }}
                 iconType="arrowRight"
+                iconSide="right"
                 aria-label={nextAriaLabel}
-              />
+              >
+                {nextAriaLabel}
+              </EuiButtonEmpty>
             </EuiFlexItem>
           </EuiFlexGroup>
         )}
+        <span className="eui-textNoWrap">{getShortTimeStamp(moment(timestamp))}</span>
       </div>
-      {/* TODO: Add link to details page once it's available */}
-      <span className="eui-textNoWrap">{getShortTimeStamp(moment(timestamp))}</span>
-      <EuiSpacer size="s" />
-    </>
+    </ImageCaption>
   );
 };
