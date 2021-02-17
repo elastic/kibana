@@ -674,7 +674,7 @@ function discoverController($route, $scope, Promise) {
     history.push('/');
   };
 
-  const showUnmappedFieldsDefaultValue = $scope.useNewFieldsApi && !!$scope.opts.savedSearch.pre712;
+  const showUnmappedFieldsDefaultValue = $scope.useNewFieldsApi;
   let showUnmappedFields = showUnmappedFieldsDefaultValue;
 
   const onChangeUnmappedFields = (value) => {
