@@ -6,6 +6,8 @@
  */
 
 import React from 'react';
+
+import { HttpSetup } from 'src/core/public';
 import { DocLinksStart } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -32,6 +34,7 @@ enum ReindexFlyoutStep {
 
 interface ReindexFlyoutProps {
   indexName: string;
+  http: HttpSetup;
   closeFlyout: () => void;
   reindexState: ReindexState;
   startReindex: () => void;
@@ -44,8 +47,12 @@ interface ReindexFlyoutState {
   currentFlyoutStep: ReindexFlyoutStep;
 }
 
-const getOpenAndCloseIndexDocLink = (docLinks: DocLinksStart) => (
-  <EuiLink target="_blank" href={`${docLinks.links.apis.openIndex}`}>
+// eslint-disable-next-line @typescript-eslint/naming-convention
+const getOpenAndCloseIndexDocLink = ({ ELASTIC_WEBSITE_URL, DOC_LINK_VERSION }: DocLinksStart) => (
+  <EuiLink
+    target="_blank"
+    href={`${ELASTIC_WEBSITE_URL}/guide/en/elasticsearch/reference/${DOC_LINK_VERSION}/indices-open-close.html`}
+  >
     {i18n.translate(
       'xpack.upgradeAssistant.checkupTab.reindexing.flyout.openAndCloseDocumentation',
       { defaultMessage: 'documentation' }
@@ -134,6 +141,7 @@ export class ReindexFlyout extends React.Component<ReindexFlyoutProps, ReindexFl
       case ReindexFlyoutStep.checklist:
         flyoutContents = (
           <ChecklistFlyoutStep
+            http={this.props.http}
             renderGlobalCallouts={() => globalCallout}
             closeFlyout={closeFlyout}
             reindexState={reindexState}

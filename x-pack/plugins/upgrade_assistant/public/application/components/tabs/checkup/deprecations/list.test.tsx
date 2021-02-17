@@ -75,12 +75,14 @@ describe('DeprecationList', () => {
                 "blockerForReindexing": undefined,
                 "details": undefined,
                 "index": "0",
+                "needsDefaultFields": false,
                 "reindex": false,
               },
               Object {
                 "blockerForReindexing": undefined,
                 "details": undefined,
                 "index": "1",
+                "needsDefaultFields": false,
                 "reindex": false,
               },
             ]

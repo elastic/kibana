@@ -7,6 +7,7 @@
 
 import { kibanaResponseFactory } from 'src/core/server';
 import { licensingMock } from '../../../../licensing/server/mocks';
+import { apmOSSPluginSetupMock } from '../../../../../../src/plugins/apm_oss/server/mocks';
 import { createMockRouter, MockRouter, routeHandlerContextMock } from '../__mocks__/routes.mock';
 import { createRequestMock } from '../__mocks__/request.mock';
 
@@ -60,6 +61,7 @@ describe('reindex API', () => {
     routeDependencies = {
       credentialStore,
       router: mockRouter,
+      apmOSS: apmOSSPluginSetupMock.create(),
       licensing: licensingMock.createSetup(),
     };
     registerReindexIndicesRoutes(routeDependencies, () => worker);

@@ -5,13 +5,21 @@
  * 2.0.
  */
 
+import { first } from 'rxjs/operators';
 import { getUpgradeAssistantStatus } from '../lib/es_migration_apis';
 import { versionCheckHandlerWrapper } from '../lib/es_version_precheck';
+import { extractIndexPatterns } from '../lib/apm/extract_index_patterns';
 import { RouteDependencies } from '../types';
 import { reindexActionsFactory } from '../lib/reindexing/reindex_actions';
 import { reindexServiceFactory } from '../lib/reindexing';
 
-export function registerClusterCheckupRoutes({ cloud, router, licensing, log }: RouteDependencies) {
+export function registerClusterCheckupRoutes({
+  cloud,
+  router,
+  apmOSS,
+  licensing,
+  log,
+}: RouteDependencies) {
   const isCloudEnabled = Boolean(cloud?.isCloudEnabled);
 
   router.get(
@@ -31,7 +39,10 @@ export function registerClusterCheckupRoutes({ cloud, router, licensing, log }: 
         response
       ) => {
         try {
-          const status = await getUpgradeAssistantStatus(client, isCloudEnabled);
+          const apmConfig = await apmOSS.config$.pipe(first()).toPromise();
+          const indexPatterns = extractIndexPatterns(apmConfig);
+
+          const status = await getUpgradeAssistantStatus(client, isCloudEnabled, indexPatterns);
 
           const asCurrentUser = client.asCurrentUser;
           const reindexActions = reindexActionsFactory(savedObjectsClient, asCurrentUser);

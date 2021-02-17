@@ -17,13 +17,16 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { FixDefaultFieldsButton } from './default_fields/button';
 import { ReindexButton } from './reindex';
 import { AppContext } from '../../../../app_context';
 import { EnrichedDeprecationInfo } from '../../../../../../common/types';
 
 interface DeprecationCellProps {
   items?: Array<{ title?: string; body: string }>;
-  reindexIndexName?: string;
+  indexName?: string;
+  reindex?: boolean;
+  needsDefaultFields?: boolean;
   docUrl?: string;
   headline?: string;
   healthColor?: string;
@@ -37,7 +40,9 @@ interface DeprecationCellProps {
 export const DeprecationCell: FunctionComponent<DeprecationCellProps> = ({
   headline,
   healthColor,
-  reindexIndexName,
+  indexName,
+  reindex,
+  needsDefaultFields,
   docUrl,
   items = [],
   children,
@@ -80,17 +85,25 @@ export const DeprecationCell: FunctionComponent<DeprecationCellProps> = ({
         ))}
       </EuiFlexItem>
 
-      {reindexIndexName && (
+      {reindex && (
         <EuiFlexItem grow={false}>
           <AppContext.Consumer>
             {({ http, docLinks }) => (
               <ReindexButton
                 docLinks={docLinks}
                 reindexBlocker={reindexBlocker}
-                indexName={reindexIndexName}
+                indexName={indexName!}
                 http={http}
               />
             )}
+          </AppContext.Consumer>
+        </EuiFlexItem>
+      )}
+
+      {needsDefaultFields && (
+        <EuiFlexItem grow={false}>
+          <AppContext.Consumer>
+            {({ http }) => <FixDefaultFieldsButton indexName={indexName!} http={http} />}
           </AppContext.Consumer>
         </EuiFlexItem>
       )}

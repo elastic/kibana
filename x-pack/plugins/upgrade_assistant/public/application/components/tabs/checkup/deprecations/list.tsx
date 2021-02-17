@@ -35,7 +35,9 @@ const MessageDeprecation: FunctionComponent<{ deprecation: EnrichedDeprecationIn
       reindexBlocker={deprecation.blockerForReindexing}
       headline={deprecation.message}
       healthColor={COLOR_MAP[deprecation.level]}
-      reindexIndexName={deprecation.reindex ? deprecation.index! : undefined}
+      indexName={deprecation.index}
+      reindex={deprecation.reindex}
+      needsDefaultFields={deprecation.needsDefaultFields}
       docUrl={deprecation.url}
       items={items}
     />
@@ -96,6 +98,7 @@ export const DeprecationList: FunctionComponent<{
       index: dep.index!,
       details: dep.details,
       reindex: dep.reindex === true,
+      needsDefaultFields: dep.needsDefaultFields === true,
       blockerForReindexing: dep.blockerForReindexing,
     }));
     return <IndexDeprecation indices={indices} deprecation={deprecations[0]} />;

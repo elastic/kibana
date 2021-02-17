@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ReindexWarning } from '../../../common/types';
 import { versionService } from '../version';
 import { MOCK_VERSION_STRING, getMockVersionInfo } from '../__fixtures__/version';
 
@@ -128,6 +129,24 @@ describe('getReindexWarnings', () => {
       getReindexWarnings({
         settings: {},
         mappings: {},
+      })
+    ).toEqual([]);
+  });
+
+  it('returns customTypeName for non-_doc mapping types', () => {
+    expect(
+      getReindexWarnings({
+        settings: {},
+        mappings: { doc: {} },
+      })
+    ).toEqual([ReindexWarning.customTypeName]);
+  });
+
+  it('does not return customTypeName for _doc mapping types', () => {
+    expect(
+      getReindexWarnings({
+        settings: {},
+        mappings: { _doc: {} },
       })
     ).toEqual([]);
   });

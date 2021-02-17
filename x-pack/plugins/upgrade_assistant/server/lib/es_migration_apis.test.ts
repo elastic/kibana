@@ -24,6 +24,7 @@ describe('getUpgradeAssistantStatus', () => {
   const resolvedIndices = {
     indices: fakeIndexNames.map((f) => ({ name: f, attributes: ['open'] })),
   };
+
   // @ts-expect-error mock data is too loosely typed
   const deprecationsResponse: DeprecationAPIResponse = _.cloneDeep(fakeDeprecations);
 
@@ -36,12 +37,12 @@ describe('getUpgradeAssistantStatus', () => {
   esClient.asCurrentUser.indices.resolveIndex.mockResolvedValue(asApiResponse(resolvedIndices));
 
   it('calls /_migration/deprecations', async () => {
-    await getUpgradeAssistantStatus(esClient, false);
+    await getUpgradeAssistantStatus(esClient, false, []);
     expect(esClient.asCurrentUser.migration.deprecations).toHaveBeenCalled();
   });
 
   it('returns the correct shape of data', async () => {
-    const resp = await getUpgradeAssistantStatus(esClient, false);
+    const resp = await getUpgradeAssistantStatus(esClient, false, []);
     expect(resp).toMatchSnapshot();
   });
 
@@ -55,7 +56,7 @@ describe('getUpgradeAssistantStatus', () => {
       })
     );
 
-    await expect(getUpgradeAssistantStatus(esClient, false)).resolves.toHaveProperty(
+    await expect(getUpgradeAssistantStatus(esClient, false, [])).resolves.toHaveProperty(
       'readyForUpgrade',
       false
     );
@@ -71,7 +72,7 @@ describe('getUpgradeAssistantStatus', () => {
       })
     );
 
-    await expect(getUpgradeAssistantStatus(esClient, false)).resolves.toHaveProperty(
+    await expect(getUpgradeAssistantStatus(esClient, false, [])).resolves.toHaveProperty(
       'readyForUpgrade',
       true
     );
@@ -93,7 +94,7 @@ describe('getUpgradeAssistantStatus', () => {
       })
     );
 
-    const result = await getUpgradeAssistantStatus(esClient, true);
+    const result = await getUpgradeAssistantStatus(esClient, true, []);
 
     expect(result).toHaveProperty('readyForUpgrade', true);
     expect(result).toHaveProperty('cluster', []);

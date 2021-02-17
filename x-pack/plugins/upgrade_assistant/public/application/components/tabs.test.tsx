@@ -18,7 +18,7 @@ import { OverviewTab } from './tabs/overview';
 const promisesToResolve = () => new Promise((resolve) => setTimeout(resolve, 0));
 
 const mockHttp = httpServiceMock.createSetupContract();
-const mockKibanaVersion = new SemVer('8.0.0');
+const mockKibanaVersion = new SemVer('7.0.0');
 
 jest.mock('../app_context', () => {
   return {

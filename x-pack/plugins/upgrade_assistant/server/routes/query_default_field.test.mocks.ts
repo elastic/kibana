@@ -5,5 +5,8 @@
  * 2.0.
  */
 
-export { reindexServiceFactory, isSystemIndex } from './reindex_service';
-export { ReindexWorker } from './worker';
+export const mockAddDefaultField = jest.fn();
+
+jest.mock('../lib/query_default_field', () => ({
+  addDefaultField: mockAddDefaultField,
+}));

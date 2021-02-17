@@ -14,7 +14,7 @@ exports[`CheckupTab render with deprecations 1`] = `
         id="xpack.upgradeAssistant.checkupTab.tabDetail"
         values={
           Object {
-            "nextEsVersion": "9.x",
+            "nextEsVersion": "8.x",
             "strongCheckupLabel": <strong>
               index
             </strong>,
@@ -298,7 +298,7 @@ exports[`CheckupTab render with error 1`] = `
         id="xpack.upgradeAssistant.checkupTab.tabDetail"
         values={
           Object {
-            "nextEsVersion": "9.x",
+            "nextEsVersion": "8.x",
             "strongCheckupLabel": <strong>
               index
             </strong>,
@@ -366,7 +366,7 @@ exports[`CheckupTab render without deprecations 1`] = `
         id="xpack.upgradeAssistant.checkupTab.tabDetail"
         values={
           Object {
-            "nextEsVersion": "9.x",
+            "nextEsVersion": "8.x",
             "strongCheckupLabel": <strong>
               index
             </strong>,

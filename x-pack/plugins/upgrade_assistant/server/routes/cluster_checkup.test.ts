@@ -6,6 +6,7 @@
  */
 
 import { kibanaResponseFactory } from 'src/core/server';
+import { apmOSSPluginSetupMock } from '../../../../../src/plugins/apm_oss/server/mocks';
 import { createMockRouter, MockRouter, routeHandlerContextMock } from './__mocks__/routes.mock';
 import { createRequestMock } from './__mocks__/request.mock';
 
@@ -35,6 +36,7 @@ describe('cluster checkup API', () => {
       cloud: {
         isCloudEnabled: true,
       },
+      apmOSS: apmOSSPluginSetupMock.create({ indexPattern: 'apm-*' }),
       router: mockRouter,
     };
     registerClusterCheckupRoutes(routeDependencies);
@@ -59,6 +61,24 @@ describe('cluster checkup API', () => {
         pathPattern: '/api/upgrade_assistant/status',
       })(routeHandlerContextMock, createRequestMock(), kibanaResponseFactory);
       expect(spy.mock.calls[0][1]).toBe(true);
+    });
+  });
+
+  describe('with APM enabled', () => {
+    it('is provided to getUpgradeAssistantStatus', async () => {
+      const spy = jest.spyOn(MigrationApis, 'getUpgradeAssistantStatus');
+      await routeDependencies.router.getHandler({
+        method: 'get',
+        pathPattern: '/api/upgrade_assistant/status',
+      })(routeHandlerContextMock, createRequestMock(), kibanaResponseFactory);
+
+      MigrationApis.getUpgradeAssistantStatus.mockResolvedValue({
+        cluster: [],
+        indices: [],
+        nodes: [],
+      });
+
+      expect(spy.mock.calls[0][2]).toEqual(['apm-*']);
     });
   });
 
