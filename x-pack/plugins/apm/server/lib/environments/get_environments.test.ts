@@ -11,7 +11,7 @@ import {
   inspectSearchParams,
 } from '../../utils/test_helpers';
 
-describe('ui filter queries', () => {
+describe('getEnvironments', () => {
   let mock: SearchParamsMock;
 
   afterEach(() => {

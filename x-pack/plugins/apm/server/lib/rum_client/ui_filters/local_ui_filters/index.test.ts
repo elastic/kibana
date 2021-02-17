@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { getLocalUIFilters } from './';
+import { getLocalUIFilters } from '.';
 import {
   SearchParamsMock,
   inspectSearchParams,
-} from '../../../utils/test_helpers';
-import { getServicesProjection } from '../../../projections/services';
+} from '../../../../utils/test_helpers';
+import { getServicesProjection } from '../../../../projections/services';
 
-describe('local ui filter queries', () => {
+describe('getLocalUIFilters', () => {
   let mock: SearchParamsMock;
 
   beforeEach(() => {
-    jest.mock('../../helpers/convert_ui_filters/get_es_filter', () => {
+    jest.mock('../../../helpers/convert_ui_filters/get_es_filter', () => {
       return [];
     });
   });
