@@ -30,7 +30,7 @@ Create {kib} alerts.
   (Optional, string) A Duration specifying how often this alert should fire the same actions. This will prevent the alert from sending out the same notification over and over. For example, if an alert with a `schedule` of 1 minute stays in a triggered state for 90 minutes, setting a `throttle` of `10m` or `1h` will prevent it from sending 90 notifications over this period.
 
 `notifyWhen`::
-  (Required, string) Defines the conditions for notifications thottling from the three available option types 'onActionGroupChange', 'onActiveAlert', 'onThrottleInterval'.
+  (Required, string) The condition for throttling the notification: `onActionGroupChange`, `onActiveAlert`, or `onThrottleInterval`.
 
 `enabled`::
   (Optional, boolean) Indicate if you want the alert to start executing on an interval basis after it has been created.
