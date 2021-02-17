@@ -136,11 +136,8 @@ export const RoleMappingsTable: React.FC<IRoleMappingsTableProps> = ({
                     </EuiTableRowCell>
                   )}
                   <EuiTableRowCell>
-                    {(!myRole || myRole.ability.invitableRoleTypes().includes(roleType)) && id && (
-                      <Link to={getRoleMappingPath(id)}>Manage</Link>
-                    )}
-                    {(!myRole || myRole.ability.invitableRoleTypes().includes(roleType)) &&
-                      toolTip && <EuiIconTip position="left" content={toolTip.content} />}
+                    {id && <Link to={getRoleMappingPath(id)}>Manage</Link>}
+                    {toolTip && <EuiIconTip position="left" content={toolTip.content} />}
                   </EuiTableRowCell>
                 </EuiTableRow>
               )
