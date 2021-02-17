@@ -30,17 +30,15 @@ export const FileHash = React.memo<Props>(({ contextId, eventId, fileHashSha256 
 
   return (
     <HashFlexGroup alignItems="center" direction="column" gutterSize="none">
-      {!isNillEmptyOrNotFinite(fileHashSha256) && (
-        <TokensFlexItem grow={false} component="div">
-          <DraggableBadge
-            contextId={contextId}
-            eventId={eventId}
-            field="file.hash.sha256"
-            iconType="number"
-            value={fileHashSha256}
-          />
-        </TokensFlexItem>
-      )}
+      <TokensFlexItem grow={false} component="div">
+        <DraggableBadge
+          contextId={contextId}
+          eventId={eventId}
+          field="file.hash.sha256"
+          iconType="number"
+          value={fileHashSha256}
+        />
+      </TokensFlexItem>
     </HashFlexGroup>
   );
 });

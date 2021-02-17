@@ -30,17 +30,15 @@ export const ProcessHash = React.memo<Props>(({ contextId, eventId, processHashS
 
   return (
     <HashFlexGroup alignItems="center" direction="column" gutterSize="none">
-      {!isNillEmptyOrNotFinite(processHashSha256) && (
-        <TokensFlexItem grow={false} component="div">
-          <DraggableBadge
-            contextId={contextId}
-            eventId={eventId}
-            field="process.hash.sha256"
-            iconType="number"
-            value={processHashSha256}
-          />
-        </TokensFlexItem>
-      )}
+      <TokensFlexItem grow={false} component="div">
+        <DraggableBadge
+          contextId={contextId}
+          eventId={eventId}
+          field="process.hash.sha256"
+          iconType="number"
+          value={processHashSha256}
+        />
+      </TokensFlexItem>
     </HashFlexGroup>
   );
 });
