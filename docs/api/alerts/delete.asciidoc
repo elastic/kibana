@@ -6,7 +6,7 @@
 
 Remove {kib} alerts.
 
-WARNING: Once you delete an alert, _it cannot be recovered_.
+WARNING: Once you delete an alert, you cannot recover it.
 
 [[alerts-api-delete-request]]
 ==== Request
