@@ -36,7 +36,7 @@ export function useEnvironmentsFetcher({
     (callApmApi) => {
       if (start && end) {
         return callApmApi({
-          endpoint: 'GET /api/apm/ui_filters/environments',
+          endpoint: 'GET /api/apm/environments',
           params: {
             query: {
               start,
