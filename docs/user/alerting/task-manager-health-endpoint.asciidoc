@@ -99,7 +99,7 @@ Or post in the https://discuss.elastic.co/[Elastic forum].
 
 [float]
 [[task-manager-health-scheduled-tasks-small-schedule-interval-run-late]]
-=== Scheduled Tasks with Small Schedule Intervals Run Late
+===== Scheduled Tasks with Small Schedule Intervals Run Late
 
 *Symptom*:
 Tasks are scheduled to run every 2 seconds but they seem to be running too late
@@ -112,7 +112,7 @@ This can be addressed by adjusting the <<task-manager-settings,`xpack.task_manag
 
 [float]
 [[task-manager-health-tasks-run-late]]
-=== Tasks Run Late
+===== Tasks Run Late
 
 *Symptoms*:
 Recurring Tasks run at an inconsistent cadence, often running late.
@@ -134,14 +134,14 @@ Before we dig deeper into diagnosing the underlying cause, it is worth understan
 
 [float]
 [[task-manager-health-resolution-scale-horizontally]]
-==== Scale Horizontaly
+====== Scale Horizontaly
 
 At times it the most sustainbale approach might be to expand the throughput of your cluster by provisioning additional {kib} instances.
 By default, each additional {kib} instance will add an additional 10 tasks that your cluster can run concurrenctly. You can also scale each {kib} instance vertically, if your dignosis indicates they can handle the additiuonal workload.
 
 [float]
 [[task-manager-health-resolution-scale-vertically]]
-==== Scale Vertically
+====== Scale Vertically
 
 Other times it, might be preferable to increase the throughput of individual {kib} instances.
 
@@ -149,7 +149,7 @@ Tweak the *Max Workers* via the <<task-manager-settings,`xpack.task_manager.max_
 Tweak the *Poll Interval* via the <<task-manager-settings,`xpack.task_manager.poll_interval`>> setting, which would allow each {kib} to pull scheduled tasks at a higher rate, but keep in mind that this could impact the performance of the {es} cluster as their workload would be higher.
 
 [float]
-==== Diagnosing A Root Cause
+====== Diagnosing A Root Cause
 
 The following is a step-by-step guide to making sense of the output from the Task Manager Health endpoint. 
 
@@ -324,7 +324,7 @@ The API returns the following:
 
 [float]
 [[task-manager-health-evaluate-the-configuration]]
-===== Evaluate the Configuration
+====== Evaluate the Configuration
 
 *Theory*:
 Perhaps {kib} is configured to poll for tasks at a reduced rate?
@@ -395,7 +395,7 @@ In such a case a deeper investigation into the high error rate experienced by th
 
 [float]
 [[task-manager-health-evaluate-the-runtime]]
-===== Evaluate the Runtime
+====== Evaluate the Runtime
 
 [[task-manager-health-evaluate-the-runtime-polling]]
 *Theory*:
@@ -537,6 +537,8 @@ In the above hypothetical scenario, it would be worth experimenting with both op
 If your {kib} instances have the capacity for higher resource utilization, for instance, it might be easiest to start by scaling vertically.
 If, on the other hand, your {kib} instances are already experiencing high resource utilization, then it might be better to scale horizontally by provisioning an additional {kib} instance.
 
+By <<task-manager-health-evaluate-the-workload, evaluating the Workload>> it is possible to asses the scale that the system is trying to handle.
+
 [[task-manager-health-evaluate-the-runtime-long-running-task]]
 *Theory*:
 Perhaps tasks aren't "running late" so much as "running for too long"?
@@ -644,4 +646,8 @@ Evaluating the health stats above, we can see the following output under `stats.
 
 We can infer from these stats that most `actions:.index` tasks, which back the `ES Index` {kib} action, are failing a lot.
 Resolving that would require deeper investigation into the {kib} Server Log, where the exact errors would be logged, and addressing the specific errors identified in the logs.
+
+[float]
+[[task-manager-health-evaluate-the-workload]]
+====== Evaluate the Workload
 
