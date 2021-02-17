@@ -12,10 +12,10 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { StepScreenshotDisplay } from '../../step_screenshot_display';
 import { Ping } from '../../../../../common/runtime_types/ping';
 import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
-import { useUiSetting$ } from '../../../../../../../../src/plugins/kibana_react/public';
 import { useFetcher } from '../../../../../../observability/public';
 import { fetchLastSuccessfulStep } from '../../../../state/api/journey';
 import { ScreenshotLink } from './screenshot_link';
+import { getShortTimeStamp } from '../../../overview/monitor_list/columns/monitor_status_column';
 
 const Label = euiStyled.div`
   margin-bottom: ${(props) => props.theme.eui.paddingSizes.xs};
@@ -28,8 +28,6 @@ interface Props {
 }
 
 export const StepScreenshots = ({ step }: Props) => {
-  const [dateFormat] = useUiSetting$<string>('dateFormat');
-
   const isSucceeded = step.synthetics?.payload?.status === 'succeeded';
 
   const { data: lastSuccessfulStep } = useFetcher(() => {
@@ -67,7 +65,7 @@ export const StepScreenshots = ({ step }: Props) => {
           lazyLoad={false}
         />
         <EuiSpacer size="xs" />
-        <Label>{moment(step.timestamp).format(dateFormat)}</Label>
+        <Label>{getShortTimeStamp(moment(step.timestamp))}</Label>
       </EuiFlexItem>
       {!isSucceeded && lastSuccessfulStep?.monitor && (
         <EuiFlexItem>
@@ -80,7 +78,7 @@ export const StepScreenshots = ({ step }: Props) => {
             lazyLoad={false}
           />
           <EuiSpacer size="xs" />
-          <Label>{moment(lastSuccessfulStep.timestamp).format(dateFormat)}</Label>
+          <Label>{getShortTimeStamp(moment(lastSuccessfulStep.timestamp))}</Label>
         </EuiFlexItem>
       )}
     </EuiFlexGroup>

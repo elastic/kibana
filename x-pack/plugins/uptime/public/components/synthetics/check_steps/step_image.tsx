@@ -18,7 +18,11 @@ export const StepImage = ({ step }: Props) => {
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s">
       <EuiFlexItem grow={false}>
-        <PingTimestamp ping={step} showNavBtn={false} />
+        <PingTimestamp
+          ping={step}
+          showNavBtn={false}
+          initialStepNo={step.synthetics?.step?.index}
+        />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiText>{step.synthetics?.step?.name}</EuiText>

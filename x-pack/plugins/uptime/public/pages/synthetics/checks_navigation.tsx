@@ -10,8 +10,8 @@ import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui
 import { FormattedMessage } from '@kbn/i18n/react';
 import { useHistory } from 'react-router-dom';
 import moment from 'moment';
-import { useUiSetting$ } from '../../../../../../src/plugins/kibana_react/public';
 import { SyntheticsJourneyApiResponse } from '../../../common/runtime_types/ping';
+import { getShortTimeStamp } from '../../components/overview/monitor_list/columns/monitor_status_column';
 
 interface Props {
   timestamp: string;
@@ -19,8 +19,6 @@ interface Props {
 }
 
 export const ChecksNavigation = ({ timestamp, details }: Props) => {
-  const [dateFormat] = useUiSetting$<string>('dateFormat');
-
   const history = useHistory();
 
   return (
@@ -40,9 +38,7 @@ export const ChecksNavigation = ({ timestamp, details }: Props) => {
         </EuiButtonEmpty>
       </EuiFlexItem>
       <EuiFlexItem>
-        <EuiText className="eui-textNoWrap">
-          {moment(timestamp).format(dateFormat).toString()}
-        </EuiText>
+        <EuiText className="eui-textNoWrap">{getShortTimeStamp(moment(timestamp))}</EuiText>
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiButtonEmpty

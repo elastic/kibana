@@ -41,10 +41,11 @@ interface Props {
   label?: string;
   ping: Ping;
   showNavBtn?: boolean;
+  initialStepNo?: number;
 }
 
-export const PingTimestamp = ({ label, ping, showNavBtn = true }: Props) => {
-  const [stepNumber, setStepNumber] = useState(1);
+export const PingTimestamp = ({ label, ping, showNavBtn = true, initialStepNo = 1 }: Props) => {
+  const [stepNumber, setStepNumber] = useState(initialStepNo);
   const [isImagePopoverOpen, setIsImagePopoverOpen] = useState(false);
 
   const [stepImages, setStepImages] = useState<string[]>([]);

@@ -8,10 +8,11 @@
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import { useBreadcrumbs } from '../../../../hooks/use_breadcrumbs';
-import { useKibana, useUiSetting$ } from '../../../../../../../../src/plugins/kibana_react/public';
+import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import { JourneyState } from '../../../../state/reducers/journey';
 import { Ping } from '../../../../../common/runtime_types/ping';
 import { PLUGIN } from '../../../../../common/constants/plugin';
+import { getShortTimeStamp } from '../../../overview/monitor_list/columns/monitor_status_column';
 
 interface Props {
   details: JourneyState['details'];
@@ -24,8 +25,6 @@ export const useMonitorBreadcrumb = ({
   activeStep,
   performanceBreakDownView = false,
 }: Props) => {
-  const [dateFormat] = useUiSetting$<string>('dateFormat');
-
   const kibana = useKibana();
   const appPath = kibana.services.application?.getUrlForApp(PLUGIN.ID) ?? '';
 
@@ -41,7 +40,7 @@ export const useMonitorBreadcrumb = ({
     ...(details?.journey?.monitor?.check_group
       ? [
           {
-            text: moment(details?.timestamp).format(dateFormat),
+            text: getShortTimeStamp(moment(details?.timestamp)),
             href: `${appPath}/journey/${details.journey.monitor.check_group}/steps`,
           },
         ]
