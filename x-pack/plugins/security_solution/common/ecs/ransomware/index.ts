@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export interface RansomwareEcs {
+export interface Ransomware {
   feature?: string[];
   score?: string[];
   version?: number[];
