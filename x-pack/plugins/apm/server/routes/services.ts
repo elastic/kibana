@@ -27,7 +27,10 @@ import { offsetPreviousPeriodCoordinates } from '../utils/offset_previous_period
 import { createRoute } from './create_route';
 import { comparisonRangeRt, rangeRt, uiFiltersRt } from './default_api_types';
 import { withApmSpan } from '../utils/with_apm_span';
-import { latencyAggregationTypeRt } from '../../common/latency_aggregation_types';
+import {
+  latencyAggregationTypeRt,
+  LatencyAggregationType,
+} from '../../common/latency_aggregation_types';
 
 export const servicesRoute = createRoute({
   endpoint: 'GET /api/apm/services',
@@ -401,11 +404,9 @@ export const serviceInstancesRoute = createRoute({
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
     const { serviceName } = context.params.path;
-    const {
-      latencyAggregationType,
-      transactionType,
-      numBuckets,
-    } = context.params.query;
+    const { transactionType, numBuckets } = context.params.query;
+    const latencyAggregationType = (context.params.query
+      .latencyAggregationType as unknown) as LatencyAggregationType;
 
     const searchAggregatedTransactions = await getSearchAggregatedTransactions(
       setup
