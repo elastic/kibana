@@ -11,14 +11,6 @@ import { transformThresholdResultsToEcs } from './bulk_create_threshold_signals'
 import { calculateThresholdSignalUuid } from './utils';
 import { Threshold } from '../../../../common/detection_engine/schemas/common/schemas';
 
-describe('getCombinations', () => {
-  it('should get all combinations for multiple aggregations without cardinality', () => {});
-
-  it('should get all combinations for multiple aggregations with cardinality', () => {});
-
-  it('should exclude empty buckets', () => {});
-});
-
 describe('transformThresholdResultsToEcs', () => {
   it('should return transformed threshold results', () => {
     const threshold: Threshold = {
