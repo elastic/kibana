@@ -9,13 +9,14 @@
 import { inspect } from 'util';
 import Fs from 'fs/promises';
 import Path from 'path';
-import { Readable } from 'stream';
 
 import FormData from 'form-data';
 import { ToolingLog, isAxiosResponseError, createFailError } from '@kbn/dev-utils';
 
 import type { SavedObjectsImportResponse } from 'src/core/server/saved_objects/import/types';
 import { KbnClientRequester, uriencode } from './kbn_client_requester';
+
+const DEFAULT_SAVED_OBJECT_TYPES = ['index-pattern', 'search', 'visualization', 'dashboard'];
 
 export class KbnClientImportExport {
   constructor(
@@ -24,29 +25,30 @@ export class KbnClientImportExport {
     public readonly dir?: string
   ) {}
 
-  resolvePath(path: string) {
+  private resolvePath(path: string) {
     if (!Path.extname(path)) {
       path = `${path}.json`;
     }
 
     if (!this.dir && !Path.isAbsolute(path)) {
       throw new Error(
-        '[KbnClientImportExport] unable to resolve relative path to import/export without a configured dir'
+        '[KbnClientImportExport] unable to resolve relative path to import/export without a configured dir, either path absolute path or specify --dir'
       );
     }
 
-    return this.dir ? Path.resolve(this.dir, path) : Path.resolve(path);
+    return this.dir ? Path.resolve(this.dir, path) : path;
   }
 
   async import(name: string, options?: { space?: string }) {
     const src = this.resolvePath(name);
+    this.log.debug('resolved import for', name, 'to', src);
 
     const objects = (await Fs.readFile(src, 'utf-8'))
       .split('\n\n')
       .filter((line) => !!line)
       .map((line) => JSON.parse(line));
 
-    this.log.debug('importing', objects.length, 'saved objects');
+    this.log.info('importing', objects.length, 'saved objects');
 
     const formData = new FormData();
     formData.append('file', objects.map((obj) => JSON.stringify(obj)).join('\n'), 'import.ndjson');
@@ -77,7 +79,7 @@ export class KbnClientImportExport {
     }
 
     if (resp.data.success) {
-      this.log.debug('[KbnClientImportExport] import success');
+      this.log.success('[KbnClientImportExport] import success');
     } else {
       throw createFailError(
         `[KbnClientImportExport] failed to import all saved objects: ${inspect(resp.data)}`
@@ -85,15 +87,30 @@ export class KbnClientImportExport {
     }
   }
 
-  async export(name: string, options?: { space?: string }) {
+  async export(name: string, options?: { savedObjectTypes?: string[]; space?: string }) {
     const dest = this.resolvePath(name);
 
-    const resp = await this.requester.request({
-      method: 'POST',
-      path: options?.space
-        ? uriencode`/s/${options.space}/api/saved_objects/_export`
-        : '/api/saved_objects/_export',
-    });
+    let resp;
+    try {
+      resp = await this.requester.request({
+        method: 'POST',
+        path: options?.space
+          ? uriencode`/s/${options.space}/api/saved_objects/_export`
+          : '/api/saved_objects/_export',
+        body: {
+          type: options?.savedObjectTypes ?? DEFAULT_SAVED_OBJECT_TYPES,
+          excludeExportDetails: true,
+        },
+      });
+    } catch (error) {
+      if (!isAxiosResponseError(error)) {
+        throw error;
+      }
+
+      throw createFailError(
+        `[KbnClientImportExport] ${error.response.status} resp: ${inspect(error.response.data)}`
+      );
+    }
 
     if (typeof resp.data !== 'string' || !resp.data) {
       throw new Error(
@@ -106,6 +123,6 @@ export class KbnClientImportExport {
 
     await Fs.writeFile(dest, fileContents, 'utf-8');
 
-    this.log.debug(`[KbnClientImportExport] Exported saved objects to destination:\n  ${dest}`);
+    this.log.success(`[KbnClientImportExport] Exported saved objects to destination:\n  ${dest}`);
   }
 }

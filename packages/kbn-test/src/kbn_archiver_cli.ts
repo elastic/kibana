@@ -27,6 +27,22 @@ function getSinglePositionalArg(flags: Flags) {
   return positional[0];
 }
 
+function parseTypesFlag(flags: Flags) {
+  if (!flags.type) {
+    return undefined;
+  }
+
+  if (Array.isArray(flags.type)) {
+    return flags.type;
+  }
+
+  if (typeof flags.type === 'string') {
+    return [flags.type];
+  }
+
+  throw createFlagError('--flag must be a string');
+}
+
 export function runKbnArchiverCli() {
   new RunWithCommands({
     description: 'Import/export saved objects from archives, for testing',
@@ -96,8 +112,19 @@ export function runKbnArchiverCli() {
       name: 'save',
       usage: 'save <name>',
       description: 'export saved objects from Kibana to a file',
+      flags: {
+        string: ['type'],
+        help: `
+          --type             saved object type that should be fetched and stored in the archive, can
+                               be specified multiple times and defaults to 'index-pattern', 'search',
+                               'visualization', and 'dashboard'.
+
+        `,
+      },
       async run({ kbnClient, flags }) {
-        await kbnClient.importExport.export(getSinglePositionalArg(flags));
+        await kbnClient.importExport.export(getSinglePositionalArg(flags), {
+          savedObjectTypes: parseTypesFlag(flags),
+        });
       },
     })
     .command({
