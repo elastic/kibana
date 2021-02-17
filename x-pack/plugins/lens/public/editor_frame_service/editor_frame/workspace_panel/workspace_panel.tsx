@@ -106,8 +106,10 @@ export const WorkspacePanel = React.memo(function WorkspacePanel({
 }: WorkspacePanelProps) {
   const dragDropContext = useContext(DragContext);
 
-  const suggestionForDraggedField =
-    dragDropContext.dragging && getSuggestionForField(dragDropContext.dragging);
+  const suggestionForDraggedField = useMemo(
+    () => dragDropContext.dragging && getSuggestionForField(dragDropContext.dragging),
+    [dragDropContext.dragging, getSuggestionForField]
+  );
 
   const [localState, setLocalState] = useState<WorkspaceState>({
     expressionBuildError: undefined,
@@ -173,6 +175,8 @@ export const WorkspacePanel = React.memo(function WorkspacePanel({
     ]
   );
 
+  const expressionExists = Boolean(expression);
+
   const onEvent = useCallback(
     (event: ExpressionRendererEvent) => {
       if (!plugins.uiActions) {
@@ -202,23 +206,23 @@ export const WorkspacePanel = React.memo(function WorkspacePanel({
 
   useEffect(() => {
     // reset expression error if component attempts to run it again
-    if (expression && localState.expressionBuildError) {
+    if (expressionExists && localState.expressionBuildError) {
       setLocalState((s) => ({
         ...s,
         expressionBuildError: undefined,
       }));
     }
-  }, [expression, localState.expressionBuildError]);
+  }, [expressionExists, localState.expressionBuildError]);
 
-  function onDrop() {
+  const onDrop = useCallback(() => {
     if (suggestionForDraggedField) {
       trackUiEvent('drop_onto_workspace');
-      trackUiEvent(expression ? 'drop_non_empty' : 'drop_empty');
+      trackUiEvent(expressionExists ? 'drop_non_empty' : 'drop_empty');
       switchToSuggestion(dispatch, suggestionForDraggedField, 'SWITCH_VISUALIZATION');
     }
-  }
+  }, [suggestionForDraggedField, expressionExists, dispatch]);
 
-  function renderEmptyWorkspace() {
+  const renderEmptyWorkspace = useCallback(() => {
     return (
       <EuiText
         className={classNames('lnsWorkspacePanel__emptyContent')}
@@ -229,7 +233,7 @@ export const WorkspacePanel = React.memo(function WorkspacePanel({
       >
         <h2>
           <strong>
-            {expression === null
+            {!expressionExists
               ? i18n.translate('xpack.lens.editorFrame.emptyWorkspace', {
                   defaultMessage: 'Drop some fields here to start',
                 })
@@ -239,7 +243,7 @@ export const WorkspacePanel = React.memo(function WorkspacePanel({
           </strong>
         </h2>
         <DropIllustration aria-hidden={true} className="lnsWorkspacePanel__dropIllustration" />
-        {expression === null && (
+        {!expressionExists && (
           <>
             <p>
               {i18n.translate('xpack.lens.editorFrame.emptyWorkspaceHeading', {
@@ -263,9 +267,9 @@ export const WorkspacePanel = React.memo(function WorkspacePanel({
         )}
       </EuiText>
     );
-  }
+  }, [expressionExists]);
 
-  function renderVisualization() {
+  const renderVisualization = useCallback(() => {
     // we don't want to render the emptyWorkspace on visualizing field from Discover
     // as it is specific for the drag and drop functionality and can confuse the users
     if (expression === null && !visualizeTriggerFieldContext) {
@@ -283,7 +287,19 @@ export const WorkspacePanel = React.memo(function WorkspacePanel({
         ExpressionRendererComponent={ExpressionRendererComponent}
       />
     );
-  }
+  }, [
+    expression,
+    visualizeTriggerFieldContext,
+    framePublicAPI,
+    plugins.data.query.timefilter.timefilter,
+    dispatch,
+    onEvent,
+    setLocalState,
+    localState,
+    ExpressionRendererComponent,
+    configurationValidationError,
+    renderEmptyWorkspace,
+  ]);
 
   return (
     <WorkspacePanelWrapper
