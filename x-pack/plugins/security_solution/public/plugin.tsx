@@ -78,6 +78,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   private detectionsUpdater$ = new Subject<AppUpdater>();
   private hostsUpdater$ = new Subject<AppUpdater>();
   private networkUpdater$ = new Subject<AppUpdater>();
+  private caseUpdater$ = new Subject<AppUpdater>();
 
   private storage = new Storage(localStorage);
   private licensingSubscription: Subscription | null = null;
@@ -279,6 +280,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       euiIconType: APP_ICON_SOLUTION,
       category: DEFAULT_APP_CATEGORIES.security,
       appRoute: APP_CASES_PATH,
+      updater$: this.caseUpdater$,
       mount: async (params: AppMountParameters) => {
         const [coreStart, startPlugins] = await core.getStartServices();
         const { cases: subPlugin } = await this.subPlugins();
@@ -300,6 +302,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       euiIconType: APP_ICON_SOLUTION,
       category: DEFAULT_APP_CATEGORIES.security,
       appRoute: APP_MANAGEMENT_PATH,
+      meta: getSearchDeepLinksAndKeywords(SecurityPageName.administration),
       mount: async (params: AppMountParameters) => {
         const [coreStart, startPlugins] = await core.getStartServices();
         const { management: managementSubPlugin } = await this.subPlugins();
@@ -380,6 +383,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
             currentLicense.type
           );
           registerSearchLinks(SecurityPageName.hosts, this.hostsUpdater$, currentLicense.type);
+          registerSearchLinks(SecurityPageName.case, this.caseUpdater$, currentLicense.type);
         }
       });
     }
