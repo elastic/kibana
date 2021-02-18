@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiSwitch, EuiButtonGroup, htmlIdGenerator } from '@elastic/eui';
 import { VisualizationDimensionEditorProps } from '../../types';
 import { DatatableVisualizationState } from '../visualization';
+import { getOriginalId } from '../transpose_helpers';
 
 const idPrefix = htmlIdGenerator()();
 
@@ -25,8 +26,9 @@ export function TableDimensionEditor(
   const currentAlignment =
     column?.alignment ||
     (frame.activeData &&
-    frame.activeData[state.layerId].columns.find((col) => col.id === accessor)?.meta.type ===
-      'number'
+    frame.activeData[state.layerId].columns.find(
+      (col) => col.id === accessor || getOriginalId(col.id) === accessor
+    )?.meta.type === 'number'
       ? 'right'
       : 'left');
 
