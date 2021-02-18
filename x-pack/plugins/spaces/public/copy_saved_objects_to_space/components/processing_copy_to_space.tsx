@@ -15,7 +15,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { ProcessedImportResponse } from 'src/plugins/saved_objects_management/public';
-import { Space } from '../../../../../../src/plugins/spaces_oss/common';
+import { Space } from 'src/plugins/spaces_oss/common';
 import { CopyOptions, ImportRetry, SavedObjectTarget } from '../types';
 import { SpaceResult, SpaceResultProcessing } from './space_result';
 import { summarizeCopyResult } from '..';

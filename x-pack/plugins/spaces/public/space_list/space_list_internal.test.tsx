@@ -10,7 +10,7 @@ import { mountWithIntl } from '@kbn/test/jest';
 import { act } from '@testing-library/react';
 import { coreMock } from 'src/core/public/mocks';
 import type { Space } from 'src/plugins/spaces_oss/common';
-import type { SpaceListProps } from '../../../../../src/plugins/spaces_oss/public';
+import type { SpaceListProps } from 'src/plugins/spaces_oss/public';
 import { getSpacesContextWrapper } from '../spaces_context';
 import { spacesManagerMock } from '../spaces_manager/mocks';
 import { ReactWrapper } from 'enzyme';

@@ -7,13 +7,13 @@
 
 import { coreMock } from 'src/core/public/mocks';
 import { SpacesPlugin } from './plugin';
-import { spacesOssPluginMock } from '../../../../src/plugins/spaces_oss/public/mocks';
-import { homePluginMock } from '../../../../src/plugins/home/public/mocks';
+import { spacesOssPluginMock } from 'src/plugins/spaces_oss/public/mocks';
+import { homePluginMock } from 'src/plugins/home/public/mocks';
 import {
   managementPluginMock,
   createManagementSectionMock,
-} from '../../../../src/plugins/management/public/mocks';
-import { advancedSettingsMock } from '../../../../src/plugins/advanced_settings/public/mocks';
+} from 'src/plugins/management/public/mocks';
+import { advancedSettingsMock } from 'src/plugins/advanced_settings/public/mocks';
 
 describe('Spaces plugin', () => {
   describe('#setup', () => {

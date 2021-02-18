@@ -17,7 +17,7 @@ import {
   elasticsearchServiceMock,
   pluginInitializerContextConfigMock,
 } from 'src/core/server/mocks';
-import { createCollectorFetchContextMock } from 'src/plugins/usage_collection/server/mocks';
+import { createCollectorFetchContextMock } from '../../../../../src/plugins/usage_collection/server/mocks';
 
 interface SetupOpts {
   license?: Partial<ILicense>;

@@ -6,7 +6,7 @@
  */
 
 import { StartServicesAccessor } from 'src/core/public';
-import type { SpacesApiUiComponent } from '../../../../../src/plugins/spaces_oss/public';
+import type { SpacesApiUiComponent } from 'src/plugins/spaces_oss/public';
 import { PluginsStart } from '../plugin';
 import {
   getShareToSpaceFlyoutComponent,

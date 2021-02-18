@@ -6,7 +6,7 @@
  */
 
 import type { StartServicesAccessor } from 'src/core/public';
-import type { SpacesApiUi } from '../../../../../src/plugins/spaces_oss/public';
+import type { SpacesApiUi } from 'src/plugins/spaces_oss/public';
 import type { PluginsStart } from '../plugin';
 import type { SpacesManager } from '../spaces_manager';
 import { getComponents } from './components';

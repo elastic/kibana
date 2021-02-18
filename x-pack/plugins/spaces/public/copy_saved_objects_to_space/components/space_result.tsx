@@ -15,7 +15,7 @@ import {
   EuiSpacer,
   EuiLoadingSpinner,
 } from '@elastic/eui';
-import { Space } from '../../../../../../src/plugins/spaces_oss/common';
+import { Space } from 'src/plugins/spaces_oss/common';
 import { SummarizedCopyToSpaceResult } from '../index';
 import { SpaceAvatar } from '../../space_avatar';
 import { CopyStatusSummaryIndicator } from './copy_status_summary_indicator';

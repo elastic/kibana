@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObjectsManagementRecord } from '../../../../../src/plugins/saved_objects_management/public';
+import { SavedObjectsManagementRecord } from 'src/plugins/saved_objects_management/public';
 import { uiApiMock } from '../ui_api/mocks';
 import { ShareToSpaceSavedObjectsManagementAction } from './share_saved_objects_to_space_action';
 

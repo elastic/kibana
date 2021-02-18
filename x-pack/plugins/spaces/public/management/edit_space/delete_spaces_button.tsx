@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Component, Fragment } from 'react';
 import { NotificationsStart } from 'src/core/public';
-import { Space } from '../../../../../../src/plugins/spaces_oss/common';
+import { Space } from 'src/plugins/spaces_oss/common';
 import { SpacesManager } from '../../spaces_manager';
 import { ConfirmDeleteModal } from '../components/confirm_delete_modal';
 

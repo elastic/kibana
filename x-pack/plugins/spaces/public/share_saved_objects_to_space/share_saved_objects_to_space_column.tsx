@@ -7,8 +7,8 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import type { SpacesApiUi } from 'src/plugins/spaces_oss/public';
 import { SavedObjectsManagementColumn } from '../../../../../src/plugins/saved_objects_management/public';
-import type { SpacesApiUi } from '../../../../../src/plugins/spaces_oss/public';
 
 export class ShareToSpaceSavedObjectsManagementColumn
   implements SavedObjectsManagementColumn<void> {

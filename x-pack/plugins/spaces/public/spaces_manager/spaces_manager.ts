@@ -8,7 +8,7 @@
 import { Observable, BehaviorSubject } from 'rxjs';
 import { skipWhile } from 'rxjs/operators';
 import { HttpSetup } from 'src/core/public';
-import { Space } from '../../../../../src/plugins/spaces_oss/common';
+import { Space } from 'src/plugins/spaces_oss/common';
 import { GetAllSpacesOptions, GetSpaceResult } from '../../common';
 import { CopySavedObjectsToSpaceResponse } from '../copy_saved_objects_to_space/types';
 

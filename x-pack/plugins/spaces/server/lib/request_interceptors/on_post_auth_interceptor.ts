@@ -6,7 +6,7 @@
  */
 
 import { Logger, CoreSetup } from 'src/core/server';
-import { Space } from '../../../../../../src/plugins/spaces_oss/common';
+import { Space } from 'src/plugins/spaces_oss/common';
 import { wrapError } from '../errors';
 import { SpacesServiceStart } from '../../spaces_service/spaces_service';
 import { PluginsSetup } from '../../plugin';

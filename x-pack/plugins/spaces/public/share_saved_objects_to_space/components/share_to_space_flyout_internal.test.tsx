@@ -17,7 +17,7 @@ import {
   EuiLoadingSpinner,
   EuiSelectable,
 } from '@elastic/eui';
-import { Space } from '../../../../../../src/plugins/spaces_oss/common';
+import { Space } from 'src/plugins/spaces_oss/common';
 import { SelectableSpacesControl } from './selectable_spaces_control';
 import { act } from '@testing-library/react';
 import { spacesManagerMock } from '../../spaces_manager/mocks';

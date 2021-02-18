@@ -23,8 +23,8 @@ import {
 } from 'kibana/public';
 import { EuiSuperSelect } from '@elastic/eui';
 import moment from 'moment';
+import { Space } from 'src/plugins/spaces_oss/common';
 import { SummarizedCopyToSpaceResult } from '../index';
-import { Space } from '../../../../../../src/plugins/spaces_oss/common';
 import { CopyStatusIndicator } from './copy_status_indicator';
 import { ImportRetry } from '../types';
 

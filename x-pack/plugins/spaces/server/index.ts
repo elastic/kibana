@@ -25,7 +25,7 @@ export { ISpacesClient } from './spaces_client';
 export { GetAllSpacesOptions, GetAllSpacesPurpose, GetSpaceResult } from '../common';
 
 // re-export types from oss definition
-export { Space } from '../../../../src/plugins/spaces_oss/common';
+export { Space } from 'src/plugins/spaces_oss/common';
 
 export const config: PluginConfigDescriptor = {
   schema: ConfigSchema,

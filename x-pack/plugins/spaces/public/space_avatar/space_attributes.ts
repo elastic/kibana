@@ -6,7 +6,7 @@
  */
 
 import { VISUALIZATION_COLORS } from '@elastic/eui';
-import { Space } from '../../../../../src/plugins/spaces_oss/common';
+import { Space } from 'src/plugins/spaces_oss/common';
 import { MAX_SPACE_INITIALS } from '../../common';
 
 // code point for lowercase "a"

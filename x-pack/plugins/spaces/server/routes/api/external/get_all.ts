@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { Space } from '../../../../../../../src/plugins/spaces_oss/common';
+import { Space } from 'src/plugins/spaces_oss/common';
 import { wrapError } from '../../../lib/errors';
 import { ExternalRouteDeps } from '.';
 import { createLicensedRouteHandler } from '../../lib';

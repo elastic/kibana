@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Space } from '../../../../../src/plugins/spaces_oss/common';
+import { Space } from 'src/plugins/spaces_oss/common';
 import { KibanaFeature } from '../../../../plugins/features/server';
 import { setupCapabilitiesSwitcher } from './capabilities_switcher';
 import { Capabilities, CoreSetup } from 'src/core/server';

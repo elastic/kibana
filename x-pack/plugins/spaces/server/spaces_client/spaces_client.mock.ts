@@ -6,7 +6,7 @@
  */
 
 import { DEFAULT_SPACE_ID } from '../../common/constants';
-import { Space } from '../../../../../src/plugins/spaces_oss/common';
+import { Space } from 'src/plugins/spaces_oss/common';
 import { SpacesClient } from './spaces_client';
 
 const createSpacesClientMock = () =>

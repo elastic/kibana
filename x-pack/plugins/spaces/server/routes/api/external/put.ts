@@ -6,8 +6,8 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { Space } from 'src/plugins/spaces_oss/common';
 import { SavedObjectsErrorHelpers } from '../../../../../../../src/core/server';
-import { Space } from '../../../../../../../src/plugins/spaces_oss/common';
 import { wrapError } from '../../../lib/errors';
 import { spaceSchema } from '../../../lib/space_schema';
 import { ExternalRouteDeps } from '.';

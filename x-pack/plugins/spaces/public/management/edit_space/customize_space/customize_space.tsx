@@ -18,7 +18,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import React, { ChangeEvent, Component, Fragment } from 'react';
-import { Space } from '../../../../../../../src/plugins/spaces_oss/common';
+import { Space } from 'src/plugins/spaces_oss/common';
 import { isReservedSpace } from '../../../../common';
 import { SpaceAvatar } from '../../../space_avatar';
 import { SpaceValidator, toSpaceIdentifier } from '../../lib';

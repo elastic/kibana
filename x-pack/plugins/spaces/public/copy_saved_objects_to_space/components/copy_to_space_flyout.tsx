@@ -24,11 +24,11 @@ import { mapValues } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { ToastsStart } from 'src/core/public';
+import { Space } from 'src/plugins/spaces_oss/common';
 import {
   ProcessedImportResponse,
   processImportResponse,
 } from '../../../../../../src/plugins/saved_objects_management/public';
-import { Space } from '../../../../../../src/plugins/spaces_oss/common';
 import { SpacesManager } from '../../spaces_manager';
 import { ProcessingCopyToSpace } from './processing_copy_to_space';
 import { CopyToSpaceFlyoutFooter } from './copy_to_space_flyout_footer';

@@ -21,7 +21,7 @@ import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
 import React, { Component, Fragment } from 'react';
 import { ApplicationStart, Capabilities, NotificationsStart, ScopedHistory } from 'src/core/public';
-import { Space } from '../../../../../../src/plugins/spaces_oss/common';
+import { Space } from 'src/plugins/spaces_oss/common';
 import { KibanaFeature, FeaturesPluginStart } from '../../../../features/public';
 import { isReservedSpace } from '../../../common';
 import { SpacesManager } from '../../spaces_manager';

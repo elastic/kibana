@@ -8,8 +8,8 @@
 import React from 'react';
 import { EuiSpacer, EuiTitle, EuiFormRow } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { Space } from 'src/plugins/spaces_oss/common';
 import { CopyOptions, SavedObjectTarget } from '../types';
-import { Space } from '../../../../../../src/plugins/spaces_oss/common';
 import { SelectableSpacesControl } from './selectable_spaces_control';
 import { CopyModeControl, CopyMode } from './copy_mode_control';
 
