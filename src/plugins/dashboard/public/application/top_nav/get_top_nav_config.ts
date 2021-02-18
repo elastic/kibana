@@ -50,7 +50,7 @@ export function getTopNavConfig(
         getSaveConfig(actions[TopNavIds.SAVE], options.isNewDashboard, disableButton),
       ];
       if (!options.isNewDashboard) {
-        navItems.push(getQuickSave(actions[TopNavIds.QUICK_SAVE], disableButton));
+        navItems.push(getQuickSave(actions[TopNavIds.QUICK_SAVE], disableButton, options.isDirty));
       }
       return navItems;
     default:
@@ -109,9 +109,10 @@ function getEditConfig(action: NavAction) {
 /**
  * @returns {kbnTopNavConfig}
  */
-function getQuickSave(action: NavAction, isLoading?: boolean) {
+function getQuickSave(action: NavAction, isLoading?: boolean, isDirty?: boolean) {
   return {
     isLoading,
+    disableButton: !isDirty,
     id: 'quick-save',
     iconType: 'save',
     emphasize: true,
