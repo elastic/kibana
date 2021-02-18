@@ -85,12 +85,6 @@ describe('When the add exception modal is opened', () => {
     }));
   });
 
-  const alertDataMock: AlertData = {
-    '@timestamp': '1234567890',
-    _id: 'test-id',
-    file: { path: 'test/path' },
-  };
-
   afterEach(() => {
     jest.clearAllMocks();
     jest.restoreAllMocks();
@@ -163,6 +157,11 @@ describe('When the add exception modal is opened', () => {
   describe('when there is alert data passed to an endpoint list exception', () => {
     let wrapper: ReactWrapper;
     beforeEach(async () => {
+      const alertDataMock: AlertData = {
+        '@timestamp': '1234567890',
+        _id: 'test-id',
+        file: { path: 'test/path' },
+      };
       wrapper = mount(
         <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
           <AddExceptionModal
@@ -215,6 +214,11 @@ describe('When the add exception modal is opened', () => {
   describe('when there is alert data passed to a detection list exception', () => {
     let wrapper: ReactWrapper;
     beforeEach(async () => {
+      const alertDataMock: AlertData = {
+        '@timestamp': '1234567890',
+        _id: 'test-id',
+        file: { path: 'test/path' },
+      };
       wrapper = mount(
         <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
           <AddExceptionModal
@@ -271,6 +275,11 @@ describe('When the add exception modal is opened', () => {
             'sequence [process where process.name = "test.exe"] [process where process.name = "explorer.exe"]',
         },
       }));
+      const alertDataMock: AlertData = {
+        '@timestamp': '1234567890',
+        _id: 'test-id',
+        file: { path: 'test/path' },
+      };
       wrapper = mount(
         <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
           <AddExceptionModal
@@ -340,6 +349,11 @@ describe('When the add exception modal is opened', () => {
           },
         },
       ]);
+      const alertDataMock: AlertData = {
+        '@timestamp': '1234567890',
+        _id: 'test-id',
+        file: { path: 'test/path' },
+      };
       wrapper = mount(
         <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
           <AddExceptionModal

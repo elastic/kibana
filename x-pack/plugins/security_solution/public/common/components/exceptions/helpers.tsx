@@ -16,7 +16,7 @@ import {
   BuilderEntry,
   CreateExceptionListItemBuilderSchema,
   ExceptionsBuilderExceptionItem,
-  FlattenType,
+  Flattened,
 } from './types';
 import { EXCEPTION_OPERATORS, isOperator } from '../autocomplete/operators';
 import { OperatorOption } from '../autocomplete/types';
@@ -370,7 +370,7 @@ export const entryHasListType = (
  * can be an object or array of objects
  */
 export const getFileCodeSignature = (
-  alertData: FlattenType<Ecs>
+  alertData: Flattened<Ecs>
 ): Array<{ subjectName: string; trusted: string }> => {
   const { file } = alertData;
   const codeSignature = file && file.Ext && file.Ext.code_signature;
@@ -383,7 +383,7 @@ export const getFileCodeSignature = (
  * can be an object or array of objects
  */
 export const getProcessCodeSignature = (
-  alertData: FlattenType<Ecs>
+  alertData: Flattened<Ecs>
 ): Array<{ subjectName: string; trusted: string }> => {
   const { process } = alertData;
   const codeSignature = process && process.Ext && process.Ext.code_signature;
@@ -395,7 +395,7 @@ export const getProcessCodeSignature = (
  * a single object with subject_name and trusted.
  */
 export const getCodeSignatureValue = (
-  codeSignature: FlattenType<CodeSignature> | FlattenType<CodeSignature[]> | undefined
+  codeSignature: Flattened<CodeSignature> | Flattened<CodeSignature[]> | undefined
 ): Array<{ subjectName: string; trusted: string }> => {
   if (Array.isArray(codeSignature) && codeSignature.length > 0) {
     return codeSignature.map((signature) => {
@@ -405,7 +405,7 @@ export const getCodeSignatureValue = (
       };
     });
   } else {
-    const signature: FlattenType<CodeSignature> | undefined = !Array.isArray(codeSignature)
+    const signature: Flattened<CodeSignature> | undefined = !Array.isArray(codeSignature)
       ? codeSignature
       : undefined;
 
@@ -434,11 +434,11 @@ export const getPrepopulatedEndpointException = ({
   ruleName: string;
   codeSignature: { subjectName: string; trusted: string };
   eventCode: string;
-  alertEcsData: FlattenType<Ecs>;
+  alertEcsData: Flattened<Ecs>;
 }): ExceptionsBuilderExceptionItem => {
   const { file } = alertEcsData;
-  const filePath = file && file.path ? file.path : '';
-  const sha256Hash = file && file.hash && file.hash.sha256 ? file.hash.sha256 : '';
+  const filePath = file?.path ?? '';
+  const sha256Hash = file?.hash?.sha256 ?? '';
   return {
     ...getNewExceptionItem({ listId, namespaceType: listNamespace, ruleName }),
     entries: [
@@ -498,12 +498,12 @@ export const getPrepopulatedRansomwareException = ({
   ruleName: string;
   codeSignature: { subjectName: string; trusted: string };
   eventCode: string;
-  alertEcsData: FlattenType<Ecs>;
+  alertEcsData: Flattened<Ecs>;
 }): ExceptionsBuilderExceptionItem => {
   const { process, Ransomware } = alertEcsData;
-  const sha256Hash = process && process.hash && process.hash.sha256 ? process.hash.sha256 : '';
-  const executable = process && process.executable ? process.executable : '';
-  const ransomwareFeature = Ransomware && Ransomware.feature ? Ransomware.feature : '';
+  const sha256Hash = process?.hash?.sha256 ?? '';
+  const executable = process?.executable ?? '';
+  const ransomwareFeature = Ransomware?.feature ?? '';
   return {
     ...getNewExceptionItem({ listId, namespaceType: listNamespace, ruleName }),
     entries: [
@@ -589,10 +589,10 @@ export const entryHasNonEcsType = (
 export const defaultEndpointExceptionItems = (
   listId: string,
   ruleName: string,
-  alertEcsData: FlattenType<Ecs>
+  alertEcsData: Flattened<Ecs>
 ): ExceptionsBuilderExceptionItem[] => {
   const { event: alertEvent } = alertEcsData;
-  const eventCode = alertEvent && alertEvent.code ? alertEvent.code : '';
+  const eventCode = alertEvent?.code ?? '';
 
   if (eventCode === 'ransomware') {
     return getProcessCodeSignature(alertEcsData).map((codeSignature) =>

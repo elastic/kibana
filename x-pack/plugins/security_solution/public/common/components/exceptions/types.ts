@@ -22,7 +22,6 @@ import {
   OperatorTypeEnum,
   OperatorEnum,
 } from '../../../lists_plugin_deps';
-import { AddExceptionModalProps } from './add_exception_modal';
 
 export interface FormattedEntry {
   fieldName: string;
@@ -113,26 +112,26 @@ export interface FlattenedCodeSignature {
   trusted: string;
 }
 
-export type FlattenType<T> = {
+export type Flattened<T> = {
   [K in keyof T]: T[K] extends infer AliasType
     ? AliasType extends CodeSignature[]
       ? FlattenedCodeSignature[]
       : AliasType extends Array<infer rawType>
       ? rawType
       : AliasType extends object
-      ? FlattenType<AliasType>
+      ? Flattened<AliasType>
       : AliasType
     : never;
 };
 
 export type AlertData = {
   '@timestamp': string;
-} & FlattenType<Ecs>;
+} & Flattened<Ecs>;
 
 export interface EcsHit {
   _id: string;
   _index: string;
   _source: {
     '@timestamp': string;
-  } & Omit<FlattenType<Ecs>, '_id' | '_index'>;
+  } & Omit<Flattened<Ecs>, '_id' | '_index'>;
 }
