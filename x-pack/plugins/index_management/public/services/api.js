@@ -5,6 +5,7 @@
  */
 
 import chrome from 'ui/chrome';
+import { addSystemApiHeader } from 'ui/system_api';
 let httpClient;
 export const setHttpClient = (client) => {
   httpClient = client;
@@ -19,11 +20,12 @@ export async function loadIndices() {
   return response.data;
 }
 
-export async function reloadIndices(indexNames) {
+export async function reloadIndices(indexNames, { asSystemRequest } = {}) {
   const body = {
     indexNames
   };
-  const response = await httpClient.post(`${apiPrefix}/indices/reload`, body);
+  const headers = asSystemRequest ? addSystemApiHeader({}) : undefined;
+  const response = await httpClient.post(`${apiPrefix}/indices/reload`, body, { headers });
   return response.data;
 }
 

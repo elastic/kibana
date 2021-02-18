@@ -98,7 +98,10 @@ export class IndexTableUi extends Component {
   }
   componentDidMount() {
     this.props.loadIndices();
-    this.interval = setInterval(this.props.reloadIndices, REFRESH_RATE_INDEX_LIST);
+    this.interval = setInterval(
+      () => this.props.reloadIndices({ asSystemRequest: true }),
+      REFRESH_RATE_INDEX_LIST
+    );
     const { filterChanged, filterFromURI } = this.props;
     if (filterFromURI) {
       const decodedFilter = decodeURIComponent(filterFromURI);
