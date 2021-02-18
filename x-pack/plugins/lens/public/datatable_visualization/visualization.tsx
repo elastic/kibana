@@ -29,6 +29,7 @@ export interface ColumnState {
   transposable?: boolean;
   originalColumnId?: string;
   originalName?: string;
+  alignment?: 'left' | 'right' | 'center';
 }
 
 export interface SortingState {
@@ -326,6 +327,7 @@ export const datatableVisualization: Visualization<DatatableVisualizationState> 
                     transposable: [
                       !datasource!.getOperationForColumnId(column.columnId)?.isBucketed,
                     ],
+                    alignment: typeof column.alignment === 'undefined' ? [] : [column.alignment],
                   },
                 },
               ],

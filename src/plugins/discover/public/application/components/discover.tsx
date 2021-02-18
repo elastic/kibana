@@ -206,6 +206,7 @@ export function Discover({
           query={state.query}
           savedQuery={state.savedQuery}
           updateQuery={updateQuery}
+          searchSource={searchSource}
         />
         <EuiPageBody className="dscPageBody" aria-describedby="savedSearchTitle">
           <h1 id="savedSearchTitle" className="euiScreenReaderOnly">

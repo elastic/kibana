@@ -66,13 +66,16 @@ export function DraggableDimensionButton({
   columnId: string;
   registerNewButtonRef: (id: string, instance: HTMLDivElement | null) => void;
 }) {
-  const dropType = layerDatasource.getDropTypes({
+  const dropProps = layerDatasource.getDropProps({
     ...layerDatasourceDropProps,
     columnId,
     filterOperations: group.filterOperations,
     groupId: group.groupId,
     dimensionGroups: groups,
   });
+
+  const dropType = dropProps?.dropType;
+  const nextLabel = dropProps?.nextLabel;
 
   const value = useMemo(
     () => ({
@@ -85,9 +88,10 @@ export function DraggableDimensionButton({
         label,
         groupLabel: group.groupLabel,
         position: accessorIndex + 1,
+        nextLabel: nextLabel || '',
       },
     }),
-    [columnId, group.groupId, accessorIndex, layerId, dropType, label, group.groupLabel]
+    [columnId, group.groupId, accessorIndex, layerId, dropType, label, group.groupLabel, nextLabel]
   );
 
   // todo: simplify by id and use drop targets?

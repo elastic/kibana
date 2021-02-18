@@ -433,6 +433,7 @@ describe('Datatable Visualization', () => {
         width: [],
         isTransposed: [],
         transposable: [true],
+        alignment: [],
       });
       expect(columnArgs[1].arguments).toEqual({
         columnId: ['b'],
@@ -440,6 +441,7 @@ describe('Datatable Visualization', () => {
         width: [],
         isTransposed: [],
         transposable: [true],
+        alignment: [],
       });
     });
 

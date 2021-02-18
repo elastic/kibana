@@ -241,7 +241,7 @@ export function map(state = DEFAULT_MAP_STATE, action) {
       };
       return { ...state, mapState: { ...state.mapState, ...newMapState } };
     case SET_QUERY:
-      const { query, timeFilters, filters, searchSessionId } = action;
+      const { query, timeFilters, filters, searchSessionId, searchSessionMapBuffer } = action;
       return {
         ...state,
         mapState: {
@@ -250,6 +250,7 @@ export function map(state = DEFAULT_MAP_STATE, action) {
           timeFilters,
           filters,
           searchSessionId,
+          searchSessionMapBuffer,
         },
       };
     case SET_REFRESH_CONFIG:

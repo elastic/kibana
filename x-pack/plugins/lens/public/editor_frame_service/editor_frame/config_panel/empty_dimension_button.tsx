@@ -57,13 +57,16 @@ export function EmptyDimensionButton({
     setNewColumnId(generateId());
   }, [itemIndex]);
 
-  const dropType = layerDatasource.getDropTypes({
+  const dropProps = layerDatasource.getDropProps({
     ...layerDatasourceDropProps,
     columnId: newColumnId,
     filterOperations: group.filterOperations,
     groupId: group.groupId,
     dimensionGroups: groups,
   });
+
+  const dropType = dropProps?.dropType;
+  const nextLabel = dropProps?.nextLabel;
 
   const value = useMemo(
     () => ({
@@ -76,9 +79,10 @@ export function EmptyDimensionButton({
         label,
         groupLabel: group.groupLabel,
         position: itemIndex + 1,
+        nextLabel: nextLabel || '',
       },
     }),
-    [dropType, newColumnId, group.groupId, layerId, group.groupLabel, itemIndex]
+    [dropType, newColumnId, group.groupId, layerId, group.groupLabel, itemIndex, nextLabel]
   );
 
   return (

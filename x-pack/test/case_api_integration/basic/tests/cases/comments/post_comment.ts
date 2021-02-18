@@ -148,6 +148,10 @@ export default ({ getService }: FtrProviderContext): void => {
         type: CommentType.alert,
         index: 'test-index',
         alertId: 'test-id',
+        rule: {
+          id: 'id',
+          name: 'name',
+        },
       };
 
       for (const attribute of ['alertId', 'index']) {
@@ -176,6 +180,10 @@ export default ({ getService }: FtrProviderContext): void => {
             [attribute]: attribute,
             alertId: 'test-id',
             index: 'test-index',
+            rule: {
+              id: 'id',
+              name: 'name',
+            },
           })
           .expect(400);
       }
@@ -296,6 +304,10 @@ export default ({ getService }: FtrProviderContext): void => {
           .send({
             alertId: alert._id,
             index: alert._index,
+            rule: {
+              id: 'id',
+              name: 'name',
+            },
             type: CommentType.alert,
           })
           .expect(200);
@@ -346,6 +358,10 @@ export default ({ getService }: FtrProviderContext): void => {
           .send({
             alertId: alert._id,
             index: alert._index,
+            rule: {
+              id: 'id',
+              name: 'name',
+            },
             type: CommentType.alert,
           })
           .expect(200);

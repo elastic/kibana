@@ -6,8 +6,8 @@
  */
 import { DataPublicPluginStart } from '../../../../../../src/plugins/data/public';
 import { IndexPatternDimensionEditorProps } from './dimension_panel';
-import { onDrop, getDropTypes } from './droppable';
-import { DragContextState, DragDropIdentifier } from '../../drag_drop';
+import { onDrop, getDropProps } from './droppable';
+import { DragContextState, DraggingIdentifier } from '../../drag_drop';
 import { createMockedDragDropContext } from '../mocks';
 import { IUiSettingsClient, SavedObjectsClientContract, HttpSetup, CoreSetup } from 'kibana/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
@@ -107,7 +107,7 @@ const draggingField = {
  * - Dimension trigger: Not tested here
  * - Dimension editor component: First half of the tests
  *
- * - getDropTypes: Returns drop types that are possible for the current dragging field or other dimension
+ * - getDropProps: Returns drop types that are possible for the current dragging field or other dimension
  * - onDrop: Correct application of drop logic
  */
 describe('IndexPatternDimensionEditorPanel', () => {
@@ -191,14 +191,14 @@ describe('IndexPatternDimensionEditorPanel', () => {
   });
 
   const groupId = 'a';
-  describe('getDropTypes', () => {
+  describe('getDropProps', () => {
     it('returns undefined if no drag is happening', () => {
-      expect(getDropTypes({ ...defaultProps, groupId, dragDropContext })).toBe(undefined);
+      expect(getDropProps({ ...defaultProps, groupId, dragDropContext })).toBe(undefined);
     });
 
     it('returns undefined if the dragged item has no field', () => {
       expect(
-        getDropTypes({
+        getDropProps({
           ...defaultProps,
           groupId,
           dragDropContext: {
@@ -215,7 +215,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
 
     it('returns undefined if field is not supported by filterOperations', () => {
       expect(
-        getDropTypes({
+        getDropProps({
           ...defaultProps,
           groupId,
           dragDropContext: {
@@ -234,7 +234,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
 
     it('returns remove_add if the field is supported by filterOperations and the dropTarget is an existing column', () => {
       expect(
-        getDropTypes({
+        getDropProps({
           ...defaultProps,
           groupId,
           dragDropContext: {
@@ -243,12 +243,12 @@ describe('IndexPatternDimensionEditorPanel', () => {
           },
           filterOperations: (op: OperationMetadata) => op.dataType === 'number',
         })
-      ).toBe('field_replace');
+      ).toEqual({ dropType: 'field_replace', nextLabel: 'Intervals' });
     });
 
     it('returns undefined if the field belongs to another index pattern', () => {
       expect(
-        getDropTypes({
+        getDropProps({
           ...defaultProps,
           groupId,
           dragDropContext: {
@@ -267,7 +267,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
 
     it('returns undefined if the dragged field is already in use by this operation', () => {
       expect(
-        getDropTypes({
+        getDropProps({
           ...defaultProps,
           groupId,
           dragDropContext: {
@@ -292,7 +292,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
 
     it('returns move if the dragged column is compatible', () => {
       expect(
-        getDropTypes({
+        getDropProps({
           ...defaultProps,
           groupId,
           dragDropContext: {
@@ -307,7 +307,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
           },
           columnId: 'col2',
         })
-      ).toBe('move_compatible');
+      ).toEqual({ dropType: 'move_compatible' });
     });
 
     it('returns undefined if the dragged column from different group uses the same field as the dropTarget', () => {
@@ -335,7 +335,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
       };
 
       expect(
-        getDropTypes({
+        getDropProps({
           ...defaultProps,
           groupId,
           dragDropContext: {
@@ -374,7 +374,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
       };
 
       expect(
-        getDropTypes({
+        getDropProps({
           ...defaultProps,
           groupId,
           dragDropContext: {
@@ -390,7 +390,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
           columnId: 'col2',
           filterOperations: (op: OperationMetadata) => op.isBucketed === false,
         })
-      ).toEqual('replace_incompatible');
+      ).toEqual({ dropType: 'replace_incompatible', nextLabel: 'Unique count' });
     });
   });
   describe('onDrop', () => {
@@ -641,7 +641,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
     });
 
     describe('dimension group aware ordering and copying', () => {
-      let dragging: DragDropIdentifier;
+      let dragging: DraggingIdentifier;
       let testState: IndexPatternPrivateState;
       beforeEach(() => {
         dragging = {
