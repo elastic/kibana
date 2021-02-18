@@ -27,7 +27,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           `/api/apm/services/opbeans-java/error_groups?${qs.stringify({
             start,
             end,
-            uiFilters: '{}',
             size: 5,
             numBuckets: 20,
             pageIndex: 0,
@@ -56,7 +55,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           `/api/apm/services/opbeans-java/error_groups?${qs.stringify({
             start,
             end,
-            uiFilters: '{}',
             size: 5,
             numBuckets: 20,
             pageIndex: 0,
@@ -114,7 +112,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           `/api/apm/services/opbeans-java/error_groups?${qs.stringify({
             start,
             end,
-            uiFilters: '{}',
             size: 5,
             numBuckets: 20,
             pageIndex: 0,
@@ -136,7 +133,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           `/api/apm/services/opbeans-java/error_groups?${qs.stringify({
             start,
             end,
-            uiFilters: '{}',
             size: 5,
             numBuckets: 20,
             pageIndex: 0,
@@ -158,7 +154,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           `/api/apm/services/opbeans-java/error_groups?${qs.stringify({
             start,
             end,
-            uiFilters: '{}',
             size: 5,
             numBuckets: 20,
             pageIndex: 0,
@@ -182,7 +177,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           `/api/apm/services/opbeans-java/error_groups?${qs.stringify({
             start,
             end,
-            uiFilters: '{}',
             size,
             numBuckets: 20,
             pageIndex: 0,
@@ -207,7 +201,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               `/api/apm/services/opbeans-java/error_groups?${qs.stringify({
                 start,
                 end,
-                uiFilters: '{}',
                 size,
                 numBuckets: 20,
                 pageIndex,
