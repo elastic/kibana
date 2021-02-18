@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-export * from './api';
-export * from './use_update_rule';
-export * from './use_create_rule';
-export * from './types';
-export * from './use_rule';
-export * from './rules_table';
-export * from './use_pre_packaged_rules';
-export * from './use_rule_status';
+export * from './rules_table_facade';
+export * from './rules_table_reducer';
+export * from './use_rules';
+export * from './use_rules_table';
