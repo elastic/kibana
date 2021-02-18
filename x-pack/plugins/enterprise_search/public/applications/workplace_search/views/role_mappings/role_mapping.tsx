@@ -7,20 +7,11 @@
 
 import React, { useEffect } from 'react';
 
-import { withRouter } from 'react-router-dom';
+import { useHistory, useParams } from 'react-router-dom';
+
+import { History } from 'history';
 
 import { useActions, useValues } from 'kea';
-
-import FlashMessages from 'shared/components/FlashMessages';
-
-import {
-  AttributeSelector,
-  DeleteMappingCallout,
-  RoleSelector,
-} from 'shared/components/RoleMapping';
-
-import { Loading, ViewContentHeader } from 'workplace_search/components';
-import { Router } from 'workplace_search/types';
 
 import {
   EuiButton,
@@ -33,7 +24,21 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import { RoleMappingsLogic } from './RoleMappingsLogic';
+import { FlashMessages } from '../../../shared/flash_messages';
+import { Loading } from '../../../shared/loading';
+import {
+  AttributeSelector,
+  DeleteMappingCallout,
+  RoleSelector,
+} from '../../../shared/role_mapping';
+import { ViewContentHeader } from '../../components/shared/view_content_header';
+
+import { RoleMappingsLogic } from './role_mappings_logic';
+
+interface RoleType {
+  type: 'admin' | 'user';
+  description: string;
+}
 
 const roleTypes = [
   {
@@ -46,19 +51,15 @@ const roleTypes = [
     description:
       "Users' feature access is limited to search interfaces and personal settings management.",
   },
-];
+] as RoleType[];
 
-interface RoleMappingProps extends Router {
+interface RoleMappingProps {
   isNew?: boolean;
 }
 
-export const RoleMapping: React.FC<RoleMappingProps> = ({
-  isNew,
-  history,
-  match: {
-    params: { roleId },
-  },
-}) => {
+export const RoleMapping: React.FC<RoleMappingProps> = ({ isNew }) => {
+  const history = useHistory() as History;
+  const { roleId } = useParams() as { roleId: string };
   const {
     initializeRoleMappings,
     initializeRoleMapping,
@@ -107,7 +108,8 @@ export const RoleMapping: React.FC<RoleMappingProps> = ({
   );
 
   const hasAdminRoleMapping = roleMappings.some(
-    ({ roleType: roleMappingRoleType }) => roleMappingRoleType === 'admin'
+    ({ roleType: roleMappingRoleType }: { roleType: 'admin' | 'user' }) =>
+      roleMappingRoleType === 'admin'
   );
 
   return (
