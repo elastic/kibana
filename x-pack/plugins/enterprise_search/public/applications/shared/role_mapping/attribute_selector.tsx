@@ -51,6 +51,16 @@ interface AttributeExamples {
   metadata: string;
 }
 
+interface ParentOption extends EuiComboBoxOptionOption<string> {
+  label: string;
+  options: ChildOption[];
+}
+
+interface ChildOption extends EuiComboBoxOptionOption<string> {
+  value: string;
+  label: string;
+}
+
 const attributeValueExamples = {
   username: 'elastic,*_system',
   email: 'user@example.com,*@example.org',
@@ -75,20 +85,10 @@ const getAuthProviderOptions = (
   ];
 };
 
-const getSelectedOptions = (
-  selectedAuthProviders: string[],
-  availableAuthProviders: string[]
-): Array<EuiComboBoxOptionOption<string>> => {
-  const groupedOptions: Array<EuiComboBoxOptionOption<string>> = getAuthProviderOptions(
-    availableAuthProviders
-  );
-  const options: Array<EuiComboBoxOptionOption<string>> = groupedOptions.reduce(
-    (acc: Array<EuiComboBoxOptionOption<string>>, n: EuiComboBoxOptionOption<string>) => [
-      ...acc,
-      ...(n.options as Array<EuiComboBoxOptionOption<string>>),
-    ],
-    []
-  );
+const getSelectedOptions = (selectedAuthProviders: string[], availableAuthProviders: string[]) => {
+  const groupedOptions: ParentOption[] = getAuthProviderOptions(availableAuthProviders);
+  const childOptions: ChildOption[] = [];
+  const options = groupedOptions.reduce((acc, n) => [...acc, ...n.options], childOptions);
   return options.filter((o) => o.value && selectedAuthProviders.includes(o.value));
 };
 
@@ -124,7 +124,7 @@ export const AttributeSelector: React.FC<IAttributeSelectorProps> = ({
                 selectedOptions={getSelectedOptions(selectedAuthProviders, availableAuthProviders)}
                 options={getAuthProviderOptions(availableAuthProviders)}
                 onChange={(options) => {
-                  handleAuthProviderChange(options.map((o) => o.value as string));
+                  handleAuthProviderChange(options.map((o) => (o as ChildOption).value));
                 }}
                 fullWidth
                 isDisabled={disabled}
