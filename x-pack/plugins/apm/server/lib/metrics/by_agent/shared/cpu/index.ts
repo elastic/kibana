@@ -54,16 +54,19 @@ const chartBase: ChartBase = {
 };
 
 export function getCPUChartData({
+  environment,
   setup,
   serviceName,
   serviceNodeName,
 }: {
+  environment?: string;
   setup: Setup & SetupTimeRange;
   serviceName: string;
   serviceNodeName?: string;
 }) {
   return withApmSpan('get_cpu_metric_charts', () =>
     fetchAndTransformMetrics({
+      environment,
       setup,
       serviceName,
       serviceNodeName,

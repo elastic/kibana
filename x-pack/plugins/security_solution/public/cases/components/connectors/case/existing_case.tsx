@@ -5,10 +5,22 @@
  * 2.0.
  */
 
-import React, { memo, useMemo, useCallback } from 'react';
-import { useGetCases } from '../../../containers/use_get_cases';
+import {
+  EuiButton,
+  EuiButtonIcon,
+  EuiCallOut,
+  EuiTextColor,
+  EuiLoadingSpinner,
+} from '@elastic/eui';
+import { isEmpty } from 'lodash';
+import React, { memo, useEffect, useCallback, useState } from 'react';
+import { CaseType } from '../../../../../../case/common/api';
+import { Case } from '../../../containers/types';
+import { useDeleteCases } from '../../../containers/use_delete_cases';
+import { useGetCase } from '../../../containers/use_get_case';
+import { ConfirmDeleteCaseModal } from '../../confirm_delete_case';
 import { useCreateCaseModal } from '../../use_create_case_modal';
-import { CasesDropdown, ADD_CASE_BUTTON_ID } from './cases_dropdown';
+import * as i18n from './translations';
 
 interface ExistingCaseProps {
   selectedCase: string | null;
@@ -16,37 +28,72 @@ interface ExistingCaseProps {
 }
 
 const ExistingCaseComponent: React.FC<ExistingCaseProps> = ({ onCaseChanged, selectedCase }) => {
-  const { data: cases, loading: isLoadingCases, refetchCases } = useGetCases();
+  const { data, isLoading, isError } = useGetCase(selectedCase ?? '');
+  const [createdCase, setCreatedCase] = useState<Case | null>(null);
 
-  const onCaseCreated = useCallback(() => refetchCases(), [refetchCases]);
-
-  const { modal, openModal } = useCreateCaseModal({ onCaseCreated });
-
-  const onChange = useCallback(
-    (id: string) => {
-      if (id === ADD_CASE_BUTTON_ID) {
-        openModal();
-        return;
-      }
-
-      onCaseChanged(id);
+  const onCaseCreated = useCallback(
+    (newCase: Case) => {
+      onCaseChanged(newCase.id);
+      setCreatedCase(newCase);
     },
-    [onCaseChanged, openModal]
+    [onCaseChanged]
   );
 
-  const isCasesLoading = useMemo(
-    () => isLoadingCases.includes('cases') || isLoadingCases.includes('caseUpdate'),
-    [isLoadingCases]
-  );
+  const { modal, openModal } = useCreateCaseModal({ caseType: CaseType.collection, onCaseCreated });
+
+  // Delete case
+  const {
+    dispatchResetIsDeleted,
+    handleOnDeleteConfirm,
+    handleToggleModal,
+    isLoading: isDeleting,
+    isDeleted,
+    isDisplayConfirmDeleteModal,
+  } = useDeleteCases();
+
+  useEffect(() => {
+    if (isDeleted) {
+      setCreatedCase(null);
+      onCaseChanged('');
+      dispatchResetIsDeleted();
+    }
+  }, [isDeleted, dispatchResetIsDeleted, onCaseChanged]);
+
+  useEffect(() => {
+    if (!isLoading && !isError && data != null) {
+      setCreatedCase(data);
+      onCaseChanged(data.id);
+    }
+  }, [data, isLoading, isError, onCaseChanged]);
 
   return (
     <>
-      <CasesDropdown
-        isLoading={isCasesLoading}
-        cases={cases.cases}
-        selectedCase={selectedCase ?? undefined}
-        onCaseChanged={onChange}
-      />
+      {createdCase == null && isEmpty(selectedCase) && (
+        <EuiButton fill fullWidth onClick={openModal}>
+          {i18n.CREATE_CASE}
+        </EuiButton>
+      )}
+      {createdCase == null && isLoading && <EuiLoadingSpinner size="m" />}
+      {createdCase != null && !isLoading && (
+        <>
+          <EuiCallOut title={i18n.CONNECTED_CASE} color="success">
+            <EuiTextColor color="default">
+              {createdCase.title}{' '}
+              {!isDeleting && (
+                <EuiButtonIcon color="danger" onClick={handleToggleModal} iconType="trash" />
+              )}
+              {isDeleting && <EuiLoadingSpinner size="m" />}
+            </EuiTextColor>
+          </EuiCallOut>
+          <ConfirmDeleteCaseModal
+            caseTitle={createdCase.title}
+            isModalVisible={isDisplayConfirmDeleteModal}
+            isPlural={false}
+            onCancel={handleToggleModal}
+            onConfirm={handleOnDeleteConfirm.bind(null, [createdCase])}
+          />
+        </>
+      )}
       {modal}
     </>
   );

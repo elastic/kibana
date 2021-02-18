@@ -629,6 +629,14 @@ describe('CaseView ', () => {
       loading: true,
       data: { hits: { hits: [] } },
     }));
+    useGetCaseUserActionsMock.mockReturnValue({
+      caseServices: {},
+      caseUserActions: [],
+      hasDataToPush: false,
+      isError: false,
+      isLoading: true,
+      participants: [],
+    });
 
     const wrapper = mount(
       <TestProviders>
