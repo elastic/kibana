@@ -57,14 +57,18 @@ const ExistingCaseComponent: React.FC<ExistingCaseProps> = ({ onCaseChanged, sel
       onCaseChanged('');
       dispatchResetIsDeleted();
     }
-  }, [isDeleted, dispatchResetIsDeleted, onCaseChanged]);
+    // onCaseChanged and/or dispatchResetIsDeleted causes re-renders
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isDeleted]);
 
   useEffect(() => {
     if (!isLoading && !isError && data != null) {
       setCreatedCase(data);
       onCaseChanged(data.id);
     }
-  }, [data, isLoading, isError, onCaseChanged]);
+    // onCaseChanged causes re-renders
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data, isLoading, isError]);
 
   return (
     <>

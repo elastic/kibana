@@ -465,6 +465,7 @@ export const CaseView = React.memo(({ caseId, subCaseId, userCanCrud }: Props) =
   if (isError) {
     return null;
   }
+
   if (isLoading) {
     return (
       <MyEuiFlexGroup gutterSize="none" justifyContent="center" alignItems="center">
@@ -476,14 +477,16 @@ export const CaseView = React.memo(({ caseId, subCaseId, userCanCrud }: Props) =
   }
 
   return (
-    <CaseComponent
-      caseId={caseId}
-      subCaseId={subCaseId}
-      fetchCase={fetchCase}
-      caseData={data}
-      updateCase={updateCase}
-      userCanCrud={userCanCrud}
-    />
+    data && (
+      <CaseComponent
+        caseId={caseId}
+        subCaseId={subCaseId}
+        fetchCase={fetchCase}
+        caseData={data}
+        updateCase={updateCase}
+        userCanCrud={userCanCrud}
+      />
+    )
   );
 });
 
