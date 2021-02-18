@@ -24,7 +24,18 @@ Create {kib} alerts.
   (Required, string) The ID of the alert type that you want to call when the alert is scheduled to run.
 
 `schedule`::
-  (Required, object) When to run this alert. Use one of the available schedule formats.
+  (Required, object) The schedule specifying when this alert should be run, using one of the available schedule formats specified under
++
+._Schedule Formats_.
+[%collapsible%open]
+=====
+A schedule is structured such that the key specifies the format you wish to use and its value specifies the schedule.
+
+We currently support the _Interval format_ which specifies the interval in seconds, minutes, hours or days at which the alert should execute.
+Example: `{ interval: "10s" }`, `{ interval: "5m" }`, `{ interval: "1h" }`, `{ interval: "1d" }`.
+
+There are plans to support multiple other schedule formats in the near future.
+=====
 
 `throttle`::
   (Optional, string) How often this alert should fire the same actions. This will prevent the alert from sending out the same notification over and over. For example, if an alert with a `schedule` of 1 minute stays in a triggered state for 90 minutes, setting a `throttle` of `10m` or `1h` will prevent it from sending 90 notifications during this period.

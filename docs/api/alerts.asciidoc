@@ -19,13 +19,11 @@ The following APIs are available for managing {kib} alerts.
 
 * <<alerts-api-disable, Disable alert API>> to disable a single alert by ID
 
-* <<alerts-api-mute-all, Mute all alert instances API>> to mute all alert instances for a single alert by ID
-
 * <<alerts-api-mute, Mute alert instance API>> to mute alert instances for a single alert by ID
 
-* <<alerts-api-unmute-all, Unmute all alert instances API>> to unmute all alert instances for a single  alert by ID
-
 * <<alerts-api-unmute, Unmute alert instance API>> to unmute alert instances for a single alert by ID
+
+* <<alerts-api-unmute-all, Unmute all alert instances API>> to unmute all alert instances for a single  alert by ID
 
 * <<alerts-api-health, Get framework health API>> to retrieve the health of the alerts framework
 
