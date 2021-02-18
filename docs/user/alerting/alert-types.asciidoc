@@ -5,19 +5,22 @@
 {kib} supplies alert types in two ways: some are built into {kib} (these are known as stack alerts), while domain-specific alert types are registered by {kib} apps.
 
 [float]
-==== Standard stack alert types
+==== Standard stack alerts
 
-This section covers stack alerts.
-Users will need `all` access to the *Stack Alerts* feature to be able to create and edit any of the alerts listed below.
-See <<kibana-feature-privileges, feature privileges>> for more information on configuring roles that provide access to this feature. 
+Users require the `all` privilege to access to the *Stack Alerts* feature and create and edit alerts. .
+See <<kibana-feature-privileges, feature privileges>> for more information. 
 
-Currently {kib} provides two stack alerts: <<alert-type-index-threshold>> and <<alert-type-es-query>>.
+{kib} provides two stack alerts: 
+
+* <<alert-type-index-threshold>>
+* <<alert-type-es-query>>
+
 
 [float]
-==== Domain-specific alert types
+==== Domain-specific alerts
 
-For domain-specific alert types, refer to the documentation for that app.
-Currently we the next alerts grouped by the application:
+For domain-specific alerts, refer to the documentation for that app.
+{kib} supports these alerts:
 
 * {observability-guide}/create-alerts.html[Observability alerts]
 * {security-guide}/prebuilt-rules.html[Security alerts]
