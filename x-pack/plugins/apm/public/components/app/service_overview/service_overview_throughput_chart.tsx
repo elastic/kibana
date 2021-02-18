@@ -30,19 +30,7 @@ export function ServiceOverviewThroughputChart({
   const { serviceName } = useParams<{ serviceName?: string }>();
   const { urlParams, uiFilters } = useUrlParams();
   const { transactionType } = useApmServiceContext();
-  const {
-    start,
-    end,
-    comparisonEnabled,
-    comparisonType,
-    environment,
-  } = urlParams;
-  const comparisonChartTheme = getComparisonChartTheme(theme);
-  const { comparisonStart, comparisonEnd } = getTimeRangeComparison({
-    start,
-    end,
-    comparisonType,
-  });
+  const { environment, start, end } = urlParams;
 
   const { data = INITIAL_STATE, status } = useFetcher(
     (callApmApi) => {
