@@ -35,7 +35,9 @@ export class LogStreamEmbeddableFactoryDefinition
   }
 
   public getDisplayName() {
-    return 'Log stream';
+    return i18n.translate('xpack.infra.logStreamEmbeddable.displayName', {
+      defaultMessage: 'Log stream',
+    });
   }
 
   public async getExplicitInput() {
