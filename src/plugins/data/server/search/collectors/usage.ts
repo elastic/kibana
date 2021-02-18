@@ -8,6 +8,7 @@
 
 import { once } from 'lodash';
 import type { CoreSetup, Logger } from 'kibana/server';
+import { SavedObjectsErrorHelpers } from 'kibana/server';
 import type { IEsSearchResponse } from '../../../common';
 
 const SAVED_OBJECT_ID = 'search-telemetry';
@@ -35,7 +36,7 @@ export function usageProvider(core: CoreSetup): SearchUsage {
         },
       ]);
     } catch (e) {
-      if (e.statusCode === 409 && retryCount < MAX_RETRY_COUNT) {
+      if (SavedObjectsErrorHelpers.isConflictError(e) && retryCount < MAX_RETRY_COUNT) {
         setTimeout(() => trackSuccess(duration, retryCount + 1), 1000);
       }
     }
@@ -48,7 +49,7 @@ export function usageProvider(core: CoreSetup): SearchUsage {
         { fieldName: 'errorCount' },
       ]);
     } catch (e) {
-      if (e.statusCode === 409 && retryCount < MAX_RETRY_COUNT) {
+      if (SavedObjectsErrorHelpers.isConflictError(e) && retryCount < MAX_RETRY_COUNT) {
         setTimeout(() => trackError(retryCount + 1), 1000);
       }
     }
