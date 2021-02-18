@@ -12,9 +12,9 @@ Array [
   Object {
     "default": false,
     "id": "test1",
-    "sort": "1test1 name",
+    "sort": "1test name 1",
     "tags": undefined,
-    "title": "test1 name",
+    "title": "test name 1",
   },
 ]
 `;
