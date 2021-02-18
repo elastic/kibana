@@ -5,6 +5,7 @@
  */
 
 import chrome from 'ui/chrome';
+import { addSystemApiHeader } from 'ui/system_api';
 import { ROUTES } from '../../../common/constants';
 import { Watch } from 'plugins/watcher/models/watch';
 
@@ -14,8 +15,9 @@ export class WatchesService {
     this.basePath = chrome.addBasePath(ROUTES.API_ROOT);
   }
 
-  getWatchList() {
-    return this.$http.get(`${this.basePath}/watches`)
+  getWatchList({ asSystemRequest } = {}) {
+    const headers = asSystemRequest ? addSystemApiHeader({}) : undefined;
+    return this.$http.get(`${this.basePath}/watches`, { headers })
       .then(response => response.data.watches)
       .then(watches => watches.map(watch => {
         return Watch.fromUpstreamJson(watch);
