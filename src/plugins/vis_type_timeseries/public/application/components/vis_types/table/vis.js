@@ -18,6 +18,7 @@ import { replaceVars } from '../../lib/replace_vars';
 import { fieldFormats } from '../../../../../../../plugins/data/public';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { getFieldFormats, getCoreStart } from '../../../../services';
+import { emptyLabel } from '../../../../../common/empty_label';
 
 function getColor(rules, colorKey, value) {
   let color;
@@ -90,10 +91,7 @@ class TableVis extends Component {
     return (
       <tr key={row.key}>
         <td>
-          {rowDisplay ||
-            i18n.translate('visTypeTimeseries.emptyTextValue', {
-              defaultMessage: '(empty)',
-            })}
+          {rowDisplay || emptyLabel}
         </td>
         {columns}
       </tr>
