@@ -7,6 +7,7 @@
 
 import { ESSearchResponse } from '../../../../../../typings/elasticsearch';
 import { PromiseReturnType } from '../../../../../observability/typings/common';
+import { rangeQuery } from '../../../../common/utils/queries';
 import { withApmSpan } from '../../../utils/with_apm_span';
 import { Setup } from '../../helpers/setup_request';
 
@@ -40,15 +41,7 @@ export function anomalySeriesFetcher({
               { terms: { result_type: ['model_plot', 'record'] } },
               { term: { partition_field_value: serviceName } },
               { term: { by_field_value: transactionType } },
-              {
-                range: {
-                  timestamp: {
-                    gte: start,
-                    lte: end,
-                    format: 'epoch_millis',
-                  },
-                },
-              },
+              ...rangeQuery(start, end, 'timestamp'),
             ],
           },
         },

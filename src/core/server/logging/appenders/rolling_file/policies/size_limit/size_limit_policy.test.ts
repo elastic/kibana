@@ -15,7 +15,7 @@ describe('SizeLimitTriggeringPolicy', () => {
   let context: RollingFileContext;
 
   const createPolicy = (size: ByteSizeValue) =>
-    new SizeLimitTriggeringPolicy({ kind: 'size-limit', size }, context);
+    new SizeLimitTriggeringPolicy({ type: 'size-limit', size }, context);
 
   const createLogRecord = (parts: Partial<LogRecord> = {}): LogRecord => ({
     timestamp: new Date(),
