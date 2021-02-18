@@ -17,6 +17,7 @@ import {
   TRANSACTION_PAGE_LOAD,
   TRANSACTION_REQUEST,
 } from '../../../common/transaction_types';
+import { rangeQuery } from '../../../common/utils/queries';
 import { withApmSpan } from '../../utils/with_apm_span';
 import { getMlJobsWithAPMGroup } from '../anomaly_detection/get_ml_jobs_with_apm_group';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
@@ -51,16 +52,11 @@ export async function getServiceAnomalies({
           bool: {
             filter: [
               { terms: { result_type: ['model_plot', 'record'] } },
-              {
-                range: {
-                  timestamp: {
-                    // fetch data for at least 30 minutes
-                    gte: Math.min(end - 30 * 60 * 1000, start),
-                    lte: end,
-                    format: 'epoch_millis',
-                  },
-                },
-              },
+              ...rangeQuery(
+                Math.min(end - 30 * 60 * 1000, start),
+                end,
+                'timestamp'
+              ),
               {
                 terms: {
                   // Only retrieving anomalies for transaction types "request" and "page-load"

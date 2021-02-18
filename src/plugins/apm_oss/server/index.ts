@@ -47,4 +47,5 @@ export {
   createGoAgentInstructions,
   createJavaAgentInstructions,
   createDotNetAgentInstructions,
+  createPhpAgentInstructions,
 } from './tutorial/instructions/apm_agent_instructions';

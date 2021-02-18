@@ -13,6 +13,7 @@ import {
   SUB_CASE_DETAILS_URL,
   SUB_CASES_URL,
   CASE_PUSH_URL,
+  SUB_CASE_USER_ACTIONS_URL,
 } from '../constants';
 
 export const getCaseDetailsUrl = (id: string): string => {
@@ -38,6 +39,11 @@ export const getCaseCommentDetailsUrl = (caseId: string, commentId: string): str
 export const getCaseUserActionUrl = (id: string): string => {
   return CASE_USER_ACTIONS_URL.replace('{case_id}', id);
 };
+
+export const getSubCaseUserActionUrl = (caseID: string, subCaseID: string): string => {
+  return SUB_CASE_USER_ACTIONS_URL.replace('{case_id}', caseID).replace('{sub_case_id}', subCaseID);
+};
+
 export const getCasePushUrl = (caseId: string, connectorId: string): string => {
   return CASE_PUSH_URL.replace('{case_id}', caseId).replace('{connector_id}', connectorId);
 };

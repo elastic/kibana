@@ -81,6 +81,7 @@ describe('PATCH cases', () => {
             "syncAlerts": true,
           },
           "status": "closed",
+          "subCaseIds": undefined,
           "subCases": undefined,
           "tags": Array [
             "defacement",
@@ -154,6 +155,7 @@ describe('PATCH cases', () => {
             "syncAlerts": true,
           },
           "status": "open",
+          "subCaseIds": undefined,
           "subCases": undefined,
           "tags": Array [
             "LOLBins",
@@ -222,6 +224,7 @@ describe('PATCH cases', () => {
             "syncAlerts": true,
           },
           "status": "in-progress",
+          "subCaseIds": undefined,
           "subCases": undefined,
           "tags": Array [
             "defacement",
