@@ -10,24 +10,15 @@ import { inspect } from 'util';
 import Fs from 'fs/promises';
 import Path from 'path';
 
-import * as Rx from 'rxjs';
-import { mergeMap } from 'rxjs/operators';
-import { lastValueFrom } from '@kbn/std';
 import FormData from 'form-data';
 import { ToolingLog, isAxiosResponseError, createFailError } from '@kbn/dev-utils';
 
 import { KbnClientRequester, uriencode, ReqOptions } from './kbn_client_requester';
+import { KbnClientSavedObjects } from './kbn_client_saved_objects';
 
 interface ImportApiResponse {
   success: boolean;
   [key: string]: unknown;
-}
-
-interface FindApiResponse {
-  saved_objects: SavedObject[];
-  total: number;
-  per_page: number;
-  page: number;
 }
 
 interface SavedObject {
@@ -43,14 +34,11 @@ async function parseArchive(path: string): Promise<SavedObject[]> {
     .map((line) => JSON.parse(line));
 }
 
-async function concurrently<T>(maxConcurrency: number, arr: T[], fn: (item: T) => Promise<void>) {
-  await lastValueFrom(Rx.from(arr).pipe(mergeMap(async (item) => await fn(item), maxConcurrency)));
-}
-
 export class KbnClientImportExport {
   constructor(
     public readonly log: ToolingLog,
     public readonly requester: KbnClientRequester,
+    public readonly savedObjects: KbnClientSavedObjects,
     public readonly dir?: string
   ) {}
 
@@ -96,34 +84,6 @@ export class KbnClientImportExport {
     }
   }
 
-  async clean(options: { types: string[]; space?: string }) {
-    this.log.debug('cleaning all saved objects', { space: options?.space });
-
-    let deleted = 0;
-
-    while (true) {
-      const resp = await this.req<FindApiResponse>(options.space, {
-        method: 'GET',
-        path: '/api/saved_objects/_find',
-        query: {
-          per_page: 1000,
-          type: options.types,
-          fields: 'none',
-        },
-      });
-
-      this.log.info('deleting batch of', resp.data.saved_objects.length, 'objects');
-      const deletion = await this.deleteObjects(options.space, resp.data.saved_objects);
-      deleted += deletion.deleted;
-
-      if (resp.data.total < resp.data.per_page) {
-        break;
-      }
-    }
-
-    this.log.success('deleted', deleted, 'objects');
-  }
-
   async unload(name: string, options?: { space?: string }) {
     const src = this.resolvePath(name);
     this.log.debug('unloading docs from archive at', src);
@@ -131,7 +91,10 @@ export class KbnClientImportExport {
     const objects = await parseArchive(src);
     this.log.info('deleting', objects.length, 'objects', { space: options?.space });
 
-    const { deleted, missing } = await this.deleteObjects(options?.space, objects);
+    const { deleted, missing } = await this.savedObjects.bulkDelete({
+      space: options?.space,
+      objects,
+    });
 
     if (missing) {
       this.log.info(missing, 'saved objects were already deleted');
@@ -191,35 +154,5 @@ export class KbnClientImportExport {
         )}`
       );
     }
-  }
-
-  private async deleteObjects(space: string | undefined, objects: SavedObject[]) {
-    let deleted = 0;
-    let missing = 0;
-
-    await concurrently(20, objects, async (obj) => {
-      try {
-        await this.requester.request({
-          method: 'DELETE',
-          path: space
-            ? uriencode`/s/${space}/api/saved_objects/${obj.type}/${obj.id}`
-            : uriencode`/api/saved_objects/${obj.type}/${obj.id}`,
-        });
-        deleted++;
-      } catch (error) {
-        if (isAxiosResponseError(error)) {
-          if (error.response.status === 404) {
-            missing++;
-            return;
-          }
-
-          throw createFailError(`${error.response.status} resp: ${inspect(error.response.data)}`);
-        }
-
-        throw error;
-      }
-    });
-
-    return { deleted, missing };
   }
 }

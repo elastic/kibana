@@ -8,6 +8,7 @@
 
 import Url from 'url';
 import Https from 'https';
+import Qs from 'querystring';
 
 import Axios, { AxiosResponse } from 'axios';
 import { ToolingLog, isAxiosRequestError, isAxiosResponseError } from '@kbn/dev-utils';
@@ -106,6 +107,7 @@ export class KbnClientRequester {
             'kbn-xsrf': 'kbn-client',
           },
           httpsAgent: this.httpsAgent,
+          paramsSerializer: (params) => Qs.stringify(params),
         });
 
         return response;

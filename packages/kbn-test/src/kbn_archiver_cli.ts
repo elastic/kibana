@@ -145,22 +145,5 @@ export function runKbnArchiverCli() {
         await kbnClient.importExport.unload(getSinglePositionalArg(flags), { space });
       },
     })
-    .command({
-      name: 'clean',
-      description: 'clean all saved objects of specific types from the Kibana index',
-      flags: {
-        string: ['type'],
-        help: `
-          --type             saved object type that should be cleaned from the index, can
-                               be specified multiple times or be a comma-separated list.
-        `,
-      },
-      async run({ kbnClient, space, flags }) {
-        await kbnClient.importExport.clean({
-          types: parseTypesFlag(flags),
-          space,
-        });
-      },
-    })
     .execute();
 }
