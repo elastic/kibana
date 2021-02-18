@@ -25,7 +25,7 @@ export function ServiceOverviewInstancesChartAndTable({
   const { transactionType } = useApmServiceContext();
 
   const {
-    urlParams: { start, end },
+    urlParams: { environment, start, end },
     uiFilters,
   } = useUrlParams();
 
@@ -43,6 +43,7 @@ export function ServiceOverviewInstancesChartAndTable({
             serviceName,
           },
           query: {
+            environment,
             start,
             end,
             transactionType,
@@ -52,7 +53,7 @@ export function ServiceOverviewInstancesChartAndTable({
         },
       });
     },
-    [start, end, serviceName, transactionType, uiFilters]
+    [environment, start, end, serviceName, transactionType, uiFilters]
   );
 
   return (
