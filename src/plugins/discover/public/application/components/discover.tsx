@@ -36,7 +36,6 @@ import { DiscoverSidebarResponsive } from './sidebar';
 import { DiscoverProps } from './types';
 import { getDisplayedColumns } from '../helpers/columns';
 import { SortPairArr } from '../angular/doc_table/lib/get_sort';
-import { SEARCH_FIELDS_FROM_SOURCE } from '../../../common';
 import { popularizeField } from '../helpers/popularize_field';
 import { getStateColumnActions } from '../angular/doc_table/actions/columns';
 import { DocViewFilterFn } from '../doc_views/doc_views_types';
@@ -90,7 +89,7 @@ export function Discover({
       : undefined;
   const contentCentered = resultState === 'uninitialized';
   const isLegacy = services.uiSettings.get('doc_table:legacy');
-  const useNewFieldsApi = !services.uiSettings.get(SEARCH_FIELDS_FROM_SOURCE);
+  const useNewFieldsApi = services.shouldUseNewFieldsApi();
   const updateQuery = useCallback(
     (_payload, isUpdate?: boolean) => {
       if (isUpdate === false) {

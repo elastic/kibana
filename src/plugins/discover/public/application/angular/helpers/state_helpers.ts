@@ -7,7 +7,8 @@
  */
 
 import { IUiSettingsClient } from 'src/core/public';
-import { SEARCH_FIELDS_FROM_SOURCE, DEFAULT_COLUMNS_SETTING } from '../../../../common';
+import { DEFAULT_COLUMNS_SETTING } from '../../../../common';
+import { DiscoverServices } from '../../../build_services';
 
 /**
  * Makes sure the current state is not referencing the source column when using the fields api
@@ -16,20 +17,21 @@ import { SEARCH_FIELDS_FROM_SOURCE, DEFAULT_COLUMNS_SETTING } from '../../../../
  */
 export function handleSourceColumnState<TState extends { columns?: string[] }>(
   state: TState,
-  uiSettings: IUiSettingsClient
+  uiSettings: IUiSettingsClient,
+  shouldUseNewFieldsApi: DiscoverServices['shouldUseNewFieldsApi']
 ): TState {
   if (!state.columns) {
     return state;
   }
-  const useNewFieldsApi = !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE);
   const defaultColumns = uiSettings.get(DEFAULT_COLUMNS_SETTING);
-  if (useNewFieldsApi) {
+  if (shouldUseNewFieldsApi()) {
     // if fields API is used, filter out the source column
     return {
       ...state,
       columns: state.columns.filter((column) => column !== '_source'),
     };
-  } else if (state.columns.length === 0) {
+  }
+  if (state.columns.length === 0) {
     // if _source fetching is used and there are no column, switch back to default columns
     // this can happen if the fields API was previously used
     return {

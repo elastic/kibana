@@ -10,7 +10,6 @@ import { useEffect, useState, useMemo } from 'react';
 import { IndexPattern, getServices } from '../../../kibana_services';
 import { DocProps } from './doc';
 import { ElasticSearchHit } from '../../doc_views/doc_views_types';
-import { SEARCH_FIELDS_FROM_SOURCE } from '../../../../common';
 
 export enum ElasticRequestState {
   Loading,
@@ -57,8 +56,8 @@ export function useEsDocSearch({
   const [indexPattern, setIndexPattern] = useState<IndexPattern | null>(null);
   const [status, setStatus] = useState(ElasticRequestState.Loading);
   const [hit, setHit] = useState<ElasticSearchHit | null>(null);
-  const { data, uiSettings } = useMemo(() => getServices(), []);
-  const useNewFieldsApi = useMemo(() => !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE), [uiSettings]);
+  const { data, shouldUseNewFieldsApi } = useMemo(() => getServices(), []);
+  const useNewFieldsApi = useMemo(() => !shouldUseNewFieldsApi(), [shouldUseNewFieldsApi]);
 
   useEffect(() => {
     async function requestData() {

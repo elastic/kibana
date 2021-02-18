@@ -16,11 +16,10 @@ import { fetchContextProvider } from '../api/context';
 import { getQueryParameterActions } from '../query_parameters';
 import { FAILURE_REASONS, LOADING_STATUS } from './index';
 import { MarkdownSimple } from '../../../../../../kibana_react/public';
-import { SEARCH_FIELDS_FROM_SOURCE } from '../../../../../common';
 
 export function QueryActionsProvider(Promise) {
-  const { filterManager, indexPatterns, data, uiSettings } = getServices();
-  const useNewFieldsApi = !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE);
+  const { filterManager, indexPatterns, data, shouldUseNewFieldsApi } = getServices();
+  const useNewFieldsApi = shouldUseNewFieldsApi();
   const fetchAnchor = fetchAnchorProvider(
     indexPatterns,
     data.search.searchSource.createEmpty(),

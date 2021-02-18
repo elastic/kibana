@@ -46,7 +46,6 @@ import { addFatalError } from '../../../../kibana_legacy/public';
 import {
   DEFAULT_COLUMNS_SETTING,
   SAMPLE_SIZE_SETTING,
-  SEARCH_FIELDS_FROM_SOURCE,
   SEARCH_ON_PAGE_LOAD_SETTING,
   SORT_DEFAULT_ORDER_SETTING,
 } from '../../../common';
@@ -68,6 +67,7 @@ const {
   timefilter,
   toastNotifications,
   uiSettings: config,
+  shouldUseNewFieldsApi,
 } = getServices();
 
 const fetchStatuses = {
@@ -110,7 +110,11 @@ app.config(($routeProvider) => {
         const history = getHistory();
         const savedSearchId = $route.current.params.id;
         return data.indexPatterns.ensureDefaultIndexPattern(history).then(() => {
-          const { appStateContainer } = getState({ history, uiSettings: config });
+          const { appStateContainer } = getState({
+            history,
+            uiSettings: config,
+            shouldUseNewFieldsApi,
+          });
           const { index } = appStateContainer.getState();
           return Promise.props({
             ip: loadIndexPattern(index, data.indexPatterns, config),
@@ -175,7 +179,7 @@ function discoverController($route, $scope, Promise) {
     persistentSearchSource,
     toastNotifications
   );
-  $scope.useNewFieldsApi = !config.get(SEARCH_FIELDS_FROM_SOURCE);
+  $scope.useNewFieldsApi = shouldUseNewFieldsApi();
 
   //used for functional testing
   $scope.fetchCounter = 0;
@@ -196,6 +200,7 @@ function discoverController($route, $scope, Promise) {
     history,
     toasts: core.notifications.toasts,
     uiSettings: config,
+    shouldUseNewFieldsApi,
   });
 
   const {

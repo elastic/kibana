@@ -7,11 +7,7 @@
  */
 
 import _ from 'lodash';
-import {
-  CONTEXT_STEP_SETTING,
-  CONTEXT_TIE_BREAKER_FIELDS_SETTING,
-  SEARCH_FIELDS_FROM_SOURCE,
-} from '../../../common';
+import { CONTEXT_STEP_SETTING, CONTEXT_TIE_BREAKER_FIELDS_SETTING } from '../../../common';
 import { getAngularModule, getServices } from '../../kibana_services';
 import contextAppTemplate from './context_app.html';
 import './context/components/action_bar';
@@ -49,8 +45,14 @@ getAngularModule().directive('contextApp', function ContextApp() {
 });
 
 function ContextAppController($scope, Private) {
-  const { filterManager, indexPatterns, uiSettings, navigation } = getServices();
-  const useNewFieldsApi = !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE);
+  const {
+    filterManager,
+    indexPatterns,
+    uiSettings,
+    navigation,
+    shouldUseNewFieldsApi,
+  } = getServices();
+  const useNewFieldsApi = shouldUseNewFieldsApi();
   const queryParameterActions = getQueryParameterActions(filterManager, indexPatterns);
   const queryActions = Private(QueryActionsProvider);
   this.state = createInitialState(

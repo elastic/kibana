@@ -66,6 +66,7 @@ function ContextAppRouteController($routeParams, $scope, $route) {
     history: getServices().history(),
     toasts: getServices().core.notifications.toasts,
     uiSettings: getServices().core.uiSettings,
+    shouldUseNewFieldsApi: getServices().shouldUseNewFieldsApi,
   });
   this.state = { ...appState.getState() };
   this.anchorId = $routeParams.id;

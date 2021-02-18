@@ -15,15 +15,13 @@ import {
 import { createBrowserHistory, History } from 'history';
 import { dataPluginMock } from '../../../../data/public/mocks';
 import { SavedSearch } from '../../saved_searches';
-import { SEARCH_FIELDS_FROM_SOURCE } from '../../../common';
 
 let history: History;
 let state: GetStateReturn;
 const getCurrentUrl = () => history.createHref(history.location);
 
 const uiSettingsMock = {
-  get: <T>(key: string) =>
-    ((key === SEARCH_FIELDS_FROM_SOURCE ? true : ['_source']) as unknown) as T,
+  get: <T>(_key: string) => (['_source'] as unknown) as T,
 } as IUiSettingsClient;
 
 describe('Test discover state', () => {
@@ -34,6 +32,7 @@ describe('Test discover state', () => {
       getStateDefaults: () => ({ index: 'test' }),
       history,
       uiSettings: uiSettingsMock,
+      shouldUseNewFieldsApi: () => true,
     });
     await state.replaceUrlAppState({});
     await state.startSync();
@@ -90,6 +89,7 @@ describe('Test discover state with legacy migration', () => {
       getStateDefaults: () => ({ index: 'test' }),
       history,
       uiSettings: uiSettingsMock,
+      shouldUseNewFieldsApi: () => true,
     });
     expect(state.appStateContainer.getState()).toMatchInlineSnapshot(`
       Object {
@@ -116,6 +116,7 @@ describe('createSearchSessionRestorationDataProvider', () => {
     appStateContainer: getState({
       history: createBrowserHistory(),
       uiSettings: uiSettingsMock,
+      shouldUseNewFieldsApi: () => true,
     }).appStateContainer,
     getSavedSearch: () => mockSavedSearch,
   });

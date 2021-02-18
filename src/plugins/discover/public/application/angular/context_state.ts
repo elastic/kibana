@@ -18,6 +18,7 @@ import {
 } from '../../../../kibana_utils/public';
 import { esFilters, FilterManager, Filter, Query } from '../../../../data/public';
 import { handleSourceColumnState } from './helpers';
+import { DiscoverServices } from '../../build_services';
 
 export interface AppState {
   /**
@@ -79,6 +80,7 @@ interface GetStateParams {
    * core ui settings service
    */
   uiSettings: IUiSettingsClient;
+  shouldUseNewFieldsApi: DiscoverServices['shouldUseNewFieldsApi'];
 }
 
 interface GetStateReturn {
@@ -130,6 +132,7 @@ export function getState({
   history,
   toasts,
   uiSettings,
+  shouldUseNewFieldsApi,
 }: GetStateParams): GetStateReturn {
   const stateStorage = createKbnUrlStateStorage({
     useHash: storeInSessionStorage,
@@ -145,7 +148,8 @@ export function getState({
     defaultStepSize,
     timeFieldName,
     appStateFromUrl,
-    uiSettings
+    uiSettings,
+    shouldUseNewFieldsApi
   );
   const appStateContainer = createStateContainer<AppState>(appStateInitial);
 
@@ -270,7 +274,8 @@ function createInitialAppState(
   defaultSize: string,
   timeFieldName: string,
   urlState: AppState,
-  uiSettings: IUiSettingsClient
+  uiSettings: IUiSettingsClient,
+  shouldUseNewFieldsApi: DiscoverServices['shouldUseNewFieldsApi']
 ): AppState {
   const defaultState = {
     columns: ['_source'],
@@ -288,6 +293,7 @@ function createInitialAppState(
       ...defaultState,
       ...urlState,
     },
-    uiSettings
+    uiSettings,
+    shouldUseNewFieldsApi
   );
 }

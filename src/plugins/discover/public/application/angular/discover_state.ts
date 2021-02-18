@@ -31,6 +31,7 @@ import { DiscoverGridSettings } from '../components/discover_grid/types';
 import { DISCOVER_APP_URL_GENERATOR, DiscoverUrlGeneratorState } from '../../url_generator';
 import { SavedSearch } from '../../saved_searches';
 import { handleSourceColumnState } from './helpers';
+import { DiscoverServices } from '../../build_services';
 
 export interface AppState {
   /**
@@ -96,6 +97,7 @@ interface GetStateParams {
    * core ui settings service
    */
   uiSettings: IUiSettingsClient;
+  shouldUseNewFieldsApi: DiscoverServices['shouldUseNewFieldsApi'];
 }
 
 export interface GetStateReturn {
@@ -156,6 +158,7 @@ export function getState({
   history,
   toasts,
   uiSettings,
+  shouldUseNewFieldsApi,
 }: GetStateParams): GetStateReturn {
   const defaultAppState = getStateDefaults ? getStateDefaults() : {};
   const stateStorage = createKbnUrlStateStorage({
@@ -175,7 +178,8 @@ export function getState({
       ...defaultAppState,
       ...appStateFromUrl,
     },
-    uiSettings
+    uiSettings,
+    shouldUseNewFieldsApi
   );
   // todo filter source depending on fields fetchinbg flag (if no columns remain and source fetching is enabled, use default columns)
   let previousAppState: AppState;

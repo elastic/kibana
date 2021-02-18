@@ -34,6 +34,7 @@ import { getHistory } from './kibana_services';
 import { KibanaLegacyStart } from '../../kibana_legacy/public';
 import { UrlForwardingStart } from '../../url_forwarding/public';
 import { NavigationPublicPluginStart } from '../../navigation/public';
+import { SEARCH_FIELDS_FROM_SOURCE } from '../common';
 
 export interface DiscoverServices {
   addBasePath: (path: string) => string;
@@ -59,6 +60,7 @@ export interface DiscoverServices {
   getEmbeddableInjector: any;
   uiSettings: IUiSettingsClient;
   trackUiMetric?: (metricType: UiCounterMetricType, eventName: string | string[]) => void;
+  shouldUseNewFieldsApi: () => boolean;
 }
 
 export async function buildServices(
@@ -100,5 +102,9 @@ export async function buildServices(
     toastNotifications: core.notifications.toasts,
     uiSettings: core.uiSettings,
     trackUiMetric: usageCollection?.reportUiCounter.bind(usageCollection, 'discover'),
+    shouldUseNewFieldsApi: () =>
+      context.config.get<{ disableFieldsApi: boolean }>().disableFieldsApi
+        ? false
+        : !core.uiSettings.get(SEARCH_FIELDS_FROM_SOURCE),
   };
 }

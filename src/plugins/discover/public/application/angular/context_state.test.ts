@@ -11,7 +11,6 @@ import { getState } from './context_state';
 import { createBrowserHistory, History } from 'history';
 import { FilterManager, Filter } from '../../../../data/public';
 import { coreMock } from '../../../../../core/public/mocks';
-import { SEARCH_FIELDS_FROM_SOURCE } from '../../../common';
 const setupMock = coreMock.createSetup();
 
 describe('Test Discover Context State', () => {
@@ -26,9 +25,9 @@ describe('Test Discover Context State', () => {
       timeFieldName: 'time',
       history,
       uiSettings: {
-        get: <T>(key: string) =>
-          ((key === SEARCH_FIELDS_FROM_SOURCE ? true : ['_source']) as unknown) as T,
+        get: <T>(_key: string) => (['_source'] as unknown) as T,
       } as IUiSettingsClient,
+      shouldUseNewFieldsApi: () => true,
     });
     state.startSync();
   });

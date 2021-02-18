@@ -6,6 +6,22 @@
  * Side Public License, v 1.
  */
 
+import { schema, TypeOf } from '@kbn/config-schema';
+import { PluginConfigDescriptor } from 'kibana/server';
+
 import { DiscoverServerPlugin } from './plugin';
+
+export const configSchema = schema.object({
+  disableFieldsApi: schema.boolean({ defaultValue: false }),
+});
+
+export type ConfigSchema = TypeOf<typeof configSchema>;
+
+export const config: PluginConfigDescriptor<ConfigSchema> = {
+  exposeToBrowser: {
+    disableFieldsApi: true,
+  },
+  schema: configSchema,
+};
 
 export const plugin = () => new DiscoverServerPlugin();

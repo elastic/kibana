@@ -38,11 +38,7 @@ import {
 } from '../../kibana_services';
 import { SEARCH_EMBEDDABLE_TYPE } from './constants';
 import { SavedSearch } from '../..';
-import {
-  SAMPLE_SIZE_SETTING,
-  SEARCH_FIELDS_FROM_SOURCE,
-  SORT_DEFAULT_ORDER_SETTING,
-} from '../../../common';
+import { SAMPLE_SIZE_SETTING, SORT_DEFAULT_ORDER_SETTING } from '../../../common';
 import { DiscoverGridSettings } from '../components/discover_grid/types';
 import { DiscoverServices } from '../../build_services';
 import { ElasticSearchHit } from '../doc_views/doc_views_types';
@@ -225,7 +221,7 @@ export class SearchEmbeddable
       this.updateInput({ sort });
     };
 
-    const useNewFieldsApi = !getServices().uiSettings.get(SEARCH_FIELDS_FROM_SOURCE, false);
+    const useNewFieldsApi = getServices().shouldUseNewFieldsApi();
     searchScope.useNewFieldsApi = useNewFieldsApi;
 
     searchScope.addColumn = (columnName: string) => {
@@ -288,7 +284,7 @@ export class SearchEmbeddable
 
   private fetch = async () => {
     const searchSessionId = this.input.searchSessionId;
-    const useNewFieldsApi = !this.services.uiSettings.get(SEARCH_FIELDS_FROM_SOURCE, false);
+    const useNewFieldsApi = this.services.shouldUseNewFieldsApi();
     if (!this.searchScope) return;
 
     const { searchSource, pre712 } = this.savedSearch;
