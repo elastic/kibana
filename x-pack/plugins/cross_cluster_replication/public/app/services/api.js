@@ -36,9 +36,10 @@ export function setHttpClient(client, $deffered) {
 const extractData = (response) => response.data;
 
 /* Auto Follow Pattern */
-export const loadAutoFollowPatterns = () => (
-  httpClient.get(`${apiPrefix}/auto_follow_patterns`).then(extractData)
-);
+export const loadAutoFollowPatterns = (asSystemRequest) => {
+  const headers = asSystemRequest ? addSystemApiHeader({}) : undefined;
+  return httpClient.get(`${apiPrefix}/auto_follow_patterns`, { headers }).then(extractData);
+};
 
 export const getAutoFollowPattern = (id) => (
   httpClient.get(`${apiPrefix}/auto_follow_patterns/${encodeURIComponent(id)}`).then(extractData)

@@ -36,7 +36,7 @@ export const loadAutoFollowPatterns = (isUpdating = false) =>
     scope,
     status: isUpdating ? API_STATUS.UPDATING : API_STATUS.LOADING,
     handler: async () => (
-      await loadAutoFollowPatternsRequest()
+      await loadAutoFollowPatternsRequest(isUpdating)
     ),
   });
 
