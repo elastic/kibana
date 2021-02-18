@@ -8,10 +8,8 @@
 import * as React from 'react';
 import { EuiButton } from '@elastic/eui';
 import { useDrilldownManager } from '../context';
-import { FlyoutDrilldownWizard } from '../../components/flyout_drilldown_wizard';
 import { txtDrilldowns, txtCreateDrilldownButtonLabel, txtEditDrilldownButtonLabel } from './i18n';
 import { FlyoutFrame } from '../../components/flyout_frame';
-import { DrilldownHelloBar } from '../../components/drilldown_hello_bar';
 import { FormDrilldownWizard } from '../form_drilldown_wizard';
 
 export const DrilldownManager: React.FC = ({}) => {
@@ -34,7 +32,7 @@ export const DrilldownManager: React.FC = ({}) => {
     </EuiButton>
   );
 
-  const handleSubmit = () => {};
+  // const handleSubmit = () => {};
 
   // const content = (
 
