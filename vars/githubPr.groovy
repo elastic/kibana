@@ -235,9 +235,11 @@ def getNextCommentMessage(previousCommentInfo = [:], isFinal = false) {
 
   messages << "To update your PR or re-run it, just comment with:\n`@elasticmachine merge upstream`"
 
-  def assignees = getAssignees()
-  if (assignees) {
-    messages << "cc " + assignees.collect { "@${it}"}.join(" ")
+  catchErrors {
+    def assignees = getAssignees()
+    if (assignees) {
+      messages << "cc " + assignees.collect { "@${it}"}.join(" ")
+    }
   }
 
   info.builds << [
