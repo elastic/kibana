@@ -16,12 +16,11 @@ const POPOVER_IMG_WIDTH = 640;
 const StepImage = styled(EuiImage)`
   &&& {
     display: flex;
-    figcaption {
-      white-space: nowrap;
-      align-self: center;
-      margin-left: 8px;
-      margin-top: 8px;
-      text-decoration: none !important;
+    figure.euiImage-isFullScreen {
+      display: flex;
+      div.stepArrowsFullScreen {
+        display: flex;
+      }
     }
   }
 `;
@@ -39,7 +38,7 @@ export const StepImagePopover: React.FC<StepImagePopoverProps> = ({
   isImagePopoverOpen,
 }) => (
   <EuiPopover
-    anchorPosition="rightCenter"
+    anchorPosition="upCenter"
     button={
       <StepImage
         allowFullScreen={true}
@@ -49,6 +48,7 @@ export const StepImagePopover: React.FC<StepImagePopoverProps> = ({
         hasShadow
         url={imgSrc}
         size="s"
+        className="syntheticsStepImage"
       />
     }
     isOpen={isImagePopoverOpen}

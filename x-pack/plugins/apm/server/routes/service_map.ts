@@ -12,7 +12,7 @@ import { setupRequest } from '../lib/helpers/setup_request';
 import { getServiceMap } from '../lib/service_map/get_service_map';
 import { getServiceMapServiceNodeInfo } from '../lib/service_map/get_service_map_service_node_info';
 import { createRoute } from './create_route';
-import { rangeRt, uiFiltersRt } from './default_api_types';
+import { environmentRt, rangeRt, uiFiltersRt } from './default_api_types';
 import { notifyFeatureUsage } from '../feature';
 import { getSearchAggregatedTransactions } from '../lib/helpers/aggregated_transactions';
 import { isActivePlatinumLicense } from '../../common/license_check';
@@ -22,9 +22,9 @@ export const serviceMapRoute = createRoute({
   params: t.type({
     query: t.intersection([
       t.partial({
-        environment: t.string,
         serviceName: t.string,
       }),
+      environmentRt,
       rangeRt,
     ]),
   }),
