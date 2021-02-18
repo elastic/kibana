@@ -40,7 +40,7 @@ click *Load*.  Five documents are added with each click.
 [[configure-context-ContextView]]
 === Configure the context view
 
-To configure the Context view, use these settings in <<advanced-options,
+To configure the Context view, go to <<advanced-options,
 Advanced Settings>> and search for Discover.
 
 [horizontal]
