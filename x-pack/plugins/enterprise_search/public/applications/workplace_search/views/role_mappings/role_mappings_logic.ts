@@ -6,12 +6,14 @@
  */
 
 import { kea, MakeLogicType } from 'kea';
-import { ANY_AUTH_PROVIDER } from 'shared/constants/role_mappings';
+
 import http from 'shared/http';
 import { IFlashMessagesProps } from 'shared/types';
 import routes from 'workplace_search/routes';
-import { IObject, RoleGroup, WSRoleMapping, Role } from 'workplace_search/types';
-import { ROLE_MAPPINGS_PATH } from 'workplace_search/utils/routePaths';
+
+import { ANY_AUTH_PROVIDER } from '../../../shared/role_mapping/constants';
+import { ROLE_MAPPINGS_PATH } from '../../routes';
+import { IObject, RoleGroup, WSRoleMapping, Role } from '../../types';
 
 const DELETE_MESSAGE =
   'Are you sure you want to permanently delete this mapping? This action is not reversible and some users might lose access.';
