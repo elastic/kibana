@@ -27,9 +27,10 @@ export function createMapStore() {
   });
 
   const rootReducer = (state, action) => {
-    // Reset store on map destroyed
+    // Reset all but map state on map destroyed
     if (action.type === MAP_DESTROYED) {
-      state = undefined;
+      const { map } = state;
+      state = { map };
     }
 
     return combinedReducers(state, action);
