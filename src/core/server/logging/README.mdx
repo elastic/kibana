@@ -1,7 +1,7 @@
 ---
 id: kibCoreLogging
 slug: /kibana-dev-docs/services/logging
-title: Logging
+title: Logging system
 image: https://source.unsplash.com/400x175/?Logging
 summary: Core logging contains the system and service for Kibana logs.
 date: 2020-12-02
@@ -9,20 +9,20 @@ tags: ['kibana','dev', 'contributor', 'api docs']
 ---
 
 # Logging
-- [Loggers, Appenders and Layouts](#loggers-appenders-and-layouts)
-- [Logger hierarchy](#logger-hierarchy)
-- [Log level](#log-level)
-- [Layouts](#layouts)
-  - [Pattern layout](#pattern-layout)
-  - [JSON layout](#json-layout)
-- [Appenders](#appenders)
-  - [Rolling File Appender](#rolling-file-appender)
-    - [Triggering Policies](#triggering-policies)
-    - [Rolling strategies](#rolling-strategies)
-- [Configuration](#configuration)
-- [Usage](#usage)
-- [Logging config migration](#logging-config-migration)
-- [Log record format changes](#log-record-format-changes)
+- <DocLink id="kibCoreLogging" section="loggers-appenders-layouts" text="Loggers, Appenders and Layouts"/>
+- <DocLink id="kibCoreLogging" section="logger-heirarchy" text="Logger hierarchy"/>
+- <DocLink id="kibCoreLoggin" section="log-level" text="Log level"/>
+- <docLink id="kibCoreLogging" section="layouts" text="Layouts"/>
+  - <docLink id="kibCoreLogging" section="pattern-layout" text="Pattern layout"/>
+  - <docLink id="kibCoreLogging" section="json-layout" text="JSON layout"/>
+- <docLink id="kibCoreLogging" section="appenders" text="Appenders"/>
+  - <docLink id="kibCoreLogging" section="rolling-file-appender" text="Rolling File Appender"/>
+    - <docLink id="kibCoreLogging" section="triggering-policies" text="Triggering Policies"/>"
+    - <docLink id="kibCoreLogging" section="rolling-strategies" text="Rolling strategies"/>
+- <docLink id="kibCoreLogging" section="configuration" text="Configuration"/>
+- <docLink id="kibCoreLogging" section="usage" text="Usage"/>
+- <docLink id="kibCoreLogging" section="logging-config-migration" text="Logging config migration"/>
+- <docLink id="kibCoreLogging" section="log-record-format-changes" text="Log record format changes"/>
 
 The way logging works in Kibana is inspired by `log4j 2` logging framework used by [Elasticsearch](https://www.elastic.co/guide/en/elasticsearch/reference/current/settings.html#logging).
 The main idea is to have consistent logging behaviour (configuration, log format etc.) across the entire Elastic Stack
