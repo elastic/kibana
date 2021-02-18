@@ -1762,4 +1762,42 @@ describe('migration visualization', () => {
       });
     });
   });
+
+  describe('7.12.0 remove aggregate functions support from TSVB table', () => {
+    const migrate = (doc: any) =>
+      visualizationSavedObjectTypeMigrations['7.12.0'](
+        doc as Parameters<SavedObjectMigrationFn>[0],
+        savedObjectMigrationContext
+      );
+    const generateDoc = (visState: any) => ({
+      attributes: {
+        title: 'My Vis',
+        visState: JSON.stringify(visState),
+      },
+    });
+
+    it('should remove aggregate functions support from TSVB table', () => {
+      const visState = {
+        type: 'metrics',
+        params: {
+          series: [
+            {
+              id: 'id',
+              aggregate_by: 'aggregate_by',
+              aggregate_function: 'aggregate_function',
+            },
+          ],
+        },
+      };
+      const timeSeriesDoc = generateDoc(visState);
+      const migratedtimeSeriesDoc = migrate(timeSeriesDoc);
+      const migratedParams = JSON.parse(migratedtimeSeriesDoc.attributes.visState).params;
+
+      expect(migratedParams.series[0]).toMatchInlineSnapshot(`
+        Object {
+          "id": "id",
+        }
+      `);
+    });
+  });
 });

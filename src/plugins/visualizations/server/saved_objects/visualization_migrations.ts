@@ -719,6 +719,36 @@ const migrateTsvbDefaultColorPalettes: SavedObjectMigrationFn<any, any> = (doc) 
   return doc;
 };
 
+const removeTableAggregateFunctionsFromTSVB: SavedObjectMigrationFn<any, any> = (doc) => {
+  const visStateJSON = get(doc, 'attributes.visState');
+  let visState;
+
+  if (visStateJSON) {
+    try {
+      visState = JSON.parse(visStateJSON);
+    } catch (e) {
+      // Let it go, the data is invalid and we'll leave it as is
+    }
+    if (visState && visState.type === 'metrics') {
+      const series: any[] = get(visState, 'params.series') || [];
+
+      series.forEach((a, index) => {
+        delete a.aggregate_by;
+        delete a.aggregate_function;
+      });
+
+      return {
+        ...doc,
+        attributes: {
+          ...doc.attributes,
+          visState: JSON.stringify(visState),
+        },
+      };
+    }
+  }
+  return doc;
+};
+
 // [TSVB] Remove serialized search source as it's not used in TSVB visualizations
 const removeTSVBSearchSource: SavedObjectMigrationFn<any, any> = (doc) => {
   const visStateJSON = get(doc, 'attributes.visState');
@@ -883,5 +913,5 @@ export const visualizationSavedObjectTypeMigrations = {
   '7.9.3': flow(migrateMatchAllQuery),
   '7.10.0': flow(migrateFilterRatioQuery, removeTSVBSearchSource),
   '7.11.0': flow(enableDataTableVisToolbar),
-  '7.12.0': flow(migrateVislibAreaLineBarTypes),
+  '7.12.0': flow(migrateVislibAreaLineBarTypes, removeTableAggregateFunctionsFromTSVB),
 };

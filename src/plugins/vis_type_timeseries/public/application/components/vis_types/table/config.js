@@ -12,12 +12,10 @@ import uuid from 'uuid';
 import { DataFormatPicker } from '../../data_format_picker';
 import { createSelectHandler } from '../../lib/create_select_handler';
 import { createTextHandler } from '../../lib/create_text_handler';
-import { FieldSelect } from '../../aggs/field_select';
 import { YesNo } from '../../yes_no';
 import { ColorRules } from '../../color_rules';
 import {
   htmlIdGenerator,
-  EuiComboBox,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFieldText,
@@ -28,11 +26,12 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
-import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { getDefaultQueryLanguage } from '../../lib/get_default_query_language';
 
 import { QueryBarWrapper } from '../../query_bar_wrapper';
-class TableSeriesConfigUI extends Component {
+
+export class TableSeriesConfig extends Component {
   UNSAFE_componentWillMount() {
     const { model } = this.props;
     if (!model.color_rules || (model.color_rules && model.color_rules.length === 0)) {
@@ -48,76 +47,6 @@ class TableSeriesConfigUI extends Component {
     const handleSelectChange = createSelectHandler(this.props.onChange);
     const handleTextChange = createTextHandler(this.props.onChange);
     const htmlId = htmlIdGenerator();
-    const { intl } = this.props;
-
-    const functionOptions = [
-      {
-        label: intl.formatMessage({
-          id: 'visTypeTimeseries.table.sumLabel',
-          defaultMessage: 'Sum',
-        }),
-        value: 'sum',
-      },
-      {
-        label: intl.formatMessage({
-          id: 'visTypeTimeseries.table.maxLabel',
-          defaultMessage: 'Max',
-        }),
-        value: 'max',
-      },
-      {
-        label: intl.formatMessage({
-          id: 'visTypeTimeseries.table.minLabel',
-          defaultMessage: 'Min',
-        }),
-        value: 'min',
-      },
-      {
-        label: intl.formatMessage({
-          id: 'visTypeTimeseries.table.avgLabel',
-          defaultMessage: 'Avg',
-        }),
-        value: 'mean',
-      },
-      {
-        label: intl.formatMessage({
-          id: 'visTypeTimeseries.table.overallSumLabel',
-          defaultMessage: 'Overall Sum',
-        }),
-        value: 'overall_sum',
-      },
-      {
-        label: intl.formatMessage({
-          id: 'visTypeTimeseries.table.overallMaxLabel',
-          defaultMessage: 'Overall Max',
-        }),
-        value: 'overall_max',
-      },
-      {
-        label: intl.formatMessage({
-          id: 'visTypeTimeseries.table.overallMinLabel',
-          defaultMessage: 'Overall Min',
-        }),
-        value: 'overall_min',
-      },
-      {
-        label: intl.formatMessage({
-          id: 'visTypeTimeseries.table.overallAvgLabel',
-          defaultMessage: 'Overall Avg',
-        }),
-        value: 'overall_avg',
-      },
-      {
-        label: intl.formatMessage({
-          id: 'visTypeTimeseries.table.cumulativeSumLabel',
-          defaultMessage: 'Cumulative Sum',
-        }),
-        value: 'cumulative_sum',
-      },
-    ];
-    const selectedAggFuncOption = functionOptions.find((option) => {
-      return model.aggregate_function === option.value;
-    });
 
     return (
       <div className="tvbAggRow">
@@ -195,47 +124,6 @@ class TableSeriesConfigUI extends Component {
 
         <EuiHorizontalRule margin="s" />
 
-        <EuiFlexGroup responsive={false} wrap={true}>
-          <EuiFlexItem grow={true}>
-            <EuiFormRow
-              id={htmlId('field')}
-              label={
-                <FormattedMessage id="visTypeTimeseries.table.fieldLabel" defaultMessage="Field" />
-              }
-            >
-              <FieldSelect
-                fields={this.props.fields}
-                indexPattern={this.props.panel.index_pattern}
-                value={model.aggregate_by}
-                onChange={handleSelectChange('aggregate_by')}
-                fullWidth
-              />
-            </EuiFormRow>
-          </EuiFlexItem>
-          <EuiFlexItem grow={true}>
-            <EuiFormRow
-              id={htmlId('aggregateFunctionInput')}
-              label={
-                <FormattedMessage
-                  id="visTypeTimeseries.table.aggregateFunctionLabel"
-                  defaultMessage="Aggregate function"
-                />
-              }
-              fullWidth
-            >
-              <EuiComboBox
-                options={functionOptions}
-                selectedOptions={selectedAggFuncOption ? [selectedAggFuncOption] : []}
-                onChange={handleSelectChange('aggregate_function')}
-                singleSelection={{ asPlainText: true }}
-                fullWidth
-              />
-            </EuiFormRow>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-
-        <EuiHorizontalRule margin="s" />
-
         <EuiTitle size="xxs">
           <span>
             <FormattedMessage
@@ -259,11 +147,9 @@ class TableSeriesConfigUI extends Component {
   }
 }
 
-TableSeriesConfigUI.propTypes = {
+TableSeriesConfig.propTypes = {
   fields: PropTypes.object,
   model: PropTypes.object,
   onChange: PropTypes.func,
   indexPatternForQuery: PropTypes.string,
 };
-
-export const TableSeriesConfig = injectI18n(TableSeriesConfigUI);

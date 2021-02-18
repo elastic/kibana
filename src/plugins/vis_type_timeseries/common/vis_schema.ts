@@ -126,8 +126,6 @@ const splitFiltersItems = schema.object({
 });
 
 export const seriesItems = schema.object({
-  aggregate_by: fieldObject,
-  aggregate_function: stringOptionalNullable,
   axis_position: stringRequired,
   axis_max: stringOrNumberOptionalNullable,
   axis_min: stringOrNumberOptionalNullable,
