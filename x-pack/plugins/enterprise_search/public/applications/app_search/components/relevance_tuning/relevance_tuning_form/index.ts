@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export const SET_STATE = 'SET_STATE';
+export { RelevanceTuningForm } from './relevance_tuning_form';

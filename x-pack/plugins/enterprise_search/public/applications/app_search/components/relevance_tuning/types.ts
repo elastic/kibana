@@ -5,11 +5,26 @@
  * 2.0.
  */
 
-export type BoostType = 'value' | 'functional' | 'proximity';
+export enum BoostType {
+  Value = 'value',
+  Functional = 'functional',
+  Proximity = 'proximity',
+}
+
+export enum BoostFunction {
+  Gaussian = 'gaussian',
+  Exponential = 'exponential',
+  Linear = 'linear',
+}
+
+export enum BoostOperation {
+  Add = 'add',
+  Multiple = 'multiply',
+}
 
 export interface BaseBoost {
-  operation?: string;
-  function?: string;
+  operation?: BoostOperation;
+  function?: BoostFunction;
 }
 
 // A boost that comes from the server, before we normalize it has a much looser schema
@@ -25,13 +40,13 @@ export interface RawBoost extends BaseBoost {
 export interface Boost extends RawBoost {
   value?: string[];
 }
+
+export interface SearchField {
+  weight: number;
+}
+
 export interface SearchSettings {
   boosts: Record<string, Boost[]>;
-  search_fields: Record<
-    string,
-    {
-      weight: number;
-    }
-  >;
+  search_fields: Record<string, SearchField>;
   result_fields?: object;
 }
