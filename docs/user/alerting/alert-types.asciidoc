@@ -17,8 +17,8 @@ Currently {kib} provides two stack alerts: <<alert-type-index-threshold>> and <<
 For domain-specific alert types, refer to the documentation for that app.
 Currently we the next alerts grouped by the application:
 
-* <<{observability-guide}/create-alerts.html, Observability alerts>>
-* <<{security-guide}/prebuilt-rules.html, Security alerts>>
+* {observability-guide}/create-alerts.html[Observability alerts]
+* {security-guide}/prebuilt-rules.html[Security alerts]
 * <<geo-alerting, Maps alerts>>
 * <<xpack-ml, ML alerts>>
 
