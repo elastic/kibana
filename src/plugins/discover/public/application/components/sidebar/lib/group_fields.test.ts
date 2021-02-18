@@ -47,6 +47,7 @@ const fieldCounts = {
   category: 1,
   currency: 1,
   customer_birth_date: 1,
+  unknown_field: 1,
 };
 
 describe('group_fields', function () {
@@ -232,7 +233,7 @@ describe('group_fields', function () {
 
     const actual = groupFields(
       fieldsWithUnmappedField as IndexPatternField[],
-      ['customer_birth_date', 'currency', 'unknown'],
+      ['customer_birth_date', 'currency'],
       5,
       fieldCounts,
       fieldFilterState,
@@ -240,5 +241,31 @@ describe('group_fields', function () {
       false
     );
     expect(actual.unpopular).toEqual([]);
+  });
+
+  it('includes unmapped fields when reading from source', function () {
+    const fieldFilterState = getDefaultFieldFilter();
+    const fieldsWithUnmappedField = [...fields];
+    fieldsWithUnmappedField.push({
+      name: 'unknown_field',
+      type: 'unknown',
+      esTypes: ['unknown'],
+      count: 0,
+      scripted: false,
+      searchable: false,
+      aggregatable: false,
+      readFromDocValues: false,
+    });
+
+    const actual = groupFields(
+      fieldsWithUnmappedField as IndexPatternField[],
+      ['customer_birth_date', 'currency'],
+      5,
+      fieldCounts,
+      fieldFilterState,
+      false,
+      undefined
+    );
+    expect(actual.unpopular.map((field) => field.name)).toEqual(['unknown_field']);
   });
 });

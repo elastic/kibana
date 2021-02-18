@@ -46,7 +46,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     await testSubjects.click('savedObjectTitle');
   };
 
-  describe('visualize integration', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/89958
+  describe.skip('visualize integration', () => {
     before(async () => {
       await esArchiver.load('visualize');
       await esArchiver.loadIfNeeded('logstash_functional');

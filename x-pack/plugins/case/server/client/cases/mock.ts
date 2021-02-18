@@ -54,6 +54,10 @@ export const commentAlert: CommentResponse = {
   id: 'mock-comment-1',
   alertId: 'alert-id-1',
   index: 'alert-index-1',
+  rule: {
+    id: 'rule-id-1',
+    name: 'rule-name-1',
+  },
   type: CommentType.alert as const,
   created_at: '2019-11-25T21:55:00.177Z',
   created_by: {
