@@ -411,6 +411,7 @@ export function Discover({
                               onSetColumns={onSetColumns}
                               onSort={onSort}
                               onResize={onResize}
+                              useNewFieldsApi={useNewFieldsApi}
                             />
                           </div>
                         )}
