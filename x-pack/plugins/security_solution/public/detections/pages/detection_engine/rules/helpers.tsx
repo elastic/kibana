@@ -190,7 +190,7 @@ export const getAboutStepsData = (rule: Rule, detailsView: boolean): AboutStepRu
     },
     falsePositives,
     threat: threat as Threats,
-    threatIndicatorPath: threatIndicatorPath ?? '',
+    threatIndicatorPath,
   };
 };
 
