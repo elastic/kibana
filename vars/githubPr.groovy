@@ -235,6 +235,11 @@ def getNextCommentMessage(previousCommentInfo = [:], isFinal = false) {
 
   messages << "To update your PR or re-run it, just comment with:\n`@elasticmachine merge upstream`"
 
+  def assignees = getAssignees()
+  if (assignees) {
+    messages << "cc " + assignees.collect { "@${it}"}.join(" ")
+  }
+
   info.builds << [
     status: status,
     url: env.BUILD_URL,
@@ -328,4 +333,20 @@ def shouldCheckCiMetricSuccess() {
   }
 
   return true
+}
+
+def getPR() {
+  withGithubCredentials {
+    def path = "repos/elastic/kibana/pulls/${env.ghprbPullId}"
+    return githubApi.get(path)
+  }
+}
+
+def getAssignees() {
+  def pr = getPR()
+  if (!pr) {
+    return []
+  }
+
+  return pr.assignees.collect { it.login }
 }
