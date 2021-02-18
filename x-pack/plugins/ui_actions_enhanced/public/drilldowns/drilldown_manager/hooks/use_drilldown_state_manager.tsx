@@ -8,7 +8,7 @@
 import { useState } from 'react';
 import { ToastsStart } from 'kibana/public';
 import useMountedState from 'react-use/lib/useMountedState';
-import { useContainerState } from '../../../../../../src/plugins/kibana_utils/public';
+import { useContainerState } from '../../../../../../../src/plugins/kibana_utils/public';
 import {
   toastDrilldownCreated,
   toastDrilldownDeleted,
@@ -16,7 +16,7 @@ import {
   toastDrilldownsCRUDError,
   toastDrilldownsDeleted,
 } from './i18n';
-import { DynamicActionManager, SerializedAction } from '../../dynamic_actions';
+import { DynamicActionManager, SerializedAction } from '../../../dynamic_actions';
 
 export function useDrilldownsStateManager(
   actionManager: DynamicActionManager,

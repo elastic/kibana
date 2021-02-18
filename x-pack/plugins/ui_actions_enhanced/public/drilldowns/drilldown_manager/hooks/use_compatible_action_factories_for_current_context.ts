@@ -6,7 +6,7 @@
  */
 
 import { useEffect, useState } from 'react';
-import { ActionFactory, BaseActionFactoryContext } from '../../dynamic_actions';
+import { ActionFactory, BaseActionFactoryContext } from '../../../dynamic_actions';
 
 export function useCompatibleActionFactoriesForCurrentContext<
   Context extends BaseActionFactoryContext = BaseActionFactoryContext

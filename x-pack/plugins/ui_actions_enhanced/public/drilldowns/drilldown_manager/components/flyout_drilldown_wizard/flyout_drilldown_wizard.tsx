@@ -13,8 +13,8 @@ import {
   ActionFactory,
   BaseActionConfig,
   BaseActionFactoryContext,
-} from '../../../dynamic_actions';
-import { Trigger } from '../../../../../../../src/plugins/ui_actions/public';
+} from '../../../../dynamic_actions';
+import { Trigger } from '../../../../../../../../src/plugins/ui_actions/public';
 import { ActionFactoryPlaceContext } from '../types';
 import { DrilldownWizardState, useDrilldownWizard } from './use_flyout_drilldown_wizard';
 

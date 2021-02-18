@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export * from './drilldown_definition';
-export * from './drilldown_manager';
+export * from './containers';

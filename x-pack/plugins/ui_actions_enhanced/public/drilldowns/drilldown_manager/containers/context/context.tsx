@@ -10,9 +10,10 @@ import type {
   PublicDrilldownManagerProps,
   DrilldownManagerDependencies,
   DrilldownManagerContextValue as Value,
+  DrilldownManagerScreen,
 } from './types';
 import { useWelcomeMessage } from '../../hooks/use_welcome_message';
-import { BaseActionConfig } from '../../../dynamic_actions';
+import { BaseActionConfig } from '../../../../dynamic_actions';
 
 const context = React.createContext<Value | null>(null);
 
@@ -33,6 +34,7 @@ export const DrilldownManagerProvider: React.FC<DrilldownManagerProviderProps> =
   const [drilldownName, setDrilldownName] = React.useState<string>('');
   const [actionFactory, setActionFactory] = React.useState<Value['actionFactory']>(undefined);
   const [actionConfig, setActionConfig] = React.useState<Value['actionConfig']>(undefined);
+  const [screen, setScreen] = React.useState<DrilldownManagerScreen>('list');
   const [actionFactoryCache, setActionFactoryCache] = React.useState<
     Record<string, ActionFactoryCacheItem>
   >(
@@ -83,7 +85,8 @@ export const DrilldownManagerProvider: React.FC<DrilldownManagerProviderProps> =
 
   const contextValue: Value = {
     ...rest,
-    currentTab: rest.tab === 'create' ? 'create' : 'list',
+    screen,
+    setScreen,
     showWelcomeMessage,
     hideWelcomeMessage,
     drilldownName,

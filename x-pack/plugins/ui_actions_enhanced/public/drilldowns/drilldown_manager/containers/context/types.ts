@@ -6,15 +6,17 @@
  */
 
 import { ToastsStart } from 'kibana/public';
-import { IStorageWrapper } from '../../../../../../../src/plugins/kibana_utils/public';
-import { Trigger } from '../../../../../../../src/plugins/ui_actions/public';
+import { IStorageWrapper } from '../../../../../../../../src/plugins/kibana_utils/public';
+import { Trigger } from '../../../../../../../../src/plugins/ui_actions/public';
 import {
   ActionFactory,
   BaseActionConfig,
   BaseActionFactoryContext,
   DynamicActionManager,
-} from '../../../dynamic_actions';
+} from '../../../../dynamic_actions';
 import { ActionFactoryPlaceContext } from '../../components/types';
+
+export type DrilldownManagerScreen = 'create' | 'edit' | 'list';
 
 /**
  * This are props of the public <DrilldownManager> React component which is
@@ -98,7 +100,12 @@ export interface DrilldownManagerContextValue
   /**
    * Keeps track of the current view to display to the user.
    */
-  currentTab: 'create' | 'edit' | 'list';
+  screen: DrilldownManagerScreen;
+
+  /**
+   * Change the screen of Drilldown Manager.
+   */
+  setScreen: (newScreen: DrilldownManagerScreen) => void;
 
   /**
    * Whether a drilldowns welcome message should be displayed to the user at

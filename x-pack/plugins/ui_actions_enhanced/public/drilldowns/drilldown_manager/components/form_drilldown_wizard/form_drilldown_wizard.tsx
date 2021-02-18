@@ -14,9 +14,9 @@ import {
   ActionFactory,
   BaseActionConfig,
   BaseActionFactoryContext,
-} from '../../../dynamic_actions';
-import { ActionWizard } from '../../../components/action_wizard';
-import { Trigger } from '../../../../../../../src/plugins/ui_actions/public';
+} from '../../../../dynamic_actions';
+import { ActionWizard } from '../../../../components/action_wizard';
+import { Trigger } from '../../../../../../../../src/plugins/ui_actions/public';
 import { txtGetMoreActions } from './i18n';
 
 const GET_MORE_ACTIONS_LINK = 'https://www.elastic.co/subscriptions';

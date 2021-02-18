@@ -10,7 +10,7 @@ import {
   ActionFactory,
   BaseActionConfig,
   BaseActionFactoryContext,
-} from '../../../dynamic_actions';
+} from '../../../../dynamic_actions';
 
 export interface DrilldownWizardState<ActionConfig extends BaseActionConfig = BaseActionConfig> {
   name: string;

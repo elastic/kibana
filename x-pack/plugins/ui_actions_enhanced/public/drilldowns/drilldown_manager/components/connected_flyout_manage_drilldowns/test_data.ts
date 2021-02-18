@@ -11,8 +11,8 @@ import {
   UiActionsEnhancedDynamicActionManager as DynamicActionManager,
   UiActionsEnhancedDynamicActionManagerState as DynamicActionManagerState,
   UiActionsEnhancedSerializedAction,
-} from '../../../index';
-import { createStateContainer } from '../../../../../../../src/plugins/kibana_utils/common';
+} from '../../../..';
+import { createStateContainer } from '../../../../../../../../src/plugins/kibana_utils/common';
 
 class MockDynamicActionManager implements PublicMethodsOf<DynamicActionManager> {
   public readonly state = createStateContainer<DynamicActionManagerState>({

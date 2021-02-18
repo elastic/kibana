@@ -9,8 +9,8 @@ import * as React from 'react';
 import { EuiFlyout } from '@elastic/eui';
 import { storiesOf } from '@storybook/react';
 import { FlyoutDrilldownWizard } from './index';
-import { mockActionFactories } from '../../../components/action_wizard/test_data';
-import { Trigger } from '../../../../../../../src/plugins/ui_actions/public';
+import { mockActionFactories } from '../../../../components/action_wizard/test_data';
+import { Trigger } from '../../../../../../../../src/plugins/ui_actions/public';
 
 const otherProps = {
   supportedTriggers: ['VALUE_CLICK_TRIGGER', 'SELECT_RANGE_TRIGGER', 'FILTER_TRIGGER'] as string[],

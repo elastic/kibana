@@ -14,8 +14,8 @@ import {
   FlyoutDrilldownWizardProps,
   FlyoutDrilldownWizard,
 } from '../flyout_drilldown_wizard';
-import { IStorageWrapper } from '../../../../../../../src/plugins/kibana_utils/public';
-import { Trigger } from '../../../../../../../src/plugins/ui_actions/public';
+import { IStorageWrapper } from '../../../../../../../../src/plugins/kibana_utils/public';
+import { Trigger } from '../../../../../../../../src/plugins/ui_actions/public';
 import { DrilldownListItem } from '../list_manage_drilldowns';
 import {
   txtDrilldowns,
@@ -30,7 +30,7 @@ import {
   BaseActionFactoryContext,
   DynamicActionManager,
   SerializedEvent,
-} from '../../../dynamic_actions';
+} from '../../../../dynamic_actions';
 import { useWelcomeMessage } from '../../hooks/use_welcome_message';
 import { useCompatibleActionFactoriesForCurrentContext } from '../../hooks/use_compatible_action_factories_for_current_context';
 import { useDrilldownsStateManager } from '../../hooks/use_drilldown_state_manager';

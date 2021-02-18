@@ -10,7 +10,7 @@ import { render } from 'react-dom';
 import { FormDrilldownWizard } from './form_drilldown_wizard';
 import { render as renderTestingLibrary, fireEvent } from '@testing-library/react';
 import { txtNameOfDrilldown } from './i18n';
-import { Trigger } from '../../../../../../../src/plugins/ui_actions/public';
+import { Trigger } from '../../../../../../../../src/plugins/ui_actions/public';
 
 const otherProps = {
   actionFactoryContext: { triggers: [] as string[] },

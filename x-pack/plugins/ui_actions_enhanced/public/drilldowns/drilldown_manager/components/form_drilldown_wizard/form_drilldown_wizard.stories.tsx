@@ -8,7 +8,7 @@
 import * as React from 'react';
 import { storiesOf } from '@storybook/react';
 import { FormDrilldownWizard } from './index';
-import { Trigger } from '../../../../../../../src/plugins/ui_actions/public';
+import { Trigger } from '../../../../../../../../src/plugins/ui_actions/public';
 
 const otherProps = {
   triggers: ['VALUE_CLICK_TRIGGER', 'SELECT_RANGE_TRIGGER', 'FILTER_TRIGGER'],

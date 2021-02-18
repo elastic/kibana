@@ -12,13 +12,13 @@ import {
   mockGetTriggerInfo,
   mockSupportedTriggers,
   mockActionFactories,
-} from '../../../components/action_wizard/test_data';
+} from '../../../../components/action_wizard/test_data';
 import { StubBrowserStorage } from '@kbn/test/jest';
-import { Storage } from '../../../../../../../src/plugins/kibana_utils/public';
+import { Storage } from '../../../../../../../../src/plugins/kibana_utils/public';
 import { mockDynamicActionManager } from './test_data';
 import { TEST_SUBJ_DRILLDOWN_ITEM } from '../list_manage_drilldowns';
 import { WELCOME_MESSAGE_TEST_SUBJ } from '../drilldown_hello_bar';
-import { coreMock } from '../../../../../../../src/core/public/mocks';
+import { coreMock } from '../../../../../../../../src/core/public/mocks';
 import { NotificationsStart } from 'kibana/public';
 import { toastDrilldownsCRUDError } from '../../hooks/i18n';
 
