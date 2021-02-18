@@ -68,6 +68,11 @@ export interface AppState {
    * id of the used saved query
    */
   savedQuery?: string;
+  /**
+   * Used with new fields API. Affects the field list and doc views. The default
+   * hidden state will likely change in a future release
+   */
+  hideUnmapped?: boolean;
 }
 
 interface GetStateParams {

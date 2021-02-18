@@ -38,6 +38,7 @@ export function createDocTableDirective(pagerFactory: any, $filter: any) {
       onRemoveColumn: '=?',
       inspectorAdapters: '=?',
       useNewFieldsApi: '<',
+      hideUnmapped: '<',
     },
     link: ($scope: LazyScope, $el: JQuery) => {
       $scope.persist = {

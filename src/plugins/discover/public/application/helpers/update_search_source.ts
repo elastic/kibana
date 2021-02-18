@@ -21,7 +21,7 @@ export function updateSearchSource({
   sort,
   columns,
   useNewFieldsApi,
-  showUnmappedFields,
+  hideUnmappedFields,
   persistentSearchSource,
   volatileSearchSource,
 }: {
@@ -30,7 +30,7 @@ export function updateSearchSource({
   sort: SortOrder[];
   columns: string[];
   useNewFieldsApi: boolean;
-  showUnmappedFields?: boolean;
+  hideUnmappedFields?: boolean;
   persistentSearchSource: ISearchSource;
   volatileSearchSource?: ISearchSource;
 }) {
@@ -59,9 +59,10 @@ export function updateSearchSource({
     if (useNewFieldsApi) {
       volatileSearchSource.removeField('fieldsFromSource');
       const fields: Record<string, string> = { field: '*' };
-      if (showUnmappedFields) {
+      if (!hideUnmappedFields) {
         fields.include_unmapped = 'true';
       }
+      volatileSearchSource.removeField('fields');
       volatileSearchSource.setField('fields', [fields]);
     } else {
       volatileSearchSource.removeField('fields');

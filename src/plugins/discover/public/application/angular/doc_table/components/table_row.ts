@@ -109,7 +109,9 @@ export function createTableRowDirective($compile: ng.ICompileService) {
         );
       };
 
-      // create a tr element that lists the value for each *column*
+      // create a tr element that lists the value for each *column*. this summary is not updated
+      // as part of the normal angular update process, it is only updated when the ng-repeat setup
+      // in doc_table.html causes it to update by reference.
       function createSummaryRow(row: any) {
         const indexPattern = $scope.indexPattern;
         $scope.flattenedRow = indexPattern.flattenHit(row);

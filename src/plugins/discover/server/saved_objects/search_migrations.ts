@@ -121,16 +121,16 @@ const migrateExistingSavedSearch: SavedObjectMigrationFn<any, any> = (doc) => {
   if (!doc.attributes) {
     return doc;
   }
-  const pre712 = doc.attributes.pre712;
-  // pre712 already has a value
-  if (pre712 !== undefined) {
+  const hideUnmapped = doc.attributes.hideUnmapped;
+  // hideUnmapped already has a value
+  if (hideUnmapped !== undefined) {
     return doc;
   }
   return {
     ...doc,
     attributes: {
       ...doc.attributes,
-      pre712: true,
+      hideUnmapped: false,
     },
   };
 };

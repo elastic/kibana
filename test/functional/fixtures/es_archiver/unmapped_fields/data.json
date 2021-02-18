@@ -18,7 +18,8 @@
           "desc"
         ],
         "title": "Existing Saved Search",
-        "version": 1
+        "version": 1,
+        "hideUnmapped": false
       },
       "type": "search"
     }
@@ -102,4 +103,3 @@
     "type": "_doc"
   }
 }
-

@@ -42,6 +42,7 @@ export async function persistSavedSearch(
     sort: state.sort as SortOrder[],
     columns: state.columns || [],
     useNewFieldsApi: false,
+    hideUnmappedFields: state.hideUnmapped,
   });
 
   savedSearch.columns = state.columns || [];
@@ -52,6 +53,7 @@ export async function persistSavedSearch(
   if (state.hideChart) {
     savedSearch.hideChart = state.hideChart;
   }
+  savedSearch.hideUnmapped = state.hideUnmapped;
 
   try {
     const id = await savedSearch.save(saveOptions);

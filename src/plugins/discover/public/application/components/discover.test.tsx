@@ -90,6 +90,7 @@ function getProps(indexPattern: IndexPattern): DiscoverProps {
     rows: esHits,
     searchSource: searchSourceMock,
     state: { columns: [] },
+    onChangeUnmappedFields: jest.fn(),
   };
 }
 

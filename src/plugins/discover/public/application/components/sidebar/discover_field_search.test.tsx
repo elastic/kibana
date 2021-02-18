@@ -141,8 +141,26 @@ describe('DiscoverFieldSearch', () => {
     const onChangeUnmappedFields = jest.fn();
     const componentProps = {
       ...defaultProps,
-      showUnmappedFields: true,
-      useNewFieldsApi: false,
+      useNewFieldsApi: true,
+      hideUnmappedFields: false,
+      onChangeUnmappedFields,
+    };
+    const component = mountComponent(componentProps);
+    const btn = findTestSubject(component, 'toggleFieldFilterButton');
+    btn.simulate('click');
+    const unmappedFieldsSwitch = findTestSubject(component, 'unmappedFieldsSwitch');
+    act(() => {
+      unmappedFieldsSwitch.simulate('click');
+    });
+    expect(onChangeUnmappedFields).toHaveBeenCalledWith(true);
+  });
+
+  test('enabling unmapped fields', () => {
+    const onChangeUnmappedFields = jest.fn();
+    const componentProps = {
+      ...defaultProps,
+      useNewFieldsApi: true,
+      hideUnmappedFields: true,
       onChangeUnmappedFields,
     };
     const component = mountComponent(componentProps);

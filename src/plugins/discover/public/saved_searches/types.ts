@@ -23,7 +23,8 @@ export interface SavedSearch {
   save: (saveOptions: SavedObjectSaveOpts) => Promise<string>;
   lastSavedTitle?: string;
   copyOnSave?: boolean;
-  pre712?: boolean;
+  // default is to show unmapped fields, but in the future this default might change
+  hideUnmapped?: boolean;
   hideChart?: boolean;
 }
 export interface SavedSearchLoader {

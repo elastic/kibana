@@ -20,7 +20,7 @@ export function createSavedSearchClass(savedObjects: SavedObjectsStart) {
       grid: 'object',
       sort: 'keyword',
       version: 'integer',
-      pre712: 'boolean',
+      hideUnmapped: 'boolean',
     };
     // Order these fields to the top, the rest are alphabetical
     public static fieldOrder = ['title', 'description'];
@@ -42,7 +42,7 @@ export function createSavedSearchClass(savedObjects: SavedObjectsStart) {
           grid: 'object',
           sort: 'keyword',
           version: 'integer',
-          pre712: 'boolean',
+          hideUnmapped: 'boolean',
         },
         searchSource: true,
         defaults: {
@@ -52,7 +52,7 @@ export function createSavedSearchClass(savedObjects: SavedObjectsStart) {
           hits: 0,
           sort: [],
           version: 1,
-          pre712: false,
+          hideUnmapped: false,
         },
       });
       this.showInRecentlyAccessed = true;

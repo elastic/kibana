@@ -37,7 +37,6 @@ export interface State {
   aggregatable: string;
   type: string;
   missing: boolean;
-  unmappedFields: boolean;
   [index: string]: string | boolean;
 }
 
@@ -69,9 +68,9 @@ export interface Props {
   onChangeUnmappedFields?: (value: boolean) => void;
 
   /**
-   * should unmapped fields switch be rendered
+   * state of the unmapped flag, externally controlled
    */
-  showUnmappedFields?: boolean;
+  hideUnmappedFields?: boolean;
 }
 
 /**
@@ -83,7 +82,7 @@ export function DiscoverFieldSearch({
   value,
   types,
   useNewFieldsApi,
-  showUnmappedFields,
+  hideUnmappedFields,
   onChangeUnmappedFields,
 }: Props) {
   const searchPlaceholder = i18n.translate('discover.fieldChooser.searchPlaceHolder', {
@@ -111,14 +110,8 @@ export function DiscoverFieldSearch({
     aggregatable: 'any',
     type: 'any',
     missing: true,
-    unmappedFields: !!showUnmappedFields,
   });
-
-  if (typeof value !== 'string') {
-    // at initial rendering value is undefined (angular related), this catches the warning
-    // should be removed once all is react
-    return null;
-  }
+  const [hideUnmapped, setUnmapped] = useState(Boolean(hideUnmappedFields));
 
   const filterBtnAriaLabel = isPopoverOpen
     ? i18n.translate('discover.fieldChooser.toggleFieldFilterButtonHideAriaLabel', {
@@ -182,8 +175,9 @@ export function DiscoverFieldSearch({
   };
 
   const handleUnmappedFieldsChange = (e: EuiSwitchEvent) => {
-    const unmappedFieldsValue = e.target.checked;
-    handleValueChange('unmappedFields', unmappedFieldsValue);
+    // The checkbox is the opposite of the stored value
+    const unmappedFieldsValue = !e.target.checked;
+    setUnmapped(unmappedFieldsValue);
     if (onChangeUnmappedFields) {
       onChangeUnmappedFields(unmappedFieldsValue);
     }
@@ -262,46 +256,44 @@ export function DiscoverFieldSearch({
   };
 
   const footer = () => {
-    if (!showUnmappedFields && useNewFieldsApi) {
-      return null;
-    }
     return (
       <EuiPopoverFooter>
-        {showUnmappedFields ? (
-          <EuiFlexGroup>
-            <EuiFlexItem component="span">
-              <EuiSwitch
-                label={i18n.translate('discover.fieldChooser.filter.showUnmappedFields', {
-                  defaultMessage: 'Show unmapped fields',
-                })}
-                checked={values.unmappedFields}
-                onChange={handleUnmappedFieldsChange}
-                data-test-subj="unmappedFieldsSwitch"
-              />
-            </EuiFlexItem>
-            <EuiFlexItem component="span" grow={false}>
-              <EuiToolTip
-                position="right"
-                content={i18n.translate('discover.fieldChooser.filter.unmappedFieldsWarning', {
-                  defaultMessage:
-                    'Unmapped fields will be deprecated and removed in a future release.',
-                })}
-              >
-                <EuiIcon type="alert" />
-              </EuiToolTip>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+        <EuiSwitch
+          label={i18n.translate('discover.fieldChooser.filter.hideMissingFieldsLabel', {
+            defaultMessage: 'Hide missing fields',
+          })}
+          checked={values.missing}
+          onChange={handleMissingChange}
+          data-test-subj="missingSwitch"
+        />
+        {useNewFieldsApi ? (
+          <>
+            <EuiSpacer size="s" />
+            <EuiFlexGroup>
+              <EuiFlexItem component="span">
+                <EuiSwitch
+                  label={i18n.translate('discover.fieldChooser.filter.showUnmappedFields', {
+                    defaultMessage: 'Show unmapped fields',
+                  })}
+                  checked={!hideUnmapped}
+                  onChange={handleUnmappedFieldsChange}
+                  data-test-subj="unmappedFieldsSwitch"
+                />
+              </EuiFlexItem>
+              <EuiFlexItem component="span" grow={false}>
+                <EuiToolTip
+                  position="right"
+                  content={i18n.translate('discover.fieldChooser.filter.unmappedFieldsWarning', {
+                    defaultMessage:
+                      'Unmapped fields will be deprecated and removed in a future release.',
+                  })}
+                >
+                  <EuiIcon type="alert" />
+                </EuiToolTip>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </>
         ) : null}
-        {useNewFieldsApi ? null : (
-          <EuiSwitch
-            label={i18n.translate('discover.fieldChooser.filter.hideMissingFieldsLabel', {
-              defaultMessage: 'Hide missing fields',
-            })}
-            checked={values.missing}
-            onChange={handleMissingChange}
-            data-test-subj="missingSwitch"
-          />
-        )}
       </EuiPopoverFooter>
     );
   };
@@ -321,6 +313,12 @@ export function DiscoverFieldSearch({
       </EuiForm>
     </div>
   );
+
+  if (typeof value !== 'string') {
+    // at initial rendering value is undefined (angular related), this catches the warning
+    // should be removed once all is react
+    return null;
+  }
 
   return (
     <React.Fragment>

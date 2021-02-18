@@ -216,7 +216,7 @@ describe('group_fields', function () {
     ]);
   });
 
-  it('excludes unmapped fields if showUnmappedFields set to false', function () {
+  it('excludes unmapped fields if hideUnmappedFields is set to true', function () {
     const fieldFilterState = getDefaultFieldFilter();
     const fieldsWithUnmappedField = [...fields];
     fieldsWithUnmappedField.push({
@@ -237,7 +237,7 @@ describe('group_fields', function () {
       fieldCounts,
       fieldFilterState,
       true,
-      false
+      true
     );
     expect(actual.unpopular).toEqual([]);
   });

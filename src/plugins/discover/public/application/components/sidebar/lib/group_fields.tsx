@@ -25,7 +25,7 @@ export function groupFields(
   fieldCounts: Record<string, number>,
   fieldFilterState: FieldFilterState,
   useNewFieldsApi: boolean,
-  showUnmappedFields = true
+  hideUnmappedFields = false
 ): GroupedFields {
   const result: GroupedFields = {
     selected: [],
@@ -64,7 +64,7 @@ export function groupFields(
     } else if (field.type !== '_source') {
       // do not show unmapped fields unless explicitly specified
       // do not add subfields to this list
-      if ((field.type !== 'unknown' || showUnmappedFields) && !isSubfield) {
+      if ((field.type !== 'unknown' || !hideUnmappedFields) && !isSubfield) {
         result.unpopular.push(field);
       }
     }

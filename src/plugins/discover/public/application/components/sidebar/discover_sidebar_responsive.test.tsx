@@ -102,6 +102,7 @@ function getCompProps(): DiscoverSidebarResponsiveProps {
     setAppState: jest.fn(),
     state: {},
     trackUiMetric: jest.fn(),
+    onChangeUnmappedFields: jest.fn(),
   };
 }
 
@@ -136,15 +137,11 @@ describe('discover responsive sidebar', function () {
     expect(props.onAddFilter).toHaveBeenCalled();
   });
   it('renders sidebar with unmapped fields config', function () {
-    const unmappedFieldsConfig = {
-      onChangeUnmappedFields: jest.fn(),
-      showUnmappedFields: false,
-      showUnmappedFieldsDefaultValue: false,
-    };
-    const componentProps = { ...props, unmappedFieldsConfig };
+    const onChangeUnmappedFields = jest.fn();
+    const componentProps = { ...props, onChangeUnmappedFields };
     const component = mountWithIntl(<DiscoverSidebarResponsive {...componentProps} />);
     const discoverSidebar = component.find(DiscoverSidebar);
     expect(discoverSidebar).toHaveLength(1);
-    expect(discoverSidebar.props().unmappedFieldsConfig).toEqual(unmappedFieldsConfig);
+    expect(discoverSidebar.props().onChangeUnmappedFields).toEqual(onChangeUnmappedFields);
   });
 });

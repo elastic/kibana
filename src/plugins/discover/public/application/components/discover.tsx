@@ -66,7 +66,7 @@ export function Discover({
   searchSource,
   state,
   timeRange,
-  unmappedFieldsConfig,
+  onChangeUnmappedFields,
 }: DiscoverProps) {
   const [expandedDoc, setExpandedDoc] = useState<ElasticSearchHit | undefined>(undefined);
   const scrollableDesktop = useRef<HTMLDivElement>(null);
@@ -230,7 +230,7 @@ export function Discover({
                 state={state}
                 isClosed={isSidebarClosed}
                 trackUiMetric={trackUiMetric}
-                unmappedFieldsConfig={unmappedFieldsConfig}
+                onChangeUnmappedFields={onChangeUnmappedFields}
                 useNewFieldsApi={useNewFieldsApi}
               />
             </EuiFlexItem>
@@ -384,6 +384,7 @@ export function Discover({
                             onSort={onSort}
                             sampleSize={opts.sampleSize}
                             useNewFieldsApi={useNewFieldsApi}
+                            hideUnmapped={state.hideUnmapped}
                           />
                         )}
                         {!isLegacy && rows && rows.length && (

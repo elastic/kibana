@@ -411,6 +411,7 @@ function discoverController($route, $scope, Promise) {
       index: $scope.indexPattern.id,
       interval: 'auto',
       filters: _.cloneDeep(persistentSearchSource.getOwnField('filter')),
+      hideUnmapped: false,
     };
     if (savedSearch.grid) {
       defaultState.grid = savedSearch.grid;
@@ -418,6 +419,7 @@ function discoverController($route, $scope, Promise) {
     if (savedSearch.hideChart) {
       defaultState.hideChart = savedSearch.hideChart;
     }
+    defaultState.hideUnmapped = savedSearch.hideUnmapped;
 
     return defaultState;
   }
@@ -674,19 +676,10 @@ function discoverController($route, $scope, Promise) {
     history.push('/');
   };
 
-  const showUnmappedFieldsDefaultValue = $scope.useNewFieldsApi && !!$scope.opts.savedSearch.pre712;
-  let showUnmappedFields = showUnmappedFieldsDefaultValue;
-
-  const onChangeUnmappedFields = (value) => {
-    showUnmappedFields = value;
-    $scope.unmappedFieldsConfig.showUnmappedFields = value;
+  $scope.onChangeUnmappedFields = (value) => {
+    $scope.state.hideUnmapped = value;
+    $scope.opts.setAppState({ ...$scope.state, hideUnmapped: value });
     $scope.fetch();
-  };
-
-  $scope.unmappedFieldsConfig = {
-    showUnmappedFieldsDefaultValue,
-    showUnmappedFields,
-    onChangeUnmappedFields,
   };
 
   $scope.updateDataSource = () => {
@@ -700,7 +693,7 @@ function discoverController($route, $scope, Promise) {
       sort,
       columns,
       useNewFieldsApi,
-      showUnmappedFields,
+      hideUnmappedFields: $scope.state.hideUnmapped,
     });
     return Promise.resolve();
   };

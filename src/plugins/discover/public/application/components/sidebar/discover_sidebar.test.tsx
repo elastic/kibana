@@ -102,6 +102,7 @@ function getCompProps(): DiscoverSidebarProps {
     fieldFilter: getDefaultFieldFilter(),
     setFieldFilter: jest.fn(),
     setAppState: jest.fn(),
+    onChangeUnmappedFields: jest.fn(),
   };
 }
 

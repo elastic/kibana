@@ -365,9 +365,9 @@ Object {
           },
           savedObjectMigrationContext
         );
-        const migratedPre712Flag = migratedDoc.attributes.pre712;
+        const migratedHideUnmappedFlag = migratedDoc.attributes.hideUnmapped;
 
-        expect(migratedPre712Flag).toEqual(true);
+        expect(migratedHideUnmappedFlag).toEqual(false);
       });
 
       it('should not modify a flag if it already exists', () => {
@@ -376,14 +376,14 @@ Object {
             type: 'search',
             attributes: {
               kibanaSavedObjectMeta: {},
-              pre712: false,
+              hideUnmapped: true,
             },
           },
           savedObjectMigrationContext
         );
-        const migratedPre712Flag = migratedDoc.attributes.pre712;
+        const migratedHideUnmappedFlag = migratedDoc.attributes.hideUnmapped;
 
-        expect(migratedPre712Flag).toEqual(false);
+        expect(migratedHideUnmappedFlag).toEqual(true);
       });
     });
   });
