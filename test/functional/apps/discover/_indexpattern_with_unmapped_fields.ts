@@ -12,14 +12,11 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
-  const testSubjects = getService('testSubjects');
   const log = getService('log');
   const retry = getService('retry');
   const PageObjects = getPageObjects(['common', 'timePicker', 'discover']);
 
   describe('index pattern with unmapped fields', () => {
-    const unmappedFieldsSwitchSelector = 'unmappedFieldsSwitch';
-
     before(async () => {
       await esArchiver.loadIfNeeded('unmapped_fields');
       await kibanaServer.uiSettings.replace({
@@ -59,22 +56,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(allFields.includes('message')).to.be(true);
       expect(allFields.includes('sender')).to.be(true);
       expect(allFields.includes('receiver')).to.be(true);
-    });
-
-    it('unmapped fields toggle exists on an existing saved search', async () => {
-      await PageObjects.discover.openSidebarFieldFilter();
-      await testSubjects.existOrFail('filterSelectionPanel');
-      await testSubjects.existOrFail(unmappedFieldsSwitchSelector);
-      expect(await testSubjects.isEuiSwitchChecked(unmappedFieldsSwitchSelector)).to.be(true);
-    });
-
-    it('switching unmapped fields toggle off hides unmapped fields', async () => {
-      await testSubjects.setEuiSwitch(unmappedFieldsSwitchSelector, 'uncheck');
-      await PageObjects.discover.closeSidebarFieldFilter();
-      const allFields = await PageObjects.discover.getAllFieldNames();
-      expect(allFields.includes('message')).to.be(true);
-      expect(allFields.includes('sender')).to.be(false);
-      expect(allFields.includes('receiver')).to.be(false);
     });
   });
 }

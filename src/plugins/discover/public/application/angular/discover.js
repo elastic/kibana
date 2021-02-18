@@ -675,18 +675,12 @@ function discoverController($route, $scope, Promise) {
   };
 
   const showUnmappedFieldsDefaultValue = $scope.useNewFieldsApi;
-  let showUnmappedFields = showUnmappedFieldsDefaultValue;
-
-  const onChangeUnmappedFields = (value) => {
-    showUnmappedFields = value;
-    $scope.unmappedFieldsConfig.showUnmappedFields = value;
-    $scope.fetch();
-  };
+  const showUnmappedFields = true;
 
   $scope.unmappedFieldsConfig = {
     showUnmappedFieldsDefaultValue,
     showUnmappedFields,
-    onChangeUnmappedFields,
+    onChangeUnmappedFields: () => {},
   };
 
   $scope.updateDataSource = () => {
