@@ -479,6 +479,29 @@ describe('<EditPolicy />', () => {
       component.update();
     });
 
+    test('serialization', async () => {
+      httpRequestsMockHelpers.setLoadPolicies([DEFAULT_POLICY]);
+      await act(async () => {
+        testBed = await setup();
+      });
+      const { component, actions } = testBed;
+      component.update();
+      await actions.delete.enablePhase();
+      await actions.setWaitForSnapshotPolicy('test');
+      await actions.savePolicy();
+      const latestRequest = server.requests[server.requests.length - 1];
+      const entirePolicy = JSON.parse(JSON.parse(latestRequest.requestBody).body);
+      expect(entirePolicy.phases.delete).toEqual({
+        min_age: '365d',
+        actions: {
+          delete: {},
+          wait_for_snapshot: {
+            policy: 'test',
+          },
+        },
+      });
+    });
+
     test('wait for snapshot policy field should correctly display snapshot policy name', () => {
       expect(testBed.find('snapshotPolicyCombobox').prop('data-currentvalue')).toEqual([
         {
