@@ -375,13 +375,14 @@ export const InnerVisualizationWrapper = ({
               key={longMessage}
               className="eui-textBreakAll"
               data-test-subj="configuration-failure-error"
+              grow={false}
             >
               {longMessage}
             </EuiFlexItem>
           ));
       } else {
         showExtraErrors = (
-          <EuiFlexItem>
+          <EuiFlexItem grow={false}>
             <EuiButtonEmpty
               onClick={() => {
                 setLocalState((prevState: WorkspaceState) => ({
@@ -403,35 +404,42 @@ export const InnerVisualizationWrapper = ({
 
     return (
       <EuiFlexGroup
-        style={{ maxWidth: '100%' }}
-        direction="column"
+        style={{ maxWidth: '100%', height: '100%' }}
         alignItems="center"
         data-test-subj="configuration-failure"
       >
         <EuiFlexItem>
-          <EuiIcon type="alert" size="xl" color="danger" />
+          <EuiFlexGroup alignItems="center" direction="column">
+            <EuiFlexItem>
+              <EuiIcon type="alert" size="xl" color="danger" />
+            </EuiFlexItem>
+            <EuiFlexItem className="eui-textBreakAll" data-test-subj="configuration-failure-error">
+              {localState.configurationValidationError[0].longMessage}
+            </EuiFlexItem>
+            {showExtraErrors}
+          </EuiFlexGroup>
         </EuiFlexItem>
-        <EuiFlexItem className="eui-textBreakAll" data-test-subj="configuration-failure-error">
-          {localState.configurationValidationError[0].longMessage}
-        </EuiFlexItem>
-        {showExtraErrors}
       </EuiFlexGroup>
     );
   }
 
   if (localState.expressionBuildError?.length) {
     return (
-      <EuiFlexGroup style={{ maxWidth: '100%' }} direction="column" alignItems="center">
+      <EuiFlexGroup style={{ maxWidth: '100%' }} alignItems="center">
         <EuiFlexItem>
-          <EuiIcon type="alert" size="xl" color="danger" />
+          <EuiFlexGroup alignItems="center" direction="column">
+            <EuiFlexItem>
+              <EuiIcon type="alert" size="xl" color="danger" />
+            </EuiFlexItem>
+            <EuiFlexItem data-test-subj="expression-failure">
+              <FormattedMessage
+                id="xpack.lens.editorFrame.expressionFailure"
+                defaultMessage="An error occurred in the expression"
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>{localState.expressionBuildError[0].longMessage}</EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
-        <EuiFlexItem data-test-subj="expression-failure">
-          <FormattedMessage
-            id="xpack.lens.editorFrame.expressionFailure"
-            defaultMessage="An error occurred in the expression"
-          />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>{localState.expressionBuildError[0].longMessage}</EuiFlexItem>
       </EuiFlexGroup>
     );
   }
@@ -451,34 +459,38 @@ export const InnerVisualizationWrapper = ({
           const visibleErrorMessage = getOriginalRequestErrorMessage(error) || errorMessage;
 
           return (
-            <EuiFlexGroup style={{ maxWidth: '100%' }} direction="column" alignItems="center">
+            <EuiFlexGroup style={{ maxWidth: '100%' }} alignItems="center">
               <EuiFlexItem>
-                <EuiIcon type="alert" size="xl" color="danger" />
-              </EuiFlexItem>
-              <EuiFlexItem data-test-subj="expression-failure">
-                <FormattedMessage
-                  id="xpack.lens.editorFrame.dataFailure"
-                  defaultMessage="An error occurred when loading data."
-                />
-              </EuiFlexItem>
-              {visibleErrorMessage ? (
-                <EuiFlexItem className="eui-textBreakAll" grow={false}>
-                  <EuiButtonEmpty
-                    onClick={() => {
-                      setLocalState((prevState: WorkspaceState) => ({
-                        ...prevState,
-                        expandError: !prevState.expandError,
-                      }));
-                    }}
-                  >
-                    {i18n.translate('xpack.lens.editorFrame.expandRenderingErrorButton', {
-                      defaultMessage: 'Show details of error',
-                    })}
-                  </EuiButtonEmpty>
+                <EuiFlexGroup alignItems="center" direction="column">
+                  <EuiFlexItem>
+                    <EuiIcon type="alert" size="xl" color="danger" />
+                  </EuiFlexItem>
+                  <EuiFlexItem data-test-subj="expression-failure">
+                    <FormattedMessage
+                      id="xpack.lens.editorFrame.dataFailure"
+                      defaultMessage="An error occurred when loading data."
+                    />
+                  </EuiFlexItem>
+                  {visibleErrorMessage ? (
+                    <EuiFlexItem className="eui-textBreakAll" grow={false}>
+                      <EuiButtonEmpty
+                        onClick={() => {
+                          setLocalState((prevState: WorkspaceState) => ({
+                            ...prevState,
+                            expandError: !prevState.expandError,
+                          }));
+                        }}
+                      >
+                        {i18n.translate('xpack.lens.editorFrame.expandRenderingErrorButton', {
+                          defaultMessage: 'Show details of error',
+                        })}
+                      </EuiButtonEmpty>
 
-                  {localState.expandError ? visibleErrorMessage : null}
-                </EuiFlexItem>
-              ) : null}
+                      {localState.expandError ? visibleErrorMessage : null}
+                    </EuiFlexItem>
+                  ) : null}{' '}
+                </EuiFlexGroup>
+              </EuiFlexItem>
             </EuiFlexGroup>
           );
         }}
