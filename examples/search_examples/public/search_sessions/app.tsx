@@ -238,7 +238,7 @@ export const SearchSessionsExampleApp = ({
       <EuiPageHeader>
         <EuiPageHeaderSection>
           <EuiTitle size="l">
-            <h1>Basic search session example</h1>
+            <h1>Search session example</h1>
           </EuiTitle>
           <EuiSpacer />
           {!isShardDelayEnabled(data) && (

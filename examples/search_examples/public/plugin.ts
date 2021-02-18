@@ -21,6 +21,7 @@ import {
 } from './types';
 import { createSearchSessionsExampleUrlGenerator } from './search_sessions/url_generator';
 import { PLUGIN_NAME } from '../common';
+import img from './search_examples.jpg';
 
 export class SearchExamplesPlugin
   implements
@@ -52,9 +53,20 @@ export class SearchExamplesPlugin
     developerExamples.register({
       appId: 'searchExamples',
       title: 'Search Examples',
-      description: `Search Examples`,
+      description: `Examples on searching elasticsearch using data plugin: low-level search client (data.search.search), high-level search client (SearchSource), search sessions (data.search.sessions)`,
+      image: img,
+      links: [
+        {
+          label: 'README',
+          href: 'https://github.com/elastic/kibana/tree/master/src/plugins/data/README.mdx',
+          iconType: 'logoGithub',
+          target: '_blank',
+          size: 's',
+        },
+      ],
     });
 
+    // we need an URL generator for search session examples for restoring a search session
     share.urlGenerators.registerUrlGenerator(
       createSearchSessionsExampleUrlGenerator(() => {
         return core
