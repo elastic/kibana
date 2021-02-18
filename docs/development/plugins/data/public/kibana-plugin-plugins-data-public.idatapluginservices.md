@@ -21,4 +21,5 @@ export interface IDataPluginServices extends Partial<CoreStart>
 |  [savedObjects](./kibana-plugin-plugins-data-public.idatapluginservices.savedobjects.md) | <code>CoreStart['savedObjects']</code> |  |
 |  [storage](./kibana-plugin-plugins-data-public.idatapluginservices.storage.md) | <code>IStorageWrapper</code> |  |
 |  [uiSettings](./kibana-plugin-plugins-data-public.idatapluginservices.uisettings.md) | <code>CoreStart['uiSettings']</code> |  |
+|  [usageCollection](./kibana-plugin-plugins-data-public.idatapluginservices.usagecollection.md) | <code>UsageCollectionStart</code> |  |
 

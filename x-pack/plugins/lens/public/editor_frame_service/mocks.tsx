@@ -88,7 +88,7 @@ export function createMockDatasource(id: string): DatasourceMock {
     uniqueLabels: jest.fn((_state) => ({})),
     renderDimensionTrigger: jest.fn(),
     renderDimensionEditor: jest.fn(),
-    getDropTypes: jest.fn(),
+    getDropProps: jest.fn(),
     onDrop: jest.fn(),
 
     // this is an additional property which doesn't exist on real datasources

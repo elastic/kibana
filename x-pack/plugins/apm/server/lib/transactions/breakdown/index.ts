@@ -18,18 +18,20 @@ import {
   TRANSACTION_BREAKDOWN_COUNT,
 } from '../../../../common/elasticsearch_fieldnames';
 import { Setup, SetupTimeRange } from '../../helpers/setup_request';
-import { rangeFilter } from '../../../../common/utils/range_filter';
+import { environmentQuery, rangeQuery } from '../../../../common/utils/queries';
 import { getMetricsDateHistogramParams } from '../../helpers/metrics';
 import { MAX_KPIS } from './constants';
 import { getVizColorForIndex } from '../../../../common/viz_colors';
 import { withApmSpan } from '../../../utils/with_apm_span';
 
 export function getTransactionBreakdown({
+  environment,
   setup,
   serviceName,
   transactionName,
   transactionType,
 }: {
+  environment?: string;
   setup: Setup & SetupTimeRange;
   serviceName: string;
   transactionName?: string;
@@ -82,7 +84,8 @@ export function getTransactionBreakdown({
     const filters = [
       { term: { [SERVICE_NAME]: serviceName } },
       { term: { [TRANSACTION_TYPE]: transactionType } },
-      { range: rangeFilter(start, end) },
+      ...rangeQuery(start, end),
+      ...environmentQuery(environment),
       ...esFilter,
     ];
 

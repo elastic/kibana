@@ -6,6 +6,7 @@
  */
 
 import { get, isObject } from 'lodash';
+import { DEFAULT_INDICATOR_PATH } from '../../../../../common/constants';
 
 import type { SignalSearchResponse, SignalSourceHit } from '../types';
 import type {
@@ -16,7 +17,6 @@ import type {
 } from './types';
 import { extractNamedQueries } from './utils';
 
-const DEFAULT_INDICATOR_PATH = 'threat.indicator';
 const getSignalId = (signal: SignalSourceHit): string => signal._id;
 
 export const groupAndMergeSignalMatches = (signalHits: SignalSourceHit[]): SignalSourceHit[] => {
@@ -43,11 +43,11 @@ export const groupAndMergeSignalMatches = (signalHits: SignalSourceHit[]): Signa
 export const buildMatchedIndicator = ({
   queries,
   threats,
-  indicatorPath = DEFAULT_INDICATOR_PATH,
+  indicatorPath,
 }: {
   queries: ThreatMatchNamedQuery[];
   threats: ThreatListItem[];
-  indicatorPath?: string;
+  indicatorPath: string;
 }): ThreatIndicator[] =>
   queries.map((query) => {
     const matchedThreat = threats.find((threat) => threat._id === query.id);
@@ -67,7 +67,8 @@ export const buildMatchedIndicator = ({
 
 export const enrichSignalThreatMatches = async (
   signals: SignalSearchResponse,
-  getMatchedThreats: GetMatchedThreats
+  getMatchedThreats: GetMatchedThreats,
+  indicatorPath: string
 ): Promise<SignalSearchResponse> => {
   const signalHits = signals.hits.hits;
   if (signalHits.length === 0) {
@@ -79,7 +80,11 @@ export const enrichSignalThreatMatches = async (
   const matchedThreatIds = [...new Set(signalMatches.flat().map(({ id }) => id))];
   const matchedThreats = await getMatchedThreats(matchedThreatIds);
   const matchedIndicators = signalMatches.map((queries) =>
-    buildMatchedIndicator({ queries, threats: matchedThreats })
+    buildMatchedIndicator({
+      indicatorPath,
+      queries,
+      threats: matchedThreats,
+    })
   );
 
   const enrichedSignals: SignalSourceHit[] = uniqueHits.map((signalHit, i) => {
@@ -87,7 +92,7 @@ export const enrichSignalThreatMatches = async (
     if (!isObject(threat)) {
       throw new Error(`Expected threat field to be an object, but found: ${threat}`);
     }
-    const existingIndicatorValue = get(signalHit._source, 'threat.indicator') ?? [];
+    const existingIndicatorValue = get(signalHit._source, DEFAULT_INDICATOR_PATH) ?? [];
     const existingIndicators = [existingIndicatorValue].flat(); // ensure indicators is an array
 
     return {
@@ -101,14 +106,15 @@ export const enrichSignalThreatMatches = async (
       },
     };
   });
-  /* eslint-disable require-atomic-updates */
-  signals.hits.hits = enrichedSignals;
-  if (isObject(signals.hits.total)) {
-    signals.hits.total.value = enrichedSignals.length;
-  } else {
-    signals.hits.total = enrichedSignals.length;
-  }
-  /* eslint-enable require-atomic-updates */
 
-  return signals;
+  return {
+    ...signals,
+    hits: {
+      ...signals.hits,
+      hits: enrichedSignals,
+      total: isObject(signals.hits.total)
+        ? { ...signals.hits.total, value: enrichedSignals.length }
+        : enrichedSignals.length,
+    },
+  };
 };

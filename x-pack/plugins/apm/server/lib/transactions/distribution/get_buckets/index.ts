@@ -17,7 +17,10 @@ import {
 } from '../../../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../../../common/processor_event';
 import { joinByKey } from '../../../../../common/utils/join_by_key';
-import { rangeFilter } from '../../../../../common/utils/range_filter';
+import {
+  environmentQuery,
+  rangeQuery,
+} from '../../../../../common/utils/queries';
 import {
   getDocumentTypeFilterForAggregatedTransactions,
   getProcessorEventForAggregatedTransactions,
@@ -46,6 +49,7 @@ function getHistogramAggOptions({
 }
 
 export async function getBuckets({
+  environment,
   serviceName,
   transactionName,
   transactionType,
@@ -56,6 +60,7 @@ export async function getBuckets({
   setup,
   searchAggregatedTransactions,
 }: {
+  environment?: string;
   serviceName: string;
   transactionName: string;
   transactionType: string;
@@ -75,7 +80,8 @@ export async function getBuckets({
         { term: { [SERVICE_NAME]: serviceName } },
         { term: { [TRANSACTION_TYPE]: transactionType } },
         { term: { [TRANSACTION_NAME]: transactionName } },
-        { range: rangeFilter(start, end) },
+        ...rangeQuery(start, end),
+        ...environmentQuery(environment),
         ...esFilter,
       ];
 
@@ -109,8 +115,11 @@ export async function getBuckets({
                     }),
                     aggs: {
                       samples: {
-                        top_hits: {
-                          _source: [TRANSACTION_ID, TRACE_ID],
+                        top_metrics: {
+                          metrics: [
+                            { field: TRANSACTION_ID },
+                            { field: TRACE_ID },
+                          ] as const,
                           size: 10,
                           sort: {
                             _score: 'desc',
@@ -128,9 +137,9 @@ export async function getBuckets({
           response.aggregations?.distribution.buckets.map((bucket) => {
             return {
               key: bucket.key,
-              samples: bucket.samples.hits.hits.map((hit) => ({
-                traceId: hit._source.trace.id,
-                transactionId: hit._source.transaction.id,
+              samples: bucket.samples.top.map((sample) => ({
+                traceId: sample.metrics[TRACE_ID] as string,
+                transactionId: sample.metrics[TRANSACTION_ID] as string,
               })),
             };
           }) ?? []
