@@ -24,7 +24,7 @@ export const ScreenshotLink = ({ lastSuccessfulStep }: Props) => {
   return (
     <span>
       <FormattedMessage
-        id="xpack.uptime.synthetics.executedStep.screenshot.not"
+        id="xpack.uptime.synthetics.executedStep.screenshot.successfulLink"
         defaultMessage="Screenshot {link}"
         values={{
           link: (
