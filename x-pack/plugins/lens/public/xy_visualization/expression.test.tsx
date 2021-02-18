@@ -1913,7 +1913,8 @@ describe('xy_expression', () => {
         sourceParams: {
           type: 'histogram',
           params: {
-            interval: 'auto$$$5',
+            interval: 'auto',
+            used_interval: 5,
           },
         },
       };

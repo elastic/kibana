@@ -101,9 +101,6 @@ describe('Histogram Agg', () => {
               "schema": Array [
                 "segment",
               ],
-              "used_interval": Array [
-                100,
-              ],
             },
             "function": "aggHistogram",
             "type": "function",
