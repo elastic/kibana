@@ -315,7 +315,8 @@ export const DiscoverGrid = ({
           <DiscoverGridFlyout
             indexPattern={indexPattern}
             hit={expandedDoc}
-            columns={columns}
+            // if default columns are used, dont make them part of the URL - the context state handling will take care to restore them
+            columns={defaultColumns ? [] : columns}
             onFilter={onFilter}
             onRemoveColumn={onRemoveColumn}
             onAddColumn={onAddColumn}
