@@ -51,6 +51,7 @@ cp cfg/metricbeat/elasticsearch-xpack.yml $KIBANA_DIR/metricbeat-install/modules
 cp cfg/metricbeat/kibana-xpack.yml $KIBANA_DIR/metricbeat-install/modules.d/kibana-xpack.yml
 echo "fields.build: ${BUILD_ID}" >> cfg/metricbeat/metricbeat.yml
 echo "path.config: ${KIBANA_DIR}/metricbeat-install" >> cfg/metricbeat/metricbeat.yml
+echo "cloud.auth: ${USER_FROM_VAULT}:${PASS_FROM_VAULT}" >> cfg/metricbeat/metricbeat.yml
 cp cfg/metricbeat/metricbeat.yml $KIBANA_DIR/metricbeat-install/metricbeat.yml
 mv $KIBANA_DIR/metricbeat-install/modules.d/system.yml $KIBANA_DIR/metricbeat-install/modules.d/system.yml.disabled
 popd
