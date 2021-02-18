@@ -53,7 +53,9 @@ export function ServiceProfiling({
     }
 
     const availableValueTypes = data.reduce((set, point) => {
-      (Object.keys(point.valueTypes) as ProfilingValueType[])
+      (Object.keys(point.valueTypes).filter(
+        (type) => type !== 'unknown'
+      ) as ProfilingValueType[])
         .filter((type) => point.valueTypes[type] > 0)
         .forEach((type) => {
           set.add(type);
@@ -83,7 +85,15 @@ export function ServiceProfiling({
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiPanel>
-              <ServiceProfilingTimeline profiles={data} />
+              <ServiceProfilingTimeline
+                start={start!}
+                end={end!}
+                series={data}
+                onValueTypeSelect={(type) => {
+                  setValueType(type);
+                }}
+                selectedValueType={valueType}
+              />
               <ServiceProfilingFlamegraph
                 serviceName={serviceName}
                 environment={environment}

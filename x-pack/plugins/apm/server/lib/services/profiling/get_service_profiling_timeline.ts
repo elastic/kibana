@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { rangeFilter } from '../../../../common/utils/range_filter';
+import { rangeQuery, environmentQuery } from '../../../../common/utils/queries';
 import { ProcessorEvent } from '../../../../common/processor_event';
 import {
   PROFILE_CPU_NS,
@@ -16,7 +16,6 @@ import {
 import { ProfilingValueType } from '../../../../common/profiling';
 import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 import { getBucketSize } from '../../helpers/get_bucket_size';
-import { getEnvironmentUiFilterES } from '../../helpers/convert_ui_filters/get_environment_ui_filter_es';
 
 export async function getServiceProfilingTimeline({
   serviceName,
@@ -39,8 +38,8 @@ export async function getServiceProfilingTimeline({
         bool: {
           filter: [
             { term: { [SERVICE_NAME]: serviceName } },
-            { range: rangeFilter(start, end) },
-            ...getEnvironmentUiFilterES(environment),
+            ...rangeQuery(start, end),
+            ...environmentQuery(environment),
             ...esFilter,
           ],
         },
@@ -57,14 +56,17 @@ export async function getServiceProfilingTimeline({
             },
           },
           aggs: {
-            num_profiles: {
-              cardinality: {
-                field: PROFILE_ID,
-              },
-            },
             value_type: {
               filters: {
                 filters: {
+                  unknown: {
+                    bool: {
+                      must_not: [
+                        { exists: { field: PROFILE_CPU_NS } },
+                        { exists: { field: PROFILE_WALL_US } },
+                      ],
+                    },
+                  },
                   [ProfilingValueType.cpuTime]: {
                     exists: { field: PROFILE_CPU_NS },
                   },
@@ -96,8 +98,8 @@ export async function getServiceProfilingTimeline({
   return aggregations.timeseries.buckets.map((bucket) => {
     return {
       x: bucket.key,
-      count: bucket.num_profiles.value,
       valueTypes: {
+        unknown: bucket.value_type.buckets.unknown.num_profiles.value,
         // TODO: use enum as object key. not possible right now
         // because of https://github.com/microsoft/TypeScript/issues/37888
         cpu_time: bucket.value_type.buckets.cpu_time.num_profiles.value,

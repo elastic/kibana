@@ -188,7 +188,7 @@ export function ServiceProfilingFlamegraph({
         config={{
           fillLabel: {
             fontFamily: theme.eui.euiCodeFontFamily,
-            clip: true,
+            // clip: true,
           },
           fontFamily: theme.eui.euiCodeFontFamily,
           minFontSize: 9,

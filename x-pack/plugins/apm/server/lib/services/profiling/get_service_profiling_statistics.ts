@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { keyBy } from 'lodash';
+import { keyBy, last } from 'lodash';
+import { ProfileStackFrame } from '../../../../typings/es_schemas/ui/profile';
 import { ProfilingValueType, ProfileNode } from '../../../../common/profiling';
 import { ProcessorEvent } from '../../../../common/processor_event';
 import { ESFilter } from '../../../../../../typings/elasticsearch';
@@ -18,8 +19,7 @@ import {
   PROFILE_WALL_US,
   SERVICE_NAME,
 } from '../../../../common/elasticsearch_fieldnames';
-import { rangeFilter } from '../../../../common/utils/range_filter';
-import { getEnvironmentUiFilterES } from '../../helpers/convert_ui_filters/get_environment_ui_filter_es';
+import { rangeQuery, environmentQuery } from '../../../../common/utils/queries';
 import { APMEventClient } from '../../helpers/create_es_client/create_apm_event_client';
 import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 
@@ -150,6 +150,12 @@ async function getProfilesWithStacks({
   return response.hits.hits.map((hit) => hit._source);
 }
 
+function getNodeNameFromFrame(frame: ProfileStackFrame) {
+  return [last(frame.function.split('/')), frame.line]
+    .filter(Boolean)
+    .join(':');
+}
+
 export async function getServiceProfilingStatistics({
   serviceName,
   setup,
@@ -169,9 +175,9 @@ export async function getServiceProfilingStatistics({
   }[valueType];
 
   const filter: ESFilter[] = [
-    { range: rangeFilter(start, end) },
+    ...rangeQuery(start, end),
     { term: { [SERVICE_NAME]: serviceName } },
-    ...getEnvironmentUiFilterES(environment),
+    ...environmentQuery(environment),
     { exists: { field: valueTypeField } },
   ];
 
@@ -199,7 +205,7 @@ export async function getServiceProfilingStatistics({
     const frames = profile.profile.stack.concat().reverse();
 
     frames.forEach((frame, index) => {
-      const node = getNode({ id: frame.id, name: frame.function });
+      const node = getNode({ id: frame.id, name: getNodeNameFromFrame(frame) });
 
       if (index === frames.length - 1) {
         node.value += stats.value;
