@@ -20,7 +20,7 @@ Retrieve the health status of the Alerting framework.
 [[alerts-api-health-example]]
 ==== Example
 
-Retrieve the Alerting framework health status:
+Retrieve the health status of the Alerting framework:
 
 [source,sh]
 --------------------------------------------------
