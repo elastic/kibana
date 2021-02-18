@@ -99,3 +99,10 @@ export const META_ENGINE_CREATION_FORM_ENGINE_SOURCE_ENGINES_LABEL = i18n.transl
     defaultMessage: 'Add engines to this meta engine',
   }
 );
+
+export const META_ENGINE_CREATION_FORM_MAX_SOURCE_ENGINES_WARNING_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.appSearch.metaEngineCreation.form.sourceEngines.maxSourceEnginesWarningTitle',
+  {
+    defaultMessage: 'Meta Engines have a limit of {maxEnginesPerMetaEngine} engines',
+  }
+);

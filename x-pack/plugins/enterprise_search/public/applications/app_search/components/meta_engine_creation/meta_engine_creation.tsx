@@ -10,6 +10,7 @@ import React, { useEffect } from 'react';
 import { useActions, useValues } from 'kea';
 
 import {
+  EuiCallOut,
   EuiComboBox,
   EuiComboBoxOptionOption,
   EuiForm,
@@ -29,6 +30,7 @@ import {
 
 import { FlashMessages } from '../../../shared/flash_messages';
 import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
+import { AppLogic } from '../../app_logic';
 
 import {
   ALLOWED_CHARS_NOTE,
@@ -36,6 +38,7 @@ import {
   META_ENGINE_CREATION_FORM_ENGINE_NAME_LABEL,
   META_ENGINE_CREATION_FORM_ENGINE_NAME_PLACEHOLDER,
   META_ENGINE_CREATION_FORM_ENGINE_SOURCE_ENGINES_LABEL,
+  META_ENGINE_CREATION_FORM_MAX_SOURCE_ENGINES_WARNING_TITLE,
   META_ENGINE_CREATION_FORM_META_ENGINE_DESCRIPTION,
   META_ENGINE_CREATION_FORM_SUBMIT_BUTTON_LABEL,
   META_ENGINE_CREATION_FORM_TITLE,
@@ -52,6 +55,11 @@ const comboBoxOptionToEngineName = (option: EuiComboBoxOptionOption<string>): st
   option.label;
 
 export const MetaEngineCreation: React.FC = () => {
+  const {
+    configuredLimits: {
+      engine: { maxEnginesPerMetaEngine } = { maxEnginesPerMetaEngine: Infinity },
+    },
+  } = useValues(AppLogic);
   const { fetchIndexedEngineNames, setRawName, setSelectedIndexedEngineNames } = useActions(
     MetaEngineCreationLogic
   );
@@ -129,6 +137,13 @@ export const MetaEngineCreation: React.FC = () => {
                   }}
                 />
               </EuiFormRow>
+              <EuiSpacer />
+              {selectedIndexedEngineNames.length >= maxEnginesPerMetaEngine && (
+                <EuiCallOut
+                  color="warning"
+                  title={META_ENGINE_CREATION_FORM_MAX_SOURCE_ENGINES_WARNING_TITLE}
+                />
+              )}
               <EuiSpacer />
               <EuiButton
                 disabled={name.length === 0 || selectedIndexedEngineNames.length === 0}
