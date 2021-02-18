@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { set } from '@elastic/safer-lodash-set';
 import { isEmpty } from 'lodash/fp';
 
 import {
@@ -49,38 +50,68 @@ export const findThresholdSignals = async ({
   searchDuration: string;
   searchErrors: string[];
 }> => {
+  const thresholdFields = Array.isArray(threshold.field) ? threshold.field : [threshold.field];
+
   const aggregations =
     threshold && !isEmpty(threshold.field)
-      ? {
-          threshold: {
+      ? thresholdFields.reduce((acc, field, i) => {
+          const aggPath = [...Array(i + 1).keys()]
+            .map((j) => {
+              return `['threshold_${j}:${thresholdFields[j]}']`;
+            })
+            .join(`['aggs']`);
+          set(acc, aggPath, {
             terms: {
-              field: threshold.field,
-              min_doc_count: threshold.value,
+              field,
+              min_doc_count: threshold.value, // not needed on parent agg, but can help narrow down result set
               size: 10000, // max 10k buckets
             },
-            aggs: {
-              // Get the most recent hit per bucket
-              top_threshold_hits: {
-                top_hits: {
-                  sort: [
-                    {
-                      [timestampOverride ?? '@timestamp']: {
-                        order: 'desc',
-                      },
+          });
+          if (i === threshold.field.length - 1) {
+            const topHitsAgg = {
+              top_hits: {
+                sort: [
+                  {
+                    [timestampOverride ?? '@timestamp']: {
+                      order: 'desc',
                     },
-                  ],
-                  fields: [
-                    {
-                      field: '*',
-                      include_unmapped: true,
-                    },
-                  ],
-                  size: 1,
-                },
+                  },
+                ],
+                fields: [
+                  {
+                    field: '*',
+                    include_unmapped: true,
+                  },
+                ],
+                size: 1,
               },
-            },
-          },
-        }
+            };
+            // TODO: support case where threshold fields are not supplied, but cardinality is?
+            if (!isEmpty(threshold.cardinality_field)) {
+              set(acc, `${aggPath}['aggs']`, {
+                top_threshold_hits: topHitsAgg,
+                cardinality_count: {
+                  cardinality: {
+                    field: threshold.cardinality_field,
+                  },
+                },
+                cardinality_check: {
+                  bucket_selector: {
+                    buckets_path: {
+                      cardinalityCount: 'cardinality_count',
+                    },
+                    script: `params.cardinalityCount >= ${threshold.cardinality_value}`, // TODO: cardinality operator
+                  },
+                },
+              });
+            } else {
+              set(acc, `${aggPath}['aggs']`, {
+                top_threshold_hits: topHitsAgg,
+              });
+            }
+          }
+          return acc;
+        }, {})
       : {};
 
   return singleSearchAfter({

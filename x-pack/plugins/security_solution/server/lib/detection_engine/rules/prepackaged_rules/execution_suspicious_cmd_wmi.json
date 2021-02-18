@@ -6,12 +6,13 @@
   "from": "now-9m",
   "index": [
     "logs-endpoint.events.*",
-    "winlogbeat-*"
+    "winlogbeat-*",
+    "logs-windows.*"
   ],
   "language": "eql",
   "license": "Elastic License",
   "name": "Suspicious Cmd Execution via WMI",
-  "query": "process where event.type in (\"start\", \"process_started\") and\n process.parent.name == \"WmiPrvSE.exe\" and process.name == \"cmd.exe\" and\n wildcard(process.args, \"\\\\\\\\127.0.0.1\\\\*\") and process.args in (\"2>&1\", \"1>\")\n",
+  "query": "process where event.type in (\"start\", \"process_started\") and\n process.parent.name : \"WmiPrvSE.exe\" and process.name : \"cmd.exe\" and\n process.args : \"\\\\\\\\127.0.0.1\\\\*\" and process.args : (\"2>&1\", \"1>\")\n",
   "risk_score": 47,
   "rule_id": "12f07955-1674-44f7-86b5-c35da0a6f41a",
   "severity": "medium",
@@ -41,5 +42,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 2
+  "version": 3
 }
