@@ -186,7 +186,7 @@ export function getLayerLists(mapSavedObjects: MapSavedObject[]): LayerDescripto
 
 async function filterIndexPatternsByField(fields: string[]) {
   const indexPatternsService = await getIndexPatternsService();
-  const indexPatternIds = await indexPatternsService.getIds();
+  const indexPatternIds = await indexPatternsService.getIds(true);
   let numIndexPatternsContainingField = 0;
   await Promise.all(
     indexPatternIds.map(async (indexPatternId: string) => {
