@@ -13,8 +13,7 @@ import { PLUGIN_ID } from '../../common';
 
 export interface ExampleLink {
   title: string;
-  path?: string;
-  externalHref?: string;
+  path: string;
 }
 
 interface NavProps {
@@ -24,12 +23,12 @@ interface NavProps {
 
 const SideNav: React.FC<NavProps> = ({ exampleLinks, basePath }: NavProps) => {
   const navItems = exampleLinks.map((example) => ({
-    id: example.path ?? example.externalHref ?? '',
+    id: example.path,
     name: example.title,
-    'data-test-subj': example.path ?? example.externalHref ?? '',
-    href: example.path
-      ? basePath.prepend(`/app/${PLUGIN_ID}${example.path}`)
-      : example.externalHref ?? '',
+    'data-test-subj': example.path,
+    href: example.path.startsWith('http')
+      ? example.path
+      : basePath.prepend(`/app/${PLUGIN_ID}${example.path}`),
   }));
 
   return (
