@@ -11,7 +11,6 @@ import {
   ApplicationStart,
   IUiSettingsClient,
   OverlayStart,
-  SavedObjectsStart,
   NotificationsStart,
   DocLinksStart,
   HttpSetup,
@@ -24,7 +23,6 @@ import { KibanaReactContextValue } from '../../kibana_react/public';
 export interface IndexPatternManagmentContext {
   chrome: ChromeStart;
   application: ApplicationStart;
-  savedObjects: SavedObjectsStart;
   uiSettings: IUiSettingsClient;
   notifications: NotificationsStart;
   overlays: OverlayStart;
