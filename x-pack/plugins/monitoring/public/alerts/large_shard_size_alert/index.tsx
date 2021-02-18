@@ -9,7 +9,11 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { Expression, Props } from '../components/param_details_form/expression';
 import { AlertTypeModel, ValidationResult } from '../../../../triggers_actions_ui/public';
-import { ALERT_LARGE_SHARD_SIZE, ALERT_DETAILS } from '../../../common/constants';
+import {
+  ALERT_LARGE_SHARD_SIZE,
+  ALERT_DETAILS,
+  ALERT_REQUIRES_APP_CONTEXT,
+} from '../../../common/constants';
 import { AlertTypeParams } from '../../../../alerts/common';
 
 interface ValidateOptions extends AlertTypeParams {
@@ -45,6 +49,6 @@ export function createLargeShardSizeAlertType(): AlertTypeModel<ValidateOptions>
     ),
     validate,
     defaultActionMessage: '{{context.internalFullMessage}}',
-    requiresAppContext: true,
+    requiresAppContext: ALERT_REQUIRES_APP_CONTEXT,
   };
 }

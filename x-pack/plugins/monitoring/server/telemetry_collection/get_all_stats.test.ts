@@ -9,7 +9,7 @@ import sinon from 'sinon';
 import { getStackStats, getAllStats, handleAllStats } from './get_all_stats';
 import { ESClusterStats } from './get_es_stats';
 import { KibanaStats } from './get_kibana_stats';
-import { ClustersHighLevelStats } from './get_high_level_stats';
+import { LogstashStatsByClusterUuid } from './get_logstash_stats';
 
 describe('get_all_stats', () => {
   const timestamp = Date.now();
@@ -145,13 +145,13 @@ describe('get_all_stats', () => {
             logstash: {
               count: 1,
               versions: [{ version: '2.3.4-beta2', count: 1 }],
-              os: {
-                platforms: [],
-                platformReleases: [],
-                distros: [],
-                distroReleases: [],
+              cluster_stats: {
+                collection_types: {
+                  internal_collection: 1,
+                },
+                pipelines: {},
+                plugins: [],
               },
-              cloud: undefined,
             },
           },
         },
@@ -188,7 +188,7 @@ describe('get_all_stats', () => {
     it('handles response', () => {
       const clusters = handleAllStats(esClusters as ESClusterStats[], {
         kibana: (kibanaStats as unknown) as KibanaStats,
-        logstash: (logstashStats as unknown) as ClustersHighLevelStats,
+        logstash: (logstashStats as unknown) as LogstashStatsByClusterUuid,
         beats: {},
       });
 
