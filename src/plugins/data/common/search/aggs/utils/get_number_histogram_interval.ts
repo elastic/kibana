@@ -10,26 +10,6 @@ import { DatatableColumn } from 'src/plugins/expressions/common';
 import type { AggParamsHistogram } from '../buckets';
 import { BUCKET_TYPES } from '../buckets/bucket_agg_types';
 
-const SEPARATOR = '$$$';
-
-function parseSerializedInterval(interval: string | number) {
-  if (typeof interval === 'number') {
-    return interval;
-  }
-  if (interval === 'auto') {
-    return 'auto';
-  }
-  return Number(interval.split(SEPARATOR)[1]);
-}
-
-export function buildSerializedAutoInterval(usedInterval: number) {
-  return `auto${SEPARATOR}${usedInterval}`;
-}
-
-export function isSerializedAutoInterval(interval: string | number) {
-  return typeof interval === 'string' && interval.startsWith('auto');
-}
-
 /**
  * Helper function returning the used interval for data table column created by the histogramm agg type.
  * "auto" will get expanded to the actually used interval.
@@ -41,8 +21,8 @@ export const getNumberHistogramIntervalByDatatableColumn = (column: DatatableCol
   if (column.meta.sourceParams?.type !== BUCKET_TYPES.HISTOGRAM) return;
   const params = (column.meta.sourceParams.params as unknown) as AggParamsHistogram;
 
-  if (!params.interval) {
+  if (!params.used_interval || typeof params.used_interval === 'string') {
     return undefined;
   }
-  return parseSerializedInterval(params.interval);
+  return params.used_interval;
 };

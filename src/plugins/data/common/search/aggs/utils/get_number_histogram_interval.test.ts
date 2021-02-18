@@ -50,7 +50,8 @@ describe('getNumberHistogramIntervalByDatatableColumn', () => {
           sourceParams: {
             type: BUCKET_TYPES.HISTOGRAM,
             params: {
-              interval: 'auto$$$20',
+              interval: 'auto',
+              used_interval: 20,
             },
           },
         },
@@ -70,6 +71,7 @@ describe('getNumberHistogramIntervalByDatatableColumn', () => {
             type: BUCKET_TYPES.HISTOGRAM,
             params: {
               interval: 7,
+              used_interval: 7,
             },
           },
         },

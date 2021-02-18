@@ -13,7 +13,6 @@ import { BUCKET_TYPES } from './bucket_agg_types';
 import { IBucketHistogramAggConfig, getHistogramBucketAgg, AutoBounds } from './histogram';
 import { BucketAggType } from './bucket_agg_type';
 import { SerializableState } from 'src/plugins/expressions/common';
-import { isSerializedAutoInterval } from '../utils/get_number_histogram_interval';
 
 describe('Histogram Agg', () => {
   let aggTypesDependencies: AggTypesDependencies;
@@ -101,6 +100,9 @@ describe('Histogram Agg', () => {
               ],
               "schema": Array [
                 "segment",
+              ],
+              "used_interval": Array [
+                100,
               ],
             },
             "function": "aggHistogram",
@@ -241,8 +243,8 @@ describe('Histogram Agg', () => {
         });
         (aggConfigs.aggs[0] as IBucketHistogramAggConfig).setAutoBounds({ min: 0, max: 1000 });
         const serializedAgg = aggConfigs.aggs[0].serialize();
-        const serializedIntervalParam = (serializedAgg.params as SerializableState).interval;
-        expect(isSerializedAutoInterval(serializedIntervalParam as string | number)).toBe(true);
+        const serializedIntervalParam = (serializedAgg.params as SerializableState).used_interval;
+        expect(serializedIntervalParam).toBe(500);
         const freshHistogramAggConfig = getAggConfigs({
           interval: 100,
           field: {
