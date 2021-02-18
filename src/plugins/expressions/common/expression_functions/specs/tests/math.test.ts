@@ -52,6 +52,11 @@ describe('math', () => {
         expect(fn(testTable, { expression: 'mean(name)', onError: 'null' })).toBe(null);
         expect(fn(testTable, { expression: 'mean(name)', onError: 'false' })).toBe(false);
       });
+      it('should return the desired fallback value, for division by zero', () => {
+        expect(fn(testTable, { expression: '1/0', onError: 'zero' })).toBe(0);
+        expect(fn(testTable, { expression: '1/0', onError: 'null' })).toBe(null);
+        expect(fn(testTable, { expression: '1/0', onError: 'false' })).toBe(false);
+      });
     });
   });
 
@@ -103,6 +108,12 @@ describe('math', () => {
     it('should throw when declared in the onError argument', () => {
       expect(() => fn(testTable, { expression: 'mean(name)', onError: 'throw' })).toThrow(
         new RegExp(errors.executionFailed().message)
+      );
+    });
+
+    it('should throw when dividing by zero', () => {
+      expect(() => fn(testTable, { expression: '1/0', onError: 'throw' })).toThrow(
+        new RegExp('Cannot divide by 0')
       );
     });
   });

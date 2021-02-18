@@ -153,6 +153,9 @@ export const math: ExpressionFunctionDefinition<
       }
       return result;
     } catch (e) {
+      if (onErrorValue !== 'throw' && onErrorValue in fallbackValue) {
+        return fallbackValue[onErrorValue];
+      }
       if (isDatatable(input) && input.rows.length === 0) {
         throw errors.emptyDatatable();
       } else {
