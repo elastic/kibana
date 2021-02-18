@@ -35,6 +35,7 @@ export const createRoute = async (
       postUserActions: jest.fn(),
       getUserActions: jest.fn(),
     },
+    logger: log,
   });
 
   return router[method].mock.calls[0][1];

@@ -73,6 +73,7 @@ export class CaseClientHandler implements CaseClient {
         userActionService: this._userActionService,
         user: this.user,
         theCase: caseInfo,
+        logger: this.logger,
       });
     } catch (error) {
       throw createCaseError({
@@ -92,6 +93,7 @@ export class CaseClientHandler implements CaseClient {
         user: this.user,
         cases,
         caseClient: this,
+        logger: this.logger,
       });
     } catch (error) {
       const caseIDVersions = cases.cases.map((caseInfo) => ({
@@ -146,6 +148,7 @@ export class CaseClientHandler implements CaseClient {
         savedObjectsClient: this._savedObjectsClient,
         connectorMappingsService: this._connectorMappingsService,
         caseClient: this,
+        logger: this.logger,
       });
     } catch (error) {
       throw createCaseError({
@@ -162,6 +165,7 @@ export class CaseClientHandler implements CaseClient {
         ...args,
         alertsService: this._alertsService,
         scopedClusterClient: this._scopedClusterClient,
+        logger: this.logger,
       });
     } catch (error) {
       throw createCaseError({
@@ -180,6 +184,7 @@ export class CaseClientHandler implements CaseClient {
         ...args,
         caseService: this._caseService,
         savedObjectsClient: this._savedObjectsClient,
+        logger: this.logger,
       });
     } catch (error) {
       this.logger.error(`Failed to get case using client id: ${args.id}: ${error}`);
@@ -209,6 +214,7 @@ export class CaseClientHandler implements CaseClient {
         ...args,
         alertsService: this._alertsService,
         scopedClusterClient: this._scopedClusterClient,
+        logger: this.logger,
       });
     } catch (error) {
       throw createCaseError({

@@ -63,8 +63,9 @@ export function createCaseError({
   error?: Error;
   logger: Logger;
 }) {
-  if (message !== undefined) {
-    logger.error(message);
+  const logMessage: string | undefined = message ?? error?.toString();
+  if (logMessage !== undefined) {
+    logger.error(logMessage);
   }
 
   return new CaseError(message, error);

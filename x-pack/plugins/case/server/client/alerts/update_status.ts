@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from 'src/core/server';
+import { ElasticsearchClient, Logger } from 'src/core/server';
 import { CaseStatuses } from '../../../common/api';
 import { AlertServiceContract } from '../../services';
 
@@ -15,6 +15,7 @@ interface UpdateAlertsStatusArgs {
   status: CaseStatuses;
   indices: Set<string>;
   scopedClusterClient: ElasticsearchClient;
+  logger: Logger;
 }
 
 export const updateAlertsStatus = async ({
@@ -23,6 +24,7 @@ export const updateAlertsStatus = async ({
   status,
   indices,
   scopedClusterClient,
+  logger,
 }: UpdateAlertsStatusArgs): Promise<void> => {
-  await alertsService.updateAlertsStatus({ ids, status, indices, scopedClusterClient });
+  await alertsService.updateAlertsStatus({ ids, status, indices, scopedClusterClient, logger });
 };

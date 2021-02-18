@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract } from 'src/core/server';
+import { SavedObjectsClientContract, Logger } from 'src/core/server';
 import { ActionsClient } from '../../../../actions/server';
 import { ConnectorMappingsAttributes, ConnectorTypes } from '../../../common/api';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ACTION_SAVED_OBJECT_TYPE } from '../../../../actions/server/saved_objects';
 import { ConnectorMappingsServiceSetup } from '../../services';
 import { CaseClientHandler } from '..';
+import { createCaseError } from '../../common/error';
 
 interface GetMappingsArgs {
   savedObjectsClient: SavedObjectsClientContract;
@@ -20,6 +21,7 @@ interface GetMappingsArgs {
   caseClient: CaseClientHandler;
   connectorType: string;
   connectorId: string;
+  logger: Logger;
 }
 
 export const getMappings = async ({
@@ -29,42 +31,51 @@ export const getMappings = async ({
   caseClient,
   connectorType,
   connectorId,
+  logger,
 }: GetMappingsArgs): Promise<ConnectorMappingsAttributes[]> => {
-  if (connectorType === ConnectorTypes.none) {
-    return [];
-  }
-  const myConnectorMappings = await connectorMappingsService.find({
-    client: savedObjectsClient,
-    options: {
-      hasReference: {
-        type: ACTION_SAVED_OBJECT_TYPE,
-        id: connectorId,
-      },
-    },
-  });
-  let theMapping;
-  // Create connector mappings if there are none
-  if (myConnectorMappings.total === 0) {
-    const res = await caseClient.getFields({
-      actionsClient,
-      connectorId,
-      connectorType,
-    });
-    theMapping = await connectorMappingsService.post({
+  try {
+    if (connectorType === ConnectorTypes.none) {
+      return [];
+    }
+    const myConnectorMappings = await connectorMappingsService.find({
       client: savedObjectsClient,
-      attributes: {
-        mappings: res.defaultMappings,
-      },
-      references: [
-        {
+      options: {
+        hasReference: {
           type: ACTION_SAVED_OBJECT_TYPE,
-          name: `associated-${ACTION_SAVED_OBJECT_TYPE}`,
           id: connectorId,
         },
-      ],
+      },
     });
-  } else {
-    theMapping = myConnectorMappings.saved_objects[0];
+    let theMapping;
+    // Create connector mappings if there are none
+    if (myConnectorMappings.total === 0) {
+      const res = await caseClient.getFields({
+        actionsClient,
+        connectorId,
+        connectorType,
+      });
+      theMapping = await connectorMappingsService.post({
+        client: savedObjectsClient,
+        attributes: {
+          mappings: res.defaultMappings,
+        },
+        references: [
+          {
+            type: ACTION_SAVED_OBJECT_TYPE,
+            name: `associated-${ACTION_SAVED_OBJECT_TYPE}`,
+            id: connectorId,
+          },
+        ],
+      });
+    } else {
+      theMapping = myConnectorMappings.saved_objects[0];
+    }
+    return theMapping ? theMapping.attributes.mappings : [];
+  } catch (error) {
+    throw createCaseError({
+      message: `Failed to retrieve mapping connector id: ${connectorId} type: ${connectorType}: ${error}`,
+      error,
+      logger,
+    });
   }
-  return theMapping ? theMapping.attributes.mappings : [];
 };

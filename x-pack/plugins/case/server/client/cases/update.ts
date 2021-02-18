@@ -15,6 +15,7 @@ import {
   SavedObjectsClientContract,
   SavedObjectsFindResponse,
   SavedObjectsFindResult,
+  Logger,
 } from 'kibana/server';
 import {
   AlertInfo,
@@ -53,6 +54,7 @@ import {
 } from '../../saved_object_types';
 import { CaseClientHandler } from '..';
 import { addAlertInfoToStatusMap } from '../../common';
+import { createCaseError } from '../../common/error';
 
 /**
  * Throws an error if any of the requests attempt to update a collection style cases' status field.
@@ -325,6 +327,7 @@ interface UpdateArgs {
   user: User;
   caseClient: CaseClientHandler;
   cases: CasesPatchRequest;
+  logger: Logger;
 }
 
 export const update = async ({
@@ -334,175 +337,189 @@ export const update = async ({
   user,
   caseClient,
   cases,
+  logger,
 }: UpdateArgs): Promise<CasesResponse> => {
   const query = pipe(
     excess(CasesPatchRequestRt).decode(cases),
     fold(throwErrors(Boom.badRequest), identity)
   );
 
-  const myCases = await caseService.getCases({
-    client: savedObjectsClient,
-    caseIds: query.cases.map((q) => q.id),
-  });
-
-  let nonExistingCases: CasePatchRequest[] = [];
-  const conflictedCases = query.cases.filter((q) => {
-    const myCase = myCases.saved_objects.find((c) => c.id === q.id);
-
-    if (myCase && myCase.error) {
-      nonExistingCases = [...nonExistingCases, q];
-      return false;
-    }
-    return myCase == null || myCase?.version !== q.version;
-  });
-
-  if (nonExistingCases.length > 0) {
-    throw Boom.notFound(
-      `These cases ${nonExistingCases
-        .map((c) => c.id)
-        .join(', ')} do not exist. Please check you have the correct ids.`
-    );
-  }
-
-  if (conflictedCases.length > 0) {
-    throw Boom.conflict(
-      `These cases ${conflictedCases
-        .map((c) => c.id)
-        .join(', ')} has been updated. Please refresh before saving additional updates.`
-    );
-  }
-
-  const updateCases: ESCasePatchRequest[] = query.cases.map((updateCase) => {
-    const currentCase = myCases.saved_objects.find((c) => c.id === updateCase.id);
-    const { connector, ...thisCase } = updateCase;
-    return currentCase != null
-      ? getCaseToUpdate(currentCase.attributes, {
-          ...thisCase,
-          ...(connector != null
-            ? { connector: transformCaseConnectorToEsConnector(connector) }
-            : {}),
-        })
-      : { id: thisCase.id, version: thisCase.version };
-  });
-
-  const updateFilterCases = updateCases.filter((updateCase) => {
-    const { id, version, ...updateCaseAttributes } = updateCase;
-    return Object.keys(updateCaseAttributes).length > 0;
-  });
-
-  if (updateFilterCases.length <= 0) {
-    throw Boom.notAcceptable('All update fields are identical to current version.');
-  }
-
-  const casesMap = myCases.saved_objects.reduce((acc, so) => {
-    acc.set(so.id, so);
-    return acc;
-  }, new Map<string, SavedObject<ESCaseAttributes>>());
-
-  throwIfUpdateStatusOfCollection(updateFilterCases, casesMap);
-  throwIfUpdateTypeCollectionToIndividual(updateFilterCases, casesMap);
-  await throwIfInvalidUpdateOfTypeWithAlerts({
-    requests: updateFilterCases,
-    caseService,
-    client: savedObjectsClient,
-  });
-
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  const { username, full_name, email } = user;
-  const updatedDt = new Date().toISOString();
-  const updatedCases = await caseService.patchCases({
-    client: savedObjectsClient,
-    cases: updateFilterCases.map((thisCase) => {
-      const { id: caseId, version, ...updateCaseAttributes } = thisCase;
-      let closedInfo = {};
-      if (updateCaseAttributes.status && updateCaseAttributes.status === CaseStatuses.closed) {
-        closedInfo = {
-          closed_at: updatedDt,
-          closed_by: { email, full_name, username },
-        };
-      } else if (
-        updateCaseAttributes.status &&
-        (updateCaseAttributes.status === CaseStatuses.open ||
-          updateCaseAttributes.status === CaseStatuses['in-progress'])
-      ) {
-        closedInfo = {
-          closed_at: null,
-          closed_by: null,
-        };
-      }
-      return {
-        caseId,
-        updatedAttributes: {
-          ...updateCaseAttributes,
-          ...closedInfo,
-          updated_at: updatedDt,
-          updated_by: { email, full_name, username },
-        },
-        version,
-      };
-    }),
-  });
-
-  // If a status update occurred and the case is synced then we need to update all alerts' status
-  // attached to the case to the new status.
-  const casesWithStatusChangedAndSynced = updateFilterCases.filter((caseToUpdate) => {
-    const currentCase = myCases.saved_objects.find((c) => c.id === caseToUpdate.id);
-    return (
-      currentCase != null &&
-      caseToUpdate.status != null &&
-      currentCase.attributes.status !== caseToUpdate.status &&
-      currentCase.attributes.settings.syncAlerts
-    );
-  });
-
-  // If syncAlerts setting turned on we need to update all alerts' status
-  // attached to the case to the current status.
-  const casesWithSyncSettingChangedToOn = updateFilterCases.filter((caseToUpdate) => {
-    const currentCase = myCases.saved_objects.find((c) => c.id === caseToUpdate.id);
-    return (
-      currentCase != null &&
-      caseToUpdate.settings?.syncAlerts != null &&
-      currentCase.attributes.settings.syncAlerts !== caseToUpdate.settings.syncAlerts &&
-      caseToUpdate.settings.syncAlerts
-    );
-  });
-
-  // Update the alert's status to match any case status or sync settings changes
-  await updateAlerts({
-    casesWithStatusChangedAndSynced,
-    casesWithSyncSettingChangedToOn,
-    caseService,
-    client: savedObjectsClient,
-    caseClient,
-    casesMap,
-  });
-
-  const returnUpdatedCase = myCases.saved_objects
-    .filter((myCase) =>
-      updatedCases.saved_objects.some((updatedCase) => updatedCase.id === myCase.id)
-    )
-    .map((myCase) => {
-      const updatedCase = updatedCases.saved_objects.find((c) => c.id === myCase.id);
-      return flattenCaseSavedObject({
-        savedObject: {
-          ...myCase,
-          ...updatedCase,
-          attributes: { ...myCase.attributes, ...updatedCase?.attributes },
-          references: myCase.references,
-          version: updatedCase?.version ?? myCase.version,
-        },
-      });
+  try {
+    const myCases = await caseService.getCases({
+      client: savedObjectsClient,
+      caseIds: query.cases.map((q) => q.id),
     });
 
-  await userActionService.postUserActions({
-    client: savedObjectsClient,
-    actions: buildCaseUserActions({
-      originalCases: myCases.saved_objects,
-      updatedCases: updatedCases.saved_objects,
-      actionDate: updatedDt,
-      actionBy: { email, full_name, username },
-    }),
-  });
+    let nonExistingCases: CasePatchRequest[] = [];
+    const conflictedCases = query.cases.filter((q) => {
+      const myCase = myCases.saved_objects.find((c) => c.id === q.id);
 
-  return CasesResponseRt.encode(returnUpdatedCase);
+      if (myCase && myCase.error) {
+        nonExistingCases = [...nonExistingCases, q];
+        return false;
+      }
+      return myCase == null || myCase?.version !== q.version;
+    });
+
+    if (nonExistingCases.length > 0) {
+      throw Boom.notFound(
+        `These cases ${nonExistingCases
+          .map((c) => c.id)
+          .join(', ')} do not exist. Please check you have the correct ids.`
+      );
+    }
+
+    if (conflictedCases.length > 0) {
+      throw Boom.conflict(
+        `These cases ${conflictedCases
+          .map((c) => c.id)
+          .join(', ')} has been updated. Please refresh before saving additional updates.`
+      );
+    }
+
+    const updateCases: ESCasePatchRequest[] = query.cases.map((updateCase) => {
+      const currentCase = myCases.saved_objects.find((c) => c.id === updateCase.id);
+      const { connector, ...thisCase } = updateCase;
+      return currentCase != null
+        ? getCaseToUpdate(currentCase.attributes, {
+            ...thisCase,
+            ...(connector != null
+              ? { connector: transformCaseConnectorToEsConnector(connector) }
+              : {}),
+          })
+        : { id: thisCase.id, version: thisCase.version };
+    });
+
+    const updateFilterCases = updateCases.filter((updateCase) => {
+      const { id, version, ...updateCaseAttributes } = updateCase;
+      return Object.keys(updateCaseAttributes).length > 0;
+    });
+
+    if (updateFilterCases.length <= 0) {
+      throw Boom.notAcceptable('All update fields are identical to current version.');
+    }
+
+    const casesMap = myCases.saved_objects.reduce((acc, so) => {
+      acc.set(so.id, so);
+      return acc;
+    }, new Map<string, SavedObject<ESCaseAttributes>>());
+
+    throwIfUpdateStatusOfCollection(updateFilterCases, casesMap);
+    throwIfUpdateTypeCollectionToIndividual(updateFilterCases, casesMap);
+    await throwIfInvalidUpdateOfTypeWithAlerts({
+      requests: updateFilterCases,
+      caseService,
+      client: savedObjectsClient,
+    });
+
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    const { username, full_name, email } = user;
+    const updatedDt = new Date().toISOString();
+    const updatedCases = await caseService.patchCases({
+      client: savedObjectsClient,
+      cases: updateFilterCases.map((thisCase) => {
+        const { id: caseId, version, ...updateCaseAttributes } = thisCase;
+        let closedInfo = {};
+        if (updateCaseAttributes.status && updateCaseAttributes.status === CaseStatuses.closed) {
+          closedInfo = {
+            closed_at: updatedDt,
+            closed_by: { email, full_name, username },
+          };
+        } else if (
+          updateCaseAttributes.status &&
+          (updateCaseAttributes.status === CaseStatuses.open ||
+            updateCaseAttributes.status === CaseStatuses['in-progress'])
+        ) {
+          closedInfo = {
+            closed_at: null,
+            closed_by: null,
+          };
+        }
+        return {
+          caseId,
+          updatedAttributes: {
+            ...updateCaseAttributes,
+            ...closedInfo,
+            updated_at: updatedDt,
+            updated_by: { email, full_name, username },
+          },
+          version,
+        };
+      }),
+    });
+
+    // If a status update occurred and the case is synced then we need to update all alerts' status
+    // attached to the case to the new status.
+    const casesWithStatusChangedAndSynced = updateFilterCases.filter((caseToUpdate) => {
+      const currentCase = myCases.saved_objects.find((c) => c.id === caseToUpdate.id);
+      return (
+        currentCase != null &&
+        caseToUpdate.status != null &&
+        currentCase.attributes.status !== caseToUpdate.status &&
+        currentCase.attributes.settings.syncAlerts
+      );
+    });
+
+    // If syncAlerts setting turned on we need to update all alerts' status
+    // attached to the case to the current status.
+    const casesWithSyncSettingChangedToOn = updateFilterCases.filter((caseToUpdate) => {
+      const currentCase = myCases.saved_objects.find((c) => c.id === caseToUpdate.id);
+      return (
+        currentCase != null &&
+        caseToUpdate.settings?.syncAlerts != null &&
+        currentCase.attributes.settings.syncAlerts !== caseToUpdate.settings.syncAlerts &&
+        caseToUpdate.settings.syncAlerts
+      );
+    });
+
+    // Update the alert's status to match any case status or sync settings changes
+    await updateAlerts({
+      casesWithStatusChangedAndSynced,
+      casesWithSyncSettingChangedToOn,
+      caseService,
+      client: savedObjectsClient,
+      caseClient,
+      casesMap,
+    });
+
+    const returnUpdatedCase = myCases.saved_objects
+      .filter((myCase) =>
+        updatedCases.saved_objects.some((updatedCase) => updatedCase.id === myCase.id)
+      )
+      .map((myCase) => {
+        const updatedCase = updatedCases.saved_objects.find((c) => c.id === myCase.id);
+        return flattenCaseSavedObject({
+          savedObject: {
+            ...myCase,
+            ...updatedCase,
+            attributes: { ...myCase.attributes, ...updatedCase?.attributes },
+            references: myCase.references,
+            version: updatedCase?.version ?? myCase.version,
+          },
+        });
+      });
+
+    await userActionService.postUserActions({
+      client: savedObjectsClient,
+      actions: buildCaseUserActions({
+        originalCases: myCases.saved_objects,
+        updatedCases: updatedCases.saved_objects,
+        actionDate: updatedDt,
+        actionBy: { email, full_name, username },
+      }),
+    });
+
+    return CasesResponseRt.encode(returnUpdatedCase);
+  } catch (error) {
+    const idVersions = cases.cases.map((caseInfo) => ({
+      id: caseInfo.id,
+      version: caseInfo.version,
+    }));
+
+    throw createCaseError({
+      message: `Failed to update case, ids: ${JSON.stringify(idVersions)}: ${error}`,
+      error,
+      logger,
+    });
+  }
 };

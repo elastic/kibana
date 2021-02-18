@@ -6,7 +6,7 @@
  */
 
 import { curry } from 'lodash';
-
+import { Logger } from 'src/core/server';
 import { ActionTypeExecutorResult } from '../../../../actions/common';
 import {
   CasePatchRequest,
@@ -131,7 +131,7 @@ async function executor(
   if (subAction === 'addComment') {
     const { caseId, comment } = subActionParams as ExecutorSubActionAddCommentParams;
     try {
-      const formattedComment = transformConnectorComment(comment);
+      const formattedComment = transformConnectorComment(comment, logger);
       data = await caseClient.addComment({ caseId, comment: formattedComment });
     } catch (error) {
       throw createCaseError({
@@ -153,7 +153,10 @@ interface AttachmentAlerts {
   indices: string[];
   rule: { id: string | null; name: string | null };
 }
-export const transformConnectorComment = (comment: CommentSchemaType): CommentRequest => {
+export const transformConnectorComment = (
+  comment: CommentSchemaType,
+  logger: Logger
+): CommentRequest => {
   if (isCommentGeneratedAlert(comment)) {
     try {
       const genAlerts: Array<{
@@ -188,7 +191,11 @@ export const transformConnectorComment = (comment: CommentSchemaType): CommentRe
         rule,
       };
     } catch (e) {
-      throw new Error(`Error parsing generated alert in case connector -> ${e.message}`);
+      throw createCaseError({
+        message: `Error parsing generated alert in case connector -> ${e}`,
+        error: e,
+        logger,
+      });
     }
   } else {
     return comment;
