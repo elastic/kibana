@@ -56,7 +56,15 @@ export const toExpressionAst: VisToExpressionAst<TableVisParams> = (vis, params)
   const metrics = getMetrics(schemas, vis.params);
 
   const args = {
-    ...vis.params,
+    // explicitly pass each param to prevent extra values trapping
+    perPage: vis.params.perPage,
+    percentageCol: vis.params.percentageCol,
+    row: vis.params.row,
+    showPartialRows: vis.params.showPartialRows,
+    showMetricsAtAllLevels: vis.params.showMetricsAtAllLevels,
+    showToolbar: vis.params.showToolbar,
+    showTotal: vis.params.showTotal,
+    totalFunc: vis.params.totalFunc,
     title: vis.title,
     metrics: metrics.map(prepareDimension),
     buckets: schemas.bucket?.map(prepareDimension),
