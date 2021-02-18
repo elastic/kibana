@@ -2382,7 +2382,7 @@ export class SearchSource {
     // @deprecated
     fetch(options?: ISearchOptions): Promise<import("elasticsearch").SearchResponse<any>>;
     getField<K extends keyof SearchSourceFields>(field: K, recurse?: boolean): SearchSourceFields[K];
-    getFields(recurse?: boolean): SearchSourceFields;
+    getFields(): SearchSourceFields;
     getId(): string;
     getOwnField<K extends keyof SearchSourceFields>(field: K): SearchSourceFields[K];
     getParent(): SearchSource | undefined;
@@ -2427,6 +2427,8 @@ export interface SearchSourceFields {
     //
     // (undocumented)
     index?: IndexPattern;
+    // (undocumented)
+    parent?: SearchSourceFields;
     // (undocumented)
     query?: Query;
     // Warning: (ae-forgotten-export) The symbol "EsQuerySearchAfter" needs to be exported by the entry point index.d.ts
