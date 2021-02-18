@@ -189,6 +189,7 @@ export async function getServiceTransactionGroupComparisonStatisticsPeriods({
   latencyAggregationType,
   comparisonStart,
   comparisonEnd,
+  environment,
 }: {
   serviceName: string;
   transactionNames: string[];
@@ -199,6 +200,7 @@ export async function getServiceTransactionGroupComparisonStatisticsPeriods({
   latencyAggregationType: LatencyAggregationType;
   comparisonStart?: number;
   comparisonEnd?: number;
+  environment?: string;
 }) {
   const { start, end } = setup;
 
@@ -210,6 +212,7 @@ export async function getServiceTransactionGroupComparisonStatisticsPeriods({
     transactionType,
     numBuckets,
     latencyAggregationType: latencyAggregationType as LatencyAggregationType,
+    environment,
   };
 
   const currentPeriodPromise = getServiceTransactionGroupComparisonStatistics({

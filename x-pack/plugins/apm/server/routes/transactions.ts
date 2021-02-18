@@ -153,7 +153,7 @@ export const transactionGroupsComparisonStatisticsRoute = createRoute({
       },
     } = context.params;
 
-    return getServiceTransactionGroupComparisonStatisticsPeriods({
+    return await getServiceTransactionGroupComparisonStatisticsPeriods({
       environment,
       setup,
       serviceName,
