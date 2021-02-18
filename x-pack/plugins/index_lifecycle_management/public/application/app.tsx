@@ -17,7 +17,7 @@ import { RollupWizard } from './sections/rollup_wizard';
 import { trackUiMetric } from './services/ui_metric';
 import { ROUTES } from './services/navigation';
 
-import { AppContext } from './app_context';
+import { AppContextProvider } from './app_context';
 
 export const AppWithRouter = ({
   history,
@@ -43,7 +43,7 @@ export const App = ({
   useEffect(() => trackUiMetric(METRIC_TYPE.LOADED, UIM_APP_LOAD), []);
 
   return (
-    <AppContext>
+    <AppContextProvider>
       <Switch>
         <Redirect exact from="/" to={ROUTES.list} />
         <Route
@@ -57,6 +57,6 @@ export const App = ({
         />
         <Route path={ROUTES.rollupWizard} render={(props) => <RollupWizard {...props} />} />
       </Switch>
-    </AppContext>
+    </AppContextProvider>
   );
 };

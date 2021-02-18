@@ -23,6 +23,7 @@ import {
   SearchableSnapshotField,
   IndexPriorityField,
   ReplicasField,
+  RollupField,
 } from '../shared_fields';
 
 import { Phase } from '../phase';
@@ -90,6 +91,8 @@ export const ColdPhase: FunctionComponent = () => {
         description={i18nTexts.dataTierAllocation.description}
         phase="cold"
       />
+
+      <RollupField />
 
       <IndexPriorityField phase="cold" />
     </Phase>
