@@ -16,7 +16,7 @@ export function replaceVars(str, args = {}, vars = {}) {
     // we need add '[]' for emptyLabel because this value contains special characters. (https://handlebarsjs.com/guide/expressions.html#literal-segments)
     const template = handlebars.compile(str.replace(emptyLabel, `[${emptyLabel}]`), {
       strict: true,
-      knownHelpersOnly: true
+      knownHelpersOnly: true,
     });
 
     const string = template(_.assign({}, vars, { args }));
