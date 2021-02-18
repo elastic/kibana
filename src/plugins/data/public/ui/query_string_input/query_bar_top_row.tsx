@@ -57,6 +57,9 @@ export interface QueryBarTopRowProps {
   isDirty: boolean;
   timeHistory?: TimeHistoryContract;
   indicateNoData?: boolean;
+  iconType?: string;
+  placeholder?: string;
+  isClearable?: boolean;
   nonKqlMode?: 'lucene' | 'text';
   nonKqlModeHelpText?: string;
 }
@@ -187,6 +190,9 @@ export default function QueryBarTopRow(props: QueryBarTopRowProps) {
           onSubmit={onInputSubmit}
           persistedLog={persistedLog}
           dataTestSubj={props.dataTestSubj}
+          placeholder={props.placeholder}
+          isClearable={props.isClearable}
+          iconType={props.iconType}
           nonKqlMode={props.nonKqlMode}
           nonKqlModeHelpText={props.nonKqlModeHelpText}
         />

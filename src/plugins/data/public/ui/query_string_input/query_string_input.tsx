@@ -56,6 +56,7 @@ export interface QueryStringInputProps {
   size?: SuggestionsListSize;
   className?: string;
   isInvalid?: boolean;
+  isClearable?: boolean;
   iconType?: string;
   nonKqlMode?: 'lucene' | 'text';
   nonKqlModeHelpText?: string;
@@ -702,6 +703,19 @@ export default class QueryStringInputUI extends Component<Props, State> {
                     aria-hidden="true"
                     type="search"
                   />
+                </div>
+              ) : null}
+              {this.props.isClearable && this.props.query.query ? (
+                <div className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right">
+                  <button
+                    type="button"
+                    className="euiFormControlLayoutClearButton"
+                    onClick={() => {
+                      this.onQueryStringChange('');
+                    }}
+                  >
+                    <EuiIcon className="euiFormControlLayoutClearButton__icon" type="cross" />
+                  </button>
                 </div>
               ) : null}
             </div>

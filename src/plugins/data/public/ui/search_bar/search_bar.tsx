@@ -69,6 +69,9 @@ export interface SearchBarOwnProps {
   onRefresh?: (payload: { dateRange: TimeRange }) => void;
   indicateNoData?: boolean;
 
+  placeholder?: string;
+  isClearable?: boolean;
+  iconType?: string;
   nonKqlMode?: 'lucene' | 'text';
   nonKqlModeHelpText?: string;
 }
@@ -402,6 +405,9 @@ class SearchBarUI extends Component<SearchBarProps, State> {
           }
           dataTestSubj={this.props.dataTestSubj}
           indicateNoData={this.props.indicateNoData}
+          placeholder={this.props.placeholder}
+          isClearable={this.props.isClearable}
+          iconType={this.props.iconType}
           nonKqlMode={this.props.nonKqlMode}
           nonKqlModeHelpText={this.props.nonKqlModeHelpText}
         />
