@@ -101,11 +101,10 @@ export const WarningsFlyoutStep: React.FunctionComponent<WarningsConfirmationFly
     }));
   };
 
-  const { docLinks } = useAppContext();
+  const { docLinks, kibanaVersionInfo } = useAppContext();
   const { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } = docLinks;
   const esDocBasePath = `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference`;
 
-  // TODO: Revisit warnings returned for 8.0 upgrade; many of these are likely obselete now
   return (
     <>
       <EuiFlyoutBody>
@@ -130,7 +129,7 @@ export const WarningsFlyoutStep: React.FunctionComponent<WarningsConfirmationFly
 
         <EuiSpacer />
 
-        {warnings.includes(ReindexWarning.customTypeName) && (
+        {kibanaVersionInfo.currentMajor === 7 && warnings.includes(ReindexWarning.customTypeName) && (
           <WarningCheckbox
             checkedIds={checkedIds}
             onChange={onChange}

@@ -5,9 +5,10 @@
  * 2.0.
  */
 
+import { mockKibanaSemverVersion, mockKibanaVersion } from '../../../common/constants';
 import { ReindexWarning } from '../../../common/types';
 import { versionService } from '../version';
-import { MOCK_VERSION_STRING, getMockVersionInfo } from '../__fixtures__/version';
+import { getMockVersionInfo } from '../__fixtures__/version';
 
 import {
   generateNewIndexName,
@@ -63,7 +64,7 @@ describe('transformFlatSettings', () => {
 
 describe('sourceNameForIndex', () => {
   beforeEach(() => {
-    versionService.setup(MOCK_VERSION_STRING);
+    versionService.setup(mockKibanaVersion);
   });
 
   it('parses internal indices', () => {
@@ -89,7 +90,7 @@ describe('sourceNameForIndex', () => {
 
 describe('generateNewIndexName', () => {
   beforeEach(() => {
-    versionService.setup(MOCK_VERSION_STRING);
+    versionService.setup(mockKibanaVersion);
   });
 
   it('parses internal indices', () => {
@@ -133,21 +134,23 @@ describe('getReindexWarnings', () => {
     ).toEqual([]);
   });
 
-  it('returns customTypeName for non-_doc mapping types', () => {
-    expect(
-      getReindexWarnings({
-        settings: {},
-        mappings: { doc: {} },
-      })
-    ).toEqual([ReindexWarning.customTypeName]);
-  });
+  if (mockKibanaSemverVersion.major === 7) {
+    it('returns customTypeName for non-_doc mapping types', () => {
+      expect(
+        getReindexWarnings({
+          settings: {},
+          mappings: { doc: {} },
+        })
+      ).toEqual([ReindexWarning.customTypeName]);
+    });
 
-  it('does not return customTypeName for _doc mapping types', () => {
-    expect(
-      getReindexWarnings({
-        settings: {},
-        mappings: { _doc: {} },
-      })
-    ).toEqual([]);
-  });
+    it('does not return customTypeName for _doc mapping types', () => {
+      expect(
+        getReindexWarnings({
+          settings: {},
+          mappings: { _doc: {} },
+        })
+      ).toEqual([]);
+    });
+  }
 });

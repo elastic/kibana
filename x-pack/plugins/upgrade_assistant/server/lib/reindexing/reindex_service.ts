@@ -20,8 +20,6 @@ import {
 
 import { esIndicesStateCheck } from '../es_indices_state_check';
 
-import { versionService } from '../version';
-
 import {
   generateNewIndexName,
   getReindexWarnings,
@@ -550,7 +548,7 @@ export const reindexServiceFactory = (
     },
 
     async detectReindexWarnings(indexName: string) {
-      const flatSettings = await actions.getFlatSettingsWithTypeName(indexName);
+      const flatSettings = await actions.getFlatSettings(indexName);
       if (!flatSettings) {
         return null;
       } else {

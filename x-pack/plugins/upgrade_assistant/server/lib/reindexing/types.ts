@@ -28,6 +28,7 @@ export interface FlatSettings {
   };
 }
 
+// Specific to 7.x-8 upgrade
 export interface FlatSettingsWithTypeName {
   settings: {
     [key: string]: string;

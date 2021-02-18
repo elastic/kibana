@@ -8,6 +8,7 @@
 import { I18nProvider } from '@kbn/i18n/react';
 import { mount, shallow } from 'enzyme';
 import React from 'react';
+import { mockKibanaSemverVersion } from '../../../../../../../../common/constants';
 
 import { ReindexWarning } from '../../../../../../../../common/types';
 import { idForWarning, WarningsFlyoutStep } from './warnings_step';
@@ -19,6 +20,11 @@ jest.mock('../../../../../../app_context', () => {
         docLinks: {
           DOC_LINK_VERSION: 'current',
           ELASTIC_WEBSITE_URL: 'https://www.elastic.co/',
+        },
+        kibanaVersionInfo: {
+          currentMajor: mockKibanaSemverVersion.major,
+          prevMajor: mockKibanaSemverVersion.major - 1,
+          nextMajor: mockKibanaSemverVersion.major + 1,
         },
       };
     },
@@ -37,19 +43,21 @@ describe('WarningsFlyoutStep', () => {
     expect(shallow(<WarningsFlyoutStep {...defaultProps} />)).toMatchSnapshot();
   });
 
-  it('does not allow proceeding until all are checked', () => {
-    const wrapper = mount(
-      <I18nProvider>
-        <WarningsFlyoutStep {...defaultProps} />
-      </I18nProvider>
-    );
-    const button = wrapper.find('EuiButton');
+  if (mockKibanaSemverVersion.major === 7) {
+    it('does not allow proceeding until all are checked', () => {
+      const wrapper = mount(
+        <I18nProvider>
+          <WarningsFlyoutStep {...defaultProps} />
+        </I18nProvider>
+      );
+      const button = wrapper.find('EuiButton');
 
-    button.simulate('click');
-    expect(defaultProps.advanceNextStep).not.toHaveBeenCalled();
+      button.simulate('click');
+      expect(defaultProps.advanceNextStep).not.toHaveBeenCalled();
 
-    wrapper.find(`input#${idForWarning(ReindexWarning.customTypeName)}`).simulate('change');
-    button.simulate('click');
-    expect(defaultProps.advanceNextStep).toHaveBeenCalled();
-  });
+      wrapper.find(`input#${idForWarning(ReindexWarning.customTypeName)}`).simulate('change');
+      button.simulate('click');
+      expect(defaultProps.advanceNextStep).toHaveBeenCalled();
+    });
+  }
 });

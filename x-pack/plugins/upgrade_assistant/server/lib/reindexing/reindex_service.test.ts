@@ -20,10 +20,11 @@ import {
   ReindexStatus,
   ReindexStep,
 } from '../../../common/types';
+import { mockKibanaVersion } from '../../../common/constants';
 import { licensingMock } from '../../../../licensing/server/mocks';
 import { LicensingPluginSetup } from '../../../../licensing/server';
 
-import { MOCK_VERSION_STRING, getMockVersionInfo } from '../__fixtures__/version';
+import { getMockVersionInfo } from '../__fixtures__/version';
 import { esIndicesStateCheck } from '../es_indices_state_check';
 import { versionService } from '../version';
 
@@ -67,7 +68,6 @@ describe('reindexService', () => {
       findReindexOperations: jest.fn(unimplemented('findReindexOperations')),
       findAllByStatus: jest.fn(unimplemented('findAllInProgressOperations')),
       getFlatSettings: jest.fn(unimplemented('getFlatSettings')),
-      getFlatSettingsWithTypeName: jest.fn(unimplemented('getFlatSettingsWithTypeName')),
       cleanupChanges: jest.fn(),
       incrementIndexGroupReindexes: jest.fn(unimplemented('incrementIndexGroupReindexes')),
       decrementIndexGroupReindexes: jest.fn(unimplemented('decrementIndexGroupReindexes')),
@@ -89,7 +89,7 @@ describe('reindexService', () => {
       licensingPluginSetup
     );
 
-    versionService.setup(MOCK_VERSION_STRING);
+    versionService.setup(mockKibanaVersion);
   });
 
   describe('hasRequiredPrivileges', () => {
@@ -211,7 +211,7 @@ describe('reindexService', () => {
   describe('detectReindexWarnings', () => {
     it('fetches reindex warnings from flat settings', async () => {
       const indexName = 'myIndex';
-      actions.getFlatSettingsWithTypeName.mockResolvedValueOnce({
+      actions.getFlatSettings.mockResolvedValueOnce({
         settings: {
           'index.provided_name': indexName,
         },
@@ -225,7 +225,7 @@ describe('reindexService', () => {
     });
 
     it('returns null if index does not exist', async () => {
-      actions.getFlatSettingsWithTypeName.mockResolvedValueOnce(null);
+      actions.getFlatSettings.mockResolvedValueOnce(null);
       const reindexWarnings = await service.detectReindexWarnings('myIndex');
       expect(reindexWarnings).toBeNull();
     });
