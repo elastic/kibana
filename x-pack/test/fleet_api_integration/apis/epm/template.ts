@@ -20,12 +20,20 @@ export default function ({ getService }: FtrProviderContext) {
       },
     },
   };
+  const fields = [
+    {
+      name: 'foo',
+      type: 'keyword',
+    },
+  ];
+
   // This test was inspired by https://github.com/elastic/kibana/blob/master/x-pack/test/api_integration/apis/monitoring/common/mappings_exist.js
   describe('EPM - template', async () => {
     it('can be loaded', async () => {
       const template = getTemplate({
         type: 'logs',
         templateIndexPattern,
+        fields,
         mappings,
         packageName: 'system',
         composedOfTemplates: [],
