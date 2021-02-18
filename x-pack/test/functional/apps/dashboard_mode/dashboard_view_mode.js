@@ -188,7 +188,6 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('can paginate on a saved search', async () => {
-        await PageObjects.common.sleep(100000000);
         await PageObjects.dashboard.expectToolbarPaginationDisplayed({ displayed: true });
       });
 

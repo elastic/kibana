@@ -225,7 +225,7 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
       const subjects = ['pagination-button-previous', 'pagination-button-next'];
 
       await Promise.all(subjects.map(async (subj) => await testSubjects.existOrFail(subj)));
-      const paginationListExists = await find.existsByCssSelector('euiPagination__list');
+      const paginationListExists = await find.existsByCssSelector('.euiPagination__list');
       if (!paginationListExists) {
         throw new Error(`expected discover data grid pagination list to exist`);
       }
