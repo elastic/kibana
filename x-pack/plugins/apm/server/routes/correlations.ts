@@ -28,6 +28,7 @@ export const correlationsForSlowTransactionsRoute = createRoute({
   params: t.type({
     query: t.intersection([
       t.partial({
+        kuery: t.string,
         serviceName: t.string,
         transactionName: t.string,
         transactionType: t.string,
@@ -36,7 +37,6 @@ export const correlationsForSlowTransactionsRoute = createRoute({
         durationPercentile: t.string,
         fieldNames: t.string,
       }),
-      t.partial({ uiFilters: t.string }),
       environmentRt,
       rangeRt,
     ]),
@@ -49,6 +49,7 @@ export const correlationsForSlowTransactionsRoute = createRoute({
     const setup = await setupRequest(context, request);
     const {
       environment,
+      kuery,
       serviceName,
       transactionType,
       transactionName,
@@ -58,6 +59,7 @@ export const correlationsForSlowTransactionsRoute = createRoute({
 
     return getCorrelationsForSlowTransactions({
       environment,
+      kuery,
       serviceName,
       transactionType,
       transactionName,
@@ -73,6 +75,7 @@ export const correlationsForFailedTransactionsRoute = createRoute({
   params: t.type({
     query: t.intersection([
       t.partial({
+        kuery: t.string,
         serviceName: t.string,
         transactionName: t.string,
         transactionType: t.string,
@@ -93,6 +96,7 @@ export const correlationsForFailedTransactionsRoute = createRoute({
     const setup = await setupRequest(context, request);
     const {
       environment,
+      kuery,
       serviceName,
       transactionType,
       transactionName,
@@ -101,6 +105,7 @@ export const correlationsForFailedTransactionsRoute = createRoute({
 
     return getCorrelationsForFailedTransactions({
       environment,
+      kuery,
       serviceName,
       transactionType,
       transactionName,

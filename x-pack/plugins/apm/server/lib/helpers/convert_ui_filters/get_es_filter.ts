@@ -11,10 +11,9 @@ import {
   localUIFilters,
   localUIFilterNames,
 } from '../../rum_client/ui_filters/local_ui_filters/config';
-import { esKuery } from '../../../../../../../src/plugins/data/server';
 
 export function getEsFilter(uiFilters: UIFilters) {
-  const { kuery, environment, ...localFilterValues } = uiFilters;
+  const localFilterValues = uiFilters;
   const mappedFilters = localUIFilterNames
     .filter((name) => name in localFilterValues)
     .map((filterName) => {
@@ -27,16 +26,5 @@ export function getEsFilter(uiFilters: UIFilters) {
       };
     }) as ESFilter[];
 
-  const esFilters = [...getKueryUiFilterES(uiFilters.kuery), ...mappedFilters];
-
-  return esFilters;
-}
-
-function getKueryUiFilterES(kuery?: string) {
-  if (!kuery) {
-    return [];
-  }
-
-  const ast = esKuery.fromKueryExpression(kuery);
-  return [esKuery.toElasticsearchQuery(ast) as ESFilter];
+  return mappedFilters;
 }

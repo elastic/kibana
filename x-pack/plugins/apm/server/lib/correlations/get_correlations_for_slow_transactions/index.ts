@@ -7,7 +7,11 @@
 
 import { AggregationOptionsByType } from '../../../../../../typings/elasticsearch/aggregations';
 import { ESFilter } from '../../../../../../typings/elasticsearch';
-import { environmentQuery, rangeQuery } from '../../../../common/utils/queries';
+import {
+  environmentQuery,
+  rangeQuery,
+  searchQuery,
+} from '../../../../common/utils/queries';
 import {
   SERVICE_NAME,
   TRANSACTION_DURATION,
@@ -24,6 +28,7 @@ import { withApmSpan } from '../../../utils/with_apm_span';
 
 export async function getCorrelationsForSlowTransactions({
   environment,
+  kuery,
   serviceName,
   transactionType,
   transactionName,
@@ -32,6 +37,7 @@ export async function getCorrelationsForSlowTransactions({
   setup,
 }: {
   environment?: string;
+  kuery?: string;
   serviceName: string | undefined;
   transactionType: string | undefined;
   transactionName: string | undefined;
@@ -46,7 +52,7 @@ export async function getCorrelationsForSlowTransactions({
       { term: { [PROCESSOR_EVENT]: ProcessorEvent.transaction } },
       ...rangeQuery(start, end),
       ...environmentQuery(environment),
-      ...esFilter,
+      ...searchQuery(kuery),
     ];
 
     if (serviceName) {

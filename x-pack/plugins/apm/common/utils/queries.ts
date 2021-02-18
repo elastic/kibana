@@ -11,6 +11,7 @@ import {
   ENVIRONMENT_ALL,
 } from '../environment_filter_values';
 import { SERVICE_ENVIRONMENT } from '../elasticsearch_fieldnames';
+import { esKuery } from '../../../../../src/plugins/data/server';
 
 type QueryContainer = ESFilter;
 
@@ -42,4 +43,13 @@ export function rangeQuery(
       },
     },
   ];
+}
+
+export function searchQuery(queryText?: string) {
+  if (!queryText) {
+    return [];
+  }
+
+  const ast = esKuery.fromKueryExpression(queryText);
+  return [esKuery.toElasticsearchQuery(ast) as ESFilter];
 }

@@ -30,8 +30,8 @@ export type AnomalyDetectionApiResponse = APIReturnType<'GET /api/apm/settings/a
 const DEFAULT_DATA = { jobs: [], hasLegacyJobs: false };
 
 export function AnomalyDetectionSetupLink() {
-  const { uiFilters } = useUrlParams();
-  const environment = uiFilters.environment;
+  const { urlParams } = useUrlParams();
+  const { environment } = urlParams;
   const { core } = useApmPluginContext();
   const canGetJobs = !!core.application.capabilities.ml?.canGetJobs;
   const license = useLicenseContext();
