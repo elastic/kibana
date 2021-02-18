@@ -78,6 +78,8 @@ import {
   AT_LEAST_ONE_VALID_MATCH,
   AT_LEAST_ONE_INDEX_PATTERN,
   CUSTOM_QUERY_REQUIRED,
+  RULES_CREATION_FORM,
+  RULES_CREATION_PREVIEW,
 } from '../screens/create_new_rule';
 import { TOAST_ERROR } from '../screens/shared';
 import { SERVER_SIDE_EVENT_COUNT } from '../screens/timeline';
@@ -271,23 +273,26 @@ export const fillDefineThresholdRuleAndContinue = (rule: ThresholdRule) => {
 };
 
 export const fillDefineEqlRuleAndContinue = (rule: CustomRule) => {
-  cy.get(EQL_QUERY_INPUT).should('exist');
-  cy.get(EQL_QUERY_INPUT).should('be.visible');
-  cy.get(EQL_QUERY_INPUT).type(rule.customQuery!);
-  cy.get(EQL_QUERY_VALIDATION_SPINNER).should('not.exist');
-  cy.get(QUERY_PREVIEW_BUTTON).should('not.be.disabled').click({ force: true });
+  cy.get(RULES_CREATION_FORM).find(EQL_QUERY_INPUT).should('exist');
+  cy.get(RULES_CREATION_FORM).find(EQL_QUERY_INPUT).should('be.visible');
+  cy.get(RULES_CREATION_FORM).find(EQL_QUERY_INPUT).type(rule.customQuery!);
+  cy.get(RULES_CREATION_FORM).find(EQL_QUERY_VALIDATION_SPINNER).should('not.exist');
+  cy.get(RULES_CREATION_PREVIEW)
+    .find(QUERY_PREVIEW_BUTTON)
+    .should('not.be.disabled')
+    .click({ force: true });
   cy.get(EQL_QUERY_PREVIEW_HISTOGRAM)
     .invoke('text')
     .then((text) => {
       if (text !== 'Hits') {
-        cy.get(QUERY_PREVIEW_BUTTON).click({ force: true });
+        cy.get(RULES_CREATION_PREVIEW).find(QUERY_PREVIEW_BUTTON).click({ force: true });
         cy.get(EQL_QUERY_PREVIEW_HISTOGRAM).should('contain.text', 'Hits');
       }
     });
   cy.get(TOAST_ERROR).should('not.exist');
 
   cy.get(DEFINE_CONTINUE_BUTTON).should('exist').click({ force: true });
-  cy.get(EQL_QUERY_INPUT).should('not.exist');
+  cy.get(`${RULES_CREATION_FORM} ${EQL_QUERY_INPUT}`).should('not.exist');
 };
 
 /**
@@ -480,7 +485,7 @@ export const waitForAlertsToPopulate = async () => {
 
 export const waitForTheRuleToBeExecuted = () => {
   cy.waitUntil(() => {
-    cy.get(REFRESH_BUTTON).click();
+    cy.get(REFRESH_BUTTON).click({ force: true });
     return cy
       .get(RULE_STATUS)
       .invoke('text')

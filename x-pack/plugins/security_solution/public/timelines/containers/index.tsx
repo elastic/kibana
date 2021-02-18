@@ -12,7 +12,7 @@ import { useDispatch } from 'react-redux';
 
 import { ESQuery } from '../../../common/typed_json';
 import { isCompleteResponse, isErrorResponse } from '../../../../../../src/plugins/data/public';
-import { inputsModel } from '../../common/store';
+import { inputsModel, KueryFilterQueryKind } from '../../common/store';
 import { useKibana } from '../../common/lib/kibana';
 import { createFilter } from '../../common/containers/helpers';
 import { DocValueFields } from '../../common/containers/query_template';
@@ -34,6 +34,11 @@ import * as i18n from './translations';
 import { TimelineId } from '../../../common/types/timeline';
 import { useRouteSpy } from '../../common/utils/route/use_route_spy';
 import { activeTimeline } from './active_timeline_context';
+import {
+  EqlOptionsSelected,
+  TimelineEqlRequestOptions,
+  TimelineEqlResponse,
+} from '../../../common/search_strategy/timeline/events/eql';
 
 export interface TimelineArgs {
   events: TimelineItem[];
@@ -48,16 +53,34 @@ export interface TimelineArgs {
 
 type LoadPage = (newActivePage: number) => void;
 
+type TimelineRequest<T extends KueryFilterQueryKind> = T extends 'kuery'
+  ? TimelineEventsAllRequestOptions
+  : T extends 'lucene'
+  ? TimelineEventsAllRequestOptions
+  : T extends 'eql'
+  ? TimelineEqlRequestOptions
+  : TimelineEventsAllRequestOptions;
+
+type TimelineResponse<T extends KueryFilterQueryKind> = T extends 'kuery'
+  ? TimelineEventsAllStrategyResponse
+  : T extends 'lucene'
+  ? TimelineEventsAllStrategyResponse
+  : T extends 'eql'
+  ? TimelineEqlResponse
+  : TimelineEventsAllStrategyResponse;
+
 export interface UseTimelineEventsProps {
   docValueFields?: DocValueFields[];
   filterQuery?: ESQuery | string;
   skip?: boolean;
   endDate: string;
+  eqlOptions?: EqlOptionsSelected;
   id: string;
   fields: string[];
   indexNames: string[];
+  language?: KueryFilterQueryKind;
   limit: number;
-  sort: TimelineRequestSortField[];
+  sort?: TimelineRequestSortField[];
   startDate: string;
   timerangeKind?: 'absolute' | 'relative';
 }
@@ -77,11 +100,13 @@ export const initSortDefault = [
 export const useTimelineEvents = ({
   docValueFields,
   endDate,
+  eqlOptions = undefined,
   id = ID,
   indexNames,
   fields,
   filterQuery,
   startDate,
+  language = 'kuery',
   limit,
   sort = initSortDefault,
   skip = false,
@@ -97,10 +122,10 @@ export const useTimelineEvents = ({
   const [activePage, setActivePage] = useState(
     id === TimelineId.active ? activeTimeline.getActivePage() : 0
   );
-  const [timelineRequest, setTimelineRequest] = useState<TimelineEventsAllRequestOptions | null>(
+  const [timelineRequest, setTimelineRequest] = useState<TimelineRequest<typeof language> | null>(
     null
   );
-  const prevTimelineRequest = useRef<TimelineEventsAllRequestOptions | null>(null);
+  const prevTimelineRequest = useRef<TimelineRequest<typeof language> | null>(null);
 
   const clearSignalsState = useCallback(() => {
     if (id != null && detectionsTimelineIds.some((timelineId) => timelineId === id)) {
@@ -114,7 +139,7 @@ export const useTimelineEvents = ({
       clearSignalsState();
 
       if (id === TimelineId.active) {
-        activeTimeline.setExpandedEvent({});
+        activeTimeline.setExpandedDetail({});
         activeTimeline.setActivePage(newActivePage);
       }
 
@@ -148,7 +173,7 @@ export const useTimelineEvents = ({
   });
 
   const timelineSearch = useCallback(
-    (request: TimelineEventsAllRequestOptions | null) => {
+    (request: TimelineRequest<typeof language> | null) => {
       if (request == null || pageName === '' || skip) {
         return;
       }
@@ -158,8 +183,11 @@ export const useTimelineEvents = ({
         abortCtrl.current = new AbortController();
         setLoading(true);
         const searchSubscription$ = data.search
-          .search<TimelineEventsAllRequestOptions, TimelineEventsAllStrategyResponse>(request, {
-            strategy: 'securitySolutionTimelineSearchStrategy',
+          .search<TimelineRequest<typeof language>, TimelineResponse<typeof language>>(request, {
+            strategy:
+              request.language === 'eql'
+                ? 'securitySolutionTimelineEqlSearchStrategy'
+                : 'securitySolutionTimelineSearchStrategy',
             abortSignal: abortCtrl.current.signal,
           })
           .subscribe({
@@ -177,10 +205,15 @@ export const useTimelineEvents = ({
                       updatedAt: Date.now(),
                     };
                     if (id === TimelineId.active) {
-                      activeTimeline.setExpandedEvent({});
+                      activeTimeline.setExpandedDetail({});
                       activeTimeline.setPageName(pageName);
-                      activeTimeline.setRequest(request);
-                      activeTimeline.setResponse(newTimelineResponse);
+                      if (request.language === 'eql') {
+                        activeTimeline.setEqlRequest(request as TimelineEqlRequestOptions);
+                        activeTimeline.setEqlResponse(newTimelineResponse);
+                      } else {
+                        activeTimeline.setRequest(request);
+                        activeTimeline.setResponse(newTimelineResponse);
+                      }
                     }
                     return newTimelineResponse;
                   });
@@ -219,10 +252,20 @@ export const useTimelineEvents = ({
         activeTimeline.setPageName(pageName);
         abortCtrl.current.abort();
         setLoading(false);
-        prevTimelineRequest.current = activeTimeline.getRequest();
-        refetch.current = asyncSearch.bind(null, activeTimeline.getRequest());
+
+        if (request.language === 'eql') {
+          prevTimelineRequest.current = activeTimeline.getEqlRequest();
+          refetch.current = asyncSearch.bind(null, activeTimeline.getEqlRequest());
+        } else {
+          prevTimelineRequest.current = activeTimeline.getRequest();
+          refetch.current = asyncSearch.bind(null, activeTimeline.getRequest());
+        }
+
         setTimelineResponse((prevResp) => {
-          const resp = activeTimeline.getResponse();
+          const resp =
+            request.language === 'eql'
+              ? activeTimeline.getEqlResponse()
+              : activeTimeline.getResponse();
           if (resp != null) {
             return {
               ...resp,
@@ -232,7 +275,9 @@ export const useTimelineEvents = ({
           }
           return prevResp;
         });
-        if (activeTimeline.getResponse() != null) {
+        if (request.language !== 'eql' && activeTimeline.getResponse() != null) {
+          return;
+        } else if (request.language === 'eql' && activeTimeline.getEqlResponse() != null) {
           return;
         }
       }
@@ -250,12 +295,33 @@ export const useTimelineEvents = ({
     }
 
     setTimelineRequest((prevRequest) => {
+      const prevEqlRequest = prevRequest as TimelineEqlRequestOptions;
       const prevSearchParameters = {
         defaultIndex: prevRequest?.defaultIndex ?? [],
         filterQuery: prevRequest?.filterQuery ?? '',
         querySize: prevRequest?.pagination.querySize ?? 0,
         sort: prevRequest?.sort ?? initSortDefault,
         timerange: prevRequest?.timerange ?? {},
+        ...(prevEqlRequest?.eventCategoryField
+          ? {
+              eventCategoryField: prevEqlRequest?.eventCategoryField,
+            }
+          : {}),
+        ...(prevEqlRequest?.size
+          ? {
+              size: prevEqlRequest?.size,
+            }
+          : {}),
+        ...(prevEqlRequest?.tiebreakerField
+          ? {
+              tiebreakerField: prevEqlRequest?.tiebreakerField,
+            }
+          : {}),
+        ...(prevEqlRequest?.timestampField
+          ? {
+              timestampField: prevEqlRequest?.timestampField,
+            }
+          : {}),
       };
 
       const currentSearchParameters = {
@@ -268,6 +334,7 @@ export const useTimelineEvents = ({
           from: startDate,
           to: endDate,
         },
+        ...(eqlOptions ? eqlOptions : {}),
       };
 
       const newActivePage = deepEqual(prevSearchParameters, currentSearchParameters)
@@ -285,12 +352,14 @@ export const useTimelineEvents = ({
           activePage: newActivePage,
           querySize: limit,
         },
+        language,
         sort,
         timerange: {
           interval: '12h',
           from: startDate,
           to: endDate,
         },
+        ...(eqlOptions ? eqlOptions : {}),
       };
 
       if (activePage !== newActivePage) {
@@ -310,8 +379,10 @@ export const useTimelineEvents = ({
     activePage,
     docValueFields,
     endDate,
+    eqlOptions,
     filterQuery,
     id,
+    language,
     limit,
     startDate,
     sort,
@@ -322,7 +393,7 @@ export const useTimelineEvents = ({
     if (
       id !== TimelineId.active ||
       timerangeKind === 'absolute' ||
-      !deepEqual(prevTimelineRequest, timelineRequest)
+      !deepEqual(prevTimelineRequest.current, timelineRequest)
     ) {
       timelineSearch(timelineRequest);
     }
@@ -330,7 +401,7 @@ export const useTimelineEvents = ({
       didCancel.current = true;
       abortCtrl.current.abort();
     };
-  }, [id, prevTimelineRequest, timelineRequest, timelineSearch, timerangeKind]);
+  }, [id, timelineRequest, timelineSearch, timerangeKind]);
 
   /*
     cleanup timeline events response when the filters were removed completely

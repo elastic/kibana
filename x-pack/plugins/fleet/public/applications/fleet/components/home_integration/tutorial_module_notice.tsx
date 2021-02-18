@@ -43,7 +43,7 @@ const TutorialModuleNotice: TutorialModuleNoticeComponent = memo(({ moduleName }
                 ),
                 availableAsIntegrationLink: (
                   <EuiLink
-                    href={getHref('integration_details', {
+                    href={getHref('integration_details_overview', {
                       pkgkey: pkgKeyFromPackageInfo(pkgInfo),
                     })}
                   >

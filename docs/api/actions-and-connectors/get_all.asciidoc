@@ -1,0 +1,52 @@
+[[actions-and-connectors-api-get-all]]
+=== Get all actions API
+++++
+<titleabbrev>Get all actions API</titleabbrev>
+++++
+
+Retrieves all actions.
+
+[[actions-and-connectors-api-get-all-request]]
+==== Request
+
+`GET <kibana host>:<port>/api/actions`
+
+[[actions-and-connectors-api-get-all-codes]]
+==== Response code
+
+`200`::
+    Indicates a successful call.
+
+[[actions-and-connectors-api-get-all-example]]
+==== Example
+
+[source,sh]
+--------------------------------------------------
+$ curl -X GET api/actions
+--------------------------------------------------
+// KIBANA
+
+The API returns the following:
+
+[source,sh]
+--------------------------------------------------
+[
+  {
+    "id": "preconfigured-mail-action",
+    "actionTypeId": ".email",
+    "name": "email: preconfigured-mail-action",
+    "isPreconfigured": true
+  },
+  {
+    "id": "c55b6eb0-6bad-11eb-9f3b-611eebc6c3ad",
+    "actionTypeId": ".index",
+    "name": "my-action",
+    "config": {
+      "index": "test-index",
+      "refresh": false,
+      "executionTimeField": null
+    },
+    "isPreconfigured": false
+  }
+]
+--------------------------------------------------
