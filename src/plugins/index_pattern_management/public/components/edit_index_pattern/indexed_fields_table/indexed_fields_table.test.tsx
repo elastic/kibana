@@ -10,7 +10,6 @@ import React from 'react';
 import { shallow } from 'enzyme';
 import { IndexPatternField, IndexPattern } from 'src/plugins/data/public';
 import { IndexedFieldsTable } from './indexed_fields_table';
-import { IndexedFieldItem } from './types';
 
 jest.mock('@elastic/eui', () => ({
   EuiFlexGroup: 'eui-flex-group',
@@ -27,7 +26,8 @@ jest.mock('./components/table', () => ({
 }));
 
 const helpers = {
-  redirectToRoute: (field: IndexedFieldItem) => {},
+  editField: (fieldName: string) => {},
+  deleteField: (fieldName: string) => {},
   getFieldInfo: () => [],
 };
 
@@ -36,7 +36,9 @@ const indexPattern = ({
   getFormatterForFieldNoDefault: () => ({ params: () => ({}) }),
 } as unknown) as IndexPattern;
 
-const mockFieldToIndexPatternField = (spec: Record<string, string | boolean | undefined>) => {
+const mockFieldToIndexPatternField = (
+  spec: Record<string, string | string[] | boolean | undefined>
+) => {
   return new IndexPatternField((spec as unknown) as IndexPatternField['spec']);
 };
 
@@ -45,10 +47,10 @@ const fields = [
     name: 'Elastic',
     displayName: 'Elastic',
     searchable: true,
-    type: 'string',
+    esTypes: ['keyword'],
   },
-  { name: 'timestamp', displayName: 'timestamp', type: 'date' },
-  { name: 'conflictingField', displayName: 'conflictingField', type: 'conflict' },
+  { name: 'timestamp', displayName: 'timestamp', esTypes: ['date'] },
+  { name: 'conflictingField', displayName: 'conflictingField', esTypes: ['keyword', 'long'] },
 ].map(mockFieldToIndexPatternField);
 
 describe('IndexedFieldsTable', () => {
