@@ -51,7 +51,7 @@ interface SharedRoleMapping extends ASRoleMapping, WSRoleMapping {
 interface IRoleMappingsTableProps {
   accessItemKey: 'groups' | 'engines';
   accessHeader: string;
-  roleMappings: SharedRoleMapping[];
+  roleMappings: ASRoleMapping[] | WSRoleMapping[];
   addMappingButton: React.ReactNode;
   accessAllEngines?: boolean;
   shouldShowAuthProvider?: boolean;
@@ -76,11 +76,11 @@ export const RoleMappingsTable: React.FC<IRoleMappingsTableProps> = ({
   const [filterValue, updateValue] = useState('');
 
   // This is needed because App Search has `engines` and Workplace Search has `groups`.
-  const standardizeRoleMapping = roleMappings.map((rm) => {
+  const standardizeRoleMapping = (roleMappings as SharedRoleMapping[]).map((rm) => {
     const _rm = { ...rm } as SharedRoleMapping;
     _rm.accessItems = rm[accessItemKey];
     return _rm;
-  }) as SharedRoleMapping[];
+  });
 
   const filterResults = (result: SharedRoleMapping) => {
     const values = Object.values(result) as string[];
