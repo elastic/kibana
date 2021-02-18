@@ -32,11 +32,15 @@ const nameConfig: FieldConfig<MyForm, string> = {
     },
     // ...
     // You can add as many validations as you need.
-    // It is better to kepp validators single purposed.
+
+    // It is a good practice to keep validators single purposed,
+    // and compose them in the "validations" array.
+    // This way if any other field has the same validation we can easily
+    // copy/paste it or extract it and import it in multiple places.
   ],
 };
 
-export const ValidationBasic = () => {
+export const MyComponent = () => {
   const { form } = useForm<MyForm>();
 
   return (
@@ -44,16 +48,22 @@ export const ValidationBasic = () => {
       <UseField path="name" config={nameConfig}>
         {(field) => {
           const isInvalid = !field.isChangingValue && field.errors.length > 0;
+          const errorMessage = !isChangingValue && errors.length ? errors[0].message : null;
+
           return (
-            <>
+            <EuiFormRow
+              label={field.label}
+              helpText={typeof field.helpText === 'function' ? field.helpText() : helpText}
+              error={errorMessage}
+              isInvalid={isInvalid}
+            >
               <EuiFieldText
                 isInvalid={isInvalid}
                 value={field.value}
                 onChange={field.onChange}
                 fullWidth
               />
-              {!field.isValid && <div>{field.getErrorsMessages()}</div>}
-            </>
+            </EuiFormRow>
           );
         }}
       </UseField>
@@ -62,61 +72,7 @@ export const ValidationBasic = () => {
 };
 ```
 
-## Reusable validators
-
-Before creating your own validator, verify that it does not exist already in our reusable field validators.
-
-In the example below, in just a few lines we've added 2 validations on a field that:
-
-* must be a valid index name (try adding a "?" or "/" character so see the validation)
-* cannot be empty
-
-```js
-import React from 'react';
-import { i18n } from '@kbn/i18n';
-import {
-  fieldValidators,
-  ...
-} from '<path-to-form-lib>';
-
-const { emptyField, indexNameField } = fieldValidators;
-
-const nameConfig: FieldConfig<MyForm, string> = {
-  validations: [
-    {
-      validator: emptyField('The name cannot be empty,'),
-    },
-    {
-      validator: indexNameField(i18n),
-    },
-  ],
-};
-
-export const ReusableValidations = () => {
-  const { form } = useForm<MyForm>();
-
-  return (
-    <Form form={form}>
-      <UseField<string> path="name" config={nameConfig}>
-        {(field) => {
-          const isInvalid = !field.isChangingValue && field.errors.length > 0;
-          return (
-            <>
-              <EuiFieldText
-                isInvalid={isInvalid}
-                value={field.value}
-                onChange={field.onChange}
-                fullWidth
-              />
-              {!field.isValid && <div>{field.getErrorsMessages()}</div>}
-            </>
-          );
-        }}
-      </UseField>
-    </Form>
-  );
-};
-```
+**Note:** Before creating your own validator, verify that it does not exist already in our [reusable field validators](../helpers/validators).
 
 ## Asynchronous validation
 
@@ -146,31 +102,6 @@ const nameConfig: FieldConfig<MyForm, string> = {
       },
     },
   ],
-};
-
-export const AsyncValidation = () => {
-  const { form } = useForm<MyForm>();
-  return (
-    <Form form={form}>
-      <UseField<string> path="name" config={nameConfig}>
-        {(field) => {
-          const isInvalid = !field.isChangingValue && field.errors.length > 0;
-          return (
-            <>
-              <EuiFieldText
-                isInvalid={isInvalid}
-                value={field.value}
-                onChange={field.onChange}
-                isLoading={field.isValidating}
-                fullWidth
-              />
-              {isInvalid && <div>{field.getErrorsMessages()}</div>}
-            </>
-          );
-        }}
-      </UseField>
-    </Form>
-  );
 };
 ```
 
@@ -236,11 +167,15 @@ export const CancelAsyncValidation = () => {
 };
 ```
 
-## Typed validation
+## Validating arrays of items
 
-It is possible to give a `type` to a validation to cover some cases where you need different validation type for the same field. Let's imagine that we have a form field to enter "tags" (an array of string). The array cannot be left empty and the tags cannot contain the "?" and "/" characters.
+When validating an array of items we might have to handle **two types of validations**: one to make sure the array valid (e.g. it is not empty or it contains X number of items), and another one to make sure that each item in the array is valid.
 
-The field `value` is an array of string, and the default (not typed) validation(s) will run against this array of string. We are going to use a typed validation for the array items.
+To solve that problem, you can give a `type` to a validation to distinguish between different validations.
+
+Let's go through an example. Imagine that we have a form field to enter "tags" (an array of string). The array cannot be left empty and the tags cannot contain the "?" and "/" characters.
+
+The form field `value` is an array of string, and the default validation(s) (those without a `type` defined) will run against this **array**. For the validation of the items we will use a **typed** validation.
 
 **Note:** Typed validation are not executed when the field value changes, we need to manually validate the field with `field.validate(...)`.
 
@@ -251,7 +186,7 @@ const tagsConfig: FieldConfig<MyForm, string[]> = {
     // Validator for the Array
     { validator: emptyField('You need to add at least one tag') },
     {
-      // Validator for the Array item
+      // Validator for the items
       validator: containsCharsField({
         message: ({ charsFound }) => {
           return `Remove the char ${charsFound.join(', ')} from the field.`;
@@ -259,8 +194,11 @@ const tagsConfig: FieldConfig<MyForm, string[]> = {
         chars: ['?', '/'],
       }),
       // We give a custom type to this validation.
-      // This validation won't be executed when the field value changes (items being added or removed to the array).
-      // This means that we will need to manually call field.validate({ validationType: 'arrayItem }).
+      // This validation won't be executed when the field value changes
+      // (when items are added or removed from the array).
+      // This means that we will need to manually call:
+      // field.validate({ validationType: 'arrayItem })
+      // to run this validation.
       type: 'arrayItem',
     },
   ],
@@ -284,7 +222,7 @@ export const ValidationWithType = () => {
 
           const onCreateOption = (value: string) => {
             const { isValid } = field.validate({
-              value: value as any,
+              value: value,
               validationType: 'arrayItem', // Validate  **only** this validation type against the value provided
             }) as { isValid: boolean };
 
@@ -329,41 +267,4 @@ export const ValidationWithType = () => {
 };
 ```
 
-Great, but that's **a lot** of code for a simple tags field input. Fortunatelly the `<ComboBoxField />` helper component takes care of all the heavy lifting for us. The above component can simply be:
-
-```js
-const tagsConfig: FieldConfig<MyForm, string[]> = {
-  defaultValue: [],
-  validations: [
-    { validator: emptyField('You need to add at least one tag')},
-    {
-      validator: containsCharsField({
-        message: ({ charsFound }) => {
-          return `Remove the char ${charsFound.join(', ')} from the field.`;
-        },
-        chars: ['?', '/'],
-      }),
-      // Make sure to use the "ARRAY_ITEM" constant
-      type: VALIDATION_TYPES.ARRAY_ITEM,
-    },
-  ],
-};
-
-export const ValidationWithTypeComboBoxField = () => {
-  const onSubmit: FormConfig['onSubmit'] = async (data, isValid) => {
-    console.log('Is form valid:', isValid);
-    console.log('Form data', data);
-  };
-
-  const { form } = useForm<MyForm>({ onSubmit });
-
-  return (
-    <Form form={form}>
-      <UseField<string[]> path="tags" config={tagsConfig} component={ComboBoxField} />
-      <button onClick={form.submit}>Submit</button>
-    </Form>
-  );
-};
-```
-
-Much better! :blush:
+Great, but that's **a lot** of code for a simple tags field input. Fortunatelly the `<ComboBoxField />` helper component takes care of all the heavy lifting for us. [Have a look at the example](../helpers/components#comboboxfield).

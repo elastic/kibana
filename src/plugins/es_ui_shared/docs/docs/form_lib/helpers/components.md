@@ -123,3 +123,45 @@ export const MyFormComponent = () => {
   );
 };
 ```
+## Examples
+### ComboBoxField
+
+The ComboBox has the particualrity of sometimes requiring **two validations**. One for the array and one for the items of the array. In the example below you can see how easy it is to generate an array of tags (`string[]`) in your form thanks to the `<ComboBoxField />` helper component.
+
+```js
+const tagsConfig: FieldConfig<MyForm, string[]> = {
+  defaultValue: [],
+  validations: [
+    // Validate that the array is not empty
+    { validator: emptyField('You need to add at least one tag')},
+    {
+      // Validate each item about to be added to the combo box
+      validator: containsCharsField({
+        message: ({ charsFound }) => {
+          return `Remove the char ${charsFound.join(', ')} from the field.`;
+        },
+        chars: ['?', '/'],
+      }),
+      // We use a typed validation to validate the array items
+      // Make sure to use the "ARRAY_ITEM" constant
+      type: VALIDATION_TYPES.ARRAY_ITEM,
+    },
+  ],
+};
+
+export const ValidationWithTypeComboBoxField = () => {
+  const onSubmit: FormConfig['onSubmit'] = async (data, isValid) => {
+    console.log('Is form valid:', isValid);
+    console.log('Form data', data);
+  };
+
+  const { form } = useForm<MyForm>({ onSubmit });
+
+  return (
+    <Form form={form}>
+      <UseField<string[]> path="tags" config={tagsConfig} component={ComboBoxField} />
+      <button onClick={form.submit}>Submit</button>
+    </Form>
+  );
+};
+```
