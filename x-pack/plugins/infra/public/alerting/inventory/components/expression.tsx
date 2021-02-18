@@ -303,26 +303,25 @@ export const Expressions: React.FC<Props> = (props) => {
       {alertParams.criteria &&
         alertParams.criteria.map((e, idx) => {
           return (
-            <>
-              <ExpressionRow
-                nodeType={alertParams.nodeType}
-                canDelete={alertParams.criteria.length > 1}
-                remove={removeExpression}
-                addExpression={addExpression}
-                key={idx} // idx's don't usually make good key's but here the index has semantic meaning
-                expressionId={idx}
-                setAlertParams={updateParams}
-                errors={(errors[idx] as IErrorObject) || emptyError}
-                expression={e || {}}
-                fields={derivedIndexPattern.fields}
-              />
+            <ExpressionRow
+              nodeType={alertParams.nodeType}
+              canDelete={alertParams.criteria.length > 1}
+              remove={removeExpression}
+              addExpression={addExpression}
+              key={idx} // idx's don't usually make good key's but here the index has semantic meaning
+              expressionId={idx}
+              setAlertParams={updateParams}
+              errors={(errors[idx] as IErrorObject) || emptyError}
+              expression={e || {}}
+              fields={derivedIndexPattern.fields}
+            >
               <ExpressionChart
                 expression={e}
                 filterQuery={alertParams.filterQueryText}
                 nodeType={alertParams.nodeType}
                 sourceId={alertParams.sourceId}
               />
-            </>
+            </ExpressionRow>
           );
         })}
 
@@ -448,7 +447,19 @@ const StyledHealth = euiStyled(EuiHealth)`
 `;
 
 export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
-  const { setAlertParams, expression, errors, expressionId, remove, canDelete, fields } = props;
+  const [isExpanded, setRowState] = useState(true);
+  const toggleRowState = useCallback(() => setRowState(!isExpanded), [isExpanded]);
+
+  const {
+    children,
+    setAlertParams,
+    expression,
+    errors,
+    expressionId,
+    remove,
+    canDelete,
+    fields,
+  } = props;
   const {
     metric,
     comparator = Comparator.GT,
@@ -588,6 +599,16 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
   return (
     <>
       <EuiFlexGroup gutterSize="xs">
+        <EuiFlexItem grow={false}>
+          <EuiButtonIcon
+            iconType={isExpanded ? 'arrowDown' : 'arrowRight'}
+            onClick={toggleRowState}
+            aria-label={i18n.translate('xpack.infra.metrics.alertFlyout.expandRowLabel', {
+              defaultMessage: 'Expand row.',
+            })}
+          />
+        </EuiFlexItem>
+
         <EuiFlexItem grow>
           <StyledExpressionRow>
             <StyledExpression>
@@ -679,6 +700,7 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
+      {isExpanded ? <div style={{ padding: '0 0 0 28px' }}>{children}</div> : null}
       <EuiSpacer size={'s'} />
     </>
   );
