@@ -20,6 +20,8 @@ export enum METRIC_TYPES {
   VALUE_COUNT = 'value_count',
   AVERAGE = 'avg',
   SUM = 'sum',
+  MIN = 'min',
+  MAX = 'max',
 }
 
 // We should probably use BUCKET_TYPES from data plugin in future.
