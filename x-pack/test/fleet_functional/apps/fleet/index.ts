@@ -8,7 +8,7 @@
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function (providerContext: FtrProviderContext) {
-  const { loadTestFile, getService } = providerContext;
+  const { loadTestFile } = providerContext;
 
   describe('endpoint', function () {
     this.tags('ciGroup7');
