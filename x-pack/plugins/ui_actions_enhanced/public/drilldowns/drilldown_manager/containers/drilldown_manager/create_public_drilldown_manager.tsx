@@ -6,11 +6,8 @@
  */
 
 import * as React from 'react';
-import {
-  PublicDrilldownManagerProps,
-  DrilldownManagerDependencies,
-  DrilldownManagerProvider,
-} from '../context';
+import { DrilldownManagerDependencies, PublicDrilldownManagerProps } from '../../types';
+import { DrilldownManagerProvider } from '../context';
 import { DrilldownManager } from './drilldown_manager';
 
 export type PublicDrilldownManagerComponent = React.FC<PublicDrilldownManagerProps>;

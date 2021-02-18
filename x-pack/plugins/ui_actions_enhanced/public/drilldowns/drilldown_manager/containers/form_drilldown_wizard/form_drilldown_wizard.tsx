@@ -19,38 +19,7 @@ import { useDrilldownManager } from '../context';
 // import { ActionFactoryPlaceContext } from '../types';
 // import { DrilldownWizardState, useDrilldownWizard } from './use_flyout_drilldown_wizard';
 
-export interface FormDrilldownWizardProps {
-  mode?: 'create' | 'edit';
-  // drilldownActionFactories: ActionFactory[];
-
-  // onSubmit?: (drilldownWizardConfig: Required<DrilldownWizardState>) => void;
-  // onDelete?: () => void;
-  // onClose?: () => void;
-  // onBack?: () => void;
-
-  // initialDrilldownWizardConfig?: DrilldownWizardState<CurrentActionConfig>;
-
-  // actionFactoryPlaceContext?: ActionFactoryPlaceContext<ActionFactoryContext>;
-
-  /**
-   * General overview of drilldowns
-   */
-  // docsLink?: string;
-
-  /**
-   * Link that explains different triggers
-   */
-  // triggerPickerDocsLink?: string;
-
-  // getTrigger: (triggerId: string) => Trigger;
-
-  /**
-   * List of possible triggers in current context
-   */
-  // supportedTriggers: string[];
-}
-
-export const FormDrilldownWizard: React.FC<FormDrilldownWizardProps> = ({ mode }) => {
+export const FormDrilldownWizard: React.FC = ({}) => {
   const drilldowns = useDrilldownManager();
 
   // const [

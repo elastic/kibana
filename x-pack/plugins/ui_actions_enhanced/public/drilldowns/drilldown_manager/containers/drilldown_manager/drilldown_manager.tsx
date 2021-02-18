@@ -62,7 +62,7 @@ export const DrilldownManager: React.FC = ({}) => {
   // />
   // );
 
-  const content = <FormDrilldownWizard mode={'create'} />;
+  const content = screen === 'create' ? <FormDrilldownWizard /> : null;
 
   const flyoutFrame = (
     <FlyoutFrame
