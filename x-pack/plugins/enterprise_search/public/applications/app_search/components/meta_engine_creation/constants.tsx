@@ -92,3 +92,10 @@ export const META_ENGINE_CREATION_FORM_ENGINE_NAME_PLACEHOLDER = i18n.translate(
     defaultMessage: 'i.e., my-search-engine',
   }
 );
+
+export const META_ENGINE_CREATION_FORM_ENGINE_SOURCE_ENGINES_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.appSearch.metaEngineCreation.form.sourceEngines.label',
+  {
+    defaultMessage: 'Add engines to this meta engine',
+  }
+);

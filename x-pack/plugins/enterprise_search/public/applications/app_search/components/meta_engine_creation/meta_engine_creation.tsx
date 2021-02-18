@@ -10,6 +10,8 @@ import React, { useEffect } from 'react';
 import { useActions, useValues } from 'kea';
 
 import {
+  EuiComboBox,
+  EuiComboBoxOptionOption,
   EuiForm,
   EuiFlexGroup,
   EuiFormRow,
@@ -33,6 +35,7 @@ import {
   META_ENGINE_CREATION_FORM_DOCUMENTATION_DESCRIPTION,
   META_ENGINE_CREATION_FORM_ENGINE_NAME_LABEL,
   META_ENGINE_CREATION_FORM_ENGINE_NAME_PLACEHOLDER,
+  META_ENGINE_CREATION_FORM_ENGINE_SOURCE_ENGINES_LABEL,
   META_ENGINE_CREATION_FORM_META_ENGINE_DESCRIPTION,
   META_ENGINE_CREATION_FORM_SUBMIT_BUTTON_LABEL,
   META_ENGINE_CREATION_FORM_TITLE,
@@ -41,9 +44,21 @@ import {
 } from './constants';
 import { MetaEngineCreationLogic } from './meta_engine_creation_logic';
 
+const engineNameToComboBoxOption = (engineName: string): EuiComboBoxOptionOption<string> => ({
+  label: engineName,
+});
+
+const comboBoxOptionToEngineName = (option: EuiComboBoxOptionOption<string>): string =>
+  option.label;
+
 export const MetaEngineCreation: React.FC = () => {
-  const { fetchIndexedEngineNames, setRawName } = useActions(MetaEngineCreationLogic);
-  const { rawName, name } = useValues(MetaEngineCreationLogic);
+  const { fetchIndexedEngineNames, setRawName, setSelectedIndexedEngineNames } = useActions(
+    MetaEngineCreationLogic
+  );
+
+  const { rawName, name, indexedEngineNames, selectedIndexedEngineNames } = useValues(
+    MetaEngineCreationLogic
+  );
 
   useEffect(() => {
     fetchIndexedEngineNames();
@@ -105,8 +120,18 @@ export const MetaEngineCreation: React.FC = () => {
                 </EuiFlexItem>
               </EuiFlexGroup>
               <EuiSpacer />
+              <EuiFormRow label={META_ENGINE_CREATION_FORM_ENGINE_SOURCE_ENGINES_LABEL} fullWidth>
+                <EuiComboBox
+                  options={indexedEngineNames.map(engineNameToComboBoxOption)}
+                  selectedOptions={selectedIndexedEngineNames.map(engineNameToComboBoxOption)}
+                  onChange={(options) => {
+                    setSelectedIndexedEngineNames(options.map(comboBoxOptionToEngineName));
+                  }}
+                />
+              </EuiFormRow>
+              <EuiSpacer />
               <EuiButton
-                disabled
+                disabled={name.length === 0 || selectedIndexedEngineNames.length === 0}
                 type="submit"
                 data-test-subj="NewMetaEngineSubmitButton"
                 fill
