@@ -7,7 +7,7 @@
  */
 
 import { TimeRange, Filter, Query, esFilters } from '../../../../src/plugins/data/public';
-import { setStateToKbnUrl } from '../../../../src/plugins/kibana_utils/public';
+import { getStatesFromKbnUrl, setStateToKbnUrl } from '../../../../src/plugins/kibana_utils/public';
 import { UrlGeneratorsDefinition } from '../../../../src/plugins/share/public';
 
 export const STATE_STORAGE_KEY = '_a';
@@ -68,3 +68,25 @@ export const createSearchSessionsExampleUrlGenerator = (
     return url;
   },
 });
+
+export function getInitialStateFromUrl(): SearchSessionExamplesUrlGeneratorState {
+  const {
+    _a: { numericFieldName, indexPatternId, searchSessionId, filters: aFilters, query } = {},
+    _g: { filters: gFilters, time } = {},
+  } = getStatesFromKbnUrl<{ _a: AppUrlState; _g: GlobalUrlState }>(
+    window.location.href,
+    ['_a', '_g'],
+    {
+      getFromHashQuery: false,
+    }
+  );
+
+  return {
+    numericFieldName,
+    searchSessionId,
+    time,
+    filters: [...(gFilters ?? []), ...(aFilters ?? [])],
+    indexPatternId,
+    query,
+  };
+}

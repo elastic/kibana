@@ -53,12 +53,10 @@ import {
 } from '../../../../src/plugins/data/public';
 import {
   createStateContainer,
-  getStatesFromKbnUrl,
   useContainerState,
 } from '../../../../src/plugins/kibana_utils/public';
 import {
-  AppUrlState,
-  GlobalUrlState,
+  getInitialStateFromUrl,
   SEARCH_SESSIONS_EXAMPLES_APP_URL_GENERATOR,
   SearchSessionExamplesUrlGeneratorState,
 } from './url_generator';
@@ -67,7 +65,6 @@ interface SearchSessionsExampleAppDeps {
   notifications: CoreStart['notifications'];
   navigation: NavigationPublicPluginStart;
   data: DataPublicPluginStart;
-  shardDelayEnabled: boolean;
 }
 
 /**
@@ -256,7 +253,16 @@ export const SearchSessionsExampleApp = ({
               group your searches into a search session and allow user to save search results for
               later. <br />
               Start a long-running search, save the session and then restore it. See how fast search
-              is completed when restoring the session.
+              is completed when restoring the session comparing to when doing initial search. <br />
+              <br />
+              Follow this demo step-by-step:{' '}
+              <b>configure the query, start the search and then save your session.</b> You can save
+              your session both when search is still in progress or when it is completed. After you
+              save the session and when initial search is completed you can{' '}
+              <b>restore the session</b>: the search will re-run reusing previous results. It will
+              finish a lot faster then the initial search. You can also{' '}
+              <b>go to search sessions management</b> and <b>get back to the stored results</b> from
+              there.
             </p>
           </EuiText>
         </EuiPageHeaderSection>
@@ -266,14 +272,14 @@ export const SearchSessionsExampleApp = ({
           {!isRestoring && (
             <>
               <EuiTitle size="s">
-                <h2>1. Configure the search query</h2>
+                <h2>1. Configure the search query (OK to leave defaults)</h2>
               </EuiTitle>
               <navigation.ui.TopNavMenu
                 appName={PLUGIN_ID}
                 showSearchBar={true}
                 useDefaultBehaviors={true}
                 indexPatterns={indexPattern ? [indexPattern] : undefined}
-                onQuerySubmit={() => reset()}
+                onQuerySubmit={reset}
               />
               <EuiFlexGroup justifyContent={'flexStart'}>
                 <EuiFlexItem grow={false}>
@@ -528,33 +534,31 @@ function SearchInspector({
 
 function useAppState({ data }: { data: DataPublicPluginStart }) {
   const stateContainer = useMemo(() => {
-    // get state to restore from the URL and use it as initial state
-    const { _a, _g } = getStatesFromKbnUrl(window.location.href, ['_a', '_g'], {
-      getFromHashQuery: false,
-    }) as { _a: AppUrlState | null; _g: GlobalUrlState | null };
+    const {
+      filters,
+      time,
+      searchSessionId,
+      numericFieldName,
+      indexPatternId,
+      query,
+    } = getInitialStateFromUrl();
 
-    if (_a) {
-      if (_a.filters) {
-        data.query.filterManager.setAppFilters(_a.filters);
-      }
-      if (_a.query) {
-        data.query.queryString.setQuery(_a.query);
-      }
+    if (filters) {
+      data.query.filterManager.setFilters(filters);
     }
 
-    if (_g) {
-      if (_g.filters) {
-        data.query.filterManager.setGlobalFilters(_g.filters);
-      }
-      if (_g.time) {
-        data.query.timefilter.timefilter.setTime(_g.time);
-      }
+    if (query) {
+      data.query.queryString.setQuery(query);
+    }
+
+    if (time) {
+      data.query.timefilter.timefilter.setTime(time);
     }
 
     return createStateContainer<State>({
-      indexPatternId: _a?.indexPatternId,
-      numericFieldName: _a?.numericFieldName,
-      restoreSessionId: _a?.searchSessionId,
+      restoreSessionId: searchSessionId,
+      numericFieldName,
+      indexPatternId,
     });
   }, [data.query.filterManager, data.query.queryString, data.query.timefilter.timefilter]);
   const setState = useCallback(
