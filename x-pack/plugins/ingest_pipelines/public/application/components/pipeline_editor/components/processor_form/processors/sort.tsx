@@ -12,7 +12,7 @@ import { FIELD_TYPES, UseField, SelectField } from '../../../../../../shared_imp
 
 import { FieldNameField } from './common_fields/field_name_field';
 import { TargetField } from './common_fields/target_field';
-import { FieldsConfig, from } from './shared';
+import { FieldsConfig } from './shared';
 
 const fieldsConfig: FieldsConfig = {
   /* Optional fields config */
@@ -20,7 +20,7 @@ const fieldsConfig: FieldsConfig = {
     type: FIELD_TYPES.SELECT,
     defaultValue: 'asc',
     deserializer: (v) => (v === 'asc' || v === 'desc' ? v : 'asc'),
-    serializer: from.undefinedIfValue('asc'),
+    serializer: (v) => (v === 'asc' || v === '' ? undefined : v),
     label: i18n.translate('xpack.ingestPipelines.pipelineEditor.sortForm.orderFieldLabel', {
       defaultMessage: 'Order',
     }),

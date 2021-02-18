@@ -12,7 +12,6 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiSpacer,
-  EuiOverlayMask,
   EuiConfirmModal,
   EuiCallOut,
   EuiLoadingSpinner,
@@ -234,59 +233,54 @@ const ConfirmUpdate = React.memo<{
   onCancel: () => void;
 }>(({ hostCount, onCancel, onConfirm }) => {
   return (
-    <EuiOverlayMask>
-      <EuiConfirmModal
-        data-test-subj="policyDetailsConfirmModal"
-        title={i18n.translate(
-          'xpack.securitySolution.endpoint.policy.details.updateConfirm.title',
-          {
-            defaultMessage: 'Save and deploy changes',
-          }
-        )}
-        onCancel={onCancel}
-        onConfirm={onConfirm}
-        confirmButtonText={i18n.translate(
-          'xpack.securitySolution.endpoint.policy.details.updateConfirm.confirmButtonTitle',
-          {
-            defaultMessage: 'Save and deploy changes',
-          }
-        )}
-        cancelButtonText={i18n.translate(
-          'xpack.securitySolution.endpoint.policy.details.updateConfirm.cancelButtonTitle',
-          {
-            defaultMessage: 'Cancel',
-          }
-        )}
-      >
-        {hostCount > 0 && (
-          <>
-            <EuiCallOut
-              data-test-subj="policyDetailsWarningCallout"
-              title={i18n.translate(
-                'xpack.securitySolution.endpoint.policy.details.updateConfirm.warningTitle',
-                {
-                  defaultMessage:
-                    'This action will update {hostCount, plural, one {# host} other {# hosts}}',
-                  values: { hostCount },
-                }
-              )}
-            >
-              <FormattedMessage
-                id="xpack.securitySolution.endpoint.policy.details.updateConfirm.warningMessage"
-                defaultMessage="Saving these changes will apply updates to all endpoints assigned to this agent policy."
-              />
-            </EuiCallOut>
-            <EuiSpacer size="xl" />
-          </>
-        )}
-        <p>
-          <FormattedMessage
-            id="xpack.securitySolution.endpoint.policy.details.updateConfirm.message"
-            defaultMessage="This action cannot be undone. Are you sure you wish to continue?"
-          />
-        </p>
-      </EuiConfirmModal>
-    </EuiOverlayMask>
+    <EuiConfirmModal
+      data-test-subj="policyDetailsConfirmModal"
+      title={i18n.translate('xpack.securitySolution.endpoint.policy.details.updateConfirm.title', {
+        defaultMessage: 'Save and deploy changes',
+      })}
+      onCancel={onCancel}
+      onConfirm={onConfirm}
+      confirmButtonText={i18n.translate(
+        'xpack.securitySolution.endpoint.policy.details.updateConfirm.confirmButtonTitle',
+        {
+          defaultMessage: 'Save and deploy changes',
+        }
+      )}
+      cancelButtonText={i18n.translate(
+        'xpack.securitySolution.endpoint.policy.details.updateConfirm.cancelButtonTitle',
+        {
+          defaultMessage: 'Cancel',
+        }
+      )}
+    >
+      {hostCount > 0 && (
+        <>
+          <EuiCallOut
+            data-test-subj="policyDetailsWarningCallout"
+            title={i18n.translate(
+              'xpack.securitySolution.endpoint.policy.details.updateConfirm.warningTitle',
+              {
+                defaultMessage:
+                  'This action will update {hostCount, plural, one {# host} other {# hosts}}',
+                values: { hostCount },
+              }
+            )}
+          >
+            <FormattedMessage
+              id="xpack.securitySolution.endpoint.policy.details.updateConfirm.warningMessage"
+              defaultMessage="Saving these changes will apply updates to all endpoints assigned to this agent policy."
+            />
+          </EuiCallOut>
+          <EuiSpacer size="xl" />
+        </>
+      )}
+      <p>
+        <FormattedMessage
+          id="xpack.securitySolution.endpoint.policy.details.updateConfirm.message"
+          defaultMessage="This action cannot be undone. Are you sure you wish to continue?"
+        />
+      </p>
+    </EuiConfirmModal>
   );
 });
 
