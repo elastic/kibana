@@ -44,6 +44,7 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
 }) => {
   const eventId = ecsRowData._id;
   const eventIndex = ecsRowData._index;
+  const rule = ecsRowData.signal?.rule;
 
   const { navigateToApp } = useKibana().services.application;
   const [, dispatchToaster] = useStateToaster();
@@ -71,21 +72,25 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
   const attachAlertToCase = useCallback(
     (theCase: Case) => {
       closeCaseFlyoutOpen();
-      postComment(
-        theCase.id,
-        {
+      postComment({
+        caseId: theCase.id,
+        data: {
           type: CommentType.alert,
           alertId: eventId,
           index: eventIndex ?? '',
+          rule: {
+            id: rule?.id != null ? rule.id[0] : null,
+            name: rule?.name != null ? rule.name[0] : null,
+          },
         },
-        () =>
+        updateCase: () =>
           dispatchToaster({
             type: 'addToaster',
             toast: createUpdateSuccessToaster(theCase, onViewCaseClick),
-          })
-      );
+          }),
+      });
     },
-    [closeCaseFlyoutOpen, postComment, eventId, eventIndex, dispatchToaster, onViewCaseClick]
+    [closeCaseFlyoutOpen, postComment, eventId, eventIndex, rule, dispatchToaster, onViewCaseClick]
   );
 
   const onCaseClicked = useCallback(
