@@ -27,7 +27,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       before(async () => {
         await PageObjects.common.navigateToApp('dashboard');
         log.debug('wait for dashboard landing page');
-        retry.tryForTime(10000, async () => {
+        await retry.tryForTime(10000, async () => {
           testSubjects.existOrFail('dashboardLandingPage');
         });
         await searchSessions.markTourDone();
@@ -199,16 +199,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('has working pagination controls', async () => {
         await esArchiver.load('data/search_sessions');
 
-        retry.try(async () => {
-          const searchSessionList = await PageObjects.searchSessionsManagement.getList();
-          expect(searchSessionList.length).to.be(10);
-        });
+        log.debug(`loading first page of sessions`);
+        const sessionListFirst = await PageObjects.searchSessionsManagement.getList();
+        expect(sessionListFirst.length).to.be(10);
 
         await testSubjects.click('pagination-button-next');
 
-        const searchSessionList = await PageObjects.searchSessionsManagement.getList();
-        expect(searchSessionList.length).to.be(2);
-        expectSnapshot(searchSessionList.map((ss) => [ss.app, ss.name, ss.created, ss.expires]))
+        const sessionListSecond = await PageObjects.searchSessionsManagement.getList();
+        expect(sessionListSecond.length).to.be(2);
+
+        expectSnapshot(sessionListSecond.map((ss) => [ss.app, ss.name, ss.created, ss.expires]))
           .toMatchInline(`
           Array [
             Array [
