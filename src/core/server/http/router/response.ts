@@ -34,7 +34,6 @@ export interface IKibanaResponse<T extends HttpResponsePayload | ResponseError =
   readonly status: number;
   readonly payload?: T;
   readonly options: HttpResponseOptions;
-  readonly customResponse?: boolean;
 }
 
 export function isKibanaResponse(response: Record<string, any>): response is IKibanaResponse {
@@ -50,8 +49,7 @@ export class KibanaResponse<T extends HttpResponsePayload | ResponseError = any>
   constructor(
     public readonly status: number,
     public readonly payload?: T,
-    public readonly options: HttpResponseOptions = {},
-    public readonly customResponse?: boolean // Is the response created via the factory `res.custom`
+    public readonly options: HttpResponseOptions = {}
   ) {}
 }
 
@@ -194,7 +192,7 @@ const errorResponseFactory = {
         `Unexpected Http status code. Expected from 400 to 599, but given: ${options.statusCode}`
       );
     }
-    return new KibanaResponse(options.statusCode, options.body, options, true);
+    return new KibanaResponse(options.statusCode, options.body, options);
   },
 };
 /**
@@ -305,7 +303,7 @@ export const kibanaResponseFactory = {
       );
     }
     const { statusCode: code, body, ...rest } = options;
-    return new KibanaResponse(code, body, rest, true);
+    return new KibanaResponse(code, body, rest);
   },
 };
 
