@@ -226,6 +226,7 @@ export const PingList = () => {
     }
     const { monitor } = item;
     return {
+      height: '85px',
       'data-test-subj': `row-${monitor.check_group}`,
       onClick: (evt: MouseEvent) => {
         const targetElem = evt.target as HTMLElement;

@@ -128,6 +128,7 @@ export const StepsList = ({ data, error, loading }: Props) => {
     const { monitor } = item;
 
     return {
+      height: '85px',
       'data-test-subj': `row-${monitor.check_group}`,
       onClick: (evt: MouseEvent) => {
         const targetElem = evt.target as HTMLElement;
