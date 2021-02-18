@@ -9,7 +9,6 @@
 import React, { useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
-import { i18n } from '@kbn/i18n';
 import { labelDateFormatter } from '../../../components/lib/label_date_formatter';
 
 import {

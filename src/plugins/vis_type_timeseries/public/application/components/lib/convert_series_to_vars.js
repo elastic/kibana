@@ -21,9 +21,7 @@ export const convertSeriesToVars = (series, model, dateFormat = 'lll', getConfig
       .filter((row) => _.startsWith(row.id, seriesModel.id))
       .forEach((row) => {
         const label = row.label ? _.snakeCase(row.label) : emptyLabel;
-        const varName = [label, _.snakeCase(seriesModel.var_name)]
-          .filter((v) => v)
-          .join('.');
+        const varName = [label, _.snakeCase(seriesModel.var_name)].filter((v) => v).join('.');
 
         const formatter = createTickFormatter(
           seriesModel.formatter,
