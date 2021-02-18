@@ -6,7 +6,7 @@ sidebar_label: Validators
 
 As you have seen in the `<UseField />` configuration, the validations are objects with [a required `validator` function](../core/use_field#validator-required) attached to them.
 
-After building many forms, we have realized that we are doing almost all the time the same validation on a field: is the field empty? does it contain a character not allowed?, does it start with an invalid character? is it valid JSON? ...
+After building many forms, we have realized that we are often doing the same validation on a field: is the field empty? does it contain a character not allowed?, does it start with an invalid character? is it valid JSON? ...
 
 So instead of reinventing the wheel on each form we have exported to most common validators as reusable function that you can use directly in your field validations. Some validator might expose directly the handler to validate, some others expose a function that you need to call with some parameter and you will receive the validator back.
 

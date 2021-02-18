@@ -120,7 +120,7 @@ export const ReusableValidations = () => {
 
 ## Asynchronous validation
 
-You can mix synchronous and asynchronous validations. Although it is usually better to first declare the synchronous one(s), this way if any of those ones fails, the asynchronous validation is not executed.
+You can mix synchronous and asynchronous validations. Although it is usually better to first declare the synchronous one(s), this way if any of those fail, the asynchronous validation is not executed.
 
 In the example below, if you enter "bad" in the field, the asynchronous validation will fail.
 

@@ -4,9 +4,11 @@ title: Components
 sidebar_label: Components
 ---
 
-The core of the form lib is UI agnostic. It can be used with any React UI library to render the form fields. As in Elastic we use [the EUI framework](https://elastic.github.io/eui), we have created components that connect our `FieldHook` to the `<EuiFormRow/>` and its corresponding EUI field.
+The core of the form lib is UI agnostic. It can be used with any React UI library to render the form fields.
 
-You can import those component and directly use them as `component` prop on your `<UseField />`.
+At Elastic we use [the EUI framework](https://elastic.github.io/eui). We created components that connect our `FieldHook` to the `<EuiFormRow/>` and its corresponding EUI field.
+
+You can import these components and pass them to the `component` prop on your `<UseField />`.
 
 ```js
 import { Form, useForm, UseField, TextField, ToggleField } from '<path-to-form-lib>';
