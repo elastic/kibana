@@ -9,6 +9,7 @@
 import React, { useEffect, useRef, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
+import { i18n } from '@kbn/i18n';
 import { labelDateFormatter } from '../../../components/lib/label_date_formatter';
 import { getSeriesColor } from '../../../components/lib/get_series_color';
 
@@ -235,7 +236,12 @@ export const TimeSeries = ({
                 key={key}
                 seriesId={id}
                 seriesGroupId={groupId}
-                name={seriesName}
+                name={
+                  seriesName ||
+                  i18n.translate('visTypeTimeseries.emptyTextValue', {
+                    defaultMessage: '(empty)',
+                  })
+                }
                 data={data}
                 hideInLegend={hideInLegend}
                 bars={bars}
@@ -260,7 +266,12 @@ export const TimeSeries = ({
                 key={key}
                 seriesId={id}
                 seriesGroupId={groupId}
-                name={seriesName}
+                name={
+                  seriesName ||
+                  i18n.translate('visTypeTimeseries.emptyTextValue', {
+                    defaultMessage: '(empty)',
+                  })
+                }
                 data={data}
                 hideInLegend={hideInLegend}
                 lines={lines}

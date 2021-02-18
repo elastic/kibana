@@ -97,6 +97,7 @@ describe('Task Runner', () => {
     eventLogger: eventLoggerMock.create(),
     internalSavedObjectsRepository: savedObjectsRepositoryMock.create(),
     alertTypeRegistry,
+    kibanaBaseUrl: 'https://localhost:5601',
   };
 
   const mockedAlertTypeSavedObject: Alert<AlertTypeParams> = {

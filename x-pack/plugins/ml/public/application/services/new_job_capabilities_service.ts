@@ -86,7 +86,7 @@ class NewJobCapsService {
   }
 
   public get categoryFields(): Field[] {
-    return this._fields.filter((f) => categoryFieldTypes.includes(f.type));
+    return filterCategoryFields(this._fields);
   }
 
   public async initializeFromIndexPattern(
@@ -250,6 +250,10 @@ function processTextAndKeywordFields(fields: Field[]) {
   );
 
   return { fieldsPreferringKeyword, fieldsPreferringText };
+}
+
+export function filterCategoryFields(fields: Field[]) {
+  return fields.filter((f) => categoryFieldTypes.includes(f.type));
 }
 
 export const newJobCapsService = new NewJobCapsService();
