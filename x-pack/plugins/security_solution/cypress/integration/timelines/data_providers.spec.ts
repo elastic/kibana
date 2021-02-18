@@ -88,11 +88,11 @@ describe('timeline data providers', () => {
     dragFirstHostToEmptyTimelineDataProviders();
 
     if (Cypress.browser.name === 'firefox') {
-      cy.get(TIMELINE_DATA_PROVIDERS)
+      cy.get(TIMELINE_DATA_PROVIDERS_EMPTY)
         .filter(':visible')
-        .should('have.css', 'background-color', 'rgba(1, 125, 115, 0.1)');
+        .should('have.css', 'background-color', 'rgba(1, 125, 115, 0.2)');
     } else {
-      cy.get(TIMELINE_DATA_PROVIDERS)
+      cy.get(TIMELINE_DATA_PROVIDERS_EMPTY)
         .filter(':visible')
         .should(
           'have.css',
