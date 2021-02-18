@@ -8,7 +8,7 @@
 import { CoreStart } from 'kibana/public';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { Query, TimeRange } from '../../../../../../src/plugins/data/public';
+import { Query, TimeRange, esQuery, Filter } from '../../../../../../src/plugins/data/public';
 import {
   Embeddable,
   EmbeddableInput,
@@ -23,6 +23,7 @@ import { LazyLogStreamWrapper } from './lazy_log_stream_wrapper';
 export const LOG_STREAM_EMBEDDABLE = 'LOG_STREAM_EMBEDDABLE';
 
 export interface LogStreamEmbeddableInput extends EmbeddableInput {
+  filters: Filter[];
   timeRange: TimeRange;
   query: Query;
 }
@@ -65,6 +66,8 @@ export class LogStreamEmbeddable extends Embeddable<LogStreamEmbeddableInput> {
       return;
     }
 
+    const parsedQuery = esQuery.buildEsQuery(undefined, this.input.query, this.input.filters);
+
     const startTimestamp = datemathToEpochMillis(this.input.timeRange.from);
     const endTimestamp = datemathToEpochMillis(this.input.timeRange.to);
 
@@ -80,7 +83,7 @@ export class LogStreamEmbeddable extends Embeddable<LogStreamEmbeddableInput> {
               startTimestamp={startTimestamp}
               endTimestamp={endTimestamp}
               height="100%"
-              query={this.input.query}
+              query={parsedQuery}
             />
           </div>
         </EuiThemeProvider>
