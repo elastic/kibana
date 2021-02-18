@@ -66,7 +66,7 @@ export function registerRepositoriesRoutes({
           });
         }
         // Case: default
-        return res.internalError({ body: e });
+        throw e;
       }
 
       // If a managed repository, we also need to check if a policy is associated to it
@@ -121,7 +121,7 @@ export function registerRepositoriesRoutes({
           });
         }
         // Case: default
-        return res.internalError({ body: e });
+        throw e;
       }
 
       const { snapshots } = await callAsCurrentUser('snapshot.get', {
@@ -189,7 +189,7 @@ export function registerRepositoriesRoutes({
           });
         }
         // Case: default
-        return res.internalError({ body: e });
+        throw e;
       }
     })
   );
@@ -230,7 +230,7 @@ export function registerRepositoriesRoutes({
           });
         }
         // Case: default
-        return res.internalError({ body: e });
+        throw e;
       }
     })
   );
@@ -271,7 +271,7 @@ export function registerRepositoriesRoutes({
           });
         }
         // Case: default
-        return res.internalError({ body: e });
+        throw e;
       }
     })
   );
@@ -315,7 +315,7 @@ export function registerRepositoriesRoutes({
           });
         }
         // Case: default
-        return res.internalError({ body: e });
+        throw e;
       }
     })
   );
@@ -357,7 +357,7 @@ export function registerRepositoriesRoutes({
           });
         }
         // Case: default
-        return res.internalError({ body: e });
+        throw e;
       }
     })
   );
@@ -398,7 +398,7 @@ export function registerRepositoriesRoutes({
           });
         }
         // Case: default
-        return res.internalError({ body: e });
+        throw e;
       }
     })
   );
