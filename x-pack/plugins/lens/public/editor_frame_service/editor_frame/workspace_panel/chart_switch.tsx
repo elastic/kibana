@@ -268,7 +268,6 @@ export function ChartSwitch(props: Props) {
                       aria-label={i18n.translate('xpack.lens.chartSwitch.dataLossLabel', {
                         defaultMessage: 'Data loss',
                       })}
-                      data-test-subj={`lnsChartSwitchPopoverAlert_${v.id}`}
                       type="alert"
                       color="warning"
                       title={i18n.translate('xpack.lens.chartSwitch.dataLossLabel', {
@@ -278,7 +277,10 @@ export function ChartSwitch(props: Props) {
                         defaultMessage:
                           'Switching to this chart will lose some of the configuration',
                       })}
-                      iconProps={{ className: 'lnsChartSwitch__chartIcon' }}
+                      iconProps={{
+                        className: 'lnsChartSwitch__chartIcon',
+                        'data-test-subj': `lnsChartSwitchPopoverAlert_${v.id}`,
+                      }}
                     />
                   ) : null,
               }))
