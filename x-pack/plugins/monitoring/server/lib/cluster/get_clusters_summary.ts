@@ -43,7 +43,11 @@ export function getClustersSummary(
     const clusterStatsLegacy = cluster.cluster_stats;
     const clusterStatsMB = cluster.elasticsearch?.cluster?.stats;
 
-    const clusterName = get(clusterSettings, 'cluster.metadata.display_name', cluster.cluster_name);
+    const clusterName = get(
+      clusterSettings,
+      'cluster.metadata.display_name',
+      cluster.elasticsearch?.cluster?.name ?? cluster.cluster_name
+    );
 
     // check for any missing licenses
     if (!license) {

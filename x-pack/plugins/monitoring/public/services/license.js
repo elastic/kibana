@@ -42,8 +42,6 @@ export function licenseProvider() {
     }
 
     isExpired() {
-      console.warn('CHRIS REMOVE THIS DEBUG');
-      return false;
       if (this.doesExpire()) {
         const { expiry_date_in_millis: expiryDateInMillis } = this.license;
         return new Date().getTime() >= expiryDateInMillis;
