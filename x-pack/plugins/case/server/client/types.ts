@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ElasticsearchClient, SavedObjectsClientContract } from 'kibana/server';
+import { ElasticsearchClient, SavedObjectsClientContract, Logger } from 'kibana/server';
 import { ActionsClient } from '../../../actions/server';
 import {
   CasePostRequest,
@@ -77,6 +77,7 @@ export interface CaseClientFactoryArguments {
   savedObjectsClient: SavedObjectsClientContract;
   userActionService: CaseUserActionServiceSetup;
   alertsService: AlertServiceContract;
+  logger: Logger;
 }
 
 export interface ConfigureFields {

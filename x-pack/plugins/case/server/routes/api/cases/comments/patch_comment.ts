@@ -12,7 +12,7 @@ import { identity } from 'fp-ts/lib/function';
 import { schema } from '@kbn/config-schema';
 import Boom from '@hapi/boom';
 
-import { SavedObjectsClientContract } from 'kibana/server';
+import { SavedObjectsClientContract, Logger } from 'kibana/server';
 import { CommentableCase } from '../../../../common';
 import { CommentPatchRequestRt, throwErrors, User } from '../../../../../common/api';
 import { CASE_SAVED_OBJECT, SUB_CASE_SAVED_OBJECT } from '../../../../saved_object_types';
@@ -26,10 +26,17 @@ interface CombinedCaseParams {
   service: CaseServiceSetup;
   client: SavedObjectsClientContract;
   caseID: string;
+  logger: Logger;
   subCaseID?: string;
 }
 
-async function getCommentableCase({ service, client, caseID, subCaseID }: CombinedCaseParams) {
+async function getCommentableCase({
+  service,
+  client,
+  caseID,
+  subCaseID,
+  logger,
+}: CombinedCaseParams) {
   if (subCaseID) {
     const [caseInfo, subCase] = await Promise.all([
       service.getCase({
@@ -41,13 +48,19 @@ async function getCommentableCase({ service, client, caseID, subCaseID }: Combin
         id: subCaseID,
       }),
     ]);
-    return new CommentableCase({ collection: caseInfo, service, subCase, soClient: client });
+    return new CommentableCase({
+      collection: caseInfo,
+      service,
+      subCase,
+      soClient: client,
+      logger,
+    });
   } else {
     const caseInfo = await service.getCase({
       client,
       id: caseID,
     });
-    return new CommentableCase({ collection: caseInfo, service, soClient: client });
+    return new CommentableCase({ collection: caseInfo, service, soClient: client, logger });
   }
 }
 
@@ -56,6 +69,7 @@ export function initPatchCommentApi({
   caseService,
   router,
   userActionService,
+  logger,
 }: RouteDeps) {
   router.patch(
     {
@@ -88,6 +102,7 @@ export function initPatchCommentApi({
           client,
           caseID: request.params.case_id,
           subCaseID: request.query?.subCaseID,
+          logger,
         });
 
         const myComment = await caseService.getComment({

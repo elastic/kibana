@@ -26,6 +26,7 @@ import * as i18n from './translations';
 
 import { GetActionTypeParams, isCommentGeneratedAlert } from '..';
 import { nullUser } from '../../common';
+import { createCaseError } from '../../common/error';
 
 const supportedSubActions: string[] = ['create', 'update', 'addComment'];
 
@@ -84,6 +85,7 @@ async function executor(
     connectorMappingsService,
     userActionService,
     alertsService,
+    logger,
   });
 
   if (!supportedSubActions.includes(subAction)) {
@@ -93,9 +95,17 @@ async function executor(
   }
 
   if (subAction === 'create') {
-    data = await caseClient.create({
-      ...(subActionParams as CasePostRequest),
-    });
+    try {
+      data = await caseClient.create({
+        ...(subActionParams as CasePostRequest),
+      });
+    } catch (error) {
+      throw createCaseError({
+        message: `Failed to create a case using connector: ${error}`,
+        error,
+        logger,
+      });
+    }
   }
 
   if (subAction === 'update') {
@@ -107,13 +117,29 @@ async function executor(
       {} as CasePatchRequest
     );
 
-    data = await caseClient.update({ cases: [updateParamsWithoutNullValues] });
+    try {
+      data = await caseClient.update({ cases: [updateParamsWithoutNullValues] });
+    } catch (error) {
+      throw createCaseError({
+        message: `Failed to update case using connector id: ${updateParamsWithoutNullValues?.id} version: ${updateParamsWithoutNullValues?.version}: ${error}`,
+        error,
+        logger,
+      });
+    }
   }
 
   if (subAction === 'addComment') {
     const { caseId, comment } = subActionParams as ExecutorSubActionAddCommentParams;
-    const formattedComment = transformConnectorComment(comment);
-    data = await caseClient.addComment({ caseId, comment: formattedComment });
+    try {
+      const formattedComment = transformConnectorComment(comment);
+      data = await caseClient.addComment({ caseId, comment: formattedComment });
+    } catch (error) {
+      throw createCaseError({
+        message: `Failed to create comment using connector case id: ${caseId}: ${error}`,
+        error,
+        logger,
+      });
+    }
   }
 
   return { status: 'ok', data: data ?? {}, actionId };
