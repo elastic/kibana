@@ -6,6 +6,7 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import styled from 'styled-components';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -45,6 +46,17 @@ import { PolicyDetailsRouteState } from '../../../../../common/endpoint/types';
 import { WrapperPage } from '../../../../common/components/wrapper_page';
 import { HeaderPage } from '../../../../common/components/header_page';
 import { PolicyDetailsForm } from './policy_details_form';
+
+const wideSideMargin = '130px';
+const PolicyDetailsHeader = styled(HeaderPage)`
+  margin: 0;
+  padding: ${(props) => props.theme.eui.paddingSizes.l} ${wideSideMargin};
+`;
+
+const PolicyDetailsFormDiv = styled.div`
+  background-color: ${(props) => props.theme.eui.euiHeaderBackgroundColor};
+  padding: ${(props) => props.theme.eui.paddingSizes.l} ${wideSideMargin};
+`;
 
 export const PolicyDetails = React.memo(() => {
   const dispatch = useDispatch<(action: AppAction) => void>();
@@ -201,8 +213,9 @@ export const PolicyDetails = React.memo(() => {
           onConfirm={handleSaveConfirmation}
         />
       )}
-      <WrapperPage noTimeline data-test-subj="policyDetailsPage">
-        <HeaderPage
+      <WrapperPage noTimeline data-test-subj="policyDetailsPage" noPadding>
+        <PolicyDetailsHeader
+          border
           hideSourcerer={true}
           title={policyItem.name}
           backOptions={{
@@ -215,9 +228,11 @@ export const PolicyDetails = React.memo(() => {
           }}
         >
           {headerRightContent}
-        </HeaderPage>
+        </PolicyDetailsHeader>
 
-        <PolicyDetailsForm />
+        <PolicyDetailsFormDiv>
+          <PolicyDetailsForm />
+        </PolicyDetailsFormDiv>
       </WrapperPage>
 
       <SpyRoute pageName={SecurityPageName.administration} />
