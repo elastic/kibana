@@ -11,9 +11,6 @@ import { ProcessorEvent } from '../../../../common/processor_event';
 import { ESFilter } from '../../../../../../typings/elasticsearch';
 import {
   PROFILE_CPU_NS,
-  PROFILE_DURATION,
-  PROFILE_ID,
-  PROFILE_SAMPLES_COUNT,
   PROFILE_STACK,
   PROFILE_TOP_ID,
   PROFILE_WALL_US,
@@ -25,7 +22,7 @@ import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 import { withApmSpan } from '../../../utils/with_apm_span';
 
 const MAX_STACK_IDS = 10000;
-const MAX_PROFILE_IDS = 1000;
+const MAX_STACKS_PER_REQUEST = 1000;
 
 const maybeAdd = (to: any[], value: any) => {
   if (to.includes(value)) {
@@ -57,39 +54,18 @@ function getProfilingStats({
           },
         },
         aggs: {
-          profiles: {
-            terms: {
-              field: PROFILE_ID,
-              size: MAX_PROFILE_IDS,
-            },
-            aggs: {
-              latest: {
-                top_metrics: {
-                  metrics: [
-                    { field: '@timestamp' },
-                    { field: PROFILE_DURATION },
-                  ] as const,
-                  sort: {
-                    '@timestamp': 'desc',
-                  },
-                },
-              },
-            },
-          },
           stacks: {
             terms: {
               field: PROFILE_TOP_ID,
               size: MAX_STACK_IDS,
+              order: {
+                value: 'desc',
+              },
             },
             aggs: {
               value: {
                 sum: {
                   field: valueTypeField,
-                },
-              },
-              [PROFILE_SAMPLES_COUNT]: {
-                sum: {
-                  field: PROFILE_SAMPLES_COUNT,
                 },
               },
             },
@@ -98,30 +74,15 @@ function getProfilingStats({
       },
     });
 
-    const profiles =
-      response.aggregations?.profiles.buckets.map((profile) => {
-        const latest = profile.latest.top[0].metrics ?? {};
-
-        return {
-          id: profile.key as string,
-          duration: latest[PROFILE_DURATION] as number,
-          timestamp: latest['@timestamp'] as number,
-        };
-      }) ?? [];
-
     const stacks =
       response.aggregations?.stacks.buckets.map((stack) => {
         return {
           id: stack.key as string,
           value: stack.value.value!,
-          count: stack[PROFILE_SAMPLES_COUNT].value!,
         };
       }) ?? [];
 
-    return {
-      profiles,
-      stacks,
-    };
+    return stacks;
   });
 }
 
@@ -133,29 +94,91 @@ function getProfilesWithStacks({
   filter: ESFilter[];
 }) {
   return withApmSpan('get_profiles_with_stacks', async () => {
-    const response = await apmEventClient.search({
-      apm: {
-        events: [ProcessorEvent.profile],
-      },
-      body: {
-        size: MAX_STACK_IDS,
-        query: {
-          bool: {
-            filter,
+    const cardinalityResponse = await withApmSpan('get_top_cardinality', () =>
+      apmEventClient.search({
+        apm: {
+          events: [ProcessorEvent.profile],
+        },
+        body: {
+          size: 0,
+          query: {
+            bool: { filter },
+          },
+          aggs: {
+            top: {
+              cardinality: {
+                field: PROFILE_TOP_ID,
+              },
+            },
           },
         },
-        collapse: {
-          field: PROFILE_TOP_ID,
-        },
-        _source: [PROFILE_TOP_ID, PROFILE_STACK],
-      },
+      })
+    );
+
+    const cardinality = cardinalityResponse.aggregations?.top.value ?? 0;
+
+    const numStacksToFetch = Math.min(
+      Math.ceil(cardinality * 1.1),
+      MAX_STACK_IDS
+    );
+
+    const partitions = Math.ceil(numStacksToFetch / MAX_STACKS_PER_REQUEST);
+
+    if (partitions === 0) {
+      return [];
+    }
+
+    const allResponses = await withApmSpan('get_all_stacks', async () => {
+      return Promise.all(
+        [...new Array(partitions)].map(async (_, num) => {
+          const response = await withApmSpan('get_partition', () =>
+            apmEventClient.search({
+              apm: {
+                events: [ProcessorEvent.profile],
+              },
+              body: {
+                query: {
+                  bool: {
+                    filter,
+                  },
+                },
+                aggs: {
+                  top: {
+                    terms: {
+                      field: PROFILE_TOP_ID,
+                      size: Math.max(MAX_STACKS_PER_REQUEST),
+                      include: {
+                        num_partitions: partitions,
+                        partition: num,
+                      },
+                    },
+                    aggs: {
+                      latest: {
+                        top_hits: {
+                          _source: [PROFILE_TOP_ID, PROFILE_STACK],
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            })
+          );
+
+          return (
+            response.aggregations?.top.buckets.flatMap((bucket) => {
+              return bucket.latest.hits.hits[0]._source;
+            }) ?? []
+          );
+        })
+      );
     });
 
-    return response.hits.hits.map((hit) => hit._source);
+    return allResponses.flat();
   });
 }
 
-function getNodeNameFromFrame(frame: ProfileStackFrame) {
+function getNodeLabelFromFrame(frame: ProfileStackFrame) {
   return [last(frame.function.split('/')), frame.line]
     .filter(Boolean)
     .join(':');
@@ -185,6 +208,7 @@ export async function getServiceProfilingStatistics({
       { term: { [SERVICE_NAME]: serviceName } },
       ...environmentQuery(environment),
       { exists: { field: valueTypeField } },
+      ...setup.esFilter,
     ];
 
     const [profileStats, profileStacks] = await Promise.all([
@@ -195,30 +219,30 @@ export async function getServiceProfilingStatistics({
     const nodes: Record<string, ProfileNode> = {};
     const rootNodes: string[] = [];
 
-    function getNode({ id, name }: { id: string; name: string }) {
+    function getNode(frame: ProfileStackFrame) {
+      const { id, filename, function: functionName, line } = frame;
+      const location = [functionName, line].filter(Boolean).join(':');
+      const fqn = [filename, location].filter(Boolean).join('/');
+      const label = last(location.split('/'))!;
       let node = nodes[id];
       if (!node) {
-        node = { id, name, value: 0, count: 0, children: [] };
+        node = { id, label, fqn, value: 0, children: [] };
         nodes[id] = node;
       }
       return node;
     }
 
-    const stackStatsById = keyBy(profileStats.stacks, 'id');
+    const stackStatsById = keyBy(profileStats, 'id');
 
     profileStacks.forEach((profile) => {
       const stats = stackStatsById[profile.profile.top.id];
       const frames = profile.profile.stack.concat().reverse();
 
       frames.forEach((frame, index) => {
-        const node = getNode({
-          id: frame.id,
-          name: getNodeNameFromFrame(frame),
-        });
+        const node = getNode(frame);
 
         if (index === frames.length - 1) {
           node.value += stats.value;
-          node.count += stats.count;
         }
 
         if (index === 0) {
@@ -232,7 +256,6 @@ export async function getServiceProfilingStatistics({
     });
 
     return {
-      profiles: profileStats.profiles,
       nodes,
       rootNodes,
     };

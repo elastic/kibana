@@ -12,8 +12,8 @@ export enum ProfilingValueType {
 
 export interface ProfileNode {
   id: string;
-  name: string;
+  label: string;
+  fqn: string;
   value: number;
-  count: number;
   children: string[];
 }

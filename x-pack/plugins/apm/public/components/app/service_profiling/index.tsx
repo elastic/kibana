@@ -26,6 +26,7 @@ export function ServiceProfiling({
 }: ServiceProfilingProps) {
   const {
     urlParams: { start, end },
+    uiFilters,
   } = useUrlParams();
 
   const { data = [] } = useFetcher(
@@ -38,11 +39,16 @@ export function ServiceProfiling({
         endpoint: 'GET /api/apm/services/{serviceName}/profiling/timeline',
         params: {
           path: { serviceName },
-          query: { start, end, environment, uiFilters: JSON.stringify({}) },
+          query: {
+            start,
+            end,
+            environment,
+            uiFilters: JSON.stringify(uiFilters),
+          },
         },
       });
     },
-    [start, end, serviceName, environment]
+    [start, end, serviceName, environment, uiFilters]
   );
 
   const [valueType, setValueType] = useState<ProfilingValueType | undefined>();
@@ -100,6 +106,7 @@ export function ServiceProfiling({
                 valueType={valueType}
                 start={start}
                 end={end}
+                uiFilters={uiFilters}
               />
             </EuiPanel>
           </EuiFlexItem>

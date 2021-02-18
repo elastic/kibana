@@ -515,6 +515,7 @@ export const serviceProfilingStatisticsRoute = createRoute({
     }),
     query: t.intersection([
       rangeRt,
+      uiFiltersRt,
       t.partial({
         environment: t.string,
       }),
