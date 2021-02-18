@@ -390,6 +390,7 @@ export type {
   ISessionService,
   SearchSessionInfoProvider,
   ISessionsClient,
+  SearchUsageCollector,
 } from './search';
 
 export { ISearchOptions, isErrorResponse, isCompleteResponse, isPartialResponse } from '../common';

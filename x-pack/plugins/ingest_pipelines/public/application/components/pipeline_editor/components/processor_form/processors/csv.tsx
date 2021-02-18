@@ -24,7 +24,7 @@ import { FieldsConfig } from './shared';
 import { IgnoreMissingField } from './common_fields/ignore_missing_field';
 import { FieldNameField } from './common_fields/field_name_field';
 
-import { to } from './shared';
+import { to, from } from './shared';
 
 const { minLengthField } = fieldValidators;
 
@@ -72,7 +72,7 @@ const fieldsConfig: FieldsConfig = {
   /* Optional fields config */
   separator: {
     type: FIELD_TYPES.TEXT,
-    serializer: (v) => (v ? v : undefined),
+    serializer: from.emptyStringToUndefined,
     label: i18n.translate('xpack.ingestPipelines.pipelineEditor.convertForm.separatorFieldLabel', {
       defaultMessage: 'Separator (optional)',
     }),
@@ -85,13 +85,13 @@ const fieldsConfig: FieldsConfig = {
       <FormattedMessage
         id="xpack.ingestPipelines.pipelineEditor.convertForm.separatorHelpText"
         defaultMessage="Delimiter used in the CSV data. Defaults to {value}."
-        values={{ value: <EuiCode inline>{','}</EuiCode> }}
+        values={{ value: <EuiCode>{','}</EuiCode> }}
       />
     ),
   },
   quote: {
     type: FIELD_TYPES.TEXT,
-    serializer: (v) => (v ? v : undefined),
+    serializer: from.emptyStringToUndefined,
     label: i18n.translate('xpack.ingestPipelines.pipelineEditor.convertForm.quoteFieldLabel', {
       defaultMessage: 'Quote (optional)',
     }),
@@ -104,7 +104,7 @@ const fieldsConfig: FieldsConfig = {
       <FormattedMessage
         id="xpack.ingestPipelines.pipelineEditor.convertForm.quoteHelpText"
         defaultMessage="Escape character used in the CSV data. Defaults to {value}."
-        values={{ value: <EuiCode inline>{'"'}</EuiCode> }}
+        values={{ value: <EuiCode>{'"'}</EuiCode> }}
       />
     ),
   },
@@ -121,6 +121,7 @@ const fieldsConfig: FieldsConfig = {
   },
   empty_value: {
     type: FIELD_TYPES.TEXT,
+    serializer: from.emptyStringToUndefined,
     label: i18n.translate('xpack.ingestPipelines.pipelineEditor.convertForm.emptyValueFieldLabel', {
       defaultMessage: 'Empty value (optional)',
     }),

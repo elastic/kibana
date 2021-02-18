@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiConfirmModal, EuiOverlayMask } from '@elastic/eui';
+import { EuiConfirmModal } from '@elastic/eui';
 import PropTypes from 'prop-types';
 import React, { FunctionComponent } from 'react';
 
@@ -39,21 +39,19 @@ export const ConfirmModal: FunctionComponent<Props> = (props) => {
   }
 
   return (
-    <EuiOverlayMask>
-      <EuiConfirmModal
-        {...rest}
-        className={`canvasConfirmModal ${className || ''}`}
-        title={title}
-        onCancel={onCancel}
-        onConfirm={onConfirm}
-        confirmButtonText={confirmButtonText}
-        cancelButtonText={cancelButtonText}
-        defaultFocusedButton="confirm"
-        buttonColor="danger"
-      >
-        {message}
-      </EuiConfirmModal>
-    </EuiOverlayMask>
+    <EuiConfirmModal
+      {...rest}
+      className={`canvasConfirmModal ${className || ''}`}
+      title={title}
+      onCancel={onCancel}
+      onConfirm={onConfirm}
+      confirmButtonText={confirmButtonText}
+      cancelButtonText={cancelButtonText}
+      defaultFocusedButton="confirm"
+      buttonColor="danger"
+    >
+      {message}
+    </EuiConfirmModal>
   );
 };
 

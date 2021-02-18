@@ -13,7 +13,7 @@ import React, { Component } from 'react';
 import ResizeObserver from 'resize-observer-polyfill';
 import { get, isEqual } from 'lodash';
 
-import { METRIC_TYPE, UiCounterMetricType } from '@kbn/analytics';
+import { METRIC_TYPE } from '@kbn/analytics';
 import { withKibana, KibanaReactContextValue } from '../../../../kibana_react/public';
 
 import QueryBarTopRow from '../query_string_input/query_bar_top_row';
@@ -68,8 +68,6 @@ export interface SearchBarOwnProps {
 
   onRefresh?: (payload: { dateRange: TimeRange }) => void;
   indicateNoData?: boolean;
-  // Track UI Metrics
-  trackUiMetric?: (metricType: UiCounterMetricType, eventName: string | string[]) => void;
 }
 
 export type SearchBarProps = SearchBarOwnProps & SearchBarInjectedDeps;
@@ -323,9 +321,11 @@ class SearchBarUI extends Component<SearchBarProps, State> {
             },
           });
         }
-        if (this.props.trackUiMetric) {
-          this.props.trackUiMetric(METRIC_TYPE.CLICK, `${this.services.appName}:query_submitted`);
-        }
+        this.services.usageCollection?.reportUiCounter(
+          this.services.appName,
+          METRIC_TYPE.CLICK,
+          'query_submitted'
+        );
       }
     );
   };
@@ -428,7 +428,6 @@ class SearchBarUI extends Component<SearchBarProps, State> {
               onFiltersUpdated={this.props.onFiltersUpdated}
               indexPatterns={this.props.indexPatterns!}
               appName={this.services.appName}
-              trackUiMetric={this.props.trackUiMetric}
             />
           </div>
         </div>

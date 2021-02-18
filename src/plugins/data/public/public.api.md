@@ -105,7 +105,6 @@ import { Type } from '@kbn/config-schema';
 import { TypeOf } from '@kbn/config-schema';
 import { UiActionsSetup } from 'src/plugins/ui_actions/public';
 import { UiActionsStart } from 'src/plugins/ui_actions/public';
-import { UiCounterMetricType } from '@kbn/analytics';
 import { Unit } from '@elastic/datemath';
 import { UnregisterCallback } from 'history';
 import { URL } from 'url';
@@ -1094,6 +1093,10 @@ export interface IDataPluginServices extends Partial<CoreStart_2> {
     storage: IStorageWrapper;
     // (undocumented)
     uiSettings: CoreStart_2['uiSettings'];
+    // Warning: (ae-forgotten-export) The symbol "UsageCollectionStart" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    usageCollection?: UsageCollectionStart;
 }
 
 // Warning: (ae-missing-release-tag) "IEsSearchRequest" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
@@ -1640,6 +1643,7 @@ export type ISearchGeneric = <SearchStrategyRequest extends IKibanaSearchRequest
 // @public (undocumented)
 export interface ISearchOptions {
     abortSignal?: AbortSignal;
+    indexPattern?: IndexPattern;
     isRestore?: boolean;
     isStored?: boolean;
     legacyHitsTotal?: boolean;
@@ -1661,7 +1665,7 @@ export interface ISearchSetup {
     aggs: AggsSetup;
     session: ISessionService;
     sessionsClient: ISessionsClient;
-    // Warning: (ae-forgotten-export) The symbol "SearchUsageCollector" needs to be exported by the entry point index.d.ts
+    // Warning: (ae-incompatible-release-tags) The symbol "usageCollector" is marked as @public, but its signature references "SearchUsageCollector" which is marked as @internal
     //
     // (undocumented)
     usageCollector?: SearchUsageCollector;
@@ -1870,9 +1874,11 @@ export interface OptionedValueProp {
 // @public (undocumented)
 export class PainlessError extends EsError {
     // Warning: (ae-forgotten-export) The symbol "IEsError" needs to be exported by the entry point index.d.ts
-    constructor(err: IEsError);
+    constructor(err: IEsError, indexPattern?: IndexPattern);
     // (undocumented)
     getErrorMessage(application: ApplicationStart): JSX.Element;
+    // (undocumented)
+    indexPattern?: IndexPattern;
     // (undocumented)
     painlessStack?: string;
 }
@@ -2248,8 +2254,8 @@ export const SEARCH_SESSIONS_MANAGEMENT_ID = "search_sessions";
 // Warning: (ae-missing-release-tag) "SearchBar" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export const SearchBar: React.ComponentClass<Pick<Pick<SearchBarProps, "query" | "isLoading" | "indexPatterns" | "filters" | "dataTestSubj" | "intl" | "refreshInterval" | "screenTitle" | "onRefresh" | "onRefreshChange" | "showQueryInput" | "showDatePicker" | "showAutoRefreshOnly" | "dateRangeFrom" | "dateRangeTo" | "isRefreshPaused" | "customSubmitButton" | "timeHistory" | "indicateNoData" | "onFiltersUpdated" | "trackUiMetric" | "savedQuery" | "showSaveQuery" | "onClearSavedQuery" | "showQueryBar" | "showFilterBar" | "onQueryChange" | "onQuerySubmit" | "onSaved" | "onSavedQueryUpdated">, "query" | "isLoading" | "indexPatterns" | "filters" | "dataTestSubj" | "refreshInterval" | "screenTitle" | "onRefresh" | "onRefreshChange" | "showQueryInput" | "showDatePicker" | "showAutoRefreshOnly" | "dateRangeFrom" | "dateRangeTo" | "isRefreshPaused" | "customSubmitButton" | "timeHistory" | "indicateNoData" | "onFiltersUpdated" | "trackUiMetric" | "savedQuery" | "showSaveQuery" | "onClearSavedQuery" | "showQueryBar" | "showFilterBar" | "onQueryChange" | "onQuerySubmit" | "onSaved" | "onSavedQueryUpdated">, any> & {
-    WrappedComponent: React.ComponentType<Pick<SearchBarProps, "query" | "isLoading" | "indexPatterns" | "filters" | "dataTestSubj" | "intl" | "refreshInterval" | "screenTitle" | "onRefresh" | "onRefreshChange" | "showQueryInput" | "showDatePicker" | "showAutoRefreshOnly" | "dateRangeFrom" | "dateRangeTo" | "isRefreshPaused" | "customSubmitButton" | "timeHistory" | "indicateNoData" | "onFiltersUpdated" | "trackUiMetric" | "savedQuery" | "showSaveQuery" | "onClearSavedQuery" | "showQueryBar" | "showFilterBar" | "onQueryChange" | "onQuerySubmit" | "onSaved" | "onSavedQueryUpdated"> & ReactIntl.InjectedIntlProps>;
+export const SearchBar: React.ComponentClass<Pick<Pick<SearchBarProps, "query" | "isLoading" | "indexPatterns" | "filters" | "dataTestSubj" | "intl" | "refreshInterval" | "screenTitle" | "onRefresh" | "onRefreshChange" | "showQueryInput" | "showDatePicker" | "showAutoRefreshOnly" | "dateRangeFrom" | "dateRangeTo" | "isRefreshPaused" | "customSubmitButton" | "timeHistory" | "indicateNoData" | "onFiltersUpdated" | "savedQuery" | "showSaveQuery" | "onClearSavedQuery" | "showQueryBar" | "showFilterBar" | "onQueryChange" | "onQuerySubmit" | "onSaved" | "onSavedQueryUpdated">, "query" | "isLoading" | "indexPatterns" | "filters" | "dataTestSubj" | "refreshInterval" | "screenTitle" | "onRefresh" | "onRefreshChange" | "showQueryInput" | "showDatePicker" | "showAutoRefreshOnly" | "dateRangeFrom" | "dateRangeTo" | "isRefreshPaused" | "customSubmitButton" | "timeHistory" | "indicateNoData" | "onFiltersUpdated" | "savedQuery" | "showSaveQuery" | "onClearSavedQuery" | "showQueryBar" | "showFilterBar" | "onQueryChange" | "onQuerySubmit" | "onSaved" | "onSavedQueryUpdated">, any> & {
+    WrappedComponent: React.ComponentType<Pick<SearchBarProps, "query" | "isLoading" | "indexPatterns" | "filters" | "dataTestSubj" | "intl" | "refreshInterval" | "screenTitle" | "onRefresh" | "onRefreshChange" | "showQueryInput" | "showDatePicker" | "showAutoRefreshOnly" | "dateRangeFrom" | "dateRangeTo" | "isRefreshPaused" | "customSubmitButton" | "timeHistory" | "indicateNoData" | "onFiltersUpdated" | "savedQuery" | "showSaveQuery" | "onClearSavedQuery" | "showQueryBar" | "showFilterBar" | "onQueryChange" | "onQuerySubmit" | "onSaved" | "onSavedQueryUpdated"> & ReactIntl.InjectedIntlProps>;
 };
 
 // Warning: (ae-forgotten-export) The symbol "SearchBarOwnProps" needs to be exported by the entry point index.d.ts
@@ -2330,6 +2336,8 @@ export interface SearchInterceptorDeps {
     toasts: ToastsSetup;
     // (undocumented)
     uiSettings: CoreSetup_2['uiSettings'];
+    // Warning: (ae-incompatible-release-tags) The symbol "usageCollector" is marked as @public, but its signature references "SearchUsageCollector" which is marked as @internal
+    //
     // (undocumented)
     usageCollector?: SearchUsageCollector;
 }
@@ -2453,6 +2461,38 @@ export class SearchTimeoutError extends KbnError {
     // (undocumented)
     mode: TimeoutErrorMode;
     }
+
+// @internal (undocumented)
+export interface SearchUsageCollector {
+    // (undocumented)
+    trackQueryTimedOut: () => Promise<void>;
+    // (undocumented)
+    trackSessionCancelled: () => Promise<void>;
+    // (undocumented)
+    trackSessionDeleted: () => Promise<void>;
+    // (undocumented)
+    trackSessionExtended: () => Promise<void>;
+    // (undocumented)
+    trackSessionIndicatorSaveDisabled: () => Promise<void>;
+    // (undocumented)
+    trackSessionIndicatorTourLoading: () => Promise<void>;
+    // (undocumented)
+    trackSessionIndicatorTourRestored: () => Promise<void>;
+    // (undocumented)
+    trackSessionIsRestored: () => Promise<void>;
+    // (undocumented)
+    trackSessionReloaded: () => Promise<void>;
+    // (undocumented)
+    trackSessionSavedResults: () => Promise<void>;
+    // (undocumented)
+    trackSessionSentToBackground: () => Promise<void>;
+    // (undocumented)
+    trackSessionsListLoaded: () => Promise<void>;
+    // (undocumented)
+    trackSessionViewRestored: () => Promise<void>;
+    // (undocumented)
+    trackViewSessionsList: () => Promise<void>;
+}
 
 // Warning: (ae-missing-release-tag) "SortDirection" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
