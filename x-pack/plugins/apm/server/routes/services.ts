@@ -32,6 +32,10 @@ import {
   uiFiltersRt,
 } from './default_api_types';
 import { withApmSpan } from '../utils/with_apm_span';
+import {
+  latencyAggregationTypeRt,
+  LatencyAggregationType,
+} from '../../common/latency_aggregation_types';
 
 export const servicesRoute = createRoute({
   endpoint: 'GET /api/apm/services',
@@ -401,7 +405,11 @@ export const serviceInstancesRoute = createRoute({
       serviceName: t.string,
     }),
     query: t.intersection([
-      t.type({ transactionType: t.string, numBuckets: toNumberRt }),
+      t.type({
+        latencyAggregationType: latencyAggregationTypeRt,
+        transactionType: t.string,
+        numBuckets: toNumberRt,
+      }),
       environmentRt,
       uiFiltersRt,
       rangeRt,
@@ -412,6 +420,8 @@ export const serviceInstancesRoute = createRoute({
     const setup = await setupRequest(context, request);
     const { serviceName } = context.params.path;
     const { environment, transactionType, numBuckets } = context.params.query;
+    const latencyAggregationType = (context.params.query
+      .latencyAggregationType as unknown) as LatencyAggregationType;
 
     const searchAggregatedTransactions = await getSearchAggregatedTransactions(
       setup
@@ -419,6 +429,7 @@ export const serviceInstancesRoute = createRoute({
 
     return getServiceInstances({
       environment,
+      latencyAggregationType,
       serviceName,
       setup,
       transactionType,
