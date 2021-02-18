@@ -1,3 +1,4 @@
+[role="xpack"]
 [[alert-type-es-query]]
 == ES query
 
@@ -10,7 +11,7 @@ actions to run when the threshold condition is met.
 An ES query alert can be created from the *Create* button in the <<alert-management, alert management UI>>. Fill in the <<defining-alerts-general-details, general alert details>>, then select *ES query*.
 
 [role="screenshot"]
-image::images/alert-types-es-query-select.png[Choosing an ES query alert type]
+image::user/alerting/images/alert-types-es-query-select.png[Choosing an ES query alert type]
 
 [float]
 === Defining the conditions
@@ -18,7 +19,7 @@ image::images/alert-types-es-query-select.png[Choosing an ES query alert type]
 The ES query alert has 5 clauses that define the condition to detect.
 
 [role="screenshot"]
-image::images/alert-types-es-query-conditions.png[Four clauses define the condition to detect]
+image::user/alerting/images/alert-types-es-query-conditions.png[Four clauses define the condition to detect]
 
 Index:: This clause requires an *index or index pattern* and a *time field* that will be used for the *time window*.
 Size:: This clause specifies the number of documents to pass to the configured actions when the the threshold condition is met.
@@ -36,9 +37,9 @@ When your query is valid:: Valid queries will be executed against the configured
 match the query will be displayed.
 
 [role="screenshot"]
-image::images/alert-types-es-query-valid.png[Test ES query returns number of matches when valid]
+image::user/alerting/images/alert-types-es-query-valid.png[Test ES query returns number of matches when valid]
 
 When your query is invalid:: An error message is shown if the query is invalid.
 
 [role="screenshot"]
-image::images/alert-types-es-query-invalid.png[Test ES query shows error when invalid]
+image::user/alerting/images/alert-types-es-query-invalid.png[Test ES query shows error when invalid]
