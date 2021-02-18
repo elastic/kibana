@@ -12,7 +12,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const es = getService('es');
   const supertest = getService('supertest');
 
-  describe('saved objects security and spaces enabled', function () {
+  describe.skip('saved objects security and spaces enabled', function () {
     this.tags('ciGroup8');
 
     before(async () => {

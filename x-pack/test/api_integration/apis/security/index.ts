@@ -8,7 +8,7 @@
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('security', function () {
+  describe.skip('security', function () {
     this.tags('ciGroup6');
 
     // Updates here should be mirrored in `./security_basic.ts` if tests

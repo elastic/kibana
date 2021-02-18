@@ -10,7 +10,7 @@ import { createUsersAndRoles } from '../../../common/lib';
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService, loadTestFile }: FtrProviderContext) {
-  describe('saved objects tagging API - security and spaces integration', function () {
+  describe.skip('saved objects tagging API - security and spaces integration', function () {
     this.tags('ciGroup10');
 
     before(async () => {

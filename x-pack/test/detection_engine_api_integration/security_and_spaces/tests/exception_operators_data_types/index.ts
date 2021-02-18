@@ -9,7 +9,7 @@ import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ loadTestFile }: FtrProviderContext): void => {
-  describe('Detection exceptions data types and operators', function () {
+  describe.skip('Detection exceptions data types and operators', function () {
     describe('', function () {
       this.tags('ciGroup11');
 

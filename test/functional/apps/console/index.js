@@ -9,7 +9,8 @@
 export default function ({ getService, loadTestFile }) {
   const browser = getService('browser');
 
-  describe('console app', function () {
+  // eslint-disable-next-line mocha/no-exclusive-tests
+  describe.only('console app', function () {
     this.tags('ciGroup1');
 
     before(async function () {

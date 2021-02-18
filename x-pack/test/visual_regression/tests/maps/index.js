@@ -10,7 +10,7 @@ export default function ({ loadTestFile, getService }) {
   const esArchiver = getService('esArchiver');
   const browser = getService('browser');
 
-  describe('maps app visual regression', function () {
+  describe.skip('maps app visual regression', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('logstash_functional');
       await esArchiver.load('maps/data');
