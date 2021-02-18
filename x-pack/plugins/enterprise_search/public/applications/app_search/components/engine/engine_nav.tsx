@@ -220,8 +220,8 @@ export const EngineNav: React.FC = () => {
       )}
       {canManageEngineCurations && (
         <SideNavLink
-          isExternal
-          to={getAppSearchUrl(generateEnginePath(ENGINE_CURATIONS_PATH))}
+          to={generateEnginePath(ENGINE_CURATIONS_PATH)}
+          shouldShowActiveForSubroutes
           data-test-subj="EngineCurationsLink"
         >
           {CURATIONS_TITLE}
