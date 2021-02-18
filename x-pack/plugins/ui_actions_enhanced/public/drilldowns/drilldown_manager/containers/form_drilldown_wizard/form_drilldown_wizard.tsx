@@ -8,7 +8,7 @@
 import React from 'react';
 import { ActionFactoryPicker } from '../action_factory_picker';
 // import { EuiButton, EuiSpacer } from '@elastic/eui';
-// import { FormDrilldownWizard as FormDrilldownWizardUi } from '../../components/form_drilldown_wizard';
+import { FormDrilldownWizard as FormDrilldownWizardUi } from '../../components/form_drilldown_wizard';
 // import { txtDeleteDrilldownButtonLabel } from './i18n';
 // import {
 // ActionFactory,
