@@ -10,7 +10,7 @@ import { HostsQueries, HostsKpiQueries } from '../../../../../common/search_stra
 import { allHosts } from './all';
 import { hostDetails } from './details';
 import { hostOverview } from './overview';
-import { firstLastSeenHost } from './last_first_seen';
+import { firstSeenHost, lastSeenHost } from './last_first_seen';
 import { uncommonProcesses } from './uncommon_processes';
 import { authentications } from './authentications';
 import { hostsKpiAuthentications } from './kpi/authentications';
@@ -33,7 +33,8 @@ describe('hostsFactory', () => {
       [HostsQueries.details]: hostDetails,
       [HostsQueries.hosts]: allHosts,
       [HostsQueries.overview]: hostOverview,
-      [HostsQueries.firstLastSeen]: firstLastSeenHost,
+      [HostsQueries.firstSeen]: firstSeenHost,
+      [HostsQueries.lastSeen]: lastSeenHost,
       [HostsQueries.uncommonProcesses]: uncommonProcesses,
       [HostsQueries.authentications]: authentications,
       [HostsKpiQueries.kpiAuthentications]: hostsKpiAuthentications,

@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import { get } from 'lodash/fp';
+import { getOr } from 'lodash/fp';
 
 import { IEsSearchResponse } from '../../../../../../../../../src/plugins/data/common';
 import {
   HostAggEsData,
-  HostAggEsItem,
   HostFirstLastSeenStrategyResponse,
   HostsQueries,
   HostFirstLastSeenRequestOptions,
@@ -18,24 +17,60 @@ import {
 
 import { inspectStringifyObject } from '../../../../../utils/build_query';
 import { SecuritySolutionFactory } from '../../types';
-import { buildFirstLastSeenHostQuery } from './query.last_first_seen_host.dsl';
+import { buildFirstOrLastSeenHostQuery } from './query.first_or_last_seen_host.dsl';
 
-export const firstLastSeenHost: SecuritySolutionFactory<HostsQueries.firstLastSeen> = {
-  buildDsl: (options: HostFirstLastSeenRequestOptions) => buildFirstLastSeenHostQuery(options),
+export const firstSeenHost: SecuritySolutionFactory<HostsQueries.firstSeen> = {
+  buildDsl: (options: HostFirstLastSeenRequestOptions) => buildFirstOrLastSeenHostQuery(options),
   parse: async (
     options: HostFirstLastSeenRequestOptions,
-    response: IEsSearchResponse<HostAggEsData>
+    response: IEsSearchResponse<HostAggEsData> // TODO: Change this response to match things better
   ): Promise<HostFirstLastSeenStrategyResponse> => {
-    const aggregations: HostAggEsItem = get('aggregations', response.rawResponse) || {};
+    // First try to get the formatted field if it exists or not.
+    const formattedField: string | null = getOr(
+      null,
+      'hits.hits[0].fields.@timestamp[0]',
+      response.rawResponse
+    );
+    // If it doesn't exist, fall back on _source as a last try.
+    const firstSeen: string | null =
+      formattedField || getOr(null, 'hits.hits[0]._source', response.rawResponse);
+
     const inspect = {
-      dsl: [inspectStringifyObject(buildFirstLastSeenHostQuery(options))],
+      dsl: [inspectStringifyObject(buildFirstOrLastSeenHostQuery(options))],
     };
 
     return {
       ...response,
       inspect,
-      firstSeen: get('firstSeen.value_as_string', aggregations),
-      lastSeen: get('lastSeen.value_as_string', aggregations),
+      firstSeen,
+    };
+  },
+};
+
+export const lastSeenHost: SecuritySolutionFactory<HostsQueries.lastSeen> = {
+  buildDsl: (options: HostFirstLastSeenRequestOptions) => buildFirstOrLastSeenHostQuery(options),
+  parse: async (
+    options: HostFirstLastSeenRequestOptions,
+    response: IEsSearchResponse<HostAggEsData> // TODO: Change this response to match things better
+  ): Promise<HostFirstLastSeenStrategyResponse> => {
+    // First try to get the formatted field if it exists or not.
+    const formattedField: string | null = getOr(
+      null,
+      'hits.hits[0].fields.@timestamp[0]',
+      response.rawResponse
+    );
+    // If it doesn't exist, fall back on _source as a last try.
+    const lastSeen: string | null =
+      formattedField || getOr(null, 'hits.hits[0]._source', response.rawResponse);
+
+    const inspect = {
+      dsl: [inspectStringifyObject(buildFirstOrLastSeenHostQuery(options))],
+    };
+
+    return {
+      ...response,
+      inspect,
+      lastSeen,
     };
   },
 };
