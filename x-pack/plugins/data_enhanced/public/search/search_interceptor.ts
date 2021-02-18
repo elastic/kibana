@@ -46,15 +46,6 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
       : TimeoutErrorMode.CONTACT;
   }
 
-  /**
-   * Abort our `AbortController`, which in turn aborts any intercepted searches.
-   */
-  public cancelPending = () => {
-    this.abortController.abort();
-    this.abortController = new AbortController();
-    if (this.deps.usageCollector) this.deps.usageCollector.trackQueriesCancelled();
-  };
-
   public search({ id, ...request }: IKibanaSearchRequest, options: IAsyncSearchOptions = {}) {
     const { combinedSignal, timeoutSignal, cleanup, abort } = this.setupAbortSignal({
       abortSignal: options.abortSignal,

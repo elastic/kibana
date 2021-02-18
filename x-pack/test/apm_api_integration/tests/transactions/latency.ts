@@ -27,7 +27,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     'Latency with a basic license when data is not loaded ',
     { config: 'basic', archives: [] },
     () => {
-      const uiFilters = JSON.stringify({ environment: 'testing' });
+      const uiFilters = JSON.stringify({});
       it('returns 400 when latencyAggregationType is not informed', async () => {
         const response = await supertest.get(
           url.format({
@@ -37,6 +37,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               end,
               uiFilters,
               transactionType: 'request',
+              environment: 'testing',
             },
           })
         );
@@ -53,6 +54,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               end,
               uiFilters,
               latencyAggregationType: 'avg',
+              environment: 'testing',
             },
           })
         );
@@ -70,6 +72,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               uiFilters,
               latencyAggregationType: 'avg',
               transactionType: 'request',
+              environment: 'testing',
             },
           })
         );
@@ -90,7 +93,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     () => {
       let response: PromiseReturnType<typeof supertest.get>;
 
-      const uiFilters = JSON.stringify({ environment: 'testing' });
+      const uiFilters = JSON.stringify({});
 
       describe('average latency type', () => {
         before(async () => {
@@ -103,6 +106,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 uiFilters,
                 latencyAggregationType: 'avg',
                 transactionType: 'request',
+                environment: 'testing',
               },
             })
           );
@@ -127,6 +131,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 uiFilters,
                 latencyAggregationType: 'p95',
                 transactionType: 'request',
+                environment: 'testing',
               },
             })
           );
@@ -151,6 +156,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 uiFilters,
                 latencyAggregationType: 'p99',
                 transactionType: 'request',
+                environment: 'testing',
               },
             })
           );
@@ -209,7 +215,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       const transactionType = 'request';
 
-      describe('without environment', () => {
+      describe('without an environment', () => {
         const uiFilters = JSON.stringify({});
         before(async () => {
           response = await supertest.get(
@@ -225,8 +231,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             })
           );
         });
-        it('should return an error response', () => {
-          expect(response.status).to.eql(400);
+
+        it('returns an ok response', () => {
+          expect(response.status).to.eql(200);
         });
       });
 
@@ -250,7 +257,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       describe('with environment selected in uiFilters', () => {
-        const uiFilters = JSON.stringify({ environment: 'production' });
+        const uiFilters = JSON.stringify({});
         before(async () => {
           response = await supertest.get(
             url.format({
@@ -261,6 +268,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 uiFilters,
                 latencyAggregationType: 'avg',
                 transactionType,
+                environment: 'production',
               },
             })
           );
@@ -289,8 +297,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
       });
 
-      describe('when not defined environments seleted', () => {
-        const uiFilters = JSON.stringify({ environment: 'ENVIRONMENT_NOT_DEFINED' });
+      describe('when not defined environments is seleted', () => {
+        const uiFilters = JSON.stringify({});
 
         before(async () => {
           response = await supertest.get(
@@ -302,6 +310,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 uiFilters,
                 latencyAggregationType: 'avg',
                 transactionType,
+                environment: 'ENVIRONMENT_NOT_DEFINED',
               },
             })
           );
@@ -328,7 +337,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       describe('with all environments selected', () => {
-        const uiFilters = JSON.stringify({ environment: 'ENVIRONMENT_ALL' });
+        const uiFilters = JSON.stringify({});
         before(async () => {
           response = await supertest.get(
             url.format({
@@ -339,6 +348,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 uiFilters,
                 latencyAggregationType: 'avg',
                 transactionType,
+                environment: 'ENVIRONMENT_ALL',
               },
             })
           );
@@ -355,7 +365,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       describe('with environment selected and empty kuery filter', () => {
-        const uiFilters = JSON.stringify({ kuery: '', environment: 'production' });
+        const uiFilters = JSON.stringify({ kuery: '' });
 
         before(async () => {
           response = await supertest.get(
@@ -367,6 +377,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 uiFilters,
                 latencyAggregationType: 'avg',
                 transactionType,
+                environment: 'production',
               },
             })
           );

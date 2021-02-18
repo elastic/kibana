@@ -20,6 +20,7 @@ export function useTransactionLatencyChartsFetcher() {
   const theme = useTheme();
   const {
     urlParams: {
+      environment,
       start,
       end,
       transactionName,
@@ -55,6 +56,7 @@ export function useTransactionLatencyChartsFetcher() {
           params: {
             path: { serviceName },
             query: {
+              environment,
               start,
               end,
               transactionType,
@@ -69,6 +71,7 @@ export function useTransactionLatencyChartsFetcher() {
       }
     },
     [
+      environment,
       serviceName,
       start,
       end,
