@@ -5,19 +5,18 @@
  * 2.0.
  */
 
-import { ElasticsearchClient, Logger } from 'kibana/server';
 import { ResponseError } from '@elastic/elasticsearch/lib/errors';
+import { ElasticsearchClient, Logger } from 'kibana/server';
+import { environmentQuery, rangeQuery } from '../../../../common/utils/queries';
 import {
   unwrapEsResponse,
   WrappedElasticsearchClientError,
 } from '../../../../../observability/server';
-import { rangeFilter } from '../../../../common/utils/range_filter';
 import { ESSearchResponse } from '../../../../../../typings/elasticsearch';
 import { Annotation as ESAnnotation } from '../../../../../observability/common/annotations';
 import { ScopedAnnotationsClient } from '../../../../../observability/server';
 import { Annotation, AnnotationType } from '../../../../common/annotations';
 import { SERVICE_NAME } from '../../../../common/elasticsearch_fieldnames';
-import { getEnvironmentUiFilterES } from '../../helpers/convert_ui_filters/get_environment_ui_filter_es';
 import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 import { withApmSpan } from '../../../utils/with_apm_span';
 
@@ -37,18 +36,18 @@ export function getStoredAnnotations({
   logger: Logger;
 }): Promise<Annotation[]> {
   return withApmSpan('get_stored_annotations', async () => {
+    const { start, end } = setup;
+
     const body = {
       size: 50,
       query: {
         bool: {
           filter: [
-            {
-              range: rangeFilter(setup.start, setup.end),
-            },
             { term: { 'annotation.type': 'deployment' } },
             { term: { tags: 'apm' } },
             { term: { [SERVICE_NAME]: serviceName } },
-            ...getEnvironmentUiFilterES(environment),
+            ...rangeQuery(start, end),
+            ...environmentQuery(environment),
           ],
         },
       },

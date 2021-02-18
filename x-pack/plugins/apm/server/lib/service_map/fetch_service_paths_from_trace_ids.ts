@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { rangeFilter } from '../../../common/utils/range_filter';
+import { rangeQuery } from '../../../common/utils/queries';
 import { ProcessorEvent } from '../../../common/processor_event';
 import { TRACE_ID } from '../../../common/elasticsearch_fieldnames';
 import {
@@ -42,7 +42,7 @@ export async function fetchServicePathsFromTraceIds(
                   [TRACE_ID]: traceIds,
                 },
               },
-              { range: rangeFilter(start, end) },
+              ...rangeQuery(start, end),
             ],
           },
         },
