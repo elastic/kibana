@@ -59,16 +59,16 @@ There are plans to support multiple other schedule formats in the near future.
 [%collapsible%open]
 =====
   `group`:::
-    (Required, string) We support grouping actions in the scenario of escalations or different types of alert instances. If you don't need this, feel free to use `default` as a value.
+    (Required, string) Grouping actions is recommended for escalations for different types of alert instances. If you don't need this, set this value to `default`.
 
   `id`:::
-    (Required, string) The id of the action saved object to execute.
+    (Required, string) The ID of the action saved object to execute.
 
   `actionTypeId`:::
-    (Required, string) The id of the <<action-types,action type>>.
+    (Required, string) The ID of the <<action-types,action type>>.
 
   `params`:::
-    (Required, object) The map to the `params` the <<action-types,action type>> will receive. In order to help apply context to strings, we handle them as mustache templates and pass in a default set of context.
+    (Required, object) The map to the `params` that the <<action-types,action type>> will receive. ` params` are handled as Mustache templates and passed a default set of context.
 =====
 
 

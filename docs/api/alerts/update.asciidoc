@@ -27,17 +27,15 @@ Update the attributes for an existing alert.
   (Optional, string array) A list of keywords to reference and search.
 
 `schedule`::
-  (Required, object) The schedule specifying when this alert should be run, using one of the available schedule formats specified under
+  (Required, object) When to run this alert. Use one of the available schedule formats.
 +
 ._Schedule Formats_.
 [%collapsible%open]
 =====
-A schedule is structured such that the key specifies the format you wish to use and its value specifies the schedule.
+A schedule uses a key: value format.  {kib} currently supports the _Interval format_ , which specifies the interval in seconds, minutes, hours, or days at which to execute the alert.
 
-We currently support the _Interval format_ which specifies the interval in seconds, minutes, hours or days at which the alert should execute.
 Example: `{ interval: "10s" }`, `{ interval: "5m" }`, `{ interval: "1h" }`, `{ interval: "1d" }`.
 
-There are plans to support multiple other schedule formats in the near future.
 =====
 
 `throttle`::
@@ -56,16 +54,16 @@ There are plans to support multiple other schedule formats in the near future.
 [%collapsible%open]
 =====
   `group`:::
-    (Required, string) We support grouping actions in the scenario of escalations or different types of alert instances. If you don't need this, feel free to use `default` as a value.
+    (Required, string) Grouping actions is recommended for escalations for different types of alert instances. If you don't need this, set the value to `default`.
 
   `id`:::
-    (Required, string) The id of the action saved object to execute.
+    (Required, string) The ID of the action that saved object executes.
 
   `actionTypeId`:::
     (Required, string) The id of the <<action-types,action type>>.
 
   `params`:::
-    (Required, object) The map to the `params` the <<action-types,action type>> will receive. In order to help apply context to strings, we handle them as mustache templates and pass in a default set of context.
+    (Required, object) The map to the `params` that the <<action-types,action type>> will receive. `params` are handled as Mustache templates and passed a default set of context.
 =====
 
 
