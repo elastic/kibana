@@ -48,6 +48,7 @@ export function TransactionErrorRateChart({
     transactionName,
     comparisonEnabled,
     comparisonType,
+    environment,
   } = urlParams;
 
   const { comparisonStart, comparisonEnd } = getTimeRangeComparison({
@@ -68,6 +69,7 @@ export function TransactionErrorRateChart({
               serviceName,
             },
             query: {
+              environment,
               start,
               end,
               transactionType,

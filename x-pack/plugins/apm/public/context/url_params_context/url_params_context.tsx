@@ -14,11 +14,10 @@ import React, {
   useState,
 } from 'react';
 import { withRouter } from 'react-router-dom';
-import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
 import { LocalUIFilterName } from '../../../common/ui_filter';
 import { pickKeys } from '../../../common/utils/pick_keys';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { localUIFilterNames } from '../../../server/lib/ui_filters/local_ui_filters/config';
+import { localUIFilterNames } from '../../../server/lib/rum_client/ui_filters/local_ui_filters/config';
 import { UIFilters } from '../../../typings/ui_filters';
 import { useDeepObjectIdentity } from '../../hooks/useDeepObjectIdentity';
 import { getDateRange } from './helpers';
@@ -39,7 +38,6 @@ function useUiFilters(params: IUrlParams): UIFilters {
 
   return useDeepObjectIdentity({
     kuery,
-    environment: environment || ENVIRONMENT_ALL.value,
     ...localUiFilters,
   });
 }
