@@ -5,14 +5,16 @@
  */
 
 import chrome from 'ui/chrome';
+import { addSystemApiHeader } from 'ui/system_api';
 let httpClient;
 export const setHttpClient = (client) => {
   httpClient = client;
 };
 const apiPrefix = chrome.addBasePath('/api/remote_clusters');
 
-export async function loadClusters() {
-  const response = await httpClient.get(`${apiPrefix}`);
+export async function loadClusters({ asSystemRequest } = {}) {
+  const headers = asSystemRequest ? addSystemApiHeader({}) : undefined;
+  const response = await httpClient.get(`${apiPrefix}`, { headers });
   return response.data;
 }
 
