@@ -5,6 +5,7 @@
  */
 
 import chrome from 'ui/chrome';
+import { addSystemApiHeader } from 'ui/system_api';
 import {
   API_BASE_PATH,
   API_REMOTE_CLUSTERS_BASE_PATH,
@@ -62,9 +63,10 @@ export const deleteAutoFollowPattern = (id) => {
 };
 
 /* Follower Index */
-export const loadFollowerIndices = () => (
-  httpClient.get(`${apiPrefix}/follower_indices`).then(extractData)
-);
+export const loadFollowerIndices = (asSystemRequest) => {
+  const headers = asSystemRequest ? addSystemApiHeader({}) : undefined;
+  return httpClient.get(`${apiPrefix}/follower_indices`, { headers }).then(extractData);
+};
 
 export const getFollowerIndex = (id) => (
   httpClient.get(`${apiPrefix}/follower_indices/${encodeURIComponent(id)}`).then(extractData)
