@@ -32,6 +32,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       require.resolve('./apps/ml'),
       require.resolve('./apps/lens'),
       require.resolve('./apps/upgrade_assistant'),
+      require.resolve('./apps/canvas'),
     ],
 
     pageObjects,
