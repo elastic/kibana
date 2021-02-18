@@ -38,7 +38,7 @@ export const useColorPicker = (
   uiState: PersistedState
 ): LegendColorPicker =>
   useMemo(
-    () => ({ anchor, color, onClose, onChange, seriesIdentifier }) => {
+    () => ({ anchor, color, onClose, onChange, seriesIdentifiers: [seriesIdentifier] }) => {
       const seriesName = getSeriesName(seriesIdentifier as XYChartSeriesIdentifier);
       const overwriteColors: Record<string, string> = uiState?.get('vis.colors', {});
       const colorIsOverwritten = Object.keys(overwriteColors).includes(seriesName as string);

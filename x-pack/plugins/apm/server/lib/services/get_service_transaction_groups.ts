@@ -13,7 +13,7 @@ import {
 } from '../../../common/elasticsearch_fieldnames';
 import { EventOutcome } from '../../../common/event_outcome';
 import { LatencyAggregationType } from '../../../common/latency_aggregation_types';
-import { rangeFilter } from '../../../common/utils/range_filter';
+import { environmentQuery, rangeQuery } from '../../../common/utils/queries';
 import { withApmSpan } from '../../utils/with_apm_span';
 import {
   getDocumentTypeFilterForAggregatedTransactions,
@@ -36,12 +36,14 @@ export type ServiceOverviewTransactionGroupSortField =
   | 'impact';
 
 export async function getServiceTransactionGroups({
+  environment,
   serviceName,
   setup,
   searchAggregatedTransactions,
   transactionType,
   latencyAggregationType,
 }: {
+  environment?: string;
   serviceName: string;
   setup: Setup & SetupTimeRange;
   searchAggregatedTransactions: boolean;
@@ -70,10 +72,11 @@ export async function getServiceTransactionGroups({
             filter: [
               { term: { [SERVICE_NAME]: serviceName } },
               { term: { [TRANSACTION_TYPE]: transactionType } },
-              { range: rangeFilter(start, end) },
               ...getDocumentTypeFilterForAggregatedTransactions(
                 searchAggregatedTransactions
               ),
+              ...rangeQuery(start, end),
+              ...environmentQuery(environment),
               ...esFilter,
             ],
           },

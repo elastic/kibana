@@ -51,6 +51,7 @@
       ]
     }
   ],
+  "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 6
+  "version": 7
 }
