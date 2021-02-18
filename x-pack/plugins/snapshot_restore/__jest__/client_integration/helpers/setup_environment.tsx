@@ -22,6 +22,7 @@ import { textService } from '../../../public/application/services/text';
 import { init as initHttpRequests } from './http_requests';
 import { UiMetricService } from '../../../public/application/services';
 import { documentationLinksService } from '../../../public/application/services/documentation';
+import { docLinksServiceMock } from '../../../../../../src/core/public/mocks';
 
 const mockHttpClient = axios.create({ adapter: axiosXhrAdapter });
 
@@ -53,7 +54,7 @@ export const setupEnvironment = () => {
   httpService.setup(mockHttpClient);
   breadcrumbService.setup(() => undefined);
   textService.setup(i18n);
-  documentationLinksService.setup({} as any);
+  documentationLinksService.setup(docLinksServiceMock.createStartContract());
   docTitleService.setup(() => undefined);
 
   const { server, httpRequestsMockHelpers } = initHttpRequests();
