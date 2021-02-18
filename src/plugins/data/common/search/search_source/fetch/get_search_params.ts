@@ -36,10 +36,12 @@ export function getSearchParamsFromRequest(
 ): ISearchRequestParams {
   const { getConfig } = dependencies;
   const searchParams = getSearchParams(getConfig);
+  const { trackTotalHits, ...body } = searchRequest.body;
 
   return {
     index: searchRequest.index.title || searchRequest.index,
-    body: searchRequest.body,
+    body,
+    track_total_hits: trackTotalHits,
     ...searchParams,
   };
 }
