@@ -6,8 +6,9 @@
  */
 
 import React from 'react';
+import { ActionFactoryPicker } from '../action_factory_picker';
 // import { EuiButton, EuiSpacer } from '@elastic/eui';
-import { FormDrilldownWizard as FormDrilldownWizardUi } from '../../components/form_drilldown_wizard';
+// import { FormDrilldownWizard as FormDrilldownWizardUi } from '../../components/form_drilldown_wizard';
 // import { txtDeleteDrilldownButtonLabel } from './i18n';
 // import {
 // ActionFactory,
@@ -21,6 +22,7 @@ import { useDrilldownManager } from '../context';
 
 export const FormDrilldownWizard: React.FC = ({}) => {
   const drilldowns = useDrilldownManager();
+  const actionFactory = drilldowns.useActionFactory();
 
   // const [
   //   wizardConfig,
@@ -37,6 +39,8 @@ export const FormDrilldownWizard: React.FC = ({}) => {
   //   }),
   //   [actionFactoryPlaceContext, wizardConfig.selectedTriggers]
   // );
+
+  if (!actionFactory) return <ActionFactoryPicker />;
 
   return (
     <>

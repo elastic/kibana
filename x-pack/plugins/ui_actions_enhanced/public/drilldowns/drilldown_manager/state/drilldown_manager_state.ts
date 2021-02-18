@@ -12,7 +12,7 @@ import {
   DrilldownManagerDependencies,
   DrilldownManagerScreen,
 } from '../types';
-import { ActionFactory } from '../../../dynamic_actions';
+import { ActionFactory, BaseActionFactoryContext } from '../../../dynamic_actions';
 
 export interface DrilldownManagerStateDeps
   extends DrilldownManagerDependencies,
@@ -78,6 +78,16 @@ export class DrilldownManagerState {
   public readonly close = (): void => {
     this.deps.onClose();
   };
+
+  public getActionFactoryContext(): BaseActionFactoryContext {
+    const placeContext = this.deps.placeContext ?? [];
+    const context: BaseActionFactoryContext = {
+      ...placeContext,
+      triggers: [],
+    };
+
+    return context;
+  }
 
   // Below are convenience React hooks for consuming observables in connected
   // React components.
