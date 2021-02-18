@@ -6,14 +6,16 @@
  */
 
 import React from 'react';
+
 import { useActions } from 'kea';
-import { EuiPageContent, EuiEmptyPrompt, EuiButton } from '@elastic/eui';
+
+import { EuiPageContent, EuiEmptyPrompt } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { TelemetryLogic } from '../../../../shared/telemetry';
-import { getAppSearchUrl } from '../../../../shared/enterprise_search_url';
 import { SetAppSearchChrome as SetPageChrome } from '../../../../shared/kibana_chrome';
-import { CREATE_ENGINES_PATH } from '../../../routes';
+import { EuiButtonTo } from '../../../../shared/react_router_helpers';
+import { TelemetryLogic } from '../../../../shared/telemetry';
+import { ENGINE_CREATION_PATH } from '../../../routes';
 
 import { EnginesOverviewHeader } from './header';
 
@@ -21,16 +23,6 @@ import './empty_state.scss';
 
 export const EmptyState: React.FC = () => {
   const { sendAppSearchTelemetry } = useActions(TelemetryLogic);
-
-  const buttonProps = {
-    href: getAppSearchUrl(CREATE_ENGINES_PATH),
-    target: '_blank',
-    onClick: () =>
-      sendAppSearchTelemetry({
-        action: 'clicked',
-        metric: 'create_first_engine_button',
-      }),
-  };
 
   return (
     <>
@@ -58,12 +50,23 @@ export const EmptyState: React.FC = () => {
             </p>
           }
           actions={
-            <EuiButton iconType="popout" fill {...buttonProps}>
+            <EuiButtonTo
+              data-test-subj="EmptyStateCreateFirstEngineCta"
+              iconType="popout"
+              fill
+              to={ENGINE_CREATION_PATH}
+              onClick={() =>
+                sendAppSearchTelemetry({
+                  action: 'clicked',
+                  metric: 'create_first_engine_button',
+                })
+              }
+            >
               <FormattedMessage
                 id="xpack.enterpriseSearch.appSearch.emptyState.createFirstEngineCta"
                 defaultMessage="Create an engine"
               />
-            </EuiButton>
+            </EuiButtonTo>
           }
         />
       </EuiPageContent>

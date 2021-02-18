@@ -11,16 +11,14 @@ import { useActions, useValues } from 'kea';
 
 import { EuiButton, EuiFieldText, EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
 
+import { ContentSection } from '../../../components/shared/content_section';
+import { ViewContentHeader } from '../../../components/shared/view_content_header';
 import {
   CUSTOMIZE_HEADER_TITLE,
   CUSTOMIZE_HEADER_DESCRIPTION,
   CUSTOMIZE_NAME_LABEL,
   CUSTOMIZE_NAME_BUTTON,
 } from '../../../constants';
-
-import { ContentSection } from '../../../components/shared/content_section';
-import { ViewContentHeader } from '../../../components/shared/view_content_header';
-
 import { SettingsLogic } from '../settings_logic';
 
 export const Customize: React.FC = () => {

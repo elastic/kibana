@@ -8,7 +8,9 @@
 import '../../__mocks__/kea.mock';
 
 import React from 'react';
+
 import { shallow } from 'enzyme';
+
 import { EuiEmptyPrompt } from '@elastic/eui';
 
 import { ErrorStatePrompt } from './';

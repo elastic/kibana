@@ -49,6 +49,7 @@ import {
   SavedObjectsServiceStart,
   ISavedObjectsExporter,
   ISavedObjectsImporter,
+  SavedObjectsClientProviderOptions,
 } from './saved_objects';
 import { CapabilitiesSetup, CapabilitiesStart } from './capabilities';
 import { MetricsServiceSetup, MetricsServiceStart } from './metrics';
@@ -260,6 +261,8 @@ export {
   SavedObjectsClientWrapperOptions,
   SavedObjectsClientFactory,
   SavedObjectsClientFactoryProvider,
+  SavedObjectsClosePointInTimeOptions,
+  SavedObjectsClosePointInTimeResponse,
   SavedObjectsCreateOptions,
   SavedObjectsErrorHelpers,
   SavedObjectsExportResultDetails,
@@ -277,6 +280,8 @@ export {
   SavedObjectsImportUnsupportedTypeError,
   SavedObjectMigrationContext,
   SavedObjectsMigrationLogger,
+  SavedObjectsOpenPointInTimeOptions,
+  SavedObjectsOpenPointInTimeResponse,
   SavedObjectsRawDoc,
   SavedObjectsRawDocParseOptions,
   SavedObjectSanitizedDoc,
@@ -373,6 +378,7 @@ export {
   SavedObjectsClientContract,
   SavedObjectsFindOptions,
   SavedObjectsFindOptionsReference,
+  SavedObjectsPitParams,
   SavedObjectsMigrationVersion,
 } from './types';
 
@@ -410,8 +416,9 @@ export interface RequestHandlerContext {
     savedObjects: {
       client: SavedObjectsClientContract;
       typeRegistry: ISavedObjectTypeRegistry;
-      exporter: ISavedObjectsExporter;
-      importer: ISavedObjectsImporter;
+      getClient: (options?: SavedObjectsClientProviderOptions) => SavedObjectsClientContract;
+      getExporter: (client: SavedObjectsClientContract) => ISavedObjectsExporter;
+      getImporter: (client: SavedObjectsClientContract) => ISavedObjectsImporter;
     };
     elasticsearch: {
       client: IScopedClusterClient;

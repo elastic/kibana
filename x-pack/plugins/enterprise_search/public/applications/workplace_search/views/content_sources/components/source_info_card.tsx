@@ -18,7 +18,6 @@ import {
 } from '@elastic/eui';
 
 import { SourceIcon } from '../../../components/shared/source_icon';
-
 import { REMOTE_SOURCE_LABEL, CREATED_LABEL, STATUS_LABEL, READY_TEXT } from '../constants';
 
 interface SourceInfoCardProps {

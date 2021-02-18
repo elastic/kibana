@@ -21,7 +21,7 @@ import {
   getIndexNameFromLoad,
   waitForIndexToPopulate,
 } from '../../utils';
-import { createUserAndRole } from '../roles_users_utils';
+import { createUserAndRole, deleteUserAndRole } from '../roles_users_utils';
 
 interface CreateResponse {
   index: string;
@@ -34,7 +34,6 @@ export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');
   const esArchiver = getService('esArchiver');
   const kbnClient = getService('kibanaServer');
-  const security = getService('security');
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
@@ -173,7 +172,7 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     it('rejects the request if the user does not have sufficient privileges', async () => {
-      await createUserAndRole(security, ROLES.t1_analyst);
+      await createUserAndRole(getService, ROLES.t1_analyst);
 
       await supertestWithoutAuth
         .post(DETECTION_ENGINE_SIGNALS_MIGRATION_URL)
@@ -181,6 +180,8 @@ export default ({ getService }: FtrProviderContext): void => {
         .auth(ROLES.t1_analyst, 'changeme')
         .send({ index: [legacySignalsIndexName] })
         .expect(400);
+
+      await deleteUserAndRole(getService, ROLES.t1_analyst);
     });
   });
 };

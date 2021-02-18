@@ -35,8 +35,13 @@ import {
   dataTypes,
   FleetServerPolicy,
   AGENT_POLICY_INDEX,
+  DEFAULT_FLEET_SERVER_AGENT_POLICY,
 } from '../../common';
-import { AgentPolicyNameExistsError, AgentPolicyDeletionError } from '../errors';
+import {
+  AgentPolicyNameExistsError,
+  AgentPolicyDeletionError,
+  IngestManagerError,
+} from '../errors';
 import { createAgentPolicyAction, listAgents } from './agents';
 import { packagePolicyService } from './package_policy';
 import { outputService } from './output';
@@ -129,6 +134,39 @@ class AgentPolicyService {
     };
   }
 
+  public async ensureDefaultFleetServerAgentPolicy(
+    soClient: SavedObjectsClientContract,
+    esClient: ElasticsearchClient
+  ): Promise<{
+    created: boolean;
+    policy: AgentPolicy;
+  }> {
+    const agentPolicies = await soClient.find<AgentPolicySOAttributes>({
+      type: AGENT_POLICY_SAVED_OBJECT_TYPE,
+      searchFields: ['is_default_fleet_server'],
+      search: 'true',
+    });
+
+    if (agentPolicies.total === 0) {
+      const newDefaultAgentPolicy: NewAgentPolicy = {
+        ...DEFAULT_FLEET_SERVER_AGENT_POLICY,
+      };
+
+      return {
+        created: true,
+        policy: await this.create(soClient, esClient, newDefaultAgentPolicy),
+      };
+    }
+
+    return {
+      created: false,
+      policy: {
+        id: agentPolicies.saved_objects[0].id,
+        ...agentPolicies.saved_objects[0].attributes,
+      },
+    };
+  }
+
   public async create(
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
@@ -203,6 +241,21 @@ class AgentPolicyService {
     }
 
     return agentPolicy;
+  }
+
+  public async getByIDs(
+    soClient: SavedObjectsClientContract,
+    ids: string[],
+    options: { fields?: string[] } = {}
+  ): Promise<AgentPolicy[]> {
+    const objects = ids.map((id) => ({ ...options, id, type: SAVED_OBJECT_TYPE }));
+    const agentPolicySO = await soClient.bulkGet<AgentPolicySOAttributes>(objects);
+
+    return agentPolicySO.saved_objects.map((so) => ({
+      id: so.id,
+      version: so.version,
+      ...so.attributes,
+    }));
   }
 
   public async list(
@@ -382,6 +435,10 @@ class AgentPolicyService {
       throw new Error('Agent policy not found');
     }
 
+    if (oldAgentPolicy.is_managed) {
+      throw new IngestManagerError(`Cannot update integrations of managed policy ${id}`);
+    }
+
     return await this._update(
       soClient,
       esClient,
@@ -407,6 +464,10 @@ class AgentPolicyService {
 
     if (!oldAgentPolicy) {
       throw new Error('Agent policy not found');
+    }
+
+    if (oldAgentPolicy.is_managed) {
+      throw new IngestManagerError(`Cannot remove integrations of managed policy ${id}`);
     }
 
     return await this._update(
@@ -542,18 +603,19 @@ class AgentPolicyService {
     if (!(await isAgentsSetup(soClient))) {
       return;
     }
-    const policy = await agentPolicyService.getFullAgentPolicy(soClient, agentPolicyId);
-    if (!policy || !policy.revision) {
+    const policy = await agentPolicyService.get(soClient, agentPolicyId);
+    const fullPolicy = await agentPolicyService.getFullAgentPolicy(soClient, agentPolicyId);
+    if (!policy || !fullPolicy || !fullPolicy.revision) {
       return;
     }
 
     const fleetServerPolicy: FleetServerPolicy = {
       '@timestamp': new Date().toISOString(),
-      revision_idx: policy.revision,
+      revision_idx: fullPolicy.revision,
       coordinator_idx: 0,
-      data: (policy as unknown) as FleetServerPolicy['data'],
-      policy_id: policy.id,
-      default_fleet_server: false,
+      data: (fullPolicy as unknown) as FleetServerPolicy['data'],
+      policy_id: fullPolicy.id,
+      default_fleet_server: policy.is_default_fleet_server === true,
     };
 
     await esClient.create({

@@ -9,12 +9,13 @@ import '../../../../../__mocks__/shallow_useeffect.mock';
 import { setMockActions, setMockValues } from '../../../../../__mocks__';
 
 import React from 'react';
+
 import { shallow } from 'enzyme';
 
-import { EuiBadge, EuiCallOut, EuiSwitch } from '@elastic/eui';
+import { EuiSwitch } from '@elastic/eui';
 
-import { FeatureIds } from '../../../../types';
 import { staticSourceData } from '../../source_data';
+
 import { ConnectInstance } from './connect_instance';
 
 describe('ConnectInstance', () => {
@@ -44,7 +45,6 @@ describe('ConnectInstance', () => {
   const credentialsSourceData = staticSourceData[13];
   const oauthSourceData = staticSourceData[0];
   const subdomainSourceData = staticSourceData[16];
-  const privateSourceData = staticSourceData[6];
 
   const props = {
     ...credentialsSourceData,
@@ -126,22 +126,6 @@ describe('ConnectInstance', () => {
     expect(setSourceSubdomainValue).toHaveBeenCalledWith(TEXT);
   });
 
-  it('shows correct feature badges', () => {
-    setMockValues({ ...values, isOrganization: false });
-    const wrapper = shallow(<ConnectInstance {...props} features={privateSourceData.features} />);
-
-    expect(wrapper.find(EuiBadge)).toHaveLength(2);
-  });
-
-  it('shows no feature badges', () => {
-    setMockValues({ ...values, isOrganization: false });
-    const features = { ...privateSourceData.features };
-    features.platinumPrivateContext = [FeatureIds.SyncFrequency];
-    const wrapper = shallow(<ConnectInstance {...props} features={features as any} />);
-
-    expect(wrapper.find(EuiBadge)).toHaveLength(0);
-  });
-
   it('calls handler on click', () => {
     const wrapper = shallow(<ConnectInstance {...props} />);
     wrapper.find(EuiSwitch).simulate('change', { target: { checked: true } });
@@ -161,16 +145,23 @@ describe('ConnectInstance', () => {
     expect(mockReplace).toHaveBeenCalled();
   });
 
-  it('renders permissions link', () => {
-    const wrapper = shallow(<ConnectInstance {...oauthProps} needsPermissions={false} />);
+  it('renders doc-level permissions message when not available', () => {
+    const wrapper = shallow(<ConnectInstance {...props} needsPermissions={false} />);
 
-    expect(wrapper.find('[data-test-subj="NeedsPermissionsMessage"]')).toHaveLength(1);
+    expect(wrapper.find('FormattedMessage')).toHaveLength(1);
   });
 
-  it('shows permissions callout', () => {
+  it('renders callout when not synced', () => {
     setMockValues({ ...values, indexPermissionsValue: false });
-    const wrapper = shallow(<ConnectInstance {...props} features={privateSourceData.features} />);
+    const wrapper = shallow(<ConnectInstance {...props} />);
 
-    expect(wrapper.find(EuiCallOut)).toHaveLength(1);
+    expect(wrapper.find('EuiCallOut')).toHaveLength(1);
+  });
+
+  it('renders documentLevelPermissionsCallout', () => {
+    setMockValues({ ...values, hasPlatinumLicense: false });
+    const wrapper = shallow(<ConnectInstance {...oauthProps} />);
+
+    expect(wrapper.find('[data-test-subj="DocumentLevelPermissionsCallout"]')).toHaveLength(1);
   });
 });

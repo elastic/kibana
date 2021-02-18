@@ -24,14 +24,18 @@ import {
 } from '../translations';
 
 interface InvestigateInTimelineActionProps {
-  ariaLabel?: string;
-  ecsRowData: Ecs;
+  ecsRowData: Ecs | Ecs[] | null;
   nonEcsRowData: TimelineNonEcsData[];
+  ariaLabel?: string;
+  alertIds?: string[];
+  fetchEcsAlertsData?: (alertIds?: string[]) => Promise<Ecs[]>;
 }
 
 const InvestigateInTimelineActionComponent: React.FC<InvestigateInTimelineActionProps> = ({
   ariaLabel = ACTION_INVESTIGATE_IN_TIMELINE_ARIA_LABEL,
+  alertIds,
   ecsRowData,
+  fetchEcsAlertsData,
   nonEcsRowData,
 }) => {
   const {
@@ -66,25 +70,42 @@ const InvestigateInTimelineActionComponent: React.FC<InvestigateInTimelineAction
     [dispatch, updateTimelineIsLoading]
   );
 
-  const investigateInTimelineAlertClick = useCallback(
-    () =>
-      sendAlertToTimelineAction({
-        apolloClient,
-        createTimeline,
-        ecsData: ecsRowData,
-        nonEcsData: nonEcsRowData,
-        searchStrategyClient,
-        updateTimelineIsLoading,
-      }),
-    [
-      apolloClient,
-      createTimeline,
-      ecsRowData,
-      nonEcsRowData,
-      searchStrategyClient,
-      updateTimelineIsLoading,
-    ]
-  );
+  const investigateInTimelineAlertClick = useCallback(async () => {
+    try {
+      if (ecsRowData != null) {
+        await sendAlertToTimelineAction({
+          apolloClient,
+          createTimeline,
+          ecsData: ecsRowData,
+          nonEcsData: nonEcsRowData,
+          searchStrategyClient,
+          updateTimelineIsLoading,
+        });
+      }
+      if (ecsRowData == null && fetchEcsAlertsData) {
+        const alertsEcsData = await fetchEcsAlertsData(alertIds);
+        await sendAlertToTimelineAction({
+          apolloClient,
+          createTimeline,
+          ecsData: alertsEcsData,
+          nonEcsData: nonEcsRowData,
+          searchStrategyClient,
+          updateTimelineIsLoading,
+        });
+      }
+    } catch {
+      // TODO show a toaster that something went wrong
+    }
+  }, [
+    alertIds,
+    apolloClient,
+    createTimeline,
+    ecsRowData,
+    fetchEcsAlertsData,
+    nonEcsRowData,
+    searchStrategyClient,
+    updateTimelineIsLoading,
+  ]);
 
   return (
     <ActionIconItem

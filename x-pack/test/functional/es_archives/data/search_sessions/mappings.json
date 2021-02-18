@@ -31,7 +31,7 @@
           "core-usage-stats": "3d1b76c39bfb2cc8296b024d73854724",
           "dashboard": "40554caf09725935e2c02e02563a2d07",
           "endpoint:user-artifact": "4a11183eee21e6fbad864f7a30b39ad0",
-          "endpoint:user-artifact-manifest": "4b9c0e7cfaf86d82a7ee9ed68065e50d",
+          "endpoint:user-artifact-manifest": "a0d7b04ad405eed54d76e279c3727862",
           "enterprise_search_telemetry": "3d1b76c39bfb2cc8296b024d73854724",
           "epm-packages": "0cbbb16506734d341a96aaed65ec6413",
           "epm-packages-assets": "44621b2f6052ef966da47b7c3a00f33b",
@@ -832,16 +832,25 @@
               "index": false,
               "type": "date"
             },
-            "ids": {
-              "index": false,
-              "type": "keyword"
-            },
             "schemaVersion": {
               "type": "keyword"
             },
             "semanticVersion": {
               "index": false,
               "type": "keyword"
+            },
+            "artifacts": {
+              "type": "nested",
+              "properties": {
+                "policyId": {
+                  "type": "keyword",
+                  "index": false
+                },
+                "artifactId": {
+                  "type": "keyword",
+                  "index": false
+                }
+              }
             }
           }
         },

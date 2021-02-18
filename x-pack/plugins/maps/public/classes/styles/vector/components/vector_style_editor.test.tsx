@@ -9,7 +9,7 @@ import React from 'react';
 import { shallow } from 'enzyme';
 import { StyleProperties, VectorStyleEditor } from './vector_style_editor';
 import { getDefaultStaticProperties } from '../vector_style_defaults';
-import { IVectorLayer } from '../../../layers/vector_layer/vector_layer';
+import { IVectorLayer } from '../../../layers/vector_layer';
 import { IVectorSource } from '../../../sources/vector_source';
 import {
   FIELD_ORIGIN,
