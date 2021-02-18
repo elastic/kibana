@@ -437,7 +437,7 @@ export const areLayersLoaded = createSelector(
         layer.isVisible() &&
         layer.showAtZoomLevel(zoom) &&
         !layer.hasErrors() &&
-        !layer.isDataLoaded()
+        !layer.isInitialDataLoadComplete()
       ) {
         return false;
       }
