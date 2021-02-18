@@ -63,7 +63,6 @@ Password::  Password for 'login' type authentication.
 
 |===
 
-[[email-connector-secret-properties]]
 **`secrets`** defines sensitive information for the action type and contains the following properties:
 
 [cols="2*<"]

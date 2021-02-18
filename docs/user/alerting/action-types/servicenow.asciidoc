@@ -42,7 +42,6 @@ Password::  Password for HTTP Basic authentication.
 
 |===
 
-[[servicenow-connector-secrets-properties]]
 **`secrets`** defines sensitive information for the action type and contains the following properties:
 
 [cols="2*<"]
@@ -61,61 +60,31 @@ Password::  Password for HTTP Basic authentication.
 
 ServiceNow actions have the following configuration properties:
 
-Subaction::        The sub action to perform. It can be `pushToService`, `getFields`, `getIncident`, and `getChoices`.
+Subaction::        The subaction to perform. Either `pushToService`, `getFields`, `getIncident`, or `getChoices`.
 Subaction Params:: The parameters of the subaction.
 
-===== pushToService subaction configuration
+==== `pushToService` subaction configuration
 
-Incident:: The ServiceNow incident.
-
-[cols="3*<"]
-|===
-
-| `short_description`
-| A short description for the incident, used for searching the contents of the knowledge base.
-| string
-
-| `description`
-| The details about the incident.
-| string _(optional)_
-
-| `externalId`
-| The id of the incident in ServiceNow. If presented the incident will be update. Otherwise a new incident will be created.
-| string _(optional)_
-
-| `severity`
-| The severity of the incident.
-| string _(optional)_
-
-| `urgency`
-| The extent to which the incident resolution can delay.
-| string _(optional)_
-
-| `impact`
-| The effect an incident has on business. Can be measured by the number of affected users or by how critical it is to the business in question.
-| string _(optional)_
-
-| `category`
-| The name of the category in ServiceNow.
-| string _(optional)_
-
-| `subcategory`
-| The name of the subcategory in ServiceNow.
-| string _(optional)_
-
-|===
-
+Incident:: The ServiceNow incident which has the following properties:
+* `short_description` - A short description for the incident, used for searching the contents of the knowledge base.
+* `description` - The details about the incident.
+* `externalId` - The id of the incident in ServiceNow. If present the incident will be updated. Otherwise a new incident will be created.
+* `severity` - The severity of the incident.
+* `urgency` - The extent to which the incident resolution can delay.
+* `impact` - The effect an incident has on business. Can be measured by the number of affected users or by how critical it is to the business in question.
+* `category` - The name of the category in ServiceNow.
+* `subcategory` - The name of the subcategory in ServiceNow.
 Comments:: The comments of the case. A comment is of the form `{ commentId: string, version: string, comment: string }`.
 
-===== getFields subaction configuration
+===== `getFields` subaction configuration
 
-No parameters for `getFields` sub-action. Provide an empty object `{}`.
+No parameters for `getFields` subaction. Provide an empty object `{}`.
 
-===== getIncident subaction configuration
+===== `getIncident` subaction configuration
 
 External ID:: The id of the incident in ServiceNow.
 
-===== getChoices subaction configuration
+===== `getChoices` subaction configuration
 
 Fields:: An array of fields. Example: `[priority, category, impact]`.
 

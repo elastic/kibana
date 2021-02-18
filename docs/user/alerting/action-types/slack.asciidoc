@@ -26,7 +26,6 @@ Webhook URL::   The URL of the incoming webhook. See https://api.slack.com/messa
      webhookUrl: 'https://hooks.slack.com/services/abcd/efgh/ijklmnopqrstuvwxyz'
 --
 
-[[slack-connector-secrets-properties]]
 **`secrets`** defines sensitive information for the action type and contains the following properties:
 
 [cols="2*<"]

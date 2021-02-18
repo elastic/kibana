@@ -34,7 +34,7 @@ API token (or password)::  Jira API authentication token (or password) for HTTP 
 --
 
 [[jira-connector-config-properties]]
-`config` defines the action type specific to the configuration and contains the following properties:
+**`config`** defines the action type specific to the configuration and contains the following properties:
 
 [cols="2*<"]
 |===
@@ -47,7 +47,7 @@ API token (or password)::  Jira API authentication token (or password) for HTTP 
 
 |===
 
-`secrets` defines sensitive information for the action type:
+**`secrets`** defines sensitive information for the action type and contains the following properties:
 
 [cols="2*<"]
 |===
@@ -65,14 +65,44 @@ API token (or password)::  Jira API authentication token (or password) for HTTP 
 
 Jira actions have the following configuration properties:
 
-Issue type::              The type of the issue.
-Priority::              The priority of the incident.
-Labels::              The labels of the incident.
-Title::    A title for the issue, used for searching the contents of the knowledge base. 
-Description::          The details about the incident.
-Parent::              The parent issue id or key. Only for `Sub-task` issue types.
-Priority::              The priority of the incident.
-Additional comments::  Additional information for the client, such as how to troubleshoot the issue.
+Subaction::        The subaction to perform. Either `pushToService`, `getIncident`, `issueTypes`, `fieldsByIssueType`, `issues`, `issue`, or `getFields`.
+Subaction Params:: The parameters of the subaction.
+
+==== `pushToService` subaction configuration
+
+Incident:: The Jira incident which has the following properties:
+* `summary` - The title of the issue.
+* `description` - The description of the issue.
+* `externalId` - The id of the issue in Jira. If present the issue will be updated. Otherwise a new issue will be created.
+* `issueType` - The id of the issue type in Jira.
+* `priority` - The name of the priority in Jira. Example: `Medium`.
+* `labels` - An array of labels. Labels cannot contain spaces.
+* `parent` - The parent issue id or key. Only for Sub-task issue types.
+Comments:: The comments of the case. A comment is of the form `{ commentId: string, version: string, comment: string }`.
+
+==== `getIncident` subaction configuration
+
+External ID:: The id of the issue in Jira.
+
+==== `issueTypes` subaction configuration
+
+No parameters for `issueTypes` subaction. Provide an empty object `{}`.
+
+==== `fieldsByIssueType` subaction configuration
+
+ID:: The id of the issue in Jira.
+
+==== `issues` subaction configuration
+
+Title:: The title to search for.
+
+==== `issue` subaction configuration
+
+ID:: The id of the issue in Jira.
+
+==== `getFields` subaction configuration
+
+No parameters for `getFields` subaction. Provide an empty object `{}`.
 
 [[configuring-jira]]
 ==== Configuring and testing Jira

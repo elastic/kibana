@@ -56,7 +56,6 @@ Password::  Password for HTTP basic authentication.
 
 |===
 
-[[webhook-connector-secret-properties]]
 **`secrets`** defines sensitive information for the action type and contains the following properties:
 
 [cols="2*<"]
