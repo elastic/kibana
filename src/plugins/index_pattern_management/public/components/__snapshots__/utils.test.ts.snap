@@ -5,16 +5,16 @@ Array [
   Object {
     "default": true,
     "id": "test",
-    "sort": "0test",
+    "sort": "0test name",
     "tags": undefined,
-    "title": "test",
+    "title": "test name",
   },
   Object {
     "default": false,
     "id": "test1",
-    "sort": "1test1",
+    "sort": "1test1 name",
     "tags": undefined,
-    "title": "test1",
+    "title": "test1 name",
   },
 ]
 `;

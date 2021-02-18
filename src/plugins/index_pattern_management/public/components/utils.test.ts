@@ -14,11 +14,11 @@ const indexPatternContractMock = ({
     Promise.resolve([
       {
         id: 'test',
-        title: 'test',
+        title: 'test name',
       },
       {
         id: 'test1',
-        title: 'test1',
+        title: 'test1 name',
       },
     ])
   ),

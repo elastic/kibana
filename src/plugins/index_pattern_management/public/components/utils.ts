@@ -15,7 +15,7 @@ export async function getIndexPatterns(
   indexPatternsService: IndexPatternsContract
 ) {
   const existingIndexPatterns = await indexPatternsService.getIdsWithTitle();
-  const resolved = await Promise.all(
+  const indexPatternsListItems = await Promise.all(
     existingIndexPatterns.map(async ({ id, title }) => {
       const isDefault = defaultIndex === id;
       const pattern = await indexPatternsService.get(id);
@@ -38,7 +38,7 @@ export async function getIndexPatterns(
   );
 
   return (
-    resolved.sort((a, b) => {
+    indexPatternsListItems.sort((a, b) => {
       if (a.sort < b.sort) {
         return -1;
       } else if (a.sort > b.sort) {
