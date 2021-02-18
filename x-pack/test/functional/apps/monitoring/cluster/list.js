@@ -12,7 +12,7 @@ export default function ({ getService, getPageObjects }) {
   const clusterList = getService('monitoringClusterList');
   const clusterOverview = getService('monitoringClusterOverview');
   const testSubjects = getService('testSubjects');
-  const PageObjects = getPageObjects(['monitoring', 'header']);
+  const PageObjects = getPageObjects(['monitoring', 'header', 'common']);
 
   describe('Cluster listing', () => {
     describe('with trial license clusters', () => {
@@ -108,6 +108,7 @@ export default function ({ getService, getPageObjects }) {
         });
 
         it('primary basic cluster shows cluster metrics', async () => {
+          // PageObjects.common.sleep(10000)
           expect(await clusterList.getClusterName(SUPPORTED_CLUSTER_UUID)).to.be('production');
           expect(await clusterList.getClusterStatus(SUPPORTED_CLUSTER_UUID)).to.be('N/A');
           expect(await clusterList.getClusterNodesCount(SUPPORTED_CLUSTER_UUID)).to.be('2');
