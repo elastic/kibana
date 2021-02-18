@@ -42,40 +42,40 @@ export const LockedPolicyCard = memo(() => {
             </strong>
           </h3>
         }
-        description={
-          <EuiFlexGroup className="lockedCardDescription" direction="column" gutterSize="none">
-            <EuiFlexItem>
-              <h4>
-                <EuiTextColor color="subdued">
-                  <FormattedMessage
-                    id="xpack.securitySolution.endpoint.policy.details.upgradeToPlatinum"
-                    defaultMessage="Upgrade to Elastic Platinum"
-                  />
-                </EuiTextColor>
-              </h4>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <p>
+        description={false}
+      >
+        <EuiFlexGroup className="lockedCardDescription" direction="column" gutterSize="none">
+          <EuiFlexItem>
+            <h4>
+              <EuiTextColor color="subdued">
                 <FormattedMessage
-                  id="xpack.securitySolution.endpoint.policy.details.lockedCard"
-                  defaultMessage="To turn on Ransomware protection, you must upgrade your license to Platinum, start a
-            free 30-day trial, or spin up a {cloudDeploymentLink} on AWS, GCP, or Azure."
-                  values={{
-                    cloudDeploymentLink: (
-                      <EuiLink href="https://www.elastic.co/cloud/" target="_blank">
-                        <FormattedMessage
-                          id="xpack.securitySolution.endpoint.policy.details.cloudDeploymentLInk"
-                          defaultMessage="cloud deployment"
-                        />
-                      </EuiLink>
-                    ),
-                  }}
+                  id="xpack.securitySolution.endpoint.policy.details.upgradeToPlatinum"
+                  defaultMessage="Upgrade to Elastic Platinum"
                 />
-              </p>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        }
-      />
+              </EuiTextColor>
+            </h4>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <p>
+              <FormattedMessage
+                id="xpack.securitySolution.endpoint.policy.details.lockedCard"
+                defaultMessage="To turn on Ransomware protection, you must upgrade your license to Platinum, start a
+            free 30-day trial, or spin up a {cloudDeploymentLink} on AWS, GCP, or Azure."
+                values={{
+                  cloudDeploymentLink: (
+                    <EuiLink href="https://www.elastic.co/cloud/" target="_blank">
+                      <FormattedMessage
+                        id="xpack.securitySolution.endpoint.policy.details.cloudDeploymentLInk"
+                        defaultMessage="cloud deployment"
+                      />
+                    </EuiLink>
+                  ),
+                }}
+              />
+            </p>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiCard>
     </LockedPolicyDiv>
   );
 });

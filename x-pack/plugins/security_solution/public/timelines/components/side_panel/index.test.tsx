@@ -29,6 +29,7 @@ jest.mock('react-apollo', () => {
     Query: () => <></>,
   };
 });
+
 describe('Details Panel Component', () => {
   const state: State = { ...mockGlobalState };
 
