@@ -3,6 +3,7 @@
     "Elastic"
   ],
   "description": "The Debugger and SilentProcessExit registry keys can allow an adversary to intercept the execution of files, causing a different process to be executed. This functionality can be abused by an adversary to establish persistence.",
+  "from": "now-9m",
   "index": [
     "winlogbeat-*",
     "logs-endpoint.events.*",
@@ -49,6 +50,7 @@
       ]
     }
   ],
+  "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 2
+  "version": 3
 }

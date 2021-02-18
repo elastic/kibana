@@ -3,6 +3,7 @@
     "Elastic"
   ],
   "description": "Identifies a privilege escalation attempt via a rogue Windows directory (Windir) environment variable. This is a known primitive that is often combined with other vulnerabilities to elevate privileges.",
+  "from": "now-9m",
   "index": [
     "winlogbeat-*",
     "logs-endpoint.events.*",
@@ -49,6 +50,7 @@
       ]
     }
   ],
+  "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 2
+  "version": 3
 }

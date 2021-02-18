@@ -3,6 +3,7 @@
     "Elastic"
   ],
   "description": "Detects attempts to maintain persistence by creating registry keys using AppCert DLLs. AppCert DLLs are loaded by every process using the common API functions to create processes.",
+  "from": "now-9m",
   "index": [
     "winlogbeat-*",
     "logs-endpoint.events.*",
@@ -46,6 +47,7 @@
       ]
     }
   ],
+  "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 2
+  "version": 3
 }

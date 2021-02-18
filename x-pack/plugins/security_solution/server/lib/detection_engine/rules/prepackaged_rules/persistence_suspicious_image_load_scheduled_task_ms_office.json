@@ -3,6 +3,7 @@
     "Elastic"
   ],
   "description": "Identifies a suspicious image load (taskschd.dll) from Microsoft Office processes. This behavior may indicate adversarial activity where a scheduled task is configured via Windows Component Object Model (COM). This technique can be used to configure persistence and evade monitoring by avoiding the usage of the traditional Windows binary (schtasks.exe) used to manage scheduled tasks.",
+  "from": "now-9m",
   "index": [
     "winlogbeat-*",
     "logs-endpoint.events.*",
@@ -43,6 +44,7 @@
       ]
     }
   ],
+  "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 2
+  "version": 3
 }

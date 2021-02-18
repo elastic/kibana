@@ -6,6 +6,7 @@
   "false_positives": [
     "These programs may be used by Windows developers but use by non-engineers is unusual."
   ],
+  "from": "now-9m",
   "index": [
     "winlogbeat-*",
     "logs-endpoint.events.*",
@@ -51,6 +52,7 @@
       "technique": []
     }
   ],
+  "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 6
+  "version": 7
 }

@@ -3,6 +3,7 @@
     "Elastic"
   ],
   "description": "Identifies instances of lower privilege accounts enumerating Administrator accounts or groups using built-in Windows tools.",
+  "from": "now-9m",
   "index": [
     "logs-endpoint.events.*",
     "winlogbeat-*",
@@ -44,6 +45,7 @@
       ]
     }
   ],
+  "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 2
+  "version": 3
 }

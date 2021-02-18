@@ -3,6 +3,7 @@
     "Elastic"
   ],
   "description": "Discovery of remote system information using built-in commands, which may be used to mover laterally.",
+  "from": "now-9m",
   "index": [
     "logs-endpoint.events.*",
     "winlogbeat-*",
@@ -39,6 +40,7 @@
       ]
     }
   ],
+  "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 2
+  "version": 3
 }

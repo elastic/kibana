@@ -3,6 +3,7 @@
     "Elastic"
   ],
   "description": "Identifies script engines creating files in the startup folder, or the creation of script files in the startup folder.",
+  "from": "now-9m",
   "index": [
     "winlogbeat-*",
     "logs-endpoint.events.*",
@@ -46,6 +47,7 @@
       ]
     }
   ],
+  "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 2
+  "version": 3
 }

@@ -27,6 +27,7 @@
     "Threat Detection",
     "Defense Evasion"
   ],
+  "timestamp_override": "event.ingested",
   "type": "query",
   "version": 1
 }

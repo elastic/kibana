@@ -26,6 +26,7 @@
     "Threat Detection",
     "Persistence"
   ],
+  "timestamp_override": "event.ingested",
   "type": "query",
   "version": 1
 }

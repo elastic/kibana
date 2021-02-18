@@ -3,6 +3,7 @@
     "Elastic"
   ],
   "description": "Detects attempts to disable Gatekeeper on macOS. Gatekeeper is a security feature that's designed to ensure that only trusted software is run. Adversaries may attempt to disable Gatekeeper before executing malicious code.",
+  "from": "now-9m",
   "index": [
     "auditbeat-*",
     "logs-endpoint.events.*"
@@ -42,6 +43,7 @@
       ]
     }
   ],
+  "timestamp_override": "event.ingested",
   "type": "query",
   "version": 1
 }

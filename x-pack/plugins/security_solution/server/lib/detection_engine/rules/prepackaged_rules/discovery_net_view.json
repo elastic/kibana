@@ -3,6 +3,7 @@
     "Elastic"
   ],
   "description": "Identifies attempts to enumerate hosts in a network using the built-in Windows net.exe tool.",
+  "from": "now-9m",
   "index": [
     "logs-endpoint.events.*",
     "winlogbeat-*",
@@ -44,6 +45,7 @@
       ]
     }
   ],
+  "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 2
+  "version": 3
 }

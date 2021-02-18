@@ -74,6 +74,7 @@
       ]
     }
   ],
+  "timestamp_override": "event.ingested",
   "type": "eql",
   "version": 1
 }

@@ -6,6 +6,7 @@
   "false_positives": [
     "Enumeration of files and directories may not be inherently malicious and noise may come from scripts, automation tools, or normal command line usage. It's important to baseline your environment to determine the amount of expected noise and exclude any known FP's from the rule."
   ],
+  "from": "now-9m",
   "index": [
     "logs-endpoint.events.*",
     "winlogbeat-*",
@@ -42,6 +43,7 @@
       ]
     }
   ],
+  "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 2
+  "version": 3
 }

@@ -3,6 +3,7 @@
     "Elastic"
   ],
   "description": "Identifies execution of suspicious persistent programs (scripts, rundll32, etc.) by looking at process lineage and command line usage.",
+  "from": "now-9m",
   "index": [
     "winlogbeat-*",
     "logs-endpoint.events.*",

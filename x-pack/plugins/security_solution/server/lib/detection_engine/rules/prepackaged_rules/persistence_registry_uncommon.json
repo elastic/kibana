@@ -3,6 +3,7 @@
     "Elastic"
   ],
   "description": "Detects changes to registry persistence keys that are uncommonly used or modified by legitimate programs. This could be an indication of an adversary's attempt to persist in a stealthy manner.",
+  "from": "now-9m",
   "index": [
     "winlogbeat-*",
     "logs-endpoint.events.*",
@@ -51,6 +52,7 @@
       ]
     }
   ],
+  "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 2
+  "version": 3
 }
