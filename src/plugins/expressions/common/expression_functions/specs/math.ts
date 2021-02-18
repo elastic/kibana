@@ -112,6 +112,7 @@ export const math: ExpressionFunctionDefinition<
     },
     onError: {
       types: ['string'],
+      options: ['throw', 'false', 'zero', 'null'],
       help: i18n.translate('expressions.functions.math.args.onErrorHelpText', {
         defaultMessage:
           "In case the {TINYMATH} evaluation fails or returns NaN, the return value is specified by onError. When `'throw'`, it will throw an exception, terminating expression execution (default).",
