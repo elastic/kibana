@@ -240,6 +240,42 @@ describe('AllCases', () => {
     });
   });
 
+  it('should render correct actions for case collection', async () => {
+    useGetCasesMock.mockReturnValue({
+      ...defaultGetCases,
+      data: {
+        ...defaultGetCases.data,
+        cases: [
+          {
+            ...defaultGetCases.data.cases[0],
+            id: null,
+            createdAt: null,
+            createdBy: null,
+            status: null,
+            subCases: null,
+            tags: null,
+            title: null,
+            totalComment: null,
+            totalAlerts: null,
+            type: CaseType.collection,
+          },
+        ],
+      },
+    });
+    const wrapper = mount(
+      <TestProviders>
+        <AllCases userCanCrud={true} />
+      </TestProviders>
+    );
+
+    await waitFor(() => {
+      expect(wrapper.find('[data-test-subj="in-open"]').exists()).toBeFalsy();
+      expect(wrapper.find('[data-test-subj="in-progress"]').exists()).toBeFalsy();
+      expect(wrapper.find('[data-test-subj="action-close"]').exists()).toBeFalsy();
+      expect(wrapper.find('[data-test-subj="action-delete"]').exists()).toBeTruthy();
+    });
+  });
+
   it('should not render case link or actions on modal=true', async () => {
     const wrapper = mount(
       <TestProviders>
@@ -374,6 +410,48 @@ describe('AllCases', () => {
       expect(handleOnDeleteConfirm.mock.calls[0][0]).toStrictEqual(
         useGetCasesMockState.data.cases.map(({ id }) => ({ id }))
       );
+    });
+  });
+
+  it('Renders correct bulk actoins for case collection - enable only bulk delete if any collection is selected', async () => {
+    useGetCasesMock.mockReturnValue({
+      ...defaultGetCases,
+      selectedCases: [
+        ...useGetCasesMockState.data.cases,
+        {
+          ...useGetCasesMockState.data.cases[0],
+          type: CaseType.collection,
+        },
+      ],
+    });
+
+    useDeleteCasesMock
+      .mockReturnValueOnce({
+        ...defaultDeleteCases,
+        isDisplayConfirmDeleteModal: false,
+      })
+      .mockReturnValue({
+        ...defaultDeleteCases,
+        isDisplayConfirmDeleteModal: true,
+      });
+
+    const wrapper = mount(
+      <TestProviders>
+        <AllCases userCanCrud={true} />
+      </TestProviders>
+    );
+    await waitFor(() => {
+      wrapper.find('[data-test-subj="case-table-bulk-actions"] button').first().simulate('click');
+      expect(wrapper.find('[data-test-subj="cases-bulk-open-button"]').exists()).toEqual(false);
+      expect(
+        wrapper.find('[data-test-subj="cases-bulk-in-progress-button"]').first().props().disabled
+      ).toEqual(true);
+      expect(
+        wrapper.find('[data-test-subj="cases-bulk-close-button"]').first().props().disabled
+      ).toEqual(true);
+      expect(
+        wrapper.find('[data-test-subj="cases-bulk-delete-button"]').first().props().disabled
+      ).toEqual(false);
     });
   });
 

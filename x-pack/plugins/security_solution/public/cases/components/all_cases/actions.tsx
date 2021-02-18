@@ -77,6 +77,9 @@ export const getActions = ({
   };
 
   return [
+    openCaseAction,
+    makeInProgressAction,
+    closeCaseAction,
     {
       description: i18n.DELETE_CASE,
       icon: 'trash',
@@ -85,8 +88,5 @@ export const getActions = ({
       type: 'icon',
       'data-test-subj': 'action-delete',
     },
-    openCaseAction,
-    makeInProgressAction,
-    closeCaseAction,
   ];
 };
