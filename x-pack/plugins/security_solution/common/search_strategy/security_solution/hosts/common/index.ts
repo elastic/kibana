@@ -70,7 +70,6 @@ export interface HostAggEsItem {
   cloud_machine_type?: HostBuckets;
   cloud_provider?: HostBuckets;
   cloud_region?: HostBuckets;
-  firstSeen?: HostValue;
   host_architecture?: HostBuckets;
   host_id?: HostBuckets;
   host_ip?: HostBuckets;
@@ -80,7 +79,6 @@ export interface HostAggEsItem {
   host_os_version?: HostBuckets;
   host_type?: HostBuckets;
   key?: string;
-  lastSeen?: HostValue;
   os?: HostOsHitsItem;
 }
 

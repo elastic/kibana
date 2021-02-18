@@ -51,7 +51,13 @@ export function ErrorCorrelations({ onClose }: Props) {
 
   const { serviceName } = useParams<{ serviceName?: string }>();
   const { urlParams, uiFilters } = useUrlParams();
-  const { transactionName, transactionType, start, end } = urlParams;
+  const {
+    environment,
+    transactionName,
+    transactionType,
+    start,
+    end,
+  } = urlParams;
   const { defaultFieldNames } = useFieldNames();
   const [fieldNames, setFieldNames] = useLocalStorage(
     `apm.correlations.errors.fields:${serviceName}`,
@@ -65,6 +71,7 @@ export function ErrorCorrelations({ onClose }: Props) {
           endpoint: 'GET /api/apm/correlations/failed_transactions',
           params: {
             query: {
+              environment,
               serviceName,
               transactionName,
               transactionType,
@@ -78,6 +85,7 @@ export function ErrorCorrelations({ onClose }: Props) {
       }
     },
     [
+      environment,
       serviceName,
       start,
       end,
