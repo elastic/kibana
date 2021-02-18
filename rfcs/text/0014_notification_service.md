@@ -77,8 +77,8 @@ It consists of a message with an associated CTA to show to an end-user.
 - `recipient_id: string []` - unique identifiers of all the recipients. It might be the same as `elastic_id` (if the env supports it) - the unique user identifier across all the company products. 
 There is currently no way to unambiguously identify the user. WIP [#82725](https://github.com/elastic/kibana/issues/82725)
 - `priority?: 'normal' | 'high' | 'critical'` - to prioritize the delivery in case of async delivery mechanism. An event with high priority is processed first. Shouldn’t be used in UI. Considered as `normal` if not specified. Important messages have `high` priority. `Critical` is used in emergency cases.
-- `created_at: number` - Unix timestamp in UTC timezone when a notification has been created.
-- `expire_at?: number` - Unix timestamp in UTC timezone when notification will be removed from the system. 
+- `created_at: string` - ISO-8601 format date in UTC timezone when a notification has been created.
+- `expire_at?: string` - ISO-8601 format date in UTC timezone when notification will be removed from the system. 
 - `is_pinned?: boolean` - a flag to pin a notification at top of the list of notifications. Used by a source to draw a user's attention to a notification.
 - `source_type: string` - source type. the same as source domain name: `cloud`, `alerting`.
 - `group_id?: string` - identifier to associate several notifications in the UI. Notifications are rendered in form of an event timeline in UI.
@@ -88,12 +88,12 @@ There is currently no way to unambiguously identify the user. WIP [#82725](https
 - `icon?: { euiIconType: string }` - icon on the left side of the title.
 Compatible with all the types supported by euiIcon type: a predefined EUI icon name, URL to SVG file, data URL for SVG file.
 - `severity?: 'normal' | 'high' | 'critical'` -  type of severity. Used in UI only. Shows as a text after the `source_type` following the format "Alert: Critical".
-- `message: TranslatedContent` - a notification message is subject to i18n. 
+- `message: TranslatedContent | { text: string }` - a notification message is subject to i18n. 
 Locale might be changed on the Space level (on the User level in the future).
 Thus, we cannot determine a message locale during notification creation.
 Considering that Kibana notifications might be rendered outside of Kibana UI (in Cloud UI, for example), the message must contain translations for all the supported locales.
-- `title: TranslatedContent & { url?: string }` - notification header.
-- `action: TranslatedContent & { url: string }` - notification CTA
+- `title: TranslatedContent & { url?: string } | { text: string; url?: string }` - notification header.
+- `action: TranslatedContent & { url: string } | { text: string; url: string }` - notification CTA
 
 ```typescript
 import type { TranslateArguments } from '@kbn/i18n';
@@ -204,7 +204,7 @@ Notification model is responsible for:
 
 Processing a large number of incoming notifications might slow down Kibana and create a disproportionately high load on some Kibana instances.
 The use of a queue allows us to make the handling of incoming notifications asynchronous.
-Async mechanism lets Kibana to cope with spikes in the number of messages created. The queue implementation is based on the Elasticsearch server. 
+The async mechanism lets Kibana cope with spikes in the number of messages created. The queue implementation is based on the Elasticsearch server.
 
 The logic is run as a background task. The usage of the single background task:
 - reduces the possibility of read- and write-conflicts
@@ -216,7 +216,7 @@ priority property value: the notification with the higher value is processed ear
 
 ##### Notification storage
 
-NS storage keeps different notification statuses for every user. Most Kibana deployments have [from 20 to 90 users](https://elastic.slack.com/archives/C9097ABGC/p1597162974399900),
+NS storage keeps different notification statuses for every user. Most Kibana deployments have from 20 to 90 users,
 although there are some odd instances with >100k users. So we consider two options at the moment (see the [workflow](https://docs.google.com/document/d/18s-BTHog_oPaQKf871gzuhxkah4pK1GYJM9DCLceaLo/edit#)):
 - Store notification state separately from a notification. State for new notifications created for every user when they change the state.
 ```typescript
@@ -266,7 +266,7 @@ Server orders notifications by *pinned* and *created_at* timestamp.
 
 Kibana HTTP API:
 - Endpoint: `GET /api/notifications/` 
-    - `search_after?: number` - Unix timestamp to start searching from.
+    - `search_after?: string` - date in ISO-8601 format to start searching from.
     - `type_id?: string[]` - list of source types to filter by.
     - `size?: number` - max number of notifications to retrieve.
 
@@ -365,7 +365,7 @@ A notification cannot have a particular recipient in the lack of a way to identi
 User-specific notification state (*is_read*) is not stored in Kibana but browser Local Storage.
 ### Phase II
 When [user profiles](https://github.com/elastic/kibana/issues/17888) are supported, Kibana UI starts showing user-specific notifications.
-KIbana UI supports applying filters to the notification list.
+Kibana UI supports applying filters to the notification list.
 The very first three candidates for the integration with Notification systems:
 - Data plugin - Search sessions
 - Security solutions plugin - Cases
