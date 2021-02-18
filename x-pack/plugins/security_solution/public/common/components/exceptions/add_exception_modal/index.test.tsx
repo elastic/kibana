@@ -215,11 +215,6 @@ describe('When the add exception modal is opened', () => {
   describe('when there is alert data passed to a detection list exception', () => {
     let wrapper: ReactWrapper;
     beforeEach(async () => {
-      // const alertDataMock: AlertData = {
-      //   '@timestamp': '1234567890',
-      //   _id: 'test-id',
-      //   file: { path: 'test/path' },
-      // };
       wrapper = mount(
         <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
           <AddExceptionModal
