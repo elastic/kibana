@@ -55,6 +55,7 @@ export class QuotaMetric extends Metric {
       const quota = get(bucket, 'quota.value');
       const deltaUsageDerivNormalizedValue = get(bucket, 'usage_deriv.normalized_value');
       const periodsDerivNormalizedValue = get(bucket, 'periods_deriv.normalized_value');
+      const backupMetricDerivNormalizedValue = get(bucket, 'metric_deriv.normalized_value');
 
       if (deltaUsageDerivNormalizedValue && periodsDerivNormalizedValue && quota > 0) {
         // if throttling is configured
@@ -62,8 +63,8 @@ export class QuotaMetric extends Metric {
           deltaUsageDerivNormalizedValue / (periodsDerivNormalizedValue * quota * 1000); // convert quota from microseconds to nanoseconds by multiplying 1000
         return factor * 100; // convert factor to percentage
       }
-      // if throttling is NOT configured, show nothing. The user should see that something is not configured correctly
-      return null;
+      // if throttling is NOT configured, show the backup field or nothing. The user should see that something is not configured correctly
+      return backupMetricDerivNormalizedValue || null;
     };
   }
 }
