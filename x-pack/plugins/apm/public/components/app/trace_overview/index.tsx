@@ -23,7 +23,7 @@ const DEFAULT_RESPONSE: TracesAPIResponse = {
 
 export function TraceOverview() {
   const { urlParams, uiFilters } = useUrlParams();
-  const { start, end } = urlParams;
+  const { environment, start, end } = urlParams;
   const { status, data = DEFAULT_RESPONSE } = useFetcher(
     (callApmApi) => {
       if (start && end) {
@@ -31,6 +31,7 @@ export function TraceOverview() {
           endpoint: 'GET /api/apm/traces',
           params: {
             query: {
+              environment,
               start,
               end,
               uiFilters: JSON.stringify(uiFilters),
@@ -39,7 +40,7 @@ export function TraceOverview() {
         });
       }
     },
-    [start, end, uiFilters]
+    [environment, start, end, uiFilters]
   );
 
   useTrackPageview({ app: 'apm', path: 'traces_overview' });
