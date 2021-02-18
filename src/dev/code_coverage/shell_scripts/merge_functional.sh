@@ -6,7 +6,7 @@ export COVERAGE_TEMP_DIR
 echo "### Clone kibana to /dev/shm/workspace/"
 mkdir -p /dev/shm/workspace/
 cd ..
-cp -RlP kibana /dev/shm/workspace/kibana
+rsync -avz kibana /dev/shm/workspace/kibana
 cd /dev/shm/workspace/kibana
 echo "### bootstrap from x-pack folder"
 # bootstrap from x-pack folder
