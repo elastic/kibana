@@ -3,7 +3,6 @@
   overflow-y: auto;
   // sass-lint:disable-block no-important
   flex-basis: auto !important; // Fixes IE and ensures the layer items are visible
-  padding-bottom: $euiSizeS + 1px;
   border-top: 1px solid $euiColorLightestShade;
 }
 
