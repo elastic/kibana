@@ -14,6 +14,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { orderBy } from 'lodash';
 import React, { useState } from 'react';
+import uuid from 'uuid';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
@@ -37,6 +38,7 @@ const DEFAULT_SORT = {
 
 const INITIAL_STATE = {
   items: [],
+  requestId: undefined,
 };
 
 export function ServiceOverviewErrorsTable({ serviceName }: Props) {
@@ -78,6 +80,7 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
         },
       }).then((response) => {
         return {
+          requestId: uuid(),
           items: response.error_groups,
         };
       });
@@ -85,7 +88,7 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
     [environment, start, end, serviceName, uiFilters, transactionType]
   );
 
-  const { items } = data;
+  const { requestId, items } = data;
   const currentPageErrorGroups = orderBy(
     items,
     sort.field,
@@ -101,7 +104,7 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
   } = useFetcher(
     (callApmApi) => {
       if (
-        status === FETCH_STATUS.SUCCESS &&
+        requestId &&
         currentPageErrorGroups.length &&
         start &&
         end &&
@@ -124,9 +127,9 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
         });
       }
     },
-    // only fetches agg results when status changes or group ids change
+    // only fetches agg results when requestId or group ids change
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [status, groupIds],
+    [requestId, groupIds],
     { preservePreviousData: false }
   );
 
