@@ -34,10 +34,11 @@ import { Network } from './network';
 import { Overview } from './overview';
 import { Timelines } from './timelines';
 import { Management } from './management';
-import { LicensingPluginStart } from '../../licensing/public';
+import { LicensingPluginStart, LicensingPluginSetup } from '../../licensing/public';
 
 export interface SetupPlugins {
   home?: HomePublicPluginSetup;
+  licensing: LicensingPluginSetup;
   security: SecurityPluginSetup;
   triggersActionsUi: TriggersActionsSetup;
   usageCollection?: UsageCollectionSetup;
