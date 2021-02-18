@@ -14,7 +14,7 @@ import {
 } from '../../../../common/elasticsearch_fieldnames';
 import { NOT_AVAILABLE_LABEL } from '../../../../common/i18n';
 import { ProcessorEvent } from '../../../../common/processor_event';
-import { rangeFilter } from '../../../../common/utils/range_filter';
+import { environmentQuery, rangeQuery } from '../../../../common/utils/queries';
 import { withApmSpan } from '../../../utils/with_apm_span';
 import { getErrorName } from '../../helpers/get_error_name';
 import { Setup, SetupTimeRange } from '../../helpers/setup_request';
@@ -23,10 +23,12 @@ export function getServiceErrorGroupPrimaryStatistics({
   serviceName,
   setup,
   transactionType,
+  environment,
 }: {
   serviceName: string;
   setup: Setup & SetupTimeRange;
   transactionType: string;
+  environment?: string;
 }) {
   return withApmSpan('get_service_error_group_primary_statistics', async () => {
     const { apmEventClient, start, end, esFilter } = setup;
@@ -42,7 +44,8 @@ export function getServiceErrorGroupPrimaryStatistics({
             filter: [
               { term: { [SERVICE_NAME]: serviceName } },
               { term: { [TRANSACTION_TYPE]: transactionType } },
-              { range: rangeFilter(start, end) },
+              ...rangeQuery(start, end),
+              ...environmentQuery(environment),
               ...esFilter,
             ],
           },

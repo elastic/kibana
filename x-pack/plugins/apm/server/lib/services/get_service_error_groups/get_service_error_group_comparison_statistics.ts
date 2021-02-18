@@ -11,7 +11,7 @@ import {
   TRANSACTION_TYPE,
 } from '../../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../../common/processor_event';
-import { rangeFilter } from '../../../../common/utils/range_filter';
+import { environmentQuery, rangeQuery } from '../../../../common/utils/queries';
 import { withApmSpan } from '../../../utils/with_apm_span';
 import { getBucketSize } from '../../helpers/get_bucket_size';
 import { Setup, SetupTimeRange } from '../../helpers/setup_request';
@@ -22,12 +22,14 @@ export async function getServiceErrorGroupComparisonStatistics({
   numBuckets,
   transactionType,
   groupIds,
+  environment,
 }: {
   serviceName: string;
   setup: Setup & SetupTimeRange;
   numBuckets: number;
   transactionType: string;
   groupIds: string[];
+  environment?: string;
 }) {
   return withApmSpan(
     'get_service_error_group_comparison_statistics',
@@ -48,7 +50,8 @@ export async function getServiceErrorGroupComparisonStatistics({
                 { terms: { [ERROR_GROUP_ID]: groupIds } },
                 { term: { [SERVICE_NAME]: serviceName } },
                 { term: { [TRANSACTION_TYPE]: transactionType } },
-                { range: rangeFilter(start, end) },
+                ...rangeQuery(start, end),
+                ...environmentQuery(environment),
                 ...esFilter,
               ],
             },

@@ -50,16 +50,16 @@ describe('request logging', () => {
             silent: true,
             appenders: {
               'test-console': {
-                kind: 'console',
+                type: 'console',
                 layout: {
-                  kind: 'pattern',
+                  type: 'pattern',
                   pattern: '%level|%logger|%message|%meta',
                 },
               },
             },
             loggers: [
               {
-                context: 'http.server.response',
+                name: 'http.server.response',
                 appenders: ['test-console'],
                 level: 'debug',
               },
@@ -96,16 +96,16 @@ describe('request logging', () => {
           silent: true,
           appenders: {
             'test-console': {
-              kind: 'console',
+              type: 'console',
               layout: {
-                kind: 'pattern',
+                type: 'pattern',
                 pattern: '%level|%logger|%message|%meta',
               },
             },
           },
           loggers: [
             {
-              context: 'http.server.response',
+              name: 'http.server.response',
               appenders: ['test-console'],
               level: 'debug',
             },
