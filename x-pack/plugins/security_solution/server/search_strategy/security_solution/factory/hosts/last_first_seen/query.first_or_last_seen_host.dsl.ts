@@ -6,14 +6,14 @@
  */
 
 import { isEmpty } from 'lodash/fp';
-import { ISearchRequestParams } from '../../../../../../../../../src/plugins/data/common';
 import { HostFirstLastSeenRequestOptions } from '../../../../../../common/search_strategy/security_solution/hosts';
 
-export const buildFirstLastSeenHostQuery = ({
+export const buildFirstOrLastSeenHostQuery = ({
   hostName,
   defaultIndex,
   docValueFields,
-}: HostFirstLastSeenRequestOptions): ISearchRequestParams => {
+  order,
+}: HostFirstLastSeenRequestOptions) => {
   const filter = [{ term: { 'host.name': hostName } }];
 
   const dslQuery = {
@@ -23,12 +23,16 @@ export const buildFirstLastSeenHostQuery = ({
     track_total_hits: false,
     body: {
       ...(!isEmpty(docValueFields) ? { docvalue_fields: docValueFields } : {}),
-      aggregations: {
-        firstSeen: { min: { field: '@timestamp' } },
-        lastSeen: { max: { field: '@timestamp' } },
-      },
       query: { bool: { filter } },
-      size: 0,
+      _source: ['@timestamp'],
+      size: 1,
+      sort: [
+        {
+          '@timestamp': {
+            order,
+          },
+        },
+      ],
     },
   };
 
