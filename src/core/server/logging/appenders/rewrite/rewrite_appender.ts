@@ -48,6 +48,34 @@ export class RewriteAppender implements DisposableAppender {
   }
 
   /**
+   * List of appenders that are dependencies of this appender.
+   *
+   * `addAppender` will throw an error when called with an appender
+   * reference that isn't in this list.
+   */
+  public get appenderRefs() {
+    return this.config.appenders;
+  }
+
+  /**
+   * Appenders can be "attached" to this one so that the RewriteAppender
+   * is able to act as a sort of middleware by calling `append` other appenders.
+   *
+   * As appenders cannot be attached to each other until they are created,
+   * the `addAppender` method is used to pass in a configured appender.
+   */
+  public addAppender(appenderRef: string, appender: DisposableAppender) {
+    if (!this.appenderRefs.includes(appenderRef)) {
+      throw new Error(
+        `addAppender was called with an appender key that is missing from the appenderRefs: "${appenderRef}".`
+      );
+    }
+    // TODO: check circular refs
+
+    this.appenders.set(appenderRef, appender);
+  }
+
+  /**
    * Modifies the `record` and passes it to the specified appender.
    * @param record `LogRecord` instance to be logged.
    */
@@ -58,7 +86,7 @@ export class RewriteAppender implements DisposableAppender {
       if (!appender) {
         throw new Error(
           `Rewrite Appender could not find appender key "${appenderName}". ` +
-            'Be sure `appender.update()` is called before `appender.append()`.'
+            'Be sure `appender.addAppender()` was called before `appender.append()`.'
         );
       }
       appender.append(rewrittenRecord);
@@ -66,27 +94,9 @@ export class RewriteAppender implements DisposableAppender {
   }
 
   /**
-   * Updates `RewriteAppender` configuration.
-   */
-  public update({ appenders }: { appenders: Map<string, Appender> }) {
-    this.appenders = appenders;
-
-    // Ensure config only contains valid appenders.
-    const unknownAppenderKey = this.config.appenders.find(
-      (appenderKey) => !this.appenders.has(appenderKey)
-    );
-
-    if (unknownAppenderKey) {
-      throw new Error(
-        `Rewrite Appender config contains unknown appender key "${unknownAppenderKey}".`
-      );
-    }
-  }
-
-  /**
    * Disposes `RewriteAppender`.
    */
   public dispose() {
-    // noop
+    this.appenders.clear();
   }
 }

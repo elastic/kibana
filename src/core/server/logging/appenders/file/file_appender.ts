@@ -57,13 +57,6 @@ export class FileAppender implements DisposableAppender {
   }
 
   /**
-   * Updates `FileAppender` configuration.
-   */
-  public update() {
-    // noop
-  }
-
-  /**
    * Disposes `FileAppender`. Waits for the underlying file stream to be completely flushed and closed.
    */
   public async dispose() {

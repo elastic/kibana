@@ -47,13 +47,6 @@ export class LegacyAppender implements DisposableAppender {
     this.loggingServer.log(record);
   }
 
-  /**
-   * Updates `LegacyAppender` configuration.
-   */
-  public update() {
-    // noop
-  }
-
   public dispose() {
     this.loggingServer.stop();
   }

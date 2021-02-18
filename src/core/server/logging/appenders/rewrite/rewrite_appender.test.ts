@@ -18,7 +18,6 @@ const toTuple = <A, B>(a: A, b: B): [A, B] => [a, b];
 const createAppenderMock = (name: string) => {
   const appenderMock: MockedKeys<DisposableAppender> = {
     append: jest.fn(),
-    update: jest.fn(),
     dispose: jest.fn(),
   };
 
@@ -67,92 +66,71 @@ describe('RewriteAppender', () => {
     expect(createRewritePolicyMock).toHaveBeenCalledWith(config.policy);
   });
 
-  describe('#update', () => {
+  describe('#addAppender', () => {
     it('updates the map of available appenders', () => {
       const config = createConfig(['mock1']);
       const appender = new RewriteAppender(config);
-      appender.update({
-        appenders: new Map([createAppenderMock('mock1')]),
-      });
+      appender.addAppender(...createAppenderMock('mock1'));
       expect(() => {
         appender.append(createLogRecord());
       }).not.toThrowError();
-    });
-
-    it('throws if an appender is configured with an unknown key', () => {
-      const config = createConfig(['mock1', 'missing_appender']);
-      const appender = new RewriteAppender(config);
-      expect(() => {
-        appender.update({
-          appenders: new Map([createAppenderMock('mock1')]),
-        });
-      }).toThrowErrorMatchingInlineSnapshot(
-        `"Rewrite Appender config contains unknown appender key \\"missing_appender\\"."`
-      );
     });
   });
 
   describe('#append', () => {
     it('calls the configured appenders with the provided LogRecord', () => {
       const config = createConfig(['mock1', 'mock2']);
-      const appenderMocks = new Map([createAppenderMock('mock1'), createAppenderMock('mock2')]);
+      const appenderMocks = [createAppenderMock('mock1'), createAppenderMock('mock2')];
 
       const appender = new RewriteAppender(config);
-      appender.update({ appenders: appenderMocks });
+      appenderMocks.forEach((mock) => appender.addAppender(...mock));
 
       const log1 = createLogRecord({ a: 'b' });
       const log2 = createLogRecord({ c: 'd' });
 
       appender.append(log1);
 
-      expect(appenderMocks.get('mock1')!.append).toHaveBeenCalledTimes(1);
-      expect(appenderMocks.get('mock2')!.append).toHaveBeenCalledTimes(1);
-      expect(appenderMocks.get('mock1')!.append).toHaveBeenCalledWith(log1);
-      expect(appenderMocks.get('mock2')!.append).toHaveBeenCalledWith(log1);
+      expect(appenderMocks[0][1].append).toHaveBeenCalledTimes(1);
+      expect(appenderMocks[1][1].append).toHaveBeenCalledTimes(1);
+      expect(appenderMocks[0][1].append).toHaveBeenCalledWith(log1);
+      expect(appenderMocks[1][1].append).toHaveBeenCalledWith(log1);
 
       appender.append(log2);
 
-      expect(appenderMocks.get('mock1')!.append).toHaveBeenCalledTimes(2);
-      expect(appenderMocks.get('mock2')!.append).toHaveBeenCalledTimes(2);
-      expect(appenderMocks.get('mock1')!.append).toHaveBeenCalledWith(log2);
-      expect(appenderMocks.get('mock2')!.append).toHaveBeenCalledWith(log2);
+      expect(appenderMocks[0][1].append).toHaveBeenCalledTimes(2);
+      expect(appenderMocks[1][1].append).toHaveBeenCalledTimes(2);
+      expect(appenderMocks[0][1].append).toHaveBeenCalledWith(log2);
+      expect(appenderMocks[1][1].append).toHaveBeenCalledWith(log2);
     });
 
-    it('calls `rewrite` on the configured policy', () => {
+    it('calls `transform` on the configured policy', () => {
       const config = createConfig(['mock1']);
-      const appenderMocks = new Map([createAppenderMock('mock1')]);
 
       const appender = new RewriteAppender(config);
-      appender.update({ appenders: appenderMocks });
+      appender.addAppender(...createAppenderMock('mock1'));
 
       const log1 = createLogRecord({ a: 'b' });
       const log2 = createLogRecord({ c: 'd' });
 
       appender.append(log1);
 
-      expect(policy.rewrite).toHaveBeenCalledTimes(1);
-      expect(policy.rewrite.mock.calls).toEqual([[log1]]);
+      expect(policy.transform).toHaveBeenCalledTimes(1);
+      expect(policy.transform.mock.calls).toEqual([[log1]]);
 
       appender.append(log2);
 
-      expect(policy.rewrite).toHaveBeenCalledTimes(2);
-      expect(policy.rewrite.mock.calls).toEqual([[log1], [log2]]);
+      expect(policy.transform).toHaveBeenCalledTimes(2);
+      expect(policy.transform.mock.calls).toEqual([[log1], [log2]]);
     });
 
     it('throws if an appender key cannot be found', () => {
-      const config = createConfig(['mock1']);
+      const config = createConfig(['oops']);
       const appender = new RewriteAppender(config);
-      const appenderMocks = new Map([createAppenderMock('mock1')]);
-
-      appender.update({ appenders: appenderMocks });
-
-      // intentionally corrupt the provided Map
-      appenderMocks.delete('mock1');
 
       expect(() => {
         appender.append(createLogRecord());
       }).toThrowErrorMatchingInlineSnapshot(
-        `"Rewrite Appender could not find appender key \\"mock1\\". Be sure \`appender.update()\` is called before \`appender.append()\`."`
+        `"Rewrite Appender could not find appender key \\"oops\\". Be sure \`appender.addAppender()\` was called before \`appender.append()\`."`
       );
     });
   });
