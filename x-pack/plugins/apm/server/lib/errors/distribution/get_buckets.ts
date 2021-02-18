@@ -11,16 +11,18 @@ import {
   SERVICE_NAME,
 } from '../../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../../common/processor_event';
-import { rangeFilter } from '../../../../common/utils/range_filter';
+import { environmentQuery, rangeQuery } from '../../../../common/utils/queries';
 import { withApmSpan } from '../../../utils/with_apm_span';
 import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 
 export async function getBuckets({
+  environment,
   serviceName,
   groupId,
   bucketSize,
   setup,
 }: {
+  environment?: string;
   serviceName: string;
   groupId?: string;
   bucketSize: number;
@@ -30,7 +32,8 @@ export async function getBuckets({
     const { start, end, esFilter, apmEventClient } = setup;
     const filter: ESFilter[] = [
       { term: { [SERVICE_NAME]: serviceName } },
-      { range: rangeFilter(start, end) },
+      ...rangeQuery(start, end),
+      ...environmentQuery(environment),
       ...esFilter,
     ];
 

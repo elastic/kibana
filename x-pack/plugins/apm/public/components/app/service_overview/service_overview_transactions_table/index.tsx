@@ -65,6 +65,7 @@ export function ServiceOverviewTransactionsTable({ serviceName }: Props) {
       latencyAggregationType,
       comparisonType,
       comparisonEnabled,
+      environment,
     },
   } = useUrlParams();
 
@@ -90,6 +91,7 @@ export function ServiceOverviewTransactionsTable({ serviceName }: Props) {
         params: {
           path: { serviceName },
           query: {
+            environment,
             start,
             end,
             uiFilters: JSON.stringify(uiFilters),
@@ -105,6 +107,7 @@ export function ServiceOverviewTransactionsTable({ serviceName }: Props) {
       });
     },
     [
+      environment,
       serviceName,
       start,
       end,
@@ -143,6 +146,7 @@ export function ServiceOverviewTransactionsTable({ serviceName }: Props) {
           params: {
             path: { serviceName },
             query: {
+              environment,
               start,
               end,
               uiFilters: JSON.stringify(uiFilters),

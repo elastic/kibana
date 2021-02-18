@@ -6,6 +6,7 @@
  */
 
 import { get } from 'lodash';
+import { DEFAULT_INDICATOR_PATH } from '../../../../../common/constants';
 
 import { getThreatListItemMock } from './build_threat_mapping_filter.mock';
 import {
@@ -93,6 +94,7 @@ describe('buildMatchedIndicator', () => {
     const indicators = buildMatchedIndicator({
       queries: [],
       threats,
+      indicatorPath: DEFAULT_INDICATOR_PATH,
     });
 
     expect(indicators).toEqual([]);
@@ -102,6 +104,7 @@ describe('buildMatchedIndicator', () => {
     const [indicator] = buildMatchedIndicator({
       queries,
       threats,
+      indicatorPath: DEFAULT_INDICATOR_PATH,
     });
 
     expect(get(indicator, 'matched.atomic')).toEqual('domain_1');
@@ -111,6 +114,7 @@ describe('buildMatchedIndicator', () => {
     const [indicator] = buildMatchedIndicator({
       queries,
       threats,
+      indicatorPath: DEFAULT_INDICATOR_PATH,
     });
 
     expect(get(indicator, 'matched.field')).toEqual('event.field');
@@ -120,6 +124,7 @@ describe('buildMatchedIndicator', () => {
     const [indicator] = buildMatchedIndicator({
       queries,
       threats,
+      indicatorPath: DEFAULT_INDICATOR_PATH,
     });
 
     expect(get(indicator, 'matched.type')).toEqual('type_1');
@@ -148,6 +153,7 @@ describe('buildMatchedIndicator', () => {
     const indicators = buildMatchedIndicator({
       queries,
       threats,
+      indicatorPath: DEFAULT_INDICATOR_PATH,
     });
 
     expect(indicators).toHaveLength(queries.length);
@@ -157,6 +163,7 @@ describe('buildMatchedIndicator', () => {
     const indicators = buildMatchedIndicator({
       queries,
       threats,
+      indicatorPath: DEFAULT_INDICATOR_PATH,
     });
 
     expect(indicators).toEqual([
@@ -192,9 +199,9 @@ describe('buildMatchedIndicator', () => {
     ];
 
     const indicators = buildMatchedIndicator({
-      indicatorPath: 'custom.indicator.path',
       queries,
       threats,
+      indicatorPath: 'custom.indicator.path',
     });
 
     expect(indicators).toEqual([
@@ -221,6 +228,7 @@ describe('buildMatchedIndicator', () => {
     const indicators = buildMatchedIndicator({
       queries,
       threats,
+      indicatorPath: DEFAULT_INDICATOR_PATH,
     });
 
     expect(indicators).toEqual([
@@ -245,6 +253,7 @@ describe('buildMatchedIndicator', () => {
     const indicators = buildMatchedIndicator({
       queries,
       threats,
+      indicatorPath: DEFAULT_INDICATOR_PATH,
     });
 
     expect(indicators).toEqual([
@@ -276,6 +285,7 @@ describe('buildMatchedIndicator', () => {
     const indicators = buildMatchedIndicator({
       queries,
       threats,
+      indicatorPath: DEFAULT_INDICATOR_PATH,
     });
 
     expect(indicators).toEqual([
@@ -307,6 +317,7 @@ describe('buildMatchedIndicator', () => {
       buildMatchedIndicator({
         queries,
         threats,
+        indicatorPath: DEFAULT_INDICATOR_PATH,
       })
     ).toThrowError('Expected indicator field to be an object, but found: not an object');
   });
@@ -327,6 +338,7 @@ describe('buildMatchedIndicator', () => {
       buildMatchedIndicator({
         queries,
         threats,
+        indicatorPath: DEFAULT_INDICATOR_PATH,
       })
     ).toThrowError('Expected indicator field to be an object, but found: not an object');
   });
@@ -352,7 +364,11 @@ describe('enrichSignalThreatMatches', () => {
 
   it('performs no enrichment if there are no signals', async () => {
     const signals = getSignalsResponseMock([]);
-    const enrichedSignals = await enrichSignalThreatMatches(signals, getMatchedThreats);
+    const enrichedSignals = await enrichSignalThreatMatches(
+      signals,
+      getMatchedThreats,
+      DEFAULT_INDICATOR_PATH
+    );
 
     expect(enrichedSignals.hits.hits).toEqual([]);
   });
@@ -363,9 +379,13 @@ describe('enrichSignalThreatMatches', () => {
       matched_queries: [matchedQuery],
     });
     const signals = getSignalsResponseMock([signalHit]);
-    const enrichedSignals = await enrichSignalThreatMatches(signals, getMatchedThreats);
+    const enrichedSignals = await enrichSignalThreatMatches(
+      signals,
+      getMatchedThreats,
+      DEFAULT_INDICATOR_PATH
+    );
     const [enrichedHit] = enrichedSignals.hits.hits;
-    const indicators = get(enrichedHit._source, 'threat.indicator');
+    const indicators = get(enrichedHit._source, DEFAULT_INDICATOR_PATH);
 
     expect(indicators).toEqual([
       { existing: 'indicator' },
@@ -384,9 +404,13 @@ describe('enrichSignalThreatMatches', () => {
       matched_queries: [matchedQuery],
     });
     const signals = getSignalsResponseMock([signalHit]);
-    const enrichedSignals = await enrichSignalThreatMatches(signals, getMatchedThreats);
+    const enrichedSignals = await enrichSignalThreatMatches(
+      signals,
+      getMatchedThreats,
+      DEFAULT_INDICATOR_PATH
+    );
     const [enrichedHit] = enrichedSignals.hits.hits;
-    const indicators = get(enrichedHit._source, 'threat.indicator');
+    const indicators = get(enrichedHit._source, DEFAULT_INDICATOR_PATH);
 
     expect(indicators).toEqual([
       {
@@ -401,9 +425,13 @@ describe('enrichSignalThreatMatches', () => {
       matched_queries: [matchedQuery],
     });
     const signals = getSignalsResponseMock([signalHit]);
-    const enrichedSignals = await enrichSignalThreatMatches(signals, getMatchedThreats);
+    const enrichedSignals = await enrichSignalThreatMatches(
+      signals,
+      getMatchedThreats,
+      DEFAULT_INDICATOR_PATH
+    );
     const [enrichedHit] = enrichedSignals.hits.hits;
-    const indicators = get(enrichedHit._source, 'threat.indicator');
+    const indicators = get(enrichedHit._source, DEFAULT_INDICATOR_PATH);
 
     expect(indicators).toEqual([
       { existing: 'indicator' },
@@ -422,9 +450,53 @@ describe('enrichSignalThreatMatches', () => {
       matched_queries: [matchedQuery],
     });
     const signals = getSignalsResponseMock([signalHit]);
-    await expect(() => enrichSignalThreatMatches(signals, getMatchedThreats)).rejects.toThrowError(
-      'Expected threat field to be an object, but found: whoops'
+    await expect(() =>
+      enrichSignalThreatMatches(signals, getMatchedThreats, DEFAULT_INDICATOR_PATH)
+    ).rejects.toThrowError('Expected threat field to be an object, but found: whoops');
+  });
+
+  it('enriches from a configured indicator path, if specified', async () => {
+    getMatchedThreats = async () => [
+      getThreatListItemMock({
+        _id: '123',
+        _source: {
+          custom_threat: {
+            custom_indicator: {
+              domain: 'custom_domain',
+              other: 'custom_other',
+              type: 'custom_type',
+            },
+          },
+        },
+      }),
+    ];
+    matchedQuery = encodeThreatMatchNamedQuery(
+      getNamedQueryMock({
+        id: '123',
+        field: 'event.field',
+        value: 'custom_threat.custom_indicator.domain',
+      })
     );
+    const signalHit = getSignalHitMock({
+      matched_queries: [matchedQuery],
+    });
+    const signals = getSignalsResponseMock([signalHit]);
+    const enrichedSignals = await enrichSignalThreatMatches(
+      signals,
+      getMatchedThreats,
+      'custom_threat.custom_indicator'
+    );
+    const [enrichedHit] = enrichedSignals.hits.hits;
+    const indicators = get(enrichedHit._source, DEFAULT_INDICATOR_PATH);
+
+    expect(indicators).toEqual([
+      {
+        domain: 'custom_domain',
+        matched: { atomic: 'custom_domain', field: 'event.field', type: 'custom_type' },
+        other: 'custom_other',
+        type: 'custom_type',
+      },
+    ]);
   });
 
   it('merges duplicate matched signals into a single signal with multiple indicators', async () => {
@@ -455,12 +527,16 @@ describe('enrichSignalThreatMatches', () => {
       ],
     });
     const signals = getSignalsResponseMock([signalHit, otherSignalHit]);
-    const enrichedSignals = await enrichSignalThreatMatches(signals, getMatchedThreats);
+    const enrichedSignals = await enrichSignalThreatMatches(
+      signals,
+      getMatchedThreats,
+      DEFAULT_INDICATOR_PATH
+    );
     expect(enrichedSignals.hits.total).toEqual(expect.objectContaining({ value: 1 }));
     expect(enrichedSignals.hits.hits).toHaveLength(1);
 
     const [enrichedHit] = enrichedSignals.hits.hits;
-    const indicators = get(enrichedHit._source, 'threat.indicator');
+    const indicators = get(enrichedHit._source, DEFAULT_INDICATOR_PATH);
 
     expect(indicators).toEqual([
       {

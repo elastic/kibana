@@ -25,13 +25,13 @@ export function ServiceOverviewInstancesChartAndTable({
   const { transactionType } = useApmServiceContext();
 
   const {
-    urlParams: { start, end },
+    urlParams: { environment, latencyAggregationType, start, end },
     uiFilters,
   } = useUrlParams();
 
   const { data = [], status } = useFetcher(
     (callApmApi) => {
-      if (!start || !end || !transactionType) {
+      if (!start || !end || !transactionType || !latencyAggregationType) {
         return;
       }
 
@@ -43,6 +43,8 @@ export function ServiceOverviewInstancesChartAndTable({
             serviceName,
           },
           query: {
+            environment,
+            latencyAggregationType,
             start,
             end,
             transactionType,
@@ -52,7 +54,15 @@ export function ServiceOverviewInstancesChartAndTable({
         },
       });
     },
-    [start, end, serviceName, transactionType, uiFilters]
+    [
+      environment,
+      latencyAggregationType,
+      start,
+      end,
+      serviceName,
+      transactionType,
+      uiFilters,
+    ]
   );
 
   return (
