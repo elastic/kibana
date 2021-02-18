@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { isEmpty } from 'lodash';
 import { badRequest, boomify, isBoom } from '@hapi/boom';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
@@ -120,7 +121,8 @@ export interface AlertInfo {
 const accumulateIndicesAndIDs = (comment: CommentAttributes, acc: AlertInfo): AlertInfo => {
   if (isCommentRequestTypeAlertOrGenAlert(comment)) {
     acc.ids.push(...getAlertIds(comment));
-    acc.indices.add(comment.index);
+    const indices = Array.isArray(comment.index) ? comment.index : [comment.index];
+    indices.forEach((index) => acc.indices.add(index));
   }
   return acc;
 };
@@ -249,12 +251,14 @@ export const flattenCaseSavedObject = ({
   totalComment = comments.length,
   totalAlerts = 0,
   subCases,
+  subCaseIds,
 }: {
   savedObject: SavedObject<ESCaseAttributes>;
   comments?: Array<SavedObject<CommentAttributes>>;
   totalComment?: number;
   totalAlerts?: number;
   subCases?: SubCaseResponse[];
+  subCaseIds?: string[];
 }): CaseResponse => ({
   id: savedObject.id,
   version: savedObject.version ?? '0',
@@ -264,6 +268,7 @@ export const flattenCaseSavedObject = ({
   ...savedObject.attributes,
   connector: transformESConnectorToCaseConnector(savedObject.attributes.connector),
   subCases,
+  subCaseIds: !isEmpty(subCaseIds) ? subCaseIds : undefined,
 });
 
 export const flattenSubCaseSavedObject = ({

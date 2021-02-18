@@ -36,7 +36,7 @@ import { UrlGeneratorState } from '../../share/public';
 import { DocViewInput, DocViewInputFn } from './application/doc_views/doc_views_types';
 import { DocViewsRegistry } from './application/doc_views/doc_views_registry';
 import { DocViewTable } from './application/components/table/table';
-import { JsonCodeBlock } from './application/components/json_code_block/json_code_block';
+import { JsonCodeEditor } from './application/components/json_code_editor/json_code_editor';
 import {
   setDocViewsRegistry,
   setUrlTracker,
@@ -187,7 +187,7 @@ export class DiscoverPlugin
         defaultMessage: 'JSON',
       }),
       order: 20,
-      component: JsonCodeBlock,
+      component: JsonCodeEditor,
     });
 
     const {

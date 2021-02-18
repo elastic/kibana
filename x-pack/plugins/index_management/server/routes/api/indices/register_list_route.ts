@@ -27,7 +27,7 @@ export function registerListRoute({ router, license, indexDataEnricher, lib }: R
           });
         }
         // Case: default
-        return res.internalError({ body: e });
+        throw e;
       }
     })
   );
