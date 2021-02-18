@@ -17,7 +17,7 @@ import {
   AlertExecutorOptions,
   AlertServices,
 } from '../../../../../alerts/server';
-import { BaseSearchResponse, SearchResponse, TermAggregationBucket } from '../../types';
+import { BaseSearchResponse, SearchHit, SearchResponse, TermAggregationBucket } from '../../types';
 import {
   EqlSearchResponse,
   BaseHit,
@@ -50,8 +50,27 @@ export interface SignalsStatusParams {
 }
 
 export interface ThresholdResult {
+  terms?: Array<{
+    field?: string;
+    value: string;
+  }>;
+  cardinality?: Array<{
+    field: string;
+    value: number;
+  }>;
   count: number;
-  value: string;
+}
+
+export interface ThresholdSignalHistoryRecord {
+  terms: Array<{
+    field?: string;
+    value: SearchTypes;
+  }>;
+  lastSignalTimestamp: number;
+}
+
+export interface ThresholdSignalHistory {
+  [hash: string]: ThresholdSignalHistoryRecord;
 }
 
 export interface SignalSource {
@@ -74,8 +93,9 @@ export interface SignalSource {
     };
     // signal.depth doesn't exist on pre-7.10 signals
     depth?: number;
+    original_time?: string;
+    threshold_result?: ThresholdResult;
   };
-  threshold_result?: ThresholdResult;
 }
 
 export interface BulkItem {
@@ -276,6 +296,28 @@ export interface SearchAfterAndBulkCreateReturnType {
 
 export interface ThresholdAggregationBucket extends TermAggregationBucket {
   top_threshold_hits: BaseSearchResponse<SignalSource>;
+  cardinality_count: {
+    value: number;
+  };
+}
+
+export interface MultiAggBucket {
+  cardinality?: Array<{
+    field: string;
+    value: number;
+  }>;
+  terms: Array<{
+    field: string;
+    value: string;
+  }>;
+  docCount: number;
+  topThresholdHits?:
+    | {
+        hits: {
+          hits: SearchHit[];
+        };
+      }
+    | undefined;
 }
 
 export interface ThresholdQueryBucket extends TermAggregationBucket {

@@ -9,15 +9,15 @@ import { Logger } from 'kibana/server';
 import uuid from 'uuid/v4';
 import { snakeCase } from 'lodash';
 import Boom from '@hapi/boom';
-import { ProcessorEvent } from '../../../common/processor_event';
 import { ML_ERRORS } from '../../../common/anomaly_detection';
+import { ProcessorEvent } from '../../../common/processor_event';
+import { environmentQuery } from '../../../common/utils/queries';
 import { Setup } from '../helpers/setup_request';
 import {
   TRANSACTION_DURATION,
   PROCESSOR_EVENT,
 } from '../../../common/elasticsearch_fieldnames';
 import { APM_ML_JOB_GROUP, ML_MODULE_ID_APM_TRANSACTION } from './constants';
-import { getEnvironmentUiFilterES } from '../helpers/convert_ui_filters/get_environment_ui_filter_es';
 import { withApmSpan } from '../../utils/with_apm_span';
 
 export async function createAnomalyDetectionJobs(
@@ -86,7 +86,7 @@ async function createAnomalyDetectionJob({
           filter: [
             { term: { [PROCESSOR_EVENT]: ProcessorEvent.transaction } },
             { exists: { field: TRANSACTION_DURATION } },
-            ...getEnvironmentUiFilterES(environment),
+            ...environmentQuery(environment),
           ],
         },
       },
