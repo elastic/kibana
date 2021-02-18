@@ -213,6 +213,7 @@ describe('POST cases', () => {
           "syncAlerts": true,
         },
         "status": "open",
+        "subCaseIds": undefined,
         "subCases": undefined,
         "tags": Array [
           "defacement",
