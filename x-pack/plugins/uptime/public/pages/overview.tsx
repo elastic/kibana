@@ -6,12 +6,12 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import React, { ComponentType, useContext, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 import { useDispatch } from 'react-redux';
 import { useGetUrlParams } from '../hooks';
-import { IIndexPattern, StatefulSearchBarProps } from '../../../../../src/plugins/data/public';
+import { IIndexPattern } from '../../../../../src/plugins/data/public';
 import { useUpdateKueryString } from '../hooks';
 import { useBreadcrumbs } from '../hooks/use_breadcrumbs';
 import { useTrackPageview } from '../../../observability/public';
@@ -20,9 +20,6 @@ import { EmptyState, FilterGroup, KueryBar, ParsingErrorCallout } from '../compo
 import { StatusPanel } from '../components/overview/status_panel';
 import { getConnectorsAction, getMonitorAlertsAction } from '../state/alerts/alerts';
 import { useInitApp } from '../hooks/use_init_app';
-import { useKibana } from '../../../../../src/plugins/kibana_react/public';
-import { UptimeStartupPluginsContext } from '../contexts';
-import { useIndexPattern } from '../components/overview/kuery_bar/use_index_pattern';
 
 interface Props {
   loading: boolean;
@@ -42,67 +39,54 @@ const EuiFlexItemStyled = styled(EuiFlexItem)`
   }
 `;
 
-export const OverviewPageComponent = React.memo(({ setEsKueryFilters, loading }: Props) => {
-  const { absoluteDateRangeStart, absoluteDateRangeEnd, ...params } = useGetUrlParams();
-  const { search, filters: urlFilters } = params;
+export const OverviewPageComponent = React.memo(
+  ({ indexPattern, setEsKueryFilters, loading }: Props) => {
+    const { absoluteDateRangeStart, absoluteDateRangeEnd, ...params } = useGetUrlParams();
+    const { search, filters: urlFilters } = params;
 
-  useTrackPageview({ app: 'uptime', path: 'overview' });
-  useTrackPageview({ app: 'uptime', path: 'overview', delay: 15000 });
+    useTrackPageview({ app: 'uptime', path: 'overview' });
+    useTrackPageview({ app: 'uptime', path: 'overview', delay: 15000 });
 
-  useInitApp();
+    useInitApp();
 
-  const { index_pattern: indexPattern } = useIndexPattern();
+    const [esFilters, error] = useUpdateKueryString(indexPattern, search, urlFilters);
 
-  const [esFilters, error] = useUpdateKueryString(indexPattern, search, urlFilters);
+    useEffect(() => {
+      setEsKueryFilters(esFilters ?? '');
+    }, [esFilters, setEsKueryFilters]);
 
-  useEffect(() => {
-    setEsKueryFilters(esFilters ?? '');
-  }, [esFilters, setEsKueryFilters]);
+    const dispatch = useDispatch();
 
-  const dispatch = useDispatch();
+    useEffect(() => {
+      dispatch(getConnectorsAction.get());
+      dispatch(getMonitorAlertsAction.get());
+    }, [dispatch]);
 
-  useEffect(() => {
-    dispatch(getConnectorsAction.get());
-    dispatch(getMonitorAlertsAction.get());
-  }, [dispatch]);
+    useBreadcrumbs([]); // No extra breadcrumbs on overview
 
-  useBreadcrumbs([]); // No extra breadcrumbs on overview
-
-  const {
-    data: { ui },
-  } = useContext(UptimeStartupPluginsContext);
-
-  const SearchBar: ComponentType<StatefulSearchBarProps> = ui.SearchBar;
-
-  return (
-    <>
-      <EmptyState>
-        <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
-          <EuiFlexItem grow={1} style={{ flexBasis: 485 }}>
-            <SearchBar
-              appName="uptime"
-              showQueryBar={true}
-              showQueryInput={true}
-              useDefaultBehaviors={true}
-              indexPatterns={indexPattern ? [indexPattern] : []}
-              showFilterBar={false}
-              showDatePicker={false}
-              nonKqlMode={'text'}
-              nonKqlModeHelpText={'Uptime uses simple text search.'}
-              onQueryChange={(payload) => {}}
-              onQuerySubmit={(payload) => {}}
-            />
-          </EuiFlexItem>
-          <EuiFlexItemStyled grow={true}>
-            <FilterGroup esFilters={esFilters} />
-          </EuiFlexItemStyled>
-          {error && !loading && <ParsingErrorCallout error={error} />}
-        </EuiFlexGroup>
-        <EuiSpacer size="xs" />
-        <StatusPanel />
-        <EuiSpacer size="s" />
-        <MonitorList filters={esFilters} />
-      </EmptyState>
-    </>
-  );
-});
+    return (
+      <>
+        <EmptyState>
+          <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
+            <EuiFlexItem grow={1} style={{ flexBasis: 485 }}>
+              <KueryBar
+                aria-label={i18n.translate('xpack.uptime.filterBar.ariaLabel', {
+                  defaultMessage: 'Input filter criteria for the overview page',
+                })}
+                data-test-subj="xpack.uptime.filterBar"
+              />
+            </EuiFlexItem>
+            <EuiFlexItemStyled grow={true}>
+              <FilterGroup esFilters={esFilters} />
+            </EuiFlexItemStyled>
+            {error && !loading && <ParsingErrorCallout error={error} />}
+          </EuiFlexGroup>
+          <EuiSpacer size="xs" />
+          <StatusPanel />
+          <EuiSpacer size="s" />
+          <MonitorList filters={esFilters} />
+        </EmptyState>
+      </>
+    );
+  }
+);
