@@ -259,11 +259,11 @@ export const leaveConfirmStrings = {
 export const leaveEditModeConfirmStrings = {
   getLeaveEditModeTitle: () =>
     i18n.translate('dashboard.changeViewModeConfirmModal.leaveEditModeTitle', {
-      defaultMessage: 'You have pending changes',
+      defaultMessage: 'You have unsaved changes',
     }),
   getLeaveEditModeSubtitle: () =>
     i18n.translate('dashboard.changeViewModeConfirmModal.description', {
-      defaultMessage: `You may return to view mode without losing your changes. If you discard your changes, there's no getting them back.`,
+      defaultMessage: `You can keep or discard your changes on return to view mode.  You can't recover discarded changes.`,
     }),
   getLeaveEditModeKeepChangesText: () =>
     i18n.translate('dashboard.changeViewModeConfirmModal.keepUnsavedChangesButtonLabel', {
@@ -275,7 +275,7 @@ export const leaveEditModeConfirmStrings = {
     }),
   getLeaveEditModeCancelButtonText: () =>
     i18n.translate('dashboard.changeViewModeConfirmModal.cancelButtonLabel', {
-      defaultMessage: 'Cancel',
+      defaultMessage: 'Continue editing',
     }),
 };
 
