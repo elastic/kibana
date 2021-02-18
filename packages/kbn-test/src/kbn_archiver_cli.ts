@@ -28,19 +28,15 @@ function getSinglePositionalArg(flags: Flags) {
 }
 
 function parseTypesFlag(flags: Flags) {
-  if (!flags.type) {
-    return undefined;
+  if (!flags.type || (typeof flags.type !== 'string' && !Array.isArray(flags.type))) {
+    throw createFlagError('--type is a required flag');
   }
 
-  if (Array.isArray(flags.type)) {
-    return flags.type;
-  }
-
-  if (typeof flags.type === 'string') {
-    return [flags.type];
-  }
-
-  throw createFlagError('--flag must be a string');
+  const types = typeof flags.type === 'string' ? [flags.type] : flags.type;
+  return types.reduce(
+    (acc: string[], type) => [...acc, ...type.split(',').map((t) => t.trim())],
+    []
+  );
 }
 
 export function runKbnArchiverCli() {
@@ -49,6 +45,7 @@ export function runKbnArchiverCli() {
     globalFlags: {
       string: ['config'],
       help: `
+        --space            space id to operate on, defaults to the default space
         --config           optional path to an FTR config file that will be parsed and used for defaults
         --kibana-url       set the url that kibana can be reached at, uses the "servers.kibana" setting from --config by default
         --dir              directory that contains exports to be imported, or where exports will be saved, uses the "kbnArchiver.directory"
@@ -99,7 +96,13 @@ export function runKbnArchiverCli() {
         );
       }
 
+      const space = flags.space;
+      if (!(space === undefined || typeof space === 'string')) {
+        throw createFlagError('--space must be a string');
+      }
+
       return {
+        space,
         kbnClient: new KbnClient({
           log,
           url: kibanaUrl,
@@ -116,14 +119,13 @@ export function runKbnArchiverCli() {
         string: ['type'],
         help: `
           --type             saved object type that should be fetched and stored in the archive, can
-                               be specified multiple times and defaults to 'index-pattern', 'search',
-                               'visualization', and 'dashboard'.
-
+                               be specified multiple times or be a comma-separated list.
         `,
       },
-      async run({ kbnClient, flags }) {
+      async run({ kbnClient, flags, space }) {
         await kbnClient.importExport.save(getSinglePositionalArg(flags), {
-          savedObjectTypes: parseTypesFlag(flags),
+          types: parseTypesFlag(flags),
+          space,
         });
       },
     })
@@ -131,16 +133,33 @@ export function runKbnArchiverCli() {
       name: 'load',
       usage: 'load <name>',
       description: 'import a saved export to Kibana',
-      async run({ kbnClient, flags }) {
-        await kbnClient.importExport.load(getSinglePositionalArg(flags));
+      async run({ kbnClient, flags, space }) {
+        await kbnClient.importExport.load(getSinglePositionalArg(flags), { space });
       },
     })
     .command({
       name: 'unload',
       usage: 'unload <name>',
       description: 'delete the saved objects saved in the archive from the Kibana index',
-      async run({ kbnClient, flags }) {
-        await kbnClient.importExport.unload(getSinglePositionalArg(flags));
+      async run({ kbnClient, flags, space }) {
+        await kbnClient.importExport.unload(getSinglePositionalArg(flags), { space });
+      },
+    })
+    .command({
+      name: 'clean',
+      description: 'clean all saved objects of specific types from the Kibana index',
+      flags: {
+        string: ['type'],
+        help: `
+          --type             saved object type that should be cleaned from the index, can
+                               be specified multiple times or be a comma-separated list.
+        `,
+      },
+      async run({ kbnClient, space, flags }) {
+        await kbnClient.importExport.clean({
+          types: parseTypesFlag(flags),
+          space,
+        });
       },
     })
     .execute();
