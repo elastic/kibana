@@ -14,18 +14,19 @@
 * Tasks are then claiming them by updating them in the {es} index, using optimistic concurrency control to prevent conflicts. Each {kib} instance can run a maximum of 10 concurrent tasks, so a maximum of 10 tasks are claimed each interval. 
 * Tasks are run on the {kib} server. 
 * Task Manager ensures that tasks:
-  * Are only executed once
-  * Are retried when they fail (if configured to do so)
-  * Are rescheduled to run again at a future point in time (if configured to do so)
+** Are only executed once
+** Are retried when they fail (if configured to do so)
+** Are rescheduled to run again at a future point in time (if configured to do so)
 
 [IMPORTANT]
 ==============================================
 It is possible for tasks to be run late or at an inconsistent schedule.
+
 This is usually a symptom of the specific usage or scaling strategy of the cluster in question.
 
-Such issues can be addressed by tweaking the {kib} Task Manager or adjusting the cluster scaling strategy to better suit the unique use case.
+Such issues can be addressed by tweaking the {kib} Task Manager settings or the cluster scaling strategy to better suit the unique use case.
 
 For details on the settings that can influence the performance and throughput of Task Manager, see <<task-manager-settings-kb, Task Manager Settings>>.
 
-For detailed guidance, see <<task-manager-troubleshooting>>.
+For detailed troubleshooting guidance, see <<task-manager-troubleshooting>>.
 ==============================================

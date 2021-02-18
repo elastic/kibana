@@ -2,7 +2,7 @@
 [[task-manager-production-considerations]]
 == Production considerations
 
-{kib} Task Manager is leveraged by services such as Alerting, Actions and Reporting to run mission critical work as persistent background tasks. This has two major benefits:
+{kib} Task Manager is leveraged by features such as Alerting, Actions and Reporting to run mission critical work as persistent background tasks. This has two major benefits:
 
 * *Persistence*: all task state and scheduling is stored in {es}, so if {kib} is restarted, tasks will pick up where they left off. Task definitions are stored in the index specified by `xpack.task_manager.index` (defaults to `.kibana_task_manager`).  It is important to have at least 1 replica of this index for production deployments, since if you lose this index all scheduled tasks are also lost.
 * *Scaling*: multiple {kib} instances can read from and update the same task queue in {es}, allowing the work load to be distributed across instances. In cases where a {kib} instance no longer has capacity to run tasks, capacity can be increased by adding additional {kib} instances.
@@ -12,3 +12,64 @@
 === Deployment considerations
 
 {es} and {kib} instances use the system clock to determine the current time. To ensure schedules are triggered when expected, you should synchronize the clocks of all nodes in the cluster using a time service such as http://www.ntp.org/[Network Time Protocol].
+
+
+[float]
+[[task-manager-scaling-guidance]]
+=== Scaling Guidance
+
+How you deploy {kib} largely depends on your use case. With that in mind, it is difficult to predict the throughout a deplyment might require in order to support {kib} Task Management is difficult, as features can schedule an unpredictable number of tasks at a variety of scheduled cadences.
+
+That said, there is a relatively straight forward method you can follow to produce a rough estimate based on your expected usage.
+
+[float]
+[[task-manager-default-scaling]]
+==== Default Scale
+
+By default {kib} polls for tasks at a rate of 10 tasks every 3 seconds.
+This means that we can reasonably expect a single {kib} instance to support up to 200 _tasks per minute_ (hence forth termed as `200/tpm`).
+
+In practice, a {kib} insatnce will only ever achieve that uppoer bound of `200/tpm` if the duration of task execution is below the polling rate of 3 seconds. For the most part, the duration of tasks is below that threshold, but it can vary greatly as {es} and {lib} usage grow and task complexity increases (such as Alerts executing heavy queries across large datasets).
+
+By <<task-manager-health-evaluate-the-workload,evaluating the workload>> a rough estimate can be made as to the required throughput as a _tasks per minute_ measurment. 
+
+For example, suppose your current workload reveals a required throughput of `440/tpm`, this scale could be addressed by provisioning 3 {kib} instances, providing an upper throughput of `600/tpm`. This scale would provide aproximated 25% additional capacity to handle ad-hoc non-recurring tasks and potential growth in recurring tasks.
+
+It is highly recommended that you maintain at least 20% additional capacity, beyond your expected workload, as spikes in ad hoc tasks is possible at times of high activity (such as a spike in _Actions_ in response to an active _Alert_).
+
+For details on monitoring the health of {kib} Task Manager, follow the guidance under <<task-manager-health-monitoring>>.
+
+[float]
+[[task-manager-scaling-horizontally]]
+==== Scaling Horizontaly
+
+At times the sustainbale approach might be to expand the throughput of your cluster by provisioning additional {kib} instances.
+By default, each additional {kib} instance will add an additional 10 tasks that your cluster can run concurrenctly, but you can also scale each {kib} instance vertically, if your dignosis indicates they can handle the additional workload.
+
+[float]
+[[task-manager-scaling-vertically]]
+==== Scaling Vertically
+
+Other times it, might be preferable to increase the throughput of individual {kib} instances.
+
+Tweak the *Max Workers* via the <<task-manager-settings,`xpack.task_manager.max_workers`>> setting, which would allow each {kib} to pull a higher number of tasks per interval, but keep in mind that this could impact the performance of each {kib} instance as their workload would be higher.
+
+Tweak the *Poll Interval* via the <<task-manager-settings,`xpack.task_manager.poll_interval`>> setting, which would allow each {kib} to pull scheduled tasks at a higher rate, but keep in mind that this could impact the performance of the {es} cluster *as their workload would be higher*.
+
+[float]
+[[task-manager-choosing-scaling-strategy]]
+==== Choosing a Scaling Strategy
+
+Each scaling strategy comes with its own considerations, and as a consequence, the appropriate strategy largely depends on your use case
+
+Scaling {kib} instances vertically causes higher resource utilization in each {kib} instance, as it will perform more concurrent work.
+Scaling {kib} instances horizontally requires a higher degree of coordination which can impact overall performance.
+
+Find the sweet spot between both strategies requires experimentation, but in general our recommended strategy would be to follow these steps:
+
+1. <<task-manager-health-evaluate-the-workload,Evaluate your workload>> to calculatea rough required throughput in _tasks per minute_, and provision as many {kib} instances as needed to deliver that throughot as described under <<task-manager-default-scaling>> . Include in this calculation any growth in tasks you predict you will incurr in the near future, and the 20% buffer intended on addressing ad-hoc tasks.
+2. Assess whether the provosioned {kib} instances achieve the required throughput by evaluating the <<task-manager-health-monitoring>> as described under <<task-manager-health-evaluate-the-runtime-insufficient-throughput>>
+3. If the throughout is insufficient, and {kib} instances are exhibiting low resource utilization, incrementally scale vertically while <<kibana-page,monitoring>> the impact of these changes.
+4. If the throughout is insufficient, and {kib} instances are exhibiting high resource utilization, incrementally scale horizontally and reassess.
+
+{kib} Task Manager, just like {kib} and {es} themselves, has been designed to scale horizontally, and we recommend taking advantage of this ability to ensure mission ciritcal services such as Alerting and Reporting always have the capacity they need.

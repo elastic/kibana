@@ -49,25 +49,9 @@ We refer to this sort of delay as _drift_, the underlying cause of which vary fr
 A possible cause for both consistent and inconsistent _drift_ is *an excess of concurrent tasks* relative to the available capacity of {kib} instances in the cluster, which can be addressed by expanding the throughput of the cluster.
 An additional possible cause for consistent _drift_ is that *Long running tasks* may overrun their scheduled cadence. Such a scenario would ocurr if a task is scheduled to execute every 2 seconds, but takes 4 seconds to complete, in which case it will consistenly suffer from a _drift_ of, at least, 2 seconds.
 
-There are several options for addressing _drift_ in the system, each with their own considerations
-Before we dig deeper into diagnosing the underlying cause, it is worth understanding the options on the table:
+There are several options for addressing _drift_ in the system by adjusting the scaling strategy, each with their own considerations.
 
-[float]
-[[task-manager-health-resolution-scale-horizontally]]
-==== Scale Horizontaly
-
-At times the sustainbale approach might be to expand the throughput of your cluster by provisioning additional {kib} instances.
-By default, each additional {kib} instance will add an additional 10 tasks that your cluster can run concurrenctly, but you can also scale each {kib} instance vertically, if your dignosis indicates they can handle the additional workload.
-
-[float]
-[[task-manager-health-resolution-scale-vertically]]
-==== Scale Vertically
-
-Other times it, might be preferable to increase the throughput of individual {kib} instances.
-
-Tweak the *Max Workers* via the <<task-manager-settings,`xpack.task_manager.max_workers`>> setting, which would allow each {kib} to pull a higher number of tasks per interval, but keep in mind that this could impact the performance of each {kib} instance as their workload would be higher.
-
-Tweak the *Poll Interval* via the <<task-manager-settings,`xpack.task_manager.poll_interval`>> setting, which would allow each {kib} to pull scheduled tasks at a higher rate, but keep in mind that this could impact the performance of the {es} cluster *as their workload would be higher*.
+For details on finding the scaling strategy best suited to your unique use case, see <<task-manager-scaling-guidance>>.
 
 [float]
 ==== Diagnosing A Root Cause
@@ -401,7 +385,7 @@ Analyzing the {kib} Server Log should reveal the underlying issue causing the hi
 The high `NoAvailableWorkers` rate of 20% suggests that there are many tasks running for durations longer than the `poll_interval`.
 For details on analyzing long task execution durations, see the <<task-manager-health-evaluate-the-runtime-long-running-task,long running tasks>> theory.
 
-[[task-manager-health-evaluate-the-runtime-insufficient-workload]]
+[[task-manager-health-evaluate-the-runtime-insufficient-throughput]]
 *Theory*:
 Perhaps {kib} is polling as frequently as it should, but that isn't often enough to keep up with the workload?
 
@@ -456,13 +440,7 @@ We can infer from these stats that this {kib} is running at capacity much of the
 That said, it also reveals that tasks are not being run much after their scheduled time, as a `poll_interval` of `3000` milliseconds would often experience a consistent _drift_ of somewhere in between `0` and `3000` milliseconds.
 
 Seeing a `p50 drift` of `2999` suggests that there is room for improvmenet, and we could benefit from a higher throughput.
-This could be achieved by scaling either <<task-manager-health-resolution-scale-horizontally, horizontally>> or <<task-manager-health-resolution-scale-vertically, vertically>>.
-
-In the hypothetical scenario above, it would be worth experimenting with both options.
-If your {kib} instances have the capacity for higher resource utilization, for instance, it might be easiest to start by scaling vertically.
-If, on the other hand, your {kib} instances are already experiencing high resource utilization, then it might be better to scale horizontally by provisioning an additional {kib} instance.
-
-By <<task-manager-health-evaluate-the-workload, evaluating the Workload>> it is possible to asses the scale that the system is trying to handle.
+For details on achieving higher throughput by adjusting your scaling strategy, see <<task-manager-scaling-guidance>>.
 
 [[task-manager-health-evaluate-the-runtime-long-running-task]]
 *Theory*:
@@ -470,7 +448,7 @@ Perhaps tasks aren't "running late" so much as "running for too long"?
 
 *Diagnosis*:
 
-Diagnosing the theory that {kib} Task Manager has <<task-manager-health-evaluate-the-runtime-insufficient-workload,insufficient throughtput to handle the scheduled workload>> theorized a hypothetical scenario where both _drift_ and _load_ are unusually high.
+Diagnosing the theory that {kib} Task Manager has <<task-manager-health-evaluate-the-runtime-insufficient-throughput,insufficient throughtput to handle the scheduled workload>> theorized a hypothetical scenario where both _drift_ and _load_ are unusually high.
 
 Suppose an alternate scenario, where `drift` is high, but `load` is not, such as the following:
 
