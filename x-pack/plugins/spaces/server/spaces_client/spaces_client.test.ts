@@ -7,7 +7,7 @@
 
 import { SpacesClient } from './spaces_client';
 import { ConfigType, ConfigSchema } from '../config';
-import { savedObjectsRepositoryMock } from '../../../../../src/core/server/mocks';
+import { savedObjectsRepositoryMock } from 'src/core/server/mocks';
 import { GetAllSpacesPurpose } from '../../common';
 
 const createMockDebugLogger = () => {

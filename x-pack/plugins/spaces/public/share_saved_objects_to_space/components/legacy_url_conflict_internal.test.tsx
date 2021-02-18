@@ -10,7 +10,7 @@ import { BehaviorSubject } from 'rxjs';
 import { EuiCallOut } from '@elastic/eui';
 import { mountWithIntl, findTestSubject } from '@kbn/test/jest';
 import { act } from '@testing-library/react';
-import { coreMock } from '../../../../../../src/core/public/mocks';
+import { coreMock } from 'src/core/public/mocks';
 import { LegacyUrlConflictInternal } from './legacy_url_conflict_internal';
 
 const APP_ID = 'testAppId';

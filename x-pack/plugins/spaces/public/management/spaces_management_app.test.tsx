@@ -20,7 +20,7 @@ jest.mock('./edit_space', () => ({
 
 import { spacesManagementApp } from './spaces_management_app';
 
-import { coreMock, scopedHistoryMock } from '../../../../../src/core/public/mocks';
+import { coreMock, scopedHistoryMock } from 'src/core/public/mocks';
 import { spacesManagerMock } from '../spaces_manager/mocks';
 import { featuresPluginMock } from '../../../features/public/mocks';
 import { PluginsStart } from '../plugin';

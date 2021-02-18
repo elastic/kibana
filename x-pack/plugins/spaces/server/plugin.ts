@@ -8,13 +8,7 @@
 import { Observable } from 'rxjs';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { HomeServerPluginSetup } from 'src/plugins/home/server';
-import {
-  CoreSetup,
-  CoreStart,
-  Logger,
-  PluginInitializerContext,
-  Plugin,
-} from '../../../../src/core/server';
+import { CoreSetup, CoreStart, Logger, PluginInitializerContext, Plugin } from 'src/core/server';
 import {
   PluginSetupContract as FeaturesPluginSetup,
   PluginStartContract as FeaturesPluginStart,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { PluginConfigDescriptor, PluginInitializerContext } from '../../../../src/core/server';
+import type { PluginConfigDescriptor, PluginInitializerContext } from 'src/core/server';
 import { ConfigSchema, spacesConfigDeprecationProvider } from './config';
 import { SpacesPlugin } from './plugin';
 
@@ -25,7 +25,7 @@ export { ISpacesClient } from './spaces_client';
 export { GetAllSpacesOptions, GetAllSpacesPurpose, GetSpaceResult } from '../common';
 
 // re-export types from oss definition
-export { Space } from 'src/plugins/spaces_oss/common';
+export type { Space } from 'src/plugins/spaces_oss/common';
 
 export const config: PluginConfigDescriptor = {
   schema: ConfigSchema,

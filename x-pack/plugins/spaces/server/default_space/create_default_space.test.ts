@@ -7,7 +7,7 @@
 
 import { createDefaultSpace } from './create_default_space';
 import { SavedObjectsErrorHelpers } from 'src/core/server';
-import { loggingSystemMock } from '../../../../../src/core/server/mocks';
+import { loggingSystemMock } from 'src/core/server/mocks';
 
 interface MockServerSettings {
   defaultExists?: boolean;

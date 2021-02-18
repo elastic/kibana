@@ -21,9 +21,9 @@ import {
   SavedObjectsAddToNamespacesOptions,
   SavedObjectsDeleteFromNamespacesOptions,
   SavedObjectsRemoveReferencesToOptions,
-  SavedObjectsUtils,
   ISavedObjectTypeRegistry,
-} from '../../../../../src/core/server';
+} from 'src/core/server';
+import { SavedObjectsUtils } from '../../../../../src/core/server';
 import { ALL_SPACES_ID } from '../../common/constants';
 import { SpacesServiceStart } from '../spaces_service/spaces_service';
 import { spaceIdToNamespace } from '../lib/utils/namespace';

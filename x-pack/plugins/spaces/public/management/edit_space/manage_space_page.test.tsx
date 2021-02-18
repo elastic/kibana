@@ -18,7 +18,7 @@ import { SpacesManager } from '../../spaces_manager';
 import { notificationServiceMock, scopedHistoryMock } from 'src/core/public/mocks';
 import { featuresPluginMock } from '../../../../features/public/mocks';
 import { KibanaFeature } from '../../../../features/public';
-import { DEFAULT_APP_CATEGORIES } from '../../../../../../src/core/public';
+import { DEFAULT_APP_CATEGORIES } from 'src/core/public';
 
 // To be resolved by EUI team.
 // https://github.com/elastic/eui/issues/3712

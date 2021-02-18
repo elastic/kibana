@@ -9,7 +9,7 @@ import React from 'react';
 import { mountWithIntl, nextTick, shallowWithIntl } from '@kbn/test/jest';
 import { EnabledFeatures } from './enabled_features';
 import { KibanaFeatureConfig } from '../../../../../features/public';
-import { DEFAULT_APP_CATEGORIES } from '../../../../../../../src/core/public';
+import { DEFAULT_APP_CATEGORIES } from 'src/core/public';
 import { findTestSubject } from '@kbn/test/jest';
 import { EuiCheckboxProps } from '@elastic/eui';
 

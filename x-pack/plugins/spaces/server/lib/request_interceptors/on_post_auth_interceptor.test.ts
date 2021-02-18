@@ -10,18 +10,10 @@ import { Legacy } from 'kibana';
 // @ts-ignore
 import { kibanaTestUser } from '@kbn/test';
 import { initSpacesOnRequestInterceptor } from './on_request_interceptor';
-import {
-  CoreSetup,
-  SavedObjectsErrorHelpers,
-  IBasePath,
-  IRouter,
-} from '../../../../../../src/core/server';
-import {
-  elasticsearchServiceMock,
-  loggingSystemMock,
-  coreMock,
-} from '../../../../../../src/core/server/mocks';
-import * as kbnTestServer from '../../../../../../src/core/test_helpers/kbn_server';
+import { CoreSetup, IBasePath, IRouter } from 'src/core/server';
+import { SavedObjectsErrorHelpers } from '../../../../../../src/core/server';
+import { elasticsearchServiceMock, loggingSystemMock, coreMock } from 'src/core/server/mocks';
+import * as kbnTestServer from 'src/core/test_helpers/kbn_server';
 import { SpacesService } from '../../spaces_service';
 import { convertSavedObjectToSpace } from '../../routes/lib';
 import { initSpacesOnPostAuthRequestInterceptor } from './on_post_auth_interceptor';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Logger, CoreSetup } from '../../../../../src/core/server';
+import { Logger, CoreSetup } from 'src/core/server';
 import { UsageStatsClient } from './usage_stats_client';
 import { SPACES_USAGE_STATS_TYPE } from './constants';
 

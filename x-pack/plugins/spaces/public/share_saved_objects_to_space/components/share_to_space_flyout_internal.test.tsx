@@ -21,7 +21,7 @@ import { Space } from 'src/plugins/spaces_oss/common';
 import { SelectableSpacesControl } from './selectable_spaces_control';
 import { act } from '@testing-library/react';
 import { spacesManagerMock } from '../../spaces_manager/mocks';
-import { coreMock } from '../../../../../../src/core/public/mocks';
+import { coreMock } from 'src/core/public/mocks';
 import { CopySavedObjectsToSpaceFlyout } from '../../copy_saved_objects_to_space/components';
 import { NoSpacesAvailable } from './no_spaces_available';
 import { getShareToSpaceFlyoutComponent } from './share_to_space_flyout';

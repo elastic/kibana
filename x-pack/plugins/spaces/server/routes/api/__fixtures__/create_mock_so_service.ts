@@ -11,7 +11,7 @@ import {
   savedObjectsClientMock,
   savedObjectsTypeRegistryMock,
   savedObjectsServiceMock,
-} from '../../../../../../../src/core/server/mocks';
+} from 'src/core/server/mocks';
 
 export const createMockSavedObjectsService = (spaces: any[] = []) => {
   const typeRegistry = savedObjectsTypeRegistryMock.create();

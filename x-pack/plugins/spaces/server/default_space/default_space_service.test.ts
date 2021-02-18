@@ -18,7 +18,7 @@ import {
   CoreStatus,
   SavedObjectsRepository,
   SavedObjectsErrorHelpers,
-} from '../../../../../src/core/server';
+} from 'src/core/server';
 import { coreMock, loggingSystemMock } from 'src/core/server/mocks';
 import { licensingMock } from '../../../licensing/server/mocks';
 import { SpacesLicenseService } from '../../common/licensing';
