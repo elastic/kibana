@@ -29,6 +29,7 @@ import {
 } from '../../../../../src/plugins/data/public';
 import {
   replaceLayerList,
+  setMapSettings,
   setQuery,
   setRefreshConfig,
   disableScrollZoom,
@@ -37,6 +38,7 @@ import {
 import { getIsLayerTOCOpen, getOpenTOCDetails } from '../selectors/ui_selectors';
 import {
   getInspectorAdapters,
+  setChartsPaletteServiceGetColor,
   setEventHandlers,
   EventHandlers,
 } from '../reducers/non_serializable_instances';
@@ -54,7 +56,13 @@ import {
   RawValue,
 } from '../../common/constants';
 import { RenderToolTipContent } from '../classes/tooltips/tooltip_property';
-import { getUiActions, getCoreI18n, getHttp } from '../kibana_services';
+import {
+  getUiActions,
+  getCoreI18n,
+  getHttp,
+  getChartsPaletteServiceGetColor,
+  getSearchService,
+} from '../kibana_services';
 import { LayerDescriptor } from '../../common/descriptor_types';
 import { MapContainer } from '../connected_components/map_container';
 import { SavedMap } from '../routes/map_page';
@@ -71,6 +79,14 @@ import {
 } from './types';
 export { MapEmbeddableInput, MapEmbeddableOutput };
 
+function getIsRestore(searchSessionId?: string) {
+  if (!searchSessionId) {
+    return false;
+  }
+  const searchSessionOptions = getSearchService().session.getSearchOptions(searchSessionId);
+  return searchSessionOptions ? searchSessionOptions.isRestore : false;
+}
+
 export class MapEmbeddable
   extends Embeddable<MapEmbeddableInput, MapEmbeddableOutput>
   implements ReferenceOrValueEmbeddable<MapByValueInput, MapByReferenceInput> {
@@ -79,10 +95,12 @@ export class MapEmbeddable
   private _savedMap: SavedMap;
   private _renderTooltipContent?: RenderToolTipContent;
   private _subscription: Subscription;
+  private _prevIsRestore: boolean = false;
   private _prevTimeRange?: TimeRange;
   private _prevQuery?: Query;
   private _prevRefreshConfig?: RefreshInterval;
   private _prevFilters?: Filter[];
+  private _prevSyncColors?: boolean;
   private _prevSearchSessionId?: string;
   private _domNode?: HTMLElement;
   private _unsubscribeFromStore?: Unsubscribe;
@@ -126,6 +144,8 @@ export class MapEmbeddable
   }
 
   private _initializeStore() {
+    this._dispatchSetChartsPaletteServiceGetColor(this.input.syncColors);
+
     const store = this._savedMap.getStore();
     store.dispatch(setReadOnly(true));
     store.dispatch(disableScrollZoom());
@@ -221,6 +241,21 @@ export class MapEmbeddable
     if (this.input.refreshConfig && !_.isEqual(this.input.refreshConfig, this._prevRefreshConfig)) {
       this._dispatchSetRefreshConfig(this.input.refreshConfig);
     }
+
+    if (this.input.syncColors !== this._prevSyncColors) {
+      this._dispatchSetChartsPaletteServiceGetColor(this.input.syncColors);
+    }
+
+    const isRestore = getIsRestore(this.input.searchSessionId);
+    if (isRestore !== this._prevIsRestore) {
+      this._prevIsRestore = isRestore;
+      this._savedMap.getStore().dispatch(
+        setMapSettings({
+          disableInteractive: isRestore,
+          hideToolbarOverlay: isRestore,
+        })
+      );
+    }
   }
 
   _dispatchSetQuery({
@@ -259,6 +294,19 @@ export class MapEmbeddable
         interval: refreshConfig.value,
       })
     );
+  }
+
+  async _dispatchSetChartsPaletteServiceGetColor(syncColors?: boolean) {
+    this._prevSyncColors = syncColors;
+    const chartsPaletteServiceGetColor = syncColors
+      ? await getChartsPaletteServiceGetColor()
+      : null;
+    if (syncColors !== this._prevSyncColors) {
+      return;
+    }
+    this._savedMap
+      .getStore()
+      .dispatch(setChartsPaletteServiceGetColor(chartsPaletteServiceGetColor));
   }
 
   /**

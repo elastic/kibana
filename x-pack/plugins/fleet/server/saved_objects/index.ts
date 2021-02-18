@@ -10,7 +10,8 @@ import { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objec
 import {
   migratePackagePolicyToV7110,
   migratePackagePolicyToV7120,
-} from '../../../security_solution/common';
+  // @ts-expect-error
+} from './security_solution';
 import {
   OUTPUT_SAVED_OBJECT_TYPE,
   AGENT_POLICY_SAVED_OBJECT_TYPE,
@@ -161,6 +162,7 @@ const getSavedObjectTypes = (
         description: { type: 'text' },
         namespace: { type: 'keyword' },
         is_default: { type: 'boolean' },
+        is_default_fleet_server: { type: 'boolean' },
         is_managed: { type: 'boolean' },
         status: { type: 'keyword' },
         package_policies: { type: 'keyword' },

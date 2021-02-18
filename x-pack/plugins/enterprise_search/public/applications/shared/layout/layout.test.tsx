@@ -6,7 +6,9 @@
  */
 
 import React from 'react';
+
 import { shallow } from 'enzyme';
+
 import { EuiPageSideBar, EuiButton, EuiPageBody, EuiCallOut } from '@elastic/eui';
 
 import { Layout, INavContext } from './layout';

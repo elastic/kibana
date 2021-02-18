@@ -11,9 +11,7 @@ export { SpaceAvatar, getSpaceColor, getSpaceImageUrl, getSpaceInitials } from '
 
 export { SpacesPluginSetup, SpacesPluginStart } from './plugin';
 
-export { SpacesManager } from './spaces_manager';
-
-export { GetAllSpacesOptions, GetAllSpacesPurpose, GetSpaceResult } from '../common';
+export type { GetAllSpacesPurpose, GetSpaceResult } from '../common';
 
 // re-export types from oss definition
 export type { Space } from '../../../../src/plugins/spaces_oss/common';

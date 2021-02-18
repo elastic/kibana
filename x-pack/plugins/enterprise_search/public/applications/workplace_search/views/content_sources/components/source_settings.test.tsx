@@ -8,13 +8,13 @@
 import '../../../../__mocks__/shallow_useeffect.mock';
 
 import { setMockValues, setMockActions } from '../../../../__mocks__';
+import { fullContentSources, sourceConfigData } from '../../../__mocks__/content_sources.mock';
 
 import React from 'react';
+
 import { shallow } from 'enzyme';
 
 import { EuiConfirmModal } from '@elastic/eui';
-
-import { fullContentSources, sourceConfigData } from '../../../__mocks__/content_sources.mock';
 
 import { SourceConfigFields } from '../../../components/shared/source_config_fields';
 

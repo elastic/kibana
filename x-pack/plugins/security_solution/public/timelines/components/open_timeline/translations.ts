@@ -146,7 +146,7 @@ export const OPEN_TIMELINE = i18n.translate(
 export const OPEN_TIMELINE_TITLE = i18n.translate(
   'xpack.securitySolution.open.timeline.openTimelineTitle',
   {
-    defaultMessage: 'Open Timeline',
+    defaultMessage: 'Open',
   }
 );
 
@@ -273,12 +273,6 @@ export const SUCCESSFULLY_EXPORTED_TIMELINE_TEMPLATES = (totalTimelineTemplates:
         'Successfully exported {totalTimelineTemplates, plural, =0 {all timelines} =1 {{totalTimelineTemplates} timeline template} other {{totalTimelineTemplates} timeline templates}}',
     }
   );
-
-export const FILTER_TIMELINES = (timelineType: string) =>
-  i18n.translate('xpack.securitySolution.open.timeline.filterByTimelineTypesTitle', {
-    values: { timelineType },
-    defaultMessage: 'Only {timelineType}',
-  });
 
 export const TAB_TIMELINES = i18n.translate(
   'xpack.securitySolution.timelines.components.tabs.timelinesTitle',

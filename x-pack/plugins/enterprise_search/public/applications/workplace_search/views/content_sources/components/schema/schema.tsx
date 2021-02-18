@@ -20,17 +20,12 @@ import {
   EuiPanel,
 } from '@elastic/eui';
 
-import { getReindexJobRoute } from '../../../../routes';
-import { AppLogic } from '../../../../app_logic';
-
-import { Loading } from '../../../../../shared/loading';
-import { ViewContentHeader } from '../../../../components/shared/view_content_header';
-
-import { SchemaAddFieldModal } from '../../../../../shared/schema/schema_add_field_modal';
 import { IndexingStatus } from '../../../../../shared/indexing_status';
-
-import { SchemaFieldsTable } from './schema_fields_table';
-import { SchemaLogic } from './schema_logic';
+import { Loading } from '../../../../../shared/loading';
+import { SchemaAddFieldModal } from '../../../../../shared/schema/schema_add_field_modal';
+import { AppLogic } from '../../../../app_logic';
+import { ViewContentHeader } from '../../../../components/shared/view_content_header';
+import { getReindexJobRoute } from '../../../../routes';
 
 import {
   SCHEMA_ADD_FIELD_BUTTON,
@@ -42,6 +37,8 @@ import {
   SCHEMA_EMPTY_SCHEMA_TITLE,
   SCHEMA_EMPTY_SCHEMA_DESCRIPTION,
 } from './constants';
+import { SchemaFieldsTable } from './schema_fields_table';
+import { SchemaLogic } from './schema_logic';
 
 export const Schema: React.FC = () => {
   const {

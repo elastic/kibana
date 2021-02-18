@@ -9,14 +9,14 @@ import React, { Fragment, FC } from 'react';
 
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { isCloud } from '../../services/ml_server_info';
+import { lazyMlNodesAvailable } from '../../ml_nodes_check';
 
 interface Props {
   jobCount: number;
 }
 
 export const JobsAwaitingNodeWarning: FC<Props> = ({ jobCount }) => {
-  if (isCloud() === false || jobCount === 0) {
+  if (lazyMlNodesAvailable() === false || jobCount === 0) {
     return null;
   }
 
@@ -26,7 +26,7 @@ export const JobsAwaitingNodeWarning: FC<Props> = ({ jobCount }) => {
         title={
           <FormattedMessage
             id="xpack.ml.jobsAwaitingNodeWarning.title"
-            defaultMessage="Awaiting ML node provisioning"
+            defaultMessage="Awaiting machine learning node"
           />
         }
         color="primary"
@@ -35,7 +35,7 @@ export const JobsAwaitingNodeWarning: FC<Props> = ({ jobCount }) => {
         <div>
           <FormattedMessage
             id="xpack.ml.jobsAwaitingNodeWarning.noMLNodesAvailableDescription"
-            defaultMessage="There {jobCount, plural, one {is} other {are}} {jobCount, plural, one {# job} other {# jobs}} waiting to be started while ML nodes are being provisioned."
+            defaultMessage="There {jobCount, plural, one {is} other {are}} {jobCount, plural, one {# job} other {# jobs}} waiting for machine learning nodes to start."
             values={{
               jobCount,
             }}
