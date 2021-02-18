@@ -913,5 +913,6 @@ export const visualizationSavedObjectTypeMigrations = {
   '7.9.3': flow(migrateMatchAllQuery),
   '7.10.0': flow(migrateFilterRatioQuery, removeTSVBSearchSource),
   '7.11.0': flow(enableDataTableVisToolbar),
-  '7.12.0': flow(migrateVislibAreaLineBarTypes, removeTableAggregateFunctionsFromTSVB),
+  '7.12.0': flow(migrateVislibAreaLineBarTypes),
+  '7.13.0': flow(removeTableAggregateFunctionsFromTSVB),
 };

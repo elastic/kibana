@@ -1763,9 +1763,9 @@ describe('migration visualization', () => {
     });
   });
 
-  describe('7.12.0 remove aggregate functions support from TSVB table', () => {
+  describe('7.13.0 remove aggregate functions support from TSVB table', () => {
     const migrate = (doc: any) =>
-      visualizationSavedObjectTypeMigrations['7.12.0'](
+      visualizationSavedObjectTypeMigrations['7.13.0'](
         doc as Parameters<SavedObjectMigrationFn>[0],
         savedObjectMigrationContext
       );
