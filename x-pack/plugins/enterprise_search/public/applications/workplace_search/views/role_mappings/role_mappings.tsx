@@ -9,22 +9,20 @@ import React, { useEffect } from 'react';
 
 import { useActions, useValues } from 'kea';
 
-import FlashMessages from 'shared/components/FlashMessages';
-import { AddRoleMappingButton, RoleMappingsTable } from 'shared/components/RoleMapping';
-
-import { Loading, ViewContentHeader } from 'workplace_search/components';
-import { getRoleMappingPath, ROLE_MAPPING_NEW_PATH } from 'workplace_search/utils/routePaths';
-
 import { EuiEmptyPrompt } from '@elastic/eui';
 
-import { RoleMappingsLogic } from './RoleMappingsLogic';
+import { FlashMessages } from '../../../shared/flash_messages';
+import { Loading } from '../../../shared/loading';
+import { AddRoleMappingButton, RoleMappingsTable } from '../../../shared/role_mapping';
+import { ViewContentHeader } from '../../components/shared/view_content_header';
+import { getRoleMappingPath, ROLE_MAPPING_NEW_PATH } from '../../routes';
+
+import { RoleMappingsLogic } from './role_mappings_logic';
 
 export const RoleMappings: React.FC = () => {
   const { initializeRoleMappings } = useActions(RoleMappingsLogic);
 
-  const { roleMappings, dataLoading, multipleAuthProvidersConfig, flashMessages } = useValues(
-    RoleMappingsLogic
-  );
+  const { roleMappings, dataLoading, multipleAuthProvidersConfig } = useValues(RoleMappingsLogic);
 
   useEffect(() => {
     initializeRoleMappings();
@@ -64,7 +62,7 @@ export const RoleMappings: React.FC = () => {
         description="Define role mappings for elasticsearch-native and elasticsearch-saml authentication."
       />
       <div>
-        {flashMessages && <FlashMessages {...flashMessages} />}
+        <FlashMessages />
         {roleMappings.length === 0 ? emptyPrompt : roleMappingsTable}
       </div>
     </>
