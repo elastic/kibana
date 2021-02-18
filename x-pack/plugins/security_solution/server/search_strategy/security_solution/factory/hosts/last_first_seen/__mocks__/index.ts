@@ -21,7 +21,7 @@ export const mockOptions: HostFirstLastSeenRequestOptions = {
     'winlogbeat-*',
   ],
   docValueFields: [],
-  factoryQueryType: HostsQueries.firstSeen,
+  factoryQueryType: HostsQueries.firstOrLastSeen,
   hostName: 'siem-kibana',
   order: 'asc',
 };

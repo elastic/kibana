@@ -6,7 +6,7 @@
  */
 
 import * as buildQuery from './query.first_or_last_seen_host.dsl';
-import { firstSeenHost, lastSeenHost } from '.';
+import { firstOrLastSeenHost } from '.';
 import {
   mockOptions,
   mockSearchStrategyFirstSeenResponse,
@@ -26,14 +26,17 @@ describe('firstLastSeenHost search strategy', () => {
 
     describe('buildDsl', () => {
       test('should build dsl query', () => {
-        firstSeenHost.buildDsl(mockOptions);
+        firstOrLastSeenHost.buildDsl(mockOptions);
         expect(buildFirstLastSeenHostQuery).toHaveBeenCalledWith(mockOptions);
       });
     });
 
     describe('parse', () => {
       test('should parse data correctly', async () => {
-        const result = await firstSeenHost.parse(mockOptions, mockSearchStrategyFirstSeenResponse);
+        const result = await firstOrLastSeenHost.parse(
+          mockOptions,
+          mockSearchStrategyFirstSeenResponse
+        );
         expect(result).toMatchObject(formattedSearchStrategyFirstResponse);
       });
     });
@@ -49,14 +52,14 @@ describe('firstLastSeenHost search strategy', () => {
     describe('buildDsl', () => {
       test('should build dsl query', () => {
         const options: HostFirstLastSeenRequestOptions = { ...mockOptions, order: 'desc' };
-        lastSeenHost.buildDsl(options);
+        firstOrLastSeenHost.buildDsl(options);
         expect(buildFirstLastSeenHostQuery).toHaveBeenCalledWith(options);
       });
     });
 
     describe('parse', () => {
       test('should parse data correctly', async () => {
-        const result = await lastSeenHost.parse(
+        const result = await firstOrLastSeenHost.parse(
           { ...mockOptions, order: 'desc' },
           mockSearchStrategyLastSeenResponse
         );

@@ -111,9 +111,7 @@ export type StrategyResponseType<T extends FactoryQueryTypes> = T extends HostsQ
   ? HostsOverviewStrategyResponse
   : T extends HostsQueries.authentications
   ? HostAuthenticationsStrategyResponse
-  : T extends HostsQueries.firstSeen
-  ? HostFirstLastSeenStrategyResponse
-  : T extends HostsQueries.lastSeen
+  : T extends HostsQueries.firstOrLastSeen
   ? HostFirstLastSeenStrategyResponse
   : T extends HostsQueries.uncommonProcesses
   ? HostsUncommonProcessesStrategyResponse
@@ -161,9 +159,7 @@ export type StrategyRequestType<T extends FactoryQueryTypes> = T extends HostsQu
   ? HostOverviewRequestOptions
   : T extends HostsQueries.authentications
   ? HostAuthenticationsRequestOptions
-  : T extends HostsQueries.firstSeen
-  ? HostFirstLastSeenRequestOptions
-  : T extends HostsQueries.lastSeen
+  : T extends HostsQueries.firstOrLastSeen
   ? HostFirstLastSeenRequestOptions
   : T extends HostsQueries.uncommonProcesses
   ? HostsUncommonProcessesRequestOptions

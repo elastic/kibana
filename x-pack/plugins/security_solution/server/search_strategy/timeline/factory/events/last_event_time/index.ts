@@ -36,7 +36,7 @@ export const timelineEventsLastEventTime: SecuritySolutionTimelineFactory<Timeli
     );
     // If it doesn't exist, fall back on _source as a last try.
     const lastSeen: string | null =
-      formattedField || getOr(null, 'hits.hits[0]._source', response.rawResponse);
+      formattedField || getOr(null, 'hits.hits[0]._source.@timestamp', response.rawResponse);
 
     return {
       ...response,

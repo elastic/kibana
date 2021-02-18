@@ -54,7 +54,7 @@ export const useFirstLastSeenHost = ({
   ] = useState<HostFirstLastSeenRequestOptions>({
     defaultIndex: indexNames,
     docValueFields: docValueFields ?? [],
-    factoryQueryType: order === 'asc' ? HostsQueries.firstSeen : HostsQueries.lastSeen,
+    factoryQueryType: HostsQueries.firstOrLastSeen,
     hostName,
     order,
   });
