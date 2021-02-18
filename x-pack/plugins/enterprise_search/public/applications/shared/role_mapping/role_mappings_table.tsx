@@ -127,7 +127,10 @@ export const RoleMappingsTable: React.FC<IRoleMappingsTableProps> = ({
                     {getFirstAttributeValue(rules)}
                   </EuiTableRowCell>
                   <EuiTableRowCell>{roleType}</EuiTableRowCell>
-                  <EuiTableRowCell style={{ maxWidth: MAX_CELL_WIDTH }}>
+                  <EuiTableRowCell
+                    data-test-subj="AccessItemsList"
+                    style={{ maxWidth: MAX_CELL_WIDTH }}
+                  >
                     {accessAllEngines ? (
                       ALL_LABEL
                     ) : (
@@ -144,7 +147,7 @@ export const RoleMappingsTable: React.FC<IRoleMappingsTableProps> = ({
                     )}
                   </EuiTableRowCell>
                   {shouldShowAuthProvider && (
-                    <EuiTableRowCell>
+                    <EuiTableRowCell data-test-subj="AuthProviderDisplay">
                       {authProvider.map(getAuthProviderDisplayValue).join(', ')}
                     </EuiTableRowCell>
                   )}
