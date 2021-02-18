@@ -91,15 +91,36 @@ const dropProps = {
 export const WorkspacePanel = React.memo(function WorkspacePanel(props: WorkspacePanelProps) {
   const { getSuggestionForField, ...restProps } = props;
 
-  const dragDropContext = useContext(DragContext);
+  const {
+    dragging,
+    activeDropTarget,
+    keyboardMode,
+    dropTargetsByOrder,
+    ...dispatchers
+  } = useContext(DragContext);
 
-  const suggestionForDraggedField = useMemo(
-    () => dragDropContext.dragging && getSuggestionForField(dragDropContext.dragging),
-    [dragDropContext.dragging, getSuggestionForField]
+  const isActiveDropTarget = Boolean(activeDropTarget?.id === dropProps.value.id);
+  const dropContext = useMemo(
+    () => ({
+      dragging,
+      keyboardMode,
+      activeDropTarget,
+      ...dispatchers,
+    }),
+    [dragging, keyboardMode, isActiveDropTarget, dispatchers]
   );
 
+  const suggestionForDraggedField = useMemo(() => dragging && getSuggestionForField(dragging), [
+    dragging,
+    getSuggestionForField,
+  ]);
+
   return (
-    <InnerWorkspacePanel {...restProps} suggestionForDraggedField={suggestionForDraggedField} />
+    <InnerWorkspacePanel
+      {...restProps}
+      dropContext={dropContext}
+      suggestionForDraggedField={suggestionForDraggedField}
+    />
   );
 });
 
@@ -119,6 +140,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
   title,
   visualizeTriggerFieldContext,
   suggestionForDraggedField,
+  dropContext,
 }: Omit<WorkspacePanelProps, 'getSuggestionForField'> & {
   suggestionForDraggedField: Suggestion | undefined;
 }) {
@@ -300,6 +322,8 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     );
   };
 
+  const dropType = suggestionForDraggedField ? 'field_add' : undefined;
+
   return (
     <WorkspacePanelWrapper
       title={title}
@@ -315,10 +339,11 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
         className="lnsWorkspacePanel__dragDrop"
         dataTestSubj="lnsWorkspace"
         draggable={false}
-        dropType={suggestionForDraggedField ? 'field_add' : undefined}
+        dropType={dropType}
         onDrop={onDrop}
         value={dropProps.value}
         order={dropProps.order}
+        dragDropContext={dropContext}
       >
         <div>
           {renderVisualization()}

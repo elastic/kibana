@@ -105,6 +105,7 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
     itemIndex,
     groupIndex,
     dropOntoWorkspace,
+    dragDropContext,
   } = props;
 
   const [infoIsOpen, setOpen] = useState(false);
@@ -217,6 +218,7 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
             order={order}
             value={value}
             dataTestSubj={`lnsFieldListPanelField-${field.name}`}
+            dragDropContext={dragDropContext}
           >
             <FieldButton
               className={`lnsFieldItem lnsFieldItem--${field.type} lnsFieldItem--${

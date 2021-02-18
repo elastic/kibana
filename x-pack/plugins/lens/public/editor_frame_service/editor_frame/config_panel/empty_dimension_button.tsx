@@ -48,7 +48,7 @@ export function EmptyDimensionButton({
   layerDatasource: Datasource<unknown, unknown>;
   layerDatasourceDropProps: LayerDatasourceDropProps;
 }) {
-  const { dragging } = useContext(DragContext);
+  const dragDropContext = useContext(DragContext);
 
   const itemIndex = group.accessors.length;
 
@@ -59,7 +59,7 @@ export function EmptyDimensionButton({
 
   const dropProps = layerDatasource.getDropProps({
     ...layerDatasourceDropProps,
-    dragging,
+    dragging: dragDropContext.dragging,
     columnId: newColumnId,
     filterOperations: group.filterOperations,
     groupId: group.groupId,
@@ -98,6 +98,7 @@ export function EmptyDimensionButton({
         order={[2, layerIndex, groupIndex, itemIndex]}
         onDrop={handleOnDrop}
         dropType={dropType}
+        dragDropContext={dragDropContext}
       >
         <div className="lnsLayerPanel__dimension lnsLayerPanel__dimension--empty">
           <EuiButtonEmpty

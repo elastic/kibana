@@ -63,11 +63,11 @@ export function DraggableDimensionButton({
   columnId: string;
   registerNewButtonRef: (id: string, instance: HTMLDivElement | null) => void;
 }) {
-  const { dragging } = useContext(DragContext);
+  const dragDropContext = useContext(DragContext);
 
   const dropProps = layerDatasource.getDropProps({
     ...layerDatasourceDropProps,
-    dragging,
+    dragging: dragDropContext.dragging,
     columnId,
     filterOperations: group.filterOperations,
     groupId: group.groupId,
@@ -123,11 +123,12 @@ export function DraggableDimensionButton({
         getAdditionalClassesOnDroppable={getAdditionalClassesOnDroppable}
         order={[2, layerIndex, groupIndex, accessorIndex]}
         draggable
-        dragType={isDraggedOperation(dragging) ? 'move' : 'copy'}
+        dragType={isDraggedOperation(dragDropContext?.dragging) ? 'move' : 'copy'}
         dropType={dropType}
         reorderableGroup={reorderableGroup.length > 1 ? reorderableGroup : undefined}
         value={value}
         onDrop={handleOnDrop}
+        dragDropContext={dragDropContext}
       >
         {children}
       </DragDrop>

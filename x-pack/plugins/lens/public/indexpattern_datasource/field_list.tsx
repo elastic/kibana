@@ -9,11 +9,12 @@ import './field_list.scss';
 import { throttle } from 'lodash';
 import React, { useState, Fragment, useCallback, useMemo, useEffect } from 'react';
 import { EuiSpacer } from '@elastic/eui';
-import { FieldItem } from './field_item';
+import { SpecialFieldsGroup } from './special_fields_group';
 import { NoFieldsCallout } from './no_fields_callout';
 import { IndexPatternField } from './types';
 import { FieldItemSharedProps, FieldsAccordion } from './fields_accordion';
 import { DatasourceDataPanelProps } from '../types';
+
 const PAGINATION_SIZE = 50;
 
 export type FieldGroups = Record<
@@ -135,21 +136,16 @@ export const FieldList = React.memo(function FieldList({
         <ul>
           {Object.entries(fieldGroups)
             .filter(([, { showInAccordion }]) => !showInAccordion)
-            .flatMap(([, { fields }]) =>
-              fields.map((field, index) => (
-                <FieldItem
-                  {...fieldProps}
-                  exists={exists(field)}
-                  field={field}
-                  hideDetails={true}
-                  key={field.name}
-                  itemIndex={index}
-                  groupIndex={0}
-                  dropOntoWorkspace={dropOntoWorkspace}
-                  hasSuggestionForField={hasSuggestionForField}
-                />
-              ))
-            )}
+            .flatMap(([, { fields }], index) => (
+              <SpecialFieldsGroup
+                key={index}
+                fields={fields}
+                exists={exists}
+                fieldProps={fieldProps}
+                dropOntoWorkspace={dropOntoWorkspace}
+                hasSuggestionForField={hasSuggestionForField}
+              />
+            ))}
         </ul>
         <EuiSpacer size="s" />
         {Object.entries(fieldGroups)

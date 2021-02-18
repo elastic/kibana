@@ -146,7 +146,7 @@ export const DragDrop = (props: BaseProps) => {
     activeDropTarget,
     setActiveDropTarget,
     setA11yMessage,
-  } = useContext(DragContext);
+  } = props.dragDropContext;
 
   const { value, draggable, dropType, reorderableGroup } = props;
   const isDragging = !!(draggable && value.id === dragging?.id);

@@ -6,7 +6,7 @@
  */
 
 import './datapanel.scss';
-import React, { memo, useCallback, useMemo } from 'react';
+import React, { memo, useCallback, useMemo, useContext } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiText,
@@ -18,6 +18,7 @@ import {
 } from '@elastic/eui';
 import classNames from 'classnames';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
+import { DragContext } from '../drag_drop';
 import { IndexPatternField } from './types';
 import { FieldItem } from './field_item';
 import { Query, Filter } from '../../../../../src/plugins/data/public';
@@ -75,21 +76,34 @@ export const FieldsAccordion = memo(function InnerFieldsAccordion({
   dropOntoWorkspace,
   hasSuggestionForField,
 }: FieldsAccordionProps) {
+  const dragDropContext = useContext(DragContext);
+
   const renderField = useCallback(
-    (field: IndexPatternField, index) => (
-      <FieldItem
-        {...fieldProps}
-        key={field.name}
-        field={field}
-        exists={exists(field)}
-        hideDetails={hideDetails}
-        itemIndex={index}
-        groupIndex={groupIndex}
-        dropOntoWorkspace={dropOntoWorkspace}
-        hasSuggestionForField={hasSuggestionForField}
-      />
-    ),
-    [fieldProps, exists, hideDetails, dropOntoWorkspace, hasSuggestionForField, groupIndex]
+    (field: IndexPatternField, index) => {
+      return (
+        <FieldItem
+          {...fieldProps}
+          key={field.name}
+          field={field}
+          exists={exists(field)}
+          hideDetails={hideDetails}
+          itemIndex={index}
+          groupIndex={groupIndex}
+          dropOntoWorkspace={dropOntoWorkspace}
+          hasSuggestionForField={hasSuggestionForField}
+          dragDropContext={dragDropContext}
+        />
+      );
+    },
+    [
+      fieldProps,
+      exists,
+      hideDetails,
+      dropOntoWorkspace,
+      hasSuggestionForField,
+      groupIndex,
+      dragDropContext,
+    ]
   );
 
   const renderButton = useMemo(() => {
