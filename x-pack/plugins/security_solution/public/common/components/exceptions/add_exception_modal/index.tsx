@@ -33,7 +33,6 @@ import {
 import * as i18nCommon from '../../../translations';
 import * as i18n from './translations';
 import * as sharedI18n from '../translations';
-import { Ecs } from '../../../../../common/ecs';
 import { osTypeArray, OsTypeArray } from '../../../../../common/shared_imports';
 import { useAppToasts } from '../../../hooks/use_app_toasts';
 import { useKibana } from '../../../lib/kibana';
@@ -53,17 +52,23 @@ import {
   entryHasNonEcsType,
 } from '../helpers';
 import { ErrorInfo, ErrorCallout } from '../error_callout';
-import { ExceptionsBuilderExceptionItem, FlattenType } from '../types';
+import { AlertData, ExceptionsBuilderExceptionItem } from '../types';
 import { useFetchIndex } from '../../../containers/source';
 import { useGetInstalledJob } from '../../ml/hooks/use_get_jobs';
-import { useFetchAlertData } from '../use_fetch_alert_data';
 
 export interface AddExceptionModalProps {
   ruleName: string;
   ruleId: string;
   exceptionListType: ExceptionListType;
   ruleIndices: string[];
-  ecsData?: Ecs;
+  alertData?: AlertData;
+  /**
+   * The components that use this may or may not define `alertData`
+   * If they do, they need to fetch it async. In that case `alertData` will be
+   * undefined while `isAlertDataLoading` will be true. In the case that `alertData`
+   *  is not used, `isAlertDataLoading` will be undefined
+   */
+  isAlertDataLoading?: boolean;
   alertStatus?: Status;
   onCancel: () => void;
   onConfirm: (didCloseAlert: boolean, didBulkCloseAlert: boolean) => void;
@@ -98,16 +103,13 @@ const ModalBodySection = styled.section`
   `}
 `;
 
-export type Alert = {
-  '@timestamp': string;
-} & FlattenType<Ecs>;
-
 export const AddExceptionModal = memo(function AddExceptionModal({
   ruleName,
   ruleId,
   ruleIndices,
   exceptionListType,
-  ecsData,
+  alertData,
+  isAlertDataLoading,
   onCancel,
   onConfirm,
   onRuleChange,
@@ -132,18 +134,6 @@ export const AddExceptionModal = memo(function AddExceptionModal({
   const [isSignalIndexPatternLoading, { indexPatterns: signalIndexPatterns }] = useFetchIndex(
     memoSignalIndexName
   );
-
-  const { loading: isLoadingAlertData, data: alertData } = useFetchAlertData(
-    ecsData?._id,
-    signalIndexName
-  );
-
-  const alert = useMemo(() => {
-    if (isLoadingAlertData === false && ecsData != null) {
-      const { _id, _index, _source } = alertData?.hits.hits[0] ?? {};
-      return { _id: _id || ecsData._id, _index, ..._source };
-    }
-  }, [alertData?.hits.hits, isLoadingAlertData, ecsData]);
 
   const memoMlJobIds = useMemo(
     () => (maybeRule?.machine_learning_job_id != null ? [maybeRule.machine_learning_job_id] : []),
@@ -251,12 +241,12 @@ export const AddExceptionModal = memo(function AddExceptionModal({
   });
 
   const initialExceptionItems = useMemo((): ExceptionsBuilderExceptionItem[] => {
-    if (exceptionListType === 'endpoint' && alert != null && ecsData != null && ruleExceptionList) {
-      return defaultEndpointExceptionItems(ruleExceptionList.list_id, ruleName, alert);
+    if (exceptionListType === 'endpoint' && alertData != null && ruleExceptionList) {
+      return defaultEndpointExceptionItems(ruleExceptionList.list_id, ruleName, alertData);
     } else {
       return [];
     }
-  }, [exceptionListType, ruleExceptionList, ruleName, alert, ecsData]);
+  }, [exceptionListType, ruleExceptionList, ruleName, alertData]);
 
   useEffect((): void => {
     if (isSignalIndexPatternLoading === false && isSignalIndexLoading === false) {
@@ -303,15 +293,15 @@ export const AddExceptionModal = memo(function AddExceptionModal({
 
   const retrieveAlertOsTypes = useCallback((): OsTypeArray => {
     const osDefaults: OsTypeArray = ['windows', 'macos'];
-    if (ecsData != null) {
-      const osTypes = ecsData.host && ecsData.host.os && ecsData.host.os.family;
+    if (alertData != null) {
+      const osTypes = alertData.host && alertData.host.os && alertData.host.os.family;
       if (osTypeArray.is(osTypes) && osTypes != null && osTypes.length > 0) {
         return osTypes;
       }
       return osDefaults;
     }
     return osDefaults;
-  }, [ecsData]);
+  }, [alertData]);
 
   const enrichExceptionItems = useCallback((): Array<
     ExceptionListItemSchema | CreateExceptionListItemSchema
@@ -330,7 +320,7 @@ export const AddExceptionModal = memo(function AddExceptionModal({
 
   const onAddExceptionConfirm = useCallback((): void => {
     if (addOrUpdateExceptionItems != null) {
-      const alertIdToClose = shouldCloseAlert && ecsData ? ecsData._id : undefined;
+      const alertIdToClose = shouldCloseAlert && alertData ? alertData._id : undefined;
       const bulkCloseIndex =
         shouldBulkCloseAlert && signalIndexName != null ? [signalIndexName] : undefined;
       addOrUpdateExceptionItems(ruleId, enrichExceptionItems(), alertIdToClose, bulkCloseIndex);
@@ -341,7 +331,7 @@ export const AddExceptionModal = memo(function AddExceptionModal({
     enrichExceptionItems,
     shouldCloseAlert,
     shouldBulkCloseAlert,
-    ecsData,
+    alertData,
     signalIndexName,
   ]);
 
@@ -389,7 +379,7 @@ export const AddExceptionModal = memo(function AddExceptionModal({
         (isLoadingExceptionList ||
           isIndexPatternLoading ||
           isSignalIndexLoading ||
-          isLoadingAlertData ||
+          isAlertDataLoading ||
           isSignalIndexPatternLoading) && (
           <Loader data-test-subj="loadingAddExceptionModal" size="xl" />
         )}
@@ -400,7 +390,7 @@ export const AddExceptionModal = memo(function AddExceptionModal({
         !isIndexPatternLoading &&
         !isRuleLoading &&
         !mlJobLoading &&
-        !isLoadingAlertData &&
+        !isAlertDataLoading &&
         ruleExceptionList && (
           <>
             <ModalBodySection className="builder-section">
@@ -440,7 +430,7 @@ export const AddExceptionModal = memo(function AddExceptionModal({
             </ModalBodySection>
             <EuiHorizontalRule />
             <ModalBodySection>
-              {ecsData != null && alertStatus !== 'closed' && (
+              {alertData != null && alertStatus !== 'closed' && (
                 <EuiFormRow fullWidth>
                   <EuiCheckbox
                     data-test-subj="close-alert-on-add-add-exception-checkbox"

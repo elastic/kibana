@@ -30,7 +30,7 @@ import {
   getFileCodeSignature,
   getProcessCodeSignature,
 } from './helpers';
-import { EmptyEntry } from './types';
+import { AlertData, EmptyEntry } from './types';
 import {
   isOperator,
   isNotOperator,
@@ -636,14 +636,18 @@ describe('Exception helpers', () => {
   });
 
   describe('getPrepopulatedItem', () => {
-    test('it returns prepopulated items', () => {
+    const alertDataMock: AlertData = {
+      '@timestamp': '1234567890',
+      _id: 'test-id',
+      file: { path: 'some-file-path', hash: { sha256: 'some-hash' } },
+    };
+    test('it returns prepopulated fields with empty values', () => {
       const prepopulatedItem = getPrepopulatedEndpointException({
         listId: 'some_id',
         ruleName: 'my rule',
         codeSignature: { subjectName: '', trusted: '' },
-        filePath: '',
-        sha256Hash: '',
         eventCode: '',
+        alertEcsData: { ...alertDataMock, file: { path: '', hash: { sha256: '' } } },
       });
 
       expect(prepopulatedItem.entries).toEqual([
@@ -661,14 +665,13 @@ describe('Exception helpers', () => {
       ]);
     });
 
-    test('it returns prepopulated items with values', () => {
+    test('it returns prepopulated items with actual values', () => {
       const prepopulatedItem = getPrepopulatedEndpointException({
         listId: 'some_id',
         ruleName: 'my rule',
         codeSignature: { subjectName: 'someSubjectName', trusted: 'false' },
-        filePath: 'some-file-path',
-        sha256Hash: 'some-hash',
         eventCode: 'some-event-code',
+        alertEcsData: alertDataMock,
       });
 
       expect(prepopulatedItem.entries).toEqual([

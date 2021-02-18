@@ -6,6 +6,7 @@
  */
 
 import { ReactNode } from 'react';
+import { Ecs } from '../../../../common/ecs';
 import { CodeSignature } from '../../../../common/ecs/file';
 import { IFieldType } from '../../../../../../../src/plugins/data/common';
 import { OperatorOption } from '../autocomplete/types';
@@ -21,6 +22,7 @@ import {
   OperatorTypeEnum,
   OperatorEnum,
 } from '../../../lists_plugin_deps';
+import { AddExceptionModalProps } from './add_exception_modal';
 
 export interface FormattedEntry {
   fieldName: string;
@@ -122,3 +124,15 @@ export type FlattenType<T> = {
       : AliasType
     : never;
 };
+
+export type AlertData = {
+  '@timestamp': string;
+} & FlattenType<Ecs>;
+
+export interface EcsHit {
+  _id: string;
+  _index: string;
+  _source: {
+    '@timestamp': string;
+  } & Omit<FlattenType<Ecs>, '_id' | '_index'>;
+}

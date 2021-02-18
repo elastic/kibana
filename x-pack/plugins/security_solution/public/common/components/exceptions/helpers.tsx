@@ -425,19 +425,20 @@ export const getPrepopulatedEndpointException = ({
   listId,
   ruleName,
   codeSignature,
-  filePath,
-  sha256Hash,
   eventCode,
   listNamespace = 'agnostic',
+  alertEcsData,
 }: {
   listId: string;
   listNamespace?: NamespaceType;
   ruleName: string;
   codeSignature: { subjectName: string; trusted: string };
-  filePath: string;
-  sha256Hash: string;
   eventCode: string;
+  alertEcsData: FlattenType<Ecs>;
 }): ExceptionsBuilderExceptionItem => {
+  const { file } = alertEcsData;
+  const filePath = file && file.path ? file.path : '';
+  const sha256Hash = file && file.hash && file.hash.sha256 ? file.hash.sha256 : '';
   return {
     ...getNewExceptionItem({ listId, namespaceType: listNamespace, ruleName }),
     entries: [
@@ -488,21 +489,21 @@ export const getPrepopulatedRansomwareException = ({
   listId,
   ruleName,
   codeSignature,
-  executable,
-  sha256Hash,
-  ransomwareFeature,
   eventCode,
   listNamespace = 'agnostic',
+  alertEcsData,
 }: {
   listId: string;
   listNamespace?: NamespaceType;
   ruleName: string;
   codeSignature: { subjectName: string; trusted: string };
-  executable: string;
-  sha256Hash: string;
-  ransomwareFeature: string;
   eventCode: string;
+  alertEcsData: FlattenType<Ecs>;
 }): ExceptionsBuilderExceptionItem => {
+  const { process, Ransomware } = alertEcsData;
+  const sha256Hash = process && process.hash && process.hash.sha256 ? process.hash.sha256 : '';
+  const executable = process && process.executable ? process.executable : '';
+  const ransomwareFeature = Ransomware && Ransomware.feature ? Ransomware.feature : '';
   return {
     ...getNewExceptionItem({ listId, namespaceType: listNamespace, ruleName }),
     entries: [
@@ -590,7 +591,7 @@ export const defaultEndpointExceptionItems = (
   ruleName: string,
   alertEcsData: FlattenType<Ecs>
 ): ExceptionsBuilderExceptionItem[] => {
-  const { file, process, Ransomware, event: alertEvent } = alertEcsData;
+  const { event: alertEvent } = alertEcsData;
   const eventCode = alertEvent && alertEvent.code ? alertEvent.code : '';
 
   if (eventCode === 'ransomware') {
@@ -598,11 +599,9 @@ export const defaultEndpointExceptionItems = (
       getPrepopulatedRansomwareException({
         listId,
         ruleName,
-        sha256Hash: process && process.hash && process.hash.sha256 ? process.hash.sha256 : '',
-        executable: process && process.executable ? process.executable : '',
-        ransomwareFeature: Ransomware && Ransomware.feature ? Ransomware.feature : '',
         eventCode,
         codeSignature,
+        alertEcsData,
       })
     );
   }
@@ -612,10 +611,9 @@ export const defaultEndpointExceptionItems = (
     getPrepopulatedEndpointException({
       listId,
       ruleName,
-      filePath: file && file.path ? file.path : '',
-      sha256Hash: file && file.hash && file.hash.sha256 ? file.hash.sha256 : '',
       eventCode,
       codeSignature,
+      alertEcsData,
     })
   );
 };

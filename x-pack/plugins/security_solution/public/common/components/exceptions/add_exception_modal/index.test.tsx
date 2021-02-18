@@ -20,7 +20,6 @@ import { stubIndexPattern } from 'src/plugins/data/common/index_patterns/index_p
 import { useAddOrUpdateException } from '../use_add_exception';
 import { useFetchOrCreateRuleExceptionList } from '../use_fetch_or_create_rule_exception_list';
 import { useSignalIndex } from '../../../../detections/containers/detection_engine/alerts/use_signal_index';
-import { Ecs } from '../../../../../common/ecs';
 import * as builder from '../builder';
 import * as helpers from '../helpers';
 import { getExceptionListItemSchemaMock } from '../../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
@@ -31,8 +30,7 @@ import {
   getRulesSchemaMock,
 } from '../../../../../common/detection_engine/schemas/response/rules_schema.mocks';
 import { useRuleAsync } from '../../../../detections/containers/detection_engine/rules/use_rule_async';
-import { useFetchAlertData } from '../use_fetch_alert_data';
-import { alertsMock } from '../../../../detections/containers/detection_engine/alerts/mock';
+import { AlertData } from '../types';
 
 jest.mock('../../../../detections/containers/detection_engine/alerts/use_signal_index');
 jest.mock('../../../../common/lib/kibana');
@@ -43,7 +41,6 @@ jest.mock('../use_fetch_or_create_rule_exception_list');
 jest.mock('../builder');
 jest.mock('../../../../shared_imports');
 jest.mock('../../../../detections/containers/detection_engine/rules/use_rule_async');
-jest.mock('../use_fetch_alert_data');
 
 describe('When the add exception modal is opened', () => {
   const ruleName = 'test rule';
@@ -86,11 +83,13 @@ describe('When the add exception modal is opened', () => {
     (useRuleAsync as jest.Mock).mockImplementation(() => ({
       rule: getRulesSchemaMock(),
     }));
-    (useFetchAlertData as jest.Mock).mockImplementation(() => ({
-      data: alertsMock,
-      loading: false,
-    }));
   });
+
+  const alertDataMock: AlertData = {
+    '@timestamp': '1234567890',
+    _id: 'test-id',
+    file: { path: 'test/path' },
+  };
 
   afterEach(() => {
     jest.clearAllMocks();
@@ -164,8 +163,6 @@ describe('When the add exception modal is opened', () => {
   describe('when there is alert data passed to an endpoint list exception', () => {
     let wrapper: ReactWrapper;
     beforeEach(async () => {
-      const alertDataMock: Ecs = { _id: 'test-id', file: { path: ['test/path'] } };
-
       wrapper = mount(
         <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
           <AddExceptionModal
@@ -175,7 +172,7 @@ describe('When the add exception modal is opened', () => {
             exceptionListType={'endpoint'}
             onCancel={jest.fn()}
             onConfirm={jest.fn()}
-            ecsData={alertDataMock}
+            alertData={alertDataMock}
           />
         </ThemeProvider>
       );
@@ -218,8 +215,11 @@ describe('When the add exception modal is opened', () => {
   describe('when there is alert data passed to a detection list exception', () => {
     let wrapper: ReactWrapper;
     beforeEach(async () => {
-      const alertDataMock: Ecs = { _id: 'test-id', file: { path: ['test/path'] } };
-
+      // const alertDataMock: AlertData = {
+      //   '@timestamp': '1234567890',
+      //   _id: 'test-id',
+      //   file: { path: 'test/path' },
+      // };
       wrapper = mount(
         <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
           <AddExceptionModal
@@ -229,7 +229,7 @@ describe('When the add exception modal is opened', () => {
             exceptionListType={'detection'}
             onCancel={jest.fn()}
             onConfirm={jest.fn()}
-            ecsData={alertDataMock}
+            alertData={alertDataMock}
           />
         </ThemeProvider>
       );
@@ -269,7 +269,6 @@ describe('When the add exception modal is opened', () => {
   describe('when there is an exception being created on a sequence eql rule type', () => {
     let wrapper: ReactWrapper;
     beforeEach(async () => {
-      const alertDataMock: Ecs = { _id: 'test-id', file: { path: ['test/path'] } };
       (useRuleAsync as jest.Mock).mockImplementation(() => ({
         rule: {
           ...getRulesEqlSchemaMock(),
@@ -286,7 +285,7 @@ describe('When the add exception modal is opened', () => {
             exceptionListType={'detection'}
             onCancel={jest.fn()}
             onConfirm={jest.fn()}
-            ecsData={alertDataMock}
+            alertData={alertDataMock}
           />
         </ThemeProvider>
       );
@@ -346,7 +345,6 @@ describe('When the add exception modal is opened', () => {
           },
         },
       ]);
-      const alertDataMock: Ecs = { _id: 'test-id', file: { path: ['test/path'] } };
       wrapper = mount(
         <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
           <AddExceptionModal
@@ -356,7 +354,7 @@ describe('When the add exception modal is opened', () => {
             exceptionListType={'endpoint'}
             onCancel={jest.fn()}
             onConfirm={jest.fn()}
-            ecsData={alertDataMock}
+            alertData={alertDataMock}
           />
         </ThemeProvider>
       );
