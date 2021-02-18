@@ -14,7 +14,9 @@ import { FormDrilldownWizard } from '../form_drilldown_wizard';
 import { DrilldownHelloBar } from '../../components/drilldown_hello_bar';
 
 export const DrilldownManager: React.FC = ({}) => {
-  const manager = useDrilldownManager();
+  const drilldowns = useDrilldownManager();
+  const screen = drilldowns.useScreen();
+  const showWelcomeMessage = drilldowns.useWelcomeMessage();
 
   const footer = (
     <EuiButton
@@ -27,7 +29,7 @@ export const DrilldownManager: React.FC = ({}) => {
       // isDisabled={!isActionValid(wizardConfig)}
       data-test-subj={'drilldownWizardSubmit'}
     >
-      {manager.screen === 'create' ? txtCreateDrilldownButtonLabel : txtEditDrilldownButtonLabel}
+      {screen === 'create' ? txtCreateDrilldownButtonLabel : txtEditDrilldownButtonLabel}
     </EuiButton>
   );
 
@@ -66,12 +68,15 @@ export const DrilldownManager: React.FC = ({}) => {
     <FlyoutFrame
       title={txtDrilldowns}
       footer={footer}
-      onClose={manager.onClose}
+      onClose={drilldowns.close}
       // onBack={isCreateOnly ? undefined : () => setRoute(Routes.Manage)}
-      onBack={() => manager.setScreen('list')}
+      onBack={() => drilldowns.setScreen('list')}
       banner={
-        manager.showWelcomeMessage && (
-          <DrilldownHelloBar docsLink={manager.docsLink} onHideClick={manager.hideWelcomeMessage} />
+        showWelcomeMessage && (
+          <DrilldownHelloBar
+            docsLink={drilldowns.deps.docsLink}
+            onHideClick={drilldowns.hideWelcomeMessage}
+          />
         )
       }
     >

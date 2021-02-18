@@ -51,7 +51,7 @@ export interface FormDrilldownWizardProps {
 }
 
 export const FormDrilldownWizard: React.FC<FormDrilldownWizardProps> = ({ mode }) => {
-  const manager = useDrilldownManager();
+  const drilldowns = useDrilldownManager();
 
   // const [
   //   wizardConfig,
@@ -71,23 +71,24 @@ export const FormDrilldownWizard: React.FC<FormDrilldownWizardProps> = ({ mode }
 
   return (
     <>
-      <FormDrilldownWizardUi
-        name={manager.drilldownName}
-        onNameChange={manager.setDrilldownName}
-        actionConfig={manager.actionConfig}
-        onActionConfigChange={manager.setActionConfig}
-        currentActionFactory={manager.actionFactory}
-        onActionFactoryChange={manager.setActionFactory}
-        actionFactories={manager.actionFactories}
+      <div>wizard...</div>
+      {/* <FormDrilldownWizardUi
+        name={drilldowns.drilldownName}
+        onNameChange={drilldowns.setDrilldownName}
+        actionConfig={drilldowns.actionConfig}
+        onActionConfigChange={drilldowns.setActionConfig}
+        currentActionFactory={drilldowns.actionFactory}
+        onActionFactoryChange={drilldowns.setActionFactory}
+        actionFactories={drilldowns.actionFactories}
         // actionFactoryContext={manager.placeContext}
         actionFactoryContext={{
           triggers: [],
         }}
-        onSelectedTriggersChange={manager.setSelectedTriggers}
-        triggers={manager.triggers}
-        getTriggerInfo={manager.getTrigger}
-        triggerPickerDocsLink={manager.triggerPickerDocsLink}
-      />
+        onSelectedTriggersChange={drilldowns.setSelectedTriggers}
+        triggers={drilldowns.triggers}
+        getTriggerInfo={drilldowns.getTrigger}
+        triggerPickerDocsLink={drilldowns.triggerPickerDocsLink}
+      /> */}
       {/* {mode === 'edit' && (
         <>
           <EuiSpacer size={'xl'} />

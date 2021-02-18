@@ -6,98 +6,79 @@
  */
 
 import * as React from 'react';
-import type {
-  PublicDrilldownManagerProps,
-  DrilldownManagerDependencies,
-  DrilldownManagerContextValue as Value,
-  DrilldownManagerScreen,
-} from './types';
+import type { PublicDrilldownManagerProps, DrilldownManagerDependencies } from '../../types';
 import { useWelcomeMessage } from '../../hooks/use_welcome_message';
 import { BaseActionConfig } from '../../../../dynamic_actions';
+import { DrilldownManagerState, DrilldownManagerStateDeps } from '../../state';
 
-const context = React.createContext<Value | null>(null);
+const context = React.createContext<DrilldownManagerState | null>(null);
 
 export const useDrilldownManager = () => React.useContext(context)!;
 
-export interface DrilldownManagerProviderProps
-  extends PublicDrilldownManagerProps,
-    DrilldownManagerDependencies {}
+export type DrilldownManagerProviderProps = DrilldownManagerStateDeps;
 
-interface ActionFactoryCacheItem {
-  config: BaseActionConfig;
-}
+// interface ActionFactoryCacheItem {
+//   config: BaseActionConfig;
+// }
 
 export const DrilldownManagerProvider: React.FC<DrilldownManagerProviderProps> = ({
   children,
-  ...rest
+  ...deps
 }) => {
-  const [drilldownName, setDrilldownName] = React.useState<string>('');
-  const [actionFactory, setActionFactory] = React.useState<Value['actionFactory']>(undefined);
-  const [actionConfig, setActionConfig] = React.useState<Value['actionConfig']>(undefined);
-  const [screen, setScreen] = React.useState<DrilldownManagerScreen>('list');
-  const [actionFactoryCache, setActionFactoryCache] = React.useState<
-    Record<string, ActionFactoryCacheItem>
-  >(
-    actionFactory && actionConfig
-      ? {
-          [actionFactory.id]: {
-            config: actionConfig,
-          },
-        }
-      : {}
-  );
-  const [selectedTriggers, setSelectedTriggers] = React.useState<Value['selectedTriggers']>(
-    undefined
-  );
-  const [showWelcomeMessage, hideWelcomeMessage] = useWelcomeMessage(rest.storage);
+  // const [drilldownName, setDrilldownName] = React.useState<string>('');
+  // const [actionFactory, setActionFactory] = React.useState<Value['actionFactory']>(undefined);
+  // const [actionConfig, setActionConfig] = React.useState<Value['actionConfig']>(undefined);
+  // const [screen, setScreen] = React.useState<DrilldownManagerScreen>('list');
+  // const [actionFactoryCache, setActionFactoryCache] = React.useState<
+  //   Record<string, ActionFactoryCacheItem>
+  // >(
+  //   actionFactory && actionConfig
+  //     ? {
+  //         [actionFactory.id]: {
+  //           config: actionConfig,
+  //         },
+  //       }
+  //     : {}
+  // );
+  // const [selectedTriggers, setSelectedTriggers] = React.useState<Value['selectedTriggers']>(
+  //   undefined
+  // );
+  // const [showWelcomeMessage, hideWelcomeMessage] = useWelcomeMessage(rest.storage);
 
-  const setActionFactoryPublic = React.useCallback(
-    (newActionFactory: Value['actionFactory']) => {
-      if (actionFactory?.id && !!actionConfig) {
-        setActionFactoryCache({
-          ...actionFactoryCache,
-          [actionFactory.id]: {
-            config: actionConfig,
-          },
-        });
-      }
+  // const setActionFactoryPublic = React.useCallback(
+  //   (newActionFactory: Value['actionFactory']) => {
+  //     if (actionFactory?.id && !!actionConfig) {
+  //       setActionFactoryCache({
+  //         ...actionFactoryCache,
+  //         [actionFactory.id]: {
+  //           config: actionConfig,
+  //         },
+  //       });
+  //     }
 
-      setSelectedTriggers(undefined);
+  //     setSelectedTriggers(undefined);
 
-      if (!newActionFactory) {
-        setActionFactory(undefined);
-        setActionConfig(undefined);
-        return;
-      }
+  //     if (!newActionFactory) {
+  //       setActionFactory(undefined);
+  //       setActionConfig(undefined);
+  //       return;
+  //     }
 
-      setActionFactory(newActionFactory);
+  //     setActionFactory(newActionFactory);
 
-      const newActionConfig = (!!actionFactoryCache[newActionFactory.id]
-        ? actionFactoryCache[newActionFactory.id].config
-        : newActionFactory.createConfig({
-            ...rest.placeContext,
-            triggers: rest.triggers,
-          })) as BaseActionConfig;
-      setActionConfig(newActionConfig);
-    },
-    [actionFactoryCache, actionFactory, actionConfig, rest.placeContext, rest.triggers]
-  );
+  //     const newActionConfig = (!!actionFactoryCache[newActionFactory.id]
+  //       ? actionFactoryCache[newActionFactory.id].config
+  //       : newActionFactory.createConfig({
+  //           ...rest.placeContext,
+  //           triggers: rest.triggers,
+  //         })) as BaseActionConfig;
+  //     setActionConfig(newActionConfig);
+  //   },
+  //   [actionFactoryCache, actionFactory, actionConfig, rest.placeContext, rest.triggers]
+  // );
 
-  const contextValue: Value = {
-    ...rest,
-    screen,
-    setScreen,
-    showWelcomeMessage,
-    hideWelcomeMessage,
-    drilldownName,
-    setDrilldownName,
-    actionFactory,
-    setActionFactory: setActionFactoryPublic,
-    actionConfig,
-    setActionConfig,
-    selectedTriggers,
-    setSelectedTriggers,
-  };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const value = React.useMemo(() => new DrilldownManagerState(deps), []);
 
-  return <context.Provider value={contextValue}>{children}</context.Provider>;
+  return <context.Provider value={value}>{children}</context.Provider>;
 };
