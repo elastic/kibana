@@ -53,6 +53,8 @@ readonly links: {
             readonly base: string;
         };
         readonly aggs: {
+            readonly composite: string;
+            readonly composite_missing_bucket: string;
             readonly date_histogram: string;
             readonly date_range: string;
             readonly date_format_pattern: string;
