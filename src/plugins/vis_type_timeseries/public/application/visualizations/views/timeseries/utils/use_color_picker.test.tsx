@@ -60,17 +60,19 @@ describe('useColorPicker', function () {
       onClose: jest.fn(),
       onChange: jest.fn(),
       anchor: document.createElement('div'),
-      seriesIdentifier: {
-        key: 'key',
-        specId: '61ca57f1-469d-11e7-af02-69e470af7417:0',
-      },
+      seriesIdentifiers: [
+        {
+          key: 'key',
+          specId: '61ca57f1-469d-11e7-af02-69e470af7417:0',
+        },
+      ],
     };
   });
 
   it('not renders the color picker if series id and specId not match', () => {
     const newProps = {
       ...wrapperProps,
-      seriesIdentifier: { key: 'key', specId: '61ca57f1-469d-11e7-af02-69e470af7417:test' },
+      seriesIdentifiers: [{ key: 'key', specId: '61ca57f1-469d-11e7-af02-69e470af7417:test' }],
     };
     wrapper = mount(<Component {...newProps} />);
     expect(wrapper.find(ColorPicker).length).toBe(0);

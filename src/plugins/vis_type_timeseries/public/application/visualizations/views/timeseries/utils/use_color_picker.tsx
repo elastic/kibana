@@ -34,7 +34,13 @@ export const useColorPicker = (
     id: string,
     event: BaseSyntheticEvent
   ) => void
-): LegendColorPicker => ({ anchor, color, onClose, onChange, seriesIdentifier }) => {
+): LegendColorPicker => ({
+  anchor,
+  color,
+  onClose,
+  onChange,
+  seriesIdentifiers: [seriesIdentifier],
+}) => {
   const selectedSeries = series.filter((s) => s.id === seriesIdentifier.specId);
   if (!selectedSeries.length) {
     return null;
