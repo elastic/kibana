@@ -11,16 +11,18 @@ import {
   TRANSACTION_SAMPLED,
 } from '../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../common/processor_event';
-import { rangeFilter } from '../../../common/utils/range_filter';
+import { environmentQuery, rangeQuery } from '../../../common/utils/queries';
 import { withApmSpan } from '../../utils/with_apm_span';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import { getTransaction } from '../transactions/get_transaction';
 
 export function getErrorGroupSample({
+  environment,
   serviceName,
   groupId,
   setup,
 }: {
+  environment?: string;
   serviceName: string;
   groupId: string;
   setup: Setup & SetupTimeRange;
@@ -39,7 +41,8 @@ export function getErrorGroupSample({
             filter: [
               { term: { [SERVICE_NAME]: serviceName } },
               { term: { [ERROR_GROUP_ID]: groupId } },
-              { range: rangeFilter(start, end) },
+              ...rangeQuery(start, end),
+              ...environmentQuery(environment),
               ...esFilter,
             ],
             should: [{ term: { [TRANSACTION_SAMPLED]: true } }],

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { buildFirstLastSeenHostQuery as buildQuery } from './query.last_first_seen_host.dsl';
+import { buildFirstOrLastSeenHostQuery as buildQuery } from './query.first_or_last_seen_host.dsl';
 import { mockOptions, expectedDsl } from './__mocks__';
 
 describe('buildQuery', () => {

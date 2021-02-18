@@ -76,6 +76,7 @@ describe('create', () => {
             "syncAlerts": true,
           },
           "status": "open",
+          "subCaseIds": undefined,
           "subCases": undefined,
           "tags": Array [
             "defacement",
@@ -174,6 +175,7 @@ describe('create', () => {
             "syncAlerts": true,
           },
           "status": "open",
+          "subCaseIds": undefined,
           "subCases": undefined,
           "tags": Array [
             "defacement",
@@ -239,6 +241,7 @@ describe('create', () => {
             "syncAlerts": true,
           },
           "status": "open",
+          "subCaseIds": undefined,
           "subCases": undefined,
           "tags": Array [
             "defacement",

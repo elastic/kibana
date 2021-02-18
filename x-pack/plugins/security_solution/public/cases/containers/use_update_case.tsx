@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { useReducer, useCallback } from 'react';
+import { useReducer, useCallback, useEffect, useRef } from 'react';
 
 import { errorToToaster, useStateToaster } from '../../common/components/toasters';
 
-import { patchCase } from './api';
-import { UpdateKey, UpdateByKey } from './types';
+import { patchCase, patchSubCase } from './api';
+import { UpdateKey, UpdateByKey, CaseStatuses } from './types';
 import * as i18n from './translations';
 import { createUpdateSuccessToaster } from './utils';
 
@@ -57,13 +57,21 @@ const dataFetchReducer = (state: NewCaseState, action: Action): NewCaseState => 
 export interface UseUpdateCase extends NewCaseState {
   updateCaseProperty: (updates: UpdateByKey) => void;
 }
-export const useUpdateCase = ({ caseId }: { caseId: string }): UseUpdateCase => {
+export const useUpdateCase = ({
+  caseId,
+  subCaseId,
+}: {
+  caseId: string;
+  subCaseId?: string;
+}): UseUpdateCase => {
   const [state, dispatch] = useReducer(dataFetchReducer, {
     isLoading: false,
     isError: false,
     updateKey: null,
   });
   const [, dispatchToaster] = useStateToaster();
+  const abortCtrl = useRef(new AbortController());
+  const didCancel = useRef(false);
 
   const dispatchUpdateCaseProperty = useCallback(
     async ({
@@ -75,20 +83,27 @@ export const useUpdateCase = ({ caseId }: { caseId: string }): UseUpdateCase => 
       onSuccess,
       onError,
     }: UpdateByKey) => {
-      let cancel = false;
-      const abortCtrl = new AbortController();
-
       try {
+        didCancel.current = false;
+        abortCtrl.current = new AbortController();
         dispatch({ type: 'FETCH_INIT', payload: updateKey });
-        const response = await patchCase(
-          caseId,
-          { [updateKey]: updateValue },
-          caseData.version,
-          abortCtrl.signal
-        );
-        if (!cancel) {
+        const response = await (updateKey === 'status' && subCaseId
+          ? patchSubCase(
+              caseId,
+              subCaseId,
+              { status: updateValue as CaseStatuses },
+              caseData.version,
+              abortCtrl.current.signal
+            )
+          : patchCase(
+              caseId,
+              { [updateKey]: updateValue },
+              caseData.version,
+              abortCtrl.current.signal
+            ));
+        if (!didCancel.current) {
           if (fetchCaseUserActions != null) {
-            fetchCaseUserActions(caseId);
+            fetchCaseUserActions(caseId, subCaseId);
           }
           if (updateCase != null) {
             updateCase(response[0]);
@@ -104,26 +119,31 @@ export const useUpdateCase = ({ caseId }: { caseId: string }): UseUpdateCase => 
           }
         }
       } catch (error) {
-        if (!cancel) {
-          errorToToaster({
-            title: i18n.ERROR_TITLE,
-            error: error.body && error.body.message ? new Error(error.body.message) : error,
-            dispatchToaster,
-          });
+        if (!didCancel.current) {
+          if (error.name !== 'AbortError') {
+            errorToToaster({
+              title: i18n.ERROR_TITLE,
+              error: error.body && error.body.message ? new Error(error.body.message) : error,
+              dispatchToaster,
+            });
+          }
           dispatch({ type: 'FETCH_FAILURE' });
           if (onError) {
             onError();
           }
         }
       }
-      return () => {
-        cancel = true;
-        abortCtrl.abort();
-      };
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
+    [caseId, subCaseId]
   );
+
+  useEffect(() => {
+    return () => {
+      didCancel.current = true;
+      abortCtrl.current.abort();
+    };
+  }, []);
 
   return { ...state, updateCaseProperty: dispatchUpdateCaseProperty };
 };

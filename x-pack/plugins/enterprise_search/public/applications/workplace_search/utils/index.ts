@@ -5,12 +5,4 @@
  * 2.0.
  */
 
-export function rangeFilter(start: number, end: number) {
-  return {
-    '@timestamp': {
-      gte: start,
-      lte: end,
-      format: 'epoch_millis',
-    },
-  };
-}
+export { toSentenceSerial } from './to_sentence_serial';

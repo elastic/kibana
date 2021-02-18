@@ -77,7 +77,7 @@ export interface ILayer {
   canShowTooltip(): boolean;
   syncLayerWithMB(mbMap: MbMap): void;
   getLayerTypeIconName(): string;
-  isDataLoaded(): boolean;
+  isInitialDataLoadComplete(): boolean;
   getIndexPatternIds(): string[];
   getQueryableIndexPatternIds(): string[];
   getType(): string | undefined;
@@ -446,7 +446,7 @@ export class AbstractLayer implements ILayer {
     throw new Error('should implement Layer#getLayerTypeIconName');
   }
 
-  isDataLoaded(): boolean {
+  isInitialDataLoadComplete(): boolean {
     const sourceDataRequest = this.getSourceDataRequest();
     return sourceDataRequest ? sourceDataRequest.hasData() : false;
   }

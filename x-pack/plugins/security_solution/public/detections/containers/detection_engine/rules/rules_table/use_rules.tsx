@@ -7,10 +7,10 @@
 
 import { useEffect, useState, useRef } from 'react';
 
-import { FetchRulesResponse, FilterOptions, PaginationOptions, Rule } from './types';
-import { errorToToaster, useStateToaster } from '../../../../common/components/toasters';
-import { fetchRules } from './api';
-import * as i18n from './translations';
+import { FetchRulesResponse, FilterOptions, PaginationOptions, Rule } from '../types';
+import { errorToToaster, useStateToaster } from '../../../../../common/components/toasters';
+import { fetchRules } from '../api';
+import * as i18n from '../translations';
 
 export type ReturnRules = [boolean, FetchRulesResponse | null, () => Promise<void>];
 

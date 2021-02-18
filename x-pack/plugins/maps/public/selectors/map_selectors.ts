@@ -183,6 +183,9 @@ export const getFilters = ({ map }: MapStoreState): Filter[] => map.mapState.fil
 export const getSearchSessionId = ({ map }: MapStoreState): string | undefined =>
   map.mapState.searchSessionId;
 
+export const getSearchSessionMapBuffer = ({ map }: MapStoreState): MapExtent | undefined =>
+  map.mapState.searchSessionMapBuffer;
+
 export const isUsingSearch = (state: MapStoreState): boolean => {
   const filters = getFilters(state).filter((filter) => !filter.meta.disabled);
   const queryString = _.get(getQuery(state), 'query', '');
@@ -235,6 +238,7 @@ export const getDataFilters = createSelector(
   getQuery,
   getFilters,
   getSearchSessionId,
+  getSearchSessionMapBuffer,
   (
     mapExtent,
     mapBuffer,
@@ -243,11 +247,12 @@ export const getDataFilters = createSelector(
     refreshTimerLastTriggeredAt,
     query,
     filters,
-    searchSessionId
+    searchSessionId,
+    searchSessionMapBuffer
   ) => {
     return {
       extent: mapExtent,
-      buffer: mapBuffer,
+      buffer: searchSessionId && searchSessionMapBuffer ? searchSessionMapBuffer : mapBuffer,
       zoom: mapZoom,
       timeFilters,
       refreshTimerLastTriggeredAt,
@@ -432,7 +437,7 @@ export const areLayersLoaded = createSelector(
         layer.isVisible() &&
         layer.showAtZoomLevel(zoom) &&
         !layer.hasErrors() &&
-        !layer.isDataLoaded()
+        !layer.isInitialDataLoadComplete()
       ) {
         return false;
       }
