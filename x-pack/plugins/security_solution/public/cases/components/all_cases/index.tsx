@@ -21,7 +21,7 @@ import { isEmpty, memoize } from 'lodash/fp';
 import styled, { css } from 'styled-components';
 import * as i18n from './translations';
 
-import { CaseStatuses } from '../../../../../case/common/api';
+import { CaseStatuses, CaseType } from '../../../../../case/common/api';
 import { getCasesColumns } from './columns';
 import { Case, DeleteCase, FilterOptions, SortFieldCase } from '../../containers/types';
 import { useGetCases, UpdateCase } from '../../containers/use_get_cases';
@@ -245,10 +245,19 @@ export const AllCases = React.memo<AllCasesProps>(
             deleteCasesAction: toggleBulkDeleteModal,
             selectedCaseIds,
             updateCaseStatus: handleUpdateCaseStatus,
+            includeCollections:
+              selectedCases.length > 0 &&
+              selectedCases.some((caseObj: Case) => caseObj.type === CaseType.collection),
           })}
         />
       ),
-      [selectedCaseIds, filterOptions.status, toggleBulkDeleteModal, handleUpdateCaseStatus]
+      [
+        selectedCases,
+        selectedCaseIds,
+        filterOptions.status,
+        toggleBulkDeleteModal,
+        handleUpdateCaseStatus,
+      ]
     );
     const handleDispatchUpdate = useCallback(
       (args: Omit<UpdateCase, 'refetchCasesStatus'>) => {
@@ -354,7 +363,6 @@ export const AllCases = React.memo<AllCasesProps>(
 
     const euiBasicTableSelectionProps = useMemo<EuiTableSelectionType<Case>>(
       () => ({
-        selectable: (theCase) => isEmpty(theCase.subCases),
         onSelectionChange: setSelectedCases,
       }),
       [setSelectedCases]
