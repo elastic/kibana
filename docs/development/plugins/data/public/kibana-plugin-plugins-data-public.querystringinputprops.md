@@ -21,8 +21,11 @@ export interface QueryStringInputProps
 |  [disableLanguageSwitcher](./kibana-plugin-plugins-data-public.querystringinputprops.disablelanguageswitcher.md) | <code>boolean</code> |  |
 |  [iconType](./kibana-plugin-plugins-data-public.querystringinputprops.icontype.md) | <code>string</code> |  |
 |  [indexPatterns](./kibana-plugin-plugins-data-public.querystringinputprops.indexpatterns.md) | <code>Array&lt;IIndexPattern &#124; string&gt;</code> |  |
+|  [isClearable](./kibana-plugin-plugins-data-public.querystringinputprops.isclearable.md) | <code>boolean</code> |  |
 |  [isInvalid](./kibana-plugin-plugins-data-public.querystringinputprops.isinvalid.md) | <code>boolean</code> |  |
 |  [languageSwitcherPopoverAnchorPosition](./kibana-plugin-plugins-data-public.querystringinputprops.languageswitcherpopoveranchorposition.md) | <code>PopoverAnchorPosition</code> |  |
+|  [nonKqlMode](./kibana-plugin-plugins-data-public.querystringinputprops.nonkqlmode.md) | <code>'lucene' &#124; 'text'</code> |  |
+|  [nonKqlModeHelpText](./kibana-plugin-plugins-data-public.querystringinputprops.nonkqlmodehelptext.md) | <code>string</code> |  |
 |  [onBlur](./kibana-plugin-plugins-data-public.querystringinputprops.onblur.md) | <code>() =&gt; void</code> |  |
 |  [onChange](./kibana-plugin-plugins-data-public.querystringinputprops.onchange.md) | <code>(query: Query) =&gt; void</code> |  |
 |  [onChangeQueryInputFocus](./kibana-plugin-plugins-data-public.querystringinputprops.onchangequeryinputfocus.md) | <code>(isFocused: boolean) =&gt; void</code> |  |
