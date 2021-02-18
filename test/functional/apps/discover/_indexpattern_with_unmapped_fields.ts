@@ -37,7 +37,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await esArchiver.unload('unmapped_fields');
     });
 
-    it('unmapped fields do not exist on a new saved search', async () => {
+    it('unmapped fields exist on a new saved search', async () => {
       const expectedHitCount = '4';
       await retry.try(async function () {
         expect(await PageObjects.discover.getHitCount()).to.be(expectedHitCount);
@@ -46,13 +46,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // message is a mapped field
       expect(allFields.includes('message')).to.be(true);
       // sender is not a mapped field
-      expect(allFields.includes('sender')).to.be(false);
-    });
-
-    it('unmapped fields toggle does not exist on a new saved search', async () => {
-      await PageObjects.discover.openSidebarFieldFilter();
-      await testSubjects.existOrFail('filterSelectionPanel');
-      await testSubjects.missingOrFail('unmappedFieldsSwitch');
+      expect(allFields.includes('sender')).to.be(true);
     });
 
     it('unmapped fields exist on an existing saved search', async () => {
