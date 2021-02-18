@@ -6,7 +6,9 @@
  */
 
 import React from 'react';
+
 import { shallow } from 'enzyme';
+
 import { EuiStat } from '@elastic/eui';
 
 import { AnalyticsCards } from './';

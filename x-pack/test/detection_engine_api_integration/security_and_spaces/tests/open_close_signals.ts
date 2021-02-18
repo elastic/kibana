@@ -27,7 +27,7 @@ import {
   waitForRuleSuccessOrStatus,
   getRuleForSignalTesting,
 } from '../../utils';
-import { createUserAndRole } from '../roles_users_utils';
+import { createUserAndRole, deleteUserAndRole } from '../roles_users_utils';
 import { ROLES } from '../../../../plugins/security_solution/common/test';
 
 // eslint-disable-next-line import/no-default-export
@@ -35,7 +35,6 @@ export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
-  const securityService = getService('security');
 
   describe('open_close_signals', () => {
     describe('validation checks', () => {
@@ -172,7 +171,7 @@ export default ({ getService }: FtrProviderContext) => {
           const { id } = await createRule(supertest, rule);
           await waitForRuleSuccessOrStatus(supertest, id);
           await waitForSignalsToBePresent(supertest, 1, [id]);
-          await createUserAndRole(securityService, ROLES.t1_analyst);
+          await createUserAndRole(getService, ROLES.t1_analyst);
           const signalsOpen = await getSignalsByIds(supertest, [id]);
           const signalIds = signalsOpen.hits.hits.map((signal) => signal._id);
 
@@ -203,6 +202,8 @@ export default ({ getService }: FtrProviderContext) => {
             }) => status === 'closed'
           );
           expect(everySignalOpen).to.eql(true);
+
+          await deleteUserAndRole(getService, ROLES.t1_analyst);
         });
 
         it('should be able to close signals with soc_manager user', async () => {
@@ -211,7 +212,7 @@ export default ({ getService }: FtrProviderContext) => {
           await waitForRuleSuccessOrStatus(supertest, id);
           await waitForSignalsToBePresent(supertest, 1, [id]);
           const userAndRole = ROLES.soc_manager;
-          await createUserAndRole(securityService, userAndRole);
+          await createUserAndRole(getService, userAndRole);
           const signalsOpen = await getSignalsByIds(supertest, [id]);
           const signalIds = signalsOpen.hits.hits.map((signal) => signal._id);
 
@@ -240,6 +241,8 @@ export default ({ getService }: FtrProviderContext) => {
             }) => status === 'closed'
           );
           expect(everySignalClosed).to.eql(true);
+
+          await deleteUserAndRole(getService, userAndRole);
         });
       });
     });

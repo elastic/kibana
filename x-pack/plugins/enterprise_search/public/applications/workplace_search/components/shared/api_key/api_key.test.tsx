@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+
 import { shallow } from 'enzyme';
 
 import { EuiCodeBlock, EuiFormLabel } from '@elastic/eui';

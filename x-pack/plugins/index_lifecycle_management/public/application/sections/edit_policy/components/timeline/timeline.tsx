@@ -6,21 +6,20 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import React, { FunctionComponent, memo } from 'react';
-
-import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiIconTip } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiText, EuiIconTip } from '@elastic/eui';
 
 import { PhasesExceptDelete } from '../../../../../../common/types';
 
 import {
   calculateRelativeFromAbsoluteMilliseconds,
-  normalizeTimingsToHumanReadable,
   PhaseAgeInMilliseconds,
   AbsoluteTimings,
 } from '../../lib';
 
-import { InfinityIcon } from '../infinity_icon';
+import { InfinityIcon, LearnMoreLink } from '..';
 
 import { TimelinePhaseText } from './components';
 
@@ -48,16 +47,15 @@ const msTimeToOverallPercent = (ms: number, totalMs: number) => {
 const SCORE_BUFFER_AMOUNT = 50;
 
 const i18nTexts = {
+  title: i18n.translate('xpack.indexLifecycleMgmt.timeline.title', {
+    defaultMessage: 'Policy summary',
+  }),
+  description: i18n.translate('xpack.indexLifecycleMgmt.timeline.description', {
+    defaultMessage: 'This policy moves data through the following phases.',
+  }),
   hotPhase: i18n.translate('xpack.indexLifecycleMgmt.timeline.hotPhaseSectionTitle', {
     defaultMessage: 'Hot phase',
   }),
-  rolloverTooltip: i18n.translate(
-    'xpack.indexLifecycleMgmt.timeline.hotPhaseRolloverToolTipContent',
-    {
-      defaultMessage:
-        'How long it takes to reach the rollover criteria in the hot phase can vary. Data moves to the next phase when the time since rollover reaches the minimum age.',
-    }
-  ),
   warmPhase: i18n.translate('xpack.indexLifecycleMgmt.timeline.warmPhaseSectionTitle', {
     defaultMessage: 'Warm phase',
   }),
@@ -67,6 +65,11 @@ const i18nTexts = {
   deleteIcon: {
     toolTipContent: i18n.translate('xpack.indexLifecycleMgmt.timeline.deleteIconToolTipContent', {
       defaultMessage: 'Policy deletes the index after lifecycle phases complete.',
+    }),
+  },
+  foreverIcon: {
+    ariaLabel: i18n.translate('xpack.indexLifecycleMgmt.timeline.foreverIconToolTipContent', {
+      defaultMessage: 'Forever',
     }),
   },
 };
@@ -118,27 +121,33 @@ export const Timeline: FunctionComponent<Props> = memo(
     };
 
     const phaseAgeInMilliseconds = calculateRelativeFromAbsoluteMilliseconds(absoluteTimings);
-    const humanReadableTimings = normalizeTimingsToHumanReadable(phaseAgeInMilliseconds);
 
     const widths = calculateWidths(phaseAgeInMilliseconds);
 
     const getDurationInPhaseContent = (phase: PhasesExceptDelete): string | React.ReactNode =>
       phaseAgeInMilliseconds.phases[phase] === Infinity ? (
-        <InfinityIcon aria-label={humanReadableTimings[phase]} />
-      ) : (
-        humanReadableTimings[phase]
-      );
+        <InfinityIcon color="subdued" aria-label={i18nTexts.foreverIcon.ariaLabel} />
+      ) : null;
 
     return (
       <EuiFlexGroup gutterSize="s" direction="column" responsive={false}>
         <EuiFlexItem>
           <EuiTitle size="s">
-            <h2>
-              {i18n.translate('xpack.indexLifecycleMgmt.timeline.title', {
-                defaultMessage: 'Policy Timeline',
-              })}
-            </h2>
+            <h2>{i18nTexts.title}</h2>
           </EuiTitle>
+          <EuiText size="s" color="subdued">
+            {i18nTexts.description}
+            &nbsp;
+            <LearnMoreLink
+              docPath="ilm-index-lifecycle.html#ilm-phase-transitions"
+              text={
+                <FormattedMessage
+                  id="xpack.indexLifecycleMgmt.editPolicy.learnAboutTimingText"
+                  defaultMessage="Learn about timing"
+                />
+              }
+            />
+          </EuiText>
         </EuiFlexItem>
         <EuiFlexItem>
           <div
@@ -161,22 +170,7 @@ export const Timeline: FunctionComponent<Props> = memo(
                   >
                     <div className="ilmTimeline__colorBar ilmTimeline__hotPhase__colorBar" />
                     <TimelinePhaseText
-                      phaseName={
-                        isUsingRollover ? (
-                          <>
-                            {i18nTexts.hotPhase}
-                            &nbsp;
-                            <div
-                              className="ilmTimeline__rolloverIcon"
-                              data-test-subj="timelineHotPhaseRolloverToolTip"
-                            >
-                              <EuiIconTip type="iInCircle" content={i18nTexts.rolloverTooltip} />
-                            </div>
-                          </>
-                        ) : (
-                          i18nTexts.hotPhase
-                        )
-                      }
+                      phaseName={i18nTexts.hotPhase}
                       durationInPhase={getDurationInPhaseContent('hot')}
                     />
                   </div>

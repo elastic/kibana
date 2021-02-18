@@ -120,6 +120,9 @@ export default function ({ getService }: FtrProviderContext) {
             defaultIndex: ['filebeat-*'],
             docValueFields: [],
             inspect: false,
+            /* We need a very long timeout to avoid returning just partial data.
+             ** https://github.com/elastic/kibana/blob/master/x-pack/test/api_integration/apis/search/search.ts#L18
+             */
             wait_for_completion_timeout: '10s',
           })
           .expect(200);

@@ -281,7 +281,6 @@ async function fetchLogEntryAnomalies(
           nextPageCursor: hits[hits.length - 1].sort,
         }
       : undefined;
-
   const anomalies = hits.map((result) => {
     const {
       // eslint-disable-next-line @typescript-eslint/naming-convention

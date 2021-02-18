@@ -479,6 +479,29 @@ describe('<EditPolicy />', () => {
       component.update();
     });
 
+    test('serialization', async () => {
+      httpRequestsMockHelpers.setLoadPolicies([DEFAULT_POLICY]);
+      await act(async () => {
+        testBed = await setup();
+      });
+      const { component, actions } = testBed;
+      component.update();
+      await actions.delete.enablePhase();
+      await actions.setWaitForSnapshotPolicy('test');
+      await actions.savePolicy();
+      const latestRequest = server.requests[server.requests.length - 1];
+      const entirePolicy = JSON.parse(JSON.parse(latestRequest.requestBody).body);
+      expect(entirePolicy.phases.delete).toEqual({
+        min_age: '365d',
+        actions: {
+          delete: {},
+          wait_for_snapshot: {
+            policy: 'test',
+          },
+        },
+      });
+    });
+
     test('wait for snapshot policy field should correctly display snapshot policy name', () => {
       expect(testBed.find('snapshotPolicyCombobox').prop('data-currentvalue')).toEqual([
         {
@@ -769,6 +792,38 @@ describe('<EditPolicy />', () => {
       });
     });
   });
+  describe('with rollover', () => {
+    beforeEach(async () => {
+      httpRequestsMockHelpers.setLoadPolicies([getDefaultHotPhasePolicy('my_policy')]);
+      httpRequestsMockHelpers.setListNodes({
+        isUsingDeprecatedDataRoleConfig: false,
+        nodesByAttributes: { test: ['123'] },
+        nodesByRoles: { data: ['123'] },
+      });
+      httpRequestsMockHelpers.setListSnapshotRepos({ repositories: ['abc'] });
+      httpRequestsMockHelpers.setLoadSnapshotPolicies([]);
+
+      await act(async () => {
+        testBed = await setup();
+      });
+
+      const { component } = testBed;
+      component.update();
+    });
+
+    test('shows rollover tip on minimum age', async () => {
+      const { actions } = testBed;
+
+      await actions.warm.enable(true);
+      await actions.cold.enable(true);
+      await actions.delete.enablePhase();
+
+      expect(actions.warm.hasRolloverTipOnMinAge()).toBeTruthy();
+      expect(actions.cold.hasRolloverTipOnMinAge()).toBeTruthy();
+      expect(actions.delete.hasRolloverTipOnMinAge()).toBeTruthy();
+    });
+  });
+
   describe('without rollover', () => {
     beforeEach(async () => {
       httpRequestsMockHelpers.setLoadPolicies([getDefaultHotPhasePolicy('my_policy')]);
@@ -778,6 +833,7 @@ describe('<EditPolicy />', () => {
         nodesByRoles: { data: ['123'] },
       });
       httpRequestsMockHelpers.setListSnapshotRepos({ repositories: ['found-snapshots'] });
+      httpRequestsMockHelpers.setLoadSnapshotPolicies([]);
 
       await act(async () => {
         testBed = await setup({
@@ -798,6 +854,20 @@ describe('<EditPolicy />', () => {
 
       expect(actions.hot.searchableSnapshotsExists()).toBeFalsy();
       expect(actions.cold.searchableSnapshotDisabledDueToRollover()).toBeTruthy();
+    });
+
+    test('hiding rollover tip on minimum age', async () => {
+      const { actions } = testBed;
+      await actions.hot.toggleDefaultRollover(false);
+      await actions.hot.toggleRollover(false);
+
+      await actions.warm.enable(true);
+      await actions.cold.enable(true);
+      await actions.delete.enablePhase();
+
+      expect(actions.warm.hasRolloverTipOnMinAge()).toBeFalsy();
+      expect(actions.cold.hasRolloverTipOnMinAge()).toBeFalsy();
+      expect(actions.delete.hasRolloverTipOnMinAge()).toBeFalsy();
     });
   });
 
@@ -844,14 +914,6 @@ describe('<EditPolicy />', () => {
       expect(actions.timeline.hasWarmPhase()).toBe(true);
       expect(actions.timeline.hasColdPhase()).toBe(true);
       expect(actions.timeline.hasDeletePhase()).toBe(true);
-    });
-
-    test('show and hide rollover indicator on timeline', async () => {
-      const { actions } = testBed;
-      expect(actions.timeline.hasRolloverIndicator()).toBe(true);
-      await actions.hot.toggleDefaultRollover(false);
-      await actions.hot.toggleRollover(false);
-      expect(actions.timeline.hasRolloverIndicator()).toBe(false);
     });
   });
 
@@ -924,7 +986,7 @@ describe('<EditPolicy />', () => {
       await actions.warm.enable(true);
       await actions.warm.toggleForceMerge(true);
       await actions.warm.setForcemergeSegmentsCount('-22');
-      await runTimers();
+      runTimers();
       expect(actions.hasGlobalErrorCallout()).toBe(true);
       expect(actions.hot.hasErrorIndicator()).toBe(true);
       expect(actions.warm.hasErrorIndicator()).toBe(true);
@@ -933,7 +995,7 @@ describe('<EditPolicy />', () => {
       // 3. Cold phase validation issue
       await actions.cold.enable(true);
       await actions.cold.setReplicas('-33');
-      await runTimers();
+      runTimers();
       expect(actions.hasGlobalErrorCallout()).toBe(true);
       expect(actions.hot.hasErrorIndicator()).toBe(true);
       expect(actions.warm.hasErrorIndicator()).toBe(true);
@@ -941,7 +1003,7 @@ describe('<EditPolicy />', () => {
 
       // 4. Fix validation issue in hot
       await actions.hot.setForcemergeSegmentsCount('1');
-      await runTimers();
+      runTimers();
       expect(actions.hasGlobalErrorCallout()).toBe(true);
       expect(actions.hot.hasErrorIndicator()).toBe(false);
       expect(actions.warm.hasErrorIndicator()).toBe(true);
@@ -949,7 +1011,7 @@ describe('<EditPolicy />', () => {
 
       // 5. Fix validation issue in warm
       await actions.warm.setForcemergeSegmentsCount('1');
-      await runTimers();
+      runTimers();
       expect(actions.hasGlobalErrorCallout()).toBe(true);
       expect(actions.hot.hasErrorIndicator()).toBe(false);
       expect(actions.warm.hasErrorIndicator()).toBe(false);
@@ -957,7 +1019,7 @@ describe('<EditPolicy />', () => {
 
       // 6. Fix validation issue in cold
       await actions.cold.setReplicas('1');
-      await runTimers();
+      runTimers();
       expect(actions.hasGlobalErrorCallout()).toBe(false);
       expect(actions.hot.hasErrorIndicator()).toBe(false);
       expect(actions.warm.hasErrorIndicator()).toBe(false);
@@ -974,9 +1036,34 @@ describe('<EditPolicy />', () => {
 
       await actions.saveAsNewPolicy(true);
       await actions.setPolicyName('');
-      await runTimers();
+      runTimers();
 
       expect(actions.hasGlobalErrorCallout()).toBe(true);
+      expect(actions.hot.hasErrorIndicator()).toBe(false);
+      expect(actions.warm.hasErrorIndicator()).toBe(false);
+      expect(actions.cold.hasErrorIndicator()).toBe(false);
+    });
+
+    test('clears all error indicators if last erroring field is unmounted', async () => {
+      const { actions } = testBed;
+
+      await actions.cold.enable(true);
+      // introduce validation error
+      await actions.cold.setSearchableSnapshot('');
+      runTimers();
+
+      await actions.savePolicy();
+      runTimers();
+
+      expect(actions.hasGlobalErrorCallout()).toBe(true);
+      expect(actions.hot.hasErrorIndicator()).toBe(false);
+      expect(actions.warm.hasErrorIndicator()).toBe(false);
+      expect(actions.cold.hasErrorIndicator()).toBe(true);
+
+      // unmount the field
+      await actions.cold.toggleSearchableSnapshot(false);
+
+      expect(actions.hasGlobalErrorCallout()).toBe(false);
       expect(actions.hot.hasErrorIndicator()).toBe(false);
       expect(actions.warm.hasErrorIndicator()).toBe(false);
       expect(actions.cold.hasErrorIndicator()).toBe(false);

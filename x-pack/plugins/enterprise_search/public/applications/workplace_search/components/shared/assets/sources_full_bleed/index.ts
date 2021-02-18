@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import box from './box.svg';
 import confluence from './confluence.svg';
 import custom from './custom.svg';
 import dropbox from './dropbox.svg';
@@ -21,6 +22,7 @@ import slack from './slack.svg';
 import zendesk from './zendesk.svg';
 
 export const imagesFull = {
+  box,
   confluence,
   confluenceCloud: confluence,
   confluenceServer: confluence,
