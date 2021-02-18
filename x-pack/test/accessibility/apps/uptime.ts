@@ -17,6 +17,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const uptimeService = getService('uptime');
   const esArchiver = getService('esArchiver');
   const es = getService('es');
+  const toasts = getService('toasts');
 
   describe('uptime', () => {
     before(async () => {
@@ -59,6 +60,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('overview alert popover controls', async () => {
       await uptimeService.overview.openAlertsPopover();
+      await toasts.dismissAllToasts();
       await a11y.testAppSnapshot();
     });
 

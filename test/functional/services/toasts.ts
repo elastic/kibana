@@ -51,7 +51,7 @@ export function ToastsProvider({ getService }: FtrProviderContext) {
       for (const toast of toasts) {
         await toast.moveMouseTo();
         const dismissButton = await testSubjects.findDescendant('toastCloseButton', toast);
-        await dismissButton.click();
+        if (dismissButton) await dismissButton.click();
       }
     }
 
