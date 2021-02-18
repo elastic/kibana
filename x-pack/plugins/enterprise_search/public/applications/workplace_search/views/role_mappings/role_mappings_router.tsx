@@ -9,42 +9,21 @@ import React from 'react';
 
 import { Route, Switch } from 'react-router-dom';
 
-import { SidebarNavigation, AppView } from 'workplace_search/components';
-import {
-  ROLE_MAPPING_NEW_PATH,
-  ROLE_MAPPING_PATH,
-  ROLE_MAPPINGS_PATH,
-} from 'workplace_search/utils/routePaths';
+import { ROLE_MAPPING_NEW_PATH, ROLE_MAPPING_PATH, ROLE_MAPPINGS_PATH } from '../../routes';
 
-import RoleMapping from './RoleMapping';
-import RoleMappings from './RoleMappings';
-
-const sidebarLinks = [
-  {
-    title: 'Users and roles',
-    path: ROLE_MAPPINGS_PATH,
-  },
-  {
-    title: 'Add a role mapping',
-    path: ROLE_MAPPING_NEW_PATH,
-    iconType: 'plusInCircle',
-  },
-];
-
-const sidebar = (
-  <SidebarNavigation
-    title="Manage access"
-    description="Control user access to sources and core Workplace Search settings."
-    links={sidebarLinks}
-  />
-);
+import { RoleMapping } from './role_mapping';
+import { RoleMappings } from './role_mappings';
 
 export const RoleMappingsRouter: React.FC = () => (
-  <AppView sidebar={sidebar}>
-    <Switch>
-      <Route exact path={ROLE_MAPPING_NEW_PATH} render={() => <RoleMapping isNew />} />
-      <Route exact path={ROLE_MAPPINGS_PATH} render={() => <RoleMappings />} />
-      <Route path={ROLE_MAPPING_PATH} render={() => <RoleMapping />} />
-    </Switch>
-  </AppView>
+  <Switch>
+    <Route exact path={ROLE_MAPPING_NEW_PATH}>
+      <RoleMapping isNew />
+    </Route>
+    <Route exact path={ROLE_MAPPINGS_PATH}>
+      <RoleMappings />
+    </Route>
+    <Route path={ROLE_MAPPING_PATH}>
+      <RoleMapping />
+    </Route>
+  </Switch>
 );
