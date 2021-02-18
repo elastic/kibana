@@ -14,17 +14,20 @@ import {
   EuiTableActionsColumnType,
   EuiTableComputedColumnType,
   EuiTableFieldDataColumnType,
-  HorizontalAlignment,
 } from '@elastic/eui';
+import { RIGHT_ALIGNMENT } from '@elastic/eui/lib/services';
 import styled from 'styled-components';
 import { DefaultItemIconButtonAction } from '@elastic/eui/src/components/basic_table/action_types';
 
 import { CaseStatuses } from '../../../../../case/common/api';
 import { getEmptyTagValue } from '../../../common/components/empty_value';
-import { Case } from '../../containers/types';
+import { Case, SubCase } from '../../containers/types';
 import { FormattedRelativePreferenceDate } from '../../../common/components/formatted_date';
 import { CaseDetailsLink } from '../../../common/components/links';
 import * as i18n from './translations';
+import { Status } from '../status';
+import { getSubCasesStatusCountsBadges, isSubCase } from './helpers';
+import { ALERTS } from '../../../app/home/translations';
 
 export type CasesColumns =
   | EuiTableFieldDataColumnType<Case>
@@ -54,10 +57,14 @@ export const getCasesColumns = (
   const columns = [
     {
       name: i18n.NAME,
-      render: (theCase: Case) => {
+      render: (theCase: Case | SubCase) => {
         if (theCase.id != null && theCase.title != null) {
           const caseDetailsLinkComponent = !isModal ? (
-            <CaseDetailsLink detailName={theCase.id} title={theCase.title}>
+            <CaseDetailsLink
+              detailName={isSubCase(theCase) ? theCase.caseParentId : theCase.id}
+              title={theCase.title}
+              subCaseId={isSubCase(theCase) ? theCase.id : undefined}
+            >
               {theCase.title}
             </CaseDetailsLink>
           ) : (
@@ -122,7 +129,17 @@ export const getCasesColumns = (
       truncateText: true,
     },
     {
-      align: 'right' as HorizontalAlignment,
+      align: RIGHT_ALIGNMENT,
+      field: 'totalAlerts',
+      name: ALERTS,
+      sortable: true,
+      render: (totalAlerts: Case['totalAlerts']) =>
+        totalAlerts != null
+          ? renderStringField(`${totalAlerts}`, `case-table-column-alertsCount`)
+          : getEmptyTagValue(),
+    },
+    {
+      align: RIGHT_ALIGNMENT,
       field: 'totalComment',
       name: i18n.COMMENTS,
       sortable: true,
@@ -181,6 +198,24 @@ export const getCasesColumns = (
           );
         }
         return getEmptyTagValue();
+      },
+    },
+    {
+      name: i18n.STATUS,
+      render: (theCase: Case) => {
+        if (theCase?.subCases == null || theCase.subCases.length === 0) {
+          if (theCase.status == null) {
+            return getEmptyTagValue();
+          }
+          return <Status type={theCase.status} />;
+        }
+
+        const badges = getSubCasesStatusCountsBadges(theCase.subCases);
+        return badges.map(({ color, count }, index) => (
+          <EuiBadge key={index} color={color}>
+            {count}
+          </EuiBadge>
+        ));
       },
     },
     {

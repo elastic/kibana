@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { DEFAULT_INDICATOR_PATH } from '../../../constants';
 import { getListArrayMock } from '../types/lists.mock';
 
 import { RulesSchema } from './rules_schema';
@@ -150,7 +151,7 @@ export const getThreatMatchingSchemaPartialMock = (enabled = false): Partial<Rul
     language: 'kuery',
     threat_query: '*:*',
     threat_index: ['list-index'],
-    threat_indicator_path: 'threat.indicator',
+    threat_indicator_path: DEFAULT_INDICATOR_PATH,
     threat_mapping: [
       {
         entries: [

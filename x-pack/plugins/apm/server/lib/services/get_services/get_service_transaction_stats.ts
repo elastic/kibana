@@ -15,7 +15,7 @@ import {
   TRANSACTION_PAGE_LOAD,
   TRANSACTION_REQUEST,
 } from '../../../../common/transaction_types';
-import { rangeFilter } from '../../../../common/utils/range_filter';
+import { environmentQuery, rangeQuery } from '../../../../common/utils/queries';
 import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
 import {
   getDocumentTypeFilterForAggregatedTransactions,
@@ -32,6 +32,7 @@ import { ServicesItemsSetup } from './get_services_items';
 import { withApmSpan } from '../../../utils/with_apm_span';
 
 interface AggregationParams {
+  environment?: string;
   setup: ServicesItemsSetup;
   searchAggregatedTransactions: boolean;
 }
@@ -39,6 +40,7 @@ interface AggregationParams {
 const MAX_NUMBER_OF_SERVICES = 500;
 
 export async function getServiceTransactionStats({
+  environment,
   setup,
   searchAggregatedTransactions,
 }: AggregationParams) {
@@ -71,11 +73,12 @@ export async function getServiceTransactionStats({
         query: {
           bool: {
             filter: [
-              { range: rangeFilter(start, end) },
-              ...esFilter,
               ...getDocumentTypeFilterForAggregatedTransactions(
                 searchAggregatedTransactions
               ),
+              ...rangeQuery(start, end),
+              ...environmentQuery(environment),
+              ...esFilter,
             ],
           },
         },

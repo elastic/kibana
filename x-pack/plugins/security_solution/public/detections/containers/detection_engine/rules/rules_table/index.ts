@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-export function rangeFilter(start: number, end: number) {
-  return {
-    '@timestamp': {
-      gte: start,
-      lte: end,
-      format: 'epoch_millis',
-    },
-  };
-}
+export * from './rules_table_facade';
+export * from './rules_table_reducer';
+export * from './use_rules';
+export * from './use_rules_table';
