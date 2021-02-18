@@ -7,6 +7,72 @@
 
 import React from 'react';
 
-export const ValueBoostForm: React.FC = () => {
-  return <div>ValueBoostForm</div>;
+import { useActions } from 'kea';
+
+import {
+  EuiButtonEmpty,
+  EuiButtonIcon,
+  EuiFieldText,
+  EuiFlexGroup,
+  EuiFlexItem,
+} from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+
+import { RelevanceTuningLogic } from '../../../..';
+import { Boost } from '../../../../types';
+
+interface Props {
+  boost: Boost;
+  index: number;
+  name: string;
+}
+
+export const ValueBoostForm: React.FC<Props> = ({ boost, index, name }) => {
+  const { updateBoostValue, removeBoostValue, addBoostValue } = useActions(RelevanceTuningLogic);
+  const values = boost.value || [''];
+
+  return (
+    <>
+      {values.map((value, valueIndex) => (
+        <EuiFlexGroup key={valueIndex} responsive={false}>
+          <EuiFlexItem>
+            <EuiFieldText
+              value={value}
+              fullWidth
+              onChange={(e) => updateBoostValue(name, index, valueIndex, e.target.value)}
+              aria-label={i18n.translate(
+                'xpack.enterpriseSearch.appSearch.engine.relevanceTuning.boosts.value.valueNameAriaLabel',
+                {
+                  defaultMessage: 'Value name',
+                }
+              )}
+              autoFocus
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButtonIcon
+              iconType="trash"
+              onClick={() => removeBoostValue(name, index, valueIndex)}
+              aria-label={i18n.translate(
+                'xpack.enterpriseSearch.appSearch.engine.relevanceTuning.boosts.value.removeValueAriaLabel',
+                {
+                  defaultMessage: 'Remove value',
+                }
+              )}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      ))}
+      <div>
+        <EuiButtonEmpty size="s" onClick={() => addBoostValue(name, index)}>
+          {i18n.translate(
+            'xpack.enterpriseSearch.appSearch.engine.relevanceTuning.boosts.value.addValueButtonLabel',
+            {
+              defaultMessage: 'Add Value',
+            }
+          )}
+        </EuiButtonEmpty>
+      </div>
+    </>
+  );
 };

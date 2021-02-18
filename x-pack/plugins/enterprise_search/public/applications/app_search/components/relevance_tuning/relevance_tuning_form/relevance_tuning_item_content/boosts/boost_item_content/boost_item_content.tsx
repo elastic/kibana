@@ -34,7 +34,7 @@ export const BoostItemContent: React.FC<Props> = ({ boost, index, name }) => {
   const getBoostForm = () => {
     switch (type) {
       case BoostType.Value:
-        return <ValueBoostForm />;
+        return <ValueBoostForm boost={boost} index={index} name={name} />;
       case BoostType.Functional:
         return <FunctionalBoostForm boost={boost} index={index} name={name} />;
       case BoostType.Proximity:
