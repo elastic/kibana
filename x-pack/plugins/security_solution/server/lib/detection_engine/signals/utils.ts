@@ -134,9 +134,10 @@ export const hasTimestampFields = async (
         ? 'timestamp field "@timestamp"'
         : `timestamp override field "${timestampField}"`
     }: ${JSON.stringify(
-      isEmpty(timestampFieldCapsResponse.body.fields)
+      isEmpty(timestampFieldCapsResponse.body.fields) ||
+        isEmpty(timestampFieldCapsResponse.body.fields[timestampField])
         ? timestampFieldCapsResponse.body.indices
-        : timestampFieldCapsResponse.body.fields[timestampField].unmapped.indices
+        : timestampFieldCapsResponse.body.fields[timestampField]?.unmapped?.indices
     )}`;
     logger.error(buildRuleMessage(errorString));
     await ruleStatusService.warning(errorString);
@@ -698,9 +699,12 @@ export const createSearchAfterReturnTypeFromResponse = ({
       searchResult._shards.failed === 0 ||
       searchResult._shards.failures?.every((failure) => {
         return (
-          failure.reason?.reason === 'No mapping found for [@timestamp] in order to sort on' ||
-          failure.reason?.reason ===
+          failure.reason?.reason?.includes(
+            'No mapping found for [@timestamp] in order to sort on'
+          ) ||
+          failure.reason?.reason?.includes(
             `No mapping found for [${timestampOverride}] in order to sort on`
+          )
         );
       }),
     lastLookBackDate: lastValidDate({ searchResult, timestampOverride }),
