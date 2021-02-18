@@ -8,7 +8,7 @@
 /* eslint-disable complexity */
 
 import dateMath from '@elastic/datemath';
-import { get, getOr, isEmpty, find } from 'lodash/fp';
+import { getOr, isEmpty } from 'lodash/fp';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 
@@ -38,7 +38,10 @@ import {
   replaceTemplateFieldFromDataProviders,
 } from './helpers';
 import { KueryFilterQueryKind } from '../../../common/store';
-import { DataProvider } from '../../../timelines/components/timeline/data_providers/data_provider';
+import {
+  DataProvider,
+  QueryOperator,
+} from '../../../timelines/components/timeline/data_providers/data_provider';
 import { esFilters } from '../../../../../../../src/plugins/data/public';
 
 export const getUpdateAlertsQuery = (eventIds: Readonly<string[]>) => {
@@ -47,7 +50,7 @@ export const getUpdateAlertsQuery = (eventIds: Readonly<string[]>) => {
       bool: {
         filter: {
           terms: {
-            _id: [...eventIds],
+            _id: eventIds,
           },
         },
       },
@@ -148,35 +151,76 @@ export const getThresholdAggregationDataProvider = (
   nonEcsData: TimelineNonEcsData[]
 ): DataProvider[] => {
   const thresholdEcsData: Ecs[] = Array.isArray(ecsData) ? ecsData : [ecsData];
-  return thresholdEcsData.reduce<DataProvider[]>((acc, tresholdData) => {
-    const aggregationField = tresholdData.signal?.rule?.threshold?.field!;
-    const aggregationValue =
-      get(aggregationField, tresholdData) ?? find(['field', aggregationField], nonEcsData)?.value;
-    const dataProviderValue = Array.isArray(aggregationValue)
-      ? aggregationValue[0]
-      : aggregationValue;
+  return thresholdEcsData.reduce<DataProvider[]>((outerAcc, thresholdData) => {
+    const threshold = thresholdData.signal?.rule?.threshold as string[];
 
-    if (!dataProviderValue) {
-      return acc;
+    let aggField: string[] = [];
+    let thresholdResult: {
+      terms?: Array<{
+        field?: string;
+        value: string;
+      }>;
+      count: number;
+    };
+
+    try {
+      thresholdResult = JSON.parse((thresholdData.signal?.threshold_result as string[])[0]);
+      aggField = JSON.parse(threshold[0]).field;
+    } catch (err) {
+      thresholdResult = {
+        terms: [
+          {
+            field: (thresholdData.rule?.threshold as { field: string }).field,
+            value: (thresholdData.signal?.threshold_result as { value: string }).value,
+          },
+        ],
+        count: (thresholdData.signal?.threshold_result as { count: number }).count,
+      };
     }
 
-    const aggregationFieldId = aggregationField.replace('.', '-');
+    const aggregationFields = Array.isArray(aggField) ? aggField : [aggField];
 
     return [
-      ...acc,
-      {
-        and: [],
-        id: `send-alert-to-timeline-action-default-draggable-event-details-value-formatted-field-value-${TimelineId.active}-${aggregationFieldId}-${dataProviderValue}`,
-        name: aggregationField,
-        enabled: true,
-        excluded: false,
-        kqlQuery: '',
-        queryMatch: {
-          field: aggregationField,
-          value: dataProviderValue,
-          operator: ':',
-        },
-      },
+      ...outerAcc,
+      ...aggregationFields.reduce<DataProvider[]>((acc, aggregationField, i) => {
+        const aggregationValue = (thresholdResult.terms ?? []).filter(
+          (term: { field?: string | undefined; value: string }) => term.field === aggregationField
+        )[0].value;
+        const dataProviderValue = Array.isArray(aggregationValue)
+          ? aggregationValue[0]
+          : aggregationValue;
+
+        if (!dataProviderValue) {
+          return acc;
+        }
+
+        const aggregationFieldId = aggregationField.replace('.', '-');
+        const dataProviderPartial = {
+          id: `send-alert-to-timeline-action-default-draggable-event-details-value-formatted-field-value-${TimelineId.active}-${aggregationFieldId}-${dataProviderValue}`,
+          name: aggregationField,
+          enabled: true,
+          excluded: false,
+          kqlQuery: '',
+          queryMatch: {
+            field: aggregationField,
+            value: dataProviderValue,
+            operator: ':' as QueryOperator,
+          },
+        };
+
+        if (i === 0) {
+          return [
+            ...acc,
+            {
+              ...dataProviderPartial,
+              and: [],
+            },
+          ];
+        } else {
+          acc[0].and.push(dataProviderPartial);
+          return acc;
+        }
+      }, []),
     ];
   }, []);
 };
@@ -409,7 +453,7 @@ export const sendAlertToTimelineAction = async ({
         ...timelineDefaults,
         description: `_id: ${ecsData._id}`,
         filters: getFiltersFromRule(ecsData.signal?.rule?.filters as string[]),
-        dataProviders: [...getThresholdAggregationDataProvider(ecs, nonEcsData)],
+        dataProviders: getThresholdAggregationDataProvider(ecsData, nonEcsData),
         id: TimelineId.active,
         indexNames: [],
         dateRange: {
