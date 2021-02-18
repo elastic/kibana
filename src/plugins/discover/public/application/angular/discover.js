@@ -169,10 +169,10 @@ function discoverController($route, $scope, Promise) {
   let inspectorRequest;
   let isChangingIndexPattern = false;
   const savedSearch = $route.current.locals.savedObjects.savedSearch;
-  $scope.searchSource = savedSearch.searchSource;
+  const persistentSearchSource = savedSearch.searchSource;
   $scope.indexPattern = resolveIndexPattern(
     $route.current.locals.savedObjects.ip,
-    $scope.searchSource,
+    persistentSearchSource,
     toastNotifications
   );
   $scope.useNewFieldsApi = !config.get(SEARCH_FIELDS_FROM_SOURCE);
@@ -370,25 +370,19 @@ function discoverController($route, $scope, Promise) {
     });
   };
 
-  $scope.searchSource
-    .setField('index', $scope.indexPattern)
-    .setField('highlightAll', true)
-    .setField('version', true);
-
-  // Even when searching rollups, we want to use the default strategy so that we get back a
-  // document-like response.
-  $scope.searchSource.setPreferredSearchStrategyId('default');
+  persistentSearchSource.setField('index', $scope.indexPattern);
 
   // searchSource which applies time range
-  const timeRangeSearchSource = savedSearch.searchSource.create();
+  const volatileSearchSource = savedSearch.searchSource.create();
 
   if (isDefaultType($scope.indexPattern)) {
-    timeRangeSearchSource.setField('filter', () => {
+    volatileSearchSource.setField('filter', () => {
       return timefilter.createFilter($scope.indexPattern);
     });
   }
 
-  $scope.searchSource.setParent(timeRangeSearchSource);
+  volatileSearchSource.setParent(persistentSearchSource);
+  $scope.volatileSearchSource = volatileSearchSource;
 
   const pageTitleSuffix = savedSearch.id && savedSearch.title ? `: ${savedSearch.title}` : '';
   chrome.docTitle.change(`Discover${pageTitleSuffix}`);
@@ -403,7 +397,8 @@ function discoverController($route, $scope, Promise) {
   }
 
   function getStateDefaults() {
-    const query = $scope.searchSource.getField('query') || data.query.queryString.getDefaultQuery();
+    const query =
+      persistentSearchSource.getField('query') || data.query.queryString.getDefaultQuery();
     const sort = getSortArray(savedSearch.sort, $scope.indexPattern);
     const columns = getDefaultColumns();
 
@@ -415,7 +410,7 @@ function discoverController($route, $scope, Promise) {
       columns,
       index: $scope.indexPattern.id,
       interval: 'auto',
-      filters: _.cloneDeep($scope.searchSource.getOwnField('filter')),
+      filters: _.cloneDeep(persistentSearchSource.getOwnField('filter')),
     };
     if (savedSearch.grid) {
       defaultState.grid = savedSearch.grid;
@@ -556,7 +551,7 @@ function discoverController($route, $scope, Promise) {
       .then(function () {
         $scope.fetchStatus = fetchStatuses.LOADING;
         logInspectorRequest({ searchSessionId });
-        return $scope.searchSource.fetch({
+        return $scope.volatileSearchSource.fetch({
           abortSignal: abortController.signal,
           sessionId: searchSessionId,
         });
@@ -603,11 +598,13 @@ function discoverController($route, $scope, Promise) {
   }
 
   function onResults(resp) {
-    inspectorRequest.stats(getResponseInspectorStats(resp, $scope.searchSource)).ok({ json: resp });
+    inspectorRequest
+      .stats(getResponseInspectorStats(resp, $scope.volatileSearchSource))
+      .ok({ json: resp });
 
     if (getTimeField() && !$scope.state.hideChart) {
       const tabifiedData = tabifyAggResponse($scope.opts.chartAggConfigs, resp);
-      $scope.searchSource.rawResponse = resp;
+      $scope.volatileSearchSource.rawResponse = resp;
       $scope.histogramData = discoverResponseHandler(
         tabifiedData,
         getDimensions($scope.opts.chartAggConfigs.aggs, $scope.timeRange)
@@ -635,8 +632,8 @@ function discoverController($route, $scope, Promise) {
       defaultMessage: 'This request queries Elasticsearch to fetch the data for the search.',
     });
     inspectorRequest = inspectorAdapters.requests.start(title, { description, searchSessionId });
-    inspectorRequest.stats(getRequestInspectorStats($scope.searchSource));
-    $scope.searchSource.getSearchRequestBody().then((body) => {
+    inspectorRequest.stats(getRequestInspectorStats($scope.volatileSearchSource));
+    $scope.volatileSearchSource.getSearchRequestBody().then((body) => {
       inspectorRequest.json(body);
     });
   }
@@ -693,9 +690,11 @@ function discoverController($route, $scope, Promise) {
   };
 
   $scope.updateDataSource = () => {
-    const { indexPattern, searchSource, useNewFieldsApi } = $scope;
+    const { indexPattern, useNewFieldsApi } = $scope;
     const { columns, sort } = $scope.state;
-    updateSearchSource(searchSource, {
+    updateSearchSource({
+      persistentSearchSource,
+      volatileSearchSource: $scope.volatileSearchSource,
       indexPattern,
       services,
       sort,
@@ -731,12 +730,12 @@ function discoverController($route, $scope, Promise) {
       visStateAggs
     );
 
-    $scope.searchSource.onRequestStart((searchSource, options) => {
+    $scope.volatileSearchSource.onRequestStart((searchSource, options) => {
       if (!$scope.opts.chartAggConfigs) return;
       return $scope.opts.chartAggConfigs.onSearchRequestStart(searchSource, options);
     });
 
-    $scope.searchSource.setField('aggs', function () {
+    $scope.volatileSearchSource.setField('aggs', function () {
       if (!$scope.opts.chartAggConfigs) return;
       return $scope.opts.chartAggConfigs.toDsl();
     });
