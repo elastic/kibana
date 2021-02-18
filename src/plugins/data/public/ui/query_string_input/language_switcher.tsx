@@ -24,7 +24,7 @@ import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import { useKibana } from '../../../../kibana_react/public';
 
-interface Props {
+export interface QueryLanguageSwitcherProps {
   language: string;
   onSelectLanguage: (newLanguage: string) => void;
   anchorPosition?: PopoverAnchorPosition;
@@ -38,7 +38,7 @@ export function QueryLanguageSwitcher({
   onSelectLanguage,
   nonKqlMode = 'lucene',
   nonKqlModeHelpText,
-}: Props) {
+}: QueryLanguageSwitcherProps) {
   const kibana = useKibana();
   const kueryQuerySyntaxDocs = kibana.services.docLinks!.links.query.kueryQuerySyntax;
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -105,9 +105,12 @@ export function QueryLanguageSwitcher({
                 ),
                 nonKqlModeHelpText:
                   nonKqlModeHelpText ||
-                  i18n.translate('data.query.queryBar.syntaxOptionsDescription', {
-                    defaultMessage: 'Kibana uses Lucene.',
-                  }),
+                  i18n.translate(
+                    'data.query.queryBar.syntaxOptionsDescription.nonKqlModeHelpText',
+                    {
+                      defaultMessage: 'Kibana uses Lucene.',
+                    }
+                  ),
               }}
             />
           </p>
