@@ -18,6 +18,7 @@ import {
 import styled from 'styled-components';
 import { getOr } from 'lodash/fp';
 
+import { buildGetAlertByIdQuery } from '../../../../common/components/exceptions/helpers';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { TimelineId } from '../../../../../common/types/timeline';
 import { DEFAULT_INDEX_PATTERN } from '../../../../../common/constants';
@@ -29,7 +30,10 @@ import { FILTER_OPEN, FILTER_CLOSED, FILTER_IN_PROGRESS } from '../alerts_filter
 import { updateAlertStatusAction } from '../actions';
 import { SetEventsDeletedProps, SetEventsLoadingProps } from '../types';
 import { Ecs } from '../../../../../common/ecs';
-import { AddExceptionModal } from '../../../../common/components/exceptions/add_exception_modal';
+import {
+  AddExceptionModal,
+  AddExceptionModalProps,
+} from '../../../../common/components/exceptions/add_exception_modal';
 import * as i18nCommon from '../../../../common/translations';
 import * as i18n from '../translations';
 import {
@@ -40,6 +44,9 @@ import {
 import { inputsModel } from '../../../../common/store';
 import { useUserData } from '../../user_info';
 import { ExceptionListType } from '../../../../../common/shared_imports';
+import { AlertData, EcsHit } from '../../../../common/components/exceptions/types';
+import { useQueryAlerts } from '../../../containers/detection_engine/alerts/use_query';
+import { useSignalIndex } from '../../../containers/detection_engine/alerts/use_signal_index';
 
 interface AlertContextMenuProps {
   ariaLabel?: string;
@@ -386,12 +393,12 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
         </EventsTdContent>
       </div>
       {exceptionModalType != null && ruleId != null && ecsRowData != null && (
-        <AddExceptionModal
+        <AddExceptionModalWrapper
           ruleName={ruleName}
           ruleId={ruleId}
           ruleIndices={ruleIndices}
           exceptionListType={exceptionModalType}
-          alertData={ecsRowData}
+          ecsData={ecsRowData}
           onCancel={onAddExceptionCancel}
           onConfirm={onAddExceptionConfirm}
           alertStatus={alertStatus}
@@ -409,3 +416,62 @@ const ContextMenuPanel = styled(EuiContextMenuPanel)`
 ContextMenuPanel.displayName = 'ContextMenuPanel';
 
 export const AlertContextMenu = React.memo(AlertContextMenuComponent);
+
+type AddExceptionModalWrapperProps = Omit<
+  AddExceptionModalProps,
+  'alertData' | 'isAlertDataLoading'
+> & {
+  ecsData: Ecs;
+};
+
+/**
+ * This component exists to fetch needed data outside of the AddExceptionModal
+ * Due to the conditional nature of the modal and how we use the `ecsData` field,
+ * we cannot use the fetch hook within the modal component itself
+ */
+const AddExceptionModalWrapper: React.FC<AddExceptionModalWrapperProps> = ({
+  ruleName,
+  ruleId,
+  ruleIndices,
+  exceptionListType,
+  ecsData,
+  onCancel,
+  onConfirm,
+  alertStatus,
+  onRuleChange,
+}) => {
+  const { loading: isSignalIndexLoading, signalIndexName } = useSignalIndex();
+
+  const { loading: isLoadingAlertData, data } = useQueryAlerts<EcsHit, {}>(
+    buildGetAlertByIdQuery(ecsData?._id),
+    signalIndexName
+  );
+
+  const enrichedAlert: AlertData | undefined = useMemo(() => {
+    if (isLoadingAlertData === false) {
+      const hit = data?.hits.hits[0];
+      if (!hit) {
+        return undefined;
+      }
+      const { _id, _index, _source } = hit;
+      return { ..._source, _id, _index };
+    }
+  }, [data?.hits.hits, isLoadingAlertData]);
+
+  const isLoading = isLoadingAlertData && isSignalIndexLoading;
+
+  return (
+    <AddExceptionModal
+      ruleName={ruleName}
+      ruleId={ruleId}
+      ruleIndices={ruleIndices}
+      exceptionListType={exceptionListType}
+      alertData={enrichedAlert}
+      isAlertDataLoading={isLoading}
+      onCancel={onCancel}
+      onConfirm={onConfirm}
+      alertStatus={alertStatus}
+      onRuleChange={onRuleChange}
+    />
+  );
+};
