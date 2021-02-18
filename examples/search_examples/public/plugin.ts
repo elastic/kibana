@@ -21,7 +21,7 @@ import {
 } from './types';
 import { createSearchSessionsExampleUrlGenerator } from './search_sessions/url_generator';
 import { PLUGIN_NAME } from '../common';
-import img from './search_examples.jpg';
+import img from './search_examples.png';
 
 export class SearchExamplesPlugin
   implements
