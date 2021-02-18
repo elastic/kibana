@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { rangeFilter } from '../../../common/utils/range_filter';
+import { rangeQuery } from '../../../common/utils/queries';
 import { Coordinates } from '../../../../observability/typings/common';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import { getProcessorEventForAggregatedTransactions } from '../helpers/aggregated_transactions';
@@ -38,7 +38,7 @@ export function getTransactionCoordinates({
           size: 0,
           query: {
             bool: {
-              filter: [{ range: rangeFilter(start, end) }],
+              filter: rangeQuery(start, end),
             },
           },
           aggs: {

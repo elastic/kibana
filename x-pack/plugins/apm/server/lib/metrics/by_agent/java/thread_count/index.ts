@@ -42,16 +42,19 @@ const chartBase: ChartBase = {
 };
 
 export async function getThreadCountChart({
+  environment,
   setup,
   serviceName,
   serviceNodeName,
 }: {
+  environment?: string;
   setup: Setup & SetupTimeRange;
   serviceName: string;
   serviceNodeName?: string;
 }) {
   return withApmSpan('get_thread_count_charts', () =>
     fetchAndTransformMetrics({
+      environment,
       setup,
       serviceName,
       serviceNodeName,
