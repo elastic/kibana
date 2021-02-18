@@ -92,6 +92,16 @@ export const revertModelSnapshotSchema = schema.object({
   ),
 });
 
+export const datafeedPreviewSchema = schema.oneOf([
+  schema.object({
+    job: schema.maybe(schema.any()),
+    datafeed: schema.maybe(schema.any()),
+  }),
+  schema.object({
+    datafeedId: schema.maybe(schema.string()),
+  }),
+]);
+
 export const jobsExistSchema = schema.object({
   jobIds: schema.arrayOf(schema.string()),
   allSpaces: schema.maybe(schema.boolean()),

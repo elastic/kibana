@@ -322,4 +322,16 @@ export const jobsApiProvider = (httpService: HttpService) => ({
       body,
     });
   },
+
+  datafeedPreview(job: Job, datafeed: Datafeed) {
+    const body = JSON.stringify({ job, datafeed });
+    return httpService.http<{
+      total: number;
+      categories: Array<{ count?: number; category: Category }>;
+    }>({
+      path: `${ML_BASE_PATH}/jobs/datafeed_preview`,
+      method: 'POST',
+      body,
+    });
+  },
 });

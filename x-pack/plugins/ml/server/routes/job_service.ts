@@ -20,12 +20,14 @@ import {
   updateGroupsSchema,
   revertModelSnapshotSchema,
   jobsExistSchema,
+  datafeedPreviewSchema,
 } from './schemas/job_service_schema';
 
 import { jobIdSchema } from './schemas/anomaly_detectors_schema';
 
 import { jobServiceProvider } from '../models/job_service';
 import { categorizationExamplesProvider } from '../models/job_service/new_job';
+import { getAuthorizationHeader } from '../lib/request_authorization';
 
 /**
  * Routes for job service
@@ -760,6 +762,52 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
 
         return response.ok({
           body: resp,
+        });
+      } catch (e) {
+        return response.customError(wrapError(e));
+      }
+    })
+  );
+
+  /**
+   * @apiGroup JobService
+   *
+   * @api {post} /api/ml/jobs/datafeed_preview Get datafeed preview
+   * @apiName TopCategories
+   * @apiDescription Returns list of top categories
+   *
+   * @apiSchema (body) topCategoriesSchema
+   */
+  router.post(
+    {
+      path: '/api/ml/jobs/datafeed_preview',
+      validate: {
+        body: datafeedPreviewSchema,
+      },
+      options: {
+        tags: ['access:ml:canGetJobs'],
+      },
+    },
+    routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, request, response }) => {
+      try {
+        const { datafeedId, job, datafeed } = request.body;
+
+        if (datafeedId !== undefined) {
+          const { body } = await mlClient.previewDatafeed(
+            {
+              datafeed_id: datafeedId,
+            },
+            getAuthorizationHeader(request)
+          );
+          return response.ok({
+            body,
+          });
+        }
+
+        const { datafeedPreview } = jobServiceProvider(client, mlClient);
+        const body = await datafeedPreview(job, datafeed);
+        return response.ok({
+          body,
         });
       } catch (e) {
         return response.customError(wrapError(e));
