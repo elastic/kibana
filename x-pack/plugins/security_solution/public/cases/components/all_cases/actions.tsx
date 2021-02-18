@@ -8,7 +8,7 @@
 import { Dispatch } from 'react';
 import { DefaultItemIconButtonAction } from '@elastic/eui/src/components/basic_table/action_types';
 
-import { CaseStatuses } from '../../../../../case/common/api';
+import { CaseStatuses, CaseType } from '../../../../../case/common/api';
 import { Case, SubCase } from '../../containers/types';
 import { UpdateCase } from '../../containers/use_get_cases';
 import { statuses } from '../status';
@@ -20,8 +20,8 @@ interface GetActions {
   deleteCaseOnClick: (deleteCase: Case) => void;
 }
 
-const hasSubCases = (subCases: SubCase[] | null | undefined) =>
-  subCases != null && subCases?.length > 0;
+const isCollection = (theCase: Case | SubCase | null | undefined) =>
+  theCase != null && (theCase as Case).type === CaseType.collection;
 
 export const getActions = ({
   caseStatus,
@@ -29,7 +29,7 @@ export const getActions = ({
   deleteCaseOnClick,
 }: GetActions): Array<DefaultItemIconButtonAction<Case>> => {
   const openCaseAction = {
-    available: (item: Case) => caseStatus !== CaseStatuses.open && !hasSubCases(item.subCases),
+    available: (item: Case | SubCase) => caseStatus !== CaseStatuses.open && !isCollection(item),
     description: statuses[CaseStatuses.open].actions.single.title,
     icon: statuses[CaseStatuses.open].icon,
     name: statuses[CaseStatuses.open].actions.single.title,
@@ -45,8 +45,7 @@ export const getActions = ({
   };
 
   const makeInProgressAction = {
-    available: (item: Case) =>
-      caseStatus !== CaseStatuses['in-progress'] && !hasSubCases(item.subCases),
+    available: (item: Case) => caseStatus !== CaseStatuses['in-progress'] && !isCollection(item),
     description: statuses[CaseStatuses['in-progress']].actions.single.title,
     icon: statuses[CaseStatuses['in-progress']].icon,
     name: statuses[CaseStatuses['in-progress']].actions.single.title,
@@ -62,7 +61,7 @@ export const getActions = ({
   };
 
   const closeCaseAction = {
-    available: (item: Case) => caseStatus !== CaseStatuses.closed && !hasSubCases(item.subCases),
+    available: (item: Case) => caseStatus !== CaseStatuses.closed && !isCollection(item),
     description: statuses[CaseStatuses.closed].actions.single.title,
     icon: statuses[CaseStatuses.closed].icon,
     name: statuses[CaseStatuses.closed].actions.single.title,

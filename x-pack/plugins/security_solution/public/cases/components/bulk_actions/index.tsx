@@ -34,7 +34,7 @@ export const getBulkItems = ({
   const openMenuItem = (
     <EuiContextMenuItem
       data-test-subj="cases-bulk-open-button"
-      disabled={selectedCaseIds.length === 0}
+      disabled={selectedCaseIds.length === 0 || includeCollections}
       key="cases-bulk-open-button"
       icon={statuses[CaseStatuses.open].icon}
       onClick={() => {
