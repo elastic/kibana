@@ -190,6 +190,7 @@ export function ServiceProfilingFlamegraph({
             fontFamily: theme.eui.euiCodeFontFamily,
             // clip: true,
           },
+          drilldown: true,
           fontFamily: theme.eui.euiCodeFontFamily,
           minFontSize: 9,
           maxFontSize: 9,
