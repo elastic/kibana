@@ -15,9 +15,15 @@ interface SetValueOptions {
   typeCharByChar?: boolean;
 }
 
+export type CanvasElementColorStats = Array<{
+  key: string;
+  value: number;
+}>;
+
 export type MlCommonUI = ProvidedType<typeof MachineLearningCommonUIProvider>;
 
 export function MachineLearningCommonUIProvider({ getService }: FtrProviderContext) {
+  const canvasElement = getService('canvasElement');
   const log = getService('log');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
@@ -211,6 +217,42 @@ export function MachineLearningCommonUIProvider({ getService }: FtrProviderConte
         expectedValue,
         `${testDataSubj} slider value should be '${expectedValue}' (got '${actualValue}')`
       );
+    },
+
+    async assertCanvasElement(
+      dataTestSubj: string,
+      expectedColorStats: CanvasElementColorStats,
+      exclude?: string[],
+      percentageThreshold = 1
+    ) {
+      await retry.tryForTime(5000, async () => {
+        await testSubjects.existOrFail(dataTestSubj);
+
+        const sortedExpectedColorStats = [...expectedColorStats].sort((a, b) =>
+          a.key.localeCompare(b.key)
+        );
+
+        const actualColorStats = await canvasElement.getColorStats(
+          `[data-test-subj="${dataTestSubj}"] canvas`,
+          sortedExpectedColorStats,
+          exclude,
+          percentageThreshold
+        );
+        expect(actualColorStats.length).to.eql(
+          sortedExpectedColorStats.length,
+          `Expected and actual color stats for '${dataTestSubj}' should have the same amount of elements. Expected: ${
+            sortedExpectedColorStats.length
+          } ${JSON.stringify(sortedExpectedColorStats)} (got ${
+            actualColorStats.length
+          } ${JSON.stringify(actualColorStats)})`
+        );
+        expect(actualColorStats.every((d) => d.withinTolerance)).to.eql(
+          true,
+          `Color stats for '${dataTestSubj}' should be within tolerance. Expected: '${JSON.stringify(
+            sortedExpectedColorStats
+          )}' (got '${JSON.stringify(actualColorStats)}')`
+        );
+      });
     },
   };
 }

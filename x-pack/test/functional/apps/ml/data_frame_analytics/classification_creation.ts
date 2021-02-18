@@ -110,7 +110,7 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.dataFrameAnalyticsCreation.assertIncludeFieldsSelectionExists();
 
           await ml.testExecution.logTestStep('displays the scatterplot matrix');
-          await ml.dataFrameAnalyticsCanvasElement.assertCanvasElement(
+          await ml.commonUI.assertCanvasElement(
             'mlAnalyticsCreateJobWizardScatterplotMatrixPanel',
             testData.expected.scatterplotMatrixColorStats
           );
@@ -229,7 +229,7 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.testExecution.logTestStep('displays the results view for created job');
           await ml.dataFrameAnalyticsTable.openResultsView(testData.jobId);
           await ml.dataFrameAnalyticsResults.assertClassificationEvaluatePanelElementsExists();
-          await ml.dataFrameAnalyticsCanvasElement.assertCanvasElement(
+          await ml.commonUI.assertCanvasElement(
             'mlDFAnalyticsClassificationExplorationRocCurveChart',
             testData.expected.rocCurveColorState,
             ['#000000'],
@@ -239,7 +239,7 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.dataFrameAnalyticsResults.assertResultsTableExists();
           await ml.dataFrameAnalyticsResults.assertResultsTableTrainingFiltersExist();
           await ml.dataFrameAnalyticsResults.assertResultsTableNotEmpty();
-          await ml.dataFrameAnalyticsCanvasElement.assertCanvasElement(
+          await ml.commonUI.assertCanvasElement(
             'mlDFExpandableSection-splom',
             testData.expected.scatterplotMatrixColorStats
           );

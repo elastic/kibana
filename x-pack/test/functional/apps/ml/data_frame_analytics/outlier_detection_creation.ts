@@ -127,11 +127,8 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.dataFrameAnalyticsCreation.assertIncludeFieldsSelectionExists();
 
           await ml.testExecution.logTestStep('displays the scatterplot matrix');
-          await ml.dataFrameAnalyticsCanvasElement.assertCanvasElement(
-            'mlAnalyticsCreateJobWizardScatterplotMatrixPanel',
-            testData.expected.scatterplotMatrixColorStatsWizard,
-            ['#000000'],
-            5
+          await ml.dataFrameAnalyticsCreation.assertScatterplotMatrix(
+            testData.expected.scatterplotMatrixColorStatsWizard
           );
 
           await ml.testExecution.logTestStep('continues to the additional options step');
@@ -250,11 +247,8 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.dataFrameAnalyticsResults.assertOutlierTablePanelExists();
           await ml.dataFrameAnalyticsResults.assertResultsTableExists();
           await ml.dataFrameAnalyticsResults.assertResultsTableNotEmpty();
-          await ml.dataFrameAnalyticsCanvasElement.assertCanvasElement(
-            'mlDFExpandableSection-splom',
-            testData.expected.scatterplotMatrixColorStatsResults,
-            ['#000000'],
-            5
+          await ml.dataFrameAnalyticsResults.assertScatterplotMatrix(
+            testData.expected.scatterplotMatrixColorStatsResults
           );
         });
 
