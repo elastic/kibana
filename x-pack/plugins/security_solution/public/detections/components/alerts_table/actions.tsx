@@ -150,72 +150,78 @@ export const getThresholdAggregationDataProvider = (
   ecsData: Ecs | Ecs[],
   nonEcsData: TimelineNonEcsData[]
 ): DataProvider[] => {
-  const threshold = ecsData.signal?.rule?.threshold as string[];
+  const thresholdEcsData: Ecs[] = Array.isArray(ecsData) ? ecsData : [ecsData];
+  return thresholdEcsData.reduce<DataProvider[]>((outerAcc, thresholdData) => {
+    const threshold = thresholdData.signal?.rule?.threshold as string[];
 
-  let aggField: string[] = [];
-  let thresholdResult: {
-    terms?: Array<{
-      field?: string;
-      value: string;
-    }>;
-    count: number;
-  };
-
-  try {
-    thresholdResult = JSON.parse((ecsData.signal?.threshold_result as string[])[0]);
-    aggField = JSON.parse(threshold[0]).field;
-  } catch (err) {
-    thresholdResult = {
-      terms: [
-        {
-          field: (ecsData.rule?.threshold as { field: string }).field,
-          value: (ecsData.signal?.threshold_result as { value: string }).value,
-        },
-      ],
-      count: (ecsData.signal?.threshold_result as { count: number }).count,
-    };
-  }
-
-  const aggregationFields = Array.isArray(aggField) ? aggField : [aggField];
-
-  return aggregationFields.reduce<DataProvider[]>((acc, aggregationField, i) => {
-    const aggregationValue = (thresholdResult.terms ?? []).filter(
-      (term: { field?: string | undefined; value: string }) => term.field === aggregationField
-    )[0].value;
-    const dataProviderValue = Array.isArray(aggregationValue)
-      ? aggregationValue[0]
-      : aggregationValue;
-
-    if (!dataProviderValue) {
-      return acc;
-    }
-
-    const aggregationFieldId = aggregationField.replace('.', '-');
-    const dataProviderPartial = {
-      id: `send-alert-to-timeline-action-default-draggable-event-details-value-formatted-field-value-${TimelineId.active}-${aggregationFieldId}-${dataProviderValue}`,
-      name: aggregationField,
-      enabled: true,
-      excluded: false,
-      kqlQuery: '',
-      queryMatch: {
-        field: aggregationField,
-        value: dataProviderValue,
-        operator: ':' as QueryOperator,
-      },
+    let aggField: string[] = [];
+    let thresholdResult: {
+      terms?: Array<{
+        field?: string;
+        value: string;
+      }>;
+      count: number;
     };
 
-    if (i === 0) {
-      return [
-        ...acc,
-        {
-          ...dataProviderPartial,
-          and: [],
-        },
-      ];
-    } else {
-      acc[0].and.push(dataProviderPartial);
-      return acc;
+    try {
+      thresholdResult = JSON.parse((thresholdData.signal?.threshold_result as string[])[0]);
+      aggField = JSON.parse(threshold[0]).field;
+    } catch (err) {
+      thresholdResult = {
+        terms: [
+          {
+            field: (thresholdData.rule?.threshold as { field: string }).field,
+            value: (thresholdData.signal?.threshold_result as { value: string }).value,
+          },
+        ],
+        count: (thresholdData.signal?.threshold_result as { count: number }).count,
+      };
     }
+
+    const aggregationFields = Array.isArray(aggField) ? aggField : [aggField];
+
+    return [
+      ...outerAcc,
+      ...aggregationFields.reduce<DataProvider[]>((acc, aggregationField, i) => {
+        const aggregationValue = (thresholdResult.terms ?? []).filter(
+          (term: { field?: string | undefined; value: string }) => term.field === aggregationField
+        )[0].value;
+        const dataProviderValue = Array.isArray(aggregationValue)
+          ? aggregationValue[0]
+          : aggregationValue;
+
+        if (!dataProviderValue) {
+          return acc;
+        }
+
+        const aggregationFieldId = aggregationField.replace('.', '-');
+        const dataProviderPartial = {
+          id: `send-alert-to-timeline-action-default-draggable-event-details-value-formatted-field-value-${TimelineId.active}-${aggregationFieldId}-${dataProviderValue}`,
+          name: aggregationField,
+          enabled: true,
+          excluded: false,
+          kqlQuery: '',
+          queryMatch: {
+            field: aggregationField,
+            value: dataProviderValue,
+            operator: ':' as QueryOperator,
+          },
+        };
+
+        if (i === 0) {
+          return [
+            ...acc,
+            {
+              ...dataProviderPartial,
+              and: [],
+            },
+          ];
+        } else {
+          acc[0].and.push(dataProviderPartial);
+          return acc;
+        }
+      }, []),
+    ];
   }, []);
 };
 
