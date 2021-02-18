@@ -36,7 +36,7 @@ const FormFields = () => {
 
   return (
     <>
-      <UseField path="fistName" config={{ label: 'First name' }} component={TextField} />
+      <UseField path="firstName" config={{ label: 'First name' }} component={TextField} />
       <UseField path="lastName" config={{ label: 'Last name' }} component={TextField} />
       <EuiCode>{JSON.stringify(formData)}</EuiCode>
     </>
