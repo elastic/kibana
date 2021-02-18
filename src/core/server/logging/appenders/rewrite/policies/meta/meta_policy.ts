@@ -13,16 +13,11 @@ import { has, unset } from 'lodash';
 import { assertNever } from '@kbn/std';
 import { RewritePolicy } from '../policy';
 
-const META_PATH = 'meta';
-
 export interface MetaRewritePolicyConfig {
   type: 'meta';
 
   /**
-   * The 'mode' specifies what action to perform on the
-   * specified properties.
-   *
-   * @remarks
+   * The 'mode' specifies what action to perform on the specified properties.
    *   - 'add' creates a new property at the provided 'path', skipping properties which already exist.
    *   - 'update' updates an existing property at the provided 'path' without creating new properties.
    *   - 'remove' removes an existing property at the provided 'path'.
@@ -76,27 +71,27 @@ export class MetaRewritePolicy implements RewritePolicy {
 
   private add(record: LogRecord) {
     for (const { path, value } of this.config.properties) {
-      if (has(record, `${META_PATH}.${path}`)) {
+      if (has(record, `meta.${path}`)) {
         continue; // don't overwrite properties which already exist
       }
-      set(record, `${META_PATH}.${path}`, value);
+      set(record, `meta.${path}`, value);
     }
     return record;
   }
 
   private update(record: LogRecord) {
     for (const { path, value } of this.config.properties) {
-      if (!has(record, `${META_PATH}.${path}`)) {
+      if (!has(record, `meta.${path}`)) {
         continue; // don't add properties which don't already exist
       }
-      set(record, `${META_PATH}.${path}`, value);
+      set(record, `meta.${path}`, value);
     }
     return record;
   }
 
   private remove(record: LogRecord) {
     for (const { path } of this.config.properties) {
-      unset(record, `${META_PATH}.${path}`);
+      unset(record, `meta.${path}`);
     }
     return record;
   }

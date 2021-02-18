@@ -84,14 +84,14 @@ describe('MetaRewritePolicy', () => {
     });
 
     it('does not touch anything outside of LogMeta', () => {
-      const policy = createPolicy('add', [{ path: 'foo', value: 'bar' }]);
+      const policy = createPolicy('add', [{ path: 'message', value: 'bar' }]);
       const message = Symbol();
       expect(policy.rewrite(({ message } as unknown) as LogRecord).message).toBe(message);
       expect(policy.rewrite(({ message } as unknown) as LogRecord)).toMatchInlineSnapshot(`
         Object {
           "message": Symbol(),
           "meta": Object {
-            "foo": "bar",
+            "message": "bar",
           },
         }
       `);
@@ -211,12 +211,12 @@ describe('MetaRewritePolicy', () => {
     });
 
     it('does not touch anything outside of LogMeta', () => {
-      const policy = createPolicy('remove', [{ path: 'a' }]);
+      const policy = createPolicy('remove', [{ path: 'message' }]);
       const message = Symbol();
       expect(
-        policy.rewrite(({ message, meta: { a: 'foo' } } as unknown) as LogRecord).message
+        policy.rewrite(({ message, meta: { message: 'foo' } } as unknown) as LogRecord).message
       ).toBe(message);
-      expect(policy.rewrite(({ message, meta: { a: 'foo' } } as unknown) as LogRecord))
+      expect(policy.rewrite(({ message, meta: { message: 'foo' } } as unknown) as LogRecord))
         .toMatchInlineSnapshot(`
         Object {
           "message": Symbol(),

@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { schema } from '@kbn/config-schema';
 import { assertNever } from '@kbn/std';
 import { RewritePolicy } from './policy';
 import { MetaRewritePolicy, MetaRewritePolicyConfig, metaRewritePolicyConfigSchema } from './meta';
@@ -19,7 +18,7 @@ export { RewritePolicy };
  */
 export type RewritePolicyConfig = MetaRewritePolicyConfig;
 
-export const rewritePolicyConfigSchema = schema.oneOf([metaRewritePolicyConfigSchema]);
+export const rewritePolicyConfigSchema = metaRewritePolicyConfigSchema;
 
 export const createRewritePolicy = (config: RewritePolicyConfig): RewritePolicy => {
   switch (config.type) {

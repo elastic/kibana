@@ -35,7 +35,7 @@ const SENSITIVE_META_PATHS = [
   'http.request.headers.authorization',
   'http.request.headers.cookie',
   'http.response.headers.set-cookie',
-];
+] as const;
 
 /**
  * Replacement text to use when censoring SENSITIVE_META_PATHS.
@@ -173,7 +173,7 @@ export class LoggingConfig {
       'console',
       {
         type: 'rewrite',
-        appenders: ['stdout'],
+        appenders: ['rewrite-console'],
         policy: {
           type: 'meta',
           mode: 'update',
@@ -184,7 +184,7 @@ export class LoggingConfig {
     [
       // This is our actual console appender which the rewrite appender
       // sends its records to.
-      'stdout',
+      'rewrite-console',
       {
         type: 'console',
         layout: { type: 'pattern', highlight: true },

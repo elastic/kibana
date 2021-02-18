@@ -56,7 +56,7 @@ test('correctly fills in default config.', () => {
   });
   expect(configValue.appenders.get('console')).toEqual({
     type: 'rewrite',
-    appenders: ['stdout'],
+    appenders: ['rewrite-console'],
     policy: {
       type: 'meta',
       mode: 'update',
@@ -76,7 +76,7 @@ test('correctly fills in default config.', () => {
       ],
     },
   });
-  expect(configValue.appenders.get('stdout')).toEqual({
+  expect(configValue.appenders.get('rewrite-console')).toEqual({
     type: 'console',
     layout: { type: 'pattern', highlight: true },
   });
@@ -211,7 +211,7 @@ describe('extend', () => {
     expect([...mergedConfigValue.appenders.keys()]).toEqual([
       'default',
       'console',
-      'stdout',
+      'rewrite-console',
       'file1',
       'file2',
     ]);
