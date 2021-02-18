@@ -6,7 +6,8 @@
   "from": "now-9m",
   "index": [
     "winlogbeat-*",
-    "logs-endpoint.events.*"
+    "logs-endpoint.events.*",
+    "logs-windows.*"
   ],
   "language": "eql",
   "license": "Elastic License",
@@ -15,7 +16,7 @@
   "references": [
     "https://medium.com/tenable-techblog/uac-bypass-by-mocking-trusted-directories-24a96675f6e"
   ],
-  "risk_score": 71,
+  "risk_score": 73,
   "rule_id": "290aca65-e94d-403b-ba0f-62f320e63f51",
   "severity": "high",
   "tags": [
@@ -51,5 +52,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 2
+  "version": 3
 }
