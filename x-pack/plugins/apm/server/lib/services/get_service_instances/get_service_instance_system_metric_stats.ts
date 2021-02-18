@@ -6,7 +6,7 @@
  */
 
 import { AggregationOptionsByType } from '../../../../../../typings/elasticsearch';
-import { rangeFilter } from '../../../../common/utils/range_filter';
+import { environmentQuery, rangeQuery } from '../../../../common/utils/queries';
 import { SERVICE_NODE_NAME_MISSING } from '../../../../common/service_nodes';
 import {
   METRIC_CGROUP_MEMORY_USAGE_BYTES,
@@ -26,6 +26,7 @@ import {
 import { withApmSpan } from '../../../utils/with_apm_span';
 
 export async function getServiceInstanceSystemMetricStats({
+  environment,
   setup,
   serviceName,
   size,
@@ -95,8 +96,9 @@ export async function getServiceInstanceSystemMetricStats({
         query: {
           bool: {
             filter: [
-              { range: rangeFilter(start, end) },
               { term: { [SERVICE_NAME]: serviceName } },
+              ...rangeQuery(start, end),
+              ...environmentQuery(environment),
               ...esFilter,
             ],
             should: [cgroupMemoryFilter, systemMemoryFilter, cpuUsageFilter],

@@ -129,6 +129,10 @@ export const RISK_MAPPING_OVERRIDE_OPTION = '#risk_score-mapping-override';
 export const RISK_OVERRIDE =
   '[data-test-subj="detectionEngineStepAboutRuleRiskScore-riskOverride"]';
 
+export const RULES_CREATION_FORM = '[data-test-subj="stepDefineRule"]';
+
+export const RULES_CREATION_PREVIEW = '[data-test-subj="ruleCreationQueryPreview"]';
+
 export const RULE_DESCRIPTION_INPUT =
   '[data-test-subj="detectionEngineStepAboutRuleDescription"] [data-test-subj="input"]';
 

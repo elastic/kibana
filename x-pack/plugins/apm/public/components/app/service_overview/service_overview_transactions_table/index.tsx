@@ -58,7 +58,7 @@ export function ServiceOverviewTransactionsTable({ serviceName }: Props) {
   const { transactionType } = useApmServiceContext();
   const {
     uiFilters,
-    urlParams: { start, end, latencyAggregationType },
+    urlParams: { environment, start, end, latencyAggregationType },
   } = useUrlParams();
 
   const { data = INITIAL_STATE, status } = useFetcher(
@@ -72,6 +72,7 @@ export function ServiceOverviewTransactionsTable({ serviceName }: Props) {
         params: {
           path: { serviceName },
           query: {
+            environment,
             start,
             end,
             uiFilters: JSON.stringify(uiFilters),
@@ -87,6 +88,7 @@ export function ServiceOverviewTransactionsTable({ serviceName }: Props) {
       });
     },
     [
+      environment,
       serviceName,
       start,
       end,
@@ -125,6 +127,7 @@ export function ServiceOverviewTransactionsTable({ serviceName }: Props) {
           params: {
             path: { serviceName },
             query: {
+              environment,
               start,
               end,
               uiFilters: JSON.stringify(uiFilters),

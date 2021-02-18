@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { IScopedClusterClient } from 'kibana/server';
 import { schema } from '@kbn/config-schema';
 import { MAX_FILE_SIZE_BYTES } from '../../../file_upload/common';
 import { InputOverrides } from '../../common/types/file_datavisualizer';
@@ -13,10 +14,9 @@ import { InputData, fileDataVisualizerProvider } from '../models/file_data_visua
 
 import { RouteInitialization } from '../types';
 import { analyzeFileQuerySchema } from './schemas/file_data_visualizer_schema';
-import type { MlClient } from '../lib/ml_client';
 
-function analyzeFiles(mlClient: MlClient, data: InputData, overrides: InputOverrides) {
-  const { analyzeFile } = fileDataVisualizerProvider(mlClient);
+function analyzeFiles(client: IScopedClusterClient, data: InputData, overrides: InputOverrides) {
+  const { analyzeFile } = fileDataVisualizerProvider(client);
   return analyzeFile(data, overrides);
 }
 
@@ -48,9 +48,9 @@ export function fileDataVisualizerRoutes({ router, routeGuard }: RouteInitializa
         tags: ['access:ml:canFindFileStructure'],
       },
     },
-    routeGuard.basicLicenseAPIGuard(async ({ mlClient, request, response }) => {
+    routeGuard.basicLicenseAPIGuard(async ({ client, request, response }) => {
       try {
-        const result = await analyzeFiles(mlClient, request.body, request.query);
+        const result = await analyzeFiles(client, request.body, request.query);
         return response.ok({ body: result });
       } catch (e) {
         return response.customError(wrapError(e));
