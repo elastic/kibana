@@ -6,7 +6,7 @@
  */
 
 import { renderHook, act } from '@testing-library/react-hooks';
-import { initialData, useGetCase, UseGetCase } from './use_get_case';
+import { useGetCase, UseGetCase } from './use_get_case';
 import { basicCase } from './mock';
 import * as api from './api';
 
@@ -26,8 +26,8 @@ describe('useGetCase', () => {
       );
       await waitForNextUpdate();
       expect(result.current).toEqual({
-        data: initialData,
-        isLoading: true,
+        data: null,
+        isLoading: false,
         isError: false,
         fetchCase: result.current.fetchCase,
         updateCase: result.current.updateCase,
@@ -102,7 +102,7 @@ describe('useGetCase', () => {
       await waitForNextUpdate();
 
       expect(result.current).toEqual({
-        data: initialData,
+        data: null,
         isLoading: false,
         isError: true,
         fetchCase: result.current.fetchCase,

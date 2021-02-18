@@ -47,7 +47,9 @@ const CaseParamsFields: React.FunctionComponent<ActionParamsProps<CaseActionPara
       const newProps = { ...actionParams.subActionParams, [key]: value };
       editAction('subActionParams', newProps, index);
     },
-    [actionParams.subActionParams, editAction, index]
+    // edit action causes re-renders
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [actionParams.subActionParams, index]
   );
 
   const onCaseChanged = useCallback(
