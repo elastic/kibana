@@ -9,6 +9,8 @@ import React from 'react';
 import { EuiFlexGroup } from '@elastic/eui';
 import { PresentablePickerItem, Item } from './presentable_picker_item';
 
+export { Item } from './presentable_picker_item';
+
 export interface PresentablePickerProps {
   items: Item[];
   context: unknown;
@@ -48,7 +50,7 @@ export const PresentablePicker: React.FC<PresentablePickerProps> = ({
   return (
     <EuiFlexGroup gutterSize="m" responsive={false} wrap={true} style={firefoxBugFix}>
       {itemsSorted.map((item) => (
-        <PresentablePickerItem item={item} context={context} onSelect={onSelect} />
+        <PresentablePickerItem key={item.id} item={item} context={context} onSelect={onSelect} />
       ))}
     </EuiFlexGroup>
   );
