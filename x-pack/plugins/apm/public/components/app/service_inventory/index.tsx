@@ -39,19 +39,24 @@ function useServicesFetcher() {
   const { urlParams, uiFilters } = useUrlParams();
   const { core } = useApmPluginContext();
   const upgradeAssistantHref = useUpgradeAssistantHref();
-  const { start, end } = urlParams;
+  const { environment, start, end } = urlParams;
   const { data = initialData, status } = useFetcher(
     (callApmApi) => {
       if (start && end) {
         return callApmApi({
           endpoint: 'GET /api/apm/services',
           params: {
-            query: { start, end, uiFilters: JSON.stringify(uiFilters) },
+            query: {
+              environment,
+              start,
+              end,
+              uiFilters: JSON.stringify(uiFilters),
+            },
           },
         });
       }
     },
-    [start, end, uiFilters]
+    [environment, start, end, uiFilters]
   );
 
   useEffect(() => {
@@ -118,7 +123,7 @@ export function ServiceInventory() {
 
   return (
     <>
-      <SearchBar showTimeComparison />
+      <SearchBar />
       <EuiPage>
         <EuiFlexGroup direction="column" gutterSize="s">
           {displayMlCallout ? (

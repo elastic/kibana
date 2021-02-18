@@ -39,6 +39,8 @@ import { CaseServiceSetup, CaseUserActionServiceSetup } from '../../services';
 import { CommentableCase } from '../../common';
 import { CaseClientHandler } from '..';
 import { createCaseError } from '../../common/error';
+import { CASE_COMMENT_SAVED_OBJECT } from '../../saved_object_types';
+import { MAX_GENERATED_ALERTS_PER_SUB_CASE } from '../../../common/constants';
 
 async function getSubCase({
   caseService,
@@ -57,7 +59,20 @@ async function getSubCase({
 }): Promise<SavedObject<SubCaseAttributes>> {
   const mostRecentSubCase = await caseService.getMostRecentSubCase(savedObjectsClient, caseId);
   if (mostRecentSubCase && mostRecentSubCase.attributes.status !== CaseStatuses.closed) {
-    return mostRecentSubCase;
+    const subCaseAlertsAttachement = await caseService.getAllSubCaseComments({
+      client: savedObjectsClient,
+      id: mostRecentSubCase.id,
+      options: {
+        fields: [],
+        filter: `${CASE_COMMENT_SAVED_OBJECT}.attributes.type: ${CommentType.generatedAlert}`,
+        page: 1,
+        perPage: 1,
+      },
+    });
+
+    if (subCaseAlertsAttachement.total <= MAX_GENERATED_ALERTS_PER_SUB_CASE) {
+      return mostRecentSubCase;
+    }
   }
 
   const newSubCase = await caseService.createSubCase({
@@ -166,7 +181,11 @@ const addGeneratedAlerts = async ({
       await caseClient.updateAlertsStatus({
         ids,
         status: subCase.attributes.status,
-        indices: new Set([newComment.attributes.index]),
+        indices: new Set([
+          ...(Array.isArray(newComment.attributes.index)
+            ? newComment.attributes.index
+            : [newComment.attributes.index]),
+        ]),
       });
     }
 
@@ -316,7 +335,11 @@ export const addComment = async ({
       await caseClient.updateAlertsStatus({
         ids,
         status: updatedCase.status,
-        indices: new Set([newComment.attributes.index]),
+        indices: new Set([
+          ...(Array.isArray(newComment.attributes.index)
+            ? newComment.attributes.index
+            : [newComment.attributes.index]),
+        ]),
       });
     }
 

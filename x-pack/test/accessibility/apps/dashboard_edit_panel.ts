@@ -18,7 +18,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['security', 'common']);
   const toasts = getService('toasts');
 
-  describe('Dashboard Edit Panel', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/91592
+  describe.skip('Dashboard Edit Panel', () => {
     before(async () => {
       await esArchiver.load('dashboard/drilldowns');
       await esArchiver.loadIfNeeded('logstash_functional');

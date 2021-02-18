@@ -21,7 +21,7 @@ const DEFAULT_RESPONSE: Partial<TransactionsAPIResponse> = {
 export function useTransactionListFetcher() {
   const { urlParams, uiFilters } = useUrlParams();
   const { serviceName } = useParams<{ serviceName?: string }>();
-  const { transactionType, start, end } = urlParams;
+  const { environment, transactionType, start, end } = urlParams;
   const { data = DEFAULT_RESPONSE, error, status } = useFetcher(
     (callApmApi) => {
       if (serviceName && start && end && transactionType) {
@@ -30,6 +30,7 @@ export function useTransactionListFetcher() {
           params: {
             path: { serviceName },
             query: {
+              environment,
               start,
               end,
               transactionType,
@@ -39,7 +40,7 @@ export function useTransactionListFetcher() {
         });
       }
     },
-    [serviceName, start, end, transactionType, uiFilters]
+    [environment, serviceName, start, end, transactionType, uiFilters]
   );
 
   return {
