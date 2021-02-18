@@ -10,6 +10,7 @@ import './field_item.scss';
 import React, { useCallback, useState, useMemo } from 'react';
 import DateMath from '@elastic/datemath';
 import {
+  EuiButtonEmpty,
   EuiButtonGroup,
   EuiButtonIcon,
   EuiFlexGroup,
@@ -72,6 +73,7 @@ export interface FieldItemProps {
   itemIndex: number;
   groupIndex: number;
   dropOntoWorkspace: DatasourceDataPanelProps['dropOntoWorkspace'];
+  editField: (name: string) => void;
   hasSuggestionForField: DatasourceDataPanelProps['hasSuggestionForField'];
 }
 
@@ -314,6 +316,7 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
     chartsThemeService,
     data: { fieldFormats },
     dropOntoWorkspace,
+    editField,
     hasSuggestionForField,
     hideDetails,
   } = props;
@@ -391,6 +394,12 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
               'This field is empty because it doesn’t exist in the 500 sampled documents. Adding this field to the configuration may result in a blank chart.',
           })}
         </EuiText>
+
+        {field.runtime && (
+          <>
+            <EuiButtonEmpty onClick={() => editField(field.name)}>Edit</EuiButtonEmpty>
+          </>
+        )}
       </>
     );
   }
@@ -482,6 +491,12 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
           </EuiPopoverFooter>
         ) : (
           <></>
+        )}
+
+        {field.runtime && (
+          <>
+            <EuiButtonEmpty onClick={() => editField(field.name)}>Edit</EuiButtonEmpty>
+          </>
         )}
       </>
     );

@@ -7,7 +7,7 @@
 
 import './datapanel.scss';
 import { uniq, groupBy } from 'lodash';
-import React, { useState, memo, useCallback, useMemo } from 'react';
+import React, { useState, memo, useCallback, useMemo, useRef, useEffect } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -20,6 +20,7 @@ import {
   EuiFilterGroup,
   EuiFilterButton,
   EuiScreenReaderOnly,
+  EuiButton,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -34,10 +35,11 @@ import {
   IndexPatternRef,
 } from './types';
 import { trackUiEvent } from '../lens_ui_telemetry';
-import { syncExistingFields } from './loader';
+import { loadIndexPatterns, syncExistingFields } from './loader';
 import { fieldExists } from './pure_helpers';
 import { Loader } from '../loader';
 import { esQuery, IIndexPattern } from '../../../../../src/plugins/data/public';
+import { IndexPatternFieldEditorStart } from '../../../../../src/plugins/index_pattern_field_editor/public';
 
 export type Props = DatasourceDataPanelProps<IndexPatternPrivateState> & {
   data: DataPublicPluginStart;
@@ -47,6 +49,7 @@ export type Props = DatasourceDataPanelProps<IndexPatternPrivateState> & {
     setState: StateSetter<IndexPatternPrivateState>
   ) => void;
   charts: ChartsPluginSetup;
+  indexPatternFieldEditor: IndexPatternFieldEditorStart;
 };
 import { LensFieldIcon } from './lens_field_icon';
 import { ChangeIndexPattern } from './change_indexpattern';
@@ -109,6 +112,7 @@ export function IndexPatternDataPanel({
   dateRange,
   changeIndexPattern,
   charts,
+  indexPatternFieldEditor,
   showNoDataPopover,
   dropOntoWorkspace,
   hasSuggestionForField,
@@ -117,6 +121,19 @@ export function IndexPatternDataPanel({
   const onChangeIndexPattern = useCallback(
     (id: string) => changeIndexPattern(id, state, setState),
     [state, setState, changeIndexPattern]
+  );
+
+  const onUpdateIndexPattern = useCallback(
+    (indexPattern: IndexPattern) => {
+      setState((prevState) => ({
+        ...prevState,
+        indexPatterns: {
+          ...prevState.indexPatterns,
+          [indexPattern.id]: indexPattern
+        }
+      }))
+    },
+    [setState, changeIndexPattern]
   );
 
   const indexPatternList = uniq(
@@ -202,7 +219,9 @@ export function IndexPatternDataPanel({
           core={core}
           data={data}
           charts={charts}
+          indexPatternFieldEditor={indexPatternFieldEditor}
           onChangeIndexPattern={onChangeIndexPattern}
+          onUpdateIndexPattern={onUpdateIndexPattern}
           existingFields={state.existingFields}
           existenceFetchFailed={state.existenceFetchFailed}
           dropOntoWorkspace={dropOntoWorkspace}
@@ -251,8 +270,10 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
   filters,
   dragDropContext,
   onChangeIndexPattern,
+  onUpdateIndexPattern,
   core,
   data,
+  indexPatternFieldEditor,
   existingFields,
   charts,
   dropOntoWorkspace,
@@ -264,8 +285,10 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
   indexPatterns: Record<string, IndexPattern>;
   dragDropContext: DragContextState;
   onChangeIndexPattern: (newId: string) => void;
+  onUpdateIndexPattern: (indexPattern: IndexPattern) => void;
   existingFields: IndexPatternPrivateState['existingFields'];
   charts: ChartsPluginSetup;
+  indexPatternFieldEditor: IndexPatternFieldEditorStart;
   existenceFetchFailed?: boolean;
 }) {
   const [localState, setLocalState] = useState<DataPanelState>({
@@ -453,6 +476,34 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
     [nameFilter, typeFilter]
   );
 
+  const closeFieldEditor = useRef<() => void | undefined>();
+
+  useEffect(() => {
+    return () => {
+      // Make sure to close the editor when unmounting
+      if (closeFieldEditor.current) {
+        closeFieldEditor.current();
+      }
+    };
+  }, []);
+
+  const editField = useCallback(async (fieldName?: string) => {
+    const indexPatternInstance = await data.indexPatterns.get(currentIndexPattern.id);
+    closeFieldEditor.current = indexPatternFieldEditor.openEditor({
+      // the only required option is the context in which the editor is being used
+      ctx: {
+        indexPattern: indexPatternInstance,
+      },
+      fieldName,
+      onSave: async () => {
+        const newlyMappedIndexPattern = await loadIndexPatterns({ indexPatternsService: data.indexPatterns, cache: {}, patterns: [currentIndexPattern.id]});
+        onUpdateIndexPattern(newlyMappedIndexPattern[currentIndexPattern.id]);
+      },
+    });
+  }, [data, indexPatternFieldEditor, onUpdateIndexPattern]);
+
+  const addField = useCallback(() => editField(), [editField]);
+
   const fieldProps = useMemo(
     () => ({
       core,
@@ -623,7 +674,15 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
             existFieldsInIndex={!!allFields.length}
             dropOntoWorkspace={dropOntoWorkspace}
             hasSuggestionForField={hasSuggestionForField}
+            editField={editField}
           />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButton onClick={addField}>
+            {i18n.translate('xpack.lens.indexPatterns.addFieldButton', {
+              defaultMessage: 'Add field',
+            })}
+          </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>
     </ChildDragDropProvider>
