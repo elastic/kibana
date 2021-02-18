@@ -75,17 +75,29 @@ export function alertsInstanceSummaryFromEventLog(
         );
         status.activeStartDate = instanceCreated?.instance_created?.max_timestamp?.value_as_string;
 
-        const actionActivityResult = instance.last_state?.action?.hits?.hits;
-        if (actionActivityResult && actionActivityResult.length > 0) {
-          const actionData = actionActivityResult[0]._source;
-          if (
-            actionData.event.action === EVENT_LOG_ACTIONS.activeInstance ||
-            actionData.event.action === EVENT_LOG_ACTIONS.newInstance
-          ) {
-            status.status = 'Active';
-            status.actionGroupId = actionData.kibana?.alerting?.action_group_id;
-            status.actionSubgroup = actionData.kibana?.alerting?.action_subgroup;
-          }
+        const lastActiveTimestamp = new Date(
+          instance.last_active_state?.max_timestamp?.value_as_string
+        );
+        const lastNewTimestamp = new Date(instance.last_new_state?.max_timestamp?.value_as_string);
+        const lastRecoveredTimestamp = new Date(
+          instance.last_recovered_state?.max_timestamp?.value_as_string
+        );
+
+        console.log(instance);
+
+        if (
+          lastActiveTimestamp > lastRecoveredTimestamp ||
+          lastNewTimestamp > lastRecoveredTimestamp
+        ) {
+          status.status = 'Active';
+          status.actionGroupId =
+            instance.last_action_group_id?.top?.length > 0
+              ? instance.last_action_group_id?.top[0].metrics['kibana.alerting.action_group_id']
+              : undefined;
+          status.actionSubgroup =
+            instance.last_action_group_id?.top?.length > 0
+              ? instance.last_action_subgroup.top[0].metrics['kibana.alerting.action_subgroup']
+              : undefined;
         }
       }
     }
@@ -202,19 +214,8 @@ export const alertActiveAndResolvedInstancesSummaryQueryAggregation = {
     },
   },
   errors_state: {
-    filter: {
-      bool: {
-        must: [{ term: { 'event.action': 'execute' } }, { exists: { field: 'error.message' } }],
-      },
-    },
-    aggs: {
-      action: {
-        top_metrics: {
-          metrics: { field: 'error.message' },
-          sort: { '@timestamp': 'desc' },
-          size: 1,
-        },
-      },
+    terms: {
+      field: 'error',
     },
   },
   last_execution_state: {
@@ -232,7 +233,6 @@ export const alertInstanceCreatedQueryAggregation = {
     // reason: '[composite] aggregation cannot be used with a parent aggregation of type: [ReverseNestedAggregatorFactory]'
     terms: {
       field: 'kibana.alerting.instance_id',
-      order: { _key: 'asc' },
       size: MAX_BUCKETS_LIMIT,
     },
     aggs: {
