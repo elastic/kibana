@@ -47,7 +47,7 @@ export function buildEuiGridColumn(
   const column: EuiDataGridColumn = {
     id: columnName,
     schema: getSchemaByKbnType(indexPatternField?.type),
-    isSortable: indexPatternField?.sortable,
+    isSortable: indexPatternField?.sortable === true,
     display:
       columnName === '_source'
         ? i18n.translate('discover.grid.documentHeader', {

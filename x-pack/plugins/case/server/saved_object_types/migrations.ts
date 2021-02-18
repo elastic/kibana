@@ -173,8 +173,9 @@ interface SanitizedComment {
   type: CommentType;
 }
 
-interface SanitizedCommentAssociationType {
+interface SanitizedCommentFoSubCases {
   associationType: AssociationType;
+  rule: { id: string | null; name: string | null };
 }
 
 export const commentsMigrations = {
@@ -192,11 +193,12 @@ export const commentsMigrations = {
   },
   '7.12.0': (
     doc: SavedObjectUnsanitizedDoc<UnsanitizedComment>
-  ): SavedObjectSanitizedDoc<SanitizedCommentAssociationType> => {
+  ): SavedObjectSanitizedDoc<SanitizedCommentFoSubCases> => {
     return {
       ...doc,
       attributes: {
         ...doc.attributes,
+        rule: { id: null, name: null },
         associationType: AssociationType.case,
       },
       references: doc.references || [],

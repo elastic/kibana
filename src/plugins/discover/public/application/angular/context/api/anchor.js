@@ -32,7 +32,7 @@ export function fetchAnchorProvider(indexPatterns, searchSource, useNewFieldsApi
       .setField('sort', sort);
     if (useNewFieldsApi) {
       searchSource.removeField('fieldsFromSource');
-      searchSource.setField('fields', ['*']);
+      searchSource.setField('fields', [{ field: '*', include_unmapped: 'true' }]);
     }
     const response = await searchSource.fetch();
 
