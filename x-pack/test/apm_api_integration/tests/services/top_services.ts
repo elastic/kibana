@@ -346,8 +346,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         let response: PromiseReturnType<typeof supertest.get>;
         before(async () => {
           response = await supertest.get(
-            `/api/apm/services?start=${start}&end=${end}&uiFilters=${encodeURIComponent(
-              `{"kuery":"service.name:opbeans-java","environment":"ENVIRONMENT_ALL"}`
+            `/api/apm/services?environment=ENVIRONMENT_ALL&start=${start}&end=${end}&uiFilters=${encodeURIComponent(
+              `{"kuery":"service.name:opbeans-java"}`
             )}`
           );
         });

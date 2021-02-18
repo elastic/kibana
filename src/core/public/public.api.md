@@ -523,6 +523,8 @@ export interface DocLinksStart {
             readonly base: string;
         };
         readonly aggs: {
+            readonly composite: string;
+            readonly composite_missing_bucket: string;
             readonly date_histogram: string;
             readonly date_range: string;
             readonly date_format_pattern: string;
@@ -1385,7 +1387,7 @@ export interface SavedObjectsMigrationVersion {
 }
 
 // @public
-export type SavedObjectsNamespaceType = 'single' | 'multiple' | 'agnostic';
+export type SavedObjectsNamespaceType = 'single' | 'multiple' | 'multiple-isolated' | 'agnostic';
 
 // @public (undocumented)
 export interface SavedObjectsStart {

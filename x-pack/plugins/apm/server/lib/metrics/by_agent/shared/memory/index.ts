@@ -71,10 +71,12 @@ export const percentCgroupMemoryUsedScript = {
 };
 
 export async function getMemoryChartData({
+  environment,
   setup,
   serviceName,
   serviceNodeName,
 }: {
+  environment?: string;
   setup: Setup & SetupTimeRange;
   serviceName: string;
   serviceNodeName?: string;
@@ -84,6 +86,7 @@ export async function getMemoryChartData({
       'get_cgroup_memory_metrics_charts',
       () =>
         fetchAndTransformMetrics({
+          environment,
           setup,
           serviceName,
           serviceNodeName,
@@ -101,6 +104,7 @@ export async function getMemoryChartData({
     if (cgroupResponse.noHits) {
       return await withApmSpan('get_system_memory_metrics_charts', () =>
         fetchAndTransformMetrics({
+          environment,
           setup,
           serviceName,
           serviceNodeName,
