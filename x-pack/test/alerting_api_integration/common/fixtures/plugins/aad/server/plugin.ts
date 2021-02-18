@@ -42,23 +42,19 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
         req: KibanaRequest<any, any, any, any>,
         res: KibanaResponseFactory
       ): Promise<IKibanaResponse<any>> {
-        try {
-          let namespace: string | undefined;
-          if (spaces && req.body.spaceId) {
-            namespace = spaces.spacesService.spaceIdToNamespace(req.body.spaceId);
-          }
-          const [, { encryptedSavedObjects }] = await core.getStartServices();
-          await encryptedSavedObjects
-            .getClient({
-              includedHiddenTypes: ['alert', 'action'],
-            })
-            .getDecryptedAsInternalUser(req.body.type, req.body.id, {
-              namespace,
-            });
-          return res.ok({ body: { success: true } });
-        } catch (err) {
-          return res.internalError({ body: err });
+        let namespace: string | undefined;
+        if (spaces && req.body.spaceId) {
+          namespace = spaces.spacesService.spaceIdToNamespace(req.body.spaceId);
         }
+        const [, { encryptedSavedObjects }] = await core.getStartServices();
+        await encryptedSavedObjects
+          .getClient({
+            includedHiddenTypes: ['alert', 'action'],
+          })
+          .getDecryptedAsInternalUser(req.body.type, req.body.id, {
+            namespace,
+          });
+        return res.ok({ body: { success: true } });
       }
     );
   }
