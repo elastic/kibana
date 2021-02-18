@@ -9,6 +9,7 @@
 // TODO: Disabling complexity is temporary till this component is refactored as part of lists UI integration
 
 import {
+  EuiButtonIcon,
   EuiLoadingSpinner,
   EuiFlexGroup,
   EuiFlexItem,
@@ -24,6 +25,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useParams, useHistory } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
+import deepEqual from 'fast-deep-equal';
 
 import {
   useDeepEqualSelector,
@@ -41,7 +43,7 @@ import {
 } from '../../../../../common/components/link_to/redirect_to_detection_engine';
 import { SiemSearchBar } from '../../../../../common/components/search_bar';
 import { WrapperPage } from '../../../../../common/components/wrapper_page';
-import { Rule } from '../../../../containers/detection_engine/rules';
+import { Rule, useRuleStatus, RuleInfoStatus } from '../../../../containers/detection_engine/rules';
 import { useListsConfig } from '../../../../containers/detection_engine/lists/use_lists_config';
 import { SpyRoute } from '../../../../../common/utils/route/spy_routes';
 import { StepAboutRuleToggleDetails } from '../../../../components/rules/step_about_rule_details';
@@ -101,6 +103,7 @@ import {
 
 import * as detectionI18n from '../../translations';
 import * as ruleI18n from '../translations';
+import * as statusI18n from '../../../../components/rules/rule_status/translations';
 import * as i18n from './translations';
 import { isTab } from '../../../../../common/components/accessibility/helpers';
 import { NeedAdminForUpdateRulesCallOut } from '../../../../components/callouts/need_admin_for_update_callout';
@@ -179,6 +182,15 @@ const RuleDetailsPageComponent = () => {
   const loading = userInfoLoading || listsConfigLoading;
   const { detailName: ruleId } = useParams<{ detailName: string }>();
   const { rule: maybeRule, refresh: refreshRule, loading: ruleLoading } = useRuleAsync(ruleId);
+  const [loadingStatus, ruleStatus, fetchRuleStatus] = useRuleStatus(ruleId);
+  const [currentStatus, setCurrentStatus] = useState<RuleInfoStatus | null>(
+    ruleStatus?.current_status ?? null
+  );
+  useEffect(() => {
+    if (!deepEqual(currentStatus, ruleStatus?.current_status)) {
+      setCurrentStatus(ruleStatus?.current_status ?? null);
+    }
+  }, [currentStatus, ruleStatus, setCurrentStatus]);
   const [rule, setRule] = useState<Rule | null>(null);
   const isLoading = ruleLoading && rule == null;
   // This is used to re-trigger api rule status when user de/activate rule
@@ -302,33 +314,65 @@ const RuleDetailsPageComponent = () => {
     ),
     [ruleDetailTabs, ruleDetailTab, setRuleDetailTab]
   );
+
+  const handleRefresh = useCallback(() => {
+    if (fetchRuleStatus != null && ruleId != null) {
+      fetchRuleStatus(ruleId);
+    }
+  }, [fetchRuleStatus, ruleId]);
+
+  const ruleStatusInfo = useMemo(() => {
+    return loadingStatus ? (
+      <EuiFlexItem>
+        <EuiLoadingSpinner size="m" data-test-subj="rule-status-loader" />
+      </EuiFlexItem>
+    ) : (
+      <>
+        <RuleStatus status={currentStatus?.status} statusDate={currentStatus?.status_date}>
+          <EuiButtonIcon
+            data-test-subj="refreshButton"
+            color="primary"
+            onClick={handleRefresh}
+            iconType="refresh"
+            aria-label={ruleI18n.REFRESH}
+          />
+        </RuleStatus>
+      </>
+    );
+  }, [currentStatus, loadingStatus, handleRefresh]);
   const ruleError = useMemo(() => {
-    if (
-      rule?.status === 'failed' &&
+    if (loadingStatus) {
+      return (
+        <EuiFlexItem>
+          <EuiLoadingSpinner size="m" data-test-subj="rule-status-loader" />
+        </EuiFlexItem>
+      );
+    } else if (
+      currentStatus?.status === 'failed' &&
       ruleDetailTab === RuleDetailTabs.alerts &&
-      rule?.last_failure_at != null
+      currentStatus?.last_failure_at != null
     ) {
       return (
         <RuleStatusFailedCallOut
-          message={rule?.last_failure_message ?? ''}
-          date={rule?.last_failure_at}
+          message={currentStatus?.last_failure_message ?? ''}
+          date={currentStatus?.last_failure_at}
         />
       );
     } else if (
-      (rule?.status === 'warning' || rule?.status === 'partial failure') &&
+      (currentStatus?.status === 'warning' || currentStatus?.status === 'partial failure') &&
       ruleDetailTab === RuleDetailTabs.alerts &&
-      rule?.last_success_at != null
+      currentStatus?.last_success_at != null
     ) {
       return (
         <RuleStatusFailedCallOut
-          message={rule?.last_success_message ?? ''}
-          date={rule?.last_success_at}
+          message={currentStatus?.last_success_message ?? ''}
+          date={currentStatus?.last_success_at}
           color="warning"
         />
       );
     }
     return null;
-  }, [rule, ruleDetailTab]);
+  }, [ruleDetailTab, currentStatus, loadingStatus]);
 
   const updateDateRangeCallback = useCallback<UpdateDateRange>(
     ({ x }) => {
@@ -500,7 +544,15 @@ const RuleDetailsPageComponent = () => {
                         </>,
                       ]
                     : []),
-                  <RuleStatus ruleId={ruleId ?? null} ruleEnabled={ruleEnabled} />,
+                  <>
+                    <EuiFlexGroup gutterSize="xs" alignItems="center" justifyContent="flexStart">
+                      <EuiFlexItem grow={false}>
+                        {statusI18n.STATUS}
+                        {':'}
+                      </EuiFlexItem>
+                      {ruleStatusInfo}
+                    </EuiFlexGroup>
+                  </>,
                 ]}
                 title={title}
               >

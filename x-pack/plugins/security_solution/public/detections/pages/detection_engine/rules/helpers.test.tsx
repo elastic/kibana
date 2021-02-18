@@ -84,6 +84,8 @@ describe('rule helpers', () => {
         threshold: {
           field: ['host.name'],
           value: '50',
+          cardinality_field: ['process.name'],
+          cardinality_value: '2',
         },
         threatIndex: [],
         threatMapping: [],
@@ -116,7 +118,6 @@ describe('rule helpers', () => {
         severity: { value: 'low', mapping: fillEmptySeverityMappings([]), isMappingChecked: false },
         tags: ['tag1', 'tag2'],
         threat: getThreatMock(),
-        threatIndicatorPath: '',
         timestampOverride: 'event.ingested',
       };
       const scheduleRuleStepData = { from: '0s', interval: '5m' };
@@ -214,6 +215,8 @@ describe('rule helpers', () => {
         threshold: {
           field: [],
           value: '100',
+          cardinality_field: [],
+          cardinality_value: '0',
         },
         threatIndex: [],
         threatMapping: [],
@@ -256,6 +259,8 @@ describe('rule helpers', () => {
         threshold: {
           field: [],
           value: '100',
+          cardinality_field: [],
+          cardinality_value: '0',
         },
         threatIndex: [],
         threatMapping: [],

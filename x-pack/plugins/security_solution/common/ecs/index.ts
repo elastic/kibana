@@ -28,6 +28,7 @@ import { UserEcs } from './user';
 import { WinlogEcs } from './winlog';
 import { ProcessEcs } from './process';
 import { SystemEcs } from './system';
+import { Ransomware } from './ransomware';
 
 export interface Ecs {
   _id: string;
@@ -59,4 +60,5 @@ export interface Ecs {
   system?: SystemEcs;
   // This should be temporary
   eql?: { parentId: string; sequenceNumber: string };
+  Ransomware?: Ransomware;
 }

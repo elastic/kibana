@@ -24,6 +24,7 @@ export const TIMELINE_EVENTS_FIELDS = [
   'signal.rule.version',
   'signal.rule.severity',
   'signal.rule.risk_score',
+  'signal.threshold_result',
   'event.code',
   'event.module',
   'event.action',
