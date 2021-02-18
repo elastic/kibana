@@ -24,7 +24,7 @@ export function useServiceMetricChartsFetcher({
   const { urlParams, uiFilters } = useUrlParams();
   const { agentName } = useApmServiceContext();
   const { serviceName } = useParams<{ serviceName?: string }>();
-  const { start, end } = urlParams;
+  const { environment, start, end } = urlParams;
   const { data = INITIAL_DATA, error, status } = useFetcher(
     (callApmApi) => {
       if (serviceName && start && end && agentName) {
@@ -33,6 +33,7 @@ export function useServiceMetricChartsFetcher({
           params: {
             path: { serviceName },
             query: {
+              environment,
               serviceNodeName,
               start,
               end,
@@ -43,7 +44,15 @@ export function useServiceMetricChartsFetcher({
         });
       }
     },
-    [serviceName, start, end, agentName, serviceNodeName, uiFilters]
+    [
+      environment,
+      serviceName,
+      start,
+      end,
+      agentName,
+      serviceNodeName,
+      uiFilters,
+    ]
   );
 
   return {

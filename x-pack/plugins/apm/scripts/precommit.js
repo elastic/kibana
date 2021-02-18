@@ -11,10 +11,24 @@
 const execa = require('execa');
 const Listr = require('listr');
 const { resolve } = require('path');
+const { argv } = require('yargs');
 
-const cwd = resolve(__dirname, '../../../..');
+const root = resolve(__dirname, '../../../..');
 
-const execaOpts = { cwd, stderr: 'inherit' };
+const execaOpts = { cwd: root, stderr: 'pipe' };
+
+const useOptimizedTsConfig = !!argv.optimizeTs;
+
+const tsconfig = useOptimizedTsConfig
+  ? resolve(root, 'x-pack/tsconfig.json')
+  : resolve(root, 'x-pack/plugins/apm/tsconfig.json');
+
+console.log(
+  resolve(
+    __dirname,
+    useOptimizedTsConfig ? './optimize-tsonfig.js' : './unoptimize-tsconfig.js'
+  )
+);
 
 const tasks = new Listr(
   [
@@ -37,9 +51,27 @@ const tasks = new Listr(
       title: 'Typescript',
       task: () =>
         execa(
-          require.resolve('typescript/bin/tsc'),
-          ['--project', resolve(__dirname, '../tsconfig.json'), '--pretty'],
+          'node',
+          [
+            resolve(
+              __dirname,
+              useOptimizedTsConfig
+                ? './optimize-tsconfig.js'
+                : './unoptimize-tsconfig.js'
+            ),
+          ],
           execaOpts
+        ).then(() =>
+          execa(
+            require.resolve('typescript/bin/tsc'),
+            [
+              '--project',
+              tsconfig,
+              '--pretty',
+              ...(useOptimizedTsConfig ? ['--noEmit'] : []),
+            ],
+            execaOpts
+          )
         ),
     },
     {
@@ -47,7 +79,7 @@ const tasks = new Listr(
       task: () => execa('node', [resolve(__dirname, 'eslint.js')], execaOpts),
     },
   ],
-  { exitOnError: false, concurrent: true }
+  { exitOnError: true, concurrent: true }
 );
 
 tasks.run().catch((error) => {

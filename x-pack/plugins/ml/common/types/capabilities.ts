@@ -57,6 +57,8 @@ export const adminMlCapabilities = {
   canCreateDataFrameAnalytics: false,
   canDeleteDataFrameAnalytics: false,
   canStartStopDataFrameAnalytics: false,
+  // Alerts
+  canCreateMlAlerts: false,
 };
 
 export type UserMlCapabilities = typeof userMlCapabilities;

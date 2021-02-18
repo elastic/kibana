@@ -50,16 +50,19 @@ const chartBase: ChartBase = {
 };
 
 export async function getNonHeapMemoryChart({
+  environment,
   setup,
   serviceName,
   serviceNodeName,
 }: {
+  environment?: string;
   setup: Setup & SetupTimeRange;
   serviceName: string;
   serviceNodeName?: string;
 }) {
   return withApmSpan('get_non_heap_memory_charts', () =>
     fetchAndTransformMetrics({
+      environment,
       setup,
       serviceName,
       serviceNodeName,
