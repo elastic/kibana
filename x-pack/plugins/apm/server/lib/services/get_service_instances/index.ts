@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
 import { joinByKey } from '../../../../common/utils/join_by_key';
 import { withApmSpan } from '../../../utils/with_apm_span';
 import { Setup, SetupTimeRange } from '../../helpers/setup_request';
@@ -12,6 +13,8 @@ import { getServiceInstanceSystemMetricStats } from './get_service_instance_syst
 import { getServiceInstanceTransactionStats } from './get_service_instance_transaction_stats';
 
 export interface ServiceInstanceParams {
+  environment?: string;
+  latencyAggregationType: LatencyAggregationType;
   setup: Setup & SetupTimeRange;
   serviceName: string;
   transactionType: string;

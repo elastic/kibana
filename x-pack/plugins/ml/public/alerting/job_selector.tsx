@@ -19,7 +19,7 @@ interface JobSelection {
 
 export interface JobSelectorControlProps {
   jobSelection?: JobSelection;
-  onSelectionChange: (jobSelection: JobSelection) => void;
+  onChange: (jobSelection: JobSelection) => void;
   adJobsApiService: MlApiServices['jobs'];
   /**
    * Validation is handled by alerting framework
@@ -29,7 +29,7 @@ export interface JobSelectorControlProps {
 
 export const JobSelectorControl: FC<JobSelectorControlProps> = ({
   jobSelection,
-  onSelectionChange,
+  onChange,
   adJobsApiService,
   errors,
 }) => {
@@ -70,7 +70,7 @@ export const JobSelectorControl: FC<JobSelectorControlProps> = ({
     }
   }, [adJobsApiService]);
 
-  const onChange: EuiComboBoxProps<string>['onChange'] = useCallback(
+  const onSelectionChange: EuiComboBoxProps<string>['onChange'] = useCallback(
     (selectedOptions) => {
       const selectedJobIds: JobId[] = [];
       const selectedGroupIds: string[] = [];
@@ -81,7 +81,7 @@ export const JobSelectorControl: FC<JobSelectorControlProps> = ({
           selectedGroupIds.push(label);
         }
       });
-      onSelectionChange({
+      onChange({
         ...(selectedJobIds.length > 0 ? { jobIds: selectedJobIds } : {}),
         ...(selectedGroupIds.length > 0 ? { groupIds: selectedGroupIds } : {}),
       });
@@ -114,7 +114,7 @@ export const JobSelectorControl: FC<JobSelectorControlProps> = ({
       <EuiComboBox<string>
         selectedOptions={selectedOptions}
         options={options}
-        onChange={onChange}
+        onChange={onSelectionChange}
         fullWidth
         data-test-subj={'mlAnomalyAlertJobSelection'}
         isInvalid={!!errors?.length}

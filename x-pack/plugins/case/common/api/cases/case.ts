@@ -123,6 +123,7 @@ export const CaseResponseRt = rt.intersection([
     version: rt.string,
   }),
   rt.partial({
+    subCaseIds: rt.array(rt.string),
     subCases: rt.array(SubCaseResponseRt),
     comments: rt.array(CommentResponseRt),
   }),

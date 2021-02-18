@@ -33,6 +33,19 @@ import { RangePopover } from './advanced_editor';
 import { DragDropBuckets } from '../shared_components';
 import { getFieldByNameFactory } from '../../../pure_helpers';
 
+// mocking random id generator function
+jest.mock('@elastic/eui', () => {
+  const original = jest.requireActual('@elastic/eui');
+
+  return {
+    ...original,
+    htmlIdGenerator: (fn: unknown) => {
+      let counter = 0;
+      return () => counter++;
+    },
+  };
+});
+
 const dataPluginMockValue = dataPluginMock.createStartContract();
 // need to overwrite the formatter field first
 dataPluginMockValue.fieldFormats.deserialize = jest.fn().mockImplementation(({ params }) => {

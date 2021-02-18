@@ -77,6 +77,7 @@ describe('Task Runner Factory', () => {
     eventLogger: eventLoggerMock.create(),
     internalSavedObjectsRepository: savedObjectsRepositoryMock.create(),
     alertTypeRegistry: alertTypeRegistryMock.create(),
+    kibanaBaseUrl: 'https://localhost:5601',
   };
 
   beforeEach(() => {
