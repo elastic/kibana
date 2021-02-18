@@ -24,7 +24,6 @@ import {
   FetchRulesResponse,
   Rule,
   FetchRuleProps,
-  BasicFetchProps,
   ImportDataProps,
   ExportDocumentsProps,
   RuleStatusResponse,
@@ -246,18 +245,24 @@ export const duplicateRules = async ({ rules }: DuplicateRulesProps): Promise<Bu
 /**
  * Create Prepackaged Rules
  *
+ * @param pkgVersion Optional version of the rules package to install
  * @param signal AbortSignal for cancelling request
  *
  * @throws An error if response is not OK
  */
 export const createPrepackagedRules = async ({
+  pkgVersion,
   signal,
-}: BasicFetchProps): Promise<{
+}: {
+  pkgVersion: string | undefined | null;
+  signal: AbortSignal;
+}): Promise<{
   rules_installed: number;
   rules_updated: number;
   timelines_installed: number;
   timelines_updated: number;
 }> => {
+  const body = pkgVersion ? { rules_package_version: pkgVersion } : {};
   const result = await KibanaServices.get().http.fetch<{
     rules_installed: number;
     rules_updated: number;
@@ -265,6 +270,7 @@ export const createPrepackagedRules = async ({
     timelines_updated: number;
   }>(DETECTION_ENGINE_PREPACKAGED_URL, {
     method: 'PUT',
+    body: JSON.stringify(body),
     signal,
   });
 

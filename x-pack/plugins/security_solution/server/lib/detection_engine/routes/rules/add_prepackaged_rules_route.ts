@@ -12,6 +12,11 @@ import type {
 } from '../../../../types';
 
 import { validate } from '../../../../../common/validate';
+import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
+import {
+  installPrepackagedRulesSchema,
+  InstallPrepackagedRulesSchema,
+} from '../../../../../common/detection_engine/schemas/request/rule_schemas';
 import {
   PrePackagedRulesAndTimelinesSchema,
   prePackagedRulesAndTimelinesSchema,
@@ -25,7 +30,7 @@ import { buildFrameworkRequest } from '../../../timeline/routes/utils/common';
 import { installPrepackagedTimelines } from '../../../timeline/routes/utils/install_prepacked_timelines';
 
 import { getIndexExists } from '../../index/get_index_exists';
-import { getPrepackagedRules } from '../../rules/get_prepackaged_rules';
+import { getRegistryOrFileSystemRules } from '../../rules/get_prepackaged_rules';
 import { installPrepackagedRules } from '../../rules/install_prepacked_rules';
 import { updatePrepackagedRules } from '../../rules/update_prepacked_rules';
 import { getRulesToInstall } from '../../rules/get_rules_to_install';
@@ -46,14 +51,19 @@ export const addPrepackedRulesRoute = (
   router.put(
     {
       path: DETECTION_ENGINE_PREPACKAGED_URL,
-      validate: false,
+      validate: {
+        body: buildRouteValidation<
+          typeof installPrepackagedRulesSchema,
+          InstallPrepackagedRulesSchema
+        >(installPrepackagedRulesSchema),
+      },
       options: {
         tags: ['access:securitySolution'],
       },
     },
-    async (context, _, response) => {
+    async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
-      const frameworkRequest = await buildFrameworkRequest(context, security, _);
+      const frameworkRequest = await buildFrameworkRequest(context, security, request);
 
       try {
         const alertsClient = context.alerting?.getAlertsClient();
@@ -68,7 +78,9 @@ export const addPrepackedRulesRoute = (
           siemClient,
           alertsClient,
           frameworkRequest,
-          config.maxTimelineImportExportSize
+          config.maxTimelineImportExportSize,
+          undefined,
+          request.body.rules_package_version
         );
         return response.ok({ body: validated ?? {} });
       } catch (err) {
@@ -96,7 +108,8 @@ export const createPrepackagedRules = async (
   alertsClient: AlertsClient,
   frameworkRequest: FrameworkRequest,
   maxTimelineImportExportSize: number,
-  exceptionsClient?: ExceptionListClient
+  exceptionsClient?: ExceptionListClient,
+  rulesPackageVersion?: string
 ): Promise<PrePackagedRulesAndTimelinesSchema | null> => {
   const clusterClient = context.core.elasticsearch.legacy.client;
   const savedObjectsClient = context.core.savedObjects.client;
@@ -112,10 +125,10 @@ export const createPrepackagedRules = async (
     await exceptionsListClient.createEndpointList();
   }
 
-  const rulesFromFileSystem = await getPrepackagedRules();
-  const prepackagedRules = await getExistingPrepackagedRules({ alertsClient });
-  const rulesToInstall = getRulesToInstall(rulesFromFileSystem, prepackagedRules);
-  const rulesToUpdate = getRulesToUpdate(rulesFromFileSystem, prepackagedRules);
+  const prepackagedRules = await getRegistryOrFileSystemRules(rulesPackageVersion);
+  const existingPrepackagedRules = await getExistingPrepackagedRules({ alertsClient });
+  const rulesToInstall = getRulesToInstall(prepackagedRules, existingPrepackagedRules);
+  const rulesToUpdate = getRulesToUpdate(prepackagedRules, existingPrepackagedRules);
   const signalsIndex = siemClient.getSignalsIndex();
   if (rulesToInstall.length !== 0 || rulesToUpdate.length !== 0) {
     const signalsIndexExists = await getIndexExists(clusterClient.callAsCurrentUser, signalsIndex);

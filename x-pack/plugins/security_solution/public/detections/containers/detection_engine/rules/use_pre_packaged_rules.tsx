@@ -56,6 +56,7 @@ interface ReturnPrePackagedRules {
   rulesInstalled: number | null;
   rulesNotInstalled: number | null;
   rulesNotUpdated: number | null;
+  rulesPackageVersion: string | null | undefined;
   getLoadPrebuiltRulesAndTemplatesButton: GetLoadPrebuiltRulesAndTemplatesButton;
   getReloadPrebuiltRulesAndTemplatesButton: GetReloadPrebuiltRulesAndTemplatesButton;
 }
@@ -96,6 +97,7 @@ export const usePrePackagedRules = ({
       | 'rulesInstalled'
       | 'rulesNotInstalled'
       | 'rulesNotUpdated'
+      | 'rulesPackageVersion'
       | 'timelinesInstalled'
       | 'timelinesNotInstalled'
       | 'timelinesNotUpdated'
@@ -107,6 +109,7 @@ export const usePrePackagedRules = ({
     rulesInstalled: null,
     rulesNotInstalled: null,
     rulesNotUpdated: null,
+    rulesPackageVersion: null,
     timelinesInstalled: null,
     timelinesNotInstalled: null,
     timelinesNotUpdated: null,
@@ -148,12 +151,14 @@ export const usePrePackagedRules = ({
         });
         if (isSubscribed) {
           setPrepackagedDataStatus({
-            createPrePackagedRules: createElasticRules,
+            createPrePackagedRules: async () =>
+              createElasticRules(prePackagedRuleStatusResponse.rules_package_version),
             refetchPrePackagedRulesStatus: fetchPrePackagedRules,
             rulesCustomInstalled: prePackagedRuleStatusResponse.rules_custom_installed,
             rulesInstalled: prePackagedRuleStatusResponse.rules_installed,
             rulesNotInstalled: prePackagedRuleStatusResponse.rules_not_installed,
             rulesNotUpdated: prePackagedRuleStatusResponse.rules_not_updated,
+            rulesPackageVersion: prePackagedRuleStatusResponse.rules_package_version,
             timelinesInstalled: prePackagedRuleStatusResponse.timelines_installed,
             timelinesNotInstalled: prePackagedRuleStatusResponse.timelines_not_installed,
             timelinesNotUpdated: prePackagedRuleStatusResponse.timelines_not_updated,
@@ -168,6 +173,7 @@ export const usePrePackagedRules = ({
             rulesInstalled: null,
             rulesNotInstalled: null,
             rulesNotUpdated: null,
+            rulesPackageVersion: null,
             timelinesInstalled: null,
             timelinesNotInstalled: null,
             timelinesNotUpdated: null,
@@ -181,7 +187,7 @@ export const usePrePackagedRules = ({
       }
     };
 
-    const createElasticRules = async (): Promise<boolean> => {
+    const createElasticRules = async (pkgVersion: string | null | undefined): Promise<boolean> => {
       return new Promise(async (resolve) => {
         try {
           if (
@@ -193,6 +199,7 @@ export const usePrePackagedRules = ({
           ) {
             setLoadingCreatePrePackagedRules(true);
             const result = await createPrepackagedRules({
+              pkgVersion,
               signal: abortCtrl.signal,
             });
 
@@ -221,12 +228,14 @@ export const usePrePackagedRules = ({
                   ) {
                     setLoadingCreatePrePackagedRules(false);
                     setPrepackagedDataStatus({
-                      createPrePackagedRules: createElasticRules,
+                      createPrePackagedRules: async () =>
+                        createElasticRules(prePackagedRuleStatusResponse.rules_package_version),
                       refetchPrePackagedRulesStatus: fetchPrePackagedRules,
                       rulesCustomInstalled: prePackagedRuleStatusResponse.rules_custom_installed,
                       rulesInstalled: prePackagedRuleStatusResponse.rules_installed,
                       rulesNotInstalled: prePackagedRuleStatusResponse.rules_not_installed,
                       rulesNotUpdated: prePackagedRuleStatusResponse.rules_not_updated,
+                      rulesPackageVersion: prePackagedRuleStatusResponse.rules_package_version,
                       timelinesInstalled: prePackagedRuleStatusResponse.timelines_installed,
                       timelinesNotInstalled: prePackagedRuleStatusResponse.timelines_not_installed,
                       timelinesNotUpdated: prePackagedRuleStatusResponse.timelines_not_updated,

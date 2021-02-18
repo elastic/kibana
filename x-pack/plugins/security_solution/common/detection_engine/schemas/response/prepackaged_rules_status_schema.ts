@@ -12,6 +12,7 @@ import {
   rules_custom_installed,
   rules_not_installed,
   rules_not_updated,
+  rules_package_version,
   timelines_installed,
   timelines_not_installed,
   timelines_not_updated,
@@ -30,8 +31,16 @@ const prePackagedRulesStatusSchema = t.type({
   rules_not_updated,
 });
 
+const prePackagedRulesRegistrySchema = t.type({
+  rules_package_version,
+});
+
 export const prePackagedRulesAndTimelinesStatusSchema = t.exact(
-  t.intersection([prePackagedRulesStatusSchema, prePackagedTimelinesStatusSchema])
+  t.intersection([
+    prePackagedRulesStatusSchema,
+    prePackagedTimelinesStatusSchema,
+    prePackagedRulesRegistrySchema,
+  ])
 );
 
 export type PrePackagedRulesAndTimelinesStatusSchema = t.TypeOf<

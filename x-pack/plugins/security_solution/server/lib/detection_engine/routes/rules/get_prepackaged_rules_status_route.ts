@@ -13,7 +13,10 @@ import {
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { DETECTION_ENGINE_PREPACKAGED_URL } from '../../../../../common/constants';
 import { transformError, buildSiemResponse } from '../utils';
-import { getPrepackagedRules } from '../../rules/get_prepackaged_rules';
+import {
+  getLatestRulesPackageVersion,
+  getRegistryOrFileSystemRules,
+} from '../../rules/get_prepackaged_rules';
 import { getRulesToInstall } from '../../rules/get_rules_to_install';
 import { getRulesToUpdate } from '../../rules/get_rules_to_update';
 import { findRules } from '../../rules/find_rules';
@@ -46,7 +49,8 @@ export const getPrepackagedRulesStatusRoute = async (
       }
 
       try {
-        const rulesFromFileSystem = await getPrepackagedRules();
+        const pkgVersion = getLatestRulesPackageVersion();
+        const rulesFromFileSystem = await getRegistryOrFileSystemRules(pkgVersion);
         const customRules = await findRules({
           alertsClient,
           perPage: 1,
@@ -72,6 +76,7 @@ export const getPrepackagedRulesStatusRoute = async (
           rules_installed: prepackagedRules.length,
           rules_not_installed: rulesToInstall.length,
           rules_not_updated: rulesToUpdate.length,
+          rules_package_version: pkgVersion,
           timelines_installed: validatedprepackagedTimelineStatus?.prepackagedTimelines.length ?? 0,
           timelines_not_installed:
             validatedprepackagedTimelineStatus?.timelinesToInstall.length ?? 0,

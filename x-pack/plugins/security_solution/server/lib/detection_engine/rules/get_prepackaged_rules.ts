@@ -18,11 +18,12 @@ import {
 import { BadRequestError } from '../errors/bad_request_error';
 import * as Registry from '../../../../../fleet/server/services/epm/registry';
 import { getAsset, getPathParts } from '../../../../../fleet/server/services/epm/archive';
-import {
-  KibanaAssetType,
-} from '../../../../../fleet/server/types';
 
-const DetectionRulesPackage = "detection_rules";
+import { rawRules } from './prepackaged_rules';
+
+const DetectionRulesPackageName = 'detection_rules';
+let latestRulesPackageVersion: string | undefined;
+let latestRulesDownload: AddPrepackagedRulesSchemaDecoded[];
 
 /**
  * Validate the rules from the file system and throw any errors indicating to the developer
@@ -61,22 +62,70 @@ const isRuleTemplate = (path: string) => {
   return pathParts.type === 'rules' && pathParts.file !== 'CHANGELOG.json';
 };
 
-export const getPrepackagedRules = async (
-  // @ts-expect-error mock data is too loosely typed
-  rules: AddPrepackagedRulesSchema[] = []
+// non-blocking check the latest version
+export const getLatestRulesPackageVersion = (): string | undefined => {
+  // kick off a background check for the latest package version.
+  // next time this is called, it might point to the latest.
+  // for on-prem, EPR is not reachable, but we don't want to timeout waiting to connect
+  checkAndStageUpdate();
+
+  // return the most recently known version
+  return latestRulesPackageVersion;
+};
+
+export const getPackageRegistryRules = async (
+  pkgVersion: string
 ): Promise<AddPrepackagedRulesSchemaDecoded[]> => {
-  if (!rules || rules.length == 0) {
-    const registryPackage = await Registry.fetchFindLatestPackage(DetectionRulesPackage);
-    const {paths} = await Registry.getRegistryPackage(registryPackage.name, registryPackage.version);
-
-    const rulePaths = paths.filter(isRuleTemplate);
-    const rulePromises = rulePaths.map(async (path) => {
-      const content = JSON.parse(getAsset(path).toString('utf8'));
-      return content as AddPrepackagedRulesSchema
-    });
-
-    rules = await Promise.all(rulePromises);
+  if (pkgVersion === latestRulesPackageVersion) {
+    return latestRulesDownload;
   }
 
-  return validateAllPrepackagedRules(rules)
-}
+  const { paths } = await Registry.getRegistryPackage(DetectionRulesPackageName, pkgVersion);
+
+  const rulePaths = paths.filter(isRuleTemplate);
+  const rulePromises = rulePaths.map(async (path) => {
+    const content = JSON.parse(getAsset(path).toString('utf8'));
+    return content as AddPrepackagedRulesSchema;
+  });
+
+  return validateAllPrepackagedRules(await Promise.all(rulePromises));
+};
+
+export const getFileSystemRules = async (
+  rules: AddPrepackagedRulesSchema[] = []
+): Promise<AddPrepackagedRulesSchemaDecoded[]> => {
+  if (!rules || rules.length === 0) {
+    // @ts-expect-error mock data is too loosely typed
+    validateAllPrepackagedRules(rawRules);
+  }
+
+  return validateAllPrepackagedRules(rules);
+};
+
+export const checkAndStageUpdate = async () => {
+  try {
+    const registryPackage = await Registry.fetchFindLatestPackage(DetectionRulesPackageName);
+    if (!latestRulesPackageVersion || registryPackage.version !== latestRulesPackageVersion) {
+      // automatically download and cache the latest in memory
+      const downloaded = await getPackageRegistryRules(registryPackage.version);
+
+      latestRulesDownload = downloaded;
+      // eslint-disable-line require-atomic-updates
+      latestRulesPackageVersion = registryPackage.version;
+    }
+  } catch (error) {
+    // console.warn(error);
+  }
+};
+
+export const getRegistryOrFileSystemRules = async (
+  pkgVersion?: string
+): Promise<AddPrepackagedRulesSchemaDecoded[]> => {
+  if (!pkgVersion) {
+    return getFileSystemRules();
+  }
+
+  // require pinning to a specific package version, otherwise the "X updates available" dialog
+  // could be out of date
+  return getPackageRegistryRules(pkgVersion);
+};

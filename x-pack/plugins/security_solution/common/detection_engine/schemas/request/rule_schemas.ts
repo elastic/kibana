@@ -67,6 +67,7 @@ import {
   throttleOrNull,
   createdByOrNull,
   updatedByOrNull,
+  rules_package_version,
 } from '../common/schemas';
 
 const createSchema = <
@@ -405,6 +406,11 @@ const responseTypeSpecific = t.union([
   machineLearningResponseParams,
 ]);
 export type ResponseTypeSpecific = t.TypeOf<typeof responseTypeSpecific>;
+
+export const installPrepackagedRulesSchema = t.type({
+  rules_package_version,
+});
+export type InstallPrepackagedRulesSchema = t.TypeOf<typeof installPrepackagedRulesSchema>;
 
 export const updateRulesSchema = t.intersection([
   commonCreateParams,
