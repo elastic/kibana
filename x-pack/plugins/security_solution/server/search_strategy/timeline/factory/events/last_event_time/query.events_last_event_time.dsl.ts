@@ -43,7 +43,7 @@ export const buildLastEventTimeQuery = ({
             track_total_hits: false,
             body: {
               ...(!isEmpty(docValueFields) ? { docvalue_fields: docValueFields } : {}),
-              query: { bool: { should: getIpDetailsFilter(details.ip) } }, // TODO: Change this to use a bool filter
+              query: { bool: { filter: { bool: { should: getIpDetailsFilter(details.ip) } } } },
               _source: ['@timestamp'],
               size: 1,
               sort: [

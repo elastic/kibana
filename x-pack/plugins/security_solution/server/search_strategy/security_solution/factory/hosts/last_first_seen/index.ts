@@ -9,7 +9,6 @@ import { getOr } from 'lodash/fp';
 
 import { IEsSearchResponse } from '../../../../../../../../../src/plugins/data/common';
 import {
-  HostAggEsData,
   HostFirstLastSeenStrategyResponse,
   HostsQueries,
   HostFirstLastSeenRequestOptions,
@@ -23,7 +22,7 @@ export const firstSeenHost: SecuritySolutionFactory<HostsQueries.firstSeen> = {
   buildDsl: (options: HostFirstLastSeenRequestOptions) => buildFirstOrLastSeenHostQuery(options),
   parse: async (
     options: HostFirstLastSeenRequestOptions,
-    response: IEsSearchResponse<HostAggEsData> // TODO: Change this response to match things better
+    response: IEsSearchResponse<unknown>
   ): Promise<HostFirstLastSeenStrategyResponse> => {
     // First try to get the formatted field if it exists or not.
     const formattedField: string | null = getOr(
@@ -51,7 +50,7 @@ export const lastSeenHost: SecuritySolutionFactory<HostsQueries.lastSeen> = {
   buildDsl: (options: HostFirstLastSeenRequestOptions) => buildFirstOrLastSeenHostQuery(options),
   parse: async (
     options: HostFirstLastSeenRequestOptions,
-    response: IEsSearchResponse<HostAggEsData> // TODO: Change this response to match things better
+    response: IEsSearchResponse<unknown>
   ): Promise<HostFirstLastSeenStrategyResponse> => {
     // First try to get the formatted field if it exists or not.
     const formattedField: string | null = getOr(
