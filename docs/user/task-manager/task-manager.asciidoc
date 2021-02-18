@@ -2,7 +2,7 @@
 [[task-manager]]
 = Task Manager
 
-{kib} Task Manager uses background tasks to distribute work across all nodes in the cluster.
+{kib} Task Manager uses background tasks to distribute work across multiple {kib} instances.
 
 [float]
 [[task-manager-background-tasks]]

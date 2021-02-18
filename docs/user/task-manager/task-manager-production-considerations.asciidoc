@@ -52,9 +52,9 @@ By default, each additional {kib} instance will add an additional 10 tasks that 
 
 Other times it, might be preferable to increase the throughput of individual {kib} instances.
 
-Tweak the *Max Workers* via the <<task-manager-settings,`xpack.task_manager.max_workers`>> setting, which would allow each {kib} to pull a higher number of tasks per interval, but keep in mind that this could impact the performance of each {kib} instance as their workload would be higher.
+Tweak the *Max Workers* via the <<task-manager-settings,`xpack.task_manager.max_workers`>> setting, which would allow each {kib} to pull a higher number of tasks per interval, but keep in mind that this could impact the performance of each {kib} instance as _their_ workload would be higher.
 
-Tweak the *Poll Interval* via the <<task-manager-settings,`xpack.task_manager.poll_interval`>> setting, which would allow each {kib} to pull scheduled tasks at a higher rate, but keep in mind that this could impact the performance of the {es} cluster *as their workload would be higher*.
+Tweak the *Poll Interval* via the <<task-manager-settings,`xpack.task_manager.poll_interval`>> setting, which would allow each {kib} to pull scheduled tasks at a higher rate, but keep in mind that this could impact the performance of the {es} cluster as _their_ workload would be higher.
 
 [float]
 [[task-manager-choosing-scaling-strategy]]
@@ -65,11 +65,11 @@ Each scaling strategy comes with its own considerations, and as a consequence, t
 Scaling {kib} instances vertically causes higher resource utilization in each {kib} instance, as it will perform more concurrent work.
 Scaling {kib} instances horizontally requires a higher degree of coordination which can impact overall performance.
 
-Find the sweet spot between both strategies requires experimentation, but in general our recommended strategy would be to follow these steps:
+Finding the sweet spot between both strategies requires experimentation, but in general our recommended strategy would be to follow these steps:
 
-1. <<task-manager-health-evaluate-the-workload,Evaluate your workload>> to calculatea rough required throughput in _tasks per minute_, and provision as many {kib} instances as needed to deliver that throughot as described under <<task-manager-default-scaling>> . Include in this calculation any growth in tasks you predict you will incurr in the near future, and the 20% buffer intended on addressing ad-hoc tasks.
-2. Assess whether the provosioned {kib} instances achieve the required throughput by evaluating the <<task-manager-health-monitoring>> as described under <<task-manager-health-evaluate-the-runtime-insufficient-throughput>>
-3. If the throughout is insufficient, and {kib} instances are exhibiting low resource utilization, incrementally scale vertically while <<kibana-page,monitoring>> the impact of these changes.
-4. If the throughout is insufficient, and {kib} instances are exhibiting high resource utilization, incrementally scale horizontally and reassess.
+1. <<task-manager-health-evaluate-the-workload,Evaluate your workload>> to calculatea rough required throughput as a measurment in _tasks per minute_. Using that rough estimate as a guide, provision as many {kib} instances as needed to deliver that throughot as described under <<task-manager-default-scaling>>. We recommend including in that rough estimate any growth in tasks you predict experiencing in the near future, and a 20% buffer to better address ad-hoc tasks.
+2. Assess whether the provosioned {kib} instances achieve the required throughput by evaluating the <<task-manager-health-monitoring>> as described under <<task-manager-health-evaluate-the-runtime-insufficient-throughput,"Insufficient Throughtput to Handle the Scheduled Workload">>
+3. If the throughput is insufficient, and {kib} instances are exhibiting low resource utilization, incrementally scale vertically all the while <<kibana-page,monitoring>> the impact of these changes.
+4. If the throughput is insufficient, and {kib} instances are exhibiting high resource utilization, incrementally scale horizontally by provisioning new {kib} instances and reassess.
 
-{kib} Task Manager, just like {kib} and {es} themselves, has been designed to scale horizontally, and we recommend taking advantage of this ability to ensure mission ciritcal services such as Alerting and Reporting always have the capacity they need.
+{kib} Task Manager, like the rest of the Elastic Stack, has been designed to scale horizontally, and we recommend taking advantage of this ability to ensure mission ciritcal services such as Alerting and Reporting always have the capacity they need.
