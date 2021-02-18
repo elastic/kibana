@@ -16,6 +16,7 @@ import {
 import { ProfilingValueType } from '../../../../common/profiling';
 import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 import { getBucketSize } from '../../helpers/get_bucket_size';
+import { withApmSpan } from '../../../utils/with_apm_span';
 
 export async function getServiceProfilingTimeline({
   serviceName,
@@ -26,59 +27,61 @@ export async function getServiceProfilingTimeline({
   setup: Setup & SetupTimeRange;
   environment?: string;
 }) {
-  const { apmEventClient, start, end, esFilter } = setup;
+  return withApmSpan('get_service_profiling_timeline', async () => {
+    const { apmEventClient, start, end, esFilter } = setup;
 
-  const response = await apmEventClient.search({
-    apm: {
-      events: [ProcessorEvent.profile],
-    },
-    body: {
-      size: 0,
-      query: {
-        bool: {
-          filter: [
-            { term: { [SERVICE_NAME]: serviceName } },
-            ...rangeQuery(start, end),
-            ...environmentQuery(environment),
-            ...esFilter,
-          ],
-        },
+    const response = await apmEventClient.search({
+      apm: {
+        events: [ProcessorEvent.profile],
       },
-      aggs: {
-        timeseries: {
-          date_histogram: {
-            field: '@timestamp',
-            fixed_interval: getBucketSize({ start, end }).intervalString,
-            min_doc_count: 0,
-            extended_bounds: {
-              min: start,
-              max: end,
-            },
+      body: {
+        size: 0,
+        query: {
+          bool: {
+            filter: [
+              { term: { [SERVICE_NAME]: serviceName } },
+              ...rangeQuery(start, end),
+              ...environmentQuery(environment),
+              ...esFilter,
+            ],
           },
-          aggs: {
-            value_type: {
-              filters: {
+        },
+        aggs: {
+          timeseries: {
+            date_histogram: {
+              field: '@timestamp',
+              fixed_interval: getBucketSize({ start, end }).intervalString,
+              min_doc_count: 0,
+              extended_bounds: {
+                min: start,
+                max: end,
+              },
+            },
+            aggs: {
+              value_type: {
                 filters: {
-                  unknown: {
-                    bool: {
-                      must_not: [
-                        { exists: { field: PROFILE_CPU_NS } },
-                        { exists: { field: PROFILE_WALL_US } },
-                      ],
+                  filters: {
+                    unknown: {
+                      bool: {
+                        must_not: [
+                          { exists: { field: PROFILE_CPU_NS } },
+                          { exists: { field: PROFILE_WALL_US } },
+                        ],
+                      },
+                    },
+                    [ProfilingValueType.cpuTime]: {
+                      exists: { field: PROFILE_CPU_NS },
+                    },
+                    [ProfilingValueType.wallTime]: {
+                      exists: { field: PROFILE_WALL_US },
                     },
                   },
-                  [ProfilingValueType.cpuTime]: {
-                    exists: { field: PROFILE_CPU_NS },
-                  },
-                  [ProfilingValueType.wallTime]: {
-                    exists: { field: PROFILE_WALL_US },
-                  },
                 },
-              },
-              aggs: {
-                num_profiles: {
-                  cardinality: {
-                    field: PROFILE_ID,
+                aggs: {
+                  num_profiles: {
+                    cardinality: {
+                      field: PROFILE_ID,
+                    },
                   },
                 },
               },
@@ -86,25 +89,25 @@ export async function getServiceProfilingTimeline({
           },
         },
       },
-    },
-  });
+    });
 
-  const { aggregations } = response;
+    const { aggregations } = response;
 
-  if (!aggregations) {
-    return [];
-  }
+    if (!aggregations) {
+      return [];
+    }
 
-  return aggregations.timeseries.buckets.map((bucket) => {
-    return {
-      x: bucket.key,
-      valueTypes: {
-        unknown: bucket.value_type.buckets.unknown.num_profiles.value,
-        // TODO: use enum as object key. not possible right now
-        // because of https://github.com/microsoft/TypeScript/issues/37888
-        cpu_time: bucket.value_type.buckets.cpu_time.num_profiles.value,
-        wall_time: bucket.value_type.buckets.wall_time.num_profiles.value,
-      },
-    };
+    return aggregations.timeseries.buckets.map((bucket) => {
+      return {
+        x: bucket.key,
+        valueTypes: {
+          unknown: bucket.value_type.buckets.unknown.num_profiles.value,
+          // TODO: use enum as object key. not possible right now
+          // because of https://github.com/microsoft/TypeScript/issues/37888
+          cpu_time: bucket.value_type.buckets.cpu_time.num_profiles.value,
+          wall_time: bucket.value_type.buckets.wall_time.num_profiles.value,
+        },
+      };
+    });
   });
 }

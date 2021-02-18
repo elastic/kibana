@@ -22,6 +22,7 @@ import {
 import { rangeQuery, environmentQuery } from '../../../../common/utils/queries';
 import { APMEventClient } from '../../helpers/create_es_client/create_apm_event_client';
 import { Setup, SetupTimeRange } from '../../helpers/setup_request';
+import { withApmSpan } from '../../../utils/with_apm_span';
 
 const MAX_STACK_IDS = 10000;
 const MAX_PROFILE_IDS = 1000;
@@ -34,7 +35,7 @@ const maybeAdd = (to: any[], value: any) => {
   to.push(value);
 };
 
-async function getProfilingStats({
+function getProfilingStats({
   apmEventClient,
   filter,
   valueTypeField,
@@ -43,111 +44,115 @@ async function getProfilingStats({
   filter: ESFilter[];
   valueTypeField: string;
 }) {
-  const response = await apmEventClient.search({
-    apm: {
-      events: [ProcessorEvent.profile],
-    },
-    body: {
-      size: 0,
-      query: {
-        bool: {
-          filter,
-        },
+  return withApmSpan('get_profile_stats', async () => {
+    const response = await apmEventClient.search({
+      apm: {
+        events: [ProcessorEvent.profile],
       },
-      aggs: {
-        profiles: {
-          terms: {
-            field: PROFILE_ID,
-            size: MAX_PROFILE_IDS,
+      body: {
+        size: 0,
+        query: {
+          bool: {
+            filter,
           },
-          aggs: {
-            latest: {
-              top_metrics: {
-                metrics: [
-                  { field: '@timestamp' },
-                  { field: PROFILE_DURATION },
-                ] as const,
-                sort: {
-                  '@timestamp': 'desc',
+        },
+        aggs: {
+          profiles: {
+            terms: {
+              field: PROFILE_ID,
+              size: MAX_PROFILE_IDS,
+            },
+            aggs: {
+              latest: {
+                top_metrics: {
+                  metrics: [
+                    { field: '@timestamp' },
+                    { field: PROFILE_DURATION },
+                  ] as const,
+                  sort: {
+                    '@timestamp': 'desc',
+                  },
+                },
+              },
+            },
+          },
+          stacks: {
+            terms: {
+              field: PROFILE_TOP_ID,
+              size: MAX_STACK_IDS,
+            },
+            aggs: {
+              value: {
+                sum: {
+                  field: valueTypeField,
+                },
+              },
+              [PROFILE_SAMPLES_COUNT]: {
+                sum: {
+                  field: PROFILE_SAMPLES_COUNT,
                 },
               },
             },
           },
         },
-        stacks: {
-          terms: {
-            field: PROFILE_TOP_ID,
-            size: MAX_STACK_IDS,
-          },
-          aggs: {
-            value: {
-              sum: {
-                field: valueTypeField,
-              },
-            },
-            [PROFILE_SAMPLES_COUNT]: {
-              sum: {
-                field: PROFILE_SAMPLES_COUNT,
-              },
-            },
-          },
-        },
       },
-    },
+    });
+
+    const profiles =
+      response.aggregations?.profiles.buckets.map((profile) => {
+        const latest = profile.latest.top[0].metrics ?? {};
+
+        return {
+          id: profile.key as string,
+          duration: latest[PROFILE_DURATION] as number,
+          timestamp: latest['@timestamp'] as number,
+        };
+      }) ?? [];
+
+    const stacks =
+      response.aggregations?.stacks.buckets.map((stack) => {
+        return {
+          id: stack.key as string,
+          value: stack.value.value!,
+          count: stack[PROFILE_SAMPLES_COUNT].value!,
+        };
+      }) ?? [];
+
+    return {
+      profiles,
+      stacks,
+    };
   });
-
-  const profiles =
-    response.aggregations?.profiles.buckets.map((profile) => {
-      const latest = profile.latest.top[0].metrics ?? {};
-
-      return {
-        id: profile.key as string,
-        duration: latest[PROFILE_DURATION] as number,
-        timestamp: latest['@timestamp'] as number,
-      };
-    }) ?? [];
-
-  const stacks =
-    response.aggregations?.stacks.buckets.map((stack) => {
-      return {
-        id: stack.key as string,
-        value: stack.value.value!,
-        count: stack[PROFILE_SAMPLES_COUNT].value!,
-      };
-    }) ?? [];
-
-  return {
-    profiles,
-    stacks,
-  };
 }
 
-async function getProfilesWithStacks({
+function getProfilesWithStacks({
   apmEventClient,
   filter,
 }: {
   apmEventClient: APMEventClient;
   filter: ESFilter[];
 }) {
-  const response = await apmEventClient.search({
-    apm: {
-      events: [ProcessorEvent.profile],
-    },
-    body: {
-      size: MAX_STACK_IDS,
-      query: {
-        bool: {
-          filter,
+  return withApmSpan('get_profiles_with_stacks', async () => {
+    const response = await apmEventClient.search({
+      apm: {
+        events: [ProcessorEvent.profile],
+      },
+      body: {
+        size: MAX_STACK_IDS,
+        query: {
+          bool: {
+            filter,
+          },
         },
+        collapse: {
+          field: PROFILE_TOP_ID,
+        },
+        _source: [PROFILE_TOP_ID, PROFILE_STACK],
       },
-      collapse: {
-        field: PROFILE_TOP_ID,
-      },
-      _source: [PROFILE_TOP_ID, PROFILE_STACK],
-    },
-  });
+    });
 
-  return response.hits.hits.map((hit) => hit._source);
+    return response.hits.hits.map((hit) => hit._source);
+  });
 }
 
 function getNodeNameFromFrame(frame: ProfileStackFrame) {
@@ -167,64 +172,69 @@ export async function getServiceProfilingStatistics({
   environment?: string;
   valueType: ProfilingValueType;
 }) {
-  const { apmEventClient, start, end } = setup;
+  return withApmSpan('get_service_profiling_statistics', async () => {
+    const { apmEventClient, start, end } = setup;
 
-  const valueTypeField = {
-    [ProfilingValueType.wallTime]: PROFILE_WALL_US,
-    [ProfilingValueType.cpuTime]: PROFILE_CPU_NS,
-  }[valueType];
+    const valueTypeField = {
+      [ProfilingValueType.wallTime]: PROFILE_WALL_US,
+      [ProfilingValueType.cpuTime]: PROFILE_CPU_NS,
+    }[valueType];
 
-  const filter: ESFilter[] = [
-    ...rangeQuery(start, end),
-    { term: { [SERVICE_NAME]: serviceName } },
-    ...environmentQuery(environment),
-    { exists: { field: valueTypeField } },
-  ];
+    const filter: ESFilter[] = [
+      ...rangeQuery(start, end),
+      { term: { [SERVICE_NAME]: serviceName } },
+      ...environmentQuery(environment),
+      { exists: { field: valueTypeField } },
+    ];
 
-  const [profileStats, profileStacks] = await Promise.all([
-    getProfilingStats({ apmEventClient, filter, valueTypeField }),
-    getProfilesWithStacks({ apmEventClient, filter }),
-  ]);
+    const [profileStats, profileStacks] = await Promise.all([
+      getProfilingStats({ apmEventClient, filter, valueTypeField }),
+      getProfilesWithStacks({ apmEventClient, filter }),
+    ]);
 
-  const nodes: Record<string, ProfileNode> = {};
-  const rootNodes: string[] = [];
+    const nodes: Record<string, ProfileNode> = {};
+    const rootNodes: string[] = [];
 
-  function getNode({ id, name }: { id: string; name: string }) {
-    let node = nodes[id];
-    if (!node) {
-      node = { id, name, value: 0, count: 0, children: [] };
-      nodes[id] = node;
+    function getNode({ id, name }: { id: string; name: string }) {
+      let node = nodes[id];
+      if (!node) {
+        node = { id, name, value: 0, count: 0, children: [] };
+        nodes[id] = node;
+      }
+      return node;
     }
-    return node;
-  }
 
-  const stackStatsById = keyBy(profileStats.stacks, 'id');
+    const stackStatsById = keyBy(profileStats.stacks, 'id');
 
-  profileStacks.forEach((profile) => {
-    const stats = stackStatsById[profile.profile.top.id];
-    const frames = profile.profile.stack.concat().reverse();
+    profileStacks.forEach((profile) => {
+      const stats = stackStatsById[profile.profile.top.id];
+      const frames = profile.profile.stack.concat().reverse();
 
-    frames.forEach((frame, index) => {
-      const node = getNode({ id: frame.id, name: getNodeNameFromFrame(frame) });
+      frames.forEach((frame, index) => {
+        const node = getNode({
+          id: frame.id,
+          name: getNodeNameFromFrame(frame),
+        });
 
-      if (index === frames.length - 1) {
-        node.value += stats.value;
-        node.count += stats.count;
-      }
+        if (index === frames.length - 1) {
+          node.value += stats.value;
+          node.count += stats.count;
+        }
 
-      if (index === 0) {
-        // root node
-        maybeAdd(rootNodes, node.id);
-      } else {
-        const parent = nodes[frames[index - 1].id];
-        maybeAdd(parent.children, node.id);
-      }
+        if (index === 0) {
+          // root node
+          maybeAdd(rootNodes, node.id);
+        } else {
+          const parent = nodes[frames[index - 1].id];
+          maybeAdd(parent.children, node.id);
+        }
+      });
     });
-  });
 
-  return {
-    profiles: profileStats.profiles,
-    nodes,
-    rootNodes,
-  };
+    return {
+      profiles: profileStats.profiles,
+      nodes,
+      rootNodes,
+    };
+  });
 }
