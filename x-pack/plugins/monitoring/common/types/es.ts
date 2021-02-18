@@ -332,7 +332,9 @@ export interface ElasticsearchMetricbeatSource {
         data_counts?: {
           processed_record_count?: number;
         };
-        forecasts_stats?: {};
+        forecasts_stats?: {
+          total?: number;
+        };
       };
     };
     ccr?: {
