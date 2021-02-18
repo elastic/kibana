@@ -19,9 +19,8 @@ import {
   SPAN_SUBTYPE,
   SPAN_TYPE,
 } from '../../../../common/elasticsearch_fieldnames';
-import { rangeFilter } from '../../../../common/utils/range_filter';
 import { ProcessorEvent } from '../../../../common/processor_event';
-import { getEnvironmentUiFilterES } from '../../helpers/convert_ui_filters/get_environment_ui_filter_es';
+import { environmentQuery, rangeQuery } from '../../../../common/utils/queries';
 import { joinByKey } from '../../../../common/utils/join_by_key';
 import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 import { withApmSpan } from '../../../utils/with_apm_span';
@@ -33,7 +32,7 @@ export const getDestinationMap = ({
 }: {
   setup: Setup & SetupTimeRange;
   serviceName: string;
-  environment: string;
+  environment?: string;
 }) => {
   return withApmSpan('get_service_destination_map', async () => {
     const { start, end, apmEventClient } = setup;
@@ -50,8 +49,8 @@ export const getDestinationMap = ({
               filter: [
                 { term: { [SERVICE_NAME]: serviceName } },
                 { exists: { field: SPAN_DESTINATION_SERVICE_RESOURCE } },
-                { range: rangeFilter(start, end) },
-                ...getEnvironmentUiFilterES(environment),
+                ...rangeQuery(start, end),
+                ...environmentQuery(environment),
               ],
             },
           },
@@ -71,14 +70,13 @@ export const getDestinationMap = ({
                 ],
               },
               aggs: {
-                docs: {
-                  top_hits: {
-                    docvalue_fields: [
-                      SPAN_TYPE,
-                      SPAN_SUBTYPE,
-                      SPAN_ID,
+                sample: {
+                  top_metrics: {
+                    metrics: [
+                      { field: SPAN_TYPE },
+                      { field: SPAN_SUBTYPE },
+                      { field: SPAN_ID },
                     ] as const,
-                    _source: false,
                     sort: {
                       '@timestamp': 'desc',
                     },
@@ -93,15 +91,15 @@ export const getDestinationMap = ({
 
     const outgoingConnections =
       response.aggregations?.connections.buckets.map((bucket) => {
-        const doc = bucket.docs.hits.hits[0];
+        const fieldValues = bucket.sample.top[0].metrics;
 
         return {
           [SPAN_DESTINATION_SERVICE_RESOURCE]: String(
             bucket.key[SPAN_DESTINATION_SERVICE_RESOURCE]
           ),
-          [SPAN_ID]: String(doc.fields[SPAN_ID]?.[0]),
-          [SPAN_TYPE]: String(doc.fields[SPAN_TYPE]?.[0] ?? ''),
-          [SPAN_SUBTYPE]: String(doc.fields[SPAN_SUBTYPE]?.[0] ?? ''),
+          [SPAN_ID]: (fieldValues[SPAN_ID] ?? '') as string,
+          [SPAN_TYPE]: (fieldValues[SPAN_TYPE] ?? '') as string,
+          [SPAN_SUBTYPE]: (fieldValues[SPAN_SUBTYPE] ?? '') as string,
         };
       }) ?? [];
 
@@ -123,7 +121,7 @@ export const getDestinationMap = ({
                       ),
                     },
                   },
-                  { range: rangeFilter(start, end) },
+                  ...rangeQuery(start, end),
                 ],
               },
             },
