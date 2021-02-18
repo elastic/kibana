@@ -1,17 +1,19 @@
 [[discover-document-context]]
-== View a document in context
+== View surrounding documents
 
 Once you've narrowed your search to a specific event,
 you might want to inspect the documents that occurred
 immediately before and after the event. 
-To view the surrounding documents, your  index pattern must contain time-based events.
+To view the surrounding documents, your index pattern must contain time-based events.
 
 . In the document table, click the expand icon (>).
 . Click *View surrounding documents.*
 
-The documents are sorted  by the time field specified in the index pattern 
+This opens the Context view of *Discover*.
+The documents are sorted by the time field specified in the index pattern 
 and displayed using the same set of columns as the *Discover* view from which 
 the context was opened. The anchor document is highlighted in blue.
+
 
 [role="screenshot"]
 image::images/Discover-ContextView.png[Image showing context view feature, with anchor documents highlighted in blue]
@@ -33,14 +35,20 @@ investigation, you can use filters to restrict the documents to display.
 
 By default, the five newest and oldest
 documents are listed. To increase the number of documents that surround the anchor document,
-click *Load*.  Five documents are added with each click.
+click *Load*.
+
+[role="screenshot"]
+image::images/discover-context-load-newer-documents.png[Image the Load button and the number of documents to load]
+
+By default, five documents are added with each click. You can change the number of documents that
+should be added by changing the number in the input displayed next to the *Load* button.
 
 [float]
 [[configure-context-ContextView]]
 === Configure the context view
 
 To configure the Context view, go to <<advanced-options,
-Advanced Settings>> and search for Discover.
+Advanced Settings>> and search for Context.
 
 [horizontal]
 `context:defaultSize`:: The number of documents to display by default.
