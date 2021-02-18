@@ -12,7 +12,7 @@ import { setupRequest } from '../lib/helpers/setup_request';
 import { getServiceMap } from '../lib/service_map/get_service_map';
 import { getServiceMapServiceNodeInfo } from '../lib/service_map/get_service_map_service_node_info';
 import { createRoute } from './create_route';
-import { environmentRt, rangeRt, uiFiltersRt } from './default_api_types';
+import { environmentRt, rangeRt } from './default_api_types';
 import { notifyFeatureUsage } from '../feature';
 import { getSearchAggregatedTransactions } from '../lib/helpers/aggregated_transactions';
 import { isActivePlatinumLicense } from '../../common/license_check';
@@ -62,12 +62,12 @@ export const serviceMapRoute = createRoute({
 });
 
 export const serviceMapServiceNodeRoute = createRoute({
-  endpoint: `GET /api/apm/service-map/service/{serviceName}`,
+  endpoint: 'GET /api/apm/service-map/service/{serviceName}',
   params: t.type({
     path: t.type({
       serviceName: t.string,
     }),
-    query: t.intersection([rangeRt, uiFiltersRt]),
+    query: rangeRt,
   }),
   options: { tags: ['access:apm'] },
   handler: async ({ context, request }) => {

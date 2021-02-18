@@ -31,13 +31,15 @@ import { localUIFilterNames } from '../lib/rum_client/ui_filters/local_ui_filter
 import { getRumPageLoadTransactionsProjection } from '../projections/rum_page_load_transactions';
 import { Projection } from '../projections/typings';
 import { createRoute } from './create_route';
-import { rangeRt, uiFiltersRt } from './default_api_types';
+import { rangeRt } from './default_api_types';
 import { APMRequestHandlerContext } from './typings';
 
 export const percentileRangeRt = t.partial({
   minPercentile: t.string,
   maxPercentile: t.string,
 });
+
+export const uiFiltersRt = t.type({ uiFilters: t.string });
 
 const uxQueryRt = t.intersection([
   uiFiltersRt,

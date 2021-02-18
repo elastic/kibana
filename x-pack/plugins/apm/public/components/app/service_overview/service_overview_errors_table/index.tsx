@@ -52,8 +52,7 @@ const DEFAULT_SORT = {
 
 export function ServiceOverviewErrorsTable({ serviceName }: Props) {
   const {
-    urlParams: { environment, start, end },
-    uiFilters,
+    urlParams: { environment, kuery, start, end },
   } = useUrlParams();
   const { transactionType } = useApmServiceContext();
   const [tableOptions, setTableOptions] = useState<{
@@ -153,9 +152,9 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
           path: { serviceName },
           query: {
             environment,
+            kuery,
             start,
             end,
-            uiFilters: JSON.stringify(uiFilters),
             size: PAGE_SIZE,
             numBuckets: 20,
             pageIndex: tableOptions.pageIndex,
@@ -180,10 +179,10 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
     },
     [
       environment,
+      kuery,
       start,
       end,
       serviceName,
-      uiFilters,
       tableOptions.pageIndex,
       tableOptions.sort.field,
       tableOptions.sort.direction,

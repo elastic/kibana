@@ -46,7 +46,7 @@ export async function getCorrelationsForSlowTransactions({
   setup: Setup & SetupTimeRange;
 }) {
   return withApmSpan('get_correlations_for_slow_transactions', async () => {
-    const { start, end, esFilter, apmEventClient } = setup;
+    const { start, end, apmEventClient } = setup;
 
     const backgroundFilters: ESFilter[] = [
       { term: { [PROCESSOR_EVENT]: ProcessorEvent.transaction } },

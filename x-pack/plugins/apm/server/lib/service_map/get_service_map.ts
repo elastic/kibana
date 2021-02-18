@@ -91,7 +91,7 @@ async function getServicesData(options: IEnvOptions) {
     const { environment, setup, searchAggregatedTransactions } = options;
 
     const projection = getServicesProjection({
-      setup: { ...setup, esFilter: [] },
+      setup,
       searchAggregatedTransactions,
     });
 

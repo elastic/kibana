@@ -13,7 +13,7 @@ import { getCorrelationsForFailedTransactions } from '../lib/correlations/get_co
 import { getCorrelationsForSlowTransactions } from '../lib/correlations/get_correlations_for_slow_transactions';
 import { setupRequest } from '../lib/helpers/setup_request';
 import { createRoute } from './create_route';
-import { environmentRt, rangeRt } from './default_api_types';
+import { environmentRt, kueryRt, rangeRt } from './default_api_types';
 
 const INVALID_LICENSE = i18n.translate(
   'xpack.apm.significanTerms.license.text',
@@ -28,7 +28,6 @@ export const correlationsForSlowTransactionsRoute = createRoute({
   params: t.type({
     query: t.intersection([
       t.partial({
-        kuery: t.string,
         serviceName: t.string,
         transactionName: t.string,
         transactionType: t.string,
@@ -38,6 +37,7 @@ export const correlationsForSlowTransactionsRoute = createRoute({
         fieldNames: t.string,
       }),
       environmentRt,
+      kueryRt,
       rangeRt,
     ]),
   }),
@@ -75,7 +75,6 @@ export const correlationsForFailedTransactionsRoute = createRoute({
   params: t.type({
     query: t.intersection([
       t.partial({
-        kuery: t.string,
         serviceName: t.string,
         transactionName: t.string,
         transactionType: t.string,
@@ -83,8 +82,8 @@ export const correlationsForFailedTransactionsRoute = createRoute({
       t.type({
         fieldNames: t.string,
       }),
-      t.partial({ uiFilters: t.string }),
       environmentRt,
+      kueryRt,
       rangeRt,
     ]),
   }),

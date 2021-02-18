@@ -14,6 +14,7 @@ import {
 import { rangeQuery } from '../../common/utils/queries';
 import { ProcessorEvent } from '../../common/processor_event';
 import { TRANSACTION_PAGE_LOAD } from '../../common/transaction_types';
+import { getEsFilter } from '../lib/helpers/convert_ui_filters/get_es_filter';
 
 export function getRumPageLoadTransactionsProjection({
   setup,
@@ -24,7 +25,7 @@ export function getRumPageLoadTransactionsProjection({
   urlQuery?: string;
   checkFetchStartFieldExists?: boolean;
 }) {
-  const { start, end, esFilter } = setup;
+  const { start, end, uiFilters } = setup;
 
   const bool = {
     filter: [
@@ -52,7 +53,7 @@ export function getRumPageLoadTransactionsProjection({
             },
           ]
         : []),
-      ...esFilter,
+      ...getEsFilter(uiFilters),
     ],
   };
 
@@ -75,7 +76,7 @@ export function getRumErrorsProjection({
   setup: Setup & SetupTimeRange;
   urlQuery?: string;
 }) {
-  const { start, end, esFilter: esFilter } = setup;
+  const { start, end, uiFilters } = setup;
 
   const bool = {
     filter: [
@@ -86,7 +87,7 @@ export function getRumErrorsProjection({
           [SERVICE_LANGUAGE_NAME]: 'javascript',
         },
       },
-      ...esFilter,
+      ...getEsFilter(uiFilters),
       ...(urlQuery
         ? [
             {
