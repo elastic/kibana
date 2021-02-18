@@ -8984,6 +8984,10 @@ const BootstrapCommand = {
         _utils_log__WEBPACK_IMPORTED_MODULE_2__["log"].success(`[${project.name}] bootstrap complete`);
       }
     });
+
+    if (!process.env.BUILD_TS_REFS_ON_BOOTSTRAP) {
+      _utils_log__WEBPACK_IMPORTED_MODULE_2__["log"].info('For IDE TypeScript support run `node scripts/build_ts_refs` or set BUILD_TS_REFS_ON_BOOTSTRAP=true');
+    }
   }
 
 };

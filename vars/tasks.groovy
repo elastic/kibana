@@ -18,6 +18,9 @@ def check() {
     kibanaPipeline.scriptTask('Verify NOTICE', 'test/scripts/checks/verify_notice.sh'),
     kibanaPipeline.scriptTask('Test Projects', 'test/scripts/checks/test_projects.sh'),
     kibanaPipeline.scriptTask('Test Hardening', 'test/scripts/checks/test_hardening.sh'),
+    dir("${env.WORKSPACE}/kibana") {
+      kibanaPipeline.scriptTask('Build TS Refs', 'test/scripts/jenkins_build_ts_refs.sh')()
+    }
   ])
 }
 

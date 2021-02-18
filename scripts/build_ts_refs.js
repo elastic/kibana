@@ -7,4 +7,9 @@
  */
 
 require('../src/setup_node_env');
-require('../src/dev/typescript').runBuildRefsCli();
+
+if (!process.env.npm_lifecycle_event || process.env.BUILD_TS_REFS_ON_BOOTSTRAP) {
+  require('../src/dev/typescript').runBuildRefsCli();
+} else {
+  console.warn('ran from yarn script without env BUILD_TS_REFS_ON_BOOTSTRAP=true');
+}
