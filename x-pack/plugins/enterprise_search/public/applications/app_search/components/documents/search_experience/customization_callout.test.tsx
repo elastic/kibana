@@ -8,6 +8,7 @@
 import React from 'react';
 
 import { shallow, ShallowWrapper } from 'enzyme';
+
 import { EuiButton } from '@elastic/eui';
 
 import { CustomizationCallout } from './customization_callout';

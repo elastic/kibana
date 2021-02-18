@@ -28,7 +28,7 @@ import { IndexThresholdAlertParams } from './types';
 import './expression.scss';
 import { IndexSelectPopover } from '../components/index_select_popover';
 
-const DEFAULT_VALUES = {
+export const DEFAULT_VALUES = {
   AGGREGATION_TYPE: 'count',
   TERM_SIZE: 5,
   THRESHOLD_COMPARATOR: COMPARATORS.GREATER_THAN,
@@ -100,7 +100,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<
       alertParams[errorKey as keyof IndexThresholdAlertParams] !== undefined
   );
 
-  const canShowVizualization = !!Object.keys(errors).find(
+  const cannotShowVisualization = !!Object.keys(errors).find(
     (errorKey) => expressionFieldsWithValidation.includes(errorKey) && errors[errorKey].length >= 1
   );
 
@@ -158,6 +158,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<
       <EuiSpacer size="s" />
       <IndexSelectPopover
         index={indexArray}
+        data-test-subj="indexSelectPopover"
         esFields={esFields}
         timeField={timeField}
         errors={errors}
@@ -188,6 +189,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<
       />
       <WhenExpression
         display="fullWidth"
+        data-test-subj="whenExpression"
         aggType={aggType ?? DEFAULT_VALUES.AGGREGATION_TYPE}
         onChangeSelectedAggType={(selectedAggType: string) =>
           setAlertParams('aggType', selectedAggType)
@@ -196,6 +198,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<
       {aggType && builtInAggregationTypes[aggType].fieldRequired ? (
         <OfExpression
           aggField={aggField}
+          data-test-subj="aggTypeExpression"
           fields={esFields}
           aggType={aggType}
           errors={errors}
@@ -207,6 +210,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<
       ) : null}
       <GroupByExpression
         groupBy={groupBy || DEFAULT_VALUES.GROUP_BY}
+        data-test-subj="groupByExpression"
         termField={termField}
         termSize={termSize}
         errors={errors}
@@ -233,6 +237,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<
       <ThresholdExpression
         thresholdComparator={thresholdComparator ?? DEFAULT_VALUES.THRESHOLD_COMPARATOR}
         threshold={threshold}
+        data-test-subj="thresholdExpression"
         errors={errors}
         display="fullWidth"
         popupPosition={'upLeft'}
@@ -244,9 +249,10 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<
         }
       />
       <ForLastExpression
+        data-test-subj="forLastExpression"
         popupPosition={'upLeft'}
-        timeWindowSize={timeWindowSize}
-        timeWindowUnit={timeWindowUnit}
+        timeWindowSize={timeWindowSize ?? DEFAULT_VALUES.TIME_WINDOW_SIZE}
+        timeWindowUnit={timeWindowUnit ?? DEFAULT_VALUES.TIME_WINDOW_UNIT}
         display="fullWidth"
         errors={errors}
         onChangeWindowSize={(selectedWindowSize: number | undefined) =>
@@ -258,9 +264,10 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<
       />
       <EuiSpacer />
       <div className="actAlertVisualization__chart">
-        {canShowVizualization ? (
+        {cannotShowVisualization ? (
           <Fragment>
             <EuiEmptyPrompt
+              data-test-subj="visualizationPlaceholder"
               iconType="visBarVertical"
               body={
                 <EuiText color="subdued">
@@ -275,6 +282,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<
         ) : (
           <Fragment>
             <ThresholdVisualization
+              data-test-subj="thresholdVisualization"
               alertParams={alertParams}
               alertInterval={alertInterval}
               aggregationTypes={builtInAggregationTypes}

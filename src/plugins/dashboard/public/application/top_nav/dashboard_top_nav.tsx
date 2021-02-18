@@ -43,9 +43,9 @@ import { showOptionsPopover } from './show_options_popover';
 import { TopNavIds } from './top_nav_ids';
 import { ShowShareModal } from './show_share_modal';
 import { PanelToolbar } from './panel_toolbar';
-import { confirmDiscardUnsavedChanges } from '../listing/confirm_overlays';
+import { confirmDiscardOrKeepUnsavedChanges } from '../listing/confirm_overlays';
 import { OverlayRef } from '../../../../../core/public';
-import { getNewDashboardTitle } from '../../dashboard_strings';
+import { getNewDashboardTitle, unsavedChangesBadge } from '../../dashboard_strings';
 import { DASHBOARD_PANELS_UNSAVED_ID } from '../lib/dashboard_panel_storage';
 import { DashboardContainer } from '..';
 
@@ -64,6 +64,7 @@ export interface DashboardTopNavProps {
   timefilter: TimefilterContract;
   indexPatterns: IndexPattern[];
   redirectTo: DashboardRedirect;
+  unsavedChanges?: boolean;
   lastDashboardId?: string;
   viewMode: ViewMode;
 }
@@ -72,6 +73,7 @@ export function DashboardTopNav({
   dashboardStateManager,
   dashboardContainer,
   lastDashboardId,
+  unsavedChanges,
   savedDashboard,
   onQuerySubmit,
   embedSettings,
@@ -152,34 +154,53 @@ export function DashboardTopNav({
     }
   }, [state.addPanelOverlay]);
 
-  const onDiscardChanges = useCallback(() => {
-    function revertChangesAndExitEditMode() {
-      dashboardStateManager.resetState();
-      dashboardStateManager.clearUnsavedPanels();
-
-      // We need to do a hard reset of the timepicker. appState will not reload like
-      // it does on 'open' because it's been saved to the url and the getAppState.previouslyStored() check on
-      // reload will cause it not to sync.
-      if (dashboardStateManager.getIsTimeSavedWithDashboard()) {
-        dashboardStateManager.syncTimefilterWithDashboardTime(timefilter);
-        dashboardStateManager.syncTimefilterWithDashboardRefreshInterval(timefilter);
-      }
-      dashboardStateManager.switchViewMode(ViewMode.VIEW);
-    }
-    confirmDiscardUnsavedChanges(core.overlays, revertChangesAndExitEditMode);
-  }, [core.overlays, dashboardStateManager, timefilter]);
-
   const onChangeViewMode = useCallback(
     (newMode: ViewMode) => {
       clearAddPanel();
-      if (savedDashboard?.id && allowByValueEmbeddables) {
-        const { getFullEditPath, title, id } = savedDashboard;
-        chrome.recentlyAccessed.add(getFullEditPath(newMode === ViewMode.EDIT), title, id);
+      const isPageRefresh = newMode === dashboardStateManager.getViewMode();
+      const isLeavingEditMode = !isPageRefresh && newMode === ViewMode.VIEW;
+      const willLoseChanges = isLeavingEditMode && dashboardStateManager.getIsDirty(timefilter);
+
+      function switchViewMode() {
+        dashboardStateManager.switchViewMode(newMode);
+        dashboardStateManager.restorePanels();
+
+        if (savedDashboard?.id && allowByValueEmbeddables) {
+          const { getFullEditPath, title, id } = savedDashboard;
+          chrome.recentlyAccessed.add(getFullEditPath(newMode === ViewMode.EDIT), title, id);
+        }
       }
-      dashboardStateManager.switchViewMode(newMode);
-      dashboardStateManager.restorePanels();
+
+      if (!willLoseChanges) {
+        switchViewMode();
+        return;
+      }
+
+      function discardChanges() {
+        dashboardStateManager.resetState();
+        dashboardStateManager.clearUnsavedPanels();
+
+        // We need to do a hard reset of the timepicker. appState will not reload like
+        // it does on 'open' because it's been saved to the url and the getAppState.previouslyStored() check on
+        // reload will cause it not to sync.
+        if (dashboardStateManager.getIsTimeSavedWithDashboard()) {
+          dashboardStateManager.syncTimefilterWithDashboardTime(timefilter);
+          dashboardStateManager.syncTimefilterWithDashboardRefreshInterval(timefilter);
+        }
+        dashboardStateManager.switchViewMode(ViewMode.VIEW);
+      }
+      confirmDiscardOrKeepUnsavedChanges(core.overlays).then((selection) => {
+        if (selection === 'discard') {
+          discardChanges();
+        }
+        if (selection !== 'cancel') {
+          switchViewMode();
+        }
+      });
     },
     [
+      timefilter,
+      core.overlays,
       clearAddPanel,
       savedDashboard,
       dashboardStateManager,
@@ -321,6 +342,33 @@ export function DashboardTopNav({
     dashboardStateManager,
   ]);
 
+  const runQuickSave = useCallback(async () => {
+    const currentTitle = dashboardStateManager.getTitle();
+    const currentDescription = dashboardStateManager.getDescription();
+    const currentTimeRestore = dashboardStateManager.getTimeRestore();
+
+    let currentTags: string[] = [];
+    if (savedObjectsTagging) {
+      const dashboard = dashboardStateManager.savedDashboard;
+      if (savedObjectsTagging.ui.hasTagDecoration(dashboard)) {
+        currentTags = dashboard.getTags();
+      }
+    }
+
+    save({}).then((response: SaveResult) => {
+      // If the save wasn't successful, put the original values back.
+      if (!(response as { id: string }).id) {
+        dashboardStateManager.setTitle(currentTitle);
+        dashboardStateManager.setDescription(currentDescription);
+        dashboardStateManager.setTimeRestore(currentTimeRestore);
+        if (savedObjectsTagging) {
+          dashboardStateManager.setTags(currentTags);
+        }
+      }
+      return response;
+    });
+  }, [save, savedObjectsTagging, dashboardStateManager]);
+
   const runClone = useCallback(() => {
     const currentTitle = dashboardStateManager.getTitle();
     const onClone = async (
@@ -354,11 +402,9 @@ export function DashboardTopNav({
       },
       [TopNavIds.EXIT_EDIT_MODE]: () => onChangeViewMode(ViewMode.VIEW),
       [TopNavIds.ENTER_EDIT_MODE]: () => onChangeViewMode(ViewMode.EDIT),
-      [TopNavIds.DISCARD_CHANGES]: onDiscardChanges,
       [TopNavIds.SAVE]: runSave,
+      [TopNavIds.QUICK_SAVE]: runQuickSave,
       [TopNavIds.CLONE]: runClone,
-      [TopNavIds.ADD_EXISTING]: addFromLibrary,
-      [TopNavIds.VISUALIZE]: createNew,
       [TopNavIds.OPTIONS]: (anchorElement) => {
         showOptionsPopover({
           anchorElement,
@@ -391,13 +437,11 @@ export function DashboardTopNav({
   }, [
     dashboardCapabilities,
     dashboardStateManager,
-    onDiscardChanges,
     onChangeViewMode,
     savedDashboard,
-    addFromLibrary,
-    createNew,
     runClone,
     runSave,
+    runQuickSave,
     share,
   ]);
 
@@ -419,13 +463,24 @@ export function DashboardTopNav({
     const showFilterBar = shouldShowFilterBar(Boolean(embedSettings?.forceHideFilterBar));
     const showSearchBar = showQueryBar || showFilterBar;
 
-    const topNav = getTopNavConfig(
-      viewMode,
-      dashboardTopNavActions,
-      dashboardCapabilities.hideWriteControls
-    );
+    const topNav = getTopNavConfig(viewMode, dashboardTopNavActions, {
+      hideWriteControls: dashboardCapabilities.hideWriteControls,
+      isNewDashboard: !savedDashboard.id,
+      isDirty: dashboardStateManager.isDirty,
+    });
+
+    const badges = unsavedChanges
+      ? [
+          {
+            'data-test-subj': 'dashboardUnsavedChangesBadge',
+            badgeText: unsavedChangesBadge.getUnsavedChangedBadgeText(),
+            color: 'secondary',
+          },
+        ]
+      : undefined;
 
     return {
+      badges,
       appName: 'dashboard',
       config: showTopNavMenu ? topNav : undefined,
       className: isFullScreenMode ? 'kbnTopNavMenu-isFullScreen' : undefined,

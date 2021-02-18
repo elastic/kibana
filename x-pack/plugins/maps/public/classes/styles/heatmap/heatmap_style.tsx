@@ -31,7 +31,7 @@ export class HeatmapStyle implements IStyle {
     this._descriptor = HeatmapStyle.createDescriptor(descriptor.colorRampName);
   }
 
-  static createDescriptor(colorRampName: string) {
+  static createDescriptor(colorRampName?: string) {
     return {
       type: LAYER_STYLE_TYPE.HEATMAP,
       colorRampName: colorRampName ? colorRampName : DEFAULT_HEATMAP_COLOR_RAMP_NAME,

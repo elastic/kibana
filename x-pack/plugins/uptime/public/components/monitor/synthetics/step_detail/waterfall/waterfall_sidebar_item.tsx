@@ -5,20 +5,35 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { RefObject, useMemo, useCallback, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiBadge } from '@elastic/eui';
 import { SidebarItem } from '../waterfall/types';
 import { MiddleTruncatedText } from '../../waterfall';
 import { SideBarItemHighlighter } from '../../waterfall/components/styles';
 import { SIDEBAR_FILTER_MATCHES_SCREENREADER_LABEL } from '../../waterfall/components/translations';
+import { OnSidebarClick } from '../../waterfall/components/use_flyout';
 
 interface SidebarItemProps {
   item: SidebarItem;
   renderFilterScreenReaderText?: boolean;
+  onClick?: OnSidebarClick;
 }
 
-export const WaterfallSidebarItem = ({ item, renderFilterScreenReaderText }: SidebarItemProps) => {
-  const { status, offsetIndex, isHighlighted } = item;
+export const WaterfallSidebarItem = ({
+  item,
+  renderFilterScreenReaderText,
+  onClick,
+}: SidebarItemProps) => {
+  const [buttonRef, setButtonRef] = useState<RefObject<HTMLButtonElement | null>>();
+  const { status, offsetIndex, index, isHighlighted, url } = item;
+
+  const handleSidebarClick = useMemo(() => {
+    if (onClick) {
+      return () => onClick({ buttonRef, networkItemIndex: index });
+    }
+  }, [buttonRef, index, onClick]);
+
+  const setRef = useCallback((ref) => setButtonRef(ref), [setButtonRef]);
 
   const isErrorStatusCode = (statusCode: number) => {
     const is400 = statusCode >= 400 && statusCode <= 499;
@@ -40,11 +55,23 @@ export const WaterfallSidebarItem = ({ item, renderFilterScreenReaderText }: Sid
       data-test-subj={isHighlighted ? 'sideBarHighlightedItem' : 'sideBarDimmedItem'}
     >
       {!status || !isErrorStatusCode(status) ? (
-        <MiddleTruncatedText text={text} ariaLabel={ariaLabel} />
+        <MiddleTruncatedText
+          text={text}
+          url={url}
+          ariaLabel={ariaLabel}
+          onClick={handleSidebarClick}
+          setButtonRef={setRef}
+        />
       ) : (
-        <EuiFlexGroup justifyContent="spaceBetween">
-          <EuiFlexItem>
-            <MiddleTruncatedText text={text} ariaLabel={ariaLabel} />
+        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+          <EuiFlexItem grow={false} style={{ minWidth: 0 }}>
+            <MiddleTruncatedText
+              text={text}
+              url={url}
+              ariaLabel={ariaLabel}
+              onClick={handleSidebarClick}
+              setButtonRef={setRef}
+            />
           </EuiFlexItem>
           <EuiFlexItem component="span" grow={false}>
             <EuiBadge color="danger">{status}</EuiBadge>

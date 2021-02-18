@@ -53,6 +53,8 @@ readonly links: {
             readonly base: string;
         };
         readonly aggs: {
+            readonly composite: string;
+            readonly composite_missing_bucket: string;
             readonly date_histogram: string;
             readonly date_range: string;
             readonly date_format_pattern: string;
@@ -91,7 +93,9 @@ readonly links: {
             readonly scriptAggs: string;
             readonly painless: string;
             readonly painlessApi: string;
+            readonly painlessLangSpec: string;
             readonly painlessSyntax: string;
+            readonly painlessWalkthrough: string;
             readonly luceneExpressions: string;
         };
         readonly indexPatterns: {
@@ -131,6 +135,7 @@ readonly links: {
             openIndex: string;
             putComponentTemplate: string;
             painlessExecute: string;
+            painlessExecuteAPIContexts: string;
             putComponentTemplateMetadata: string;
             putWatch: string;
             updateTransform: string;

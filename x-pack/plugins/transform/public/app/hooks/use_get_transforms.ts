@@ -39,8 +39,9 @@ export const useGetTransforms = (
         return;
       }
 
-      const transformConfigs = await api.getTransforms();
-      const transformStats = await api.getTransformsStats();
+      const fetchOptions = { asSystemRequest: true };
+      const transformConfigs = await api.getTransforms(fetchOptions);
+      const transformStats = await api.getTransformsStats(fetchOptions);
 
       if (
         !isGetTransformsResponseSchema(transformConfigs) ||

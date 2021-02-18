@@ -7,9 +7,6 @@
 
 import React from 'react';
 
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
-
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -22,12 +19,12 @@ import {
   EuiLink,
   EuiPanel,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import { EuiLinkTo } from '../../../../../shared/react_router_helpers';
 import { CredentialItem } from '../../../../components/shared/credential_item';
 import { LicenseBadge } from '../../../../components/shared/license_badge';
-
-import { CustomSource } from '../../../../types';
 import {
   SOURCES_PATH,
   SOURCE_DISPLAY_SETTINGS_PATH,
@@ -36,7 +33,7 @@ import {
   getContentSourcePath,
   getSourcesPath,
 } from '../../../../routes';
-
+import { CustomSource } from '../../../../types';
 import { ACCESS_TOKEN_LABEL, ID_LABEL, LEARN_CUSTOM_FEATURES_BUTTON } from '../../constants';
 
 import {
