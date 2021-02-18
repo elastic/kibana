@@ -41,7 +41,7 @@ click *Load*.  Five documents are added with each click.
 === Configure the context view
 
 To configure the Context view, use these settings in <<advanced-options,
-Advanced Settings>>.
+Advanced Settings>> and search for Discover.
 
 [horizontal]
 `context:defaultSize`:: The number of documents to display by default.
