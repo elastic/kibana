@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { DEFAULT_MAX_SIGNALS } from '../../security_solution/common/constants';
+
 export const APP_ID = 'case';
 
 /**
@@ -19,6 +21,7 @@ export const CASE_CONFIGURE_CONNECTORS_URL = `${CASE_CONFIGURE_URL}/connectors`;
 export const SUB_CASES_PATCH_DEL_URL = `${CASES_URL}/sub_cases`;
 export const SUB_CASES_URL = `${CASE_DETAILS_URL}/sub_cases`;
 export const SUB_CASE_DETAILS_URL = `${CASE_DETAILS_URL}/sub_cases/{sub_case_id}`;
+export const SUB_CASE_USER_ACTIONS_URL = `${SUB_CASE_DETAILS_URL}/user_actions`;
 
 export const CASE_COMMENTS_URL = `${CASE_DETAILS_URL}/comments`;
 export const CASE_COMMENT_DETAILS_URL = `${CASE_DETAILS_URL}/comments/{comment_id}`;
@@ -45,3 +48,10 @@ export const SUPPORTED_CONNECTORS = [
   JIRA_ACTION_TYPE_ID,
   RESILIENT_ACTION_TYPE_ID,
 ];
+
+/**
+ * Alerts
+ */
+
+export const MAX_ALERTS_PER_SUB_CASE = 5000;
+export const MAX_GENERATED_ALERTS_PER_SUB_CASE = MAX_ALERTS_PER_SUB_CASE / DEFAULT_MAX_SIGNALS;

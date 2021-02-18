@@ -17293,7 +17293,6 @@
     "xpack.securitySolution.case.caseView.reporterLabel": "报告者",
     "xpack.securitySolution.case.caseView.requiredUpdateToExternalService": "需要更新 { externalService } 事件",
     "xpack.securitySolution.case.caseView.sendEmalLinkAria": "单击可向 {user} 发送电子邮件",
-    "xpack.securitySolution.case.caseView.showAlertDeletedTooltip": "未找到告警",
     "xpack.securitySolution.case.caseView.showAlertTooltip": "显示告警详情",
     "xpack.securitySolution.case.caseView.statusLabel": "状态",
     "xpack.securitySolution.case.caseView.tags": "标签",

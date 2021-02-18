@@ -17250,7 +17250,6 @@
     "xpack.securitySolution.case.caseView.reporterLabel": "報告者",
     "xpack.securitySolution.case.caseView.requiredUpdateToExternalService": "{ externalService }インシデントの更新が必要です",
     "xpack.securitySolution.case.caseView.sendEmalLinkAria": "クリックすると、{user}に電子メールを送信します",
-    "xpack.securitySolution.case.caseView.showAlertDeletedTooltip": "アラートが見つかりません",
     "xpack.securitySolution.case.caseView.showAlertTooltip": "アラートの詳細を表示",
     "xpack.securitySolution.case.caseView.statusLabel": "ステータス",
     "xpack.securitySolution.case.caseView.tags": "タグ",
