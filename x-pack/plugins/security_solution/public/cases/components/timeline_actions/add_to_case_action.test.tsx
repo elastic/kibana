@@ -163,10 +163,14 @@ describe('AddToCaseAction', () => {
 
     wrapper.find(`[data-test-subj="form-context-on-success"]`).first().simulate('click');
 
-    expect(postComment.mock.calls[0][0]).toBe('new-case');
-    expect(postComment.mock.calls[0][1]).toEqual({
+    expect(postComment.mock.calls[0][0].caseId).toBe('new-case');
+    expect(postComment.mock.calls[0][0].data).toEqual({
       alertId: 'test-id',
       index: 'test-index',
+      rule: {
+        id: null,
+        name: null,
+      },
       type: 'alert',
     });
   });
@@ -196,10 +200,14 @@ describe('AddToCaseAction', () => {
 
     wrapper.find(`[data-test-subj="all-cases-modal-button"]`).first().simulate('click');
 
-    expect(postComment.mock.calls[0][0]).toBe('selected-case');
-    expect(postComment.mock.calls[0][1]).toEqual({
+    expect(postComment.mock.calls[0][0].caseId).toBe('selected-case');
+    expect(postComment.mock.calls[0][0].data).toEqual({
       alertId: 'test-id',
       index: 'test-index',
+      rule: {
+        id: null,
+        name: null,
+      },
       type: 'alert',
     });
   });
@@ -208,7 +216,7 @@ describe('AddToCaseAction', () => {
     usePostCommentMock.mockImplementation(() => {
       return {
         ...defaultPostComment,
-        postComment: jest.fn().mockImplementation((caseId, data, updateCase) => updateCase()),
+        postComment: jest.fn().mockImplementation(({ caseId, data, updateCase }) => updateCase()),
       };
     });
 

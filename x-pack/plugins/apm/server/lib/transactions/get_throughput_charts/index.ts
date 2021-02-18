@@ -13,20 +13,22 @@ import {
   TRANSACTION_RESULT,
   TRANSACTION_TYPE,
 } from '../../../../common/elasticsearch_fieldnames';
-import { rangeFilter } from '../../../../common/utils/range_filter';
+import { environmentQuery, rangeQuery } from '../../../../common/utils/queries';
 import {
   getDocumentTypeFilterForAggregatedTransactions,
   getProcessorEventForAggregatedTransactions,
 } from '../../../lib/helpers/aggregated_transactions';
 import { getBucketSize } from '../../../lib/helpers/get_bucket_size';
 import { Setup, SetupTimeRange } from '../../../lib/helpers/setup_request';
+import { withApmSpan } from '../../../utils/with_apm_span';
 import { getThroughputBuckets } from './transform';
 
 export type ThroughputChartsResponse = PromiseReturnType<
   typeof searchThroughput
 >;
 
-async function searchThroughput({
+function searchThroughput({
+  environment,
   serviceName,
   transactionType,
   transactionName,
@@ -34,6 +36,7 @@ async function searchThroughput({
   searchAggregatedTransactions,
   intervalString,
 }: {
+  environment?: string;
   serviceName: string;
   transactionType: string;
   transactionName: string | undefined;
@@ -41,16 +44,17 @@ async function searchThroughput({
   searchAggregatedTransactions: boolean;
   intervalString: string;
 }) {
-  const { start, end, apmEventClient } = setup;
+  const { esFilter, start, end, apmEventClient } = setup;
 
   const filter: ESFilter[] = [
     { term: { [SERVICE_NAME]: serviceName } },
-    { range: rangeFilter(start, end) },
+    { term: { [TRANSACTION_TYPE]: transactionType } },
     ...getDocumentTypeFilterForAggregatedTransactions(
       searchAggregatedTransactions
     ),
-    { term: { [TRANSACTION_TYPE]: transactionType } },
-    ...setup.esFilter,
+    ...rangeQuery(start, end),
+    ...environmentQuery(environment),
+    ...esFilter,
   ];
 
   if (transactionName) {
@@ -90,34 +94,39 @@ async function searchThroughput({
 }
 
 export async function getThroughputCharts({
+  environment,
   serviceName,
   transactionType,
   transactionName,
   setup,
   searchAggregatedTransactions,
 }: {
+  environment?: string;
   serviceName: string;
   transactionType: string;
   transactionName: string | undefined;
   setup: Setup & SetupTimeRange;
   searchAggregatedTransactions: boolean;
 }) {
-  const { bucketSize, intervalString } = getBucketSize(setup);
+  return withApmSpan('get_transaction_throughput_series', async () => {
+    const { bucketSize, intervalString } = getBucketSize(setup);
 
-  const response = await searchThroughput({
-    serviceName,
-    transactionType,
-    transactionName,
-    setup,
-    searchAggregatedTransactions,
-    intervalString,
+    const response = await searchThroughput({
+      environment,
+      serviceName,
+      transactionType,
+      transactionName,
+      setup,
+      searchAggregatedTransactions,
+      intervalString,
+    });
+
+    return {
+      throughputTimeseries: getThroughputBuckets({
+        throughputResultBuckets: response.aggregations?.throughput.buckets,
+        bucketSize,
+        setupTimeRange: setup,
+      }),
+    };
   });
-
-  return {
-    throughputTimeseries: getThroughputBuckets({
-      throughputResultBuckets: response.aggregations?.throughput.buckets,
-      bucketSize,
-      setupTimeRange: setup,
-    }),
-  };
 }

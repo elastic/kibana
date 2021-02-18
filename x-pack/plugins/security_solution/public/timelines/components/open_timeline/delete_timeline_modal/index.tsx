@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiModal, EuiOverlayMask } from '@elastic/eui';
+import { EuiModal } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import { createGlobalStyle } from 'styled-components';
 
@@ -46,16 +46,14 @@ export const DeleteTimelineModalOverlay = React.memo<Props>(
       <>
         {isModalOpen && <RemovePopover data-test-subj="remove-popover" />}
         {isModalOpen ? (
-          <EuiOverlayMask>
-            <EuiModal maxWidth={DELETE_TIMELINE_MODAL_WIDTH} onClose={internalCloseModal}>
-              <DeleteTimelineModal
-                data-test-subj="delete-timeline-modal"
-                onDelete={onDelete}
-                title={title}
-                closeModal={internalCloseModal}
-              />
-            </EuiModal>
-          </EuiOverlayMask>
+          <EuiModal maxWidth={DELETE_TIMELINE_MODAL_WIDTH} onClose={internalCloseModal}>
+            <DeleteTimelineModal
+              data-test-subj="delete-timeline-modal"
+              onDelete={onDelete}
+              title={title}
+              closeModal={internalCloseModal}
+            />
+          </EuiModal>
         ) : null}
       </>
     );

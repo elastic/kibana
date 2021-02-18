@@ -29,16 +29,20 @@ kibanaPipeline(timeoutMinutes: 180) {
       catchErrors {
         print "Agent ${agentNumberInside} - ${agentExecutions} executions"
 
-        workers.functional('flaky-test-runner', {
-          if (!IS_XPACK) {
-            kibanaPipeline.buildOss()
-            if (CI_GROUP == '1') {
-              runbld("./test/scripts/jenkins_build_kbn_sample_panel_action.sh", "Build kbn tp sample panel action for ciGroup1")
+        withEnv([
+          'IGNORE_SHIP_CI_STATS_ERROR=true',
+        ]) {
+          workers.functional('flaky-test-runner', {
+            if (!IS_XPACK) {
+              kibanaPipeline.buildOss()
+              if (CI_GROUP == '1') {
+                runbld("./test/scripts/jenkins_build_kbn_sample_panel_action.sh", "Build kbn tp sample panel action for ciGroup1")
+              }
+            } else {
+              kibanaPipeline.buildXpack()
             }
-          } else {
-            kibanaPipeline.buildXpack()
-          }
-        }, getWorkerMap(agentNumberInside, agentExecutions, worker, workerFailures))()
+          }, getWorkerMap(agentNumberInside, agentExecutions, worker, workerFailures))()
+        }
       }
     }
   }
