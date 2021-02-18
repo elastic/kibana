@@ -297,7 +297,8 @@ export async function installTemplate({
   packageVersion: string;
   packageName: string;
 }): Promise<TemplateRef> {
-  const mappings = generateMappings(processFields(fields));
+  const validFields = processFields(fields);
+  const mappings = generateMappings(validFields);
   const templateName = generateTemplateName(dataStream);
   const templateIndexPattern = generateTemplateIndexPattern(dataStream);
   const templatePriority = getTemplatePriority(dataStream);
@@ -359,6 +360,7 @@ export async function installTemplate({
   const template = getTemplate({
     type: dataStream.type,
     templateIndexPattern,
+    fields: validFields,
     mappings,
     pipelineName,
     packageName,

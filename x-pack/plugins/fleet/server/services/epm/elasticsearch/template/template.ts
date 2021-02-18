@@ -37,6 +37,8 @@ const DEFAULT_IGNORE_ABOVE = 1024;
 const DEFAULT_TEMPLATE_PRIORITY = 200;
 const DATASET_IS_PREFIX_TEMPLATE_PRIORITY = 150;
 
+const DEFAULT_FIELD_TYPES = ['keyword', 'text'];
+
 /**
  * getTemplate retrieves the default template but overwrites the index pattern with the given value.
  *
@@ -45,6 +47,7 @@ const DATASET_IS_PREFIX_TEMPLATE_PRIORITY = 150;
 export function getTemplate({
   type,
   templateIndexPattern,
+  fields,
   mappings,
   pipelineName,
   packageName,
@@ -55,6 +58,7 @@ export function getTemplate({
 }: {
   type: string;
   templateIndexPattern: string;
+  fields: Fields;
   mappings: IndexTemplateMappings;
   pipelineName?: string | undefined;
   packageName: string;
@@ -66,6 +70,7 @@ export function getTemplate({
   const template = getBaseTemplate(
     type,
     templateIndexPattern,
+    fields,
     mappings,
     packageName,
     composedOfTemplates,
@@ -296,9 +301,28 @@ export function generateESIndexPatterns(
   return patterns;
 }
 
+const flattenFieldsToNameAndType = (
+  fields: Fields,
+  path: string = ''
+): Array<Pick<Field, 'name' | 'type'>> => {
+  let newFields: Array<Pick<Field, 'name' | 'type'>> = [];
+  fields.forEach((field) => {
+    const fieldName = path ? `${path}.${field.name}` : field.name;
+    newFields.push({
+      name: fieldName,
+      type: field.type,
+    });
+    if (field.fields && field.fields.length) {
+      newFields = newFields.concat(flattenFieldsToNameAndType(field.fields, fieldName));
+    }
+  });
+  return newFields;
+};
+
 function getBaseTemplate(
   type: string,
   templateIndexPattern: string,
+  fields: Fields,
   mappings: IndexTemplateMappings,
   packageName: string,
   composedOfTemplates: string[],
@@ -314,6 +338,10 @@ function getBaseTemplate(
     managed_by: 'ingest-manager',
     managed: true,
   };
+
+  const defaultFields = flattenFieldsToNameAndType(fields)
+    .filter((field) => field.type && DEFAULT_FIELD_TYPES.includes(field.type))
+    .map((field) => field.name);
 
   return {
     priority: templatePriority,
@@ -338,13 +366,18 @@ function getBaseTemplate(
           refresh_interval: '5s',
           // Default in the stack now, still good to have it in
           number_of_shards: '1',
-          // All the default fields which should be queried have to be added here.
-          // So far we add all keyword and text fields here.
-          query: {
-            default_field: ['message'],
-          },
           // We are setting 30 because it can be devided by several numbers. Useful when shrinking.
           number_of_routing_shards: '30',
+          // All the default fields which should be queried have to be added here.
+          // So far we add all keyword and text fields here if there are any, otherwise
+          // this setting is skipped.
+          ...(defaultFields.length
+            ? {
+                query: {
+                  default_field: defaultFields,
+                },
+              }
+            : {}),
         },
       },
       mappings: {
