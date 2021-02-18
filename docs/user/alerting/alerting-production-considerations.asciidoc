@@ -10,19 +10,21 @@
 [float]
 === Running background alert checks and actions
 
-{kib} background tasks are managed by:
+{kib} uses <<task-manager>> to run Alerts and Actions as background tasks, distributed across all {kib} nodes in the cluster.
 
-* Polling an {es} task index for overdue tasks at 3 second intervals.  This interval can be changed using the `xpack.task_manager.poll_interval` setting.
-* Tasks are then claiming them by updating them in the {es} index, using optimistic concurrency control to prevent conflicts. Each {kib} instance can run a maximum of 10 concurrent tasks, so a maximum of 10 tasks are claimed each interval. 
-* Tasks are run on the {kib} server. 
-* In the case of alerts which are recurring background checks, upon completion the task is scheduled again according to the <<defining-alerts-general-details, check interval>>.
+By default, each {kib} instance polls for work at 3 second intervals, and can run a maximum of 10 concurrent tasks.
+These tasks are then ran on the {kib} server.
+
+In the case of alerts which are recurring background checks, upon completion the task is scheduled again according to the <<defining-alerts-general-details, check interval>>.
+
+For more details on Task Manager, see <<task-manager-background-tasks>>.
 
 [IMPORTANT]
 ==============================================
 It is possible for alert and action tasks to be run late or at an inconsistent schedule.
-This is usually a symptom of the specific usage or scaling strategy of the cluster in question.
+This is usually a symptom of the specific usage of the cluster in question.
 
-Such issues can be addressed by tweaking the {kib} Task Manager or adjusting the cluster scaling strategy to better suit the unique use case.
+Such issues can be addressed by tweaking the {kib} <<task-manager>> or adjusting the cluster scaling strategy to better suit the unique use case.
 
 For detailed guidance, see <<alerting-troubleshooting,`Alerting Troubelshooting`>>.
 ==============================================
