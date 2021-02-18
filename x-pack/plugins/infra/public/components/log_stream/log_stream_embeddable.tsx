@@ -39,6 +39,8 @@ export class LogStreamEmbeddable extends Embeddable<LogStreamEmbeddableInput> {
     parent?: IContainer
   ) {
     super(initialInput, {}, parent);
+
+    this.getInput$().subscribe(() => this.renderComponent());
   }
 
   public render(node: HTMLElement) {
