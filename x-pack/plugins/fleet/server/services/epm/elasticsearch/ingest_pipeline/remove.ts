@@ -61,7 +61,11 @@ export async function deletePipeline(callCluster: CallESAsCurrentUser, id: strin
     try {
       await callCluster('ingest.deletePipeline', { id });
     } catch (err) {
-      throw new Error(`error deleting pipeline ${id}`);
+      // Only throw if error is not a 404 error. Sometimes the pipeline is already deleted, but we have
+      // duplicate references to them, see https://github.com/elastic/kibana/issues/91192
+      if (err.statusCode !== 404) {
+        throw new Error(`error deleting pipeline ${id}: ${err}`);
+      }
     }
   }
 }
