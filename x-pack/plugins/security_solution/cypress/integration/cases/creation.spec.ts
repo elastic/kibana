@@ -8,11 +8,10 @@
 import { case1 } from '../../objects/case';
 
 import {
-  ALL_CASES_CLOSE_ACTION,
   ALL_CASES_CLOSED_CASES_STATS,
   ALL_CASES_COMMENTS_COUNT,
-  ALL_CASES_DELETE_ACTION,
   ALL_CASES_IN_PROGRESS_CASES_STATS,
+  ALL_CASES_ITEM_ACTIONS_BTN,
   ALL_CASES_NAME,
   ALL_CASES_OPEN_CASES_COUNT,
   ALL_CASES_OPEN_CASES_STATS,
@@ -91,8 +90,7 @@ describe('Cases', () => {
     cy.get(ALL_CASES_COMMENTS_COUNT).should('have.text', '0');
     cy.get(ALL_CASES_OPENED_ON).should('include.text', 'ago');
     cy.get(ALL_CASES_SERVICE_NOW_INCIDENT).should('have.text', 'Not pushed');
-    cy.get(ALL_CASES_DELETE_ACTION).should('exist');
-    cy.get(ALL_CASES_CLOSE_ACTION).should('exist');
+    cy.get(ALL_CASES_ITEM_ACTIONS_BTN).should('exist');
 
     goToCaseDetails();
 
