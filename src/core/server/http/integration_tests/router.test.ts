@@ -1439,16 +1439,9 @@ describe('Response factory', () => {
 
       expect(result.body).toEqual({
         error: 'Internal Server Error',
-        message: 'An internal server error occurred.',
+        message: 'some message',
         statusCode: 500,
       });
-      expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
-        Array [
-          Array [
-            [Error: some message],
-          ],
-        ]
-      `);
     });
 
     it('Custom error response for Boom server error', async () => {
@@ -1470,16 +1463,9 @@ describe('Response factory', () => {
 
       expect(result.body).toEqual({
         error: 'Internal Server Error',
-        message: 'An internal server error occurred.',
+        message: 'some message',
         statusCode: 500,
       });
-      expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
-        Array [
-          Array [
-            [Error: some message],
-          ],
-        ]
-      `);
     });
 
     it('Custom error response requires error status code', async () => {

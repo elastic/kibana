@@ -194,7 +194,7 @@ const errorResponseFactory = {
         `Unexpected Http status code. Expected from 400 to 599, but given: ${options.statusCode}`
       );
     }
-    return new KibanaResponse(options.statusCode, options.body, options);
+    return new KibanaResponse(options.statusCode, options.body, options, true);
   },
 };
 /**
