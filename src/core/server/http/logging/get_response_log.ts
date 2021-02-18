@@ -30,7 +30,12 @@ export function getEcsResponseLog(request: Request, log: Logger): LogMeta {
 
   // eslint-disable-next-line @typescript-eslint/naming-convention
   const status_code = isBoom(response) ? response.output.statusCode : response.statusCode;
-  const responseHeaders = isBoom(response) ? response.output.headers : response.headers;
+
+  // shallow clone the headers so they are not mutated if filtered by a RewriteAppender
+  const requestHeaders = { ...request.headers };
+  const responseHeaders = isBoom(response)
+    ? { ...response.output.headers }
+    : { ...response.headers };
 
   // borrowed from the hapi/good implementation
   const responseTime = (request.info.completed || request.info.responded) - request.info.received;
@@ -51,7 +56,7 @@ export function getEcsResponseLog(request: Request, log: Logger): LogMeta {
         mime_type: request.mime,
         referrer: request.info.referrer,
         // @ts-expect-error Headers are not yet part of ECS: https://github.com/elastic/ecs/issues/232.
-        headers: request.headers,
+        headers: requestHeaders,
       },
       response: {
         body: {
