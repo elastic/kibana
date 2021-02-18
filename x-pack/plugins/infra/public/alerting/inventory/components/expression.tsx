@@ -292,11 +292,13 @@ export const Expressions: React.FC<Props> = (props) => {
       </EuiText>
       <StyledExpression>
         <StyledExpressionRow>
-          <NodeTypeExpression
-            options={nodeTypes}
-            value={alertParams.nodeType || 'host'}
-            onChange={updateNodeType}
-          />
+          <NonCollapsibleExpression>
+            <NodeTypeExpression
+              options={nodeTypes}
+              value={alertParams.nodeType || 'host'}
+              onChange={updateNodeType}
+            />
+          </NonCollapsibleExpression>
         </StyledExpressionRow>
       </StyledExpression>
       <EuiSpacer size={'xs'} />
@@ -325,13 +327,15 @@ export const Expressions: React.FC<Props> = (props) => {
           );
         })}
 
-      <ForLastExpression
-        timeWindowSize={timeSize}
-        timeWindowUnit={timeUnit}
-        errors={emptyError}
-        onChangeWindowSize={updateTimeSize}
-        onChangeWindowUnit={updateTimeUnit}
-      />
+      <NonCollapsibleExpression>
+        <ForLastExpression
+          timeWindowSize={timeSize}
+          timeWindowUnit={timeUnit}
+          errors={emptyError}
+          onChangeWindowSize={updateTimeSize}
+          onChangeWindowUnit={updateTimeUnit}
+        />
+      </NonCollapsibleExpression>
 
       <div>
         <EuiButtonEmpty
@@ -431,6 +435,10 @@ interface ExpressionRowProps {
   setAlertParams(id: number, params: Partial<InventoryMetricConditions>): void;
   fields: IFieldType[];
 }
+
+const NonCollapsibleExpression = euiStyled.div`
+  margin-left: 28px;
+`;
 
 const StyledExpressionRow = euiStyled(EuiFlexGroup)`
   display: flex;
