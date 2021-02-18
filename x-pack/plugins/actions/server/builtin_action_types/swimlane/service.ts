@@ -31,9 +31,7 @@ export const createExternalService = (
   const { apiToken } = secrets as SwimlaneSecretConfigurationType;
 
   const axiosInstance = axios.create({
-    httpsAgent: new https.Agent({
-      rejectUnauthorized: false,
-    }),
+    httpsAgent: new https.Agent({}),
   });
 
   if (!url || !appId || !apiToken || !mappings) {
@@ -54,14 +52,6 @@ export const createExternalService = (
   const getApplicationUrl = (id: string) => applicationUrl.replace('{appId}', id);
   const getPostRecordUrl = (id: string) => recordUrl.replace('{appId}', id);
 
-  const normalizeApplication = (application: {
-    id: string;
-    fields: Array<{ id: string; key: string }>;
-  }) => ({
-    id: application.id,
-    fields: application.fields,
-  });
-
   const getBodyForEventAction = (
     applicationId: string,
     mappingConfig: MappingConfigType,
@@ -74,7 +64,7 @@ export const createExternalService = (
     const values: Record<string, unknown> = {};
 
     for (const mappingsKey in mappingConfig) {
-      if (!{}.hasOwnProperty.call(mappingConfig, mappingsKey)) {
+      if (!Object.hasOwnProperty.call(mappingConfig, mappingsKey)) {
         continue;
       }
 
@@ -105,7 +95,7 @@ export const createExternalService = (
         headers,
       });
 
-      return normalizeApplication(res.data ?? {});
+      return { ...(res?.data?.application ?? {}) };
     } catch (error) {
       throw new Error(
         getErrorMessage(

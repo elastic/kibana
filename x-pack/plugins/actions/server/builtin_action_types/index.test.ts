@@ -14,7 +14,16 @@ import { actionsConfigMock } from '../actions_config.mock';
 import { licenseStateMock } from '../lib/license_state.mock';
 import { licensingMock } from '../../../licensing/server/mocks';
 
-const ACTION_TYPE_IDS = ['.index', '.email', '.pagerduty', '.swimlane', '.server-log', '.slack', '.webhook'];
+const ACTION_TYPE_IDS = [
+  '.index',
+  '.email',
+  '.pagerduty',
+  '.swimlane',
+  '.server-log',
+  '.slack',
+  '.teams',
+  '.webhook',
+];
 
 export function createActionTypeRegistry(): {
   logger: jest.Mocked<Logger>;

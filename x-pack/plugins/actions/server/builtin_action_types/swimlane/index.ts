@@ -86,13 +86,13 @@ async function executor(
   );
 
   if (!api[subAction]) {
-    const errorMessage = `[Action][ExternalService] Unsupported subAction type ${subAction}.`;
+    const errorMessage = `[Action][ExternalService] -> [Swimlane] Unsupported subAction type ${subAction}.`;
     logger.error(errorMessage);
     throw new Error(errorMessage);
   }
 
   if (!supportedSubActions.includes(subAction)) {
-    const errorMessage = `[Action][ExternalService] subAction ${subAction} not implemented.`;
+    const errorMessage = `[Action][ExternalService] -> [Swimlane] subAction ${subAction} not implemented.`;
     logger.error(errorMessage);
     throw new Error(errorMessage);
   }
@@ -116,7 +116,7 @@ async function executor(
       logger,
     });
 
-    logger.debug(`new record id ${data.id}`);
+    logger.debug(`Swimlane new record id ${data.id}`);
   }
 
   return { status: 'ok', data: data ?? {}, actionId };
