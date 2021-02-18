@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SpacesRouter } from '../../../types';
+import { SpacesRouter } from '../../../types';
 import { SpacesServiceStart } from '../../../spaces_service/spaces_service';
 import { initGetActiveSpaceApi } from './get_active_space';
 

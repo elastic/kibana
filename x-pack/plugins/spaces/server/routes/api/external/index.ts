@@ -15,7 +15,7 @@ import { SpacesServiceStart } from '../../../spaces_service';
 import { UsageStatsServiceSetup } from '../../../usage_stats';
 import { initCopyToSpacesApi } from './copy_to_space';
 import { initShareToSpacesApi } from './share_to_space';
-import type { SpacesRouter } from '../../../types';
+import { SpacesRouter } from '../../../types';
 
 export interface ExternalRouteDeps {
   externalRouter: SpacesRouter;

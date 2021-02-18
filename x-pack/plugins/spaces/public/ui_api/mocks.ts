@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SpacesApiUi, SpacesApiUiComponent } from 'src/plugins/spaces_oss/public';
+import { SpacesApiUi, SpacesApiUiComponent } from 'src/plugins/spaces_oss/public';
 
 function createComponentsMock(): jest.Mocked<SpacesApiUiComponent> {
   return {

@@ -6,7 +6,7 @@
  */
 
 import * as Rx from 'rxjs';
-import type { Writable } from '@kbn/utility-types';
+import { Writable } from '@kbn/utility-types';
 import {
   DefaultSpaceService,
   RETRY_SCALE_DURATION,

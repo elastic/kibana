@@ -12,7 +12,7 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { EuiToolTip } from '@elastic/eui';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import type { SpaceListProps } from 'src/plugins/spaces_oss/public';
+import { SpaceListProps } from 'src/plugins/spaces_oss/public';
 import { ShareToSpacesData, ShareToSpaceTarget } from '../types';
 import { ALL_SPACES_ID, UNKNOWN_SPACE } from '../../common/constants';
 import { useSpaces } from '../spaces_context';

@@ -32,7 +32,7 @@ import {
   SpacesClientService,
   SpacesClientWrapper,
 } from './spaces_client';
-import type { SpacesRequestHandlerContext } from './types';
+import { SpacesRequestHandlerContext } from './types';
 
 export interface PluginsSetup {
   features: FeaturesPluginSetup;

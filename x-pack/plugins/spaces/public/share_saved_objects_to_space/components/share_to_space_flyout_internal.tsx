@@ -24,7 +24,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { ToastsStart } from 'src/core/public';
-import type {
+import {
   ShareToSpaceFlyoutProps,
   ShareToSpaceSavedObjectTarget,
 } from 'src/plugins/spaces_oss/public';

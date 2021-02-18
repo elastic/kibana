@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { KibanaRequest, IBasePath } from 'src/core/server';
+import { KibanaRequest, IBasePath } from 'src/core/server';
 import { SpacesClientServiceStart } from '../spaces_client';
 import { getSpaceIdFromPath } from '../../common';
 import { DEFAULT_SPACE_ID } from '../../common/constants';

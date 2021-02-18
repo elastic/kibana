@@ -6,7 +6,7 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
-import type {
+import {
   PluginInitializerContext,
   ConfigDeprecationProvider,
   ConfigDeprecation,

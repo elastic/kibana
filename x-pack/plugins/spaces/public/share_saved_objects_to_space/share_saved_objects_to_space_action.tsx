@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import type { SpacesApiUi } from 'src/plugins/spaces_oss/public';
+import { SpacesApiUi } from 'src/plugins/spaces_oss/public';
 import {
   SavedObjectsManagementAction,
   SavedObjectsManagementRecord,

@@ -16,9 +16,9 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 import { firstValueFrom } from '@kbn/std';
 import React, { useState, useEffect } from 'react';
-import type { ApplicationStart, StartServicesAccessor } from 'src/core/public';
-import type { LegacyUrlConflictProps } from 'src/plugins/spaces_oss/public';
-import type { PluginsStart } from '../../plugin';
+import { ApplicationStart, StartServicesAccessor } from 'src/core/public';
+import { LegacyUrlConflictProps } from 'src/plugins/spaces_oss/public';
+import { PluginsStart } from '../../plugin';
 import { DEFAULT_OBJECT_NOUN } from './constants';
 
 export interface InternalProps {

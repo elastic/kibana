@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { IRouter, RequestHandlerContext } from 'src/core/server';
-import type { LicensingApiRequestHandlerContext } from '../../licensing/server';
+import { IRouter, RequestHandlerContext } from 'src/core/server';
+import { LicensingApiRequestHandlerContext } from '../../licensing/server';
 
 /**
  * @internal

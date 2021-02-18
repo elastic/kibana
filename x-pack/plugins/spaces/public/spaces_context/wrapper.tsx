@@ -12,7 +12,7 @@ import {
   ApplicationStart,
   NotificationsStart,
 } from 'src/core/public';
-import type { SpacesContextProps } from 'src/plugins/spaces_oss/public';
+import { SpacesContextProps } from 'src/plugins/spaces_oss/public';
 import { createSpacesReactContext } from './context';
 import { PluginsStart } from '../plugin';
 import { SpacesManager } from '../spaces_manager';
