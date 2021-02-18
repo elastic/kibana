@@ -67,16 +67,17 @@ describe('cluster checkup API', () => {
   describe('with APM enabled', () => {
     it('is provided to getUpgradeAssistantStatus', async () => {
       const spy = jest.spyOn(MigrationApis, 'getUpgradeAssistantStatus');
-      await routeDependencies.router.getHandler({
-        method: 'get',
-        pathPattern: '/api/upgrade_assistant/status',
-      })(routeHandlerContextMock, createRequestMock(), kibanaResponseFactory);
 
       MigrationApis.getUpgradeAssistantStatus.mockResolvedValue({
         cluster: [],
         indices: [],
         nodes: [],
       });
+
+      await routeDependencies.router.getHandler({
+        method: 'get',
+        pathPattern: '/api/upgrade_assistant/status',
+      })(routeHandlerContextMock, createRequestMock(), kibanaResponseFactory);
 
       expect(spy.mock.calls[0][2]).toEqual(['apm-*']);
     });
