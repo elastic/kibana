@@ -13,7 +13,7 @@ import React, { useCallback, useMemo, useRef, useEffect, useState } from 'react'
 import useDebounce from 'react-use/lib/useDebounce';
 import useInterval from 'react-use/lib/useInterval';
 import { TableText } from '../';
-import { SessionsConfigSchema } from '../..';
+import { IManagementSectionsPluginsSetup, SessionsConfigSchema } from '../..';
 import { SearchSessionsMgmtAPI } from '../../lib/api';
 import { getColumns } from '../../lib/get_columns';
 import { UISession } from '../../types';
@@ -28,9 +28,10 @@ interface Props {
   api: SearchSessionsMgmtAPI;
   timezone: string;
   config: SessionsConfigSchema;
+  plugins: IManagementSectionsPluginsSetup;
 }
 
-export function SearchSessionsMgmtTable({ core, api, timezone, config, ...props }: Props) {
+export function SearchSessionsMgmtTable({ core, api, timezone, config, plugins, ...props }: Props) {
   const [tableData, setTableData] = useState<UISession[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [debouncedIsLoading, setDebouncedIsLoading] = useState(false);
@@ -71,7 +72,8 @@ export function SearchSessionsMgmtTable({ core, api, timezone, config, ...props 
   // initial data load
   useEffect(() => {
     doRefresh();
-  }, [doRefresh]);
+    plugins.data.search.usageCollector?.trackSessionsListLoaded();
+  }, [doRefresh, plugins]);
 
   useInterval(doRefresh, refreshInterval);
 
@@ -110,7 +112,7 @@ export function SearchSessionsMgmtTable({ core, api, timezone, config, ...props 
       rowProps={() => ({
         'data-test-subj': 'searchSessionsRow',
       })}
-      columns={getColumns(core, api, config, timezone, onActionComplete)}
+      columns={getColumns(core, plugins, api, config, timezone, onActionComplete)}
       items={tableData}
       pagination={pagination}
       search={search}

@@ -32,6 +32,7 @@ export function MachineLearningDataFrameAnalyticsResultsProvider({
     async assertClassificationEvaluatePanelElementsExists() {
       await testSubjects.existOrFail('mlDFExpandableSection-ClassificationEvaluation');
       await testSubjects.existOrFail('mlDFAnalyticsClassificationExplorationConfusionMatrix');
+      await testSubjects.existOrFail('mlDFAnalyticsClassificationExplorationRocCurveChart');
     },
 
     async assertClassificationTablePanelExists() {

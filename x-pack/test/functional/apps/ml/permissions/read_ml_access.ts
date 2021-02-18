@@ -15,16 +15,19 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
 
-  const testUsers = [USER.ML_VIEWER, USER.ML_VIEWER_SPACES];
+  const testUsers = [
+    { user: USER.ML_VIEWER, discoverAvailable: true },
+    { user: USER.ML_VIEWER_SPACES, discoverAvailable: false },
+  ];
 
   describe('for user with read ML access', function () {
     this.tags(['skipFirefox', 'mlqa']);
 
     describe('with no data loaded', function () {
-      for (const user of testUsers) {
-        describe(`(${user})`, function () {
+      for (const testUser of testUsers) {
+        describe(`(${testUser.user})`, function () {
           before(async () => {
-            await ml.securityUI.loginAs(user);
+            await ml.securityUI.loginAs(testUser.user);
             await ml.api.cleanMlIndices();
           });
 
@@ -154,10 +157,10 @@ export default function ({ getService }: FtrProviderContext) {
         await ml.api.deleteFilter(filterId);
       });
 
-      for (const user of testUsers) {
-        describe(`(${user})`, function () {
+      for (const testUser of testUsers) {
+        describe(`(${testUser.user})`, function () {
           before(async () => {
-            await ml.securityUI.loginAs(user);
+            await ml.securityUI.loginAs(testUser.user);
           });
 
           after(async () => {
@@ -351,14 +354,17 @@ export default function ({ getService }: FtrProviderContext) {
             await ml.dataVisualizerIndexBased.assertDataVisualizerTableExist();
 
             await ml.testExecution.logTestStep(
-              'should display the actions panel with Discover card'
+              `should display the actions panel ${
+                testUser.discoverAvailable ? 'with' : 'without'
+              } Discover card`
             );
             await ml.dataVisualizerIndexBased.assertActionsPanelExists();
-            await ml.dataVisualizerIndexBased.assertViewInDiscoverCardExists();
+            await ml.dataVisualizerIndexBased.assertViewInDiscoverCard(testUser.discoverAvailable);
 
             await ml.testExecution.logTestStep('should not display job cards');
             await ml.dataVisualizerIndexBased.assertCreateAdvancedJobCardNotExists();
             await ml.dataVisualizerIndexBased.assertRecognizerCardNotExists(ecExpectedModuleId);
+            await ml.dataVisualizerIndexBased.assertCreateDataFrameAnalyticsCardNotExists();
           });
 
           it('should display elements on File Data Visualizer page correctly', async () => {
