@@ -45,4 +45,11 @@ describe('RoleSelector', () => {
 
     expect(radio.dive().find(EuiCallOut)).toHaveLength(1);
   });
+
+  it('sets checked attribute on radio when option matched type', () => {
+    const wrapper = shallow(<RoleSelector {...props} roleTypeOption="user" />);
+    const radio = wrapper.find(EuiRadio);
+
+    expect(radio.prop('checked')).toEqual(true);
+  });
 });
