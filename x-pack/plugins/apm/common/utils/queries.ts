@@ -45,11 +45,11 @@ export function rangeQuery(
   ];
 }
 
-export function searchQuery(queryText?: string) {
-  if (!queryText) {
+export function searchQuery(searchTerm?: string) {
+  if (!searchTerm) {
     return [];
   }
 
-  const ast = esKuery.fromKueryExpression(queryText);
+  const ast = esKuery.fromKueryExpression(searchTerm);
   return [esKuery.toElasticsearchQuery(ast) as ESFilter];
 }
