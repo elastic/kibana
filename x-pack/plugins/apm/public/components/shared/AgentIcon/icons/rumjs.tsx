@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { EuiIconProps } from '@elastic/eui';
 
 export function rumJsIcon({
   title,

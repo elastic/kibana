@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { EuiIconProps } from '@elastic/eui';
 
 export function phpIcon({
   title,
@@ -13,9 +14,6 @@ export function phpIcon({
   ...props
 }: Omit<EuiIconProps, 'type'>) {
   return (
-  
-
-  
     <svg
       width="32"
       height="32"
