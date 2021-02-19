@@ -264,6 +264,125 @@ The maximum number of files to keep. Once this number is reached, oldest files w
 
 The default value is `7`
 
+### Rewrite Appender
+
+*This appender is currently considered experimental and is not intended
+for public consumption. The API is subject to change at any time.*
+
+Similar to log4j's `RewriteAppender`, this appender serves as a sort of middleware,
+modifying the provided log events before passing them along to another
+appender.
+
+The most common use case for the `RewriteAppender` is when you want to
+filter or censor sensitive data that may be contained in a log entry.
+In fact, with a default configuration, Kibana will automatically redact
+any `authorization`, `cookie`, or `set-cookie` headers when logging http
+requests & responses.
+
+To configure additional rewrite rules, you'll need to specify a `RewritePolicy`.
+
+#### Rewrite Policies
+
+Rewrite policies exist to indicate which parts of a log record can be
+modified within the rewrite appender.
+
+**Meta**
+
+The `meta` rewrite policy can read and modify any data contained in the
+`LogMeta` before passing it along to a destination appender.
+
+```yaml
+logging:
+  appenders:
+    my-rewrite-appender:
+      type: rewrite
+      appenders: [console, file] # name of "destination" appender(s)
+      policy:
+        # ...
+```
+
+Meta policies must specify one of three modes, which indicate which action
+to perform on the configured properties:
+- `add` creates a new property at the provided `path`, skipping properties which already exist.
+- `update` updates an existing property at the provided `path` without creating new properties.
+- `remove` removes an existing property at the provided `path`.
+
+The `properties` are listed as a `path` and `value` pair, where `path` is
+the dot-delimited path to the target property in the `LogMeta` object, and
+`value` is the value to add or update in that target property. When using
+the `remove` mode, a `value` is not necessary.
+
+```yaml
+logging:
+  appenders:
+    my-rewrite-appender:
+      type: rewrite
+      appenders: [console]
+      policy:
+        type: meta # indicates that we want to rewrite the LogMeta
+        mode: update # will update an existing property only
+        properties:
+          - path: "http.request.headers.cookie" # path to property
+            value: "[REDACTED]" # value to replace at path
+```
+
+Rewrite appenders can even be passed to other rewrite appenders to apply
+multiple filter policies/modes, as long as it doesn't create a circular
+reference.
+```yaml
+logging:
+  appenders:
+    remove-stuff:
+      type: rewrite
+      appenders: [add-stuff] # redirect to the next rewrite appender
+      policy:
+        type: meta
+        mode: remove
+        properties:
+          - path: "http.request.headers.authorization"
+          - path: "http.request.headers.cookie"
+          - path: "http.request.headers.set-cookie"
+    add-stuff:
+      type: rewrite
+      appenders: [console] # output to console
+      policy:
+        type: meta
+        mode: add
+        properties:
+          - path: "hello"
+            value: "world" # creates { hello: 'world' } at the LogMeta root
+```
+
+#### Complete Example
+```yaml
+logging:
+  appenders:
+    console:
+      type: console
+      layout:
+        type: pattern
+        highlight: true
+        pattern: "[%date][%level][%logger] %message %meta"
+    file:
+      type: file
+      fileName: ./kibana.log
+      layout:
+        type: json
+    censor:
+      type: rewrite
+      appenders: [console, file]
+      policy:
+        type: meta
+        mode: update
+        properties:
+          - path: "http.request.headers.cookie"
+            value: "[REDACTED]"
+  loggers:
+    - name: http.server.response
+      appenders: [censor] # pass these logs to our rewrite appender
+      level: debug
+```
+
 ## Configuration
 
 As any configuration in the platform, logging configuration is validated against the predefined schema and if there are
