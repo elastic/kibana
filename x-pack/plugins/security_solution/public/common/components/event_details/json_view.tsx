@@ -60,7 +60,7 @@ export const buildJsonView = (data: TimelineEventsDetailsItem[]) =>
       (accumulator, item) =>
         set(
           item.field,
-          item.originalValue instanceof Array ? item.originalValue.join() : item.originalValue,
+          Array.isArray(item.originalValue) ? item.originalValue.join() : item.originalValue,
           accumulator
         ),
       {}
