@@ -29,7 +29,6 @@ import { track, METRIC_TYPE, TELEMETRY_EVENT } from '../../../../../common/lib/t
 
 import * as i18n from '../translations';
 import { bucketRulesResponse } from './helpers';
-import { Action } from './reducer';
 import { transformOutput } from '../../../../containers/detection_engine/rules/transforms';
 
 export const editRuleAction = (rule: Rule, history: H.History) => {
