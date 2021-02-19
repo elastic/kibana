@@ -51,6 +51,7 @@ export function extractPanelsReferences(
 
   for (const panel of panels) {
     const embeddable = convertSavedDashboardPanelToPanelState(panel);
+
     const {
       state: embeddableInputWithExtractedReferences,
       references,
@@ -58,6 +59,7 @@ export function extractPanelsReferences(
       ...embeddable.explicitInput,
       type: embeddable.type,
     });
+
     embeddable.explicitInput = omit(embeddableInputWithExtractedReferences, 'type');
 
     const newPanel = convertPanelStateToSavedDashboardPanel(embeddable, panel.version);
