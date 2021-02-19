@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { resolveTimeInterval } from './alerting_service';
+import { resolveBucketSpanInSeconds } from './alerting_service';
 
 describe('Alerting Service', () => {
   test('should resolve maximum bucket interval', () => {
-    expect(resolveTimeInterval(['15m', '1h', '6h', '90s'])).toBe('43200s');
+    expect(resolveBucketSpanInSeconds(['15m', '1h', '6h', '90s'])).toBe(43200);
   });
 });
