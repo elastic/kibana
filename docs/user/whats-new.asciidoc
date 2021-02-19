@@ -102,7 +102,7 @@ image::user/images/highlights-search-syntax.png[Global search field with syntax 
 
 [float]
 [[improved-visualization-chooser]]
-=== Simplier visualization workflow
+=== Simplified visualization workflow
 
 {kib} simplifies the visualization workflow by providing guidance for
 which visualization editor to use for your type of data. To view the new visualization selector,
