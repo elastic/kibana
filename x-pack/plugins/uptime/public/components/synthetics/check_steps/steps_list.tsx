@@ -97,7 +97,6 @@ export const StepsList = ({ data, error, loading }: Props) => {
       align: 'left',
       field: 'timestamp',
       name: '',
-      width: '250px',
       render: (val: string, item: Ping) => (
         <StepDetailLink
           checkGroupId={item.monitor.check_group!}
