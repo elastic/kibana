@@ -159,7 +159,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
               'pre-7.10.0'
             );
 
-            // loading the archive likely caused the task to fail so ensure it's rescheduled to run in 3 seconds,
+            // loading the archive likely caused the task to fail so ensure it's rescheduled to run in 4 seconds,
             // otherwise this test will stall for 5 minutes
             // no other attributes are touched, only runAt, so unless it would have ran when runAt expired, it
             // won't run now
@@ -167,7 +167,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
               .put(`${getUrlPrefix(space.id)}/api/alerts_fixture/${alertId}/reschedule_task`)
               .set('kbn-xsrf', 'foo')
               .send({
-                runAt: getRunAt(3000),
+                runAt: getRunAt(4000),
               })
               .expect(200);
           }
