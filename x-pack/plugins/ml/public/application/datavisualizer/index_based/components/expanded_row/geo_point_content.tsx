@@ -66,7 +66,7 @@ export const GeoPointContent: FC<{
     <ExpandedRowContent dataTestSubj={'mlDVIndexBasedMapContent'}>
       <DocumentStatsTable config={config} />
 
-      <EuiFlexItem>
+      <EuiFlexItem style={{ maxWidth: '50%' }}>
         <ExamplesList examples={stats.examples} />
       </EuiFlexItem>
       <EuiFlexItem className={'mlDataVisualizerMapWrapper'}>
