@@ -60,13 +60,15 @@ export const ExplorationQueryBar: FC<ExplorationQueryBarProps> = ({
 
   const searchChangeHandler = (q: Query) => setSearchInput(q);
 
-  const regex = useMemo(() => new RegExp(`${filters?.columnId}\s?:\s?(true|false)`, 'g'), []);
+  const regex = useMemo(() => new RegExp(`${filters?.columnId}\s?:\s?(true|false)`, 'g'), [
+    filters?.columnId,
+  ]);
 
   /**
-   * If a filter option is active in the url set the corresponding options
-   * button to selected mode
+   * Restoring state from the URL once on load. If a filter option is active
+   * in the url set the corresponding options button to selected mode.
    */
-  useEffect(() => {
+  useEffect(function updateIdToSelectedMap() {
     if (filters !== undefined) {
       const match: string[] | null = query.query.match(regex);
       let filterKeyInEffect: string | undefined;
