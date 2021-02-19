@@ -2,7 +2,7 @@
 [[alerting-production-considerations]]
 == Production considerations
 
-{kib} alerting run both alert checks and actions as persistent background tasks managed by the {kib} Task Manager.
+{kib} Alerting run both alert checks and actions as persistent background tasks managed by the {kib} Task Manager.
 
 When relying on Alerts and Actions as mission critical services, it is important to ensure the {kib} Task Manager <<task-manager-production-considerations>> are followed.
 
