@@ -254,7 +254,7 @@ export function ChartSwitch(props: Props) {
             }
             return [{ key: group, label: group, isGroupLabel: true }].concat(
               visualizations.map((v) => ({
-                'aria-label': v.label,
+                'aria-label': v.fullLabel,
                 checked: subVisualizationId === v.id ? 'on' : null,
                 isGroupLabel: false,
                 key: `${v.visualizationId}:${v.id}`,
