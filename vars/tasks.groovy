@@ -124,4 +124,10 @@ def functionalXpack(Map params = [:]) {
   }
 }
 
+def storybooksCi() {
+  task {
+    storybooks.buildAndUpload()
+  }
+}
+
 return this

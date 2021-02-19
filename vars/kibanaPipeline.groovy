@@ -445,6 +445,7 @@ def allCiTasks() {
         tasks.test()
         tasks.functionalOss()
         tasks.functionalXpack()
+        tasks.storybooksCi()
       }
     },
     jest: {
