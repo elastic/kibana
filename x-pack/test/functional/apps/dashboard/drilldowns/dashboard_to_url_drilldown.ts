@@ -37,7 +37,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboardDrilldownPanelActions.clickCreateDrilldown();
       await dashboardDrilldownsManage.expectsCreateDrilldownFlyoutOpen();
 
-      const urlTemplate = `{{kibanaUrl}}/app/discover#/?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:'{{event.from}}',to:'{{event.to}}'))&_a=(columns:!(_source),filters:{{rison context.panel.filters}},index:'{{context.panel.indexPatternId}}',interval:auto,query:(language:{{context.panel.query.language}},query:'{{context.panel.query.query}}'),sort:!())`;
+      const urlTemplate = `{{kibanaUrl}}/app/discover#/?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:'{{date event.from}}',to:'{{date event.to}}'))&_a=(columns:!(_source),filters:{{rison context.panel.filters}},index:'{{context.panel.indexPatternId}}',interval:auto,query:(language:{{context.panel.query.language}},query:'{{context.panel.query.query}}'),sort:!())`;
 
       await dashboardDrilldownsManage.fillInDashboardToURLDrilldownWizard({
         drilldownName: DRILLDOWN_TO_DISCOVER_URL,
@@ -70,10 +70,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboardDrilldownPanelActions.clickActionByText(DRILLDOWN_TO_DISCOVER_URL);
 
       await PageObjects.discover.waitForDiscoverAppOnScreen();
-
       // check that new time range duration was applied
       const newTimeRangeDurationHours = await PageObjects.timePicker.getTimeDurationInHours();
       expect(newTimeRangeDurationHours).to.be.lessThan(originalTimeRangeDurationHours);
+      // check that hours duration is more than 1 hour (meaning that the default time range of last 15 minutes has not been applied)
+      expect(newTimeRangeDurationHours).to.be.greaterThan(1);
     });
   });
 

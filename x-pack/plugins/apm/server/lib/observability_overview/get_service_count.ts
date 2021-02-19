@@ -6,7 +6,7 @@
  */
 
 import { ProcessorEvent } from '../../../common/processor_event';
-import { rangeFilter } from '../../../common/utils/range_filter';
+import { rangeQuery } from '../../../common/utils/queries';
 import { SERVICE_NAME } from '../../../common/elasticsearch_fieldnames';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import { getProcessorEventForAggregatedTransactions } from '../helpers/aggregated_transactions';
@@ -36,7 +36,7 @@ export function getServiceCount({
         size: 0,
         query: {
           bool: {
-            filter: [{ range: rangeFilter(start, end) }],
+            filter: rangeQuery(start, end),
           },
         },
         aggs: { serviceCount: { cardinality: { field: SERVICE_NAME } } },
