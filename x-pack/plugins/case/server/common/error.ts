@@ -52,7 +52,8 @@ export function isCaseError(error: unknown): error is CaseError {
 }
 
 /**
- * Create a CaseError that wraps the original thrown error. This also logs the message that will be placed in the CaseError.
+ * Create a CaseError that wraps the original thrown error. This also logs the message that will be placed in the CaseError
+ * if the logger was defined.
  */
 export function createCaseError({
   message,
@@ -61,11 +62,11 @@ export function createCaseError({
 }: {
   message?: string;
   error?: Error;
-  logger: Logger;
+  logger?: Logger;
 }) {
   const logMessage: string | undefined = message ?? error?.toString();
   if (logMessage !== undefined) {
-    logger.error(logMessage);
+    logger?.error(logMessage);
   }
 
   return new CaseError(message, error);

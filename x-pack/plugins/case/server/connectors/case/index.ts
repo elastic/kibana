@@ -153,9 +153,18 @@ interface AttachmentAlerts {
   indices: string[];
   rule: { id: string | null; name: string | null };
 }
+
+/**
+ * Convert a connector style comment passed through the action plugin to the expected format for the add comment functionality.
+ *
+ * @param comment an object defining the comment to be attached to a case/sub case
+ * @param logger an optional logger to handle logging an error if parsing failed
+ *
+ * Note: This is exported so that the integration tests can use it.
+ */
 export const transformConnectorComment = (
   comment: CommentSchemaType,
-  logger: Logger
+  logger?: Logger
 ): CommentRequest => {
   if (isCommentGeneratedAlert(comment)) {
     try {
