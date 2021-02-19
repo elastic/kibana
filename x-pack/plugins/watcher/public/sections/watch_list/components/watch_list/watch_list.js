@@ -60,7 +60,9 @@ app.directive('watchList', function ($injector, i18n) {
         this.pager = pagerFactory.create(this.watches.length, PAGINATION.PAGE_SIZE, 1);
 
         // Reload watches periodically
-        const refreshInterval = $interval(() => this.loadWatches(), REFRESH_INTERVALS.WATCH_LIST);
+        const refreshInterval = $interval(() => this.loadWatches({
+          asSystemRequest: true,
+        }), REFRESH_INTERVALS.WATCH_LIST);
         $scope.$on('$destroy', () => $interval.cancel(refreshInterval));
 
         // react to watch and ui changes
@@ -81,8 +83,8 @@ app.directive('watchList', function ($injector, i18n) {
         return this.selectedWatches.length > 0;
       }
 
-      loadWatches = () => {
-        watchesService.getWatchList()
+      loadWatches = ({ asSystemRequest } = {}) => {
+        watchesService.getWatchList({ asSystemRequest })
           .then(watches => {
             this.watches = watches;
             this.forbidden = false;

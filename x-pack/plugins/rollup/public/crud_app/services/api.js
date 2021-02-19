@@ -5,12 +5,14 @@
  */
 
 import chrome from 'ui/chrome';
+import { addSystemApiHeader } from 'ui/system_api';
 import { getHttp } from './http_provider';
 
 const apiPrefix = chrome.addBasePath('/api/rollup');
 
-export async function loadJobs() {
-  const { data: { jobs } } = await getHttp().get(`${apiPrefix}/jobs`);
+export async function loadJobs({ asSystemRequest } = {}) {
+  const headers = asSystemRequest ? addSystemApiHeader({}) : undefined;
+  const { data: { jobs } } = await getHttp().get(`${apiPrefix}/jobs`, { headers });
   return jobs;
 }
 

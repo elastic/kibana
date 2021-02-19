@@ -38,7 +38,7 @@ export const loadFollowerIndices = (isUpdating = false) =>
     scope,
     status: isUpdating ? API_STATUS.UPDATING : API_STATUS.LOADING,
     handler: async () => (
-      await loadFollowerIndicesRequest()
+      await loadFollowerIndicesRequest(isUpdating)
     ),
   });
 

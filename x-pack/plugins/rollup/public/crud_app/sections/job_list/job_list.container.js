@@ -34,8 +34,8 @@ const mapDispatchToProps = (dispatch) => {
     loadJobs: () => {
       dispatch(loadJobs());
     },
-    refreshJobs: () => {
-      dispatch(refreshJobs());
+    refreshJobs: (options) => {
+      dispatch(refreshJobs(options));
     },
     openDetailPanel: (jobId) => {
       dispatch(openDetailPanel({ jobId: jobId }));
