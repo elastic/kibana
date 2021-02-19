@@ -5,13 +5,16 @@
  * 2.0.
  */
 
-import {
+import type {
   SavedObjectsImportAmbiguousConflictError,
   SavedObjectsImportConflictError,
 } from 'src/core/public';
-import { FailedImport, ProcessedImportResponse } from 'src/plugins/saved_objects_management/public';
+import type {
+  FailedImport,
+  ProcessedImportResponse,
+} from 'src/plugins/saved_objects_management/public';
 
-import { SavedObjectTarget } from './types';
+import type { SavedObjectTarget } from './types';
 
 export interface SummarizedSavedObjectResult {
   type: string;

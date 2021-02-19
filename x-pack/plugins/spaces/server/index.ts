@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PluginConfigDescriptor, PluginInitializerContext } from 'src/core/server';
+import type { PluginConfigDescriptor, PluginInitializerContext } from 'src/core/server';
 
 import { ConfigSchema, spacesConfigDeprecationProvider } from './config';
 import { SpacesPlugin } from './plugin';

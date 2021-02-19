@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObjectMigrationContext } from 'src/core/server';
+import type { SavedObjectMigrationContext } from 'src/core/server';
 
 import { migrateToKibana660 } from './migrate_6x';
 

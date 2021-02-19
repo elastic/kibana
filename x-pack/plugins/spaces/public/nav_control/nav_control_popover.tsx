@@ -5,20 +5,16 @@
  * 2.0.
  */
 
-import {
-  EuiHeaderSectionItemButton,
-  EuiLoadingSpinner,
-  EuiPopover,
-  PopoverAnchorPosition,
-} from '@elastic/eui';
+import type { PopoverAnchorPosition } from '@elastic/eui';
+import { EuiHeaderSectionItemButton, EuiLoadingSpinner, EuiPopover } from '@elastic/eui';
 import React, { Component } from 'react';
-import { Subscription } from 'rxjs';
+import type { Subscription } from 'rxjs';
 
-import { ApplicationStart, Capabilities } from 'src/core/public';
-import { Space } from 'src/plugins/spaces_oss/common';
+import type { ApplicationStart, Capabilities } from 'src/core/public';
+import type { Space } from 'src/plugins/spaces_oss/common';
 
 import { SpaceAvatar } from '../space_avatar';
-import { SpacesManager } from '../spaces_manager';
+import type { SpacesManager } from '../spaces_manager';
 import { SpacesDescription } from './components/spaces_description';
 import { SpacesMenu } from './components/spaces_menu';
 

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { StartServicesAccessor } from 'src/core/public';
-import { ManagementApp, ManagementSetup } from 'src/plugins/management/public';
+import type { StartServicesAccessor } from 'src/core/public';
+import type { ManagementApp, ManagementSetup } from 'src/plugins/management/public';
 
-import { PluginsStart } from '../plugin';
-import { SpacesManager } from '../spaces_manager';
+import type { PluginsStart } from '../plugin';
+import type { SpacesManager } from '../spaces_manager';
 import { spacesManagementApp } from './spaces_management_app';
 
 interface SetupDeps {

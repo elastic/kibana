@@ -5,25 +5,27 @@
  * 2.0.
  */
 
+import type { EuiPopoverProps } from '@elastic/eui';
 import {
   EuiDescribedFormGroup,
   EuiFieldText,
   EuiFormRow,
   EuiPopover,
-  EuiPopoverProps,
   EuiSpacer,
   EuiTextArea,
   EuiTitle,
 } from '@elastic/eui';
-import React, { ChangeEvent, Component, Fragment } from 'react';
+import type { ChangeEvent } from 'react';
+import React, { Component, Fragment } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { Space } from 'src/plugins/spaces_oss/common';
+import type { Space } from 'src/plugins/spaces_oss/common';
 
 import { isReservedSpace } from '../../../../common';
 import { SpaceAvatar } from '../../../space_avatar';
-import { SpaceValidator, toSpaceIdentifier } from '../../lib';
+import type { SpaceValidator } from '../../lib';
+import { toSpaceIdentifier } from '../../lib';
 import { SectionPanel } from '../section_panel';
 import { CustomizeSpaceAvatar } from './customize_space_avatar';
 import { SpaceIdentifier } from './space_identifier';

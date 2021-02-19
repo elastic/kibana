@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { CoreSetup, CoreStart, Plugin } from 'src/core/public';
-import { AdvancedSettingsSetup } from 'src/plugins/advanced_settings/public';
-import { HomePublicPluginSetup } from 'src/plugins/home/public';
-import { ManagementSetup, ManagementStart } from 'src/plugins/management/public';
-import { SavedObjectsManagementPluginSetup } from 'src/plugins/saved_objects_management/public';
-import { SpacesApi, SpacesOssPluginSetup } from 'src/plugins/spaces_oss/public';
+import type { CoreSetup, CoreStart, Plugin } from 'src/core/public';
+import type { AdvancedSettingsSetup } from 'src/plugins/advanced_settings/public';
+import type { HomePublicPluginSetup } from 'src/plugins/home/public';
+import type { ManagementSetup, ManagementStart } from 'src/plugins/management/public';
+import type { SavedObjectsManagementPluginSetup } from 'src/plugins/saved_objects_management/public';
+import type { SpacesApi, SpacesOssPluginSetup } from 'src/plugins/spaces_oss/public';
 
-import { FeaturesPluginStart } from '../../features/public';
+import type { FeaturesPluginStart } from '../../features/public';
 import { AdvancedSettingsService } from './advanced_settings';
 import { CopySavedObjectsToSpaceService } from './copy_saved_objects_to_space';
 import { createSpacesFeatureCatalogueEntry } from './create_feature_catalogue_entry';

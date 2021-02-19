@@ -9,7 +9,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n/react';
-import { Space } from 'src/plugins/spaces_oss/common';
+import type { Space } from 'src/plugins/spaces_oss/common';
 
 import { SpaceAvatar } from '../../../space_avatar';
 

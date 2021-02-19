@@ -15,10 +15,11 @@ import {
   EuiSpacer,
   isValidHex,
 } from '@elastic/eui';
-import React, { ChangeEvent, Component } from 'react';
+import type { ChangeEvent } from 'react';
+import React, { Component } from 'react';
 
 import { i18n } from '@kbn/i18n';
-import { Space } from 'src/plugins/spaces_oss/common';
+import type { Space } from 'src/plugins/spaces_oss/common';
 
 import { MAX_SPACE_INITIALS } from '../../../../common';
 import { encode, imageTypes } from '../../../../common/lib/dataurl';

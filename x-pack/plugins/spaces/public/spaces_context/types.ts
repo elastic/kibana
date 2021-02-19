@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import * as React from 'react';
+import type * as React from 'react';
 
-import { CoreStart } from 'src/core/public';
+import type { CoreStart } from 'src/core/public';
 
-import { SpacesManager } from '../spaces_manager';
-import { ShareToSpacesData } from '../types';
+import type { SpacesManager } from '../spaces_manager';
+import type { ShareToSpacesData } from '../types';
 
 export type KibanaServices = Partial<CoreStart>;
 

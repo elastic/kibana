@@ -8,9 +8,10 @@
 import './spaces_description.scss';
 
 import { EuiContextMenuPanel, EuiText } from '@elastic/eui';
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 
-import { ApplicationStart, Capabilities } from 'src/core/public';
+import type { ApplicationStart, Capabilities } from 'src/core/public';
 
 import { getSpacesFeatureDescription } from '../../constants';
 import { ManageSpacesButton } from './manage_spaces_button';

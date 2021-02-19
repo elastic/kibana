@@ -7,7 +7,7 @@
 
 import { Readable } from 'stream';
 
-import {
+import type {
   SavedObjectsExportByObjectOptions,
   SavedObjectsImportOptions,
   SavedObjectsImportResponse,

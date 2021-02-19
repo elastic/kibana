@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { CoreSetup, Logger } from 'src/core/server';
+import type { CoreSetup, Logger } from 'src/core/server';
 
-import { SpacesServiceStart } from '../../../spaces_service';
-import { SpacesRouter } from '../../../types';
-import { UsageStatsServiceSetup } from '../../../usage_stats';
+import type { SpacesServiceStart } from '../../../spaces_service';
+import type { SpacesRouter } from '../../../types';
+import type { UsageStatsServiceSetup } from '../../../usage_stats';
 import { initCopyToSpacesApi } from './copy_to_space';
 import { initDeleteSpacesApi } from './delete';
 import { initGetSpaceApi } from './get';

@@ -7,8 +7,8 @@
 
 import React from 'react';
 
-import { AdvancedSettingsSetup } from 'src/plugins/advanced_settings/public';
-import { Space } from 'src/plugins/spaces_oss/common';
+import type { AdvancedSettingsSetup } from 'src/plugins/advanced_settings/public';
+import type { Space } from 'src/plugins/spaces_oss/common';
 
 import { AdvancedSettingsSubtitle, AdvancedSettingsTitle } from './components';
 

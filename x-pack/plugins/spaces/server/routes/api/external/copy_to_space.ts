@@ -8,7 +8,7 @@
 import _ from 'lodash';
 
 import { schema } from '@kbn/config-schema';
-import { SavedObject } from 'src/core/server';
+import type { SavedObject } from 'src/core/server';
 
 import {
   copySavedObjectsToSpacesFactory,
@@ -16,7 +16,7 @@ import {
 } from '../../../lib/copy_to_spaces';
 import { SPACE_ID_REGEX } from '../../../lib/space_schema';
 import { createLicensedRouteHandler } from '../../lib';
-import { ExternalRouteDeps } from './';
+import type { ExternalRouteDeps } from './';
 
 type SavedObjectIdentifier = Pick<SavedObject, 'id' | 'type'>;
 

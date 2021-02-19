@@ -7,7 +7,7 @@
 
 import * as Rx from 'rxjs';
 
-import { ObjectType } from '@kbn/config-schema';
+import type { ObjectType } from '@kbn/config-schema';
 import { kibanaResponseFactory } from 'src/core/server';
 import {
   coreMock,

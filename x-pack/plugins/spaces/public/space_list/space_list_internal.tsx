@@ -6,16 +6,17 @@
  */
 
 import { EuiBadge, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
-import React, { ReactNode, useEffect, useState } from 'react';
+import type { ReactNode } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { SpaceListProps } from 'src/plugins/spaces_oss/public';
+import type { SpaceListProps } from 'src/plugins/spaces_oss/public';
 
 import { ALL_SPACES_ID, UNKNOWN_SPACE } from '../../common/constants';
 import { SpaceAvatar } from '../space_avatar';
 import { useSpaces } from '../spaces_context';
-import { ShareToSpacesData, ShareToSpaceTarget } from '../types';
+import type { ShareToSpacesData, ShareToSpaceTarget } from '../types';
 
 const DEFAULT_DISPLAY_LIMIT = 5;
 

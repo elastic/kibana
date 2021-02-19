@@ -8,13 +8,11 @@
 import React from 'react';
 
 import { i18n } from '@kbn/i18n';
-import { NotificationsStart } from 'src/core/public';
+import type { NotificationsStart } from 'src/core/public';
+import type { SavedObjectsManagementRecord } from 'src/plugins/saved_objects_management/public';
 
-import {
-  SavedObjectsManagementAction,
-  SavedObjectsManagementRecord,
-} from '../../../../../src/plugins/saved_objects_management/public';
-import { SpacesManager } from '../spaces_manager';
+import { SavedObjectsManagementAction } from '../../../../../src/plugins/saved_objects_management/public';
+import type { SpacesManager } from '../spaces_manager';
 import { CopySavedObjectsToSpaceFlyout } from './components';
 
 export class CopyToSpaceSavedObjectsManagementAction extends SavedObjectsManagementAction {

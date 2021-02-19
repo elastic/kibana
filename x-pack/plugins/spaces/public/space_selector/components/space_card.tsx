@@ -10,7 +10,7 @@ import './space_card.scss';
 import { EuiCard } from '@elastic/eui';
 import React from 'react';
 
-import { Space } from 'src/plugins/spaces_oss/common';
+import type { Space } from 'src/plugins/spaces_oss/common';
 
 import { addSpaceIdToPath, ENTER_SPACE_PATH } from '../../../common';
 import { SpaceAvatar } from '../../space_avatar';

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { Payload } from '@hapi/boom';
+import type { Payload } from '@hapi/boom';
 
-import {
+import type {
   SavedObjectsImportError,
   SavedObjectsImportFailure,
   SavedObjectsImportRetry,

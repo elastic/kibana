@@ -9,17 +9,12 @@ import * as Rx from 'rxjs';
 import { first } from 'rxjs/operators';
 
 import { nextTick } from '@kbn/test/jest';
-import { Writable } from '@kbn/utility-types';
-import {
-  CoreStatus,
-  SavedObjectsErrorHelpers,
-  SavedObjectsRepository,
-  ServiceStatusLevel,
-  ServiceStatusLevels,
-} from 'src/core/server';
+import type { Writable } from '@kbn/utility-types';
+import type { CoreStatus, SavedObjectsRepository, ServiceStatusLevel } from 'src/core/server';
+import { SavedObjectsErrorHelpers, ServiceStatusLevels } from 'src/core/server';
 import { coreMock, loggingSystemMock } from 'src/core/server/mocks';
 
-import { ILicense } from '../../../licensing/server';
+import type { ILicense } from '../../../licensing/server';
 import { licensingMock } from '../../../licensing/server/mocks';
 import { SpacesLicenseService } from '../../common/licensing';
 import {

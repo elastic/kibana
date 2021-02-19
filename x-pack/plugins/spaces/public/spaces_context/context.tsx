@@ -7,9 +7,9 @@
 
 import * as React from 'react';
 
-import { SpacesManager } from '../spaces_manager';
-import { ShareToSpacesData } from '../types';
-import { KibanaServices, SpacesReactContext, SpacesReactContextValue } from './types';
+import type { SpacesManager } from '../spaces_manager';
+import type { ShareToSpacesData } from '../types';
+import type { KibanaServices, SpacesReactContext, SpacesReactContextValue } from './types';
 
 const { useContext, createElement, createContext } = React;
 

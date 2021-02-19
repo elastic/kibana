@@ -5,20 +5,26 @@
  * 2.0.
  */
 
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 
-import { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from 'src/core/server';
-import { HomeServerPluginSetup } from 'src/plugins/home/server';
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import type {
+  CoreSetup,
+  CoreStart,
+  Logger,
+  Plugin,
+  PluginInitializerContext,
+} from 'src/core/server';
+import type { HomeServerPluginSetup } from 'src/plugins/home/server';
+import type { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 
-import {
+import type {
   PluginSetupContract as FeaturesPluginSetup,
   PluginStartContract as FeaturesPluginStart,
 } from '../../features/server';
-import { LicensingPluginSetup } from '../../licensing/server';
+import type { LicensingPluginSetup } from '../../licensing/server';
 import { SpacesLicenseService } from '../common/licensing';
 import { setupCapabilities } from './capabilities';
-import { ConfigType } from './config';
+import type { ConfigType } from './config';
 import { DefaultSpaceService } from './default_space';
 import { initSpacesRequestInterceptors } from './lib/request_interceptors';
 import { createSpacesTutorialContextFactory } from './lib/spaces_tutorial_context_factory';
@@ -26,13 +32,11 @@ import { initExternalSpacesApi } from './routes/api/external';
 import { initInternalSpacesApi } from './routes/api/internal';
 import { initSpacesViewsRoutes } from './routes/views';
 import { SpacesSavedObjectsService } from './saved_objects';
-import {
-  SpacesClientRepositoryFactory,
-  SpacesClientService,
-  SpacesClientWrapper,
-} from './spaces_client';
-import { SpacesService, SpacesServiceSetup, SpacesServiceStart } from './spaces_service';
-import { SpacesRequestHandlerContext } from './types';
+import type { SpacesClientRepositoryFactory, SpacesClientWrapper } from './spaces_client';
+import { SpacesClientService } from './spaces_client';
+import type { SpacesServiceSetup, SpacesServiceStart } from './spaces_service';
+import { SpacesService } from './spaces_service';
+import type { SpacesRequestHandlerContext } from './types';
 import { registerSpacesUsageCollector } from './usage_collection';
 import { UsageStatsService } from './usage_stats';
 

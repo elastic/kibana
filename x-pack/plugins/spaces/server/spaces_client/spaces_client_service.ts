@@ -5,17 +5,18 @@
  * 2.0.
  */
 
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 
-import {
+import type {
   CoreStart,
   ISavedObjectsRepository,
   KibanaRequest,
   SavedObjectsServiceStart,
 } from 'src/core/server';
 
-import { ConfigType } from '../config';
-import { ISpacesClient, SpacesClient } from './spaces_client';
+import type { ConfigType } from '../config';
+import type { ISpacesClient } from './spaces_client';
+import { SpacesClient } from './spaces_client';
 
 export type SpacesClientWrapper = (
   request: KibanaRequest,

@@ -11,10 +11,10 @@ import { EuiBadge, EuiIconTip, EuiLoadingSpinner } from '@elastic/eui';
 import React, { Fragment } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n/react';
-import { Space } from 'src/plugins/spaces_oss/common';
+import type { Space } from 'src/plugins/spaces_oss/common';
 
-import { SummarizedCopyToSpaceResult } from '../summarize_copy_result';
-import { ImportRetry } from '../types';
+import type { SummarizedCopyToSpaceResult } from '../summarize_copy_result';
+import type { ImportRetry } from '../types';
 import { ResolveAllConflicts } from './resolve_all_conflicts';
 
 interface Props {

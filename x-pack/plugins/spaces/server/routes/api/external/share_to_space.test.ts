@@ -7,8 +7,9 @@
 
 import * as Rx from 'rxjs';
 
-import { ObjectType } from '@kbn/config-schema';
-import { kibanaResponseFactory, RouteValidatorConfig } from 'src/core/server';
+import type { ObjectType } from '@kbn/config-schema';
+import type { RouteValidatorConfig } from 'src/core/server';
+import { kibanaResponseFactory } from 'src/core/server';
 import {
   coreMock,
   httpServerMock,

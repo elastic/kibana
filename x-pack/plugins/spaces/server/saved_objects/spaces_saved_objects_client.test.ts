@@ -11,7 +11,7 @@ import { SavedObjectTypeRegistry } from 'src/core/server';
 import { savedObjectsClientMock } from 'src/core/server/mocks';
 
 import { DEFAULT_SPACE_ID } from '../../common/constants';
-import { SpacesClient } from '../spaces_client';
+import type { SpacesClient } from '../spaces_client';
 import { spacesClientMock } from '../spaces_client/spaces_client.mock';
 import { spacesServiceMock } from '../spaces_service/spaces_service.mock';
 import { SpacesSavedObjectsClient } from './spaces_saved_objects_client';

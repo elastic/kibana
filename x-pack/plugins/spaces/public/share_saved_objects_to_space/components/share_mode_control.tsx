@@ -26,8 +26,8 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { ALL_SPACES_ID } from '../../../common/constants';
 import { DocumentationLinksService } from '../../lib';
 import { useSpaces } from '../../spaces_context';
-import { ShareToSpaceTarget } from '../../types';
-import { ShareOptions } from '../types';
+import type { ShareToSpaceTarget } from '../../types';
+import type { ShareOptions } from '../types';
 import { SelectableSpacesControl } from './selectable_spaces_control';
 
 interface Props {

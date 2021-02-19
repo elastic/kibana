@@ -13,7 +13,7 @@ import { httpServiceMock, notificationServiceMock, scopedHistoryMock } from 'src
 import { KibanaFeature } from '../../../../features/public';
 import { featuresPluginMock } from '../../../../features/public/mocks';
 import { SpaceAvatar } from '../../space_avatar';
-import { SpacesManager } from '../../spaces_manager';
+import type { SpacesManager } from '../../spaces_manager';
 import { spacesManagerMock } from '../../spaces_manager/mocks';
 import { SpacesGridPage } from './spaces_grid_page';
 

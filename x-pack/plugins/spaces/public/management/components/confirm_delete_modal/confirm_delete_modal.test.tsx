@@ -9,7 +9,7 @@ import React from 'react';
 
 import { mountWithIntl, shallowWithIntl } from '@kbn/test/jest';
 
-import { SpacesManager } from '../../../spaces_manager';
+import type { SpacesManager } from '../../../spaces_manager';
 import { spacesManagerMock } from '../../../spaces_manager/mocks';
 import { ConfirmDeleteModal } from './confirm_delete_modal';
 

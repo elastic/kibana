@@ -13,8 +13,8 @@ import React, { Component } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { SummarizedCopyToSpaceResult } from '../summarize_copy_result';
-import { ImportRetry } from '../types';
+import type { SummarizedCopyToSpaceResult } from '../summarize_copy_result';
+import type { ImportRetry } from '../types';
 
 export interface ResolveAllConflictsProps {
   summarizedCopyResult: SummarizedCopyToSpaceResult;

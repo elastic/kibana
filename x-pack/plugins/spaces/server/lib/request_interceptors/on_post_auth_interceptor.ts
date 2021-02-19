@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { CoreSetup, Logger } from 'src/core/server';
-import { Space } from 'src/plugins/spaces_oss/common';
+import type { CoreSetup, Logger } from 'src/core/server';
+import type { Space } from 'src/plugins/spaces_oss/common';
 
 import { addSpaceIdToPath } from '../../../common';
 import { DEFAULT_SPACE_ID, ENTER_SPACE_PATH } from '../../../common/constants';
-import { PluginsSetup } from '../../plugin';
-import { SpacesServiceStart } from '../../spaces_service/spaces_service';
+import type { PluginsSetup } from '../../plugin';
+import type { SpacesServiceStart } from '../../spaces_service/spaces_service';
 import { wrapError } from '../errors';
 import { getSpaceSelectorUrl } from '../get_space_selector_url';
 

@@ -9,7 +9,7 @@ import { EuiBadge, EuiToolTip } from '@elastic/eui';
 import React from 'react';
 
 import { FormattedMessage } from '@kbn/i18n/react';
-import { Space } from 'src/plugins/spaces_oss/common';
+import type { Space } from 'src/plugins/spaces_oss/common';
 
 import { isReservedSpace } from '../../../common';
 

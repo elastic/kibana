@@ -6,9 +6,10 @@
  */
 
 import { EuiAvatar, isValidHex } from '@elastic/eui';
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 
-import { Space } from 'src/plugins/spaces_oss/common';
+import type { Space } from 'src/plugins/spaces_oss/common';
 
 import { MAX_SPACE_INITIALS } from '../../common';
 import { getSpaceColor, getSpaceImageUrl, getSpaceInitials } from './space_attributes';

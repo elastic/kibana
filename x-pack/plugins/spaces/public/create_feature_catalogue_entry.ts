@@ -7,10 +7,9 @@
 
 import { i18n } from '@kbn/i18n';
 
-import {
-  FeatureCatalogueCategory,
-  FeatureCatalogueEntry,
-} from '../../../../src/plugins/home/public';
+import type { FeatureCatalogueEntry } from 'src/plugins/home/public';
+
+import { FeatureCatalogueCategory } from '../../../../src/plugins/home/public';
 import { getSpacesFeatureDescription } from './constants';
 
 export const createSpacesFeatureCatalogueEntry = (): FeatureCatalogueEntry => {

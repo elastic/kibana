@@ -7,28 +7,28 @@
 
 import './space_result_details.scss';
 
+import type { EuiSwitchEvent } from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
   EuiSuperSelect,
   EuiSwitch,
-  EuiSwitchEvent,
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
-import {
-  SavedObjectsImportAmbiguousConflictError,
-  SavedObjectsImportConflictError,
-} from 'kibana/public';
 import moment from 'moment';
 import React, { Fragment } from 'react';
 
 import { i18n } from '@kbn/i18n';
-import { Space } from 'src/plugins/spaces_oss/common';
+import type {
+  SavedObjectsImportAmbiguousConflictError,
+  SavedObjectsImportConflictError,
+} from 'src/core/public';
+import type { Space } from 'src/plugins/spaces_oss/common';
 
-import { SummarizedCopyToSpaceResult } from '../index';
-import { ImportRetry } from '../types';
+import type { SummarizedCopyToSpaceResult } from '../index';
+import type { ImportRetry } from '../types';
 import { CopyStatusIndicator } from './copy_status_indicator';
 
 interface Props {

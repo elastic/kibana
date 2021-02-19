@@ -11,12 +11,12 @@ import { act } from '@testing-library/react';
 import React from 'react';
 
 import { findTestSubject, mountWithIntl, nextTick } from '@kbn/test/jest';
-import { ToastsApi } from 'src/core/public';
-import { Space } from 'src/plugins/spaces_oss/common';
+import type { ToastsApi } from 'src/core/public';
+import type { Space } from 'src/plugins/spaces_oss/common';
 
-import { SpacesManager } from '../../spaces_manager';
+import type { SpacesManager } from '../../spaces_manager';
 import { spacesManagerMock } from '../../spaces_manager/mocks';
-import { SavedObjectTarget } from '../types';
+import type { SavedObjectTarget } from '../types';
 import { CopyModeControl } from './copy_mode_control';
 import { CopySavedObjectsToSpaceFlyout } from './copy_to_space_flyout';
 import { CopyToSpaceForm } from './copy_to_space_form';

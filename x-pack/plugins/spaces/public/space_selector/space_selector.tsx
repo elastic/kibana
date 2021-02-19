@@ -27,11 +27,11 @@ import ReactDOM from 'react-dom';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { CoreStart } from 'src/core/public';
-import { Space } from 'src/plugins/spaces_oss/common';
+import type { CoreStart } from 'src/core/public';
+import type { Space } from 'src/plugins/spaces_oss/common';
 
 import { SPACE_SEARCH_COUNT_THRESHOLD } from '../../common/constants';
-import { SpacesManager } from '../spaces_manager';
+import type { SpacesManager } from '../spaces_manager';
 import { SpaceCards } from './components';
 
 interface Props {

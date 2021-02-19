@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { SavedObject, SavedObjectsErrorHelpers, SavedObjectsUpdateResponse } from 'src/core/server';
+import type { SavedObject, SavedObjectsUpdateResponse } from 'src/core/server';
+import { SavedObjectsErrorHelpers } from 'src/core/server';
 import {
   coreMock,
   savedObjectsClientMock,

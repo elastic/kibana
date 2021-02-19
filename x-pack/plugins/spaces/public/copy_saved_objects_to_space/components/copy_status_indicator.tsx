@@ -10,8 +10,11 @@ import React, { Fragment } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { SummarizedCopyToSpaceResult, SummarizedSavedObjectResult } from '../summarize_copy_result';
-import { ImportRetry } from '../types';
+import type {
+  SummarizedCopyToSpaceResult,
+  SummarizedSavedObjectResult,
+} from '../summarize_copy_result';
+import type { ImportRetry } from '../types';
 
 interface Props {
   summarizedCopyResult: SummarizedCopyToSpaceResult;

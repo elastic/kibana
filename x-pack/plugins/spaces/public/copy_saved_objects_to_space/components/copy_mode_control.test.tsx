@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { ReactWrapper } from 'enzyme';
+import type { ReactWrapper } from 'enzyme';
 import React from 'react';
 
 import { mountWithIntl } from '@kbn/test/jest';
 
-import { CopyModeControl, CopyModeControlProps } from './copy_mode_control';
+import type { CopyModeControlProps } from './copy_mode_control';
+import { CopyModeControl } from './copy_mode_control';
 
 describe('CopyModeControl', () => {
   const initialValues = { createNewCopies: true, overwrite: true }; // some test cases below make assumptions based on these initial values

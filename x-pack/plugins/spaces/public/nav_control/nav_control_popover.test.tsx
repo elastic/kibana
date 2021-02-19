@@ -14,7 +14,7 @@ import * as Rx from 'rxjs';
 import { mountWithIntl } from '@kbn/test/jest';
 
 import { SpaceAvatar } from '../space_avatar';
-import { SpacesManager } from '../spaces_manager';
+import type { SpacesManager } from '../spaces_manager';
 import { spacesManagerMock } from '../spaces_manager/mocks';
 import { NavControlPopover } from './nav_control_popover';
 

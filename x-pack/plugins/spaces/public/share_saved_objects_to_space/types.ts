@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObjectsImportResponse, SavedObjectsImportRetry } from 'src/core/public';
+import type { SavedObjectsImportResponse, SavedObjectsImportRetry } from 'src/core/public';
 
 export interface ShareOptions {
   selectedSpaceIds: string[];

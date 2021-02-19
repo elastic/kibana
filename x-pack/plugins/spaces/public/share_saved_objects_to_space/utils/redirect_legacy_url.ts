@@ -7,10 +7,10 @@
 
 import { i18n } from '@kbn/i18n';
 import { firstValueFrom } from '@kbn/std';
-import { StartServicesAccessor } from 'src/core/public';
-import { SpacesApiUi } from 'src/plugins/spaces_oss/public';
+import type { StartServicesAccessor } from 'src/core/public';
+import type { SpacesApiUi } from 'src/plugins/spaces_oss/public';
 
-import { PluginsStart } from '../../plugin';
+import type { PluginsStart } from '../../plugin';
 import { DEFAULT_OBJECT_NOUN } from '../components/constants';
 
 export function createRedirectLegacyUrl(

@@ -8,17 +8,13 @@
 import Boom from '@hapi/boom';
 import { omit } from 'lodash';
 
-import { PublicMethodsOf } from '@kbn/utility-types';
-import { ISavedObjectsRepository, SavedObject } from 'src/core/server';
-import { Space } from 'src/plugins/spaces_oss/common';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import type { ISavedObjectsRepository, SavedObject } from 'src/core/server';
+import type { Space } from 'src/plugins/spaces_oss/common';
 
-import {
-  GetAllSpacesOptions,
-  GetAllSpacesPurpose,
-  GetSpaceResult,
-  isReservedSpace,
-} from '../../common';
-import { ConfigType } from '../config';
+import type { GetAllSpacesOptions, GetAllSpacesPurpose, GetSpaceResult } from '../../common';
+import { isReservedSpace } from '../../common';
+import type { ConfigType } from '../config';
 
 const SUPPORTED_GET_SPACE_PURPOSES: GetAllSpacesPurpose[] = [
   'any',

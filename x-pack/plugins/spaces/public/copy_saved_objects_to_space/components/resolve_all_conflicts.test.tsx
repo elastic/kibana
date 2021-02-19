@@ -6,14 +6,15 @@
  */
 
 import { act } from '@testing-library/react';
-import { ReactWrapper } from 'enzyme';
+import type { ReactWrapper } from 'enzyme';
 import React from 'react';
 
 import { findTestSubject, mountWithIntl, nextTick, shallowWithIntl } from '@kbn/test/jest';
 
-import { SummarizedCopyToSpaceResult } from '../summarize_copy_result';
-import { ImportRetry } from '../types';
-import { ResolveAllConflicts, ResolveAllConflictsProps } from './resolve_all_conflicts';
+import type { SummarizedCopyToSpaceResult } from '../summarize_copy_result';
+import type { ImportRetry } from '../types';
+import type { ResolveAllConflictsProps } from './resolve_all_conflicts';
+import { ResolveAllConflicts } from './resolve_all_conflicts';
 
 describe('ResolveAllConflicts', () => {
   const summarizedCopyResult = ({

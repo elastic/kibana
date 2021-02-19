@@ -7,11 +7,12 @@
 
 import './selectable_spaces_control.scss';
 
-import { EuiIconTip, EuiLoadingSpinner, EuiSelectable, EuiSelectableOption } from '@elastic/eui';
+import type { EuiSelectableOption } from '@elastic/eui';
+import { EuiIconTip, EuiLoadingSpinner, EuiSelectable } from '@elastic/eui';
 import React, { Fragment } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n/react';
-import { Space } from 'src/plugins/spaces_oss/common';
+import type { Space } from 'src/plugins/spaces_oss/common';
 
 import { SpaceAvatar } from '../../space_avatar';
 

@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { SpaceListProps } from 'src/plugins/spaces_oss/public';
+import type { SpaceListProps } from 'src/plugins/spaces_oss/public';
 
 import { SpaceListInternal } from './space_list_internal';
 

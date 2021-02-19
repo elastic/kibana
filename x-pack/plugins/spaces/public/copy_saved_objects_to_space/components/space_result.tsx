@@ -17,11 +17,11 @@ import {
 } from '@elastic/eui';
 import React, { useState } from 'react';
 
-import { Space } from 'src/plugins/spaces_oss/common';
+import type { Space } from 'src/plugins/spaces_oss/common';
 
 import { SpaceAvatar } from '../../space_avatar';
-import { SummarizedCopyToSpaceResult } from '../index';
-import { ImportRetry } from '../types';
+import type { SummarizedCopyToSpaceResult } from '../index';
+import type { ImportRetry } from '../types';
 import { CopyStatusSummaryIndicator } from './copy_status_summary_indicator';
 import { SpaceCopyResultDetails } from './space_result_details';
 

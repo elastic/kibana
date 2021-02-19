@@ -5,22 +5,22 @@
  * 2.0.
  */
 
+import type { EuiCheckableCardProps } from '@elastic/eui';
 import {
   EuiCallOut,
   EuiCheckableCard,
-  EuiCheckableCardProps,
   EuiIconTip,
   EuiLoadingSpinner,
   EuiSelectable,
 } from '@elastic/eui';
 import Boom from '@hapi/boom';
 import { act } from '@testing-library/react';
-import { ReactWrapper } from 'enzyme';
+import type { ReactWrapper } from 'enzyme';
 import React from 'react';
 
 import { findTestSubject, mountWithIntl, nextTick } from '@kbn/test/jest';
 import { coreMock } from 'src/core/public/mocks';
-import { Space } from 'src/plugins/spaces_oss/common';
+import type { Space } from 'src/plugins/spaces_oss/common';
 
 import { ALL_SPACES_ID } from '../../../common/constants';
 import { CopySavedObjectsToSpaceFlyout } from '../../copy_saved_objects_to_space/components';

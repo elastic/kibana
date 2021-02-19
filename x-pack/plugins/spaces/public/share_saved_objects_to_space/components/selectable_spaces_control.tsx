@@ -7,6 +7,7 @@
 
 import './selectable_spaces_control.scss';
 
+import type { EuiSelectableOption } from '@elastic/eui';
 import {
   EuiBadge,
   EuiFlexGroup,
@@ -15,7 +16,6 @@ import {
   EuiIconTip,
   EuiLink,
   EuiSelectable,
-  EuiSelectableOption,
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
@@ -28,8 +28,8 @@ import { ALL_SPACES_ID, UNKNOWN_SPACE } from '../../../common/constants';
 import { DocumentationLinksService } from '../../lib';
 import { SpaceAvatar } from '../../space_avatar';
 import { useSpaces } from '../../spaces_context';
-import { ShareToSpaceTarget } from '../../types';
-import { ShareOptions } from '../types';
+import type { ShareToSpaceTarget } from '../../types';
+import type { ShareOptions } from '../types';
 import { NoSpacesAvailable } from './no_spaces_available';
 
 interface Props {

@@ -8,7 +8,8 @@
 import { of } from 'rxjs';
 
 import { licenseMock } from '../../../licensing/common/licensing.mock';
-import { LICENSE_TYPE, LicenseType } from '../../../licensing/common/types';
+import type { LicenseType } from '../../../licensing/common/types';
+import { LICENSE_TYPE } from '../../../licensing/common/types';
 import { SpacesLicenseService } from './license_service';
 
 describe('license#isEnabled', function () {

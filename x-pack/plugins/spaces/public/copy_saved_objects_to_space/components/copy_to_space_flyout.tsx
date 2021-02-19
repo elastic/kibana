@@ -24,15 +24,13 @@ import React, { useEffect, useMemo, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { ToastsStart } from 'src/core/public';
-import { Space } from 'src/plugins/spaces_oss/common';
+import type { ToastsStart } from 'src/core/public';
+import type { ProcessedImportResponse } from 'src/plugins/saved_objects_management/public';
+import type { Space } from 'src/plugins/spaces_oss/common';
 
-import {
-  ProcessedImportResponse,
-  processImportResponse,
-} from '../../../../../../src/plugins/saved_objects_management/public';
-import { SpacesManager } from '../../spaces_manager';
-import { CopyOptions, ImportRetry, SavedObjectTarget } from '../types';
+import { processImportResponse } from '../../../../../../src/plugins/saved_objects_management/public';
+import type { SpacesManager } from '../../spaces_manager';
+import type { CopyOptions, ImportRetry, SavedObjectTarget } from '../types';
 import { CopyToSpaceFlyoutFooter } from './copy_to_space_flyout_footer';
 import { CopyToSpaceForm } from './copy_to_space_form';
 import { ProcessingCopyToSpace } from './processing_copy_to_space';

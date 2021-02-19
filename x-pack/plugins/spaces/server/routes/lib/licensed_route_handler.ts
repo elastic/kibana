@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { RequestHandler, RequestHandlerContext } from 'src/core/server';
+import type { RequestHandler, RequestHandlerContext } from 'src/core/server';
 
-import { LicensingApiRequestHandlerContext } from '../../../../licensing/server';
+import type { LicensingApiRequestHandlerContext } from '../../../../licensing/server';
 
 export const createLicensedRouteHandler = <
   P,

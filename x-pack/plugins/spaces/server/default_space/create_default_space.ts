@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Logger, SavedObjectsRepository, SavedObjectsServiceStart } from 'src/core/server';
+import type { Logger, SavedObjectsRepository, SavedObjectsServiceStart } from 'src/core/server';
 
 import { SavedObjectsErrorHelpers } from '../../../../../src/core/server';
 import { DEFAULT_SPACE_ID } from '../../common/constants';

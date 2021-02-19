@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { EuiButton, EuiCheckboxProps } from '@elastic/eui';
+import type { EuiCheckboxProps } from '@elastic/eui';
+import { EuiButton } from '@elastic/eui';
 import { waitFor } from '@testing-library/react';
-import { ReactWrapper } from 'enzyme';
+import type { ReactWrapper } from 'enzyme';
 import React from 'react';
 
 import { mountWithIntl } from '@kbn/test/jest';
@@ -16,7 +17,7 @@ import { notificationServiceMock, scopedHistoryMock } from 'src/core/public/mock
 
 import { KibanaFeature } from '../../../../features/public';
 import { featuresPluginMock } from '../../../../features/public/mocks';
-import { SpacesManager } from '../../spaces_manager';
+import type { SpacesManager } from '../../spaces_manager';
 import { spacesManagerMock } from '../../spaces_manager/mocks';
 import { ConfirmAlterActiveSpaceModal } from './confirm_alter_active_space_modal';
 import { ManageSpacePage } from './manage_space_page';

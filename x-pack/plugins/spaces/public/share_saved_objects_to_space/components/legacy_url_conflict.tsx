@@ -7,9 +7,10 @@
 
 import React from 'react';
 
-import { LegacyUrlConflictProps } from 'src/plugins/spaces_oss/public';
+import type { LegacyUrlConflictProps } from 'src/plugins/spaces_oss/public';
 
-import { InternalProps, LegacyUrlConflictInternal } from './legacy_url_conflict_internal';
+import type { InternalProps } from './legacy_url_conflict_internal';
+import { LegacyUrlConflictInternal } from './legacy_url_conflict_internal';
 
 export const getLegacyUrlConflict = (
   internalProps: InternalProps

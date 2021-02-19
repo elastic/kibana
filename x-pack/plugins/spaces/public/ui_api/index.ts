@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { StartServicesAccessor } from 'src/core/public';
-import { SpacesApiUi } from 'src/plugins/spaces_oss/public';
+import type { StartServicesAccessor } from 'src/core/public';
+import type { SpacesApiUi } from 'src/plugins/spaces_oss/public';
 
-import { PluginsStart } from '../plugin';
+import type { PluginsStart } from '../plugin';
 import { createRedirectLegacyUrl } from '../share_saved_objects_to_space';
-import { SpacesManager } from '../spaces_manager';
+import type { SpacesManager } from '../spaces_manager';
 import { getComponents } from './components';
 
 interface GetUiApiOptions {

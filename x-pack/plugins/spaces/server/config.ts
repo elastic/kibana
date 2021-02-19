@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 
-import { schema, TypeOf } from '@kbn/config-schema';
-import {
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
+import type {
   ConfigDeprecation,
   ConfigDeprecationProvider,
   PluginInitializerContext,

@@ -13,13 +13,14 @@ import {
 } from 'src/core/server/mocks';
 
 import { createCollectorFetchContextMock } from '../../../../../src/plugins/usage_collection/server/mocks';
-import { KibanaFeature } from '../../../features/server';
-import { ILicense, LicensingPluginSetup } from '../../../licensing/server';
-import { PluginsSetup } from '../plugin';
-import { UsageStats } from '../usage_stats';
+import type { KibanaFeature } from '../../../features/server';
+import type { ILicense, LicensingPluginSetup } from '../../../licensing/server';
+import type { PluginsSetup } from '../plugin';
+import type { UsageStats } from '../usage_stats';
 import { usageStatsClientMock } from '../usage_stats/usage_stats_client.mock';
 import { usageStatsServiceMock } from '../usage_stats/usage_stats_service.mock';
-import { getSpacesUsageCollector, UsageData } from './spaces_usage_collector';
+import type { UsageData } from './spaces_usage_collector';
+import { getSpacesUsageCollector } from './spaces_usage_collector';
 
 interface SetupOpts {
   license?: Partial<ILicense>;

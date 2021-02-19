@@ -6,13 +6,13 @@
  */
 
 import { act } from '@testing-library/react';
-import { ReactWrapper } from 'enzyme';
+import type { ReactWrapper } from 'enzyme';
 import React from 'react';
 
 import { mountWithIntl } from '@kbn/test/jest';
 import { coreMock } from 'src/core/public/mocks';
-import { Space } from 'src/plugins/spaces_oss/common';
-import { SpaceListProps } from 'src/plugins/spaces_oss/public';
+import type { Space } from 'src/plugins/spaces_oss/common';
+import type { SpaceListProps } from 'src/plugins/spaces_oss/public';
 
 import { getSpacesContextWrapper } from '../spaces_context';
 import { spacesManagerMock } from '../spaces_manager/mocks';

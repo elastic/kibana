@@ -7,7 +7,7 @@
 
 import Boom from '@hapi/boom';
 
-import {
+import type {
   ISavedObjectTypeRegistry,
   SavedObjectsAddToNamespacesOptions,
   SavedObjectsBaseOptions,
@@ -28,8 +28,8 @@ import {
 import { SavedObjectsUtils } from '../../../../../src/core/server';
 import { ALL_SPACES_ID } from '../../common/constants';
 import { spaceIdToNamespace } from '../lib/utils/namespace';
-import { ISpacesClient } from '../spaces_client';
-import { SpacesServiceStart } from '../spaces_service/spaces_service';
+import type { ISpacesClient } from '../spaces_client';
+import type { SpacesServiceStart } from '../spaces_service/spaces_service';
 
 interface SpacesSavedObjectsClientOptions {
   baseClient: SavedObjectsClientContract;

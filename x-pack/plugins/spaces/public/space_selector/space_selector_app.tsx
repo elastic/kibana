@@ -6,9 +6,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ApplicationSetup, AppMountParameters, StartServicesAccessor } from 'src/core/public';
+import type { ApplicationSetup, AppMountParameters, StartServicesAccessor } from 'src/core/public';
 
-import { SpacesManager } from '../spaces_manager';
+import type { SpacesManager } from '../spaces_manager';
 
 interface CreateDeps {
   application: ApplicationSetup;

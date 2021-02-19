@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { Observable, Subscription } from 'rxjs';
+import type { Observable, Subscription } from 'rxjs';
 
-import { ILicense } from '../../../licensing/common/types';
+import type { ILicense } from '../../../licensing/common/types';
 
 export interface SpacesLicense {
   isEnabled(): boolean;

@@ -8,12 +8,10 @@
 import React from 'react';
 
 import { i18n } from '@kbn/i18n';
-import { SpacesApiUi } from 'src/plugins/spaces_oss/public';
+import type { SavedObjectsManagementRecord } from 'src/plugins/saved_objects_management/public';
+import type { SpacesApiUi } from 'src/plugins/spaces_oss/public';
 
-import {
-  SavedObjectsManagementAction,
-  SavedObjectsManagementRecord,
-} from '../../../../../src/plugins/saved_objects_management/public';
+import { SavedObjectsManagementAction } from '../../../../../src/plugins/saved_objects_management/public';
 
 export class ShareToSpaceSavedObjectsManagementAction extends SavedObjectsManagementAction {
   public id: string = 'share_saved_objects_to_space';

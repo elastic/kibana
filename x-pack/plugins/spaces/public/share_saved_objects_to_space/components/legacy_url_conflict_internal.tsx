@@ -17,10 +17,10 @@ import React, { useEffect, useState } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 import { firstValueFrom } from '@kbn/std';
-import { ApplicationStart, StartServicesAccessor } from 'src/core/public';
-import { LegacyUrlConflictProps } from 'src/plugins/spaces_oss/public';
+import type { ApplicationStart, StartServicesAccessor } from 'src/core/public';
+import type { LegacyUrlConflictProps } from 'src/plugins/spaces_oss/public';
 
-import { PluginsStart } from '../../plugin';
+import type { PluginsStart } from '../../plugin';
 import { DEFAULT_OBJECT_NOUN } from './constants';
 
 export interface InternalProps {

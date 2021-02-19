@@ -5,21 +5,22 @@
  * 2.0.
  */
 
-import React, { PropsWithChildren, useEffect, useMemo, useState } from 'react';
+import type { PropsWithChildren } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 
-import {
+import type {
   ApplicationStart,
   DocLinksStart,
   NotificationsStart,
   StartServicesAccessor,
 } from 'src/core/public';
-import { SpacesContextProps } from 'src/plugins/spaces_oss/public';
+import type { SpacesContextProps } from 'src/plugins/spaces_oss/public';
 
-import { PluginsStart } from '../plugin';
-import { SpacesManager } from '../spaces_manager';
-import { ShareToSpacesData, ShareToSpaceTarget } from '../types';
+import type { PluginsStart } from '../plugin';
+import type { SpacesManager } from '../spaces_manager';
+import type { ShareToSpacesData, ShareToSpaceTarget } from '../types';
 import { createSpacesReactContext } from './context';
-import { SpacesReactContext } from './types';
+import type { SpacesReactContext } from './types';
 
 interface InternalProps {
   spacesManager: SpacesManager;

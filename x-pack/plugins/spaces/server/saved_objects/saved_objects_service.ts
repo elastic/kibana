@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { CoreSetup } from 'src/core/server';
+import type { CoreSetup } from 'src/core/server';
 
-import { SpacesServiceStart } from '../spaces_service';
+import type { SpacesServiceStart } from '../spaces_service';
 import { SPACES_USAGE_STATS_TYPE } from '../usage_stats';
 import { SpacesSavedObjectMappings, UsageStatsMappings } from './mappings';
 import { migrateToKibana660 } from './migrations';

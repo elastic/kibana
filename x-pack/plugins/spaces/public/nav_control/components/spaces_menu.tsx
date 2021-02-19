@@ -14,11 +14,13 @@ import {
   EuiLoadingContent,
   EuiText,
 } from '@elastic/eui';
-import React, { Component, ReactElement } from 'react';
+import type { ReactElement } from 'react';
+import React, { Component } from 'react';
 
-import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
-import { ApplicationStart, Capabilities } from 'src/core/public';
-import { Space } from 'src/plugins/spaces_oss/common';
+import type { InjectedIntl } from '@kbn/i18n/react';
+import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+import type { ApplicationStart, Capabilities } from 'src/core/public';
+import type { Space } from 'src/plugins/spaces_oss/common';
 
 import { addSpaceIdToPath, ENTER_SPACE_PATH, SPACE_SEARCH_COUNT_THRESHOLD } from '../../../common';
 import { SpaceAvatar } from '../../space_avatar';

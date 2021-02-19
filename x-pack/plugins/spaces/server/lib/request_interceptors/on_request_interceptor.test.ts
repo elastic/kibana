@@ -6,8 +6,8 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { Legacy } from 'kibana';
-import {
+import type { Legacy } from 'kibana';
+import type {
   CoreSetup,
   IBasePath,
   IRouter,

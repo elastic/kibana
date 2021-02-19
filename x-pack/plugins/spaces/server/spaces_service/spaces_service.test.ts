@@ -7,12 +7,8 @@
 
 import * as Rx from 'rxjs';
 
-import {
-  HttpServiceSetup,
-  KibanaRequest,
-  SavedObjectsErrorHelpers,
-  SavedObjectsRepository,
-} from 'src/core/server';
+import type { HttpServiceSetup, KibanaRequest, SavedObjectsRepository } from 'src/core/server';
+import { SavedObjectsErrorHelpers } from 'src/core/server';
 import { coreMock, httpServerMock } from 'src/core/server/mocks';
 
 import { DEFAULT_SPACE_ID } from '../../common/constants';
