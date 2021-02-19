@@ -151,7 +151,7 @@ const InvestigateInResolverActionComponent: React.FC<InvestigateInResolverAction
   const isDisabled = useMemo(() => !isInvestigateInResolverActionEnabled(ecsData), [ecsData]);
   const handleClick = useCallback(() => {
     dispatch(updateTimelineGraphEventId({ id: timelineId, graphEventId: ecsData._id }));
-    if (TimelineId.active) {
+    if (timelineId === TimelineId.active) {
       dispatch(setActiveTabTimeline({ id: timelineId, activeTab: TimelineTabs.graph }));
     }
   }, [dispatch, ecsData._id, timelineId]);

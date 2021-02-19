@@ -7,6 +7,9 @@
 
 import Boom from '@hapi/boom';
 import rison from 'rison-node';
+import { ElasticsearchClient } from 'kibana/server';
+import moment from 'moment';
+import { Duration } from 'moment/moment';
 import { MlClient } from '../ml_client';
 import {
   MlAnomalyDetectionAlertParams,
@@ -25,6 +28,8 @@ import {
 import { parseInterval } from '../../../common/util/parse_interval';
 import { AnomalyDetectionAlertContext } from './register_anomaly_detection_alert_type';
 import { MlJobsResponse } from '../../../common/types/job_service';
+import { ANOMALY_SCORE_MATCH_GROUP_ID } from '../../../common/constants/alerts';
+import { getEntityFieldName, getEntityFieldValue } from '../../../common/util/anomaly_utils';
 
 function isDefined<T>(argument: T | undefined | null): argument is T {
   return argument !== undefined && argument !== null;
@@ -34,22 +39,23 @@ function isDefined<T>(argument: T | undefined | null): argument is T {
  * Resolves the longest bucket span from the list and multiply it by 2.
  * @param bucketSpans Collection of bucket spans
  */
-export function resolveTimeInterval(bucketSpans: string[]): string {
-  return `${
+export function resolveBucketSpanInSeconds(bucketSpans: string[]): number {
+  return (
     Math.max(
       ...bucketSpans
         .map((b) => parseInterval(b))
         .filter(isDefined)
         .map((v) => v.asSeconds())
     ) * 2
-  }s`;
+  );
 }
 
 /**
  * Alerting related server-side methods
  * @param mlClient
+ * @param esClient
  */
-export function alertingServiceProvider(mlClient: MlClient) {
+export function alertingServiceProvider(mlClient: MlClient, esClient: ElasticsearchClient) {
   const getAggResultsLabel = (resultType: AnomalyResultType) => {
     return {
       aggGroupLabel: `${resultType}_results` as PreviewResultsKeys,
@@ -177,10 +183,14 @@ export function alertingServiceProvider(mlClient: MlClient) {
                   'is_interim',
                   'function',
                   'field_name',
+                  'by_field_name',
                   'by_field_value',
+                  'over_field_name',
                   'over_field_value',
+                  'partition_field_name',
                   'partition_field_value',
                   'job_id',
+                  'detector_index',
                 ],
               },
               size: 3,
@@ -258,13 +268,30 @@ export function alertingServiceProvider(mlClient: MlClient) {
   };
 
   /**
+   * Provides unique key for the anomaly result.
+   */
+  const getAlertInstanceKey = (source: any): string => {
+    let alertInstanceKey = `${source.job_id}_${source.timestamp}`;
+    if (source.result_type === ANOMALY_RESULT_TYPE.INFLUENCER) {
+      alertInstanceKey += `_${source.influencer_field_name}_${source.influencer_field_value}`;
+    } else if (source.result_type === ANOMALY_RESULT_TYPE.RECORD) {
+      const fieldName = getEntityFieldName(source);
+      const fieldValue = getEntityFieldValue(source);
+      alertInstanceKey += `_${source.detector_index}_${source.function}_${fieldName}_${fieldValue}`;
+    }
+    return alertInstanceKey;
+  };
+
+  /**
    * Builds a request body
-   * @param params
-   * @param previewTimeInterval
+   * @param params - Alert params
+   * @param previewTimeInterval - Relative time interval to test the alert condition
+   * @param checkIntervalGap - Interval between alert executions
    */
   const fetchAnomalies = async (
     params: MlAnomalyDetectionAlertParams,
-    previewTimeInterval?: string
+    previewTimeInterval?: string,
+    checkIntervalGap?: Duration
   ): Promise<AlertExecutionResult[] | undefined> => {
     const jobAndGroupIds = [
       ...(params.jobSelection.jobIds ?? []),
@@ -281,9 +308,14 @@ export function alertingServiceProvider(mlClient: MlClient) {
       return;
     }
 
-    const lookBackTimeInterval = resolveTimeInterval(
-      jobsResponse.map((v) => v.analysis_config.bucket_span)
-    );
+    /**
+     * The check interval might be bigger than the 2x bucket span.
+     * We need to check the biggest time range to make sure anomalies are not missed.
+     */
+    const lookBackTimeInterval = `${Math.max(
+      resolveBucketSpanInSeconds(jobsResponse.map((v) => v.analysis_config.bucket_span)),
+      checkIntervalGap ? checkIntervalGap.asSeconds() : 0
+    )}s`;
 
     const jobIds = jobsResponse.map((v) => v.job_id);
 
@@ -370,19 +402,22 @@ export function alertingServiceProvider(mlClient: MlClient) {
           const aggTypeResults = v[resultsLabel.aggGroupLabel];
           const requestedAnomalies = aggTypeResults[resultsLabel.topHitsLabel].hits.hits;
 
+          const topAnomaly = requestedAnomalies[0];
+          const alertInstanceKey = getAlertInstanceKey(topAnomaly._source);
+
           return {
             count: aggTypeResults.doc_count,
             key: v.key,
-            key_as_string: v.key_as_string,
+            alertInstanceKey,
             jobIds: [...new Set(requestedAnomalies.map((h) => h._source.job_id))],
             isInterim: requestedAnomalies.some((h) => h._source.is_interim),
-            timestamp: requestedAnomalies[0]._source.timestamp,
-            timestampIso8601: requestedAnomalies[0].fields.timestamp_iso8601[0],
-            timestampEpoch: requestedAnomalies[0].fields.timestamp_epoch[0],
-            score: requestedAnomalies[0].fields.score[0],
+            timestamp: topAnomaly._source.timestamp,
+            timestampIso8601: topAnomaly.fields.timestamp_iso8601[0],
+            timestampEpoch: topAnomaly.fields.timestamp_epoch[0],
+            score: topAnomaly.fields.score[0],
             bucketRange: {
-              start: requestedAnomalies[0].fields.start[0],
-              end: requestedAnomalies[0].fields.end[0],
+              start: topAnomaly.fields.start[0],
+              end: topAnomaly.fields.end[0],
             },
             topRecords: v.record_results.top_record_hits.hits.hits.map((h) => ({
               ...h._source,
@@ -479,13 +514,24 @@ export function alertingServiceProvider(mlClient: MlClient) {
     /**
      * Return the result of an alert condition execution.
      *
-     * @param params
+     * @param params - Alert params
+     * @param publicBaseUrl
+     * @param alertId - Alert ID
+     * @param startedAt
+     * @param previousStartedAt
      */
     execute: async (
       params: MlAnomalyDetectionAlertParams,
-      publicBaseUrl: string | undefined
+      publicBaseUrl: string | undefined,
+      alertId: string,
+      startedAt: Date,
+      previousStartedAt: Date | null
     ): Promise<AnomalyDetectionAlertContext | undefined> => {
-      const res = await fetchAnomalies(params);
+      const checkIntervalGap = previousStartedAt
+        ? moment.duration(moment(startedAt).diff(previousStartedAt))
+        : undefined;
+
+      const res = await fetchAnomalies(params, undefined, checkIntervalGap);
 
       if (!res) {
         throw new Error('No results found');
@@ -496,12 +542,65 @@ export function alertingServiceProvider(mlClient: MlClient) {
 
       const anomalyExplorerUrl = buildExplorerUrl(result, params.resultType as AnomalyResultType);
 
-      return {
+      const executionResult = {
         ...result,
-        name: result.key_as_string,
+        name: result.alertInstanceKey,
         anomalyExplorerUrl,
         kibanaBaseUrl: publicBaseUrl!,
       };
+
+      let kibanaEventLogCount = 0;
+      try {
+        // Check kibana-event-logs for presence of this alert instance
+        const kibanaLogResults = await esClient.count({
+          index: '.kibana-event-log-*',
+          body: {
+            query: {
+              bool: {
+                must: [
+                  {
+                    term: {
+                      'kibana.alerting.action_group_id': {
+                        value: ANOMALY_SCORE_MATCH_GROUP_ID,
+                      },
+                    },
+                  },
+                  {
+                    term: {
+                      'kibana.alerting.instance_id': {
+                        value: executionResult.name,
+                      },
+                    },
+                  },
+                  {
+                    nested: {
+                      path: 'kibana.saved_objects',
+                      query: {
+                        term: {
+                          'kibana.saved_objects.id': {
+                            value: alertId,
+                          },
+                        },
+                      },
+                    },
+                  },
+                ],
+              },
+            },
+          },
+        });
+
+        kibanaEventLogCount = kibanaLogResults.body.count;
+      } catch (e) {
+        // eslint-disable-next-line no-console
+        console.log('Unable to check kibana event logs', e);
+      }
+
+      if (kibanaEventLogCount > 0) {
+        return;
+      }
+
+      return executionResult;
     },
     /**
      * Checks how often the alert condition will fire an alert instance
