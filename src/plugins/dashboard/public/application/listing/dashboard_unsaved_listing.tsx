@@ -17,11 +17,7 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useState } from 'react';
 import { DashboardSavedObject } from '../..';
-import {
-  createConfirmStrings,
-  dashboardUnsavedListingStrings,
-  getNewDashboardTitle,
-} from '../../dashboard_strings';
+import { dashboardUnsavedListingStrings, getNewDashboardTitle } from '../../dashboard_strings';
 import { useKibana } from '../../services/kibana_react';
 import { DASHBOARD_PANELS_UNSAVED_ID } from '../lib/dashboard_panel_storage';
 import { DashboardAppServices, DashboardRedirect } from '../types';
@@ -136,14 +132,10 @@ export const DashboardUnsavedListing = ({
 
   const onDiscard = useCallback(
     (id?: string) => {
-      confirmDiscardUnsavedChanges(
-        overlays,
-        () => {
-          dashboardPanelStorage.clearPanels(id);
-          refreshUnsavedDashboards();
-        },
-        createConfirmStrings.getCancelButtonText()
-      );
+      confirmDiscardUnsavedChanges(overlays, () => {
+        dashboardPanelStorage.clearPanels(id);
+        refreshUnsavedDashboards();
+      });
     },
     [overlays, refreshUnsavedDashboards, dashboardPanelStorage]
   );
