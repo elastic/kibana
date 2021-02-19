@@ -53,7 +53,7 @@ export const registerStartRoute = ({
         if (isEsError(err)) {
           return response.customError({ statusCode: err.statusCode, body: err });
         }
-        return response.internalError({ body: err });
+        throw err;
       }
     })
   );

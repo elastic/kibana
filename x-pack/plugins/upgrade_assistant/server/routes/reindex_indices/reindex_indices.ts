@@ -76,7 +76,7 @@ const mapAnyErrorToKibanaHttpResponse = (e: any) => {
         return kibanaResponseFactory.notFound({ body: e.message });
       case CannotCreateIndex:
       case ReindexTaskCannotBeDeleted:
-        return kibanaResponseFactory.internalError({ body: e.message });
+        throw e;
       case ReindexTaskFailed:
         // Bad data
         return kibanaResponseFactory.customError({ body: e.message, statusCode: 422 });
@@ -91,7 +91,7 @@ const mapAnyErrorToKibanaHttpResponse = (e: any) => {
       // nothing matched
     }
   }
-  return kibanaResponseFactory.internalError({ body: e });
+  throw e;
 };
 
 export function registerReindexIndicesRoutes(
