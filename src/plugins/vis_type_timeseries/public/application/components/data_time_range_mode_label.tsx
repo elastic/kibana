@@ -78,7 +78,7 @@ export const DataTimeRangeModeLabel = ({
   };
 
   const lastValueLabel =
-    seriesData && panelInterval ? getLastValueLabelWithTooltip() : lastValueFormattedMessage;
+    seriesData.length && panelInterval ? getLastValueLabelWithTooltip() : lastValueFormattedMessage;
 
   return (
     <EuiFlexItem grow={false}>
@@ -88,13 +88,13 @@ export const DataTimeRangeModeLabel = ({
           defaultMessage="Data timerange mode: {timeRangeMode}"
           values={{
             timeRangeMode:
-              modelTimeRangeMode === TIME_RANGE_DATA_MODES.LAST_VALUE ? (
-                lastValueLabel
-              ) : (
+              modelTimeRangeMode === TIME_RANGE_DATA_MODES.ENTIRE_TIME_RANGE ? (
                 <FormattedMessage
                   id="visTypeTimeseries.dataTimeRangeModeLabel.entireTimeRangeMode"
                   defaultMessage="Entire time range"
                 />
+              ) : (
+                lastValueLabel
               ),
           }}
         />
