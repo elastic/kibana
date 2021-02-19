@@ -31,8 +31,7 @@ export function getClusterStatus(cluster: ElasticsearchSource, shardStats: unkno
     status:
       cluster.elasticsearch?.cluster?.stats?.status ?? cluster.cluster_state?.status ?? 'unknown',
     // index-based stats
-    indicesCount:
-      clusterStatsLegacy?.indices?.shards?.total ?? clusterStatsMB?.indices?.shards?.count ?? 0,
+    indicesCount: clusterStatsLegacy?.indices?.count ?? clusterStatsMB?.indices?.total ?? 0,
     documentCount:
       clusterStatsLegacy?.indices?.docs?.count ?? clusterStatsMB?.indices?.docs?.total ?? 0,
     dataSize:
