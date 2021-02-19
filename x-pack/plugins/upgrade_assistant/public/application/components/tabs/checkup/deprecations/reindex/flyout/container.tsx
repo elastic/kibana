@@ -44,12 +44,8 @@ interface ReindexFlyoutState {
   currentFlyoutStep: ReindexFlyoutStep;
 }
 
-// eslint-disable-next-line @typescript-eslint/naming-convention
-const getOpenAndCloseIndexDocLink = ({ ELASTIC_WEBSITE_URL, DOC_LINK_VERSION }: DocLinksStart) => (
-  <EuiLink
-    target="_blank"
-    href={`${ELASTIC_WEBSITE_URL}/guide/en/elasticsearch/reference/${DOC_LINK_VERSION}/indices-open-close.html`}
-  >
+const getOpenAndCloseIndexDocLink = (docLinks: DocLinksStart) => (
+  <EuiLink target="_blank" href={`${docLinks.links.apis.openIndex}`}>
     {i18n.translate(
       'xpack.upgradeAssistant.checkupTab.reindexing.flyout.openAndCloseDocumentation',
       { defaultMessage: 'documentation' }

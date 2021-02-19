@@ -15,8 +15,8 @@ import {
   Position,
   timeFormatter,
   Settings,
-  SeriesIdentifier,
   BrushEndListener,
+  LegendItemListener,
 } from '@elastic/charts';
 import { getChartDateLabel } from '../../../lib/helper';
 import { LocationDurationLine } from '../../../../common/types';
@@ -76,7 +76,7 @@ export const DurationChartComponent = ({
     });
   };
 
-  const legendToggleVisibility = (legendItem: SeriesIdentifier | null) => {
+  const legendToggleVisibility: LegendItemListener = ([legendItem]) => {
     if (legendItem) {
       setHiddenLegends((prevState) => {
         if (prevState.includes(legendItem.specId)) {
