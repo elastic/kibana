@@ -16,12 +16,8 @@ export function registerPermissionsRoute({
   router.post({ path: addBasePath('/permissions'), validate: false }, async (ctx, req, res) => {
     const { callAsCurrentUser } = ctx.core.elasticsearch.legacy.client;
 
-    try {
-      return res.ok({
-        body: await getPermissions({ callAsCurrentUser, isSecurityEnabled }),
-      });
-    } catch (e) {
-      return res.internalError({ body: e });
-    }
+    return res.ok({
+      body: await getPermissions({ callAsCurrentUser, isSecurityEnabled }),
+    });
   });
 }

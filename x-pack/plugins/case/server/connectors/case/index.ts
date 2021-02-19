@@ -122,23 +122,48 @@ async function executor(
 /**
  * This converts a connector style generated alert ({_id: string} | {_id: string}[]) to the expected format of addComment.
  */
+interface AttachmentAlerts {
+  ids: string[];
+  indices: string[];
+  rule: { id: string | null; name: string | null };
+}
 export const transformConnectorComment = (comment: CommentSchemaType): CommentRequest => {
   if (isCommentGeneratedAlert(comment)) {
-    const alertId: string[] = [];
-    if (Array.isArray(comment.alerts)) {
-      alertId.push(
-        ...comment.alerts.map((alert: { _id: string }) => {
-          return alert._id;
-        })
+    try {
+      const genAlerts: Array<{
+        _id: string;
+        _index: string;
+        ruleId: string | undefined;
+        ruleName: string | undefined;
+      }> = JSON.parse(
+        `${comment.alerts.substring(0, comment.alerts.lastIndexOf('__SEPARATOR__'))}]`.replace(
+          /__SEPARATOR__/gi,
+          ','
+        )
       );
-    } else {
-      alertId.push(comment.alerts._id);
+
+      const { ids, indices, rule } = genAlerts.reduce<AttachmentAlerts>(
+        (acc, { _id, _index, ruleId, ruleName }) => {
+          // Mutation is faster than destructing.
+          // Mutation usually leads to side effects but for this scenario it's ok to do it.
+          acc.ids.push(_id);
+          acc.indices.push(_index);
+          // We assume one rule per batch of alerts
+          acc.rule = { id: ruleId ?? null, name: ruleName ?? null };
+          return acc;
+        },
+        { ids: [], indices: [], rule: { id: null, name: null } }
+      );
+
+      return {
+        type: CommentType.generatedAlert,
+        alertId: ids,
+        index: indices,
+        rule,
+      };
+    } catch (e) {
+      throw new Error(`Error parsing generated alert in case connector -> ${e.message}`);
     }
-    return {
-      type: CommentType.generatedAlert,
-      alertId,
-      index: comment.index,
-    };
   } else {
     return comment;
   }
