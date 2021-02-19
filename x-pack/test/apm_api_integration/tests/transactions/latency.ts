@@ -83,6 +83,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         expect(latencyChartReturn.currentPeriod.overallAvgDuration).to.be(null);
         expect(latencyChartReturn.currentPeriod.latencyTimeseries.length).to.be(0);
+        expect(latencyChartReturn.previousPeriod.latencyTimeseries.length).to.be(0);
       });
     }
   );
