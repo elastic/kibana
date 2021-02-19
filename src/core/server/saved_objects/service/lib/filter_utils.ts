@@ -227,7 +227,7 @@ export const fieldDefined = (indexMappings: IndexMapping, key: string): boolean 
     isFieldDefined = get(indexMappings, mapping) != null;
   }
 
-  // Handle scenario when the key references a flattened type
+  // If the path is for a flattned type field, we'll assume the mappings are defined.
   if (!isFieldDefined) {
     const keys = key.split('.');
     for (let i = 0; i < keys.length; i++) {
