@@ -124,6 +124,8 @@ export const exceptionListItemToTrustedApp = (
       effectScope: tagsToEffectScope(exceptionListItem.tags),
       created_at: exceptionListItem.created_at,
       created_by: exceptionListItem.created_by,
+      updated_at: exceptionListItem.updated_at,
+      updated_by: exceptionListItem.updated_by,
       ...(os === OperatingSystem.LINUX || os === OperatingSystem.MAC
         ? {
             os,

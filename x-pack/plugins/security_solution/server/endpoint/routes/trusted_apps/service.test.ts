@@ -57,6 +57,8 @@ const TRUSTED_APP: TrustedApp = {
   version: 'abc123',
   created_at: '11/11/2011T11:11:11.111',
   created_by: 'admin',
+  updated_at: '11/11/2011T11:11:11.111',
+  updated_by: 'admin',
   name: 'linux trusted app 1',
   description: 'Linux trusted app 1',
   os: OperatingSystem.LINUX,
@@ -205,6 +207,8 @@ describe('service', () => {
         data: {
           created_at: '11/11/2011T11:11:11.111',
           created_by: 'admin',
+          updated_at: '11/11/2011T11:11:11.111',
+          updated_by: 'admin',
           description: 'updated description',
           effectScope: {
             type: 'global',

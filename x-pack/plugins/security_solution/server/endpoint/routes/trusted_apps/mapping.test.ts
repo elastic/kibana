@@ -267,6 +267,8 @@ describe('mapping', () => {
           effectScope: { type: 'global' },
           created_at: '11/11/2011T11:11:11.111',
           created_by: 'admin',
+          updated_at: '11/11/2011T11:11:11.111',
+          updated_by: 'admin',
           os: OperatingSystem.LINUX,
           entries: [createConditionEntry(ConditionEntryField.PATH, '/bin/malware')],
         }
@@ -292,6 +294,8 @@ describe('mapping', () => {
           effectScope: { type: 'global' },
           created_at: '11/11/2011T11:11:11.111',
           created_by: 'admin',
+          updated_at: '11/11/2011T11:11:11.111',
+          updated_by: 'admin',
           os: OperatingSystem.MAC,
           entries: [createConditionEntry(ConditionEntryField.PATH, '/bin/malware')],
         }
@@ -317,6 +321,8 @@ describe('mapping', () => {
           effectScope: { type: 'global' },
           created_at: '11/11/2011T11:11:11.111',
           created_by: 'admin',
+          updated_at: '11/11/2011T11:11:11.111',
+          updated_by: 'admin',
           os: OperatingSystem.WINDOWS,
           entries: [createConditionEntry(ConditionEntryField.PATH, 'C:\\Program Files\\Malware')],
         }
@@ -347,6 +353,8 @@ describe('mapping', () => {
           effectScope: { type: 'global' },
           created_at: '11/11/2011T11:11:11.111',
           created_by: 'admin',
+          updated_at: '11/11/2011T11:11:11.111',
+          updated_by: 'admin',
           os: OperatingSystem.WINDOWS,
           entries: [createConditionEntry(ConditionEntryField.SIGNER, 'Microsoft Windows')],
         }
@@ -372,6 +380,8 @@ describe('mapping', () => {
           effectScope: { type: 'global' },
           created_at: '11/11/2011T11:11:11.111',
           created_by: 'admin',
+          updated_at: '11/11/2011T11:11:11.111',
+          updated_by: 'admin',
           os: OperatingSystem.LINUX,
           entries: [
             createConditionEntry(ConditionEntryField.HASH, '1234234659af249ddf3e40864e9fb241'),
@@ -401,6 +411,8 @@ describe('mapping', () => {
           effectScope: { type: 'global' },
           created_at: '11/11/2011T11:11:11.111',
           created_by: 'admin',
+          updated_at: '11/11/2011T11:11:11.111',
+          updated_by: 'admin',
           os: OperatingSystem.LINUX,
           entries: [
             createConditionEntry(
@@ -436,6 +448,8 @@ describe('mapping', () => {
           effectScope: { type: 'global' },
           created_at: '11/11/2011T11:11:11.111',
           created_by: 'admin',
+          updated_at: '11/11/2011T11:11:11.111',
+          updated_by: 'admin',
           os: OperatingSystem.LINUX,
           entries: [
             createConditionEntry(
