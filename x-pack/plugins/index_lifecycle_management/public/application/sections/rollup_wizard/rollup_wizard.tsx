@@ -8,6 +8,7 @@
 import React, { Component, Fragment } from 'react';
 import {
   EuiCallOut,
+  EuiPage,
   EuiLoadingKibana,
   EuiOverlayMask,
   EuiPageContent,
@@ -190,171 +191,6 @@ export class RollupWizardUi extends Component<any, any> {
     // Clean up after ourselves.
     this.props.clearCreateJobErrors();
   }
-
-  // requestIndexPatternValidation = debounce((resetDefaults = true) => {
-  //   const indexPattern = this.getIndexPattern();
-
-  //   const lastIndexPatternValidationTime = (this.lastIndexPatternValidationTime = Date.now());
-  //   validateIndexPattern(indexPattern)
-  //     .then((response) => {
-  //       // We don't need to do anything if this component has been unmounted.
-  //       if (!this._isMounted) {
-  //         return;
-  //       }
-
-  //       // Only re-request if the index pattern changed.
-  //       if (lastIndexPatternValidationTime !== this.lastIndexPatternValidationTime) {
-  //         return;
-  //       }
-
-  //       const {
-  //         doesMatchIndices: doesIndexPatternMatchIndices,
-  //         doesMatchRollupIndices: doesIndexPatternMatchRollupIndices,
-  //         dateFields: indexPatternDateFields,
-  //         numericFields,
-  //         keywordFields,
-  //       } = response;
-
-  //       let indexPatternAsyncErrors;
-
-  //       if (doesIndexPatternMatchRollupIndices) {
-  //         indexPatternAsyncErrors = [
-  //           <FormattedMessage
-  //             id="xpack.rollupJobs.create.errors.indexPatternMatchesRollupIndices"
-  //             defaultMessage="Index pattern must not match rollup indices."
-  //           />,
-  //         ];
-  //       } else if (!doesIndexPatternMatchIndices) {
-  //         indexPatternAsyncErrors = [
-  //           <FormattedMessage
-  //             id="xpack.rollupJobs.create.errors.indexPatternNoMatchingIndices"
-  //             defaultMessage="Index pattern doesn't match any indices."
-  //           />,
-  //         ];
-  //       } else if (!indexPatternDateFields.length) {
-  //         indexPatternAsyncErrors = [
-  //           <FormattedMessage
-  //             id="xpack.rollupJobs.create.errors.indexPatternNoTimeFields"
-  //             defaultMessage="Index pattern must match indices that contain time fields."
-  //           />,
-  //         ];
-  //       }
-
-  //       const numericType = i18n.translate('xpack.rollupJobs.create.numericTypeField', {
-  //         defaultMessage: 'numeric',
-  //       });
-  //       const keywordType = i18n.translate('xpack.rollupJobs.create.keywordTypeField', {
-  //         defaultMessage: 'keyword',
-  //       });
-  //       const dateType = i18n.translate('xpack.rollupJobs.create.dateTypeField', {
-  //         defaultMessage: 'date',
-  //       });
-
-  //       const formattedNumericFields = formatFields(numericFields, numericType);
-  //       const formattedKeywordFields = formatFields(keywordFields, keywordType);
-  //       const formattedDateFields = formatFields(indexPatternDateFields, dateType);
-
-  //       const { jobToClone, stepsFields } = this.state;
-  //       const {
-  //         [STEP_METRICS]: { metrics },
-  //       } = stepsFields;
-
-  //       // Only re-type metrics if they haven't been typed already
-  //       if (jobToClone && metrics && metrics.length && !first(metrics).type) {
-  //         // Re-type any pre-existing metrics entries for the job we are cloning.
-  //         const typeMaps = [
-  //           { fields: formattedNumericFields, type: numericType },
-  //           { fields: formattedKeywordFields, type: keywordType },
-  //           { fields: formattedDateFields, type: dateType },
-  //         ];
-  //         const retypedMetrics = retypeMetrics({ metrics, typeMaps });
-  //         this.onFieldsChange({ metrics: retypedMetrics }, STEP_METRICS);
-  //       }
-
-  //       function sortFields(a, b) {
-  //         const nameA = a.name.toUpperCase();
-  //         const nameB = b.name.toUpperCase();
-
-  //         if (nameA < nameB) {
-  //           return -1;
-  //         }
-
-  //         if (nameA > nameB) {
-  //           return 1;
-  //         }
-
-  //         return 0;
-  //       }
-
-  //       const indexPatternTermsFields = [...formattedNumericFields, ...formattedKeywordFields].sort(
-  //         sortFields
-  //       );
-
-  //       const indexPatternHistogramFields = [...formattedNumericFields].sort(sortFields);
-
-  //       const indexPatternMetricsFields = [...formattedNumericFields, ...formattedDateFields].sort(
-  //         sortFields
-  //       );
-
-  //       indexPatternDateFields.sort();
-
-  //       if (resetDefaults) {
-  //         // Whenever the index pattern changes we default to the first date field if there is one.
-  //         this.onFieldsChange(
-  //           {
-  //             dateHistogramField: indexPatternDateFields.length
-  //               ? indexPatternDateFields[0]
-  //               : undefined,
-  //           },
-  //           STEP_DATE_HISTOGRAM
-  //         );
-  //       }
-
-  //       this.setState({
-  //         indexPatternAsyncErrors,
-  //         indexPatternDateFields,
-  //         indexPatternTermsFields,
-  //         indexPatternHistogramFields,
-  //         indexPatternMetricsFields,
-  //         isValidatingIndexPattern: false,
-  //       });
-  //     })
-  //     .catch((error) => {
-  //       // We don't need to do anything if this component has been unmounted.
-  //       if (!this._isMounted) {
-  //         return;
-  //       }
-
-  //       // Ignore all responses except that to the most recent request.
-  //       if (lastIndexPatternValidationTime !== this.lastIndexPatternValidationTime) {
-  //         return;
-  //       }
-
-  //       // Expect an error in the shape provided by http service.
-  //       if (error && error.body) {
-  //         const { error: errorString, statusCode } = error.body;
-
-  //         const indexPatternAsyncErrors = [
-  //           <FormattedMessage
-  //             id="xpack.rollupJobs.create.errors.indexPatternValidationError"
-  //             defaultMessage="There was a problem validating this index pattern: {statusCode} {error}"
-  //             values={{ error: errorString, statusCode }}
-  //           />,
-  //         ];
-
-  //         this.setState({
-  //           indexPatternAsyncErrors,
-  //           indexPatternDateFields: [],
-  //           indexPatternTermsFields: [],
-  //           indexPatternHistogramFields: [],
-  //           indexPatternMetricsFields: [],
-  //           isValidatingIndexPattern: false,
-  //         });
-
-  //         return;
-  //       }
-  //     });
-  // }, 300);
 
   getSteps() {
     const { currentStepId, checkpointStepId } = this.state;
@@ -560,14 +396,14 @@ export class RollupWizardUi extends Component<any, any> {
     }
 
     return (
-      <Fragment>
+      <EuiPage>
         <EuiPageContent>
           <EuiPageContentHeader>
             <EuiTitle size="l">
               <h1>
                 <FormattedMessage
                   id="xpack.rollupJobs.createTitle"
-                  defaultMessage="Create rollup job"
+                  defaultMessage="Configure rollup action"
                 />
               </h1>
             </EuiTitle>
@@ -586,7 +422,7 @@ export class RollupWizardUi extends Component<any, any> {
           {this.renderNavigation()}
         </EuiPageContent>
         {savingFeedback}
-      </Fragment>
+      </EuiPage>
     );
   }
 
@@ -625,7 +461,6 @@ export class RollupWizardUi extends Component<any, any> {
       case STEP_DATE_HISTOGRAM:
         return (
           <StepDateHistogram
-            indexPattern={this.getIndexPattern()}
             fields={currentStepFields}
             onFieldsChange={this.onFieldsChange}
             fieldErrors={currentStepFieldErrors}

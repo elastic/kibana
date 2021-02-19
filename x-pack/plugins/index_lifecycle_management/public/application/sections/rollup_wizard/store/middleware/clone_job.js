@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { getRouter, getUserHasLeftApp } from '../../services';
-import { CLONE_JOB_START } from '../action_types';
+// import { getRouter, getUserHasLeftApp } from '../../services';
+// import { CLONE_JOB_START } from '../action_types';
 
 export const cloneJob = () => (next) => (action) => {
-  const { type } = action;
+  // const { type } = action;
 
-  if (type === CLONE_JOB_START) {
-    if (!getUserHasLeftApp()) {
-      getRouter().history.push({
-        pathname: `/create`,
-      });
-    }
-  }
+  // if (type === CLONE_JOB_START) {
+  //   if (!getUserHasLeftApp()) {
+  //     getRouter().history.push({
+  //       pathname: `/create`,
+  //     });
+  //   }
+  // }
 
   return next(action);
 };

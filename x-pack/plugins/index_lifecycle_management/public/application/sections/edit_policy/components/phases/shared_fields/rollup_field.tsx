@@ -5,64 +5,44 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import React, { FunctionComponent } from 'react';
 import { useHistory } from 'react-router-dom';
-import { EuiBasicTable, EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
+import { EuiButtonEmpty } from '@elastic/eui';
 
 import { reactRouterNavigate } from '../../../../../../../../../../src/plugins/kibana_react/public';
 
-import { useForm } from '../../../../../../shared_imports';
+// import { useForm } from '../../../../../../shared_imports';
 
-import { useAppContext } from '../../../../../app_context';
+// import { useAppContext } from '../../../../../app_context';
 import { getPolicyRollupWizardPath } from '../../../../../services/navigation';
 
 import { DescribedFormRow } from '../../described_form_row';
 
 export const RollupField: FunctionComponent = () => {
+  const phase = 'cold';
+  const initialValue = true;
   const history = useHistory();
-  const form = useForm();
-  const { setCurrentPolicy } = useAppContext();
+  // const form = useForm();
+  // const { setCurrentPolicy } = useAppContext();
   return (
-    <DescribedFormRow title={<h3>Rollup</h3>} fullWidth>
-      <EuiBasicTable
-        columns={[
-          { field: 'name', name: 'Name' },
-          {
-            name: 'Actions',
-            actions: [
-              {
-                name: 'Edit',
-                description: 'Edit this rollup',
-                render: () => (
-                  <EuiButtonIcon
-                    aria-label="edit this rollup"
-                    iconType="pencil"
-                    onClick={() => {}}
-                  />
-                ),
-              },
-              {
-                name: 'Delete',
-                description: 'Delete this rollup',
-                render: () => (
-                  <EuiButtonIcon
-                    aria-label="delete this rollup"
-                    iconType="trash"
-                    color="danger"
-                    onClick={() => {}}
-                  />
-                ),
-              },
-            ],
-          },
-        ]}
-        items={[{ name: 'Rollup alpha' }, { name: 'Rollup beta' }]}
-      />
+    <DescribedFormRow
+      title={<h3>Rollup</h3>}
+      description="Use rollups to precalculate aggregations and save storage space"
+      switchProps={{
+        'data-test-subj': `${phase}-setReplicasSwitch`,
+        label: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.rollup.switchLabel', {
+          defaultMessage: 'Set rollup',
+        }),
+        initialValue,
+      }}
+      fullWidth
+    >
       <EuiButtonEmpty
         iconType="plusInACircle"
         {...reactRouterNavigate(history, getPolicyRollupWizardPath())}
       >
-        Add rollup
+        Configure rollup
       </EuiButtonEmpty>
     </DescribedFormRow>
   );

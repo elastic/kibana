@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { RollupWizard } from './rollup_wizard.container';
+export { DescribedFormRow } from './described_form_row';

@@ -49,7 +49,7 @@ export const useLoadIndexTemplates = (legacy: boolean = false) => {
   });
 };
 
-export async function loadPolicies(withIndices: boolean) {
+export async function loadPolicies(withIndices: boolean): Promise<PolicyFromES[]> {
   return await sendGet('policies', { withIndices });
 }
 
