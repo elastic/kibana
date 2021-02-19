@@ -22,13 +22,13 @@ import {
 
 describe('getColorSpec()', () => {
   it('should return the default color for non-outlier specs', () => {
-    const colorSpec = getColorSpec(euiThemeLight, false);
+    const colorSpec = getColorSpec(euiThemeLight);
 
     expect(colorSpec).toEqual({ value: DEFAULT_COLOR });
   });
 
   it('should return a conditional spec for outliers', () => {
-    const colorSpec = getColorSpec(euiThemeLight, true);
+    const colorSpec = getColorSpec(euiThemeLight, 'outlier_score');
 
     expect(colorSpec).toEqual({
       condition: {
@@ -42,7 +42,7 @@ describe('getColorSpec()', () => {
   it('should return a field based spec for non-outlier specs with legendType supplied', () => {
     const colorName = 'the-color-field';
 
-    const colorSpec = getColorSpec(euiThemeLight, false, colorName, LEGEND_TYPES.NOMINAL);
+    const colorSpec = getColorSpec(euiThemeLight, undefined, colorName, LEGEND_TYPES.NOMINAL);
 
     expect(colorSpec).toEqual({
       field: colorName,
