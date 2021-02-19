@@ -115,9 +115,10 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
           params: {
             path: { serviceName },
             query: {
+              environment,
+              kuery,
               start,
               end,
-              uiFilters: JSON.stringify(uiFilters),
               numBuckets: 20,
               transactionType,
               groupIds,
