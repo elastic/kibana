@@ -143,7 +143,7 @@ describe('alert_add', () => {
         consumer={ALERTS_FEATURE_ID}
         onClose={() => {}}
         initialValues={initialValues}
-        reloadAlerts={() => {
+        onSave={() => {
           return new Promise<void>(() => {});
         }}
         actionTypeRegistry={actionTypeRegistry}

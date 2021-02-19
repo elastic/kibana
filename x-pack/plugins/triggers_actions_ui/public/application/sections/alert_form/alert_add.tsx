@@ -38,7 +38,9 @@ export interface AlertAddProps<MetaData = Record<string, any>> {
   alertTypeId?: string;
   canChangeTrigger?: boolean;
   initialValues?: Partial<Alert>;
+  /** @deprecated use `onSave` as a callback after an alert is saved*/
   reloadAlerts?: () => Promise<void>;
+  onSave?: () => Promise<void>;
   metadata?: MetaData;
 }
 
@@ -51,8 +53,10 @@ const AlertAdd = ({
   alertTypeId,
   initialValues,
   reloadAlerts,
+  onSave,
   metadata,
 }: AlertAddProps) => {
+  const onSaveHandler = onSave ?? reloadAlerts;
   const initialAlert: InitialAlert = useMemo(
     () => ({
       params: {},
@@ -128,8 +132,8 @@ const AlertAdd = ({
     setIsSaving(false);
     if (savedAlert) {
       onClose();
-      if (reloadAlerts) {
-        reloadAlerts();
+      if (onSaveHandler) {
+        onSaveHandler();
       }
     }
   };
