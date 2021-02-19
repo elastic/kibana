@@ -28,10 +28,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { FormattedDate, FormattedMessage } from 'react-intl';
-import {
-  InventoryItemType,
-  SnapshotMetricType,
-} from '../../../../../../../../common/inventory_models/types';
+import { SnapshotMetricType } from '../../../../../../../../common/inventory_models/types';
 import { withTheme } from '../../../../../../../../../../../src/plugins/kibana_react/common';
 import { PrefilledAnomalyAlertFlyout } from '../../../../../../../alerting/metric_anomaly/components/alert_flyout';
 import { useLinkProps } from '../../../../../../../hooks/use_link_props';
@@ -55,111 +52,114 @@ interface JobOption {
   id: JobType;
   label: string;
 }
-const AnomalyActionMenu = ({
-  jobId,
-  influencers,
-  type,
-  startTime,
-}: {
-  jobId: string;
-  influencers: string[];
-  type: string;
-  startTime: number;
-}) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [isAlertOpen, setIsAlertOpen] = useState(false);
-  const close = useCallback(() => setIsOpen(false), [setIsOpen]);
-  const handleToggleMenu = useCallback(() => setIsOpen(!isOpen), [isOpen]);
-  const openAlert = useCallback(() => setIsAlertOpen(true), [setIsAlertOpen]);
-  const closeAlert = useCallback(() => setIsAlertOpen(false), [setIsAlertOpen]);
-  const { onViewChange } = useWaffleViewState();
+const AnomalyActionMenu = React.memo(
+  ({
+    jobId,
+    type,
+    startTime,
+    partitionFieldName,
+    partitionFieldValue,
+  }: {
+    jobId: string;
+    type: string;
+    startTime: number;
+    partitionFieldName?: string;
+    partitionFieldValue?: string;
+  }) => {
+    const [isOpen, setIsOpen] = useState(false);
+    const [isAlertOpen, setIsAlertOpen] = useState(false);
+    const close = useCallback(() => setIsOpen(false), [setIsOpen]);
+    const handleToggleMenu = useCallback(() => setIsOpen(!isOpen), [isOpen]);
+    const openAlert = useCallback(() => setIsAlertOpen(true), [setIsAlertOpen]);
+    const closeAlert = useCallback(() => setIsAlertOpen(false), [setIsAlertOpen]);
+    const { onViewChange } = useWaffleViewState();
 
-  const filters = influencers.map(
-    (influencer) =>
-      `${type === 'metrics_k8s' ? 'kubernetes.pod.uid' : 'host.name'}: "${influencer}"`
-  );
-  const getNodeType = (metricType: string): InventoryItemType => {
-    return metricType === 'metrics_k8s' ? 'pod' : 'host';
-  };
-  const showInInventory = useCallback(() => {
-    const metricTypeMap: { [key in Metric]: SnapshotMetricType } = {
-      memory_usage: 'memory',
-      network_in: 'rx',
-      network_out: 'tx',
-    };
-    // parse the anomaly job id for metric type
-    const jobIdParts = jobId.split('-');
-    const jobIdMetric = jobIdParts[jobIdParts.length - 1];
-    const metricType = metricTypeMap[jobIdMetric.replace(/hosts_|k8s_/, '') as Metric];
-    const anomalyViewParams: WaffleViewState = {
-      metric: { type: metricType },
-      sort: { by: 'name', direction: 'desc' },
-      groupBy: [],
-      nodeType: getNodeType(type),
-      view: 'map',
-      customOptions: [],
-      customMetrics: [],
-      boundsOverride: { max: 1, min: 0 },
-      autoBounds: true,
-      accountId: '',
-      region: '',
-      autoReload: false,
-      filterQuery: { expression: filters.join(' or '), kind: 'kuery' },
-      legend: { palette: 'cool', reverseColors: false, steps: 10 },
-      time: startTime,
-    };
-    onViewChange(anomalyViewParams);
-  }, [filters, jobId, onViewChange, startTime, type]);
+    const showInInventory = useCallback(() => {
+      const metricTypeMap: { [key in Metric]: SnapshotMetricType } = {
+        memory_usage: 'memory',
+        network_in: 'rx',
+        network_out: 'tx',
+      };
+      // parse the anomaly job id for metric type
+      const jobIdParts = jobId.split('-');
+      const jobIdMetric = jobIdParts[jobIdParts.length - 1];
+      const metricType = metricTypeMap[jobIdMetric.replace(/hosts_|k8s_/, '') as Metric];
+      const anomalyViewParams: WaffleViewState = {
+        metric: { type: metricType },
+        sort: { by: 'name', direction: 'desc' },
+        groupBy: [],
+        nodeType: type === 'metrics_k8s' ? 'pod' : 'host',
+        view: 'map',
+        customOptions: [],
+        customMetrics: [],
+        boundsOverride: { max: 1, min: 0 },
+        autoBounds: true,
+        accountId: '',
+        region: '',
+        autoReload: false,
+        filterQuery: {
+          expression:
+            partitionFieldName && partitionFieldValue
+              ? `${partitionFieldName}: "${partitionFieldValue}"`
+              : ``,
+          kind: 'kuery',
+        },
+        legend: { palette: 'cool', reverseColors: false, steps: 10 },
+        time: startTime,
+      };
+      onViewChange(anomalyViewParams);
+    }, [jobId, onViewChange, startTime, type, partitionFieldName, partitionFieldValue]);
 
-  const anomaliesUrl = useLinkProps({
-    app: 'ml',
-    pathname: `/explorer?_g=${createResultsUrl([jobId.toString()])}`,
-  });
+    const anomaliesUrl = useLinkProps({
+      app: 'ml',
+      pathname: `/explorer?_g=${createResultsUrl([jobId.toString()])}`,
+    });
 
-  const items = [
-    <EuiContextMenuItem key="showInInventory" icon="search" onClick={showInInventory}>
-      <FormattedMessage
-        id="xpack.infra.ml.anomalyFlyout.actions.showInInventory"
-        defaultMessage="Show in Inventory"
-      />
-    </EuiContextMenuItem>,
-    <EuiContextMenuItem key="openInAnomalyExplorer" icon="popout" {...anomaliesUrl}>
-      <FormattedMessage
-        id="xpack.infra.ml.anomalyFlyout.actions.openInAnomalyExplorer"
-        defaultMessage="Open in Anomaly Explorer"
-      />
-    </EuiContextMenuItem>,
-    <EuiContextMenuItem key="createAlert" icon="bell" onClick={openAlert}>
-      <FormattedMessage
-        id="xpack.infra.ml.anomalyFlyout.actions.createAlert"
-        defaultMessage="Create Alert"
-      />
-    </EuiContextMenuItem>,
-  ];
+    const items = [
+      <EuiContextMenuItem key="showInInventory" icon="search" onClick={showInInventory}>
+        <FormattedMessage
+          id="xpack.infra.ml.anomalyFlyout.actions.showInInventory"
+          defaultMessage="Show in Inventory"
+        />
+      </EuiContextMenuItem>,
+      <EuiContextMenuItem key="openInAnomalyExplorer" icon="popout" {...anomaliesUrl}>
+        <FormattedMessage
+          id="xpack.infra.ml.anomalyFlyout.actions.openInAnomalyExplorer"
+          defaultMessage="Open in Anomaly Explorer"
+        />
+      </EuiContextMenuItem>,
+      <EuiContextMenuItem key="createAlert" icon="bell" onClick={openAlert}>
+        <FormattedMessage
+          id="xpack.infra.ml.anomalyFlyout.actions.createAlert"
+          defaultMessage="Create Alert"
+        />
+      </EuiContextMenuItem>,
+    ];
 
-  return (
-    <>
-      <EuiPopover
-        anchorPosition="downRight"
-        panelPaddingSize="none"
-        button={
-          <EuiButtonIcon
-            iconType="boxesHorizontal"
-            onClick={handleToggleMenu}
-            aria-label={i18n.translate('xpack.infra.ml.anomalyFlyout.actions.openActionMenu', {
-              defaultMessage: 'Open',
-            })}
-          />
-        }
-        isOpen={isOpen && !isAlertOpen}
-        closePopover={close}
-      >
-        <EuiContextMenuPanel items={items} />
-      </EuiPopover>
-      {isAlertOpen && <PrefilledAnomalyAlertFlyout onClose={closeAlert} />}
-    </>
-  );
-};
+    return (
+      <>
+        <EuiPopover
+          anchorPosition="downRight"
+          panelPaddingSize="none"
+          button={
+            <EuiButtonIcon
+              iconType="boxesHorizontal"
+              onClick={handleToggleMenu}
+              aria-label={i18n.translate('xpack.infra.ml.anomalyFlyout.actions.openActionMenu', {
+                defaultMessage: 'Open',
+              })}
+            />
+          }
+          isOpen={isOpen && !isAlertOpen}
+          closePopover={close}
+        >
+          <EuiContextMenuPanel items={items} />
+        </EuiPopover>
+        {isAlertOpen && <PrefilledAnomalyAlertFlyout onClose={closeAlert} />}
+      </>
+    );
+  }
+);
 export const NoAnomaliesFound = withTheme(({ theme }) => (
   <EuiText>
     <EuiSpacer size="xl" />
@@ -470,14 +470,17 @@ const columns: Array<
     width: '10%',
     actions: [
       {
-        render: (anomaly: MetricsHostsAnomaly) => (
-          <AnomalyActionMenu
-            jobId={anomaly.jobId}
-            type={anomaly.type}
-            influencers={anomaly.influencers}
-            startTime={anomaly.startTime}
-          />
-        ),
+        render: (anomaly: MetricsHostsAnomaly) => {
+          return (
+            <AnomalyActionMenu
+              jobId={anomaly.jobId}
+              type={anomaly.type}
+              partitionFieldName={anomaly.partitionFieldName}
+              partitionFieldValue={anomaly.partitionFieldValue}
+              startTime={anomaly.startTime}
+            />
+          );
+        },
       },
     ],
   },

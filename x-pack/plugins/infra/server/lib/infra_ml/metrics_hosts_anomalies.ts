@@ -151,6 +151,8 @@ const parseAnomalyResult = (anomaly: MappedAnomalyHit, jobId: string) => {
     duration,
     influencers,
     startTime: anomalyStartTime,
+    partitionFieldName,
+    partitionFieldValue,
   } = anomaly;
 
   return {
@@ -163,6 +165,8 @@ const parseAnomalyResult = (anomaly: MappedAnomalyHit, jobId: string) => {
     startTime: anomalyStartTime,
     type: 'metrics_hosts' as const,
     jobId,
+    partitionFieldName,
+    partitionFieldValue,
   };
 };
 
@@ -184,21 +188,18 @@ async function fetchMetricsHostsAnomalies(
   const expandedPagination = { ...pagination, pageSize: pagination.pageSize + 1 };
 
   const finalizeFetchLogEntryAnomaliesSpan = startTracingSpan('fetch metrics hosts anomalies');
-
+  const hostQuery = createMetricsHostsAnomaliesQuery({
+    jobIds,
+    anomalyThreshold,
+    startTime,
+    endTime,
+    sort,
+    pagination: expandedPagination,
+    influencerFilter,
+    jobQuery: query,
+  });
   const results = decodeOrThrow(metricsHostsAnomaliesResponseRT)(
-    await mlSystem.mlAnomalySearch(
-      createMetricsHostsAnomaliesQuery({
-        jobIds,
-        anomalyThreshold,
-        startTime,
-        endTime,
-        sort,
-        pagination: expandedPagination,
-        influencerFilter,
-        jobQuery: query,
-      }),
-      jobIds
-    )
+    await mlSystem.mlAnomalySearch(hostQuery, jobIds)
   );
 
   const {
@@ -236,6 +237,8 @@ async function fetchMetricsHostsAnomalies(
       bucket_span: duration,
       timestamp: anomalyStartTime,
       by_field_value: categoryId,
+      partition_field_value: partitionFieldValue,
+      partition_field_name: partitionFieldName,
     } = result._source;
 
     const hostInfluencers = influencers.filter((i) => i.influencer_field_name === 'host.name');
@@ -253,6 +256,8 @@ async function fetchMetricsHostsAnomalies(
       startTime: anomalyStartTime,
       duration: duration * 1000,
       categoryId,
+      partitionFieldName,
+      partitionFieldValue,
     };
   });
 

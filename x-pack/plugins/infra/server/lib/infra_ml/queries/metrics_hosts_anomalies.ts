@@ -69,6 +69,7 @@ export const createMetricsHostsAnomaliesQuery = ({
     'record_score',
     'typical',
     'actual',
+    'partition_field_name',
     'partition_field_value',
     'timestamp',
     'bucket_span',
@@ -123,6 +124,8 @@ export const metricsHostsAnomalyHitRT = rt.type({
       timestamp: rt.number,
     }),
     rt.partial({
+      partition_field_name: rt.string,
+      partition_field_value: rt.string,
       by_field_value: rt.string,
     }),
   ]),

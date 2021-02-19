@@ -147,6 +147,8 @@ const parseAnomalyResult = (anomaly: MappedAnomalyHit, jobId: string) => {
     duration,
     influencers,
     startTime: anomalyStartTime,
+    partitionFieldName,
+    partitionFieldValue,
   } = anomaly;
 
   return {
@@ -159,6 +161,8 @@ const parseAnomalyResult = (anomaly: MappedAnomalyHit, jobId: string) => {
     influencers,
     type: 'metrics_k8s' as const,
     jobId,
+    partitionFieldName,
+    partitionFieldValue,
   };
 };
 
@@ -232,6 +236,8 @@ async function fetchMetricK8sAnomalies(
       timestamp: anomalyStartTime,
       by_field_value: categoryId,
       influencers,
+      partition_field_value: partitionFieldValue,
+      partition_field_name: partitionFieldName,
     } = result._source;
 
     const podInfluencers = influencers.filter(
@@ -250,6 +256,8 @@ async function fetchMetricK8sAnomalies(
       startTime: anomalyStartTime,
       duration: duration * 1000,
       categoryId,
+      partitionFieldValue,
+      partitionFieldName,
     };
   });
 
