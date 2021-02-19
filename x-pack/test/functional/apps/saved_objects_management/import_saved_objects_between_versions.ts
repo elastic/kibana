@@ -32,6 +32,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     after(async () => {
       await esArchiver.unload('logstash_functional');
       await esArchiver.unload('getting_started/shakespeare');
+      await esArchiver.load('empty_kibana');
     });
 
     it('should be able to import 7.12 saved objects into 8.0.0', async function () {
