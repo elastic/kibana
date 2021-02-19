@@ -78,7 +78,9 @@ export const DataTimeRangeModeLabel = ({
   };
 
   const lastValueLabel =
-    seriesData.length && panelInterval ? getLastValueLabelWithTooltip() : lastValueFormattedMessage;
+    seriesData?.length && panelInterval
+      ? getLastValueLabelWithTooltip()
+      : lastValueFormattedMessage;
 
   return (
     <EuiFlexItem grow={false}>
