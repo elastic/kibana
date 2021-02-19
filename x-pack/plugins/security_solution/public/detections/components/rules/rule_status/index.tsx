@@ -5,115 +5,43 @@
  * 2.0.
  */
 
-import {
-  EuiButtonIcon,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiHealth,
-  EuiLoadingSpinner,
-  EuiText,
-} from '@elastic/eui';
-import React, { memo, useCallback, useEffect, useState } from 'react';
-import deepEqual from 'fast-deep-equal';
+import { EuiFlexItem, EuiHealth, EuiText } from '@elastic/eui';
+import React, { memo } from 'react';
 
-import {
-  useRuleStatus,
-  RuleInfoStatus,
-  RuleStatusType,
-} from '../../../containers/detection_engine/rules';
+import { RuleStatusType } from '../../../containers/detection_engine/rules';
 import { FormattedDate } from '../../../../common/components/formatted_date';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import { getStatusColor } from './helpers';
 import * as i18n from './translations';
 
 interface RuleStatusProps {
-  ruleId: string | null;
-  ruleEnabled?: boolean | null;
+  children: React.ReactNode | null | undefined;
+  statusDate: string | null | undefined;
+  status: RuleStatusType | null | undefined;
 }
 
-const RuleStatusComponent: React.FC<RuleStatusProps> = ({ ruleId, ruleEnabled }) => {
-  const [loading, ruleStatus, fetchRuleStatus] = useRuleStatus(ruleId);
-  const [myRuleEnabled, setMyRuleEnabled] = useState<boolean | null>(ruleEnabled ?? null);
-  const [currentStatus, setCurrentStatus] = useState<RuleInfoStatus | null>(
-    ruleStatus?.current_status ?? null
-  );
-
-  useEffect(() => {
-    if (myRuleEnabled !== ruleEnabled && fetchRuleStatus != null && ruleId != null) {
-      fetchRuleStatus(ruleId);
-      if (myRuleEnabled !== ruleEnabled) {
-        setMyRuleEnabled(ruleEnabled ?? null);
-      }
-    }
-  }, [fetchRuleStatus, myRuleEnabled, ruleId, ruleEnabled, setMyRuleEnabled]);
-
-  useEffect(() => {
-    if (!deepEqual(currentStatus, ruleStatus?.current_status)) {
-      setCurrentStatus(ruleStatus?.current_status ?? null);
-    }
-  }, [currentStatus, ruleStatus, setCurrentStatus]);
-
-  const handleRefresh = useCallback(() => {
-    if (fetchRuleStatus != null && ruleId != null) {
-      fetchRuleStatus(ruleId);
-    }
-  }, [fetchRuleStatus, ruleId]);
-
-  const getStatus = useCallback((status: RuleStatusType | null | undefined) => {
-    if (status == null) {
-      return getEmptyTagValue();
-    } else if (status != null && status === 'partial failure') {
-      // Temporary fix if on upgrade a rule has a status of 'partial failure' we want to display that text as 'warning'
-      // On the next subsequent rule run, that 'partial failure' status will be re-written as a 'warning' status
-      // and this code will no longer be necessary
-      // TODO: remove this code in 8.0.0
-      return 'warning';
-    }
-    return status;
-  }, []);
-
+const RuleStatusComponent: React.FC<RuleStatusProps> = ({ children, statusDate, status }) => {
   return (
-    <EuiFlexGroup gutterSize="xs" alignItems="center" justifyContent="flexStart">
+    <>
       <EuiFlexItem grow={false}>
-        {i18n.STATUS}
-        {':'}
+        <EuiHealth color={getStatusColor(status ?? null)}>
+          <EuiText data-test-subj="ruleStatus" size="xs">
+            {status ?? getEmptyTagValue()}
+          </EuiText>
+        </EuiHealth>
       </EuiFlexItem>
-      {loading && (
-        <EuiFlexItem>
-          <EuiLoadingSpinner size="m" data-test-subj="rule-status-loader" />
-        </EuiFlexItem>
-      )}
-      {!loading && (
+      {statusDate != null && status != null && (
         <>
           <EuiFlexItem grow={false}>
-            <EuiHealth color={getStatusColor(currentStatus?.status ?? null)}>
-              <EuiText data-test-subj="ruleStatus" size="xs">
-                {getStatus(currentStatus?.status)}
-              </EuiText>
-            </EuiHealth>
+            <>{i18n.STATUS_AT}</>
           </EuiFlexItem>
-          {currentStatus?.status_date != null && currentStatus?.status != null && (
-            <>
-              <EuiFlexItem grow={false}>
-                <>{i18n.STATUS_AT}</>
-              </EuiFlexItem>
-              <EuiFlexItem grow={true}>
-                <FormattedDate value={currentStatus?.status_date} fieldName={i18n.STATUS_DATE} />
-              </EuiFlexItem>
-            </>
-          )}
-          <EuiFlexItem grow={false}>
-            <EuiButtonIcon
-              data-test-subj="refreshButton"
-              color="primary"
-              onClick={handleRefresh}
-              iconType="refresh"
-              aria-label={i18n.REFRESH}
-            />
+          <EuiFlexItem grow={true}>
+            <FormattedDate value={statusDate} fieldName={i18n.STATUS_DATE} />
           </EuiFlexItem>
         </>
       )}
-    </EuiFlexGroup>
+      <EuiFlexItem grow={false}>{children}</EuiFlexItem>
+    </>
   );
 };
 

@@ -14,16 +14,19 @@ function getBucketSize({ start, end }: SetupTimeRange) {
 }
 
 export async function getErrorDistribution({
+  environment,
   serviceName,
   groupId,
   setup,
 }: {
+  environment?: string;
   serviceName: string;
   groupId?: string;
   setup: Setup & SetupTimeRange;
 }) {
   const bucketSize = getBucketSize({ start: setup.start, end: setup.end });
   const { buckets, noHits } = await getBuckets({
+    environment,
     serviceName,
     groupId,
     bucketSize,

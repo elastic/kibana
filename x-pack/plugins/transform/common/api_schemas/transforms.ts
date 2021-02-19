@@ -64,7 +64,32 @@ export const settingsSchema = schema.object({
   docs_per_second: schema.maybe(schema.nullable(schema.number())),
 });
 
+export const runtimeMappingsSchema = schema.maybe(
+  schema.recordOf(
+    schema.string(),
+    schema.object({
+      type: schema.oneOf([
+        schema.literal('keyword'),
+        schema.literal('long'),
+        schema.literal('double'),
+        schema.literal('date'),
+        schema.literal('ip'),
+        schema.literal('boolean'),
+      ]),
+      script: schema.maybe(
+        schema.oneOf([
+          schema.string(),
+          schema.object({
+            source: schema.string(),
+          }),
+        ])
+      ),
+    })
+  )
+);
+
 export const sourceSchema = schema.object({
+  runtime_mappings: runtimeMappingsSchema,
   index: schema.oneOf([schema.string(), schema.arrayOf(schema.string())]),
   query: schema.maybe(schema.recordOf(schema.string(), schema.any())),
 });

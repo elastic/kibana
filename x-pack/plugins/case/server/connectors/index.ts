@@ -65,3 +65,27 @@ export const isCommentAlert = (
 ): comment is ContextTypeAlertSchemaType => {
   return comment.type === CommentType.alert;
 };
+
+/**
+ * Separator field for the case connector alerts string parser.
+ */
+const separator = '__SEPARATOR__';
+
+interface AlertIDIndex {
+  _id: string;
+  _index: string;
+  ruleId: string;
+  ruleName: string;
+}
+
+/**
+ * Creates the format that the connector's parser is expecting, it should result in something like this:
+ * [{"_id":"1","_index":"index1"}__SEPARATOR__{"_id":"id2","_index":"index2"}__SEPARATOR__]
+ *
+ * This should only be used for testing purposes.
+ */
+export function createAlertsString(alerts: AlertIDIndex[]) {
+  return `[${alerts.reduce((acc, alert) => {
+    return `${acc}${JSON.stringify(alert)}${separator}`;
+  }, '')}]`;
+}
