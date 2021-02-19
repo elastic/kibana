@@ -55,10 +55,11 @@ export const LinkAnchor: React.FC<EuiLinkProps> = ({ children, ...props }) => (
 );
 
 // Internal Links
-const HostDetailsLinkComponent: React.FC<{ children?: React.ReactNode; hostName: string }> = ({
-  children,
-  hostName,
-}) => {
+const HostDetailsLinkComponent: React.FC<{
+  children?: React.ReactNode;
+  hostName: string;
+  isButton?: boolean;
+}> = ({ children, hostName, isButton }) => {
   const { formatUrl, search } = useFormatUrl(SecurityPageName.hosts);
   const { navigateToApp } = useKibana().services.application;
   const goToHostDetails = useCallback(
@@ -71,7 +72,14 @@ const HostDetailsLinkComponent: React.FC<{ children?: React.ReactNode; hostName:
     [hostName, navigateToApp, search]
   );
 
-  return (
+  return isButton ? (
+    <LinkButton
+      onClick={goToHostDetails}
+      href={formatUrl(getHostDetailsUrl(encodeURIComponent(hostName)))}
+    >
+      {children ? children : hostName}
+    </LinkButton>
+  ) : (
     <LinkAnchor
       onClick={goToHostDetails}
       href={formatUrl(getHostDetailsUrl(encodeURIComponent(hostName)))}
@@ -80,6 +88,7 @@ const HostDetailsLinkComponent: React.FC<{ children?: React.ReactNode; hostName:
     </LinkAnchor>
   );
 };
+
 export const HostDetailsLink = React.memo(HostDetailsLinkComponent);
 
 const allowedUrlSchemes = ['http://', 'https://'];
@@ -119,7 +128,8 @@ const NetworkDetailsLinkComponent: React.FC<{
   children?: React.ReactNode;
   ip: string;
   flowTarget?: FlowTarget | FlowTargetSourceDest;
-}> = ({ children, ip, flowTarget = FlowTarget.source }) => {
+  isButton?: boolean;
+}> = ({ children, ip, flowTarget = FlowTarget.source, isButton }) => {
   const { formatUrl, search } = useFormatUrl(SecurityPageName.network);
   const { navigateToApp } = useKibana().services.application;
   const goToNetworkDetails = useCallback(
@@ -132,7 +142,14 @@ const NetworkDetailsLinkComponent: React.FC<{
     [flowTarget, ip, navigateToApp, search]
   );
 
-  return (
+  return isButton ? (
+    <LinkButton
+      href={formatUrl(getNetworkDetailsUrl(encodeURIComponent(encodeIpv6(ip))))}
+      onClick={goToNetworkDetails}
+    >
+      {children ? children : ip}
+    </LinkButton>
+  ) : (
     <LinkAnchor
       onClick={goToNetworkDetails}
       href={formatUrl(getNetworkDetailsUrl(encodeURIComponent(encodeIpv6(ip))))}
@@ -147,24 +164,25 @@ export const NetworkDetailsLink = React.memo(NetworkDetailsLinkComponent);
 const CaseDetailsLinkComponent: React.FC<{
   children?: React.ReactNode;
   detailName: string;
+  subCaseId?: string;
   title?: string;
-}> = ({ children, detailName, title }) => {
+}> = ({ children, detailName, subCaseId, title }) => {
   const { formatUrl, search } = useFormatUrl(SecurityPageName.case);
   const { navigateToApp } = useKibana().services.application;
   const goToCaseDetails = useCallback(
     (ev) => {
       ev.preventDefault();
       navigateToApp(`${APP_ID}:${SecurityPageName.case}`, {
-        path: getCaseDetailsUrl({ id: detailName, search }),
+        path: getCaseDetailsUrl({ id: detailName, search, subCaseId }),
       });
     },
-    [detailName, navigateToApp, search]
+    [detailName, navigateToApp, search, subCaseId]
   );
 
   return (
     <LinkAnchor
       onClick={goToCaseDetails}
-      href={formatUrl(getCaseDetailsUrl({ id: detailName }))}
+      href={formatUrl(getCaseDetailsUrl({ id: detailName, subCaseId }))}
       data-test-subj="case-details-link"
       aria-label={i18n.CASE_DETAILS_LINK_ARIA(title ?? detailName)}
     >

@@ -16,6 +16,7 @@ import {
   SearchTimeoutError,
   SearchSessionState,
   PainlessError,
+  DataPublicPluginSetup,
 } from 'src/plugins/data/public';
 import { dataPluginMock } from '../../../../../src/plugins/data/public/mocks';
 import { bfetchPluginMock } from '../../../../../src/plugins/bfetch/public/mocks';
@@ -51,14 +52,15 @@ function mockFetchImplementation(responses: any[]) {
 }
 
 describe('EnhancedSearchInterceptor', () => {
-  let mockUsageCollector: any;
   let sessionService: jest.Mocked<ISessionService>;
   let sessionState$: BehaviorSubject<SearchSessionState>;
+  let dataPluginMockSetup: DataPublicPluginSetup;
 
   beforeEach(() => {
     mockCoreSetup = coreMock.createSetup();
     mockCoreStart = coreMock.createStart();
     sessionState$ = new BehaviorSubject<SearchSessionState>(SearchSessionState.None);
+    dataPluginMockSetup = dataPluginMock.createSetupContract();
     const dataPluginMockStart = dataPluginMock.createStartContract();
     sessionService = {
       ...(dataPluginMockStart.search.session as jest.Mocked<ISessionService>),
@@ -80,11 +82,6 @@ describe('EnhancedSearchInterceptor', () => {
     complete.mockClear();
     jest.clearAllTimers();
 
-    mockUsageCollector = {
-      trackQueryTimedOut: jest.fn(),
-      trackQueriesCancelled: jest.fn(),
-    };
-
     const mockPromise = new Promise((resolve) => {
       resolve([
         {
@@ -102,7 +99,7 @@ describe('EnhancedSearchInterceptor', () => {
       startServices: mockPromise as any,
       http: mockCoreSetup.http,
       uiSettings: mockCoreSetup.uiSettings,
-      usageCollector: mockUsageCollector,
+      usageCollector: dataPluginMockSetup.search.usageCollector,
       session: sessionService,
     });
   });
@@ -452,39 +449,6 @@ describe('EnhancedSearchInterceptor', () => {
 
       expect(fetchMock).toHaveBeenCalledTimes(2);
       expect(mockCoreSetup.http.delete).not.toHaveBeenCalled();
-    });
-  });
-
-  describe('cancelPending', () => {
-    test('should abort all pending requests', async () => {
-      mockFetchImplementation([
-        {
-          time: 10,
-          value: {
-            isPartial: false,
-            isRunning: false,
-            id: 1,
-          },
-        },
-        {
-          time: 20,
-          value: {
-            isPartial: false,
-            isRunning: false,
-            id: 1,
-          },
-        },
-      ]);
-
-      searchInterceptor.search({}).subscribe({ next, error });
-      searchInterceptor.search({}).subscribe({ next, error });
-      searchInterceptor.cancelPending();
-
-      await timeTravel();
-
-      const areAllRequestsAborted = fetchMock.mock.calls.every(([_, signal]) => signal?.aborted);
-      expect(areAllRequestsAborted).toBe(true);
-      expect(mockUsageCollector.trackQueriesCancelled).toBeCalledTimes(1);
     });
   });
 

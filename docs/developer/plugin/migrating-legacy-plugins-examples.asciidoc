@@ -800,7 +800,7 @@ However, there are some minor changes:
 
 * The `schema.isNamespaceAgnostic` property has been renamed:
 `SavedObjectsType.namespaceType`. It no longer accepts a boolean but
-instead an enum of `single`, `multiple`, or `agnostic` (see
+instead an enum of `single`, `multiple`, `multiple-isolated`, or `agnostic` (see
 {kib-repo}/tree/{branch}/docs/development/core/server/kibana-plugin-core-server.savedobjectsnamespacetype.md[SavedObjectsNamespaceType]).
 * The `schema.indexPattern` was accepting either a `string` or a
 `(config: LegacyConfig) => string`. `SavedObjectsType.indexPattern` only

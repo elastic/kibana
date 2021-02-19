@@ -12,7 +12,6 @@ import { useActions, useValues } from 'kea';
 import {
   EuiButton,
   EuiConfirmModal,
-  EuiOverlayMask,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
@@ -226,18 +225,16 @@ export const GroupOverview: React.FC = () => {
       <EuiSpacer size="xxl" />
       <ContentSection title={REMOVE_SECTION_TITLE} description={REMOVE_SECTION_DESCRIPTION}>
         {confirmDeleteModalVisible && (
-          <EuiOverlayMask>
-            <EuiConfirmModal
-              onCancel={hideConfirmDeleteModal}
-              onConfirm={deleteGroup}
-              confirmButtonText={CONFIRM_REMOVE_BUTTON_TEXT}
-              title={CONFIRM_TITLE_TEXT}
-              cancelButtonText={CANCEL_BUTTON}
-              defaultFocusedButton="confirm"
-            >
-              {CONFIRM_REMOVE_DESCRIPTION}
-            </EuiConfirmModal>
-          </EuiOverlayMask>
+          <EuiConfirmModal
+            onCancel={hideConfirmDeleteModal}
+            onConfirm={deleteGroup}
+            confirmButtonText={CONFIRM_REMOVE_BUTTON_TEXT}
+            title={CONFIRM_TITLE_TEXT}
+            cancelButtonText={CANCEL_BUTTON}
+            defaultFocusedButton="confirm"
+          >
+            {CONFIRM_REMOVE_DESCRIPTION}
+          </EuiConfirmModal>
         )}
         <EuiButton
           color="danger"

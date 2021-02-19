@@ -10,7 +10,7 @@ import React, { ChangeEvent } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiFieldNumber } from '@elastic/eui';
 
-interface TruncateLabelsOptionProps {
+export interface TruncateLabelsOptionProps {
   disabled?: boolean;
   value?: number | null;
   setValue: (paramName: 'truncate', value: null | number) => void;
@@ -29,6 +29,7 @@ function TruncateLabelsOption({ disabled, value = null, setValue }: TruncateLabe
       display="rowCompressed"
     >
       <EuiFieldNumber
+        data-test-subj="xyLabelTruncateInput"
         disabled={disabled}
         value={value === null ? '' : value}
         onChange={onChange}

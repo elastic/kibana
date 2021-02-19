@@ -1882,14 +1882,6 @@
     pirates "^4.0.0"
     source-map-support "^0.5.16"
 
-"@babel/runtime-corejs2@^7.2.0":
-  version "7.11.2"
-  resolved "https://registry.yarnpkg.com/@babel/runtime-corejs2/-/runtime-corejs2-7.11.2.tgz#700a03945ebad0d31ba6690fc8a6bcc9040faa47"
-  integrity sha512-AC/ciV28adSSpEkBglONBWq4/Lvm6GAZuxIoyVtsnUpZMl0bxLtoChEnYAkP+47KyOCayZanojtflUEUJtR/6Q==
-  dependencies:
-    core-js "^2.6.5"
-    regenerator-runtime "^0.13.4"
-
 "@babel/runtime-corejs3@^7.10.2":
   version "7.11.2"
   resolved "https://registry.yarnpkg.com/@babel/runtime-corejs3/-/runtime-corejs3-7.11.2.tgz#02c3029743150188edeb66541195f54600278419"
@@ -2146,10 +2138,10 @@
   dependencies:
     object-hash "^1.3.0"
 
-"@elastic/charts@24.5.1":
-  version "24.5.1"
-  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-24.5.1.tgz#4757721b0323b15412c92d696dd76fdef9b963f8"
-  integrity sha512-eHJna3xyHREaSfTRb+3/34EmyoINopH6yP9KReakXRb0jW8DD4n9IkbPFwpVN3uXQ6ND2x1ObA0ZzLPSLCPozg==
+"@elastic/charts@25.0.1":
+  version "25.0.1"
+  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-25.0.1.tgz#7c61fc22887b7b1feba3e52fc1b44f21a9c1d0bc"
+  integrity sha512-UYGO9Yg2+cdJOOs9DjlYeB2Oy/3UMXTtF6/yWZt2iXh7mmW9jI5DqfjgG/9BFSCwQZHUKBZ58d5ZCQfe72maGA==
   dependencies:
     "@popperjs/core" "^2.4.0"
     chroma-js "^2.1.0"
@@ -2175,10 +2167,10 @@
   version "0.0.0"
   uid ""
 
-"@elastic/elasticsearch@npm:@elastic/elasticsearch-canary@^8.0.0-canary":
-  version "8.0.0-canary.1"
-  resolved "https://registry.yarnpkg.com/@elastic/elasticsearch-canary/-/elasticsearch-canary-8.0.0-canary.1.tgz#5cd0eda62531b71af66a08da6c3cebc26a73d4c0"
-  integrity sha512-VhQ42wH+0OGmHSlc4It3bqGTL7mLuC2RIionJZBIuY5P6lwUMz7goelfyfTHoo+LStxz5QQ8Zt2xcnAnShTBJg==
+"@elastic/elasticsearch@npm:@elastic/elasticsearch-canary@^8.0.0-canary.2":
+  version "8.0.0-canary.2"
+  resolved "https://registry.yarnpkg.com/@elastic/elasticsearch-canary/-/elasticsearch-canary-8.0.0-canary.2.tgz#476e22bc90fc4f422f7195f693fdcddb7f8e1897"
+  integrity sha512-xYdVJ1MCAprVxd0rqmkBVof7I0N+e6VBCcr0UOwEYjvpQJTvu6PPQROBAAmtAAgvIKs4a8HmpArGgu5QJUnNjw==
   dependencies:
     debug "^4.1.1"
     hpagent "^0.1.1"
@@ -2203,10 +2195,10 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-0.0.2.tgz#56b9ef03984a05cc213772ae3713ea8ef47b0314"
   integrity sha512-IoxURM5zraoQ7C8f+mJb9HYSENiZGgRVcG4tLQxE61yHNNRDXtGDWTZh8N1KIHcsqN1CEPETjuzBXkJYF/fDiQ==
 
-"@elastic/eui@31.4.0":
-  version "31.4.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-31.4.0.tgz#d2c8cc91fc538f7b1c5e5229663e186fa0c9207c"
-  integrity sha512-ADdUeNxj2uiN13U7AkF0ishLAN0xcqFWHC+xjEmx8Wedyaj5DFrmmJEuH9aXv+XSQG5l8ppMgZQb3pMDjR2mKw==
+"@elastic/eui@31.7.0":
+  version "31.7.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-31.7.0.tgz#091cad212da3d7bad8e1717398d9bf404257f835"
+  integrity sha512-Be4K/dizAsmOrRMAKZy6oW4VaEvQNB1LvbKxNWIa4yFeX7Wn6gw5ihttgbQ4vqWWIkhLPoadbXMebKF9+7VuhA==
   dependencies:
     "@types/chroma-js" "^2.0.0"
     "@types/lodash" "^4.14.160"
@@ -3413,6 +3405,10 @@
   uid ""
 
 "@kbn/apm-config-loader@link:packages/kbn-apm-config-loader":
+  version "0.0.0"
+  uid ""
+
+"@kbn/apm-utils@link:packages/kbn-apm-utils":
   version "0.0.0"
   uid ""
 
@@ -9024,10 +9020,10 @@ bach@^1.0.0:
     async-settle "^1.0.0"
     now-and-later "^2.0.0"
 
-backport@^5.6.4:
-  version "5.6.4"
-  resolved "https://registry.yarnpkg.com/backport/-/backport-5.6.4.tgz#8cf4bc750b26d27161306858ee9069218ad7cdfd"
-  integrity sha512-ZhuZcGxOBHBXFBCwweVf02b+KhWe0tdgg71jPSl583YYxlru+JBRH+TFM8S0J6/6YUuTWO81M9funjehJ18jqg==
+backport@^5.6.6:
+  version "5.6.6"
+  resolved "https://registry.yarnpkg.com/backport/-/backport-5.6.6.tgz#cb03f948a36386734fa491343b93f4ca280e00f3"
+  integrity sha512-8O7z0q6m5DfQgrhLDUOLcH2y/rXwSgqv5WIWSSoZpPyRdPpmd3xApIfohlJ3oBX9W0TdbO3aKzaV00qg3H9P7w==
   dependencies:
     "@octokit/rest" "^18.0.12"
     "@types/lodash.difference" "^4.5.6"
@@ -9044,7 +9040,7 @@ backport@^5.6.4:
     lodash.isstring "^4.0.1"
     lodash.uniq "^4.5.0"
     make-dir "^3.1.0"
-    ora "^5.2.0"
+    ora "^5.3.0"
     safe-json-stringify "^1.2.0"
     strip-json-comments "^3.1.1"
     winston "^3.3.3"
@@ -11116,7 +11112,7 @@ core-js@^1.0.0:
   resolved "https://registry.yarnpkg.com/core-js/-/core-js-1.2.7.tgz#652294c14651db28fa93bd2d5ff2983a4f08c636"
   integrity sha1-ZSKUwUZR2yj6k70tX/KYOk8IxjY=
 
-core-js@^2.4.0, core-js@^2.5.0, core-js@^2.5.3, core-js@^2.6.5, core-js@^2.6.9:
+core-js@^2.4.0, core-js@^2.5.0, core-js@^2.5.3, core-js@^2.6.9:
   version "2.6.9"
   resolved "https://registry.yarnpkg.com/core-js/-/core-js-2.6.9.tgz#6b4b214620c834152e179323727fc19741b084f2"
   integrity sha512-HOpZf6eXmnl7la+cUdMnLvUxKNqLUzJvgIziQ0DiF3JwSImNphIqdGqzj6hIKyX04MmV0poclQ7+wjWvxQyR2A==
@@ -22190,10 +22186,10 @@ ora@^4.0.3, ora@^4.0.4:
     strip-ansi "^6.0.0"
     wcwidth "^1.0.1"
 
-ora@^5.2.0:
-  version "5.2.0"
-  resolved "https://registry.yarnpkg.com/ora/-/ora-5.2.0.tgz#de10bfd2d15514384af45f3fa9d9b1aaf344fda1"
-  integrity sha512-+wG2v8TUU8EgzPHun1k/n45pXquQ9fHnbXVetl9rRgO6kjZszGGbraF3XPTIdgeA+s1lbRjSEftAnyT0w8ZMvQ==
+ora@^5.3.0:
+  version "5.3.0"
+  resolved "https://registry.yarnpkg.com/ora/-/ora-5.3.0.tgz#fb832899d3a1372fe71c8b2c534bbfe74961bb6f"
+  integrity sha512-zAKMgGXUim0Jyd6CXK9lraBnD3H5yPGBPPOkC23a2BG6hsm4Zu6OQSjQuEtV0BHDf4aKHcUFvJiGRrFuW3MG8g==
   dependencies:
     bl "^4.0.3"
     chalk "^4.1.0"
@@ -30795,13 +30791,6 @@ xpath@0.0.27:
   version "0.0.27"
   resolved "https://registry.yarnpkg.com/xpath/-/xpath-0.0.27.tgz#dd3421fbdcc5646ac32c48531b4d7e9d0c2cfa92"
   integrity sha512-fg03WRxtkCV6ohClePNAECYsmpKKTv5L8y/X3Dn1hQrec3POx2jHZ/0P2qQ6HvsrU1BmeqXcof3NGGueG6LxwQ==
-
-xregexp@4.2.4:
-  version "4.2.4"
-  resolved "https://registry.yarnpkg.com/xregexp/-/xregexp-4.2.4.tgz#02a4aea056d65a42632c02f0233eab8e4d7e57ed"
-  integrity sha512-sO0bYdYeJAJBcJA8g7MJJX7UrOZIfJPd8U2SC7B2Dd/J24U0aQNoGp33shCaBSWeb0rD5rh6VBUIXOkGal1TZA==
-  dependencies:
-    "@babel/runtime-corejs2" "^7.2.0"
 
 "xtend@>=4.0.0 <4.1.0-0", xtend@^4.0.0, xtend@^4.0.1, xtend@^4.0.2, xtend@~4.0.0, xtend@~4.0.1:
   version "4.0.2"
