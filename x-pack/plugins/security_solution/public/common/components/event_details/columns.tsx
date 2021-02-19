@@ -191,6 +191,7 @@ export const getColumns = ({
                     fieldFormat={data.format}
                     fieldName={data.field}
                     fieldType={data.type}
+                    isObjectArray={data.isObjectArray}
                     value={value}
                     linkValue={getLinkValue(data.field)}
                   />

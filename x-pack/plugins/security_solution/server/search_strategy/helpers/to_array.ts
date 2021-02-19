@@ -8,24 +8,34 @@
 export const toArray = <T = string>(value: T | T[] | null): T[] =>
   Array.isArray(value) ? value : value == null ? [] : [value];
 
-export const toStringArray = <T = string>(value: T | T[] | null): string[] => {
+export const toObjectArrayOfStrings = <T = string>(
+  value: T | T[] | null
+): Array<{
+  str: string;
+  isObjectArray?: boolean;
+}> => {
   if (Array.isArray(value)) {
-    return value.reduce<string[]>((acc, v) => {
+    return value.reduce<
+      Array<{
+        str: string;
+        isObjectArray?: boolean;
+      }>
+    >((acc, v) => {
       if (v != null) {
         switch (typeof v) {
           case 'number':
           case 'boolean':
-            return [...acc, v.toString()];
+            return [...acc, { str: v.toString() }];
           case 'object':
             try {
-              return [...acc, JSON.stringify(v)];
+              return [...acc, { str: JSON.stringify(v), isObjectArray: true }]; // here
             } catch {
-              return [...acc, 'Invalid Object'];
+              return [...acc, { str: 'Invalid Object' }];
             }
           case 'string':
-            return [...acc, v];
+            return [...acc, { str: v }];
           default:
-            return [...acc, `${v}`];
+            return [...acc, { str: `${v}` }];
         }
       }
       return acc;
@@ -34,11 +44,11 @@ export const toStringArray = <T = string>(value: T | T[] | null): string[] => {
     return [];
   } else if (!Array.isArray(value) && typeof value === 'object') {
     try {
-      return [JSON.stringify(value)];
+      return [{ str: JSON.stringify(value), isObjectArray: true }];
     } catch {
-      return ['Invalid Object'];
+      return [{ str: 'Invalid Object' }];
     }
   } else {
-    return [`${value}`];
+    return [{ str: `${value}` }];
   }
 };

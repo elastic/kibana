@@ -8,7 +8,7 @@
 import { get, isEmpty, isNumber, isObject, isString } from 'lodash/fp';
 
 import { EventSource, TimelineEventsDetailsItem } from '../../../../../../common/search_strategy';
-import { toStringArray } from '../../../../helpers/to_array';
+import { toObjectArrayOfStrings } from '../../../../helpers/to_array';
 
 export const baseCategoryFields = ['@timestamp', 'labels', 'message', 'tags'];
 
@@ -24,12 +24,15 @@ export const formatGeoLocation = (item: unknown[]) => {
   const itemGeo = item.length > 0 ? (item[0] as { coordinates: number[] }) : null;
   if (itemGeo != null && !isEmpty(itemGeo.coordinates)) {
     try {
-      return toStringArray({ long: itemGeo.coordinates[0], lat: itemGeo.coordinates[1] });
+      return toObjectArrayOfStrings({
+        long: itemGeo.coordinates[0],
+        lat: itemGeo.coordinates[1],
+      }).map(({ str }) => str);
     } catch {
-      return toStringArray(item);
+      return toObjectArrayOfStrings(item).map(({ str }) => str);
     }
   }
-  return toStringArray(item);
+  return toObjectArrayOfStrings(item).map(({ str }) => str);
 };
 
 export const isGeoField = (field: string) =>
@@ -46,13 +49,18 @@ export const getDataFromSourceHits = (
       const field = path ? `${path}.${source}` : source;
       const fieldCategory = getFieldCategory(field);
 
+      const objArrStr = toObjectArrayOfStrings(item);
+      const strArr = objArrStr.map(({ str }) => str);
+      const isObjectArray = objArrStr.some((o) => o.isObjectArray);
+
       return [
         ...accumulator,
         {
           category: fieldCategory,
           field,
-          values: toStringArray(item),
-          originalValue: toStringArray(item),
+          values: strArr,
+          originalValue: strArr,
+          isObjectArray,
         } as TimelineEventsDetailsItem,
       ];
     } else if (isObject(item)) {
@@ -70,13 +78,17 @@ export const getDataFromFieldsHits = (
   Object.keys(fields).reduce<TimelineEventsDetailsItem[]>((accumulator, field) => {
     const item: unknown[] = fields[field];
     const fieldCategory = getFieldCategory(field);
+    const objArrStr = toObjectArrayOfStrings(item);
+    const strArr = objArrStr.map(({ str }) => str);
+    const isObjectArray = objArrStr.some((o) => o.isObjectArray);
     return [
       ...accumulator,
       {
         category: fieldCategory,
         field,
-        values: isGeoField(field) ? formatGeoLocation(item) : toStringArray(item),
-        originalValue: toStringArray(item),
+        values: isGeoField(field) ? formatGeoLocation(item) : strArr,
+        originalValue: strArr,
+        isObjectArray,
       } as TimelineEventsDetailsItem,
     ];
   }, []);

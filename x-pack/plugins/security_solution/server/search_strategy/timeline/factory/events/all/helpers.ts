@@ -7,7 +7,7 @@
 
 import { get, has, merge, uniq } from 'lodash/fp';
 import { EventHit, TimelineEdges } from '../../../../../../common/search_strategy';
-import { toStringArray } from '../../../../helpers/to_array';
+import { toObjectArrayOfStrings } from '../../../../helpers/to_array';
 import { formatGeoLocation, isGeoField } from '../details/helpers';
 
 const getTimestamp = (hit: EventHit): string => {
@@ -70,12 +70,12 @@ const mergeTimelineFieldsWithHit = <T>(
                 {
                   field: fieldName,
                   value: specialFields.includes(fieldName)
-                    ? toStringArray(get(fieldName, hit))
+                    ? toObjectArrayOfStrings(get(fieldName, hit)).map(({ str }) => str)
                     : isGeoField(fieldName)
                     ? formatGeoLocation(hit.fields[fieldName])
                     : has(fieldName, hit._source)
-                    ? toStringArray(get(fieldName, hit._source))
-                    : toStringArray(hit.fields[fieldName]),
+                    ? toObjectArrayOfStrings(get(fieldName, hit._source)).map(({ str }) => str)
+                    : toObjectArrayOfStrings(hit.fields[fieldName]).map(({ str }) => str),
                 },
               ]
             : get('node.data', flattenedFields),
@@ -86,11 +86,11 @@ const mergeTimelineFieldsWithHit = <T>(
                 ...fieldName.split('.').reduceRight(
                   // @ts-expect-error
                   (obj, next) => ({ [next]: obj }),
-                  toStringArray(
+                  toObjectArrayOfStrings(
                     has(fieldName, hit._source)
                       ? get(fieldName, hit._source)
                       : hit.fields[fieldName]
-                  )
+                  ).map(({ str }) => str)
                 ),
               }
             : get('node.ecs', flattenedFields),
