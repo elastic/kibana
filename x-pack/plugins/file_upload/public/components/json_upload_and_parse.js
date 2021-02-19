@@ -44,6 +44,8 @@ const INDEXING_STAGE = {
 };
 
 export class JsonUploadAndParse extends Component {
+  geojsonImporter = new GeoJsonImporter();
+
   state = {
     // File state
     fileRef: null,
@@ -64,7 +66,6 @@ export class JsonUploadAndParse extends Component {
     currentIndexingStage: INDEXING_STAGE.INDEXING_STARTED,
     indexDataResp: '',
     indexPatternResp: '',
-    geojsonImporter: new GeoJsonImporter(),
   };
 
   componentDidMount() {
@@ -166,7 +167,7 @@ export class JsonUploadAndParse extends Component {
       currentIndexingStage: INDEXING_STAGE.WRITING_TO_INDEX,
     });
 
-    this.state.geojsonImporter.setDocs(parsedFile.parsedGeojson, selectedIndexType);
+    this.geojsonImporter.setDocs(parsedFile.parsedGeojson, selectedIndexType);
 
     // initialize import
     const settings = {
@@ -180,7 +181,7 @@ export class JsonUploadAndParse extends Component {
       },
     };
     const ingestPipeline = {};
-    const initializeImportResp = await this.state.geojsonImporter.initializeImport(
+    const initializeImportResp = await this.geojsonImporter.initializeImport(
       indexName,
       settings,
       mappings,
@@ -200,7 +201,7 @@ export class JsonUploadAndParse extends Component {
     }
 
     // import file
-    const importResp = await this.state.geojsonImporter.import(
+    const importResp = await this.geojsonImporter.import(
       initializeImportResp.id,
       indexName,
       initializeImportResp.pipelineId,
@@ -304,7 +305,7 @@ export class JsonUploadAndParse extends Component {
                 this.props.onFileUpload(parsedFile.parsedGeojson, indexName);
               }}
               resetFileAndIndexSettings={this._resetFileAndIndexSettings}
-              geojsonImporter={this.state.geojsonImporter}
+              geojsonImporter={this.geojsonImporter}
             />
             <IndexSettings
               disabled={!fileRef}
