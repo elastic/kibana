@@ -64,13 +64,7 @@ async function getCommentableCase({
   }
 }
 
-export function initPatchCommentApi({
-  caseConfigureService,
-  caseService,
-  router,
-  userActionService,
-  logger,
-}: RouteDeps) {
+export function initPatchCommentApi({ caseService, router, userActionService, logger }: RouteDeps) {
   router.patch(
     {
       path: CASE_COMMENTS_URL,
@@ -176,6 +170,9 @@ export function initPatchCommentApi({
           body: await updatedCase.encode(),
         });
       } catch (error) {
+        logger.error(
+          `Failed to patch comment in route case id: ${request.params.case_id} sub case id: ${request.query?.subCaseID}: ${error}`
+        );
         return response.customError(wrapError(error));
       }
     }

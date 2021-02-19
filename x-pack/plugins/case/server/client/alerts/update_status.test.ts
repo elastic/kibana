@@ -22,6 +22,7 @@ describe('updateAlertsStatus', () => {
 
     expect(caseClient.services.alertsService.updateAlertsStatus).toHaveBeenCalledWith({
       scopedClusterClient: expect.anything(),
+      logger: expect.anything(),
       ids: ['alert-id-1'],
       indices: new Set<string>(['.siem-signals']),
       status: CaseStatuses.closed,

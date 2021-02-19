@@ -10,7 +10,7 @@ import { RouteDeps } from '../types';
 import { CASES_URL } from '../../../../common/constants';
 import { CasesPatchRequest } from '../../../../common/api';
 
-export function initPatchCasesApi({ router }: RouteDeps) {
+export function initPatchCasesApi({ router, logger }: RouteDeps) {
   router.patch(
     {
       path: CASES_URL,
@@ -19,18 +19,19 @@ export function initPatchCasesApi({ router }: RouteDeps) {
       },
     },
     async (context, request, response) => {
-      if (!context.case) {
-        return response.badRequest({ body: 'RouteHandlerContext is not registered for cases' });
-      }
-
-      const caseClient = context.case.getCaseClient();
-      const cases = request.body as CasesPatchRequest;
-
       try {
+        if (!context.case) {
+          return response.badRequest({ body: 'RouteHandlerContext is not registered for cases' });
+        }
+
+        const caseClient = context.case.getCaseClient();
+        const cases = request.body as CasesPatchRequest;
+
         return response.ok({
           body: await caseClient.update(cases),
         });
       } catch (error) {
+        logger.error(`Failed to patch cases in route: ${error}`);
         return response.customError(wrapError(error));
       }
     }

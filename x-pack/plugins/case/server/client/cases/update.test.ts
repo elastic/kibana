@@ -6,6 +6,7 @@
  */
 
 import { ConnectorTypes, CasesPatchRequest, CaseStatuses } from '../../../common/api';
+import { isCaseError } from '../../common/error';
 import {
   createMockSavedObjectsRepository,
   mockCaseNoConnectorId,
@@ -640,14 +641,16 @@ describe('update', () => {
       });
 
       const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
-      caseClient.client
-        // @ts-expect-error
-        .update({ cases: patchCases })
-        .catch((e) => {
-          expect(e).not.toBeNull();
-          expect(e.isBoom).toBe(true);
-          expect(e.output.statusCode).toBe(400);
-        });
+      return (
+        caseClient.client
+          // @ts-expect-error
+          .update({ cases: patchCases })
+          .catch((e) => {
+            expect(e).not.toBeNull();
+            expect(e.isBoom).toBe(true);
+            expect(e.output.statusCode).toBe(400);
+          })
+      );
     });
 
     test('it throws when missing version', async () => {
@@ -671,18 +674,20 @@ describe('update', () => {
       });
 
       const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
-      caseClient.client
-        // @ts-expect-error
-        .update({ cases: patchCases })
-        .catch((e) => {
-          expect(e).not.toBeNull();
-          expect(e.isBoom).toBe(true);
-          expect(e.output.statusCode).toBe(400);
-        });
+      return (
+        caseClient.client
+          // @ts-expect-error
+          .update({ cases: patchCases })
+          .catch((e) => {
+            expect(e).not.toBeNull();
+            expect(e.isBoom).toBe(true);
+            expect(e.output.statusCode).toBe(400);
+          })
+      );
     });
 
     test('it throws when fields are identical', async () => {
-      expect.assertions(4);
+      expect.assertions(5);
       const patchCases = {
         cases: [
           {
@@ -698,16 +703,18 @@ describe('update', () => {
       });
 
       const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
-      caseClient.client.update(patchCases).catch((e) => {
+      return caseClient.client.update(patchCases).catch((e) => {
         expect(e).not.toBeNull();
-        expect(e.isBoom).toBe(true);
-        expect(e.output.statusCode).toBe(406);
-        expect(e.message).toBe('All update fields are identical to current version.');
+        expect(isCaseError(e)).toBeTruthy();
+        const boomErr = e.boomify();
+        expect(boomErr.isBoom).toBe(true);
+        expect(boomErr.output.statusCode).toBe(406);
+        expect(boomErr.message).toContain('All update fields are identical to current version.');
       });
     });
 
     test('it throws when case does not exist', async () => {
-      expect.assertions(4);
+      expect.assertions(5);
       const patchCases = {
         cases: [
           {
@@ -728,18 +735,20 @@ describe('update', () => {
       });
 
       const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
-      caseClient.client.update(patchCases).catch((e) => {
+      return caseClient.client.update(patchCases).catch((e) => {
         expect(e).not.toBeNull();
-        expect(e.isBoom).toBe(true);
-        expect(e.output.statusCode).toBe(404);
-        expect(e.message).toBe(
+        expect(isCaseError(e)).toBeTruthy();
+        const boomErr = e.boomify();
+        expect(boomErr.isBoom).toBe(true);
+        expect(boomErr.output.statusCode).toBe(404);
+        expect(boomErr.message).toContain(
           'These cases not-exists do not exist. Please check you have the correct ids.'
         );
       });
     });
 
     test('it throws when cases conflicts', async () => {
-      expect.assertions(4);
+      expect.assertions(5);
       const patchCases = {
         cases: [
           {
@@ -755,11 +764,13 @@ describe('update', () => {
       });
 
       const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
-      caseClient.client.update(patchCases).catch((e) => {
+      return caseClient.client.update(patchCases).catch((e) => {
         expect(e).not.toBeNull();
-        expect(e.isBoom).toBe(true);
-        expect(e.output.statusCode).toBe(409);
-        expect(e.message).toBe(
+        expect(isCaseError(e)).toBeTruthy();
+        const boomErr = e.boomify();
+        expect(boomErr.isBoom).toBe(true);
+        expect(boomErr.output.statusCode).toBe(409);
+        expect(boomErr.message).toContain(
           'These cases mock-id-1 has been updated. Please refresh before saving additional updates.'
         );
       });

@@ -77,7 +77,7 @@ async function deleteSubCases({
   );
 }
 
-export function initDeleteCasesApi({ caseService, router, userActionService }: RouteDeps) {
+export function initDeleteCasesApi({ caseService, router, userActionService, logger }: RouteDeps) {
   router.delete(
     {
       path: CASES_URL,
@@ -155,6 +155,9 @@ export function initDeleteCasesApi({ caseService, router, userActionService }: R
 
         return response.noContent();
       } catch (error) {
+        logger.error(
+          `Failed to delete cases in route ids: ${JSON.stringify(request.query.ids)}: ${error}`
+        );
         return response.customError(wrapError(error));
       }
     }

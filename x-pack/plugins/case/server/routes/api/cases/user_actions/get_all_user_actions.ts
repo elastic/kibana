@@ -11,7 +11,7 @@ import { RouteDeps } from '../../types';
 import { wrapError } from '../../utils';
 import { CASE_USER_ACTIONS_URL, SUB_CASE_USER_ACTIONS_URL } from '../../../../../common/constants';
 
-export function initGetAllCaseUserActionsApi({ router }: RouteDeps) {
+export function initGetAllCaseUserActionsApi({ router, logger }: RouteDeps) {
   router.get(
     {
       path: CASE_USER_ACTIONS_URL,
@@ -22,25 +22,28 @@ export function initGetAllCaseUserActionsApi({ router }: RouteDeps) {
       },
     },
     async (context, request, response) => {
-      if (!context.case) {
-        return response.badRequest({ body: 'RouteHandlerContext is not registered for cases' });
-      }
-
-      const caseClient = context.case.getCaseClient();
-      const caseId = request.params.case_id;
-
       try {
+        if (!context.case) {
+          return response.badRequest({ body: 'RouteHandlerContext is not registered for cases' });
+        }
+
+        const caseClient = context.case.getCaseClient();
+        const caseId = request.params.case_id;
+
         return response.ok({
           body: await caseClient.getUserActions({ caseId }),
         });
       } catch (error) {
+        logger.error(
+          `Failed to retrieve case user actions in route case id: ${request.params.case_id}: ${error}`
+        );
         return response.customError(wrapError(error));
       }
     }
   );
 }
 
-export function initGetAllSubCaseUserActionsApi({ router }: RouteDeps) {
+export function initGetAllSubCaseUserActionsApi({ router, logger }: RouteDeps) {
   router.get(
     {
       path: SUB_CASE_USER_ACTIONS_URL,
@@ -52,19 +55,22 @@ export function initGetAllSubCaseUserActionsApi({ router }: RouteDeps) {
       },
     },
     async (context, request, response) => {
-      if (!context.case) {
-        return response.badRequest({ body: 'RouteHandlerContext is not registered for cases' });
-      }
-
-      const caseClient = context.case.getCaseClient();
-      const caseId = request.params.case_id;
-      const subCaseId = request.params.sub_case_id;
-
       try {
+        if (!context.case) {
+          return response.badRequest({ body: 'RouteHandlerContext is not registered for cases' });
+        }
+
+        const caseClient = context.case.getCaseClient();
+        const caseId = request.params.case_id;
+        const subCaseId = request.params.sub_case_id;
+
         return response.ok({
           body: await caseClient.getUserActions({ caseId, subCaseId }),
         });
       } catch (error) {
+        logger.error(
+          `Failed to retrieve sub case user actions in route case id: ${request.params.case_id} sub case id: ${request.params.sub_case_id}: ${error}`
+        );
         return response.customError(wrapError(error));
       }
     }

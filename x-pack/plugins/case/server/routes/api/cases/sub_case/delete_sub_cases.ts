@@ -13,7 +13,12 @@ import { wrapError } from '../../utils';
 import { SUB_CASES_PATCH_DEL_URL } from '../../../../../common/constants';
 import { CASE_SAVED_OBJECT } from '../../../../saved_object_types';
 
-export function initDeleteSubCasesApi({ caseService, router, userActionService }: RouteDeps) {
+export function initDeleteSubCasesApi({
+  caseService,
+  router,
+  userActionService,
+  logger,
+}: RouteDeps) {
   router.delete(
     {
       path: SUB_CASES_PATCH_DEL_URL,
@@ -80,6 +85,9 @@ export function initDeleteSubCasesApi({ caseService, router, userActionService }
 
         return response.noContent();
       } catch (error) {
+        logger.error(
+          `Failed to delete sub cases in route ids: ${JSON.stringify(request.query.ids)}: ${error}`
+        );
         return response.customError(wrapError(error));
       }
     }

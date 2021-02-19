@@ -237,6 +237,7 @@ export class CaseClientHandler implements CaseClient {
         user: this.user,
         caseClient: this,
         caseConfigureService: this._caseConfigureService,
+        logger: this.logger,
       });
     } catch (error) {
       throw createCaseError({

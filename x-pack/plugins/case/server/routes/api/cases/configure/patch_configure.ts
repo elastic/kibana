@@ -24,7 +24,12 @@ import {
   transformESConnectorToCaseConnector,
 } from '../helpers';
 
-export function initPatchCaseConfigure({ caseConfigureService, caseService, router }: RouteDeps) {
+export function initPatchCaseConfigure({
+  caseConfigureService,
+  caseService,
+  router,
+  logger,
+}: RouteDeps) {
   router.patch(
     {
       path: CASE_CONFIGURE_URL,
@@ -107,6 +112,7 @@ export function initPatchCaseConfigure({ caseConfigureService, caseService, rout
           }),
         });
       } catch (error) {
+        logger.error(`Failed to get patch configure in route: ${error}`);
         return response.customError(wrapError(error));
       }
     }

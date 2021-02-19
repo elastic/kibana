@@ -66,7 +66,7 @@ export class CaseUserActionService {
           sortOrder: 'asc',
         });
       } catch (error) {
-        this.log.debug(`Error on GET case user action: ${error}`);
+        this.log.error(`Error on GET case user action case id: ${caseId}: ${error}`);
         throw error;
       }
     },
@@ -77,7 +77,7 @@ export class CaseUserActionService {
           actions.map((action) => ({ type: CASE_USER_ACTION_SAVED_OBJECT, ...action }))
         );
       } catch (error) {
-        this.log.debug(`Error on POST a new case user action: ${error}`);
+        this.log.error(`Error on POST a new case user action: ${error}`);
         throw error;
       }
     },

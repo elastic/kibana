@@ -28,7 +28,7 @@ const isConnectorSupported = (
  * Be aware that this api will only return 20 connectors
  */
 
-export function initCaseConfigureGetActionConnector({ router }: RouteDeps) {
+export function initCaseConfigureGetActionConnector({ router, logger }: RouteDeps) {
   router.get(
     {
       path: `${CASE_CONFIGURE_CONNECTORS_URL}/_find`,
@@ -52,6 +52,7 @@ export function initCaseConfigureGetActionConnector({ router }: RouteDeps) {
         );
         return response.ok({ body: results });
       } catch (error) {
+        logger.error(`Failed to get connectors in route: ${error}`);
         return response.customError(wrapError(error));
       }
     }
