@@ -7,7 +7,6 @@
 
 import React from 'react';
 import { fireEvent } from '@testing-library/react';
-import { act } from 'react-dom/test-utils';
 import { render } from '../../../../../lib/helper/rtl_helpers';
 import { SearchType } from './search_type';
 
@@ -25,10 +24,8 @@ describe('Kuery bar search type', () => {
     // open popover to change
     fireEvent.click(getByTestId('syntaxChangeToKql'));
 
-    act(() => {
-      // change syntax
-      fireEvent.click(getByTestId('toggleKqlSyntax'));
-    });
+    // change syntax
+    fireEvent.click(getByTestId('toggleKqlSyntax'));
 
     expect(setKqlSyntax).toHaveBeenCalledWith(true);
     expect(setKqlSyntax).toHaveBeenCalledTimes(1);

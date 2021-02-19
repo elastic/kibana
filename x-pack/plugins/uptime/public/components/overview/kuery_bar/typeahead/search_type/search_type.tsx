@@ -18,6 +18,7 @@ import {
   EuiLink,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../../../../../../../../src/plugins/kibana_react/public';
 import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common';
 import { useUrlParams } from '../../../../../hooks';
@@ -66,9 +67,7 @@ export const SearchType = ({ kqlSyntax, setKqlSyntax }: Props) => {
     if (!kqlSyntax && search) {
       updateUrlParams({ search: '' });
     }
-    // don't include kqlSyntax
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isPopoverOpen, query, search, updateUrlParams]);
+  }, [kqlSyntax, query, search, updateUrlParams]);
 
   const button = kqlSyntax ? (
     <EuiButtonEmpty
@@ -90,50 +89,55 @@ export const SearchType = ({ kqlSyntax, setKqlSyntax }: Props) => {
   );
 
   return (
-    <>
-      <EuiPopover
-        button={button}
-        isOpen={isPopoverOpen}
-        closePopover={closePopover}
-        ownFocus={true}
-        anchorPosition="downRight"
-      >
-        <div style={{ width: '360px' }}>
-          <EuiPopoverTitle>{SYNTAX_OPTIONS_LABEL}</EuiPopoverTitle>
-          <EuiText>
-            <p>
-              <FormattedMessage
-                id="xpack.uptime.queryBar.syntaxOptionsDescription"
-                defaultMessage="The {docsLink} (KQL) offers a simplified query
+    <EuiPopover
+      button={button}
+      isOpen={isPopoverOpen}
+      closePopover={closePopover}
+      ownFocus={true}
+      anchorPosition="downRight"
+    >
+      <div style={{ width: '360px' }}>
+        <EuiPopoverTitle>{SYNTAX_OPTIONS_LABEL}</EuiPopoverTitle>
+        <EuiText>
+          <p>
+            <KqlDescription href={docLinks!.links.query.kueryQuerySyntax} />
+          </p>
+        </EuiText>
+        <EuiSpacer />
+        <EuiFormRow label={KIBANA_QUERY_LANGUAGE} hasChildLabel={false}>
+          <EuiSwitch
+            name="switch"
+            label={kqlSyntax ? 'On' : 'Off'}
+            checked={kqlSyntax}
+            onChange={() => setKqlSyntax(!kqlSyntax)}
+            data-test-subj="toggleKqlSyntax"
+          />
+        </EuiFormRow>
+      </div>
+    </EuiPopover>
+  );
+};
+
+const KqlDescription = ({ href }: { href: string }) => {
+  return (
+    <FormattedMessage
+      id="xpack.uptime.queryBar.syntaxOptionsDescription"
+      defaultMessage="The {docsLink} (KQL) offers a simplified query
               syntax and support for scripted fields. KQL also provides autocomplete if you have
               a Basic license or above. If you turn off KQL, Uptime
             uses simple wildcard search against {searchField} fields."
-                values={{
-                  docsLink: (
-                    <EuiLink href={docLinks!.links.query.kueryQuerySyntax} target="_blank" external>
-                      <FormattedMessage
-                        id="xpack.uptime.query.queryBar.kqlFullLanguageName"
-                        defaultMessage="Kibana Query Language"
-                      />
-                    </EuiLink>
-                  ),
-                  searchField: <strong>Monitor Name, ID, Url</strong>,
-                }}
-              />
-            </p>
-          </EuiText>
-          <EuiSpacer />
-          <EuiFormRow label="Kibana Query Language" id="asdf" hasChildLabel={false}>
-            <EuiSwitch
-              name="switch"
-              label={kqlSyntax ? 'On' : 'Off'}
-              checked={kqlSyntax}
-              onChange={() => setKqlSyntax(!kqlSyntax)}
-              data-test-subj="toggleKqlSyntax"
-            />
-          </EuiFormRow>
-        </div>
-      </EuiPopover>
-    </>
+      values={{
+        docsLink: (
+          <EuiLink href={href} target="_blank" external>
+            {KIBANA_QUERY_LANGUAGE}
+          </EuiLink>
+        ),
+        searchField: <strong>Monitor Name, ID, Url</strong>,
+      }}
+    />
   );
 };
+
+const KIBANA_QUERY_LANGUAGE = i18n.translate('xpack.uptime.query.queryBar.kqlFullLanguageName', {
+  defaultMessage: 'Kibana Query Language',
+});

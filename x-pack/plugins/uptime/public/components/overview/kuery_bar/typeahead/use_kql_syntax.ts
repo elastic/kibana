@@ -31,7 +31,20 @@ export const useKqlSyntax = ({ setValue }: Props) => {
   }, [search, setValue]);
 
   useEffect(() => {
-    setKqlSyntax(localStorage.getItem(KQL_SYNTAX_LOCAL_STORAGE) === 'true');
+    if (query || search) {
+      // if url has query or params we will give them preference on load
+      // for selecting syntax type
+      if (query) {
+        setKqlSyntax(false);
+      }
+      if (search) {
+        setKqlSyntax(true);
+      }
+    } else {
+      setKqlSyntax(localStorage.getItem(KQL_SYNTAX_LOCAL_STORAGE) === 'true');
+    }
+    // This part is meant to run only when component loads
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
