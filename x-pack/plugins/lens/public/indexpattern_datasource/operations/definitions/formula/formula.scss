@@ -1,4 +1,5 @@
 .monaco-editor .suggest-widget {
   left: auto !important;
-  width: 100%;
+  // Interior flyout width
+  width: 280px !important;
 }

@@ -299,7 +299,6 @@ function FormulaEditor({
             minimap: {
               enabled: false,
             },
-            wordBasedSuggestions: false,
             wordWrap: 'on',
             wrappingIndent: 'indent',
           }}
