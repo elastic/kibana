@@ -523,6 +523,11 @@ export const serviceProfilingStatisticsRoute = createRoute({
         valueType: t.union([
           t.literal(ProfilingValueType.wallTime),
           t.literal(ProfilingValueType.cpuTime),
+          t.literal(ProfilingValueType.samples),
+          t.literal(ProfilingValueType.allocObjects),
+          t.literal(ProfilingValueType.allocSpace),
+          t.literal(ProfilingValueType.inuseObjects),
+          t.literal(ProfilingValueType.inuseSpace),
         ]),
       }),
     ]),
@@ -543,6 +548,7 @@ export const serviceProfilingStatisticsRoute = createRoute({
       environment,
       valueType,
       setup,
+      logger: context.logger,
     });
   },
 });

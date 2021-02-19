@@ -8,7 +8,10 @@ import { EuiPanel } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiPage, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState } from 'react';
-import { ProfilingValueType } from '../../../../common/profiling';
+import {
+  getValueTypeConfig,
+  ProfilingValueType,
+} from '../../../../common/profiling';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useFetcher } from '../../../hooks/use_fetcher';
 import { SearchBar } from '../../shared/search_bar';
@@ -91,23 +94,36 @@ export function ServiceProfiling({
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiPanel>
-              <ServiceProfilingTimeline
-                start={start!}
-                end={end!}
-                series={data}
-                onValueTypeSelect={(type) => {
-                  setValueType(type);
-                }}
-                selectedValueType={valueType}
-              />
-              <ServiceProfilingFlamegraph
-                serviceName={serviceName}
-                environment={environment}
-                valueType={valueType}
-                start={start}
-                end={end}
-                uiFilters={uiFilters}
-              />
+              <EuiFlexGroup direction="column">
+                <EuiFlexItem>
+                  <ServiceProfilingTimeline
+                    start={start!}
+                    end={end!}
+                    series={data}
+                    onValueTypeSelect={(type) => {
+                      setValueType(type);
+                    }}
+                    selectedValueType={valueType}
+                  />
+                </EuiFlexItem>
+                {valueType ? (
+                  <EuiFlexItem>
+                    <EuiTitle size="s">
+                      <h3>{getValueTypeConfig(valueType).label}</h3>
+                    </EuiTitle>
+                  </EuiFlexItem>
+                ) : null}
+                <EuiFlexItem>
+                  <ServiceProfilingFlamegraph
+                    serviceName={serviceName}
+                    environment={environment}
+                    valueType={valueType}
+                    start={start}
+                    end={end}
+                    uiFilters={uiFilters}
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
             </EuiPanel>
           </EuiFlexItem>
         </EuiFlexGroup>

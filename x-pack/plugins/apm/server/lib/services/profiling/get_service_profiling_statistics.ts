@@ -5,15 +5,20 @@
  * 2.0.
  */
 import { keyBy, last } from 'lodash';
+import { Logger } from 'kibana/server';
+import util from 'util';
+import { maybe } from '../../../../common/utils/maybe';
 import { ProfileStackFrame } from '../../../../typings/es_schemas/ui/profile';
-import { ProfilingValueType, ProfileNode } from '../../../../common/profiling';
+import {
+  ProfilingValueType,
+  ProfileNode,
+  getValueTypeConfig,
+} from '../../../../common/profiling';
 import { ProcessorEvent } from '../../../../common/processor_event';
 import { ESFilter } from '../../../../../../typings/elasticsearch';
 import {
-  PROFILE_CPU_NS,
   PROFILE_STACK,
   PROFILE_TOP_ID,
-  PROFILE_WALL_US,
   SERVICE_NAME,
 } from '../../../../common/elasticsearch_fieldnames';
 import { rangeQuery, environmentQuery } from '../../../../common/utils/queries';
@@ -178,30 +183,23 @@ function getProfilesWithStacks({
   });
 }
 
-function getNodeLabelFromFrame(frame: ProfileStackFrame) {
-  return [last(frame.function.split('/')), frame.line]
-    .filter(Boolean)
-    .join(':');
-}
-
 export async function getServiceProfilingStatistics({
   serviceName,
   setup,
   environment,
   valueType,
+  logger,
 }: {
   serviceName: string;
   setup: Setup & SetupTimeRange;
   environment?: string;
   valueType: ProfilingValueType;
+  logger: Logger;
 }) {
   return withApmSpan('get_service_profiling_statistics', async () => {
     const { apmEventClient, start, end } = setup;
 
-    const valueTypeField = {
-      [ProfilingValueType.wallTime]: PROFILE_WALL_US,
-      [ProfilingValueType.cpuTime]: PROFILE_CPU_NS,
-    }[valueType];
+    const valueTypeField = getValueTypeConfig(valueType).field;
 
     const filter: ESFilter[] = [
       ...rangeQuery(start, end),
@@ -234,14 +232,22 @@ export async function getServiceProfilingStatistics({
 
     const stackStatsById = keyBy(profileStats, 'id');
 
+    const missingStacks: string[] = [];
+
     profileStacks.forEach((profile) => {
-      const stats = stackStatsById[profile.profile.top.id];
+      const stats = maybe(stackStatsById[profile.profile.top.id]);
+
+      if (!stats) {
+        missingStacks.push(profile.profile.top.id);
+        return;
+      }
+
       const frames = profile.profile.stack.concat().reverse();
 
       frames.forEach((frame, index) => {
         const node = getNode(frame);
 
-        if (index === frames.length - 1) {
+        if (index === frames.length - 1 && stats) {
           node.value += stats.value;
         }
 
@@ -254,6 +260,16 @@ export async function getServiceProfilingStatistics({
         }
       });
     });
+
+    if (missingStacks.length > 0) {
+      logger.warn(
+        `Could not find stats for all stacks: ${util.inspect({
+          numProfileStats: profileStats.length,
+          numStacks: profileStacks.length,
+          missing: missingStacks,
+        })}`
+      );
+    }
 
     return {
       nodes,

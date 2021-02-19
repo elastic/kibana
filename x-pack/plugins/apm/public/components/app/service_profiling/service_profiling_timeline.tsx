@@ -24,29 +24,14 @@ import {
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useChartTheme } from '../../../../../observability/public';
-import { ProfilingValueType } from '../../../../common/profiling';
+import {
+  getValueTypeConfig,
+  ProfilingValueType,
+} from '../../../../common/profiling';
 
 type ProfilingTimelineItem = {
   x: number;
 } & { valueTypes: Record<ProfilingValueType | 'unknown', number> };
-
-const labels = {
-  unknown: i18n.translate('xpack.apm.serviceProfiling.valueTypeLabel.unknown', {
-    defaultMessage: 'Other',
-  }),
-  [ProfilingValueType.cpuTime]: i18n.translate(
-    'xpack.apm.serviceProfiling.valueTypeLabel.cpuTime',
-    {
-      defaultMessage: 'On-CPU',
-    }
-  ),
-  [ProfilingValueType.wallTime]: i18n.translate(
-    'xpack.apm.serviceProfiling.valueTypeLabel.wallTime',
-    {
-      defaultMessage: 'Wall',
-    }
-  ),
-};
 
 const palette = euiPaletteColorBlind();
 
@@ -68,7 +53,12 @@ export function ServiceProfilingTimeline({
   const xFormat = niceTimeFormatter([Date.parse(start), Date.parse(end)]);
 
   function getSeriesForValueType(type: ProfilingValueType | 'unknown') {
-    const label = labels[type];
+    const label =
+      type === 'unknown'
+        ? i18n.translate('xpack.apm.serviceProfiling.valueTypeLabel.unknown', {
+            defaultMessage: 'Other',
+          })
+        : getValueTypeConfig(type).label;
 
     return {
       name: label,
@@ -82,8 +72,9 @@ export function ServiceProfilingTimeline({
 
   const specs = [
     getSeriesForValueType('unknown'),
-    getSeriesForValueType(ProfilingValueType.cpuTime),
-    getSeriesForValueType(ProfilingValueType.wallTime),
+    ...Object.values(ProfilingValueType).map((type) =>
+      getSeriesForValueType(type)
+    ),
   ]
     .filter((spec) => spec.data.some((coord) => coord.y > 0))
     .map((spec, index) => {
@@ -94,9 +85,9 @@ export function ServiceProfilingTimeline({
     });
 
   return (
-    <EuiFlexGroup>
+    <EuiFlexGroup style={{ minHeight: 120 }}>
       <EuiFlexItem grow>
-        <Chart size={{ width: '100%', height: 120 }}>
+        <Chart size={{ width: '100%' }}>
           <Settings theme={chartTheme} />
           <Axis id="time" position={Position.Bottom} tickFormat={xFormat} />
           <Axis id="count" position={Position.Left} />
@@ -107,6 +98,7 @@ export function ServiceProfilingTimeline({
               xScaleType={ScaleType.Time}
               yScaleType={ScaleType.Linear}
               xAccessor="x"
+              stackAccessors={['x']}
             />
           ))}
         </Chart>
@@ -135,7 +127,14 @@ export function ServiceProfilingTimeline({
                       }
                     }}
                   >
-                    <EuiText size="xs">{spec.name}</EuiText>
+                    <EuiText
+                      size="xs"
+                      color={
+                        spec.id === selectedValueType ? 'default' : 'subdued'
+                      }
+                    >
+                      {spec.name}
+                    </EuiText>
                   </EuiButtonEmpty>
                 </EuiFlexItem>
               </EuiFlexGroup>

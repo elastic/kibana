@@ -15,6 +15,7 @@ import {
 } from '@elastic/charts';
 import { EuiInMemoryTable } from '@elastic/eui';
 import { EuiFieldText } from '@elastic/eui';
+import { EuiToolTip } from '@elastic/eui';
 import {
   EuiCheckbox,
   EuiFlexGroup,
@@ -24,14 +25,23 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { find, sumBy, sortBy } from 'lodash';
+import { find, sumBy } from 'lodash';
 import { rgba } from 'polished';
 import React, { useMemo, useState } from 'react';
 import seedrandom from 'seedrandom';
 import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
 import { useChartTheme } from '../../../../../observability/public';
-import { ProfileNode, ProfilingValueType } from '../../../../common/profiling';
-import { asDuration } from '../../../../common/utils/formatters';
+import {
+  getValueTypeConfig,
+  ProfileNode,
+  ProfilingValueType,
+  ProfilingValueTypeUnit,
+} from '../../../../common/profiling';
+import {
+  asDuration,
+  asDynamicBytes,
+  asInteger,
+} from '../../../../common/utils/formatters';
 import { UIFilters } from '../../../../typings/ui_filters';
 import { useFetcher } from '../../../hooks/use_fetcher';
 import { useTheme } from '../../../hooks/use_theme';
@@ -53,18 +63,39 @@ const TooltipContainer = euiStyled.div`
   padding: ${(props) => props.theme.eui.paddingSizes.s};
 `;
 
+const formatValue = (
+  value: number,
+  valueUnit: ProfilingValueTypeUnit
+): string => {
+  switch (valueUnit) {
+    case ProfilingValueTypeUnit.ns:
+      return asDuration(value / 1000);
+
+    case ProfilingValueTypeUnit.us:
+      return asDuration(value);
+
+    case ProfilingValueTypeUnit.count:
+      return asInteger(value);
+
+    case ProfilingValueTypeUnit.bytes:
+      return asDynamicBytes(value);
+  }
+};
+
 function CustomTooltip({
   values,
   nodes,
+  valueUnit,
 }: TooltipInfo & {
   nodes: Record<string, ProfileNode>;
+  valueUnit: ProfilingValueTypeUnit;
 }) {
   const first = values[0];
 
   const foundNode = find(nodes, (node) => node.label === first.label);
 
   const label = foundNode?.fqn ?? first.label;
-  const value = asDuration(first.value) + first.formattedValue;
+  const value = formatValue(first.value, valueUnit) + first.formattedValue;
 
   return (
     <TooltipContainer>
@@ -263,6 +294,10 @@ export function ServiceProfilingFlamegraph({
     highlightFilter ? node.fqn.includes(highlightFilter) : true
   );
 
+  const valueUnit = valueType
+    ? getValueTypeConfig(valueType).unit
+    : ProfilingValueTypeUnit.count;
+
   return (
     <EuiFlexGroup direction="row">
       <EuiFlexItem grow>
@@ -271,7 +306,11 @@ export function ServiceProfilingFlamegraph({
             theme={chartTheme}
             tooltip={{
               customTooltip: (info) => (
-                <CustomTooltip {...info} nodes={data?.nodes ?? {}} />
+                <CustomTooltip
+                  {...info}
+                  valueUnit={valueUnit}
+                  nodes={data?.nodes ?? {}}
+                />
               ),
             }}
           />
@@ -284,8 +323,10 @@ export function ServiceProfilingFlamegraph({
             config={{
               fillLabel: {
                 fontFamily: theme.eui.euiCodeFontFamily,
+                // @ts-ignore (coming soon in Elastic charts)
                 clip: true,
               },
+              // @ts-expect-error (coming soon in Elastic charts)
               drilldown: true,
               fontFamily: theme.eui.euiCodeFontFamily,
               minFontSize: 9,
@@ -326,7 +367,7 @@ export function ServiceProfilingFlamegraph({
               }}
               onKeyPress={(e) => {
                 if (e.charCode === 13) {
-                  setHighlightFilter(() => e.target.value);
+                  setHighlightFilter(() => (e.target as any).value);
                 }
               }}
             />
@@ -339,7 +380,6 @@ export function ServiceProfilingFlamegraph({
                   field: 'value',
                   direction: 'desc',
                 },
-                enableAllColumns: true,
               }}
               pagination={{
                 pageSize: 20,
@@ -353,13 +393,20 @@ export function ServiceProfilingFlamegraph({
                     defaultMessage: 'Name',
                   }),
                   truncateText: true,
+                  render: (_, item) => {
+                    return (
+                      <EuiToolTip content={item.fqn}>
+                        <span>{item.label}</span>
+                      </EuiToolTip>
+                    );
+                  },
                 },
                 {
                   field: 'value',
                   name: i18n.translate('xpack.apm.profiling.table.value', {
-                    defaultMessage: 'Value',
+                    defaultMessage: 'Self',
                   }),
-                  render: (us) => asDuration(us),
+                  render: (_, item) => formatValue(item.value, valueUnit),
                   width: px(unit * 6),
                 },
               ]}
