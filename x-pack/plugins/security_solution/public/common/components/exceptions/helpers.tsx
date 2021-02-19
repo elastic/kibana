@@ -178,11 +178,7 @@ export const filterExceptionItems = (
         if (singleEntry.type === 'nested') {
           const nestedEntriesArray = singleEntry.entries.filter((singleNestedEntry) => {
             const [validatedNestedEntry] = validate(singleNestedEntry, nestedEntryItem);
-
-            if (validatedNestedEntry != null) {
-              return true;
-            }
-            return false;
+            return validatedNestedEntry != null;
           });
 
           const [validatedNestedEntry] = validate(
