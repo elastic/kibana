@@ -23,7 +23,7 @@ export function AnnotationsContextProvider({
   children: React.ReactNode;
 }) {
   const { serviceName } = useParams<{ serviceName?: string }>();
-  const { urlParams, uiFilters } = useUrlParams();
+  const { urlParams } = useUrlParams();
   const { environment, start, end } = urlParams;
 
   const { data = INITIAL_STATE } = useFetcher(
