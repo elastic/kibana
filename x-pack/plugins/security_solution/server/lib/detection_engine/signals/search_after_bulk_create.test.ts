@@ -26,6 +26,7 @@ import { getExceptionListItemSchemaMock } from '../../../../../lists/common/sche
 import { BulkResponse } from './types';
 import { SearchListItemArraySchema } from '../../../../../lists/common/schemas';
 import { getSearchListItemResponseMock } from '../../../../../lists/common/schemas/response/search_list_item_schema.mock';
+import { getRuleRangeTuples } from './utils';
 
 const buildRuleMessage = buildRuleMessageFactory({
   id: 'fake id',
@@ -112,11 +113,18 @@ describe('searchAfterAndBulkCreate', () => {
         },
       },
     ];
-
+    const tuples = getRuleRangeTuples({
+      logger: mockLogger,
+      previousStartedAt: new Date(),
+      from: sampleParams.from,
+      to: sampleParams.to,
+      interval: '5m',
+      maxSignals: sampleParams.maxSignals,
+      buildRuleMessage,
+    });
     const { success, createdSignalsCount, lastLookBackDate } = await searchAfterAndBulkCreate({
       ruleParams: sampleParams,
-      gap: null,
-      previousStartedAt: new Date(),
+      tuples,
       listClient,
       exceptionsList: [exceptionItem],
       services: mockService,
@@ -199,10 +207,18 @@ describe('searchAfterAndBulkCreate', () => {
         },
       },
     ];
+    const tuples = getRuleRangeTuples({
+      logger: mockLogger,
+      previousStartedAt: moment().subtract(10, 'm').toDate(),
+      from: sampleParams.from,
+      to: sampleParams.to,
+      interval: '5m',
+      maxSignals: sampleParams.maxSignals,
+      buildRuleMessage,
+    });
     const { success, createdSignalsCount, lastLookBackDate } = await searchAfterAndBulkCreate({
       ruleParams: sampleParams,
-      gap: moment.duration(2, 'm'),
-      previousStartedAt: moment().subtract(10, 'm').toDate(),
+      tuples,
       listClient,
       exceptionsList: [exceptionItem],
       services: mockService,
@@ -276,10 +292,18 @@ describe('searchAfterAndBulkCreate', () => {
         },
       },
     ];
+    const tuples = getRuleRangeTuples({
+      logger: mockLogger,
+      previousStartedAt: new Date(),
+      from: sampleParams.from,
+      to: sampleParams.to,
+      interval: '5m',
+      maxSignals: sampleParams.maxSignals,
+      buildRuleMessage,
+    });
     const { success, createdSignalsCount, lastLookBackDate } = await searchAfterAndBulkCreate({
       ruleParams: sampleParams,
-      gap: null,
-      previousStartedAt: new Date(),
+      tuples,
       listClient,
       exceptionsList: [exceptionItem],
       services: mockService,
@@ -305,7 +329,7 @@ describe('searchAfterAndBulkCreate', () => {
     });
     expect(success).toEqual(true);
     expect(mockService.callCluster).toHaveBeenCalledTimes(3);
-    expect(createdSignalsCount).toEqual(4); // should not create any signals because all events were in the allowlist
+    expect(createdSignalsCount).toEqual(4);
     expect(lastLookBackDate).toEqual(new Date('2020-04-20T21:27:45+0000'));
   });
 
@@ -340,10 +364,18 @@ describe('searchAfterAndBulkCreate', () => {
         },
       },
     ];
+    const tuples = getRuleRangeTuples({
+      logger: mockLogger,
+      previousStartedAt: new Date(),
+      from: sampleParams.from,
+      to: sampleParams.to,
+      interval: '5m',
+      maxSignals: sampleParams.maxSignals,
+      buildRuleMessage,
+    });
     const { success, createdSignalsCount, lastLookBackDate } = await searchAfterAndBulkCreate({
       ruleParams: sampleParams,
-      gap: null,
-      previousStartedAt: new Date(),
+      tuples,
       listClient,
       exceptionsList: [exceptionItem],
       services: mockService,
@@ -404,10 +436,18 @@ describe('searchAfterAndBulkCreate', () => {
         },
       },
     ];
+    const tuples = getRuleRangeTuples({
+      logger: mockLogger,
+      previousStartedAt: new Date(),
+      from: sampleParams.from,
+      to: sampleParams.to,
+      interval: '5m',
+      maxSignals: sampleParams.maxSignals,
+      buildRuleMessage,
+    });
     const { success, createdSignalsCount, lastLookBackDate } = await searchAfterAndBulkCreate({
       ruleParams: sampleParams,
-      gap: null,
-      previousStartedAt: new Date(),
+      tuples,
       listClient,
       exceptionsList: [exceptionItem],
       services: mockService,
@@ -437,7 +477,7 @@ describe('searchAfterAndBulkCreate', () => {
     expect(lastLookBackDate).toEqual(new Date('2020-04-20T21:27:45+0000'));
     // I don't like testing log statements since logs change but this is the best
     // way I can think of to ensure this section is getting hit with this test case.
-    expect(((mockLogger.debug as unknown) as jest.Mock).mock.calls[8][0]).toContain(
+    expect(((mockLogger.debug as unknown) as jest.Mock).mock.calls[7][0]).toContain(
       'ran out of sort ids to sort on name: "fake name" id: "fake id" rule id: "fake rule id" signals index: "fakeindex"'
     );
   });
@@ -485,10 +525,18 @@ describe('searchAfterAndBulkCreate', () => {
         },
       },
     ];
+    const tuples = getRuleRangeTuples({
+      logger: mockLogger,
+      previousStartedAt: new Date(),
+      from: sampleParams.from,
+      to: sampleParams.to,
+      interval: '5m',
+      maxSignals: sampleParams.maxSignals,
+      buildRuleMessage,
+    });
     const { success, createdSignalsCount, lastLookBackDate } = await searchAfterAndBulkCreate({
       ruleParams: sampleParams,
-      gap: null,
-      previousStartedAt: new Date(),
+      tuples,
       listClient,
       exceptionsList: [exceptionItem],
       services: mockService,
@@ -514,11 +562,11 @@ describe('searchAfterAndBulkCreate', () => {
     });
     expect(success).toEqual(true);
     expect(mockService.callCluster).toHaveBeenCalledTimes(2);
-    expect(createdSignalsCount).toEqual(4); // should not create any signals because all events were in the allowlist
+    expect(createdSignalsCount).toEqual(4);
     expect(lastLookBackDate).toEqual(new Date('2020-04-20T21:27:45+0000'));
     // I don't like testing log statements since logs change but this is the best
     // way I can think of to ensure this section is getting hit with this test case.
-    expect(((mockLogger.debug as unknown) as jest.Mock).mock.calls[15][0]).toContain(
+    expect(((mockLogger.debug as unknown) as jest.Mock).mock.calls[14][0]).toContain(
       'ran out of sort ids to sort on name: "fake name" id: "fake id" rule id: "fake rule id" signals index: "fakeindex"'
     );
   });
@@ -563,10 +611,18 @@ describe('searchAfterAndBulkCreate', () => {
         }))
       )
     );
+    const tuples = getRuleRangeTuples({
+      logger: mockLogger,
+      previousStartedAt: new Date(),
+      from: sampleParams.from,
+      to: sampleParams.to,
+      interval: '5m',
+      maxSignals: sampleParams.maxSignals,
+      buildRuleMessage,
+    });
     const { success, createdSignalsCount, lastLookBackDate } = await searchAfterAndBulkCreate({
       ruleParams: sampleParams,
-      gap: null,
-      previousStartedAt: new Date(),
+      tuples,
       listClient,
       exceptionsList: [],
       services: mockService,
@@ -592,7 +648,7 @@ describe('searchAfterAndBulkCreate', () => {
     });
     expect(success).toEqual(true);
     expect(mockService.callCluster).toHaveBeenCalledTimes(3);
-    expect(createdSignalsCount).toEqual(4); // should not create any signals because all events were in the allowlist
+    expect(createdSignalsCount).toEqual(4);
     expect(lastLookBackDate).toEqual(new Date('2020-04-20T21:27:45+0000'));
   });
 
@@ -613,11 +669,19 @@ describe('searchAfterAndBulkCreate', () => {
     mockService.callCluster
       .mockResolvedValueOnce(repeatedSearchResultsWithSortId(4, 1, someGuids.slice(0, 3)))
       .mockRejectedValue(new Error('bulk failed')); // Added this recently
+    const tuples = getRuleRangeTuples({
+      logger: mockLogger,
+      previousStartedAt: new Date(),
+      from: sampleParams.from,
+      to: sampleParams.to,
+      interval: '5m',
+      maxSignals: sampleParams.maxSignals,
+      buildRuleMessage,
+    });
     const { success, createdSignalsCount, lastLookBackDate } = await searchAfterAndBulkCreate({
       listClient,
       exceptionsList: [exceptionItem],
-      gap: null,
-      previousStartedAt: new Date(),
+      tuples,
       ruleParams: sampleParams,
       services: mockService,
       logger: mockLogger,
@@ -669,11 +733,19 @@ describe('searchAfterAndBulkCreate', () => {
         }))
       )
     );
+    const tuples = getRuleRangeTuples({
+      logger: mockLogger,
+      previousStartedAt: new Date(),
+      from: sampleParams.from,
+      to: sampleParams.to,
+      interval: '5m',
+      maxSignals: sampleParams.maxSignals,
+      buildRuleMessage,
+    });
     const { success, createdSignalsCount, lastLookBackDate } = await searchAfterAndBulkCreate({
       listClient,
       exceptionsList: [exceptionItem],
-      gap: null,
-      previousStartedAt: new Date(),
+      tuples,
       ruleParams: sampleParams,
       services: mockService,
       logger: mockLogger,
@@ -738,11 +810,19 @@ describe('searchAfterAndBulkCreate', () => {
         },
       },
     ];
+    const tuples = getRuleRangeTuples({
+      logger: mockLogger,
+      previousStartedAt: new Date(),
+      from: sampleParams.from,
+      to: sampleParams.to,
+      interval: '5m',
+      maxSignals: sampleParams.maxSignals,
+      buildRuleMessage,
+    });
     const { success, createdSignalsCount, lastLookBackDate } = await searchAfterAndBulkCreate({
       listClient,
       exceptionsList: [exceptionItem],
-      gap: null,
-      previousStartedAt: new Date(),
+      tuples,
       ruleParams: sampleParams,
       services: mockService,
       logger: mockLogger,
@@ -832,7 +912,15 @@ describe('searchAfterAndBulkCreate', () => {
         ],
       })
       .mockResolvedValueOnce(sampleDocSearchResultsNoSortIdNoHits());
-
+    const tuples = getRuleRangeTuples({
+      logger: mockLogger,
+      previousStartedAt: new Date(),
+      from: sampleParams.from,
+      to: sampleParams.to,
+      interval: '5m',
+      maxSignals: sampleParams.maxSignals,
+      buildRuleMessage,
+    });
     const {
       success,
       createdSignalsCount,
@@ -840,8 +928,7 @@ describe('searchAfterAndBulkCreate', () => {
       errors,
     } = await searchAfterAndBulkCreate({
       ruleParams: sampleParams,
-      gap: null,
-      previousStartedAt: new Date(),
+      tuples,
       listClient,
       exceptionsList: [],
       services: mockService,
@@ -914,11 +1001,19 @@ describe('searchAfterAndBulkCreate', () => {
       .mockResolvedValueOnce(sampleDocSearchResultsNoSortIdNoHits());
 
     const mockEnrichment = jest.fn((a) => a);
+    const tuples = getRuleRangeTuples({
+      logger: mockLogger,
+      previousStartedAt: moment().subtract(10, 'm').toDate(),
+      from: sampleParams.from,
+      to: sampleParams.to,
+      interval: '5m',
+      maxSignals: sampleParams.maxSignals,
+      buildRuleMessage,
+    });
     const { success, createdSignalsCount, lastLookBackDate } = await searchAfterAndBulkCreate({
       enrichment: mockEnrichment,
       ruleParams: sampleParams,
-      gap: moment.duration(2, 'm'),
-      previousStartedAt: moment().subtract(10, 'm').toDate(),
+      tuples,
       listClient,
       exceptionsList: [],
       services: mockService,

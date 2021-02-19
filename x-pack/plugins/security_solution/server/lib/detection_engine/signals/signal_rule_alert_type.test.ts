@@ -18,6 +18,7 @@ import {
   getExceptions,
   sortExceptionItems,
   checkPrivileges,
+  getRemainingGap,
 } from './utils';
 import { parseScheduleDates } from '../../../../common/detection_engine/parse_schedule_dates';
 import { RuleExecutorOptions, SearchAfterAndBulkCreateReturnType } from './types';
@@ -42,6 +43,7 @@ jest.mock('./utils', () => {
     ...original,
     getGapBetweenRuns: jest.fn(),
     getGapMaxCatchupRatio: jest.fn(),
+    getRemainingGap: jest.fn(),
     getListsClient: jest.fn(),
     getExceptions: jest.fn(),
     sortExceptionItems: jest.fn(),
@@ -114,6 +116,7 @@ describe('rules_notification_alert_type', () => {
     };
     (ruleStatusServiceFactory as jest.Mock).mockReturnValue(ruleStatusService);
     (getGapBetweenRuns as jest.Mock).mockReturnValue(moment.duration(0));
+    (getRemainingGap as jest.Mock).mockReturnValue(moment.duration(0));
     (getListsClient as jest.Mock).mockReturnValue({
       listClient: getListClientMock(),
       exceptionsClient: getExceptionListClientMock(),
@@ -187,12 +190,7 @@ describe('rules_notification_alert_type', () => {
 
   describe('executor', () => {
     it('should warn about the gap between runs if gap is very large', async () => {
-      (getGapBetweenRuns as jest.Mock).mockReturnValue(moment.duration(100, 'm'));
-      (getGapMaxCatchupRatio as jest.Mock).mockReturnValue({
-        maxCatchup: 4,
-        ratio: 20,
-        gapDiffInUnits: 95,
-      });
+      (getRemainingGap as jest.Mock).mockReturnValue(moment.duration(100, 'm'));
       await alert.executor(payload);
       expect(logger.warn).toHaveBeenCalled();
       expect(logger.warn.mock.calls[0][0]).toContain(
