@@ -1,35 +1,12 @@
-# Canvas Shareable Workpads
-
-- [Introduction](#introduction)
-- [Quick Start](#quick-start)
-- [Using the Runtime](#using-the-runtime)
-  - [Assumptions](#assumptions)
-  - [Restrictions](#restrictions)
-  - [JS](#js)
-  - [HTML](#html)
-  - [Options](#options)
-- [Testing](#testing)
-  - [Download a ZIP from Canvas](#download-a-zip-from-canvas)
-  - [Test the Runtime Directly from Webpack](#test-the-runtime-directly-from-webpack)
-  - [Run the Canvas Storybook](#run-the-canvas-storybook)
-  - [Run the Jest Tests](#run-the-jest-tests)
-    - [Gathering Test Coverage](#gathering-test-coverage)
-- [Building](#building)
-  - [Build Options](#build-options)
-- [Development](#development)
-  - [Prerequisite](#prerequisite)
-  - [Webpack Dev Server](#webpack-dev-server)
-  - [Gathering Statistics](#gathering-statistics)
-- [Architecture](#architecture)
-  - [The Build](#the-build)
-    - [Supported Expressions](#supported-expressions)
-    - [Expression Interpreter](#expression-interpreter)
-    - [Build Size](#build-size)
-  - [The App](#the-app)
-    - [App State](#app-state)
-    - [CSS](#css)
-
-## Introduction
+---
+id: canvasShareableWorkpads
+slug: /playground/kibana/canvas-shareable-workpads
+title: Share a Canvas Workpad on a Website
+summary: How to share a static snapshot of a workpad on an external website.
+date: 2021-02-18
+tags: ['kibana', 'canvas', 'share']
+related: []
+---
 
 The Canvas Shareable Runtime is designed to render Shareable Canvas Workpads outside of Kibana in a different website or application. It uses the intermediate, "transient" state of a workpad, which is a JSON-blob state after element expressions are initially evaluated against their data sources, but before the elements are rendered to the screen. This "transient" state, therefore, has no dependency or access to ES/Kibana data, making it lightweight and portable.
 
@@ -228,11 +205,7 @@ The `index.html` file contains a call to the `CanvasShareable` runtime. Currentl
 </script>
 ```
 
-There are three workpads available, in `test/workpads`:
-
-- `hello.json` - A simple 'Hello, Canvas' workpad.
-- `austin.json` - A workpad from an Elastic{ON} talk in Austin, TX.
-- `test.json` - A couple of pages with customized CSS animations and charts.
+There are three test workpads available, in `test/workpads`.
 
 ### Gathering Statistics
 
