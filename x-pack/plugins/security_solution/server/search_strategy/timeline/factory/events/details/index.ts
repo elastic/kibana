@@ -46,6 +46,7 @@ export const timelineEventsDetails: SecuritySolutionTimelineFactory<TimelineEven
     const fieldsData = getDataFromFieldsHits(merge(fields, hitsData));
 
     const data = unionBy('field', fieldsData, sourceData);
+
     return {
       ...response,
       data,

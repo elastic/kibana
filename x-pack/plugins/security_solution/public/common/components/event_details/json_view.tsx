@@ -54,12 +54,14 @@ export const JsonView = React.memo<Props>(({ data }) => {
 JsonView.displayName = 'JsonView';
 
 export const buildJsonView = (data: TimelineEventsDetailsItem[]) =>
-  data.reduce(
-    (accumulator, item) =>
-      set(
-        item.field,
-        Array.isArray(item.originalValue) ? item.originalValue.join() : item.originalValue,
-        accumulator
-      ),
-    {}
-  );
+  data
+    .sort((a, b) => (a.field > b.field ? 1 : b.field > a.field ? -1 : 0))
+    .reduce(
+      (accumulator, item) =>
+        set(
+          item.field,
+          item.originalValue instanceof Array ? item.originalValue.join() : item.originalValue,
+          accumulator
+        ),
+      {}
+    );
