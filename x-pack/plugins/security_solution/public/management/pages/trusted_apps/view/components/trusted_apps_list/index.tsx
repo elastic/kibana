@@ -5,20 +5,12 @@
  * 2.0.
  */
 
-import { Dispatch } from 'redux';
 import React, { memo, ReactNode, useCallback, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
-import {
-  EuiBasicTable,
-  EuiBasicTableColumn,
-  EuiButtonIcon,
-  EuiTableActionsColumnType,
-  RIGHT_ALIGNMENT,
-} from '@elastic/eui';
+import { EuiBasicTable, EuiBasicTableColumn, EuiButtonIcon, RIGHT_ALIGNMENT } from '@elastic/eui';
 
 import { useHistory } from 'react-router-dom';
 import { Immutable, TrustedApp } from '../../../../../../../common/endpoint/types';
-import { AppAction } from '../../../../../../common/store/actions';
 
 import {
   getCurrentLocation,
@@ -40,14 +32,6 @@ import { getTrustedAppsListPath } from '../../../../../common/routing';
 interface DetailsMap {
   [K: string]: ReactNode;
 }
-
-interface TrustedAppsListContext {
-  dispatch: Dispatch<Immutable<AppAction>>;
-  detailsMapState: [DetailsMap, (value: DetailsMap) => void];
-}
-
-type ColumnsList = Array<EuiBasicTableColumn<Immutable<TrustedApp>>>;
-type ActionsList = EuiTableActionsColumnType<Immutable<TrustedApp>>['actions'];
 
 const ExpandedRowContent = memo<Pick<TrustedAppCardProps, 'trustedApp'>>(({ trustedApp }) => {
   const dispatch = useDispatch();
@@ -71,141 +55,161 @@ const ExpandedRowContent = memo<Pick<TrustedAppCardProps, 'trustedApp'>>(({ trus
     );
   }, [history, location, trustedApp.id]);
 
-  return <TrustedAppCard trustedApp={trustedApp} onEdit={handleOnEdit} onDelete={handleOnDelete} />;
+  return (
+    <TrustedAppCard
+      trustedApp={trustedApp}
+      onEdit={handleOnEdit}
+      onDelete={handleOnDelete}
+      data-test-subj="trustedAppCard"
+    />
+  );
 });
 ExpandedRowContent.displayName = 'ExpandedRowContent';
 
-const toggleItemDetailsInMap = (map: DetailsMap, item: Immutable<TrustedApp>): DetailsMap => {
-  const changedMap = { ...map };
-
-  if (changedMap[item.id]) {
-    delete changedMap[item.id];
-  } else {
-    changedMap[item.id] = <ExpandedRowContent trustedApp={item} />;
-  }
-
-  return changedMap;
-};
-
-const getActionDefinitions = ({ dispatch }: TrustedAppsListContext): ActionsList => [
-  {
-    name: LIST_ACTIONS.delete.name,
-    description: LIST_ACTIONS.delete.description,
-    'data-test-subj': 'trustedAppDeleteAction',
-    isPrimary: true,
-    icon: 'trash',
-    color: 'danger',
-    type: 'icon',
-    onClick: (item: Immutable<TrustedApp>) => {
-      dispatch({
-        type: 'trustedAppDeletionDialogStarted',
-        payload: { entry: item },
-      });
-    },
-  },
-];
-
-const getColumnDefinitions = (context: TrustedAppsListContext): ColumnsList => {
-  const [itemDetailsMap, setItemDetailsMap] = context.detailsMapState;
-
-  return [
-    {
-      field: 'name',
-      name: PROPERTY_TITLES.name,
-      render(value: TrustedApp['name'], record: Immutable<TrustedApp>) {
-        return (
-          <TextFieldValue
-            fieldName={PROPERTY_TITLES.name}
-            value={value}
-            className="eui-textTruncate"
-          />
-        );
-      },
-    },
-    {
-      field: 'os',
-      name: PROPERTY_TITLES.os,
-      render(value: TrustedApp['os'], record: Immutable<TrustedApp>) {
-        return (
-          <TextFieldValue
-            fieldName={PROPERTY_TITLES.os}
-            value={OS_TITLES[value]}
-            className="eui-textTruncate"
-          />
-        );
-      },
-    },
-    {
-      field: 'created_at',
-      name: PROPERTY_TITLES.created_at,
-      render(value: TrustedApp['created_at'], record: Immutable<TrustedApp>) {
-        return (
-          <FormattedDate
-            fieldName={PROPERTY_TITLES.created_at}
-            value={value}
-            className="eui-textTruncate"
-          />
-        );
-      },
-    },
-    {
-      field: 'created_by',
-      name: PROPERTY_TITLES.created_by,
-      render(value: TrustedApp['created_by'], record: Immutable<TrustedApp>) {
-        return (
-          <TextFieldValue
-            fieldName={PROPERTY_TITLES.created_by}
-            value={value}
-            className="eui-textTruncate"
-          />
-        );
-      },
-    },
-    {
-      name: ACTIONS_COLUMN_TITLE,
-      actions: getActionDefinitions(context),
-    },
-    {
-      align: RIGHT_ALIGNMENT,
-      width: '40px',
-      isExpander: true,
-      render(item: Immutable<TrustedApp>) {
-        return (
-          <EuiButtonIcon
-            onClick={() => setItemDetailsMap(toggleItemDetailsInMap(itemDetailsMap, item))}
-            aria-label={itemDetailsMap[item.id] ? 'Collapse' : 'Expand'}
-            iconType={itemDetailsMap[item.id] ? 'arrowUp' : 'arrowDown'}
-            data-test-subj="trustedAppsListItemExpandButton"
-          />
-        );
-      },
-    },
-  ];
-};
-
 export const TrustedAppsList = memo(() => {
-  const [detailsMap, setDetailsMap] = useState<DetailsMap>({});
-  const pagination = useTrustedAppsSelector(getListPagination);
-  const listItems = useTrustedAppsSelector(getListItems);
   const dispatch = useDispatch();
+
+  const [showDetailsFor, setShowDetailsFor] = useState<{ [key: string]: boolean }>({});
+
+  // Cast below is needed because EuiBasicTable expects listItems to be mutable
+  const listItems = useTrustedAppsSelector(getListItems) as TrustedApp[];
+  const pagination = useTrustedAppsSelector(getListPagination);
+  const listError = useTrustedAppsSelector(getListErrorMessage);
+  const isLoading = useTrustedAppsSelector(isListLoading);
+
+  const toggleShowDetailsFor = useCallback((trustedAppId) => {
+    setShowDetailsFor((prevState) => {
+      const newState = { ...prevState };
+      if (prevState[trustedAppId]) {
+        delete newState[trustedAppId];
+      } else {
+        newState[trustedAppId] = true;
+      }
+      return newState;
+    });
+  }, []);
+
+  const detailsMap = useMemo<DetailsMap>(() => {
+    return Object.keys(showDetailsFor).reduce<DetailsMap>((expandMap, trustedAppId) => {
+      const trustedApp = listItems.find((ta) => ta.id === trustedAppId);
+
+      if (trustedApp) {
+        expandMap[trustedAppId] = <ExpandedRowContent trustedApp={trustedApp} />;
+      }
+
+      return expandMap;
+    }, {});
+  }, [listItems, showDetailsFor]);
+
+  const handleTableOnChange = useTrustedAppsNavigateCallback(({ page }) => ({
+    page_index: page.index,
+    page_size: page.size,
+  }));
+
+  const tableColumns: Array<EuiBasicTableColumn<Immutable<TrustedApp>>> = useMemo(() => {
+    return [
+      {
+        field: 'name',
+        name: PROPERTY_TITLES.name,
+        'data-test-subj': 'trustedAppNameTableCell',
+        render(value: TrustedApp['name']) {
+          return (
+            <TextFieldValue
+              fieldName={PROPERTY_TITLES.name}
+              value={value}
+              className="eui-textTruncate"
+            />
+          );
+        },
+      },
+      {
+        field: 'os',
+        name: PROPERTY_TITLES.os,
+        render(value: TrustedApp['os']) {
+          return (
+            <TextFieldValue
+              fieldName={PROPERTY_TITLES.os}
+              value={OS_TITLES[value]}
+              className="eui-textTruncate"
+            />
+          );
+        },
+      },
+      {
+        field: 'created_at',
+        name: PROPERTY_TITLES.created_at,
+        render(value: TrustedApp['created_at']) {
+          return (
+            <FormattedDate
+              fieldName={PROPERTY_TITLES.created_at}
+              value={value}
+              className="eui-textTruncate"
+            />
+          );
+        },
+      },
+      {
+        field: 'created_by',
+        name: PROPERTY_TITLES.created_by,
+        render(value: TrustedApp['created_by']) {
+          return (
+            <TextFieldValue
+              fieldName={PROPERTY_TITLES.created_by}
+              value={value}
+              className="eui-textTruncate"
+            />
+          );
+        },
+      },
+      {
+        name: ACTIONS_COLUMN_TITLE,
+        actions: [
+          {
+            name: LIST_ACTIONS.delete.name,
+            description: LIST_ACTIONS.delete.description,
+            'data-test-subj': 'trustedAppDeleteAction',
+            isPrimary: true,
+            icon: 'trash',
+            color: 'danger',
+            type: 'icon',
+            onClick: (item: Immutable<TrustedApp>) => {
+              dispatch({
+                type: 'trustedAppDeletionDialogStarted',
+                payload: { entry: item },
+              });
+            },
+          },
+        ],
+      },
+      {
+        align: RIGHT_ALIGNMENT,
+        width: '40px',
+        isExpander: true,
+        render({ id }: Immutable<TrustedApp>) {
+          return (
+            <EuiButtonIcon
+              onClick={() => toggleShowDetailsFor(id)}
+              aria-label={detailsMap[id] ? 'Collapse' : 'Expand'}
+              iconType={detailsMap[id] ? 'arrowUp' : 'arrowDown'}
+              data-test-subj="trustedAppsListItemExpandButton"
+            />
+          );
+        },
+      },
+    ];
+  }, [detailsMap, dispatch, toggleShowDetailsFor]);
 
   return (
     <EuiBasicTable
-      columns={useMemo(
-        () => getColumnDefinitions({ dispatch, detailsMapState: [detailsMap, setDetailsMap] }),
-        [dispatch, detailsMap]
-      )}
-      items={useMemo(() => [...listItems], [listItems])}
-      error={useTrustedAppsSelector(getListErrorMessage)}
-      loading={useTrustedAppsSelector(isListLoading)}
+      columns={tableColumns}
+      items={listItems}
+      error={listError}
+      loading={isLoading}
       itemId="id"
       itemIdToExpandedRowMap={detailsMap}
       isExpandable={true}
       pagination={pagination}
-      onChange={useTrustedAppsNavigateCallback(({ page }) => ({
-        page_index: page.index,
-        page_size: page.size,
-      }))}
+      onChange={handleTableOnChange}
       data-test-subj="trustedAppsList"
     />
   );

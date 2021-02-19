@@ -49,6 +49,8 @@ export const createSampleTrustedApp = (i: number, longTexts?: boolean): TrustedA
     description: generate(longTexts ? 10 : 1, () => `Trusted App ${i}`).join(' '),
     created_at: '1 minute ago',
     created_by: 'someone',
+    updated_at: '1 minute ago',
+    updated_by: 'someone',
     os: OPERATING_SYSTEMS[i % 3],
     entries: [],
     effectScope: { type: 'global' },
