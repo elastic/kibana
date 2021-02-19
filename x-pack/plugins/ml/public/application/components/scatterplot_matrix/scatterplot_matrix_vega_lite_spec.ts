@@ -63,7 +63,7 @@ export const getColorSpec = (
 // since VEGA treats dots in field names as nested values and escaping
 // in columns/rows for repeated charts isn't working as expected.
 function getEscapedVegaFieldName(fieldName: string) {
-  return fieldName.replaceAll('.', '․');
+  return fieldName.replace(/\./g, '․');
 }
 
 // Replace dots for all keys of all data items with an alternative UTF-8 character
