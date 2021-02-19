@@ -45,8 +45,10 @@ export const formatTopLevelObject = (
   const highlightPairs: Array<[string, unknown]> = [];
   const sourcePairs: Array<[string, unknown]> = [];
   Object.entries(fields).forEach(([key, values]) => {
-    const field = indexPattern.getFieldByName(key)!;
-    const formatter = indexPattern.getFormatterForField(field);
+    const field = indexPattern.getFieldByName(key);
+    const formatter = field
+      ? indexPattern.getFormatterForField(field)
+      : { convert: (v: string, ...rest: unknown[]) => v.toString() };
     const formatted = values
       .map((val: unknown) =>
         formatter.convert(val, 'html', {
