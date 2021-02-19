@@ -68,11 +68,8 @@ export const formulaOperation: OperationDefinition<
       return;
     }
     const { root, error } = tryToParse(column.params.formula);
-    if (!root) {
-      return [];
-    }
-    if (error) {
-      return [error.message];
+    if (error || !root) {
+      return [error!.message];
     }
 
     const errors = runASTValidation(root, layer, indexPattern, operationDefinitionMap);

@@ -126,13 +126,15 @@ function getMessageFromId({
   return { message, locations };
 }
 
-export function tryToParse(formula: string, { shouldThrow }: { shouldThrow?: boolean } = {}) {
+export function tryToParse(
+  formula: string
+): { root: TinymathAST; error: null } | { root: null; error: ErrorWrapper } {
   let root;
   try {
     root = parse(formula);
   } catch (e) {
     return {
-      root: undefined,
+      root: null,
       error: getMessageFromId({
         messageId: 'failedParsing',
         values: {
@@ -247,17 +249,31 @@ function runFullASTValidation(
     if (nodeOperation.input === 'field') {
       if (shouldHaveFieldArgument(node)) {
         if (!isFirstArgumentValidType(firstArg, 'variable')) {
-          errors.push(
-            getMessageFromId({
-              messageId: 'wrongFirstArgument',
-              values: {
-                operation: node.name,
-                type: 'field',
-                argument: getValueOrName(firstArg),
-              },
-              locations: [node.location],
-            })
-          );
+          if (isMathNode(firstArg)) {
+            errors.push(
+              getMessageFromId({
+                messageId: 'wrongFirstArgument',
+                values: {
+                  operation: node.name,
+                  type: 'field',
+                  argument: `math operation`,
+                },
+                locations: [node.location],
+              })
+            );
+          } else {
+            errors.push(
+              getMessageFromId({
+                messageId: 'wrongFirstArgument',
+                values: {
+                  operation: node.name,
+                  type: 'field',
+                  argument: getValueOrName(firstArg),
+                },
+                locations: [node.location],
+              })
+            );
+          }
         }
       } else {
         if (firstArg) {
