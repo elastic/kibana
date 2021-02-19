@@ -5,4 +5,9 @@
  * 2.0.
  */
 
-export { documentationLinksService } from './documentation_links';
+import { GenericFtrProviderContext } from '@kbn/test/types/ftr';
+
+import { pageObjects } from './page_objects';
+import { services } from './services';
+
+export type FtrProviderContext = GenericFtrProviderContext<typeof services, typeof pageObjects>;
