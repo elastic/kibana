@@ -587,6 +587,7 @@ export interface DocLinksStart {
         };
         readonly date: {
             readonly dateMath: string;
+            readonly dateMathIndexNames: string;
         };
         readonly management: Record<string, string>;
         readonly ml: Record<string, string>;

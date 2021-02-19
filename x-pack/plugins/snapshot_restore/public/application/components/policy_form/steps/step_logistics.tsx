@@ -338,7 +338,7 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
             defaultMessage="Supports date math expressions. {docLink}"
             values={{
               docLink: (
-                <EuiLink href={docLinks.links.elasticsearch.dateMathIndexNames} target="_blank">
+                <EuiLink href={docLinks.links.date.dateMathIndexNames} target="_blank">
                   <FormattedMessage
                     id="xpack.snapshotRestore.policyForm.stepLogistics.policySnapshotNameHelpTextDocLink"
                     defaultMessage="Learn more."

@@ -127,7 +127,6 @@ export class DocLinksService {
         addData: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/connect-to-elasticsearch.html`,
         kibana: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/index.html`,
         elasticsearch: {
-          dateMathIndexNames: `${ELASTICSEARCH_DOCS}date-math-index-names.html`,
           indexModules: `${ELASTICSEARCH_DOCS}index-modules.html`,
           mapping: `${ELASTICSEARCH_DOCS}mapping.html`,
           remoteClusters: `${ELASTICSEARCH_DOCS}modules-remote-clusters.html`,
@@ -148,6 +147,7 @@ export class DocLinksService {
         },
         date: {
           dateMath: `${ELASTICSEARCH_DOCS}common-options.html#date-math`,
+          dateMathIndexNames: `${ELASTICSEARCH_DOCS}date-math-index-names.html`,
         },
         management: {
           kibanaSearchSettings: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/advanced-options.html#kibana-search-settings`,
@@ -389,6 +389,7 @@ export interface DocLinksStart {
     };
     readonly date: {
       readonly dateMath: string;
+      readonly dateMathIndexNames: string;
     };
     readonly management: Record<string, string>;
     readonly ml: Record<string, string>;
