@@ -40,6 +40,7 @@ export async function getGridTile({
   requestType = RENDER_AS.POINT,
   geoFieldType = ES_GEO_FIELD_TYPE.GEO_POINT,
   searchSessionId,
+  abortSignal,
 }: {
   x: number;
   y: number;
@@ -52,6 +53,7 @@ export async function getGridTile({
   requestType: RENDER_AS;
   geoFieldType: ES_GEO_FIELD_TYPE;
   searchSessionId?: string;
+  abortSignal: AbortSignal;
 }): Promise<Buffer | null> {
   try {
     const tileBounds: ESBounds = tileToESBbox(x, y, z);
@@ -72,6 +74,7 @@ export async function getGridTile({
         },
         {
           sessionId: searchSessionId,
+          abortSignal,
         }
       )
       .toPromise();
@@ -99,6 +102,7 @@ export async function getTile({
   requestBody = {},
   geoFieldType,
   searchSessionId,
+  abortSignal,
 }: {
   x: number;
   y: number;
@@ -110,6 +114,7 @@ export async function getTile({
   requestBody: any;
   geoFieldType: ES_GEO_FIELD_TYPE;
   searchSessionId?: string;
+  abortSignal: AbortSignal;
 }): Promise<Buffer | null> {
   let features: Feature[];
   try {
@@ -119,6 +124,7 @@ export async function getTile({
 
     const searchOptions = {
       sessionId: searchSessionId,
+      abortSignal,
     };
 
     const countResponse = await context

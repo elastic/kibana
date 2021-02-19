@@ -50,6 +50,14 @@ export function initMVTRoutes({
       response: KibanaResponseFactory
     ) => {
       const { query } = request;
+
+      const abortController = new AbortController();
+      request.events.aborted$.subscribe({
+        next: () => {
+          abortController.abort();
+        },
+      });
+
       const requestBodyDSL = rison.decode(query.requestBody as string);
 
       const tile = await getTile({
@@ -63,6 +71,7 @@ export function initMVTRoutes({
         requestBody: requestBodyDSL as any,
         geoFieldType: query.geoFieldType as ES_GEO_FIELD_TYPE,
         searchSessionId: query.searchSessionId,
+        abortSignal: abortController.signal,
       });
 
       return sendResponse(response, tile);
@@ -92,6 +101,13 @@ export function initMVTRoutes({
       response: KibanaResponseFactory
     ) => {
       const { query } = request;
+      const abortController = new AbortController();
+      request.events.aborted$.subscribe({
+        next: () => {
+          abortController.abort();
+        },
+      });
+
       const requestBodyDSL = rison.decode(query.requestBody as string);
 
       const tile = await getGridTile({
@@ -106,6 +122,7 @@ export function initMVTRoutes({
         requestType: query.requestType as RENDER_AS,
         geoFieldType: query.geoFieldType as ES_GEO_FIELD_TYPE,
         searchSessionId: query.searchSessionId,
+        abortSignal: abortController.signal,
       });
 
       return sendResponse(response, tile);
