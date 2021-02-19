@@ -206,14 +206,16 @@ export const hasFilterKeyError = (
 };
 
 export const fieldDefined = (indexMappings: IndexMapping, key: string): boolean => {
+  let isFieldDefined = false;
+
   const mappingKey = 'properties.' + key.split('.').join('.properties.');
-  const potentialKey = get(indexMappings, mappingKey);
+  isFieldDefined = get(indexMappings, mappingKey) != null;
 
   // If the `mappingKey` does not match a valid path, before returning null,
   // we want to check and see if the intended path was for a multi-field
   // such as `x.attributes.field.text` where `field` is mapped to both text
   // and keyword
-  if (potentialKey == null) {
+  if (!isFieldDefined) {
     const propertiesAttribute = 'properties';
     const indexOfLastProperties = mappingKey.lastIndexOf(propertiesAttribute);
     const fieldMapping = mappingKey.substr(0, indexOfLastProperties);
@@ -222,8 +224,21 @@ export const fieldDefined = (indexMappings: IndexMapping, key: string): boolean 
     );
     const mapping = `${fieldMapping}fields.${fieldType}`;
 
-    return get(indexMappings, mapping) != null;
-  } else {
-    return true;
+    isFieldDefined = get(indexMappings, mapping) != null;
   }
+
+  // Handle scenario when the key references a flattened type
+  if (!isFieldDefined) {
+    const keys = key.split('.');
+    for (let i = 0; i < keys.length; i++) {
+      const path = `properties.${keys.slice(0, i + 1).join('.properties.')}`;
+      const mapping = get(indexMappings, path);
+      if (mapping?.type === 'flattened') {
+        isFieldDefined = true;
+        break;
+      }
+    }
+  }
+
+  return isFieldDefined;
 };
