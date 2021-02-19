@@ -168,13 +168,12 @@ export function removeBrokenLinks(
       if (api.signature) {
         api.signature = api.signature.map((sig) => {
           if (typeof sig !== 'string') {
-            const ref = sig as Reference;
-            if (apiItemExists(ref.text, ref.scope, pluginApiMap[ref.pluginId]) === false) {
-              if (missingApiItems[ref.pluginId] === undefined) {
-                missingApiItems[ref.pluginId] = [];
+            if (apiItemExists(sig.text, sig.scope, pluginApiMap[sig.pluginId]) === false) {
+              if (missingApiItems[sig.pluginId] === undefined) {
+                missingApiItems[sig.pluginId] = [];
               }
-              missingApiItems[ref.pluginId].push(`${ref.scope}.${ref.text}`);
-              return ref.text;
+              missingApiItems[sig.pluginId].push(`${sig.scope}.${sig.text}`);
+              return sig.text;
             }
           }
           return sig;
