@@ -148,7 +148,7 @@ export const sendGetFleetAgentsWithEndpoint = (
     query: {
       page: 1,
       perPage: 1,
-      kuery: ' fleet-agents.packages : "endpoint" and fleet-agents.last_checkin >= "now-89d"',
+      kuery: 'fleet-agents.packages : "endpoint" and fleet-agents.last_checkin >= "now-89d"',
     },
   });
 };
