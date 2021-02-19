@@ -28,6 +28,10 @@ const isFsReadStream = (src: unknown, res: Response): src is ReadStream => {
 const isString = (src: unknown, res: Response): src is string =>
   !isBoom(res) && res.variety === 'plain' && typeof src === 'string';
 
+const isObject = (src: unknown, res: Response) => {
+  return !isBoom(res) && res.variety === 'plain' && (isPlainObject(src) || Array.isArray(src));
+};
+
 /**
  * Attempts to determine the size (in bytes) of a Hapi response
  * body based on the payload type. Falls back to `undefined`
@@ -69,7 +73,7 @@ export function getResponsePayloadBytes(response: Response, log: Logger): number
       return Buffer.byteLength(response.source);
     }
 
-    if (response.variety === 'plain' && isPlainObject(response.source)) {
+    if (isObject(response.source, response)) {
       return Buffer.byteLength(JSON.stringify(response.source));
     }
   } catch (e) {

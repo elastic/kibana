@@ -79,8 +79,17 @@ describe('getPayloadSize', () => {
       expect(result).toBe(JSON.stringify(payload).length);
     });
 
+    test('when source is array object', () => {
+      const payload = [{ message: 'hey' }, { message: 'ya' }];
+      const result = getResponsePayloadBytes(payload);
+      expect(result).toBe(JSON.stringify(payload).length);
+    });
+
     test('returns undefined when source is not plain object', () => {
-      const result = getResponsePayloadBytes([1, 2, 3]);
+      class TestClass {
+        constructor() {}
+      }
+      const result = getResponsePayloadBytes(new TestClass());
       expect(result).toBe(undefined);
     });
   });

@@ -14,6 +14,7 @@ const isBuffer = (obj: unknown): obj is Buffer => Buffer.isBuffer(obj);
 const isFsReadStream = (obj: unknown): obj is ReadStream =>
   typeof obj === 'object' && obj !== null && 'bytesRead' in obj && obj instanceof ReadStream;
 const isString = (obj: unknown): obj is string => typeof obj === 'string';
+const isObject = (obj: unknown) => isPlainObject(obj) || Array.isArray(obj);
 
 /**
  * Attempts to determine the size (in bytes) of a hapi/good
@@ -55,7 +56,7 @@ export function getResponsePayloadBytes(
     return Buffer.byteLength(payload);
   }
 
-  if (isPlainObject(payload)) {
+  if (isObject(payload)) {
     return Buffer.byteLength(JSON.stringify(payload));
   }
 

@@ -134,7 +134,7 @@ describe('getPayloadSize', () => {
       expect(result).toBe(7);
     });
 
-    test('when source is object', () => {
+    test('when source is plain object', () => {
       const payload = { message: 'heya' };
       const result = getResponsePayloadBytes(
         {
@@ -146,11 +146,26 @@ describe('getPayloadSize', () => {
       expect(result).toBe(JSON.stringify(payload).length);
     });
 
-    test('returns undefined when source is not a plain object', () => {
+    test('when source is array object', () => {
+      const payload = [{ message: 'hey' }, { message: 'ya' }];
       const result = getResponsePayloadBytes(
         {
           variety: 'plain',
-          source: [1, 2, 3],
+          source: payload,
+        } as Response,
+        logger
+      );
+      expect(result).toBe(JSON.stringify(payload).length);
+    });
+
+    test('returns undefined when source is not a plain object', () => {
+      class TestClass {
+        constructor() {}
+      }
+      const result = getResponsePayloadBytes(
+        {
+          variety: 'plain',
+          source: new TestClass(),
         } as Response,
         logger
       );
