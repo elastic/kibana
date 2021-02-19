@@ -29,8 +29,8 @@ Tags::      A list of tag names that can be applied to an alert. Tags can help y
 Check every::      This value determines how frequently the alert conditions below are checked. Note that the timing of background alert checks are not guaranteed, particularly for intervals of less than 10 seconds. See <<alerting-production-considerations>> for more information.
 Notify::      This value limits how often actions are repeated when an alert instance remains active across alert checks. See <<alerting-concepts-suppressing-duplicate-notifications>> for more information. +
 - **Only on status change**: Actions are not repeated when an alert instance remains active across checks. Actions only run when the alert status changes.
-- **Every time alert is active**: Actions are repeated each time when an alert instance remains active across checks.
-- **On a custom action interval**: Actions are supressed for the throttle interval but will be repeated when an alert instance remains active across checks for a duration longer than the throttle interval.
+- **Every time alert is active**: Actions are repeated when an alert instance remains active across checks.
+- **On a custom action interval**: Actions are suppressed for the throttle interval, but repeat when an alert instance remains active across checks for a duration longer than the throttle interval.
 
 
 [float]
