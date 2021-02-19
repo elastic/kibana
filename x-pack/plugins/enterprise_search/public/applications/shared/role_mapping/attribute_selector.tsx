@@ -67,9 +67,7 @@ const attributeValueExamples = {
   metadata: '{"_reserved": true}',
 };
 
-const getAuthProviderOptions = (
-  availableAuthProviders: string[]
-): Array<EuiComboBoxOptionOption<string>> => {
+const getAuthProviderOptions = (availableAuthProviders: string[]) => {
   return [
     {
       label: AUTH_ANY_PROVIDER_LABEL,
