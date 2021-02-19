@@ -11,12 +11,12 @@ The email action type uses the SMTP protocol to send mail message, using an inte
 Email connectors have the following configuration properties:
 
 Name::      The name of the connector. The name is used to identify a  connector in the management UI connector listing, or in the connector list when configuring an action.
-Sender::    The from address for all emails sent with this connector. This can be specified in `user@host-name` format or as `"human name <user@host-name>"` format. See the [nodemailer address documentation](https://nodemailer.com/message/addresses/) for more information.
+Sender::    The from address for all emails sent with this connector. This can be specified in `user@host-name` format or as `"human name <user@host-name>"` format. See the https://nodemailer.com/message/addresses/[Nodemailer address documentation] for more information.
 Host::      Host name of the service provider. If you are using the <<action-settings, `xpack.actions.allowedHosts`>> setting, make sure this hostname is added to the allowed hosts.
 Port::      The port to connect to on the service provider.
 Secure::    If true, the connection will use TLS when connecting to the service provider. Refer to the https://nodemailer.com/smtp/#tls-options[Nodemailer TLS documentation] for more information.  If not true, the connection will initially connect over TCP, then attempt to switch to TLS via the SMTP STARTTLS command.
-User::  Username for 'login' type authentication.
-Password::  Password for 'login' type authentication.
+User::  Username for login type authentication.
+Password::  Password for login type authentication.
 
 [float]
 [[Preconfigured-email-configuration]]
@@ -44,7 +44,7 @@ Password::  Password for 'login' type authentication.
 |===
 
 | `service`
-| The name of a [well-known email service provider](https://nodemailer.com/smtp/well-known/) value. If `service` is provided, `host`, `port`, and `secure` properties are ignored. For more information on the `gmail` service value specifically, see the [nodemailer gmail documentation](https://nodemailer.com/usage/using-gmail/).
+| The name of a https://nodemailer.com/smtp/well-known/[well-known email service provider]. If `service` is provided, `host`, `port`, and `secure` properties are ignored. For more information on the `gmail` service value, see the (https://nodemailer.com/usage/using-gmail/)[Nodemailer Gmail documentation].
 
 | `from`
 | An email address that corresponds to *Sender*.

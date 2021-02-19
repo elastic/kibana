@@ -60,29 +60,29 @@ Password::  Password for HTTP Basic authentication.
 
 ServiceNow actions have the following configuration properties:
 
-Subaction::        The subaction to perform. Either `pushToService`, `getFields`, `getIncident`, or `getChoices`.
+Subaction::        The subaction to perform: `pushToService`, `getFields`, `getIncident`, or `getChoices`.
 Subaction Params:: The parameters of the subaction.
 
 ==== `pushToService` subaction configuration
 
-Incident:: The ServiceNow incident which has the following properties:
+Incident:: The ServiceNow incident has the following properties:
 * `short_description` - A short description for the incident, used for searching the contents of the knowledge base.
 * `description` - The details about the incident.
-* `externalId` - The id of the incident in ServiceNow. If present the incident will be updated. Otherwise a new incident will be created.
+* `externalId` - The ID of the incident in ServiceNow. If present, the incident is updated. Otherwise, a new incident is created.
 * `severity` - The severity of the incident.
 * `urgency` - The extent to which the incident resolution can delay.
 * `impact` - The effect an incident has on business. Can be measured by the number of affected users or by how critical it is to the business in question.
 * `category` - The name of the category in ServiceNow.
 * `subcategory` - The name of the subcategory in ServiceNow.
-Comments:: The comments of the case. A comment is of the form `{ commentId: string, version: string, comment: string }`.
+Comments:: A comment in the form of `{ commentId: string, version: string, comment: string }`.
 
 ===== `getFields` subaction configuration
 
-No parameters for `getFields` subaction. Provide an empty object `{}`.
+The `getFields` subaction has no parameters. Provide an empty object `{}`.
 
 ===== `getIncident` subaction configuration
 
-External ID:: The id of the incident in ServiceNow.
+External ID:: The ID of the incident in ServiceNow.
 
 ===== `getChoices` subaction configuration
 

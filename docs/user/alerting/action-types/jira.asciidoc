@@ -65,32 +65,32 @@ API token (or password)::  Jira API authentication token (or password) for HTTP 
 
 Jira actions have the following configuration properties:
 
-Subaction::        The subaction to perform. Either `pushToService`, `getIncident`, `issueTypes`, `fieldsByIssueType`, `issues`, `issue`, or `getFields`.
+Subaction::        The subaction to perform: `pushToService`, `getIncident`, `issueTypes`, `fieldsByIssueType`, `issues`, `issue`, or `getFields`.
 Subaction Params:: The parameters of the subaction.
 
 ==== `pushToService` subaction configuration
 
-Incident:: The Jira incident which has the following properties:
+Incident:: A Jira incident has the following properties:
 * `summary` - The title of the issue.
-* `description` - The description of the issue.
-* `externalId` - The id of the issue in Jira. If present the issue will be updated. Otherwise a new issue will be created.
-* `issueType` - The id of the issue type in Jira.
-* `priority` - The name of the priority in Jira. Example: `Medium`.
+* `description` - A description of the issue.
+* `externalId` - The ID of the issue in Jira. If present, the issue is updated. Otherwise, a new issue is created.
+* `issueType` - The ID of the issue type in Jira.
+* `priority` - The priority level in Jira. Example: `Medium`.
 * `labels` - An array of labels. Labels cannot contain spaces.
-* `parent` - The parent issue id or key. Only for Sub-task issue types.
-Comments:: The comments of the case. A comment is of the form `{ commentId: string, version: string, comment: string }`.
+* `parent` - The parent issue ID or key. Only for subtask issue types.
+Comments:: A comment in the form of `{ commentId: string, version: string, comment: string }`.
 
 ==== `getIncident` subaction configuration
 
-External ID:: The id of the issue in Jira.
+External ID:: The ID of the issue in Jira.
 
 ==== `issueTypes` subaction configuration
 
-No parameters for `issueTypes` subaction. Provide an empty object `{}`.
+The `issueTypes` subaction has no parameters. Provide an empty object `{}`.
 
 ==== `fieldsByIssueType` subaction configuration
 
-ID:: The id of the issue in Jira.
+ID:: The ID of the issue in Jira.
 
 ==== `issues` subaction configuration
 
@@ -98,11 +98,11 @@ Title:: The title to search for.
 
 ==== `issue` subaction configuration
 
-ID:: The id of the issue in Jira.
+ID:: The ID of the issue in Jira.
 
 ==== `getFields` subaction configuration
 
-No parameters for `getFields` subaction. Provide an empty object `{}`.
+The `getFields` subaction has no parameters. Provide an empty object `{}`.
 
 [[configuring-jira]]
 ==== Configuring and testing Jira

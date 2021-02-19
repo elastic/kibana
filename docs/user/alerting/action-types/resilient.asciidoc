@@ -65,30 +65,30 @@ API key secret::  The authentication key secret for HTTP Basic authentication.
 
 IBM Resilient actions have the following configuration properties:
 
-Subaction::        The subaction to perform. Either `pushToService`, `getFields`, `incidentTypes`, or `severity`.
+Subaction::        The subaction to perform: `pushToService`, `getFields`, `incidentTypes`, or `severity`.
 Subaction Params:: The parameters of the subaction.
 
 ==== `pushToService` subaction configuration
 
-Incident:: The IBM resilient incident which has the following properties:
+Incident:: The IBM resilient incident has the following properties:
 * `name` - A name for the issue, used for searching the contents of the knowledge base.
 * `description` - The details about the incident.
-* `externalId` - The id of the incident in IBM Resilient. If present the incident will be updated. Otherwise a new incident will be created.
-* `incidentTypes` - An array with the ids of IBM Resilient incident types.
-* `severityCode` - IBM Resilient id of the severity code.
-Comments:: The comments of the case. A comment is of the form `{ commentId: string, version: string, comment: string }`.
+* `externalId` - The ID of the incident in IBM Resilient. If present, the incident is updated. Otherwise, a new incident is created.
+* `incidentTypes` - An array with the IDs of IBM Resilient incident types.
+* `severityCode` - The IBM Resilient ID of the severity code.
+Comments:: A comment in the form of `{ commentId: string, version: string, comment: string }`.
 
 ===== `getFields` subaction configuration
 
-No parameters for `getFields` subaction. Provide an empty object `{}`.
+The `getFields` subaction has not parameters. Provide an empty object `{}`.
 
 ===== `incidentTypes` subaction configuration
 
-No parameters for `incidentTypes` subaction. Provide an empty object `{}`.
+The `incidentTypes` subaction has no parameters. Provide an empty object `{}`.
 
 ===== `severity` subaction configuration
 
-No parameters for `severity` subaction. Provide an empty object `{}`.
+The `severity` subaction has no parameters. Provide an empty object `{}`.
 
 [[configuring-resilient]]
 ==== Configuring and testing IBM Resilient
