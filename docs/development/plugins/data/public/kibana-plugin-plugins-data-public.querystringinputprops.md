@@ -19,7 +19,7 @@ export interface QueryStringInputProps
 |  [dataTestSubj](./kibana-plugin-plugins-data-public.querystringinputprops.datatestsubj.md) | <code>string</code> |  |
 |  [disableAutoFocus](./kibana-plugin-plugins-data-public.querystringinputprops.disableautofocus.md) | <code>boolean</code> |  |
 |  [disableLanguageSwitcher](./kibana-plugin-plugins-data-public.querystringinputprops.disablelanguageswitcher.md) | <code>boolean</code> |  |
-|  [iconType](./kibana-plugin-plugins-data-public.querystringinputprops.icontype.md) | <code>string</code> |  |
+|  [iconType](./kibana-plugin-plugins-data-public.querystringinputprops.icontype.md) | <code>EuiIconProps['type']</code> |  |
 |  [indexPatterns](./kibana-plugin-plugins-data-public.querystringinputprops.indexpatterns.md) | <code>Array&lt;IIndexPattern &#124; string&gt;</code> |  |
 |  [isClearable](./kibana-plugin-plugins-data-public.querystringinputprops.isclearable.md) | <code>boolean</code> |  |
 |  [isInvalid](./kibana-plugin-plugins-data-public.querystringinputprops.isinvalid.md) | <code>boolean</code> |  |

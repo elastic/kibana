@@ -35,6 +35,7 @@ import { EuiComboBoxProps } from '@elastic/eui';
 import { EuiConfirmModalProps } from '@elastic/eui';
 import { EuiFlyoutSize } from '@elastic/eui';
 import { EuiGlobalToastListToast } from '@elastic/eui';
+import { EuiIconProps } from '@elastic/eui';
 import { EventEmitter } from 'events';
 import { ExecutionContext } from 'src/plugins/expressions/common';
 import { ExpressionAstExpression } from 'src/plugins/expressions/common';
@@ -1998,7 +1999,7 @@ export interface QueryStringInputProps {
     // (undocumented)
     disableLanguageSwitcher?: boolean;
     // (undocumented)
-    iconType?: string;
+    iconType?: EuiIconProps['type'];
     // (undocumented)
     indexPatterns: Array<IIndexPattern | string>;
     // (undocumented)
