@@ -11,11 +11,11 @@ import { EuiButtonTo } from '../react_router_helpers';
 
 import { ADD_ROLE_MAPPING_BUTTON } from './constants';
 
-interface IAddRoleMappingButtonProps {
+interface Props {
   path: string;
 }
 
-export const AddRoleMappingButton: React.FC<IAddRoleMappingButtonProps> = ({ path }) => (
+export const AddRoleMappingButton: React.FC<Props> = ({ path }) => (
   <EuiButtonTo to={path} fill color="secondary">
     {ADD_ROLE_MAPPING_BUTTON}
   </EuiButtonTo>
