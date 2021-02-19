@@ -7,7 +7,6 @@
 
 import React from 'react';
 import { EuiText, EuiToolTip, EuiFormFieldset, EuiLink } from '@elastic/eui';
-import './action_wizard.scss';
 import { i18n } from '@kbn/i18n';
 import { TriggerPickerItemDescription, TriggerPickerItem } from './trigger_picker_item';
 
@@ -43,7 +42,7 @@ export interface TriggerPickerProps {
   docs?: string;
 
   /** Called on trigger selection change. */
-  onChange: (selected?: string[]) => void;
+  onChange: (selected: string[]) => void;
 }
 
 export const TriggerPicker: React.FC<TriggerPickerProps> = ({
@@ -56,7 +55,7 @@ export const TriggerPicker: React.FC<TriggerPickerProps> = ({
     <EuiFormFieldset
       data-test-subj={`triggerPicker`}
       legend={{
-        children: (
+        children: !!docs && (
           <EuiText size="s">
             <h5>
               <span>{txtTriggerPickerLabel}</span>{' '}
