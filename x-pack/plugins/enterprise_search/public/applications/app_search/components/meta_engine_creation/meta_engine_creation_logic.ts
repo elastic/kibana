@@ -5,13 +5,19 @@
  * 2.0.
  */
 
+import { generatePath } from 'react-router-dom';
+
 import { kea, MakeLogicType } from 'kea';
 
 import { Meta } from '../../../../../common/types';
-import { flashAPIErrors } from '../../../shared/flash_messages';
+import { flashAPIErrors, setQueuedSuccessMessage } from '../../../shared/flash_messages';
 import { HttpLogic } from '../../../shared/http';
+import { KibanaLogic } from '../../../shared/kibana';
+import { ENGINE_PATH } from '../../routes';
 import { formatApiName } from '../../utils/format_api_name';
 import { EngineDetails } from '../engine/types';
+
+import { META_ENGINE_CREATION_SUCCESS_MESSAGE } from './constants';
 
 interface MetaEngineCreationValues {
   indexedEngineNames: string[];
@@ -22,6 +28,7 @@ interface MetaEngineCreationValues {
 
 interface MetaEngineCreationActions {
   fetchIndexedEngineNames(page?: number): { page: number };
+  onEngineCreationSuccess(): void;
   setIndexedEngineNames(
     indexedEngineNames: MetaEngineCreationValues['indexedEngineNames']
   ): { indexedEngineNames: MetaEngineCreationValues['indexedEngineNames'] };
@@ -38,6 +45,7 @@ export const MetaEngineCreationLogic = kea<
   path: ['enterprise_search', 'app_search', 'meta_engine_creation_logic'],
   actions: {
     fetchIndexedEngineNames: (page = 1) => ({ page }),
+    onEngineCreationSuccess: true,
     setIndexedEngineNames: (indexedEngineNames) => ({ indexedEngineNames }),
     setRawName: (rawName) => ({ rawName }),
     setSelectedIndexedEngineNames: (selectedIndexedEngineNames) => ({ selectedIndexedEngineNames }),
@@ -89,6 +97,14 @@ export const MetaEngineCreationLogic = kea<
         }
       }
     },
+    onEngineCreationSuccess: () => {
+      const { name } = values;
+      const { navigateToUrl } = KibanaLogic.values;
+      const enginePath = generatePath(ENGINE_PATH, { engineName: name });
+
+      setQueuedSuccessMessage(META_ENGINE_CREATION_SUCCESS_MESSAGE);
+      navigateToUrl(enginePath);
+    },
     submitEngine: async () => {
       const { http } = HttpLogic.values;
       const { name, selectedIndexedEngineNames } = values;
@@ -99,10 +115,15 @@ export const MetaEngineCreationLogic = kea<
         source_engines: selectedIndexedEngineNames,
       });
 
+      let response;
       try {
-        await http.post('/api/app_search/engines', { body });
+        response = await http.post('/api/app_search/engines', { body });
       } catch (e) {
         flashAPIErrors(e);
+      }
+
+      if (response) {
+        actions.onEngineCreationSuccess();
       }
     },
   }),

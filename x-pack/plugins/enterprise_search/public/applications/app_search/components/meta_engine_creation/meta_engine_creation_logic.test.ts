@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import { LogicMounter } from '../../../__mocks__';
+import { LogicMounter, mockFlashMessageHelpers, mockKibanaValues } from '../../../__mocks__';
 
 import { MetaEngineCreationLogic } from './meta_engine_creation_logic';
 
 describe('MetaEngineCreationLogic', () => {
   const { mount } = new LogicMounter(MetaEngineCreationLogic);
+  const { navigateToUrl } = mockKibanaValues;
+  const { setQueuedSuccessMessage } = mockFlashMessageHelpers;
 
   const DEFAULT_VALUES = {
     indexedEngineNames: [],
@@ -90,6 +92,25 @@ describe('MetaEngineCreationLogic', () => {
       });
     });
 
+    describe('onEngineCreationSuccess', () => {
+      beforeAll(() => {
+        mount({ language: 'English', rawName: 'test' });
+        MetaEngineCreationLogic.actions.onEngineCreationSuccess();
+      });
+
+      afterAll(() => {
+        jest.clearAllMocks();
+      });
+
+      it('should set a success message', () => {
+        expect(setQueuedSuccessMessage).toHaveBeenCalledWith('Successfully created engine.');
+      });
+
+      it('should navigate the user to the engine page', () => {
+        expect(navigateToUrl).toHaveBeenCalledWith('/engines/test');
+      });
+    });
+
     describe('submitEngine', () => {
       beforeAll(() => {
         mount({ language: 'English', rawName: 'test' });
@@ -104,6 +125,10 @@ describe('MetaEngineCreationLogic', () => {
       });
 
       it('calls flashAPIErrors on API Error', async () => {
+        throw Error('TODO');
+      });
+
+      it('calls onEngineCreationSuccess on valid submission', async () => {
         throw Error('TODO');
       });
     });

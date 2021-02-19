@@ -106,3 +106,10 @@ export const META_ENGINE_CREATION_FORM_MAX_SOURCE_ENGINES_WARNING_TITLE = i18n.t
     defaultMessage: 'Meta Engines have a limit of {maxEnginesPerMetaEngine} engines',
   }
 );
+
+export const META_ENGINE_CREATION_SUCCESS_MESSAGE = i18n.translate(
+  'xpack.enterpriseSearch.appSearch.metaEngineCreation.successMessage',
+  {
+    defaultMessage: 'Successfully created meta engine.',
+  }
+);
