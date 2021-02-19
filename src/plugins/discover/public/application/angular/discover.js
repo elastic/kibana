@@ -110,7 +110,7 @@ app.config(($routeProvider) => {
         const history = getHistory();
         const savedSearchId = $route.current.params.id;
         return data.indexPatterns.ensureDefaultIndexPattern(history).then(() => {
-          const { appStateContainer } = getState({ history });
+          const { appStateContainer } = getState({ history, uiSettings: config });
           const { index } = appStateContainer.getState();
           return Promise.props({
             ip: loadIndexPattern(index, data.indexPatterns, config),
@@ -195,6 +195,7 @@ function discoverController($route, $scope, Promise) {
     storeInSessionStorage: config.get('state:storeInSessionStorage'),
     history,
     toasts: core.notifications.toasts,
+    uiSettings: config,
   });
 
   const {
