@@ -374,6 +374,100 @@ export const sampleSignalHit = (): SignalHit => ({
   },
 });
 
+export const sampleThresholdSignalHit = (): SignalHit => ({
+  '@timestamp': '2020-04-20T21:27:45+0000',
+  event: {
+    kind: 'signal',
+  },
+  signal: {
+    parents: [
+      {
+        id: 'd5e8eb51-a6a0-456d-8a15-4b79bfec3d71',
+        type: 'event',
+        index: 'myFakeSignalIndex',
+        depth: 0,
+      },
+      {
+        id: '730ddf9e-5a00-4f85-9ddf-5878ca511a87',
+        type: 'event',
+        index: 'myFakeSignalIndex',
+        depth: 0,
+      },
+    ],
+    ancestors: [
+      {
+        id: 'd5e8eb51-a6a0-456d-8a15-4b79bfec3d71',
+        type: 'event',
+        index: 'myFakeSignalIndex',
+        depth: 0,
+      },
+      {
+        id: '730ddf9e-5a00-4f85-9ddf-5878ca511a87',
+        type: 'event',
+        index: 'myFakeSignalIndex',
+        depth: 0,
+      },
+    ],
+    original_time: '2021-02-16T17:37:34.275Z',
+    status: 'open',
+    threshold_result: {
+      count: 72,
+      terms: [{ field: 'host.name', value: 'a hostname' }],
+      cardinality: [{ field: 'process.name', value: 6 }],
+    },
+    rule: {
+      author: [],
+      id: '7a7065d7-6e8b-4aae-8d20-c93613dec9f9',
+      created_at: '2020-04-20T21:27:45+0000',
+      updated_at: '2020-04-20T21:27:45+0000',
+      created_by: 'elastic',
+      description: 'some description',
+      enabled: true,
+      false_positives: ['false positive 1', 'false positive 2'],
+      from: 'now-6m',
+      immutable: false,
+      name: 'Query with a rule id',
+      query: 'user.name: root or user.name: admin',
+      references: ['test 1', 'test 2'],
+      severity: 'high',
+      severity_mapping: [],
+      threshold: {
+        field: ['host.name'],
+        value: 5,
+        cardinality_field: 'process.name',
+        cardinality_value: 2,
+      },
+      updated_by: 'elastic_kibana',
+      tags: ['some fake tag 1', 'some fake tag 2'],
+      to: 'now',
+      type: 'query',
+      threat: [],
+      version: 1,
+      status: 'succeeded',
+      status_date: '2020-02-22T16:47:50.047Z',
+      last_success_at: '2020-02-22T16:47:50.047Z',
+      last_success_message: 'succeeded',
+      output_index: '.siem-signals-default',
+      max_signals: 100,
+      risk_score: 55,
+      risk_score_mapping: [],
+      language: 'kuery',
+      rule_id: 'query-rule-id',
+      interval: '5m',
+      exceptions_list: getListArrayMock(),
+    },
+    depth: 1,
+  },
+});
+
+export const sampleWrappedThresholdSignalHit = (): WrappedSignalHit => {
+  return {
+    _index: 'myFakeSignalIndex',
+    _id: sampleIdGuid,
+    _source: sampleThresholdSignalHit(),
+  };
+};
+
 export const sampleBulkCreateDuplicateResult = {
   took: 60,
   errors: true,

@@ -15,15 +15,18 @@ import {
   getProcessorEventForAggregatedTransactions,
   getTransactionDurationFieldForAggregatedTransactions,
 } from '../../helpers/aggregated_transactions';
+import { environmentQuery, rangeQuery } from '../../../../common/utils/queries';
 import { withApmSpan } from '../../../utils/with_apm_span';
 
 export async function getDistributionMax({
+  environment,
   serviceName,
   transactionName,
   transactionType,
   setup,
   searchAggregatedTransactions,
 }: {
+  environment?: string;
   serviceName: string;
   transactionName: string;
   transactionType: string;
@@ -49,15 +52,8 @@ export async function getDistributionMax({
               { term: { [SERVICE_NAME]: serviceName } },
               { term: { [TRANSACTION_TYPE]: transactionType } },
               { term: { [TRANSACTION_NAME]: transactionName } },
-              {
-                range: {
-                  '@timestamp': {
-                    gte: start,
-                    lte: end,
-                    format: 'epoch_millis',
-                  },
-                },
-              },
+              ...rangeQuery(start, end),
+              ...environmentQuery(environment),
               ...esFilter,
             ],
           },

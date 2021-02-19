@@ -14,7 +14,7 @@ import {
 } from '../../../common/elasticsearch_fieldnames';
 import { EventOutcome } from '../../../common/event_outcome';
 import { LatencyAggregationType } from '../../../common/latency_aggregation_types';
-import { rangeFilter } from '../../../common/utils/range_filter';
+import { environmentQuery, rangeQuery } from '../../../common/utils/queries';
 import { Coordinate } from '../../../typings/timeseries';
 import { withApmSpan } from '../../utils/with_apm_span';
 import {
@@ -31,6 +31,7 @@ import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import { calculateTransactionErrorPercentage } from '../helpers/transaction_error_rate';
 
 export async function getServiceTransactionGroupComparisonStatistics({
+  environment,
   serviceName,
   transactionNames,
   setup,
@@ -39,6 +40,7 @@ export async function getServiceTransactionGroupComparisonStatistics({
   transactionType,
   latencyAggregationType,
 }: {
+  environment?: string;
   serviceName: string;
   transactionNames: string[];
   setup: Setup & SetupTimeRange;
@@ -82,10 +84,11 @@ export async function getServiceTransactionGroupComparisonStatistics({
               filter: [
                 { term: { [SERVICE_NAME]: serviceName } },
                 { term: { [TRANSACTION_TYPE]: transactionType } },
-                { range: rangeFilter(start, end) },
                 ...getDocumentTypeFilterForAggregatedTransactions(
                   searchAggregatedTransactions
                 ),
+                ...rangeQuery(start, end),
+                ...environmentQuery(environment),
                 ...esFilter,
               ],
             },

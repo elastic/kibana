@@ -24,7 +24,8 @@ import {
   serviceNodeMetadataRoute,
   serviceAnnotationsRoute,
   serviceAnnotationsCreateRoute,
-  serviceErrorGroupsRoute,
+  serviceErrorGroupsPrimaryStatisticsRoute,
+  serviceErrorGroupsComparisonStatisticsRoute,
   serviceThroughputRoute,
   serviceDependenciesRoute,
   serviceMetadataDetailsRoute,
@@ -63,8 +64,8 @@ import {
   transactionChartsErrorRateRoute,
   transactionGroupsRoute,
   transactionGroupsPrimaryStatisticsRoute,
-  transactionLatencyChatsRoute,
-  transactionThroughputChatsRoute,
+  transactionLatencyChartsRoute,
+  transactionThroughputChartsRoute,
   transactionGroupsComparisonStatisticsRoute,
 } from './transactions';
 import { serviceMapRoute, serviceMapServiceNodeRoute } from './service_map';
@@ -126,12 +127,13 @@ const createApmApi = () => {
     .add(serviceNodeMetadataRoute)
     .add(serviceAnnotationsRoute)
     .add(serviceAnnotationsCreateRoute)
-    .add(serviceErrorGroupsRoute)
+    .add(serviceErrorGroupsPrimaryStatisticsRoute)
     .add(serviceThroughputRoute)
     .add(serviceDependenciesRoute)
     .add(serviceMetadataDetailsRoute)
     .add(serviceMetadataIconsRoute)
     .add(serviceInstancesRoute)
+    .add(serviceErrorGroupsComparisonStatisticsRoute)
 
     // Agent configuration
     .add(getSingleAgentConfigurationRoute)
@@ -167,8 +169,8 @@ const createApmApi = () => {
     .add(transactionChartsErrorRateRoute)
     .add(transactionGroupsRoute)
     .add(transactionGroupsPrimaryStatisticsRoute)
-    .add(transactionLatencyChatsRoute)
-    .add(transactionThroughputChatsRoute)
+    .add(transactionLatencyChartsRoute)
+    .add(transactionThroughputChartsRoute)
     .add(transactionGroupsComparisonStatisticsRoute)
 
     // Service map

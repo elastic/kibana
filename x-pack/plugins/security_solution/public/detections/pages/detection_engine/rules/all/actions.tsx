@@ -13,6 +13,7 @@ import {
   duplicateRules,
   enableRules,
   Rule,
+  RulesTableAction,
 } from '../../../../containers/detection_engine/rules';
 
 import { getEditRuleUrl } from '../../../../../common/components/link_to/redirect_to_detection_engine';
@@ -27,7 +28,6 @@ import { track, METRIC_TYPE, TELEMETRY_EVENT } from '../../../../../common/lib/t
 
 import * as i18n from '../translations';
 import { bucketRulesResponse } from './helpers';
-import { Action } from './reducer';
 
 export const editRuleAction = (rule: Rule, history: H.History) => {
   history.push(getEditRuleUrl(rule.id));
@@ -36,7 +36,7 @@ export const editRuleAction = (rule: Rule, history: H.History) => {
 export const duplicateRulesAction = async (
   rules: Rule[],
   ruleIds: string[],
-  dispatch: React.Dispatch<Action>,
+  dispatch: React.Dispatch<RulesTableAction>,
   dispatchToaster: Dispatch<ActionToaster>
 ) => {
   try {
@@ -59,13 +59,16 @@ export const duplicateRulesAction = async (
   }
 };
 
-export const exportRulesAction = (exportRuleId: string[], dispatch: React.Dispatch<Action>) => {
+export const exportRulesAction = (
+  exportRuleId: string[],
+  dispatch: React.Dispatch<RulesTableAction>
+) => {
   dispatch({ type: 'exportRuleIds', ids: exportRuleId });
 };
 
 export const deleteRulesAction = async (
   ruleIds: string[],
-  dispatch: React.Dispatch<Action>,
+  dispatch: React.Dispatch<RulesTableAction>,
   dispatchToaster: Dispatch<ActionToaster>,
   onRuleDeleted?: () => void
 ) => {
@@ -96,7 +99,7 @@ export const deleteRulesAction = async (
 export const enableRulesAction = async (
   ids: string[],
   enabled: boolean,
-  dispatch: React.Dispatch<Action>,
+  dispatch: React.Dispatch<RulesTableAction>,
   dispatchToaster: Dispatch<ActionToaster>
 ) => {
   const errorTitle = enabled
