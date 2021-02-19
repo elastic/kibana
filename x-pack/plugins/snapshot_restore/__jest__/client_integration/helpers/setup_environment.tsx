@@ -39,7 +39,7 @@ export const services = {
 setUiMetricService(services.uiMetricService);
 
 const appDependencies = {
-  core: coreMock.createSetup(),
+  core: coreMock.createStart(),
   services,
   config: {
     slm_ui: { enabled: true },
