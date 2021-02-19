@@ -7,7 +7,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { LogRecord, DisposableAppender } from '@kbn/logging';
+import { LogRecord, Appender, DisposableAppender } from '@kbn/logging';
 import {
   createRewritePolicy,
   rewritePolicyConfigSchema,
@@ -40,7 +40,7 @@ export class RewriteAppender implements DisposableAppender {
     policy: rewritePolicyConfigSchema,
   });
 
-  private appenders: Map<string, DisposableAppender> = new Map();
+  private appenders: Map<string, Appender> = new Map();
   private readonly policy: RewritePolicy;
 
   constructor(private readonly config: RewriteAppenderConfig) {
@@ -64,7 +64,7 @@ export class RewriteAppender implements DisposableAppender {
    * As appenders cannot be attached to each other until they are created,
    * the `addAppender` method is used to pass in a configured appender.
    */
-  public addAppender(appenderRef: string, appender: DisposableAppender) {
+  public addAppender(appenderRef: string, appender: Appender) {
     if (!this.appenderRefs.includes(appenderRef)) {
       throw new Error(
         `addAppender was called with an appender key that is missing from the appenderRefs: "${appenderRef}".`
