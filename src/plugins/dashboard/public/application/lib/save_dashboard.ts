@@ -11,8 +11,6 @@ import { SavedObjectSaveOpts } from '../../services/saved_objects';
 import { updateSavedDashboard } from './update_saved_dashboard';
 import { DashboardStateManager } from '../dashboard_state_manager';
 
-export type SavedDashboardSaveOpts = SavedObjectSaveOpts & { stayInEditMode?: boolean };
-
 /**
  * Saves the dashboard.
  * @param toJson A custom toJson function. Used because the previous code used
@@ -25,7 +23,7 @@ export function saveDashboard(
   toJson: (obj: any) => string,
   timeFilter: TimefilterContract,
   dashboardStateManager: DashboardStateManager,
-  saveOptions: SavedDashboardSaveOpts
+  saveOptions: SavedObjectSaveOpts
 ): Promise<string> {
   const savedDashboard = dashboardStateManager.savedDashboard;
   const appState = dashboardStateManager.appState;
@@ -38,7 +36,6 @@ export function saveDashboard(
       // reset state only when save() was successful
       // e.g. save() could be interrupted if title is duplicated and not confirmed
       dashboardStateManager.lastSavedDashboardFilters = dashboardStateManager.getFilterState();
-      dashboardStateManager.resetState(!saveOptions.stayInEditMode);
     }
 
     return id;
