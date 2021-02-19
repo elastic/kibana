@@ -8,6 +8,7 @@
 
 import { isPlainObject } from 'lodash';
 import { ReadStream } from 'fs';
+import { Zlib } from 'zlib';
 import { isBoom } from '@hapi/boom';
 import type { Request } from '@hapi/hapi';
 import { Logger } from '../../logging';
@@ -23,6 +24,16 @@ const isFsReadStream = (src: unknown, res: Response): src is ReadStream => {
     res.variety === 'stream' &&
     res.source === src &&
     res.source instanceof ReadStream
+  );
+};
+const isZlibStream = (src: unknown, res: Response): src is Zlib => {
+  return (
+    !isBoom(res) &&
+    res.variety === 'stream' &&
+    res.source === src &&
+    typeof src === 'object' &&
+    src !== null &&
+    'bytesWritten' in src
   );
 };
 const isString = (src: unknown, res: Response): src is string =>
@@ -67,6 +78,10 @@ export function getResponsePayloadBytes(response: Response, log: Logger): number
 
     if (isFsReadStream(response.source, response)) {
       return response.source.bytesRead;
+    }
+
+    if (isZlibStream(response.source, response)) {
+      return response.source.bytesWritten;
     }
 
     if (isString(response.source, response)) {

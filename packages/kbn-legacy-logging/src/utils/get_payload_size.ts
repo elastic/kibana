@@ -8,11 +8,15 @@
 
 import { isPlainObject } from 'lodash';
 import { ReadStream } from 'fs';
+import { Zlib } from 'zlib';
 import type { ResponseObject } from '@hapi/hapi';
 
 const isBuffer = (obj: unknown): obj is Buffer => Buffer.isBuffer(obj);
 const isFsReadStream = (obj: unknown): obj is ReadStream =>
   typeof obj === 'object' && obj !== null && 'bytesRead' in obj && obj instanceof ReadStream;
+const isZlibStream = (obj: unknown): obj is Zlib => {
+  return typeof obj === 'object' && obj !== null && 'bytesWritten' in obj;
+};
 const isString = (obj: unknown): obj is string => typeof obj === 'string';
 const isObject = (obj: unknown) => isPlainObject(obj) || Array.isArray(obj);
 
@@ -50,6 +54,10 @@ export function getResponsePayloadBytes(
 
   if (isFsReadStream(payload)) {
     return payload.bytesRead;
+  }
+
+  if (isZlibStream(payload)) {
+    return payload.bytesWritten;
   }
 
   if (isString(payload)) {
