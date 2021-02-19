@@ -67,10 +67,8 @@ type ErrorGroupDetailsProps = RouteComponentProps<{
 
 export function ErrorGroupDetails({ location, match }: ErrorGroupDetailsProps) {
   const { serviceName, groupId } = match.params;
-  const {
-    urlParams: { environment, kuery, start, end },
-  } = useUrlParams();
-
+  const { urlParams } = useUrlParams();
+  const { environment, kuery, start, end } = urlParams;
   const { data: errorGroupData } = useFetcher(
     (callApmApi) => {
       if (start && end) {

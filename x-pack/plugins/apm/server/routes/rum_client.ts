@@ -321,10 +321,7 @@ function createLocalFiltersRoute<
       const projection = await getProjection({
         query,
         context,
-        setup: {
-          ...setup,
-          esFilter: getEsFilter(omit(uiFilters, filterNames)),
-        },
+        setup,
       });
 
       return getLocalUIFilters({
