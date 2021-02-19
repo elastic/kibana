@@ -119,7 +119,7 @@ export const transactionGroupsComparisonStatisticsRoute = createRoute({
       kueryRt,
       rangeRt,
       t.type({
-        transactionNames: jsonRt,
+        transactionNames: jsonRt.pipe(t.array(t.string)),
         numBuckets: toNumberRt,
         transactionType: t.string,
         latencyAggregationType: latencyAggregationTypeRt,
