@@ -996,6 +996,23 @@ export function resetIncomplete(layer: IndexPatternLayer, columnId: string): Ind
   return { ...layer, incompleteColumns };
 }
 
+// managedReferences have a relaxed policy about operation allowed, so let them pass
+function maybeValidateOperations({
+  column,
+  validation,
+}: {
+  column: IndexPatternColumn;
+  validation: RequiredReference;
+}) {
+  if (!validation.specificOperations) {
+    return true;
+  }
+  if (operationDefinitionMap[column.operationType].input === 'managedReference') {
+    return true;
+  }
+  return validation.specificOperations.includes(column.operationType);
+}
+
 export function isColumnValidAsReference({
   column,
   validation,
@@ -1008,7 +1025,10 @@ export function isColumnValidAsReference({
   const operationDefinition = operationDefinitionMap[operationType];
   return (
     validation.input.includes(operationDefinition.input) &&
-    (!validation.specificOperations || validation.specificOperations.includes(operationType)) &&
+    maybeValidateOperations({
+      column,
+      validation,
+    }) &&
     validation.validateMetadata(column)
   );
 }
