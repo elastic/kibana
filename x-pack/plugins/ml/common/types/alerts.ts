@@ -15,7 +15,7 @@ export type TopHitsResultsKeys = 'top_record_hits' | 'top_bucket_hits' | 'top_in
 export interface AlertExecutionResult {
   count: number;
   key: number;
-  key_as_string: string;
+  alertInstanceKey: string;
   isInterim: boolean;
   jobIds: string[];
   timestamp: number;
@@ -47,10 +47,13 @@ interface BaseAnomalyAlertDoc {
 export interface RecordAnomalyAlertDoc extends BaseAnomalyAlertDoc {
   result_type: typeof ANOMALY_RESULT_TYPE.RECORD;
   function: string;
-  field_name: string;
-  by_field_value: string | number;
-  over_field_value: string | number;
-  partition_field_value: string | number;
+  field_name?: string;
+  by_field_name?: string;
+  by_field_value?: string | number;
+  over_field_name?: string;
+  over_field_value?: string | number;
+  partition_field_name?: string;
+  partition_field_value?: string | number;
 }
 
 export interface BucketAnomalyAlertDoc extends BaseAnomalyAlertDoc {
