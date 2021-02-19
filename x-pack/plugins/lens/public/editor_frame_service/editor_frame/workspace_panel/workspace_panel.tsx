@@ -233,7 +233,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     }
   }, [suggestionForDraggedField, expressionExists, dispatch]);
 
-  const renderEmptyWorkspace = useCallback(() => {
+  const renderEmptyWorkspace = () => {
     return (
       <EuiText
         className={classNames('lnsWorkspacePanel__emptyContent')}
@@ -278,9 +278,9 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
         )}
       </EuiText>
     );
-  }, [expressionExists]);
+  };
 
-  const renderVisualization = useCallback(() => {
+  const renderVisualization = () => {
     // we don't want to render the emptyWorkspace on visualizing field from Discover
     // as it is specific for the drag and drop functionality and can confuse the users
     if (expression === null && !visualizeTriggerFieldContext) {
@@ -298,19 +298,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
         ExpressionRendererComponent={ExpressionRendererComponent}
       />
     );
-  }, [
-    expression,
-    visualizeTriggerFieldContext,
-    framePublicAPI,
-    plugins.data.query.timefilter.timefilter,
-    dispatch,
-    onEvent,
-    setLocalState,
-    localState,
-    ExpressionRendererComponent,
-    configurationValidationError,
-    renderEmptyWorkspace,
-  ]);
+  };
 
   return (
     <WorkspacePanelWrapper
