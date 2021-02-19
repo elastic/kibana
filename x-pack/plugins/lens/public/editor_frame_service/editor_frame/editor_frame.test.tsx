@@ -8,6 +8,7 @@
 import React, { ReactElement } from 'react';
 import { ReactWrapper } from 'enzyme';
 
+// Tests are not ran within the browser and the AutoSizer will always compute a 0x0 size space
 // Mock the AutoSizer inside EuiSelectable (Chart Switch) and return some dimensions > 0
 jest.mock('react-virtualized-auto-sizer', () => {
   return function (props: {
