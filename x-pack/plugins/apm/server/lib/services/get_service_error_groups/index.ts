@@ -9,7 +9,7 @@ import { ValuesType } from 'utility-types';
 import { orderBy } from 'lodash';
 import { NOT_AVAILABLE_LABEL } from '../../../../common/i18n';
 import { PromiseReturnType } from '../../../../../observability/typings/common';
-import { rangeFilter } from '../../../../common/utils/range_filter';
+import { environmentQuery, rangeQuery } from '../../../../common/utils/queries';
 import { ProcessorEvent } from '../../../../common/processor_event';
 import {
   ERROR_EXC_MESSAGE,
@@ -28,6 +28,7 @@ export type ServiceErrorGroupItem = ValuesType<
 >;
 
 export async function getServiceErrorGroups({
+  environment,
   serviceName,
   setup,
   size,
@@ -37,6 +38,7 @@ export async function getServiceErrorGroups({
   sortField,
   transactionType,
 }: {
+  environment?: string;
   serviceName: string;
   setup: Setup & SetupTimeRange;
   size: number;
@@ -63,7 +65,8 @@ export async function getServiceErrorGroups({
               filter: [
                 { term: { [SERVICE_NAME]: serviceName } },
                 { term: { [TRANSACTION_TYPE]: transactionType } },
-                { range: rangeFilter(start, end) },
+                ...rangeQuery(start, end),
+                ...environmentQuery(environment),
                 ...esFilter,
               ],
             },
@@ -145,7 +148,8 @@ export async function getServiceErrorGroups({
                   { terms: { [ERROR_GROUP_ID]: sortedErrorGroupIds } },
                   { term: { [SERVICE_NAME]: serviceName } },
                   { term: { [TRANSACTION_TYPE]: transactionType } },
-                  { range: rangeFilter(start, end) },
+                  ...rangeQuery(start, end),
+                  ...environmentQuery(environment),
                   ...esFilter,
                 ],
               },
