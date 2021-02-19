@@ -377,8 +377,9 @@ describe('loader', () => {
 
     it('should load a default state without loading the indexPatterns when embedded', async () => {
       const storage = createMockStorage();
+      const indexPatternsService = mockIndexPatternsService();
       const state = await loadInitialState({
-        indexPatternsService: mockIndexPatternsService(),
+        indexPatternsService,
         storage,
         options: { isFullEditor: false },
       });
@@ -391,6 +392,7 @@ describe('loader', () => {
       });
 
       expect(storage.set).not.toHaveBeenCalled();
+      expect(indexPatternsService.getIdsWithTitle).not.toHaveBeenCalled();
     });
 
     it('should load a default state when lastUsedIndexPatternId is not found in indexPatternRefs', async () => {
