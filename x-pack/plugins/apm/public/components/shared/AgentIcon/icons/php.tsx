@@ -11,11 +11,11 @@ export function phpIcon({
   title,
   titleId,
   ...props
-}: {
-  title: string;
-  titleId: string;
-} & React.SVGProps<SVGSVGElement>) {
+}: Omit<EuiIconProps, 'type'>) {
   return (
+  
+
+  
     <svg
       width="32"
       height="32"
