@@ -64,9 +64,9 @@ function fetchContextProvider(indexPatterns: IndexPatternsContract, useNewFields
     const searchSource = await createSearchSource(indexPattern, filters);
     const sortDirToApply = type === 'successors' ? sortDir : reverseSortDir(sortDir);
 
-    const nanos = indexPattern.isTimeNanosBased() ? extractNanos(anchor._source[timeField]) : '';
+    const nanos = indexPattern.isTimeNanosBased() ? extractNanos(anchor.fields[timeField][0]) : '';
     const timeValueMillis =
-      nanos !== '' ? convertIsoToMillis(anchor._source[timeField]) : anchor.sort[0];
+      nanos !== '' ? convertIsoToMillis(anchor.fields[timeField][0]) : anchor.sort[0];
 
     const intervals = generateIntervals(LOOKUP_OFFSETS, timeValueMillis, type, sortDir);
     let documents: EsHitRecordList = [];
@@ -114,7 +114,7 @@ function fetchContextProvider(indexPatterns: IndexPatternsContract, useNewFields
     const searchSource = await data.search.searchSource.create();
     if (useNewFieldsApi) {
       searchSource.removeField('fieldsFromSource');
-      searchSource.setField('fields', ['*']);
+      searchSource.setField('fields', [{ field: '*', include_unmapped: 'true' }]);
     }
     return searchSource
       .setParent(undefined)
