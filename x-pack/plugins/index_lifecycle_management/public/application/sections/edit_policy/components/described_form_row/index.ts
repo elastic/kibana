@@ -5,6 +5,4 @@
  * 2.0.
  */
 
-export { DescribedFormRow } from './described_form_row';
-
 export { ToggleFieldWithDescribedFormRow } from './toggle_field_with_described_form_row';

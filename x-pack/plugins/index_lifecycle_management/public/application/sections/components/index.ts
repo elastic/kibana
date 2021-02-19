@@ -5,4 +5,8 @@
  * 2.0.
  */
 
-export { DescribedFormRow } from './described_form_row';
+export {
+  DescribedFormRow,
+  Props as DescribedFormRowProps,
+  SwitchProps as DescribedFormRowSwitchProps,
+} from './described_form_row';

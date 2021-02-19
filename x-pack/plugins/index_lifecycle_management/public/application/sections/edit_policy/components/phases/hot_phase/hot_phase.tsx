@@ -27,9 +27,11 @@ import { ROLLOVER_EMPTY_VALIDATION, useConfigurationIssues, UseField } from '../
 
 import { useEditPolicyContext } from '../../../edit_policy_context';
 
+import { DescribedFormRow } from '../../../../components';
+
 import { ROLLOVER_FORM_PATHS, isUsingDefaultRolloverPath } from '../../../constants';
 
-import { LearnMoreLink, DescribedFormRow } from '../../';
+import { LearnMoreLink } from '../../';
 
 import {
   ForcemergeField,

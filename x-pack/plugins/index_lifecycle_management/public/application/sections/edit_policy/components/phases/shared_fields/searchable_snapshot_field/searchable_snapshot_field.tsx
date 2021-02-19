@@ -24,12 +24,14 @@ import {
   useFormData,
 } from '../../../../../../../shared_imports';
 
+import { DescribedFormRow } from '../../../../../components';
+
 import { useEditPolicyContext } from '../../../../edit_policy_context';
 import { useConfigurationIssues, UseField } from '../../../../form';
 
 import { i18nTexts } from '../../../../i18n_texts';
 
-import { FieldLoadingError, DescribedFormRow, LearnMoreLink } from '../../../';
+import { FieldLoadingError, LearnMoreLink } from '../../../';
 
 import { SearchableSnapshotDataProvider } from './searchable_snapshot_data_provider';
 

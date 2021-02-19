@@ -11,12 +11,12 @@ import { UseField } from '../../form';
 
 import {
   DescribedFormRow,
-  Props as DescribedFormRowProps,
-  SwitchProps,
-} from './described_form_row';
+  DescribedFormRowProps,
+  DescribedFormRowSwitchProps,
+} from '../../../components';
 
 type Props = Omit<DescribedFormRowProps, 'switchProps'> & {
-  switchProps: Omit<SwitchProps, 'label'> & { path: string };
+  switchProps: Omit<DescribedFormRowSwitchProps, 'label'> & { path: string };
 };
 
 export const ToggleFieldWithDescribedFormRow: FunctionComponent<Props> = ({

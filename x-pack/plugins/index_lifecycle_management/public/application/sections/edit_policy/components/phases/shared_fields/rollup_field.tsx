@@ -17,7 +17,7 @@ import { reactRouterNavigate } from '../../../../../../../../../../src/plugins/k
 // import { useAppContext } from '../../../../../app_context';
 import { getPolicyRollupWizardPath } from '../../../../../services/navigation';
 
-import { DescribedFormRow } from '../../described_form_row';
+import { DescribedFormRow } from '../../../../components';
 
 export const RollupField: FunctionComponent = () => {
   const phase = 'cold';
