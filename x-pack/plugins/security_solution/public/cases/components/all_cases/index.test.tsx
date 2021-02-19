@@ -240,7 +240,27 @@ describe('AllCases', () => {
     });
   });
 
-  it('should render correct actions for case collection', async () => {
+  it('should render correct actions for case (with type individual)', async () => {
+    useGetCasesMock.mockReturnValue({
+      ...defaultGetCases,
+    });
+    const wrapper = mount(
+      <TestProviders>
+        <AllCases userCanCrud={true} />
+      </TestProviders>
+    );
+    wrapper.find('[data-test-subj="euiCollapsedItemActionsButton"]').first().simulate('click');
+    await waitFor(() => {
+      expect(wrapper.find('[data-test-subj="action-open"]').exists()).toBeFalsy();
+      expect(
+        wrapper.find('[data-test-subj="action-in-progress"]').first().props().disabled
+      ).toBeFalsy();
+      expect(wrapper.find('[data-test-subj="action-close"]').first().props().disabled).toBeFalsy();
+      expect(wrapper.find('[data-test-subj="action-delete"]').first().props().disabled).toBeFalsy();
+    });
+  });
+
+  it('should enable correct actions for sub cases', async () => {
     useGetCasesMock.mockReturnValue({
       ...defaultGetCases,
       data: {
@@ -248,11 +268,15 @@ describe('AllCases', () => {
         cases: [
           {
             ...defaultGetCases.data.cases[0],
-            id: null,
+            id: 'my-case-with-subcases',
             createdAt: null,
             createdBy: null,
             status: null,
-            subCases: null,
+            subCases: [
+              {
+                id: 'sub-case-id',
+              },
+            ],
             tags: null,
             title: null,
             totalComment: null,
@@ -267,12 +291,22 @@ describe('AllCases', () => {
         <AllCases userCanCrud={true} />
       </TestProviders>
     );
-
     await waitFor(() => {
-      expect(wrapper.find('[data-test-subj="in-open"]').exists()).toBeFalsy();
-      expect(wrapper.find('[data-test-subj="in-progress"]').exists()).toBeFalsy();
-      expect(wrapper.find('[data-test-subj="action-close"]').exists()).toBeFalsy();
-      expect(wrapper.find('[data-test-subj="action-delete"]').exists()).toBeTruthy();
+      wrapper
+        .find(
+          '[data-test-subj="sub-cases-table-my-case-with-subcases"] [data-test-subj="euiCollapsedItemActionsButton"]'
+        )
+        .last()
+        .simulate('click');
+      expect(
+        wrapper.find('[data-test-subj="action-in-progress"]').first().props().disabled
+      ).toEqual(false);
+      expect(wrapper.find('[data-test-subj="action-close"]').first().props().disabled).toEqual(
+        false
+      );
+      expect(wrapper.find('[data-test-subj="action-delete"]').first().props().disabled).toEqual(
+        false
+      );
     });
   });
 

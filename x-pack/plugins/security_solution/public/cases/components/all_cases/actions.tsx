@@ -29,7 +29,8 @@ export const getActions = ({
   deleteCaseOnClick,
 }: GetActions): Array<DefaultItemIconButtonAction<Case>> => {
   const openCaseAction = {
-    available: (item: Case | SubCase) => caseStatus !== CaseStatuses.open && !isCollection(item),
+    available: (item: Case | SubCase) => caseStatus !== CaseStatuses.open,
+    enabled: (item: Case | SubCase) => !isCollection(item),
     description: statuses[CaseStatuses.open].actions.single.title,
     icon: statuses[CaseStatuses.open].icon,
     name: statuses[CaseStatuses.open].actions.single.title,
@@ -45,7 +46,8 @@ export const getActions = ({
   };
 
   const makeInProgressAction = {
-    available: (item: Case) => caseStatus !== CaseStatuses['in-progress'] && !isCollection(item),
+    available: (item: Case) => caseStatus !== CaseStatuses['in-progress'],
+    enabled: (item: Case | SubCase) => !isCollection(item),
     description: statuses[CaseStatuses['in-progress']].actions.single.title,
     icon: statuses[CaseStatuses['in-progress']].icon,
     name: statuses[CaseStatuses['in-progress']].actions.single.title,
@@ -61,7 +63,8 @@ export const getActions = ({
   };
 
   const closeCaseAction = {
-    available: (item: Case) => caseStatus !== CaseStatuses.closed && !isCollection(item),
+    available: (item: Case | SubCase) => caseStatus !== CaseStatuses.closed,
+    enabled: (item: Case | SubCase) => !isCollection(item),
     description: statuses[CaseStatuses.closed].actions.single.title,
     icon: statuses[CaseStatuses.closed].icon,
     name: statuses[CaseStatuses.closed].actions.single.title,
@@ -77,9 +80,6 @@ export const getActions = ({
   };
 
   return [
-    openCaseAction,
-    makeInProgressAction,
-    closeCaseAction,
     {
       description: i18n.DELETE_CASE,
       icon: 'trash',
@@ -88,5 +88,8 @@ export const getActions = ({
       type: 'icon',
       'data-test-subj': 'action-delete',
     },
+    openCaseAction,
+    makeInProgressAction,
+    closeCaseAction,
   ];
 };
