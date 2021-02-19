@@ -15,7 +15,8 @@ export default function apmApiIntegrationTests(providerContext: FtrProviderConte
     this.tags('ciGroup1');
     loadTestFile(require.resolve('./alerts/chart_preview'));
 
-    loadTestFile(require.resolve('./correlations/slow_transactions'));
+    // Flaky, see https://github.com/elastic/kibana/issues/91673
+    // loadTestFile(require.resolve('./correlations/slow_transactions'));
 
     loadTestFile(require.resolve('./csm/csm_services'));
     loadTestFile(require.resolve('./csm/has_rum_data'));
