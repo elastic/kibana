@@ -36,7 +36,7 @@ export interface EditIndexPatternProps extends RouteComponentProps {
 const mappingAPILink = i18n.translate(
   'indexPatternManagement.editIndexPattern.timeFilterLabel.mappingAPILink',
   {
-    defaultMessage: 'Mapping API',
+    defaultMessage: 'field mappings',
   }
 );
 
@@ -180,12 +180,16 @@ export const EditIndexPattern = withRouter(
             <p>
               <FormattedMessage
                 id="indexPatternManagement.editIndexPattern.timeFilterLabel.timeFilterDetail"
-                defaultMessage="This page lists every field in the {indexPatternTitle} index and the field's associated core type as recorded by Elasticsearch. To change a field type, use the Elasticsearch"
-                values={{ indexPatternTitle: <strong>{indexPattern.title}</strong> }}
+                defaultMessage="View and edit fields in {indexPatternTitle}. Field attributes, such as type and searchability, are based on {mappingAPILink} in Elasticsearch."
+                values={{
+                  indexPatternTitle: <strong>{indexPattern.title}</strong>,
+                  mappingAPILink: (
+                    <EuiLink href={docsUrl} target="_blank" external>
+                      {mappingAPILink}
+                    </EuiLink>
+                  ),
+                }}
               />{' '}
-              <EuiLink href={docsUrl} target="_blank" external>
-                {mappingAPILink}
-              </EuiLink>
             </p>
           </EuiText>
           {conflictedFields.length > 0 && (
@@ -203,6 +207,9 @@ export const EditIndexPattern = withRouter(
             fields={fields}
             history={history}
             location={location}
+            refreshFields={() => {
+              setFields(indexPattern.getNonScriptedFields());
+            }}
           />
         </div>
       </EuiPanel>

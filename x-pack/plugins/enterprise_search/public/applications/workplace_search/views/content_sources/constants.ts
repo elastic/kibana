@@ -413,10 +413,6 @@ export const SHARED_EMPTY_DESCRIPTION = i18n.translate(
   }
 );
 
-export const AND = i18n.translate('xpack.enterpriseSearch.workplaceSearch.and', {
-  defaultMessage: 'and',
-});
-
 export const LICENSE_CALLOUT_TITLE = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.sources.licenseCallout.title',
   {

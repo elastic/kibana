@@ -48,6 +48,9 @@ import { getNestedProperty } from '../../util/object_utils';
 import { mlFieldFormatService } from '../../services/field_format_service';
 
 import { DataGridItem, IndexPagination, RenderCellValue } from './types';
+import type { RuntimeField } from '../../../../../../../src/plugins/data/common/index_patterns';
+import { RuntimeMappings } from '../../../../common/types/fields';
+import { isPopulatedObject } from '../../../../common/util/object_utils';
 
 export const INIT_MAX_COLUMNS = 10;
 
@@ -84,6 +87,37 @@ export const getFieldsFromKibanaIndexPattern = (indexPattern: IndexPattern): str
   });
 
   return indexPatternFields;
+};
+
+/**
+ * Return a map of runtime_mappings for each of the index pattern field provided
+ * to provide in ES search queries
+ * @param indexPatternFields
+ * @param indexPattern
+ * @param clonedRuntimeMappings
+ */
+export const getRuntimeFieldsMapping = (
+  indexPatternFields: string[] | undefined,
+  indexPattern: IndexPattern | undefined,
+  clonedRuntimeMappings?: RuntimeMappings
+) => {
+  if (!Array.isArray(indexPatternFields) || indexPattern === undefined) return {};
+  const ipRuntimeMappings = indexPattern.getComputedFields().runtimeFields;
+  let combinedRuntimeMappings: RuntimeMappings = {};
+
+  if (isPopulatedObject(ipRuntimeMappings)) {
+    indexPatternFields.forEach((ipField) => {
+      if (ipRuntimeMappings.hasOwnProperty(ipField)) {
+        combinedRuntimeMappings[ipField] = ipRuntimeMappings[ipField];
+      }
+    });
+  }
+  if (isPopulatedObject(clonedRuntimeMappings)) {
+    combinedRuntimeMappings = { ...combinedRuntimeMappings, ...clonedRuntimeMappings };
+  }
+  return Object.keys(combinedRuntimeMappings).length > 0
+    ? { runtime_mappings: combinedRuntimeMappings }
+    : {};
 };
 
 export interface FieldTypes {
@@ -135,6 +169,45 @@ export const getDataGridSchemasFromFieldTypes = (fieldTypes: FieldTypes, results
 };
 
 export const NON_AGGREGATABLE = 'non-aggregatable';
+
+export const getDataGridSchemaFromESFieldType = (
+  fieldType: ES_FIELD_TYPES | undefined | RuntimeField['type']
+): string | undefined => {
+  // Built-in values are ['boolean', 'currency', 'datetime', 'numeric', 'json']
+  // To fall back to the default string schema it needs to be undefined.
+  let schema;
+
+  switch (fieldType) {
+    case ES_FIELD_TYPES.GEO_POINT:
+    case ES_FIELD_TYPES.GEO_SHAPE:
+      schema = 'json';
+      break;
+    case ES_FIELD_TYPES.BOOLEAN:
+      schema = 'boolean';
+      break;
+    case ES_FIELD_TYPES.DATE:
+    case ES_FIELD_TYPES.DATE_NANOS:
+      schema = 'datetime';
+      break;
+    case ES_FIELD_TYPES.BYTE:
+    case ES_FIELD_TYPES.DOUBLE:
+    case ES_FIELD_TYPES.FLOAT:
+    case ES_FIELD_TYPES.HALF_FLOAT:
+    case ES_FIELD_TYPES.INTEGER:
+    case ES_FIELD_TYPES.LONG:
+    case ES_FIELD_TYPES.SCALED_FLOAT:
+    case ES_FIELD_TYPES.SHORT:
+      schema = 'numeric';
+      break;
+    // keep schema undefined for text based columns
+    case ES_FIELD_TYPES.KEYWORD:
+    case ES_FIELD_TYPES.TEXT:
+      break;
+  }
+
+  return schema;
+};
+
 export const getDataGridSchemaFromKibanaFieldType = (
   field: IFieldType | undefined
 ): string | undefined => {
