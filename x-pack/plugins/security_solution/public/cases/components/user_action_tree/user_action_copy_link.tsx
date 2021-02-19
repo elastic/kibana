@@ -18,24 +18,26 @@ interface UserActionCopyLinkProps {
   id: string;
 }
 
-const UserActionCopyLinkComponent = ({ id }: UserActionCopyLinkProps) => {
-  const { detailName: caseId } = useParams<{ detailName: string }>();
+const UserActionCopyLinkComponent = ({ id: commentId }: UserActionCopyLinkProps) => {
+  const { detailName: caseId, subCaseId } = useParams<{ detailName: string; subCaseId?: string }>();
   const { formatUrl } = useFormatUrl(SecurityPageName.case);
 
   const handleAnchorLink = useCallback(() => {
     copy(
-      formatUrl(getCaseDetailsUrlWithCommentId({ id: caseId, commentId: id }), { absolute: true })
+      formatUrl(getCaseDetailsUrlWithCommentId({ id: caseId, commentId, subCaseId }), {
+        absolute: true,
+      })
     );
-  }, [caseId, formatUrl, id]);
+  }, [caseId, commentId, formatUrl, subCaseId]);
 
   return (
     <EuiToolTip position="top" content={<p>{i18n.COPY_REFERENCE_LINK}</p>}>
       <EuiButtonIcon
         aria-label={i18n.COPY_REFERENCE_LINK}
-        data-test-subj={`copy-link-${id}`}
+        data-test-subj={`copy-link-${commentId}`}
         onClick={handleAnchorLink}
         iconType="link"
-        id={`${id}-permLink`}
+        id={`${commentId}-permLink`}
       />
     </EuiToolTip>
   );

@@ -22,29 +22,29 @@ export default ({ getService }: FtrProviderContext) => {
   describe('index stats apis', () => {
     before(async () => {
       await esArchiver.loadIfNeeded('logstash_functional');
-      await esArchiver.loadIfNeeded('visualize/default');
-      await esArchiver.loadIfNeeded('pre_calculated_histogram');
     });
     after(async () => {
       await esArchiver.unload('logstash_functional');
-      await esArchiver.unload('visualize/default');
-      await esArchiver.unload('pre_calculated_histogram');
     });
 
     describe('field distribution', () => {
+      before(async () => {
+        await esArchiver.loadIfNeeded('visualize/default');
+      });
+      after(async () => {
+        await esArchiver.unload('visualize/default');
+      });
+
       it('should return a 404 for missing index patterns', async () => {
         await supertest
-          .post('/api/lens/index_stats/logstash/field')
+          .post('/api/lens/index_stats/123/field')
           .set(COMMON_HEADERS)
           .send({
             dslQuery: { match_all: {} },
             fromDate: TEST_START_TIME,
             toDate: TEST_END_TIME,
             timeFieldName: '@timestamp',
-            field: {
-              name: 'bytes',
-              type: 'number',
-            },
+            fieldName: 'bytes',
           })
           .expect(404);
       });
@@ -57,10 +57,7 @@ export default ({ getService }: FtrProviderContext) => {
             dslQuery: { match_all: {} },
             fromDate: TEST_START_TIME,
             toDate: TEST_END_TIME,
-            field: {
-              name: 'bytes',
-              type: 'number',
-            },
+            fieldName: 'bytes',
           })
           .expect(200);
 
@@ -75,11 +72,7 @@ export default ({ getService }: FtrProviderContext) => {
             dslQuery: { match_all: {} },
             fromDate: TEST_START_TIME,
             toDate: TEST_END_TIME,
-            timeFieldName: '@timestamp',
-            field: {
-              name: 'bytes',
-              type: 'number',
-            },
+            fieldName: 'bytes',
           })
           .expect(200);
 
@@ -186,11 +179,7 @@ export default ({ getService }: FtrProviderContext) => {
             dslQuery: { match_all: {} },
             fromDate: TEST_START_TIME,
             toDate: TEST_END_TIME,
-            timeFieldName: '@timestamp',
-            field: {
-              name: '@timestamp',
-              type: 'date',
-            },
+            fieldName: '@timestamp',
           })
           .expect(200);
 
@@ -223,11 +212,7 @@ export default ({ getService }: FtrProviderContext) => {
             dslQuery: { match_all: {} },
             fromDate: TEST_START_TIME,
             toDate: TEST_END_TIME,
-            timeFieldName: '@timestamp',
-            field: {
-              name: 'geo.src',
-              type: 'string',
-            },
+            fieldName: 'geo.src',
           })
           .expect(200);
 
@@ -290,11 +275,7 @@ export default ({ getService }: FtrProviderContext) => {
             dslQuery: { match_all: {} },
             fromDate: TEST_START_TIME,
             toDate: TEST_END_TIME,
-            timeFieldName: '@timestamp',
-            field: {
-              name: 'ip',
-              type: 'ip',
-            },
+            fieldName: 'ip',
           })
           .expect(200);
 
@@ -349,6 +330,113 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
+      it('should return histograms for scripted date fields', async () => {
+        const { body } = await supertest
+          .post('/api/lens/index_stats/logstash-2015.09.22/field')
+          .set(COMMON_HEADERS)
+          .send({
+            dslQuery: { match_all: {} },
+            fromDate: TEST_START_TIME,
+            toDate: TEST_END_TIME,
+            fieldName: 'scripted_date',
+          })
+          .expect(200);
+
+        expect(body).to.eql({
+          histogram: {
+            buckets: [
+              {
+                count: 4634,
+                key: 0,
+              },
+            ],
+          },
+          totalDocuments: 4634,
+        });
+      });
+
+      it('should return top values for scripted string fields', async () => {
+        const { body } = await supertest
+          .post('/api/lens/index_stats/logstash-2015.09.22/field')
+          .set(COMMON_HEADERS)
+          .send({
+            dslQuery: { match_all: {} },
+            fromDate: TEST_START_TIME,
+            toDate: TEST_END_TIME,
+            fieldName: 'scripted_string',
+          })
+          .expect(200);
+
+        expect(body).to.eql({
+          totalDocuments: 4634,
+          sampledDocuments: 4634,
+          sampledValues: 4634,
+          topValues: {
+            buckets: [
+              {
+                count: 4634,
+                key: 'hello',
+              },
+            ],
+          },
+        });
+      });
+
+      it('should return top values for index pattern runtime string fields', async () => {
+        const { body } = await supertest
+          .post('/api/lens/index_stats/logstash-2015.09.22/field')
+          .set(COMMON_HEADERS)
+          .send({
+            dslQuery: { match_all: {} },
+            fromDate: TEST_START_TIME,
+            toDate: TEST_END_TIME,
+            fieldName: 'runtime_string_field',
+          })
+          .expect(200);
+
+        expect(body).to.eql({
+          totalDocuments: 4634,
+          sampledDocuments: 4634,
+          sampledValues: 4634,
+          topValues: {
+            buckets: [
+              {
+                count: 4634,
+                key: 'hello world!',
+              },
+            ],
+          },
+        });
+      });
+
+      it('should apply filters and queries', async () => {
+        const { body } = await supertest
+          .post('/api/lens/index_stats/logstash-2015.09.22/field')
+          .set(COMMON_HEADERS)
+          .send({
+            dslQuery: {
+              bool: {
+                filter: [{ match: { 'geo.src': 'US' } }],
+              },
+            },
+            fromDate: TEST_START_TIME,
+            toDate: TEST_END_TIME,
+            fieldName: 'bytes',
+          })
+          .expect(200);
+
+        expect(body.totalDocuments).to.eql(425);
+      });
+    });
+
+    describe('histogram', () => {
+      before(async () => {
+        await esArchiver.loadIfNeeded('pre_calculated_histogram');
+      });
+      after(async () => {
+        await esArchiver.unload('pre_calculated_histogram');
+      });
+
       it('should return an auto histogram for precalculated histograms', async () => {
         const { body } = await supertest
           .post('/api/lens/index_stats/histogram-test/field')
@@ -357,10 +445,7 @@ export default ({ getService }: FtrProviderContext) => {
             dslQuery: { match_all: {} },
             fromDate: TEST_START_TIME,
             toDate: TEST_END_TIME,
-            field: {
-              name: 'histogram-content',
-              type: 'histogram',
-            },
+            fieldName: 'histogram-content',
           })
           .expect(200);
 
@@ -428,10 +513,7 @@ export default ({ getService }: FtrProviderContext) => {
             dslQuery: { match: { 'histogram-title': 'single value' } },
             fromDate: TEST_START_TIME,
             toDate: TEST_END_TIME,
-            field: {
-              name: 'histogram-content',
-              type: 'histogram',
-            },
+            fieldName: 'histogram-content',
           })
           .expect(200);
 
@@ -442,95 +524,6 @@ export default ({ getService }: FtrProviderContext) => {
           totalDocuments: 1,
           topValues: { buckets: [] },
         });
-      });
-
-      it('should return histograms for scripted date fields', async () => {
-        const { body } = await supertest
-          .post('/api/lens/index_stats/logstash-2015.09.22/field')
-          .set(COMMON_HEADERS)
-          .send({
-            dslQuery: { match_all: {} },
-            fromDate: TEST_START_TIME,
-            toDate: TEST_END_TIME,
-            timeFieldName: '@timestamp',
-            field: {
-              name: 'scripted date',
-              type: 'date',
-              scripted: true,
-              script: '1234',
-              lang: 'painless',
-            },
-          })
-          .expect(200);
-
-        expect(body).to.eql({
-          histogram: {
-            buckets: [
-              {
-                count: 4634,
-                key: 0,
-              },
-            ],
-          },
-          totalDocuments: 4634,
-        });
-      });
-
-      it('should return top values for scripted string fields', async () => {
-        const { body } = await supertest
-          .post('/api/lens/index_stats/logstash-2015.09.22/field')
-          .set(COMMON_HEADERS)
-          .send({
-            dslQuery: { match_all: {} },
-            fromDate: TEST_START_TIME,
-            toDate: TEST_END_TIME,
-            timeFieldName: '@timestamp',
-            field: {
-              name: 'scripted string',
-              type: 'string',
-              scripted: true,
-              script: 'return "hello"',
-              lang: 'painless',
-            },
-          })
-          .expect(200);
-
-        expect(body).to.eql({
-          totalDocuments: 4634,
-          sampledDocuments: 4634,
-          sampledValues: 4634,
-          topValues: {
-            buckets: [
-              {
-                count: 4634,
-                key: 'hello',
-              },
-            ],
-          },
-        });
-      });
-
-      it('should apply filters and queries', async () => {
-        const { body } = await supertest
-          .post('/api/lens/index_stats/logstash-2015.09.22/field')
-          .set(COMMON_HEADERS)
-          .send({
-            dslQuery: {
-              bool: {
-                filter: [{ match: { 'geo.src': 'US' } }],
-              },
-            },
-            fromDate: TEST_START_TIME,
-            toDate: TEST_END_TIME,
-            timeFieldName: '@timestamp',
-            field: {
-              name: 'bytes',
-              type: 'number',
-            },
-          })
-          .expect(200);
-
-        expect(body.totalDocuments).to.eql(425);
       });
     });
   });

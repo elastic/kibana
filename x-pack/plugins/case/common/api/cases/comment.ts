@@ -52,7 +52,11 @@ export const ContextTypeUserRt = rt.type({
 export const AlertCommentRequestRt = rt.type({
   type: rt.union([rt.literal(CommentType.generatedAlert), rt.literal(CommentType.alert)]),
   alertId: rt.union([rt.array(rt.string), rt.string]),
-  index: rt.string,
+  index: rt.union([rt.array(rt.string), rt.string]),
+  rule: rt.type({
+    id: rt.union([rt.string, rt.null]),
+    name: rt.union([rt.string, rt.null]),
+  }),
 });
 
 const AttributesTypeUserRt = rt.intersection([ContextTypeUserRt, CommentAttributesBasicRt]);
@@ -108,6 +112,7 @@ export const CommentsResponseRt = rt.type({
 
 export const AllCommentsResponseRt = rt.array(CommentResponseRt);
 
+export type AttributesTypeAlerts = rt.TypeOf<typeof AttributesTypeAlertsRt>;
 export type CommentAttributes = rt.TypeOf<typeof CommentAttributesRt>;
 export type CommentRequest = rt.TypeOf<typeof CommentRequestRt>;
 export type CommentResponse = rt.TypeOf<typeof CommentResponseRt>;
