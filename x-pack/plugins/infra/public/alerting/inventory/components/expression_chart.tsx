@@ -47,6 +47,7 @@ import {
   tooltipProps,
   getChartTheme,
 } from '../../common/criterion_preview_chart/criterion_preview_chart';
+import { ThresholdAnnotations } from '../../common/criterion_preview_chart/threshold_annotations';
 
 interface Props {
   expression: InventoryMetricConditions;
@@ -183,137 +184,6 @@ export const ExpressionChart: React.FC<Props> = ({
   const { timeSize, timeUnit } = expression;
   const timeLabel = TIME_LABELS[timeUnit as keyof typeof TIME_LABELS];
 
-  const ThresholdAnnotations = ({
-    threshold,
-    sortedThresholds,
-    comparator,
-    color,
-    id,
-  }: Partial<InventoryMetricConditions> & {
-    sortedThresholds: number[];
-    color: Color;
-    id: string;
-  }) => {
-    if (!comparator || !threshold) return null;
-    const isAbove = [Comparator.GT, Comparator.GT_OR_EQ].includes(comparator);
-    const isBelow = [Comparator.LT, Comparator.LT_OR_EQ].includes(comparator);
-    return (
-      <>
-        <LineAnnotation
-          id={`${id}-thresholds`}
-          domainType={AnnotationDomainTypes.YDomain}
-          dataValues={sortedThresholds.map((t) => ({
-            dataValue: thresholdFormatter(t),
-          }))}
-          style={{
-            line: {
-              strokeWidth: 2,
-              stroke: colorTransformer(color),
-              opacity: 1,
-            },
-          }}
-        />
-        {sortedThresholds.length === 2 && comparator === Comparator.BETWEEN ? (
-          <>
-            <RectAnnotation
-              id={`${id}-lower-threshold`}
-              style={{
-                fill: colorTransformer(color),
-                opacity,
-              }}
-              dataValues={[
-                {
-                  coordinates: {
-                    x0: firstTimestamp,
-                    x1: lastTimestamp,
-                    y0: thresholdFormatter(first(expression.threshold)),
-                    y1: thresholdFormatter(last(expression.threshold)),
-                  },
-                },
-              ]}
-            />
-          </>
-        ) : null}
-        {sortedThresholds.length === 2 && comparator === Comparator.OUTSIDE_RANGE ? (
-          <>
-            <RectAnnotation
-              id={`${id}-lower-threshold`}
-              style={{
-                fill: colorTransformer(color),
-                opacity,
-              }}
-              dataValues={[
-                {
-                  coordinates: {
-                    x0: firstTimestamp,
-                    x1: lastTimestamp,
-                    y0: domain.min,
-                    y1: thresholdFormatter(first(threshold)),
-                  },
-                },
-              ]}
-            />
-            <RectAnnotation
-              id={`${id}-upper-threshold`}
-              style={{
-                fill: colorTransformer(color),
-                opacity,
-              }}
-              dataValues={[
-                {
-                  coordinates: {
-                    x0: firstTimestamp,
-                    x1: lastTimestamp,
-                    y0: thresholdFormatter(last(threshold)),
-                    y1: domain.max,
-                  },
-                },
-              ]}
-            />
-          </>
-        ) : null}
-        {isBelow && first(threshold) != null ? (
-          <RectAnnotation
-            id={`${id}-upper-threshold`}
-            style={{
-              fill: colorTransformer(color),
-              opacity,
-            }}
-            dataValues={[
-              {
-                coordinates: {
-                  x0: firstTimestamp,
-                  x1: lastTimestamp,
-                  y0: domain.min,
-                  y1: thresholdFormatter(first(threshold)),
-                },
-              },
-            ]}
-          />
-        ) : null}
-        {isAbove && first(threshold) != null ? (
-          <RectAnnotation
-            id={`${id}-upper-threshold`}
-            style={{
-              fill: colorTransformer(color),
-              opacity,
-            }}
-            dataValues={[
-              {
-                coordinates: {
-                  x0: firstTimestamp,
-                  x1: lastTimestamp,
-                  y0: thresholdFormatter(first(threshold)),
-                  y1: domain.max,
-                },
-              },
-            ]}
-          />
-        ) : null}
-      </>
-    );
-  };
-
   return (
     <>
       <ChartContainer>
@@ -331,6 +201,10 @@ export const ExpressionChart: React.FC<Props> = ({
             sortedThresholds={criticalThresholds}
             color={Color.color1}
             id="critical"
+            formatter={thresholdFormatter}
+            firstTimestamp={firstTimestamp}
+            lastTimestamp={lastTimestamp}
+            domain={domain}
           />
           {expression.warningComparator && expression.warningThreshold && (
             <ThresholdAnnotations
@@ -339,6 +213,10 @@ export const ExpressionChart: React.FC<Props> = ({
               sortedThresholds={warningThresholds}
               color={Color.color5}
               id="warning"
+              formatter={thresholdFormatter}
+              firstTimestamp={firstTimestamp}
+              lastTimestamp={lastTimestamp}
+              domain={domain}
             />
           )}
           <Axis
