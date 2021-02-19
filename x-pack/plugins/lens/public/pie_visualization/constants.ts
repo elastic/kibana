@@ -10,15 +10,17 @@ import { LensIconChartDonut } from '../assets/chart_donut';
 import { LensIconChartPie } from '../assets/chart_pie';
 import { LensIconChartTreemap } from '../assets/chart_treemap';
 
+const groupLabel = i18n.translate('xpack.lens.pie.groupLabel', {
+  defaultMessage: 'Proportion',
+});
+
 export const CHART_NAMES = {
   donut: {
     icon: LensIconChartDonut,
     label: i18n.translate('xpack.lens.pie.donutLabel', {
       defaultMessage: 'Donut',
     }),
-    groupLabel: i18n.translate('xpack.lens.pie.groupLabel', {
-      defaultMessage: 'Proportion',
-    }),
+    groupLabel,
   },
   pie: {
     icon: LensIconChartPie,
@@ -26,9 +28,7 @@ export const CHART_NAMES = {
       defaultMessage: 'Pie',
     }),
 
-    groupLabel: i18n.translate('xpack.lens.pie.groupLabel', {
-      defaultMessage: 'Proportion',
-    }),
+    groupLabel,
   },
   treemap: {
     icon: LensIconChartTreemap,
@@ -36,9 +36,7 @@ export const CHART_NAMES = {
       defaultMessage: 'Treemap',
     }),
 
-    groupLabel: i18n.translate('xpack.lens.pie.groupLabel', {
-      defaultMessage: 'Proportion',
-    }),
+    groupLabel,
   },
 };
 

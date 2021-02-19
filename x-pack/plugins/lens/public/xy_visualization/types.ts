@@ -431,6 +431,13 @@ export interface XYState {
 }
 
 export type State = XYState;
+const groupLabelForBar = i18n.translate('xpack.lens.xyVisualization.barGroupLabel', {
+  defaultMessage: 'Bar',
+});
+
+const groupLabelForLineAndArea = i18n.translate('xpack.lens.xyVisualization.lineGroupLabel', {
+  defaultMessage: 'Line and area',
+});
 
 export const visualizationTypes: VisualizationType[] = [
   {
@@ -439,9 +446,7 @@ export const visualizationTypes: VisualizationType[] = [
     label: i18n.translate('xpack.lens.xyVisualization.barLabel', {
       defaultMessage: 'Bar',
     }),
-    groupLabel: i18n.translate('xpack.lens.xyVisualization.barGroupLabel', {
-      defaultMessage: 'Bar',
-    }),
+    groupLabel: groupLabelForBar,
   },
   {
     id: 'bar_horizontal',
@@ -452,9 +457,7 @@ export const visualizationTypes: VisualizationType[] = [
     fullLabel: i18n.translate('xpack.lens.xyVisualization.barHorizontalFullLabel', {
       defaultMessage: 'Horizontal bar',
     }),
-    groupLabel: i18n.translate('xpack.lens.xyVisualization.barGroupLabel', {
-      defaultMessage: 'Bar',
-    }),
+    groupLabel: groupLabelForBar,
   },
   {
     id: 'bar_stacked',
@@ -462,9 +465,7 @@ export const visualizationTypes: VisualizationType[] = [
     label: i18n.translate('xpack.lens.xyVisualization.stackedBarLabel', {
       defaultMessage: 'Stacked bar',
     }),
-    groupLabel: i18n.translate('xpack.lens.xyVisualization.barGroupLabel', {
-      defaultMessage: 'Bar',
-    }),
+    groupLabel: groupLabelForBar,
   },
   {
     id: 'bar_percentage_stacked',
@@ -472,9 +473,7 @@ export const visualizationTypes: VisualizationType[] = [
     label: i18n.translate('xpack.lens.xyVisualization.stackedPercentageBarLabel', {
       defaultMessage: 'Percentage bar',
     }),
-    groupLabel: i18n.translate('xpack.lens.xyVisualization.barGroupLabel', {
-      defaultMessage: 'Bar',
-    }),
+    groupLabel: groupLabelForBar,
   },
   {
     id: 'bar_horizontal_stacked',
@@ -485,9 +484,7 @@ export const visualizationTypes: VisualizationType[] = [
     fullLabel: i18n.translate('xpack.lens.xyVisualization.stackedBarHorizontalFullLabel', {
       defaultMessage: 'Horizontal stacked bar',
     }),
-    groupLabel: i18n.translate('xpack.lens.xyVisualization.barGroupLabel', {
-      defaultMessage: 'Bar',
-    }),
+    groupLabel: groupLabelForBar,
   },
   {
     id: 'bar_horizontal_percentage_stacked',
@@ -501,9 +498,7 @@ export const visualizationTypes: VisualizationType[] = [
         defaultMessage: 'Horizontal percentage bar',
       }
     ),
-    groupLabel: i18n.translate('xpack.lens.xyVisualization.barGroupLabel', {
-      defaultMessage: 'Bar',
-    }),
+    groupLabel: groupLabelForBar,
   },
   {
     id: 'area',
@@ -511,9 +506,7 @@ export const visualizationTypes: VisualizationType[] = [
     label: i18n.translate('xpack.lens.xyVisualization.areaLabel', {
       defaultMessage: 'Area',
     }),
-    groupLabel: i18n.translate('xpack.lens.xyVisualization.lineGroupLabel', {
-      defaultMessage: 'Line and area',
-    }),
+    groupLabel: groupLabelForLineAndArea,
   },
   {
     id: 'area_stacked',
@@ -521,9 +514,7 @@ export const visualizationTypes: VisualizationType[] = [
     label: i18n.translate('xpack.lens.xyVisualization.stackedAreaLabel', {
       defaultMessage: 'Stacked area',
     }),
-    groupLabel: i18n.translate('xpack.lens.xyVisualization.lineGroupLabel', {
-      defaultMessage: 'Line and area',
-    }),
+    groupLabel: groupLabelForLineAndArea,
   },
   {
     id: 'area_percentage_stacked',
@@ -531,9 +522,7 @@ export const visualizationTypes: VisualizationType[] = [
     label: i18n.translate('xpack.lens.xyVisualization.stackedPercentageAreaLabel', {
       defaultMessage: 'Percentage area',
     }),
-    groupLabel: i18n.translate('xpack.lens.xyVisualization.lineGroupLabel', {
-      defaultMessage: 'Line and area',
-    }),
+    groupLabel: groupLabelForLineAndArea,
   },
   {
     id: 'line',
@@ -541,8 +530,6 @@ export const visualizationTypes: VisualizationType[] = [
     label: i18n.translate('xpack.lens.xyVisualization.lineLabel', {
       defaultMessage: 'Line',
     }),
-    groupLabel: i18n.translate('xpack.lens.xyVisualization.lineGroupLabel', {
-      defaultMessage: 'Line and area',
-    }),
+    groupLabel: groupLabelForLineAndArea,
   },
 ];
