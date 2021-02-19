@@ -285,6 +285,45 @@ describe('Discover grid cell rendering', function () {
     `);
   });
 
+  it('collect object fields and renders them like _source with fallback for unmapped', () => {
+    (indexPatternMock.getFieldByName as jest.Mock).mockReturnValueOnce(undefined);
+    const DiscoverGridCellValue = getRenderCellValueFn(
+      indexPatternMock,
+      rowsFieldsWithTopLevelObject,
+      rowsFieldsWithTopLevelObject.map((row) => indexPatternMock.flattenHit(row)),
+      true
+    );
+    const component = shallow(
+      <DiscoverGridCellValue
+        rowIndex={0}
+        columnId="object"
+        isDetails={false}
+        isExpanded={false}
+        isExpandable={true}
+        setCellProps={jest.fn()}
+      />
+    );
+    expect(component).toMatchInlineSnapshot(`
+      <EuiDescriptionList
+        className="dscDiscoverGrid__descriptionList"
+        compressed={true}
+        type="inline"
+      >
+        <EuiDescriptionListTitle>
+          object.value
+        </EuiDescriptionListTitle>
+        <EuiDescriptionListDescription
+          className="dscDiscoverGrid__descriptionListDescription"
+          dangerouslySetInnerHTML={
+            Object {
+              "__html": "100",
+            }
+          }
+        />
+      </EuiDescriptionList>
+    `);
+  });
+
   it('collect object fields and renders them as json in details', () => {
     const DiscoverGridCellValue = getRenderCellValueFn(
       indexPatternMock,

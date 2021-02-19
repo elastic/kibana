@@ -75,7 +75,7 @@ const indexPattern = ({
   fields,
   getComputedFields: () => ({ docvalueFields: [], scriptFields: {}, storedFields: ['*'] }),
   getSourceFiltering: () => ({}),
-  getFieldByName: () => ({}),
+  getFieldByName: jest.fn(() => ({})),
   timeFieldName: '',
   docvalueFields: [],
   getFormatterForField: () => ({ convert: () => 'formatted' }),

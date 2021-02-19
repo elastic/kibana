@@ -68,8 +68,10 @@ export const getRenderCellValueFn = (
     const highlightPairs: Array<[string, string]> = [];
     const sourcePairs: Array<[string, string]> = [];
     Object.entries(innerColumns).forEach(([key, values]) => {
-      const subField = indexPattern.getFieldByName(key)!;
-      const formatter = indexPattern.getFormatterForField(subField);
+      const subField = indexPattern.getFieldByName(key);
+      const formatter = subField
+        ? indexPattern.getFormatterForField(subField)
+        : { convert: (v: string, ...rest: unknown[]) => v.toString() };
       const formatted = (values as unknown[])
         .map((val: unknown) =>
           formatter.convert(val, 'html', {
