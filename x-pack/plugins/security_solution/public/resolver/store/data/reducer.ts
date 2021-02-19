@@ -19,6 +19,7 @@ const initialState: DataState = {
     data: null,
   },
   resolverComponentInstanceID: undefined,
+  indices: [],
 };
 /* eslint-disable complexity */
 export const dataReducer: Reducer<DataState, ResolverAction> = (state = initialState, action) => {
@@ -35,6 +36,7 @@ export const dataReducer: Reducer<DataState, ResolverAction> = (state = initialS
       },
       resolverComponentInstanceID: action.payload.resolverComponentInstanceID,
       locationSearch: action.payload.locationSearch,
+      indices: action.payload.indices,
     };
     const panelViewAndParameters = selectors.panelViewAndParameters(nextState);
     return {

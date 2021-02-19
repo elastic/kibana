@@ -68,6 +68,7 @@ const setUpModule = async (setUpModuleArgs: SetUpModuleArgs, fetch: HttpHandler)
   const {
     start,
     end,
+    filter,
     moduleSourceConfiguration: { spaceId, sourceId, indices, timestampField },
     partitionField,
   } = setUpModuleArgs;
@@ -107,10 +108,23 @@ const setUpModule = async (setUpModuleArgs: SetUpModuleArgs, fetch: HttpHandler)
 
   const datafeedOverrides = jobIds.map((id) => {
     const { datafeed: defaultDatafeedConfig } = getDefaultJobConfigs(id);
+    const config = { ...defaultDatafeedConfig };
+
+    if (filter) {
+      const query = JSON.parse(filter);
+
+      config.query.bool = {
+        ...config.query.bool,
+        ...query.bool,
+      };
+    }
 
     if (!partitionField || id === 'k8s_memory_usage') {
       // Since the host memory usage doesn't have custom aggs, we don't need to do anything to add a partition field
-      return defaultDatafeedConfig;
+      return {
+        ...config,
+        job_id: id,
+      };
     }
 
     // Because the ML K8s jobs ship with a default partition field of {kubernetes.namespace}, ignore that agg and wrap it in our own agg.
@@ -131,7 +145,7 @@ const setUpModule = async (setUpModuleArgs: SetUpModuleArgs, fetch: HttpHandler)
     };
 
     return {
-      ...defaultDatafeedConfig,
+      ...config,
       job_id: id,
       aggregations,
     };

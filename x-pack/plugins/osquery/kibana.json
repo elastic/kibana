@@ -14,8 +14,7 @@
   "requiredBundles": [
     "esUiShared",
     "kibanaUtils",
-    "kibanaReact",
-    "kibanaUtils"
+    "kibanaReact"
   ],
   "requiredPlugins": [
     "data",

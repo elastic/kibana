@@ -6,6 +6,7 @@
  */
 
 import { kea, MakeLogicType } from 'kea';
+
 import { i18n } from '@kbn/i18n';
 
 import {
@@ -14,13 +15,11 @@ import {
   setSuccessMessage,
   flashAPIErrors,
 } from '../../../shared/flash_messages';
-import { KibanaLogic } from '../../../shared/kibana';
 import { HttpLogic } from '../../../shared/http';
-
-import { Connector } from '../../types';
+import { KibanaLogic } from '../../../shared/kibana';
 import { ORG_UPDATED_MESSAGE, OAUTH_APP_UPDATED_MESSAGE } from '../../constants';
-
 import { ORG_SETTINGS_CONNECTORS_PATH } from '../../routes';
+import { Connector } from '../../types';
 
 interface IOauthApplication {
   name: string;

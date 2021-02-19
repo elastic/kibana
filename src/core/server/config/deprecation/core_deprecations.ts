@@ -127,6 +127,18 @@ const requestLoggingEventDeprecation: ConfigDeprecation = (settings, fromPath, l
   return settings;
 };
 
+const timezoneLoggingDeprecation: ConfigDeprecation = (settings, fromPath, log) => {
+  if (has(settings, 'logging.timezone')) {
+    log(
+      '"logging.timezone" has been deprecated and will be removed ' +
+        'in 8.0. To set the timezone moving forward, please add a timezone date modifier to the log pattern ' +
+        'in your logging configuration. For more details, see ' +
+        'https://github.com/elastic/kibana/blob/master/src/core/server/logging/README.md'
+    );
+  }
+  return settings;
+};
+
 export const coreDeprecationProvider: ConfigDeprecationProvider = ({ rename, unusedFromRoot }) => [
   unusedFromRoot('savedObjects.indexCheckTimeout'),
   unusedFromRoot('server.xsrf.token'),
@@ -163,4 +175,5 @@ export const coreDeprecationProvider: ConfigDeprecationProvider = ({ rename, unu
   mapManifestServiceUrlDeprecation,
   opsLoggingEventDeprecation,
   requestLoggingEventDeprecation,
+  timezoneLoggingDeprecation,
 ];

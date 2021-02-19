@@ -30,7 +30,7 @@ export class TriggersActionsPlugin implements Plugin<void, PluginStartContract> 
     this.data = getService();
   }
 
-  public async setup(core: CoreSetup, plugins: PluginsSetup): Promise<void> {
+  public setup(core: CoreSetup, plugins: PluginsSetup): void {
     const router = core.http.createRouter();
     registerDataService({
       logger: this.logger,
@@ -42,7 +42,7 @@ export class TriggersActionsPlugin implements Plugin<void, PluginStartContract> 
     createHealthRoute(this.logger, router, BASE_ROUTE, plugins.alerts !== undefined);
   }
 
-  public async start(): Promise<PluginStartContract> {
+  public start(): PluginStartContract {
     return {
       data: this.data,
     };

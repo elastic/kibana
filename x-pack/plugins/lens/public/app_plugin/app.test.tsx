@@ -393,7 +393,11 @@ describe('Lens App', () => {
       const { component, services } = mountWith({});
 
       expect(services.chrome.setBreadcrumbs).toHaveBeenCalledWith([
-        { text: 'Visualize', href: '/testbasepath/app/visualize#/', onClick: expect.anything() },
+        {
+          text: 'Visualize Library',
+          href: '/testbasepath/app/visualize#/',
+          onClick: expect.anything(),
+        },
         { text: 'Create' },
       ]);
 
@@ -403,7 +407,11 @@ describe('Lens App', () => {
       });
 
       expect(services.chrome.setBreadcrumbs).toHaveBeenCalledWith([
-        { text: 'Visualize', href: '/testbasepath/app/visualize#/', onClick: expect.anything() },
+        {
+          text: 'Visualize Library',
+          href: '/testbasepath/app/visualize#/',
+          onClick: expect.anything(),
+        },
         { text: 'Daaaaaaadaumching!' },
       ]);
     });
@@ -417,7 +425,11 @@ describe('Lens App', () => {
 
       expect(services.chrome.setBreadcrumbs).toHaveBeenCalledWith([
         { text: 'The Coolest Container Ever Made', onClick: expect.anything() },
-        { text: 'Visualize', href: '/testbasepath/app/visualize#/', onClick: expect.anything() },
+        {
+          text: 'Visualize Library',
+          href: '/testbasepath/app/visualize#/',
+          onClick: expect.anything(),
+        },
         { text: 'Create' },
       ]);
 
@@ -428,7 +440,11 @@ describe('Lens App', () => {
 
       expect(services.chrome.setBreadcrumbs).toHaveBeenCalledWith([
         { text: 'The Coolest Container Ever Made', onClick: expect.anything() },
-        { text: 'Visualize', href: '/testbasepath/app/visualize#/', onClick: expect.anything() },
+        {
+          text: 'Visualize Library',
+          href: '/testbasepath/app/visualize#/',
+          onClick: expect.anything(),
+        },
         { text: 'Daaaaaaadaumching!' },
       ]);
     });

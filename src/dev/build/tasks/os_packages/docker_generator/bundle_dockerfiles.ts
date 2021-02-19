@@ -7,18 +7,18 @@
  */
 
 import { resolve } from 'path';
+import { readFileSync } from 'fs';
 
 import { ToolingLog } from '@kbn/dev-utils';
+import Mustache from 'mustache';
 
 import { compressTar, copyAll, mkdirp, write, Config } from '../../../lib';
 import { dockerfileTemplate } from './templates';
 import { TemplateContext } from './template_context';
 
 export async function bundleDockerFiles(config: Config, log: ToolingLog, scope: TemplateContext) {
-  log.info(
-    `Generating kibana${scope.imageFlavor}${scope.ubiImageFlavor} docker build context bundle`
-  );
-  const dockerFilesDirName = `kibana${scope.imageFlavor}${scope.ubiImageFlavor}-${scope.version}-docker-build-context`;
+  log.info(`Generating kibana${scope.imageFlavor} docker build context bundle`);
+  const dockerFilesDirName = `kibana${scope.imageFlavor}-${scope.version}-docker-build-context`;
   const dockerFilesBuildDir = resolve(scope.dockerBuildDir, dockerFilesDirName);
   const dockerFilesOutputDir = config.resolveFromTarget(`${dockerFilesDirName}.tar.gz`);
 
@@ -38,6 +38,17 @@ export async function bundleDockerFiles(config: Config, log: ToolingLog, scope: 
   // dockerfiles folder
   await copyAll(resolve(scope.dockerBuildDir, 'bin'), resolve(dockerFilesBuildDir, 'bin'));
   await copyAll(resolve(scope.dockerBuildDir, 'config'), resolve(dockerFilesBuildDir, 'config'));
+  if (scope.ironbank) {
+    await copyAll(resolve(scope.dockerBuildDir), resolve(dockerFilesBuildDir), {
+      select: ['LICENSE'],
+    });
+    const templates = ['hardening_manifest.yml', 'README.md'];
+    for (const template of templates) {
+      const file = readFileSync(resolve(__dirname, 'templates/ironbank', template));
+      const output = Mustache.render(file.toString(), scope);
+      await write(resolve(dockerFilesBuildDir, template), output);
+    }
+  }
 
   // Compress dockerfiles dir created inside
   // docker build dir as output it as a target

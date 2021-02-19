@@ -16,6 +16,9 @@ export const caseCommentSavedObjectType: SavedObjectsType = {
   namespaceType: 'single',
   mappings: {
     properties: {
+      associationType: {
+        type: 'keyword',
+      },
       comment: {
         type: 'text',
       },
@@ -56,6 +59,16 @@ export const caseCommentSavedObjectType: SavedObjectsType = {
             type: 'keyword',
           },
           email: {
+            type: 'keyword',
+          },
+        },
+      },
+      rule: {
+        properties: {
+          id: {
+            type: 'keyword',
+          },
+          name: {
             type: 'keyword',
           },
         },
