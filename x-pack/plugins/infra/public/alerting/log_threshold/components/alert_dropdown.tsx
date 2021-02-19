@@ -10,8 +10,11 @@ import { EuiPopover, EuiButtonEmpty, EuiContextMenuItem, EuiContextMenuPanel } f
 import { FormattedMessage } from '@kbn/i18n/react';
 import { AlertFlyout } from './alert_flyout';
 import { useLinkProps } from '../../../hooks/use_link_props';
+import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 
 export const AlertDropdown = () => {
+  const { services: { application: { capabilities } } } = useKibanaContextForPlugin();
+  const canCreateAlerts = capabilities?.logs?.save ?? false;
   const [popoverOpen, setPopoverOpen] = useState(false);
   const [flyoutVisible, setFlyoutVisible] = useState(false);
   const manageAlertsLinkProps = useLinkProps(
@@ -34,12 +37,14 @@ export const AlertDropdown = () => {
 
   const menuItems = useMemo(() => {
     return [
-      <EuiContextMenuItem icon="bell" key="createLink" onClick={() => setFlyoutVisible(true)}>
-        <FormattedMessage
-          id="xpack.infra.alerting.logs.createAlertButton"
-          defaultMessage="Create alert"
-        />
-      </EuiContextMenuItem>,
+      ...(canCreateAlerts ? [
+        <EuiContextMenuItem icon="bell" key="createLink" onClick={() => setFlyoutVisible(true)}>
+          <FormattedMessage
+            id="xpack.infra.alerting.logs.createAlertButton"
+            defaultMessage="Create alert"
+          />
+        </EuiContextMenuItem>
+      ] : []),
       <EuiContextMenuItem icon="tableOfContents" key="manageLink" {...manageAlertsLinkProps}>
         <FormattedMessage
           id="xpack.infra.alerting.logs.manageAlerts"
