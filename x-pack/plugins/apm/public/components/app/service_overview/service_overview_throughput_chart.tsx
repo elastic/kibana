@@ -30,7 +30,7 @@ export function ServiceOverviewThroughputChart({
   const { serviceName } = useParams<{ serviceName?: string }>();
   const { urlParams, uiFilters } = useUrlParams();
   const { transactionType } = useApmServiceContext();
-  const { start, end } = urlParams;
+  const { environment, start, end } = urlParams;
 
   const { data = INITIAL_STATE, status } = useFetcher(
     (callApmApi) => {
@@ -42,6 +42,7 @@ export function ServiceOverviewThroughputChart({
               serviceName,
             },
             query: {
+              environment,
               start,
               end,
               transactionType,
@@ -51,7 +52,7 @@ export function ServiceOverviewThroughputChart({
         });
       }
     },
-    [serviceName, start, end, uiFilters, transactionType]
+    [environment, serviceName, start, end, uiFilters, transactionType]
   );
 
   return (
