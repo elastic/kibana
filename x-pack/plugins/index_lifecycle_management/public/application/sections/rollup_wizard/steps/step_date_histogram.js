@@ -11,14 +11,12 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import moment from 'moment-timezone';
 
 import {
-  EuiButtonEmpty,
   EuiDescribedFormGroup,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiForm,
   EuiFormRow,
-  EuiLink,
   EuiSelect,
   EuiSpacer,
   EuiTextColor,
@@ -27,8 +25,6 @@ import {
 
 import { search } from '../../../../../../../../src/plugins/data/public';
 const { parseEsInterval } = search.aggs;
-
-import { getDateHistogramDetailsUrl, getDateHistogramAggregationUrl } from '../../../services';
 
 import { StepError } from './components';
 
@@ -189,22 +185,6 @@ export class StepDateHistogram extends Component {
               </h2>
             </EuiTitle>
           </EuiFlexItem>
-
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              size="s"
-              flush="right"
-              href={getDateHistogramDetailsUrl()}
-              target="_blank"
-              iconType="help"
-              data-test-subj="rollupJobCreateDateHistogramDocsButton"
-            >
-              <FormattedMessage
-                id="xpack.rollupJobs.create.stepDateHistogram.readDocsButtonLabel"
-                defaultMessage="Date histogram docs"
-              />
-            </EuiButtonEmpty>
-          </EuiFlexItem>
         </EuiFlexGroup>
 
         <EuiSpacer size="l" />
@@ -217,17 +197,7 @@ export class StepDateHistogram extends Component {
                 <p>
                   <FormattedMessage
                     id="xpack.rollupJobs.create.stepDateHistogramDescription"
-                    defaultMessage="Define how {link} will operate on your rollup data."
-                    values={{
-                      link: (
-                        <EuiLink href={getDateHistogramAggregationUrl()} target="_blank">
-                          <FormattedMessage
-                            id="xpack.rollupJobs.create.stepDateHistogramDescription.aggregationsLinkLabel"
-                            defaultMessage="date histogram aggregations"
-                          />
-                        </EuiLink>
-                      ),
-                    }}
+                    defaultMessage="Define how date histogram aggregations will operate on your rollup data."
                   />
                 </p>
 

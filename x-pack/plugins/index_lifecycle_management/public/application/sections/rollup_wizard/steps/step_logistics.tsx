@@ -55,7 +55,7 @@ export class StepLogistics extends Component<Props, State> {
     indexPatternAsyncErrors: PropTypes.array,
   };
 
-  state = { isLoadingPolicies: false, policies: [] };
+  state = { isLoadingPolicies: true, policies: [] };
 
   constructor(props: Props) {
     super(props);
@@ -63,11 +63,17 @@ export class StepLogistics extends Component<Props, State> {
   }
 
   async loadIlmPolicies() {
-    this.setState({ isLoadingPolicies: true });
-    const policies = await loadPolicies(false);
-    this.setState({
-      policies: policies.map(({ name }) => name),
-    });
+    if (!this.state.isLoadingPolicies) {
+      this.setState({ isLoadingPolicies: true });
+    }
+    try {
+      const policies = await loadPolicies(false);
+      this.setState({
+        policies: policies.map(({ name }) => name),
+      });
+    } finally {
+      this.setState({ isLoadingPolicies: false });
+    }
   }
 
   render() {

@@ -10,7 +10,6 @@ import PropTypes from 'prop-types';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import {
-  EuiButtonEmpty,
   EuiDescribedFormGroup,
   EuiFieldNumber,
   EuiFlexGroup,
@@ -20,8 +19,6 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-
-import { getHistogramDetailsUrl } from '../../../services';
 
 import { FieldList } from '../components';
 
@@ -91,22 +88,6 @@ export class StepHistogram extends Component {
                 />
               </p>
             </EuiText>
-          </EuiFlexItem>
-
-          <EuiFlexItem grow={false} className="rollupJobWizardStepActions">
-            <EuiButtonEmpty
-              size="s"
-              flush="right"
-              href={getHistogramDetailsUrl()}
-              target="_blank"
-              iconType="help"
-              data-test-subj="rollupJobCreateHistogramDocsButton"
-            >
-              <FormattedMessage
-                id="xpack.rollupJobs.create.stepHistogram.readDocsButtonLabel"
-                defaultMessage="Histogram docs"
-              />
-            </EuiButtonEmpty>
           </EuiFlexItem>
         </EuiFlexGroup>
 

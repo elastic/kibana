@@ -7,8 +7,6 @@
 
 export { FieldList } from './field_list';
 
-export { JobActionMenu } from './job_action_menu';
-
 export {
   JobDetails,
   JOB_DETAILS_TAB_SUMMARY,

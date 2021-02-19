@@ -257,13 +257,7 @@ export class RollupWizardUi extends Component<any, any> {
   }
 
   hasStepErrors(stepId: any) {
-    const { indexPatternAsyncErrors, stepsFieldErrors } = this.state;
-
-    if (stepId === STEP_LOGISTICS) {
-      if (Boolean(indexPatternAsyncErrors)) {
-        return true;
-      }
-    }
+    const { stepsFieldErrors } = this.state;
 
     const stepFieldErrors = stepsFieldErrors[stepId];
     return Object.values(stepFieldErrors).some((error) => error != null);

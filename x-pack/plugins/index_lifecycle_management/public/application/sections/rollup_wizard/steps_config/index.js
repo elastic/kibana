@@ -9,12 +9,13 @@ import { cloneDeep, get, pick } from 'lodash';
 
 import { WEEK } from '../../../../../../../../src/plugins/es_ui_shared/public';
 
-import { validateId } from './validate_id';
-import { validateIndexPattern } from './validate_index_pattern';
-import { validateRollupIndex } from './validate_rollup_index';
-import { validateRollupCron } from './validate_rollup_cron';
-import { validateRollupPageSize } from './validate_rollup_page_size';
-import { validateRollupDelay } from './validate_rollup_delay';
+// TODO: cleanup
+// import { validateId } from './validate_id';
+// import { validateIndexPattern } from './validate_index_pattern';
+// import { validateRollupIndex } from './validate_rollup_index';
+// import { validateRollupCron } from './validate_rollup_cron';
+// import { validateRollupPageSize } from './validate_rollup_page_size';
+// import { validateRollupDelay } from './validate_rollup_delay';
 import { validateDateHistogramField } from './validate_date_histogram_field';
 import { validateDateHistogramInterval } from './validate_date_histogram_interval';
 import { validateHistogramInterval } from './validate_histogram_interval';
@@ -79,23 +80,24 @@ export const stepIdToStepConfigMap = {
         clonedRollupId,
       };
     },
-    fieldsValidator: (fields) => {
-      const {
-        id,
-        indexPattern,
-        rollupIndex,
-        rollupCron,
-        rollupPageSize,
-        rollupDelay,
-        clonedRollupId,
-      } = fields;
+    fieldsValidator: () => {
+      // TODO: Clean up
+      // const {
+      //   id,
+      //   indexPattern,
+      //   rollupIndex,
+      //   rollupCron,
+      //   rollupPageSize,
+      //   rollupDelay,
+      //   clonedRollupId,
+      // } = fields;
       return {
-        id: validateId(id, clonedRollupId),
-        indexPattern: validateIndexPattern(indexPattern, rollupIndex),
-        rollupIndex: validateRollupIndex(rollupIndex, indexPattern),
-        rollupCron: validateRollupCron(rollupCron),
-        rollupPageSize: validateRollupPageSize(rollupPageSize),
-        rollupDelay: validateRollupDelay(rollupDelay),
+        // id: validateId(id, clonedRollupId),
+        // indexPattern: validateIndexPattern(indexPattern, rollupIndex),
+        // rollupIndex: validateRollupIndex(rollupIndex, indexPattern),
+        // rollupCron: validateRollupCron(rollupCron),
+        // rollupPageSize: validateRollupPageSize(rollupPageSize),
+        // rollupDelay: validateRollupDelay(rollupDelay),
       };
     },
   },
