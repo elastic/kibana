@@ -1,0 +1,68 @@
+[[actions-and-connectors-api-update]]
+=== Update action API
+++++
+<titleabbrev>Update action API</titleabbrev>
+++++
+
+Updates the attributes for an existing action.
+
+[[actions-and-connectors-api-update-request]]
+==== Request
+
+`PUT <kibana host>:<port>/api/actions/action/<id>`
+
+[[actions-and-connectors-api-update-params]]
+==== Path parameters
+
+`id`::
+  (Required, string) The ID of the action.
+
+[[actions-and-connectors-api-update-request-body]]
+==== Request body
+
+`name`::
+  (Required, string) The new name of the action.
+
+`config`::
+  (Required, object) The new action configuration. Configuration properties vary depending on the action type. For information about the configuration properties, refer to <<action-types,Action and connector types>>.
+
+`secrets`::
+  (Required, object) The updated secrets configuration for the action. Secrets properties vary depending on the action type. For information about the secrets configuration properties, refer to <<action-types,Action and connector types>>.
+
+[[actions-and-connectors-api-update-codes]]
+==== Response code
+
+`200`::
+    Indicates a successful call.
+
+[[actions-and-connectors-api-update-example]]
+==== Example
+
+[source,sh]
+--------------------------------------------------
+$ curl -X PUT api/actions/action/c55b6eb0-6bad-11eb-9f3b-611eebc6c3ad  -H 'kbn-xsrf: true' -H 'Content-Type: application/json' -d '
+{
+  "name": "updated-action",
+  "config": {
+    "index": "updated-index"
+  }
+}'
+--------------------------------------------------
+// KIBANA
+
+The API returns the following:
+
+[source,sh]
+--------------------------------------------------
+{
+  "id": "c55b6eb0-6bad-11eb-9f3b-611eebc6c3ad",
+  "actionTypeId": ".index",
+  "name": "updated-action",
+  "config": {
+    "index": "updated-index",
+    "refresh": false,
+    "executionTimeField": null
+  },
+  "isPreconfigured": false
+}
+--------------------------------------------------

@@ -87,6 +87,6 @@ const getQueryOrder = (sort: SortField<HostsFields>): QueryOrder => {
     case HostsFields.hostName:
       return { _key: sort.direction };
     default:
-      return assertUnreachable(sort.field as never);
+      return assertUnreachable(sort.field);
   }
 };

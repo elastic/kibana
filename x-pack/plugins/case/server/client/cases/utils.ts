@@ -314,6 +314,7 @@ export const getCommentContextFromAttributes = (
         type: attributes.type,
         alertId: attributes.alertId,
         index: attributes.index,
+        rule: attributes.rule,
       };
     default:
       return {
