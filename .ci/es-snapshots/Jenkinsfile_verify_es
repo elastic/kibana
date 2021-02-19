@@ -57,6 +57,9 @@ kibanaPipeline(timeoutMinutes: 210) {
 
 def promoteSnapshot(snapshotVersion, snapshotId) {
   if (buildUtils.getBuildStatus() == 'SUCCESS') {
+    print "Would promote ${snapshotVersion}"
+    return
+
     node(workers.label('s')) {
       esSnapshots.promote(snapshotVersion, snapshotId)
     }
