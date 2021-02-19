@@ -57,6 +57,10 @@ kibanaPipeline(timeoutMinutes: 210) {
 }
 
 def promoteSnapshot(snapshotVersion, snapshotId) {
+  // TODO remove after testing
+  print "Would promote ${snapshotVersion} ${snapshotId}"
+  return
+
   node(workers.label('s')) {
     esSnapshots.promote(snapshotVersion, snapshotId)
   }
