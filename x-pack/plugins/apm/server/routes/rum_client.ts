@@ -6,10 +6,8 @@
  */
 
 import * as t from 'io-ts';
-import { omit } from 'lodash';
 import { jsonRt } from '../../common/runtime_types/json_rt';
 import { LocalUIFilterName } from '../../common/ui_filter';
-import { getEsFilter } from '../lib/helpers/convert_ui_filters/get_es_filter';
 import {
   Setup,
   setupRequest,
