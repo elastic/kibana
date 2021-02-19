@@ -76,22 +76,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await searchSessions.expectState('restored');
       });
 
-      // NOTE: this test depends on the previous one passing
-      it.skip('Reloads as new session from management', async () => {
-        await PageObjects.searchSessionsManagement.goTo();
-
-        const searchSessionList = await PageObjects.searchSessionsManagement.getList();
-
-        expect(searchSessionList.length).to.be(1);
-        await searchSessionList[0].reload();
-
-        // embeddable has loaded
-        await PageObjects.dashboard.waitForRenderComplete();
-
-        // new search session was completed
-        await searchSessions.expectState('completed');
-      });
-
       it('Deletes a session from management', async () => {
         await PageObjects.searchSessionsManagement.goTo();
 
