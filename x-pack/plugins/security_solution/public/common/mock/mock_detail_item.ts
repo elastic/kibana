@@ -46,41 +46,6 @@ export const mockDetailItemData: TimelineEventsDetailsItem[] = [
     values: ['siem-kibana'],
   },
   {
-    field: 'agent.id',
-    originalValue: '5de03d5f-52f3-482e-91d4-853c7de073c3',
-    values: ['5de03d5f-52f3-482e-91d4-853c7de073c3'],
-  },
-  {
-    field: 'agent.type',
-    originalValue: 'filebeat',
-    values: ['filebeat'],
-  },
-  {
-    field: 'agent.version',
-    originalValue: '8.0.0',
-    values: ['8.0.0'],
-  },
-  {
-    field: 'cloud.availability_zone',
-    originalValue: 'projects/189716325846/zones/us-east1-b',
-    values: ['projects/189716325846/zones/us-east1-b'],
-  },
-  {
-    field: 'cloud.instance.id',
-    originalValue: '5412578377715150143',
-    values: ['5412578377715150143'],
-  },
-  {
-    field: 'cloud.instance.name',
-    originalValue: 'siem-kibana',
-    values: ['siem-kibana'],
-  },
-  {
-    field: 'cloud.machine.type',
-    originalValue: 'projects/189716325846/machineTypes/n1-standard-1',
-    values: ['projects/189716325846/machineTypes/n1-standard-1'],
-  },
-  {
     field: 'cloud.project.id',
     originalValue: 'elastic-beats',
     values: ['elastic-beats'],
@@ -101,6 +66,26 @@ export const mockDetailItemData: TimelineEventsDetailsItem[] = [
     values: ['10.47.8.200'],
   },
   {
+    field: 'agent.id',
+    originalValue: '5de03d5f-52f3-482e-91d4-853c7de073c3',
+    values: ['5de03d5f-52f3-482e-91d4-853c7de073c3'],
+  },
+  {
+    field: 'cloud.instance.name',
+    originalValue: 'siem-kibana',
+    values: ['siem-kibana'],
+  },
+  {
+    field: 'cloud.machine.type',
+    originalValue: 'projects/189716325846/machineTypes/n1-standard-1',
+    values: ['projects/189716325846/machineTypes/n1-standard-1'],
+  },
+  {
+    field: 'agent.type',
+    originalValue: 'filebeat',
+    values: ['filebeat'],
+  },
+  {
     field: 'destination.packets',
     originalValue: 4,
     values: ['4'],
@@ -114,5 +99,20 @@ export const mockDetailItemData: TimelineEventsDetailsItem[] = [
     field: 'event.kind',
     originalValue: 'event',
     values: ['event'],
+  },
+  {
+    field: 'agent.version',
+    originalValue: '8.0.0',
+    values: ['8.0.0'],
+  },
+  {
+    field: 'cloud.availability_zone',
+    originalValue: 'projects/189716325846/zones/us-east1-b',
+    values: ['projects/189716325846/zones/us-east1-b'],
+  },
+  {
+    field: 'cloud.instance.id',
+    originalValue: '5412578377715150143',
+    values: ['5412578377715150143'],
   },
 ];
