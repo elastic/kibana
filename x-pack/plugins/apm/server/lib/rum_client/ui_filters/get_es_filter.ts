@@ -7,10 +7,7 @@
 
 import { ESFilter } from '../../../../../../typings/elasticsearch';
 import { UIFilters } from '../../../../typings/ui_filters';
-import {
-  localUIFilters,
-  localUIFilterNames,
-} from '../../rum_client/ui_filters/local_ui_filters/config';
+import { localUIFilters, localUIFilterNames } from './local_ui_filters/config';
 
 export function getEsFilter(uiFilters: UIFilters) {
   const localFilterValues = uiFilters;

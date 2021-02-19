@@ -14,7 +14,7 @@ import {
 import { rangeQuery } from '../../common/utils/queries';
 import { ProcessorEvent } from '../../common/processor_event';
 import { TRANSACTION_PAGE_LOAD } from '../../common/transaction_types';
-import { getEsFilter } from '../lib/helpers/convert_ui_filters/get_es_filter';
+import { getEsFilter } from '../lib/rum_client/ui_filters/get_es_filter';
 
 export function getRumPageLoadTransactionsProjection({
   setup,
