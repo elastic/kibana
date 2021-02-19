@@ -9,6 +9,10 @@
     "mappings": {
       "dynamic": "false",
       "properties": {
+        "space": {
+          "dynamic": false,
+          "type": "object"
+        },
         "type": { "type": "keyword" },
         "migrationVersion": {
           "dynamic": "true",
