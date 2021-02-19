@@ -15,6 +15,7 @@ export const FLEET_SERVER_PACKAGE = 'fleet_server';
 export const requiredPackages = {
   System: 'system',
   Endpoint: 'endpoint',
+  ElasticAgent: 'elastic_agent',
 } as const;
 
 // these are currently identical. we can separate if they later diverge
