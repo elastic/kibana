@@ -196,7 +196,6 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
       basePath: core.http.basePath,
       http: core.http,
       i18n: core.i18n,
-      fileUpload: deps.fileUpload,
     });
 
     return {

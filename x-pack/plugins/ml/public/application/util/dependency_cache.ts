@@ -87,9 +87,7 @@ export function setDependencyCache(deps: Partial<DependencyCache>) {
   cache.security = deps.security || null;
   cache.i18n = deps.i18n || null;
   cache.urlGenerators = deps.urlGenerators || null;
-  if (deps.fileUpload) {
-    cache.fileUpload = deps.fileUpload;
-  }
+  cache.fileUpload = deps.fileUpload || null;
 }
 
 export function getTimefilter() {
