@@ -6,18 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectsType } from 'kibana/server';
-import { migrate712 } from './migrations/to_v7_12_0';
+import type { SavedObjectMigrationFn } from 'kibana/server';
 
-export const searchTelemetry: SavedObjectsType = {
-  name: 'search-telemetry',
-  namespaceType: 'agnostic',
-  hidden: false,
-  mappings: {
-    dynamic: false,
-    properties: {},
-  },
-  migrations: {
-    '7.12.0': migrate712,
-  },
+/**
+ * Drop the previous document's attributes, which report `averageDuration` incorrectly.
+ * @param doc
+ */
+export const migrate712: SavedObjectMigrationFn = (doc) => {
+  return { ...doc, attributes: {} };
 };
