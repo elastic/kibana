@@ -417,7 +417,7 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
                 defaultMessage="Use cron expression. {docLink}"
                 values={{
                   docLink: (
-                    <EuiLink href={docLinks.links.watcher.cronSchedule} target="_blank">
+                    <EuiLink href={docLinks.links.apis.cronExpressions} target="_blank">
                       <FormattedMessage
                         id="xpack.snapshotRestore.policyForm.stepLogistics.policyScheduleHelpTextDocLink"
                         defaultMessage="Learn more."

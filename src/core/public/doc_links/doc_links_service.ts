@@ -226,7 +226,6 @@ export class DocLinksService {
           runAsPrivilege: `${ELASTICSEARCH_DOCS}security-privileges.html#_run_as_privilege`,
         },
         watcher: {
-          cronSchedule: `${ELASTICSEARCH_DOCS}trigger-schedule.html#schedule-cron`,
           jiraAction: `${ELASTICSEARCH_DOCS}actions-jira.html`,
           pagerDutyAction: `${ELASTICSEARCH_DOCS}actions-pagerduty.html`,
           slackAction: `${ELASTICSEARCH_DOCS}actions-slack.html`,
@@ -243,6 +242,7 @@ export class DocLinksService {
           createApiKey: `${ELASTICSEARCH_DOCS}security-api-create-api-key.html`,
           createPipeline: `${ELASTICSEARCH_DOCS}put-pipeline-api.html`,
           createTransformRequest: `${ELASTICSEARCH_DOCS}put-transform.html#put-transform-request-body`,
+          cronExpressions: `${ELASTICSEARCH_DOCS}cron-expressions.html`,
           executeWatchActionModes: `${ELASTICSEARCH_DOCS}watcher-api-execute-watch.html#watcher-api-execute-watch-action-mode`,
           indexExists: `${ELASTICSEARCH_DOCS}indices-exists.html`,
           openIndex: `${ELASTICSEARCH_DOCS}indices-open-close.html`,
@@ -402,6 +402,7 @@ export interface DocLinksStart {
       createApiKey: string;
       createPipeline: string;
       createTransformRequest: string;
+      cronExpressions: string;
       executeWatchActionModes: string;
       indexExists: string;
       openIndex: string;

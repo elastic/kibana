@@ -130,6 +130,7 @@ readonly links: {
             createApiKey: string;
             createPipeline: string;
             createTransformRequest: string;
+            cronExpressions: string;
             executeWatchActionModes: string;
             indexExists: string;
             openIndex: string;
