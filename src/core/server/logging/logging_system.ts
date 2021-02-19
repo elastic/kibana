@@ -146,6 +146,26 @@ export class LoggingSystem implements LoggerFactory {
     return this.getLoggerConfigByContext(config, LoggingConfig.getParentLoggerContext(context));
   }
 
+  /**
+   * Retrieves an appender by the provided key, after first checking that no circular
+   * dependencies exist between appender refs.
+   */
+  private getAppenderByRef(appenderRef: string) {
+    const checkCircularRefs = (key: string, stack: string[]) => {
+      if (stack.includes(key)) {
+        throw new Error(`Circular appender reference detected: [${stack.join(' -> ')} -> ${key}]`);
+      }
+      stack.push(key);
+      const appender = this.appenders.get(key);
+      if (appender?.appenderRefs) {
+        appender.appenderRefs.forEach((ref) => checkCircularRefs(ref, [...stack]));
+      }
+      return appender;
+    };
+
+    return checkCircularRefs(appenderRef, []);
+  }
+
   private async applyBaseConfig(newBaseConfig: LoggingConfig) {
     const computedConfig = [...this.contextConfigs.values()].reduce(
       (baseConfig, contextConfig) => baseConfig.extend(contextConfig),
@@ -167,17 +187,20 @@ export class LoggingSystem implements LoggerFactory {
       this.appenders.set(appenderKey, Appenders.create(appenderConfig));
     }
 
-    // Once all appenders have been created, update them with a reference to
-    // the other configured appenders. This enables appenders to act as a sort
-    // of middleware and call `append` on each other if needed.
-    for (const [, appenderConfig] of this.appenders) {
-      if (!appenderConfig.addAppender || !appenderConfig.appenderRefs) continue;
-      for (const ref of appenderConfig.appenderRefs) {
-        const foundAppender = this.appenders.get(ref);
+    // Once all appenders have been created, check for any that have explicitly
+    // declared `appenderRefs` dependencies, and look up those dependencies to
+    // attach to the appender. This enables appenders to act as a sort of
+    // middleware and call `append` on each other if needed.
+    for (const [, appender] of this.appenders) {
+      if (!appender.addAppender || !appender.appenderRefs) {
+        continue;
+      }
+      for (const ref of appender.appenderRefs) {
+        const foundAppender = this.getAppenderByRef(ref);
         if (!foundAppender) {
           throw new Error(`Appender config contains unknown appender key "${ref}".`);
         }
-        appenderConfig.addAppender(ref, foundAppender);
+        appender.addAppender(ref, foundAppender);
       }
     }
 

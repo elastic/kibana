@@ -7,7 +7,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { LogRecord, Appender, DisposableAppender } from '@kbn/logging';
+import { LogRecord, DisposableAppender } from '@kbn/logging';
 import {
   createRewritePolicy,
   rewritePolicyConfigSchema,
@@ -18,7 +18,7 @@ import {
 export interface RewriteAppenderConfig {
   type: 'rewrite';
   /**
-   * The {@link Appender | appender(s) } to pass the log event to after
+   * The {@link Appender | appender(s)} to pass the log event to after
    * implementing the specified rewrite policy.
    */
   appenders: string[];
@@ -40,7 +40,7 @@ export class RewriteAppender implements DisposableAppender {
     policy: rewritePolicyConfigSchema,
   });
 
-  private appenders: Map<string, Appender> = new Map();
+  private appenders: Map<string, DisposableAppender> = new Map();
   private readonly policy: RewritePolicy;
 
   constructor(private readonly config: RewriteAppenderConfig) {
@@ -70,27 +70,25 @@ export class RewriteAppender implements DisposableAppender {
         `addAppender was called with an appender key that is missing from the appenderRefs: "${appenderRef}".`
       );
     }
-    // TODO: check circular refs
 
     this.appenders.set(appenderRef, appender);
   }
 
   /**
    * Modifies the `record` and passes it to the specified appender.
-   * @param record `LogRecord` instance to be logged.
    */
   public append(record: LogRecord) {
     const rewrittenRecord = this.policy.rewrite(record);
-    this.config.appenders.forEach((appenderName) => {
-      const appender = this.appenders.get(appenderName);
+    for (const appenderRef of this.appenderRefs) {
+      const appender = this.appenders.get(appenderRef);
       if (!appender) {
         throw new Error(
-          `Rewrite Appender could not find appender key "${appenderName}". ` +
+          `Rewrite Appender could not find appender key "${appenderRef}". ` +
             'Be sure `appender.addAppender()` was called before `appender.append()`.'
         );
       }
       appender.append(rewrittenRecord);
-    });
+    }
   }
 
   /**

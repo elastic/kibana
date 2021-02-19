@@ -134,6 +134,69 @@ test('uses `root` logger if context name is not specified.', async () => {
   expect(mockConsoleLog.mock.calls).toMatchSnapshot();
 });
 
+test('attaches appenders to appenders that declare refs', async () => {
+  await system.upgrade(
+    config.schema.validate({
+      appenders: {
+        console: { type: 'console', layout: { type: 'pattern' } },
+        file: { type: 'file', layout: { type: 'pattern' }, fileName: 'path' },
+        rewrite: {
+          type: 'rewrite',
+          appenders: ['console', 'file'],
+          policy: { type: 'meta', mode: 'remove', properties: [{ path: 'b' }] },
+        },
+      },
+      loggers: [{ name: 'tests', level: 'warn', appenders: ['rewrite'] }],
+    })
+  );
+
+  const testLogger = system.get('tests');
+  testLogger.warn('This message goes to a test context.', { a: 'hi', b: 'remove me' });
+
+  expect(mockConsoleLog).toHaveBeenCalledTimes(1);
+  expect(mockConsoleLog.mock.calls[0][0]).toMatchInlineSnapshot(
+    `"[2012-01-30T22:33:22.011-05:00][WARN ][tests]{\\"a\\":\\"hi\\"} This message goes to a test context."`
+  );
+
+  expect(mockStreamWrite).toHaveBeenCalledTimes(1);
+  expect(mockStreamWrite.mock.calls[0][0]).toMatchInlineSnapshot(`
+    "[2012-01-30T17:33:22.011-05:00][WARN ][tests]{\\"a\\":\\"hi\\"} This message goes to a test context.
+    "
+  `);
+});
+
+test('throws if a circular appender reference is detected', async () => {
+  expect(async () => {
+    await system.upgrade(
+      config.schema.validate({
+        appenders: {
+          console: { type: 'console', layout: { type: 'pattern' } },
+          a: {
+            type: 'rewrite',
+            appenders: ['b'],
+            policy: { type: 'meta', mode: 'remove', properties: [{ path: 'b' }] },
+          },
+          b: {
+            type: 'rewrite',
+            appenders: ['c'],
+            policy: { type: 'meta', mode: 'remove', properties: [{ path: 'b' }] },
+          },
+          c: {
+            type: 'rewrite',
+            appenders: ['console', 'a'],
+            policy: { type: 'meta', mode: 'remove', properties: [{ path: 'b' }] },
+          },
+        },
+        loggers: [{ name: 'tests', level: 'warn', appenders: ['a'] }],
+      })
+    );
+  }).rejects.toThrowErrorMatchingInlineSnapshot(
+    `"Circular appender reference detected: [b -> c -> a -> b]"`
+  );
+
+  expect(mockConsoleLog).toHaveBeenCalledTimes(0);
+});
+
 test('`stop()` disposes all appenders.', async () => {
   await system.upgrade(
     config.schema.validate({
