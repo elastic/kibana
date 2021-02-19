@@ -7,9 +7,16 @@
 
 import useObservable from 'react-use/lib/useObservable';
 import { BehaviorSubject } from 'rxjs';
-import { BaseActionConfig } from '../../../dynamic_actions';
+import {
+  ActionFactory,
+  BaseActionConfig,
+  BaseActionFactoryContext,
+} from '../../../dynamic_actions';
+import { ActionFactoryPlaceContext } from '../types';
 
 export interface DrilldownStateDeps {
+  factory: ActionFactory;
+  placeContext: ActionFactoryPlaceContext<BaseActionFactoryContext>;
   name?: string;
   triggers?: string[];
   config?: BaseActionConfig;
@@ -20,6 +27,16 @@ export interface DrilldownStateDeps {
  * is currently being created or edited.
  */
 export class DrilldownState {
+  /**
+   * Drilldown type used to configure this drilldown.
+   */
+  public readonly factory: ActionFactory;
+
+  /**
+   * Opaque action factory context object excluding the `triggers` attribute.
+   */
+  public readonly placeContext: ActionFactoryPlaceContext<BaseActionFactoryContext>;
+
   /**
    * User entered name of this drilldown.
    */
@@ -36,7 +53,15 @@ export class DrilldownState {
    */
   public readonly config$: BehaviorSubject<BaseActionConfig>;
 
-  constructor({ name = '', triggers = [], config = {} }: DrilldownStateDeps = {}) {
+  constructor({
+    factory,
+    placeContext,
+    name = '',
+    triggers = [],
+    config = {},
+  }: DrilldownStateDeps) {
+    this.factory = factory;
+    this.placeContext = placeContext;
     this.name$ = new BehaviorSubject<string>(name);
     this.triggers$ = new BehaviorSubject<string[]>(triggers);
     this.config$ = new BehaviorSubject<BaseActionConfig>(config);
@@ -45,22 +70,29 @@ export class DrilldownState {
   /**
    * Change the name of the drilldown.
    */
-  public setName(name: string): void {
+  public readonly setName = (name: string): void => {
     this.name$.next(name);
-  }
+  };
 
   /**
    * Change the list of user selected triggers.
    */
-  public setTriggers(triggers: string[]): void {
+  public readonly setTriggers = (triggers: string[]): void => {
     this.triggers$.next(triggers);
-  }
+  };
 
   /**
    * Update the current drilldown configuration.
    */
   public setActionConfig(config: BaseActionConfig): void {
     this.config$.next(config);
+  }
+
+  public getFactoryContext(): BaseActionFactoryContext {
+    return {
+      ...this.placeContext,
+      triggers: this.triggers$.getValue(),
+    };
   }
 
   // Below are convenience React hooks for consuming observables in connected

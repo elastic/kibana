@@ -108,10 +108,6 @@ export interface FormDrilldownWizardProps {
   triggers?: TriggerPickerProps;
 }
 
-const beta = (
-  <EuiBetaBadge label={txtBetaActionFactoryLabel} tooltipContent={txtBetaActionFactoryTooltip} />
-);
-
 export const DrilldownForm: React.FC<FormDrilldownWizardProps> = ({
   isBeta,
   name = '',
@@ -141,7 +137,7 @@ export const DrilldownForm: React.FC<FormDrilldownWizardProps> = ({
         placeholder={txtUntitledDrilldown}
         value={name}
         disabled={!onNameChange}
-        onChange={onNameChange ? (event) => onNameChange(event.target.value) : undefined}
+        onChange={!!onNameChange ? (event) => onNameChange(event.target.value) : undefined}
         data-test-subj="drilldownNameInput"
       />
     </EuiFormRow>
@@ -178,7 +174,13 @@ export const DrilldownForm: React.FC<FormDrilldownWizardProps> = ({
           <EuiFlexItem grow={true}>
             <EuiText>
               <h4>
-                {drilldownTypeName} {isBeta && beta}
+                {drilldownTypeName}{' '}
+                {isBeta && (
+                  <EuiBetaBadge
+                    label={txtBetaActionFactoryLabel}
+                    tooltipContent={txtBetaActionFactoryTooltip}
+                  />
+                )}
               </h4>
             </EuiText>
           </EuiFlexItem>

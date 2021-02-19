@@ -77,6 +77,26 @@ export class DrilldownManagerState {
    * Select a different action factory.
    */
   public setActionFactory(actionFactory: undefined | ActionFactory): void {
+    if (!actionFactory) {
+      this.actionFactory$.next(undefined);
+      return;
+    }
+
+    if (!this.drilldownStateByFactoryId.has(actionFactory.id)) {
+      const oldActionFactory = this.actionFactory$.getValue();
+      const oldDrilldownState = !!oldActionFactory
+        ? this.drilldownStateByFactoryId.get(oldActionFactory.id)
+        : undefined;
+      const context = this.getActionFactoryContext();
+      const drilldownState = new DrilldownState({
+        factory: actionFactory,
+        name: !!oldDrilldownState ? oldDrilldownState.name$.getValue() : '',
+        triggers: [],
+        config: actionFactory.createConfig(context),
+      });
+      this.drilldownStateByFactoryId.set(actionFactory.id, drilldownState);
+    }
+
     this.actionFactory$.next(actionFactory);
   }
 
