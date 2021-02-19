@@ -29,7 +29,6 @@ import {
   errorAggregator,
   getListsClient,
   getRuleRangeTuples,
-  getCatchupTuples,
   getExceptions,
   hasTimestampFields,
   wrapBuildingBlocks,

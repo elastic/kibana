@@ -173,8 +173,6 @@ export const getGapMaxCatchupRatio = ({
   if (gapInMilliseconds <= 0) {
     return 0;
   }
-  // BUG: gapDiffInUnits is always an integer, so if we compute the difference using units like hours then
-  // it can be truncated to 0, even though we should have a decimal gap (e.g. 0.1 hours)
   const ratio = Math.ceil(gapInMilliseconds / intervalDuration.asMilliseconds());
   // maxCatchup is to ensure we are not trying to catch up too far back.
   // This allows for a maximum of 4 consecutive rule execution misses
@@ -522,28 +520,18 @@ export const getCatchupTuples = ({
   if (originalTo == null || originalFrom == null) {
     throw new Error(buildRuleMessage('dateMath parse failed'));
   }
-
-  // BUG: tempTo is converted from a "now" based timestamp to a concrete moment here. However, time keeps advancing
-  // before ruleParamsFrom is converted into a concrete timestamp for the current rule run tuple at the end.
-  // Thus we can end up with a small gap between some of the tuples.
-
   const catchupTuples: RuleRangeTuple[] = [];
   const intervalInMilliseconds = intervalDuration.asMilliseconds();
   let currentTo = originalTo;
   let currentFrom = originalFrom;
   while (catchupTuples.length < catchup) {
-    // always round maxCatchup up to the nearest integer. To determine if we still have a gap after
-    // adding the additional tuples, compare the earliest tuple to previousStartedAt. Otherwise it's possible
-    // for floating point errors to make ratio appear to be within the maximum catch up limits even though
-    // the earliest tuple is later than previousStartedAt.
     const nextTo = currentTo.clone().subtract(intervalInMilliseconds);
     const nextFrom = currentFrom.clone().subtract(intervalInMilliseconds);
-    const tuple = {
+    catchupTuples.push({
       to: nextTo,
       from: nextFrom,
       maxSignals: ruleParamsMaxSignals,
-    };
-    catchupTuples.push(tuple);
+    });
     currentTo = nextTo;
     currentFrom = nextFrom;
   }
