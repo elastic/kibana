@@ -22,7 +22,6 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
   const globalNav = getService('globalNav');
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['login']);
-  const toasts = getService('toasts');
 
   const defaultTryTimeout = config.get('timeouts.try');
   const defaultFindTimeout = config.get('timeouts.find');
@@ -397,7 +396,16 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
     }
 
     async clearAllToasts() {
-      await toasts.dismissAllToasts();
+      const toasts = await find.allByCssSelector('.euiToast');
+      for (const toastElement of toasts) {
+        try {
+          await toastElement.moveMouseTo();
+          const closeBtn = await toastElement.findByCssSelector('.euiToast__closeButton');
+          await closeBtn.click();
+        } catch (err) {
+          // ignore errors, toast clear themselves after timeout
+        }
+      }
     }
 
     async getJsonBodyText() {
