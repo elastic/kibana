@@ -12,13 +12,26 @@ import { register } from './get_route';
 import { API_BASE_PATH } from '../../../common/constants';
 import { LicenseStatus } from '../../types';
 
-import { xpackMocks } from '../../../../../mocks';
+import { licensingMock } from '../../../../../plugins/licensing/server/mocks';
+
 import {
   elasticsearchServiceMock,
   httpServerMock,
   httpServiceMock,
+  coreMock,
 } from '../../../../../../src/core/server/mocks';
 
+// Re-implement the mock that was imported directly from `x-pack/mocks`
+function createCoreRequestHandlerContextMock() {
+  return {
+    core: coreMock.createRequestHandlerContext(),
+    licensing: licensingMock.createRequestHandlerContext(),
+  };
+}
+
+const xpackMocks = {
+  createRequestHandlerContext: createCoreRequestHandlerContextMock,
+};
 interface TestOptions {
   licenseCheckResult?: LicenseStatus;
   apiResponses?: Array<() => Promise<unknown>>;
@@ -65,10 +78,16 @@ describe('GET remote clusters', () => {
       const mockContext = xpackMocks.createRequestHandlerContext();
       mockContext.core.elasticsearch.legacy.client = mockScopedClusterClient;
 
-      const response = await handler(mockContext, mockRequest, kibanaResponseFactory);
+      if (asserts.statusCode === 500) {
+        await expect(handler(mockContext, mockRequest, kibanaResponseFactory)).rejects.toThrowError(
+          asserts.result as Error
+        );
+      } else {
+        const response = await handler(mockContext, mockRequest, kibanaResponseFactory);
 
-      expect(response.status).toBe(asserts.statusCode);
-      expect(response.payload).toEqual(asserts.result);
+        expect(response.status).toBe(asserts.statusCode);
+        expect(response.payload).toEqual(asserts.result);
+      }
 
       if (Array.isArray(asserts.apiArguments)) {
         for (const apiArguments of asserts.apiArguments) {

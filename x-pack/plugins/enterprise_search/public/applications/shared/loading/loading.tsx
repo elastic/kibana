@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+
 import { EuiLoadingSpinner } from '@elastic/eui';
 
 import './loading.scss';

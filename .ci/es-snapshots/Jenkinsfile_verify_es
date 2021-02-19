@@ -19,17 +19,19 @@ currentBuild.description = "ES: ${SNAPSHOT_VERSION}<br />Kibana: ${params.branch
 
 def SNAPSHOT_MANIFEST = "https://storage.googleapis.com/kibana-ci-es-snapshots-daily/${SNAPSHOT_VERSION}/archives/${SNAPSHOT_ID}/manifest.json"
 
-kibanaPipeline(timeoutMinutes: 150) {
+kibanaPipeline(timeoutMinutes: 210) {
   catchErrors {
     slackNotifications.onFailure(
       title: "*<${env.BUILD_URL}|[${SNAPSHOT_VERSION}] ES Snapshot Verification Failure>*",
       message: "[${SNAPSHOT_VERSION}] ES Snapshot Verification Failure",
     ) {
       retryable.enable(2)
-      withEnv(["ES_SNAPSHOT_MANIFEST=${SNAPSHOT_MANIFEST}"]) {
+      withEnv([
+        "ES_SNAPSHOT_MANIFEST=${SNAPSHOT_MANIFEST}",
+        'IGNORE_SHIP_CI_STATS_ERROR=true',
+      ]) {
         parallel([
           'kibana-intake-agent': workers.intake('kibana-intake', './test/scripts/jenkins_unit.sh'),
-          'x-pack-intake-agent': workers.intake('x-pack-intake', './test/scripts/jenkins_xpack.sh'),
           'kibana-oss-agent': workers.functional('kibana-oss-tests', { kibanaPipeline.buildOss() }, [
             'oss-ciGroup1': kibanaPipeline.ossCiGroupProcess(1),
             'oss-ciGroup2': kibanaPipeline.ossCiGroupProcess(2),

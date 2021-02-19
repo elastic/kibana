@@ -12,7 +12,7 @@ import { IntegrationGroup } from './integration_group';
 import { MonitorSummary } from '../../../../../../common/runtime_types';
 import { toggleIntegrationsPopover, PopoverState } from '../../../../../state/actions';
 
-interface ActionsPopoverProps {
+export interface ActionsPopoverProps {
   summary: MonitorSummary;
   popoverState: PopoverState | null;
   togglePopoverIsVisible: typeof toggleIntegrationsPopover;

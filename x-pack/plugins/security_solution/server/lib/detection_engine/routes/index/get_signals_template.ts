@@ -8,7 +8,20 @@
 import signalsMapping from './signals_mapping.json';
 import ecsMapping from './ecs_mapping.json';
 
-export const SIGNALS_TEMPLATE_VERSION = 14;
+/**
+  @constant
+  @type {number}
+  @description This value represents the template version assumed by app code.
+  If this number is greater than the user's signals index version, the
+  detections UI will attempt to update the signals template and roll over to
+  a new signals index.
+
+  If making mappings changes in a patch release, this number should be incremented by 1.
+  If making mappings changes in a minor release, this number should be
+  incremented by 10 in order to add "room" for the aforementioned patch
+  release
+*/
+export const SIGNALS_TEMPLATE_VERSION = 24;
 export const MIN_EQL_RULE_INDEX_VERSION = 2;
 
 export const getSignalsTemplate = (index: string) => {

@@ -15,7 +15,7 @@ afterEach(() => {
 });
 
 describe('createMigration()', () => {
-  const { log } = migrationMocks.createContext();
+  const migrationContext = migrationMocks.createContext();
   const inputType = { type: 'known-type-1', attributesToEncrypt: new Set(['firstAttr']) };
   const migrationType = {
     type: 'known-type-1',
@@ -88,7 +88,7 @@ describe('createMigration()', () => {
           namespace: 'namespace',
           attributes,
         },
-        { log }
+        migrationContext
       );
 
       expect(encryptionSavedObjectService.decryptAttributesSync).toHaveBeenCalledWith(
@@ -97,7 +97,8 @@ describe('createMigration()', () => {
           type: 'known-type-1',
           namespace: 'namespace',
         },
-        attributes
+        attributes,
+        { convertToMultiNamespaceType: false }
       );
 
       expect(encryptionSavedObjectService.encryptAttributesSync).toHaveBeenCalledWith(
@@ -112,7 +113,7 @@ describe('createMigration()', () => {
   });
 
   describe('migration of a single legacy type', () => {
-    it('uses the input type as the mirgation type when omitted', async () => {
+    it('uses the input type as the migration type when omitted', async () => {
       const serviceWithLegacyType = encryptedSavedObjectsServiceMock.create();
       const instantiateServiceWithLegacyType = jest.fn(() => serviceWithLegacyType);
 
@@ -142,7 +143,7 @@ describe('createMigration()', () => {
           namespace: 'namespace',
           attributes,
         },
-        { log }
+        migrationContext
       );
 
       expect(serviceWithLegacyType.decryptAttributesSync).toHaveBeenCalledWith(
@@ -151,7 +152,8 @@ describe('createMigration()', () => {
           type: 'known-type-1',
           namespace: 'namespace',
         },
-        attributes
+        attributes,
+        { convertToMultiNamespaceType: false }
       );
 
       expect(encryptionSavedObjectService.encryptAttributesSync).toHaveBeenCalledWith(
@@ -162,6 +164,81 @@ describe('createMigration()', () => {
         },
         attributes
       );
+    });
+
+    describe('uses the object `namespaces` field to populate the descriptor when the migration context indicates this type is being converted', () => {
+      const doTest = ({
+        objectNamespace,
+        decryptDescriptorNamespace,
+      }: {
+        objectNamespace: string | undefined;
+        decryptDescriptorNamespace: string | undefined;
+      }) => {
+        const instantiateServiceWithLegacyType = jest.fn(() =>
+          encryptedSavedObjectsServiceMock.create()
+        );
+
+        const migrationCreator = getCreateMigration(
+          encryptionSavedObjectService,
+          instantiateServiceWithLegacyType
+        );
+        const noopMigration = migrationCreator<InputType, MigrationType>(
+          function (doc): doc is SavedObjectUnsanitizedDoc<InputType> {
+            return true;
+          },
+          (doc) => doc
+        );
+
+        const attributes = {
+          firstAttr: 'first_attr',
+        };
+
+        encryptionSavedObjectService.decryptAttributesSync.mockReturnValueOnce(attributes);
+        encryptionSavedObjectService.encryptAttributesSync.mockReturnValueOnce(attributes);
+
+        noopMigration(
+          {
+            id: '123',
+            type: 'known-type-1',
+            namespaces: objectNamespace ? [objectNamespace] : [],
+            attributes,
+          },
+          migrationMocks.createContext({
+            migrationVersion: '8.0.0',
+            convertToMultiNamespaceTypeVersion: '8.0.0',
+          })
+        );
+
+        expect(encryptionSavedObjectService.decryptAttributesSync).toHaveBeenCalledWith(
+          {
+            id: '123',
+            type: 'known-type-1',
+            namespace: decryptDescriptorNamespace,
+          },
+          attributes,
+          { convertToMultiNamespaceType: true }
+        );
+
+        expect(encryptionSavedObjectService.encryptAttributesSync).toHaveBeenCalledWith(
+          {
+            id: '123',
+            type: 'known-type-1',
+          },
+          attributes
+        );
+      };
+
+      it('when namespaces is an empty array', () => {
+        doTest({ objectNamespace: undefined, decryptDescriptorNamespace: undefined });
+      });
+
+      it('when the first namespace element is "default"', () => {
+        doTest({ objectNamespace: 'default', decryptDescriptorNamespace: undefined });
+      });
+
+      it('when the first namespace element is another string', () => {
+        doTest({ objectNamespace: 'foo', decryptDescriptorNamespace: 'foo' });
+      });
     });
   });
 
@@ -216,7 +293,7 @@ describe('createMigration()', () => {
               firstAttr: '#####',
             },
           },
-          { log }
+          migrationContext
         )
       ).toMatchObject({
         id: '123',
@@ -257,7 +334,7 @@ describe('createMigration()', () => {
               nonEncryptedAttr: 'non encrypted',
             },
           },
-          { log }
+          migrationContext
         )
       ).toMatchObject({
         id: '123',
@@ -278,7 +355,8 @@ describe('createMigration()', () => {
         {
           firstAttr: '#####',
           nonEncryptedAttr: 'non encrypted',
-        }
+        },
+        { convertToMultiNamespaceType: false }
       );
 
       expect(serviceWithMigrationLegacyType.encryptAttributesSync).toHaveBeenCalledWith(

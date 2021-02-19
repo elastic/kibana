@@ -12,7 +12,6 @@ import { coerce } from 'semver';
 import { promisify } from 'util';
 import { snakeCase } from 'lodash';
 import { isConfigPath, PackageInfo } from '../../config';
-import { Logger } from '../../logging';
 import { PluginManifest } from '../types';
 import { PluginDiscoveryError } from './plugin_discovery_error';
 import { isCamelCase } from './is_camel_case';
@@ -63,8 +62,7 @@ const KNOWN_MANIFEST_FIELDS = (() => {
  */
 export async function parseManifest(
   pluginPath: string,
-  packageInfo: PackageInfo,
-  log: Logger
+  packageInfo: PackageInfo
 ): Promise<PluginManifest> {
   const manifestPath = resolve(pluginPath, MANIFEST_FILE_NAME);
 
@@ -105,8 +103,11 @@ export async function parseManifest(
     );
   }
 
-  if (!packageInfo.dist && !isCamelCase(manifest.id)) {
-    log.warn(`Expect plugin "id" in camelCase, but found: ${manifest.id}`);
+  if (!isCamelCase(manifest.id)) {
+    throw PluginDiscoveryError.invalidManifest(
+      manifestPath,
+      new Error(`Plugin "id" must be camelCase, but found: ${manifest.id}.`)
+    );
   }
 
   if (!manifest.version || typeof manifest.version !== 'string') {

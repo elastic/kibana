@@ -230,8 +230,6 @@ export function getEntityFieldName(record: AnomalyRecordDoc): string | undefined
   if (record.partition_field_name !== undefined) {
     return record.partition_field_name;
   }
-
-  return undefined;
 }
 
 // Returns the value of the field to use as the entity value from the source record
@@ -249,8 +247,6 @@ export function getEntityFieldValue(record: AnomalyRecordDoc): string | number |
   if (record.partition_field_value !== undefined) {
     return record.partition_field_value;
   }
-
-  return undefined;
 }
 
 // Returns the list of partitioning entity fields for the source record as a list

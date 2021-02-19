@@ -6,12 +6,13 @@
   "from": "now-9m",
   "index": [
     "logs-endpoint.events.*",
-    "winlogbeat-*"
+    "winlogbeat-*",
+    "logs-windows.*"
   ],
   "language": "eql",
   "license": "Elastic License",
   "name": "Service Command Lateral Movement",
-  "query": "sequence by process.entity_id with maxspan=1m\n  [process where event.type in (\"start\", \"process_started\") and\n                               /* uncomment once in winlogbeat */\n     (process.name == \"sc.exe\" /* or process.pe.original_file_name == \"sc.exe\" */ ) and\n                                                   /* case insensitive */\n      wildcard(process.args, \"\\\\\\\\*\") and wildcard(process.args, \"binPath=*\", \"binpath=*\") and\n      (process.args : \"create\" or\n       process.args : \"config\" or\n       process.args : \"failure\" or\n       process.args : \"start\")]\n  [network where process.name : \"sc.exe\" and destination.ip != \"127.0.0.1\"]\n",
+  "query": "sequence by process.entity_id with maxspan = 1m\n  [process where event.type in (\"start\", \"process_started\") and\n     (process.name : \"sc.exe\" or process.pe.original_file_name : \"sc.exe\") and\n      process.args : \"\\\\\\\\*\" and process.args : (\"binPath=*\", \"binpath=*\") and\n      process.args : (\"create\", \"config\", \"failure\", \"start\")]\n  [network where process.name : \"sc.exe\" and destination.ip != \"127.0.0.1\"]\n",
   "risk_score": 21,
   "rule_id": "d61cbcf8-1bc1-4cff-85ba-e7b21c5beedc",
   "severity": "low",
@@ -84,5 +85,5 @@
     }
   ],
   "type": "eql",
-  "version": 2
+  "version": 3
 }
