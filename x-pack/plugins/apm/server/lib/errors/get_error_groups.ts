@@ -21,11 +21,13 @@ import { getErrorName } from '../helpers/get_error_name';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
 
 export function getErrorGroups({
+  environment,
   serviceName,
   sortField,
   sortDirection = 'desc',
   setup,
 }: {
+  environment?: string;
   serviceName: string;
   sortField?: string;
   sortDirection?: 'asc' | 'desc';
@@ -37,7 +39,11 @@ export function getErrorGroups({
     // sort buckets by last occurrence of error
     const sortByLatestOccurrence = sortField === 'latestOccurrenceAt';
 
-    const projection = getErrorGroupsProjection({ setup, serviceName });
+    const projection = getErrorGroupsProjection({
+      environment,
+      setup,
+      serviceName,
+    });
 
     const order: SortOptions = sortByLatestOccurrence
       ? {

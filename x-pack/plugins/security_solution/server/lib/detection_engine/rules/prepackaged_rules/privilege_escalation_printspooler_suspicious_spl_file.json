@@ -6,7 +6,8 @@
   "from": "now-9m",
   "index": [
     "winlogbeat-*",
-    "logs-endpoint.events.*"
+    "logs-endpoint.events.*",
+    "logs-windows.*"
   ],
   "language": "kuery",
   "license": "Elastic License",
@@ -16,7 +17,7 @@
   "references": [
     "https://safebreach.com/Post/How-we-bypassed-CVE-2020-1048-Patch-and-got-CVE-2020-1337"
   ],
-  "risk_score": 74,
+  "risk_score": 73,
   "rule_id": "a7ccae7b-9d2c-44b2-a061-98e5946971fa",
   "severity": "high",
   "tags": [
@@ -45,5 +46,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 2
+  "version": 3
 }
