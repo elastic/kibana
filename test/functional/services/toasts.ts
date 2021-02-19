@@ -10,7 +10,6 @@ import { FtrProviderContext } from '../ftr_provider_context';
 
 export function ToastsProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
-  const retry = getService('retry');
 
   class Toasts {
     /**
@@ -53,8 +52,13 @@ export function ToastsProvider({ getService }: FtrProviderContext) {
         await toast.moveMouseTo();
 
         if (await testSubjects.descendantExists('toastCloseButton', toast)) {
-          const dismissButton = await testSubjects.findDescendant('toastCloseButton', toast);
-          await dismissButton.click();
+          try {
+            const dismissButton = await testSubjects.findDescendant('toastCloseButton', toast);
+            await dismissButton.click();
+          } catch (err) {
+            // ignore errors
+            // toasts are finnicky because they can dismiss themselves right before you close them
+          }
         }
       }
     }
