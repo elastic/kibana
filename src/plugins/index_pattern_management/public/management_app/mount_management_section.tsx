@@ -42,7 +42,7 @@ export async function mountManagementSection(
 ) {
   const [
     { chrome, application, uiSettings, notifications, overlays, http, docLinks },
-    { data },
+    { data, indexPatternFieldEditor },
     indexPatternManagementStart,
   ] = await getStartServices();
   const canSave = Boolean(application.capabilities.indexPatterns.save);
@@ -60,9 +60,11 @@ export async function mountManagementSection(
     http,
     docLinks,
     data,
+    indexPatternFieldEditor,
     indexPatternManagementStart: indexPatternManagementStart as IndexPatternManagementStart,
     setBreadcrumbs: params.setBreadcrumbs,
     getMlCardState,
+    fieldFormatEditors: indexPatternFieldEditor.fieldFormatEditors,
   };
 
   ReactDOM.render(
