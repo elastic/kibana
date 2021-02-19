@@ -49,7 +49,7 @@ export const WaterfallChartFixedTopContainer = euiStyled(StyledScrollDiv)`
 `;
 
 export const WaterfallChartAxisOnlyContainer = euiStyled(EuiFlexItem)`
-  margin-left: -22px;
+  margin-left: -18px;
 `;
 
 export const WaterfallChartTopContainer = euiStyled(EuiFlexGroup)`
