@@ -10,7 +10,7 @@ import React from 'react';
 import { shallow } from 'enzyme';
 import { FieldFormat } from 'src/plugins/data/public';
 
-import { SampleInput } from '../../../../types';
+import { SampleInput } from '../../types';
 import { DefaultFormatEditor, convertSampleInput } from './default';
 
 const fieldType = 'number';
