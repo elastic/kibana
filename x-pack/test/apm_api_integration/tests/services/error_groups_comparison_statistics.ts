@@ -74,9 +74,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(response.status).to.be(200);
 
         const errorGroupsComparisonStatistics = response.body as ErrorGroupsComparisonStatistics;
-        expect(Object.keys(errorGroupsComparisonStatistics).length).to.be.eql(groupIds.length);
+        expect(Object.keys(errorGroupsComparisonStatistics).sort()).to.eql(groupIds.sort());
 
-        groupIds.map((groupId) => {
+        groupIds.forEach((groupId) => {
           expect(errorGroupsComparisonStatistics[groupId]).not.to.be.empty();
         });
 

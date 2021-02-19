@@ -325,7 +325,7 @@ export const serviceErrorGroupsComparisonStatisticsRoute = createRoute({
       t.type({
         numBuckets: toNumberRt,
         transactionType: t.string,
-        groupIds: t.string.pipe(jsonRt),
+        groupIds: jsonRt.pipe(t.array(t.string)),
       }),
     ]),
   }),
