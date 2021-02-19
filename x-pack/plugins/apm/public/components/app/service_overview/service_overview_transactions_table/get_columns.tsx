@@ -9,6 +9,7 @@ import { EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { ValuesType } from 'utility-types';
+import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
 import {
   asMillisecondDuration,
   asPercent,
@@ -20,6 +21,7 @@ import { SparkPlot } from '../../../shared/charts/spark_plot';
 import { ImpactBar } from '../../../shared/ImpactBar';
 import { TransactionDetailLink } from '../../../shared/Links/apm/transaction_detail_link';
 import { TruncateWithTooltip } from '../../../shared/truncate_with_tooltip';
+import { getLatencyColumnLabel } from '../get_latency_column_label';
 
 type TransactionGroupPrimaryStatistics = APIReturnType<'GET /api/apm/services/{serviceName}/transactions/groups/primary_statistics'>;
 
@@ -28,35 +30,13 @@ type ServiceTransactionGroupItem = ValuesType<
 >;
 type TransactionGroupComparisonStatistics = APIReturnType<'GET /api/apm/services/{serviceName}/transactions/groups/comparison_statistics'>;
 
-function getLatencyAggregationTypeLabel(latencyAggregationType?: string) {
-  switch (latencyAggregationType) {
-    case 'avg':
-      return i18n.translate(
-        'xpack.apm.serviceOverview.transactionsTableColumnLatency.avg',
-        { defaultMessage: 'Latency (avg.)' }
-      );
-
-    case 'p95':
-      return i18n.translate(
-        'xpack.apm.serviceOverview.transactionsTableColumnLatency.p95',
-        { defaultMessage: 'Latency (95th)' }
-      );
-
-    case 'p99':
-      return i18n.translate(
-        'xpack.apm.serviceOverview.transactionsTableColumnLatency.p99',
-        { defaultMessage: 'Latency (99th)' }
-      );
-  }
-}
-
 export function getColumns({
   serviceName,
   latencyAggregationType,
   transactionGroupComparisonStatistics,
 }: {
   serviceName: string;
-  latencyAggregationType?: string;
+  latencyAggregationType?: LatencyAggregationType;
   transactionGroupComparisonStatistics?: TransactionGroupComparisonStatistics;
 }): Array<EuiBasicTableColumn<ServiceTransactionGroupItem>> {
   return [
@@ -88,7 +68,7 @@ export function getColumns({
     {
       field: 'latency',
       sortable: true,
-      name: getLatencyAggregationTypeLabel(latencyAggregationType),
+      name: getLatencyColumnLabel(latencyAggregationType),
       width: px(unit * 10),
       render: (_, { latency, name }) => {
         const timeseries =

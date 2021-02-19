@@ -2167,10 +2167,10 @@
   version "0.0.0"
   uid ""
 
-"@elastic/elasticsearch@npm:@elastic/elasticsearch-canary@^8.0.0-canary":
-  version "8.0.0-canary.1"
-  resolved "https://registry.yarnpkg.com/@elastic/elasticsearch-canary/-/elasticsearch-canary-8.0.0-canary.1.tgz#5cd0eda62531b71af66a08da6c3cebc26a73d4c0"
-  integrity sha512-VhQ42wH+0OGmHSlc4It3bqGTL7mLuC2RIionJZBIuY5P6lwUMz7goelfyfTHoo+LStxz5QQ8Zt2xcnAnShTBJg==
+"@elastic/elasticsearch@npm:@elastic/elasticsearch-canary@^8.0.0-canary.2":
+  version "8.0.0-canary.2"
+  resolved "https://registry.yarnpkg.com/@elastic/elasticsearch-canary/-/elasticsearch-canary-8.0.0-canary.2.tgz#476e22bc90fc4f422f7195f693fdcddb7f8e1897"
+  integrity sha512-xYdVJ1MCAprVxd0rqmkBVof7I0N+e6VBCcr0UOwEYjvpQJTvu6PPQROBAAmtAAgvIKs4a8HmpArGgu5QJUnNjw==
   dependencies:
     debug "^4.1.1"
     hpagent "^0.1.1"
@@ -9020,10 +9020,10 @@ bach@^1.0.0:
     async-settle "^1.0.0"
     now-and-later "^2.0.0"
 
-backport@^5.6.4:
-  version "5.6.4"
-  resolved "https://registry.yarnpkg.com/backport/-/backport-5.6.4.tgz#8cf4bc750b26d27161306858ee9069218ad7cdfd"
-  integrity sha512-ZhuZcGxOBHBXFBCwweVf02b+KhWe0tdgg71jPSl583YYxlru+JBRH+TFM8S0J6/6YUuTWO81M9funjehJ18jqg==
+backport@^5.6.6:
+  version "5.6.6"
+  resolved "https://registry.yarnpkg.com/backport/-/backport-5.6.6.tgz#cb03f948a36386734fa491343b93f4ca280e00f3"
+  integrity sha512-8O7z0q6m5DfQgrhLDUOLcH2y/rXwSgqv5WIWSSoZpPyRdPpmd3xApIfohlJ3oBX9W0TdbO3aKzaV00qg3H9P7w==
   dependencies:
     "@octokit/rest" "^18.0.12"
     "@types/lodash.difference" "^4.5.6"
@@ -9040,7 +9040,7 @@ backport@^5.6.4:
     lodash.isstring "^4.0.1"
     lodash.uniq "^4.5.0"
     make-dir "^3.1.0"
-    ora "^5.2.0"
+    ora "^5.3.0"
     safe-json-stringify "^1.2.0"
     strip-json-comments "^3.1.1"
     winston "^3.3.3"
@@ -11679,6 +11679,11 @@ cypress-multi-reporters@^1.4.0:
   dependencies:
     debug "^4.1.1"
     lodash "^4.17.15"
+
+cypress-pipe@^2.0.0:
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/cypress-pipe/-/cypress-pipe-2.0.0.tgz#577df7a70a8603d89a96dfe4092a605962181af8"
+  integrity sha512-KW9s+bz4tFLucH3rBGfjW+Q12n7S4QpUSSyxiGrgPOfoHlbYWzAGB3H26MO0VTojqf9NVvfd5Kt0MH5XMgbfyg==
 
 cypress-promise@^1.1.0:
   version "1.1.0"
@@ -20250,10 +20255,10 @@ mapbox-gl-draw-rectangle-mode@^1.0.4:
   resolved "https://registry.yarnpkg.com/mapbox-gl-draw-rectangle-mode/-/mapbox-gl-draw-rectangle-mode-1.0.4.tgz#42987d68872a5fb5cc5d76d3375ee20cd8bab8f7"
   integrity sha512-BdF6nwEK2p8n9LQoMPzBO8LhddW1fe+d5vK8HQIei+4VcRnUbKNsEj7Z15FsJxCHzsc2BQKXbESx5GaE8x0imQ==
 
-mapbox-gl@^1.12.0:
-  version "1.12.0"
-  resolved "https://registry.yarnpkg.com/mapbox-gl/-/mapbox-gl-1.12.0.tgz#7d1c73b1153d7ee219d30d80728d7df079bc7c05"
-  integrity sha512-B3URR4qY9R/Bx+DKqP8qmGCai8IOZYMSZF7ZSvcCZaYTaOYhQQi8ErTEDZtFMOR0ZPj7HFWOkkhl5SqvDfpJpA==
+mapbox-gl@1.13.1:
+  version "1.13.1"
+  resolved "https://registry.yarnpkg.com/mapbox-gl/-/mapbox-gl-1.13.1.tgz#322efe75ab4c764fc4c776da1506aad58d5a5b9d"
+  integrity sha512-GSyubcoSF5MyaP8z+DasLu5v7KmDK2pp4S5+VQ5WdVQUOaAqQY4jwl4JpcdNho3uWm2bIKs7x1l7q3ynGmW60g==
   dependencies:
     "@mapbox/geojson-rewind" "^0.5.0"
     "@mapbox/geojson-types" "^1.0.2"
@@ -22186,10 +22191,10 @@ ora@^4.0.3, ora@^4.0.4:
     strip-ansi "^6.0.0"
     wcwidth "^1.0.1"
 
-ora@^5.2.0:
-  version "5.2.0"
-  resolved "https://registry.yarnpkg.com/ora/-/ora-5.2.0.tgz#de10bfd2d15514384af45f3fa9d9b1aaf344fda1"
-  integrity sha512-+wG2v8TUU8EgzPHun1k/n45pXquQ9fHnbXVetl9rRgO6kjZszGGbraF3XPTIdgeA+s1lbRjSEftAnyT0w8ZMvQ==
+ora@^5.3.0:
+  version "5.3.0"
+  resolved "https://registry.yarnpkg.com/ora/-/ora-5.3.0.tgz#fb832899d3a1372fe71c8b2c534bbfe74961bb6f"
+  integrity sha512-zAKMgGXUim0Jyd6CXK9lraBnD3H5yPGBPPOkC23a2BG6hsm4Zu6OQSjQuEtV0BHDf4aKHcUFvJiGRrFuW3MG8g==
   dependencies:
     bl "^4.0.3"
     chalk "^4.1.0"

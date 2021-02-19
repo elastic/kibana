@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 import { EuiTitle } from '@elastic/eui';
 import { HostDetailsLink } from '../../../../common/components/links';
@@ -23,14 +24,20 @@ interface ExpandableHostProps {
   hostName: string;
 }
 
+const StyledTitle = styled.h4`
+  word-break: break-all;
+  word-wrap: break-word;
+  white-space: pre-wrap;
+`;
+
 export const ExpandableHostDetailsTitle = ({ hostName }: ExpandableHostProps) => (
   <EuiTitle size="s">
-    <h4>
+    <StyledTitle>
       {i18n.translate('xpack.securitySolution.timeline.sidePanel.hostDetails.title', {
         defaultMessage: 'Host details',
       })}
       {`: ${hostName}`}
-    </h4>
+    </StyledTitle>
   </EuiTitle>
 );
 
