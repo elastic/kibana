@@ -11,7 +11,7 @@ import { Logger } from 'src/core/server';
 /**
  * Helper class for wrapping errors while preserving the original thrown error.
  */
-export class CaseError extends Error {
+class CaseError extends Error {
   public readonly wrappedError?: Error;
   constructor(message?: string, originalError?: Error) {
     super(message);
