@@ -37,20 +37,20 @@ export class HistogramFormatEditor extends DefaultFormatEditor<HistogramFormatEd
     const numberOptions = [
       {
         value: 'number',
-        text: i18n.translate('data.fieldFormats.number.title', {
+        text: i18n.translate('indexPatternManagement.histogram.subFormat.number', {
           defaultMessage: 'Number',
         }),
       },
       {
         value: 'bytes',
-        text: i18n.translate('data.fieldFormats.bytes.title', {
+        text: i18n.translate('indexPatternManagement.histogram.subFormat.bytes', {
           defaultMessage: 'Bytes',
         }),
       },
       {
         value: 'percent',
-        text: i18n.translate('data.fieldFormats.percent.title', {
-          defaultMessage: 'Percent',
+        text: i18n.translate('indexPatternManagement.histogram.subFormat.percent', {
+          defaultMessage: 'Percentage',
         }),
       },
     ];

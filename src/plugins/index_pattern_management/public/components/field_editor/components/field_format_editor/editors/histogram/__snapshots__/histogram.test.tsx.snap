@@ -57,7 +57,7 @@ exports[`HistogramFormatEditor should render normally 1`] = `
       </span>
     }
     isInvalid={false}
-    label="Numeral format pattern"
+    label="Numeral format pattern (optional)"
     labelType="label"
   >
     <EuiFieldText
