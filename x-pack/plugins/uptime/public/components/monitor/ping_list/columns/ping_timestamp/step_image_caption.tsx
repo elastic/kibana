@@ -19,7 +19,7 @@ export interface StepImageCaptionProps {
   setStepNumber: React.Dispatch<React.SetStateAction<number>>;
   stepNumber: number;
   timestamp: string;
-  isLoading?: boolean;
+  isLoading: boolean;
 }
 
 const ImageCaption = euiStyled.div`
@@ -47,7 +47,7 @@ export const StepImageCaption: React.FC<StepImageCaptionProps> = ({
               <EuiButtonEmpty
                 disabled={stepNumber === 1}
                 onClick={() => {
-                  setStepNumber((prevState) => prevState - 1);
+                  setStepNumber(stepNumber - 1);
                 }}
                 iconType="arrowLeft"
                 aria-label={prevAriaLabel}
@@ -63,7 +63,7 @@ export const StepImageCaption: React.FC<StepImageCaptionProps> = ({
               <EuiButtonEmpty
                 disabled={stepNumber === maxSteps}
                 onClick={() => {
-                  setStepNumber((prevState) => prevState + 1);
+                  setStepNumber(stepNumber + 1);
                 }}
                 iconType="arrowRight"
                 iconSide="right"
