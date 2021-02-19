@@ -67,7 +67,7 @@ Having UNS as a single source of truth reduces the disk space usage for the syst
 - *Source* - a program entity creating a notification event.
 - *Sourcing* - collects notification events created by different internal sources.
 - *Notification* system - abstracts the way notifications are created, stored, configured, and retrieved.  Ensures compatible operation for on-prem and Cloud Kibana versions.
-- *Delivery* - provides API for Kibana UI to retrieve the latest notifications for a user, to update notification status (is_read).
+- *Delivery* - provides API for Kibana UI to retrieve the latest notifications for a user, to update notification status.
 - *Settings* - provides API to adjust user-specific notification settings (unsubscribe from / subscribe to a source).
 ![image](../images/0014/kns_key_elements.png)
 
@@ -220,28 +220,34 @@ NS storage keeps different notification statuses for every user. Most Kibana dep
 although there are some odd instances with >100k users. So we consider two options at the moment (see the [workflow](https://docs.google.com/document/d/18s-BTHog_oPaQKf871gzuhxkah4pK1GYJM9DCLceaLo/edit#)):
 - Store notification state separately from a notification. State for new notifications created for every user when they change the state.
 ```typescript
-interface  NotificationState {
-  notification_id: string;
+interface  UserNotificationStatus {
+  recipient_id: string;
+  is_read: string[]; // list of read notificaiton_id
+  is_pinned: string[]; // list of pinned notificaiton_id
+}
+```
+This option consumes less storage space but require to read `UserNotificationStatus` object whenever a notification list is retieved.
+- Store user-specific `NotificationStatus` as [nested](https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-nested-query.html) field of `Notification`.
+```typescript
+interface  NotificationStatus {
   recipient_id: string;
   is_read: boolean;
   is_pinned: boolean;
 }
-``` 
-This option consumes less storage space but might lead to expensive read operations due to an additional JOIN call to search for notification state objects. We don’t expect Kibana to read more than 10-20 notifications at once, so the overhead might be acceptable. Also, this option doesn't rely on built-in ES functionality, which can simplify migration to SavedObject storage later.
-- Store user-specific `NotificationState` as [nested](https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-nested-query.html) field of `Notification`. This option can affect ES performance since it reindexes the whole document on every `nested` object update. It can lead to conflicts when several users update the notification state at the same time (see [Best suited for data that does not change frequently](https://www.elastic.co/blog/managing-relations-inside-elasticsearch))
-- Store user-specific `NotificationState` as [child](https://www.elastic.co/guide/en/elasticsearch/reference/current/parent-join.html) of `Notification` object. This option doesn't have the reindexing problem typical of the previous option. But [you cannot sort the results of a has_child/has_parent query using standard sort options.](https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-has-parent-query.html).
-- Create a copy for every notification in a user-specific list of notifications. Denormalization is [the recommended way to manage relationships](https://www.elastic.co/blog/managing-relations-inside-elasticsearch),
-but it leads to duplicating notification messages. 
+```
+This option can affect ES performance since it reindexes the whole document on every `nested` object update. It can lead to conflicts when several users update the notification state at the same time (see [Best suited for data that does not change frequently](https://www.elastic.co/blog/managing-relations-inside-elasticsearch))
+- Store user-specific `NotificationStatus` as [child](https://www.elastic.co/guide/en/elasticsearch/reference/current/parent-join.html) of `Notification` object. This option doesn't have the reindexing problem typical of the previous option. But [you cannot sort the results of a has_child/has_parent query using standard sort options.](https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-has-parent-query.html).
+- Create a copy for every notification in a user-specific list of notifications. Denormalization is [one of the recommended way to manage relationships](https://www.elastic.co/blog/managing-relations-inside-elasticsearch),
+but it leads to significant disk space consumption.
 
 Stale notifications and their states must be removed from the storage. There should be a dedicated task performing
-look up through the storage to remove notifications with *expire_at* > the current timestamp.
+lookup through the storage to remove notifications with *expire_at* > the current timestamp.
 
 Data are stored in the hidden system index to prevent accidental access by a random user.
 We don’t expect notifications to contain sensitive information.
 They must be stored in an encrypted form otherwise. 
-Kibana can query user-specific notifications by *recipent_id*.
 
-Alternative implementation might be to use SO with OLS([#17888](https://github.com/elastic/kibana/issues/17888)) and built-in migration support. The main obstacle to use SO is limited search functionality that doesn’t allow using complex search queries (can be addressed in [#84729](https://github.com/elastic/kibana/issues/84729)).
+Data are stored in form of SO in order to re-use OLS([#17888](https://github.com/elastic/kibana/issues/17888)) security mechanism and built-in migration support. The main obstacle to use SO is limited search functionality that doesn’t allow using complex search queries and aggregation(can be addressed in [#84729](https://github.com/elastic/kibana/issues/84729)). As a temporary workaround, NS can perform a search by querying a custom SO index directly.
 
 ### RemoteRepository
 Cloud plugin registered RemoteRepository as a strategy Kibana Notification Service for creation, storage,
@@ -277,7 +283,7 @@ to HTTP polling delivery mechanisms: passing information with a response header 
 
 #### Notification Status
 The delivery mechanism handles Notification status change performed by Kibana UI.
-Every notification has a different status for every user.
+Notification statuses are tracked separately for every user.
 Supported notification statuses:
 - `is_read: boolean`
 - `is_pinned: boolean`
