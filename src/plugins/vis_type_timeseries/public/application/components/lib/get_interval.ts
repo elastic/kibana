@@ -13,6 +13,8 @@ import { search } from '../../../../../../plugins/data/public';
 const { parseEsInterval } = search.aggs;
 import { GTE_INTERVAL_RE } from '../../../../common/interval_regexp';
 import { AUTO_INTERVAL } from '../../../../common/constants';
+import { PanelData, TimeseriesVisData } from '../../../../common/types';
+import { TimeseriesVisParams } from '../../../metrics_fn';
 
 export const unitLookup = {
   s: i18n.translate('visTypeTimeseries.getInterval.secondsLabel', { defaultMessage: 'seconds' }),
@@ -24,9 +26,11 @@ export const unitLookup = {
   y: i18n.translate('visTypeTimeseries.getInterval.yearsLabel', { defaultMessage: 'years' }),
 };
 
-export const convertIntervalIntoUnit = (interval, hasTranslateUnitString = true) => {
+type TimeUnits = Array<keyof typeof unitLookup>;
+
+export const convertIntervalIntoUnit = (interval: number, hasTranslateUnitString = true) => {
   // Iterate units from biggest to smallest
-  const units = Object.keys(unitLookup).reverse();
+  const units = Object.keys(unitLookup).reverse() as TimeUnits;
   const duration = moment.duration(interval, 'ms');
 
   for (let i = 0; i < units.length; i++) {
@@ -41,11 +45,16 @@ export const convertIntervalIntoUnit = (interval, hasTranslateUnitString = true)
   }
 };
 
-export const isGteInterval = (interval) => GTE_INTERVAL_RE.test(interval);
-export const isAutoInterval = (interval) => !interval || interval === AUTO_INTERVAL;
+export const isGteInterval = (interval: string) => GTE_INTERVAL_RE.test(interval);
+export const isAutoInterval = (interval: string) => !interval || interval === AUTO_INTERVAL;
 
-export const validateReInterval = (intervalValue) => {
-  const validationResult = {};
+interface ValidationResult {
+  errorMessage: string;
+  isValid: boolean;
+}
+
+export const validateReInterval = (intervalValue: string) => {
+  const validationResult = {} as ValidationResult;
 
   try {
     parseEsInterval(intervalValue);
@@ -58,14 +67,12 @@ export const validateReInterval = (intervalValue) => {
   return validationResult;
 };
 
-export const getInterval = (visData, model) => {
-  let series;
-
-  if (model && model.type === 'table') {
-    series = get(visData, `series[0].series`, []);
-  } else {
-    series = get(visData, `${model.id}.series`, []);
-  }
+export const getInterval = (visData: TimeseriesVisData, model: TimeseriesVisParams) => {
+  const series = get(
+    visData,
+    model?.type === 'table' ? `series[0].series` : `${model.id}.series`,
+    []
+  ) as PanelData[];
 
   return series.reduce((currentInterval, item) => {
     if (item.data.length > 1) {
