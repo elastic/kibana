@@ -216,6 +216,18 @@ syslog, Apache, and other webserver logs. See
 {kibana-ref}/xpack-grokdebugger.html[Debugging grok expressions].
 // end::grok-debugger-def[]
 
+[float]
+[[h_glos]]
+== H
+
+[[glossary-graph]] heat map ::
+// tag::heat-map-def[]
+A layer type in the *Maps* application. Heat maps cluster locations to show higher
+(or lower) densities. Heat maps describe a visualization with color-coded cells
+or regions to analyze patterns across multiple dimensions.
+See {kibana-ref}/heatmap-layer.html[Heat map layer].
+// end::heat-map-def[]
+
 
 [float]
 [[k_glos]]
@@ -455,4 +467,5 @@ See
 // tag::wms-def[]
 A layer type in the *Maps* application. WMS stands for Web Map Service.
 Add a WMS source to provide authoritative geographic context to your map.
+See the https://www.ogc.org/standards/wms[OpenGIS Web Map Service].
 // end::wms-def[]
