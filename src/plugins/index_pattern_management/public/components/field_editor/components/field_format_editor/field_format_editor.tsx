@@ -7,7 +7,7 @@
  */
 
 import React, { PureComponent, Fragment } from 'react';
-import { DefaultFormatEditor } from '../../components/field_format_editor/editors/default';
+import type { DefaultFormatEditor } from 'src/plugins/index_pattern_field_editor/public';
 
 export interface FieldFormatEditorProps {
   fieldType: string;
