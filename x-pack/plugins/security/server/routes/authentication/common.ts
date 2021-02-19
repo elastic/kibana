@@ -142,28 +142,23 @@ export function defineCommonRoutes({
       logger.info(`Logging in with provider "${providerName}" (${providerType})`);
 
       const redirectURL = parseNext(currentURL, basePath.serverBasePath);
-      try {
-        const authenticationResult = await getAuthenticationService().login(request, {
-          provider: { name: providerName },
-          redirectURL,
-          value: getLoginAttemptForProviderType(providerType, redirectURL, params),
-        });
+      const authenticationResult = await getAuthenticationService().login(request, {
+        provider: { name: providerName },
+        redirectURL,
+        value: getLoginAttemptForProviderType(providerType, redirectURL, params),
+      });
 
-        if (authenticationResult.redirected() || authenticationResult.succeeded()) {
-          return response.ok({
-            body: { location: authenticationResult.redirectURL || redirectURL },
-            headers: authenticationResult.authResponseHeaders,
-          });
-        }
-
-        return response.unauthorized({
-          body: authenticationResult.error,
+      if (authenticationResult.redirected() || authenticationResult.succeeded()) {
+        return response.ok({
+          body: { location: authenticationResult.redirectURL || redirectURL },
           headers: authenticationResult.authResponseHeaders,
         });
-      } catch (err) {
-        logger.error(err);
-        return response.internalError();
       }
+
+      return response.unauthorized({
+        body: authenticationResult.error,
+        headers: authenticationResult.authResponseHeaders,
+      });
     })
   );
 
@@ -178,12 +173,7 @@ export function defineCommonRoutes({
         });
       }
 
-      try {
-        await getAuthenticationService().acknowledgeAccessAgreement(request);
-      } catch (err) {
-        logger.error(err);
-        return response.internalError();
-      }
+      await getAuthenticationService().acknowledgeAccessAgreement(request);
 
       return response.noContent();
     })

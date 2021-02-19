@@ -9,10 +9,11 @@ import React from 'react';
 import { EuiContextMenuItem } from '@elastic/eui';
 
 import { CaseStatuses } from '../../../../../case/common/api';
+import { statuses } from '../status';
 import * as i18n from './translations';
 
 interface GetBulkItems {
-  caseStatus: string;
+  caseStatus: CaseStatuses;
   closePopover: () => void;
   deleteCasesAction: (cases: string[]) => void;
   selectedCaseIds: string[];
@@ -26,34 +27,72 @@ export const getBulkItems = ({
   selectedCaseIds,
   updateCaseStatus,
 }: GetBulkItems) => {
+  let statusMenuItems: JSX.Element[] = [];
+
+  const openMenuItem = (
+    <EuiContextMenuItem
+      data-test-subj="cases-bulk-open-button"
+      disabled={selectedCaseIds.length === 0}
+      key="cases-bulk-open-button"
+      icon={statuses[CaseStatuses.open].icon}
+      onClick={() => {
+        closePopover();
+        updateCaseStatus(CaseStatuses.open);
+      }}
+    >
+      {statuses[CaseStatuses.open].actions.bulk.title}
+    </EuiContextMenuItem>
+  );
+
+  const inProgressMenuItem = (
+    <EuiContextMenuItem
+      data-test-subj="cases-bulk-in-progress-button"
+      disabled={selectedCaseIds.length === 0}
+      key="cases-bulk-in-progress-button"
+      icon={statuses[CaseStatuses['in-progress']].icon}
+      onClick={() => {
+        closePopover();
+        updateCaseStatus(CaseStatuses['in-progress']);
+      }}
+    >
+      {statuses[CaseStatuses['in-progress']].actions.bulk.title}
+    </EuiContextMenuItem>
+  );
+
+  const closeMenuItem = (
+    <EuiContextMenuItem
+      data-test-subj="cases-bulk-close-button"
+      disabled={selectedCaseIds.length === 0}
+      key="cases-bulk-close-button"
+      icon={statuses[CaseStatuses.closed].icon}
+      onClick={() => {
+        closePopover();
+        updateCaseStatus(CaseStatuses.closed);
+      }}
+    >
+      {statuses[CaseStatuses.closed].actions.bulk.title}
+    </EuiContextMenuItem>
+  );
+
+  switch (caseStatus) {
+    case CaseStatuses.open:
+      statusMenuItems = [inProgressMenuItem, closeMenuItem];
+      break;
+
+    case CaseStatuses['in-progress']:
+      statusMenuItems = [openMenuItem, closeMenuItem];
+      break;
+
+    case CaseStatuses.closed:
+      statusMenuItems = [openMenuItem, inProgressMenuItem];
+      break;
+
+    default:
+      break;
+  }
+
   return [
-    caseStatus === CaseStatuses.open ? (
-      <EuiContextMenuItem
-        data-test-subj="cases-bulk-close-button"
-        disabled={selectedCaseIds.length === 0}
-        key={i18n.BULK_ACTION_CLOSE_SELECTED}
-        icon="folderCheck"
-        onClick={() => {
-          closePopover();
-          updateCaseStatus(CaseStatuses.closed);
-        }}
-      >
-        {i18n.BULK_ACTION_CLOSE_SELECTED}
-      </EuiContextMenuItem>
-    ) : (
-      <EuiContextMenuItem
-        data-test-subj="cases-bulk-open-button"
-        disabled={selectedCaseIds.length === 0}
-        key={i18n.BULK_ACTION_OPEN_SELECTED}
-        icon="folderExclamation"
-        onClick={() => {
-          closePopover();
-          updateCaseStatus(CaseStatuses.open);
-        }}
-      >
-        {i18n.BULK_ACTION_OPEN_SELECTED}
-      </EuiContextMenuItem>
-    ),
+    ...statusMenuItems,
     <EuiContextMenuItem
       data-test-subj="cases-bulk-delete-button"
       key={i18n.BULK_ACTION_DELETE_SELECTED}
