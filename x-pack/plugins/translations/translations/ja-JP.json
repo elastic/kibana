@@ -589,8 +589,6 @@
     "dashboard.badge.readOnly.tooltip": "ダッシュボードを保存できません",
     "dashboard.changeViewModeConfirmModal.cancelButtonLabel": "編集を続行",
     "dashboard.changeViewModeConfirmModal.confirmButtonLabel": "変更を破棄",
-    "dashboard.changeViewModeConfirmModal.discardChangesDescription": "変更を破棄すると、元に戻すことはできません。",
-    "dashboard.changeViewModeConfirmModal.discardChangesTitle": "ダッシュボードへの変更を破棄しますか？",
     "dashboard.cloneModal.cloneDashboardTitleAriaLabel": "クローンダッシュボードタイトル",
     "dashboard.dashboardAppBreadcrumbsTitle": "ダッシュボード",
     "dashboard.dashboardGrid.toast.unableToLoadDashboardDangerMessage": "ダッシュボードが読み込めません。",
