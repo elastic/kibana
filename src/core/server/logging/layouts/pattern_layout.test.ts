@@ -66,28 +66,28 @@ expect.addSnapshotSerializer(stripAnsiSnapshotSerializer);
 test('`createConfigSchema()` creates correct schema.', () => {
   const layoutSchema = PatternLayout.configSchema;
 
-  const validConfigWithOptional = { kind: 'pattern' };
+  const validConfigWithOptional = { type: 'pattern' };
   expect(layoutSchema.validate(validConfigWithOptional)).toEqual({
     highlight: undefined,
-    kind: 'pattern',
+    type: 'pattern',
     pattern: undefined,
   });
 
   const validConfig = {
     highlight: true,
-    kind: 'pattern',
+    type: 'pattern',
     pattern: '%message',
   };
   expect(layoutSchema.validate(validConfig)).toEqual({
     highlight: true,
-    kind: 'pattern',
+    type: 'pattern',
     pattern: '%message',
   });
 
-  const wrongConfig1 = { kind: 'json' };
+  const wrongConfig1 = { type: 'json' };
   expect(() => layoutSchema.validate(wrongConfig1)).toThrow();
 
-  const wrongConfig2 = { kind: 'pattern', pattern: 1 };
+  const wrongConfig2 = { type: 'pattern', pattern: 1 };
   expect(() => layoutSchema.validate(wrongConfig2)).toThrow();
 });
 

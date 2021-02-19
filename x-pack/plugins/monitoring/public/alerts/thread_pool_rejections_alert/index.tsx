@@ -12,6 +12,7 @@ import { Expression, Props } from '../components/param_details_form/expression';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { AlertTypeModel } from '../../../../triggers_actions_ui/public/types';
 import { CommonAlertParamDetails } from '../../../common/types/alerts';
+import { ALERT_REQUIRES_APP_CONTEXT } from '../../../common/constants';
 
 interface ThreadPoolTypes {
   [key: string]: unknown;
@@ -60,6 +61,6 @@ export function createThreadPoolRejectionsAlertType(
       return { errors };
     },
     defaultActionMessage: '{{context.internalFullMessage}}',
-    requiresAppContext: true,
+    requiresAppContext: ALERT_REQUIRES_APP_CONTEXT,
   };
 }

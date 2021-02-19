@@ -27,6 +27,7 @@ interface TransformActionParamsOptions {
   actionParams: AlertActionParams;
   alertParams: AlertTypeParams;
   state: AlertInstanceState;
+  kibanaBaseUrl?: string;
   context: AlertInstanceContext;
 }
 
@@ -44,6 +45,7 @@ export function transformActionParams({
   context,
   actionParams,
   state,
+  kibanaBaseUrl,
   alertParams,
 }: TransformActionParamsOptions): AlertActionParams {
   // when the list of variables we pass in here changes,
@@ -61,6 +63,7 @@ export function transformActionParams({
     context,
     date: new Date().toISOString(),
     state,
+    kibanaBaseUrl,
     params: alertParams,
   };
   return actionsPlugin.renderActionParameterTemplates(actionTypeId, actionParams, variables);
