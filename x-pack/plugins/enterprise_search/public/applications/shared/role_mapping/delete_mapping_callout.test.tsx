@@ -21,4 +21,11 @@ describe('DeleteMappingCallout', () => {
     expect(wrapper.find(EuiCallOut)).toHaveLength(1);
     expect(wrapper.find(EuiButton).prop('onClick')).toEqual(handleDeleteMapping);
   });
+
+  it('handles button click', () => {
+    const wrapper = shallow(<DeleteMappingCallout handleDeleteMapping={handleDeleteMapping} />);
+    wrapper.find(EuiButton).simulate('click');
+
+    expect(handleDeleteMapping).toHaveBeenCalled();
+  });
 });

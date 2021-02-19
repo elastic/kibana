@@ -51,7 +51,7 @@ interface SharedRoleMapping extends ASRoleMapping, WSRoleMapping {
 interface Props {
   accessItemKey: 'groups' | 'engines';
   accessHeader: string;
-  roleMappings: ASRoleMapping[] | WSRoleMapping[];
+  roleMappings: Array<ASRoleMapping | WSRoleMapping>;
   addMappingButton: React.ReactNode;
   accessAllEngines?: boolean;
   shouldShowAuthProvider?: boolean;
@@ -83,15 +83,14 @@ export const RoleMappingsTable: React.FC<Props> = ({
   });
 
   const filterResults = (result: SharedRoleMapping) => {
-    const values = Object.values(result) as string[];
+    const values = Object.values(result);
     const regexp = new RegExp(filterValue, 'i');
     return values.filter((x) => regexp.test(x)).length > 0;
   };
 
-  const filteredResults = standardizeRoleMapping.filter(filterResults) as SharedRoleMapping[];
+  const filteredResults = standardizeRoleMapping.filter(filterResults);
   const getFirstAttributeName = (rules: RoleRules): string => Object.entries(rules)[0][0];
-  const getFirstAttributeValue = (rules: RoleRules): string =>
-    Object.entries(rules)[0][1] as string;
+  const getFirstAttributeValue = (rules: RoleRules): string => Object.entries(rules)[0][1];
 
   return (
     <>

@@ -11,7 +11,7 @@ import { shallow, ShallowWrapper } from 'enzyme';
 
 import { EuiComboBox, EuiFieldText } from '@elastic/eui';
 
-import { AttributeSelector } from './attribute_selector';
+import { AttributeSelector, AttributeName } from './attribute_selector';
 import { ANY_AUTH_PROVIDER, ANY_AUTH_PROVIDER_OPTION_LABEL } from './constants';
 
 const handleAttributeSelectorChange = jest.fn();
@@ -19,7 +19,7 @@ const handleAttributeValueChange = jest.fn();
 const handleAuthProviderChange = jest.fn();
 
 const baseProps = {
-  attributeName: 'An Attribute',
+  attributeName: 'username' as AttributeName,
   attributeValue: 'Something',
   attributes: ['a', 'b', 'c'],
   availableAuthProviders: ['ees_saml', 'kbn_saml'],
@@ -36,27 +36,27 @@ describe('AttributeSelector', () => {
   it('renders', () => {
     const wrapper = shallow(<AttributeSelector {...baseProps} />);
 
-    expect(wrapper.find('[data-test-subj="attributeSelector"]')).toBeDefined();
+    expect(wrapper.find('[data-test-subj="AttributeSelector"]').exists()).toBe(true);
   });
 
   it('renders disabled panel with className', () => {
     const wrapper = shallow(<AttributeSelector {...baseProps} disabled />);
 
-    expect(wrapper.find('[data-test-subj="attributeSelector"]').prop('className')).toEqual(
+    expect(wrapper.find('[data-test-subj="AttributeSelector"]').prop('className')).toEqual(
       'euiPanel--disabled'
     );
   });
 
   describe('Auth Providers', () => {
     const findAuthProvidersSelect = (wrapper: ShallowWrapper) =>
-      wrapper.find('[data-test-subj="authProviderSelect"]');
+      wrapper.find('[data-test-subj="AuthProviderSelect"]');
 
     it('will not render if "availableAuthProviders" prop has not been provided', () => {
       const wrapper = shallow(
         <AttributeSelector {...baseProps} availableAuthProviders={undefined} />
       );
 
-      expect(wrapper.find('[data-test-subj="authProviderSelect"]')).toHaveLength(0);
+      expect(findAuthProvidersSelect(wrapper)).toHaveLength(0);
     });
 
     it('handles fallback props', () => {
@@ -68,7 +68,7 @@ describe('AttributeSelector', () => {
         />
       );
 
-      const select = findAuthProvidersSelect(wrapper) as any;
+      const select: ShallowWrapper = findAuthProvidersSelect(wrapper);
 
       expect(select.prop('selectedOptions')).toEqual([
         {
@@ -87,7 +87,7 @@ describe('AttributeSelector', () => {
       expect(select.props().options).toEqual([
         {
           label: expect.any(String),
-          options: [{ label: 'Any', value: '*' }],
+          options: [{ label: ANY_AUTH_PROVIDER_OPTION_LABEL, value: '*' }],
         },
         {
           label: expect.any(String),

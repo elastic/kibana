@@ -31,8 +31,10 @@ import {
   ATTRIBUTE_VALUE_LABEL,
 } from './constants';
 
+export type AttributeName = keyof AttributeExamples | 'role';
+
 interface Props {
-  attributeName: string;
+  attributeName: AttributeName;
   attributeValue?: string;
   attributes: string[];
   selectedAuthProviders?: string[];
@@ -61,7 +63,7 @@ interface ChildOption extends EuiComboBoxOptionOption<string> {
   label: string;
 }
 
-const attributeValueExamples = {
+const attributeValueExamples: AttributeExamples = {
   username: 'elastic,*_system',
   email: 'user@example.com,*@example.org',
   metadata: '{"_reserved": true}',
@@ -105,7 +107,7 @@ export const AttributeSelector: React.FC<Props> = ({
 }) => {
   return (
     <EuiPanel
-      data-test-subj="attributeSelector"
+      data-test-subj="AttributeSelector"
       paddingSize="l"
       className={disabled ? 'euiPanel--disabled' : ''}
     >
@@ -118,7 +120,7 @@ export const AttributeSelector: React.FC<Props> = ({
           <EuiFlexItem>
             <EuiFormRow label={AUTH_PROVIDER_LABEL} fullWidth>
               <EuiComboBox
-                data-test-subj="authProviderSelect"
+                data-test-subj="AuthProviderSelect"
                 selectedOptions={getSelectedOptions(selectedAuthProviders, availableAuthProviders)}
                 options={getAuthProviderOptions(availableAuthProviders)}
                 onChange={(options) => {
@@ -171,7 +173,7 @@ export const AttributeSelector: React.FC<Props> = ({
               <EuiFieldText
                 value={attributeValue}
                 name="attribute-value"
-                placeholder={attributeValueExamples[attributeName as keyof AttributeExamples]}
+                placeholder={attributeValueExamples[attributeName]}
                 onChange={(e) => {
                   handleAttributeValueChange(e.target.value);
                 }}

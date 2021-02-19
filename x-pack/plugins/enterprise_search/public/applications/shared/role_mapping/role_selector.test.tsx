@@ -34,8 +34,7 @@ describe('RoleSelector', () => {
   it('calls method on change', () => {
     const wrapper = shallow(<RoleSelector {...props} />);
     const radio = wrapper.find(EuiRadio);
-    const event = { target: { value: 'bar' } };
-    radio.prop('onChange')(event as any);
+    radio.simulate('change', { target: { value: 'bar' } });
 
     expect(onChange).toHaveBeenCalled();
   });

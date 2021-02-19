@@ -9,17 +9,26 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EuiFieldSearch, EuiTableRow, EuiTextColor } from '@elastic/eui';
+import { EuiFieldSearch, EuiTableRow } from '@elastic/eui';
 
 import { wsRoleMapping, asRoleMapping } from './__mocks__/roles';
 
-import { ALL_LABEL } from './constants';
+import { ALL_LABEL, ANY_AUTH_PROVIDER_OPTION_LABEL } from './constants';
 
 import { RoleMappingsTable } from './role_mappings_table';
 
 describe('RoleMappingsTable', () => {
   const getRoleMappingPath = jest.fn();
-  const roleMappings = [wsRoleMapping] as any;
+  const roleMappings = [
+    {
+      ...wsRoleMapping,
+      accessItems: [
+        {
+          name: 'foo',
+        },
+      ],
+    },
+  ];
 
   const props = {
     accessItemKey: 'groups' as 'groups' | 'engines',
@@ -41,7 +50,7 @@ describe('RoleMappingsTable', () => {
     const wrapper = shallow(<RoleMappingsTable {...props} />);
 
     expect(wrapper.find('[data-test-subj="AuthProviderDisplay"]').prop('children')).toEqual(
-      'Any, other_auth'
+      `${ANY_AUTH_PROVIDER_OPTION_LABEL}, other_auth`
     );
   });
 
@@ -74,10 +83,8 @@ describe('RoleMappingsTable', () => {
       />
     );
 
-    expect(wrapper.find('[data-test-subj="AccessItemsList"]').prop('children')).toEqual(
-      <React.Fragment>
-        <EuiTextColor color="subdued">—</EuiTextColor>
-      </React.Fragment>
+    expect(wrapper.find('[data-test-subj="AccessItemsList"]').children().children().text()).toEqual(
+      '—'
     );
   });
 });
