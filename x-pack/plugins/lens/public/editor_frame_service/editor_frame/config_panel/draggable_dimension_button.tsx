@@ -107,13 +107,6 @@ export function DraggableDimensionButton({
     columnId,
   ]);
 
-  /* 2 to leave room for data panel and workspace, then go by layer index, then by group index */
-  const order = useMemo(() => [2, layerIndex, groupIndex, accessorIndex], [
-    layerIndex,
-    groupIndex,
-    accessorIndex,
-  ]);
-
   const handleOnDrop = React.useCallback(
     (droppedItem, selectedDropType) => onDrop(droppedItem, value, selectedDropType),
     [value, onDrop]
@@ -128,7 +121,7 @@ export function DraggableDimensionButton({
       <DragDrop
         getAdditionalClassesOnEnter={getAdditionalClassesOnEnter}
         getAdditionalClassesOnDroppable={getAdditionalClassesOnDroppable}
-        order={order}
+        order={[2, layerIndex, groupIndex, accessorIndex]}
         draggable
         dragType={isDraggedOperation(dragging) ? 'move' : 'copy'}
         dropType={dropType}

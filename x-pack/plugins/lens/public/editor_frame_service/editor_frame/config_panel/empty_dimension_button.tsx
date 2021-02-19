@@ -85,13 +85,6 @@ export function EmptyDimensionButton({
     [dropType, newColumnId, group.groupId, layerId, group.groupLabel, itemIndex, nextLabel]
   );
 
-  /* 2 to leave room for data panel and workspace, then go by layer index, then by group index */
-  const order = useMemo(() => [2, layerIndex, groupIndex, itemIndex], [
-    layerIndex,
-    groupIndex,
-    itemIndex,
-  ]);
-
   const handleOnDrop = React.useCallback(
     (droppedItem, selectedDropType) => onDrop(droppedItem, value, selectedDropType),
     [value, onDrop]
@@ -102,7 +95,7 @@ export function EmptyDimensionButton({
       <DragDrop
         getAdditionalClassesOnDroppable={getAdditionalClassesOnDroppable}
         value={value}
-        order={order}
+        order={[2, layerIndex, groupIndex, itemIndex]}
         onDrop={handleOnDrop}
         dropType={dropType}
       >
