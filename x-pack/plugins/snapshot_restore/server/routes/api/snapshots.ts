@@ -61,7 +61,7 @@ export function registerSnapshotsRoutes({
             body: e,
           });
         }
-        return res.internalError({ body: e });
+        throw e;
       }
 
       const snapshots: SnapshotDetails[] = [];
@@ -166,7 +166,7 @@ export function registerSnapshotsRoutes({
           });
         }
         // Case: default
-        return res.internalError({ body: e });
+        throw e;
       }
     })
   );
@@ -219,7 +219,7 @@ export function registerSnapshotsRoutes({
           });
         }
         // Case: default
-        return res.internalError({ body: e });
+        throw e;
       }
     })
   );
