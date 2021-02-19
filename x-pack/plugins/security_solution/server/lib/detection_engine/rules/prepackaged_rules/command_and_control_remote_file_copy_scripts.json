@@ -6,13 +6,14 @@
   "from": "now-9m",
   "index": [
     "winlogbeat-*",
-    "logs-endpoint.events.*"
+    "logs-endpoint.events.*",
+    "logs-windows.*"
   ],
   "language": "eql",
   "license": "Elastic License",
   "name": "Remote File Download via Script Interpreter",
   "query": "sequence by host.id, process.entity_id\n  [network where process.name : (\"wscript.exe\", \"cscript.exe\") and network.protocol != \"dns\" and\n   network.direction == \"outgoing\" and network.type == \"ipv4\" and destination.ip != \"127.0.0.1\"\n  ]\n  [file where event.type == \"creation\" and file.extension : (\"exe\", \"dll\")]\n",
-  "risk_score": 43,
+  "risk_score": 47,
   "rule_id": "1d276579-3380-4095-ad38-e596a01bc64f",
   "severity": "medium",
   "tags": [
@@ -40,5 +41,5 @@
     }
   ],
   "type": "eql",
-  "version": 1
+  "version": 2
 }
