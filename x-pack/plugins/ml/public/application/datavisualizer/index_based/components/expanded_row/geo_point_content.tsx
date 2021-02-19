@@ -38,12 +38,13 @@ export const GeoPointContent: FC<{
         indexPattern?.id !== undefined &&
         config !== undefined &&
         config.fieldName !== undefined &&
-        config.type === ML_JOB_FIELD_TYPES.GEO_POINT
+        (config.type === ML_JOB_FIELD_TYPES.GEO_POINT ||
+          config.type === ML_JOB_FIELD_TYPES.GE0_SHAPE)
       ) {
         const params = {
           indexPatternId: indexPattern.id,
           geoFieldName: config.fieldName,
-          geoFieldType: config.type as ES_GEO_FIELD_TYPE.GEO_POINT,
+          geoFieldType: config.type as ES_GEO_FIELD_TYPE,
           query: {
             query: combinedQuery.searchString,
             language: combinedQuery.searchQueryLanguage,

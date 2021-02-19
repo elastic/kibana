@@ -52,6 +52,7 @@ export const IndexBasedDataVisualizerExpandedRow = ({
         return <DateContent config={config} />;
 
       case ML_JOB_FIELD_TYPES.GEO_POINT:
+      case ML_JOB_FIELD_TYPES.GE0_SHAPE:
         return (
           <GeoPointContent
             config={config}
