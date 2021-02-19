@@ -67,7 +67,7 @@ export const serviceMapServiceNodeRoute = createRoute({
     path: t.type({
       serviceName: t.string,
     }),
-    query: t.intersection([rangeRt, uiFiltersRt]),
+    query: t.intersection([environmentRt, rangeRt]),
   }),
   options: { tags: ['access:apm'] },
   handler: async ({ context, request }) => {
@@ -88,6 +88,7 @@ export const serviceMapServiceNodeRoute = createRoute({
     );
 
     return getServiceMapServiceNodeInfo({
+      environment,
       setup,
       serviceName,
       searchAggregatedTransactions,
