@@ -13,11 +13,13 @@ import {
   EuiSelectableProps,
   EuiSwitch,
   EuiSwitchProps,
+  EuiText,
   htmlIdGenerator,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { EuiSelectableOption } from '@elastic/eui/src/components/selectable/selectable_option';
 import { FormattedMessage } from '@kbn/i18n/react';
+import styled from 'styled-components';
 import { PolicyData } from '../../../../../../../common/endpoint/types';
 import { MANAGEMENT_APP_ID } from '../../../../../common/constants';
 import { getPolicyDetailPath } from '../../../../../common/routing';
@@ -27,6 +29,13 @@ import { LinkToApp } from '../../../../../../common/components/endpoint/link_to_
 
 const NOOP = () => {};
 const DEFAULT_LIST_PROPS: EuiSelectableProps['listProps'] = { bordered: true, showIcons: false };
+
+const EffectivePolicyFormContainer = styled.div`
+  .policy-name .euiSelectableListItem__text {
+    text-decoration: none !important;
+    color: ${(props) => props.theme.eui.euiTextColor} !important;
+  }
+`;
 
 interface OptionPolicyData {
   policy: PolicyData;
@@ -75,6 +84,7 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
       return options
         .map<EffectedPolicyOption>((policy) => ({
           label: policy.name,
+          className: 'policy-name',
           prepend: (
             <EuiCheckbox
               id={htmlIdGenerator()()}
@@ -136,15 +146,19 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
     }, []);
 
     return (
-      <>
+      <EffectivePolicyFormContainer>
         <EuiFormRow
           fullWidth
-          label={i18n.translate(
-            'xpack.securitySolution.trustedapps.policySelect.globalSectionTitle',
-            {
-              defaultMessage: 'Global application',
-            }
-          )}
+          label={
+            <EuiText size="s">
+              <h3>
+                <FormattedMessage
+                  id="xpack.securitySolution.trustedapps.policySelect.globalSectionTitle"
+                  defaultMessage="Assignment"
+                />
+              </h3>
+            </EuiText>
+          }
         >
           <EuiSwitch
             label={i18n.translate(
@@ -175,7 +189,7 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
             {listBuilderCallback}
           </EuiSelectable>
         </EuiFormRow>
-      </>
+      </EffectivePolicyFormContainer>
     );
   }
 );
