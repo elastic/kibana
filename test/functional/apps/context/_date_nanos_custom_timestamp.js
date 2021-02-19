@@ -22,7 +22,6 @@ export default function ({ getService, getPageObjects }) {
   describe('context view for date_nanos with custom timestamp', () => {
     before(async function () {
       await security.testUser.setRoles(['kibana_admin', 'kibana_date_nanos_custom']);
-    before(async function() {
       await esArchiver.loadIfNeeded('date_nanos_custom');
       await kibanaServer.uiSettings.replace({ defaultIndex: TEST_INDEX_PATTERN });
       await kibanaServer.uiSettings.update({
