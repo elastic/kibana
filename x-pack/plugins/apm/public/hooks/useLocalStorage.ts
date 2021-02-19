@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 export function useLocalStorage<T>(key: string, defaultValue: T) {
-  const [item, setItem] = useState<T>(getFromStorage());
-
-  function getFromStorage() {
+  const getFromStorage = useCallback(() => {
     const storedItem = window.localStorage.getItem(key);
 
     let toStore: T = defaultValue;
@@ -26,7 +24,9 @@ export function useLocalStorage<T>(key: string, defaultValue: T) {
     }
 
     return toStore;
-  }
+  }, [key, defaultValue]);
+
+  const [item, setItem] = useState<T>(getFromStorage());
 
   const updateFromStorage = () => {
     const storedItem = getFromStorage();
@@ -50,6 +50,10 @@ export function useLocalStorage<T>(key: string, defaultValue: T) {
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    setItem(getFromStorage());
+  }, [getFromStorage]);
 
   return [item, saveToStorage] as const;
 }
