@@ -40,7 +40,7 @@ export async function getServiceErrorGroupComparisonStatistics({
   return withApmSpan(
     'get_service_error_group_comparison_statistics',
     async () => {
-      const { apmEventClient, start, end, esFilter } = setup;
+      const { apmEventClient, start, end } = setup;
 
       const { intervalString } = getBucketSize({ start, end, numBuckets });
 

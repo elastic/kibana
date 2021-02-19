@@ -303,9 +303,10 @@ export const serviceErrorGroupsPrimaryStatisticsRoute = createRoute({
 
     const {
       path: { serviceName },
-      query: { transactionType, environment },
+      query: { kuery, transactionType, environment },
     } = context.params;
     return getServiceErrorGroupPrimaryStatistics({
+      kuery,
       serviceName,
       setup,
       transactionType,
