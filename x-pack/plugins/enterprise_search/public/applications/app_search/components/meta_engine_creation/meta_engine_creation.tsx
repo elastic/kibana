@@ -60,9 +60,13 @@ export const MetaEngineCreation: React.FC = () => {
       engine: { maxEnginesPerMetaEngine } = { maxEnginesPerMetaEngine: Infinity },
     },
   } = useValues(AppLogic);
-  const { fetchIndexedEngineNames, setRawName, setSelectedIndexedEngineNames } = useActions(
-    MetaEngineCreationLogic
-  );
+
+  const {
+    fetchIndexedEngineNames,
+    setRawName,
+    setSelectedIndexedEngineNames,
+    submitEngine,
+  } = useActions(MetaEngineCreationLogic);
 
   const { rawName, name, indexedEngineNames, selectedIndexedEngineNames } = useValues(
     MetaEngineCreationLogic
@@ -92,6 +96,7 @@ export const MetaEngineCreation: React.FC = () => {
               data-test-subj="MetaEngineCreationForm"
               onSubmit={(e) => {
                 e.preventDefault();
+                submitEngine();
               }}
             >
               <EuiTitle>
@@ -130,6 +135,7 @@ export const MetaEngineCreation: React.FC = () => {
               <EuiSpacer />
               <EuiFormRow label={META_ENGINE_CREATION_FORM_ENGINE_SOURCE_ENGINES_LABEL} fullWidth>
                 <EuiComboBox
+                  data-test-subj="MetaEngineCreationSourceEnginesInput"
                   options={indexedEngineNames.map(engineNameToComboBoxOption)}
                   selectedOptions={selectedIndexedEngineNames.map(engineNameToComboBoxOption)}
                   onChange={(options) => {
@@ -138,7 +144,7 @@ export const MetaEngineCreation: React.FC = () => {
                 />
               </EuiFormRow>
               <EuiSpacer />
-              {selectedIndexedEngineNames.length >= maxEnginesPerMetaEngine && (
+              {selectedIndexedEngineNames.length > maxEnginesPerMetaEngine && (
                 <EuiCallOut
                   color="warning"
                   title={META_ENGINE_CREATION_FORM_MAX_SOURCE_ENGINES_WARNING_TITLE}
@@ -146,7 +152,11 @@ export const MetaEngineCreation: React.FC = () => {
               )}
               <EuiSpacer />
               <EuiButton
-                disabled={name.length === 0 || selectedIndexedEngineNames.length === 0}
+                disabled={
+                  name.length === 0 ||
+                  selectedIndexedEngineNames.length === 0 ||
+                  selectedIndexedEngineNames.length > maxEnginesPerMetaEngine
+                }
                 type="submit"
                 data-test-subj="NewMetaEngineSubmitButton"
                 fill

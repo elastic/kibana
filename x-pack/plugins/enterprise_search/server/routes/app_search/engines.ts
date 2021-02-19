@@ -45,6 +45,8 @@ export function registerEnginesRoutes({
         body: schema.object({
           name: schema.string(),
           language: schema.maybe(schema.string()),
+          source_engines: schema.maybe(schema.arrayOf(schema.string())),
+          type: schema.maybe(schema.string()),
         }),
       },
     },

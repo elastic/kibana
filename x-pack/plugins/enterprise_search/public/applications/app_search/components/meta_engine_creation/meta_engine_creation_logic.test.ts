@@ -89,5 +89,23 @@ describe('MetaEngineCreationLogic', () => {
         throw Error('TODO');
       });
     });
+
+    describe('submitEngine', () => {
+      beforeAll(() => {
+        mount({ language: 'English', rawName: 'test' });
+      });
+
+      afterAll(() => {
+        jest.clearAllMocks();
+      });
+
+      it('POSTS to /api/app_search/engines', () => {
+        throw Error('TODO');
+      });
+
+      it('calls flashAPIErrors on API Error', async () => {
+        throw Error('TODO');
+      });
+    });
   });
 });

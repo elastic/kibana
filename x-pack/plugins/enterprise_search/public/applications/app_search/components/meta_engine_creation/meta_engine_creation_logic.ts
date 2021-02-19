@@ -29,6 +29,7 @@ interface MetaEngineCreationActions {
   setSelectedIndexedEngineNames(
     selectedIndexedEngineNames: MetaEngineCreationValues['selectedIndexedEngineNames']
   ): { selectedIndexedEngineNames: MetaEngineCreationValues['selectedIndexedEngineNames'] };
+  submitEngine(): void;
 }
 
 export const MetaEngineCreationLogic = kea<
@@ -40,6 +41,7 @@ export const MetaEngineCreationLogic = kea<
     setIndexedEngineNames: (indexedEngineNames) => ({ indexedEngineNames }),
     setRawName: (rawName) => ({ rawName }),
     setSelectedIndexedEngineNames: (selectedIndexedEngineNames) => ({ selectedIndexedEngineNames }),
+    submitEngine: () => null,
   },
   reducers: {
     indexedEngineNames: [
@@ -85,6 +87,22 @@ export const MetaEngineCreationLogic = kea<
         if (page < response.meta.page.total_pages) {
           actions.fetchIndexedEngineNames(page + 1);
         }
+      }
+    },
+    submitEngine: async () => {
+      const { http } = HttpLogic.values;
+      const { name, selectedIndexedEngineNames } = values;
+
+      const body = JSON.stringify({
+        name,
+        type: 'meta',
+        source_engines: selectedIndexedEngineNames,
+      });
+
+      try {
+        await http.post('/api/app_search/engines', { body });
+      } catch (e) {
+        flashAPIErrors(e);
       }
     },
   }),

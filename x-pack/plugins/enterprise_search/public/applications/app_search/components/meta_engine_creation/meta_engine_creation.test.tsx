@@ -102,4 +102,16 @@ describe('MetaEngineCreation', () => {
       ).toBeTruthy();
     });
   });
+
+  describe('MetaEngineCreationSourceEnginesInput', () => {
+    it('uses selectedIndexedEngines as its value', () => {
+      const wrapper = shallow(<MetaEngineCreation />);
+      throw Error('TODO');
+    });
+
+    it('calls calls setSelectedIndexedEngines on change', () => {
+      const wrapper = shallow(<MetaEngineCreation />);
+      throw Error('TODO');
+    });
+  });
 });
