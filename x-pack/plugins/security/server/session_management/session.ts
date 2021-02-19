@@ -77,6 +77,22 @@ export interface SessionValueContentToEncrypt {
 }
 
 /**
+ * Parameters provided for the `SessionIndex.clearAll` method that determine which session index
+ * values should be cleared (removed from the index).
+ */
+export interface ClearAllSessionFilter {
+  /**
+   * Descriptor of the authentication provider that created sessions that should be cleared. Provider
+   * name is optional.
+   */
+  provider: { type: string; name?: string };
+  /**
+   * Optional name of the user whose sessions should be cleared.
+   */
+  username?: string;
+}
+
+/**
  * The SIDs and AAD must be unpredictable to prevent guessing attacks, where an attacker is able to
  * guess or predict the ID of a valid session through statistical analysis techniques. That's why we
  * generate SIDs and AAD using a secure PRNG and current OWASP guidance suggests a minimum of 16
@@ -375,6 +391,37 @@ export class Session {
     sessionLogger.debug('Successfully invalidated session.');
   }
 
+  /**
+   * Clears all existing session values.
+   * @param request Request instance to clear session value for.
+   * @param [filter] Filter that narrows down the list of the sessions that should be cleared.
+   */
+  async clearAll(request: KibanaRequest, filter?: ClearAllSessionFilter) {
+    // For this case method we don't require request to have the associated session, but nevertheless
+    // we still want to log the SID if session is available.
+    const sessionCookieValue = await this.options.sessionCookie.get(request);
+    const sessionLogger = this.getLoggerForSID(sessionCookieValue?.sid);
+    sessionLogger.debug('Invalidating sessions.');
+
+    const clearIndexFilter = filter?.username
+      ? {
+          provider: filter.provider,
+          usernameHash: createHash('sha3-256').update(filter.username).digest('hex'),
+        }
+      : filter;
+
+    // There are two things to be aware of here:
+    // 1. We don't clear the cookie for the current session as we cannot be sure that we removed the
+    // session index value for this session, but it's not a big deal since it will be automatically
+    // cleared as soon as it's reused anyway.
+    // 2. We only remove session index values and don't invalidate any Elasticsearch tokens that
+    // may have been stored there since we cannot decrypt the session content. To decrypt it we need
+    // AAD string that is separately stored in the user browser cookie.
+    const invalidatedSessionsCount = await this.options.sessionIndex.clearAll(clearIndexFilter);
+    sessionLogger.debug(`Successfully invalidated ${invalidatedSessionsCount} session(s).`);
+    return invalidatedSessionsCount;
+  }
+
   private calculateExpiry(
     provider: AuthenticationProvider,
     currentLifespanExpiration?: number | null
@@ -411,9 +458,9 @@ export class Session {
 
   /**
    * Creates logger scoped to a specified session ID.
-   * @param sid Session ID to create logger for.
+   * @param [sid] Session ID to create logger for.
    */
-  private getLoggerForSID(sid: string) {
-    return this.options.logger.get(sid?.slice(-10));
+  private getLoggerForSID(sid?: string) {
+    return this.options.logger.get(sid?.slice(-10) ?? 'x'.repeat(10));
   }
 }

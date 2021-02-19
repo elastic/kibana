@@ -17,6 +17,22 @@ export interface SessionIndexOptions {
 }
 
 /**
+ * Parameters provided for the `SessionIndex.clearAll` method that determine which session index
+ * values should be cleared (removed from the index).
+ */
+export interface ClearAllSessionIndexFilter {
+  /**
+   * Descriptor of the authentication provider that created sessions that should be cleared. Provider
+   * name is optional.
+   */
+  provider: { type: string; name?: string };
+  /**
+   * Optional hash of the name of the user whose sessions should be cleared.
+   */
+  usernameHash?: string;
+}
+
+/**
  * Version of the current session index template.
  */
 const SESSION_INDEX_TEMPLATE_VERSION = 1;
@@ -249,6 +265,42 @@ export class SessionIndex {
       );
     } catch (err) {
       this.options.logger.error(`Failed to clear session value: ${err.message}`);
+      throw err;
+    }
+  }
+
+  /**
+   * Clears all existing session values optionally filtered by the `filter` parameter.
+   * @param [filter] Filter that narrows down the list of the session values that should be cleared.
+   * @returns A number of cleared session index values.
+   */
+  async clearAll(filter?: ClearAllSessionIndexFilter) {
+    // If filter is specified we should clear only session values that are matched by the filter.
+    // Otherwise all session values should be cleared.
+    let deleteQuery;
+    if (filter) {
+      deleteQuery = {
+        bool: {
+          must: [
+            { term: { 'provider.type': filter.provider.type } },
+            ...(filter.provider.name ? [{ term: { 'provider.name': filter.provider.name } }] : []),
+            ...(filter.usernameHash ? [{ term: { usernameHash: filter.usernameHash } }] : []),
+          ],
+        },
+      };
+    } else {
+      deleteQuery = { match_all: {} };
+    }
+
+    try {
+      const { body: response } = await this.options.elasticsearchClient.deleteByQuery({
+        index: this.indexName,
+        refresh: true,
+        body: { query: deleteQuery },
+      });
+      return response.deleted as number;
+    } catch (err) {
+      this.options.logger.error(`Failed to clear sessions: ${err.message}`);
       throw err;
     }
   }

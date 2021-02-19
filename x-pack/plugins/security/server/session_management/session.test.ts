@@ -807,4 +807,61 @@ describe('Session', () => {
       expect(mockSessionCookie.clear).toHaveBeenCalledWith(mockRequest);
     });
   });
+
+  describe('#clearAll', () => {
+    beforeEach(() => {
+      mockSessionCookie.get.mockResolvedValue(sessionCookieMock.createValue());
+      mockSessionIndex.clearAll.mockResolvedValue(10);
+    });
+
+    it('clears all sessions even if current initiator request does not have a session', async () => {
+      mockSessionCookie.get.mockResolvedValue(null);
+
+      await expect(session.clearAll(httpServerMock.createKibanaRequest())).resolves.toBe(10);
+
+      expect(mockSessionCookie.clear).not.toHaveBeenCalled();
+      expect(mockSessionIndex.clearAll).toHaveBeenCalledTimes(1);
+      expect(mockSessionIndex.clearAll).toHaveBeenCalledWith(undefined);
+    });
+
+    it('properly forwards filter with the provider type to the session index', async () => {
+      await expect(
+        session.clearAll(httpServerMock.createKibanaRequest(), { provider: { type: 'basic' } })
+      ).resolves.toBe(10);
+
+      expect(mockSessionCookie.clear).not.toHaveBeenCalled();
+      expect(mockSessionIndex.clearAll).toHaveBeenCalledTimes(1);
+      expect(mockSessionIndex.clearAll).toHaveBeenCalledWith({ provider: { type: 'basic' } });
+    });
+
+    it('properly forwards filter with the provider type and provider name to the session index', async () => {
+      await expect(
+        session.clearAll(httpServerMock.createKibanaRequest(), {
+          provider: { type: 'basic', name: 'basic1' },
+        })
+      ).resolves.toBe(10);
+
+      expect(mockSessionCookie.clear).not.toHaveBeenCalled();
+      expect(mockSessionIndex.clearAll).toHaveBeenCalledTimes(1);
+      expect(mockSessionIndex.clearAll).toHaveBeenCalledWith({
+        provider: { type: 'basic', name: 'basic1' },
+      });
+    });
+
+    it('properly forwards filter with the provider type, provider name, and username hash to the session index', async () => {
+      await expect(
+        session.clearAll(httpServerMock.createKibanaRequest(), {
+          provider: { type: 'basic', name: 'basic1' },
+          username: 'elastic',
+        })
+      ).resolves.toBe(10);
+
+      expect(mockSessionCookie.clear).not.toHaveBeenCalled();
+      expect(mockSessionIndex.clearAll).toHaveBeenCalledTimes(1);
+      expect(mockSessionIndex.clearAll).toHaveBeenCalledWith({
+        provider: { type: 'basic', name: 'basic1' },
+        usernameHash: 'eb28536c8ead72bf81a0a9226e38fc9bad81f5e07c2081bb801b2a5c8842924e',
+      });
+    });
+  });
 });

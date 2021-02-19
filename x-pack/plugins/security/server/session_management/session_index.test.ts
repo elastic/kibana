@@ -161,7 +161,7 @@ describe('Session index', () => {
     });
   });
 
-  describe('cleanUp', () => {
+  describe('#cleanUp', () => {
     const now = 123456;
     beforeEach(() => {
       mockElasticsearchClient.deleteByQuery.mockResolvedValue(
@@ -814,6 +814,115 @@ describe('Session index', () => {
         { id: 'some-long-sid', index: indexName, refresh: 'wait_for' },
         { ignore: [404] }
       );
+    });
+  });
+
+  describe('#clearAll', () => {
+    beforeEach(() => {
+      mockElasticsearchClient.deleteByQuery.mockResolvedValue(
+        securityMock.createApiResponse({ body: { deleted: 10 } })
+      );
+    });
+
+    it('throws if call to Elasticsearch fails', async () => {
+      const failureReason = new errors.ResponseError(
+        securityMock.createApiResponse(securityMock.createApiResponse({ body: { type: 'Uh oh.' } }))
+      );
+      mockElasticsearchClient.deleteByQuery.mockRejectedValue(failureReason);
+
+      await expect(sessionIndex.clearAll()).rejects.toBe(failureReason);
+    });
+
+    it('when filter is not specified', async () => {
+      await expect(sessionIndex.clearAll()).resolves.toBe(10);
+
+      expect(mockElasticsearchClient.deleteByQuery).toHaveBeenCalledTimes(1);
+      expect(mockElasticsearchClient.deleteByQuery).toHaveBeenCalledWith({
+        index: indexName,
+        refresh: true,
+        body: { query: { match_all: {} } },
+      });
+    });
+
+    it('when only provider type is specified', async () => {
+      await expect(sessionIndex.clearAll({ provider: { type: 'basic' } })).resolves.toBe(10);
+
+      expect(mockElasticsearchClient.deleteByQuery).toHaveBeenCalledTimes(1);
+      expect(mockElasticsearchClient.deleteByQuery).toHaveBeenCalledWith({
+        index: indexName,
+        refresh: true,
+        body: { query: { bool: { must: [{ term: { 'provider.type': 'basic' } }] } } },
+      });
+    });
+
+    it('when both provider type and provider name are specified', async () => {
+      await expect(
+        sessionIndex.clearAll({ provider: { type: 'basic', name: 'basic1' } })
+      ).resolves.toBe(10);
+
+      expect(mockElasticsearchClient.deleteByQuery).toHaveBeenCalledTimes(1);
+      expect(mockElasticsearchClient.deleteByQuery).toHaveBeenCalledWith({
+        index: indexName,
+        refresh: true,
+        body: {
+          query: {
+            bool: {
+              must: [
+                { term: { 'provider.type': 'basic' } },
+                { term: { 'provider.name': 'basic1' } },
+              ],
+            },
+          },
+        },
+      });
+    });
+
+    it('when both provider type and username hash are specified', async () => {
+      await expect(
+        sessionIndex.clearAll({ provider: { type: 'basic' }, usernameHash: 'some-hash' })
+      ).resolves.toBe(10);
+
+      expect(mockElasticsearchClient.deleteByQuery).toHaveBeenCalledTimes(1);
+      expect(mockElasticsearchClient.deleteByQuery).toHaveBeenCalledWith({
+        index: indexName,
+        refresh: true,
+        body: {
+          query: {
+            bool: {
+              must: [
+                { term: { 'provider.type': 'basic' } },
+                { term: { usernameHash: 'some-hash' } },
+              ],
+            },
+          },
+        },
+      });
+    });
+
+    it('when provider type, provider name, and username hash are specified', async () => {
+      await expect(
+        sessionIndex.clearAll({
+          provider: { type: 'basic', name: 'basic1' },
+          usernameHash: 'some-hash',
+        })
+      ).resolves.toBe(10);
+
+      expect(mockElasticsearchClient.deleteByQuery).toHaveBeenCalledTimes(1);
+      expect(mockElasticsearchClient.deleteByQuery).toHaveBeenCalledWith({
+        index: indexName,
+        refresh: true,
+        body: {
+          query: {
+            bool: {
+              must: [
+                { term: { 'provider.type': 'basic' } },
+                { term: { 'provider.name': 'basic1' } },
+                { term: { usernameHash: 'some-hash' } },
+              ],
+            },
+          },
+        },
+      });
     });
   });
 });

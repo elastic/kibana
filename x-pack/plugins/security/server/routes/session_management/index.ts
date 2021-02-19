@@ -5,11 +5,13 @@
  * 2.0.
  */
 
+import { defineDeleteAllSessionsRoutes } from './delete_all';
 import { defineSessionExtendRoutes } from './extend';
 import { defineSessionInfoRoutes } from './info';
-import { RouteDefinitionParams } from '..';
+import type { RouteDefinitionParams } from '..';
 
 export function defineSessionManagementRoutes(params: RouteDefinitionParams) {
   defineSessionInfoRoutes(params);
   defineSessionExtendRoutes(params);
+  defineDeleteAllSessionsRoutes(params);
 }
