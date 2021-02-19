@@ -32,7 +32,7 @@ import {
   comment,
   entry,
   entriesNested,
-  nestedEntries,
+  nestedEntryItem,
   createExceptionListItemSchema,
   exceptionListItemSchema,
   UpdateExceptionListItemSchema,
@@ -177,7 +177,7 @@ export const filterExceptionItems = (
       const entries = exception.entries.reduce<BuilderEntry[]>((nestedAcc, singleEntry) => {
         if (singleEntry.type === 'nested') {
           const nestedEntriesArray = singleEntry.entries.filter((singleNestedEntry) => {
-            const [validatedNestedEntry] = validate(singleNestedEntry, nestedEntries);
+            const [validatedNestedEntry] = validate(singleNestedEntry, nestedEntryItem);
 
             if (validatedNestedEntry != null) {
               return true;
