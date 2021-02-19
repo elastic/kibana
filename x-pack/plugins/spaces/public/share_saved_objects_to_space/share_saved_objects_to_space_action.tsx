@@ -5,13 +5,28 @@
  * 2.0.
  */
 
+import { EuiLoadingSpinner } from '@elastic/eui';
 import React from 'react';
 
 import { i18n } from '@kbn/i18n';
 import type { SavedObjectsManagementRecord } from 'src/plugins/saved_objects_management/public';
-import type { SpacesApiUi } from 'src/plugins/spaces_oss/public';
+import type { SpacesApiUi, ShareToSpaceFlyoutProps } from 'src/plugins/spaces_oss/public';
 
 import { SavedObjectsManagementAction } from '../../../../../src/plugins/saved_objects_management/public';
+
+type WrapperProps = ShareToSpaceFlyoutProps & {
+  spacesApiUi: SpacesApiUi;
+};
+
+const Wrapper = ({ spacesApiUi, ...props }: WrapperProps) => {
+  const LazyComponent = React.lazy(spacesApiUi.components.getShareToSpaceFlyout);
+
+  return (
+    <React.Suspense fallback={<EuiLoadingSpinner />}>
+      <LazyComponent {...props} />
+    </React.Suspense>
+  );
+};
 
 export class ShareToSpaceSavedObjectsManagementAction extends SavedObjectsManagementAction {
   public id: string = 'share_saved_objects_to_space';
@@ -49,25 +64,22 @@ export class ShareToSpaceSavedObjectsManagementAction extends SavedObjectsManage
       throw new Error('No record available! `render()` was likely called before `start()`.');
     }
 
-    const savedObjectTarget = {
-      type: this.record.type,
-      id: this.record.id,
-      namespaces: this.record.namespaces ?? [],
-      title: this.record.meta.title,
-      icon: this.record.meta.icon,
+    const props: ShareToSpaceFlyoutProps = {
+      savedObjectTarget: {
+        type: this.record.type,
+        id: this.record.id,
+        namespaces: this.record.namespaces ?? [],
+        title: this.record.meta.title,
+        icon: this.record.meta.icon,
+      },
+      flyoutIcon: 'share',
+      onUpdate: () => (this.isDataChanged = true),
+      onClose: this.onClose,
+      enableCreateCopyCallout: true,
+      enableCreateNewSpaceLink: true,
     };
-    const { ShareToSpaceFlyout } = this.spacesApiUi.components;
 
-    return (
-      <ShareToSpaceFlyout
-        savedObjectTarget={savedObjectTarget}
-        flyoutIcon="share"
-        onUpdate={() => (this.isDataChanged = true)}
-        onClose={this.onClose}
-        enableCreateCopyCallout={true}
-        enableCreateNewSpaceLink={true}
-      />
-    );
+    return <Wrapper spacesApiUi={this.spacesApiUi} {...props} />;
   };
 
   private onClose = () => {

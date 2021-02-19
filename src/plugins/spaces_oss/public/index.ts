@@ -16,6 +16,7 @@ export {
 } from './types';
 
 export {
+  LazyComponentFn,
   SpacesApi,
   SpacesApiUi,
   SpacesApiUiComponent,

@@ -27,9 +27,16 @@ export const getComponents = ({
   getStartServices,
 }: GetComponentsOptions): SpacesApiUiComponent => {
   return {
-    SpacesContext: getSpacesContextWrapper({ spacesManager, getStartServices }),
-    ShareToSpaceFlyout: getShareToSpaceFlyoutComponent(),
-    SpaceList: getSpaceListComponent(),
-    LegacyUrlConflict: getLegacyUrlConflict({ getStartServices }),
+    getSpacesContext: lazy(() => getSpacesContextWrapper({ spacesManager, getStartServices })),
+    getShareToSpaceFlyout: lazy(getShareToSpaceFlyoutComponent),
+    getSpaceList: lazy(getSpaceListComponent),
+    getLegacyUrlConflict: lazy(() => getLegacyUrlConflict({ getStartServices })),
   };
 };
+
+/**
+ * Returns a lazy-loadable version of a component. React expects these to be default exports.
+ */
+function lazy<T>(fn: () => React.FunctionComponent<T>) {
+  return () => Promise.resolve({ default: fn() });
+}

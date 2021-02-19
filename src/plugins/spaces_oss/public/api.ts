@@ -23,11 +23,18 @@ export interface SpacesApi {
 }
 
 /**
+ * Function that returns a promise for a lazy-loadable component.
+ *
+ * @public
+ */
+export type LazyComponentFn<T> = () => Promise<{ default: FunctionComponent<T> }>;
+
+/**
  * @public
  */
 export interface SpacesApiUi {
   /**
-   * {@link SpacesApiUiComponent | React components} to support the spaces feature.
+   * Lazy-loadable {@link SpacesApiUiComponent | React components} to support the spaces feature.
    */
   components: SpacesApiUiComponent;
   /**
@@ -62,13 +69,13 @@ export interface SpacesApiUiComponent {
   /**
    * Provides a context that is required to render some Spaces components.
    */
-  SpacesContext: FunctionComponent<SpacesContextProps>;
+  getSpacesContext: LazyComponentFn<SpacesContextProps>;
   /**
    * Displays a flyout to edit the spaces that an object is shared to.
    *
    * Note: must be rendered inside of a SpacesContext.
    */
-  ShareToSpaceFlyout: FunctionComponent<ShareToSpaceFlyoutProps>;
+  getShareToSpaceFlyout: LazyComponentFn<ShareToSpaceFlyoutProps>;
   /**
    * Displays a corresponding list of spaces for a given list of saved object namespaces. It shows up to five spaces (and an indicator for
    * any number of spaces that the user is not authorized to see) by default. If more than five named spaces would be displayed, the extras
@@ -77,7 +84,7 @@ export interface SpacesApiUiComponent {
    *
    * Note: must be rendered inside of a SpacesContext.
    */
-  SpaceList: FunctionComponent<SpaceListProps>;
+  getSpaceList: LazyComponentFn<SpaceListProps>;
   /**
    * Displays a callout that needs to be used if a call to `SavedObjectsClient.resolve()` results in an `"conflict"` outcome, which
    * indicates that the user has loaded the page which is associated directly with one object (A), *and* with a legacy URL that points to a
@@ -95,7 +102,7 @@ export interface SpacesApiUiComponent {
    *
    * New URL path: `#/workpad/workpad-e08b9bdb-ec14-4339-94c4-063bddfd610e/page/1`
    */
-  LegacyUrlConflict: FunctionComponent<LegacyUrlConflictProps>;
+  getLegacyUrlConflict: LazyComponentFn<LegacyUrlConflictProps>;
 }
 
 /**

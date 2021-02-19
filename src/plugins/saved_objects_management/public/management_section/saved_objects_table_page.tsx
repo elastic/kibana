@@ -9,13 +9,16 @@
 import React, { useEffect, useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
 import { get } from 'lodash';
-import { Query } from '@elastic/eui';
+import { EuiLoadingSpinner, Query } from '@elastic/eui';
 import { parse } from 'query-string';
 import { i18n } from '@kbn/i18n';
 import { CoreStart, ChromeBreadcrumb } from 'src/core/public';
+import type {
+  SpacesAvailableStartContract,
+  SpacesContextProps,
+} from 'src/plugins/spaces_oss/public';
 import { DataPublicPluginStart } from '../../../data/public';
 import { SavedObjectsTaggingApi } from '../../../saved_objects_tagging_oss/public';
-import type { SpacesAvailableStartContract } from '../../../spaces_oss/public';
 import {
   ISavedObjectsManagementServiceRegistry,
   SavedObjectsManagementActionServiceStart,
@@ -23,7 +26,9 @@ import {
 } from '../services';
 import { SavedObjectsTable } from './objects_table';
 
-const EmptyFunctionComponent: React.FC = ({ children }) => <>{children}</>;
+const getEmptyFunctionComponent = async () => ({
+  default: (({ children }) => <>{children}</>) as React.FC,
+});
 
 const SavedObjectsTablePage = ({
   coreStart,
@@ -71,41 +76,46 @@ const SavedObjectsTablePage = ({
   }, [setBreadcrumbs]);
 
   const ContextWrapper = useMemo(
-    () => spacesApi?.ui.components.SpacesContext || EmptyFunctionComponent,
+    () =>
+      React.lazy<React.FC<SpacesContextProps>>(
+        spacesApi ? spacesApi.ui.components.getSpacesContext : getEmptyFunctionComponent
+      ),
     [spacesApi]
   );
 
   return (
-    <ContextWrapper>
-      <SavedObjectsTable
-        initialQuery={initialQuery}
-        allowedTypes={allowedTypes}
-        serviceRegistry={serviceRegistry}
-        actionRegistry={actionRegistry}
-        columnRegistry={columnRegistry}
-        taggingApi={taggingApi}
-        savedObjectsClient={coreStart.savedObjects.client}
-        indexPatterns={dataStart.indexPatterns}
-        search={dataStart.search}
-        http={coreStart.http}
-        overlays={coreStart.overlays}
-        notifications={coreStart.notifications}
-        applications={coreStart.application}
-        perPageConfig={itemsPerPage}
-        goInspectObject={(savedObject) => {
-          const { editUrl } = savedObject.meta;
-          if (editUrl) {
-            return coreStart.application.navigateToUrl(
-              coreStart.http.basePath.prepend(`/app${editUrl}`)
-            );
-          }
-        }}
-        canGoInApp={(savedObject) => {
-          const { inAppUrl } = savedObject.meta;
-          return inAppUrl ? Boolean(get(capabilities, inAppUrl.uiCapabilitiesPath)) : false;
-        }}
-      />
-    </ContextWrapper>
+    <React.Suspense fallback={<EuiLoadingSpinner />}>
+      <ContextWrapper>
+        <SavedObjectsTable
+          initialQuery={initialQuery}
+          allowedTypes={allowedTypes}
+          serviceRegistry={serviceRegistry}
+          actionRegistry={actionRegistry}
+          columnRegistry={columnRegistry}
+          taggingApi={taggingApi}
+          savedObjectsClient={coreStart.savedObjects.client}
+          indexPatterns={dataStart.indexPatterns}
+          search={dataStart.search}
+          http={coreStart.http}
+          overlays={coreStart.overlays}
+          notifications={coreStart.notifications}
+          applications={coreStart.application}
+          perPageConfig={itemsPerPage}
+          goInspectObject={(savedObject) => {
+            const { editUrl } = savedObject.meta;
+            if (editUrl) {
+              return coreStart.application.navigateToUrl(
+                coreStart.http.basePath.prepend(`/app${editUrl}`)
+              );
+            }
+          }}
+          canGoInApp={(savedObject) => {
+            const { inAppUrl } = savedObject.meta;
+            return inAppUrl ? Boolean(get(capabilities, inAppUrl.uiCapabilitiesPath)) : false;
+          }}
+        />
+      </ContextWrapper>
+    </React.Suspense>
   );
 };
 // eslint-disable-next-line import/no-default-export

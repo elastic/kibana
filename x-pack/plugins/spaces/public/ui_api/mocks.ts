@@ -9,10 +9,10 @@ import type { SpacesApiUi, SpacesApiUiComponent } from 'src/plugins/spaces_oss/p
 
 function createComponentsMock(): jest.Mocked<SpacesApiUiComponent> {
   return {
-    SpacesContext: jest.fn(),
-    ShareToSpaceFlyout: jest.fn(),
-    SpaceList: jest.fn(),
-    LegacyUrlConflict: jest.fn(),
+    getSpacesContext: jest.fn(),
+    getShareToSpaceFlyout: jest.fn(),
+    getSpaceList: jest.fn(),
+    getLegacyUrlConflict: jest.fn(),
   };
 }
 
