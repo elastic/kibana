@@ -50,11 +50,11 @@ For example, among other things, _drift_:
 
 Following the <<task-manager-diagnosing-root-cause>> step-by-step guide should aid in identifying the correct resolution.
 
-_Drift_ is often be addressed by adjusting the scaling the deployment to better suit your usage.
+_Drift_ is often addressed by adjusting the scaling the deployment to better suit your usage.
 For details on scaling Task Manager, see <<task-manager-scaling-guidance>>.
 
 [[task-manager-diagnosing-root-cause]]
-==== Diagnosing A Root Cause For Drift
+=== Diagnosing A Root Cause For Drift
 
 The following is a step-by-step guide to identifying a root cause for _drift_ by making sense of the output from the <<task-manager-health-monitoring>> endpoint.
 
