@@ -33,7 +33,6 @@ import {
 import * as i18nCommon from '../../../translations';
 import * as i18n from './translations';
 import * as sharedI18n from '../translations';
-import { Ecs } from '../../../../../common/ecs';
 import { osTypeArray, OsTypeArray } from '../../../../../common/shared_imports';
 import { useAppToasts } from '../../../hooks/use_app_toasts';
 import { useKibana } from '../../../lib/kibana';
@@ -53,7 +52,7 @@ import {
   entryHasNonEcsType,
 } from '../helpers';
 import { ErrorInfo, ErrorCallout } from '../error_callout';
-import { ExceptionsBuilderExceptionItem } from '../types';
+import { AlertData, ExceptionsBuilderExceptionItem } from '../types';
 import { useFetchIndex } from '../../../containers/source';
 import { useGetInstalledJob } from '../../ml/hooks/use_get_jobs';
 
@@ -62,7 +61,14 @@ export interface AddExceptionModalProps {
   ruleId: string;
   exceptionListType: ExceptionListType;
   ruleIndices: string[];
-  alertData?: Ecs;
+  alertData?: AlertData;
+  /**
+   * The components that use this may or may not define `alertData`
+   * If they do, they need to fetch it async. In that case `alertData` will be
+   * undefined while `isAlertDataLoading` will be true. In the case that `alertData`
+   *  is not used, `isAlertDataLoading` will be undefined
+   */
+  isAlertDataLoading?: boolean;
   alertStatus?: Status;
   onCancel: () => void;
   onConfirm: (didCloseAlert: boolean, didBulkCloseAlert: boolean) => void;
@@ -103,6 +109,7 @@ export const AddExceptionModal = memo(function AddExceptionModal({
   ruleIndices,
   exceptionListType,
   alertData,
+  isAlertDataLoading,
   onCancel,
   onConfirm,
   onRuleChange,
@@ -239,7 +246,7 @@ export const AddExceptionModal = memo(function AddExceptionModal({
     } else {
       return [];
     }
-  }, [alertData, exceptionListType, ruleExceptionList, ruleName]);
+  }, [exceptionListType, ruleExceptionList, ruleName, alertData]);
 
   useEffect((): void => {
     if (isSignalIndexPatternLoading === false && isSignalIndexLoading === false) {
@@ -372,6 +379,7 @@ export const AddExceptionModal = memo(function AddExceptionModal({
         (isLoadingExceptionList ||
           isIndexPatternLoading ||
           isSignalIndexLoading ||
+          isAlertDataLoading ||
           isSignalIndexPatternLoading) && (
           <Loader data-test-subj="loadingAddExceptionModal" size="xl" />
         )}
@@ -382,6 +390,7 @@ export const AddExceptionModal = memo(function AddExceptionModal({
         !isIndexPatternLoading &&
         !isRuleLoading &&
         !mlJobLoading &&
+        !isAlertDataLoading &&
         ruleExceptionList && (
           <>
             <ModalBodySection className="builder-section">
@@ -421,7 +430,7 @@ export const AddExceptionModal = memo(function AddExceptionModal({
             </ModalBodySection>
             <EuiHorizontalRule />
             <ModalBodySection>
-              {alertData !== undefined && alertStatus !== 'closed' && (
+              {alertData != null && alertStatus !== 'closed' && (
                 <EuiFormRow fullWidth>
                   <EuiCheckbox
                     data-test-subj="close-alert-on-add-add-exception-checkbox"
