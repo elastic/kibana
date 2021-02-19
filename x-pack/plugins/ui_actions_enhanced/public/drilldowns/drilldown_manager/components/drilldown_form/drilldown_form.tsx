@@ -7,35 +7,82 @@
 
 import React from 'react';
 import {
-  EuiFieldText,
-  EuiForm,
-  EuiFormRow,
+  EuiBetaBadge,
   EuiButtonEmpty,
+  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiForm,
+  EuiFormRow,
   EuiIcon,
+  EuiLink,
   EuiSpacer,
   EuiText,
-  EuiLink,
-  EuiBetaBadge,
+  EuiCallOut,
+  EuiCode,
 } from '@elastic/eui';
-import { EuiCallOut } from '@elastic/eui';
-import { EuiCode } from '@elastic/eui';
-import {
-  txtNameOfDrilldown,
-  txtUntitledDrilldown,
-  txtBetaActionFactoryLabel,
-  txtBetaActionFactoryTooltip,
-} from './i18n';
+import { i18n } from '@kbn/i18n';
 import type { ActionFactory, BaseActionFactoryContext } from '../../../../dynamic_actions';
-import { ActionWizard } from '../../../../components/action_wizard';
-import { Trigger } from '../../../../../../../../src/plugins/ui_actions/public';
-import { txtGetMoreActions } from './i18n';
+import { TriggerPicker, TriggerPickerProps } from '../trigger_picker';
+
+const txtNameOfDrilldown = i18n.translate(
+  'xpack.uiActionsEnhanced.components.DrilldownForm.nameOfDrilldown',
+  {
+    defaultMessage: 'Name',
+  }
+);
+
+const txtUntitledDrilldown = i18n.translate(
+  'xpack.uiActionsEnhanced.components.DrilldownForm.untitledDrilldown',
+  {
+    defaultMessage: 'Untitled drilldown',
+  }
+);
+
+const txtDrilldownAction = i18n.translate(
+  'xpack.uiActionsEnhanced.components.DrilldownForm.drilldownAction',
+  {
+    defaultMessage: 'Action',
+  }
+);
+
+const txtTrigger = i18n.translate('xpack.uiActionsEnhanced.components.DrilldownForm.trigger', {
+  defaultMessage: 'Trigger',
+});
+
+const txtConfig = i18n.translate('xpack.uiActionsEnhanced.components.DrilldownForm.configuration', {
+  defaultMessage: 'Configuration',
+});
+
+const txtGetMoreActions = i18n.translate(
+  'xpack.uiActionsEnhanced.components.DrilldownForm.getMoreActionsLinkLabel',
+  {
+    defaultMessage: 'Get more actions',
+  }
+);
+
+const txtBetaActionFactoryLabel = i18n.translate(
+  'xpack.uiActionsEnhanced.components.DrilldownForm.betaActionLabel',
+  {
+    defaultMessage: `Beta`,
+  }
+);
+
+const txtBetaActionFactoryTooltip = i18n.translate(
+  'xpack.uiActionsEnhanced.components.DrilldownForm.betaActionTooltip',
+  {
+    defaultMessage: `This action is in beta and is subject to change. The design and code is less mature than official GA features and is being provided as-is with no warranties. Beta features are not subject to the support SLA of official GA features. Please help us by reporting any bugs or providing other feedback.`,
+  }
+);
+
+const txtChangeButton = i18n.translate(
+  'xpack.uiActionsEnhanced.components.DrilldownForm.changeButton',
+  {
+    defaultMessage: 'Change',
+  }
+);
 
 const GET_MORE_ACTIONS_LINK = 'https://www.elastic.co/subscriptions';
-
-const noopFn = () => {};
-
 export interface FormDrilldownWizardProps {
   actionFactory: ActionFactory;
   context: BaseActionFactoryContext;
@@ -47,24 +94,45 @@ export interface FormDrilldownWizardProps {
   /** Callback called on name change. */
   onNameChange?: (name: string) => void;
 
-  /** List of possible triggers in current context. */
-  triggers: string[];
+  /** ID of EUI icon. */
+  euiIconType?: string;
+
+  /** Name of the drilldown type. */
+  drilldownTypeName: string;
+
+  /** Whether to show "Get more actions" link to upgrade license. */
+  showMoreActionsLink?: boolean;
+
+  /** On drilldown type change click. */
+  onTypeChange: () => void;
+
+  /** Trigger picker props. */
+  triggers?: TriggerPickerProps;
 }
+
+const beta = (
+  <EuiBetaBadge label={txtBetaActionFactoryLabel} tooltipContent={txtBetaActionFactoryTooltip} />
+);
 
 export const DrilldownForm: React.FC<FormDrilldownWizardProps> = ({
   actionFactory,
   context,
   isBeta,
   name = '',
-  onNameChange = noopFn,
-  triggers = [],
+  euiIconType,
+  drilldownTypeName,
+  showMoreActionsLink,
+  onNameChange,
+  onTypeChange,
+  triggers,
+  children,
 }) => {
-  if (!triggers || !triggers.length) {
+  if (!!triggers && !triggers.items.length) {
     // Below callout is not translated, because this message is only for developers.
     return (
       <EuiCallOut title="Sorry, there was an error" color="danger" iconType="alert">
         <p>
-          No triggers provided in <EuiCode>trigger</EuiCode> prop.
+          No triggers provided in <EuiCode>triggers</EuiCode> prop.
         </p>
       </EuiCallOut>
     );
@@ -76,93 +144,81 @@ export const DrilldownForm: React.FC<FormDrilldownWizardProps> = ({
         name="drilldown_name"
         placeholder={txtUntitledDrilldown}
         value={name}
-        disabled={onNameChange === noopFn}
-        onChange={(event) => onNameChange(event.target.value)}
+        disabled={!onNameChange}
+        onChange={onNameChange ? (event) => onNameChange(event.target.value) : undefined}
         data-test-subj="drilldownNameInput"
       />
     </EuiFormRow>
   );
 
-  // const hasNotCompatibleLicenseFactory = () =>
-  //   actionFactories?.some((f) => !f.isCompatibleLicense());
+  const icon = euiIconType && (
+    <EuiFlexItem grow={false}>
+      <EuiIcon type={euiIconType} size="m" />
+    </EuiFlexItem>
+  );
 
-  // const renderGetMoreActionsLink = () => (
-  //   <EuiText size="s">
-  //     <EuiLink
-  //       href={GET_MORE_ACTIONS_LINK}
-  //       target="_blank"
-  //       external
-  //       data-test-subj={'getMoreActionsLink'}
-  //     >
-  //       {txtGetMoreActions}
-  //     </EuiLink>
-  //   </EuiText>
-  // );
-
-  const configFragment = (
-    <div
-      className="auaActionWizard__selectedActionFactoryContainer"
-      data-test-subj={`selectedActionFactory-${actionFactory.id}`}
+  const drilldownTypeInfo = (
+    <EuiFormRow
+      label={txtDrilldownAction}
+      fullWidth={true}
+      labelAppend={
+        showMoreActionsLink && (
+          <EuiText size="s">
+            <EuiLink
+              href={GET_MORE_ACTIONS_LINK}
+              target="_blank"
+              external
+              data-test-subj={'getMoreActionsLink'}
+            >
+              {txtGetMoreActions}
+            </EuiLink>
+          </EuiText>
+        )
+      }
     >
       <header>
         <EuiFlexGroup alignItems="center" responsive={false} gutterSize="s">
-          {/* {actionFactory.getIconType(context) && (
-            <EuiFlexItem grow={false}>
-              <EuiIcon type={actionFactory.getIconType(context)!} size="m" />
-            </EuiFlexItem>
-          )} */}
+          {icon}
           <EuiFlexItem grow={true}>
             <EuiText>
               <h4>
-                {actionFactory.getDisplayName(context)}{' '}
-                {isBeta && (
-                  <EuiBetaBadge
-                    label={txtBetaActionFactoryLabel}
-                    tooltipContent={txtBetaActionFactoryTooltip}
-                  />
-                )}
+                {drilldownTypeName} {isBeta && beta}
               </h4>
             </EuiText>
           </EuiFlexItem>
-          {/* {showDeselect && (
+          {!!onTypeChange && (
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty size="xs" onClick={() => onDeselect()}>
+              <EuiButtonEmpty size="xs" onClick={onTypeChange}>
                 {txtChangeButton}
               </EuiButtonEmpty>
             </EuiFlexItem>
-          )} */}
+          )}
         </EuiFlexGroup>
       </header>
-      {/* {allTriggers.length > 1 && (
-        <>
-          <EuiSpacer size="l" />
-          <TriggerPicker
-            triggers={allTriggers}
-            getTriggerInfo={getTriggerInfo}
-            selectedTriggers={context.triggers}
-            onSelectedTriggersChange={onSelectedTriggersChange}
-            triggerPickerDocsLink={triggerPickerDocsLink}
-          />
-        </>
-      )} */}
-      <EuiSpacer size="m" />
-      <div>
-        {/* <actionFactory.ReactCollectConfig
-          config={config}
-          onConfig={onConfigChange}
-          context={context}
-        /> */}
-      </div>
-    </div>
+    </EuiFormRow>
+  );
+
+  const triggersFragment = !!triggers && triggers.items.length > 1 && (
+    <EuiFormRow label={txtTrigger} fullWidth={true}>
+      <TriggerPicker {...triggers} />
+    </EuiFormRow>
+  );
+
+  const configFragment = (
+    <EuiFormRow label={txtConfig} fullWidth={true}>
+      <div>{children}</div>
+    </EuiFormRow>
   );
 
   return (
-    <>
-      <EuiForm>
-        {nameFragment}
-        <EuiSpacer size={'xl'} />
-        {configFragment}
-      </EuiForm>
-    </>
+    <EuiForm data-test-subj={`selectedActionFactory-${actionFactory.id}`}>
+      {drilldownTypeInfo}
+      <EuiSpacer size={'m'} />
+      {nameFragment}
+      <EuiSpacer size={'m'} />
+      {triggersFragment}
+      <EuiSpacer size={'m'} />
+      {configFragment}
+    </EuiForm>
   );
 };
