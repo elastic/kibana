@@ -736,7 +736,12 @@ export default ({ getService }: FtrProviderContext): void => {
             subAction: 'addComment',
             subActionParams: {
               caseId: caseRes.body.id,
-              comment: { alertId: alert._id, index: alert._index, type: CommentType.alert },
+              comment: {
+                alertId: alert._id,
+                index: alert._index,
+                type: CommentType.alert,
+                rule: { id: 'id', name: 'name' },
+              },
             },
           };
 
@@ -784,7 +789,12 @@ export default ({ getService }: FtrProviderContext): void => {
           .expect(200);
 
         createdActionId = createdAction.id;
-        const comment = { alertId: 'test-id', index: 'test-index', type: CommentType.alert };
+        const comment = {
+          alertId: 'test-id',
+          index: 'test-index',
+          type: CommentType.alert,
+          rule: { id: 'id', name: 'name' },
+        };
         const params = {
           subAction: 'addComment',
           subActionParams: {
@@ -876,7 +886,12 @@ export default ({ getService }: FtrProviderContext): void => {
           subAction: 'addComment',
           subActionParams: {
             caseId: '123',
-            comment: { alertId: 'test-id', index: 'test-index', type: CommentType.alert },
+            comment: {
+              alertId: 'test-id',
+              index: 'test-index',
+              type: CommentType.alert,
+              rule: { id: 'id', name: 'name' },
+            },
           },
         };
 
@@ -1017,7 +1032,12 @@ export default ({ getService }: FtrProviderContext): void => {
           subAction: 'addComment',
           subActionParams: {
             caseId: caseRes.body.id,
-            comment: { alertId: 'test-id', index: 'test-index', type: CommentType.alert },
+            comment: {
+              alertId: 'test-id',
+              index: 'test-index',
+              type: CommentType.alert,
+              rule: { id: 'id', name: 'name' },
+            },
           },
         };
 

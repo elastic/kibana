@@ -11,7 +11,11 @@ import { Expression, Props } from '../components/param_details_form/expression';
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { AlertTypeModel } from '../../../../triggers_actions_ui/public/types';
-import { ALERT_DISK_USAGE, ALERT_DETAILS } from '../../../common/constants';
+import {
+  ALERT_DISK_USAGE,
+  ALERT_DETAILS,
+  ALERT_REQUIRES_APP_CONTEXT,
+} from '../../../common/constants';
 
 export function createDiskUsageAlertType(): AlertTypeModel<MonitoringAlertTypeParams> {
   return {
@@ -26,6 +30,6 @@ export function createDiskUsageAlertType(): AlertTypeModel<MonitoringAlertTypePa
     ),
     validate,
     defaultActionMessage: '{{context.internalFullMessage}}',
-    requiresAppContext: true,
+    requiresAppContext: ALERT_REQUIRES_APP_CONTEXT,
   };
 }
