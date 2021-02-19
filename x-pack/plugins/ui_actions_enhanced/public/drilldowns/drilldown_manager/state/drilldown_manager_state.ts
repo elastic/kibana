@@ -54,8 +54,17 @@ export class DrilldownManagerState {
    */
   public readonly drilldownStateByFactoryId = new Map<string, DrilldownState>();
 
+  /**
+   * Whether user can unlock more drilldown types if they subscribe to a higher
+   * license tier.
+   */
+  public readonly canUnlockMoreDrilldowns: boolean;
+
   constructor(public readonly deps: DrilldownManagerStateDeps) {
     this.screen$ = new BehaviorSubject<DrilldownManagerScreen>(deps.screen || 'list');
+    this.canUnlockMoreDrilldowns = deps.actionFactories.some(
+      (factory) => !factory.isCompatibleLicense
+    );
   }
 
   /**
@@ -90,6 +99,7 @@ export class DrilldownManagerState {
       const context = this.getActionFactoryContext();
       const drilldownState = new DrilldownState({
         factory: actionFactory,
+        placeContext: this.deps.placeContext || {},
         name: !!oldDrilldownState ? oldDrilldownState.name$.getValue() : '',
         triggers: [],
         config: actionFactory.createConfig(context),

@@ -49,10 +49,6 @@ const txtTrigger = i18n.translate('xpack.uiActionsEnhanced.components.DrilldownF
   defaultMessage: 'Trigger',
 });
 
-const txtConfig = i18n.translate('xpack.uiActionsEnhanced.components.DrilldownForm.configuration', {
-  defaultMessage: 'Configuration',
-});
-
 const txtGetMoreActions = i18n.translate(
   'xpack.uiActionsEnhanced.components.DrilldownForm.getMoreActionsLinkLabel',
   {
@@ -202,12 +198,6 @@ export const DrilldownForm: React.FC<FormDrilldownWizardProps> = ({
     </EuiFormRow>
   );
 
-  const configFragment = (
-    <EuiFormRow label={txtConfig} fullWidth={true}>
-      <div>{children}</div>
-    </EuiFormRow>
-  );
-
   return (
     <EuiForm data-test-subj={`DrilldownForm`}>
       {drilldownTypeInfo}
@@ -216,7 +206,7 @@ export const DrilldownForm: React.FC<FormDrilldownWizardProps> = ({
       <EuiSpacer size={'m'} />
       {triggersFragment}
       <EuiSpacer size={'m'} />
-      {configFragment}
+      <div>{children}</div>
     </EuiForm>
   );
 };

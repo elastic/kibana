@@ -84,9 +84,9 @@ export class DrilldownState {
   /**
    * Update the current drilldown configuration.
    */
-  public setActionConfig(config: BaseActionConfig): void {
+  public readonly setConfig = (config: BaseActionConfig): void => {
     this.config$.next(config);
-  }
+  };
 
   public getFactoryContext(): BaseActionFactoryContext {
     return {

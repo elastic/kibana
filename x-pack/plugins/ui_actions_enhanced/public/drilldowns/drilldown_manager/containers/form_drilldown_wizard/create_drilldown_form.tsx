@@ -50,30 +50,21 @@ export const CreateDrilldownForm: React.FC<CreateDrilldownFormProps> = ({ state 
   return (
     <>
       <DrilldownForm
-        drilldownTypeName={drilldownTypeDisplayName}
         euiIconType={iconType}
+        drilldownTypeName={drilldownTypeDisplayName}
+        onTypeChange={() => drilldowns.setActionFactory(undefined)}
         name={name}
         onNameChange={state.setName}
         triggers={triggerPickerProps}
-        onTypeChange={() => drilldowns.setActionFactory(undefined)}
-      />
-      {/* <FormDrilldownWizardUi
-        name={drilldowns.drilldownName}
-        onNameChange={drilldowns.setDrilldownName}
-        actionConfig={drilldowns.actionConfig}
-        onActionConfigChange={drilldowns.setActionConfig}
-        currentActionFactory={drilldowns.actionFactory}
-        onActionFactoryChange={drilldowns.setActionFactory}
-        actionFactories={drilldowns.actionFactories}
-        // actionFactoryContext={manager.placeContext}
-        actionFactoryContext={{
-          triggers: [],
-        }}
-        onSelectedTriggersChange={drilldowns.setSelectedTriggers}
-        triggers={drilldowns.triggers}
-        getTriggerInfo={drilldowns.getTrigger}
-        triggerPickerDocsLink={drilldowns.triggerPickerDocsLink}
-      /> */}
+        isBeta={state.factory.isBeta}
+        showMoreActionsLink={drilldowns.canUnlockMoreDrilldowns}
+      >
+        <state.factory.ReactCollectConfig
+          config={config}
+          onConfig={state.setConfig}
+          context={context}
+        />
+      </DrilldownForm>
       {/* {mode === 'edit' && (
         <>
           <EuiSpacer size={'xl'} />
