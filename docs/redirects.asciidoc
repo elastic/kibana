@@ -256,13 +256,13 @@ This page has been moved. Refer to <<canvas>>.
 [[vega-lite-tutorial]]
 === Vega-Lite Tutorial
 
-This page has been moved. Refer to <<vega-tutorial-create-a-stacked-area-chart>>.
+This page has been moved. Refer to <<vega-lite-tutorial-create-your-first-visualizations>>.
 
 [float]
 [[heatmap-chart]]
 === Heatmap Chart
 
-This page has been moved. Refer to <<types-of-visualization-panels>>.
+This page has been moved. Refer to <<types-of-panels>>.
 
 [float]
 [[interface-overview]]
@@ -297,11 +297,5 @@ This page has been moved. PRefer to <<external-plugin-localization>>.
 [role="exclude",id="visualize"]
 == Visualize
 
-<<<<<<< HEAD
 This page has been removed. Refer to <<dashboard>>.
-=======
-This content has moved. Refer to <<dashboard, **Dashboard**>>.
 
-[role="exclude",id="explore-dashboard-data"]
-This content has moved. Refer to <<dashboard, **Dashboard**>>.
->>>>>>> caed606fbd4... Update redirects.asciidoc (#84719)
