@@ -27,9 +27,9 @@ import {
   paginate,
   reloadDeletedRules,
   selectNumberOfRules,
-  waitForLoadElasticPrebuiltDetectionRulesTableToBeLoaded,
+  waitForRulesTableToBeLoaded,
   waitForPrebuiltDetectionRulesToBeLoaded,
-  waitForRulesToBeLoaded,
+  waitForRulesTableToBeRefreshed,
 } from '../../tasks/alerts_detection_rules';
 import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
 
@@ -51,20 +51,20 @@ describe('Alerts rules, prebuilt rules', () => {
     waitForAlertsPanelToBeLoaded();
     waitForAlertsIndexToBeCreated();
     goToManageAlertsDetectionRules();
-    waitForLoadElasticPrebuiltDetectionRulesTableToBeLoaded();
+    waitForRulesTableToBeLoaded();
     loadPrebuiltDetectionRules();
     waitForPrebuiltDetectionRulesToBeLoaded();
 
     cy.get(ELASTIC_RULES_BTN).should('have.text', expectedElasticRulesBtnText);
 
     changeToThreeHundredRowsPerPage();
-    waitForRulesToBeLoaded();
+    waitForRulesTableToBeRefreshed();
 
     cy.get(SHOWING_RULES_TEXT).should('have.text', `Showing ${expectedNumberOfRules} rules`);
     cy.get(RULES_TABLE).then(($table1) => {
       const firstScreenRules = $table1.find(RULES_ROW).length;
       paginate();
-      waitForRulesToBeLoaded();
+      waitForRulesTableToBeRefreshed();
       cy.get(RULES_TABLE).then(($table2) => {
         const secondScreenRules = $table2.find(RULES_ROW).length;
         const totalNumberOfRules = firstScreenRules + secondScreenRules;
@@ -85,14 +85,14 @@ describe('Deleting prebuilt rules', () => {
     waitForAlertsPanelToBeLoaded();
     waitForAlertsIndexToBeCreated();
     goToManageAlertsDetectionRules();
-    waitForLoadElasticPrebuiltDetectionRulesTableToBeLoaded();
+    waitForRulesTableToBeLoaded();
     loadPrebuiltDetectionRules();
     waitForPrebuiltDetectionRulesToBeLoaded();
 
     cy.get(ELASTIC_RULES_BTN).should('have.text', expectedElasticRulesBtnText);
 
     changeToThreeHundredRowsPerPage();
-    waitForRulesToBeLoaded();
+    waitForRulesTableToBeRefreshed();
   });
 
   it('Does not allow to delete one rule when more than one is selected', () => {
@@ -111,7 +111,7 @@ describe('Deleting prebuilt rules', () => {
     deleteFirstRule();
     cy.reload();
     changeToThreeHundredRowsPerPage();
-    waitForRulesToBeLoaded();
+    waitForRulesTableToBeRefreshed();
 
     cy.get(ELASTIC_RULES_BTN).should(
       'have.text',
@@ -126,7 +126,7 @@ describe('Deleting prebuilt rules', () => {
 
     cy.reload();
     changeToThreeHundredRowsPerPage();
-    waitForRulesToBeLoaded();
+    waitForRulesTableToBeRefreshed();
 
     cy.get(ELASTIC_RULES_BTN).should(
       'have.text',
@@ -143,7 +143,7 @@ describe('Deleting prebuilt rules', () => {
     deleteSelectedRules();
     cy.reload();
     changeToThreeHundredRowsPerPage();
-    waitForRulesToBeLoaded();
+    waitForRulesTableToBeRefreshed();
 
     cy.get(RELOAD_PREBUILT_RULES_BTN).should('exist');
     cy.get(RELOAD_PREBUILT_RULES_BTN).should(
@@ -161,7 +161,7 @@ describe('Deleting prebuilt rules', () => {
 
     cy.reload();
     changeToThreeHundredRowsPerPage();
-    waitForRulesToBeLoaded();
+    waitForRulesTableToBeRefreshed();
 
     cy.get(ELASTIC_RULES_BTN).should(
       'have.text',

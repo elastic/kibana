@@ -62,8 +62,8 @@ import {
   filterByCustomRules,
   goToCreateNewRule,
   goToRuleDetails,
-  waitForLoadElasticPrebuiltDetectionRulesTableToBeLoaded,
-  waitForRulesToBeLoaded,
+  waitForRulesTableToBeLoaded,
+  waitForRulesTableToBeRefreshed,
 } from '../../tasks/alerts_detection_rules';
 import { createTimeline } from '../../tasks/api_calls/timelines';
 import { cleanKibana } from '../../tasks/common';
@@ -102,7 +102,7 @@ describe.skip('Threshold Rules', () => {
       waitForAlertsPanelToBeLoaded();
       waitForAlertsIndexToBeCreated();
       goToManageAlertsDetectionRules();
-      waitForLoadElasticPrebuiltDetectionRulesTableToBeLoaded();
+      waitForRulesTableToBeLoaded();
       goToCreateNewRule();
       selectThresholdRuleType();
       fillDefineThresholdRuleAndContinue(rule);
@@ -113,7 +113,7 @@ describe.skip('Threshold Rules', () => {
       cy.get(CUSTOM_RULES_BTN).should('have.text', 'Custom rules (1)');
 
       changeToThreeHundredRowsPerPage();
-      waitForRulesToBeLoaded();
+      waitForRulesTableToBeRefreshed();
 
       const expectedNumberOfRules = 1;
       cy.get(RULES_TABLE).then(($table) => {

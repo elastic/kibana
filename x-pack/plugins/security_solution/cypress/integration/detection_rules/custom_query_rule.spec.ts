@@ -88,8 +88,8 @@ import {
   goToCreateNewRule,
   goToRuleDetails,
   selectNumberOfRules,
-  waitForLoadElasticPrebuiltDetectionRulesTableToBeLoaded,
-  waitForRulesToBeLoaded,
+  waitForRulesTableToBeLoaded,
+  waitForRulesTableToBeRefreshed,
 } from '../../tasks/alerts_detection_rules';
 import { createCustomRuleActivated } from '../../tasks/api_calls/rules';
 import { createTimeline } from '../../tasks/api_calls/timelines';
@@ -136,7 +136,7 @@ describe('Custom detection rules creation', () => {
     waitForAlertsPanelToBeLoaded();
     waitForAlertsIndexToBeCreated();
     goToManageAlertsDetectionRules();
-    waitForLoadElasticPrebuiltDetectionRulesTableToBeLoaded();
+    waitForRulesTableToBeLoaded();
     goToCreateNewRule();
     fillDefineCustomRuleWithImportedQueryAndContinue(this.rule);
     fillAboutRuleAndContinue(this.rule);
@@ -159,7 +159,7 @@ describe('Custom detection rules creation', () => {
     cy.get(CUSTOM_RULES_BTN).should('have.text', 'Custom rules (1)');
 
     changeToThreeHundredRowsPerPage();
-    waitForRulesToBeLoaded();
+    waitForRulesTableToBeRefreshed();
 
     cy.get(RULES_TABLE).then(($table) => {
       cy.wrap($table.find(RULES_ROW).length).should('eql', expectedNumberOfRules);
@@ -245,7 +245,7 @@ describe('Custom detection rules deletion and edition', () => {
           cy.get(SHOWING_RULES_TEXT).should('have.text', `Showing ${initialNumberOfRules} rules`);
 
           deleteFirstRule();
-          waitForRulesToBeLoaded();
+          waitForRulesTableToBeRefreshed();
 
           cy.get(RULES_TABLE).then(($table) => {
             cy.wrap($table.find(RULES_ROW).length).should(
@@ -275,7 +275,7 @@ describe('Custom detection rules deletion and edition', () => {
 
           selectNumberOfRules(numberOfRulesToBeDeleted);
           deleteSelectedRules();
-          waitForRulesToBeLoaded();
+          waitForRulesTableToBeRefreshed();
 
           cy.get(RULES_TABLE).then(($table) => {
             cy.wrap($table.find(RULES_ROW).length).should(

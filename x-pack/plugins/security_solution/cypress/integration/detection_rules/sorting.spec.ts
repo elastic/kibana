@@ -24,14 +24,14 @@ import {
 } from '../../tasks/alerts';
 import {
   activateRule,
-  changeToFiveRowsPerPage,
+  changeRowsPerPageTo,
   checkAllRulesIdleModal,
   checkAutoRefresh,
   dismissAllRulesIdleModal,
-  goToSecondPage,
+  goToPage,
   resetAllRulesIdleModalTimeout,
   sortByActivatedRules,
-  waitForLoadElasticPrebuiltDetectionRulesTableToBeLoaded,
+  waitForRulesTableToBeLoaded,
   waitForRuleToBeActivated,
 } from '../../tasks/alerts_detection_rules';
 import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
@@ -54,12 +54,9 @@ describe('Alerts detection rules', () => {
     createCustomRule(newThresholdRule, '4');
   });
 
-  after(() => {
-    cy.clock().invoke('restore');
-  });
-
   it('Sorts by activated rules', () => {
     goToManageAlertsDetectionRules();
+    waitForRulesTableToBeLoaded();
 
     cy.get(RULE_NAME)
       .eq(SECOND_RULE)
@@ -98,8 +95,9 @@ describe('Alerts detection rules', () => {
     createCustomRule({ ...newRule, name: 'Not same as first rule' }, '6');
 
     goToManageAlertsDetectionRules();
-    changeToFiveRowsPerPage();
+    waitForRulesTableToBeLoaded();
 
+    changeRowsPerPageTo(5);
     cy.get(RULES_TABLE)
       .find(FIRST_PAGE_SELECTOR)
       .should('have.class', 'euiPaginationButton-isActive');
@@ -109,8 +107,7 @@ describe('Alerts detection rules', () => {
       .first()
       .invoke('text')
       .then((ruleNameFirstPage) => {
-        goToSecondPage();
-        cy.wait(1500);
+        goToPage(2);
         cy.get(RULES_TABLE)
           .find(RULE_NAME)
           .first()
@@ -128,15 +125,11 @@ describe('Alerts detection rules', () => {
       .should('have.class', 'euiPaginationButton-isActive');
   });
 
-  // FIXME: UI hangs on loading
-  it.skip('Auto refreshes rules', () => {
+  it('Auto refreshes rules', () => {
     cy.clock(Date.now());
 
-    loginAndWaitForPageWithoutDateRange(DETECTIONS_URL);
-    waitForAlertsPanelToBeLoaded();
-    waitForAlertsIndexToBeCreated();
     goToManageAlertsDetectionRules();
-    waitForLoadElasticPrebuiltDetectionRulesTableToBeLoaded();
+    waitForRulesTableToBeLoaded();
 
     // mock 1 minute passing to make sure refresh
     // is conducted
@@ -145,7 +138,7 @@ describe('Alerts detection rules', () => {
     // mock 45 minutes passing to check that idle modal shows
     // and refreshing is paused
     checkAllRulesIdleModal('be.visible');
-    checkAutoRefresh(DEFAULT_RULE_REFRESH_INTERVAL_VALUE, 'not.be.visible');
+    checkAutoRefresh(DEFAULT_RULE_REFRESH_INTERVAL_VALUE, 'not.exist');
 
     // clicking on modal to continue, should resume refreshing
     dismissAllRulesIdleModal();
@@ -155,7 +148,5 @@ describe('Alerts detection rules', () => {
     // show after 45 min
     resetAllRulesIdleModalTimeout();
     cy.get(RULE_AUTO_REFRESH_IDLE_MODAL).should('not.exist');
-
-    cy.clock().invoke('restore');
   });
 });

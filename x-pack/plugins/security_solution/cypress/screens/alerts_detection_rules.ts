@@ -31,10 +31,12 @@ export const FOURTH_RULE = 3;
 
 export const LOAD_PREBUILT_RULES_BTN = '[data-test-subj="load-prebuilt-rules"]';
 
-export const LOADING_INITIAL_PREBUILT_RULES_TABLE =
+export const RULES_TABLE_INITIAL_LOADING_INDICATOR =
   '[data-test-subj="initialLoadingPanelAllRulesTable"]';
 
-export const ASYNC_LOADING_PROGRESS = '[data-test-subj="loadingRulesInfoProgress"]';
+export const RULES_TABLE_REFRESH_INDICATOR = '[data-test-subj="loading-spinner"]';
+
+export const RULES_TABLE_AUTOREFRESH_INDICATOR = '[data-test-subj="loadingRulesInfoProgress"]';
 
 export const NEXT_BTN = '[data-test-subj="pagination-button-next"]';
 
@@ -66,14 +68,18 @@ export const SHOWING_RULES_TEXT = '[data-test-subj="showingRules"]';
 
 export const SORT_RULES_BTN = '[data-test-subj="tableHeaderSortButton"]';
 
-export const THREE_HUNDRED_ROWS = '[data-test-subj="tablePagination-300-rows"]';
-
-export const FIVE_ROWS = '[data-test-subj="tablePagination-5-rows"]';
-
 export const RULE_AUTO_REFRESH_IDLE_MODAL = '[data-test-subj="allRulesIdleModal"]';
 
 export const RULE_AUTO_REFRESH_IDLE_MODAL_CONTINUE = '[data-test-subj="allRulesIdleModal"] button';
 
-export const FIRST_PAGE_SELECTOR = '[data-test-subj="pagination-button-0"]';
+export const rowsPerPageSelector = (count: number) =>
+  `[data-test-subj="tablePagination-${count}-rows"]`;
 
-export const SECOND_PAGE_SELECTOR = '[data-test-subj="pagination-button-1"]';
+export const FIVE_ROWS = rowsPerPageSelector(5);
+export const THREE_HUNDRED_ROWS = rowsPerPageSelector(300);
+
+export const pageSelector = (pageNumber: number) =>
+  `[data-test-subj="pagination-button-${pageNumber - 1}"]`;
+
+export const FIRST_PAGE_SELECTOR = pageSelector(1);
+export const SECOND_PAGE_SELECTOR = pageSelector(2);

@@ -13,7 +13,9 @@ import {
   DELETE_RULE_ACTION_BTN,
   DELETE_RULE_BULK_BTN,
   LOAD_PREBUILT_RULES_BTN,
-  LOADING_INITIAL_PREBUILT_RULES_TABLE,
+  RULES_TABLE_INITIAL_LOADING_INDICATOR,
+  RULES_TABLE_REFRESH_INDICATOR,
+  RULES_TABLE_AUTOREFRESH_INDICATOR,
   PAGINATION_POPOVER_BTN,
   RELOAD_PREBUILT_RULES_BTN,
   RULE_CHECKBOX,
@@ -26,11 +28,10 @@ import {
   EXPORT_ACTION_BTN,
   EDIT_RULE_ACTION_BTN,
   NEXT_BTN,
-  ASYNC_LOADING_PROGRESS,
   RULE_AUTO_REFRESH_IDLE_MODAL,
   RULE_AUTO_REFRESH_IDLE_MODAL_CONTINUE,
-  FIVE_ROWS,
-  SECOND_PAGE_SELECTOR,
+  rowsPerPageSelector,
+  pageSelector,
 } from '../screens/alerts_detection_rules';
 import { ALL_ACTIONS, DELETE_RULE } from '../screens/rule_details';
 
@@ -73,8 +74,8 @@ export const exportFirstRule = () => {
 
 export const filterByCustomRules = () => {
   cy.get(CUSTOM_RULES_BTN).click({ force: true });
-  cy.get(ASYNC_LOADING_PROGRESS).should('exist');
-  cy.get(ASYNC_LOADING_PROGRESS).should('not.exist');
+  cy.get(RULES_TABLE_AUTOREFRESH_INDICATOR).should('exist');
+  cy.get(RULES_TABLE_AUTOREFRESH_INDICATOR).should('not.exist');
 };
 
 export const goToCreateNewRule = () => {
@@ -105,14 +106,24 @@ export const selectNumberOfRules = (numberOfRules: number) => {
 
 export const sortByActivatedRules = () => {
   cy.get(SORT_RULES_BTN).contains('Activated').click({ force: true });
-  waitForRulesToBeLoaded();
+  waitForRulesTableToBeRefreshed();
   cy.get(SORT_RULES_BTN).contains('Activated').click({ force: true });
-  waitForRulesToBeLoaded();
+  waitForRulesTableToBeRefreshed();
 };
 
-export const waitForLoadElasticPrebuiltDetectionRulesTableToBeLoaded = () => {
-  cy.get(LOADING_INITIAL_PREBUILT_RULES_TABLE).should('exist');
-  cy.get(LOADING_INITIAL_PREBUILT_RULES_TABLE).should('not.exist');
+export const waitForRulesTableToBeLoaded = () => {
+  cy.get(RULES_TABLE_INITIAL_LOADING_INDICATOR).should('exist');
+  cy.get(RULES_TABLE_INITIAL_LOADING_INDICATOR).should('not.exist');
+};
+
+export const waitForRulesTableToBeRefreshed = () => {
+  cy.get(RULES_TABLE_REFRESH_INDICATOR).should('exist');
+  cy.get(RULES_TABLE_REFRESH_INDICATOR).should('not.exist');
+};
+
+export const waitForRulesTableToBeAutoRefreshed = () => {
+  cy.get(RULES_TABLE_AUTOREFRESH_INDICATOR).should('exist');
+  cy.get(RULES_TABLE_AUTOREFRESH_INDICATOR).should('not.exist');
 };
 
 export const waitForPrebuiltDetectionRulesToBeLoaded = () => {
@@ -125,15 +136,10 @@ export const waitForRuleToBeActivated = () => {
   cy.get(RULE_SWITCH_LOADER).should('not.exist');
 };
 
-export const waitForRulesToBeLoaded = () => {
-  cy.get(ASYNC_LOADING_PROGRESS).should('exist');
-  cy.get(ASYNC_LOADING_PROGRESS).should('not.exist');
-};
-
 export const checkAutoRefresh = (ms: number, condition: string) => {
-  cy.get(ASYNC_LOADING_PROGRESS).should('not.exist');
+  cy.get(RULES_TABLE_AUTOREFRESH_INDICATOR).should('not.exist');
   cy.tick(ms);
-  cy.get(ASYNC_LOADING_PROGRESS).should(condition);
+  cy.get(RULES_TABLE_AUTOREFRESH_INDICATOR).should(condition);
 };
 
 export const dismissAllRulesIdleModal = () => {
@@ -155,11 +161,14 @@ export const resetAllRulesIdleModalTimeout = () => {
   cy.tick(700000);
 };
 
-export const changeToFiveRowsPerPage = () => {
+export const changeRowsPerPageTo = (rowsCount: number) => {
   cy.get(PAGINATION_POPOVER_BTN).click({ force: true });
-  cy.get(FIVE_ROWS).click();
+  cy.get(rowsPerPageSelector(rowsCount)).click();
+  waitForRulesTableToBeRefreshed();
 };
 
-export const goToSecondPage = () => {
-  cy.get(SECOND_PAGE_SELECTOR).last().click({ force: true });
+export const goToPage = (pageNumber: number) => {
+  cy.get(RULES_TABLE_REFRESH_INDICATOR).should('not.exist');
+  cy.get(pageSelector(pageNumber)).last().click({ force: true });
+  waitForRulesTableToBeRefreshed();
 };
