@@ -12,8 +12,9 @@ import { EuiDataGridSorting, EuiDataGridColumn } from '@elastic/eui';
 import { INDEX_STATUS } from '../../data_frame_analytics/common';
 
 import { ColumnChart } from './column_chart';
-import { INIT_MAX_COLUMNS } from './common';
+import { COLUMN_CHART_DEFAULT_VISIBILITY_ROWS_THRESHOLED, INIT_MAX_COLUMNS } from './common';
 import {
+  ChartsVisible,
   ColumnId,
   DataGridItem,
   IndexPagination,
@@ -40,10 +41,12 @@ export const useDataGrid = (
   const [tableItems, setTableItems] = useState<DataGridItem[]>([]);
   const [pagination, setPagination] = useState(defaultPagination);
   const [sortingColumns, setSortingColumns] = useState<EuiDataGridSorting['columns']>([]);
-  const [chartsVisible, setChartsVisible] = useState(false);
+  const [chartsVisible, setChartsVisible] = useState<ChartsVisible>(undefined);
 
   const toggleChartVisibility = () => {
-    setChartsVisible(!chartsVisible);
+    if (chartsVisible !== undefined) {
+      setChartsVisible(!chartsVisible);
+    }
   };
 
   const onChangeItemsPerPage: OnChangeItemsPerPage = useCallback((pageSize) => {
@@ -130,6 +133,16 @@ export const useDataGrid = (
       return visibleColumns.indexOf(a.id) - visibleColumns.indexOf(b.id);
     });
   }, [columns, columnCharts, chartsVisible, JSON.stringify(visibleColumns)]);
+
+  // Initialize the mini histogram charts toggle button.
+  // On load `chartsVisible` is set to `undefined`, the button will be disabled.
+  // Once we know how many rows have been returned,
+  // we decide whether to show or hide the charts by default.
+  useEffect(() => {
+    if (chartsVisible === undefined && rowCount > 0) {
+      setChartsVisible(rowCount < COLUMN_CHART_DEFAULT_VISIBILITY_ROWS_THRESHOLED);
+    }
+  }, [chartsVisible, rowCount]);
 
   return {
     chartsVisible,

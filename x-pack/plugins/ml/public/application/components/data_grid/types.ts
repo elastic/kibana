@@ -19,6 +19,9 @@ import { FeatureImportanceBaseline } from '../../../../common/types/feature_impo
 export type ColumnId = string;
 export type DataGridItem = Record<string, any>;
 
+// `undefined` is used to indicate a non-initialized state.
+export type ChartsVisible = boolean | undefined;
+
 export type IndexPagination = Pick<EuiDataGridPaginationProps, 'pageIndex' | 'pageSize'>;
 
 export type OnChangeItemsPerPage = (pageSize: any) => void;
@@ -73,7 +76,7 @@ export interface UseIndexDataReturnType
 }
 
 export interface UseDataGridReturnType {
-  chartsVisible: boolean;
+  chartsVisible: ChartsVisible;
   chartsButtonVisible: boolean;
   columnsWithCharts: EuiDataGridColumn[];
   errorMessage: string;
