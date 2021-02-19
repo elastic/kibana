@@ -33,12 +33,20 @@ import { MetricsExplorerRow, MetricsExplorerAggregation } from '../../../../comm
 import { MetricExplorerSeriesChart } from '../../../pages/metrics/metrics_explorer/components/series_chart';
 import { MetricExpression } from '../types';
 import { MetricsExplorerChartType } from '../../../pages/metrics/metrics_explorer/hooks/use_metrics_explorer_options';
-import { getChartTheme } from '../../../pages/metrics/metrics_explorer/components/helpers/get_chart_theme';
 import { createFormatterForMetric } from '../../../pages/metrics/metrics_explorer/components/helpers/create_formatter_for_metric';
 import { calculateDomain } from '../../../pages/metrics/metrics_explorer/components/helpers/calculate_domain';
 import { useMetricsExplorerChartData } from '../hooks/use_metrics_explorer_chart_data';
 import { getMetricId } from '../../../pages/metrics/metrics_explorer/components/helpers/get_metric_id';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
+import {
+  ChartContainer,
+  LoadingState,
+  NoDataState,
+  TIME_LABELS,
+  tooltipProps,
+  useDateFormatter,
+  getChartTheme,
+} from '../../common/criterion_preview_chart/criterion_preview_chart';
 
 interface Props {
   expression: MetricExpression;
@@ -47,18 +55,6 @@ interface Props {
   filterQuery?: string;
   groupBy?: string | string[];
 }
-
-const tooltipProps = {
-  headerFormatter: (tooltipValue: TooltipValue) =>
-    moment(tooltipValue.value).format('Y-MM-DD HH:mm:ss.SSS'),
-};
-
-const TIME_LABELS = {
-  s: i18n.translate('xpack.infra.metrics.alerts.timeLabels.seconds', { defaultMessage: 'seconds' }),
-  m: i18n.translate('xpack.infra.metrics.alerts.timeLabels.minutes', { defaultMessage: 'minutes' }),
-  h: i18n.translate('xpack.infra.metrics.alerts.timeLabels.hours', { defaultMessage: 'hours' }),
-  d: i18n.translate('xpack.infra.metrics.alerts.timeLabels.days', { defaultMessage: 'days' }),
-};
 
 export const ExpressionChart: React.FC<Props> = ({
   expression,
@@ -99,16 +95,7 @@ export const ExpressionChart: React.FC<Props> = ({
   const yAxisFormater = useCallback(createFormatterForMetric(metric), [expression]);
 
   if (loading || !data) {
-    return (
-      <EmptyContainer>
-        <EuiText color="subdued">
-          <FormattedMessage
-            id="xpack.infra.metrics.alerts.loadingMessage"
-            defaultMessage="Loading"
-          />
-        </EuiText>
-      </EmptyContainer>
-    );
+    return <LoadingState />;
   }
 
   const criticalThresholds = expression.threshold.slice().sort();
@@ -119,16 +106,7 @@ export const ExpressionChart: React.FC<Props> = ({
   // so that we can get a proper domian
   const firstSeries = first(data.series);
   if (!firstSeries || !firstSeries.rows || firstSeries.rows.length === 0) {
-    return (
-      <EmptyContainer>
-        <EuiText color="subdued" data-test-subj="noChartData">
-          <FormattedMessage
-            id="xpack.infra.metrics.alerts.noDataMessage"
-            defaultMessage="Oops, no chart data available"
-          />
-        </EuiText>
-      </EmptyContainer>
-    );
+    return <NoDataState />;
   }
 
   const series = {
@@ -344,28 +322,3 @@ export const ExpressionChart: React.FC<Props> = ({
     </>
   );
 };
-
-const EmptyContainer: React.FC = ({ children }) => (
-  <div
-    style={{
-      width: '100%',
-      height: 150,
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
-    }}
-  >
-    {children}
-  </div>
-);
-
-const ChartContainer: React.FC = ({ children }) => (
-  <div
-    style={{
-      width: '100%',
-      height: 150,
-    }}
-  >
-    {children}
-  </div>
-);

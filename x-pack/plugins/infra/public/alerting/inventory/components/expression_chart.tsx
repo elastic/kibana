@@ -29,7 +29,6 @@ import { Color, colorTransformer } from '../../../../common/color_palette';
 import { MetricsExplorerRow, MetricsExplorerAggregation } from '../../../../common/http_api';
 import { MetricExplorerSeriesChart } from '../../../pages/metrics/metrics_explorer/components/series_chart';
 import { MetricsExplorerChartType } from '../../../pages/metrics/metrics_explorer/hooks/use_metrics_explorer_options';
-import { getChartTheme } from '../../../pages/metrics/metrics_explorer/components/helpers/get_chart_theme';
 import { calculateDomain } from '../../../pages/metrics/metrics_explorer/components/helpers/calculate_domain';
 import { getMetricId } from '../../../pages/metrics/metrics_explorer/components/helpers/get_metric_id';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
@@ -40,6 +39,14 @@ import { InventoryItemType, SnapshotMetricType } from '../../../../common/invent
 import { createInventoryMetricFormatter } from '../../../pages/metrics/inventory_view/lib/create_inventory_metric_formatter';
 import { METRIC_FORMATTERS } from '../../../../common/formatters/snapshot_metric_formats';
 import { InfraFormatterType } from '../../../lib/lib';
+import {
+  ChartContainer,
+  LoadingState,
+  NoDataState,
+  TIME_LABELS,
+  tooltipProps,
+  getChartTheme,
+} from '../../common/criterion_preview_chart/criterion_preview_chart';
 
 interface Props {
   expression: InventoryMetricConditions;
@@ -47,18 +54,6 @@ interface Props {
   nodeType: InventoryItemType;
   sourceId: string;
 }
-
-const tooltipProps = {
-  headerFormatter: (tooltipValue: TooltipValue) =>
-    moment(tooltipValue.value).format('Y-MM-DD HH:mm:ss.SSS'),
-};
-
-const TIME_LABELS = {
-  s: i18n.translate('xpack.infra.metrics.alerts.timeLabels.seconds', { defaultMessage: 'seconds' }),
-  m: i18n.translate('xpack.infra.metrics.alerts.timeLabels.minutes', { defaultMessage: 'minutes' }),
-  h: i18n.translate('xpack.infra.metrics.alerts.timeLabels.hours', { defaultMessage: 'hours' }),
-  d: i18n.translate('xpack.infra.metrics.alerts.timeLabels.days', { defaultMessage: 'days' }),
-};
 
 export const ExpressionChart: React.FC<Props> = ({
   expression,
@@ -130,16 +125,7 @@ export const ExpressionChart: React.FC<Props> = ({
   );
 
   if (loading || !nodes) {
-    return (
-      <EmptyContainer>
-        <EuiText color="subdued">
-          <FormattedMessage
-            id="xpack.infra.metrics.alerts.loadingMessage"
-            defaultMessage="Loading"
-          />
-        </EuiText>
-      </EmptyContainer>
-    );
+    return <LoadingState />;
   }
 
   const thresholds = expression.threshold.slice().sort();
@@ -148,16 +134,7 @@ export const ExpressionChart: React.FC<Props> = ({
   // so that we can get a proper domian
   const firstSeries = nodes[0]?.metrics[0]?.timeseries;
   if (!firstSeries || !firstSeries.rows || firstSeries.rows.length === 0) {
-    return (
-      <EmptyContainer>
-        <EuiText color="subdued" data-test-subj="noChartData">
-          <FormattedMessage
-            id="xpack.infra.metrics.alerts.noDataMessage"
-            defaultMessage="Oops, no chart data available"
-          />
-        </EuiText>
-      </EmptyContainer>
-    );
+    return <NoDataState />;
   }
 
   const thresholdFormatter = (value: number | undefined) => {
@@ -360,28 +337,3 @@ export const ExpressionChart: React.FC<Props> = ({
     </>
   );
 };
-
-const EmptyContainer: React.FC = ({ children }) => (
-  <div
-    style={{
-      width: '100%',
-      height: 150,
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
-    }}
-  >
-    {children}
-  </div>
-);
-
-const ChartContainer: React.FC = ({ children }) => (
-  <div
-    style={{
-      width: '100%',
-      height: 150,
-    }}
-  >
-    {children}
-  </div>
-);
