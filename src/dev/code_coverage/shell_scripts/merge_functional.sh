@@ -8,9 +8,6 @@ mkdir -p /dev/shm/workspace/kibana
 # rsync -avz kibana /dev/shm/workspace/kibana
 rsync -ahSD --ignore-errors --force --delete --stats ./ /dev/shm/workspace/kibana/
 cd /dev/shm/workspace/kibana
-echo
-"### Show new path"
-pwd
 echo "### Show folders tree"
 ls -d -- */
 echo "### bootstrap from x-pack folder"
