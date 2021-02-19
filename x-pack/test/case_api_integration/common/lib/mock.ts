@@ -8,6 +8,7 @@
 import {
   CommentSchemaType,
   ContextTypeGeneratedAlertType,
+  createAlertsString,
   isCommentGeneratedAlert,
   transformConnectorComment,
 } from '../../../../plugins/case/server/connectors';
@@ -70,12 +71,15 @@ export const postCommentUserReq: CommentRequestUserType = {
 export const postCommentAlertReq: CommentRequestAlertType = {
   alertId: 'test-id',
   index: 'test-index',
+  rule: { id: 'test-rule-id', name: 'test-index-id' },
   type: CommentType.alert,
 };
 
 export const postCommentGenAlertReq: ContextTypeGeneratedAlertType = {
-  alerts: [{ _id: 'test-id' }, { _id: 'test-id2' }],
-  index: 'test-index',
+  alerts: createAlertsString([
+    { _id: 'test-id', _index: 'test-index', ruleId: 'rule-id', ruleName: 'rule name' },
+    { _id: 'test-id2', _index: 'test-index', ruleId: 'rule-id', ruleName: 'rule name' },
+  ]),
   type: CommentType.generatedAlert,
 };
 

@@ -30,11 +30,11 @@ describe('LoggingService', () => {
     it('forwards configuration changes to logging system', () => {
       const config1: LoggerContextConfigType = {
         appenders: new Map(),
-        loggers: [{ context: 'subcontext', appenders: ['console'], level: 'warn' }],
+        loggers: [{ name: 'subcontext', appenders: ['console'], level: 'warn' }],
       };
       const config2: LoggerContextConfigType = {
         appenders: new Map(),
-        loggers: [{ context: 'subcontext', appenders: ['default'], level: 'all' }],
+        loggers: [{ name: 'subcontext', appenders: ['default'], level: 'all' }],
       };
 
       setup.configure(['test', 'context'], of(config1, config2));
@@ -54,11 +54,11 @@ describe('LoggingService', () => {
       const updates$ = new Subject<LoggerContextConfigType>();
       const config1: LoggerContextConfigType = {
         appenders: new Map(),
-        loggers: [{ context: 'subcontext', appenders: ['console'], level: 'warn' }],
+        loggers: [{ name: 'subcontext', appenders: ['console'], level: 'warn' }],
       };
       const config2: LoggerContextConfigType = {
         appenders: new Map(),
-        loggers: [{ context: 'subcontext', appenders: ['default'], level: 'all' }],
+        loggers: [{ name: 'subcontext', appenders: ['default'], level: 'all' }],
       };
 
       setup.configure(['test', 'context'], updates$);
@@ -78,7 +78,7 @@ describe('LoggingService', () => {
       const updates$ = new Subject<LoggerContextConfigType>();
       const config1: LoggerContextConfigType = {
         appenders: new Map(),
-        loggers: [{ context: 'subcontext', appenders: ['console'], level: 'warn' }],
+        loggers: [{ name: 'subcontext', appenders: ['console'], level: 'warn' }],
       };
 
       setup.configure(['test', 'context'], updates$);

@@ -182,8 +182,8 @@ export async function inspectSearchParams(
         },
       }
     ) as APMConfig,
-    uiFilters: { environment: 'test' },
-    esFilter: [{ term: { 'service.environment': 'test' } }],
+    uiFilters: {},
+    esFilter: [],
     indices: {
       /* eslint-disable @typescript-eslint/naming-convention */
       'apm_oss.sourcemapIndices': 'myIndex',

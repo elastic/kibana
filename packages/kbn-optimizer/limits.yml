@@ -33,8 +33,8 @@ pageLoadAssetSize:
   home: 41661
   indexLifecycleManagement: 107090
   indexManagement: 140608
-  indexPatternManagement: 154222
-  infra: 204800
+  indexPatternManagement: 28222
+  infra: 184320
   fleet: 415829
   ingestPipelines: 58003
   inputControlVis: 172675
@@ -103,6 +103,7 @@ pageLoadAssetSize:
   stackAlerts: 29684
   presentationUtil: 28545
   spacesOss: 18817
+  indexPatternFieldEditor: 90489
   osquery: 107090
   fileUpload: 25664
   banners: 17946
