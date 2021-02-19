@@ -15,7 +15,7 @@ Or post in the https://discuss.elastic.co/[Elastic forum].
 
 [float]
 [[task-manager-health-scheduled-tasks-small-schedule-interval-run-late]]
-=== Scheduled Tasks with Small Schedule Intervals Run Late
+=== Tasks with Small Schedule Intervals Run Late
 
 *Symptom*:
 
