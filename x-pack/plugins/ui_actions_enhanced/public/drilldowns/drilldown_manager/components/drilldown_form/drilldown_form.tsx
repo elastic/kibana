@@ -22,7 +22,6 @@ import {
   EuiCode,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { ActionFactory, BaseActionFactoryContext } from '../../../../dynamic_actions';
 import { TriggerPicker, TriggerPickerProps } from '../trigger_picker';
 
 const txtNameOfDrilldown = i18n.translate(
@@ -84,10 +83,6 @@ const txtChangeButton = i18n.translate(
 
 const GET_MORE_ACTIONS_LINK = 'https://www.elastic.co/subscriptions';
 export interface FormDrilldownWizardProps {
-  actionFactory: ActionFactory;
-  context: BaseActionFactoryContext;
-  isBeta?: boolean;
-
   /** Value of name field. */
   name?: string;
 
@@ -99,6 +94,9 @@ export interface FormDrilldownWizardProps {
 
   /** Name of the drilldown type. */
   drilldownTypeName: string;
+
+  /** Whether the current drilldown type is in beta. */
+  isBeta?: boolean;
 
   /** Whether to show "Get more actions" link to upgrade license. */
   showMoreActionsLink?: boolean;
@@ -115,8 +113,6 @@ const beta = (
 );
 
 export const DrilldownForm: React.FC<FormDrilldownWizardProps> = ({
-  actionFactory,
-  context,
   isBeta,
   name = '',
   euiIconType,
@@ -211,7 +207,7 @@ export const DrilldownForm: React.FC<FormDrilldownWizardProps> = ({
   );
 
   return (
-    <EuiForm data-test-subj={`selectedActionFactory-${actionFactory.id}`}>
+    <EuiForm data-test-subj={`DrilldownForm`}>
       {drilldownTypeInfo}
       <EuiSpacer size={'m'} />
       {nameFragment}
