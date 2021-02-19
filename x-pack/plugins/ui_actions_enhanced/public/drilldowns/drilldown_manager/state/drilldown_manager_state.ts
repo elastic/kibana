@@ -13,6 +13,7 @@ import {
   DrilldownManagerScreen,
 } from '../types';
 import { ActionFactory, BaseActionFactoryContext } from '../../../dynamic_actions';
+import { DrilldownState } from './drilldown_state';
 
 export interface DrilldownManagerStateDeps
   extends DrilldownManagerDependencies,
@@ -45,6 +46,13 @@ export class DrilldownManagerState {
    * Currently selected action factory (drilldown type).
    */
   public readonly actionFactory$ = new BehaviorSubject<undefined | ActionFactory>(undefined);
+
+  /**
+   * State for each drilldown type used for new drilldown creation, so when user
+   * switched between drilldown types the configuration of the previous
+   * drilldown is preserved.
+   */
+  public readonly drilldownStateByFactoryId = new Map<string, DrilldownState>();
 
   constructor(public readonly deps: DrilldownManagerStateDeps) {
     this.screen$ = new BehaviorSubject<DrilldownManagerScreen>(deps.screen || 'list');
@@ -79,6 +87,10 @@ export class DrilldownManagerState {
     this.deps.onClose();
   };
 
+  /**
+   * Get action factory context, which also contains a custom place context
+   * provided by the user who triggered rendering of the <DrilldownManager>.
+   */
   public getActionFactoryContext(): BaseActionFactoryContext {
     const placeContext = this.deps.placeContext ?? [];
     const context: BaseActionFactoryContext = {
@@ -87,6 +99,16 @@ export class DrilldownManagerState {
     };
 
     return context;
+  }
+
+  /**
+   * Get state object of the drilldown which is currently being created.
+   */
+  public getDrilldownState(): undefined | DrilldownState {
+    const actionFactory = this.actionFactory$.getValue();
+    if (!actionFactory) return undefined;
+    const drilldownState = this.drilldownStateByFactoryId.get(actionFactory.id);
+    return drilldownState;
   }
 
   // Below are convenience React hooks for consuming observables in connected

@@ -6,19 +6,19 @@
  */
 
 import { uiToReactComponent } from '../../../../../src/plugins/kibana_react/public';
-import { UiActionsPresentable as Presentable } from '../../../../../src/plugins/ui_actions/public';
-import { ActionFactoryDefinition } from './action_factory_definition';
-import { Configurable } from '../../../../../src/plugins/kibana_utils/public';
-import {
+import type { UiActionsPresentable as Presentable } from '../../../../../src/plugins/ui_actions/public';
+import type { ActionFactoryDefinition } from './action_factory_definition';
+import type { Configurable } from '../../../../../src/plugins/kibana_utils/public';
+import type {
   BaseActionConfig,
   BaseActionFactoryContext,
   SerializedAction,
   SerializedEvent,
 } from './types';
-import { ILicense, LicensingPluginStart } from '../../../licensing/public';
-import { UiActionsActionDefinition as ActionDefinition } from '../../../../../src/plugins/ui_actions/public';
-import { SavedObjectReference } from '../../../../../src/core/types';
-import { PersistableState } from '../../../../../src/plugins/kibana_utils/common';
+import type { ILicense, LicensingPluginStart } from '../../../licensing/public';
+import type { UiActionsActionDefinition as ActionDefinition } from '../../../../../src/plugins/ui_actions/public';
+import type { SavedObjectReference } from '../../../../../src/core/types';
+import type { PersistableState } from '../../../../../src/plugins/kibana_utils/common';
 
 export interface ActionFactoryDeps {
   readonly getLicense: () => ILicense;
