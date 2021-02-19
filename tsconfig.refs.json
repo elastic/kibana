@@ -67,6 +67,7 @@
     { "path": "./x-pack/plugins/data_enhanced/tsconfig.json" },
     { "path": "./x-pack/plugins/dashboard_mode/tsconfig.json" },
     { "path": "./x-pack/plugins/discover_enhanced/tsconfig.json" },
+    { "path": "./x-pack/plugins/drilldowns/url_drilldown/tsconfig.json" },
     { "path": "./x-pack/plugins/embeddable_enhanced/tsconfig.json" },
     { "path": "./x-pack/plugins/encrypted_saved_objects/tsconfig.json" },
     { "path": "./x-pack/plugins/enterprise_search/tsconfig.json" },
@@ -84,6 +85,7 @@
     { "path": "./x-pack/plugins/lens/tsconfig.json" },
     { "path": "./x-pack/plugins/license_management/tsconfig.json" },
     { "path": "./x-pack/plugins/licensing/tsconfig.json" },
+    { "path": "./x-pack/plugins/logstash/tsconfig.json" },
     { "path": "./x-pack/plugins/maps_legacy_licensing/tsconfig.json" },
     { "path": "./x-pack/plugins/maps/tsconfig.json" },
     { "path": "./x-pack/plugins/ml/tsconfig.json" },
@@ -112,6 +114,7 @@
     { "path": "./x-pack/plugins/remote_clusters/tsconfig.json" },
     { "path": "./x-pack/plugins/cross_cluster_replication/tsconfig.json" },
     { "path": "./x-pack/plugins/index_lifecycle_management/tsconfig.json" },
-    { "path": "./x-pack/plugins/uptime/tsconfig.json" }
+    { "path": "./x-pack/plugins/uptime/tsconfig.json" },
+    { "path": "./x-pack/plugins/xpack_legacy/tsconfig.json" },
   ]
 }

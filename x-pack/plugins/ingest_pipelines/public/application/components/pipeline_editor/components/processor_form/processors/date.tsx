@@ -18,7 +18,7 @@ import {
   ComboBoxField,
 } from '../../../../../../shared_imports';
 
-import { FieldsConfig, to } from './shared';
+import { FieldsConfig, to, from } from './shared';
 import { FieldNameField } from './common_fields/field_name_field';
 import { TargetField } from './common_fields/target_field';
 
@@ -53,7 +53,7 @@ const fieldsConfig: FieldsConfig = {
   /* Optional fields config */
   timezone: {
     type: FIELD_TYPES.TEXT,
-    serializer: (v) => (v ? v : undefined),
+    serializer: from.emptyStringToUndefined,
     label: i18n.translate('xpack.ingestPipelines.pipelineEditor.dateForm.timezoneFieldLabel', {
       defaultMessage: 'Timezone (optional)',
     }),
@@ -67,7 +67,7 @@ const fieldsConfig: FieldsConfig = {
   },
   locale: {
     type: FIELD_TYPES.TEXT,
-    serializer: (v) => (v ? v : undefined),
+    serializer: from.emptyStringToUndefined,
     label: i18n.translate('xpack.ingestPipelines.pipelineEditor.dateForm.localeFieldLabel', {
       defaultMessage: 'Locale (optional)',
     }),

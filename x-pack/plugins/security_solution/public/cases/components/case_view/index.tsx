@@ -42,8 +42,6 @@ import {
   normalizeActionConnector,
   getNoneConnector,
 } from '../configure_cases/utils';
-import { useQueryAlerts } from '../../../detections/containers/detection_engine/alerts/use_query';
-import { buildAlertsQuery, getRuleIdsFromComments } from './helpers';
 import { DetailsPanel } from '../../../timelines/components/side_panel';
 import { useSourcererScope } from '../../../common/containers/sourcerer';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
@@ -55,6 +53,7 @@ import * as i18n from './translations';
 
 interface Props {
   caseId: string;
+  subCaseId?: string;
   userCanCrud: boolean;
 }
 
@@ -87,32 +86,8 @@ export interface CaseProps extends Props {
   updateCase: (newCase: Case) => void;
 }
 
-interface Signal {
-  rule: {
-    id: string;
-    name: string;
-    to: string;
-    from: string;
-  };
-}
-
-interface SignalHit {
-  _id: string;
-  _index: string;
-  _source: {
-    '@timestamp': string;
-    signal: Signal;
-  };
-}
-
-export type Alert = {
-  _id: string;
-  _index: string;
-  '@timestamp': string;
-} & Signal;
-
 export const CaseComponent = React.memo<CaseProps>(
-  ({ caseId, caseData, fetchCase, updateCase, userCanCrud }) => {
+  ({ caseId, caseData, fetchCase, subCaseId, updateCase, userCanCrud }) => {
     const dispatch = useDispatch();
     const { formatUrl, search } = useFormatUrl(SecurityPageName.case);
     const allCasesLink = getCaseUrl(search);
@@ -127,45 +102,18 @@ export const CaseComponent = React.memo<CaseProps>(
       hasDataToPush,
       isLoading: isLoadingUserActions,
       participants,
-    } = useGetCaseUserActions(caseId, caseData.connector.id);
+    } = useGetCaseUserActions(caseId, caseData.connector.id, subCaseId);
 
     const { isLoading, updateKey, updateCaseProperty } = useUpdateCase({
       caseId,
+      subCaseId,
     });
-
-    const alertsQuery = useMemo(() => buildAlertsQuery(getRuleIdsFromComments(caseData.comments)), [
-      caseData.comments,
-    ]);
 
     /**
      * For the future developer: useSourcererScope is security solution dependent.
      * You can use useSignalIndex as an alternative.
      */
-    const { browserFields, docValueFields, selectedPatterns } = useSourcererScope(
-      SourcererScopeName.detections
-    );
-
-    const { loading: isLoadingAlerts, data: alertsData } = useQueryAlerts<SignalHit, unknown>(
-      alertsQuery,
-      selectedPatterns[0]
-    );
-
-    const alerts = useMemo(
-      () =>
-        alertsData?.hits.hits.reduce<Record<string, Alert>>(
-          (acc, { _id, _index, _source }) => ({
-            ...acc,
-            [_id]: {
-              _id,
-              _index,
-              '@timestamp': _source['@timestamp'],
-              ..._source.signal,
-            },
-          }),
-          {}
-        ) ?? {},
-      [alertsData?.hits.hits]
-    );
+    const { browserFields, docValueFields } = useSourcererScope(SourcererScopeName.detections);
 
     // Update Fields
     const onUpdateField = useCallback(
@@ -350,10 +298,10 @@ export const CaseComponent = React.memo<CaseProps>(
     );
 
     useEffect(() => {
-      if (initLoadingData && !isLoadingUserActions && !isLoadingAlerts) {
+      if (initLoadingData && !isLoadingUserActions) {
         setInitLoadingData(false);
       }
-    }, [initLoadingData, isLoadingAlerts, isLoadingUserActions]);
+    }, [initLoadingData, isLoadingUserActions]);
 
     const backOptions = useMemo(
       () => ({
@@ -435,18 +383,17 @@ export const CaseComponent = React.memo<CaseProps>(
                 {!initLoadingData && (
                   <>
                     <UserActionTree
+                      caseServices={caseServices}
                       caseUserActions={caseUserActions}
                       connectors={connectors}
                       data={caseData}
                       fetchUserActions={fetchCaseUserActions.bind(null, caseData.id)}
-                      caseServices={caseServices}
                       isLoadingDescription={isLoading && updateKey === 'description'}
                       isLoadingUserActions={isLoadingUserActions}
+                      onShowAlertDetails={showAlert}
                       onUpdateField={onUpdateField}
                       updateCase={updateCase}
                       userCanCrud={userCanCrud}
-                      alerts={alerts}
-                      onShowAlertDetails={showAlert}
                     />
                     <MyEuiHorizontalRule margin="s" />
                     <EuiFlexGroup alignItems="center" gutterSize="s" justifyContent="flexEnd">
@@ -513,8 +460,8 @@ export const CaseComponent = React.memo<CaseProps>(
   }
 );
 
-export const CaseView = React.memo(({ caseId, userCanCrud }: Props) => {
-  const { data, isLoading, isError, fetchCase, updateCase } = useGetCase(caseId);
+export const CaseView = React.memo(({ caseId, subCaseId, userCanCrud }: Props) => {
+  const { data, isLoading, isError, fetchCase, updateCase } = useGetCase(caseId, subCaseId);
   if (isError) {
     return null;
   }
@@ -531,6 +478,7 @@ export const CaseView = React.memo(({ caseId, userCanCrud }: Props) => {
   return (
     <CaseComponent
       caseId={caseId}
+      subCaseId={subCaseId}
       fetchCase={fetchCase}
       caseData={data}
       updateCase={updateCase}
