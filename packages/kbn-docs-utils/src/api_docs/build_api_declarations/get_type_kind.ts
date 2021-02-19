@@ -32,7 +32,7 @@ function getTypeKindForType(type: Type): TypeKind {
     return TypeKind.ArrayKind;
   } else if (type.isObject()) {
     return TypeKind.ObjectKind;
-  } else if (type.isBoolean()) {
+  } else if (type.isBoolean() || type.isBooleanLiteral()) {
     return TypeKind.BooleanKind;
   } else if (type.isEnum() || type.isEnumLiteral()) {
     return TypeKind.EnumKind;
