@@ -10,7 +10,7 @@ import {
   environmentQuery,
   rangeQuery,
   searchQuery,
-} from '../../../../common/utils/queries';
+} from '../../../../server/utils/queries';
 import { SERVICE_NODE_NAME_MISSING } from '../../../../common/service_nodes';
 import {
   EVENT_OUTCOME,

@@ -18,7 +18,7 @@ import {
   environmentQuery,
   rangeQuery,
   searchQuery,
-} from '../../../common/utils/queries';
+} from '../../../server/utils/queries';
 import { Coordinate } from '../../../typings/timeseries';
 import { withApmSpan } from '../../utils/with_apm_span';
 import {

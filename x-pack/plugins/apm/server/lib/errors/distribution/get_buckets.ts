@@ -15,7 +15,7 @@ import {
   environmentQuery,
   rangeQuery,
   searchQuery,
-} from '../../../../common/utils/queries';
+} from '../../../../server/utils/queries';
 import { withApmSpan } from '../../../utils/with_apm_span';
 import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 

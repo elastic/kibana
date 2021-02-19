@@ -22,7 +22,7 @@ import {
   environmentQuery,
   rangeQuery,
   searchQuery,
-} from '../../../../common/utils/queries';
+} from '../../../../server/utils/queries';
 import { getMetricsDateHistogramParams } from '../../helpers/metrics';
 import { MAX_KPIS } from './constants';
 import { getVizColorForIndex } from '../../../../common/viz_colors';

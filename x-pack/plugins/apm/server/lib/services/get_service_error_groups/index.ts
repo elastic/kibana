@@ -13,7 +13,7 @@ import {
   environmentQuery,
   rangeQuery,
   searchQuery,
-} from '../../../../common/utils/queries';
+} from '../../../../server/utils/queries';
 import { ProcessorEvent } from '../../../../common/processor_event';
 import {
   ERROR_EXC_MESSAGE,

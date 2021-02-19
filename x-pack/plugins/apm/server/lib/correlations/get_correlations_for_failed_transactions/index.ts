@@ -17,7 +17,7 @@ import {
   environmentQuery,
   rangeQuery,
   searchQuery,
-} from '../../../../common/utils/queries';
+} from '../../../../server/utils/queries';
 import {
   EVENT_OUTCOME,
   SERVICE_NAME,
