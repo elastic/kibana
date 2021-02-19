@@ -12,7 +12,7 @@ import { REPOSITORY_TYPES } from '../../../common';
 export const getRepositoryTypeDocUrl = (docLinks: DocLinksStart, type: RepositoryType) => {
   switch (type) {
     case REPOSITORY_TYPES.fs:
-      return `${docLinks.links.snapshotRestore.registerSharedFileSystem}`;
+      return docLinks.links.snapshotRestore.registerSharedFileSystem;
     case REPOSITORY_TYPES.url:
       return `${docLinks.links.snapshotRestore.registerUrl}`;
     case REPOSITORY_TYPES.source:
