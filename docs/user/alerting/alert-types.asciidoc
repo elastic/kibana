@@ -2,7 +2,7 @@
 [[alert-types]]
 == Standard stack alert types
 
-{kib} supplies alert types in two ways: some are built into {kib} (these are known as stack alerts), while domain-specific alert types are registered by {kib} apps such as <<xpack-apm,*APM*>>, <<metrics-app,*Metrics*>>, and <<uptime-app,*Uptime*>>.
+{kib} supplies alert types in two ways: some are built into {kib} (these are known as stack alerts), while domain-specific alert types are registered by {kib} apps such as <<xpack-apm,*APM*>>, <<xpack-ml,*{ml-cap}*>>, <<metrics-app,*Metrics*>>, and <<uptime-app,*Uptime*>>.
 
 This section covers stack alerts. For domain-specific alert types, refer to the documentation for that app.
 Users will need `all` access to the *Stack Alerts* feature to be able to create and edit any of the alerts listed below.

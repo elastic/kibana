@@ -16,7 +16,7 @@ export function useErrorGroupDistributionFetcher({
   groupId: string | undefined;
 }) {
   const { urlParams, uiFilters } = useUrlParams();
-  const { start, end } = urlParams;
+  const { environment, start, end } = urlParams;
   const { data } = useFetcher(
     (callApmApi) => {
       if (start && end) {
@@ -25,6 +25,7 @@ export function useErrorGroupDistributionFetcher({
           params: {
             path: { serviceName },
             query: {
+              environment,
               start,
               end,
               groupId,
@@ -34,7 +35,7 @@ export function useErrorGroupDistributionFetcher({
         });
       }
     },
-    [serviceName, start, end, groupId, uiFilters]
+    [environment, serviceName, start, end, groupId, uiFilters]
   );
 
   return { errorDistributionData: data };

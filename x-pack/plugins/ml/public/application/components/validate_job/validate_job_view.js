@@ -19,7 +19,6 @@ import {
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
-  EuiOverlayMask,
   EuiSpacer,
   EuiText,
   EuiFlexGroup,
@@ -161,24 +160,19 @@ const LoadingSpinner = () => (
 );
 
 const Modal = ({ close, title, children }) => (
-  <EuiOverlayMask>
-    <EuiModal onClose={close} style={{ width: '800px' }}>
-      <EuiModalHeader>
-        <EuiModalHeaderTitle>{title}</EuiModalHeaderTitle>
-      </EuiModalHeader>
+  <EuiModal onClose={close} style={{ width: '800px' }}>
+    <EuiModalHeader>
+      <EuiModalHeaderTitle>{title}</EuiModalHeaderTitle>
+    </EuiModalHeader>
 
-      <EuiModalBody>{children}</EuiModalBody>
+    <EuiModalBody>{children}</EuiModalBody>
 
-      <EuiModalFooter>
-        <EuiButton onClick={close} size="s" fill>
-          <FormattedMessage
-            id="xpack.ml.validateJob.modal.closeButtonLabel"
-            defaultMessage="Close"
-          />
-        </EuiButton>
-      </EuiModalFooter>
-    </EuiModal>
-  </EuiOverlayMask>
+    <EuiModalFooter>
+      <EuiButton onClick={close} size="s" fill>
+        <FormattedMessage id="xpack.ml.validateJob.modal.closeButtonLabel" defaultMessage="Close" />
+      </EuiButton>
+    </EuiModalFooter>
+  </EuiModal>
 );
 Modal.propType = {
   close: PropTypes.func.isRequired,

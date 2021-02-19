@@ -52,11 +52,11 @@ export class Appenders {
    * @returns Fully constructed `Appender` instance.
    */
   public static create(config: AppenderConfigType): DisposableAppender {
-    switch (config.kind) {
+    switch (config.type) {
       case 'console':
         return new ConsoleAppender(Layouts.create(config.layout));
       case 'file':
-        return new FileAppender(Layouts.create(config.layout), config.path);
+        return new FileAppender(Layouts.create(config.layout), config.fileName);
       case 'rolling-file':
         return new RollingFileAppender(config);
       case 'legacy-appender':
