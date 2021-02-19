@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { IconType } from '@elastic/eui';
 import {
   OPEN_TELEMETRY_AGENT_NAMES,
   RUM_AGENT_NAMES,
@@ -23,7 +24,6 @@ import pythonIcon from './icons/python.svg';
 import rubyIcon from './icons/ruby.svg';
 import { rumJsIcon } from './icons/rumjs';
 
-import { IconType } from '@elastic/eui';
 const agentIcons: { [key: string]: IconType } = {
   dotnet: dotNetIcon,
   erlang: erlangIcon,
