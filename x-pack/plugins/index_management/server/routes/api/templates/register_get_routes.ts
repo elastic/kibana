@@ -109,7 +109,7 @@ export function registerGetOneRoute({ router, license, lib }: RouteDependencies)
           });
         }
         // Case: default
-        return res.internalError({ body: e });
+        throw e;
       }
     })
   );
