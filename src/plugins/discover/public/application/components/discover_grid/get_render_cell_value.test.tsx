@@ -352,6 +352,35 @@ describe('Discover grid cell rendering', function () {
     `);
   });
 
+  it('does not collect subfields when the the column is unmapped but part of fields response', () => {
+    (indexPatternMock.getFieldByName as jest.Mock).mockReturnValueOnce(undefined);
+    const DiscoverGridCellValue = getRenderCellValueFn(
+      indexPatternMock,
+      rowsFieldsWithTopLevelObject,
+      rowsFieldsWithTopLevelObject.map((row) => indexPatternMock.flattenHit(row)),
+      true
+    );
+    const component = shallow(
+      <DiscoverGridCellValue
+        rowIndex={0}
+        columnId="object.value"
+        isDetails={false}
+        isExpanded={false}
+        isExpandable={true}
+        setCellProps={jest.fn()}
+      />
+    );
+    expect(component).toMatchInlineSnapshot(`
+      <span
+        dangerouslySetInnerHTML={
+          Object {
+            "__html": 100,
+          }
+        }
+      />
+    `);
+  });
+
   it('renders correctly when invalid row is given', () => {
     const DiscoverGridCellValue = getRenderCellValueFn(
       indexPatternMock,

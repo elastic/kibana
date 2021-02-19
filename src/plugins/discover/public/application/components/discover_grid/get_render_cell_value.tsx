@@ -52,7 +52,13 @@ export const getRenderCellValueFn = (
     return <span>-</span>;
   }
 
-  if (useNewFieldsApi && !field && row && row.fields) {
+  if (
+    useNewFieldsApi &&
+    !field &&
+    row &&
+    row.fields &&
+    !(row.fields as Record<string, unknown[]>)[columnId]
+  ) {
     const innerColumns = Object.fromEntries(
       Object.entries(row.fields as Record<string, unknown[]>).filter(([key]) => {
         return key.indexOf(`${columnId}.`) === 0;
