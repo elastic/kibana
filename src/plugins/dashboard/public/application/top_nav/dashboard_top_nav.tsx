@@ -365,6 +365,7 @@ export function DashboardTopNav({
       }
     }
 
+    setIsSaveInProgress(true);
     save({}).then((response: SaveResult) => {
       // If the save wasn't successful, put the original values back.
       if (!(response as { id: string }).id) {
@@ -377,6 +378,7 @@ export function DashboardTopNav({
       } else {
         clearUnsavedChanges();
       }
+      setIsSaveInProgress(false);
       return response;
     });
   }, [save, savedObjectsTagging, dashboardStateManager, clearUnsavedChanges]);
