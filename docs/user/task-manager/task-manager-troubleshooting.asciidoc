@@ -58,6 +58,17 @@ For details on scaling Task Manager, see <<task-manager-scaling-guidance>>.
 
 The following is a step-by-step guide to identifying a root cause for _drift_ by making sense of the output from the <<task-manager-health-monitoring>> endpoint.
 
+The guide evaluates the output in order t ovalidate the following theories:
+
+. <<task-manager-health-evaluate-the-configuration,Evaluate the Configuration>>
+.. <<task-manager-theory-reduced-polling-rate,Perhaps {kib} is configured to poll for tasks at a reduced rate?>>
+. <<task-manager-health-evaluate-the-runtime,Evaluate the Runtime>>
+.. <<task-manager-theory-actual-polling-frequently,Perhaps {kib} is not actually polling as frequently as it should?>>
+.. <<task-manager-theory-insufficient-throughput,Perhaps {kib} is polling as frequently as it should, but that isn't often enough to keep up with the workload?>>
+.. <<task-manager-theory-long-running-tasks,Perhaps tasks aren't "running late" so much as "running for too long"?>>
+.. <<task-manager-theory-high-fail-rate,Perhaps tasks aren't "running late" so much as "take multiple attempts to succeed"?>>
+. <<task-manager-health-evaluate-the-workload,Evaluate the Workload>>
+
 Retrieve the latest monitored health stats of a {kib} instance Task Manager:
 
 [source,sh]
@@ -232,6 +243,7 @@ By analyzing the different sections of the output we can evaluate the variety of
 [[task-manager-health-evaluate-the-configuration]]
 ==== Evaluate the Configuration
 
+[[task-manager-theory-reduced-polling-rate]]
 *Theory*:
 Perhaps {kib} is configured to poll for tasks at a reduced rate?
 
@@ -306,7 +318,7 @@ In such a case a deeper investigation into the high error rate experienced by th
 [[task-manager-health-evaluate-the-runtime]]
 ==== Evaluate the Runtime
 
-[[task-manager-health-evaluate-the-runtime-polling]]
+[[task-manager-theory-actual-polling-frequently]]
 *Theory*:
 Perhaps {kib} is not actually polling as frequently as it should?
 
@@ -385,9 +397,9 @@ We can infer from this output that {kib} Task Manager is not healthy, as the fai
 Analyzing the {kib} Server Log should reveal the underlying issue causing the high error rate and capacity issues.
 
 The high `NoAvailableWorkers` rate of 20% suggests that there are many tasks running for durations longer than the `poll_interval`.
-For details on analyzing long task execution durations, see the <<task-manager-health-evaluate-the-runtime-long-running-task,long running tasks>> theory.
+For details on analyzing long task execution durations, see the <<task-manager-theory-long-running-tasks,long running tasks>> theory.
 
-[[task-manager-health-evaluate-the-runtime-insufficient-throughput]]
+[[task-manager-theory-insufficient-throughput]]
 *Theory*:
 Perhaps {kib} is polling as frequently as it should, but that isn't often enough to keep up with the workload?
 
@@ -446,13 +458,13 @@ This assessment is based on the following:
 
 For details on achieving higher throughput by adjusting your scaling strategy, see <<task-manager-scaling-guidance>>.
 
-[[task-manager-health-evaluate-the-runtime-long-running-task]]
+[[task-manager-theory-long-running-tasks]]
 *Theory*:
 Perhaps tasks aren't "running late" so much as "running for too long"?
 
 *Diagnosis*:
 
-The <<task-manager-health-evaluate-the-runtime-insufficient-throughput,"Insufficient throughtput to handle the scheduled workload">> theory analyzed a hypothetical scenario where both _drift_ and _load_ were unusually high.
+The <<task-manager-theory-insufficient-throughput,"Insufficient throughtput to handle the scheduled workload">> theory analyzed a hypothetical scenario where both _drift_ and _load_ were unusually high.
 
 Suppose an alternate scenario, where `drift` is high, but `load` is not, such as the following:
 
@@ -514,7 +526,7 @@ We can infer from these stats that the high _drift_ the {kib} Task Manager is ex
 Resolving this issue is context dependent and would change from case to case.
 In the hypothetical example above, most likely, this would be resolved by modifying the queries in these alerts to make them faster, or improving the {es} throughput to speed up the exiting query.
 
-[[task-manager-health-evaluate-the-runtime-fail-rate]]
+[[task-manager-theory-high-fail-rate]]
 *Theory*:
 Perhaps tasks aren't "running late" so much as "take multiple attempts to succeed"?
 
