@@ -16,7 +16,7 @@ import {
   EuiConfirmModal,
   EuiCallOut,
   EuiLoadingSpinner,
-  EuiHideFor,
+  EuiBottomBar,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
@@ -174,33 +174,6 @@ export const PolicyDetails = React.memo(() => {
           error={policyAgentStatusSummary?.error ?? 0}
         />
       </EuiFlexItem>
-      <EuiHideFor sizes={['xs', 's']}>
-        <EuiFlexItem>
-          <VerticalDivider spacing="l" />
-        </EuiFlexItem>
-      </EuiHideFor>
-      <EuiFlexItem grow={false}>
-        <EuiButtonEmpty onClick={handleCancelOnClick} data-test-subj="policyDetailsCancelButton">
-          <FormattedMessage
-            id="xpack.securitySolution.endpoint.policy.details.cancel"
-            defaultMessage="Cancel"
-          />
-        </EuiButtonEmpty>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiButton
-          fill={true}
-          iconType="save"
-          data-test-subj="policyDetailsSaveButton"
-          onClick={handleSaveOnClick}
-          isLoading={isPolicyLoading}
-        >
-          <FormattedMessage
-            id="xpack.securitySolution.endpoint.policy.details.save"
-            defaultMessage="Save"
-          />
-        </EuiButton>
-      </EuiFlexItem>
     </EuiFlexGroup>
   );
 
@@ -233,6 +206,37 @@ export const PolicyDetails = React.memo(() => {
         <PolicyDetailsFormDiv>
           <PolicyDetailsForm />
         </PolicyDetailsFormDiv>
+        <EuiBottomBar paddingSize="s">
+          <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                color="ghost"
+                onClick={handleCancelOnClick}
+                data-test-subj="policyDetailsCancelButton"
+              >
+                <FormattedMessage
+                  id="xpack.securitySolution.endpoint.policy.details.cancel"
+                  defaultMessage="Cancel"
+                />
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                fill={true}
+                color="text"
+                iconType="save"
+                data-test-subj="policyDetailsSaveButton"
+                onClick={handleSaveOnClick}
+                isLoading={isPolicyLoading}
+              >
+                <FormattedMessage
+                  id="xpack.securitySolution.endpoint.policy.details.save"
+                  defaultMessage="Save"
+                />
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiBottomBar>
       </WrapperPage>
 
       <SpyRoute pageName={SecurityPageName.administration} />
