@@ -308,6 +308,8 @@ const allowlistEventFields: AllowlistFields = {
   elastic: true,
   event: true,
   rule: {
+    id: true,
+    name: true,
     ruleset: true,
   },
   file: {
@@ -322,6 +324,7 @@ const allowlistEventFields: AllowlistFields = {
     Ext: {
       code_signature: true,
       malware_classification: true,
+      malware_signature: true,
       quarantine_result: true,
       quarantine_message: true,
     },

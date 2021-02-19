@@ -35,6 +35,8 @@ describe('TelemetryEventsSender', () => {
             name: 'test',
           },
           rule: {
+            id: 'X',
+            name: 'Y',
             ruleset: 'Z',
           },
           file: {
@@ -48,6 +50,9 @@ describe('TelemetryEventsSender', () => {
                 key2: 'Y',
               },
               malware_classification: {
+                key1: 'X',
+              },
+              malware_signature: {
                 key1: 'X',
               },
               quarantine_result: true,
