@@ -76,16 +76,14 @@ describe('SAML authentication routes', () => {
       const unhandledException = new Error('Something went wrong.');
       authc.login.mockRejectedValue(unhandledException);
 
-      const internalServerErrorResponse = Symbol('error');
       const responseFactory = httpServerMock.createResponseFactory();
-      responseFactory.internalError.mockReturnValue(internalServerErrorResponse as any);
 
       const request = httpServerMock.createKibanaRequest({
         body: { SAMLResponse: 'saml-response' },
       });
 
-      await expect(routeHandler({} as any, request, responseFactory)).resolves.toBe(
-        internalServerErrorResponse
+      await expect(routeHandler({} as any, request, responseFactory)).rejects.toThrow(
+        unhandledException
       );
 
       expect(authc.login).toHaveBeenCalledWith(request, {
