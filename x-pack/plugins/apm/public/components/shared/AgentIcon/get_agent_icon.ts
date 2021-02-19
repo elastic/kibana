@@ -18,12 +18,12 @@ import javaIcon from './icons/java.svg';
 import nodeJsIcon from './icons/nodejs.svg';
 import ocamlIcon from './icons/ocaml.svg';
 import openTelemetryIcon from './icons/opentelemetry.svg';
-import phpIcon from './icons/php.svg';
+import { phpIcon } from './icons/php';
 import pythonIcon from './icons/python.svg';
 import rubyIcon from './icons/ruby.svg';
-import rumJsIcon from './icons/rumjs.svg';
+import { rumJsIcon } from './icons/rumjs';
 
-const agentIcons: { [key: string]: string } = {
+const agentIcons: { [key: string]: string | JSX.Element } = {
   dotnet: dotNetIcon,
   erlang: erlangIcon,
   go: goIcon,
