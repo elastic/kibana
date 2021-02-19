@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import { ESFilter } from '../../../../../typings/elasticsearch';
 import {
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
 } from '../../../common/elasticsearch_fieldnames';
 import { ENVIRONMENT_NOT_DEFINED } from '../../../common/environment_filter_values';
 import { ProcessorEvent } from '../../../common/processor_event';
-import { rangeFilter } from '../../../common/utils/range_filter';
+import { rangeQuery } from '../../../common/utils/queries';
 import { withApmSpan } from '../../utils/with_apm_span';
 import { getProcessorEventForAggregatedTransactions } from '../helpers/aggregated_transactions';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
@@ -37,7 +36,7 @@ export async function getEnvironments({
   return withApmSpan(spanName, async () => {
     const { start, end, apmEventClient, config } = setup;
 
-    const filter: ESFilter[] = [{ range: rangeFilter(start, end) }];
+    const filter = rangeQuery(start, end);
 
     if (serviceName) {
       filter.push({
