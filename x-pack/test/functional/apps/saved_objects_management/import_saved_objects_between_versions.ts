@@ -11,12 +11,13 @@
 
 import expect from '@kbn/expect';
 import path from 'path';
+import { keyBy } from 'lodash';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const esArchiver = getService('esArchiver');
-  const PageObjects = getPageObjects(['settings', 'savedObjects']);
+  const PageObjects = getPageObjects(['common', 'settings', 'header', 'savedObjects']);
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
 
@@ -32,10 +33,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     after(async () => {
       await esArchiver.unload('logstash_functional');
       await esArchiver.unload('getting_started/shakespeare');
-      await esArchiver.load('empty_kibana');
     });
 
-    it('should import 7.8 saved objects', async function () {
+    it('should be able to import 7.12 saved objects into 8.0.0', async function () {
       await retry.tryForTime(10000, async () => {
         const existingSavedObjects = await testSubjects.getVisibleText('exportAllObjects');
         // Kibana always has 1 advanced setting as a saved object
