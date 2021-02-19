@@ -34,6 +34,9 @@ describe('TelemetryEventsSender', () => {
           agent: {
             name: 'test',
           },
+          rule: {
+            ruleset: 'Z',
+          },
           file: {
             size: 3,
             path: 'X',
