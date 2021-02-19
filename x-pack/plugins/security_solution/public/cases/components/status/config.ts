@@ -36,6 +36,7 @@ type Statuses = Record<
 >;
 
 export const statuses: Statuses = {
+  [CaseStatuses.all]: { color: 'hollow', label: i18n.ALL },
   [CaseStatuses.open]: {
     color: 'primary',
     label: i18n.OPEN,

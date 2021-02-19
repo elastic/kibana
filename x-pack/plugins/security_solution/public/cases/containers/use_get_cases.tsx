@@ -95,7 +95,7 @@ const dataFetchReducer = (state: UseGetCasesState, action: Action): UseGetCasesS
 export const DEFAULT_FILTER_OPTIONS: FilterOptions = {
   search: '',
   reporters: [],
-  status: CaseStatuses.open,
+  status: CaseStatuses.all,
   tags: [],
 };
 
@@ -108,6 +108,7 @@ export const DEFAULT_QUERY_PARAMS: QueryParams = {
 
 export const initialData: AllCases = {
   cases: [],
+  countAllCases: null,
   countClosedCases: null,
   countInProgressCases: null,
   countOpenCases: null,

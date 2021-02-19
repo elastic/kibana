@@ -167,7 +167,7 @@ export const getCases = async ({
   filterOptions = {
     search: '',
     reporters: [],
-    status: CaseStatuses.open,
+    status: CaseStatuses.all,
     tags: [],
   },
   queryParams = {

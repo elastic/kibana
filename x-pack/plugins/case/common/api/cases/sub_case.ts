@@ -10,7 +10,7 @@ import * as rt from 'io-ts';
 import { NumberFromString } from '../saved_object';
 import { UserRT } from '../user';
 import { CommentResponseRt } from './comment';
-import { CasesStatusResponseRt } from './status';
+import { SubCasesStatusResponseRt } from './status';
 import { CaseStatusRt } from './status';
 
 const SubCaseBasicRt = rt.type({
@@ -61,7 +61,7 @@ export const SubCasesFindResponseRt = rt.intersection([
     per_page: rt.number,
     total: rt.number,
   }),
-  CasesStatusResponseRt,
+  SubCasesStatusResponseRt,
 ]);
 
 export const SubCasePatchRequestRt = rt.intersection([
