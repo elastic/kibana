@@ -10,7 +10,10 @@ import {
   TimelineExpandedDetailType,
   TimelineTabs,
 } from '../../../common/types/timeline';
-import { TimelineEventsAllRequestOptions } from '../../../common/search_strategy/timeline';
+import {
+  TimelineEqlRequestOptions,
+  TimelineEventsAllRequestOptions,
+} from '../../../common/search_strategy/timeline';
 import { TimelineArgs } from '.';
 
 /*
@@ -30,6 +33,8 @@ class ActiveTimelineEvents {
   private _pageName: string = '';
   private _request: TimelineEventsAllRequestOptions | null = null;
   private _response: TimelineArgs | null = null;
+  private _eqlRequest: TimelineEqlRequestOptions | null = null;
+  private _eqlResponse: TimelineArgs | null = null;
 
   getActivePage() {
     return this._activePage;
@@ -97,6 +102,22 @@ class ActiveTimelineEvents {
 
   setResponse(resp: TimelineArgs | null) {
     this._response = resp;
+  }
+
+  getEqlRequest() {
+    return this._eqlRequest;
+  }
+
+  setEqlRequest(req: TimelineEqlRequestOptions) {
+    this._eqlRequest = req;
+  }
+
+  getEqlResponse() {
+    return this._eqlResponse;
+  }
+
+  setEqlResponse(resp: TimelineArgs | null) {
+    this._eqlResponse = resp;
   }
 }
 
