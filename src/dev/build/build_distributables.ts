@@ -16,8 +16,9 @@ export interface BuildOptions {
   buildOssDist: boolean;
   buildDefaultDist: boolean;
   downloadFreshNode: boolean;
+  initialize: boolean;
   createGenericFolders: boolean;
-  CreatePlatformFolders: boolean;
+  createPlatformFolders: boolean;
   createArchives: boolean;
   createRpmPackage: boolean;
   createDebPackage: boolean;
