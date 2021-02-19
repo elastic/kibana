@@ -28,7 +28,7 @@ export const toObjectArrayOfStrings = <T = string>(
             return [...acc, { str: v.toString() }];
           case 'object':
             try {
-              return [...acc, { str: JSON.stringify(v), isObjectArray: true }]; // here
+              return [...acc, { str: JSON.stringify(v), isObjectArray: true }]; // need to track when string is not a simple value
             } catch {
               return [...acc, { str: 'Invalid Object' }];
             }
