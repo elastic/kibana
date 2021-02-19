@@ -96,18 +96,15 @@ export const useKeyEvents = ({
           selectSuggestion(suggestions[index!]);
         } else {
           setIsSuggestionsVisible(false);
-
           onSubmit(value);
         }
         break;
       case KEY_CODES.ESC:
         event.preventDefault();
         setIsSuggestionsVisible(false);
-
         break;
       case KEY_CODES.TAB:
         setIsSuggestionsVisible(false);
-
         break;
     }
   };
