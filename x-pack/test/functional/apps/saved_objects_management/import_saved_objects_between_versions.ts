@@ -11,7 +11,6 @@
 
 import expect from '@kbn/expect';
 import path from 'path';
-import { keyBy } from 'lodash';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
