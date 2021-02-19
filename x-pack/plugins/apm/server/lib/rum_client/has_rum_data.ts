@@ -11,7 +11,7 @@ import {
   TRANSACTION_TYPE,
 } from '../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../common/processor_event';
-import { rangeFilter } from '../../../common/utils/range_filter';
+import { rangeQuery } from '../../../common/utils/queries';
 import { TRANSACTION_PAGE_LOAD } from '../../../common/transaction_types';
 
 export async function hasRumData({ setup }: { setup: Setup & SetupTimeRange }) {
@@ -31,9 +31,7 @@ export async function hasRumData({ setup }: { setup: Setup & SetupTimeRange }) {
         },
         aggs: {
           services: {
-            filter: {
-              range: rangeFilter(start, end),
-            },
+            filter: rangeQuery(start, end)[0],
             aggs: {
               mostTraffic: {
                 terms: {

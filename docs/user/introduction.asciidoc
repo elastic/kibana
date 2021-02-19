@@ -7,19 +7,18 @@
 {kib} enables you to give
 shape to your data and navigate the Elastic Stack.  With {kib}, you can:
 
-* *Visualize and analyze your data.*
-Search for hidden insights, visualize what you've found in charts, gauges,
-maps and more, and combine them in a dashboard.
-
 * *Search, observe, and protect.*
 From discovering documents to analyzing logs to finding security vulnerabilities,
 {kib} is your portal for accessing these capabilities and more.
+
+* *Visualize and analyze your data.*
+Search for hidden insights, visualize what you've found in charts, gauges,
+maps and more, and combine them in a dashboard.
 
 * *Manage, monitor, and secure the Elastic Stack.*
 Manage your indices and ingest pipelines, monitor the health of your
 Elastic Stack cluster, and control which users have access to
 which features.
-
 
 *{kib} is for administrators, analysts, and business users.*
 As an admin, your role is to manage the Elastic Stack, from creating your
@@ -37,32 +36,257 @@ No matter your data, {kib} can help you uncover patterns and relationships and v
 [[kibana-home-page]]
 === Where to start
 
-Start with the home page, where you’re guided toward the most common use cases.
-For a quick reference of {kib} use cases, refer to <<whats-the-right-app,What’s the right app for you?>>
+Start with the home page, where you’re presented options for adding your data.
+You can collect data from an app or service or upload a file that contains your data.
+If you’re not ready to use your own data, you can add a sample data set.
+
+The home page provides access to the *Enterprise Search*, *Observability*, and *Security* solutions,
+and everything you need to visualize and analyze your data.
 
 [role="screenshot"]
 image::images/home-page.png[Kibana home page]
 
-The main menu gets you to where you need to go. Like the home page,
-the menu is organized by use case. Want to work with your logs, metrics, APM, or
-Uptime data? The apps you need are under *Observability*. The main menu also includes
-*Recently viewed*, so you can easily access your previously opened apps.
-
-Hidden by default, you open the main menu by clicking the
-hamburger icon. To keep the main menu visible at all times, click the *Dock navigation* item.
+To access all of {kib} features, use the main menu.
+Open this menu by clicking the
+menu icon. To keep the main menu visible at all times, click *Dock navigation*.
+For a quick reference of all {kib} features, refer to <<whats-the-right-app,What’s the right app for you?>>
 
 [role="screenshot"]
 image::images/kibana-main-menu.png[Kibana main menu]
 
 [float]
+[[extend-your-use-case]]
+=== Search, observe, and protect
+
+Being able to search, observe, and protect your data is a requirement for any analyst.
+{kib} provides solutions for each of these use cases.
+
+* https://www.elastic.co/guide/en/enterprise-search/current/index.html[*Enterprise Search*] enables you to create a search experience for your app, workplace, and website.
+
+* {observability-guide}/observability-introduction.html[*Elastic Observability*] enables you to monitor and apply analytics in real time
+to events happening across all your environments. You can analyze log events, monitor the performance metrics for the host or container
+that it ran in, trace the transaction, and check the overall service availability.
+
+* Designed for security analysts, {security-guide}/es-overview.html[*Elastic Security*] provides an overview of
+the events and alerts from your environment.  Elastic Security helps you defend
+your organization from threats before damage and loss occur.
++
+[role="screenshot"]
+image::siem/images/detections-ui.png[Detections view in Elastic Security]
+
+
+[float]
+[[visualize-and-analyze]]
+=== Visualize and analyze
+
+Data analysis is a core functionality of {kib}.
+You can quickly search through large amounts of data, explore fields and values,
+and then use {kib}’s drag-and-drop interface to rapidly build charts, tables, metrics, and more.
+
+[role="screenshot"]
+image::images/visualization-journey.png[User data analysis journey]
+
+[[get-data-into-kibana]]
+[cols=2*]
+|===
+
+| *1*
+| *Add data.* The best way to add {es} data to {kib} is to use one of our guided processes,
+available from the <<kibana-home-page,home page>>.
+
+| *2*
+| *Explore.* With <<discover,*Discover*>>, you can search your data for hidden
+insights and relationships. Ask your questions, and then filter the results to just the data you want.
+You can limit your results to the most recent documents added to {es}.
+
+| *3*
+| *Visualize.* {kib} provides many options to create visualizations of your data, from
+aggregation-based data to time series data.
+<<dashboard, *Dashboard*>> is your starting point to create visualizations,
+and then pulling them together to show your data from multiple perspectives.
+
+| *4*
+| *Present.*  With <<canvas, *Canvas*>>, you can display your data on a visually
+compelling, pixel-perfect workpad. **Canvas** can give your data
+the “wow” factor needed to impress your CEO and captivate coworkers with a big-screen display.
+
+| *5*
+| *Share.* Ready to <<reporting-getting-started, share>> your findings with a larger audience? {kib} offers many options&mdash;embed
+a dashboard, share a link, export to PDF, and more.
+|===
+
+[float]
+==== Plot location data on a map
+If you’re looking to better understand the “where’’ in your data, your data
+analysis journey will also include <<maps, *Maps*>>. This app is the right
+choice when you’re looking for a spatial pattern, performing ad-hoc location-driven analysis,
+or analyzing metrics with a geographic perspective. With *Maps*, you can build
+world country maps, administrative region maps, and point-to-point origin-destination maps.
+You can also visualize and track movement over space and through time.
+
+[float]
+==== Model data behavior
+
+To model the behavior of your data, you'll use
+<<xpack-ml, *{ml-cap}*>>.
+This app can help you extract insights from your data that you might otherwise miss.
+You can forecast unusual behavior in your time series data.
+You can also perform outlier detection, regression, and classification analysis
+on your data and generate annotated results.
+
+[float]
+==== Graph relationships
+
+Looking to uncover how items in your data are related?
+<<xpack-graph, *Graph*>> is your app. Graphing relationships is useful in a variety of use cases,
+from fraud detection to recommendation engines. For example, graph exploration
+can help you uncover website vulnerabilities that hackers are targeting,
+so you can harden your website. Or, you might provide graph-based
+personalized recommendations to your e-commerce customers.
+
+[float]
+[[manage-all-things-stack]]
+=== Manage all things Elastic Stack
+
+{kib}'s <<management, *Management*>> UIs takes you under the hood,
+so you can twist the levers and turn the knobs. You'll find
+guided processes for administering all things Elastic Stack,
+including data, indices, clusters, alerts, and security.
+
+[role="screenshot"]
+image::images/intro-management.png[Index Management view in Stack Management]
+
+[float]
+==== Manage your data, indices, and clusters
+
+{kib} offers these data management tasks&mdash;all from the convenience of a UI:
+
+* Refresh, flush, and clear the cache of your indices.
+* Define the lifecycle of an index as it ages.
+* Define a policy for taking snapshots of your cluster.
+* Roll up data from one or more indices into a new, compact index.
+* Replicate indices on a remote cluster and copy them to a local cluster.
+
+[float]
+==== Alert and take action
+Detecting and acting on significant shifts and signals in your data is a need
+that exists in almost every use case. For example, you might set an alert to notify you when:
+
+* A shift occurs in your business critical KPIs.
+* System resources, such as memory, CPU and disk space, take a dip.
+* An unusually high number of service requests, suspicious processes, and login attempts occurs.
+
+An alert triggers when a specified condition is met. For example,
+you can trigger an alert when the average or max of one of
+your metrics exceeds a threshold within a specified time frame.
+
+When the alert triggers, you can send a notification to a system that is part of
+your daily workflow. {kib} integrates with email, Slack, PagerDuty, and ServiceNow,
+to name a few.
+
+A dedicated view for creating, searching, and editing alerts is in <<alert-management,*Alerts and Actions*>>.
+
+[role="screenshot"]
+image::images/alerts-and-actions.png[Alerts and Actions view]
+
+
+[float]
+[[organize-and-secure]]
+=== Organize your work in spaces
+
+Want to share {kib}’s goodness with other people or teams without overwhelming them? You can do so
+with <<xpack-spaces, Spaces>>, built for organizing your visualizations, dashboards, and indices.
+Think of a space as its own mini {kib} installation&mdash;it’s isolated from all other spaces,
+so you can tailor it to your specific needs without impacting others.
+
+[role="screenshot"]
+image::images/select-your-space.png[Space selector view]
+
+Most of {kib}’s entities are space-aware, including dashboards, visualizations, index patterns,
+Canvas workpads, Timelion visualizations, graphs, tags, and machine learning jobs.
+
+In addition:
+
+* **Elastic Security** is space-aware, so the timelines and investigations
+you open in one space will not be available to other spaces.
+
+* **Observability** is currently partially space-aware, but will be enhanced to become fully space-aware.
+
+* Most of the **Stack Management** features are not space aware because they
+are primarily used to manage features of {es}, which serves as a shared data store for all spaces.
+
+* Alerts are space-aware and work nicely with the {kib} role-based access control
+model to allow you secure access to them, depending on the alert type and your user roles.
+For example, roles with no access to an app will not have access to its alerts.
+
+[float]
+==== Control feature visibility
+
+You can take spaces one step further and control which features are visible
+within each space. For example, you might hide **Dev Tools** in your "Executive"
+space or show **Stack Monitoring** only in your "Admin" space.
+
+Controlling feature visibility is not a security feature. To secure access
+to specific features on a per-user basis, you must configure
+<<xpack-security-authorization,{kib} Security>>.
+
+[role="screenshot"]
+image::images/features-control.png[Features Controls view]
+
+[float]
+[[intro-kibana-Security]]
+=== Secure {kib}
+
+{kib} offers a range of security features for you to control who has access to what.
+The security features are automatically turned on when
+{ref}/get-started-enable-security.html[security is enabled in
+{es}]. For a description of all available configuration options,
+see <<security-settings-kb,Security settings in {kib}>>.
+
+[float]
+==== Log in
+Kibana supports several <<kibana-authentication,authentication providers>>,
+allowing you to login using {es}’s built-in realms, or by your own single sign-on provider.
+
+[role="screenshot"]
+image::images/login-screen.png[Login page]
+
+[float]
+==== Secure access
+
+{kib} provides roles and privileges for controlling which users can
+view and manage {kib} features. Privileges grant permission to view an application
+or perform a specific action and are assigned to roles. Roles allow you to describe
+a “template” of capabilities that you can grant to many users,
+without having to redefine what each user should be able to do.
+
+When you create a role, you can scope the assigned {kib} privileges to specific spaces.
+This makes it possible to grant users different access levels in different spaces,
+or even give users their very own private space. For example, power users might
+have privileges to create and edit visualizations and dashboards,
+while analysts or executives might have *Dashboard* and *Canvas* with read-only privileges.
+
+{kib}’s role management interface allows you to describe these various access
+levels, or you can automate role creation via our <<role-management-api,API>>.
+
+[role="screenshot"]
+image::images/roles-and-privileges.png[{kib privileges}]
+
+[float]
+==== Audit access
+
+Once you have your users and roles configured, you might want to maintain a
+record of who did what, when. The {kib} audit log will record this information for you,
+which can then be correlated with {es} audit logs to gain more insights into your
+users’ behavior. For more information, see <<xpack-security-audit-logging,{kib} audit logging>>.
+
+[float]
 [[kibana-navigation-search]]
-=== Search {kib}
+=== Quickly find apps and objects
 
-Using the Search field in the global header, you can
+Using the search field in the global header, you can
 search for applications and objects, such as
-dashboards and visualizations.
-
-Search suggestions include deep links into applications,
+dashboards and visualizations. Search suggestions include deep links into applications,
 allowing you to directly navigate to the views you need most.
 
 [role="screenshot"]
@@ -102,224 +326,6 @@ Available types: `application`, `canvas-workpad`, `dashboard`, `index-pattern`, 
 `type:(dashboard or canvas-workpad) logs` +
 |===
 
-
-[float]
-[[visualize-and-analyze]]
-=== Analyze your data
-
-Data analysis is the core functionality of {kib}.
-You can quickly search through large amounts of data, explore fields and values,
-and then use {kib}’s drag-and-drop interface to rapidly build charts, tables, metrics, and more.
-
-[role="screenshot"]
-image::images/visualization-journey.png[User visualization journey]
-
-[[get-data-into-kibana]]
-. *Add data.* The best way to add {es} data to {kib} is to use one of our guided processes,
-available from the <<kibana-home-page,home page>>. You can collect data from an app or service, upload a
-file, or add a sample data set.
-
-. *Explore.* With <<discover,*Discover*>>, you can search your data for hidden
-insights and relationships. Ask your questions, and then filter the results to just the data you want.
-You can also limit your results to the most recent documents added to {es}.
-
-. *Visualize.* {kib} provides many options to create visualizations of your data, from
-aggregation-based data to time series data.
-<<dashboard, *Dashboard*>> is your starting point to create visualizations,
-and then pulling them together to show your data from multiple perspectives.
-
-. *Present.*  With <<canvas, *Canvas*>>, you can display your data on a visually
-compelling, pixel-perfect workpad. **Canvas** can give your data
-the “wow” factor needed to impress your CEO and captivate coworkers with a big-screen display.
-
-. *Share.* Ready to <<reporting-getting-started, share>> your findings with a larger audience? {kib} offers many options&mdash;embed
-a dashboard, share a link, export to PDF, and more.
-
-[float]
-==== Plot location data on a map
-If you’re looking to better understand the “where’’ in your data, your data
-analysis journey will also include <<maps, *Maps*>>. This app is the right
-choice when you’re looking for a spatial pattern, performing ad-hoc location-driven analysis,
-or analyzing metrics with a geographic perspective. With *Maps*, you can build
-world country maps, administrative region maps, and point-to-point origin-destination maps.
-You can also visualize and track movement over space and through time.
-
-[float]
-==== Model data behavior
-
-To model the behavior of your data, you'll want to use
-<<xpack-ml, *{ml-cap}*>>.
-This app can help you extract insights from your data that you might otherwise miss.
-You can forecast unusual behavior in your time series data.
-You can also perform outlier detection, regression, and classification analysis
-on your data and generate annotated results.
-
-[float]
-==== Graph relationships
-
-Looking to uncover how items in your data are related?
-<<xpack-graph, *Graph*>> is your app. Graphing relationships is useful in a variety of use cases,
-from fraud detection to recommendation engines. For example, graph exploration
-can help you uncover website vulnerabilities that hackers are targeting,
-so you can harden your website. Or, you might provide graph-based
-personalized recommendations to your e-commerce customers.
-
-[float]
-[[extend-your-use-case]]
-=== Search, observe, and protect
-
-Being able to search, observe, and protect your data is a requirement for any analyst.
-{kib} provides solutions for each of these use cases.
-
-* https://www.elastic.co/guide/en/enterprise-search/current/index.html[*Enterprise Search*] enables you to create a search experience for your app, workplace, and website.
-
-* {observability-guide}/observability-introduction.html[*Elastic Observability*] enables you to monitor and apply analytics in real time
-to events happening across all your environments. You can analyze log events, monitor the performance metrics for the host or container
-that it ran in, trace the transaction, and check the overall service availability.
-
-* Designed for security analysts, {security-guide}/es-overview.html[*Elastic Security*] provides an overview of
-the events and alerts from your environment.  Elastic Security helps you defend
-your organization from threats before damage and loss occur.
-+
-[role="screenshot"]
-image::siem/images/detections-ui.png[]
-
-[float]
-[[manage-all-things-stack]]
-=== Manage all things Elastic Stack
-
-{kib}'s <<management, Stack Management>> takes you under the hood,
-so you can twist the levers and turn the knobs.  *Stack Management* provides
-guided processes for administering all things Elastic Stack,
-including data, indices, clusters, alerts, and security.
-
-[role="screenshot"]
-image::images/intro-management.png[]
-
-[float]
-==== Manage your data, indices, and clusters
-
-{kib} offers these data management tasks&mdash;all from the convenience of a UI:
-
-* Refresh, flush, and clear the cache of your indices.
-* Define the lifecycle of an index as it ages.
-* Define a policy for taking snapshots of your cluster.
-* Roll up data from one or more indices into a new, compact index.
-* Replicate indices on a remote cluster and copy them to a local cluster.
-
-[float]
-==== Alert and take action
-Detecting and acting on significant shifts and signals in your data is a need
-that exists in almost every use case. For example, you might set an alert to notify you when:
-
-* A shift occurs in your business critical KPIs.
-* System resources, such as memory, CPU and disk space, take a dip.
-* An unusually high number of service requests, suspicious processes, and login attempts occurs.
-
-An alert is triggered when a specified condition is met. For example,
-an alert might trigger when the average or max of one of
-your metrics exceeds a threshold within a specified time frame.
-
-When the alert triggers, you can send a notification to a system that is part of
-your daily workflow. {kib} integrates with email, Slack, PagerDuty, and ServiceNow,
-to name a few.
-
-A dedicated view for creating, searching, and editing alerts is in <<alert-management,*Alerts and Actions*>>.
-
-[role="screenshot"]
-image::images/alerts-and-actions.png[Alerts and Actions view]
-
-
-[float]
-[[organize-and-secure]]
-=== Organize your work in spaces
-
-Want to share {kib}’s goodness with other people or teams without overwhelming them? You can do so
-with <<xpack-spaces, Spaces>>, built for organizing your visualizations, dashboards, and indices.
-Think of a space as its own mini {kib} installation&mdash;it’s isolated from all other spaces,
-so you can tailor it to your specific needs without impacting others.
-
-[role="screenshot"]
-image::images/select-your-space.png[Space selector screen]
-
-Most of {kib}’s entities are space-aware, including dashboards, visualizations, index patterns,
-Canvas workpads, Timelion visualizations, graphs, tags, and machine learning jobs.
-
-In addition:
-
-* **Elastic Security** is space-aware, so the timelines and investigations
-you open in one space will not be available to other spaces.
-
-* **Observability** is currently partially space-aware, but will be enhanced to become fully space-aware.
-
-* Most of the **Stack Management** features are not space aware because they
-are primarily used to manage features of {es}, which serves as a shared data store for all spaces.
-
-* Alerts are space-aware and work nicely with the {kib} role-based access control
-model to allow you secure access to them, depending on the alert type and your user roles.
-For example, roles with no access to an app will not have access to its alerts.
-
-[float]
-==== Control feature visibility
-
-You can take spaces one step further and control which features are visible
-within each space. For example, you might hide **Dev Tools** in your "Executive"
-space or show **Stack Monitoring** only in your "Admin" space.
-
-Controlling feature visibility is not a security feature. To secure access
-to specific features on a per-user basis, you must configure
-<<xpack-security-authorization,{kib} Security>>.
-
-[role="screenshot"]
-image::images/features-control.png[Features Controls screen]
-
-[float]
-[[intro-kibana-Security]]
-=== Secure {kib}
-
-{kib} offers a range of security features for you to control who has access to what.
-The security features are automatically turned on when
-{ref}/get-started-enable-security.html[security is enabled in
-{es}]. For a description of all available configuration options,
-see <<security-settings-kb,Security settings in {kib}>>.
-
-[float]
-==== Log in
-Kibana supports several <<kibana-authentication,authentication providers>>,
-allowing you to login using {es}’s built-in realms, or by your own single sign-on provider.
-
-[role="screenshot"]
-image::images/login-screen.png[Login screen]
-
-[float]
-==== Secure access
-
-{kib} provides roles and privileges for controlling which users can
-view and manage {kib} features. Privileges grant permission to view an application
-or perform a specific action and are assigned to roles. Roles allow you to describe
-a “template” of capabilities that you can grant to many users,
-without having to redefine what each user should be able to do.
-
-When you create a role, you can scope the assigned {kib} privileges to specific spaces.
-This makes it possible to grant users different access levels in different spaces,
-or even give users their very own private space. For example, power users might
-have privileges to create and edit visualizations and dashboards,
-while analysts or executives might have *Dashboard* and *Canvas* with read-only privileges.
-
-{kib}’s role management interface allows you to describe these various access
-levels, or you can automate role creation via our <<role-management-api,API>>.
-
-[role="screenshot"]
-image::images/roles-and-privileges.png[{kib privileges}]
-
-[float]
-==== Audit access
-
-Once you have your users and roles configured, you might want to maintain a
-record of who did what, when. The {kib} audit log will record this information for you,
-which can then be correlated with {es} audit logs to gain more insights into your
-users’ behavior. For more information, see <<xpack-security-audit-logging,{kib} audit logging>>.
-
 [float]
 [[whats-the-right-app]]
 === What’s the right app for you?
@@ -344,32 +350,6 @@ the <<get-started,{kib} Quick start>>.
 
 |See the full list of {kib} features
 |The https://www.elastic.co/kibana/features[{kib} features page on elastic.co]
-
-2+| *Analyze and visualize your data*
-
-|Know what’s in your data
-|<<discover,Discover>>
-
-|Create charts and other visualizations
-|<<dashboard, Dashboard>>
-
-|Show your data from different perspectives
-|<<dashboard, Dashboard>>
-
-|Work with location data
-|<<maps, Maps>>
-
-|Create a presentation of your data
-|<<canvas, Canvas>>
-
-|Generate models for your data’s behavior
-|<<xpack-ml, {ml-cap}>>
-
-|Explore connections in your data
-|<<xpack-graph, Graph>>
-
-|Share your data
-|<<dashboard, Dashboard>>, <<canvas, Canvas>>
 
 2+|*Build a search experience*
 
@@ -414,6 +394,32 @@ the <<get-started,{kib} Quick start>>.
 |View and manage hosts that are running Endpoint Security
 |{security-guide}/admin-page-ov.html[Administration]
 
+2+| *Analyze and visualize your data*
+
+|Know what’s in your data
+|<<discover,Discover>>
+
+|Create charts and other visualizations
+|<<dashboard, Dashboard>>
+
+|Show your data from different perspectives
+|<<dashboard, Dashboard>>
+
+|Work with location data
+|<<maps, Maps>>
+
+|Create a presentation of your data
+|<<canvas, Canvas>>
+
+|Generate models for your data’s behavior
+|<<xpack-ml, {ml-cap}>>
+
+|Explore connections in your data
+|<<xpack-graph, Graph>>
+
+|Share your data
+|<<dashboard, Dashboard>>, <<canvas, Canvas>>
+
 2+|*Administer your Kibana instance*
 
 |Manage your Elasticsearch data
@@ -435,7 +441,7 @@ the <<get-started,{kib} Quick start>>.
 
 [float]
 [[try-kibana]]
-=== Getting help
+=== How to get help
 
 Using our in-product guidance can help you get up and running, faster.
 Click the help icon image:images/intro-help-icon.png[Help icon in navigation bar]
