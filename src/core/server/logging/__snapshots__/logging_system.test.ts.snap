@@ -14,7 +14,7 @@ exports[`appends records via multiple appenders.: file logs 2`] = `
 
 exports[`asLoggerFactory() only allows to create new loggers. 1`] = `
 Object {
-  "@timestamp": "2012-01-30T22:33:22.011-05:00",
+  "@timestamp": "2012-01-30T12:33:22.011-05:00",
   "log": Object {
     "level": "TRACE",
     "logger": "test.context",
@@ -28,7 +28,7 @@ Object {
 
 exports[`asLoggerFactory() only allows to create new loggers. 2`] = `
 Object {
-  "@timestamp": "2012-01-30T17:33:22.011-05:00",
+  "@timestamp": "2012-01-30T07:33:22.011-05:00",
   "log": Object {
     "level": "INFO",
     "logger": "test.context",
@@ -43,7 +43,7 @@ Object {
 
 exports[`asLoggerFactory() only allows to create new loggers. 3`] = `
 Object {
-  "@timestamp": "2012-01-30T12:33:22.011-05:00",
+  "@timestamp": "2012-01-30T02:33:22.011-05:00",
   "log": Object {
     "level": "FATAL",
     "logger": "test.context",
