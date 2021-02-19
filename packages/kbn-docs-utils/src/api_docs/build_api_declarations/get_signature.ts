@@ -41,6 +41,10 @@ export function getSignature(
       if (declarations.length === 1) {
         // Unfortunately we are losing some reference links here.
         signature = declarations[0].getType().getText(node);
+      } else {
+        log.error(
+          `Node is type alias declaration with more than one declaration. This is not handled!`
+        );
       }
     }
   } else if (Node.isFunctionDeclaration(node)) {

@@ -14,7 +14,6 @@ import {
   TypeKind,
   Lifecycle,
   PluginApi,
-  Reference,
   ApiScope,
 } from './types';
 
@@ -22,12 +21,7 @@ function capitalize(str: string): string {
   return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
-export const camelToSnake = (str: string): string =>
-  str
-    .replace(/([A-Z])/g, ' $1')
-    .split(' ')
-    .join('_')
-    .toLowerCase();
+export const camelToSnake = (str: string): string => str.replace(/([A-Z])/g, '_$1').toLowerCase();
 
 export const snakeToCamel = (str: string): string =>
   str.replace(/([-_][a-z])/g, (group) => group.toUpperCase().replace('-', '').replace('_', ''));
