@@ -146,9 +146,8 @@ export const WarningsFlyoutStep: React.FunctionComponent<WarningsConfirmationFly
             description={
               <FormattedMessage
                 id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.customTypeNameWarningDetail"
-                defaultMessage="Mapping types are no longer supported in 8.x. This index mapping does not use the
-                    default type name, {defaultType}, and will be updated when reindexed. Ensure no application code
-                    or scripts rely on a different type."
+                defaultMessage="Mapping types are no longer supported in 8.0. This index mapping does not use the
+                    default type name, {defaultType}. Ensure no application code or scripts rely on a different type."
                 values={{
                   defaultType: <EuiCode>_doc</EuiCode>,
                 }}
