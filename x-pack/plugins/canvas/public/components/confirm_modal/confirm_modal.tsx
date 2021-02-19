@@ -49,6 +49,7 @@ export const ConfirmModal: FunctionComponent<Props> = (props) => {
       cancelButtonText={cancelButtonText}
       defaultFocusedButton="confirm"
       buttonColor="danger"
+      data-test-subj="canvasConfirmModal"
     >
       {message}
     </EuiConfirmModal>
