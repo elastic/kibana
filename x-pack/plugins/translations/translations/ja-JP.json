@@ -4482,7 +4482,6 @@
     "visTypeTimeseries.visEditorVisualization.changesHaveNotBeenAppliedMessage": "ビジュアライゼーションへの変更が適用されました。",
     "visTypeTimeseries.visEditorVisualization.changesSuccessfullyAppliedMessage": "最新の変更が適用されました。",
     "visTypeTimeseries.visEditorVisualization.changesWillBeAutomaticallyAppliedMessage": "変更が自動的に適用されます。",
-    "visTypeTimeseries.visEditorVisualization.panelInterval": "間隔：{panelInterval}",
     "visTypeTimeseries.visPicker.gaugeLabel": "ゲージ",
     "visTypeTimeseries.visPicker.metricLabel": "メトリック",
     "visTypeTimeseries.visPicker.tableLabel": "表",

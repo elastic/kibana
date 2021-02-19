@@ -7,7 +7,7 @@
  */
 
 import { TypeOf } from '@kbn/config-schema';
-import { metricsItems, panel, seriesItems, visPayloadSchema, fieldObject } from './vis_schema';
+import { fieldObject, metricsItems, panel, seriesItems, visPayloadSchema } from './vis_schema';
 import { PANEL_TYPES } from './panel_types';
 import { TimeseriesUIRestrictions } from './ui_restrictions';
 
@@ -24,7 +24,10 @@ export interface PanelData {
 }
 
 // series data is not fully typed yet
-interface SeriesData {
+type SeriesData = {
+  type: Exclude<PANEL_TYPES, PANEL_TYPES.TABLE>;
+  uiRestrictions: TimeseriesUIRestrictions;
+} & {
   [key: string]: {
     annotations: {
       [key: string]: unknown[];
@@ -33,16 +36,19 @@ interface SeriesData {
     series: PanelData[];
     error?: unknown;
   };
+};
+
+interface TableData {
+  type: PANEL_TYPES.TABLE;
+  uiRestrictions: TimeseriesUIRestrictions;
+  series?: PanelData[];
+  pivot_label?: string;
 }
 
-export type TimeseriesVisData = SeriesData & {
-  type: PANEL_TYPES;
-  uiRestrictions: TimeseriesUIRestrictions;
-  /**
-   * series array is responsible only for "table" vis type
-   */
-  series?: unknown[];
-};
+export type TimeseriesVisData = SeriesData | TableData;
+
+export const isVisDataTable = (data: TimeseriesVisData): data is TableData =>
+  (data as TableData).type === PANEL_TYPES.TABLE;
 
 export interface SanitizedFieldType {
   name: string;

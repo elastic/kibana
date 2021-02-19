@@ -14,7 +14,7 @@ import type { PersistedState } from '../../visualizations/public';
 import { VisualizationContainer } from '../../visualizations/public';
 import { ExpressionRenderDefinition } from '../../expressions/common/expression_renderers';
 import { TimeseriesRenderValue, TimeseriesVisParams } from './metrics_fn';
-import { TimeseriesVisData } from '../common/types';
+import { isVisDataTable, TimeseriesVisData } from '../common/types';
 
 const TimeseriesVisualization = lazy(
   () => import('./application/components/timeseries_visualization')
@@ -22,7 +22,7 @@ const TimeseriesVisualization = lazy(
 
 const checkIfDataExists = (visData: TimeseriesVisData | {}, model: TimeseriesVisParams) => {
   if ('type' in visData) {
-    const data = visData.type === 'table' ? visData.series : visData?.[model.id]?.series;
+    const data = isVisDataTable(visData) ? visData.series : visData?.[model.id]?.series;
     return Boolean(data?.length);
   }
 

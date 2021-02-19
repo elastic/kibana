@@ -13,7 +13,7 @@ import { search } from '../../../../../../plugins/data/public';
 const { parseEsInterval } = search.aggs;
 import { GTE_INTERVAL_RE } from '../../../../common/interval_regexp';
 import { AUTO_INTERVAL } from '../../../../common/constants';
-import { PanelData, TimeseriesVisData } from '../../../../common/types';
+import { isVisDataTable, PanelData, TimeseriesVisData } from '../../../../common/types';
 import { TimeseriesVisParams } from '../../../metrics_fn';
 
 export const unitLookup = {
@@ -26,11 +26,11 @@ export const unitLookup = {
   y: i18n.translate('visTypeTimeseries.getInterval.yearsLabel', { defaultMessage: 'years' }),
 };
 
-type TimeUnits = Array<keyof typeof unitLookup>;
+type TimeUnit = keyof typeof unitLookup;
 
 export const convertIntervalIntoUnit = (interval: number, hasTranslateUnitString = true) => {
   // Iterate units from biggest to smallest
-  const units = Object.keys(unitLookup).reverse() as TimeUnits;
+  const units = Object.keys(unitLookup).reverse() as TimeUnit[];
   const duration = moment.duration(interval, 'ms');
 
   for (let i = 0; i < units.length; i++) {
@@ -49,8 +49,8 @@ export const isGteInterval = (interval: string) => GTE_INTERVAL_RE.test(interval
 export const isAutoInterval = (interval: string) => !interval || interval === AUTO_INTERVAL;
 
 interface ValidationResult {
-  errorMessage: string;
   isValid: boolean;
+  errorMessage?: string;
 }
 
 export const validateReInterval = (intervalValue: string) => {
@@ -70,7 +70,7 @@ export const validateReInterval = (intervalValue: string) => {
 export const getInterval = (visData: TimeseriesVisData, model: TimeseriesVisParams) => {
   const series = get(
     visData,
-    model?.type === 'table' ? `series[0].series` : `${model.id}.series`,
+    isVisDataTable(visData) ? `series[0].series` : `${model.id}.series`,
     []
   ) as PanelData[];
 

@@ -4487,7 +4487,6 @@
     "visTypeTimeseries.visEditorVisualization.changesHaveNotBeenAppliedMessage": "尚未应用对此可视化的更改。",
     "visTypeTimeseries.visEditorVisualization.changesSuccessfullyAppliedMessage": "已应用最新更改。",
     "visTypeTimeseries.visEditorVisualization.changesWillBeAutomaticallyAppliedMessage": "将自动应用更改。",
-    "visTypeTimeseries.visEditorVisualization.panelInterval": "时间间隔：{panelInterval}",
     "visTypeTimeseries.visPicker.gaugeLabel": "仪表盘",
     "visTypeTimeseries.visPicker.metricLabel": "指标",
     "visTypeTimeseries.visPicker.tableLabel": "表",

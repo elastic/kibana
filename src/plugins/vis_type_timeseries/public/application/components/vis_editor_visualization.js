@@ -15,6 +15,7 @@ import { getInterval } from './lib/get_interval';
 import { AUTO_INTERVAL } from '../../../common/constants';
 import { PANEL_TYPES } from '../../../common/panel_types';
 import { DataTimeRangeModeLabel } from './data_time_range_mode_label';
+import { isVisDataTable } from '../../../common/types';
 
 const MIN_CHART_HEIGHT = 300;
 
@@ -65,9 +66,9 @@ class VisEditorVisualizationUI extends Component {
       const visData = data.value?.visData;
       const series = get(visData, `${this.props.model.id}.series`, []);
       this.setState({
-        seriesData: series?.length
-          ? series[0].data
-          : visData?.series && visData.series[0]?.series[0]?.data,
+        seriesData: isVisDataTable(visData)
+          ? visData?.series && visData.series[0]?.series[0]?.data
+          : series?.length && series[0].data,
       });
 
       this.setPanelInterval(visData);
@@ -105,13 +106,7 @@ class VisEditorVisualizationUI extends Component {
   isAnyPanelTypeExceptTimeseries() {
     const type = get(this.props, 'model.type', '');
 
-    return [
-      PANEL_TYPES.METRIC,
-      PANEL_TYPES.TOP_N,
-      PANEL_TYPES.GAUGE,
-      PANEL_TYPES.MARKDOWN,
-      PANEL_TYPES.TABLE,
-    ].includes(type);
+    return type !== PANEL_TYPES.TIMESERIES;
   }
 
   componentWillUnmount() {

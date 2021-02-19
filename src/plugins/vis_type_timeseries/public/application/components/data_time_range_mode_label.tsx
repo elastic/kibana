@@ -7,22 +7,24 @@
  */
 
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiFlexItem, EuiLink, EuiText, EuiToolTip } from '@elastic/eui';
 import { getUISettings } from '../../services';
 import { convertIntervalIntoUnit, isAutoInterval, isGteInterval } from './lib/get_interval';
 import { createIntervalBasedFormatter } from '../components/lib/create_interval_based_formatter';
 import { TIME_RANGE_DATA_MODES } from '../../../common/timerange_data_modes';
+import { PanelData } from '../../../common/types';
 
-const lastValueFormattedMessage = (
-  <FormattedMessage
-    id="visTypeTimeseries.dataTimeRangeModeLabel.lastValueMode"
-    defaultMessage="Last value"
-  />
+const lastValueFormattedMessage = i18n.translate(
+  'visTypeTimeseries.dataTimeRangeModeLabel.lastValueMode',
+  {
+    defaultMessage: 'Last value',
+  }
 );
 
 interface DataTimeRangeModeLabelProps {
-  seriesData: Array<Array<number | null>>;
+  seriesData: PanelData['data'];
   panelInterval: number;
   modelInterval: string;
   modelTimeRangeMode: TIME_RANGE_DATA_MODES;
