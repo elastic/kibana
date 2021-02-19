@@ -6,7 +6,6 @@
  */
 
 import { get, isObject } from 'lodash';
-import { DEFAULT_INDICATOR_PATH } from '../../../../../common/constants';
 
 import type { SignalSearchResponse, SignalSourceHit } from '../types';
 import type {
@@ -92,7 +91,7 @@ export const enrichSignalThreatMatches = async (
     if (!isObject(threat)) {
       throw new Error(`Expected threat field to be an object, but found: ${threat}`);
     }
-    const existingIndicatorValue = get(signalHit._source, DEFAULT_INDICATOR_PATH) ?? [];
+    const existingIndicatorValue = get(signalHit._source, 'threat.indicator') ?? [];
     const existingIndicators = [existingIndicatorValue].flat(); // ensure indicators is an array
 
     return {
