@@ -7,7 +7,11 @@
 
 import React from 'react';
 
-export function rumJsIcon({ title, titleId, ...props }) {
+export function rumJsIcon({
+  title,
+  titleId,
+  ...props
+}: Omit<EuiIconProps, 'type'>) {
   return (
     <svg
       width="32"
