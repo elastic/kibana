@@ -5,27 +5,12 @@
  * 2.0.
  */
 import React, { useMemo, useCallback } from 'react';
-import {
-  Axis,
-  Chart,
-  niceTimeFormatter,
-  Position,
-  Settings,
-  TooltipValue,
-  RectAnnotation,
-  AnnotationDomainTypes,
-  LineAnnotation,
-} from '@elastic/charts';
+import { Axis, Chart, niceTimeFormatter, Position, Settings } from '@elastic/charts';
 import { first, last } from 'lodash';
 import moment from 'moment';
-import { i18n } from '@kbn/i18n';
 import { EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import {
-  Comparator,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../../../../server/lib/alerting/metric_threshold/types';
-import { Color, colorTransformer } from '../../../../common/color_palette';
+import { Color } from '../../../../common/color_palette';
 import { MetricsExplorerRow, MetricsExplorerAggregation } from '../../../../common/http_api';
 import { MetricExplorerSeriesChart } from '../../../pages/metrics/metrics_explorer/components/series_chart';
 import { MetricsExplorerChartType } from '../../../pages/metrics/metrics_explorer/hooks/use_metrics_explorer_options';
@@ -180,7 +165,6 @@ export const ExpressionChart: React.FC<Props> = ({
     domain.min = domain.min * 0.9;
   }
 
-  const opacity = 0.3;
   const { timeSize, timeUnit } = expression;
   const timeLabel = TIME_LABELS[timeUnit as keyof typeof TIME_LABELS];
 

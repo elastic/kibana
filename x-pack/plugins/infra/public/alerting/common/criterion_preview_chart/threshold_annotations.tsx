@@ -6,17 +6,7 @@
  */
 import React from 'react';
 import { first, last } from 'lodash';
-import {
-  Axis,
-  Chart,
-  niceTimeFormatter,
-  Position,
-  Settings,
-  TooltipValue,
-  RectAnnotation,
-  AnnotationDomainTypes,
-  LineAnnotation,
-} from '@elastic/charts';
+import { RectAnnotation, AnnotationDomainTypes, LineAnnotation } from '@elastic/charts';
 
 import {
   Comparator,
