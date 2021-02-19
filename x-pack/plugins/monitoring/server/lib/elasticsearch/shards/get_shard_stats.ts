@@ -70,17 +70,24 @@ export function getShardStats(
     });
   }
   if (indexName) {
-    filters.push(
-      ...[
-        { term: { 'shard.index': indexName } },
-        { term: { 'elasticsearch.index.name': indexName } },
-      ]
-    );
+    filters.push({
+      bool: {
+        should: [
+          { term: { 'shard.index': indexName } },
+          { term: { 'elasticsearch.index.name': indexName } },
+        ],
+      },
+    });
   }
   if (nodeUuid) {
-    filters.push(
-      ...[{ term: { 'shard.node': nodeUuid } }, { term: { 'elasticsearch.node.name': nodeUuid } }]
-    );
+    filters.push({
+      bool: {
+        should: [
+          { term: { 'shard.node': nodeUuid } },
+          { term: { 'elasticsearch.node.name': nodeUuid } },
+        ],
+      },
+    });
   }
   const params = {
     index: esIndexPattern,

@@ -445,7 +445,7 @@ export function ElasticsearchPanel(props) {
                   maxBytes={get(
                     nodes,
                     'jvm.mem.heap.max.bytes',
-                    get(nodes, 'jvm.mem.heap.heap_max_in_bytes')
+                    get(nodes, 'jvm.mem.heap_max_in_bytes')
                   )}
                 />
               </EuiDescriptionListDescription>
