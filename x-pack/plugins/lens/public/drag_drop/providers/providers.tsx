@@ -137,7 +137,7 @@ export function nextValidDropTarget(
     return;
   }
 
-  const filteredTargets = [...Object.entries(dropTargetsByOrder)].filter(
+  const filteredTargets = Object.entries(dropTargetsByOrder).filter(
     ([, dropTarget]) => dropTarget && filterElements(dropTarget)
   );
 
