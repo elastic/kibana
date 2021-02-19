@@ -17,23 +17,22 @@ interface NodeMetric {
 }
 
 interface NodeMetrics {
+  doc_count: number;
   uptime: NodeMetric;
   cpu: NodeMetric;
   iowait: NodeMetric;
   load: NodeMetric;
-  diskUsage: NodeMetric;
+  rx: NodeMetric;
+  tx: NodeMetric;
 }
 
 interface TimeSeriesMetric extends NodeMetrics {
   key_as_string: string;
   key: number;
-  doc_count: number;
 }
 
 export interface NodeBucket extends NodeMetrics {
   key: string;
-  doc_count: number;
-  cpu: NodeMetric;
   metadata: {
     top: TopMetric[];
   };

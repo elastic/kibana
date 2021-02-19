@@ -25,18 +25,18 @@ export const convertESResponseToTopNodesResponse = (
           return {
             timestamp: bucket.key,
             cpu: bucket.cpu.value,
-            diskUsage: bucket.diskUsage.value,
             iowait: bucket.iowait.value,
             load: bucket.load.value,
+            rx: bucket.rx.value,
+            tx: bucket.tx.value,
           };
         }),
-        metrics: {
-          cpu: node.cpu.value,
-          diskUsage: node.diskUsage.value,
-          iowait: node.iowait.value,
-          load: node.load.value,
-          uptime: node.uptime.value,
-        },
+        cpu: node.cpu.value,
+        iowait: node.iowait.value,
+        load: node.load.value,
+        uptime: node.uptime.value,
+        rx: node.rx.value,
+        tx: node.tx.value,
       };
     }),
   };

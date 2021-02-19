@@ -7,7 +7,6 @@
 
 import { ObservabilityApp } from '../../../typings/common';
 import { UXMetrics } from '../../components/shared/core_web_vitals';
-
 export interface Stat {
   type: 'number' | 'percent' | 'bytesPerSecond';
   value: number;
@@ -67,12 +66,33 @@ export interface LogsFetchDataResponse extends FetchDataResponse {
   series: Record<string, Series & { label: string }>;
 }
 
+export type StringOrNull = string | null;
+export type NumberOrNull = number | null;
+
+export interface MetricsFetchDataSeries {
+  id: string;
+  name: StringOrNull;
+  platform: StringOrNull;
+  provider: StringOrNull;
+  cpu: NumberOrNull;
+  iowait: NumberOrNull;
+  load: NumberOrNull;
+  uptime: NumberOrNull;
+  rx: NumberOrNull;
+  tx: NumberOrNull;
+  timeseries: Array<{
+    timestamp: number;
+    cpu: NumberOrNull;
+    iowait: NumberOrNull;
+    load: NumberOrNull;
+    rx: NumberOrNull;
+    tx: NumberOrNull;
+  }>;
+}
+
 export interface MetricsFetchDataResponse extends FetchDataResponse {
-  stats: {
-    hosts: Stat;
-    cpu: Stat;
-    memory: Stat;
-  };
+  sort: (by: string, direction: string) => Promise<MetricsFetchDataResponse>;
+  series: MetricsFetchDataSeries[];
 }
 
 export interface UptimeFetchDataResponse extends FetchDataResponse {

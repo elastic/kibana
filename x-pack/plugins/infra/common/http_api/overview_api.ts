@@ -34,14 +34,18 @@ export const OverviewRequestRT = rt.type({
   }),
 });
 
-export const TopNodesRequestRT = rt.type({
-  sourceId: rt.string,
-  size: rt.number,
-  timerange: rt.type({
-    from: rt.number,
-    to: rt.number,
+export const TopNodesRequestRT = rt.intersection([
+  rt.type({
+    sourceId: rt.string,
+    size: rt.number,
+    bucketSize: rt.string,
+    timerange: rt.type({
+      from: rt.number,
+      to: rt.number,
+    }),
   }),
-});
+  rt.partial({ sort: rt.string, sortDirection: rt.string }),
+]);
 
 export type TopNodesRequest = rt.TypeOf<typeof TopNodesRequestRT>;
 
@@ -53,7 +57,8 @@ export const TopNodesTimeseriesRowRT = rt.type({
   cpu: numberOrNullRT,
   iowait: numberOrNullRT,
   load: numberOrNullRT,
-  diskUsage: numberOrNullRT,
+  rx: numberOrNullRT,
+  tx: numberOrNullRT,
 });
 
 export const TopNodesSeriesRT = rt.type({
@@ -61,13 +66,12 @@ export const TopNodesSeriesRT = rt.type({
   name: stringOrNullRT,
   platform: stringOrNullRT,
   provider: stringOrNullRT,
-  metrics: rt.type({
-    cpu: numberOrNullRT,
-    diskUsage: numberOrNullRT,
-    iowait: numberOrNullRT,
-    load: numberOrNullRT,
-    uptime: numberOrNullRT,
-  }),
+  cpu: numberOrNullRT,
+  iowait: numberOrNullRT,
+  load: numberOrNullRT,
+  uptime: numberOrNullRT,
+  rx: numberOrNullRT,
+  tx: numberOrNullRT,
   timeseries: rt.array(TopNodesTimeseriesRowRT),
 });
 

@@ -321,56 +321,17 @@ describe('registerDataHandler', () => {
   });
 
   describe('Metrics', () => {
+    const makeRequest = async () => {
+      return {
+        title: 'metrics',
+        appLink: '/metrics',
+        sort: () => makeRequest(),
+        series: [],
+      };
+    };
     registerDataHandler({
       appName: 'infra_metrics',
-      fetchData: async () => {
-        return {
-          title: 'metrics',
-          appLink: '/metrics',
-          stats: {
-            hosts: {
-              label: 'hosts',
-              type: 'number',
-              value: 1,
-            },
-            cpu: {
-              label: 'cpu',
-              type: 'number',
-              value: 1,
-            },
-            memory: {
-              label: 'memory',
-              type: 'number',
-              value: 1,
-            },
-            disk: {
-              label: 'disk',
-              type: 'number',
-              value: 1,
-            },
-            inboundTraffic: {
-              label: 'inboundTraffic',
-              type: 'number',
-              value: 1,
-            },
-            outboundTraffic: {
-              label: 'outboundTraffic',
-              type: 'number',
-              value: 1,
-            },
-          },
-          series: {
-            inboundTraffic: {
-              label: 'inbound Traffic',
-              coordinates: [{ x: 1 }],
-            },
-            outboundTraffic: {
-              label: 'outbound Traffic',
-              coordinates: [{ x: 1 }],
-            },
-          },
-        };
-      },
+      fetchData: makeRequest,
       hasData: async () => true,
     });
 
@@ -386,48 +347,7 @@ describe('registerDataHandler', () => {
       expect(response).toEqual({
         title: 'metrics',
         appLink: '/metrics',
-        stats: {
-          hosts: {
-            label: 'hosts',
-            type: 'number',
-            value: 1,
-          },
-          cpu: {
-            label: 'cpu',
-            type: 'number',
-            value: 1,
-          },
-          memory: {
-            label: 'memory',
-            type: 'number',
-            value: 1,
-          },
-          disk: {
-            label: 'disk',
-            type: 'number',
-            value: 1,
-          },
-          inboundTraffic: {
-            label: 'inboundTraffic',
-            type: 'number',
-            value: 1,
-          },
-          outboundTraffic: {
-            label: 'outboundTraffic',
-            type: 'number',
-            value: 1,
-          },
-        },
-        series: {
-          inboundTraffic: {
-            label: 'inbound Traffic',
-            coordinates: [{ x: 1 }],
-          },
-          outboundTraffic: {
-            label: 'outbound Traffic',
-            coordinates: [{ x: 1 }],
-          },
-        },
+        series: [],
       });
     });
 
