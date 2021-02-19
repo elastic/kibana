@@ -8,13 +8,14 @@
 import React from 'react';
 import { LineSeries, CurveType, Fit } from '@elastic/charts';
 import { LocationDurationLine } from '../../../../common/types';
-import { formatDuration } from '../../monitor/ping_list/ping_list';
+import { microToMilli, microToSec } from '../../../lib/formatting';
 
 interface Props {
+  monitorType: string;
   lines: LocationDurationLine[];
 }
 
-export const DurationLineSeriesList = ({ lines }: Props) => (
+export const DurationLineSeriesList = ({ monitorType, lines }: Props) => (
   <>
     {lines.map(({ name, line }) => (
       <LineSeries
@@ -30,7 +31,9 @@ export const DurationLineSeriesList = ({ lines }: Props) => (
         yScaleToDataExtent={false}
         yScaleType="linear"
         fit={Fit.Linear}
-        tickFormat={(d) => formatDuration(d, true)}
+        tickFormat={(d) =>
+          monitorType === 'browser' ? `${microToSec(d)} sec` : `${microToMilli(d)} ms`
+        }
       />
     ))}
   </>

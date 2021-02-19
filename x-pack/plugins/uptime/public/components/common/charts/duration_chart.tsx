@@ -18,6 +18,7 @@ import {
   BrushEndListener,
   LegendItemListener,
 } from '@elastic/charts';
+import { useSelector } from 'react-redux';
 import { getChartDateLabel } from '../../../lib/helper';
 import { LocationDurationLine } from '../../../../common/types';
 import { DurationLineSeriesList } from './duration_line_series_list';
@@ -29,7 +30,8 @@ import { DurationAnomaliesBar } from './duration_line_bar_list';
 import { AnomalyRecords } from '../../../state/actions';
 import { UptimeThemeContext } from '../../../contexts';
 import { MONITOR_CHART_HEIGHT } from '../../monitor';
-import { formatDuration } from '../../monitor/ping_list/ping_list';
+import { monitorStatusSelector } from '../../../state/selectors';
+import { microToMilli, microToSec } from '../../../lib/formatting';
 
 interface DurationChartProps {
   /**
@@ -88,6 +90,8 @@ export const DurationChartComponent = ({
     }
   };
 
+  const monitor = useSelector(monitorStatusSelector);
+
   return (
     <ChartWrapper height={MONITOR_CHART_HEIGHT} loading={loading}>
       {hasLines ? (
@@ -113,11 +117,17 @@ export const DurationChartComponent = ({
             position={Position.Left}
             tickFormat={(d) => getTickFormat(d)}
             title={i18n.translate('xpack.uptime.monitorCharts.durationChart.leftAxis.title', {
-              defaultMessage: 'Duration',
+              defaultMessage: 'Duration in {unit}',
+              values: { unit: monitor?.monitor.type === 'browser' ? 'seconds' : 'ms' },
             })}
-            labelFormat={(d) => formatDuration(d, true)}
+            labelFormat={(d) =>
+              monitor?.monitor.type === 'browser' ? `${microToSec(d)}` : `${microToMilli(d)}`
+            }
           />
-          <DurationLineSeriesList lines={locationDurationLines} />
+          <DurationLineSeriesList
+            lines={locationDurationLines}
+            monitorType={monitor?.monitor.type!}
+          />
           <DurationAnomaliesBar anomalies={anomalies} hiddenLegends={hiddenLegends} />
         </Chart>
       ) : (
