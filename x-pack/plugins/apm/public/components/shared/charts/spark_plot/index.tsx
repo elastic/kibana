@@ -76,7 +76,7 @@ export function SparkPlot({
               justifyContent: 'center',
             }}
           >
-            <EuiIcon type="visLine" color={theme.eui.euiColorLightShade} />
+            <EuiIcon type="visLine" color={theme.eui.euiColorMediumShade} />
           </div>
         ) : (
           <Chart size={chartSize}>
