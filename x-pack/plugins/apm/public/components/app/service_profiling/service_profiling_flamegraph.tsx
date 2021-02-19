@@ -326,7 +326,6 @@ export function ServiceProfilingFlamegraph({
                 // @ts-ignore (coming soon in Elastic charts)
                 clip: true,
               },
-              // @ts-expect-error (coming soon in Elastic charts)
               drilldown: true,
               fontFamily: theme.eui.euiCodeFontFamily,
               minFontSize: 9,

@@ -8,11 +8,11 @@
 import { EuiTab } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { ReactNode } from 'react';
+import { EuiBetaBadge } from '@elastic/eui';
+import { EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup } from '@elastic/eui';
 import { isJavaAgentName, isRumAgentName } from '../../../../common/agent_name';
-import {
-  enableServiceOverview,
-  enableProfiling,
-} from '../../../../common/ui_settings_keys';
+import { enableServiceOverview } from '../../../../common/ui_settings_keys';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
@@ -36,7 +36,7 @@ import { Correlations } from '../correlations';
 interface Tab {
   key: string;
   href: string;
-  text: string;
+  text: ReactNode;
   render: () => ReactNode;
 }
 
@@ -54,7 +54,10 @@ interface Props {
 
 export function ServiceDetailTabs({ serviceName, tab }: Props) {
   const { agentName } = useApmServiceContext();
-  const { uiSettings } = useApmPluginContext().core;
+  const {
+    core: { uiSettings },
+    config,
+  } = useApmPluginContext();
   const {
     urlParams: { latencyAggregationType },
   } = useUrlParams();
@@ -123,9 +126,32 @@ export function ServiceDetailTabs({ serviceName, tab }: Props) {
   const profilingTab = {
     key: 'profiling',
     href: useServiceProfilingHref({ serviceName }),
-    text: i18n.translate('xpack.apm.serviceDetails.profilingTabLabel', {
-      defaultMessage: 'Profiling',
-    }),
+    text: (
+      <EuiFlexGroup direction="row" gutterSize="s">
+        <EuiFlexItem>
+          {i18n.translate('xpack.apm.serviceDetails.profilingTabLabel', {
+            defaultMessage: 'Profiling',
+          })}
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiBetaBadge
+            label={i18n.translate(
+              'xpack.apm.serviceDetails.profilingTabExperimentalLabel',
+              {
+                defaultMessage: 'Experimental',
+              }
+            )}
+            tooltipContent={i18n.translate(
+              'xpack.apm.serviceDetails.profilingTabExperimentalDedcription',
+              {
+                defaultMessage:
+                  'Profiling is highly experimental and for internal use only.',
+              }
+            )}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    ),
     render: () => <ServiceProfiling serviceName={serviceName} />,
   };
 
@@ -143,7 +169,7 @@ export function ServiceDetailTabs({ serviceName, tab }: Props) {
 
   tabs.push(serviceMapTab);
 
-  if (uiSettings.get(enableProfiling)) {
+  if (config.profilingEnabled) {
     tabs.push(profilingTab);
   }
 
