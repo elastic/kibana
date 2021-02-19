@@ -31,7 +31,7 @@ import {
   ATTRIBUTE_VALUE_LABEL,
 } from './constants';
 
-interface IAttributeSelectorProps {
+interface Props {
   attributeName: string;
   attributeValue?: string;
   attributes: string[];
@@ -90,7 +90,7 @@ const getSelectedOptions = (selectedAuthProviders: string[], availableAuthProvid
   return options.filter((o) => o.value && selectedAuthProviders.includes(o.value));
 };
 
-export const AttributeSelector: React.FC<IAttributeSelectorProps> = ({
+export const AttributeSelector: React.FC<Props> = ({
   attributeName,
   attributeValue = '',
   attributes,

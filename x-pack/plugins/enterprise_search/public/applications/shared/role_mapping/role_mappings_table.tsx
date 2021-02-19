@@ -40,15 +40,15 @@ import {
   MANAGE_ROLE_MAPPING_BUTTON,
 } from './constants';
 
-interface IAccessItem {
+interface AccessItem {
   name: string;
 }
 
 interface SharedRoleMapping extends ASRoleMapping, WSRoleMapping {
-  accessItems: IAccessItem[];
+  accessItems: AccessItem[];
 }
 
-interface IRoleMappingsTableProps {
+interface Props {
   accessItemKey: 'groups' | 'engines';
   accessHeader: string;
   roleMappings: ASRoleMapping[] | WSRoleMapping[];
@@ -65,7 +65,7 @@ const noItemsPlaceholder = <EuiTextColor color="subdued">&mdash;</EuiTextColor>;
 const getAuthProviderDisplayValue = (authProvider: string) =>
   authProvider === ANY_AUTH_PROVIDER ? ANY_AUTH_PROVIDER_OPTION_LABEL : authProvider;
 
-export const RoleMappingsTable: React.FC<IRoleMappingsTableProps> = ({
+export const RoleMappingsTable: React.FC<Props> = ({
   accessItemKey,
   accessHeader,
   roleMappings,

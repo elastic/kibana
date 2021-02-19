@@ -15,13 +15,11 @@ import {
   DELETE_ROLE_MAPPING_BUTTON,
 } from './constants';
 
-interface IDeleteMappingCalloutProps {
+interface Props {
   handleDeleteMapping(): void;
 }
 
-export const DeleteMappingCallout: React.FC<IDeleteMappingCalloutProps> = ({
-  handleDeleteMapping,
-}) => (
+export const DeleteMappingCallout: React.FC<Props> = ({ handleDeleteMapping }) => (
   <EuiCallOut color="danger" iconType="alert" title={DELETE_ROLE_MAPPING_TITLE}>
     <p>{DELETE_ROLE_MAPPING_DESCRIPTION}</p>
     <EuiButton color="danger" fill onClick={handleDeleteMapping}>

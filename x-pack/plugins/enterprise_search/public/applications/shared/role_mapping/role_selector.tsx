@@ -19,7 +19,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-interface IRoleSelectorProps {
+interface Props {
   disabled?: boolean;
   disabledText?: string;
   roleType?: string;
@@ -28,7 +28,7 @@ interface IRoleSelectorProps {
   onChange(roleTypeOption: string): void;
 }
 
-export const RoleSelector: React.FC<IRoleSelectorProps> = ({
+export const RoleSelector: React.FC<Props> = ({
   disabled,
   disabledText,
   roleType,
