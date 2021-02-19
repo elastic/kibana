@@ -6,9 +6,11 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
+import React, { useEffect, useState } from 'react';
+
 import { FormattedMessage } from '@kbn/i18n/react';
-import React, { useState, useEffect } from 'react';
 import { Space } from 'src/plugins/spaces_oss/common';
+
 import { SpaceAvatar } from '../../../space_avatar';
 
 interface Props {

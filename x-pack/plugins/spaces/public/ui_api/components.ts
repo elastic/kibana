@@ -7,14 +7,15 @@
 
 import { StartServicesAccessor } from 'src/core/public';
 import { SpacesApiUiComponent } from 'src/plugins/spaces_oss/public';
+
 import { PluginsStart } from '../plugin';
 import {
-  getShareToSpaceFlyoutComponent,
   getLegacyUrlConflict,
+  getShareToSpaceFlyoutComponent,
 } from '../share_saved_objects_to_space';
+import { getSpaceListComponent } from '../space_list';
 import { getSpacesContextWrapper } from '../spaces_context';
 import { SpacesManager } from '../spaces_manager';
-import { getSpaceListComponent } from '../space_list';
 
 export interface GetComponentsOptions {
   spacesManager: SpacesManager;

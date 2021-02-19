@@ -7,9 +7,11 @@
 
 import { EuiAvatar, isValidHex } from '@elastic/eui';
 import React, { FC } from 'react';
+
 import { Space } from 'src/plugins/spaces_oss/common';
+
 import { MAX_SPACE_INITIALS } from '../../common';
-import { getSpaceColor, getSpaceInitials, getSpaceImageUrl } from './space_attributes';
+import { getSpaceColor, getSpaceImageUrl, getSpaceInitials } from './space_attributes';
 
 interface Props {
   space: Partial<Space>;

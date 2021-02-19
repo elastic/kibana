@@ -7,16 +7,18 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { Router, Route, Switch, useParams } from 'react-router-dom';
+import { Route, Router, Switch, useParams } from 'react-router-dom';
+
 import { i18n } from '@kbn/i18n';
 import { StartServicesAccessor } from 'src/core/public';
 import { RegisterManagementAppArgs } from 'src/plugins/management/public';
+import { Space } from 'src/plugins/spaces_oss/common';
+
 import { RedirectAppLinks } from '../../../../../src/plugins/kibana_react/public';
 import { PluginsStart } from '../plugin';
 import { SpacesManager } from '../spaces_manager';
-import { SpacesGridPage } from './spaces_grid';
 import { ManageSpacePage } from './edit_space';
-import { Space } from '..';
+import { SpacesGridPage } from './spaces_grid';
 
 interface CreateParams {
   getStartServices: StartServicesAccessor<PluginsStart>;

@@ -6,20 +6,23 @@
  */
 
 import './spaces_menu.scss';
+
 import {
   EuiContextMenuItem,
   EuiContextMenuPanel,
   EuiFieldSearch,
-  EuiText,
   EuiLoadingContent,
+  EuiText,
 } from '@elastic/eui';
-import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React, { Component, ReactElement } from 'react';
-import { Capabilities, ApplicationStart } from 'src/core/public';
+
+import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
+import { ApplicationStart, Capabilities } from 'src/core/public';
 import { Space } from 'src/plugins/spaces_oss/common';
-import { addSpaceIdToPath, SPACE_SEARCH_COUNT_THRESHOLD, ENTER_SPACE_PATH } from '../../../common';
-import { ManageSpacesButton } from './manage_spaces_button';
+
+import { addSpaceIdToPath, ENTER_SPACE_PATH, SPACE_SEARCH_COUNT_THRESHOLD } from '../../../common';
 import { SpaceAvatar } from '../../space_avatar';
+import { ManageSpacesButton } from './manage_spaces_button';
 
 interface Props {
   id: string;

@@ -6,7 +6,9 @@
  */
 
 import React from 'react';
+
 import { ShareToSpaceFlyoutProps } from 'src/plugins/spaces_oss/public';
+
 import { ShareToSpaceFlyoutInternal } from './share_to_space_flyout_internal';
 
 export const getShareToSpaceFlyoutComponent = (): React.FC<ShareToSpaceFlyoutProps> => {

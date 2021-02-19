@@ -6,33 +6,35 @@
  */
 
 import { Observable } from 'rxjs';
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+
+import { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from 'src/core/server';
 import { HomeServerPluginSetup } from 'src/plugins/home/server';
-import { CoreSetup, CoreStart, Logger, PluginInitializerContext, Plugin } from 'src/core/server';
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+
 import {
   PluginSetupContract as FeaturesPluginSetup,
   PluginStartContract as FeaturesPluginStart,
 } from '../../features/server';
 import { LicensingPluginSetup } from '../../licensing/server';
-import { createSpacesTutorialContextFactory } from './lib/spaces_tutorial_context_factory';
-import { registerSpacesUsageCollector } from './usage_collection';
-import { SpacesService, SpacesServiceSetup, SpacesServiceStart } from './spaces_service';
-import { UsageStatsService } from './usage_stats';
+import { SpacesLicenseService } from '../common/licensing';
+import { setupCapabilities } from './capabilities';
 import { ConfigType } from './config';
+import { DefaultSpaceService } from './default_space';
 import { initSpacesRequestInterceptors } from './lib/request_interceptors';
+import { createSpacesTutorialContextFactory } from './lib/spaces_tutorial_context_factory';
 import { initExternalSpacesApi } from './routes/api/external';
 import { initInternalSpacesApi } from './routes/api/internal';
 import { initSpacesViewsRoutes } from './routes/views';
-import { setupCapabilities } from './capabilities';
 import { SpacesSavedObjectsService } from './saved_objects';
-import { DefaultSpaceService } from './default_space';
-import { SpacesLicenseService } from '../common/licensing';
 import {
   SpacesClientRepositoryFactory,
   SpacesClientService,
   SpacesClientWrapper,
 } from './spaces_client';
+import { SpacesService, SpacesServiceSetup, SpacesServiceStart } from './spaces_service';
 import { SpacesRequestHandlerContext } from './types';
+import { registerSpacesUsageCollector } from './usage_collection';
+import { UsageStatsService } from './usage_stats';
 
 export interface PluginsSetup {
   features: FeaturesPluginSetup;

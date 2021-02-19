@@ -8,11 +8,13 @@
 import './resolve_all_conflicts.scss';
 
 import { EuiContextMenuItem, EuiContextMenuPanel, EuiLink, EuiPopover } from '@elastic/eui';
+import React, { Component } from 'react';
+
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React, { Component } from 'react';
+
+import { SummarizedCopyToSpaceResult } from '../summarize_copy_result';
 import { ImportRetry } from '../types';
-import { SummarizedCopyToSpaceResult } from '..';
 
 export interface ResolveAllConflictsProps {
   summarizedCopyResult: SummarizedCopyToSpaceResult;

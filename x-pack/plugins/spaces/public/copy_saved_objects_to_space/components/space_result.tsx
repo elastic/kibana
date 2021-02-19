@@ -6,21 +6,24 @@
  */
 
 import './space_result.scss';
-import React, { useState } from 'react';
+
 import {
   EuiAccordion,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiText,
-  EuiSpacer,
   EuiLoadingSpinner,
+  EuiSpacer,
+  EuiText,
 } from '@elastic/eui';
+import React, { useState } from 'react';
+
 import { Space } from 'src/plugins/spaces_oss/common';
-import { SummarizedCopyToSpaceResult } from '../index';
+
 import { SpaceAvatar } from '../../space_avatar';
+import { SummarizedCopyToSpaceResult } from '../index';
+import { ImportRetry } from '../types';
 import { CopyStatusSummaryIndicator } from './copy_status_summary_indicator';
 import { SpaceCopyResultDetails } from './space_result_details';
-import { ImportRetry } from '../types';
 
 interface Props {
   space: Space;

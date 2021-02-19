@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { ProcessedImportResponse, FailedImport } from 'src/plugins/saved_objects_management/public';
 import {
-  SavedObjectsImportConflictError,
   SavedObjectsImportAmbiguousConflictError,
-} from 'kibana/public';
+  SavedObjectsImportConflictError,
+} from 'src/core/public';
+import { FailedImport, ProcessedImportResponse } from 'src/plugins/saved_objects_management/public';
+
 import { SavedObjectTarget } from './types';
 
 export interface SummarizedSavedObjectResult {

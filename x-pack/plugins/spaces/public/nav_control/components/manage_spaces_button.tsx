@@ -6,9 +6,10 @@
  */
 
 import { EuiButton } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Component, CSSProperties } from 'react';
-import { Capabilities, ApplicationStart } from 'src/core/public';
+
+import { FormattedMessage } from '@kbn/i18n/react';
+import { ApplicationStart, Capabilities } from 'src/core/public';
 
 interface Props {
   isDisabled?: boolean;

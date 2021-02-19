@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import React, { Component, Fragment } from 'react';
-
 import {
   EuiButton,
   EuiButtonIcon,
@@ -19,16 +17,19 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+import React, { Component, Fragment } from 'react';
+
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { ApplicationStart, Capabilities, NotificationsStart, ScopedHistory } from 'src/core/public';
 import { Space } from 'src/plugins/spaces_oss/common';
+
 import { reactRouterNavigate } from '../../../../../../src/plugins/kibana_react/public';
-import { KibanaFeature, FeaturesPluginStart } from '../../../../features/public';
+import { FeaturesPluginStart, KibanaFeature } from '../../../../features/public';
 import { isReservedSpace } from '../../../common';
 import { DEFAULT_SPACE_ID } from '../../../common/constants';
-import { SpaceAvatar } from '../../space_avatar';
 import { getSpacesFeatureDescription } from '../../constants';
+import { SpaceAvatar } from '../../space_avatar';
 import { SpacesManager } from '../../spaces_manager';
 import { ConfirmDeleteModal, UnauthorizedPrompt } from '../components';
 import { getEnabledFeatures } from '../lib/feature_utils';

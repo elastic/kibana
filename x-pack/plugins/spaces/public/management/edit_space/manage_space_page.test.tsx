@@ -6,19 +6,20 @@
  */
 
 import { EuiButton, EuiCheckboxProps } from '@elastic/eui';
+import { waitFor } from '@testing-library/react';
 import { ReactWrapper } from 'enzyme';
 import React from 'react';
-import { waitFor } from '@testing-library/react';
 
 import { mountWithIntl } from '@kbn/test/jest';
+import { DEFAULT_APP_CATEGORIES } from 'src/core/public';
+import { notificationServiceMock, scopedHistoryMock } from 'src/core/public/mocks';
+
+import { KibanaFeature } from '../../../../features/public';
+import { featuresPluginMock } from '../../../../features/public/mocks';
+import { SpacesManager } from '../../spaces_manager';
+import { spacesManagerMock } from '../../spaces_manager/mocks';
 import { ConfirmAlterActiveSpaceModal } from './confirm_alter_active_space_modal';
 import { ManageSpacePage } from './manage_space_page';
-import { spacesManagerMock } from '../../spaces_manager/mocks';
-import { SpacesManager } from '../../spaces_manager';
-import { notificationServiceMock, scopedHistoryMock } from 'src/core/public/mocks';
-import { featuresPluginMock } from '../../../../features/public/mocks';
-import { KibanaFeature } from '../../../../features/public';
-import { DEFAULT_APP_CATEGORIES } from 'src/core/public';
 
 // To be resolved by EUI team.
 // https://github.com/elastic/eui/issues/3712

@@ -6,18 +6,20 @@
  */
 
 import * as Rx from 'rxjs';
-import { SpacesService } from './spaces_service';
-import { coreMock, httpServerMock } from 'src/core/server/mocks';
+
 import {
+  HttpServiceSetup,
   KibanaRequest,
   SavedObjectsErrorHelpers,
-  HttpServiceSetup,
   SavedObjectsRepository,
 } from 'src/core/server';
+import { coreMock, httpServerMock } from 'src/core/server/mocks';
+
 import { DEFAULT_SPACE_ID } from '../../common/constants';
 import { getSpaceIdFromPath } from '../../common/lib/spaces_url_parser';
 import { spacesConfig } from '../lib/__fixtures__';
 import { SpacesClientService } from '../spaces_client';
+import { SpacesService } from './spaces_service';
 
 const createService = (serverBasePath: string = '') => {
   const spacesService = new SpacesService();

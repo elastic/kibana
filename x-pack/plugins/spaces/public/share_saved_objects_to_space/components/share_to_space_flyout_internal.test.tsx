@@ -5,10 +5,6 @@
  * 2.0.
  */
 
-import React from 'react';
-import Boom from '@hapi/boom';
-import { mountWithIntl, nextTick, findTestSubject } from '@kbn/test/jest';
-import { ShareToSpaceForm } from './share_to_space_form';
 import {
   EuiCallOut,
   EuiCheckableCard,
@@ -17,18 +13,24 @@ import {
   EuiLoadingSpinner,
   EuiSelectable,
 } from '@elastic/eui';
-import { Space } from 'src/plugins/spaces_oss/common';
-import { SelectableSpacesControl } from './selectable_spaces_control';
+import Boom from '@hapi/boom';
 import { act } from '@testing-library/react';
-import { spacesManagerMock } from '../../spaces_manager/mocks';
-import { coreMock } from 'src/core/public/mocks';
-import { CopySavedObjectsToSpaceFlyout } from '../../copy_saved_objects_to_space/components';
-import { NoSpacesAvailable } from './no_spaces_available';
-import { getShareToSpaceFlyoutComponent } from './share_to_space_flyout';
-import { ShareModeControl } from './share_mode_control';
 import { ReactWrapper } from 'enzyme';
+import React from 'react';
+
+import { findTestSubject, mountWithIntl, nextTick } from '@kbn/test/jest';
+import { coreMock } from 'src/core/public/mocks';
+import { Space } from 'src/plugins/spaces_oss/common';
+
 import { ALL_SPACES_ID } from '../../../common/constants';
+import { CopySavedObjectsToSpaceFlyout } from '../../copy_saved_objects_to_space/components';
 import { getSpacesContextWrapper } from '../../spaces_context';
+import { spacesManagerMock } from '../../spaces_manager/mocks';
+import { NoSpacesAvailable } from './no_spaces_available';
+import { SelectableSpacesControl } from './selectable_spaces_control';
+import { ShareModeControl } from './share_mode_control';
+import { getShareToSpaceFlyoutComponent } from './share_to_space_flyout';
+import { ShareToSpaceForm } from './share_to_space_form';
 
 interface SetupOpts {
   mockSpaces?: Space[];

@@ -5,35 +5,37 @@
  * 2.0.
  */
 
-import React, { useState, useEffect, useMemo } from 'react';
 import {
-  EuiFlyout,
-  EuiIcon,
-  EuiFlyoutHeader,
-  EuiTitle,
-  EuiText,
-  EuiFlyoutBody,
-  EuiFlyoutFooter,
-  EuiLoadingSpinner,
+  EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiFlyout,
+  EuiFlyoutBody,
+  EuiFlyoutFooter,
+  EuiFlyoutHeader,
   EuiHorizontalRule,
-  EuiEmptyPrompt,
+  EuiIcon,
+  EuiLoadingSpinner,
+  EuiText,
+  EuiTitle,
 } from '@elastic/eui';
 import { mapValues } from 'lodash';
+import React, { useEffect, useMemo, useState } from 'react';
+
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { ToastsStart } from 'src/core/public';
 import { Space } from 'src/plugins/spaces_oss/common';
+
 import {
   ProcessedImportResponse,
   processImportResponse,
 } from '../../../../../../src/plugins/saved_objects_management/public';
 import { SpacesManager } from '../../spaces_manager';
-import { ProcessingCopyToSpace } from './processing_copy_to_space';
+import { CopyOptions, ImportRetry, SavedObjectTarget } from '../types';
 import { CopyToSpaceFlyoutFooter } from './copy_to_space_flyout_footer';
 import { CopyToSpaceForm } from './copy_to_space_form';
-import { CopyOptions, ImportRetry, SavedObjectTarget } from '../types';
+import { ProcessingCopyToSpace } from './processing_copy_to_space';
 
 interface Props {
   onClose: () => void;

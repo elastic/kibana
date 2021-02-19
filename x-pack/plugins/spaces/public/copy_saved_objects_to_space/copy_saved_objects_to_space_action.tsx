@@ -6,14 +6,16 @@
  */
 
 import React from 'react';
+
 import { i18n } from '@kbn/i18n';
 import { NotificationsStart } from 'src/core/public';
+
 import {
   SavedObjectsManagementAction,
   SavedObjectsManagementRecord,
 } from '../../../../../src/plugins/saved_objects_management/public';
-import { CopySavedObjectsToSpaceFlyout } from './components';
 import { SpacesManager } from '../spaces_manager';
+import { CopySavedObjectsToSpaceFlyout } from './components';
 
 export class CopyToSpaceSavedObjectsManagementAction extends SavedObjectsManagementAction {
   public id: string = 'copy_saved_objects_to_space';

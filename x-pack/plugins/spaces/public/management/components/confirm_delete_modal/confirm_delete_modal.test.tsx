@@ -6,10 +6,12 @@
  */
 
 import React from 'react';
+
 import { mountWithIntl, shallowWithIntl } from '@kbn/test/jest';
-import { ConfirmDeleteModal } from './confirm_delete_modal';
-import { spacesManagerMock } from '../../../spaces_manager/mocks';
+
 import { SpacesManager } from '../../../spaces_manager';
+import { spacesManagerMock } from '../../../spaces_manager/mocks';
+import { ConfirmDeleteModal } from './confirm_delete_modal';
 
 describe('ConfirmDeleteModal', () => {
   it('renders as expected', () => {

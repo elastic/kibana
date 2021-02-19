@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import React from 'react';
-import { mountWithIntl, nextTick } from '@kbn/test/jest';
-import { AdvancedSettingsTitle } from './advanced_settings_title';
-import { SpaceAvatar } from '../../../space_avatar';
 import { act } from '@testing-library/react';
+import React from 'react';
+
+import { mountWithIntl, nextTick } from '@kbn/test/jest';
+
+import { SpaceAvatar } from '../../../space_avatar';
+import { AdvancedSettingsTitle } from './advanced_settings_title';
 
 describe('AdvancedSettingsTitle', () => {
   it('renders without crashing', async () => {

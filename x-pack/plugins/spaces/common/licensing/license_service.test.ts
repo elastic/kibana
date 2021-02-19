@@ -6,9 +6,10 @@
  */
 
 import { of } from 'rxjs';
+
 import { licenseMock } from '../../../licensing/common/licensing.mock';
-import { SpacesLicenseService } from './license_service';
 import { LICENSE_TYPE, LicenseType } from '../../../licensing/common/types';
+import { SpacesLicenseService } from './license_service';
 
 describe('license#isEnabled', function () {
   it('should indicate that Spaces is disabled when there is no license information', () => {

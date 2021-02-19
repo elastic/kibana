@@ -6,9 +6,11 @@
  */
 
 import * as React from 'react';
+
 import { CoreStart } from 'src/core/public';
-import { ShareToSpacesData } from '../types';
+
 import { SpacesManager } from '../spaces_manager';
+import { ShareToSpacesData } from '../types';
 
 export type KibanaServices = Partial<CoreStart>;
 

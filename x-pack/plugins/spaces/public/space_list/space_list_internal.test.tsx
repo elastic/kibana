@@ -5,15 +5,17 @@
  * 2.0.
  */
 
-import React from 'react';
-import { mountWithIntl } from '@kbn/test/jest';
 import { act } from '@testing-library/react';
+import { ReactWrapper } from 'enzyme';
+import React from 'react';
+
+import { mountWithIntl } from '@kbn/test/jest';
 import { coreMock } from 'src/core/public/mocks';
 import { Space } from 'src/plugins/spaces_oss/common';
 import { SpaceListProps } from 'src/plugins/spaces_oss/public';
+
 import { getSpacesContextWrapper } from '../spaces_context';
 import { spacesManagerMock } from '../spaces_manager/mocks';
-import { ReactWrapper } from 'enzyme';
 import { SpaceListInternal } from './space_list_internal';
 
 const ACTIVE_SPACE: Space = {

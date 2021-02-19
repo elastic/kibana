@@ -6,9 +6,10 @@
  */
 
 import { StartServicesAccessor } from 'src/core/public';
-import { ManagementSetup, ManagementApp } from 'src/plugins/management/public';
-import { SpacesManager } from '../spaces_manager';
+import { ManagementApp, ManagementSetup } from 'src/plugins/management/public';
+
 import { PluginsStart } from '../plugin';
+import { SpacesManager } from '../spaces_manager';
 import { spacesManagementApp } from './spaces_management_app';
 
 interface SetupDeps {

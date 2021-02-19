@@ -5,17 +5,18 @@
  * 2.0.
  */
 
-import { Logger, CoreSetup } from 'src/core/server';
+import { CoreSetup, Logger } from 'src/core/server';
+
+import { SpacesServiceStart } from '../../../spaces_service';
+import { SpacesRouter } from '../../../types';
+import { UsageStatsServiceSetup } from '../../../usage_stats';
+import { initCopyToSpacesApi } from './copy_to_space';
 import { initDeleteSpacesApi } from './delete';
 import { initGetSpaceApi } from './get';
 import { initGetAllSpacesApi } from './get_all';
 import { initPostSpacesApi } from './post';
 import { initPutSpacesApi } from './put';
-import { SpacesServiceStart } from '../../../spaces_service';
-import { UsageStatsServiceSetup } from '../../../usage_stats';
-import { initCopyToSpacesApi } from './copy_to_space';
 import { initShareToSpacesApi } from './share_to_space';
-import { SpacesRouter } from '../../../types';
 
 export interface ExternalRouteDeps {
   externalRouter: SpacesRouter;

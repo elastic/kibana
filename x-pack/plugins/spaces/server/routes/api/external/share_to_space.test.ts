@@ -6,26 +6,28 @@
  */
 
 import * as Rx from 'rxjs';
-import {
-  createSpaces,
-  createMockSavedObjectsRepository,
-  mockRouteContext,
-  mockRouteContextWithInvalidLicense,
-  createMockSavedObjectsService,
-} from '../__fixtures__';
+
+import { ObjectType } from '@kbn/config-schema';
 import { kibanaResponseFactory, RouteValidatorConfig } from 'src/core/server';
 import {
-  loggingSystemMock,
-  httpServiceMock,
-  httpServerMock,
   coreMock,
+  httpServerMock,
+  httpServiceMock,
+  loggingSystemMock,
 } from 'src/core/server/mocks';
-import { SpacesService } from '../../../spaces_service';
-import { initShareToSpacesApi } from './share_to_space';
+
 import { spacesConfig } from '../../../lib/__fixtures__';
-import { ObjectType } from '@kbn/config-schema';
 import { SpacesClientService } from '../../../spaces_client';
+import { SpacesService } from '../../../spaces_service';
 import { usageStatsServiceMock } from '../../../usage_stats/usage_stats_service.mock';
+import {
+  createMockSavedObjectsRepository,
+  createMockSavedObjectsService,
+  createSpaces,
+  mockRouteContext,
+  mockRouteContextWithInvalidLicense,
+} from '../__fixtures__';
+import { initShareToSpacesApi } from './share_to_space';
 
 describe('share to space', () => {
   const spacesSavedObjects = createSpaces();

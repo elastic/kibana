@@ -5,22 +5,23 @@
  * 2.0.
  */
 
-import React, { useState, useEffect, useMemo } from 'react';
 import {
-  EuiFlyout,
-  EuiIcon,
-  EuiFlyoutHeader,
-  EuiTitle,
-  EuiText,
-  EuiFlyoutBody,
-  EuiFlyoutFooter,
-  EuiLoadingSpinner,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiHorizontalRule,
   EuiButton,
   EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFlyout,
+  EuiFlyoutBody,
+  EuiFlyoutFooter,
+  EuiFlyoutHeader,
+  EuiHorizontalRule,
+  EuiIcon,
+  EuiLoadingSpinner,
+  EuiText,
+  EuiTitle,
 } from '@elastic/eui';
+import React, { useEffect, useMemo, useState } from 'react';
+
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { ToastsStart } from 'src/core/public';
@@ -28,14 +29,15 @@ import {
   ShareToSpaceFlyoutProps,
   ShareToSpaceSavedObjectTarget,
 } from 'src/plugins/spaces_oss/public';
+
 import { ALL_SPACES_ID, UNKNOWN_SPACE } from '../../../common/constants';
-import { SpacesManager } from '../../spaces_manager';
-import { ShareToSpaceTarget } from '../../types';
-import { ShareToSpaceForm } from './share_to_space_form';
-import { ShareOptions } from '../types';
 import { CopySavedObjectsToSpaceFlyout } from '../../copy_saved_objects_to_space/components';
 import { useSpaces } from '../../spaces_context';
+import { SpacesManager } from '../../spaces_manager';
+import { ShareToSpaceTarget } from '../../types';
+import { ShareOptions } from '../types';
 import { DEFAULT_OBJECT_NOUN } from './constants';
+import { ShareToSpaceForm } from './share_to_space_form';
 
 const ALL_SPACES_TARGET = i18n.translate('xpack.spaces.shareToSpace.allSpacesTarget', {
   defaultMessage: 'all',

@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { isReservedSpace } from './is_reserved_space';
 import { Space } from 'src/plugins/spaces_oss/common';
+
+import { isReservedSpace } from './is_reserved_space';
 
 test('it returns true for reserved spaces', () => {
   const space: Space = {

@@ -6,11 +6,13 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import { ApplicationStart } from 'kibana/public';
+import React, { Component, Fragment, ReactNode } from 'react';
+
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React, { Component, Fragment, ReactNode } from 'react';
-import { ApplicationStart } from 'kibana/public';
 import { Space } from 'src/plugins/spaces_oss/common';
+
 import { KibanaFeatureConfig } from '../../../../../../plugins/features/public';
 import { getEnabledFeatures } from '../../lib/feature_utils';
 import { SectionPanel } from '../section_panel';

@@ -6,29 +6,31 @@
  */
 
 import * as Rx from 'rxjs';
-import {
-  createSpaces,
-  createMockSavedObjectsRepository,
-  mockRouteContext,
-  mockRouteContextWithInvalidLicense,
-} from '../__fixtures__';
+
+import { ObjectType } from '@kbn/config-schema';
 import {
   kibanaResponseFactory,
   RouteValidatorConfig,
   SavedObjectsErrorHelpers,
 } from 'src/core/server';
 import {
-  loggingSystemMock,
-  httpServiceMock,
-  httpServerMock,
   coreMock,
+  httpServerMock,
+  httpServiceMock,
+  loggingSystemMock,
 } from 'src/core/server/mocks';
-import { SpacesService } from '../../../spaces_service';
-import { initDeleteSpacesApi } from './delete';
+
 import { spacesConfig } from '../../../lib/__fixtures__';
-import { ObjectType } from '@kbn/config-schema';
 import { SpacesClientService } from '../../../spaces_client';
+import { SpacesService } from '../../../spaces_service';
 import { usageStatsServiceMock } from '../../../usage_stats/usage_stats_service.mock';
+import {
+  createMockSavedObjectsRepository,
+  createSpaces,
+  mockRouteContext,
+  mockRouteContextWithInvalidLicense,
+} from '../__fixtures__';
+import { initDeleteSpacesApi } from './delete';
 
 describe('Spaces Public API', () => {
   const spacesSavedObjects = createSpaces();

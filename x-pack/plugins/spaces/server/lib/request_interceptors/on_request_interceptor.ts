@@ -6,11 +6,12 @@
  */
 
 import {
-  KibanaRequest,
-  OnPreRoutingToolkit,
-  LifecycleResponseFactory,
   CoreSetup,
+  KibanaRequest,
+  LifecycleResponseFactory,
+  OnPreRoutingToolkit,
 } from 'src/core/server';
+
 import { getSpaceIdFromPath } from '../../../common';
 
 export interface OnRequestInterceptorDeps {

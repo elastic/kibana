@@ -6,10 +6,11 @@
  */
 
 import { CoreSetup, Logger } from 'src/core/server';
-import { capabilitiesProvider } from './capabilities_provider';
-import { setupCapabilitiesSwitcher } from './capabilities_switcher';
+
 import { PluginsStart } from '../plugin';
 import { SpacesServiceStart } from '../spaces_service';
+import { capabilitiesProvider } from './capabilities_provider';
+import { setupCapabilitiesSwitcher } from './capabilities_switcher';
 
 export const setupCapabilities = (
   core: CoreSetup<PluginsStart>,

@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { EuiCallOut } from '@elastic/eui';
+import './feature_table.scss';
 
 import {
   EuiAccordion,
+  EuiCallOut,
   EuiCheckbox,
   EuiCheckboxProps,
   EuiFlexGroup,
@@ -20,14 +21,15 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { AppCategory } from 'kibana/public';
 import _ from 'lodash';
 import React, { ChangeEvent, Component, ReactElement } from 'react';
+
+import { i18n } from '@kbn/i18n';
 import { Space } from 'src/plugins/spaces_oss/common';
+
 import { KibanaFeatureConfig } from '../../../../../../plugins/features/public';
 import { getEnabledFeatures } from '../../lib/feature_utils';
-import './feature_table.scss';
 
 interface Props {
   space: Partial<Space>;

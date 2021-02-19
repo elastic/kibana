@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from 'src/core/server';
-import { take } from 'rxjs/operators';
-import { CollectorFetchContext, UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { Observable } from 'rxjs';
+import { take } from 'rxjs/operators';
+
+import { ElasticsearchClient } from 'src/core/server';
+import { CollectorFetchContext, UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+
 import { PluginsSetup } from '../plugin';
 import { UsageStats, UsageStatsServiceSetup } from '../usage_stats';
 

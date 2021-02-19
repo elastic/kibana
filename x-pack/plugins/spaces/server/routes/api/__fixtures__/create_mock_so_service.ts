@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { SavedObject, SavedObjectsUpdateResponse, SavedObjectsErrorHelpers } from 'src/core/server';
+import { SavedObject, SavedObjectsErrorHelpers, SavedObjectsUpdateResponse } from 'src/core/server';
 import {
   coreMock,
   savedObjectsClientMock,
-  savedObjectsTypeRegistryMock,
   savedObjectsServiceMock,
+  savedObjectsTypeRegistryMock,
 } from 'src/core/server/mocks';
 
 export const createMockSavedObjectsService = (spaces: any[] = []) => {

@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { ISavedObjectsRepository, Headers } from 'src/core/server';
-import { SPACES_USAGE_STATS_TYPE, SPACES_USAGE_STATS_ID } from './constants';
+import { Headers, ISavedObjectsRepository } from 'src/core/server';
+
 import { CopyOptions, ResolveConflictsOptions } from '../lib/copy_to_spaces/types';
+import { SPACES_USAGE_STATS_ID, SPACES_USAGE_STATS_TYPE } from './constants';
 import { UsageStats } from './types';
 
 interface BaseIncrementOptions {

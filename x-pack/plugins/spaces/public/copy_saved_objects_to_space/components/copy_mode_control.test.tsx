@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import React from 'react';
 import { ReactWrapper } from 'enzyme';
+import React from 'react';
+
 import { mountWithIntl } from '@kbn/test/jest';
+
 import { CopyModeControl, CopyModeControlProps } from './copy_mode_control';
 
 describe('CopyModeControl', () => {

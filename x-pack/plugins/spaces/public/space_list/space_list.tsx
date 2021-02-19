@@ -6,7 +6,9 @@
  */
 
 import React from 'react';
+
 import { SpaceListProps } from 'src/plugins/spaces_oss/public';
+
 import { SpaceListInternal } from './space_list_internal';
 
 export const getSpaceListComponent = (): React.FC<SpaceListProps> => {

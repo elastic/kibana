@@ -6,6 +6,7 @@
  */
 
 import { docLinksServiceMock } from 'src/core/public/mocks';
+
 import { DocumentationLinksService } from './documentation_links';
 
 describe('DocumentationLinksService', () => {

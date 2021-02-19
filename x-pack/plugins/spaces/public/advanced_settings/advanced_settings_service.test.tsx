@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { AdvancedSettingsService } from './advanced_settings_service';
 import { advancedSettingsMock } from 'src/plugins/advanced_settings/public/mocks';
+
+import { AdvancedSettingsService } from './advanced_settings_service';
 
 const componentRegistryMock = advancedSettingsMock.createSetupContract();
 

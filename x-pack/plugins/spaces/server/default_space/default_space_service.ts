@@ -5,19 +5,21 @@
  * 2.0.
  */
 
-import { CoreSetup, SavedObjectsServiceStart, Logger, ServiceStatus } from 'src/core/server';
 import {
+  BehaviorSubject,
+  combineLatest,
   concat,
-  of,
-  timer,
+  defer,
   Observable,
   ObservableInput,
-  combineLatest,
-  defer,
+  of,
   Subscription,
-  BehaviorSubject,
+  timer,
 } from 'rxjs';
-import { mergeMap, switchMap, catchError, tap } from 'rxjs/operators';
+import { catchError, mergeMap, switchMap, tap } from 'rxjs/operators';
+
+import { CoreSetup, Logger, SavedObjectsServiceStart, ServiceStatus } from 'src/core/server';
+
 import { ServiceStatusLevels } from '../../../../../src/core/server';
 import { ILicense } from '../../../licensing/server';
 import { SpacesLicense } from '../../common/licensing';

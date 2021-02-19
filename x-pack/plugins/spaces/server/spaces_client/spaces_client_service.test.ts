@@ -6,7 +6,9 @@
  */
 
 import * as Rx from 'rxjs';
+
 import { coreMock, httpServerMock } from 'src/core/server/mocks';
+
 import { ConfigType } from '../config';
 import { spacesConfig } from '../lib/__fixtures__';
 import { ISpacesClient, SpacesClient } from './spaces_client';

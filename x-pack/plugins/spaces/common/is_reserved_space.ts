@@ -6,6 +6,7 @@
  */
 
 import { get } from 'lodash';
+
 import { Space } from 'src/plugins/spaces_oss/common';
 
 /**

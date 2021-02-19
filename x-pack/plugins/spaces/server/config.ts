@@ -5,13 +5,14 @@
  * 2.0.
  */
 
+import { Observable } from 'rxjs';
+
 import { schema, TypeOf } from '@kbn/config-schema';
 import {
-  PluginInitializerContext,
-  ConfigDeprecationProvider,
   ConfigDeprecation,
+  ConfigDeprecationProvider,
+  PluginInitializerContext,
 } from 'src/core/server';
-import { Observable } from 'rxjs';
 
 export const ConfigSchema = schema.object({
   enabled: schema.boolean({ defaultValue: true }),

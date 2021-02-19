@@ -5,22 +5,23 @@
  * 2.0.
  */
 
-import React from 'react';
+import { EuiEmptyPrompt, EuiLoadingSpinner } from '@elastic/eui';
 import Boom from '@hapi/boom';
-import { mountWithIntl, nextTick } from '@kbn/test/jest';
+import { act } from '@testing-library/react';
+import React from 'react';
+
+import { findTestSubject, mountWithIntl, nextTick } from '@kbn/test/jest';
+import { ToastsApi } from 'src/core/public';
+import { Space } from 'src/plugins/spaces_oss/common';
+
+import { SpacesManager } from '../../spaces_manager';
+import { spacesManagerMock } from '../../spaces_manager/mocks';
+import { SavedObjectTarget } from '../types';
+import { CopyModeControl } from './copy_mode_control';
 import { CopySavedObjectsToSpaceFlyout } from './copy_to_space_flyout';
 import { CopyToSpaceForm } from './copy_to_space_form';
-import { EuiLoadingSpinner, EuiEmptyPrompt } from '@elastic/eui';
-import { Space } from 'src/plugins/spaces_oss/common';
-import { findTestSubject } from '@kbn/test/jest';
-import { SelectableSpacesControl } from './selectable_spaces_control';
-import { CopyModeControl } from './copy_mode_control';
-import { act } from '@testing-library/react';
 import { ProcessingCopyToSpace } from './processing_copy_to_space';
-import { spacesManagerMock } from '../../spaces_manager/mocks';
-import { SpacesManager } from '../../spaces_manager';
-import { ToastsApi } from 'src/core/public';
-import { SavedObjectTarget } from '../types';
+import { SelectableSpacesControl } from './selectable_spaces_control';
 
 interface SetupOpts {
   mockSpaces?: Space[];

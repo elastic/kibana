@@ -6,6 +6,7 @@
  */
 
 import { Observable, Subscription } from 'rxjs';
+
 import { ILicense } from '../../../licensing/common/types';
 
 export interface SpacesLicense {

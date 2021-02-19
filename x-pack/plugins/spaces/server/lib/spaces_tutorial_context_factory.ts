@@ -6,6 +6,7 @@
  */
 
 import { KibanaRequest } from 'src/core/server';
+
 import { SpacesServiceStart } from '../spaces_service/spaces_service';
 
 export function createSpacesTutorialContextFactory(getSpacesService: () => SpacesServiceStart) {

@@ -9,8 +9,9 @@ import {
   SavedObjectsClientWrapperFactory,
   SavedObjectsClientWrapperOptions,
 } from 'src/core/server';
-import { SpacesSavedObjectsClient } from './spaces_saved_objects_client';
+
 import { SpacesServiceStart } from '../spaces_service/spaces_service';
+import { SpacesSavedObjectsClient } from './spaces_saved_objects_client';
 
 export function spacesSavedObjectsClientWrapperFactory(
   getSpacesService: () => SpacesServiceStart

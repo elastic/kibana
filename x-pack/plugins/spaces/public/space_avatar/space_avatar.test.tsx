@@ -7,6 +7,7 @@
 
 import { mount, shallow } from 'enzyme';
 import React from 'react';
+
 import { SpaceAvatar } from './space_avatar';
 
 test('renders without crashing', () => {

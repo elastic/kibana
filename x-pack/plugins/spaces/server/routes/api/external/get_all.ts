@@ -7,9 +7,10 @@
 
 import { schema } from '@kbn/config-schema';
 import { Space } from 'src/plugins/spaces_oss/common';
+
 import { wrapError } from '../../../lib/errors';
-import { ExternalRouteDeps } from '.';
 import { createLicensedRouteHandler } from '../../lib';
+import { ExternalRouteDeps } from './';
 
 export function initGetAllSpacesApi(deps: ExternalRouteDeps) {
   const { externalRouter, log, getSpacesService } = deps;

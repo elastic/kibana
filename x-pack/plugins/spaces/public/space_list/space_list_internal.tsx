@@ -5,18 +5,17 @@
  * 2.0.
  */
 
-import React, { useState, ReactNode, useEffect } from 'react';
+import { EuiBadge, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
+import React, { ReactNode, useEffect, useState } from 'react';
+
 import { i18n } from '@kbn/i18n';
-import { EuiBadge } from '@elastic/eui';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { EuiToolTip } from '@elastic/eui';
-import { EuiButtonEmpty } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { SpaceListProps } from 'src/plugins/spaces_oss/public';
-import { ShareToSpacesData, ShareToSpaceTarget } from '../types';
+
 import { ALL_SPACES_ID, UNKNOWN_SPACE } from '../../common/constants';
-import { useSpaces } from '../spaces_context';
 import { SpaceAvatar } from '../space_avatar';
+import { useSpaces } from '../spaces_context';
+import { ShareToSpacesData, ShareToSpaceTarget } from '../types';
 
 const DEFAULT_DISPLAY_LIMIT = 5;
 

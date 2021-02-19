@@ -6,6 +6,7 @@
  */
 
 import { PluginConfigDescriptor, PluginInitializerContext } from 'src/core/server';
+
 import { ConfigSchema, spacesConfigDeprecationProvider } from './config';
 import { SpacesPlugin } from './plugin';
 

@@ -6,7 +6,7 @@
  */
 
 import './selectable_spaces_control.scss';
-import React from 'react';
+
 import {
   EuiBadge,
   EuiFlexGroup,
@@ -19,15 +19,18 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
+import React from 'react';
+
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { NoSpacesAvailable } from './no_spaces_available';
+
 import { ALL_SPACES_ID, UNKNOWN_SPACE } from '../../../common/constants';
 import { DocumentationLinksService } from '../../lib';
 import { SpaceAvatar } from '../../space_avatar';
-import { ShareToSpaceTarget } from '../../types';
 import { useSpaces } from '../../spaces_context';
+import { ShareToSpaceTarget } from '../../types';
 import { ShareOptions } from '../types';
+import { NoSpacesAvailable } from './no_spaces_available';
 
 interface Props {
   spaces: ShareToSpaceTarget[];

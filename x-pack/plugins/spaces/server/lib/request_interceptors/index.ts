@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { initSpacesOnRequestInterceptor, OnRequestInterceptorDeps } from './on_request_interceptor';
 import {
   initSpacesOnPostAuthRequestInterceptor,
   OnPostAuthInterceptorDeps,
 } from './on_post_auth_interceptor';
+import { initSpacesOnRequestInterceptor, OnRequestInterceptorDeps } from './on_request_interceptor';
 
 export type InterceptorDeps = OnRequestInterceptorDeps & OnPostAuthInterceptorDeps;
 

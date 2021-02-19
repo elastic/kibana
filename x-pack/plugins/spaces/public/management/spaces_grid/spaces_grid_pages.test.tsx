@@ -6,15 +6,16 @@
  */
 
 import React from 'react';
-import { mountWithIntl, shallowWithIntl, nextTick } from '@kbn/test/jest';
-import { SpaceAvatar } from '../../space_avatar';
-import { spacesManagerMock } from '../../spaces_manager/mocks';
-import { SpacesManager } from '../../spaces_manager';
-import { SpacesGridPage } from './spaces_grid_page';
-import { httpServiceMock, scopedHistoryMock } from 'src/core/public/mocks';
-import { notificationServiceMock } from 'src/core/public/mocks';
-import { featuresPluginMock } from '../../../../features/public/mocks';
+
+import { mountWithIntl, nextTick, shallowWithIntl } from '@kbn/test/jest';
+import { httpServiceMock, notificationServiceMock, scopedHistoryMock } from 'src/core/public/mocks';
+
 import { KibanaFeature } from '../../../../features/public';
+import { featuresPluginMock } from '../../../../features/public/mocks';
+import { SpaceAvatar } from '../../space_avatar';
+import { SpacesManager } from '../../spaces_manager';
+import { spacesManagerMock } from '../../spaces_manager/mocks';
+import { SpacesGridPage } from './spaces_grid_page';
 
 const spaces = [
   {

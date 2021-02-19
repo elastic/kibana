@@ -6,6 +6,7 @@
  */
 
 import { HttpResources, IBasePath, Logger } from 'src/core/server';
+
 import { ENTER_SPACE_PATH } from '../../../common';
 import { wrapError } from '../../lib/errors';
 
