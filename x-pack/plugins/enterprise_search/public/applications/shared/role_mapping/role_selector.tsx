@@ -47,7 +47,7 @@ export const RoleSelector: React.FC<Props> = ({
       label={
         <>
           <EuiTitle size="xs">
-            <h4 className="users-layout__users--roletype">{startCase(roleTypeOption)}</h4>
+            <h4 className="usersLayout__users--roletype">{startCase(roleTypeOption)}</h4>
           </EuiTitle>
           {disabled && disabledText && (
             <EuiCallOut
