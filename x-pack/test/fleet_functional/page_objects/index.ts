@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import * as editPolicyHelpers from './edit_policy';
+import { pageObjects as xpackFunctionalPageObjects } from '../../functional/page_objects';
+import { OverviewPage } from './overview_page';
 
-export { HttpRequestMockHelpers, init } from './http_requests';
-
-export { editPolicyHelpers };
+export const pageObjects = {
+  ...xpackFunctionalPageObjects,
+  overviewPage: OverviewPage,
+};

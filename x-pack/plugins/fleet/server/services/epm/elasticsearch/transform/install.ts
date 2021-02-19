@@ -42,9 +42,13 @@ export const installTransform = async (
     previousInstalledTransformEsAssets = installation.installed_es.filter(
       ({ type, id }) => type === ElasticsearchAssetType.transform
     );
-    logger.info(
-      `Found previous transform references:\n ${JSON.stringify(previousInstalledTransformEsAssets)}`
-    );
+    if (previousInstalledTransformEsAssets.length) {
+      logger.info(
+        `Found previous transform references:\n ${JSON.stringify(
+          previousInstalledTransformEsAssets
+        )}`
+      );
+    }
   }
 
   // delete all previous transform
