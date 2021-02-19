@@ -21,7 +21,9 @@ Alerts are scheduled to run every 2 seconds but they seem to be running too late
 *Resolution*:
 
 As described under <<alerting-background-tasks>>, Alerts are ran as background tasks at a cadence defined by their *check interval*.
-This issue can be addressed by either tweaking the {kib} Task Manager settings or adjusting the Alerts in question.
+When an Alert *check interval* is smaller than the Task Manager <<task-manager-settings,`poll_interval`>> the alert will inevitably run late.
+
+This issue can be addressed by either tweaking the <<task-manager-settings,{kib} Task Manager settings>> or increasing the *check interval* of the Alerts in question.
 
 For details on resolving this issue please see <<task-manager-health-scheduled-tasks-small-schedule-interval-run-late>>.
 

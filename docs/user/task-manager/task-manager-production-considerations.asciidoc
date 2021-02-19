@@ -28,9 +28,9 @@ That said, there is a relatively straight forward method you can follow to produ
 By default {kib} polls for tasks at a rate of 10 tasks every 3 seconds.
 This means that we can reasonably expect a single {kib} instance to support up to 200 _tasks per minute_ (hence forth termed as `200/tpm`).
 
-In practice, a {kib} insatance will only ever achieve that upper bound of `200/tpm` if the duration of task execution is below the polling rate of 3 seconds. For the most part, the duration of tasks is below that threshold, but it can vary greatly as {es} and {lib} usage grow and task complexity increases (such as Alerts executing heavy queries across large datasets).
+In practice, a {kib} instance will only ever achieve that upper bound of `200/tpm` if the duration of task execution is below the polling rate of 3 seconds. For the most part, the duration of tasks is below that threshold, but it can vary greatly as {es} and {kib} usage grow and task complexity increases (such as Alerts executing heavy queries across large datasets).
 
-By <<task-manager-health-evaluate-the-workload,evaluating the workload>> a rough estimate can be made as to the required throughput as a _tasks per minute_ measurment.
+By <<task-manager-health-evaluate-the-workload,evaluating the workload>> a rough estimate can be made as to the required throughput as a _tasks per minute_ measurement.
 
 For example, suppose your current workload reveals a required throughput of `440/tpm`, this scale could be addressed by provisioning 3 {kib} instances, providing an upper throughput of `600/tpm`. This scale would provide aproximated 25% additional capacity to handle ad-hoc non-recurring tasks and potential growth in recurring tasks.
 
@@ -42,8 +42,8 @@ For details on monitoring the health of {kib} Task Manager, follow the guidance 
 [[task-manager-scaling-horizontally]]
 ==== Scaling Horizontaly
 
-At times the sustainbale approach might be to expand the throughput of your cluster by provisioning additional {kib} instances.
-By default, each additional {kib} instance will add an additional 10 tasks that your cluster can run concurrenctly, but you can also scale each {kib} instance vertically, if your dignosis indicates they can handle the additional workload.
+At times the sustainable approach might be to expand the throughput of your cluster by provisioning additional {kib} instances.
+By default, each additional {kib} instance will add an additional 10 tasks that your cluster can run concurrenctly, but you can also scale each {kib} instance vertically, if your diagnosis indicates they can handle the additional workload.
 
 [float]
 [[task-manager-scaling-vertically]]
@@ -77,14 +77,14 @@ Finding the sweet spot between both strategies requires experimentation, but in 
 [[task-manager-rough-throughput-estimation]]
 ==== Rough Throughput Estimation
 
-Predicting the required throughout a deplyment might need to support {kib} Task Management is difficult, as features can schedule an unpredictable number of tasks at a variety of scheduled cadences.
+Predicting the required throughout a deployment might need to support {kib} Task Management is difficult, as features can schedule an unpredictable number of tasks at a variety of scheduled cadences.
 That said, a rough lower bound can be estimated which is then used as a guide.
 
 Throughput is best thought of as a measurements in _tasks per minute_.
 
 As <<task-manager-default-scaling,mentioned above>>, a default {kib} instance can support up to `200/tpm`.
 
-Given a hypothetical deployment of 100 recurring tasks, estimating the required throughput deppends entirely on their scheduled cadence.
+Given a hypothetical deployment of 100 recurring tasks, estimating the required throughput depends entirely on their scheduled cadence.
 Suppose we expect to run 50 tasks at a cadence of `10s`, the other 50 at `20m` and in addition, we expect a couple dozen non-recurring tasks every minute.
 
 A non-recurring task requires a single execution, which means that a single {kib} instance could execute all 100 tasks in less than a minute, utilizing only half of its capacity. As these tasks are only executed once, the {kib} instance will sit idle once all tasks have executed.
@@ -92,10 +92,10 @@ For that reason, we don't tend to include non-recurring tasks in our _tasks per 
 
 A recurring task requires as many executions as its cadence can fit into a minute. This means that a recurring task with a `10s` schedule will require as `6/tpm`, as it will be executed 6 times per minute. On the other hand, a recurring tasks with a `20m` schedule, will only execute 3 times per hour, meaning it would only require a throughput of `0.05/tpm`, a number so small it is difficult to take it into account.
 
-For this reason, we recommend grouping tasks by _tasks per minute_ and _tasks per hour_, as demonstrated under <<task-manager-health-evaluate-the-workload,"Evaluate your workload">>, averaging the _per hour_ measurment across all minutes.
+For this reason, we recommend grouping tasks by _tasks per minute_ and _tasks per hour_, as demonstrated under <<task-manager-health-evaluate-the-workload,"Evaluate your workload">>, averaging the _per hour_ measurement across all minutes.
 
-Given our predicted workload, we extimate a lower bound throughput of `340/tpm` (`6/tpm` * 50 + `3/tph` * 50 + 20% buffer).
-As a default {kib} instance provides us with a throughput of `200/tpm`, a good starting point for our deployment woulk appear to be to provision 2 {kib} instances. We would then monitor their performance and reassess as the required throughput becomes clearer.
+Given our predicted workload, we estimate a lower bound throughput of `340/tpm` (`6/tpm` * 50 + `3/tph` * 50 + 20% buffer).
+As a default {kib} instance provides us with a throughput of `200/tpm`, a good starting point for our deployment would appear to be to provision 2 {kib} instances. We would then monitor their performance and reassess as the required throughput becomes clearer.
 
 We recognize this is nothing more than a _rough_ estimate, but this rough _tasks per minute_ provides the lower bound that is needed in order to execute tasks on time.
 Once you have calculated the rough _tasks per minute_ estimate, we recommend adding a 20% buffer for non-recurring tasks. How much of a buffer is required largely depends on your use case, and as a result we recommend <<task-manager-health-evaluate-the-workload,evaluating your workload>> as it grows to ensure enough of a buffer is provisioned.

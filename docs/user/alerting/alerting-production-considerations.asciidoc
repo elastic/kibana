@@ -26,7 +26,7 @@ This is usually a symptom of the specific usage of the cluster in question.
 
 Such issues can be addressed by tweaking the {kib} <<task-manager>> or scaling the deployment to better suit your use case.
 
-For detailed guidance, see <<alerting-troubleshooting,`Alerting Troubelshooting`>>.
+For detailed guidance, see <<alerting-troubleshooting,`Alerting Troubleshooting`>>.
 ==============================================
 
 [float]

@@ -2,7 +2,7 @@
 [[task-manager-troubleshooting]]
 == Task Manager Troubleshooting
 
-Task Manager is used by a wide ange of services in {kib}, such as <<alerting-production-considerations, Alerting>>, Reporting and Telemetry.
+Task Manager is used by a wide range of services in {kib}, such as <<alerting-production-considerations, Alerting>>, Reporting and Telemetry.
 Unexpected behavior in these services might be a downstream issue originating in Task Manager.
 
 Use the information in this section to troubleshoot common problems and find answers for frequently asked questions.
@@ -13,7 +13,6 @@ https://support.elastic.co/customers/s/login/[Elastic Support portal].
 Or post in the https://discuss.elastic.co/[Elastic forum].
 
 
-[float]
 [[task-manager-health-scheduled-tasks-small-schedule-interval-run-late]]
 === Tasks with Small Schedule Intervals Run Late
 
@@ -28,7 +27,6 @@ Task Manager polls for tasks at the cadence specified by the <<task-manager-sett
 This can be addressed by adjusting the <<task-manager-settings,`xpack.task_manager.poll_interval`>> setting, though this will add additional load to both {kib} and {es} instances in the cluster, as they will peform more queries.
 
 
-[float]
 [[task-manager-health-tasks-run-late]]
 === Tasks Run Late
 
@@ -55,7 +53,6 @@ Following the <<task-manager-diagnosing-root-cause>> step-by-step guide should a
 _Drift_ is often be addressed by adjusting the scaling the deployment to better suit your usage.
 For details on scaling Task Manager, see <<task-manager-scaling-guidance>>.
 
-[float]
 [[task-manager-diagnosing-root-cause]]
 ==== Diagnosing A Root Cause For Drift
 
@@ -232,7 +229,6 @@ The API returns the following:
 
 By analyzing the different sections of the output we can evaluate the variety of different theories that might explain the _drift_ identified in a deplyment.
 
-[float]
 [[task-manager-health-evaluate-the-configuration]]
 ==== Evaluate the Configuration
 
@@ -307,7 +303,6 @@ Max workers configuration is temporarily reduced after Elasticsearch returned 25
 
 In such a case a deeper investigation into the high error rate experienced by the {es} cluster is required.
 
-[float]
 [[task-manager-health-evaluate-the-runtime]]
 ==== Evaluate the Runtime
 
@@ -484,7 +479,7 @@ Suppose an alternate scenario, where `drift` is high, but `load` is not, such as
 In the scenario above we can see that tasks are in fact being ran far too late, but we have sufficient capacity to run more concurrent tasks.
 A high capacity allows {kib} to run multiple different tasks concurrently, but if a task is already running when its next schedule run is due, {kib} will avoid running it a second time, and instead it will wait for the first execution to complete.
 
-This means that if a task takes longer to execute than the cadence of its schedule, then that task will always overrun and experience a high _drift_. For example, suppose a task is scheduled to execute every 3 seconds, but takes 6 seconds to complete, it will consistenly suffer from a _drift_ of, at least, 3 seconds.
+This means that if a task takes longer to execute than the cadence of its schedule, then that task will always overrun and experience a high _drift_. For example, suppose a task is scheduled to execute every 3 seconds, but takes 6 seconds to complete, it will consistently suffer from a _drift_ of, at least, 3 seconds.
 
 Evaluating the health stats in this hypothetical scenario, we can see the following output under `stats.runtime.value.execution.duration`:
 
@@ -559,7 +554,6 @@ Evaluating the health stats above, we can see the following output under `stats.
 We can infer from these stats that most `actions:.index` tasks, which back the `ES Index` {kib} action, fail.
 Resolving that would require deeper investigation into the {kib} Server Log, where the exact errors are logged, and addressing these specific errors.
 
-[float]
 [[task-manager-health-evaluate-the-workload]]
 ==== Evaluate the Workload
 
@@ -688,11 +682,11 @@ Hypothetically, lets suppose the output of `stats.workload.value` looked somethi
 We can infer several important attributes of our workload from this output:
 
 * There are many tasks in our system and ensuring these tasks run on their scheduled cadence will require attention to the {kib} Task Management throughput.
-* Assessing the high frequency tasks (tasks that recure at a cadence of a couple of minutes and below), we have a need to support a throughput of _aproximately_ 400 tasks per minute (38 every 10 seconds + 101 every minute + 55 every 90 seconds).
-* Assessing the medium frequency tasks (tasks that recure at a cadence of an hour or less), we have a need to support an additional throughput of over 2000 tasks per hour (89 every 5 minutes, + 62 every 20 minutes + 106 each hour). We can naively average these throughoput the hour and count these tasks as an additional 30 to 40 tasks per minute.
+* Assessing the high frequency tasks (tasks that recurr at a cadence of a couple of minutes and below), we have a need to support a throughput of _approximately_ 400 tasks per minute (38 every 10 seconds + 101 every minute + 55 every 90 seconds).
+* Assessing the medium frequency tasks (tasks that recurr at a cadence of an hour or less), we have a need to support an additional throughput of over 2000 tasks per hour (89 every 5 minutes, + 62 every 20 minutes + 106 each hour). We can naively average these throughput the hour and count these tasks as an additional 30 to 40 tasks per minute.
 * Assessing the estimated schedule density, there are cycles that are due to run upwards of 31 tasks concurrently, but along side these cycles, there are empty cycles. We can expect Task Manager to load balance these tasks throughout the empty cycles, but this won't leave much capacity to handle spikes in fresh tasks that might be scheduled in the future.
 
-These _rough_ calculations give us a lower bound to the required througput which is that of _at least_ 440 tasks per minute to ensure recurring tasks are excuted, more or less, at their scheduled time. This throughput doesn't account for non recurring tasks that might have been scheduled, nor does it account tasks (recurring or otherwise) that might be scheduled in the future.
+These _rough_ calculations give us a lower bound to the required throughput which is that of _at least_ 440 tasks per minute to ensure recurring tasks are excuted, more or less, at their scheduled time. This throughput doesn't account for non recurring tasks that might have been scheduled, nor does it account tasks (recurring or otherwise) that might be scheduled in the future.
 
 Given these inferred attributes, it would be safe to assume that a single {kib} instance with default settings **would not** provide the required throughput. That said, it is quite possible that scaling horizontally by adding a couple more {kib} instances will.
 
