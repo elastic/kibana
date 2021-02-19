@@ -78,6 +78,11 @@ describe('TelemetryEventsSender', () => {
           agent: {
             name: 'test',
           },
+          rule: {
+            id: 'X',
+            name: 'Y',
+            ruleset: 'Z',
+          },
           file: {
             size: 3,
             path: 'X',
@@ -87,6 +92,9 @@ describe('TelemetryEventsSender', () => {
                 key2: 'Y',
               },
               malware_classification: {
+                key1: 'X',
+              },
+              malware_signature: {
                 key1: 'X',
               },
               quarantine_result: true,
