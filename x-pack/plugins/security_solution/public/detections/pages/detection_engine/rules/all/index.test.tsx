@@ -127,7 +127,7 @@ describe('AllRules', () => {
         exportRuleIds: [],
         lastUpdated: 0,
         isRefreshOn: true,
-        refreshing: false,
+        isRefreshing: false,
         showIdleModal: false,
       };
 
