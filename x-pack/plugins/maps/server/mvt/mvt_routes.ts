@@ -52,10 +52,8 @@ export function initMVTRoutes({
       const { query } = request;
 
       const abortController = new AbortController();
-      request.events.aborted$.subscribe({
-        next: () => {
-          abortController.abort();
-        },
+      request.events.aborted$.subscribe(() => {
+        abortController.abort();
       });
 
       const requestBodyDSL = rison.decode(query.requestBody as string);
@@ -102,10 +100,8 @@ export function initMVTRoutes({
     ) => {
       const { query } = request;
       const abortController = new AbortController();
-      request.events.aborted$.subscribe({
-        next: () => {
-          abortController.abort();
-        },
+      request.events.aborted$.subscribe(() => {
+        abortController.abort();
       });
 
       const requestBodyDSL = rison.decode(query.requestBody as string);
