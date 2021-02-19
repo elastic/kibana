@@ -25,7 +25,7 @@ export const ScreenshotLink = ({ lastSuccessfulStep }: Props) => {
     <span>
       <FormattedMessage
         id="xpack.uptime.synthetics.executedStep.screenshot.successfulLink"
-        defaultMessage="Screenshot {link}"
+        defaultMessage="Screenshot from {link}"
         values={{
           link: (
             <ReactRouterEuiLink
@@ -35,7 +35,7 @@ export const ScreenshotLink = ({ lastSuccessfulStep }: Props) => {
               <LabelLink>
                 <FormattedMessage
                   id="xpack.uptime.synthetics.executedStep.screenshot.success"
-                  defaultMessage=" from last successful check"
+                  defaultMessage="last successful check"
                 />
               </LabelLink>
             </ReactRouterEuiLink>
