@@ -44,6 +44,7 @@ describe('RoleSelector', () => {
     const radio = wrapper.find(EuiRadio);
 
     expect(radio.dive().find(EuiCallOut)).toHaveLength(1);
+    expect(wrapper.find(EuiRadio).prop('checked')).toEqual(false);
   });
 
   it('sets checked attribute on radio when option matched type', () => {
