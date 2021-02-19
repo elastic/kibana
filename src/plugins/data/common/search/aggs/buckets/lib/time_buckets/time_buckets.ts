@@ -180,8 +180,8 @@ export class TimeBuckets {
     this._i = undefined;
     this._originalInterval = null;
 
-    if (input === autoInterval) {
-      this._i = 'auto';
+    if (!input || input === autoInterval) {
+      this._i = autoInterval;
       return;
     }
 
