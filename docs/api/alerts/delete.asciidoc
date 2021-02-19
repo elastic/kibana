@@ -1,0 +1,36 @@
+[[alerts-api-delete]]
+=== Delete alert API
+++++
+<titleabbrev>Delete alert</titleabbrev>
+++++
+
+Permanently remove an alert.
+
+WARNING: Once you delete an alert, you cannot recover it.
+
+[[alerts-api-delete-request]]
+==== Request
+
+`DELETE <kibana host>:<port>/api/alerts/alert/<id>`
+
+[[alerts-api-delete-path-params]]
+==== Path parameters
+
+`id`::
+  (Required, string) The ID of the alert that you want to remove.
+
+[[alerts-api-delete-response-codes]]
+==== Response code
+
+`200`::
+  Indicates a successful call.
+
+==== Example
+
+Delete an alert with ID:
+
+[source,sh]
+--------------------------------------------------
+$ curl -X DELETE api/alerts/alert/41893910-6bca-11eb-9e0d-85d233e3ee35
+--------------------------------------------------
+// KIBANA
