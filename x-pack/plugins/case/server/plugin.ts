@@ -56,7 +56,7 @@ export class CasePlugin {
   private alertsService?: AlertService;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
-    this.log = this.initializerContext.logger.get('case');
+    this.log = this.initializerContext.logger.get();
   }
 
   public async setup(core: CoreSetup, plugins: PluginsSetup) {
