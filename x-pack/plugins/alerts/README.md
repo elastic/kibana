@@ -20,26 +20,13 @@ Table of Contents
 		- [Example](#example)
 	- [Role Based Access-Control](#role-based-access-control)
 	- [Alert Navigation](#alert-navigation)
-	- [RESTful API](#restful-api)
-		- [`POST /api/alerts/alert`: Create alert](#post-apialert-create-alert)
-		- [`DELETE /api/alerts/alert/{id}`: Delete alert](#delete-apialertid-delete-alert)
-		- [`GET /api/alerts/_find`: Find alerts](#get-apialertfind-find-alerts)
-		- [`GET /api/alerts/alert/{id}`: Get alert](#get-apialertid-get-alert)
+	- [Experimental RESTful API](#restful-api)
 		- [`GET /api/alerts/alert/{id}/state`: Get alert state](#get-apialertidstate-get-alert-state)
 		- [`GET /api/alerts/alert/{id}/_instance_summary`: Get alert instance summary](#get-apialertidstate-get-alert-instance-summary)
-		- [`GET /api/alerts/list_alert_types`: List alert types](#get-apialerttypes-list-alert-types)
-		- [`PUT /api/alerts/alert/{id}`: Update alert](#put-apialertid-update-alert)
-		- [`POST /api/alerts/alert/{id}/_enable`: Enable an alert](#post-apialertidenable-enable-an-alert)
-		- [`POST /api/alerts/alert/{id}/_disable`: Disable an alert](#post-apialertiddisable-disable-an-alert)
-		- [`POST /api/alerts/alert/{id}/_mute_all`: Mute all alert instances](#post-apialertidmuteall-mute-all-alert-instances)
-		- [`POST /api/alerts/alert/{alert_id}/alert_instance/{alert_instance_id}/_mute`: Mute alert instance](#post-apialertalertidalertinstancealertinstanceidmute-mute-alert-instance)
-		- [`POST /api/alerts/alert/{id}/_unmute_all`: Unmute all alert instances](#post-apialertidunmuteall-unmute-all-alert-instances)
-		- [`POST /api/alerts/alert/{alertId}/alert_instance/{alertInstanceId}/_unmute`: Unmute an alert instance](#post-apialertalertidalertinstancealertinstanceidunmute-unmute-an-alert-instance)
 		- [`POST /api/alerts/alert/{id}/_update_api_key`: Update alert API key](#post-apialertidupdateapikey-update-alert-api-key)
-	- [Schedule Formats](#schedule-formats)
 	- [Alert instance factory](#alert-instance-factory)
 	- [Templating actions](#templating-actions)
-	- [Examples](#examples)
+		- [Examples](#examples)
 
 
 ## Terminology
@@ -61,7 +48,7 @@ A Kibana alert detects a condition and executes one or more actions when that co
 
 1. Develop and register an alert type (see alert types -> example).
 2. Configure feature level privileges using RBAC 
-3. Create an alert using the RESTful API (see alerts -> create).
+3. Create an alert using the RESTful API [Documentation](https://www.elastic.co/guide/en/kibana/master/alerts-api-update.html) (see alerts -> create).
 
 ## Limitations
 
@@ -96,6 +83,7 @@ The following table describes the properties of the `options` object.
 |validate.params|When developing an alert type, you can choose to accept a series of parameters. You may also have the parameters validated before they are passed to the `executor` function or created as an alert saved object. In order to do this, provide a `@kbn/config-schema` schema that we will use to validate the `params` attribute.|@kbn/config-schema|
 |executor|This is where the code of the alert type lives. This is a function to be called when executing an alert on an interval basis. For full details, see executor section below.|Function|
 |producer|The id of the application producing this alert type.|string|
+|minimumLicenseRequired|The value of a minimum license. Most of the alerts are licensed as "basic".|string|
 
 ### Executor
 
@@ -142,13 +130,13 @@ This example receives server and threshold as parameters. It will read the CPU u
 
 ```typescript
 import { schema } from '@kbn/config-schema';
+import { AlertType, AlertExecutorOptions } from '../../../alerts/server';
 import {
-	Alert,
-	AlertTypeParams,
-	AlertTypeState,
-	AlertInstanceState,
-	AlertInstanceContext
-} from 'x-pack/plugins/alerts/common';
+  AlertTypeParams,
+  AlertTypeState,
+  AlertInstanceState,
+  AlertInstanceContext,
+} from '../../../alerts/common';
 ...
 interface MyAlertTypeParams extends AlertTypeParams {
 	server: string;
@@ -156,7 +144,7 @@ interface MyAlertTypeParams extends AlertTypeParams {
 }
 
 interface MyAlertTypeState extends AlertTypeState {
-	lastChecked: number;
+	lastChecked: Date;
 }
 
 interface MyAlertTypeInstanceState extends AlertInstanceState {
@@ -257,83 +245,6 @@ const myAlertType: AlertType<
 server.newPlatform.setup.plugins.alerts.registerType(myAlertType);
 ```
 
-This example only receives threshold as a parameter. It will read the CPU usage of all the servers and schedule individual actions if the reading for a server is greater than the threshold. This is a better implementation than above as only one query is performed for all the servers instead of one query per server.
-
-```typescript
-server.newPlatform.setup.plugins.alerts.registerType({
-	id: 'my-alert-type',
-	name: 'My alert type',
-	validate: {
-		params: schema.object({
-			threshold: schema.number({ min: 0, max: 1 }),
-		}),
-	},
-	actionGroups: [
-		{
-			id: 'default',
-			name: 'Default',
-		},
-	],
-	defaultActionGroupId: 'default',
-	minimumLicenseRequired: 'basic',
-	actionVariables: {
-		context: [
-			{ name: 'server', description: 'the server' },
-			{ name: 'hasCpuUsageIncreased', description: 'boolean indicating if the cpu usage has increased' },
-		],
-		state: [
-			{ name: 'cpuUsage', description: 'CPU usage' },
-		],
-	},
-	async executor({
-    alertId,
-		startedAt,
-		previousStartedAt,
-		services,
-		params,
-		state,
-	}: AlertExecutorOptions) {
-		const { threshold } = params; // Let's assume params is { threshold: 0.8 }
-
-		// Call a function to get the CPU readings on all the servers. The result will be
-		// an array of { server, cpuUsage }.
-		const cpuUsageByServer = await getCpuUsageByServer();
-
-		for (const { server, cpuUsage: currentCpuUsage } of cpuUsageByServer) {
-			// Only execute if CPU usage is greater than threshold
-			if (currentCpuUsage > threshold) {
-				// The first argument is a unique identifier the alert instance is about. In this scenario
-				// the provided server will be used. Also, this id will be used to make `getState()` return
-				// previous state, if any, on matching identifiers.
-				const alertInstance = services.alertInstanceFactory(server);
-
-				// State from last execution. This will exist if an alert instance was created and executed
-				// in the previous execution
-				const { cpuUsage: previousCpuUsage } = alertInstance.getState();
-
-				// Replace state entirely with new values
-				alertInstance.replaceState({
-					cpuUsage: currentCpuUsage,
-				});
-
-				// 'default' refers to the id of a group of actions to be scheduled for execution, see 'actions' in create alert section
-				alertInstance.scheduleActions('default', {
-					server,
-					hasCpuUsageIncreased: currentCpuUsage > previousCpuUsage,
-				});
-			}
-		}
-
-		// Single object containing state that isn't specific to a server, this will become available
-		// within the `state` function parameter at the next execution
-		return {
-			lastChecked: new Date(),
-		};
-	},
-	producer: 'alerting',
-});
-```
-
 ## Role Based Access-Control
 Once you have registered your AlertType, you need to grant your users privileges to use it.
 When registering a feature in Kibana you can specify multiple types of privileges which are granted to users when they're assigned certain roles.
@@ -387,29 +298,37 @@ It's important to note that any role can be granted a mix of `all` and `read` pr
 
 ```typescript
 features.registerKibanaFeature({
-	id: 'my-application-id',
-	name: 'My Application',
-	app: [],
-	privileges: {
-		all: {
-			alerting: {
-				all: [
-					'my-application-id.my-alert-type',
-					'my-application-id.my-restricted-alert-type'
-				],
-			},
-		},
-		read: {
-			alerting: {
-				all: [
-					'my-application-id.my-alert-type'
-				]
-				read: [
-					'my-application-id.my-restricted-alert-type'
-				],
-			},
-		},
-	},
+  id: 'my-application-id',
+  name: 'My Application',
+  app: [],
+  privileges: {
+    all: {
+      app: ['my-application-id', 'kibana'],
+      savedObject: {
+        all: [],
+        read: [],
+      },
+      ui: [],
+      api: [],
+    },
+    read: {
+      app: ['lens', 'kibana'],
+      alerting: {
+        all: [
+          'my-application-id.my-alert-type'
+        ],
+        read: [
+          'my-application-id.my-restricted-alert-type'
+        ],
+      },
+      savedObject: {
+        all: [],
+        read: [],
+      },
+      ui: [],
+      api: [],
+    },
+  },
 });
 ```
 
@@ -494,46 +413,10 @@ The only case in which this handler will not be used to evaluate the navigation 
 
 You can use the `registerNavigation` api to specify as many AlertType specific handlers as you like, but you can only use it once per AlertType as we wouldn't know which handler to use if you specified two for the same AlertType. For the same reason, you can only use `registerDefaultNavigation` once per plugin, as it covers all cases for your specific plugin.
 
-## RESTful API
+## Experimental RESTful API
 
-Using an alert type requires you to create an alert that will contain parameters and actions for a given alert type. See below for CRUD operations using the API.
-
-### `POST /api/alerts/alert`: Create alert
-
-Payload:
-
-|Property|Description|Type|
-|---|---|---|
-|enabled|Indicate if you want the alert to start executing on an interval basis after it has been created.|boolean| 
-|name|A name to reference and search in the future.|string|
-|tags|A list of keywords to reference and search in the future.|string[]|
-|alertTypeId|The id value of the alert type you want to call when the alert is scheduled to execute.|string|
-|schedule|The schedule specifying when this alert should be run, using one of the available schedule formats specified under _Schedule Formats_ below|object|
-|throttle|A Duration specifying how often this alert should fire the same actions. This will prevent the alert from sending out the same notification over and over. For example, if an alert with a `schedule` of 1 minute stays in a triggered state for 90 minutes, setting a `throttle` of `10m` or `1h` will prevent it from sending 90 notifications over this period.|string|
-|params|The parameters to pass in to the alert type executor `params` value. This will also validate against the alert type params validator if defined.|object|
-|actions|Array of the following:<br> - `group` (string): We support grouping actions in the scenario of escalations or different types of alert instances. If you don't need this, feel free to use `default` as a value.<br>- `id` (string): The id of the action saved object to execute.<br>- `params` (object): The map to the `params` the action type will receive. In order to help apply context to strings, we handle them as mustache templates and pass in a default set of context. (see templating actions).|array|
-
-### `DELETE /api/alerts/alert/{id}`: Delete alert
-
-Params:
-
-|Property|Description|Type|
-|---|---|---|
-|id|The id of the alert you're trying to delete.|string|
-
-### `GET /api/alerts/_find`: Find alerts
-
-Params:
-
-See the saved objects API documentation for find. All the properties are the same except you cannot pass in `type`.
-
-### `GET /api/alerts/alert/{id}`: Get alert
-
-Params:
-
-|Property|Description|Type|
-|---|---|---|
-|id|The id of the alert you're trying to get.|string|
+Using of the alert type requires you to create an alert that will contain parameters and actions for a given alert type. API description for CRUD operations is a part of the [user documentation](https://www.elastic.co/guide/en/kibana/master/alerts-api-update.html).
+API listed below is experimental and could be changed or removed in the future.
 
 ### `GET /api/alerts/alert/{id}/state`: Get alert state
 
@@ -560,92 +443,11 @@ Query:
 |---|---|---|
 |dateStart|The date to start looking for alert events in the event log. Either an ISO date string, or a duration string indicating time since now.|string|
 
-### `GET /api/alerts/list_alert_types`: List alert types
-
-No parameters.
-
-### `PUT /api/alerts/alert/{id}`: Update alert
-
-Params:
-
-|Property|Description|Type|
-|---|---|---|
-|id|The id of the alert you're trying to update.|string|
-
-Payload:
-
-|Property|Description|Type|
-|---|---|---|
-|schedule|The schedule specifying when this alert should be run, using one of the available schedule formats specified under _Schedule Formats_ below|object|
-|throttle|A Duration specifying how often this alert should fire the same actions. This will prevent the alert from sending out the same notification over and over. For example, if an alert with a `schedule` of 1 minute stays in a triggered state for 90 minutes, setting a `throttle` of `10m` or `1h` will prevent it from sending 90 notifications over this period.|string|
-|name|A name to reference and search in the future.|string|
-|tags|A list of keywords to reference and search in the future.|string[]|
-|params|The parameters to pass in to the alert type executor `params` value. This will also validate against the alert type params validator if defined.|object|
-|actions|Array of the following:<br> - `group` (string): We support grouping actions in the scenario of escalations or different types of alert instances. If you don't need this, feel free to use `default` as a value.<br>- `id` (string): The id of the action saved object to execute.<br>- `params` (object): There map to the `params` the action type will receive. In order to help apply context to strings, we handle them as mustache templates and pass in a default set of context. (see templating actions).|array|
-
-### `POST /api/alerts/alert/{id}/_enable`: Enable an alert
-
-Params:
-
-|Property|Description|Type|
-|---|---|---|
-|id|The id of the alert you're trying to enable.|string|
-
-### `POST /api/alerts/alert/{id}/_disable`: Disable an alert
-
-Params:
-
-|Property|Description|Type|
-|---|---|---|
-|id|The id of the alert you're trying to disable.|string|
-
-### `POST /api/alerts/alert/{id}/_mute_all`: Mute all alert instances
-
-Params:
-
-|Property|Description|Type|
-|---|---|---|
-|id|The id of the alert you're trying to mute all alert instances for.|string|
-
-### `POST /api/alerts/alert/{alert_id}/alert_instance/{alert_instance_id}/_mute`: Mute alert instance
-
-Params:
-
-|Property|Description|Type|
-|---|---|---|
-|alertId|The id of the alert you're trying to mute an instance for.|string|
-|alertInstanceId|The instance id of the alert instance you're trying to mute.|string|
-
-### `POST /api/alerts/alert/{id}/_unmute_all`: Unmute all alert instances
-
-Params:
-
-|Property|Description|Type|
-|---|---|---|
-|id|The id of the alert you're trying to unmute all alert instances for.|string|
-
-### `POST /api/alerts/alert/{alertId}/alert_instance/{alertInstanceId}/_unmute`: Unmute an alert instance
-
-Params:
-
-|Property|Description|Type|
-|---|---|---|
-|alertId|The id of the alert you're trying to unmute an instance for.|string|
-|alertInstanceId|The instance id of the alert instance you're trying to unmute.|string|
-
 ### `POST /api/alerts/alert/{id}/_update_api_key`: Update alert API key
 
 |Property|Description|Type|
 |---|---|---|
 |id|The id of the alert you're trying to update the API key for. System will use user in request context to generate an API key for.|string|
-
-## Schedule Formats
-A schedule is structured such that the key specifies the format you wish to use and its value specifies the schedule.
-
-We currently support the _Interval format_ which specifies the interval in seconds, minutes, hours or days at which the alert should execute.
-Example: `{ interval: "10s" }`, `{ interval: "5m" }`, `{ interval: "1h" }`, `{ interval: "1d" }`.
-
-There are plans to support multiple other schedule formats in the near future.
 
 ## Alert instance factory
 
@@ -694,7 +496,7 @@ When an alert instance executes, the first argument is the `group` of actions to
 
 The templating engine is [mustache]. General definition for the [mustache variable] is a double-brace {{}}. All variables are HTML-escaped by default and if there is a requirement to render unescaped HTML, it should be applied the triple mustache: `{{{name}}}`. Also, can be used `&` to unescape a variable.
 
-## Examples
+### Examples
 
 The following code would be within an alert type. As you can see `cpuUsage ` will replace the state of the alert instance and `server` is the context for the alert instance to execute. The difference between the two is `cpuUsage ` will be accessible at the next execution.
 

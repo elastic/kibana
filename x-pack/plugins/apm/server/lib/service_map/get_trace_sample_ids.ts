@@ -16,9 +16,8 @@ import {
 } from '../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../common/processor_event';
 import { SERVICE_MAP_TIMEOUT_ERROR } from '../../../common/service_map';
-import { rangeFilter } from '../../../common/utils/range_filter';
+import { environmentQuery, rangeQuery } from '../../../common/utils/queries';
 import { withApmSpan } from '../../utils/with_apm_span';
-import { getEnvironmentUiFilterES } from '../helpers/convert_ui_filters/get_environment_ui_filter_es';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
 
 const MAX_TRACES_TO_INSPECT = 1000;
@@ -35,8 +34,6 @@ export function getTraceSampleIds({
   return withApmSpan('get_trace_sample_ids', async () => {
     const { start, end, apmEventClient, config } = setup;
 
-    const rangeQuery = { range: rangeFilter(start, end) };
-
     const query = {
       bool: {
         filter: [
@@ -45,7 +42,7 @@ export function getTraceSampleIds({
               field: SPAN_DESTINATION_SERVICE_RESOURCE,
             },
           },
-          rangeQuery,
+          ...rangeQuery(start, end),
         ] as ESFilter[],
       },
     } as { bool: { filter: ESFilter[]; must_not?: ESFilter[] | ESFilter } };
@@ -54,7 +51,7 @@ export function getTraceSampleIds({
       query.bool.filter.push({ term: { [SERVICE_NAME]: serviceName } });
     }
 
-    query.bool.filter.push(...getEnvironmentUiFilterES(environment));
+    query.bool.filter.push(...environmentQuery(environment));
 
     const fingerprintBucketSize = serviceName
       ? config['xpack.apm.serviceMapFingerprintBucketSize']

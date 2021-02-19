@@ -26,7 +26,9 @@ export const deleteTransforms = async (
   transformIds: string[]
 ) => {
   const logger = appContextService.getLogger();
-  logger.info(`Deleting currently installed transform ids ${transformIds}`);
+  if (transformIds.length) {
+    logger.info(`Deleting currently installed transform ids ${transformIds}`);
+  }
   await Promise.all(
     transformIds.map(async (transformId) => {
       // get the index the transform

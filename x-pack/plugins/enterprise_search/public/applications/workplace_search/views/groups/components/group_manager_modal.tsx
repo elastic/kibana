@@ -21,7 +21,6 @@ import {
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
-  EuiOverlayMask,
   EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -161,14 +160,12 @@ export const GroupManagerModal: React.FC<GroupManagerModalProps> = ({
   );
 
   return (
-    <EuiOverlayMask>
-      <EuiModal
-        onClose={handleClose}
-        initialFocus=".euiFieldSearch"
-        data-test-subj="GroupManagerModal"
-      >
-        {showEmptyState ? emptyState : modalContent}
-      </EuiModal>
-    </EuiOverlayMask>
+    <EuiModal
+      onClose={handleClose}
+      initialFocus=".euiFieldSearch"
+      data-test-subj="GroupManagerModal"
+    >
+      {showEmptyState ? emptyState : modalContent}
+    </EuiModal>
   );
 };

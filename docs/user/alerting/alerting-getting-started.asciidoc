@@ -172,6 +172,7 @@ To access alerting in a space, a user must have access to one of the following f
 * Alerting
 * <<xpack-apm,*APM*>>
 * <<logs-app,*Logs*>>
+* <<xpack-ml,*{ml-cap}*>>
 * <<metrics-app,*Metrics*>>
 * <<xpack-siem,*Security*>>
 * <<uptime-app,*Uptime*>>

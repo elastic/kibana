@@ -11,6 +11,7 @@ import type { PublicMethodsOf } from '@kbn/utility-types';
 
 import { ElasticsearchClient } from 'kibana/server';
 import { CaseStatuses } from '../../../common/api';
+import { MAX_ALERTS_PER_SUB_CASE } from '../../../common/constants';
 
 export type AlertServiceContract = PublicMethodsOf<AlertService>;
 
@@ -95,14 +96,14 @@ export class AlertService {
         query: {
           bool: {
             filter: {
-              bool: {
-                should: ids.map((_id) => ({ match: { _id } })),
-                minimum_should_match: 1,
+              ids: {
+                values: ids,
               },
             },
           },
         },
       },
+      size: MAX_ALERTS_PER_SUB_CASE,
       ignore_unavailable: true,
     });
 
