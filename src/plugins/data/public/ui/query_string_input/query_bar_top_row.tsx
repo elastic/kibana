@@ -19,6 +19,7 @@ import {
   EuiSuperDatePicker,
   EuiFieldText,
   prettyDuration,
+  EuiIconProps,
 } from '@elastic/eui';
 // @ts-ignore
 import { EuiSuperUpdateButton, OnRefreshProps } from '@elastic/eui';
@@ -57,7 +58,7 @@ export interface QueryBarTopRowProps {
   isDirty: boolean;
   timeHistory?: TimeHistoryContract;
   indicateNoData?: boolean;
-  iconType?: string;
+  iconType?: EuiIconProps['type'];
   placeholder?: string;
   isClearable?: boolean;
   nonKqlMode?: 'lucene' | 'text';

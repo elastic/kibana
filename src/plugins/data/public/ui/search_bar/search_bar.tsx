@@ -12,6 +12,7 @@ import classNames from 'classnames';
 import React, { Component } from 'react';
 import ResizeObserver from 'resize-observer-polyfill';
 import { get, isEqual } from 'lodash';
+import { EuiIconProps } from '@elastic/eui';
 
 import { METRIC_TYPE } from '@kbn/analytics';
 import { withKibana, KibanaReactContextValue } from '../../../../kibana_react/public';
@@ -71,7 +72,7 @@ export interface SearchBarOwnProps {
 
   placeholder?: string;
   isClearable?: boolean;
-  iconType?: string;
+  iconType?: EuiIconProps['type'];
   nonKqlMode?: 'lucene' | 'text';
   nonKqlModeHelpText?: string;
 }

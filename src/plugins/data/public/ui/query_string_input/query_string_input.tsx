@@ -21,6 +21,7 @@ import {
   htmlIdGenerator,
   EuiPortal,
   EuiIcon,
+  EuiIconProps,
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -57,7 +58,12 @@ export interface QueryStringInputProps {
   className?: string;
   isInvalid?: boolean;
   isClearable?: boolean;
-  iconType?: string;
+  iconType?: EuiIconProps['type'];
+
+  /**
+   * @param nonKqlMode by default if language switch is enabled, user can switch between kql and lucene syntax mode
+   * this params add another option text, which is just a  simple keyword search mode, the way a simple search box works
+   */
   nonKqlMode?: 'lucene' | 'text';
   nonKqlModeHelpText?: string;
 }
@@ -701,7 +707,7 @@ export default class QueryStringInputUI extends Component<Props, State> {
                   <EuiIcon
                     className="euiFormControlLayoutCustomIcon__icon"
                     aria-hidden="true"
-                    type="search"
+                    type={this.props.iconType}
                   />
                 </div>
               ) : null}
@@ -710,6 +716,9 @@ export default class QueryStringInputUI extends Component<Props, State> {
                   <button
                     type="button"
                     className="euiFormControlLayoutClearButton"
+                    title={i18n.translate('data.query.queryBar.clearInputLabel', {
+                      defaultMessage: 'Clear input',
+                    })}
                     onClick={() => {
                       this.onQueryStringChange('');
                     }}

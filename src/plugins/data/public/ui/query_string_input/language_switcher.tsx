@@ -56,6 +56,10 @@ export function QueryLanguageSwitcher({
     />
   );
 
+  const kqlModeTitle = i18n.translate('data.query.queryBar.languageSwitcher.toText', {
+    defaultMessage: 'Switch to Kibana Query Language for search',
+  });
+
   const button = (
     <EuiButtonEmpty
       size="xs"
@@ -68,7 +72,7 @@ export function QueryLanguageSwitcher({
       ) : nonKqlMode === 'lucene' ? (
         luceneLabel
       ) : (
-        <EuiIcon type={'boxesVertical'} />
+        <EuiIcon type={'boxesVertical'} title={kqlModeTitle} aria-label={kqlModeTitle} />
       )}
     </EuiButtonEmpty>
   );
