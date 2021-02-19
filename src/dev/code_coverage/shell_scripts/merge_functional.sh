@@ -8,7 +8,6 @@ echo  "checkoutDir=${checkoutDir}"
 
 echo "### Clone kibana to /dev/shm/workspace/"
 mkdir -p /dev/shm/workspace/kibana
-# rsync -avz kibana /dev/shm/workspace/kibana
 rsync -ahSD --ignore-errors --force --delete --stats ./ /dev/shm/workspace/kibana/
 cd /dev/shm/workspace/kibana
 echo "### Show folders tree"
@@ -27,3 +26,9 @@ tar -czf kibana-functional-coverage.tar.gz target/kibana-coverage/functional-com
 
 echo "### Copy archive to checkoutDir"
 cp kibana-functional-coverage.tar.gz $checkoutDir
+
+currentPath="$(pwd)"
+echo "Current path ${currentPath}"
+
+echo "### Back to $checkoutDir"
+cd "$checkoutDir"
