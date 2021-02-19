@@ -4,10 +4,15 @@ COVERAGE_TEMP_DIR=/tmp/extracted_coverage/target/kibana-coverage/
 export COVERAGE_TEMP_DIR
 
 echo "### Clone kibana to /dev/shm/workspace/"
-mkdir -p /dev/shm/workspace/
-cd ..
-rsync -avz kibana /dev/shm/workspace/kibana
+mkdir -p /dev/shm/workspace/kibana
+# rsync -avz kibana /dev/shm/workspace/kibana
+rsync -ahSD --ignore-errors --force --delete --stats ./ /dev/shm/workspace/kibana/
 cd /dev/shm/workspace/kibana
+echo
+"### Show new path"
+pwd
+echo "### Show folders tree"
+ls -d -- */
 echo "### bootstrap from x-pack folder"
 # bootstrap from x-pack folder
 cd x-pack
