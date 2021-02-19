@@ -17,6 +17,7 @@ import {
   ElasticsearchResponse,
   ElasticsearchLegacySource,
   ElasticsearchMetricbeatSource,
+  ElasticsearchSource,
 } from '../../../../../common/types/es';
 import { LegacyRequest } from '../../../../types';
 
@@ -288,19 +289,25 @@ export function ccrRoute(server: {
 
           stat.shards = get(bucket, 'by_shard_id.buckets').reduce(
             (accum2: any, shardBucket: any) => {
-              const fullStat:
-                | NonNullable<ElasticsearchLegacySource['ccr_stats']>
-                | NonNullable<ElasticsearchMetricbeatSource['elasticsearch']>['ccr'] =
-                fullStats[`${bucket.key}:${shardBucket.key}`][0] ?? {};
+              const fullStat: any = fullStats[`${bucket.key}:${shardBucket.key}`][0];
+              const fullLegacyStat: ElasticsearchLegacySource = fullStat._source?.ccr_stats
+                ? fullStat._source
+                : null;
+              const fullMbStat: ElasticsearchMetricbeatSource = fullStat._source?.elasticsearch?.ccr
+                ? fullStat._source
+                : null;
+              const readExceptions =
+                fullLegacyStat?.ccr_stats?.read_exceptions ??
+                fullMbStat?.elasticsearch?.ccr?.read_exceptions ??
+                [];
               const shardStat = {
                 shardId: shardBucket.key,
-                error: fullStat.read_exceptions?.length
-                  ? fullStat.read_exceptions[0].exception?.type
-                  : null,
+                error: readExceptions.length ? readExceptions[0].exception?.type : null,
                 opsSynced: get(shardBucket, 'ops_synced.value'),
                 syncLagTime:
                   // @ts-ignore
-                  fullStat.time_since_last_read?.ms ?? fullStat.time_since_last_read_millis,
+                  fullLegacyStat?.ccr_stats?.time_since_last_read_millis ??
+                  fullMbStat?.elasticsearch?.ccr?.follower?.time_since_last_read?.ms,
                 syncLagOps: get(shardBucket, 'lag_ops.value'),
                 syncLagOpsLeader: get(shardBucket, 'leader_lag_ops.value'),
                 syncLagOpsFollower: get(shardBucket, 'follower_lag_ops.value'),

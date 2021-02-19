@@ -353,7 +353,11 @@ export interface ElasticsearchMetricbeatSource {
         failed_read_requests?: number;
       };
 
-      read_exceptions?: [];
+      read_exceptions?: Array<{
+        exception?: {
+          type?: string;
+        };
+      }>;
     };
     cluster?: {
       name?: string;

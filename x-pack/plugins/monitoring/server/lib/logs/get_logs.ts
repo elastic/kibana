@@ -40,7 +40,6 @@ async function handleResponse(
   const result: { enabled: boolean; logs: Log[]; reason?: any } = {
     enabled: false,
     logs: [],
-    reason: {},
   };
 
   const timezone = await getTimezone(req);

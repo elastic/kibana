@@ -52,7 +52,8 @@ export function esNodeRoute(server) {
       const filebeatIndexPattern = prefixIndexPattern(
         config,
         config.get('monitoring.ui.logs.index'),
-        '*'
+        '*',
+        true
       );
       const isAdvanced = req.payload.is_advanced;
 
