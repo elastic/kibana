@@ -94,7 +94,6 @@ const removeUnsettableSettings = (settings: FlatSettings['settings']) =>
 const transformSettings = flow(removeUnsettableSettings);
 
 const updateFixableMappings = (mappings: FlatSettings['mappings']) => {
-  // TODO: change type to _doc
   return mappings;
 };
 
