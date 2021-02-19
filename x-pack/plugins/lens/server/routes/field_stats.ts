@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import Boom from '@hapi/boom';
 import { errors } from '@elastic/elasticsearch';
 import DateMath from '@elastic/datemath';
 import { schema } from '@kbn/config-schema';
 import { CoreSetup } from 'src/core/server';
 import { IFieldType } from 'src/plugins/data/common';
+import { SavedObjectNotFound } from '../../../../../src/plugins/kibana_utils/common';
 import { ESSearchResponse } from '../../../../typings/elasticsearch';
 import { FieldStatsResponse, BASE_API_URL } from '../../common';
 import { PluginStartContract } from '../plugin';
@@ -21,28 +21,17 @@ export async function initFieldsRoute(setup: CoreSetup<PluginStartContract>) {
   const router = setup.http.createRouter();
   router.post(
     {
-      path: `${BASE_API_URL}/index_stats/{indexPatternTitle}/field`,
+      path: `${BASE_API_URL}/index_stats/{indexPatternId}/field`,
       validate: {
         params: schema.object({
-          indexPatternTitle: schema.string(),
+          indexPatternId: schema.string(),
         }),
         body: schema.object(
           {
             dslQuery: schema.object({}, { unknowns: 'allow' }),
             fromDate: schema.string(),
             toDate: schema.string(),
-            timeFieldName: schema.maybe(schema.string()),
-            field: schema.object(
-              {
-                name: schema.string(),
-                type: schema.string(),
-                esTypes: schema.maybe(schema.arrayOf(schema.string())),
-                scripted: schema.maybe(schema.boolean()),
-                lang: schema.maybe(schema.string()),
-                script: schema.maybe(schema.string()),
-              },
-              { unknowns: 'allow' }
-            ),
+            fieldName: schema.string(),
           },
           { unknowns: 'allow' }
         ),
@@ -50,9 +39,26 @@ export async function initFieldsRoute(setup: CoreSetup<PluginStartContract>) {
     },
     async (context, req, res) => {
       const requestClient = context.core.elasticsearch.client.asCurrentUser;
-      const { fromDate, toDate, timeFieldName, field, dslQuery } = req.body;
+      const { fromDate, toDate, fieldName, dslQuery } = req.body;
+
+      const [{ savedObjects, elasticsearch }, { data }] = await setup.getStartServices();
+      const savedObjectsClient = savedObjects.getScopedClient(req);
+      const esClient = elasticsearch.client.asScoped(req).asCurrentUser;
+      const indexPatternsService = await data.indexPatterns.indexPatternsServiceFactory(
+        savedObjectsClient,
+        esClient
+      );
 
       try {
+        const indexPattern = await indexPatternsService.get(req.params.indexPatternId);
+
+        const timeFieldName = indexPattern.timeFieldName;
+        const field = indexPattern.fields.find((f) => f.name === fieldName);
+
+        if (!field) {
+          throw new Error(`Field {fieldName} not found in index pattern ${indexPattern.title}`);
+        }
+
         const filter = timeFieldName
           ? [
               {
@@ -75,11 +81,12 @@ export async function initFieldsRoute(setup: CoreSetup<PluginStartContract>) {
 
         const search = async (aggs: unknown) => {
           const { body: result } = await requestClient.search({
-            index: req.params.indexPatternTitle,
+            index: indexPattern.title,
             track_total_hits: true,
             body: {
               query,
               aggs,
+              runtime_mappings: field.runtimeField ? { [fieldName]: field.runtimeField } : {},
             },
             size: 0,
           });
@@ -104,6 +111,9 @@ export async function initFieldsRoute(setup: CoreSetup<PluginStartContract>) {
           body: await getStringSamples(search, field),
         });
       } catch (e) {
+        if (e instanceof SavedObjectNotFound) {
+          return res.notFound();
+        }
         if (e instanceof errors.ResponseError && e.statusCode === 404) {
           return res.notFound();
         }
@@ -111,11 +121,9 @@ export async function initFieldsRoute(setup: CoreSetup<PluginStartContract>) {
           if (e.output.statusCode === 404) {
             return res.notFound();
           }
-          return res.internalError(e.output.message);
+          throw new Error(e.output.message);
         } else {
-          return res.internalError({
-            body: Boom.internal(e.message || e.name),
-          });
+          throw e;
         }
       }
     }

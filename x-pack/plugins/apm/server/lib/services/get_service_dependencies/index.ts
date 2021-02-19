@@ -51,7 +51,7 @@ export function getServiceDependencies({
 }: {
   serviceName: string;
   setup: Setup & SetupTimeRange;
-  environment: string;
+  environment?: string;
   numBuckets: number;
 }): Promise<ServiceDependencyItem[]> {
   return withApmSpan('get_service_dependencies', async () => {
