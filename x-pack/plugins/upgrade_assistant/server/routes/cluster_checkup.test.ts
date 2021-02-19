@@ -67,16 +67,17 @@ describe('cluster checkup API', () => {
   describe('with APM enabled', () => {
     it('is provided to getUpgradeAssistantStatus', async () => {
       const spy = jest.spyOn(MigrationApis, 'getUpgradeAssistantStatus');
-      await routeDependencies.router.getHandler({
-        method: 'get',
-        pathPattern: '/api/upgrade_assistant/status',
-      })(routeHandlerContextMock, createRequestMock(), kibanaResponseFactory);
 
       MigrationApis.getUpgradeAssistantStatus.mockResolvedValue({
         cluster: [],
         indices: [],
         nodes: [],
       });
+
+      await routeDependencies.router.getHandler({
+        method: 'get',
+        pathPattern: '/api/upgrade_assistant/status',
+      })(routeHandlerContextMock, createRequestMock(), kibanaResponseFactory);
 
       expect(spy.mock.calls[0][2]).toEqual(['apm-*']);
     });
@@ -116,12 +117,12 @@ describe('cluster checkup API', () => {
     it('returns an 500 error if it throws', async () => {
       MigrationApis.getUpgradeAssistantStatus.mockRejectedValue(new Error(`scary error!`));
 
-      const resp = await routeDependencies.router.getHandler({
-        method: 'get',
-        pathPattern: '/api/upgrade_assistant/status',
-      })(routeHandlerContextMock, createRequestMock(), kibanaResponseFactory);
-
-      expect(resp.status).toEqual(500);
+      await expect(
+        routeDependencies.router.getHandler({
+          method: 'get',
+          pathPattern: '/api/upgrade_assistant/status',
+        })(routeHandlerContextMock, createRequestMock(), kibanaResponseFactory)
+      ).rejects.toThrow('scary error!');
     });
   });
 });

@@ -66,7 +66,7 @@ export function registerClusterCheckupRoutes({
             return response.forbidden(e.message);
           }
 
-          return response.internalError({ body: e });
+          throw e;
         }
       }
     )
