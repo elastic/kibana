@@ -23,7 +23,8 @@ import pythonIcon from './icons/python.svg';
 import rubyIcon from './icons/ruby.svg';
 import { rumJsIcon } from './icons/rumjs';
 
-const agentIcons: { [key: string]: string | JSX.Element } = {
+import { IconType } from '@elastic/eui';
+const agentIcons: { [key: string]: IconType } = {
   dotnet: dotNetIcon,
   erlang: erlangIcon,
   go: goIcon,
