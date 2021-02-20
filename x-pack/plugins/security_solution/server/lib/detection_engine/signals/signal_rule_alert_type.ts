@@ -135,6 +135,7 @@ export const signalRulesAlertType = ({
         threatFilters,
         threatQuery,
         threatIndex,
+        threatIndicatorPath,
         threatMapping,
         threatLanguage,
         timestampOverride,
@@ -178,7 +179,7 @@ export const signalRulesAlertType = ({
 
       logger.debug(buildRuleMessage('[+] Starting Signal Rule execution'));
       logger.debug(buildRuleMessage(`interval: ${interval}`));
-      let wrotePartialFailureStatus = false;
+      let wroteWarningStatus = false;
       await ruleStatusService.goingToRun();
 
       // check if rule has permissions to access given index pattern
@@ -199,7 +200,7 @@ export const signalRulesAlertType = ({
             }),
           ]);
 
-          wrotePartialFailureStatus = await flow(
+          wroteWarningStatus = await flow(
             () =>
               tryCatch(
                 () =>
@@ -366,6 +367,10 @@ export const signalRulesAlertType = ({
         } else if (isThresholdRule(type) && threshold) {
           const inputIndex = await getInputIndex(services, version, index);
 
+          const thresholdFields = Array.isArray(threshold.field)
+            ? threshold.field
+            : [threshold.field];
+
           const {
             filters: bucketFilters,
             searchErrors: previousSearchErrors,
@@ -376,7 +381,7 @@ export const signalRulesAlertType = ({
             services,
             logger,
             ruleId,
-            bucketByField: threshold.field,
+            bucketByFields: thresholdFields,
             timestampOverride,
             buildRuleMessage,
           });
@@ -500,6 +505,7 @@ export const signalRulesAlertType = ({
             threatLanguage,
             buildRuleMessage,
             threatIndex,
+            threatIndicatorPath,
             concurrentSearches: concurrentSearches ?? 1,
             itemsPerSearch: itemsPerSearch ?? 9000,
           });
@@ -648,7 +654,7 @@ export const signalRulesAlertType = ({
               `[+] Finished indexing ${result.createdSignalsCount} signals into ${outputIndex}`
             )
           );
-          if (!hasError && !wrotePartialFailureStatus) {
+          if (!hasError && !wroteWarningStatus) {
             await ruleStatusService.success('succeeded', {
               bulkCreateTimeDurations: result.bulkCreateTimes,
               searchAfterTimeDurations: result.searchAfterTimes,

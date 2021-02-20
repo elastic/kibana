@@ -52,7 +52,6 @@ export const AddSourceHeader: React.FC<AddSourceHeaderProps> = ({
           </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiSpacer size="xl" />
     </>
   );
 };

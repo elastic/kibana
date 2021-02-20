@@ -131,6 +131,10 @@ export const REOPEN_CASE = i18n.translate('xpack.securitySolution.case.caseView.
   defaultMessage: 'Reopen case',
 });
 
+export const OPEN_CASE = i18n.translate('xpack.securitySolution.case.caseView.openCase', {
+  defaultMessage: 'Open case',
+});
+
 export const CASE_NAME = i18n.translate('xpack.securitySolution.case.caseView.caseName', {
   defaultMessage: 'Case name',
 });

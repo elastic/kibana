@@ -62,7 +62,7 @@ export interface MlStartDependencies {
   embeddable: EmbeddableStart;
   maps?: MapsStartApi;
   lens?: LensPublicStart;
-  triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
+  triggersActionsUi?: TriggersAndActionsUIPublicPluginStart;
 }
 
 export interface MlSetupDependencies {
@@ -76,7 +76,7 @@ export interface MlSetupDependencies {
   kibanaVersion: string;
   share: SharePluginSetup;
   indexPatternManagement: IndexPatternManagementSetup;
-  triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
+  triggersActionsUi?: TriggersAndActionsUIPublicPluginSetup;
 }
 
 export type MlCoreSetup = CoreSetup<MlStartDependencies, MlPluginStart>;
@@ -127,6 +127,10 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
 
     if (pluginsSetup.share) {
       this.urlGenerator = registerUrlGenerator(pluginsSetup.share, core);
+    }
+
+    if (pluginsSetup.triggersActionsUi) {
+      registerMlAlerts(pluginsSetup.triggersActionsUi);
     }
 
     const licensing = pluginsSetup.licensing.license$.pipe(take(1));
@@ -190,7 +194,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
       http: core.http,
       i18n: core.i18n,
     });
-    registerMlAlerts(deps.triggersActionsUi.alertTypeRegistry);
+
     return {
       urlGenerator: this.urlGenerator,
     };
