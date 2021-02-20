@@ -75,6 +75,10 @@ describe('addComment', () => {
           type: CommentType.alert,
           alertId: 'test-id',
           index: 'test-index',
+          rule: {
+            id: 'test-rule1',
+            name: 'test-rule',
+          },
         },
       });
 
@@ -94,6 +98,10 @@ describe('addComment', () => {
           "index": "test-index",
           "pushed_at": null,
           "pushed_by": null,
+          "rule": Object {
+            "id": "test-rule1",
+            "name": "test-rule",
+          },
           "type": "alert",
           "updated_at": null,
           "updated_by": null,
@@ -231,6 +239,10 @@ describe('addComment', () => {
           type: CommentType.alert,
           alertId: 'test-alert',
           index: 'test-index',
+          rule: {
+            id: 'test-rule1',
+            name: 'test-rule',
+          },
         },
       });
 
@@ -265,6 +277,10 @@ describe('addComment', () => {
           type: CommentType.alert,
           alertId: 'test-alert',
           index: 'test-index',
+          rule: {
+            id: 'test-rule1',
+            name: 'test-rule',
+          },
         },
       });
 
@@ -406,6 +422,10 @@ describe('addComment', () => {
               type: CommentType.alert,
               index: 'test-index',
               alertId: 'test-id',
+              rule: {
+                id: 'test-rule1',
+                name: 'test-rule',
+              },
             },
           })
           .catch((e) => {
@@ -478,6 +498,10 @@ describe('addComment', () => {
             type: CommentType.alert,
             alertId: 'test-alert',
             index: 'test-index',
+            rule: {
+              id: 'test-rule1',
+              name: 'test-rule',
+            },
           },
         })
         .catch((e) => {

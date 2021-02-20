@@ -67,7 +67,10 @@ describe('Test of <Doc /> helper / hook', () => {
         "_source": false,
         "docvalue_fields": Array [],
         "fields": Array [
-          "*",
+          Object {
+            "field": "*",
+            "include_unmapped": "true",
+          },
         ],
         "query": Object {
           "ids": Object {

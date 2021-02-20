@@ -18,7 +18,8 @@ interface IndexedFieldsTableProps {
   fieldFilter?: string;
   indexedFieldTypeFilter?: string;
   helpers: {
-    redirectToRoute: (obj: any) => void;
+    editField: (fieldName: string) => void;
+    deleteField: (fieldName: string) => void;
     getFieldInfo: (indexPattern: IndexPattern, field: IFieldType) => string[];
   };
   fieldWildcardMatcher: (filters: any[]) => (val: any) => boolean;
@@ -60,10 +61,13 @@ export class IndexedFieldsTable extends Component<
         fields.map((field) => {
           return {
             ...field.spec,
+            type: field.esTypes?.join(', ') || '',
+            kbnType: field.type,
             displayName: field.displayName,
             format: indexPattern.getFormatterForFieldNoDefault(field.name)?.type?.title || '',
             excluded: fieldWildcardMatch ? fieldWildcardMatch(field.name) : false,
             info: helpers.getFieldInfo && helpers.getFieldInfo(indexPattern, field),
+            isMapped: !!field.isMapped,
           };
         })) ||
       []
@@ -102,7 +106,8 @@ export class IndexedFieldsTable extends Component<
         <Table
           indexPattern={indexPattern}
           items={fields}
-          editField={(field) => this.props.helpers.redirectToRoute(field)}
+          editField={(field) => this.props.helpers.editField(field.name)}
+          deleteField={(fieldName) => this.props.helpers.deleteField(fieldName)}
         />
       </div>
     );
