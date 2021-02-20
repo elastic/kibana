@@ -472,12 +472,11 @@ export const getRuleRangeTuples = ({
 
 /**
  * Creates rule range tuples needed to cover gaps since the last rule run.
- * @param ruleParamsFrom string representing the rules 'from' property
- * @param ruleParamsTo string representing the rules 'to' property
+ * @param to moment.Moment representing the rules 'to' property
+ * @param from moment.Moment representing the rules 'from' property
  * @param ruleParamsMaxSignals int representing the maxSignals property on the rule (usually unmodified at 100)
  * @param catchup number the number of additional rule run intervals to add
  * @param intervalDuration moment.Duration the interval which the rule runs
- * @param buildRuleMessage function provides meta information for logged event
  */
 export const getCatchupTuples = ({
   to,
