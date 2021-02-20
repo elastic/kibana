@@ -11,8 +11,7 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const esArchiver = getService('esArchiver');
 
-  // eslint-disable-next-line ban/ban
-  describe.only('lens search sessions', function () {
+  describe('lens search sessions', function () {
     this.tags('ciGroup3');
 
     before(async () => {

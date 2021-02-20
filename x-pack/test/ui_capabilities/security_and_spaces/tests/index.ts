@@ -15,8 +15,7 @@ export default function uiCapabilitiesTests({ loadTestFile, getService }: FtrPro
   const spacesService = getService('spaces');
   const featuresService: FeaturesService = getService('features');
 
-  // eslint-disable-next-line ban/ban
-  describe.only('ui capabilities', function () {
+  describe('ui capabilities', function () {
     this.tags('ciGroup9');
 
     before(async () => {

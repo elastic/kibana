@@ -8,8 +8,7 @@
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
-  // eslint-disable-next-line ban/ban
-  describe.only('Kibana embedded', function () {
+  describe('Kibana embedded', function () {
     this.tags('ciGroup2');
     loadTestFile(require.resolve('./iframe_embedded'));
   });

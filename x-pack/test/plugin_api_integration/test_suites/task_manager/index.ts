@@ -8,7 +8,7 @@
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
-  describe.skip('task_manager', function taskManagerSuite() {
+  describe('task_manager', function taskManagerSuite() {
     this.tags('ciGroup12');
     loadTestFile(require.resolve('./health_route'));
     loadTestFile(require.resolve('./task_management'));

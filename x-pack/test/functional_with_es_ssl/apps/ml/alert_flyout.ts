@@ -65,7 +65,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
   let testJobId = '';
 
-  describe.skip('anomaly detection alert', function () {
+  describe('anomaly detection alert', function () {
     this.tags('ciGroup13');
 
     before(async () => {

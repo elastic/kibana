@@ -8,7 +8,7 @@
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
-  describe.skip('Visualization Wizard', function () {
+  describe('Visualization Wizard', function () {
     this.tags('ciGroup4');
 
     loadTestFile(require.resolve('./visualization_wizard'));

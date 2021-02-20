@@ -6,18 +6,17 @@
  */
 
 export default function ({ loadTestFile }) {
-  // eslint-disable-next-line mocha/no-exclusive-tests
-  describe.only('security app', function () {
+  describe('security app', function () {
     this.tags('ciGroup4');
 
     loadTestFile(require.resolve('./security'));
-    // loadTestFile(require.resolve('./doc_level_security_roles'));
-    // loadTestFile(require.resolve('./management'));
-    // loadTestFile(require.resolve('./users'));
-    // loadTestFile(require.resolve('./secure_roles_perm'));
-    // loadTestFile(require.resolve('./field_level_security'));
-    // loadTestFile(require.resolve('./rbac_phase1'));
-    // loadTestFile(require.resolve('./user_email'));
-    // loadTestFile(require.resolve('./role_mappings'));
+    loadTestFile(require.resolve('./doc_level_security_roles'));
+    loadTestFile(require.resolve('./management'));
+    loadTestFile(require.resolve('./users'));
+    loadTestFile(require.resolve('./secure_roles_perm'));
+    loadTestFile(require.resolve('./field_level_security'));
+    loadTestFile(require.resolve('./rbac_phase1'));
+    loadTestFile(require.resolve('./user_email'));
+    loadTestFile(require.resolve('./role_mappings'));
   });
 }

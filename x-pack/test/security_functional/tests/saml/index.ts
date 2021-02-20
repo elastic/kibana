@@ -8,7 +8,7 @@
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
-  describe.skip('security app - SAML interactions', function () {
+  describe('security app - SAML interactions', function () {
     this.tags('ciGroup13');
 
     loadTestFile(require.resolve('./url_capture'));

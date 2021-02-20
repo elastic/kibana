@@ -11,7 +11,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
 
-  describe.skip('machine learning', function () {
+  describe('machine learning', function () {
     describe('', function () {
       this.tags('ciGroup3');
 
@@ -52,7 +52,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       loadTestFile(require.resolve('./data_frame_analytics'));
     });
 
-    describe.skip('', function () {
+    describe('', function () {
       this.tags('ciGroup13');
 
       before(async () => {

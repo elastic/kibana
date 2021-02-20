@@ -8,8 +8,7 @@
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
-  // eslint-disable-next-line ban/ban
-  describe.only('discover', function () {
+  describe('discover', function () {
     this.tags('ciGroup1');
 
     loadTestFile(require.resolve('./feature_controls'));
