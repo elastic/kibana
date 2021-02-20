@@ -10,6 +10,10 @@ import minimatch from 'minimatch';
 
 import { deleteAll, deleteEmptyFolders, scanDelete, Task, GlobalTask } from '../lib';
 
+function makeRegexps(patterns: string[]) {
+  return patterns.map((pattern) => minimatch.makeRe(pattern, { nocase: true }));
+}
+
 export const Clean: GlobalTask = {
   global: true,
   description: 'Cleaning artifacts from previous builds',
@@ -26,38 +30,10 @@ export const Clean: GlobalTask = {
   },
 };
 
-export const CleanPackages: Task = {
-  description: 'Cleaning source for packages that are now installed in node_modules',
-
-  async run(config, log, build) {
-    await deleteAll(
-      [build.resolvePath('packages'), build.resolvePath('yarn.lock'), build.resolvePath('.npmrc')],
-      log
-    );
-  },
-};
-
-export const CleanTypescript: Task = {
-  description: 'Cleaning typescript source files that have been transpiled to JS',
-
-  async run(config, log, build) {
-    log.info(
-      'Deleted %d files',
-      await scanDelete({
-        directory: build.resolvePath(),
-        regularExpressions: [/\.(ts|tsx|d\.ts)$/, /tsconfig.*\.(json|tsbuildinfo)$/],
-      })
-    );
-  },
-};
-
-export const CleanExtraFilesFromModules: Task = {
+export const CleanNodeModules: Task = {
   description: 'Cleaning tests, examples, docs, etc. from node_modules',
 
   async run(config, log, build) {
-    const makeRegexps = (patterns: string[]) =>
-      patterns.map((pattern) => minimatch.makeRe(pattern, { nocase: true }));
-
     const regularExpressions = makeRegexps([
       // tests
       '**/test',
@@ -182,8 +158,8 @@ export const CleanExtraBinScripts: Task = {
   },
 };
 
-export const CleanEmptyFolders: Task = {
-  description: 'Cleaning all empty folders recursively',
+export const CleanBuild: Task = {
+  description: 'Cleaning unnecessary files from build',
 
   async run(config, log, build) {
     // Delete every single empty folder from
@@ -193,5 +169,42 @@ export const CleanEmptyFolders: Task = {
       build.resolvePath('plugins'),
       build.resolvePath('data'),
     ]);
+
+    log.info(
+      'Deleted %d files',
+      await scanDelete({
+        directory: build.resolvePath(),
+        regularExpressions: [/\.(ts|tsx|d\.ts)$/, /tsconfig.*\.json$/],
+      })
+    );
+
+    // await deleteAll(
+    //   [build.resolvePath('packages'), build.resolvePath('yarn.lock'), build.resolvePath('.npmrc')],
+    //   log
+    // );
+
+    const regularExpressions = makeRegexps([
+      // typescript
+      '**/*.(ts|tsx|d.ts)',
+      '**/tsconfig.json',
+      '**/tsconfig.tsbuildinfo',
+
+      // docs
+      '**/*.(md|asciidoc)',
+
+      // styles
+      '**/*.asciidoc',
+
+      // tests
+      '**/__fixtures__/**',
+    ]);
+
+    log.info(
+      'Deleted %d files',
+      await scanDelete({
+        directory: build.resolvePath(),
+        regularExpressions,
+      })
+    );
   },
 };

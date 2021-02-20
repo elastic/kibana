@@ -60,13 +60,11 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
   await run(Tasks.TranspileBabel);
   await run(Tasks.CreatePackageJson);
   await run(Tasks.InstallDependencies);
-  await run(Tasks.CleanPackages);
   await run(Tasks.CreateNoticeFile);
   await run(Tasks.UpdateLicenseFile);
   await run(Tasks.RemovePackageJsonDeps);
-  await run(Tasks.CleanTypescript);
-  await run(Tasks.CleanExtraFilesFromModules);
-  await run(Tasks.CleanEmptyFolders);
+  await run(Tasks.CleanNodeModules);
+  await run(Tasks.CleanBuild);
 
   /**
    * copy generic build outputs into platform-specific build
@@ -77,7 +75,6 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
   await run(Tasks.InstallChromium);
   await run(Tasks.CleanExtraBinScripts);
   await run(Tasks.CleanNodeBuilds);
-
   await run(Tasks.PathLength);
   await run(Tasks.UuidVerification);
 
