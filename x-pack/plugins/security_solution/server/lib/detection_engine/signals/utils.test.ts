@@ -40,7 +40,6 @@ import {
   createTotalHitsFromSearchResult,
   lastValidDate,
   calculateThresholdSignalUuid,
-  getRemainingGap,
 } from './utils';
 import { BulkResponseErrorAggregation, SearchAfterAndBulkCreateReturnType } from './types';
 import {
@@ -600,7 +599,7 @@ describe('utils', () => {
 
   describe('getRuleRangeTuples', () => {
     test('should return a single tuple if no gap', () => {
-      const someTuples = getRuleRangeTuples({
+      const { tuples, remainingGap } = getRuleRangeTuples({
         logger: mockLogger,
         previousStartedAt: moment().subtract(30, 's').toDate(),
         interval: '30s',
@@ -609,13 +608,14 @@ describe('utils', () => {
         maxSignals: 20,
         buildRuleMessage,
       });
-      const someTuple = someTuples[0];
+      const someTuple = tuples[0];
       expect(moment(someTuple.to).diff(moment(someTuple.from), 's')).toEqual(30);
-      expect(someTuples.length).toEqual(1);
+      expect(tuples.length).toEqual(1);
+      expect(remainingGap.asMilliseconds()).toEqual(0);
     });
 
     test('should return a single tuple if malformed interval prevents gap calculation', () => {
-      const someTuples = getRuleRangeTuples({
+      const { tuples, remainingGap } = getRuleRangeTuples({
         logger: mockLogger,
         previousStartedAt: moment().subtract(30, 's').toDate(),
         interval: 'invalid',
@@ -624,13 +624,14 @@ describe('utils', () => {
         maxSignals: 20,
         buildRuleMessage,
       });
-      const someTuple = someTuples[0];
+      const someTuple = tuples[0];
       expect(moment(someTuple.to).diff(moment(someTuple.from), 's')).toEqual(30);
-      expect(someTuples.length).toEqual(1);
+      expect(tuples.length).toEqual(1);
+      expect(remainingGap.asMilliseconds()).toEqual(0);
     });
 
     test('should return two tuples if gap and previouslyStartedAt', () => {
-      const someTuples = getRuleRangeTuples({
+      const { tuples, remainingGap } = getRuleRangeTuples({
         logger: mockLogger,
         previousStartedAt: moment().subtract(65, 's').toDate(),
         interval: '50s',
@@ -639,12 +640,13 @@ describe('utils', () => {
         maxSignals: 20,
         buildRuleMessage,
       });
-      const someTuple = someTuples[1];
+      const someTuple = tuples[1];
       expect(moment(someTuple.to).diff(moment(someTuple.from), 's')).toEqual(55);
+      expect(remainingGap.asMilliseconds()).toEqual(0);
     });
 
     test('should return five tuples when give long gap', () => {
-      const someTuples = getRuleRangeTuples({
+      const { tuples, remainingGap } = getRuleRangeTuples({
         logger: mockLogger,
         previousStartedAt: moment().subtract(65, 's').toDate(), // 64 is 5 times the interval + lookback, which will trigger max lookback
         interval: '10s',
@@ -653,19 +655,20 @@ describe('utils', () => {
         maxSignals: 20,
         buildRuleMessage,
       });
-      expect(someTuples.length).toEqual(5);
-      someTuples.forEach((item, index) => {
+      expect(tuples.length).toEqual(5);
+      tuples.forEach((item, index) => {
         if (index === 0) {
           return;
         }
         expect(moment(item.to).diff(moment(item.from), 's')).toEqual(13);
-        expect(item.to.diff(someTuples[index - 1].to, 's')).toEqual(-10);
-        expect(item.from.diff(someTuples[index - 1].from, 's')).toEqual(-10);
+        expect(item.to.diff(tuples[index - 1].to, 's')).toEqual(-10);
+        expect(item.from.diff(tuples[index - 1].from, 's')).toEqual(-10);
       });
+      expect(remainingGap.asMilliseconds()).toEqual(12000);
     });
 
     test('should return a single tuple when give a negative gap (rule ran sooner than expected)', () => {
-      const someTuples = getRuleRangeTuples({
+      const { tuples, remainingGap } = getRuleRangeTuples({
         logger: mockLogger,
         previousStartedAt: moment().subtract(-15, 's').toDate(),
         interval: '10s',
@@ -674,9 +677,10 @@ describe('utils', () => {
         maxSignals: 20,
         buildRuleMessage,
       });
-      expect(someTuples.length).toEqual(1);
-      const someTuple = someTuples[0];
+      expect(tuples.length).toEqual(1);
+      const someTuple = tuples[0];
       expect(moment(someTuple.to).diff(moment(someTuple.from), 's')).toEqual(13);
+      expect(remainingGap.asMilliseconds()).toEqual(0);
     });
   });
 
@@ -703,57 +707,6 @@ describe('utils', () => {
         intervalDuration: moment.duration(11000),
       });
       expect(catchup).toEqual(2);
-    });
-  });
-
-  describe('getRemainingGap', () => {
-    test('should return 0 if previousStartedAt is null', () => {
-      const tuples = [
-        {
-          from: moment().subtract(5, 'm'),
-          to: moment(),
-          maxSignals: 100,
-        },
-      ];
-      const remainingGap = getRemainingGap({ tuples, previousStartedAt: null });
-      expect(remainingGap.asMilliseconds()).toEqual(0);
-    });
-
-    test('should return 5 minutes if previousStartedAt 5 mins before earliest "from" moment', () => {
-      const now = moment();
-      const tuples = [
-        {
-          from: now.clone().subtract(5, 'm'),
-          to: now,
-          maxSignals: 100,
-        },
-      ];
-      const remainingGap = getRemainingGap({
-        tuples,
-        previousStartedAt: now.clone().subtract(10, 'm').toDate(),
-      });
-      expect(remainingGap.asMilliseconds()).toEqual(5 * 60000);
-    });
-
-    test('should use the last tuple in the array as the earliest tuple', () => {
-      const now = moment();
-      const tuples = [
-        {
-          from: now.clone().subtract(5, 'm'),
-          to: now,
-          maxSignals: 100,
-        },
-        {
-          from: now.clone().subtract(10, 'm'),
-          to: now.clone().subtract(5, 'm'),
-          maxSignals: 100,
-        },
-      ];
-      const remainingGap = getRemainingGap({
-        tuples,
-        previousStartedAt: now.clone().subtract(12, 'm').toDate(),
-      });
-      expect(remainingGap.asMilliseconds()).toEqual(2 * 60000);
     });
   });
 

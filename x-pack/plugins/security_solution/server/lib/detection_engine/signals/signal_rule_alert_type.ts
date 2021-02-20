@@ -48,7 +48,6 @@ import {
   hasTimestampFields,
   hasReadIndexPrivileges,
   getRuleRangeTuples,
-  getRemainingGap,
 } from './utils';
 import { signalParamsSchema } from './signal_params_schema';
 import { siemRuleActionGroups } from './siem_rule_action_groups';
@@ -228,7 +227,7 @@ export const signalRulesAlertType = ({
       } catch (exc) {
         logger.error(buildRuleMessage(`Check privileges failed to execute ${exc}`));
       }
-      const tuples = getRuleRangeTuples({
+      const { tuples, remainingGap } = getRuleRangeTuples({
         logger,
         previousStartedAt,
         from,
@@ -237,7 +236,6 @@ export const signalRulesAlertType = ({
         maxSignals,
         buildRuleMessage,
       });
-      const remainingGap = getRemainingGap({ tuples, previousStartedAt });
       if (remainingGap.asMilliseconds() > 0) {
         const gapString = remainingGap.humanize();
         const gapMessage = buildRuleMessage(

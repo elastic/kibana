@@ -431,14 +431,19 @@ export const getRuleRangeTuples = ({
   maxSignals: number;
   buildRuleMessage: BuildRuleMessage;
 }) => {
+  const originalTo = dateMath.parse(to);
+  const originalFrom = dateMath.parse(from);
+  if (originalTo == null || originalFrom == null) {
+    throw new Error(buildRuleMessage('dateMath parse failed'));
+  }
   const tuples = [
-    getOriginalTuple({
-      ruleParamsFrom: from,
-      ruleParamsTo: to,
-      ruleParamsMaxSignals: maxSignals,
-      buildRuleMessage,
-    }),
+    {
+      to: originalTo,
+      from: originalFrom,
+      maxSignals,
+    },
   ];
+  let remainingGapMilliseconds = 0;
   try {
     const intervalDuration = parseInterval(interval);
     const gap = getGapBetweenRuns({ previousStartedAt, intervalDuration, from, to });
@@ -447,48 +452,22 @@ export const getRuleRangeTuples = ({
       intervalDuration,
     });
     const catchupTuples = getCatchupTuples({
-      ruleParamsFrom: from,
-      ruleParamsTo: to,
+      to: originalTo,
+      from: originalFrom,
       ruleParamsMaxSignals: maxSignals,
       catchup,
       intervalDuration,
-      buildRuleMessage,
     });
     tuples.push(...catchupTuples);
+    // Each extra tuple adds one extra intervalDuration to the time range this rule will cover.
+    remainingGapMilliseconds = Math.max(
+      gap.asMilliseconds() - catchup * intervalDuration.asMilliseconds(),
+      0
+    );
   } catch (err) {
     logger.error(`Failed to compute gap between rule runs: ${err}`);
   }
-  return tuples;
-};
-
-/**
- * Creates the RuleRangeTuple for the current rule run.
- * @param ruleParamsFrom string representing the rules 'from' property
- * @param ruleParamsTo string representing the rules 'to' property
- * @param ruleParamsMaxSignals int representing the maxSignals property on the rule (usually unmodified at 100)
- * @param buildRuleMessage function provides meta information for logged event
- */
-export const getOriginalTuple = ({
-  ruleParamsFrom,
-  ruleParamsTo,
-  ruleParamsMaxSignals,
-  buildRuleMessage,
-}: {
-  ruleParamsFrom: string;
-  ruleParamsTo: string;
-  ruleParamsMaxSignals: number;
-  buildRuleMessage: BuildRuleMessage;
-}): RuleRangeTuple => {
-  const originalTo = dateMath.parse(ruleParamsTo);
-  const originalFrom = dateMath.parse(ruleParamsFrom);
-  if (originalTo == null || originalFrom == null) {
-    throw new Error(buildRuleMessage('dateMath parse failed'));
-  }
-  return {
-    to: originalTo,
-    from: originalFrom,
-    maxSignals: ruleParamsMaxSignals,
-  };
+  return { tuples, remainingGap: moment.duration(remainingGapMilliseconds) };
 };
 
 /**
@@ -501,29 +480,27 @@ export const getOriginalTuple = ({
  * @param buildRuleMessage function provides meta information for logged event
  */
 export const getCatchupTuples = ({
-  ruleParamsFrom,
-  ruleParamsTo,
+  to,
+  from,
   ruleParamsMaxSignals,
   catchup,
   intervalDuration,
-  buildRuleMessage,
 }: {
-  ruleParamsFrom: string;
-  ruleParamsTo: string;
+  to: moment.Moment;
+  from: moment.Moment;
   ruleParamsMaxSignals: number;
   catchup: number;
   intervalDuration: moment.Duration;
-  buildRuleMessage: BuildRuleMessage;
 }): RuleRangeTuple[] => {
-  const originalTo = dateMath.parse(ruleParamsTo);
-  const originalFrom = dateMath.parse(ruleParamsFrom);
-  if (originalTo == null || originalFrom == null) {
-    throw new Error(buildRuleMessage('dateMath parse failed'));
-  }
   const catchupTuples: RuleRangeTuple[] = [];
   const intervalInMilliseconds = intervalDuration.asMilliseconds();
-  let currentTo = originalTo;
-  let currentFrom = originalFrom;
+  let currentTo = to;
+  let currentFrom = from;
+  // This loop will create tuples with overlapping time ranges, the same way rule runs have overlapping time
+  // ranges due to the additional lookback. We could choose to create tuples that don't overlap here by using the
+  // "from" value from one tuple as "to" in the next one, however, the overlap matters for rule types like EQL and
+  // threshold rules that look for sets of documents within the query. Thus we keep the overlap so that these
+  // extra tuples behave as similarly to the regular rule runs as possible.
   while (catchupTuples.length < catchup) {
     const nextTo = currentTo.clone().subtract(intervalInMilliseconds);
     const nextFrom = currentFrom.clone().subtract(intervalInMilliseconds);
@@ -536,19 +513,6 @@ export const getCatchupTuples = ({
     currentFrom = nextFrom;
   }
   return catchupTuples;
-};
-
-export const getRemainingGap = ({
-  tuples,
-  previousStartedAt,
-}: {
-  tuples: RuleRangeTuple[];
-  previousStartedAt: Date | null;
-}): moment.Duration => {
-  if (previousStartedAt == null) {
-    return moment.duration(0);
-  }
-  return moment.duration(tuples[tuples.length - 1].from.diff(previousStartedAt));
 };
 
 /**
