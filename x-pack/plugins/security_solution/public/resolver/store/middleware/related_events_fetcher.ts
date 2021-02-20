@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { Dispatch, MiddlewareAPI } from 'redux';
@@ -11,7 +12,6 @@ import { ResolverPaginatedEvents } from '../../../../common/endpoint/types';
 import { ResolverState, DataAccessLayer, PanelViewAndParameters } from '../../types';
 import * as selectors from '../selectors';
 import { ResolverAction } from '../actions';
-import { createRange } from './../../models/time_range';
 
 export function RelatedEventsFetcher(
   dataAccessLayer: DataAccessLayer,
@@ -27,9 +27,10 @@ export function RelatedEventsFetcher(
 
     const newParams = selectors.panelViewAndParameters(state);
     const isLoadingMoreEvents = selectors.isLoadingMoreNodeEventsInCategory(state);
-    const indices = selectors.treeParameterIndices(state);
+    const indices = selectors.eventIndices(state);
 
     const oldParams = last;
+    const timeRangeFilters = selectors.timeRangeFilters(state);
     // Update this each time before fetching data (or even if we don't fetch data) so that subsequent actions that call this (concurrently) will have up to date info.
     last = newParams;
 
@@ -43,6 +44,7 @@ export function RelatedEventsFetcher(
       cursor: string | null;
     }) {
       let result: ResolverPaginatedEvents | null = null;
+
       try {
         if (cursor) {
           result = await dataAccessLayer.eventsWithEntityIDAndCategory({
@@ -50,14 +52,14 @@ export function RelatedEventsFetcher(
             category: eventCategory,
             after: cursor,
             indexPatterns: indices,
-            timeRange: createRange(),
+            timeRange: timeRangeFilters,
           });
         } else {
           result = await dataAccessLayer.eventsWithEntityIDAndCategory({
             entityID: nodeID,
             category: eventCategory,
             indexPatterns: indices,
-            timeRange: createRange(),
+            timeRange: timeRangeFilters,
           });
         }
       } catch (error) {
@@ -88,7 +90,13 @@ export function RelatedEventsFetcher(
     if (!isEqual(newParams, oldParams)) {
       if (newParams.panelView === 'nodeEventsInCategory') {
         const nodeID = newParams.panelParameters.nodeID;
-        fetchEvents({
+        api.dispatch({
+          type: 'appRequestedNodeEventsInCategory',
+          payload: {
+            parameters: newParams,
+          },
+        });
+        await fetchEvents({
           nodeID,
           eventCategory: newParams.panelParameters.eventCategory,
           cursor: null,
@@ -97,7 +105,7 @@ export function RelatedEventsFetcher(
     } else if (isLoadingMoreEvents) {
       const nodeEventsInCategory = state.data.nodeEventsInCategory;
       if (nodeEventsInCategory !== undefined) {
-        fetchEvents(nodeEventsInCategory);
+        await fetchEvents(nodeEventsInCategory);
       }
     }
   };

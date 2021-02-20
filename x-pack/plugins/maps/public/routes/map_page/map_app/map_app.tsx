@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -51,7 +52,7 @@ import {
   unsavedChangesWarning,
 } from '../saved_map';
 
-interface Props {
+export interface Props {
   savedMap: SavedMap;
   // saveCounter used to trigger MapApp render after SaveMap.save
   saveCounter: number;
@@ -82,7 +83,7 @@ interface Props {
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
 }
 
-interface State {
+export interface State {
   initialized: boolean;
   indexPatterns: IndexPattern[];
   savedQuery?: SavedQuery;

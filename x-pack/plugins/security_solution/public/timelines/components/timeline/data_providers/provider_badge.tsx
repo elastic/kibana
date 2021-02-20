@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiBadge } from '@elastic/eui';
@@ -180,6 +181,11 @@ export const ProviderBadge = React.memo<ProviderBadgeProps>(
       [field, formattedValue, operator, prefix]
     );
 
+    const ariaLabel = useMemo(
+      () => i18n.SHOW_OPTIONS_DATA_PROVIDER({ field, value: `${formattedValue}` }),
+      [field, formattedValue]
+    );
+
     return (
       <ProviderContainer id={`${providerId}-${field}-${val}`}>
         <>
@@ -192,7 +198,7 @@ export const ProviderBadge = React.memo<ProviderBadgeProps>(
             iconType="cross"
             iconSide="right"
             onClick={togglePopover}
-            onClickAriaLabel={`${i18n.SHOW_OPTIONS_DATA_PROVIDER} ${formattedValue}`}
+            onClickAriaLabel={ariaLabel}
             closeButtonProps={closeButtonProps}
             data-test-subj="providerBadge"
             $timelineType={timelineType}

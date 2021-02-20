@@ -1,46 +1,34 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import {
-  KibanaMigratorMock,
   migratorInstanceMock,
   clientProviderInstanceMock,
   typeRegistryInstanceMock,
 } from './saved_objects_service.test.mocks';
 import { BehaviorSubject } from 'rxjs';
 import { ByteSizeValue } from '@kbn/config-schema';
-import { errors as esErrors } from '@elastic/elasticsearch';
 
 import { SavedObjectsService } from './saved_objects_service';
 import { mockCoreContext } from '../core_context.mock';
 import { Env } from '../config';
 import { configServiceMock } from '../mocks';
 import { elasticsearchServiceMock } from '../elasticsearch/elasticsearch_service.mock';
-import { elasticsearchClientMock } from '../elasticsearch/client/mocks';
 import { coreUsageDataServiceMock } from '../core_usage_data/core_usage_data_service.mock';
 import { httpServiceMock } from '../http/http_service.mock';
 import { httpServerMock } from '../http/http_server.mocks';
 import { SavedObjectsClientFactoryProvider } from './service/lib';
 import { NodesVersionCompatibility } from '../elasticsearch/version_check/ensure_es_version';
 import { SavedObjectsRepository } from './service/lib/repository';
+import { registerCoreObjectTypes } from './object_types';
 
 jest.mock('./service/lib/repository');
+jest.mock('./object_types');
 
 describe('SavedObjectsService', () => {
   const createCoreContext = ({
@@ -81,6 +69,16 @@ describe('SavedObjectsService', () => {
   });
 
   describe('#setup()', () => {
+    it('calls registerCoreObjectTypes', async () => {
+      const coreContext = createCoreContext();
+      const soService = new SavedObjectsService(coreContext);
+
+      const mockedRegisterCoreObjectTypes = registerCoreObjectTypes as jest.Mock<any, any>;
+      expect(mockedRegisterCoreObjectTypes).not.toHaveBeenCalled();
+      await soService.setup(createSetupDeps());
+      expect(mockedRegisterCoreObjectTypes).toHaveBeenCalledTimes(1);
+    });
+
     describe('#setClientFactoryProvider', () => {
       it('registers the factory to the clientProvider', async () => {
         const coreContext = createCoreContext();
@@ -144,6 +142,7 @@ describe('SavedObjectsService', () => {
 
     describe('#registerType', () => {
       it('registers the type to the internal typeRegistry', async () => {
+        // we mocked registerCoreObjectTypes above, so this test case only reflects direct calls to the registerType method
         const coreContext = createCoreContext();
         const soService = new SavedObjectsService(coreContext);
         const setup = await soService.setup(createSetupDeps());
@@ -163,29 +162,6 @@ describe('SavedObjectsService', () => {
   });
 
   describe('#start()', () => {
-    it('creates a KibanaMigrator which retries NoLivingConnectionsError errors from ES client', async () => {
-      const coreContext = createCoreContext();
-
-      const soService = new SavedObjectsService(coreContext);
-      const coreSetup = createSetupDeps();
-      const coreStart = createStartDeps();
-
-      coreStart.elasticsearch.client.asInternalUser.indices.create = jest
-        .fn()
-        .mockImplementationOnce(() =>
-          Promise.reject(new esErrors.NoLivingConnectionsError('reason', {} as any))
-        )
-        .mockImplementationOnce(() =>
-          elasticsearchClientMock.createSuccessTransportRequestPromise('success')
-        );
-
-      await soService.setup(coreSetup);
-      await soService.start(coreStart, 1);
-
-      const response = await KibanaMigratorMock.mock.calls[0][0].client.indices.create();
-      return expect(response.body).toBe('success');
-    });
-
     it('skips KibanaMigrator migrations when pluginsInitialized=false', async () => {
       const coreContext = createCoreContext({ skipMigration: false });
       const soService = new SavedObjectsService(coreContext);

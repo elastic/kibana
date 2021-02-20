@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import * as t from 'io-ts';
@@ -240,10 +241,32 @@ export const PingType = t.intersection([
   }),
 ]);
 
-export const SyntheticsJourneyApiResponseType = t.type({
-  checkGroup: t.string,
-  steps: t.array(PingType),
-});
+export const SyntheticsJourneyApiResponseType = t.intersection([
+  t.type({
+    checkGroup: t.string,
+    steps: t.array(PingType),
+  }),
+  t.partial({
+    details: t.union([
+      t.intersection([
+        t.type({
+          timestamp: t.string,
+        }),
+        t.partial({
+          next: t.type({
+            timestamp: t.string,
+            checkGroup: t.string,
+          }),
+          previous: t.type({
+            timestamp: t.string,
+            checkGroup: t.string,
+          }),
+        }),
+      ]),
+      t.null,
+    ]),
+  }),
+]);
 
 export type SyntheticsJourneyApiResponse = t.TypeOf<typeof SyntheticsJourneyApiResponseType>;
 

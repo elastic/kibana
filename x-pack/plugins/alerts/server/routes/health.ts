@@ -1,17 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import {
-  IRouter,
-  RequestHandlerContext,
-  KibanaRequest,
-  IKibanaResponse,
-  KibanaResponseFactory,
-} from 'kibana/server';
-import { LicenseState } from '../lib/license_state';
+import type { AlertingRouter } from '../types';
+import { ILicenseState } from '../lib/license_state';
 import { verifyApiAccess } from '../lib/license_api_access';
 import { AlertingFrameworkHealth } from '../types';
 import { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objects/server';
@@ -28,8 +23,8 @@ interface XPackUsageSecurity {
 }
 
 export function healthRoute(
-  router: IRouter,
-  licenseState: LicenseState,
+  router: AlertingRouter,
+  licenseState: ILicenseState,
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup
 ) {
   router.get(
@@ -37,11 +32,7 @@ export function healthRoute(
       path: '/api/alerts/_health',
       validate: false,
     },
-    router.handleLegacyErrors(async function (
-      context: RequestHandlerContext,
-      req: KibanaRequest<unknown, unknown, unknown>,
-      res: KibanaResponseFactory
-    ): Promise<IKibanaResponse> {
+    router.handleLegacyErrors(async function (context, req, res) {
       verifyApiAccess(licenseState);
       if (!context.alerting) {
         return res.badRequest({ body: 'RouteHandlerContext is not registered for alerting' });
@@ -64,7 +55,7 @@ export function healthRoute(
 
         const frameworkHealth: AlertingFrameworkHealth = {
           isSufficientlySecure: !isSecurityEnabled || (isSecurityEnabled && isTLSEnabled),
-          hasPermanentEncryptionKey: !encryptedSavedObjects.usingEphemeralEncryptionKey,
+          hasPermanentEncryptionKey: encryptedSavedObjects.canEncrypt,
           alertingFrameworkHeath,
         };
 

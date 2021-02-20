@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -17,7 +18,7 @@ import {
   UpdateExceptionListItemSchema,
   UpdateExceptionListSchema,
 } from '../../common/schemas';
-import { HttpStart } from '../../../../../src/core/public';
+import { HttpStart, NotificationsStart } from '../../../../../src/core/public';
 
 export interface FilterExceptionsOptions {
   filter: string;
@@ -43,7 +44,7 @@ export interface ExceptionList extends ExceptionListSchema {
   totalItems: number;
 }
 
-export interface UseExceptionListSuccess {
+export interface UseExceptionListItemsSuccess {
   exceptions: ExceptionListItemSchema[];
   pagination: Pagination;
 }
@@ -57,7 +58,7 @@ export interface UseExceptionListProps {
   showDetectionsListsOnly: boolean;
   showEndpointListsOnly: boolean;
   matchFilters: boolean;
-  onSuccess?: (arg: UseExceptionListSuccess) => void;
+  onSuccess?: (arg: UseExceptionListItemsSuccess) => void;
 }
 
 export interface ExceptionListIdentifiers {
@@ -86,8 +87,19 @@ export interface ApiCallByIdProps {
 export interface ApiCallMemoProps {
   id: string;
   namespaceType: NamespaceType;
-  onError: (arg: string[]) => void;
+  onError: (arg: Error) => void;
   onSuccess: () => void;
+}
+
+// TODO: Switch to use ApiCallMemoProps
+// after cleaning up exceptions/api file to
+// remove unnecessary validation checks
+export interface ApiListExportProps {
+  id: string;
+  listId: string;
+  namespaceType: NamespaceType;
+  onError: (err: Error) => void;
+  onSuccess: (blob: Blob) => void;
 }
 
 export interface ApiCallFindListsItemsMemoProps {
@@ -97,7 +109,37 @@ export interface ApiCallFindListsItemsMemoProps {
   showDetectionsListsOnly: boolean;
   showEndpointListsOnly: boolean;
   onError: (arg: string[]) => void;
-  onSuccess: (arg: UseExceptionListSuccess) => void;
+  onSuccess: (arg: UseExceptionListItemsSuccess) => void;
+}
+export interface ApiCallFetchExceptionListsProps {
+  http: HttpStart;
+  namespaceTypes: string;
+  pagination: Partial<Pagination>;
+  filters: string;
+  signal: AbortSignal;
+}
+
+export interface UseExceptionListsSuccess {
+  exceptions: ExceptionListSchema[];
+  pagination: Pagination;
+}
+
+export interface ExceptionListFilter {
+  name?: string | null;
+  list_id?: string | null;
+  created_by?: string | null;
+  type?: string | null;
+  tags?: string | null;
+}
+
+export interface UseExceptionListsProps {
+  errorMessage: string;
+  filterOptions?: ExceptionListFilter;
+  http: HttpStart;
+  namespaceTypes: NamespaceType[];
+  notifications: NotificationsStart;
+  pagination?: Pagination;
+  showTrustedApps: boolean;
 }
 
 export interface AddExceptionListProps {
@@ -126,5 +168,13 @@ export interface UpdateExceptionListItemProps {
 
 export interface AddEndpointExceptionListProps {
   http: HttpStart;
+  signal: AbortSignal;
+}
+
+export interface ExportExceptionListProps {
+  http: HttpStart;
+  id: string;
+  listId: string;
+  namespaceType: NamespaceType;
   signal: AbortSignal;
 }

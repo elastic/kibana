@@ -1,10 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { RequestHandlerContext } from 'src/core/server';
+import type { InfraPluginRequestHandlerContext } from '../types';
 import { InfraSources } from './sources';
 
 export class InfraSourceStatus {
@@ -14,7 +15,7 @@ export class InfraSourceStatus {
   ) {}
 
   public async getLogIndexNames(
-    requestContext: RequestHandlerContext,
+    requestContext: InfraPluginRequestHandlerContext,
     sourceId: string
   ): Promise<string[]> {
     const sourceConfiguration = await this.libs.sources.getSourceConfiguration(
@@ -28,7 +29,7 @@ export class InfraSourceStatus {
     return indexNames;
   }
   public async getMetricIndexNames(
-    requestContext: RequestHandlerContext,
+    requestContext: InfraPluginRequestHandlerContext,
     sourceId: string
   ): Promise<string[]> {
     const sourceConfiguration = await this.libs.sources.getSourceConfiguration(
@@ -42,7 +43,7 @@ export class InfraSourceStatus {
     return indexNames;
   }
   public async hasLogAlias(
-    requestContext: RequestHandlerContext,
+    requestContext: InfraPluginRequestHandlerContext,
     sourceId: string
   ): Promise<boolean> {
     const sourceConfiguration = await this.libs.sources.getSourceConfiguration(
@@ -56,7 +57,7 @@ export class InfraSourceStatus {
     return hasAlias;
   }
   public async hasMetricAlias(
-    requestContext: RequestHandlerContext,
+    requestContext: InfraPluginRequestHandlerContext,
     sourceId: string
   ): Promise<boolean> {
     const sourceConfiguration = await this.libs.sources.getSourceConfiguration(
@@ -70,7 +71,7 @@ export class InfraSourceStatus {
     return hasAlias;
   }
   public async getLogIndexStatus(
-    requestContext: RequestHandlerContext,
+    requestContext: InfraPluginRequestHandlerContext,
     sourceId: string
   ): Promise<SourceIndexStatus> {
     const sourceConfiguration = await this.libs.sources.getSourceConfiguration(
@@ -84,7 +85,7 @@ export class InfraSourceStatus {
     return indexStatus;
   }
   public async hasMetricIndices(
-    requestContext: RequestHandlerContext,
+    requestContext: InfraPluginRequestHandlerContext,
     sourceId: string
   ): Promise<boolean> {
     const sourceConfiguration = await this.libs.sources.getSourceConfiguration(
@@ -102,10 +103,13 @@ export class InfraSourceStatus {
 export type SourceIndexStatus = 'missing' | 'empty' | 'available';
 
 export interface InfraSourceStatusAdapter {
-  getIndexNames(requestContext: RequestHandlerContext, aliasName: string): Promise<string[]>;
-  hasAlias(requestContext: RequestHandlerContext, aliasName: string): Promise<boolean>;
+  getIndexNames(
+    requestContext: InfraPluginRequestHandlerContext,
+    aliasName: string
+  ): Promise<string[]>;
+  hasAlias(requestContext: InfraPluginRequestHandlerContext, aliasName: string): Promise<boolean>;
   getIndexStatus(
-    requestContext: RequestHandlerContext,
+    requestContext: InfraPluginRequestHandlerContext,
     indexNames: string
   ): Promise<SourceIndexStatus>;
 }

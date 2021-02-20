@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -14,7 +15,7 @@ import { ExpressionValueSearchContext, search } from '../../../../../src/plugins
 const { toAbsoluteDates } = search.aggs;
 
 import { LensMultiTable } from '../types';
-import { LensInspectorAdapters } from './types';
+import { Adapters } from '../../../../../src/plugins/inspector/common';
 
 interface MergeTables {
   layerIds: string[];
@@ -26,7 +27,7 @@ export const mergeTables: ExpressionFunctionDefinition<
   ExpressionValueSearchContext | null,
   MergeTables,
   LensMultiTable,
-  ExecutionContext<LensInspectorAdapters, ExpressionValueSearchContext>
+  ExecutionContext<Adapters, ExpressionValueSearchContext>
 > = {
   name: 'lens_merge_tables',
   type: 'lens_multitable',
@@ -48,17 +49,14 @@ export const mergeTables: ExpressionFunctionDefinition<
   },
   inputTypes: ['kibana_context', 'null'],
   fn(input, { layerIds, tables }, context) {
-    if (!context.inspectorAdapters) {
-      context.inspectorAdapters = {};
-    }
-    if (!context.inspectorAdapters.tables) {
-      context.inspectorAdapters.tables = {};
-    }
     const resultTables: Record<string, Datatable> = {};
     tables.forEach((table, index) => {
       resultTables[layerIds[index]] = table;
       // adapter is always defined at that point because we make sure by the beginning of the function
-      context.inspectorAdapters.tables![layerIds[index]] = table;
+      if (context?.inspectorAdapters?.tables) {
+        context.inspectorAdapters.tables.allowCsvExport = true;
+        context.inspectorAdapters.tables.logDatatable(layerIds[index], table);
+      }
     });
     return {
       type: 'lens_multitable',

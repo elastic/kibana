@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -22,10 +23,11 @@ describe('AllRules', () => {
           userHasNoPermissions={false}
           onRefresh={jest.fn()}
           paginationTotal={4}
-          numberSelectedRules={1}
+          numberSelectedItems={1}
           onGetBatchItemsPopoverContent={jest.fn()}
           isAutoRefreshOn={true}
           onRefreshSwitch={jest.fn()}
+          showBulkActions
         />
       </ThemeProvider>
     );
@@ -36,6 +38,29 @@ describe('AllRules', () => {
     );
   });
 
+  it('does not render total selected and bulk actions when "showBulkActions" is false', () => {
+    const wrapper = mount(
+      <ThemeProvider theme={theme}>
+        <AllRulesUtilityBar
+          userHasNoPermissions={false}
+          onRefresh={jest.fn()}
+          paginationTotal={4}
+          numberSelectedItems={1}
+          onGetBatchItemsPopoverContent={jest.fn()}
+          isAutoRefreshOn={true}
+          onRefreshSwitch={jest.fn()}
+          showBulkActions={false}
+        />
+      </ThemeProvider>
+    );
+
+    expect(wrapper.find('[data-test-subj="showingRules"]').exists()).toBeFalsy();
+    expect(wrapper.find('[data-test-subj="tableBulkActions"]').exists()).toBeFalsy();
+    expect(wrapper.find('[data-test-subj="showingExceptionLists"]').at(0).text()).toEqual(
+      'Showing 4 lists'
+    );
+  });
+
   it('renders utility actions if user has permissions', () => {
     const wrapper = mount(
       <ThemeProvider theme={theme}>
@@ -43,10 +68,11 @@ describe('AllRules', () => {
           userHasNoPermissions={false}
           onRefresh={jest.fn()}
           paginationTotal={4}
-          numberSelectedRules={1}
+          numberSelectedItems={1}
           onGetBatchItemsPopoverContent={jest.fn()}
           isAutoRefreshOn={true}
           onRefreshSwitch={jest.fn()}
+          showBulkActions
         />
       </ThemeProvider>
     );
@@ -61,10 +87,11 @@ describe('AllRules', () => {
           userHasNoPermissions
           onRefresh={jest.fn()}
           paginationTotal={4}
-          numberSelectedRules={1}
+          numberSelectedItems={1}
           onGetBatchItemsPopoverContent={jest.fn()}
           isAutoRefreshOn={true}
           onRefreshSwitch={jest.fn()}
+          showBulkActions
         />
       </ThemeProvider>
     );
@@ -80,10 +107,11 @@ describe('AllRules', () => {
           userHasNoPermissions={false}
           onRefresh={mockRefresh}
           paginationTotal={4}
-          numberSelectedRules={1}
+          numberSelectedItems={1}
           onGetBatchItemsPopoverContent={jest.fn()}
           isAutoRefreshOn={true}
           onRefreshSwitch={jest.fn()}
+          showBulkActions
         />
       </ThemeProvider>
     );
@@ -101,10 +129,11 @@ describe('AllRules', () => {
           userHasNoPermissions={false}
           onRefresh={jest.fn()}
           paginationTotal={4}
-          numberSelectedRules={1}
+          numberSelectedItems={1}
           onGetBatchItemsPopoverContent={jest.fn()}
           isAutoRefreshOn={true}
           onRefreshSwitch={mockSwitch}
+          showBulkActions
         />
       </ThemeProvider>
     );

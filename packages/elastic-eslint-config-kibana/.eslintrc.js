@@ -65,6 +65,11 @@ module.exports = {
           to: false,
           disallowedMessage: `Don't import monaco directly, use or add exports to @kbn/monaco`
         },
+        {
+          from: 'tinymath',
+          to: '@kbn/tinymath',
+          disallowedMessage: `Don't use 'tinymath', use '@kbn/tinymath'`
+        },
       ],
     ],
   },

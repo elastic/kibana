@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React, { useCallback } from 'react';
 
 import {
@@ -17,66 +19,49 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import { isEmpty } from 'lodash';
 import { ActionConnectorFieldsProps } from '../../../../types';
-import { CasesConfigurationMapping, FieldMapping, createDefaultMapping } from '../case_mappings';
 
 import * as i18n from './translations';
 import { JiraActionConnector } from './types';
-import { connectorConfiguration } from './config';
 
 const JiraConnectorFields: React.FC<ActionConnectorFieldsProps<JiraActionConnector>> = ({
   action,
   editActionSecrets,
   editActionConfig,
   errors,
-  consumer,
   readOnly,
 }) => {
-  // TODO: remove incidentConfiguration later, when Case Jira will move their fields to the level of action execution
-  const { apiUrl, projectKey, incidentConfiguration, isCaseOwned } = action.config;
-  const mapping = incidentConfiguration ? incidentConfiguration.mapping : [];
+  const { apiUrl, projectKey } = action.config;
 
-  const isApiUrlInvalid: boolean = errors.apiUrl.length > 0 && apiUrl != null;
+  const isApiUrlInvalid: boolean = errors.apiUrl.length > 0 && apiUrl !== undefined;
 
   const { email, apiToken } = action.secrets;
 
-  const isProjectKeyInvalid: boolean = errors.projectKey.length > 0 && projectKey != null;
-  const isEmailInvalid: boolean = errors.email.length > 0 && email != null;
-  const isApiTokenInvalid: boolean = errors.apiToken.length > 0 && apiToken != null;
-
-  // TODO: remove this block later, when Case ServiceNow will move their fields to the level of action execution
-  if (consumer === 'case') {
-    if (isEmpty(mapping)) {
-      editActionConfig('incidentConfiguration', {
-        mapping: createDefaultMapping(connectorConfiguration.fields as any),
-      });
-    }
-    if (!isCaseOwned) {
-      editActionConfig('isCaseOwned', true);
-    }
-  }
+  const isProjectKeyInvalid: boolean = errors.projectKey.length > 0 && projectKey !== undefined;
+  const isEmailInvalid: boolean = errors.email.length > 0 && email !== undefined;
+  const isApiTokenInvalid: boolean = errors.apiToken.length > 0 && apiToken !== undefined;
 
   const handleOnChangeActionConfig = useCallback(
     (key: string, value: string) => editActionConfig(key, value),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
+    [editActionConfig]
   );
 
   const handleOnChangeSecretConfig = useCallback(
     (key: string, value: string) => editActionSecrets(key, value),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
+    [editActionSecrets]
   );
 
-  const handleOnChangeMappingConfig = useCallback(
-    (newMapping: CasesConfigurationMapping[]) =>
-      editActionConfig('incidentConfiguration', {
-        ...action.config.incidentConfiguration,
-        mapping: newMapping,
-      }),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [action.config]
+  const handleResetField = useCallback(
+    (checkValue, fieldName: string, actionField: 'config' | 'secrets') => {
+      if (!checkValue) {
+        if (actionField === 'config') {
+          handleOnChangeActionConfig(fieldName, '');
+        } else {
+          handleOnChangeSecretConfig(fieldName, '');
+        }
+      }
+    },
+    [handleOnChangeActionConfig, handleOnChangeSecretConfig]
   );
 
   return (
@@ -98,11 +83,7 @@ const JiraConnectorFields: React.FC<ActionConnectorFieldsProps<JiraActionConnect
               value={apiUrl || ''} // Needed to prevent uncontrolled input error when value is undefined
               data-test-subj="apiUrlFromInput"
               onChange={(evt) => handleOnChangeActionConfig('apiUrl', evt.target.value)}
-              onBlur={() => {
-                if (!apiUrl) {
-                  editActionConfig('apiUrl', '');
-                }
-              }}
+              onBlur={() => handleResetField(apiUrl, 'apiUrl', 'config')}
             />
           </EuiFormRow>
         </EuiFlexItem>
@@ -124,11 +105,7 @@ const JiraConnectorFields: React.FC<ActionConnectorFieldsProps<JiraActionConnect
               value={projectKey || ''} // Needed to prevent uncontrolled input error when value is undefined
               data-test-subj="connector-jira-project-key-form-input"
               onChange={(evt) => handleOnChangeActionConfig('projectKey', evt.target.value)}
-              onBlur={() => {
-                if (!projectKey) {
-                  editActionConfig('projectKey', '');
-                }
-              }}
+              onBlur={() => handleResetField(projectKey, 'projectKey', 'config')}
             />
           </EuiFormRow>
         </EuiFlexItem>
@@ -165,11 +142,7 @@ const JiraConnectorFields: React.FC<ActionConnectorFieldsProps<JiraActionConnect
               value={email || ''} // Needed to prevent uncontrolled input error when value is undefined
               data-test-subj="connector-jira-email-form-input"
               onChange={(evt) => handleOnChangeSecretConfig('email', evt.target.value)}
-              onBlur={() => {
-                if (!email) {
-                  editActionSecrets('email', '');
-                }
-              }}
+              onBlur={() => handleResetField(email, 'email', 'secrets')}
             />
           </EuiFormRow>
         </EuiFlexItem>
@@ -192,30 +165,11 @@ const JiraConnectorFields: React.FC<ActionConnectorFieldsProps<JiraActionConnect
               value={apiToken || ''} // Needed to prevent uncontrolled input error when value is undefined
               data-test-subj="connector-jira-apiToken-form-input"
               onChange={(evt) => handleOnChangeSecretConfig('apiToken', evt.target.value)}
-              onBlur={() => {
-                if (!apiToken) {
-                  editActionSecrets('apiToken', '');
-                }
-              }}
+              onBlur={() => handleResetField(apiToken, 'apiToken', 'secrets')}
             />
           </EuiFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
-      {consumer === 'case' && ( // TODO: remove this block later, when Case Jira will move their fields to the level of action execution
-        <>
-          <EuiSpacer size="l" />
-          <EuiFlexGroup>
-            <EuiFlexItem data-test-subj="case-jira-mappings">
-              <FieldMapping
-                disabled={true}
-                connectorConfiguration={connectorConfiguration}
-                mapping={mapping as CasesConfigurationMapping[]}
-                onChangeMapping={handleOnChangeMappingConfig}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </>
-      )}
     </>
   );
 };

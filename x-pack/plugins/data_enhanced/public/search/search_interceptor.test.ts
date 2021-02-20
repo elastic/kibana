@@ -1,18 +1,27 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import type { MockedKeys } from '@kbn/utility-types/jest';
 import { coreMock } from '../../../../../src/core/public/mocks';
 import { EnhancedSearchInterceptor } from './search_interceptor';
 import { CoreSetup, CoreStart } from 'kibana/public';
 import { UI_SETTINGS } from '../../../../../src/plugins/data/common';
 import { AbortError } from '../../../../../src/plugins/kibana_utils/public';
-import { ISessionService, SearchTimeoutError, SessionState } from 'src/plugins/data/public';
+import {
+  ISessionService,
+  SearchTimeoutError,
+  SearchSessionState,
+  PainlessError,
+  DataPublicPluginSetup,
+} from 'src/plugins/data/public';
 import { dataPluginMock } from '../../../../../src/plugins/data/public/mocks';
 import { bfetchPluginMock } from '../../../../../src/plugins/bfetch/public/mocks';
 import { BehaviorSubject } from 'rxjs';
+import * as xpackResourceNotFoundException from '../../common/search/test_data/search_phase_execution_exception.json';
 
 const timeTravel = (msToRun = 0) => {
   jest.advanceTimersByTime(msToRun);
@@ -43,14 +52,15 @@ function mockFetchImplementation(responses: any[]) {
 }
 
 describe('EnhancedSearchInterceptor', () => {
-  let mockUsageCollector: any;
   let sessionService: jest.Mocked<ISessionService>;
-  let sessionState$: BehaviorSubject<SessionState>;
+  let sessionState$: BehaviorSubject<SearchSessionState>;
+  let dataPluginMockSetup: DataPublicPluginSetup;
 
   beforeEach(() => {
     mockCoreSetup = coreMock.createSetup();
     mockCoreStart = coreMock.createStart();
-    sessionState$ = new BehaviorSubject<SessionState>(SessionState.None);
+    sessionState$ = new BehaviorSubject<SearchSessionState>(SearchSessionState.None);
+    dataPluginMockSetup = dataPluginMock.createSetupContract();
     const dataPluginMockStart = dataPluginMock.createStartContract();
     sessionService = {
       ...(dataPluginMockStart.search.session as jest.Mocked<ISessionService>),
@@ -72,11 +82,6 @@ describe('EnhancedSearchInterceptor', () => {
     complete.mockClear();
     jest.clearAllTimers();
 
-    mockUsageCollector = {
-      trackQueryTimedOut: jest.fn(),
-      trackQueriesCancelled: jest.fn(),
-    };
-
     const mockPromise = new Promise((resolve) => {
       resolve([
         {
@@ -94,8 +99,35 @@ describe('EnhancedSearchInterceptor', () => {
       startServices: mockPromise as any,
       http: mockCoreSetup.http,
       uiSettings: mockCoreSetup.uiSettings,
-      usageCollector: mockUsageCollector,
+      usageCollector: dataPluginMockSetup.search.usageCollector,
       session: sessionService,
+    });
+  });
+
+  describe('errors', () => {
+    test('Should throw Painless error on server error with OSS format', async () => {
+      const mockResponse: any = {
+        statusCode: 400,
+        message: 'search_phase_execution_exception',
+        attributes: xpackResourceNotFoundException.error,
+      };
+      fetchMock.mockRejectedValueOnce(mockResponse);
+      const response = searchInterceptor.search({
+        params: {},
+      });
+      await expect(response.toPromise()).rejects.toThrow(PainlessError);
+    });
+
+    test('Renders a PainlessError', async () => {
+      searchInterceptor.showError(
+        new PainlessError({
+          statusCode: 400,
+          message: 'search_phase_execution_exception',
+          attributes: xpackResourceNotFoundException.error,
+        })
+      );
+      expect(mockCoreSetup.notifications.toasts.addDanger).toBeCalledTimes(1);
+      expect(mockCoreSetup.notifications.toasts.addError).not.toBeCalled();
     });
   });
 
@@ -192,7 +224,7 @@ describe('EnhancedSearchInterceptor', () => {
       await timeTravel(10);
 
       expect(error).toHaveBeenCalled();
-      expect(error.mock.calls[0][0]).toBeInstanceOf(AbortError);
+      expect(error.mock.calls[0][0]).toBeInstanceOf(Error);
     });
 
     test('should abort on user abort', async () => {
@@ -262,7 +294,7 @@ describe('EnhancedSearchInterceptor', () => {
       expect(error.mock.calls[0][0]).toBeInstanceOf(AbortError);
 
       expect(fetchMock).toHaveBeenCalledTimes(2);
-      expect(mockCoreSetup.http.delete).toHaveBeenCalled();
+      expect(mockCoreSetup.http.delete).toHaveBeenCalledTimes(1);
     });
 
     test('should not DELETE a running async search on async timeout prior to first response', async () => {
@@ -326,7 +358,7 @@ describe('EnhancedSearchInterceptor', () => {
       expect(error).toHaveBeenCalled();
       expect(error.mock.calls[0][0]).toBeInstanceOf(SearchTimeoutError);
       expect(fetchMock).toHaveBeenCalledTimes(2);
-      expect(mockCoreSetup.http.delete).toHaveBeenCalled();
+      expect(mockCoreSetup.http.delete).toHaveBeenCalledTimes(1);
     });
 
     test('should DELETE a running async search on async timeout on error from fetch', async () => {
@@ -342,9 +374,8 @@ describe('EnhancedSearchInterceptor', () => {
         {
           time: 10,
           value: {
-            error: 'oh no',
-            isPartial: false,
-            isRunning: false,
+            statusCode: 500,
+            message: 'oh no',
             id: 1,
           },
           isError: true,
@@ -366,14 +397,15 @@ describe('EnhancedSearchInterceptor', () => {
       await timeTravel(10);
 
       expect(error).toHaveBeenCalled();
-      expect(error.mock.calls[0][0]).toBe(responses[1].value);
+      expect(error.mock.calls[0][0]).toBeInstanceOf(Error);
+      expect((error.mock.calls[0][0] as Error).message).toBe('oh no');
       expect(fetchMock).toHaveBeenCalledTimes(2);
-      expect(mockCoreSetup.http.delete).toHaveBeenCalled();
+      expect(mockCoreSetup.http.delete).toHaveBeenCalledTimes(1);
     });
 
     test('should NOT DELETE a running SAVED async search on abort', async () => {
       const sessionId = 'sessionId';
-      sessionService.getSessionId.mockImplementation(() => sessionId);
+      sessionService.isCurrentSession.mockImplementation((_sessionId) => _sessionId === sessionId);
       const responses = [
         {
           time: 10,
@@ -408,7 +440,7 @@ describe('EnhancedSearchInterceptor', () => {
       expect(next).toHaveBeenCalled();
       expect(error).not.toHaveBeenCalled();
 
-      sessionState$.next(SessionState.BackgroundLoading);
+      sessionState$.next(SearchSessionState.BackgroundLoading);
 
       await timeTravel(240);
 
@@ -417,39 +449,6 @@ describe('EnhancedSearchInterceptor', () => {
 
       expect(fetchMock).toHaveBeenCalledTimes(2);
       expect(mockCoreSetup.http.delete).not.toHaveBeenCalled();
-    });
-  });
-
-  describe('cancelPending', () => {
-    test('should abort all pending requests', async () => {
-      mockFetchImplementation([
-        {
-          time: 10,
-          value: {
-            isPartial: false,
-            isRunning: false,
-            id: 1,
-          },
-        },
-        {
-          time: 20,
-          value: {
-            isPartial: false,
-            isRunning: false,
-            id: 1,
-          },
-        },
-      ]);
-
-      searchInterceptor.search({}).subscribe({ next, error });
-      searchInterceptor.search({}).subscribe({ next, error });
-      searchInterceptor.cancelPending();
-
-      await timeTravel();
-
-      const areAllRequestsAborted = fetchMock.mock.calls.every(([_, signal]) => signal?.aborted);
-      expect(areAllRequestsAborted).toBe(true);
-      expect(mockUsageCollector.trackQueriesCancelled).toBeCalledTimes(1);
     });
   });
 
@@ -479,6 +478,7 @@ describe('EnhancedSearchInterceptor', () => {
 
     test('should track searches', async () => {
       const sessionId = 'sessionId';
+      sessionService.isCurrentSession.mockImplementation((_sessionId) => _sessionId === sessionId);
       sessionService.getSessionId.mockImplementation(() => sessionId);
 
       const untrack = jest.fn();
@@ -496,6 +496,7 @@ describe('EnhancedSearchInterceptor', () => {
 
     test('session service should be able to cancel search', async () => {
       const sessionId = 'sessionId';
+      sessionService.isCurrentSession.mockImplementation((_sessionId) => _sessionId === sessionId);
       sessionService.getSessionId.mockImplementation(() => sessionId);
 
       const untrack = jest.fn();
@@ -519,6 +520,7 @@ describe('EnhancedSearchInterceptor', () => {
 
     test("don't track non current session searches", async () => {
       const sessionId = 'sessionId';
+      sessionService.isCurrentSession.mockImplementation((_sessionId) => _sessionId === sessionId);
       sessionService.getSessionId.mockImplementation(() => sessionId);
 
       const untrack = jest.fn();
@@ -539,6 +541,7 @@ describe('EnhancedSearchInterceptor', () => {
 
     test("don't track if no current session", async () => {
       sessionService.getSessionId.mockImplementation(() => undefined);
+      sessionService.isCurrentSession.mockImplementation((_sessionId) => false);
 
       const untrack = jest.fn();
       sessionService.trackSearch.mockImplementation(() => untrack);

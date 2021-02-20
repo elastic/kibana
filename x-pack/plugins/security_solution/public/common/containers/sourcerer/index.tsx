@@ -1,10 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 
 import { sourcererActions, sourcererSelectors } from '../../store/sourcerer';
@@ -19,13 +20,20 @@ export const useInitSourcerer = (
   scopeId: SourcererScopeName.default | SourcererScopeName.detections = SourcererScopeName.default
 ) => {
   const dispatch = useDispatch();
-
+  const initialTimelineSourcerer = useRef(true);
+  const initialDetectionSourcerer = useRef(true);
   const { loading: loadingSignalIndex, isSignalIndexExists, signalIndexName } = useUserInfo();
   const getConfigIndexPatternsSelector = useMemo(
     () => sourcererSelectors.configIndexPatternsSelector(),
     []
   );
   const ConfigIndexPatterns = useDeepEqualSelector(getConfigIndexPatternsSelector);
+
+  const getSignalIndexNameSelector = useMemo(
+    () => sourcererSelectors.signalIndexNameSelector(),
+    []
+  );
+  const signalIndexNameSelector = useDeepEqualSelector(getSignalIndexNameSelector);
 
   const getTimelineSelector = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
   const activeTimeline = useDeepEqualSelector((state) =>
@@ -36,42 +44,76 @@ export const useInitSourcerer = (
   useIndexFields(SourcererScopeName.timeline);
 
   useEffect(() => {
-    if (!loadingSignalIndex && signalIndexName != null) {
+    if (!loadingSignalIndex && signalIndexName != null && signalIndexNameSelector == null) {
       dispatch(sourcererActions.setSignalIndexName({ signalIndexName }));
     }
-  }, [dispatch, loadingSignalIndex, signalIndexName]);
+  }, [dispatch, loadingSignalIndex, signalIndexName, signalIndexNameSelector]);
 
   // Related to timeline
   useEffect(() => {
     if (
       !loadingSignalIndex &&
       signalIndexName != null &&
-      (activeTimeline == null || (activeTimeline != null && activeTimeline.savedObjectId == null))
+      signalIndexNameSelector == null &&
+      (activeTimeline == null ||
+        (activeTimeline != null && activeTimeline.savedObjectId == null)) &&
+      initialTimelineSourcerer.current
     ) {
+      initialTimelineSourcerer.current = false;
       dispatch(
         sourcererActions.setSelectedIndexPatterns({
           id: SourcererScopeName.timeline,
           selectedPatterns: [...ConfigIndexPatterns, signalIndexName],
         })
       );
+    } else if (
+      signalIndexNameSelector != null &&
+      (activeTimeline == null ||
+        (activeTimeline != null && activeTimeline.savedObjectId == null)) &&
+      initialTimelineSourcerer.current
+    ) {
+      initialTimelineSourcerer.current = false;
+      dispatch(
+        sourcererActions.setSelectedIndexPatterns({
+          id: SourcererScopeName.timeline,
+          selectedPatterns: [...ConfigIndexPatterns, signalIndexNameSelector],
+        })
+      );
     }
-  }, [activeTimeline, ConfigIndexPatterns, dispatch, loadingSignalIndex, signalIndexName]);
+  }, [
+    activeTimeline,
+    ConfigIndexPatterns,
+    dispatch,
+    loadingSignalIndex,
+    signalIndexName,
+    signalIndexNameSelector,
+  ]);
 
   // Related to the detection page
   useEffect(() => {
     if (
       scopeId === SourcererScopeName.detections &&
       isSignalIndexExists &&
-      signalIndexName != null
+      signalIndexName != null &&
+      initialDetectionSourcerer.current
     ) {
+      initialDetectionSourcerer.current = false;
       dispatch(
         sourcererActions.setSelectedIndexPatterns({
           id: scopeId,
           selectedPatterns: [signalIndexName],
         })
       );
+    } else if (signalIndexNameSelector != null && initialTimelineSourcerer.current) {
+      initialDetectionSourcerer.current = false;
+      dispatch(
+        sourcererActions.setSelectedIndexPatterns({
+          id: scopeId,
+          selectedPatterns: [signalIndexNameSelector],
+        })
+      );
     }
-  }, [dispatch, isSignalIndexExists, scopeId, signalIndexName]);
+  }, [dispatch, isSignalIndexExists, scopeId, signalIndexName, signalIndexNameSelector]);
 };
 
 export const useSourcererScope = (scope: SourcererScopeName = SourcererScopeName.default) => {

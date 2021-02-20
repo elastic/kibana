@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { uniq } from 'lodash';
@@ -38,6 +39,15 @@ import {
 } from '../../../../../src/plugins/charts/public';
 import { LensIconChartDonut } from '../assets/chart_donut';
 
+declare global {
+  interface Window {
+    /**
+     * Flag used to enable debugState on elastic charts
+     */
+    _echDebugStateFlag?: boolean;
+  }
+}
+
 const EMPTY_SLICE = Symbol('empty_slice');
 
 export function PieComponent(
@@ -47,12 +57,13 @@ export function PieComponent(
     paletteService: PaletteRegistry;
     onClickValue: (data: LensFilterEvent['data']) => void;
     renderMode: RenderMode;
+    syncColors: boolean;
   }
 ) {
   const [firstTable] = Object.values(props.data.tables);
   const formatters: Record<string, ReturnType<FormatFactory>> = {};
 
-  const { chartsThemeService, paletteService, onClickValue } = props;
+  const { chartsThemeService, paletteService, syncColors, onClickValue } = props;
   const {
     shape,
     groups,
@@ -145,6 +156,7 @@ export function PieComponent(
               behindText: categoryDisplay !== 'hide',
               maxDepth: bucketColumns.length,
               totalSeries: totalSeriesCount,
+              syncColors,
             },
             palette.params
           );
@@ -249,6 +261,7 @@ export function PieComponent(
     >
       <Chart>
         <Settings
+          debugState={window._echDebugStateFlag ?? false}
           // Legend is hidden in many scenarios
           // - Tiny preview
           // - Treemap does not need a legend because it uses category labels

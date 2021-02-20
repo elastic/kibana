@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { createMemoryHistory, History as HistoryPackageHistoryInterface } from 'history';
 
 import { oneNodeWithPaginatedEvents } from '../../data_access_layer/mocks/one_node_with_paginated_related_events';
@@ -40,6 +42,8 @@ describe(`Resolver: when analyzing a tree with only the origin and paginated rel
           resolverComponentInstanceID,
           history: memoryHistory,
           indices: [],
+          shouldUpdate: false,
+          filters: {},
         });
         return simulatorInstance;
       }
@@ -52,6 +56,7 @@ describe(`Resolver: when analyzing a tree with only the origin and paginated rel
 
   describe(`when the URL query string is showing a resolver with nodeID origin, panel view nodeEventsInCategory, and eventCategory registry`, () => {
     beforeEach(() => {
+      simulator(); // Initialize simulator in beforeEach to use instance in tests
       memoryHistory.push({
         search: urlSearch(resolverComponentInstanceID, {
           panelParameters: { nodeID: 'origin', eventCategory: 'registry' },
@@ -74,6 +79,7 @@ describe(`Resolver: when analyzing a tree with only the origin and paginated rel
     });
     describe('when the user clicks the load more button', () => {
       beforeEach(async () => {
+        simulator(); // Initialize simulator in beforeEach to use instance in tests
         const loadMore = await simulator().resolve('resolver:nodeEventsInCategory:loadMore');
         if (loadMore) {
           loadMore.simulate('click', { button: 0 });

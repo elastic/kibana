@@ -1,15 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import { EuiButton, EuiButtonEmpty } from '@elastic/eui';
 
 import { defaultHeaders } from '../body/column_headers/default_headers';
 import { timelineActions } from '../../../store/timeline';
-import { useFullScreen } from '../../../../common/containers/use_full_screen';
+import { useTimelineFullScreen } from '../../../../common/containers/use_full_screen';
 import {
   TimelineId,
   TimelineType,
@@ -34,7 +36,7 @@ export const useCreateTimeline = ({ timelineId, timelineType, closeGearMenu }: P
     []
   );
   const existingIndexNames = useDeepEqualSelector<string[]>(existingIndexNamesSelector);
-  const { timelineFullScreen, setTimelineFullScreen } = useFullScreen();
+  const { timelineFullScreen, setTimelineFullScreen } = useTimelineFullScreen();
   const globalTimeRange = useDeepEqualSelector(inputsSelectors.globalTimeRangeSelector);
   const createTimeline = useCallback(
     ({ id, show }) => {
@@ -123,13 +125,13 @@ export const useCreateTimelineButton = ({ timelineId, timelineType, closeGearMen
       };
       const dataTestSubjPrefix =
         timelineType === TimelineType.template ? `template-timeline-new` : `timeline-new`;
-
+      const { fill: noThanks, ...propsWithoutFill } = buttonProps;
       return outline ? (
         <EuiButton data-test-subj={`${dataTestSubjPrefix}-with-border`} {...buttonProps}>
           {title}
         </EuiButton>
       ) : (
-        <EuiButtonEmpty data-test-subj={dataTestSubjPrefix} color="text" {...buttonProps}>
+        <EuiButtonEmpty data-test-subj={dataTestSubjPrefix} color="text" {...propsWithoutFill}>
           {title}
         </EuiButtonEmpty>
       );

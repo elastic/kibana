@@ -1,17 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
 import { pickBy } from 'lodash/fp';
-import React, { forwardRef, useCallback } from 'react';
+import React, { forwardRef, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import { OutPortal } from 'react-reverse-portal';
 
 import { navTabs } from '../../../app/home/home_navigations';
-import { useFullScreen } from '../../containers/use_full_screen';
+import { useGlobalFullScreen, useTimelineFullScreen } from '../../containers/use_full_screen';
 import { SecurityPageName } from '../../../app/types';
 import { getAppOverviewUrl } from '../link_to';
 import { MlPopover } from '../ml_popover/ml_popover';
@@ -68,10 +69,20 @@ export const HeaderGlobal = React.memo(
   forwardRef<HTMLDivElement, HeaderGlobalProps>(
     ({ hideDetectionEngine = false, isFixed = true }, ref) => {
       const { globalHeaderPortalNode } = useGlobalHeaderPortal();
-      const { globalFullScreen, timelineFullScreen } = useFullScreen();
+      const { globalFullScreen } = useGlobalFullScreen();
+      const { timelineFullScreen } = useTimelineFullScreen();
       const search = useGetUrlSearch(navTabs.overview);
       const { application, http } = useKibana().services;
-      const { navigateToApp } = application;
+      const { navigateToApp, getUrlForApp } = application;
+      const overviewPath = useMemo(
+        () => getUrlForApp(APP_ID, { path: SecurityPageName.overview }),
+        [getUrlForApp]
+      );
+      const overviewHref = useMemo(() => getAppOverviewUrl(overviewPath, search), [
+        overviewPath,
+        search,
+      ]);
+
       const basePath = http.basePath.get();
       const goToOverview = useCallback(
         (ev) => {
@@ -92,7 +103,7 @@ export const HeaderGlobal = React.memo(
               <FlexItem>
                 <EuiFlexGroup alignItems="center" responsive={false}>
                   <FlexItem grow={false}>
-                    <LinkAnchor onClick={goToOverview} href={getAppOverviewUrl(search)}>
+                    <LinkAnchor onClick={goToOverview} href={overviewHref}>
                       <EuiIcon aria-label={i18n.SECURITY_SOLUTION} type="logoSecurity" size="l" />
                     </LinkAnchor>
                   </FlexItem>

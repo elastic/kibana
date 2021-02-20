@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiTabbedContent, EuiTabbedContentTab, EuiSpacer } from '@elastic/eui';
@@ -14,6 +15,7 @@ import { EventFieldsBrowser } from './event_fields_browser';
 import { JsonView } from './json_view';
 import * as i18n from './translations';
 import { SummaryView } from './summary_view';
+import { TimelineTabs } from '../../../../common/types/timeline';
 
 export type View = EventsViewType.tableView | EventsViewType.jsonView | EventsViewType.summaryView;
 export enum EventsViewType {
@@ -29,6 +31,7 @@ interface Props {
   isAlert: boolean;
   view: EventsViewType;
   onViewSelected: (selected: EventsViewType) => void;
+  timelineTabType: TimelineTabs | 'flyout';
   timelineId: string;
 }
 
@@ -46,12 +49,18 @@ const StyledEuiTabbedContent = styled(EuiTabbedContent)`
   }
 `;
 
+const TabContentWrapper = styled.div`
+  height: 100%;
+  position: relative;
+`;
+
 const EventDetailsComponent: React.FC<Props> = ({
   browserFields,
   data,
   id,
   view,
   onViewSelected,
+  timelineTabType,
   timelineId,
   isAlert,
 }) => {
@@ -91,6 +100,7 @@ const EventDetailsComponent: React.FC<Props> = ({
               data={data}
               eventId={id}
               timelineId={timelineId}
+              timelineTabType={timelineTabType}
             />
           </>
         ),
@@ -101,12 +111,14 @@ const EventDetailsComponent: React.FC<Props> = ({
         content: (
           <>
             <EuiSpacer size="m" />
-            <JsonView data={data} />
+            <TabContentWrapper>
+              <JsonView data={data} />
+            </TabContentWrapper>
           </>
         ),
       },
     ],
-    [alerts, browserFields, data, id, isAlert, timelineId]
+    [alerts, browserFields, data, id, isAlert, timelineId, timelineTabType]
   );
 
   const selectedTab = useMemo(() => tabs.find((t) => t.id === view) ?? tabs[0], [tabs, view]);

@@ -1,20 +1,23 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 /*
  * This module contains the logic that ensures we don't run too many
  * tasks at once in a given Kibana instance.
  */
-import { Observable } from 'rxjs';
+import { Observable, Subject } from 'rxjs';
 import moment, { Duration } from 'moment';
 import { performance } from 'perf_hooks';
 import { padStart } from 'lodash';
 import { Logger } from '../../../../src/core/server';
 import { TaskRunner } from './task_running';
 import { isTaskSavedObjectNotFoundError } from './lib/is_task_not_found_error';
+import { TaskManagerStat, asTaskManagerStatEvent } from './task_events';
+import { asOk } from './lib/result_type';
 
 interface Opts {
   maxWorkers$: Observable<number>;
@@ -22,7 +25,13 @@ interface Opts {
 }
 
 export enum TaskPoolRunResult {
+  // This mean we have no Run Result becuse no tasks were Ran in this cycle
+  NoTaskWereRan = 'NoTaskWereRan',
+  // This means we're running all the tasks we claimed
   RunningAllClaimedTasks = 'RunningAllClaimedTasks',
+  // This means we're running all the tasks we claimed and we're at capacity
+  RunningAtCapacity = 'RunningAtCapacity',
+  // This means we're prematurely out of capacity and have accidentally claimed more tasks than we had capacity for
   RanOutOfCapacity = 'RanOutOfCapacity',
 }
 
@@ -33,8 +42,9 @@ const VERSION_CONFLICT_MESSAGE = 'Task has been claimed by another Kibana servic
  */
 export class TaskPool {
   private maxWorkers: number = 0;
-  private running = new Set<TaskRunner>();
+  private tasksInPool = new Map<string, TaskRunner>();
   private logger: Logger;
+  private load$ = new Subject<TaskManagerStat>();
 
   /**
    * Creates an instance of TaskPool.
@@ -52,25 +62,47 @@ export class TaskPool {
     });
   }
 
+  public get load(): Observable<TaskManagerStat> {
+    return this.load$;
+  }
+
   /**
    * Gets how many workers are currently in use.
    */
   public get occupiedWorkers() {
-    return this.running.size;
+    return this.tasksInPool.size;
+  }
+
+  /**
+   * Gets % of workers in use
+   */
+  public get workerLoad() {
+    return this.maxWorkers ? Math.round((this.occupiedWorkers * 100) / this.maxWorkers) : 100;
   }
 
   /**
    * Gets how many workers are currently available.
    */
   public get availableWorkers() {
+    // emit load whenever we check how many available workers there are
+    // this should happen less often than the actual changes to the worker queue
+    // so is lighter than emitting the load every time we add/remove a task from the queue
+    this.load$.next(asTaskManagerStatEvent('load', asOk(this.workerLoad)));
+    // cancel expired task whenever a call is made to check for capacity
+    // this ensures that we don't end up with a queue of hung tasks causing both
+    // the poller and the pool from hanging due to lack of capacity
+    this.cancelExpiredTasks();
     return this.maxWorkers - this.occupiedWorkers;
   }
 
   /**
-   * Gets how many workers are currently available.
+   * Gets how many workers are currently in use by type.
    */
-  public get hasAvailableWorkers() {
-    return this.availableWorkers > 0;
+  public getOccupiedWorkersByType(type: string) {
+    return [...this.tasksInPool.values()].reduce(
+      (count, runningTask) => (runningTask.definition.type === type ? ++count : count),
+      0
+    );
   }
 
   /**
@@ -81,26 +113,16 @@ export class TaskPool {
    * @param {TaskRunner[]} tasks
    * @returns {Promise<boolean>}
    */
-  public run = (tasks: TaskRunner[]) => {
-    this.cancelExpiredTasks();
-    return this.attemptToRun(tasks);
-  };
-
-  public cancelRunningTasks() {
-    this.logger.debug('Cancelling running tasks.');
-    for (const task of this.running) {
-      this.cancelTask(task);
-    }
-  }
-
-  private async attemptToRun(tasks: TaskRunner[]): Promise<TaskPoolRunResult> {
+  public run = async (tasks: TaskRunner[]): Promise<TaskPoolRunResult> => {
     const [tasksToRun, leftOverTasks] = partitionListByCount(tasks, this.availableWorkers);
     if (tasksToRun.length) {
       performance.mark('attemptToRun_start');
       await Promise.all(
-        tasksToRun.map(
-          async (taskRunner) =>
-            await taskRunner
+        tasksToRun
+          .filter((taskRunner) => !this.tasksInPool.has(taskRunner.id))
+          .map(async (taskRunner) => {
+            this.tasksInPool.set(taskRunner.id, taskRunner);
+            return taskRunner
               .markTaskAsRunning()
               .then((hasTaskBeenMarkAsRunning: boolean) =>
                 hasTaskBeenMarkAsRunning
@@ -110,8 +132,8 @@ export class TaskPool {
                       message: VERSION_CONFLICT_MESSAGE,
                     })
               )
-              .catch((err) => this.handleFailureOfMarkAsRunning(taskRunner, err))
-        )
+              .catch((err) => this.handleFailureOfMarkAsRunning(taskRunner, err));
+          })
       );
 
       performance.mark('attemptToRun_stop');
@@ -120,15 +142,23 @@ export class TaskPool {
 
     if (leftOverTasks.length) {
       if (this.availableWorkers) {
-        return this.attemptToRun(leftOverTasks);
+        return this.run(leftOverTasks);
       }
       return TaskPoolRunResult.RanOutOfCapacity;
+    } else if (!this.availableWorkers) {
+      return TaskPoolRunResult.RunningAtCapacity;
     }
     return TaskPoolRunResult.RunningAllClaimedTasks;
+  };
+
+  public cancelRunningTasks() {
+    this.logger.debug('Cancelling running tasks.');
+    for (const task of this.tasksInPool.values()) {
+      this.cancelTask(task);
+    }
   }
 
   private handleMarkAsRunning(taskRunner: TaskRunner) {
-    this.running.add(taskRunner);
     taskRunner
       .run()
       .catch((err) => {
@@ -144,26 +174,31 @@ export class TaskPool {
           this.logger.warn(errorLogLine);
         }
       })
-      .then(() => this.running.delete(taskRunner));
+      .then(() => this.tasksInPool.delete(taskRunner.id));
   }
 
   private handleFailureOfMarkAsRunning(task: TaskRunner, err: Error) {
+    this.tasksInPool.delete(task.id);
     this.logger.error(`Failed to mark Task ${task.toString()} as running: ${err.message}`);
   }
 
   private cancelExpiredTasks() {
-    for (const task of this.running) {
-      if (task.isExpired) {
+    for (const taskRunner of this.tasksInPool.values()) {
+      if (taskRunner.isExpired) {
         this.logger.warn(
-          `Cancelling task ${task.toString()} as it expired at ${task.expiration.toISOString()}${
-            task.startedAt
+          `Cancelling task ${taskRunner.toString()} as it expired at ${taskRunner.expiration.toISOString()}${
+            taskRunner.startedAt
               ? ` after running for ${durationAsString(
-                  moment.duration(moment(new Date()).utc().diff(task.startedAt))
+                  moment.duration(moment(new Date()).utc().diff(taskRunner.startedAt))
                 )}`
               : ``
-          }${task.definition.timeout ? ` (with timeout set at ${task.definition.timeout})` : ``}.`
+          }${
+            taskRunner.definition.timeout
+              ? ` (with timeout set at ${taskRunner.definition.timeout})`
+              : ``
+          }.`
         );
-        this.cancelTask(task);
+        this.cancelTask(taskRunner);
       }
     }
   }
@@ -171,7 +206,7 @@ export class TaskPool {
   private async cancelTask(task: TaskRunner) {
     try {
       this.logger.debug(`Cancelling task ${task.toString()}.`);
-      this.running.delete(task);
+      this.tasksInPool.delete(task.id);
       await task.cancel();
     } catch (err) {
       this.logger.error(`Failed to cancel task ${task.toString()}: ${err}`);

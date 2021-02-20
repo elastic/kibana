@@ -1,13 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+export const CLOUD = 'cloud';
 export const CLOUD_AVAILABILITY_ZONE = 'cloud.availability_zone';
 export const CLOUD_PROVIDER = 'cloud.provider';
 export const CLOUD_REGION = 'cloud.region';
+export const CLOUD_MACHINE_TYPE = 'cloud.machine.type';
 
+export const SERVICE = 'service';
 export const SERVICE_NAME = 'service.name';
 export const SERVICE_ENVIRONMENT = 'service.environment';
 export const SERVICE_FRAMEWORK_NAME = 'service.framework.name';
@@ -19,6 +23,7 @@ export const SERVICE_RUNTIME_VERSION = 'service.runtime.version';
 export const SERVICE_NODE_NAME = 'service.node.name';
 export const SERVICE_VERSION = 'service.version';
 
+export const AGENT = 'agent';
 export const AGENT_NAME = 'agent.name';
 export const AGENT_VERSION = 'agent.version';
 
@@ -102,8 +107,11 @@ export const METRIC_JAVA_GC_TIME = 'jvm.gc.time';
 
 export const LABEL_NAME = 'labels.name';
 
+export const HOST = 'host';
 export const HOST_NAME = 'host.hostname';
+export const HOST_OS_PLATFORM = 'host.os.platform';
 export const CONTAINER_ID = 'container.id';
+export const KUBERNETES = 'kubernetes';
 export const POD_NAME = 'kubernetes.pod.name';
 
 export const CLIENT_GEO_COUNTRY_ISO_CODE = 'client.geo.country_iso_code';

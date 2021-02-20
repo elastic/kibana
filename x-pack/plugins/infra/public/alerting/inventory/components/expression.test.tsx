@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { mountWithIntl, nextTick } from '@kbn/test/jest';
@@ -47,8 +48,9 @@ describe('Expression', () => {
       <Expressions
         alertInterval="1m"
         alertThrottle="1m"
+        alertNotifyWhen="onThrottleInterval"
         alertParams={alertParams as any}
-        errors={[]}
+        errors={{}}
         setAlertParams={(key, value) => Reflect.set(alertParams, key, value)}
         setAlertProperty={() => {}}
         metadata={currentOptions}

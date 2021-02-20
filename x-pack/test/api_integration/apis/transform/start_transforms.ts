@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import expect from '@kbn/expect';
 
 import { StartTransformsRequestSchema } from '../../../../plugins/transform/common/api_schemas/start_transforms';
@@ -75,7 +77,7 @@ export default ({ getService }: FtrProviderContext) => {
           .expect(200);
 
         expect(body[transformId].success).to.eql(false);
-        expect(typeof body[transformId].error).to.eql('string');
+        expect(typeof body[transformId].error).to.eql('object');
 
         await transform.api.waitForTransformState(transformId, TRANSFORM_STATE.STOPPED);
         await transform.api.waitForIndicesNotToExist(destinationIndex);

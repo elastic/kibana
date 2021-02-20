@@ -1,26 +1,18 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import moment from 'moment';
 import { timer } from 'rxjs';
 import { ISavedObjectsRepository, Logger, SavedObjectsServiceSetup } from 'kibana/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { MAIN_APP_DEFAULT_VIEW_ID } from '../../../../usage_collection/common/constants';
+import { serializeKey } from './rollups';
+
 import {
   ApplicationUsageDaily,
   ApplicationUsageTotal,
@@ -38,8 +30,27 @@ import {
   ROLL_INDICES_START,
 } from './constants';
 
+export interface ApplicationViewUsage {
+  appId: string;
+  viewId: string;
+  clicks_total: number;
+  clicks_7_days: number;
+  clicks_30_days: number;
+  clicks_90_days: number;
+  minutes_on_screen_total: number;
+  minutes_on_screen_7_days: number;
+  minutes_on_screen_30_days: number;
+  minutes_on_screen_90_days: number;
+}
+
+export interface ApplicationUsageViews {
+  [serializedKey: string]: ApplicationViewUsage;
+}
+
 export interface ApplicationUsageTelemetryReport {
   [appId: string]: {
+    appId: string;
+    viewId: string;
     clicks_total: number;
     clicks_7_days: number;
     clicks_30_days: number;
@@ -48,8 +59,30 @@ export interface ApplicationUsageTelemetryReport {
     minutes_on_screen_7_days: number;
     minutes_on_screen_30_days: number;
     minutes_on_screen_90_days: number;
+    views?: ApplicationViewUsage[];
   };
 }
+
+export const transformByApplicationViews = (
+  report: ApplicationUsageViews
+): ApplicationUsageTelemetryReport => {
+  const reportMetrics = Object.values(report);
+  const mainApplications = reportMetrics.filter(
+    (appView) => appView.viewId === MAIN_APP_DEFAULT_VIEW_ID
+  );
+  const appViews = reportMetrics.filter((appView) => appView.viewId !== MAIN_APP_DEFAULT_VIEW_ID);
+
+  return mainApplications.reduce((acc, mainApplication) => {
+    const currentAppViews = appViews.filter((appView) => appView.appId === mainApplication.appId);
+
+    acc[mainApplication.appId] = {
+      ...mainApplication,
+      views: currentAppViews,
+    };
+
+    return acc;
+  }, {} as ApplicationUsageTelemetryReport);
+};
 
 export function registerApplicationUsageCollector(
   logger: Logger,
@@ -89,11 +122,23 @@ export function registerApplicationUsageCollector(
         ]);
 
         const applicationUsageFromTotals = rawApplicationUsageTotals.reduce(
-          (acc, { attributes: { appId, minutesOnScreen, numberOfClicks } }) => {
+          (
+            acc,
+            {
+              attributes: {
+                appId,
+                viewId = MAIN_APP_DEFAULT_VIEW_ID,
+                minutesOnScreen,
+                numberOfClicks,
+              },
+            }
+          ) => {
             const existing = acc[appId] || { clicks_total: 0, minutes_on_screen_total: 0 };
             return {
               ...acc,
-              [appId]: {
+              [serializeKey(appId, viewId)]: {
+                appId,
+                viewId,
                 clicks_total: numberOfClicks + existing.clicks_total,
                 clicks_7_days: 0,
                 clicks_30_days: 0,
@@ -114,50 +159,66 @@ export function registerApplicationUsageCollector(
         const applicationUsage = [
           ...rawApplicationUsageDaily,
           ...rawApplicationUsageTransactional,
-        ].reduce((acc, { attributes: { appId, minutesOnScreen, numberOfClicks, timestamp } }) => {
-          const existing = acc[appId] || {
-            clicks_total: 0,
-            clicks_7_days: 0,
-            clicks_30_days: 0,
-            clicks_90_days: 0,
-            minutes_on_screen_total: 0,
-            minutes_on_screen_7_days: 0,
-            minutes_on_screen_30_days: 0,
-            minutes_on_screen_90_days: 0,
-          };
+        ].reduce(
+          (
+            acc,
+            {
+              attributes: {
+                appId,
+                viewId = MAIN_APP_DEFAULT_VIEW_ID,
+                minutesOnScreen,
+                numberOfClicks,
+                timestamp,
+              },
+            }
+          ) => {
+            const existing = acc[serializeKey(appId, viewId)] || {
+              appId,
+              viewId,
+              clicks_total: 0,
+              clicks_7_days: 0,
+              clicks_30_days: 0,
+              clicks_90_days: 0,
+              minutes_on_screen_total: 0,
+              minutes_on_screen_7_days: 0,
+              minutes_on_screen_30_days: 0,
+              minutes_on_screen_90_days: 0,
+            };
 
-          const timeOfEntry = moment(timestamp);
-          const isInLast7Days = timeOfEntry.isSameOrAfter(nowMinus7);
-          const isInLast30Days = timeOfEntry.isSameOrAfter(nowMinus30);
-          const isInLast90Days = timeOfEntry.isSameOrAfter(nowMinus90);
+            const timeOfEntry = moment(timestamp);
+            const isInLast7Days = timeOfEntry.isSameOrAfter(nowMinus7);
+            const isInLast30Days = timeOfEntry.isSameOrAfter(nowMinus30);
+            const isInLast90Days = timeOfEntry.isSameOrAfter(nowMinus90);
 
-          const last7Days = {
-            clicks_7_days: existing.clicks_7_days + numberOfClicks,
-            minutes_on_screen_7_days: existing.minutes_on_screen_7_days + minutesOnScreen,
-          };
-          const last30Days = {
-            clicks_30_days: existing.clicks_30_days + numberOfClicks,
-            minutes_on_screen_30_days: existing.minutes_on_screen_30_days + minutesOnScreen,
-          };
-          const last90Days = {
-            clicks_90_days: existing.clicks_90_days + numberOfClicks,
-            minutes_on_screen_90_days: existing.minutes_on_screen_90_days + minutesOnScreen,
-          };
+            const last7Days = {
+              clicks_7_days: existing.clicks_7_days + numberOfClicks,
+              minutes_on_screen_7_days: existing.minutes_on_screen_7_days + minutesOnScreen,
+            };
+            const last30Days = {
+              clicks_30_days: existing.clicks_30_days + numberOfClicks,
+              minutes_on_screen_30_days: existing.minutes_on_screen_30_days + minutesOnScreen,
+            };
+            const last90Days = {
+              clicks_90_days: existing.clicks_90_days + numberOfClicks,
+              minutes_on_screen_90_days: existing.minutes_on_screen_90_days + minutesOnScreen,
+            };
 
-          return {
-            ...acc,
-            [appId]: {
-              ...existing,
-              clicks_total: existing.clicks_total + numberOfClicks,
-              minutes_on_screen_total: existing.minutes_on_screen_total + minutesOnScreen,
-              ...(isInLast7Days ? last7Days : {}),
-              ...(isInLast30Days ? last30Days : {}),
-              ...(isInLast90Days ? last90Days : {}),
-            },
-          };
-        }, applicationUsageFromTotals);
+            return {
+              ...acc,
+              [serializeKey(appId, viewId)]: {
+                ...existing,
+                clicks_total: existing.clicks_total + numberOfClicks,
+                minutes_on_screen_total: existing.minutes_on_screen_total + minutesOnScreen,
+                ...(isInLast7Days ? last7Days : {}),
+                ...(isInLast30Days ? last30Days : {}),
+                ...(isInLast90Days ? last90Days : {}),
+              },
+            };
+          },
+          applicationUsageFromTotals
+        );
 
-        return applicationUsage;
+        return transformByApplicationViews(applicationUsage);
       },
     }
   );

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { useCallback, useReducer } from 'react';
@@ -61,6 +62,24 @@ export interface UseUpdateCases extends UpdateState {
   dispatchResetIsUpdated: () => void;
 }
 
+const getStatusToasterMessage = (
+  status: CaseStatuses,
+  messageArgs: {
+    totalCases: number;
+    caseTitle?: string;
+  }
+): string => {
+  if (status === CaseStatuses.open) {
+    return i18n.REOPENED_CASES(messageArgs);
+  } else if (status === CaseStatuses['in-progress']) {
+    return i18n.MARK_IN_PROGRESS_CASES(messageArgs);
+  } else if (status === CaseStatuses.closed) {
+    return i18n.CLOSED_CASES(messageArgs);
+  }
+
+  return '';
+};
+
 export const useUpdateCases = (): UseUpdateCases => {
   const [state, dispatch] = useReducer(dataFetchReducer, {
     isLoading: false,
@@ -69,7 +88,7 @@ export const useUpdateCases = (): UseUpdateCases => {
   });
   const [, dispatchToaster] = useStateToaster();
 
-  const dispatchUpdateCases = useCallback((cases: BulkUpdateStatus[]) => {
+  const dispatchUpdateCases = useCallback((cases: BulkUpdateStatus[], action: string) => {
     let cancel = false;
     const abortCtrl = new AbortController();
 
@@ -82,14 +101,16 @@ export const useUpdateCases = (): UseUpdateCases => {
           const firstTitle = patchResponse[0].title;
 
           dispatch({ type: 'FETCH_SUCCESS', payload: true });
+
           const messageArgs = {
             totalCases: resultCount,
             caseTitle: resultCount === 1 ? firstTitle : '',
           };
+
           const message =
-            resultCount && patchResponse[0].status === CaseStatuses.open
-              ? i18n.REOPENED_CASES(messageArgs)
-              : i18n.CLOSED_CASES(messageArgs);
+            action === 'status'
+              ? getStatusToasterMessage(patchResponse[0].status, messageArgs)
+              : '';
 
           displaySuccessToast(message, dispatchToaster);
         }
@@ -122,7 +143,7 @@ export const useUpdateCases = (): UseUpdateCases => {
       id: theCase.id,
       version: theCase.version,
     }));
-    dispatchUpdateCases(updateCasesStatus);
+    dispatchUpdateCases(updateCasesStatus, 'status');
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   return { ...state, updateBulkStatus, dispatchResetIsUpdated };

@@ -34,7 +34,7 @@
 |  [KBN\_FIELD\_TYPES](./kibana-plugin-plugins-data-public.kbn_field_types.md) | \* |
 |  [METRIC\_TYPES](./kibana-plugin-plugins-data-public.metric_types.md) |  |
 |  [QuerySuggestionTypes](./kibana-plugin-plugins-data-public.querysuggestiontypes.md) |  |
-|  [SessionState](./kibana-plugin-plugins-data-public.sessionstate.md) | Possible state that current session can be in |
+|  [SearchSessionState](./kibana-plugin-plugins-data-public.searchsessionstate.md) | Possible state that current session can be in |
 |  [SortDirection](./kibana-plugin-plugins-data-public.sortdirection.md) |  |
 |  [TimeoutErrorMode](./kibana-plugin-plugins-data-public.timeouterrormode.md) |  |
 
@@ -65,12 +65,12 @@
 |  [IEsSearchRequest](./kibana-plugin-plugins-data-public.iessearchrequest.md) |  |
 |  [IFieldSubType](./kibana-plugin-plugins-data-public.ifieldsubtype.md) |  |
 |  [IFieldType](./kibana-plugin-plugins-data-public.ifieldtype.md) |  |
-|  [IIndexPattern](./kibana-plugin-plugins-data-public.iindexpattern.md) |  |
+|  [IIndexPattern](./kibana-plugin-plugins-data-public.iindexpattern.md) | IIndexPattern allows for an IndexPattern OR an index pattern saved object too ambiguous, should be avoided |
 |  [IIndexPatternFieldList](./kibana-plugin-plugins-data-public.iindexpatternfieldlist.md) |  |
 |  [IKibanaSearchRequest](./kibana-plugin-plugins-data-public.ikibanasearchrequest.md) |  |
 |  [IKibanaSearchResponse](./kibana-plugin-plugins-data-public.ikibanasearchresponse.md) |  |
-|  [IndexPatternAttributes](./kibana-plugin-plugins-data-public.indexpatternattributes.md) |  |
-|  [IndexPatternSpec](./kibana-plugin-plugins-data-public.indexpatternspec.md) |  |
+|  [IndexPatternAttributes](./kibana-plugin-plugins-data-public.indexpatternattributes.md) | Interface for an index pattern saved object |
+|  [IndexPatternSpec](./kibana-plugin-plugins-data-public.indexpatternspec.md) | Static index pattern format Serialized data object, representing index pattern attributes and state |
 |  [IndexPatternTypeMeta](./kibana-plugin-plugins-data-public.indexpatterntypemeta.md) |  |
 |  [ISearchOptions](./kibana-plugin-plugins-data-public.isearchoptions.md) |  |
 |  [ISearchSetup](./kibana-plugin-plugins-data-public.isearchsetup.md) | The setup contract exposed by the Search plugin exposes the search strategy extension point. |
@@ -90,10 +90,8 @@
 |  [SavedQueryService](./kibana-plugin-plugins-data-public.savedqueryservice.md) |  |
 |  [SearchError](./kibana-plugin-plugins-data-public.searcherror.md) |  |
 |  [SearchInterceptorDeps](./kibana-plugin-plugins-data-public.searchinterceptordeps.md) |  |
-|  [SearchSessionInfoProvider](./kibana-plugin-plugins-data-public.searchsessioninfoprovider.md) | Provide info about current search session to be stored in backgroundSearch saved object |
+|  [SearchSessionInfoProvider](./kibana-plugin-plugins-data-public.searchsessioninfoprovider.md) | Provide info about current search session to be stored in the Search Session saved object |
 |  [SearchSourceFields](./kibana-plugin-plugins-data-public.searchsourcefields.md) | search source fields |
-|  [TabbedAggColumn](./kibana-plugin-plugins-data-public.tabbedaggcolumn.md) | \* |
-|  [TabbedTable](./kibana-plugin-plugins-data-public.tabbedtable.md) | \* |
 
 ## Variables
 
@@ -102,6 +100,7 @@
 |  [ACTION\_GLOBAL\_APPLY\_FILTER](./kibana-plugin-plugins-data-public.action_global_apply_filter.md) |  |
 |  [AggGroupLabels](./kibana-plugin-plugins-data-public.agggrouplabels.md) |  |
 |  [AggGroupNames](./kibana-plugin-plugins-data-public.agggroupnames.md) |  |
+|  [APPLY\_FILTER\_TRIGGER](./kibana-plugin-plugins-data-public.apply_filter_trigger.md) |  |
 |  [baseFormattersPublic](./kibana-plugin-plugins-data-public.baseformatterspublic.md) |  |
 |  [castEsToKbnFieldTypeName](./kibana-plugin-plugins-data-public.castestokbnfieldtypename.md) | Get the KbnFieldType name for an esType string |
 |  [connectToQueryState](./kibana-plugin-plugins-data-public.connecttoquerystate.md) | Helper to setup two-way syncing of global data and a state container |
@@ -124,8 +123,10 @@
 |  [isPartialResponse](./kibana-plugin-plugins-data-public.ispartialresponse.md) |  |
 |  [isQuery](./kibana-plugin-plugins-data-public.isquery.md) |  |
 |  [isTimeRange](./kibana-plugin-plugins-data-public.istimerange.md) |  |
+|  [noSearchSessionStorageCapabilityMessage](./kibana-plugin-plugins-data-public.nosearchsessionstoragecapabilitymessage.md) | Message to display in case storing session session is disabled due to turned off capability |
 |  [parseSearchSourceJSON](./kibana-plugin-plugins-data-public.parsesearchsourcejson.md) |  |
 |  [QueryStringInput](./kibana-plugin-plugins-data-public.querystringinput.md) |  |
+|  [SEARCH\_SESSIONS\_MANAGEMENT\_ID](./kibana-plugin-plugins-data-public.search_sessions_management_id.md) |  |
 |  [search](./kibana-plugin-plugins-data-public.search.md) |  |
 |  [SearchBar](./kibana-plugin-plugins-data-public.searchbar.md) |  |
 |  [syncQueryStateWithUrl](./kibana-plugin-plugins-data-public.syncquerystatewithurl.md) | Helper to setup syncing of global data with the URL |
@@ -185,7 +186,6 @@
 |  [SavedQueryTimeFilter](./kibana-plugin-plugins-data-public.savedquerytimefilter.md) |  |
 |  [SearchBarProps](./kibana-plugin-plugins-data-public.searchbarprops.md) |  |
 |  [StatefulSearchBarProps](./kibana-plugin-plugins-data-public.statefulsearchbarprops.md) |  |
-|  [TabbedAggRow](./kibana-plugin-plugins-data-public.tabbedaggrow.md) | \* |
 |  [TimefilterContract](./kibana-plugin-plugins-data-public.timefiltercontract.md) |  |
 |  [TimeHistoryContract](./kibana-plugin-plugins-data-public.timehistorycontract.md) |  |
 |  [TimeRange](./kibana-plugin-plugins-data-public.timerange.md) |  |

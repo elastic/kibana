@@ -1,10 +1,17 @@
 # Lens
 
+Visualization editor allowing to quickly and easily configure compelling visualizations to use on dashboards and canvas workpads.
+
+## Embedding
+
+It's possible to embed Lens visualizations in other apps using `EmbeddableComponent` and `navigateToPrefilledEditor`
+exposed via contract. For more information check out the example in `x-pack/examples/embedded_lens_example`.
+
 ## Testing
 
 Run all tests from the `x-pack` root directory
 
-- Unit tests: `node scripts/jest --watch lens`
+- Unit tests: `yarn test:jest x-pack/plugins/lens`
 - Functional tests:
   - Run `node scripts/functional_tests_server`
   - Run `node ../scripts/functional_test_runner.js --config ./test/functional/config.js --grep="lens app"`

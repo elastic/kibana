@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import axios from 'axios';
@@ -12,6 +13,7 @@ import { ExternalService } from './types';
 import { Logger } from '../../../../../../src/core/server';
 import { loggingSystemMock } from '../../../../../../src/core/server/mocks';
 import { incidentTypes, resilientFields, severity } from './mocks';
+import { actionsConfigMock } from '../../actions_config.mock';
 
 const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 
@@ -28,6 +30,7 @@ axios.create = jest.fn(() => axios);
 const requestMock = utils.request as jest.Mock;
 const now = Date.now;
 const TIMESTAMP = 1589391874472;
+const configurationUtilities = actionsConfigMock.create();
 
 // Incident update makes three calls to the API.
 // The function below mocks this calls.
@@ -86,7 +89,8 @@ describe('IBM Resilient service', () => {
         config: { apiUrl: 'https://resilient.elastic.co/', orgId: '201' },
         secrets: { apiKeyId: 'keyId', apiKeySecret: 'secret' },
       },
-      logger
+      logger,
+      configurationUtilities
     );
   });
 
@@ -155,7 +159,8 @@ describe('IBM Resilient service', () => {
             config: { apiUrl: null, orgId: '201' },
             secrets: { apiKeyId: 'token', apiKeySecret: 'secret' },
           },
-          logger
+          logger,
+          configurationUtilities
         )
       ).toThrow();
     });
@@ -167,7 +172,8 @@ describe('IBM Resilient service', () => {
             config: { apiUrl: 'test.com', orgId: null },
             secrets: { apiKeyId: 'token', apiKeySecret: 'secret' },
           },
-          logger
+          logger,
+          configurationUtilities
         )
       ).toThrow();
     });
@@ -179,7 +185,8 @@ describe('IBM Resilient service', () => {
             config: { apiUrl: 'test.com', orgId: '201' },
             secrets: { apiKeyId: '', apiKeySecret: 'secret' },
           },
-          logger
+          logger,
+          configurationUtilities
         )
       ).toThrow();
     });
@@ -191,7 +198,8 @@ describe('IBM Resilient service', () => {
             config: { apiUrl: 'test.com', orgId: '201' },
             secrets: { apiKeyId: '', apiKeySecret: undefined },
           },
-          logger
+          logger,
+          configurationUtilities
         )
       ).toThrow();
     });
@@ -226,6 +234,7 @@ describe('IBM Resilient service', () => {
         params: {
           text_content_output_format: 'objects_convert',
         },
+        configurationUtilities,
       });
     });
 
@@ -294,6 +303,7 @@ describe('IBM Resilient service', () => {
           'https://resilient.elastic.co/rest/orgs/201/incidents?text_content_output_format=objects_convert',
         logger,
         method: 'post',
+        configurationUtilities,
         data: {
           name: 'title',
           description: {
@@ -367,6 +377,7 @@ describe('IBM Resilient service', () => {
         axios,
         logger,
         method: 'patch',
+        configurationUtilities,
         url: 'https://resilient.elastic.co/rest/orgs/201/incidents/1',
         data: {
           changes: [
@@ -450,10 +461,6 @@ describe('IBM Resilient service', () => {
         comment: {
           comment: 'comment',
           commentId: 'comment-1',
-          createdBy: null,
-          createdAt: null,
-          updatedAt: null,
-          updatedBy: null,
         },
       });
 
@@ -477,10 +484,6 @@ describe('IBM Resilient service', () => {
         comment: {
           comment: 'comment',
           commentId: 'comment-1',
-          createdBy: null,
-          createdAt: null,
-          updatedAt: null,
-          updatedBy: null,
         },
       });
 
@@ -488,7 +491,7 @@ describe('IBM Resilient service', () => {
         axios,
         logger,
         method: 'post',
-        proxySettings: undefined,
+        configurationUtilities,
         url: 'https://resilient.elastic.co/rest/orgs/201/incidents/1/comments',
         data: {
           text: {
@@ -510,10 +513,6 @@ describe('IBM Resilient service', () => {
           comment: {
             comment: 'comment',
             commentId: 'comment-1',
-            createdBy: null,
-            createdAt: null,
-            updatedAt: null,
-            updatedBy: null,
           },
         })
       ).rejects.toThrow(
@@ -596,6 +595,7 @@ describe('IBM Resilient service', () => {
       expect(requestMock).toHaveBeenCalledWith({
         axios,
         logger,
+        configurationUtilities,
         url: 'https://resilient.elastic.co/rest/orgs/201/types/incident/fields',
       });
     });

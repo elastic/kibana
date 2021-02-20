@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { getCerts } from './get_certs';
@@ -20,6 +21,8 @@ import { getSnapshotCount } from './get_snapshot_counts';
 import { getIndexStatus } from './get_index_status';
 import { getJourneySteps } from './get_journey_steps';
 import { getJourneyScreenshot } from './get_journey_screenshot';
+import { getJourneyDetails } from './get_journey_details';
+import { getNetworkEvents } from './get_network_events';
 import { getJourneyFailedSteps } from './get_journey_failed_steps';
 
 export const requests = {
@@ -40,6 +43,8 @@ export const requests = {
   getJourneySteps,
   getJourneyFailedSteps,
   getJourneyScreenshot,
+  getJourneyDetails,
+  getNetworkEvents,
 };
 
 export type UptimeRequests = typeof requests;

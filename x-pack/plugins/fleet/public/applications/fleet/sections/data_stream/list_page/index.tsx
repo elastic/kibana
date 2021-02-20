@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React, { useMemo } from 'react';
 import {
   EuiBadge,
@@ -121,14 +123,14 @@ export const DataStreamListPage: React.FunctionComponent<{}> = () => {
         },
       },
       {
-        field: 'last_activity',
+        field: 'last_activity_ms',
         sortable: true,
         width: '25%',
         dataType: 'date',
         name: i18n.translate('xpack.fleet.dataStreamList.lastActivityColumnTitle', {
           defaultMessage: 'Last activity',
         }),
-        render: (date: DataStream['last_activity']) => {
+        render: (date: DataStream['last_activity_ms']) => {
           try {
             const formatter = fieldFormats.getInstance('date');
             return formatter.convert(date);

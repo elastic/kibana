@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 /**
@@ -30,9 +19,9 @@
 import { isFunction, defaults, cloneDeep } from 'lodash';
 import { Assign } from '@kbn/utility-types';
 import { i18n } from '@kbn/i18n';
+
 import { PersistedState } from './persisted_state';
 import { getTypes, getAggs, getSearch, getSavedSearchLoader } from './services';
-import { VisType } from './vis_types';
 import {
   IAggConfigs,
   IndexPattern,
@@ -40,6 +29,8 @@ import {
   AggConfigOptions,
   SearchSourceFields,
 } from '../../../plugins/data/public';
+import { BaseVisType } from './vis_types';
+import { VisParams } from '../common/types';
 
 export interface SerializedVisData {
   expression?: string;
@@ -66,10 +57,6 @@ export interface VisData {
   savedSearchId?: string;
 }
 
-export interface VisParams {
-  [key: string]: any;
-}
-
 const getSearchSource = async (inputSearchSource: ISearchSource, savedSearchId?: string) => {
   const searchSource = inputSearchSource.createCopy();
   if (savedSearchId) {
@@ -84,14 +71,11 @@ const getSearchSource = async (inputSearchSource: ISearchSource, savedSearchId?:
 type PartialVisState = Assign<SerializedVis, { data: Partial<SerializedVisData> }>;
 
 export class Vis<TVisParams = VisParams> {
-  public readonly type: VisType<TVisParams>;
+  public readonly type: BaseVisType<TVisParams>;
   public readonly id?: string;
   public title: string = '';
   public description: string = '';
   public params: TVisParams;
-  // Session state is for storing information that is transitory, and will not be saved with the visualization.
-  // For instance, map bounds, which depends on the view port, browser window size, etc.
-  public sessionState: Record<string, any> = {};
   public data: VisData = {};
 
   public readonly uiState: PersistedState;

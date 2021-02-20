@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { Reducer } from 'redux';
@@ -17,8 +18,8 @@ const initialState: DataState = {
     loading: false,
     data: null,
   },
-  relatedEvents: new Map(),
   resolverComponentInstanceID: undefined,
+  indices: [],
 };
 /* eslint-disable complexity */
 export const dataReducer: Reducer<DataState, ResolverAction> = (state = initialState, action) => {
@@ -30,10 +31,12 @@ export const dataReducer: Reducer<DataState, ResolverAction> = (state = initialS
         currentParameters: {
           databaseDocumentID: action.payload.databaseDocumentID,
           indices: action.payload.indices,
+          filters: action.payload.filters,
         },
       },
       resolverComponentInstanceID: action.payload.resolverComponentInstanceID,
       locationSearch: action.payload.locationSearch,
+      indices: action.payload.indices,
     };
     const panelViewAndParameters = selectors.panelViewAndParameters(nextState);
     return {
@@ -57,6 +60,7 @@ export const dataReducer: Reducer<DataState, ResolverAction> = (state = initialS
         pendingRequestParameters: {
           databaseDocumentID: action.payload.databaseDocumentID,
           indices: action.payload.indices,
+          filters: action.payload.filters,
         },
       },
     };
@@ -117,12 +121,6 @@ export const dataReducer: Reducer<DataState, ResolverAction> = (state = initialS
     } else {
       return state;
     }
-  } else if (action.type === 'serverReturnedRelatedEventData') {
-    const nextState: DataState = {
-      ...state,
-      relatedEvents: new Map([...state.relatedEvents, [action.payload.entityID, action.payload]]),
-    };
-    return nextState;
   } else if (action.type === 'serverReturnedNodeEventsInCategory') {
     // The data in the action could be irrelevant if the panel view or parameters have changed since the corresponding request was made. In that case, ignore this action.
     if (
@@ -141,7 +139,9 @@ export const dataReducer: Reducer<DataState, ResolverAction> = (state = initialS
         if (updated) {
           const next: DataState = {
             ...state,
-            nodeEventsInCategory: updated,
+            nodeEventsInCategory: {
+              ...updated,
+            },
           };
           return next;
         } else {
@@ -235,7 +235,9 @@ export const dataReducer: Reducer<DataState, ResolverAction> = (state = initialS
       ...state,
       currentRelatedEvent: {
         loading: false,
-        data: action.payload,
+        data: {
+          ...action.payload,
+        },
       },
     };
     return nextState;

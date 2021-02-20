@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { APMConfig } from '../';
 import { PromiseReturnType } from '../../../observability/typings/common';
 import {
@@ -79,11 +81,14 @@ export async function inspectSearchParams(
 
             case 'xpack.apm.maxServiceEnvironments':
               return 100;
+
+            case 'xpack.apm.maxServiceSelection':
+              return 50;
           }
         },
       }
     ) as APMConfig,
-    uiFilters: { environment: 'test' },
+    uiFilters: {},
     esFilter: [{ term: { 'service.environment': 'test' } }],
     indices: {
       /* eslint-disable @typescript-eslint/naming-convention */

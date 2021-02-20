@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -11,8 +12,8 @@ import { i18n } from '@kbn/i18n';
 import { StartServicesAccessor } from 'src/core/public';
 import { RegisterManagementAppArgs } from '../../../../../../src/plugins/management/public';
 import { PluginStartDependencies } from '../../plugin';
-import { DocumentationLinksService } from './documentation_links';
 import { tryDecodeURIComponent } from '../url_utils';
+import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
 
 interface CreateParams {
   getStartServices: StartServicesAccessor<PluginStartDependencies>;
@@ -39,7 +40,7 @@ export const roleMappingsManagementApp = Object.freeze({
         ];
 
         const [
-          [{ docLinks, http, notifications, i18n: i18nStart }],
+          [core],
           { RoleMappingsGridPage },
           { EditRoleMappingPage },
           { RoleMappingsAPIClient },
@@ -52,16 +53,15 @@ export const roleMappingsManagementApp = Object.freeze({
           import('../roles'),
         ]);
 
-        const roleMappingsAPIClient = new RoleMappingsAPIClient(http);
-        const dockLinksService = new DocumentationLinksService(docLinks);
+        const roleMappingsAPIClient = new RoleMappingsAPIClient(core.http);
         const RoleMappingsGridPageWithBreadcrumbs = () => {
           setBreadcrumbs(roleMappingsBreadcrumbs);
           return (
             <RoleMappingsGridPage
-              notifications={notifications}
-              rolesAPIClient={new RolesAPIClient(http)}
+              notifications={core.notifications}
+              rolesAPIClient={new RolesAPIClient(core.http)}
               roleMappingsAPI={roleMappingsAPIClient}
-              docLinks={dockLinksService}
+              docLinks={core.docLinks}
               history={history}
               navigateToApp={coreStart.application.navigateToApp}
             />
@@ -90,27 +90,29 @@ export const roleMappingsManagementApp = Object.freeze({
             <EditRoleMappingPage
               name={decodedName}
               roleMappingsAPI={roleMappingsAPIClient}
-              rolesAPIClient={new RolesAPIClient(http)}
-              notifications={notifications}
-              docLinks={dockLinksService}
+              rolesAPIClient={new RolesAPIClient(core.http)}
+              notifications={core.notifications}
+              docLinks={core.docLinks}
               history={history}
             />
           );
         };
 
         render(
-          <i18nStart.Context>
-            <Router history={history}>
-              <Switch>
-                <Route path={['/', '']} exact={true}>
-                  <RoleMappingsGridPageWithBreadcrumbs />
-                </Route>
-                <Route path="/edit/:name?">
-                  <EditRoleMappingsPageWithBreadcrumbs />
-                </Route>
-              </Switch>
-            </Router>
-          </i18nStart.Context>,
+          <KibanaContextProvider services={core}>
+            <core.i18n.Context>
+              <Router history={history}>
+                <Switch>
+                  <Route path={['/', '']} exact={true}>
+                    <RoleMappingsGridPageWithBreadcrumbs />
+                  </Route>
+                  <Route path="/edit/:name?">
+                    <EditRoleMappingsPageWithBreadcrumbs />
+                  </Route>
+                </Switch>
+              </Router>
+            </core.i18n.Context>
+          </KibanaContextProvider>,
           element
         );
 

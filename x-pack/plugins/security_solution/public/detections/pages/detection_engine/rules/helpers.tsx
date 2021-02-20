@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import dateMath from '@elastic/datemath';
@@ -22,7 +23,6 @@ import {
   AboutStepRule,
   AboutStepRuleDetails,
   DefineStepRule,
-  IMitreEnterpriseAttack,
   ScheduleStepRule,
   ActionsStepRule,
 } from './types';
@@ -30,6 +30,7 @@ import {
   SeverityMapping,
   Type,
   Severity,
+  Threats,
 } from '../../../../../common/detection_engine/schemas/common/schemas';
 import { severityOptions } from '../../../components/rules/step_about_rule/data';
 
@@ -98,8 +99,18 @@ export const getDefineStepsData = (rule: Rule): DefineStepRule => ({
     title: rule.timeline_title ?? null,
   },
   threshold: {
-    field: rule.threshold?.field ? [rule.threshold.field] : [],
+    field: rule.threshold?.field
+      ? Array.isArray(rule.threshold.field)
+        ? rule.threshold.field
+        : [rule.threshold.field]
+      : [],
     value: `${rule.threshold?.value || 100}`,
+    cardinality_field: Array.isArray(rule.threshold?.cardinality_field)
+      ? rule.threshold!.cardinality_field
+      : rule.threshold?.cardinality_field != null
+      ? [rule.threshold!.cardinality_field]
+      : [],
+    cardinality_value: `${rule.threshold?.cardinality_value ?? 0}`,
   },
 });
 
@@ -152,6 +163,7 @@ export const getAboutStepsData = (rule: Rule, detailsView: boolean): AboutStepRu
     risk_score: riskScore,
     tags,
     threat,
+    threat_indicator_path: threatIndicatorPath,
   } = rule;
 
   return {
@@ -177,7 +189,8 @@ export const getAboutStepsData = (rule: Rule, detailsView: boolean): AboutStepRu
       isMappingChecked: riskScoreMapping.length > 0,
     },
     falsePositives,
-    threat: threat as IMitreEnterpriseAttack[],
+    threat: threat as Threats,
+    threatIndicatorPath,
   };
 };
 
@@ -382,6 +395,7 @@ export const getActionMessageParams = memoizeOne(
           description: 'context.results_link',
           useWithTripleBracesInTemplates: true,
         },
+        { name: 'alerts', description: 'context.alerts' },
         ...actionMessageRuleParams.map((param) => {
           const extendedParam = `rule.${param}`;
           return { name: extendedParam, description: `context.${extendedParam}` };

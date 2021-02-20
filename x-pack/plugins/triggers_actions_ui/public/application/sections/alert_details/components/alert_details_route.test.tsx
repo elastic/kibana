@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import * as React from 'react';
 import uuid from 'uuid';
 import { shallow } from 'enzyme';
@@ -10,7 +12,7 @@ import { createMemoryHistory, createLocation } from 'history';
 import { ToastsApi } from 'kibana/public';
 import { AlertDetailsRoute, getAlertData } from './alert_details_route';
 import { Alert } from '../../../../types';
-import { EuiLoadingSpinner } from '@elastic/eui';
+import { CenterJustifiedSpinner } from '../../../components/center_justified_spinner';
 jest.mock('../../../../common/lib/kibana');
 
 describe('alert_details_route', () => {
@@ -20,7 +22,7 @@ describe('alert_details_route', () => {
     expect(
       shallow(
         <AlertDetailsRoute {...mockRouterProps(alert)} {...mockApis()} />
-      ).containsMatchingElement(<EuiLoadingSpinner size="l" />)
+      ).containsMatchingElement(<CenterJustifiedSpinner />)
     ).toBeTruthy();
   });
 });

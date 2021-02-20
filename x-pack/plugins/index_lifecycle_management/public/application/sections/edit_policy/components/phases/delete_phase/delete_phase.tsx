@@ -1,108 +1,89 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import React, { FunctionComponent, Fragment } from 'react';
+import React, { FunctionComponent } from 'react';
 import { get } from 'lodash';
+import {
+  EuiFlexItem,
+  EuiFlexGroup,
+  EuiTitle,
+  EuiButtonEmpty,
+  EuiSpacer,
+  EuiText,
+  EuiComment,
+} from '@elastic/eui';
+
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiDescribedFormGroup, EuiTextColor, EuiFormRow } from '@elastic/eui';
 
-import { useFormData, UseField, ToggleField } from '../../../../../../shared_imports';
+import { useFormData } from '../../../../../../shared_imports';
 
-import { ActiveBadge, LearnMoreLink, OptionalLabel } from '../../index';
+import { i18nTexts } from '../../../i18n_texts';
 
-import { MinAgeInputField, SnapshotPoliciesField } from '../shared_fields';
+import { usePhaseTimings } from '../../../form';
+
+import { MinAgeField, SnapshotPoliciesField } from '../shared_fields';
+import './delete_phase.scss';
+import { PhaseIcon } from '../../phase_icon';
+import { PhaseErrorIndicator } from '../phase/phase_error_indicator';
 
 const formFieldPaths = {
   enabled: '_meta.delete.enabled',
 };
 
 export const DeletePhase: FunctionComponent = () => {
+  const { setDeletePhaseEnabled } = usePhaseTimings();
   const [formData] = useFormData({
     watch: formFieldPaths.enabled,
   });
 
   const enabled = get(formData, formFieldPaths.enabled);
 
-  return (
-    <div id="deletePhaseContent" aria-live="polite" role="region">
-      <EuiDescribedFormGroup
-        title={
-          <div>
-            <h2 className="eui-displayInlineBlock eui-alignMiddle">
-              <FormattedMessage
-                id="xpack.indexLifecycleMgmt.editPolicy.deletePhase.deletePhaseLabel"
-                defaultMessage="Delete phase"
-              />
-            </h2>{' '}
-            {enabled && <ActiveBadge />}
-          </div>
-        }
-        titleSize="s"
-        description={
-          <Fragment>
-            <p>
-              <FormattedMessage
-                id="xpack.indexLifecycleMgmt.editPolicy.deletePhase.deletePhaseDescriptionText"
-                defaultMessage="You no longer need your index.  You can define when it is safe to delete it."
-              />
-            </p>
-            <UseField
-              path={formFieldPaths.enabled}
-              component={ToggleField}
-              componentProps={{
-                euiFieldProps: {
-                  'data-test-subj': 'enablePhaseSwitch-delete',
-                  'aria-controls': 'deletePhaseContent',
-                },
-              }}
-            />
-          </Fragment>
-        }
-        fullWidth
-      >
-        {enabled && <MinAgeInputField phase="delete" />}
-      </EuiDescribedFormGroup>
-      {enabled ? (
-        <EuiDescribedFormGroup
-          title={
-            <h3>
-              <FormattedMessage
-                id="xpack.indexLifecycleMgmt.editPolicy.deletePhase.waitForSnapshotTitle"
-                defaultMessage="Wait for snapshot policy"
-              />
-            </h3>
-          }
-          description={
-            <EuiTextColor color="subdued">
-              <FormattedMessage
-                id="xpack.indexLifecycleMgmt.editPolicy.deletePhase.waitForSnapshotDescription"
-                defaultMessage="Specify a snapshot policy to be executed before the deletion of the index. This ensures that a snapshot of the deleted index is available."
-              />{' '}
-              <LearnMoreLink docPath="ilm-wait-for-snapshot.html" />
-            </EuiTextColor>
-          }
-          titleSize="xs"
-          fullWidth
+  if (!enabled) {
+    return null;
+  }
+  const phaseTitle = (
+    <EuiFlexGroup alignItems="center" gutterSize={'s'} wrap>
+      <EuiFlexItem grow={false}>
+        <EuiTitle size={'s'}>
+          <h2>{i18nTexts.editPolicy.titles.delete}</h2>
+        </EuiTitle>
+      </EuiFlexItem>
+
+      <EuiFlexItem>
+        <EuiButtonEmpty
+          onClick={() => setDeletePhaseEnabled(false)}
+          data-test-subj={'disableDeletePhaseButton'}
         >
-          <EuiFormRow
-            id="deletePhaseWaitForSnapshot"
-            label={
-              <Fragment>
-                <FormattedMessage
-                  id="xpack.indexLifecycleMgmt.editPolicy.deletePhase.waitForSnapshotLabel"
-                  defaultMessage="Snapshot policy name"
-                />
-                <OptionalLabel />
-              </Fragment>
-            }
-          >
-            <SnapshotPoliciesField />
-          </EuiFormRow>
-        </EuiDescribedFormGroup>
-      ) : null}
-    </div>
+          <FormattedMessage
+            id="xpack.indexLifecycleMgmt.editPolicy.deletePhase.removeDeletePhaseButtonLabel"
+            defaultMessage="Remove"
+          />
+        </EuiButtonEmpty>
+      </EuiFlexItem>
+
+      <EuiFlexItem grow={false}>
+        <PhaseErrorIndicator phase={'delete'} />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+
+  return (
+    <EuiComment
+      data-test-subj="delete-phaseContent"
+      username={phaseTitle}
+      actions={<MinAgeField phase={'delete'} />}
+      className="ilmDeletePhase ilmPhase"
+      timelineIcon={<PhaseIcon enabled={enabled} phase={'delete'} />}
+    >
+      <EuiText color="subdued" size={'s'} style={{ maxWidth: '50%' }}>
+        {i18nTexts.editPolicy.descriptions.delete}
+      </EuiText>
+      <EuiSpacer />
+      <SnapshotPoliciesField />
+    </EuiComment>
   );
 };

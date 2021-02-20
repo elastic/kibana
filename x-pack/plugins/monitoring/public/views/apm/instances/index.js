@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -52,37 +53,40 @@ uiRoutes.when('/apm/instances', {
 
       this.scope = $scope;
       this.injector = $injector;
+      this.onTableChangeRender = this.renderComponent;
 
       $scope.$watch(
         () => this.data,
-        (data) => {
-          const { pagination, sorting, onTableChange } = this;
-
-          const component = (
-            <SetupModeRenderer
-              scope={this.scope}
-              injector={this.injector}
-              productName={APM_SYSTEM_ID}
-              render={({ setupMode, flyoutComponent, bottomBarComponent }) => (
-                <SetupModeContext.Provider value={{ setupModeSupported: true }}>
-                  {flyoutComponent}
-                  <ApmServerInstances
-                    setupMode={setupMode}
-                    apms={{
-                      pagination,
-                      sorting,
-                      onTableChange,
-                      data,
-                    }}
-                  />
-                  {bottomBarComponent}
-                </SetupModeContext.Provider>
-              )}
-            />
-          );
-          this.renderReact(component);
-        }
+        () => this.renderComponent()
       );
+    }
+
+    renderComponent() {
+      const { pagination, sorting, onTableChange } = this;
+
+      const component = (
+        <SetupModeRenderer
+          scope={this.scope}
+          injector={this.injector}
+          productName={APM_SYSTEM_ID}
+          render={({ setupMode, flyoutComponent, bottomBarComponent }) => (
+            <SetupModeContext.Provider value={{ setupModeSupported: true }}>
+              {flyoutComponent}
+              <ApmServerInstances
+                setupMode={setupMode}
+                apms={{
+                  pagination,
+                  sorting,
+                  onTableChange,
+                  data: this.data,
+                }}
+              />
+              {bottomBarComponent}
+            </SetupModeContext.Provider>
+          )}
+        />
+      );
+      this.renderReact(component);
     }
   },
 });

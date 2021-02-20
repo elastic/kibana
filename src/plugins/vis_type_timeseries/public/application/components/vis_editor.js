@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import PropTypes from 'prop-types';
@@ -40,13 +29,8 @@ export class VisEditor extends Component {
   constructor(props) {
     super(props);
     this.localStorage = new Storage(window.localStorage);
-    this.state = {
-      model: props.visParams,
-      dirty: false,
-      autoApply: true,
-      visFields: props.visFields,
-      extractedIndexPatterns: [''],
-    };
+    this.state = {};
+
     this.visDataSubject = new Rx.BehaviorSubject(this.props.visData);
     this.visData$ = this.visDataSubject.asObservable().pipe(share());
 
@@ -75,7 +59,10 @@ export class VisEditor extends Component {
       isDirty: false,
     });
 
-    const extractedIndexPatterns = extractIndexPatterns(this.state.model);
+    const extractedIndexPatterns = extractIndexPatterns(
+      this.state.model,
+      this.state.model.default_index_pattern
+    );
     if (!isEqual(this.state.extractedIndexPatterns, extractedIndexPatterns)) {
       this.abortableFetchFields(extractedIndexPatterns).then((visFields) => {
         this.setState({
@@ -191,6 +178,31 @@ export class VisEditor extends Component {
   }
 
   componentDidMount() {
+    const dataStart = getDataStart();
+
+    dataStart.indexPatterns.getDefault().then(async (index) => {
+      const defaultIndexTitle = index?.title ?? '';
+      const indexPatterns = extractIndexPatterns(this.props.visParams, defaultIndexTitle);
+
+      this.setState({
+        model: {
+          ...this.props.visParams,
+          /** @legacy
+           *  please use IndexPatterns service instead
+           * **/
+          default_index_pattern: defaultIndexTitle,
+          /** @legacy
+           *  please use IndexPatterns service instead
+           * **/
+          default_timefield: index?.timeFieldName ?? '',
+        },
+        dirty: false,
+        autoApply: true,
+        visFields: await fetchFields(indexPatterns),
+        extractedIndexPatterns: [''],
+      });
+    });
+
     this.props.eventEmitter.on('updateEditor', this.updateModel);
   }
 
@@ -207,10 +219,8 @@ VisEditor.defaultProps = {
 VisEditor.propTypes = {
   vis: PropTypes.object,
   visData: PropTypes.object,
-  visFields: PropTypes.object,
   renderComplete: PropTypes.func,
   config: PropTypes.object,
-  savedObj: PropTypes.object,
   timeRange: PropTypes.object,
   appState: PropTypes.object,
 };

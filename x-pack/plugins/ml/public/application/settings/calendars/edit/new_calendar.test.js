@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 jest.mock('../../../contexts/kibana/use_create_url', () => ({
@@ -11,6 +12,19 @@ jest.mock('../../../contexts/kibana/use_create_url', () => ({
 jest.mock('../../../components/navigation_menu', () => ({
   NavigationMenu: () => <div id="mockNavigationMenu" />,
 }));
+
+jest.mock('../../../components/help_menu', () => ({
+  HelpMenu: () => <div id="mockHelpMenu" />,
+}));
+
+jest.mock('../../../util/dependency_cache', () => ({
+  getDocLinks: () => ({
+    links: {
+      ml: { calendars: jest.fn() },
+    },
+  }),
+}));
+
 jest.mock('../../../capabilities/check_capabilities', () => ({
   checkPermission: () => true,
 }));

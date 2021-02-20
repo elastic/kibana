@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -22,10 +23,7 @@ const getRawArrayDisplay = (rawArray: Array<string | number>): string => {
 };
 
 const parseHighlights = (highlight: string): string => {
-  return highlight.replace(
-    /<em>(.+?)<\/em>/gi,
-    '<em class="enterpriseSearchResultHighlight">$1</em>'
-  );
+  return highlight.replace(/<em>(.+?)<\/em>/gi, '<mark class="euiMark">$1</mark>');
 };
 
 const isFieldValueEmpty = (type?: string, raw?: Raw, snippet?: Snippet) => {

@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { AlertsClient, ConstructorOptions } from '../alerts_client';
 import { savedObjectsClientMock, loggingSystemMock } from '../../../../../../src/core/server/mocks';
 import { taskManagerMock } from '../../../../task_manager/server/mocks';
@@ -15,6 +17,7 @@ import { ActionsAuthorization } from '../../../../actions/server';
 import { getBeforeSetup, setGlobalDate } from './lib';
 import { AlertExecutionStatusValues } from '../../types';
 import { RecoveredActionGroup } from '../../../common';
+import { RegistryAlertType } from '../../alert_type_registry';
 
 const taskManager = taskManagerMock.createStart();
 const alertTypeRegistry = alertTypeRegistryMock.create();
@@ -49,15 +52,17 @@ beforeEach(() => {
 setGlobalDate();
 
 describe('aggregate()', () => {
-  const listedTypes = new Set([
+  const listedTypes = new Set<RegistryAlertType>([
     {
       actionGroups: [],
       actionVariables: undefined,
       defaultActionGroupId: 'default',
+      minimumLicenseRequired: 'basic',
       recoveryActionGroup: RecoveredActionGroup,
       id: 'myType',
       name: 'myType',
       producer: 'myApp',
+      enabledInLicense: true,
     },
   ]);
   beforeEach(() => {
@@ -104,11 +109,13 @@ describe('aggregate()', () => {
           name: 'Test',
           actionGroups: [{ id: 'default', name: 'Default' }],
           defaultActionGroupId: 'default',
+          minimumLicenseRequired: 'basic',
           recoveryActionGroup: RecoveredActionGroup,
           producer: 'alerts',
           authorizedConsumers: {
             myApp: { read: true, all: true },
           },
+          enabledInLicense: true,
         },
       ])
     );

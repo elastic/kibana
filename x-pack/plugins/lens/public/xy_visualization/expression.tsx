@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import './expression.scss';
@@ -60,6 +61,15 @@ import { fittingFunctionDefinitions, getFitOptions } from './fitting_functions';
 import { getAxesConfiguration } from './axes_configuration';
 import { getColorAssignments } from './color_assignment';
 
+declare global {
+  interface Window {
+    /**
+     * Flag used to enable debugState on elastic charts
+     */
+    _echDebugStateFlag?: boolean;
+  }
+}
+
 type InferPropType<T> = T extends React.FunctionComponent<infer P> ? P : T;
 type SeriesSpec = InferPropType<typeof LineSeries> &
   InferPropType<typeof BarSeries> &
@@ -76,7 +86,7 @@ export interface XYRender {
   value: XYChartProps;
 }
 
-type XYChartRenderProps = XYChartProps & {
+export type XYChartRenderProps = XYChartProps & {
   chartsThemeService: ChartsPluginSetup['theme'];
   paletteService: PaletteRegistry;
   formatFactory: FormatFactory;
@@ -85,6 +95,7 @@ type XYChartRenderProps = XYChartProps & {
   onClickValue: (data: LensFilterEvent['data']) => void;
   onSelectRange: (data: LensBrushEvent['data']) => void;
   renderMode: RenderMode;
+  syncColors: boolean;
 };
 
 export const xyChart: ExpressionFunctionDefinition<
@@ -188,13 +199,20 @@ export async function calculateMinInterval(
   const filteredLayers = getFilteredLayers(layers, data);
   if (filteredLayers.length === 0) return;
   const isTimeViz = data.dateRange && filteredLayers.every((l) => l.xScaleType === 'time');
-
-  if (!isTimeViz) return;
-  const dateColumn = data.tables[filteredLayers[0].layerId].columns.find(
+  const xColumn = data.tables[filteredLayers[0].layerId].columns.find(
     (column) => column.id === filteredLayers[0].xAccessor
   );
-  if (!dateColumn) return;
-  const dateMetaData = await getIntervalByColumn(dateColumn);
+
+  if (!xColumn) return;
+  if (!isTimeViz) {
+    const histogramInterval = search.aggs.getNumberHistogramIntervalByDatatableColumn(xColumn);
+    if (typeof histogramInterval === 'number') {
+      return histogramInterval;
+    } else {
+      return undefined;
+    }
+  }
+  const dateMetaData = await getIntervalByColumn(xColumn);
   if (!dateMetaData) return;
   const intervalDuration = search.aggs.parseInterval(dateMetaData.interval);
   if (!intervalDuration) return;
@@ -240,6 +258,7 @@ export const getXyChartRenderer = (dependencies: {
           onClickValue={onClickValue}
           onSelectRange={onSelectRange}
           renderMode={handlers.getRenderMode()}
+          syncColors={handlers.isSyncColorsEnabled()}
         />
       </I18nProvider>,
       domNode,
@@ -309,6 +328,7 @@ export function XYChart({
   onClickValue,
   onSelectRange,
   renderMode,
+  syncColors,
 }: XYChartRenderProps) {
   const { legend, layers, fittingFunction, gridlinesVisibilitySettings, valueLabels } = args;
   const chartTheme = chartsThemeService.useChartsTheme();
@@ -368,13 +388,11 @@ export function XYChart({
   const isTimeViz = data.dateRange && filteredLayers.every((l) => l.xScaleType === 'time');
   const isHistogramViz = filteredLayers.every((l) => l.isHistogram);
 
-  const xDomain = isTimeViz
-    ? {
-        min: data.dateRange?.fromDate.getTime(),
-        max: data.dateRange?.toDate.getTime(),
-        minInterval,
-      }
-    : undefined;
+  const xDomain = {
+    min: isTimeViz ? data.dateRange?.fromDate.getTime() : undefined,
+    max: isTimeViz ? data.dateRange?.toDate.getTime() : undefined,
+    minInterval,
+  };
 
   const getYAxesTitles = (
     axisSeries: Array<{ layer: string; accessor: string }>,
@@ -505,6 +523,7 @@ export function XYChart({
   return (
     <Chart>
       <Settings
+        debugState={window._echDebugStateFlag ?? false}
         showLegend={
           legend.isVisible && !legend.showSingleSeries
             ? chartHasMoreThanOneSeries
@@ -681,6 +700,7 @@ export function XYChart({
                   maxDepth: 1,
                   behindText: false,
                   totalSeries: colorAssignment.totalSeriesCount,
+                  syncColors,
                 },
                 palette.params
               );

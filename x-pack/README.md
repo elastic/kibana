@@ -1,8 +1,8 @@
 # Elastic License Functionality
 
-This directory tree contains files subject to the Elastic License. The files subject
-to the Elastic License are grouped in this directory to clearly separate them
-from files licensed under the Apache License 2.0.
+This directory tree contains files subject to the Elastic License 2.0. The files subject
+to the Elastic License 2.0 are grouped in this directory to clearly separate them
+from files dual-licensed under the Server Side Public License and the Elastic License 2.0.
 
 # Development
 
@@ -15,45 +15,10 @@ Example: `yarn es snapshot --license trial --password changeme`
 By default, this will also set the password for native realm accounts to the password provided (`changeme` by default). This includes that of the `kibana_system` user which `elasticsearch.username` defaults to in development. If you wish to specify a password for a given native realm account, you can do that like so: `--password.kibana_system=notsecure`
 
 # Testing
-## Running specific tests
-| Test runner  | Test location                                                                       | Runner command (working directory is kibana/x-pack)                                     |
-| ------------ | ----------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
-| Jest         | `x-pack/**/*.test.js`<br>`x-pack/**/*.test.ts`                                      | `cd x-pack && node scripts/jest -t regexp [test path]`                                     |
-| Functional   | `x-pack/test/*integration/**/config.js`<br>`x-pack/test/*functional/config.js`<br>`x-pack/test/accessibility/config.js`      | `node scripts/functional_tests_server --config x-pack/test/[directory]/config.js`<br>`node scripts/functional_test_runner --config x-pack/test/[directory]/config.js --grep=regexp`       |
 
-Examples:
-  - Run the jest test case whose description matches 'filtering should skip values of null':
-    `cd x-pack && yarn test:jest -t 'filtering should skip values of null' plugins/ml/public/application/explorer/explorer_charts/explorer_charts_container_service.test.js`
-  - Run the x-pack api integration test case whose description matches the given string:
-    `node scripts/functional_tests_server --config x-pack/test/api_integration/config.ts`
-    `node scripts/functional_test_runner --config x-pack/test/api_integration/config.ts --grep='apis Monitoring Beats list with restarted beat instance should load multiple clusters'`
-
-In addition to to providing a regular expression argument, specific tests can also be run by appeding `.only` to an `it` or `describe` function block. E.g. `describe(` to `describe.only(`.
-
-## Running all tests
-
-You can run unit tests by running:
-
-```
-yarn test
-```
-
-If you want to run tests only for a specific plugin (to save some time), you can run:
-
-```
-yarn test --plugins <plugin>[,<plugin>]*    # where <plugin> is "reporting", etc.
-```
-
-#### Running server unit tests
-You can run mocha unit tests by running:
-
-```
-yarn test:mocha
-```
+For information on testing, see [the Elastic functional test development guide](https://www.elastic.co/guide/en/kibana/current/development-functional-tests.html).
 
 #### Running functional tests
-
-For more info, see [the Elastic functional test development guide](https://www.elastic.co/guide/en/kibana/current/development-functional-tests.html).
 
 The functional UI tests, the API integration tests, and the SAML API integration tests are all run against a live browser, Kibana, and Elasticsearch install. Each set of tests is specified with a unique config that describes how to start the Elasticsearch server, the Kibana server, and what tests to run against them. The sets of tests that exist today are *functional UI tests* ([specified by this config](test/functional/config.js)), *API integration tests* ([specified by this config](test/api_integration/config.ts)), and *SAML API integration tests* ([specified by this config](test/security_api_integration/saml.config.ts)).
 
@@ -116,11 +81,12 @@ node scripts/functional_tests --config test/security_api_integration/saml.config
 Jest integration tests can be used to test behavior with Elasticsearch and the Kibana server.
 
 ```sh
-node scripts/jest_integration
+yarn test:jest_integration
 ```
-
-An example test exists at [test_utils/jest/integration_tests/example_integration.test.ts](test_utils/jest/integration_tests/example_integration.test.ts)
 
 #### Running Reporting functional tests
 
-See [here](test/reporting/README.md) for more information on running reporting tests.
+See [here](./test/functional/apps/dashboard/reporting/README.md) for more information on running reporting tests.
+
+#### Running Security Solution Cypress E2E/integration tests
+See [here](./plugins/security_solution/cypress/README.md) for information on running this test suite.

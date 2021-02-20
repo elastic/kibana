@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React, { Fragment, useReducer, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
@@ -19,20 +21,18 @@ import {
   EuiCallOut,
   EuiSpacer,
 } from '@elastic/eui';
+import { cloneDeep } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import {
-  ActionTypeRegistryContract,
-  Alert,
-  AlertAction,
-  AlertTypeRegistryContract,
-  IErrorObject,
-} from '../../../types';
-import { AlertForm, validateBaseProperties } from './alert_form';
+import { ActionTypeRegistryContract, Alert, AlertTypeRegistryContract } from '../../../types';
+import { AlertForm, getAlertErrors, isValidAlert } from './alert_form';
 import { alertReducer, ConcreteAlertReducer } from './alert_reducer';
 import { updateAlert } from '../../lib/alert_api';
 import { HealthCheck } from '../../components/health_check';
 import { HealthContextProvider } from '../../context/health_context';
 import { useKibana } from '../../../common/lib/kibana';
+import { ConfirmAlertClose } from './confirm_alert_close';
+import { hasAlertChanged } from './has_alert_changed';
+import { getAlertWithInvalidatedFields } from '../../lib/value_validators';
 
 export interface AlertEditProps<MetaData = Record<string, any>> {
   initialAlert: Alert;
@@ -52,52 +52,62 @@ export const AlertEdit = ({
   metadata,
 }: AlertEditProps) => {
   const [{ alert }, dispatch] = useReducer(alertReducer as ConcreteAlertReducer, {
-    alert: initialAlert,
+    alert: cloneDeep(initialAlert),
   });
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [hasActionsDisabled, setHasActionsDisabled] = useState<boolean>(false);
   const [hasActionsWithBrokenConnector, setHasActionsWithBrokenConnector] = useState<boolean>(
     false
   );
+  const [isConfirmAlertCloseModalOpen, setIsConfirmAlertCloseModalOpen] = useState<boolean>(false);
 
   const {
     http,
     notifications: { toasts },
   } = useKibana().services;
+  const setAlert = (value: Alert) => {
+    dispatch({ command: { type: 'setAlert' }, payload: { key: 'alert', value } });
+  };
 
   const alertType = alertTypeRegistry.get(alert.alertTypeId);
 
-  const errors = {
-    ...(alertType ? alertType.validate(alert.params).errors : []),
-    ...validateBaseProperties(alert).errors,
-  } as IErrorObject;
-  const hasErrors = !!Object.keys(errors).find((errorKey) => errors[errorKey].length >= 1);
-
-  const actionsErrors: Array<{
-    errors: IErrorObject;
-  }> = alert.actions.map((alertAction: AlertAction) =>
-    actionTypeRegistry.get(alertAction.actionTypeId)?.validateParams(alertAction.params)
+  const { alertActionsErrors, alertBaseErrors, alertErrors, alertParamsErrors } = getAlertErrors(
+    alert as Alert,
+    actionTypeRegistry,
+    alertType
   );
 
-  const hasActionErrors =
-    actionsErrors.find(
-      (errorObj: { errors: IErrorObject }) =>
-        errorObj &&
-        !!Object.keys(errorObj.errors).find((errorKey) => errorObj.errors[errorKey].length >= 1)
-    ) !== undefined;
+  const checkForChangesAndCloseFlyout = () => {
+    if (hasAlertChanged(alert, initialAlert, true)) {
+      setIsConfirmAlertCloseModalOpen(true);
+    } else {
+      onClose();
+    }
+  };
 
   async function onSaveAlert(): Promise<Alert | undefined> {
     try {
-      const newAlert = await updateAlert({ http, alert, id: alert.id });
-      toasts.addSuccess(
-        i18n.translate('xpack.triggersActionsUI.sections.alertEdit.saveSuccessNotificationText', {
-          defaultMessage: "Updated '{alertName}'",
-          values: {
-            alertName: newAlert.name,
-          },
-        })
-      );
-      return newAlert;
+      if (isValidAlert(alert, alertErrors, alertActionsErrors) && !hasActionsWithBrokenConnector) {
+        const newAlert = await updateAlert({ http, alert, id: alert.id });
+        toasts.addSuccess(
+          i18n.translate('xpack.triggersActionsUI.sections.alertEdit.saveSuccessNotificationText', {
+            defaultMessage: "Updated '{alertName}'",
+            values: {
+              alertName: newAlert.name,
+            },
+          })
+        );
+        return newAlert;
+      } else {
+        setAlert(
+          getAlertWithInvalidatedFields(
+            alert as Alert,
+            alertParamsErrors,
+            alertBaseErrors,
+            alertActionsErrors
+          )
+        );
+      }
     } catch (errorRes) {
       toasts.addDanger(
         errorRes.body?.message ??
@@ -111,7 +121,7 @@ export const AlertEdit = ({
   return (
     <EuiPortal>
       <EuiFlyout
-        onClose={() => onClose()}
+        onClose={checkForChangesAndCloseFlyout}
         aria-labelledby="flyoutAlertEditTitle"
         size="m"
         maxWidth={620}
@@ -147,7 +157,7 @@ export const AlertEdit = ({
               <AlertForm
                 alert={alert}
                 dispatch={dispatch}
-                errors={errors}
+                errors={alertErrors}
                 actionTypeRegistry={actionTypeRegistry}
                 alertTypeRegistry={alertTypeRegistry}
                 canChangeTrigger={false}
@@ -164,7 +174,7 @@ export const AlertEdit = ({
                 <EuiFlexItem grow={false}>
                   <EuiButtonEmpty
                     data-test-subj="cancelSaveEditedAlertButton"
-                    onClick={() => onClose()}
+                    onClick={() => checkForChangesAndCloseFlyout()}
                   >
                     {i18n.translate(
                       'xpack.triggersActionsUI.sections.alertEdit.cancelButtonLabel',
@@ -181,7 +191,6 @@ export const AlertEdit = ({
                     data-test-subj="saveEditedAlertButton"
                     type="submit"
                     iconType="check"
-                    isDisabled={hasErrors || hasActionErrors || hasActionsWithBrokenConnector}
                     isLoading={isSaving}
                     onClick={async () => {
                       setIsSaving(true);
@@ -205,6 +214,17 @@ export const AlertEdit = ({
             </EuiFlyoutFooter>
           </HealthCheck>
         </HealthContextProvider>
+        {isConfirmAlertCloseModalOpen && (
+          <ConfirmAlertClose
+            onConfirm={() => {
+              setIsConfirmAlertCloseModalOpen(false);
+              onClose();
+            }}
+            onCancel={() => {
+              setIsConfirmAlertCloseModalOpen(false);
+            }}
+          />
+        )}
       </EuiFlyout>
     </EuiPortal>
   );

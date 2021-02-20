@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 export {
   AGENT_TYPE_PERMANENT,
   AGENT_TYPE_EPHEMERAL,
@@ -14,7 +16,6 @@ export {
   AGENT_POLICY_ROLLOUT_RATE_LIMIT_REQUEST_PER_INTERVAL,
   AGENT_POLICY_ROLLOUT_RATE_LIMIT_INTERVAL_MS,
   AGENT_UPDATE_ACTIONS_INTERVAL_MS,
-  INDEX_PATTERN_PLACEHOLDER_SUFFIX,
   MAX_TIME_COMPLETE_INSTALL,
   // Routes
   LIMITED_CONCURRENCY_ROUTE_TAG,
@@ -48,4 +49,7 @@ export {
   // Defaults
   DEFAULT_AGENT_POLICY,
   DEFAULT_OUTPUT,
+  // Fleet Server index
+  ENROLLMENT_API_KEYS_INDEX,
+  AGENTS_INDEX,
 } from '../../common';

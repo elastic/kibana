@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { useReducer, useCallback } from 'react';
@@ -56,6 +57,7 @@ interface UpdateComment {
   commentId: string;
   commentUpdate: string;
   fetchUserActions: () => void;
+  subCaseId?: string;
   updateCase: (newCase: Case) => void;
   version: string;
 }
@@ -77,6 +79,7 @@ export const useUpdateComment = (): UseUpdateComment => {
       commentId,
       commentUpdate,
       fetchUserActions,
+      subCaseId,
       updateCase,
       version,
     }: UpdateComment) => {
@@ -89,7 +92,8 @@ export const useUpdateComment = (): UseUpdateComment => {
           commentId,
           commentUpdate,
           version,
-          abortCtrl.signal
+          abortCtrl.signal,
+          subCaseId
         );
         if (!cancel) {
           updateCase(response);

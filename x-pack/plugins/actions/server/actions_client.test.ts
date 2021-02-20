@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { schema } from '@kbn/config-schema';
@@ -58,9 +59,7 @@ beforeEach(() => {
   actionTypeRegistryParams = {
     licensing: licensingMock.createSetup(),
     taskManager: mockTaskManager,
-    taskRunnerFactory: new TaskRunnerFactory(
-      new ActionExecutor({ isESOUsingEphemeralEncryptionKey: false })
-    ),
+    taskRunnerFactory: new TaskRunnerFactory(new ActionExecutor({ isESOCanEncrypt: true })),
     actionsConfigUtils: actionsConfigMock.create(),
     licenseState: mockedLicenseState,
     preconfiguredActions: [],
@@ -402,14 +401,15 @@ describe('create()', () => {
       enabled: true,
       enabledActionTypes: ['some-not-ignored-action-type'],
       allowedHosts: ['*'],
+      preconfigured: {},
+      proxyRejectUnauthorizedCertificates: true,
+      rejectUnauthorized: true,
     });
 
     const localActionTypeRegistryParams = {
       licensing: licensingMock.createSetup(),
       taskManager: mockTaskManager,
-      taskRunnerFactory: new TaskRunnerFactory(
-        new ActionExecutor({ isESOUsingEphemeralEncryptionKey: false })
-      ),
+      taskRunnerFactory: new TaskRunnerFactory(new ActionExecutor({ isESOCanEncrypt: true })),
       actionsConfigUtils: localConfigUtils,
       licenseState: licenseStateMock.create(),
       preconfiguredActions: [],

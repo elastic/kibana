@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiHorizontalRule, EuiSpacer, EuiWindowEvent } from '@elastic/eui';
@@ -43,7 +44,7 @@ import { HostDetailsProps } from './types';
 import { type } from './utils';
 import { getHostDetailsPageFilters } from './helpers';
 import { showGlobalFilters } from '../../../timelines/components/timeline/helpers';
-import { useFullScreen } from '../../../common/containers/use_full_screen';
+import { useGlobalFullScreen } from '../../../common/containers/use_full_screen';
 import { Display } from '../display';
 import { timelineSelectors } from '../../../timelines/store/timeline';
 import { TimelineId } from '../../../../common/types/timeline';
@@ -68,7 +69,7 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
   const filters = useDeepEqualSelector(getGlobalFiltersQuerySelector);
 
   const { to, from, deleteQuery, setQuery, isInitializing } = useGlobalTime();
-  const { globalFullScreen } = useFullScreen();
+  const { globalFullScreen } = useGlobalFullScreen();
 
   const capabilities = useMlCapabilities();
   const kibana = useKibana();
@@ -150,6 +151,7 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
                         docValueFields={docValueFields}
                         id={id}
                         inspect={inspect}
+                        isInDetailsSidePanel={false}
                         refetch={refetch}
                         setQuery={setQuery}
                         data={hostOverview as HostItem}

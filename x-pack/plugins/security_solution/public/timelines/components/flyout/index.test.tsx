@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { mount, shallow } from 'enzyme';
@@ -17,6 +18,7 @@ import {
   kibanaObservable,
   createSecuritySolutionStorageMock,
 } from '../../../common/mock';
+import { TimelineId } from '../../../../common/types/timeline';
 import { createStore, State } from '../../../common/store';
 import * as timelineActions from '../../store/timeline/actions';
 
@@ -40,6 +42,10 @@ jest.mock('../timeline', () => ({
 describe('Flyout', () => {
   const state: State = mockGlobalState;
   const { storage } = createSecuritySolutionStorageMock();
+  const props = {
+    onAppLeave: jest.fn(),
+    timelineId: TimelineId.test,
+  };
 
   beforeEach(() => {
     mockDispatch.mockClear();
@@ -49,7 +55,7 @@ describe('Flyout', () => {
     test('it renders correctly against snapshot', () => {
       const wrapper = shallow(
         <TestProviders>
-          <Flyout timelineId="test" />
+          <Flyout {...props} />
         </TestProviders>
       );
       expect(wrapper.find('Flyout')).toMatchSnapshot();
@@ -58,7 +64,7 @@ describe('Flyout', () => {
     test('it renders the default flyout state as a bottom bar', () => {
       const wrapper = mount(
         <TestProviders>
-          <Flyout timelineId="test" />
+          <Flyout {...props} />
         </TestProviders>
       );
 
@@ -79,7 +85,7 @@ describe('Flyout', () => {
 
       const wrapper = mount(
         <TestProviders store={storeShowIsTrue}>
-          <Flyout timelineId="test" />
+          <Flyout {...props} />
         </TestProviders>
       );
 
@@ -91,7 +97,7 @@ describe('Flyout', () => {
     test('should call the onOpen when the mouse is clicked for rendering', () => {
       const wrapper = mount(
         <TestProviders>
-          <Flyout timelineId="test" />
+          <Flyout {...props} />
         </TestProviders>
       );
 

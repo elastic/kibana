@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { SanitizedAlert, AlertInstanceSummary } from '../types';
@@ -635,11 +636,11 @@ export class EventsFactory {
   }
 }
 
-function createAlert(overrides: Partial<SanitizedAlert>): SanitizedAlert {
+function createAlert(overrides: Partial<SanitizedAlert>): SanitizedAlert<{ bar: boolean }> {
   return { ...BaseAlert, ...overrides };
 }
 
-const BaseAlert: SanitizedAlert = {
+const BaseAlert: SanitizedAlert<{ bar: boolean }> = {
   id: 'alert-123',
   alertTypeId: '123',
   schedule: { interval: '10s' },

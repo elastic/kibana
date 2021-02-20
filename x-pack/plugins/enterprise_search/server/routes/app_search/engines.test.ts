@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { MockRouter, mockRequestHandler, mockDependencies } from '../../__mocks__';
@@ -28,7 +29,6 @@ describe('engine routes', () => {
       mockRouter = new MockRouter({
         method: 'get',
         path: '/api/app_search/engines',
-        payload: 'query',
       });
 
       registerEnginesRoutes({
@@ -59,6 +59,7 @@ describe('engine routes', () => {
 
     describe('hasValidData', () => {
       it('should correctly validate that the response has data', () => {
+        mockRequestHandler.createRequest.mockClear();
         const response = {
           meta: {
             page: {
@@ -73,6 +74,7 @@ describe('engine routes', () => {
       });
 
       it('should correctly validate that a response does not have data', () => {
+        mockRequestHandler.createRequest.mockClear();
         const response = {};
 
         mockRouter.callRoute(mockRequest);
@@ -108,6 +110,47 @@ describe('engine routes', () => {
     });
   });
 
+  describe('POST /api/app_search/engines', () => {
+    let mockRouter: MockRouter;
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      mockRouter = new MockRouter({
+        method: 'post',
+        path: '/api/app_search/engines',
+      });
+
+      registerEnginesRoutes({
+        ...mockDependencies,
+        router: mockRouter.router,
+      });
+    });
+
+    it('creates a request handler', () => {
+      mockRouter.callRoute({ body: { name: 'some-engine', language: 'en' } });
+      expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
+        path: '/as/engines/collection',
+      });
+    });
+
+    describe('validates', () => {
+      it('correctly', () => {
+        const request = { body: { name: 'some-engine', language: 'en' } };
+        mockRouter.shouldValidate(request);
+      });
+
+      it('missing name', () => {
+        const request = { body: { language: 'en' } };
+        mockRouter.shouldThrow(request);
+      });
+
+      it('optional language', () => {
+        const request = { body: { name: 'some-engine' } };
+        mockRouter.shouldValidate(request);
+      });
+    });
+  });
+
   describe('GET /api/app_search/engines/{name}', () => {
     let mockRouter: MockRouter;
 
@@ -125,10 +168,8 @@ describe('engine routes', () => {
     });
 
     it('creates a request to enterprise search', () => {
-      mockRouter.callRoute({ params: { name: 'some-engine' } });
-
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/as/engines/some-engine/details',
+        path: '/as/engines/:name/details',
       });
     });
   });
@@ -150,10 +191,8 @@ describe('engine routes', () => {
     });
 
     it('creates a request to enterprise search', () => {
-      mockRouter.callRoute({ params: { name: 'some-engine' } });
-
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/as/engines/some-engine/overview_metrics',
+        path: '/as/engines/:name/overview_metrics',
       });
     });
   });

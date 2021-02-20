@@ -5,6 +5,7 @@ exports[`ReportInfoButton handles button click flyout on click 1`] = `
   aria-label="Show report info"
   className="euiButtonIcon euiButtonIcon--primary"
   data-test-subj="reportInfoButton"
+  disabled={false}
   onClick={[Function]}
   type="button"
 >
@@ -57,7 +58,7 @@ Array [
       >
         <div
           aria-labelledby="flyoutTitle"
-          className="euiFlyout euiFlyout--small"
+          className="euiFlyout euiFlyout--small euiFlyout--paddingLarge"
           data-test-subj="reportInfoFlyout"
           role="dialog"
           tabIndex={0}
@@ -78,6 +79,7 @@ Array [
                 aria-label="Close this dialog"
                 className="euiButtonIcon euiButtonIcon--text euiFlyout__closeButton"
                 data-test-subj="euiFlyoutCloseButton"
+                disabled={false}
                 onClick={[Function]}
                 type="button"
               >
@@ -142,7 +144,7 @@ Array [
   </EuiFlyout>,
   <div
     aria-labelledby="flyoutTitle"
-    className="euiFlyout euiFlyout--small"
+    className="euiFlyout euiFlyout--small euiFlyout--paddingLarge"
     data-test-subj="reportInfoFlyout"
     role="dialog"
     tabIndex={0}
@@ -163,6 +165,7 @@ Array [
           aria-label="Close this dialog"
           className="euiButtonIcon euiButtonIcon--text euiFlyout__closeButton"
           data-test-subj="euiFlyoutCloseButton"
+          disabled={false}
           onClick={[Function]}
           type="button"
         >
@@ -258,7 +261,7 @@ Array [
       >
         <div
           aria-labelledby="flyoutTitle"
-          className="euiFlyout euiFlyout--small"
+          className="euiFlyout euiFlyout--small euiFlyout--paddingLarge"
           data-test-subj="reportInfoFlyout"
           role="dialog"
           tabIndex={0}
@@ -279,6 +282,7 @@ Array [
                 aria-label="Close this dialog"
                 className="euiButtonIcon euiButtonIcon--text euiFlyout__closeButton"
                 data-test-subj="euiFlyoutCloseButton"
+                disabled={false}
                 onClick={[Function]}
                 type="button"
               >
@@ -341,7 +345,7 @@ Array [
   </EuiFlyout>,
   <div
     aria-labelledby="flyoutTitle"
-    className="euiFlyout euiFlyout--small"
+    className="euiFlyout euiFlyout--small euiFlyout--paddingLarge"
     data-test-subj="reportInfoFlyout"
     role="dialog"
     tabIndex={0}
@@ -362,6 +366,7 @@ Array [
           aria-label="Close this dialog"
           className="euiButtonIcon euiButtonIcon--text euiFlyout__closeButton"
           data-test-subj="euiFlyoutCloseButton"
+          disabled={false}
           onClick={[Function]}
           type="button"
         >

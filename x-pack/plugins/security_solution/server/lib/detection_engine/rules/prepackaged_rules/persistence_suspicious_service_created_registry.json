@@ -3,9 +3,11 @@
     "Elastic"
   ],
   "description": "Identifies the creation of a suspicious ImagePath value. This could be an indication of an adversary attempting to stealthily persist or escalate privileges through abnormal service creation.",
+  "from": "now-9m",
   "index": [
     "winlogbeat-*",
-    "logs-endpoint.events.*"
+    "logs-endpoint.events.*",
+    "logs-windows.*"
   ],
   "language": "eql",
   "license": "Elastic License",
@@ -31,13 +33,21 @@
       },
       "technique": [
         {
-          "id": "T1050",
-          "name": "New Service",
-          "reference": "https://attack.mitre.org/techniques/T1050/"
+          "id": "T1543",
+          "name": "Create or Modify System Process",
+          "reference": "https://attack.mitre.org/techniques/T1543/",
+          "subtechnique": [
+            {
+              "id": "T1543.003",
+              "name": "Windows Service",
+              "reference": "https://attack.mitre.org/techniques/T1543/003/"
+            }
+          ]
         }
       ]
     }
   ],
+  "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 1
+  "version": 3
 }

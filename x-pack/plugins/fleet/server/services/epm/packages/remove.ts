@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { SavedObjectsClientContract } from 'src/core/server';
@@ -23,6 +24,7 @@ import { deleteTransforms } from '../elasticsearch/transform/remove';
 import { packagePolicyService, appContextService } from '../..';
 import { splitPkgKey } from '../registry';
 import { deletePackageCache } from '../archive';
+import { deleteIlms } from '../elasticsearch/datastream_ilm/remove';
 import { removeArchiveEntries } from '../archive/storage';
 
 export async function removeInstallation(options: {
@@ -93,6 +95,8 @@ function deleteESAssets(installedObjects: EsAssetReference[], callCluster: CallE
       return deleteTemplate(callCluster, id);
     } else if (assetType === ElasticsearchAssetType.transform) {
       return deleteTransforms(callCluster, [id]);
+    } else if (assetType === ElasticsearchAssetType.dataStreamIlmPolicy) {
+      return deleteIlms(callCluster, [id]);
     }
   });
 }
@@ -112,7 +116,10 @@ async function deleteAssets(
   try {
     await Promise.all(deletePromises);
   } catch (err) {
-    logger.error(err);
+    // in the rollback case, partial installs are likely, so missing assets are not an error
+    if (!savedObjectsClient.errors.isNotFoundError(err)) {
+      logger.error(err);
+    }
   }
 }
 

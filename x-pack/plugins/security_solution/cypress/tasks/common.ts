@@ -1,8 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
+import { esArchiverResetKibana } from './es_archiver';
+import { RuleEcs } from '../../common/ecs/rule';
 
 const primaryButton = 0;
 
@@ -55,8 +59,92 @@ export const drop = (dropTarget: JQuery<HTMLElement>) => {
     .wait(300);
 };
 
-export const reload = (afterReload: () => void) => {
+export const reload = () => {
   cy.reload();
   cy.contains('a', 'Security');
-  afterReload();
+};
+
+export const cleanKibana = () => {
+  const kibanaIndexUrl = `${Cypress.env('ELASTICSEARCH_URL')}/.kibana_\*`;
+
+  cy.request('GET', '/api/detection_engine/rules/_find').then((response) => {
+    const rules: RuleEcs[] = response.body.data;
+
+    if (response.body.data.length > 0) {
+      rules.forEach((rule) => {
+        const jsonRule = rule;
+        cy.request({
+          method: 'DELETE',
+          url: `/api/detection_engine/rules?rule_id=${jsonRule.rule_id}`,
+          headers: { 'kbn-xsrf': 'cypress-creds-via-config' },
+        });
+      });
+    }
+  });
+
+  cy.request('POST', `${kibanaIndexUrl}/_delete_by_query?conflicts=proceed`, {
+    query: {
+      bool: {
+        filter: [
+          {
+            match: {
+              type: 'alert',
+            },
+          },
+          {
+            match: {
+              'alert.alertTypeId': 'siem.signals',
+            },
+          },
+          {
+            match: {
+              'alert.consumer': 'siem',
+            },
+          },
+        ],
+      },
+    },
+  });
+
+  cy.request('POST', `${kibanaIndexUrl}/_delete_by_query?conflicts=proceed`, {
+    query: {
+      bool: {
+        filter: [
+          {
+            match: {
+              type: 'cases',
+            },
+          },
+        ],
+      },
+    },
+  });
+
+  cy.request('POST', `${kibanaIndexUrl}/_delete_by_query?conflicts=proceed`, {
+    query: {
+      bool: {
+        filter: [
+          {
+            match: {
+              type: 'siem-ui-timeline',
+            },
+          },
+        ],
+      },
+    },
+  });
+
+  cy.request(
+    'POST',
+    `${Cypress.env(
+      'ELASTICSEARCH_URL'
+    )}/.lists-*,.items-*,.siem-signals-*/_delete_by_query?conflicts=proceed&scroll_size=10000`,
+    {
+      query: {
+        match_all: {},
+      },
+    }
+  );
+
+  esArchiverResetKibana();
 };

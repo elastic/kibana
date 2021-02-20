@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { flatten, omit, isEmpty } from 'lodash';
@@ -24,6 +25,7 @@ export function useTransactionDistributionFetcher() {
   const { serviceName } = useParams<{ serviceName?: string }>();
   const { urlParams, uiFilters } = useUrlParams();
   const {
+    environment,
     start,
     end,
     transactionType,
@@ -44,6 +46,7 @@ export function useTransactionDistributionFetcher() {
               serviceName,
             },
             query: {
+              environment,
               start,
               end,
               transactionType,
@@ -91,7 +94,15 @@ export function useTransactionDistributionFetcher() {
     },
     // the histogram should not be refetched if the transactionId or traceId changes
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [serviceName, start, end, transactionType, transactionName, uiFilters]
+    [
+      environment,
+      serviceName,
+      start,
+      end,
+      transactionType,
+      transactionName,
+      uiFilters,
+    ]
   );
 
   return {

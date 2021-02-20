@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { useEffect, useState } from 'react';
@@ -25,7 +14,7 @@ import { useKibana } from '../../services/kibana_react';
 
 import { DashboardConstants } from '../..';
 import { DashboardSavedObject } from '../../saved_dashboards';
-import { getDashboard60Warning } from '../../dashboard_strings';
+import { getDashboard60Warning, getNewDashboardTitle } from '../../dashboard_strings';
 import { DashboardAppServices } from '../types';
 
 export const useSavedDashboard = (savedDashboardId: string | undefined, history: History) => {
@@ -36,7 +25,7 @@ export const useSavedDashboard = (savedDashboardId: string | undefined, history:
   // abstraction of service dependencies easier.
   const { indexPatterns } = data;
   const { recentlyAccessed: recentlyAccessedPaths, docTitle } = chrome;
-  const { addDanger: showDangerToast, addWarning: showWarningToast } = core.notifications.toasts;
+  const { toasts } = core.notifications;
 
   useEffect(() => {
     (async function loadSavedDashboard() {
@@ -46,7 +35,7 @@ export const useSavedDashboard = (savedDashboardId: string | undefined, history:
           pathname: DashboardConstants.CREATE_NEW_DASHBOARD_URL,
         });
 
-        showWarningToast(getDashboard60Warning());
+        toasts.addWarning(getDashboard60Warning());
         return;
       }
 
@@ -54,29 +43,23 @@ export const useSavedDashboard = (savedDashboardId: string | undefined, history:
 
       try {
         const dashboard = (await savedDashboards.get(savedDashboardId)) as DashboardSavedObject;
-        const { title, getFullPath } = dashboard;
-        if (savedDashboardId) {
-          recentlyAccessedPaths.add(getFullPath(), title, savedDashboardId);
-        }
-
-        docTitle.change(title);
+        docTitle.change(dashboard.title || getNewDashboardTitle());
         setSavedDashboard(dashboard);
       } catch (error) {
         // E.g. a corrupt or deleted dashboard
-        showDangerToast(error.message);
+        toasts.addDanger(error.message);
         history.push(DashboardConstants.LANDING_PAGE_PATH);
       }
     })();
     return () => setSavedDashboard(null);
   }, [
+    toasts,
     docTitle,
     history,
     indexPatterns,
     recentlyAccessedPaths,
     savedDashboardId,
     savedDashboards,
-    showDangerToast,
-    showWarningToast,
   ]);
 
   return savedDashboard;

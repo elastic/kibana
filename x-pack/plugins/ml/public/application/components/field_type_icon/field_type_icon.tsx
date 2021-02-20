@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FC } from 'react';
@@ -12,10 +13,11 @@ import { i18n } from '@kbn/i18n';
 
 import { getMLJobTypeAriaLabel } from '../../util/field_types_utils';
 import { ML_JOB_FIELD_TYPES } from '../../../../common/constants/field_types';
+import type { MlJobFieldType } from '../../../../common/types/field_types';
 
 interface FieldTypeIconProps {
   tooltipEnabled: boolean;
-  type: ML_JOB_FIELD_TYPES;
+  type: MlJobFieldType;
   fieldName?: string;
   needsAria: boolean;
 }

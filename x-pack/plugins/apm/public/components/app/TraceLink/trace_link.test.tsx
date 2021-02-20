@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { act, render, waitFor } from '@testing-library/react';
 import { shallow } from 'enzyme';
 import React, { ReactNode } from 'react';
@@ -60,12 +62,13 @@ describe('TraceLink', () => {
   describe('when no transaction is found', () => {
     it('renders a trace page', () => {
       jest.spyOn(urlParamsHooks, 'useUrlParams').mockReturnValue({
+        rangeId: 0,
+        refreshTimeRange: jest.fn(),
+        uiFilters: {},
         urlParams: {
           rangeFrom: 'now-24h',
           rangeTo: 'now',
         },
-        refreshTimeRange: jest.fn(),
-        uiFilters: {},
       });
       jest.spyOn(hooks, 'useFetcher').mockReturnValue({
         data: { transaction: undefined },
@@ -87,12 +90,13 @@ describe('TraceLink', () => {
   describe('transaction page', () => {
     beforeAll(() => {
       jest.spyOn(urlParamsHooks, 'useUrlParams').mockReturnValue({
+        rangeId: 0,
+        refreshTimeRange: jest.fn(),
+        uiFilters: {},
         urlParams: {
           rangeFrom: 'now-24h',
           rangeTo: 'now',
         },
-        refreshTimeRange: jest.fn(),
-        uiFilters: {},
       });
     });
 

@@ -1,18 +1,25 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { FilterStateStore } from '../../../../../../src/plugins/data/common/es_query/filters/meta_filter';
 
-import { TimelineId, TimelineType, TimelineStatus } from '../../../common/types/timeline';
+import {
+  TimelineId,
+  TimelineType,
+  TimelineStatus,
+  TimelineTabs,
+} from '../../../common/types/timeline';
 
 import { OpenTimelineResult } from '../../timelines/components/open_timeline/types';
 import { GetAllTimeline, SortFieldTimeline, TimelineResult, Direction } from '../../graphql/types';
 import { TimelineEventsDetailsItem } from '../../../common/search_strategy';
 import { allTimelinesQuery } from '../../timelines/containers/all/index.gql_query';
 import { CreateTimelineProps } from '../../detections/components/alerts_table/types';
-import { TimelineModel, TimelineTabs } from '../../timelines/store/timeline/model';
+import { TimelineModel } from '../../timelines/store/timeline/model';
 import { timelineDefaults } from '../../timelines/store/timeline/defaults';
 
 export interface MockedProvidedQuery {
@@ -2099,10 +2106,15 @@ export const mockTimelineModel: TimelineModel = {
   },
   deletedEventIds: [],
   description: 'This is a sample rule description',
+  eqlOptions: {
+    eventCategoryField: 'event.category',
+    tiebreakerField: 'event.sequence',
+    timestampField: '@timestamp',
+  },
   eventIdToNoteIds: {},
   eventType: 'all',
   excludedRowRendererIds: [],
-  expandedEvent: {},
+  expandedDetail: {},
   filters: [
     {
       $state: {
@@ -2145,6 +2157,7 @@ export const mockTimelineModel: TimelineModel = {
   sort: [
     {
       columnId: '@timestamp',
+      columnType: 'number',
       sortDirection: Direction.desc,
     },
   ],
@@ -2179,7 +2192,7 @@ export const mockTimelineResult: TimelineResult = {
   templateTimelineId: null,
   templateTimelineVersion: null,
   savedQueryId: null,
-  sort: [{ columnId: '@timestamp', sortDirection: 'desc' }],
+  sort: [{ columnId: '@timestamp', columnType: 'number', sortDirection: 'desc' }],
   version: '1',
 };
 
@@ -2197,7 +2210,7 @@ export const defaultTimelineProps: CreateTimelineProps = {
   timeline: {
     activeTab: TimelineTabs.query,
     columns: [
-      { columnHeaderType: 'not-filtered', id: '@timestamp', width: 190 },
+      { columnHeaderType: 'not-filtered', id: '@timestamp', type: 'number', width: 190 },
       { columnHeaderType: 'not-filtered', id: 'message', width: 180 },
       { columnHeaderType: 'not-filtered', id: 'event.category', width: 180 },
       { columnHeaderType: 'not-filtered', id: 'event.action', width: 180 },
@@ -2221,10 +2234,17 @@ export const defaultTimelineProps: CreateTimelineProps = {
     dateRange: { end: '2018-11-05T19:03:25.937Z', start: '2018-11-05T18:58:25.937Z' },
     deletedEventIds: [],
     description: '',
+    eqlOptions: {
+      eventCategoryField: 'event.category',
+      query: '',
+      size: 100,
+      tiebreakerField: 'event.sequence',
+      timestampField: '@timestamp',
+    },
     eventIdToNoteIds: {},
     eventType: 'all',
     excludedRowRendererIds: [],
-    expandedEvent: {},
+    expandedDetail: {},
     filters: [],
     highlightedDropAndProviderId: '',
     historyIds: [],
@@ -2249,7 +2269,7 @@ export const defaultTimelineProps: CreateTimelineProps = {
     selectedEventIds: {},
     show: false,
     showCheckboxes: false,
-    sort: [{ columnId: '@timestamp', sortDirection: Direction.desc }],
+    sort: [{ columnId: '@timestamp', columnType: 'number', sortDirection: Direction.desc }],
     status: TimelineStatus.draft,
     title: '',
     timelineType: TimelineType.default,

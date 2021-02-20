@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useState } from 'react';
@@ -32,6 +33,7 @@ import { useUrlGenerator } from '../../../../services/use_url_generator';
 import { getIndexListUri, getTemplateDetailsLink } from '../../../../services/routing';
 import { ILM_PAGES_POLICY_EDIT, ILM_URL_GENERATOR_ID } from '../../../../constants';
 import { useAppContext } from '../../../../app_context';
+import { DataStreamsBadges } from '../data_stream_badges';
 
 interface DetailsListProps {
   details: Array<{
@@ -269,6 +271,7 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
           <EuiTitle size="m">
             <h2 id="dataStreamDetailPanelTitle" data-test-subj="dataStreamDetailPanelTitle">
               {dataStreamName}
+              {dataStream && <DataStreamsBadges dataStream={dataStream} />}
             </h2>
           </EuiTitle>
         </EuiFlyoutHeader>

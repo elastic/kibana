@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import * as yaml from 'js-yaml';
 import Url, { UrlObject } from 'url';
 
-import { RolesType } from '../../common/test';
+import { ROLES } from '../../common/test';
 import { TIMELINE_FLYOUT_BODY } from '../screens/timeline';
 
 /**
@@ -53,7 +54,7 @@ const LOGIN_API_ENDPOINT = '/internal/security/login';
  * @param role string role/user to log in with
  * @param route string route to visit
  */
-export const getUrlWithRoute = (role: RolesType, route: string) => {
+export const getUrlWithRoute = (role: ROLES, route: string) => {
   const theUrl = `${Url.format({
     auth: `${role}:changeme`,
     username: role,
@@ -73,7 +74,7 @@ export const getCurlScriptEnvVars = () => ({
   KIBANA_URL: Cypress.env('KIBANA_URL'),
 });
 
-export const postRoleAndUser = (role: RolesType) => {
+export const postRoleAndUser = (role: ROLES) => {
   const env = getCurlScriptEnvVars();
   const detectionsRoleScriptPath = `./server/lib/detection_engine/scripts/roles_users/${role}/post_detections_role.sh`;
   const detectionsRoleJsonPath = `./server/lib/detection_engine/scripts/roles_users/${role}/detections_role.json`;
@@ -91,7 +92,7 @@ export const postRoleAndUser = (role: RolesType) => {
   });
 };
 
-export const deleteRoleAndUser = (role: RolesType) => {
+export const deleteRoleAndUser = (role: ROLES) => {
   const env = getCurlScriptEnvVars();
   const detectionsUserDeleteScriptPath = `./server/lib/detection_engine/scripts/roles_users/${role}/delete_detections_user.sh`;
 
@@ -101,7 +102,7 @@ export const deleteRoleAndUser = (role: RolesType) => {
   });
 };
 
-export const loginWithRole = async (role: RolesType) => {
+export const loginWithRole = async (role: ROLES) => {
   postRoleAndUser(role);
   const theUrl = Url.format({
     auth: `${role}:changeme`,
@@ -136,7 +137,7 @@ export const loginWithRole = async (role: RolesType) => {
  * To speed the execution of tests, prefer this non-interactive authentication,
  * which is faster than authentication via Kibana's interactive login page.
  */
-export const login = (role?: RolesType) => {
+export const login = (role?: ROLES) => {
   if (role != null) {
     loginWithRole(role);
   } else if (credentialsProvidedByEnvironment()) {
@@ -217,7 +218,7 @@ const loginViaConfig = () => {
  * Authenticates with Kibana, visits the specified `url`, and waits for the
  * Kibana global nav to be displayed before continuing
  */
-export const loginAndWaitForPage = (url: string, role?: RolesType) => {
+export const loginAndWaitForPage = (url: string, role?: ROLES) => {
   login(role);
   cy.visit(
     `${url}?timerange=(global:(linkTo:!(timeline),timerange:(from:1547914976217,fromStr:'2019-01-19T16:22:56.217Z',kind:relative,to:1579537385745,toStr:now)),timeline:(linkTo:!(global),timerange:(from:1547914976217,fromStr:'2019-01-19T16:22:56.217Z',kind:relative,to:1579537385745,toStr:now)))`
@@ -225,17 +226,22 @@ export const loginAndWaitForPage = (url: string, role?: RolesType) => {
   cy.get('[data-test-subj="headerGlobalNav"]');
 };
 
-export const loginAndWaitForPageWithoutDateRange = (url: string, role?: RolesType) => {
+export const loginAndWaitForPageWithoutDateRange = (url: string, role?: ROLES) => {
   login(role);
   cy.visit(role ? getUrlWithRoute(role, url) : url);
   cy.get('[data-test-subj="headerGlobalNav"]', { timeout: 120000 });
 };
 
-export const loginAndWaitForTimeline = (timelineId: string, role?: RolesType) => {
+export const loginAndWaitForTimeline = (timelineId: string, role?: ROLES) => {
   const route = `/app/security/timelines?timeline=(id:'${timelineId}',isOpen:!t)`;
 
   login(role);
   cy.visit(role ? getUrlWithRoute(role, route) : route);
   cy.get('[data-test-subj="headerGlobalNav"]');
   cy.get(TIMELINE_FLYOUT_BODY).should('be.visible');
+};
+
+export const waitForPageWithoutDateRange = (url: string, role?: ROLES) => {
+  cy.visit(role ? getUrlWithRoute(role, url) : url);
+  cy.get('[data-test-subj="headerGlobalNav"]', { timeout: 120000 });
 };

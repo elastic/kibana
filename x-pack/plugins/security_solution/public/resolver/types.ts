@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 /* eslint-disable no-duplicate-imports */
@@ -208,6 +209,8 @@ export interface TreeFetcherParameters {
    * The indices that the backend will use to search for the document ID.
    */
   indices: string[];
+
+  filters: TimeFilters;
 }
 
 /**
@@ -236,6 +239,13 @@ export interface NodeEventsInCategoryState {
    */
 
   lastCursorRequested?: null | string;
+
+  pendingRequest?: {
+    /**
+     * Parameters used for a request currently in progress.
+     */
+    parameters: PanelViewAndParameters;
+  };
 
   /**
    * Flag for showing an error message when fetching additional related events.
@@ -298,11 +308,6 @@ export interface NodeData {
  * State for `data` reducer which handles receiving Resolver data from the back-end.
  */
 export interface DataState {
-  /**
-   * @deprecated Use the API
-   */
-  readonly relatedEvents: Map<string, ResolverRelatedEvents>;
-
   /**
    * Used when the panelView is `nodeEventsInCategory`.
    * Store the `nodeEventsInCategory` data for the current panel view. If the panel view or parameters change, the reducer may delete this.
@@ -370,6 +375,8 @@ export interface DataState {
    * Used to prevent collisions in things like query parameters.
    */
   readonly resolverComponentInstanceID?: string;
+
+  readonly indices: string[];
 
   /**
    * The `search` part of the URL.
@@ -680,8 +687,8 @@ export interface IsometricTaxiLayout {
  * Defines the type for bounding a search by a time box.
  */
 export interface TimeRange {
-  from: Date;
-  to: Date;
+  from: string;
+  to: string;
 }
 
 /**
@@ -791,6 +798,11 @@ export interface DataAccessLayer {
   }) => Promise<ResolverEntityIndex>;
 }
 
+export interface TimeFilters {
+  from?: string;
+  to?: string;
+}
+
 /**
  * The externally provided React props.
  */
@@ -815,6 +827,13 @@ export interface ResolverProps {
    * Indices that the backend should use to find the originating document.
    */
   indices: string[];
+
+  filters: TimeFilters;
+
+  /**
+   * A flag to update data from an external source
+   */
+  shouldUpdate: boolean;
 }
 
 /**

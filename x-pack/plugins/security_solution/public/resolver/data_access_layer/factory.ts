@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { KibanaReactContextValue } from '../../../../../../src/plugins/kibana_react/public';
@@ -43,8 +44,8 @@ export function dataAccessLayerFactory(
           body: JSON.stringify({
             indexPatterns,
             timeRange: {
-              from: timeRange.from.toISOString(),
-              to: timeRange.to.toISOString(),
+              from: timeRange.from,
+              to: timeRange.to,
             },
             filter: JSON.stringify({
               bool: {
@@ -82,8 +83,8 @@ export function dataAccessLayerFactory(
         query: { afterEvent: after, limit: 25 },
         body: JSON.stringify({
           timeRange: {
-            from: timeRange.from.toISOString(),
-            to: timeRange.to.toISOString(),
+            from: timeRange.from,
+            to: timeRange.to,
           },
           indexPatterns,
           filter: JSON.stringify({
@@ -119,8 +120,8 @@ export function dataAccessLayerFactory(
           query: { limit },
           body: JSON.stringify({
             timeRange: {
-              from: timeRange.from.toISOString(),
-              to: timeRange.to.toISOString(),
+              from: timeRange.from,
+              to: timeRange.to,
             },
             indexPatterns,
             filter: JSON.stringify({
@@ -182,8 +183,8 @@ export function dataAccessLayerFactory(
           body: JSON.stringify({
             indexPatterns,
             timeRange: {
-              from: timeRange.from.toISOString(),
-              to: timeRange.to.toISOString(),
+              from: timeRange.from,
+              to: timeRange.to,
             },
             filter: JSON.stringify(filter),
           }),

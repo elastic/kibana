@@ -1,11 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { IRouter } from 'kibana/server';
-
+import type { ListsPluginRouter } from '../types';
 import { LIST_INDEX } from '../../common/constants';
 import { buildSiemResponse, transformError } from '../siem_server_deps';
 import { validate } from '../../common/shared_imports';
@@ -13,7 +13,7 @@ import { listItemIndexExistSchema } from '../../common/schemas';
 
 import { getListClient } from '.';
 
-export const readListIndexRoute = (router: IRouter): void => {
+export const readListIndexRoute = (router: ListsPluginRouter): void => {
   router.get(
     {
       options: {

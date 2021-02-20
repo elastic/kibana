@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { Simulator } from '../test_utilities/simulator';
@@ -27,6 +28,8 @@ describe('Resolver: data loading and resolution states', () => {
         databaseDocumentID,
         resolverComponentInstanceID,
         indices: [],
+        shouldUpdate: false,
+        filters: {},
       });
     });
 
@@ -58,6 +61,8 @@ describe('Resolver: data loading and resolution states', () => {
         databaseDocumentID,
         resolverComponentInstanceID,
         indices: [],
+        shouldUpdate: false,
+        filters: {},
       });
     });
 
@@ -88,6 +93,8 @@ describe('Resolver: data loading and resolution states', () => {
         databaseDocumentID,
         resolverComponentInstanceID,
         indices: [],
+        shouldUpdate: false,
+        filters: {},
       });
     });
 
@@ -118,21 +125,23 @@ describe('Resolver: data loading and resolution states', () => {
         databaseDocumentID,
         resolverComponentInstanceID,
         indices: [],
+        shouldUpdate: false,
+        filters: {},
       });
     });
 
-    it('should display a resolver graph with 0 nodes', async () => {
+    it('should display a message informing the user why no nodes are present', async () => {
       await expect(
         simulator.map(() => ({
           resolverGraphLoading: simulator.testSubject('resolver:graph:loading').length,
           resolverGraphError: simulator.testSubject('resolver:graph:error').length,
-          resolverTree: simulator.testSubject('resolver:graph').length,
+          resolverEmptyMessage: simulator.testSubject('resolver:no-process-events').length,
           resolverGraphNodes: simulator.testSubject('resolver:node').length,
         }))
       ).toYieldEqualTo({
         resolverGraphLoading: 0,
         resolverGraphError: 0,
-        resolverTree: 1,
+        resolverEmptyMessage: 1,
         resolverGraphNodes: 0,
       });
     });
@@ -150,6 +159,8 @@ describe('Resolver: data loading and resolution states', () => {
         databaseDocumentID,
         resolverComponentInstanceID,
         indices: [],
+        shouldUpdate: false,
+        filters: {},
       });
     });
 

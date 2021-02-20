@@ -59,7 +59,9 @@ Array [
         "all": Array [],
         "read": Array [],
       },
-      "api": Array [],
+      "api": Array [
+        "store_search_session",
+      ],
       "app": Array [
         "dashboards",
         "kibana",
@@ -67,12 +69,17 @@ Array [
       "catalogue": Array [
         "dashboard",
       ],
-      "management": Object {},
+      "management": Object {
+        "kibana": Array [
+          "search_sessions",
+        ],
+      },
       "savedObject": Object {
         "all": Array [
           "dashboard",
           "query",
           "url",
+          "search-session",
         ],
         "read": Array [
           "index-pattern",
@@ -91,6 +98,7 @@ Array [
         "showWriteControls",
         "saveQuery",
         "createShortUrl",
+        "storeSearchSession",
       ],
     },
     "privilegeId": "all",
@@ -190,7 +198,9 @@ Array [
         "all": Array [],
         "read": Array [],
       },
-      "api": Array [],
+      "api": Array [
+        "store_search_session",
+      ],
       "app": Array [
         "discover",
         "kibana",
@@ -198,13 +208,18 @@ Array [
       "catalogue": Array [
         "discover",
       ],
-      "management": Object {},
+      "management": Object {
+        "kibana": Array [
+          "search_sessions",
+        ],
+      },
       "savedObject": Object {
         "all": Array [
           "search",
           "query",
           "index-pattern",
           "url",
+          "search-session",
         ],
         "read": Array [],
       },
@@ -213,6 +228,7 @@ Array [
         "save",
         "saveQuery",
         "createShortUrl",
+        "storeSearchSession",
       ],
     },
     "privilegeId": "all",
@@ -541,7 +557,9 @@ Array [
         "all": Array [],
         "read": Array [],
       },
-      "api": Array [],
+      "api": Array [
+        "store_search_session",
+      ],
       "app": Array [
         "dashboards",
         "kibana",
@@ -549,12 +567,17 @@ Array [
       "catalogue": Array [
         "dashboard",
       ],
-      "management": Object {},
+      "management": Object {
+        "kibana": Array [
+          "search_sessions",
+        ],
+      },
       "savedObject": Object {
         "all": Array [
           "dashboard",
           "query",
           "url",
+          "search-session",
         ],
         "read": Array [
           "index-pattern",
@@ -573,6 +596,7 @@ Array [
         "showWriteControls",
         "saveQuery",
         "createShortUrl",
+        "storeSearchSession",
       ],
     },
     "privilegeId": "all",
@@ -672,7 +696,9 @@ Array [
         "all": Array [],
         "read": Array [],
       },
-      "api": Array [],
+      "api": Array [
+        "store_search_session",
+      ],
       "app": Array [
         "discover",
         "kibana",
@@ -680,13 +706,18 @@ Array [
       "catalogue": Array [
         "discover",
       ],
-      "management": Object {},
+      "management": Object {
+        "kibana": Array [
+          "search_sessions",
+        ],
+      },
       "savedObject": Object {
         "all": Array [
           "search",
           "query",
           "index-pattern",
           "url",
+          "search-session",
         ],
         "read": Array [],
       },
@@ -695,6 +726,7 @@ Array [
         "save",
         "saveQuery",
         "createShortUrl",
+        "storeSearchSession",
       ],
     },
     "privilegeId": "all",

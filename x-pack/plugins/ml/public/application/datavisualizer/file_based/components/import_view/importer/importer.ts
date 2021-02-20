@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { chunk } from 'lodash';
@@ -15,7 +16,7 @@ import {
   Mappings,
   Settings,
   IngestPipeline,
-} from '../../../../../../../common/types/file_datavisualizer';
+} from '../../../../../../../../file_upload/common';
 
 const CHUNK_SIZE = 5000;
 const MAX_CHUNK_CHAR_COUNT = 1000000;

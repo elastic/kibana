@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiPopover } from '@elastic/eui';
@@ -16,6 +17,8 @@ import { NewTemplateTimeline } from '../../timeline/properties/new_template_time
 interface AddTimelineButtonComponentProps {
   timelineId: string;
 }
+
+export const ADD_TIMELINE_BUTTON_CLASS_NAME = 'add-timeline-button';
 
 const AddTimelineButtonComponent: React.FC<AddTimelineButtonComponentProps> = ({ timelineId }) => {
   const [showActions, setShowActions] = useState(false);
@@ -32,6 +35,7 @@ const AddTimelineButtonComponent: React.FC<AddTimelineButtonComponentProps> = ({
   const PopoverButtonIcon = useMemo(
     () => (
       <EuiButtonIcon
+        className={ADD_TIMELINE_BUTTON_CLASS_NAME}
         data-test-subj="settings-plus-in-circle"
         iconType="plusInCircle"
         color="primary"
@@ -52,6 +56,7 @@ const AddTimelineButtonComponent: React.FC<AddTimelineButtonComponentProps> = ({
           id="timelineSettingsPopover"
           isOpen={showActions}
           closePopover={onClosePopover}
+          ownFocus
           repositionOnScroll
         >
           <EuiFlexGroup alignItems="flexStart" direction="column" gutterSize="none">

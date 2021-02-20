@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { schema } from '@kbn/config-schema';
 
-import { RouteDependencies } from '../../plugin';
 import { ENGINES_PAGE_SIZE } from '../../../common/constants';
+import { RouteDependencies } from '../../plugin';
 
 interface EnginesResponse {
   results: object[];
@@ -44,6 +45,21 @@ export function registerEnginesRoutes({
     }
   );
 
+  router.post(
+    {
+      path: '/api/app_search/engines',
+      validate: {
+        body: schema.object({
+          name: schema.string(),
+          language: schema.maybe(schema.string()),
+        }),
+      },
+    },
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/as/engines/collection',
+    })
+  );
+
   // Single engine endpoints
   router.get(
     {
@@ -54,11 +70,9 @@ export function registerEnginesRoutes({
         }),
       },
     },
-    async (context, request, response) => {
-      return enterpriseSearchRequestHandler.createRequest({
-        path: `/as/engines/${request.params.name}/details`,
-      })(context, request, response);
-    }
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/as/engines/:name/details',
+    })
   );
   router.get(
     {
@@ -69,10 +83,8 @@ export function registerEnginesRoutes({
         }),
       },
     },
-    async (context, request, response) => {
-      return enterpriseSearchRequestHandler.createRequest({
-        path: `/as/engines/${request.params.name}/overview_metrics`,
-      })(context, request, response);
-    }
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/as/engines/:name/overview_metrics',
+    })
   );
 }

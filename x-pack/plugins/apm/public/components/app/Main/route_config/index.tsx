@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -22,11 +23,13 @@ import { AnomalyDetection } from '../../Settings/anomaly_detection';
 import { ApmIndices } from '../../Settings/ApmIndices';
 import { CustomizeUI } from '../../Settings/CustomizeUI';
 import { TraceLink } from '../../TraceLink';
-import { TransactionDetails } from '../../TransactionDetails';
+import { TransactionDetails } from '../../transaction_details';
 import {
   CreateAgentConfigurationRouteHandler,
   EditAgentConfigurationRouteHandler,
 } from './route_handlers/agent_configuration';
+import { enableServiceOverview } from '../../../../../common/ui_settings_keys';
+import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 
 /**
  * Given a path, redirect to that location, preserving the search and maintaining
@@ -143,6 +146,17 @@ function SettingsCustomizeUI(props: RouteComponentProps<{}>) {
   );
 }
 
+function DefaultServicePageRouteHandler(
+  props: RouteComponentProps<{ serviceName: string }>
+) {
+  const { uiSettings } = useApmPluginContext().core;
+  const { serviceName } = props.match.params;
+  if (uiSettings.get(enableServiceOverview)) {
+    return renderAsRedirectTo(`/services/${serviceName}/overview`)(props);
+  }
+  return renderAsRedirectTo(`/services/${serviceName}/transactions`)(props);
+}
+
 /**
  * The array of route definitions to be used when the application
  * creates the routes.
@@ -217,10 +231,7 @@ export const routes: APMRouteDefinition[] = [
     exact: true,
     path: '/services/:serviceName',
     breadcrumb: ({ match }) => match.params.serviceName,
-    render: (props: RouteComponentProps<{ serviceName: string }>) =>
-      renderAsRedirectTo(
-        `/services/${props.match.params.serviceName}/transactions`
-      )(props),
+    component: DefaultServicePageRouteHandler,
   } as APMRouteDefinition<{ serviceName: string }>,
   {
     exact: true,

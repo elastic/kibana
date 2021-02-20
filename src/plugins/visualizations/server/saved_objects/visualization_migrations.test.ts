@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { visualizationSavedObjectTypeMigrations } from './visualization_migrations';
@@ -1652,6 +1641,125 @@ describe('migration visualization', () => {
         ...oldAttributes
       } = migratedtimeSeriesDoc.attributes;
       expect(attributes).toEqual(oldAttributes);
+    });
+  });
+
+  describe('7.11.0 Data table vis - enable toolbar', () => {
+    const migrate = (doc: any) =>
+      visualizationSavedObjectTypeMigrations['7.11.0'](
+        doc as Parameters<SavedObjectMigrationFn>[0],
+        savedObjectMigrationContext
+      );
+
+    const testDoc = {
+      attributes: {
+        title: 'My data table vis',
+        description: 'Data table vis for test.',
+        visState: `{"type":"table","params": {"perPage": 10,"showPartialRows": false,"showTotal": false,"totalFunc": "sum"}}`,
+      },
+    };
+
+    it('should enable toolbar in visState.params', () => {
+      const migratedDataTableVisDoc = migrate(testDoc);
+      const visState = JSON.parse(migratedDataTableVisDoc.attributes.visState);
+      expect(visState.params.showToolbar).toEqual(true);
+    });
+  });
+
+  describe('7.12.0 update vislib visualization defaults', () => {
+    const migrate = (doc: any) =>
+      visualizationSavedObjectTypeMigrations['7.12.0'](
+        doc as Parameters<SavedObjectMigrationFn>[0],
+        savedObjectMigrationContext
+      );
+    const getTestDoc = (type = 'area', categoryAxes?: object[], valueAxes?: object[]) => ({
+      attributes: {
+        title: 'My Vis',
+        description: 'This is my super cool vis.',
+        visState: JSON.stringify({
+          type,
+          title: '[Flights] Delay Type',
+          params: {
+            type: type === 'horizontal_bar' ? 'histogram' : type,
+            categoryAxes: categoryAxes ?? [
+              {
+                labels: {},
+              },
+            ],
+            valueAxes: valueAxes ?? [
+              {
+                labels: {},
+              },
+            ],
+          },
+        }),
+      },
+    });
+
+    it('should return original doc if not area, line or histogram chart', () => {
+      const doc = getTestDoc('pie');
+      const migratedTestDoc = migrate(doc);
+      expect(migratedTestDoc).toEqual(doc);
+    });
+
+    it('should decorate existing docs with isVislibVis flag', () => {
+      const migratedTestDoc = migrate(getTestDoc());
+      const { isVislibVis } = JSON.parse(migratedTestDoc.attributes.visState).params;
+
+      expect(isVislibVis).toEqual(true);
+    });
+
+    it('should decorate existing docs with the kibana legacy palette', () => {
+      const migratedTestDoc = migrate(getTestDoc());
+      const { palette } = JSON.parse(migratedTestDoc.attributes.visState).params;
+
+      expect(palette.name).toEqual('kibana_palette');
+    });
+
+    describe('labels.filter', () => {
+      it('should keep existing categoryAxes labels.filter value', () => {
+        const migratedTestDoc = migrate(getTestDoc('area', [{ labels: { filter: false } }]));
+        const [result] = JSON.parse(migratedTestDoc.attributes.visState).params.categoryAxes;
+
+        expect(result.labels.filter).toEqual(false);
+      });
+
+      it('should keep existing valueAxes labels.filter value', () => {
+        const migratedTestDoc = migrate(
+          getTestDoc('area', undefined, [{ labels: { filter: true } }])
+        );
+        const [result] = JSON.parse(migratedTestDoc.attributes.visState).params.valueAxes;
+
+        expect(result.labels.filter).toEqual(true);
+      });
+
+      it('should set categoryAxes labels.filter to true for non horizontal_bar', () => {
+        const migratedTestDoc = migrate(getTestDoc());
+        const [result] = JSON.parse(migratedTestDoc.attributes.visState).params.categoryAxes;
+
+        expect(result.labels.filter).toEqual(true);
+      });
+
+      it('should set categoryAxes labels.filter to false for horizontal_bar', () => {
+        const migratedTestDoc = migrate(getTestDoc('horizontal_bar'));
+        const [result] = JSON.parse(migratedTestDoc.attributes.visState).params.categoryAxes;
+
+        expect(result.labels.filter).toEqual(false);
+      });
+
+      it('should set valueAxes labels.filter to false for non horizontal_bar', () => {
+        const migratedTestDoc = migrate(getTestDoc());
+        const [result] = JSON.parse(migratedTestDoc.attributes.visState).params.valueAxes;
+
+        expect(result.labels.filter).toEqual(false);
+      });
+
+      it('should set valueAxes labels.filter to true for horizontal_bar', () => {
+        const migratedTestDoc = migrate(getTestDoc('horizontal_bar'));
+        const [result] = JSON.parse(migratedTestDoc.attributes.visState).params.valueAxes;
+
+        expect(result.labels.filter).toEqual(true);
+      });
     });
   });
 });

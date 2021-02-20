@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { History } from 'history';
@@ -14,6 +15,7 @@ import { ThemeProvider } from 'styled-components';
 import { EuiErrorBoundary } from '@elastic/eui';
 import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
+import { AppLeaveHandler } from '../../../../../src/core/public';
 
 import { ManageUserInfo } from '../detections/components/user_info';
 import { DEFAULT_DARK_MODE, APP_NAME } from '../../common/constants';
@@ -28,13 +30,21 @@ import { ApolloClientContext } from '../common/utils/apollo_context';
 import { ManageGlobalTimeline } from '../timelines/components/manage_timeline';
 import { StartServices } from '../types';
 import { PageRouter } from './routes';
+
 interface StartAppComponent extends AppFrontendLibs {
   children: React.ReactNode;
   history: History;
+  onAppLeave: (handler: AppLeaveHandler) => void;
   store: Store<State, Action>;
 }
 
-const StartAppComponent: FC<StartAppComponent> = ({ children, apolloClient, history, store }) => {
+const StartAppComponent: FC<StartAppComponent> = ({
+  children,
+  apolloClient,
+  history,
+  onAppLeave,
+  store,
+}) => {
   const { i18n } = useKibana().services;
 
   const [darkMode] = useUiSetting$<boolean>(DEFAULT_DARK_MODE);
@@ -57,7 +67,9 @@ const StartAppComponent: FC<StartAppComponent> = ({ children, apolloClient, hist
                   <ThemeProvider theme={theme}>
                     <MlCapabilitiesProvider>
                       <ManageUserInfo>
-                        <PageRouter history={history}>{children}</PageRouter>
+                        <PageRouter history={history} onAppLeave={onAppLeave}>
+                          {children}
+                        </PageRouter>
                       </ManageUserInfo>
                     </MlCapabilitiesProvider>
                   </ThemeProvider>
@@ -78,6 +90,7 @@ const StartApp = memo(StartAppComponent);
 interface SecurityAppComponentProps extends AppFrontendLibs {
   children: React.ReactNode;
   history: History;
+  onAppLeave: (handler: AppLeaveHandler) => void;
   services: StartServices;
   store: Store<State, Action>;
 }
@@ -86,6 +99,7 @@ const SecurityAppComponent: React.FC<SecurityAppComponentProps> = ({
   children,
   apolloClient,
   history,
+  onAppLeave,
   services,
   store,
 }) => (
@@ -95,7 +109,7 @@ const SecurityAppComponent: React.FC<SecurityAppComponentProps> = ({
       ...services,
     }}
   >
-    <StartApp apolloClient={apolloClient} history={history} store={store}>
+    <StartApp apolloClient={apolloClient} history={history} onAppLeave={onAppLeave} store={store}>
       {children}
     </StartApp>
   </KibanaContextProvider>

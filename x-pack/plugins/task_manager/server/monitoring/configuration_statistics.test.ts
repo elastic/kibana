@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { Subject } from 'rxjs';
@@ -17,6 +18,7 @@ describe('Configuration Statistics Aggregator', () => {
       index: 'foo',
       max_attempts: 9,
       poll_interval: 6000000,
+      version_conflict_threshold: 80,
       monitored_stats_required_freshness: 6000000,
       max_poll_inactivity_cycles: 10,
       request_capacity: 1000,

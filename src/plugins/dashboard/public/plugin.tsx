@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import * as React from 'react';
@@ -39,6 +28,7 @@ import {
 import { createKbnUrlTracker } from './services/kibana_utils';
 import { UsageCollectionSetup } from './services/usage_collection';
 import { UiActionsSetup, UiActionsStart } from './services/ui_actions';
+import { PresentationUtilPluginStart } from './services/presentation_util';
 import { KibanaLegacySetup, KibanaLegacyStart } from './services/kibana_legacy';
 import { FeatureCatalogueCategory, HomePublicPluginSetup } from './services/home';
 import { NavigationPublicPluginStart as NavigationStart } from './services/navigation';
@@ -62,28 +52,17 @@ import {
 } from './services/kibana_react';
 
 import {
-  ACTION_CLONE_PANEL,
-  ACTION_EXPAND_PANEL,
-  ACTION_REPLACE_PANEL,
   ClonePanelAction,
-  ClonePanelActionContext,
   createDashboardContainerByValueRenderer,
   DASHBOARD_CONTAINER_TYPE,
   DashboardContainerFactory,
   DashboardContainerFactoryDefinition,
   ExpandPanelAction,
-  ExpandPanelActionContext,
   ReplacePanelAction,
-  ReplacePanelActionContext,
-  ACTION_UNLINK_FROM_LIBRARY,
-  UnlinkFromLibraryActionContext,
   UnlinkFromLibraryAction,
-  ACTION_ADD_TO_LIBRARY,
-  AddToLibraryActionContext,
   AddToLibraryAction,
-  ACTION_LIBRARY_NOTIFICATION,
-  LibraryNotificationActionContext,
   LibraryNotificationAction,
+  CopyToDashboardAction,
 } from './application';
 import {
   createDashboardUrlGenerator,
@@ -94,12 +73,9 @@ import { createSavedDashboardLoader } from './saved_dashboards';
 import { DashboardConstants } from './dashboard_constants';
 import { PlaceholderEmbeddableFactory } from './application/embeddable/placeholder';
 import { UrlGeneratorState } from '../../share/public';
-import {
-  ACTION_EXPORT_CSV,
-  ExportContext,
-  ExportCSVAction,
-} from './application/actions/export_csv_action';
+import { ExportCSVAction } from './application/actions/export_csv_action';
 import { dashboardFeatureCatalog } from './dashboard_strings';
+import { replaceUrlHashQuery } from '../../kibana_utils/public';
 
 declare module '../../share/public' {
   export interface UrlGeneratorStateMapping {
@@ -135,6 +111,7 @@ export interface DashboardStartDependencies {
   share?: SharePluginStart;
   uiActions: UiActionsStart;
   savedObjects: SavedObjectsStart;
+  presentationUtil: PresentationUtilPluginStart;
   savedObjectsTaggingOss?: SavedObjectTaggingOssPluginStart;
 }
 
@@ -145,18 +122,6 @@ export interface DashboardStart {
   dashboardUrlGenerator?: DashboardUrlGenerator;
   dashboardFeatureFlagConfig: DashboardFeatureFlagConfig;
   DashboardContainerByValueRenderer: ReturnType<typeof createDashboardContainerByValueRenderer>;
-}
-
-declare module '../../../plugins/ui_actions/public' {
-  export interface ActionContextMapping {
-    [ACTION_EXPAND_PANEL]: ExpandPanelActionContext;
-    [ACTION_REPLACE_PANEL]: ReplacePanelActionContext;
-    [ACTION_CLONE_PANEL]: ClonePanelActionContext;
-    [ACTION_ADD_TO_LIBRARY]: AddToLibraryActionContext;
-    [ACTION_UNLINK_FROM_LIBRARY]: UnlinkFromLibraryActionContext;
-    [ACTION_LIBRARY_NOTIFICATION]: LibraryNotificationActionContext;
-    [ACTION_EXPORT_CSV]: ExportContext;
-  }
 }
 
 export class DashboardPlugin
@@ -278,13 +243,23 @@ export class DashboardPlugin
         },
       ],
       getHistory: () => this.currentHistory!,
+      onBeforeNavLinkSaved: (newNavLink: string) => {
+        // Do not save SEARCH_SESSION_ID into nav link, because of possible edge cases
+        // that could lead to session restoration failure.
+        // see: https://github.com/elastic/kibana/issues/87149
+        if (newNavLink.includes(DashboardConstants.SEARCH_SESSION_ID)) {
+          newNavLink = replaceUrlHashQuery(newNavLink, (query) => {
+            delete query[DashboardConstants.SEARCH_SESSION_ID];
+            return query;
+          });
+        }
+
+        return newNavLink;
+      },
     });
 
-    const factory = new DashboardContainerFactoryDefinition(
-      getStartServices,
-      () => this.currentHistory!
-    );
-    embeddable.registerEmbeddableFactory(factory.type, factory);
+    const dashboardContainerFactory = new DashboardContainerFactoryDefinition(getStartServices);
+    embeddable.registerEmbeddableFactory(dashboardContainerFactory.type, dashboardContainerFactory);
 
     const placeholderFactory = new PlaceholderEmbeddableFactory();
     embeddable.registerEmbeddableFactory(placeholderFactory.type, placeholderFactory);
@@ -310,11 +285,11 @@ export class DashboardPlugin
           core,
           appUnMounted,
           usageCollection,
-          onAppLeave: params.onAppLeave,
-          initializerContext: this.initializerContext,
           restorePreviousUrl,
           element: params.element,
+          onAppLeave: params.onAppLeave,
           scopedHistory: this.currentHistory!,
+          initializerContext: this.initializerContext,
           setHeaderActionMenu: params.setHeaderActionMenu,
         });
       },
@@ -365,8 +340,8 @@ export class DashboardPlugin
   }
 
   public start(core: CoreStart, plugins: DashboardStartDependencies): DashboardStart {
-    const { notifications } = core;
-    const { uiActions, data, share } = plugins;
+    const { notifications, overlays } = core;
+    const { uiActions, data, share, presentationUtil, embeddable } = plugins;
 
     const SavedObjectFinder = getSavedObjectFinder(core.savedObjects, core.uiSettings);
 
@@ -404,6 +379,18 @@ export class DashboardPlugin
       const libraryNotificationAction = new LibraryNotificationAction(unlinkFromLibraryAction);
       uiActions.registerAction(libraryNotificationAction);
       uiActions.attachAction(PANEL_NOTIFICATION_TRIGGER, libraryNotificationAction.id);
+
+      const copyToDashboardAction = new CopyToDashboardAction(
+        overlays,
+        embeddable.getStateTransfer(),
+        {
+          canCreateNew: Boolean(core.application.capabilities.dashboard.createNew),
+          canEditExisting: !Boolean(core.application.capabilities.dashboard.hideWriteControls),
+        },
+        presentationUtil.ContextProvider
+      );
+      uiActions.registerAction(copyToDashboardAction);
+      uiActions.attachAction(CONTEXT_MENU_TRIGGER, copyToDashboardAction.id);
     }
 
     const savedDashboardLoader = createSavedDashboardLoader({

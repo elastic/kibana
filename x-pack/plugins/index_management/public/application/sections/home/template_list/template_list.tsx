@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { Fragment, useState, useEffect, useMemo } from 'react';
@@ -36,7 +37,7 @@ import { getIsLegacyFromQueryParams } from '../../../lib/index_templates';
 import { TemplateTable } from './template_table';
 import { TemplateDetails } from './template_details';
 import { LegacyTemplateTable } from './legacy_templates/template_table';
-import { FilterListButton, Filters } from './components';
+import { FilterListButton, Filters } from '../components';
 import { attemptToURIDecode } from '../../../../shared_imports';
 
 type FilterName = 'managed' | 'cloudManaged' | 'system';

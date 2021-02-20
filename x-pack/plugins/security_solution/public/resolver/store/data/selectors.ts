@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import rbush from 'rbush';
@@ -19,6 +20,7 @@ import {
   IsometricTaxiLayout,
   NodeData,
   NodeDataStatus,
+  TimeRange,
 } from '../../types';
 import * as indexedProcessTreeModel from '../../models/indexed_process_tree';
 import * as nodeModel from '../../../../common/endpoint/models/node';
@@ -33,6 +35,7 @@ import {
 import * as resolverTreeModel from '../../models/resolver_tree';
 import * as treeFetcherParametersModel from '../../models/tree_fetcher_parameters';
 import * as isometricTaxiLayoutModel from '../../models/indexed_process_tree/isometric_taxi_layout';
+import * as timeRangeModel from '../../models/time_range';
 import * as aabbModel from '../../models/aabb';
 import * as vector2 from '../../models/vector2';
 
@@ -61,11 +64,24 @@ export function resolverComponentInstanceID(state: DataState): string {
 }
 
 /**
+ * The indices resolver should use, passed in as external props.
+ */
+const currentIndices = (state: DataState): string[] => {
+  return state.indices;
+};
+
+/**
  * The last NewResolverTree we received, if any. It may be stale (it might not be for the same databaseDocumentID that
  * we're currently interested in.
  */
 const resolverTreeResponse = (state: DataState): NewResolverTree | undefined => {
   return state.tree?.lastResponse?.successful ? state.tree?.lastResponse.result : undefined;
+};
+
+const lastResponseIndices = (state: DataState): string[] | undefined => {
+  return state.tree?.lastResponse?.successful
+    ? state.tree?.lastResponse?.parameters?.indices
+    : undefined;
 };
 
 /**
@@ -306,11 +322,48 @@ export function treeParametersToFetch(state: DataState): TreeFetcherParameters |
 }
 
 /**
+ * Retrieve the time range filters if they exist, otherwise default to start of epoch to the largest future date.
+ */
+export const timeRangeFilters = createSelector(
+  (state: DataState) => state.tree?.currentParameters,
+  function timeRangeFilters(treeParameters): TimeRange {
+    // Should always be provided from date picker, but provide valid defaults in any case.
+    const from = new Date(0);
+    const to = new Date(timeRangeModel.maxDate);
+    const timeRange = {
+      from: from.toISOString(),
+      to: to.toISOString(),
+    };
+    if (treeParameters !== undefined) {
+      if (treeParameters.filters.from) {
+        timeRange.from = treeParameters.filters.from;
+      }
+      if (treeParameters.filters.to) {
+        timeRange.to = treeParameters.filters.to;
+      }
+    }
+    return timeRange;
+  }
+);
+
+/**
  * The indices to use for the requests with the backend.
  */
-export const treeParamterIndices = createSelector(treeParametersToFetch, (parameters) => {
+export const treeParameterIndices = createSelector(treeParametersToFetch, (parameters) => {
   return parameters?.indices ?? [];
 });
+
+/**
+ * Panel requests should not use indices derived from the tree parameter selector, as this is only defined briefly while the resolver_tree_fetcher middleware is running.
+ * Instead, panel requests should use the indices used by the last good request, falling back to the indices passed as external props.
+ */
+export const eventIndices = createSelector(
+  lastResponseIndices,
+  currentIndices,
+  function eventIndices(lastIndices, current): string[] {
+    return lastIndices ?? current ?? [];
+  }
+);
 
 export const layout: (state: DataState) => IsometricTaxiLayout = createSelector(
   tree,
@@ -682,7 +735,7 @@ export const isLoadingNodeEventsInCategory = createSelector(
   (state: DataState) => state.nodeEventsInCategory,
   panelViewAndParameters,
   // eslint-disable-next-line @typescript-eslint/no-shadow
-  function (nodeEventsInCategory, panelViewAndParameters) {
+  function (nodeEventsInCategory, panelViewAndParameters): boolean {
     const { panelView } = panelViewAndParameters;
     return panelView === 'nodeEventsInCategory' && nodeEventsInCategory === undefined;
   }

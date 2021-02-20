@@ -1,34 +1,29 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { resetContext } from 'kea';
-
-import { mockHttpValues } from '../../../__mocks__';
-jest.mock('../../../shared/http', () => ({
-  HttpLogic: { values: mockHttpValues },
-}));
-const { http } = mockHttpValues;
-
-jest.mock('../../../shared/flash_messages', () => ({
-  flashAPIErrors: jest.fn(),
-}));
-import { flashAPIErrors } from '../../../shared/flash_messages';
+import { LogicMounter, mockHttpValues, mockFlashMessageHelpers } from '../../../__mocks__';
 
 jest.mock('../engine', () => ({
   EngineLogic: { values: { engineName: 'some-engine' } },
 }));
 
+import { nextTick } from '@kbn/test/jest';
+
 import { EngineOverviewLogic } from './';
 
 describe('EngineOverviewLogic', () => {
+  const { mount, unmount } = new LogicMounter(EngineOverviewLogic);
+  const { http } = mockHttpValues;
+  const { flashAPIErrors } = mockFlashMessageHelpers;
+
   const mockEngineMetrics = {
     apiLogsUnavailable: true,
     documentCount: 10,
     startDate: '1970-01-30',
-    endDate: '1970-01-31',
     operationsPerDay: [0, 0, 0, 0, 0, 0, 0],
     queriesPerDay: [0, 0, 0, 0, 0, 25, 50],
     totalClicks: 50,
@@ -40,17 +35,11 @@ describe('EngineOverviewLogic', () => {
     apiLogsUnavailable: false,
     documentCount: 0,
     startDate: '',
-    endDate: '',
     operationsPerDay: [],
     queriesPerDay: [],
     totalClicks: 0,
     totalQueries: 0,
     timeoutId: null,
-  };
-
-  const mount = () => {
-    resetContext({});
-    EngineOverviewLogic.mount();
   };
 
   beforeEach(() => {
@@ -94,11 +83,10 @@ describe('EngineOverviewLogic', () => {
       it('fetches data and calls onPollingSuccess', async () => {
         mount();
         jest.spyOn(EngineOverviewLogic.actions, 'onPollingSuccess');
-        const promise = Promise.resolve(mockEngineMetrics);
-        http.get.mockReturnValueOnce(promise);
+        http.get.mockReturnValueOnce(Promise.resolve(mockEngineMetrics));
 
         EngineOverviewLogic.actions.pollForOverviewMetrics();
-        await promise;
+        await nextTick();
 
         expect(http.get).toHaveBeenCalledWith('/api/app_search/engines/some-engine/overview');
         expect(EngineOverviewLogic.actions.onPollingSuccess).toHaveBeenCalledWith(
@@ -108,15 +96,11 @@ describe('EngineOverviewLogic', () => {
 
       it('handles errors', async () => {
         mount();
-        const promise = Promise.reject('An error occurred');
-        http.get.mockReturnValue(promise);
+        http.get.mockReturnValue(Promise.reject('An error occurred'));
 
-        try {
-          EngineOverviewLogic.actions.pollForOverviewMetrics();
-          await promise;
-        } catch {
-          // Do nothing
-        }
+        EngineOverviewLogic.actions.pollForOverviewMetrics();
+        await nextTick();
+
         expect(flashAPIErrors).toHaveBeenCalledWith('An error occurred');
       });
     });
@@ -141,12 +125,9 @@ describe('EngineOverviewLogic', () => {
   });
 
   describe('unmount', () => {
-    let unmount: Function;
-
     beforeEach(() => {
       jest.useFakeTimers();
-      resetContext({});
-      unmount = EngineOverviewLogic.mount();
+      mount();
     });
 
     it('clears existing polling timeouts on unmount', () => {

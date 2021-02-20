@@ -1,14 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-
-declare module 'src/core/server' {
-  interface RequestHandlerContext {
-    crossClusterReplication?: CrossClusterReplicationContext;
-  }
-}
 
 import { Observable } from 'rxjs';
 import { first } from 'rxjs/operators';
@@ -20,22 +15,17 @@ import {
   Logger,
   PluginInitializerContext,
   LegacyAPICaller,
-  ILegacyScopedClusterClient,
 } from 'src/core/server';
 
 import { Index } from '../../index_management/server';
 import { PLUGIN } from '../common/constants';
-import { Dependencies } from './types';
+import type { Dependencies, CcrRequestHandlerContext } from './types';
 import { registerApiRoutes } from './routes';
 import { License } from './services';
 import { elasticsearchJsPlugin } from './client/elasticsearch_ccr';
 import { CrossClusterReplicationConfig } from './config';
 import { isEsError } from './shared_imports';
 import { formatEsError } from './lib/format_es_error';
-
-interface CrossClusterReplicationContext {
-  client: ILegacyScopedClusterClient;
-}
 
 async function getCustomEsClient(getStartServices: CoreSetup['getStartServices']) {
   const [core] = await getStartServices();
@@ -137,12 +127,15 @@ export class CrossClusterReplicationServerPlugin implements Plugin<void, void, a
       ],
     });
 
-    http.registerRouteHandlerContext('crossClusterReplication', async (ctx, request) => {
-      this.ccrEsClient = this.ccrEsClient ?? (await getCustomEsClient(getStartServices));
-      return {
-        client: this.ccrEsClient.asScoped(request),
-      };
-    });
+    http.registerRouteHandlerContext<CcrRequestHandlerContext, 'crossClusterReplication'>(
+      'crossClusterReplication',
+      async (ctx, request) => {
+        this.ccrEsClient = this.ccrEsClient ?? (await getCustomEsClient(getStartServices));
+        return {
+          client: this.ccrEsClient.asScoped(request),
+        };
+      }
+    );
 
     registerApiRoutes({
       router: http.createRouter(),

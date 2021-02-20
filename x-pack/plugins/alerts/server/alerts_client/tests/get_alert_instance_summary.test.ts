@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { AlertsClient, ConstructorOptions } from '../alerts_client';
 import { savedObjectsClientMock, loggingSystemMock } from '../../../../../../src/core/server/mocks';
 import { taskManagerMock } from '../../../../task_manager/server/mocks';
@@ -131,7 +133,7 @@ describe('getAlertInstanceSummary()', () => {
       total: events.length,
       data: events,
     };
-    eventLogClient.findEventsBySavedObject.mockResolvedValueOnce(eventsResult);
+    eventLogClient.findEventsBySavedObjectIds.mockResolvedValueOnce(eventsResult);
 
     const dateStart = new Date(Date.now() - 60 * 1000).toISOString();
 
@@ -188,18 +190,20 @@ describe('getAlertInstanceSummary()', () => {
 
   test('calls saved objects and event log client with default params', async () => {
     unsecuredSavedObjectsClient.get.mockResolvedValueOnce(getAlertInstanceSummarySavedObject());
-    eventLogClient.findEventsBySavedObject.mockResolvedValueOnce(
+    eventLogClient.findEventsBySavedObjectIds.mockResolvedValueOnce(
       AlertInstanceSummaryFindEventsResult
     );
 
     await alertsClient.getAlertInstanceSummary({ id: '1' });
 
     expect(unsecuredSavedObjectsClient.get).toHaveBeenCalledTimes(1);
-    expect(eventLogClient.findEventsBySavedObject).toHaveBeenCalledTimes(1);
-    expect(eventLogClient.findEventsBySavedObject.mock.calls[0]).toMatchInlineSnapshot(`
+    expect(eventLogClient.findEventsBySavedObjectIds).toHaveBeenCalledTimes(1);
+    expect(eventLogClient.findEventsBySavedObjectIds.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         "alert",
-        "1",
+        Array [
+          "1",
+        ],
         Object {
           "end": "2019-02-12T21:01:22.479Z",
           "page": 1,
@@ -210,7 +214,7 @@ describe('getAlertInstanceSummary()', () => {
       ]
     `);
     // calculate the expected start/end date for one test
-    const { start, end } = eventLogClient.findEventsBySavedObject.mock.calls[0][2]!;
+    const { start, end } = eventLogClient.findEventsBySavedObjectIds.mock.calls[0][2]!;
     expect(end).toBe(mockedDateString);
 
     const startMillis = Date.parse(start!);
@@ -222,7 +226,7 @@ describe('getAlertInstanceSummary()', () => {
 
   test('calls event log client with start date', async () => {
     unsecuredSavedObjectsClient.get.mockResolvedValueOnce(getAlertInstanceSummarySavedObject());
-    eventLogClient.findEventsBySavedObject.mockResolvedValueOnce(
+    eventLogClient.findEventsBySavedObjectIds.mockResolvedValueOnce(
       AlertInstanceSummaryFindEventsResult
     );
 
@@ -232,8 +236,8 @@ describe('getAlertInstanceSummary()', () => {
     await alertsClient.getAlertInstanceSummary({ id: '1', dateStart });
 
     expect(unsecuredSavedObjectsClient.get).toHaveBeenCalledTimes(1);
-    expect(eventLogClient.findEventsBySavedObject).toHaveBeenCalledTimes(1);
-    const { start, end } = eventLogClient.findEventsBySavedObject.mock.calls[0][2]!;
+    expect(eventLogClient.findEventsBySavedObjectIds).toHaveBeenCalledTimes(1);
+    const { start, end } = eventLogClient.findEventsBySavedObjectIds.mock.calls[0][2]!;
 
     expect({ start, end }).toMatchInlineSnapshot(`
       Object {
@@ -245,7 +249,7 @@ describe('getAlertInstanceSummary()', () => {
 
   test('calls event log client with relative start date', async () => {
     unsecuredSavedObjectsClient.get.mockResolvedValueOnce(getAlertInstanceSummarySavedObject());
-    eventLogClient.findEventsBySavedObject.mockResolvedValueOnce(
+    eventLogClient.findEventsBySavedObjectIds.mockResolvedValueOnce(
       AlertInstanceSummaryFindEventsResult
     );
 
@@ -253,8 +257,8 @@ describe('getAlertInstanceSummary()', () => {
     await alertsClient.getAlertInstanceSummary({ id: '1', dateStart });
 
     expect(unsecuredSavedObjectsClient.get).toHaveBeenCalledTimes(1);
-    expect(eventLogClient.findEventsBySavedObject).toHaveBeenCalledTimes(1);
-    const { start, end } = eventLogClient.findEventsBySavedObject.mock.calls[0][2]!;
+    expect(eventLogClient.findEventsBySavedObjectIds).toHaveBeenCalledTimes(1);
+    const { start, end } = eventLogClient.findEventsBySavedObjectIds.mock.calls[0][2]!;
 
     expect({ start, end }).toMatchInlineSnapshot(`
       Object {
@@ -266,7 +270,7 @@ describe('getAlertInstanceSummary()', () => {
 
   test('invalid start date throws an error', async () => {
     unsecuredSavedObjectsClient.get.mockResolvedValueOnce(getAlertInstanceSummarySavedObject());
-    eventLogClient.findEventsBySavedObject.mockResolvedValueOnce(
+    eventLogClient.findEventsBySavedObjectIds.mockResolvedValueOnce(
       AlertInstanceSummaryFindEventsResult
     );
 
@@ -280,7 +284,7 @@ describe('getAlertInstanceSummary()', () => {
 
   test('saved object get throws an error', async () => {
     unsecuredSavedObjectsClient.get.mockRejectedValueOnce(new Error('OMG!'));
-    eventLogClient.findEventsBySavedObject.mockResolvedValueOnce(
+    eventLogClient.findEventsBySavedObjectIds.mockResolvedValueOnce(
       AlertInstanceSummaryFindEventsResult
     );
 
@@ -291,7 +295,7 @@ describe('getAlertInstanceSummary()', () => {
 
   test('findEvents throws an error', async () => {
     unsecuredSavedObjectsClient.get.mockResolvedValueOnce(getAlertInstanceSummarySavedObject());
-    eventLogClient.findEventsBySavedObject.mockRejectedValueOnce(new Error('OMG 2!'));
+    eventLogClient.findEventsBySavedObjectIds.mockRejectedValueOnce(new Error('OMG 2!'));
 
     // error eaten but logged
     await alertsClient.getAlertInstanceSummary({ id: '1' });

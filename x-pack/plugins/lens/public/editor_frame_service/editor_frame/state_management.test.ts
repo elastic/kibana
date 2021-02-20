@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { getInitialState, reducer } from './state_management';
@@ -39,6 +40,7 @@ describe('editor_frame state management', () => {
         query: { query: '', language: 'lucene' },
         filters: [],
         showNoDataPopover: jest.fn(),
+        searchSessionId: 'sessionId',
       };
     });
 
@@ -129,7 +131,7 @@ describe('editor_frame state management', () => {
         {
           type: 'UPDATE_VISUALIZATION_STATE',
           visualizationId: 'testVis',
-          newState: newVisState,
+          updater: newVisState,
         }
       );
 

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { RuleAlertAction } from '../../../../../common/detection_engine/types';
@@ -21,6 +22,7 @@ import {
   TimestampOverride,
   Type,
   Severity,
+  Threats,
 } from '../../../../../common/detection_engine/schemas/common/schemas';
 import {
   List,
@@ -99,7 +101,8 @@ export interface AboutStepRule {
   ruleNameOverride: string;
   tags: string[];
   timestampOverride: string;
-  threat: IMitreEnterpriseAttack[];
+  threatIndicatorPath?: string;
+  threat: Threats;
   note: string;
 }
 
@@ -155,9 +158,16 @@ export interface DefineStepRuleJson {
   query?: string;
   language?: string;
   threshold?: {
-    field: string;
+    field: string[];
     value: number;
+    cardinality_field: string;
+    cardinality_value: number;
   };
+  threat_query?: string;
+  threat_mapping?: ThreatMapping;
+  threat_language?: string;
+  threat_index?: string[];
+  threat_filters?: Filter[];
   timeline_id?: string;
   timeline_title?: string;
   type: Type;
@@ -178,7 +188,8 @@ export interface AboutStepRuleJson {
   false_positives: string[];
   rule_name_override?: RuleNameOverride;
   tags: string[];
-  threat: IMitreEnterpriseAttack[];
+  threat: Threats;
+  threat_indicator_path?: string;
   timestamp_override?: TimestampOverride;
   note?: string;
 }
@@ -195,23 +206,4 @@ export interface ActionsStepRuleJson {
   enabled: boolean;
   throttle?: string | null;
   meta?: unknown;
-}
-
-export interface IMitreAttack {
-  id: string;
-  name: string;
-  reference: string;
-}
-
-export interface IMitreAttackTechnique {
-  id: string;
-  name: string;
-  reference: string;
-  subtechnique?: IMitreAttack[];
-}
-
-export interface IMitreEnterpriseAttack {
-  framework: string;
-  tactic: IMitreAttack;
-  technique: IMitreAttackTechnique[];
 }

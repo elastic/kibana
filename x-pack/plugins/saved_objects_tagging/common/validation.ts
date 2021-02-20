@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -12,7 +13,6 @@ export const tagNameMaxLength = 50;
 export const tagDescriptionMaxLength = 100;
 
 const hexColorRegexp = /^#[0-9A-F]{6}$/i;
-const nameValidCharsRegexp = /^[0-9A-Z:\-_\s]+$/i;
 
 export interface TagValidation {
   valid: boolean;
@@ -47,11 +47,6 @@ export const validateTagName = (name: string): string | undefined => {
       values: {
         length: tagNameMaxLength,
       },
-    });
-  }
-  if (!nameValidCharsRegexp.test(name)) {
-    return i18n.translate('xpack.savedObjectsTagging.validation.name.errorInvalidCharacters', {
-      defaultMessage: 'Tag name can only include a-z, 0-9, _, -,:.',
     });
   }
 };

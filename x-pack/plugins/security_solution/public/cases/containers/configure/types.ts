@@ -1,47 +1,46 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { ElasticUser } from '../types';
 import {
+  ActionConnector,
+  ActionTypeConnector,
   ActionType,
-  CasesConfigurationMaps,
+  CaseConnector,
   CaseField,
+  CasesConfigure,
   ClosureType,
   ThirdPartyField,
-  CasesConfigure,
-  ActionConnector,
-  CaseConnector,
 } from '../../../../../case/common/api';
 
 export {
+  ActionConnector,
+  ActionTypeConnector,
   ActionType,
-  CasesConfigurationMaps,
+  CaseConnector,
   CaseField,
   ClosureType,
   ThirdPartyField,
-  ActionConnector,
-  CaseConnector,
 };
 
-export interface CasesConfigurationMapping {
-  source: CaseField;
-  target: ThirdPartyField;
+export interface CaseConnectorMapping {
   actionType: ActionType;
+  source: CaseField;
+  target: string;
 }
 
 export interface CaseConfigure {
+  closureType: ClosureType;
+  connector: CasesConfigure['connector'];
   createdAt: string;
   createdBy: ElasticUser;
-  connector: CasesConfigure['connector'];
-  closureType: ClosureType;
+  error: string | null;
+  mappings: CaseConnectorMapping[];
   updatedAt: string;
   updatedBy: ElasticUser;
   version: string;
-}
-
-export interface CCMapsCombinedActionAttributes extends CasesConfigurationMaps {
-  actionType?: ActionType;
 }

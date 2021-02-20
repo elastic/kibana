@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { initializeESFieldsRoute } from './es_fields';
@@ -146,8 +147,8 @@ describe('Retrieve ES Fields', () => {
 
     callAsCurrentUserMock.mockRejectedValueOnce(new Error('Index not found'));
 
-    const response = await routeHandler(mockRouteContext, request, kibanaResponseFactory);
-
-    expect(response.status).toBe(500);
+    await expect(
+      routeHandler(mockRouteContext, request, kibanaResponseFactory)
+    ).rejects.toThrowError('Index not found');
   });
 });

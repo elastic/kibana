@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -27,10 +28,11 @@ import { MonitorListProps } from './monitor_list_container';
 import { MonitorList } from '../../../state/reducers/monitor_list';
 import { CertStatusColumn } from './columns/cert_status_column';
 import { MonitorListHeader } from './monitor_list_header';
-import { URL_LABEL } from '../../common/translations';
+import { TAGS_LABEL, URL_LABEL } from '../../common/translations';
 import { EnableMonitorAlert } from './columns/enable_alert';
 import { STATUS_ALERT_COLUMN } from './translations';
 import { MonitorNameColumn } from './columns/monitor_name_col';
+import { MonitorTags } from '../../common/monitor_tags';
 
 interface Props extends MonitorListProps {
   pageSize: number;
@@ -101,12 +103,19 @@ export const MonitorListComponent: ({
       align: 'left' as const,
       field: 'state.url.full',
       name: URL_LABEL,
-      width: '40%',
+      width: '30%',
       render: (url: string) => (
         <EuiLink href={url} target="_blank" color="text" external>
           {url}
         </EuiLink>
       ),
+    },
+    {
+      align: 'left' as const,
+      field: 'state.monitor.name',
+      name: TAGS_LABEL,
+      width: '12%',
+      render: (_name: string, summary: MonitorSummary) => <MonitorTags summary={summary} />,
     },
     {
       align: 'left' as const,

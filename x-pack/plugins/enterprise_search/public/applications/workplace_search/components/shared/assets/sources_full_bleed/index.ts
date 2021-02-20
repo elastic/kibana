@@ -1,9 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+import box from './box.svg';
 import confluence from './confluence.svg';
 import custom from './custom.svg';
 import dropbox from './dropbox.svg';
@@ -20,6 +22,7 @@ import slack from './slack.svg';
 import zendesk from './zendesk.svg';
 
 export const imagesFull = {
+  box,
   confluence,
   confluenceCloud: confluence,
   confluenceServer: confluence,

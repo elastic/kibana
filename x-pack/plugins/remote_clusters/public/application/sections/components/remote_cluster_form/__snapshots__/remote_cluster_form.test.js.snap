@@ -830,6 +830,7 @@ exports[`RemoteClusterForm proxy mode renders correct connection settings when u
                               >
                                 <button
                                   className="euiLink euiLink--primary"
+                                  disabled={false}
                                   type="button"
                                 >
                                   <FormattedMessage
@@ -935,6 +936,7 @@ exports[`RemoteClusterForm proxy mode renders correct connection settings when u
                                   />
                                 </EuiValidatableControl>
                                 <EuiFormControlLayoutIcons
+                                  compressed={false}
                                   isLoading={false}
                                 />
                               </div>
@@ -1104,6 +1106,7 @@ exports[`RemoteClusterForm proxy mode renders correct connection settings when u
                               >
                                 <button
                                   className="euiLink euiLink--primary"
+                                  disabled={false}
                                   type="button"
                                 >
                                   <FormattedMessage
@@ -1351,6 +1354,7 @@ exports[`RemoteClusterForm proxy mode renders correct connection settings when u
           >
             <button
               className="euiButtonEmpty euiButtonEmpty--primary"
+              disabled={false}
               onClick={[Function]}
               type="button"
             >

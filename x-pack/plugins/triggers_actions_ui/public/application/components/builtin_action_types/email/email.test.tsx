@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { TypeRegistry } from '../../../type_registry';
 import { registerBuiltInActionTypes } from '../index';
 import { ActionTypeModel } from '../../../../types';
@@ -48,12 +50,18 @@ describe('connector validation', () => {
     } as EmailActionConnector;
 
     expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
-      errors: {
-        from: [],
-        port: [],
-        host: [],
-        user: [],
-        password: [],
+      config: {
+        errors: {
+          from: [],
+          port: [],
+          host: [],
+        },
+      },
+      secrets: {
+        errors: {
+          user: [],
+          password: [],
+        },
       },
     });
   });
@@ -78,12 +86,18 @@ describe('connector validation', () => {
     } as EmailActionConnector;
 
     expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
-      errors: {
-        from: [],
-        port: [],
-        host: [],
-        user: [],
-        password: [],
+      config: {
+        errors: {
+          from: [],
+          port: [],
+          host: [],
+        },
+      },
+      secrets: {
+        errors: {
+          user: [],
+          password: [],
+        },
       },
     });
   });
@@ -103,12 +117,18 @@ describe('connector validation', () => {
     } as EmailActionConnector;
 
     expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
-      errors: {
-        from: [],
-        port: ['Port is required.'],
-        host: ['Host is required.'],
-        user: [],
-        password: [],
+      config: {
+        errors: {
+          from: [],
+          port: ['Port is required.'],
+          host: ['Host is required.'],
+        },
+      },
+      secrets: {
+        errors: {
+          user: [],
+          password: [],
+        },
       },
     });
   });
@@ -132,12 +152,18 @@ describe('connector validation', () => {
     } as EmailActionConnector;
 
     expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
-      errors: {
-        from: [],
-        port: [],
-        host: [],
-        user: [],
-        password: ['Password is required when username is used.'],
+      config: {
+        errors: {
+          from: [],
+          port: [],
+          host: [],
+        },
+      },
+      secrets: {
+        errors: {
+          user: [],
+          password: ['Password is required when username is used.'],
+        },
       },
     });
   });
@@ -161,12 +187,18 @@ describe('connector validation', () => {
     } as EmailActionConnector;
 
     expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
-      errors: {
-        from: [],
-        port: [],
-        host: [],
-        user: ['Username is required when password is used.'],
-        password: [],
+      config: {
+        errors: {
+          from: [],
+          port: [],
+          host: [],
+        },
+      },
+      secrets: {
+        errors: {
+          user: ['Username is required when password is used.'],
+          password: [],
+        },
       },
     });
   });

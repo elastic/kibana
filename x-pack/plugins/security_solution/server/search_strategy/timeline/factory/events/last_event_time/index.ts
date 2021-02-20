@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { getOr } from 'lodash/fp';
@@ -27,9 +28,19 @@ export const timelineEventsLastEventTime: SecuritySolutionTimelineFactory<Timeli
       dsl: [inspectStringifyObject(buildLastEventTimeQuery(options))],
     };
 
+    // First try to get the formatted field if it exists or not.
+    const formattedField: string | null = getOr(
+      null,
+      'hits.hits[0].fields.@timestamp[0]',
+      response.rawResponse
+    );
+    // If it doesn't exist, fall back on _source as a last try.
+    const lastSeen: string | null =
+      formattedField || getOr(null, 'hits.hits[0]._source.@timestamp', response.rawResponse);
+
     return {
       ...response,
-      lastSeen: getOr(null, 'aggregations.last_seen_event.value_as_string', response.rawResponse),
+      lastSeen,
       inspect,
     };
   },

@@ -104,7 +104,7 @@ When you're ready to connect the element to your data, select *Data*, then selec
 
 * *{es} documents* &mdash; Access your data in {es} without using aggregations. To use, select an index and fields, and optionally enter a query using the <<lucene-query,Lucene Query Syntax>>. Use the *{es} documents* data source when you have low volume datasets, to view raw documents, or to plot exact, non-aggregated values on a chart.
 
-* *Timelion* &mdash; Access your time series data using <<timelion,Timelion>> queries. To use Timelion queries, you can enter a query using the <<lucene-query,Lucene Query Syntax>>.
+* *Timelion* &mdash; Access your time series data using <<create-panels-with-timelion,Timelion>> queries. To use Timelion queries, you can enter a query using the <<lucene-query,Lucene Query Syntax>>.
 
 Each element can display a different data source, and pages and workpads often contain multiple data sources.
 

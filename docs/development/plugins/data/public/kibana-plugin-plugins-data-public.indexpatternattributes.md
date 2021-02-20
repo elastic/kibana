@@ -4,6 +4,8 @@
 
 ## IndexPatternAttributes interface
 
+Interface for an index pattern saved object
+
 <b>Signature:</b>
 
 ```typescript
@@ -14,10 +16,12 @@ export interface IndexPatternAttributes
 
 |  Property | Type | Description |
 |  --- | --- | --- |
+|  [allowNoIndex](./kibana-plugin-plugins-data-public.indexpatternattributes.allownoindex.md) | <code>boolean</code> | prevents errors when index pattern exists before indices |
 |  [fieldAttrs](./kibana-plugin-plugins-data-public.indexpatternattributes.fieldattrs.md) | <code>string</code> |  |
 |  [fieldFormatMap](./kibana-plugin-plugins-data-public.indexpatternattributes.fieldformatmap.md) | <code>string</code> |  |
 |  [fields](./kibana-plugin-plugins-data-public.indexpatternattributes.fields.md) | <code>string</code> |  |
 |  [intervalName](./kibana-plugin-plugins-data-public.indexpatternattributes.intervalname.md) | <code>string</code> |  |
+|  [runtimeFieldMap](./kibana-plugin-plugins-data-public.indexpatternattributes.runtimefieldmap.md) | <code>string</code> |  |
 |  [sourceFilters](./kibana-plugin-plugins-data-public.indexpatternattributes.sourcefilters.md) | <code>string</code> |  |
 |  [timeFieldName](./kibana-plugin-plugins-data-public.indexpatternattributes.timefieldname.md) | <code>string</code> |  |
 |  [title](./kibana-plugin-plugins-data-public.indexpatternattributes.title.md) | <code>string</code> |  |

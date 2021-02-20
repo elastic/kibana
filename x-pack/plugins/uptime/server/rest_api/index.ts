@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { createGetCertsRoute } from './certs/certs';
@@ -24,6 +25,7 @@ import {
 } from './monitors';
 import { createGetMonitorDurationRoute } from './monitors/monitors_durations';
 import { createGetIndexPatternRoute, createGetIndexStatusRoute } from './index_state';
+import { createNetworkEventsRoute } from './network_events';
 import { createJourneyFailedStepsRoute } from './pings/journeys';
 
 export * from './types';
@@ -48,5 +50,6 @@ export const restApiRoutes: UMRestApiRouteFactory[] = [
   createGetMonitorDurationRoute,
   createJourneyRoute,
   createJourneyScreenshotRoute,
+  createNetworkEventsRoute,
   createJourneyFailedStepsRoute,
 ];

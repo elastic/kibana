@@ -14,7 +14,7 @@ Object {
   },
   "count": 1,
   "esTypes": Array [
-    "text",
+    "keyword",
   ],
   "lang": "lang",
   "name": "name",
@@ -49,7 +49,7 @@ Object {
   "count": 1,
   "customLabel": undefined,
   "esTypes": Array [
-    "text",
+    "keyword",
   ],
   "format": Object {
     "id": "number",
@@ -57,9 +57,16 @@ Object {
       "pattern": "$0,0.[00]",
     },
   },
+  "isMapped": undefined,
   "lang": "lang",
   "name": "name",
   "readFromDocValues": false,
+  "runtimeField": Object {
+    "script": Object {
+      "source": "emit('hello world')",
+    },
+    "type": "keyword",
+  },
   "script": "script",
   "scripted": true,
   "searchable": true,

@@ -1,28 +1,26 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { mockHistory } from '../../__mocks__';
-jest.mock('../kibana', () => ({
-  KibanaLogic: { values: { history: mockHistory } },
-}));
+import '../../__mocks__/kibana_logic.mock';
 
+import { FlashMessagesLogic } from './flash_messages_logic';
 import {
-  FlashMessagesLogic,
-  mountFlashMessagesLogic,
   setSuccessMessage,
   setErrorMessage,
   setQueuedSuccessMessage,
   setQueuedErrorMessage,
-} from './';
+  clearFlashMessages,
+} from './set_message_helpers';
 
 describe('Flash Message Helpers', () => {
   const message = 'I am a message';
 
   beforeEach(() => {
-    mountFlashMessagesLogic();
+    FlashMessagesLogic.mount();
   });
 
   it('setSuccessMessage()', () => {
@@ -67,5 +65,11 @@ describe('Flash Message Helpers', () => {
         type: 'error',
       },
     ]);
+  });
+
+  it('clearFlashMessages()', () => {
+    clearFlashMessages();
+
+    expect(FlashMessagesLogic.values.messages).toEqual([]);
   });
 });

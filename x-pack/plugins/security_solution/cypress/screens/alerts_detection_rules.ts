@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 export const BULK_ACTIONS_BTN = '[data-test-subj="bulkActions"] span';
@@ -25,6 +26,8 @@ export const EXPORT_ACTION_BTN = '[data-test-subj="exportRuleAction"]';
 export const FIFTH_RULE = 4;
 
 export const FIRST_RULE = 0;
+
+export const FOURTH_RULE = 3;
 
 export const LOAD_PREBUILT_RULES_BTN = '[data-test-subj="load-prebuilt-rules"]';
 

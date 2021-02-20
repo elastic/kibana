@@ -1,5 +1,4 @@
 .kbnDocViewerTable {
-  margin-top: $euiSizeS;
   @include euiBreakpoint('xs', 's') {
     table-layout: fixed;
   }
@@ -14,10 +13,18 @@
     white-space: pre-wrap;
     color: $euiColorFullShade;
     vertical-align: top;
-    padding-top: $euiSizeXS * 0.5;
+    padding-top: $euiSizeXS * .5;
   }
   .kbnDocViewer__field {
     padding-top: $euiSizeS;
+  }
+
+  .kbnDocViewer__multifield_row:hover td {
+    background-color: transparent;
+  }
+
+  .kbnDocViewer__multifield_title {
+    font-family: $euiFontFamily;
   }
 
   .dscFieldName {

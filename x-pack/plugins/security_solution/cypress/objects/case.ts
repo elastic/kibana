@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { CompleteTimeline, timeline } from './timeline';
@@ -83,14 +84,6 @@ export const mockConnectorsResponse = [
     actionTypeId: '.jira',
     name: 'Jira',
     config: {
-      incidentConfiguration: {
-        mapping: [
-          { source: 'title', target: 'summary', actionType: 'overwrite' },
-          { source: 'description', target: 'description', actionType: 'overwrite' },
-          { source: 'comments', target: 'comments', actionType: 'append' },
-        ],
-      },
-      isCaseOwned: true,
       apiUrl: 'https://siem-kibana.atlassian.net',
       projectKey: 'RJ',
     },
@@ -102,14 +95,6 @@ export const mockConnectorsResponse = [
     actionTypeId: '.resilient',
     name: 'Resilient',
     config: {
-      incidentConfiguration: {
-        mapping: [
-          { source: 'title', target: 'name', actionType: 'overwrite' },
-          { source: 'description', target: 'description', actionType: 'overwrite' },
-          { source: 'comments', target: 'comments', actionType: 'append' },
-        ],
-      },
-      isCaseOwned: true,
       apiUrl: 'https://ibm-resilient.siem.estc.dev',
       orgId: '201',
     },
@@ -121,14 +106,6 @@ export const mockConnectorsResponse = [
     actionTypeId: '.servicenow',
     name: 'ServiceNow',
     config: {
-      incidentConfiguration: {
-        mapping: [
-          { source: 'title', target: 'short_description', actionType: 'overwrite' },
-          { source: 'description', target: 'description', actionType: 'overwrite' },
-          { source: 'comments', target: 'comments', actionType: 'append' },
-        ],
-      },
-      isCaseOwned: true,
       apiUrl: 'https://dev65287.service-now.com',
     },
     isPreconfigured: false,
@@ -136,6 +113,89 @@ export const mockConnectorsResponse = [
   },
 ];
 export const executeResponses = {
+  servicenow: {
+    choices: {
+      status: 'ok',
+      data: [
+        {
+          dependent_value: '',
+          label: 'Priviledge Escalation',
+          value: 'Priviledge Escalation',
+          element: 'category',
+        },
+        {
+          dependent_value: '',
+          label: 'Criminal activity/investigation',
+          value: 'Criminal activity/investigation',
+          element: 'category',
+        },
+        {
+          dependent_value: '',
+          label: 'Denial of Service',
+          value: 'Denial of Service',
+          element: 'category',
+        },
+        {
+          dependent_value: 'Denial of Service',
+          label: 'Inbound or outbound',
+          value: '12',
+          element: 'subcategory',
+        },
+        {
+          dependent_value: 'Denial of Service',
+          label: 'Single or distributed (DoS or DDoS)',
+          value: '26',
+          element: 'subcategory',
+        },
+        {
+          dependent_value: 'Denial of Service',
+          label: 'Inbound DDos',
+          value: 'inbound_ddos',
+          element: 'subcategory',
+        },
+        {
+          dependent_value: '',
+          label: 'Software',
+          value: 'software',
+          element: 'category',
+        },
+        {
+          dependent_value: 'software',
+          label: 'Operation System',
+          value: 'os',
+          element: 'subcategory',
+        },
+        ...['severity', 'urgency', 'impact', 'priority']
+          .map((element) => [
+            {
+              dependent_value: '',
+              label: '1 - Critical',
+              value: '1',
+              element,
+            },
+            {
+              dependent_value: '',
+              label: '2 - High',
+              value: '2',
+              element,
+            },
+            {
+              dependent_value: '',
+              label: '3 - Moderate',
+              value: '3',
+              element,
+            },
+            {
+              dependent_value: '',
+              label: '4 - Low',
+              value: '4',
+              element,
+            },
+          ])
+          .flat(),
+      ],
+    },
+  },
   jira: {
     issueTypes: {
       status: 'ok',

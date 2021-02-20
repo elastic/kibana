@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { i18n } from '@kbn/i18n';
-import { ILegacyScopedClusterClient, Logger, SavedObjectsClientContract } from 'kibana/server';
+import { IScopedClusterClient, Logger, SavedObjectsClientContract } from 'kibana/server';
 
 import { LicensingPluginSetup } from '../../../../licensing/server';
 
@@ -17,7 +19,7 @@ import { error } from '../../lib/reindexing/error';
 
 interface ReindexHandlerArgs {
   savedObjects: SavedObjectsClientContract;
-  dataClient: ILegacyScopedClusterClient;
+  dataClient: IScopedClusterClient;
   indexName: string;
   log: Logger;
   licensing: LicensingPluginSetup;
@@ -38,7 +40,7 @@ export const reindexHandler = async ({
   savedObjects,
   reindexOptions,
 }: ReindexHandlerArgs): Promise<ReindexOperation> => {
-  const callAsCurrentUser = dataClient.callAsCurrentUser.bind(dataClient);
+  const callAsCurrentUser = dataClient.asCurrentUser;
   const reindexActions = reindexActionsFactory(savedObjects, callAsCurrentUser);
   const reindexService = reindexServiceFactory(callAsCurrentUser, reindexActions, log, licensing);
 

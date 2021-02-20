@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -11,6 +12,7 @@ import { Connectors, Props } from './connectors';
 import { TestProviders } from '../../../common/mock';
 import { ConnectorsDropdown } from './connectors_dropdown';
 import { connectors } from './__mock__';
+import { ConnectorTypes } from '../../../../../case/common/api/connectors';
 
 describe('Connectors', () => {
   let wrapper: ReactWrapper;
@@ -18,13 +20,14 @@ describe('Connectors', () => {
   const handleShowEditFlyout = jest.fn();
 
   const props: Props = {
-    disabled: false,
-    updateConnectorDisabled: false,
     connectors,
-    selectedConnector: 'none',
-    isLoading: false,
-    onChangeConnector,
+    disabled: false,
     handleShowEditFlyout,
+    isLoading: false,
+    mappings: [],
+    onChangeConnector,
+    selectedConnector: { id: 'none', type: ConnectorTypes.none },
+    updateConnectorDisabled: false,
   };
 
   beforeAll(() => {
@@ -66,9 +69,15 @@ describe('Connectors', () => {
 
   test('the connector is changed successfully to none', () => {
     onChangeConnector.mockClear();
-    const newWrapper = mount(<Connectors {...props} selectedConnector={'servicenow-1'} />, {
-      wrappingComponent: TestProviders,
-    });
+    const newWrapper = mount(
+      <Connectors
+        {...props}
+        selectedConnector={{ id: 'servicenow-1', type: ConnectorTypes.serviceNowITSM }}
+      />,
+      {
+        wrappingComponent: TestProviders,
+      }
+    );
 
     newWrapper.find('button[data-test-subj="dropdown-connectors"]').simulate('click');
     newWrapper.find('button[data-test-subj="dropdown-connector-no-connector"]').simulate('click');
@@ -87,9 +96,15 @@ describe('Connectors', () => {
   });
 
   test('the text of the update button is shown correctly', () => {
-    const newWrapper = mount(<Connectors {...props} selectedConnector={'servicenow-1'} />, {
-      wrappingComponent: TestProviders,
-    });
+    const newWrapper = mount(
+      <Connectors
+        {...props}
+        selectedConnector={{ id: 'servicenow-1', type: ConnectorTypes.serviceNowITSM }}
+      />,
+      {
+        wrappingComponent: TestProviders,
+      }
+    );
 
     expect(
       newWrapper

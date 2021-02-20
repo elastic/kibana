@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -167,3 +168,31 @@ export const TEXT_RADIO = i18n.translate(
     defaultMessage: 'Text',
   }
 );
+
+export const REFERENCE_MODAL_TITLE = i18n.translate(
+  'xpack.securitySolution.lists.referenceModalTitle',
+  {
+    defaultMessage: 'Remove value list',
+  }
+);
+
+export const REFERENCE_MODAL_CANCEL_BUTTON = i18n.translate(
+  'xpack.securitySolution.lists.referenceModalCancelButton',
+  {
+    defaultMessage: 'Cancel',
+  }
+);
+
+export const REFERENCE_MODAL_CONFIRM_BUTTON = i18n.translate(
+  'xpack.securitySolution.lists.referenceModalDeleteButton',
+  {
+    defaultMessage: 'Remove value list',
+  }
+);
+
+export const referenceErrorMessage = (referenceCount: number) =>
+  i18n.translate('xpack.securitySolution.lists.referenceModalDescription', {
+    defaultMessage:
+      'This value list is associated with ({referenceCount}) exception {referenceCount, plural, =1 {list} other {lists}}. Removing this list will remove all exception items that reference this value list.',
+    values: { referenceCount },
+  });

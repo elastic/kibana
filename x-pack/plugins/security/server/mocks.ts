@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import type { ApiResponse } from '@elastic/elasticsearch';
@@ -14,7 +15,7 @@ function createSetupMock() {
   const mockAuthz = authorizationMock.create();
   return {
     audit: auditServiceMock.create(),
-    authc: authenticationServiceMock.createSetup(),
+    authc: { getCurrentUser: jest.fn() },
     authz: {
       actions: mockAuthz.actions,
       checkPrivilegesWithRequest: mockAuthz.checkPrivilegesWithRequest,

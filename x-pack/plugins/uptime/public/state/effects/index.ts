@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { fork } from 'redux-saga/effects';
@@ -19,6 +20,7 @@ import { fetchIndexStatusEffect } from './index_status';
 import { fetchCertificatesEffect } from '../certificates/certificates';
 import { fetchAlertsEffect } from '../alerts/alerts';
 import { fetchJourneyStepsEffect } from './journey';
+import { fetchNetworkEventsEffect } from './network_events';
 
 export function* rootEffect() {
   yield fork(fetchMonitorDetailsEffect);
@@ -37,4 +39,5 @@ export function* rootEffect() {
   yield fork(fetchCertificatesEffect);
   yield fork(fetchAlertsEffect);
   yield fork(fetchJourneyStepsEffect);
+  yield fork(fetchNetworkEventsEffect);
 }

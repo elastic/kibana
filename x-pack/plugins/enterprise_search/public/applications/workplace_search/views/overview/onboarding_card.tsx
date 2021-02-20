@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
+
 import { useActions } from 'kea';
 
 import {
@@ -14,13 +16,10 @@ import {
   EuiPanel,
   EuiEmptyPrompt,
   IconType,
-  EuiButtonProps,
-  EuiButtonEmptyProps,
-  EuiLinkProps,
 } from '@elastic/eui';
 
+import { EuiButtonTo, EuiButtonEmptyTo } from '../../../shared/react_router_helpers';
 import { TelemetryLogic } from '../../../shared/telemetry';
-import { getWorkplaceSearchUrl } from '../../../shared/enterprise_search_url';
 
 interface OnboardingCardProps {
   title: React.ReactNode;
@@ -48,25 +47,22 @@ export const OnboardingCard: React.FC<OnboardingCardProps> = ({
       action: 'clicked',
       metric: 'onboarding_card_button',
     });
-  const buttonActionProps = actionPath
-    ? {
-        onClick,
-        href: getWorkplaceSearchUrl(actionPath),
-        target: '_blank',
-        'data-test-subj': testSubj,
-      }
-    : {
-        'data-test-subj': testSubj,
-      };
 
-  const emptyButtonProps = {
-    ...buttonActionProps,
-  } as EuiButtonEmptyProps & EuiLinkProps;
-  const fillButtonProps = {
-    ...buttonActionProps,
-    color: 'secondary',
-    fill: true,
-  } as EuiButtonProps & EuiLinkProps;
+  const completeButton = actionPath ? (
+    <EuiButtonEmptyTo to={actionPath} data-test-subj={testSubj} onClick={onClick}>
+      {actionTitle}
+    </EuiButtonEmptyTo>
+  ) : (
+    <EuiButtonEmpty data-test-subj={testSubj}>{actionTitle}</EuiButtonEmpty>
+  );
+
+  const incompleteButton = actionPath ? (
+    <EuiButtonTo to={actionPath} data-test-subj={testSubj} onClick={onClick}>
+      {actionTitle}
+    </EuiButtonTo>
+  ) : (
+    <EuiButton data-test-subj={testSubj}>{actionTitle}</EuiButton>
+  );
 
   return (
     <EuiFlexItem>
@@ -76,13 +72,7 @@ export const OnboardingCard: React.FC<OnboardingCardProps> = ({
           iconColor={complete ? 'secondary' : 'subdued'}
           title={<h3>{title}</h3>}
           body={description}
-          actions={
-            complete ? (
-              <EuiButtonEmpty {...emptyButtonProps}>{actionTitle}</EuiButtonEmpty>
-            ) : (
-              <EuiButton {...fillButtonProps}>{actionTitle}</EuiButton>
-            )
-          }
+          actions={complete ? completeButton : incompleteButton}
         />
       </EuiPanel>
     </EuiFlexItem>

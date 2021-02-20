@@ -24,6 +24,7 @@ export interface SearchSourceFields
 |  [highlight](./kibana-plugin-plugins-data-public.searchsourcefields.highlight.md) | <code>any</code> |  |
 |  [highlightAll](./kibana-plugin-plugins-data-public.searchsourcefields.highlightall.md) | <code>boolean</code> |  |
 |  [index](./kibana-plugin-plugins-data-public.searchsourcefields.index.md) | <code>IndexPattern</code> |  |
+|  [parent](./kibana-plugin-plugins-data-public.searchsourcefields.parent.md) | <code>SearchSourceFields</code> |  |
 |  [query](./kibana-plugin-plugins-data-public.searchsourcefields.query.md) | <code>Query</code> | [Query](./kibana-plugin-plugins-data-public.query.md) |
 |  [searchAfter](./kibana-plugin-plugins-data-public.searchsourcefields.searchafter.md) | <code>EsQuerySearchAfter</code> |  |
 |  [size](./kibana-plugin-plugins-data-public.searchsourcefields.size.md) | <code>number</code> |  |

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import moment from 'moment';
@@ -14,7 +15,8 @@ import { createApmQuery } from './create_apm_query';
 import { calculateRate } from '../calculate_rate';
 // @ts-ignore
 import { getDiffCalculation } from './_apm_stats';
-import { LegacyRequest, ElasticsearchResponse, ElasticsearchResponseHit } from '../../types';
+import { LegacyRequest } from '../../types';
+import { ElasticsearchResponse, ElasticsearchResponseHit } from '../../../common/types/es';
 
 export function handleResponse(response: ElasticsearchResponse, start: number, end: number) {
   const initial = { ids: new Set(), beats: [] };
@@ -24,9 +26,13 @@ export function handleResponse(response: ElasticsearchResponse, start: number, e
       return accum;
     }
 
-    const earliestStats = hit.inner_hits.earliest.hits.hits[0]._source.beats_stats;
-    if (!earliestStats) {
-      return accum;
+    let earliestStats = null;
+    if (
+      hit.inner_hits?.earliest?.hits?.hits &&
+      hit.inner_hits?.earliest?.hits?.hits.length > 0 &&
+      hit.inner_hits.earliest.hits.hits[0]._source.beats_stats
+    ) {
+      earliestStats = hit.inner_hits.earliest.hits.hits[0]._source.beats_stats;
     }
 
     const uuid = stats?.beat?.uuid;
@@ -41,7 +47,7 @@ export function handleResponse(response: ElasticsearchResponse, start: number, e
     //  add the beat
     const rateOptions = {
       hitTimestamp: stats.timestamp,
-      earliestHitTimestamp: earliestStats.timestamp,
+      earliestHitTimestamp: earliestStats?.timestamp,
       timeWindowMin: start,
       timeWindowMax: end,
     };
@@ -54,14 +60,14 @@ export function handleResponse(response: ElasticsearchResponse, start: number, e
 
     const { rate: totalEventsRate } = calculateRate({
       latestTotal: stats.metrics?.libbeat?.pipeline?.events?.total,
-      earliestTotal: earliestStats.metrics?.libbeat?.pipeline?.events?.total,
+      earliestTotal: earliestStats?.metrics?.libbeat?.pipeline?.events?.total,
       ...rateOptions,
     });
 
     const errorsWrittenLatest = stats.metrics?.libbeat?.output?.write?.errors ?? 0;
-    const errorsWrittenEarliest = earliestStats.metrics?.libbeat?.output?.write?.errors ?? 0;
+    const errorsWrittenEarliest = earliestStats?.metrics?.libbeat?.output?.write?.errors ?? 0;
     const errorsReadLatest = stats.metrics?.libbeat?.output?.read?.errors ?? 0;
-    const errorsReadEarliest = earliestStats.metrics?.libbeat?.output?.read?.errors ?? 0;
+    const errorsReadEarliest = earliestStats?.metrics?.libbeat?.output?.read?.errors ?? 0;
     const errors = getDiffCalculation(
       errorsWrittenLatest + errorsReadLatest,
       errorsWrittenEarliest + errorsReadEarliest

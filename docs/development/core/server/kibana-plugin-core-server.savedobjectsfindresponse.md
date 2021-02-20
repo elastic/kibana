@@ -20,6 +20,7 @@ export interface SavedObjectsFindResponse<T = unknown>
 |  --- | --- | --- |
 |  [page](./kibana-plugin-core-server.savedobjectsfindresponse.page.md) | <code>number</code> |  |
 |  [per\_page](./kibana-plugin-core-server.savedobjectsfindresponse.per_page.md) | <code>number</code> |  |
+|  [pit\_id](./kibana-plugin-core-server.savedobjectsfindresponse.pit_id.md) | <code>string</code> |  |
 |  [saved\_objects](./kibana-plugin-core-server.savedobjectsfindresponse.saved_objects.md) | <code>Array&lt;SavedObjectsFindResult&lt;T&gt;&gt;</code> |  |
 |  [total](./kibana-plugin-core-server.savedobjectsfindresponse.total.md) | <code>number</code> |  |
 

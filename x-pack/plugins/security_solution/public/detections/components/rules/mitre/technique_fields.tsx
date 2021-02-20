@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -16,13 +17,13 @@ import { kebabCase, camelCase } from 'lodash/fp';
 import React, { useCallback } from 'react';
 import styled, { css } from 'styled-components';
 
+import {
+  Threats,
+  ThreatTechnique,
+} from '../../../../../common/detection_engine/schemas/common/schemas';
 import { techniquesOptions } from '../../../mitre/mitre_tactics_techniques';
 import * as Rulei18n from '../../../pages/detection_engine/rules/translations';
 import { FieldHook } from '../../../../shared_imports';
-import {
-  IMitreAttackTechnique,
-  IMitreEnterpriseAttack,
-} from '../../../pages/detection_engine/rules/types';
 import { MyAddItemButton } from '../add_item_form';
 import { hasSubtechniqueOptions } from './helpers';
 import * as i18n from './translations';
@@ -41,7 +42,7 @@ interface AddTechniqueProps {
   threatIndex: number;
   idAria: string;
   isDisabled: boolean;
-  onFieldChange: (threats: IMitreEnterpriseAttack[]) => void;
+  onFieldChange: (threats: Threats) => void;
 }
 
 export const MitreAttackTechniqueFields: React.FC<AddTechniqueProps> = ({
@@ -51,11 +52,11 @@ export const MitreAttackTechniqueFields: React.FC<AddTechniqueProps> = ({
   threatIndex,
   onFieldChange,
 }): JSX.Element => {
-  const values = field.value as IMitreEnterpriseAttack[];
+  const values = field.value as Threats;
 
   const removeTechnique = useCallback(
     (index: number) => {
-      const threats = [...(field.value as IMitreEnterpriseAttack[])];
+      const threats = [...(field.value as Threats)];
       const techniques = threats[threatIndex].technique;
       techniques.splice(index, 1);
       threats[threatIndex] = {
@@ -68,7 +69,7 @@ export const MitreAttackTechniqueFields: React.FC<AddTechniqueProps> = ({
   );
 
   const addMitreAttackTechnique = useCallback(() => {
-    const threats = [...(field.value as IMitreEnterpriseAttack[])];
+    const threats = [...(field.value as Threats)];
     threats[threatIndex] = {
       ...threats[threatIndex],
       technique: [
@@ -81,7 +82,7 @@ export const MitreAttackTechniqueFields: React.FC<AddTechniqueProps> = ({
 
   const updateTechnique = useCallback(
     (index: number, value: string) => {
-      const threats = [...(field.value as IMitreEnterpriseAttack[])];
+      const threats = [...(field.value as Threats)];
       const { id, reference, name } = techniquesOptions.find((t) => t.value === value) || {
         id: '',
         name: '',
@@ -109,7 +110,7 @@ export const MitreAttackTechniqueFields: React.FC<AddTechniqueProps> = ({
   );
 
   const getSelectTechnique = useCallback(
-    (tacticName: string, index: number, disabled: boolean, technique: IMitreAttackTechnique) => {
+    (tacticName: string, index: number, disabled: boolean, technique: ThreatTechnique) => {
       const options = techniquesOptions.filter((t) => t.tactics.includes(kebabCase(tacticName)));
       return (
         <>

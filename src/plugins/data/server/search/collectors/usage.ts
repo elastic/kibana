@@ -1,27 +1,18 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
+import { once } from 'lodash';
 import type { CoreSetup, Logger } from 'kibana/server';
+import { SavedObjectsErrorHelpers } from '../../../../../core/server';
 import type { IEsSearchResponse } from '../../../common';
-import type { Usage } from './register';
 
 const SAVED_OBJECT_ID = 'search-telemetry';
+const MAX_RETRY_COUNT = 3;
 
 export interface SearchUsage {
   trackError(): Promise<void>;
@@ -29,51 +20,42 @@ export interface SearchUsage {
 }
 
 export function usageProvider(core: CoreSetup): SearchUsage {
-  const getTracker = (eventType: keyof Usage) => {
-    return async (duration?: number) => {
-      const repository = await core
-        .getStartServices()
-        .then(([coreStart]) => coreStart.savedObjects.createInternalRepository());
+  const getRepository = once(async () => {
+    const [coreStart] = await core.getStartServices();
+    return coreStart.savedObjects.createInternalRepository();
+  });
 
-      let attributes: Usage;
-      let doesSavedObjectExist: boolean = true;
-
-      try {
-        const response = await repository.get<Usage>(SAVED_OBJECT_ID, SAVED_OBJECT_ID);
-        attributes = response.attributes;
-      } catch (e) {
-        doesSavedObjectExist = false;
-        attributes = {
-          successCount: 0,
-          errorCount: 0,
-          averageDuration: 0,
-        };
+  const trackSuccess = async (duration: number, retryCount = 0) => {
+    const repository = await getRepository();
+    try {
+      await repository.incrementCounter(SAVED_OBJECT_ID, SAVED_OBJECT_ID, [
+        { fieldName: 'successCount' },
+        {
+          fieldName: 'totalDuration',
+          incrementBy: duration,
+        },
+      ]);
+    } catch (e) {
+      if (SavedObjectsErrorHelpers.isConflictError(e) && retryCount < MAX_RETRY_COUNT) {
+        setTimeout(() => trackSuccess(duration, retryCount + 1), 1000);
       }
-
-      attributes[eventType]++;
-
-      // Only track the average duration for successful requests
-      if (eventType === 'successCount') {
-        attributes.averageDuration =
-          ((duration ?? 0) + (attributes.averageDuration ?? 0)) / (attributes.successCount ?? 1);
-      }
-
-      try {
-        if (doesSavedObjectExist) {
-          await repository.update(SAVED_OBJECT_ID, SAVED_OBJECT_ID, attributes);
-        } else {
-          await repository.create(SAVED_OBJECT_ID, attributes, { id: SAVED_OBJECT_ID });
-        }
-      } catch (e) {
-        // Version conflict error, swallow
-      }
-    };
+    }
   };
 
-  return {
-    trackError: () => getTracker('errorCount')(),
-    trackSuccess: getTracker('successCount'),
+  const trackError = async (retryCount = 0) => {
+    const repository = await getRepository();
+    try {
+      await repository.incrementCounter(SAVED_OBJECT_ID, SAVED_OBJECT_ID, [
+        { fieldName: 'errorCount' },
+      ]);
+    } catch (e) {
+      if (SavedObjectsErrorHelpers.isConflictError(e) && retryCount < MAX_RETRY_COUNT) {
+        setTimeout(() => trackError(retryCount + 1), 1000);
+      }
+    }
   };
+
+  return { trackSuccess, trackError };
 }
 
 /**

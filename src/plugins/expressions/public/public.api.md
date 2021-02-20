@@ -12,7 +12,6 @@ import { EventEmitter } from 'events';
 import { KibanaRequest } from 'src/core/server';
 import { Observable } from 'rxjs';
 import { PackageInfo } from '@kbn/config';
-import { PersistedState } from 'src/plugins/visualizations/public';
 import { Plugin as Plugin_2 } from 'src/core/public';
 import { PluginInitializerContext as PluginInitializerContext_2 } from 'src/core/public';
 import React from 'react';
@@ -144,6 +143,7 @@ export interface ExecutionContext<InspectorAdapters extends Adapters = Adapters,
     getSearchContext: () => ExecutionContextSearch;
     getSearchSessionId: () => string | undefined;
     inspectorAdapters: InspectorAdapters;
+    isSyncColorsEnabled?: () => boolean;
     types: Record<string, ExpressionType>;
     variables: Record<string, unknown>;
 }
@@ -532,7 +532,7 @@ export interface ExpressionRenderError extends Error {
 // @public (undocumented)
 export class ExpressionRenderHandler {
     // Warning: (ae-forgotten-export) The symbol "ExpressionRenderHandlerParams" needs to be exported by the entry point index.d.ts
-    constructor(element: HTMLElement, { onRenderError, renderMode, hasCompatibleActions, }?: ExpressionRenderHandlerParams);
+    constructor(element: HTMLElement, { onRenderError, renderMode, syncColors, hasCompatibleActions, }?: ExpressionRenderHandlerParams);
     // (undocumented)
     destroy: () => void;
     // (undocumented)
@@ -550,6 +550,16 @@ export class ExpressionRenderHandler {
     // (undocumented)
     update$: Observable<UpdateValue | null>;
     }
+
+// Warning: (ae-missing-release-tag) "ExpressionsInspectorAdapter" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public (undocumented)
+export class ExpressionsInspectorAdapter extends EventEmitter {
+    // (undocumented)
+    get ast(): any;
+    // (undocumented)
+    logAST(ast: any): void;
+}
 
 // Warning: (ae-missing-release-tag) "ExpressionsPublicPlugin" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
@@ -904,6 +914,8 @@ export interface IExpressionLoaderParams {
     // (undocumented)
     searchSessionId?: string;
     // (undocumented)
+    syncColors?: boolean;
+    // (undocumented)
     uiState?: unknown;
     // (undocumented)
     variables?: Record<string, any>;
@@ -921,11 +933,12 @@ export interface IInterpreterRenderHandlers {
     // (undocumented)
     hasCompatibleActions?: (event: any) => Promise<boolean>;
     // (undocumented)
+    isSyncColorsEnabled: () => boolean;
+    // (undocumented)
     onDestroy: (fn: () => void) => void;
     // (undocumented)
     reload: () => void;
-    // (undocumented)
-    uiState?: PersistedState;
+    uiState?: unknown;
     // (undocumented)
     update: (params: any) => void;
 }
@@ -1096,6 +1109,18 @@ export interface SerializedFieldFormat<TParams = Record<string, any>> {
 // @public (undocumented)
 export type Style = ExpressionTypeStyle;
 
+// Warning: (ae-missing-release-tag) "TablesAdapter" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public (undocumented)
+export class TablesAdapter extends EventEmitter {
+    // (undocumented)
+    logDatatable(name: string, datatable: Datatable): void;
+    // (undocumented)
+    get tables(): {
+        [key: string]: Datatable;
+    };
+    }
+
 // Warning: (ae-missing-release-tag) "TextAlignment" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public
@@ -1153,8 +1178,8 @@ export type UnmappedTypeStrings = 'date' | 'filter';
 
 // Warnings were encountered during analysis:
 //
-// src/plugins/expressions/common/ast/types.ts:40:3 - (ae-forgotten-export) The symbol "ExpressionAstFunctionDebug" needs to be exported by the entry point index.d.ts
-// src/plugins/expressions/common/expression_types/specs/error.ts:31:5 - (ae-forgotten-export) The symbol "ErrorLike" needs to be exported by the entry point index.d.ts
+// src/plugins/expressions/common/ast/types.ts:29:3 - (ae-forgotten-export) The symbol "ExpressionAstFunctionDebug" needs to be exported by the entry point index.d.ts
+// src/plugins/expressions/common/expression_types/specs/error.ts:20:5 - (ae-forgotten-export) The symbol "ErrorLike" needs to be exported by the entry point index.d.ts
 
 // (No @packageDocumentation comment for this package)
 

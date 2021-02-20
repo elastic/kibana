@@ -13,7 +13,6 @@ Enroll agent
 ## Request body
 
 - `type` (Required, string) Agent type should be one of `EPHEMERAL`, `TEMPORARY`, `PERMANENT`
-- `shared_id` (Optional, string) An ID for the agent.
 - `metadata` (Optional, object) Objects with `local` and `user_provided` properties that contain the metadata for an agent. The metadata is a dictionary of strings (example: `"local": { "os": "macos" }`).
 
 ## Response code
@@ -68,12 +67,3 @@ The API will return a response with a `401` status code and an error if the enro
 }
 ```
 
-The API will return a response with a `400` status code and an error if you enroll an agent with the same `shared_id` than an already active agent:
-
-```js
-{
-  "statusCode": 400,
-  "error": "BadRequest",
-  "message": "Impossible to enroll an already active agent"
-}
-```

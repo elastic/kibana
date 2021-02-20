@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import type { DefaultOperator } from 'elasticsearch';
@@ -10,19 +11,18 @@ import { HttpFetchError } from '../../../../../../src/core/public';
 import type { IndexPattern } from '../../../../../../src/plugins/data/public';
 
 import type {
+  PivotTransformPreviewRequestSchema,
   PostTransformsPreviewRequestSchema,
+  PutTransformsLatestRequestSchema,
+  PutTransformsPivotRequestSchema,
   PutTransformsRequestSchema,
 } from '../../../common/api_schemas/transforms';
-import type {
-  DateHistogramAgg,
-  HistogramAgg,
-  TermsAgg,
-} from '../../../common/types/pivot_group_by';
-import { dictionaryToArray } from '../../../common/types/common';
+import { DateHistogramAgg, HistogramAgg, TermsAgg } from '../../../common/types/pivot_group_by';
 
 import type { SavedSearchQuery } from '../hooks/use_search_items';
 import type { StepDefineExposedState } from '../sections/create_transform/components/step_define';
-import type { StepDetailsExposedState } from '../sections/create_transform/components/step_details/step_details_form';
+import type { StepDetailsExposedState } from '../sections/create_transform/components/step_details';
+import { isPopulatedObject } from './utils/object_utils';
 
 import {
   getEsAggFromAggConfig,
@@ -30,10 +30,10 @@ import {
   isGroupByDateHistogram,
   isGroupByHistogram,
   isGroupByTerms,
+  GroupByConfigWithUiSupport,
+  PivotAggsConfig,
   PivotGroupByConfig,
-} from '../common';
-
-import { PivotAggsConfig } from './pivot_aggs';
+} from './';
 
 export interface SimpleQuery {
   query_string: {
@@ -71,30 +71,52 @@ export function isDefaultQuery(query: PivotQuery): boolean {
   return isSimpleQuery(query) && query.query_string.query === '*';
 }
 
-export function getPreviewTransformRequestBody(
-  indexPatternTitle: IndexPattern['title'],
-  query: PivotQuery,
-  groupBy: PivotGroupByConfig[],
-  aggs: PivotAggsConfig[]
-): PostTransformsPreviewRequestSchema {
-  const index = indexPatternTitle.split(',').map((name: string) => name.trim());
+export function getCombinedRuntimeMappings(
+  indexPattern: IndexPattern | undefined,
+  runtimeMappings?: StepDefineExposedState['runtimeMappings']
+): StepDefineExposedState['runtimeMappings'] | undefined {
+  let combinedRuntimeMappings = {};
 
-  const request: PostTransformsPreviewRequestSchema = {
-    source: {
-      index,
-      ...(!isDefaultQuery(query) && !isMatchAllQuery(query) ? { query } : {}),
-    },
+  // Use runtime field mappings defined inline from API
+  if (isPopulatedObject(runtimeMappings)) {
+    combinedRuntimeMappings = { ...combinedRuntimeMappings, ...runtimeMappings };
+  }
+
+  // And runtime field mappings defined by index pattern
+  if (indexPattern !== undefined) {
+    const ipRuntimeMappings = indexPattern.getComputedFields().runtimeFields;
+    combinedRuntimeMappings = { ...combinedRuntimeMappings, ...ipRuntimeMappings };
+  }
+
+  if (isPopulatedObject(combinedRuntimeMappings)) {
+    return combinedRuntimeMappings;
+  }
+  return undefined;
+}
+
+export const getMissingBucketConfig = (
+  g: GroupByConfigWithUiSupport
+): { missing_bucket?: boolean } => {
+  return g.missing_bucket !== undefined ? { missing_bucket: g.missing_bucket } : {};
+};
+
+export const getRequestPayload = (
+  pivotAggsArr: PivotAggsConfig[],
+  pivotGroupByArr: PivotGroupByConfig[]
+) => {
+  const request = {
     pivot: {
       group_by: {},
       aggregations: {},
-    },
+    } as PivotTransformPreviewRequestSchema['pivot'],
   };
 
-  groupBy.forEach((g) => {
+  pivotGroupByArr.forEach((g) => {
     if (isGroupByTerms(g)) {
       const termsAgg: TermsAgg = {
         terms: {
           field: g.field,
+          ...getMissingBucketConfig(g),
         },
       };
       request.pivot.group_by[g.aggName] = termsAgg;
@@ -103,6 +125,7 @@ export function getPreviewTransformRequestBody(
         histogram: {
           field: g.field,
           interval: g.interval,
+          ...getMissingBucketConfig(g),
         },
       };
       request.pivot.group_by[g.aggName] = histogramAgg;
@@ -111,6 +134,7 @@ export function getPreviewTransformRequestBody(
         date_histogram: {
           field: g.field,
           calendar_interval: g.calendar_interval,
+          ...getMissingBucketConfig(g),
         },
       };
       request.pivot.group_by[g.aggName] = dateHistogramAgg;
@@ -119,7 +143,7 @@ export function getPreviewTransformRequestBody(
     }
   });
 
-  aggs.forEach((agg) => {
+  pivotAggsArr.forEach((agg) => {
     const result = getEsAggFromAggConfig(agg);
     if (result === null) {
       return;
@@ -128,6 +152,24 @@ export function getPreviewTransformRequestBody(
   });
 
   return request;
+};
+
+export function getPreviewTransformRequestBody(
+  indexPatternTitle: IndexPattern['title'],
+  query: PivotQuery,
+  partialRequest?: StepDefineExposedState['previewRequest'] | undefined,
+  runtimeMappings?: StepDefineExposedState['runtimeMappings']
+): PostTransformsPreviewRequestSchema {
+  const index = indexPatternTitle.split(',').map((name: string) => name.trim());
+
+  return {
+    source: {
+      index,
+      ...(!isDefaultQuery(query) && !isMatchAllQuery(query) ? { query } : {}),
+      ...(isPopulatedObject(runtimeMappings) ? { runtime_mappings: runtimeMappings } : {}),
+    },
+    ...(partialRequest ?? {}),
+  };
 }
 
 export const getCreateTransformSettingsRequestBody = (
@@ -148,12 +190,12 @@ export const getCreateTransformRequestBody = (
   indexPatternTitle: IndexPattern['title'],
   pivotState: StepDefineExposedState,
   transformDetailsState: StepDetailsExposedState
-): PutTransformsRequestSchema => ({
+): PutTransformsPivotRequestSchema | PutTransformsLatestRequestSchema => ({
   ...getPreviewTransformRequestBody(
     indexPatternTitle,
     getPivotQuery(pivotState.searchQuery),
-    dictionaryToArray(pivotState.groupByList),
-    dictionaryToArray(pivotState.aggList)
+    pivotState.previewRequest,
+    pivotState.runtimeMappings
   ),
   // conditionally add optional description
   ...(transformDetailsState.transformDescription !== ''
@@ -173,6 +215,17 @@ export const getCreateTransformRequestBody = (
           time: {
             field: transformDetailsState.continuousModeDateField,
             delay: transformDetailsState.continuousModeDelay,
+          },
+        },
+      }
+    : {}),
+  // conditionally add retention policy settings
+  ...(transformDetailsState.isRetentionPolicyEnabled
+    ? {
+        retention_policy: {
+          time: {
+            field: transformDetailsState.retentionPolicyDateField,
+            max_age: transformDetailsState.retentionPolicyMaxAge,
           },
         },
       }

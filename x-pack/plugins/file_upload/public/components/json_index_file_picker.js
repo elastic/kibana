@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { Fragment, Component } from 'react';
@@ -9,9 +10,8 @@ import { EuiFilePicker, EuiFormRow, EuiProgress } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { parseFile } from '../util/file_parser';
-import { MAX_FILE_SIZE } from '../../common/constants/file_import';
-import _ from 'lodash';
 
+const MAX_FILE_SIZE = 52428800;
 const ACCEPTABLE_FILETYPES = ['json', 'geojson'];
 const acceptedFileTypeString = ACCEPTABLE_FILETYPES.map((type) => `.${type}`).join(',');
 const acceptedFileTypeStringMessage = ACCEPTABLE_FILETYPES.map((type) => `.${type}`).join(', ');
@@ -134,14 +134,12 @@ export class JsonIndexFilePicker extends Component {
     return fileNameOnly.toLowerCase();
   }
 
-  // It's necessary to throttle progress. Updates that are too frequent cause
-  // issues (update failure) in the nested progress component
-  setFileProgress = _.debounce(({ featuresProcessed, bytesProcessed, totalBytes }) => {
+  setFileProgress = ({ featuresProcessed, bytesProcessed, totalBytes }) => {
     const percentageProcessed = parseInt((100 * bytesProcessed) / totalBytes);
     if (this.getFileParseActive()) {
       this.setState({ featuresProcessed, percentageProcessed });
     }
-  }, 150);
+  };
 
   async _parseFile(file) {
     const { currentFileTracker } = this.state;

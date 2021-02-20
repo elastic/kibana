@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { SavedObjectsType } from 'src/core/server';
 import { APP_ICON, getExistingMapPath } from '../../common/constants';
 // @ts-ignore
@@ -20,6 +22,7 @@ export const mapSavedObjects: SavedObjectsType = {
       mapStateJSON: { type: 'text' },
       layerListJSON: { type: 'text' },
       uiStateJSON: { type: 'text' },
+      bounds: { dynamic: false, properties: {} }, // Disable removed field
     },
   },
   management: {

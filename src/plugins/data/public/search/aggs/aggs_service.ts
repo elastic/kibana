@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { Subscription } from 'rxjs';
@@ -22,7 +11,6 @@ import { Subscription } from 'rxjs';
 import { IUiSettingsClient } from 'src/core/public';
 import { ExpressionsServiceSetup } from 'src/plugins/expressions/common';
 import { FieldFormatsStart } from '../../field_formats';
-import { getForceNow } from '../../query/timefilter/lib/get_force_now';
 import { calculateBounds, TimeRange } from '../../../common';
 import {
   aggsRequiredUiSettings,
@@ -33,6 +21,7 @@ import {
 } from '../../../common/search/aggs';
 import { AggsSetup, AggsStart } from './types';
 import { IndexPatternsContract } from '../../index_patterns';
+import { NowProviderInternalContract } from '../../now_provider';
 
 /**
  * Aggs needs synchronous access to specific uiSettings. Since settings can change
@@ -63,6 +52,7 @@ export function createGetConfig(
 export interface AggsSetupDependencies {
   registerFunction: ExpressionsServiceSetup['registerFunction'];
   uiSettings: IUiSettingsClient;
+  nowProvider: NowProviderInternalContract;
 }
 
 /** @internal */
@@ -82,15 +72,17 @@ export class AggsService {
   private readonly initializedAggTypes = new Map();
   private getConfig?: AggsCommonStartDependencies['getConfig'];
   private subscriptions: Subscription[] = [];
+  private nowProvider!: NowProviderInternalContract;
 
   /**
-   * getForceNow uses window.location, so we must have a separate implementation
+   * NowGetter uses window.location, so we must have a separate implementation
    * of calculateBounds on the client and the server.
    */
   private calculateBounds = (timeRange: TimeRange) =>
-    calculateBounds(timeRange, { forceNow: getForceNow() });
+    calculateBounds(timeRange, { forceNow: this.nowProvider.get() });
 
-  public setup({ registerFunction, uiSettings }: AggsSetupDependencies): AggsSetup {
+  public setup({ registerFunction, uiSettings, nowProvider }: AggsSetupDependencies): AggsSetup {
+    this.nowProvider = nowProvider;
     this.getConfig = createGetConfig(uiSettings, aggsRequiredUiSettings, this.subscriptions);
 
     return this.aggsCommonService.setup({ registerFunction });
@@ -102,6 +94,7 @@ export class AggsService {
     const {
       calculateAutoTimeExpression,
       getDateMetaByDatatableColumn,
+      datatableUtilities,
       types,
     } = this.aggsCommonService.start({
       getConfig: this.getConfig!,
@@ -148,7 +141,8 @@ export class AggsService {
     return {
       calculateAutoTimeExpression,
       getDateMetaByDatatableColumn,
-      createAggConfigs: (indexPattern, configStates = [], schemas) => {
+      datatableUtilities,
+      createAggConfigs: (indexPattern, configStates = []) => {
         return new AggConfigs(indexPattern, configStates, { typesRegistry });
       },
       types: typesRegistry,

@@ -1,21 +1,25 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { setMockValues } from '../../../../__mocks__/kea.mock';
-import { setMockSearchContextState } from './__mocks__/hooks.mock';
 
 import React from 'react';
 
 import { shallow, mount } from 'enzyme';
+
 // @ts-expect-error types are not available for this package yet
 import { Results } from '@elastic/react-search-ui';
 
-import { ResultView } from './views';
+import { SchemaTypes } from '../../../../shared/types';
+
+import { setMockSearchContextState } from './__mocks__/hooks.mock';
 import { Pagination } from './pagination';
 import { SearchExperienceContent } from './search_experience_content';
+import { ResultView } from './views';
 
 describe('SearchExperienceContent', () => {
   const searchState = {
@@ -27,6 +31,11 @@ describe('SearchExperienceContent', () => {
     engineName: 'engine1',
     isMetaEngine: false,
     myRole: { canManageEngineDocuments: true },
+    engine: {
+      schema: {
+        title: 'string' as SchemaTypes,
+      },
+    },
   };
 
   beforeEach(() => {
@@ -40,27 +49,32 @@ describe('SearchExperienceContent', () => {
     expect(wrapper.isEmptyRender()).toBe(false);
   });
 
-  it('passes engineName to the result view', () => {
-    const props = {
-      result: {
-        id: {
-          raw: '1',
-        },
-        _meta: {
-          id: '1',
-          scopedId: '1',
-          score: 100,
-          engine: 'my-engine',
-        },
-        foo: {
-          raw: 'bar',
-        },
+  it('passes result, schema, and isMetaEngine to the result view', () => {
+    const result = {
+      id: {
+        raw: '1',
+      },
+      _meta: {
+        id: '1',
+        score: 100,
+        engine: 'my-engine',
+      },
+      foo: {
+        raw: 'bar',
       },
     };
 
     const wrapper = shallow(<SearchExperienceContent />);
     const resultView: any = wrapper.find(Results).prop('resultView');
-    expect(resultView(props)).toEqual(<ResultView {...props} />);
+    expect(resultView({ result })).toEqual(
+      <ResultView
+        {...{
+          isMetaEngine: values.isMetaEngine,
+          result,
+          schemaForTypeHighlights: values.engine.schema,
+        }}
+      />
+    );
   });
 
   it('renders pagination', () => {

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiFlexGroup, EuiSpacer, EuiText } from '@elastic/eui';
@@ -78,7 +79,7 @@ export const ExecutedJourney: FC<ExecutedJourneyProps> = ({ journey }) => {
       <EuiSpacer />
       <EuiFlexGroup direction="column">
         {journey.steps.filter(isStepEnd).map((step, index) => (
-          <ExecutedStep key={index} index={index} step={step} />
+          <ExecutedStep key={index} index={index} step={step} checkGroup={journey.checkGroup} />
         ))}
         <EuiSpacer size="s" />
       </EuiFlexGroup>

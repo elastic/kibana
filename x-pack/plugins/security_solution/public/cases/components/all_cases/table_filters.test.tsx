@@ -1,18 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
 import { mount } from 'enzyme';
 
 import { CaseStatuses } from '../../../../../case/common/api';
-import { CasesTableFilters } from './table_filters';
 import { TestProviders } from '../../../common/mock';
 import { useGetTags } from '../../containers/use_get_tags';
 import { useGetReporters } from '../../containers/use_get_reporters';
 import { DEFAULT_FILTER_OPTIONS } from '../../containers/use_get_cases';
+import { CasesTableFilters } from './table_filters';
 
 jest.mock('../../containers/use_get_reporters');
 jest.mock('../../containers/use_get_tags');
@@ -150,5 +151,21 @@ describe('CasesTableFilters ', () => {
       </TestProviders>
     );
     expect(onFilterChanged).toHaveBeenCalledWith({ reporters: [{ username: 'casetester' }] });
+  });
+
+  it('StatusFilterWrapper should have a fixed width of 180px', () => {
+    const wrapper = mount(
+      <TestProviders>
+        <CasesTableFilters {...props} />
+      </TestProviders>
+    );
+
+    expect(wrapper.find('[data-test-subj="status-filter-wrapper"]').first()).toHaveStyleRule(
+      'flex-basis',
+      '180px',
+      {
+        modifier: '&&',
+      }
+    );
   });
 });

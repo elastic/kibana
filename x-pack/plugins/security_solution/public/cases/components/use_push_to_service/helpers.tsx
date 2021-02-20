@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiLink } from '@elastic/eui';
@@ -17,11 +18,16 @@ export const getLicenseError = () => ({
   title: i18n.PUSH_DISABLE_BY_LICENSE_TITLE,
   description: (
     <FormattedMessage
-      defaultMessage="To open cases in external systems, you must update your license to Platinum, start a free 30-day trial, or spin up a {link} on AWS, GCP, or Azure."
+      defaultMessage="Opening cases in external systems is available when you have the {appropriateLicense}, are using a {cloud}, or are testing out a Free Trial."
       id="xpack.securitySolution.case.caseView.pushToServiceDisableByLicenseDescription"
       values={{
-        link: (
-          <EuiLink href="https://www.elastic.co/cloud/" target="_blank">
+        appropriateLicense: (
+          <EuiLink href="https://www.elastic.co/subscriptions" target="_blank">
+            {i18n.LINK_APPROPRIATE_LICENSE}
+          </EuiLink>
+        ),
+        cloud: (
+          <EuiLink href="https://www.elastic.co/cloud/elasticsearch-service/signup" target="_blank">
             {i18n.LINK_CLOUD_DEPLOYMENT}
           </EuiLink>
         ),

@@ -226,6 +226,7 @@ exports[`Flyout conflicts should allow conflict resolution 2`] = `
             "createNewCopies": false,
             "overwrite": true,
           },
+          "importWarnings": undefined,
           "indexPatterns": Array [
             Object {
               "id": "1",
@@ -668,7 +669,18 @@ exports[`Flyout should render import step 1`] = `
 
 exports[`Flyout summary should display summary when import is complete 1`] = `
 <ImportSummary
+  basePath={
+    BasePath {
+      "basePath": "",
+      "get": [Function],
+      "prepend": [Function],
+      "publicBaseUrl": undefined,
+      "remove": [Function],
+      "serverBasePath": "",
+    }
+  }
   failedImports={Symbol()}
+  importWarnings={Array []}
   successfulImports={Symbol()}
 />
 `;

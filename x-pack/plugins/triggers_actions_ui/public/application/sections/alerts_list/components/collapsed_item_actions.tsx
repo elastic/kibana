@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -68,7 +69,7 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
         <div className="actCollapsedItemActions__item">
           <EuiSwitch
             name="disable"
-            disabled={!item.isEditable}
+            disabled={!item.isEditable || !item.enabledInLicense}
             compressed
             checked={!item.enabled}
             data-test-subj="disableSwitch"
@@ -99,7 +100,7 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
           <EuiSwitch
             name="mute"
             checked={item.muteAll}
-            disabled={!(item.isEditable && item.enabled)}
+            disabled={!(item.isEditable && item.enabled) || !item.enabledInLicense}
             compressed
             data-test-subj="muteSwitch"
             onChange={async () => {

@@ -1,13 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { BehaviorSubject } from 'rxjs';
 import {
   LicensingPluginSetup,
   LicensingPluginStart,
-  LicensingRequestHandlerContext,
+  LicensingApiRequestHandlerContext,
 } from './types';
 import { licenseMock } from '../common/licensing.mock';
 import { featureUsageMock } from './services/feature_usage_service.mock';
@@ -49,8 +51,8 @@ const createStartMock = (): jest.Mocked<LicensingPluginStart> => {
 
 const createRequestHandlerContextMock = (
   ...options: Parameters<typeof licenseMock.createLicense>
-): jest.Mocked<LicensingRequestHandlerContext> => {
-  const mock: jest.Mocked<LicensingRequestHandlerContext> = {
+): jest.Mocked<LicensingApiRequestHandlerContext> => {
+  const mock: jest.Mocked<LicensingApiRequestHandlerContext> = {
     license: licenseMock.createLicense(...options),
     featureUsage: featureUsageMock.createStart(),
   };

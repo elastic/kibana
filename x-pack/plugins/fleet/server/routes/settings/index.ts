@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { IRouter, RequestHandler } from 'src/core/server';
 import { TypeOf } from '@kbn/config-schema';
 import { PLUGIN_ID, SETTINGS_API_ROUTES } from '../../constants';
@@ -36,10 +38,12 @@ export const putSettingsHandler: RequestHandler<
   TypeOf<typeof PutSettingsRequestSchema.body>
 > = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
+  const esClient = context.core.elasticsearch.client.asCurrentUser;
   const user = await appContextService.getSecurity()?.authc.getCurrentUser(request);
+
   try {
     const settings = await settingsService.saveSettings(soClient, request.body);
-    await agentPolicyService.bumpAllAgentPolicies(soClient, {
+    await agentPolicyService.bumpAllAgentPolicies(soClient, esClient, {
       user: user || undefined,
     });
     const body = {

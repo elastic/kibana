@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -23,39 +12,30 @@ import { ViewMode } from './services/embeddable';
 /**
  * @param title {string} the current title of the dashboard
  * @param viewMode {DashboardViewMode} the current mode. If in editing state, prepends 'Editing ' to the title.
- * @param isDirty {boolean} if the dashboard is in a dirty state. If in dirty state, adds (unsaved) to the
- * end of the title.
  * @returns {string} A title to display to the user based on the above parameters.
  */
-export function getDashboardTitle(
-  title: string,
-  viewMode: ViewMode,
-  isDirty: boolean,
-  isNew: boolean
-): string {
+export function getDashboardTitle(title: string, viewMode: ViewMode, isNew: boolean): string {
   const isEditMode = viewMode === ViewMode.EDIT;
-  let displayTitle: string;
-  const newDashboardTitle = i18n.translate('dashboard.savedDashboard.newDashboardTitle', {
-    defaultMessage: 'New Dashboard',
-  });
-  const dashboardTitle = isNew ? newDashboardTitle : title;
-
-  if (isEditMode && isDirty) {
-    displayTitle = i18n.translate('dashboard.strings.dashboardUnsavedEditTitle', {
-      defaultMessage: 'Editing {title} (unsaved)',
-      values: { title: dashboardTitle },
-    });
-  } else if (isEditMode) {
-    displayTitle = i18n.translate('dashboard.strings.dashboardEditTitle', {
-      defaultMessage: 'Editing {title}',
-      values: { title: dashboardTitle },
-    });
-  } else {
-    displayTitle = dashboardTitle;
-  }
-
-  return displayTitle;
+  const dashboardTitle = isNew ? getNewDashboardTitle() : title;
+  return isEditMode
+    ? i18n.translate('dashboard.strings.dashboardEditTitle', {
+        defaultMessage: 'Editing {title}',
+        values: { title: dashboardTitle },
+      })
+    : dashboardTitle;
 }
+
+export const unsavedChangesBadge = {
+  getUnsavedChangedBadgeText: () =>
+    i18n.translate('dashboard.unsavedChangesBadge', {
+      defaultMessage: 'Unsaved changes',
+    }),
+};
+
+export const getMigratedToastText = () =>
+  i18n.translate('dashboard.migratedChanges', {
+    defaultMessage: 'Some panels have been successfully updated to the latest version.',
+  });
 
 /*
   Plugin
@@ -89,10 +69,37 @@ export const dashboardFeatureCatalog = {
 /*
   Actions
 */
+export const dashboardCopyToDashboardAction = {
+  getDisplayName: () =>
+    i18n.translate('dashboard.panel.copyToDashboard.title', {
+      defaultMessage: 'Copy to dashboard',
+    }),
+  getCancelButtonName: () =>
+    i18n.translate('dashboard.panel.copyToDashboard.cancel', {
+      defaultMessage: 'Cancel',
+    }),
+  getAcceptButtonName: () =>
+    i18n.translate('dashboard.panel.copyToDashboard.goToDashboard', {
+      defaultMessage: 'Copy and go to dashboard',
+    }),
+  getNewDashboardOption: () =>
+    i18n.translate('dashboard.panel.copyToDashboard.newDashboardOptionLabel', {
+      defaultMessage: 'New dashboard',
+    }),
+  getExistingDashboardOption: () =>
+    i18n.translate('dashboard.panel.copyToDashboard.existingDashboardOptionLabel', {
+      defaultMessage: 'Existing dashboard',
+    }),
+  getDescription: () =>
+    i18n.translate('dashboard.panel.copyToDashboard.description', {
+      defaultMessage: "Select where to copy the panel. You're navigated to destination dashboard.",
+    }),
+};
+
 export const dashboardAddToLibraryAction = {
   getDisplayName: () =>
     i18n.translate('dashboard.panel.AddToLibrary', {
-      defaultMessage: 'Add to library',
+      defaultMessage: 'Save to library',
     }),
   getSuccessMessage: (panelTitle: string) =>
     i18n.translate('dashboard.panel.addToLibrary.successMessage', {
@@ -134,7 +141,7 @@ export const dashboardExportCsvAction = {
     }),
   getUntitledFilename: () =>
     i18n.translate('dashboard.actions.downloadOptionsUnsavedFilename', {
-      defaultMessage: 'unsaved',
+      defaultMessage: 'untitled',
     }),
 };
 
@@ -187,6 +194,30 @@ export const dashboardReplacePanelAction = {
 /*
   Dashboard Editor
 */
+export const getNewDashboardTitle = () =>
+  i18n.translate('dashboard.savedDashboard.newDashboardTitle', {
+    defaultMessage: 'New Dashboard',
+  });
+
+export const getDashboard60Warning = () =>
+  i18n.translate('dashboard.urlWasRemovedInSixZeroWarningMessage', {
+    defaultMessage: 'The url "dashboard/create" was removed in 6.0. Please update your bookmarks.',
+  });
+
+export const dashboardReadonlyBadge = {
+  getText: () =>
+    i18n.translate('dashboard.badge.readOnly.text', {
+      defaultMessage: 'Read only',
+    }),
+  getTooltip: () =>
+    i18n.translate('dashboard.badge.readOnly.tooltip', {
+      defaultMessage: 'Unable to save dashboards',
+    }),
+};
+
+/*
+  Modals
+*/
 export const shareModalStrings = {
   getTopMenuCheckbox: () =>
     i18n.translate('dashboard.embedUrlParamExtension.topMenu', {
@@ -210,22 +241,6 @@ export const shareModalStrings = {
     }),
 };
 
-export const getDashboard60Warning = () =>
-  i18n.translate('dashboard.urlWasRemovedInSixZeroWarningMessage', {
-    defaultMessage: 'The url "dashboard/create" was removed in 6.0. Please update your bookmarks.',
-  });
-
-export const dashboardReadonlyBadge = {
-  getText: () =>
-    i18n.translate('dashboard.badge.readOnly.text', {
-      defaultMessage: 'Read only',
-    }),
-  getTooltip: () =>
-    i18n.translate('dashboard.badge.readOnly.tooltip', {
-      defaultMessage: 'Unable to save dashboards',
-    }),
-};
-
 export const leaveConfirmStrings = {
   getLeaveTitle: () =>
     i18n.translate('dashboard.appLeaveConfirmModal.unsavedChangesTitle', {
@@ -235,21 +250,96 @@ export const leaveConfirmStrings = {
     i18n.translate('dashboard.appLeaveConfirmModal.unsavedChangesSubtitle', {
       defaultMessage: 'Leave Dashboard with unsaved work?',
     }),
-  getDiscardTitle: () =>
-    i18n.translate('dashboard.changeViewModeConfirmModal.discardChangesTitle', {
-      defaultMessage: 'Discard changes to dashboard?',
+  getLeaveCancelButtonText: () =>
+    i18n.translate('dashboard.appLeaveConfirmModal.cancelButtonLabel', {
+      defaultMessage: 'Cancel',
     }),
-  getDiscardSubtitle: () =>
-    i18n.translate('dashboard.changeViewModeConfirmModal.discardChangesDescription', {
-      defaultMessage: `Once you discard your changes, there's no getting them back.`,
+};
+
+export const leaveEditModeConfirmStrings = {
+  getLeaveEditModeTitle: () =>
+    i18n.translate('dashboard.changeViewModeConfirmModal.leaveEditModeTitle', {
+      defaultMessage: 'You have unsaved changes',
     }),
-  getConfirmButtonText: () =>
+  getLeaveEditModeSubtitle: () =>
+    i18n.translate('dashboard.changeViewModeConfirmModal.description', {
+      defaultMessage: `You can keep or discard your changes on return to view mode.  You can't recover discarded changes.`,
+    }),
+  getLeaveEditModeKeepChangesText: () =>
+    i18n.translate('dashboard.changeViewModeConfirmModal.keepUnsavedChangesButtonLabel', {
+      defaultMessage: 'Keep changes',
+    }),
+  getLeaveEditModeDiscardButtonText: () =>
     i18n.translate('dashboard.changeViewModeConfirmModal.confirmButtonLabel', {
       defaultMessage: 'Discard changes',
     }),
-  getCancelButtonText: () =>
+  getLeaveEditModeCancelButtonText: () =>
     i18n.translate('dashboard.changeViewModeConfirmModal.cancelButtonLabel', {
       defaultMessage: 'Continue editing',
+    }),
+};
+
+export const discardConfirmStrings = {
+  getDiscardTitle: () =>
+    i18n.translate('dashboard.discardChangesConfirmModal.discardChangesTitle', {
+      defaultMessage: 'Discard changes to dashboard?',
+    }),
+  getDiscardSubtitle: () =>
+    i18n.translate('dashboard.discardChangesConfirmModal.discardChangesDescription', {
+      defaultMessage: `Once you discard your changes, there's no getting them back.`,
+    }),
+  getDiscardConfirmButtonText: () =>
+    i18n.translate('dashboard.discardChangesConfirmModal.confirmButtonLabel', {
+      defaultMessage: 'Discard changes',
+    }),
+  getDiscardCancelButtonText: () =>
+    i18n.translate('dashboard.discardChangesConfirmModal.cancelButtonLabel', {
+      defaultMessage: 'Cancel',
+    }),
+};
+
+export const createConfirmStrings = {
+  getCreateTitle: () =>
+    i18n.translate('dashboard.createConfirmModal.unsavedChangesTitle', {
+      defaultMessage: 'New dashboard already in progress',
+    }),
+  getCreateSubtitle: () =>
+    i18n.translate('dashboard.createConfirmModal.unsavedChangesSubtitle', {
+      defaultMessage: 'You can continue editing or start with a blank dashboard.',
+    }),
+  getStartOverButtonText: () =>
+    i18n.translate('dashboard.createConfirmModal.confirmButtonLabel', {
+      defaultMessage: 'Start over',
+    }),
+  getContinueButtonText: () =>
+    i18n.translate('dashboard.createConfirmModal.continueButtonLabel', {
+      defaultMessage: 'Continue editing',
+    }),
+  getCancelButtonText: () =>
+    i18n.translate('dashboard.createConfirmModal.cancelButtonLabel', {
+      defaultMessage: 'Cancel',
+    }),
+};
+
+/*
+  Error Messages
+*/
+
+export const panelStorageErrorStrings = {
+  getPanelsGetError: (message: string) =>
+    i18n.translate('dashboard.panelStorageError.getError', {
+      defaultMessage: 'Error encountered while fetching unsaved changes: {message}',
+      values: { message },
+    }),
+  getPanelsSetError: (message: string) =>
+    i18n.translate('dashboard.panelStorageError.setError', {
+      defaultMessage: 'Error encountered while setting unsaved changes: {message}',
+      values: { message },
+    }),
+  getPanelsClearError: (message: string) =>
+    i18n.translate('dashboard.panelStorageError.clearError', {
+      defaultMessage: 'Error encountered while clearing unsaved changes: {message}',
+      values: { message },
     }),
 };
 
@@ -285,25 +375,13 @@ export const emptyScreenStrings = {
     i18n.translate('dashboard.howToStartWorkingOnNewDashboardEditLinkAriaLabel', {
       defaultMessage: 'Edit dashboard',
     }),
-  getAddExistingVisualizationLinkText: () =>
-    i18n.translate('dashboard.addExistingVisualizationLinkText', {
-      defaultMessage: 'Add an existing',
+  getEmptyWidgetTitle: () =>
+    i18n.translate('dashboard.emptyWidget.addPanelTitle', {
+      defaultMessage: 'Add your first panel',
     }),
-  getAddExistingVisualizationLinkAriaLabel: () =>
-    i18n.translate('dashboard.addVisualizationLinkAriaLabel', {
-      defaultMessage: 'Add an existing visualization',
-    }),
-  getAddNewVisualizationDescription: () =>
-    i18n.translate('dashboard.addNewVisualizationText', {
-      defaultMessage: 'or new object to this dashboard',
-    }),
-  getCreateNewVisualizationButton: () =>
-    i18n.translate('dashboard.createNewVisualizationButton', {
-      defaultMessage: 'Create new',
-    }),
-  getCreateNewVisualizationButtonAriaLabel: () =>
-    i18n.translate('dashboard.createNewVisualizationButtonAriaLabel', {
-      defaultMessage: 'Create new visualization button',
+  getEmptyWidgetDescription: () =>
+    i18n.translate('dashboard.emptyWidget.addPanelDescription', {
+      defaultMessage: 'Create content that tells a story about your data.',
     }),
 };
 
@@ -328,5 +406,39 @@ export const dashboardListingTable = {
   getDescriptionColumnName: () =>
     i18n.translate('dashboard.listing.table.descriptionColumnName', {
       defaultMessage: 'Description',
+    }),
+};
+
+export const dashboardUnsavedListingStrings = {
+  getUnsavedChangesTitle: (plural = false) =>
+    i18n.translate('dashboard.listing.unsaved.unsavedChangesTitle', {
+      defaultMessage: 'You have unsaved changes in the following {dash}.',
+      values: {
+        dash: plural
+          ? dashboardListingTable.getEntityNamePlural()
+          : dashboardListingTable.getEntityName(),
+      },
+    }),
+  getLoadingTitle: () =>
+    i18n.translate('dashboard.listing.unsaved.loading', {
+      defaultMessage: 'Loading',
+    }),
+  getEditAriaLabel: (title: string) =>
+    i18n.translate('dashboard.listing.unsaved.editAria', {
+      defaultMessage: 'Continue editing {title}',
+      values: { title },
+    }),
+  getEditTitle: () =>
+    i18n.translate('dashboard.listing.unsaved.editTitle', {
+      defaultMessage: 'Continue editing',
+    }),
+  getDiscardAriaLabel: (title: string) =>
+    i18n.translate('dashboard.listing.unsaved.discardAria', {
+      defaultMessage: 'Discard changes to {title}',
+      values: { title },
+    }),
+  getDiscardTitle: () =>
+    i18n.translate('dashboard.listing.unsaved.discardTitle', {
+      defaultMessage: 'Discard changes',
     }),
 };

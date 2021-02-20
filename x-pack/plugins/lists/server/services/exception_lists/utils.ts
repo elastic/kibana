@@ -1,11 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import uuid from 'uuid';
 import { SavedObject, SavedObjectsFindResponse, SavedObjectsUpdateResponse } from 'kibana/server';
 
+import {
+  SavedObjectType,
+  exceptionListAgnosticSavedObjectType,
+  exceptionListSavedObjectType,
+} from '../../../common/types';
 import { NamespaceTypeArray } from '../../../common/schemas/types/default_namespace_array';
 import {
   CommentsArray,
@@ -21,11 +28,6 @@ import {
   exceptionListItemType,
   exceptionListType,
 } from '../../../common/schemas';
-import {
-  SavedObjectType,
-  exceptionListAgnosticSavedObjectType,
-  exceptionListSavedObjectType,
-} from '../../saved_objects';
 
 export const getSavedObjectType = ({
   namespaceType,

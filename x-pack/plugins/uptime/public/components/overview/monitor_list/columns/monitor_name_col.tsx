@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useState } from 'react';
@@ -17,7 +18,7 @@ interface Props {
   summary: MonitorSummary;
 }
 
-const parseCurrentFilters = (filters: string) => {
+export const parseCurrentFilters = (filters: string) => {
   let parsedFilters: Map<string, string[]>;
   try {
     parsedFilters = new Map<string, string[]>(JSON.parse(filters));
@@ -35,7 +36,7 @@ const MONITOR_TYPES: Record<string, string> = {
 };
 
 export const MonitorNameColumn = ({ summary }: Props) => {
-  const { absoluteDateRangeStart, absoluteDateRangeEnd, ...params } = useGetUrlParams();
+  const params = useGetUrlParams();
 
   const linkParameters = stringifyUrlParams(params, true);
 

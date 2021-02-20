@@ -1,17 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import React, { FC, Fragment, useEffect, useMemo, useState } from 'react';
+import React, { FC, Fragment, useEffect, useMemo, useState, useCallback } from 'react';
 import { merge } from 'rxjs';
-import { i18n } from '@kbn/i18n';
-
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHorizontalRule,
   EuiPage,
   EuiPageBody,
   EuiPageContentBody,
@@ -21,22 +19,21 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
+import { EuiTableActionsColumnType } from '@elastic/eui/src/components/basic_table/table_types';
+import { FormattedMessage } from '@kbn/i18n/react';
 import {
   IFieldType,
   KBN_FIELD_TYPES,
-  Query,
   esQuery,
   esKuery,
   UI_SETTINGS,
+  Query,
 } from '../../../../../../../src/plugins/data/public';
 import { SavedSearchSavedObject } from '../../../../common/types/kibana';
 import { NavigationMenu } from '../../components/navigation_menu';
 import { DatePickerWrapper } from '../../components/navigation_menu/date_picker_wrapper';
 import { ML_JOB_FIELD_TYPES } from '../../../../common/constants/field_types';
 import { SEARCH_QUERY_LANGUAGE, SearchQueryLanguage } from '../../../../common/constants/search';
-import { isFullLicense } from '../../license';
-import { checkPermission } from '../../capabilities/check_capabilities';
-import { mlNodesAvailable } from '../../ml_nodes_check/check_ml_nodes';
 import { FullTimeRangeSelector } from '../../components/full_time_range_selector';
 import { mlTimefilterRefresh$ } from '../../services/timefilter_refresh_service';
 import { useMlContext } from '../../contexts/ml';
@@ -45,30 +42,37 @@ import { useTimefilter } from '../../contexts/kibana';
 import { timeBasedIndexCheck, getQueryFromSavedSearch } from '../../util/index_utils';
 import { getTimeBucketsFromCache } from '../../util/time_buckets';
 import { getToastNotifications } from '../../util/dependency_cache';
-import { useUrlState } from '../../util/url_state';
-import { FieldRequestConfig, FieldVisConfig } from './common';
+import { usePageUrlState, useUrlState } from '../../util/url_state';
 import { ActionsPanel } from './components/actions_panel';
-import { FieldsPanel } from './components/fields_panel';
 import { SearchPanel } from './components/search_panel';
+import { DocumentCountContent } from './components/field_data_row/content_types/document_count_content';
+import { DataVisualizerTable, ItemIdToExpandedRowMap } from '../stats_table';
+import { FieldCountPanel } from './components/field_count_panel';
+import { ML_PAGES } from '../../../../common/constants/ml_url_generator';
 import { DataLoader } from './data_loader';
+import type { FieldRequestConfig } from './common';
+import type { DataVisualizerIndexBasedAppState } from '../../../../common/types/ml_url_generator';
+import type { OverallStats } from '../../../../common/types/datavisualizer';
+import { MlJobFieldType } from '../../../../common/types/field_types';
+import { HelpMenu } from '../../components/help_menu';
+import { useMlKibana } from '../../contexts/kibana';
+import { IndexBasedDataVisualizerExpandedRow } from './components/expanded_row';
+import { FieldVisConfig } from '../stats_table/types';
+import type {
+  MetricFieldsStats,
+  TotalFieldsStats,
+} from '../stats_table/components/field_count_stats';
+import { getActions } from './components/field_data_row/action_menu/actions';
 
 interface DataVisualizerPageState {
-  searchQuery: Query['query'];
-  searchString: Query['query'];
-  searchQueryLanguage: SearchQueryLanguage;
-  samplerShardSize: number;
-  overallStats: any;
+  overallStats: OverallStats;
   metricConfigs: FieldVisConfig[];
   totalMetricFieldCount: number;
   populatedMetricFieldCount: number;
-  showAllMetrics: boolean;
-  metricFieldQuery?: string;
+  metricsLoaded: boolean;
   nonMetricConfigs: FieldVisConfig[];
-  totalNonMetricFieldCount: number;
-  populatedNonMetricFieldCount: number;
-  showAllNonMetrics: boolean;
-  nonMetricShowFieldType: ML_JOB_FIELD_TYPES | '*';
-  nonMetricFieldQuery?: string;
+  nonMetricsLoaded: boolean;
+  documentCountStats?: FieldVisConfig;
 }
 
 const defaultSearchQuery = {
@@ -77,10 +81,6 @@ const defaultSearchQuery = {
 
 function getDefaultPageState(): DataVisualizerPageState {
   return {
-    searchString: '',
-    searchQuery: defaultSearchQuery,
-    searchQueryLanguage: SEARCH_QUERY_LANGUAGE.KUERY,
-    samplerShardSize: 5000,
     overallStats: {
       totalCount: 0,
       aggregatableExistsFields: [],
@@ -91,17 +91,39 @@ function getDefaultPageState(): DataVisualizerPageState {
     metricConfigs: [],
     totalMetricFieldCount: 0,
     populatedMetricFieldCount: 0,
-    showAllMetrics: false,
+    metricsLoaded: false,
     nonMetricConfigs: [],
-    totalNonMetricFieldCount: 0,
-    populatedNonMetricFieldCount: 0,
-    showAllNonMetrics: false,
-    nonMetricShowFieldType: '*',
+    nonMetricsLoaded: false,
+    documentCountStats: undefined,
   };
 }
+export const getDefaultDataVisualizerListState = (): Required<DataVisualizerIndexBasedAppState> => ({
+  pageIndex: 0,
+  pageSize: 10,
+  sortField: 'fieldName',
+  sortDirection: 'asc',
+  visibleFieldTypes: [],
+  visibleFieldNames: [],
+  samplerShardSize: 5000,
+  searchString: '',
+  searchQuery: defaultSearchQuery,
+  searchQueryLanguage: SEARCH_QUERY_LANGUAGE.KUERY,
+  showDistributions: true,
+  showAllFields: false,
+  showEmptyFields: false,
+});
 
 export const Page: FC = () => {
   const mlContext = useMlContext();
+  const restorableDefaults = getDefaultDataVisualizerListState();
+  const {
+    services: { lens: lensPlugin, docLinks },
+  } = useMlKibana();
+
+  const [dataVisualizerListState, setDataVisualizerListState] = usePageUrlState(
+    ML_PAGES.DATA_VISUALIZER_INDEX_VIEWER,
+    restorableDefaults
+  );
 
   const { combinedQuery, currentIndexPattern, currentSavedSearch, kibanaConfig } = mlContext;
   const timefilter = useTimefilter({
@@ -135,16 +157,12 @@ export const Page: FC = () => {
   }, []);
 
   // Obtain the list of non metric field types which appear in the index pattern.
-  let indexedFieldTypes: ML_JOB_FIELD_TYPES[] = [];
+  let indexedFieldTypes: MlJobFieldType[] = [];
   const indexPatternFields: IFieldType[] = currentIndexPattern.fields;
   indexPatternFields.forEach((field) => {
     if (field.scripted !== true) {
-      const dataVisualizerType: ML_JOB_FIELD_TYPES | undefined = kbnTypeToMLJobType(field);
-      if (
-        dataVisualizerType !== undefined &&
-        !indexedFieldTypes.includes(dataVisualizerType) &&
-        dataVisualizerType !== ML_JOB_FIELD_TYPES.NUMBER
-      ) {
+      const dataVisualizerType: MlJobFieldType | undefined = kbnTypeToMLJobType(field);
+      if (dataVisualizerType !== undefined && !indexedFieldTypes.includes(dataVisualizerType)) {
         indexedFieldTypes.push(dataVisualizerType);
       }
     }
@@ -153,52 +171,72 @@ export const Page: FC = () => {
 
   const defaults = getDefaultPageState();
 
-  const showActionsPanel =
-    isFullLicense() &&
-    checkPermission('canCreateJob') &&
-    mlNodesAvailable() &&
-    currentIndexPattern.timeFieldName !== undefined;
+  const { searchQueryLanguage, searchString, searchQuery } = useMemo(() => {
+    const searchData = extractSearchData(currentSavedSearch);
+    if (searchData === undefined || dataVisualizerListState.searchString !== '') {
+      return {
+        searchQuery: dataVisualizerListState.searchQuery,
+        searchString: dataVisualizerListState.searchString,
+        searchQueryLanguage: dataVisualizerListState.searchQueryLanguage,
+      };
+    } else {
+      return {
+        searchQuery: searchData.searchQuery,
+        searchString: searchData.searchString,
+        searchQueryLanguage: searchData.queryLanguage,
+      };
+    }
+  }, [currentSavedSearch, dataVisualizerListState]);
 
-  const {
-    searchQuery: initSearchQuery,
-    searchString: initSearchString,
-    queryLanguage: initQueryLanguage,
-  } = extractSearchData(currentSavedSearch);
+  const setSearchParams = (searchParams: {
+    searchQuery: Query['query'];
+    searchString: Query['query'];
+    queryLanguage: SearchQueryLanguage;
+  }) => {
+    setDataVisualizerListState({
+      ...dataVisualizerListState,
+      searchQuery: searchParams.searchQuery,
+      searchString: searchParams.searchString,
+      searchQueryLanguage: searchParams.queryLanguage,
+    });
+  };
 
-  const [searchString, setSearchString] = useState(initSearchString);
-  const [searchQuery, setSearchQuery] = useState(initSearchQuery);
-  const [searchQueryLanguage, setSearchQueryLanguage] = useState<SearchQueryLanguage>(
-    initQueryLanguage
-  );
-  const [samplerShardSize, setSamplerShardSize] = useState(defaults.samplerShardSize);
+  const samplerShardSize =
+    dataVisualizerListState.samplerShardSize ?? restorableDefaults.samplerShardSize;
+  const setSamplerShardSize = (value: number) => {
+    setDataVisualizerListState({ ...dataVisualizerListState, samplerShardSize: value });
+  };
 
-  // TODO - type overallStats and stats
+  const visibleFieldTypes =
+    dataVisualizerListState.visibleFieldTypes ?? restorableDefaults.visibleFieldTypes;
+  const setVisibleFieldTypes = (values: string[]) => {
+    setDataVisualizerListState({ ...dataVisualizerListState, visibleFieldTypes: values });
+  };
+
+  const visibleFieldNames =
+    dataVisualizerListState.visibleFieldNames ?? restorableDefaults.visibleFieldNames;
+  const setVisibleFieldNames = (values: string[]) => {
+    setDataVisualizerListState({ ...dataVisualizerListState, visibleFieldNames: values });
+  };
+
+  const showEmptyFields =
+    dataVisualizerListState.showEmptyFields ?? restorableDefaults.showEmptyFields;
+  const toggleShowEmptyFields = () => {
+    setDataVisualizerListState({
+      ...dataVisualizerListState,
+      showEmptyFields: !dataVisualizerListState.showEmptyFields,
+    });
+  };
+
   const [overallStats, setOverallStats] = useState(defaults.overallStats);
 
+  const [documentCountStats, setDocumentCountStats] = useState(defaults.documentCountStats);
   const [metricConfigs, setMetricConfigs] = useState(defaults.metricConfigs);
-  const [totalMetricFieldCount, setTotalMetricFieldCount] = useState(
-    defaults.totalMetricFieldCount
-  );
-  const [populatedMetricFieldCount, setPopulatedMetricFieldCount] = useState(
-    defaults.populatedMetricFieldCount
-  );
-  const [showAllMetrics, setShowAllMetrics] = useState(defaults.showAllMetrics);
-  const [metricFieldQuery, setMetricFieldQuery] = useState(defaults.metricFieldQuery);
+  const [metricsLoaded, setMetricsLoaded] = useState(defaults.metricsLoaded);
+  const [metricsStats, setMetricsStats] = useState<undefined | MetricFieldsStats>();
 
   const [nonMetricConfigs, setNonMetricConfigs] = useState(defaults.nonMetricConfigs);
-  const [totalNonMetricFieldCount, setTotalNonMetricFieldCount] = useState(
-    defaults.totalNonMetricFieldCount
-  );
-  const [populatedNonMetricFieldCount, setPopulatedNonMetricFieldCount] = useState(
-    defaults.populatedNonMetricFieldCount
-  );
-  const [showAllNonMetrics, setShowAllNonMetrics] = useState(defaults.showAllNonMetrics);
-
-  const [nonMetricShowFieldType, setNonMetricShowFieldType] = useState(
-    defaults.nonMetricShowFieldType
-  );
-
-  const [nonMetricFieldQuery, setNonMetricFieldQuery] = useState(defaults.nonMetricFieldQuery);
+  const [nonMetricsLoaded, setNonMetricsLoaded] = useState(defaults.nonMetricsLoaded);
 
   useEffect(() => {
     const timeUpdateSubscription = merge(
@@ -223,7 +261,7 @@ export const Page: FC = () => {
   useEffect(() => {
     createMetricCards();
     createNonMetricCards();
-  }, [overallStats]);
+  }, [overallStats, showEmptyFields]);
 
   useEffect(() => {
     loadMetricFieldStats();
@@ -235,22 +273,18 @@ export const Page: FC = () => {
 
   useEffect(() => {
     createMetricCards();
-  }, [showAllMetrics, metricFieldQuery]);
+  }, [metricsLoaded]);
 
   useEffect(() => {
     createNonMetricCards();
-  }, [showAllNonMetrics, nonMetricShowFieldType, nonMetricFieldQuery]);
+  }, [nonMetricsLoaded]);
 
   /**
    * Extract query data from the saved search object.
    */
   function extractSearchData(savedSearch: SavedSearchSavedObject | null) {
     if (!savedSearch) {
-      return {
-        searchQuery: defaults.searchQuery,
-        searchString: defaults.searchString,
-        queryLanguage: defaults.searchQueryLanguage,
-      };
+      return undefined;
     }
 
     const { query } = getQueryFromSavedSearch(savedSearch);
@@ -364,18 +398,21 @@ export const Page: FC = () => {
               (fieldStats: any) => fieldStats.fieldName === config.fieldName
             ),
           };
+          configWithStats.loading = false;
+          configs.push(configWithStats);
         } else {
           // Document count card.
           configWithStats.stats = metricFieldStats.find(
             (fieldStats: any) => fieldStats.fieldName === undefined
           );
 
-          // Add earliest / latest of timefilter for setting x axis domain.
-          configWithStats.stats.timeRangeEarliest = earliest;
-          configWithStats.stats.timeRangeLatest = latest;
+          if (configWithStats.stats !== undefined) {
+            // Add earliest / latest of timefilter for setting x axis domain.
+            configWithStats.stats.timeRangeEarliest = earliest;
+            configWithStats.stats.timeRangeLatest = latest;
+          }
+          setDocumentCountStats(configWithStats);
         }
-        configWithStats.loading = false;
-        configs.push(configWithStats);
       });
 
       setMetricConfigs(configs);
@@ -450,21 +487,13 @@ export const Page: FC = () => {
     const configs: FieldVisConfig[] = [];
     const aggregatableExistsFields: any[] = overallStats.aggregatableExistsFields || [];
 
-    let allMetricFields = indexPatternFields.filter((f) => {
+    const allMetricFields = indexPatternFields.filter((f) => {
       return (
         f.type === KBN_FIELD_TYPES.NUMBER &&
         f.displayName !== undefined &&
         dataLoader.isDisplayField(f.displayName) === true
       );
     });
-    if (metricFieldQuery !== undefined) {
-      const metricFieldRegexp = new RegExp(`(${metricFieldQuery})`, 'gi');
-      allMetricFields = allMetricFields.filter((f) => {
-        const addField = f.displayName !== undefined && !!f.displayName.match(metricFieldRegexp);
-        return addField;
-      });
-    }
-
     const metricExistsFields = allMetricFields.filter((f) => {
       return aggregatableExistsFields.find((existsF) => {
         return existsF.fieldName === f.displayName;
@@ -472,8 +501,6 @@ export const Page: FC = () => {
     });
 
     // Add a config for 'document count', identified by no field name if indexpattern is time based.
-    let allFieldCount = allMetricFields.length;
-    let popFieldCount = metricExistsFields.length;
     if (currentIndexPattern.timeFieldName !== undefined) {
       configs.push({
         type: ML_JOB_FIELD_TYPES.NUMBER,
@@ -481,91 +508,52 @@ export const Page: FC = () => {
         loading: true,
         aggregatable: true,
       });
-      allFieldCount++;
-      popFieldCount++;
     }
 
-    // Add on 1 for the document count card.
-    setTotalMetricFieldCount(allFieldCount);
-    setPopulatedMetricFieldCount(popFieldCount);
-
-    if (allMetricFields.length === metricExistsFields.length && showAllMetrics === false) {
-      setShowAllMetrics(true);
+    if (metricsLoaded === false) {
+      setMetricsLoaded(true);
       return;
     }
 
     let aggregatableFields: any[] = overallStats.aggregatableExistsFields;
-    if (allMetricFields.length !== metricExistsFields.length && showAllMetrics === true) {
+    if (allMetricFields.length !== metricExistsFields.length && metricsLoaded === true) {
       aggregatableFields = aggregatableFields.concat(overallStats.aggregatableNotExistsFields);
     }
 
-    const metricFieldsToShow = showAllMetrics === true ? allMetricFields : metricExistsFields;
+    const metricFieldsToShow =
+      metricsLoaded === true && showEmptyFields === true ? allMetricFields : metricExistsFields;
 
     metricFieldsToShow.forEach((field) => {
       const fieldData = aggregatableFields.find((f) => {
         return f.fieldName === field.displayName;
       });
 
-      if (fieldData !== undefined) {
-        const metricConfig: FieldVisConfig = {
-          ...fieldData,
-          fieldFormat: currentIndexPattern.getFormatterForField(field),
-          type: ML_JOB_FIELD_TYPES.NUMBER,
-          loading: true,
-          aggregatable: true,
-        };
+      const metricConfig: FieldVisConfig = {
+        ...(fieldData ? fieldData : {}),
+        fieldFormat: currentIndexPattern.getFormatterForField(field),
+        type: ML_JOB_FIELD_TYPES.NUMBER,
+        loading: true,
+        aggregatable: true,
+      };
 
-        configs.push(metricConfig);
-      }
+      configs.push(metricConfig);
     });
 
+    setMetricsStats({
+      totalMetricFieldsCount: allMetricFields.length,
+      visibleMetricsCount: metricFieldsToShow.length,
+    });
     setMetricConfigs(configs);
   }
 
   function createNonMetricCards() {
-    let allNonMetricFields = [];
-    if (nonMetricShowFieldType === '*') {
-      allNonMetricFields = indexPatternFields.filter((f) => {
-        return (
-          f.type !== KBN_FIELD_TYPES.NUMBER &&
-          f.displayName !== undefined &&
-          dataLoader.isDisplayField(f.displayName) === true
-        );
-      });
-    } else {
-      if (
-        nonMetricShowFieldType === ML_JOB_FIELD_TYPES.TEXT ||
-        nonMetricShowFieldType === ML_JOB_FIELD_TYPES.KEYWORD
-      ) {
-        const aggregatableCheck =
-          nonMetricShowFieldType === ML_JOB_FIELD_TYPES.KEYWORD ? true : false;
-        allNonMetricFields = indexPatternFields.filter((f) => {
-          return (
-            f.displayName !== undefined &&
-            dataLoader.isDisplayField(f.displayName) === true &&
-            f.type === KBN_FIELD_TYPES.STRING &&
-            f.aggregatable === aggregatableCheck
-          );
-        });
-      } else {
-        allNonMetricFields = indexPatternFields.filter((f) => {
-          return (
-            f.type === nonMetricShowFieldType &&
-            f.displayName !== undefined &&
-            dataLoader.isDisplayField(f.displayName) === true
-          );
-        });
-      }
-    }
-
-    // If a field filter has been entered, perform another filter on the entered regexp.
-    if (nonMetricFieldQuery !== undefined) {
-      const nonMetricFieldRegexp = new RegExp(`(${nonMetricFieldQuery})`, 'gi');
-      allNonMetricFields = allNonMetricFields.filter(
-        (f) => f.displayName !== undefined && f.displayName.match(nonMetricFieldRegexp)
+    const allNonMetricFields = indexPatternFields.filter((f) => {
+      return (
+        f.type !== KBN_FIELD_TYPES.NUMBER &&
+        f.displayName !== undefined &&
+        dataLoader.isDisplayField(f.displayName) === true
       );
-    }
-
+    });
     // Obtain the list of all non-metric fields which appear in documents
     // (aggregatable or not aggregatable).
     const populatedNonMetricFields: any[] = []; // Kibana index pattern non metric fields.
@@ -593,15 +581,12 @@ export const Page: FC = () => {
       }
     });
 
-    setTotalNonMetricFieldCount(allNonMetricFields.length);
-    setPopulatedNonMetricFieldCount(nonMetricFieldData.length);
-
-    if (allNonMetricFields.length === nonMetricFieldData.length && showAllNonMetrics === false) {
-      setShowAllNonMetrics(true);
+    if (nonMetricsLoaded === false) {
+      setNonMetricsLoaded(true);
       return;
     }
 
-    if (allNonMetricFields.length !== nonMetricFieldData.length && showAllNonMetrics === true) {
+    if (allNonMetricFields.length !== nonMetricFieldData.length && showEmptyFields === true) {
       // Combine the field data obtained from Elasticsearch into a single array.
       nonMetricFieldData = nonMetricFieldData.concat(
         overallStats.aggregatableNotExistsFields,
@@ -609,8 +594,7 @@ export const Page: FC = () => {
       );
     }
 
-    const nonMetricFieldsToShow =
-      showAllNonMetrics === true ? allNonMetricFields : populatedNonMetricFields;
+    const nonMetricFieldsToShow = showEmptyFields ? allNonMetricFields : populatedNonMetricFields;
 
     const configs: FieldVisConfig[] = [];
 
@@ -645,6 +629,83 @@ export const Page: FC = () => {
 
   const wizardPanelWidth = '280px';
 
+  const configs = useMemo(() => {
+    let combinedConfigs = [...nonMetricConfigs, ...metricConfigs];
+    if (visibleFieldTypes && visibleFieldTypes.length > 0) {
+      combinedConfigs = combinedConfigs.filter(
+        (config) => visibleFieldTypes.findIndex((field) => field === config.type) > -1
+      );
+    }
+    if (visibleFieldNames && visibleFieldNames.length > 0) {
+      combinedConfigs = combinedConfigs.filter(
+        (config) => visibleFieldNames.findIndex((field) => field === config.fieldName) > -1
+      );
+    }
+
+    return combinedConfigs;
+  }, [nonMetricConfigs, metricConfigs, visibleFieldTypes, visibleFieldNames]);
+
+  const fieldsCountStats: TotalFieldsStats | undefined = useMemo(() => {
+    let _visibleFieldsCount = 0;
+    let _totalFieldsCount = 0;
+    Object.keys(overallStats).forEach((key) => {
+      const fieldsGroup = overallStats[key as keyof OverallStats];
+      if (Array.isArray(fieldsGroup) && fieldsGroup.length > 0) {
+        _totalFieldsCount += fieldsGroup.length;
+      }
+    });
+
+    if (showEmptyFields === true) {
+      _visibleFieldsCount = _totalFieldsCount;
+    } else {
+      _visibleFieldsCount =
+        overallStats.aggregatableExistsFields.length +
+        overallStats.nonAggregatableExistsFields.length;
+    }
+    return { visibleFieldsCount: _visibleFieldsCount, totalFieldsCount: _totalFieldsCount };
+  }, [overallStats, showEmptyFields]);
+
+  const getItemIdToExpandedRowMap = useCallback(
+    function (itemIds: string[], items: FieldVisConfig[]): ItemIdToExpandedRowMap {
+      return itemIds.reduce((m: ItemIdToExpandedRowMap, fieldName: string) => {
+        const item = items.find((fieldVisConfig) => fieldVisConfig.fieldName === fieldName);
+        if (item !== undefined) {
+          m[fieldName] = (
+            <IndexBasedDataVisualizerExpandedRow
+              item={item}
+              indexPattern={currentIndexPattern}
+              combinedQuery={{ searchQueryLanguage, searchString }}
+            />
+          );
+        }
+        return m;
+      }, {} as ItemIdToExpandedRowMap);
+    },
+    [currentIndexPattern, searchQuery]
+  );
+
+  // Inject custom action column for the index based visualizer
+  const extendedColumns = useMemo(() => {
+    if (lensPlugin === undefined) {
+      // eslint-disable-next-line no-console
+      console.error('Lens plugin not available');
+      return;
+    }
+    const actionColumn: EuiTableActionsColumnType<FieldVisConfig> = {
+      name: (
+        <FormattedMessage
+          id="xpack.ml.dataVisualizer.indexBasedDataGrid.actionsColumnLabel"
+          defaultMessage="Actions"
+        />
+      ),
+      actions: getActions(currentIndexPattern, lensPlugin, { searchQueryLanguage, searchString }),
+      width: '100px',
+    };
+
+    return [actionColumn];
+  }, [currentIndexPattern, lensPlugin, searchQueryLanguage, searchString]);
+
+  const helpLink = docLinks.links.ml.guide;
   return (
     <Fragment>
       <NavigationMenu tabId="datavisualizer" />
@@ -682,71 +743,61 @@ export const Page: FC = () => {
             <EuiFlexGroup gutterSize="m">
               <EuiFlexItem>
                 <EuiPanel>
+                  {documentCountStats && overallStats?.totalCount !== undefined && (
+                    <EuiFlexItem grow={true}>
+                      <DocumentCountContent
+                        config={documentCountStats}
+                        totalCount={overallStats.totalCount}
+                      />
+                    </EuiFlexItem>
+                  )}
+                  <EuiSpacer size={'m'} />
+
                   <SearchPanel
                     indexPattern={currentIndexPattern}
                     searchString={searchString}
-                    setSearchString={setSearchString}
                     searchQuery={searchQuery}
-                    setSearchQuery={setSearchQuery}
                     searchQueryLanguage={searchQueryLanguage}
-                    setSearchQueryLanguage={setSearchQueryLanguage}
+                    setSearchParams={setSearchParams}
                     samplerShardSize={samplerShardSize}
                     setSamplerShardSize={setSamplerShardSize}
-                    totalCount={overallStats.totalCount}
+                    overallStats={overallStats}
+                    indexedFieldTypes={indexedFieldTypes}
+                    setVisibleFieldTypes={setVisibleFieldTypes}
+                    visibleFieldTypes={visibleFieldTypes}
+                    visibleFieldNames={visibleFieldNames}
+                    setVisibleFieldNames={setVisibleFieldNames}
+                    showEmptyFields={showEmptyFields}
                   />
-                  <EuiHorizontalRule />
-                  <EuiFlexGroup gutterSize="m">
-                    <EuiFlexItem>
-                      {totalMetricFieldCount > 0 && (
-                        <Fragment>
-                          <FieldsPanel
-                            title={i18n.translate(
-                              'xpack.ml.datavisualizer.page.metricsPanelTitle',
-                              {
-                                defaultMessage: 'Metrics',
-                              }
-                            )}
-                            totalFieldCount={totalMetricFieldCount}
-                            populatedFieldCount={populatedMetricFieldCount}
-                            fieldTypes={[ML_JOB_FIELD_TYPES.NUMBER]}
-                            showFieldType={ML_JOB_FIELD_TYPES.NUMBER}
-                            showAllFields={showAllMetrics}
-                            setShowAllFields={setShowAllMetrics}
-                            fieldSearchBarQuery={metricFieldQuery}
-                            setFieldSearchBarQuery={setMetricFieldQuery}
-                            fieldVisConfigs={metricConfigs}
-                          />
-                          <EuiSpacer size="xl" />
-                        </Fragment>
-                      )}
-                      <FieldsPanel
-                        title={i18n.translate('xpack.ml.datavisualizer.page.fieldsPanelTitle', {
-                          defaultMessage: 'Fields',
-                        })}
-                        totalFieldCount={totalNonMetricFieldCount}
-                        populatedFieldCount={populatedNonMetricFieldCount}
-                        showAllFields={showAllNonMetrics}
-                        setShowAllFields={setShowAllNonMetrics}
-                        fieldTypes={indexedFieldTypes}
-                        showFieldType={nonMetricShowFieldType}
-                        setShowFieldType={setNonMetricShowFieldType}
-                        fieldSearchBarQuery={nonMetricFieldQuery}
-                        setFieldSearchBarQuery={setNonMetricFieldQuery}
-                        fieldVisConfigs={nonMetricConfigs}
-                      />
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
+                  <EuiSpacer size={'l'} />
+                  <FieldCountPanel
+                    showEmptyFields={showEmptyFields}
+                    toggleShowEmptyFields={toggleShowEmptyFields}
+                    fieldsCountStats={fieldsCountStats}
+                    metricsStats={metricsStats}
+                  />
+                  <EuiSpacer size={'m'} />
+                  <DataVisualizerTable<FieldVisConfig>
+                    items={configs}
+                    pageState={dataVisualizerListState}
+                    updatePageState={setDataVisualizerListState}
+                    getItemIdToExpandedRowMap={getItemIdToExpandedRowMap}
+                    extendedColumns={extendedColumns}
+                  />
                 </EuiPanel>
               </EuiFlexItem>
-              {showActionsPanel === true && (
-                <EuiFlexItem grow={false} style={{ width: wizardPanelWidth }}>
-                  <ActionsPanel indexPattern={currentIndexPattern} />
-                </EuiFlexItem>
-              )}
+              <EuiFlexItem grow={false} style={{ width: wizardPanelWidth }}>
+                <ActionsPanel
+                  indexPattern={currentIndexPattern}
+                  searchQueryLanguage={searchQueryLanguage}
+                  searchString={searchString}
+                />
+              </EuiFlexItem>
             </EuiFlexGroup>
           </EuiPageContentBody>
         </EuiPageBody>
       </EuiPage>
+      <HelpMenu docLink={helpLink} />
     </Fragment>
   );
 };

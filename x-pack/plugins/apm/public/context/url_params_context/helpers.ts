@@ -1,34 +1,54 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { compact, pickBy } from 'lodash';
 import datemath from '@elastic/datemath';
+import { compact, pickBy } from 'lodash';
+import moment from 'moment';
 import { IUrlParams } from './types';
 
-export function getParsedDate(rawDate?: string, opts = {}) {
+function getParsedDate(rawDate?: string, options = {}) {
   if (rawDate) {
-    const parsed = datemath.parse(rawDate, opts);
-    if (parsed) {
-      return parsed.toISOString();
+    const parsed = datemath.parse(rawDate, options);
+    if (parsed && parsed.isValid()) {
+      return parsed.toDate();
     }
   }
 }
 
-export function getStart(prevState: IUrlParams, rangeFrom?: string) {
-  if (prevState.rangeFrom !== rangeFrom) {
-    return getParsedDate(rangeFrom);
+export function getDateRange({
+  state,
+  rangeFrom,
+  rangeTo,
+}: {
+  state: IUrlParams;
+  rangeFrom?: string;
+  rangeTo?: string;
+}) {
+  // If the previous state had the same range, just return that instead of calculating a new range.
+  if (state.rangeFrom === rangeFrom && state.rangeTo === rangeTo) {
+    return { start: state.start, end: state.end };
   }
-  return prevState.start;
-}
 
-export function getEnd(prevState: IUrlParams, rangeTo?: string) {
-  if (prevState.rangeTo !== rangeTo) {
-    return getParsedDate(rangeTo, { roundUp: true });
+  const start = getParsedDate(rangeFrom);
+  const end = getParsedDate(rangeTo, { roundUp: true });
+
+  // `getParsedDate` will return undefined for invalid or empty dates. We return
+  // the previous state if either date is undefined.
+  if (!start || !end) {
+    return { start: state.start, end: state.end };
   }
-  return prevState.end;
+
+  // rounds down start to minute
+  const roundedStart = moment(start).startOf('minute');
+
+  return {
+    start: roundedStart.toISOString(),
+    end: end.toISOString(),
+  };
 }
 
 export function toNumber(value?: string) {

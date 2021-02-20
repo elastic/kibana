@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { Simulator } from '../test_utilities/simulator';
@@ -35,6 +36,8 @@ describe('graph controls: when relsover is loaded with an origin node', () => {
       databaseDocumentID,
       resolverComponentInstanceID,
       indices: [],
+      shouldUpdate: false,
+      filters: {},
     });
     originEntityID = entityIDs.origin;
 

@@ -1,38 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
-import {
-  EuiCallOut,
-  EuiText,
-  EuiSpacer,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiContextMenuPanel,
-  EuiPopover,
-  EuiButton,
-  EuiContextMenuItem,
-  EuiContextMenuPanelProps,
-} from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import React, { memo, useEffect, useState } from 'react';
+import { EuiSpacer } from '@elastic/eui';
 import { useDispatch } from 'react-redux';
 import {
-  pagePathGetters,
   PackagePolicyEditExtensionComponentProps,
   NewPackagePolicy,
 } from '../../../../../../../fleet/public';
-import { getPolicyDetailPath, getTrustedAppsListPath } from '../../../../common/routing';
-import { MANAGEMENT_APP_ID } from '../../../../common/constants';
-import {
-  PolicyDetailsRouteState,
-  TrustedAppsListPageRouteState,
-} from '../../../../../../common/endpoint/types';
-import { useKibana } from '../../../../../common/lib/kibana';
-import { useNavigateToAppEventHandler } from '../../../../../common/hooks/endpoint/use_navigate_to_app_event_handler';
+import { getPolicyDetailPath } from '../../../../common/routing';
 import { PolicyDetailsForm } from '../policy_details_form';
 import { AppAction } from '../../../../../common/store/actions';
 import { usePolicyDetailsSelector } from '../policy_hooks';
@@ -46,12 +26,6 @@ export const EndpointPolicyEditExtension = memo<PackagePolicyEditExtensionCompon
   ({ policy, onChange }) => {
     return (
       <>
-        <EuiSpacer size="m" />
-        <EuiCallOut data-test-subj="endpointPackagePolicy_edit" iconType="iInCircle">
-          <EuiText size="s">
-            <EditFlowMessage agentPolicyId={policy.policy_id} integrationPolicyId={policy.id} />
-          </EuiText>
-        </EuiCallOut>
         <EuiSpacer size="m" />
         <WrappedPolicyDetailsForm policyId={policy.id} onChange={onChange} />
       </>
@@ -126,106 +100,3 @@ const WrappedPolicyDetailsForm = memo<{
   );
 });
 WrappedPolicyDetailsForm.displayName = 'WrappedPolicyDetailsForm';
-
-const EditFlowMessage = memo<{
-  agentPolicyId: string;
-  integrationPolicyId: string;
-}>(({ agentPolicyId, integrationPolicyId }) => {
-  const {
-    services: {
-      application: { getUrlForApp },
-    },
-  } = useKibana();
-
-  const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
-
-  const navigateBackToIngest = useMemo<
-    PolicyDetailsRouteState['onSaveNavigateTo'] &
-      PolicyDetailsRouteState['onCancelNavigateTo'] &
-      TrustedAppsListPageRouteState['onBackButtonNavigateTo']
-  >(() => {
-    return [
-      'fleet',
-      {
-        path: `#${pagePathGetters.edit_integration({
-          policyId: agentPolicyId,
-          packagePolicyId: integrationPolicyId!,
-        })}`,
-      },
-    ];
-  }, [agentPolicyId, integrationPolicyId]);
-
-  const handleClosePopup = useCallback(() => setIsMenuOpen(false), []);
-
-  const handleTrustedAppsAction = useNavigateToAppEventHandler<TrustedAppsListPageRouteState>(
-    MANAGEMENT_APP_ID,
-    {
-      path: getTrustedAppsListPath(),
-      state: {
-        backButtonUrl: navigateBackToIngest[1]?.path
-          ? `${getUrlForApp('fleet')}${navigateBackToIngest[1].path}`
-          : undefined,
-        onBackButtonNavigateTo: navigateBackToIngest,
-        backButtonLabel: i18n.translate(
-          'xpack.securitySolution.endpoint.fleet.editPackagePolicy.trustedAppsMessageReturnBackLabel',
-          { defaultMessage: 'Back to Edit Integration' }
-        ),
-      },
-    }
-  );
-
-  const menuButton = useMemo(() => {
-    return (
-      <EuiButton
-        size="s"
-        iconType="arrowDown"
-        iconSide="right"
-        onClick={() => setIsMenuOpen((prevState) => !prevState)}
-        data-test-subj="endpointActions"
-      >
-        <FormattedMessage
-          id="xpack.securitySolution.endpoint.fleet.editPackagePolicy.menuButton"
-          defaultMessage="Actions"
-        />
-      </EuiButton>
-    );
-  }, []);
-
-  const actionItems = useMemo<EuiContextMenuPanelProps['items']>(() => {
-    return [
-      <EuiContextMenuItem
-        key="trustedApps"
-        onClick={handleTrustedAppsAction}
-        data-test-subj="trustedAppsAction"
-      >
-        <FormattedMessage
-          id="xpack.securitySolution.endpoint.fleet.editPackagePolicy.actionTrustedApps"
-          defaultMessage="Edit Trusted Applications"
-        />
-      </EuiContextMenuItem>,
-    ];
-  }, [handleTrustedAppsAction]);
-
-  return (
-    <EuiFlexGroup>
-      <EuiFlexItem>
-        <FormattedMessage
-          id="xpack.securitySolution.endpoint.fleet.editPackagePolicy.message"
-          defaultMessage="Access additional configuration options from the action menu"
-        />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiPopover
-          button={menuButton}
-          isOpen={isMenuOpen}
-          closePopover={handleClosePopup}
-          anchorPosition="downRight"
-          panelPaddingSize="s"
-        >
-          <EuiContextMenuPanel data-test-subj="endpointActionsMenuPanel" items={actionItems} />
-        </EuiPopover>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
-});
-EditFlowMessage.displayName = 'EditFlowMessage';

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { ExceptionListItemSchema } from '../../../../../lists/common/schemas/response';
@@ -13,6 +14,7 @@ import {
   createTrustedApp,
   deleteTrustedApp,
   getTrustedAppsList,
+  getTrustedAppsSummary,
   MissingTrustedAppException,
 } from './service';
 
@@ -118,6 +120,54 @@ describe('service', () => {
       expect(result).toEqual({ data: [TRUSTED_APP], page: 1, per_page: 20, total: 100 });
 
       expect(exceptionsListClient.createTrustedAppsList).toHaveBeenCalled();
+    });
+  });
+
+  describe('getTrustedAppsSummary', () => {
+    beforeEach(() => {
+      exceptionsListClient.findExceptionListItem.mockImplementation(async ({ page }) => {
+        let data: ExceptionListItemSchema[] = [];
+
+        // linux ++ windows entries
+        if (page === 1) {
+          data = [
+            ...Array.from<void, ExceptionListItemSchema>({ length: 45 }, () => ({
+              ...EXCEPTION_LIST_ITEM,
+              os_types: ['linux'],
+            })),
+            ...Array.from({ length: 55 }, () => ({
+              ...EXCEPTION_LIST_ITEM,
+              os_types: ['windows'] as ExceptionListItemSchema['os_types'],
+            })),
+          ];
+        }
+
+        // macos entries
+        if (page === 2) {
+          data = [
+            ...Array.from({ length: 30 }, () => ({
+              ...EXCEPTION_LIST_ITEM,
+              os_types: ['macos'] as ExceptionListItemSchema['os_types'],
+            })),
+          ];
+        }
+
+        return {
+          data,
+          page: page || 1,
+          total: 130,
+          per_page: 100,
+        };
+      });
+    });
+
+    it('should return summary of trusted app items', async () => {
+      expect(await getTrustedAppsSummary(exceptionsListClient)).toEqual({
+        linux: 45,
+        windows: 55,
+        macos: 30,
+        total: 130,
+      });
     });
   });
 });

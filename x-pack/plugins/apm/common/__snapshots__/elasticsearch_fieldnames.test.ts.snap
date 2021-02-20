@@ -1,5 +1,12 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`Error AGENT 1`] = `
+Object {
+  "name": "java",
+  "version": "agent version",
+}
+`;
+
 exports[`Error AGENT_NAME 1`] = `"java"`;
 
 exports[`Error AGENT_VERSION 1`] = `"agent version"`;
@@ -8,7 +15,17 @@ exports[`Error CLIENT_GEO 1`] = `undefined`;
 
 exports[`Error CLIENT_GEO_COUNTRY_ISO_CODE 1`] = `undefined`;
 
+exports[`Error CLOUD 1`] = `
+Object {
+  "availability_zone": "europe-west1-c",
+  "provider": "gcp",
+  "region": "europe-west1",
+}
+`;
+
 exports[`Error CLOUD_AVAILABILITY_ZONE 1`] = `"europe-west1-c"`;
+
+exports[`Error CLOUD_MACHINE_TYPE 1`] = `undefined`;
 
 exports[`Error CLOUD_PROVIDER 1`] = `"gcp"`;
 
@@ -42,11 +59,21 @@ exports[`Error FCP_FIELD 1`] = `undefined`;
 
 exports[`Error FID_FIELD 1`] = `undefined`;
 
+exports[`Error HOST 1`] = `
+Object {
+  "hostname": "my hostname",
+}
+`;
+
 exports[`Error HOST_NAME 1`] = `"my hostname"`;
+
+exports[`Error HOST_OS_PLATFORM 1`] = `undefined`;
 
 exports[`Error HTTP_REQUEST_METHOD 1`] = `undefined`;
 
 exports[`Error HTTP_RESPONSE_STATUS_CODE 1`] = `undefined`;
+
+exports[`Error KUBERNETES 1`] = `undefined`;
 
 exports[`Error LABEL_NAME 1`] = `undefined`;
 
@@ -93,6 +120,16 @@ exports[`Error PARENT_ID 1`] = `"parentId"`;
 exports[`Error POD_NAME 1`] = `undefined`;
 
 exports[`Error PROCESSOR_EVENT 1`] = `"error"`;
+
+exports[`Error SERVICE 1`] = `
+Object {
+  "language": Object {
+    "name": "nodejs",
+    "version": "v1337",
+  },
+  "name": "service name",
+}
+`;
 
 exports[`Error SERVICE_ENVIRONMENT 1`] = `undefined`;
 
@@ -176,6 +213,13 @@ exports[`Error USER_AGENT_OS 1`] = `undefined`;
 
 exports[`Error USER_ID 1`] = `undefined`;
 
+exports[`Span AGENT 1`] = `
+Object {
+  "name": "java",
+  "version": "agent version",
+}
+`;
+
 exports[`Span AGENT_NAME 1`] = `"java"`;
 
 exports[`Span AGENT_VERSION 1`] = `"agent version"`;
@@ -184,7 +228,17 @@ exports[`Span CLIENT_GEO 1`] = `undefined`;
 
 exports[`Span CLIENT_GEO_COUNTRY_ISO_CODE 1`] = `undefined`;
 
+exports[`Span CLOUD 1`] = `
+Object {
+  "availability_zone": "europe-west1-c",
+  "provider": "gcp",
+  "region": "europe-west1",
+}
+`;
+
 exports[`Span CLOUD_AVAILABILITY_ZONE 1`] = `"europe-west1-c"`;
+
+exports[`Span CLOUD_MACHINE_TYPE 1`] = `undefined`;
 
 exports[`Span CLOUD_PROVIDER 1`] = `"gcp"`;
 
@@ -218,11 +272,17 @@ exports[`Span FCP_FIELD 1`] = `undefined`;
 
 exports[`Span FID_FIELD 1`] = `undefined`;
 
+exports[`Span HOST 1`] = `undefined`;
+
 exports[`Span HOST_NAME 1`] = `undefined`;
+
+exports[`Span HOST_OS_PLATFORM 1`] = `undefined`;
 
 exports[`Span HTTP_REQUEST_METHOD 1`] = `undefined`;
 
 exports[`Span HTTP_RESPONSE_STATUS_CODE 1`] = `undefined`;
+
+exports[`Span KUBERNETES 1`] = `undefined`;
 
 exports[`Span LABEL_NAME 1`] = `undefined`;
 
@@ -269,6 +329,12 @@ exports[`Span PARENT_ID 1`] = `"parentId"`;
 exports[`Span POD_NAME 1`] = `undefined`;
 
 exports[`Span PROCESSOR_EVENT 1`] = `"span"`;
+
+exports[`Span SERVICE 1`] = `
+Object {
+  "name": "service name",
+}
+`;
 
 exports[`Span SERVICE_ENVIRONMENT 1`] = `undefined`;
 
@@ -352,6 +418,13 @@ exports[`Span USER_AGENT_OS 1`] = `undefined`;
 
 exports[`Span USER_ID 1`] = `undefined`;
 
+exports[`Transaction AGENT 1`] = `
+Object {
+  "name": "java",
+  "version": "agent version",
+}
+`;
+
 exports[`Transaction AGENT_NAME 1`] = `"java"`;
 
 exports[`Transaction AGENT_VERSION 1`] = `"agent version"`;
@@ -360,7 +433,17 @@ exports[`Transaction CLIENT_GEO 1`] = `undefined`;
 
 exports[`Transaction CLIENT_GEO_COUNTRY_ISO_CODE 1`] = `undefined`;
 
+exports[`Transaction CLOUD 1`] = `
+Object {
+  "availability_zone": "europe-west1-c",
+  "provider": "gcp",
+  "region": "europe-west1",
+}
+`;
+
 exports[`Transaction CLOUD_AVAILABILITY_ZONE 1`] = `"europe-west1-c"`;
+
+exports[`Transaction CLOUD_MACHINE_TYPE 1`] = `undefined`;
 
 exports[`Transaction CLOUD_PROVIDER 1`] = `"gcp"`;
 
@@ -394,11 +477,27 @@ exports[`Transaction FCP_FIELD 1`] = `undefined`;
 
 exports[`Transaction FID_FIELD 1`] = `undefined`;
 
+exports[`Transaction HOST 1`] = `
+Object {
+  "hostname": "my hostname",
+}
+`;
+
 exports[`Transaction HOST_NAME 1`] = `"my hostname"`;
+
+exports[`Transaction HOST_OS_PLATFORM 1`] = `undefined`;
 
 exports[`Transaction HTTP_REQUEST_METHOD 1`] = `"GET"`;
 
 exports[`Transaction HTTP_RESPONSE_STATUS_CODE 1`] = `200`;
+
+exports[`Transaction KUBERNETES 1`] = `
+Object {
+  "pod": Object {
+    "uid": "pod1234567890abcdef",
+  },
+}
+`;
 
 exports[`Transaction LABEL_NAME 1`] = `undefined`;
 
@@ -445,6 +544,16 @@ exports[`Transaction PARENT_ID 1`] = `"parentId"`;
 exports[`Transaction POD_NAME 1`] = `undefined`;
 
 exports[`Transaction PROCESSOR_EVENT 1`] = `"transaction"`;
+
+exports[`Transaction SERVICE 1`] = `
+Object {
+  "language": Object {
+    "name": "nodejs",
+    "version": "v1337",
+  },
+  "name": "service name",
+}
+`;
 
 exports[`Transaction SERVICE_ENVIRONMENT 1`] = `undefined`;
 

@@ -1,11 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useCallback, useEffect, useState, useMemo } from 'react';
 import { isEqual } from 'lodash/fp';
+import styled from 'styled-components';
 import { EuiFlexGroup, EuiFlexItem, EuiFieldSearch, EuiFilterGroup } from '@elastic/eui';
 
 import { CaseStatuses } from '../../../../../case/common/api';
@@ -24,6 +26,13 @@ interface CasesTableFiltersProps {
   initial: FilterOptions;
   setFilterRefetch: (val: () => void) => void;
 }
+
+// Fix the width of the status dropdown to prevent hiding long text items
+const StatusFilterWrapper = styled(EuiFlexItem)`
+  && {
+    flex-basis: 180px;
+  }
+`;
 
 /**
  * Collection of filters for filtering data within the CasesTable. Contains search bar,
@@ -131,23 +140,27 @@ const CasesTableFiltersComponent = ({
   );
 
   return (
-    <EuiFlexGroup gutterSize="m" justifyContent="flexEnd">
-      <EuiFlexItem grow={8}>
-        <EuiFieldSearch
-          aria-label={i18n.SEARCH_CASES}
-          data-test-subj="search-cases"
-          fullWidth
-          incremental={false}
-          placeholder={i18n.SEARCH_PLACEHOLDER}
-          onSearch={handleOnSearch}
-        />
-      </EuiFlexItem>
-      <EuiFlexItem grow={2}>
-        <StatusFilter
-          selectedStatus={initial.status}
-          onStatusChanged={onStatusChanged}
-          stats={stats}
-        />
+    <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
+      <EuiFlexItem>
+        <EuiFlexGroup gutterSize="s">
+          <EuiFlexItem>
+            <EuiFieldSearch
+              aria-label={i18n.SEARCH_CASES}
+              data-test-subj="search-cases"
+              fullWidth
+              incremental={false}
+              placeholder={i18n.SEARCH_PLACEHOLDER}
+              onSearch={handleOnSearch}
+            />
+          </EuiFlexItem>
+          <StatusFilterWrapper grow={false} data-test-subj="status-filter-wrapper">
+            <StatusFilter
+              selectedStatus={initial.status}
+              onStatusChanged={onStatusChanged}
+              stats={stats}
+            />
+          </StatusFilterWrapper>
+        </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiFilterGroup>

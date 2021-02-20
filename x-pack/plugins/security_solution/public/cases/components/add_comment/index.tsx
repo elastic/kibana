@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiButton, EuiLoadingSpinner } from '@elastic/eui';
@@ -38,11 +39,15 @@ interface AddCommentProps {
   onCommentSaving?: () => void;
   onCommentPosted: (newCase: Case) => void;
   showLoading?: boolean;
+  subCaseId?: string;
 }
 
 export const AddComment = React.memo(
   forwardRef<AddCommentRefObject, AddCommentProps>(
-    ({ caseId, disabled, showLoading = true, onCommentPosted, onCommentSaving }, ref) => {
+    (
+      { caseId, disabled, onCommentPosted, onCommentSaving, showLoading = true, subCaseId },
+      ref
+    ) => {
       const { isLoading, postComment } = usePostComment();
 
       const { form } = useForm<AddCommentFormSchema>({
@@ -79,10 +84,15 @@ export const AddComment = React.memo(
           if (onCommentSaving != null) {
             onCommentSaving();
           }
-          postComment(caseId, { ...data, type: CommentType.user }, onCommentPosted);
+          postComment({
+            caseId,
+            data: { ...data, type: CommentType.user },
+            updateCase: onCommentPosted,
+            subCaseId,
+          });
           reset();
         }
-      }, [onCommentPosted, onCommentSaving, postComment, reset, submit, caseId]);
+      }, [caseId, onCommentPosted, onCommentSaving, postComment, reset, submit, subCaseId]);
 
       return (
         <span id="add-comment-permLink">

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -59,6 +60,21 @@ describe('Transform: <DefinePivotSummary />', () => {
       searchString: 'the-query',
       searchQuery: 'the-search-query',
       valid: true,
+      validationStatus: {
+        isValid: true,
+      },
+      transformFunction: 'pivot',
+      previewRequest: {
+        pivot: {
+          aggregations: {
+            // @ts-ignore
+            'the-agg-name': agg,
+          },
+          group_by: {
+            'the-group-by-name': groupBy,
+          },
+        },
+      },
     };
 
     const { getByText } = render(

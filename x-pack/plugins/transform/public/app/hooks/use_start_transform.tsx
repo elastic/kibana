@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -47,7 +48,8 @@ export const useStartTransforms = () => {
     for (const transformId in results) {
       // hasOwnProperty check to ensure only properties on object itself, and not its prototypes
       if (results.hasOwnProperty(transformId)) {
-        if (results[transformId].success === true) {
+        const result = results[transformId];
+        if (result.success === true) {
           toastNotifications.addSuccess(
             i18n.translate('xpack.transform.transformList.startTransformSuccessMessage', {
               defaultMessage: 'Request to start transform {transformId} acknowledged.',
@@ -55,12 +57,13 @@ export const useStartTransforms = () => {
             })
           );
         } else {
-          toastNotifications.addDanger(
-            i18n.translate('xpack.transform.transformList.startTransformErrorMessage', {
+          toastNotifications.addError(new Error(JSON.stringify(result.error!.caused_by, null, 2)), {
+            title: i18n.translate('xpack.transform.transformList.startTransformErrorMessage', {
               defaultMessage: 'An error occurred starting the transform {transformId}',
               values: { transformId },
-            })
-          );
+            }),
+            toastMessage: result.error!.reason,
+          });
         }
       }
     }
