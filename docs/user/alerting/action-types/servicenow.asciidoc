@@ -61,7 +61,7 @@ Password::  Password for HTTP Basic authentication.
 ServiceNow actions have the following configuration properties:
 
 Subaction::        The subaction to perform: `pushToService`, `getFields`, `getIncident`, or `getChoices`.
-Subaction Params:: The parameters of the subaction.
+Subaction params:: The parameters of the subaction.
 
 ==== `pushToService` subaction configuration
 
