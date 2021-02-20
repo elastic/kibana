@@ -21,14 +21,17 @@ cd ..
 echo "### Merge coverage reports"
 yarn nyc report --nycrc-path src/dev/code_coverage/nyc_config/nyc.functional.config.js
 
-echo "### zip functional combined report"
-tar -czf kibana-functional-coverage.tar.gz target/kibana-coverage/functional-combined/*
+rsync -ahSD --ignore-errors --force --delete --stats target "$checkoutDir/"
 
-echo "### Copy archive to checkoutDir"
-cp kibana-functional-coverage.tar.gz $checkoutDir
+# echo "### zip functional combined report"
+# tar -czf kibana-functional-coverage.tar.gz target/kibana-coverage/functional-combined/*
 
-currentPath="$(pwd)"
-echo "Current path ${currentPath}"
+# echo "### Copy archive to checkoutDir"
+# cp kibana-functional-coverage.tar.gz $checkoutDir
+
+# currentPath="$(pwd)"
+# echo "Current path ${currentPath}"
 
 echo "### Back to $checkoutDir"
 cd "$checkoutDir"
+ls -als
