@@ -16,7 +16,7 @@ describe('MetaRewritePolicy', () => {
   ) => new MetaRewritePolicy({ type: 'meta', mode, properties });
 
   const createLogRecord = (meta: LogMeta = {}): LogRecord => ({
-    timestamp: new Date(),
+    timestamp: new Date(Date.UTC(2012, 1, 1, 14, 30, 22, 11)),
     level: LogLevel.Info,
     context: 'context',
     message: 'just a log',
