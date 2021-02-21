@@ -5,14 +5,22 @@
  * 2.0.
  */
 
-import { LogicMounter, mockFlashMessageHelpers, mockKibanaValues } from '../../../__mocks__';
+import {
+  LogicMounter,
+  mockHttpValues,
+  mockFlashMessageHelpers,
+  mockKibanaValues,
+} from '../../../__mocks__';
+
+import { nextTick } from '@kbn/test/jest';
 
 import { MetaEngineCreationLogic } from './meta_engine_creation_logic';
 
 describe('MetaEngineCreationLogic', () => {
   const { mount } = new LogicMounter(MetaEngineCreationLogic);
+  const { http } = mockHttpValues;
   const { navigateToUrl } = mockKibanaValues;
-  const { setQueuedSuccessMessage } = mockFlashMessageHelpers;
+  const { setQueuedSuccessMessage, flashAPIErrors } = mockFlashMessageHelpers;
 
   const DEFAULT_VALUES = {
     indexedEngineNames: [],
@@ -29,12 +37,9 @@ describe('MetaEngineCreationLogic', () => {
   describe('actions', () => {
     describe('setRawName', () => {
       beforeAll(() => {
+        jest.clearAllMocks();
         mount();
         MetaEngineCreationLogic.actions.setRawName('Name__With#$&*%Special--Characters');
-      });
-
-      afterAll(() => {
-        jest.clearAllMocks();
       });
 
       it('should set rawName to provided value', () => {
@@ -75,35 +80,57 @@ describe('MetaEngineCreationLogic', () => {
 
   describe('listeners', () => {
     describe('fetchIndexedEngineNames', () => {
-      it('should call flashApiErrors if the API throws an error', () => {
-        throw Error('TODO');
+      beforeEach(() => {
+        jest.clearAllMocks();
       });
 
-      it('should call setIndexedEngineNames with the current value.indexedEngineNames plus the results from the API request', () => {
-        throw Error('TODO');
+      it('calls flashAPIErrors on API Error', async () => {
+        http.get.mockReturnValueOnce(Promise.reject());
+        MetaEngineCreationLogic.actions.fetchIndexedEngineNames();
+        await nextTick();
+        expect(flashAPIErrors).toHaveBeenCalledTimes(1);
       });
 
-      it('if there are remaining pages it should call fetchIndexedEngineNames recursively with an incremented page', () => {
-        throw Error('TODO');
+      it('calls onEngineCreationSuccess on valid submission', async () => {
+        jest.spyOn(MetaEngineCreationLogic.actions, 'setIndexedEngineNames');
+        http.get.mockReturnValueOnce(
+          Promise.resolve({ results: [{ name: 'foo' }], meta: { page: { total_pages: 1 } } })
+        );
+        MetaEngineCreationLogic.actions.fetchIndexedEngineNames();
+        await nextTick();
+        expect(MetaEngineCreationLogic.actions.setIndexedEngineNames).toHaveBeenCalledWith(['foo']);
       });
 
-      it('if there are no remaining pages it should end without calling recursively', () => {
-        throw Error('TODO');
+      it('if there are remaining pages it should call fetchIndexedEngineNames recursively with an incremented page', async () => {
+        jest.spyOn(MetaEngineCreationLogic.actions, 'fetchIndexedEngineNames');
+        http.get.mockReturnValueOnce(
+          Promise.resolve({ results: [{ name: 'foo' }], meta: { page: { total_pages: 2 } } })
+        );
+        MetaEngineCreationLogic.actions.fetchIndexedEngineNames();
+        await nextTick();
+        expect(MetaEngineCreationLogic.actions.fetchIndexedEngineNames).toHaveBeenCalledWith(2);
+      });
+
+      it('if there are no remaining pages it should end without calling recursively', async () => {
+        jest.spyOn(MetaEngineCreationLogic.actions, 'fetchIndexedEngineNames');
+        http.get.mockReturnValueOnce(
+          Promise.resolve({ results: [{ name: 'foo' }], meta: { page: { total_pages: 1 } } })
+        );
+        MetaEngineCreationLogic.actions.fetchIndexedEngineNames();
+        await nextTick();
+        expect(MetaEngineCreationLogic.actions.fetchIndexedEngineNames).toHaveBeenCalledTimes(1); // it's one time cause we called it two lines above
       });
     });
 
     describe('onEngineCreationSuccess', () => {
       beforeAll(() => {
+        jest.clearAllMocks();
         mount({ language: 'English', rawName: 'test' });
         MetaEngineCreationLogic.actions.onEngineCreationSuccess();
       });
 
-      afterAll(() => {
-        jest.clearAllMocks();
-      });
-
       it('should set a success message', () => {
-        expect(setQueuedSuccessMessage).toHaveBeenCalledWith('Successfully created engine.');
+        expect(setQueuedSuccessMessage).toHaveBeenCalledWith('Successfully created meta engine.');
       });
 
       it('should navigate the user to the engine page', () => {
@@ -113,23 +140,33 @@ describe('MetaEngineCreationLogic', () => {
 
     describe('submitEngine', () => {
       beforeAll(() => {
-        mount({ language: 'English', rawName: 'test' });
-      });
-
-      afterAll(() => {
         jest.clearAllMocks();
+        mount({ rawName: 'test', selectedIndexedEngineNames: ['foo'] });
       });
 
       it('POSTS to /api/app_search/engines', () => {
-        throw Error('TODO');
-      });
-
-      it('calls flashAPIErrors on API Error', async () => {
-        throw Error('TODO');
+        const body = JSON.stringify({
+          name: 'test',
+          type: 'meta',
+          source_engines: ['foo'],
+        });
+        MetaEngineCreationLogic.actions.submitEngine();
+        expect(http.post).toHaveBeenCalledWith('/api/app_search/engines', { body });
       });
 
       it('calls onEngineCreationSuccess on valid submission', async () => {
-        throw Error('TODO');
+        jest.spyOn(MetaEngineCreationLogic.actions, 'onEngineCreationSuccess');
+        http.post.mockReturnValueOnce(Promise.resolve({}));
+        MetaEngineCreationLogic.actions.submitEngine();
+        await nextTick();
+        expect(MetaEngineCreationLogic.actions.onEngineCreationSuccess).toHaveBeenCalledTimes(1);
+      });
+
+      it('calls flashAPIErrors on API Error', async () => {
+        http.post.mockReturnValueOnce(Promise.reject());
+        MetaEngineCreationLogic.actions.submitEngine();
+        await nextTick();
+        expect(flashAPIErrors).toHaveBeenCalledTimes(1);
       });
     });
   });

@@ -103,15 +103,15 @@ describe('MetaEngineCreation', () => {
     });
   });
 
-  describe('MetaEngineCreationSourceEnginesInput', () => {
-    it('uses selectedIndexedEngines as its value', () => {
-      const wrapper = shallow(<MetaEngineCreation />);
-      throw Error('TODO');
-    });
+  it('MetaEngineCreationSourceEnginesInput calls calls setSelectedIndexedEngines on change', () => {
+    const wrapper = shallow(<MetaEngineCreation />);
+    const simulatedEvent = {
+      currentTarget: { value: [{ name: 'foo', value: 'foo' }] },
+    };
+    wrapper
+      .find('[data-test-subj="MetaEngineCreationSourceEnginesInput"]')
+      .simulate('change', simulatedEvent);
 
-    it('calls calls setSelectedIndexedEngines on change', () => {
-      const wrapper = shallow(<MetaEngineCreation />);
-      throw Error('TODO');
-    });
+    expect(MOCK_ACTIONS.setRawName).toHaveBeenCalledWith(['foo']);
   });
 });

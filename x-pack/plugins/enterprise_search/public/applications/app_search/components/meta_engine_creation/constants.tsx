@@ -100,12 +100,16 @@ export const META_ENGINE_CREATION_FORM_ENGINE_SOURCE_ENGINES_LABEL = i18n.transl
   }
 );
 
-export const META_ENGINE_CREATION_FORM_MAX_SOURCE_ENGINES_WARNING_TITLE = i18n.translate(
-  'xpack.enterpriseSearch.appSearch.metaEngineCreation.form.sourceEngines.maxSourceEnginesWarningTitle',
-  {
-    defaultMessage: 'Meta Engines have a limit of {maxEnginesPerMetaEngine} engines',
-  }
-);
+export const META_ENGINE_CREATION_FORM_MAX_SOURCE_ENGINES_WARNING_TITLE = (
+  maxEnginesPerMetaEngine: number
+) =>
+  i18n.translate(
+    'xpack.enterpriseSearch.appSearch.metaEngineCreation.form.sourceEngines.maxSourceEnginesWarningTitle',
+    {
+      defaultMessage: 'Meta Engines have a limit of {maxEnginesPerMetaEngine} engines',
+      values: { maxEnginesPerMetaEngine },
+    }
+  );
 
 export const META_ENGINE_CREATION_SUCCESS_MESSAGE = i18n.translate(
   'xpack.enterpriseSearch.appSearch.metaEngineCreation.successMessage',

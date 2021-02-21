@@ -147,7 +147,9 @@ export const MetaEngineCreation: React.FC = () => {
               {selectedIndexedEngineNames.length > maxEnginesPerMetaEngine && (
                 <EuiCallOut
                   color="warning"
-                  title={META_ENGINE_CREATION_FORM_MAX_SOURCE_ENGINES_WARNING_TITLE}
+                  title={META_ENGINE_CREATION_FORM_MAX_SOURCE_ENGINES_WARNING_TITLE(
+                    maxEnginesPerMetaEngine
+                  )}
                 />
               )}
               <EuiSpacer />
