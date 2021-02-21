@@ -21,10 +21,12 @@ import { KibanaContextProvider } from '../../../public/shared_imports';
 import { AppServicesContext } from '../../../public/types';
 import { createBreadcrumbsMock } from '../../../public/application/services/breadcrumbs.mock';
 
+import { TestSubjects } from '../helpers';
+import { POLICY_NAME } from './constants';
+
 type Phases = keyof PolicyPhases;
 
-import { POLICY_NAME } from './constants';
-import { TestSubjects } from '../helpers';
+window.scrollTo = jest.fn();
 
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
@@ -46,14 +48,17 @@ jest.mock('@elastic/eui', () => {
   };
 });
 
-const testBedConfig: TestBedConfig = {
-  memoryRouter: {
-    initialEntries: [`/policies/edit/${POLICY_NAME}`],
-    componentRoutePath: `/policies/edit/:policyName`,
-  },
-  defaultProps: {
-    getUrlForApp: () => {},
-  },
+const getTestBedConfig = (testBedConfigArgs?: Partial<TestBedConfig>): TestBedConfig => {
+  return {
+    memoryRouter: {
+      initialEntries: [`/policies/edit/${POLICY_NAME}`],
+      componentRoutePath: `/policies/edit/:policyName`,
+    },
+    defaultProps: {
+      getUrlForApp: () => {},
+    },
+    ...testBedConfigArgs,
+  };
 };
 
 const breadcrumbService = createBreadcrumbsMock();
@@ -72,13 +77,22 @@ const MyComponent = ({ appServicesContext, ...rest }: any) => {
   );
 };
 
-const initTestBed = registerTestBed<TestSubjects>(MyComponent, testBedConfig);
+const initTestBed = (arg?: {
+  appServicesContext?: Partial<AppServicesContext>;
+  testBedConfig?: Partial<TestBedConfig>;
+}) => {
+  const { testBedConfig: testBedConfigArgs, ...rest } = arg || {};
+  return registerTestBed<TestSubjects>(MyComponent, getTestBedConfig(testBedConfigArgs))(rest);
+};
 
 type SetupReturn = ReturnType<typeof setup>;
 
 export type EditPolicyTestBed = SetupReturn extends Promise<infer U> ? U : SetupReturn;
 
-export const setup = async (arg?: { appServicesContext: Partial<AppServicesContext> }) => {
+export const setup = async (arg?: {
+  appServicesContext?: Partial<AppServicesContext>;
+  testBedConfig?: Partial<TestBedConfig>;
+}) => {
   const testBed = await initTestBed(arg);
 
   const { find, component, form, exists } = testBed;
@@ -169,33 +183,14 @@ export const setup = async (arg?: { appServicesContext: Partial<AppServicesConte
 
   const enable = (phase: Phases) => createFormToggleAction(`enablePhaseSwitch-${phase}`);
 
-  const setMinAgeValue = (phase: Phases) => createFormSetValueAction(`${phase}-selectedMinimumAge`);
-
-  const setMinAgeUnits = (phase: Phases) =>
-    createFormSetValueAction(`${phase}-selectedMinimumAgeUnits`);
-
-  const setDataAllocation = (phase: Phases) => async (value: DataTierAllocationType) => {
-    act(() => {
-      find(`${phase}-dataTierAllocationControls.dataTierSelect`).simulate('click');
-    });
-    component.update();
-    await act(async () => {
-      switch (value) {
-        case 'node_roles':
-          find(`${phase}-dataTierAllocationControls.defaultDataAllocationOption`).simulate('click');
-          break;
-        case 'node_attrs':
-          find(`${phase}-dataTierAllocationControls.customDataAllocationOption`).simulate('click');
-          break;
-        default:
-          find(`${phase}-dataTierAllocationControls.noneDataAllocationOption`).simulate('click');
-      }
-    });
-    component.update();
+  const createMinAgeActions = (phase: Phases) => {
+    return {
+      hasMinAgeInput: () => exists(`${phase}-selectedMinimumAge`),
+      setMinAgeValue: createFormSetValueAction(`${phase}-selectedMinimumAge`),
+      setMinAgeUnits: createFormSetValueAction(`${phase}-selectedMinimumAgeUnits`),
+      hasRolloverTipOnMinAge: () => exists(`${phase}-rolloverMinAgeInputIconTip`),
+    };
   };
-
-  const setSelectedNodeAttribute = (phase: Phases) =>
-    createFormSetValueAction(`${phase}-selectedNodeAttrs`);
 
   const setReplicas = (phase: Phases) => async (value: string) => {
     if (!exists(`${phase}-selectedReplicaCount`)) {
@@ -216,8 +211,12 @@ export const setup = async (arg?: { appServicesContext: Partial<AppServicesConte
   const setFreeze = createFormToggleAction('freezeSwitch');
   const freezeExists = () => exists('freezeSwitch');
 
-  const setReadonly = (phase: Phases) => async (value: boolean) => {
-    await createFormToggleAction(`${phase}-readonlySwitch`)(value);
+  const createReadonlyActions = (phase: Phases) => {
+    const toggleSelector = `${phase}-readonlySwitch`;
+    return {
+      readonlyExists: () => exists(toggleSelector),
+      toggleReadonly: createFormToggleAction(toggleSelector),
+    };
   };
 
   const createSearchableSnapshotActions = (phase: Phases) => {
@@ -271,17 +270,93 @@ export const setup = async (arg?: { appServicesContext: Partial<AppServicesConte
     };
   };
 
-  const hasRolloverTipOnMinAge = (phase: Phases) => (): boolean =>
-    exists(`${phase}-rolloverMinAgeInputIconTip`);
+  const hasRolloverSettingRequiredCallout = (): boolean => exists('rolloverSettingsRequired');
+
+  const createNodeAllocationActions = (phase: Phases) => {
+    const controlsSelector = `${phase}-dataTierAllocationControls`;
+    const dataTierSelector = `${controlsSelector}.dataTierSelect`;
+    const nodeAttrsSelector = `${phase}-selectedNodeAttrs`;
+
+    return {
+      hasDataTierAllocationControls: () => exists(controlsSelector),
+      openNodeAttributesSection: async () => {
+        await act(async () => {
+          find(dataTierSelector).simulate('click');
+        });
+        component.update();
+      },
+      hasNodeAttributesSelect: (): boolean => exists(nodeAttrsSelector),
+      getNodeAttributesSelectOptions: () => find(nodeAttrsSelector).find('option'),
+      setDataAllocation: async (value: DataTierAllocationType) => {
+        act(() => {
+          find(dataTierSelector).simulate('click');
+        });
+        component.update();
+        await act(async () => {
+          switch (value) {
+            case 'node_roles':
+              find(`${controlsSelector}.defaultDataAllocationOption`).simulate('click');
+              break;
+            case 'node_attrs':
+              find(`${controlsSelector}.customDataAllocationOption`).simulate('click');
+              break;
+            default:
+              find(`${controlsSelector}.noneDataAllocationOption`).simulate('click');
+          }
+        });
+        component.update();
+      },
+      setSelectedNodeAttribute: createFormSetValueAction(nodeAttrsSelector),
+      hasNoNodeAttrsWarning: () => exists('noNodeAttributesWarning'),
+      hasDefaultAllocationWarning: () => exists('defaultAllocationWarning'),
+      hasDefaultAllocationNotice: () => exists('defaultAllocationNotice'),
+      hasNodeDetailsFlyout: () => exists(`${phase}-viewNodeDetailsFlyoutButton`),
+      openNodeDetailsFlyout: async () => {
+        await act(async () => {
+          find(`${phase}-viewNodeDetailsFlyoutButton`).simulate('click');
+        });
+        component.update();
+      },
+    };
+  };
+
+  const expectErrorMessages = (expectedMessages: string[]) => {
+    const errorMessages = component.find('.euiFormErrorText');
+    expect(errorMessages.length).toBe(expectedMessages.length);
+    expectedMessages.forEach((expectedErrorMessage) => {
+      let foundErrorMessage;
+      for (let i = 0; i < errorMessages.length; i++) {
+        if (errorMessages.at(i).text() === expectedErrorMessage) {
+          foundErrorMessage = true;
+        }
+      }
+      expect(foundErrorMessage).toBe(true);
+    });
+  };
+
+  /*
+   * For new we rely on a setTimeout to ensure that error messages have time to populate
+   * the form object before we look at the form object. See:
+   * x-pack/plugins/index_lifecycle_management/public/application/sections/edit_policy/form/form_errors_context.tsx
+   * for where this logic lives.
+   */
+  const runTimers = () => {
+    act(() => {
+      jest.runAllTimers();
+    });
+    component.update();
+  };
 
   return {
     ...testBed,
+    runTimers,
     actions: {
       saveAsNewPolicy: createFormToggleAction('saveAsNewSwitch'),
       setPolicyName: createFormSetValueAction('policyNameField'),
       setWaitForSnapshotPolicy,
       savePolicy,
       hasGlobalErrorCallout: () => exists('policyFormErrorsCallout'),
+      expectErrorMessages,
       timeline: {
         hasHotPhase: () => exists('ilmTimelineHotPhase'),
         hasWarmPhase: () => exists('ilmTimelineWarmPhase'),
@@ -294,46 +369,40 @@ export const setup = async (arg?: { appServicesContext: Partial<AppServicesConte
         setMaxAge,
         toggleRollover,
         toggleDefaultRollover,
+        hasRolloverSettingRequiredCallout,
         hasErrorIndicator: () => exists('phaseErrorIndicator-hot'),
         ...createForceMergeActions('hot'),
         ...createIndexPriorityActions('hot'),
         ...createShrinkActions('hot'),
-        setReadonly: setReadonly('hot'),
+        ...createReadonlyActions('hot'),
         ...createSearchableSnapshotActions('hot'),
       },
       warm: {
         enable: enable('warm'),
-        setMinAgeValue: setMinAgeValue('warm'),
-        setMinAgeUnits: setMinAgeUnits('warm'),
-        setDataAllocation: setDataAllocation('warm'),
-        setSelectedNodeAttribute: setSelectedNodeAttribute('warm'),
+        ...createMinAgeActions('warm'),
         setReplicas: setReplicas('warm'),
         hasErrorIndicator: () => exists('phaseErrorIndicator-warm'),
-        hasRolloverTipOnMinAge: hasRolloverTipOnMinAge('warm'),
         ...createShrinkActions('warm'),
         ...createForceMergeActions('warm'),
-        setReadonly: setReadonly('warm'),
+        ...createReadonlyActions('warm'),
         ...createIndexPriorityActions('warm'),
+        ...createNodeAllocationActions('warm'),
       },
       cold: {
         enable: enable('cold'),
-        setMinAgeValue: setMinAgeValue('cold'),
-        setMinAgeUnits: setMinAgeUnits('cold'),
-        setDataAllocation: setDataAllocation('cold'),
-        setSelectedNodeAttribute: setSelectedNodeAttribute('cold'),
+        ...createMinAgeActions('cold'),
         setReplicas: setReplicas('cold'),
         setFreeze,
         freezeExists,
         hasErrorIndicator: () => exists('phaseErrorIndicator-cold'),
-        hasRolloverTipOnMinAge: hasRolloverTipOnMinAge('cold'),
         ...createIndexPriorityActions('cold'),
         ...createSearchableSnapshotActions('cold'),
+        ...createNodeAllocationActions('cold'),
       },
       delete: {
+        isShown: () => exists('delete-phaseContent'),
         ...createToggleDeletePhaseActions(),
-        hasRolloverTipOnMinAge: hasRolloverTipOnMinAge('delete'),
-        setMinAgeValue: setMinAgeValue('delete'),
-        setMinAgeUnits: setMinAgeUnits('delete'),
+        ...createMinAgeActions('delete'),
       },
     },
   };
