@@ -59,7 +59,7 @@ export class RewriteAppender implements DisposableAppender {
 
   /**
    * Appenders can be "attached" to this one so that the RewriteAppender
-   * is able to act as a sort of middleware by calling `append` other appenders.
+   * is able to act as a sort of middleware by calling `append` on other appenders.
    *
    * As appenders cannot be attached to each other until they are created,
    * the `addAppender` method is used to pass in a configured appender.

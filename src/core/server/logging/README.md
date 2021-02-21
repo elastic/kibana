@@ -273,6 +273,16 @@ Similar to log4j's `RewriteAppender`, this appender serves as a sort of middlewa
 modifying the provided log events before passing them along to another
 appender.
 
+```yaml
+logging:
+  appenders:
+    my-rewrite-appender:
+      type: rewrite
+      appenders: [console, file] # name of "destination" appender(s)
+      policy:
+        # ...
+```
+
 The most common use case for the `RewriteAppender` is when you want to
 filter or censor sensitive data that may be contained in a log entry.
 In fact, with a default configuration, Kibana will automatically redact
@@ -291,16 +301,6 @@ modified within the rewrite appender.
 The `meta` rewrite policy can read and modify any data contained in the
 `LogMeta` before passing it along to a destination appender.
 
-```yaml
-logging:
-  appenders:
-    my-rewrite-appender:
-      type: rewrite
-      appenders: [console, file] # name of "destination" appender(s)
-      policy:
-        # ...
-```
-
 Meta policies must specify one of three modes, which indicate which action
 to perform on the configured properties:
 - `add` creates a new property at the provided `path`, skipping properties which already exist.
@@ -311,6 +311,8 @@ The `properties` are listed as a `path` and `value` pair, where `path` is
 the dot-delimited path to the target property in the `LogMeta` object, and
 `value` is the value to add or update in that target property. When using
 the `remove` mode, a `value` is not necessary.
+
+Here's an example of how you would replace any `cookie` header values with `[REDACTED]`:
 
 ```yaml
 logging:
@@ -328,7 +330,7 @@ logging:
 
 Rewrite appenders can even be passed to other rewrite appenders to apply
 multiple filter policies/modes, as long as it doesn't create a circular
-reference.
+reference. Each rewrite appender is applied sequentially (one after the other).
 ```yaml
 logging:
   appenders:
