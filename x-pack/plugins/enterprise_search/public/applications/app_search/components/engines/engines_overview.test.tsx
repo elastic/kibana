@@ -19,7 +19,6 @@ import { EnginesOverview } from './';
 
 describe('EnginesOverview', () => {
   const values = {
-    hasPlatinumLicense: false,
     dataLoading: false,
     engines: [],
     enginesMeta: {
@@ -39,6 +38,7 @@ describe('EnginesOverview', () => {
       },
     },
     metaEnginesLoading: false,
+    myRole: { canViewMetaEngines: false },
   };
   const actions = {
     loadEngines: jest.fn(),
@@ -73,7 +73,7 @@ describe('EnginesOverview', () => {
     const valuesWithEngines = {
       ...values,
       dataLoading: false,
-      engines: ['dummy-engine'],
+      engines: ['test-engine'],
       enginesMeta: {
         page: {
           current: 1,
@@ -102,12 +102,11 @@ describe('EnginesOverview', () => {
       ).toEqual('/engine_creation');
     });
 
-    describe('when on a platinum license', () => {
+    describe('when myRole.canViewMetaEngines is true', () => {
       it('renders a 2nd meta engines table & makes a 2nd meta engines API call', async () => {
         setMockValues({
           ...valuesWithEngines,
-          hasPlatinumLicense: true,
-          metaEngines: ['dummy-meta-engine'],
+          myRole: { canViewMetaEngines: true },
         });
         const wrapper = shallow(<EnginesOverview />);
 
@@ -149,8 +148,15 @@ describe('EnginesOverview', () => {
       it('calls onPagination handlers', async () => {
         setMockValues({
           ...valuesWithEngines,
-          hasPlatinumLicense: true,
-          metaEngines: ['dummy-meta-engine'],
+          myRole: { canViewMetaEngines: true },
+          metaEngines: ['test-meta-engine'],
+          metaEnginesMeta: {
+            page: {
+              current: 1,
+              size: 10,
+              total_results: 100,
+            },
+          },
         });
         const wrapper = shallow(<EnginesOverview />);
         const pageEvent = { page: { index: 0 } };

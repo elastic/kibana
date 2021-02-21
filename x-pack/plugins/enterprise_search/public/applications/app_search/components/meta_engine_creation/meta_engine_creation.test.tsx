@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import '../../../__mocks__/shallow_useeffect.mock';
 import { setMockActions, setMockValues } from '../../../__mocks__';
 
 import React from 'react';
@@ -14,32 +15,33 @@ import { shallow } from 'enzyme';
 import { MetaEngineCreation } from './';
 
 const DEFAULT_VALUES = {
+  // MetaEngineLogic
   name: '',
   rawName: '',
+  indexedEngineNames: [],
+  selectedIndexedEngineNames: [],
+  // AppLogic
+  configuredLimits: { engine: { maxEnginesPerMetaEngine: 10 } },
 };
 
 const MOCK_ACTIONS = {
   setRawName: jest.fn(),
+  setSelectedIndexedEngineNames: jest.fn(),
+  fetchIndexedEngineNames: jest.fn(),
+  submitEngine: jest.fn(),
 };
 
 describe('MetaEngineCreation', () => {
   beforeEach(() => {
+    jest.clearAllMocks();
     setMockValues(DEFAULT_VALUES);
     setMockActions(MOCK_ACTIONS);
   });
 
-  afterEach(() => {
-    jest.clearAllMocks();
-  });
-
-  it('renders', () => {
+  it('renders and calls fetchIndexedEngineNames', () => {
     const wrapper = shallow(<MetaEngineCreation />);
     expect(wrapper.find('[data-test-subj="MetaEngineCreation"]')).toHaveLength(1);
-  });
-
-  it('calls fetchIndexedEngineNames on first render', () => {
-    const wrapper = shallow(<MetaEngineCreation />);
-    throw Error('TODO');
+    expect(MOCK_ACTIONS.fetchIndexedEngineNames).toHaveBeenCalledTimes(1);
   });
 
   describe('MetaEngineCreationNameInput', () => {
@@ -57,6 +59,16 @@ describe('MetaEngineCreation', () => {
           .find('input') // as far as I can tell I can't include this input in the .find() two lines above
           .attr('value')
       ).toEqual('Name__With#$&*%Special--Characters');
+    });
+
+    it('EngineCreationForm calls submitEngine on form submit', () => {
+      const wrapper = shallow(<MetaEngineCreation />);
+      const simulatedEvent = {
+        preventDefault: jest.fn(),
+      };
+      wrapper.find('[data-test-subj="MetaEngineCreationForm"]').simulate('submit', simulatedEvent);
+
+      expect(MOCK_ACTIONS.submitEngine).toHaveBeenCalledTimes(1);
     });
 
     it('MetaEngineCreationNameInput calls setRawName on change', () => {
@@ -105,13 +117,11 @@ describe('MetaEngineCreation', () => {
 
   it('MetaEngineCreationSourceEnginesInput calls calls setSelectedIndexedEngines on change', () => {
     const wrapper = shallow(<MetaEngineCreation />);
-    const simulatedEvent = {
-      currentTarget: { value: [{ name: 'foo', value: 'foo' }] },
-    };
+
     wrapper
       .find('[data-test-subj="MetaEngineCreationSourceEnginesInput"]')
-      .simulate('change', simulatedEvent);
+      .simulate('change', [{ label: 'foo', value: 'foo' }]);
 
-    expect(MOCK_ACTIONS.setRawName).toHaveBeenCalledWith(['foo']);
+    expect(MOCK_ACTIONS.setSelectedIndexedEngineNames).toHaveBeenCalledWith(['foo']);
   });
 });

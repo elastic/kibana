@@ -20,10 +20,10 @@ import {
 
 import { FlashMessages } from '../../../shared/flash_messages';
 import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
-import { LicensingLogic } from '../../../shared/licensing';
 import { EuiButtonTo } from '../../../shared/react_router_helpers';
 import { convertMetaToPagination, handlePageChange } from '../../../shared/table_pagination';
 import { SendAppSearchTelemetry as SendTelemetry } from '../../../shared/telemetry';
+import { AppLogic } from '../../app_logic';
 import { ENGINE_CREATION_PATH } from '../../routes';
 
 import { EngineIcon } from './assets/engine_icon';
@@ -36,7 +36,10 @@ import { EnginesTable } from './engines_table';
 import './engines_overview.scss';
 
 export const EnginesOverview: React.FC = () => {
-  const { hasPlatinumLicense } = useValues(LicensingLogic);
+  const {
+    myRole: { canViewMetaEngines },
+  } = useValues(AppLogic);
+
   const {
     dataLoading,
     engines,
@@ -46,6 +49,7 @@ export const EnginesOverview: React.FC = () => {
     metaEnginesMeta,
     metaEnginesLoading,
   } = useValues(EnginesLogic);
+
   const { loadEngines, loadMetaEngines, onEnginesPagination, onMetaEnginesPagination } = useActions(
     EnginesLogic
   );
@@ -55,8 +59,8 @@ export const EnginesOverview: React.FC = () => {
   }, [enginesMeta.page.current]);
 
   useEffect(() => {
-    if (hasPlatinumLicense) loadMetaEngines();
-  }, [hasPlatinumLicense, metaEnginesMeta.page.current]);
+    if (canViewMetaEngines) loadMetaEngines();
+  }, [canViewMetaEngines, metaEnginesMeta.page.current]);
 
   if (dataLoading) return <LoadingState />;
   if (!engines.length) return <EmptyState />;
@@ -100,7 +104,7 @@ export const EnginesOverview: React.FC = () => {
           />
         </EuiPageContentBody>
 
-        {metaEngines.length > 0 && (
+        {canViewMetaEngines && (
           <>
             <EuiSpacer size="xl" />
             <EuiPageContentHeader>
