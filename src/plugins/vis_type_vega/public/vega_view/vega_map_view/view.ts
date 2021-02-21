@@ -8,8 +8,9 @@
 
 import { i18n } from '@kbn/i18n';
 import type { Map, Style, NavigationControl, MapboxOptions } from 'mapbox-gl';
-
 import { View, parse } from 'vega';
+// @ts-expect-error
+import mapboxgl from 'maplibre-gl/dist/maplibre-gl-csp';
 import { initTmsRasterLayer, initVegaLayer } from './layers';
 import { VegaBaseView } from '../vega_base_view';
 import { getMapServiceSettings } from '../../services';
@@ -22,8 +23,15 @@ import {
   userConfiguredLayerId,
   vegaLayerId,
 } from './constants';
-
 import { validateZoomSettings, injectMapPropsIntoSpec } from './utils';
+
+// @ts-expect-error
+import mbRtlPlugin from '!!file-loader!@mapbox/mapbox-gl-rtl-text/mapbox-gl-rtl-text.min.js';
+// @ts-expect-error
+import mbWorkerUrl from '!!file-loader!maplibre-gl/dist/maplibre-gl-csp-worker';
+
+mapboxgl.workerUrl = mbWorkerUrl;
+mapboxgl.setRTLTextPlugin(mbRtlPlugin);
 
 import './vega_map_view.scss';
 
@@ -115,7 +123,7 @@ export class VegaMapView extends VegaBaseView {
     // In some cases, Vega may be initialized twice, e.g. after awaiting...
     if (!this._$container) return;
 
-    const mapBoxInstance = new Map({
+    const mapBoxInstance = new mapboxgl.Map({
       style,
       customAttribution,
       container: this._$container.get(0),
@@ -142,7 +150,7 @@ export class VegaMapView extends VegaBaseView {
 
   private initControls(mapBoxInstance: Map) {
     if (this.shouldShowZoomControl) {
-      mapBoxInstance.addControl(new NavigationControl({ showCompass: false }), 'top-left');
+      mapBoxInstance.addControl(new mapboxgl.NavigationControl({ showCompass: false }), 'top-left');
     }
   }
 
