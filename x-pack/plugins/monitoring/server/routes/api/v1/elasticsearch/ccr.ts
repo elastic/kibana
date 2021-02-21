@@ -17,7 +17,6 @@ import {
   ElasticsearchResponse,
   ElasticsearchLegacySource,
   ElasticsearchMetricbeatSource,
-  ElasticsearchSource,
 } from '../../../../../common/types/es';
 import { LegacyRequest } from '../../../../types';
 
