@@ -38,8 +38,10 @@ export COVERAGE_INGESTION_KIBANA_ROOT=/dev/shm/workspace/kibana
 for x in functional jest; do
   echo "### Ingesting coverage for ${x}"
   COVERAGE_SUMMARY_FILE=target/kibana-coverage/${x}-combined/coverage-summary.json
-  node scripts/ingest_coverage.js --verbose --path ${COVERAGE_SUMMARY_FILE} --vcsInfoPath ./VCS_INFO.txt --teamAssignmentsPath $TEAM_ASSIGN_PATH
+  # running in background to speed up ingestion
+  node scripts/ingest_coverage.js --verbose --path ${COVERAGE_SUMMARY_FILE} --vcsInfoPath ./VCS_INFO.txt --teamAssignmentsPath $TEAM_ASSIGN_PATH &
 done
+wait
 
 echo "###  Ingesting Code Coverage - Complete"
 echo ""
