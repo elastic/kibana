@@ -45,6 +45,9 @@
 .lnsDragDrop-isDropTarget {
   @include lnsDroppable;
   @include lnsDroppableActive;
+  > * {
+    pointer-events: none;
+  }
 }
 
 .lnsDragDrop-isActiveGroup {
