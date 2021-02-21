@@ -13,6 +13,7 @@ import { parsedIndexedInterfaceWithNoMatchingSchema } from './parsed_indexed_int
 import { parsedNestedCollector } from './parsed_nested_collector';
 import { parsedSchemaDefinedWithSpreadsCollector } from './parsed_schema_defined_with_spreads_collector';
 import { parsedWorkingCollector } from './parsed_working_collector';
+import { parsedCollectorWithDescription } from './parsed_working_collector_with_description';
 import { ParsedUsageCollection } from '../ts_parser';
 
 export const allExtractedCollectors: ParsedUsageCollection[] = [
@@ -23,4 +24,5 @@ export const allExtractedCollectors: ParsedUsageCollection[] = [
   parsedNestedCollector,
   parsedSchemaDefinedWithSpreadsCollector,
   parsedWorkingCollector,
+  parsedCollectorWithDescription,
 ];
