@@ -32,7 +32,7 @@ export function ServiceStatsFetcher({
   serviceAnomalyStats,
 }: ServiceStatsFetcherProps) {
   const {
-    urlParams: { start, end },
+    urlParams: { environment, start, end },
   } = useUrlParams();
 
   const {
@@ -45,12 +45,12 @@ export function ServiceStatsFetcher({
           endpoint: 'GET /api/apm/service-map/service/{serviceName}',
           params: {
             path: { serviceName },
-            query: { start, end },
+            query: { environment, start, end },
           },
         });
       }
     },
-    [serviceName, start, end],
+    [environment, serviceName, start, end],
     {
       preservePreviousData: false,
     }
