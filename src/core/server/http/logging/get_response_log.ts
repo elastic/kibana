@@ -15,6 +15,21 @@ import { EcsEvent, Logger } from '../../logging';
 import { getResponsePayloadBytes } from './get_payload_size';
 
 const ECS_VERSION = '1.7.0';
+const FORBIDDEN_HEADERS = ['authorization', 'cookie', 'set-cookie'];
+const REDACTED_HEADER_TEXT = '[REDACTED]';
+
+// We are excluding sensitive headers by default, until we have a log filtering mechanism.
+function redactSensitiveHeaders(
+  headers?: Record<string, string | string[]>
+): Record<string, string | string[]> {
+  const result = {} as Record<string, string | string[]>;
+  if (headers) {
+    for (const key of Object.keys(headers)) {
+      result[key] = FORBIDDEN_HEADERS.includes(key) ? REDACTED_HEADER_TEXT : headers[key];
+    }
+  }
+  return result;
+}
 
 /**
  * Converts a hapi `Request` into ECS-compliant `LogMeta` for logging.
@@ -56,7 +71,7 @@ export function getEcsResponseLog(request: Request, log: Logger): LogMeta {
         mime_type: request.mime,
         referrer: request.info.referrer,
         // @ts-expect-error Headers are not yet part of ECS: https://github.com/elastic/ecs/issues/232.
-        headers: requestHeaders,
+        headers: redactSensitiveHeaders(requestHeaders),
       },
       response: {
         body: {
@@ -64,7 +79,7 @@ export function getEcsResponseLog(request: Request, log: Logger): LogMeta {
         },
         status_code,
         // @ts-expect-error Headers are not yet part of ECS: https://github.com/elastic/ecs/issues/232.
-        headers: responseHeaders,
+        headers: redactSensitiveHeaders(responseHeaders),
         // responseTime is a custom non-ECS field
         responseTime: !isNaN(responseTime) ? responseTime : undefined,
       },

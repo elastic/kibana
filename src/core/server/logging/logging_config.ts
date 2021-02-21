@@ -30,6 +30,7 @@ const DEFAULT_APPENDER_NAME = 'default';
 
 /**
  * Sensitive `LogMeta` paths that we want to censor by default.
+ * These paths are only filtered in a default logging configuration.
  */
 const SENSITIVE_META_PATHS = [
   'http.request.headers.authorization',
@@ -169,7 +170,9 @@ export class LoggingConfig {
     [
       // By default, we transparently rewrite `LogMeta` sent to the
       // console appender to remove potentially sensitive keys.
-      // This can be overridden in a logger's configuration.
+      // This logic is also hardcoded in the http response logger
+      // itself, but included here as an additional measure for
+      // other loggers which might be logging the same data.
       'console',
       {
         type: 'rewrite',

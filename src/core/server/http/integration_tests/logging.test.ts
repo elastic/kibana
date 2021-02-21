@@ -251,6 +251,38 @@ describe('request logging', () => {
           expect(JSON.parse(meta).http.response.headers.bar).toBe('world');
         });
 
+        it('filters sensitive request headers by default', async () => {
+          const { http } = await root.setup();
+
+          http.createRouter('/').post(
+            {
+              path: '/ping',
+              validate: {
+                body: schema.object({ message: schema.string() }),
+              },
+              options: {
+                authRequired: 'optional',
+                body: {
+                  accepts: ['application/json'],
+                },
+                timeout: { payload: 100 },
+              },
+            },
+            (context, req, res) => res.ok({ body: { message: req.body.message } })
+          );
+          await root.start();
+
+          await kbnTestServer.request
+            .post(root, '/ping')
+            .set('content-type', 'application/json')
+            .set('authorization', 'abc')
+            .send({ message: 'hi' })
+            .expect(200);
+          expect(mockConsoleLog).toHaveBeenCalledTimes(1);
+          const [, , , meta] = mockConsoleLog.mock.calls[0][0].split('|');
+          expect(JSON.parse(meta).http.request.headers.authorization).toBe('[REDACTED]');
+        });
+
         it('filters sensitive request headers when RewriteAppender is configured', async () => {
           root = kbnTestServer.createRoot({
             logging: {
@@ -316,6 +348,38 @@ describe('request logging', () => {
           expect(mockConsoleLog).toHaveBeenCalledTimes(1);
           const [, , , meta] = mockConsoleLog.mock.calls[0][0].split('|');
           expect(JSON.parse(meta).http.request.headers.authorization).toBe('[REDACTED]');
+        });
+
+        it('filters sensitive response headers by defaut', async () => {
+          const { http } = await root.setup();
+
+          http.createRouter('/').post(
+            {
+              path: '/ping',
+              validate: {
+                body: schema.object({ message: schema.string() }),
+              },
+              options: {
+                authRequired: 'optional',
+                body: {
+                  accepts: ['application/json'],
+                },
+                timeout: { payload: 100 },
+              },
+            },
+            (context, req, res) =>
+              res.ok({ headers: { 'set-cookie': ['123'] }, body: { message: req.body.message } })
+          );
+          await root.start();
+
+          await kbnTestServer.request
+            .post(root, '/ping')
+            .set('Content-Type', 'application/json')
+            .send({ message: 'hi' })
+            .expect(200);
+          expect(mockConsoleLog).toHaveBeenCalledTimes(1);
+          const [, , , meta] = mockConsoleLog.mock.calls[0][0].split('|');
+          expect(JSON.parse(meta).http.response.headers['set-cookie']).toBe('[REDACTED]');
         });
 
         it('filters sensitive response headers when RewriteAppender is configured', async () => {
