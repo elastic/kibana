@@ -45,10 +45,12 @@ describe('getColorPicker', function () {
       onClose: jest.fn(),
       onChange: jest.fn(),
       anchor: document.createElement('div'),
-      seriesIdentifier: {
-        key: 'Logstash Airways',
-        specId: 'pie',
-      },
+      seriesIdentifiers: [
+        {
+          key: 'Logstash Airways',
+          specId: 'pie',
+        },
+      ],
     };
   });
 

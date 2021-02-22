@@ -55,7 +55,13 @@ export const getColorPicker = (
   bucketColumns: Array<Partial<BucketColumns>>,
   palette: string,
   data: DatatableRow[]
-): LegendColorPicker => ({ anchor, color, onClose, onChange, seriesIdentifier }) => {
+): LegendColorPicker => ({
+  anchor,
+  color,
+  onClose,
+  onChange,
+  seriesIdentifiers: [seriesIdentifier],
+}) => {
   const seriesName = seriesIdentifier.key;
   const handlChange = (newColor: string | null, event: BaseSyntheticEvent) => {
     if (newColor) {

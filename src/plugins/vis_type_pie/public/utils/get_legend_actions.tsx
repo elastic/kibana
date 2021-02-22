@@ -26,10 +26,10 @@ export const getLegendActions = (
   actions: DataPublicPluginStart['actions'],
   formatter: DataPublicPluginStart['fieldFormats']
 ): LegendAction => {
-  return ({ series }) => {
+  return ({ series: [pieSeries] }) => {
     const [popoverOpen, setPopoverOpen] = useState(false);
     const [isfilterable, setIsfilterable] = useState(true);
-    const filterData = getFilterEventData(series);
+    const filterData = getFilterEventData(pieSeries);
 
     (async () => setIsfilterable(await canFilter(filterData, actions)))();
 
@@ -42,10 +42,10 @@ export const getLegendActions = (
       const column = visParams.dimensions.buckets.find(
         (bucket) => bucket.accessor === filterData.data.data[0].column
       );
-      formattedTitle = formatter.deserialize(column?.format).convert(series.key) ?? '';
+      formattedTitle = formatter.deserialize(column?.format).convert(pieSeries.key) ?? '';
     }
 
-    const title = formattedTitle || series.key;
+    const title = formattedTitle || pieSeries.key;
     const panels: EuiContextMenuPanelDescriptor[] = [
       {
         id: 'main',
