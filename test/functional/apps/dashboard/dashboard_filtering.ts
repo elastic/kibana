@@ -106,7 +106,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('tsvb metric is filtered', async () => {
-        await dashboardExpect.tsvbMetricValuesExist(['- custom template']);
+        await dashboardExpect.tsvbMetricValuesExist(['0 custom template']);
       });
 
       it('tsvb top n is filtered', async () => {
@@ -168,7 +168,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('tsvb metric is filtered', async () => {
-        await dashboardExpect.tsvbMetricValuesExist(['- custom template']);
+        await dashboardExpect.tsvbMetricValuesExist(['0 custom template']);
       });
 
       it('tsvb top n is filtered', async () => {
