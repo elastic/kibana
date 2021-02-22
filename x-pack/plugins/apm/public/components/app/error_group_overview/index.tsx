@@ -28,7 +28,7 @@ interface ErrorGroupOverviewProps {
 
 export function ErrorGroupOverview({ serviceName }: ErrorGroupOverviewProps) {
   const { urlParams, uiFilters } = useUrlParams();
-  const { start, end, sortField, sortDirection } = urlParams;
+  const { environment, start, end, sortField, sortDirection } = urlParams;
   const { errorDistributionData } = useErrorGroupDistributionFetcher({
     serviceName,
     groupId: undefined,
@@ -46,6 +46,7 @@ export function ErrorGroupOverview({ serviceName }: ErrorGroupOverviewProps) {
               serviceName,
             },
             query: {
+              environment,
               start,
               end,
               sortField,
@@ -56,7 +57,7 @@ export function ErrorGroupOverview({ serviceName }: ErrorGroupOverviewProps) {
         });
       }
     },
-    [serviceName, start, end, sortField, sortDirection, uiFilters]
+    [environment, serviceName, start, end, sortField, sortDirection, uiFilters]
   );
 
   useTrackPageview({

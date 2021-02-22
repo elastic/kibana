@@ -63,5 +63,6 @@
     { "path": "./src/plugins/visualizations/tsconfig.json" },
     { "path": "./src/plugins/visualize/tsconfig.json" },
     { "path": "./src/plugins/index_pattern_management/tsconfig.json" },
+    { "path": "./src/plugins/index_pattern_field_editor/tsconfig.json" },
   ]
 }

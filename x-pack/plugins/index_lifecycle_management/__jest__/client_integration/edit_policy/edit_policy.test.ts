@@ -25,8 +25,6 @@ import {
   getDefaultHotPhasePolicy,
 } from './constants';
 
-window.scrollTo = jest.fn();
-
 describe('<EditPolicy />', () => {
   let testBed: EditPolicyTestBed;
   const { server, httpRequestsMockHelpers } = setupEnvironment();
@@ -127,7 +125,7 @@ describe('<EditPolicy />', () => {
         await actions.hot.setBestCompression(true);
         await actions.hot.toggleShrink(true);
         await actions.hot.setShrink('2');
-        await actions.hot.setReadonly(true);
+        await actions.hot.toggleReadonly(true);
         await actions.hot.toggleIndexPriority(true);
         await actions.hot.setIndexPriority('123');
 
@@ -271,7 +269,7 @@ describe('<EditPolicy />', () => {
         await actions.warm.toggleForceMerge(true);
         await actions.warm.setForcemergeSegmentsCount('123');
         await actions.warm.setBestCompression(true);
-        await actions.warm.setReadonly(true);
+        await actions.warm.toggleReadonly(true);
         await actions.warm.setIndexPriority('123');
         await actions.savePolicy();
         const latestRequest = server.requests[server.requests.length - 1];
@@ -477,6 +475,29 @@ describe('<EditPolicy />', () => {
 
       const { component } = testBed;
       component.update();
+    });
+
+    test('serialization', async () => {
+      httpRequestsMockHelpers.setLoadPolicies([DEFAULT_POLICY]);
+      await act(async () => {
+        testBed = await setup();
+      });
+      const { component, actions } = testBed;
+      component.update();
+      await actions.delete.enablePhase();
+      await actions.setWaitForSnapshotPolicy('test');
+      await actions.savePolicy();
+      const latestRequest = server.requests[server.requests.length - 1];
+      const entirePolicy = JSON.parse(JSON.parse(latestRequest.requestBody).body);
+      expect(entirePolicy.phases.delete).toEqual({
+        min_age: '365d',
+        actions: {
+          delete: {},
+          wait_for_snapshot: {
+            policy: 'test',
+          },
+        },
+      });
     });
 
     test('wait for snapshot policy field should correctly display snapshot policy name', () => {
@@ -729,7 +750,7 @@ describe('<EditPolicy />', () => {
           component.update();
         });
 
-        test('should show off, custom and data role options on cloud with data roles', async () => {
+        test('should show recommended, custom and "off" options on cloud with data roles', async () => {
           const { actions, find } = testBed;
 
           await actions.warm.enable(true);
@@ -977,6 +998,7 @@ describe('<EditPolicy />', () => {
   });
 
   describe('policy error notifications', () => {
+    let runTimers: () => void;
     beforeAll(() => {
       jest.useFakeTimers();
     });
@@ -984,6 +1006,7 @@ describe('<EditPolicy />', () => {
     afterAll(() => {
       jest.useRealTimers();
     });
+
     beforeEach(async () => {
       httpRequestsMockHelpers.setLoadPolicies([getDefaultHotPhasePolicy('my_policy')]);
       httpRequestsMockHelpers.setListNodes({
@@ -999,19 +1022,9 @@ describe('<EditPolicy />', () => {
 
       const { component } = testBed;
       component.update();
-    });
 
-    // For new we rely on a setTimeout to ensure that error messages have time to populate
-    // the form object before we look at the form object. See:
-    // x-pack/plugins/index_lifecycle_management/public/application/sections/edit_policy/form/form_errors_context.tsx
-    // for where this logic lives.
-    const runTimers = () => {
-      const { component } = testBed;
-      act(() => {
-        jest.runAllTimers();
-      });
-      component.update();
-    };
+      ({ runTimers } = testBed);
+    });
 
     test('shows phase error indicators correctly', async () => {
       // This test simulates a user configuring a policy phase by phase. The flow is the following:
