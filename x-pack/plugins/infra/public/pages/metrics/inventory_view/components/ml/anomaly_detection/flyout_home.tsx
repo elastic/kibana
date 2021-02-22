@@ -121,18 +121,18 @@ export const FlyoutHome = (props: Props) => {
                     jobIds={jobIds}
                   />
                   <EuiSpacer size="l" />
-                  <EuiText>
-                    <h4>Create ML Jobs</h4>
-                    <p>
-                      <FormattedMessage
-                        defaultMessage="Anomaly detection is powered by machine learning. Machine learning jobs are available for the following resource types. Enable these jobs to begin detecting anomalies in your infrastructure metrics."
-                        id="xpack.infra.ml.anomalyFlyout.createJobs"
-                      />
-                    </p>
-                  </EuiText>
-                  <EuiSpacer size="l" />
                 </>
               )}
+              <EuiText>
+                <h4>Create ML Jobs</h4>
+                <p>
+                  <FormattedMessage
+                    defaultMessage="Anomaly detection is powered by machine learning. Machine learning jobs are available for the following resource types. Enable these jobs to begin detecting anomalies in your infrastructure metrics."
+                    id="xpack.infra.ml.anomalyFlyout.createJobs"
+                  />
+                </p>
+              </EuiText>
+              <EuiSpacer size="l" />
 
               <CreateJobTab
                 hasHostJobs={hostJobSummaries.length > 0}
