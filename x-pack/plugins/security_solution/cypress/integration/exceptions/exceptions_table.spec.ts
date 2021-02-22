@@ -12,7 +12,7 @@ import { RULE_STATUS } from '../../screens/create_new_rule';
 
 import { goToManageAlertsDetectionRules, waitForAlertsIndexToBeCreated } from '../../tasks/alerts';
 import { createCustomRule } from '../../tasks/api_calls/rules';
-import { goToRuleDetails, waitForRulesToBeLoaded } from '../../tasks/alerts_detection_rules';
+import { goToRuleDetails, waitForRulesTableToBeLoaded } from '../../tasks/alerts_detection_rules';
 import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
 import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
 import {
@@ -61,7 +61,7 @@ describe('Exceptions Table', () => {
     createExceptionList(exceptionList).as('exceptionListResponse');
 
     goBackToAllRulesTable();
-    waitForRulesToBeLoaded();
+    waitForRulesTableToBeLoaded();
   });
 
   after(() => {
