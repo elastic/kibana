@@ -21,7 +21,7 @@ import {
   SERVICE_VERSION,
 } from '../../../common/elasticsearch_fieldnames';
 import { ContainerType } from '../../../common/service_metadata';
-import { rangeFilter } from '../../../common/utils/range_filter';
+import { rangeQuery } from '../../../common/utils/queries';
 import { TransactionRaw } from '../../../typings/es_schemas/raw/transaction_raw';
 import { getProcessorEventForAggregatedTransactions } from '../helpers/aggregated_transactions';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
@@ -74,7 +74,7 @@ export function getServiceMetadataDetails({
 
     const filter = [
       { term: { [SERVICE_NAME]: serviceName } },
-      { range: rangeFilter(start, end) },
+      ...rangeQuery(start, end),
     ];
 
     const params = {

@@ -99,8 +99,18 @@ export const getDefineStepsData = (rule: Rule): DefineStepRule => ({
     title: rule.timeline_title ?? null,
   },
   threshold: {
-    field: rule.threshold?.field ? [rule.threshold.field] : [],
+    field: rule.threshold?.field
+      ? Array.isArray(rule.threshold.field)
+        ? rule.threshold.field
+        : [rule.threshold.field]
+      : [],
     value: `${rule.threshold?.value || 100}`,
+    cardinality_field: Array.isArray(rule.threshold?.cardinality_field)
+      ? rule.threshold!.cardinality_field
+      : rule.threshold?.cardinality_field != null
+      ? [rule.threshold!.cardinality_field]
+      : [],
+    cardinality_value: `${rule.threshold?.cardinality_value ?? 0}`,
   },
 });
 
@@ -180,7 +190,7 @@ export const getAboutStepsData = (rule: Rule, detailsView: boolean): AboutStepRu
     },
     falsePositives,
     threat: threat as Threats,
-    threatIndicatorPath: threatIndicatorPath ?? '',
+    threatIndicatorPath,
   };
 };
 

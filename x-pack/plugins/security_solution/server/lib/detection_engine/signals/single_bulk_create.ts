@@ -172,8 +172,10 @@ export const singleBulkCreate = async ({
   logger.debug(buildRuleMessage(`took property says bulk took: ${response.took} milliseconds`));
 
   const createdItems = filteredEvents.hits.hits
-    .map((doc) =>
-      buildBulkBody({
+    .map((doc, index) => ({
+      _id: response.items[index].create?._id ?? '',
+      _index: response.items[index].create?._index ?? '',
+      ...buildBulkBody({
         doc,
         ruleParams,
         id,
@@ -187,8 +189,8 @@ export const singleBulkCreate = async ({
         enabled,
         tags,
         throttle,
-      })
-    )
+      }),
+    }))
     .filter((_, index) => get(response.items[index], 'create.status') === 201);
   const createdItemsCount = createdItems.length;
   const duplicateSignalsCount = countBy(response.items, 'create.status')['409'];
@@ -263,7 +265,11 @@ export const bulkInsertSignals = async (
 
   const createdItemsCount = countBy(response.items, 'create.status')['201'] ?? 0;
   const createdItems = signals
-    .map((doc) => doc._source)
+    .map((doc, index) => ({
+      ...doc._source,
+      _id: response.items[index].create?._id ?? '',
+      _index: response.items[index].create?._index ?? '',
+    }))
     .filter((_, index) => get(response.items[index], 'create.status') === 201);
   logger.debug(`bulk created ${createdItemsCount} signals`);
   return { bulkCreateDuration: makeFloatString(end - start), createdItems, createdItemsCount };

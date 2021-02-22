@@ -7,3 +7,5 @@
 
 export * from './status';
 export * from './types';
+
+export const SEARCH_SESSIONS_TABLE_ID = 'searchSessionsMgmtUiTable';
