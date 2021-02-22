@@ -111,8 +111,8 @@ export const CurationsTable: React.FC = () => {
             { defaultMessage: 'Edit' }
           ),
           description: i18n.translate(
-            'xpack.enterpriseSearch.appSearch.engine.curations.table.editAction',
-            { defaultMessage: 'Edit' }
+            'xpack.enterpriseSearch.appSearch.engine.curations.table.editTooltip',
+            { defaultMessage: 'Edit curation' }
           ),
           type: 'icon',
           icon: 'pencil',
@@ -130,8 +130,8 @@ export const CurationsTable: React.FC = () => {
             { defaultMessage: 'Delete' }
           ),
           description: i18n.translate(
-            'xpack.enterpriseSearch.appSearch.engine.curations.table.deleteAction',
-            { defaultMessage: 'Delete' }
+            'xpack.enterpriseSearch.appSearch.engine.curations.table.deleteTooltip',
+            { defaultMessage: 'Delete curation' }
           ),
           type: 'icon',
           icon: 'trash',
