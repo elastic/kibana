@@ -46,20 +46,15 @@ export function defineAccessAgreementRoutes({
       // It's not guaranteed that we'll have session for the authenticated user (e.g. when user is
       // authenticated with the help of HTTP authentication), that means we should safely check if
       // we have it and can get a corresponding configuration.
-      try {
-        const sessionValue = await getSession().get(request);
-        const accessAgreement =
-          (sessionValue &&
-            config.authc.providers[
-              sessionValue.provider.type as keyof ConfigType['authc']['providers']
-            ]?.[sessionValue.provider.name]?.accessAgreement?.message) ||
-          '';
+      const sessionValue = await getSession().get(request);
+      const accessAgreement =
+        (sessionValue &&
+          config.authc.providers[
+            sessionValue.provider.type as keyof ConfigType['authc']['providers']
+          ]?.[sessionValue.provider.name]?.accessAgreement?.message) ||
+        '';
 
-        return response.ok({ body: { accessAgreement } });
-      } catch (err) {
-        logger.error(err);
-        return response.internalError();
-      }
+      return response.ok({ body: { accessAgreement } });
     })
   );
 }

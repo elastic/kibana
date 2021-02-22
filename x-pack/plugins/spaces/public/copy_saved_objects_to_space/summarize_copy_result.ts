@@ -5,15 +5,12 @@
  * 2.0.
  */
 
-import {
-  SavedObjectsManagementRecord,
-  ProcessedImportResponse,
-  FailedImport,
-} from 'src/plugins/saved_objects_management/public';
+import { ProcessedImportResponse, FailedImport } from 'src/plugins/saved_objects_management/public';
 import {
   SavedObjectsImportConflictError,
   SavedObjectsImportAmbiguousConflictError,
 } from 'kibana/public';
+import { SavedObjectTarget } from './types';
 
 export interface SummarizedSavedObjectResult {
   type: string;
@@ -67,7 +64,7 @@ export type SummarizedCopyToSpaceResult =
   | ProcessingResponse;
 
 export function summarizeCopyResult(
-  savedObject: SavedObjectsManagementRecord,
+  savedObjectTarget: Required<SavedObjectTarget>,
   copyResult: ProcessedImportResponse | undefined
 ): SummarizedCopyToSpaceResult {
   const conflicts = copyResult?.failedImports.filter(isAnyConflict) ?? [];
@@ -95,12 +92,12 @@ export function summarizeCopyResult(
   };
 
   const objectMap = new Map<string, SummarizedSavedObjectResult>();
-  objectMap.set(`${savedObject.type}:${savedObject.id}`, {
-    type: savedObject.type,
-    id: savedObject.id,
-    name: savedObject.meta.title,
-    icon: savedObject.meta.icon,
-    ...getExtraFields(savedObject),
+  objectMap.set(`${savedObjectTarget.type}:${savedObjectTarget.id}`, {
+    type: savedObjectTarget.type,
+    id: savedObjectTarget.id,
+    name: savedObjectTarget.title,
+    icon: savedObjectTarget.icon,
+    ...getExtraFields(savedObjectTarget),
   });
 
   const addObjectsToMap = (

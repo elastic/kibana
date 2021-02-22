@@ -46,7 +46,7 @@ export function fetchAnchorProvider(
 
     if (useNewFieldsApi) {
       searchSource.removeField('fieldsFromSource');
-      searchSource.setField('fields', ['*']);
+      searchSource.setField('fields', [{ field: '*', include_unmapped: 'true' }]);
     }
     const response = await searchSource.fetch();
 

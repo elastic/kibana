@@ -7,18 +7,18 @@
 
 import { AppMountParameters, CoreStart } from 'kibana/public';
 import React, { useMemo } from 'react';
-import {
-  useUiSetting$,
-  KibanaContextProvider,
-} from '../../../../../src/plugins/kibana_react/public';
 import { EuiThemeProvider } from '../../../../../src/plugins/kibana_react/common';
+import {
+  KibanaContextProvider,
+  useUiSetting$,
+} from '../../../../../src/plugins/kibana_react/public';
+import { Storage } from '../../../../../src/plugins/kibana_utils/public';
 import { TriggersAndActionsUIPublicPluginStart } from '../../../triggers_actions_ui/public';
 import { createKibanaContextForPlugin } from '../hooks/use_kibana';
 import { InfraClientStartDeps } from '../types';
 import { HeaderActionMenuProvider } from '../utils/header_action_menu_provider';
 import { NavigationWarningPromptProvider } from '../utils/navigation_warning_prompt';
 import { TriggersActionsProvider } from '../utils/triggers_actions_context';
-import { Storage } from '../../../../../src/plugins/kibana_utils/public';
 
 export const CommonInfraProviders: React.FC<{
   appName: string;

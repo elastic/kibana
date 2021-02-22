@@ -4,14 +4,9 @@
     "mocks.ts",
     "typings/**/*",
     "tasks/**/*",
-    "plugins/apm/**/*",
     "plugins/case/**/*",
     "plugins/lists/**/*",
-    "plugins/logstash/**/*",
-    "plugins/monitoring/**/*",
     "plugins/security_solution/**/*",
-    "plugins/xpack_legacy/**/*",
-    "plugins/drilldowns/url_drilldown/**/*"
   ],
   "exclude": [
     "test/**/*",
@@ -62,6 +57,7 @@
     { "path": "../src/plugins/usage_collection/tsconfig.json" },
     { "path": "./plugins/actions/tsconfig.json" },
     { "path": "./plugins/alerts/tsconfig.json" },
+    { "path": "./plugins/apm/tsconfig.json" },
     { "path": "./plugins/beats_management/tsconfig.json" },
     { "path": "./plugins/canvas/tsconfig.json" },
     { "path": "./plugins/cloud/tsconfig.json" },
@@ -70,6 +66,7 @@
     { "path": "./plugins/data_enhanced/tsconfig.json" },
     { "path": "./plugins/dashboard_mode/tsconfig.json" },
     { "path": "./plugins/discover_enhanced/tsconfig.json" },
+    { "path": "./plugins/drilldowns/url_drilldown/tsconfig.json" },
     { "path": "./plugins/embeddable_enhanced/tsconfig.json" },
     { "path": "./plugins/encrypted_saved_objects/tsconfig.json" },
     { "path": "./plugins/enterprise_search/tsconfig.json" },
@@ -87,9 +84,11 @@
     { "path": "./plugins/lens/tsconfig.json" },
     { "path": "./plugins/license_management/tsconfig.json" },
     { "path": "./plugins/licensing/tsconfig.json" },
+    { "path": "./plugins/logstash/tsconfig.json" },
     { "path": "./plugins/maps_legacy_licensing/tsconfig.json" },
     { "path": "./plugins/maps/tsconfig.json" },
     { "path": "./plugins/ml/tsconfig.json" },
+    { "path": "./plugins/monitoring/tsconfig.json" },
     { "path": "./plugins/observability/tsconfig.json" },
     { "path": "./plugins/osquery/tsconfig.json" },
     { "path": "./plugins/painless_lab/tsconfig.json" },
@@ -113,6 +112,7 @@
     { "path": "./plugins/remote_clusters/tsconfig.json" },
     { "path": "./plugins/cross_cluster_replication/tsconfig.json"},
     { "path": "./plugins/index_lifecycle_management/tsconfig.json"},
-    { "path": "./plugins/uptime/tsconfig.json" }
+    { "path": "./plugins/uptime/tsconfig.json" },
+    { "path": "./plugins/xpack_legacy/tsconfig.json" }
   ]
 }

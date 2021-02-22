@@ -103,6 +103,8 @@ export interface SearchSourceFields {
   searchAfter?: EsQuerySearchAfter;
   timeout?: string;
   terminate_after?: number;
+
+  parent?: SearchSourceFields;
 }
 
 export interface SearchSourceOptions {
