@@ -13,7 +13,7 @@ export default function ({ loadTestFile, getService, getPageObjects }: FtrProvid
   const PageObjects = getPageObjects(['common']);
   const searchSessions = getService('searchSessions');
 
-  describe('async search', function () {
+  describe('Discover', function () {
     this.tags('ciGroup3');
 
     before(async () => {
