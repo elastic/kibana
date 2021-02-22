@@ -7,7 +7,9 @@ echo " -> building and extracting OSS Kibana distributable for use in functional
 node scripts/build --debug --oss
 
 echo " -> shipping metrics from build to ci-stats"
-node scripts/ship_ci_stats --metrics target/optimizer_bundle_metrics.json
+node scripts/ship_ci_stats \
+  --metrics target/optimizer_bundle_metrics.json \
+  --metrics packages/kbn-ui-shared-deps/target/metrics.json
 
 linuxBuild="$(find "$KIBANA_DIR/target" -name 'kibana-*-linux-x86_64.tar.gz')"
 installDir="$PARENT_DIR/install/kibana"

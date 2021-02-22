@@ -359,11 +359,28 @@
           },
           "threshold_result": {
             "properties": {
+              "terms": {
+                "properties": {
+                  "field": {
+                    "type": "keyword"
+                  },
+                  "value": {
+                    "type": "keyword"
+                  }
+                }
+              },
+              "cardinality": {
+                "properties": {
+                  "field": {
+                    "type": "keyword"
+                  },
+                  "value": {
+                    "type": "long"
+                  }
+                }
+              },
               "count": {
                 "type": "long"
-              },
-              "value": {
-                "type": "keyword"
               }
             }
           },
