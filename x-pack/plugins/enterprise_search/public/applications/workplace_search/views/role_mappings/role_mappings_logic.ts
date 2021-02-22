@@ -8,9 +8,9 @@
 import { kea, MakeLogicType } from 'kea';
 
 import http from 'shared/http';
-import { IFlashMessagesProps } from 'shared/types';
 import routes from 'workplace_search/routes';
 
+import { clearFlashMessages, flashAPIErrors } from '../../../shared/flash_messages';
 import { KibanaLogic } from '../../../shared/kibana';
 import { ANY_AUTH_PROVIDER } from '../../../shared/role_mapping/constants';
 import { ROLE_MAPPINGS_PATH } from '../../routes';
@@ -21,7 +21,6 @@ const DELETE_MESSAGE =
 const DEFAULT_GROUP_NAME = 'Default';
 
 interface RoleMappingsServerDetails {
-  flashMessages?: IFlashMessagesProps;
   multipleAuthProvidersConfig: boolean;
   roleMappings: WSRoleMapping[];
 }
@@ -38,7 +37,6 @@ interface RoleMappingServerDetails {
 interface RoleMappingsActions {
   setRoleMappingsData(data: RoleMappingsServerDetails): RoleMappingsServerDetails;
   setRoleMappingData(data: RoleMappingServerDetails): RoleMappingServerDetails;
-  setFlashMessages(flashMessages: IFlashMessagesProps): { flashMessages: IFlashMessagesProps };
   handleRoleChange(roleType: Role): { roleType: Role };
   handleAllGroupsSelectionChange(selected: boolean): { selected: boolean };
   handleAttributeSelectorChange(
@@ -69,7 +67,6 @@ interface RoleMappingsValues {
   attributeName: string;
   dataLoading: boolean;
   multipleAuthProvidersConfig: boolean;
-  flashMessages: IFlashMessagesProps;
   availableGroups: RoleGroup[];
   selectedGroups: Set<string>;
   includeInAllGroups: boolean;
@@ -85,7 +82,6 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
   actions: {
     setRoleMappingsData: (data: RoleMappingsServerDetails) => data,
     setRoleMappingData: (data: RoleMappingServerDetails) => data,
-    setFlashMessages: (flashMessages: IFlashMessagesProps) => ({ flashMessages }),
     handleRoleChange: (roleType: Role) => ({ roleType }),
     handleGroupSelectionChange: (groupId: string, selected: boolean) => ({ groupId, selected }),
     handleAllGroupsSelectionChange: (selected: boolean) => ({ selected }),
@@ -108,14 +104,6 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
         setRoleMappingsData: () => false,
         setRoleMappingData: () => false,
         resetState: () => true,
-      },
-    ],
-    flashMessages: [
-      {},
-      {
-        setRoleMappingsData: (_, { flashMessages }) => flashMessages || {},
-        setFlashMessages: (_, { flashMessages }) => flashMessages,
-        resetState: () => ({}),
       },
     ],
     roleMappings: [
@@ -243,7 +231,7 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
     initializeRoleMappings: () => {
       http(routes.fritoPieOrganizationRoleMappingsPath())
         .then(({ data }) => actions.setRoleMappingsData(data))
-        .catch(({ response }) => actions.setFlashMessages({ error: response.data.errors }));
+        .catch(({ response }) => flashAPIErrors({ error: response.data.errors }));
     },
     initializeRoleMapping: ({ roleId }) => {
       const { navigateToUrl } = KibanaLogic.values;
@@ -257,7 +245,7 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
           if (response.status === 404) {
             navigateToUrl(ROLE_MAPPINGS_PATH);
           }
-          actions.setFlashMessages({ error: response.data.errors });
+          flashAPIErrors({ error: response.data.errors });
         });
     },
     handleDeleteMapping: () => {
@@ -272,7 +260,7 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
           .then(() => {
             navigateToUrl(ROLE_MAPPINGS_PATH);
           })
-          .catch(({ response }) => actions.setFlashMessages({ error: response.data.errors }));
+          .catch(({ response }) => flashAPIErrors({ error: response.data.errors }));
       }
     },
     handleSaveMapping: () => {
@@ -305,7 +293,10 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
         .then(() => {
           navigateToUrl(ROLE_MAPPINGS_PATH);
         })
-        .catch(({ response }) => actions.setFlashMessages({ error: response.data.errors }));
+        .catch(({ response }) => flashAPIErrors({ error: response.data.errors }));
+    },
+    resetState: () => {
+      clearFlashMessages();
     },
   }),
 });
