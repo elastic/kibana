@@ -22,9 +22,11 @@ export function initGetCasesStatusApi({ caseService, router }: RouteDeps) {
       try {
         const client = context.core.savedObjects.client;
 
-        const [openCases, inProgressCases, closedCases] = await Promise.all([
+        const [allCases, openCases, inProgressCases, closedCases] = await Promise.all([
           ...caseStatuses.map((status) => {
-            const statusQuery = constructQueryOptions({ status });
+            const statusQuery = constructQueryOptions({
+              status: status === 'all' ? undefined : status,
+            });
             return caseService.findCaseStatusStats({
               client,
               caseOptions: statusQuery.case,
@@ -35,6 +37,7 @@ export function initGetCasesStatusApi({ caseService, router }: RouteDeps) {
 
         return response.ok({
           body: CasesStatusResponseRt.encode({
+            count_all_cases: allCases,
             count_open_cases: openCases,
             count_in_progress_cases: inProgressCases,
             count_closed_cases: closedCases,
