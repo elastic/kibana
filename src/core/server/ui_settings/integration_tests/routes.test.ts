@@ -9,7 +9,7 @@
 import { schema } from '@kbn/config-schema';
 import * as kbnTestServer from '../../../test_helpers/kbn_server';
 
-describe.each(Array.from(new Array(200), (_, index) => index))('ui settings service #%d', () => {
+describe('ui settings service', () => {
   describe('routes', () => {
     let root: ReturnType<typeof kbnTestServer.createRoot>;
     beforeAll(async () => {
