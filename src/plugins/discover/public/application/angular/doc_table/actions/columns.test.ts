@@ -42,19 +42,37 @@ describe('Test column actions', () => {
   test('getStateColumnActions with columns and sort in state', () => {
     const setAppState = jest.fn();
     const actions = getStateColumnAction(
-      { columns: ['first'], sort: [['first', 'desc']] },
+      { columns: ['first', 'second'], sort: [['first', 'desc']] },
       setAppState
     );
 
     actions.onAddColumn('_score');
     expect(setAppState).toHaveBeenCalledWith({
-      columns: ['first', '_score'],
+      columns: ['first', 'second', '_score'],
       sort: [['first', 'desc']],
     });
-    actions.onAddColumn('test');
+    setAppState.mockClear();
+    actions.onAddColumn('third');
     expect(setAppState).toHaveBeenCalledWith({
-      columns: ['first', '_score'],
+      columns: ['first', 'second', 'third'],
       sort: [['first', 'desc']],
+    });
+    setAppState.mockClear();
+    actions.onRemoveColumn('first');
+    expect(setAppState).toHaveBeenCalledWith({
+      columns: ['second'],
+      sort: [],
+    });
+    setAppState.mockClear();
+    actions.onSetColumns(['first', 'second', 'third']);
+    expect(setAppState).toHaveBeenCalledWith({
+      columns: ['first', 'second', 'third'],
+    });
+    setAppState.mockClear();
+
+    actions.onMoveColumn('second', 0);
+    expect(setAppState).toHaveBeenCalledWith({
+      columns: ['second', 'first'],
     });
   });
 });
