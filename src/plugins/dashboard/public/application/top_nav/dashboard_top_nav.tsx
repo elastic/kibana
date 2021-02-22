@@ -19,12 +19,7 @@ import {
   openAddPanelFlyout,
   ViewMode,
 } from '../../services/embeddable';
-import {
-  getSavedObjectFinder,
-  SavedObjectSaveOpts,
-  SaveResult,
-  showSaveModal,
-} from '../../services/saved_objects';
+import { getSavedObjectFinder, SaveResult, showSaveModal } from '../../services/saved_objects';
 
 import { NavAction } from '../../types';
 import { DashboardSavedObject } from '../..';
@@ -48,6 +43,7 @@ import { OverlayRef } from '../../../../../core/public';
 import { getNewDashboardTitle, unsavedChangesBadge } from '../../dashboard_strings';
 import { DASHBOARD_PANELS_UNSAVED_ID } from '../lib/dashboard_panel_storage';
 import { DashboardContainer } from '..';
+import { SavedDashboardSaveOpts } from '../lib/save_dashboard';
 
 export interface DashboardTopNavState {
   chromeIsVisible: boolean;
@@ -64,13 +60,15 @@ export interface DashboardTopNavProps {
   timefilter: TimefilterContract;
   indexPatterns: IndexPattern[];
   redirectTo: DashboardRedirect;
-  unsavedChanges?: boolean;
+  unsavedChanges: boolean;
+  clearUnsavedChanges: () => void;
   lastDashboardId?: string;
   viewMode: ViewMode;
 }
 
 export function DashboardTopNav({
   dashboardStateManager,
+  clearUnsavedChanges,
   dashboardContainer,
   lastDashboardId,
   unsavedChanges,
@@ -98,6 +96,7 @@ export function DashboardTopNav({
   } = useKibana<DashboardAppServices>().services;
 
   const [state, setState] = useState<DashboardTopNavState>({ chromeIsVisible: false });
+  const [isSaveInProgress, setIsSaveInProgress] = useState(false);
 
   useEffect(() => {
     const visibleSubscription = chrome.getIsVisible$().subscribe((chromeIsVisible) => {
@@ -177,7 +176,7 @@ export function DashboardTopNav({
       }
 
       function discardChanges() {
-        dashboardStateManager.resetState();
+        dashboardStateManager.resetState(true);
         dashboardStateManager.clearUnsavedPanels();
 
         // We need to do a hard reset of the timepicker. appState will not reload like
@@ -222,7 +221,7 @@ export function DashboardTopNav({
    * @resolved {String} - The id of the doc
    */
   const save = useCallback(
-    async (saveOptions: SavedObjectSaveOpts) => {
+    async (saveOptions: SavedDashboardSaveOpts) => {
       return saveDashboard(angular.toJson, timefilter, dashboardStateManager, saveOptions)
         .then(function (id) {
           if (id) {
@@ -239,7 +238,6 @@ export function DashboardTopNav({
               redirectTo({ destination: 'dashboard', id, useReplace: !lastDashboardId });
             } else {
               chrome.docTitle.change(dashboardStateManager.savedDashboard.lastSavedTitle);
-              dashboardStateManager.switchViewMode(ViewMode.VIEW);
             }
           }
           return { id };
@@ -355,7 +353,8 @@ export function DashboardTopNav({
       }
     }
 
-    save({}).then((response: SaveResult) => {
+    setIsSaveInProgress(true);
+    save({ stayInEditMode: true }).then((response: SaveResult) => {
       // If the save wasn't successful, put the original values back.
       if (!(response as { id: string }).id) {
         dashboardStateManager.setTitle(currentTitle);
@@ -364,10 +363,13 @@ export function DashboardTopNav({
         if (savedObjectsTagging) {
           dashboardStateManager.setTags(currentTags);
         }
+      } else {
+        clearUnsavedChanges();
       }
+      setIsSaveInProgress(false);
       return response;
     });
-  }, [save, savedObjectsTagging, dashboardStateManager]);
+  }, [save, savedObjectsTagging, dashboardStateManager, clearUnsavedChanges]);
 
   const runClone = useCallback(() => {
     const currentTitle = dashboardStateManager.getTitle();
@@ -467,6 +469,7 @@ export function DashboardTopNav({
       hideWriteControls: dashboardCapabilities.hideWriteControls,
       isNewDashboard: !savedDashboard.id,
       isDirty: dashboardStateManager.isDirty,
+      isSaveInProgress,
     });
 
     const badges = unsavedChanges

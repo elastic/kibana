@@ -93,7 +93,7 @@ export function ServiceOverviewDependenciesTable({ serviceName }: Props) {
       name: i18n.translate(
         'xpack.apm.serviceOverview.dependenciesTableColumnLatency',
         {
-          defaultMessage: 'Latency',
+          defaultMessage: 'Latency (avg.)',
         }
       ),
       width: px(unit * 10),

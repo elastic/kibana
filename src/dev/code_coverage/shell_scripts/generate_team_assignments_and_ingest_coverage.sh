@@ -41,9 +41,10 @@ for x in functional jest; do
     # Need to override COVERAGE_INGESTION_KIBANA_ROOT since json file has original intake worker path
     export COVERAGE_INGESTION_KIBANA_ROOT=/dev/shm/workspace/kibana
   fi
-
-  node scripts/ingest_coverage.js --verbose --path ${COVERAGE_SUMMARY_FILE} --vcsInfoPath ./VCS_INFO.txt --teamAssignmentsPath $TEAM_ASSIGN_PATH
+  # running in background to speed up ingestion
+  node scripts/ingest_coverage.js --verbose --path ${COVERAGE_SUMMARY_FILE} --vcsInfoPath ./VCS_INFO.txt --teamAssignmentsPath $TEAM_ASSIGN_PATH &
 done
+wait
 
 echo "###  Ingesting Code Coverage - Complete"
 echo ""
