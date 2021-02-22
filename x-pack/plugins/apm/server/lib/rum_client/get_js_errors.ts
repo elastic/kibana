@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { mergeProjection } from '../../projections/util/merge_projection';
+import { mergeProjection } from './merge_projection';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
-import { getRumErrorsProjection } from '../../projections/rum_page_load_transactions';
+import { getRumErrorsProjection } from './projections';
 import {
   ERROR_EXC_MESSAGE,
   ERROR_EXC_TYPE,

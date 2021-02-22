@@ -6,8 +6,8 @@
  */
 
 import { TRANSACTION_DURATION } from '../../../common/elasticsearch_fieldnames';
-import { getRumPageLoadTransactionsProjection } from '../../projections/rum_page_load_transactions';
-import { mergeProjection } from '../../projections/util/merge_projection';
+import { getRumPageLoadTransactionsProjection } from './projections';
+import { mergeProjection } from './merge_projection';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
 
 export const MICRO_TO_SEC = 1000000;

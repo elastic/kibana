@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { mergeProjection } from '../../projections/util/merge_projection';
+import { mergeProjection } from './merge_projection';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
-import { getRumPageLoadTransactionsProjection } from '../../projections/rum_page_load_transactions';
+import { getRumPageLoadTransactionsProjection } from './projections';
 import {
   TRANSACTION_DURATION,
   TRANSACTION_URL,

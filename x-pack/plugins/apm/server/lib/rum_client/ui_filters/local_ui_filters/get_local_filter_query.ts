@@ -6,8 +6,8 @@
  */
 
 import { omit } from 'lodash';
-import { mergeProjection } from '../../../../projections/util/merge_projection';
-import { Projection } from '../../../../projections/typings';
+import { mergeProjection } from '../../merge_projection';
+import { Projection } from '../../projections';
 import { UIFilters } from '../../../../../typings/ui_filters';
 import { getEsFilter } from '../../../helpers/convert_ui_filters/get_es_filter';
 import { localUIFilters } from './config';

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { getRumPageLoadTransactionsProjection } from '../../projections/rum_page_load_transactions';
-import { mergeProjection } from '../../projections/util/merge_projection';
+import { getRumPageLoadTransactionsProjection } from './projections';
+import { mergeProjection } from './merge_projection';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import {
   CLS_FIELD,

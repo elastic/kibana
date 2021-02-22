@@ -28,8 +28,10 @@ import { getWebCoreVitals } from '../lib/rum_client/get_web_core_vitals';
 import { hasRumData } from '../lib/rum_client/has_rum_data';
 import { getLocalUIFilters } from '../lib/rum_client/ui_filters/local_ui_filters';
 import { localUIFilterNames } from '../lib/rum_client/ui_filters/local_ui_filters/config';
-import { getRumPageLoadTransactionsProjection } from '../projections/rum_page_load_transactions';
-import { Projection } from '../projections/typings';
+import {
+  getRumPageLoadTransactionsProjection,
+  Projection,
+} from '../lib/rum_client/projections';
 import { createRoute } from './create_route';
 import { rangeRt, uiFiltersRt } from './default_api_types';
 import { APMRequestHandlerContext } from './typings';

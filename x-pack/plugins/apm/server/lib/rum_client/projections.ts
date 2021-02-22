@@ -5,15 +5,32 @@
  * 2.0.
  */
 
-import { Setup, SetupTimeRange } from '../../server/lib/helpers/setup_request';
+import { Setup, SetupTimeRange } from '../../lib/helpers/setup_request';
 import {
   AGENT_NAME,
   TRANSACTION_TYPE,
   SERVICE_LANGUAGE_NAME,
-} from '../../common/elasticsearch_fieldnames';
-import { rangeQuery } from '../../common/utils/queries';
-import { ProcessorEvent } from '../../common/processor_event';
-import { TRANSACTION_PAGE_LOAD } from '../../common/transaction_types';
+} from '../../../common/elasticsearch_fieldnames';
+import { rangeQuery } from '../../../common/utils/queries';
+import { ProcessorEvent } from '../../../common/processor_event';
+import { TRANSACTION_PAGE_LOAD } from '../../../common/transaction_types';
+import {
+  AggregationOptionsByType,
+  AggregationInputMap,
+  ESSearchBody,
+} from '../../../../../typings/elasticsearch';
+import { APMEventESSearchRequest } from '../helpers/create_es_client/create_apm_event_client';
+
+export type Projection = Omit<APMEventESSearchRequest, 'body'> & {
+  body: Omit<ESSearchBody, 'aggs'> & {
+    aggs?: {
+      [key: string]: {
+        terms: AggregationOptionsByType['terms'] & { field: string };
+        aggs?: AggregationInputMap;
+      };
+    };
+  };
+};
 
 export function getRumPageLoadTransactionsProjection({
   setup,

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { getRumPageLoadTransactionsProjection } from '../../projections/rum_page_load_transactions';
+import { getRumPageLoadTransactionsProjection } from './projections';
 import { ProcessorEvent } from '../../../common/processor_event';
-import { mergeProjection } from '../../projections/util/merge_projection';
+import { mergeProjection } from './merge_projection';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import {
   CLIENT_GEO_COUNTRY_ISO_CODE,

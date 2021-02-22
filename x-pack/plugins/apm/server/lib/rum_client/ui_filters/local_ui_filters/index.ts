@@ -7,7 +7,7 @@
 
 import { cloneDeep, orderBy } from 'lodash';
 import { UIFilters } from '../../../../../typings/ui_filters';
-import { Projection } from '../../../../projections/typings';
+import { Projection } from '../../projections';
 import { PromiseReturnType } from '../../../../../../observability/typings/common';
 import { getLocalFilterQuery } from './get_local_filter_query';
 import { Setup } from '../../../helpers/setup_request';

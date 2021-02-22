@@ -11,8 +11,8 @@ import {
   AggregationInputMap,
   ESSearchBody,
 } from '../../../../../../typings/elasticsearch';
-import { APMEventESSearchRequest } from '../../../lib/helpers/create_es_client/create_apm_event_client';
-import { Projection } from '../../typings';
+import { APMEventESSearchRequest } from '../../helpers/create_es_client/create_apm_event_client';
+import { Projection } from '../projections';
 
 type PlainObject = Record<string | number | symbol, any>;
 
