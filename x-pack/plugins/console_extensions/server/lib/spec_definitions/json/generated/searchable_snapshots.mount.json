@@ -2,7 +2,8 @@
   "searchable_snapshots.mount": {
     "url_params": {
       "master_timeout": "",
-      "wait_for_completion": "__flag__"
+      "wait_for_completion": "__flag__",
+      "storage": ""
     },
     "methods": [
       "POST"

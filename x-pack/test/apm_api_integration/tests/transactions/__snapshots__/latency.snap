@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`APM API tests trial apm_8.0.0 Transaction latency with a trial license when data is loaded when not defined environments seleted should return the correct anomaly boundaries 1`] = `
+exports[`APM API tests trial apm_8.0.0 Transaction latency with a trial license when data is loaded when not defined environment is selected should return the correct anomaly boundaries 1`] = `
 Array [
   Object {
     "x": 1607436000000,
@@ -30,7 +30,7 @@ Array [
 ]
 `;
 
-exports[`APM API tests trial apm_8.0.0 Transaction latency with a trial license when data is loaded with environment selected in uiFilters should return a non-empty anomaly series 1`] = `
+exports[`APM API tests trial apm_8.0.0 Transaction latency with a trial license when data is loaded with environment selected should return a non-empty anomaly series 1`] = `
 Array [
   Object {
     "x": 1607436000000,

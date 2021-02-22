@@ -61,7 +61,7 @@ export function registerQueryDefaultFieldRoutes({ router }: RouteDependencies) {
             return response.forbidden({ body: e });
           }
 
-          return response.internalError({ body: e });
+          throw e;
         }
       }
     )

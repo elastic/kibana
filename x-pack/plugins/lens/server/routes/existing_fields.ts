@@ -77,11 +77,9 @@ export async function existingFieldsRoute(setup: CoreSetup<PluginStartContract>,
           if (e.output.statusCode === 404) {
             return res.notFound({ body: e.output.payload.message });
           }
-          return res.internalError({ body: e.output.payload.message });
+          throw new Error(e.output.payload.message);
         } else {
-          return res.internalError({
-            body: Boom.internal(e.message || e.name),
-          });
+          throw e;
         }
       }
     }

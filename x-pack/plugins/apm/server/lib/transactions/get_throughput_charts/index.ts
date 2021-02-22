@@ -13,7 +13,7 @@ import {
   TRANSACTION_RESULT,
   TRANSACTION_TYPE,
 } from '../../../../common/elasticsearch_fieldnames';
-import { rangeFilter } from '../../../../common/utils/range_filter';
+import { environmentQuery, rangeQuery } from '../../../../common/utils/queries';
 import {
   getDocumentTypeFilterForAggregatedTransactions,
   getProcessorEventForAggregatedTransactions,
@@ -28,6 +28,7 @@ export type ThroughputChartsResponse = PromiseReturnType<
 >;
 
 function searchThroughput({
+  environment,
   serviceName,
   transactionType,
   transactionName,
@@ -35,6 +36,7 @@ function searchThroughput({
   searchAggregatedTransactions,
   intervalString,
 }: {
+  environment?: string;
   serviceName: string;
   transactionType: string;
   transactionName: string | undefined;
@@ -42,16 +44,17 @@ function searchThroughput({
   searchAggregatedTransactions: boolean;
   intervalString: string;
 }) {
-  const { start, end, apmEventClient } = setup;
+  const { esFilter, start, end, apmEventClient } = setup;
 
   const filter: ESFilter[] = [
     { term: { [SERVICE_NAME]: serviceName } },
-    { range: rangeFilter(start, end) },
+    { term: { [TRANSACTION_TYPE]: transactionType } },
     ...getDocumentTypeFilterForAggregatedTransactions(
       searchAggregatedTransactions
     ),
-    { term: { [TRANSACTION_TYPE]: transactionType } },
-    ...setup.esFilter,
+    ...rangeQuery(start, end),
+    ...environmentQuery(environment),
+    ...esFilter,
   ];
 
   if (transactionName) {
@@ -91,12 +94,14 @@ function searchThroughput({
 }
 
 export async function getThroughputCharts({
+  environment,
   serviceName,
   transactionType,
   transactionName,
   setup,
   searchAggregatedTransactions,
 }: {
+  environment?: string;
   serviceName: string;
   transactionType: string;
   transactionName: string | undefined;
@@ -107,6 +112,7 @@ export async function getThroughputCharts({
     const { bucketSize, intervalString } = getBucketSize(setup);
 
     const response = await searchThroughput({
+      environment,
       serviceName,
       transactionType,
       transactionName,
