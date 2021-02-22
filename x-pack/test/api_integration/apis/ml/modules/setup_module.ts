@@ -277,7 +277,7 @@ export default ({ getService }: FtrProviderContext) => {
             jobId: 'pf7_log-entry-categories-count',
             jobState: JOB_STATE.CLOSED,
             datafeedState: DATAFEED_STATE.STOPPED,
-            modelMemoryLimit: '26mb',
+            modelMemoryLimit: '41mb',
           },
         ],
         searches: [] as string[],

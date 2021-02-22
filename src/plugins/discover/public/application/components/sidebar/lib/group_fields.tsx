@@ -64,7 +64,9 @@ export function groupFields(
     } else if (field.type !== '_source') {
       // do not show unmapped fields unless explicitly specified
       // do not add subfields to this list
-      if ((field.type !== 'unknown' || showUnmappedFields) && !isSubfield) {
+      if (useNewFieldsApi && (field.type !== 'unknown' || showUnmappedFields) && !isSubfield) {
+        result.unpopular.push(field);
+      } else if (!useNewFieldsApi) {
         result.unpopular.push(field);
       }
     }

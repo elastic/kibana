@@ -76,6 +76,7 @@ import {
 } from '../../../../src/plugins/telemetry/server';
 import { licenseService } from './lib/license/license';
 import { PolicyWatcher } from './endpoint/lib/policy/license_watch';
+import { securitySolutionTimelineEqlSearchStrategyProvider } from './search_strategy/timeline/eql';
 
 export interface SetupPlugins {
   alerts: AlertingSetup;
@@ -114,6 +115,14 @@ const securitySubPlugins = [
   `${APP_ID}:${SecurityPageName.timelines}`,
   `${APP_ID}:${SecurityPageName.case}`,
   `${APP_ID}:${SecurityPageName.administration}`,
+];
+
+const caseSavedObjects = [
+  'cases',
+  'cases-comments',
+  'cases-sub-case',
+  'cases-configure',
+  'cases-user-actions',
 ];
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
@@ -189,9 +198,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     );
     registerEndpointRoutes(router, endpointContext);
     registerLimitedConcurrencyRoutes(core);
-    registerResolverRoutes(router, endpointContext);
+    registerResolverRoutes(router);
     registerPolicyRoutes(router, endpointContext);
-    registerTrustedAppsRoutes(router, endpointContext);
+    registerTrustedAppsRoutes(router);
     registerDownloadArtifactRoute(router, endpointContext, this.artifactsCache);
 
     plugins.features.registerKibanaFeature({
@@ -215,10 +224,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           savedObject: {
             all: [
               'alert',
-              'cases',
-              'cases-comments',
-              'cases-configure',
-              'cases-user-actions',
+              ...caseSavedObjects,
               'exception-list',
               'exception-list-agnostic',
               ...savedObjectTypes,
@@ -241,10 +247,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
             all: [],
             read: [
               'config',
-              'cases',
-              'cases-comments',
-              'cases-configure',
-              'cases-user-actions',
+              ...caseSavedObjects,
               'exception-list',
               'exception-list-agnostic',
               ...savedObjectTypes,
@@ -302,6 +305,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       const securitySolutionTimelineSearchStrategy = securitySolutionTimelineSearchStrategyProvider(
         depsStart.data
       );
+      const securitySolutionTimelineEqlSearchStrategy = securitySolutionTimelineEqlSearchStrategyProvider(
+        depsStart.data
+      );
       const securitySolutionIndexFields = securitySolutionIndexFieldsProvider();
 
       plugins.data.search.registerSearchStrategy(
@@ -315,6 +321,10 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       plugins.data.search.registerSearchStrategy(
         'securitySolutionTimelineSearchStrategy',
         securitySolutionTimelineSearchStrategy
+      );
+      plugins.data.search.registerSearchStrategy(
+        'securitySolutionTimelineEqlSearchStrategy',
+        securitySolutionTimelineEqlSearchStrategy
       );
     });
 

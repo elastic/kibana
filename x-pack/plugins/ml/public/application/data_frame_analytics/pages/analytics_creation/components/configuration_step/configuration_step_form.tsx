@@ -8,6 +8,7 @@
 import React, { FC, Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import {
   EuiBadge,
+  EuiCallOut,
   EuiComboBox,
   EuiComboBoxOptionOption,
   EuiFormRow,
@@ -19,6 +20,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { debounce } from 'lodash';
 
+import { FormattedMessage } from '@kbn/i18n/react';
 import { newJobCapsService } from '../../../../../services/new_job_capabilities_service';
 import { useMlContext } from '../../../../../contexts/ml';
 
@@ -61,6 +63,8 @@ const requiredFieldsErrorText = i18n.translate(
       'At least one field must be included in the analysis in addition to the dependent variable.',
   }
 );
+
+const maxRuntimeFieldsDisplayCount = 5;
 
 export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
   actions,
@@ -314,6 +318,15 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
     };
   }, [jobType, dependentVariable, trainingPercent, JSON.stringify(includes), jobConfigQueryString]);
 
+  const unsupportedRuntimeFields = useMemo(
+    () =>
+      currentIndexPattern.fields
+        .getAll()
+        .filter((f) => f.runtimeField)
+        .map((f) => `'${f.displayName}'`),
+    [currentIndexPattern.fields]
+  );
+
   return (
     <Fragment>
       <Messages messages={requestMessages} />
@@ -445,6 +458,36 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
       >
         <Fragment />
       </EuiFormRow>
+      {Array.isArray(unsupportedRuntimeFields) && unsupportedRuntimeFields.length > 0 && (
+        <>
+          <EuiCallOut size="s" color="warning">
+            <FormattedMessage
+              id="xpack.ml.dataframe.analytics.create.unsupportedRuntimeFieldsCallout"
+              defaultMessage="The runtime {runtimeFieldsCount, plural, one {field} other {fields}} {unsupportedRuntimeFields} {extraCountMsg} are not supported for analysis."
+              values={{
+                runtimeFieldsCount: unsupportedRuntimeFields.length,
+                extraCountMsg:
+                  unsupportedRuntimeFields.length - maxRuntimeFieldsDisplayCount > 0 ? (
+                    <FormattedMessage
+                      id="xpack.ml.dataframe.analytics.create.extraUnsupportedRuntimeFieldsMsg"
+                      defaultMessage="and {count} more"
+                      values={{
+                        count: unsupportedRuntimeFields.length - maxRuntimeFieldsDisplayCount,
+                      }}
+                    />
+                  ) : (
+                    ''
+                  ),
+                unsupportedRuntimeFields: unsupportedRuntimeFields
+                  .slice(0, maxRuntimeFieldsDisplayCount)
+                  .join(', '),
+              }}
+            />
+          </EuiCallOut>
+          <EuiSpacer />
+        </>
+      )}
+
       <AnalysisFieldsTable
         dependentVariable={dependentVariable}
         includes={includes}

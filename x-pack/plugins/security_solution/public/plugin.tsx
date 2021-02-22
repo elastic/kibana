@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Subject, Subscription } from 'rxjs';
 import { pluck } from 'rxjs/operators';
 import {
   PluginSetup,
@@ -19,6 +19,7 @@ import {
 } from './types';
 import {
   AppMountParameters,
+  AppUpdater,
   CoreSetup,
   CoreStart,
   PluginInitializerContext,
@@ -46,6 +47,7 @@ import {
 } from '../common/constants';
 
 import { SecurityPageName } from './app/types';
+import { registerSearchLinks, getSearchDeepLinksAndKeywords } from './app/search';
 import { manageOldSiemRoutes } from './helpers';
 import {
   OVERVIEW,
@@ -73,8 +75,13 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   constructor(initializerContext: PluginInitializerContext) {
     this.kibanaVersion = initializerContext.env.packageInfo.version;
   }
+  private detectionsUpdater$ = new Subject<AppUpdater>();
+  private hostsUpdater$ = new Subject<AppUpdater>();
+  private networkUpdater$ = new Subject<AppUpdater>();
+  private caseUpdater$ = new Subject<AppUpdater>();
 
   private storage = new Storage(localStorage);
+  private licensingSubscription: Subscription | null = null;
 
   /**
    * Lazily instantiated subPlugins.
@@ -184,6 +191,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       euiIconType: APP_ICON_SOLUTION,
       category: DEFAULT_APP_CATEGORIES.security,
       appRoute: APP_DETECTIONS_PATH,
+      updater$: this.detectionsUpdater$,
       mount: async (params: AppMountParameters) => {
         const [coreStart, startPlugins] = await core.getStartServices();
         const { detections: subPlugin } = await this.subPlugins();
@@ -206,6 +214,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       euiIconType: APP_ICON_SOLUTION,
       category: DEFAULT_APP_CATEGORIES.security,
       appRoute: APP_HOSTS_PATH,
+      updater$: this.hostsUpdater$,
       mount: async (params: AppMountParameters) => {
         const [coreStart, startPlugins] = await core.getStartServices();
         const { hosts: subPlugin } = await this.subPlugins();
@@ -227,6 +236,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       euiIconType: APP_ICON_SOLUTION,
       category: DEFAULT_APP_CATEGORIES.security,
       appRoute: APP_NETWORK_PATH,
+      updater$: this.networkUpdater$,
       mount: async (params: AppMountParameters) => {
         const [coreStart, startPlugins] = await core.getStartServices();
         const { network: subPlugin } = await this.subPlugins();
@@ -248,6 +258,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       euiIconType: APP_ICON_SOLUTION,
       category: DEFAULT_APP_CATEGORIES.security,
       appRoute: APP_TIMELINES_PATH,
+      meta: getSearchDeepLinksAndKeywords(SecurityPageName.timelines),
       mount: async (params: AppMountParameters) => {
         const [coreStart, startPlugins] = await core.getStartServices();
         const { timelines: subPlugin } = await this.subPlugins();
@@ -269,6 +280,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       euiIconType: APP_ICON_SOLUTION,
       category: DEFAULT_APP_CATEGORIES.security,
       appRoute: APP_CASES_PATH,
+      updater$: this.caseUpdater$,
       mount: async (params: AppMountParameters) => {
         const [coreStart, startPlugins] = await core.getStartServices();
         const { cases: subPlugin } = await this.subPlugins();
@@ -290,6 +302,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       euiIconType: APP_ICON_SOLUTION,
       category: DEFAULT_APP_CATEGORIES.security,
       appRoute: APP_MANAGEMENT_PATH,
+      meta: getSearchDeepLinksAndKeywords(SecurityPageName.administration),
       mount: async (params: AppMountParameters) => {
         const [coreStart, startPlugins] = await core.getStartServices();
         const { management: managementSubPlugin } = await this.subPlugins();
@@ -356,11 +369,31 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       });
     }
     licenseService.start(plugins.licensing.license$);
-
+    const licensing = licenseService.getLicenseInformation$();
+    /**
+     * Register searchDeepLinks and pass an appUpdater for each subPlugin, to change searchDeepLinks as needed when licensing changes.
+     */
+    if (licensing !== null) {
+      this.licensingSubscription = licensing.subscribe((currentLicense) => {
+        if (currentLicense.type !== undefined) {
+          registerSearchLinks(SecurityPageName.network, this.networkUpdater$, currentLicense.type);
+          registerSearchLinks(
+            SecurityPageName.detections,
+            this.detectionsUpdater$,
+            currentLicense.type
+          );
+          registerSearchLinks(SecurityPageName.hosts, this.hostsUpdater$, currentLicense.type);
+          registerSearchLinks(SecurityPageName.case, this.caseUpdater$, currentLicense.type);
+        }
+      });
+    }
     return {};
   }
 
   public stop() {
+    if (this.licensingSubscription !== null) {
+      this.licensingSubscription.unsubscribe();
+    }
     return {};
   }
 
