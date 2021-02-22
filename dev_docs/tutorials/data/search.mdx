@@ -69,7 +69,7 @@ Note: The `data` plugin contains services to help you generate the `query` and `
 
 The `search` method can throw several types of errors. 
 
-If you want to display them to a user, within the context of an application, you may use the helper method provided on the `data.search` service. Those errors will be shown in a toast message, using the `core.notifications` service.  
+To display the errors in the context of an application, use the helper method provided on the `data.search` service. These errors are shown in a toast message, using the `core.notifications` service.  
 
 ```ts
 data.search.search(req).subscribe({
