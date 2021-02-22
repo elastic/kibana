@@ -24,7 +24,7 @@ export { transformConnectorComment } from './case';
 
 /**
  * Separator used for creating a json parsable array from the mustache syntax that the alerting framework
- * sends. I'm exposing this so the tests can correctly build the expected format.
+ * sends.
  */
 export const separator = '__SEPARATOR__';
 
