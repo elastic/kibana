@@ -129,7 +129,7 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
     setState((s) => ({ ...s, isLoading: true }));
 
     core.http
-      .post(`/api/lens/index_stats/${indexPattern.title}/field`, {
+      .post(`/api/lens/index_stats/${indexPattern.id}/field`, {
         body: JSON.stringify({
           dslQuery: esQuery.buildEsQuery(
             indexPattern as IIndexPattern,
@@ -139,8 +139,7 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
           ),
           fromDate: dateRange.fromDate,
           toDate: dateRange.toDate,
-          timeFieldName: indexPattern.timeFieldName,
-          field,
+          fieldName: field.name,
         }),
       })
       .then((results: FieldStatsResponse<string | number>) => {
