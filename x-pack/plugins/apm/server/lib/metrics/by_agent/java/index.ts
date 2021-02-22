@@ -29,56 +29,22 @@ export function getJavaMetricsCharts({
   serviceNodeName?: string;
 }) {
   return withApmSpan('get_java_system_metric_charts', async () => {
+    const options = {
+      environment,
+      kuery,
+      setup,
+      serviceName,
+      serviceNodeName,
+    };
+
     const charts = await Promise.all([
-      getCPUChartData({
-        environment,
-        kuery,
-        setup,
-        serviceName,
-        serviceNodeName,
-      }),
-      getMemoryChartData({
-        environment,
-        kuery,
-        setup,
-        serviceName,
-        serviceNodeName,
-      }),
-      getHeapMemoryChart({
-        environment,
-        kuery,
-        setup,
-        serviceName,
-        serviceNodeName,
-      }),
-      getNonHeapMemoryChart({
-        environment,
-        kuery,
-        setup,
-        serviceName,
-        serviceNodeName,
-      }),
-      getThreadCountChart({
-        environment,
-        kuery,
-        setup,
-        serviceName,
-        serviceNodeName,
-      }),
-      getGcRateChart({
-        environment,
-        kuery,
-        setup,
-        serviceName,
-        serviceNodeName,
-      }),
-      getGcTimeChart({
-        environment,
-        kuery,
-        setup,
-        serviceName,
-        serviceNodeName,
-      }),
+      getCPUChartData(options),
+      getMemoryChartData(options),
+      getHeapMemoryChart(options),
+      getNonHeapMemoryChart(options),
+      getThreadCountChart(options),
+      getGcRateChart(options),
+      getGcTimeChart(options),
     ]);
 
     return { charts };
