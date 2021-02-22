@@ -70,7 +70,7 @@ describe('Curations', () => {
     expect(wrapper.find(Loading)).toHaveLength(1);
   });
 
-  it('calls loadEffect on page load', () => {
+  it('calls loadCurations on page load', () => {
     mount(<Curations />);
 
     expect(actions.loadCurations).toHaveBeenCalledTimes(1);
@@ -95,8 +95,6 @@ describe('Curations', () => {
       let wrapper: ReactWrapper;
 
       beforeAll(() => {
-        setMockValues(values);
-        setMockActions(actions);
         wrapper = mount(<CurationsTable />);
       });
 

@@ -135,7 +135,7 @@ describe('CurationsLogic', () => {
         confirmSpy.mockImplementation(jest.fn(() => true));
       });
 
-      it('should make an API call and set curations & meta state', async () => {
+      it('should make an API call and show a success message', async () => {
         http.delete.mockReturnValueOnce(Promise.resolve({}));
         mount();
         jest.spyOn(CurationsLogic.actions, 'loadCurations');
