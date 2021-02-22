@@ -31,6 +31,32 @@ export default function ({ getService }: FtrProviderContext) {
     before(() => esArchiver.load('auditbeat/uncommon_processes'));
     after(() => esArchiver.unload('auditbeat/uncommon_processes'));
 
+    it('should return an edge of length 1 when given a pagination of length 1', async () => {
+      const { body: UncommonProcesses } = await supertest
+        .post('/internal/search/securitySolutionSearchStrategy/')
+        .set('kbn-xsrf', 'true')
+        .send({
+          factoryQueryType: HostsQueries.uncommonProcesses,
+          sourceId: 'default',
+          timerange: {
+            interval: '12h',
+            to: TO,
+            from: FROM,
+          },
+          pagination: {
+            activePage: 0,
+            cursorStart: 0,
+            fakePossibleCount: 3,
+            querySize: 1,
+          },
+          defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+          docValueFields: [],
+          inspect: false,
+        })
+        .expect(200);
+      expect(UncommonProcesses.edges.length).to.be(1);
+    });
+
     describe('when given a pagination of length 2', () => {
       let response: null | UncommonProcessesResponse = null;
 
