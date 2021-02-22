@@ -32,6 +32,7 @@ import {
   comment,
   entry,
   entriesNested,
+  nestedEntryItem,
   createExceptionListItemSchema,
   exceptionListItemSchema,
   UpdateExceptionListItemSchema,
@@ -173,16 +174,31 @@ export const filterExceptionItems = (
 ): Array<ExceptionListItemSchema | CreateExceptionListItemSchema> => {
   return exceptions.reduce<Array<ExceptionListItemSchema | CreateExceptionListItemSchema>>(
     (acc, exception) => {
-      const entries = exception.entries.filter((t) => {
-        const [validatedEntry] = validate(t, entry);
-        const [validatedNestedEntry] = validate(t, entriesNested);
+      const entries = exception.entries.reduce<BuilderEntry[]>((nestedAcc, singleEntry) => {
+        if (singleEntry.type === 'nested') {
+          const nestedEntriesArray = singleEntry.entries.filter((singleNestedEntry) => {
+            const [validatedNestedEntry] = validate(singleNestedEntry, nestedEntryItem);
+            return validatedNestedEntry != null;
+          });
 
-        if (validatedEntry != null || validatedNestedEntry != null) {
-          return true;
+          const [validatedNestedEntry] = validate(
+            { ...singleEntry, entries: nestedEntriesArray },
+            entriesNested
+          );
+
+          if (validatedNestedEntry != null) {
+            return [...nestedAcc, validatedNestedEntry];
+          }
+          return nestedAcc;
+        } else {
+          const [validatedEntry] = validate(singleEntry, entry);
+
+          if (validatedEntry != null) {
+            return [...nestedAcc, validatedEntry];
+          }
+          return nestedAcc;
         }
-
-        return false;
-      });
+      }, []);
 
       const item = { ...exception, entries };
 
@@ -401,7 +417,7 @@ export const getCodeSignatureValue = (
     return codeSignature.map((signature) => {
       return {
         subjectName: signature.subject_name ?? '',
-        trusted: signature.trusted ?? '',
+        trusted: signature.trusted.toString() ?? '',
       };
     });
   } else {
