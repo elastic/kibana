@@ -99,12 +99,11 @@ export const getPackageRegistryRules = async (
   const { paths } = await getRegistryPackage(DetectionRulesPackageName, pkgVersion);
 
   const rulePaths = paths.filter(isRuleTemplate);
-  const rulePromises = rulePaths.map(async (path) => {
-    const content = JSON.parse(getAsset(path).toString('utf8'));
-    return content as AddPrepackagedRulesSchema;
+  const rulePromises = rulePaths.map<AddPrepackagedRulesSchema>((path) => {
+    return JSON.parse(getAsset(path).toString('utf8'));
   });
 
-  return validateAllPrepackagedRules(await Promise.all(rulePromises));
+  return validateAllPrepackagedRules(rulePromises);
 };
 
 /**
