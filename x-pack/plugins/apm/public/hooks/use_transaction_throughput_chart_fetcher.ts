@@ -18,7 +18,7 @@ export function useTransactionThroughputChartsFetcher() {
   const { transactionType } = useApmServiceContext();
   const theme = useTheme();
   const {
-    urlParams: { start, end, transactionName },
+    urlParams: { environment, start, end, transactionName },
     uiFilters,
   } = useUrlParams();
 
@@ -31,6 +31,7 @@ export function useTransactionThroughputChartsFetcher() {
           params: {
             path: { serviceName },
             query: {
+              environment,
               start,
               end,
               transactionType,
@@ -41,7 +42,15 @@ export function useTransactionThroughputChartsFetcher() {
         });
       }
     },
-    [serviceName, start, end, transactionName, transactionType, uiFilters]
+    [
+      environment,
+      serviceName,
+      start,
+      end,
+      transactionName,
+      transactionType,
+      uiFilters,
+    ]
   );
 
   const memoizedData = useMemo(
