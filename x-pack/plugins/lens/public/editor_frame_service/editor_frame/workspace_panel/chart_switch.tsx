@@ -95,7 +95,7 @@ function computeListHeight(list: SelectableEntry[], maxHeight: number): number {
   if (list.length === 0) {
     return 0;
   }
-  return Math.min(list.length * ENTRY_HEIGH, maxHeight);
+  return Math.min(list.length * ENTRY_HEIGHT, maxHeight);
 }
 
 export const ChartSwitch = memo(function ChartSwitch(props: Props) {
@@ -264,13 +264,13 @@ export const ChartSwitch = memo(function ChartSwitch(props: Props) {
             }
             return [{ key: group, label: group, isGroupLabel: true }].concat(
               visualizations.map((v) => ({
-                'aria-label': v.fullLabel,
+                'aria-label': v.fullLabel || v.label,
                 checked: subVisualizationId === v.id ? 'on' : null,
                 isGroupLabel: false,
                 key: `${v.visualizationId}:${v.id}`,
                 value: `${v.visualizationId}:${v.id}`,
                 'data-test-subj': `lnsChartSwitchPopover_${v.id}`,
-                label: v.label,
+                label: v.fullLabel || v.label,
                 prepend: <EuiIcon className="lnsChartSwitch__chartIcon" type={v.icon || 'empty'} />,
                 append:
                   v.selection.dataLoss !== 'nothing' ? (
