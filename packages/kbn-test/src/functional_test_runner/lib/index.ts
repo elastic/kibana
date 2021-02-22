@@ -9,8 +9,10 @@
 export { Lifecycle } from './lifecycle';
 export { LifecyclePhase } from './lifecycle_phase';
 export { readConfigFile, Config } from './config';
-export { readProviderSpec, ProviderCollection, Provider } from './providers';
+export { readProviderSpec, ProviderCollection } from './providers';
 export { runTests, setupMocha } from './mocha';
 export { FailureMetadata } from './failure_metadata';
 export * from './docker_servers';
 export { SuiteTracker } from './suite_tracker';
+
+export type { Provider } from './providers';
