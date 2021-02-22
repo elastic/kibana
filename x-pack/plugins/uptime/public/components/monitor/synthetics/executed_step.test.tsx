@@ -8,7 +8,7 @@
 import React from 'react';
 import { ExecutedStep } from './executed_step';
 import { Ping } from '../../../../common/runtime_types';
-import { render } from '../../../lib/helper/rtl_helpers';
+import { render } from '../../../lib/helper/mocks';
 
 describe('ExecutedStep', () => {
   let step: Ping;

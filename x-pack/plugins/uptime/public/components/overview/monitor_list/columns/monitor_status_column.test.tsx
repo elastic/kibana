@@ -11,7 +11,7 @@ import { Ping } from '../../../../../common/runtime_types';
 import { STATUS } from '../../../../../common/constants';
 import { EuiThemeProvider } from '../../../../../../../../src/plugins/kibana_react/common';
 import { mockDate, mockMoment } from '../../../../lib/helper/test_helpers';
-import { render } from '../../../../lib/helper/rtl_helpers';
+import { render } from '../../../../lib/helper/mocks';
 import { fireEvent, screen, waitFor } from '@testing-library/react';
 
 describe('MonitorListStatusColumn', () => {

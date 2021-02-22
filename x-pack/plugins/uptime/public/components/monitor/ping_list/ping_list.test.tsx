@@ -12,7 +12,7 @@ import { ExpandedRowMap } from '../../overview/monitor_list/types';
 import { rowShouldExpand, toggleDetails } from './columns/expand_row';
 import * as pingListHook from './use_pings';
 import { mockDispatch } from '../../../lib/helper/test_helpers';
-import { render } from '../../../lib/helper/rtl_helpers';
+import { render } from '../../../lib/helper/mocks';
 
 mockDispatch();
 

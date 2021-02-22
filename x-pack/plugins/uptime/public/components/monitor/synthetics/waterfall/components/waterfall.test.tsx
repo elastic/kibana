@@ -8,7 +8,7 @@
 import React from 'react';
 import { WaterfallChart } from './waterfall_chart';
 import { renderLegendItem } from '../../step_detail/waterfall/waterfall_chart_wrapper';
-import { render } from '../../../../../lib/helper/rtl_helpers';
+import { render } from '../../../../../lib/helper/mocks';
 
 import 'jest-canvas-mock';
 

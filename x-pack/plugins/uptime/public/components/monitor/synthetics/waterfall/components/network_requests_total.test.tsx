@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { NetworkRequestsTotal } from './network_requests_total';
-import { render } from '../../../../../lib/helper/rtl_helpers';
+import { render } from '../../../../../lib/helper/mocks';
 
 describe('NetworkRequestsTotal', () => {
   it('message in case total is greater than fetched', () => {

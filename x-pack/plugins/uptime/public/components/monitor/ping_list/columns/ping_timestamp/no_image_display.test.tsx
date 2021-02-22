@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render } from '../../../../../lib/helper/rtl_helpers';
+import { render } from '../../../../../lib/helper/mocks';
 import { NoImageDisplay, NoImageDisplayProps } from './no_image_display';
 import { imageLoadingSpinnerAriaLabel } from './translations';
 

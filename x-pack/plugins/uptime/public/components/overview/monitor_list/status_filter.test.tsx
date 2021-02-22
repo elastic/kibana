@@ -11,7 +11,7 @@ import {
   renderWithRouter,
   shallowWithRouter,
   MountWithReduxProvider,
-} from '../../../lib';
+} from '../../../lib/helper/mocks';
 import { createMemoryHistory } from 'history';
 import { StatusFilter } from './status_filter';
 import { FilterStatusButton } from './filter_status_button';

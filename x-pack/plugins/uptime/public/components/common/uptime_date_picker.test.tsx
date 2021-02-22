@@ -12,7 +12,7 @@ import {
   shallowWithRouter,
   MountWithReduxProvider,
   mountWithRouterRedux,
-} from '../../lib';
+} from '../../lib/helper/mocks';
 import { UptimeStartupPluginsContextProvider } from '../../contexts';
 import { startPlugins } from '../../lib/__mocks__/uptime_plugin_start_mock';
 import { ClientPluginsStart } from '../../apps/plugin';

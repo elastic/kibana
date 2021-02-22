@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render } from '../../../lib/helper/rtl_helpers';
+import { render } from '../../../lib/helper/mocks';
 import { MLJobLink } from './ml_job_link';
 
 describe('ML JobLink', () => {

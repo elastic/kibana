@@ -9,7 +9,7 @@ import React from 'react';
 import { fireEvent, waitFor } from '@testing-library/react';
 import { PingTimestamp } from './ping_timestamp';
 import { mockReduxHooks } from '../../../../../lib/helper/test_helpers';
-import { render } from '../../../../../lib/helper/rtl_helpers';
+import { render } from '../../../../../lib/helper/mocks';
 import { Ping } from '../../../../../../common/runtime_types/ping';
 import * as observabilityPublic from '../../../../../../../observability/public';
 

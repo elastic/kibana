@@ -9,7 +9,7 @@ import React from 'react';
 import { shallowWithIntl } from '@kbn/test/jest';
 import { fireEvent, waitFor } from '@testing-library/react';
 import { FiltersExpressionsSelect } from './filters_expression_select';
-import { render } from '../../../../lib/helper/rtl_helpers';
+import { render } from '../../../../lib/helper/mocks';
 import { filterAriaLabels as aria } from './translations';
 import { filterLabels } from '../../filter_group/translations';
 

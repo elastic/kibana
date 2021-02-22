@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { act, fireEvent, waitFor } from '@testing-library/react';
-import { render } from '../../../../../lib/helper/rtl_helpers';
+import { render } from '../../../../../lib/helper/mocks';
 import { WaterfallChartWrapper } from './waterfall_chart_wrapper';
 import { networkItems as mockNetworkItems } from './data_formatting.test';
 

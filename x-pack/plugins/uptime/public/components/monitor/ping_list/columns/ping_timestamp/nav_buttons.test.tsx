@@ -7,7 +7,7 @@
 
 import { fireEvent, waitFor } from '@testing-library/react';
 import React from 'react';
-import { render } from '../../../../../lib/helper/rtl_helpers';
+import { render } from '../../../../../lib/helper/mocks';
 import { NavButtons, NavButtonsProps } from './nav_buttons';
 
 describe('NavButtons', () => {

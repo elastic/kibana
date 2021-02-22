@@ -7,7 +7,7 @@
 
 import { fireEvent, waitFor } from '@testing-library/react';
 import React from 'react';
-import { render } from '../../../../../lib/helper/rtl_helpers';
+import { render } from '../../../../../lib/helper/mocks';
 import { StepImageCaption, StepImageCaptionProps } from './step_image_caption';
 
 describe('StepImageCaption', () => {

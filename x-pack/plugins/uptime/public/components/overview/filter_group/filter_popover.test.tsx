@@ -8,7 +8,7 @@
 import React from 'react';
 import { fireEvent, waitFor, waitForElementToBeRemoved } from '@testing-library/react';
 import { FilterPopoverProps, FilterPopover } from './filter_popover';
-import { render } from '../../../lib/helper/rtl_helpers';
+import { render } from '../../../lib/helper/mocks';
 
 describe('FilterPopover component', () => {
   let props: FilterPopoverProps;

@@ -8,7 +8,7 @@
 import React, { useState } from 'react';
 import { act, fireEvent } from '@testing-library/react';
 
-import { render } from '../../../../../lib/helper/rtl_helpers';
+import { render } from '../../../../../lib/helper/mocks';
 
 import 'jest-canvas-mock';
 import { MIME_FILTERS, WaterfallFilter } from './waterfall_filter';

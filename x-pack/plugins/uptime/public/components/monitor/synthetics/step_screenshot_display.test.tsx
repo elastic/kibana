@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { render } from '../../../lib/helper/rtl_helpers';
+import { render } from '../../../lib/helper/mocks';
 import React from 'react';
 import { StepScreenshotDisplay } from './step_screenshot_display';
 

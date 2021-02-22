@@ -7,7 +7,10 @@
 
 import React, { ReactElement } from 'react';
 import { of } from 'rxjs';
+import { Provider as ReduxProvider } from 'react-redux';
+import { mountWithIntl, renderWithIntl, shallowWithIntl } from '@kbn/test/jest';
 import { render as reactTestLibRender, RenderOptions } from '@testing-library/react';
+import type { MemoryHistory } from 'history/createMemoryHistory';
 import { Router } from 'react-router-dom';
 import { createMemoryHistory, History } from 'history';
 import { CoreStart } from 'kibana/public';
@@ -20,7 +23,7 @@ import {
   KibanaContextProvider,
   KibanaServices,
 } from '../../../../../../src/plugins/kibana_react/public';
-import { MountWithReduxProvider } from './helper_with_redux';
+
 import { AppState } from '../../state';
 
 interface KibanaProps {
@@ -119,3 +122,64 @@ export function render<ExtraCore>(
     renderOptions
   );
 }
+
+export const MountWithReduxProvider: React.FC<{ state?: AppState }> = ({ children, state }) => (
+  <ReduxProvider
+    store={{
+      dispatch: jest.fn(),
+      getState: jest.fn().mockReturnValue(state || { selectedFilters: null }),
+      subscribe: jest.fn(),
+      replaceReducer: jest.fn(),
+    }}
+  >
+    {children}
+  </ReduxProvider>
+);
+
+interface RenderRouterOptions<ExtraCore> extends KibanaProviderOptions<ExtraCore> {
+  history?: History;
+  state?: Partial<AppState>;
+}
+
+const helperWithRouter: <R>(
+  helper: (node: ReactElement) => R,
+  component: ReactElement,
+  customHistory?: MemoryHistory,
+  wrapReduxStore?: boolean,
+  storeState?: AppState
+) => R = (helper, component, customHistory, wrapReduxStore, storeState) => {
+  const history = customHistory ?? createMemoryHistory();
+
+  history.location.key = 'TestKeyForTesting';
+
+  const routerWrapper = <Router history={history}>{component}</Router>;
+
+  if (wrapReduxStore) {
+    return helper(
+      <MountWithReduxProvider state={storeState}>{routerWrapper}</MountWithReduxProvider>
+    );
+  }
+
+  return helper(routerWrapper);
+};
+
+export const renderWithRouter = (component: ReactElement, customHistory?: MemoryHistory) => {
+  return helperWithRouter(renderWithIntl, component, customHistory);
+};
+
+export const shallowWithRouter = (component: ReactElement, customHistory?: MemoryHistory) => {
+  return helperWithRouter(shallowWithIntl, component, customHistory);
+};
+
+export const mountWithRouterRedux = (
+  component: ReactElement,
+  options?: { customHistory?: MemoryHistory; storeState?: AppState }
+) => {
+  return helperWithRouter(
+    mountWithIntl,
+    component,
+    options?.customHistory,
+    true,
+    options?.storeState
+  );
+};

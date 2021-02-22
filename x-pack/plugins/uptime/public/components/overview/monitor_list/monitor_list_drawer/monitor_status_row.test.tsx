@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render } from '../../../../lib/helper/rtl_helpers';
+import { render } from '../../../../lib/helper/mocks';
 import { MonitorStatusRow } from './monitor_status_row';
 
 describe('MonitorStatusRow component', () => {
