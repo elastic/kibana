@@ -79,6 +79,7 @@ export const getReindexWarnings = (flatSettings: FlatSettings): ReindexWarning[]
 
 const removeUnsettableSettings = (settings: FlatSettings['settings']) =>
   omit(settings, [
+    // Private ES settings
     'index.allocation.existing_shards_allocator',
     'index.blocks.write',
     'index.creation_date',
@@ -102,12 +103,34 @@ const removeUnsettableSettings = (settings: FlatSettings['settings']) =>
     'index.verified_before_close',
     'index.version.created',
 
-    // Below settings are deprecated in 9.0
+    // Deprecated in 9.0
     'index.version.upgraded',
   ]);
 
+const validateSettings = (settings: FlatSettings['settings']) => {
+  if (settings['index.mapper.dynamic']) {
+    throw new Error(`'index.mapper.dynamic' is no longer supported.`);
+  }
+
+  if (settings['index.merge.policy.reclaim_deletes_weight']) {
+    throw new Error(`'index.merge.policy.reclaim_deletes_weight' is no longer supported.`);
+  }
+
+  if (settings['index.force_memory_term_dictionary']) {
+    throw new Error(`'index.force_memory_term_dictionary' is no longer supported.`);
+  }
+
+  if (settings['index.max_adjacency_matrix_filters']) {
+    throw new Error(
+      `'index.max_adjacency_matrix_filters' is no longer supported; use 'indices.query.bool.max_clause_count' as an alternative.`
+    );
+  }
+
+  return settings;
+};
+
 // Use `flow` to pipe the settings through each function.
-const transformSettings = flow(removeUnsettableSettings);
+const transformSettings = flow(removeUnsettableSettings, validateSettings);
 
 const updateFixableMappings = (mappings: FlatSettings['mappings']) => {
   return mappings;
