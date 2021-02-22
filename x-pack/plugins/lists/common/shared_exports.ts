@@ -36,6 +36,7 @@ export {
   listSchema,
   entry,
   entriesNested,
+  nestedEntryItem,
   entriesMatch,
   entriesMatchAny,
   entriesExists,
@@ -47,4 +48,4 @@ export {
   OsTypeArray,
 } from './schemas';
 
-export { ENDPOINT_LIST_ID } from './constants';
+export { ENDPOINT_LIST_ID, ENDPOINT_TRUSTED_APPS_LIST_ID } from './constants';

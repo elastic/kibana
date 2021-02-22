@@ -35,7 +35,7 @@ import {
   getTopClasses,
 } from './common';
 import { UseIndexDataReturnType } from './types';
-import { DecisionPathPopover } from './feature_importance/decision_path_popover';
+import { DecisionPathPopover } from '../../data_frame_analytics/pages/analytics_exploration/components/feature_importance/decision_path_popover';
 import {
   FeatureImportanceBaseline,
   FeatureImportance,
