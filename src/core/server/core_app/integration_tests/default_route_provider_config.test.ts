@@ -9,15 +9,14 @@
 import * as kbnTestServer from '../../../test_helpers/kbn_server';
 import { Root } from '../../root';
 
-const { startES } = kbnTestServer.createTestServers({
-  adjustTimeout: (t: number) => jest.setTimeout(t),
-});
-let esServer: kbnTestServer.TestElasticsearchUtils;
-
-describe('default route provider', () => {
+describe.each(Array.from(new Array(200), (_, index) => index))('default route provider #%d', () => {
+  let esServer: kbnTestServer.TestElasticsearchUtils;
   let root: Root;
 
   beforeAll(async () => {
+    const { startES } = kbnTestServer.createTestServers({
+      adjustTimeout: (t: number) => jest.setTimeout(t),
+    });
     esServer = await startES();
     root = kbnTestServer.createRootWithCorePlugins({
       server: {
