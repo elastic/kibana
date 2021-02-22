@@ -1,5 +1,5 @@
 {
-  "id": "core_history_block",
+  "id": "coreHistoryBlock",
   "version": "0.0.1",
   "kibanaVersion": "kibana",
   "server": false,
