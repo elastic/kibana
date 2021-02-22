@@ -11,6 +11,7 @@ import numeral from '@elastic/numeral';
 import { ml } from '../../../../services/ml_api_service';
 import { AnalysisResult, InputOverrides } from '../../../../../../common/types/file_datavisualizer';
 import {
+  MB,
   MAX_FILE_SIZE,
   MAX_FILE_SIZE_BYTES,
   ABSOLUTE_MAX_FILE_SIZE_BYTES,
@@ -49,7 +50,7 @@ export function readFile(file: File) {
           if (data === null || typeof data === 'string') {
             return reject();
           }
-          const size = UPLOAD_SIZE_MB * Math.pow(2, 20);
+          const size = UPLOAD_SIZE_MB * MB;
           const fileContents = decoder.decode(data.slice(0, size));
 
           if (fileContents === '') {

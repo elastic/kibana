@@ -120,6 +120,10 @@ export interface DiscoverGridProps {
    * Current sort setting
    */
   sort: SortPairArr[];
+  /**
+   * How the data is fetched
+   */
+  useNewFieldsApi: boolean;
 }
 
 export const EuiDataGridMemoized = React.memo((props: EuiDataGridProps) => {
@@ -146,6 +150,7 @@ export const DiscoverGrid = ({
   settings,
   showTimeCol,
   sort,
+  useNewFieldsApi,
 }: DiscoverGridProps) => {
   const displayedColumns = getDisplayedColumns(columns, indexPattern);
   const defaultColumns = displayedColumns.includes('_source');
@@ -197,9 +202,10 @@ export const DiscoverGrid = ({
       getRenderCellValueFn(
         indexPattern,
         rows,
-        rows ? rows.map((hit) => indexPattern.flattenHit(hit)) : []
+        rows ? rows.map((hit) => indexPattern.flattenHit(hit)) : [],
+        useNewFieldsApi
       ),
-    [rows, indexPattern]
+    [rows, indexPattern, useNewFieldsApi]
   );
 
   /**
