@@ -49,6 +49,7 @@ const CaseUserActionResponseRT = rt.intersection([
     case_id: rt.string,
     comment_id: rt.union([rt.string, rt.null]),
   }),
+  rt.partial({ sub_case_id: rt.string }),
 ]);
 
 export const CaseUserActionAttributesRt = CaseUserActionBasicRT;
