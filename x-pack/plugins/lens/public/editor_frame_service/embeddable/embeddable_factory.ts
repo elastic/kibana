@@ -111,8 +111,8 @@ export class EmbeddableFactory implements EmbeddableFactoryDefinition {
     let references: SavedObjectReference[] = [];
     const typedState = (state as unknown) as LensEmbeddableInput;
 
-    if ((typedState as LensByValueInput).attributes !== undefined) {
-      references = (typedState as LensByValueInput).attributes.references;
+    if ('attributes' in typedState && typedState.attributes !== undefined) {
+      references = typedState.attributes.references;
     }
 
     return { state, references };
