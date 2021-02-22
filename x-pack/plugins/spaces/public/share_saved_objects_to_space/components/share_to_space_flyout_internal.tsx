@@ -31,7 +31,7 @@ import type {
 } from 'src/plugins/spaces_oss/public';
 
 import { ALL_SPACES_ID, UNKNOWN_SPACE } from '../../../common/constants';
-import { CopyToSpaceFlyoutInternal } from '../../copy_saved_objects_to_space/components';
+import { getCopyToSpaceFlyoutComponent } from '../../copy_saved_objects_to_space';
 import { useSpaces } from '../../spaces_context';
 import type { SpacesManager } from '../../spaces_manager';
 import type { ShareToSpaceTarget } from '../../types';
@@ -270,13 +270,19 @@ export const ShareToSpaceFlyoutInternal = (props: ShareToSpaceFlyoutProps) => {
   };
 
   if (showMakeCopy) {
+    const LazyCopyToSpaceFlyout = React.lazy(() =>
+      getCopyToSpaceFlyoutComponent().then((component) => ({ default: component }))
+    );
+
     return (
-      <CopyToSpaceFlyoutInternal
-        onClose={onClose}
-        savedObjectTarget={savedObjectTarget}
-        spacesManager={spacesManager}
-        toastNotifications={toastNotifications}
-      />
+      <React.Suspense fallback={<EuiLoadingSpinner />}>
+        <LazyCopyToSpaceFlyout
+          onClose={onClose}
+          savedObjectTarget={savedObjectTarget}
+          spacesManager={spacesManager}
+          toastNotifications={toastNotifications}
+        />
+      </React.Suspense>
     );
   }
 

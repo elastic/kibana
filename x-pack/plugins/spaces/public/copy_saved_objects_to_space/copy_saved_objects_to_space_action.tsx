@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { EuiLoadingSpinner } from '@elastic/eui';
 import React from 'react';
 
 import { i18n } from '@kbn/i18n';
@@ -13,7 +14,20 @@ import type { SavedObjectsManagementRecord } from 'src/plugins/saved_objects_man
 
 import { SavedObjectsManagementAction } from '../../../../../src/plugins/saved_objects_management/public';
 import type { SpacesManager } from '../spaces_manager';
-import { CopyToSpaceFlyoutInternal } from './components';
+import type { CopyToSpaceFlyoutProps } from './components';
+import { getCopyToSpaceFlyoutComponent } from './components';
+
+const Wrapper = (props: CopyToSpaceFlyoutProps) => {
+  const LazyComponent = React.lazy(() =>
+    getCopyToSpaceFlyoutComponent().then((component) => ({ default: component }))
+  );
+
+  return (
+    <React.Suspense fallback={<EuiLoadingSpinner />}>
+      <LazyComponent {...props} />
+    </React.Suspense>
+  );
+};
 
 export class CopyToSpaceSavedObjectsManagementAction extends SavedObjectsManagementAction {
   public id: string = 'copy_saved_objects_to_space';
@@ -56,7 +70,7 @@ export class CopyToSpaceSavedObjectsManagementAction extends SavedObjectsManagem
     };
 
     return (
-      <CopyToSpaceFlyoutInternal
+      <Wrapper
         onClose={this.onClose}
         savedObjectTarget={savedObjectTarget}
         spacesManager={this.spacesManager}

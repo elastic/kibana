@@ -5,4 +5,5 @@
  * 2.0.
  */
 
+export { getCopyToSpaceFlyoutComponent } from './components';
 export { CopySavedObjectsToSpaceService } from './copy_saved_objects_to_space_service';

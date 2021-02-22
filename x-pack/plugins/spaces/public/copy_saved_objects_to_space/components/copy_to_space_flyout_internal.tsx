@@ -35,7 +35,7 @@ import { CopyToSpaceFlyoutFooter } from './copy_to_space_flyout_footer';
 import { CopyToSpaceForm } from './copy_to_space_form';
 import { ProcessingCopyToSpace } from './processing_copy_to_space';
 
-interface Props {
+export interface CopyToSpaceFlyoutProps {
   onClose: () => void;
   savedObjectTarget: SavedObjectTarget;
   spacesManager: SpacesManager;
@@ -46,7 +46,7 @@ const INCLUDE_RELATED_DEFAULT = true;
 const CREATE_NEW_COPIES_DEFAULT = true;
 const OVERWRITE_ALL_DEFAULT = true;
 
-export const CopyToSpaceFlyoutInternal = (props: Props) => {
+export const CopyToSpaceFlyoutInternal = (props: CopyToSpaceFlyoutProps) => {
   const { onClose, savedObjectTarget: object, spacesManager, toastNotifications } = props;
   const savedObjectTarget = useMemo(
     () => ({

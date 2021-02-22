@@ -23,7 +23,7 @@ import { coreMock } from 'src/core/public/mocks';
 import type { Space } from 'src/plugins/spaces_oss/common';
 
 import { ALL_SPACES_ID } from '../../../common/constants';
-import { CopyToSpaceFlyoutInternal } from '../../copy_saved_objects_to_space/components';
+import { CopyToSpaceFlyoutInternal } from '../../copy_saved_objects_to_space/components/copy_to_space_flyout_internal';
 import { getSpacesContextWrapper } from '../../spaces_context';
 import { spacesManagerMock } from '../../spaces_manager/mocks';
 import { NoSpacesAvailable } from './no_spaces_available';
@@ -217,8 +217,8 @@ describe('ShareToSpaceFlyout', () => {
       await act(async () => {
         copyButton.simulate('click');
         await nextTick();
-        wrapper.update();
       });
+      wrapper.update();
 
       expect(wrapper.find(CopyToSpaceFlyoutInternal)).toHaveLength(1);
       expect(onClose).toHaveBeenCalledTimes(0);
