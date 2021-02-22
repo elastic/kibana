@@ -11,13 +11,8 @@
     "index-pattern": "7.11.0"
   },
   "references": [],
-  "sort": [
-    1613589558181,
-    0
-  ],
   "type": "index-pattern",
-  "updated_at": "2021-02-17T19:19:18.181Z",
-  "version": "WzMwLDFd"
+  "version": "WzQsMl0="
 }
 
 {
@@ -30,7 +25,6 @@
     "kibanaSavedObjectMeta": {
       "searchSourceJSON": "{\"highlightAll\":true,\"filter\":[],\"query\":{\"query_string\":{\"query\":\"*\",\"analyze_wildcard\":true}},\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
     },
-    "pre712": true,
     "sort": [
       [
         "@timestamp",
@@ -43,7 +37,7 @@
   "coreMigrationVersion": "8.0.0",
   "id": "ab12e3c0-f231-11e6-9486-733b1ac9221a",
   "migrationVersion": {
-    "search": "7.12.0"
+    "search": "7.9.3"
   },
   "references": [
     {
@@ -52,11 +46,6 @@
       "type": "index-pattern"
     }
   ],
-  "sort": [
-    1613589558181,
-    2
-  ],
   "type": "search",
-  "updated_at": "2021-02-17T19:19:18.181Z",
-  "version": "WzMxLDFd"
+  "version": "WzUsMl0="
 }
