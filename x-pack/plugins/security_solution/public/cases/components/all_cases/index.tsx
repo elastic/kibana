@@ -96,9 +96,10 @@ interface AllCasesProps {
   onRowClick?: (theCase?: Case) => void;
   isModal?: boolean;
   userCanCrud: boolean;
+  disabledStatuses?: CaseStatuses[];
 }
 export const AllCases = React.memo<AllCasesProps>(
-  ({ onRowClick, isModal = false, userCanCrud }) => {
+  ({ onRowClick, isModal = false, userCanCrud, disabledStatuses }) => {
     const { navigateToApp } = useKibana().services.application;
     const { formatUrl, search: urlSearch } = useFormatUrl(SecurityPageName.case);
     const { actionLicense } = useGetActionLicense();
@@ -462,6 +463,7 @@ export const AllCases = React.memo<AllCasesProps>(
               status: filterOptions.status,
             }}
             setFilterRefetch={setFilterRefetch}
+            disabledStatuses={disabledStatuses}
           />
           {isCasesLoading && isDataEmpty ? (
             <Div>

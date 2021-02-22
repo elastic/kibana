@@ -14,9 +14,15 @@ interface Props {
   stats: Record<CaseStatuses, number>;
   selectedStatus: CaseStatuses;
   onStatusChanged: (status: CaseStatuses) => void;
+  disabledStatuses?: CaseStatuses[];
 }
 
-const StatusFilterComponent: React.FC<Props> = ({ stats, selectedStatus, onStatusChanged }) => {
+const StatusFilterComponent: React.FC<Props> = ({
+  stats,
+  selectedStatus,
+  onStatusChanged,
+  disabledStatuses = [],
+}) => {
   const caseStatuses = Object.keys(statuses) as CaseStatuses[];
   const options: Array<EuiSuperSelectOption<CaseStatuses>> = caseStatuses.map((status) => ({
     value: status,
@@ -28,6 +34,7 @@ const StatusFilterComponent: React.FC<Props> = ({ stats, selectedStatus, onStatu
         <EuiFlexItem grow={false}>{` (${stats[status]})`}</EuiFlexItem>
       </EuiFlexGroup>
     ),
+    disabled: disabledStatuses.includes(status),
     'data-test-subj': `case-status-filter-${status}`,
   }));
 
