@@ -79,13 +79,29 @@ export const getReindexWarnings = (flatSettings: FlatSettings): ReindexWarning[]
 
 const removeUnsettableSettings = (settings: FlatSettings['settings']) =>
   omit(settings, [
-    'index.uuid',
+    'index.allocation.existing_shards_allocator',
     'index.blocks.write',
     'index.creation_date',
+    'index.frozen',
+    'index.history.uuid',
+    'index.merge.enabled',
     'index.provided_name',
+    'index.resize.source.name',
+    'index.resize.source.uuid',
     'index.routing.allocation.initial_recovery._id',
-    'index.version.created',
+    'index.search.throttled',
+    'index.source_only',
+    'index.shrink.source.name',
+    'index.shrink.source.uuid',
+    'index.store.snapshot.repository_name',
+    'index.store.snapshot.snapshot_name',
+    'index.store.snapshot.snapshot_uuid',
+    'index.store.snapshot.index_name',
+    'index.store.snapshot.index_uuid',
+    'index.uuid',
     'index.verified_before_close',
+    'index.version.created',
+
     // Below settings are deprecated in 9.0
     'index.version.upgraded',
   ]);
