@@ -49,7 +49,6 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
         const q = querystring.stringify({
           start: metadata.start,
           end: metadata.end,
-          uiFilters: encodeURIComponent('{}'),
         });
         const response = await supertest.get(`/api/apm/service-map/service/opbeans-node?${q}`);
 
