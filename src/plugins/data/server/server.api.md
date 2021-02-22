@@ -898,7 +898,7 @@ export class IndexPatternsFetcher {
 // @public (undocumented)
 class IndexPatternsService {
     // Warning: (ae-forgotten-export) The symbol "IndexPatternsServiceDeps" needs to be exported by the entry point index.d.ts
-    constructor({ uiSettings, savedObjectsClient, apiClient, fieldFormats, onNotification, onError, onRedirectNoIndexPattern, }: IndexPatternsServiceDeps);
+    constructor({ uiSettings, savedObjectsClient, apiClient, fieldFormats, onNotification, onError, onUnsupportedTimePattern, onRedirectNoIndexPattern, }: IndexPatternsServiceDeps);
     clearCache: (id?: string | undefined) => void;
     create(spec: IndexPatternSpec, skipFetchFields?: boolean): Promise<IndexPattern>;
     createAndSave(spec: IndexPatternSpec, override?: boolean, skipFetchFields?: boolean): Promise<IndexPattern>;
@@ -926,6 +926,8 @@ class IndexPatternsService {
         title: string;
     }>>;
     getTitles: (refresh?: boolean) => Promise<string[]>;
+    // (undocumented)
+    migrate(indexPattern: IndexPattern, newTitle: string): Promise<this>;
     refreshFields: (indexPattern: IndexPattern) => Promise<void>;
     savedObjectToSpec: (savedObject: SavedObject_2<IndexPatternAttributes>) => IndexPatternSpec;
     setDefault: (id: string, force?: boolean) => Promise<void>;
