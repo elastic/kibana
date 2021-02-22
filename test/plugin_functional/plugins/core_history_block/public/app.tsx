@@ -46,7 +46,7 @@ const FooPage = ({
     <RedirectAppLinks application={application}>
       <h1>FOO PAGE</h1>
       <br /> <br />
-      <a data-test-subj="applink-intra-test" href={basePath.prepend(`/app/history_block_test`)}>
+      <a data-test-subj="applink-intra-test" href={basePath.prepend(`/app/core_history_block`)}>
         Link to home on the same app
       </a>
       <br /> <br />
