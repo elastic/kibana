@@ -82,7 +82,6 @@ export function getIndexPatternDatasource({
   data: DataPublicPluginStart;
   charts: ChartsPluginSetup;
 }) {
-  const savedObjectsClient = core.savedObjects.client;
   const uiSettings = core.uiSettings;
   const onIndexPatternLoadError = (err: Error) =>
     core.notifications.toasts.addError(err, {
@@ -121,7 +120,6 @@ export function getIndexPatternDatasource({
       return loadInitialState({
         persistedState,
         references,
-        savedObjectsClient: await savedObjectsClient,
         defaultIndexPatternId: core.uiSettings.get('defaultIndex'),
         storage,
         indexPatternsService,
