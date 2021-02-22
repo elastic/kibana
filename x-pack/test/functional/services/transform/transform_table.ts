@@ -8,10 +8,15 @@
 import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
+import { TransformManagement } from './management';
 
-export function TransformTableProvider({ getService }: FtrProviderContext) {
+export function TransformTableProvider(
+  { getService }: FtrProviderContext,
+  management: TransformManagement
+) {
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
+  const browser = getService('browser');
 
   return new (class TransformTable {
     public async parseTransformTable() {
@@ -201,6 +206,30 @@ export function TransformTableProvider({ getService }: FtrProviderContext) {
       }
     }
 
+    public async assertTransformRowDeleteActionEnabled(expectedValue: boolean) {
+      await retry.tryForTime(30 * 1000, async () => {
+        await testSubjects.click('euiCollapsedItemActionsButton');
+        await testSubjects.existOrFail('transformActionDelete');
+        const isEnabled = await testSubjects.isEnabled('transformActionDelete');
+        expect(isEnabled).to.eql(
+          expectedValue,
+          `Expected 'Delete' button to be '${expectedValue ? 'enabled' : 'disabled'}' (got '${
+            isEnabled ? 'enabled' : 'disabled'
+          }')`
+        );
+        await browser.pressKeys(browser.keys.ESCAPE);
+        await testSubjects.existOrFail('euiCollapsedItemActionsButton');
+      });
+    }
+
+    public async clickTransformRowActionWithRetry(action: string) {
+      await retry.tryForTime(30 * 1000, async () => {
+        await testSubjects.click('euiCollapsedItemActionsButton');
+        await testSubjects.existOrFail(`transformAction${action}`);
+        await testSubjects.click(`transformAction${action}`);
+      });
+    }
+
     public async clickTransformRowAction(action: string) {
       await testSubjects.click(`transformAction${action}`);
     }
@@ -213,6 +242,32 @@ export function TransformTableProvider({ getService }: FtrProviderContext) {
     public async assertTransformsExpandedRowPreviewColumnValues(column: number, values: string[]) {
       await this.waitForTransformsExpandedRowPreviewTabToLoad();
       await this.assertEuiDataGridColumnValues('transformPivotPreview', column, values);
+    }
+
+    public async assertTransformDeleteModalExists() {
+      await testSubjects.existOrFail('transformDeleteModal', { timeout: 60 * 1000 });
+    }
+
+    public async assertTransformDeleteModalNotExists() {
+      await testSubjects.missingOrFail('transformDeleteModal', { timeout: 60 * 1000 });
+    }
+
+    public async clickDeleteTransform(transformId: string) {
+      const expectedNumRows = (await this.parseTransformTable()).length - 1;
+
+      await retry.tryForTime(30 * 1000, async () => {
+        await this.assertTransformDeleteModalExists();
+        await testSubjects.click('transformDeleteModal > confirmModalConfirmButton');
+        await this.assertTransformDeleteModalNotExists();
+
+        // If after deletion, and there's no Transform left
+        if (expectedNumRows < 1) {
+          await management.assertNoTransformsFoundMessageExists();
+        } else {
+          await this.filterWithSearchString(transformId, 0);
+          await this.filterWithSearchString('', expectedNumRows);
+        }
+      });
     }
   })();
 }

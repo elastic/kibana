@@ -36,11 +36,12 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       await transform.securityUI.logout();
     });
 
-    loadTestFile(require.resolve('./creation_index_pattern'));
-    loadTestFile(require.resolve('./creation_saved_search'));
-    loadTestFile(require.resolve('./cloning'));
-    loadTestFile(require.resolve('./editing'));
-    loadTestFile(require.resolve('./feature_controls'));
+    // loadTestFile(require.resolve('./creation_index_pattern'));
+    // loadTestFile(require.resolve('./creation_saved_search'));
+    // loadTestFile(require.resolve('./cloning'));
+    // loadTestFile(require.resolve('./editing'));
+    // loadTestFile(require.resolve('./feature_controls'));
+    loadTestFile(require.resolve('./deleting'));
   });
 }
 export interface ComboboxOption {
