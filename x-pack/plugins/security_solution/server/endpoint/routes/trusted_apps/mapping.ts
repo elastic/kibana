@@ -14,8 +14,8 @@ import {
   EntryNested,
   ExceptionListItemSchema,
   NestedEntriesArray,
+  ENDPOINT_TRUSTED_APPS_LIST_ID,
 } from '../../../../../lists/common';
-import { ENDPOINT_TRUSTED_APPS_LIST_ID } from '../../../../../lists/common/constants';
 import {
   CreateExceptionListItemOptions,
   UpdateExceptionListItemOptions,

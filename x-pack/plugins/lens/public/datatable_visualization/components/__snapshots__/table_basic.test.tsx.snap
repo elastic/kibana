@@ -8,6 +8,11 @@ exports[`DatatableComponent it renders actions column when there are row actions
   <ContextProvider
     value={
       Object {
+        "alignments": Object {
+          "a": "left",
+          "b": "left",
+          "c": "right",
+        },
         "rowHasRowClickTriggerActions": Array [
           true,
           true,
@@ -234,6 +239,11 @@ exports[`DatatableComponent it renders the title and value 1`] = `
   <ContextProvider
     value={
       Object {
+        "alignments": Object {
+          "a": "left",
+          "b": "left",
+          "c": "right",
+        },
         "rowHasRowClickTriggerActions": undefined,
         "table": Object {
           "columns": Array [
@@ -447,6 +457,11 @@ exports[`DatatableComponent it should not render actions on header when it is in
   <ContextProvider
     value={
       Object {
+        "alignments": Object {
+          "a": "left",
+          "b": "left",
+          "c": "right",
+        },
         "rowHasRowClickTriggerActions": Array [
           false,
           false,

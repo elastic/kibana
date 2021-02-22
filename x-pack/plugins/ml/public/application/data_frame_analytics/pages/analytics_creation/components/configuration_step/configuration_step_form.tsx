@@ -8,6 +8,7 @@
 import React, { FC, Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import {
   EuiBadge,
+  EuiCallOut,
   EuiComboBox,
   EuiComboBoxOptionOption,
   EuiFormRow,
@@ -19,6 +20,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { debounce } from 'lodash';
 
+import { FormattedMessage } from '@kbn/i18n/react';
 import { newJobCapsService } from '../../../../../services/new_job_capabilities_service';
 import { useMlContext } from '../../../../../contexts/ml';
 
@@ -61,6 +63,8 @@ const requiredFieldsErrorText = i18n.translate(
       'At least one field must be included in the analysis in addition to the dependent variable.',
   }
 );
+
+const maxRuntimeFieldsDisplayCount = 5;
 
 export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
   actions,
@@ -314,6 +318,26 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
     };
   }, [jobType, dependentVariable, trainingPercent, JSON.stringify(includes), jobConfigQueryString]);
 
+  const unsupportedRuntimeFields = useMemo(
+    () =>
+      currentIndexPattern.fields
+        .getAll()
+        .filter((f) => f.runtimeField)
+        .map((f) => `'${f.displayName}'`),
+    [currentIndexPattern.fields]
+  );
+
+  // Show the Scatterplot Matrix only if
+  // - There's more than one suitable field available
+  // - The job type is outlier detection, or
+  // - The job type is regression or classification and the dependent variable has been set
+  const showScatterplotMatrix =
+    (jobType === ANALYSIS_CONFIG_TYPE.OUTLIER_DETECTION ||
+      ((jobType === ANALYSIS_CONFIG_TYPE.REGRESSION ||
+        jobType === ANALYSIS_CONFIG_TYPE.CLASSIFICATION) &&
+        !dependentVariableEmpty)) &&
+    scatterplotFieldOptions.length > 1;
+
   return (
     <Fragment>
       <Messages messages={requestMessages} />
@@ -445,6 +469,36 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
       >
         <Fragment />
       </EuiFormRow>
+      {Array.isArray(unsupportedRuntimeFields) && unsupportedRuntimeFields.length > 0 && (
+        <>
+          <EuiCallOut size="s" color="warning">
+            <FormattedMessage
+              id="xpack.ml.dataframe.analytics.create.unsupportedRuntimeFieldsCallout"
+              defaultMessage="The runtime {runtimeFieldsCount, plural, one {field} other {fields}} {unsupportedRuntimeFields} {extraCountMsg} are not supported for analysis."
+              values={{
+                runtimeFieldsCount: unsupportedRuntimeFields.length,
+                extraCountMsg:
+                  unsupportedRuntimeFields.length - maxRuntimeFieldsDisplayCount > 0 ? (
+                    <FormattedMessage
+                      id="xpack.ml.dataframe.analytics.create.extraUnsupportedRuntimeFieldsMsg"
+                      defaultMessage="and {count} more"
+                      values={{
+                        count: unsupportedRuntimeFields.length - maxRuntimeFieldsDisplayCount,
+                      }}
+                    />
+                  ) : (
+                    ''
+                  ),
+                unsupportedRuntimeFields: unsupportedRuntimeFields
+                  .slice(0, maxRuntimeFieldsDisplayCount)
+                  .join(', '),
+              }}
+            />
+          </EuiCallOut>
+          <EuiSpacer />
+        </>
+      )}
+
       <AnalysisFieldsTable
         dependentVariable={dependentVariable}
         includes={includes}
@@ -456,7 +510,7 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
         loadingItems={loadingFieldOptions}
         setFormState={setFormState}
       />
-      {scatterplotFieldOptions.length > 1 && (
+      {showScatterplotMatrix && (
         <>
           <EuiFormRow
             data-test-subj="mlAnalyticsCreateJobWizardScatterplotMatrixFormRow"

@@ -679,6 +679,10 @@ export const DESCRIPTION_LABEL = i18n.translate(
   }
 );
 
+export const AND = i18n.translate('xpack.enterpriseSearch.workplaceSearch.and', {
+  defaultMessage: 'and',
+});
+
 export const UPDATE_LABEL = i18n.translate('xpack.enterpriseSearch.workplaceSearch.update.label', {
   defaultMessage: 'Update',
 });

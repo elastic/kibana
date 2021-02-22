@@ -52,7 +52,7 @@ export const registerSimulateRoute = ({
           });
         }
 
-        return res.internalError({ body: error });
+        throw error;
       }
     })
   );
