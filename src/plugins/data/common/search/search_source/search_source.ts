@@ -503,12 +503,7 @@ export class SearchSource {
     // we need to get the list of fields from an index pattern
     return fields
       .filter((fld: IndexPatternField) => filterSourceFields(fld.name))
-      .map((fld: IndexPatternField) => ({
-        field: fld.name,
-        ...((wildcardField as Record<string, string>)?.include_unmapped && {
-          include_unmapped: (wildcardField as Record<string, string>).include_unmapped,
-        }),
-      }));
+      .map((fld: IndexPatternField) => ({ field: fld.name }));
   }
 
   private getFieldFromDocValueFieldsOrIndexPattern(
