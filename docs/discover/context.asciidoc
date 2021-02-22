@@ -22,8 +22,18 @@ image::images/Discover-ContextView.png[Image showing context view feature, with 
 [[filter-context]]
 === Filter the context
 
-The filters you applied in *Discover* are carried over to the Context view. 
-Pinned filters remain active, while normal filters are copied in a disabled state. 
+The filters you applied in *Discover* are carried over to the Context view.
+
+[role="screenshot"]
+image::images/discover-context-filters-1.png[Image showing pinned and unpinned filter in Discover]
+
+
+Pinned filters remain active, while normal filters are copied in a disabled state.
+
+[role="screenshot"]
+image::images/discover-context-filters-2.png[Image showing pinned and disabled unpinned filter in Discover Context]
+
+
 You can re-enable these filters to refine your context view.
 
 If the Context view contains a large number of documents not related to the event under
