@@ -326,6 +326,52 @@ describe('Exception helpers', () => {
       expect(output).toEqual([{ ...getExceptionListItemSchemaMock() }]);
     });
 
+    test('it removes the "nested" entry entries with "value" of empty string', () => {
+      const { entries, ...rest } = { ...getExceptionListItemSchemaMock() };
+      const mockEmptyException: EntryNested = {
+        field: 'host.name',
+        type: OperatorTypeEnum.NESTED,
+        entries: [getEntryMatchMock(), { ...getEntryMatchMock(), value: '' }],
+      };
+      const output: Array<
+        ExceptionListItemSchema | CreateExceptionListItemSchema
+      > = filterExceptionItems([
+        {
+          ...rest,
+          entries: [...entries, mockEmptyException],
+        },
+      ]);
+
+      expect(output).toEqual([
+        {
+          ...getExceptionListItemSchemaMock(),
+          entries: [
+            ...getExceptionListItemSchemaMock().entries,
+            { ...mockEmptyException, entries: [getEntryMatchMock()] },
+          ],
+        },
+      ]);
+    });
+
+    test('it removes the "nested" entry item if all its entries are invalid', () => {
+      const { entries, ...rest } = { ...getExceptionListItemSchemaMock() };
+      const mockEmptyException: EntryNested = {
+        field: 'host.name',
+        type: OperatorTypeEnum.NESTED,
+        entries: [{ ...getEntryMatchMock(), value: '' }],
+      };
+      const output: Array<
+        ExceptionListItemSchema | CreateExceptionListItemSchema
+      > = filterExceptionItems([
+        {
+          ...rest,
+          entries: [...entries, mockEmptyException],
+        },
+      ]);
+
+      expect(output).toEqual([{ ...getExceptionListItemSchemaMock() }]);
+    });
+
     test('it removes `temporaryId` from items', () => {
       const { meta, ...rest } = getNewExceptionItem({
         listId: '123',
