@@ -429,6 +429,8 @@ export class SearchSource {
         return key && data[key] == null && addToRoot(key, val);
       case 'searchAfter':
         return addToBody('search_after', val);
+      case 'trackTotalHits':
+        return addToBody('track_total_hits', val);
       case 'source':
         return addToBody('_source', val);
       case 'sort':
