@@ -18,7 +18,7 @@ import {
   SearchUsageCollector,
 } from '../../../../../../../src/plugins/data/public';
 import { RedirectAppLinks } from '../../../../../../../src/plugins/kibana_react/public';
-import { ApplicationStart } from '../../../../../../../src/core/public';
+import { ApplicationStart, IBasePath } from '../../../../../../../src/core/public';
 import { IStorageWrapper } from '../../../../../../../src/plugins/kibana_utils/public';
 import { useSearchSessionTour } from './search_session_tour';
 
@@ -26,6 +26,7 @@ export interface SearchSessionIndicatorDeps {
   sessionService: ISessionService;
   timeFilter: TimefilterContract;
   application: ApplicationStart;
+  basePath: IBasePath;
   storage: IStorageWrapper;
   /**
    * Controls for how long we allow to save a session,
@@ -42,7 +43,9 @@ export const createConnectedSearchSessionIndicator = ({
   storage,
   disableSaveAfterSessionCompletesTimeout,
   usageCollector,
+  basePath,
 }: SearchSessionIndicatorDeps): React.FC => {
+  const searchSessionsManagementUrl = basePath.prepend('/app/management/kibana/search_sessions');
   const isAutoRefreshEnabled = () => !timeFilter.getRefreshInterval().pause;
   const isAutoRefreshEnabled$ = timeFilter
     .getRefreshIntervalUpdate$()
@@ -185,6 +188,7 @@ export const createConnectedSearchSessionIndicator = ({
           onCancel={onCancel}
           onOpened={onOpened}
           onViewSearchSessions={onViewSearchSessions}
+          viewSearchSessionsLink={searchSessionsManagementUrl}
         />
       </RedirectAppLinks>
     );
