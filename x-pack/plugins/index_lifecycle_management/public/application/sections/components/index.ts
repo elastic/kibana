@@ -7,6 +7,6 @@
 
 export {
   DescribedFormRow,
-  Props as DescribedFormRowProps,
-  SwitchProps as DescribedFormRowSwitchProps,
+  DescribedFormRowProps,
+  DescribedFormRowSwitchProps,
 } from './described_form_row';

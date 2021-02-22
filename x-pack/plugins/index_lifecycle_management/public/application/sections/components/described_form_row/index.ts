@@ -4,9 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { Props, SwitchProps } from './described_form_row';
 
-export {
-  DescribedFormRow,
-  Props as DescribedFormRowProps,
-  SwitchProps as DescribedFormRowSwitchProps,
-} from './described_form_row';
+export { Props as DescribedFormRowProps, SwitchProps as DescribedFormRowSwitchProps };
+export { DescribedFormRow } from './described_form_row';
