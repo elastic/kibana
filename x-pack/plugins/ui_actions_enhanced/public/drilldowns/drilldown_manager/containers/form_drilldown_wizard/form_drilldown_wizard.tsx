@@ -12,12 +12,18 @@ import { CreateDrilldownForm } from './create_drilldown_form';
 
 export const FormDrilldownWizard: React.FC = ({}) => {
   const drilldowns = useDrilldownManager();
-
   const actionFactory = drilldowns.useActionFactory();
-  if (!actionFactory) return <ActionFactoryPicker />;
 
   const drilldownState = drilldowns.getDrilldownState();
-  if (drilldownState) return <CreateDrilldownForm state={drilldownState} />;
+  let content: React.ReactNode = null;
 
-  return null;
+  if (!actionFactory) content = null;
+  if (drilldownState) content = <CreateDrilldownForm state={drilldownState} />;
+
+  return (
+    <>
+      <ActionFactoryPicker />
+      {content}
+    </>
+  );
 };

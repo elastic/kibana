@@ -6,16 +6,25 @@
  */
 
 import React from 'react';
+import { EuiButton, EuiSpacer } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { useDrilldownManager } from '../context';
 import { DrilldownForm } from '../../components/drilldown_form';
 import { DrilldownState } from '../../state';
 import { TriggerPickerProps } from '../../components/trigger_picker';
 
-export interface CreateDrilldownFormProps {
+export const txtDeleteDrilldownButtonLabel = i18n.translate(
+  'xpack.uiActionsEnhanced.drilldowns.components.flyoutDrilldownWizard.deleteDrilldownButtonLabel',
+  {
+    defaultMessage: 'Delete drilldown',
+  }
+);
+
+export interface EditDrilldownFormProps {
   state: DrilldownState;
 }
 
-export const CreateDrilldownForm: React.FC<CreateDrilldownFormProps> = ({ state }) => {
+export const EditDrilldownForm: React.FC<EditDrilldownFormProps> = ({ state }) => {
   const drilldowns = useDrilldownManager();
   const name = state.useName();
   const triggers = state.useTriggers();
@@ -34,12 +43,23 @@ export const CreateDrilldownForm: React.FC<CreateDrilldownFormProps> = ({ state 
   const context = state.getFactoryContext();
 
   return (
-    <DrilldownForm name={name} onNameChange={state.setName} triggers={triggerPickerProps}>
-      <state.factory.ReactCollectConfig
-        config={config}
-        onConfig={state.setConfig}
-        context={context}
-      />
-    </DrilldownForm>
+    <>
+      <DrilldownForm name={name} onNameChange={state.setName} triggers={triggerPickerProps}>
+        <state.factory.ReactCollectConfig
+          config={config}
+          onConfig={state.setConfig}
+          context={context}
+        />
+      </DrilldownForm>
+      <EuiSpacer size={'xl'} />
+      <EuiButton
+        onClick={() => {
+          alert('DELETE!');
+        }}
+        color={'danger'}
+      >
+        {txtDeleteDrilldownButtonLabel}
+      </EuiButton>
+    </>
   );
 };
