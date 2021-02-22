@@ -67,8 +67,9 @@ function PercentageModeOption({
       >
         <EuiFieldText
           fullWidth
+          compressed
           data-test-subj={`${dataTestSubj}FormatPattern`}
-          value={formatPattern}
+          value={formatPattern || ''}
           placeholder={defaultPattern}
           onChange={(e) => {
             setValue('percentageFormatPattern', e.target.value ? e.target.value : undefined);

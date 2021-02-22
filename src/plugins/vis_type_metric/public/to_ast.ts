@@ -43,6 +43,7 @@ export const toExpressionAst: VisToExpressionAst<VisParams> = (vis, params) => {
 
   const {
     percentageMode,
+    percentageFormatPattern,
     useRanges,
     colorSchema,
     metricColorMode,
@@ -57,7 +58,7 @@ export const toExpressionAst: VisToExpressionAst<VisParams> = (vis, params) => {
     schemas.metric.forEach((metric: SchemaConfig) => {
       metric.format = {
         id: 'percent',
-        params: { pattern: get(vis.params, 'metric.percentageFormatPattern', undefined) },
+        params: { pattern: percentageFormatPattern },
       };
     });
   }
