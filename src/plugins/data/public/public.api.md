@@ -1651,6 +1651,7 @@ export type ISearchGeneric = <SearchStrategyRequest extends IKibanaSearchRequest
 // @public (undocumented)
 export interface ISearchOptions {
     abortSignal?: AbortSignal;
+    indexPattern?: IndexPattern;
     isRestore?: boolean;
     isStored?: boolean;
     legacyHitsTotal?: boolean;
@@ -1881,9 +1882,11 @@ export interface OptionedValueProp {
 // @public (undocumented)
 export class PainlessError extends EsError {
     // Warning: (ae-forgotten-export) The symbol "IEsError" needs to be exported by the entry point index.d.ts
-    constructor(err: IEsError);
+    constructor(err: IEsError, indexPattern?: IndexPattern);
     // (undocumented)
     getErrorMessage(application: ApplicationStart): JSX.Element;
+    // (undocumented)
+    indexPattern?: IndexPattern;
     // (undocumented)
     painlessStack?: string;
 }

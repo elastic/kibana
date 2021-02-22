@@ -961,6 +961,7 @@ export class IndexPatternsServiceProvider implements Plugin_3<void, IndexPattern
 // @public (undocumented)
 export interface ISearchOptions {
     abortSignal?: AbortSignal;
+    indexPattern?: IndexPattern;
     isRestore?: boolean;
     isStored?: boolean;
     legacyHitsTotal?: boolean;
