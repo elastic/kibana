@@ -143,7 +143,7 @@ describe('DocumentMigrator', () => {
       ).toThrow(/Migrations are not ready. Make sure prepareMigrations is called first./i);
     });
 
-    it(`validates convertToMultiNamespaceTypeVersion can only be used with namespaceType 'multiple'`, () => {
+    it(`validates convertToMultiNamespaceTypeVersion can only be used with namespaceType 'multiple' or 'multiple-isolated'`, () => {
       const invalidDefinition = {
         kibanaVersion: '3.2.3',
         typeRegistry: createRegistry({
@@ -154,7 +154,7 @@ describe('DocumentMigrator', () => {
         log: mockLogger,
       };
       expect(() => new DocumentMigrator(invalidDefinition)).toThrow(
-        `Invalid convertToMultiNamespaceTypeVersion for type foo. Expected namespaceType to be 'multiple', but got 'single'.`
+        `Invalid convertToMultiNamespaceTypeVersion for type foo. Expected namespaceType to be 'multiple' or 'multiple-isolated', but got 'single'.`
       );
     });
 
@@ -722,7 +722,7 @@ describe('DocumentMigrator', () => {
       });
     });
 
-    it('logs the document and transform that failed', () => {
+    it('logs the original error and throws a transform error if a document transform fails', () => {
       const log = mockLogger;
       const migrator = new DocumentMigrator({
         ...testOpts(),
@@ -747,10 +747,13 @@ describe('DocumentMigrator', () => {
         migrator.migrate(_.cloneDeep(failedDoc));
         expect('Did not throw').toEqual('But it should have!');
       } catch (error) {
-        expect(error.message).toMatch(/Dang diggity!/);
-        const warning = loggingSystemMock.collect(mockLoggerFactory).warn[0][0];
-        expect(warning).toContain(JSON.stringify(failedDoc));
-        expect(warning).toContain('dog:1.2.3');
+        expect(error.message).toMatchInlineSnapshot(`
+          "Failed to transform document smelly. Transform: dog:1.2.3
+          Doc: {\\"id\\":\\"smelly\\",\\"type\\":\\"dog\\",\\"attributes\\":{},\\"migrationVersion\\":{}}"
+        `);
+        expect(loggingSystemMock.collect(mockLoggerFactory).error[0][0]).toMatchInlineSnapshot(
+          `[Error: Dang diggity!]`
+        );
       }
     });
 
@@ -779,7 +782,7 @@ describe('DocumentMigrator', () => {
       };
       migrator.migrate(doc);
       expect(loggingSystemMock.collect(mockLoggerFactory).info[0][0]).toEqual(logTestMsg);
-      expect(loggingSystemMock.collect(mockLoggerFactory).warn[1][0]).toEqual(logTestMsg);
+      expect(loggingSystemMock.collect(mockLoggerFactory).warn[0][0]).toEqual(logTestMsg);
     });
 
     test('extracts the latest migration version info', () => {
