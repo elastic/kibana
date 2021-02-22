@@ -21,9 +21,7 @@ export const DrilldownManager: React.FC = ({}) => {
   const footer = (
     <EuiButton
       onClick={() => {
-        // if (isActionValid(wizardConfig)) {
-        //   onSubmit(wizardConfig);
-        // }
+        alert('CREATE DRILL');
       }}
       fill
       // isDisabled={!isActionValid(wizardConfig)}
@@ -70,7 +68,7 @@ export const DrilldownManager: React.FC = ({}) => {
       footer={footer}
       onClose={drilldowns.close}
       // onBack={isCreateOnly ? undefined : () => setRoute(Routes.Manage)}
-      onBack={() => drilldowns.setScreen('list')}
+      // onBack={() => drilldowns.setScreen('list')}
       banner={
         showWelcomeMessage && (
           <DrilldownHelloBar

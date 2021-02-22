@@ -32,7 +32,7 @@ export const CreateDrilldownForm: React.FC<CreateDrilldownFormProps> = ({ state 
   const config = state.useConfig();
   const triggerPickerProps: TriggerPickerProps = React.useMemo(
     () => ({
-      items: drilldowns.deps.triggers.map((id) => {
+      items: state.uiTriggers.map((id) => {
         const trigger = drilldowns.deps.getTrigger(id);
         return trigger;
       }),

@@ -99,6 +99,7 @@ export class DrilldownManagerState {
       const context = this.getActionFactoryContext();
       const drilldownState = new DrilldownState({
         factory: actionFactory,
+        placeTriggers: this.deps.triggers,
         placeContext: this.deps.placeContext || {},
         name: !!oldDrilldownState ? oldDrilldownState.name$.getValue() : '',
         triggers: [],

@@ -15,10 +15,35 @@ import {
 import { ActionFactoryPlaceContext } from '../types';
 
 export interface DrilldownStateDeps {
+  /**
+   * Action factory, i.e. drilldown, which we are creating.
+   */
   factory: ActionFactory;
+
+  /**
+   * List of all triggers the current place supports.
+   */
+  placeTriggers: string[];
+
+  /**
+   * Special opaque context object provided by the place from where the
+   * Drilldown Manager was opened.
+   */
   placeContext: ActionFactoryPlaceContext<BaseActionFactoryContext>;
+
+  /**
+   * Initial name of the drilldown instance.
+   */
   name?: string;
+
+  /**
+   * Initially selected triggers of the drilldown instance.
+   */
   triggers?: string[];
+
+  /**
+   * Initial config of the drilldown instance.
+   */
   config?: BaseActionConfig;
 }
 
@@ -43,7 +68,20 @@ export class DrilldownState {
   public readonly name$: BehaviorSubject<string>;
 
   /**
-   * User entered name of this drilldown.
+   * List of all triggers the place which opened the Drilldown Manager supports.
+   */
+  public readonly placeTriggers: string[];
+
+  /**
+   * List of all triggers from which the user can pick in UI for this specific
+   * drilldown. This is the selection list we show to the user. It is an
+   * intersection of all triggers supported by current place with the triggers
+   * that the action factory supports.
+   */
+  public readonly uiTriggers: string[];
+
+  /**
+   * User selected triggers. (Currently in UI we support user picking just one trigger).
    */
   public readonly triggers$: BehaviorSubject<string[]>;
 
@@ -55,16 +93,23 @@ export class DrilldownState {
 
   constructor({
     factory,
+    placeTriggers,
     placeContext,
     name = '',
     triggers = [],
     config = {},
   }: DrilldownStateDeps) {
     this.factory = factory;
+    this.placeTriggers = placeTriggers;
     this.placeContext = placeContext;
     this.name$ = new BehaviorSubject<string>(name);
     this.triggers$ = new BehaviorSubject<string[]>(triggers);
     this.config$ = new BehaviorSubject<BaseActionConfig>(config);
+
+    const triggersFactorySupports = this.factory.supportedTriggers();
+    this.uiTriggers = triggersFactorySupports.filter((trigger) =>
+      this.placeTriggers.includes(trigger)
+    );
   }
 
   /**
@@ -93,6 +138,18 @@ export class DrilldownState {
       ...this.placeContext,
       triggers: this.triggers$.getValue(),
     };
+  }
+
+  /**
+   * Returns a list of all triggers from which user can pick in UI, for this
+   * specific drilldown.
+   */
+  public getAllDrilldownTriggers(): string[] {
+    const triggersFactorySupports = this.factory.supportedTriggers();
+    const uiTriggers = triggersFactorySupports.filter((trigger) =>
+      this.placeTriggers.includes(trigger)
+    );
+    return uiTriggers;
   }
 
   // Below are convenience React hooks for consuming observables in connected
