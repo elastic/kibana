@@ -52,14 +52,14 @@ With field-level security (FLS), you can instruct {es} to grant or deny access t
 image::user/security/images/create-role-index-example.png[Create role with index privileges]
 
 [[index_privilege_dls_example]]
-===== Example: Grant read access to specific documents that match the `filebeat-*` pattern
+===== Example: Grant read access to specific documents in indices that match the `filebeat-*` pattern
 
 . Go to **Stack Management > Roles**, and then click **Create role**.
 . In **Index privileges**, enter:
-.. `filebeat-*` in the **Index** field.
+.. `filebeat-*` in the **Indices** field.
 .. `read` and `view_index_metadata` in the **Privileges** field.
-. Select **Grant read privileges to selected documents**.
-. Enter an {es} query that describes the documents you want to grant access to. This example writes a query that allows access to documents that have a `category` field equal to `click`:
+. Select **Grant read privileges to specific documents**.
+. Enter an {es} query that matches the documents you want to grant access to. This example writes a query that allows access to documents that have a `category` field equal to `click`:
 +
 [source,sh]
 --------------------------------------------------
