@@ -147,7 +147,7 @@ describe('role mappings routes', () => {
 
     it('creates a request handler', () => {
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/ws/org/role_mappings/collection/new',
+        path: '/ws/org/role_mappings/new',
       });
     });
   });

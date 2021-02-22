@@ -105,7 +105,7 @@ export function registerOrgNewRoleMappingRoute({
       validate: false,
     },
     enterpriseSearchRequestHandler.createRequest({
-      path: '/ws/org/role_mappings/collection/new',
+      path: '/ws/org/role_mappings/new',
     })
   );
 }
