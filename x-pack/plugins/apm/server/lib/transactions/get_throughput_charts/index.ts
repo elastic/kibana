@@ -16,7 +16,7 @@ import {
 import {
   environmentQuery,
   rangeQuery,
-  searchQuery,
+  kqlQuery,
 } from '../../../../server/utils/queries';
 import {
   getDocumentTypeFilterForAggregatedTransactions,
@@ -60,7 +60,7 @@ function searchThroughput({
     ),
     ...rangeQuery(start, end),
     ...environmentQuery(environment),
-    ...searchQuery(kuery),
+    ...kqlQuery(kuery),
   ];
 
   if (transactionName) {

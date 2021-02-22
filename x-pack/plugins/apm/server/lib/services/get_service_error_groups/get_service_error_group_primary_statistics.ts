@@ -17,7 +17,7 @@ import { ProcessorEvent } from '../../../../common/processor_event';
 import {
   environmentQuery,
   rangeQuery,
-  searchQuery,
+  kqlQuery,
 } from '../../../../server/utils/queries';
 import { withApmSpan } from '../../../utils/with_apm_span';
 import { getErrorName } from '../../helpers/get_error_name';
@@ -52,7 +52,7 @@ export function getServiceErrorGroupPrimaryStatistics({
               { term: { [TRANSACTION_TYPE]: transactionType } },
               ...rangeQuery(start, end),
               ...environmentQuery(environment),
-              ...searchQuery(kuery),
+              ...kqlQuery(kuery),
             ],
           },
         },

@@ -16,7 +16,7 @@ import { LatencyAggregationType } from '../../../common/latency_aggregation_type
 import {
   environmentQuery,
   rangeQuery,
-  searchQuery,
+  kqlQuery,
 } from '../../../server/utils/queries';
 import { withApmSpan } from '../../utils/with_apm_span';
 import {
@@ -83,7 +83,7 @@ export async function getServiceTransactionGroups({
               ),
               ...rangeQuery(start, end),
               ...environmentQuery(environment),
-              ...searchQuery(kuery),
+              ...kqlQuery(kuery),
             ],
           },
         },

@@ -18,7 +18,7 @@ import {
 import {
   environmentQuery,
   rangeQuery,
-  searchQuery,
+  kqlQuery,
 } from '../../../../server/utils/queries';
 import { withApmSpan } from '../../../utils/with_apm_span';
 
@@ -60,7 +60,7 @@ export async function getDistributionMax({
               { term: { [TRANSACTION_NAME]: transactionName } },
               ...rangeQuery(start, end),
               ...environmentQuery(environment),
-              ...searchQuery(kuery),
+              ...kqlQuery(kuery),
             ],
           },
         },

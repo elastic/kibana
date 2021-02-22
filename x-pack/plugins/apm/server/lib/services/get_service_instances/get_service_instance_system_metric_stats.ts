@@ -9,7 +9,7 @@ import { AggregationOptionsByType } from '../../../../../../typings/elasticsearc
 import {
   environmentQuery,
   rangeQuery,
-  searchQuery,
+  kqlQuery,
 } from '../../../../server/utils/queries';
 import { SERVICE_NODE_NAME_MISSING } from '../../../../common/service_nodes';
 import {
@@ -104,7 +104,7 @@ export async function getServiceInstanceSystemMetricStats({
               { term: { [SERVICE_NAME]: serviceName } },
               ...rangeQuery(start, end),
               ...environmentQuery(environment),
-              ...searchQuery(kuery),
+              ...kqlQuery(kuery),
             ],
             should: [cgroupMemoryFilter, systemMemoryFilter, cpuUsageFilter],
             minimum_should_match: 1,

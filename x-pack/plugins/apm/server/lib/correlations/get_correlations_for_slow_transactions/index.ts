@@ -10,7 +10,7 @@ import { ESFilter } from '../../../../../../typings/elasticsearch';
 import {
   environmentQuery,
   rangeQuery,
-  searchQuery,
+  kqlQuery,
 } from '../../../../server/utils/queries';
 import {
   SERVICE_NAME,
@@ -52,7 +52,7 @@ export async function getCorrelationsForSlowTransactions({
       { term: { [PROCESSOR_EVENT]: ProcessorEvent.transaction } },
       ...rangeQuery(start, end),
       ...environmentQuery(environment),
-      ...searchQuery(kuery),
+      ...kqlQuery(kuery),
     ];
 
     if (serviceName) {

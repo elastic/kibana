@@ -18,7 +18,7 @@ import {
 import {
   environmentQuery,
   rangeQuery,
-  searchQuery,
+  kqlQuery,
 } from '../../../../server/utils/queries';
 import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
 import {
@@ -84,7 +84,7 @@ export async function getServiceTransactionStats({
               ),
               ...rangeQuery(start, end),
               ...environmentQuery(environment),
-              ...searchQuery(kuery),
+              ...kqlQuery(kuery),
             ],
           },
         },

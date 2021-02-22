@@ -12,7 +12,7 @@ import { PromiseReturnType } from '../../../../../observability/typings/common';
 import {
   environmentQuery,
   rangeQuery,
-  searchQuery,
+  kqlQuery,
 } from '../../../../server/utils/queries';
 import { ProcessorEvent } from '../../../../common/processor_event';
 import {
@@ -73,7 +73,7 @@ export async function getServiceErrorGroups({
                 { term: { [TRANSACTION_TYPE]: transactionType } },
                 ...rangeQuery(start, end),
                 ...environmentQuery(environment),
-                ...searchQuery(kuery),
+                ...kqlQuery(kuery),
               ],
             },
           },
@@ -156,7 +156,7 @@ export async function getServiceErrorGroups({
                   { term: { [TRANSACTION_TYPE]: transactionType } },
                   ...rangeQuery(start, end),
                   ...environmentQuery(environment),
-                  ...searchQuery(kuery),
+                  ...kqlQuery(kuery),
                 ],
               },
             },

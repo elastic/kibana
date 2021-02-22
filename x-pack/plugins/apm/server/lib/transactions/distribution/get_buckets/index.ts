@@ -20,7 +20,7 @@ import { joinByKey } from '../../../../../common/utils/join_by_key';
 import {
   environmentQuery,
   rangeQuery,
-  searchQuery,
+  kqlQuery,
 } from '../../../../../server/utils/queries';
 import {
   getDocumentTypeFilterForAggregatedTransactions,
@@ -85,7 +85,7 @@ export async function getBuckets({
         { term: { [TRANSACTION_NAME]: transactionName } },
         ...rangeQuery(start, end),
         ...environmentQuery(environment),
-        ...searchQuery(kuery),
+        ...kqlQuery(kuery),
       ];
 
       async function getSamplesForDistributionBuckets() {

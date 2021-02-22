@@ -13,7 +13,7 @@ import {
 import {
   environmentQuery,
   rangeQuery,
-  searchQuery,
+  kqlQuery,
 } from '../../server/utils/queries';
 import { SERVICE_NODE_NAME_MISSING } from '../../common/service_nodes';
 import { ProcessorEvent } from '../../common/processor_event';
@@ -50,7 +50,7 @@ export function getMetricsProjection({
     ...getServiceNodeNameFilters(serviceNodeName),
     ...rangeQuery(start, end),
     ...environmentQuery(environment),
-    ...searchQuery(kuery),
+    ...kqlQuery(kuery),
   ];
 
   return {

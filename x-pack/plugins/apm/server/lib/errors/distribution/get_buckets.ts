@@ -14,7 +14,7 @@ import { ProcessorEvent } from '../../../../common/processor_event';
 import {
   environmentQuery,
   rangeQuery,
-  searchQuery,
+  kqlQuery,
 } from '../../../../server/utils/queries';
 import { withApmSpan } from '../../../utils/with_apm_span';
 import { Setup, SetupTimeRange } from '../../helpers/setup_request';
@@ -40,7 +40,7 @@ export async function getBuckets({
       { term: { [SERVICE_NAME]: serviceName } },
       ...rangeQuery(start, end),
       ...environmentQuery(environment),
-      ...searchQuery(kuery),
+      ...kqlQuery(kuery),
     ];
 
     if (groupId) {

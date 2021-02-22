@@ -14,7 +14,7 @@ import { ProcessorEvent } from '../../../common/processor_event';
 import {
   environmentQuery,
   rangeQuery,
-  searchQuery,
+  kqlQuery,
 } from '../../../server/utils/queries';
 import { withApmSpan } from '../../utils/with_apm_span';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
@@ -49,7 +49,7 @@ export function getErrorGroupSample({
               { term: { [ERROR_GROUP_ID]: groupId } },
               ...rangeQuery(start, end),
               ...environmentQuery(environment),
-              ...searchQuery(kuery),
+              ...kqlQuery(kuery),
             ],
             should: [{ term: { [TRANSACTION_SAMPLED]: true } }],
           },

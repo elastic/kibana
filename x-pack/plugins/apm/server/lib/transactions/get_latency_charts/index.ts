@@ -16,7 +16,7 @@ import { LatencyAggregationType } from '../../../../common/latency_aggregation_t
 import {
   environmentQuery,
   rangeQuery,
-  searchQuery,
+  kqlQuery,
 } from '../../../../server/utils/queries';
 import {
   getDocumentTypeFilterForAggregatedTransactions,
@@ -63,7 +63,7 @@ function searchLatency({
     ),
     ...rangeQuery(start, end),
     ...environmentQuery(environment),
-    ...searchQuery(kuery),
+    ...kqlQuery(kuery),
   ];
 
   if (transactionName) {

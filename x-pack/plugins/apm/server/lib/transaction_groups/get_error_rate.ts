@@ -17,7 +17,7 @@ import { EventOutcome } from '../../../common/event_outcome';
 import {
   environmentQuery,
   rangeQuery,
-  searchQuery,
+  kqlQuery,
 } from '../../../server/utils/queries';
 import {
   getDocumentTypeFilterForAggregatedTransactions,
@@ -77,7 +77,7 @@ export async function getErrorRate({
       ),
       ...rangeQuery(start, end),
       ...environmentQuery(environment),
-      ...searchQuery(kuery),
+      ...kqlQuery(kuery),
     ];
 
     const outcomes = getOutcomeAggregation();

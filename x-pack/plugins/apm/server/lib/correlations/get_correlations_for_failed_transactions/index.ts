@@ -16,7 +16,7 @@ import { ESFilter } from '../../../../../../typings/elasticsearch';
 import {
   environmentQuery,
   rangeQuery,
-  searchQuery,
+  kqlQuery,
 } from '../../../../server/utils/queries';
 import {
   EVENT_OUTCOME,
@@ -58,7 +58,7 @@ export async function getCorrelationsForFailedTransactions({
       { term: { [PROCESSOR_EVENT]: ProcessorEvent.transaction } },
       ...rangeQuery(start, end),
       ...environmentQuery(environment),
-      ...searchQuery(kuery),
+      ...kqlQuery(kuery),
     ];
 
     if (serviceName) {

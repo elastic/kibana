@@ -13,7 +13,7 @@ import {
 import {
   environmentQuery,
   rangeQuery,
-  searchQuery,
+  kqlQuery,
 } from '../../server/utils/queries';
 import { ProcessorEvent } from '../../common/processor_event';
 
@@ -41,7 +41,7 @@ export function getErrorGroupsProjection({
             { term: { [SERVICE_NAME]: serviceName } },
             ...rangeQuery(start, end),
             ...environmentQuery(environment),
-            ...searchQuery(kuery),
+            ...kqlQuery(kuery),
           ],
         },
       },

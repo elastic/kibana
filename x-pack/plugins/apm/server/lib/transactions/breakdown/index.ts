@@ -21,7 +21,7 @@ import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 import {
   environmentQuery,
   rangeQuery,
-  searchQuery,
+  kqlQuery,
 } from '../../../../server/utils/queries';
 import { getMetricsDateHistogramParams } from '../../helpers/metrics';
 import { MAX_KPIS } from './constants';
@@ -92,7 +92,7 @@ export function getTransactionBreakdown({
       { term: { [TRANSACTION_TYPE]: transactionType } },
       ...rangeQuery(start, end),
       ...environmentQuery(environment),
-      ...searchQuery(kuery),
+      ...kqlQuery(kuery),
     ];
 
     if (transactionName) {

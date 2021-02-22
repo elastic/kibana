@@ -14,7 +14,7 @@ import {
 import {
   environmentQuery,
   rangeQuery,
-  searchQuery,
+  kqlQuery,
 } from '../../server/utils/queries';
 import {
   getProcessorEventForAggregatedTransactions,
@@ -60,7 +60,7 @@ export function getTransactionsProjection({
       ),
       ...rangeQuery(start, end),
       ...environmentQuery(environment),
-      ...searchQuery(kuery),
+      ...kqlQuery(kuery),
     ],
   };
 
