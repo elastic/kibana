@@ -11,7 +11,7 @@ import React from 'react';
 
 import { findTestSubject, mountWithIntl, nextTick, shallowWithIntl } from '@kbn/test/jest';
 
-import type { SummarizedCopyToSpaceResult } from '../summarize_copy_result';
+import type { SummarizedCopyToSpaceResult } from '../lib';
 import type { ImportRetry } from '../types';
 import type { ResolveAllConflictsProps } from './resolve_all_conflicts';
 import { ResolveAllConflicts } from './resolve_all_conflicts';

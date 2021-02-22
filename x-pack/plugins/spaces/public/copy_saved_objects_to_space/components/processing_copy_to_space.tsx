@@ -18,7 +18,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import type { ProcessedImportResponse } from 'src/plugins/saved_objects_management/public';
 import type { Space } from 'src/plugins/spaces_oss/common';
 
-import { summarizeCopyResult } from '../summarize_copy_result';
+import { summarizeCopyResult } from '../lib';
 import type { CopyOptions, ImportRetry, SavedObjectTarget } from '../types';
 import { SpaceResult, SpaceResultProcessing } from './space_result';
 

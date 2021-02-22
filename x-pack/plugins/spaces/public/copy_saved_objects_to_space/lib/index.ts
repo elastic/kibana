@@ -5,4 +5,8 @@
  * 2.0.
  */
 
-export { CopySavedObjectsToSpaceService } from './copy_saved_objects_to_space_service';
+export type {
+  SummarizedCopyToSpaceResult,
+  SummarizedSavedObjectResult,
+} from './summarize_copy_result';
+export { summarizeCopyResult } from './summarize_copy_result';

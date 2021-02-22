@@ -27,7 +27,7 @@ import type {
 } from 'src/core/public';
 import type { Space } from 'src/plugins/spaces_oss/common';
 
-import type { SummarizedCopyToSpaceResult } from '../index';
+import type { SummarizedCopyToSpaceResult } from '../lib';
 import type { ImportRetry } from '../types';
 import { CopyStatusIndicator } from './copy_status_indicator';
 

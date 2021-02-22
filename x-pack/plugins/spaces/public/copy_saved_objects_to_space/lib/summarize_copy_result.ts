@@ -14,7 +14,7 @@ import type {
   ProcessedImportResponse,
 } from 'src/plugins/saved_objects_management/public';
 
-import type { SavedObjectTarget } from './types';
+import type { SavedObjectTarget } from '../types';
 
 export interface SummarizedSavedObjectResult {
   type: string;

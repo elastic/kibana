@@ -13,7 +13,7 @@ import React, { Fragment } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import type { Space } from 'src/plugins/spaces_oss/common';
 
-import type { SummarizedCopyToSpaceResult } from '../summarize_copy_result';
+import type { SummarizedCopyToSpaceResult } from '../lib';
 import type { ImportRetry } from '../types';
 import { ResolveAllConflicts } from './resolve_all_conflicts';
 
