@@ -10,8 +10,6 @@ import { storiesOf } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import { DrilldownForm } from '.';
 import type { TriggerPickerProps } from '../trigger_picker';
-import { ActionFactory, BaseActionFactoryContext } from '../../../../dynamic_actions';
-import { reactToUiComponent } from '../../../../../../../../src/plugins/kibana_react/public';
 
 const triggers: TriggerPickerProps = {
   items: [
@@ -31,34 +29,10 @@ const triggers: TriggerPickerProps = {
   onChange: () => {},
 };
 
-const factory: ActionFactory = ({
-  ReactCollectConfig: () => <div>collect config</div>,
-  CollectConfig: reactToUiComponent(() => <div>collect config</div>),
-  id: 'TEST',
-  isConfigValid: () => true,
-  create: () => ({
-    id: 'TEST_ACTION',
-    execute: async () => {},
-  }),
-  createConfig: () => ({}),
-  supportedTriggers: () => ['RANGE_SELECT_TRIGGER'],
-  def: {} as any,
-  deps: {} as any,
-  getDisplayName: () => 'Go to Discover',
-  getDisplayNameTooltip: () => 'This is Discover drilldown',
-  getIconType: () => 'discoverApp',
-  isBeta: false,
-  isCompatible: async () => true,
-  isCompatibleLicense: () => true,
-  order: 1,
-} as unknown) as ActionFactory;
-
 storiesOf('components/DrilldownForm', module)
   .add('Default', () => {
     return (
       <DrilldownForm
-        actionFactory={factory}
-        context={{} as BaseActionFactoryContext}
         name={'...'}
         euiIconType={'discoverApp'}
         drilldownTypeName={'Go to Discover'}
@@ -73,8 +47,6 @@ storiesOf('components/DrilldownForm', module)
   .add('With license link', () => {
     return (
       <DrilldownForm
-        actionFactory={factory}
-        context={{} as BaseActionFactoryContext}
         name={'...'}
         euiIconType={'discoverApp'}
         drilldownTypeName={'Go to Discover'}
@@ -90,8 +62,6 @@ storiesOf('components/DrilldownForm', module)
   .add('No triggers', () => {
     return (
       <DrilldownForm
-        actionFactory={factory}
-        context={{} as BaseActionFactoryContext}
         name={'...'}
         euiIconType={'discoverApp'}
         drilldownTypeName={'Go to Discover'}

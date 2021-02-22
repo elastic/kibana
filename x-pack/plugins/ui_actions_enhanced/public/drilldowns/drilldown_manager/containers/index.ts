@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export { PublicDrilldownManagerProps } from './context';
 export { createPublicDrilldownManager, PublicDrilldownManagerComponent } from './drilldown_manager';
