@@ -20,7 +20,7 @@ import { APP_ID, APP_ICON, MAP_SAVED_OBJECT_TYPE, getExistingMapPath } from '../
 import { mapSavedObjects, mapsTelemetrySavedObjects } from './saved_objects';
 import { MapsXPackConfig } from '../config';
 // @ts-ignore
-import { setInternalRepository } from './kibana_server_services';
+import { setIndexPatternsService, setInternalRepository } from './kibana_server_services';
 import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/server';
 import { emsBoundariesSpecProvider } from './tutorials/ems';
 // @ts-ignore
@@ -30,6 +30,7 @@ import { LicensingPluginSetup } from '../../licensing/server';
 import { HomeServerPluginSetup } from '../../../../src/plugins/home/server';
 import { MapsLegacyPluginSetup } from '../../../../src/plugins/maps_legacy/server';
 import { EMSSettings } from '../common/ems_settings';
+import { PluginStart as DataPluginStart } from '../../../../src/plugins/data/server';
 
 interface SetupDeps {
   features: FeaturesPluginSetupContract;
@@ -37,6 +38,10 @@ interface SetupDeps {
   home: HomeServerPluginSetup;
   licensing: LicensingPluginSetup;
   mapsLegacy: MapsLegacyPluginSetup;
+}
+
+export interface StartDeps {
+  data: DataPluginStart;
 }
 
 export class MapsPlugin implements Plugin {
@@ -208,7 +213,11 @@ export class MapsPlugin implements Plugin {
   }
 
   // @ts-ignore
-  start(core: CoreStart) {
+  start(core: CoreStart, plugins: StartDeps) {
     setInternalRepository(core.savedObjects.createInternalRepository);
+    setIndexPatternsService(
+      plugins.data.indexPatterns.indexPatternsServiceFactory,
+      core.elasticsearch.client.asInternalUser
+    );
   }
 }
