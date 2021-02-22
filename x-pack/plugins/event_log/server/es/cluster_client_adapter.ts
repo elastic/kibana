@@ -417,7 +417,7 @@ export class ClusterClientAdapter {
       );
     } catch (err) {
       throw new Error(
-        `querying for Event Log alerts instances summaries by alert ids "${ids}" failed with: ${err.message}`
+        `querying for Event Log saved objects summaries by ids "${ids}" failed with: ${err.message}`
       );
     }
   }
