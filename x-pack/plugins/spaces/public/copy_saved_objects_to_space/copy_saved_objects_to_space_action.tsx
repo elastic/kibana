@@ -13,7 +13,7 @@ import type { SavedObjectsManagementRecord } from 'src/plugins/saved_objects_man
 
 import { SavedObjectsManagementAction } from '../../../../../src/plugins/saved_objects_management/public';
 import type { SpacesManager } from '../spaces_manager';
-import { CopySavedObjectsToSpaceFlyout } from './components';
+import { CopyToSpaceFlyoutInternal } from './components';
 
 export class CopyToSpaceSavedObjectsManagementAction extends SavedObjectsManagementAction {
   public id: string = 'copy_saved_objects_to_space';
@@ -56,7 +56,7 @@ export class CopyToSpaceSavedObjectsManagementAction extends SavedObjectsManagem
     };
 
     return (
-      <CopySavedObjectsToSpaceFlyout
+      <CopyToSpaceFlyoutInternal
         onClose={this.onClose}
         savedObjectTarget={savedObjectTarget}
         spacesManager={this.spacesManager}

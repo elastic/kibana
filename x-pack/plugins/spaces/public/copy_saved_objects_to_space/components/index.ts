@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { CopySavedObjectsToSpaceFlyout } from './copy_to_space_flyout';
+export { CopyToSpaceFlyoutInternal } from './copy_to_space_flyout_internal';

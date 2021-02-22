@@ -18,7 +18,7 @@ import type { SpacesManager } from '../../spaces_manager';
 import { spacesManagerMock } from '../../spaces_manager/mocks';
 import type { SavedObjectTarget } from '../types';
 import { CopyModeControl } from './copy_mode_control';
-import { CopySavedObjectsToSpaceFlyout } from './copy_to_space_flyout';
+import { CopyToSpaceFlyoutInternal } from './copy_to_space_flyout_internal';
 import { CopyToSpaceForm } from './copy_to_space_form';
 import { ProcessingCopyToSpace } from './processing_copy_to_space';
 import { SelectableSpacesControl } from './selectable_spaces_control';
@@ -77,7 +77,7 @@ const setup = async (opts: SetupOpts = {}) => {
   } as SavedObjectTarget;
 
   const wrapper = mountWithIntl(
-    <CopySavedObjectsToSpaceFlyout
+    <CopyToSpaceFlyoutInternal
       savedObjectTarget={savedObjectToCopy}
       spacesManager={(mockSpacesManager as unknown) as SpacesManager}
       toastNotifications={(mockToastNotifications as unknown) as ToastsApi}

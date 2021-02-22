@@ -31,7 +31,7 @@ import type {
 } from 'src/plugins/spaces_oss/public';
 
 import { ALL_SPACES_ID, UNKNOWN_SPACE } from '../../../common/constants';
-import { CopySavedObjectsToSpaceFlyout } from '../../copy_saved_objects_to_space/components';
+import { CopyToSpaceFlyoutInternal } from '../../copy_saved_objects_to_space/components';
 import { useSpaces } from '../../spaces_context';
 import type { SpacesManager } from '../../spaces_manager';
 import type { ShareToSpaceTarget } from '../../types';
@@ -271,7 +271,7 @@ export const ShareToSpaceFlyoutInternal = (props: ShareToSpaceFlyoutProps) => {
 
   if (showMakeCopy) {
     return (
-      <CopySavedObjectsToSpaceFlyout
+      <CopyToSpaceFlyoutInternal
         onClose={onClose}
         savedObjectTarget={savedObjectTarget}
         spacesManager={spacesManager}

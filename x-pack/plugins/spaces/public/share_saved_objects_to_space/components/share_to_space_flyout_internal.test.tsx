@@ -23,7 +23,7 @@ import { coreMock } from 'src/core/public/mocks';
 import type { Space } from 'src/plugins/spaces_oss/common';
 
 import { ALL_SPACES_ID } from '../../../common/constants';
-import { CopySavedObjectsToSpaceFlyout } from '../../copy_saved_objects_to_space/components';
+import { CopyToSpaceFlyoutInternal } from '../../copy_saved_objects_to_space/components';
 import { getSpacesContextWrapper } from '../../spaces_context';
 import { spacesManagerMock } from '../../spaces_manager/mocks';
 import { NoSpacesAvailable } from './no_spaces_available';
@@ -197,7 +197,7 @@ describe('ShareToSpaceFlyout', () => {
       });
 
       expect(wrapper.find(ShareToSpaceForm)).toHaveLength(1);
-      expect(wrapper.find(CopySavedObjectsToSpaceFlyout)).toHaveLength(0);
+      expect(wrapper.find(CopyToSpaceFlyoutInternal)).toHaveLength(0);
       expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(0);
       expect(onClose).toHaveBeenCalledTimes(0);
     });
@@ -220,7 +220,7 @@ describe('ShareToSpaceFlyout', () => {
         wrapper.update();
       });
 
-      expect(wrapper.find(CopySavedObjectsToSpaceFlyout)).toHaveLength(1);
+      expect(wrapper.find(CopyToSpaceFlyoutInternal)).toHaveLength(1);
       expect(onClose).toHaveBeenCalledTimes(0);
     });
   });
