@@ -82,9 +82,8 @@ describe('ServiceOverview', () => {
 
     /* eslint-disable @typescript-eslint/naming-convention */
     const calls = {
-      'GET /api/apm/services/{serviceName}/error_groups': {
+      'GET /api/apm/services/{serviceName}/error_groups/primary_statistics': {
         error_groups: [],
-        total_error_groups: 0,
       },
       'GET /api/apm/services/{serviceName}/transactions/groups/primary_statistics': {
         transactionGroups: [],
