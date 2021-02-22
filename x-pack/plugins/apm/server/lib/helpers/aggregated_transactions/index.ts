@@ -6,7 +6,7 @@
  */
 
 import { SearchAggregatedTransactionSetting } from '../../../../common/aggregated_transactions';
-import { rangeFilter } from '../../../../common/utils/range_filter';
+import { rangeQuery } from '../../../../common/utils/queries';
 import { ProcessorEvent } from '../../../../common/processor_event';
 import {
   TRANSACTION_DURATION,
@@ -35,7 +35,7 @@ export async function getHasAggregatedTransactions({
           bool: {
             filter: [
               { exists: { field: TRANSACTION_DURATION_HISTOGRAM } },
-              ...(start && end ? [{ range: rangeFilter(start, end) }] : []),
+              ...(start && end ? rangeQuery(start, end) : []),
             ],
           },
         },

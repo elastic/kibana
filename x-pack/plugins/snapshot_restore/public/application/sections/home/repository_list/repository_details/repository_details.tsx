@@ -29,8 +29,7 @@ import 'brace/theme/textmate';
 
 import { SectionError, Error } from '../../../../../shared_imports';
 
-import { useServices } from '../../../../app_context';
-import { documentationLinksService } from '../../../../services/documentation';
+import { useCore, useServices } from '../../../../app_context';
 import {
   useLoadRepository,
   verifyRepository as verifyRepositoryRequest,
@@ -54,6 +53,7 @@ import {
 import { TypeDetails } from './type_details';
 
 import { reactRouterNavigate } from '../../../../../../../../../src/plugins/kibana_react/public';
+import { getRepositoryTypeDocUrl } from '../../../../lib/type_to_doc_url';
 
 interface Props {
   repositoryName: Repository['name'];
@@ -67,6 +67,7 @@ export const RepositoryDetails: React.FunctionComponent<Props> = ({
   onRepositoryDeleted,
 }) => {
   const { i18n, history } = useServices();
+  const { docLinks } = useCore();
   const { error, data: repositoryDetails } = useLoadRepository(repositoryName);
   const [verification, setVerification] = useState<RepositoryVerification | undefined>(undefined);
   const [cleanup, setCleanup] = useState<RepositoryCleanup | undefined>(undefined);
@@ -223,7 +224,7 @@ export const RepositoryDetails: React.FunctionComponent<Props> = ({
             <EuiButtonEmpty
               size="s"
               flush="right"
-              href={documentationLinksService.getRepositoryTypeDocUrl(type)}
+              href={getRepositoryTypeDocUrl(docLinks, type)}
               target="_blank"
               iconType="help"
               data-test-subj="documentationLink"
@@ -281,7 +282,7 @@ export const RepositoryDetails: React.FunctionComponent<Props> = ({
           </EuiTitle>
           <EuiSpacer size="s" />
           {verification ? (
-            <EuiCodeBlock language="json" inline={false} data-test-subj="verificationCodeBlock">
+            <EuiCodeBlock language="json" data-test-subj="verificationCodeBlock">
               {JSON.stringify(
                 verification.valid ? verification.response : verification.error,
                 null,
@@ -350,7 +351,7 @@ export const RepositoryDetails: React.FunctionComponent<Props> = ({
                   />
                 </h4>
               </EuiTitle>
-              <EuiCodeBlock language="json" inline={false} data-test-subj="cleanupCodeBlock">
+              <EuiCodeBlock language="json" data-test-subj="cleanupCodeBlock">
                 {JSON.stringify(cleanup.response, null, 2)}
               </EuiCodeBlock>
             </div>

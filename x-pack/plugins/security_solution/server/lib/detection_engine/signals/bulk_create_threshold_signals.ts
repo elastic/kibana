@@ -18,12 +18,13 @@ import {
   AlertInstanceState,
   AlertServices,
 } from '../../../../../alerts/server';
-import { RuleAlertAction } from '../../../../common/detection_engine/types';
+import { BaseHit, RuleAlertAction } from '../../../../common/detection_engine/types';
 import { RuleTypeParams, RefreshTypes } from '../types';
 import { singleBulkCreate, SingleBulkCreateResponse } from './single_bulk_create';
-import { SignalSearchResponse, ThresholdAggregationBucket } from './types';
-import { calculateThresholdSignalUuid } from './utils';
+import { calculateThresholdSignalUuid, getThresholdAggregationParts } from './utils';
 import { BuildRuleMessage } from './rule_messages';
+import { TermAggregationBucket } from '../../types';
+import { MultiAggBucket, SignalSearchResponse, SignalSource } from './types';
 
 interface BulkCreateThresholdSignalsParams {
   actions: RuleAlertAction[];
@@ -73,52 +74,150 @@ const getTransformedHits = (
       logger.warn(`No hits returned, but totalResults >= threshold.value (${threshold.value})`);
       return [];
     }
+    const timestampArray = get(timestampOverride ?? '@timestamp', hit.fields);
+    if (timestampArray == null) {
+      return [];
+    }
+    const timestamp = timestampArray[0];
+    if (typeof timestamp !== 'string') {
+      return [];
+    }
 
     const source = {
-      '@timestamp': get(timestampOverride ?? '@timestamp', hit.fields),
+      '@timestamp': timestamp,
       threshold_result: {
+        terms: [
+          {
+            value: ruleId,
+          },
+        ],
         count: totalResults,
-        value: ruleId,
       },
     };
 
     return [
       {
         _index: inputIndex,
-        _id: calculateThresholdSignalUuid(ruleId, startedAt, threshold.field),
+        _id: calculateThresholdSignalUuid(
+          ruleId,
+          startedAt,
+          Array.isArray(threshold.field) ? threshold.field : [threshold.field]
+        ),
         _source: source,
       },
     ];
   }
 
-  if (!results.aggregations?.threshold) {
+  const aggParts = results.aggregations && getThresholdAggregationParts(results.aggregations);
+  if (!aggParts) {
     return [];
   }
 
-  return results.aggregations.threshold.buckets
-    .map(
-      ({ key, doc_count: docCount, top_threshold_hits: topHits }: ThresholdAggregationBucket) => {
-        const hit = topHits.hits.hits[0];
-        if (hit == null) {
-          return null;
+  const getCombinations = (buckets: TermAggregationBucket[], i: number, field: string) => {
+    return buckets.reduce((acc: MultiAggBucket[], bucket: TermAggregationBucket) => {
+      if (i < threshold.field.length - 1) {
+        const nextLevelIdx = i + 1;
+        const nextLevelAggParts = getThresholdAggregationParts(bucket, nextLevelIdx);
+        if (nextLevelAggParts == null) {
+          throw new Error('Something went horribly wrong');
         }
-
-        const source = {
-          '@timestamp': get(timestampOverride ?? '@timestamp', hit.fields),
-          threshold_result: {
-            count: docCount,
-            value: key,
-          },
+        const nextLevelPath = `['${nextLevelAggParts.name}']['buckets']`;
+        const nextBuckets = get(nextLevelPath, bucket);
+        const combinations = getCombinations(nextBuckets, nextLevelIdx, nextLevelAggParts.field);
+        combinations.forEach((val) => {
+          const el = {
+            terms: [
+              {
+                field,
+                value: bucket.key,
+              },
+              ...val.terms,
+            ],
+            cardinality: val.cardinality,
+            topThresholdHits: val.topThresholdHits,
+            docCount: val.docCount,
+          };
+          acc.push(el);
+        });
+      } else {
+        const el = {
+          terms: [
+            {
+              field,
+              value: bucket.key,
+            },
+          ],
+          cardinality: !isEmpty(threshold.cardinality_field)
+            ? [
+                {
+                  field: Array.isArray(threshold.cardinality_field)
+                    ? threshold.cardinality_field[0]
+                    : threshold.cardinality_field!,
+                  value: bucket.cardinality_count!.value,
+                },
+              ]
+            : undefined,
+          topThresholdHits: bucket.top_threshold_hits,
+          docCount: bucket.doc_count,
         };
-
-        return {
-          _index: inputIndex,
-          _id: calculateThresholdSignalUuid(ruleId, startedAt, threshold.field, key),
-          _source: source,
-        };
+        acc.push(el);
       }
-    )
-    .filter((bucket: ThresholdAggregationBucket) => bucket != null);
+
+      return acc;
+    }, []);
+  };
+
+  return getCombinations(results.aggregations[aggParts.name].buckets, 0, aggParts.field).reduce(
+    (acc: Array<BaseHit<SignalSource>>, bucket) => {
+      const hit = bucket.topThresholdHits?.hits.hits[0];
+      if (hit == null) {
+        return acc;
+      }
+
+      const timestampArray = get(timestampOverride ?? '@timestamp', hit.fields);
+      if (timestampArray == null) {
+        return acc;
+      }
+
+      const timestamp = timestampArray[0];
+      if (typeof timestamp !== 'string') {
+        return acc;
+      }
+
+      const source = {
+        '@timestamp': timestamp,
+        threshold_result: {
+          terms: bucket.terms.map((term) => {
+            return {
+              field: term.field,
+              value: term.value,
+            };
+          }),
+          cardinality: bucket.cardinality?.map((cardinality) => {
+            return {
+              field: cardinality.field,
+              value: cardinality.value,
+            };
+          }),
+          count: bucket.docCount,
+        },
+      };
+
+      acc.push({
+        _index: inputIndex,
+        _id: calculateThresholdSignalUuid(
+          ruleId,
+          startedAt,
+          Array.isArray(threshold.field) ? threshold.field : [threshold.field],
+          bucket.terms.map((term) => term.value).join(',')
+        ),
+        _source: source,
+      });
+
+      return acc;
+    },
+    []
+  );
 };
 
 export const transformThresholdResultsToEcs = (
@@ -149,7 +248,7 @@ export const transformThresholdResultsToEcs = (
     },
   };
 
-  delete thresholdResults.aggregations; // no longer needed
+  delete thresholdResults.aggregations; // delete because no longer needed
 
   set(thresholdResults, 'results.hits.total', transformedHits.length);
 

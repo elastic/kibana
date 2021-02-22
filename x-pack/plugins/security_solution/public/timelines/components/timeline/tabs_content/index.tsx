@@ -9,13 +9,16 @@ import { EuiBadge, EuiLoadingContent, EuiTabs, EuiTab } from '@elastic/eui';
 import React, { lazy, memo, Suspense, useCallback, useEffect, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
-import { TimelineTabs, TimelineId } from '../../../../../common/types/timeline';
+import { TimelineTabs, TimelineId, TimelineType } from '../../../../../common/types/timeline';
 
 import {
   useShallowEqualSelector,
   useDeepEqualSelector,
 } from '../../../../common/hooks/use_selector';
-import { TimelineEventsCountBadge } from '../../../../common/hooks/use_timeline_events_count';
+import {
+  EqlEventsCountBadge,
+  TimelineEventsCountBadge,
+} from '../../../../common/hooks/use_timeline_events_count';
 import { timelineActions } from '../../../store/timeline';
 import {
   getActiveTabSelector,
@@ -37,37 +40,46 @@ const HideShowContainer = styled.div.attrs<{ $isVisible: boolean }>(({ $isVisibl
 `;
 
 const QueryTabContent = lazy(() => import('../query_tab_content'));
+const EqlTabContent = lazy(() => import('../eql_tab_content'));
 const GraphTabContent = lazy(() => import('../graph_tab_content'));
 const NotesTabContent = lazy(() => import('../notes_tab_content'));
 const PinnedTabContent = lazy(() => import('../pinned_tab_content'));
 
 interface BasicTimelineTab {
   timelineId: TimelineId;
+  timelineType: TimelineType;
   graphEventId?: string;
 }
 
-const QueryTab: React.FC<BasicTimelineTab> = memo(({ timelineId }) => (
+const QueryTab: React.FC<{ timelineId: TimelineId }> = memo(({ timelineId }) => (
   <Suspense fallback={<EuiLoadingContent lines={10} />}>
     <QueryTabContent timelineId={timelineId} />
   </Suspense>
 ));
 QueryTab.displayName = 'QueryTab';
 
-const GraphTab: React.FC<BasicTimelineTab> = memo(({ timelineId }) => (
+const EqlTab: React.FC<{ timelineId: TimelineId }> = memo(({ timelineId }) => (
+  <Suspense fallback={<EuiLoadingContent lines={10} />}>
+    <EqlTabContent timelineId={timelineId} />
+  </Suspense>
+));
+EqlTab.displayName = 'EqlTab';
+
+const GraphTab: React.FC<{ timelineId: TimelineId }> = memo(({ timelineId }) => (
   <Suspense fallback={<EuiLoadingContent lines={10} />}>
     <GraphTabContent timelineId={timelineId} />
   </Suspense>
 ));
 GraphTab.displayName = 'GraphTab';
 
-const NotesTab: React.FC<BasicTimelineTab> = memo(({ timelineId }) => (
+const NotesTab: React.FC<{ timelineId: TimelineId }> = memo(({ timelineId }) => (
   <Suspense fallback={<EuiLoadingContent lines={10} />}>
     <NotesTabContent timelineId={timelineId} />
   </Suspense>
 ));
 NotesTab.displayName = 'NotesTab';
 
-const PinnedTab: React.FC<BasicTimelineTab> = memo(({ timelineId }) => (
+const PinnedTab: React.FC<{ timelineId: TimelineId }> = memo(({ timelineId }) => (
   <Suspense fallback={<EuiLoadingContent lines={10} />}>
     <PinnedTabContent timelineId={timelineId} />
   </Suspense>
@@ -76,45 +88,52 @@ PinnedTab.displayName = 'PinnedTab';
 
 type ActiveTimelineTabProps = BasicTimelineTab & { activeTimelineTab: TimelineTabs };
 
-const ActiveTimelineTab = memo<ActiveTimelineTabProps>(({ activeTimelineTab, timelineId }) => {
-  const getTab = useCallback(
-    (tab: TimelineTabs) => {
-      switch (tab) {
-        case TimelineTabs.graph:
-          return <GraphTab timelineId={timelineId} />;
-        case TimelineTabs.notes:
-          return <NotesTab timelineId={timelineId} />;
-        default:
-          return null;
-      }
-    },
-    [timelineId]
-  );
+const ActiveTimelineTab = memo<ActiveTimelineTabProps>(
+  ({ activeTimelineTab, timelineId, timelineType }) => {
+    const getTab = useCallback(
+      (tab: TimelineTabs) => {
+        switch (tab) {
+          case TimelineTabs.graph:
+            return <GraphTab timelineId={timelineId} />;
+          case TimelineTabs.notes:
+            return <NotesTab timelineId={timelineId} />;
+          default:
+            return null;
+        }
+      },
+      [timelineId]
+    );
 
-  const isGraphOrNotesTabs = useMemo(
-    () => [TimelineTabs.graph, TimelineTabs.notes].includes(activeTimelineTab),
-    [activeTimelineTab]
-  );
+    const isGraphOrNotesTabs = useMemo(
+      () => [TimelineTabs.graph, TimelineTabs.notes].includes(activeTimelineTab),
+      [activeTimelineTab]
+    );
 
-  /* Future developer -> why are we doing that
-   * It is really expansive to re-render the QueryTab because the drag/drop
-   * Therefore, we are only hiding its dom when switching to another tab
-   * to avoid mounting/un-mounting === re-render
-   */
-  return (
-    <>
-      <HideShowContainer $isVisible={TimelineTabs.query === activeTimelineTab}>
-        <QueryTab timelineId={timelineId} />
-      </HideShowContainer>
-      <HideShowContainer $isVisible={TimelineTabs.pinned === activeTimelineTab}>
-        <PinnedTab timelineId={timelineId} />
-      </HideShowContainer>
-      <HideShowContainer $isVisible={isGraphOrNotesTabs}>
-        {isGraphOrNotesTabs && getTab(activeTimelineTab)}
-      </HideShowContainer>
-    </>
-  );
-});
+    /* Future developer -> why are we doing that
+     * It is really expansive to re-render the QueryTab because the drag/drop
+     * Therefore, we are only hiding its dom when switching to another tab
+     * to avoid mounting/un-mounting === re-render
+     */
+    return (
+      <>
+        <HideShowContainer $isVisible={TimelineTabs.query === activeTimelineTab}>
+          <QueryTab timelineId={timelineId} />
+        </HideShowContainer>
+        <HideShowContainer $isVisible={TimelineTabs.pinned === activeTimelineTab}>
+          <PinnedTab timelineId={timelineId} />
+        </HideShowContainer>
+        {timelineType === TimelineType.default && (
+          <HideShowContainer $isVisible={TimelineTabs.eql === activeTimelineTab}>
+            <EqlTab timelineId={timelineId} />
+          </HideShowContainer>
+        )}
+        <HideShowContainer $isVisible={isGraphOrNotesTabs}>
+          {isGraphOrNotesTabs && getTab(activeTimelineTab)}
+        </HideShowContainer>
+      </>
+    );
+  }
+);
 
 ActiveTimelineTab.displayName = 'ActiveTimelineTab';
 
@@ -138,7 +157,11 @@ const StyledEuiTab = styled(EuiTab)`
   }
 `;
 
-const TabsContentComponent: React.FC<BasicTimelineTab> = ({ timelineId, graphEventId }) => {
+const TabsContentComponent: React.FC<BasicTimelineTab> = ({
+  timelineId,
+  timelineType,
+  graphEventId,
+}) => {
   const dispatch = useDispatch();
   const getActiveTab = useMemo(() => getActiveTabSelector(), []);
   const getShowTimeline = useMemo(() => getShowTimelineSelector(), []);
@@ -179,6 +202,10 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({ timelineId, graphEve
     );
   }, [dispatch, timelineId]);
 
+  const setEqlAsActiveTab = useCallback(() => {
+    dispatch(timelineActions.setActiveTabTimeline({ id: timelineId, activeTab: TimelineTabs.eql }));
+  }, [dispatch, timelineId]);
+
   const setGraphAsActiveTab = useCallback(() => {
     dispatch(
       timelineActions.setActiveTabTimeline({ id: timelineId, activeTab: TimelineTabs.graph })
@@ -216,6 +243,18 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({ timelineId, graphEve
           <span>{i18n.QUERY_TAB}</span>
           {showTimeline && <TimelineEventsCountBadge />}
         </StyledEuiTab>
+        {timelineType === TimelineType.default && (
+          <StyledEuiTab
+            data-test-subj={`timelineTabs-${TimelineTabs.eql}`}
+            onClick={setEqlAsActiveTab}
+            isSelected={activeTab === TimelineTabs.eql}
+            disabled={false}
+            key={TimelineTabs.eql}
+          >
+            <span>{i18n.EQL_TAB}</span>
+            {showTimeline && <EqlEventsCountBadge />}
+          </StyledEuiTab>
+        )}
         <EuiTab
           data-test-subj={`timelineTabs-${TimelineTabs.graph}`}
           onClick={setGraphAsActiveTab}
@@ -253,7 +292,11 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({ timelineId, graphEve
           )}
         </StyledEuiTab>
       </EuiTabs>
-      <ActiveTimelineTab activeTimelineTab={activeTab} timelineId={timelineId} />
+      <ActiveTimelineTab
+        activeTimelineTab={activeTab}
+        timelineId={timelineId}
+        timelineType={timelineType}
+      />
     </>
   );
 };

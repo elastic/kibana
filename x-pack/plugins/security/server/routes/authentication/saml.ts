@@ -30,28 +30,23 @@ export function defineSAMLRoutes({
       options: { authRequired: false, xsrfRequired: false },
     },
     async (context, request, response) => {
-      try {
-        // When authenticating using SAML we _expect_ to redirect to the Kibana target location.
-        const authenticationResult = await getAuthenticationService().login(request, {
-          provider: { type: SAMLAuthenticationProvider.type },
-          value: {
-            type: SAMLLogin.LoginWithSAMLResponse,
-            samlResponse: request.body.SAMLResponse,
-            relayState: request.body.RelayState,
-          },
+      // When authenticating using SAML we _expect_ to redirect to the Kibana target location.
+      const authenticationResult = await getAuthenticationService().login(request, {
+        provider: { type: SAMLAuthenticationProvider.type },
+        value: {
+          type: SAMLLogin.LoginWithSAMLResponse,
+          samlResponse: request.body.SAMLResponse,
+          relayState: request.body.RelayState,
+        },
+      });
+
+      if (authenticationResult.redirected()) {
+        return response.redirected({
+          headers: { location: authenticationResult.redirectURL! },
         });
-
-        if (authenticationResult.redirected()) {
-          return response.redirected({
-            headers: { location: authenticationResult.redirectURL! },
-          });
-        }
-
-        return response.unauthorized({ body: authenticationResult.error });
-      } catch (err) {
-        logger.error(err);
-        return response.internalError();
       }
+
+      return response.unauthorized({ body: authenticationResult.error });
     }
   );
 }

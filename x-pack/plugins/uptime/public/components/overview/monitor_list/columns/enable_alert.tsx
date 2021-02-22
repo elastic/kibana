@@ -43,7 +43,7 @@ export const EnableMonitorAlert = ({ monitorId, selectedMonitor }: Props) => {
 
   const { data: deletedAlertId } = useSelector(isAlertDeletedSelector);
 
-  const { data: newAlert } = useSelector(newAlertSelector);
+  const { data: newAlert, error: newAlertError } = useSelector(newAlertSelector);
 
   const isNewAlert = newAlert?.params.search.includes(monitorId);
 
@@ -86,7 +86,7 @@ export const EnableMonitorAlert = ({ monitorId, selectedMonitor }: Props) => {
 
   useEffect(() => {
     setIsLoading(false);
-  }, [hasAlert, deletedAlertId]);
+  }, [hasAlert, deletedAlertId, newAlertError]);
 
   const hasDefaultConnectors = (settings?.defaultConnectors ?? []).length > 0;
 
