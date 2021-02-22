@@ -21,6 +21,7 @@ describe('StepImageCaption', () => {
       setStepNumber: jest.fn(),
       stepNumber: 2,
       timestamp: '2020-11-26T15:28:56.896Z',
+      isLoading: false,
     };
   });
 
