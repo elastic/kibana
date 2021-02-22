@@ -451,12 +451,15 @@ export const ModelsList: FC = () => {
       }),
       sortable: true,
       align: 'left',
-      render: (types: string[]) =>
-        types.map((type) => (
-          <EuiBadge key={type} color="hollow">
-            {type}
-          </EuiBadge>
-        )),
+      render: (types: string[]) => (
+        <EuiFlexGroup gutterSize={'xs'} wrap>
+          {types.map((type) => (
+            <EuiFlexItem key={type} grow={false}>
+              <EuiBadge color="hollow">{type}</EuiBadge>
+            </EuiFlexItem>
+          ))}
+        </EuiFlexGroup>
+      ),
     },
     {
       field: ModelsTableToConfigMapping.createdAt,
