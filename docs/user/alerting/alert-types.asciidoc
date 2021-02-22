@@ -44,6 +44,23 @@ If data is available and all clauses have been defined, a preview chart will ren
 image::images/alert-types-index-threshold-preview.png[Five clauses define the condition to detect]
 
 [float]
+==== Action variables
+
+When the index threshold alert condition is met, the following variables are available to use inside each action:
+
+`context.title`:: A pre-constructed title for the alert. Example: `alert kibana sites - high egress met threshold`.
+`context.message`:: A pre-constructed message for the alert. Example: `alert 'kibana sites - high egress'` + 
+`is active for group 'threshold met':` +
+`- Value: 42` +
+`- Conditions Met: count greater than 4 over 5m` +
+`- Timestamp: 2020-01-01T00:00:00.000Z`
+
+`context.group`:: The name of the action group associated with the threshold condition.
+`context.date`:: The date the alert met the threshold condition.
+`context.value`:: The value for the alert that met the threshold condition.
+`context.conditions`:: A description of the threshold condition. Example: `count greater than 4`
+
+[float]
 === Example
 
 In this section, you will use the {kib} <<add-sample-data, weblog sample dataset>> to setup and tune the conditions on an index threshold alert. For this example, we want to detect when any of our top three sites have served more than 420,000 bytes over a 24 hour period.
@@ -141,6 +158,25 @@ ES query:: This clause specifies the ES DSL query to execute. The number of docu
 condition. Aggregations are not supported at this time. 
 Threshold:: This clause defines a threshold value and a comparison operator  (`is above`, `is above or equals`, `is below`, `is below or equals`, or `is between`). The number of documents that match the specified query is compared to this threshold.
 Time window:: This clause determines how far back to search for documents, using the *time field* set in the *index* clause. Generally this value should be set to a value higher than the *check every* value in the <<defining-alerts-general-details, general alert details>>, to avoid gaps in detection. 
+
+[float]
+==== Action variables
+
+When the index threshold alert condition is met, the following variables are available to use inside each action:
+
+`context.title`:: A pre-constructed title for the alert. Example: `alert term match alert query matched`.
+`context.message`:: A pre-constructed message for the alert. Example: `alert 'term match alert'` + 
+`is active:` +
+`- Value: 42` +
+`- Conditions Met: count greater than 4 over 5m` +
+`- Timestamp: 2020-01-01T00:00:00.000Z`
+
+`context.group`:: The name of the action group associated with the condition.
+`context.date`:: The date the alert met the condition.
+`context.value`:: The value for the alert that met the condition.
+`context.conditions`:: A description of the condition. Example: `count greater than 4`
+`context.hits`:: The ES documents that matched the query. +
+Using the Mustache template array syntax, you can iterate over these hits to get values from the ES documents.
 
 [float]
 ==== Testing your query
