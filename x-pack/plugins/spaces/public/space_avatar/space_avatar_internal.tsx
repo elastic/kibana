@@ -21,7 +21,7 @@ interface Props {
   announceSpaceName?: boolean;
 }
 
-export const SpaceAvatar: FC<Props> = (props: Props) => {
+export const SpaceAvatarInternal: FC<Props> = (props: Props) => {
   const { space, size, announceSpaceName, ...rest } = props;
 
   const spaceName = space.name ? space.name.trim() : '';
@@ -48,6 +48,6 @@ export const SpaceAvatar: FC<Props> = (props: Props) => {
   );
 };
 
-SpaceAvatar.defaultProps = {
+SpaceAvatarInternal.defaultProps = {
   announceSpaceName: true,
 };

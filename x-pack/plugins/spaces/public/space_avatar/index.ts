@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export { SpaceAvatar } from './space_avatar';
+export { SpaceAvatarInternal as SpaceAvatar } from './space_avatar_internal';
 export * from './space_attributes';
