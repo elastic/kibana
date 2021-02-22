@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { cleanGeometry, geoJsonCleanAndValidate } from './geo_json_clean_and_validate';
+import { cleanGeometry, geoJsonCleanAndValidate } from './geojson_clean_and_validate';
 import * as jsts from 'jsts';
 
 describe('geo_json_clean_and_validate', () => {
