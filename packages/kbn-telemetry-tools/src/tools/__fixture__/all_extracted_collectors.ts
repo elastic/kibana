@@ -23,6 +23,6 @@ export const allExtractedCollectors: ParsedUsageCollection[] = [
   parsedIndexedInterfaceWithNoMatchingSchema,
   parsedNestedCollector,
   parsedSchemaDefinedWithSpreadsCollector,
-  parsedWorkingCollector,
   parsedCollectorWithDescription,
+  parsedWorkingCollector,
 ];

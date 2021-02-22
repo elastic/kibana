@@ -1,6 +1,6 @@
 {
   "properties": {
-    "my_working_collector": {
+    "my_working_collector_with_description": {
       "properties": {
         "flat": {
           "type": "keyword",

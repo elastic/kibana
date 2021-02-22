@@ -12,7 +12,7 @@ import { ParsedUsageCollection } from '../ts_parser';
 export const parsedCollectorWithDescription: ParsedUsageCollection = [
   'src/fixtures/telemetry_collectors/working_collector_with_description.ts',
   {
-    collectorName: 'my_working_collector',
+    collectorName: 'my_working_collector_with_description',
     schema: {
       value: {
         flat: {
