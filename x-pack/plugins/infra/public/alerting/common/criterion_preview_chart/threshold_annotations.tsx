@@ -47,6 +47,7 @@ export const ThresholdAnnotations = ({
       <LineAnnotation
         id={`${id}-thresholds`}
         domainType={AnnotationDomainTypes.YDomain}
+        data-test-subj="threshold-line"
         dataValues={sortedThresholds.map((t) => ({
           dataValue: formatter(t),
         }))}
@@ -62,6 +63,7 @@ export const ThresholdAnnotations = ({
         <>
           <RectAnnotation
             id={`${id}-lower-threshold`}
+            data-test-subj="between-rect"
             style={{
               fill: colorTransformer(color),
               opacity,
@@ -83,6 +85,7 @@ export const ThresholdAnnotations = ({
         <>
           <RectAnnotation
             id={`${id}-lower-threshold`}
+            data-test-subj="outside-range-lower-rect"
             style={{
               fill: colorTransformer(color),
               opacity,
@@ -100,6 +103,7 @@ export const ThresholdAnnotations = ({
           />
           <RectAnnotation
             id={`${id}-upper-threshold`}
+            data-test-subj="outside-range-upper-rect"
             style={{
               fill: colorTransformer(color),
               opacity,
@@ -120,6 +124,7 @@ export const ThresholdAnnotations = ({
       {isBelow && first(threshold) != null ? (
         <RectAnnotation
           id={`${id}-upper-threshold`}
+          data-test-subj="below-rect"
           style={{
             fill: colorTransformer(color),
             opacity,
@@ -139,6 +144,7 @@ export const ThresholdAnnotations = ({
       {isAbove && first(threshold) != null ? (
         <RectAnnotation
           id={`${id}-upper-threshold`}
+          data-test-subj="above-rect"
           style={{
             fill: colorTransformer(color),
             opacity,
