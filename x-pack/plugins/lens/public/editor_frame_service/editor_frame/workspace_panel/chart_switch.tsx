@@ -6,7 +6,7 @@
  */
 
 import './chart_switch.scss';
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, memo } from 'react';
 import {
   EuiIcon,
   EuiPopover,
@@ -88,7 +88,7 @@ function VisualizationSummary(props: Props) {
   );
 }
 
-export function ChartSwitch(props: Props) {
+export const ChartSwitch = memo(function ChartSwitch(props: Props) {
   const [flyoutOpen, setFlyoutOpen] = useState<boolean>(false);
 
   const commitSelection = (selection: VisualizationSelection) => {
@@ -367,7 +367,7 @@ export function ChartSwitch(props: Props) {
       </EuiPopover>
     </div>
   );
-}
+});
 
 function getTopSuggestion(
   props: Props,

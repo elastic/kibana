@@ -28,6 +28,7 @@ const defaultContext = {
   setDragging: jest.fn(),
   setActiveDropTarget: () => {},
   activeDropTarget: undefined,
+  dropTargetsByOrder: undefined,
   keyboardMode: false,
   setKeyboardMode: () => {},
   setA11yMessage: jest.fn(),
@@ -466,9 +467,7 @@ describe('LayerPanel', () => {
 
       expect(mockDatasource.getDropProps).toHaveBeenCalledWith(
         expect.objectContaining({
-          dragDropContext: expect.objectContaining({
-            dragging: draggingField,
-          }),
+          dragging: draggingField,
         })
       );
 
@@ -476,9 +475,7 @@ describe('LayerPanel', () => {
 
       expect(mockDatasource.onDrop).toHaveBeenCalledWith(
         expect.objectContaining({
-          dragDropContext: expect.objectContaining({
-            dragging: draggingField,
-          }),
+          droppedItem: draggingField,
         })
       );
     });
@@ -584,9 +581,7 @@ describe('LayerPanel', () => {
 
       expect(mockDatasource.getDropProps).toHaveBeenCalledWith(
         expect.objectContaining({
-          dragDropContext: expect.objectContaining({
-            dragging: draggingOperation,
-          }),
+          dragging: draggingOperation,
         })
       );
 
@@ -595,9 +590,7 @@ describe('LayerPanel', () => {
       expect(mockDatasource.onDrop).toHaveBeenCalledWith(
         expect.objectContaining({
           columnId: 'b',
-          dragDropContext: expect.objectContaining({
-            dragging: draggingOperation,
-          }),
+          droppedItem: draggingOperation,
         })
       );
 
@@ -606,9 +599,7 @@ describe('LayerPanel', () => {
       expect(mockDatasource.onDrop).toHaveBeenCalledWith(
         expect.objectContaining({
           columnId: 'newid',
-          dragDropContext: expect.objectContaining({
-            dragging: draggingOperation,
-          }),
+          droppedItem: draggingOperation,
         })
       );
     });

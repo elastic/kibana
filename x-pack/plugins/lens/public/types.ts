@@ -190,7 +190,10 @@ export interface Datasource<T = unknown, P = unknown> {
   renderDimensionEditor: (domElement: Element, props: DatasourceDimensionEditorProps<T>) => void;
   renderLayerPanel: (domElement: Element, props: DatasourceLayerPanelProps<T>) => void;
   getDropProps: (
-    props: DatasourceDimensionDropProps<T> & { groupId: string }
+    props: DatasourceDimensionDropProps<T> & {
+      groupId: string;
+      dragging: DragContextState['dragging'];
+    }
   ) => { dropType: DropType; nextLabel?: string } | undefined;
   onDrop: (props: DatasourceDimensionDropHandlerProps<T>) => false | true | { deleted: string };
   updateStateOnCloseDimension?: (props: {
@@ -278,9 +281,7 @@ export type DatasourceDimensionEditorProps<T = unknown> = DatasourceDimensionPro
   dimensionGroups: VisualizationDimensionGroupConfig[];
 };
 
-export type DatasourceDimensionTriggerProps<T> = DatasourceDimensionProps<T> & {
-  dragDropContext: DragContextState;
-};
+export type DatasourceDimensionTriggerProps<T> = DatasourceDimensionProps<T>;
 
 export interface DatasourceLayerPanelProps<T> {
   layerId: string;
@@ -310,7 +311,6 @@ export type DatasourceDimensionDropProps<T> = SharedDimensionProps & {
   columnId: string;
   state: T;
   setState: StateSetter<T>;
-  dragDropContext: DragContextState;
 };
 
 export type DatasourceDimensionDropHandlerProps<T> = DatasourceDimensionDropProps<T> & {
