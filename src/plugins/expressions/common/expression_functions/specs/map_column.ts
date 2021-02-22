@@ -97,7 +97,7 @@ export const mapColumn: ExpressionFunctionDefinition<
 
     return Promise.all(rowPromises).then((rows) => {
       const existingColumnIndex = columns.findIndex(({ name }) => name === args.name);
-      const type = rows.length ? getType(rows[0][args.name]) : 'null';
+      const type = rows.length ? getType(rows[0][columnId]) : 'null';
       const newColumn = {
         id: columnId,
         name: args.name,

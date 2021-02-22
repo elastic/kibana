@@ -77,7 +77,7 @@ describe('mapColumn', () => {
         expect(result.columns[nameColumnIndex]).toEqual({
           id: 'myid',
           name: 'name',
-          meta: { type: 'string' },
+          meta: { type: 'number' },
         });
       }
     );
