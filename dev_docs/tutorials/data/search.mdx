@@ -385,7 +385,7 @@ async function fetchData(data: DataPublicPluginStart) {
 
 #### Supporting search sessions in your application
 
-If you want to implement the ability to create and restore `Search Sessions` within your application, you should ask yourself the following questions first:
+Before implementing the ability to create and restore search sessions in your application, ask yourself the following questions:
 
 1. *Does your application run long operations normally?* For example, it makes sense for a user to generate a Dashboard or a Canvas report from data stored in cold storage, however when editing a single visualization, it is best to work with a shorter timeframe of hot or warm data. 
 2. *Does it make sense for your application to restore a search session?* For example, you might want to restore an interesting configuration of filters of some older documents you have found in Discover. However, a single Lens or Map visualization might not be as helpful, outside the context of a specific dashboard.
