@@ -58,7 +58,7 @@ export class HistogramFormatEditor extends DefaultFormatEditor<HistogramFormatEd
     return (
       <Fragment>
         <EuiFormRow
-          label={i18n.translate('indexPatternManagement.histogram.histogramAsNumberLabel', {
+          label={i18n.translate('indexPatternFieldEditor.histogram.histogramAsNumberLabel', {
             defaultMessage: 'Aggregated number format',
           })}
         >
@@ -71,14 +71,14 @@ export class HistogramFormatEditor extends DefaultFormatEditor<HistogramFormatEd
           />
         </EuiFormRow>
         <EuiFormRow
-          label={i18n.translate('indexPatternManagement.histogram.numeralLabel', {
+          label={i18n.translate('indexPatternFieldEditor.histogram.numeralLabel', {
             defaultMessage: 'Numeral format pattern (optional)',
           })}
           helpText={
             <span>
               <EuiLink target="_blank" href="https://adamwdraper.github.io/Numeral-js/">
                 <FormattedMessage
-                  id="indexPatternManagement.number.documentationLabel"
+                  id="indexPatternFieldEditor.number.documentationLabel"
                   defaultMessage="Documentation"
                 />
                 &nbsp;
