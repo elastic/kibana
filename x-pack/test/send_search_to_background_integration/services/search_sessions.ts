@@ -137,7 +137,9 @@ export function SearchSessionsProvider({ getService }: FtrProviderContext) {
           .expect(200);
 
         const { saved_objects: savedObjects } = body as SavedObjectsFindResponse;
-        log.debug(`Found created search sessions: ${savedObjects.map(({ id }) => id)}`);
+        if (savedObjects.length) {
+          log.debug(`Found created search sessions: ${savedObjects.map(({ id }) => id)}`);
+        }
         await Promise.all(
           savedObjects.map(async (so) => {
             log.debug(`Deleting search session: ${so.id}`);
