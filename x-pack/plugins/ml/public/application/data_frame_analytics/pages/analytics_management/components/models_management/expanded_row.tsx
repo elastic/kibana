@@ -66,9 +66,11 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
     // eslint-disable-next-line @typescript-eslint/naming-convention
     license_level,
     pipelines,
+    description,
   } = item;
 
   const details = {
+    description,
     tags,
     version,
     estimated_operations,
