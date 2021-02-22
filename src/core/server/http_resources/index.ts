@@ -8,7 +8,7 @@
 
 export { HttpResourcesService } from './http_resources_service';
 
-export {
+export type {
   HttpResourcesRenderOptions,
   HttpResourcesResponseOptions,
   HttpResourcesServiceToolkit,

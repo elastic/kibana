@@ -68,7 +68,7 @@ import {
   CoreServicesUsageData,
 } from './core_usage_data';
 
-export {
+export type {
   CoreUsageStats,
   CoreUsageData,
   CoreConfigUsageData,
@@ -77,13 +77,13 @@ export {
 };
 
 export { bootstrap } from './bootstrap';
-export {
+export type {
   Capabilities,
   CapabilitiesProvider,
   CapabilitiesSwitcher,
   ResolveCapabilitiesOptions,
 } from './capabilities';
-export {
+export type {
   ConfigPath,
   ConfigService,
   ConfigDeprecation,
@@ -93,16 +93,16 @@ export {
   EnvironmentMode,
   PackageInfo,
 } from './config';
-export {
+export type {
   IContextContainer,
   IContextProvider,
   HandlerFunction,
   HandlerContextType,
   HandlerParameters,
 } from './context';
-export { CoreId } from './core_context';
-export { CspConfig, ICspConfig } from './csp';
-export {
+export type { CoreId } from './core_context';
+export type { CspConfig, ICspConfig } from './csp';
+export type {
   LegacyClusterClient,
   ILegacyClusterClient,
   ILegacyCustomClusterClient,
@@ -132,9 +132,19 @@ export {
   GetResponse,
   DeleteDocumentResponse,
 } from './elasticsearch';
-export * from './elasticsearch/legacy/api_types';
-export { IExternalUrlConfig, IExternalUrlPolicy } from './external_url';
-export {
+export type {
+  LegacyCallAPIOptions,
+  AssistantAPIClientParams,
+  MIGRATION_ASSISTANCE_INDEX_ACTION,
+  MIGRATION_DEPRECATION_LEVEL,
+  AssistanceAPIResponse,
+  DeprecationAPIClientParams,
+  DeprecationInfo,
+  IndexSettingsDeprecationInfo,
+  DeprecationAPIResponse
+} from './elasticsearch/legacy/api_types';
+export type { IExternalUrlConfig, IExternalUrlPolicy } from './external_url';
+export type {
   AuthenticationHandler,
   AuthHeaders,
   AuthResultParams,
@@ -188,7 +198,6 @@ export {
   ResponseError,
   ResponseErrorAttributes,
   ResponseHeaders,
-  kibanaResponseFactory,
   KibanaResponseFactory,
   RouteConfig,
   IRouter,
@@ -197,7 +206,6 @@ export {
   RouteConfigOptions,
   RouteConfigOptionsBody,
   RouteContentType,
-  validBodyOutput,
   RouteValidatorConfig,
   RouteValidationSpec,
   RouteValidationFunction,
@@ -214,14 +222,19 @@ export {
 } from './http';
 
 export {
+  kibanaResponseFactory,
+  validBodyOutput,
+} from './http';
+
+export type {
   HttpResourcesRenderOptions,
   HttpResourcesResponseOptions,
   HttpResourcesServiceToolkit,
   HttpResourcesRequestHandler,
 } from './http_resources';
 
-export { IRenderOptions } from './rendering';
-export {
+export type { IRenderOptions } from './rendering';
+export type {
   Logger,
   LoggerFactory,
   LogMeta,
@@ -233,7 +246,7 @@ export {
   AppenderConfigType,
 } from './logging';
 
-export {
+export type {
   DiscoveredPlugin,
   Plugin,
   AsyncPlugin,
@@ -246,7 +259,9 @@ export {
   SharedGlobalConfig,
 } from './plugins';
 
-export {
+export { SavedObjectsClient, } from './saved_objects';
+
+export type {
   SavedObjectsBulkCreateObject,
   SavedObjectsBulkGetObject,
   SavedObjectsBulkUpdateObject,
@@ -255,7 +270,6 @@ export {
   SavedObjectsBulkUpdateResponse,
   SavedObjectsCheckConflictsObject,
   SavedObjectsCheckConflictsResponse,
-  SavedObjectsClient,
   SavedObjectsClientProviderOptions,
   SavedObjectsClientWrapperFactory,
   SavedObjectsClientWrapperOptions,
@@ -338,7 +352,7 @@ export {
   SavedObjectsImportWarning,
 } from './saved_objects';
 
-export {
+export type {
   IUiSettingsClient,
   UiSettingsParams,
   PublicUiSettingsParams,
@@ -353,7 +367,7 @@ export {
   StringValidationRegexString,
 } from './ui_settings';
 
-export {
+export type {
   OpsMetrics,
   OpsOsMetrics,
   OpsServerMetrics,
@@ -362,12 +376,12 @@ export {
   MetricsServiceStart,
 } from './metrics';
 
-export { I18nServiceSetup } from './i18n';
+export type { I18nServiceSetup } from './i18n';
 
-export { AppCategory } from '../types';
+export type { AppCategory } from '../types';
 export { DEFAULT_APP_CATEGORIES } from '../utils';
 
-export {
+export type {
   SavedObject,
   SavedObjectAttribute,
   SavedObjectAttributes,
@@ -382,17 +396,17 @@ export {
   SavedObjectsMigrationVersion,
 } from './types';
 
-export { LegacyServiceSetupDeps, LegacyServiceStartDeps, LegacyConfig } from './legacy';
+export type { LegacyServiceSetupDeps, LegacyServiceStartDeps, LegacyConfig } from './legacy';
 
-export {
+export { ServiceStatusLevels } from './status';
+export type {
   CoreStatus,
   ServiceStatus,
   ServiceStatusLevel,
-  ServiceStatusLevels,
   StatusServiceSetup,
 } from './status';
 
-export { CoreUsageDataStart } from './core_usage_data';
+export type { CoreUsageDataStart } from './core_usage_data';
 
 /**
  * Plugin specific context passed to a route handler.
@@ -507,7 +521,7 @@ export interface CoreStart {
   coreUsageData: CoreUsageDataStart;
 }
 
-export {
+export type {
   CapabilitiesSetup,
   CapabilitiesStart,
   ContextSetup,

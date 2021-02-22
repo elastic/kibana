@@ -5,15 +5,13 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-export {
+export { SavedObjectsErrorHelpers, SavedObjectsClientProvider } from './lib';
+export type {
   SavedObjectsRepository,
-  SavedObjectsClientProvider,
   ISavedObjectsClientProvider,
   SavedObjectsClientProviderOptions,
   SavedObjectsClientWrapperFactory,
   SavedObjectsClientWrapperOptions,
-  SavedObjectsErrorHelpers,
   SavedObjectsClientFactory,
   SavedObjectsClientFactoryProvider,
   SavedObjectsUtils,

@@ -7,8 +7,10 @@
  */
 
 export * from './types';
-export { IScopedClusterClient, ScopedClusterClient } from './scoped_cluster_client';
-export { ElasticsearchClientConfig } from './client_config';
-export { IClusterClient, ICustomClusterClient, ClusterClient } from './cluster_client';
+export { ScopedClusterClient } from './scoped_cluster_client';
+export type { IScopedClusterClient } from './scoped_cluster_client';
+export type { ElasticsearchClientConfig } from './client_config';
+export { ClusterClient } from './cluster_client';
+export type { IClusterClient, ICustomClusterClient } from './cluster_client';
 export { configureClient } from './configure_client';
 export { retryCallCluster, migrationRetryCallCluster } from './retry_call_cluster';

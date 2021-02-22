@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-export {
-  RouteValidator,
+export { RouteValidator } from './validator';
+export type {
   RouteValidatorConfig,
   RouteValidationSpec,
   RouteValidationFunction,

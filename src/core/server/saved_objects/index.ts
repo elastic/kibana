@@ -8,9 +8,10 @@
 
 export * from './service';
 
-export {
+export { SavedObjectsImporter } from './import';
+
+export type {
   ISavedObjectsImporter,
-  SavedObjectsImporter,
   SavedObjectsImportAmbiguousConflictError,
   SavedObjectsImportConflictError,
   SavedObjectsImportFailure,
@@ -30,7 +31,7 @@ export {
   SavedObjectsImportWarning,
 } from './import';
 
-export {
+export type {
   SavedObjectsExporter,
   ISavedObjectsExporter,
   SavedObjectExportBaseOptions,
@@ -42,7 +43,7 @@ export {
   SavedObjectsExportTransform,
 } from './export';
 
-export {
+export type {
   SavedObjectsSerializer,
   SavedObjectsRawDoc,
   SavedObjectsRawDocParseOptions,
@@ -50,10 +51,13 @@ export {
   SavedObjectUnsanitizedDoc,
 } from './serialization';
 
-export { SavedObjectsMigrationLogger } from './migrations/core/migration_logger';
+export type { SavedObjectsMigrationLogger } from './migrations/core/migration_logger';
 
 export {
   SavedObjectsService,
+} from './saved_objects_service';
+
+export type {
   InternalSavedObjectsServiceStart,
   SavedObjectsServiceStart,
   SavedObjectsServiceSetup,
@@ -61,14 +65,14 @@ export {
   SavedObjectsRepositoryFactory,
 } from './saved_objects_service';
 
-export {
+export type {
   ISavedObjectsRepository,
   SavedObjectsIncrementCounterOptions,
   SavedObjectsIncrementCounterField,
   SavedObjectsDeleteByNamespaceOptions,
 } from './service/lib/repository';
 
-export {
+export type {
   SavedObjectsCoreFieldMapping,
   SavedObjectsComplexFieldMapping,
   SavedObjectsFieldMapping,
@@ -77,13 +81,13 @@ export {
   SavedObjectsTypeMappingDefinitions,
 } from './mappings';
 
-export {
+export type {
   SavedObjectMigrationMap,
   SavedObjectMigrationFn,
   SavedObjectMigrationContext,
 } from './migrations';
 
-export {
+export type {
   SavedObjectsNamespaceType,
   SavedObjectStatusMeta,
   SavedObjectsType,
@@ -91,4 +95,5 @@ export {
 } from './types';
 
 export { savedObjectsConfig, savedObjectsMigrationConfig } from './saved_objects_config';
-export { SavedObjectTypeRegistry, ISavedObjectTypeRegistry } from './saved_objects_type_registry';
+export { SavedObjectTypeRegistry } from './saved_objects_type_registry';
+export type { ISavedObjectTypeRegistry } from './saved_objects_type_registry';

@@ -8,6 +8,9 @@
 
 export {
   NumericRollingStrategy,
-  NumericRollingStrategyConfig,
   numericRollingStrategyConfigSchema,
+} from './numeric_strategy';
+
+export type {
+  NumericRollingStrategyConfig,
 } from './numeric_strategy';

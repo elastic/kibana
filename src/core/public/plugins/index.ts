@@ -7,6 +7,6 @@
  */
 
 export * from './plugins_service';
-export { Plugin, AsyncPlugin, PluginInitializer } from './plugin';
-export { PluginInitializerContext } from './plugin_context';
-export { PluginOpaqueId } from '../../server/types';
+export type { Plugin, AsyncPlugin, PluginInitializer } from './plugin';
+export type { PluginInitializerContext } from './plugin_context';
+export type { PluginOpaqueId } from '../../server/types';

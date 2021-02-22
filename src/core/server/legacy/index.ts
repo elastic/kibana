@@ -9,6 +9,13 @@
 /** @internal */
 export { ensureValidConfiguration } from './config';
 /** @internal */
-export { LegacyService, ILegacyService } from './legacy_service';
+export type { ILegacyService } from './legacy_service';
+export { LegacyService } from './legacy_service';
 /** @internal */
-export * from './types';
+export type {
+  LegacyVars,
+  LegacyConfig,
+  LegacyServiceSetupDeps,
+  LegacyServiceStartDeps,
+  LegacyServiceSetupConfig,
+} from './types';

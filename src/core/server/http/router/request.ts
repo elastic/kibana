@@ -131,7 +131,7 @@ export class KibanaRequest<
     const params = routeValidator.getParams(req.params, 'request params');
     const query = routeValidator.getQuery(req.query, 'request query');
     const body = routeValidator.getBody(req.payload, 'request body');
-
+    console.log('query', query);
     return { query, params, body };
   }
   /**

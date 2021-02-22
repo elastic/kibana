@@ -7,15 +7,15 @@
  */
 
 export { ApplicationService } from './application_service';
-export { Capabilities } from './capabilities';
 export { ScopedHistory } from './scoped_history';
-export {
+export { AppNavLinkStatus, AppStatus } from './types';
+
+export type { Capabilities } from './capabilities';
+export type {
   App,
   AppMount,
   AppUnmount,
   AppMountParameters,
-  AppStatus,
-  AppNavLinkStatus,
   AppUpdatableFields,
   AppUpdater,
   AppMeta,
