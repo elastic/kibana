@@ -6,13 +6,14 @@
   "from": "now-9m",
   "index": [
     "winlogbeat-*",
-    "logs-endpoint.events.*"
+    "logs-endpoint.events.*",
+    "logs-windows.*"
   ],
   "language": "eql",
   "license": "Elastic License",
   "name": "Potential Command and Control via Internet Explorer",
-  "query": "sequence by host.id, process.entity_id with maxspan = 1s\n  [process where event.type:\"start\" and process.parent.name:\"iexplore.exe\" and process.parent.args:\"-Embedding\"]\n  /* IE started via COM in normal conditions makes few connections, mainly to Microsoft and OCSP related domains, add FPs here */\n  [network where network.protocol : \"dns\" and process.name:\"iexplore.exe\" and\n   not wildcard(dns.question.name, \"*.microsoft.com\", \n                                   \"*.digicert.com\", \n                                   \"*.msocsp.com\", \n                                   \"*.windowsupdate.com\", \n                                   \"*.bing.com\",\n                                   \"*.identrust.com\")\n  ]\n",
-  "risk_score": 43,
+  "query": "sequence by host.id, process.entity_id with maxspan = 1s\n  [process where event.type == \"start\" and process.parent.name : \"iexplore.exe\" and process.parent.args : \"-Embedding\"]\n  /* IE started via COM in normal conditions makes few connections, mainly to Microsoft and OCSP related domains, add FPs here */\n  [network where network.protocol == \"dns\" and process.name : \"iexplore.exe\" and\n   not dns.question.name :\n   (\n    \"*.microsoft.com\",\n    \"*.digicert.com\",\n    \"*.msocsp.com\",\n    \"*.windowsupdate.com\",\n    \"*.bing.com\",\n    \"*.identrust.com\"\n    )\n  ]\n",
+  "risk_score": 47,
   "rule_id": "acd611f3-2b93-47b3-a0a3-7723bcc46f6d",
   "severity": "medium",
   "tags": [
@@ -40,5 +41,5 @@
     }
   ],
   "type": "eql",
-  "version": 1
+  "version": 2
 }
