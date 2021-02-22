@@ -435,9 +435,11 @@ describe('ElasticIndex', () => {
         body: {
           size: 100,
           query: {
-            must_not: {
-              term: {
-                type: 'fleet-agent-events',
+            bool: {
+              must_not: {
+                term: {
+                  type: 'fleet-agent-events',
+                },
               },
             },
           },
