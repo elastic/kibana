@@ -15,7 +15,7 @@ interface LegendProps {
   render: Required<WaterfallChartProps>['renderLegendItem'];
 }
 
-export const Legend: React.FC<LegendProps> = ({ items, ref, render }) => {
+export const Legend: React.FC<LegendProps> = ({ items, render }) => {
   return (
     <EuiFlexGroup gutterSize="none">
       {items.map((item, index) => {
