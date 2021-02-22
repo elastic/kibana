@@ -6,6 +6,7 @@
  */
 
 import React, { useMemo, useState, useEffect, useContext } from 'react';
+import { EuiIcon, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
@@ -20,10 +21,102 @@ const label = i18n.translate('xpack.lens.indexPattern.emptyDimensionButton', {
 });
 
 const getAdditionalClassesOnDroppable = (dropType?: string) => {
-  if (dropType === 'move_incompatible' || dropType === 'replace_incompatible') {
+  if (
+    dropType &&
+    [
+      'move_incompatible',
+      'replace_incompatible',
+      'swap_incompatible',
+      'duplicate_incompatible',
+      'replace_duplicate_incompatible',
+    ].includes(dropType)
+  ) {
     return 'lnsDragDrop-notCompatible';
   }
 };
+
+
+const customDropTargetsMap = {
+  replace_duplicate_compatible: (
+    <EuiFlexGroup
+      gutterSize="s"
+      justifyContent="center"
+      alignItems="center"
+      className="lnsDragDrop__extraDrop"
+    >
+      <EuiFlexItem grow={false}>
+        <EuiIcon size="s" type="copy" />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>Duplicate</EuiFlexItem>
+    </EuiFlexGroup>
+  ),
+  duplicate_compatible: (
+    <EuiFlexGroup
+      gutterSize="s"
+      justifyContent="center"
+      alignItems="center"
+      className="lnsDragDrop__extraDrop"
+    >
+      <EuiFlexItem grow={false}>
+        <EuiIcon size="s" type="copy" />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>Duplicate</EuiFlexItem>
+    </EuiFlexGroup>
+  ),
+  swap_compatible: (
+    <EuiFlexGroup
+      gutterSize="s"
+      justifyContent="center"
+      alignItems="center"
+      className="lnsDragDrop__extraDrop"
+    >
+      <EuiFlexItem grow={false}>
+        <EuiIcon size="s" type="expand" />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>Swap</EuiFlexItem>
+    </EuiFlexGroup>
+  ),
+  replace_duplicate_incompatible: (
+    <EuiFlexGroup
+      gutterSize="s"
+      justifyContent="center"
+      alignItems="center"
+      className="lnsDragDrop__extraDrop lnsDragDrop__extraDrop-incompatible"
+    >
+      <EuiFlexItem grow={false}>
+        <EuiIcon size="s" type="copy" />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>Duplicate</EuiFlexItem>
+    </EuiFlexGroup>
+  ),
+  duplicate_incompatible: (
+    <EuiFlexGroup
+      gutterSize="s"
+      justifyContent="center"
+      alignItems="center"
+      className="lnsDragDrop__extraDrop lnsDragDrop__extraDrop-incompatible"
+    >
+      <EuiFlexItem grow={false}>
+        <EuiIcon size="s" type="copy" />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>Duplicate</EuiFlexItem>
+    </EuiFlexGroup>
+  ),
+  swap_incompatible: (
+    <EuiFlexGroup
+      gutterSize="s"
+      justifyContent="center"
+      alignItems="center"
+      className="lnsDragDrop__extraDrop lnsDragDrop__extraDrop-incompatible"
+    >
+      <EuiFlexItem grow={false}>
+        <EuiIcon size="s" type="expand" />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>Swap</EuiFlexItem>
+    </EuiFlexGroup>
+  ),
+};
+
 
 export function EmptyDimensionButton({
   group,
@@ -69,7 +162,7 @@ export function EmptyDimensionButton({
     dimensionGroups: groups,
   });
 
-  const dropType = dropProps?.dropType;
+  const dropTypes = dropProps?.dropTypes;
   const nextLabel = dropProps?.nextLabel;
 
   const value = useMemo(
@@ -78,7 +171,6 @@ export function EmptyDimensionButton({
       groupId: group.groupId,
       layerId,
       id: newColumnId,
-      dropType,
       humanData: {
         label,
         groupLabel: group.groupLabel,
@@ -86,7 +178,7 @@ export function EmptyDimensionButton({
         nextLabel: nextLabel || '',
       },
     }),
-    [dropType, newColumnId, group.groupId, layerId, group.groupLabel, itemIndex, nextLabel]
+    [newColumnId, group.groupId, layerId, group.groupLabel, itemIndex, nextLabel]
   );
 
   const handleOnDrop = React.useCallback(
@@ -101,7 +193,8 @@ export function EmptyDimensionButton({
         value={value}
         order={[2, layerIndex, groupIndex, itemIndex]}
         onDrop={handleOnDrop}
-        dropType={dropType}
+        dropTypes={dropTypes}
+        customDropTargets={customDropTargetsMap}
       >
         <div className="lnsLayerPanel__dimension lnsLayerPanel__dimension--empty">
           <EuiButtonEmpty

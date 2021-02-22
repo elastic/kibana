@@ -148,7 +148,8 @@ export function nextValidDropTarget(
   });
 
   let currentActiveDropIndex = nextDropTargets.findIndex(
-    ([_, dropTarget]) => dropTarget?.id === activeDropTarget?.id
+    ([_, dropTarget]) =>
+      dropTarget?.id === activeDropTarget?.id && dropTarget?.dropType === activeDropTarget?.dropType
   );
 
   if (currentActiveDropIndex === -1) {

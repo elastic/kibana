@@ -53,7 +53,7 @@ describe('DragDrop', () => {
   test('dragover calls preventDefault if dropType is defined', () => {
     const preventDefault = jest.fn();
     const component = mount(
-      <DragDrop dropType="field_add" value={value} order={[2, 0, 1, 0]}>
+      <DragDrop dropTypes={['field_add']} value={value} order={[2, 0, 1, 0]}>
         <button>Hello!</button>
       </DragDrop>
     );
@@ -63,7 +63,7 @@ describe('DragDrop', () => {
     expect(preventDefault).toBeCalled();
   });
 
-  test('dragover does not call preventDefault if dropType is undefined', () => {
+  test('dragover does not call preventDefault if dropTypes is undefined', () => {
     const preventDefault = jest.fn();
     const component = mount(
       <DragDrop value={value} order={[2, 0, 1, 0]}>
@@ -128,7 +128,7 @@ describe('DragDrop', () => {
         dragging={{ id: '2', humanData: { label: 'Label1' } }}
         setDragging={setDragging}
       >
-        <DragDrop onDrop={onDrop} dropType="field_add" value={value} order={[2, 0, 1, 0]}>
+        <DragDrop onDrop={onDrop} dropTypes={['field_add']} value={value} order={[2, 0, 1, 0]}>
           <button>Hello!</button>
         </DragDrop>
       </ChildDragDropProvider>
@@ -144,7 +144,7 @@ describe('DragDrop', () => {
     expect(onDrop).toBeCalledWith({ id: '2', humanData: { label: 'Label1' } }, 'field_add');
   });
 
-  test('drop function is not called on dropType undefined', async () => {
+  test('drop function is not called on dropTypes undefined', async () => {
     const preventDefault = jest.fn();
     const stopPropagation = jest.fn();
     const setDragging = jest.fn();
@@ -156,7 +156,7 @@ describe('DragDrop', () => {
         dragging={{ id: 'hi', humanData: { label: 'Label1' } }}
         setDragging={setDragging}
       >
-        <DragDrop onDrop={onDrop} dropType={undefined} value={value} order={[2, 0, 1, 0]}>
+        <DragDrop onDrop={onDrop} dropTypes={undefined} value={value} order={[2, 0, 1, 0]}>
           <button>Hello!</button>
         </DragDrop>
       </ChildDragDropProvider>
@@ -172,13 +172,13 @@ describe('DragDrop', () => {
     expect(onDrop).not.toHaveBeenCalled();
   });
 
-  test('defined dropType is reflected in the className', () => {
+  test('defined dropTypes is reflected in the className', () => {
     const component = render(
       <DragDrop
         onDrop={(x: unknown) => {
           throw x;
         }}
-        dropType="field_add"
+        dropTypes={['field_add']}
         value={value}
         order={[2, 0, 1, 0]}
       >
@@ -235,7 +235,7 @@ describe('DragDrop', () => {
           order={[2, 0, 1, 0]}
           value={value}
           onDrop={(x: unknown) => {}}
-          dropType="field_add"
+          dropTypes={['field_add']}
           getAdditionalClassesOnEnter={getAdditionalClassesOnEnter}
           getAdditionalClassesOnDroppable={getAdditionalClassesOnDroppable}
         >
@@ -287,7 +287,7 @@ describe('DragDrop', () => {
           order={[2, 0, 1, 0]}
           value={value}
           onDrop={(x: unknown) => {}}
-          dropType="field_add"
+          dropTypes={['field_add']}
           getAdditionalClassesOnEnter={getAdditionalClasses}
           getAdditionalClassesOnDroppable={getAdditionalClassesOnDroppable}
         >
@@ -332,7 +332,7 @@ describe('DragDrop', () => {
           humanData: { label: 'label2', position: 1 },
         },
         onDrop,
-        dropType: 'move_compatible' as DropType,
+        dropTypes: ['move_compatible'] as DropType[],
         order: [2, 0, 1, 0],
       },
       {
@@ -343,7 +343,7 @@ describe('DragDrop', () => {
           humanData: { label: 'label3', position: 1, groupLabel: 'Y' },
         },
         onDrop,
-        dropType: 'replace_compatible' as DropType,
+        dropTypes: ['replace_compatible'] as DropType[],
         order: [2, 0, 2, 0],
       },
       {

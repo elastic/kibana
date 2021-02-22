@@ -34,12 +34,13 @@
 
 // Style for drop area when there's an item being dragged
 @mixin lnsDroppableActive {
-  background-color: transparentize($euiColorVis0, .9);
+  // background-color: transparentize($euiColorVis0, .9);
+  background-color: #e6f0f1;
 }
 
 // Style for drop area while hovering with item
 @mixin lnsDroppableActiveHover {
-  background-color: transparentize($euiColorVis0, .75);
+  background-color: #cee5e2;
   border: $euiBorderWidthThin dashed $euiColorVis0;
 }
 

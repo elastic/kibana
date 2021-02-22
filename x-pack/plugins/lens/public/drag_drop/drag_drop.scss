@@ -76,8 +76,18 @@
   background-color: $euiColorHighlight;
   border: $euiBorderWidthThin dashed $euiBorderColor;
   &.lnsDragDrop-isActiveDropTarget {
-    background-color: rgba(251, 208, 17, .25);
+    background-color: #fdf3cd;
     border-color: $euiColorVis5;
+  }
+}
+
+.lnsDragDrop__container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+
+  &.lnsDragDrop__container-active {
+    z-index: $euiZLevel2;
   }
 }
 
@@ -92,6 +102,14 @@
   transform: translateY(0);
   transition: transform $euiAnimSpeedFast ease-in-out;
   pointer-events: none;
+
+  .lnsDragDrop-isDropTarget {
+    @include lnsDraggable;
+  }
+
+  .lnsDragDrop-isActiveDropTarget {
+    @include lnsDraggable;
+  }
 }
 
 .lnsDragDrop-translatableDrag {
@@ -127,5 +145,40 @@
     &:focus-within {
       animation: none;
     }
+  }
+}
+
+.lnsDragDrop__extraDrops {
+  opacity: 0;
+  position: absolute;
+  right: 100%;
+  top: 50%;
+  transform: translateY(-50%);
+  transition: opacity $euiAnimSpeedFast ease-in-out;
+}
+
+.lnsDragDrop__extraDrops-visible {
+  opacity: 1;
+}
+
+.lnsDragDrop__trapezoid {
+  top: 50%;
+  transform: translateY(-50%);
+  // background:rgba(165, 17, 251, 0.2);
+  position: absolute;
+  width: calc(100% + 16px);
+  left: -8px;
+}
+
+.lnsDragDrop__extraDrop {
+  font-size: $euiSize;
+  min-width: $euiSize * 7;
+  position:relative;
+  color: $euiColorVis0;
+  color: $euiColorSuccess;
+  height: $euiSizeXS * 10;
+  border-radius: $euiSizeXS;
+  &-incompatible {
+    color: $euiColorWarningText;
   }
 }

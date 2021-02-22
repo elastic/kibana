@@ -53,7 +53,7 @@
   .lnsConfigPanel {
     @include euiScrollBar;
     padding: $euiSize $euiSizeXS $euiSize $euiSize;
-    overflow-x: hidden;
-    overflow-y: scroll;
+    // overflow-x: hidden;
+    // overflow-y: scroll;
   }
 }

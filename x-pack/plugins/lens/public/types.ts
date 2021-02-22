@@ -146,7 +146,13 @@ export type DropType =
   | 'move_compatible'
   | 'replace_compatible'
   | 'move_incompatible'
-  | 'replace_incompatible';
+  | 'replace_incompatible'
+  | 'replace_duplicate_compatible'
+  | 'duplicate_compatible'
+  | 'swap_compatible'
+  | 'replace_duplicate_incompatible'
+  | 'duplicate_incompatible'
+  | 'swap_incompatible';
 
 export interface DatasourceSuggestion<T = unknown> {
   state: T;
@@ -194,7 +200,7 @@ export interface Datasource<T = unknown, P = unknown> {
       groupId: string;
       dragging: DragContextState['dragging'];
     }
-  ) => { dropType: DropType; nextLabel?: string } | undefined;
+  ) => { dropTypes: DropType[]; nextLabel?: string } | undefined;
   onDrop: (props: DatasourceDimensionDropHandlerProps<T>) => false | true | { deleted: string };
   updateStateOnCloseDimension?: (props: {
     layerId: string;
@@ -299,6 +305,7 @@ export interface DraggedOperation {
   layerId: string;
   groupId: string;
   columnId: string;
+  filterOperations: (operation: OperationMetadata) => boolean;
 }
 
 export function isDraggedOperation(
