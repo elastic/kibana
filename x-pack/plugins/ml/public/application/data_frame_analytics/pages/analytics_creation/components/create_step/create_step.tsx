@@ -94,7 +94,12 @@ export const CreateStep: FC<Props> = ({ actions, state, step }) => {
       <EuiSpacer size="s" />
       <Messages messages={requestMessages} />
       {isJobCreated === true && (
-        <CreateStepFooter jobId={jobId} jobType={jobType!} showProgress={showProgress} />
+        <CreateStepFooter
+          jobId={jobId}
+          jobType={jobType!}
+          showProgress={showProgress}
+          isJobStarted={isJobStarted}
+        />
       )}
     </div>
   );

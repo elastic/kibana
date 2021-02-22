@@ -25,6 +25,7 @@ import { NewJobAwaitingNodeWarning } from '../../../../../components/jobs_awaiti
 export const PROGRESS_REFRESH_INTERVAL_MS = 1000;
 
 interface Props {
+  isJobStarted: boolean;
   jobId: string;
   jobType: DataFrameAnalysisConfigType;
   showProgress: boolean;
@@ -36,14 +37,14 @@ export interface AnalyticsProgressStats {
   totalPhases: number;
 }
 
-export const CreateStepFooter: FC<Props> = ({ jobId, jobType, showProgress }) => {
+export const CreateStepFooter: FC<Props> = ({ isJobStarted, jobId, jobType, showProgress }) => {
   const [initialized, setInitialized] = useState<boolean>(false);
   const [failedJobMessage, setFailedJobMessage] = useState<string | undefined>(undefined);
   const [jobFinished, setJobFinished] = useState<boolean>(false);
   const [currentProgress, setCurrentProgress] = useState<AnalyticsProgressStats | undefined>(
     undefined
   );
-  const [showJobAssignWarning, setShowJobAssignWarning] = useState(false);
+  const [showJobAssignWarning, setShowJobAssignWarning] = useState<boolean | undefined>(false);
 
   const {
     services: { notifications },
@@ -60,9 +61,15 @@ export const CreateStepFooter: FC<Props> = ({ jobId, jobType, showProgress }) =>
         const jobStats = isGetDataFrameAnalyticsStatsResponseOk(analyticsStats)
           ? analyticsStats.data_frame_analytics[0]
           : undefined;
+        const startRequestedButNotStartedYet =
+          isJobStarted &&
+          jobStats &&
+          jobStats.state === DATA_FRAME_TASK_STATE.STOPPED &&
+          jobStats.progress.every((phase) => phase.progress_percent === 0);
 
         setShowJobAssignWarning(
-          jobStats?.state === DATA_FRAME_TASK_STATE.STARTING && jobStats?.node === undefined
+          (jobStats?.state === DATA_FRAME_TASK_STATE.STARTING || startRequestedButNotStartedYet) &&
+            jobStats?.node === undefined
         );
 
         if (jobStats !== undefined) {
@@ -86,7 +93,7 @@ export const CreateStepFooter: FC<Props> = ({ jobId, jobType, showProgress }) =>
           if (
             (progressStats.currentPhase === progressStats.totalPhases &&
               progressStats.progress === 100) ||
-            jobStats.state === DATA_FRAME_TASK_STATE.STOPPED
+            (jobStats.state === DATA_FRAME_TASK_STATE.STOPPED && !startRequestedButNotStartedYet)
           ) {
             clearInterval(interval);
             // Check job has started. Jobs that fail to start will also have STOPPED state
