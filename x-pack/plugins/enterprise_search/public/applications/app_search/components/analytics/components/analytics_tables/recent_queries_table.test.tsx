@@ -7,12 +7,11 @@
 
 import { mountWithIntl } from '../../../../../__mocks__';
 import '../../../../__mocks__/engine_logic.mock';
+import { runActionColumnTests } from './shared_columns.mock';
 
 import React from 'react';
 
 import { EuiBasicTable, EuiBadge, EuiEmptyPrompt } from '@elastic/eui';
-
-import { runActionColumnTests } from './shared_columns_tests';
 
 import { RecentQueriesTable } from './';
 
