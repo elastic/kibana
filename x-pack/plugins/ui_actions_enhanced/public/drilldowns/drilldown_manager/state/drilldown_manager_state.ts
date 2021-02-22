@@ -78,9 +78,9 @@ export class DrilldownManagerState {
    * Callback called to hide drilldowns welcome message, and remember in local
    * storage that user opted to hide this message.
    */
-  public hideWelcomeMessage(): void {
+  public readonly hideWelcomeMessage = (): void => {
     this.showWelcomeMessage$.next(false);
-  }
+  };
 
   /**
    * Select a different action factory.

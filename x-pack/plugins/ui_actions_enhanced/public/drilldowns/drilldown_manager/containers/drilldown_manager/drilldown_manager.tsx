@@ -18,18 +18,19 @@ export const DrilldownManager: React.FC = ({}) => {
   const screen = drilldowns.useScreen();
   const showWelcomeMessage = drilldowns.useWelcomeMessage();
 
-  const footer = (
-    <EuiButton
-      onClick={() => {
-        alert('CREATE DRILL');
-      }}
-      fill
-      // isDisabled={!isActionValid(wizardConfig)}
-      data-test-subj={'drilldownWizardSubmit'}
-    >
-      {screen === 'create' ? txtCreateDrilldownButtonLabel : txtEditDrilldownButtonLabel}
-    </EuiButton>
-  );
+  const footer =
+    screen === 'create' ? (
+      <EuiButton
+        onClick={() => {
+          alert('CREATE DRILL');
+        }}
+        fill
+        // isDisabled={!isActionValid(wizardConfig)}
+        data-test-subj={'drilldownWizardSubmit'}
+      >
+        {screen === 'create' ? txtCreateDrilldownButtonLabel : txtEditDrilldownButtonLabel}
+      </EuiButton>
+    ) : null;
 
   // const handleSubmit = () => {};
 

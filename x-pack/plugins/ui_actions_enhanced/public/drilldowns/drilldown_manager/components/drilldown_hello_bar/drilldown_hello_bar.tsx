@@ -26,10 +26,7 @@ export interface DrilldownHelloBarProps {
 
 export const WELCOME_MESSAGE_TEST_SUBJ = 'drilldownsWelcomeMessage';
 
-export const DrilldownHelloBar: React.FC<DrilldownHelloBarProps> = ({
-  docsLink,
-  onHideClick = () => {},
-}) => {
+export const DrilldownHelloBar: React.FC<DrilldownHelloBarProps> = ({ docsLink, onHideClick }) => {
   return (
     <EuiCallOut data-test-subj={WELCOME_MESSAGE_TEST_SUBJ}>
       <EuiFlexGroup responsive={false}>
@@ -49,11 +46,13 @@ export const DrilldownHelloBar: React.FC<DrilldownHelloBarProps> = ({
             </>
           )}
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButtonEmpty size="xs" onClick={onHideClick}>
-            {txtHideHelpButtonLabel}
-          </EuiButtonEmpty>
-        </EuiFlexItem>
+        {!!onHideClick && (
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty size="xs" onClick={onHideClick}>
+              {txtHideHelpButtonLabel}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
     </EuiCallOut>
   );
