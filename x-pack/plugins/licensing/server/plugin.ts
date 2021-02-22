@@ -6,7 +6,6 @@
  */
 
 import { Observable, Subject, Subscription, timer } from 'rxjs';
-import { take, startWith, map } from 'rxjs/operators';
 import moment from 'moment';
 import { createHash } from 'crypto';
 import stringify from 'json-stable-stringify';
@@ -19,8 +18,7 @@ import {
   Plugin,
   PluginInitializerContext,
   IClusterClient,
-  ServiceStatusLevels,
-} from '../../../../src/core/server';
+} from 'src/core/server';
 
 import { ILicense, PublicLicense, PublicFeatures } from '../common/types';
 import { LicensingPluginSetup, LicensingPluginStart } from './types';
@@ -107,26 +105,6 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup, LicensingPl
     const { refresh, license$ } = this.createLicensePoller(
       clientPromise,
       pollingFrequency.asMilliseconds()
-    );
-
-    core.status.set(
-      license$.pipe(
-        startWith(undefined),
-        take(2),
-        map((license) => {
-          if (license) {
-            return {
-              level: ServiceStatusLevels.available,
-              summary: 'License fetched',
-            };
-          } else {
-            return {
-              level: ServiceStatusLevels.degraded,
-              summary: 'license not fetched yet',
-            };
-          }
-        })
-      )
     );
 
     core.http.registerRouteHandlerContext(

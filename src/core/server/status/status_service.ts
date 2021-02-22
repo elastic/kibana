@@ -7,15 +7,7 @@
  */
 
 import { Observable, combineLatest, Subscription } from 'rxjs';
-import {
-  map,
-  distinctUntilChanged,
-  shareReplay,
-  take,
-  debounceTime,
-  pairwise,
-  startWith,
-} from 'rxjs/operators';
+import { map, distinctUntilChanged, shareReplay, take, debounceTime } from 'rxjs/operators';
 import { isDeepStrictEqual } from 'util';
 
 import { CoreService } from '../../types';
@@ -47,7 +39,6 @@ export class StatusService implements CoreService<InternalStatusServiceSetup> {
   private readonly logger: Logger;
   private readonly config$: Observable<StatusConfigType>;
 
-  private overall$?: Observable<ServiceStatus>;
   private pluginsStatus?: PluginsStatusService;
   private overallSubscription?: Subscription;
 
@@ -68,7 +59,10 @@ export class StatusService implements CoreService<InternalStatusServiceSetup> {
     const core$ = this.setupCoreStatus({ elasticsearch, savedObjects });
     this.pluginsStatus = new PluginsStatusService({ core$, pluginDependencies });
 
-    this.overall$ = combineLatest([core$, this.pluginsStatus.getAll$()]).pipe(
+    const overall$: Observable<ServiceStatus> = combineLatest([
+      core$,
+      this.pluginsStatus.getAll$(),
+    ]).pipe(
       // Prevent many emissions at once from dependency status resolution from making this too noisy
       debounceTime(500),
       map(([coreStatus, pluginsStatus]) => {
@@ -84,7 +78,7 @@ export class StatusService implements CoreService<InternalStatusServiceSetup> {
     );
 
     // Create an unused subscription to ensure all underlying lazy observables are started.
-    this.overallSubscription = this.overall$.subscribe();
+    this.overallSubscription = overall$.subscribe();
 
     const router = http.createRouter('');
     registerStatusRoute({
@@ -97,7 +91,7 @@ export class StatusService implements CoreService<InternalStatusServiceSetup> {
       },
       metrics,
       status: {
-        overall$: this.overall$,
+        overall$,
         plugins$: this.pluginsStatus.getAll$(),
         core$,
       },
@@ -105,7 +99,7 @@ export class StatusService implements CoreService<InternalStatusServiceSetup> {
 
     return {
       core$,
-      overall$: this.overall$,
+      overall$,
       plugins: {
         set: this.pluginsStatus.set.bind(this.pluginsStatus),
         getDependenciesStatus$: this.pluginsStatus.getDependenciesStatus$.bind(this.pluginsStatus),
@@ -115,11 +109,7 @@ export class StatusService implements CoreService<InternalStatusServiceSetup> {
     };
   }
 
-  public start() {
-    this.overall$!.pipe(startWith(undefined), pairwise()).subscribe(([oldStatus, newStatus]) => {
-      this.logger.info(`Kibana overall status is now ${newStatus!.level.toString()}`);
-    });
-  }
+  public start() {}
 
   public stop() {
     if (this.overallSubscription) {
