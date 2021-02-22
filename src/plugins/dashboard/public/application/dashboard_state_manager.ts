@@ -345,7 +345,7 @@ export class DashboardStateManager {
   /**
    * Resets the state back to the last saved version of the dashboard.
    */
-  public resetState() {
+  public resetState(resetViewMode: boolean) {
     // In order to show the correct warning, we have to store the unsaved
     // title on the dashboard object. We should fix this at some point, but this is how all the other object
     // save panels work at the moment.
@@ -366,9 +366,14 @@ export class DashboardStateManager {
     this.stateDefaults.query = this.lastSavedDashboardFilters.query;
     // Need to make a copy to ensure they are not overwritten.
     this.stateDefaults.filters = [...this.getLastSavedFilterBars()];
-
     this.isDirty = false;
-    this.stateContainer.set(this.stateDefaults);
+
+    if (resetViewMode) {
+      this.stateContainer.set(this.stateDefaults);
+    } else {
+      const currentViewMode = this.stateContainer.get().viewMode;
+      this.stateContainer.set({ ...this.stateDefaults, viewMode: currentViewMode });
+    }
   }
 
   /**
