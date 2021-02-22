@@ -8,7 +8,7 @@
 import { set } from '@elastic/safer-lodash-set';
 import mockChartsData from './__fixtures__/monitor_charts_mock.json';
 import { getMonitorDurationChart } from './get_monitor_duration';
-import { getUptimeESMockClient } from './helper';
+import { getUptimeESMockClient } from './mocks';
 
 describe('ElasticsearchMonitorsAdapter', () => {
   it('getMonitorChartsData will provide expected filters', async () => {

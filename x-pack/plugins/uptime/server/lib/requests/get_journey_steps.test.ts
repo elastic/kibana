@@ -6,7 +6,7 @@
  */
 
 import { getJourneySteps, formatSyntheticEvents } from './get_journey_steps';
-import { getUptimeESMockClient } from './helper';
+import { getUptimeESMockClient } from './mocks';
 
 describe('getJourneySteps request module', () => {
   describe('formatStepTypes', () => {

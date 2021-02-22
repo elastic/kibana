@@ -167,8 +167,21 @@ export const renderWithRouter = (component: ReactElement, customHistory?: Memory
   return helperWithRouter(renderWithIntl, component, customHistory);
 };
 
+export const renderWithRouterRedux = (component: ReactElement, customHistory?: MemoryHistory) => {
+  return helperWithRouter(renderWithIntl, component, customHistory, true);
+};
+
 export const shallowWithRouter = (component: ReactElement, customHistory?: MemoryHistory) => {
   return helperWithRouter(shallowWithIntl, component, customHistory);
+};
+
+export const shallowWithRouterRedux = (component: ReactElement, customHistory?: MemoryHistory) => {
+  return helperWithRouter(shallowWithIntl, component, customHistory, true);
+};
+
+
+export const mountWithRouter = (component: ReactElement, customHistory?: MemoryHistory) => {
+  return helperWithRouter(mountWithIntl, component, customHistory);
 };
 
 export const mountWithRouterRedux = (

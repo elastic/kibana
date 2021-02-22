@@ -8,7 +8,7 @@
 import { getPings } from './get_pings';
 import { set } from '@elastic/safer-lodash-set';
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../common/constants';
-import { getUptimeESMockClient } from './helper';
+import { getUptimeESMockClient } from './mocks';
 
 describe('getAll', () => {
   let mockEsSearchResult: any;

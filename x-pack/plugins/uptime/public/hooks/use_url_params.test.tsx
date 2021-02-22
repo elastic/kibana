@@ -9,7 +9,7 @@ import DateMath from '@elastic/datemath';
 import React, { useState, Fragment } from 'react';
 import { useUrlParams, UptimeUrlParamsHook } from './use_url_params';
 import { UptimeRefreshContext } from '../contexts';
-import { mountWithRouter, MountWithReduxProvider } from '../lib';
+import { mountWithRouter, MountWithReduxProvider } from '../lib/helper/mocks';
 import { createMemoryHistory } from 'history';
 
 interface MockUrlParamsComponentProps {

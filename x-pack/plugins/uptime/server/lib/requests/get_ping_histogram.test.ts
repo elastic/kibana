@@ -7,7 +7,7 @@
 
 import { getPingHistogram } from './get_ping_histogram';
 import * as intervalHelper from '../helper/get_histogram_interval';
-import { getUptimeESMockClient } from './helper';
+import { getUptimeESMockClient } from './mocks';
 
 describe('getPingHistogram', () => {
   beforeEach(() => {

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { shallowWithRouter } from '../lib';
+import { shallowWithRouter } from '../lib/helper/mocks';
 import { NotFoundPage } from './not_found';
 
 describe('NotFoundPage', () => {

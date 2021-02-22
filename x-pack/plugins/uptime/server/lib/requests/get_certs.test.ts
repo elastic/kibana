@@ -6,7 +6,7 @@
  */
 
 import { getCerts } from './get_certs';
-import { getUptimeESMockClient } from './helper';
+import { getUptimeESMockClient } from './mocks';
 
 describe('getCerts', () => {
   let mockHits: any;
