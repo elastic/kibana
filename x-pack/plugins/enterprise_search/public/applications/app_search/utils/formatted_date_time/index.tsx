@@ -9,9 +9,19 @@ import React from 'react';
 
 import { FormattedDate, FormattedTime } from '@kbn/i18n/react';
 
-export const FormattedDateTime: React.FC<{ date: Date }> = ({ date }) => (
+interface Props {
+  date: Date;
+  hasTime?: boolean;
+}
+
+export const FormattedDateTime: React.FC<Props> = ({ date, hasTime = true }) => (
   <>
-    <FormattedDate value={date} year="numeric" month="short" day="numeric" />{' '}
-    <FormattedTime value={date} />
+    <FormattedDate value={date} year="numeric" month="short" day="numeric" />
+    {hasTime && (
+      <>
+        {' '}
+        <FormattedTime value={date} />
+      </>
+    )}
   </>
 );

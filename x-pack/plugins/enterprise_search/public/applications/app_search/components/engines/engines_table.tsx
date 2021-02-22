@@ -11,7 +11,7 @@ import { useActions } from 'kea';
 
 import { EuiBasicTable, EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage, FormattedDate, FormattedNumber } from '@kbn/i18n/react';
+import { FormattedMessage, FormattedNumber } from '@kbn/i18n/react';
 
 import { ENGINES_PAGE_SIZE } from '../../../../../common/constants';
 import { EuiLinkTo } from '../../../shared/react_router_helpers';
@@ -19,6 +19,7 @@ import { TelemetryLogic } from '../../../shared/telemetry';
 import { UNIVERSAL_LANGUAGE } from '../../constants';
 import { ENGINE_PATH } from '../../routes';
 import { generateEncodedPath } from '../../utils/encode_path_params';
+import { FormattedDateTime } from '../../utils/formatted_date_time';
 import { EngineDetails } from '../engine/types';
 
 interface EnginesTablePagination {
@@ -83,8 +84,7 @@ export const EnginesTable: React.FC<EnginesTableProps> = ({
       ),
       dataType: 'string',
       render: (dateString: string) => (
-        // e.g., Jan 1, 1970
-        <FormattedDate value={new Date(dateString)} year="numeric" month="short" day="numeric" />
+        <FormattedDateTime date={new Date(dateString)} hasTime={false} />
       ),
     },
     {
