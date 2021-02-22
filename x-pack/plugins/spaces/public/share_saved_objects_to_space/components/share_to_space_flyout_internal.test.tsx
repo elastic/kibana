@@ -103,11 +103,11 @@ const setup = async (opts: SetupOpts = {}) => {
   const mockToastNotifications = startServices.notifications.toasts;
   getStartServices.mockResolvedValue([startServices, , ,]);
 
-  const SpacesContext = getSpacesContextWrapper({
+  const SpacesContext = await getSpacesContextWrapper({
     getStartServices,
     spacesManager: mockSpacesManager,
   });
-  const ShareToSpaceFlyout = getShareToSpaceFlyoutComponent();
+  const ShareToSpaceFlyout = await getShareToSpaceFlyoutComponent();
   // the internal flyout depends upon the Kibana React Context, and it cannot be used without the context wrapper
   // the context wrapper is only split into a separate component to avoid recreating the context upon every flyout state change
   // the ShareToSpaceFlyout component renders the internal flyout inside of the context wrapper

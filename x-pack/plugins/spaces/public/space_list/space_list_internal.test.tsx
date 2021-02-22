@@ -57,7 +57,7 @@ describe('SpaceListInternal', () => {
     spacesManager.getActiveSpace.mockResolvedValue(ACTIVE_SPACE);
     spacesManager.getSpaces.mockResolvedValue(spaces);
 
-    const SpacesContext = getSpacesContextWrapper({ getStartServices, spacesManager });
+    const SpacesContext = await getSpacesContextWrapper({ getStartServices, spacesManager });
     const wrapper = mountWithIntl(
       <SpacesContext feature={feature}>
         <SpaceListInternal {...props} />

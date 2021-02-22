@@ -17,8 +17,6 @@ import type { Space } from 'src/plugins/spaces_oss/common';
 import { RedirectAppLinks } from '../../../../../src/plugins/kibana_react/public';
 import type { PluginsStart } from '../plugin';
 import type { SpacesManager } from '../spaces_manager';
-import { ManageSpacePage } from './edit_space';
-import { SpacesGridPage } from './spaces_grid';
 
 interface CreateParams {
   getStartServices: StartServicesAccessor<PluginsStart>;
@@ -38,10 +36,16 @@ export const spacesManagementApp = Object.freeze({
       title,
 
       async mount({ element, setBreadcrumbs, history }) {
+        const [startServices, { SpacesGridPage }, { ManageSpacePage }] = await Promise.all([
+          getStartServices(),
+          import('./spaces_grid'),
+          import('./edit_space'),
+        ]);
+
         const [
           { notifications, i18n: i18nStart, application, chrome },
           { features },
-        ] = await getStartServices();
+        ] = startServices;
         const spacesBreadcrumbs = [
           {
             text: title,

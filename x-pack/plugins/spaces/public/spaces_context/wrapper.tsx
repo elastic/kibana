@@ -6,87 +6,17 @@
  */
 
 import type { PropsWithChildren } from 'react';
-import React, { useEffect, useMemo, useState } from 'react';
+import React from 'react';
 
-import type {
-  ApplicationStart,
-  DocLinksStart,
-  NotificationsStart,
-  StartServicesAccessor,
-} from 'src/core/public';
 import type { SpacesContextProps } from 'src/plugins/spaces_oss/public';
 
-import type { PluginsStart } from '../plugin';
-import type { SpacesManager } from '../spaces_manager';
-import type { ShareToSpacesData, ShareToSpaceTarget } from '../types';
-import { createSpacesReactContext } from './context';
-import type { SpacesReactContext } from './types';
+import type { InternalProps } from './types';
 
-interface InternalProps {
-  spacesManager: SpacesManager;
-  getStartServices: StartServicesAccessor<PluginsStart>;
-}
-
-interface Services {
-  application: ApplicationStart;
-  docLinks: DocLinksStart;
-  notifications: NotificationsStart;
-}
-
-async function getShareToSpacesData(
-  spacesManager: SpacesManager,
-  feature?: string
-): Promise<ShareToSpacesData> {
-  const spaces = await spacesManager.getSpaces({ includeAuthorizedPurposes: true });
-  const activeSpace = await spacesManager.getActiveSpace();
-  const spacesMap = spaces
-    .map<ShareToSpaceTarget>(({ authorizedPurposes, disabledFeatures, ...space }) => {
-      const isActiveSpace = space.id === activeSpace.id;
-      const cannotShareToSpace = authorizedPurposes?.shareSavedObjectsIntoSpace === false;
-      const isFeatureDisabled = feature !== undefined && disabledFeatures.includes(feature);
-      return {
-        ...space,
-        ...(isActiveSpace && { isActiveSpace }),
-        ...(cannotShareToSpace && { cannotShareToSpace }),
-        ...(isFeatureDisabled && { isFeatureDisabled }),
-      };
-    })
-    .reduce((acc, cur) => acc.set(cur.id, cur), new Map<string, ShareToSpaceTarget>());
-
-  return {
-    spacesMap,
-    activeSpaceId: activeSpace.id,
-  };
-}
-
-const SpacesContextWrapper = (props: PropsWithChildren<InternalProps & SpacesContextProps>) => {
-  const { spacesManager, getStartServices, feature, children } = props;
-
-  const [context, setContext] = useState<SpacesReactContext<Services> | undefined>();
-  const shareToSpacesDataPromise = useMemo(() => getShareToSpacesData(spacesManager, feature), [
-    spacesManager,
-    feature,
-  ]);
-
-  useEffect(() => {
-    getStartServices().then(([coreStart]) => {
-      const { application, docLinks, notifications } = coreStart;
-      const services = { application, docLinks, notifications };
-      setContext(createSpacesReactContext(services, spacesManager, shareToSpacesDataPromise));
-    });
-  }, [getStartServices, shareToSpacesDataPromise, spacesManager]);
-
-  if (!context) {
-    return null;
-  }
-
-  return <context.Provider>{children}</context.Provider>;
-};
-
-export const getSpacesContextWrapper = (
+export const getSpacesContextWrapper = async (
   internalProps: InternalProps
-): React.FC<SpacesContextProps> => {
+): Promise<React.FC<SpacesContextProps>> => {
+  const { SpacesContextWrapperInternal } = await import('./wrapper_internal');
   return ({ children, ...props }: PropsWithChildren<SpacesContextProps>) => {
-    return <SpacesContextWrapper {...{ ...internalProps, ...props, children }} />;
+    return <SpacesContextWrapperInternal {...{ ...internalProps, ...props, children }} />;
   };
 };

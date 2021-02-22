@@ -37,6 +37,6 @@ export const getComponents = ({
 /**
  * Returns a lazy-loadable version of a component. React expects these to be default exports.
  */
-function lazy<T>(fn: () => React.FunctionComponent<T>) {
-  return () => Promise.resolve({ default: fn() });
+function lazy<T>(fn: () => Promise<React.FunctionComponent<T>>) {
+  return () => fn().then((component) => ({ default: component }));
 }
