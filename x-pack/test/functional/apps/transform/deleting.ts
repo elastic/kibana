@@ -35,17 +35,17 @@ export default function ({ getService }: FtrProviderContext) {
     // const transformConfigWithLatest = getLatestTransformConfig();
 
     const testDataList = [
-      // {
-      //   suiteTitle: 'transform with pivot configuration',
-      //   originalConfig: transformConfigWithPivot,
-      //   expected: {
-      //     row: {
-      //       status: TRANSFORM_STATE.STOPPED,
-      //       mode: 'batch',
-      //       progress: 100,
-      //     },
-      //   },
-      // },
+      {
+        suiteTitle: 'transform with pivot configuration',
+        originalConfig: transformConfigWithPivot,
+        expected: {
+          row: {
+            status: TRANSFORM_STATE.STOPPED,
+            mode: 'batch',
+            progress: 100,
+          },
+        },
+      },
       {
         suiteTitle: 'continuous transform with pivot configuration',
         originalConfig: getTransformConfig(true),
@@ -85,20 +85,16 @@ export default function ({ getService }: FtrProviderContext) {
           testData.originalConfig
         );
       }
-      // await transform.api.createAndRunTransform(
-      //   transformConfigWithLatest.id,
-      //   transformConfigWithLatest
-      // );
 
       await transform.testResources.setKibanaTimeZoneToUTC();
       await transform.securityUI.loginAsTransformPowerUser();
     });
 
     after(async () => {
-      await transform.testResources.deleteIndexPatternByTitle(transformConfigWithPivot.dest.index);
-      await transform.api.deleteIndices(transformConfigWithPivot.dest.index);
-      // await transform.testResources.deleteIndexPatternByTitle(transformConfigWithLatest.dest.index);
-      // await transform.api.deleteIndices(transformConfigWithLatest.dest.index);
+      for (const testData of testDataList) {
+        await transform.testResources.deleteIndexPatternByTitle(testData.originalConfig.dest.index);
+        await transform.api.deleteIndices(testData.originalConfig.dest.index);
+      }
       await transform.api.cleanTransformIndices();
     });
 
@@ -111,15 +107,11 @@ export default function ({ getService }: FtrProviderContext) {
 
           await transform.testExecution.logTestStep('should display the transforms table');
           await transform.management.assertTransformsTableExists();
-
-          await transform.testExecution.logTestStep(
-            'should display the original transform in the transform list'
-          );
           await transform.table.refreshTransformList();
 
           if (testData.expected.row.mode === 'continuous') {
-            // await transform.testExecution.logTestStep('should have the delete action disabled');
-            // await transform.table.assertTransformRowDeleteActionEnabled(false);
+            await transform.testExecution.logTestStep('should have the delete action disabled');
+            await transform.table.assertTransformRowActionEnabled('Delete', false);
 
             await transform.testExecution.logTestStep('should stop the transform');
             await transform.table.clickTransformRowActionWithRetry('Stop');
@@ -131,10 +123,11 @@ export default function ({ getService }: FtrProviderContext) {
               mode: testData.expected.row.mode,
               progress: testData.expected.row.progress,
             });
+            await transform.table.refreshTransformList();
           }
 
           await transform.testExecution.logTestStep('should show the delete modal');
-          await transform.table.assertTransformRowDeleteActionEnabled(true);
+          await transform.table.assertTransformRowActionEnabled('Delete', true);
           await transform.table.clickTransformRowActionWithRetry('Delete');
           await transform.table.assertTransformDeleteModalExists();
 

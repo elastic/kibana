@@ -28,7 +28,7 @@ export function TransformProvider(context: FtrProviderContext) {
   const securityCommon = TransformSecurityCommonProvider(context);
   const securityUI = TransformSecurityUIProvider(context, securityCommon);
   const sourceSelection = TransformSourceSelectionProvider(context);
-  const table = TransformTableProvider(context, management);
+  const table = TransformTableProvider(context);
   const testExecution = TransformTestExecutionProvider(context);
   const testResources = MachineLearningTestResourcesProvider(context);
   const wizard = TransformWizardProvider(context);

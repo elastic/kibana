@@ -134,7 +134,19 @@ export function TransformTableProvider(
       const filteredRows = rows.filter((row) => row.id === filter);
       expect(filteredRows).to.have.length(
         expectedRowCount,
-        `Filtered DFA job table should have ${expectedRowCount} row(s) for filter '${filter}' (got matching items '${filteredRows}')`
+        `Filtered Transform table should have ${expectedRowCount} row(s) for filter '${filter}' (got matching items '${filteredRows}')`
+      );
+    }
+
+    public async clearSearchString(expectedRowCount: number = 1) {
+      await this.waitForTransformsToLoad();
+      const tableListContainer = await testSubjects.find('transformListTableContainer');
+      const searchBarInput = await tableListContainer.findByClassName('euiFieldSearch');
+      await searchBarInput.clearValueWithKeyboard();
+      const rows = await this.parseTransformTable();
+      expect(rows).to.have.length(
+        expectedRowCount,
+        `Transform table should have ${expectedRowCount} row(s) after resetting search' (got '${rows.length}')`
       );
     }
 
@@ -147,6 +159,18 @@ export function TransformTableProvider(
           transformRow
         )}')`
       );
+    }
+
+    public async assertTransformRowStatusNotEql(transformId: string, status: string) {
+      await retry.tryForTime(30 * 1000, async () => {
+        await this.refreshTransformList();
+        const rows = await this.parseTransformTable();
+        const transformRow = rows.filter((row) => row.id === transformId)[0];
+        expect(transformRow.status).to.not.eql(
+          status,
+          `Expected transform row to not be '${status}' (got '${transformRow.status}')`
+        );
+      });
     }
 
     public async assertTransformExpandedRow() {
@@ -206,25 +230,28 @@ export function TransformTableProvider(
       }
     }
 
-    public async assertTransformRowDeleteActionEnabled(expectedValue: boolean) {
-      await retry.tryForTime(30 * 1000, async () => {
+    public async assertTransformRowActionEnabled(
+      action: 'Delete' | 'Start' | 'Stop' | 'Clone' | 'Edit',
+      expectedValue: boolean
+    ) {
+      const selector = `transformAction${action}`;
+      await retry.tryForTime(60 * 1000, async () => {
+        await browser.pressKeys(browser.keys.ESCAPE);
         await testSubjects.click('euiCollapsedItemActionsButton');
-        await testSubjects.existOrFail('transformActionDelete');
-        const isEnabled = await testSubjects.isEnabled('transformActionDelete');
+
+        await testSubjects.existOrFail(selector);
+        const isEnabled = await testSubjects.isEnabled(selector);
         expect(isEnabled).to.eql(
           expectedValue,
-          `Expected 'Delete' button to be '${expectedValue ? 'enabled' : 'disabled'}' (got '${
+          `Expected '${action}' button to be '${expectedValue ? 'enabled' : 'disabled'}' (got '${
             isEnabled ? 'enabled' : 'disabled'
           }')`
         );
-        await browser.pressKeys(browser.keys.ESCAPE);
-        await testSubjects.existOrFail('euiCollapsedItemActionsButton');
       });
     }
 
     public async clickTransformRowActionWithRetry(action: string) {
       await retry.tryForTime(30 * 1000, async () => {
-        await testSubjects.click('euiCollapsedItemActionsButton');
         await testSubjects.existOrFail(`transformAction${action}`);
         await testSubjects.click(`transformAction${action}`);
       });
@@ -252,6 +279,14 @@ export function TransformTableProvider(
       await testSubjects.missingOrFail('transformDeleteModal', { timeout: 60 * 1000 });
     }
 
+    public async assertTransformStartModalExists() {
+      await testSubjects.existOrFail('transformStartModal', { timeout: 60 * 1000 });
+    }
+
+    public async assertTransformStartModalNotExists() {
+      await testSubjects.missingOrFail('transformStartModal', { timeout: 60 * 1000 });
+    }
+
     public async clickDeleteTransform(transformId: string) {
       const expectedNumRows = (await this.parseTransformTable()).length - 1;
 
@@ -264,9 +299,17 @@ export function TransformTableProvider(
         if (expectedNumRows < 1) {
           await management.assertNoTransformsFoundMessageExists();
         } else {
+          // Checks that the tranform was deleted
           await this.filterWithSearchString(transformId, 0);
-          await this.filterWithSearchString('', expectedNumRows);
         }
+      });
+    }
+
+    public async confirmStartTransform() {
+      await retry.tryForTime(30 * 1000, async () => {
+        await this.assertTransformStartModalExists();
+        await testSubjects.click('transformStartModal > confirmModalConfirmButton');
+        await this.assertTransformStartModalNotExists();
       });
     }
   })();
