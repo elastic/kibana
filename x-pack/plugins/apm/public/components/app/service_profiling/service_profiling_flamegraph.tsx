@@ -269,6 +269,7 @@ export function ServiceProfilingFlamegraph({
 
             if (
               !node ||
+              // TODO: apply highlight to entire stack, not just node
               (highlightFilter && !node.fqn.includes(highlightFilter))
             ) {
               return rgba(0, 0, 0, 0.25);
@@ -323,8 +324,8 @@ export function ServiceProfilingFlamegraph({
             config={{
               fillLabel: {
                 fontFamily: theme.eui.euiCodeFontFamily,
-                // @ts-ignore (coming soon in Elastic charts)
-                clip: true,
+                // @ts-expect-error (coming soon in Elastic charts)
+                clipText: true,
               },
               drilldown: true,
               fontFamily: theme.eui.euiCodeFontFamily,

@@ -142,7 +142,7 @@ export function ServiceDetailTabs({ serviceName, tab }: Props) {
               }
             )}
             tooltipContent={i18n.translate(
-              'xpack.apm.serviceDetails.profilingTabExperimentalDedcription',
+              'xpack.apm.serviceDetails.profilingTabExperimentalDescription',
               {
                 defaultMessage:
                   'Profiling is highly experimental and for internal use only.',

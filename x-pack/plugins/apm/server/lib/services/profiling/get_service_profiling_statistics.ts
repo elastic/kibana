@@ -46,7 +46,7 @@ function getProfilingStats({
   filter: ESFilter[];
   valueTypeField: string;
 }) {
-  return withApmSpan('get_profile_stats', async () => {
+  return withApmSpan('get_profiling_stats', async () => {
     const response = await apmEventClient.search({
       apm: {
         events: [ProcessorEvent.profile],

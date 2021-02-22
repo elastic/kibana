@@ -16,15 +16,17 @@ import { getServiceAnnotations } from '../lib/services/annotations';
 import { getServices } from '../lib/services/get_services';
 import { getServiceAgentName } from '../lib/services/get_service_agent_name';
 import { getServiceDependencies } from '../lib/services/get_service_dependencies';
-import { getServiceErrorGroups } from '../lib/services/get_service_error_groups';
+import { getServiceErrorGroupPrimaryStatistics } from '../lib/services/get_service_error_groups/get_service_error_group_primary_statistics';
+import { getServiceErrorGroupComparisonStatistics } from '../lib/services/get_service_error_groups/get_service_error_group_comparison_statistics';
 import { getServiceInstances } from '../lib/services/get_service_instances';
 import { getServiceMetadataDetails } from '../lib/services/get_service_metadata_details';
 import { getServiceMetadataIcons } from '../lib/services/get_service_metadata_icons';
 import { getServiceNodeMetadata } from '../lib/services/get_service_node_metadata';
 import { getServiceTransactionTypes } from '../lib/services/get_service_transaction_types';
 import { getThroughput } from '../lib/services/get_throughput';
-import { offsetPreviousPeriodCoordinates } from '../utils/offset_previous_period_coordinate';
 import { createRoute } from './create_route';
+import { offsetPreviousPeriodCoordinates } from '../utils/offset_previous_period_coordinate';
+import { jsonRt } from '../../common/runtime_types/json_rt';
 import {
   comparisonRangeRt,
   environmentRt,
@@ -180,12 +182,7 @@ export const serviceAnnotationsRoute = createRoute({
     path: t.type({
       serviceName: t.string,
     }),
-    query: t.intersection([
-      rangeRt,
-      t.partial({
-        environment: t.string,
-      }),
-    ]),
+    query: t.intersection([rangeRt, environmentRt]),
   }),
   options: { tags: ['access:apm'] },
   handler: async ({ context, request }) => {
@@ -279,8 +276,9 @@ export const serviceAnnotationsCreateRoute = createRoute({
   },
 });
 
-export const serviceErrorGroupsRoute = createRoute({
-  endpoint: 'GET /api/apm/services/{serviceName}/error_groups',
+export const serviceErrorGroupsPrimaryStatisticsRoute = createRoute({
+  endpoint:
+    'GET /api/apm/services/{serviceName}/error_groups/primary_statistics',
   params: t.type({
     path: t.type({
       serviceName: t.string,
@@ -290,15 +288,6 @@ export const serviceErrorGroupsRoute = createRoute({
       rangeRt,
       uiFiltersRt,
       t.type({
-        size: toNumberRt,
-        numBuckets: toNumberRt,
-        pageIndex: toNumberRt,
-        sortDirection: t.union([t.literal('asc'), t.literal('desc')]),
-        sortField: t.union([
-          t.literal('last_seen'),
-          t.literal('occurrences'),
-          t.literal('name'),
-        ]),
         transactionType: t.string,
       }),
     ]),
@@ -309,27 +298,51 @@ export const serviceErrorGroupsRoute = createRoute({
 
     const {
       path: { serviceName },
-      query: {
-        environment,
-        numBuckets,
-        pageIndex,
-        size,
-        sortDirection,
-        sortField,
-        transactionType,
-      },
+      query: { transactionType, environment },
+    } = context.params;
+    return getServiceErrorGroupPrimaryStatistics({
+      serviceName,
+      setup,
+      transactionType,
+      environment,
+    });
+  },
+});
+
+export const serviceErrorGroupsComparisonStatisticsRoute = createRoute({
+  endpoint:
+    'GET /api/apm/services/{serviceName}/error_groups/comparison_statistics',
+  params: t.type({
+    path: t.type({
+      serviceName: t.string,
+    }),
+    query: t.intersection([
+      environmentRt,
+      rangeRt,
+      uiFiltersRt,
+      t.type({
+        numBuckets: toNumberRt,
+        transactionType: t.string,
+        groupIds: jsonRt.pipe(t.array(t.string)),
+      }),
+    ]),
+  }),
+  options: { tags: ['access:apm'] },
+  handler: async ({ context, request }) => {
+    const setup = await setupRequest(context, request);
+
+    const {
+      path: { serviceName },
+      query: { environment, numBuckets, transactionType, groupIds },
     } = context.params;
 
-    return getServiceErrorGroups({
+    return getServiceErrorGroupComparisonStatistics({
       environment,
       serviceName,
       setup,
-      size,
       numBuckets,
-      pageIndex,
-      sortDirection,
-      sortField,
       transactionType,
+      groupIds,
     });
   },
 });
