@@ -11,7 +11,7 @@
     "server/**/*",
     "public/**/*",
     "common/**/*",
-    "tests_client_integration/**/*",
+    "__jest__/**/*",
     "__fixtures__/*",
     "../../typings/**/*"
   ],
