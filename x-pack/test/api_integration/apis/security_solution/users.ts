@@ -24,8 +24,8 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   describe('Users', () => {
     describe('With auditbeat', () => {
-      before(() => esArchiver.load('auditbeat/default'));
-      after(() => esArchiver.unload('auditbeat/default'));
+      before(() => esArchiver.load('auditbeat/users'));
+      after(() => esArchiver.unload('auditbeat/users'));
 
       it('Ensure data is returned from auditbeat', async () => {
         const { body: users } = await supertest

@@ -27,10 +27,9 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/90416
-  describe.skip('uncommon_processes', () => {
-    before(() => esArchiver.load('auditbeat/hosts'));
-    after(() => esArchiver.unload('auditbeat/hosts'));
+  describe('uncommon_processes', () => {
+    before(() => esArchiver.load('auditbeat/uncommon_processes'));
+    after(() => esArchiver.unload('auditbeat/uncommon_processes'));
 
     describe('when given a pagination of length 2', () => {
       let response: null | UncommonProcessesResponse = null;
@@ -59,7 +58,6 @@ export default function ({ getService }: FtrProviderContext) {
             wait_for_completion_timeout: '10s',
           });
       });
-
       it('should return an edge of length 2 ', () => {
         expect(response!.body.edges.length).to.be(2);
       });
@@ -91,7 +89,6 @@ export default function ({ getService }: FtrProviderContext) {
             wait_for_completion_timeout: '10s',
           });
       });
-
       it('should return an edge of length 1 ', () => {
         expect(response!.body.edges.length).to.be(1);
       });
