@@ -589,8 +589,6 @@
     "dashboard.badge.readOnly.tooltip": "无法保存仪表板",
     "dashboard.changeViewModeConfirmModal.cancelButtonLabel": "继续编辑",
     "dashboard.changeViewModeConfirmModal.confirmButtonLabel": "放弃更改",
-    "dashboard.changeViewModeConfirmModal.discardChangesDescription": "放弃更改后，它们将无法恢复。",
-    "dashboard.changeViewModeConfirmModal.discardChangesTitle": "放弃对仪表板的更改？",
     "dashboard.cloneModal.cloneDashboardTitleAriaLabel": "克隆仪表板标题",
     "dashboard.dashboardAppBreadcrumbsTitle": "仪表板",
     "dashboard.dashboardGrid.toast.unableToLoadDashboardDangerMessage": "无法加载仪表板。",
