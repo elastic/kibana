@@ -33,6 +33,8 @@ export interface TransformStats {
     attributes: Record<string, any>;
   };
   stats: {
+    delete_time_in_ms: number;
+    documents_deleted: number;
     documents_indexed: number;
     documents_processed: number;
     index_failures: number;

@@ -150,7 +150,7 @@ export const ExplorationQueryBar: FC<ExplorationQueryBarProps> = ({
         <EuiFlexGroup alignItems="center">
           <EuiFlexItem>
             <QueryStringInput
-              bubbleSubmitEvent={true}
+              bubbleSubmitEvent={false}
               query={searchInput}
               indexPatterns={[indexPattern]}
               onChange={searchChangeHandler}

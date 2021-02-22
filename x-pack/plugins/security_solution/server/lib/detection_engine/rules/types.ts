@@ -96,6 +96,7 @@ import {
   ThreatLanguageOrUndefined,
   ConcurrentSearchesOrUndefined,
   ItemsPerSearchOrUndefined,
+  ThreatIndicatorPathOrUndefined,
 } from '../../../../common/detection_engine/schemas/types/threat_mapping';
 
 import { AlertsClient, PartialAlert } from '../../../../../alerts/server';
@@ -238,6 +239,7 @@ export interface CreateRulesOptions {
   threshold: ThresholdOrUndefined;
   threatFilters: ThreatFiltersOrUndefined;
   threatIndex: ThreatIndexOrUndefined;
+  threatIndicatorPath: ThreatIndicatorPathOrUndefined;
   threatQuery: ThreatQueryOrUndefined;
   threatMapping: ThreatMappingOrUndefined;
   concurrentSearches: ConcurrentSearchesOrUndefined;

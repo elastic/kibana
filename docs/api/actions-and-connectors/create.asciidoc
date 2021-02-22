@@ -1,0 +1,68 @@
+[[actions-and-connectors-api-create]]
+=== Create action API
+++++
+<titleabbrev>Create action API</titleabbrev>
+++++
+
+Creates an action.
+
+[[actions-and-connectors-api-create-request]]
+==== Request
+
+`POST <kibana host>:<port>/api/actions/action`
+
+[[actions-and-connectors-api-create-request-body]]
+==== Request body
+
+`name`::
+  (Required, string) The display name for the action.
+
+`actionTypeId`::
+  (Required, string) The action type ID for the action.
+
+`config`::
+  (Required, object) The configuration for the action. Configuration properties vary depending on
+  the action type. For information about the configuration properties, refer to <<action-types,Action and connector types>>.
+
+`secrets`::
+  (Required, object) The secrets configuration for the action. Secrets configuration properties vary
+  depending on the action type. For information about the secrets configuration properties, refer to <<action-types,Action and connector types>>.
+
+[[actions-and-connectors-api-create-request-codes]]
+==== Response code
+
+`200`::
+    Indicates a successful call.
+
+[[actions-and-connectors-api-create-example]]
+==== Example
+
+[source,sh]
+--------------------------------------------------
+$ curl -X POST api/actions/action  -H 'kbn-xsrf: true' -H 'Content-Type: application/json' -d '
+{
+  "name": "my-action",
+  "actionTypeId": ".index",
+  "config": {
+    "index": "test-index"
+  }
+}'
+--------------------------------------------------
+// KIBANA
+
+The API returns the following:
+
+[source,sh]
+--------------------------------------------------
+{
+  "id": "c55b6eb0-6bad-11eb-9f3b-611eebc6c3ad",
+  "actionTypeId": ".index",
+  "name": "my-action",
+  "config": {
+    "index": "test-index",
+    "refresh": false,
+    "executionTimeField": null
+  },
+  "isPreconfigured": false
+}
+--------------------------------------------------
