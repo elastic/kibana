@@ -13,7 +13,7 @@ import { createMemoryHistory, MemoryHistory } from 'history';
 import { createRenderer } from './utils';
 import { ApplicationService } from '../application_service';
 import { httpServiceMock } from '../../http/http_service.mock';
-import { MockLifecycle } from '../test_types';
+import { MockLifecycle } from '../types.test';
 import { overlayServiceMock } from '../../overlays/overlay_service.mock';
 import { AppMountParameters } from '../types';
 import { Observable } from 'rxjs';

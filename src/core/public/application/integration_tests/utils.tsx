@@ -12,7 +12,7 @@ import { mount } from 'enzyme';
 import { I18nProvider } from '@kbn/i18n/react';
 
 import { AppMountParameters } from '../types';
-import { MockedMounterTuple, Mountable } from '../test_types';
+import { MockedMounterTuple, Mountable } from '../types.test';
 
 type Dom = ReturnType<typeof mount> | null;
 type Renderer = () => Dom | Promise<Dom>;
