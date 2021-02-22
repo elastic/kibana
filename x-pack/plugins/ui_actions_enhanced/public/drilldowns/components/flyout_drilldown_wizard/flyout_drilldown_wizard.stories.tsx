@@ -9,7 +9,7 @@ import * as React from 'react';
 import { EuiFlyout } from '@elastic/eui';
 import { storiesOf } from '@storybook/react';
 import { FlyoutDrilldownWizard } from './index';
-import { mockActionFactories } from '../../../components/action_wizard/test_data';
+import { mockActionFactories } from '../../../components/action_wizard/mocks';
 import { Trigger } from '../../../../../../../src/plugins/ui_actions/public';
 
 const otherProps = {

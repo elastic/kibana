@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { storiesOf } from '@storybook/react';
-import { Demo, dashboardFactory, urlFactory } from './test_data';
+import { Demo, dashboardFactory, urlFactory } from './mocks';
 
 storiesOf('components/ActionWizard', module)
   .add('default', () => <Demo actionFactories={[dashboardFactory, urlFactory]} />)

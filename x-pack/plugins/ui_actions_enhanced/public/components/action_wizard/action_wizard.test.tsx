@@ -8,13 +8,7 @@
 import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
 import { TEST_SUBJ_ACTION_FACTORY_ITEM, TEST_SUBJ_SELECTED_ACTION_FACTORY } from './action_wizard';
-import {
-  dashboardFactory,
-  dashboards,
-  Demo,
-  urlFactory,
-  urlDrilldownActionFactory,
-} from './test_data';
+import { dashboardFactory, dashboards, Demo, urlFactory, urlDrilldownActionFactory } from './mocks';
 import { ActionFactory } from '../../dynamic_actions';
 import { licensingMock } from '../../../../licensing/public/mocks';
 
