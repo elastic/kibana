@@ -44,3 +44,37 @@ describe('ui_settings 7.9.0 migrations', () => {
     });
   });
 });
+
+describe('ui_settings 7.13.0 migrations', () => {
+  const migration = migrations['7.13.0'];
+
+  test('returns doc on empty object', () => {
+    expect(migration({} as SavedObjectUnsanitizedDoc)).toEqual({
+      references: [],
+    });
+  });
+  test('properly renames ml:fileDataVisualizerMaxFileSize to fileUpload:maxFileSize', () => {
+    const doc = {
+      type: 'config',
+      id: '8.0.0',
+      attributes: {
+        buildNum: 9007199254740991,
+        'ml:fileDataVisualizerMaxFileSize': '250MB',
+      },
+      references: [],
+      updated_at: '2020-06-09T20:18:20.349Z',
+      migrationVersion: {},
+    };
+    expect(migration(doc)).toEqual({
+      type: 'config',
+      id: '8.0.0',
+      attributes: {
+        buildNum: 9007199254740991,
+        'fileUpload:maxFileSize': '250MB',
+      },
+      references: [],
+      updated_at: '2020-06-09T20:18:20.349Z',
+      migrationVersion: {},
+    });
+  });
+});
