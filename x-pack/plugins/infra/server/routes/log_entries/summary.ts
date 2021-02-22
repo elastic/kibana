@@ -33,38 +33,32 @@ export const initLogEntriesSummaryRoute = ({ framework, logEntries }: InfraBacke
       validate: { body: escapeHatch },
     },
     async (requestContext, request, response) => {
-      try {
-        const payload = pipe(
-          logEntriesSummaryRequestRT.decode(request.body),
-          fold(throwErrors(Boom.badRequest), identity)
-        );
-        const { sourceId, startTimestamp, endTimestamp, bucketSize, query } = payload;
+      const payload = pipe(
+        logEntriesSummaryRequestRT.decode(request.body),
+        fold(throwErrors(Boom.badRequest), identity)
+      );
+      const { sourceId, startTimestamp, endTimestamp, bucketSize, query } = payload;
 
-        const buckets = await logEntries.getLogSummaryBucketsBetween(
-          requestContext,
-          sourceId,
-          startTimestamp,
-          endTimestamp,
-          bucketSize,
-          parseFilterQuery(query)
-        );
+      const buckets = await logEntries.getLogSummaryBucketsBetween(
+        requestContext,
+        sourceId,
+        startTimestamp,
+        endTimestamp,
+        bucketSize,
+        parseFilterQuery(query)
+      );
 
-        UsageCollector.countLogs();
+      UsageCollector.countLogs();
 
-        return response.ok({
-          body: logEntriesSummaryResponseRT.encode({
-            data: {
-              start: startTimestamp,
-              end: endTimestamp,
-              buckets,
-            },
-          }),
-        });
-      } catch (error) {
-        return response.internalError({
-          body: error.message,
-        });
-      }
+      return response.ok({
+        body: logEntriesSummaryResponseRT.encode({
+          data: {
+            start: startTimestamp,
+            end: endTimestamp,
+            buckets,
+          },
+        }),
+      });
     }
   );
 };

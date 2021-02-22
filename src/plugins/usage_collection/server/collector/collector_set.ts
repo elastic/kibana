@@ -211,46 +211,47 @@ export class CollectorSet {
     );
   };
 
-  // convert an array of fetched stats results into key/object
-  public toObject = <Result, T>(statsData: Array<{ type: string; result: T }> = []) => {
-    return statsData.reduce<Result>((accumulatedStats, { type, result }) => {
-      return {
-        ...accumulatedStats,
-        [type]: result,
-      };
-    }, {} as Result);
-  };
+  /**
+   * Convert an array of fetched stats results into key/object
+   * @param statsData Array of fetched stats results
+   */
+  public toObject<Result extends Record<string, unknown>, T = unknown>(
+    statsData: Array<{ type: string; result: T }> = []
+  ): Result {
+    return Object.fromEntries(statsData.map(({ type, result }) => [type, result])) as Result;
+  }
 
-  // rename fields to use api conventions
-  public toApiFieldNames = (apiData: any): any => {
-    const getValueOrRecurse = (value: any) => {
-      if (value == null || typeof value !== 'object') {
-        return value;
-      } else {
-        return this.toApiFieldNames(value); // recurse
-      }
-    };
-
+  /**
+   * Rename fields to use API conventions
+   * @param apiData Data to be normalized
+   */
+  public toApiFieldNames(
+    apiData: Record<string, unknown> | unknown[]
+  ): Record<string, unknown> | unknown[] {
     // handle array and return early, or return a reduced object
-
     if (Array.isArray(apiData)) {
-      return apiData.map(getValueOrRecurse);
+      return apiData.map((value) => this.getValueOrRecurse(value));
     }
 
-    return Object.keys(apiData).reduce((accum, field) => {
-      const value = apiData[field];
-      let newName = field;
-      newName = snakeCase(newName);
-      newName = newName.replace(/^(1|5|15)_m/, '$1m'); // os.load.15m, os.load.5m, os.load.1m
-      newName = newName.replace('_in_bytes', '_bytes');
-      newName = newName.replace('_in_millis', '_ms');
+    return Object.fromEntries(
+      Object.entries(apiData).map(([field, value]) => {
+        let newName = field;
+        newName = snakeCase(newName);
+        newName = newName.replace(/^(1|5|15)_m/, '$1m'); // os.load.15m, os.load.5m, os.load.1m
+        newName = newName.replace('_in_bytes', '_bytes');
+        newName = newName.replace('_in_millis', '_ms');
 
-      return {
-        ...accum,
-        [newName]: getValueOrRecurse(value),
-      };
-    }, {});
-  };
+        return [newName, this.getValueOrRecurse(value)];
+      })
+    );
+  }
+
+  private getValueOrRecurse(value: unknown) {
+    if (Array.isArray(value) || (typeof value === 'object' && value !== null)) {
+      return this.toApiFieldNames(value as Record<string, unknown> | unknown[]); // recurse
+    }
+    return value;
+  }
 
   private makeCollectorSetFromArray = (collectors: AnyCollector[]) => {
     return new CollectorSet({

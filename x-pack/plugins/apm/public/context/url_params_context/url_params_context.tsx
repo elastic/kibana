@@ -14,7 +14,6 @@ import React, {
   useState,
 } from 'react';
 import { withRouter } from 'react-router-dom';
-import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
 import { LocalUIFilterName } from '../../../common/ui_filter';
 import { pickKeys } from '../../../common/utils/pick_keys';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
@@ -39,7 +38,6 @@ function useUiFilters(params: IUrlParams): UIFilters {
 
   return useDeepObjectIdentity({
     kuery,
-    environment: environment || ENVIRONMENT_ALL.value,
     ...localUiFilters,
   });
 }
