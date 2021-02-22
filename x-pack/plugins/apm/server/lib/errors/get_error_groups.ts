@@ -13,9 +13,10 @@ import {
   ERROR_EXC_TYPE,
   ERROR_GROUP_ID,
   ERROR_LOG_MESSAGE,
+  SERVICE_NAME,
 } from '../../../common/elasticsearch_fieldnames';
-import { getErrorGroupsProjection } from '../../projections/errors';
-import { mergeProjection } from '../../projections/util/merge_projection';
+import { ProcessorEvent } from '../../../common/processor_event';
+import { environmentQuery, rangeQuery } from '../../../common/utils/queries';
 import { withApmSpan } from '../../utils/with_apm_span';
 import { getErrorName } from '../helpers/get_error_name';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
@@ -34,16 +35,10 @@ export function getErrorGroups({
   setup: Setup & SetupTimeRange;
 }) {
   return withApmSpan('get_error_groups', async () => {
-    const { apmEventClient } = setup;
+    const { apmEventClient, esFilter, start, end } = setup;
 
     // sort buckets by last occurrence of error
     const sortByLatestOccurrence = sortField === 'latestOccurrenceAt';
-
-    const projection = getErrorGroupsProjection({
-      environment,
-      setup,
-      serviceName,
-    });
 
     const order: SortOptions = sortByLatestOccurrence
       ? {
@@ -51,13 +46,16 @@ export function getErrorGroups({
         }
       : { _count: sortDirection };
 
-    const params = mergeProjection(projection, {
+    const params = {
+      apm: {
+        events: [ProcessorEvent.error as const],
+      },
       body: {
         size: 0,
         aggs: {
           error_groups: {
             terms: {
-              ...projection.body.aggs.error_groups.terms,
+              field: ERROR_GROUP_ID,
               size: 500,
               order,
             },
@@ -89,8 +87,18 @@ export function getErrorGroups({
             },
           },
         },
+        query: {
+          bool: {
+            filter: [
+              { term: { [SERVICE_NAME]: serviceName } },
+              ...rangeQuery(start, end),
+              ...environmentQuery(environment),
+              ...esFilter,
+            ],
+          },
+        },
       },
-    });
+    };
 
     const resp = await apmEventClient.search(params);
 

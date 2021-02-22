@@ -9,11 +9,16 @@ import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import {
   HOST_NAME,
   CONTAINER_ID,
+  SERVICE_NODE_NAME,
+  SERVICE_NAME,
 } from '../../../common/elasticsearch_fieldnames';
 import { NOT_AVAILABLE_LABEL } from '../../../common/i18n';
-import { mergeProjection } from '../../projections/util/merge_projection';
-import { getServiceNodesProjection } from '../../projections/service_nodes';
 import { withApmSpan } from '../../utils/with_apm_span';
+import { ProcessorEvent } from '../../../common/processor_event';
+import {
+  rangeQuery,
+  serviceNodeNameQuery,
+} from '../../../common/utils/queries';
 
 export function getServiceNodeMetadata({
   serviceName,
@@ -25,34 +30,45 @@ export function getServiceNodeMetadata({
   setup: Setup & SetupTimeRange;
 }) {
   return withApmSpan('get_service_node_metadata', async () => {
-    const { apmEventClient } = setup;
+    const { apmEventClient, start, end, esFilter } = setup;
 
-    const query = mergeProjection(
-      getServiceNodesProjection({
-        setup,
-        serviceName,
-        serviceNodeName,
-      }),
-      {
-        body: {
-          size: 0,
-          aggs: {
-            host: {
-              terms: {
-                field: HOST_NAME,
-                size: 1,
-              },
+    const query = {
+      apm: {
+        events: [ProcessorEvent.metric],
+      },
+      body: {
+        size: 0,
+        aggs: {
+          host: {
+            terms: {
+              field: HOST_NAME,
+              size: 1,
             },
-            containerId: {
-              terms: {
-                field: CONTAINER_ID,
-                size: 1,
-              },
+          },
+          containerId: {
+            terms: {
+              field: CONTAINER_ID,
+              size: 1,
+            },
+          },
+          nodes: {
+            terms: {
+              field: SERVICE_NODE_NAME,
             },
           },
         },
-      }
-    );
+        query: {
+          bool: {
+            filter: [
+              { term: { [SERVICE_NAME]: serviceName } },
+              ...serviceNodeNameQuery(serviceNodeName),
+              ...rangeQuery(start, end),
+              ...esFilter,
+            ],
+          },
+        },
+      },
+    };
 
     const response = await apmEventClient.search(query);
 

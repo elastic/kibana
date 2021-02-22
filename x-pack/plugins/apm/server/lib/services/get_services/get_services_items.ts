@@ -7,7 +7,6 @@
 
 import { Logger } from '@kbn/logging';
 import { joinByKey } from '../../../../common/utils/join_by_key';
-import { getServicesProjection } from '../../../projections/services';
 import { withApmSpan } from '../../../utils/with_apm_span';
 import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 import { getHealthStatuses } from './get_health_statuses';
@@ -27,15 +26,7 @@ export async function getServicesItems({
   logger: Logger;
 }) {
   return withApmSpan('get_services_items', async () => {
-    const params = {
-      environment,
-      projection: getServicesProjection({
-        setup,
-        searchAggregatedTransactions,
-      }),
-      setup,
-      searchAggregatedTransactions,
-    };
+    const params = { environment, setup, searchAggregatedTransactions };
 
     const [transactionStats, healthStatuses] = await Promise.all([
       getServiceTransactionStats(params),

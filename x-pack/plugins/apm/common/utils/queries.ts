@@ -10,7 +10,11 @@ import {
   ENVIRONMENT_NOT_DEFINED,
   ENVIRONMENT_ALL,
 } from '../environment_filter_values';
-import { SERVICE_ENVIRONMENT } from '../elasticsearch_fieldnames';
+import {
+  SERVICE_ENVIRONMENT,
+  SERVICE_NODE_NAME,
+} from '../elasticsearch_fieldnames';
+import { SERVICE_NODE_NAME_MISSING } from '../service_nodes';
 
 type QueryContainer = ESFilter;
 
@@ -42,4 +46,18 @@ export function rangeQuery(
       },
     },
   ];
+}
+
+export function serviceNodeNameQuery(
+  serviceNodeName?: string
+): QueryContainer[] {
+  if (!serviceNodeName) {
+    return [];
+  }
+
+  if (serviceNodeName === SERVICE_NODE_NAME_MISSING) {
+    return [{ bool: { must_not: [{ exists: { field: SERVICE_NODE_NAME } }] } }];
+  }
+
+  return [{ term: { [SERVICE_NODE_NAME]: serviceNodeName } }];
 }

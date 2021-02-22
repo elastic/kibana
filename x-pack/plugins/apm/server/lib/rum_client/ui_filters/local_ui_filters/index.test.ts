@@ -10,7 +10,6 @@ import {
   SearchParamsMock,
   inspectSearchParams,
 } from '../../../../utils/test_helpers';
-import { getServicesProjection } from '../../../../projections/services';
 
 describe('getLocalUIFilters', () => {
   let mock: SearchParamsMock;
@@ -30,10 +29,7 @@ describe('getLocalUIFilters', () => {
       getLocalUIFilters({
         setup,
         localFilterNames: ['transactionResult', 'host'],
-        projection: getServicesProjection({
-          setup,
-          searchAggregatedTransactions: false,
-        }),
+        projection: { apm: { events: [] }, body: {} },
         uiFilters: {
           transactionResult: ['2xx'],
         },

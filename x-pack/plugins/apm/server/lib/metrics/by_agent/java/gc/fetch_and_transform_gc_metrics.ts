@@ -5,21 +5,26 @@
  * 2.0.
  */
 
-import { sum, round } from 'lodash';
 import theme from '@elastic/eui/dist/eui_theme_light.json';
-import { Setup, SetupTimeRange } from '../../../../helpers/setup_request';
-import { getMetricsDateHistogramParams } from '../../../../helpers/metrics';
-import { ChartBase } from '../../../types';
-import { getMetricsProjection } from '../../../../../projections/metrics';
-import { mergeProjection } from '../../../../../projections/util/merge_projection';
+import { round, sum } from 'lodash';
 import {
   AGENT_NAME,
   LABEL_NAME,
   METRIC_JAVA_GC_COUNT,
   METRIC_JAVA_GC_TIME,
+  SERVICE_NAME,
 } from '../../../../../../common/elasticsearch_fieldnames';
-import { getBucketSize } from '../../../../helpers/get_bucket_size';
+import { ProcessorEvent } from '../../../../../../common/processor_event';
+import {
+  environmentQuery,
+  rangeQuery,
+  serviceNodeNameQuery,
+} from '../../../../../../common/utils/queries';
 import { getVizColorForIndex } from '../../../../../../common/viz_colors';
+import { getBucketSize } from '../../../../helpers/get_bucket_size';
+import { getMetricsDateHistogramParams } from '../../../../helpers/metrics';
+import { Setup, SetupTimeRange } from '../../../../helpers/setup_request';
+import { ChartBase } from '../../../types';
 
 export async function fetchAndTransformGcMetrics({
   environment,
@@ -36,30 +41,30 @@ export async function fetchAndTransformGcMetrics({
   chartBase: ChartBase;
   fieldName: typeof METRIC_JAVA_GC_COUNT | typeof METRIC_JAVA_GC_TIME;
 }) {
-  const { start, end, apmEventClient, config } = setup;
+  const { start, end, apmEventClient, config, esFilter } = setup;
 
   const { bucketSize } = getBucketSize({ start, end });
-
-  const projection = getMetricsProjection({
-    environment,
-    setup,
-    serviceName,
-    serviceNodeName,
-  });
 
   // GC rate and time are reported by the agents as monotonically
   // increasing counters, which means that we have to calculate
   // the delta in an es query. In the future agent might start
   // reporting deltas.
-  const params = mergeProjection(projection, {
+  const params = {
+    apm: {
+      events: [ProcessorEvent.metric],
+    },
     body: {
       size: 0,
       query: {
         bool: {
           filter: [
-            ...projection.body.query.bool.filter,
             { exists: { field: fieldName } },
             { term: { [AGENT_NAME]: 'java' } },
+            { term: { [SERVICE_NAME]: serviceName } },
+            ...serviceNodeNameQuery(serviceNodeName),
+            ...rangeQuery(start, end),
+            ...environmentQuery(environment),
+            ...esFilter,
           ],
         },
       },
@@ -102,7 +107,7 @@ export async function fetchAndTransformGcMetrics({
         },
       },
     },
-  });
+  };
 
   const response = await apmEventClient.search(params);
 

@@ -8,16 +8,24 @@
 import { sortBy, take } from 'lodash';
 import moment from 'moment';
 import { Unionize } from 'utility-types';
-import { AggregationOptionsByType } from '../../../../../typings/elasticsearch';
+import {
+  AggregationOptionsByType,
+  ESFilter,
+} from '../../../../../typings/elasticsearch';
 import { PromiseReturnType } from '../../../../observability/typings/common';
 import {
+  PARENT_ID,
   SERVICE_NAME,
   TRANSACTION_NAME,
+  TRANSACTION_ROOT,
 } from '../../../common/elasticsearch_fieldnames';
 import { joinByKey } from '../../../common/utils/join_by_key';
-import { getTransactionGroupsProjection } from '../../projections/transaction_groups';
-import { mergeProjection } from '../../projections/util/merge_projection';
+import { environmentQuery, rangeQuery } from '../../../common/utils/queries';
 import { withApmSpan } from '../../utils/with_apm_span';
+import {
+  getDocumentTypeFilterForAggregatedTransactions,
+  getProcessorEventForAggregatedTransactions,
+} from '../helpers/aggregated_transactions';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import {
   getAverages,
@@ -46,9 +54,7 @@ export type Options = TopTransactionOptions | TopTraceOptions;
 
 export type ESResponse = PromiseReturnType<typeof transactionGroupsFetcher>;
 
-export type TransactionGroupRequestBase = ReturnType<
-  typeof getTransactionGroupsProjection
-> & {
+export interface TransactionGroupRequestBase {
   body: {
     aggs: {
       transaction_groups: Unionize<
@@ -56,7 +62,7 @@ export type TransactionGroupRequestBase = ReturnType<
       >;
     };
   };
-};
+}
 
 export type TransactionGroupSetup = Setup & SetupTimeRange;
 
@@ -103,26 +109,67 @@ export function transactionGroupsFetcher(
   setup: TransactionGroupSetup,
   bucketSize: number
 ) {
+  const { start, end, esFilter } = setup;
+  const {
+    environment,
+    transactionName,
+    searchAggregatedTransactions,
+  } = options;
+
   const spanName =
     options.type === 'top_traces' ? 'get_top_traces' : 'get_top_transactions';
 
   return withApmSpan(spanName, async () => {
-    const projection = getTransactionGroupsProjection({
-      setup,
-      options,
-    });
-
     const isTopTraces = options.type === 'top_traces';
 
-    // @ts-expect-error
-    delete projection.body.aggs;
+    const transactionNameFilter = transactionName
+      ? [{ term: { [TRANSACTION_NAME]: transactionName } }]
+      : [];
+
+    const bool: { filter: ESFilter[]; must_not: ESFilter[] } = {
+      filter: [
+        ...transactionNameFilter,
+        ...getDocumentTypeFilterForAggregatedTransactions(
+          searchAggregatedTransactions
+        ),
+        ...rangeQuery(start, end),
+        ...environmentQuery(environment),
+        ...esFilter,
+      ],
+      must_not: [],
+    };
+
+    if (options.type === 'top_traces') {
+      if (options.searchAggregatedTransactions) {
+        bool.filter.push({
+          term: {
+            [TRANSACTION_ROOT]: true,
+          },
+        });
+      } else {
+        bool.must_not = [
+          {
+            exists: {
+              field: PARENT_ID,
+            },
+          },
+        ];
+      }
+    }
 
     // traces overview is hardcoded to 10000
     // transactions overview: 1 extra bucket is added to check whether the total number of buckets exceed the specified bucket size.
     const expectedBucketSize = isTopTraces ? 10000 : bucketSize;
     const size = isTopTraces ? 10000 : expectedBucketSize + 1;
 
-    const request = mergeProjection(projection, {
+    const request = {
+      apm: {
+        events: [
+          getProcessorEventForAggregatedTransactions(
+            searchAggregatedTransactions
+          ),
+        ],
+      },
       body: {
         size: 0,
         aggs: {
@@ -149,8 +196,9 @@ export function transactionGroupsFetcher(
                 }),
           },
         },
+        query: { bool },
       },
-    });
+    };
 
     const params = {
       request,
@@ -181,20 +229,20 @@ export function transactionGroupsFetcher(
 
     const itemsWithKeys: TransactionGroup[] = itemsWithRelativeImpact.map(
       (item) => {
-        let transactionName: string;
+        let itemTransactionName: string;
         let serviceName: string;
 
         if (typeof item.key === 'string') {
-          transactionName = item.key;
+          itemTransactionName = item.key;
           serviceName = defaultServiceName!;
         } else {
-          transactionName = item.key[TRANSACTION_NAME];
+          itemTransactionName = item.key[TRANSACTION_NAME];
           serviceName = item.key[SERVICE_NAME];
         }
 
         return {
           ...item,
-          transactionName,
+          transactionName: itemTransactionName,
           serviceName,
         };
       }

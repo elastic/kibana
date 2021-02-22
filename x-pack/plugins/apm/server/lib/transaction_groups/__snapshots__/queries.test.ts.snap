@@ -244,16 +244,6 @@ Array [
         "bool": Object {
           "filter": Array [
             Object {
-              "term": Object {
-                "service.name": "foo",
-              },
-            },
-            Object {
-              "term": Object {
-                "transaction.type": "bar",
-              },
-            },
-            Object {
               "range": Object {
                 "@timestamp": Object {
                   "format": "epoch_millis",
@@ -268,6 +258,7 @@ Array [
               },
             },
           ],
+          "must_not": Array [],
         },
       },
       "size": 0,
@@ -299,16 +290,6 @@ Array [
         "bool": Object {
           "filter": Array [
             Object {
-              "term": Object {
-                "service.name": "foo",
-              },
-            },
-            Object {
-              "term": Object {
-                "transaction.type": "bar",
-              },
-            },
-            Object {
               "range": Object {
                 "@timestamp": Object {
                   "format": "epoch_millis",
@@ -323,6 +304,7 @@ Array [
               },
             },
           ],
+          "must_not": Array [],
         },
       },
       "size": 0,
@@ -354,16 +336,6 @@ Array [
         "bool": Object {
           "filter": Array [
             Object {
-              "term": Object {
-                "service.name": "foo",
-              },
-            },
-            Object {
-              "term": Object {
-                "transaction.type": "bar",
-              },
-            },
-            Object {
               "range": Object {
                 "@timestamp": Object {
                   "format": "epoch_millis",
@@ -378,6 +350,7 @@ Array [
               },
             },
           ],
+          "must_not": Array [],
         },
       },
       "size": 0,
@@ -415,16 +388,6 @@ Array [
         "bool": Object {
           "filter": Array [
             Object {
-              "term": Object {
-                "service.name": "foo",
-              },
-            },
-            Object {
-              "term": Object {
-                "transaction.type": "bar",
-              },
-            },
-            Object {
               "range": Object {
                 "@timestamp": Object {
                   "format": "epoch_millis",
@@ -439,6 +402,7 @@ Array [
               },
             },
           ],
+          "must_not": Array [],
         },
       },
       "size": 0,

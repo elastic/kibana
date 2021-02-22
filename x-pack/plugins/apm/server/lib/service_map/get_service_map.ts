@@ -13,10 +13,10 @@ import {
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
 } from '../../../common/elasticsearch_fieldnames';
-import { getServicesProjection } from '../../projections/services';
-import { mergeProjection } from '../../projections/util/merge_projection';
-import { environmentQuery } from '../../../common/utils/queries';
+import { ProcessorEvent } from '../../../common/processor_event';
+import { environmentQuery, rangeQuery } from '../../../common/utils/queries';
 import { withApmSpan } from '../../utils/with_apm_span';
+import { getProcessorEventForAggregatedTransactions } from '../helpers/aggregated_transactions';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import {
   DEFAULT_ANOMALIES,
@@ -89,16 +89,9 @@ async function getConnectionData({
 async function getServicesData(options: IEnvOptions) {
   return withApmSpan('get_service_stats_for_service_map', async () => {
     const { environment, setup, searchAggregatedTransactions } = options;
+    const { start, end } = setup;
 
-    const projection = getServicesProjection({
-      setup: { ...setup, esFilter: [] },
-      searchAggregatedTransactions,
-    });
-
-    let filter = [
-      ...projection.body.query.bool.filter,
-      ...environmentQuery(environment),
-    ];
+    let filter = [...rangeQuery(start, end), ...environmentQuery(environment)];
 
     if (options.serviceName) {
       filter = filter.concat({
@@ -108,19 +101,23 @@ async function getServicesData(options: IEnvOptions) {
       });
     }
 
-    const params = mergeProjection(projection, {
+    const params = {
+      apm: {
+        events: [
+          getProcessorEventForAggregatedTransactions(
+            searchAggregatedTransactions
+          ),
+          ProcessorEvent.metric as const,
+          ProcessorEvent.error as const,
+        ],
+      },
       body: {
         size: 0,
-        query: {
-          bool: {
-            ...projection.body.query.bool,
-            filter,
-          },
-        },
+        query: { bool: { filter } },
         aggs: {
           services: {
             terms: {
-              field: projection.body.aggs.services.terms.field,
+              field: SERVICE_NAME,
               size: 500,
             },
             aggs: {
@@ -133,7 +130,7 @@ async function getServicesData(options: IEnvOptions) {
           },
         },
       },
-    });
+    };
 
     const { apmEventClient } = setup;
 

@@ -6,9 +6,17 @@
  */
 
 import { Overwrite, Unionize } from 'utility-types';
-import { AggregationOptionsByType } from '../../../../../typings/elasticsearch';
-import { getMetricsProjection } from '../../projections/metrics';
-import { mergeProjection } from '../../projections/util/merge_projection';
+import {
+  AggregationOptionsByType,
+  ESFilter,
+} from '../../../../../typings/elasticsearch';
+import { SERVICE_NAME } from '../../../common/elasticsearch_fieldnames';
+import { ProcessorEvent } from '../../../common/processor_event';
+import {
+  environmentQuery,
+  rangeQuery,
+  serviceNodeNameQuery,
+} from '../../../common/utils/queries';
 import { APMEventESSearchRequest } from '../helpers/create_es_client/create_apm_event_client';
 import { getMetricsDateHistogramParams } from '../helpers/metrics';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
@@ -28,24 +36,17 @@ export type GenericMetricsRequest = Overwrite<
   APMEventESSearchRequest,
   {
     body: {
+      size: number;
       aggs: {
         timeseriesData: {
           date_histogram: AggregationOptionsByType['date_histogram'];
           aggs: MetricAggs;
         };
       } & MetricAggs;
+      query: { bool: { filter: ESFilter[] } };
     };
   }
 >;
-
-interface Filter {
-  exists?: {
-    field: string;
-  };
-  term?: {
-    [key: string]: string;
-  };
-}
 
 export async function fetchAndTransformMetrics<T extends MetricAggs>({
   environment,
@@ -62,23 +63,26 @@ export async function fetchAndTransformMetrics<T extends MetricAggs>({
   serviceNodeName?: string;
   chartBase: ChartBase;
   aggs: T;
-  additionalFilters?: Filter[];
+  additionalFilters?: ESFilter[];
 }) {
-  const { start, end, apmEventClient, config } = setup;
+  const { start, end, apmEventClient, config, esFilter } = setup;
 
-  const projection = getMetricsProjection({
-    environment,
-    setup,
-    serviceName,
-    serviceNodeName,
-  });
-
-  const params: GenericMetricsRequest = mergeProjection(projection, {
+  const params: GenericMetricsRequest = {
+    apm: {
+      events: [ProcessorEvent.metric],
+    },
     body: {
       size: 0,
       query: {
         bool: {
-          filter: [...projection.body.query.bool.filter, ...additionalFilters],
+          filter: [
+            { term: { [SERVICE_NAME]: serviceName } },
+            ...serviceNodeNameQuery(serviceNodeName),
+            ...rangeQuery(start, end),
+            ...environmentQuery(environment),
+            ...esFilter,
+            ...additionalFilters,
+          ],
         },
       },
       aggs: {
@@ -93,7 +97,7 @@ export async function fetchAndTransformMetrics<T extends MetricAggs>({
         ...aggs,
       },
     },
-  });
+  };
 
   const response = await apmEventClient.search(params);
 
