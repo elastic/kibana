@@ -28,7 +28,7 @@ export function getDeclarationNodesForPluginScope(
   scope: ApiScope,
   log: ToolingLog
 ): Node[] {
-  const path = Path.join(`${plugin.relativeDirectory}`, scope.toString(), 'index.ts');
+  const path = Path.join(`${plugin.directory}`, scope.toString(), 'index.ts');
   const file = getSourceFileMatching(project, path);
 
   if (file) {

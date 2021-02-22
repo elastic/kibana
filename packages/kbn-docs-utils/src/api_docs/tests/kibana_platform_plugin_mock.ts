@@ -6,13 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { KibanaPlatformPlugin, REPO_ROOT } from '@kbn/dev-utils';
+import { KibanaPlatformPlugin } from '@kbn/dev-utils';
 import Path from 'path';
 
-export function getKibanaPlatformPlugin(
-  id: string,
-  relativeDirectory: string
-): KibanaPlatformPlugin {
+export function getKibanaPlatformPlugin(id: string, dir?: string): KibanaPlatformPlugin {
+  const directory = dir ?? Path.resolve(__dirname, '__fixtures__/src/plugin_a');
   return {
     manifest: {
       id,
@@ -26,8 +24,7 @@ export function getKibanaPlatformPlugin(
       optionalPlugins: [],
       extraPublicDirs: [],
     },
-    relativeDirectory,
-    directory: Path.resolve(REPO_ROOT, relativeDirectory),
-    manifestPath: Path.resolve(REPO_ROOT, relativeDirectory, 'kibana.json'),
+    directory,
+    manifestPath: Path.resolve(directory, 'kibana.json'),
   };
 }

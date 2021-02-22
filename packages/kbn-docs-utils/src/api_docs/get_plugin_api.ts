@@ -111,7 +111,7 @@ function getContractTypeNames(
   const contractTypes: { setup?: string; start?: string } = {};
   const file = getSourceFileMatching(
     project,
-    Path.join(`${plugin.relativeDirectory}`, scope.toString(), 'plugin.ts')
+    Path.join(`${plugin.directory}`, scope.toString(), 'plugin.ts')
   );
   if (file) {
     file.getClasses().forEach((c) => {

@@ -12,7 +12,8 @@ import { extractImportReferences } from './extract_import_refs';
 import { ApiScope, Reference } from '../types';
 import { getKibanaPlatformPlugin } from '../tests/kibana_platform_plugin_mock';
 
-const plugins: KibanaPlatformPlugin[] = [getKibanaPlatformPlugin('pluginA', 'plugin_a')];
+const plugin = getKibanaPlatformPlugin('pluginA');
+const plugins: KibanaPlatformPlugin[] = [plugin];
 
 const log = new ToolingLog({
   level: 'debug',
@@ -27,7 +28,7 @@ it('when there are no imports', () => {
 
 it('test extractImportReference', () => {
   const results = extractImportReferences(
-    `(param: string) => import("/plugin_a/public/bar").Bar`,
+    `(param: string) => import("${plugin.directory}/public/bar").Bar`,
     plugins,
     log
   );
@@ -42,9 +43,25 @@ it('test extractImportReference', () => {
   });
 });
 
+it('test extractImportReference with public folder nested under server folder', () => {
+  const results = extractImportReferences(
+    `import("${plugin.directory}/server/routes/public/bar").Bar`,
+    plugins,
+    log
+  );
+  expect(results.length).toBe(1);
+  expect(results[0]).toEqual({
+    text: 'Bar',
+    docId: getPluginApiDocId('plugin_a'),
+    section: 'def-server.Bar',
+    pluginId: 'pluginA',
+    scope: ApiScope.SERVER,
+  });
+});
+
 it('test extractImportReference with two imports', () => {
   const results = extractImportReferences(
-    `<I extends import("/plugin_a/public/foo").FooFoo, O extends import("/plugin_a/public/bar").Bar>`,
+    `<I extends import("${plugin.directory}/public/foo").FooFoo, O extends import("${plugin.directory}/public/bar").Bar>`,
     plugins,
     log
   );
@@ -69,7 +86,11 @@ it('test extractImportReference with unknown imports', () => {
 });
 
 it('test single link', () => {
-  const results = extractImportReferences(`import("/plugin_a/public/foo").FooFoo`, plugins, log);
+  const results = extractImportReferences(
+    `import("${plugin.directory}/public/foo").FooFoo`,
+    plugins,
+    log
+  );
   expect(results.length).toBe(1);
   expect((results[0] as Reference).text).toBe('FooFoo');
 });

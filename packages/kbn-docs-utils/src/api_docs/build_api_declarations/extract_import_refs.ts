@@ -60,12 +60,12 @@ export function extractImportReferences(
       } else {
         const section = getApiSectionId({
           pluginName: plugin.manifest.id,
-          scope: getScopeFromPath(path, log),
+          scope: getScopeFromPath(path, plugin, log),
           apiName: name,
         });
         texts.push({
           pluginId: plugin.manifest.id,
-          scope: getScopeFromPath(path, log),
+          scope: getScopeFromPath(path, plugin, log),
           docId: getPluginApiDocId(plugin.manifest.id, plugin.manifest.serviceFolders, path),
           section,
           text: name,
@@ -91,12 +91,16 @@ function extractImportRef(str: string): { path: string; name: string } | undefin
   }
 }
 
-function getScopeFromPath(path: string, log: ToolingLog): ApiScope {
-  if (path.indexOf('/public/') >= 0) {
+/**
+ *
+ * @param path An absolute path to a file inside a plugin directory.
+ */
+function getScopeFromPath(path: string, plugin: KibanaPlatformPlugin, log: ToolingLog): ApiScope {
+  if (path.startsWith(`${plugin.directory}/public/`)) {
     return ApiScope.CLIENT;
-  } else if (path.indexOf('/server/') >= 0) {
+  } else if (path.startsWith(`${plugin.directory}/server/`)) {
     return ApiScope.SERVER;
-  } else if (path.indexOf('/common/') >= 0) {
+  } else if (path.startsWith(`${plugin.directory}/common/`)) {
     return ApiScope.COMMON;
   } else {
     log.warning(`Unexpected path encountered ${path}`);

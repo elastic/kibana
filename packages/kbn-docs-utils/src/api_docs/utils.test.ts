@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
+import Path from 'path';
 import { findPlugins } from './find_plugins';
 import { getPluginForPath, getServiceForPath } from './utils';
 
 it('test getPluginForPath', () => {
   const plugins = findPlugins();
-  expect(
-    getPluginForPath('/Users/auser/kibana/src/plugins/embeddable/public/service/file.ts', plugins)
-  ).toBeDefined();
+  const path = Path.resolve(__dirname, '../../../../src/plugins/embeddable/public/service/file.ts');
+  expect(getPluginForPath(path, plugins)).toBeDefined();
 });
 
 it('test getServiceForPath', () => {
@@ -25,18 +25,3 @@ it('test getServiceForPath', () => {
   );
   expect(getServiceForPath('src/plugins/embed/server/f.ts')).toBeUndefined();
 });
-
-// it('getRelativeKibanaPath', () => {
-//   let relativePath = getRelativeKibanaPath(
-//     '/tmp/tmp-5631-rv2QP2a7ISWH/x-pack/plugins/server/authorization/ui'
-//   );
-//   expect(relativePath).toBe('x-pack/plugins/server/authorization/ui');
-
-//   relativePath = getRelativeKibanaPath(
-//     '/tmp/tmp-5631-rv2QP2a7ISWH/src/plugins/server/authorization/ui'
-//   );
-//   expect(relativePath).toBe('src/plugins/server/authorization/ui');
-
-//   relativePath = getRelativeKibanaPath('/tmp/tmp-5631-rv2QP2a7ISWH/examples/test');
-//   expect(relativePath).toBe('examples/test');
-// });

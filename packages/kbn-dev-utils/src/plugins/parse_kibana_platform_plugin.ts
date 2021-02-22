@@ -8,13 +8,11 @@
 
 import Path from 'path';
 import loadJsonFile from 'load-json-file';
-import { REPO_ROOT } from '@kbn/utils';
 
 export interface KibanaPlatformPlugin {
   readonly directory: string;
   readonly manifestPath: string;
   readonly manifest: Manifest;
-  readonly relativeDirectory: string;
 }
 
 function isValidDepsDeclaration(input: unknown, type: string): string[] {
@@ -57,7 +55,6 @@ export function parseKibanaPlatformPlugin(manifestPath: string): KibanaPlatformP
   }
 
   return {
-    relativeDirectory: Path.relative(REPO_ROOT, Path.dirname(manifestPath)),
     directory: Path.dirname(manifestPath),
     manifestPath,
     manifest: {

@@ -25,14 +25,14 @@ export function isNamedNode(node: Node | NamedNode): node is NamedNode {
  * index.ts files at a given scope.
  *
  * @param project The ts morph project which contains all the source files
- * @param relativePath The relative path of the file we want to find
+ * @param absolutePath The absolute path of the file we want to find
  * @returns a source file that exists at the location of the relative path.
  */
 export function getSourceFileMatching(
   project: Project,
-  relativePath: string
+  absolutePath: string
 ): SourceFile | undefined {
   return project.getSourceFiles().find((file) => {
-    return file.getFilePath().indexOf(relativePath) >= 0;
+    return file.getFilePath().startsWith(absolutePath);
   });
 }

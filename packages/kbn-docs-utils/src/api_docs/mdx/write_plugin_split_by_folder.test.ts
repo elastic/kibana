@@ -43,7 +43,7 @@ export interface Zed = { zed: string }`
     `export const util: string = 'Util';`
   );
 
-  const plugin = getKibanaPlatformPlugin('example', 'example');
+  const plugin = getKibanaPlatformPlugin('example', '/src/plugins/example');
   const plugins: KibanaPlatformPlugin[] = [
     {
       ...plugin,

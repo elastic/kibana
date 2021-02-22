@@ -28,14 +28,14 @@ export const snakeToCamel = (str: string): string =>
 
 /**
  * Returns the plugin that the file belongs to.
- * @param path An absolute file path that can is nested inside a plugin
+ * @param path An absolute file path that can point to a file nested inside a plugin
  * @param plugins A list of plugins to search through.
  */
 export function getPluginForPath(
   path: string,
   plugins: KibanaPlatformPlugin[]
 ): KibanaPlatformPlugin | undefined {
-  return plugins.find((plugin) => path.includes(plugin.relativeDirectory));
+  return plugins.find((plugin) => path.startsWith(plugin.directory));
 }
 
 /**

@@ -91,12 +91,10 @@ export function runBuildApiDocsCli() {
 }
 
 function getTsProject(repoPath: string) {
-  const xpackTsConfig = `${repoPath}/x-pack/tsconfig.json`;
+  const xpackTsConfig = `${repoPath}/tsconfig.json`;
   const project = new Project({
     tsConfigFilePath: xpackTsConfig,
   });
-  project.addSourceFilesAtPaths(`${repoPath}/examples/**/*{.d.ts,.ts}`);
-  project.addSourceFilesAtPaths(`${repoPath}/src/plugins/**/*{.d.ts,.ts}`);
   project.addSourceFilesAtPaths(`${repoPath}/x-pack/plugins/**/*{.d.ts,.ts}`);
   project.resolveSourceFileDependencies();
   return project;

@@ -30,7 +30,7 @@ beforeAll(() => {
 
   expect(project.getSourceFiles().length).toBeGreaterThan(0);
 
-  const pluginA = getKibanaPlatformPlugin('pluginA', 'plugin_a');
+  const pluginA = getKibanaPlatformPlugin('pluginA');
   pluginA.manifest.serviceFolders = ['foo'];
   const plugins: KibanaPlatformPlugin[] = [pluginA];
 

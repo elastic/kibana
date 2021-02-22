@@ -34,7 +34,7 @@ beforeAll(() => {
     tsConfigFilePath,
   });
 
-  plugins = [getKibanaPlatformPlugin('pluginA', 'plugin_a')];
+  plugins = [getKibanaPlatformPlugin('pluginA')];
 
   nodes = getDeclarationNodesForPluginScope(project, plugins[0], ApiScope.CLIENT, log);
 });
