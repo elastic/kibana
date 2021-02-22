@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { featureCatalogueRegistryMock } from '../services/feature_catalogue/feature_catalogue_registry.mock';
-import { environmentServiceMock } from '../services/environment/environment.mock';
-import { configSchema } from '../../config';
-import { tutorialServiceMock } from '../services/tutorials/tutorial_service.mock';
+import { featureCatalogueRegistryMock } from './services/feature_catalogue/feature_catalogue_registry.mock';
+import { environmentServiceMock } from './services/environment/environment.mock';
+import { configSchema } from '../config';
+import { tutorialServiceMock } from './services/tutorials/tutorial_service.mock';
 
 const createSetupContract = () => ({
   featureCatalogue: featureCatalogueRegistryMock.createSetup(),
