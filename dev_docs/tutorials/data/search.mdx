@@ -387,7 +387,7 @@ async function fetchData(data: DataPublicPluginStart) {
 
 Before implementing the ability to create and restore search sessions in your application, ask yourself the following questions:
 
-1. *Does your application run long operations normally?* For example, it makes sense for a user to generate a Dashboard or a Canvas report from data stored in cold storage, however when editing a single visualization, it is best to work with a shorter timeframe of hot or warm data. 
+1. **Does your application normally run long operations?** For example, it makes sense for a user to generate a Dashboard or a Canvas report from data stored in cold storage. However, when editing a single visualization, it is best to work with a shorter timeframe of hot or warm data. 
 2. *Does it make sense for your application to restore a search session?* For example, you might want to restore an interesting configuration of filters of some older documents you have found in Discover. However, a single Lens or Map visualization might not be as helpful, outside the context of a specific dashboard.
 3. **What is a search session in the context of your application?** Although Discover and Dashboard start a new search session every time the time range or filters change, or when the user clicks **Refresh**, you can manage your sessions differently. For example, if your application has tabs, you might group searches from multiple tabs into a single search session. You must be able to clearly define the **state** used to create the search session`.  The **state** refers to any setting that might change the queries being set to `Elasticsearch`. 
 
