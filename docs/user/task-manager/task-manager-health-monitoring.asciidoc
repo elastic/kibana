@@ -1,10 +1,10 @@
 [role="xpack"]
 [[task-manager-health-monitoring]]
-== Task Manager Health Monitoring
+== Task Manager health monitoring
 
-The {kib} Task Manager has an internal monitoring mechanism keeping track of a variety of metrics which can be consumed via both a Health Monitoring endpoint, and the {kib} Server Log.
+The {kib} Task Manager has an internal monitoring mechanism keeping track of a variety of metrics which can be consumed via both a health monitoring API, and the {kib} Server Log.
 
-The Health Monitoring api is designed to be fast, providing a reliable endpoint which can be monitored.
+The health monitoring API is designed to be fast, providing a reliable endpoint which can be monitored.
 Consuming this endpoint doesn't cause additional load, but rather it returns the latest health checks made by the system. This design enables consumption by external services at a regular cadance without the concern of additional load to the system.
 
 Each {kib} instance exposes its own endpoint at:
@@ -21,7 +21,7 @@ Monitoring the `_health` endpoint of each {kib} instance in the cluster is the r
 [[task-manager-configuring-health-monitoring]]
 === Configuring the Monitored Health Statistics
 
-The Health Endpoint monitors Task Manager's performance out of the box, but certain performance considerination are deployment specific and are configurable as a result.
+The health monitoring api monitors Task Manager's performance out of the box, but certain performance considerination are deployment specific and are configurable as a result.
 
 Health thresholds are configurable via the <<task-manager-health-settings,`xpack.task_manager.monitored_task_execution_thresholds`>> setting.
 This configuration specifies the threshold of failed task executions which, once exceeded, sets a health status of `warn` or `error` on the corresponding task type execution status.
@@ -71,7 +71,7 @@ We would recommend only enabling this level of logging temporarily.
 [[making-sense-of-task-manager-health-stats]]
 === Making Sense of Task Manager Health Stats
 
-The Health Monitoring api exposes three sections: `configuration`, `workload` and `runtime`:
+The health monitoring API exposes three sections: `configuration`, `workload` and `runtime`:
 
 [cols="2"]
 |===

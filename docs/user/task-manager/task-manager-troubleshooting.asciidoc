@@ -366,7 +366,7 @@ Evaluating the health stats above, we can see the following output under `stats.
 We can infer from this output that the {kib} instance is polling regularly.
 This assessment is based on the following:
 
-* By comparing the `last_successful_poll` to the `timestamp` (value of `2021-02-16T11:38:10.077Z`) at the root, where we can see the last polling cycle took place 1 second before the monitoring stats were exposed by the Health Monitoring endpoint.
+* By comparing the `last_successful_poll` to the `timestamp` (value of `2021-02-16T11:38:10.077Z`) at the root, where we can see the last polling cycle took place 1 second before the monitoring stats were exposed by the health monitoring API.
 * The `p50` of the `duration`, shows us that at least 50% of polling cycles take, at most, 13 millisconds to complete.
 * Evaluating the `result_frequency_percent_as_number`, we can tell that:
 ** 80% of the polling cycles completed without claiming any tasks (suggesting that there aren't any overdue tasks)
