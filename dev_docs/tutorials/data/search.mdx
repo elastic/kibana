@@ -13,7 +13,7 @@ tags: ['kibana', 'onboarding', 'dev', 'tutorials', 'search', 'sessions', 'search
 
 Searching data stored in `Elasticsearch` can be done in various ways, for example using the `Elasticsearch` REST API or using an `Elasticsearch Client` for low level access.
 
-However, the recommended and easist way to search `Elasticsearch` is by using the low level search service. The service is exposed from the `data` plugin, and by using it, you don't only gain access to the data you stored, but also to additional capabilities, such as Custom Search Strategies, Asynchronous Search, Partial Results, Search Sessions and more.
+However, the recommended and easist way to search `Elasticsearch` is by using the low level search service. The service is exposed from the `data` plugin, and by using it, you not only gain access to the data you stored, but also to capabilities, such as Custom Search Strategies, Asynchronous Search, Partial Results, Search Sessions, and more.
 
 Here is a basic example for using the `data.search` service from a custom plugin:
 
@@ -69,7 +69,7 @@ Note: The `data` plugin contains services to help you generate the `query` and `
 
 The `search` method can throw several types of errors. 
 
-If you want to display them to a user, within the context of an application, you may use the helper method provided on the `data.search` service. Those errors will be shown in a toast message, using the `core.notifications` service.  
+To display the errors in the context of an application, use the helper method provided on the `data.search` service. These errors are shown in a toast message, using the `core.notifications` service.  
 
 ```ts
 data.search.search(req).subscribe({
@@ -364,7 +364,7 @@ export class SearchEmbeddable
 
 ``` 
 
-You may also retrieve the active `Search Session ID` from the `Search Service` directly:
+You can also retrieve the active `Search Session ID` from the `Search Service` directly:
 
 ```ts
 async function fetchData(data: DataPublicPluginStart) {
@@ -380,22 +380,22 @@ async function fetchData(data: DataPublicPluginStart) {
 ```
 
 <DocCallOut title="Search Sessions with Server Side Search">
-  Search Sessions are initiated by the client. If you are using a route that runs server side searches, you can send the `searchSessionId` to the server, and then have it passed down to the server side `data.search` function call.
+  Search sessions are initiated by the client. If you are using a route that runs server side searches, you can send the `searchSessionId` to the server, and then pass it down to the server side `data.search` function call.
 </DocCallOut>
 
-#### Supporting Search Sessions in your application
+#### Supporting search sessions in your application
 
-If you want to implement the ability to create and restore `Search Sessions` within your application, you should ask yourself the following questions first:
+Before implementing the ability to create and restore search sessions in your application, ask yourself the following questions:
 
-1. *Does your application run long operations normally?* For example, it makes sense for a user to generate a Dashboard or a Canvas report from data stored in cold storage, however when editing a single visualization, it is best to work with a shorter timeframe of hot or warm data. 
-2. *Does it make sense for your application to restore a search session?* For example, you might want to restore an interesting configuration of filters of some older documents you have found in Discover. However, a single Lens or Map visualization might not be as helpful, outside the context of a specific dashboard.
-3. *What is a Search Session in the context of your application?* While Discover and Dashboard start a new `Search Session` every time the time range or any of the filters change, or even when the user clicks on the `Refresh` button, you may choose to manage your sessions differently. For example, if your application has tabs, you might group searches from multiple tabs into a single `Search Session`. In any case, you need to be able to clearly define the **state** used to create the `Search Session` - state meaning any setting that might change the queries being set to `Elasticsearch`. 
+1. **Does your application normally run long operations?** For example, it makes sense for a user to generate a Dashboard or a Canvas report from data stored in cold storage. However, when editing a single visualization, it is best to work with a shorter timeframe of hot or warm data. 
+2. **Does it make sense for your application to restore a search session?** For example, you might want to restore an interesting configuration of filters of older documents you found in Discover. However, a single Lens or Map visualization might not be as helpful, outside the context of a specific dashboard.
+3. **What is a search session in the context of your application?** Although Discover and Dashboard start a new search session every time the time range or filters change, or when the user clicks **Refresh**, you can manage your sessions differently. For example, if your application has tabs, you might group searches from multiple tabs into a single search session. You must be able to clearly define the **state** used to create the search session`.  The **state** refers to any setting that might change the queries being set to `Elasticsearch`. 
 
-Once you answer those questions, proceed to implement the following bits of code in your application: 
+Once you answer those questions, proceed to implement the following bits of code in your application.
 
 ##### Provide storage configuration
 
-First of all, in your plugin's `start` lifecycle method, call the `enableStorage` method. This method helps the `Session Service` gather all information it requires to `save` the `Search Sessions` upon a user's request, as well as constructing the `restore` state:
+In your plugin's `start` lifecycle method, call the `enableStorage` method. This method helps the `Session Service` gather the information required to save the search sessions upon a user's request and construct the restore state:
 
 ```ts
 export class MyPlugin implements Plugin {
@@ -423,11 +423,11 @@ export class MyPlugin implements Plugin {
 }
 ```
 
-<DocCallOut title="Search Sessions Restore State">
-  The restore state of a Search Session may be different from the initial state used to create it. For example, where the initial state may contain relative dates, in the restore state those must be converted to absolute ones (Read more about the [NowProvider here]()).  
+<DocCallOut title="Search sessions restore state">
+  The restore state of a search session may be different from the initial state used to create it. For example, where the initial state may contain relative dates, in the restore state, those must be converted to absolute dates.  Read more about the [NowProvider]().  
 </DocCallOut>
 
-<DocCallOut color="danger" title="Search Sessions Indicator">
+<DocCallOut color="danger" title="Search sessions indicator">
   Calling `enableStorage` will also enable the `Search Session Indicator` component in the chrome component of your solution. The `Search Session Indicator` is a small button, used by default to engage users and save new Search Sessions. If you wish to implement your own UI, contact us to decouple this behavior.  
 </DocCallOut>
 
@@ -463,11 +463,11 @@ function onDestroy() {
 
 ```
 
-If you don't call `clear`, you will see a warning in the console while developing. However, when running in production, you will get a fatal error. This is done to avoid leakage of unrelated `search` requests into an existing `Search Session`, left open by mistake.
+If you don't call `clear`, you will see a warning in the console while developing. However, when running in production, you will get a fatal error. This is done to avoid leakage of unrelated search requests into an existing search session left open by mistake.
 
-##### Restore Search Sessions 
+##### Restore search sessions 
 
-The last step of the integration is restoring an existing `Search Session`. At the moment, the `searchSessionId` parameter, as well as the rest of the restore state, are passed into the application via the URL (non-url support is planned for future releases).
+The last step of the integration is restoring an existing  search session. The `searchSessionId` parameter and the rest of the restore state are passed into the application via the URL. Non-URL support is planned for future releases.
 
 If you detect the presense of a `searchSessionId` parameter in the URL, call the `restore` method **instead** of calling `start`. The previous example would now become:
 
@@ -483,8 +483,8 @@ function onSearchSessionConfigChange(searchSessionIdFromUrl?: string) {
 
 ```
 
-Once you `restore` the session, as long as all `search` requests run with the same `searchSessionId`, the `Search Session` should be seamlessly restored.
+Once you `restore` the session, as long as all `search` requests run with the same `searchSessionId`, the search session should be seamlessly restored.
 
-##### Customize the User Experience
+##### Customize the user experience
 
 TBD
