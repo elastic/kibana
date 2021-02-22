@@ -43,8 +43,8 @@ describe('getLatencyChartSelector', () => {
     it('returns default values when data is undefined', () => {
       const latencyChart = getLatencyChartSelector({ theme });
       expect(latencyChart).toEqual({
-        currentPeriod: [],
-        previousPeriod: [],
+        currentPeriod: undefined,
+        previousPeriod: undefined,
         mlJobId: undefined,
         anomalyTimeseries: undefined,
       });
@@ -58,23 +58,20 @@ describe('getLatencyChartSelector', () => {
         latencyAggregationType: LatencyAggregationType.avg,
       });
       expect(latencyTimeseries).toEqual({
-        currentPeriod: [
-          {
-            title: 'Average',
-            data: [{ x: 1, y: 10 }],
-            legendValue: '1 μs',
-            type: 'linemark',
-            color: 'blue',
-          },
-        ],
-        previousPeriod: [
-          {
-            color: 'green',
-            data: [{ x: 1, y: 10 }],
-            type: 'area',
-            title: 'Previous period',
-          },
-        ],
+        currentPeriod: {
+          title: 'Average',
+          data: [{ x: 1, y: 10 }],
+          legendValue: '1 μs',
+          type: 'linemark',
+          color: 'blue',
+        },
+
+        previousPeriod: {
+          color: 'green',
+          data: [{ x: 1, y: 10 }],
+          type: 'area',
+          title: 'Previous period',
+        },
       });
     });
 
@@ -86,23 +83,19 @@ describe('getLatencyChartSelector', () => {
         latencyAggregationType: LatencyAggregationType.p95,
       });
       expect(latencyTimeseries).toEqual({
-        currentPeriod: [
-          {
-            title: '95th percentile',
-            titleShort: '95th',
-            data: [{ x: 1, y: 10 }],
-            type: 'linemark',
-            color: 'red',
-          },
-        ],
-        previousPeriod: [
-          {
-            data: [{ x: 1, y: 10 }],
-            type: 'area',
-            color: 'green',
-            title: 'Previous period',
-          },
-        ],
+        currentPeriod: {
+          title: '95th percentile',
+          titleShort: '95th',
+          data: [{ x: 1, y: 10 }],
+          type: 'linemark',
+          color: 'red',
+        },
+        previousPeriod: {
+          data: [{ x: 1, y: 10 }],
+          type: 'area',
+          color: 'green',
+          title: 'Previous period',
+        },
       });
     });
 
@@ -115,23 +108,19 @@ describe('getLatencyChartSelector', () => {
       });
 
       expect(latencyTimeseries).toEqual({
-        currentPeriod: [
-          {
-            title: '99th percentile',
-            titleShort: '99th',
-            data: [{ x: 1, y: 10 }],
-            type: 'linemark',
-            color: 'black',
-          },
-        ],
-        previousPeriod: [
-          {
-            data: [{ x: 1, y: 10 }],
-            type: 'area',
-            color: 'green',
-            title: 'Previous period',
-          },
-        ],
+        currentPeriod: {
+          title: '99th percentile',
+          titleShort: '99th',
+          data: [{ x: 1, y: 10 }],
+          type: 'linemark',
+          color: 'black',
+        },
+        previousPeriod: {
+          data: [{ x: 1, y: 10 }],
+          type: 'area',
+          color: 'green',
+          title: 'Previous period',
+        },
       });
     });
   });
@@ -144,23 +133,19 @@ describe('getLatencyChartSelector', () => {
         latencyAggregationType: LatencyAggregationType.p99,
       });
       expect(latencyTimeseries).toEqual({
-        currentPeriod: [
-          {
-            title: '99th percentile',
-            titleShort: '99th',
-            data: [{ x: 1, y: 10 }],
-            type: 'linemark',
-            color: 'black',
-          },
-        ],
-        previousPeriod: [
-          {
-            data: [{ x: 1, y: 10 }],
-            type: 'area',
-            color: 'green',
-            title: 'Previous period',
-          },
-        ],
+        currentPeriod: {
+          title: '99th percentile',
+          titleShort: '99th',
+          data: [{ x: 1, y: 10 }],
+          type: 'linemark',
+          color: 'black',
+        },
+        previousPeriod: {
+          data: [{ x: 1, y: 10 }],
+          type: 'area',
+          color: 'green',
+          title: 'Previous period',
+        },
         mlJobId: '1',
         anomalyTimeseries: {
           boundaries: [

@@ -9,6 +9,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiSelect, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
+import { APMChartSpec, Coordinate } from '../../../../../typings/timeseries';
 import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
 import { getDurationFormatter } from '../../../../../common/utils/formatters';
 import { useLicenseContext } from '../../../../context/license/use_license_context';
@@ -55,9 +56,9 @@ export function LatencyChart({ height }: Props) {
   } = latencyChartsData;
 
   const timeseries = [
-    ...currentPeriod,
-    ...(comparisonEnabled ? previousPeriod : []),
-  ];
+    currentPeriod,
+    comparisonEnabled ? previousPeriod : undefined,
+  ].filter((data) => data) as Array<APMChartSpec<Coordinate>>;
 
   const latencyMaxY = getMaxY(timeseries);
   const latencyFormatter = getDurationFormatter(latencyMaxY);

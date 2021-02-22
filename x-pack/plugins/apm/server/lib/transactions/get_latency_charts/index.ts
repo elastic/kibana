@@ -207,14 +207,7 @@ export async function getLatencyPeriods({
           start: comparisonStart,
           end: comparisonEnd,
           latencyAggregationType: latencyAggregationType as LatencyAggregationType,
-        }).then((latency) => ({
-          ...latency,
-          latencyTimeseries: offsetPreviousPeriodCoordinates({
-            currentPeriodStart: start,
-            previousPeriodStart: comparisonStart,
-            previousPeriodTimeseries: latency.latencyTimeseries,
-          }),
-        }))
+        })
       : { latencyTimeseries: [], overallAvgDuration: null };
 
   const [currentPeriod, previousPeriod] = await Promise.all([
@@ -222,5 +215,14 @@ export async function getLatencyPeriods({
     previousPeriodPromise,
   ]);
 
-  return { currentPeriod, previousPeriod };
+  return {
+    currentPeriod,
+    previousPeriod: {
+      ...previousPeriod,
+      latencyTimeseries: offsetPreviousPeriodCoordinates({
+        currentPeriodStart: currentPeriod.latencyTimeseries[0]?.x,
+        previousPeriodTimeseries: previousPeriod.latencyTimeseries,
+      }),
+    },
+  };
 }

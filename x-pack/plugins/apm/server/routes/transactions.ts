@@ -170,17 +170,12 @@ export const transactionLatencyChartsRoute = createRoute({
       serviceName: t.string,
     }),
     query: t.intersection([
-      t.partial({
-        transactionName: t.string,
-      }),
       t.type({
         transactionType: t.string,
         latencyAggregationType: latencyAggregationTypeRt,
       }),
-      environmentRt,
-      uiFiltersRt,
-      rangeRt,
-      comparisonRangeRt,
+      t.partial({ transactionName: t.string }),
+      t.intersection([environmentRt, uiFiltersRt, rangeRt, comparisonRangeRt]),
     ]),
   }),
   options: { tags: ['access:apm'] },

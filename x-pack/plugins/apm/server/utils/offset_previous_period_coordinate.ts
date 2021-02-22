@@ -10,19 +10,17 @@ import { Coordinate } from '../../typings/timeseries';
 
 export function offsetPreviousPeriodCoordinates({
   currentPeriodStart,
-  previousPeriodStart,
   previousPeriodTimeseries,
 }: {
-  currentPeriodStart: number;
-  previousPeriodStart: number;
+  currentPeriodStart?: number;
   previousPeriodTimeseries?: Coordinate[];
 }) {
-  if (!previousPeriodTimeseries) {
+  if (!previousPeriodTimeseries?.length) {
     return [];
   }
 
   const dateOffset = moment(currentPeriodStart).diff(
-    moment(previousPeriodStart)
+    moment(previousPeriodTimeseries[0].x)
   );
 
   return previousPeriodTimeseries.map(({ x, y }) => {
