@@ -10,6 +10,7 @@
 import deepEqual from 'fast-deep-equal';
 import { noop } from 'lodash/fp';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { Subscription } from 'rxjs';
 
 import { inputsModel } from '../../../../common/store';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -25,7 +26,6 @@ import {
   isCompleteResponse,
   isErrorResponse,
 } from '../../../../../../../../src/plugins/data/common';
-import { AbortError } from '../../../../../../../../src/plugins/kibana_utils/common';
 import { getInspectResponse } from '../../../../helpers';
 import { InspectResponse } from '../../../../types';
 
@@ -60,7 +60,7 @@ export const useHostDetails = ({
   const { data, notifications } = useKibana().services;
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
-  const didCancel = useRef(false);
+  const searchSubscription$ = useRef(new Subscription());
   const [loading, setLoading] = useState(false);
   const [hostDetailsRequest, setHostDetailsRequest] = useState<HostDetailsRequestOptions | null>(
     null
@@ -84,52 +84,44 @@ export const useHostDetails = ({
         return;
       }
 
-      didCancel.current = false;
       const asyncSearch = async () => {
         abortCtrl.current = new AbortController();
         setLoading(true);
 
-        const searchSubscription$ = data.search
+        searchSubscription$.current = data.search
           .search<HostDetailsRequestOptions, HostDetailsStrategyResponse>(request, {
             strategy: 'securitySolutionSearchStrategy',
             abortSignal: abortCtrl.current.signal,
           })
           .subscribe({
             next: (response) => {
-              if (!didCancel.current) {
-                if (isCompleteResponse(response)) {
-                  setLoading(false);
-                  setHostDetailsResponse((prevResponse) => ({
-                    ...prevResponse,
-                    hostDetails: response.hostDetails,
-                    inspect: getInspectResponse(response, prevResponse.inspect),
-                    refetch: refetch.current,
-                  }));
-                  searchSubscription$.unsubscribe();
-                } else if (isErrorResponse(response)) {
-                  setLoading(false);
-                  // TODO: Make response error status clearer
-                  notifications.toasts.addWarning(i18n.ERROR_HOST_OVERVIEW);
-                  searchSubscription$.unsubscribe();
-                }
-              } else {
-                searchSubscription$.unsubscribe();
+              if (isCompleteResponse(response)) {
+                setLoading(false);
+                setHostDetailsResponse((prevResponse) => ({
+                  ...prevResponse,
+                  hostDetails: response.hostDetails,
+                  inspect: getInspectResponse(response, prevResponse.inspect),
+                  refetch: refetch.current,
+                }));
+                searchSubscription$.current.unsubscribe();
+              } else if (isErrorResponse(response)) {
+                setLoading(false);
+                // TODO: Make response error status clearer
+                notifications.toasts.addWarning(i18n.ERROR_HOST_OVERVIEW);
+                searchSubscription$.current.unsubscribe();
               }
             },
             error: (msg) => {
-              if (!didCancel.current) {
-                if (!(msg instanceof AbortError)) {
-                  setLoading(false);
-                  notifications.toasts.addDanger({
-                    title: i18n.FAIL_HOST_OVERVIEW,
-                    text: msg.message,
-                  });
-                }
-              }
-              searchSubscription$.unsubscribe();
+              setLoading(false);
+              notifications.toasts.addDanger({
+                title: i18n.FAIL_HOST_OVERVIEW,
+                text: msg.message,
+              });
+              searchSubscription$.current.unsubscribe();
             },
           });
       };
+      searchSubscription$.current.unsubscribe();
       abortCtrl.current.abort();
       asyncSearch();
       refetch.current = asyncSearch;
@@ -156,7 +148,7 @@ export const useHostDetails = ({
       return prevRequest;
     });
     return () => {
-      didCancel.current = true;
+      searchSubscription$.current.unsubscribe();
       abortCtrl.current.abort();
     };
   }, [endDate, hostName, indexNames, startDate]);

@@ -8,6 +8,7 @@
 import deepEqual from 'fast-deep-equal';
 import { noop } from 'lodash/fp';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { Subscription } from 'rxjs';
 
 import { inputsModel } from '../../../../common/store';
 import { createFilter } from '../../../../common/containers/helpers';
@@ -20,7 +21,6 @@ import {
 import { ESTermQuery } from '../../../../../common/typed_json';
 
 import * as i18n from './translations';
-import { AbortError } from '../../../../../../../../src/plugins/kibana_utils/common';
 import { getInspectResponse } from '../../../../helpers';
 import { InspectResponse } from '../../../../types';
 
@@ -51,7 +51,7 @@ export const useHostsKpiHosts = ({
   const { data, notifications } = useKibana().services;
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
-  const didCancel = useRef(false);
+  const searchSubscription$ = useRef(new Subscription());
   const [loading, setLoading] = useState(false);
   const [
     hostsKpiHostsRequest,
@@ -75,54 +75,45 @@ export const useHostsKpiHosts = ({
       if (request == null || skip) {
         return;
       }
-
-      didCancel.current = false;
       const asyncSearch = async () => {
         abortCtrl.current = new AbortController();
         setLoading(true);
 
-        const searchSubscription$ = data.search
+        searchSubscription$.current = data.search
           .search<HostsKpiHostsRequestOptions, HostsKpiHostsStrategyResponse>(request, {
             strategy: 'securitySolutionSearchStrategy',
             abortSignal: abortCtrl.current.signal,
           })
           .subscribe({
             next: (response) => {
-              if (!didCancel.current) {
-                if (!response.isPartial && !response.isRunning) {
-                  setLoading(false);
-                  setHostsKpiHostsResponse((prevResponse) => ({
-                    ...prevResponse,
-                    hosts: response.hosts,
-                    hostsHistogram: response.hostsHistogram,
-                    inspect: getInspectResponse(response, prevResponse.inspect),
-                    refetch: refetch.current,
-                  }));
-                  searchSubscription$.unsubscribe();
-                } else if (response.isPartial && !response.isRunning) {
-                  setLoading(false);
-                  // TODO: Make response error status clearer
-                  notifications.toasts.addWarning(i18n.ERROR_HOSTS_KPI_HOSTS);
-                  searchSubscription$.unsubscribe();
-                }
-              } else {
-                searchSubscription$.unsubscribe();
+              if (!response.isPartial && !response.isRunning) {
+                setLoading(false);
+                setHostsKpiHostsResponse((prevResponse) => ({
+                  ...prevResponse,
+                  hosts: response.hosts,
+                  hostsHistogram: response.hostsHistogram,
+                  inspect: getInspectResponse(response, prevResponse.inspect),
+                  refetch: refetch.current,
+                }));
+                searchSubscription$.current.unsubscribe();
+              } else if (response.isPartial && !response.isRunning) {
+                setLoading(false);
+                // TODO: Make response error status clearer
+                notifications.toasts.addWarning(i18n.ERROR_HOSTS_KPI_HOSTS);
+                searchSubscription$.current.unsubscribe();
               }
             },
             error: (msg) => {
-              if (!didCancel.current) {
-                if (!(msg instanceof AbortError)) {
-                  setLoading(false);
-                  notifications.toasts.addDanger({
-                    title: i18n.FAIL_HOSTS_KPI_HOSTS,
-                    text: msg.message,
-                  });
-                }
-              }
-              searchSubscription$.unsubscribe();
+              setLoading(false);
+              notifications.toasts.addDanger({
+                title: i18n.FAIL_HOSTS_KPI_HOSTS,
+                text: msg.message,
+              });
+              searchSubscription$.current.unsubscribe();
             },
           });
       };
+      searchSubscription$.current.unsubscribe();
       abortCtrl.current.abort();
       asyncSearch();
       refetch.current = asyncSearch;
@@ -153,7 +144,7 @@ export const useHostsKpiHosts = ({
   useEffect(() => {
     hostsKpiHostsSearch(hostsKpiHostsRequest);
     return () => {
-      didCancel.current = true;
+      searchSubscription$.current.unsubscribe();
       abortCtrl.current.abort();
     };
   }, [hostsKpiHostsRequest, hostsKpiHostsSearch]);

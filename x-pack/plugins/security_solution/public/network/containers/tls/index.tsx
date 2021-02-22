@@ -8,6 +8,7 @@
 import { noop } from 'lodash/fp';
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import deepEqual from 'fast-deep-equal';
+import { Subscription } from 'rxjs';
 
 import { ESTermQuery } from '../../../../common/typed_json';
 import { inputsModel } from '../../../common/store';
@@ -23,7 +24,6 @@ import {
   NetworkTlsStrategyResponse,
 } from '../../../../common/search_strategy/security_solution/network';
 import { isCompleteResponse, isErrorResponse } from '../../../../../../../src/plugins/data/common';
-import { AbortError } from '../../../../../../../src/plugins/kibana_utils/common';
 
 import * as i18n from './translations';
 import { getInspectResponse } from '../../../helpers';
@@ -71,7 +71,7 @@ export const useNetworkTls = ({
   const { data, notifications } = useKibana().services;
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
-  const didCancel = useRef(false);
+  const searchSubscription$ = useRef(new Subscription());
   const [loading, setLoading] = useState(false);
 
   const [networkTlsRequest, setHostRequest] = useState<NetworkTlsRequestOptions | null>(null);
@@ -116,55 +116,47 @@ export const useNetworkTls = ({
         return;
       }
 
-      didCancel.current = false;
       const asyncSearch = async () => {
         abortCtrl.current = new AbortController();
         setLoading(true);
 
-        const searchSubscription$ = data.search
+        searchSubscription$.current = data.search
           .search<NetworkTlsRequestOptions, NetworkTlsStrategyResponse>(request, {
             strategy: 'securitySolutionSearchStrategy',
             abortSignal: abortCtrl.current.signal,
           })
           .subscribe({
             next: (response) => {
-              if (!didCancel.current) {
-                if (isCompleteResponse(response)) {
-                  setLoading(false);
-                  setNetworkTlsResponse((prevResponse) => ({
-                    ...prevResponse,
-                    tls: response.edges,
-                    inspect: getInspectResponse(response, prevResponse.inspect),
-                    pageInfo: response.pageInfo,
-                    refetch: refetch.current,
-                    totalCount: response.totalCount,
-                  }));
+              if (isCompleteResponse(response)) {
+                setLoading(false);
+                setNetworkTlsResponse((prevResponse) => ({
+                  ...prevResponse,
+                  tls: response.edges,
+                  inspect: getInspectResponse(response, prevResponse.inspect),
+                  pageInfo: response.pageInfo,
+                  refetch: refetch.current,
+                  totalCount: response.totalCount,
+                }));
 
-                  searchSubscription$.unsubscribe();
-                } else if (isErrorResponse(response)) {
-                  setLoading(false);
-                  // TODO: Make response error status clearer
-                  notifications.toasts.addWarning(i18n.ERROR_NETWORK_TLS);
-                  searchSubscription$.unsubscribe();
-                }
-              } else {
-                searchSubscription$.unsubscribe();
+                searchSubscription$.current.unsubscribe();
+              } else if (isErrorResponse(response)) {
+                setLoading(false);
+                // TODO: Make response error status clearer
+                notifications.toasts.addWarning(i18n.ERROR_NETWORK_TLS);
+                searchSubscription$.current.unsubscribe();
               }
             },
             error: (msg) => {
-              if (!didCancel.current) {
-                if (!(msg instanceof AbortError)) {
-                  setLoading(false);
-                  notifications.toasts.addDanger({
-                    title: i18n.FAIL_NETWORK_TLS,
-                    text: msg.message,
-                  });
-                }
-              }
-              searchSubscription$.unsubscribe();
+              setLoading(false);
+              notifications.toasts.addDanger({
+                title: i18n.FAIL_NETWORK_TLS,
+                text: msg.message,
+              });
+              searchSubscription$.current.unsubscribe();
             },
           });
       };
+      searchSubscription$.current.unsubscribe();
       abortCtrl.current.abort();
       asyncSearch();
       refetch.current = asyncSearch;
@@ -199,7 +191,7 @@ export const useNetworkTls = ({
   useEffect(() => {
     networkTlsSearch(networkTlsRequest);
     return () => {
-      didCancel.current = true;
+      searchSubscription$.current.unsubscribe();
       abortCtrl.current.abort();
     };
   }, [networkTlsRequest, networkTlsSearch]);

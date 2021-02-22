@@ -8,6 +8,7 @@
 import { noop } from 'lodash/fp';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import deepEqual from 'fast-deep-equal';
+import { Subscription } from 'rxjs';
 
 import {
   NetworkQueries,
@@ -19,7 +20,6 @@ import { inputsModel } from '../../../common/store/inputs';
 import { createFilter } from '../../../common/containers/helpers';
 import { ESQuery } from '../../../../common/typed_json';
 import { isCompleteResponse, isErrorResponse } from '../../../../../../../src/plugins/data/common';
-import { AbortError } from '../../../../../../../src/plugins/kibana_utils/common';
 import { getInspectResponse } from '../../../helpers';
 import { InspectResponse } from '../../../types';
 import * as i18n from './translations';
@@ -52,7 +52,7 @@ export const useNetworkOverview = ({
   const { data, notifications } = useKibana().services;
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
-  const didCancel = useRef(false);
+  const searchSubscription$ = useRef(new Subscription());
   const [loading, setLoading] = useState(false);
   const [
     overviewNetworkRequest,
@@ -76,51 +76,44 @@ export const useNetworkOverview = ({
         return;
       }
 
-      didCancel.current = false;
       const asyncSearch = async () => {
         abortCtrl.current = new AbortController();
         setLoading(true);
 
-        const searchSubscription$ = data.search
+        searchSubscription$.current = data.search
           .search<NetworkOverviewRequestOptions, NetworkOverviewStrategyResponse>(request, {
             strategy: 'securitySolutionSearchStrategy',
             abortSignal: abortCtrl.current.signal,
           })
           .subscribe({
             next: (response) => {
-              if (!didCancel.current) {
-                if (isCompleteResponse(response)) {
-                  setLoading(false);
-                  setNetworkOverviewResponse((prevResponse) => ({
-                    ...prevResponse,
-                    overviewNetwork: response.overviewNetwork,
-                    inspect: getInspectResponse(response, prevResponse.inspect),
-                    refetch: refetch.current,
-                  }));
-                  searchSubscription$.unsubscribe();
-                } else if (isErrorResponse(response)) {
-                  setLoading(false);
-                  // TODO: Make response error status clearer
-                  notifications.toasts.addWarning(i18n.ERROR_NETWORK_OVERVIEW);
-                  searchSubscription$.unsubscribe();
-                }
-              } else {
-                searchSubscription$.unsubscribe();
+              if (isCompleteResponse(response)) {
+                setLoading(false);
+                setNetworkOverviewResponse((prevResponse) => ({
+                  ...prevResponse,
+                  overviewNetwork: response.overviewNetwork,
+                  inspect: getInspectResponse(response, prevResponse.inspect),
+                  refetch: refetch.current,
+                }));
+                searchSubscription$.current.unsubscribe();
+              } else if (isErrorResponse(response)) {
+                setLoading(false);
+                // TODO: Make response error status clearer
+                notifications.toasts.addWarning(i18n.ERROR_NETWORK_OVERVIEW);
+                searchSubscription$.current.unsubscribe();
               }
             },
             error: (msg) => {
-              if (!didCancel.current) {
-                if (!(msg instanceof AbortError)) {
-                  setLoading(false);
-                  notifications.toasts.addDanger({
-                    title: i18n.FAIL_NETWORK_OVERVIEW,
-                    text: msg.message,
-                  });
-                }
-              }
+              setLoading(false);
+              notifications.toasts.addDanger({
+                title: i18n.FAIL_NETWORK_OVERVIEW,
+                text: msg.message,
+              });
+              searchSubscription$.current.unsubscribe();
             },
           });
       };
+      searchSubscription$.current.unsubscribe();
       abortCtrl.current.abort();
       asyncSearch();
       refetch.current = asyncSearch;
@@ -151,7 +144,7 @@ export const useNetworkOverview = ({
   useEffect(() => {
     overviewNetworkSearch(overviewNetworkRequest);
     return () => {
-      didCancel.current = true;
+      searchSubscription$.current.unsubscribe();
       abortCtrl.current.abort();
     };
   }, [overviewNetworkRequest, overviewNetworkSearch]);

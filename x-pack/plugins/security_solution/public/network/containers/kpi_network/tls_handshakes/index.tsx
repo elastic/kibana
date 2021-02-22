@@ -8,6 +8,7 @@
 import deepEqual from 'fast-deep-equal';
 import { noop } from 'lodash/fp';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { Subscription } from 'rxjs';
 
 import { inputsModel } from '../../../../common/store';
 import { createFilter } from '../../../../common/containers/helpers';
@@ -24,7 +25,6 @@ import {
   isCompleteResponse,
   isErrorResponse,
 } from '../../../../../../../../src/plugins/data/common';
-import { AbortError } from '../../../../../../../../src/plugins/kibana_utils/common';
 import { getInspectResponse } from '../../../../helpers';
 import { InspectResponse } from '../../../../types';
 
@@ -56,7 +56,7 @@ export const useNetworkKpiTlsHandshakes = ({
   const { data, notifications } = useKibana().services;
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
-  const didCancel = useRef(false);
+  const searchSubscription$ = useRef(new Subscription());
   const [loading, setLoading] = useState(false);
   const [
     networkKpiTlsHandshakesRequest,
@@ -82,12 +82,11 @@ export const useNetworkKpiTlsHandshakes = ({
       if (request == null || skip) {
         return;
       }
-      didCancel.current = false;
       const asyncSearch = async () => {
         abortCtrl.current = new AbortController();
         setLoading(true);
 
-        const searchSubscription$ = data.search
+        searchSubscription$.current = data.search
           .search<NetworkKpiTlsHandshakesRequestOptions, NetworkKpiTlsHandshakesStrategyResponse>(
             request,
             {
@@ -97,40 +96,33 @@ export const useNetworkKpiTlsHandshakes = ({
           )
           .subscribe({
             next: (response) => {
-              if (!didCancel.current) {
-                if (isCompleteResponse(response)) {
-                  setLoading(false);
-                  setNetworkKpiTlsHandshakesResponse((prevResponse) => ({
-                    ...prevResponse,
-                    tlsHandshakes: response.tlsHandshakes,
-                    inspect: getInspectResponse(response, prevResponse.inspect),
-                    refetch: refetch.current,
-                  }));
-                  searchSubscription$.unsubscribe();
-                } else if (isErrorResponse(response)) {
-                  setLoading(false);
-                  // TODO: Make response error status clearer
-                  notifications.toasts.addWarning(i18n.ERROR_NETWORK_KPI_TLS_HANDSHAKES);
-                  searchSubscription$.unsubscribe();
-                }
-              } else {
-                searchSubscription$.unsubscribe();
+              if (isCompleteResponse(response)) {
+                setLoading(false);
+                setNetworkKpiTlsHandshakesResponse((prevResponse) => ({
+                  ...prevResponse,
+                  tlsHandshakes: response.tlsHandshakes,
+                  inspect: getInspectResponse(response, prevResponse.inspect),
+                  refetch: refetch.current,
+                }));
+                searchSubscription$.current.unsubscribe();
+              } else if (isErrorResponse(response)) {
+                setLoading(false);
+                // TODO: Make response error status clearer
+                notifications.toasts.addWarning(i18n.ERROR_NETWORK_KPI_TLS_HANDSHAKES);
+                searchSubscription$.current.unsubscribe();
               }
             },
             error: (msg) => {
-              if (!didCancel.current) {
-                if (!(msg instanceof AbortError)) {
-                  setLoading(false);
-                  notifications.toasts.addDanger({
-                    title: i18n.FAIL_NETWORK_KPI_TLS_HANDSHAKES,
-                    text: msg.message,
-                  });
-                }
-              }
-              searchSubscription$.unsubscribe();
+              setLoading(false);
+              notifications.toasts.addDanger({
+                title: i18n.FAIL_NETWORK_KPI_TLS_HANDSHAKES,
+                text: msg.message,
+              });
+              searchSubscription$.current.unsubscribe();
             },
           });
       };
+      searchSubscription$.current.unsubscribe();
       abortCtrl.current.abort();
       asyncSearch();
       refetch.current = asyncSearch;
@@ -161,7 +153,7 @@ export const useNetworkKpiTlsHandshakes = ({
   useEffect(() => {
     networkKpiTlsHandshakesSearch(networkKpiTlsHandshakesRequest);
     return () => {
-      didCancel.current = true;
+      searchSubscription$.current.unsubscribe();
       abortCtrl.current.abort();
     };
   }, [networkKpiTlsHandshakesRequest, networkKpiTlsHandshakesSearch]);

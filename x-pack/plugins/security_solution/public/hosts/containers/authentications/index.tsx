@@ -8,10 +8,9 @@
 import { noop, pick } from 'lodash/fp';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import deepEqual from 'fast-deep-equal';
+import { Subscription } from 'rxjs';
 
 import { isCompleteResponse, isErrorResponse } from '../../../../../../../src/plugins/data/common';
-import { AbortError } from '../../../../../../../src/plugins/kibana_utils/common';
-
 import { HostsQueries } from '../../../../common/search_strategy/security_solution';
 import {
   HostAuthenticationsRequestOptions,
@@ -75,7 +74,7 @@ export const useAuthentications = ({
   const { data, notifications } = useKibana().services;
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
-  const didCancel = useRef(false);
+  const searchSubscription$ = useRef(new Subscription());
   const [loading, setLoading] = useState(false);
   const [
     authenticationsRequest,
@@ -122,54 +121,45 @@ export const useAuthentications = ({
       if (request == null || skip) {
         return;
       }
-
-      didCancel.current = false;
       const asyncSearch = async () => {
         abortCtrl.current = new AbortController();
         setLoading(true);
 
-        const searchSubscription$ = data.search
+        searchSubscription$.current = data.search
           .search<HostAuthenticationsRequestOptions, HostAuthenticationsStrategyResponse>(request, {
             strategy: 'securitySolutionSearchStrategy',
             abortSignal: abortCtrl.current.signal,
           })
           .subscribe({
             next: (response) => {
-              if (!didCancel.current) {
-                if (isCompleteResponse(response)) {
-                  setLoading(false);
-                  setAuthenticationsResponse((prevResponse) => ({
-                    ...prevResponse,
-                    authentications: response.edges,
-                    inspect: getInspectResponse(response, prevResponse.inspect),
-                    pageInfo: response.pageInfo,
-                    refetch: refetch.current,
-                    totalCount: response.totalCount,
-                  }));
-                  searchSubscription$.unsubscribe();
-                } else if (isErrorResponse(response)) {
-                  setLoading(false);
-                  notifications.toasts.addWarning(i18n.ERROR_AUTHENTICATIONS);
-                  searchSubscription$.unsubscribe();
-                }
-              } else {
-                searchSubscription$.unsubscribe();
+              if (isCompleteResponse(response)) {
+                setLoading(false);
+                setAuthenticationsResponse((prevResponse) => ({
+                  ...prevResponse,
+                  authentications: response.edges,
+                  inspect: getInspectResponse(response, prevResponse.inspect),
+                  pageInfo: response.pageInfo,
+                  refetch: refetch.current,
+                  totalCount: response.totalCount,
+                }));
+                searchSubscription$.current.unsubscribe();
+              } else if (isErrorResponse(response)) {
+                setLoading(false);
+                notifications.toasts.addWarning(i18n.ERROR_AUTHENTICATIONS);
+                searchSubscription$.current.unsubscribe();
               }
             },
             error: (msg) => {
-              if (!didCancel.current) {
-                if (!(msg instanceof AbortError)) {
-                  setLoading(false);
-                  notifications.toasts.addDanger({
-                    title: i18n.FAIL_AUTHENTICATIONS,
-                    text: msg.message,
-                  });
-                }
-              }
-              searchSubscription$.unsubscribe();
+              setLoading(false);
+              notifications.toasts.addDanger({
+                title: i18n.FAIL_AUTHENTICATIONS,
+                text: msg.message,
+              });
+              searchSubscription$.current.unsubscribe();
             },
           });
       };
+      searchSubscription$.current.unsubscribe();
       abortCtrl.current.abort();
       asyncSearch();
       refetch.current = asyncSearch;
@@ -203,7 +193,7 @@ export const useAuthentications = ({
   useEffect(() => {
     authenticationsSearch(authenticationsRequest);
     return () => {
-      didCancel.current = true;
+      searchSubscription$.current.unsubscribe();
       abortCtrl.current.abort();
     };
   }, [authenticationsRequest, authenticationsSearch]);

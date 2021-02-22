@@ -8,6 +8,7 @@
 import deepEqual from 'fast-deep-equal';
 import { noop } from 'lodash/fp';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { Subscription } from 'rxjs';
 
 import { inputsModel } from '../../../../common/store';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -22,7 +23,6 @@ import {
   isCompleteResponse,
   isErrorResponse,
 } from '../../../../../../../../src/plugins/data/common';
-import { AbortError } from '../../../../../../../../src/plugins/kibana_utils/common';
 import * as i18n from './translations';
 import { DocValueFields } from '../../../../../common/search_strategy';
 
@@ -48,7 +48,7 @@ export const useTimelineLastEventTime = ({
   const { data, notifications } = useKibana().services;
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
-  const didCancel = useRef(false);
+  const searchSubscription$ = useRef(new Subscription());
   const [loading, setLoading] = useState(false);
   const [
     TimelineLastEventTimeRequest,
@@ -72,12 +72,11 @@ export const useTimelineLastEventTime = ({
 
   const timelineLastEventTimeSearch = useCallback(
     (request: TimelineEventsLastEventTimeRequestOptions) => {
-      didCancel.current = false;
       const asyncSearch = async () => {
         abortCtrl.current = new AbortController();
         setLoading(true);
 
-        const searchSubscription$ = data.search
+        searchSubscription$.current = data.search
           .search<
             TimelineEventsLastEventTimeRequestOptions,
             TimelineEventsLastEventTimeStrategyResponse
@@ -87,43 +86,34 @@ export const useTimelineLastEventTime = ({
           })
           .subscribe({
             next: (response) => {
-              if (!didCancel.current) {
-                if (isCompleteResponse(response)) {
-                  setLoading(false);
-                  setTimelineLastEventTimeResponse((prevResponse) => ({
-                    ...prevResponse,
-                    errorMessage: undefined,
-                    lastSeen: response.lastSeen,
-                    refetch: refetch.current,
-                  }));
-                  searchSubscription$.unsubscribe();
-                } else if (isErrorResponse(response)) {
-                  setLoading(false);
-                  // TODO: Make response error status clearer
-                  notifications.toasts.addWarning(i18n.ERROR_LAST_EVENT_TIME);
-                }
-              } else {
-                searchSubscription$.unsubscribe();
+              if (isCompleteResponse(response)) {
+                setLoading(false);
+                setTimelineLastEventTimeResponse((prevResponse) => ({
+                  ...prevResponse,
+                  errorMessage: undefined,
+                  lastSeen: response.lastSeen,
+                  refetch: refetch.current,
+                }));
+              } else if (isErrorResponse(response)) {
+                setLoading(false);
+                // TODO: Make response error status clearer
+                notifications.toasts.addWarning(i18n.ERROR_LAST_EVENT_TIME);
               }
             },
             error: (msg) => {
-              if (!didCancel.current) {
-                if (!(msg instanceof AbortError)) {
-                  setLoading(false);
-                  notifications.toasts.addDanger({
-                    title: i18n.FAIL_LAST_EVENT_TIME,
-                    text: msg.message,
-                  });
-                  setTimelineLastEventTimeResponse((prevResponse) => ({
-                    ...prevResponse,
-                    errorMessage: msg.message,
-                  }));
-                }
-              }
-              searchSubscription$.unsubscribe();
+              setLoading(false);
+              notifications.toasts.addDanger({
+                title: i18n.FAIL_LAST_EVENT_TIME,
+                text: msg.message,
+              });
+              setTimelineLastEventTimeResponse((prevResponse) => ({
+                ...prevResponse,
+                errorMessage: msg.message,
+              }));
             },
           });
       };
+      searchSubscription$.current.unsubscribe();
       abortCtrl.current.abort();
       asyncSearch();
       refetch.current = asyncSearch;
@@ -150,7 +140,7 @@ export const useTimelineLastEventTime = ({
   useEffect(() => {
     timelineLastEventTimeSearch(TimelineLastEventTimeRequest);
     return () => {
-      didCancel.current = true;
+      searchSubscription$.current.unsubscribe();
       abortCtrl.current.abort();
     };
   }, [TimelineLastEventTimeRequest, timelineLastEventTimeSearch]);
