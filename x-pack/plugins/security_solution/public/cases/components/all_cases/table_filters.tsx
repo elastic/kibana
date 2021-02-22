@@ -10,7 +10,7 @@ import { isEqual } from 'lodash/fp';
 import styled from 'styled-components';
 import { EuiFlexGroup, EuiFlexItem, EuiFieldSearch, EuiFilterGroup } from '@elastic/eui';
 
-import { CaseStatuses } from '../../../../../case/common/api';
+import { AllCaseType, CaseStatuses, CaseStatusFilter } from '../../../../../case/common/api';
 import { FilterOptions } from '../../containers/types';
 import { useGetTags } from '../../containers/use_get_tags';
 import { useGetReporters } from '../../containers/use_get_reporters';
@@ -19,7 +19,6 @@ import { StatusFilter } from './status_filter';
 
 import * as i18n from './translations';
 interface CasesTableFiltersProps {
-  countAllCases: number | null;
   countClosedCases: number | null;
   countInProgressCases: number | null;
   countOpenCases: number | null;
@@ -42,11 +41,15 @@ const StatusFilterWrapper = styled(EuiFlexItem)`
  * @param onFilterChanged change listener to be notified on filter changes
  */
 
-const defaultInitial = { search: '', reporters: [], status: CaseStatuses.all, tags: [] };
+const defaultInitial = {
+  search: '',
+  reporters: [],
+  status: AllCaseType as CaseStatusFilter,
+  tags: [],
+};
 
 const CasesTableFiltersComponent = ({
   countClosedCases,
-  countAllCases,
   countOpenCases,
   countInProgressCases,
   onFilterChanged,
@@ -126,7 +129,7 @@ const CasesTableFiltersComponent = ({
   );
 
   const onStatusChanged = useCallback(
-    (status: CaseStatuses) => {
+    (status: CaseStatusFilter) => {
       onFilterChanged({ status });
     },
     [onFilterChanged]
@@ -134,12 +137,12 @@ const CasesTableFiltersComponent = ({
 
   const stats = useMemo(
     () => ({
-      [CaseStatuses.all]: countAllCases ?? 0,
+      [AllCaseType]: null,
       [CaseStatuses.open]: countOpenCases ?? 0,
       [CaseStatuses['in-progress']]: countInProgressCases ?? 0,
       [CaseStatuses.closed]: countClosedCases ?? 0,
     }),
-    [countAllCases, countClosedCases, countInProgressCases, countOpenCases]
+    [countClosedCases, countInProgressCases, countOpenCases]
   );
 
   return (

@@ -459,7 +459,6 @@ export const AllCases = React.memo<AllCasesProps>(
         )}
         <TableWrap data-test-subj="table-wrap" loading={!isModal ? isCasesLoading : undefined}>
           <CasesTableFilters
-            countAllCases={data.countAllCases}
             countClosedCases={data.countClosedCases}
             countOpenCases={data.countOpenCases}
             countInProgressCases={data.countInProgressCases}

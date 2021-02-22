@@ -16,6 +16,7 @@ import {
   CasePatchRequest,
   CaseType,
   AssociationType,
+  CaseStatusFilter,
 } from '../../../../case/common/api';
 
 export { CaseConnector, ActionConnector, CaseStatuses } from '../../../../case/common/api';
@@ -96,13 +97,12 @@ export interface QueryParams {
 
 export interface FilterOptions {
   search: string;
-  status: CaseStatuses;
+  status: CaseStatusFilter;
   tags: string[];
   reporters: User[];
 }
 
 export interface CasesStatus {
-  countAllCases: number | null;
   countClosedCases: number | null;
   countOpenCases: number | null;
   countInProgressCases: number | null;

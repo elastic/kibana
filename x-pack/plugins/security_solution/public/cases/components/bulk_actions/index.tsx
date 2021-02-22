@@ -8,12 +8,13 @@
 import React from 'react';
 import { EuiContextMenuItem } from '@elastic/eui';
 
-import { CaseStatuses } from '../../../../../case/common/api';
+import { get } from 'lodash';
+import { CaseStatuses, CaseStatusFilter } from '../../../../../case/common/api';
 import { statuses } from '../status';
 import * as i18n from './translations';
 
 interface GetBulkItems {
-  caseStatus: CaseStatuses;
+  caseStatus: CaseStatusFilter;
   closePopover: () => void;
   deleteCasesAction: (cases: string[]) => void;
   selectedCaseIds: string[];
@@ -42,7 +43,7 @@ export const getBulkItems = ({
         updateCaseStatus(CaseStatuses.open);
       }}
     >
-      {statuses[CaseStatuses.open].actions.bulk.title}
+      {get(statuses, `${CaseStatuses.open}.actions.bulk.title`)}
     </EuiContextMenuItem>
   );
 
@@ -57,7 +58,7 @@ export const getBulkItems = ({
         updateCaseStatus(CaseStatuses['in-progress']);
       }}
     >
-      {statuses[CaseStatuses['in-progress']].actions.bulk.title}
+      {get(statuses, `${CaseStatuses['in-progress']}.actions.bulk.title`)}
     </EuiContextMenuItem>
   );
 
@@ -72,7 +73,7 @@ export const getBulkItems = ({
         updateCaseStatus(CaseStatuses.closed);
       }}
     >
-      {statuses[CaseStatuses.closed].actions.bulk.title}
+      {get(statuses, `${CaseStatuses.closed}.actions.bulk.title`)}
     </EuiContextMenuItem>
   );
 

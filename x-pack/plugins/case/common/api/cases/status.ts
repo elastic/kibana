@@ -7,15 +7,15 @@
 
 import * as rt from 'io-ts';
 
+export const AllCaseType = 'all';
+
 export enum CaseStatuses {
-  all = 'all',
   open = 'open',
   'in-progress' = 'in-progress',
   closed = 'closed',
 }
 
 export const CaseStatusRt = rt.union([
-  rt.literal(CaseStatuses.all),
   rt.literal(CaseStatuses.open),
   rt.literal(CaseStatuses['in-progress']),
   rt.literal(CaseStatuses.closed),
@@ -23,19 +23,20 @@ export const CaseStatusRt = rt.union([
 
 export const caseStatuses = Object.values(CaseStatuses);
 
+export const CaseStatusFilterRt = rt.union([
+  rt.literal(AllCaseType),
+  rt.literal(CaseStatuses.open),
+  rt.literal(CaseStatuses['in-progress']),
+  rt.literal(CaseStatuses.closed),
+]);
+
+export const caseStatusFilter = Object.values(CaseStatusFilterRt);
+export type CaseStatusFilter = rt.TypeOf<typeof CaseStatusFilterRt>;
+
 export const CasesStatusResponseRt = rt.type({
-  count_all_cases: rt.number,
   count_open_cases: rt.number,
   count_in_progress_cases: rt.number,
   count_closed_cases: rt.number,
 });
 
 export type CasesStatusResponse = rt.TypeOf<typeof CasesStatusResponseRt>;
-
-export const SubCasesStatusResponseRt = rt.type({
-  count_open_cases: rt.number,
-  count_in_progress_cases: rt.number,
-  count_closed_cases: rt.number,
-});
-
-export type SubCasesStatusResponse = rt.TypeOf<typeof SubCasesStatusResponseRt>;

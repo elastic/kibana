@@ -194,7 +194,6 @@ export function wrapError(error: any): CustomHttpResponseOptions<ResponseError> 
 
 export const transformCases = ({
   casesMap,
-  countAllCases,
   countOpenCases,
   countInProgressCases,
   countClosedCases,
@@ -203,7 +202,6 @@ export const transformCases = ({
   total,
 }: {
   casesMap: Map<string, CaseResponse>;
-  countAllCases: number;
   countOpenCases: number;
   countInProgressCases: number;
   countClosedCases: number;
@@ -215,7 +213,6 @@ export const transformCases = ({
   per_page: perPage,
   total,
   cases: Array.from(casesMap.values()),
-  count_all_cases: countAllCases,
   count_open_cases: countOpenCases,
   count_in_progress_cases: countInProgressCases,
   count_closed_cases: countClosedCases,

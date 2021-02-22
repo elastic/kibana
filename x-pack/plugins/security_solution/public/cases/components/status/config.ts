@@ -5,16 +5,16 @@
  * 2.0.
  */
 import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
-import { CaseStatuses } from '../../../../../case/common/api';
+import { AllCaseType, CaseStatuses, CaseStatusFilter } from '../../../../../case/common/api';
 import * as i18n from './translations';
 
 type Statuses = Record<
-  CaseStatuses,
+  CaseStatusFilter,
   {
     color: string;
     label: string;
-    icon: EuiIconType;
-    actions: {
+    icon?: EuiIconType;
+    actions?: {
       bulk: {
         title: string;
       };
@@ -23,20 +23,20 @@ type Statuses = Record<
         description?: string;
       };
     };
-    actionBar: {
+    actionBar?: {
       title: string;
     };
-    button: {
+    button?: {
       label: string;
     };
-    stats: {
+    stats?: {
       title: string;
     };
   }
 >;
 
 export const statuses: Statuses = {
-  [CaseStatuses.all]: { color: 'hollow', label: i18n.ALL },
+  [AllCaseType]: { color: 'hollow', label: i18n.ALL },
   [CaseStatuses.open]: {
     color: 'primary',
     label: i18n.OPEN,
