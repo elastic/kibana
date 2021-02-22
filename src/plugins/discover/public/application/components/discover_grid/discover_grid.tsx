@@ -35,6 +35,7 @@ import {
 } from './discover_grid_columns';
 import { defaultPageSize, gridStyle, pageSizeArr, toolbarVisibility } from './constants';
 import { DiscoverServices } from '../../../build_services';
+import { getDisplayedColumns } from '../../helpers/columns';
 
 interface SortObj {
   id: string;
@@ -151,7 +152,8 @@ export const DiscoverGrid = ({
   sort,
   useNewFieldsApi,
 }: DiscoverGridProps) => {
-  const defaultColumns = columns.includes('_source');
+  const displayedColumns = getDisplayedColumns(columns, indexPattern);
+  const defaultColumns = displayedColumns.includes('_source');
 
   /**
    * Pagination
@@ -213,19 +215,19 @@ export const DiscoverGrid = ({
   const randomId = useMemo(() => htmlIdGenerator()(), []);
 
   const euiGridColumns = useMemo(
-    () => getEuiGridColumns(columns, settings, indexPattern, showTimeCol, defaultColumns),
-    [columns, indexPattern, showTimeCol, settings, defaultColumns]
+    () => getEuiGridColumns(displayedColumns, settings, indexPattern, showTimeCol, defaultColumns),
+    [displayedColumns, indexPattern, showTimeCol, settings, defaultColumns]
   );
   const schemaDetectors = useMemo(() => getSchemaDetectors(), []);
   const popoverContents = useMemo(() => getPopoverContents(), []);
   const columnsVisibility = useMemo(
     () => ({
-      visibleColumns: getVisibleColumns(columns, indexPattern, showTimeCol) as string[],
+      visibleColumns: getVisibleColumns(displayedColumns, indexPattern, showTimeCol) as string[],
       setVisibleColumns: (newColumns: string[]) => {
         onSetColumns(newColumns);
       },
     }),
-    [columns, indexPattern, showTimeCol, onSetColumns]
+    [displayedColumns, indexPattern, showTimeCol, onSetColumns]
   );
   const sorting = useMemo(() => ({ columns: sortingColumns, onSort: onTableSort }), [
     sortingColumns,
@@ -322,7 +324,7 @@ export const DiscoverGrid = ({
             indexPattern={indexPattern}
             hit={expandedDoc}
             // if default columns are used, dont make them part of the URL - the context state handling will take care to restore them
-            columns={defaultColumns ? [] : columns}
+            columns={defaultColumns ? [] : displayedColumns}
             onFilter={onFilter}
             onRemoveColumn={onRemoveColumn}
             onAddColumn={onAddColumn}
