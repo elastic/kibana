@@ -38,12 +38,12 @@ kibanaPipeline(timeoutMinutes: 210) {
 
           task {
             kibanaPipeline.buildOss(6)
-            tasks((1..12).collect { kibanaPipeline.ossCiGroupProcess(it, true) })
+            tasks.ossCiGroups()
           }
 
           task {
             kibanaPipeline.buildXpack(10)
-            tasks((1..13).collect { kibanaPipeline.xpackCiGroupProcess(it, true) })
+            tasks.xpackCiGroups()
           }
         }
       }
