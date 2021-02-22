@@ -19,6 +19,23 @@ import { MigrateAndConvertFn } from './document_migrator';
 import { SavedObjectsMigrationLogger } from '.';
 
 /**
+ * Error thrown when saved object migrations encounter a corrupt saved object.
+ * Corrupt saved objects cannot be serialized because:
+ *  - there's no `[type]` property which contains the type attributes
+ *  - the type or namespace in the _id doesn't match the `type` or `namespace`
+ *    properties
+ */
+export class CorruptSavedObjectError extends Error {
+  constructor(public readonly rawId: string) {
+    super(`Unable to migrate the corrupt saved object document with _id: '${rawId}'.`);
+
+    // Set the prototype explicitly, see:
+    // https://github.com/Microsoft/TypeScript/wiki/Breaking-Changes#extending-built-ins-like-error-array-and-map-may-no-longer-work
+    Object.setPrototypeOf(this, CorruptSavedObjectError.prototype);
+  }
+}
+
+/**
  * Applies the specified migration function to every saved object document in the list
  * of raw docs. Any raw docs that are not valid saved objects will simply be passed through.
  *
@@ -48,9 +65,7 @@ export async function migrateRawDocs(
         )
       );
     } else {
-      throw new Error(
-        `Unable to migrate the corrupt saved object document with _id: '${raw._id}'.`
-      );
+      throw new CorruptSavedObjectError(raw._id);
     }
   }
   return processedDocs;

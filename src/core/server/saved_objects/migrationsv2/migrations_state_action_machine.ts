@@ -10,6 +10,7 @@ import { errors as EsErrors } from '@elastic/elasticsearch';
 import * as Option from 'fp-ts/lib/Option';
 import { performance } from 'perf_hooks';
 import { Logger, LogMeta } from '../../logging';
+import { CorruptSavedObjectError } from '../migrations/core/migrate_raw_docs';
 import { Model, Next, stateActionMachine } from './state_action_machine';
 import { State } from './types';
 
@@ -165,7 +166,7 @@ export async function migrationStateActionMachine({
       logger.error(e);
 
       dumpExecutionLog(logger, logMessagePrefix, executionLog);
-      if (e.message.startsWith('Unable to migrate the corrupt saved object document')) {
+      if (e instanceof CorruptSavedObjectError) {
         throw new Error(
           `${e.message} To allow migrations to proceed, please delete this document from the [${initialState.indexPrefix}_${initialState.kibanaVersion}_001] index.`
         );
