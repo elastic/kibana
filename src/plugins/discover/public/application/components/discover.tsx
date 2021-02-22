@@ -105,13 +105,14 @@ export function Discover({
     () =>
       getStateColumnActions({
         capabilities,
+        config,
         indexPattern,
         indexPatterns,
         setAppState,
         state,
         useNewFieldsApi,
       }),
-    [capabilities, indexPattern, indexPatterns, setAppState, state, useNewFieldsApi]
+    [capabilities, indexPattern, indexPatterns, setAppState, state, config, useNewFieldsApi]
   );
 
   const onOpenInspector = useCallback(() => {
