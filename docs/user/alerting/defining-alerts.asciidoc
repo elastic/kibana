@@ -52,7 +52,10 @@ To add an action to an alert, you first select the type of action:
 [role="screenshot"]
 image::images/alert-flyout-action-type-selection.png[UI for selecting an action type]
 
-Each action  must specify a <<alerting-concepts-connectors, connector>> instance. If no connectors exist for that action type, click "Add new" to create one.
+Next you must specify when the action is to be run, by choosing an _action group_ under the **Run When** field. When an alert instance is detected as matching a condition it is marked as _Active_, assigned an action group and triggers the actions in that group.
+When the condition is no longer detected for an _Active_ alert instance, it is assigned the _Recovered_ action group, triggering any actions assigned to that group.
+
+Each action must specify a <<alerting-concepts-connectors, connector>> instance. If no connectors exist for that action type, click "Add new" to create one.
 
 Each action type exposes different properties. For example an email action allows you to set the recipients, the subject, and a message body in markdown format. See <<action-types>> for details on the types of actions provided by {kib} and their properties.
 
