@@ -395,7 +395,7 @@ Once you answer those questions, proceed to implement the following bits of code
 
 ##### Provide storage configuration
 
-First of all, in your plugin's `start` lifecycle method, call the `enableStorage` method. This method helps the `Session Service` gather all information it requires to `save` the `Search Sessions` upon a user's request, as well as constructing the `restore` state:
+In your plugin's `start` lifecycle method, call the `enableStorage` method. This method helps the `Session Service` gather the information required to save the search sessions upon a user's request and construct the restore state:
 
 ```ts
 export class MyPlugin implements Plugin {
