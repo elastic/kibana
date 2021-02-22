@@ -9,7 +9,7 @@ import { useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import { useFetcher } from './use_fetcher';
 import { useUrlParams } from '../context/url_params_context/use_url_params';
-import { getThrouputChartSelector } from '../selectors/throuput_chart_selectors';
+import { getThroughputChartSelector } from '../selectors/throughput_chart_selectors';
 import { useTheme } from './use_theme';
 import { useApmServiceContext } from '../context/apm_service/use_apm_service_context';
 
@@ -18,7 +18,7 @@ export function useTransactionThroughputChartsFetcher() {
   const { transactionType } = useApmServiceContext();
   const theme = useTheme();
   const {
-    urlParams: { start, end, transactionName },
+    urlParams: { environment, start, end, transactionName },
     uiFilters,
   } = useUrlParams();
 
@@ -31,6 +31,7 @@ export function useTransactionThroughputChartsFetcher() {
           params: {
             path: { serviceName },
             query: {
+              environment,
               start,
               end,
               transactionType,
@@ -41,11 +42,19 @@ export function useTransactionThroughputChartsFetcher() {
         });
       }
     },
-    [serviceName, start, end, transactionName, transactionType, uiFilters]
+    [
+      environment,
+      serviceName,
+      start,
+      end,
+      transactionName,
+      transactionType,
+      uiFilters,
+    ]
   );
 
   const memoizedData = useMemo(
-    () => getThrouputChartSelector({ throuputChart: data, theme }),
+    () => getThroughputChartSelector({ throughputChart: data, theme }),
     [data, theme]
   );
 

@@ -23,7 +23,7 @@ export const ruleStatusServiceFactoryMock = async ({
 
     success: jest.fn(),
 
-    partialFailure: jest.fn(),
+    warning: jest.fn(),
 
     error: jest.fn(),
   };

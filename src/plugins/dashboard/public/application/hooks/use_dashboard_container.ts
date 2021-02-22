@@ -21,15 +21,24 @@ import {
 
 import { DashboardStateManager } from '../dashboard_state_manager';
 import { getDashboardContainerInput, getSearchSessionIdFromURL } from '../dashboard_app_functions';
-import { DashboardContainer, DashboardContainerInput } from '../..';
+import { DashboardConstants, DashboardContainer, DashboardContainerInput } from '../..';
 import { DashboardAppServices } from '../types';
 import { DASHBOARD_CONTAINER_TYPE } from '..';
+import { TimefilterContract } from '../../services/data';
 
-export const useDashboardContainer = (
-  dashboardStateManager: DashboardStateManager | null,
-  history: History,
-  isEmbeddedExternally: boolean
-) => {
+export const useDashboardContainer = ({
+  history,
+  timeFilter,
+  setUnsavedChanges,
+  dashboardStateManager,
+  isEmbeddedExternally,
+}: {
+  history: History;
+  isEmbeddedExternally?: boolean;
+  timeFilter?: TimefilterContract;
+  setUnsavedChanges?: (dirty: boolean) => void;
+  dashboardStateManager: DashboardStateManager | null;
+}) => {
   const {
     dashboardCapabilities,
     data,
@@ -68,17 +77,24 @@ export const useDashboardContainer = (
       searchSession.restore(searchSessionIdFromURL);
     }
 
-    const incomingEmbeddable = embeddable.getStateTransfer().getIncomingEmbeddablePackage(true);
+    const incomingEmbeddable = embeddable
+      .getStateTransfer()
+      .getIncomingEmbeddablePackage(DashboardConstants.DASHBOARDS_ID, true);
+
+    // when dashboard state manager initially loads, determine whether or not there are unsaved changes
+    setUnsavedChanges?.(
+      Boolean(incomingEmbeddable) || dashboardStateManager.hasUnsavedPanelState()
+    );
 
     let canceled = false;
     let pendingContainer: DashboardContainer | ErrorEmbeddable | null | undefined;
     (async function createContainer() {
       pendingContainer = await dashboardFactory.create(
         getDashboardContainerInput({
+          isEmbeddedExternally: Boolean(isEmbeddedExternally),
           dashboardCapabilities,
           dashboardStateManager,
           incomingEmbeddable,
-          isEmbeddedExternally,
           query,
           searchSessionId: searchSessionIdFromURL ?? searchSession.start(),
         })
@@ -139,8 +155,10 @@ export const useDashboardContainer = (
     dashboardCapabilities,
     dashboardStateManager,
     isEmbeddedExternally,
+    setUnsavedChanges,
     searchSession,
     scopedHistory,
+    timeFilter,
     embeddable,
     history,
     query,

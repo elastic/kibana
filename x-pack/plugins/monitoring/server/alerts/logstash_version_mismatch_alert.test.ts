@@ -7,13 +7,13 @@
 
 import { LogstashVersionMismatchAlert } from './logstash_version_mismatch_alert';
 import { ALERT_LOGSTASH_VERSION_MISMATCH } from '../../common/constants';
-import { fetchLegacyAlerts } from '../lib/alerts/fetch_legacy_alerts';
+import { fetchLogstashVersions } from '../lib/alerts/fetch_logstash_versions';
 import { fetchClusters } from '../lib/alerts/fetch_clusters';
 
 const RealDate = Date;
 
-jest.mock('../lib/alerts/fetch_legacy_alerts', () => ({
-  fetchLegacyAlerts: jest.fn(),
+jest.mock('../lib/alerts/fetch_logstash_versions', () => ({
+  fetchLogstashVersions: jest.fn(),
 }));
 jest.mock('../lib/alerts/fetch_clusters', () => ({
   fetchClusters: jest.fn(),
@@ -22,6 +22,7 @@ jest.mock('../lib/alerts/fetch_clusters', () => ({
 jest.mock('../static_globals', () => ({
   Globals: {
     app: {
+      url: 'UNIT_TEST_URL',
       getLogger: () => ({ debug: jest.fn() }),
       config: {
         ui: {
@@ -68,16 +69,16 @@ describe('LogstashVersionMismatchAlert', () => {
     function FakeDate() {}
     FakeDate.prototype.valueOf = () => 1;
 
+    const ccs = undefined;
     const clusterUuid = 'abc123';
     const clusterName = 'testCluster';
-    const legacyAlert = {
-      prefix: 'This cluster is running with multiple versions of Logstash.',
-      message: 'Versions: [8.0.0, 7.2.1].',
-      metadata: {
-        severity: 1000,
-        cluster_uuid: clusterUuid,
+    const logstashVersions = [
+      {
+        versions: ['8.0.0', '7.2.1'],
+        clusterUuid,
+        ccs,
       },
-    };
+    ];
 
     const replaceState = jest.fn();
     const scheduleActions = jest.fn();
@@ -99,8 +100,8 @@ describe('LogstashVersionMismatchAlert', () => {
     beforeEach(() => {
       // @ts-ignore
       Date = FakeDate;
-      (fetchLegacyAlerts as jest.Mock).mockImplementation(() => {
-        return [legacyAlert];
+      (fetchLogstashVersions as jest.Mock).mockImplementation(() => {
+        return logstashVersions;
       });
       (fetchClusters as jest.Mock).mockImplementation(() => {
         return [{ clusterUuid, clusterName }];
@@ -126,12 +127,19 @@ describe('LogstashVersionMismatchAlert', () => {
         alertStates: [
           {
             cluster: { clusterUuid: 'abc123', clusterName: 'testCluster' },
-            ccs: undefined,
-            nodeName: 'Logstash node alert',
+            ccs,
+            itemLabel: undefined,
+            nodeId: undefined,
+            nodeName: undefined,
+            meta: {
+              ccs,
+              clusterUuid,
+              versions: ['8.0.0', '7.2.1'],
+            },
             ui: {
               isFiring: true,
               message: {
-                text: 'Multiple versions of Logstash ([8.0.0, 7.2.1]) running in this cluster.',
+                text: 'Multiple versions of Logstash (8.0.0, 7.2.1) running in this cluster.',
               },
               severity: 'warning',
               triggeredMS: 1,
@@ -141,21 +149,26 @@ describe('LogstashVersionMismatchAlert', () => {
         ],
       });
       expect(scheduleActions).toHaveBeenCalledWith('default', {
-        action: '[View nodes](logstash/nodes)',
+        action: `[View nodes](UNIT_TEST_URL/app/monitoring#/logstash/nodes?_g=(cluster_uuid:${clusterUuid}))`,
         actionPlain: 'Verify you have the same version across all nodes.',
-        internalFullMessage:
-          'Logstash version mismatch alert is firing for testCluster. Logstash is running [8.0.0, 7.2.1]. [View nodes](logstash/nodes)',
+        internalFullMessage: `Logstash version mismatch alert is firing for testCluster. Logstash is running 8.0.0, 7.2.1. [View nodes](UNIT_TEST_URL/app/monitoring#/logstash/nodes?_g=(cluster_uuid:${clusterUuid}))`,
         internalShortMessage:
           'Logstash version mismatch alert is firing for testCluster. Verify you have the same version across all nodes.',
-        versionList: '[8.0.0, 7.2.1]',
+        versionList: ['8.0.0', '7.2.1'],
         clusterName,
         state: 'firing',
       });
     });
 
-    it('should not fire actions if there is no legacy alert', async () => {
-      (fetchLegacyAlerts as jest.Mock).mockImplementation(() => {
-        return [];
+    it('should not fire actions if there is no mismatch', async () => {
+      (fetchLogstashVersions as jest.Mock).mockImplementation(() => {
+        return [
+          {
+            versions: ['8.0.0'],
+            clusterUuid,
+            ccs,
+          },
+        ];
       });
       const alert = new LogstashVersionMismatchAlert();
       const type = alert.getAlertType();

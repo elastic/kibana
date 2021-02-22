@@ -288,7 +288,12 @@ describe('PreviewQuery', () => {
             idAria="queryPreview"
             query={{ query: { query: 'file where true', language: 'kuery' }, filters: [] }}
             index={['foo-*']}
-            threshold={{ field: 'agent.hostname', value: 200 }}
+            threshold={{
+              field: 'agent.hostname',
+              value: 200,
+              cardinality_field: 'user.name',
+              cardinality_value: 2,
+            }}
             isDisabled={false}
           />
         </TestProviders>
@@ -330,7 +335,12 @@ describe('PreviewQuery', () => {
             idAria="queryPreview"
             query={{ query: { query: 'file where true', language: 'kuery' }, filters: [] }}
             index={['foo-*']}
-            threshold={{ field: 'agent.hostname', value: 200 }}
+            threshold={{
+              field: 'agent.hostname',
+              value: 200,
+              cardinality_field: 'user.name',
+              cardinality_value: 2,
+            }}
             isDisabled={false}
           />
         </TestProviders>
@@ -369,7 +379,12 @@ describe('PreviewQuery', () => {
             idAria="queryPreview"
             query={{ query: { query: 'file where true', language: 'kuery' }, filters: [] }}
             index={['foo-*']}
-            threshold={{ field: undefined, value: 200 }}
+            threshold={{
+              field: undefined,
+              value: 200,
+              cardinality_field: 'user.name',
+              cardinality_value: 2,
+            }}
             isDisabled={false}
           />
         </TestProviders>
@@ -396,7 +411,12 @@ describe('PreviewQuery', () => {
             idAria="queryPreview"
             query={{ query: { query: 'file where true', language: 'kuery' }, filters: [] }}
             index={['foo-*']}
-            threshold={{ field: '   ', value: 200 }}
+            threshold={{
+              field: '   ',
+              value: 200,
+              cardinality_field: 'user.name',
+              cardinality_value: 2,
+            }}
             isDisabled={false}
           />
         </TestProviders>

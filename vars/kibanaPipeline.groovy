@@ -186,20 +186,21 @@ def uploadCoverageArtifacts(prefix, pattern) {
 def withGcsArtifactUpload(workerName, closure) {
   def uploadPrefix = "kibana-ci-artifacts/jobs/${env.JOB_NAME}/${BUILD_NUMBER}/${workerName}"
   def ARTIFACT_PATTERNS = [
-    'target/kibana-*',
-    'target/test-metrics/*',
-    'target/kibana-security-solution/**/*.png',
     'target/junit/**/*',
+    'target/kibana-*',
+    'target/kibana-coverage/jest/**/*',
+    'target/kibana-security-solution/**/*.png',
+    'target/test-metrics/*',
     'target/test-suites-ci-plan.json',
-    'test/**/screenshots/session/*.png',
-    'test/**/screenshots/failure/*.png',
     'test/**/screenshots/diff/*.png',
+    'test/**/screenshots/failure/*.png',
+    'test/**/screenshots/session/*.png',
     'test/functional/failure_debug/html/*.html',
-    'x-pack/test/**/screenshots/session/*.png',
-    'x-pack/test/**/screenshots/failure/*.png',
     'x-pack/test/**/screenshots/diff/*.png',
-    'x-pack/test/functional/failure_debug/html/*.html',
+    'x-pack/test/**/screenshots/failure/*.png',
+    'x-pack/test/**/screenshots/session/*.png',
     'x-pack/test/functional/apps/reporting/reports/session/*.pdf',
+    'x-pack/test/functional/failure_debug/html/*.html',
   ]
 
   withEnv([
@@ -424,12 +425,13 @@ def buildXpackPlugins() {
   runbld('./test/scripts/jenkins_xpack_build_plugins.sh', 'Build X-Pack Plugins')
 }
 
-def withTasks(Map params = [worker: [:]], Closure closure) {
+def withTasks(Map params = [:], Closure closure) {
   catchErrors {
-    def config = [name: 'ci-worker', size: 'xxl', ramDisk: true] + (params.worker ?: [:])
+    def config = [setupWork: {}, worker: [:], parallel: 24] + params
+    def workerConfig = [name: 'ci-worker', size: 'xxl', ramDisk: true] + config.worker
 
-    workers.ci(config) {
-      withCiTaskQueue(parallel: 24) {
+    workers.ci(workerConfig) {
+      withCiTaskQueue([parallel: config.parallel]) {
         parallel([
           docker: {
             retry(2) {
@@ -441,6 +443,8 @@ def withTasks(Map params = [worker: [:]], Closure closure) {
           ossPlugins: { buildOssPlugins() },
           xpackPlugins: { buildXpackPlugins() },
         ])
+
+        config.setupWork()
 
         catchErrors {
           closure()
@@ -459,16 +463,12 @@ def allCiTasks() {
         tasks.test()
         tasks.functionalOss()
         tasks.functionalXpack()
+        tasks.storybooksCi()
       }
     },
     jest: {
-      workers.ci(name: 'jest', size: 'c2-8', ramDisk: true) {
+      workers.ci(name: 'jest', size: 'n2-standard-16', ramDisk: false) {
         scriptTask('Jest Unit Tests', 'test/scripts/test/jest_unit.sh')()
-      }
-    },
-    xpackJest: {
-      workers.ci(name: 'xpack-jest', size: 'c2-8', ramDisk: true) {
-        scriptTask('X-Pack Jest Unit Tests', 'test/scripts/test/xpack_jest_unit.sh')()
       }
     },
   ])

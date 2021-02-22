@@ -6,7 +6,6 @@
  */
 
 import React, { useCallback, useEffect, useMemo } from 'react';
-import { noop } from 'lodash/fp';
 import { schema, FormProps } from './schema';
 import { Form, useForm } from '../../../shared_imports';
 import {
@@ -20,6 +19,7 @@ import { usePostPushToService } from '../../containers/use_post_push_to_service'
 import { useConnectors } from '../../containers/configure/use_connectors';
 import { useCaseConfigure } from '../../containers/configure/use_configure';
 import { Case } from '../../containers/types';
+import { CaseType } from '../../../../../case/common/api';
 
 const initialCaseValue: FormProps = {
   description: '',
@@ -31,14 +31,19 @@ const initialCaseValue: FormProps = {
 };
 
 interface Props {
+  caseType?: CaseType;
   onSuccess?: (theCase: Case) => void;
 }
 
-export const FormContext: React.FC<Props> = ({ children, onSuccess }) => {
+export const FormContext: React.FC<Props> = ({
+  caseType = CaseType.individual,
+  children,
+  onSuccess,
+}) => {
   const { connectors } = useConnectors();
   const { connector: configurationConnector } = useCaseConfigure();
   const { postCase } = usePostCase();
-  const { postPushToService } = usePostPushToService();
+  const { pushCaseToExternalService } = usePostPushToService();
 
   const connectorId = useMemo(
     () =>
@@ -62,17 +67,15 @@ export const FormContext: React.FC<Props> = ({ children, onSuccess }) => {
 
         const updatedCase = await postCase({
           ...dataWithoutConnectorId,
+          type: caseType,
           connector: connectorToUpdate,
           settings: { syncAlerts },
         });
 
         if (updatedCase?.id && dataConnectorId !== 'none') {
-          await postPushToService({
+          await pushCaseToExternalService({
             caseId: updatedCase.id,
-            caseServices: {},
             connector: connectorToUpdate,
-            alerts: {},
-            updateCase: noop,
           });
         }
 
@@ -81,7 +84,7 @@ export const FormContext: React.FC<Props> = ({ children, onSuccess }) => {
         }
       }
     },
-    [connectors, postCase, onSuccess, postPushToService]
+    [caseType, connectors, postCase, onSuccess, pushCaseToExternalService]
   );
 
   const { form } = useForm<FormProps>({

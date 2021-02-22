@@ -6,7 +6,9 @@
  */
 
 import React from 'react';
+
 import { shallow } from 'enzyme';
+
 import { EuiCodeBlock, EuiCallOut } from '@elastic/eui';
 
 import { ExampleDocumentJson, MoreDocumentsText } from './summary_documents';

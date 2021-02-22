@@ -12,10 +12,10 @@ import { loadIndices } from './load_indices';
 import { notificationService } from '../../services/notification';
 
 export const reloadIndicesSuccess = createAction('INDEX_MANAGEMENT_RELOAD_INDICES_SUCCESS');
-export const reloadIndices = (indexNames) => async (dispatch) => {
+export const reloadIndices = (indexNames, options) => async (dispatch) => {
   let indices;
   try {
-    indices = await request(indexNames);
+    indices = await request(indexNames, options);
   } catch (error) {
     // an index has been deleted
     // or the user does not have privileges for one of the indices on the current page,

@@ -9,12 +9,13 @@ import { setMockActions } from '../../../../__mocks__';
 import { users } from '../../../__mocks__/users.mock';
 
 import React from 'react';
+
 import { shallow } from 'enzyme';
 
-import { FilterableUsersPopover } from './filterable_users_popover';
-import { FilterableUsersList } from './filterable_users_list';
-
 import { EuiFilterGroup, EuiPopover } from '@elastic/eui';
+
+import { FilterableUsersList } from './filterable_users_list';
+import { FilterableUsersPopover } from './filterable_users_popover';
 
 const closePopover = jest.fn();
 const addFilteredUser = jest.fn();

@@ -19,7 +19,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import React, { Fragment } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
-import styled from 'styled-components';
+import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
 import { useTrackPageview } from '../../../../../observability/public';
 import { NOT_AVAILABLE_LABEL } from '../../../../common/i18n';
 import { useFetcher } from '../../../hooks/use_fetcher';
@@ -31,24 +31,24 @@ import { DetailView } from './DetailView';
 import { ErrorDistribution } from './Distribution';
 import { useErrorGroupDistributionFetcher } from '../../../hooks/use_error_group_distribution_fetcher';
 
-const Titles = styled.div`
+const Titles = euiStyled.div`
   margin-bottom: ${px(units.plus)};
 `;
 
-const Label = styled.div`
+const Label = euiStyled.div`
   margin-bottom: ${px(units.quarter)};
   font-size: ${fontSizes.small};
-  color: ${({ theme }) => theme.eui.euiColorMediumShade};
+  color: ${({ theme }) => theme.eui.euiColorDarkShade};
 `;
 
-const Message = styled.div`
+const Message = euiStyled.div`
   font-family: ${fontFamilyCode};
   font-weight: bold;
   font-size: ${fontSizes.large};
   margin-bottom: ${px(units.half)};
 `;
 
-const Culprit = styled.div`
+const Culprit = euiStyled.div`
   font-family: ${fontFamilyCode};
 `;
 
@@ -68,7 +68,7 @@ type ErrorGroupDetailsProps = RouteComponentProps<{
 export function ErrorGroupDetails({ location, match }: ErrorGroupDetailsProps) {
   const { serviceName, groupId } = match.params;
   const { urlParams, uiFilters } = useUrlParams();
-  const { start, end } = urlParams;
+  const { environment, start, end } = urlParams;
 
   const { data: errorGroupData } = useFetcher(
     (callApmApi) => {
@@ -81,6 +81,7 @@ export function ErrorGroupDetails({ location, match }: ErrorGroupDetailsProps) {
               groupId,
             },
             query: {
+              environment,
               start,
               end,
               uiFilters: JSON.stringify(uiFilters),
@@ -89,7 +90,7 @@ export function ErrorGroupDetails({ location, match }: ErrorGroupDetailsProps) {
         });
       }
     },
-    [serviceName, start, end, groupId, uiFilters]
+    [environment, serviceName, start, end, groupId, uiFilters]
   );
 
   const { errorDistributionData } = useErrorGroupDistributionFetcher({
