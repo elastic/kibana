@@ -109,7 +109,7 @@ export class SearchInterceptor {
       return e;
     } else if (isEsError(e)) {
       if (isPainlessError(e)) {
-        return new PainlessError(e);
+        return new PainlessError(e, options?.indexPattern);
       } else {
         return new EsError(e);
       }
