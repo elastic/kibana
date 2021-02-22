@@ -30,7 +30,8 @@
         "id": "TA0008",
         "name": "Lateral Movement",
         "reference": "https://attack.mitre.org/tactics/TA0008/"
-      }
+      },
+      "technique": []
     },
     {
       "framework": "MITRE ATT&CK",
