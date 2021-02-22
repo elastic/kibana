@@ -38,5 +38,5 @@ export const handleEsError = ({
     });
   }
   // Case: default
-  return response.internalError({ body: error });
+  throw error;
 };

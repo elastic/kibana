@@ -85,3 +85,17 @@ export const CASE_CONNECTOR_ADD_NEW_CASE = i18n.translate(
     defaultMessage: 'Add new case',
   }
 );
+
+export const CREATE_CASE = i18n.translate(
+  'xpack.securitySolution.case.components.connectors.case.createCaseLabel',
+  {
+    defaultMessage: 'Create case',
+  }
+);
+
+export const CONNECTED_CASE = i18n.translate(
+  'xpack.securitySolution.case.components.connectors.case.connectedCaseLabel',
+  {
+    defaultMessage: 'Connected case',
+  }
+);

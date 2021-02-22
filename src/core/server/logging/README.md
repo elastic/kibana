@@ -12,6 +12,7 @@
 - [Configuration](#configuration)
 - [Usage](#usage)
 - [Logging config migration](#logging-config-migration)
+- [Logging configuration via CLI](#logging-configuration-via-CLI)
 - [Log record format changes](#log-record-format-changes)
 
 The way logging works in Kibana is inspired by `log4j 2` logging framework used by [Elasticsearch](https://www.elastic.co/guide/en/elasticsearch/reference/current/settings.html#logging).
@@ -526,6 +527,16 @@ and you can enable them by adjusting the minimum required [logging level](#log-l
 
 #### logging.filter
 TBD
+
+### Logging configuration via CLI
+
+| legacy logging | Kibana Platform logging|
+|-|-|
+|--verbose| --logging.root.level=debug --logging.root.appenders[0]=default --logging.root.appenders[1]=console|
+|--quiet| --logging.root.level=error --logging.root.appenders[0]=default --logging.root.appenders[1]=console|
+|--silent| --logging.root.level=off|
+
+*note that you have to pass the `default` appender until the legacy logging system is removed in v8.0
 
 ### Log record format changes
 

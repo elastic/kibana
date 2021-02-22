@@ -11,9 +11,8 @@ import {
   TRANSACTION_TYPE,
 } from '../../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../../common/processor_event';
-import { rangeFilter } from '../../../../common/utils/range_filter';
 import { AlertParams } from '../../../routes/alerts/chart_preview';
-import { getEnvironmentUiFilterES } from '../../helpers/convert_ui_filters/get_environment_ui_filter_es';
+import { environmentQuery, rangeQuery } from '../../../../common/utils/queries';
 import { getBucketSize } from '../../helpers/get_bucket_size';
 import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 import {
@@ -34,13 +33,13 @@ export async function getTransactionErrorRateChartPreview({
   const query = {
     bool: {
       filter: [
-        { range: rangeFilter(start, end) },
         { term: { [PROCESSOR_EVENT]: ProcessorEvent.transaction } },
         ...(serviceName ? [{ term: { [SERVICE_NAME]: serviceName } }] : []),
         ...(transactionType
           ? [{ term: { [TRANSACTION_TYPE]: transactionType } }]
           : []),
-        ...getEnvironmentUiFilterES(environment),
+        ...rangeQuery(start, end),
+        ...environmentQuery(environment),
       ],
     },
   };
