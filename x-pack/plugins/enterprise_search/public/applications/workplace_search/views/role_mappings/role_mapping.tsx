@@ -7,9 +7,7 @@
 
 import React, { useEffect } from 'react';
 
-import { useHistory, useParams } from 'react-router-dom';
-
-import { History } from 'history';
+import { useParams } from 'react-router-dom';
 
 import { useActions, useValues } from 'kea';
 
@@ -58,7 +56,6 @@ interface RoleMappingProps {
 }
 
 export const RoleMapping: React.FC<RoleMappingProps> = ({ isNew }) => {
-  const history = useHistory() as History;
   const { roleId } = useParams() as { roleId: string };
   const {
     initializeRoleMappings,
@@ -93,7 +90,7 @@ export const RoleMapping: React.FC<RoleMappingProps> = ({ isNew }) => {
 
   useEffect(() => {
     initializeRoleMappings();
-    initializeRoleMapping(history, roleId);
+    initializeRoleMapping(roleId);
     return resetState;
   }, [roleId]);
 

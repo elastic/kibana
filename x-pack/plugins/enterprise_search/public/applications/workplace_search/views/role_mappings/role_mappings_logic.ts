@@ -11,9 +11,9 @@ import http from 'shared/http';
 import { IFlashMessagesProps } from 'shared/types';
 import routes from 'workplace_search/routes';
 
+import { KibanaLogic } from '../../../shared/kibana';
 import { ANY_AUTH_PROVIDER } from '../../../shared/role_mapping/constants';
 import { ROLE_MAPPINGS_PATH } from '../../routes';
-import { IObject, RoleGroup, WSRoleMapping, Role } from '../../types';
 
 const DELETE_MESSAGE =
   'Are you sure you want to permanently delete this mapping? This action is not reversible and some users might lose access.';
@@ -32,7 +32,6 @@ interface RoleMappingServerDetails {
   elasticsearchRoles: string[];
   multipleAuthProvidersConfig: boolean;
   roleMapping: WSRoleMapping;
-  history: IObject;
 }
 
 interface RoleMappingsActions {
@@ -52,7 +51,7 @@ interface RoleMappingsActions {
   ): { groupId: string; selected: boolean };
   handleAuthProviderChange(value: string[]): { value: string[] };
   resetState(): void;
-  initializeRoleMapping(history: IObject, roleId?: string): { history: IObject; roleId?: string };
+  initializeRoleMapping(roleId?: string): { roleId?: string };
   handleSaveMapping(): void;
   handleDeleteMapping(): void;
   initializeRoleMappings(): void;
@@ -73,7 +72,6 @@ interface RoleMappingsValues {
   availableGroups: RoleGroup[];
   selectedGroups: Set<string>;
   includeInAllGroups: boolean;
-  routerHistory: IObject;
   selectedAuthProviders: string[];
 }
 
@@ -97,7 +95,7 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
     handleAttributeValueChange: (value: string) => ({ value }),
     handleAuthProviderChange: (value: string[]) => ({ value }),
     resetState: () => true,
-    initializeRoleMapping: (history: IObject, roleId?: string) => ({ history, roleId }),
+    initializeRoleMapping: (roleId?: string) => ({ roleId }),
     handleSaveMapping: () => true,
     handleDeleteMapping: () => true,
     initializeRoleMappings: () => true,
@@ -208,12 +206,6 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
         resetState: () => 'username',
       },
     ],
-    routerHistory: [
-      {},
-      {
-        setRoleMappingData: (_, { history }) => history,
-      },
-    ],
     availableAuthProviders: [
       [],
       {
@@ -252,22 +244,24 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
         .then(({ data }) => actions.setRoleMappingsData(data))
         .catch(({ response }) => actions.setFlashMessages({ error: response.data.errors }));
     },
-    initializeRoleMapping: ({ history, roleId }) => {
+    initializeRoleMapping: ({ roleId }) => {
+      const { navigateToUrl } = KibanaLogic.values;
       const url = roleId
         ? routes.fritoPieOrganizationRoleMappingPath(roleId)
         : routes.newFritoPieOrganizationRoleMappingPath();
 
       http(url)
-        .then(({ data }) => actions.setRoleMappingData({ ...data, history }))
+        .then(({ data }) => actions.setRoleMappingData(data))
         .catch(({ response }) => {
           if (response.status === 404) {
-            history.push(ROLE_MAPPINGS_PATH);
+            navigateToUrl(ROLE_MAPPINGS_PATH);
           }
           actions.setFlashMessages({ error: response.data.errors });
         });
     },
     handleDeleteMapping: () => {
-      const { roleMapping, routerHistory } = values;
+      const { navigateToUrl } = KibanaLogic.values;
+      const { roleMapping } = values;
       if (!roleMapping) {
         return;
       }
@@ -275,12 +269,13 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
         http
           .delete(routes.fritoPieOrganizationRoleMappingPath(roleMapping.id))
           .then(() => {
-            routerHistory.push(ROLE_MAPPINGS_PATH);
+            navigateToUrl(ROLE_MAPPINGS_PATH);
           })
           .catch(({ response }) => actions.setFlashMessages({ error: response.data.errors }));
       }
     },
     handleSaveMapping: () => {
+      const { navigateToUrl } = KibanaLogic.values;
       const {
         attributeName,
         attributeValue,
@@ -288,7 +283,6 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
         roleMapping,
         selectedGroups,
         includeInAllGroups,
-        routerHistory,
         selectedAuthProviders,
       } = values;
 
@@ -312,7 +306,7 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
 
       request
         .then(() => {
-          routerHistory.push(ROLE_MAPPINGS_PATH);
+          navigateToUrl(ROLE_MAPPINGS_PATH);
         })
         .catch(({ response }) => actions.setFlashMessages({ error: response.data.errors }));
     },
