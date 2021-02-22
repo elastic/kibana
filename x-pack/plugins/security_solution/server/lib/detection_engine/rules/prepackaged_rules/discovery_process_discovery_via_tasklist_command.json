@@ -6,9 +6,11 @@
   "false_positives": [
     "Administrators may use the tasklist command to display a list of currently running processes. By itself, it does not indicate malicious activity. After obtaining a foothold, it's possible adversaries may use discovery commands like tasklist to get information about running processes."
   ],
+  "from": "now-9m",
   "index": [
     "winlogbeat-*",
-    "logs-endpoint.events.*"
+    "logs-endpoint.events.*",
+    "logs-windows.*"
   ],
   "language": "kuery",
   "license": "Elastic License",
@@ -43,5 +45,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 5
+  "version": 6
 }

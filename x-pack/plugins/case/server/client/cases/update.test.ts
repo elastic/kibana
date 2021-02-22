@@ -71,6 +71,7 @@ describe('update', () => {
               "syncAlerts": true,
             },
             "status": "closed",
+            "subCaseIds": undefined,
             "subCases": undefined,
             "tags": Array [
               "defacement",
@@ -166,6 +167,7 @@ describe('update', () => {
               "syncAlerts": true,
             },
             "status": "open",
+            "subCaseIds": undefined,
             "subCases": undefined,
             "tags": Array [
               "defacement",
@@ -233,6 +235,7 @@ describe('update', () => {
               "syncAlerts": true,
             },
             "status": "in-progress",
+            "subCaseIds": undefined,
             "subCases": undefined,
             "tags": Array [
               "LOLBins",
@@ -300,6 +303,7 @@ describe('update', () => {
               "syncAlerts": true,
             },
             "status": "closed",
+            "subCaseIds": undefined,
             "subCases": undefined,
             "tags": Array [
               "defacement",
@@ -371,6 +375,7 @@ describe('update', () => {
               "syncAlerts": true,
             },
             "status": "open",
+            "subCaseIds": undefined,
             "subCases": undefined,
             "tags": Array [
               "LOLBins",

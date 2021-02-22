@@ -95,6 +95,7 @@ exports[`Storyshots components/WorkpadTemplates default 1`] = `
   />
   <div
     className="euiBasicTable canvasWorkpad__dropzoneTable canvasWorkpad__dropzoneTable--tags"
+    data-test-subj="canvasTemplatesTable"
   >
     <div>
       <div

@@ -62,57 +62,52 @@ export const getMetadataListRequestHandler = function (
   SecuritySolutionRequestHandlerContext
 > {
   return async (context, request, response) => {
-    try {
-      const agentService = endpointAppContext.service.getAgentService();
-      if (agentService === undefined) {
-        throw new Error('agentService not available');
-      }
-
-      const metadataRequestContext: MetadataRequestContext = {
-        endpointAppContextService: endpointAppContext.service,
-        logger,
-        requestHandlerContext: context,
-      };
-
-      const unenrolledAgentIds = await findAllUnenrolledAgentIds(
-        agentService,
-        context.core.savedObjects.client,
-        context.core.elasticsearch.client.asCurrentUser
-      );
-
-      const statusIDs = request?.body?.filters?.host_status?.length
-        ? await findAgentIDsByStatus(
-            agentService,
-            context.core.savedObjects.client,
-            context.core.elasticsearch.client.asCurrentUser,
-            request.body?.filters?.host_status
-          )
-        : undefined;
-
-      const queryStrategy = await endpointAppContext.service
-        ?.getMetadataService()
-        ?.queryStrategy(context.core.savedObjects.client, queryStrategyVersion);
-
-      const queryParams = await kibanaRequestToMetadataListESQuery(
-        request,
-        endpointAppContext,
-        queryStrategy!,
-        {
-          unenrolledAgentIds: unenrolledAgentIds.concat(IGNORED_ELASTIC_AGENT_IDS),
-          statusAgentIDs: statusIDs,
-        }
-      );
-
-      const hostListQueryResult = queryStrategy!.queryResponseToHostListResult(
-        await context.core.elasticsearch.legacy.client.callAsCurrentUser('search', queryParams)
-      );
-      return response.ok({
-        body: await mapToHostResultList(queryParams, hostListQueryResult, metadataRequestContext),
-      });
-    } catch (err) {
-      logger.warn(JSON.stringify(err, null, 2));
-      return response.internalError({ body: err });
+    const agentService = endpointAppContext.service.getAgentService();
+    if (agentService === undefined) {
+      throw new Error('agentService not available');
     }
+
+    const metadataRequestContext: MetadataRequestContext = {
+      endpointAppContextService: endpointAppContext.service,
+      logger,
+      requestHandlerContext: context,
+    };
+
+    const unenrolledAgentIds = await findAllUnenrolledAgentIds(
+      agentService,
+      context.core.savedObjects.client,
+      context.core.elasticsearch.client.asCurrentUser
+    );
+
+    const statusIDs = request?.body?.filters?.host_status?.length
+      ? await findAgentIDsByStatus(
+          agentService,
+          context.core.savedObjects.client,
+          context.core.elasticsearch.client.asCurrentUser,
+          request.body?.filters?.host_status
+        )
+      : undefined;
+
+    const queryStrategy = await endpointAppContext.service
+      ?.getMetadataService()
+      ?.queryStrategy(context.core.savedObjects.client, queryStrategyVersion);
+
+    const queryParams = await kibanaRequestToMetadataListESQuery(
+      request,
+      endpointAppContext,
+      queryStrategy!,
+      {
+        unenrolledAgentIds: unenrolledAgentIds.concat(IGNORED_ELASTIC_AGENT_IDS),
+        statusAgentIDs: statusIDs,
+      }
+    );
+
+    const hostListQueryResult = queryStrategy!.queryResponseToHostListResult(
+      await context.core.elasticsearch.legacy.client.callAsCurrentUser('search', queryParams)
+    );
+    return response.ok({
+      body: await mapToHostResultList(queryParams, hostListQueryResult, metadataRequestContext),
+    });
   };
 };
 
@@ -129,7 +124,7 @@ export const getMetadataRequestHandler = function (
   return async (context, request, response) => {
     const agentService = endpointAppContext.service.getAgentService();
     if (agentService === undefined) {
-      return response.internalError({ body: 'agentService not available' });
+      throw new Error('agentService not available');
     }
 
     const metadataRequestContext: MetadataRequestContext = {
@@ -156,7 +151,7 @@ export const getMetadataRequestHandler = function (
           body: { message: err.message },
         });
       }
-      return response.internalError({ body: err });
+      throw err;
     }
   };
 };
