@@ -16,6 +16,7 @@ import {
   AlertTypeRegistryContract,
   AlertTypeParams,
   AlertUpdates,
+  AlertFlyoutCloseReason,
 } from '../../../types';
 import { AlertForm, getAlertErrors, isValidAlert } from './alert_form';
 import { alertReducer, InitialAlert, InitialAlertReducer } from './alert_reducer';
@@ -34,7 +35,7 @@ export interface AlertAddProps<MetaData = Record<string, any>> {
   consumer: string;
   alertTypeRegistry: AlertTypeRegistryContract;
   actionTypeRegistry: ActionTypeRegistryContract;
-  onClose: () => void;
+  onClose: (reason: AlertFlyoutCloseReason) => void;
   alertTypeId?: string;
   canChangeTrigger?: boolean;
   initialValues?: Partial<Alert>;
@@ -119,7 +120,7 @@ const AlertAdd = ({
     ) {
       setIsConfirmAlertCloseModalOpen(true);
     } else {
-      onClose();
+      onClose(AlertFlyoutCloseReason.CANCELED);
     }
   };
 
@@ -127,7 +128,7 @@ const AlertAdd = ({
     const savedAlert = await onSaveAlert();
     setIsSaving(false);
     if (savedAlert) {
-      onClose();
+      onClose(AlertFlyoutCloseReason.SAVED);
       if (reloadAlerts) {
         reloadAlerts();
       }
@@ -245,7 +246,7 @@ const AlertAdd = ({
           <ConfirmAlertClose
             onConfirm={() => {
               setIsConfirmAlertCloseModalOpen(false);
-              onClose();
+              onClose(AlertFlyoutCloseReason.CANCELED);
             }}
             onCancel={() => {
               setIsConfirmAlertCloseModalOpen(false);

@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { kbnFetch } from '../kibana_services';
+import { getHttp } from '../kibana_services';
 
 export async function http(options) {
   if (!(options && options.url)) {
@@ -38,7 +38,7 @@ export async function http(options) {
 
 async function doFetch(url, payload) {
   try {
-    return await kbnFetch(url, payload);
+    return await getHttp().fetch(url, payload);
   } catch (err) {
     return {
       failures: [
