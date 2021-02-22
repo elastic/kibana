@@ -15,6 +15,7 @@ import { withApmSpan } from '../../utils/with_apm_span';
 
 export interface IndexPatternTitleAndFields {
   title: string;
+  timeFieldName: string;
   fields: FieldDescriptor[];
 }
 
@@ -52,6 +53,7 @@ export const getDynamicIndexPattern = ({
 
       const indexPattern: IndexPatternTitleAndFields = {
         fields,
+        timeFieldName: '@timestamp',
         title: indexPatternTitle,
       };
 
