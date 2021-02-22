@@ -9,7 +9,7 @@
 import * as kbnTestServer from '../../../test_helpers/kbn_server';
 import { Root } from '../../root';
 
-describe.each(Array.from(new Array(200), (_, index) => index))('default route provider #%d', () => {
+describe('default route provider', () => {
   let esServer: kbnTestServer.TestElasticsearchUtils;
   let root: Root;
 
