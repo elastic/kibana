@@ -8,21 +8,17 @@
 import React, { ReactElement, useState, Fragment, ReactNode } from 'react';
 import {
   EuiButtonEmpty,
-  EuiButtonIcon,
   EuiContextMenu,
   EuiLink,
   EuiPopover,
   EuiScreenReaderOnly,
   EuiSpacer,
-  EuiBasicTable,
   EuiTable,
   EuiTableBody,
   EuiTableHeader,
   EuiTableHeaderCell,
   EuiTablePagination,
   EuiTableRow,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiTableRowCell,
   EuiText,
   Pager,
@@ -91,12 +87,6 @@ const COLUMNS: Array<[PolicyProperty, { label: string; width: number }]> = [
   ],
 ];
 
-interface ShowPolicyDetailsStateMap {
-  [policyName: string]: {
-    isShowingDetails: boolean;
-  };
-}
-
 interface Props {
   policies: PolicyFromES[];
   totalNumber: number;
@@ -105,7 +95,6 @@ interface Props {
   handleDelete: () => void;
   history: RouteComponentProps['history'];
 }
-
 export const TableContent: React.FunctionComponent<Props> = ({
   policies,
   totalNumber,
@@ -121,10 +110,6 @@ export const TableContent: React.FunctionComponent<Props> = ({
   });
   const [pageSize, setPageSize] = useState<number>(10);
   const [currentPage, setCurrentPage] = useState<number>(0);
-  const [showingPolicyDetailsMap, setShowingPolicyDetailsMap] = useState<ShowPolicyDetailsStateMap>(
-    () =>
-      policies.reduce((acc, policy) => ({ ...acc, [policy.name]: { isShowingDetails: false } }), {})
-  );
 
   let sortedPolicies = sortTable(policies, sort.sortField, sort.isSortAscending);
   const pager = new Pager(totalNumber, pageSize, currentPage);
@@ -327,18 +312,6 @@ export const TableContent: React.FunctionComponent<Props> = ({
         >
           <EuiContextMenu initialPanelId={0} panels={buildActionPanelTree(policy)} />
         </EuiPopover>
-        <EuiButtonIcon
-          onClick={() =>
-            setShowingPolicyDetailsMap((previous) => ({
-              ...previous,
-              [policy.name]: {
-                isShowingDetails: !previous[policy.name].isShowingDetails,
-              },
-            }))
-          }
-          aria-label={showingPolicyDetailsMap[policy.name].isShowingDetails ? 'Collapse' : 'Expand'}
-          iconType={showingPolicyDetailsMap[policy.name].isShowingDetails ? 'arrowUp' : 'arrowDown'}
-        />
       </EuiTableRowCell>
     );
     return cells;
@@ -346,58 +319,7 @@ export const TableContent: React.FunctionComponent<Props> = ({
 
   const rows = sortedPolicies.map((policy) => {
     const { name } = policy;
-    const id = `${name}-row`;
-    const expandedRowId = `row_${id}_expansion`;
-    return (
-      <React.Fragment key={id}>
-        <EuiTableRow aria-owns={expandedRowId} isExpandable>
-          {renderRowCells(policy)}
-        </EuiTableRow>
-        {showingPolicyDetailsMap[policy.name].isShowingDetails ? (
-          <EuiTableRow id={expandedRowId} isExpandedRow>
-            <EuiTableRowCell colSpan={headers.length} textOnly={false}>
-              <EuiFlexGroup direction="column" gutterSize="none">
-                <EuiFlexItem>
-                  <EuiText size="m">
-                    <p>
-                      <strong>Rollups</strong>
-                    </p>
-                  </EuiText>
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <EuiBasicTable
-                    columns={[
-                      { field: 'name', name: 'Name' },
-                      {
-                        name: 'Actions',
-                        actions: [
-                          {
-                            name: 'Edit',
-                            description: 'Edit this rollup',
-                            render: () => <EuiButtonIcon iconType="pencil" onClick={() => {}} />,
-                          },
-                          {
-                            name: 'Delete',
-                            description: 'Delete this rollup',
-                            render: () => (
-                              <EuiButtonIcon iconType="trash" color="danger" onClick={() => {}} />
-                            ),
-                          },
-                        ],
-                      },
-                    ]}
-                    items={[{ name: 'Rollup alpha' }, { name: 'Rollup beta' }]}
-                  />
-                  <EuiButtonEmpty iconType="plusInACircle" onClick={() => {}}>
-                    Add rollup
-                  </EuiButtonEmpty>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiTableRowCell>
-          </EuiTableRow>
-        ) : undefined}
-      </React.Fragment>
-    );
+    return <EuiTableRow key={`${name}-row`}>{renderRowCells(policy)}</EuiTableRow>;
   });
 
   const renderAddPolicyToTemplateConfirmModal = (policy: PolicyFromES): ReactElement => {
