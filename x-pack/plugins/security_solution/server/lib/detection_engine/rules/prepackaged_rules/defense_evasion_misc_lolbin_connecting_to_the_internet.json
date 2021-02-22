@@ -6,7 +6,8 @@
   "from": "now-9m",
   "index": [
     "winlogbeat-*",
-    "logs-endpoint.events.*"
+    "logs-endpoint.events.*",
+    "logs-windows.*"
   ],
   "language": "eql",
   "license": "Elastic License",
@@ -45,15 +46,9 @@
         "name": "Execution",
         "reference": "https://attack.mitre.org/tactics/TA0002/"
       },
-      "technique": [
-        {
-          "id": "T1218",
-          "name": "Signed Binary Proxy Execution",
-          "reference": "https://attack.mitre.org/techniques/T1218/"
-        }
-      ]
+      "technique": []
     }
   ],
   "type": "eql",
-  "version": 5
+  "version": 7
 }

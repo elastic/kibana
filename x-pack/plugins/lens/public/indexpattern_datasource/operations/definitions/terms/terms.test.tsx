@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -17,9 +18,11 @@ import type { TermsIndexPatternColumn } from '.';
 import { termsOperation } from '../index';
 import { IndexPattern, IndexPatternLayer } from '../../../types';
 
+const uiSettingsMock = {} as IUiSettingsClient;
+
 const defaultProps = {
   storage: {} as IStorageWrapper,
-  uiSettings: {} as IUiSettingsClient,
+  uiSettings: uiSettingsMock,
   savedObjectsClient: {} as SavedObjectsClientContract,
   dateRange: { fromDate: 'now-1d', toDate: 'now' },
   data: dataPluginMock.createStartContract(),
@@ -66,7 +69,8 @@ describe('terms', () => {
         { ...termsColumn, params: { ...termsColumn.params, otherBucket: true } },
         'col1',
         {} as IndexPattern,
-        layer
+        layer,
+        uiSettingsMock
       );
       expect(esAggsFn).toEqual(
         expect.objectContaining({
@@ -89,7 +93,8 @@ describe('terms', () => {
         },
         'col1',
         {} as IndexPattern,
-        layer
+        layer,
+        uiSettingsMock
       );
       expect(esAggsFn).toEqual(
         expect.objectContaining({
@@ -129,7 +134,8 @@ describe('terms', () => {
               },
             },
           },
-        }
+        },
+        uiSettingsMock
       );
       expect(esAggsFn).toEqual(
         expect.objectContaining({

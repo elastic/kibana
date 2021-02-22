@@ -38,6 +38,7 @@ exports[`Storyshots components/WorkpadTemplates default 1`] = `
                 aria-hidden="true"
                 className="euiFormControlLayoutCustomIcon__icon"
                 data-euiicon-type="search"
+                size="m"
               />
             </span>
           </div>
@@ -94,6 +95,7 @@ exports[`Storyshots components/WorkpadTemplates default 1`] = `
   />
   <div
     className="euiBasicTable canvasWorkpad__dropzoneTable canvasWorkpad__dropzoneTable--tags"
+    data-test-subj="canvasTemplatesTable"
   >
     <div>
       <div
@@ -319,7 +321,7 @@ exports[`Storyshots components/WorkpadTemplates default 1`] = `
                 className="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <div
-                  className="euiHealth"
+                  className="euiHealth euiHealth--textSizeS"
                 >
                   <div
                     className="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
@@ -340,7 +342,7 @@ exports[`Storyshots components/WorkpadTemplates default 1`] = `
                   </div>
                 </div>
                 <div
-                  className="euiHealth"
+                  className="euiHealth euiHealth--textSizeS"
                 >
                   <div
                     className="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
@@ -441,7 +443,7 @@ exports[`Storyshots components/WorkpadTemplates default 1`] = `
                 className="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <div
-                  className="euiHealth"
+                  className="euiHealth euiHealth--textSizeS"
                 >
                   <div
                     className="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
@@ -462,7 +464,7 @@ exports[`Storyshots components/WorkpadTemplates default 1`] = `
                   </div>
                 </div>
                 <div
-                  className="euiHealth"
+                  className="euiHealth euiHealth--textSizeS"
                 >
                   <div
                     className="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"

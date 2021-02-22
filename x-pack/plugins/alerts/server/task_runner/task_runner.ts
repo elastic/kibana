@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { Dictionary, pickBy, mapValues, without, cloneDeep } from 'lodash';
 import type { Request } from '@hapi/hapi';
@@ -10,7 +12,7 @@ import { addSpaceIdToPath } from '../../../spaces/server';
 import { Logger, KibanaRequest } from '../../../../../src/core/server';
 import { TaskRunnerContext } from './task_runner_factory';
 import { ConcreteTaskInstance, throwUnrecoverableError } from '../../../task_manager/server';
-import { createExecutionHandler } from './create_execution_handler';
+import { createExecutionHandler, ExecutionHandler } from './create_execution_handler';
 import { AlertInstance, createAlertInstanceFactory } from '../alert_instance';
 import {
   validateAlertTypeParams,
@@ -44,6 +46,7 @@ import {
   AlertTypeState,
   AlertInstanceState,
   AlertInstanceContext,
+  WithoutReservedActionGroups,
 } from '../../common';
 import { NormalizedAlertType } from '../alert_type_registry';
 
@@ -64,16 +67,32 @@ export class TaskRunner<
   Params extends AlertTypeParams,
   State extends AlertTypeState,
   InstanceState extends AlertInstanceState,
-  InstanceContext extends AlertInstanceContext
+  InstanceContext extends AlertInstanceContext,
+  ActionGroupIds extends string,
+  RecoveryActionGroupId extends string
 > {
   private context: TaskRunnerContext;
   private logger: Logger;
   private taskInstance: AlertTaskInstance;
-  private alertType: NormalizedAlertType<Params, State, InstanceState, InstanceContext>;
+  private alertType: NormalizedAlertType<
+    Params,
+    State,
+    InstanceState,
+    InstanceContext,
+    ActionGroupIds,
+    RecoveryActionGroupId
+  >;
   private readonly alertTypeRegistry: AlertTypeRegistry;
 
   constructor(
-    alertType: NormalizedAlertType<Params, State, InstanceState, InstanceContext>,
+    alertType: NormalizedAlertType<
+      Params,
+      State,
+      InstanceState,
+      InstanceContext,
+      ActionGroupIds,
+      RecoveryActionGroupId
+    >,
     taskInstance: ConcreteTaskInstance,
     context: TaskRunnerContext
   ) {
@@ -141,10 +160,18 @@ export class TaskRunner<
     tags: string[] | undefined,
     spaceId: string,
     apiKey: RawAlert['apiKey'],
+    kibanaBaseUrl: string | undefined,
     actions: Alert<Params>['actions'],
     alertParams: Params
   ) {
-    return createExecutionHandler({
+    return createExecutionHandler<
+      Params,
+      State,
+      InstanceState,
+      InstanceContext,
+      ActionGroupIds,
+      RecoveryActionGroupId
+    >({
       alertId,
       alertName,
       tags,
@@ -154,6 +181,7 @@ export class TaskRunner<
       actions,
       spaceId,
       alertType: this.alertType,
+      kibanaBaseUrl,
       eventLogger: this.context.eventLogger,
       request: this.getFakeKibanaRequest(spaceId, apiKey),
       alertParams,
@@ -163,7 +191,7 @@ export class TaskRunner<
   async executeAlertInstance(
     alertInstanceId: string,
     alertInstance: AlertInstance<InstanceState, InstanceContext>,
-    executionHandler: ReturnType<typeof createExecutionHandler>
+    executionHandler: ExecutionHandler<ActionGroupIds | RecoveryActionGroupId>
   ) {
     const {
       actionGroup,
@@ -180,7 +208,7 @@ export class TaskRunner<
     services: Services,
     alert: SanitizedAlert<Params>,
     params: Params,
-    executionHandler: ReturnType<typeof createExecutionHandler>,
+    executionHandler: ExecutionHandler<ActionGroupIds | RecoveryActionGroupId>,
     spaceId: string,
     event: Event
   ): Promise<AlertTaskState> {
@@ -208,6 +236,7 @@ export class TaskRunner<
       (rawAlertInstance) => new AlertInstance<InstanceState, InstanceContext>(rawAlertInstance)
     );
     const originalAlertInstances = cloneDeep(alertInstances);
+    const originalAlertInstanceIds = new Set(Object.keys(originalAlertInstances));
 
     const eventLogger = this.context.eventLogger;
     const alertLabel = `${this.alertType.id}:${alertId}: '${name}'`;
@@ -218,9 +247,11 @@ export class TaskRunner<
         alertId,
         services: {
           ...services,
-          alertInstanceFactory: createAlertInstanceFactory<InstanceState, InstanceContext>(
-            alertInstances
-          ),
+          alertInstanceFactory: createAlertInstanceFactory<
+            InstanceState,
+            InstanceContext,
+            WithoutReservedActionGroups<ActionGroupIds, RecoveryActionGroupId>
+          >(alertInstances),
         },
         params,
         state: alertTypeState as State,
@@ -254,8 +285,8 @@ export class TaskRunner<
     );
     const recoveredAlertInstances = pickBy(
       alertInstances,
-      (alertInstance: AlertInstance<InstanceState, InstanceContext>) =>
-        !alertInstance.hasScheduledActions()
+      (alertInstance: AlertInstance<InstanceState, InstanceContext>, id) =>
+        !alertInstance.hasScheduledActions() && originalAlertInstanceIds.has(id)
     );
 
     logActiveAndRecoveredInstances({
@@ -278,7 +309,7 @@ export class TaskRunner<
     if (!muteAll) {
       const mutedInstanceIdsSet = new Set(mutedInstanceIds);
 
-      scheduleActionsForRecoveredInstances({
+      scheduleActionsForRecoveredInstances<InstanceState, InstanceContext, RecoveryActionGroupId>({
         recoveryActionGroup: this.alertType.recoveryActionGroup,
         recoveredAlertInstances,
         executionHandler,
@@ -359,6 +390,7 @@ export class TaskRunner<
       alert.tags,
       spaceId,
       apiKey,
+      this.context.kibanaBaseUrl,
       alert.actions,
       alert.params
     );
@@ -615,20 +647,30 @@ function generateNewAndRecoveredInstanceEvents<
 
 interface ScheduleActionsForRecoveredInstancesParams<
   InstanceState extends AlertInstanceState,
-  InstanceContext extends AlertInstanceContext
+  InstanceContext extends AlertInstanceContext,
+  RecoveryActionGroupId extends string
 > {
   logger: Logger;
-  recoveryActionGroup: ActionGroup;
-  recoveredAlertInstances: Dictionary<AlertInstance<InstanceState, InstanceContext>>;
-  executionHandler: ReturnType<typeof createExecutionHandler>;
+  recoveryActionGroup: ActionGroup<RecoveryActionGroupId>;
+  recoveredAlertInstances: Dictionary<
+    AlertInstance<InstanceState, InstanceContext, RecoveryActionGroupId>
+  >;
+  executionHandler: ExecutionHandler<RecoveryActionGroupId | RecoveryActionGroupId>;
   mutedInstanceIdsSet: Set<string>;
   alertLabel: string;
 }
 
 function scheduleActionsForRecoveredInstances<
   InstanceState extends AlertInstanceState,
-  InstanceContext extends AlertInstanceContext
->(params: ScheduleActionsForRecoveredInstancesParams<InstanceState, InstanceContext>) {
+  InstanceContext extends AlertInstanceContext,
+  RecoveryActionGroupId extends string
+>(
+  params: ScheduleActionsForRecoveredInstancesParams<
+    InstanceState,
+    InstanceContext,
+    RecoveryActionGroupId
+  >
+) {
   const {
     logger,
     recoveryActionGroup,
@@ -660,18 +702,31 @@ function scheduleActionsForRecoveredInstances<
 
 interface LogActiveAndRecoveredInstancesParams<
   InstanceState extends AlertInstanceState,
-  InstanceContext extends AlertInstanceContext
+  InstanceContext extends AlertInstanceContext,
+  ActionGroupIds extends string,
+  RecoveryActionGroupId extends string
 > {
   logger: Logger;
-  activeAlertInstances: Dictionary<AlertInstance<InstanceState, InstanceContext>>;
-  recoveredAlertInstances: Dictionary<AlertInstance<InstanceState, InstanceContext>>;
+  activeAlertInstances: Dictionary<AlertInstance<InstanceState, InstanceContext, ActionGroupIds>>;
+  recoveredAlertInstances: Dictionary<
+    AlertInstance<InstanceState, InstanceContext, RecoveryActionGroupId>
+  >;
   alertLabel: string;
 }
 
 function logActiveAndRecoveredInstances<
   InstanceState extends AlertInstanceState,
-  InstanceContext extends AlertInstanceContext
->(params: LogActiveAndRecoveredInstancesParams<InstanceState, InstanceContext>) {
+  InstanceContext extends AlertInstanceContext,
+  ActionGroupIds extends string,
+  RecoveryActionGroupId extends string
+>(
+  params: LogActiveAndRecoveredInstancesParams<
+    InstanceState,
+    InstanceContext,
+    ActionGroupIds,
+    RecoveryActionGroupId
+  >
+) {
   const { logger, activeAlertInstances, recoveredAlertInstances, alertLabel } = params;
   const activeInstanceIds = Object.keys(activeAlertInstances);
   const recoveredInstanceIds = Object.keys(recoveredAlertInstances);

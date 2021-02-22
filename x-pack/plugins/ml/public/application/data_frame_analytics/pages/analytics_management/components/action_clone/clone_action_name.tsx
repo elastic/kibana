@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiToolTip } from '@elastic/eui';
@@ -116,6 +117,34 @@ const getAnalyticsJobMeta = (config: CloneDataFrameAnalyticsConfig): AnalyticsJo
               optional: true,
               defaultValue: 'maximize_minimum_recall',
             },
+            early_stopping_enabled: {
+              optional: true,
+              ignore: true,
+            },
+            alpha: {
+              optional: true,
+              formKey: 'alpha',
+            },
+            downsample_factor: {
+              optional: true,
+              formKey: 'downsampleFactor',
+            },
+            eta_growth_rate_per_tree: {
+              optional: true,
+              formKey: 'etaGrowthRatePerTree',
+            },
+            max_optimization_rounds_per_hyperparameter: {
+              optional: true,
+              formKey: 'maxOptimizationRoundsPerHyperparameter',
+            },
+            soft_tree_depth_limit: {
+              optional: true,
+              formKey: 'softTreeDepthLimit',
+            },
+            soft_tree_depth_tolerance: {
+              optional: true,
+              formKey: 'softTreeDepthTolerance',
+            },
           },
         }
       : {}),
@@ -205,6 +234,34 @@ const getAnalyticsJobMeta = (config: CloneDataFrameAnalyticsConfig): AnalyticsJo
             },
             loss_function_parameter: {
               optional: true,
+            },
+            early_stopping_enabled: {
+              optional: true,
+              ignore: true,
+            },
+            alpha: {
+              optional: true,
+              formKey: 'alpha',
+            },
+            downsample_factor: {
+              optional: true,
+              formKey: 'downsampleFactor',
+            },
+            eta_growth_rate_per_tree: {
+              optional: true,
+              formKey: 'etaGrowthRatePerTree',
+            },
+            max_optimization_rounds_per_hyperparameter: {
+              optional: true,
+              formKey: 'maxOptimizationRoundsPerHyperparameter',
+            },
+            soft_tree_depth_limit: {
+              optional: true,
+              formKey: 'softTreeDepthLimit',
+            },
+            soft_tree_depth_tolerance: {
+              optional: true,
+              formKey: 'softTreeDepthTolerance',
             },
           },
         }
@@ -310,9 +367,6 @@ export type CloneDataFrameAnalyticsConfig = Omit<
  */
 export function extractCloningConfig({
   id,
-  version,
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  create_time,
   ...configToClone
 }: DeepReadonly<DataFrameAnalyticsConfig>): CloneDataFrameAnalyticsConfig {
   return (cloneDeep({

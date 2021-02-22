@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -64,6 +65,42 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         advancedPolicyButton = await pageObjects.policy.findAdvancedPolicyButton();
         await advancedPolicyButton.click();
         await testSubjects.missingOrFail('advancedPolicyPanel');
+      });
+    });
+
+    describe('on the Malware protections section', () => {
+      let policyInfo: PolicyTestResourceInfo;
+
+      beforeEach(async () => {
+        policyInfo = await policyTestResources.createPolicy();
+        await pageObjects.policy.navigateToPolicyDetails(policyInfo.packagePolicy.id);
+        await testSubjects.existOrFail('malwareProtectionsForm');
+      });
+
+      afterEach(async () => {
+        if (policyInfo) {
+          await policyInfo.cleanup();
+        }
+      });
+
+      it('should show the custom message text area when the Notify User checkbox is checked', async () => {
+        expect(await testSubjects.isChecked('malwareUserNotificationCheckbox')).to.be(true);
+        await testSubjects.existOrFail('malwareUserNotificationCustomMessage');
+      });
+      it('should not show the custom message text area when the Notify User checkbox is unchecked', async () => {
+        await pageObjects.endpointPageUtils.clickOnEuiCheckbox('malwareUserNotificationCheckbox');
+        expect(await testSubjects.isChecked('malwareUserNotificationCheckbox')).to.be(false);
+        await testSubjects.missingOrFail('malwareUserNotificationCustomMessage');
+      });
+      it('should preserve a custom notification message upon saving', async () => {
+        const customMessage = await testSubjects.find('malwareUserNotificationCustomMessage');
+        await customMessage.clearValue();
+        await customMessage.type('a custom malware notification message');
+        await pageObjects.policy.confirmAndSave();
+        await testSubjects.existOrFail('policyDetailsSuccessMessage');
+        expect(await testSubjects.getVisibleText('malwareUserNotificationCustomMessage')).to.equal(
+          'a custom malware notification message'
+        );
       });
     });
 
@@ -219,8 +256,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
                 events: { file: false, network: true, process: true },
                 logging: { file: 'info' },
                 malware: { mode: 'prevent' },
+                ransomware: { mode: 'prevent' },
                 popup: {
                   malware: {
+                    enabled: true,
+                    message: 'Elastic Security {action} {filename}',
+                  },
+                  ransomware: {
                     enabled: true,
                     message: 'Elastic Security {action} {filename}',
                   },
@@ -238,8 +280,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
                 },
                 logging: { file: 'info' },
                 malware: { mode: 'prevent' },
+                ransomware: { mode: 'prevent' },
                 popup: {
                   malware: {
+                    enabled: true,
+                    message: 'Elastic Security {action} {filename}',
+                  },
+                  ransomware: {
                     enabled: true,
                     message: 'Elastic Security {action} {filename}',
                   },
@@ -363,8 +410,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
                 events: { file: true, network: true, process: true },
                 logging: { file: 'info' },
                 malware: { mode: 'prevent' },
+                ransomware: { mode: 'prevent' },
                 popup: {
                   malware: {
+                    enabled: true,
+                    message: 'Elastic Security {action} {filename}',
+                  },
+                  ransomware: {
                     enabled: true,
                     message: 'Elastic Security {action} {filename}',
                   },
@@ -382,8 +434,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
                 },
                 logging: { file: 'info' },
                 malware: { mode: 'prevent' },
+                ransomware: { mode: 'prevent' },
                 popup: {
                   malware: {
+                    enabled: true,
+                    message: 'Elastic Security {action} {filename}',
+                  },
+                  ransomware: {
                     enabled: true,
                     message: 'Elastic Security {action} {filename}',
                   },
@@ -500,8 +557,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
                 events: { file: true, network: true, process: true },
                 logging: { file: 'info' },
                 malware: { mode: 'prevent' },
+                ransomware: { mode: 'prevent' },
                 popup: {
                   malware: {
+                    enabled: true,
+                    message: 'Elastic Security {action} {filename}',
+                  },
+                  ransomware: {
                     enabled: true,
                     message: 'Elastic Security {action} {filename}',
                   },
@@ -519,8 +581,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
                 },
                 logging: { file: 'info' },
                 malware: { mode: 'prevent' },
+                ransomware: { mode: 'prevent' },
                 popup: {
                   malware: {
+                    enabled: true,
+                    message: 'Elastic Security {action} {filename}',
+                  },
+                  ransomware: {
                     enabled: true,
                     message: 'Elastic Security {action} {filename}',
                   },

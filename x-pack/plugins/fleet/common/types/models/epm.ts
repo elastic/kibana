@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 // Follow pattern from https://github.com/elastic/kibana/pull/52447
@@ -46,6 +47,7 @@ export enum KibanaAssetType {
   search = 'search',
   indexPattern = 'index_pattern',
   map = 'map',
+  lens = 'lens',
 }
 
 /*
@@ -57,6 +59,7 @@ export enum KibanaSavedObjectType {
   search = 'search',
   indexPattern = 'index-pattern',
   map = 'map',
+  lens = 'lens',
 }
 
 export enum ElasticsearchAssetType {
@@ -187,8 +190,8 @@ export type AssetTypeToParts = KibanaAssetTypeToParts & ElasticsearchAssetTypeTo
 export type AssetsGroupedByServiceByType = Record<
   Extract<ServiceName, 'kibana'>,
   KibanaAssetTypeToParts
->;
-// & Record<Extract<ServiceName, 'elasticsearch'>, ElasticsearchAssetTypeToParts>;
+> &
+  Record<Extract<ServiceName, 'elasticsearch'>, ElasticsearchAssetTypeToParts>;
 
 export type KibanaAssetParts = AssetParts & {
   service: Extract<ServiceName, 'kibana'>;
@@ -218,6 +221,7 @@ export interface RegistryDataStream {
   path: string;
   ingest_pipeline: string;
   elasticsearch?: RegistryElasticsearch;
+  dataset_is_prefix?: boolean;
 }
 
 export interface RegistryElasticsearch {
@@ -269,7 +273,7 @@ export type PackageInfo =
 export interface Installation extends SavedObjectAttributes {
   installed_kibana: KibanaAssetReference[];
   installed_es: EsAssetReference[];
-  package_assets: PackageAssetReference[];
+  package_assets?: PackageAssetReference[];
   es_index_patterns: Record<string, string>;
   name: string;
   version: string;
@@ -277,6 +281,10 @@ export interface Installation extends SavedObjectAttributes {
   install_version: string;
   install_started_at: string;
   install_source: InstallSource;
+}
+
+export interface PackageUsageStats {
+  agent_policy_count: number;
 }
 
 export type Installable<T> = Installed<T> | NotInstalled<T>;
@@ -320,7 +328,6 @@ export interface IndexTemplate {
   template: {
     settings: any;
     mappings: any;
-    aliases: object;
   };
   data_stream: { hidden?: boolean };
   composed_of: string[];

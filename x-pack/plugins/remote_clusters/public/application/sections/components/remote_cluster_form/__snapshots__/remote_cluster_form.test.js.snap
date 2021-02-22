@@ -936,6 +936,7 @@ exports[`RemoteClusterForm proxy mode renders correct connection settings when u
                                   />
                                 </EuiValidatableControl>
                                 <EuiFormControlLayoutIcons
+                                  compressed={false}
                                   isLoading={false}
                                 />
                               </div>

@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import Boom from '@hapi/boom';
 import * as t from 'io-ts';
 import { pick } from 'lodash';
+import { isActiveGoldLicense } from '../../../common/license_check';
 import { INVALID_LICENSE } from '../../../common/custom_link';
-import { ILicense } from '../../../../licensing/common/types';
 import { FILTER_OPTIONS } from '../../../common/custom_link/custom_link_filter_options';
 import { notifyFeatureUsage } from '../../feature';
 import { setupRequest } from '../../lib/helpers/setup_request';
@@ -21,10 +22,6 @@ import { deleteCustomLink } from '../../lib/settings/custom_link/delete_custom_l
 import { getTransaction } from '../../lib/settings/custom_link/get_transaction';
 import { listCustomLinks } from '../../lib/settings/custom_link/list_custom_links';
 import { createRoute } from '../create_route';
-
-function isActiveGoldLicense(license: ILicense) {
-  return license.isActive && license.hasAtLeast('gold');
-}
 
 export const customLinkTransactionRoute = createRoute({
   endpoint: 'GET /api/apm/settings/custom_links/transaction',

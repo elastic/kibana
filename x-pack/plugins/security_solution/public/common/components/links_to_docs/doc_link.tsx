@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FC, memo } from 'react';
@@ -22,7 +23,11 @@ const DocLink: FC<DocLinkProps> = ({ guidePath = 'security', docPath, linkText }
   const url = `${ELASTIC_WEBSITE_URL}guide/en/${guidePath}/${DOC_LINK_VERSION}/${docPath}`;
   const ariaLabel = `${linkText} - ${COMMON_ARIA_LABEL_ENDING}`;
 
-  return <ExternalLink url={url} text={linkText} ariaLabel={ariaLabel} />;
+  return (
+    <ExternalLink url={url} ariaLabel={ariaLabel}>
+      {linkText}
+    </ExternalLink>
+  );
 };
 
 /**

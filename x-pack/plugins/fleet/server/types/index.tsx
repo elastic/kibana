@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { LegacyScopedClusterClient } from 'src/core/server';
 
 export {
@@ -77,6 +79,11 @@ export {
   PostAgentCheckinRequest,
   DataType,
   dataTypes,
+  // Fleet Server types
+  FleetServerEnrollmentAPIKey,
+  FleetServerAgent,
+  FleetServerAgentAction,
+  FleetServerPolicy,
 } from '../../common';
 
 export type CallESAsCurrentUser = LegacyScopedClusterClient['callAsCurrentUser'];

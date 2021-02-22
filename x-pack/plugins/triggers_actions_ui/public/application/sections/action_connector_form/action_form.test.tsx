@@ -1,10 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React, { Fragment, lazy } from 'react';
 import { mountWithIntl, nextTick } from '@kbn/test/jest';
+import { EuiAccordion } from '@elastic/eui';
 import { coreMock } from '../../../../../../../src/core/public/mocks';
 import { act } from 'react-dom/test-utils';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
@@ -521,7 +524,7 @@ describe('action_form', () => {
     });
 
     it('recognizes actions with broken connectors', async () => {
-      await setup([
+      const wrapper = await setup([
         {
           group: 'default',
           id: 'test',
@@ -538,8 +541,20 @@ describe('action_form', () => {
             message: 'broken',
           },
         },
+        {
+          group: 'not the default',
+          id: 'connector-doesnt-exist',
+          actionTypeId: actionType.id,
+          params: {
+            message: 'broken',
+          },
+        },
       ]);
       expect(setHasActionsWithBrokenConnector).toHaveBeenLastCalledWith(true);
+      expect(wrapper.find(EuiAccordion)).toHaveLength(3);
+      expect(
+        wrapper.find(`EuiIconTip[data-test-subj="alertActionAccordionErrorTooltip"]`)
+      ).toHaveLength(2);
     });
   });
 });

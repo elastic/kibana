@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -41,23 +42,19 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
         req: KibanaRequest<any, any, any, any>,
         res: KibanaResponseFactory
       ): Promise<IKibanaResponse<any>> {
-        try {
-          let namespace: string | undefined;
-          if (spaces && req.body.spaceId) {
-            namespace = spaces.spacesService.spaceIdToNamespace(req.body.spaceId);
-          }
-          const [, { encryptedSavedObjects }] = await core.getStartServices();
-          await encryptedSavedObjects
-            .getClient({
-              includedHiddenTypes: ['alert', 'action'],
-            })
-            .getDecryptedAsInternalUser(req.body.type, req.body.id, {
-              namespace,
-            });
-          return res.ok({ body: { success: true } });
-        } catch (err) {
-          return res.internalError({ body: err });
+        let namespace: string | undefined;
+        if (spaces && req.body.spaceId) {
+          namespace = spaces.spacesService.spaceIdToNamespace(req.body.spaceId);
         }
+        const [, { encryptedSavedObjects }] = await core.getStartServices();
+        await encryptedSavedObjects
+          .getClient({
+            includedHiddenTypes: ['alert', 'action'],
+          })
+          .getDecryptedAsInternalUser(req.body.type, req.body.id, {
+            namespace,
+          });
+        return res.ok({ body: { success: true } });
       }
     );
   }

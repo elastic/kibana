@@ -1,12 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { History } from 'history';
 import { parse, stringify } from 'query-string';
-import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
 import { url } from '../../../../../../../src/plugins/kibana_utils/public';
 import { LocalUIFilterName } from '../../../../common/ui_filter';
 
@@ -85,7 +85,9 @@ export type APMQueryParams = {
   refreshInterval?: string | number;
   searchTerm?: string;
   percentile?: 50 | 75 | 90 | 95 | 99;
-  latencyAggregationType?: LatencyAggregationType;
+  latencyAggregationType?: string;
+  comparisonEnabled?: boolean;
+  comparisonType?: string;
 } & { [key in LocalUIFilterName]?: string };
 
 // forces every value of T[K] to be type: string

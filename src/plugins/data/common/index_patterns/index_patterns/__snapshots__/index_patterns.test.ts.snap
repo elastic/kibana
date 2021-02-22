@@ -10,6 +10,7 @@ Object {
   "fields": Object {},
   "id": "id",
   "intervalName": undefined,
+  "runtimeFieldMap": Object {},
   "sourceFilters": Array [
     Object {
       "value": "item1",

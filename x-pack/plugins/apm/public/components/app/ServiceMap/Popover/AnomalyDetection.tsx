@@ -1,12 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import styled from 'styled-components';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -14,6 +14,7 @@ import {
   EuiIconTip,
   EuiHealth,
 } from '@elastic/eui';
+import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
 import {
   getServiceHealthStatus,
   getServiceHealthStatusColor,
@@ -29,28 +30,28 @@ import {
   ServiceAnomalyStats,
 } from '../../../../../common/anomaly_detection';
 
-const HealthStatusTitle = styled(EuiTitle)`
+const HealthStatusTitle = euiStyled(EuiTitle)`
   display: inline;
   text-transform: uppercase;
 `;
 
-const VerticallyCentered = styled.div`
+const VerticallyCentered = euiStyled.div`
   display: flex;
   align-items: center;
 `;
 
-const SubduedText = styled.span`
+const SubduedText = euiStyled.span`
   color: ${({ theme }) => theme.eui.euiTextSubduedColor};
 `;
 
-const EnableText = styled.section`
+const EnableText = euiStyled.section`
   color: ${({ theme }) => theme.eui.euiTextSubduedColor};
   line-height: 1.4;
   font-size: ${fontSize};
   width: ${px(popoverWidth)};
 `;
 
-export const ContentLine = styled.section`
+export const ContentLine = euiStyled.section`
   line-height: 2;
 `;
 

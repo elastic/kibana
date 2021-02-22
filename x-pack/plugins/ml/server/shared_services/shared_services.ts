@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { IClusterClient, IScopedClusterClient, SavedObjectsClientContract } from 'kibana/server';
@@ -25,12 +26,17 @@ import { hasMlCapabilitiesProvider, HasMlCapabilities } from '../lib/capabilitie
 import { MLClusterClientUninitialized } from './errors';
 import { MlClient, getMlClient } from '../lib/ml_client';
 import { jobSavedObjectServiceFactory, JobSavedObjectService } from '../saved_objects';
+import {
+  getAlertingServiceProvider,
+  MlAlertingServiceProvider,
+} from './providers/alerting_service';
 
 export type SharedServices = JobServiceProvider &
   AnomalyDetectorsProvider &
   MlSystemProvider &
   ModulesProvider &
-  ResultsServiceProvider;
+  ResultsServiceProvider &
+  MlAlertingServiceProvider;
 
 interface Guards {
   isMinimumLicense(): Guards;
@@ -117,6 +123,7 @@ export function createSharedServices(
     ...getModulesProvider(getGuards),
     ...getResultsServiceProvider(getGuards),
     ...getMlSystemProvider(getGuards, mlLicense, getSpaces, cloud, resolveMlCapabilities),
+    ...getAlertingServiceProvider(getGuards),
   };
 }
 

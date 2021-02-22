@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -499,7 +500,6 @@ export function reducer(state: State, action: Action): State {
       }
 
       if (action.payload.jobId !== undefined) {
-        newFormState.jobIdExists = state.jobIds.some((id) => newFormState.jobId === id);
         newFormState.jobIdEmpty = newFormState.jobId === '';
         newFormState.jobIdValid = isJobIdValid(newFormState.jobId);
         newFormState.jobIdInvalidMaxLength = !!maxLengthValidator(JOB_ID_MAX_LENGTH)(
@@ -542,12 +542,6 @@ export function reducer(state: State, action: Action): State {
     case ACTION.SET_JOB_CONFIG:
       return validateAdvancedEditor({ ...state, jobConfig: action.payload });
 
-    case ACTION.SET_JOB_IDS: {
-      const newState = { ...state, jobIds: action.jobIds };
-      newState.form.jobIdExists = newState.jobIds.some((id) => newState.form.jobId === id);
-      return newState;
-    }
-
     case ACTION.SWITCH_TO_ADVANCED_EDITOR:
       const jobConfig = getJobConfigFromFormState(state.form);
       const shouldDisableSwitchToForm = isAdvancedConfig(jobConfig);
@@ -562,7 +556,7 @@ export function reducer(state: State, action: Action): State {
       });
 
     case ACTION.SWITCH_TO_FORM:
-      const { jobConfig: config, jobIds } = state;
+      const { jobConfig: config } = state;
       const { jobId } = state.form;
       // @ts-ignore
       const formState = getFormStateFromJobConfig(config, false);
@@ -571,7 +565,6 @@ export function reducer(state: State, action: Action): State {
         formState.jobId = jobId;
       }
 
-      formState.jobIdExists = jobIds.some((id) => formState.jobId === id);
       formState.jobIdEmpty = jobId === '';
       formState.jobIdValid = isJobIdValid(jobId);
       formState.jobIdInvalidMaxLength = !!maxLengthValidator(JOB_ID_MAX_LENGTH)(jobId);

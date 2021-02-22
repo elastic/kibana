@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { removeOrphanedSourcesAndLayers } from './utils';
@@ -184,5 +185,17 @@ describe('removeOrphanedSourcesAndLayers', () => {
 
     removeOrphanedSourcesAndLayers(mockMbMap, [], spatialFilterLayer);
     expect(mockMbMap.getStyle()).toEqual(styleWithSpatialFilters);
+  });
+
+  test('should not remove mapbox gl draw layers and sources', async () => {
+    const fooLayer = makeMultiSourceMockLayer('foo');
+    const layerList = [fooLayer];
+
+    const currentStyle = getMockStyle(layerList);
+    currentStyle.layers.push({ id: 'gl-draw-points' });
+    const mockMbMap = new MockMbMap(currentStyle);
+
+    removeOrphanedSourcesAndLayers(mockMbMap, layerList, spatialFilterLayer);
+    expect(mockMbMap.getStyle()).toEqual(currentStyle);
   });
 });

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { Component } from 'react';
@@ -237,7 +238,7 @@ export class UsersGridPage extends Component<Props, State> {
             <EuiPageContentHeaderSection>
               <EuiButton
                 data-test-subj="createUserButton"
-                {...reactRouterNavigate(this.props.history, `/edit/`)}
+                {...reactRouterNavigate(this.props.history, `/create`)}
               >
                 <FormattedMessage
                   id="xpack.security.management.users.createNewUserButtonLabel"

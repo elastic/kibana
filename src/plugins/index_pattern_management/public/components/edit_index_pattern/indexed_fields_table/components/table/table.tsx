@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React, { PureComponent } from 'react';
@@ -151,6 +140,18 @@ const editDescription = i18n.translate(
   { defaultMessage: 'Edit' }
 );
 
+const deleteLabel = i18n.translate(
+  'indexPatternManagement.editIndexPattern.fields.table.deleteLabel',
+  {
+    defaultMessage: 'Delete',
+  }
+);
+
+const deleteDescription = i18n.translate(
+  'indexPatternManagement.editIndexPattern.fields.table.deleteDescription',
+  { defaultMessage: 'Delete' }
+);
+
 const labelDescription = i18n.translate(
   'indexPatternManagement.editIndexPattern.fields.table.customLabelTooltip',
   { defaultMessage: 'A custom label for the field.' }
@@ -160,6 +161,7 @@ interface IndexedFieldProps {
   indexPattern: IIndexPattern;
   items: IndexedFieldItem[];
   editField: (field: IndexedFieldItem) => void;
+  deleteField: (fieldName: string) => void;
 }
 
 export class Table extends PureComponent<IndexedFieldProps> {
@@ -232,7 +234,7 @@ export class Table extends PureComponent<IndexedFieldProps> {
   }
 
   render() {
-    const { items, editField } = this.props;
+    const { items, editField, deleteField } = this.props;
 
     const pagination = {
       initialPageSize: 10,
@@ -256,8 +258,8 @@ export class Table extends PureComponent<IndexedFieldProps> {
         name: typeHeader,
         dataType: 'string',
         sortable: true,
-        render: (value: string) => {
-          return this.renderFieldType(value, value === 'conflict');
+        render: (value: string, field: IndexedFieldItem) => {
+          return this.renderFieldType(value, field.kbnType === 'conflict');
         },
         'data-test-subj': 'indexedFieldType',
       },
@@ -305,10 +307,30 @@ export class Table extends PureComponent<IndexedFieldProps> {
         ],
         width: '40px',
       },
+      {
+        name: '',
+        actions: [
+          {
+            name: deleteLabel,
+            description: deleteDescription,
+            icon: 'trash',
+            onClick: (field) => deleteField(field.name),
+            type: 'icon',
+            'data-test-subj': 'deleteField',
+            available: (field) => !field.isMapped,
+          },
+        ],
+        width: '40px',
+      },
     ];
 
     return (
-      <EuiInMemoryTable items={items} columns={columns} pagination={pagination} sorting={true} />
+      <EuiInMemoryTable
+        items={items}
+        columns={columns}
+        pagination={pagination}
+        sorting={{ sort: { field: 'displayName', direction: 'asc' } }}
+      />
     );
   }
 }

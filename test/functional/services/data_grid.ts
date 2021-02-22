@@ -1,22 +1,12 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
+import { chunk } from 'lodash';
 import { FtrProviderContext } from '../ftr_provider_context';
 import { WebElementWrapper } from './lib/web_element_wrapper';
 
@@ -42,14 +32,11 @@ export function DataGridProvider({ getService, getPageObjects }: FtrProviderCont
       const columns = $('.euiDataGridHeaderCell__content')
         .toArray()
         .map((cell) => $(cell).text());
-      const rows = $.findTestSubjects('dataGridRow')
+      const cells = $.findTestSubjects('dataGridRowCell')
         .toArray()
-        .map((row) =>
-          $(row)
-            .find('.euiDataGridRowCell__truncate')
-            .toArray()
-            .map((cell) => $(cell).text())
-        );
+        .map((cell) => $(cell).text());
+
+      const rows = chunk(cells, columns.length);
 
       return {
         columns,
@@ -67,20 +54,18 @@ export function DataGridProvider({ getService, getPageObjects }: FtrProviderCont
       cellDataTestSubj: string
     ): Promise<string[][]> {
       const $ = await element.parseDomContent();
-      return $('[data-test-subj="dataGridRow"]')
+      const columnNumber = $('.euiDataGridHeaderCell__content').length;
+      const cells = $.findTestSubjects('dataGridRowCell')
         .toArray()
-        .map((row) =>
-          $(row)
-            .findTestSubjects('dataGridRowCell')
-            .toArray()
-            .map((cell) =>
-              $(cell)
-                .findTestSubject(cellDataTestSubj)
-                .text()
-                .replace(/&nbsp;/g, '')
-                .trim()
-            )
+        .map((cell) =>
+          $(cell)
+            .findTestSubject(cellDataTestSubj)
+            .text()
+            .replace(/&nbsp;/g, '')
+            .trim()
         );
+
+      return chunk(cells, columnNumber);
     }
 
     /**
@@ -101,62 +86,72 @@ export function DataGridProvider({ getService, getPageObjects }: FtrProviderCont
      * @param columnIndex column index starting from 1 (1 means 1st column)
      */
     public async getCellElement(rowIndex: number, columnIndex: number) {
+      const table = await find.byCssSelector('.euiDataGrid');
+      const $ = await table.parseDomContent();
+      const columnNumber = $('.euiDataGridHeaderCell__content').length;
       return await find.byCssSelector(
-        `[data-test-subj="dataGridWrapper"] [data-test-subj="dataGridRow"]:nth-of-type(${
-          rowIndex + 1
-        })
-        [data-test-subj="dataGridRowCell"]:nth-of-type(${columnIndex})`
+        `[data-test-subj="dataGridWrapper"] [data-test-subj="dataGridRowCell"]:nth-of-type(${
+          columnNumber * (rowIndex - 1) + columnIndex + 1
+        })`
       );
     }
     public async getFields() {
-      const rows = await find.allByCssSelector('.euiDataGridRow');
+      const cells = await find.allByCssSelector('.euiDataGridRowCell');
 
-      const result = [];
-      for (const row of rows) {
-        const cells = await row.findAllByClassName('euiDataGridRowCell__truncate');
-        const cellsText = [];
-        let cellIdx = 0;
-        for (const cell of cells) {
-          if (cellIdx > 0) {
-            cellsText.push(await cell.getVisibleText());
-          }
-          cellIdx++;
+      const rows: string[][] = [];
+      let rowIdx = -1;
+      for (const cell of cells) {
+        if (await cell.elementHasClass('euiDataGridRowCell--firstColumn')) {
+          // first column contains expand icon
+          rowIdx++;
+          rows[rowIdx] = [];
         }
-        result.push(cellsText);
+        if (!(await cell.elementHasClass('euiDataGridRowCell--controlColumn'))) {
+          rows[rowIdx].push(await cell.getVisibleText());
+        }
       }
-      return result;
+      return rows;
     }
 
     public async getTable(selector: string = 'docTable') {
       return await testSubjects.find(selector);
     }
 
-    public async getBodyRows(): Promise<WebElementWrapper[]> {
-      const table = await this.getTable();
-      return await table.findAllByTestSubject('dataGridRow');
+    public async getBodyRows(): Promise<WebElementWrapper[][]> {
+      return this.getDocTableRows();
     }
 
+    /**
+     * Returns an array of rows (which are array of cells)
+     */
     public async getDocTableRows() {
       const table = await this.getTable();
-      return await table.findAllByTestSubject('dataGridRow');
+      const cells = await table.findAllByCssSelector('.euiDataGridRowCell');
+
+      const rows: WebElementWrapper[][] = [];
+      let rowIdx = -1;
+      for (const cell of cells) {
+        if (await cell.elementHasClass('euiDataGridRowCell--firstColumn')) {
+          rowIdx++;
+          rows[rowIdx] = [];
+        }
+        rows[rowIdx].push(cell);
+      }
+      return rows;
     }
 
-    public async getAnchorRow(): Promise<WebElementWrapper> {
-      const table = await this.getTable();
-      return await table.findByTestSubject('~docTableAnchorRow');
-    }
-
-    public async getRow(options: SelectOptions): Promise<WebElementWrapper> {
-      return options.isAnchorRow
-        ? await this.getAnchorRow()
-        : (await this.getBodyRows())[options.rowIndex];
+    /**
+     * Returns an array of cells for that row
+     */
+    public async getRow(options: SelectOptions): Promise<WebElementWrapper[]> {
+      return (await this.getBodyRows())[options.rowIndex];
     }
 
     public async clickRowToggle(
       options: SelectOptions = { isAnchorRow: false, rowIndex: 0 }
     ): Promise<void> {
       const row = await this.getRow(options);
-      const toggle = await row.findByTestSubject('~docTableExpandToggleColumn');
+      const toggle = await row[0];
       await toggle.click();
     }
 

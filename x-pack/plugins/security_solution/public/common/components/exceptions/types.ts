@@ -1,9 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { ReactNode } from 'react';
+import { Ecs } from '../../../../common/ecs';
+import { CodeSignature } from '../../../../common/ecs/file';
 import { IFieldType } from '../../../../../../../src/plugins/data/common';
 import { OperatorOption } from '../autocomplete/types';
 import {
@@ -102,3 +106,32 @@ export type CreateExceptionListItemBuilderSchema = Omit<
 export type ExceptionsBuilderExceptionItem =
   | ExceptionListItemBuilderSchema
   | CreateExceptionListItemBuilderSchema;
+
+export interface FlattenedCodeSignature {
+  subject_name: string;
+  trusted: string;
+}
+
+export type Flattened<T> = {
+  [K in keyof T]: T[K] extends infer AliasType
+    ? AliasType extends CodeSignature[]
+      ? FlattenedCodeSignature[]
+      : AliasType extends Array<infer rawType>
+      ? rawType
+      : AliasType extends object
+      ? Flattened<AliasType>
+      : AliasType
+    : never;
+};
+
+export type AlertData = {
+  '@timestamp': string;
+} & Flattened<Ecs>;
+
+export interface EcsHit {
+  _id: string;
+  _index: string;
+  _source: {
+    '@timestamp': string;
+  } & Omit<Flattened<Ecs>, '_id' | '_index'>;
+}

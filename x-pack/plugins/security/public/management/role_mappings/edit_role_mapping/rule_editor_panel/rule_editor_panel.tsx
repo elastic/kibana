@@ -1,14 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { Component, Fragment } from 'react';
 import {
   EuiSpacer,
   EuiConfirmModal,
-  EuiOverlayMask,
   EuiCallOut,
   EuiErrorBoundary,
   EuiIcon,
@@ -22,12 +22,12 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
+import type { DocLinksStart } from 'src/core/public';
 import { RoleMapping } from '../../../../../common/model';
 import { VisualRuleEditor } from './visual_rule_editor';
 import { JSONRuleEditor } from './json_rule_editor';
 import { VISUAL_MAX_RULE_DEPTH } from '../services/role_mapping_constants';
 import { Rule, generateRulesFromRaw } from '../../model';
-import { DocumentationLinksService } from '../../documentation_links';
 import { validateRoleMappingRules } from '../services/role_mapping_validation';
 
 interface Props {
@@ -35,7 +35,7 @@ interface Props {
   onChange: (rawRules: RoleMapping['rules']) => void;
   onValidityChange: (isValid: boolean) => void;
   validateForm: boolean;
-  docLinks: DocumentationLinksService;
+  docLinks: DocLinksStart;
 }
 
 interface State {
@@ -92,7 +92,7 @@ export class RuleEditorPanel extends Component<Props, State> {
                   values={{
                     learnMoreLink: (
                       <EuiLink
-                        href={this.props.docLinks.getRoleMappingFieldRulesDocUrl()}
+                        href={this.props.docLinks.links.security.mappingRolesFieldRules}
                         target="_blank"
                         external={true}
                       >
@@ -215,7 +215,6 @@ export class RuleEditorPanel extends Component<Props, State> {
             rules={this.state.rules}
             onChange={this.onRuleChange}
             onValidityChange={this.onValidityChange}
-            docLinks={this.props.docLinks}
           />
         );
       default:
@@ -228,40 +227,38 @@ export class RuleEditorPanel extends Component<Props, State> {
       return null;
     }
     return (
-      <EuiOverlayMask>
-        <EuiConfirmModal
-          title={
-            <FormattedMessage
-              id="xpack.security.management.editRoleMapping.confirmModeChangePromptTitle"
-              defaultMessage="Switch with invalid rules?"
-            />
-          }
-          onCancel={() => this.setState({ showConfirmModeChange: false })}
-          onConfirm={() => {
-            this.setState({ mode: 'visual', showConfirmModeChange: false });
-            this.onValidityChange(true);
-          }}
-          cancelButtonText={
-            <FormattedMessage
-              id="xpack.security.management.editRoleMapping.confirmModeChangePromptCancelButton"
-              defaultMessage="Cancel"
-            />
-          }
-          confirmButtonText={
-            <FormattedMessage
-              id="xpack.security.management.editRoleMapping.confirmModeChangePromptConfirmButton"
-              defaultMessage="Switch anyway"
-            />
-          }
-        >
-          <p>
-            <FormattedMessage
-              id="xpack.security.management.editRoleMapping.confirmModeChangePromptBody"
-              defaultMessage="The rules defined are not valid, and cannot be translated to the visual editor. You may lose some or all of your changes during the conversion. Do you wish to continue?"
-            />
-          </p>
-        </EuiConfirmModal>
-      </EuiOverlayMask>
+      <EuiConfirmModal
+        title={
+          <FormattedMessage
+            id="xpack.security.management.editRoleMapping.confirmModeChangePromptTitle"
+            defaultMessage="Switch with invalid rules?"
+          />
+        }
+        onCancel={() => this.setState({ showConfirmModeChange: false })}
+        onConfirm={() => {
+          this.setState({ mode: 'visual', showConfirmModeChange: false });
+          this.onValidityChange(true);
+        }}
+        cancelButtonText={
+          <FormattedMessage
+            id="xpack.security.management.editRoleMapping.confirmModeChangePromptCancelButton"
+            defaultMessage="Cancel"
+          />
+        }
+        confirmButtonText={
+          <FormattedMessage
+            id="xpack.security.management.editRoleMapping.confirmModeChangePromptConfirmButton"
+            defaultMessage="Switch anyway"
+          />
+        }
+      >
+        <p>
+          <FormattedMessage
+            id="xpack.security.management.editRoleMapping.confirmModeChangePromptBody"
+            defaultMessage="The rules defined are not valid, and cannot be translated to the visual editor. You may lose some or all of your changes during the conversion. Do you wish to continue?"
+          />
+        </p>
+      </EuiConfirmModal>
     );
   };
 

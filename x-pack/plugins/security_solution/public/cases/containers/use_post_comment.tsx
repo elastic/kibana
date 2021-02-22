@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { useReducer, useCallback } from 'react';
@@ -41,8 +42,14 @@ const dataFetchReducer = (state: NewCommentState, action: Action): NewCommentSta
   }
 };
 
+interface PostComment {
+  caseId: string;
+  data: CommentRequest;
+  updateCase?: (newCase: Case) => void;
+  subCaseId?: string;
+}
 export interface UsePostComment extends NewCommentState {
-  postComment: (caseId: string, data: CommentRequest, updateCase?: (newCase: Case) => void) => void;
+  postComment: (args: PostComment) => void;
 }
 
 export const usePostComment = (): UsePostComment => {
@@ -53,13 +60,13 @@ export const usePostComment = (): UsePostComment => {
   const [, dispatchToaster] = useStateToaster();
 
   const postMyComment = useCallback(
-    async (caseId: string, data: CommentRequest, updateCase?: (newCase: Case) => void) => {
+    async ({ caseId, data, updateCase, subCaseId }: PostComment) => {
       let cancel = false;
       const abortCtrl = new AbortController();
 
       try {
         dispatch({ type: 'FETCH_INIT' });
-        const response = await postComment(data, caseId, abortCtrl.signal);
+        const response = await postComment(data, caseId, abortCtrl.signal, subCaseId);
         if (!cancel) {
           dispatch({ type: 'FETCH_SUCCESS' });
           if (updateCase) {

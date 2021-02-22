@@ -4,12 +4,12 @@
 
 ## RequestHandler type
 
-A function executed when route path matched requested resource path. Request handler is expected to return a result of one of [KibanaResponseFactory](./kibana-plugin-core-server.kibanaresponsefactory.md) functions.
+A function executed when route path matched requested resource path. Request handler is expected to return a result of one of [KibanaResponseFactory](./kibana-plugin-core-server.kibanaresponsefactory.md) functions. If anything else is returned, or an error is thrown, the HTTP service will automatically log the error and respond `500 - Internal Server Error`<!-- -->.
 
 <b>Signature:</b>
 
 ```typescript
-export declare type RequestHandler<P = unknown, Q = unknown, B = unknown, Method extends RouteMethod = any, ResponseFactory extends KibanaResponseFactory = KibanaResponseFactory> = (context: RequestHandlerContext, request: KibanaRequest<P, Q, B, Method>, response: ResponseFactory) => IKibanaResponse<any> | Promise<IKibanaResponse<any>>;
+export declare type RequestHandler<P = unknown, Q = unknown, B = unknown, Context extends RequestHandlerContext = RequestHandlerContext, Method extends RouteMethod = any, ResponseFactory extends KibanaResponseFactory = KibanaResponseFactory> = (context: Context, request: KibanaRequest<P, Q, B, Method>, response: ResponseFactory) => IKibanaResponse<any> | Promise<IKibanaResponse<any>>;
 ```
 
 ## Example

@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { getRandomString } from './random';
 
 /**
@@ -10,9 +12,14 @@ import { getRandomString } from './random';
  * during our tests.
  * @param {ElasticsearchClient} es The Elasticsearch client instance
  */
-export const initElasticsearchHelpers = (es) => {
+export const initElasticsearchHelpers = (getService) => {
+  const es = getService('es');
+  const esDeleteAllIndices = getService('esDeleteAllIndices');
+
   let indicesCreated = [];
   let templatesCreated = [];
+  let composableTemplatesCreated = [];
+  let dataStreamsCreated = [];
 
   // Indices
   const getIndex = (index) => es.indices.get({ index }).then(({ body }) => body);
@@ -22,13 +29,24 @@ export const initElasticsearchHelpers = (es) => {
     return es.indices.create({ index }).then(() => index);
   };
 
-  const deleteIndex = (index) => {
-    indicesCreated = indicesCreated.filter((i) => i !== index);
-    return es.indices.delete({ index });
+  const deleteAllIndices = async () => {
+    await esDeleteAllIndices(indicesCreated);
+    indicesCreated = [];
   };
 
-  const deleteAllIndices = () =>
-    Promise.all(indicesCreated.map(deleteIndex)).then(() => (indicesCreated = []));
+  // Data streams
+  const createDataStream = (dataStream = getRandomString(), document) => {
+    dataStreamsCreated.push(dataStream);
+    return es.index({ index: dataStream, body: document });
+  };
+
+  const deleteDataStream = (dataStream) => {
+    dataStreamsCreated = dataStreamsCreated.filter((i) => i !== dataStream);
+    return es.indices.deleteDataStream({ name: dataStream });
+  };
+
+  const deleteAllDataStreams = () =>
+    Promise.all(dataStreamsCreated.map(deleteDataStream)).then(() => (dataStreamsCreated = []));
 
   // Index templates
   const getIndexTemplates = () => es.indices.getTemplate();
@@ -37,6 +55,11 @@ export const initElasticsearchHelpers = (es) => {
   const createIndexTemplate = (name, template) => {
     templatesCreated.push(name);
     return es.indices.putTemplate({ name, body: template }, { create: true });
+  };
+
+  const createComposableIndexTemplate = (name, template) => {
+    composableTemplatesCreated.push(name);
+    return es.indices.putIndexTemplate({ name, body: template }, { create: true });
   };
 
   const deleteIndexTemplate = (name) => {
@@ -49,22 +72,44 @@ export const initElasticsearchHelpers = (es) => {
     });
   };
 
+  const deleteComposableIndexTemplate = (name) => {
+    composableTemplatesCreated = composableTemplatesCreated.filter((i) => i !== name);
+    return es.indices.deleteIndexTemplate({ name }).catch((err) => {
+      // Silently fail if templates not found
+      if (err.statusCode !== 404) {
+        throw err;
+      }
+    });
+  };
+
   const deleteAllTemplates = () =>
     Promise.all(templatesCreated.map(deleteIndexTemplate)).then(() => (templatesCreated = []));
 
-  const cleanUp = () => Promise.all([deleteAllIndices(), deleteAllTemplates()]);
+  const deleteAllComposableTemplates = () =>
+    Promise.all(templatesCreated.map(deleteComposableIndexTemplate)).then(
+      () => (composableTemplatesCreated = [])
+    );
+
+  const cleanUp = () =>
+    Promise.all([
+      deleteAllIndices(),
+      deleteAllTemplates(),
+      deleteAllComposableTemplates(),
+      deleteAllDataStreams(),
+    ]);
 
   const getNodesStats = () => es.nodes.stats().then(({ body }) => body);
 
   return {
     getIndex,
     createIndex,
-    deleteIndex,
+    createDataStream,
     deleteAllIndices,
     deleteAllTemplates,
     getIndexTemplates,
     createIndexTemplate,
     deleteIndexTemplate,
+    createComposableIndexTemplate,
     getNodesStats,
     cleanUp,
   };

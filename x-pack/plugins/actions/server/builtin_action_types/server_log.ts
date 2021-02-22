@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { curry } from 'lodash';
@@ -38,11 +39,11 @@ const ParamsSchema = schema.object({
   ),
 });
 
-export const SERVER_LOG_ACTION_TYPE_ID = '.server-log';
+export const ActionTypeId = '.server-log';
 // action type definition
 export function getActionType({ logger }: { logger: Logger }): ServerLogActionType {
   return {
-    id: SERVER_LOG_ACTION_TYPE_ID,
+    id: ActionTypeId,
     minimumLicenseRequired: 'basic',
     name: i18n.translate('xpack.actions.builtin.serverLogTitle', {
       defaultMessage: 'Server log',

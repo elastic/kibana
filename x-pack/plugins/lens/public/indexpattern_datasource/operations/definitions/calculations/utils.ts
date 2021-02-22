@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -10,8 +11,8 @@ import type { TimeScaleUnit } from '../../../time_scale';
 import type { IndexPattern, IndexPatternLayer } from '../../../types';
 import { adjustTimeScaleLabelSuffix } from '../../time_scale_utils';
 import type { ReferenceBasedIndexPatternColumn } from '../column_types';
+import { isColumnValidAsReference } from '../../layer_helpers';
 import { operationDefinitionMap } from '..';
-import type { IndexPatternColumn, RequiredReference } from '..';
 
 export const buildLabelFunction = (ofName: (name?: string) => string) => (
   name?: string,
@@ -35,7 +36,7 @@ export function checkForDateHistogram(layer: IndexPatternLayer, name: string) {
   return [
     i18n.translate('xpack.lens.indexPattern.calculations.dateHistogramErrorMessage', {
       defaultMessage:
-        '{name} requires a date histogram to work. Choose a different function or add a date histogram.',
+        '{name} requires a date histogram to work. Add a date histogram or select a different function.',
       values: {
         name,
       },
@@ -83,23 +84,6 @@ export function checkReferences(layer: IndexPatternLayer, columnId: string) {
     }
   });
   return errors.length ? errors : undefined;
-}
-
-export function isColumnValidAsReference({
-  column,
-  validation,
-}: {
-  column: IndexPatternColumn;
-  validation: RequiredReference;
-}): boolean {
-  if (!column) return false;
-  const operationType = column.operationType;
-  const operationDefinition = operationDefinitionMap[operationType];
-  return (
-    validation.input.includes(operationDefinition.input) &&
-    (!validation.specificOperations || validation.specificOperations.includes(operationType)) &&
-    validation.validateMetadata(column)
-  );
 }
 
 export function getErrorsForDateReference(

@@ -1,12 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FC, Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import {
   EuiBadge,
+  EuiCallOut,
   EuiComboBox,
   EuiComboBoxOptionOption,
   EuiFormRow,
@@ -18,6 +20,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { debounce } from 'lodash';
 
+import { FormattedMessage } from '@kbn/i18n/react';
 import { newJobCapsService } from '../../../../../services/new_job_capabilities_service';
 import { useMlContext } from '../../../../../contexts/ml';
 
@@ -27,10 +30,10 @@ import {
   TRAINING_PERCENT_MAX,
   FieldSelectionItem,
 } from '../../../../common/analytics';
+import { getScatterplotMatrixLegendType } from '../../../../common/get_scatterplot_matrix_legend_type';
 import { CreateAnalyticsStepProps } from '../../../analytics_management/hooks/use_create_analytics_form';
 import { Messages } from '../shared';
 import {
-  AnalyticsJobType,
   DEFAULT_MODEL_MEMORY_LIMIT,
   State,
 } from '../../../analytics_management/hooks/use_create_analytics_form/state';
@@ -51,18 +54,7 @@ import { SEARCH_QUERY_LANGUAGE } from '../../../../../../../common/constants/sea
 import { ExplorationQueryBarProps } from '../../../analytics_exploration/components/exploration_query_bar/exploration_query_bar';
 import { Query } from '../../../../../../../../../../src/plugins/data/common/query';
 
-import { LEGEND_TYPES, ScatterplotMatrix } from '../../../../../components/scatterplot_matrix';
-
-const getScatterplotMatrixLegendType = (jobType: AnalyticsJobType) => {
-  switch (jobType) {
-    case ANALYSIS_CONFIG_TYPE.CLASSIFICATION:
-      return LEGEND_TYPES.NOMINAL;
-    case ANALYSIS_CONFIG_TYPE.REGRESSION:
-      return LEGEND_TYPES.QUANTITATIVE;
-    default:
-      return undefined;
-  }
-};
+import { ScatterplotMatrix } from '../../../../../components/scatterplot_matrix';
 
 const requiredFieldsErrorText = i18n.translate(
   'xpack.ml.dataframe.analytics.createWizard.requiredFieldsErrorMessage',
@@ -71,6 +63,8 @@ const requiredFieldsErrorText = i18n.translate(
       'At least one field must be included in the analysis in addition to the dependent variable.',
   }
 );
+
+const maxRuntimeFieldsDisplayCount = 5;
 
 export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
   actions,
@@ -324,6 +318,15 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
     };
   }, [jobType, dependentVariable, trainingPercent, JSON.stringify(includes), jobConfigQueryString]);
 
+  const unsupportedRuntimeFields = useMemo(
+    () =>
+      currentIndexPattern.fields
+        .getAll()
+        .filter((f) => f.runtimeField)
+        .map((f) => `'${f.displayName}'`),
+    [currentIndexPattern.fields]
+  );
+
   return (
     <Fragment>
       <Messages messages={requestMessages} />
@@ -455,6 +458,36 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
       >
         <Fragment />
       </EuiFormRow>
+      {Array.isArray(unsupportedRuntimeFields) && unsupportedRuntimeFields.length > 0 && (
+        <>
+          <EuiCallOut size="s" color="warning">
+            <FormattedMessage
+              id="xpack.ml.dataframe.analytics.create.unsupportedRuntimeFieldsCallout"
+              defaultMessage="The runtime {runtimeFieldsCount, plural, one {field} other {fields}} {unsupportedRuntimeFields} {extraCountMsg} are not supported for analysis."
+              values={{
+                runtimeFieldsCount: unsupportedRuntimeFields.length,
+                extraCountMsg:
+                  unsupportedRuntimeFields.length - maxRuntimeFieldsDisplayCount > 0 ? (
+                    <FormattedMessage
+                      id="xpack.ml.dataframe.analytics.create.extraUnsupportedRuntimeFieldsMsg"
+                      defaultMessage="and {count} more"
+                      values={{
+                        count: unsupportedRuntimeFields.length - maxRuntimeFieldsDisplayCount,
+                      }}
+                    />
+                  ) : (
+                    ''
+                  ),
+                unsupportedRuntimeFields: unsupportedRuntimeFields
+                  .slice(0, maxRuntimeFieldsDisplayCount)
+                  .join(', '),
+              }}
+            />
+          </EuiCallOut>
+          <EuiSpacer />
+        </>
+      )}
+
       <AnalysisFieldsTable
         dependentVariable={dependentVariable}
         includes={includes}
@@ -498,6 +531,7 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
                   : undefined
               }
               legendType={getScatterplotMatrixLegendType(jobType)}
+              searchQuery={jobConfigQuery}
             />
           </EuiPanel>
           <EuiSpacer />

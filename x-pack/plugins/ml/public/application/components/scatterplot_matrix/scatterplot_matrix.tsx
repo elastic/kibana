@@ -1,43 +1,39 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useMemo, useEffect, useState, FC } from 'react';
 
-// There is still an issue with Vega Lite's typings with the strict mode Kibana is using.
-// @ts-ignore
-import { compile } from 'vega-lite/build-es5/vega-lite';
-import { parse, View, Warn } from 'vega';
-import { Handler } from 'vega-tooltip';
-
 import {
-  htmlIdGenerator,
   EuiComboBox,
   EuiComboBoxOptionOption,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
-  EuiLoadingSpinner,
   EuiSelect,
-  EuiSpacer,
   EuiSwitch,
-  EuiText,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
 import type { SearchResponse7 } from '../../../../common/types/es_client';
+import type { ResultsSearchQuery } from '../../data_frame_analytics/common/analytics';
 
 import { useMlApiContext } from '../../contexts/kibana';
 
 import { getProcessedFields } from '../data_grid';
 import { useCurrentEuiTheme } from '../color_range_legend';
 
+// Separate imports for lazy loadable VegaChart and related code
+import { VegaChart } from '../vega_chart';
+import type { LegendType } from '../vega_chart/common';
+import { VegaChartLoading } from '../vega_chart/vega_chart_loading';
+
 import {
   getScatterplotMatrixVegaLiteSpec,
-  LegendType,
   OUTLIER_SCORE_FIELD,
 } from './scatterplot_matrix_vega_lite_spec';
 
@@ -57,12 +53,13 @@ const TOGGLE_OFF = i18n.translate('xpack.ml.splom.toggleOff', {
 
 const sampleSizeOptions = [100, 1000, 10000].map((d) => ({ value: d, text: '' + d }));
 
-interface ScatterplotMatrixProps {
+export interface ScatterplotMatrixProps {
   fields: string[];
   index: string;
   resultsField?: string;
   color?: string;
   legendType?: LegendType;
+  searchQuery?: ResultsSearchQuery;
 }
 
 export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
@@ -71,6 +68,7 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
   resultsField,
   color,
   legendType,
+  searchQuery,
 }) => {
   const { esSearch } = useMlApiContext();
 
@@ -132,6 +130,12 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
   const { euiTheme } = useCurrentEuiTheme();
 
   useEffect(() => {
+    if (fields.length === 0) {
+      setSplom(undefined);
+      setIsLoading(false);
+      return;
+    }
+
     async function fetchSplom(options: { didCancel: boolean }) {
       setIsLoading(true);
       try {
@@ -141,13 +145,15 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
           ...(legendType !== undefined ? [] : [`${resultsField}.${OUTLIER_SCORE_FIELD}`]),
         ];
 
+        const queryFallback = searchQuery !== undefined ? searchQuery : { match_all: {} };
         const query = randomizeQuery
           ? {
               function_score: {
+                query: queryFallback,
                 random_score: { seed: 10, field: '_seq_no' },
               },
             }
-          : { match_all: {} };
+          : queryFallback;
 
         const resp: SearchResponse7 = await esSearch({
           index,
@@ -181,12 +187,10 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
     return () => {
       options.didCancel = true;
     };
-    // stringify the fields array, otherwise the comparator will trigger on new but identical instances.
-  }, [fetchSize, JSON.stringify(fields), index, randomizeQuery, resultsField]);
+    // stringify the fields array and search, otherwise the comparator will trigger on new but identical instances.
+  }, [fetchSize, JSON.stringify({ fields, searchQuery }), index, randomizeQuery, resultsField]);
 
-  const htmlId = useMemo(() => htmlIdGenerator()(), []);
-
-  useEffect(() => {
+  const vegaSpec = useMemo(() => {
     if (splom === undefined) {
       return;
     }
@@ -201,7 +205,7 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
             return d;
           });
 
-    const vegaSpec = getScatterplotMatrixVegaLiteSpec(
+    return getScatterplotMatrixVegaLiteSpec(
       values,
       columns,
       euiTheme,
@@ -210,28 +214,14 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
       legendType,
       dynamicSize
     );
-
-    const vgSpec = compile(vegaSpec).spec;
-
-    const view = new View(parse(vgSpec))
-      .logLevel(Warn)
-      .renderer('canvas')
-      .tooltip(new Handler().call)
-      .initialize(`#${htmlId}`);
-
-    view.runAsync(); // evaluate and render the view
   }, [resultsField, splom, color, legendType, dynamicSize]);
 
   return (
     <>
-      {splom === undefined ? (
-        <EuiText textAlign="center">
-          <EuiSpacer size="l" />
-          <EuiLoadingSpinner size="l" />
-          <EuiSpacer size="l" />
-        </EuiText>
+      {splom === undefined || vegaSpec === undefined ? (
+        <VegaChartLoading />
       ) : (
-        <>
+        <div data-test-subj="mlScatterplotMatrix">
           <EuiFlexGroup>
             <EuiFlexItem>
               <EuiFormRow
@@ -259,7 +249,7 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
             </EuiFlexItem>
             <EuiFlexItem style={{ width: '200px' }} grow={false}>
               <EuiFormRow
-                label={i18n.translate('xpack.ml.splom.SampleSizeLabel', {
+                label={i18n.translate('xpack.ml.splom.sampleSizeLabel', {
                   defaultMessage: 'Sample size',
                 })}
                 display="rowCompressed"
@@ -275,7 +265,7 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
             </EuiFlexItem>
             <EuiFlexItem style={{ width: '120px' }} grow={false}>
               <EuiFormRow
-                label={i18n.translate('xpack.ml.splom.RandomScoringLabel', {
+                label={i18n.translate('xpack.ml.splom.randomScoringLabel', {
                   defaultMessage: 'Random scoring',
                 })}
                 display="rowCompressed"
@@ -311,8 +301,8 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
             )}
           </EuiFlexGroup>
 
-          <div id={htmlId} className="mlScatterplotMatrix" />
-        </>
+          <VegaChart vegaSpec={vegaSpec} />
+        </div>
       )}
     </>
   );

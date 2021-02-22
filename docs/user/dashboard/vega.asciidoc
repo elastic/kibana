@@ -1,0 +1,1104 @@
+[[vega]]
+=== Vega
+
+*Vega* and *Vega-Lite* are both grammars for creating custom visualizations.
+They are recommended for advanced users who are comfortable writing {es} queries manually.
+*Vega-Lite* is a good starting point for users who are new to both grammars, but they are
+not compatible.
+
+Both *Vega* and *Vega-Lite* use JSON, but {kib} has made this simpler to type by integrating
+https://hjson.github.io/[HJSON]. HJSON supports the following:
+
+* Optional quotes
+* Double quotes or single quotes
+* Optional commas
+* Comments using // or /* syntax
+* Multiline strings
+
+[float]
+==== Tutorials: Create custom panels
+
+Learn how to connect *Vega-Lite* with {kib} filters and {es} data, then learn how to create more {kib} interaction using *Vega*.
+
+As you edit the specs, work in small steps, and frequently save your work. Small changes can cause unexpected results. To save, click *Save* in the toolbar.
+
+Before starting, add the eCommerce sample data that you'll use in your spec, then create the dashboard.
+
+. From the {kib} *Home* page, click *Try our sample data*.
+
+. From *eCommerce sample data*, click *Add data*.
+
+. Open the main menu, then click *Dashboard*.
+
+. On the *Dashboards* page, click *Create dashboard*.
+
+[float]
+===== Open and set up Vega-Lite
+
+Open *Vega-Lite* and change the time range.
+
+. On the dashboard, click *Create panel*.
+
+. On the *New visualization* window, click *Custom visualization*.
++
+A pre-populated line chart displays the total number of documents. 
+
+. Change the <<set-time-filter,time range>> to *Last 7 days*.
+
+[float]
+[[vega-tutorial-create-a-stacked-area-chart]]
+=== Tutorial: Create a stacked area chart from an {es} search query
+
+Learn how to query {es} from *Vega-Lite*, displaying the results in a stacked area chart.
+
+. In the *Vega-Lite* spec, replace `index: _all` with the following, then click *Update*:
+
+```yaml
+index: kibana_sample_data_ecommerce
+```
+
+A flat line appears with zero results.
+
+To add the data fields from the *kibana_sample_data_ecommerce* index, replace the following, then click *Update*:
+
+* `%timefield%: @timestamp` with `%timefield%: order_date`
+
+* `field: @timestamp` with `field: order_date`
+
+[float]
+===== Add the aggregations
+
+To create the stacked area chart, add the aggregations. 
+
+To check your work, open and use the <<console-kibana,*Console*>> on a separate browser tab.
+
+. Open {kib} on a new tab. 
+
+. Open the main menu, then click *Dev Tools*.
+
+. On the *Console* editor, enter the aggregation, then click *Click to send request*:
+
+```js
+POST kibana_sample_data_ecommerce/_search
+{
+  "query": {
+    "range": {
+      "order_date": {
+        "gte": "now-7d"
+      }
+    }
+  },
+  "aggs": {
+    "time_buckets": {
+      "date_histogram": {
+        "field": "order_date",
+        "fixed_interval": "1d",
+        "extended_bounds": {
+          "min": "now-7d"
+        },
+        "min_doc_count": 0
+      }
+    }
+  },
+  "size": 0
+}
+```
+
+Add the {ref}/search-aggregations-bucket-terms-aggregation.html[terms aggregation], then click *Click to send request*:
+
+```js
+POST kibana_sample_data_ecommerce/_search
+{
+  "query": {
+    "range": {
+      "order_date": {
+        "gte": "now-7d"
+      }
+    }
+  },
+  "aggs": {
+    "categories": {
+      "terms": { "field": "category.keyword" },
+      "aggs": {
+        "time_buckets": {
+          "date_histogram": {
+            "field": "order_date",
+            "fixed_interval": "1d",
+            "extended_bounds": {
+              "min": "now-7d"
+            },
+            "min_doc_count": 0
+          }
+        }
+      }
+    }
+  },
+  "size": 0
+}
+```
+
+The response format is different from the first aggregation query:
+
+```json
+{
+  "aggregations" : {
+    "categories" : {
+      "doc_count_error_upper_bound" : 0,
+      "sum_other_doc_count" : 0,
+      "buckets" : [{
+        "key" : "Men's Clothing",
+        "doc_count" : 1661,
+        "time_buckets" : {
+          "buckets" : [{
+            "key_as_string" : "2020-06-30T00:00:00.000Z",
+            "key" : 1593475200000,
+            "doc_count" : 19
+          }, {
+            "key_as_string" : "2020-07-01T00:00:00.000Z",
+            "key" : 1593561600000,
+            "doc_count" : 71
+          }]
+        }
+      }]
+    }
+  }
+}
+```
+
+In the *Vega-Lite* spec, enter the aggregations, then click *Update*:
+
+```yaml
+  data: {
+    url: {
+      %context%: true
+      %timefield%: order_date
+      index: kibana_sample_data_ecommerce
+      body: {
+        aggs: {
+          categories: {
+            terms: { field: "category.keyword" }
+            aggs: {
+              time_buckets: {
+                date_histogram: {
+                  field: order_date
+                  interval: {%autointerval%: true}
+                  extended_bounds: {
+                    min: {%timefilter%: "min"}
+                    max: {%timefilter%: "max"}
+                  }
+                  min_doc_count: 0
+                }
+              }
+            }
+          }
+        }
+        size: 0
+      }
+    }
+    format: {property: "aggregations.categories.buckets" }
+  }
+```
+
+For information about the queries, refer to <<vega-queries, reference for writing {es} queries in Vega>>. 
+
+[float]
+===== Debug the warning
+
+To generate the data, *Vega-Lite* uses the `source_0` and `data_0`. `source_0` contains
+the results from the {es} query, and `data_0` contains the visually encoded results that are shown on the chart.
+To debug the warning, compare `source_0` and `data_0`.
+
+. In the toolbar, click *Inspect*. 
+
+. From the *View* dropdown, select *Vega debug*.
+
+. From the dropdown, select *source_0*.
++
+[role="screenshot"]
+image::visualize/images/vega_lite_tutorial_4.png[Table for data_0 with columns key, doc_count and array of time_buckets]
+
+. To compare to the visually encoded data, select *data_0* from the dropdown.
++
+[role="screenshot"]
+image::visualize/images/vega_lite_tutorial_5.png[Table for data_0 where the key is NaN instead of a string]
++
+*key* is unable to convert because the property is category (`Men's Clothing`, `Women's Clothing`, etc.) instead of a timestamp.
+
+[float]
+===== Add and debug the encoding block 
+
+In the *Vega-Lite* spec, add the `encoding` block:
+
+```yaml
+  encoding: {
+    x: {
+      field: time_buckets.buckets.key
+      type: temporal
+      axis: { title: null }
+    }
+    y: {
+      field: time_buckets.buckets.doc_count
+      type: quantitative
+      axis: { title: "Document count" }
+    }
+  }
+```
+
+. Click *Inspect*, then select *Vega Debug* from the *View* dropdown.
+
+. From the dropdown, select *data_0*.
++
+[role="screenshot"]
+image::visualize/images/vega_lite_tutorial_6.png[Table for data_0 showing that the column time_buckets.buckets.key is undefined]
+
+*Vega-Lite* is unable to extract the `time_buckets.buckets` inner array.
+
+[float]
+===== Extract the `time_buckets.buckets` inner array
+
+In {kib} 7.9 and later, use the *Vega-Lite* https://vega.github.io/vega-lite/docs/flatten.html[flatten transformation] to extract the `time_buckets.buckets` inner array.
+
+If you are using {kib} 7.8 and earlier, the flatten transformation is available only in *Vega*.
+
+In the *Vega-Lite* spec, add a `transform` block, then click *Update*:
+
+```yaml
+  transform: [{
+    flatten: ["time_buckets.buckets"]
+  }]
+```
+
+. Click *Inspect*, then select *Vega Debug* from the *View* dropdown.
+
+. From the dropdown, select *data_0*.
++
+[role="screenshot"]
+image::visualize/images/vega_lite_tutorial_7.png[Table showing data_0 with multiple pages of results, but undefined values in the column time_buckets.buckets.key]
++
+Vega-Lite displays *undefined* values because there are duplicate names. 
+
+. To resolve the duplicate names, add the `transform` and `encoding` blocks, then click *Update*:
+
+```yaml
+  transform: [{
+    flatten: ["time_buckets.buckets"],
+    as: ["buckets"]
+  }]
+
+  mark: area
+
+  encoding: {
+    x: {
+      field: buckets.key
+      type: temporal
+      axis: { title: null }
+    }
+    y: {
+      field: buckets.doc_count
+      type: quantitative
+      axis: { title: "Document count" }
+    }
+    color: {
+      field: key
+      type: nominal
+    }
+  }
+```
+
+[float]
+===== Add hover states and tooltips
+
+With the *Vega-Lite* spec, you can add hover states and tooltips to the stacked area chart with the `selection` block.
+
+In the *Vega-Lite* spec, add the `encoding` block, then click *Update*:
+
+```yaml
+  encoding: {
+    tooltip: [{
+      field: buckets.key
+      type: temporal
+      title: "Date"
+    }, {
+      field: key
+      type: nominal
+      title: "Category"
+    }, {
+      field: buckets.doc_count
+      type: quantitative
+      title: "Count"
+    }]
+  }
+```
+
+When you hover over the area series on the stacked area chart, a multi-line tooltip
+appears, but is unable to indicate the nearest point. To
+indicate the nearest point, add a second layer.
+
+Add composite marks, then click *Update*:
+
+```yaml
+  layer: [{
+    mark: area
+  }, {
+    mark: point
+  }]
+```
+
+The points are unable to stack and align with the stacked area chart.
+
+Change the y `encoding`:
+
+```yaml
+    y: {
+      field: buckets.doc_count
+      type: quantitative
+      axis: { title: "Document count" }
+      stack: true
+    }
+```
+
+Add a `selection` block inside `mark: point`:
+
+```yaml
+  layer: [{
+    mark: area
+  }, {
+    mark: point
+    
+    selection: {
+      pointhover: {
+        type: single
+        on: mouseover
+        clear: mouseout
+        empty: none
+        fields: ["buckets.key", "key"]
+        nearest: true
+      }
+    }
+
+    encoding: {
+      size: {
+        condition: {
+          selection: pointhover
+          value: 100
+        }
+        value: 5
+      }
+      fill: {
+        condition: {
+          selection: pointhover
+          value: white
+        }
+      }
+    }
+  }]
+```
+
+Move your cursor around the stacked area chart. The points are able to
+indicate the nearest point.
+
+[role="screenshot"]
+image::visualize/images/vega_lite_tutorial_2.png[Vega-Lite tutorial selection enabled]
+
+The selection is controlled by a signal. To view the signal, click *Inspect* in the toolbar.
+
+.Expand final Vega-Lite spec
+[%collapsible%closed]
+====
+[source,yaml]
+----
+{
+  $schema: https://vega.github.io/schema/vega-lite/v4.json
+  title: Event counts from ecommerce
+  data: {
+    url: {
+      %context%: true
+      %timefield%: order_date
+      index: kibana_sample_data_ecommerce
+      body: {
+        aggs: {
+          categories: {
+            terms: { field: "category.keyword" }
+            aggs: {
+              time_buckets: {
+                date_histogram: {
+                  field: order_date
+                  interval: {%autointerval%: true}
+                  extended_bounds: {
+                    min: {%timefilter%: "min"}
+                    max: {%timefilter%: "max"}
+                  }
+                  min_doc_count: 0
+                }
+              }
+            }
+          }
+        }
+        size: 0
+      }
+    }
+    format: {property: "aggregations.categories.buckets" }
+  }
+  
+  transform: [{
+    flatten: ["time_buckets.buckets"]
+    as: ["buckets"]
+  }]
+
+  encoding: {
+    x: {
+      field: buckets.key
+      type: temporal
+      axis: { title: null }
+    }
+    y: {
+      field: buckets.doc_count
+      type: quantitative
+      axis: { title: "Document count" }
+      stack: true
+    }
+    color: {
+      field: key
+      type: nominal
+      title: "Category"
+    }
+    tooltip: [{
+      field: buckets.key
+      type: temporal
+      title: "Date"
+    }, {
+      field: key
+      type: nominal
+      title: "Category"
+    }, {
+      field: buckets.doc_count
+      type: quantitative
+      title: "Count"
+    }]
+  }
+  
+  layer: [{
+    mark: area
+  }, {
+    mark: point
+    
+    selection: {
+      pointhover: {
+        type: single
+        on: mouseover
+        clear: mouseout
+        empty: none
+        fields: ["buckets.key", "key"]
+        nearest: true
+      }
+    }
+
+    encoding: {
+      size: {
+        condition: {
+          selection: pointhover
+          value: 100
+        }
+        value: 5
+      }
+      fill: {
+        condition: {
+          selection: pointhover
+          value: white
+        }
+      }
+    }
+  }]
+}
+----
+
+====
+
+[float]
+[[vega-tutorial-update-kibana-filters-from-vega]]
+=== Tutorial: Update {kib} filters from Vega
+
+To build an area chart using an {es} search query, edit the *Vega* spec, then add click and drag handlers to update the {kib} filters.
+
+In the *Vega* spec, enter the following, then click *Update*:
+
+```yaml
+{
+  $schema: "https://vega.github.io/schema/vega/v5.json"
+  data: [{
+    name: source_0
+  }]
+  
+  scales: [{
+    name: x
+    type: time
+    range: width
+  }, {
+    name: y
+    type: linear
+    range: height
+  }]
+  
+  axes: [{
+    orient: bottom
+    scale: x
+  }, {
+    orient: left
+    scale: y
+  }]
+  
+  marks: [
+    {
+      type: area
+      from: {
+        data: source_0
+      }
+      encode: {
+        update: {
+        }
+      }
+    }
+  ]
+}
+```
+
+Add the {es} search query with the `data` block, then click *Update*:
+
+```yaml
+  data: [
+    {
+      name: source_0
+      url: {
+        %context%: true
+        %timefield%: order_date
+        index: kibana_sample_data_ecommerce
+        body: {
+          aggs: {
+            time_buckets: {
+              date_histogram: {
+                field: order_date
+                fixed_interval: "3h"
+                extended_bounds: {
+                  min: {%timefilter%: "min"}
+                  max: {%timefilter%: "max"}
+                }
+                min_doc_count: 0
+              }
+            }
+          }
+          size: 0
+        }
+      }
+      format: { property: "aggregations.time_buckets.buckets" }
+    }
+  ]
+```
+
+[float]
+===== Change the X- and Y-axes
+
+Display labels for the X- and Y-axes. 
+
+In the *Vega* spec, add the `scales` block, then click *Update*:
+
+```yaml
+  scales: [{
+    name: x
+    type: time
+    range: width
+    domain: {
+      data: source_0
+      field: key
+    }
+  }, {
+    name: y
+    type: linear
+    range: height
+    domain: {
+      data: source_0
+      field: doc_count
+    }
+  }]
+```
+
+Add the `key` and `doc_count` fields as the X- and Y-axis values, then click *Update*:
+
+```yaml
+  marks: [
+    {
+      type: area
+      from: {
+        data: source_0
+      }
+      encode: {
+        update: {
+          x: {
+            scale: x
+            field: key
+          }
+          y: {
+            scale: y
+            value: 0
+          }
+          y2: {
+            scale: y
+            field: doc_count
+          }
+        }
+      }
+    }
+  ]
+```
+
+[role="screenshot"]
+image::visualize/images/vega_tutorial_3.png[]
+
+[float]
+===== Add a block to the `marks` section
+
+Show the clickable points on the area chart to filter for a specific date.
+
+In the *Vega* spec, add to the `marks` block, then click *Update*:
+
+```yaml
+  {
+    name: point
+    type: symbol
+    style: ["point"]
+    from: {
+      data: source_0
+    }
+    encode: {
+      update: {
+        x: {
+          scale: x
+          field: key
+        }
+        y: {
+          scale: y
+          field: doc_count
+        }
+        size: {
+          value: 100
+        }
+        fill: {
+          value: black
+        }
+      }
+    }
+  }
+```
+
+[float]
+===== Create a signal 
+
+To make the points clickable, create a *Vega* signal. You can access the clicked `datum` in the expression used to update. 
+
+In the *Vega* spec, add a `signals` block to specify that the cursor clicks add a time filter with the three hour interval, then click *Update*:
+
+```yaml
+  signals: [
+    {
+      name: point_click
+      on: [{
+        events: {
+          source: scope
+          type: click
+          markname: point
+        }
+        update: '''kibanaSetTimeFilter(datum.key, datum.key + 3 * 60 * 60 * 1000)'''
+      }]
+    }
+  ]
+```
+
+The event uses the `kibanaSetTimeFilter` custom function to generate a filter that
+applies to the entire dashboard on a click.
+
+To make the area chart interactive, locate the `marks` block,
+then update the `point` and add `cursor: { value: "pointer" }` to
+`encoding`:
+
+```yaml
+  {
+    name: point
+    type: symbol
+    style: ["point"]
+    from: {
+      data: source_0
+    }
+    encode: {
+      update: {
+        ...
+        cursor: { value: "pointer" }
+      }
+    }
+  }
+```
+
+[float]
+===== Add a drag interaction 
+
+To allow users to filter based on a time range, add a drag interaction, which requires additional signals and a rectangle overlay.
+
+[role="screenshot"]
+image::visualize/images/vega_tutorial_4.png[]
+
+In the *Vega* spec, add a `signal` to track the X position of the cursor:
+
+```yaml
+    {
+      name: currentX
+      value: -1
+      on: [{
+        events: {
+          type: mousemove
+          source: view
+        },
+        update: "clamp(x(), 0, width)"
+      }, {
+        events: {
+          type: mouseout
+          source: view
+        }
+        update: "-1"
+      }]
+    }
+```
+
+To indicate the current cursor position, add a `mark` block:
+
+```yaml
+    {
+      type: rule
+      interactive: false
+      encode: {
+        update: {
+          y: {value: 0}
+          y2: {signal: "height"}
+          stroke: {value: "gray"}
+          strokeDash: {
+            value: [2, 1]
+          }
+          x: {signal: "max(currentX,0)"}
+          defined: {signal: "currentX > 0"}
+        }
+      }
+    }
+```
+
+To track the selected time range, add a signal that updates
+until the user releases their cursor or presses Return:
+
+
+```yaml
+    {
+      name: selected
+      value: [0, 0]
+      on: [{
+        events: {
+          type: mousedown
+          source: view
+        }
+        update: "[clamp(x(), 0, width), clamp(x(), 0, width)]"
+      }, {
+        events: {
+          type: mousemove
+          source: window
+          consume: true
+          between: [{
+            type: mousedown
+            source: view
+          }, {
+            merge: [{
+              type: mouseup
+              source: window
+            }, {
+              type: keydown
+              source: window
+              filter: "event.key === 'Escape'"
+            }]
+          }]
+        }
+        update: "[selected[0], clamp(x(), 0, width)]"
+      }, {
+        events: {
+          type: keydown
+          source: window
+          filter: "event.key === 'Escape'"
+        }
+        update: "[0, 0]"
+      }]
+    }
+```
+
+There is a signal that tracks the time range from the user.
+
+To indicate the range visually, add a mark that only appears conditionally:
+
+```yaml
+    {
+      type: rect
+      name: selectedRect
+      encode: {
+        update: {
+          height: {signal: "height"}
+          fill: {value: "#333"}
+          fillOpacity: {value: 0.2}
+          x: {signal: "selected[0]"}
+          x2: {signal: "selected[1]"}
+          defined: {signal: "selected[0] !== selected[1]"}
+        }
+      }
+    }
+```
+
+Add a signal that updates the {kib} time filter when the cursor is released while
+dragging:
+
+```yaml
+    {
+      name: applyTimeFilter
+      value: null
+      on: [{
+        events: {
+          type: mouseup
+          source: view
+        }
+        update: '''selected[0] !== selected[1] ? kibanaSetTimeFilter(
+               invert('x',selected[0]),
+               invert('x',selected[1])) : null'''
+      }]
+    }
+```
+
+.Expand final Vega spec
+[%collapsible%closed]
+====
+[source,yaml]
+----
+{
+  $schema: "https://vega.github.io/schema/vega/v5.json"
+  data: [
+    {
+      name: source_0
+      url: {
+        %context%: true
+        %timefield%: order_date
+        index: kibana_sample_data_ecommerce
+        body: {
+          aggs: {
+            time_buckets: {
+              date_histogram: {
+                field: order_date
+                fixed_interval: "3h"
+                extended_bounds: {
+                  min: {%timefilter%: "min"}
+                  max: {%timefilter%: "max"}
+                }
+                min_doc_count: 0
+              }
+            }
+          }
+          size: 0
+        }
+      }
+      format: { property: "aggregations.time_buckets.buckets" }
+    }
+  ]
+  
+  scales: [{
+    name: x
+    type: time
+    range: width
+    domain: {
+      data: source_0
+      field: key
+    }
+  }, {
+    name: y
+    type: linear
+    range: height
+    domain: {
+      data: source_0
+      field: doc_count
+    }
+  }]
+  
+  axes: [{
+    orient: bottom
+    scale: x
+  }, {
+    orient: left
+    scale: y
+  }]
+  
+  marks: [
+    {
+      type: area
+      from: {
+        data: source_0
+      }
+      encode: {
+        update: {
+          x: {
+            scale: x
+            field: key
+          }
+          y: {
+            scale: y
+            value: 0
+          }
+          y2: {
+            scale: y
+            field: doc_count
+          }
+        }
+      }
+    },
+    {
+      name: point
+      type: symbol
+      style: ["point"]
+      from: {
+        data: source_0
+      }
+      encode: {
+        update: {
+          x: {
+            scale: x
+            field: key
+          }
+          y: {
+            scale: y
+            field: doc_count
+          }
+          size: {
+            value: 100
+          }
+          fill: {
+            value: black
+          }
+          cursor: { value: "pointer" }
+        }
+      }
+    },
+    {
+      type: rule
+      interactive: false
+      encode: {
+        update: {
+          y: {value: 0}
+          y2: {signal: "height"}
+          stroke: {value: "gray"}
+          strokeDash: {
+            value: [2, 1]
+          }
+          x: {signal: "max(currentX,0)"}
+          defined: {signal: "currentX > 0"}
+        }
+      }
+    },
+    {
+      type: rect
+      name: selectedRect
+      encode: {
+        update: {
+          height: {signal: "height"}
+          fill: {value: "#333"}
+          fillOpacity: {value: 0.2}
+          x: {signal: "selected[0]"}
+          x2: {signal: "selected[1]"}
+          defined: {signal: "selected[0] !== selected[1]"}
+        }
+      }
+    }
+  ]
+  
+  signals: [
+    {
+      name: point_click
+      on: [{
+        events: {
+          source: scope
+          type: click
+          markname: point
+        }
+        update: '''kibanaSetTimeFilter(datum.key, datum.key + 3 * 60 * 60 * 1000)'''
+      }]
+    }
+    {
+      name: currentX
+      value: -1
+      on: [{
+        events: {
+          type: mousemove
+          source: view
+        },
+        update: "clamp(x(), 0, width)"
+      }, {
+        events: {
+          type: mouseout
+          source: view
+        }
+        update: "-1"
+      }]
+    }
+    {
+      name: selected
+      value: [0, 0]
+      on: [{
+        events: {
+          type: mousedown
+          source: view
+        }
+        update: "[clamp(x(), 0, width), clamp(x(), 0, width)]"
+      }, {
+        events: {
+          type: mousemove
+          source: window
+          consume: true
+          between: [{
+            type: mousedown
+            source: view
+          }, {
+            merge: [{
+              type: mouseup
+              source: window
+            }, {
+              type: keydown
+              source: window
+              filter: "event.key === 'Escape'"
+            }]
+          }]
+        }
+        update: "[selected[0], clamp(x(), 0, width)]"
+      }, {
+        events: {
+          type: keydown
+          source: window
+          filter: "event.key === 'Escape'"
+        }
+        update: "[0, 0]"
+      }]
+    }
+    {
+      name: applyTimeFilter
+      value: null
+      on: [{
+        events: {
+          type: mouseup
+          source: view
+        }
+        update: '''selected[0] !== selected[1] ? kibanaSetTimeFilter(
+               invert('x',selected[0]),
+               invert('x',selected[1])) : null'''
+      }]
+    }
+  ]
+}
+
+----
+====
+
+include::vega-reference.asciidoc[]

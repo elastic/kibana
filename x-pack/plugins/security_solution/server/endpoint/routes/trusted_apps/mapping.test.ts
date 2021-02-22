@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { CreateExceptionListItemOptions } from '../../../../../lists/server';
@@ -34,7 +35,7 @@ const createExceptionListItemOptions = (
   name: '',
   namespaceType: 'agnostic',
   osTypes: [],
-  tags: [],
+  tags: ['policy:all'],
   type: 'simple',
   ...options,
 });
@@ -55,7 +56,7 @@ const exceptionListItemSchema = (
   name: '',
   namespace_type: 'agnostic',
   os_types: [],
-  tags: [],
+  tags: ['policy:all'],
   type: 'simple',
   tie_breaker_id: '123',
   updated_at: '11/11/2011T11:11:11.111',

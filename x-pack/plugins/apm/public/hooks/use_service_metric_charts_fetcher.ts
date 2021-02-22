@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { useParams } from 'react-router-dom';
@@ -23,7 +24,7 @@ export function useServiceMetricChartsFetcher({
   const { urlParams, uiFilters } = useUrlParams();
   const { agentName } = useApmServiceContext();
   const { serviceName } = useParams<{ serviceName?: string }>();
-  const { start, end } = urlParams;
+  const { environment, start, end } = urlParams;
   const { data = INITIAL_DATA, error, status } = useFetcher(
     (callApmApi) => {
       if (serviceName && start && end && agentName) {
@@ -32,6 +33,7 @@ export function useServiceMetricChartsFetcher({
           params: {
             path: { serviceName },
             query: {
+              environment,
               serviceNodeName,
               start,
               end,
@@ -42,7 +44,15 @@ export function useServiceMetricChartsFetcher({
         });
       }
     },
-    [serviceName, start, end, agentName, serviceNodeName, uiFilters]
+    [
+      environment,
+      serviceName,
+      start,
+      end,
+      agentName,
+      serviceNodeName,
+      uiFilters,
+    ]
   );
 
   return {

@@ -43,15 +43,35 @@ be issued by calling the returned `search()` function. For each new request the
 hook emits an object describing the request and its state in the `requests$`
 `Observable`.
 
+Since the specific response shape depends on the data strategy used, the hook
+takes a projection function, that is responsible for decoding the response in
+an appropriate way. Because most response projections follow a similar pattern
+there's a helper `normalizeDataSearchResponses(initialResponse,
+parseRawResponse)`, which generates an RxJS operator, that...
+
+- emits an initial response containing the given `initialResponse` value
+- applies `parseRawResponse` to the `rawResponse` property of each emitted response
+- transforms transport layer errors as well as parsing errors into
+  `SearchStrategyError`s
+
 ```typescript
+const parseMyCustomSearchResponse = normalizeDataSearchResponses(
+  'initial value',
+  decodeOrThrow(myCustomSearchResponsePayloadRT)
+);
+
 const { search, requests$ } = useDataSearch({
   getRequest: useCallback((searchTerm: string) => ({
     request: {
       params: {
         searchTerm
-      }
-    }
-  }), []);
+      },
+      options: {
+        strategy: 'my-custom-search-strategy',
+      },
+    },
+  }), []),
+  parseResponses: parseMyCustomSearchResponse,
 });
 ```
 
@@ -67,10 +87,6 @@ newest response observable is subscribed to and that any previous response
 observables are unsubscribed from for proper cancellation if a new request has
 been created. This uses RxJS's `switchMap()` operator under the hood. The hook
 also makes sure that all observables are unsubscribed from on unmount.
-
-Since the specific response shape depends on the data strategy used, the hook
-takes a projection function, that is responsible for decoding the response in
-an appropriate way.
 
 A request can fail due to various reasons that include servers-side errors,
 Elasticsearch shard failures and network failures. The intention is to map all
@@ -94,11 +110,7 @@ const {
   latestResponseErrors,
   loaded,
   total,
-} = useLatestPartialDataSearchResponse(
-  requests$,
-  'initialValue',
-  useMemo(() => decodeOrThrow(mySearchStrategyResponsePayloadRT), []),
-);
+} = useLatestPartialDataSearchResponse(requests$);
 ```
 
 ## Representing the request state to the user

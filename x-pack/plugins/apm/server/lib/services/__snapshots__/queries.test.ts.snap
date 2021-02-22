@@ -6,7 +6,6 @@ Object {
     "events": Array [
       "error",
       "metric",
-      "sourcemap",
       "transaction",
     ],
   },
@@ -102,14 +101,6 @@ Array [
           "aggs": Object {
             "transactionType": Object {
               "aggs": Object {
-                "agentName": Object {
-                  "top_hits": Object {
-                    "docvalue_fields": Array [
-                      "agent.name",
-                    ],
-                    "size": 1,
-                  },
-                },
                 "avg_duration": Object {
                   "avg": Object {
                     "field": "transaction.duration.us",
@@ -122,13 +113,6 @@ Array [
                   },
                 },
                 "outcomes": Object {
-                  "aggs": Object {
-                    "count": Object {
-                      "value_count": Object {
-                        "field": "transaction.duration.us",
-                      },
-                    },
-                  },
                   "terms": Object {
                     "field": "event.outcome",
                     "include": Array [
@@ -137,9 +121,14 @@ Array [
                     ],
                   },
                 },
-                "real_document_count": Object {
-                  "value_count": Object {
-                    "field": "transaction.duration.us",
+                "sample": Object {
+                  "top_metrics": Object {
+                    "metrics": Object {
+                      "field": "agent.name",
+                    },
+                    "sort": Object {
+                      "@timestamp": "desc",
+                    },
                   },
                 },
                 "timeseries": Object {
@@ -150,24 +139,12 @@ Array [
                       },
                     },
                     "outcomes": Object {
-                      "aggs": Object {
-                        "count": Object {
-                          "value_count": Object {
-                            "field": "transaction.duration.us",
-                          },
-                        },
-                      },
                       "terms": Object {
                         "field": "event.outcome",
                         "include": Array [
                           "failure",
                           "success",
                         ],
-                      },
-                    },
-                    "real_document_count": Object {
-                      "value_count": Object {
-                        "field": "transaction.duration.us",
                       },
                     },
                   },
@@ -184,9 +161,6 @@ Array [
               },
               "terms": Object {
                 "field": "transaction.type",
-                "order": Object {
-                  "real_document_count": "desc",
-                },
               },
             },
           },

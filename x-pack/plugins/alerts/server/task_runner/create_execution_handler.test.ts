@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { createExecutionHandler, CreateExecutionHandlerOptions } from './create_execution_handler';
@@ -15,7 +16,7 @@ import { eventLoggerMock } from '../../../event_log/server/event_logger.mock';
 import { KibanaRequest } from 'kibana/server';
 import { asSavedObjectExecutionSource } from '../../../actions/server';
 import { InjectActionParamsOpts } from './inject_action_params';
-import { UntypedNormalizedAlertType } from '../alert_type_registry';
+import { NormalizedAlertType } from '../alert_type_registry';
 import {
   AlertTypeParams,
   AlertTypeState,
@@ -27,7 +28,14 @@ jest.mock('./inject_action_params', () => ({
   injectActionParams: jest.fn(),
 }));
 
-const alertType: UntypedNormalizedAlertType = {
+const alertType: NormalizedAlertType<
+  AlertTypeParams,
+  AlertTypeState,
+  AlertInstanceState,
+  AlertInstanceContext,
+  'default' | 'other-group',
+  'recovered'
+> = {
   id: 'test',
   name: 'Test',
   actionGroups: [
@@ -53,7 +61,9 @@ const createExecutionHandlerParams: jest.Mocked<
     AlertTypeParams,
     AlertTypeState,
     AlertInstanceState,
-    AlertInstanceContext
+    AlertInstanceContext,
+    'default' | 'other-group',
+    'recovered'
   >
 > = {
   actionsPlugin: mockActionsPlugin,
@@ -62,6 +72,7 @@ const createExecutionHandlerParams: jest.Mocked<
   alertName: 'name-of-alert',
   tags: ['tag-A', 'tag-B'],
   apiKey: 'MTIzOmFiYw==',
+  kibanaBaseUrl: 'http://localhost:5601',
   alertType,
   logger: loggingSystemMock.create().get(),
   eventLogger: mockEventLogger,
@@ -348,7 +359,9 @@ test('state attribute gets parameterized', async () => {
 test(`logs an error when action group isn't part of actionGroups available for the alertType`, async () => {
   const executionHandler = createExecutionHandler(createExecutionHandlerParams);
   const result = await executionHandler({
-    actionGroup: 'invalid-group',
+    // we have to trick the compiler as this is an invalid type and this test checks whether we
+    // enforce this at runtime as well as compile time
+    actionGroup: 'invalid-group' as 'default' | 'other-group',
     context: {},
     state: {},
     alertInstanceId: '2',

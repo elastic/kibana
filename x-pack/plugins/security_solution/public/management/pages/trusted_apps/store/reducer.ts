@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 // eslint-disable-next-line import/no-nodejs-modules
@@ -27,6 +28,7 @@ import {
   TrustedAppCreationDialogFormStateUpdated,
   TrustedAppCreationDialogConfirmed,
   TrustedAppCreationDialogClosed,
+  TrustedAppsExistResponse,
 } from './action';
 
 import { TrustedAppsListPageState } from '../state';
@@ -35,6 +37,7 @@ import {
   initialDeletionDialogState,
   initialTrustedAppsPageState,
 } from './builders';
+import { entriesExistState } from './selectors';
 
 type StateReducer = ImmutableReducer<TrustedAppsListPageState, AppAction>;
 type CaseReducer<T extends AppAction> = (
@@ -142,6 +145,16 @@ const userChangedUrl: CaseReducer<UserChangedUrl> = (state, action) => {
   }
 };
 
+const updateEntriesExists: CaseReducer<TrustedAppsExistResponse> = (state, { payload }) => {
+  if (entriesExistState(state) !== payload) {
+    return {
+      ...state,
+      entriesExist: payload,
+    };
+  }
+  return state;
+};
+
 export const trustedAppsPageReducer: StateReducer = (
   state = initialTrustedAppsPageState(),
   action
@@ -182,6 +195,9 @@ export const trustedAppsPageReducer: StateReducer = (
 
     case 'userChangedUrl':
       return userChangedUrl(state, action);
+
+    case 'trustedAppsExistStateChanged':
+      return updateEntriesExists(state, action);
   }
 
   return state;

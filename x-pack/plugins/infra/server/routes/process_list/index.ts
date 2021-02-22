@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import Boom from '@hapi/boom';
@@ -34,23 +35,17 @@ export const initProcessListRoute = (libs: InfraBackendLibs) => {
       },
     },
     async (requestContext, request, response) => {
-      try {
-        const options = pipe(
-          ProcessListAPIRequestRT.decode(request.body),
-          fold(throwErrors(Boom.badRequest), identity)
-        );
+      const options = pipe(
+        ProcessListAPIRequestRT.decode(request.body),
+        fold(throwErrors(Boom.badRequest), identity)
+      );
 
-        const client = createSearchClient(requestContext, framework);
-        const processListResponse = await getProcessList(client, options);
+      const client = createSearchClient(requestContext, framework);
+      const processListResponse = await getProcessList(client, options);
 
-        return response.ok({
-          body: ProcessListAPIResponseRT.encode(processListResponse),
-        });
-      } catch (error) {
-        return response.internalError({
-          body: error.message,
-        });
-      }
+      return response.ok({
+        body: ProcessListAPIResponseRT.encode(processListResponse),
+      });
     }
   );
 
@@ -63,23 +58,17 @@ export const initProcessListRoute = (libs: InfraBackendLibs) => {
       },
     },
     async (requestContext, request, response) => {
-      try {
-        const options = pipe(
-          ProcessListAPIChartRequestRT.decode(request.body),
-          fold(throwErrors(Boom.badRequest), identity)
-        );
+      const options = pipe(
+        ProcessListAPIChartRequestRT.decode(request.body),
+        fold(throwErrors(Boom.badRequest), identity)
+      );
 
-        const client = createSearchClient(requestContext, framework);
-        const processListResponse = await getProcessListChart(client, options);
+      const client = createSearchClient(requestContext, framework);
+      const processListResponse = await getProcessListChart(client, options);
 
-        return response.ok({
-          body: ProcessListAPIChartResponseRT.encode(processListResponse),
-        });
-      } catch (error) {
-        return response.internalError({
-          body: error.message,
-        });
-      }
+      return response.ok({
+        body: ProcessListAPIChartResponseRT.encode(processListResponse),
+      });
     }
   );
 };

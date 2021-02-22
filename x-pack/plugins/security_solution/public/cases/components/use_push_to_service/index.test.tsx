@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 /* eslint-disable react/display-name */
 import React from 'react';
 import { renderHook, act } from '@testing-library/react-hooks';
@@ -37,11 +39,12 @@ jest.mock('../../containers/configure/api');
 describe('usePushToService', () => {
   const caseId = '12345';
   const updateCase = jest.fn();
-  const postPushToService = jest.fn();
+  const pushCaseToExternalService = jest.fn();
   const mockPostPush = {
     isLoading: false,
-    postPushToService,
+    pushCaseToExternalService,
   };
+
   const mockConnector = connectorsMock[0];
   const actionLicense = actionLicenses[0];
   const caseServices = {
@@ -53,11 +56,12 @@ describe('usePushToService', () => {
       hasDataToPush: true,
     },
   };
+
   const defaultArgs = {
     connector: {
       id: mockConnector.id,
       name: mockConnector.name,
-      type: ConnectorTypes.servicenow,
+      type: ConnectorTypes.serviceNowITSM,
       fields: null,
     },
     caseId,
@@ -88,16 +92,14 @@ describe('usePushToService', () => {
       );
       await waitForNextUpdate();
       result.current.pushButton.props.children.props.onClick();
-      expect(postPushToService).toBeCalledWith({
+      expect(pushCaseToExternalService).toBeCalledWith({
         caseId,
-        caseServices,
         connector: {
           fields: null,
           id: 'servicenow-1',
           name: 'My Connector',
-          type: ConnectorTypes.servicenow,
+          type: ConnectorTypes.serviceNowITSM,
         },
-        updateCase,
       });
       expect(result.current.pushCallouts).toBeNull();
     });

@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import {
   CoreSetup,
   RequestHandlerContext,
@@ -64,7 +66,7 @@ export function defineRoutes(core: CoreSetup<FixtureStartDeps>) {
 
       const user = await security.authc.getCurrentUser(req);
       if (!user) {
-        return res.internalError({});
+        throw new Error('Failed to get the current user');
       }
 
       // Create an API key using the new grant API - in this case the Kibana system user is creating the
@@ -76,7 +78,7 @@ export function defineRoutes(core: CoreSetup<FixtureStartDeps>) {
       });
 
       if (!createAPIKeyResult) {
-        return res.internalError({});
+        throw new Error('Failed to grant an API Key');
       }
 
       const result = await savedObjectsWithAlerts.update<RawAlert>(

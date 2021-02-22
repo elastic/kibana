@@ -4,8 +4,29 @@
 
 ## PluginInitializerContext.logger property
 
+ instance already bound to the plugin's logging context
+
 <b>Signature:</b>
 
 ```typescript
 logger: LoggerFactory;
 ```
+
+## Example
+
+
+```typescript
+// plugins/my-plugin/server/plugin.ts
+// "id: myPlugin" in `plugins/my-plugin/kibana.yaml`
+
+export class MyPlugin implements Plugin  {
+  constructor(private readonly initContext: PluginInitializerContext) {
+    this.logger = initContext.logger.get();
+    // `logger` context: `plugins.myPlugin`
+    this.mySubLogger = initContext.logger.get('sub'); // or this.logger.get('sub');
+    // `mySubLogger` context: `plugins.myPlugin.sub`
+  }
+}
+
+```
+

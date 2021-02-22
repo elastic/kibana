@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { schema } from '@kbn/config-schema';
@@ -275,6 +276,40 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
   /**
    * @apiGroup JobService
    *
+   * @api {post} /api/ml/jobs/job_for_cloning Get job for cloning
+   * @apiName GetJobForCloning
+   * @apiDescription Get the job configuration with auto generated fields excluded for cloning
+   *
+   * @apiSchema (body) jobIdSchema
+   */
+  router.post(
+    {
+      path: '/api/ml/jobs/job_for_cloning',
+      validate: {
+        body: jobIdSchema,
+      },
+      options: {
+        tags: ['access:ml:canGetJobs'],
+      },
+    },
+    routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, request, response }) => {
+      try {
+        const { getJobForCloning } = jobServiceProvider(client, mlClient);
+        const { jobId } = request.body;
+
+        const resp = await getJobForCloning(jobId);
+        return response.ok({
+          body: resp,
+        });
+      } catch (e) {
+        return response.customError(wrapError(e));
+      }
+    })
+  );
+
+  /**
+   * @apiGroup JobService
+   *
    * @api {post} /api/ml/jobs/jobs Create jobs list
    * @apiName CreateFullJobsList
    * @apiDescription Creates a list of jobs
@@ -499,6 +534,7 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
           aggFieldNamePairs,
           splitFieldName,
           splitFieldValue,
+          runtimeMappings,
         } = request.body;
 
         const { newJobLineChart } = jobServiceProvider(client, mlClient);
@@ -511,7 +547,8 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
           query,
           aggFieldNamePairs,
           splitFieldName,
-          splitFieldValue
+          splitFieldValue,
+          runtimeMappings
         );
 
         return response.ok({
@@ -553,6 +590,7 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
           query,
           aggFieldNamePairs,
           splitFieldName,
+          runtimeMappings,
         } = request.body;
 
         const { newJobPopulationChart } = jobServiceProvider(client, mlClient);
@@ -564,7 +602,8 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
           intervalMs,
           query,
           aggFieldNamePairs,
-          splitFieldName
+          splitFieldName,
+          runtimeMappings
         );
 
         return response.ok({
@@ -670,6 +709,7 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
           start,
           end,
           analyzer,
+          runtimeMappings,
         } = request.body;
 
         const resp = await validateCategoryExamples(
@@ -680,7 +720,8 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
           timeField,
           start,
           end,
-          analyzer
+          analyzer,
+          runtimeMappings
         );
 
         return response.ok({

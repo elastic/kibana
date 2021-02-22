@@ -1,12 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import request, { Cookie } from 'request';
 import { delay } from 'bluebird';
 import expect from '@kbn/expect';
+import { adminTestUser } from '@kbn/test';
 import type { AuthenticationProvider } from '../../../../plugins/security/common/model';
 import { getSAMLRequestId, getSAMLResponse } from '../../fixtures/saml/saml_tools';
 import { FtrProviderContext } from '../../ftr_provider_context';
@@ -14,9 +16,10 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertestWithoutAuth');
   const es = getService('es');
+  const esDeleteAllIndices = getService('esDeleteAllIndices');
   const config = getService('config');
   const randomness = getService('randomness');
-  const [basicUsername, basicPassword] = config.get('servers.elasticsearch.auth').split(':');
+  const { username: basicUsername, password: basicPassword } = adminTestUser;
   const kibanaServerConfig = config.get('servers.kibana');
 
   async function checkSessionCookie(
@@ -67,7 +70,7 @@ export default function ({ getService }: FtrProviderContext) {
   describe('Session Lifespan cleanup', () => {
     beforeEach(async () => {
       await es.cluster.health({ index: '.kibana_security_session*', wait_for_status: 'green' });
-      await es.indices.delete({ index: '.kibana_security_session*' }, { ignore: [404] });
+      await esDeleteAllIndices('.kibana_security_session*');
     });
 
     it('should properly clean up session expired because of lifespan', async function () {

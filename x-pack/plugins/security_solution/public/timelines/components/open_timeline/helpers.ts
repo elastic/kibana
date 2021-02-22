@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import ApolloClient from 'apollo-client';
@@ -433,7 +434,7 @@ export const dispatchUpdateTimeline = (dispatch: Dispatch): DispatchUpdateTimeli
         id,
         filterQuery: {
           kuery: {
-            kind: 'kuery',
+            kind: timeline.kqlQuery.filterQuery.kuery.kind ?? 'kuery',
             expression: timeline.kqlQuery.filterQuery.kuery.expression || '',
           },
           serializedQuery: timeline.kqlQuery.filterQuery.serializedQuery || '',

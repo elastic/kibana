@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import _ from 'lodash';
 import { FieldFormat } from 'src/plugins/data/common';
 import { FieldFormatConfig, IFieldFormatsRegistry } from 'src/plugins/data/server';
-import { IndexPatternSavedObject } from '../types';
+import { IndexPatternSavedObjectDeprecatedCSV } from '../types';
 
 /**
  *  Create a map of FieldFormat instances for index pattern fields
@@ -17,7 +18,7 @@ import { IndexPatternSavedObject } from '../types';
  *  @return {Map} key: field name, value: FieldFormat instance
  */
 export function fieldFormatMapFactory(
-  indexPatternSavedObject: IndexPatternSavedObject,
+  indexPatternSavedObject: IndexPatternSavedObjectDeprecatedCSV,
   fieldFormatsRegistry: IFieldFormatsRegistry,
   timezone: string | undefined
 ) {

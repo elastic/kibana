@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { useEffect, useMemo, useRef } from 'react';
@@ -65,7 +66,12 @@ export const useInitSourcerer = (
           selectedPatterns: [...ConfigIndexPatterns, signalIndexName],
         })
       );
-    } else if (signalIndexNameSelector != null && initialTimelineSourcerer.current) {
+    } else if (
+      signalIndexNameSelector != null &&
+      (activeTimeline == null ||
+        (activeTimeline != null && activeTimeline.savedObjectId == null)) &&
+      initialTimelineSourcerer.current
+    ) {
       initialTimelineSourcerer.current = false;
       dispatch(
         sourcererActions.setSelectedIndexPatterns({

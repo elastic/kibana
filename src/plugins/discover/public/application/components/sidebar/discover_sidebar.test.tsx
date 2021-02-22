@@ -1,29 +1,18 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { each, cloneDeep } from 'lodash';
 import { ReactWrapper } from 'enzyme';
 import { findTestSubject } from '@elastic/eui/lib/test';
 // @ts-ignore
-import realHits from 'fixtures/real_hits.js';
+import realHits from '../../../__fixtures__/real_hits.js';
 // @ts-ignore
-import stubbedLogstashFields from 'fixtures/logstash_fields';
+import stubbedLogstashFields from '../../../__fixtures__/logstash_fields';
 import { mountWithIntl } from '@kbn/test/jest';
 import React from 'react';
 import { DiscoverSidebarProps } from './discover_sidebar';
@@ -35,6 +24,8 @@ import { getDefaultFieldFilter } from './lib/field_filter';
 import { DiscoverSidebar } from './discover_sidebar';
 import { DiscoverServices } from '../../../build_services';
 import { ElasticSearchHit } from '../../doc_views/doc_views_types';
+import { configMock } from '../../../__mocks__/config';
+import { indexPatternsMock } from '../../../__mocks__/index_patterns';
 
 const mockServices = ({
   history: () => ({
@@ -67,7 +58,7 @@ jest.mock('./lib/get_index_pattern_field_list', () => ({
   getIndexPatternFieldList: jest.fn((indexPattern) => indexPattern.fields),
 }));
 
-function getCompProps() {
+function getCompProps(): DiscoverSidebarProps {
   const indexPattern = getStubIndexPattern(
     'logstash-*',
     (cfg: any) => cfg,
@@ -95,20 +86,22 @@ function getCompProps() {
     }
   }
   return {
+    config: configMock,
     columns: ['extension'],
     fieldCounts,
     hits,
     indexPatternList,
+    indexPatterns: indexPatternsMock,
     onAddFilter: jest.fn(),
     onAddField: jest.fn(),
     onRemoveField: jest.fn(),
     selectedIndexPattern: indexPattern,
     services: mockServices,
-    setIndexPattern: jest.fn(),
     state: {},
     trackUiMetric: jest.fn(),
     fieldFilter: getDefaultFieldFilter(),
     setFieldFilter: jest.fn(),
+    setAppState: jest.fn(),
   };
 }
 

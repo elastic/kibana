@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useCallback, useEffect, useState } from 'react';
@@ -14,7 +15,6 @@ import {
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
-  EuiOverlayMask,
   EuiPanel,
   EuiSpacer,
   EuiText,
@@ -210,7 +210,7 @@ export const ValueListsModalComponent: React.FC<ValueListsModalProps> = ({
   const columns = buildColumns(handleExport, handleDelete);
 
   return (
-    <EuiOverlayMask onClick={onClose}>
+    <>
       <EuiModal onClose={onClose} maxWidth={800}>
         <EuiModalHeader>
           <EuiModalHeaderTitle>{i18n.MODAL_TITLE}</EuiModalHeaderTitle>
@@ -254,7 +254,7 @@ export const ValueListsModalComponent: React.FC<ValueListsModalProps> = ({
         name={exportDownload.name}
         onDownload={() => setExportDownload({})}
       />
-    </EuiOverlayMask>
+    </>
   );
 };
 

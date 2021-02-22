@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { ReactNode } from 'react';
@@ -23,6 +24,7 @@ import { ServiceOverview } from './';
 import { waitFor } from '@testing-library/dom';
 import * as callApmApiModule from '../../../services/rest/createCallApmApi';
 import * as useApmServiceContextHooks from '../../../context/apm_service/use_apm_service_context';
+import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
 
 const KibanaReactContext = createKibanaReactContext({
   usageCollection: { reportUiCounter: () => {} },
@@ -45,7 +47,11 @@ function Wrapper({ children }: { children?: ReactNode }) {
       <KibanaReactContext.Provider>
         <MockApmPluginContextWrapper value={value}>
           <MockUrlParamsContextProvider
-            params={{ rangeFrom: 'now-15m', rangeTo: 'now' }}
+            params={{
+              rangeFrom: 'now-15m',
+              rangeTo: 'now',
+              latencyAggregationType: LatencyAggregationType.avg,
+            }}
           >
             {children}
           </MockUrlParamsContextProvider>
@@ -74,21 +80,20 @@ describe('ServiceOverview', () => {
         status: FETCH_STATUS.SUCCESS,
       });
 
+    /* eslint-disable @typescript-eslint/naming-convention */
     const calls = {
-      // eslint-disable-next-line @typescript-eslint/naming-convention
-      'GET /api/apm/services/{serviceName}/error_groups': {
+      'GET /api/apm/services/{serviceName}/error_groups/primary_statistics': {
         error_groups: [],
-        total_error_groups: 0,
       },
-      'GET /api/apm/services/{serviceName}/transactions/groups/overview': {
+      'GET /api/apm/services/{serviceName}/transactions/groups/primary_statistics': {
         transactionGroups: [],
         totalTransactionGroups: 0,
         isAggregationAccurate: true,
       },
       'GET /api/apm/services/{serviceName}/dependencies': [],
-      // eslint-disable-next-line @typescript-eslint/naming-convention
       'GET /api/apm/services/{serviceName}/service_overview_instances': [],
     };
+    /* eslint-enable @typescript-eslint/naming-convention */
 
     jest
       .spyOn(callApmApiModule, 'createCallApmApi')

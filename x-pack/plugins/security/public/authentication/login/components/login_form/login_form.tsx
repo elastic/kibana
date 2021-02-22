@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import './login_form.scss';
@@ -221,6 +222,7 @@ export class LoginForm extends Component<Props, State> {
             {...this.validator.validateUsername(this.state.username)}
           >
             <EuiFieldText
+              autoComplete="off"
               id="username"
               name="username"
               data-test-subj="loginUsername"

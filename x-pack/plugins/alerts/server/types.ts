@@ -1,8 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
+import type { IRouter, RequestHandlerContext } from 'src/core/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { PublicAlertInstance } from './alert_instance';
 import { AlertTypeRegistry as OrigAlertTypeRegistry } from './alert_type_registry';
@@ -29,6 +32,7 @@ import {
   AlertExecutionStatusErrorReasons,
   AlertsHealth,
   AlertNotifyWhenType,
+  WithoutReservedActionGroups,
 } from '../common';
 import { LicenseType } from '../../licensing/server';
 
@@ -36,15 +40,26 @@ export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'param
 export type GetServicesFunction = (request: KibanaRequest) => Services;
 export type SpaceIdToNamespaceFunction = (spaceId?: string) => string | undefined;
 
-declare module 'src/core/server' {
-  interface RequestHandlerContext {
-    alerting?: {
-      getAlertsClient: () => AlertsClient;
-      listTypes: AlertTypeRegistry['list'];
-      getFrameworkHealth: () => Promise<AlertsHealth>;
-    };
-  }
+/**
+ * @public
+ */
+export interface AlertingApiRequestHandlerContext {
+  getAlertsClient: () => AlertsClient;
+  listTypes: AlertTypeRegistry['list'];
+  getFrameworkHealth: () => Promise<AlertsHealth>;
 }
+
+/**
+ * @internal
+ */
+export interface AlertingRequestHandlerContext extends RequestHandlerContext {
+  alerting: AlertingApiRequestHandlerContext;
+}
+
+/**
+ * @internal
+ */
+export type AlertingRouter = IRouter<AlertingRequestHandlerContext>;
 
 export interface Services {
   /**
@@ -58,21 +73,25 @@ export interface Services {
 
 export interface AlertServices<
   InstanceState extends AlertInstanceState = AlertInstanceState,
-  InstanceContext extends AlertInstanceContext = AlertInstanceContext
+  InstanceContext extends AlertInstanceContext = AlertInstanceContext,
+  ActionGroupIds extends string = never
 > extends Services {
-  alertInstanceFactory: (id: string) => PublicAlertInstance<InstanceState, InstanceContext>;
+  alertInstanceFactory: (
+    id: string
+  ) => PublicAlertInstance<InstanceState, InstanceContext, ActionGroupIds>;
 }
 
 export interface AlertExecutorOptions<
   Params extends AlertTypeParams = never,
   State extends AlertTypeState = never,
   InstanceState extends AlertInstanceState = never,
-  InstanceContext extends AlertInstanceContext = never
+  InstanceContext extends AlertInstanceContext = never,
+  ActionGroupIds extends string = never
 > {
   alertId: string;
   startedAt: Date;
   previousStartedAt: Date | null;
-  services: AlertServices<InstanceState, InstanceContext>;
+  services: AlertServices<InstanceState, InstanceContext, ActionGroupIds>;
   params: Params;
   state: State;
   spaceId: string;
@@ -86,15 +105,17 @@ export interface AlertExecutorOptions<
 export interface ActionVariable {
   name: string;
   description: string;
+  useWithTripleBracesInTemplates?: boolean;
 }
 
 export type ExecutorType<
   Params extends AlertTypeParams = never,
   State extends AlertTypeState = never,
   InstanceState extends AlertInstanceState = never,
-  InstanceContext extends AlertInstanceContext = never
+  InstanceContext extends AlertInstanceContext = never,
+  ActionGroupIds extends string = never
 > = (
-  options: AlertExecutorOptions<Params, State, InstanceState, InstanceContext>
+  options: AlertExecutorOptions<Params, State, InstanceState, InstanceContext, ActionGroupIds>
 ) => Promise<State | void>;
 
 export interface AlertTypeParamsValidator<Params extends AlertTypeParams> {
@@ -104,17 +125,29 @@ export interface AlertType<
   Params extends AlertTypeParams = never,
   State extends AlertTypeState = never,
   InstanceState extends AlertInstanceState = never,
-  InstanceContext extends AlertInstanceContext = never
+  InstanceContext extends AlertInstanceContext = never,
+  ActionGroupIds extends string = never,
+  RecoveryActionGroupId extends string = never
 > {
   id: string;
   name: string;
   validate?: {
     params?: AlertTypeParamsValidator<Params>;
   };
-  actionGroups: ActionGroup[];
-  defaultActionGroupId: ActionGroup['id'];
-  recoveryActionGroup?: ActionGroup;
-  executor: ExecutorType<Params, State, InstanceState, InstanceContext>;
+  actionGroups: Array<ActionGroup<ActionGroupIds>>;
+  defaultActionGroupId: ActionGroup<ActionGroupIds>['id'];
+  recoveryActionGroup?: ActionGroup<RecoveryActionGroupId>;
+  executor: ExecutorType<
+    Params,
+    State,
+    InstanceState,
+    InstanceContext,
+    /**
+     * Ensure that the reserved ActionGroups (such as `Recovered`) are not
+     * available for scheduling in the Executor
+     */
+    WithoutReservedActionGroups<ActionGroupIds, RecoveryActionGroupId>
+  >;
   producer: string;
   actionVariables?: {
     context?: ActionVariable[];

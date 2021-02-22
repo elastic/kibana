@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import RE2 from 're2';
@@ -131,8 +132,10 @@ export function jobSavedObjectServiceFactory(
       type: jobType,
     });
 
+    // * space cannot be used in a delete call, so use undefined which
+    // is the same as specifying the default space
     await internalSavedObjectsClient.delete(ML_SAVED_OBJECT_TYPE, id, {
-      namespace,
+      namespace: namespace === '*' ? undefined : namespace,
       force: true,
     });
   }

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -287,7 +288,12 @@ describe('PreviewQuery', () => {
             idAria="queryPreview"
             query={{ query: { query: 'file where true', language: 'kuery' }, filters: [] }}
             index={['foo-*']}
-            threshold={{ field: 'agent.hostname', value: 200 }}
+            threshold={{
+              field: 'agent.hostname',
+              value: 200,
+              cardinality_field: 'user.name',
+              cardinality_value: 2,
+            }}
             isDisabled={false}
           />
         </TestProviders>
@@ -329,7 +335,12 @@ describe('PreviewQuery', () => {
             idAria="queryPreview"
             query={{ query: { query: 'file where true', language: 'kuery' }, filters: [] }}
             index={['foo-*']}
-            threshold={{ field: 'agent.hostname', value: 200 }}
+            threshold={{
+              field: 'agent.hostname',
+              value: 200,
+              cardinality_field: 'user.name',
+              cardinality_value: 2,
+            }}
             isDisabled={false}
           />
         </TestProviders>
@@ -368,7 +379,12 @@ describe('PreviewQuery', () => {
             idAria="queryPreview"
             query={{ query: { query: 'file where true', language: 'kuery' }, filters: [] }}
             index={['foo-*']}
-            threshold={{ field: undefined, value: 200 }}
+            threshold={{
+              field: undefined,
+              value: 200,
+              cardinality_field: 'user.name',
+              cardinality_value: 2,
+            }}
             isDisabled={false}
           />
         </TestProviders>
@@ -395,7 +411,12 @@ describe('PreviewQuery', () => {
             idAria="queryPreview"
             query={{ query: { query: 'file where true', language: 'kuery' }, filters: [] }}
             index={['foo-*']}
-            threshold={{ field: '   ', value: 200 }}
+            threshold={{
+              field: '   ',
+              value: 200,
+              cardinality_field: 'user.name',
+              cardinality_value: 2,
+            }}
             isDisabled={false}
           />
         </TestProviders>

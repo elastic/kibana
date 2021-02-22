@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiFlexGroup, EuiSpacer } from '@elastic/eui';
@@ -22,6 +23,7 @@ import { Args } from '../args';
 import { AuthSsh } from './auth_ssh';
 import { ExitCodeDraggable } from '../exit_code_draggable';
 import { FileDraggable } from '../file_draggable';
+import { FileHash } from '../file_hash';
 import { Package } from './package';
 import { Badge } from '../../../../../../common/components/page';
 import { ParentProcessDraggable } from '../parent_process_draggable';
@@ -37,6 +39,8 @@ interface Props {
   endgamePid: number | null | undefined;
   endgameProcessName: string | null | undefined;
   eventAction: string | null | undefined;
+  fileExtOriginalPath: string | null | undefined;
+  fileHashSha256: string | null | undefined;
   fileName: string | null | undefined;
   filePath: string | null | undefined;
   hostName: string | null | undefined;
@@ -47,14 +51,17 @@ interface Props {
   packageSummary: string | null | undefined;
   packageVersion: string | null | undefined;
   processName: string | null | undefined;
+  processParentName: string | null | undefined;
+  processParentPid: number | null | undefined;
+  processExitCode: number | null | undefined;
   processPid: number | null | undefined;
   processPpid: number | null | undefined;
   processExecutable: string | null | undefined;
-  processHashMd5: string | null | undefined;
-  processHashSha1: string | null | undefined;
   processHashSha256: string | null | undefined;
   processTitle: string | null | undefined;
   showMessage: boolean;
+  skipRedundantFileDetails?: boolean;
+  skipRedundantProcessDetails?: boolean;
   sshSignature: string | null | undefined;
   sshMethod: string | null | undefined;
   text: string | null | undefined;
@@ -74,6 +81,8 @@ export const SystemGenericFileLine = React.memo<Props>(
     endgamePid,
     endgameProcessName,
     eventAction,
+    fileExtOriginalPath,
+    fileHashSha256,
     fileName,
     filePath,
     hostName,
@@ -81,17 +90,20 @@ export const SystemGenericFileLine = React.memo<Props>(
     message,
     outcome,
     packageName,
+    processParentName,
+    processParentPid,
+    processExitCode,
     packageSummary,
     packageVersion,
     processExecutable,
-    processHashMd5,
-    processHashSha1,
     processHashSha256,
     processName,
     processPid,
     processPpid,
     processTitle,
     showMessage,
+    skipRedundantFileDetails = false,
+    skipRedundantProcessDetails = false,
     sshSignature,
     sshMethod,
     text,
@@ -112,14 +124,18 @@ export const SystemGenericFileLine = React.memo<Props>(
         <TokensFlexItem grow={false} component="span">
           {text}
         </TokensFlexItem>
-        <FileDraggable
-          contextId={contextId}
-          endgameFileName={endgameFileName}
-          endgameFilePath={endgameFilePath}
-          eventId={id}
-          fileName={fileName}
-          filePath={filePath}
-        />
+
+        {!skipRedundantFileDetails && (
+          <FileDraggable
+            contextId={contextId}
+            endgameFileName={endgameFileName}
+            endgameFilePath={endgameFilePath}
+            eventId={id}
+            fileExtOriginalPath={fileExtOriginalPath}
+            fileName={fileName}
+            filePath={filePath}
+          />
+        )}
         {showVia(eventAction) && (
           <TokensFlexItem data-test-subj="via" grow={false} component="span">
             {i18n.VIA}
@@ -141,6 +157,7 @@ export const SystemGenericFileLine = React.memo<Props>(
           contextId={contextId}
           endgameExitCode={endgameExitCode}
           eventId={id}
+          processExitCode={processExitCode}
           text={i18n.WITH_EXIT_CODE}
         />
         {!isProcessStoppedOrTerminationEvent(eventAction) && (
@@ -148,6 +165,8 @@ export const SystemGenericFileLine = React.memo<Props>(
             contextId={contextId}
             endgameParentProcessName={endgameParentProcessName}
             eventId={id}
+            processParentName={processParentName}
+            processParentPid={processParentPid}
             processPpid={processPpid}
             text={i18n.VIA_PARENT_PROCESS}
           />
@@ -180,13 +199,12 @@ export const SystemGenericFileLine = React.memo<Props>(
           packageVersion={packageVersion}
         />
       </EuiFlexGroup>
-      <ProcessHash
-        contextId={contextId}
-        eventId={id}
-        processHashMd5={processHashMd5}
-        processHashSha1={processHashSha1}
-        processHashSha256={processHashSha256}
-      />
+      {!skipRedundantFileDetails && (
+        <FileHash contextId={contextId} eventId={id} fileHashSha256={fileHashSha256} />
+      )}
+      {!skipRedundantProcessDetails && (
+        <ProcessHash contextId={contextId} eventId={id} processHashSha256={processHashSha256} />
+      )}
 
       {message != null && showMessage && (
         <>
@@ -211,12 +229,22 @@ interface GenericDetailsProps {
   data: Ecs;
   contextId: string;
   showMessage?: boolean;
+  skipRedundantFileDetails?: boolean;
+  skipRedundantProcessDetails?: boolean;
   text: string;
   timelineId: string;
 }
 
 export const SystemGenericFileDetails = React.memo<GenericDetailsProps>(
-  ({ data, contextId, showMessage = true, text, timelineId }) => {
+  ({
+    data,
+    contextId,
+    showMessage = true,
+    skipRedundantFileDetails = false,
+    skipRedundantProcessDetails = false,
+    text,
+    timelineId,
+  }) => {
     const id = data._id;
     const message: string | null = data.message != null ? data.message[0] : null;
     const hostName: string | null | undefined = get('host.name[0]', data);
@@ -230,6 +258,8 @@ export const SystemGenericFileDetails = React.memo<GenericDetailsProps>(
     const endgamePid: number | null | undefined = get('endgame.pid[0]', data);
     const endgameProcessName: string | null | undefined = get('endgame.process_name[0]', data);
     const eventAction: string | null | undefined = get('event.action[0]', data);
+    const fileExtOriginalPath: string | null | undefined = get('file.Ext.original.path[0]', data);
+    const fileHashSha256: string | null | undefined = get('file.hash.sha256[0]', data);
     const fileName: string | null | undefined = get('file.name[0]', data);
     const filePath: string | null | undefined = get('file.path[0]', data);
     const userDomain: string | null | undefined = get('user.domain[0]', data);
@@ -238,8 +268,9 @@ export const SystemGenericFileDetails = React.memo<GenericDetailsProps>(
     const packageName: string | null | undefined = get('system.audit.package.name[0]', data);
     const packageSummary: string | null | undefined = get('system.audit.package.summary[0]', data);
     const packageVersion: string | null | undefined = get('system.audit.package.version[0]', data);
-    const processHashMd5: string | null | undefined = get('process.hash.md5[0]', data);
-    const processHashSha1: string | null | undefined = get('process.hash.sha1[0]', data);
+    const processExitCode: number | null | undefined = get('process.exit_code[0]', data);
+    const processParentName: string | null | undefined = get('process.parent.name[0]', data);
+    const processParentPid: number | null | undefined = get('process.parent.pid[0]', data);
     const processHashSha256: string | null | undefined = get('process.hash.sha256[0]', data);
     const processPid: number | null | undefined = get('process.pid[0]', data);
     const processPpid: number | null | undefined = get('process.ppid[0]', data);
@@ -265,25 +296,30 @@ export const SystemGenericFileDetails = React.memo<GenericDetailsProps>(
           endgamePid={endgamePid}
           endgameProcessName={endgameProcessName}
           eventAction={eventAction}
+          fileExtOriginalPath={fileExtOriginalPath}
+          fileHashSha256={fileHashSha256}
           fileName={fileName}
           filePath={filePath}
           userDomain={userDomain}
           userName={userName}
           message={message}
+          processExitCode={processExitCode}
+          processParentName={processParentName}
+          processParentPid={processParentPid}
           processTitle={processTitle}
           workingDirectory={workingDirectory}
           args={args}
           packageName={packageName}
           packageSummary={packageSummary}
           packageVersion={packageVersion}
-          processHashMd5={processHashMd5}
-          processHashSha1={processHashSha1}
           processHashSha256={processHashSha256}
           processName={processName}
           processPid={processPid}
           processPpid={processPpid}
           processExecutable={processExecutable}
           showMessage={showMessage}
+          skipRedundantFileDetails={skipRedundantFileDetails}
+          skipRedundantProcessDetails={skipRedundantProcessDetails}
           sshSignature={sshSignature}
           sshMethod={sshMethod}
           outcome={outcome}

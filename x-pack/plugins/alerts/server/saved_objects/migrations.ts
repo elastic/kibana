@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import {
   SavedObjectMigrationMap,
   SavedObjectUnsanitizedDoc,
@@ -11,11 +13,9 @@ import {
 } from '../../../../../src/core/server';
 import { RawAlert } from '../types';
 import { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objects/server';
-import {
-  APP_ID as SIEM_APP_ID,
-  SERVER_APP_ID as SIEM_SERVER_APP_ID,
-} from '../../../security_solution/common/constants';
 
+const SIEM_APP_ID = 'securitySolution';
+const SIEM_SERVER_APP_ID = 'siem';
 export const LEGACY_LAST_MODIFIED_VERSION = 'pre-7.10.0';
 
 type AlertMigration = (

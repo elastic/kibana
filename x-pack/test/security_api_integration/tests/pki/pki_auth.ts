@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -10,6 +11,7 @@ import { delay } from 'bluebird';
 import { readFileSync } from 'fs';
 import { resolve } from 'path';
 import { CA_CERT_PATH } from '@kbn/dev-utils';
+import { adminTestUser } from '@kbn/test';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 const CA_CERT = readFileSync(CA_CERT_PATH);
@@ -21,7 +23,6 @@ const UNTRUSTED_CLIENT_CERT = readFileSync(
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertestWithoutAuth');
-  const config = getService('config');
 
   function checkCookieIsSet(cookie: Cookie) {
     expect(cookie.value).to.not.be.empty();
@@ -64,7 +65,6 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('does not prevent basic login', async () => {
-      const [username, password] = config.get('servers.elasticsearch.auth').split(':');
       const response = await supertest
         .post('/internal/security/login')
         .ca(CA_CERT)
@@ -74,7 +74,7 @@ export default function ({ getService }: FtrProviderContext) {
           providerType: 'basic',
           providerName: 'basic',
           currentURL: '/',
-          params: { username, password },
+          params: { username: adminTestUser.username, password: adminTestUser.password },
         })
         .expect(200);
 
@@ -92,7 +92,7 @@ export default function ({ getService }: FtrProviderContext) {
         .set('Cookie', cookie.cookieString())
         .expect(200);
 
-      expect(user.username).to.eql(username);
+      expect(user.username).to.eql(adminTestUser.username);
       expect(user.authentication_provider).to.eql({ type: 'basic', name: 'basic' });
       // Do not assert on the `authentication_realm`, as the value differs for on-prem vs cloud
     });

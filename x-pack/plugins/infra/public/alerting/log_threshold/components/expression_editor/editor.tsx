@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiButton, EuiCallOut, EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
@@ -14,10 +15,12 @@ import {
   ForLastExpression,
 } from '../../../../../../triggers_actions_ui/public';
 import {
-  PartialAlertParams,
   Comparator,
   isRatioAlert,
+  PartialAlertParams,
+  PartialCountAlertParams,
   PartialCriteria as PartialCriteriaType,
+  PartialRatioAlertParams,
   ThresholdType,
   timeUnitRT,
 } from '../../../../../common/alerting/logs/log_threshold/types';
@@ -47,7 +50,7 @@ interface LogsContextMeta {
 
 const DEFAULT_BASE_EXPRESSION = {
   timeSize: 5,
-  timeUnit: 'm',
+  timeUnit: 'm' as const,
 };
 
 const DEFAULT_FIELD = 'log.level';
@@ -60,7 +63,9 @@ const createDefaultCriterion = (
     ? { field: DEFAULT_FIELD, comparator: Comparator.EQ, value }
     : { field: undefined, comparator: undefined, value: undefined };
 
-const createDefaultCountAlertParams = (availableFields: LogIndexField[]) => ({
+const createDefaultCountAlertParams = (
+  availableFields: LogIndexField[]
+): PartialCountAlertParams => ({
   ...DEFAULT_BASE_EXPRESSION,
   count: {
     value: 75,
@@ -69,15 +74,17 @@ const createDefaultCountAlertParams = (availableFields: LogIndexField[]) => ({
   criteria: [createDefaultCriterion(availableFields, 'error')],
 });
 
-const createDefaultRatioAlertParams = (availableFields: LogIndexField[]) => ({
+const createDefaultRatioAlertParams = (
+  availableFields: LogIndexField[]
+): PartialRatioAlertParams => ({
   ...DEFAULT_BASE_EXPRESSION,
   count: {
     value: 2,
     comparator: Comparator.GT,
   },
   criteria: [
-    createDefaultCriterion(availableFields, 'error'),
-    createDefaultCriterion([], 'warning'),
+    [createDefaultCriterion(availableFields, 'error')],
+    [createDefaultCriterion(availableFields, 'warning')],
   ],
 });
 

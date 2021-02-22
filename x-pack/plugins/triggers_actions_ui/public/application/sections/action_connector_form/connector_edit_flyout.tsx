@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React, { useCallback, useReducer, useState, Fragment } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
@@ -26,8 +28,12 @@ import { i18n } from '@kbn/i18n';
 import { Option, none, some } from 'fp-ts/lib/Option';
 import { ActionConnectorForm, getConnectorErrors } from './action_connector_form';
 import { TestConnectorForm } from './test_connector_form';
-import { ActionConnector, ActionTypeRegistryContract } from '../../../types';
-import { connectorReducer } from './connector_reducer';
+import {
+  ActionConnector,
+  ActionTypeRegistryContract,
+  UserConfiguredActionConnector,
+} from '../../../types';
+import { ConnectorReducer, createConnectorReducer } from './connector_reducer';
 import { updateActionConnector, executeAction } from '../../lib/action_connector_api';
 import { hasSaveActionsCapability } from '../../lib/capabilities';
 import {
@@ -66,17 +72,29 @@ export const ConnectorEditFlyout = ({
     docLinks,
     application: { capabilities },
   } = useKibana().services;
+  const getConnectorWithoutSecrets = () => ({
+    ...(initialConnector as UserConfiguredActionConnector<
+      Record<string, unknown>,
+      Record<string, unknown>
+    >),
+    secrets: {},
+  });
   const canSave = hasSaveActionsCapability(capabilities);
 
-  const [{ connector }, dispatch] = useReducer(connectorReducer, {
-    connector: { ...initialConnector, secrets: {} },
+  const reducer: ConnectorReducer<
+    Record<string, unknown>,
+    Record<string, unknown>
+  > = createConnectorReducer<Record<string, unknown>, Record<string, unknown>>();
+  const [{ connector }, dispatch] = useReducer(reducer, {
+    connector: getConnectorWithoutSecrets(),
   });
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [selectedTab, setTab] = useState<EditConectorTabs>(tab);
 
   const [hasChanges, setHasChanges] = useState<boolean>(false);
-  const setConnector = (key: string, value: any) => {
-    dispatch({ command: { type: 'setConnector' }, payload: { key, value } });
+
+  const setConnector = (value: any) => {
+    dispatch({ command: { type: 'setConnector' }, payload: { key: 'connector', value } });
   };
 
   const [testExecutionActionParams, setTestExecutionActionParams] = useState<
@@ -101,7 +119,7 @@ export const ConnectorEditFlyout = ({
   );
 
   const closeFlyout = useCallback(() => {
-    setConnector('connector', { ...initialConnector, secrets: {} });
+    setConnector(getConnectorWithoutSecrets());
     setHasChanges(false);
     setTestExecutionResult(none);
     onClose();
@@ -220,7 +238,6 @@ export const ConnectorEditFlyout = ({
   const onSaveClicked = async (closeAfterSave: boolean = true) => {
     if (hasErrors) {
       setConnector(
-        'connector',
         getConnectorWithInvalidatedFields(
           connector,
           configErrors,
@@ -282,7 +299,6 @@ export const ConnectorEditFlyout = ({
             <ActionConnectorForm
               connector={connector}
               errors={connectorErrors}
-              actionTypeName={connector.actionType}
               dispatch={(changes) => {
                 setHasChanges(true);
                 // if the user changes the connector, "forget" the last execution
@@ -371,7 +387,7 @@ export const ConnectorEditFlyout = ({
                     >
                       <FormattedMessage
                         id="xpack.triggersActionsUI.sections.editConnectorForm.saveAndCloseButtonLabel"
-                        defaultMessage="Save & Close"
+                        defaultMessage="Save & close"
                       />
                     </EuiButton>
                   </EuiFlexItem>

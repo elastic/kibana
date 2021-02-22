@@ -1,13 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import Boom from '@hapi/boom';
 import { KibanaRequest } from 'src/core/server';
-import { GetAllSpacesPurpose, GetSpaceResult } from '../../../spaces/common/model/types';
-import { Space, ISpacesClient } from '../../../spaces/server';
+import {
+  Space,
+  ISpacesClient,
+  GetAllSpacesOptions,
+  GetAllSpacesPurpose,
+  GetSpaceResult,
+} from '../../../spaces/server';
 import { LegacySpacesAuditLogger } from './legacy_audit_logger';
 import { AuthorizationServiceSetup } from '../authorization';
 import { AuditLogger, EventOutcome, SpaceAuditAction, spaceAuditEvent } from '../audit';
@@ -28,11 +34,6 @@ const PURPOSE_PRIVILEGE_MAP: Record<
     authorization.actions.ui.get('savedObjectsManagement', 'shareIntoSpace'),
   ],
 };
-
-interface GetAllSpacesOptions {
-  purpose?: GetAllSpacesPurpose;
-  includeAuthorizedPurposes?: boolean;
-}
 
 export class SecureSpacesClientWrapper implements ISpacesClient {
   private readonly useRbac = this.authorization.mode.useRbacForRequest(this.request);

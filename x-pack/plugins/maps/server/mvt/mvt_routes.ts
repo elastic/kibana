@@ -1,18 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import rison from 'rison-node';
 import { schema } from '@kbn/config-schema';
-import {
-  KibanaRequest,
-  KibanaResponseFactory,
-  Logger,
-  RequestHandlerContext,
-} from 'src/core/server';
+import { KibanaRequest, KibanaResponseFactory, Logger } from 'src/core/server';
 import { IRouter } from 'src/core/server';
+import type { DataRequestHandlerContext } from 'src/plugins/data/server';
 import {
   MVT_GETTILE_API_PATH,
   API_ROOT_PATH,
@@ -24,7 +21,13 @@ import { getGridTile, getTile } from './get_tile';
 
 const CACHE_TIMEOUT = 0; // Todo. determine good value. Unsure about full-implications (e.g. wrt. time-based data).
 
-export function initMVTRoutes({ router, logger }: { logger: Logger; router: IRouter }) {
+export function initMVTRoutes({
+  router,
+  logger,
+}: {
+  router: IRouter<DataRequestHandlerContext>;
+  logger: Logger;
+}) {
   router.get(
     {
       path: `${API_ROOT_PATH}/${MVT_GETTILE_API_PATH}`,
@@ -37,11 +40,12 @@ export function initMVTRoutes({ router, logger }: { logger: Logger; router: IRou
           requestBody: schema.string(),
           index: schema.string(),
           geoFieldType: schema.string(),
+          searchSessionId: schema.maybe(schema.string()),
         }),
       },
     },
     async (
-      context: RequestHandlerContext,
+      context: DataRequestHandlerContext,
       request: KibanaRequest<unknown, Record<string, any>, unknown>,
       response: KibanaResponseFactory
     ) => {
@@ -50,7 +54,7 @@ export function initMVTRoutes({ router, logger }: { logger: Logger; router: IRou
 
       const tile = await getTile({
         logger,
-        callElasticsearch: makeCallElasticsearch(context),
+        context,
         geometryFieldName: query.geometryFieldName as string,
         x: query.x as number,
         y: query.y as number,
@@ -58,6 +62,7 @@ export function initMVTRoutes({ router, logger }: { logger: Logger; router: IRou
         index: query.index as string,
         requestBody: requestBodyDSL as any,
         geoFieldType: query.geoFieldType as ES_GEO_FIELD_TYPE,
+        searchSessionId: query.searchSessionId,
       });
 
       return sendResponse(response, tile);
@@ -77,11 +82,12 @@ export function initMVTRoutes({ router, logger }: { logger: Logger; router: IRou
           index: schema.string(),
           requestType: schema.string(),
           geoFieldType: schema.string(),
+          searchSessionId: schema.maybe(schema.string()),
         }),
       },
     },
     async (
-      context: RequestHandlerContext,
+      context: DataRequestHandlerContext,
       request: KibanaRequest<unknown, Record<string, any>, unknown>,
       response: KibanaResponseFactory
     ) => {
@@ -90,7 +96,7 @@ export function initMVTRoutes({ router, logger }: { logger: Logger; router: IRou
 
       const tile = await getGridTile({
         logger,
-        callElasticsearch: makeCallElasticsearch(context),
+        context,
         geometryFieldName: query.geometryFieldName as string,
         x: query.x as number,
         y: query.y as number,
@@ -99,6 +105,7 @@ export function initMVTRoutes({ router, logger }: { logger: Logger; router: IRou
         requestBody: requestBodyDSL as any,
         requestType: query.requestType as RENDER_AS,
         geoFieldType: query.geoFieldType as ES_GEO_FIELD_TYPE,
+        searchSessionId: query.searchSessionId,
       });
 
       return sendResponse(response, tile);
@@ -124,10 +131,4 @@ function sendResponse(response: KibanaResponseFactory, tile: any) {
       headers,
     });
   }
-}
-
-function makeCallElasticsearch(context: RequestHandlerContext) {
-  return async (type: string, ...args: any[]): Promise<unknown> => {
-    return context.core.elasticsearch.legacy.client.callAsCurrentUser(type, ...args);
-  };
 }

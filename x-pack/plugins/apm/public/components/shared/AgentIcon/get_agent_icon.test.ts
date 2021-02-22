@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { getAgentIconKey } from './get_agent_icon';
@@ -9,13 +10,15 @@ import { getAgentIconKey } from './get_agent_icon';
 const examples = {
   DotNet: 'dotnet', // Test for case sensitivity
   dotnet: 'dotnet',
+  erlang: 'erlang',
   go: 'go',
   java: 'java',
   'js-base': 'rum',
   nodejs: 'nodejs',
+  ocaml: 'ocaml',
   'opentelemetry/cpp': 'opentelemetry',
   'opentelemetry/dotnet': 'dotnet',
-  'opentelemetry/erlang': 'opentelemetry',
+  'opentelemetry/erlang': 'erlang',
   'opentelemetry/go': 'go',
   'opentelemetry/java': 'java',
   'opentelemetry/nodejs': 'nodejs',

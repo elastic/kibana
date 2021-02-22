@@ -1,11 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import './chart_switch.scss';
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, memo } from 'react';
 import {
   EuiIcon,
   EuiPopover,
@@ -24,7 +25,7 @@ import { Visualization, FramePublicAPI, Datasource } from '../../../types';
 import { Action } from '../state_management';
 import { getSuggestions, switchToSuggestion, Suggestion } from '../suggestion_helpers';
 import { trackUiEvent } from '../../../lens_ui_telemetry';
-import { ToolbarButton } from '../../../shared_components';
+import { ToolbarButton } from '../../../../../../../src/plugins/kibana_react/public';
 
 interface VisualizationSelection {
   visualizationId: string;
@@ -78,7 +79,7 @@ function VisualizationSummary(props: Props) {
   );
 }
 
-export function ChartSwitch(props: Props) {
+export const ChartSwitch = memo(function ChartSwitch(props: Props) {
   const [flyoutOpen, setFlyoutOpen] = useState<boolean>(false);
 
   const commitSelection = (selection: VisualizationSelection) => {
@@ -304,7 +305,7 @@ export function ChartSwitch(props: Props) {
   );
 
   return <div className="lnsChartSwitch__header">{popover}</div>;
-}
+});
 
 function getTopSuggestion(
   props: Props,

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
@@ -19,24 +20,15 @@ export const UX_LABEL = i18n.translate('xpack.apm.ux.title', {
 export function RumHome() {
   return (
     <CsmSharedContextProvider>
-      <EuiFlexGroup>
+      <EuiFlexGroup wrap justifyContent={'flexEnd'} responsive={true}>
         <EuiFlexItem>
           <EuiTitle>
             <h1 className="eui-textNoWrap">{UX_LABEL}</h1>
           </EuiTitle>
         </EuiFlexItem>
+        <MainFilters />
         <EuiFlexItem grow={false}>
-          <EuiFlexGroup
-            wrap
-            style={{ flexWrap: 'wrap-reverse' }}
-            justifyContent="flexEnd"
-            gutterSize="s"
-          >
-            <MainFilters />
-            <EuiFlexItem grow={false}>
-              <DatePicker />
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          <DatePicker />
         </EuiFlexItem>
       </EuiFlexGroup>
       <RumOverview />

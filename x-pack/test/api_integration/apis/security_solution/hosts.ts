@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -141,24 +142,64 @@ export default function ({ getService }: FtrProviderContext) {
       expect(hostDetails).to.eql(expectedHostDetails);
     });
 
-    it('Make sure that we get Last First Seen for a Host', async () => {
+    it('Make sure that we get First Seen for a Host without docValueFields', async () => {
       const { body: firstLastSeenHost } = await supertest
         .post('/internal/search/securitySolutionSearchStrategy/')
         .set('kbn-xsrf', 'true')
         .send({
-          factoryQueryType: HostsQueries.firstLastSeen,
+          factoryQueryType: HostsQueries.firstOrLastSeen,
           defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
           docValueFields: [],
           hostName: 'zeek-sensor-san-francisco',
+          order: 'asc',
         })
         .expect(200);
-      const expected = {
-        firstSeen: '2019-02-19T19:36:23.561Z',
-        lastSeen: '2019-02-19T20:42:33.561Z',
-      };
+      expect(firstLastSeenHost.firstSeen).to.eql('2019-02-19T19:36:23.561Z');
+    });
 
-      expect(firstLastSeenHost.firstSeen).to.eql(expected.firstSeen);
-      expect(firstLastSeenHost.lastSeen).to.eql(expected.lastSeen);
+    it('Make sure that we get Last Seen for a Host without docValueFields', async () => {
+      const { body: firstLastSeenHost } = await supertest
+        .post('/internal/search/securitySolutionSearchStrategy/')
+        .set('kbn-xsrf', 'true')
+        .send({
+          factoryQueryType: HostsQueries.firstOrLastSeen,
+          defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+          docValueFields: [],
+          hostName: 'zeek-sensor-san-francisco',
+          order: 'desc',
+        })
+        .expect(200);
+      expect(firstLastSeenHost.lastSeen).to.eql('2019-02-19T20:42:33.561Z');
+    });
+
+    it('Make sure that we get First Seen for a Host with docValueFields', async () => {
+      const { body: firstLastSeenHost } = await supertest
+        .post('/internal/search/securitySolutionSearchStrategy/')
+        .set('kbn-xsrf', 'true')
+        .send({
+          factoryQueryType: HostsQueries.firstOrLastSeen,
+          defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+          docValueFields: [{ field: '@timestamp', format: 'epoch_millis' }],
+          hostName: 'zeek-sensor-san-francisco',
+          order: 'asc',
+        })
+        .expect(200);
+      expect(firstLastSeenHost.firstSeen).to.eql(new Date('2019-02-19T19:36:23.561Z').valueOf());
+    });
+
+    it('Make sure that we get Last Seen for a Host with docValueFields', async () => {
+      const { body: firstLastSeenHost } = await supertest
+        .post('/internal/search/securitySolutionSearchStrategy/')
+        .set('kbn-xsrf', 'true')
+        .send({
+          factoryQueryType: HostsQueries.firstOrLastSeen,
+          defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+          docValueFields: [{ field: '@timestamp', format: 'epoch_millis' }],
+          hostName: 'zeek-sensor-san-francisco',
+          order: 'desc',
+        })
+        .expect(200);
+      expect(firstLastSeenHost.lastSeen).to.eql(new Date('2019-02-19T20:42:33.561Z').valueOf());
     });
   });
 }

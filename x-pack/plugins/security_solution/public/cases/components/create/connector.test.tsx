@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -13,8 +14,11 @@ import { useForm, Form, FormHook } from '../../../shared_imports';
 import { connectorsMock } from '../../containers/mock';
 import { Connector } from './connector';
 import { useConnectors } from '../../containers/configure/use_connectors';
-import { useGetIncidentTypes } from '../settings/resilient/use_get_incident_types';
-import { useGetSeverity } from '../settings/resilient/use_get_severity';
+import { useGetIncidentTypes } from '../connectors/resilient/use_get_incident_types';
+import { useGetSeverity } from '../connectors/resilient/use_get_severity';
+import { useGetChoices } from '../connectors/servicenow/use_get_choices';
+import { incidentTypes, severity, choices } from '../connectors/mock';
+import { schema, FormProps } from './schema';
 
 jest.mock('../../../common/lib/kibana', () => {
   return {
@@ -27,51 +31,40 @@ jest.mock('../../../common/lib/kibana', () => {
   };
 });
 jest.mock('../../containers/configure/use_connectors');
-jest.mock('../settings/resilient/use_get_incident_types');
-jest.mock('../settings/resilient/use_get_severity');
+jest.mock('../connectors/resilient/use_get_incident_types');
+jest.mock('../connectors/resilient/use_get_severity');
+jest.mock('../connectors/servicenow/use_get_choices');
 
 const useConnectorsMock = useConnectors as jest.Mock;
 const useGetIncidentTypesMock = useGetIncidentTypes as jest.Mock;
 const useGetSeverityMock = useGetSeverity as jest.Mock;
+const useGetChoicesMock = useGetChoices as jest.Mock;
 
 const useGetIncidentTypesResponse = {
   isLoading: false,
-  incidentTypes: [
-    {
-      id: 19,
-      name: 'Malware',
-    },
-    {
-      id: 21,
-      name: 'Denial of Service',
-    },
-  ],
+  incidentTypes,
 };
 
 const useGetSeverityResponse = {
   isLoading: false,
-  severity: [
-    {
-      id: 4,
-      name: 'Low',
-    },
-    {
-      id: 5,
-      name: 'Medium',
-    },
-    {
-      id: 6,
-      name: 'High',
-    },
-  ],
+  severity,
+};
+
+const useGetChoicesResponse = {
+  isLoading: false,
+  choices,
 };
 
 describe('Connector', () => {
   let globalForm: FormHook;
 
   const MockHookWrapperComponent: React.FC = ({ children }) => {
-    const { form } = useForm<{ connectorId: string; fields: Record<string, unknown> | null }>({
+    const { form } = useForm<FormProps>({
       defaultValue: { connectorId: connectorsMock[0].id, fields: null },
+      schema: {
+        connectorId: schema.connectorId,
+        fields: schema.fields,
+      },
     });
 
     globalForm = form;
@@ -84,6 +77,7 @@ describe('Connector', () => {
     useConnectorsMock.mockReturnValue({ loading: false, connectors: connectorsMock });
     useGetIncidentTypesMock.mockReturnValue(useGetIncidentTypesResponse);
     useGetSeverityMock.mockReturnValue(useGetSeverityResponse);
+    useGetChoicesMock.mockReturnValue(useGetChoicesResponse);
   });
 
   it('it renders', async () => {
@@ -94,10 +88,17 @@ describe('Connector', () => {
     );
 
     expect(wrapper.find(`[data-test-subj="caseConnectors"]`).exists()).toBeTruthy();
-    expect(wrapper.find(`[data-test-subj="connector-settings"]`).exists()).toBeTruthy();
+    expect(wrapper.find(`[data-test-subj="connector-fields"]`).exists()).toBeTruthy();
 
-    waitFor(() => {
-      expect(wrapper.find(`[data-test-subj="connector-settings-sn"]`).exists()).toBeTruthy();
+    await waitFor(() => {
+      expect(wrapper.find(`button[data-test-subj="dropdown-connectors"]`).first().text()).toBe(
+        'My Connector'
+      );
+    });
+
+    await waitFor(() => {
+      wrapper.update();
+      expect(wrapper.find(`[data-test-subj="connector-fields-sn-itsm"]`).exists()).toBeTruthy();
     });
   });
 
@@ -150,7 +151,7 @@ describe('Connector', () => {
     );
 
     await waitFor(() => {
-      expect(wrapper.find(`[data-test-subj="connector-settings-resilient"]`).exists()).toBeFalsy();
+      expect(wrapper.find(`[data-test-subj="connector-fields-resilient"]`).exists()).toBeFalsy();
       wrapper.find('button[data-test-subj="dropdown-connectors"]').simulate('click');
       wrapper.find(`button[data-test-subj="dropdown-connector-resilient-2"]`).simulate('click');
       wrapper.update();
@@ -158,7 +159,7 @@ describe('Connector', () => {
 
     await waitFor(() => {
       wrapper.update();
-      expect(wrapper.find(`[data-test-subj="connector-settings-resilient"]`).exists()).toBeTruthy();
+      expect(wrapper.find(`[data-test-subj="connector-fields-resilient"]`).exists()).toBeTruthy();
     });
 
     act(() => {

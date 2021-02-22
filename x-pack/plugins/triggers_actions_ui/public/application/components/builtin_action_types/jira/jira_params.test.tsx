@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React from 'react';
 import { mount } from 'enzyme';
 import JiraParamsFields from './jira_params';
@@ -83,6 +85,14 @@ describe('JiraParamsFields renders', () => {
         ],
         defaultValue: { name: 'Medium', id: '3' },
       },
+    },
+  };
+  const useGetFieldsByIssueTypeResponseNoPriority = {
+    ...useGetFieldsByIssueTypeResponse,
+    fields: {
+      summary: { allowedValues: [], defaultValue: {} },
+      labels: { allowedValues: [], defaultValue: {} },
+      description: { allowedValues: [], defaultValue: {} },
     },
   };
 
@@ -385,6 +395,23 @@ describe('JiraParamsFields renders', () => {
       expect(editAction.mock.calls[0][1].comments.length).toEqual(0);
       expect(comments.simulate('change', emptyComment));
       expect(editAction.mock.calls.length).toEqual(1);
+    });
+    test('Clears any left behind priority when issueType changes and hasPriority becomes false', () => {
+      useGetFieldsByIssueTypeMock
+        .mockReturnValueOnce(useGetFieldsByIssueTypeResponse)
+        .mockReturnValue(useGetFieldsByIssueTypeResponseNoPriority);
+      const wrapper = mount(<JiraParamsFields {...defaultProps} />);
+      wrapper.setProps({
+        ...{
+          ...defaultProps,
+          actionParams: {
+            ...defaultProps.actionParams,
+            incident: { issueType: '10001' },
+          },
+        },
+      });
+      expect(editAction.mock.calls[0][1].incident.priority).toEqual('Medium');
+      expect(editAction.mock.calls[1][1].incident.priority).toEqual(null);
     });
   });
 });

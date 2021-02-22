@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { AlertsClient, ConstructorOptions } from '../alerts_client';
 import { savedObjectsClientMock, loggingSystemMock } from '../../../../../../src/core/server/mocks';
 import { taskManagerMock } from '../../../../task_manager/server/mocks';
@@ -199,7 +201,7 @@ describe('disable()', () => {
         version: '123',
       }
     );
-    expect(taskManager.remove).toHaveBeenCalledWith('task-123');
+    expect(taskManager.removeIfExists).toHaveBeenCalledWith('task-123');
     expect(
       (unsecuredSavedObjectsClient.create.mock.calls[0][1] as InvalidatePendingApiKey).apiKeyId
     ).toBe('123');
@@ -254,7 +256,7 @@ describe('disable()', () => {
         version: '123',
       }
     );
-    expect(taskManager.remove).toHaveBeenCalledWith('task-123');
+    expect(taskManager.removeIfExists).toHaveBeenCalledWith('task-123');
     expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
   });
 
@@ -280,7 +282,7 @@ describe('disable()', () => {
 
     await alertsClient.disable({ id: '1' });
     expect(unsecuredSavedObjectsClient.update).not.toHaveBeenCalled();
-    expect(taskManager.remove).not.toHaveBeenCalled();
+    expect(taskManager.removeIfExists).not.toHaveBeenCalled();
     expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
   });
 
@@ -314,7 +316,7 @@ describe('disable()', () => {
 
     await alertsClient.disable({ id: '1' });
     expect(unsecuredSavedObjectsClient.update).toHaveBeenCalled();
-    expect(taskManager.remove).toHaveBeenCalled();
+    expect(taskManager.removeIfExists).toHaveBeenCalled();
     expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
     expect(alertsClientParams.logger.error).toHaveBeenCalledWith(
       'disable(): Failed to load API key to invalidate on alert 1: Fail'
@@ -338,7 +340,7 @@ describe('disable()', () => {
   });
 
   test('throws when failing to remove task from task manager', async () => {
-    taskManager.remove.mockRejectedValueOnce(new Error('Failed to remove task'));
+    taskManager.removeIfExists.mockRejectedValueOnce(new Error('Failed to remove task'));
 
     await expect(alertsClient.disable({ id: '1' })).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Failed to remove task"`

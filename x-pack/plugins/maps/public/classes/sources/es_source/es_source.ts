@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -40,6 +41,10 @@ import {
 } from '../../../../../../../src/plugins/inspector/common/adapters';
 import { isValidStringConfig } from '../../util/valid_string_config';
 
+export function isSearchSourceAbortError(error: Error) {
+  return error.name === 'AbortError';
+}
+
 export interface IESSource extends IVectorSource {
   isESSource(): true;
   getId(): string;
@@ -53,6 +58,7 @@ export interface IESSource extends IVectorSource {
     registerCancelCallback,
     sourceQuery,
     timeFilters,
+    searchSessionId,
   }: {
     layerName: string;
     style: IVectorStyle;
@@ -60,6 +66,7 @@ export interface IESSource extends IVectorSource {
     registerCancelCallback: (callback: () => void) => void;
     sourceQuery?: MapQuery;
     timeFilters: TimeRange;
+    searchSessionId?: string;
   }): Promise<object>;
 }
 
@@ -147,17 +154,19 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
   }
 
   async _runEsQuery({
+    registerCancelCallback,
+    requestDescription,
     requestId,
     requestName,
-    requestDescription,
+    searchSessionId,
     searchSource,
-    registerCancelCallback,
   }: {
+    registerCancelCallback: (callback: () => void) => void;
+    requestDescription: string;
     requestId: string;
     requestName: string;
-    requestDescription: string;
+    searchSessionId?: string;
     searchSource: ISearchSource;
-    registerCancelCallback: (callback: () => void) => void;
   }): Promise<any> {
     const abortController = new AbortController();
     registerCancelCallback(() => abortController.abort());
@@ -168,6 +177,7 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
       inspectorRequest = inspectorAdapters.requests.start(requestName, {
         id: requestId,
         description: requestDescription,
+        searchSessionId,
       });
     }
 
@@ -182,7 +192,10 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
           }
         });
       }
-      resp = await searchSource.fetch({ abortSignal: abortController.signal });
+      resp = await searchSource.fetch({
+        abortSignal: abortController.signal,
+        sessionId: searchSessionId,
+      });
       if (inspectorRequest) {
         const responseStats = search.getResponseInspectorStats(resp, searchSource);
         inspectorRequest.stats(responseStats).ok({ json: resp });
@@ -191,7 +204,7 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
       if (inspectorRequest) {
         inspectorRequest.error(error);
       }
-      if (error.name === 'AbortError') {
+      if (isSearchSourceAbortError(error)) {
         throw new DataRequestAbortError();
       }
 
@@ -400,6 +413,7 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
     registerCancelCallback,
     sourceQuery,
     timeFilters,
+    searchSessionId,
   }: {
     layerName: string;
     style: IVectorStyle;
@@ -407,6 +421,7 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
     registerCancelCallback: (callback: () => void) => void;
     sourceQuery?: MapQuery;
     timeFilters: TimeRange;
+    searchSessionId?: string;
   }): Promise<object> {
     const promises = dynamicStyleProps.map((dynamicStyleProp) => {
       return dynamicStyleProp.getFieldMetaRequest();
@@ -452,6 +467,7 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
             'Elasticsearch request retrieving field metadata used for calculating symbolization bands.',
         }
       ),
+      searchSessionId,
     });
 
     return resp.aggregations;

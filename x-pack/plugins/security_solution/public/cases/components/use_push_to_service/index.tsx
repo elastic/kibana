@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiButton, EuiToolTip } from '@elastic/eui';
@@ -50,20 +51,22 @@ export const usePushToService = ({
 }: UsePushToService): ReturnUsePushToService => {
   const history = useHistory();
   const { formatUrl, search: urlSearch } = useFormatUrl(SecurityPageName.case);
-  const { isLoading, postPushToService } = usePostPushToService();
+  const { isLoading, pushCaseToExternalService } = usePostPushToService();
 
   const { isLoading: loadingLicense, actionLicense } = useGetActionLicense();
 
-  const handlePushToService = useCallback(() => {
+  const handlePushToService = useCallback(async () => {
     if (connector.id != null && connector.id !== 'none') {
-      postPushToService({
+      const theCase = await pushCaseToExternalService({
         caseId,
-        caseServices,
         connector,
-        updateCase,
       });
+
+      if (theCase != null) {
+        updateCase(theCase);
+      }
     }
-  }, [caseId, caseServices, connector, postPushToService, updateCase]);
+  }, [caseId, connector, pushCaseToExternalService, updateCase]);
 
   const goToConfigureCases = useCallback(
     (ev) => {

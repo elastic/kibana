@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import _ from 'lodash';
@@ -27,6 +28,7 @@ describe('TaskPoller', () => {
       createTaskPoller<void, boolean>({
         logger: loggingSystemMock.create().get(),
         pollInterval$: of(pollInterval),
+        pollIntervalDelay$: of(0),
         bufferCapacity,
         getCapacity: () => 1,
         work,
@@ -62,6 +64,7 @@ describe('TaskPoller', () => {
       createTaskPoller<void, boolean>({
         logger: loggingSystemMock.create().get(),
         pollInterval$,
+        pollIntervalDelay$: of(0),
         bufferCapacity,
         getCapacity: () => 1,
         work,
@@ -104,6 +107,7 @@ describe('TaskPoller', () => {
       createTaskPoller<void, boolean>({
         logger: loggingSystemMock.create().get(),
         pollInterval$: of(pollInterval),
+        pollIntervalDelay$: of(0),
         bufferCapacity,
         work,
         workTimeout: pollInterval * 5,
@@ -163,6 +167,7 @@ describe('TaskPoller', () => {
       createTaskPoller<void, boolean>({
         logger: loggingSystemMock.create().get(),
         pollInterval$: of(pollInterval),
+        pollIntervalDelay$: of(0),
         bufferCapacity,
         work,
         workTimeout: pollInterval * 5,
@@ -209,6 +214,7 @@ describe('TaskPoller', () => {
       createTaskPoller<void, boolean>({
         logger: loggingSystemMock.create().get(),
         pollInterval$: of(pollInterval),
+        pollIntervalDelay$: of(0),
         bufferCapacity,
         work,
         workTimeout: pollInterval * 5,
@@ -254,6 +260,7 @@ describe('TaskPoller', () => {
       createTaskPoller<string, boolean>({
         logger: loggingSystemMock.create().get(),
         pollInterval$: of(pollInterval),
+        pollIntervalDelay$: of(0),
         bufferCapacity,
         work,
         workTimeout: pollInterval * 5,
@@ -291,6 +298,7 @@ describe('TaskPoller', () => {
       createTaskPoller<string, string[]>({
         logger: loggingSystemMock.create().get(),
         pollInterval$: of(pollInterval),
+        pollIntervalDelay$: of(0),
         bufferCapacity,
         work: async (...args) => {
           await worker;
@@ -342,6 +350,7 @@ describe('TaskPoller', () => {
       createTaskPoller<[string, Resolvable], string[]>({
         logger: loggingSystemMock.create().get(),
         pollInterval$: of(pollInterval),
+        pollIntervalDelay$: of(0),
         bufferCapacity,
         work: async (...resolvables) => {
           await Promise.all(resolvables.map(([, future]) => future));
@@ -402,6 +411,7 @@ describe('TaskPoller', () => {
       createTaskPoller<string, string[]>({
         logger: loggingSystemMock.create().get(),
         pollInterval$: of(pollInterval),
+        pollIntervalDelay$: of(0),
         bufferCapacity,
         work: async (...args) => {
           throw new Error('failed to work');
@@ -443,6 +453,7 @@ describe('TaskPoller', () => {
       createTaskPoller<string, number>({
         logger: loggingSystemMock.create().get(),
         pollInterval$: of(pollInterval),
+        pollIntervalDelay$: of(0),
         bufferCapacity,
         work,
         workTimeout: pollInterval * 5,
@@ -486,6 +497,7 @@ describe('TaskPoller', () => {
       createTaskPoller<string, void>({
         logger: loggingSystemMock.create().get(),
         pollInterval$: of(pollInterval),
+        pollIntervalDelay$: of(0),
         bufferCapacity,
         work,
         workTimeout: pollInterval * 5,

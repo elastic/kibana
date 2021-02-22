@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -228,17 +229,14 @@ export function isSparseDataJob(job: Job, datafeed: Datafeed): boolean {
   return false;
 }
 
-function stashCombinedJob(
+function stashJobForCloning(
   jobCreator: JobCreatorType,
   skipTimeRangeStep: boolean = false,
   includeTimeRange: boolean = false
 ) {
-  const combinedJob = {
-    ...jobCreator.jobConfig,
-    datafeed_config: jobCreator.datafeedConfig,
-  };
-
-  mlJobService.tempJobCloningObjects.job = combinedJob;
+  mlJobService.tempJobCloningObjects.job = jobCreator.jobConfig;
+  mlJobService.tempJobCloningObjects.datafeed = jobCreator.datafeedConfig;
+  mlJobService.tempJobCloningObjects.createdBy = jobCreator.createdBy ?? undefined;
 
   // skip over the time picker step of the wizard
   mlJobService.tempJobCloningObjects.skipTimeRangeStep = skipTimeRangeStep;
@@ -258,21 +256,21 @@ export function convertToMultiMetricJob(
 ) {
   jobCreator.createdBy = CREATED_BY_LABEL.MULTI_METRIC;
   jobCreator.modelPlot = false;
-  stashCombinedJob(jobCreator, true, true);
+  stashJobForCloning(jobCreator, true, true);
 
   navigateToPath(`jobs/new_job/${JOB_TYPE.MULTI_METRIC}`, true);
 }
 
 export function convertToAdvancedJob(jobCreator: JobCreatorType, navigateToPath: NavigateToPath) {
   jobCreator.createdBy = null;
-  stashCombinedJob(jobCreator, true, true);
+  stashJobForCloning(jobCreator, true, true);
 
   navigateToPath(`jobs/new_job/${JOB_TYPE.ADVANCED}`, true);
 }
 
 export function resetJob(jobCreator: JobCreatorType, navigateToPath: NavigateToPath) {
   jobCreator.jobId = '';
-  stashCombinedJob(jobCreator, true, true);
+  stashJobForCloning(jobCreator, true, true);
   navigateToPath('/jobs/new_job');
 }
 
@@ -281,7 +279,7 @@ export function advancedStartDatafeed(
   navigateToPath: NavigateToPath
 ) {
   if (jobCreator !== null) {
-    stashCombinedJob(jobCreator, false, false);
+    stashJobForCloning(jobCreator, false, false);
   }
   navigateToPath('/jobs');
 }

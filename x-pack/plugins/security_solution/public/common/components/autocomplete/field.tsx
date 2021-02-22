@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React, { useState, useMemo, useCallback } from 'react';
 import { EuiComboBoxOptionOption, EuiComboBox } from '@elastic/eui';
 
@@ -122,16 +124,16 @@ const getAvailableFields = (
   selectedFields: IFieldType[],
   fieldTypeFilter: string[]
 ): IFieldType[] => {
-  const map = new Map<string, IFieldType>();
+  const fieldsByName = new Map<string, IFieldType>();
 
-  existingFields.forEach((f) => map.set(f.name, f));
-  selectedFields.forEach((f) => map.set(f.name, f));
+  existingFields.forEach((f) => fieldsByName.set(f.name, f));
+  selectedFields.forEach((f) => fieldsByName.set(f.name, f));
 
-  const array = Array.from(map.values());
+  const uniqueFields = Array.from(fieldsByName.values());
 
   if (fieldTypeFilter.length > 0) {
-    return array.filter(({ type }) => fieldTypeFilter.includes(type));
+    return uniqueFields.filter(({ type }) => fieldTypeFilter.includes(type));
   }
 
-  return array;
+  return uniqueFields;
 };

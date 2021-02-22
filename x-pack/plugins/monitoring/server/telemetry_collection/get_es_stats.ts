@@ -1,11 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { SearchResponse } from 'elasticsearch';
-import { StatsCollectionConfig } from 'src/plugins/telemetry_collection_manager/server';
+import { LegacyAPICaller } from 'kibana/server';
 import { INDEX_PATTERN_ELASTICSEARCH } from '../../common/constants';
 
 /**
@@ -16,7 +17,7 @@ import { INDEX_PATTERN_ELASTICSEARCH } from '../../common/constants';
  * @param {Array} clusterUuids The string Cluster UUIDs to fetch details for
  */
 export async function getElasticsearchStats(
-  callCluster: StatsCollectionConfig['callCluster'],
+  callCluster: LegacyAPICaller,
   clusterUuids: string[],
   maxBucketSize: number
 ) {
@@ -34,7 +35,7 @@ export async function getElasticsearchStats(
  * Returns the response for the aggregations to fetch details for the product.
  */
 export function fetchElasticsearchStats(
-  callCluster: StatsCollectionConfig['callCluster'],
+  callCluster: LegacyAPICaller,
   clusterUuids: string[],
   maxBucketSize: number
 ) {

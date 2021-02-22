@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { format as formatUrl } from 'url';
@@ -26,7 +15,7 @@ import { replaceUrlHashQuery, replaceUrlQuery } from './format';
 import { url as urlUtils } from '../../../common';
 
 /**
- * Parses a kibana url and retrieves all the states encoded into url,
+ * Parses a kibana url and retrieves all the states encoded into the URL,
  * Handles both expanded rison state and hashed state (where the actual state stored in sessionStorage)
  * e.g.:
  *
@@ -34,22 +23,31 @@ import { url as urlUtils } from '../../../common';
  * http://localhost:5601/oxf/app/kibana#/yourApp?_a=(tab:indexedFields)&_b=(f:test,i:'',l:'')
  * will return object:
  * {_a: {tab: 'indexedFields'}, _b: {f: 'test', i: '', l: ''}};
+ *
+ *
+ * By default due to Kibana legacy reasons assumed that state is stored in a query inside a hash part of the URL:
+ * http://localhost:5601/oxf/app/kibana#/yourApp?_a={STATE}
+ *
+ * { getFromHashQuery: false } option should be used in case state is stored in a main query (not in a hash):
+ * http://localhost:5601/oxf/app/kibana?_a={STATE}#/yourApp
+ *
  */
-export function getStatesFromKbnUrl(
+export function getStatesFromKbnUrl<State extends object = Record<string, unknown>>(
   url: string = window.location.href,
-  keys?: string[]
-): Record<string, unknown> {
-  const query = parseUrlHash(url)?.query;
+  keys?: Array<keyof State>,
+  { getFromHashQuery = true }: { getFromHashQuery: boolean } = { getFromHashQuery: true }
+): State {
+  const query = getFromHashQuery ? parseUrlHash(url)?.query : parseUrl(url).query;
 
-  if (!query) return {};
+  if (!query) return {} as State;
   const decoded: Record<string, unknown> = {};
   Object.entries(query)
-    .filter(([key]) => (keys ? keys.includes(key) : true))
+    .filter(([key]) => (keys ? keys.includes(key as keyof State) : true))
     .forEach(([q, value]) => {
       decoded[q] = decodeState(value as string);
     });
 
-  return decoded;
+  return decoded as State;
 }
 
 /**
@@ -61,12 +59,20 @@ export function getStatesFromKbnUrl(
  * and key '_a'
  * will return object:
  * {tab: 'indexedFields'}
+ *
+ *
+ * By default due to Kibana legacy reasons assumed that state is stored in a query inside a hash part of the URL:
+ * http://localhost:5601/oxf/app/kibana#/yourApp?_a={STATE}
+ *
+ * { getFromHashQuery: false } option should be used in case state is stored in a main query (not in a hash):
+ * http://localhost:5601/oxf/app/kibana?_a={STATE}#/yourApp
  */
 export function getStateFromKbnUrl<State>(
   key: string,
-  url: string = window.location.href
+  url: string = window.location.href,
+  { getFromHashQuery = true }: { getFromHashQuery: boolean } = { getFromHashQuery: true }
 ): State | null {
-  return (getStatesFromKbnUrl(url, [key])[key] as State) || null;
+  return (getStatesFromKbnUrl(url, [key], { getFromHashQuery })[key] as State) || null;
 }
 
 /**
@@ -80,6 +86,12 @@ export function getStateFromKbnUrl<State>(
  *
  * will return url:
  * http://localhost:5601/oxf/app/kibana#/yourApp?_a=(tab:other)&_b=(f:test,i:'',l:'')
+ *
+ * By default due to Kibana legacy reasons assumed that state is stored in a query inside a hash part of the URL:
+ * http://localhost:5601/oxf/app/kibana#/yourApp?_a={STATE}
+ *
+ * { storeInHashQuery: false } option should be used in you want to store you state in a main query (not in a hash):
+ * http://localhost:5601/oxf/app/kibana?_a={STATE}#/yourApp
  */
 export function setStateToKbnUrl<State>(
   key: string,

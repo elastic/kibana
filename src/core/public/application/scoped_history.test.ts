@@ -1,24 +1,14 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { ScopedHistory } from './scoped_history';
-import { createMemoryHistory } from 'history';
+import { createMemoryHistory, History } from 'history';
+import type { ConfirmHandler } from './navigation_confirm';
 
 describe('ScopedHistory', () => {
   describe('construction', () => {
@@ -345,6 +335,155 @@ describe('ScopedHistory', () => {
       expect(h2.length).toBe(2);
       expect(h1.length).toBe(3);
       expect(gh.length).toBe(4);
+    });
+  });
+
+  describe('block', () => {
+    let gh: History;
+    let h: ScopedHistory;
+
+    const initHistory = ({
+      initialPath = '/app/wow',
+      scopedHistoryPath = '/app/wow',
+      confirmHandler,
+    }: {
+      initialPath?: string;
+      scopedHistoryPath?: string;
+      confirmHandler?: ConfirmHandler;
+    } = {}) => {
+      gh = createMemoryHistory({
+        getUserConfirmation: confirmHandler,
+      });
+      gh.push(initialPath);
+      h = new ScopedHistory(gh, scopedHistoryPath);
+    };
+
+    it('calls block on the global history', () => {
+      initHistory();
+
+      const blockSpy = jest.spyOn(gh, 'block');
+      h.block('confirm');
+
+      expect(blockSpy).toHaveBeenCalledTimes(1);
+      expect(blockSpy).toHaveBeenCalledWith('confirm');
+    });
+
+    it('returns a wrapped unregister function', () => {
+      initHistory();
+
+      const blockSpy = jest.spyOn(gh, 'block');
+      const unregister = jest.fn();
+      blockSpy.mockReturnValue(unregister);
+
+      const wrapperUnregister = h.block('confirm');
+
+      expect(unregister).not.toHaveBeenCalled();
+
+      wrapperUnregister();
+
+      expect(unregister).toHaveBeenCalledTimes(1);
+    });
+
+    it('calls the block handler when navigating to another app', () => {
+      initHistory();
+
+      const blockHandler = jest.fn().mockReturnValue(true);
+
+      h.block(blockHandler);
+
+      gh.push('/app/other');
+
+      expect(blockHandler).toHaveBeenCalledTimes(1);
+      expect(gh.location.pathname).toEqual('/app/other');
+    });
+
+    it('calls the block handler when navigating inside the current app', () => {
+      initHistory();
+
+      const blockHandler = jest.fn().mockReturnValue(true);
+
+      h.block(blockHandler);
+
+      gh.push('/app/wow/another-page');
+
+      expect(blockHandler).toHaveBeenCalledTimes(1);
+      expect(gh.location.pathname).toEqual('/app/wow/another-page');
+    });
+
+    it('can block the navigation', () => {
+      initHistory();
+
+      const blockHandler = jest.fn().mockReturnValue(false);
+
+      h.block(blockHandler);
+
+      gh.push('/app/other');
+
+      expect(blockHandler).toHaveBeenCalledTimes(1);
+      expect(gh.location.pathname).toEqual('/app/wow');
+    });
+
+    it('no longer blocks the navigation when unregistered', () => {
+      initHistory();
+
+      const blockHandler = jest.fn().mockReturnValue(false);
+
+      const unregister = h.block(blockHandler);
+
+      gh.push('/app/other');
+
+      expect(gh.location.pathname).toEqual('/app/wow');
+
+      unregister();
+
+      gh.push('/app/other');
+
+      expect(gh.location.pathname).toEqual('/app/other');
+    });
+
+    it('throws if the history is no longer active', () => {
+      initHistory();
+
+      gh.push('/app/other');
+
+      expect(() => h.block()).toThrowErrorMatchingInlineSnapshot(
+        `"ScopedHistory instance has fell out of navigation scope for basePath: /app/wow"`
+      );
+    });
+
+    it('unregisters the block handler when the history is no longer active', () => {
+      initHistory();
+
+      const blockSpy = jest.spyOn(gh, 'block');
+      const unregister = jest.fn();
+      blockSpy.mockReturnValue(unregister);
+
+      h.block('confirm');
+
+      expect(unregister).not.toHaveBeenCalled();
+
+      gh.push('/app/other');
+
+      expect(unregister).toHaveBeenCalledTimes(1);
+    });
+
+    it('calls the defined global history confirm handler', () => {
+      const confirmHandler: jest.MockedFunction<ConfirmHandler> = jest
+        .fn()
+        .mockImplementation((message, callback) => {
+          callback(true);
+        });
+
+      initHistory({
+        confirmHandler,
+      });
+
+      h.block('are you sure');
+
+      gh.push('/app/other');
+
+      expect(confirmHandler).toHaveBeenCalledTimes(1);
+      expect(gh.location.pathname).toEqual('/app/other');
     });
   });
 });

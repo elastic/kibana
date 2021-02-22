@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { useParams } from 'react-router-dom';
@@ -20,7 +21,7 @@ const DEFAULT_RESPONSE: Partial<TransactionsAPIResponse> = {
 export function useTransactionListFetcher() {
   const { urlParams, uiFilters } = useUrlParams();
   const { serviceName } = useParams<{ serviceName?: string }>();
-  const { transactionType, start, end } = urlParams;
+  const { environment, transactionType, start, end } = urlParams;
   const { data = DEFAULT_RESPONSE, error, status } = useFetcher(
     (callApmApi) => {
       if (serviceName && start && end && transactionType) {
@@ -29,6 +30,7 @@ export function useTransactionListFetcher() {
           params: {
             path: { serviceName },
             query: {
+              environment,
               start,
               end,
               transactionType,
@@ -38,7 +40,7 @@ export function useTransactionListFetcher() {
         });
       }
     },
-    [serviceName, start, end, transactionType, uiFilters]
+    [environment, serviceName, start, end, transactionType, uiFilters]
   );
 
   return {

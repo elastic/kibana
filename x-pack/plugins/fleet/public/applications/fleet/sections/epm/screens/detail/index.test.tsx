@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { createTestRendererMock, MockedFleetStartServices, TestRenderer } from '../../../../mock';
@@ -14,6 +15,7 @@ import {
   GetFleetStatusResponse,
   GetInfoResponse,
   GetPackagePoliciesResponse,
+  GetStatsResponse,
 } from '../../../../../../../common/types/rest_spec';
 import { DetailViewPanelName, KibanaAssetType } from '../../../../../../../common/types/models';
 import {
@@ -26,10 +28,10 @@ import { act, cleanup } from '@testing-library/react';
 
 describe('when on integration detail', () => {
   const pkgkey = 'nginx-0.3.7';
-  const detailPageUrlPath = pagePathGetters.integration_details({ pkgkey });
+  const detailPageUrlPath = pagePathGetters.integration_details_overview({ pkgkey });
   let testRenderer: TestRenderer;
   let renderResult: ReturnType<typeof testRenderer.render>;
-  let mockedApi: MockedApi;
+  let mockedApi: MockedApi<EpmPackageDetailsResponseProvidersMock>;
   const render = () =>
     (renderResult = testRenderer.render(
       <Route path={PAGE_ROUTING_PATHS.integration_details}>
@@ -46,6 +48,39 @@ describe('when on integration detail', () => {
   afterEach(() => {
     cleanup();
     window.location.hash = '#/';
+  });
+
+  describe('and the package is installed', () => {
+    beforeEach(() => render());
+
+    it('should display agent policy usage count', async () => {
+      await mockedApi.waitForApi();
+      expect(renderResult.queryByTestId('agentPolicyCount')).not.toBeNull();
+    });
+
+    it('should show the Policies tab', async () => {
+      await mockedApi.waitForApi();
+      expect(renderResult.queryByTestId('tab-policies')).not.toBeNull();
+    });
+  });
+
+  describe('and the package is not installed', () => {
+    beforeEach(() => {
+      const unInstalledPackage = mockedApi.responseProvider.epmGetInfo();
+      unInstalledPackage.response.status = 'not_installed';
+      mockedApi.responseProvider.epmGetInfo.mockReturnValue(unInstalledPackage);
+      render();
+    });
+
+    it('should NOT display agent policy usage count', async () => {
+      await mockedApi.waitForApi();
+      expect(renderResult.queryByTestId('agentPolicyCount')).toBeNull();
+    });
+
+    it('should NOT the Policies tab', async () => {
+      await mockedApi.waitForApi();
+      expect(renderResult.queryByTestId('tab-policies')).toBeNull();
+    });
   });
 
   describe('and a custom UI extension is NOT registered', () => {
@@ -65,7 +100,7 @@ describe('when on integration detail', () => {
     it('should redirect if custom url is accessed', () => {
       act(() => {
         testRenderer.history.push(
-          pagePathGetters.integration_details({ pkgkey: 'nginx-0.3.7', panel: 'custom' })
+          pagePathGetters.integration_details_custom({ pkgkey: 'nginx-0.3.7' })
         );
       });
       expect(testRenderer.history.location.pathname).toEqual(detailPageUrlPath);
@@ -113,7 +148,7 @@ describe('when on integration detail', () => {
     it('should display custom content when tab is clicked', async () => {
       act(() => {
         testRenderer.history.push(
-          pagePathGetters.integration_details({ pkgkey: 'nginx-0.3.7', panel: 'custom' })
+          pagePathGetters.integration_details_custom({ pkgkey: 'nginx-0.3.7' })
         );
       });
       await lazyComponentWasRendered;
@@ -138,14 +173,14 @@ describe('when on integration detail', () => {
         onCancelNavigateTo: [
           'fleet',
           {
-            path: '#/integrations/detail/nginx-0.3.7',
+            path: '#/integrations/detail/nginx-0.3.7/overview',
           },
         ],
-        onCancelUrl: '#/integrations/detail/nginx-0.3.7',
+        onCancelUrl: '#/integrations/detail/nginx-0.3.7/overview',
         onSaveNavigateTo: [
           'fleet',
           {
-            path: '#/integrations/detail/nginx-0.3.7',
+            path: '#/integrations/detail/nginx-0.3.7/overview',
           },
         ],
       });
@@ -153,7 +188,7 @@ describe('when on integration detail', () => {
   });
 
   describe('and on the Policies Tab', () => {
-    const policiesTabURLPath = pagePathGetters.integration_details({ pkgkey, panel: 'policies' });
+    const policiesTabURLPath = pagePathGetters.integration_details_policies({ pkgkey });
     beforeEach(() => {
       testRenderer.history.push(policiesTabURLPath);
       render();
@@ -190,12 +225,27 @@ describe('when on integration detail', () => {
   });
 });
 
-interface MockedApi {
+interface MockedApi<
+  R extends Record<string, jest.MockedFunction<any>> = Record<string, jest.MockedFunction<any>>
+> {
   /** Will return a promise that resolves when triggered APIs are complete */
   waitForApi: () => Promise<void>;
+  /** A object containing the list of API response provider functions that are used by the mocked API */
+  responseProvider: R;
 }
 
-const mockApiCalls = (http: MockedFleetStartServices['http']): MockedApi => {
+interface EpmPackageDetailsResponseProvidersMock {
+  epmGetInfo: jest.MockedFunction<() => GetInfoResponse>;
+  epmGetFile: jest.MockedFunction<() => string>;
+  epmGetStats: jest.MockedFunction<() => GetStatsResponse>;
+  fleetSetup: jest.MockedFunction<() => GetFleetStatusResponse>;
+  packagePolicyList: jest.MockedFunction<() => GetPackagePoliciesResponse>;
+  agentPolicyList: jest.MockedFunction<() => GetAgentPoliciesResponse>;
+}
+
+const mockApiCalls = (
+  http: MockedFleetStartServices['http']
+): MockedApi<EpmPackageDetailsResponseProvidersMock> => {
   let inflightApiCalls = 0;
   const apiDoneListeners: Array<() => void> = [];
   const markApiCallAsHandled = async () => {
@@ -637,6 +687,7 @@ On Windows, the module was tested with Nginx installed from the Chocolatey repos
           'e8a37031-2907-44f6-89d2-98bd493f60dc',
         ],
         is_default: true,
+        is_managed: false,
         monitoring_enabled: ['logs', 'metrics'],
         revision: 6,
         updated_at: '2020-12-09T13:46:31.840Z',
@@ -651,6 +702,7 @@ On Windows, the module was tested with Nginx installed from the Chocolatey repos
         status: 'active',
         package_policies: ['e8a37031-2907-44f6-89d2-98bd493f60cd'],
         is_default: false,
+        is_managed: false,
         monitoring_enabled: ['logs', 'metrics'],
         revision: 2,
         updated_at: '2020-12-09T13:46:31.840Z',
@@ -663,41 +715,13 @@ On Windows, the module was tested with Nginx installed from the Chocolatey repos
     perPage: 100,
   };
 
-  http.get.mockImplementation(async (path) => {
-    if (typeof path === 'string') {
-      if (path === epmRouteService.getInfoPath(`nginx-0.3.7`)) {
-        markApiCallAsHandled();
-        return epmPackageResponse;
-      }
+  const epmGetStatsResponse: GetStatsResponse = {
+    response: {
+      agent_policy_count: 2,
+    },
+  };
 
-      if (path === epmRouteService.getFilePath('/package/nginx/0.3.7/docs/README.md')) {
-        markApiCallAsHandled();
-        return packageReadMe;
-      }
-
-      if (path === fleetSetupRouteService.getFleetSetupPath()) {
-        markApiCallAsHandled();
-        return agentsSetupResponse;
-      }
-
-      if (path === packagePolicyRouteService.getListPath()) {
-        markApiCallAsHandled();
-        return packagePoliciesResponse;
-      }
-
-      if (path === agentPolicyRouteService.getListPath()) {
-        markApiCallAsHandled();
-        return agentPoliciesResponse;
-      }
-
-      const err = new Error(`API [GET ${path}] is not MOCKED!`);
-      // eslint-disable-next-line no-console
-      console.error(err);
-      throw err;
-    }
-  });
-
-  return {
+  const mockedApiInterface: MockedApi<EpmPackageDetailsResponseProvidersMock> = {
     waitForApi() {
       return new Promise((resolve) => {
         if (inflightApiCalls > 0) {
@@ -707,5 +731,54 @@ On Windows, the module was tested with Nginx installed from the Chocolatey repos
         }
       });
     },
+    responseProvider: {
+      epmGetInfo: jest.fn().mockReturnValue(epmPackageResponse),
+      epmGetFile: jest.fn().mockReturnValue(packageReadMe),
+      epmGetStats: jest.fn().mockReturnValue(epmGetStatsResponse),
+      fleetSetup: jest.fn().mockReturnValue(agentsSetupResponse),
+      packagePolicyList: jest.fn().mockReturnValue(packagePoliciesResponse),
+      agentPolicyList: jest.fn().mockReturnValue(agentPoliciesResponse),
+    },
   };
+
+  http.get.mockImplementation(async (path) => {
+    if (typeof path === 'string') {
+      if (path === epmRouteService.getInfoPath(`nginx-0.3.7`)) {
+        markApiCallAsHandled();
+        return mockedApiInterface.responseProvider.epmGetInfo();
+      }
+
+      if (path === epmRouteService.getFilePath('/package/nginx/0.3.7/docs/README.md')) {
+        markApiCallAsHandled();
+        return mockedApiInterface.responseProvider.epmGetFile();
+      }
+
+      if (path === fleetSetupRouteService.getFleetSetupPath()) {
+        markApiCallAsHandled();
+        return mockedApiInterface.responseProvider.fleetSetup();
+      }
+
+      if (path === packagePolicyRouteService.getListPath()) {
+        markApiCallAsHandled();
+        return mockedApiInterface.responseProvider.packagePolicyList();
+      }
+
+      if (path === agentPolicyRouteService.getListPath()) {
+        markApiCallAsHandled();
+        return mockedApiInterface.responseProvider.agentPolicyList();
+      }
+
+      if (path === epmRouteService.getStatsPath('nginx')) {
+        markApiCallAsHandled();
+        return mockedApiInterface.responseProvider.epmGetStats();
+      }
+
+      const err = new Error(`API [GET ${path}] is not MOCKED!`);
+      // eslint-disable-next-line no-console
+      console.error(err);
+      throw err;
+    }
+  });
+
+  return mockedApiInterface;
 };
