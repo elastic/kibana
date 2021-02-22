@@ -126,7 +126,12 @@ export class KbnClientImportExport {
       .filter((l) => !!l)
       .map((line) => JSON.parse(line));
 
-    const fileContents = objects.map((obj) => JSON.stringify(obj, null, 2)).join('\n\n');
+    const fileContents = objects
+      .map((obj) => {
+        const { sort: _, ...nonSortFields } = obj;
+        return JSON.stringify(nonSortFields, null, 2);
+      })
+      .join('\n\n');
 
     await Fs.writeFile(dest, fileContents, 'utf-8');
 
