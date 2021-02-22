@@ -7,18 +7,9 @@
 
 import React, { useEffect } from 'react';
 
-import { useActions } from 'kea';
+import { useActions, useValues } from 'kea';
 
-import {
-  EuiPageHeader,
-  EuiPageHeaderSection,
-  EuiTitle,
-  EuiText,
-  EuiSpacer,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiTextColor,
-} from '@elastic/eui';
+import { EuiPageHeader, EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiButton } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
@@ -34,7 +25,10 @@ interface Props {
 }
 
 export const RelevanceTuning: React.FC<Props> = ({ engineBreadcrumb }) => {
-  const { initializeRelevanceTuning } = useActions(RelevanceTuningLogic);
+  const { resetSearchSettings, initializeRelevanceTuning, updateSearchSettings } = useActions(
+    RelevanceTuningLogic
+  );
+  const { engineHasSchemaFields } = useValues(RelevanceTuningLogic);
 
   useEffect(() => {
     initializeRelevanceTuning();
@@ -43,23 +37,48 @@ export const RelevanceTuning: React.FC<Props> = ({ engineBreadcrumb }) => {
   return (
     <>
       <SetPageChrome trail={[...engineBreadcrumb, RELEVANCE_TUNING_TITLE]} />
-      <EuiPageHeader>
-        <EuiPageHeaderSection>
-          <EuiTitle size="l">
-            <h1>{RELEVANCE_TUNING_TITLE}</h1>
-          </EuiTitle>
-          <EuiText>
-            <EuiTextColor color="subdued">
-              {i18n.translate(
-                'xpack.enterpriseSearch.appSearch.engine.relevanceTuning.description',
-                {
-                  defaultMessage: 'Set field weights and boosts',
-                }
-              )}
-            </EuiTextColor>
-          </EuiText>
-        </EuiPageHeaderSection>
-      </EuiPageHeader>
+      <EuiPageHeader
+        className="relevanceTuningHeader"
+        pageTitle={RELEVANCE_TUNING_TITLE}
+        description={i18n.translate(
+          'xpack.enterpriseSearch.appSearch.engine.relevanceTuning.description',
+          {
+            defaultMessage: 'Set field weights and boosts',
+          }
+        )}
+        rightSideItems={
+          engineHasSchemaFields
+            ? [
+                <EuiButton
+                  data-test-subj="SaveRelevanceTuning"
+                  color="primary"
+                  fill
+                  onClick={updateSearchSettings}
+                >
+                  {i18n.translate(
+                    'xpack.enterpriseSearch.appSearch.engine.relevanceTuning.saveButtonLabel',
+                    {
+                      defaultMessage: 'Save',
+                    }
+                  )}
+                </EuiButton>,
+                <EuiButton
+                  data-test-subj="ResetRelevanceTuning"
+                  color="danger"
+                  onClick={resetSearchSettings}
+                >
+                  {i18n.translate(
+                    'xpack.enterpriseSearch.appSearch.engine.relevanceTuning.resetButtonLabel',
+                    {
+                      defaultMessage: 'Restore defaults',
+                    }
+                  )}
+                </EuiButton>,
+              ]
+            : []
+        }
+      />
+
       <EuiSpacer />
       <FlashMessages />
       <EuiFlexGroup>
