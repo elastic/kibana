@@ -12,14 +12,6 @@ import { setupSpacesAndUsers, tearDown } from '..';
 export default function alertingTests({ loadTestFile, getService }: FtrProviderContext) {
   describe('Alerts', () => {
     describe('legacy alerts', () => {
-      before(async () => {
-        await setupSpacesAndUsers(getService);
-      });
-
-      after(async () => {
-        await tearDown(getService);
-      });
-
       loadTestFile(require.resolve('./rbac_legacy'));
     });
 

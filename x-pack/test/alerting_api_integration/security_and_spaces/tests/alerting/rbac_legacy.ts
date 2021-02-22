@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { SuperuserAtSpace1, Superuser } from '../../scenarios';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import { ESTestIndexTool, getUrlPrefix, ObjectRemover, AlertUtils } from '../../../common/lib';
-import { setupSpacesAndUsers } from '..';
+import { setupSpacesAndUsers, tearDown } from '..';
 
 // eslint-disable-next-line import/no-default-export
 export default function alertTests({ getService }: FtrProviderContext) {
@@ -45,6 +45,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
       await esTestIndexTool.destroy();
       await es.indices.delete({ index: authorizationIndex });
       await esArchiver.unload('alerts_legacy');
+      await tearDown(getService);
     });
 
     // for (const scenario of UserAtSpaceScenarios) {
@@ -159,7 +160,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
           expect(swapResponse.body.id).to.eql(alertId);
           expect(swapResponse.body.attributes.meta.versionApiKeyLastmodified).to.eql('pre-7.10.0');
 
-          // loading the archive likely caused the task to fail so ensure it's rescheduled to run in 4 seconds,
+          // loading the archive likely caused the task to fail so ensure it's rescheduled to run in 1 seconds,
           // otherwise this test will stall for 5 minutes
           // no other attributes are touched, only runAt, so unless it would have ran when runAt expired, it
           // won't run now
@@ -167,7 +168,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
             .put(`${getUrlPrefix(space.id)}/api/alerts_fixture/${alertId}/reschedule_task`)
             .set('kbn-xsrf', 'foo')
             .send({
-              runAt: getRunAt(4000),
+              runAt: getRunAt(10000),
             })
             .expect(200);
           console.log(
@@ -234,6 +235,8 @@ export default function alertTests({ getService }: FtrProviderContext) {
 
 function getRunAt(delayInMs: number) {
   const runAt = new Date();
+  console.log(`CURRENT TIME: ${runAt.toISOString()}`);
   runAt.setMilliseconds(new Date().getMilliseconds() + delayInMs);
+  console.log(`NEW RUN AT TIME: ${runAt.toISOString()}`);
   return runAt.toISOString();
 }
