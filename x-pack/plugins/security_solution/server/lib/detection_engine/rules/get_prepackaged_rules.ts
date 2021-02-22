@@ -31,11 +31,12 @@ let latestRulesDownload: AddPrepackagedRulesSchemaDecoded[];
 let usePackageRegistryRules = false;
 
 /**
- * Enable retrieval of rules from the Elastic Package Registry. 
+ * Enable retrieval of rules from the Elastic Package Registry.
  */
 export const enablePackageRegistryRules = () => {
   usePackageRegistryRules = true;
-}
+};
+
 /**
  * Validate the rules from the file system and throw any errors indicating to the developer
  * that they are adding incorrect schema rules. Also this will auto-flush in all the default
@@ -115,7 +116,7 @@ export const getFileSystemRules = async (
 ): Promise<AddPrepackagedRulesSchemaDecoded[]> => {
   if (!rules || rules.length === 0) {
     // @ts-expect-error mock data is too loosely typed
-    validateAllPrepackagedRules(rawRules);
+    return validateAllPrepackagedRules(rawRules);
   }
 
   return validateAllPrepackagedRules(rules);
