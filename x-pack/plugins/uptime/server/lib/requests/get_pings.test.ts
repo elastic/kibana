@@ -175,7 +175,7 @@ describe('getAll', () => {
               },
             ],
           },
-          "index": "heartbeat-8*",
+          "index": "heartbeat-8*,synthetics-8*",
         },
       ]
     `);
@@ -244,7 +244,7 @@ describe('getAll', () => {
               },
             ],
           },
-          "index": "heartbeat-8*",
+          "index": "heartbeat-8*,synthetics-8*",
         },
       ]
     `);
@@ -313,7 +313,7 @@ describe('getAll', () => {
               },
             ],
           },
-          "index": "heartbeat-8*",
+          "index": "heartbeat-8*,synthetics-8*",
         },
       ]
     `);
@@ -387,7 +387,7 @@ describe('getAll', () => {
               },
             ],
           },
-          "index": "heartbeat-8*",
+          "index": "heartbeat-8*,synthetics-8*",
         },
       ]
     `);
@@ -461,7 +461,7 @@ describe('getAll', () => {
               },
             ],
           },
-          "index": "heartbeat-8*",
+          "index": "heartbeat-8*,synthetics-8*",
         },
       ]
     `);
