@@ -203,7 +203,8 @@ describe('percentile', () => {
               percentile: 95,
             },
           },
-          indexPattern
+          indexPattern,
+          {}
         )
       ).toBeTruthy();
     });
