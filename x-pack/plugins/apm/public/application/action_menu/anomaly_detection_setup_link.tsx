@@ -68,6 +68,7 @@ export function MissingJobsAlert({ environment }: { environment?: string }) {
   );
 
   const defaultIcon = <EuiIcon type="inspect" color="primary" />;
+
   if (status === FETCH_STATUS.LOADING) {
     return <EuiLoadingSpinner />;
   }
