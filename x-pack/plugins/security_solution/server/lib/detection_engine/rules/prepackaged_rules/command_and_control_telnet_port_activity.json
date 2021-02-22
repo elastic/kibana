@@ -33,8 +33,7 @@
         "id": "TA0011",
         "name": "Command and Control",
         "reference": "https://attack.mitre.org/tactics/TA0011/"
-      },
-      "technique": []
+      }
     },
     {
       "framework": "MITRE ATT&CK",

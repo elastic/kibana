@@ -56,8 +56,7 @@
         "id": "TA0005",
         "name": "Defense Evasion",
         "reference": "https://attack.mitre.org/tactics/TA0005/"
-      },
-      "technique": []
+      }
     }
   ],
   "timestamp_override": "event.ingested",

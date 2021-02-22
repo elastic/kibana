@@ -55,8 +55,7 @@
         "id": "TA0003",
         "name": "Persistence",
         "reference": "https://attack.mitre.org/tactics/TA0003/"
-      },
-      "technique": []
+      }
     }
   ],
   "timestamp_override": "event.ingested",
