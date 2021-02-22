@@ -117,7 +117,7 @@ export const transactionGroupsComparisonStatisticsRoute = createRoute({
       rangeRt,
       uiFiltersRt,
       t.type({
-        transactionNames: jsonRt,
+        transactionNames: jsonRt.pipe(t.array(t.string)),
         numBuckets: toNumberRt,
         transactionType: t.string,
         latencyAggregationType: latencyAggregationTypeRt,

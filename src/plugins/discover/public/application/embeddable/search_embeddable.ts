@@ -291,7 +291,7 @@ export class SearchEmbeddable
     const useNewFieldsApi = !this.services.uiSettings.get(SEARCH_FIELDS_FROM_SOURCE, false);
     if (!this.searchScope) return;
 
-    const { searchSource, pre712 } = this.savedSearch;
+    const { searchSource } = this.savedSearch;
 
     // Abort any in-progress requests
     if (this.abortController) this.abortController.abort();
@@ -308,10 +308,7 @@ export class SearchEmbeddable
     );
     if (useNewFieldsApi) {
       searchSource.removeField('fieldsFromSource');
-      const fields: Record<string, string> = { field: '*' };
-      if (pre712) {
-        fields.include_unmapped = 'true';
-      }
+      const fields: Record<string, string> = { field: '*', include_unmapped: 'true' };
       searchSource.setField('fields', [fields]);
     } else {
       searchSource.removeField('fields');
