@@ -88,11 +88,14 @@ function VisualizationSummary(props: Props) {
   );
 }
 
+const MAX_LIST_HEIGHT = 380;
+const ENTRY_HEIGHT = 32;
+
 function computeListHeight(list: SelectableEntry[], maxHeight: number): number {
   if (list.length === 0) {
     return 0;
   }
-  return Math.min(list.length * 32, maxHeight);
+  return Math.min(list.length * ENTRY_HEIGH, maxHeight);
 }
 
 export const ChartSwitch = memo(function ChartSwitch(props: Props) {
@@ -338,7 +341,7 @@ export const ChartSwitch = memo(function ChartSwitch(props: Props) {
           </EuiFlexGroup>
         </EuiPopoverTitle>
         <EuiSelectable
-          height={computeListHeight(visualizationTypes, 380)}
+          height={computeListHeight(visualizationTypes, MAX_LIST_HEIGHT)}
           searchable
           singleSelection
           isPreFiltered
