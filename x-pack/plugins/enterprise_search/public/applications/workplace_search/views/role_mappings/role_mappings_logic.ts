@@ -14,6 +14,7 @@ import routes from 'workplace_search/routes';
 import { KibanaLogic } from '../../../shared/kibana';
 import { ANY_AUTH_PROVIDER } from '../../../shared/role_mapping/constants';
 import { ROLE_MAPPINGS_PATH } from '../../routes';
+import { RoleGroup, WSRoleMapping, Role } from '../../types';
 
 const DELETE_MESSAGE =
   'Are you sure you want to permanently delete this mapping? This action is not reversible and some users might lose access.';

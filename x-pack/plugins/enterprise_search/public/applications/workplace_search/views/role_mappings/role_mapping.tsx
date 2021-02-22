@@ -30,11 +30,12 @@ import {
   RoleSelector,
 } from '../../../shared/role_mapping';
 import { ViewContentHeader } from '../../components/shared/view_content_header';
+import { Role } from '../../types';
 
 import { RoleMappingsLogic } from './role_mappings_logic';
 
 interface RoleType {
-  type: 'admin' | 'user';
+  type: Role;
   description: string;
 }
 
@@ -105,8 +106,8 @@ export const RoleMapping: React.FC<RoleMappingProps> = ({ isNew }) => {
   );
 
   const hasAdminRoleMapping = roleMappings.some(
-    ({ roleType: roleMappingRoleType }: { roleType: 'admin' | 'user' }) =>
-      roleMappingRoleType === 'admin'
+    ({ roleType: roleMappingRoleType }: { roleType: Role }) =>
+      roleMappingRoleType === ('admin' as Role)
   );
 
   return (

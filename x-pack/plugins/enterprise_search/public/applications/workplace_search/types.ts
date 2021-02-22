@@ -22,6 +22,8 @@ export interface Meta {
   page: MetaPage;
 }
 
+export type Role = 'admin' | 'user';
+
 export interface Group {
   id: string;
   name: string;
@@ -214,4 +216,5 @@ export interface RoleGroup {
 export interface WSRoleMapping extends RoleMapping {
   allGroups: boolean;
   groups: RoleGroup[];
+  roleType: Role;
 }
