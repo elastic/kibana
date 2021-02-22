@@ -118,7 +118,8 @@ def functionalXpack(Map params = [:]) {
       'x-pack/plugins/triggers_actions_ui/public/application/context/actions_connectors_context.tsx',
     ]) {
       if (githubPr.isPr()) {
-        task(kibanaPipeline.functionalTestProcess('xpack-securitySolutionCypress', './test/scripts/jenkins_security_solution_cypress.sh'))
+        task(kibanaPipeline.functionalTestProcess('xpack-securitySolutionCypressChrome', './test/scripts/jenkins_security_solution_cypress_chrome.sh'))
+        task(kibanaPipeline.functionalTestProcess('xpack-securitySolutionCypressFirefox', './test/scripts/jenkins_security_solution_cypress_firefox.sh'))
       }
     }
   }
