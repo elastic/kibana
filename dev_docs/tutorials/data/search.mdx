@@ -454,7 +454,7 @@ const currentSearchSessionId = data.search.sessions.getSessionId();
 
 ##### Clear Search Sessions 
 
-Creating a new `Search Session` clears the previous one. However, be sure to explicitly `clear` the `Search Session` when your application is being destroyed:
+Creating a new search session clears the previous one. You must explicitly `clear` the search session when your application is being destroyed:
 
 ```ts
 function onDestroy() {
