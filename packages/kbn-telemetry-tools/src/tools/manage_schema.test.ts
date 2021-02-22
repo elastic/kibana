@@ -26,8 +26,8 @@ describe('generateMapping', () => {
     const result = generateMapping([parsedWorkingCollector]);
     expect(result).toEqual(mockSchema);
   });
-  it.only('skips _meta.description fields', async () => {
-    const mockSchema = await parseJsonFile('mock_schema.json');
+  it('generates a mapping file that includes _meta.description fields', async () => {
+    const mockSchema = await parseJsonFile('mock_schema_with_descriptions.json');
     const result = generateMapping([parsedCollectorWithDescription]);
     expect(result).toEqual(mockSchema);
   });

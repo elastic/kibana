@@ -55,36 +55,12 @@ export function isObjectMapping(entity: any) {
   return false;
 }
 
-export function isMetaDescription(entity: any) {
-  console.log('what is the entity in here?', entity);
-  // TODO: Do not generate a mapping for `_meta: { description: string }` fields.
-  if (typeof entity === 'object') {
-    if (entity._meta && typeof entity._meta === 'object') {
-      const entityKeys = Object.keys(entity._meta);
-      // TODO extract this into another helper for simplicity
-      if (
-        entityKeys.length === 1 &&
-        entityKeys.includes('description') &&
-        typeof entity._meta.description === 'string'
-      ) {
-        return true;
-      }
-    }
-  }
-  return false;
-}
-
 function isArrayMapping(entity: any): entity is { type: 'array'; items: object } {
   return typeof entity === 'object' && entity.type === 'array' && typeof entity.items === 'object';
 }
 
 function getValueMapping(value: any) {
-  if (!isMetaDescription(value)) {
-    console.log('not meta');
-    return isObjectMapping(value) ? transformToEsMapping(value) : value;
-  }
-  console.log('meta');
-  return;
+  return isObjectMapping(value) ? transformToEsMapping(value) : value;
 }
 
 function transformToEsMapping(usageMappingValue: any) {
