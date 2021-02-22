@@ -46,17 +46,18 @@ const errorHandler = <E extends Error>(
   res: KibanaResponseFactory,
   error: E
 ): IKibanaResponse => {
-  logger.error(error);
-
   if (error instanceof TrustedAppNotFoundError) {
+    logger.error(error);
     return res.notFound({ body: error });
   }
 
   if (error instanceof TrustedAppVersionConflictError) {
+    logger.error(error);
     return res.conflict({ body: error });
   }
 
-  return res.internalError({ body: error });
+  // Kibana will take care of `500` errors when the handler `throw`'s, including logging the error
+  throw error;
 };
 
 export const getTrustedAppsDeleteRouteHandler = (

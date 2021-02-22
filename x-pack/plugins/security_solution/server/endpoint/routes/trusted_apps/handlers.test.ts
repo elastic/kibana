@@ -377,9 +377,11 @@ describe('handlers', () => {
       assertResponse(mockResponse, 'notFound', expect.any(TrustedAppNotFoundError));
     });
 
-    it('should log errors if any are encountered', async () => {
+    it.each([
+      [new TrustedAppNotFoundError('123')],
+      [new TrustedAppVersionConflictError('123', new Error('some conflict error'))],
+    ])('should log error: %s', async (error) => {
       const mockResponse = httpServerMock.createResponseFactory();
-      const error = new Error('I am an error');
       exceptionsListClient.getExceptionListItem.mockImplementation(async () => {
         throw error;
       });
