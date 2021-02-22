@@ -17,6 +17,7 @@ import { useDrilldownManager } from '../context';
 import { DrilldownForm } from '../../components/drilldown_form';
 import { DrilldownState } from '../../state';
 import { TriggerPickerProps } from '../../components/trigger_picker';
+import { ActionFactoryPicker } from '../action_factory_picker';
 // import { Trigger } from '../../../../../../../src/plugins/ui_actions/public';
 // import { ActionFactoryPlaceContext } from '../types';
 // import { DrilldownWizardState, useDrilldownWizard } from './use_flyout_drilldown_wizard';
@@ -47,6 +48,7 @@ export const CreateDrilldownForm: React.FC<CreateDrilldownFormProps> = ({ state 
 
   return (
     <>
+      <ActionFactoryPicker />
       <DrilldownForm
         euiIconType={iconType}
         drilldownTypeName={drilldownTypeDisplayName}

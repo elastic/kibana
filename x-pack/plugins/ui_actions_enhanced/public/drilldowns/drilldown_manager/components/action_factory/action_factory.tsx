@@ -11,6 +11,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
+  EuiIcon,
   EuiLink,
   EuiText,
 } from '@elastic/eui';
@@ -78,7 +79,7 @@ export interface ActionFactoryProps {
   beta?: boolean;
 
   /** Whether to show "Get more actions" link to upgrade license. */
-  showMoreActionsLink?: boolean;
+  showMoreLink?: boolean;
 
   /** On drilldown type change click. */
   onChange: () => void;
@@ -88,18 +89,22 @@ export const ActionFactory: React.FC<ActionFactoryProps> = ({
   name,
   icon,
   beta,
-  showMoreActionsLink,
+  showMoreLink,
   onChange,
 }) => {
   return (
     <EuiFormRow
       label={txtDrilldownAction}
       fullWidth={true}
-      labelAppend={showMoreActionsLink && moreActions}
+      labelAppend={showMoreLink && moreActions}
     >
       <header>
         <EuiFlexGroup alignItems="center" responsive={false} gutterSize="s">
-          {icon}
+          {!!icon && (
+            <EuiFlexItem grow={false}>
+              <EuiIcon type={icon} size="m" />
+            </EuiFlexItem>
+          )}
           <EuiFlexItem grow={true}>
             <EuiText>
               <h4>
