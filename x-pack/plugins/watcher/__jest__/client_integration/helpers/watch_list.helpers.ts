@@ -8,8 +8,8 @@
 import { act } from 'react-dom/test-utils';
 
 import { registerTestBed, findTestSubject, TestBed, TestBedConfig, nextTick } from '@kbn/test/jest';
-import { WatchList } from '../../public/application/sections/watch_list/components/watch_list';
-import { ROUTES, REFRESH_INTERVALS } from '../../common/constants';
+import { WatchList } from '../../../public/application/sections/watch_list/components/watch_list';
+import { ROUTES, REFRESH_INTERVALS } from '../../../common/constants';
 import { withAppContext } from './app_context.mock';
 
 const testBedConfig: TestBedConfig = {

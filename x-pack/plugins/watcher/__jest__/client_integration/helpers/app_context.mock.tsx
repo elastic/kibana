@@ -15,9 +15,9 @@ import {
   notificationServiceMock,
   httpServiceMock,
   scopedHistoryMock,
-} from '../../../../../src/core/public/mocks';
-import { AppContextProvider } from '../../public/application/app_context';
-import { LicenseStatus } from '../../common/types/license_status';
+} from '../../../../../../src/core/public/mocks';
+import { AppContextProvider } from '../../../public/application/app_context';
+import { LicenseStatus } from '../../../common/types/license_status';
 
 class MockTimeBuckets {
   setBounds(_domain: any) {

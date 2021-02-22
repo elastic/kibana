@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getWatch } from '../../__fixtures__';
+import { getWatch } from '../../../__fixtures__';
 
 export const WATCH_ID = 'my-test-watch';
 

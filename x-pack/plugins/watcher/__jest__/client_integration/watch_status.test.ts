@@ -9,10 +9,10 @@ import { act } from 'react-dom/test-utils';
 import { setupEnvironment, pageHelpers, nextTick } from './helpers';
 import { WatchStatusTestBed } from './helpers/watch_status.helpers';
 import { WATCH } from './helpers/jest_constants';
-import { getWatchHistory } from '../__fixtures__';
+import { getWatchHistory } from '../../__fixtures__';
 import moment from 'moment';
-import { ROUTES } from '../common/constants';
-import { WATCH_STATES, ACTION_STATES } from '../common/constants';
+import { ROUTES } from '../../common/constants';
+import { WATCH_STATES, ACTION_STATES } from '../../common/constants';
 
 const { API_ROOT } = ROUTES;
 
