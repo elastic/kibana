@@ -36,9 +36,6 @@ export default function ({ getService }: FtrProviderContext) {
         suiteTitle: 'continuous transform with pivot configuration',
         originalConfig: getTransformConfig(true),
         mode: 'continuous',
-        expected: {
-          mode: TRANSFORM_STATE.INDEXING,
-        },
       },
     ];
 

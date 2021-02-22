@@ -115,6 +115,7 @@ export default function ({ getService }: FtrProviderContext) {
 
             await transform.testExecution.logTestStep('should stop the transform');
             await transform.table.clickTransformRowActionWithRetry('Stop');
+
             await transform.testExecution.logTestStep('should display the stopped transform');
             await transform.table.assertTransformRowFields(testData.originalConfig.id, {
               id: testData.originalConfig.id,

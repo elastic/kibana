@@ -146,7 +146,7 @@ export function TransformTableProvider(
       const rows = await this.parseTransformTable();
       expect(rows).to.have.length(
         expectedRowCount,
-        `Transform table should have ${expectedRowCount} row(s) after resetting search' (got '${rows.length}')`
+        `Transform table should have ${expectedRowCount} row(s) after clearing search' (got '${rows.length}')`
       );
     }
 
@@ -168,7 +168,7 @@ export function TransformTableProvider(
         const transformRow = rows.filter((row) => row.id === transformId)[0];
         expect(transformRow.status).to.not.eql(
           status,
-          `Expected transform row to not be '${status}' (got '${transformRow.status}')`
+          `Expected transform row status to not be '${status}' (got '${transformRow.status}')`
         );
       });
     }
@@ -295,7 +295,7 @@ export function TransformTableProvider(
         await testSubjects.click('transformDeleteModal > confirmModalConfirmButton');
         await this.assertTransformDeleteModalNotExists();
 
-        // If after deletion, and there's no Transform left
+        // If after deletion, and there's no transform left
         if (expectedNumRows < 1) {
           await management.assertNoTransformsFoundMessageExists();
         } else {
