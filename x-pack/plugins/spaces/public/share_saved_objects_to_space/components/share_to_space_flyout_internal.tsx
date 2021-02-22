@@ -276,12 +276,7 @@ export const ShareToSpaceFlyoutInternal = (props: ShareToSpaceFlyoutProps) => {
 
     return (
       <React.Suspense fallback={<EuiLoadingSpinner />}>
-        <LazyCopyToSpaceFlyout
-          onClose={onClose}
-          savedObjectTarget={savedObjectTarget}
-          spacesManager={spacesManager}
-          toastNotifications={toastNotifications}
-        />
+        <LazyCopyToSpaceFlyout onClose={onClose} savedObjectTarget={savedObjectTarget} />
       </React.Suspense>
     );
   }

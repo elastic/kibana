@@ -11,14 +11,14 @@ import { act } from '@testing-library/react';
 import React from 'react';
 
 import { findTestSubject, mountWithIntl, nextTick } from '@kbn/test/jest';
-import type { ToastsApi } from 'src/core/public';
+import { coreMock } from 'src/core/public/mocks';
 import type { Space } from 'src/plugins/spaces_oss/common';
 
-import type { SpacesManager } from '../../spaces_manager';
+import { getSpacesContextWrapper } from '../../spaces_context';
 import { spacesManagerMock } from '../../spaces_manager/mocks';
 import type { SavedObjectTarget } from '../types';
 import { CopyModeControl } from './copy_mode_control';
-import { CopyToSpaceFlyoutInternal } from './copy_to_space_flyout_internal';
+import { getCopyToSpaceFlyoutComponent } from './copy_to_space_flyout';
 import { CopyToSpaceForm } from './copy_to_space_form';
 import { ProcessingCopyToSpace } from './processing_copy_to_space';
 import { SelectableSpacesControl } from './selectable_spaces_control';
@@ -64,10 +64,15 @@ const setup = async (opts: SetupOpts = {}) => {
     ]
   );
 
-  const mockToastNotifications = {
-    addError: jest.fn(),
-    addSuccess: jest.fn(),
+  const { getStartServices } = coreMock.createSetup();
+  const startServices = coreMock.createStart();
+  startServices.application.capabilities = {
+    ...startServices.application.capabilities,
+    spaces: { manage: true },
   };
+  const mockToastNotifications = startServices.notifications.toasts;
+  getStartServices.mockResolvedValue([startServices, , ,]);
+
   const savedObjectToCopy = {
     type: 'dashboard',
     id: 'my-dash',
@@ -76,21 +81,30 @@ const setup = async (opts: SetupOpts = {}) => {
     title: 'foo',
   } as SavedObjectTarget;
 
+  const SpacesContext = await getSpacesContextWrapper({
+    getStartServices,
+    spacesManager: mockSpacesManager,
+  });
+  const CopyToSpaceFlyout = await getCopyToSpaceFlyoutComponent();
+
   const wrapper = mountWithIntl(
-    <CopyToSpaceFlyoutInternal
-      savedObjectTarget={savedObjectToCopy}
-      spacesManager={(mockSpacesManager as unknown) as SpacesManager}
-      toastNotifications={(mockToastNotifications as unknown) as ToastsApi}
-      onClose={onClose}
-    />
+    <SpacesContext>
+      <CopyToSpaceFlyout savedObjectTarget={savedObjectToCopy} onClose={onClose} />
+    </SpacesContext>
   );
+
+  // wait for context wrapper to rerender
+  await act(async () => {
+    await nextTick();
+    wrapper.update();
+  });
 
   if (!opts.returnBeforeSpacesLoad) {
     // Wait for spaces manager to complete and flyout to rerender
     await act(async () => {
       await nextTick();
-      wrapper.update();
     });
+    wrapper.update();
   }
 
   return { wrapper, onClose, mockSpacesManager, mockToastNotifications, savedObjectToCopy };
@@ -104,10 +118,7 @@ describe('CopyToSpaceFlyout', () => {
     expect(wrapper.find(EuiEmptyPrompt)).toHaveLength(0);
     expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(1);
 
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
-    });
+    wrapper.update();
 
     expect(wrapper.find(CopyToSpaceForm)).toHaveLength(1);
     expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(0);

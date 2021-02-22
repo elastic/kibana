@@ -9,11 +9,9 @@ import { EuiLoadingSpinner } from '@elastic/eui';
 import React from 'react';
 
 import { i18n } from '@kbn/i18n';
-import type { NotificationsStart } from 'src/core/public';
 import type { SavedObjectsManagementRecord } from 'src/plugins/saved_objects_management/public';
 
 import { SavedObjectsManagementAction } from '../../../../../src/plugins/saved_objects_management/public';
-import type { SpacesManager } from '../spaces_manager';
 import type { CopyToSpaceFlyoutProps } from './components';
 import { getCopyToSpaceFlyoutComponent } from './components';
 
@@ -49,10 +47,7 @@ export class CopyToSpaceSavedObjectsManagementAction extends SavedObjectsManagem
     },
   };
 
-  constructor(
-    private readonly spacesManager: SpacesManager,
-    private readonly notifications: NotificationsStart
-  ) {
+  constructor() {
     super();
   }
 
@@ -69,14 +64,7 @@ export class CopyToSpaceSavedObjectsManagementAction extends SavedObjectsManagem
       icon: this.record.meta.icon,
     };
 
-    return (
-      <Wrapper
-        onClose={this.onClose}
-        savedObjectTarget={savedObjectTarget}
-        spacesManager={this.spacesManager}
-        toastNotifications={this.notifications.toasts}
-      />
-    );
+    return <Wrapper onClose={this.onClose} savedObjectTarget={savedObjectTarget} />;
   };
 
   private onClose = () => {

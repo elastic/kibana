@@ -24,22 +24,19 @@ import React, { useEffect, useMemo, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import type { ToastsStart } from 'src/core/public';
 import type { ProcessedImportResponse } from 'src/plugins/saved_objects_management/public';
 import type { Space } from 'src/plugins/spaces_oss/common';
 
 import { processImportResponse } from '../../../../../../src/plugins/saved_objects_management/public';
-import type { SpacesManager } from '../../spaces_manager';
 import type { CopyOptions, ImportRetry, SavedObjectTarget } from '../types';
 import { CopyToSpaceFlyoutFooter } from './copy_to_space_flyout_footer';
 import { CopyToSpaceForm } from './copy_to_space_form';
 import { ProcessingCopyToSpace } from './processing_copy_to_space';
+import { useSpaces } from '../../spaces_context';
 
 export interface CopyToSpaceFlyoutProps {
   onClose: () => void;
   savedObjectTarget: SavedObjectTarget;
-  spacesManager: SpacesManager;
-  toastNotifications: ToastsStart;
 }
 
 const INCLUDE_RELATED_DEFAULT = true;
@@ -47,7 +44,11 @@ const CREATE_NEW_COPIES_DEFAULT = true;
 const OVERWRITE_ALL_DEFAULT = true;
 
 export const CopyToSpaceFlyoutInternal = (props: CopyToSpaceFlyoutProps) => {
-  const { onClose, savedObjectTarget: object, spacesManager, toastNotifications } = props;
+  const { spacesManager, services } = useSpaces();
+  const { notifications } = services;
+  const toastNotifications = notifications!.toasts;
+
+  const { onClose, savedObjectTarget: object } = props;
   const savedObjectTarget = useMemo(
     () => ({
       type: object.type,

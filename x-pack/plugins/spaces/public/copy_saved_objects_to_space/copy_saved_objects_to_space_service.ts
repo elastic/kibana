@@ -5,21 +5,17 @@
  * 2.0.
  */
 
-import type { NotificationsSetup } from 'src/core/public';
 import type { SavedObjectsManagementPluginSetup } from 'src/plugins/saved_objects_management/public';
 
-import type { SpacesManager } from '../spaces_manager';
 import { CopyToSpaceSavedObjectsManagementAction } from './copy_saved_objects_to_space_action';
 
 interface SetupDeps {
-  spacesManager: SpacesManager;
   savedObjectsManagementSetup: SavedObjectsManagementPluginSetup;
-  notificationsSetup: NotificationsSetup;
 }
 
 export class CopySavedObjectsToSpaceService {
-  public setup({ spacesManager, savedObjectsManagementSetup, notificationsSetup }: SetupDeps) {
-    const action = new CopyToSpaceSavedObjectsManagementAction(spacesManager, notificationsSetup);
+  public setup({ savedObjectsManagementSetup }: SetupDeps) {
+    const action = new CopyToSpaceSavedObjectsManagementAction();
     savedObjectsManagementSetup.actions.register(action);
   }
 }

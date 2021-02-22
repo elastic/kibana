@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import { notificationServiceMock } from 'src/core/public/mocks';
 import { savedObjectsManagementPluginMock } from 'src/plugins/saved_objects_management/public/mocks';
 
-import { spacesManagerMock } from '../spaces_manager/mocks';
 import { CopyToSpaceSavedObjectsManagementAction } from './copy_saved_objects_to_space_action';
 import { CopySavedObjectsToSpaceService } from './copy_saved_objects_to_space_service';
 
@@ -16,8 +14,6 @@ describe('CopySavedObjectsToSpaceService', () => {
   describe('#setup', () => {
     it('registers the CopyToSpaceSavedObjectsManagementAction', () => {
       const deps = {
-        spacesManager: spacesManagerMock.create(),
-        notificationsSetup: notificationServiceMock.createSetupContract(),
         savedObjectsManagementSetup: savedObjectsManagementPluginMock.createSetupContract(),
       };
 
