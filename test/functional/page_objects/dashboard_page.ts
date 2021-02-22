@@ -425,8 +425,9 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
         await this.setStoreTimeWithDashboard(saveOptions.storeTimeWithDashboard);
       }
 
-      if (saveOptions.saveAsNew !== undefined) {
-        await this.setSaveAsNewCheckBox(saveOptions.saveAsNew);
+      const saveAsNewCheckboxExists = await testSubjects.exists('saveAsNewCheckbox');
+      if (saveAsNewCheckboxExists) {
+        await this.setSaveAsNewCheckBox(Boolean(saveOptions.saveAsNew));
       }
 
       if (saveOptions.tags) {
