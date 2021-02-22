@@ -7,19 +7,19 @@ date: 2021-02-10
 tags: ['kibana', 'onboarding', 'dev', 'tutorials', 'search', 'sessions', 'search-sessions']
 ---
 
-## Search Service
+## Search service
 
-### Low Level Search 
+### Low level search 
 
-Searching data stored in `Elasticsearch` can be done in various ways, for example using the `Elasticsearch` REST API or using an `Elasticsearch Client` for low level access.
+Searching data stored in Elasticsearch can be done in various ways, for example using the Elasticsearch REST API or using an `Elasticsearch Client` for low level access.
 
-However, the recommended and easist way to search `Elasticsearch` is by using the low level search service. The service is exposed from the `data` plugin, and by using it, you not only gain access to the data you stored, but also to capabilities, such as Custom Search Strategies, Asynchronous Search, Partial Results, Search Sessions, and more.
+However, the recommended and easist way to search Elasticsearch is by using the low level search service. The service is exposed from the `data` plugin, and by using it, you not only gain access to the data you stored, but also to capabilities, such as Custom Search Strategies, Asynchronous Search, Partial Results, Search Sessions, and more.
 
 Here is a basic example for using the `data.search` service from a custom plugin:
 
 ```ts
 import { CoreStart, Plugin } from 'kibana/public';
-import { DataPublicPluginStart, isCompleteResponse, isErrorResponse } from '???';
+import { DataPublicPluginStart, isCompleteResponse, isErrorResponse } from import { DataPublicPluginStart, isCompleteResponse, isErrorResponse } from '../../src/plugins/data';
 
 export interface MyPluginStartDependencies {
   data: DataPublicPluginStart;
@@ -48,7 +48,7 @@ export class MyPlugin implements Plugin {
         } else if (isErrorResponse(res)) {
           // handle error, this means that some results were returned, but the search has failed to complete.
         } else {
-          // handle partial results. See LINK TO PARTIAL RESULTS for more information.
+          // handle partial results if you want.
         }
       }, 
       error: (e) => {
@@ -59,7 +59,7 @@ export class MyPlugin implements Plugin {
 }
 ```
 
-Note: The `data` plugin contains services to help you generate the `query` and `aggs` portions, as well as managing indicies using the `data.indexPatterns` service. You can read more about them [here]().  
+Note: The `data` plugin contains services to help you generate the `query` and `aggs` portions, as well as managing indices using the `data.indexPatterns` service.
 
 <DocCallOut title="Server Side Search">
   The `data.search` service is available on both server and client, with similar APIs.
@@ -67,7 +67,12 @@ Note: The `data` plugin contains services to help you generate the `query` and `
 
 #### Error handling
 
-The `search` method can throw several types of errors. 
+The `search` method can throw several types of errors, for example:
+
+ - `EsError` for errors originating in Elasticsearch errors
+ - `PainlessError` for errors originating from a Painless script
+ - `AbortError` if the search was aborted via an `AbortController`
+ - `HttpError` in case of a network error
 
 To display the errors in the context of an application, use the helper method provided on the `data.search` service. These errors are shown in a toast message, using the `core.notifications` service.  
 
@@ -80,7 +85,7 @@ data.search.search(req).subscribe({
 })
 ```
 
-If you choose to handle errors by yourself, look out for errors coming from `Elasticsearch`. They have an additional `attributes` property that holds the raw error from `Elasticsearch`.
+If you decide to handle errors by yourself, watch for errors coming from `Elasticsearch`. They have an additional `attributes` property that holds the raw error from `Elasticsearch`.
 
 ```ts
 data.search.search(req).subscribe({
@@ -93,11 +98,13 @@ data.search.search(req).subscribe({
 })
 ```
 
-#### Aborting a running search 
+#### Stop a running search 
 
-The search service `search` method supports a second argument called `options`. One of those options is providing an `abortSignal`, to stop searches from running to completion, if the result is no longer needed.
+The search service `search` method supports a second argument called `options`. One of these options provides an `abortSignal` to stop searches from running to completion, if the result is no longer needed.
 
 ```ts
+import { AbortError } from '../../src/data/public';
+
 const abortController = new AbortController();
 data.search.search(req, {
   abortSignal: abortController.signal,
@@ -120,7 +127,7 @@ setTimeout(() => {
 }, 1000);
 ```
 
-#### Search Strategies
+#### Search strategies
 
 By default, the search service uses the DSL query and aggregation syntax and returns the response from Elasticsearch as is. It also provides several additional basic strategies, such as Async DSL (`x-pack` default) and EQL.
 
@@ -137,11 +144,11 @@ data.search.search(req, {
 });
 ```
 
-##### Custom Search Strategies
+##### Custom search strategies
 
-If you wish to use a different query syntax, pre-process the request or process the response before returning it to the client, you may create and register a custom search strategy to encapsulate your custom logic.
+To use a different query syntax, preprocess the request, or process the response before returning it to the client, you can create and register a custom search strategy to encapsulate your custom logic.
 
-The following example shows how to define, register and use a search strategy that pre-processes the request before sending it to the default DSL search strategy, then processes the response before returning.
+The following example shows how to define, register, and use a search strategy that preprocesses the request before sending it to the default DSL search strategy, and then processes the response before returning.
 
 ```ts
 // ./myPlugin/server/myStrategy.ts
@@ -219,17 +226,15 @@ data.search.search(req, {
 });
 ```
 
-##### Async Search and Custom Async Search Strategies
+##### Async search and custom async search strategies
 
-The open source default search strategy (`ES_SEARCH_STRATEGY`), run searches synchronously, keeping an open connection to Elasticsearch the whole time the query executes. The duration of those queries is restricted by the `elasticsearch.requestTimeout` setting in `kibana.yml`, which is 30 seconds, by default.
+The open source default search strategy (`ES_SEARCH_STRATEGY`), run searches synchronously, keeping an open connection to Elasticsearch while the query executes. The duration of these queries is restricted by the `elasticsearch.requestTimeout` setting in `kibana.yml`, which is 30 seconds by default.
 
-This synchronous execution works great in most cases. However, with the introduction of features, such as `Data Tiers` and `Runtime Fields`, the need to allow running slower queries, where holding an open connection might be inefficient, has increased. In 7.7, `Elasticsearch` have introduced the [async_search API](https://www.elastic.co/guide/en/elasticsearch/reference/current/async-search.html), allowing a query to run for longer, without having to keep an open connection. Instead, the initial search request returns an ID, identifying the search running in `Elasticsearch`. This ID can then be used to retrieve, cancel or manage the search result.
+This synchronous execution works great in most cases. However, with the introduction of features such as `data tiers` and `runtime fields`, the need to allow slower-running queries, where holding an open connection might be inefficient, has increased. In 7.7, `Elasticsearch` introduced the [async_search API](https://www.elastic.co/guide/en/elasticsearch/reference/current/async-search.html), allowing a query to run longer without keeping an open connection. Instead, the initial search request returns an ID that identifies the search running in `Elasticsearch`. This ID can then be used to retrieve, cancel, or manage the search result.
 
+The [async_search API](https://www.elastic.co/guide/en/elasticsearch/reference/current/async-search.html) is what drives more advanced `Kibana` `search` features, such as `partial results` and `search sessions`. [When available](https://www.elastic.co/subscriptions), the default search strategy of `Kibana` is automatically set to the **async** default search strategy (`ENHANCED_ES_SEARCH_STRATEGY`), empowering Kibana to run longer queries, with an **optional** duration restriction defined by the UI setting `search:timeout`.
 
-
-The [async_search API](https://www.elastic.co/guide/en/elasticsearch/reference/current/async-search.html) is what drives more advanced `Kibana` `search` features, such as `Partial Results` and `Search Sessions`. Therefore, Running with a Basic+ license, the default search strategy of `Kibana` is automatically set to the **async** default search strategy (`ENHANCED_ES_SEARCH_STRATEGY`), empowering kibana to run longer queries, with an **optional** duration restriction defined by the UI setting (`search:timeout`).
-
-If you are implementing your own async custom search strategy, make sure to implement `cancel` and `extend` as shown in the example bellow: 
+If you are implementing your own async custom search strategy, make sure to implement `cancel` and `extend`, as shown in the following example: 
 
 ```ts
 // ./myPlugin/server/myEnhancedStrategy.ts
@@ -257,9 +262,11 @@ export const myEnhancedSearchStrategyProvider = (
 };
 ```
 
-### High Level Search
+### High level search
 
-#### Search Source
+The high level search service is a simplified way to create and run search requests, without writing custom DSL queries.
+
+#### Search source
 
 ```ts
 function searchWithSearchSource() {
@@ -287,11 +294,11 @@ function searchWithSearchSource() {
 }
 ```
 
-### Partial Results
+### Partial results
 
 When searching using an `async` strategy (such as async DSL and async EQL), the search service will stream back partial results.   
 
-While you may ignore them and wait for the final result before rendering, you may also use those partial results to create a more interactive experience for your users. It is highly advised however, to make sure users are aware that the results they are seeing are partial.
+Although you can ignore the partial results and wait for the final result before rendering, you can also use the partial results to create a more interactive experience for your users. It is highly advised, however, to make sure users are aware that the results they are seeing are partial.
 
 ```ts
 // Handling partial results
@@ -309,28 +316,28 @@ data.search.search(req).subscribe({
 const finalResult = await data.search.search(req).toPromise();
 ```
 
-### Search Sessions
+### Search sessions
 
-A `Search Session` is a higher level concept, than search. It is used to describe a grouping of one or more async search requests with additional context. 
+A search session is a higher level concept than search. A search session describes a grouping of one or more async search requests with additional context.
 
-`Search Sessions` come in handy when you want to enable a user to run something asynchronously (for example, a dashboard over a very long period of time), and then restore the results quickly at a later time, as the `Search Service` transparently fetches results from the `.async-search` index, instead of running each request again.
+Search sessions are handy when you want to enable a user to run something asynchronously (for example, a dashboard over a long period of time), and then quickly restore the results at a later time.  The `Search Service` transparently fetches results from the `.async-search` index, instead of running each request again.
 
-Internally, any search run within the a `Search Session` is saved into a `Saved Object`, allowing `Kibana` to manage their lifecycle. Most `Saved Objects` are deleted automatically after a short period of time, but if a user chooses to save the `Search Session`, the `Saved Object` is persisted, so that results can be restored in a later time.
+Internally, any search run within a search session is saved into an object, allowing Kibana to manage their lifecycle. Most saved objects are deleted automatically after a short period of time, but if a user chooses to save the search session, the saved object is persisted, so that results can be restored in a later time.
 
-Stored `Search Sessions` are listed in the management application, under `Kibana > Search Sessions`, making it easy to find, manage and restore them.
+Stored search sessions are listed in the *Management* application, under *Kibana > Search Sessions*, making it easy to find, manage, and restore them.
 
-As a developer, there might be two different, but common, use cases you might encounter:
+As a developer, you might encounter these two common, use cases:
 
- * Running a search inside an existing Search Session
- * Supporting Search Sessions in your application
+ * Running a search inside an existing search session
+ * Supporting search sessions in your application
 
-#### Running a search inside an existing Search Session
+#### Running a search inside an existing search session
 
-For the sake of this example, lets assume you are implementing a new type of `Embeddable` that will be shown on dashboards. The same principle applies however, to any `search` requests you may be running, as long as the application you are running inside is managing an active session.
+For this example, assume you are implementing a new type of `Embeddable` that will be shown on dashboards. The same principle applies, however, to any search requests that you are running, as long as the application you are running inside is managing an active session.
 
-Since the Dashboard application is already managing a `Search Session`, all you need to do is pass down the `searchSessionId` argument to any `search` call (this applies to both the low and high level search APIs). 
+Because the Dashboard application is already managing a search session, all you need to do is pass down the `searchSessionId` argument to any `search` call. This applies to both the low and high level search APIs. 
 
-Once you do so, the `search` information will be added to the `Search Session` `Saved Object`. 
+The search information will be added to the saved object for the search session. 
 
 ```ts
 export class SearchEmbeddable
@@ -411,7 +418,6 @@ export class MyPlugin implements Plugin {
         return `MyApp_${Math.random()}`;
       },
       getUrlGeneratorData: async () => {
-        // Read more about the URL generators **link**
         return {
           urlGeneratorId: MY_URL_GENERATOR,
           initialState: getUrlGeneratorState({ ...deps, shouldRestoreSearchSession: false }),
@@ -428,12 +434,12 @@ export class MyPlugin implements Plugin {
 </DocCallOut>
 
 <DocCallOut color="danger" title="Search sessions indicator">
-  Calling `enableStorage` will also enable the `Search Session Indicator` component in the chrome component of your solution. The `Search Session Indicator` is a small button, used by default to engage users and save new search sessions. To implement your own UI, contact us to decouple this behavior.  
+  Calling `enableStorage` will also enable the `Search Session Indicator` component in the chrome component of your solution. The `Search Session Indicator` is a small button, used by default to engage users and save new search sessions. To implement your own UI, contact the Kibana application services team to decouple this behavior.  
 </DocCallOut>
 
 ##### Start a new search session 
 
-Make sure to call `start` when the *state* you previously defined changes. 
+Make sure to call `start` when the **state** you previously defined changes. 
 
 ```ts
 
@@ -443,16 +449,16 @@ function onSearchSessionConfigChange() {
 
 ```
 
-Pass the `searchSessionId` to every `search` call inside your application. If you're using `Embeddables` make sure to pass down the `searchSessionId` as `input`. 
+Pass the `searchSessionId` to every `search` call inside your application. If you're using `Embeddables`, pass down the `searchSessionId` as `input`. 
 
-If for any reason, you can't pass the `searchSessionId` directly, you can also retrieve it from the service.
+If you can't pass the `searchSessionId` directly, you can retrieve it from the service.
 
 ```ts
 const currentSearchSessionId = data.search.sessions.getSessionId();
 
 ```
 
-##### Clear Search Sessions 
+##### Clear search sessions
 
 Creating a new search session clears the previous one. You must explicitly `clear` the search session when your application is being destroyed:
 
