@@ -116,7 +116,7 @@ export interface AppLeaveDefaultAction {
 
 // Warning: (ae-forgotten-export) The symbol "AppLeaveActionFactory" needs to be exported by the entry point index.d.ts
 //
-// @public
+// @public @deprecated
 export type AppLeaveHandler = (factory: AppLeaveActionFactory, nextAppId?: string) => AppLeaveAction;
 
 // @public (undocumented)
@@ -153,6 +153,7 @@ export interface AppMountParameters<HistoryLocationState = unknown> {
     appBasePath: string;
     element: HTMLElement;
     history: ScopedHistory<HistoryLocationState>;
+    // @deprecated
     onAppLeave: (handler: AppLeaveHandler) => void;
     setHeaderActionMenu: (menuMount: MountPoint | undefined) => void;
 }
