@@ -13,19 +13,13 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
 
   describe('fleet_agent_policies', () => {
-    const createdPolicyIds: string[] = [];
-    after(async () => {
-      const deletedPromises = createdPolicyIds.map((agentPolicyId) =>
-        supertest
-          .post(`/api/fleet/agent_policies/delete`)
-          .set('kbn-xsrf', 'xxxx')
-          .send({ agentPolicyId })
-          .expect(200)
-      );
-      await Promise.all(deletedPromises);
-    });
-
     describe('POST /api/fleet/agent_policies', () => {
+      before(async () => {
+        await esArchiver.load('fleet/empty_fleet_server');
+      });
+      after(async () => {
+        await esArchiver.unload('fleet/empty_fleet_server');
+      });
       it('should work with valid minimum required values', async () => {
         const {
           body: { item: createdPolicy },
@@ -201,6 +195,23 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('PUT /api/fleet/agent_policies/{agentPolicyId}', () => {
+      before(async () => {
+        await esArchiver.load('fleet/empty_fleet_server');
+      });
+      const createdPolicyIds: string[] = [];
+      after(async () => {
+        const deletedPromises = createdPolicyIds.map((agentPolicyId) =>
+          supertest
+            .post(`/api/fleet/agent_policies/delete`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({ agentPolicyId })
+            .expect(200)
+        );
+        await Promise.all(deletedPromises);
+      });
+      after(async () => {
+        await esArchiver.unload('fleet/empty_fleet_server');
+      });
       let agentPolicyId: undefined | string;
       it('should work with valid values', async () => {
         const {
@@ -310,6 +321,12 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('POST /api/fleet/agent_policies/delete', () => {
+      before(async () => {
+        await esArchiver.load('fleet/empty_fleet_server');
+      });
+      after(async () => {
+        await esArchiver.unload('fleet/empty_fleet_server');
+      });
       let managedPolicy: any | undefined;
       it('should prevent managed policies being deleted', async () => {
         const {

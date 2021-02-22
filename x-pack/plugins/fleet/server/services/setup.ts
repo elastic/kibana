@@ -56,6 +56,7 @@ async function createSetupSideEffects(
   callCluster: CallESAsCurrentUser
 ): Promise<SetupStatus> {
   const isFleetServerEnabled = appContextService.getConfig()?.agents.fleetServerEnabled;
+
   const [
     installedPackages,
     defaultOutput,

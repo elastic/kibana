@@ -86,7 +86,7 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     it('should return a 404 when agent does not exist', async () => {
-      const { body: apiResponse } = await supertest
+      await supertest
         .post(`/api/fleet/agents/agent100/actions`)
         .set('kbn-xsrf', 'xx')
         .send({
@@ -96,7 +96,6 @@ export default function (providerContext: FtrProviderContext) {
           },
         })
         .expect(404);
-      expect(apiResponse.message).to.eql('Saved object [fleet-agents/agent100] not found');
     });
   });
 }

@@ -23,25 +23,34 @@ export default function (providerContext: FtrProviderContext) {
   describe('fleet_agent_flow', () => {
     skipIfNoDockerRegistry(providerContext);
     before(async () => {
-      await esArchiver.load('empty_kibana');
+      await esArchiver.load('fleet/empty_fleet_server');
     });
     setupFleetAndAgents(providerContext);
     after(async () => {
-      await esArchiver.unload('empty_kibana');
+      await esArchiver.unload('fleet/empty_fleet_server');
     });
 
     it('should work', async () => {
       const kibanaVersionAccessor = kibanaServer.version;
       const kibanaVersion = await kibanaVersionAccessor.get();
 
+      const { body: policiesRes } = await supertest.get(`/api/fleet/agent_policies`).expect(200);
+
+      expect(policiesRes.items).length(2);
+      const { id: defaultPolicyId } = policiesRes.items.find((p: any) => p.is_default);
+
       // Get enrollment token
       const { body: enrollmentApiKeysResponse } = await supertest
         .get(`/api/fleet/enrollment-api-keys`)
         .expect(200);
 
-      expect(enrollmentApiKeysResponse.list).length(1);
+      expect(enrollmentApiKeysResponse.list).length(2);
+      const { id: enrollmentKeyId } = enrollmentApiKeysResponse.list.find(
+        (key: any) => key.policy_id === defaultPolicyId
+      );
+
       const { body: enrollmentApiKeyResponse } = await supertest
-        .get(`/api/fleet/enrollment-api-keys/${enrollmentApiKeysResponse.list[0].id}`)
+        .get(`/api/fleet/enrollment-api-keys/${enrollmentKeyId}`)
         .expect(200);
 
       expect(enrollmentApiKeyResponse.item).to.have.key('api_key');
@@ -195,13 +204,23 @@ export default function (providerContext: FtrProviderContext) {
       const kibanaVersion = await kibanaVersionAccessor.get();
 
       // Get enrollment token
+      const { body: policiesRes } = await supertest.get(`/api/fleet/agent_policies`).expect(200);
+
+      expect(policiesRes.items).length(2);
+      const { id: defaultPolicyId } = policiesRes.items.find((p: any) => p.is_default);
+
+      // Get enrollment token
       const { body: enrollmentApiKeysResponse } = await supertest
         .get(`/api/fleet/enrollment-api-keys`)
         .expect(200);
 
-      expect(enrollmentApiKeysResponse.list).length(1);
+      expect(enrollmentApiKeysResponse.list).length(2);
+      const { id: enrollmentKeyId } = enrollmentApiKeysResponse.list.find(
+        (key: any) => key.policy_id === defaultPolicyId
+      );
+
       const { body: enrollmentApiKeyResponse } = await supertest
-        .get(`/api/fleet/enrollment-api-keys/${enrollmentApiKeysResponse.list[0].id}`)
+        .get(`/api/fleet/enrollment-api-keys/${enrollmentKeyId}`)
         .expect(200);
 
       expect(enrollmentApiKeyResponse.item).to.have.key('api_key');

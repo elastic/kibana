@@ -138,7 +138,7 @@ async function bulkCreateActions(
     }))
   );
 
-  if (appContextService.getConfig()?.agents?.fleetServerEnabled) {
+  if (appContextService.getConfig()?.agents?.fleetServerEnabled && actionSOs.length > 0) {
     await esClient.bulk({
       index: AGENT_ACTIONS_INDEX,
       body: actionSOs.flatMap((actionSO) => {

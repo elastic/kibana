@@ -17,32 +17,39 @@ import { escapeSearchQueryPhrase, normalizeKuery } from '../saved_object';
 import { searchHitToAgent, agentSOAttributesToFleetServerAgentDoc } from './helpers';
 import { appContextService } from '../../services';
 import { esKuery, KueryNode } from '../../../../../../src/plugins/data/server';
+import { IngestManagerError, isESClientError } from '../../errors';
 
 const ACTIVE_AGENT_CONDITION = 'active:true';
 const INACTIVE_AGENT_CONDITION = `NOT (${ACTIVE_AGENT_CONDITION})`;
 
 function _joinFilters(filters: Array<string | undefined | KueryNode>): KueryNode | undefined {
-  return filters
-    .filter((filter) => filter !== undefined)
-    .reduce((acc: KueryNode | undefined, kuery: string | KueryNode | undefined):
-      | KueryNode
-      | undefined => {
-      if (kuery === undefined) {
-        return acc;
-      }
-      const kueryNode: KueryNode =
-        typeof kuery === 'string' ? esKuery.fromKueryExpression(removeSOAttributes(kuery)) : kuery;
+  try {
+    return filters
+      .filter((filter) => filter !== undefined)
+      .reduce((acc: KueryNode | undefined, kuery: string | KueryNode | undefined):
+        | KueryNode
+        | undefined => {
+        if (kuery === undefined) {
+          return acc;
+        }
+        const kueryNode: KueryNode =
+          typeof kuery === 'string'
+            ? esKuery.fromKueryExpression(removeSOAttributes(kuery))
+            : kuery;
 
-      if (!acc) {
-        return kueryNode;
-      }
+        if (!acc) {
+          return kueryNode;
+        }
 
-      return {
-        type: 'function',
-        function: 'and',
-        arguments: [acc, kueryNode],
-      };
-    }, undefined as KueryNode | undefined);
+        return {
+          type: 'function',
+          function: 'and',
+          arguments: [acc, kueryNode],
+        };
+      }, undefined as KueryNode | undefined);
+  } catch (err) {
+    throw new IngestManagerError(`Kuery is malformed: ${err.message}`);
+  }
 }
 
 export function removeSOAttributes(kuery: string) {
@@ -152,13 +159,20 @@ export async function countInactiveAgents(
 }
 
 export async function getAgent(esClient: ElasticsearchClient, agentId: string) {
-  const agentHit = await esClient.get<ESSearchHit<FleetServerAgent>>({
-    index: AGENTS_INDEX,
-    id: agentId,
-  });
-  const agent = searchHitToAgent(agentHit.body);
+  try {
+    const agentHit = await esClient.get<ESSearchHit<FleetServerAgent>>({
+      index: AGENTS_INDEX,
+      id: agentId,
+    });
+    const agent = searchHitToAgent(agentHit.body);
 
-  return agent;
+    return agent;
+  } catch (err) {
+    if (isESClientError(err) && err.meta.statusCode === 404) {
+      throw Boom.notFound('Agent not found');
+    }
+    throw err;
+  }
 }
 
 export async function getAgents(
@@ -171,7 +185,6 @@ export async function getAgents(
     body,
     index: AGENTS_INDEX,
   });
-
   const agents = res.body.docs.map(searchHitToAgent);
   return agents;
 }
@@ -220,6 +233,10 @@ export async function bulkUpdateAgents(
     data: Partial<AgentSOAttributes>;
   }>
 ) {
+  if (updateData.length === 0) {
+    return [];
+  }
+
   const body = updateData.flatMap(({ agentId, data }) => [
     {
       update: {
@@ -247,11 +264,18 @@ export async function bulkUpdateAgents(
 }
 
 export async function deleteAgent(esClient: ElasticsearchClient, agentId: string) {
-  await esClient.update({
-    id: agentId,
-    index: AGENT_SAVED_OBJECT_TYPE,
-    body: {
-      doc: { active: false },
-    },
-  });
+  try {
+    await esClient.update({
+      id: agentId,
+      index: AGENTS_INDEX,
+      body: {
+        doc: { active: false },
+      },
+    });
+  } catch (err) {
+    if (isESClientError(err) && err.meta.statusCode === 404) {
+      throw Boom.notFound('Agent not found');
+    }
+    throw err;
+  }
 }
