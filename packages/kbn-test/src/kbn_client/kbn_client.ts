@@ -63,6 +63,7 @@ export class KbnClient {
     this.importExport = new KbnClientImportExport(
       this.log,
       this.requester,
+      this.savedObjects,
       options.importExportDir
     );
   }
