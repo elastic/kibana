@@ -295,11 +295,7 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
         groups: includeInAllGroups ? [] : Array.from(selectedGroups),
         allGroups: includeInAllGroups,
         authProvider: selectedAuthProviders,
-      } as IObject;
-
-      if (roleMapping) {
-        payload.id = roleMapping.id;
-      }
+      };
 
       const request = !roleMapping
         ? http.post(routes.fritoPieOrganizationRoleMappingsPath(), payload)
