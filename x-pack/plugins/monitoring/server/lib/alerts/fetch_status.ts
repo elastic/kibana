@@ -14,68 +14,42 @@ import {
   CommonAlertFilter,
 } from '../../../common/types/alerts';
 import { ALERTS } from '../../../common/constants';
-import { MonitoringLicenseService } from '../../types';
 
 export async function fetchStatus(
   alertsClient: AlertsClient,
-  licenseService: MonitoringLicenseService,
   alertTypes: string[] | undefined,
   clusterUuids: string[],
   filters: CommonAlertFilter[] = []
 ): Promise<{ [type: string]: CommonAlertStatus }> {
-  const types: Array<{ type: string; result: CommonAlertStatus }> = [];
   const byType: { [type: string]: CommonAlertStatus } = {};
-  await Promise.all(
-    (alertTypes || ALERTS).map(async (type) => {
-      const alert = await AlertsFactory.getByType(type, alertsClient);
-      if (!alert || !alert.rawAlert) {
-        return;
-      }
+  const useTypes = alertTypes || ALERTS;
+  const alertClasses = await AlertsFactory.getByTypes(useTypes, alertsClient);
+  const promises = alertClasses.map(async (alert) => {
+    if (!alert || !alert.rawAlert) {
+      return;
+    }
 
-      const result: CommonAlertStatus = {
-        states: [],
-        rawAlert: alert.rawAlert,
-      };
+    const result: CommonAlertStatus = {
+      states: [],
+      rawAlert: alert.rawAlert,
+    };
 
-      types.push({ type, result });
+    const { alertTypeId, id } = alert.rawAlert;
+    const states = await alert.getStates(alertsClient, id, filters);
 
-      const id = alert.getId();
-      if (!id) {
-        return result;
-      }
-
-      // Now that we have the id, we can get the state
-      const states = await alert.getStates(alertsClient, id, filters);
-      if (!states) {
-        return result;
-      }
-
-      result.states = Object.values(states).reduce((accum: CommonAlertState[], instance: any) => {
-        const alertInstanceState = instance.state as AlertInstanceState;
-        if (!alertInstanceState.alertStates) {
-          return accum;
-        }
-        for (const state of alertInstanceState.alertStates) {
-          const meta = instance.meta;
-          if (clusterUuids && !clusterUuids.includes(state.cluster.clusterUuid)) {
-            return accum;
-          }
-
-          let firing = false;
-          if (state.ui.isFiring) {
-            firing = true;
-          }
-          accum.push({ firing, state, meta });
-        }
+    result.states = Object.values(states).reduce((accum: CommonAlertState[], instance: any) => {
+      const alertInstanceState = instance.state as AlertInstanceState;
+      if (!alertInstanceState.alertStates) {
         return accum;
-      }, []);
-    })
-  );
+      }
+      for (const state of alertInstanceState.alertStates) {
+        accum.push({ state });
+      }
+      return accum;
+    }, []);
+    byType[alertTypeId] = result;
+  });
 
-  types.sort((a, b) => (a.type === b.type ? 0 : a.type.length > b.type.length ? 1 : -1));
-  for (const { type, result } of types) {
-    byType[type] = result;
-  }
-
+  await Promise.all(promises);
   return byType;
 }

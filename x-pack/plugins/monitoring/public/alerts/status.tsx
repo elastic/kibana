@@ -31,7 +31,7 @@ export const AlertsStatus: React.FC<Props> = (props: Props) => {
 
   let atLeastOneDanger = false;
   const count = Object.values(alerts).reduce((cnt, alertStatus) => {
-    const firingStates = alertStatus.states.filter((state) => state.firing);
+    const firingStates = alertStatus.states;
     const firingAndFilterStates = firingStates.filter((state) => stateFilter(state.state));
     cnt += firingAndFilterStates.length;
     if (firingStates.length) {

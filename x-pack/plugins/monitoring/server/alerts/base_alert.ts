@@ -115,10 +115,6 @@ export class BaseAlert {
     };
   }
 
-  public getId() {
-    return this.rawAlert?.id;
-  }
-
   public async createIfDoesNotExist(
     alertsClient: AlertsClient,
     actionsClient: ActionsClient,

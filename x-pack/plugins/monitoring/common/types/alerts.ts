@@ -21,9 +21,7 @@ export interface CommonAlertStatus {
 }
 
 export interface CommonAlertState {
-  firing: boolean;
   state: any;
-  meta: any;
 }
 
 export interface CommonAlertFilter {

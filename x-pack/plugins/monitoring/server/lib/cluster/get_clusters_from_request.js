@@ -122,7 +122,6 @@ export async function getClustersFromRequest(
       const alertsClient = req.getAlertsClient();
       const alertStatus = await fetchStatus(
         alertsClient,
-        req.server.plugins.monitoring.info,
         undefined,
         clusters.map((cluster) => cluster.cluster_uuid)
       );

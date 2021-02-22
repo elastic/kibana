@@ -58,27 +58,33 @@ const BY_TYPE = {
   [ALERT_LARGE_SHARD_SIZE]: LargeShardSizeAlert,
 };
 
+const createFilterString = (types: string[]) =>
+  types.map((type) => `alert.attributes.alertTypeId:${type}`).join(' OR ');
+
 export class AlertsFactory {
-  public static async getByType(
-    type: string,
-    alertsClient: AlertsClient | undefined
-  ): Promise<BaseAlert | undefined> {
-    const alertCls = BY_TYPE[type];
-    if (!alertCls || !alertsClient) {
-      return;
+  public static async getByTypes(
+    types?: string[],
+    alertsClient?: AlertsClient
+  ): Promise<BaseAlert[]> {
+    if (!alertsClient || !types || !types.length) {
+      return [];
     }
-    const alertClientAlerts = await alertsClient.find({
+
+    const alertsResponse = await alertsClient.find({
       options: {
-        filter: `alert.attributes.alertTypeId:${type}`,
+        filter: createFilterString(types),
+        perPage: types.length,
       },
     });
 
-    if (!alertClientAlerts.total || !alertClientAlerts.data?.length) {
-      return;
+    if (!alertsResponse.total || !alertsResponse.data?.length) {
+      return [];
     }
 
-    const [rawAlert] = alertClientAlerts.data as [Alert];
-    return new alertCls(rawAlert) as BaseAlert;
+    return alertsResponse.data.map((rawAlert) => {
+      const alertCls = BY_TYPE[rawAlert.alertTypeId];
+      return new alertCls(rawAlert as Alert) as BaseAlert;
+    });
   }
 
   public static getAll() {
