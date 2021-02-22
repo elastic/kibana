@@ -13,6 +13,11 @@ import { has, unset } from 'lodash';
 import { assertNever } from '@kbn/std';
 import { RewritePolicy } from '../policy';
 
+type MetaRewritePolicyConfigProperties = Array<{
+  path: string;
+  value?: string | number | boolean | null;
+}>;
+
 export interface MetaRewritePolicyConfig {
   type: 'meta';
 
@@ -31,7 +36,7 @@ export interface MetaRewritePolicyConfig {
    * Each provided 'path' is relative to the record's {@link LogMeta}.
    * For the 'remove' mode, no 'value' is provided.
    */
-  properties: Array<{ path: string; value?: string | number | boolean | null }>;
+  properties: MetaRewritePolicyConfigProperties;
 }
 
 export const metaRewritePolicyConfigSchema = schema.object({
