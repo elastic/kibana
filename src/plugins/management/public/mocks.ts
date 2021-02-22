@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { ManagementSetup, ManagementStart, DefinedSections } from '../types';
-import { ManagementSection } from '../index';
+import { ManagementSetup, ManagementStart, DefinedSections } from './types';
+import { ManagementSection } from './index';
 
 export const createManagementSectionMock = () =>
   (({
