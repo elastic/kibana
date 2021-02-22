@@ -1,4 +1,5 @@
 .visEditor--default {
+  // height: 1px is in place to make editor children take their height in the parent
   height: 1px;
   flex: 1 1 auto;
   display: flex;
