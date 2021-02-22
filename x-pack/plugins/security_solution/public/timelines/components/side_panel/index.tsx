@@ -36,85 +36,83 @@ interface DetailsPanelProps {
  * To prevent duplication the `isFlyoutView` prop is passed to determine the layout that should be used
  * `tabType` defaults to query and `handleOnPanelClosed` defaults to unsetting the default query tab which is used for the flyout panel
  */
-export const DetailsPanel = React.memo(
-  ({
-    browserFields,
-    docValueFields,
-    handleOnPanelClosed,
-    isFlyoutView,
-    tabType,
-    timelineId,
-  }: DetailsPanelProps) => {
-    const dispatch = useDispatch();
-    const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
-    const expandedDetail = useDeepEqualSelector((state) => {
-      return (getTimeline(state, timelineId) ?? timelineDefaults).expandedDetail;
-    });
+export const DetailsPanel = ({
+  browserFields,
+  docValueFields,
+  handleOnPanelClosed,
+  isFlyoutView,
+  tabType,
+  timelineId,
+}: DetailsPanelProps) => {
+  const dispatch = useDispatch();
+  const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
+  const expandedDetail = useDeepEqualSelector((state) => {
+    return (getTimeline(state, timelineId) ?? timelineDefaults).expandedDetail;
+  });
 
-    // To be used primarily in the flyout scenario where we don't want to maintain the tabType
-    const defaultOnPanelClose = useCallback(() => {
-      dispatch(timelineActions.toggleDetailPanel({ timelineId }));
-    }, [dispatch, timelineId]);
+  // To be used primarily in the flyout scenario where we don't want to maintain the tabType
+  const defaultOnPanelClose = useCallback(() => {
+    dispatch(timelineActions.toggleDetailPanel({ timelineId }));
+  }, [dispatch, timelineId]);
 
-    const activeTab = tabType ?? TimelineTabs.query;
-    const closePanel = useCallback(() => {
-      if (handleOnPanelClosed) handleOnPanelClosed();
-      else defaultOnPanelClose();
-    }, [defaultOnPanelClose, handleOnPanelClosed]);
+  const activeTab = tabType ?? TimelineTabs.query;
+  const closePanel = useCallback(() => {
+    if (handleOnPanelClosed) handleOnPanelClosed();
+    else defaultOnPanelClose();
+  }, [defaultOnPanelClose, handleOnPanelClosed]);
 
-    if (!expandedDetail) return null;
+  if (!expandedDetail) return null;
 
-    const currentTabDetail = expandedDetail[activeTab];
+  const currentTabDetail = expandedDetail[activeTab];
 
-    if (!currentTabDetail?.panelView) return null;
+  if (!currentTabDetail?.panelView) return null;
 
-    let visiblePanel = null; // store in variable to make return statement more readable
-    const contextID = `${timelineId}-${activeTab}`;
+  let visiblePanel = null; // store in variable to make return statement more readable
+  const contextID = `${timelineId}-${activeTab}`;
 
-    if (currentTabDetail?.panelView === 'eventDetail' && currentTabDetail?.params?.eventId) {
-      visiblePanel = (
-        <EventDetailsPanel
-          browserFields={browserFields}
-          docValueFields={docValueFields}
-          expandedEvent={currentTabDetail?.params}
-          handleOnEventClosed={closePanel}
-          isFlyoutView={isFlyoutView}
-          tabType={activeTab}
-          timelineId={timelineId}
-        />
-      );
-    }
-
-    if (currentTabDetail?.panelView === 'hostDetail' && currentTabDetail?.params?.hostName) {
-      visiblePanel = (
-        <HostDetailsPanel
-          contextID={contextID}
-          expandedHost={currentTabDetail?.params}
-          handleOnHostClosed={closePanel}
-          isFlyoutView={isFlyoutView}
-        />
-      );
-    }
-
-    if (currentTabDetail?.panelView === 'networkDetail' && currentTabDetail?.params?.ip) {
-      visiblePanel = (
-        <NetworkDetailsPanel
-          contextID={contextID}
-          expandedNetwork={currentTabDetail?.params}
-          handleOnNetworkClosed={closePanel}
-          isFlyoutView={isFlyoutView}
-        />
-      );
-    }
-
-    return isFlyoutView ? (
-      <StyledEuiFlyout data-test-subj="timeline:details-panel:flyout" size="s" onClose={closePanel}>
-        {visiblePanel}
-      </StyledEuiFlyout>
-    ) : (
-      visiblePanel
+  if (currentTabDetail?.panelView === 'eventDetail' && currentTabDetail?.params?.eventId) {
+    visiblePanel = (
+      <EventDetailsPanel
+        browserFields={browserFields}
+        docValueFields={docValueFields}
+        expandedEvent={currentTabDetail?.params}
+        handleOnEventClosed={closePanel}
+        isFlyoutView={isFlyoutView}
+        tabType={activeTab}
+        timelineId={timelineId}
+      />
     );
   }
-);
+
+  if (currentTabDetail?.panelView === 'hostDetail' && currentTabDetail?.params?.hostName) {
+    visiblePanel = (
+      <HostDetailsPanel
+        contextID={contextID}
+        expandedHost={currentTabDetail?.params}
+        handleOnHostClosed={closePanel}
+        isFlyoutView={isFlyoutView}
+      />
+    );
+  }
+
+  if (currentTabDetail?.panelView === 'networkDetail' && currentTabDetail?.params?.ip) {
+    visiblePanel = (
+      <NetworkDetailsPanel
+        contextID={contextID}
+        expandedNetwork={currentTabDetail?.params}
+        handleOnNetworkClosed={closePanel}
+        isFlyoutView={isFlyoutView}
+      />
+    );
+  }
+
+  return isFlyoutView ? (
+    <StyledEuiFlyout data-test-subj="timeline:details-panel:flyout" size="s" onClose={closePanel}>
+      {visiblePanel}
+    </StyledEuiFlyout>
+  ) : (
+    visiblePanel
+  );
+};
 
 DetailsPanel.displayName = 'DetailsPanel';

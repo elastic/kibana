@@ -51,7 +51,7 @@ interface ExpandableEventTitleProps {
 }
 
 const StyledEuiFlexGroup = styled(EuiFlexGroup)`
-  flex: 0;
+  flex: 0 1 auto;
 `;
 
 const StyledFlexGroup = styled(EuiFlexGroup)`

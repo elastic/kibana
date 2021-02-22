@@ -41,19 +41,19 @@ const StyledEuiFlyoutBody = styled(EuiFlyoutBody)`
 `;
 
 const StyledEuiFlexGroup = styled(EuiFlexGroup)`
-  flex: 0;
-`;
-
-const StyledEuiFlexItem = styled(EuiFlexItem)`
-  &.euiFlexItem {
-    flex: 1 0 0;
-    overflow-y: scroll;
-    overflow-x: hidden;
-  }
+  flex: 1 0 auto;
 `;
 
 const StyledEuiFlexButtonWrapper = styled(EuiFlexItem)`
   align-self: flex-start;
+  flex: 1 0 auto;
+`;
+
+const StyledPanelContent = styled.div`
+  display: block;
+  height: 100%;
+  overflow-y: scroll;
+  overflow-x: hidden;
 `;
 
 interface HostDetailsProps {
@@ -107,9 +107,9 @@ export const HostDetailsPanel: React.FC<HostDetailsProps> = React.memo(
           <ExpandableHostDetailsPageLink hostName={hostName} />
         </StyledEuiFlexButtonWrapper>
         <EuiSpacer size="m" />
-        <StyledEuiFlexItem grow={true}>
+        <StyledPanelContent>
           <ExpandableHostDetails contextID={contextID} hostName={hostName} />
-        </StyledEuiFlexItem>
+        </StyledPanelContent>
       </>
     );
   }
