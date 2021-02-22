@@ -31,13 +31,14 @@ export async function removeInstallation(options: {
   savedObjectsClient: SavedObjectsClientContract;
   pkgkey: string;
   callCluster: CallESAsCurrentUser;
+  force?: boolean;
 }): Promise<AssetReference[]> {
-  const { savedObjectsClient, pkgkey, callCluster } = options;
+  const { savedObjectsClient, pkgkey, callCluster, force } = options;
   // TODO:  the epm api should change to /name/version so we don't need to do this
   const { pkgName, pkgVersion } = splitPkgKey(pkgkey);
   const installation = await getInstallation({ savedObjectsClient, pkgName });
   if (!installation) throw Boom.badRequest(`${pkgName} is not installed`);
-  if (installation.removable === false)
+  if (installation.removable === false && !force)
     throw Boom.badRequest(`${pkgName} is installed by default and cannot be removed`);
 
   const { total } = await packagePolicyService.list(savedObjectsClient, {

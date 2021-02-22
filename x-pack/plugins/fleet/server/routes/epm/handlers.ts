@@ -328,7 +328,12 @@ export const deletePackageHandler: RequestHandler<
     const { pkgkey } = request.params;
     const savedObjectsClient = context.core.savedObjects.client;
     const callCluster = context.core.elasticsearch.legacy.client.callAsCurrentUser;
-    const res = await removeInstallation({ savedObjectsClient, pkgkey, callCluster });
+    const res = await removeInstallation({
+      savedObjectsClient,
+      pkgkey,
+      callCluster,
+      force: request.body?.force,
+    });
     const body: DeletePackageResponse = {
       response: res,
     };
