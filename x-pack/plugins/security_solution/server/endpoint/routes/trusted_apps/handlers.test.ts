@@ -140,7 +140,7 @@ describe('handlers', () => {
     let deleteTrustedAppHandler: ReturnType<typeof getTrustedAppsDeleteRouteHandler>;
 
     beforeEach(() => {
-      deleteTrustedAppHandler = getTrustedAppsDeleteRouteHandler();
+      deleteTrustedAppHandler = getTrustedAppsDeleteRouteHandler(appContextMock);
     });
 
     it('should return ok when trusted app deleted', async () => {
@@ -191,7 +191,7 @@ describe('handlers', () => {
     let createTrustedAppHandler: ReturnType<typeof getTrustedAppsCreateRouteHandler>;
 
     beforeEach(() => {
-      createTrustedAppHandler = getTrustedAppsCreateRouteHandler();
+      createTrustedAppHandler = getTrustedAppsCreateRouteHandler(appContextMock);
     });
 
     it('should return ok with body when trusted app created', async () => {
@@ -228,7 +228,7 @@ describe('handlers', () => {
     let getTrustedAppsListHandler: ReturnType<typeof getTrustedAppsListRouteHandler>;
 
     beforeEach(() => {
-      getTrustedAppsListHandler = getTrustedAppsListRouteHandler();
+      getTrustedAppsListHandler = getTrustedAppsListRouteHandler(appContextMock);
     });
 
     it('should return ok with list when no errors', async () => {
@@ -275,7 +275,7 @@ describe('handlers', () => {
     let getTrustedAppsSummaryHandler: ReturnType<typeof getTrustedAppsSummaryRouteHandler>;
 
     beforeEach(() => {
-      getTrustedAppsSummaryHandler = getTrustedAppsSummaryRouteHandler();
+      getTrustedAppsSummaryHandler = getTrustedAppsSummaryRouteHandler(appContextMock);
     });
 
     it('should return ok with list when no errors', async () => {
@@ -377,9 +377,11 @@ describe('handlers', () => {
       assertResponse(mockResponse, 'notFound', expect.any(TrustedAppNotFoundError));
     });
 
-    it('should log errors if any are encountered', async () => {
+    it.each([
+      [new TrustedAppNotFoundError('123')],
+      [new TrustedAppVersionConflictError('123', new Error('some conflict error'))],
+    ])('should log error: %s', async (error) => {
       const mockResponse = httpServerMock.createResponseFactory();
-      const error = new Error('I am an error');
       exceptionsListClient.getExceptionListItem.mockImplementation(async () => {
         throw error;
       });
