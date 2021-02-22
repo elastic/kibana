@@ -55,10 +55,10 @@ jest.mock('../create/submit_button', () => {
 });
 
 const onCloseFlyout = jest.fn();
-const onCaseCreated = jest.fn();
+const onSuccess = jest.fn();
 const defaultProps = {
   onCloseFlyout,
-  onCaseCreated,
+  onSuccess,
 };
 
 describe('CreateCaseFlyout', () => {
@@ -97,7 +97,7 @@ describe('CreateCaseFlyout', () => {
     const props = wrapper.find('FormContext').props();
     expect(props).toEqual(
       expect.objectContaining({
-        onSuccess: onCaseCreated,
+        onSuccess,
       })
     );
   });
@@ -110,6 +110,6 @@ describe('CreateCaseFlyout', () => {
     );
 
     wrapper.find(`[data-test-subj='form-context-on-success']`).first().simulate('click');
-    expect(onCaseCreated).toHaveBeenCalledWith({ id: 'case-id' });
+    expect(onSuccess).toHaveBeenCalledWith({ id: 'case-id' });
   });
 });

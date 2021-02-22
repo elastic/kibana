@@ -19,7 +19,7 @@ import { CaseType } from '../../../../../case/common/api';
 export interface CreateCaseModalProps {
   isModalOpen: boolean;
   onCloseCaseModal: () => void;
-  onSuccess: (theCase: Case) => void;
+  onSuccess: (theCase: Case) => Promise<void>;
   caseType?: CaseType;
 }
 

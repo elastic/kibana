@@ -70,9 +70,9 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
   } = useControl();
 
   const attachAlertToCase = useCallback(
-    (theCase: Case) => {
+    async (theCase: Case) => {
       closeCaseFlyoutOpen();
-      postComment({
+      await postComment({
         caseId: theCase.id,
         data: {
           type: CommentType.alert,
@@ -83,14 +83,18 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
             name: rule?.name != null ? rule.name[0] : null,
           },
         },
-        updateCase: () =>
-          dispatchToaster({
-            type: 'addToaster',
-            toast: createUpdateSuccessToaster(theCase, onViewCaseClick),
-          }),
       });
     },
-    [closeCaseFlyoutOpen, postComment, eventId, eventIndex, rule, dispatchToaster, onViewCaseClick]
+    [closeCaseFlyoutOpen, postComment, eventId, eventIndex, rule]
+  );
+
+  const onCaseSuccess = useCallback(
+    async (theCase: Case) =>
+      dispatchToaster({
+        type: 'addToaster',
+        toast: createUpdateSuccessToaster(theCase, onViewCaseClick),
+      }),
+    [dispatchToaster, onViewCaseClick]
   );
 
   const onCaseClicked = useCallback(
@@ -184,7 +188,11 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
         </EuiPopover>
       </ActionIconItem>
       {isCreateCaseFlyoutOpen && (
-        <CreateCaseFlyout onCloseFlyout={closeCaseFlyoutOpen} onCaseCreated={attachAlertToCase} />
+        <CreateCaseFlyout
+          onCloseFlyout={closeCaseFlyoutOpen}
+          afterCaseCreated={attachAlertToCase}
+          onSuccess={onCaseSuccess}
+        />
       )}
       {allCasesModal}
     </>
