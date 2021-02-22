@@ -43,22 +43,11 @@ export const CreateDrilldownForm: React.FC<CreateDrilldownFormProps> = ({ state 
     [drilldowns, triggers, state]
   );
   const context = state.getFactoryContext();
-  const drilldownTypeDisplayName = state.factory.getDisplayName(context);
-  const iconType = state.factory.getIconType(context);
 
   return (
     <>
       <ActionFactoryPicker />
-      <DrilldownForm
-        euiIconType={iconType}
-        drilldownTypeName={drilldownTypeDisplayName}
-        onTypeChange={() => drilldowns.setActionFactory(undefined)}
-        name={name}
-        onNameChange={state.setName}
-        triggers={triggerPickerProps}
-        isBeta={state.factory.isBeta}
-        showMoreActionsLink={drilldowns.canUnlockMoreDrilldowns}
-      >
+      <DrilldownForm name={name} onNameChange={state.setName} triggers={triggerPickerProps}>
         <state.factory.ReactCollectConfig
           config={config}
           onConfig={state.setConfig}
