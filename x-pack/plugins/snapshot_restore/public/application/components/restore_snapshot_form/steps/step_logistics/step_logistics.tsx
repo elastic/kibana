@@ -27,9 +27,7 @@ import { EuiSelectableOption } from '@elastic/eui';
 import { csvToArray, isDataStreamBackingIndex } from '../../../../../../common/lib';
 import { RestoreSettings } from '../../../../../../common/types';
 
-import { documentationLinksService } from '../../../../services/documentation';
-
-import { useServices } from '../../../../app_context';
+import { useCore, useServices } from '../../../../app_context';
 
 import { orderDataStreamsAndIndices } from '../../../lib';
 import { DataStreamBadge } from '../../../data_stream_badge';
@@ -47,6 +45,7 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
   errors,
 }) => {
   const { i18n } = useServices();
+  const { docLinks } = useCore();
   const {
     indices: unfilteredSnapshotIndices,
     dataStreams: snapshotDataStreams = [],
@@ -166,7 +165,7 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
           <EuiButtonEmpty
             size="s"
             flush="right"
-            href={documentationLinksService.getRestoreDocUrl()}
+            href={docLinks.links.snapshotRestore.restoreSnapshot}
             target="_blank"
             iconType="help"
           >
