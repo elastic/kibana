@@ -52,6 +52,15 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
         await PageObjects.common.clickConfirmOnModal();
         expect(await browser.getCurrentUrl()).to.contain('/app/core_history_block/foo');
       });
+      it('allows navigating back without prompt once the block handler has been disposed', async () => {
+        await testSubjects.click('applink-intra-test');
+        await PageObjects.common.clickConfirmOnModal();
+        expect(await browser.getCurrentUrl()).to.contain('/app/core_history_block/foo');
+
+        await testSubjects.click('applink-intra-test');
+        expect(await browser.getCurrentUrl()).to.contain('/app/core_history_block');
+        expect(await browser.getCurrentUrl()).not.to.contain('/foo');
+      });
     });
   });
 }
