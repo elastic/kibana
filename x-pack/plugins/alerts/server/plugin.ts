@@ -161,6 +161,7 @@ export class AlertingPlugin {
   private eventLogService?: IEventLogService;
   private eventLogger?: IEventLogger;
   private readonly kibanaIndexConfig: Observable<{ kibana: { index: string } }>;
+  private kibanaBaseUrl: string | undefined;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.create<AlertsConfig>().pipe(first()).toPromise();
@@ -176,6 +177,7 @@ export class AlertingPlugin {
     core: CoreSetup<AlertingPluginsStart, unknown>,
     plugins: AlertingPluginsSetup
   ): PluginSetupContract {
+    this.kibanaBaseUrl = core.http.basePath.publicBaseUrl;
     this.licenseState = new LicenseState(plugins.licensing.license$);
     this.security = plugins.security;
 
@@ -371,6 +373,7 @@ export class AlertingPlugin {
       eventLogger: this.eventLogger!,
       internalSavedObjectsRepository: core.savedObjects.createInternalRepository(['alert']),
       alertTypeRegistry: this.alertTypeRegistry!,
+      kibanaBaseUrl: this.kibanaBaseUrl,
     });
 
     this.eventLogService!.registerSavedObjectProvider('alert', (request) => {

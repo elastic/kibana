@@ -308,6 +308,7 @@ import {
   parseInterval,
   toAbsoluteDates,
   boundsDescendingRaw,
+  getNumberHistogramIntervalByDatatableColumn,
   // expressions utils
   getRequestInspectorStats,
   getResponseInspectorStats,
@@ -389,6 +390,7 @@ export type {
   ISessionService,
   SearchSessionInfoProvider,
   ISessionsClient,
+  SearchUsageCollector,
 } from './search';
 
 export { ISearchOptions, isErrorResponse, isCompleteResponse, isPartialResponse } from '../common';
@@ -416,6 +418,7 @@ export const search = {
     termsAggFilter,
     toAbsoluteDates,
     boundsDescendingRaw,
+    getNumberHistogramIntervalByDatatableColumn,
   },
   getRequestInspectorStats,
   getResponseInspectorStats,

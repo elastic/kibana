@@ -8,8 +8,8 @@
 import {
   CommentSchemaType,
   ContextTypeGeneratedAlertType,
+  createAlertsString,
   isCommentGeneratedAlert,
-  separator,
   transformConnectorComment,
 } from '../../../../plugins/case/server/connectors';
 import {
@@ -71,28 +71,14 @@ export const postCommentUserReq: CommentRequestUserType = {
 export const postCommentAlertReq: CommentRequestAlertType = {
   alertId: 'test-id',
   index: 'test-index',
+  rule: { id: 'test-rule-id', name: 'test-index-id' },
   type: CommentType.alert,
-};
-
-interface AlertIDIndex {
-  _id: string;
-  _index: string;
-}
-
-/**
- * Creates the format that the connector's parser is expecting, it should result in something like this:
- * [{"_id":"1","_index":"index1"}__SEPARATOR__{"_id":"id2","_index":"index2"}__SEPARATOR__]
- */
-export const createAlertsString = (alerts: AlertIDIndex[]) => {
-  return `[${alerts.reduce((acc, alert) => {
-    return `${acc}${JSON.stringify(alert)}${separator}`;
-  }, '')}]`;
 };
 
 export const postCommentGenAlertReq: ContextTypeGeneratedAlertType = {
   alerts: createAlertsString([
-    { _id: 'test-id', _index: 'test-index' },
-    { _id: 'test-id2', _index: 'test-index' },
+    { _id: 'test-id', _index: 'test-index', ruleId: 'rule-id', ruleName: 'rule name' },
+    { _id: 'test-id2', _index: 'test-index', ruleId: 'rule-id', ruleName: 'rule name' },
   ]),
   type: CommentType.generatedAlert,
 };

@@ -25,6 +25,7 @@ jest.mock('./use_api');
 
 import { useAppDependencies } from '../__mocks__/app_dependencies';
 import { MlSharedContext } from '../__mocks__/shared_context';
+import { RuntimeField } from '../../../../../../src/plugins/data/common/index_patterns';
 
 const query: SimpleQuery = {
   query_string: {
@@ -33,13 +34,21 @@ const query: SimpleQuery = {
   },
 };
 
+const runtimeMappings = {
+  rt_bytes_bigger: {
+    type: 'double',
+    script: {
+      source: "emit(doc['bytes'].value * 2.0)",
+    },
+  } as RuntimeField,
+};
+
 describe('Transform: useIndexData()', () => {
   test('indexPattern set triggers loading', async () => {
     const mlShared = await getMlSharedImports();
     const wrapper: FC = ({ children }) => (
       <MlSharedContext.Provider value={mlShared}>{children}</MlSharedContext.Provider>
     );
-
     const { result, waitForNextUpdate } = renderHook(
       () =>
         useIndexData(
@@ -48,7 +57,8 @@ describe('Transform: useIndexData()', () => {
             title: 'the-title',
             fields: [],
           } as unknown) as SearchItems['indexPattern'],
-          query
+          query,
+          runtimeMappings
         ),
       { wrapper }
     );
@@ -77,7 +87,7 @@ describe('Transform: <DataGrid /> with useIndexData()', () => {
         ml: { DataGrid },
       } = useAppDependencies();
       const props = {
-        ...useIndexData(indexPattern, { match_all: {} }),
+        ...useIndexData(indexPattern, { match_all: {} }, runtimeMappings),
         copyToClipboard: 'the-copy-to-clipboard-code',
         copyToClipboardDescription: 'the-copy-to-clipboard-description',
         dataTestSubj: 'the-data-test-subj',

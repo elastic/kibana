@@ -29,6 +29,10 @@ const ContextTypeAlertSchema = schema.object({
   // allowing either an array or a single value to preserve the previous API of attaching a single alert ID
   alertId: schema.oneOf([schema.arrayOf(schema.string()), schema.string()]),
   index: schema.string(),
+  rule: schema.object({
+    id: schema.nullable(schema.string()),
+    name: schema.nullable(schema.string()),
+  }),
 });
 
 export type ContextTypeAlertSchemaType = typeof ContextTypeAlertSchema.type;

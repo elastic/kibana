@@ -99,7 +99,7 @@ export const goToQueryTab = () => {
 export const addNotesToTimeline = (notes: string) => {
   goToNotesTab();
   cy.get(NOTES_TEXT_AREA).type(notes);
-  cy.get(ADD_NOTE_BUTTON).click();
+  cy.get(ADD_NOTE_BUTTON).click({ force: true });
   cy.get(QUERY_TAB_BUTTON).click();
 };
 
@@ -177,8 +177,9 @@ export const openTimelineInspectButton = () => {
 };
 
 export const openTimelineFromSettings = () => {
-  cy.get(TIMELINE_SETTINGS_ICON).filter(':visible').click({ force: true });
-  cy.get(OPEN_TIMELINE_ICON).click({ force: true });
+  const click = ($el: Cypress.ObjectLike) => cy.wrap($el).click();
+  cy.get(TIMELINE_SETTINGS_ICON).filter(':visible').pipe(click);
+  cy.get(OPEN_TIMELINE_ICON).pipe(click);
 };
 
 export const openTimelineTemplateFromSettings = (id: string) => {
