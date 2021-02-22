@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useState, useCallback, useEffect, useMemo } from 'react';
+import React, { FC, useState, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
@@ -14,7 +14,6 @@ import {
   EuiFlexItem,
   EuiTitle,
   EuiButton,
-  EuiSearchBar,
   EuiSpacer,
   EuiButtonIcon,
   EuiBadge,
@@ -48,8 +47,6 @@ import {
   refreshAnalyticsList$,
   useRefreshAnalyticsList,
 } from '../../../../common';
-import { useTableSettings } from '../analytics_list/use_table_settings';
-import { filterAnalyticsModels } from '../../../../common/search_bar_filters';
 import { ML_PAGES } from '../../../../../../../common/constants/ml_url_generator';
 import { DataFrameAnalysisConfigType } from '../../../../../../../common/types/data_frame_analytics';
 import { timeFormatter } from '../../../../../../../common/util/date_utils';
@@ -60,7 +57,7 @@ import { BUILT_IN_MODEL_TAG } from '../../../../../../../common/constants/data_f
 type Stats = Omit<TrainedModelStat, 'model_id'>;
 
 export type ModelItem = TrainedModelConfigResponse & {
-  types?: string[];
+  type?: string[];
   stats?: Stats;
   pipelines?: ModelPipelines['pipelines'] | null;
 };
@@ -105,7 +102,6 @@ export const ModelsList: FC = () => {
   const trainedModelsApiService = useTrainedModelsApiService();
   const { toasts } = useNotifications();
 
-  const [filteredModels, setFilteredModels] = useState<ModelItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [items, setItems] = useState<ModelItem[]>([]);
   const [selectedModels, setSelectedModels] = useState<ModelItem[]>([]);
@@ -116,32 +112,6 @@ export const ModelsList: FC = () => {
 
   const mlUrlGenerator = useMlUrlGenerator();
   const navigateToPath = useNavigateToPath();
-
-  const updateFilteredItems = (queryClauses: any) => {
-    if (queryClauses.length) {
-      const filtered = filterAnalyticsModels(items, queryClauses);
-      setFilteredModels(filtered);
-    } else {
-      setFilteredModels(items);
-    }
-  };
-
-  const filterList = () => {
-    if (searchQueryText !== '') {
-      const query = EuiSearchBar.Query.parse(searchQueryText);
-      let clauses: any = [];
-      if (query && query.ast !== undefined && query.ast.clauses !== undefined) {
-        clauses = query.ast.clauses;
-      }
-      updateFilteredItems(clauses);
-    } else {
-      updateFilteredItems([]);
-    }
-  };
-
-  useEffect(() => {
-    filterList();
-  }, [searchQueryText, items]);
 
   const isBuiltInModel = useCallback(
     (item: ModelItem) => item.tags.includes(BUILT_IN_MODEL_TAG),
@@ -167,7 +137,7 @@ export const ModelsList: FC = () => {
           // Extract model types
           ...(typeof model.inference_config === 'object'
             ? {
-                types: [
+                type: [
                   ...Object.keys(model.inference_config),
                   ...(isBuiltInModel(model) ? [BUILT_IN_MODEL_TYPE] : []),
                 ],
@@ -445,7 +415,7 @@ export const ModelsList: FC = () => {
       truncateText: true,
     },
     {
-      field: ModelsTableToConfigMapping.types,
+      field: ModelsTableToConfigMapping.type,
       name: i18n.translate('xpack.ml.trainedModels.modelsList.typeHeader', {
         defaultMessage: 'Type',
       }),
@@ -492,12 +462,6 @@ export const ModelsList: FC = () => {
           },
         ]
       : [];
-
-  const { onTableChange, pagination, sorting } = useTableSettings<ModelItem>(
-    filteredModels,
-    pageState,
-    updatePageState
-  );
 
   const toolsLeft = (
     <EuiFlexItem grow={false}>
@@ -580,6 +544,7 @@ export const ModelsList: FC = () => {
         }
       : {}),
   };
+
   return (
     <>
       <EuiSpacer size="m" />
@@ -602,9 +567,6 @@ export const ModelsList: FC = () => {
           items={items}
           itemId={ModelsTableToConfigMapping.id}
           loading={isLoading}
-          onTableChange={onTableChange}
-          pagination={pagination}
-          sorting={sorting}
           search={search}
           selection={selection}
           rowProps={(item) => ({
