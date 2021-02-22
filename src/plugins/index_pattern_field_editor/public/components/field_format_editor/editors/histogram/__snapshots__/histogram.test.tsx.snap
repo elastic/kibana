@@ -24,7 +24,7 @@ exports[`HistogramFormatEditor should render normally 1`] = `
             "value": "bytes",
           },
           Object {
-            "text": "Percent",
+            "text": "Percentage",
             "value": "percent",
           },
         ]
