@@ -205,8 +205,6 @@ export function DiscoverSidebar({
               value={fieldFilter.name}
               types={fieldTypes}
               useNewFieldsApi={useNewFieldsApi}
-              onChangeUnmappedFields={unmappedFieldsConfig?.onChangeUnmappedFields}
-              showUnmappedFields={unmappedFieldsConfig?.showUnmappedFieldsDefaultValue}
             />
           </form>
         </EuiFlexItem>
