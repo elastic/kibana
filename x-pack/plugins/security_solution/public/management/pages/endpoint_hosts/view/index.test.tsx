@@ -54,6 +54,16 @@ describe('when on the list page', () => {
   let store: AppContextTestRender['store'];
   let coreStart: AppContextTestRender['coreStart'];
   let middlewareSpy: AppContextTestRender['middlewareSpy'];
+  let abortSpy: jest.SpyInstance;
+  beforeAll(() => {
+    const mockAbort = new AbortController();
+    mockAbort.abort();
+    abortSpy = jest.spyOn(window, 'AbortController').mockImplementation(() => mockAbort);
+  });
+
+  afterAll(() => {
+    abortSpy.mockRestore();
+  });
   beforeEach(() => {
     const mockedContext = createAppRootMockRenderer();
     ({ history, store, coreStart, middlewareSpy } = mockedContext);
