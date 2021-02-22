@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export { SpaceAvatarInternal as SpaceAvatar } from './space_avatar_internal';
+export { getSpaceAvatarComponent } from './space_avatar';
 export * from './space_attributes';

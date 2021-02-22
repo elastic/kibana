@@ -7,6 +7,8 @@
 
 import React from 'react';
 import { mountWithIntl } from '@kbn/test/jest';
+import { uiApiMock as spacesUiApiMock } from '../../../../../../../../spaces/public/ui_api/mocks';
+import { getSpaceAvatarComponent } from '../../../../../../../../spaces/public/space_avatar';
 import { createKibanaPrivileges } from '../../../../__fixtures__/kibana_privileges';
 import { kibanaFeatures } from '../../../../__fixtures__/kibana_features';
 import { RoleKibanaPrivilege } from '../../../../../../../common/model';
@@ -31,6 +33,9 @@ const spaces = [
     disabledFeatures: [],
   },
 ];
+const spacesApiUi = spacesUiApiMock.create();
+spacesApiUi.components.getSpaceAvatar = () =>
+  getSpaceAvatarComponent().then((component) => ({ default: component }));
 
 describe('PrivilegeSummary', () => {
   it('initially renders a button', () => {
@@ -50,6 +55,7 @@ describe('PrivilegeSummary', () => {
         kibanaPrivileges={kibanaPrivileges}
         role={role}
         canCustomizeSubFeaturePrivileges={true}
+        spacesApiUi={spacesApiUi}
       />
     );
 
@@ -74,6 +80,7 @@ describe('PrivilegeSummary', () => {
         kibanaPrivileges={kibanaPrivileges}
         role={role}
         canCustomizeSubFeaturePrivileges={true}
+        spacesApiUi={spacesApiUi}
       />
     );
 

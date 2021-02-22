@@ -13,7 +13,7 @@ import * as Rx from 'rxjs';
 
 import { mountWithIntl } from '@kbn/test/jest';
 
-import { SpaceAvatar } from '../space_avatar';
+import { SpaceAvatarInternal } from '../space_avatar/space_avatar_internal';
 import type { SpacesManager } from '../spaces_manager';
 import { spacesManagerMock } from '../spaces_manager/mocks';
 import { NavControlPopover } from './nav_control_popover';
@@ -70,7 +70,7 @@ describe('NavControlPopover', () => {
     // Wait for `getSpaces` promise to resolve
     await waitFor(() => {
       wrapper.update();
-      expect(wrapper.find(SpaceAvatar)).toHaveLength(3);
+      expect(wrapper.find(SpaceAvatarInternal)).toHaveLength(3);
     });
   });
 });

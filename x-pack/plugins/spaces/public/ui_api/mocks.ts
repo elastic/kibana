@@ -13,6 +13,7 @@ function createComponentsMock(): jest.Mocked<SpacesApiUiComponent> {
     getShareToSpaceFlyout: jest.fn(),
     getSpaceList: jest.fn(),
     getLegacyUrlConflict: jest.fn(),
+    getSpaceAvatar: jest.fn(),
   };
 }
 

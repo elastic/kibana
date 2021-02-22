@@ -12,6 +12,7 @@ import {
   EuiContextMenuPanel,
   EuiFieldSearch,
   EuiLoadingContent,
+  EuiLoadingSpinner,
   EuiText,
 } from '@elastic/eui';
 import type { ReactElement } from 'react';
@@ -23,7 +24,7 @@ import type { ApplicationStart, Capabilities } from 'src/core/public';
 import type { Space } from 'src/plugins/spaces_oss/common';
 
 import { addSpaceIdToPath, ENTER_SPACE_PATH, SPACE_SEARCH_COUNT_THRESHOLD } from '../../../common';
-import { SpaceAvatar } from '../../space_avatar';
+import { getSpaceAvatarComponent } from '../../space_avatar';
 import { ManageSpacesButton } from './manage_spaces_button';
 
 interface Props {
@@ -186,7 +187,14 @@ class SpacesMenuUI extends Component<Props, State> {
   };
 
   private renderSpaceMenuItem = (space: Space): JSX.Element => {
-    const icon = <SpaceAvatar space={space} size={'s'} />;
+    const LazySpaceAvatar = React.lazy(() =>
+      getSpaceAvatarComponent().then((component) => ({ default: component }))
+    );
+    const icon = (
+      <React.Suspense fallback={<EuiLoadingSpinner />}>
+        <LazySpaceAvatar space={space} size={'s'} />
+      </React.Suspense>
+    );
     return (
       <EuiContextMenuItem
         key={space.id}

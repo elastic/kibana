@@ -12,6 +12,7 @@ import {
   EuiFlexItem,
   EuiInMemoryTable,
   EuiLink,
+  EuiLoadingSpinner,
   EuiPageContent,
   EuiSpacer,
   EuiText,
@@ -34,7 +35,7 @@ import type { FeaturesPluginStart, KibanaFeature } from '../../../../features/pu
 import { isReservedSpace } from '../../../common';
 import { DEFAULT_SPACE_ID } from '../../../common/constants';
 import { getSpacesFeatureDescription } from '../../constants';
-import { SpaceAvatar } from '../../space_avatar';
+import { getSpaceAvatarComponent } from '../../space_avatar';
 import type { SpacesManager } from '../../spaces_manager';
 import { ConfirmDeleteModal, UnauthorizedPrompt } from '../components';
 import { getEnabledFeatures } from '../lib/feature_utils';
@@ -257,11 +258,18 @@ export class SpacesGridPage extends Component<Props, State> {
         field: 'initials',
         name: '',
         width: '50px',
-        render: (value: string, record: Space) => (
-          <EuiLink {...reactRouterNavigate(this.props.history, this.getEditSpacePath(record))}>
-            <SpaceAvatar space={record} size="s" />
-          </EuiLink>
-        ),
+        render: (value: string, record: Space) => {
+          const LazySpaceAvatar = React.lazy(() =>
+            getSpaceAvatarComponent().then((component) => ({ default: component }))
+          );
+          return (
+            <React.Suspense fallback={<EuiLoadingSpinner />}>
+              <EuiLink {...reactRouterNavigate(this.props.history, this.getEditSpacePath(record))}>
+                <LazySpaceAvatar space={record} size="s" />
+              </EuiLink>
+            </React.Suspense>
+          );
+        },
       },
       {
         field: 'name',

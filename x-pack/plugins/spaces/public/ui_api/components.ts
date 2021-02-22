@@ -13,6 +13,7 @@ import {
   getLegacyUrlConflict,
   getShareToSpaceFlyoutComponent,
 } from '../share_saved_objects_to_space';
+import { getSpaceAvatarComponent } from '../space_avatar';
 import { getSpaceListComponent } from '../space_list';
 import { getSpacesContextWrapper } from '../spaces_context';
 import type { SpacesManager } from '../spaces_manager';
@@ -31,6 +32,7 @@ export const getComponents = ({
     getShareToSpaceFlyout: lazy(getShareToSpaceFlyoutComponent),
     getSpaceList: lazy(getSpaceListComponent),
     getLegacyUrlConflict: lazy(() => getLegacyUrlConflict({ getStartServices })),
+    getSpaceAvatar: lazy(getSpaceAvatarComponent),
   };
 };
 

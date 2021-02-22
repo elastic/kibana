@@ -6,6 +6,8 @@
  */
 
 import React from 'react';
+import { uiApiMock as spacesUiApiMock } from '../../../../../../../../spaces/public/ui_api/mocks';
+import { getSpaceAvatarComponent } from '../../../../../../../../spaces/public/space_avatar';
 import { createKibanaPrivileges } from '../../../../__fixtures__/kibana_privileges';
 import { kibanaFeatures } from '../../../../__fixtures__/kibana_features';
 import { mountWithIntl } from '@kbn/test/jest';
@@ -40,6 +42,9 @@ const spaces = [
     disabledFeatures: [],
   },
 ];
+const spacesApiUi = spacesUiApiMock.create();
+spacesApiUi.components.getSpaceAvatar = () =>
+  getSpaceAvatarComponent().then((component) => ({ default: component }));
 
 const maybeExpectSubFeaturePrivileges = (expect: boolean, subFeaturesPrivileges: unknown) => {
   return expect ? { subFeaturesPrivileges } : {};
@@ -107,6 +112,7 @@ describe('PrivilegeSummaryTable', () => {
             kibanaPrivileges={kibanaPrivileges}
             role={role}
             canCustomizeSubFeaturePrivileges={allowSubFeaturePrivileges}
+            spacesApiUi={spacesApiUi}
           />
         );
 
@@ -136,6 +142,7 @@ describe('PrivilegeSummaryTable', () => {
             kibanaPrivileges={kibanaPrivileges}
             role={role}
             canCustomizeSubFeaturePrivileges={allowSubFeaturePrivileges}
+            spacesApiUi={spacesApiUi}
           />
         );
 
@@ -165,6 +172,7 @@ describe('PrivilegeSummaryTable', () => {
             kibanaPrivileges={kibanaPrivileges}
             role={role}
             canCustomizeSubFeaturePrivileges={allowSubFeaturePrivileges}
+            spacesApiUi={spacesApiUi}
           />
         );
 
@@ -192,6 +200,7 @@ describe('PrivilegeSummaryTable', () => {
             kibanaPrivileges={kibanaPrivileges}
             role={role}
             canCustomizeSubFeaturePrivileges={allowSubFeaturePrivileges}
+            spacesApiUi={spacesApiUi}
           />
         );
 
@@ -255,6 +264,7 @@ describe('PrivilegeSummaryTable', () => {
             kibanaPrivileges={kibanaPrivileges}
             role={role}
             canCustomizeSubFeaturePrivileges={allowSubFeaturePrivileges}
+            spacesApiUi={spacesApiUi}
           />
         );
 
@@ -316,6 +326,7 @@ describe('PrivilegeSummaryTable', () => {
             kibanaPrivileges={kibanaPrivileges}
             role={role}
             canCustomizeSubFeaturePrivileges={allowSubFeaturePrivileges}
+            spacesApiUi={spacesApiUi}
           />
         );
 
@@ -379,6 +390,7 @@ describe('PrivilegeSummaryTable', () => {
             kibanaPrivileges={kibanaPrivileges}
             role={role}
             canCustomizeSubFeaturePrivileges={allowSubFeaturePrivileges}
+            spacesApiUi={spacesApiUi}
           />
         );
 
@@ -445,6 +457,7 @@ describe('PrivilegeSummaryTable', () => {
             kibanaPrivileges={kibanaPrivileges}
             role={role}
             canCustomizeSubFeaturePrivileges={allowSubFeaturePrivileges}
+            spacesApiUi={spacesApiUi}
           />
         );
 
@@ -538,6 +551,7 @@ describe('PrivilegeSummaryTable', () => {
             kibanaPrivileges={kibanaPrivileges}
             role={role}
             canCustomizeSubFeaturePrivileges={allowSubFeaturePrivileges}
+            spacesApiUi={spacesApiUi}
           />
         );
 
@@ -631,6 +645,7 @@ describe('PrivilegeSummaryTable', () => {
             kibanaPrivileges={kibanaPrivileges}
             role={role}
             canCustomizeSubFeaturePrivileges={allowSubFeaturePrivileges}
+            spacesApiUi={spacesApiUi}
           />
         );
 
@@ -726,6 +741,7 @@ describe('PrivilegeSummaryTable', () => {
             kibanaPrivileges={kibanaPrivileges}
             role={role}
             canCustomizeSubFeaturePrivileges={allowSubFeaturePrivileges}
+            spacesApiUi={spacesApiUi}
           />
         );
 
@@ -827,6 +843,7 @@ describe('PrivilegeSummaryTable', () => {
             kibanaPrivileges={kibanaPrivileges}
             role={role}
             canCustomizeSubFeaturePrivileges={allowSubFeaturePrivileges}
+            spacesApiUi={spacesApiUi}
           />
         );
 

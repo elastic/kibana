@@ -7,13 +7,13 @@
 
 import './space_card.scss';
 
-import { EuiCard } from '@elastic/eui';
+import { EuiCard, EuiLoadingSpinner } from '@elastic/eui';
 import React from 'react';
 
 import type { Space } from 'src/plugins/spaces_oss/common';
 
 import { addSpaceIdToPath, ENTER_SPACE_PATH } from '../../../common';
-import { SpaceAvatar } from '../../space_avatar';
+import { getSpaceAvatarComponent } from '../../space_avatar';
 
 interface Props {
   space: Space;
@@ -35,9 +35,17 @@ export const SpaceCard = (props: Props) => {
 };
 
 function renderSpaceAvatar(space: Space) {
+  const LazySpaceAvatar = React.lazy(() =>
+    getSpaceAvatarComponent().then((component) => ({ default: component }))
+  );
+
   // not announcing space name here because the title of the EuiCard that the SpaceAvatar lives in is already
   // announcing it. See https://github.com/elastic/kibana/issues/27748
-  return <SpaceAvatar space={space} size={'l'} announceSpaceName={false} />;
+  return (
+    <React.Suspense fallback={<EuiLoadingSpinner />}>
+      <LazySpaceAvatar space={space} size={'l'} announceSpaceName={false} />
+    </React.Suspense>
+  );
 }
 
 function renderSpaceDescription(space: Space) {

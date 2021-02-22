@@ -103,6 +103,10 @@ export interface SpacesApiUiComponent {
    * New URL path: `#/workpad/workpad-e08b9bdb-ec14-4339-94c4-063bddfd610e/page/1`
    */
   getLegacyUrlConflict: LazyComponentFn<LegacyUrlConflictProps>;
+  /**
+   * Displays an avatar for the given space.
+   */
+  getSpaceAvatar: LazyComponentFn<SpaceAvatarProps>;
 }
 
 /**
@@ -257,4 +261,19 @@ export interface LegacyUrlConflictProps {
    * The path to use for the new URL, optionally including `search` and/or `hash` URL components.
    */
   otherObjectPath: string;
+}
+
+/**
+ * @public
+ */
+export interface SpaceAvatarProps {
+  space: Partial<Space>;
+  size?: 's' | 'm' | 'l' | 'xl';
+  className?: string;
+  /**
+   * When enabled, allows EUI to provide an aria-label for this component, which is announced on screen readers.
+   *
+   * Default value is true.
+   */
+  announceSpaceName?: boolean;
 }

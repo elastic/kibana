@@ -36,6 +36,7 @@ const createApiUiComponentsMock = () => {
     getShareToSpaceFlyout: jest.fn(),
     getSpaceList: jest.fn(),
     getLegacyUrlConflict: jest.fn(),
+    getSpaceAvatar: jest.fn(),
   };
 
   return mock;

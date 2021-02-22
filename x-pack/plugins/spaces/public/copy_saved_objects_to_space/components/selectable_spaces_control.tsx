@@ -14,7 +14,7 @@ import React, { Fragment } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import type { Space } from 'src/plugins/spaces_oss/common';
 
-import { SpaceAvatar } from '../../space_avatar';
+import { getSpaceAvatarComponent } from '../../space_avatar';
 
 interface Props {
   spaces: Space[];
@@ -31,6 +31,9 @@ export const SelectableSpacesControl = (props: Props) => {
     return <EuiLoadingSpinner />;
   }
 
+  const LazySpaceAvatar = React.lazy(() =>
+    getSpaceAvatarComponent().then((component) => ({ default: component }))
+  );
   const disabledIndicator = (
     <EuiIconTip
       content={
@@ -48,7 +51,7 @@ export const SelectableSpacesControl = (props: Props) => {
     const disabled = props.disabledSpaceIds.has(space.id);
     return {
       label: space.name,
-      prepend: <SpaceAvatar space={space} size={'s'} />,
+      prepend: <LazySpaceAvatar space={space} size={'s'} />, // wrapped in a Suspense below
       append: disabled ? disabledIndicator : null,
       checked: props.selectedSpaceIds.includes(space.id) ? 'on' : undefined,
       disabled,
@@ -68,25 +71,27 @@ export const SelectableSpacesControl = (props: Props) => {
   }
 
   return (
-    <EuiSelectable
-      options={options}
-      onChange={(newOptions) => updateSelectedSpaces(newOptions as SpaceOption[])}
-      listProps={{
-        bordered: true,
-        rowHeight: 40,
-        className: 'spcCopyToSpace__spacesList',
-        'data-test-subj': 'cts-form-space-selector',
-      }}
-      searchable={options.length > 6}
-    >
-      {(list, search) => {
-        return (
-          <Fragment>
-            {search}
-            {list}
-          </Fragment>
-        );
-      }}
-    </EuiSelectable>
+    <React.Suspense fallback={<EuiLoadingSpinner />}>
+      <EuiSelectable
+        options={options}
+        onChange={(newOptions) => updateSelectedSpaces(newOptions as SpaceOption[])}
+        listProps={{
+          bordered: true,
+          rowHeight: 40,
+          className: 'spcCopyToSpace__spacesList',
+          'data-test-subj': 'cts-form-space-selector',
+        }}
+        searchable={options.length > 6}
+      >
+        {(list, search) => {
+          return (
+            <Fragment>
+              {search}
+              {list}
+            </Fragment>
+          );
+        }}
+      </EuiSelectable>
+    </React.Suspense>
   );
 };

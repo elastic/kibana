@@ -10,6 +10,7 @@ import {
   EuiDescribedFormGroup,
   EuiFieldText,
   EuiFormRow,
+  EuiLoadingSpinner,
   EuiPopover,
   EuiSpacer,
   EuiTextArea,
@@ -23,7 +24,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import type { Space } from 'src/plugins/spaces_oss/common';
 
 import { isReservedSpace } from '../../../../common';
-import { SpaceAvatar } from '../../../space_avatar';
+import { getSpaceAvatarComponent } from '../../../space_avatar';
 import type { SpaceValidator } from '../../lib';
 import { toSpaceIdentifier } from '../../lib';
 import { SectionPanel } from '../section_panel';
@@ -61,6 +62,10 @@ export class CustomizeSpace extends Component<Props, State> {
     const extraPopoverProps: Partial<EuiPopoverProps> = {
       initialFocus: 'input[name="spaceInitials"]',
     };
+
+    const LazySpaceAvatar = React.lazy(() =>
+      getSpaceAvatarComponent().then((component) => ({ default: component }))
+    );
 
     return (
       <SectionPanel title={panelTitle} description={panelTitle}>
@@ -157,7 +162,9 @@ export class CustomizeSpace extends Component<Props, State> {
                   )}
                   onClick={this.togglePopover}
                 >
-                  <SpaceAvatar space={this.props.space} size="l" />
+                  <React.Suspense fallback={<EuiLoadingSpinner />}>
+                    <LazySpaceAvatar space={this.props.space} size="l" />
+                  </React.Suspense>
                 </button>
               }
               closePopover={this.closePopover}

@@ -19,7 +19,7 @@ import React, { useState } from 'react';
 
 import type { Space } from 'src/plugins/spaces_oss/common';
 
-import { SpaceAvatar } from '../../space_avatar';
+import { getSpaceAvatarComponent } from '../../space_avatar';
 import type { SummarizedCopyToSpaceResult } from '../lib';
 import type { ImportRetry } from '../types';
 import { CopyStatusSummaryIndicator } from './copy_status_summary_indicator';
@@ -43,6 +43,10 @@ const getInitialDestinationMap = (objects: SummarizedCopyToSpaceResult['objects'
 
 export const SpaceResultProcessing = (props: Pick<Props, 'space'>) => {
   const { space } = props;
+  const LazySpaceAvatar = React.lazy(() =>
+    getSpaceAvatarComponent().then((component) => ({ default: component }))
+  );
+
   return (
     <EuiAccordion
       id={`copyToSpace-${space.id}`}
@@ -51,7 +55,9 @@ export const SpaceResultProcessing = (props: Pick<Props, 'space'>) => {
       buttonContent={
         <EuiFlexGroup responsive={false}>
           <EuiFlexItem grow={false}>
-            <SpaceAvatar space={space} size="s" />
+            <React.Suspense fallback={<EuiLoadingSpinner />}>
+              <LazySpaceAvatar space={space} size="s" />
+            </React.Suspense>
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiText>{space.name}</EuiText>
@@ -80,6 +86,9 @@ export const SpaceResult = (props: Props) => {
   const onDestinationMapChange = (value?: Map<string, string>) => {
     setDestinationMap(value || getInitialDestinationMap(objects));
   };
+  const LazySpaceAvatar = React.lazy(() =>
+    getSpaceAvatarComponent().then((component) => ({ default: component }))
+  );
 
   return (
     <EuiAccordion
@@ -89,7 +98,9 @@ export const SpaceResult = (props: Props) => {
       buttonContent={
         <EuiFlexGroup responsive={false}>
           <EuiFlexItem grow={false}>
-            <SpaceAvatar space={space} size="s" />
+            <React.Suspense fallback={<EuiLoadingSpinner />}>
+              <LazySpaceAvatar space={space} size="s" />
+            </React.Suspense>
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiText>{space.name}</EuiText>

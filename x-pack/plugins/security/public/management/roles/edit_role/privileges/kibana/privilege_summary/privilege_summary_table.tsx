@@ -19,6 +19,7 @@ import {
   EuiAccordion,
   EuiTitle,
 } from '@elastic/eui';
+import type { SpacesApiUi } from 'src/plugins/spaces_oss/public';
 import { Space } from '../../../../../../../../spaces/public';
 import { Role, RoleKibanaPrivilege } from '../../../../../../../common/model';
 import { isGlobalPrivilegeDefinition } from '../../../privilege_utils';
@@ -36,6 +37,7 @@ interface Props {
   spaces: Space[];
   kibanaPrivileges: KibanaPrivileges;
   canCustomizeSubFeaturePrivileges: boolean;
+  spacesApiUi: SpacesApiUi;
 }
 
 function getColumnKey(entry: RoleKibanaPrivilege) {
@@ -113,7 +115,9 @@ export const PrivilegeSummaryTable = (props: Props) => {
   const privilegeColumns = rawKibanaPrivileges.map((entry) => {
     const key = getColumnKey(entry);
     return {
-      name: <SpaceColumnHeader entry={entry} spaces={props.spaces} />,
+      name: (
+        <SpaceColumnHeader entry={entry} spaces={props.spaces} spacesApiUi={props.spacesApiUi} />
+      ),
       field: key,
       render: (kibanaPrivilege: EffectiveFeaturePrivileges, record: { featureId: string }) => {
         const { primary, hasCustomizedSubFeaturePrivileges } = kibanaPrivilege[record.featureId];

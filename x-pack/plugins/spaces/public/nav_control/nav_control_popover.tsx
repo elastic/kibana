@@ -13,7 +13,7 @@ import type { Subscription } from 'rxjs';
 import type { ApplicationStart, Capabilities } from 'src/core/public';
 import type { Space } from 'src/plugins/spaces_oss/common';
 
-import { SpaceAvatar } from '../space_avatar';
+import { getSpaceAvatarComponent } from '../space_avatar';
 import type { SpacesManager } from '../spaces_manager';
 import { SpacesDescription } from './components/spaces_description';
 import { SpacesMenu } from './components/spaces_menu';
@@ -137,8 +137,14 @@ export class NavControlPopover extends Component<Props, State> {
       return this.getButton(<EuiLoadingSpinner size="m" />, 'loading');
     }
 
+    const LazySpaceAvatar = React.lazy(() =>
+      getSpaceAvatarComponent().then((component) => ({ default: component }))
+    );
+
     return this.getButton(
-      <SpaceAvatar space={activeSpace} size={'s'} />,
+      <React.Suspense fallback={<EuiLoadingSpinner />}>
+        <LazySpaceAvatar space={activeSpace} size={'s'} />
+      </React.Suspense>,
       (activeSpace as Space).name
     );
   };
