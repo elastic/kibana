@@ -367,6 +367,7 @@ export function LayerPanel(
                 {group.supportsMoreColumns ? (
                   <EmptyDimensionButton
                     group={group}
+                    groups={groups}
                     groupIndex={groupIndex}
                     layerId={layerId}
                     layerIndex={layerIndex}

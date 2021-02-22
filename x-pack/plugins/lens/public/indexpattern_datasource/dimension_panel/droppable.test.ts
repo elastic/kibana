@@ -7,8 +7,7 @@
 import { DataPublicPluginStart } from '../../../../../../src/plugins/data/public';
 import { IndexPatternDimensionEditorProps } from './dimension_panel';
 import { onDrop, getDropProps } from './droppable';
-import { DragContextState, DraggingIdentifier } from '../../drag_drop';
-import { createMockedDragDropContext } from '../mocks';
+import { DraggingIdentifier } from '../../drag_drop';
 import { IUiSettingsClient, SavedObjectsClientContract, HttpSetup, CoreSetup } from 'kibana/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { IndexPatternPrivateState } from '../types';
