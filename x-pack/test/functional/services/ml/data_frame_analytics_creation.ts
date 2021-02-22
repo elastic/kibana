@@ -260,6 +260,9 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
           timeout: 5000,
         }
       );
+      await testSubjects.scrollIntoView(
+        'mlAnalyticsCreateJobWizardScatterplotMatrixPanel > mlScatterplotMatrix loaded'
+      );
       await mlCommonUI.assertCanvasElement(
         'mlAnalyticsCreateJobWizardScatterplotMatrixPanel',
         expectedValue,

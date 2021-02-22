@@ -88,6 +88,7 @@ export function MachineLearningDataFrameAnalyticsResultsProvider(
       await testSubjects.existOrFail('mlDFExpandableSection-splom > mlScatterplotMatrix loaded', {
         timeout: 5000,
       });
+      await testSubjects.scrollIntoView('mlDFExpandableSection-splom > mlScatterplotMatrix loaded');
       await mlCommonUI.assertCanvasElement(
         'mlDFExpandableSection-splom',
         expectedValue,
