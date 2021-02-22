@@ -24,7 +24,6 @@ import {
   RULE_SWITCH_LOADER,
   RULES_TABLE,
   SORT_RULES_BTN,
-  THREE_HUNDRED_ROWS,
   EXPORT_ACTION_BTN,
   EDIT_RULE_ACTION_BTN,
   NEXT_BTN,
@@ -37,11 +36,6 @@ import { ALL_ACTIONS, DELETE_RULE } from '../screens/rule_details';
 
 export const activateRule = (rulePosition: number) => {
   cy.get(RULE_SWITCH).eq(rulePosition).click({ force: true });
-};
-
-export const changeToThreeHundredRowsPerPage = () => {
-  cy.get(PAGINATION_POPOVER_BTN).click({ force: true });
-  cy.get(THREE_HUNDRED_ROWS).click();
 };
 
 export const editFirstRule = () => {
@@ -74,8 +68,7 @@ export const exportFirstRule = () => {
 
 export const filterByCustomRules = () => {
   cy.get(CUSTOM_RULES_BTN).click({ force: true });
-  cy.get(RULES_TABLE_AUTOREFRESH_INDICATOR).should('exist');
-  cy.get(RULES_TABLE_AUTOREFRESH_INDICATOR).should('not.exist');
+  waitForRulesTableToBeRefreshed();
 };
 
 export const goToCreateNewRule = () => {
@@ -88,10 +81,6 @@ export const goToRuleDetails = () => {
 
 export const loadPrebuiltDetectionRules = () => {
   cy.get(LOAD_PREBUILT_RULES_BTN).should('exist').click({ force: true });
-};
-
-export const paginate = () => {
-  cy.get(NEXT_BTN).click();
 };
 
 export const reloadDeletedRules = () => {
@@ -167,8 +156,18 @@ export const changeRowsPerPageTo = (rowsCount: number) => {
   waitForRulesTableToBeRefreshed();
 };
 
+export const changeRowsPerPageTo300 = () => {
+  changeRowsPerPageTo(300);
+};
+
 export const goToPage = (pageNumber: number) => {
   cy.get(RULES_TABLE_REFRESH_INDICATOR).should('not.exist');
   cy.get(pageSelector(pageNumber)).last().click({ force: true });
+  waitForRulesTableToBeRefreshed();
+};
+
+export const goToNextPage = () => {
+  cy.get(RULES_TABLE_REFRESH_INDICATOR).should('not.exist');
+  cy.get(NEXT_BTN).click({ force: true });
   waitForRulesTableToBeRefreshed();
 };

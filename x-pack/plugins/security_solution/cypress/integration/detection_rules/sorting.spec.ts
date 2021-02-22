@@ -13,8 +13,7 @@ import {
   RULE_AUTO_REFRESH_IDLE_MODAL,
   FOURTH_RULE,
   RULES_TABLE,
-  FIRST_PAGE_SELECTOR,
-  SECOND_PAGE_SELECTOR,
+  pageSelector,
 } from '../../screens/alerts_detection_rules';
 
 import {
@@ -98,6 +97,10 @@ describe('Alerts detection rules', () => {
     waitForRulesTableToBeLoaded();
 
     changeRowsPerPageTo(5);
+
+    const FIRST_PAGE_SELECTOR = pageSelector(1);
+    const SECOND_PAGE_SELECTOR = pageSelector(2);
+
     cy.get(RULES_TABLE)
       .find(FIRST_PAGE_SELECTOR)
       .should('have.class', 'euiPaginationButton-isActive');

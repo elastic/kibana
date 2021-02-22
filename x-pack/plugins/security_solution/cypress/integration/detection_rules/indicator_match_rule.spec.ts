@@ -59,12 +59,11 @@ import {
   waitForAlertsPanelToBeLoaded,
 } from '../../tasks/alerts';
 import {
-  changeToThreeHundredRowsPerPage,
+  changeRowsPerPageTo300,
   filterByCustomRules,
   goToCreateNewRule,
   goToRuleDetails,
   waitForRulesTableToBeLoaded,
-  waitForRulesTableToBeRefreshed,
 } from '../../tasks/alerts_detection_rules';
 import { cleanKibana } from '../../tasks/common';
 import {
@@ -388,8 +387,7 @@ describe('indicator match', () => {
 
         cy.get(CUSTOM_RULES_BTN).should('have.text', 'Custom rules (1)');
 
-        changeToThreeHundredRowsPerPage();
-        waitForRulesTableToBeRefreshed();
+        changeRowsPerPageTo300();
 
         cy.get(RULES_TABLE).then(($table) => {
           cy.wrap($table.find(RULES_ROW).length).should('eql', expectedNumberOfRules);

@@ -38,10 +38,6 @@ export const RULES_TABLE_REFRESH_INDICATOR = '[data-test-subj="loading-spinner"]
 
 export const RULES_TABLE_AUTOREFRESH_INDICATOR = '[data-test-subj="loadingRulesInfoProgress"]';
 
-export const NEXT_BTN = '[data-test-subj="pagination-button-next"]';
-
-export const PAGINATION_POPOVER_BTN = '[data-test-subj="tablePaginationPopoverButton"]';
-
 export const RISK_SCORE = '[data-test-subj="riskScore"]';
 
 export const RELOAD_PREBUILT_RULES_BTN = '[data-test-subj="reloadPrebuiltRulesBtn"]';
@@ -72,14 +68,12 @@ export const RULE_AUTO_REFRESH_IDLE_MODAL = '[data-test-subj="allRulesIdleModal"
 
 export const RULE_AUTO_REFRESH_IDLE_MODAL_CONTINUE = '[data-test-subj="allRulesIdleModal"] button';
 
+export const PAGINATION_POPOVER_BTN = '[data-test-subj="tablePaginationPopoverButton"]';
+
 export const rowsPerPageSelector = (count: number) =>
   `[data-test-subj="tablePagination-${count}-rows"]`;
-
-export const FIVE_ROWS = rowsPerPageSelector(5);
-export const THREE_HUNDRED_ROWS = rowsPerPageSelector(300);
 
 export const pageSelector = (pageNumber: number) =>
   `[data-test-subj="pagination-button-${pageNumber - 1}"]`;
 
-export const FIRST_PAGE_SELECTOR = pageSelector(1);
-export const SECOND_PAGE_SELECTOR = pageSelector(2);
+export const NEXT_BTN = '[data-test-subj="pagination-button-next"]';
