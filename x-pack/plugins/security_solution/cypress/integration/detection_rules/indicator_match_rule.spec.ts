@@ -98,8 +98,7 @@ import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
 
 import { DETECTIONS_URL, RULE_CREATION } from '../../urls/navigation';
 
-// Skipped for 7.12 FF - flaky tests
-describe.skip('indicator match', () => {
+describe('indicator match', () => {
   describe('Detection rules, Indicator Match', () => {
     const expectedUrls = newThreatIndicatorRule.referenceUrls.join('');
     const expectedFalsePositives = newThreatIndicatorRule.falsePositivesExamples.join('');
