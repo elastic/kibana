@@ -6,13 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { DropType } from '../types';
-export interface HumanData {
-  label: string;
-  groupLabel?: string;
-  position?: number;
-  nextLabel?: string;
-}
+import { DropType } from '../../types';
+import { HumanData } from '.';
 
 type AnnouncementFunction = (draggedElement: HumanData, dropElement: HumanData) => string;
 
