@@ -7,10 +7,8 @@
 
 import { kea, MakeLogicType } from 'kea';
 
-import http from 'shared/http';
-import routes from 'workplace_search/routes';
-
 import { clearFlashMessages, flashAPIErrors } from '../../../shared/flash_messages';
+import { HttpLogic } from '../../../shared/http';
 import { KibanaLogic } from '../../../shared/kibana';
 import { ANY_AUTH_PROVIDER } from '../../../shared/role_mapping/constants';
 import { ROLE_MAPPINGS_PATH } from '../../routes';
@@ -228,42 +226,53 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
     ],
   },
   listeners: ({ actions, values }) => ({
-    initializeRoleMappings: () => {
-      http(routes.fritoPieOrganizationRoleMappingsPath())
-        .then(({ data }) => actions.setRoleMappingsData(data))
-        .catch(({ response }) => flashAPIErrors({ error: response.data.errors }));
-    },
-    initializeRoleMapping: ({ roleId }) => {
-      const { navigateToUrl } = KibanaLogic.values;
-      const url = roleId
-        ? routes.fritoPieOrganizationRoleMappingPath(roleId)
-        : routes.newFritoPieOrganizationRoleMappingPath();
+    initializeRoleMappings: async () => {
+      const { http } = HttpLogic.values;
+      const route = '/api/workplace_search/org/role_mappings';
 
-      http(url)
-        .then(({ data }) => actions.setRoleMappingData(data))
-        .catch(({ response }) => {
-          if (response.status === 404) {
-            navigateToUrl(ROLE_MAPPINGS_PATH);
-          }
-          flashAPIErrors({ error: response.data.errors });
-        });
+      try {
+        const response = await http.get(route);
+        actions.setRoleMappingsData(response);
+      } catch (e) {
+        flashAPIErrors(e);
+      }
     },
-    handleDeleteMapping: () => {
+    initializeRoleMapping: async ({ roleId }) => {
+      const { http } = HttpLogic.values;
+      const { navigateToUrl } = KibanaLogic.values;
+      const route = roleId
+        ? `/api/workplace_search/org/role_mappings/${roleId}`
+        : '/api/workplace_search/org/role_mappings/new';
+
+      try {
+        const response = await http.get(route);
+        actions.setRoleMappingData(response);
+      } catch (e) {
+        if (e.status === 404) {
+          navigateToUrl(ROLE_MAPPINGS_PATH);
+        }
+        flashAPIErrors(e);
+      }
+    },
+    handleDeleteMapping: async () => {
+      const { http } = HttpLogic.values;
       const { navigateToUrl } = KibanaLogic.values;
       const { roleMapping } = values;
       if (!roleMapping) {
         return;
       }
+      const route = `/api/workplace_search/org/role_mappings/${roleMapping.id}`;
       if (window.confirm(DELETE_MESSAGE)) {
-        http
-          .delete(routes.fritoPieOrganizationRoleMappingPath(roleMapping.id))
-          .then(() => {
-            navigateToUrl(ROLE_MAPPINGS_PATH);
-          })
-          .catch(({ response }) => flashAPIErrors({ error: response.data.errors }));
+        try {
+          await http.delete(route);
+          navigateToUrl(ROLE_MAPPINGS_PATH);
+        } catch (e) {
+          flashAPIErrors(e);
+        }
       }
     },
-    handleSaveMapping: () => {
+    handleSaveMapping: async () => {
+      const { http } = HttpLogic.values;
       const { navigateToUrl } = KibanaLogic.values;
       const {
         attributeName,
@@ -275,7 +284,7 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
         selectedAuthProviders,
       } = values;
 
-      const payload = {
+      const body = JSON.stringify({
         rules: {
           [attributeName]: attributeValue,
         },
@@ -283,17 +292,18 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
         groups: includeInAllGroups ? [] : Array.from(selectedGroups),
         allGroups: includeInAllGroups,
         authProvider: selectedAuthProviders,
-      };
+      });
 
       const request = !roleMapping
-        ? http.post(routes.fritoPieOrganizationRoleMappingsPath(), payload)
-        : http.put(routes.fritoPieOrganizationRoleMappingPath(roleMapping.id), payload);
+        ? http.post('/api/workplace_search/org/role_mappings', { body })
+        : http.put(`/api/workplace_search/org/role_mappings/${roleMapping.id}`, { body });
 
-      request
-        .then(() => {
-          navigateToUrl(ROLE_MAPPINGS_PATH);
-        })
-        .catch(({ response }) => flashAPIErrors({ error: response.data.errors }));
+      try {
+        await request;
+        navigateToUrl(ROLE_MAPPINGS_PATH);
+      } catch (e) {
+        flashAPIErrors(e);
+      }
     },
     resetState: () => {
       clearFlashMessages();
