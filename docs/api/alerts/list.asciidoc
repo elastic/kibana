@@ -1,0 +1,127 @@
+[[alerts-api-list]]
+=== List alert types API
+++++
+<titleabbrev>List all alert types API</titleabbrev>
+++++
+
+Retrieve a list of all alert types.
+
+[[alerts-api-list-request]]
+==== Request
+
+`GET <kibana host>:<port>/api/alerts/list_alert_types`
+
+[[alerts-api-list-codes]]
+==== Response code
+
+`200`::
+    Indicates a successful call.
+
+[[alerts-api-list-example]]
+==== Example
+
+[source,sh]
+--------------------------------------------------
+$ curl -X GET api/alerts/list_alert_types
+--------------------------------------------------
+// KIBANA
+
+The API returns the following:
+
+[source,sh]
+--------------------------------------------------
+[
+   {
+      "id":".index-threshold",
+      "name":"Index threshold",
+      "actionGroups":[
+         {
+            "id":"threshold met",
+            "name":"Threshold met"
+         },
+         {
+            "id":"recovered",
+            "name":"Recovered"
+         }
+      ],
+      "recoveryActionGroup":{
+         "id":"recovered",
+         "name":"Recovered"
+      },
+      "defaultActionGroupId":"threshold met",
+      "actionVariables":{
+         "context":[
+            {
+               "name":"message",
+               "description":"A pre-constructed message for the alert."
+            },
+         ],
+         "state":[],
+         "params":[
+            {
+               "name":"threshold",
+               "description":"An array of values to use as the threshold; 'between' and 'notBetween' require two values, the others require one."
+            },
+            {
+               "name":"index",
+               "description":"index"
+            },
+         ]
+      },
+      "producer":"stackAlerts",
+      "minimumLicenseRequired":"basic",
+      "enabledInLicense":true,
+      "authorizedConsumers":{
+         "alerts":{
+            "read":true,
+            "all":true
+         },
+         "stackAlerts":{
+            "read":true,
+            "all":true
+         },
+         "uptime":{
+            "read":true,
+            "all":true
+         }
+      }
+   }
+]
+--------------------------------------------------
+
+Each alert type contains the following properties:
+
+[cols="2*<"]
+|===
+
+| `name`
+| The descriptive name of the alert type.
+
+| `id`
+| The unique ID of the alert type.
+
+| `minimumLicenseRequired`
+| The license required to use the alert type.
+
+| `enabledInLicense`
+| Whether the alert type is enabled or disabled based on the license.
+
+| `actionGroups`
+| An explicit list of groups for which the alert type can schedule actions, each with the action group's unique ID and human readable name. Alert `actions` validation will use this configuration to ensure that groups are valid. Use `kbn-i18n` to translate the names of the action group when registering the alert type.
+
+| `recoveryActionGroup`
+| An action group to use when an alert instance goes from an active state, to an inactive one. Do not specify this action group under the `actionGroups` property. If `recoveryActionGroup` is not specified, the default `recovered` action group is used.
+
+| `defaultActionGroupId`
+| The default ID for the alert type group.
+
+| `actionVariables`
+| An explicit list of action variables that the alert type makes available via context and state in action parameter templates, and a short human readable description. The Alert UI  will use this information to prompt users for these variables in action parameter editors. Use `kbn-i18n` to translate the descriptions.
+
+| `producer`
+| The ID of the application producing this alert type.
+
+| `authorizedConsumers`
+| The list of the plugins IDs that have access to the alert type.
+
+|===
