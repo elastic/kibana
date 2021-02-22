@@ -43,8 +43,9 @@ export type {
   SavedObjectsExportTransform,
 } from './export';
 
+export { SavedObjectsSerializer } from './serialization';
+
 export type {
-  SavedObjectsSerializer,
   SavedObjectsRawDoc,
   SavedObjectsRawDocParseOptions,
   SavedObjectSanitizedDoc,
@@ -53,9 +54,7 @@ export type {
 
 export type { SavedObjectsMigrationLogger } from './migrations/core/migration_logger';
 
-export {
-  SavedObjectsService,
-} from './saved_objects_service';
+export { SavedObjectsService } from './saved_objects_service';
 
 export type {
   InternalSavedObjectsServiceStart,

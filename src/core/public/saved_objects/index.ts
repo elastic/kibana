@@ -19,7 +19,7 @@ export type {
   SavedObjectsUpdateOptions,
   SavedObjectsBulkUpdateOptions,
 } from './saved_objects_client';
-export type { SimpleSavedObject } from './simple_saved_object';
+export { SimpleSavedObject } from './simple_saved_object';
 export type { SavedObjectsStart } from './saved_objects_service';
 export type {
   SavedObjectsBaseOptions,

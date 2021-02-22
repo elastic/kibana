@@ -80,6 +80,7 @@ export type {
   StringValidationRegexString,
 } from '../types';
 
+export { AppNavLinkStatus, AppStatus, ScopedHistory } from './application';
 export type {
   ApplicationSetup,
   ApplicationStart,
@@ -92,8 +93,6 @@ export type {
   AppLeaveAction,
   AppLeaveDefaultAction,
   AppLeaveConfirmAction,
-  AppStatus,
-  AppNavLinkStatus,
   AppMeta,
   AppUpdatableFields,
   AppUpdater,
@@ -101,10 +100,10 @@ export type {
   PublicAppInfo,
   PublicAppMetaInfo,
   PublicAppSearchDeepLinkInfo,
-  ScopedHistory,
   NavigateToAppOptions,
 } from './application';
 
+export { SimpleSavedObject } from './saved_objects';
 export type {
   SavedObjectsBatchResponse,
   SavedObjectsBulkCreateObject,
@@ -126,7 +125,6 @@ export type {
   SavedObjectsMigrationVersion,
   SavedObjectsClientContract,
   SavedObjectsClient,
-  SimpleSavedObject,
   SavedObjectsImportResponse,
   SavedObjectsImportSuccess,
   SavedObjectsImportConflictError,
@@ -142,10 +140,11 @@ export type {
   SavedObjectsImportWarning,
 } from './saved_objects';
 
+export { HttpFetchError } from './http';
+
 export type {
   HttpHeadersInit,
   HttpRequestInit,
-  HttpFetchError,
   HttpFetchOptions,
   HttpFetchOptionsWithPath,
   HttpFetchQuery,

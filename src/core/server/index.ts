@@ -101,14 +101,17 @@ export type {
   HandlerParameters,
 } from './context';
 export type { CoreId } from './core_context';
-export type { CspConfig, ICspConfig } from './csp';
+
+export { CspConfig } from './csp';
+export type { ICspConfig } from './csp';
+
+export { ElasticsearchConfig } from './elasticsearch';
 export type {
   LegacyClusterClient,
   ILegacyClusterClient,
   ILegacyCustomClusterClient,
   LegacyScopedClusterClient,
   ILegacyScopedClusterClient,
-  ElasticsearchConfig,
   LegacyElasticsearchClientConfig,
   LegacyElasticsearchError,
   LegacyElasticsearchErrorHelpers,
@@ -132,6 +135,7 @@ export type {
   GetResponse,
   DeleteDocumentResponse,
 } from './elasticsearch';
+
 export type {
   LegacyCallAPIOptions,
   AssistantAPIClientParams,
@@ -141,7 +145,7 @@ export type {
   DeprecationAPIClientParams,
   DeprecationInfo,
   IndexSettingsDeprecationInfo,
-  DeprecationAPIResponse
+  DeprecationAPIResponse,
 } from './elasticsearch/legacy/api_types';
 export type { IExternalUrlConfig, IExternalUrlPolicy } from './external_url';
 export type {
@@ -171,7 +175,6 @@ export type {
   ErrorHttpResponseOptions,
   IKibanaSocket,
   IsAuthenticated,
-  KibanaRequest,
   KibanaRequestEvents,
   KibanaRequestRoute,
   KibanaRequestRouteOptions,
@@ -221,10 +224,7 @@ export type {
   SafeRouteMethod,
 } from './http';
 
-export {
-  kibanaResponseFactory,
-  validBodyOutput,
-} from './http';
+export { KibanaRequest, kibanaResponseFactory, validBodyOutput } from './http';
 
 export type {
   HttpResourcesRenderOptions,
@@ -259,7 +259,13 @@ export type {
   SharedGlobalConfig,
 } from './plugins';
 
-export { SavedObjectsClient, } from './saved_objects';
+export {
+  SavedObjectsClient,
+  SavedObjectsErrorHelpers,
+  SavedObjectsSerializer,
+  SavedObjectTypeRegistry,
+  SavedObjectsUtils,
+} from './saved_objects';
 
 export type {
   SavedObjectsBulkCreateObject,
@@ -278,7 +284,6 @@ export type {
   SavedObjectsClosePointInTimeOptions,
   SavedObjectsClosePointInTimeResponse,
   SavedObjectsCreateOptions,
-  SavedObjectsErrorHelpers,
   SavedObjectsExportResultDetails,
   SavedObjectsFindResult,
   SavedObjectsFindResponse,
@@ -303,7 +308,6 @@ export type {
   SavedObjectsRepositoryFactory,
   SavedObjectsResolveImportErrorsOptions,
   SavedObjectsResolveResponse,
-  SavedObjectsSerializer,
   SavedObjectsUpdateOptions,
   SavedObjectsUpdateResponse,
   SavedObjectsAddToNamespacesOptions,
@@ -326,14 +330,12 @@ export type {
   SavedObjectsFieldMapping,
   SavedObjectsTypeMappingDefinition,
   SavedObjectsMappingProperties,
-  SavedObjectTypeRegistry,
   ISavedObjectTypeRegistry,
   SavedObjectsNamespaceType,
   SavedObjectsType,
   SavedObjectsTypeManagementDefinition,
   SavedObjectMigrationMap,
   SavedObjectMigrationFn,
-  SavedObjectsUtils,
   SavedObjectsExporter,
   ISavedObjectsExporter,
   SavedObjectExportBaseOptions,
@@ -399,12 +401,7 @@ export type {
 export type { LegacyServiceSetupDeps, LegacyServiceStartDeps, LegacyConfig } from './legacy';
 
 export { ServiceStatusLevels } from './status';
-export type {
-  CoreStatus,
-  ServiceStatus,
-  ServiceStatusLevel,
-  StatusServiceSetup,
-} from './status';
+export type { CoreStatus, ServiceStatus, ServiceStatusLevel, StatusServiceSetup } from './status';
 
 export type { CoreUsageDataStart } from './core_usage_data';
 
