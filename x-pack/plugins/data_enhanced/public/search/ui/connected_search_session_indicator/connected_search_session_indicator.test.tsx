@@ -16,18 +16,23 @@ import {
   ISessionService,
   RefreshInterval,
   SearchSessionState,
+  SearchUsageCollector,
   TimefilterContract,
 } from '../../../../../../../src/plugins/data/public';
 import { coreMock } from '../../../../../../../src/core/public/mocks';
 import { TOUR_RESTORE_STEP_KEY, TOUR_TAKING_TOO_LONG_STEP_KEY } from './search_session_tour';
 import userEvent from '@testing-library/user-event';
 import { IntlProvider } from 'react-intl';
+import { createSearchUsageCollectorMock } from '../../../../../../../src/plugins/data/public/search/collectors/mocks';
 
 const coreStart = coreMock.createStart();
 const application = coreStart.application;
+const basePath = coreStart.http.basePath;
 const dataStart = dataPluginMock.createStartContract();
 const sessionService = dataStart.search.session as jest.Mocked<ISessionService>;
 let storage: Storage;
+let usageCollector: jest.Mocked<SearchUsageCollector>;
+
 const refreshInterval$ = new BehaviorSubject<RefreshInterval>({ value: 0, pause: true });
 const timeFilter = dataStart.query.timefilter.timefilter as jest.Mocked<TimefilterContract>;
 timeFilter.getRefreshIntervalUpdate$.mockImplementation(() => refreshInterval$);
@@ -41,6 +46,7 @@ function Container({ children }: { children?: ReactNode }) {
 
 beforeEach(() => {
   storage = new Storage(new StubBrowserStorage());
+  usageCollector = createSearchUsageCollectorMock();
   refreshInterval$.next({ value: 0, pause: true });
   sessionService.isSessionStorageReady.mockImplementation(() => true);
   sessionService.getSearchSessionIndicatorUiConfig.mockImplementation(() => ({
@@ -57,6 +63,8 @@ test("shouldn't show indicator in case no active search session", async () => {
     timeFilter,
     storage,
     disableSaveAfterSessionCompletesTimeout,
+    usageCollector,
+    basePath,
   });
   const { getByTestId, container } = render(
     <Container>
@@ -84,6 +92,8 @@ test("shouldn't show indicator in case app hasn't opt-in", async () => {
     timeFilter,
     storage,
     disableSaveAfterSessionCompletesTimeout,
+    usageCollector,
+    basePath,
   });
   const { getByTestId, container } = render(
     <Container>
@@ -113,6 +123,8 @@ test('should show indicator in case there is an active search session', async ()
     timeFilter,
     storage,
     disableSaveAfterSessionCompletesTimeout,
+    usageCollector,
+    basePath,
   });
   const { getByTestId } = render(
     <Container>
@@ -137,6 +149,8 @@ test('should be disabled in case uiConfig says so ', async () => {
     timeFilter,
     storage,
     disableSaveAfterSessionCompletesTimeout,
+    usageCollector,
+    basePath,
   });
 
   render(
@@ -160,6 +174,7 @@ test('should be disabled in case not enough permissions', async () => {
     timeFilter,
     storage,
     disableSaveAfterSessionCompletesTimeout,
+    basePath,
   });
 
   render(
@@ -185,6 +200,8 @@ test('should be disabled during auto-refresh', async () => {
     timeFilter,
     storage,
     disableSaveAfterSessionCompletesTimeout,
+    usageCollector,
+    basePath,
   });
 
   render(
@@ -222,6 +239,8 @@ describe('Completed inactivity', () => {
       timeFilter,
       storage,
       disableSaveAfterSessionCompletesTimeout,
+      usageCollector,
+      basePath,
     });
 
     render(
@@ -253,12 +272,14 @@ describe('Completed inactivity', () => {
     });
 
     expect(screen.getByRole('button', { name: 'Save session' })).not.toBeDisabled();
+    expect(usageCollector.trackSessionIndicatorSaveDisabled).toHaveBeenCalledTimes(0);
 
     act(() => {
       jest.advanceTimersByTime(2.5 * 60 * 1000);
     });
 
     expect(screen.getByRole('button', { name: 'Save session' })).toBeDisabled();
+    expect(usageCollector.trackSessionIndicatorSaveDisabled).toHaveBeenCalledTimes(1);
   });
 });
 
@@ -280,6 +301,8 @@ describe('tour steps', () => {
         timeFilter,
         storage,
         disableSaveAfterSessionCompletesTimeout,
+        usageCollector,
+        basePath,
       });
       const rendered = render(
         <Container>
@@ -307,6 +330,9 @@ describe('tour steps', () => {
 
       expect(storage.get(TOUR_RESTORE_STEP_KEY)).toBeFalsy();
       expect(storage.get(TOUR_TAKING_TOO_LONG_STEP_KEY)).toBeTruthy();
+
+      expect(usageCollector.trackSessionIndicatorTourLoading).toHaveBeenCalledTimes(1);
+      expect(usageCollector.trackSessionIndicatorTourRestored).toHaveBeenCalledTimes(0);
     });
 
     test("doesn't show tour step if state changed before delay", async () => {
@@ -317,6 +343,8 @@ describe('tour steps', () => {
         timeFilter,
         storage,
         disableSaveAfterSessionCompletesTimeout,
+        usageCollector,
+        basePath,
       });
       const rendered = render(
         <Container>
@@ -337,6 +365,9 @@ describe('tour steps', () => {
 
       expect(storage.get(TOUR_RESTORE_STEP_KEY)).toBeFalsy();
       expect(storage.get(TOUR_TAKING_TOO_LONG_STEP_KEY)).toBeFalsy();
+
+      expect(usageCollector.trackSessionIndicatorTourLoading).toHaveBeenCalledTimes(0);
+      expect(usageCollector.trackSessionIndicatorTourRestored).toHaveBeenCalledTimes(0);
     });
   });
 
@@ -348,6 +379,8 @@ describe('tour steps', () => {
       timeFilter,
       storage,
       disableSaveAfterSessionCompletesTimeout,
+      usageCollector,
+      basePath,
     });
     const rendered = render(
       <Container>
@@ -360,6 +393,10 @@ describe('tour steps', () => {
 
     expect(storage.get(TOUR_RESTORE_STEP_KEY)).toBeTruthy();
     expect(storage.get(TOUR_TAKING_TOO_LONG_STEP_KEY)).toBeTruthy();
+
+    expect(usageCollector.trackSessionIndicatorTourLoading).toHaveBeenCalledTimes(0);
+    expect(usageCollector.trackSessionIsRestored).toHaveBeenCalledTimes(1);
+    expect(usageCollector.trackSessionIndicatorTourRestored).toHaveBeenCalledTimes(1);
   });
 
   test("doesn't show tour for irrelevant state", async () => {
@@ -370,6 +407,8 @@ describe('tour steps', () => {
       timeFilter,
       storage,
       disableSaveAfterSessionCompletesTimeout,
+      usageCollector,
+      basePath,
     });
     const rendered = render(
       <Container>
@@ -383,5 +422,8 @@ describe('tour steps', () => {
 
     expect(storage.get(TOUR_RESTORE_STEP_KEY)).toBeFalsy();
     expect(storage.get(TOUR_TAKING_TOO_LONG_STEP_KEY)).toBeFalsy();
+
+    expect(usageCollector.trackSessionIndicatorTourLoading).toHaveBeenCalledTimes(0);
+    expect(usageCollector.trackSessionIndicatorTourRestored).toHaveBeenCalledTimes(0);
   });
 });

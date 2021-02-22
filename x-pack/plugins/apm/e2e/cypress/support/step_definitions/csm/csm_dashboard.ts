@@ -52,12 +52,14 @@ Then(`should display percentile for page load chart`, () => {
 });
 
 Then(`should display chart legend`, () => {
-  const chartLegend = 'div.echLegendItem__label';
+  const chartLegend = 'button.echLegendItem__label';
 
   waitForLoadingToFinish();
   cy.get('.euiLoadingChart').should('not.exist');
 
-  cy.get(chartLegend, DEFAULT_TIMEOUT).eq(0).should('have.text', 'Overall');
+  cy.get('[data-cy=pageLoadDist]').within(() => {
+    cy.get(chartLegend, DEFAULT_TIMEOUT).eq(0).should('have.text', 'Overall');
+  });
 });
 
 Then(`should display tooltip on hover`, () => {
