@@ -49,7 +49,7 @@ const windowConfirm: ConfirmHandler = (message: string, callback: ConfirmHandler
 const getOverlayConfirmHandler = (overlay: OverlayStart): ConfirmHandler => {
   return (message: string, callback: ConfirmHandlerCallback) => {
     overlay
-      .openConfirm(message, { title: ' ', 'data-test-subj': 'navigationBlockConfirmModAl' })
+      .openConfirm(message, { title: ' ', 'data-test-subj': 'navigationBlockConfirmModal' })
       .then(
         (confirmed) => {
           callback(confirmed);

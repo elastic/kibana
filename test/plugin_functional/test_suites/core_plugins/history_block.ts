@@ -23,24 +23,24 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
       it('prevents navigation if user click cancel on the confirmation dialog', async () => {
         await testSubjects.click('applink-external-test');
 
-        await testSubjects.existOrFail('navigationBlockConfirmModAl');
+        await testSubjects.existOrFail('navigationBlockConfirmModal');
         await PageObjects.common.clickCancelOnModal(false);
         expect(await browser.getCurrentUrl()).to.contain('/app/core_history_block');
       });
       it('allows navigation if user click confirm on the confirmation dialog', async () => {
         await testSubjects.click('applink-external-test');
 
-        await testSubjects.existOrFail('navigationBlockConfirmModAl');
+        await testSubjects.existOrFail('navigationBlockConfirmModal');
         await PageObjects.common.clickConfirmOnModal();
         expect(await browser.getCurrentUrl()).to.contain('/app/home');
       });
     });
 
-    describe('when navigating to another app', () => {
+    describe('when navigating to the same app', () => {
       it('prevents navigation if user click cancel on the confirmation dialog', async () => {
         await testSubjects.click('applink-intra-test');
 
-        await testSubjects.existOrFail('navigationBlockConfirmModAl');
+        await testSubjects.existOrFail('navigationBlockConfirmModal');
         await PageObjects.common.clickCancelOnModal(false);
         expect(await browser.getCurrentUrl()).to.contain('/app/core_history_block');
         expect(await browser.getCurrentUrl()).not.to.contain('/foo');
@@ -48,7 +48,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
       it('allows navigation if user click confirm on the confirmation dialog', async () => {
         await testSubjects.click('applink-intra-test');
 
-        await testSubjects.existOrFail('navigationBlockConfirmModAl');
+        await testSubjects.existOrFail('navigationBlockConfirmModal');
         await PageObjects.common.clickConfirmOnModal();
         expect(await browser.getCurrentUrl()).to.contain('/app/core_history_block/foo');
       });
