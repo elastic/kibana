@@ -8,6 +8,7 @@
 import React from 'react';
 import { ActionFactory as ActionFactoryUi } from '../../components/action_factory';
 import { ActionFactory, BaseActionFactoryContext } from '../../../../dynamic_actions';
+import { useDrilldownManager } from '../context';
 
 export interface ActionFactoryViewProps {
   factory: ActionFactory;
@@ -15,9 +16,12 @@ export interface ActionFactoryViewProps {
 }
 
 export const ActionFactoryView: React.FC<ActionFactoryViewProps> = ({ factory, context }) => {
+  const drilldowns = useDrilldownManager();
   const name = React.useMemo(() => factory.getDisplayName(context), [factory, context]);
   const icon = React.useMemo(() => factory.getIconType(context), [factory, context]);
-  const handleChange = React.useCallback(() => {}, []);
+  const handleChange = React.useCallback(() => {
+    drilldowns.setActionFactory(undefined);
+  }, [drilldowns]);
 
   return <ActionFactoryUi name={name} icon={icon} beta={factory.isBeta} onChange={handleChange} />;
 };

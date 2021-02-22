@@ -9,13 +9,13 @@ import React from 'react';
 import { ActionFactory, BaseActionFactoryContext } from '../../dynamic_actions';
 import { PresentablePicker, Item } from '../presentable_picker';
 
-export interface PresentablePickerProps {
+export interface ActionFactoryPickerProps {
   actionFactories: ActionFactory[];
   context: unknown;
   onSelect: (actionFactory: ActionFactory) => void;
 }
 
-export const ActionFactoryPicker: React.FC<PresentablePickerProps> = ({
+export const ActionFactoryPicker: React.FC<ActionFactoryPickerProps> = ({
   actionFactories,
   context,
   onSelect,
