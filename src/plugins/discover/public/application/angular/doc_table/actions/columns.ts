@@ -5,10 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { Capabilities } from 'kibana/public';
+import { Capabilities, IUiSettingsClient } from 'kibana/public';
 import { popularizeField } from '../../../helpers/popularize_field';
 import { IndexPattern, IndexPatternsContract } from '../../../../kibana_services';
 import { AppState } from '../../discover_state';
+import { SORT_DEFAULT_ORDER_SETTING } from '../../../../../common';
 
 /**
  * Helper function to provide a fallback to a single _source column if the given array of columns
@@ -54,6 +55,7 @@ export function moveColumn(columns: string[], columnName: string, newIndex: numb
 
 export function getStateColumnActions({
   capabilities,
+  config,
   indexPattern,
   indexPatterns,
   useNewFieldsApi,
@@ -61,6 +63,7 @@ export function getStateColumnActions({
   state,
 }: {
   capabilities: Capabilities;
+  config: IUiSettingsClient;
   indexPattern: IndexPattern;
   indexPatterns: IndexPatternsContract;
   useNewFieldsApi: boolean;
@@ -72,7 +75,10 @@ export function getStateColumnActions({
       popularizeField(indexPattern, columnName, indexPatterns);
     }
     const columns = addColumn(state.columns || [], columnName, useNewFieldsApi);
-    setAppState({ columns });
+    const defaultOrder = config.get(SORT_DEFAULT_ORDER_SETTING);
+    const sort =
+      columnName === '_score' && !state.sort?.length ? [['_score', defaultOrder]] : state.sort;
+    setAppState({ columns, sort });
   }
 
   function onRemoveColumn(columnName: string) {
