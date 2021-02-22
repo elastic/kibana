@@ -177,30 +177,25 @@ export class TimeBuckets {
    * @param {object|string|moment.duration} input - see desc
    */
   setInterval(input: null | string | Record<string, any>) {
-    this._i = undefined;
     this._originalInterval = null;
+    this._i = isObject(input) ? input.val : input;
 
-    if (!input || input === autoInterval) {
+    if (!this._i || this._i === autoInterval) {
       this._i = autoInterval;
       return;
     }
 
-    if (moment.isDuration(input)) {
-      this._i = input;
-    } else if (isObject(input)) {
-      // selection object -> val
-      this._i = input.val;
-    } else if (isString(input)) {
-      const parsedInterval = parseInterval(input);
+    if (isString(this._i)) {
+      const parsedInterval = parseInterval(this._i);
 
       if (isDurationInterval(parsedInterval)) {
-        this._originalInterval = input;
+        this._originalInterval = this._i;
         this._i = parsedInterval;
       }
     }
 
-    if (!this._i) {
-      throw new TypeError('"' + input + '" is not a valid interval.');
+    if (!isDurationInterval(this._i)) {
+      throw new TypeError('"' + this._i + '" is not a valid interval.');
     }
   }
 
