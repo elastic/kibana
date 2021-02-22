@@ -183,12 +183,6 @@ export const setup = async (arg?: {
 
   const enable = (phase: Phases) => createFormToggleAction(`enablePhaseSwitch-${phase}`);
 
-<<<<<<< HEAD
-  const setMinAgeValue = (phase: Phases) => createFormSetValueAction(`${phase}-selectedMinimumAge`);
-
-  const setMinAgeUnits = (phase: Phases) =>
-    createFormSetValueAction(`${phase}-selectedMinimumAgeUnits`);
-
   const showDataAllocationOptions = (phase: Phases) => () => {
     act(() => {
       find(`${phase}-dataTierAllocationControls.dataTierSelect`).simulate('click');
@@ -196,22 +190,6 @@ export const setup = async (arg?: {
     component.update();
   };
 
-  const setDataAllocation = (phase: Phases) => async (value: DataTierAllocationType) => {
-    showDataAllocationOptions(phase)();
-    await act(async () => {
-      switch (value) {
-        case 'node_roles':
-          find(`${phase}-dataTierAllocationControls.defaultDataAllocationOption`).simulate('click');
-          break;
-        case 'node_attrs':
-          find(`${phase}-dataTierAllocationControls.customDataAllocationOption`).simulate('click');
-          break;
-        default:
-          find(`${phase}-dataTierAllocationControls.noneDataAllocationOption`).simulate('click');
-      }
-    });
-    component.update();
-=======
   const createMinAgeActions = (phase: Phases) => {
     return {
       hasMinAgeInput: () => exists(`${phase}-selectedMinimumAge`),
@@ -219,7 +197,6 @@ export const setup = async (arg?: {
       setMinAgeUnits: createFormSetValueAction(`${phase}-selectedMinimumAgeUnits`),
       hasRolloverTipOnMinAge: () => exists(`${phase}-rolloverMinAgeInputIconTip`),
     };
->>>>>>> 556a882a24a32e1be6c8364e5d1251d647ceaec7
   };
 
   const setReplicas = (phase: Phases) => async (value: string) => {
@@ -409,15 +386,8 @@ export const setup = async (arg?: {
       },
       warm: {
         enable: enable('warm'),
-<<<<<<< HEAD
-        setMinAgeValue: setMinAgeValue('warm'),
-        setMinAgeUnits: setMinAgeUnits('warm'),
         showDataAllocationOptions: showDataAllocationOptions('warm'),
-        setDataAllocation: setDataAllocation('warm'),
-        setSelectedNodeAttribute: setSelectedNodeAttribute('warm'),
-=======
         ...createMinAgeActions('warm'),
->>>>>>> 556a882a24a32e1be6c8364e5d1251d647ceaec7
         setReplicas: setReplicas('warm'),
         hasErrorIndicator: () => exists('phaseErrorIndicator-warm'),
         ...createShrinkActions('warm'),
@@ -428,15 +398,8 @@ export const setup = async (arg?: {
       },
       cold: {
         enable: enable('cold'),
-<<<<<<< HEAD
-        setMinAgeValue: setMinAgeValue('cold'),
-        setMinAgeUnits: setMinAgeUnits('cold'),
         showDataAllocationOptions: showDataAllocationOptions('cold'),
-        setDataAllocation: setDataAllocation('cold'),
-        setSelectedNodeAttribute: setSelectedNodeAttribute('cold'),
-=======
         ...createMinAgeActions('cold'),
->>>>>>> 556a882a24a32e1be6c8364e5d1251d647ceaec7
         setReplicas: setReplicas('cold'),
         setFreeze,
         freezeExists,

@@ -34,8 +34,7 @@ interface Props {
 export const MissingColdTierCallout: FunctionComponent<Props> = ({ linkToCloudDeployment }) => {
   return (
     <EuiCallOut title={i18nTexts.title} data-test-subj="cloudMissingColdTierCallout">
-      {i18nTexts.body}
-      &nbsp;
+      {i18nTexts.body}{' '}
       {Boolean(linkToCloudDeployment) && (
         <EuiLink href={linkToCloudDeployment} external>
           {i18nTexts.linkText}
