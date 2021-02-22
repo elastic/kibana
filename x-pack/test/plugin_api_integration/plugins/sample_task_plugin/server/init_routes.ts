@@ -71,20 +71,16 @@ export function initRoutes(
       req: KibanaRequest<any, any, any, any>,
       res: KibanaResponseFactory
     ): Promise<IKibanaResponse<any>> {
-      try {
-        const taskManager = await taskManagerStart;
-        const { task: taskFields } = req.body;
-        const task = {
-          ...taskFields,
-          scope: [scope],
-        };
+      const taskManager = await taskManagerStart;
+      const { task: taskFields } = req.body;
+      const task = {
+        ...taskFields,
+        scope: [scope],
+      };
 
-        const taskResult = await taskManager.schedule(task, { req });
+      const taskResult = await taskManager.schedule(task, { req });
 
-        return res.ok({ body: taskResult });
-      } catch (err) {
-        return res.internalError({ body: err });
-      }
+      return res.ok({ body: taskResult });
     }
   );
 
