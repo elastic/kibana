@@ -39,12 +39,10 @@ export function extractImportReferences(
 
     const ref = extractImportRef(textSegment);
     if (ref) {
-      const index = textSegment.indexOf('import("');
+      const { name, path, index, length } = ref;
       if (index !== 0) {
         texts.push(textSegment.substr(0, index));
       }
-      const { name, path } = ref;
-      const lengthOfImport = 'import(".")'.length + path.length + name.length;
       const plugin = getPluginForPath(path, plugins);
 
       if (!plugin) {
@@ -53,7 +51,7 @@ export function extractImportReferences(
         }
         // If we can't create a link for this, still remove the import("..."). part to make
         // it easier to read.
-        const str = textSegment.substr(index + lengthOfImport - name.length, name.length);
+        const str = textSegment.substr(index + length - name.length, name.length);
         if (str && str !== '') {
           texts.push(str);
         }
@@ -71,7 +69,7 @@ export function extractImportReferences(
           text: name,
         });
       }
-      textSegment = textSegment.substr(index + lengthOfImport);
+      textSegment = textSegment.substr(index + length);
     } else {
       if (textSegment && textSegment !== '') {
         texts.push(textSegment);
@@ -82,12 +80,16 @@ export function extractImportReferences(
   return texts;
 }
 
-function extractImportRef(str: string): { path: string; name: string } | undefined {
+function extractImportRef(
+  str: string
+): { path: string; name: string; index: number; length: number } | undefined {
   const groups = str.match(/import\("(.*?)"\)\.(\w*)/);
   if (groups) {
     const path = groups[1];
     const name = groups[2];
-    return { path, name };
+    const index = groups.index!;
+    const length = groups[0].length;
+    return { path, name, index, length };
   }
 }
 
