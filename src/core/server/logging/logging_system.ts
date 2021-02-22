@@ -191,14 +191,14 @@ export class LoggingSystem implements LoggerFactory {
     // declared `appenderRefs` dependencies, and look up those dependencies to
     // attach to the appender. This enables appenders to act as a sort of
     // middleware and call `append` on each other if needed.
-    for (const [, appender] of this.appenders) {
+    for (const [key, appender] of this.appenders) {
       if (!appender.addAppender || !appender.appenderRefs) {
         continue;
       }
       for (const ref of appender.appenderRefs) {
         const foundAppender = this.getAppenderByRef(ref);
         if (!foundAppender) {
-          throw new Error(`Appender config contains unknown appender key "${ref}".`);
+          throw new Error(`Appender "${key}" config contains unknown appender key "${ref}".`);
         }
         appender.addAppender(ref, foundAppender);
       }
