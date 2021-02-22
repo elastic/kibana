@@ -124,9 +124,9 @@ The API returns the following:
 }
 --------------------------------------------------
 
-The health API response is described under <<making-sense-of-task-manager-health-stats>>.
+The health API response is described in <<making-sense-of-task-manager-health-stats>>.
 
-The Health Monitoring api exposes three sections:
+The health monitoring API exposes three sections:
 
 * `configuration` is described in detail under <<task-manager-health-evaluate-the-configuration>>
 * `workload` is described in detail under <<task-manager-health-evaluate-the-workload>>
