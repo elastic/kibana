@@ -28,7 +28,14 @@ import { rawRules } from './prepackaged_rules';
 const DetectionRulesPackageName = 'detection_rules';
 let latestRulesPackageVersion: string | undefined;
 let latestRulesDownload: AddPrepackagedRulesSchemaDecoded[];
+let usePackageRegistryRules = false;
 
+/**
+ * Enable retrieval of rules from the Elastic Package Registry. 
+ */
+export const enablePackageRegistryRules = () => {
+  usePackageRegistryRules = true;
+}
 /**
  * Validate the rules from the file system and throw any errors indicating to the developer
  * that they are adding incorrect schema rules. Also this will auto-flush in all the default
@@ -77,6 +84,10 @@ export const getLatestRulesPackageVersion = (): string | undefined => {
   return latestRulesPackageVersion;
 };
 
+/**
+ * Retrieve a package of rules from the Elastic Package Registry.
+ * @param pkgVersion Specific package version to retrieve from EPR
+ */
 export const getPackageRegistryRules = async (
   pkgVersion: string
 ): Promise<AddPrepackagedRulesSchemaDecoded[]> => {
@@ -95,6 +106,10 @@ export const getPackageRegistryRules = async (
   return validateAllPrepackagedRules(await Promise.all(rulePromises));
 };
 
+/**
+ * Retrieve and decode a package of rules compiled in from the file system.
+ * @param rules List of rules to use instead
+ */
 export const getFileSystemRules = async (
   rules: AddPrepackagedRulesSchema[] = []
 ): Promise<AddPrepackagedRulesSchemaDecoded[]> => {
@@ -106,7 +121,14 @@ export const getFileSystemRules = async (
   return validateAllPrepackagedRules(rules);
 };
 
+/**
+ * Check for the latest rules package in the registry, and download if it's an update.
+ */
 export const checkAndStageUpdate = async () => {
+  if (!usePackageRegistryRules) {
+    return;
+  }
+
   try {
     const registryPackage = await fetchFindLatestPackage(DetectionRulesPackageName);
     if (!latestRulesPackageVersion || registryPackage.version !== latestRulesPackageVersion) {
@@ -121,6 +143,10 @@ export const checkAndStageUpdate = async () => {
   }
 };
 
+/**
+ * Retrieve a package from the registry if available, otherwise fallback to the file system.
+ * @param pkgVersion Retrieve a specific package from the registry by version.
+ */
 export const getRegistryOrFileSystemRules = async (
   pkgVersion?: string
 ): Promise<AddPrepackagedRulesSchemaDecoded[]> => {

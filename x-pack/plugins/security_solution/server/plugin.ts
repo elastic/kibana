@@ -43,6 +43,7 @@ import { isAlertExecutor } from './lib/detection_engine/signals/types';
 import { signalRulesAlertType } from './lib/detection_engine/signals/signal_rule_alert_type';
 import { rulesNotificationAlertType } from './lib/detection_engine/notifications/rules_notification_alert_type';
 import { isNotificationAlertExecutor } from './lib/detection_engine/notifications/types';
+import { enablePackageRegistryRules } from './lib/detection_engine/rules/get_prepackaged_rules';
 import { ManifestTask } from './endpoint/lib/artifacts';
 import { initSavedObjects, savedObjectTypes } from './saved_objects';
 import { AppClientFactory } from './client';
@@ -202,6 +203,11 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     registerPolicyRoutes(router, endpointContext);
     registerTrustedAppsRoutes(router);
     registerDownloadArtifactRoute(router, endpointContext, this.artifactsCache);
+
+    // Conditionally enable EPR-based rule updating
+    if (config.usePackageRegistryRules) {
+      enablePackageRegistryRules();
+    }
 
     plugins.features.registerKibanaFeature({
       id: SERVER_APP_ID,
