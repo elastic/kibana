@@ -16,8 +16,12 @@ import {
   AddPrepackagedRulesSchemaDecoded,
 } from '../../../../common/detection_engine/schemas/request/add_prepackaged_rules_schema';
 import { BadRequestError } from '../errors/bad_request_error';
-import * as Registry from '../../../../../fleet/server/services/epm/registry';
-import { getAsset, getPathParts } from '../../../../../fleet/server/services/epm/archive';
+import {
+  getAsset,
+  getPathParts,
+  getRegistryPackage,
+  fetchFindLatestPackage,
+} from '../../../../../fleet/server';
 
 import { rawRules } from './prepackaged_rules';
 
@@ -80,7 +84,7 @@ export const getPackageRegistryRules = async (
     return latestRulesDownload;
   }
 
-  const { paths } = await Registry.getRegistryPackage(DetectionRulesPackageName, pkgVersion);
+  const { paths } = await getRegistryPackage(DetectionRulesPackageName, pkgVersion);
 
   const rulePaths = paths.filter(isRuleTemplate);
   const rulePromises = rulePaths.map(async (path) => {
@@ -104,14 +108,13 @@ export const getFileSystemRules = async (
 
 export const checkAndStageUpdate = async () => {
   try {
-    const registryPackage = await Registry.fetchFindLatestPackage(DetectionRulesPackageName);
+    const registryPackage = await fetchFindLatestPackage(DetectionRulesPackageName);
     if (!latestRulesPackageVersion || registryPackage.version !== latestRulesPackageVersion) {
       // automatically download and cache the latest in memory
       const downloaded = await getPackageRegistryRules(registryPackage.version);
 
       latestRulesDownload = downloaded;
-      // eslint-disable-line require-atomic-updates
-      latestRulesPackageVersion = registryPackage.version;
+      latestRulesPackageVersion = registryPackage.version; // eslint-disable-line require-atomic-updates
     }
   } catch (error) {
     // console.warn(error);

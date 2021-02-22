@@ -22,6 +22,8 @@ export {
   PackageService,
   AgentPolicyServiceInterface,
 } from './services';
+export { getRegistryPackage, fetchFindLatestPackage } from './services/epm/registry';
+export { getAsset, getPathParts } from './services/epm/archive';
 export { FleetSetupContract, FleetSetupDeps, FleetStartContract, ExternalCallback } from './plugin';
 
 export const config: PluginConfigDescriptor = {
