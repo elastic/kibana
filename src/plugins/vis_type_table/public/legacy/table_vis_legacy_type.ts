@@ -13,7 +13,7 @@ import { VisTypeDefinition } from '../../../visualizations/public';
 import { TableOptions } from '../components/table_vis_options_lazy';
 import { VIS_EVENT_TO_TRIGGER } from '../../../visualizations/public';
 import { TableVisParams, VIS_TYPE_TABLE } from '../../common';
-import { toExpressionAst } from '../to_ast';
+import { toExpressionAstLegacy } from './to_ast_legacy';
 
 export const tableVisLegacyTypeDefinition: VisTypeDefinition<TableVisParams> = {
   name: VIS_TYPE_TABLE,
@@ -79,7 +79,7 @@ export const tableVisLegacyTypeDefinition: VisTypeDefinition<TableVisParams> = {
       },
     ],
   },
-  toExpressionAst,
+  toExpressionAst: toExpressionAstLegacy,
   hierarchicalData: (vis) => vis.params.showPartialRows || vis.params.showMetricsAtAllLevels,
   requiresSearch: true,
 };
