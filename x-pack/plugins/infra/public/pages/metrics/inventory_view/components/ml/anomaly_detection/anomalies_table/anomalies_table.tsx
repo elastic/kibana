@@ -7,9 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import React, { ChangeEvent, useCallback, useEffect, useMemo, useState } from 'react';
-import DateMath from '@elastic/datemath';
 import { EuiSuperDatePicker } from '@elastic/eui';
-import moment from 'moment';
 import {
   EuiFlexItem,
   EuiSpacer,
@@ -26,8 +24,10 @@ import {
   EuiContextMenuPanel,
   EuiIcon,
   EuiText,
+  OnTimeChangeProps,
 } from '@elastic/eui';
 import { FormattedDate, FormattedMessage } from 'react-intl';
+import { datemathToEpochMillis } from '../../../../../../../utils/datemath';
 import { SnapshotMetricType } from '../../../../../../../../common/inventory_models/types';
 import { withTheme } from '../../../../../../../../../../../src/plugins/kibana_react/common';
 import { PrefilledAnomalyAlertFlyout } from '../../../../../../../alerting/metric_anomaly/components/alert_flyout';
@@ -185,12 +185,10 @@ export const AnomaliesTable = () => {
   const [search, setSearch] = useState('');
   const [start, setStart] = useState('now-30d');
   const [end, setEnd] = useState('now');
-  const [timeRange, setTimeRange] = useState<{ start: number; end: number }>(
-    stringToNumericTimeRange({
-      start,
-      end,
-    })
-  );
+  const [timeRange, setTimeRange] = useState<{ start: number; end: number }>({
+    start: datemathToEpochMillis(start) || 0,
+    end: datemathToEpochMillis(end, 'up') || 0,
+  });
   const { sorting, setSorting } = useSorting<MetricsHostsAnomaly>({
     field: 'startTime',
     direction: 'desc',
@@ -216,11 +214,19 @@ export const AnomaliesTable = () => {
   const { source } = useSourceContext();
   const anomalyThreshold = source?.configuration.anomalyThreshold;
 
-  const onTimeChange = useCallback(({ start: s, end: e }) => {
-    setStart(s);
-    setEnd(e);
-    setTimeRange(stringToNumericTimeRange({ start: s, end: e }));
-  }, []);
+  const onTimeChange = useCallback(
+    ({ isInvalid, start: startChange, end: endChange }: OnTimeChangeProps) => {
+      if (!isInvalid) {
+        setStart(startChange);
+        setEnd(endChange);
+        setTimeRange({
+          start: datemathToEpochMillis(startChange)!,
+          end: datemathToEpochMillis(endChange, 'up')!,
+        });
+      }
+    },
+    []
+  );
 
   const anomalyParams = useMemo(
     () => ({
@@ -393,23 +399,6 @@ export const AnomaliesTable = () => {
     </div>
   );
 };
-
-const stringToNumericTimeRange = (timeRange: {
-  start: string;
-  end: string;
-}): { start: number; end: number } => ({
-  start: moment(
-    DateMath.parse(timeRange.start, {
-      momentInstance: moment,
-    })
-  ).valueOf(),
-  end: moment(
-    DateMath.parse(timeRange.end, {
-      momentInstance: moment,
-      roundUp: true,
-    })
-  ).valueOf(),
-});
 
 const columns: Array<
   EuiTableFieldDataColumnType<MetricsHostsAnomaly> | EuiTableActionsColumnType<MetricsHostsAnomaly>
