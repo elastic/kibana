@@ -7,6 +7,7 @@
 
 import { duration, Duration, unitOfTime } from 'moment';
 import dateMath from '@elastic/datemath';
+import { isDefined } from '../types/guards';
 
 type SupportedUnits = unitOfTime.Base;
 
@@ -59,4 +60,19 @@ export function parseInterval(interval: string, checkValidEsUnit = false): Durat
   } catch (e) {
     return null;
   }
+}
+
+/**
+ * Resolves the longest bucket span from the list and multiply it by 2.
+ * @param bucketSpans Collection of bucket spans
+ */
+export function resolveBucketSpanInSeconds(bucketSpans: string[]): number {
+  return (
+    Math.max(
+      ...bucketSpans
+        .map((b) => parseInterval(b))
+        .filter(isDefined)
+        .map((v) => v.asSeconds())
+    ) * 2
+  );
 }

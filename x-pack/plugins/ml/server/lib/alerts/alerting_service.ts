@@ -25,30 +25,11 @@ import {
   RecordAnomalyAlertDoc,
   TopHitsResultsKeys,
 } from '../../../common/types/alerts';
-import { parseInterval } from '../../../common/util/parse_interval';
 import { AnomalyDetectionAlertContext } from './register_anomaly_detection_alert_type';
 import { MlJobsResponse } from '../../../common/types/job_service';
 import { ANOMALY_SCORE_MATCH_GROUP_ID } from '../../../common/constants/alerts';
 import { getEntityFieldName, getEntityFieldValue } from '../../../common/util/anomaly_utils';
-
-function isDefined<T>(argument: T | undefined | null): argument is T {
-  return argument !== undefined && argument !== null;
-}
-
-/**
- * Resolves the longest bucket span from the list and multiply it by 2.
- * @param bucketSpans Collection of bucket spans
- */
-export function resolveBucketSpanInSeconds(bucketSpans: string[]): number {
-  return (
-    Math.max(
-      ...bucketSpans
-        .map((b) => parseInterval(b))
-        .filter(isDefined)
-        .map((v) => v.asSeconds())
-    ) * 2
-  );
-}
+import { resolveBucketSpanInSeconds } from '../../../common/util/parse_interval';
 
 /**
  * Alerting related server-side methods
