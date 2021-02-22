@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../../tsconfig.projects.json",
+  "extends": "../../../../../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "./target",
     "target": "es6",

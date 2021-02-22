@@ -1,5 +1,5 @@
 {
-  "extends": "../../../tsconfig.projects.json",
+  "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
     "composite": true,
     "outDir": "./target/types",
@@ -21,12 +21,12 @@
     "types/**/*",
     "**/*.json"
   ],
-//  "exclude": [
-//      // these files are too large and upset tsc, so we exclude them
-//     "server/sample_data/*.json",
-//     "canvas_plugin_src/functions/server/demodata/*.json",
-//     "shareable_runtime/test/workpads/*.json",
-//  ],
+ "exclude": [
+     // these files are too large and upset tsc, so we exclude them
+    "server/sample_data/*.json",
+    "canvas_plugin_src/functions/server/demodata/*.json",
+    "shareable_runtime/test/workpads/*.json",
+ ],
   "references": [
     { "path": "../../../src/core/tsconfig.json" },
     { "path": "../../../src/plugins/bfetch/tsconfig.json"},
