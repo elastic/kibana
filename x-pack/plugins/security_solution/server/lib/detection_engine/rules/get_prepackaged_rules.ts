@@ -24,8 +24,8 @@ import {
 } from '../../../../../fleet/server';
 
 import { rawRules } from './prepackaged_rules';
+import { DETECTION_RULES_PACAKGE_NAME } from './constants';
 
-const DetectionRulesPackageName = 'detection_rules';
 let latestRulesPackageVersion: string | undefined;
 let latestRulesDownload: AddPrepackagedRulesSchemaDecoded[];
 let usePackageRegistryRules = false;
@@ -96,7 +96,7 @@ export const getPackageRegistryRules = async (
     return latestRulesDownload;
   }
 
-  const { paths } = await getRegistryPackage(DetectionRulesPackageName, pkgVersion);
+  const { paths } = await getRegistryPackage(DETECTION_RULES_PACAKGE_NAME, pkgVersion);
 
   const rulePaths = paths.filter(isRuleTemplate);
   const rulePromises = rulePaths.map<AddPrepackagedRulesSchema>((path) => {
