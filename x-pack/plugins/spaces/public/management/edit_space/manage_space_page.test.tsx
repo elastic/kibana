@@ -48,6 +48,13 @@ featuresStart.getFeatures.mockResolvedValue([
 ]);
 
 describe('ManageSpacePage', () => {
+  beforeAll(() => {
+    Object.defineProperty(window, 'location', {
+      value: { reload: jest.fn() },
+      writable: true,
+    });
+  });
+
   const getUrlForApp = (appId: string) => appId;
   const history = scopedHistoryMock.create();
 
