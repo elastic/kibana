@@ -419,6 +419,15 @@ export const ModelsList: FC = () => {
       truncateText: true,
     },
     {
+      field: ModelsTableToConfigMapping.description,
+      width: '350px',
+      name: i18n.translate('xpack.ml.trainedModels.modelsList.modelDescriptionHeader', {
+        defaultMessage: 'Description',
+      }),
+      sortable: false,
+      truncateText: true,
+    },
+    {
       field: ModelsTableToConfigMapping.type,
       name: i18n.translate('xpack.ml.trainedModels.modelsList.typeHeader', {
         defaultMessage: 'Type',
