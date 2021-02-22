@@ -14,7 +14,7 @@ export declare class IndexPatternsService
 
 |  Constructor | Modifiers | Description |
 |  --- | --- | --- |
-|  [(constructor)({ uiSettings, savedObjectsClient, apiClient, fieldFormats, onNotification, onError, onRedirectNoIndexPattern, })](./kibana-plugin-plugins-data-server.indexpatternsservice._constructor_.md) |  | Constructs a new instance of the <code>IndexPatternsService</code> class |
+|  [(constructor)({ uiSettings, savedObjectsClient, apiClient, fieldFormats, onNotification, onError, onUnsupportedTimePattern, onRedirectNoIndexPattern, })](./kibana-plugin-plugins-data-server.indexpatternsservice._constructor_.md) |  | Constructs a new instance of the <code>IndexPatternsService</code> class |
 
 ## Properties
 
@@ -44,5 +44,6 @@ export declare class IndexPatternsService
 |  [createAndSave(spec, override, skipFetchFields)](./kibana-plugin-plugins-data-server.indexpatternsservice.createandsave.md) |  | Create a new index pattern and save it right away |
 |  [createSavedObject(indexPattern, override)](./kibana-plugin-plugins-data-server.indexpatternsservice.createsavedobject.md) |  | Save a new index pattern |
 |  [delete(indexPatternId)](./kibana-plugin-plugins-data-server.indexpatternsservice.delete.md) |  | Deletes an index pattern from .kibana index |
+|  [migrate(indexPattern, newTitle)](./kibana-plugin-plugins-data-server.indexpatternsservice.migrate.md) |  |  |
 |  [updateSavedObject(indexPattern, saveAttempts, ignoreErrors)](./kibana-plugin-plugins-data-server.indexpatternsservice.updatesavedobject.md) |  | Save existing index pattern. Will attempt to merge differences if there are conflicts |
 

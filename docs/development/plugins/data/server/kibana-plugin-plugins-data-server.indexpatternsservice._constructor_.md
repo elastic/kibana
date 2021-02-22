@@ -9,12 +9,12 @@ Constructs a new instance of the `IndexPatternsService` class
 <b>Signature:</b>
 
 ```typescript
-constructor({ uiSettings, savedObjectsClient, apiClient, fieldFormats, onNotification, onError, onRedirectNoIndexPattern, }: IndexPatternsServiceDeps);
+constructor({ uiSettings, savedObjectsClient, apiClient, fieldFormats, onNotification, onError, onUnsupportedTimePattern, onRedirectNoIndexPattern, }: IndexPatternsServiceDeps);
 ```
 
 ## Parameters
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  { uiSettings, savedObjectsClient, apiClient, fieldFormats, onNotification, onError, onRedirectNoIndexPattern, } | <code>IndexPatternsServiceDeps</code> |  |
+|  { uiSettings, savedObjectsClient, apiClient, fieldFormats, onNotification, onError, onUnsupportedTimePattern, onRedirectNoIndexPattern, } | <code>IndexPatternsServiceDeps</code> |  |
 
