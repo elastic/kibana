@@ -85,7 +85,7 @@ export default ({ getService }: FtrProviderContext) => {
       await ml.api.cleanMlIndices();
     });
 
-    describe('UpdateDataFrameAnalytics', () => {
+    describe('CreateDataFrameAnalytics', () => {
       testJobConfigs.forEach((testConfig) => {
         it(`should create ${testConfig.jobType} job with given config`, async () => {
           const analyticsId = `${testConfig.jobId}`;
