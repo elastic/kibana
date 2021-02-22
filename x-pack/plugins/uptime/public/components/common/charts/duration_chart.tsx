@@ -32,6 +32,7 @@ import { UptimeThemeContext } from '../../../contexts';
 import { MONITOR_CHART_HEIGHT } from '../../monitor';
 import { monitorStatusSelector } from '../../../state/selectors';
 import { microToMilli, microToSec } from '../../../lib/formatting';
+import { MS_LABEL, SECONDS_LABEL } from '../translations';
 
 interface DurationChartProps {
   /**
@@ -118,7 +119,7 @@ export const DurationChartComponent = ({
             tickFormat={(d) => getTickFormat(d)}
             title={i18n.translate('xpack.uptime.monitorCharts.durationChart.leftAxis.title', {
               defaultMessage: 'Duration in {unit}',
-              values: { unit: monitor?.monitor.type === 'browser' ? 'seconds' : 'ms' },
+              values: { unit: monitor?.monitor.type === 'browser' ? SECONDS_LABEL : MS_LABEL },
             })}
             labelFormat={(d) =>
               monitor?.monitor.type === 'browser' ? `${microToSec(d)}` : `${microToMilli(d)}`
