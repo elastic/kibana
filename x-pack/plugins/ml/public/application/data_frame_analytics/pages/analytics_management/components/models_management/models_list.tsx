@@ -55,11 +55,12 @@ import { DataFrameAnalysisConfigType } from '../../../../../../../common/types/d
 import { timeFormatter } from '../../../../../../../common/util/date_utils';
 import { ListingPageUrlState } from '../../../../../../../common/types/common';
 import { usePageUrlState } from '../../../../../util/url_state';
+import { BUILT_IN_MODEL_TAG } from '../../../../../../../common/constants/data_frame_analytics';
 
 type Stats = Omit<TrainedModelStat, 'model_id'>;
 
 export type ModelItem = TrainedModelConfigResponse & {
-  type?: string;
+  types?: string[];
   stats?: Stats;
   pipelines?: ModelPipelines['pipelines'] | null;
 };
@@ -72,6 +73,11 @@ export const getDefaultModelsListState = (): ListingPageUrlState => ({
   sortField: ModelsTableToConfigMapping.id,
   sortDirection: 'asc',
 });
+
+export const BUILT_IN_MODEL_TYPE = i18n.translate(
+  'xpack.ml.trainedModels.modelsList.builtInModelLabel',
+  { defaultMessage: 'built-in' }
+);
 
 export const ModelsList: FC = () => {
   const {
@@ -137,10 +143,15 @@ export const ModelsList: FC = () => {
     filterList();
   }, [searchQueryText, items]);
 
+  const isBuiltInModel = useCallback(
+    (item: ModelItem) => item.tags.includes(BUILT_IN_MODEL_TAG),
+    []
+  );
+
   /**
-   * Fetches inference trained models.
+   * Fetches trained models.
    */
-  const fetchData = useCallback(async () => {
+  const fetchModelsData = useCallback(async () => {
     try {
       const response = await trainedModelsApiService.getTrainedModels(undefined, {
         with_pipelines: true,
@@ -151,10 +162,16 @@ export const ModelsList: FC = () => {
       const expandedItemsToRefresh = [];
 
       for (const model of response) {
-        const tableItem = {
+        const tableItem: ModelItem = {
           ...model,
+          // Extract model types
           ...(typeof model.inference_config === 'object'
-            ? { type: Object.keys(model.inference_config)[0] }
+            ? {
+                types: [
+                  ...Object.keys(model.inference_config),
+                  ...(isBuiltInModel(model) ? [BUILT_IN_MODEL_TYPE] : []),
+                ],
+              }
             : {}),
         };
         newItems.push(tableItem);
@@ -190,7 +207,7 @@ export const ModelsList: FC = () => {
   // Subscribe to the refresh observable to trigger reloading the model list.
   useRefreshAnalyticsList({
     isLoading: setIsLoading,
-    onRefresh: fetchData,
+    onRefresh: fetchModelsData,
   });
 
   const modelsStats: ModelsBarStats = useMemo(() => {
@@ -369,7 +386,7 @@ export const ModelsList: FC = () => {
       onClick: async (model) => {
         await prepareModelsForDeletion([model]);
       },
-      available: (item) => canDeleteDataFrameAnalytics,
+      available: (item) => canDeleteDataFrameAnalytics && !isBuiltInModel(item),
       enabled: (item) => {
         // TODO check for permissions to delete ingest pipelines.
         // ATM undefined means pipelines fetch failed server-side.
@@ -428,13 +445,18 @@ export const ModelsList: FC = () => {
       truncateText: true,
     },
     {
-      field: ModelsTableToConfigMapping.type,
+      field: ModelsTableToConfigMapping.types,
       name: i18n.translate('xpack.ml.trainedModels.modelsList.typeHeader', {
         defaultMessage: 'Type',
       }),
       sortable: true,
       align: 'left',
-      render: (type: string) => <EuiBadge color="hollow">{type}</EuiBadge>,
+      render: (types: string[]) =>
+        types.map((type) => (
+          <EuiBadge key={type} color="hollow">
+            {type}
+          </EuiBadge>
+        )),
     },
     {
       field: ModelsTableToConfigMapping.createdAt,
@@ -505,15 +527,27 @@ export const ModelsList: FC = () => {
   const selection: EuiTableSelectionType<ModelItem> | undefined = isSelectionAllowed
     ? {
         selectableMessage: (selectable, item) => {
-          return selectable
-            ? i18n.translate('xpack.ml.trainedModels.modelsList.selectableMessage', {
-                defaultMessage: 'Select a model',
-              })
-            : i18n.translate('xpack.ml.trainedModels.modelsList.disableSelectableMessage', {
-                defaultMessage: 'Model has associated pipelines',
-              });
+          if (selectable) {
+            return i18n.translate('xpack.ml.trainedModels.modelsList.selectableMessage', {
+              defaultMessage: 'Select a model',
+            });
+          }
+
+          if (Array.isArray(item.pipelines) && item.pipelines.length > 0) {
+            return i18n.translate('xpack.ml.trainedModels.modelsList.disableSelectableMessage', {
+              defaultMessage: 'Model has associated pipelines',
+            });
+          }
+
+          if (isBuiltInModel(item)) {
+            return i18n.translate('xpack.ml.trainedModels.modelsList.builtInModelMessage', {
+              defaultMessage: 'Built-in model',
+            });
+          }
+
+          return '';
         },
-        selectable: (item) => !item.pipelines,
+        selectable: (item) => !item.pipelines && !isBuiltInModel(item),
         onSelectionChange: (selectedItems) => {
           setSelectedModels(selectedItems);
         },

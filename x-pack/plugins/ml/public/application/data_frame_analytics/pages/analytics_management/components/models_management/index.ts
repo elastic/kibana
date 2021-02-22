@@ -11,5 +11,5 @@ export const ModelsTableToConfigMapping = {
   id: 'model_id',
   description: 'description',
   createdAt: 'create_time',
-  type: 'type',
+  types: 'types',
 } as const;
