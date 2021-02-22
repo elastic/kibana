@@ -25,10 +25,9 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { isFullLicense } from '../license';
 import { useTimefilter, useMlKibana, useNavigateToPath } from '../contexts/kibana';
-
 import { NavigationMenu } from '../components/navigation_menu';
-import { getMaxBytesFormatted } from './file_based/components/utils';
 import { HelpMenu } from '../components/help_menu';
+import { getFileUpload } from '../util/dependency_cache';
 
 function startTrialDescription() {
   return (
@@ -68,7 +67,7 @@ export const DatavisualizerSelector: FC = () => {
     licenseManagement.enabled === true &&
     isFullLicense() === false;
 
-  const maxFileSize = getMaxBytesFormatted();
+  const maxFileSize = getFileUpload().getMaxBytesFormatted();
 
   return (
     <Fragment>

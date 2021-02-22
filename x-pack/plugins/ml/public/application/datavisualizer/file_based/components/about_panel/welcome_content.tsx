@@ -20,7 +20,7 @@ import {
 } from '@elastic/eui';
 
 import { ExperimentalBadge } from '../experimental_badge';
-import { getMaxBytesFormatted } from '../utils';
+import { getFileUpload } from '../../../../util/dependency_cache';
 
 export const WelcomeContent: FC = () => {
   const toolTipContent = i18n.translate(
@@ -30,7 +30,7 @@ export const WelcomeContent: FC = () => {
     }
   );
 
-  const maxFileSize = getMaxBytesFormatted();
+  const maxFileSize = getFileUpload().getMaxBytesFormatted();
 
   return (
     <EuiFlexGroup gutterSize="xl" alignItems="center">
