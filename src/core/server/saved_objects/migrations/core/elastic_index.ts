@@ -67,9 +67,10 @@ export function reader(
   const scroll = scrollDuration;
   let scrollId: string | undefined;
 
-  // When migrating from the outdated index, drop all the saved objects
-  // matching this query. They will still be kept in the outdated index for
-  // backup purposes, but won't be availble in the upgraded index.
+  // When migrating from the outdated index we use a read query which excludes
+  // saved objects which are no longer used. These saved objects will still be
+  // kept in the outdated index for backup purposes, but won't be availble in
+  // the upgraded index.
   const excludeUnusedTypes = {
     bool: {
       must_not: {
