@@ -32,13 +32,15 @@ const initialCaseValue: FormProps = {
 
 interface Props {
   caseType?: CaseType;
-  onSuccess?: (theCase: Case) => void;
+  onSuccess?: (theCase: Case) => Promise<void>;
+  afterCaseCreated?: (theCase: Case) => Promise<void>;
 }
 
 export const FormContext: React.FC<Props> = ({
   caseType = CaseType.individual,
   children,
   onSuccess,
+  afterCaseCreated,
 }) => {
   const { connectors } = useConnectors();
   const { connector: configurationConnector } = useCaseConfigure();
@@ -72,6 +74,10 @@ export const FormContext: React.FC<Props> = ({
           settings: { syncAlerts },
         });
 
+        if (afterCaseCreated && updatedCase) {
+          await afterCaseCreated(updatedCase);
+        }
+
         if (updatedCase?.id && dataConnectorId !== 'none') {
           await pushCaseToExternalService({
             caseId: updatedCase.id,
@@ -80,11 +86,11 @@ export const FormContext: React.FC<Props> = ({
         }
 
         if (onSuccess && updatedCase) {
-          onSuccess(updatedCase);
+          await onSuccess(updatedCase);
         }
       }
     },
-    [caseType, connectors, postCase, onSuccess, pushCaseToExternalService]
+    [caseType, connectors, postCase, onSuccess, pushCaseToExternalService, afterCaseCreated]
   );
 
   const { form } = useForm<FormProps>({
