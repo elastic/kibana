@@ -51,7 +51,7 @@ export const MitreAttackSubtechniqueFields: React.FC<AddSubtechniqueProps> = ({
   const values = field.value as Threats;
 
   const technique = useMemo(() => {
-    return values[threatIndex].technique ?? [];
+    return [...(values[threatIndex].technique ?? [])];
   }, [values, threatIndex]);
 
   const removeSubtechnique = useCallback(
@@ -65,10 +65,11 @@ export const MitreAttackSubtechniqueFields: React.FC<AddSubtechniqueProps> = ({
           ...technique[techniqueIndex],
           subtechnique: subtechniques,
         };
+        threats[threatIndex].technique = technique;
         onFieldChange(threats);
       }
     },
-    [field, onFieldChange, techniqueIndex, technique]
+    [field, onFieldChange, techniqueIndex, technique, threatIndex]
   );
 
   const addMitreAttackSubtechnique = useCallback(() => {
@@ -87,9 +88,9 @@ export const MitreAttackSubtechniqueFields: React.FC<AddSubtechniqueProps> = ({
         subtechnique: [{ id: 'none', name: 'none', reference: 'none' }],
       };
     }
-
+    threats[threatIndex].technique = technique;
     onFieldChange(threats);
-  }, [field, onFieldChange, techniqueIndex, technique]);
+  }, [field, onFieldChange, techniqueIndex, technique, threatIndex]);
 
   const updateSubtechnique = useCallback(
     (index: number, value: string) => {
