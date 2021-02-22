@@ -114,7 +114,6 @@ describe('IndexPatternDimensionEditorPanel', () => {
   let state: IndexPatternPrivateState;
   let setState: jest.Mock;
   let defaultProps: IndexPatternDimensionEditorProps;
-  let dragDropContext: DragContextState;
 
   beforeEach(() => {
     state = {
@@ -156,8 +155,6 @@ describe('IndexPatternDimensionEditorPanel', () => {
 
     setState = jest.fn();
 
-    dragDropContext = createMockedDragDropContext();
-
     defaultProps = {
       state,
       setState,
@@ -191,24 +188,28 @@ describe('IndexPatternDimensionEditorPanel', () => {
   });
 
   const groupId = 'a';
+
   describe('getDropProps', () => {
     it('returns undefined if no drag is happening', () => {
-      expect(getDropProps({ ...defaultProps, groupId, dragDropContext })).toBe(undefined);
+      const dragging = {
+        name: 'bar',
+        id: 'bar',
+        humanData: { label: 'Label' },
+      };
+      expect(getDropProps({ ...defaultProps, groupId, dragging })).toBe(undefined);
     });
 
     it('returns undefined if the dragged item has no field', () => {
+      const dragging = {
+        name: 'bar',
+        id: 'bar',
+        humanData: { label: 'Label' },
+      };
       expect(
         getDropProps({
           ...defaultProps,
           groupId,
-          dragDropContext: {
-            ...dragDropContext,
-            dragging: {
-              name: 'bar',
-              id: 'bar',
-              humanData: { label: 'Label' },
-            },
-          },
+          dragging,
         })
       ).toBe(undefined);
     });
@@ -218,14 +219,11 @@ describe('IndexPatternDimensionEditorPanel', () => {
         getDropProps({
           ...defaultProps,
           groupId,
-          dragDropContext: {
-            ...dragDropContext,
-            dragging: {
-              indexPatternId: 'foo',
-              field: { type: 'string', name: 'mystring', aggregatable: true },
-              id: 'mystring',
-              humanData: { label: 'Label' },
-            },
+          dragging: {
+            indexPatternId: 'foo',
+            field: { type: 'string', name: 'mystring', aggregatable: true },
+            id: 'mystring',
+            humanData: { label: 'Label' },
           },
           filterOperations: () => false,
         })
@@ -237,10 +235,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
         getDropProps({
           ...defaultProps,
           groupId,
-          dragDropContext: {
-            ...dragDropContext,
-            dragging: draggingField,
-          },
+          dragging: draggingField,
           filterOperations: (op: OperationMetadata) => op.dataType === 'number',
         })
       ).toEqual({ dropType: 'field_replace', nextLabel: 'Intervals' });
@@ -251,14 +246,11 @@ describe('IndexPatternDimensionEditorPanel', () => {
         getDropProps({
           ...defaultProps,
           groupId,
-          dragDropContext: {
-            ...dragDropContext,
-            dragging: {
-              field: { type: 'number', name: 'bar', aggregatable: true },
-              indexPatternId: 'foo2',
-              id: 'bar',
-              humanData: { label: 'Label' },
-            },
+          dragging: {
+            field: { type: 'number', name: 'bar', aggregatable: true },
+            indexPatternId: 'foo2',
+            id: 'bar',
+            humanData: { label: 'Label' },
           },
           filterOperations: (op: OperationMetadata) => op.dataType === 'number',
         })
@@ -270,21 +262,18 @@ describe('IndexPatternDimensionEditorPanel', () => {
         getDropProps({
           ...defaultProps,
           groupId,
-          dragDropContext: {
-            ...dragDropContext,
-            dragging: {
-              field: {
-                name: 'timestamp',
-                displayName: 'timestampLabel',
-                type: 'date',
-                aggregatable: true,
-                searchable: true,
-                exists: true,
-              },
-              indexPatternId: 'foo',
-              id: 'bar',
-              humanData: { label: 'Label' },
+          dragging: {
+            field: {
+              name: 'timestamp',
+              displayName: 'timestampLabel',
+              type: 'date',
+              aggregatable: true,
+              searchable: true,
+              exists: true,
             },
+            indexPatternId: 'foo',
+            id: 'bar',
+            humanData: { label: 'Label' },
           },
         })
       ).toBe(undefined);
@@ -295,15 +284,12 @@ describe('IndexPatternDimensionEditorPanel', () => {
         getDropProps({
           ...defaultProps,
           groupId,
-          dragDropContext: {
-            ...dragDropContext,
-            dragging: {
-              columnId: 'col1',
-              groupId: 'b',
-              layerId: 'first',
-              id: 'col1',
-              humanData: { label: 'Label' },
-            },
+          dragging: {
+            columnId: 'col1',
+            groupId: 'b',
+            layerId: 'first',
+            id: 'col1',
+            humanData: { label: 'Label' },
           },
           columnId: 'col2',
         })
@@ -338,16 +324,14 @@ describe('IndexPatternDimensionEditorPanel', () => {
         getDropProps({
           ...defaultProps,
           groupId,
-          dragDropContext: {
-            ...dragDropContext,
-            dragging: {
-              columnId: 'col1',
-              groupId: 'b',
-              layerId: 'first',
-              id: 'col1',
-              humanData: { label: 'Label' },
-            },
+          dragging: {
+            columnId: 'col1',
+            groupId: 'b',
+            layerId: 'first',
+            id: 'col1',
+            humanData: { label: 'Label' },
           },
+
           columnId: 'col2',
         })
       ).toEqual(undefined);
@@ -377,15 +361,12 @@ describe('IndexPatternDimensionEditorPanel', () => {
         getDropProps({
           ...defaultProps,
           groupId,
-          dragDropContext: {
-            ...dragDropContext,
-            dragging: {
-              columnId: 'col1',
-              groupId: 'b',
-              layerId: 'first',
-              id: 'col1',
-              humanData: { label: 'Label' },
-            },
+          dragging: {
+            columnId: 'col1',
+            groupId: 'b',
+            layerId: 'first',
+            id: 'col1',
+            humanData: { label: 'Label' },
           },
           columnId: 'col2',
           filterOperations: (op: OperationMetadata) => op.isBucketed === false,
@@ -397,10 +378,6 @@ describe('IndexPatternDimensionEditorPanel', () => {
     it('appends the dropped column when a field is dropped', () => {
       onDrop({
         ...defaultProps,
-        dragDropContext: {
-          ...dragDropContext,
-          dragging: draggingField,
-        },
         droppedItem: draggingField,
         dropType: 'field_replace',
         columnId: 'col2',
@@ -429,10 +406,6 @@ describe('IndexPatternDimensionEditorPanel', () => {
     it('selects the specific operation that was valid on drop', () => {
       onDrop({
         ...defaultProps,
-        dragDropContext: {
-          ...dragDropContext,
-          dragging: draggingField,
-        },
         droppedItem: draggingField,
         columnId: 'col2',
         filterOperations: (op: OperationMetadata) => op.isBucketed,
@@ -461,10 +434,6 @@ describe('IndexPatternDimensionEditorPanel', () => {
     it('updates a column when a field is dropped', () => {
       onDrop({
         ...defaultProps,
-        dragDropContext: {
-          ...dragDropContext,
-          dragging: draggingField,
-        },
         droppedItem: draggingField,
         filterOperations: (op: OperationMetadata) => op.dataType === 'number',
         dropType: 'field_replace',
@@ -487,18 +456,8 @@ describe('IndexPatternDimensionEditorPanel', () => {
     });
 
     it('keeps the operation when dropping a different compatible field', () => {
-      const dragging = {
-        field: { name: 'memory', type: 'number', aggregatable: true },
-        indexPatternId: 'foo',
-        id: '1',
-        humanData: { label: 'Label' },
-      };
       onDrop({
         ...defaultProps,
-        dragDropContext: {
-          ...dragDropContext,
-          dragging,
-        },
         droppedItem: {
           field: { name: 'memory', type: 'number', aggregatable: true },
           indexPatternId: 'foo',
@@ -555,10 +514,6 @@ describe('IndexPatternDimensionEditorPanel', () => {
 
       onDrop({
         ...defaultProps,
-        dragDropContext: {
-          ...dragDropContext,
-          dragging,
-        },
         droppedItem: dragging,
         columnId: 'col2',
         dropType: 'move_compatible',
@@ -615,10 +570,6 @@ describe('IndexPatternDimensionEditorPanel', () => {
 
       onDrop({
         ...defaultProps,
-        dragDropContext: {
-          ...dragDropContext,
-          dragging: defaultDragging,
-        },
         droppedItem: defaultDragging,
         state: testState,
         dropType: 'replace_compatible',
@@ -735,10 +686,6 @@ describe('IndexPatternDimensionEditorPanel', () => {
         onDrop({
           ...defaultProps,
           columnId: 'newCol',
-          dragDropContext: {
-            ...dragDropContext,
-            dragging,
-          },
           droppedItem: dragging,
           state: testState,
           groupId: 'a',
@@ -782,10 +729,6 @@ describe('IndexPatternDimensionEditorPanel', () => {
         onDrop({
           ...defaultProps,
           columnId: 'col1',
-          dragDropContext: {
-            ...dragDropContext,
-            dragging: draggingCol3,
-          },
           droppedItem: draggingCol3,
           state: testState,
           groupId: 'a',
@@ -832,10 +775,6 @@ describe('IndexPatternDimensionEditorPanel', () => {
         onDrop({
           ...defaultProps,
           columnId: 'newCol',
-          dragDropContext: {
-            ...dragDropContext,
-            dragging: draggingCol1,
-          },
           dropType: 'move_compatible',
           droppedItem: draggingCol1,
           state: testState,
@@ -882,10 +821,6 @@ describe('IndexPatternDimensionEditorPanel', () => {
 
         onDrop({
           ...defaultProps,
-          dragDropContext: {
-            ...dragDropContext,
-            dragging: draggingBytesField,
-          },
           droppedItem: draggingBytesField,
           columnId: 'newCol',
           filterOperations: (op: OperationMetadata) => op.dataType === 'number',
@@ -935,10 +870,6 @@ describe('IndexPatternDimensionEditorPanel', () => {
         onDrop({
           ...defaultProps,
           columnId: 'newCol',
-          dragDropContext: {
-            ...dragDropContext,
-            dragging: draggingCol1,
-          },
           dropType: 'duplicate_in_group',
           droppedItem: draggingCol1,
           state: testState,
@@ -987,10 +918,6 @@ describe('IndexPatternDimensionEditorPanel', () => {
         onDrop({
           ...defaultProps,
           columnId: 'newCol',
-          dragDropContext: {
-            ...dragDropContext,
-            dragging: draggingCol4,
-          },
           dropType: 'move_incompatible',
           droppedItem: draggingCol4,
           state: testState,
@@ -1077,10 +1004,6 @@ describe('IndexPatternDimensionEditorPanel', () => {
 
       onDrop({
         ...defaultProps,
-        dragDropContext: {
-          ...dragDropContext,
-          dragging: metricDragging,
-        },
         droppedItem: metricDragging,
         state: testState,
         dropType: 'duplicate_in_group',
@@ -1113,10 +1036,6 @@ describe('IndexPatternDimensionEditorPanel', () => {
 
       onDrop({
         ...defaultProps,
-        dragDropContext: {
-          ...dragDropContext,
-          dragging: bucketDragging,
-        },
         droppedItem: bucketDragging,
         state: testState,
         dropType: 'duplicate_in_group',
@@ -1178,10 +1097,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
 
       const defaultReorderDropParams = {
         ...defaultProps,
-        dragDropContext: {
-          ...dragDropContext,
-          dragging,
-        },
+        dragging,
         droppedItem: dragging,
         state: testState,
         filterOperations: (op: OperationMetadata) => op.dataType === 'number',

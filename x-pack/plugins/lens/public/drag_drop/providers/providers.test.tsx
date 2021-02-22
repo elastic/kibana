@@ -7,7 +7,7 @@
 
 import React, { useContext } from 'react';
 import { mount } from 'enzyme';
-import { RootDragDropProvider, DragContext } from './providers';
+import { RootDragDropProvider, DragContext } from '.';
 
 jest.useFakeTimers();
 
