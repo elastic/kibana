@@ -77,7 +77,7 @@ export const getRenderCellValueFn = (
       const subField = indexPattern.getFieldByName(key);
       const formatter = subField
         ? indexPattern.getFormatterForField(subField)
-        : { convert: (v: string, ...rest: unknown[]) => v.toString() };
+        : { convert: (v: string, ...rest: unknown[]) => String(v) };
       const formatted = (values as unknown[])
         .map((val: unknown) =>
           formatter.convert(val, 'html', {
