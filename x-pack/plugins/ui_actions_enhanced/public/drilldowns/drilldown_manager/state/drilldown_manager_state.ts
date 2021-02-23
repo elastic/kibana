@@ -15,6 +15,8 @@ import {
 import { ActionFactory, BaseActionFactoryContext } from '../../../dynamic_actions';
 import { DrilldownState } from './drilldown_state';
 
+const helloMessageStorageKey = `drilldowns:hidWelcomeMessage`;
+
 export interface DrilldownManagerStateDeps
   extends DrilldownManagerDependencies,
     PublicDrilldownManagerProps {}
@@ -40,7 +42,9 @@ export class DrilldownManagerState {
    * Whether a drilldowns welcome message should be displayed to the user at
    * the very top of the drilldowns manager flyout.
    */
-  public readonly showWelcomeMessage$ = new BehaviorSubject<boolean>(true);
+  public readonly showWelcomeMessage$ = new BehaviorSubject<boolean>(
+    this.deps.storage.get(helloMessageStorageKey) ?? false
+  );
 
   /**
    * Currently selected action factory (drilldown type).
@@ -80,6 +84,7 @@ export class DrilldownManagerState {
    */
   public readonly hideWelcomeMessage = (): void => {
     this.showWelcomeMessage$.next(false);
+    this.deps.storage.set(helloMessageStorageKey, true);
   };
 
   /**
