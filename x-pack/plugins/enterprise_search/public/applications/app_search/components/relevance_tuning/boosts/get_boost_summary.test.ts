@@ -5,13 +5,7 @@
  * 2.0.
  */
 
-import {
-  Boost,
-  BoostFunction,
-  BoostType,
-  BoostOperation,
-  FunctionalBoostFunction,
-} from '../../../types';
+import { Boost, BoostFunction, BoostType, BoostOperation, FunctionalBoostFunction } from '../types';
 
 import { getBoostSummary } from './get_boost_summary';
 

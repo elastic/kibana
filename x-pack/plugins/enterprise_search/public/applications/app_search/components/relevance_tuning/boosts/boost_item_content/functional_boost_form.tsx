@@ -13,18 +13,18 @@ import { EuiFormRow, EuiSelect } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
-import { RelevanceTuningLogic } from '../../../..';
+import { RelevanceTuningLogic } from '../..';
 import {
   BOOST_OPERATION_DISPLAY_MAP,
   FUNCTIONAL_BOOST_FUNCTION_DISPLAY_MAP,
-} from '../../../../constants';
+} from '../../constants';
 import {
   Boost,
   BoostFunction,
   BoostOperation,
   BoostType,
   FunctionalBoostFunction,
-} from '../../../../types';
+} from '../../types';
 
 interface Props {
   boost: Boost;

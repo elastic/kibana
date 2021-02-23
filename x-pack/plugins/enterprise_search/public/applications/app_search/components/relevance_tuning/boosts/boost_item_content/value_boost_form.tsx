@@ -19,8 +19,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { RelevanceTuningLogic } from '../../../..';
-import { Boost } from '../../../../types';
+import { RelevanceTuningLogic } from '../..';
+import { Boost } from '../../types';
 
 interface Props {
   boost: Boost;

@@ -13,13 +13,13 @@ import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle, EuiSuperSelect } from '@
 
 import { i18n } from '@kbn/i18n';
 
-import { TEXT } from '../../../../../../shared/constants/field_types';
-import { SchemaTypes } from '../../../../../../shared/types';
+import { TEXT } from '../../../../shared/constants/field_types';
+import { SchemaTypes } from '../../../../shared/types';
 
-import { BoostIcon } from '../../../boost_icon';
-import { FUNCTIONAL_DISPLAY, PROXIMITY_DISPLAY, VALUE_DISPLAY } from '../../../constants';
-import { RelevanceTuningLogic } from '../../../relevance_tuning_logic';
-import { Boost, BoostType } from '../../../types';
+import { BoostIcon } from '../boost_icon';
+import { FUNCTIONAL_DISPLAY, PROXIMITY_DISPLAY, VALUE_DISPLAY } from '../constants';
+import { RelevanceTuningLogic } from '../relevance_tuning_logic';
+import { Boost, BoostType } from '../types';
 
 import { BoostItem } from './boost_item';
 

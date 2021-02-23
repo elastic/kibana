@@ -5,15 +5,15 @@
  * 2.0.
  */
 
+import { setMockActions } from '../../../../../__mocks__/kea.mock';
+
 import React from 'react';
 
 import { shallow, ShallowWrapper } from 'enzyme';
 
 import { EuiSelect } from '@elastic/eui';
 
-import { setMockActions } from '../../../../../../../__mocks__/kea.mock';
-
-import { Boost, BoostOperation, BoostType, FunctionalBoostFunction } from '../../../../types';
+import { Boost, BoostOperation, BoostType, FunctionalBoostFunction } from '../../types';
 
 import { FunctionalBoostForm } from './functional_boost_form';
 

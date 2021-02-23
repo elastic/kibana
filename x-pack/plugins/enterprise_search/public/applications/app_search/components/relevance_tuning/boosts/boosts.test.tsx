@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { setMockActions } from '../../../../../../__mocks__/kea.mock';
+import { setMockActions } from '../../../../__mocks__/kea.mock';
 
 import React from 'react';
 
@@ -13,9 +13,9 @@ import { shallow } from 'enzyme';
 
 import { EuiSuperSelect } from '@elastic/eui';
 
-import { SchemaTypes } from '../../../../../../shared/types';
+import { SchemaTypes } from '../../../../shared/types';
 
-import { BoostType } from '../../../types';
+import { BoostType } from '../types';
 
 import { BoostItem } from './boost_item';
 import { Boosts } from './boosts';

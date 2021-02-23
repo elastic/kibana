@@ -11,9 +11,9 @@ import { EuiPanel } from '@elastic/eui';
 
 import { SchemaTypes } from '../../../../../shared/types';
 
+import { Boosts } from '../../boosts';
 import { Boost, SearchField } from '../../types';
 
-import { Boosts } from './boosts';
 import { TextSearchToggle } from './text_search_toggle';
 import { WeightSlider } from './weight_slider';
 

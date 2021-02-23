@@ -12,8 +12,8 @@ import { useActions } from 'kea';
 import { EuiButton, EuiFormRow, EuiPanel, EuiRange, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { RelevanceTuningLogic } from '../../../..';
-import { Boost, BoostType } from '../../../../types';
+import { RelevanceTuningLogic } from '../..';
+import { Boost, BoostType } from '../../types';
 
 import { FunctionalBoostForm } from './functional_boost_form';
 import { ProximityBoostForm } from './proximity_boost_form';

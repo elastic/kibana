@@ -5,15 +5,15 @@
  * 2.0.
  */
 
+import { setMockActions } from '../../../../../__mocks__/kea.mock';
+
 import React from 'react';
 
 import { shallow, ShallowWrapper } from 'enzyme';
 
 import { EuiFieldText, EuiSelect } from '@elastic/eui';
 
-import { setMockActions } from '../../../../../../../__mocks__/kea.mock';
-
-import { Boost, BoostType, ProximityBoostFunction } from '../../../../types';
+import { Boost, BoostType, ProximityBoostFunction } from '../../types';
 
 import { ProximityBoostForm } from './proximity_boost_form';
 

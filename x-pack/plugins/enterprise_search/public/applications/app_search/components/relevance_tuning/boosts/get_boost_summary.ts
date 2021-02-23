@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Boost, BoostType } from '../../../types';
+import { Boost, BoostType } from '../types';
 
 export const getBoostSummary = (boost: Boost): string => {
   if (boost.type === BoostType.Value) {
