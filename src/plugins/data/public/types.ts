@@ -19,7 +19,7 @@ import { ISearchSetup, ISearchStart, SearchEnhancements } from './search';
 import { QuerySetup, QueryStart } from './query';
 import { IndexPatternsContract } from './index_patterns';
 import { IndexPatternSelectProps, StatefulSearchBarProps } from './ui';
-import { UsageCollectionSetup } from '../../usage_collection/public';
+import { UsageCollectionSetup, UsageCollectionStart } from '../../usage_collection/public';
 import { Setup as InspectorSetup } from '../../inspector/public';
 import { NowProviderPublicContract } from './now_provider';
 
@@ -120,4 +120,5 @@ export interface IDataPluginServices extends Partial<CoreStart> {
   http: CoreStart['http'];
   storage: IStorageWrapper;
   data: DataPublicPluginStart;
+  usageCollection?: UsageCollectionStart;
 }

@@ -8,7 +8,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiOverlayMask, EuiConfirmModal } from '@elastic/eui';
+import { EuiConfirmModal } from '@elastic/eui';
 import { capitalize } from 'lodash';
 
 interface Props {
@@ -26,37 +26,35 @@ export const ManageLicenseModal: React.FC<Props> = ({
 }) => {
   const licenseRequired = capitalize(licenseType);
   return (
-    <EuiOverlayMask>
-      <EuiConfirmModal
-        title={i18n.translate('xpack.triggersActionsUI.sections.manageLicense.manageLicenseTitle', {
-          defaultMessage: '{licenseRequired} license required',
-          values: { licenseRequired },
-        })}
-        onCancel={onCancel}
-        onConfirm={onConfirm}
-        confirmButtonText={i18n.translate(
-          'xpack.triggersActionsUI.sections.manageLicense.manageLicenseConfirmButtonText',
-          {
-            defaultMessage: 'Manage license',
-          }
-        )}
-        cancelButtonText={i18n.translate(
-          'xpack.triggersActionsUI.sections.manageLicense.manageLicenseCancelButtonText',
-          {
-            defaultMessage: 'Cancel',
-          }
-        )}
-        defaultFocusedButton="confirm"
-        data-test-subj="manageLicenseModal"
-      >
-        <p>
-          <FormattedMessage
-            id="xpack.triggersActionsUI.sections.manageLicense.manageLicenseMessage"
-            defaultMessage="Alert {alertTypeId} is disabled because it requires a {licenseRequired} license. Continue to License Management to view upgrade options."
-            values={{ alertTypeId, licenseRequired }}
-          />
-        </p>
-      </EuiConfirmModal>
-    </EuiOverlayMask>
+    <EuiConfirmModal
+      title={i18n.translate('xpack.triggersActionsUI.sections.manageLicense.manageLicenseTitle', {
+        defaultMessage: '{licenseRequired} license required',
+        values: { licenseRequired },
+      })}
+      onCancel={onCancel}
+      onConfirm={onConfirm}
+      confirmButtonText={i18n.translate(
+        'xpack.triggersActionsUI.sections.manageLicense.manageLicenseConfirmButtonText',
+        {
+          defaultMessage: 'Manage license',
+        }
+      )}
+      cancelButtonText={i18n.translate(
+        'xpack.triggersActionsUI.sections.manageLicense.manageLicenseCancelButtonText',
+        {
+          defaultMessage: 'Cancel',
+        }
+      )}
+      defaultFocusedButton="confirm"
+      data-test-subj="manageLicenseModal"
+    >
+      <p>
+        <FormattedMessage
+          id="xpack.triggersActionsUI.sections.manageLicense.manageLicenseMessage"
+          defaultMessage="Alert {alertTypeId} is disabled because it requires a {licenseRequired} license. Continue to License Management to view upgrade options."
+          values={{ alertTypeId, licenseRequired }}
+        />
+      </p>
+    </EuiConfirmModal>
   );
 };

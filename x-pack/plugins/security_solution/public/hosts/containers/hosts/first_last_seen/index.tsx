@@ -11,8 +11,8 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useKibana } from '../../../../common/lib/kibana';
 import {
   HostsQueries,
-  HostFirstLastSeenRequestOptions,
   HostFirstLastSeenStrategyResponse,
+  HostFirstLastSeenRequestOptions,
 } from '../../../../../common/search_strategy/security_solution';
 
 import * as i18n from './translations';
@@ -30,17 +30,20 @@ export interface FirstLastSeenHostArgs {
   errorMessage: string | null;
   firstSeen?: string | null;
   lastSeen?: string | null;
+  order: 'asc' | 'desc' | null;
 }
 interface UseHostFirstLastSeen {
   docValueFields: DocValueFields[];
   hostName: string;
   indexNames: string[];
+  order: 'asc' | 'desc';
 }
 
 export const useFirstLastSeenHost = ({
   docValueFields,
   hostName,
   indexNames,
+  order,
 }: UseHostFirstLastSeen): [boolean, FirstLastSeenHostArgs] => {
   const { data, notifications } = useKibana().services;
   const abortCtrl = useRef(new AbortController());
@@ -51,12 +54,14 @@ export const useFirstLastSeenHost = ({
   ] = useState<HostFirstLastSeenRequestOptions>({
     defaultIndex: indexNames,
     docValueFields: docValueFields ?? [],
-    factoryQueryType: HostsQueries.firstLastSeen,
+    factoryQueryType: HostsQueries.firstOrLastSeen,
     hostName,
+    order,
   });
 
   const [firstLastSeenHostResponse, setFirstLastSeenHostResponse] = useState<FirstLastSeenHostArgs>(
     {
+      order: null,
       firstSeen: null,
       lastSeen: null,
       errorMessage: null,

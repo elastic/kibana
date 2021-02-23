@@ -19,6 +19,7 @@ import { usePostPushToService } from '../../containers/use_post_push_to_service'
 import { useConnectors } from '../../containers/configure/use_connectors';
 import { useCaseConfigure } from '../../containers/configure/use_configure';
 import { Case } from '../../containers/types';
+import { CaseType } from '../../../../../case/common/api';
 
 const initialCaseValue: FormProps = {
   description: '',
@@ -30,10 +31,15 @@ const initialCaseValue: FormProps = {
 };
 
 interface Props {
+  caseType?: CaseType;
   onSuccess?: (theCase: Case) => void;
 }
 
-export const FormContext: React.FC<Props> = ({ children, onSuccess }) => {
+export const FormContext: React.FC<Props> = ({
+  caseType = CaseType.individual,
+  children,
+  onSuccess,
+}) => {
   const { connectors } = useConnectors();
   const { connector: configurationConnector } = useCaseConfigure();
   const { postCase } = usePostCase();
@@ -61,6 +67,7 @@ export const FormContext: React.FC<Props> = ({ children, onSuccess }) => {
 
         const updatedCase = await postCase({
           ...dataWithoutConnectorId,
+          type: caseType,
           connector: connectorToUpdate,
           settings: { syncAlerts },
         });
@@ -77,7 +84,7 @@ export const FormContext: React.FC<Props> = ({ children, onSuccess }) => {
         }
       }
     },
-    [connectors, postCase, onSuccess, pushCaseToExternalService]
+    [caseType, connectors, postCase, onSuccess, pushCaseToExternalService]
   );
 
   const { form } = useForm<FormProps>({
