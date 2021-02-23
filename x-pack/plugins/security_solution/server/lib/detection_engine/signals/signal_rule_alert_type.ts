@@ -48,7 +48,7 @@ export const signalRulesAlertType = ({
     },
     producer: SERVER_APP_ID,
     minimumLicenseRequired: 'basic',
-    async executor({
+    executor({
       previousStartedAt,
       startedAt,
       alertId,
