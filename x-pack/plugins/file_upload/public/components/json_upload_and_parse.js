@@ -55,7 +55,7 @@ export class JsonUploadAndParse extends Component {
   }
 
   componentDidUpdate() {
-    this._setIndexReady({ ...this.state, ...this.props });
+    this._setIndexReady();
     if (this.props.isIndexingTriggered && this.state.phase === PHASE.CONFIGURE) {
       this._import();
     }
@@ -76,19 +76,16 @@ export class JsonUploadAndParse extends Component {
     });
   };
 
-  _setIndexReady = ({ selectedIndexType, indexName, hasIndexErrors, phase, onIndexReady }) => {
+  _setIndexReady = () => {
     const isIndexReady =
       this._geojsonImporter !== undefined &&
-      !!selectedIndexType &&
-      !!indexName &&
-      !hasIndexErrors &&
-      phase === PHASE.CONFIGURE;
-    console.log('isIndexReady', isIndexReady);
+      !!this.state.selectedIndexType &&
+      !!this.state.indexName &&
+      !this.state.hasIndexErrors &&
+      this.state.phase === PHASE.CONFIGURE;
     if (isIndexReady !== this.state.isIndexReady) {
       this.setState({ isIndexReady });
-      if (onIndexReady) {
-        onIndexReady(isIndexReady);
-      }
+      this.props.onIndexReady(isIndexReady);
     }
   };
 
