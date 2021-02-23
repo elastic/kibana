@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { SuperuserAtSpace1, Superuser } from '../../scenarios';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import { ESTestIndexTool, getUrlPrefix, ObjectRemover, AlertUtils } from '../../../common/lib';
-import { setupSpacesAndUsers, tearDown } from '..';
+import { setupSpacesAndUsers } from '..';
 
 // eslint-disable-next-line import/no-default-export
 export default function alertTests({ getService }: FtrProviderContext) {
@@ -45,7 +45,6 @@ export default function alertTests({ getService }: FtrProviderContext) {
       await esTestIndexTool.destroy();
       await es.indices.delete({ index: authorizationIndex });
       await esArchiver.unload('alerts_legacy');
-      await tearDown(getService);
     });
 
     // for (const scenario of UserAtSpaceScenarios) {
@@ -79,6 +78,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
           // case 'space_1_all at space1':
           case 'superuser at space1':
             // case 'space_1_all_with_restricted_fixture at space1':
+            await resetTaskStatus(migratedAlertId);
             await ensureLegacyAlertHasBeenMigrated(migratedAlertId);
 
             await updateMigratedAlertToUseApiKeyOfCurrentUser(migratedAlertId);
@@ -140,6 +140,16 @@ export default function alertTests({ getService }: FtrProviderContext) {
           //   break;
           default:
             throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
+        }
+
+        async function resetTaskStatus(alertId: string) {
+          await supertest
+            .put(`${getUrlPrefix(space.id)}/api/alerts_fixture/${alertId}/reset_task_status`)
+            .set('kbn-xsrf', 'foo')
+            .send({
+              status: 'idle',
+            })
+            .expect(200);
         }
 
         async function ensureLegacyAlertHasBeenMigrated(alertId: string) {
