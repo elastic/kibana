@@ -31,11 +31,16 @@ type SignificantTerm = NonNullable<
   NonNullable<CorrelationsApiResponse>['significantTerms']
 >[0];
 
+export type SelectedSignificantTerm = Pick<
+  SignificantTerm,
+  'fieldName' | 'fieldValue'
+>;
+
 interface Props<T> {
   significantTerms?: T[];
   status: FETCH_STATUS;
   percentageColumnName: string;
-  setSelectedSignificantTerm: (term: T | null) => void;
+  setSelectedSignificantTerm: (term: SelectedSignificantTerm | null) => void;
   onFilter: () => void;
 }
 
