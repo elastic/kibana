@@ -12,38 +12,48 @@ import { EuiButtonEmpty } from '@elastic/eui';
 
 import { reactRouterNavigate } from '../../../../../../../../../../src/plugins/kibana_react/public';
 
-// import { useForm } from '../../../../../../shared_imports';
+import { SerializedPolicy } from '../../../../../../../common/types';
 
-// import { useAppContext } from '../../../../../app_context';
+import { useFormContext } from '../../../../../../shared_imports';
+
+import { useAppContext } from '../../../../../app_context';
 import { getPolicyRollupWizardPath } from '../../../../../services/navigation';
 
-import { DescribedFormRow } from '../../../../components';
+import { useEditPolicyContext } from '../../../edit_policy_context';
 
-export const RollupField: FunctionComponent = () => {
-  const phase = 'cold';
+import { ToggleFieldWithDescribedFormRow } from '../../../components';
+
+interface Props {
+  phase: 'hot' | 'cold';
+}
+
+export const RollupField: FunctionComponent<Props> = ({ phase }) => {
   const initialValue = true;
   const history = useHistory();
-  // const form = useForm();
-  // const { setCurrentPolicy } = useAppContext();
+  const form = useFormContext<SerializedPolicy>();
+  const { isNewPolicy } = useEditPolicyContext();
+  const { setCurrentPolicyData } = useAppContext();
+
   return (
-    <DescribedFormRow
+    <ToggleFieldWithDescribedFormRow
       title={<h3>Rollup</h3>}
       description="Use rollups to precalculate aggregations and save storage space"
       switchProps={{
+        path: `_meta.${phase}.rollupEnabled`,
         'data-test-subj': `${phase}-setReplicasSwitch`,
-        label: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.rollup.switchLabel', {
-          defaultMessage: 'Set rollup',
-        }),
         initialValue,
       }}
       fullWidth
     >
       <EuiButtonEmpty
         iconType="plusInACircle"
-        {...reactRouterNavigate(history, getPolicyRollupWizardPath())}
+        onClick={(e: React.MouseEvent) => {
+          setCurrentPolicyData({ policy: form.getFormData(), isNewPolicy });
+          reactRouterNavigate(history, getPolicyRollupWizardPath(phase)).onClick(e);
+        }}
       >
         Configure rollup
       </EuiButtonEmpty>
-    </DescribedFormRow>
+    </ToggleFieldWithDescribedFormRow>
   );
 };

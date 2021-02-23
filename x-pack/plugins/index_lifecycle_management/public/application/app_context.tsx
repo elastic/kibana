@@ -9,20 +9,29 @@ import React, { FunctionComponent, createContext, useMemo, useRef, useContext } 
 
 import { SerializedPolicy } from '../../common/types';
 
-interface ContextValue {
-  setCurrentPolicy: (policy: SerializedPolicy) => void;
-  getCurrentPolicy: () => SerializedPolicy | undefined;
+interface PolicyData {
+  isNewPolicy: boolean;
+  policy: SerializedPolicy;
 }
 
-const AppContext = createContext<ContextValue>(null as any);
+export interface AppContextValue {
+  setCurrentPolicyData: (policyData: PolicyData) => void;
+  getCurrentPolicyData: () => PolicyData | undefined;
+  clearCurrentPolicyData: () => void;
+}
+
+export const AppContext = createContext<AppContextValue>(null as any);
 
 export const AppContextProvider: FunctionComponent = ({ children }) => {
-  const currentPolicy = useRef<SerializedPolicy | undefined>();
-  const value = useMemo<ContextValue>(() => {
+  const currentPolicyData = useRef<PolicyData | undefined>();
+  const value = useMemo<AppContextValue>(() => {
     return {
-      getCurrentPolicy: () => currentPolicy.current,
-      setCurrentPolicy: (policy) => {
-        currentPolicy.current = policy;
+      getCurrentPolicyData: () => currentPolicyData.current,
+      setCurrentPolicyData: (policyData) => {
+        currentPolicyData.current = policyData;
+      },
+      clearCurrentPolicyData: () => {
+        currentPolicyData.current = undefined;
       },
     };
   }, []);

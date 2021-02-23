@@ -9,16 +9,7 @@ import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import {
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-  EuiText,
-  EuiTitle,
-} from '@elastic/eui';
-
-import { getTermsDetailsUrl } from '../../../services';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 
 import { FieldList } from '../components';
 
@@ -28,7 +19,6 @@ export class StepTerms extends Component {
   static propTypes = {
     fields: PropTypes.object.isRequired,
     onFieldsChange: PropTypes.func.isRequired,
-    termsFields: PropTypes.array.isRequired,
   };
 
   onSelectField = (field) => {
@@ -50,7 +40,7 @@ export class StepTerms extends Component {
   };
 
   render() {
-    const { fields, termsFields } = this.props;
+    const { fields } = this.props;
 
     const { terms } = fields;
 
@@ -95,22 +85,6 @@ export class StepTerms extends Component {
               </p>
             </EuiText>
           </EuiFlexItem>
-
-          <EuiFlexItem grow={false} className="rollupJobWizardStepActions">
-            <EuiButtonEmpty
-              size="s"
-              flush="right"
-              href={getTermsDetailsUrl()}
-              target="_blank"
-              iconType="help"
-              data-test-subj="rollupJobCreateTermsDocsButton"
-            >
-              <FormattedMessage
-                id="xpack.rollupJobs.create.stepTerms.readDocsButtonLabel"
-                defaultMessage="Terms docs"
-              />
-            </EuiButtonEmpty>
-          </EuiFlexItem>
         </EuiFlexGroup>
 
         <EuiSpacer />
@@ -129,7 +103,7 @@ export class StepTerms extends Component {
                 />
               }
               columns={columns}
-              fields={termsFields}
+              fields={[]}
               selectedFields={terms}
               onSelectField={this.onSelectField}
               dataTestSubj="rollupJobTermsFieldChooser"

@@ -92,7 +92,7 @@ export const ColdPhase: FunctionComponent = () => {
         phase="cold"
       />
 
-      <RollupField />
+      <RollupField phase="cold" />
 
       <IndexPriorityField phase="cold" />
     </Phase>

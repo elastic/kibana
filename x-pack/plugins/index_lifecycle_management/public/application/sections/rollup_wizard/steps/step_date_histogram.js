@@ -40,26 +40,12 @@ export class StepDateHistogram extends Component {
     fieldErrors: PropTypes.object.isRequired,
     hasErrors: PropTypes.bool.isRequired,
     areStepErrorsVisible: PropTypes.bool.isRequired,
-    dateFields: PropTypes.array.isRequired,
   };
-
-  static getDerivedStateFromProps(props) {
-    const { dateFields } = props;
-
-    const dateHistogramFieldOptions = dateFields.map((dateField) => ({
-      value: dateField,
-      text: dateField,
-    }));
-
-    return { dateHistogramFieldOptions };
-  }
 
   constructor(props) {
     super(props);
 
-    this.state = {
-      dateHistogramFieldOptions: [],
-    };
+    this.state = {};
   }
 
   renderIntervalHelpText() {
@@ -170,8 +156,6 @@ export class StepDateHistogram extends Component {
       dateHistogramTimeZone: errorDateHistogramTimeZone,
     } = fieldErrors;
 
-    const { dateHistogramFieldOptions } = this.state;
-
     return (
       <Fragment>
         <EuiFlexGroup justifyContent="spaceBetween">
@@ -222,10 +206,9 @@ export class StepDateHistogram extends Component {
               isInvalid={Boolean(areStepErrorsVisible && errorDateHistogramField)}
               fullWidth
             >
-              <EuiSelect
+              <EuiFieldText
                 isInvalid={Boolean(areStepErrorsVisible && errorDateHistogramField)}
-                options={dateHistogramFieldOptions}
-                value={dateHistogramField}
+                value={dateHistogramField ?? ''}
                 onChange={(e) => onFieldsChange({ dateHistogramField: e.target.value })}
                 fullWidth
                 data-test-subj="rollupJobCreateDateFieldSelect"

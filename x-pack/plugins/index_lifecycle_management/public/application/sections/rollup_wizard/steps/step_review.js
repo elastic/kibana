@@ -11,7 +11,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 import { EuiErrorBoundary, EuiSpacer, EuiTab, EuiTabs, EuiTitle } from '@elastic/eui';
 
-import { serializeJob } from '../../../services';
+import { serializeRollup } from '../serialize_and_deserialize_rollup';
 
 import {
   JobDetails,
@@ -98,7 +98,7 @@ export class StepReview extends Component {
   render() {
     const { job } = this.props;
     const { selectedTab } = this.state;
-    const json = serializeJob(job);
+    const json = serializeRollup(job);
     const endpoint = `PUT _rollup/job/${job.id}`;
 
     return (

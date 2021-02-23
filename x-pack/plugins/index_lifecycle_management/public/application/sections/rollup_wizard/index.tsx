@@ -12,10 +12,10 @@ import { Provider } from 'react-redux';
 import { rollupJobsStore } from './store';
 import { RollupWizard as RollupWizardContainer } from './rollup_wizard.container';
 
-export const RollupWizard: FunctionComponent<RouteComponentProps> = () => {
+export const RollupWizard: FunctionComponent<RouteComponentProps> = (props) => {
   return (
     <Provider store={rollupJobsStore}>
-      <RollupWizardContainer />
+      <RollupWizardContainer {...props} />
     </Provider>
   );
 };

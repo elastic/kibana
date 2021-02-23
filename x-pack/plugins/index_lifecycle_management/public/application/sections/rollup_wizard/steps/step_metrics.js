@@ -12,7 +12,6 @@ import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
 
 import {
-  EuiButtonEmpty,
   EuiCheckbox,
   EuiFlexGroup,
   EuiFlexItem,
@@ -23,7 +22,6 @@ import {
   EuiButton,
 } from '@elastic/eui';
 
-import { getMetricsDetailsUrl } from '../../../services';
 import { FieldList } from '../components';
 import { FieldChooser, StepError } from './components';
 
@@ -97,7 +95,6 @@ export class StepMetrics extends Component {
     onFieldsChange: PropTypes.func.isRequired,
     fieldErrors: PropTypes.object.isRequired,
     areStepErrorsVisible: PropTypes.bool.isRequired,
-    metricsFields: PropTypes.array.isRequired,
   };
 
   constructor(props) {
@@ -379,7 +376,7 @@ export class StepMetrics extends Component {
   };
 
   render() {
-    const { fields, metricsFields } = this.props;
+    const { fields } = this.props;
 
     const { metrics } = fields;
 
@@ -408,22 +405,6 @@ export class StepMetrics extends Component {
               </p>
             </EuiText>
           </EuiFlexItem>
-
-          <EuiFlexItem grow={false} className="rollupJobWizardStepActions">
-            <EuiButtonEmpty
-              size="s"
-              flush="right"
-              href={getMetricsDetailsUrl()}
-              target="_blank"
-              iconType="help"
-              data-test-subj="rollupJobCreateMetricsDocsButton"
-            >
-              <FormattedMessage
-                id="xpack.rollupJobs.create.stepMetrics.readDocsButtonLabel"
-                defaultMessage="Metrics docs"
-              />
-            </EuiButtonEmpty>
-          </EuiFlexItem>
         </EuiFlexGroup>
 
         <EuiSpacer />
@@ -451,7 +432,7 @@ export class StepMetrics extends Component {
                     />
                   }
                   columns={StepMetrics.chooserColumns}
-                  fields={metricsFields}
+                  fields={[]}
                   selectedFields={metrics}
                   onSelectField={this.onSelectField}
                   dataTestSubj="rollupJobMetricsFieldChooser"

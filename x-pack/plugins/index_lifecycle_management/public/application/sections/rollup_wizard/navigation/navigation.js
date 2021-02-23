@@ -5,50 +5,20 @@
  * 2.0.
  */
 
-import React, { Fragment } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import {
-  EuiButton,
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiText,
-  EuiLoadingSpinner,
-  EuiCheckbox,
-} from '@elastic/eui';
+import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 export const Navigation = ({
-  isSaving,
   hasNextStep,
   hasPreviousStep,
   goToNextStep,
   goToPreviousStep,
   save,
   canGoToNextStep,
-  onClickToggleStart,
-  startJobAfterCreation,
 }) => {
-  if (isSaving) {
-    return (
-      <EuiFlexGroup justifyContent="flexStart" gutterSize="m">
-        <EuiFlexItem grow={false}>
-          <EuiLoadingSpinner size="l" />
-        </EuiFlexItem>
-
-        <EuiFlexItem grow={false}>
-          <EuiText>
-            <FormattedMessage
-              id="xpack.rollupJobs.create.navigation.savingText"
-              defaultMessage="Saving"
-            />
-          </EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    );
-  }
-
   const previousStepButton = (
     <EuiFlexItem grow={false}>
       <EuiButtonEmpty
@@ -90,33 +60,11 @@ export const Navigation = ({
     </EuiFlexItem>
   );
 
-  const startAfterCreateCheckbox = (
-    <EuiFlexItem grow={false} style={{ alignSelf: 'center' }}>
-      <EuiCheckbox
-        id="rollupJobToggleJobStartAfterCreation"
-        data-test-subj="rollupJobToggleJobStartAfterCreation"
-        checked={startJobAfterCreation}
-        label={
-          <FormattedMessage
-            id="xpack.rollupJobs.create.startJobLabel"
-            defaultMessage="Start job now"
-          />
-        }
-        onChange={onClickToggleStart}
-      />
-    </EuiFlexItem>
-  );
-
   return (
     <EuiFlexGroup justifyContent="flexStart" gutterSize="m">
       {hasPreviousStep && previousStepButton}
       {hasNextStep && nextStepButton}
-      {!hasNextStep && (
-        <Fragment>
-          {saveButton}
-          {startAfterCreateCheckbox}
-        </Fragment>
-      )}
+      {!hasNextStep && saveButton}
     </EuiFlexGroup>
   );
 };
@@ -124,7 +72,6 @@ export const Navigation = ({
 Navigation.propTypes = {
   hasNextStep: PropTypes.bool.isRequired,
   hasPreviousStep: PropTypes.bool.isRequired,
-  isSaving: PropTypes.bool.isRequired,
   goToNextStep: PropTypes.func,
   goToPreviousStep: PropTypes.func,
   save: PropTypes.func.isRequired,

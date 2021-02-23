@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { Component, Fragment } from 'react';
+import { RouteComponentProps } from 'react-router-dom';
+import React, { Component, Fragment, ContextType } from 'react';
 import {
   EuiCallOut,
   EuiPage,
@@ -17,13 +18,19 @@ import {
   EuiStepsHorizontal,
   EuiTitle,
 } from '@elastic/eui';
-import PropTypes from 'prop-types';
-import { cloneDeep, mapValues } from 'lodash';
+
+import { cloneDeep, mapValues, set, get } from 'lodash';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { withKibana } from '../../../../../../../src/plugins/kibana_react/public';
+
+import { AppContext } from '../../app_context';
+import { getPolicyEditPath, getPolicyCreatePath } from '../../services/navigation';
+
+import { serializeRollup, deserializeRollup } from './serialize_and_deserialize_rollup';
+import { InternalRollup } from './types';
 
 // const createBreadcrumb = {
 //   text: i18n.translate('xpack.rollupJobs.createBreadcrumbTitle', {
@@ -58,38 +65,7 @@ import {
   // @ts-ignore
 } from './steps_config';
 
-// TODO: Move this lib functionality somewhere
-
 // TODO: fix anys!
-
-export function formatFields(fieldNames: any, type: any) {
-  return fieldNames.map((fieldName: string) => ({
-    name: fieldName,
-    type,
-  }));
-}
-
-/**
- * Re-associate type information with the metric type (e.g., 'date', or 'numeric').
- *
- * When a job is being cloned the metrics returned from the server do not have
- * type information (e.g., numeric, date etc) associated with them.
- *
- * @param object { metrics: deserialized job metric object, typeMaps: { fields: string[], type: string } }
- * @returns { { : string, type: string, types: string[] }[] }
- */
-export function retypeMetrics({ metrics, typeMaps }: any) {
-  return metrics.map((metric: any) => {
-    const { name: metricName } = metric;
-    const { type } = typeMaps.find((t: any) =>
-      t.fields.some((field: any) => field.name === metricName)
-    );
-    return {
-      ...metric,
-      type,
-    };
-  });
-}
 
 const stepIdToTitleMap = {
   [STEP_LOGISTICS]: i18n.translate('xpack.rollupJobs.create.steps.stepLogisticsTitle', {
@@ -112,84 +88,86 @@ const stepIdToTitleMap = {
   }),
 };
 
-export class RollupWizardUi extends Component<any, any> {
-  static propTypes = {
-    createJob: PropTypes.func,
-    clearCloneJob: PropTypes.func,
-    isSaving: PropTypes.bool,
-    createJobError: PropTypes.node,
-    jobToClone: PropTypes.object,
+type Props = RouteComponentProps<{ phase: string }> & {
+  isSaving: boolean;
+  saveError: { cause: string[]; message: string };
+  kibana: unknown;
+};
+
+interface StepFields {
+  STEP_LOGISTICS: { rollupIndexIlmPolicy?: string };
+  STEP_DATE_HISTOGRAM: {
+    dateHistogramInterval: string;
+    dateHistogramTimeZone: string;
+    dateHistogramField: string;
   };
+  STEP_TERMS: { terms: Array<{ name: string }> };
+  STEP_HISTOGRAM: { histogram: Array<{ name: string }>; histogramInterval: string };
+  STEP_METRICS: { metrics: Array<{ name: string; types: string[] }> };
+  STEP_REVIEW: {};
+}
+
+interface State {
+  checkpointStepId: string;
+  currentStepId: keyof StepFields;
+  nextStepId: keyof StepFields;
+  previousStepId?: keyof StepFields;
+  stepsFieldErrors: Record<string, Record<string, string | undefined>>;
+  areStepErrorsVisible: boolean;
+  stepsFields: StepFields;
+}
+
+export class RollupWizardUi extends Component<Props, State> {
+  static contextType = AppContext;
 
   lastIndexPatternValidationTime: number;
   // @ts-ignore
   private _isMounted = false;
 
-  constructor(props: any) {
+  context!: ContextType<typeof AppContext>;
+
+  constructor(props: Props) {
     super(props);
 
     // props.kibana.services.setBreadcrumbs([listBreadcrumb, createBreadcrumb]);
-    const { jobToClone: stepDefaultOverrides } = props;
-    const stepsFields = mapValues(stepIdToStepConfigMap, (step) =>
-      cloneDeep(step.getDefaultFields(stepDefaultOverrides))
-    );
 
+    const { getCurrentPolicyData } = this.context;
+    const {
+      match: {
+        params: { phase },
+      },
+    } = props;
+
+    const currentPolicyData = getCurrentPolicyData();
+    if (!currentPolicyData) {
+      throw new Error('No policy data provided!');
+    }
+    const rollupAction = get(currentPolicyData.policy, `phases.${phase}.actions.rollup`);
+    const internalRollup = deserializeRollup(rollupAction);
+
+    const stepsFields = mapValues(stepIdToStepConfigMap, (step) =>
+      cloneDeep(step.getDefaultFields(internalRollup))
+    );
     this.state = {
-      jobToClone: stepDefaultOverrides || null,
       checkpointStepId: stepIds[0],
       currentStepId: stepIds[0],
       nextStepId: stepIds[1],
       previousStepId: undefined,
       stepsFieldErrors: this.getStepsFieldsErrors(stepsFields),
-      // Show step errors immediately if we are cloning a job.
-      areStepErrorsVisible: !!stepDefaultOverrides,
+      areStepErrorsVisible: false,
       stepsFields,
-      isValidatingIndexPattern: false,
-      indexPatternAsyncErrors: undefined,
-      indexPatternDateFields: [],
-      indexPatternTermsFields: [],
-      indexPatternHistogramFields: [],
-      indexPatternMetricsFields: [],
-      startJobAfterCreation: false,
     };
 
     this.lastIndexPatternValidationTime = 0;
   }
 
   componentDidMount() {
+    window.scroll({ top: 0 });
     this._isMounted = true;
-    const { clearCloneJob, jobToClone } = this.props;
-    if (jobToClone) {
-      clearCloneJob();
-    }
-  }
-
-  componentDidUpdate(prevProps: any, prevState: any) {
-    const indexPattern = this.getIndexPattern();
-    if (indexPattern !== this.getIndexPattern(prevState)) {
-      // If the user hasn't entered anything, then skip validation.
-      if (!indexPattern || !indexPattern.trim()) {
-        this.setState({
-          indexPatternAsyncErrors: undefined,
-          indexPatternDateFields: [],
-          isValidatingIndexPattern: false,
-        });
-
-        return;
-      }
-
-      // Set the state outside of `requestIndexPatternValidation`, because that function is
-      // debounced.
-      this.setState({
-        isValidatingIndexPattern: true,
-      });
-    }
   }
 
   componentWillUnmount() {
     this._isMounted = false;
-    // Clean up after ourselves.
-    this.props.clearCreateJobErrors();
   }
 
   getSteps() {
@@ -237,7 +215,6 @@ export class RollupWizardUi extends Component<any, any> {
       nextStepId: stepIds[currentStepIndex + 1],
       previousStepId: stepIds[currentStepIndex - 1],
       areStepErrorsVisible: false,
-      isSaving: false,
     });
 
     if (stepIds.indexOf(stepId) > stepIds.indexOf(this.state.checkpointStepId)) {
@@ -295,33 +272,20 @@ export class RollupWizardUi extends Component<any, any> {
     });
   };
 
-  getAllFields() {
+  getAllFields(): InternalRollup {
     const {
       stepsFields: {
-        [STEP_LOGISTICS]: {
-          id,
-          indexPattern,
-          rollupIndex,
-          rollupCron,
-          rollupDelay,
-          rollupPageSize,
-        },
-        [STEP_DATE_HISTOGRAM]: { dateHistogramInterval, dateHistogramTimeZone, dateHistogramField },
-        [STEP_TERMS]: { terms },
-        [STEP_HISTOGRAM]: { histogram, histogramInterval },
-        [STEP_METRICS]: { metrics },
-        [STEP_REVIEW]: {},
+        STEP_LOGISTICS: { rollupIndexIlmPolicy },
+        STEP_DATE_HISTOGRAM: { dateHistogramInterval, dateHistogramTimeZone, dateHistogramField },
+        STEP_TERMS: { terms },
+        STEP_HISTOGRAM: { histogram, histogramInterval },
+        STEP_METRICS: { metrics },
+        STEP_REVIEW: {},
       },
-      startJobAfterCreation,
     } = this.state;
 
     return {
-      id,
-      indexPattern,
-      rollupIndex,
-      rollupCron,
-      rollupPageSize,
-      rollupDelay,
+      rollupIndexIlmPolicy,
       dateHistogramInterval,
       dateHistogramTimeZone,
       dateHistogramField,
@@ -329,19 +293,31 @@ export class RollupWizardUi extends Component<any, any> {
       histogram,
       histogramInterval,
       metrics,
-      startJobAfterCreation,
     };
   }
 
-  getIndexPattern(state = this.state) {
-    return state.stepsFields[STEP_LOGISTICS].indexPattern;
-  }
-
   save = () => {
-    const { createJob } = this.props;
-    const jobConfig = this.getAllFields();
-
-    createJob(jobConfig);
+    const rollupConfig = this.getAllFields();
+    const { getCurrentPolicyData, setCurrentPolicyData } = this.context;
+    const {
+      match: {
+        params: { phase },
+      },
+      history,
+    } = this.props;
+    const currentPolicyData = getCurrentPolicyData();
+    if (!currentPolicyData) {
+      throw new Error('No policy to update with rollup config!');
+    }
+    const { isNewPolicy, policy } = cloneDeep(currentPolicyData);
+    set(policy, `phases.${phase}.actions.rollup.config`, serializeRollup(rollupConfig));
+    set(policy, `phases.${phase}.actions.rollup.rollup_policy`, rollupConfig.rollupIndexIlmPolicy);
+    setCurrentPolicyData({ policy, isNewPolicy });
+    if (isNewPolicy) {
+      history.push(getPolicyCreatePath());
+    } else {
+      history.push(getPolicyEditPath(policy.name));
+    }
   };
 
   render() {
@@ -421,18 +397,7 @@ export class RollupWizardUi extends Component<any, any> {
   }
 
   renderCurrentStep() {
-    const {
-      currentStepId,
-      stepsFields,
-      stepsFieldErrors,
-      areStepErrorsVisible,
-      isValidatingIndexPattern,
-      indexPatternDateFields,
-      indexPatternAsyncErrors,
-      indexPatternTermsFields,
-      indexPatternHistogramFields,
-      indexPatternMetricsFields,
-    } = this.state;
+    const { currentStepId, stepsFields, stepsFieldErrors, areStepErrorsVisible } = this.state;
 
     const currentStepFields = stepsFields[currentStepId];
     const currentStepFieldErrors = stepsFieldErrors[currentStepId];
@@ -446,9 +411,6 @@ export class RollupWizardUi extends Component<any, any> {
             fieldErrors={currentStepFieldErrors}
             hasErrors={hasErrors(currentStepFieldErrors)}
             areStepErrorsVisible={areStepErrorsVisible}
-            isValidatingIndexPattern={isValidatingIndexPattern}
-            indexPatternAsyncErrors={indexPatternAsyncErrors}
-            hasMatchingIndices={Boolean(indexPatternDateFields.length)}
           />
         );
 
@@ -460,18 +422,11 @@ export class RollupWizardUi extends Component<any, any> {
             fieldErrors={currentStepFieldErrors}
             hasErrors={hasErrors(currentStepFieldErrors)}
             areStepErrorsVisible={areStepErrorsVisible}
-            dateFields={indexPatternDateFields}
           />
         );
 
       case STEP_TERMS:
-        return (
-          <StepTerms
-            fields={currentStepFields}
-            onFieldsChange={this.onFieldsChange}
-            termsFields={indexPatternTermsFields}
-          />
-        );
+        return <StepTerms fields={currentStepFields} onFieldsChange={this.onFieldsChange} />;
 
       case STEP_HISTOGRAM:
         return (
@@ -481,7 +436,6 @@ export class RollupWizardUi extends Component<any, any> {
             fieldErrors={currentStepFieldErrors}
             hasErrors={hasErrors(currentStepFieldErrors)}
             areStepErrorsVisible={areStepErrorsVisible}
-            histogramFields={indexPatternHistogramFields}
           />
         );
 
@@ -492,7 +446,6 @@ export class RollupWizardUi extends Component<any, any> {
             onFieldsChange={this.onFieldsChange}
             fieldErrors={currentStepFieldErrors}
             areStepErrorsVisible={areStepErrorsVisible}
-            metricsFields={indexPatternMetricsFields}
           />
         );
 
@@ -504,28 +457,15 @@ export class RollupWizardUi extends Component<any, any> {
     }
   }
 
-  onToggleStartAfterCreate = (eve: any) => {
-    this.setState({ startJobAfterCreation: eve.target.checked });
-  };
-
   renderNavigation() {
-    const {
-      isValidatingIndexPattern,
-      nextStepId,
-      previousStepId,
-      areStepErrorsVisible,
-      startJobAfterCreation,
-    } = this.state;
+    const { nextStepId, previousStepId, areStepErrorsVisible } = this.state;
 
     const { isSaving } = this.props;
     const hasNextStep = nextStepId != null;
 
     // Users can click the next step button as long as validation hasn't executed, and as long
     // as we're not waiting on async validation to complete.
-    const canGoToNextStep =
-      !isValidatingIndexPattern &&
-      hasNextStep &&
-      (!areStepErrorsVisible || this.canGoToStep(nextStepId));
+    const canGoToNextStep = hasNextStep && (!areStepErrorsVisible || this.canGoToStep(nextStepId));
 
     return (
       <Navigation
@@ -536,11 +476,9 @@ export class RollupWizardUi extends Component<any, any> {
         goToPreviousStep={this.goToPreviousStep}
         canGoToNextStep={canGoToNextStep}
         save={this.save}
-        onClickToggleStart={this.onToggleStartAfterCreate}
-        startJobAfterCreation={startJobAfterCreation}
       />
     );
   }
 }
 
-export const RollupWizard = withKibana(RollupWizardUi);
+export const RollupWizard = withKibana(RollupWizardUi as any);

@@ -141,6 +141,44 @@ export interface ForcemergeAction {
   index_codec?: 'best_compression';
 }
 
+export interface RollupAction {
+  config: {
+    groups: {
+      date_histogram: {
+        field: string;
+        /**
+         * Deprecated interval specification option. Mutually exclusive with "calendar_interval" and "fixed_interval".
+         */
+        interval?: string;
+        /**
+         * Mutually exclusive with "interval" and "fixed_interval".
+         */
+        calendar_interval?: string;
+        /**
+         * Mutually exclusive with "interval" and "calendar_interval".
+         */
+        fixed_interval?: string;
+        delay?: string;
+        time_zone?: string;
+      };
+      terms?: {
+        fields: string[];
+      };
+      histogram?: {
+        interval: string;
+        fields: string[];
+      };
+    };
+    metrics?: Array<{ field: string; metrics: string[] }>;
+  };
+  /**
+   * Policy to manage the new, rollup index created by this action.
+   *
+   * Default behavior is to use the policy that created the index to manage the index too.
+   */
+  rollup_policy?: string;
+}
+
 export interface LegacyPolicy {
   name: string;
   phases: {

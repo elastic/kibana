@@ -31,7 +31,6 @@ export class StepHistogram extends Component {
     fieldErrors: PropTypes.object.isRequired,
     hasErrors: PropTypes.bool.isRequired,
     areStepErrorsVisible: PropTypes.bool.isRequired,
-    histogramFields: PropTypes.array.isRequired,
   };
 
   onSelectField = (field) => {
@@ -107,7 +106,7 @@ export class StepHistogram extends Component {
                 />
               }
               columns={columns}
-              fields={histogramFields}
+              fields={[]}
               selectedFields={histogram}
               onSelectField={this.onSelectField}
               dataTestSubj="rollupJobHistogramFieldChooser"
