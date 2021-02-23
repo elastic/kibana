@@ -102,7 +102,7 @@ export const ConfigValidator: FC<ConfigValidatorProps> = React.memo(
               <li>
                 <FormattedMessage
                   id="xpack.ml.alertConditionValidation.failedJobsMessage"
-                  defaultMessage="{jobIds} {count, plural, one {job is} other {jobs are}} failed."
+                  defaultMessage="The following {count, plural, one {job is} other {jobs have}} failed: {jobIds}."
                   values={{
                     count: jobIssues.failedJobsIds.length,
                     jobIds: jobIssues.failedJobsIds.join(', '),
@@ -115,7 +115,7 @@ export const ConfigValidator: FC<ConfigValidatorProps> = React.memo(
               <li>
                 <FormattedMessage
                   id="xpack.ml.alertConditionValidation.closedJobsMessage"
-                  defaultMessage="{jobIds} {count, plural, one {job is} other {jobs are}} closed."
+                  defaultMessage="The following {count, plural, one {job is} other {jobs are}} closed: {jobIds}."
                   values={{
                     count: jobIssues.closedJobIds.length,
                     jobIds: jobIssues.closedJobIds.join(', '),
@@ -128,7 +128,7 @@ export const ConfigValidator: FC<ConfigValidatorProps> = React.memo(
               <li>
                 <FormattedMessage
                   id="xpack.ml.alertConditionValidation.stoppedDatafeedJobsMessage"
-                  defaultMessage="The datafeed is currently stopped for {count, plural, one {job has} other {jobs have}} {jobIds}."
+                  defaultMessage="The datafeed is currently stopped for the following {count, plural, one {job} other {jobs}}: {jobIds}."
                   values={{
                     count: jobIssues.stoppedDatafeedJobIds.length,
                     jobIds: jobIssues.stoppedDatafeedJobIds.join(', '),
@@ -141,7 +141,7 @@ export const ConfigValidator: FC<ConfigValidatorProps> = React.memo(
               <li>
                 <FormattedMessage
                   id="xpack.ml.alertConditionValidation.deletedDatafeedJobsMessage"
-                  defaultMessage="The datafeed is deleted for {count, plural, one {job has} other {jobs have}} {jobIds}."
+                  defaultMessage="The datafeed is deleted for the following {count, plural, one {job} other {jobs}}: {jobIds}."
                   values={{
                     count: jobIssues.deletedDatafeedJobIds.length,
                     jobIds: jobIssues.deletedDatafeedJobIds.join(', '),
