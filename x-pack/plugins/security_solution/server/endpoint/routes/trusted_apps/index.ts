@@ -29,8 +29,12 @@ import {
   getTrustedAppsUpdateRouteHandler,
 } from './handlers';
 import { SecuritySolutionPluginRouter } from '../../../types';
+import { EndpointAppContext } from '../../types';
 
-export const registerTrustedAppsRoutes = (router: SecuritySolutionPluginRouter) => {
+export const registerTrustedAppsRoutes = (
+  router: SecuritySolutionPluginRouter,
+  endpointAppContext: EndpointAppContext
+) => {
   // DELETE one
   router.delete(
     {
@@ -38,7 +42,7 @@ export const registerTrustedAppsRoutes = (router: SecuritySolutionPluginRouter) 
       validate: DeleteTrustedAppsRequestSchema,
       options: { authRequired: true },
     },
-    getTrustedAppsDeleteRouteHandler()
+    getTrustedAppsDeleteRouteHandler(endpointAppContext)
   );
 
   // GET one
@@ -58,7 +62,7 @@ export const registerTrustedAppsRoutes = (router: SecuritySolutionPluginRouter) 
       validate: GetTrustedAppsRequestSchema,
       options: { authRequired: true },
     },
-    getTrustedAppsListRouteHandler()
+    getTrustedAppsListRouteHandler(endpointAppContext)
   );
 
   // CREATE
@@ -68,7 +72,7 @@ export const registerTrustedAppsRoutes = (router: SecuritySolutionPluginRouter) 
       validate: PostTrustedAppCreateRequestSchema,
       options: { authRequired: true },
     },
-    getTrustedAppsCreateRouteHandler()
+    getTrustedAppsCreateRouteHandler(endpointAppContext)
   );
 
   // PUT
@@ -88,6 +92,6 @@ export const registerTrustedAppsRoutes = (router: SecuritySolutionPluginRouter) 
       validate: false,
       options: { authRequired: true },
     },
-    getTrustedAppsSummaryRouteHandler()
+    getTrustedAppsSummaryRouteHandler(endpointAppContext)
   );
 };
