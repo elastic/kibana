@@ -45,7 +45,7 @@ export const datatableVisualization: Visualization<DatatableVisualizationState> 
       id: 'lnsDatatable',
       icon: LensIconChartDatatable,
       label: i18n.translate('xpack.lens.datatable.label', {
-        defaultMessage: 'Data table',
+        defaultMessage: 'Table',
       }),
       groupLabel: i18n.translate('xpack.lens.datatable.groupLabel', {
         defaultMessage: 'Tabular and single value',

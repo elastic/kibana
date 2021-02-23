@@ -98,6 +98,13 @@ function computeListHeight(list: SelectableEntry[], maxHeight: number): number {
   return Math.min(list.length * ENTRY_HEIGHT, maxHeight);
 }
 
+function getCurrentVisualizationId(
+  activeVisualization: Visualization,
+  visualizationState: unknown
+) {
+  return activeVisualization.getVisualizationTypeId(visualizationState);
+}
+
 export const ChartSwitch = memo(function ChartSwitch(props: Props) {
   const [flyoutOpen, setFlyoutOpen] = useState<boolean>(false);
 
@@ -213,8 +220,8 @@ export const ChartSwitch = memo(function ChartSwitch(props: Props) {
       if (!flyoutOpen) {
         return { visualizationTypes: [], visualizationsLookup: {} };
       }
-      const activeVisualization = props.visualizationMap[props.visualizationId || ''];
-      const subVisualizationId = activeVisualization.getVisualizationTypeId(
+      const subVisualizationId = getCurrentVisualizationId(
+        props.visualizationMap[props.visualizationId || ''],
         props.visualizationState
       );
       const lowercasedSearchTerm = searchTerm.toLowerCase();
@@ -263,37 +270,41 @@ export const ChartSwitch = memo(function ChartSwitch(props: Props) {
               return [];
             }
             return [{ key: group, label: group, isGroupLabel: true }].concat(
-              visualizations.map((v) => ({
-                'aria-label': v.fullLabel || v.label,
-                checked: subVisualizationId === v.id ? 'on' : null,
-                isGroupLabel: false,
-                key: `${v.visualizationId}:${v.id}`,
-                value: `${v.visualizationId}:${v.id}`,
-                'data-test-subj': `lnsChartSwitchPopover_${v.id}`,
-                label: v.fullLabel || v.label,
-                prepend: <EuiIcon className="lnsChartSwitch__chartIcon" type={v.icon || 'empty'} />,
-                append:
-                  v.selection.dataLoss !== 'nothing' ? (
-                    <EuiIconTip
-                      aria-label={i18n.translate('xpack.lens.chartSwitch.dataLossLabel', {
-                        defaultMessage: 'Data loss',
-                      })}
-                      type="alert"
-                      color="warning"
-                      title={i18n.translate('xpack.lens.chartSwitch.dataLossLabel', {
-                        defaultMessage: 'Data loss',
-                      })}
-                      content={i18n.translate('xpack.lens.chartSwitch.dataLossDescription', {
-                        defaultMessage:
-                          'Switching to this chart will lose some of the configuration',
-                      })}
-                      iconProps={{
-                        className: 'lnsChartSwitch__chartIcon',
-                        'data-test-subj': `lnsChartSwitchPopoverAlert_${v.id}`,
-                      }}
-                    />
-                  ) : null,
-              }))
+              visualizations
+                // alphabetical order within each group
+                .sort((a, b) => {
+                  return (a.fullLabel || a.label).localeCompare(b.fullLabel || b.label);
+                })
+                .map((v) => ({
+                  'aria-label': v.fullLabel || v.label,
+                  checked: subVisualizationId === v.id ? 'on' : null,
+                  isGroupLabel: false,
+                  key: `${v.visualizationId}:${v.id}`,
+                  value: `${v.visualizationId}:${v.id}`,
+                  'data-test-subj': `lnsChartSwitchPopover_${v.id}`,
+                  label: v.fullLabel || v.label,
+                  prepend: (
+                    <EuiIcon className="lnsChartSwitch__chartIcon" type={v.icon || 'empty'} />
+                  ),
+                  append:
+                    v.selection.dataLoss !== 'nothing' ? (
+                      <EuiIconTip
+                        aria-label={i18n.translate('xpack.lens.chartSwitch.dataLossLabel', {
+                          defaultMessage: 'Warning',
+                        })}
+                        type="alert"
+                        color="warning"
+                        content={i18n.translate('xpack.lens.chartSwitch.dataLossDescription', {
+                          defaultMessage:
+                            'Selecting this chart type will result in a partial loss of currently applied configuration selections.',
+                        })}
+                        iconProps={{
+                          className: 'lnsChartSwitch__chartIcon',
+                          'data-test-subj': `lnsChartSwitchPopoverAlert_${v.id}`,
+                        }}
+                      />
+                    ) : null,
+                }))
             );
           }),
         visualizationsLookup: lookup,
@@ -354,7 +365,11 @@ export const ChartSwitch = memo(function ChartSwitch(props: Props) {
           }}
           options={visualizationTypes}
           onChange={(newOptions) => {
-            const id = newOptions.find(({ checked }) => checked === 'on')!.value!;
+            const chosenType = newOptions.find(({ checked }) => checked === 'on')!;
+            if (!chosenType) {
+              return;
+            }
+            const id = chosenType.value!;
             commitSelection(visualizationsLookup[id].selection);
           }}
           noMatchesMessage={

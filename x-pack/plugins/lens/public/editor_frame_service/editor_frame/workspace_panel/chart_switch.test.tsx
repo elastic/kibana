@@ -13,7 +13,8 @@ import {
   createMockDatasource,
 } from '../../mocks';
 
-// Tests are not ran within the browser and the AutoSizer will always compute a 0x0 size space
+// Tests are executed in a jsdom environment who does not have sizing methods,
+// thus the AutoSizer will always compute a 0x0 size space
 // Mock the AutoSizer inside EuiSelectable (Chart Switch) and return some dimensions > 0
 jest.mock('react-virtualized-auto-sizer', () => {
   return function (props: {
