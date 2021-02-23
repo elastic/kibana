@@ -9,7 +9,7 @@ import React from 'react';
 
 import { shallow, ShallowWrapper } from 'enzyme';
 
-import { EuiButtonEmpty, EuiButtonIcon, EuiFieldText } from '@elastic/eui';
+import { EuiButton, EuiButtonIcon, EuiFieldText } from '@elastic/eui';
 
 import { setMockActions } from '../../../../../../../__mocks__/kea.mock';
 
@@ -39,7 +39,7 @@ describe('ValueBoostForm', () => {
     wrapper.find(EuiFieldText).at(index);
   const removeButton = (wrapper: ShallowWrapper, index: number) =>
     wrapper.find(EuiButtonIcon).at(index);
-  const addButton = (wrapper: ShallowWrapper) => wrapper.find(EuiButtonEmpty);
+  const addButton = (wrapper: ShallowWrapper) => wrapper.find(EuiButton);
 
   it('renders a text input for each value from the boost', () => {
     const wrapper = shallow(<ValueBoostForm boost={boost} index={3} name="foo" />);
