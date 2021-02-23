@@ -7,35 +7,41 @@
 
 import { schema } from '@kbn/config-schema';
 import { IRouter } from 'kibana/server';
-import { ILicenseState, verifyApiAccess, isErrorThatHandlesItsOwnResponse } from '../lib';
-import { BASE_ACTION_API_PATH } from '../../common';
-import { ActionsRequestHandlerContext } from '../types';
+import { ActionResult, ActionsRequestHandlerContext } from '../../types';
+import { ILicenseState, verifyApiAccess, isErrorThatHandlesItsOwnResponse } from '../../lib';
+import { BASE_ACTION_API_PATH } from '../../../common';
 
-const paramSchema = schema.object({
-  id: schema.string(),
+export const bodySchema = schema.object({
+  name: schema.string(),
+  actionTypeId: schema.string(),
+  config: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
+  secrets: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
 });
 
-export const deleteActionRoute = (
+export const createActionRoute = (
   router: IRouter<ActionsRequestHandlerContext>,
   licenseState: ILicenseState
 ) => {
-  router.delete(
+  router.post(
     {
-      path: `${BASE_ACTION_API_PATH}/action/{id}`,
+      path: `${BASE_ACTION_API_PATH}/action`,
       validate: {
-        params: paramSchema,
+        body: bodySchema,
       },
     },
     router.handleLegacyErrors(async function (context, req, res) {
       verifyApiAccess(licenseState);
+
       if (!context.actions) {
         return res.badRequest({ body: 'RouteHandlerContext is not registered for actions' });
       }
       const actionsClient = context.actions.getActionsClient();
-      const { id } = req.params;
+      const action = req.body;
       try {
-        await actionsClient.delete({ id });
-        return res.noContent();
+        const actionRes: ActionResult = await actionsClient.create({ action });
+        return res.ok({
+          body: actionRes,
+        });
       } catch (e) {
         if (isErrorThatHandlesItsOwnResponse(e)) {
           return e.sendResponse(res);

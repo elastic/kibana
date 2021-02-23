@@ -7,9 +7,9 @@
 
 import { schema } from '@kbn/config-schema';
 import { IRouter } from 'kibana/server';
-import { ILicenseState, verifyApiAccess } from '../lib';
-import { BASE_ACTION_API_PATH } from '../../common';
-import { ActionsRequestHandlerContext } from '../types';
+import { ILicenseState, verifyApiAccess } from '../../lib';
+import { BASE_ACTION_API_PATH } from '../../../common';
+import { ActionsRequestHandlerContext } from '../../types';
 
 const paramSchema = schema.object({
   id: schema.string(),

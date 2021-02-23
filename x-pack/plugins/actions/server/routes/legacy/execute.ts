@@ -7,11 +7,11 @@
 
 import { schema } from '@kbn/config-schema';
 import { IRouter } from 'kibana/server';
-import { ILicenseState, verifyApiAccess, isErrorThatHandlesItsOwnResponse } from '../lib';
+import { ILicenseState, verifyApiAccess, isErrorThatHandlesItsOwnResponse } from '../../lib';
 
-import { ActionTypeExecutorResult, ActionsRequestHandlerContext } from '../types';
-import { BASE_ACTION_API_PATH } from '../../common';
-import { asHttpRequestExecutionSource } from '../lib/action_execution_source';
+import { ActionTypeExecutorResult, ActionsRequestHandlerContext } from '../../types';
+import { BASE_ACTION_API_PATH } from '../../../common';
+import { asHttpRequestExecutionSource } from '../../lib/action_execution_source';
 
 const paramSchema = schema.object({
   id: schema.string(),

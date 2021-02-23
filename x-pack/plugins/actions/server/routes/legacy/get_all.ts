@@ -6,9 +6,9 @@
  */
 
 import { IRouter } from 'kibana/server';
-import { ILicenseState, verifyApiAccess } from '../lib';
-import { BASE_ACTION_API_PATH } from '../../common';
-import { ActionsRequestHandlerContext } from '../types';
+import { ILicenseState, verifyApiAccess } from '../../lib';
+import { BASE_ACTION_API_PATH } from '../../../common';
+import { ActionsRequestHandlerContext } from '../../types';
 
 export const getAllActionRoute = (
   router: IRouter<ActionsRequestHandlerContext>,
