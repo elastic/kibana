@@ -73,18 +73,21 @@ export class CrossClusterReplicationPlugin implements Plugin {
 
     // NOTE: We enable the plugin by default instead of disabling it by default because this
     // creates a race condition that causes functional tests to fail on CI (see #66781).
-    licensing.license$
-      .pipe(first())
-      .toPromise()
-      .then((license) => {
+    Promise.all([licensing.license$.pipe(first()).toPromise(), getStartServices()]).then(
+      ([license, startServices]) => {
         const licenseStatus = license.check(PLUGIN.ID, PLUGIN.minimumLicenseType);
         const isLicenseOk = licenseStatus.state === 'valid';
         const config = this.initializerContext.config.get<ClientConfigType>();
 
+        const capabilities = startServices[0].application.capabilities;
+
         // remoteClusters.isUiEnabled is driven by the xpack.remote_clusters.ui.enabled setting.
         // The CCR UI depends upon the Remote Clusters UI (e.g. by cross-linking to it), so if
         // the Remote Clusters UI is disabled we can't show the CCR UI.
-        const isCcrUiEnabled = config.ui.enabled && remoteClusters.isUiEnabled;
+        const isCcrUiEnabled =
+          capabilities.management.data?.[MANAGEMENT_ID] &&
+          config.ui.enabled &&
+          remoteClusters.isUiEnabled;
 
         if (isLicenseOk && isCcrUiEnabled) {
           if (indexManagement) {
@@ -106,7 +109,8 @@ export class CrossClusterReplicationPlugin implements Plugin {
         } else {
           ccrApp.disable();
         }
-      });
+      }
+    );
   }
 
   public start() {}

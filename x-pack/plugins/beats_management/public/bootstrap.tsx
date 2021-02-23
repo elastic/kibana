@@ -18,10 +18,13 @@ import { BeatsManagementConfigType } from '../common';
 import { MANAGEMENT_SECTION } from '../common/constants';
 
 async function startApp(libs: FrontendLibs, core: CoreSetup<StartDeps>) {
-  const [startServices] = await Promise.all([
-    core.getStartServices(),
-    libs.framework.waitUntilFrameworkReady(),
-  ]);
+  const startServices = await core.getStartServices();
+
+  if (startServices[0].http.anonymousPaths.isAnonymous(window.location.pathname)) {
+    return;
+  }
+  // Can't run until the `start` lifecycle, so we wait for start services to resolve above before calling this.
+  await libs.framework.waitUntilFrameworkReady();
 
   const capabilities = startServices[0].application.capabilities;
   const hasBeatsCapability = capabilities.management.ingest?.[MANAGEMENT_SECTION] ?? false;
