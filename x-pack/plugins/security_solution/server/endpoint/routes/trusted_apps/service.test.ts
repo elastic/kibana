@@ -25,6 +25,7 @@ import {
 import { TrustedAppNotFoundError, TrustedAppVersionConflictError } from './errors';
 import { toUpdateTrustedApp } from '../../../../common/endpoint/service/trusted_apps/to_update_trusted_app';
 import { updateExceptionListItemImplementationMock } from './test_utils';
+import { ENDPOINT_TRUSTED_APPS_LIST_ID } from '../../../../../lists/common';
 
 const exceptionsListClient = listMock.getExceptionListClient() as jest.Mocked<ExceptionListClient>;
 
@@ -120,19 +121,40 @@ describe('service', () => {
   });
 
   describe('getTrustedAppsList', () => {
-    it('should get trusted apps', async () => {
+    beforeEach(() => {
       exceptionsListClient.findExceptionListItem.mockResolvedValue({
         data: [EXCEPTION_LIST_ITEM],
         page: 1,
         per_page: 20,
         total: 100,
       });
+    });
 
+    it('should get trusted apps', async () => {
       const result = await getTrustedAppsList(exceptionsListClient, { page: 1, per_page: 20 });
 
       expect(result).toEqual({ data: [TRUSTED_APP], page: 1, per_page: 20, total: 100 });
 
       expect(exceptionsListClient.createTrustedAppsList).toHaveBeenCalled();
+    });
+
+    it('should allow KQL to be defined', async () => {
+      const result = await getTrustedAppsList(exceptionsListClient, {
+        page: 1,
+        per_page: 20,
+        kuery: 'some-param.key: value',
+      });
+
+      expect(result).toEqual({ data: [TRUSTED_APP], page: 1, per_page: 20, total: 100 });
+      expect(exceptionsListClient.findExceptionListItem).toHaveBeenCalledWith({
+        listId: ENDPOINT_TRUSTED_APPS_LIST_ID,
+        page: 1,
+        perPage: 20,
+        filter: 'some-param.key: value',
+        namespaceType: 'agnostic',
+        sortField: 'name',
+        sortOrder: 'asc',
+      });
     });
   });
 
