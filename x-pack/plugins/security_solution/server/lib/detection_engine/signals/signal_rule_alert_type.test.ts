@@ -13,7 +13,7 @@ import { alertsMock, AlertServicesMock } from '../../../../../alerts/server/mock
 import { ruleStatusServiceFactory } from './rule_status_service';
 import {
   getGapBetweenRuns,
-  getGapMaxCatchupRatio,
+  getNumCatchupIntervals,
   getListsClient,
   getExceptions,
   sortExceptionItems,
@@ -124,7 +124,7 @@ describe('rules_notification_alert_type', () => {
       exceptionsWithValueLists: [],
     });
     (searchAfterAndBulkCreate as jest.Mock).mockClear();
-    (getGapMaxCatchupRatio as jest.Mock).mockClear();
+    (getNumCatchupIntervals as jest.Mock).mockClear();
     (searchAfterAndBulkCreate as jest.Mock).mockResolvedValue({
       success: true,
       searchAfterTimes: [],

@@ -240,7 +240,7 @@ export const signalRulesAlertType = ({
       if (remainingGap.asMilliseconds() > 0) {
         const gapString = remainingGap.humanize();
         const gapMessage = buildRuleMessage(
-          `${gapString} (${remainingGap.asMilliseconds()}ms) has passed since last rule execution, and signals may have been missed.`,
+          `${gapString} (${remainingGap.asMilliseconds()}ms) were not queried between this rule execution and the last execution, so signals may have been missed.`,
           'Consider increasing your look behind time or adding more Kibana instances.'
         );
         logger.warn(gapMessage);

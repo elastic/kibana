@@ -25,7 +25,7 @@ import {
   parseInterval,
   getDriftTolerance,
   getGapBetweenRuns,
-  getGapMaxCatchupRatio,
+  getNumCatchupIntervals,
   errorAggregator,
   getListsClient,
   getRuleRangeTuples,
@@ -686,7 +686,7 @@ describe('utils', () => {
 
   describe('getMaxCatchupRatio', () => {
     test('should return 0 if gap is 0', () => {
-      const catchup = getGapMaxCatchupRatio({
+      const catchup = getNumCatchupIntervals({
         gap: moment.duration(0),
         intervalDuration: moment.duration(11000),
       });
@@ -694,7 +694,7 @@ describe('utils', () => {
     });
 
     test('should return 1 if gap is in (0, intervalDuration]', () => {
-      const catchup = getGapMaxCatchupRatio({
+      const catchup = getNumCatchupIntervals({
         gap: moment.duration(10000),
         intervalDuration: moment.duration(10000),
       });
@@ -702,7 +702,7 @@ describe('utils', () => {
     });
 
     test('should round up return value', () => {
-      const catchup = getGapMaxCatchupRatio({
+      const catchup = getNumCatchupIntervals({
         gap: moment.duration(15000),
         intervalDuration: moment.duration(11000),
       });

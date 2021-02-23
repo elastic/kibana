@@ -163,18 +163,17 @@ export const checkPrivileges = async (
     },
   });
 
-export const getGapMaxCatchupRatio = ({
+export const getNumCatchupIntervals = ({
   gap,
   intervalDuration,
 }: {
   gap: moment.Duration;
   intervalDuration: moment.Duration;
 }): number => {
-  const gapInMilliseconds = gap.asMilliseconds();
-  if (gapInMilliseconds <= 0) {
+  if (gap.asMilliseconds() <= 0 || intervalDuration.asMilliseconds() <= 0) {
     return 0;
   }
-  const ratio = Math.ceil(gapInMilliseconds / intervalDuration.asMilliseconds());
+  const ratio = Math.ceil(gap.asMilliseconds() / intervalDuration.asMilliseconds());
   // maxCatchup is to ensure we are not trying to catch up too far back.
   // This allows for a maximum of 4 consecutive rule execution misses
   // to be included in the number of signals generated.
@@ -448,7 +447,7 @@ export const getRuleRangeTuples = ({
   try {
     const intervalDuration = parseInterval(interval);
     const gap = getGapBetweenRuns({ previousStartedAt, intervalDuration, from, to });
-    const catchup = getGapMaxCatchupRatio({
+    const catchup = getNumCatchupIntervals({
       gap,
       intervalDuration,
     });
