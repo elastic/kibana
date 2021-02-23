@@ -36,10 +36,12 @@ const initialData = {
 let hasDisplayedToast = false;
 
 function useServicesFetcher() {
-  const { urlParams, uiFilters } = useUrlParams();
+  const {
+    urlParams: { environment, kuery, start, end },
+  } = useUrlParams();
   const { core } = useApmPluginContext();
   const upgradeAssistantHref = useUpgradeAssistantHref();
-  const { environment, start, end } = urlParams;
+
   const { data = initialData, status } = useFetcher(
     (callApmApi) => {
       if (start && end) {
@@ -48,15 +50,15 @@ function useServicesFetcher() {
           params: {
             query: {
               environment,
+              kuery,
               start,
               end,
-              uiFilters: JSON.stringify(uiFilters),
             },
           },
         });
       }
     },
-    [environment, start, end, uiFilters]
+    [environment, kuery, start, end]
   );
 
   useEffect(() => {
