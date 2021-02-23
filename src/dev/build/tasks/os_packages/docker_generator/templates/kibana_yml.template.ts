@@ -17,7 +17,6 @@ function generator({ imageFlavor }: TemplateContext) {
   #
 
   # Default Kibana configuration for docker target
-  server.name: kibana
   server.host: "0.0.0.0"
   elasticsearch.hosts: [ "http://elasticsearch:9200" ]
   ${!imageFlavor ? 'monitoring.ui.container.elasticsearch.enabled: true' : ''}

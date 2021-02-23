@@ -9,12 +9,13 @@ import React, { Component, Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiForm } from '@elastic/eui';
 import PropTypes from 'prop-types';
-import { indexData, createIndexPattern } from '../util/indexing_service';
-import { getGeoIndexTypesForFeatures } from '../util/geo_processing';
 import { IndexSettings } from './index_settings';
 import { JsonIndexFilePicker } from './json_index_file_picker';
 import { JsonImportProgress } from './json_import_progress';
 import _ from 'lodash';
+import { GeoJsonImporter } from '../importer/geojson_importer';
+import { ES_FIELD_TYPES } from '../../../../../src/plugins/data/public';
+import { getIndexPatternService } from '../kibana_services';
 
 const INDEXING_STAGE = {
   INDEXING_STARTED: i18n.translate('xpack.fileUpload.jsonUploadAndParse.dataIndexingStarted', {
@@ -43,6 +44,8 @@ const INDEXING_STAGE = {
 };
 
 export class JsonUploadAndParse extends Component {
+  geojsonImporter = new GeoJsonImporter();
+
   state = {
     // File state
     fileRef: null,
@@ -87,11 +90,8 @@ export class JsonUploadAndParse extends Component {
     });
   };
 
-  componentDidUpdate(prevProps, prevState) {
-    if (!_.isEqual(prevState.parsedFile, this.state.parsedFile)) {
-      this._setIndexTypes({ ...this.state, ...this.props });
-    }
-    this._setSelectedType(this.state);
+  componentDidUpdate() {
+    this._updateIndexType();
     this._setIndexReady({ ...this.state, ...this.props });
     this._indexData({ ...this.state, ...this.props });
     if (this.props.isIndexingTriggered && !this.state.showImportProgress && this._isMounted) {
@@ -99,11 +99,30 @@ export class JsonUploadAndParse extends Component {
     }
   }
 
-  _setSelectedType = ({ selectedIndexType, indexTypes }) => {
-    if (!selectedIndexType && indexTypes.length) {
-      this.setState({ selectedIndexType: indexTypes[0] });
+  _updateIndexType() {
+    let nextIndexTypes = [];
+    if (this.state.parsedFile) {
+      nextIndexTypes =
+        this.state.parsedFile.geometryTypes.includes('Point') ||
+        this.state.parsedFile.geometryTypes.includes('MultiPoint')
+          ? [ES_FIELD_TYPES.GEO_POINT, ES_FIELD_TYPES.GEO_SHAPE]
+          : [ES_FIELD_TYPES.GEO_SHAPE];
     }
-  };
+    if (!_.isEqual(nextIndexTypes, this.state.indexTypes)) {
+      this.setState({ indexTypes: nextIndexTypes });
+    }
+
+    if (!this.state.selectedIndexType && nextIndexTypes.length) {
+      // auto select index type
+      this.setState({ selectedIndexType: nextIndexTypes[0] });
+    } else if (
+      this.state.selectedIndexType &&
+      !nextIndexTypes.includes(this.state.selectedIndexType)
+    ) {
+      // unselected indexType if selected type is not longer an option
+      this.setState({ selectedIndexType: null });
+    }
+  }
 
   _setIndexReady = ({
     parsedFile,
@@ -131,14 +150,12 @@ export class JsonUploadAndParse extends Component {
     indexedFile,
     parsedFile,
     indexRequestInFlight,
-    transformDetails,
     indexName,
-    appName,
     selectedIndexType,
     isIndexingTriggered,
     isIndexReady,
     onIndexingComplete,
-    boolCreateIndexPattern,
+    onIndexingError,
   }) => {
     // Check index ready
     const filesAreEqual = _.isEqual(indexedFile, parsedFile);
@@ -150,108 +167,108 @@ export class JsonUploadAndParse extends Component {
       currentIndexingStage: INDEXING_STAGE.WRITING_TO_INDEX,
     });
 
-    // Index data
-    const indexDataResp = await indexData(
-      parsedFile,
-      transformDetails,
-      indexName,
-      selectedIndexType,
-      appName
-    );
+    this.geojsonImporter.setDocs(parsedFile.parsedGeojson, selectedIndexType);
 
+    // initialize import
+    const settings = {
+      number_of_shards: 1,
+    };
+    const mappings = {
+      properties: {
+        coordinates: {
+          type: this.state.selectedIndexType,
+        },
+      },
+    };
+    const ingestPipeline = {};
+    const initializeImportResp = await this.geojsonImporter.initializeImport(
+      indexName,
+      settings,
+      mappings,
+      ingestPipeline
+    );
     if (!this._isMounted) {
       return;
     }
-
-    // Index error
-    if (!indexDataResp.success) {
+    if (initializeImportResp.index === undefined || initializeImportResp.id === undefined) {
       this.setState({
-        indexedFile: null,
-        indexDataResp,
         indexRequestInFlight: false,
         currentIndexingStage: INDEXING_STAGE.INDEXING_ERROR,
       });
       this._resetFileAndIndexSettings();
-      if (onIndexingComplete) {
-        onIndexingComplete({ indexDataResp });
-      }
+      onIndexingError();
       return;
     }
 
-    // Index data success. Update state & create index pattern
-    this.setState({
-      indexDataResp,
-      indexedFile: parsedFile,
-      currentIndexingStage: INDEXING_STAGE.INDEXING_COMPLETE,
-    });
-    let indexPatternResp;
-    if (boolCreateIndexPattern) {
-      indexPatternResp = await this._createIndexPattern(this.state);
-    }
-
-    // Indexing complete, update state & callback (if any)
-    if (!this._isMounted || !indexPatternResp) {
-      return;
-    }
-    this.setState({
-      currentIndexingStage: INDEXING_STAGE.INDEX_PATTERN_COMPLETE,
-    });
-    if (onIndexingComplete) {
-      onIndexingComplete({
-        indexDataResp,
-        ...(boolCreateIndexPattern ? { indexPatternResp } : {}),
-      });
-    }
-  };
-
-  _createIndexPattern = async ({ indexName }) => {
+    // import file
+    const importResp = await this.geojsonImporter.import(
+      initializeImportResp.id,
+      indexName,
+      initializeImportResp.pipelineId,
+      () => {}
+    );
     if (!this._isMounted) {
       return;
     }
+    if (!importResp.success) {
+      this.setState({
+        indexDataResp: importResp,
+        indexRequestInFlight: false,
+        currentIndexingStage: INDEXING_STAGE.INDEXING_ERROR,
+      });
+      this._resetFileAndIndexSettings();
+      onIndexingError();
+      return;
+    }
+    this.setState({
+      indexDataResp: importResp,
+      indexedFile: parsedFile,
+      currentIndexingStage: INDEXING_STAGE.INDEXING_COMPLETE,
+    });
+
+    // create index pattern
     this.setState({
       indexPatternRequestInFlight: true,
       currentIndexingStage: INDEXING_STAGE.CREATING_INDEX_PATTERN,
     });
-    const indexPatternResp = await createIndexPattern(indexName);
-
+    let indexPattern;
+    try {
+      indexPattern = await getIndexPatternService().createAndSave(
+        {
+          title: indexName,
+        },
+        true
+      );
+    } catch (error) {
+      if (this._isMounted) {
+        this.setState({
+          indexPatternRequestInFlight: false,
+          currentIndexingStage: INDEXING_STAGE.INDEX_PATTERN_ERROR,
+        });
+        this._resetFileAndIndexSettings();
+        onIndexingError();
+      }
+      return;
+    }
     if (!this._isMounted) {
       return;
     }
     this.setState({
-      indexPatternResp,
+      indexPatternResp: {
+        success: true,
+        id: indexPattern.id,
+        fields: indexPattern.fields,
+      },
       indexPatternRequestInFlight: false,
     });
+    this.setState({
+      currentIndexingStage: INDEXING_STAGE.INDEX_PATTERN_COMPLETE,
+    });
     this._resetFileAndIndexSettings();
-
-    return indexPatternResp;
-  };
-
-  // This is mostly for geo. Some data have multiple valid index types that can
-  // be chosen from, such as 'geo_point' vs. 'geo_shape' for point data
-  _setIndexTypes = ({ transformDetails, parsedFile }) => {
-    if (parsedFile) {
-      // User-provided index types
-      if (typeof transformDetails === 'object') {
-        this.setState({ indexTypes: transformDetails.indexTypes });
-      } else {
-        // Included index types
-        switch (transformDetails) {
-          case 'geo':
-            const featureTypes = _.uniq(
-              parsedFile.features
-                ? parsedFile.features.map(({ geometry }) => geometry.type)
-                : [parsedFile.geometry.type]
-            );
-            this.setState({
-              indexTypes: getGeoIndexTypesForFeatures(featureTypes),
-            });
-            break;
-          default:
-            this.setState({ indexTypes: [] });
-            return;
-        }
-      }
-    }
+    onIndexingComplete({
+      indexDataResp: importResp,
+      indexPattern,
+    });
   };
 
   render() {
@@ -264,7 +281,6 @@ export class JsonUploadAndParse extends Component {
       indexTypes,
       showImportProgress,
     } = this.state;
-    const { onFileUpload, transformDetails } = this.props;
 
     return (
       <EuiForm>
@@ -282,15 +298,14 @@ export class JsonUploadAndParse extends Component {
         ) : (
           <Fragment>
             <JsonIndexFilePicker
-              {...{
-                onFileUpload,
-                fileRef,
-                setIndexName: (indexName) => this.setState({ indexName }),
-                setFileRef: (fileRef) => this.setState({ fileRef }),
-                setParsedFile: (parsedFile) => this.setState({ parsedFile }),
-                transformDetails,
-                resetFileAndIndexSettings: this._resetFileAndIndexSettings,
+              fileRef={fileRef}
+              setFileRef={(fileRef) => this.setState({ fileRef })}
+              setParsedFile={(parsedFile, indexName) => {
+                this.setState({ parsedFile, indexName });
+                this.props.onFileUpload(parsedFile.parsedGeojson, indexName);
               }}
+              resetFileAndIndexSettings={this._resetFileAndIndexSettings}
+              geojsonImporter={this.geojsonImporter}
             />
             <IndexSettings
               disabled={!fileRef}
@@ -309,16 +324,13 @@ export class JsonUploadAndParse extends Component {
 
 JsonUploadAndParse.defaultProps = {
   isIndexingTriggered: false,
-  boolCreateIndexPattern: true,
 };
 
 JsonUploadAndParse.propTypes = {
-  appName: PropTypes.string,
   isIndexingTriggered: PropTypes.bool,
-  boolCreateIndexPattern: PropTypes.bool,
-  transformDetails: PropTypes.oneOfType([PropTypes.string, PropTypes.object]),
   onIndexReadyStatusChange: PropTypes.func,
   onIndexingComplete: PropTypes.func,
+  onIndexingError: PropTypes.func,
   onFileUpload: PropTypes.func,
   onFileRemove: PropTypes.func,
 };
