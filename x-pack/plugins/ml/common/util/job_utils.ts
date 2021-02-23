@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isEmpty, isEqual, each, pick } from 'lodash';
+import { each, isEmpty, isEqual, pick } from 'lodash';
 import semverGte from 'semver/functions/gte';
 import moment, { Duration } from 'moment';
 // @ts-ignore
@@ -16,7 +16,7 @@ import { ALLOWED_DATA_UNITS, JOB_ID_MAX_LENGTH } from '../constants/validation';
 import { parseInterval } from './parse_interval';
 import { maxLengthValidator } from './validators';
 import { CREATED_BY_LABEL } from '../constants/new_job';
-import { CombinedJob, CustomSettings, Datafeed, JobId, Job } from '../types/anomaly_detection_jobs';
+import { CombinedJob, CustomSettings, Datafeed, Job, JobId } from '../types/anomaly_detection_jobs';
 import { EntityField } from './anomaly_utils';
 import { MlServerLimits } from '../types/ml_server_info';
 import { JobValidationMessage, JobValidationMessageId } from '../constants/messages';
@@ -29,6 +29,7 @@ import {
 } from './datafeed_utils';
 import { findAggField } from './validation_utils';
 import { isPopulatedObject } from './object_utils';
+import { isDefined } from '../types/guards';
 
 export interface ValidationResults {
   valid: boolean;
@@ -800,4 +801,17 @@ export function splitIndexPatternNames(indexPatternName: string): string[] {
   return indexPatternName.includes(',')
     ? indexPatternName.split(',').map((i) => i.trim())
     : [indexPatternName];
+}
+
+/**
+ * Resolves the longest bucket span from the list.
+ * @param bucketSpans Collection of bucket spans
+ */
+export function resolveBucketSpanInSeconds(bucketSpans: string[]): number {
+  return Math.max(
+    ...bucketSpans
+      .map((b) => parseInterval(b))
+      .filter(isDefined)
+      .map((v) => v.asSeconds())
+  );
 }
