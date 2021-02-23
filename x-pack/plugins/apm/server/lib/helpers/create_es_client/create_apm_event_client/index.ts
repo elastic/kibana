@@ -6,6 +6,7 @@
  */
 
 import { ValuesType } from 'utility-types';
+import { Profile } from '../../../../../typings/es_schemas/ui/profile';
 import {
   ElasticsearchClient,
   KibanaRequest,
@@ -43,6 +44,7 @@ type TypeOfProcessorEvent<T extends ProcessorEvent> = {
   transaction: Transaction;
   span: Span;
   metric: Metric;
+  profile: Profile;
 }[T];
 
 type ESSearchRequestOf<TParams extends APMEventESSearchRequest> = Omit<
