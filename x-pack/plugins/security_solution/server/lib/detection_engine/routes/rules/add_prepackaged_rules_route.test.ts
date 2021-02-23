@@ -13,7 +13,6 @@ import {
   getNonEmptyIndex,
 } from '../__mocks__/request_responses';
 import { requestContextMock, serverMock, createMockConfig, mockGetCurrentUser } from '../__mocks__';
-import { AddPrepackagedRulesSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/add_prepackaged_rules_schema';
 import { SecurityPluginSetup } from '../../../../../../security/server';
 import { installPrepackagedTimelines } from '../../../timeline/routes/utils/install_prepacked_timelines';
 import { addPrepackedRulesRoute, createPrepackagedRules } from './add_prepackaged_rules_route';
@@ -24,7 +23,7 @@ import { ExceptionListClient } from '../../../../../../lists/server';
 
 jest.mock('../../rules/get_prepackaged_rules', () => {
   return {
-    getPrepackagedRules: (): AddPrepackagedRulesSchemaDecoded[] => {
+    getRegistryOrFileSystemRules: async () => {
       return [
         {
           author: ['Elastic'],

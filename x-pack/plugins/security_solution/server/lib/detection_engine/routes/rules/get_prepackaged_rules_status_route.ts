@@ -76,7 +76,8 @@ export const getPrepackagedRulesStatusRoute = async (
           rules_installed: prepackagedRules.length,
           rules_not_installed: rulesToInstall.length,
           rules_not_updated: rulesToUpdate.length,
-          rules_package_version: pkgVersion,
+          // drop rules_package_version if it's null
+          rules_package_version: pkgVersion || undefined,
           timelines_installed: validatedprepackagedTimelineStatus?.prepackagedTimelines.length ?? 0,
           timelines_not_installed:
             validatedprepackagedTimelineStatus?.timelinesToInstall.length ?? 0,

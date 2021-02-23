@@ -407,9 +407,13 @@ const responseTypeSpecific = t.union([
 ]);
 export type ResponseTypeSpecific = t.TypeOf<typeof responseTypeSpecific>;
 
-export const installPrepackagedRulesSchema = t.type({
-  rules_package_version,
-});
+export const installPrepackagedRulesSchema = t.union([
+  t.partial({
+    rules_package_version,
+  }),
+  t.undefined,
+  t.null,
+]);
 export type InstallPrepackagedRulesSchema = t.TypeOf<typeof installPrepackagedRulesSchema>;
 
 export const updateRulesSchema = t.intersection([

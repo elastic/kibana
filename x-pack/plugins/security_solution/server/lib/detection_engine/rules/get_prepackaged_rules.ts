@@ -24,7 +24,7 @@ import {
 } from '../../../../../fleet/server';
 
 import { rawRules } from './prepackaged_rules';
-import { DETECTION_RULES_PACAKGE_NAME } from './constants';
+import { DETECTION_RULES_PACKAGE_NAME } from './constants';
 
 let latestRulesPackageVersion: string | undefined;
 let latestRulesDownload: AddPrepackagedRulesSchemaDecoded[];
@@ -96,7 +96,7 @@ export const getPackageRegistryRules = async (
     return latestRulesDownload;
   }
 
-  const { paths } = await getRegistryPackage(DETECTION_RULES_PACAKGE_NAME, pkgVersion);
+  const { paths } = await getRegistryPackage(DETECTION_RULES_PACKAGE_NAME, pkgVersion);
 
   const rulePaths = paths.filter(isRuleTemplate);
   const rulePromises = rulePaths.map<AddPrepackagedRulesSchema>((path) => {
@@ -110,9 +110,9 @@ export const getPackageRegistryRules = async (
  * Retrieve and decode a package of rules compiled in from the file system.
  * @param rules List of rules to use instead
  */
-export const getFileSystemRules = async (
+export const getFileSystemRules = (
   rules: AddPrepackagedRulesSchema[] = []
-): Promise<AddPrepackagedRulesSchemaDecoded[]> => {
+): AddPrepackagedRulesSchemaDecoded[] => {
   if (!rules || rules.length === 0) {
     // @ts-expect-error mock data is too loosely typed
     return validateAllPrepackagedRules(rawRules);

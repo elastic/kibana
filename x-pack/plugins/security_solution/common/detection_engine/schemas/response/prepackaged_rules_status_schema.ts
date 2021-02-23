@@ -31,7 +31,7 @@ const prePackagedRulesStatusSchema = t.type({
   rules_not_updated,
 });
 
-const prePackagedRulesRegistrySchema = t.type({
+const prePackagedRulesRegistrySchema = t.partial({
   rules_package_version,
 });
 

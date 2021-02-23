@@ -427,6 +427,7 @@ describe('Detections Rules API', () => {
       expect(fetchMock).toHaveBeenCalledWith('/api/detection_engine/rules/prepackaged', {
         signal: abortCtrl.signal,
         method: 'PUT',
+        body: '{}',
       });
     });
     test('happy path', async () => {

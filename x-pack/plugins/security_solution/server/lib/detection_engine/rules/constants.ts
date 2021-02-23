@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-const DETECTION_RULES_PACAKGE_NAME = 'detection_rules';
+export const DETECTION_RULES_PACKAGE_NAME = 'detection_rules';

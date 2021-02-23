@@ -51,6 +51,7 @@ describe('usePrePackagedRules', () => {
         rulesInstalled: null,
         rulesNotInstalled: null,
         rulesNotUpdated: null,
+        rulesPackageVersion: null,
         timelinesInstalled: null,
         timelinesNotInstalled: null,
         timelinesNotUpdated: null,
