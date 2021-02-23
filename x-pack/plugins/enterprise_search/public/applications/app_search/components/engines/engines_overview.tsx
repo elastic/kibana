@@ -24,12 +24,17 @@ import { EuiButtonTo } from '../../../shared/react_router_helpers';
 import { convertMetaToPagination, handlePageChange } from '../../../shared/table_pagination';
 import { SendAppSearchTelemetry as SendTelemetry } from '../../../shared/telemetry';
 import { AppLogic } from '../../app_logic';
-import { ENGINE_CREATION_PATH } from '../../routes';
+import { ENGINE_CREATION_PATH, META_ENGINE_CREATION_PATH } from '../../routes';
 
 import { EngineIcon } from './assets/engine_icon';
 import { MetaEngineIcon } from './assets/meta_engine_icon';
 import { EnginesOverviewHeader, LoadingState, EmptyState } from './components';
-import { CREATE_AN_ENGINE_BUTTON_LABEL, ENGINES_TITLE, META_ENGINES_TITLE } from './constants';
+import {
+  CREATE_AN_ENGINE_BUTTON_LABEL,
+  CREATE_A_META_ENGINE_BUTTON_LABEL,
+  ENGINES_TITLE,
+  META_ENGINES_TITLE,
+} from './constants';
 import { EnginesLogic } from './engines_logic';
 import { EnginesTable } from './engines_table';
 
@@ -108,11 +113,23 @@ export const EnginesOverview: React.FC = () => {
           <>
             <EuiSpacer size="xl" />
             <EuiPageContentHeader>
-              <EuiTitle size="s">
-                <h2>
-                  <MetaEngineIcon /> {META_ENGINES_TITLE}
-                </h2>
-              </EuiTitle>
+              <EuiPageContentHeaderSection>
+                <EuiTitle size="s">
+                  <h2>
+                    <MetaEngineIcon /> {META_ENGINES_TITLE}
+                  </h2>
+                </EuiTitle>
+              </EuiPageContentHeaderSection>
+              <EuiPageContentHeaderSection>
+                <EuiButtonTo
+                  color="primary"
+                  fill
+                  data-test-subj="appSearchEnginesMetaEngineCreationButton"
+                  to={META_ENGINE_CREATION_PATH}
+                >
+                  {CREATE_A_META_ENGINE_BUTTON_LABEL}
+                </EuiButtonTo>
+              </EuiPageContentHeaderSection>
             </EuiPageContentHeader>
             <EuiPageContentBody data-test-subj="appSearchMetaEngines">
               <EnginesTable

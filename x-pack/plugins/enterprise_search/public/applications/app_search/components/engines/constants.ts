@@ -22,3 +22,10 @@ export const CREATE_AN_ENGINE_BUTTON_LABEL = i18n.translate(
     defaultMessage: 'Create an engine',
   }
 );
+
+export const CREATE_A_META_ENGINE_BUTTON_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.appSearch.engines.createAMetaEngineButton.ButtonLabel',
+  {
+    defaultMessage: 'Create a meta engine',
+  }
+);

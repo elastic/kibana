@@ -84,6 +84,7 @@ describe('EnginesOverview', () => {
     };
 
     beforeEach(() => {
+      jest.clearAllMocks();
       setMockValues(valuesWithEngines);
     });
 
@@ -103,15 +104,28 @@ describe('EnginesOverview', () => {
     });
 
     describe('when myRole.canViewMetaEngines is true', () => {
-      it('renders a 2nd meta engines table & makes a 2nd meta engines API call', async () => {
+      let wrapper: ShallowWrapper;
+
+      beforeEach(() => {
         setMockValues({
           ...valuesWithEngines,
           myRole: { canViewMetaEngines: true },
         });
-        const wrapper = shallow(<EnginesOverview />);
+        wrapper = shallow(<EnginesOverview />);
+      });
 
+      it('renders a 2nd meta engines table ', async () => {
         expect(wrapper.find(EnginesTable)).toHaveLength(2);
+      });
+
+      it('makes a 2nd meta engines call', () => {
         expect(actions.loadMetaEngines).toHaveBeenCalled();
+      });
+
+      it('renders a create engine button which takes users to the create engine page', () => {
+        expect(
+          wrapper.find('[data-test-subj="appSearchEnginesMetaEngineCreationButton"]').prop('to')
+        ).toEqual('/meta_engine_creation');
       });
     });
 
