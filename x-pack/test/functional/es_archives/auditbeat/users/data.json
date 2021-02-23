@@ -2,7 +2,7 @@
   "type": "doc",
   "value": {
     "index": "auditbeat-users",
-    "type": "doc",
+    "type": "_doc",
     "id": "Xa2ipWkBCQofM5eXEgsv",
     "source": {
       "@timestamp": "2018-11-27T02:59:28.060Z",
