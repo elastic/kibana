@@ -29,7 +29,7 @@ rules tailored to our needs (e.g. `byteSize`, `duration` etc.). That means that 
 by the "legacy" Kibana may be rejected by the `core` now.
 
 ### Logging
-`core` has its own [logging system](./server/logging/README.md) and will output log records directly (e.g. to file or terminal) when configured. When no 
+`core` has its own [logging system](./server/logging/README.mdx) and will output log records directly (e.g. to file or terminal) when configured. When no 
 specific configuration is provided, logs are forwarded to the "legacy" Kibana so that they look the same as the rest of the
 log records throughout Kibana.
 
