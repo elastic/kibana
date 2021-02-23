@@ -25,7 +25,7 @@ import {
   CaseType,
   SubCaseAttributes,
   CommentRequest,
-  CollectionWithSubCaseResponse,
+  CaseResponse,
   User,
   CommentRequestAlertType,
   AlertCommentRequestRt,
@@ -113,7 +113,7 @@ const addGeneratedAlerts = async ({
   caseClient,
   caseId,
   comment,
-}: AddCommentFromRuleArgs): Promise<CollectionWithSubCaseResponse> => {
+}: AddCommentFromRuleArgs): Promise<CaseResponse> => {
   const query = pipe(
     AlertCommentRequestRt.decode(comment),
     fold(throwErrors(Boom.badRequest), identity)
@@ -260,7 +260,7 @@ export const addComment = async ({
   caseId,
   comment,
   user,
-}: AddCommentArgs): Promise<CollectionWithSubCaseResponse> => {
+}: AddCommentArgs): Promise<CaseResponse> => {
   const query = pipe(
     CommentRequestRt.decode(comment),
     fold(throwErrors(Boom.badRequest), identity)
