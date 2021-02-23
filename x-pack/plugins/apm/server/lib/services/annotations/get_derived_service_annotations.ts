@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isNumber } from 'lodash';
+import { isFiniteNumber } from '../../../../common/utils/is_finite_number';
 import { ESFilter } from '../../../../../../typings/elasticsearch';
 import { Annotation, AnnotationType } from '../../../../common/annotations';
 import {
@@ -85,25 +85,23 @@ export async function getDerivedServiceAnnotations({
               ],
             },
             body: {
-              size: 0,
+              size: 1,
               query: {
                 bool: {
                   filter: [...filter, { term: { [SERVICE_VERSION]: version } }],
                 },
               },
-              aggs: {
-                first_seen: {
-                  min: {
-                    field: '@timestamp',
-                  },
-                },
+              sort: {
+                '@timestamp': 'desc',
               },
             },
           });
 
-          const firstSeen = response.aggregations?.first_seen.value;
+          const firstSeen = new Date(
+            response.hits.hits[0]._source['@timestamp']
+          ).getTime();
 
-          if (!isNumber(firstSeen)) {
+          if (!isFiniteNumber(firstSeen)) {
             throw new Error(
               'First seen for version was unexpectedly undefined or null.'
             );

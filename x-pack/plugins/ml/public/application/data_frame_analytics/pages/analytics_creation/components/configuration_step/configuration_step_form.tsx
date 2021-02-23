@@ -327,6 +327,17 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
     [currentIndexPattern.fields]
   );
 
+  // Show the Scatterplot Matrix only if
+  // - There's more than one suitable field available
+  // - The job type is outlier detection, or
+  // - The job type is regression or classification and the dependent variable has been set
+  const showScatterplotMatrix =
+    (jobType === ANALYSIS_CONFIG_TYPE.OUTLIER_DETECTION ||
+      ((jobType === ANALYSIS_CONFIG_TYPE.REGRESSION ||
+        jobType === ANALYSIS_CONFIG_TYPE.CLASSIFICATION) &&
+        !dependentVariableEmpty)) &&
+    scatterplotFieldOptions.length > 1;
+
   return (
     <Fragment>
       <Messages messages={requestMessages} />
@@ -499,7 +510,7 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
         loadingItems={loadingFieldOptions}
         setFormState={setFormState}
       />
-      {scatterplotFieldOptions.length > 1 && (
+      {showScatterplotMatrix && (
         <>
           <EuiFormRow
             data-test-subj="mlAnalyticsCreateJobWizardScatterplotMatrixFormRow"
