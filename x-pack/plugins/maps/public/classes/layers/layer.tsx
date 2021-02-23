@@ -26,7 +26,7 @@ import {
   SOURCE_TYPES,
   STYLE_TYPE,
 } from '../../../common/constants';
-import { copyPersistentState } from '../../reducers/util';
+import { copyPersistentState } from '../../reducers/copy_persistent_state';
 import {
   AggDescriptor,
   ESTermSourceDescriptor,
