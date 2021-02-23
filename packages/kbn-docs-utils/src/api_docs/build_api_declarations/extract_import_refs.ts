@@ -64,7 +64,11 @@ export function extractImportReferences(
         texts.push({
           pluginId: plugin.manifest.id,
           scope: getScopeFromPath(path, plugin, log),
-          docId: getPluginApiDocId(plugin.manifest.id, plugin.manifest.serviceFolders, path),
+          docId: getPluginApiDocId(plugin.manifest.id, {
+            serviceFolders: plugin.manifest.serviceFolders,
+            apiPath: path,
+            directory: plugin.directory,
+          }),
           section,
           text: name,
         });

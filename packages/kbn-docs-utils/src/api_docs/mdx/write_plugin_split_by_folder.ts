@@ -7,7 +7,7 @@
  */
 
 import { ToolingLog } from '@kbn/dev-utils';
-import { getServiceForPath, snakeToCamel } from '../utils';
+import { snakeToCamel } from '../utils';
 import { PluginApi, ApiDeclaration } from '../types';
 import { writePluginDoc } from './write_plugin_mdx_docs';
 
@@ -44,7 +44,9 @@ function addSection(
   pluginServices: { [key: string]: PluginApi },
   serviceFolders: readonly string[]
 ) {
-  const serviceFolderName = getServiceForPath(dec.source.path);
+  const scopeFolder = scope === 'client' ? 'public' : scope;
+  const matchGroup = dec.source.path.match(`.*?\/${scopeFolder}\/([^\/]*?)\/`);
+  const serviceFolderName = matchGroup ? matchGroup[1] : undefined;
 
   if (serviceFolderName && serviceFolders.find((f) => f === serviceFolderName)) {
     const service = snakeToCamel(serviceFolderName);

@@ -40,3 +40,6 @@ export enum DayOfWeek {
 export type MultipleDeclarationsType = TypeWithGeneric<typeof DayOfWeek>;
 
 export type IRefANotExportedType = ImNotExportedFromIndex | { zed: 'hi' };
+export interface ImAnObject {
+  foo: FnWithGeneric;
+}

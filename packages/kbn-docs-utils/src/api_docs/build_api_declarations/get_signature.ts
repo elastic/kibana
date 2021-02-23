@@ -49,7 +49,10 @@ export function getSignature(
     // Need to tack on manually any type parameters or "extends/implements" section.
     const heritageClause = node
       .getHeritageClauses()
-      .map((h) => h.getText())
+      .map((h) => {
+        const heritance = h.getText().indexOf('implements') > -1 ? 'implements' : 'extends';
+        return `${heritance} ${h.getTypeNodes().map((n) => n.getType().getText())}`;
+      })
       .join(' ');
     signature = `${node.getType().getText()}${heritageClause ? ' ' + heritageClause : ''}`;
   } else {

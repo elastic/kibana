@@ -314,23 +314,31 @@ describe('interfaces and classes', () => {
     expect(exampleInterface?.signature).toBeDefined();
     expect(exampleInterface?.type).toBe(TypeKind.InterfaceKind);
 
-    expect(linkCount(exampleInterface?.signature!)).toBe(1);
+    expect(linkCount(exampleInterface?.signature!)).toBe(2);
 
     // TODO: uncomment if the bug is fixed.
     // This is wrong, the link should be to `AnotherInterface`
     // Another bug, this link is not being captured.
-    // expect(exampleInterface?.signature).toMatchInlineSnapshot(`
-    //   Array [
-    //     "",
-    //     Object {
-    //       "docId": "kibPluginAPluginApi",
-    //       "section": "def-public.ExampleInterface",
-    //       "text": "ExampleInterface",
-    //     },
-    //     " extends AnotherInterface<string>",
-    //   ]
-    // `);
-    // expect(typeof exampleInterface!.signature![2]).toBe('Object');
+    expect(exampleInterface?.signature).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "docId": "kibPluginAPluginApi",
+          "pluginId": "pluginA",
+          "scope": "public",
+          "section": "def-public.ExampleInterface",
+          "text": "ExampleInterface",
+        },
+        " extends ",
+        Object {
+          "docId": "kibPluginAPluginApi",
+          "pluginId": "pluginA",
+          "scope": "public",
+          "section": "def-public.AnotherInterface",
+          "text": "AnotherInterface",
+        },
+        "<string>",
+      ]
+    `);
   });
 
   it('Non arrow function on interface is exported as function type', () => {
@@ -356,10 +364,26 @@ describe('interfaces and classes', () => {
           "section": "def-public.CrazyClass",
           "text": "CrazyClass",
         },
-        "<P> extends ExampleClass<WithGen<P>>",
+        "<P> extends ",
+        Object {
+          "docId": "kibPluginAPluginApi",
+          "pluginId": "pluginA",
+          "scope": "public",
+          "section": "def-public.ExampleClass",
+          "text": "ExampleClass",
+        },
+        "<",
+        Object {
+          "docId": "kibPluginAPluginApi",
+          "pluginId": "pluginA",
+          "scope": "public",
+          "section": "def-public.WithGen",
+          "text": "WithGen",
+        },
+        "<P>>",
       ]
     `);
-    expect(clss?.signature?.length).toBe(2);
+    expect(linkCount(clss?.signature!)).toBe(3);
   });
 
   it('Function with generic inside interface is exported with function type', () => {

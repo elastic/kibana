@@ -59,10 +59,11 @@ export function groupPluginApi(declarations: ApiDeclaration[]): ScopeApi {
  * 'src/plugin/data/server/file.ts' would return undefined.
  * @param path
  */
-export function getServiceForPath(path: string): string | undefined {
-  const publicMatchGroups = path.match(/.*\/public\/(.*?)\/.*/);
-  const serverMatchGroups = path.match(/.*\/server\/(.*?)\/.*/);
-  const commonMatchGroups = path.match(/.*\/common\/(.*?)\/.*/);
+export function getServiceForPath(path: string, pluginDirectory: string): string | undefined {
+  const publicMatchGroups = path.match(`${pluginDirectory}/public\/([^\/]*)\/`);
+  const serverMatchGroups = path.match(`${pluginDirectory}/server\/([^\/]*)\/`);
+  const commonMatchGroups = path.match(`${pluginDirectory}/common\/([^\/]*)\/`);
+
   if (publicMatchGroups && publicMatchGroups.length > 1) {
     return publicMatchGroups[1];
   } else if (serverMatchGroups && serverMatchGroups.length > 1) {
@@ -74,14 +75,17 @@ export function getServiceForPath(path: string): string | undefined {
 
 export function getPluginApiDocId(
   id: string,
-  serviceFolders?: readonly string[],
-  apiPath?: string
+  serviceInfo?: {
+    serviceFolders: readonly string[];
+    apiPath: string;
+    directory: string;
+  }
 ) {
   let service = '';
   const cleanName = id.replace('.', '_');
-  if (apiPath) {
-    const serviceName = getServiceForPath(apiPath);
-    const serviceFolder = serviceFolders?.find((f) => f === serviceName);
+  if (serviceInfo) {
+    const serviceName = getServiceForPath(serviceInfo.apiPath, serviceInfo.directory);
+    const serviceFolder = serviceInfo.serviceFolders?.find((f) => f === serviceName);
 
     if (serviceFolder) {
       service = snakeToCamel(serviceFolder);

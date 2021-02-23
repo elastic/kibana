@@ -27,13 +27,22 @@ it('test getPluginForPath', () => {
 });
 
 it('test getServiceForPath', () => {
-  expect(getServiceForPath('src/plugins/embed/public/service/file.ts')).toBe('service');
-  expect(getServiceForPath('src/plugins/embed/public/service/subfolder/file.ts')).toBe('service');
-  expect(getServiceForPath('src/plugins/embed/public/file.ts')).toBeUndefined();
-  expect(getServiceForPath('src/plugins/embed/server/another_service/file.ts')).toBe(
-    'another_service'
+  expect(getServiceForPath('src/plugins/embed/public/service/file.ts', 'src/plugins/embed')).toBe(
+    'service'
   );
-  expect(getServiceForPath('src/plugins/embed/server/f.ts')).toBeUndefined();
+  expect(
+    getServiceForPath('src/plugins/embed/public/service/subfolder/file.ts', 'src/plugins/embed')
+  ).toBe('service');
+  expect(
+    getServiceForPath('src/plugins/embed/public/file.ts', 'src/plugins/embed')
+  ).toBeUndefined();
+  expect(
+    getServiceForPath('src/plugins/embed/server/another_service/file.ts', 'src/plugins/embed')
+  ).toBe('another_service');
+  expect(
+    getServiceForPath('src/plugins/embed/server/routes/public/foo/index.ts', 'src/plugins/embed')
+  ).toBe('routes');
+  expect(getServiceForPath('src/plugins/embed/server/f.ts', 'src/plugins/embed')).toBeUndefined();
 });
 
 it('test removeBrokenLinks', () => {
