@@ -49,7 +49,8 @@ export const useKqlSyntax = ({ setValue }: Props) => {
 
   useEffect(() => {
     localStorage.setItem(KQL_SYNTAX_LOCAL_STORAGE, String(kqlSyntax));
-  }, [kqlSyntax]);
+    setValue('');
+  }, [kqlSyntax, setValue]);
 
   return { kqlSyntax, setKqlSyntax };
 };
