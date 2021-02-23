@@ -11,14 +11,14 @@ import { EuiModal, EuiModalBody, EuiModalHeader, EuiModalHeaderTitle } from '@el
 
 import { useGetUserSavedObjectPermissions } from '../../../common/lib/kibana';
 import { CaseStatuses } from '../../../../../case/common/api';
-import { Case } from '../../containers/types';
+import { Case, SubCase } from '../../containers/types';
 import { AllCases } from '../all_cases';
 import * as i18n from './translations';
 
 export interface AllCasesModalProps {
   isModalOpen: boolean;
   onCloseCaseModal: () => void;
-  onRowClick: (theCase?: Case) => void;
+  onRowClick: (theCase?: Case | SubCase) => void;
   disabledStatuses?: CaseStatuses[];
 }
 

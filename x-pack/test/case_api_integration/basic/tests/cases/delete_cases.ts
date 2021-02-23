@@ -20,7 +20,7 @@ import {
   deleteComments,
 } from '../../../common/lib/utils';
 import { getSubCaseDetailsUrl } from '../../../../../plugins/case/common/api/helpers';
-import { CollectionWithSubCaseResponse } from '../../../../../plugins/case/common/api';
+import { CaseResponse } from '../../../../../plugins/case/common/api';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
@@ -124,17 +124,15 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(caseInfo.subCase?.id).to.not.eql(undefined);
 
         // there should be two comments on the sub case now
-        const {
-          body: patchedCaseWithSubCase,
-        }: { body: CollectionWithSubCaseResponse } = await supertest
+        const { body: patchedCaseWithSubCase }: { body: CaseResponse } = await supertest
           .post(`${CASES_URL}/${caseInfo.id}/comments`)
           .set('kbn-xsrf', 'true')
-          .query({ subCaseID: caseInfo.subCase!.id })
+          .query({ subCaseID: caseInfo.subCases[0].id })
           .send(postCommentUserReq)
           .expect(200);
 
         const subCaseCommentUrl = `${CASES_URL}/${patchedCaseWithSubCase.id}/comments/${
-          patchedCaseWithSubCase.subCase!.comments![1].id
+          patchedCaseWithSubCase.subCases![0].comments![1].id
         }`;
         // make sure we can get the second comment
         await supertest.get(subCaseCommentUrl).set('kbn-xsrf', 'true').send().expect(200);

@@ -28,7 +28,7 @@ import {
 } from '../../../../../../plugins/case/common/api/helpers';
 import {
   AssociationType,
-  CollectionWithSubCaseResponse,
+  CaseResponse,
   SubCaseResponse,
 } from '../../../../../../plugins/case/common/api';
 
@@ -73,9 +73,9 @@ export default ({ getService }: FtrProviderContext): void => {
     it('should return the correct number of alerts with multiple types of alerts', async () => {
       const { newSubCaseInfo: caseInfo } = await createSubCase({ supertest, actionID });
 
-      const { body: singleAlert }: { body: CollectionWithSubCaseResponse } = await supertest
+      const { body: singleAlert }: { body: CaseResponse } = await supertest
         .post(getCaseCommentsUrl(caseInfo.id))
-        .query({ subCaseID: caseInfo.subCase!.id })
+        .query({ subCaseID: caseInfo.subCases![0].id })
         .set('kbn-xsrf', 'true')
         .send(postCommentAlertReq)
         .expect(200);
@@ -92,7 +92,7 @@ export default ({ getService }: FtrProviderContext): void => {
             { comment: defaultCreateSubComment, id: caseInfo.subCase!.comments![0].id },
             {
               comment: postCommentAlertReq,
-              id: singleAlert.subCase!.comments![1].id,
+              id: singleAlert.subCases![0].comments![1].id,
             },
           ],
           associationType: AssociationType.subCase,
