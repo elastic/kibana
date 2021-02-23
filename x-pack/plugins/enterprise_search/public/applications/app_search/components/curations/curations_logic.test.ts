@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { LogicMounter, mockHttpValues, mockFlashMessageHelpers } from '../../../__mocks__';
+import {
+  LogicMounter,
+  mockHttpValues,
+  mockKibanaValues,
+  mockFlashMessageHelpers,
+} from '../../../__mocks__';
 import '../../__mocks__/engine_logic.mock';
 
 import { nextTick } from '@kbn/test/jest';
@@ -17,6 +22,7 @@ import { CurationsLogic } from './';
 describe('CurationsLogic', () => {
   const { mount } = new LogicMounter(CurationsLogic);
   const { http } = mockHttpValues;
+  const { navigateToUrl } = mockKibanaValues;
   const { clearFlashMessages, setSuccessMessage, flashAPIErrors } = mockFlashMessageHelpers;
 
   const MOCK_CURATIONS_RESPONSE = {
@@ -171,6 +177,33 @@ describe('CurationsLogic', () => {
         await nextTick();
 
         expect(http.delete).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('createCuration', () => {
+      it('should make an API call and navigate to the new curation', async () => {
+        http.post.mockReturnValueOnce(Promise.resolve({ id: 'some-cur-id' }));
+        mount();
+
+        CurationsLogic.actions.createCuration(['some query']);
+        expect(clearFlashMessages).toHaveBeenCalled();
+        await nextTick();
+
+        expect(http.post).toHaveBeenCalledWith('/api/app_search/engines/some-engine/curations', {
+          body: '{"queries":["some query"]}',
+        });
+        expect(navigateToUrl).toHaveBeenCalledWith('/engines/some-engine/curations/some-cur-id');
+      });
+
+      it('handles errors', async () => {
+        http.post.mockReturnValueOnce(Promise.reject('error'));
+        mount();
+
+        CurationsLogic.actions.createCuration(['some query']);
+        expect(clearFlashMessages).toHaveBeenCalled();
+        await nextTick();
+
+        expect(flashAPIErrors).toHaveBeenCalledWith('error');
       });
     });
   });

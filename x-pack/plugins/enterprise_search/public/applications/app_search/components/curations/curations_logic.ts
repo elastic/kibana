@@ -15,8 +15,10 @@ import {
   flashAPIErrors,
 } from '../../../shared/flash_messages';
 import { HttpLogic } from '../../../shared/http';
+import { KibanaLogic } from '../../../shared/kibana';
 import { updateMetaPageIndex } from '../../../shared/table_pagination';
-import { EngineLogic } from '../engine';
+import { ENGINE_CURATION_PATH } from '../../routes';
+import { EngineLogic, generateEnginePath } from '../engine';
 
 import { DELETE_MESSAGE, SUCCESS_MESSAGE } from './constants';
 import { Curation, CurationsAPIResponse } from './types';
@@ -32,6 +34,7 @@ interface CurationsActions {
   onPaginate(newPageIndex: number): { newPageIndex: number };
   loadCurations(): void;
   deleteCurationSet(id: string): string;
+  createCuration(queries: Curation['queries']): Curation['queries'];
 }
 
 export const CurationsLogic = kea<MakeLogicType<CurationsValues, CurationsActions>>({
@@ -41,6 +44,7 @@ export const CurationsLogic = kea<MakeLogicType<CurationsValues, CurationsAction
     onPaginate: (newPageIndex) => ({ newPageIndex }),
     loadCurations: true,
     deleteCurationSet: (id) => id,
+    createCuration: (queries) => queries,
   }),
   reducers: () => ({
     dataLoading: [
@@ -95,6 +99,21 @@ export const CurationsLogic = kea<MakeLogicType<CurationsValues, CurationsAction
         } catch (e) {
           flashAPIErrors(e);
         }
+      }
+    },
+    createCuration: async (queries) => {
+      const { http } = HttpLogic.values;
+      const { engineName } = EngineLogic.values;
+      const { navigateToUrl } = KibanaLogic.values;
+      clearFlashMessages();
+
+      try {
+        const response = await http.post(`/api/app_search/engines/${engineName}/curations`, {
+          body: JSON.stringify({ queries }),
+        });
+        navigateToUrl(generateEnginePath(ENGINE_CURATION_PATH, { curationId: response.id }));
+      } catch (e) {
+        flashAPIErrors(e);
       }
     },
   }),
