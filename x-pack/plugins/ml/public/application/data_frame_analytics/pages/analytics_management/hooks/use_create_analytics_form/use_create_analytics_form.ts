@@ -108,6 +108,7 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
         createKibanaIndexPattern();
       }
       refresh();
+      return true;
     } catch (e) {
       addRequestMessage({
         error: extractErrorMessage(e),
@@ -118,6 +119,7 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
           }
         ),
       });
+      return false;
     }
   };
 
