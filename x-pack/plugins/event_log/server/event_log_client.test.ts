@@ -337,6 +337,28 @@ describe('EventLogStart', () => {
         '2020-03-30T15:55:47.054Z'
       );
     });
+
+    test('throws when the user doesnt have permission to access the specified saved object', async () => {
+      const esContext = contextMock.create();
+
+      const savedObjectGetter = jest.fn();
+
+      const eventLogClient = new EventLogClient({
+        esContext,
+        savedObjectGetter,
+        request: FakeRequest(),
+      });
+
+      savedObjectGetter.mockRejectedValue(new Error('Fail'));
+
+      expect(
+        eventLogClient.getEventsSummaryBySavedObjectIds(
+          'saved-object-type',
+          ['saved-object-id'],
+          {}
+        )
+      ).rejects.toMatchInlineSnapshot(`[Error: Fail]`);
+    });
   });
 });
 

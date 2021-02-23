@@ -161,6 +161,29 @@ export default function ({ getService }: FtrProviderContext) {
           const id1 = `test-000001`;
           const expectedEvents1 = [fakeEvent(namespace, id1), fakeEvent(namespace, id1)];
 
+          await logTestEvent(namespace, id1, expectedEvents1[0]);
+          await logTestEvent(namespace, id1, expectedEvents1[1]);
+
+          const idNotExists = `test-not-exists-000001`;
+          await retry.try(async () => {
+            const urlPrefix = urlPrefixFromNamespace(namespace);
+            const url = `${urlPrefix}/api/event_log/event_log_test/saved_object_summary`;
+            log.debug(`Finding Events for Saved Object with ${url}`);
+            await supertest
+              .post(url)
+              .set('kbn-xsrf', 'foo')
+              .send({
+                ids: [idNotExists],
+                aggs: {},
+              })
+              .expect(404);
+          });
+        });
+
+        it('should return 404 if Saved Object does not exists', async () => {
+          const id1 = `test-000001`;
+          const expectedEvents1 = [fakeEvent(namespace, id1), fakeEvent(namespace, id1)];
+
           const id2 = `test-000002`;
           const expectedEvents2 = [fakeEvent(namespace, id2), fakeEvent(namespace, id2)];
 
@@ -172,11 +195,7 @@ export default function ({ getService }: FtrProviderContext) {
           await retry.try(async () => {
             const result = await aggregateEventsSummaryBySavedObjectIds(namespace, [id1, id2], {});
 
-            expect(result.body.length).to.be(2);
-            expect(result.body).to.eql([
-              { savedObjectId: 'test-000001', summary: { doc_count: 2 } },
-              { savedObjectId: 'test-000002', summary: { doc_count: 2 } },
-            ]);
+            expect(result.error).to.be(2);
           });
         });
       });
