@@ -34,7 +34,7 @@ export const ValueBoostForm: React.FC<Props> = ({ boost, index, name }) => {
   return (
     <>
       {values.map((value, valueIndex) => (
-        <EuiFlexGroup key={valueIndex} responsive={false}>
+        <EuiFlexGroup key={valueIndex} alignItems="center" gutterSize="s" responsive={false}>
           <EuiFlexItem>
             <EuiFieldText
               value={value}
