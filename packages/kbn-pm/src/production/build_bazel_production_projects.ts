@@ -61,13 +61,13 @@ async function copyToBuild(project: Project, kibanaRoot: string, buildRoot: stri
   const relativeProjectPath = relative(kibanaRoot, project.path);
   const buildProjectPath = resolve(buildRoot, relativeProjectPath);
   const bazelFilesToExclude = [
-    '!jest.sh',
-    '!jest_loader.js',
-    '!jest_require_patch.js',
     '!*.sh.runfiles*',
     '!*.params',
     '!*_mappings.json',
     '!*_options.optionsvalid.d.ts',
+    '!*_loader.js',
+    '!*_require_patch.js',
+    '!*.sh',
   ];
 
   await copy(['**/*', '!node_modules/**', ...bazelFilesToExclude], buildProjectPath, {
