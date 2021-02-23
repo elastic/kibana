@@ -10,9 +10,9 @@ import React, { useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiCode,
   EuiCallOut,
   EuiCheckbox,
-  EuiCode,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyoutBody,
