@@ -8,6 +8,7 @@
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { EuiSpacer, EuiForm } from '@elastic/eui';
 import useMount from 'react-use/lib/useMount';
+import { i18n } from '@kbn/i18n';
 import { JobSelectorControl } from './job_selector';
 import { useMlKibana } from '../application/contexts/kibana';
 import { jobsApiProvider } from '../application/services/ml_api_service/jobs';
@@ -43,6 +44,7 @@ const MlAnomalyAlertTrigger: FC<MlAnomalyAlertTriggerProps> = ({
 }) => {
   const {
     services: { http },
+    notifications: { toasts },
   } = useMlKibana();
   const mlHttpService = useMemo(() => new HttpService(http), [http]);
   const adJobsApiService = useMemo(() => jobsApiProvider(mlHttpService), [mlHttpService]);
@@ -72,7 +74,13 @@ const MlAnomalyAlertTrigger: FC<MlAnomalyAlertTriggerProps> = ({
       const jobs = await adJobsApiService.jobs(jobsAndGroupIds);
       setJobConfigs(jobs);
     } catch (e) {
-      // TODO add error handling
+      toasts.danger({
+        title: i18n.translate('xpack.ml.anomalyDetectionAlert.errorFetchingJobs', {
+          defaultMessage: 'Unable to fetch jobs configuration',
+        }),
+        body: e.message,
+        toastLifeTimeMs: 5000,
+      });
     }
   }, [jobsAndGroupIds]);
 
