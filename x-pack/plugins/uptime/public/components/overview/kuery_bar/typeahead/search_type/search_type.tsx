@@ -7,7 +7,6 @@
 
 import React, { useEffect, useState } from 'react';
 import {
-  EuiIcon,
   EuiPopover,
   EuiFormRow,
   EuiSwitch,
@@ -16,6 +15,7 @@ import {
   EuiText,
   EuiSpacer,
   EuiLink,
+  EuiButtonIcon,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
@@ -28,7 +28,7 @@ import {
   SYNTAX_OPTIONS_LABEL,
 } from '../translations';
 
-const BoxesVerticalIcon = euiStyled(EuiIcon)`
+const BoxesVerticalIcon = euiStyled(EuiButtonIcon)`
   padding: 10px 8px 0 8px;
   border-radius: 0;
   height: 38px;
@@ -80,7 +80,8 @@ export const SearchType = ({ kqlSyntax, setKqlSyntax }: Props) => {
     </EuiButtonEmpty>
   ) : (
     <BoxesVerticalIcon
-      type="boxesVertical"
+      color="text"
+      iconType="boxesVertical"
       onClick={onButtonClick}
       data-test-subj="syntaxChangeToKql"
       aria-label={CHANGE_SEARCH_BAR_SYNTAX}
