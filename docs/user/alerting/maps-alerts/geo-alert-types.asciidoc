@@ -37,7 +37,7 @@ than the current time minus the amount of the interval. If data older than
 `now - <current interval>` is ingested, it won't trigger an alert.
 
 [float]
-=== Creating a geo alert
+==== Creating a geo alert
 Both *threshold* and *containment* alerts can be created by clicking the *Create*
 button in the <<alert-management, alert management UI>>.
 Complete the <<defining-alerts-general-details, general alert details>>.
@@ -49,7 +49,7 @@ while contained within a boundary (this feature is optional) or if the alert is 
 just more focused around activity when an entity exists within a shape.
 
 [role="screenshot"]
-image::images/alert-types-tracking-select.png[Choosing a tracking alert type]
+image::user/alerting/images/alert-types-tracking-select.png[Choosing a tracking alert type]
 
 [NOTE]
 ==================================================
@@ -96,18 +96,18 @@ messages.
 
 [float]
 [[alert-type-tracking-containment]]
-=== Tracking containment
+==== Tracking containment
 The Tracking containment alert type runs an {es} query over indices, determining if any
 documents are currently contained within any boundaries from the specified boundary index.
 In the event that an entity is contained within a boundary, an alert may be generated.
 
 [float]
-==== Defining the conditions
+===== Defining the conditions
 Tracking containment alerts have 3 clauses that define the condition to detect,
 as well as 2 Kuery bars used to provide additional filtering context for each of the indices.
 
 [role="screenshot"]
-image::images/alert-types-tracking-containment-conditions.png[Five clauses define the condition to detect]
+image::user/alerting/images/alert-types-tracking-containment-conditions.png[Five clauses define the condition to detect]
 
 Index (entity):: This clause requires an *index or index pattern*, a *time field* that will be used for the *time window*, and a *`geo_point` field* for tracking.
 When entity:: This clause specifies which crossing option to track. The values
@@ -124,4 +124,4 @@ An alert can be triggered either when a containment condition is met or when an 
 is no longer contained.
 
 [role="screenshot"]
-image::images/alert-types-tracking-containment-action-options.png[Five clauses define the condition to detect]
+image::user/alerting/images/alert-types-tracking-containment-action-options.png[Five clauses define the condition to detect]
