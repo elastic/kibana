@@ -160,7 +160,6 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
               indexPatterns={props.indexPatterns}
               state={props.state}
               setAppState={props.setAppState}
-              useNewFieldsApi={props.useNewFieldsApi}
             />
           </section>
           <EuiSpacer size="s" />
