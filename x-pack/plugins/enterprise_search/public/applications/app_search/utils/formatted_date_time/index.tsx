@@ -11,13 +11,13 @@ import { FormattedDate, FormattedTime } from '@kbn/i18n/react';
 
 interface Props {
   date: Date;
-  hasTime?: boolean;
+  hideTime?: boolean;
 }
 
-export const FormattedDateTime: React.FC<Props> = ({ date, hasTime = true }) => (
+export const FormattedDateTime: React.FC<Props> = ({ date, hideTime = false }) => (
   <>
     <FormattedDate value={date} year="numeric" month="short" day="numeric" />
-    {hasTime && (
+    {!hideTime && (
       <>
         {' '}
         <FormattedTime value={date} />

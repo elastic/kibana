@@ -83,9 +83,7 @@ export const EnginesTable: React.FC<EnginesTableProps> = ({
         }
       ),
       dataType: 'string',
-      render: (dateString: string) => (
-        <FormattedDateTime date={new Date(dateString)} hasTime={false} />
-      ),
+      render: (dateString: string) => <FormattedDateTime date={new Date(dateString)} hideTime />,
     },
     {
       field: 'language',
