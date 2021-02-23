@@ -543,7 +543,7 @@ export const TimeseriesConfig = injectI18n(function (props) {
             {...props}
             prefix="series_"
             disabled={!model.override_index_pattern}
-            allowLevelofDetail={true}
+            allowLevelOfDetail={true}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

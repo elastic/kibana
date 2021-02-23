@@ -182,9 +182,9 @@ class TimeseriesPanelConfigUi extends Component {
               fields={this.props.fields}
               model={this.props.model}
               onChange={this.props.onChange}
-              allowLevelofDetail={true}
+              allowLevelOfDetail={true}
+              allowSwitchUseKibanaIndexesMode={true}
             />
-
             <EuiHorizontalRule />
 
             <EuiFlexGroup responsive={false} wrap={true}>

@@ -7,7 +7,7 @@
  */
 
 import { TypeOf } from '@kbn/config-schema';
-import { metricsItems, panel, seriesItems, visPayloadSchema, fieldObject } from './vis_schema';
+import { metricsItems, panel, seriesItems, visPayloadSchema, fieldObject, indexPattern } from './vis_schema';
 import { PANEL_TYPES } from './panel_types';
 import { TimeseriesUIRestrictions } from './ui_restrictions';
 
@@ -16,6 +16,7 @@ export type MetricsItemsSchema = TypeOf<typeof metricsItems>;
 export type PanelSchema = TypeOf<typeof panel>;
 export type VisPayload = TypeOf<typeof visPayloadSchema>;
 export type FieldObject = TypeOf<typeof fieldObject>;
+export type IndexPatternObject = TypeOf<typeof indexPattern>;
 
 interface PanelData {
   id: string;

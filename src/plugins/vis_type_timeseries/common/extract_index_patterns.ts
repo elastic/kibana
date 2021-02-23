@@ -7,13 +7,13 @@
  */
 
 import { uniq } from 'lodash';
-import { PanelSchema } from '../common/types';
+import { PanelSchema, IndexPatternObject } from '../common/types';
 
 export function extractIndexPatterns(
   panel: PanelSchema,
   defaultIndex?: PanelSchema['default_index_pattern']
 ) {
-  const patterns: string[] = [];
+  const patterns: IndexPatternObject[] = [];
 
   if (panel.index_pattern) {
     patterns.push(panel.index_pattern);
@@ -39,5 +39,5 @@ export function extractIndexPatterns(
     patterns.push(defaultIndex);
   }
 
-  return uniq<string>(patterns).sort();
+  return uniq<IndexPatternObject>(patterns).sort();
 }

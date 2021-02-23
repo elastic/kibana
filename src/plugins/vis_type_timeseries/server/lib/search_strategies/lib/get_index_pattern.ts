@@ -7,26 +7,34 @@
  */
 
 import { IndexPatternsService, IndexPattern } from '../../../../../data/server';
+import { IndexPatternObject } from '../../../../common/types';
 
 interface IndexPatternObjectDependencies {
   indexPatternsService: IndexPatternsService;
 }
 export async function getIndexPatternObject(
-  indexPatternString: string,
+  indexPattern: IndexPatternObject,
   { indexPatternsService }: IndexPatternObjectDependencies
 ) {
   let indexPatternObject: IndexPattern | undefined | null;
 
-  if (!indexPatternString) {
+  const getIndexPatternFromString = async (v: string) =>
+    (await indexPatternsService.find(v)).find((index) => index.title === indexPattern);
+
+  if (!indexPattern) {
     indexPatternObject = await indexPatternsService.getDefault();
   } else {
-    indexPatternObject = (await indexPatternsService.find(indexPatternString)).find(
-      (index) => index.title === indexPatternString
-    );
+    if (typeof indexPattern === 'string') {
+      indexPatternObject = await getIndexPatternFromString(indexPattern);
+    } else if (indexPattern.id) {
+      indexPatternObject = await indexPatternsService.get(indexPattern.id);
+    } else if (indexPattern.title) {
+      indexPatternObject = await getIndexPatternFromString(indexPattern.title);
+    }
   }
 
   return {
     indexPatternObject,
-    indexPatternString: indexPatternObject?.title || indexPatternString || '',
+    indexPatternString: indexPatternObject?.title ?? '',
   };
 }

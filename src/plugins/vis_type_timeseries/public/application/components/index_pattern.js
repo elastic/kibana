@@ -37,6 +37,7 @@ import { VisDataContext } from '../contexts/vis_data_context';
 import { getUISettings } from '../../services';
 import { AUTO_INTERVAL } from '../../../common/constants';
 import { UI_SETTINGS } from '../../../../data/common';
+import { IndexPatternSelect } from './index_pattern_select';
 
 const RESTRICT_FIELDS = [KBN_FIELD_TYPES.DATE];
 const LEVEL_OF_DETAIL_STEPS = 10;
@@ -64,7 +65,8 @@ export const IndexPattern = ({
   onChange,
   disabled,
   model: _model,
-  allowLevelofDetail,
+  allowLevelOfDetail,
+  allowSwitchUseKibanaIndexesMode,
 }) => {
   const config = getUISettings();
   const timeFieldName = `${prefix}time_field`;
@@ -175,12 +177,13 @@ export const IndexPattern = ({
               })
             }
           >
-            <EuiFieldText
-              data-test-subj="metricsIndexPatternInput"
-              disabled={disabled}
-              placeholder={model.default_index_pattern}
-              onChange={handleTextChange(indexPatternName)}
+            <IndexPatternSelect
               value={model[indexPatternName]}
+              indexPatternName={indexPatternName}
+              onChange={onChange}
+              defaultIndexPattern={model.default_index_pattern}
+              disabled={disabled}
+              allowSwitchUseKibanaIndexesMode={allowSwitchUseKibanaIndexesMode}
             />
           </EuiFormRow>
         </EuiFlexItem>
@@ -243,7 +246,7 @@ export const IndexPattern = ({
           </EuiFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
-      {allowLevelofDetail && (
+      {allowLevelOfDetail && (
         <EuiFlexGroup>
           <EuiFlexItem>
             <EuiFormRow
@@ -330,5 +333,6 @@ IndexPattern.propTypes = {
   prefix: PropTypes.string,
   disabled: PropTypes.bool,
   className: PropTypes.string,
-  allowLevelofDetail: PropTypes.bool,
+  allowLevelOfDetail: PropTypes.bool,
+  allowSwitchUseKibanaIndexesMode: PropTypes.bool,
 };
