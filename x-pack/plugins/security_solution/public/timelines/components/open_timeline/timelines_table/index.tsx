@@ -107,7 +107,7 @@ export interface TimelinesTableProps {
   onToggleShowNotes: OnToggleShowNotes;
   pageIndex: number;
   pageSize: number;
-  searchResults: OpenTimelineResult[];
+  searchResults: OpenTimelineResult[] | null;
   showExtendedColumns: boolean;
   sortDirection: 'asc' | 'desc';
   sortField: string;

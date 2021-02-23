@@ -105,7 +105,7 @@ export const useGetAllTimeline = (): AllTimelinesArgs => {
   const [allTimelines, setAllTimelines] = useState<Omit<AllTimelinesArgs, 'fetchAllTimeline'>>({
     loading: false,
     totalCount: 0,
-    timelines: null,
+    timelines: null, // use null as initial state to distinguish between empty result and haven't started loading.
     customTemplateTimelineCount: 0,
     defaultTimelineCount: 0,
     elasticTemplateTimelineCount: 0,
@@ -128,7 +128,10 @@ export const useGetAllTimeline = (): AllTimelinesArgs => {
       const fetchData = async () => {
         try {
           if (apolloClient != null) {
-            setAllTimelines((prevState) => ({ ...prevState, loading: true }));
+            setAllTimelines((prevState) => ({
+              ...prevState,
+              loading: true,
+            }));
 
             const variables: GetAllTimeline.Variables = {
               onlyUserFavorite,
