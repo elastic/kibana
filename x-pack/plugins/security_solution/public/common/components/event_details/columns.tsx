@@ -85,24 +85,28 @@ export const getColumns = ({
     sortable: false,
     truncateText: false,
     width: '30px',
-    render: (field: string) => (
-      <EuiToolTip content={i18n.VIEW_COLUMN(field)}>
-        <EuiCheckbox
-          aria-label={i18n.VIEW_COLUMN(field)}
-          checked={columnHeaders.findIndex((c) => c.id === field) !== -1}
-          data-test-subj={`toggle-field-${field}`}
-          data-colindex={1}
-          id={field}
-          onChange={() =>
-            toggleColumn({
-              columnHeaderType: defaultColumnHeaderType,
-              id: field,
-              width: DEFAULT_COLUMN_MIN_WIDTH,
-            })
-          }
-        />
-      </EuiToolTip>
-    ),
+    render: (field: string, data: EventFieldsData) => {
+      const label = data.isObjectArray ? i18n.NESTED_COLUMN(field) : i18n.VIEW_COLUMN(field);
+      return (
+        <EuiToolTip content={label}>
+          <EuiCheckbox
+            aria-label={label}
+            checked={columnHeaders.findIndex((c) => c.id === field) !== -1}
+            data-test-subj={`toggle-field-${field}`}
+            data-colindex={1}
+            id={field}
+            onChange={() =>
+              toggleColumn({
+                columnHeaderType: defaultColumnHeaderType,
+                id: field,
+                width: DEFAULT_COLUMN_MIN_WIDTH,
+              })
+            }
+            disabled={data.isObjectArray}
+          />
+        </EuiToolTip>
+      );
+    },
   },
   {
     field: 'field',
