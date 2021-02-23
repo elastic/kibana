@@ -18,7 +18,6 @@ const isZlibStream = (obj: unknown): obj is Zlib => {
   return typeof obj === 'object' && obj !== null && 'bytesWritten' in obj;
 };
 const isString = (obj: unknown): obj is string => typeof obj === 'string';
-const isObject = (obj: unknown) => isPlainObject(obj) || Array.isArray(obj);
 
 /**
  * Attempts to determine the size (in bytes) of a hapi/good
@@ -64,7 +63,7 @@ export function getResponsePayloadBytes(
     return Buffer.byteLength(payload);
   }
 
-  if (isObject(payload)) {
+  if (isPlainObject(payload) || Array.isArray(payload)) {
     return Buffer.byteLength(JSON.stringify(payload));
   }
 
