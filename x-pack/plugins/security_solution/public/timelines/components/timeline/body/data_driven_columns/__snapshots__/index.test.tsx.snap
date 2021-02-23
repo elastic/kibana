@@ -69,7 +69,7 @@ exports[`Columns it renders the expected columns 1`] = `
         fieldFormat=""
         fieldName="event.category"
         fieldType=""
-        key="plain-column-renderer-formatted-field-value-test-event.category-1-event.category-Access"
+        key="plain-column-renderer-formatted-field-value-test-event.category-1-event.category-Access-0"
         truncate={true}
         value="Access"
       />
@@ -99,7 +99,7 @@ exports[`Columns it renders the expected columns 1`] = `
         fieldFormat=""
         fieldName="event.action"
         fieldType=""
-        key="plain-column-renderer-formatted-field-value-test-event.action-1-event.action-Action"
+        key="plain-column-renderer-formatted-field-value-test-event.action-1-event.action-Action-0"
         truncate={true}
         value="Action"
       />
@@ -129,7 +129,7 @@ exports[`Columns it renders the expected columns 1`] = `
         fieldFormat=""
         fieldName="host.name"
         fieldType=""
-        key="plain-column-renderer-formatted-field-value-test-host.name-1-host.name-apache"
+        key="plain-column-renderer-formatted-field-value-test-host.name-1-host.name-apache-0"
         truncate={true}
         value="apache"
       />
@@ -159,7 +159,7 @@ exports[`Columns it renders the expected columns 1`] = `
         fieldFormat=""
         fieldName="source.ip"
         fieldType=""
-        key="plain-column-renderer-formatted-field-value-test-source.ip-1-source.ip-192.168.0.1"
+        key="plain-column-renderer-formatted-field-value-test-source.ip-1-source.ip-192.168.0.1-0"
         truncate={true}
         value="192.168.0.1"
       />
@@ -189,7 +189,7 @@ exports[`Columns it renders the expected columns 1`] = `
         fieldFormat=""
         fieldName="destination.ip"
         fieldType=""
-        key="plain-column-renderer-formatted-field-value-test-destination.ip-1-destination.ip-192.168.0.3"
+        key="plain-column-renderer-formatted-field-value-test-destination.ip-1-destination.ip-192.168.0.3-0"
         truncate={true}
         value="192.168.0.3"
       />
@@ -219,7 +219,7 @@ exports[`Columns it renders the expected columns 1`] = `
         fieldFormat=""
         fieldName="user.name"
         fieldType=""
-        key="plain-column-renderer-formatted-field-value-test-user.name-1-user.name-john.dee"
+        key="plain-column-renderer-formatted-field-value-test-user.name-1-user.name-john.dee-0"
         truncate={true}
         value="john.dee"
       />
