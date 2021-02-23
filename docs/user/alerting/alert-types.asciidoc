@@ -49,14 +49,14 @@ image::images/alert-types-index-threshold-preview.png[Five clauses define the co
 When the index threshold alert condition is met, the following variables are available to use inside each action:
 
 `context.title`:: A pre-constructed title for the alert. Example: `alert kibana sites - high egress met threshold`.
-`context.message`:: A pre-constructed message for the alert. Example: `alert 'kibana sites - high egress'` + 
-`is active for group 'threshold met':` +
+`context.message`:: A pre-constructed message for the alert. +
+Example: `alert 'kibana sites - high egress' is active for group 'threshold met':` +
 `- Value: 42` +
 `- Conditions Met: count greater than 4 over 5m` +
 `- Timestamp: 2020-01-01T00:00:00.000Z`
 
-`context.group`:: The name of the action group associated with the threshold condition.
-`context.date`:: The date the alert met the threshold condition.
+`context.group`:: The name of the action group associated with the threshold condition. Example: `threshold met`.
+`context.date`:: The date the alert met the threshold condition in ISO format. Example: `2020-01-01T00:00:00.000Z`.
 `context.value`:: The value for the alert that met the threshold condition.
 `context.conditions`:: A description of the threshold condition. Example: `count greater than 4`
 
@@ -162,21 +162,23 @@ Time window:: This clause determines how far back to search for documents, using
 [float]
 ==== Action variables
 
-When the index threshold alert condition is met, the following variables are available to use inside each action:
+When the ES query alert condition is met, the following variables are available to use inside each action:
 
 `context.title`:: A pre-constructed title for the alert. Example: `alert term match alert query matched`.
-`context.message`:: A pre-constructed message for the alert. Example: `alert 'term match alert'` + 
-`is active:` +
+`context.message`:: A pre-constructed message for the alert. +
+Example: `alert 'term match alert' is active:` +
 `- Value: 42` +
 `- Conditions Met: count greater than 4 over 5m` +
 `- Timestamp: 2020-01-01T00:00:00.000Z`
 
-`context.group`:: The name of the action group associated with the condition.
-`context.date`:: The date the alert met the condition.
+`context.group`:: The name of the action group associated with the condition. Example: `query matched`.
+`context.date`:: The date the alert met the condition in ISO format. Example: `2020-01-01T00:00:00.000Z`.
 `context.value`:: The value for the alert that met the condition.
-`context.conditions`:: A description of the condition. Example: `count greater than 4`
-`context.hits`:: The ES documents that matched the query. +
-Using the Mustache template array syntax, you can iterate over these hits to get values from the ES documents.
+`context.conditions`:: A description of the condition. Example: `count greater than 4`.
+`context.hits`:: The most recent ES documents that matched the query. Using the https://mustache.github.io/[Mustache] template array syntax, you can iterate over these hits to get values from the ES documents into your actions.
+
+[role="screenshot"]
+image::images/alert-types-es-query-example-action-variable.png[Iterate over hits using Mustache template syntax]
 
 [float]
 ==== Testing your query
