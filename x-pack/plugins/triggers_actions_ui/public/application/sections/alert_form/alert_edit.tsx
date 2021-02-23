@@ -23,7 +23,12 @@ import {
 } from '@elastic/eui';
 import { cloneDeep } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { ActionTypeRegistryContract, Alert, AlertTypeRegistryContract } from '../../../types';
+import {
+  ActionTypeRegistryContract,
+  Alert,
+  AlertFlyoutCloseReason,
+  AlertTypeRegistryContract,
+} from '../../../types';
 import { AlertForm, getAlertErrors, isValidAlert } from './alert_form';
 import { alertReducer, ConcreteAlertReducer } from './alert_reducer';
 import { updateAlert } from '../../lib/alert_api';
@@ -38,7 +43,7 @@ export interface AlertEditProps<MetaData = Record<string, any>> {
   initialAlert: Alert;
   alertTypeRegistry: AlertTypeRegistryContract;
   actionTypeRegistry: ActionTypeRegistryContract;
-  onClose(): void;
+  onClose: (reason: AlertFlyoutCloseReason) => void;
   reloadAlerts?: () => Promise<void>;
   metadata?: MetaData;
 }
@@ -81,7 +86,7 @@ export const AlertEdit = ({
     if (hasAlertChanged(alert, initialAlert, true)) {
       setIsConfirmAlertCloseModalOpen(true);
     } else {
-      onClose();
+      onClose(AlertFlyoutCloseReason.CANCELED);
     }
   };
 
@@ -197,7 +202,7 @@ export const AlertEdit = ({
                       const savedAlert = await onSaveAlert();
                       setIsSaving(false);
                       if (savedAlert) {
-                        onClose();
+                        onClose(AlertFlyoutCloseReason.SAVED);
                         if (reloadAlerts) {
                           reloadAlerts();
                         }
@@ -218,7 +223,7 @@ export const AlertEdit = ({
           <ConfirmAlertClose
             onConfirm={() => {
               setIsConfirmAlertCloseModalOpen(false);
-              onClose();
+              onClose(AlertFlyoutCloseReason.CANCELED);
             }}
             onCancel={() => {
               setIsConfirmAlertCloseModalOpen(false);
