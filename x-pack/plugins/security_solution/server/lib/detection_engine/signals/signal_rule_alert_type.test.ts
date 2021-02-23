@@ -11,14 +11,7 @@ import { getResult, getMlResult } from '../routes/__mocks__/request_responses';
 import { signalRulesAlertType } from './signal_rule_alert_type';
 import { alertsMock, AlertServicesMock } from '../../../../../alerts/server/mocks';
 import { ruleStatusServiceFactory } from './rule_status_service';
-import {
-  getGapBetweenRuns,
-  getNumCatchupIntervals,
-  getListsClient,
-  getExceptions,
-  sortExceptionItems,
-  checkPrivileges,
-} from './utils';
+import { getListsClient, getExceptions, sortExceptionItems, checkPrivileges } from './utils';
 import { parseScheduleDates } from '../../../../common/detection_engine/parse_schedule_dates';
 import { RuleExecutorOptions, SearchAfterAndBulkCreateReturnType } from './types';
 import { searchAfterAndBulkCreate } from './search_after_bulk_create';
@@ -41,7 +34,6 @@ jest.mock('./utils', () => {
   return {
     ...original,
     getGapBetweenRuns: jest.fn(),
-    getGapMaxCatchupRatio: jest.fn(),
     getListsClient: jest.fn(),
     getExceptions: jest.fn(),
     sortExceptionItems: jest.fn(),
@@ -113,7 +105,6 @@ describe('rules_notification_alert_type', () => {
       warning: jest.fn(),
     };
     (ruleStatusServiceFactory as jest.Mock).mockReturnValue(ruleStatusService);
-    (getGapBetweenRuns as jest.Mock).mockReturnValue(moment.duration(0));
     (getListsClient as jest.Mock).mockReturnValue({
       listClient: getListClientMock(),
       exceptionsClient: getExceptionListClientMock(),
@@ -124,7 +115,6 @@ describe('rules_notification_alert_type', () => {
       exceptionsWithValueLists: [],
     });
     (searchAfterAndBulkCreate as jest.Mock).mockClear();
-    (getNumCatchupIntervals as jest.Mock).mockClear();
     (searchAfterAndBulkCreate as jest.Mock).mockResolvedValue({
       success: true,
       searchAfterTimes: [],
