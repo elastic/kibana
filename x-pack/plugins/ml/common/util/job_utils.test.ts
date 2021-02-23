@@ -606,7 +606,7 @@ describe('ML - job utils', () => {
 
   describe('resolveBucketSpanInSeconds', () => {
     test('should resolve maximum bucket interval', () => {
-      expect(resolveBucketSpanInSeconds(['15m', '1h', '6h', '90s'])).toBe(43200);
+      expect(resolveBucketSpanInSeconds(['15m', '1h', '6h', '90s'])).toBe(21600);
     });
   });
 });

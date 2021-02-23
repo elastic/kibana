@@ -25,7 +25,8 @@ interface ConfigValidatorProps {
 export const ConfigValidator: FC<ConfigValidatorProps> = React.memo(
   ({ jobConfigs = [], alertInterval }) => {
     const resultBucketSpanInSeconds = useMemo(
-      () => resolveBucketSpanInSeconds(jobConfigs.map((v) => v.analysis_config.bucket_span)),
+      // Double the max bucket span of the selected jobs
+      () => resolveBucketSpanInSeconds(jobConfigs.map((v) => v.analysis_config.bucket_span)) * 2,
       [jobConfigs]
     );
 

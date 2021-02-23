@@ -294,7 +294,8 @@ export function alertingServiceProvider(mlClient: MlClient, esClient: Elasticsea
      * We need to check the biggest time range to make sure anomalies are not missed.
      */
     const lookBackTimeInterval = `${Math.max(
-      resolveBucketSpanInSeconds(jobsResponse.map((v) => v.analysis_config.bucket_span)),
+      // Double the max bucket span
+      resolveBucketSpanInSeconds(jobsResponse.map((v) => v.analysis_config.bucket_span)) * 2,
       checkIntervalGap ? checkIntervalGap.asSeconds() : 0
     )}s`;
 

@@ -804,16 +804,14 @@ export function splitIndexPatternNames(indexPatternName: string): string[] {
 }
 
 /**
- * Resolves the longest bucket span from the list and multiply it by 2.
+ * Resolves the longest bucket span from the list.
  * @param bucketSpans Collection of bucket spans
  */
 export function resolveBucketSpanInSeconds(bucketSpans: string[]): number {
-  return (
-    Math.max(
-      ...bucketSpans
-        .map((b) => parseInterval(b))
-        .filter(isDefined)
-        .map((v) => v.asSeconds())
-    ) * 2
+  return Math.max(
+    ...bucketSpans
+      .map((b) => parseInterval(b))
+      .filter(isDefined)
+      .map((v) => v.asSeconds())
   );
 }
