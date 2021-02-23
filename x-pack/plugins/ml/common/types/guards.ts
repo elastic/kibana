@@ -5,10 +5,6 @@
  * 2.0.
  */
 
-import { resolveBucketSpanInSeconds } from './alerting_service';
-
-describe('Alerting Service', () => {
-  test('should resolve maximum bucket interval', () => {
-    expect(resolveBucketSpanInSeconds(['15m', '1h', '6h', '90s'])).toBe(43200);
-  });
-});
+export function isDefined<T>(argument: T | undefined | null): argument is T {
+  return argument !== undefined && argument !== null;
+}
