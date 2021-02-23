@@ -10,7 +10,15 @@ import classNames from 'classnames';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { Ast } from '@kbn/interpreter/common';
 import { i18n } from '@kbn/i18n';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText, EuiButtonEmpty, EuiLink } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiText,
+  EuiButtonEmpty,
+  EuiLink,
+  EuiPageContentBody,
+} from '@elastic/eui';
 import { CoreStart, CoreSetup } from 'kibana/public';
 import {
   DataPublicPluginStart,
@@ -320,10 +328,10 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
         value={dropProps.value}
         order={dropProps.order}
       >
-        <div>
+        <EuiPageContentBody className="lnsWorkspacePanelWrapper__pageContentBody">
           {renderVisualization()}
           {Boolean(suggestionForDraggedField) && expression !== null && renderEmptyWorkspace()}
-        </div>
+        </EuiPageContentBody>
       </DragDrop>
     </WorkspacePanelWrapper>
   );

@@ -7,6 +7,7 @@
  */
 
 import { IUiSettingsClient } from 'src/core/public';
+import { isEqual } from 'lodash';
 import { SEARCH_FIELDS_FROM_SOURCE, DEFAULT_COLUMNS_SETTING } from '../../../../common';
 
 /**
@@ -25,9 +26,15 @@ export function handleSourceColumnState<TState extends { columns?: string[] }>(
   const defaultColumns = uiSettings.get(DEFAULT_COLUMNS_SETTING);
   if (useNewFieldsApi) {
     // if fields API is used, filter out the source column
+    let cleanedColumns = state.columns.filter((column) => column !== '_source');
+    if (cleanedColumns.length === 0 && !isEqual(defaultColumns, ['_source'])) {
+      cleanedColumns = defaultColumns;
+      // defaultColumns could still contain _source
+      cleanedColumns = cleanedColumns.filter((column) => column !== '_source');
+    }
     return {
       ...state,
-      columns: state.columns.filter((column) => column !== '_source'),
+      columns: cleanedColumns,
     };
   } else if (state.columns.length === 0) {
     // if _source fetching is used and there are no column, switch back to default columns
