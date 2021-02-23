@@ -6,17 +6,30 @@
  */
 
 import { ESSearchHit } from '../../../../../typings/elasticsearch';
-import { Agent, AgentSOAttributes } from '../../types';
+import { Agent, AgentSOAttributes, FleetServerAgent } from '../../types';
 
-export function searchHitToAgent(hit: ESSearchHit<AgentSOAttributes>): Agent {
+export function searchHitToAgent(hit: ESSearchHit<FleetServerAgent>): Agent {
   return {
     id: hit._id,
     ...hit._source,
-    current_error_events: hit._source.current_error_events
-      ? JSON.parse(hit._source.current_error_events)
-      : [],
+    policy_revision: hit._source.policy_revision_idx,
+    current_error_events: [],
     access_api_key: undefined,
     status: undefined,
     packages: hit._source.packages ?? [],
   };
+}
+
+export function agentSOAttributesToFleetServerAgentDoc(
+  data: Partial<AgentSOAttributes>
+): Partial<Omit<FleetServerAgent, 'id'>> {
+  const { policy_revision: policyRevison, ...rest } = data;
+
+  const doc: Partial<Omit<FleetServerAgent, 'id'>> = { ...rest };
+
+  if (policyRevison !== undefined) {
+    doc.policy_revision_idx = policyRevison;
+  }
+
+  return doc;
 }

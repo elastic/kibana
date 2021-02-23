@@ -6,7 +6,9 @@
  */
 
 import React from 'react';
+
 import { shallow } from 'enzyme';
+
 import { EuiPageSideBar, EuiButton, EuiPageBody, EuiCallOut } from '@elastic/eui';
 
 import { Layout, INavContext } from './layout';
@@ -57,7 +59,7 @@ describe('Layout', () => {
   });
 
   it('renders a read-only mode callout', () => {
-    const wrapper = shallow(<Layout navigation={null} readOnlyMode={true} />);
+    const wrapper = shallow(<Layout navigation={null} readOnlyMode />);
 
     expect(wrapper.find(EuiCallOut)).toHaveLength(1);
   });

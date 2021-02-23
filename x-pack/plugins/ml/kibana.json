@@ -17,15 +17,18 @@
     "uiActions",
     "kibanaLegacy",
     "indexPatternManagement",
-    "discover"
+    "discover",
+    "triggersActionsUi"
   ],
   "optionalPlugins": [
+    "alerts",
     "home",
     "security",
     "spaces",
     "management",
     "licenseManagement",
-    "maps"
+    "maps",
+    "lens"
   ],
   "server": true,
   "ui": true,
@@ -36,7 +39,6 @@
     "dashboard",
     "savedObjects",
     "home",
-    "spaces",
     "maps"
   ],
   "extraPublicDirs": [

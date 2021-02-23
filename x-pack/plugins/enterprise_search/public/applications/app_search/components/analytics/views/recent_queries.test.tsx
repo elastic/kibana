@@ -8,9 +8,11 @@
 import { setMockValues } from '../../../../__mocks__';
 
 import React from 'react';
+
 import { shallow } from 'enzyme';
 
 import { RecentQueriesTable } from '../components';
+
 import { RecentQueries } from './';
 
 describe('RecentQueries', () => {

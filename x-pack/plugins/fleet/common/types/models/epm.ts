@@ -221,6 +221,7 @@ export interface RegistryDataStream {
   path: string;
   ingest_pipeline: string;
   elasticsearch?: RegistryElasticsearch;
+  dataset_is_prefix?: boolean;
 }
 
 export interface RegistryElasticsearch {
@@ -272,7 +273,7 @@ export type PackageInfo =
 export interface Installation extends SavedObjectAttributes {
   installed_kibana: KibanaAssetReference[];
   installed_es: EsAssetReference[];
-  package_assets: PackageAssetReference[];
+  package_assets?: PackageAssetReference[];
   es_index_patterns: Record<string, string>;
   name: string;
   version: string;

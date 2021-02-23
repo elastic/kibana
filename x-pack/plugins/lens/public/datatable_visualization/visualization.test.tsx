@@ -108,6 +108,40 @@ describe('Datatable Visualization', () => {
       expect(suggestions.length).toBeGreaterThan(0);
     });
 
+    it('should retain width and hidden config from existing state', () => {
+      const suggestions = datatableVisualization.getSuggestions({
+        state: {
+          layerId: 'first',
+          columns: [
+            { columnId: 'col1', width: 123 },
+            { columnId: 'col2', hidden: true },
+          ],
+          sorting: {
+            columnId: 'col1',
+            direction: 'asc',
+          },
+        },
+        table: {
+          isMultiRow: true,
+          layerId: 'first',
+          changeType: 'initial',
+          columns: [numCol('col1'), strCol('col2'), strCol('col3')],
+        },
+        keptLayerIds: [],
+      });
+
+      expect(suggestions.length).toBeGreaterThan(0);
+      expect(suggestions[0].state.columns).toEqual([
+        { columnId: 'col1', width: 123 },
+        { columnId: 'col2', hidden: true },
+        { columnId: 'col3' },
+      ]);
+      expect(suggestions[0].state.sorting).toEqual({
+        columnId: 'col1',
+        direction: 'asc',
+      });
+    });
+
     it('should not make suggestions when the table is unchanged', () => {
       const suggestions = datatableVisualization.getSuggestions({
         state: {
@@ -385,11 +419,13 @@ describe('Datatable Visualization', () => {
         columnId: ['c'],
         hidden: [],
         width: [],
+        alignment: [],
       });
       expect(columnArgs[1].arguments).toEqual({
         columnId: ['b'],
         hidden: [],
         width: [],
+        alignment: [],
       });
     });
 
@@ -425,10 +461,10 @@ describe('Datatable Visualization', () => {
         label: 'label',
       });
 
-      const error = datatableVisualization.getErrorMessages(
-        { layerId: 'a', columns: [{ columnId: 'b' }, { columnId: 'c' }] },
-        frame
-      );
+      const error = datatableVisualization.getErrorMessages({
+        layerId: 'a',
+        columns: [{ columnId: 'b' }, { columnId: 'c' }],
+      });
 
       expect(error).toBeUndefined();
     });
@@ -444,10 +480,10 @@ describe('Datatable Visualization', () => {
         label: 'label',
       });
 
-      const error = datatableVisualization.getErrorMessages(
-        { layerId: 'a', columns: [{ columnId: 'b' }, { columnId: 'c' }] },
-        frame
-      );
+      const error = datatableVisualization.getErrorMessages({
+        layerId: 'a',
+        columns: [{ columnId: 'b' }, { columnId: 'c' }],
+      });
 
       expect(error).toBeUndefined();
     });

@@ -21,11 +21,12 @@ import {
   MAX_ZOOM,
   MB_SOURCE_ID_LAYER_ID_PREFIX_DELIMITER,
   MIN_ZOOM,
+  SOURCE_BOUNDS_DATA_REQUEST_ID,
   SOURCE_DATA_REQUEST_ID,
   SOURCE_TYPES,
   STYLE_TYPE,
 } from '../../../common/constants';
-import { copyPersistentState } from '../../reducers/util';
+import { copyPersistentState } from '../../reducers/copy_persistent_state';
 import {
   AggDescriptor,
   ESTermSourceDescriptor,
@@ -66,6 +67,7 @@ export interface ILayer {
   getImmutableSourceProperties(): Promise<ImmutableSourceProperty[]>;
   renderSourceSettingsEditor({ onChange }: SourceEditorArgs): ReactElement<any> | null;
   isLayerLoading(): boolean;
+  isLoadingBounds(): boolean;
   isFilteredByGlobalTime(): Promise<boolean>;
   hasErrors(): boolean;
   getErrors(): string;
@@ -75,7 +77,7 @@ export interface ILayer {
   canShowTooltip(): boolean;
   syncLayerWithMB(mbMap: MbMap): void;
   getLayerTypeIconName(): string;
-  isDataLoaded(): boolean;
+  isInitialDataLoadComplete(): boolean;
   getIndexPatternIds(): string[];
   getQueryableIndexPatternIds(): string[];
   getType(): string | undefined;
@@ -401,6 +403,11 @@ export class AbstractLayer implements ILayer {
     return this._dataRequests.some((dataRequest) => dataRequest.isLoading());
   }
 
+  isLoadingBounds() {
+    const boundsDataRequest = this.getDataRequest(SOURCE_BOUNDS_DATA_REQUEST_ID);
+    return !!boundsDataRequest && boundsDataRequest.isLoading();
+  }
+
   hasErrors(): boolean {
     return _.get(this._descriptor, '__isInErrorState', false);
   }
@@ -439,7 +446,7 @@ export class AbstractLayer implements ILayer {
     throw new Error('should implement Layer#getLayerTypeIconName');
   }
 
-  isDataLoaded(): boolean {
+  isInitialDataLoadComplete(): boolean {
     const sourceDataRequest = this.getSourceDataRequest();
     return sourceDataRequest ? sourceDataRequest.hasData() : false;
   }

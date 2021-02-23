@@ -10,7 +10,8 @@ import copy from 'cpy';
 import globby from 'globby';
 import { basename, join, relative, resolve } from 'path';
 
-import { buildProject, getProductionProjects } from './build_non_bazel_production_projects';
+import { getProductionProjects } from './build_non_bazel_production_projects';
+import { runBazel } from '../utils/bazel/run';
 import { chmod, isFile, isDirectory } from '../utils/fs';
 import { log } from '../utils/log';
 import {
@@ -35,8 +36,10 @@ export async function buildBazelProductionProjects({
   const projectNames = [...projects.values()].map((project) => project.name);
   log.info(`Preparing Bazel projects production build for [${projectNames.join(', ')}]`);
 
+  await runBazel(['build', '//packages:build']);
+  log.info(`All Bazel projects production builds for [${projectNames.join(', ')}] are complete}]`);
+
   for (const project of projects.values()) {
-    await buildProject(project);
     await copyToBuild(project, kibanaRoot, buildRoot);
     await applyCorrectPermissions(project, kibanaRoot, buildRoot);
   }

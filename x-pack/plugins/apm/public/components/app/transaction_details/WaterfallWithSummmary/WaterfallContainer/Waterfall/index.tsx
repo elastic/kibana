@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { History, Location } from 'history';
 import React, { useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import styled from 'styled-components';
+import { euiStyled } from '../../../../../../../../../../src/plugins/kibana_react/common';
 import { Timeline } from '../../../../../shared/charts/Timeline';
 import { HeightRetainer } from '../../../../../shared/HeightRetainer';
 import { fromQuery, toQuery } from '../../../../../shared/Links/url_helpers';
@@ -24,7 +24,7 @@ import {
   IWaterfallSpanItem,
 } from './waterfall_helpers/waterfall_helpers';
 
-const Container = styled.div`
+const Container = euiStyled.div`
   transition: 0.1s padding ease;
   position: relative;
   overflow: hidden;
@@ -56,7 +56,7 @@ const toggleFlyout = ({
   });
 };
 
-const WaterfallItemsContainer = styled.div`
+const WaterfallItemsContainer = euiStyled.div`
   border-bottom: 1px solid ${({ theme }) => theme.eui.euiColorMediumShade};
 `;
 

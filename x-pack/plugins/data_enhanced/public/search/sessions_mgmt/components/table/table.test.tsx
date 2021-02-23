@@ -14,13 +14,16 @@ import React from 'react';
 import { coreMock } from 'src/core/public/mocks';
 import { SessionsClient } from 'src/plugins/data/public/search';
 import { SearchSessionStatus } from '../../../../../common/search';
-import { SessionsConfigSchema } from '../../';
+import { IManagementSectionsPluginsSetup, SessionsConfigSchema } from '../../';
 import { SearchSessionsMgmtAPI } from '../../lib/api';
 import { LocaleWrapper, mockUrls } from '../../__mocks__';
 import { SearchSessionsMgmtTable } from './table';
+import { dataPluginMock } from '../../../../../../../../src/plugins/data/public/mocks';
+import { managementPluginMock } from '../../../../../../../../src/plugins/management/public/mocks';
 
 let mockCoreSetup: MockedKeys<CoreSetup>;
 let mockCoreStart: CoreStart;
+let mockPluginsSetup: IManagementSectionsPluginsSetup;
 let mockConfig: SessionsConfigSchema;
 let sessionsClient: SessionsClient;
 let api: SearchSessionsMgmtAPI;
@@ -29,6 +32,10 @@ describe('Background Search Session Management Table', () => {
   beforeEach(async () => {
     mockCoreSetup = coreMock.createSetup();
     mockCoreStart = coreMock.createStart();
+    mockPluginsSetup = {
+      data: dataPluginMock.createSetupContract(),
+      management: managementPluginMock.createSetupContract(),
+    };
     mockConfig = {
       defaultExpiration: moment.duration('7d'),
       management: {
@@ -79,6 +86,7 @@ describe('Background Search Session Management Table', () => {
           <LocaleWrapper>
             <SearchSessionsMgmtTable
               core={mockCoreStart}
+              plugins={mockPluginsSetup}
               api={api}
               timezone="UTC"
               config={mockConfig}
@@ -108,6 +116,7 @@ describe('Background Search Session Management Table', () => {
           <LocaleWrapper>
             <SearchSessionsMgmtTable
               core={mockCoreStart}
+              plugins={mockPluginsSetup}
               api={api}
               timezone="UTC"
               config={mockConfig}
@@ -149,6 +158,7 @@ describe('Background Search Session Management Table', () => {
           <LocaleWrapper>
             <SearchSessionsMgmtTable
               core={mockCoreStart}
+              plugins={mockPluginsSetup}
               api={api}
               timezone="UTC"
               config={mockConfig}
@@ -181,6 +191,7 @@ describe('Background Search Session Management Table', () => {
           <LocaleWrapper>
             <SearchSessionsMgmtTable
               core={mockCoreStart}
+              plugins={mockPluginsSetup}
               api={api}
               timezone="UTC"
               config={mockConfig}
