@@ -53,7 +53,7 @@ To add an action to an alert, you first select the type of action:
 image::images/alert-flyout-action-type-selection.png[UI for selecting an action type]
 
 When an alert instance matches a condition, the alert is marked as _Active_ and assigned an action group.  The actions in that group are triggered.
-When the condition is no longer detected for an _Active_ alert instance, it is assigned the _Recovered_ action group, triggering any actions assigned to that group.
+When the condition is no longer detected, the alert is assigned to the _Recovered_ action group, which triggers any actions assigned to that group.
 
 **Run When** allows you to assign an action to an _action group_, ensuring you are notified about alert instances in that group by triggering the action in accordance with your **Notify every** setting.
 
