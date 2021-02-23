@@ -9,9 +9,10 @@ import React, { FC, useMemo } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
-import { parseInterval, resolveBucketSpanInSeconds } from '../../common/util/parse_interval';
+import { parseInterval } from '../../common/util/parse_interval';
 import { CombinedJobWithStats, JobId } from '../../common/types/anomaly_detection_jobs';
 import { DATAFEED_STATE, JOB_STATE } from '../../common/constants/states';
+import { resolveBucketSpanInSeconds } from '../../common/util/job_utils';
 
 interface ConfigValidatorProps {
   alertInterval: string;

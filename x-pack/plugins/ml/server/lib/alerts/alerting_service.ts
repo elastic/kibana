@@ -29,7 +29,7 @@ import { AnomalyDetectionAlertContext } from './register_anomaly_detection_alert
 import { MlJobsResponse } from '../../../common/types/job_service';
 import { ANOMALY_SCORE_MATCH_GROUP_ID } from '../../../common/constants/alerts';
 import { getEntityFieldName, getEntityFieldValue } from '../../../common/util/anomaly_utils';
-import { resolveBucketSpanInSeconds } from '../../../common/util/parse_interval';
+import { resolveBucketSpanInSeconds } from '../../../common/util/job_utils';
 
 /**
  * Alerting related server-side methods
