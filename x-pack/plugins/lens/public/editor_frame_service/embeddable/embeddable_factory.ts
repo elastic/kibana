@@ -19,7 +19,7 @@ import {
   EmbeddableFactoryDefinition,
   IContainer,
 } from '../../../../../../src/plugins/embeddable/public';
-import { LensByReferenceInput, LensByValueInput, LensEmbeddableInput } from './embeddable';
+import { LensByReferenceInput, LensEmbeddableInput } from './embeddable';
 import { UiActionsStart } from '../../../../../../src/plugins/ui_actions/public';
 import { Document } from '../../persistence/saved_object_store';
 import { LensAttributeService } from '../../lens_attribute_service';
