@@ -510,13 +510,7 @@ export const serviceProfilingTimelineRoute = createRoute({
     path: t.type({
       serviceName: t.string,
     }),
-    query: t.intersection([
-      rangeRt,
-      uiFiltersRt,
-      t.partial({
-        environment: t.string,
-      }),
-    ]),
+    query: t.intersection([environmentRt, kueryRt, rangeRt]),
   }),
   options: {
     tags: ['access:apm'],
@@ -526,10 +520,11 @@ export const serviceProfilingTimelineRoute = createRoute({
 
     const {
       path: { serviceName },
-      query: { environment },
+      query: { environment, kuery },
     } = context.params;
 
     return getServiceProfilingTimeline({
+      kuery,
       setup,
       serviceName,
       environment,
@@ -544,11 +539,9 @@ export const serviceProfilingStatisticsRoute = createRoute({
       serviceName: t.string,
     }),
     query: t.intersection([
+      environmentRt,
+      kueryRt,
       rangeRt,
-      uiFiltersRt,
-      t.partial({
-        environment: t.string,
-      }),
       t.type({
         valueType: t.union([
           t.literal(ProfilingValueType.wallTime),
@@ -570,10 +563,11 @@ export const serviceProfilingStatisticsRoute = createRoute({
 
     const {
       path: { serviceName },
-      query: { environment, valueType },
+      query: { environment, kuery, valueType },
     } = context.params;
 
     return getServiceProfilingStatistics({
+      kuery,
       serviceName,
       environment,
       valueType,
