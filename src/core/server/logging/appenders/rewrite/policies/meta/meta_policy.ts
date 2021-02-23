@@ -23,14 +23,13 @@ export interface MetaRewritePolicyConfig {
 
   /**
    * The 'mode' specifies what action to perform on the specified properties.
-   *   - 'add' creates a new property at the provided 'path', skipping properties which already exist.
-   *   - 'update' updates an existing property at the provided 'path' without creating new properties.
+   *   - 'update' updates an existing property at the provided 'path'.
    *   - 'remove' removes an existing property at the provided 'path'.
    */
-  mode: 'add' | 'remove' | 'update';
+  mode: 'remove' | 'update';
 
   /**
-   * The properties to add, remove, or update.
+   * The properties to modify.
    *
    * @remarks
    * Each provided 'path' is relative to the record's {@link LogMeta}.
@@ -41,7 +40,7 @@ export interface MetaRewritePolicyConfig {
 
 export const metaRewritePolicyConfigSchema = schema.object({
   type: schema.literal('meta'),
-  mode: schema.oneOf([schema.literal('add'), schema.literal('update'), schema.literal('remove')], {
+  mode: schema.oneOf([schema.literal('update'), schema.literal('remove')], {
     defaultValue: 'update',
   }),
   properties: schema.arrayOf(
@@ -63,8 +62,6 @@ export class MetaRewritePolicy implements RewritePolicy {
 
   rewrite(record: LogRecord): LogRecord {
     switch (this.config.mode) {
-      case 'add':
-        return this.add(record);
       case 'update':
         return this.update(record);
       case 'remove':
@@ -72,16 +69,6 @@ export class MetaRewritePolicy implements RewritePolicy {
       default:
         return assertNever(this.config.mode);
     }
-  }
-
-  private add(record: LogRecord) {
-    for (const { path, value } of this.config.properties) {
-      if (has(record, `meta.${path}`)) {
-        continue; // don't overwrite properties which already exist
-      }
-      set(record, `meta.${path}`, value);
-    }
-    return record;
   }
 
   private update(record: LogRecord) {

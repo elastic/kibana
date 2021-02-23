@@ -317,8 +317,7 @@ The `meta` rewrite policy can read and modify any data contained in the
 
 Meta policies must specify one of three modes, which indicate which action
 to perform on the configured properties:
-- `add` creates a new property at the provided `path`, skipping properties which already exist.
-- `update` updates an existing property at the provided `path` without creating new properties.
+- `update` updates an existing property at the provided `path`.
 - `remove` removes an existing property at the provided `path`.
 
 The `properties` are listed as a `path` and `value` pair, where `path` is
@@ -348,25 +347,23 @@ reference. Each rewrite appender is applied sequentially (one after the other).
 ```yaml
 logging:
   appenders:
-    remove-stuff:
+    remove-request-headers:
       type: rewrite
-      appenders: [add-stuff] # redirect to the next rewrite appender
+      appenders: [censor-response-headers] # redirect to the next rewrite appender
       policy:
         type: meta
         mode: remove
         properties:
-          - path: "http.request.headers.authorization"
-          - path: "http.request.headers.cookie"
-          - path: "http.request.headers.set-cookie"
-    add-stuff:
+          - path: "http.request.headers" # remove all request headers
+    censor-response-headers:
       type: rewrite
       appenders: [console] # output to console
       policy:
         type: meta
-        mode: add
+        mode: update
         properties:
-          - path: "hello"
-            value: "world" # creates { hello: 'world' } at the LogMeta root
+          - path: "http.response.headers.set-cookie"
+            value: "[REDACTED]"
 ```
 
 #### Complete Example
