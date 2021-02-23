@@ -9,9 +9,9 @@ import { getFileSystemRules } from './get_prepackaged_rules';
 import { isEmpty } from 'lodash/fp';
 import { AddPrepackagedRulesSchemaDecoded } from '../../../../common/detection_engine/schemas/request/add_prepackaged_rules_schema';
 
-describe('get_existing_prepackaged_rules', async () => {
+describe('get_existing_prepackaged_rules', () => {
   test('should not throw any errors with the existing checked in pre-packaged rules', async () => {
-    expect(async () => getFileSystemRules()).not.toThrow();
+    return expect(await getFileSystemRules()).rejects;
   });
 
   test('no rule should have the same rule_id as another rule_id', async () => {
@@ -35,7 +35,7 @@ describe('get_existing_prepackaged_rules', async () => {
 
   test('should throw an exception if a pre-packaged rule is not valid', async () => {
     // @ts-expect-error intentionally invalid argument
-    expect(async () => getFileSystemRules([{ not_valid_made_up_key: true }])).toThrow(
+    expect(async () => getFileSystemRules([{ not_valid_made_up_key: true }])).rejects.toThrow(
       'name: "(rule name unknown)", rule_id: "(rule rule_id unknown)" within the folder rules/prepackaged_rules is not a valid detection engine rule. Expect the system to not work with pre-packaged rules until this rule is fixed or the file is removed. Error is: Invalid value "undefined" supplied to "description",Invalid value "undefined" supplied to "risk_score",Invalid value "undefined" supplied to "name",Invalid value "undefined" supplied to "severity",Invalid value "undefined" supplied to "type",Invalid value "undefined" supplied to "rule_id",Invalid value "undefined" supplied to "version", Full rule contents are:\n{\n  "not_valid_made_up_key": true\n}'
     );
   });
@@ -44,7 +44,7 @@ describe('get_existing_prepackaged_rules', async () => {
     expect(
       // @ts-expect-error intentionally invalid argument
       async () => getFileSystemRules([{ name: 'rule name', rule_id: 'id-123' }])
-    ).toThrow(
+    ).rejects.toThrow(
       'name: "rule name", rule_id: "id-123" within the folder rules/prepackaged_rules is not a valid detection engine rule. Expect the system to not work with pre-packaged rules until this rule is fixed or the file is removed. Error is: Invalid value "undefined" supplied to "description",Invalid value "undefined" supplied to "risk_score",Invalid value "undefined" supplied to "severity",Invalid value "undefined" supplied to "type",Invalid value "undefined" supplied to "version", Full rule contents are:\n{\n  "name": "rule name",\n  "rule_id": "id-123"\n}'
     );
   });
