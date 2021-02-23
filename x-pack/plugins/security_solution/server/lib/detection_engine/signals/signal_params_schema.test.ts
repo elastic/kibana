@@ -103,4 +103,75 @@ describe('signal_params_schema', () => {
     const { falsePositives, ...withoutFalsePositives } = getSignalParamsSchemaMock();
     expect(schema.validate(withoutFalsePositives).falsePositives).toEqual([]);
   });
+
+  test('threshold validates with `value` only', () => {
+    const schema = signalParamsSchema();
+    const threshold = {
+      value: 200,
+    };
+    const mock = {
+      ...getSignalParamsSchemaMock(),
+      threshold,
+    };
+    expect(schema.validate(mock).threshold?.value).toEqual(200);
+  });
+
+  test('threshold does not validate without `value`', () => {
+    const schema = signalParamsSchema();
+    const threshold = {
+      field: 'agent.id',
+      cardinality_field: 'host.name',
+      cardinality_value: 5,
+    };
+    const mock = {
+      ...getSignalParamsSchemaMock(),
+      threshold,
+    };
+    expect(() => schema.validate(mock)).toThrow();
+  });
+
+  test('threshold `cardinality_value` cannot be supplied without `cardinality_field`', () => {
+    const schema = signalParamsSchema();
+    const threshold = {
+      value: 100,
+      cardinality_value: 5,
+    };
+    const mock = {
+      ...getSignalParamsSchemaMock(),
+      threshold,
+    };
+    expect(() => schema.validate(mock)).toThrow();
+  });
+
+  test('threshold `cardinality_field` cannot be supplied without `cardinality_value`', () => {
+    const schema = signalParamsSchema();
+    const threshold = {
+      value: 100,
+      cardinality_field: 'host.name',
+    };
+    const mock = {
+      ...getSignalParamsSchemaMock(),
+      threshold,
+    };
+    expect(() => schema.validate(mock)).toThrow();
+  });
+
+  test('threshold validates when both `cardinality_field` and `cardinality_value` are supplied', () => {
+    const schema = signalParamsSchema();
+    const threshold = {
+      value: 100,
+      cardinality_field: 'host.name',
+      cardinality_value: 5,
+    };
+    const mock = {
+      ...getSignalParamsSchemaMock(),
+      threshold,
+    };
+    expect(schema.validate(mock).threshold).toEqual({
+      field: null,
+      value: 100,
+      cardinality_field: 'host.name',
+      cardinality_value: 5,
+    });
+  });
 });

@@ -43,8 +43,13 @@ export const signalSchema = schema.object({
     schema.object({
       field: schema.nullable(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
       value: schema.number(),
-      cardinality_field: schema.nullable(schema.string()), // TODO: depends on `field` being defined?
-      cardinality_value: schema.nullable(schema.number()),
+      cardinality_field: schema.nullable(schema.string()),
+      cardinality_value: schema.conditional(
+        schema.siblingRef('cardinality_field'),
+        null,
+        schema.never(),
+        schema.number()
+      ),
     })
   ),
   timestampOverride: schema.nullable(schema.string()),

@@ -247,6 +247,32 @@ export const schema: FormSchema<DefineStepRule> = {
           defaultMessage: 'Count',
         }
       ),
+      validations: [
+        {
+          validator: (
+            ...args: Parameters<ValidationFunc>
+          ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
+            const [{ formData }] = args;
+            const needsValidation = isThresholdRule(formData.ruleType);
+            if (!needsValidation) {
+              return;
+            }
+            if (
+              isEmpty(formData['threshold.cardinality_field']) &&
+              !isEmpty(formData['threshold.cardinality_value'])
+            ) {
+              return fieldValidators.emptyField(
+                i18n.translate(
+                  'xpack.securitySolution.detectionEngine.validations.thresholdCardinalityFieldFieldData.thresholdCardinalityFieldNotSuppliedMessage',
+                  {
+                    defaultMessage: 'A Cardinality Field is required.',
+                  }
+                )
+              )(...args);
+            }
+          },
+        },
+      ],
       helpText: i18n.translate(
         'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldThresholdFieldCardinalityFieldHelpText',
         {
@@ -272,10 +298,22 @@ export const schema: FormSchema<DefineStepRule> = {
             if (!needsValidation) {
               return;
             }
+            /*
+            if (isEmpty(formData.threshold?.cardinality_value) && !isEmpty(formData.threshold?.cardinality_field)) {
+              return fieldValidators.emptyField(
+                i18n.translate(
+                  'xpack.securitySolution.detectionEngine.validations.thresholdCardinalityValueFieldData.thresholdCardinalityValueNotSuppliedMessage',
+                  {
+                    defaultMessage: 'A Cardinality Value is required.',
+                  }
+                )
+              )(...args);
+            }
+            */
             return fieldValidators.numberGreaterThanField({
               than: 1,
               message: i18n.translate(
-                'xpack.securitySolution.detectionEngine.validations.thresholdValueFieldData.numberGreaterThanOrEqualOneErrorMessage',
+                'xpack.securitySolution.detectionEngine.validations.thresholdCardinalityValueFieldData.numberGreaterThanOrEqualOneErrorMessage',
                 {
                   defaultMessage: 'Value must be greater than or equal to one.',
                 }
