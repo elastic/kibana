@@ -32,29 +32,14 @@ const triggers: TriggerPickerProps = {
 storiesOf('components/DrilldownForm', module)
   .add('Default', () => {
     return (
-      <DrilldownForm
-        name={'...'}
-        euiIconType={'discoverApp'}
-        drilldownTypeName={'Go to Discover'}
-        triggers={triggers}
-        onNameChange={action('onNameChange')}
-        onTypeChange={action('onTypeChange')}
-      >
+      <DrilldownForm name={'...'} triggers={triggers} onNameChange={action('onNameChange')}>
         children...
       </DrilldownForm>
     );
   })
   .add('With license link', () => {
     return (
-      <DrilldownForm
-        name={'...'}
-        euiIconType={'discoverApp'}
-        drilldownTypeName={'Go to Discover'}
-        triggers={triggers}
-        showMoreActionsLink
-        onNameChange={action('onNameChange')}
-        onTypeChange={action('onTypeChange')}
-      >
+      <DrilldownForm name={'...'} triggers={triggers} onNameChange={action('onNameChange')}>
         children...
       </DrilldownForm>
     );
@@ -63,17 +48,13 @@ storiesOf('components/DrilldownForm', module)
     return (
       <DrilldownForm
         name={'...'}
-        euiIconType={'discoverApp'}
-        drilldownTypeName={'Go to Discover'}
         triggers={{
           items: [],
           selected: ['RANGE_SELECT_TRIGGER'],
           docs: 'http://example.com',
           onChange: () => {},
         }}
-        showMoreActionsLink
         onNameChange={action('onNameChange')}
-        onTypeChange={action('onTypeChange')}
       >
         children...
       </DrilldownForm>

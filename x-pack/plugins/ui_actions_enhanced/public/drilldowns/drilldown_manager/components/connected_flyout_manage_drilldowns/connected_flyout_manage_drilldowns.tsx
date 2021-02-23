@@ -31,12 +31,10 @@ import {
   DynamicActionManager,
   SerializedEvent,
 } from '../../../../dynamic_actions';
-import { useWelcomeMessage } from '../../hooks/use_welcome_message';
 import { useCompatibleActionFactoriesForCurrentContext } from '../../hooks/use_compatible_action_factories_for_current_context';
 import { useDrilldownsStateManager } from '../../hooks/use_drilldown_state_manager';
 import { ActionFactoryPlaceContext } from '../types';
 import { FlyoutFrame } from '../flyout_frame';
-import { DrilldownHelloBar } from '../drilldown_hello_bar';
 import { ListManageDrilldowns } from '../list_manage_drilldowns';
 
 interface ConnectedFlyoutManageDrilldownsProps<
@@ -102,8 +100,6 @@ export function createFlyoutManageDrilldowns({
       () => (isCreateOnly ? Routes.Create : Routes.Manage) // initial state is different depending on `viewMode`
     );
     const [currentEditId, setCurrentEditId] = useState<string | null>(null);
-
-    const [shouldShowWelcomeMessage, onHideWelcomeMessage] = useWelcomeMessage(storage);
 
     const {
       drilldowns,
@@ -176,15 +172,7 @@ export function createFlyoutManageDrilldowns({
         ).length > 1;
 
       return (
-        <FlyoutFrame
-          title={txtDrilldowns}
-          onClose={props.onClose}
-          banner={
-            shouldShowWelcomeMessage && (
-              <DrilldownHelloBar docsLink={docsLink} onHideClick={onHideWelcomeMessage} />
-            )
-          }
-        >
+        <FlyoutFrame title={txtDrilldowns} onClose={props.onClose}>
           <ListManageDrilldowns
             drilldowns={drilldowns.map(mapToDrilldownToDrilldownListItem)}
             onEdit={(id) => {
@@ -279,17 +267,10 @@ export function createFlyoutManageDrilldowns({
         footer={footer}
         onClose={props.onClose}
         onBack={isCreateOnly ? undefined : () => setRoute(Routes.Manage)}
-        banner={
-          shouldShowWelcomeMessage && (
-            <DrilldownHelloBar docsLink={docsLink} onHideClick={onHideWelcomeMessage} />
-          )
-        }
       >
         <FlyoutDrilldownWizard
           docsLink={docsLink}
           triggerPickerDocsLink={triggerPickerDocsLink}
-          showWelcomeMessage={shouldShowWelcomeMessage}
-          onWelcomeHideClick={onHideWelcomeMessage}
           drilldownActionFactories={actionFactories}
           onClose={props.onClose}
           mode={route === Routes.Create ? 'create' : 'edit'}
