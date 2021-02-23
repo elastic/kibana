@@ -41,7 +41,7 @@ export async function findAgentIDsByStatus(
   let hasMore = true;
 
   while (hasMore) {
-    const agents = await agentService.listAgents(soClient, esClient, searchOptions(page++));
+    const agents = await agentService.listAgents(esClient, searchOptions(page++));
     result.push(...agents.agents.map((agent: Agent) => agent.id));
     hasMore = agents.agents.length > 0;
   }

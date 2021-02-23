@@ -123,7 +123,7 @@ export async function agentVersionsMap(
   while (hasMore) {
     const queryResult = await endpointAppContext.service
       .getAgentService()!
-      .listAgents(soClient, esClient, searchOptions(page++));
+      .listAgents(esClient, searchOptions(page++));
     queryResult.agents.forEach((agent: Agent) => {
       const agentVersion = agent.local_metadata?.elastic?.agent?.version;
       if (result.has(agentVersion)) {

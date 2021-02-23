@@ -202,7 +202,6 @@ async function findAgent(
     return await metadataRequestContext.endpointAppContextService
       ?.getAgentService()
       ?.getAgent(
-        metadataRequestContext.requestHandlerContext.core.savedObjects.client,
         metadataRequestContext.requestHandlerContext.core.elasticsearch.client.asCurrentUser,
         hostMetadata.elastic.agent.id
       );
@@ -277,7 +276,6 @@ export async function enrichHostMetadata(
     const status = await metadataRequestContext.endpointAppContextService
       ?.getAgentService()
       ?.getAgentStatusById(
-        metadataRequestContext.requestHandlerContext.core.savedObjects.client,
         metadataRequestContext.requestHandlerContext.core.elasticsearch.client.asCurrentUser,
         elasticAgentId
       );
@@ -300,7 +298,6 @@ export async function enrichHostMetadata(
     const agent = await metadataRequestContext.endpointAppContextService
       ?.getAgentService()
       ?.getAgent(
-        metadataRequestContext.requestHandlerContext.core.savedObjects.client,
         metadataRequestContext.requestHandlerContext.core.elasticsearch.client.asCurrentUser,
         elasticAgentId
       );

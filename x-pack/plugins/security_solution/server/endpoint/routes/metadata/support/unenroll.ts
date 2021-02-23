@@ -31,11 +31,7 @@ export async function findAllUnenrolledAgentIds(
   let hasMore = true;
 
   while (hasMore) {
-    const unenrolledAgents = await agentService.listAgents(
-      soClient,
-      esClient,
-      searchOptions(page++)
-    );
+    const unenrolledAgents = await agentService.listAgents(esClient, searchOptions(page++));
     result.push(...unenrolledAgents.agents.map((agent: Agent) => agent.id));
     hasMore = unenrolledAgents.agents.length > 0;
   }
