@@ -6,15 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { isArray, last } from 'lodash';
+import { i18n } from '@kbn/i18n';
 
-const DEFAULT_VALUE = '-';
-const extractValue = (data) => (data && data[1]) ?? null;
-
-export const getLastValue = (data, defaultValue = DEFAULT_VALUE) => {
-  if (!isArray(data)) {
-    return data ?? defaultValue;
-  }
-
-  return extractValue(last(data)) ?? defaultValue;
-};
+export const emptyLabel = i18n.translate('visTypeTimeseries.emptyTextValue', {
+  defaultMessage: '(empty)',
+});
