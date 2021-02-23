@@ -97,8 +97,7 @@
 
     "!src/core/**",
 
-    "**/public/index.(js|ts)",
-    "**/*.(scss|css)"
+    "**/public/index.(js|ts)"
   ],
   "dependencies": {
     "@elastic/datemath": "link:packages/elastic-datemath",

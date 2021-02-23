@@ -115,6 +115,7 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
               },
             },
           ],
+          sideEffects: true,
         },
         {
           test: /\.css$/,
@@ -130,6 +131,7 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
               },
             },
           ],
+          sideEffects: true,
         },
         {
           test: /\.scss$/,
@@ -187,6 +189,7 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
               },
             },
           ],
+          sideEffects: true,
         },
         {
           test: /\.(woff|woff2|ttf|eot|svg|ico|png|jpg|gif|jpeg)(\?|$)/,
