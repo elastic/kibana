@@ -64,16 +64,15 @@ export const ValueBoostForm: React.FC<Props> = ({ boost, index, name }) => {
           </EuiFlexItem>
         </EuiFlexGroup>
       ))}
-      <div>
-        <EuiButtonEmpty size="s" onClick={() => addBoostValue(name, index)}>
-          {i18n.translate(
-            'xpack.enterpriseSearch.appSearch.engine.relevanceTuning.boosts.value.addValueButtonLabel',
-            {
-              defaultMessage: 'Add Value',
-            }
-          )}
-        </EuiButtonEmpty>
-      </div>
+      <EuiSpacer size="s" />
+      <EuiButton size="s" onClick={() => addBoostValue(name, index)}>
+        {i18n.translate(
+          'xpack.enterpriseSearch.appSearch.engine.relevanceTuning.boosts.value.addValueButtonLabel',
+          {
+            defaultMessage: 'Add Value',
+          }
+        )}
+      </EuiButton>
     </>
   );
 };
