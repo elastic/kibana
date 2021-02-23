@@ -58,7 +58,7 @@ export const getSignalsWithES = async ({
   const signals = await es.search<SearchResponse<SignalHit>>({
     index: indices,
     body: {
-      size: ids.length,
+      size: 10000,
       query: {
         bool: {
           filter: [

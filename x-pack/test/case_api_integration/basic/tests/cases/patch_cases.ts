@@ -520,9 +520,9 @@ export default ({ getService }: FtrProviderContext): void => {
           await deleteAllCaseItems(es);
         });
 
-        it.only('should not update the status of duplicate alert ids in separate indices', async () => {
+        it('should not update the status of duplicate alert ids in separate indices', async () => {
           const getSignals = async () => {
-            return await getSignalsWithES({
+            return getSignalsWithES({
               es,
               indices: [defaultSignalsIndex, signalsIndex2],
               ids: [signalIDInFirstIndex, signalIDInSecondIndex],
@@ -571,7 +571,6 @@ export default ({ getService }: FtrProviderContext): void => {
           await es.indices.refresh({ index: defaultSignalsIndex });
 
           let signals = await getSignals();
-
           // There should be no change in their status since syncing is disabled
           expect(
             signals.get(defaultSignalsIndex)?.get(signalIDInFirstIndex)?._source.signal.status
@@ -609,14 +608,15 @@ export default ({ getService }: FtrProviderContext): void => {
             .patch(CASES_URL)
             .set('kbn-xsrf', 'true')
             .send({
-              cases: {
-                id: updatedIndWithStatus[0].id,
-                version: updatedIndWithStatus[0].version,
-                settings: { syncAlerts: true },
-              },
+              cases: [
+                {
+                  id: updatedIndWithStatus[0].id,
+                  version: updatedIndWithStatus[0].version,
+                  settings: { syncAlerts: true },
+                },
+              ],
             })
             .expect(200);
-
           await es.indices.refresh({ index: defaultSignalsIndex });
 
           signals = await getSignals();
