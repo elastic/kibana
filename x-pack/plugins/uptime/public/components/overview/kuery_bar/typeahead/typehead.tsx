@@ -171,8 +171,8 @@ export const Typeahead: React.FC<TypeaheadProps> = ({
             }}
             disabled={disabled}
             value={value}
-            onKeyDown={onKeyDown}
-            onKeyUp={onKeyUp}
+            onKeyDown={kqlSyntax ? onKeyDown : undefined}
+            onKeyUp={kqlSyntax ? onKeyUp : undefined}
             onFocus={onFocus}
             onChange={onChangeInputValue}
             onClick={onClickInput}
