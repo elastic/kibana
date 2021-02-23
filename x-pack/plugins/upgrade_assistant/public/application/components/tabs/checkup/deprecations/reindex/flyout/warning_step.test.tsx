@@ -28,7 +28,7 @@ jest.mock('../../../../../../app_context', () => {
 describe('WarningsFlyoutStep', () => {
   const defaultProps = {
     advanceNextStep: jest.fn(),
-    warnings: [ReindexWarning.allField, ReindexWarning.booleanFields],
+    warnings: [ReindexWarning.apmReindex],
     closeFlyout: jest.fn(),
     renderGlobalCallouts: jest.fn(),
   };
@@ -48,11 +48,7 @@ describe('WarningsFlyoutStep', () => {
     button.simulate('click');
     expect(defaultProps.advanceNextStep).not.toHaveBeenCalled();
 
-    wrapper.find(`input#${idForWarning(ReindexWarning.allField)}`).simulate('change');
-    button.simulate('click');
-    expect(defaultProps.advanceNextStep).not.toHaveBeenCalled();
-
-    wrapper.find(`input#${idForWarning(ReindexWarning.booleanFields)}`).simulate('change');
+    wrapper.find(`input#${idForWarning(ReindexWarning.apmReindex)}`).simulate('change');
     button.simulate('click');
     expect(defaultProps.advanceNextStep).toHaveBeenCalled();
   });
