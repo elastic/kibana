@@ -94,7 +94,7 @@ export class GeoJsonFilePicker extends Component<Props, State> {
               defaultMessage: 'Previewing {numFeatures} features, {previewCoverage}% of file.',
               values: {
                 numFeatures: preview.features.length,
-                previewCoverage: preview.previewCoverage.toFixed(2),
+                previewCoverage: preview.previewCoverage,
               },
             })
           : null,

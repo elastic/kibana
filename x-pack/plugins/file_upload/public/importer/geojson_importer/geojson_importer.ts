@@ -20,11 +20,12 @@ import { i18n } from '@kbn/i18n';
 // @ts-expect-error
 import { JSONLoader, loadInBatches } from './loaders';
 import { CreateDocsResponse } from '../types';
-import { Importer } from '../importer';
+import { callImportRoute, Importer, IMPORT_RETRIES } from '../importer';
 import { ES_FIELD_TYPES } from '../../../../../../src/plugins/data/public';
 // @ts-expect-error
 import { geoJsonCleanAndValidate } from './geojson_clean_and_validate';
 import { validateFile } from '../validate_file';
+import { MB } from '../../../common';
 
 export const GEOJSON_FILE_TYPES = ['.json', '.geojson'];
 
@@ -40,6 +41,7 @@ export class GeoJsonImporter extends Importer {
   private _geometryTypesMap = new Map<string, boolean>();
   private _invalidCount = 0;
   private _prevBatchLastFeature?: Feature;
+  private _geoFieldType?: ES_FIELD_TYPES.GEO_POINT | ES_FIELD_TYPES.GEO_SHAPE;
 
   constructor(file: File) {
     super();
@@ -59,12 +61,114 @@ export class GeoJsonImporter extends Importer {
     await this._readUntil(rowLimit, sizeLimit);
     return {
       features: [...this._features],
-      previewCoverage: (this._unimportedBytesProcessed / this._file.size) * 100,
+      previewCoverage: Math.round((this._unimportedBytesProcessed / this._file.size) * 100),
       geoFieldTypes:
         this._geometryTypesMap.has('Point') || this._geometryTypesMap.has('MultiPoint')
           ? [ES_FIELD_TYPES.GEO_POINT, ES_FIELD_TYPES.GEO_SHAPE]
           : [ES_FIELD_TYPES.GEO_SHAPE],
     };
+  }
+
+  public setGeoFieldType(geoFieldType: ES_FIELD_TYPES.GEO_POINT | ES_FIELD_TYPES.GEO_SHAPE) {
+    this._geoFieldType = geoFieldType;
+  }
+
+  public async import(
+    id: string,
+    index: string,
+    pipelineId: string,
+    setImportProgress: (progress: number) => void
+  ): Promise<ImportResults> {
+    if (!id || !index) {
+      return {
+        success: false,
+        error: i18n.translate('xpack.fileUpload.import.noIdOrIndexSuppliedErrorMessage', {
+          defaultMessage: 'no ID or index supplied',
+        }),
+      };
+    }
+
+    const ingestPipeline = {
+      id: pipelineId,
+    };
+
+    let success = true;
+    const failures: ImportFailure[] = [];
+    let error;
+
+    while (this._features.length > 0 || (this._hasNext && this._isActive)) {
+      await this._readUntil(undefined, 10 * MB);
+      if (!this._isActive) {
+        return {
+          success: false,
+          failures,
+          docCount: this._totalFeatures,
+        };
+      }
+
+      let retries = IMPORT_RETRIES;
+      let resp: ImportResponse = {
+        success: false,
+        failures: [],
+        docCount: 0,
+        id: '',
+        index: '',
+        pipelineId: '',
+      };
+      const data = toEsDocs(this._features, this._geoFieldType);
+      const progress = Math.round((this._totalBytesProcessed / this._file.size) * 100);
+      this._features = [];
+      this._unimportedBytesProcessed = 0;
+
+      while (resp.success === false && retries > 0) {
+        try {
+          resp = await callImportRoute({
+            id,
+            index,
+            data,
+            settings: {},
+            mappings: {},
+            ingestPipeline,
+          });
+
+          if (retries < IMPORT_RETRIES) {
+            // eslint-disable-next-line no-console
+            console.log(`Retrying import ${IMPORT_RETRIES - retries}`);
+          }
+
+          retries--;
+        } catch (err) {
+          resp.success = false;
+          resp.error = err;
+          retries = 0;
+        }
+      }
+
+      if (resp.success) {
+        setImportProgress(progress);
+      } else {
+        success = false;
+        error = resp.error;
+        failures.push(...resp.failures);
+        break;
+      }
+
+      failures.push(...resp.failures);
+    }
+
+    const result: ImportResults = {
+      success,
+      failures,
+      docCount: this._docArray.length,
+    };
+
+    if (success) {
+      setImportProgress(100);
+    } else {
+      result.error = error;
+    }
+
+    return result;
   }
 
   private async _readUntil(rowLimit?: number, sizeLimit?: number) {
@@ -144,37 +248,34 @@ export class GeoJsonImporter extends Importer {
   protected _createDocs(text: string): CreateDocsResponse {
     throw new Error('_createDocs not implemented.');
   }
+}
 
-  public getDocs() {
-    return this._docArray;
+function toEsDocs(
+  features: Feature[],
+  geoFieldType: ES_FIELD_TYPES.GEO_POINT | ES_FIELD_TYPES.GEO_SHAPE
+) {
+  const esDocs = [];
+  for (let i = 0; i < features.length; i++) {
+    const feature = features[i];
+    const geometry = feature.geometry as
+      | Point
+      | MultiPoint
+      | LineString
+      | MultiLineString
+      | Polygon
+      | MultiPolygon;
+    const coordinates =
+      geoFieldType === ES_FIELD_TYPES.GEO_SHAPE
+        ? {
+            type: geometry.type.toLowerCase(),
+            coordinates: geometry.coordinates,
+          }
+        : geometry.coordinates;
+    const properties = feature.properties ? feature.properties : {};
+    esDocs.push({
+      coordinates,
+      ...properties,
+    });
   }
-
-  public setDocs(
-    featureCollection: FeatureCollection,
-    geoFieldType: ES_FIELD_TYPES.GEO_POINT | ES_FIELD_TYPES.GEO_SHAPE
-  ) {
-    this._docArray = [];
-    for (let i = 0; i < featureCollection.features.length; i++) {
-      const feature = featureCollection.features[i];
-      const geometry = feature.geometry as
-        | Point
-        | MultiPoint
-        | LineString
-        | MultiLineString
-        | Polygon
-        | MultiPolygon;
-      const coordinates =
-        geoFieldType === ES_FIELD_TYPES.GEO_SHAPE
-          ? {
-              type: geometry.type.toLowerCase(),
-              coordinates: geometry.coordinates,
-            }
-          : geometry.coordinates;
-      const properties = feature.properties ? feature.properties : {};
-      this._docArray.push({
-        coordinates,
-        ...properties,
-      });
-    }
-  }
+  return esDocs;
 }
