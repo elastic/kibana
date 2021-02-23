@@ -35,10 +35,10 @@ export function WaterfallContainer({
 
   const { legends, items } = waterfall;
 
+  // Service colors are needed to color the dot in the error popover
   const serviceLegends = legends.filter(
     ({ type }) => type === WaterfallLegendType.ServiceName
   );
-
   const serviceColors = serviceLegends.reduce((colorMap, legend) => {
     return {
       ...colorMap,
@@ -46,6 +46,7 @@ export function WaterfallContainer({
     };
   }, {} as Record<string, string>);
 
+  // only color by span type if there are only events for one service
   const colorBy =
     serviceLegends.length > 1
       ? WaterfallLegendType.ServiceName
@@ -62,6 +63,7 @@ export function WaterfallContainer({
     }
 
     if (!color) {
+      // fall back to service color if there's no span.type, e.g. for transactions
       color = serviceColors[item.doc.service.name];
     }
 
