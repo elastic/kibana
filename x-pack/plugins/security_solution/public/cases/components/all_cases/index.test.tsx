@@ -111,6 +111,11 @@ describe('AllCases', () => {
   });
 
   it('should render AllCases', async () => {
+    useGetCasesMock.mockReturnValue({
+      ...defaultGetCases,
+      filterOptions: { ...defaultGetCases.filterOptions, status: CaseStatuses.open },
+    });
+
     const wrapper = mount(
       <TestProviders>
         <AllCases userCanCrud={true} />
@@ -144,6 +149,11 @@ describe('AllCases', () => {
   });
 
   it('should render the stats', async () => {
+    useGetCasesMock.mockReturnValue({
+      ...defaultGetCases,
+      filterOptions: { ...defaultGetCases.filterOptions, status: CaseStatuses.closed },
+    });
+
     const wrapper = mount(
       <TestProviders>
         <AllCases userCanCrud={true} />
@@ -202,6 +212,7 @@ describe('AllCases', () => {
   it('should render empty fields', async () => {
     useGetCasesMock.mockReturnValue({
       ...defaultGetCases,
+      filterOptions: { ...defaultGetCases.filterOptions, status: CaseStatuses.open },
       data: {
         ...defaultGetCases.data,
         cases: [
@@ -243,6 +254,7 @@ describe('AllCases', () => {
   it('should render correct actions for case (with type individual)', async () => {
     useGetCasesMock.mockReturnValue({
       ...defaultGetCases,
+      filterOptions: { ...defaultGetCases.filterOptions, status: CaseStatuses.open },
     });
     const wrapper = mount(
       <TestProviders>
@@ -450,6 +462,7 @@ describe('AllCases', () => {
   it('Renders correct bulk actoins for case collection - enable only bulk delete if any collection is selected', async () => {
     useGetCasesMock.mockReturnValue({
       ...defaultGetCases,
+      filterOptions: { ...defaultGetCases.filterOptions, status: CaseStatuses.open },
       selectedCases: [
         ...useGetCasesMockState.data.cases,
         {
@@ -492,6 +505,7 @@ describe('AllCases', () => {
   it('Bulk close status update', async () => {
     useGetCasesMock.mockReturnValue({
       ...defaultGetCases,
+      filterOptions: { ...defaultGetCases.filterOptions, status: CaseStatuses.open },
       selectedCases: useGetCasesMockState.data.cases,
     });
 
@@ -532,6 +546,7 @@ describe('AllCases', () => {
   it('Bulk in-progress status update', async () => {
     useGetCasesMock.mockReturnValue({
       ...defaultGetCases,
+      filterOptions: { ...defaultGetCases.filterOptions, status: CaseStatuses.open },
       selectedCases: useGetCasesMockState.data.cases,
     });
 

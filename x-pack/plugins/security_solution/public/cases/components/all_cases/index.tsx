@@ -21,7 +21,7 @@ import { isEmpty, memoize } from 'lodash/fp';
 import styled, { css } from 'styled-components';
 import * as i18n from './translations';
 
-import { CaseStatuses, CaseType } from '../../../../../case/common/api';
+import { AllCaseType, CaseStatuses, CaseType } from '../../../../../case/common/api';
 import { getCasesColumns } from './columns';
 import { Case, DeleteCase, FilterOptions, SortFieldCase } from '../../containers/types';
 import { useGetCases, UpdateCase } from '../../containers/use_get_cases';
@@ -509,7 +509,7 @@ export const AllCases = React.memo<AllCasesProps>(
               <BasicTable
                 columns={memoizedGetCasesColumns}
                 data-test-subj="cases-table"
-                isSelectable={userCanCrud && !isModal}
+                isSelectable={userCanCrud && !isModal && filterOptions.status !== AllCaseType}
                 itemId="id"
                 items={data.cases}
                 itemIdToExpandedRowMap={itemIdToExpandedRowMap}
