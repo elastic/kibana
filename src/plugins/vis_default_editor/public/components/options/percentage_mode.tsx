@@ -50,7 +50,6 @@ function PercentageModeOption({
           <FormattedMessage
             id="visDefaultEditor.options.percentageMode.numeralLabel"
             defaultMessage="Format pattern"
-            values={{ defaultPattern: <EuiCode>{defaultPattern}</EuiCode> }}
           />
         }
         helpText={
