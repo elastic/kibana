@@ -1,7 +1,7 @@
 {
   "type": "doc",
   "value": {
-    "index": "auditbeat-7.0.0-alpha1-2018.11.27",
+    "index": "auditbeat-users",
     "type": "doc",
     "id": "Xa2ipWkBCQofM5eXEgsv",
     "source": {
@@ -30,7 +30,7 @@
       },
       "destination" : {
         "ip" : "0.0.0.0",
-        "port" : 22
+        "port" : "22"
       },
       "event": {
         "type": "user_err",
