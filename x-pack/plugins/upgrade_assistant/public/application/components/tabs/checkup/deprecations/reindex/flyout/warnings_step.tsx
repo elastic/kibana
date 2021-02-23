@@ -106,7 +106,6 @@ export const WarningsFlyoutStep: React.FunctionComponent<WarningsConfirmationFly
   const esDocBasePath = `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference`;
   const observabilityDocBasePath = `${ELASTIC_WEBSITE_URL}guide/en/observability`;
 
-  // TODO: Revisit warnings returned for 8.0 upgrade; many of these are likely obselete now
   return (
     <>
       <EuiFlyoutBody>
@@ -130,35 +129,6 @@ export const WarningsFlyoutStep: React.FunctionComponent<WarningsConfirmationFly
         </EuiCallOut>
 
         <EuiSpacer />
-
-        {warnings.includes(ReindexWarning.allField) && (
-          <WarningCheckbox
-            checkedIds={checkedIds}
-            onChange={onChange}
-            warning={ReindexWarning.allField}
-            label={
-              <FormattedMessage
-                id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.allFieldWarningTitle"
-                defaultMessage="{allField} will be removed"
-                values={{
-                  allField: <EuiCode>_all</EuiCode>,
-                }}
-              />
-            }
-            description={
-              <FormattedMessage
-                id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.allFieldWarningDetail"
-                defaultMessage="The {allField} meta field is no longer supported in 7.0. Reindexing removes
-                      the {allField} field in the new index. Ensure that no application code or scripts reply on
-                      this field."
-                values={{
-                  allField: <EuiCode>_all</EuiCode>,
-                }}
-              />
-            }
-            documentationUrl={`${esDocBasePath}/6.0/breaking_60_mappings_changes.html#_the_literal__all_literal_meta_field_is_now_disabled_by_default`}
-          />
-        )}
 
         {warnings.includes(ReindexWarning.customTypeName) && (
           <WarningCheckbox

@@ -93,10 +93,6 @@ export interface ReindexOperation extends SavedObjectAttributes {
 export type ReindexSavedObject = SavedObject<ReindexOperation>;
 
 export enum ReindexWarning {
-  // 6.0 -> 7.0 warnings, now unused
-  allField,
-  booleanFields,
-
   // 7.0 -> 8.0 warnings
   apmReindex,
   customTypeName,
