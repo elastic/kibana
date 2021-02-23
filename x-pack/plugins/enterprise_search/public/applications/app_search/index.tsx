@@ -10,6 +10,8 @@ import { Route, Redirect, Switch } from 'react-router-dom';
 
 import { useActions, useValues } from 'kea';
 
+import { EuiPage, EuiPageBody } from '@elastic/eui';
+
 import { APP_SEARCH_PLUGIN } from '../../../common/constants';
 import { InitialAppData } from '../../../common/types';
 import { getAppSearchUrl } from '../shared/enterprise_search_url';
@@ -79,29 +81,31 @@ export const AppSearchConfigured: React.FC<InitialAppData> = (props) => {
         </Layout>
       </Route>
       <Route>
-        <Layout navigation={<AppSearchNav />} readOnlyMode={readOnlyMode}>
-          {errorConnecting ? (
-            <ErrorConnecting />
-          ) : (
-            <Switch>
-              <Route exact path={ROOT_PATH}>
-                <Redirect to={ENGINES_PATH} />
-              </Route>
-              <Route exact path={ENGINES_PATH}>
-                <EnginesOverview />
-              </Route>
-              <Route exact path={SETTINGS_PATH}>
-                <Settings />
-              </Route>
-              <Route exact path={CREDENTIALS_PATH}>
-                <Credentials />
-              </Route>
-              <Route>
-                <NotFound product={APP_SEARCH_PLUGIN} />
-              </Route>
-            </Switch>
-          )}
-        </Layout>
+        <EuiPage>
+          <EuiPageBody restrictWidth>
+            {errorConnecting ? (
+              <ErrorConnecting />
+            ) : (
+              <Switch>
+                <Route exact path={ROOT_PATH}>
+                  <Redirect to={ENGINES_PATH} />
+                </Route>
+                <Route exact path={ENGINES_PATH}>
+                  <EnginesOverview />
+                </Route>
+                <Route exact path={SETTINGS_PATH}>
+                  <Settings />
+                </Route>
+                <Route exact path={CREDENTIALS_PATH}>
+                  <Credentials />
+                </Route>
+                <Route>
+                  <NotFound product={APP_SEARCH_PLUGIN} />
+                </Route>
+              </Switch>
+            )}
+          </EuiPageBody>
+        </EuiPage>
       </Route>
     </Switch>
   );
