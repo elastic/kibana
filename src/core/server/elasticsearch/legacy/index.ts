@@ -7,11 +7,11 @@
  */
 
 export { LegacyClusterClient } from './cluster_client';
+export type { ILegacyClusterClient, ILegacyCustomClusterClient } from './cluster_client';
 export type {
-  ILegacyClusterClient,
-  ILegacyCustomClusterClient,
-} from './cluster_client';
-export type { ILegacyScopedClusterClient, LegacyScopedClusterClient } from './scoped_cluster_client';
+  ILegacyScopedClusterClient,
+  LegacyScopedClusterClient,
+} from './scoped_cluster_client';
 export type { LegacyElasticsearchClientConfig } from './elasticsearch_client_config';
 export { LegacyElasticsearchErrorHelpers } from './errors';
 export type { LegacyElasticsearchError } from './errors';

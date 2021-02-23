@@ -30,7 +30,12 @@ export type {
   SafeRouteMethod,
 } from './route';
 export { HapiResponseAdapter } from './response_adapter';
-export { kibanaResponseFactory, lifecycleResponseFactory, isKibanaResponse, KibanaResponse } from './response';
+export {
+  kibanaResponseFactory,
+  lifecycleResponseFactory,
+  isKibanaResponse,
+  KibanaResponse,
+} from './response';
 export type {
   CustomHttpResponseOptions,
   HttpResponseOptions,

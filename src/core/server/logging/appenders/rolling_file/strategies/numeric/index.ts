@@ -6,11 +6,6 @@
  * Side Public License, v 1.
  */
 
-export {
-  NumericRollingStrategy,
-  numericRollingStrategyConfigSchema,
-} from './numeric_strategy';
+export { NumericRollingStrategy, numericRollingStrategyConfigSchema } from './numeric_strategy';
 
-export type {
-  NumericRollingStrategyConfig,
-} from './numeric_strategy';
+export type { NumericRollingStrategyConfig } from './numeric_strategy';

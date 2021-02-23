@@ -12,7 +12,6 @@ export type {
   SavedObjectsClientWrapperFactory,
   SavedObjectsClientWrapperOptions,
   ISavedObjectsClientProvider,
-
   SavedObjectsClientProviderOptions,
   SavedObjectsClientFactory,
   SavedObjectsClientFactoryProvider,

@@ -17,7 +17,4 @@ export type {
   ToastsSetup,
   ToastsStart,
 } from './toasts';
-export type {
-  NotificationsSetup,
-  NotificationsStart,
-} from './notifications_service';
+export type { NotificationsSetup, NotificationsStart } from './notifications_service';

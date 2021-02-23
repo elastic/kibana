@@ -10,5 +10,9 @@ export { OverlayService } from './overlay_service';
 export type { OverlayRef } from './types';
 export type { OverlayBannersStart } from './banners';
 export type { OverlayFlyoutStart, OverlayFlyoutOpenOptions } from './flyout';
-export type { OverlayModalStart, OverlayModalOpenOptions, OverlayModalConfirmOptions } from './modal';
+export type {
+  OverlayModalStart,
+  OverlayModalOpenOptions,
+  OverlayModalConfirmOptions,
+} from './modal';
 export type { OverlayStart } from './overlay_service';
