@@ -190,7 +190,8 @@ export const SearchExamplesApp = ({
         .setField('index', indexPattern)
         .setField('filter', filters)
         .setField('query', query)
-        .setField('fields', selectedFields.length ? selectedFields.map((f) => f.name) : ['*']);
+        .setField('fields', selectedFields.length ? selectedFields.map((f) => f.name) : ['*'])
+        .setField('trackTotalHits', 100);
 
       if (selectedNumericField) {
         searchSource.setField('aggs', () => {
