@@ -39,7 +39,7 @@ export const GeoPointContent: FC<{
         config !== undefined &&
         config.fieldName !== undefined &&
         (config.type === ML_JOB_FIELD_TYPES.GEO_POINT ||
-          config.type === ML_JOB_FIELD_TYPES.GE0_SHAPE)
+          config.type === ML_JOB_FIELD_TYPES.GEO_SHAPE)
       ) {
         const params = {
           indexPatternId: indexPattern.id,

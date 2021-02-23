@@ -36,7 +36,7 @@ export function kbnTypeToMLJobType(field: IFieldType) {
       type = ML_JOB_FIELD_TYPES.GEO_POINT;
       break;
     case KBN_FIELD_TYPES.GEO_SHAPE:
-      type = ML_JOB_FIELD_TYPES.GE0_SHAPE;
+      type = ML_JOB_FIELD_TYPES.GEO_SHAPE;
       break;
 
     default:
