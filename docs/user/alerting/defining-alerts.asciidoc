@@ -19,7 +19,7 @@ image::images/alert-flyout-sections.png[The three sections of an alert definitio
 [[defining-alerts-general-details]]
 === General alert details
 
-All alert share the following four properties in common:
+All alerts share the following four properties in common:
 
 [role="screenshot"]
 image::images/alert-flyout-general-details.png[alt='All alerts have name, tags, check every, and notify properties in common']
