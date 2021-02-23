@@ -61,7 +61,7 @@ export const mapColumn: ExpressionFunctionDefinition<
       aliases: ['exp', 'fn', 'function'],
       help: i18n.translate('expressions.functions.mapColumn.args.expressionHelpText', {
         defaultMessage:
-          'A {CANVAS} expression that is passed to each row as a single row {DATATABLE}.',
+          'An expression that is executed on every row, provided with a single-row {DATATABLE} context and returning the cell value.',
         values: {
           CANVAS: 'canvas',
           DATATABLE: '`datatable`',
@@ -73,7 +73,7 @@ export const mapColumn: ExpressionFunctionDefinition<
       types: ['string', 'null'],
       help: i18n.translate('expressions.functions.mapColumn.args.copyMetaFromHelpText', {
         defaultMessage:
-          "If set, the meta object from the specified column id is copied over to the specified target column. Throws an exception if the column doesn't exist",
+          "If set, the meta object from the specified column id is copied over to the specified target column. If the column doesn't exist it silently fails.",
       }),
       required: false,
       default: null,
@@ -104,7 +104,7 @@ export const mapColumn: ExpressionFunctionDefinition<
         meta: { type },
       };
       if (args.copyMetaFrom) {
-        const metaSourceFrom = columns.find(({ name }) => name === args.copyMetaFrom);
+        const metaSourceFrom = columns.find(({ id }) => id === args.copyMetaFrom);
         newColumn.meta = { ...newColumn.meta, ...(metaSourceFrom?.meta || {}) };
       }
 

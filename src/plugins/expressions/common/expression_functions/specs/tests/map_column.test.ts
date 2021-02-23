@@ -84,17 +84,30 @@ describe('mapColumn', () => {
   });
 
   it('should copy over the meta information from the specified column', () => {
-    return runFn(testTable, { name: 'name', copyMetaFrom: 'time', expression: pricePlusTwo }).then(
-      (result) => {
-        const nameColumnIndex = result.columns.findIndex(({ name }) => name === 'name');
-        expect(result.type).toBe('datatable');
-        expect(result.columns[nameColumnIndex]).toEqual({
-          id: 'name',
-          name: 'name',
-          meta: { type: 'date' },
-        });
-      }
-    );
+    return runFn(
+      {
+        ...testTable,
+        columns: [
+          ...testTable.columns,
+          // add a new entry
+          {
+            id: 'myId',
+            name: 'myName',
+            meta: { type: 'date' },
+          },
+        ],
+        rows: testTable.rows.map((row) => ({ ...row, myId: Date.now() })),
+      },
+      { name: 'name', copyMetaFrom: 'myId', expression: pricePlusTwo }
+    ).then((result) => {
+      const nameColumnIndex = result.columns.findIndex(({ name }) => name === 'name');
+      expect(result.type).toBe('datatable');
+      expect(result.columns[nameColumnIndex]).toEqual({
+        id: 'name',
+        name: 'name',
+        meta: { type: 'date' },
+      });
+    });
   });
 
   it('should be resilient if the references column for meta information does not exists', () => {
