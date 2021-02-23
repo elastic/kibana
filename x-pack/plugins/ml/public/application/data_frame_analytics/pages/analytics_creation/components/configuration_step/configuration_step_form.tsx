@@ -83,6 +83,7 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
     EuiComboBoxOptionOption[]
   >([]);
   const [includesTableItems, setIncludesTableItems] = useState<FieldSelectionItem[]>([]);
+  const [fetchingExplainData, setFetchingExplainData] = useState<boolean>(false);
   const [maxDistinctValuesError, setMaxDistinctValuesError] = useState<string | undefined>();
   const [unsupportedFieldsError, setUnsupportedFieldsError] = useState<string | undefined>();
   const [minimumFieldsRequiredMessage, setMinimumFieldsRequiredMessage] = useState<
@@ -150,7 +151,8 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
     maxDistinctValuesError !== undefined ||
     minimumFieldsRequiredMessage !== undefined ||
     requiredFieldsError !== undefined ||
-    unsupportedFieldsError !== undefined;
+    unsupportedFieldsError !== undefined ||
+    fetchingExplainData;
 
   const loadDepVarOptions = async (formState: State['form']) => {
     setLoadingDepVarOptions(true);
@@ -191,6 +193,7 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
   };
 
   const debouncedGetExplainData = debounce(async () => {
+    setFetchingExplainData(true);
     const jobTypeChanged = previousJobType !== jobType;
     const shouldUpdateModelMemoryLimit =
       (!firstUpdate.current || !modelMemoryLimit) && useEstimatedMml === true;
@@ -233,6 +236,7 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
           requiredFieldsError: !hasRequiredFields ? requiredFieldsErrorText : undefined,
         });
       }
+      setFetchingExplainData(false);
     } else {
       let maxDistinctValuesErrorMessage;
       let unsupportedFieldsErrorMessage;
@@ -280,6 +284,7 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
       setFieldOptionsFetchFail(true);
       setMaxDistinctValuesError(maxDistinctValuesErrorMessage);
       setUnsupportedFieldsError(unsupportedFieldsErrorMessage);
+      setFetchingExplainData(false);
       setFormState({
         ...(shouldUpdateModelMemoryLimit ? { modelMemoryLimit: fallbackModelMemoryLimit } : {}),
       });
