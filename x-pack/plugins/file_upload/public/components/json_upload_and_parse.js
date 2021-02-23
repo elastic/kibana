@@ -10,12 +10,11 @@ import { i18n } from '@kbn/i18n';
 import { EuiForm } from '@elastic/eui';
 import PropTypes from 'prop-types';
 import { IndexSettings } from './index_settings';
-import { JsonIndexFilePicker } from './json_index_file_picker';
 import { JsonImportProgress } from './json_import_progress';
 import _ from 'lodash';
-import { GeoJsonImporter } from '../importer/geojson_importer';
 import { ES_FIELD_TYPES } from '../../../../../src/plugins/data/public';
 import { getIndexPatternService } from '../kibana_services';
+import { GeoJsonFilePicker } from './geojson_file_picker';
 
 const INDEXING_STAGE = {
   INDEXING_STARTED: i18n.translate('xpack.fileUpload.jsonUploadAndParse.dataIndexingStarted', {
@@ -44,11 +43,8 @@ const INDEXING_STAGE = {
 };
 
 export class JsonUploadAndParse extends Component {
-  geojsonImporter = new GeoJsonImporter();
-
   state = {
     // File state
-    fileRef: null,
     parsedFile: null,
     indexedFile: null,
 
@@ -74,19 +70,24 @@ export class JsonUploadAndParse extends Component {
 
   componentWillUnmount() {
     this._isMounted = false;
+    if (this._geojsonImporter) {
+      this._geojsonImporter.destroy();
+      this._geojsonImporter = null;
+    }
   }
 
   _resetFileAndIndexSettings = () => {
-    if (this.props.onFileRemove && this.state.fileRef) {
-      this.props.onFileRemove(this.state.fileRef);
+    if (this._geojsonImporter) {
+      this._geojsonImporter.destroy();
+      this._geojsonImporter = undefined;
     }
+
+    this.props.onFileRemove();
+
     this.setState({
       indexTypes: [],
       selectedIndexType: '',
       indexName: '',
-      indexedFile: null,
-      parsedFile: null,
-      fileRef: null,
     });
   };
 
@@ -271,12 +272,25 @@ export class JsonUploadAndParse extends Component {
     });
   };
 
+  _onFileSelect = ({ features, geoFieldTypes, importer, indexName }) => {
+    this._geojsonImporter = importer;
+
+    this.setState({ indexTypes: geoFieldTypes });
+
+    this.props.onFileUpload(
+      {
+        type: 'FeatureCollection',
+        features,
+      },
+      indexName
+    );
+  };
+
   render() {
     const {
       currentIndexingStage,
       indexDataResp,
       indexPatternResp,
-      fileRef,
       indexName,
       indexTypes,
       showImportProgress,
@@ -297,18 +311,12 @@ export class JsonUploadAndParse extends Component {
           />
         ) : (
           <Fragment>
-            <JsonIndexFilePicker
-              fileRef={fileRef}
-              setFileRef={(fileRef) => this.setState({ fileRef })}
-              setParsedFile={(parsedFile, indexName) => {
-                this.setState({ parsedFile, indexName });
-                this.props.onFileUpload(parsedFile.parsedGeojson, indexName);
-              }}
-              resetFileAndIndexSettings={this._resetFileAndIndexSettings}
-              geojsonImporter={this.geojsonImporter}
+            <GeoJsonFilePicker
+              onSelect={this._onFileSelect}
+              onClear={this._resetFileAndIndexSettings}
             />
             <IndexSettings
-              disabled={!fileRef}
+              disabled={this._geojsonImporter === undefined}
               indexName={indexName}
               setIndexName={(indexName) => this.setState({ indexName })}
               indexTypes={indexTypes}

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import _ from 'lodash';
 import {
   Feature,
   FeatureCollection,
@@ -23,10 +24,117 @@ import { Importer } from '../importer';
 import { ES_FIELD_TYPES } from '../../../../../../src/plugins/data/public';
 // @ts-expect-error
 import { geoJsonCleanAndValidate } from './geojson_clean_and_validate';
+import { validateFile } from '../validate_file';
+
+export const GEOJSON_FILE_TYPES = ['.json', '.geojson'];
 
 export class GeoJsonImporter extends Importer {
-  constructor() {
+  private _file: File;
+  private _isActive = true;
+  private _iterator?: Iterator;
+  private _hasNext = true;
+  private _features: Feature[] = [];
+  private _totalBytesProcessed = 0;
+  private _unimportedBytesProcessed = 0;
+  private _totalFeatures = 0;
+  private _geometryTypesMap = new Map<string, boolean>();
+  private _invalidCount = 0;
+  private _prevBatchLastFeature?: Feature;
+
+  constructor(file: File) {
     super();
+
+    validateFile(file, GEOJSON_FILE_TYPES);
+    this._file = file;
+  }
+
+  public destroy() {
+    this._isActive = false;
+  }
+
+  public async previewFile(
+    rowLimit?: number,
+    sizeLimit?: number
+  ): { features: Feature[]; geoFieldTypes: string[]; previewCoverage: number } {
+    await this._readUntil(rowLimit, sizeLimit);
+    return {
+      features: [...this._features],
+      previewCoverage: (this._unimportedBytesProcessed / this._file.size) * 100,
+      geoFieldTypes:
+        this._geometryTypesMap.has('Point') || this._geometryTypesMap.has('MultiPoint')
+          ? [ES_FIELD_TYPES.GEO_POINT, ES_FIELD_TYPES.GEO_SHAPE]
+          : [ES_FIELD_TYPES.GEO_SHAPE],
+    };
+  }
+
+  private async _readUntil(rowLimit?: number, sizeLimit?: number) {
+    while (
+      this._isActive &&
+      this._hasNext &&
+      (rowLimit === undefined || this._features.length < rowLimit) &&
+      (sizeLimit === undefined || this._unimportedBytesProcessed < sizeLimit)
+    ) {
+      await this._next();
+    }
+  }
+
+  private async _next() {
+    if (this._iterator === undefined) {
+      this._iterator = await loadInBatches(this._file, JSONLoader, {
+        json: {
+          jsonpaths: ['$.features'],
+          _rootObjectBatches: true,
+        },
+      });
+    }
+
+    if (!this._isActive) {
+      return;
+    }
+
+    const { value: batch, done } = await this._iterator.next();
+
+    if (!this._isActive || done) {
+      this._hasNext = false;
+      return;
+    }
+
+    if ('bytesUsed' in batch) {
+      const bytesRead = batch.bytesUsed - this._totalBytesProcessed;
+      this._unimportedBytesProcessed += bytesRead;
+      this._totalBytesProcessed = batch.bytesUsed;
+    }
+
+    const rawFeatures: unknown[] = this._prevBatchLastFeature ? [this._prevBatchLastFeature] : [];
+    this._prevBatchLastFeature = undefined;
+    const isLastBatch = batch.batchType === 'root-object-batch-complete';
+    if (isLastBatch) {
+      // Handle single feature geoJson
+      if (this._totalFeatures === 0) {
+        rawFeatures.push(batch.container);
+      }
+    } else {
+      rawFeatures.push(...batch.data);
+    }
+
+    for (let i = 0; i < rawFeatures.length; i++) {
+      const rawFeature = rawFeatures[i] as Feature;
+      if (!isLastBatch && i === rawFeatures.length - 1) {
+        // Do not process last feature until next batch is read, features on batch boundary may be incomplete.
+        this._prevBatchLastFeature = rawFeature;
+        continue;
+      }
+
+      this._totalFeatures++;
+      if (!rawFeature.geometry || !rawFeature.geometry.type) {
+        this._invalidCount++;
+      } else {
+        if (!this._geometryTypesMap.has(rawFeature.geometry.type)) {
+          this._geometryTypesMap.set(rawFeature.geometry.type, true);
+        }
+        this._features.push(geoJsonCleanAndValidate(rawFeature));
+      }
+    }
   }
 
   public read(data: ArrayBuffer): { success: boolean } {
@@ -68,111 +176,5 @@ export class GeoJsonImporter extends Importer {
         ...properties,
       });
     }
-  }
-
-  public async readFile(
-    file: File,
-    setFileProgress: ({
-      featuresProcessed,
-      bytesProcessed,
-      totalBytes,
-    }: {
-      featuresProcessed: number;
-      bytesProcessed: number;
-      totalBytes: number;
-    }) => void,
-    isFileParseActive: () => boolean
-  ): Promise<{
-    errors: string[];
-    geometryTypes: string[];
-    parsedGeojson: FeatureCollection;
-  } | null> {
-    if (!file) {
-      throw new Error(
-        i18n.translate('xpack.fileUpload.fileParser.noFileProvided', {
-          defaultMessage: 'Error, no file provided',
-        })
-      );
-    }
-
-    return new Promise(async (resolve, reject) => {
-      const batches = await loadInBatches(file, JSONLoader, {
-        json: {
-          jsonpaths: ['$.features'],
-          _rootObjectBatches: true,
-        },
-      });
-
-      const rawFeatures: unknown[] = [];
-      for await (const batch of batches) {
-        if (!isFileParseActive()) {
-          break;
-        }
-
-        if (batch.batchType === 'root-object-batch-complete') {
-          // Handle single feature geoJson
-          if (rawFeatures.length === 0) {
-            rawFeatures.push(batch.container);
-          }
-        } else {
-          rawFeatures.push(...batch.data);
-        }
-
-        setFileProgress({
-          featuresProcessed: rawFeatures.length,
-          bytesProcessed: batch.bytesUsed,
-          totalBytes: file.size,
-        });
-      }
-
-      if (!isFileParseActive()) {
-        resolve(null);
-        return;
-      }
-
-      if (rawFeatures.length === 0) {
-        reject(
-          new Error(
-            i18n.translate('xpack.fileUpload.fileParser.noFeaturesDetected', {
-              defaultMessage: 'Error, no features detected',
-            })
-          )
-        );
-        return;
-      }
-
-      const features: Feature[] = [];
-      const geometryTypesMap = new Map<string, boolean>();
-      let invalidCount = 0;
-      for (let i = 0; i < rawFeatures.length; i++) {
-        const rawFeature = rawFeatures[i] as Feature;
-        if (!rawFeature.geometry || !rawFeature.geometry.type) {
-          invalidCount++;
-        } else {
-          if (!geometryTypesMap.has(rawFeature.geometry.type)) {
-            geometryTypesMap.set(rawFeature.geometry.type, true);
-          }
-          features.push(geoJsonCleanAndValidate(rawFeature));
-        }
-      }
-
-      const errors: string[] = [];
-      if (invalidCount > 0) {
-        errors.push(
-          i18n.translate('xpack.fileUpload.fileParser.featuresOmitted', {
-            defaultMessage: '{invalidCount} features without geometry omitted',
-            values: { invalidCount },
-          })
-        );
-      }
-      resolve({
-        errors,
-        geometryTypes: Array.from(geometryTypesMap.keys()),
-        parsedGeojson: {
-          type: 'FeatureCollection',
-          features,
-        },
-      });
-    });
   }
 }

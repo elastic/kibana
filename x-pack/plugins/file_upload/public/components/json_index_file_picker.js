@@ -9,8 +9,8 @@ import React, { Fragment, Component } from 'react';
 import { EuiFilePicker, EuiFormRow, EuiProgress } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
+import { getMaxBytes, getMaxBytesFormatted } from '../get_max_bytes';
 
-const MAX_FILE_SIZE = 52428800;
 const ACCEPTABLE_FILETYPES = ['json', 'geojson'];
 const acceptedFileTypeString = ACCEPTABLE_FILETYPES.map((type) => `.${type}`).join(',');
 const acceptedFileTypeStringMessage = ACCEPTABLE_FILETYPES.map((type) => `.${type}`).join(', ');
@@ -35,6 +35,7 @@ export class JsonIndexFilePicker extends Component {
   isFileParseActive = () => this._isMounted && this.state.fileParseActive;
 
   _fileHandler = (fileList) => {
+    console.log('fileList', fileList);
     const fileArr = Array.from(fileList);
     this.props.resetFileAndIndexSettings();
     this.setState({
@@ -114,13 +115,13 @@ export class JsonIndexFilePicker extends Component {
     const { currentFileTracker } = this.state;
     const { setFileRef, setParsedFile, resetFileAndIndexSettings } = this.props;
 
-    if (file.size > MAX_FILE_SIZE) {
+    if (file.size > getMaxBytes()) {
       this.setState({
         fileUploadError: i18n.translate('xpack.fileUpload.jsonIndexFilePicker.acceptableFileSize', {
           defaultMessage: 'File size {fileSize} exceeds maximum file size of {maxFileSize}',
           values: {
             fileSize: bytesToSize(file.size),
-            maxFileSize: bytesToSize(MAX_FILE_SIZE),
+            maxFileSize: getMaxBytesFormatted(),
           },
         }),
       });
@@ -128,6 +129,7 @@ export class JsonIndexFilePicker extends Component {
       return;
     }
 
+    console.log('file', file);
     const defaultIndexName = this._getFileNameAndCheckType(file);
     if (!defaultIndexName) {
       resetFileAndIndexSettings();
@@ -231,7 +233,7 @@ export class JsonIndexFilePicker extends Component {
                   id="xpack.fileUpload.jsonIndexFilePicker.maxSize"
                   defaultMessage="Max size: {maxFileSize}"
                   values={{
-                    maxFileSize: bytesToSize(MAX_FILE_SIZE),
+                    maxFileSize: getMaxBytesFormatted(),
                   }}
                 />
                 <br />
