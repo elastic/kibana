@@ -89,7 +89,7 @@ export const ConfigValidator: FC<ConfigValidatorProps> = React.memo(
               <li>
                 <FormattedMessage
                   id="xpack.ml.alertConditionValidation.alertIntervalTooHighMessage"
-                  defaultMessage="The check interval is higher than results bucket span of {resultBucketSpan}. Be aware of a delay in receiving notification."
+                  defaultMessage="The check interval is higher than the result bucket span of {resultBucketSpan}. Be aware of a delay in receiving notifications."
                   values={{
                     resultBucketSpan: resultBucketSpanString,
                   }}
