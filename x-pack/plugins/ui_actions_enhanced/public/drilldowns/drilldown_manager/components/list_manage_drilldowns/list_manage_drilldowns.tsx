@@ -40,7 +40,7 @@ interface Trigger {
 }
 
 export interface ListManageDrilldownsProps {
-  drilldowns: DrilldownListItem[];
+  items: DrilldownListItem[];
 
   onEdit?: (id: string) => void;
   onCreate?: () => void;
@@ -54,7 +54,7 @@ const noop = () => {};
 export const TEST_SUBJ_DRILLDOWN_ITEM = 'listManageDrilldownsItem';
 
 export function ListManageDrilldowns({
-  drilldowns,
+  items: drilldowns,
   onEdit = noop,
   onCreate = noop,
   onDelete = noop,

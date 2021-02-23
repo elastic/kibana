@@ -12,6 +12,7 @@ import { txtDrilldowns, txtCreateDrilldownButtonLabel, txtEditDrilldownButtonLab
 import { FlyoutFrame } from '../../components/flyout_frame';
 import { FormDrilldownWizard } from '../form_drilldown_wizard';
 import { DrilldownHelloBar } from '../../components/drilldown_hello_bar';
+import { DrilldownList } from '../drilldown_list';
 
 export const DrilldownManager: React.FC = ({}) => {
   const drilldowns = useDrilldownManager();
@@ -59,7 +60,9 @@ export const DrilldownManager: React.FC = ({}) => {
   // />
   // );
 
-  const content = screen === 'create' ? <FormDrilldownWizard /> : null;
+  let content: React.ReactNode = null;
+  if (screen === 'create') content = <FormDrilldownWizard />;
+  if (screen === 'list') content = <DrilldownList />;
 
   const flyoutFrame = (
     <FlyoutFrame

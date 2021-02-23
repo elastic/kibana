@@ -174,7 +174,7 @@ export function createFlyoutManageDrilldowns({
       return (
         <FlyoutFrame title={txtDrilldowns} onClose={props.onClose}>
           <ListManageDrilldowns
-            drilldowns={drilldowns.map(mapToDrilldownToDrilldownListItem)}
+            items={drilldowns.map(mapToDrilldownToDrilldownListItem)}
             onEdit={(id) => {
               setCurrentEditId(id);
               setRoute(Routes.Edit);

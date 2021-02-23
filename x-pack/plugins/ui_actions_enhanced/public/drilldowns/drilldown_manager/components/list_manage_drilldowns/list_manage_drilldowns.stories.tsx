@@ -14,7 +14,7 @@ import { FlyoutFrame } from '../flyout_frame';
 storiesOf('components/ListManageDrilldowns', module)
   .add('Default', () => (
     <ListManageDrilldowns
-      drilldowns={[
+      items={[
         {
           id: '1',
           actionName: 'Dashboard',
@@ -43,7 +43,7 @@ storiesOf('components/ListManageDrilldowns', module)
   ))
   .add('Empty list', () => (
     <ListManageDrilldowns
-      drilldowns={[]}
+      items={[]}
       onCreate={action('onCreate')}
       onDelete={action('onDelete')}
       onEdit={action('onEdit')}
@@ -51,7 +51,7 @@ storiesOf('components/ListManageDrilldowns', module)
   ))
   .add('A single drilldown', () => (
     <ListManageDrilldowns
-      drilldowns={[
+      items={[
         {
           id: '1',
           actionName: 'Dashboard',
@@ -68,7 +68,7 @@ storiesOf('components/ListManageDrilldowns', module)
   .add('Inside a flyout frame', () => (
     <FlyoutFrame title={'Some Title'} onClose={action('onClose')} banner={null}>
       <ListManageDrilldowns
-        drilldowns={[
+        items={[
           { id: '1', actionName: 'Dashboard', drilldownName: 'Drilldown 1' },
           { id: '2', actionName: 'Dashboard', drilldownName: 'Drilldown 2' },
           {

@@ -6,15 +6,22 @@
  */
 
 import useObservable from 'react-use/lib/useObservable';
-import { BehaviorSubject } from 'rxjs';
+import { Observable, BehaviorSubject } from 'rxjs';
+import { map } from 'rxjs/operators';
 import {
   PublicDrilldownManagerProps,
   DrilldownManagerDependencies,
   DrilldownManagerScreen,
 } from '../types';
-import { ActionFactory, BaseActionFactoryContext } from '../../../dynamic_actions';
+import { ActionFactory, BaseActionFactoryContext, SerializedEvent } from '../../../dynamic_actions';
 import { DrilldownState } from './drilldown_state';
-import { toastDrilldownCreated, toastDrilldownsCRUDError } from './i18n';
+import {
+  toastDrilldownCreated,
+  toastDrilldownsCRUDError,
+  insufficientLicenseLevel,
+  invalidDrilldownType,
+} from './i18n';
+import { DrilldownListItem } from '../components/list_manage_drilldowns';
 
 const helloMessageStorageKey = `drilldowns:hidWelcomeMessage`;
 
@@ -50,6 +57,31 @@ export class DrilldownManagerState {
    */
   public readonly actionFactory$ = new BehaviorSubject<undefined | ActionFactory>(undefined);
 
+  private readonly mapEventToDrilldownItem = (event: SerializedEvent): DrilldownListItem => {
+    const actionFactory = this.deps.actionFactories.find(
+      (factory) => factory.id === event.action.factoryId
+    );
+    const drilldownFactoryContext: BaseActionFactoryContext = {
+      ...this.deps.placeContext,
+      triggers: event.triggers as string[],
+    };
+    return {
+      id: event.eventId,
+      drilldownName: event.action.name,
+      actionName: actionFactory?.getDisplayName(drilldownFactoryContext) ?? event.action.factoryId,
+      icon: actionFactory?.getIconType(drilldownFactoryContext),
+      error: !actionFactory
+        ? invalidDrilldownType(event.action.factoryId) // this shouldn't happen for the end user, but useful during development
+        : !actionFactory.isCompatibleLicense()
+        ? insufficientLicenseLevel
+        : undefined,
+      triggers: event.triggers.map((trigger) => this.deps.getTrigger(trigger as string)),
+    };
+  };
+  public readonly events$ = new BehaviorSubject<DrilldownListItem[]>(
+    this.deps.dynamicActionManager.state.get().events.map(this.mapEventToDrilldownItem)
+  );
+
   /**
    * State for each drilldown type used for new drilldown creation, so when user
    * switched between drilldown types the configuration of the previous
@@ -70,6 +102,10 @@ export class DrilldownManagerState {
     this.canUnlockMoreDrilldowns = deps.actionFactories.some(
       (factory) => !factory.isCompatibleLicense
     );
+
+    deps.dynamicActionManager.state.state$
+      .pipe(map((state) => state.events.map(this.mapEventToDrilldownItem)))
+      .subscribe(this.events$);
   }
 
   /**
@@ -149,7 +185,7 @@ export class DrilldownManagerState {
   }
 
   /**
-   * Callback called when user presses "Create drilldown" button to create the
+   * Callback called when user presses "Create drilldown" button to save the
    * currently edited drilldown.
    */
   public readonly onCreateDrilldown = (): void => {
@@ -185,5 +221,6 @@ export class DrilldownManagerState {
     useObservable(this.hideWelcomeMessage$, this.hideWelcomeMessage$.getValue());
   public readonly useActionFactory = () =>
     useObservable(this.actionFactory$, this.actionFactory$.getValue());
+  public readonly useEvents = () => useObservable(this.events$, this.events$.getValue());
   /* eslint-enable react-hooks/rules-of-hooks */
 }
