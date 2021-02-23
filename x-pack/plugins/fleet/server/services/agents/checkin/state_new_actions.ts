@@ -23,16 +23,9 @@ import {
   take,
 } from 'rxjs/operators';
 import { ElasticsearchClient, SavedObjectsClientContract, KibanaRequest } from 'src/core/server';
-import {
-  Agent,
-  AgentAction,
-  AgentPolicyAction,
-  AgentPolicyActionV7_9,
-  AgentSOAttributes,
-} from '../../../types';
+import { Agent, AgentAction, AgentPolicyAction, AgentPolicyActionV7_9 } from '../../../types';
 import * as APIKeysService from '../../api_keys';
 import {
-  AGENT_SAVED_OBJECT_TYPE,
   AGENT_UPDATE_ACTIONS_INTERVAL_MS,
   AGENT_POLLING_REQUEST_TIMEOUT_MARGIN_MS,
   AGENT_POLICY_ROLLOUT_RATE_LIMIT_INTERVAL_MS,
@@ -111,17 +104,7 @@ async function getAgentDefaultOutputAPIKey(
   esClient: ElasticsearchClient,
   agent: Agent
 ) {
-  if (appContextService.getConfig()?.agents?.fleetServerEnabled) {
-    return agent.default_api_key;
-  } else {
-    const {
-      attributes: { default_api_key: defaultApiKey },
-    } = await appContextService
-      .getEncryptedSavedObjects()
-      .getDecryptedAsInternalUser<AgentSOAttributes>(AGENT_SAVED_OBJECT_TYPE, agent.id);
-
-    return defaultApiKey;
-  }
+  return agent.default_api_key;
 }
 
 async function getOrCreateAgentDefaultOutputAPIKey(
@@ -135,7 +118,7 @@ async function getOrCreateAgentDefaultOutputAPIKey(
   }
 
   const outputAPIKey = await APIKeysService.generateOutputApiKey(soClient, 'default', agent.id);
-  await updateAgent(soClient, esClient, agent.id, {
+  await updateAgent(esClient, agent.id, {
     default_api_key: outputAPIKey.key,
     default_api_key_id: outputAPIKey.id,
   });
@@ -280,7 +263,7 @@ export function agentCheckinStateNewActionsFactory() {
           (action) => action.type === 'INTERNAL_POLICY_REASSIGN'
         );
         if (hasConfigReassign) {
-          return from(getAgent(soClient, esClient, agent.id)).pipe(
+          return from(getAgent(esClient, agent.id)).pipe(
             concatMap((refreshedAgent) => {
               if (!refreshedAgent.policy_id) {
                 throw new Error('Agent does not have a policy assigned');

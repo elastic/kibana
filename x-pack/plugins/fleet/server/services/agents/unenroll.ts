@@ -46,7 +46,7 @@ export async function unenrollAgent(
     created_at: now,
     type: 'UNENROLL',
   });
-  await updateAgent(soClient, esClient, agentId, {
+  await updateAgent(esClient, agentId, {
     unenrollment_started_at: now,
   });
 }
@@ -64,9 +64,9 @@ export async function unenrollAgents(
 ) {
   const agents =
     'agentIds' in options
-      ? await getAgents(soClient, esClient, options.agentIds)
+      ? await getAgents(esClient, options.agentIds)
       : (
-          await listAllAgents(soClient, esClient, {
+          await listAllAgents(esClient, {
             kuery: options.kuery,
             showInactive: false,
           })
@@ -99,7 +99,6 @@ export async function unenrollAgents(
 
   // Update the necessary agents
   return bulkUpdateAgents(
-    soClient,
     esClient,
     agentsToUpdate.map((agent) => ({
       agentId: agent.id,
@@ -115,7 +114,7 @@ export async function forceUnenrollAgent(
   esClient: ElasticsearchClient,
   agentId: string
 ) {
-  const agent = await getAgent(soClient, esClient, agentId);
+  const agent = await getAgent(esClient, agentId);
 
   await Promise.all([
     agent.access_api_key_id
@@ -126,7 +125,7 @@ export async function forceUnenrollAgent(
       : undefined,
   ]);
 
-  await updateAgent(soClient, esClient, agentId, {
+  await updateAgent(esClient, agentId, {
     active: false,
     unenrolled_at: new Date().toISOString(),
   });
@@ -146,9 +145,9 @@ export async function forceUnenrollAgents(
   // Filter to agents that are not already unenrolled
   const agents =
     'agentIds' in options
-      ? await getAgents(soClient, esClient, options.agentIds)
+      ? await getAgents(esClient, options.agentIds)
       : (
-          await listAllAgents(soClient, esClient, {
+          await listAllAgents(esClient, {
             kuery: options.kuery,
             showInactive: false,
           })
@@ -173,7 +172,6 @@ export async function forceUnenrollAgents(
   }
   // Update the necessary agents
   return bulkUpdateAgents(
-    soClient,
     esClient,
     agentsToUpdate.map((agent) => ({
       agentId: agent.id,

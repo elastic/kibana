@@ -58,7 +58,7 @@ export const getAgentPoliciesHandler: RequestHandler<
     await bluebird.map(
       items,
       (agentPolicy: GetAgentPoliciesResponseItem) =>
-        listAgents(soClient, esClient, {
+        listAgents(esClient, {
           showInactive: false,
           perPage: 0,
           page: 1,
