@@ -180,24 +180,28 @@ export const filterExceptionItems = (
 
         if (entriesNested.is(strippedSingleEntry)) {
           const nestedEntriesArray = strippedSingleEntry.entries.filter((singleNestedEntry) => {
-            const [validatedNestedEntry] = validate(singleNestedEntry, nestedEntryItem);
+            const noIdSingleNestedEntry = removeIdFromItem(singleNestedEntry);
+            const [validatedNestedEntry] = validate(noIdSingleNestedEntry, nestedEntryItem);
             return validatedNestedEntry != null;
           });
+          const noIdNestedEntries = nestedEntriesArray.map((singleNestedEntry) =>
+            removeIdFromItem(singleNestedEntry)
+          );
 
           const [validatedNestedEntry] = validate(
-            { ...strippedSingleEntry, entries: nestedEntriesArray },
+            { ...strippedSingleEntry, entries: noIdNestedEntries },
             entriesNested
           );
 
           if (validatedNestedEntry != null) {
-            return [...nestedAcc, validatedNestedEntry];
+            return [...nestedAcc, { ...singleEntry, entries: nestedEntriesArray }];
           }
           return nestedAcc;
         } else {
           const [validatedEntry] = validate(strippedSingleEntry, entry);
 
           if (validatedEntry != null) {
-            return [...nestedAcc, validatedEntry];
+            return [...nestedAcc, singleEntry];
           }
           return nestedAcc;
         }
