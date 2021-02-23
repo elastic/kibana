@@ -54,14 +54,14 @@ export default ({ getService }: FtrProviderContext): void => {
       it('patches a comment for a sub case', async () => {
         const { newSubCaseInfo: caseInfo } = await createSubCase({ supertest, actionID });
         const { body: patchedSubCase }: { body: CaseResponse } = await supertest
-          .post(`${CASES_URL}/${caseInfo.id}/comments?subCaseID=${caseInfo.subCases[0]!.id}`)
+          .post(`${CASES_URL}/${caseInfo.id}/comments?subCaseId=${caseInfo.subCases![0].id}`)
           .set('kbn-xsrf', 'true')
           .send(postCommentUserReq)
           .expect(200);
 
         const newComment = 'Well I decided to update my comment. So what? Deal with it.';
         const { body: patchedSubCaseUpdatedComment } = await supertest
-          .patch(`${CASES_URL}/${caseInfo.id}/comments?subCaseID=${caseInfo.subCases[0].id}`)
+          .patch(`${CASES_URL}/${caseInfo.id}/comments?subCaseId=${caseInfo.subCases![0].id}`)
           .set('kbn-xsrf', 'true')
           .send({
             id: patchedSubCase.subCases![0].comments![1].id,
@@ -71,22 +71,22 @@ export default ({ getService }: FtrProviderContext): void => {
           })
           .expect(200);
 
-        expect(patchedSubCaseUpdatedComment.subCase.comments.length).to.be(2);
-        expect(patchedSubCaseUpdatedComment.subCase.comments[0].type).to.be(
+        expect(patchedSubCaseUpdatedComment.subCases![0].comments.length).to.be(2);
+        expect(patchedSubCaseUpdatedComment.subCases![0].comments[0].type).to.be(
           CommentType.generatedAlert
         );
-        expect(patchedSubCaseUpdatedComment.subCase.comments[1].type).to.be(CommentType.user);
-        expect(patchedSubCaseUpdatedComment.subCase.comments[1].comment).to.be(newComment);
+        expect(patchedSubCaseUpdatedComment.subCases![0].comments[1].type).to.be(CommentType.user);
+        expect(patchedSubCaseUpdatedComment.subCases![0].comments[1].comment).to.be(newComment);
       });
 
       it('fails to update the generated alert comment type', async () => {
         const { newSubCaseInfo: caseInfo } = await createSubCase({ supertest, actionID });
         await supertest
-          .patch(`${CASES_URL}/${caseInfo.id}/comments?subCaseID=${caseInfo.subCases[0].id}`)
+          .patch(`${CASES_URL}/${caseInfo.id}/comments?subCaseId=${caseInfo.subCases![0].id}`)
           .set('kbn-xsrf', 'true')
           .send({
-            id: caseInfo.subCases[0].comments![0].id,
-            version: caseInfo.subCases[0].comments![0].version,
+            id: caseInfo.subCases![0].comments![0].id,
+            version: caseInfo.subCases![0].comments![0].version,
             type: CommentType.alert,
             alertId: 'test-id',
             index: 'test-index',
@@ -101,11 +101,11 @@ export default ({ getService }: FtrProviderContext): void => {
       it('fails to update the generated alert comment by using another generated alert comment', async () => {
         const { newSubCaseInfo: caseInfo } = await createSubCase({ supertest, actionID });
         await supertest
-          .patch(`${CASES_URL}/${caseInfo.id}/comments?subCaseID=${caseInfo.subCases[0].id}`)
+          .patch(`${CASES_URL}/${caseInfo.id}/comments?subCaseId=${caseInfo.subCases![0].id}`)
           .set('kbn-xsrf', 'true')
           .send({
-            id: caseInfo.subCases[0].comments![0].id,
-            version: caseInfo.subCases[0].comments![0].version,
+            id: caseInfo.subCases![0].comments![0].id,
+            version: caseInfo.subCases![0].comments![0].version,
             type: CommentType.generatedAlert,
             alerts: [{ _id: 'id1' }],
             index: 'test-index',
