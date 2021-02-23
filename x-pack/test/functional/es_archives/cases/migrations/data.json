@@ -1,0 +1,211 @@
+{
+  "type": "doc",
+  "value": {
+    "id": "cases-configure:e1487a70-017f-11eb-93f8-d161651bf509",
+    "index": ".kibana_1",
+    "source": {
+      "cases-configure": {
+        "closure_type": "close-by-user",
+        "connector_id": "connector-1",
+        "connector_name": "Connector 1",
+        "created_at": "2020-09-28T11:43:51.698Z",
+        "created_by": {
+          "email": null,
+          "full_name": null,
+          "username": "elastic"
+        },
+        "updated_at": null,
+        "updated_by": null
+      },
+      "migrationVersion": {
+        "alert": "7.10.0"
+      },
+      "references": [
+      ],
+      "type": "cases-configure",
+      "updated_at": "2020-09-28T11:43:51.702Z"
+    },
+    "type": "_doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "cases:e1900ac0-017f-11eb-93f8-d161651bf509",
+    "index": ".kibana_1",
+    "source": {
+      "cases": {
+        "closed_at": null,
+        "closed_by": null,
+        "connector_id": "connector-1",
+        "created_at": "2020-09-28T11:43:52.158Z",
+        "created_by": {
+          "email": null,
+          "full_name": null,
+          "username": "elastic"
+        },
+        "description": "This is a brand new case of a bad meanie defacing data",
+        "external_service": null,
+        "status": "open",
+        "tags": [
+          "defacement"
+        ],
+        "title": "Super Bad Security Issue",
+        "updated_at": null,
+        "updated_by": null
+      },
+      "migrationVersion": {
+        "alert": "7.10.0"
+      },
+      "references": [
+      ],
+      "type": "cases",
+      "updated_at": "2020-09-28T11:43:52.171Z"
+    },
+    "type": "_doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "cases-user-actions:e22a7600-017f-11eb-93f8-d161651bf509",
+    "index": ".kibana_1",
+    "source": {
+      "cases-user-actions": {
+        "action": "create",
+        "action_at": "2020-09-28T11:43:52.158Z",
+        "action_by": {
+          "email": null,
+          "full_name": null,
+          "username": "elastic"
+        },
+        "action_field": [
+          "description",
+          "status",
+          "tags",
+          "title"
+        ],
+        "new_value": "{\"description\":\"This is a brand new case of a bad meanie defacing data\",\"title\":\"Super Bad Security Issue\",\"tags\":[\"defacement\"]}",
+        "old_value": null
+      },
+      "references": [
+        {
+          "id": "e1900ac0-017f-11eb-93f8-d161651bf509",
+          "name": "associated-cases",
+          "type": "cases"
+        }
+      ],
+      "type": "cases-user-actions",
+      "updated_at": "2020-09-28T11:43:53.184Z"
+    },
+    "type": "_doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "cases-user-actions:a22a7600-017f-11eb-93f8-d161651bf509",
+    "index": ".kibana_1",
+    "source": {
+      "cases-user-actions": {
+        "action": "update",
+        "action_at": "2020-09-28T11:53:52.158Z",
+        "action_by": {
+          "email": null,
+          "full_name": null,
+          "username": "elastic"
+        },
+        "action_field": [
+          "connector_id"
+        ],
+        "new_value": "b1900ac0-017f-11eb-93f8-d161651bf509",
+        "old_value": "c1900ac0-017f-11eb-93f8-d161651bf509"
+      },
+      "references": [
+        {
+          "id": "e1900ac0-017f-11eb-93f8-d161651bf509",
+          "name": "associated-cases",
+          "type": "cases"
+        }
+      ],
+      "type": "cases-user-actions",
+      "updated_at": "2020-09-28T11:43:53.184Z"
+    },
+    "type": "_doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "cases-comments:da677740-1ac7-11eb-b5a3-25ee88122510",
+    "index": ".kibana_1",
+    "source": {
+      "cases-comments": {
+        "comment": "This is a cool comment",
+        "created_at": "2020-10-30T15:52:02.984Z",
+        "created_by": {
+          "email": null,
+          "full_name": null,
+          "username": "elastic"
+        },
+        "pushed_at": null,
+        "pushed_by": null,
+        "updated_at": null,
+        "updated_by": null
+      },
+      "references": [
+        {
+          "id": "e1900ac0-017f-11eb-93f8-d161651bf509",
+          "name": "associated-cases",
+          "type": "cases"
+        }
+      ],
+      "type": "cases-comments",
+      "updated_at": "2020-10-30T15:52:02.996Z"
+    },
+    "type": "_doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "cases-user-actions:db027ec0-1ac7-11eb-b5a3-25ee88122510",
+    "index": ".kibana_1",
+    "source": {
+      "cases-user-actions": {
+        "action": "create",
+        "action_at": "2020-10-30T15:52:02.984Z",
+        "action_by": {
+          "email": null,
+          "full_name": null,
+          "username": "elastic"
+        },
+        "action_field": [
+          "comment"
+        ],
+        "new_value": "This is a cool comment",
+        "old_value": null
+      },
+      "references": [
+        {
+          "id": "e1900ac0-017f-11eb-93f8-d161651bf509",
+          "name": "associated-cases",
+          "type": "cases"
+        },
+        {
+          "id": "da677740-1ac7-11eb-b5a3-25ee88122510",
+          "name": "associated-cases-comments",
+          "type": "cases-comments"
+        }
+      ],
+      "type": "cases-user-actions",
+      "updated_at": "2020-10-30T15:52:04.012Z"
+    },
+    "type": "_doc"
+  }
+}
