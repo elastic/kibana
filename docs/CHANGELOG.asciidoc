@@ -258,6 +258,7 @@ Machine Learning::
 * Adds runtime_mappings to job wizards {kibana-pull}85817[#85817]
 Management::
 * Allows custom name for fields via index pattern field management {kibana-pull}70039[#70039]
+* In index pattern management - Refresh button removed as index pattern field lists are refreshed when index patterns are loaded, such as on page load or when moving between kibana apps {kibana-pull}82223[#82223]
 * Painless Lab in DevTools now supports autocompletion for keywords, and class and class members for the Painless language based on a given context {kibana-pull}80577[#80577]
 * Transforms: Remove index field limitation for custom query {kibana-pull}81467[#81467]
 * In the Index Management app, you can now click a data stream index lifecycle policy and view it in the Index Lifecycle Policies app {kibana-pull}82165[#82165]
