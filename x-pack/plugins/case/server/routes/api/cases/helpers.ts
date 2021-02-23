@@ -28,7 +28,7 @@ export const addStatusFilter = ({
   appendFilter,
   type = CASE_SAVED_OBJECT,
 }: {
-  status: CaseStatuses;
+  status: CaseStatuses | undefined;
   appendFilter?: string;
   type?: string;
 }) => {
@@ -102,7 +102,7 @@ export const constructQueryOptions = ({
 }: {
   tags?: string | string[];
   reporters?: string | string[];
-  status?: CaseStatuses | undefined;
+  status?: CaseStatuses;
   sortByField?: string;
   caseType?: CaseType;
 }): { case: SavedObjectFindOptions; subCase?: SavedObjectFindOptions } => {
