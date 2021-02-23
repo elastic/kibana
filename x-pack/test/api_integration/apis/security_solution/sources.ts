@@ -24,6 +24,7 @@ export default function ({ getService }: FtrProviderContext) {
         .send({
           indices: ['auditbeat-*'],
           onlyCheckIfIndicesExist: false,
+          wait_for_completion_timeout: '10s',
         })
         .expect(200);
 
@@ -38,6 +39,7 @@ export default function ({ getService }: FtrProviderContext) {
         .send({
           indices: ['auditbeat-*', 'filebeat-*'],
           onlyCheckIfIndicesExist: false,
+          wait_for_completion_timeout: '10s',
         })
         .expect(200);
 
@@ -51,6 +53,7 @@ export default function ({ getService }: FtrProviderContext) {
         .send({
           indices: [],
           onlyCheckIfIndicesExist: false,
+          wait_for_completion_timeout: '10s',
         })
         .expect(200);
 
@@ -64,6 +67,7 @@ export default function ({ getService }: FtrProviderContext) {
         .send({
           indices: ['_all'],
           onlyCheckIfIndicesExist: false,
+          wait_for_completion_timeout: '10s',
         })
         .expect(200);
 
@@ -77,6 +81,7 @@ export default function ({ getService }: FtrProviderContext) {
         .send({
           indices: [''],
           onlyCheckIfIndicesExist: false,
+          wait_for_completion_timeout: '10s',
         })
         .expect(200);
 
@@ -90,6 +95,7 @@ export default function ({ getService }: FtrProviderContext) {
         .send({
           indices: ['   '],
           onlyCheckIfIndicesExist: false,
+          wait_for_completion_timeout: '10s',
         })
         .expect(200);
 
@@ -103,6 +109,7 @@ export default function ({ getService }: FtrProviderContext) {
         .send({
           indices: ['', 'auditbeat-*'],
           onlyCheckIfIndicesExist: false,
+          wait_for_completion_timeout: '10s',
         })
         .expect(200);
 
