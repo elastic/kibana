@@ -128,7 +128,7 @@ export function Correlations() {
                       <EuiLink
                         href={createHref(history, { query: { kuery: '' } })}
                       >
-                        <EuiButtonEmpty iconType="cross">
+                        <EuiButtonEmpty size="xs" iconType="cross">
                           {i18n.translate(
                             'xpack.apm.correlations.clearFiltersLabel',
                             { defaultMessage: 'Clear' }
