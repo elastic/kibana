@@ -18,29 +18,29 @@ import {
 } from '@elastic/eui';
 import React from 'react';
 import { OverlayStart } from '../../../../../core/public';
-import { createConfirmStrings, leaveConfirmStrings } from '../../dashboard_strings';
+import {
+  createConfirmStrings,
+  discardConfirmStrings,
+  leaveEditModeConfirmStrings,
+} from '../../dashboard_strings';
 import { toMountPoint } from '../../services/kibana_react';
 
-export const confirmDiscardUnsavedChanges = (
-  overlays: OverlayStart,
-  discardCallback: () => void,
-  cancelButtonText = leaveConfirmStrings.getCancelButtonText()
-) =>
+export type DiscardOrKeepSelection = 'cancel' | 'discard' | 'keep';
+
+export const confirmDiscardUnsavedChanges = (overlays: OverlayStart, discardCallback: () => void) =>
   overlays
-    .openConfirm(leaveConfirmStrings.getDiscardSubtitle(), {
-      confirmButtonText: leaveConfirmStrings.getConfirmButtonText(),
-      cancelButtonText,
+    .openConfirm(discardConfirmStrings.getDiscardSubtitle(), {
+      confirmButtonText: discardConfirmStrings.getDiscardConfirmButtonText(),
+      cancelButtonText: discardConfirmStrings.getDiscardCancelButtonText(),
       buttonColor: 'danger',
       defaultFocusedButton: EUI_MODAL_CANCEL_BUTTON,
-      title: leaveConfirmStrings.getDiscardTitle(),
+      title: discardConfirmStrings.getDiscardTitle(),
     })
     .then((isConfirmed) => {
       if (isConfirmed) {
         discardCallback();
       }
     });
-
-export type DiscardOrKeepSelection = 'cancel' | 'discard' | 'keep';
 
 export const confirmDiscardOrKeepUnsavedChanges = (
   overlays: OverlayStart
@@ -50,11 +50,13 @@ export const confirmDiscardOrKeepUnsavedChanges = (
       toMountPoint(
         <>
           <EuiModalHeader data-test-subj="dashboardDiscardConfirm">
-            <EuiModalHeaderTitle>{leaveConfirmStrings.getLeaveEditModeTitle()}</EuiModalHeaderTitle>
+            <EuiModalHeaderTitle>
+              {leaveEditModeConfirmStrings.getLeaveEditModeTitle()}
+            </EuiModalHeaderTitle>
           </EuiModalHeader>
 
           <EuiModalBody>
-            <EuiText>{leaveConfirmStrings.getLeaveEditModeSubtitle()}</EuiText>
+            <EuiText>{leaveEditModeConfirmStrings.getLeaveEditModeSubtitle()}</EuiText>
           </EuiModalBody>
 
           <EuiModalFooter>
@@ -62,19 +64,9 @@ export const confirmDiscardOrKeepUnsavedChanges = (
               data-test-subj="dashboardDiscardConfirmCancel"
               onClick={() => session.close()}
             >
-              {leaveConfirmStrings.getCancelButtonText()}
+              {leaveEditModeConfirmStrings.getLeaveEditModeCancelButtonText()}
             </EuiButtonEmpty>
             <EuiButtonEmpty
-              data-test-subj="dashboardDiscardConfirmKeep"
-              onClick={() => {
-                session.close();
-                resolve('keep');
-              }}
-            >
-              {leaveConfirmStrings.getKeepChangesText()}
-            </EuiButtonEmpty>
-            <EuiButton
-              fill
               color="danger"
               data-test-subj="dashboardDiscardConfirmDiscard"
               onClick={() => {
@@ -82,13 +74,24 @@ export const confirmDiscardOrKeepUnsavedChanges = (
                 resolve('discard');
               }}
             >
-              {leaveConfirmStrings.getConfirmButtonText()}
+              {leaveEditModeConfirmStrings.getLeaveEditModeDiscardButtonText()}
+            </EuiButtonEmpty>
+            <EuiButton
+              fill
+              data-test-subj="dashboardDiscardConfirmKeep"
+              onClick={() => {
+                session.close();
+                resolve('keep');
+              }}
+            >
+              {leaveEditModeConfirmStrings.getLeaveEditModeKeepChangesText()}
             </EuiButton>
           </EuiModalFooter>
         </>
       ),
       {
         'data-test-subj': 'dashboardDiscardConfirmModal',
+        maxWidth: 550,
       }
     );
   });

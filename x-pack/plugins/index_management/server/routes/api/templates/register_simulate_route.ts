@@ -40,7 +40,7 @@ export function registerSimulateRoute({ router, license, lib }: RouteDependencie
           });
         }
         // Case: default
-        return res.internalError({ body: e });
+        throw e;
       }
     })
   );
