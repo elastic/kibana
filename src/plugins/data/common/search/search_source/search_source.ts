@@ -429,6 +429,8 @@ export class SearchSource {
         return key && data[key] == null && addToRoot(key, val);
       case 'searchAfter':
         return addToBody('search_after', val);
+      case 'trackTotalHits':
+        return addToBody('track_total_hits', val);
       case 'source':
         return addToBody('_source', val);
       case 'sort':
@@ -503,12 +505,7 @@ export class SearchSource {
     // we need to get the list of fields from an index pattern
     return fields
       .filter((fld: IndexPatternField) => filterSourceFields(fld.name))
-      .map((fld: IndexPatternField) => ({
-        field: fld.name,
-        ...((wildcardField as Record<string, string>)?.include_unmapped && {
-          include_unmapped: (wildcardField as Record<string, string>).include_unmapped,
-        }),
-      }));
+      .map((fld: IndexPatternField) => ({ field: fld.name }));
   }
 
   private getFieldFromDocValueFieldsOrIndexPattern(
