@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ActionsPlugin } from '../../actions/server';
 import {
   PluginSetup as DataPluginSetup,
   PluginStart as DataPluginStart,
@@ -17,10 +18,12 @@ export interface OsqueryPluginSetup {}
 export interface OsqueryPluginStart {}
 
 export interface SetupPlugins {
+  actions: ActionsPlugin['setup'];
   data: DataPluginSetup;
 }
 
 export interface StartPlugins {
+  actions: ActionsPlugin['start'];
   data: DataPluginStart;
   fleet?: FleetStartContract;
 }
