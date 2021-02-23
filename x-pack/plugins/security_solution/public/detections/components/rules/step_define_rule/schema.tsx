@@ -298,18 +298,6 @@ export const schema: FormSchema<DefineStepRule> = {
             if (!needsValidation) {
               return;
             }
-            /*
-            if (isEmpty(formData.threshold?.cardinality_value) && !isEmpty(formData.threshold?.cardinality_field)) {
-              return fieldValidators.emptyField(
-                i18n.translate(
-                  'xpack.securitySolution.detectionEngine.validations.thresholdCardinalityValueFieldData.thresholdCardinalityValueNotSuppliedMessage',
-                  {
-                    defaultMessage: 'A Cardinality Value is required.',
-                  }
-                )
-              )(...args);
-            }
-            */
             return fieldValidators.numberGreaterThanField({
               than: 1,
               message: i18n.translate(
