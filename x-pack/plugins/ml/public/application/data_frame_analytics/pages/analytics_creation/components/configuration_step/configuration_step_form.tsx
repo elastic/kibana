@@ -83,6 +83,7 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
     EuiComboBoxOptionOption[]
   >([]);
   const [includesTableItems, setIncludesTableItems] = useState<FieldSelectionItem[]>([]);
+  const [fetchingExplainData, setFetchingExplainData] = useState<boolean>(false);
   const [maxDistinctValuesError, setMaxDistinctValuesError] = useState<string | undefined>();
   const [unsupportedFieldsError, setUnsupportedFieldsError] = useState<string | undefined>();
   const [minimumFieldsRequiredMessage, setMinimumFieldsRequiredMessage] = useState<
@@ -150,7 +151,8 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
     maxDistinctValuesError !== undefined ||
     minimumFieldsRequiredMessage !== undefined ||
     requiredFieldsError !== undefined ||
-    unsupportedFieldsError !== undefined;
+    unsupportedFieldsError !== undefined ||
+    fetchingExplainData;
 
   const loadDepVarOptions = async (formState: State['form']) => {
     setLoadingDepVarOptions(true);
@@ -191,6 +193,7 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
   };
 
   const debouncedGetExplainData = debounce(async () => {
+    setFetchingExplainData(true);
     const jobTypeChanged = previousJobType !== jobType;
     const shouldUpdateModelMemoryLimit =
       (!firstUpdate.current || !modelMemoryLimit) && useEstimatedMml === true;
@@ -233,6 +236,7 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
           requiredFieldsError: !hasRequiredFields ? requiredFieldsErrorText : undefined,
         });
       }
+      setFetchingExplainData(false);
     } else {
       let maxDistinctValuesErrorMessage;
       let unsupportedFieldsErrorMessage;
@@ -280,6 +284,7 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
       setFieldOptionsFetchFail(true);
       setMaxDistinctValuesError(maxDistinctValuesErrorMessage);
       setUnsupportedFieldsError(unsupportedFieldsErrorMessage);
+      setFetchingExplainData(false);
       setFormState({
         ...(shouldUpdateModelMemoryLimit ? { modelMemoryLimit: fallbackModelMemoryLimit } : {}),
       });
@@ -326,6 +331,17 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
         .map((f) => `'${f.displayName}'`),
     [currentIndexPattern.fields]
   );
+
+  // Show the Scatterplot Matrix only if
+  // - There's more than one suitable field available
+  // - The job type is outlier detection, or
+  // - The job type is regression or classification and the dependent variable has been set
+  const showScatterplotMatrix =
+    (jobType === ANALYSIS_CONFIG_TYPE.OUTLIER_DETECTION ||
+      ((jobType === ANALYSIS_CONFIG_TYPE.REGRESSION ||
+        jobType === ANALYSIS_CONFIG_TYPE.CLASSIFICATION) &&
+        !dependentVariableEmpty)) &&
+    scatterplotFieldOptions.length > 1;
 
   return (
     <Fragment>
@@ -499,7 +515,7 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
         loadingItems={loadingFieldOptions}
         setFormState={setFormState}
       />
-      {scatterplotFieldOptions.length > 1 && (
+      {showScatterplotMatrix && (
         <>
           <EuiFormRow
             data-test-subj="mlAnalyticsCreateJobWizardScatterplotMatrixFormRow"
