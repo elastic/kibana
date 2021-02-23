@@ -8,6 +8,7 @@
 import expect from '@kbn/expect';
 import url from 'url';
 import moment from 'moment';
+import { pick } from 'lodash';
 import { APIReturnType } from '../../../../plugins/apm/public/services/rest/createCallApmApi';
 import archives from '../../common/fixtures/es_archiver/archives_metadata';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
@@ -76,14 +77,25 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           previousPeriod,
         } = response.body as TransactionsGroupsComparisonStatistics;
 
-        expect(Object.keys(currentPeriod).length).to.be.eql(transactionNames.length);
-        expect(Object.keys(previousPeriod).length).to.be.eql(0);
+        expect(Object.keys(currentPeriod)).to.be.eql(transactionNames);
 
-        transactionNames.map((transactionName) => {
+        const currentPeriodItems = Object.values(currentPeriod).map((data) => data);
+        const previousPeriodItems = Object.values(previousPeriod).map((data) => data);
+
+        expect(previousPeriodItems.length).to.be.eql(0);
+
+        transactionNames.forEach((transactionName) => {
           expect(currentPeriod[transactionName]).not.to.be.empty();
         });
 
-        const { latency, throughput, errorRate, impact } = currentPeriod[transactionNames[0]];
+        const firstItem = currentPeriodItems[0];
+        const { latency, throughput, errorRate, impact } = pick(
+          firstItem,
+          'latency',
+          'throughput',
+          'errorRate',
+          'impact'
+        );
 
         expect(removeEmptyCoordinates(latency).length).to.be.greaterThan(0);
         expectSnapshot(latency).toMatch();
@@ -120,14 +132,25 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           previousPeriod,
         } = response.body as TransactionsGroupsComparisonStatistics;
 
-        expect(Object.keys(currentPeriod).length).to.be.eql(transactionNames.length);
-        expect(Object.keys(previousPeriod).length).to.be.eql(0);
+        expect(Object.keys(currentPeriod)).to.be.eql(transactionNames);
 
-        transactionNames.map((transactionName) => {
+        const currentPeriodItems = Object.values(currentPeriod).map((data) => data);
+        const previousPeriodItems = Object.values(previousPeriod).map((data) => data);
+
+        expect(previousPeriodItems).to.be.empty();
+
+        transactionNames.forEach((transactionName) => {
           expect(currentPeriod[transactionName]).not.to.be.empty();
         });
 
-        const { latency, throughput, errorRate } = currentPeriod[transactionNames[0]];
+        const firstItem = currentPeriodItems[0];
+        const { latency, throughput, errorRate } = pick(
+          firstItem,
+          'latency',
+          'throughput',
+          'errorRate'
+        );
+
         expect(removeEmptyCoordinates(latency).length).to.be.greaterThan(0);
         expectSnapshot(latency).toMatch();
 
@@ -155,69 +178,103 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(response.body).to.be.eql({ currentPeriod: {}, previousPeriod: {} });
       });
 
-      it('returns data with previous period', async () => {
-        const response = await supertest.get(
-          url.format({
-            pathname: `/api/apm/services/opbeans-java/transactions/groups/comparison_statistics`,
-            query: {
-              uiFilters: '{}',
-              numBuckets: 20,
-              transactionType: 'request',
-              latencyAggregationType: 'avg',
-              transactionNames: JSON.stringify(transactionNames),
-              start: moment(end).subtract(15, 'minutes').toISOString(),
-              end,
-              comparisonStart: start,
-              comparisonEnd: moment(start).add(15, 'minutes').toISOString(),
-            },
-          })
-        );
+      describe('returns data with previous period', async () => {
+        let currentPeriod: TransactionsGroupsComparisonStatistics['currentPeriod'];
+        let previousPeriod: TransactionsGroupsComparisonStatistics['previousPeriod'];
+        before(async () => {
+          const response = await supertest.get(
+            url.format({
+              pathname: `/api/apm/services/opbeans-java/transactions/groups/comparison_statistics`,
+              query: {
+                uiFilters: '{}',
+                numBuckets: 20,
+                transactionType: 'request',
+                latencyAggregationType: 'avg',
+                transactionNames: JSON.stringify(transactionNames),
+                start: moment(end).subtract(15, 'minutes').toISOString(),
+                end,
+                comparisonStart: start,
+                comparisonEnd: moment(start).add(15, 'minutes').toISOString(),
+              },
+            })
+          );
 
-        expect(response.status).to.be(200);
-
-        const {
-          currentPeriod,
-          previousPeriod,
-        } = response.body as TransactionsGroupsComparisonStatistics;
-
-        expect(Object.keys(currentPeriod).length).to.be.eql(transactionNames.length);
-        expect(Object.keys(previousPeriod).length).to.be.eql(transactionNames.length);
-
-        transactionNames.map((transactionName) => {
-          expect(currentPeriod[transactionName]).not.to.be.empty();
-          expect(previousPeriod[transactionName]).not.to.be.empty();
+          expect(response.status).to.be(200);
+          currentPeriod = response.body.currentPeriod;
+          previousPeriod = response.body.previousPeriod;
         });
 
-        const currentPeriodStatistics = currentPeriod[transactionNames[0]];
-        const previousPeriodStatistics = previousPeriod[transactionNames[0]];
+        it('returns corrent number of items', () => {
+          expect(Object.keys(currentPeriod)).to.be.eql(transactionNames);
+          expect(Object.keys(previousPeriod)).to.be.eql(transactionNames);
 
-        expect(removeEmptyCoordinates(currentPeriodStatistics.latency).length).to.be.greaterThan(0);
-        expect(removeEmptyCoordinates(previousPeriodStatistics.latency).length).to.be.greaterThan(
-          0
-        );
-        expectSnapshot(currentPeriodStatistics.latency).toMatch();
-        expectSnapshot(previousPeriodStatistics.latency).toMatch();
+          transactionNames.forEach((transactionName) => {
+            expect(currentPeriod[transactionName]).not.to.be.empty();
+            expect(previousPeriod[transactionName]).not.to.be.empty();
+          });
+        });
 
-        expect(removeEmptyCoordinates(currentPeriodStatistics.throughput).length).to.be.greaterThan(
-          0
-        );
-        expect(
-          removeEmptyCoordinates(previousPeriodStatistics.throughput).length
-        ).to.be.greaterThan(0);
-        expectSnapshot(currentPeriodStatistics.throughput).toMatch();
-        expectSnapshot(previousPeriodStatistics.throughput).toMatch();
+        it('returns correct latency data', () => {
+          const currentPeriodItems = Object.values(currentPeriod).map((data) => data);
+          const previousPeriodItems = Object.values(previousPeriod).map((data) => data);
 
-        expect(removeEmptyCoordinates(currentPeriodStatistics.errorRate).length).to.be.greaterThan(
-          0
-        );
-        expect(removeEmptyCoordinates(previousPeriodStatistics.errorRate).length).to.be.greaterThan(
-          0
-        );
-        expectSnapshot(currentPeriodStatistics.errorRate).toMatch();
-        expectSnapshot(previousPeriodStatistics.errorRate).toMatch();
+          const currentPeriodFirstItem = currentPeriodItems[0];
+          const previousPeriodFirstItem = previousPeriodItems[0];
 
-        expectSnapshot(roundNumber(currentPeriodStatistics.impact)).toMatchInline(`"21.75"`);
-        expectSnapshot(roundNumber(previousPeriodStatistics.impact)).toMatchInline(`"96.94"`);
+          expect(removeEmptyCoordinates(currentPeriodFirstItem.latency).length).to.be.greaterThan(
+            0
+          );
+          expect(removeEmptyCoordinates(previousPeriodFirstItem.latency).length).to.be.greaterThan(
+            0
+          );
+          expectSnapshot(currentPeriodFirstItem.latency).toMatch();
+          expectSnapshot(previousPeriodFirstItem.latency).toMatch();
+        });
+
+        it('returns correct throughput data', () => {
+          const currentPeriodItems = Object.values(currentPeriod).map((data) => data);
+          const previousPeriodItems = Object.values(previousPeriod).map((data) => data);
+
+          const currentPeriodFirstItem = currentPeriodItems[0];
+          const previousPeriodFirstItem = previousPeriodItems[0];
+
+          expect(
+            removeEmptyCoordinates(currentPeriodFirstItem.throughput).length
+          ).to.be.greaterThan(0);
+          expect(
+            removeEmptyCoordinates(previousPeriodFirstItem.throughput).length
+          ).to.be.greaterThan(0);
+          expectSnapshot(currentPeriodFirstItem.throughput).toMatch();
+          expectSnapshot(previousPeriodFirstItem.throughput).toMatch();
+        });
+
+        it('returns correct error rate data', () => {
+          const currentPeriodItems = Object.values(currentPeriod).map((data) => data);
+          const previousPeriodItems = Object.values(previousPeriod).map((data) => data);
+
+          const currentPeriodFirstItem = currentPeriodItems[0];
+          const previousPeriodFirstItem = previousPeriodItems[0];
+
+          expect(removeEmptyCoordinates(currentPeriodFirstItem.errorRate).length).to.be.greaterThan(
+            0
+          );
+          expect(
+            removeEmptyCoordinates(previousPeriodFirstItem.errorRate).length
+          ).to.be.greaterThan(0);
+          expectSnapshot(currentPeriodFirstItem.errorRate).toMatch();
+          expectSnapshot(previousPeriodFirstItem.errorRate).toMatch();
+        });
+
+        it('returns correct impact data', () => {
+          const currentPeriodItems = Object.values(currentPeriod).map((data) => data);
+          const previousPeriodItems = Object.values(previousPeriod).map((data) => data);
+
+          const currentPeriodFirstItem = currentPeriodItems[0];
+          const previousPeriodFirstItem = previousPeriodItems[0];
+
+          expectSnapshot(roundNumber(currentPeriodFirstItem.impact)).toMatchInline(`"21.75"`);
+          expectSnapshot(roundNumber(previousPeriodFirstItem.impact)).toMatchInline(`"96.94"`);
+        });
       });
     }
   );
