@@ -134,7 +134,7 @@ describe('CurationsLogic', () => {
       });
     });
 
-    describe('deleteCurationSet', () => {
+    describe('deleteCuration', () => {
       const confirmSpy = jest.spyOn(window, 'confirm');
 
       beforeEach(() => {
@@ -146,7 +146,7 @@ describe('CurationsLogic', () => {
         mount();
         jest.spyOn(CurationsLogic.actions, 'loadCurations');
 
-        CurationsLogic.actions.deleteCurationSet('some-curation-id');
+        CurationsLogic.actions.deleteCuration('some-curation-id');
         expect(clearFlashMessages).toHaveBeenCalled();
         await nextTick();
 
@@ -161,7 +161,7 @@ describe('CurationsLogic', () => {
         http.delete.mockReturnValueOnce(Promise.reject('error'));
         mount();
 
-        CurationsLogic.actions.deleteCurationSet('some-curation-id');
+        CurationsLogic.actions.deleteCuration('some-curation-id');
         expect(clearFlashMessages).toHaveBeenCalled();
         await nextTick();
 
@@ -172,7 +172,7 @@ describe('CurationsLogic', () => {
         confirmSpy.mockImplementationOnce(() => false);
         mount();
 
-        CurationsLogic.actions.deleteCurationSet('some-curation-id');
+        CurationsLogic.actions.deleteCuration('some-curation-id');
         expect(clearFlashMessages).toHaveBeenCalled();
         await nextTick();
 

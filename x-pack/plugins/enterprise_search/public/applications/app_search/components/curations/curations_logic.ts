@@ -33,7 +33,7 @@ interface CurationsActions {
   onCurationsLoad(response: CurationsAPIResponse): CurationsAPIResponse;
   onPaginate(newPageIndex: number): { newPageIndex: number };
   loadCurations(): void;
-  deleteCurationSet(id: string): string;
+  deleteCuration(id: string): string;
   createCuration(queries: Curation['queries']): Curation['queries'];
 }
 
@@ -43,7 +43,7 @@ export const CurationsLogic = kea<MakeLogicType<CurationsValues, CurationsAction
     onCurationsLoad: ({ results, meta }) => ({ results, meta }),
     onPaginate: (newPageIndex) => ({ newPageIndex }),
     loadCurations: true,
-    deleteCurationSet: (id) => id,
+    deleteCuration: (id) => id,
     createCuration: (queries) => queries,
   }),
   reducers: () => ({
@@ -86,7 +86,7 @@ export const CurationsLogic = kea<MakeLogicType<CurationsValues, CurationsAction
         flashAPIErrors(e);
       }
     },
-    deleteCurationSet: async (id) => {
+    deleteCuration: async (id) => {
       const { http } = HttpLogic.values;
       const { engineName } = EngineLogic.values;
       clearFlashMessages();
