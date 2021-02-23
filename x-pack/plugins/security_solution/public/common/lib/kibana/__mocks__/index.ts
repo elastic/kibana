@@ -26,6 +26,7 @@ export const useKibana = jest.fn().mockReturnValue({
           subscribe: jest.fn().mockImplementation(() => ({
             error: jest.fn(),
             next: jest.fn(),
+            unsubscribe: jest.fn(),
           })),
         })),
       },
