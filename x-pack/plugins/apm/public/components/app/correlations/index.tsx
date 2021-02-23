@@ -140,21 +140,6 @@ export function Correlations() {
                   </>
                 ) : null}
 
-                <EuiSpacer />
-                <EuiTabs>
-                  {tabs.map(({ key, label }) => (
-                    <EuiTab
-                      key={key}
-                      isSelected={key === currentTab}
-                      onClick={() => {
-                        setCurrentTab(key);
-                      }}
-                    >
-                      {label}
-                    </EuiTab>
-                  ))}
-                </EuiTabs>
-                <EuiSpacer />
                 <TabContent onClose={() => setIsFlyoutVisible(false)} />
               </CorrelationsMetricsLicenseCheck>
             </EuiFlyoutBody>
