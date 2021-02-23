@@ -46,7 +46,6 @@ describe('fetchStatus', () => {
     triggeredMS: 0,
   };
   let alertStates: AlertState[] = [];
-  const licenseService = null;
   const alertsClient = {
     find: jest.fn(() => ({
       total: 1,
@@ -74,9 +73,7 @@ describe('fetchStatus', () => {
   });
 
   it('should fetch from the alerts client', async () => {
-    const status = await fetchStatus(alertsClient as any, licenseService as any, alertTypes, [
-      defaultClusterState.clusterUuid,
-    ]);
+    const status = await fetchStatus(alertsClient as any, alertTypes);
     expect(status).toEqual({
       monitoring_alert_cpu_usage: {
         rawAlert: { id: 1 },
@@ -96,18 +93,14 @@ describe('fetchStatus', () => {
       },
     ];
 
-    const status = await fetchStatus(alertsClient as any, licenseService as any, alertTypes, [
-      defaultClusterState.clusterUuid,
-    ]);
+    const status = await fetchStatus(alertsClient as any, alertTypes);
     expect(Object.values(status).length).toBe(1);
     expect(Object.keys(status)).toEqual(alertTypes);
     expect(status[alertType].states[0].state.ui.isFiring).toBe(true);
   });
 
   it('should pass in the right filter to the alerts client', async () => {
-    await fetchStatus(alertsClient as any, licenseService as any, alertTypes, [
-      defaultClusterState.clusterUuid,
-    ]);
+    await fetchStatus(alertsClient as any, [alertType]);
     expect((alertsClient.find as jest.Mock).mock.calls[0][0].options.filter).toBe(
       `alert.attributes.alertTypeId:${alertType}`
     );
@@ -118,9 +111,7 @@ describe('fetchStatus', () => {
       alertTypeState: null,
     })) as any;
 
-    const status = await fetchStatus(alertsClient as any, licenseService as any, alertTypes, [
-      defaultClusterState.clusterUuid,
-    ]);
+    const status = await fetchStatus(alertsClient as any, alertTypes);
     expect(status[alertType].states.length).toEqual(0);
   });
 
@@ -130,9 +121,7 @@ describe('fetchStatus', () => {
       data: [],
     })) as any;
 
-    const status = await fetchStatus(alertsClient as any, licenseService as any, alertTypes, [
-      defaultClusterState.clusterUuid,
-    ]);
+    const status = await fetchStatus(alertsClient as any, alertTypes);
     expect(status).toEqual({});
   });
 
@@ -144,12 +133,7 @@ describe('fetchStatus', () => {
         isEnabled: true,
       })),
     };
-    await fetchStatus(
-      alertsClient as any,
-      customLicenseService as any,
-      [ALERT_CLUSTER_HEALTH],
-      [defaultClusterState.clusterUuid]
-    );
+    await fetchStatus(alertsClient as any, [ALERT_CLUSTER_HEALTH]);
     expect(customLicenseService.getWatcherFeature).toHaveBeenCalled();
   });
 
@@ -181,12 +165,11 @@ describe('fetchStatus', () => {
         },
       })),
     };
-    const status = await fetchStatus(
-      customAlertsClient as any,
-      licenseService as any,
-      [ALERT_CPU_USAGE, ALERT_DISK_USAGE, ALERT_MISSING_MONITORING_DATA],
-      [defaultClusterState.clusterUuid]
-    );
+    const status = await fetchStatus(customAlertsClient as any, [
+      ALERT_CPU_USAGE,
+      ALERT_DISK_USAGE,
+      ALERT_MISSING_MONITORING_DATA,
+    ]);
     expect(Object.keys(status)).toEqual([
       ALERT_CPU_USAGE,
       ALERT_DISK_USAGE,

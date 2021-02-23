@@ -300,7 +300,7 @@ export class BaseAlert {
         .filter((node) => node.shouldFire)
         .map((node) => node.meta.nodeId || node.meta.instanceId)
         .join(',');
-      const instanceId = `${this.alertOptions.id}:${cluster.clusterUuid}:${firingNodeUuids}`;
+      const instanceId = `${this.rawAlert!.id}:${cluster.clusterUuid}:${firingNodeUuids}`;
       const instance = services.alertInstanceFactory(instanceId);
       const newAlertStates: AlertNodeState[] = [];
       const key = this.alertOptions.accessorKey;

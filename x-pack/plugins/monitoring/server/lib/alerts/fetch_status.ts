@@ -18,7 +18,6 @@ import { ALERTS } from '../../../common/constants';
 export async function fetchStatus(
   alertsClient: AlertsClient,
   alertTypes: string[] | undefined,
-  clusterUuids: string[],
   filters: CommonAlertFilter[] = []
 ): Promise<{ [type: string]: CommonAlertStatus }> {
   const byType: { [type: string]: CommonAlertStatus } = {};

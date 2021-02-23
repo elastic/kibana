@@ -32,7 +32,6 @@ export function alertStatusRoute(server: any, npRoute: RouteDependencies) {
     },
     async (context, request, response) => {
       try {
-        const { clusterUuid } = request.params;
         const { alertTypeIds, filters } = request.body;
         const alertsClient = context.alerting?.getAlertsClient();
         if (!alertsClient) {
@@ -42,7 +41,6 @@ export function alertStatusRoute(server: any, npRoute: RouteDependencies) {
         const status = await fetchStatus(
           alertsClient,
           alertTypeIds,
-          [clusterUuid],
           filters as CommonAlertFilter[]
         );
         return response.ok({ body: status });

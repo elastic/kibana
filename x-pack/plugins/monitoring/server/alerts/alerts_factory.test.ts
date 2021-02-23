@@ -36,9 +36,10 @@ describe('AlertsFactory', () => {
         ],
       };
     });
-    const alert = await AlertsFactory.getByType(ALERT_CPU_USAGE, alertsClient as any);
-    expect(alert).not.toBeNull();
-    expect(alert?.getId()).toBe(ALERT_CPU_USAGE);
+    const alerts = await AlertsFactory.getByTypes([ALERT_CPU_USAGE], alertsClient as any);
+    expect(alerts).not.toBeNull();
+    const [cpuAlert] = alerts;
+    expect(cpuAlert?.alertOptions.id).toBe(ALERT_CPU_USAGE);
   });
 
   it('should pass in the correct filters', async () => {
@@ -49,7 +50,7 @@ describe('AlertsFactory', () => {
         total: 0,
       };
     });
-    await AlertsFactory.getByType(ALERT_CPU_USAGE, alertsClient as any);
+    await AlertsFactory.getByTypes([ALERT_CPU_USAGE], alertsClient as any);
     expect(filter).toBe(`alert.attributes.alertTypeId:${ALERT_CPU_USAGE}`);
   });
 });
