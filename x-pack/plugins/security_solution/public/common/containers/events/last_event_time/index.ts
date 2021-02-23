@@ -8,6 +8,7 @@
 import deepEqual from 'fast-deep-equal';
 import { noop } from 'lodash/fp';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { Subscription } from 'rxjs';
 
 import { inputsModel } from '../../../../common/store';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -22,7 +23,6 @@ import {
   isCompleteResponse,
   isErrorResponse,
 } from '../../../../../../../../src/plugins/data/common';
-import { AbortError } from '../../../../../../../../src/plugins/kibana_utils/common';
 import * as i18n from './translations';
 import { DocValueFields } from '../../../../../common/search_strategy';
 
@@ -48,6 +48,7 @@ export const useTimelineLastEventTime = ({
   const { data, notifications } = useKibana().services;
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
+  const searchSubscription$ = useRef(new Subscription());
   const [loading, setLoading] = useState(false);
   const [
     TimelineLastEventTimeRequest,
@@ -71,12 +72,11 @@ export const useTimelineLastEventTime = ({
 
   const timelineLastEventTimeSearch = useCallback(
     (request: TimelineEventsLastEventTimeRequestOptions) => {
-      let didCancel = false;
       const asyncSearch = async () => {
         abortCtrl.current = new AbortController();
         setLoading(true);
 
-        const searchSubscription$ = data.search
+        searchSubscription$.current = data.search
           .search<
             TimelineEventsLastEventTimeRequestOptions,
             TimelineEventsLastEventTimeStrategyResponse
@@ -87,46 +87,36 @@ export const useTimelineLastEventTime = ({
           .subscribe({
             next: (response) => {
               if (isCompleteResponse(response)) {
-                if (!didCancel) {
-                  setLoading(false);
-                  setTimelineLastEventTimeResponse((prevResponse) => ({
-                    ...prevResponse,
-                    errorMessage: undefined,
-                    lastSeen: response.lastSeen,
-                    refetch: refetch.current,
-                  }));
-                }
-                searchSubscription$.unsubscribe();
+                setLoading(false);
+                setTimelineLastEventTimeResponse((prevResponse) => ({
+                  ...prevResponse,
+                  errorMessage: undefined,
+                  lastSeen: response.lastSeen,
+                  refetch: refetch.current,
+                }));
               } else if (isErrorResponse(response)) {
-                if (!didCancel) {
-                  setLoading(false);
-                }
+                setLoading(false);
                 // TODO: Make response error status clearer
                 notifications.toasts.addWarning(i18n.ERROR_LAST_EVENT_TIME);
-                searchSubscription$.unsubscribe();
               }
             },
             error: (msg) => {
-              if (!(msg instanceof AbortError)) {
-                notifications.toasts.addDanger({
-                  title: i18n.FAIL_LAST_EVENT_TIME,
-                  text: msg.message,
-                });
-                setTimelineLastEventTimeResponse((prevResponse) => ({
-                  ...prevResponse,
-                  errorMessage: msg.message,
-                }));
-              }
+              setLoading(false);
+              notifications.toasts.addDanger({
+                title: i18n.FAIL_LAST_EVENT_TIME,
+                text: msg.message,
+              });
+              setTimelineLastEventTimeResponse((prevResponse) => ({
+                ...prevResponse,
+                errorMessage: msg.message,
+              }));
             },
           });
       };
+      searchSubscription$.current.unsubscribe();
       abortCtrl.current.abort();
       asyncSearch();
       refetch.current = asyncSearch;
-      return () => {
-        didCancel = true;
-        abortCtrl.current.abort();
-      };
     },
     [data.search, notifications.toasts]
   );
@@ -149,6 +139,10 @@ export const useTimelineLastEventTime = ({
 
   useEffect(() => {
     timelineLastEventTimeSearch(TimelineLastEventTimeRequest);
+    return () => {
+      searchSubscription$.current.unsubscribe();
+      abortCtrl.current.abort();
+    };
   }, [TimelineLastEventTimeRequest, timelineLastEventTimeSearch]);
 
   return [loading, timelineLastEventTimeResponse];

@@ -28,6 +28,7 @@ export const getIndexData = async (
       pagination,
       setErrorMessage,
       setRowCount,
+      setRowCountRelation,
       setStatus,
       setTableItems,
       sortingColumns,
@@ -64,6 +65,7 @@ export const getIndexData = async (
 
       if (!options.didCancel) {
         setRowCount(resp.hits.total.value);
+        setRowCountRelation(resp.hits.total.relation);
         setTableItems(
           resp.hits.hits.map((d) =>
             getProcessedFields(d.fields, (key: string) =>
