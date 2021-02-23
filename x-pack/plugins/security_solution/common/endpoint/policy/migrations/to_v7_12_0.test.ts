@@ -96,7 +96,9 @@ describe('7.12.0 Endpoint Package Policy migration', () => {
               policy: {
                 value: {
                   windows: {
-                    ransomware: ProtectionModes.off,
+                    ransomware: {
+                      mode: ProtectionModes.off,
+                    },
                     popup: {
                       malware: {
                         message: '',
@@ -109,7 +111,9 @@ describe('7.12.0 Endpoint Package Policy migration', () => {
                     },
                   },
                   mac: {
-                    ransomware: ProtectionModes.off,
+                    ransomware: {
+                      mode: ProtectionModes.off,
+                    },
                     popup: {
                       malware: {
                         message: '',
