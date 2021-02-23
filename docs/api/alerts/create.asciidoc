@@ -15,7 +15,7 @@ Create {kib} alerts.
 ==== Path parameters
 
 `<id>`::
-  (Optional, string) Specifies a UUID to use instead of a randomly generated ID.
+  (Optional, string) Specifies a UUID v1 or v4 to use instead of a randomly generated ID.
 
 [[alerts-api-create-request-body]]
 ==== Request body
