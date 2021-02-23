@@ -33,7 +33,6 @@ jest.mock('./utils', () => {
   const original = jest.requireActual('./utils');
   return {
     ...original,
-    getGapBetweenRuns: jest.fn(),
     getListsClient: jest.fn(),
     getExceptions: jest.fn(),
     sortExceptionItems: jest.fn(),
