@@ -63,7 +63,6 @@ export const mapColumn: ExpressionFunctionDefinition<
         defaultMessage:
           'An expression that is executed on every row, provided with a single-row {DATATABLE} context and returning the cell value.',
         values: {
-          CANVAS: 'canvas',
           DATATABLE: '`datatable`',
         },
       }),
