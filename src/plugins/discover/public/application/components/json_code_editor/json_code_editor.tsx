@@ -13,7 +13,7 @@ import { i18n } from '@kbn/i18n';
 import { monaco, XJsonLang } from '@kbn/monaco';
 import { EuiButtonEmpty, EuiCopy, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { CodeEditor } from '../../../../../kibana_react/public';
-import { DocViewRenderProps } from '../../../application/doc_views/doc_views_types';
+import { DocViewRenderProps, ElasticSearchHit } from '../../doc_views/doc_views_types';
 
 const codeEditorAriaLabel = i18n.translate('discover.json.codeEditorAriaLabel', {
   defaultMessage: 'Read only JSON view of an elasticsearch document',
@@ -22,7 +22,12 @@ const copyToClipboardLabel = i18n.translate('discover.json.copyToClipboardLabel'
   defaultMessage: 'Copy to clipboard',
 });
 
-export const JsonCodeEditor = ({ hit }: DocViewRenderProps) => {
+interface JsonCodeEditorProps {
+  hit: DocViewRenderProps | ElasticSearchHit;
+  width?: string | number;
+}
+
+export const JsonCodeEditor = ({ hit, width }: JsonCodeEditorProps) => {
   const jsonValue = JSON.stringify(hit, null, 2);
 
   // setting editor height based on lines height and count to stretch and fit its content
@@ -58,6 +63,7 @@ export const JsonCodeEditor = ({ hit }: DocViewRenderProps) => {
       <EuiFlexItem grow={true}>
         <CodeEditor
           languageId={XJsonLang.ID}
+          width={width}
           value={jsonValue}
           onChange={() => {}}
           editorDidMount={setEditorCalculatedHeight}
