@@ -2,7 +2,10 @@
 [[alert-types]]
 == Alerts
 
-{kib} supplies alert types in two ways: some are built into {kib} (these are known as stack alerts), while domain-specific alert types are registered by {kib} apps.
+Kibana provides two types of alerts:
+
+* Stack alerts, which are built into {kib}
+* Domain-specific alerts, which are registered by {kib} apps.
 
 [float]
 ==== Standard stack alerts
