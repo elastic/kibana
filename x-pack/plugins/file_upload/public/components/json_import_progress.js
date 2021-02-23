@@ -9,7 +9,7 @@ import React, { Fragment, Component } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiCodeBlock, EuiSpacer, EuiText, EuiTitle, EuiProgress, EuiCallOut } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { basePath } from '../kibana_services';
+import { getHttp } from '../kibana_services';
 
 export class JsonImportProgress extends Component {
   state = {
@@ -118,7 +118,7 @@ export class JsonImportProgress extends Component {
                 <a
                   data-test-subj="indexManagementNewIndexLink"
                   target="_blank"
-                  href={`${basePath}/app/management/kibana/indexPatterns`}
+                  href={getHttp().basePath.prepend('/app/management/kibana/indexPatterns')}
                 >
                   {i18n.translate('xpack.fileUpload.jsonImport.indexMgmtLink', {
                     defaultMessage: 'Index Management',
