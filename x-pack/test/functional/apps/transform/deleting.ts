@@ -5,39 +5,22 @@
  * 2.0.
  */
 
-import { TransformPivotConfig } from '../../../../plugins/transform/common/types/transform';
 import { TRANSFORM_STATE } from '../../../../plugins/transform/common/constants';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
-
-function getTransformConfig(continuous?: boolean): TransformPivotConfig {
-  const date = Date.now();
-  return {
-    id: `ec_deleting_${date}_${continuous ? 'continuous' : 'batch'}`,
-    source: { index: ['ft_ecommerce'] },
-    pivot: {
-      group_by: { category: { terms: { field: 'category.keyword' } } },
-      aggregations: { 'products.base_price.avg': { avg: { field: 'products.base_price' } } },
-    },
-    description:
-      'ecommerce batch transform with avg(products.base_price) grouped by terms(category.keyword)',
-    dest: { index: `user-ec_2_${date}` },
-    ...(continuous ? { sync: { time: { field: 'order_date', delay: '60s' } } } : {}),
-  };
-}
+import { getLatestTransformConfig, getPivotTransformConfig } from './index';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const transform = getService('transform');
 
   describe('deleting', function () {
-    const transformConfigWithPivot = getTransformConfig(false);
-    // const transformConfigWithLatest = getLatestTransformConfig();
+    const PREFIX = 'deleting';
 
     const testDataList = [
       {
         suiteTitle: 'transform with pivot configuration',
-        originalConfig: transformConfigWithPivot,
+        originalConfig: getPivotTransformConfig(PREFIX, false),
         expected: {
           row: {
             status: TRANSFORM_STATE.STOPPED,
@@ -48,31 +31,30 @@ export default function ({ getService }: FtrProviderContext) {
       },
       {
         suiteTitle: 'continuous transform with pivot configuration',
-        originalConfig: getTransformConfig(true),
+        originalConfig: getPivotTransformConfig(PREFIX, true),
         expected: {
           row: {
-            status: TRANSFORM_STATE.STARTED,
+            status: TRANSFORM_STATE.STOPPED,
             mode: 'continuous',
             progress: undefined,
           },
         },
       },
-      // TODO enable tests when https://github.com/elastic/elasticsearch/issues/67148 is resolved
-      // {
-      //   suiteTitle: 'delete transform with latest configuration',
-      //   originalConfig: transformConfigWithLatest,
-      //   transformDescription: 'updated description',
-      //   transformDocsPerSecond: '1000',
-      //   transformFrequency: '10m',
-      //   expected: {
-      //     messageText: 'updated transform.',
-      //     row: {
-      //       status: TRANSFORM_STATE.STOPPED,
-      //       mode: 'batch',
-      //       progress: '100',
-      //     },
-      //   },
-      // },
+      {
+        suiteTitle: 'delete transform with latest configuration',
+        originalConfig: getLatestTransformConfig(PREFIX),
+        transformDescription: 'updated description',
+        transformDocsPerSecond: '1000',
+        transformFrequency: '10m',
+        expected: {
+          messageText: 'updated transform.',
+          row: {
+            status: TRANSFORM_STATE.STOPPED,
+            mode: 'batch',
+            progress: '100',
+          },
+        },
+      },
     ];
 
     before(async () => {
@@ -107,14 +89,20 @@ export default function ({ getService }: FtrProviderContext) {
 
           await transform.testExecution.logTestStep('should display the transforms table');
           await transform.management.assertTransformsTableExists();
-          await transform.table.refreshTransformList();
 
           if (testData.expected.row.mode === 'continuous') {
             await transform.testExecution.logTestStep('should have the delete action disabled');
-            await transform.table.assertTransformRowActionEnabled('Delete', false);
+            await transform.table.assertTransformRowActionEnabled(
+              testData.originalConfig.id,
+              'Delete',
+              false
+            );
 
             await transform.testExecution.logTestStep('should stop the transform');
-            await transform.table.clickTransformRowActionWithRetry('Stop');
+            await transform.table.clickTransformRowActionWithRetry(
+              testData.originalConfig.id,
+              'Stop'
+            );
 
             await transform.testExecution.logTestStep('should display the stopped transform');
             await transform.table.assertTransformRowFields(testData.originalConfig.id, {
@@ -124,16 +112,23 @@ export default function ({ getService }: FtrProviderContext) {
               mode: testData.expected.row.mode,
               progress: testData.expected.row.progress,
             });
-            await transform.table.refreshTransformList();
           }
 
           await transform.testExecution.logTestStep('should show the delete modal');
-          await transform.table.assertTransformRowActionEnabled('Delete', true);
-          await transform.table.clickTransformRowActionWithRetry('Delete');
+          await transform.table.assertTransformRowActionEnabled(
+            testData.originalConfig.id,
+            'Delete',
+            true
+          );
+          await transform.table.clickTransformRowActionWithRetry(
+            testData.originalConfig.id,
+            'Delete'
+          );
           await transform.table.assertTransformDeleteModalExists();
 
           await transform.testExecution.logTestStep('should delete the transform');
-          await transform.table.clickDeleteTransform(testData.originalConfig.id);
+          await transform.table.confirmDeleteTransform();
+          await transform.table.assertTransformRowNotExists(testData.originalConfig.id);
         });
       });
     }

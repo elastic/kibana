@@ -5,36 +5,35 @@
  * 2.0.
  */
 
-import { TransformPivotConfig } from '../../../../plugins/transform/common/types/transform';
-import { TRANSFORM_STATE } from '../../../../plugins/transform/common/constants';
-
 import { FtrProviderContext } from '../../ftr_provider_context';
-
-function getTransformConfig(continuous?: boolean): TransformPivotConfig {
-  const date = Date.now();
-  return {
-    id: `ec_starting_${date}_${continuous ? 'continuous' : 'batch'}`,
-    source: { index: ['ft_ecommerce'] },
-    pivot: {
-      group_by: { category: { terms: { field: 'category.keyword' } } },
-      aggregations: { 'products.base_price.avg': { avg: { field: 'products.base_price' } } },
-    },
-    description:
-      'ecommerce batch transform with avg(products.base_price) grouped by terms(category.keyword)',
-    dest: { index: `user-ec_2_${date}` },
-    ...(continuous ? { sync: { time: { field: 'order_date', delay: '60s' } } } : {}),
-  };
-}
+import { TRANSFORM_STATE } from '../../../../plugins/transform/common/constants';
+import { getLatestTransformConfig, getPivotTransformConfig } from './index';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const transform = getService('transform');
 
   describe('starting', function () {
+    const PREFIX = 'starting';
     const testDataList = [
       {
+        suiteTitle: 'batch transform with pivot configuration',
+        originalConfig: getPivotTransformConfig(PREFIX, false),
+        mode: 'batch',
+      },
+      {
         suiteTitle: 'continuous transform with pivot configuration',
-        originalConfig: getTransformConfig(true),
+        originalConfig: getPivotTransformConfig(PREFIX, true),
+        mode: 'continuous',
+      },
+      {
+        suiteTitle: 'batch transform with latest configuration',
+        originalConfig: getLatestTransformConfig(PREFIX, false),
+        mode: 'batch',
+      },
+      {
+        suiteTitle: 'batch transform with latest configuration',
+        originalConfig: getLatestTransformConfig(PREFIX, true),
         mode: 'continuous',
       },
     ];
@@ -60,6 +59,8 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     for (const testData of testDataList) {
+      const transformId = testData.originalConfig.id;
+
       describe(`${testData.suiteTitle}`, function () {
         it('start transform', async () => {
           await transform.testExecution.logTestStep('should load the home page');
@@ -72,19 +73,23 @@ export default function ({ getService }: FtrProviderContext) {
           await transform.testExecution.logTestStep(
             'should display the original transform in the transform list'
           );
-          await transform.table.filterWithSearchString(testData.originalConfig.id, 1);
+          await transform.table.filterWithSearchString(transformId, 1);
 
           await transform.testExecution.logTestStep('should start the transform');
-          await transform.table.assertTransformRowActionEnabled('Start', true);
-          await transform.table.clickTransformRowActionWithRetry('Start');
+          await transform.table.assertTransformRowActionEnabled(transformId, 'Start', true);
+          await transform.table.clickTransformRowActionWithRetry(transformId, 'Start');
           await transform.table.confirmStartTransform();
           await transform.table.clearSearchString(testDataList.length);
 
-          await transform.testExecution.logTestStep('should display the started transform');
-          await transform.table.assertTransformRowStatusNotEql(
-            testData.originalConfig.id,
-            TRANSFORM_STATE.STOPPED
-          );
+          if (testData.mode === 'continuous') {
+            await transform.testExecution.logTestStep('should display the started transform');
+            await transform.table.assertTransformRowStatusNotEql(
+              testData.originalConfig.id,
+              TRANSFORM_STATE.STOPPED
+            );
+          } else {
+            await transform.table.assertTransformRowProgress(transformId, 0);
+          }
         });
       });
     }

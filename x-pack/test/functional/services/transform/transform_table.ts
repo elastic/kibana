@@ -8,12 +8,8 @@
 import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { TransformManagement } from './management';
 
-export function TransformTableProvider(
-  { getService }: FtrProviderContext,
-  management: TransformManagement
-) {
+export function TransformTableProvider({ getService }: FtrProviderContext) {
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
@@ -151,14 +147,29 @@ export function TransformTableProvider(
     }
 
     public async assertTransformRowFields(transformId: string, expectedRow: object) {
-      const rows = await this.parseTransformTable();
-      const transformRow = rows.filter((row) => row.id === transformId)[0];
-      expect(transformRow).to.eql(
-        expectedRow,
-        `Expected transform row to be '${JSON.stringify(expectedRow)}' (got '${JSON.stringify(
-          transformRow
-        )}')`
-      );
+      await retry.tryForTime(30 * 1000, async () => {
+        await this.refreshTransformList();
+        const rows = await this.parseTransformTable();
+        const transformRow = rows.filter((row) => row.id === transformId)[0];
+        expect(transformRow).to.eql(
+          expectedRow,
+          `Expected transform row to be '${JSON.stringify(expectedRow)}' (got '${JSON.stringify(
+            transformRow
+          )}')`
+        );
+      });
+    }
+
+    public async assertTransformRowProgress(transformId: string, expectedProgress: number) {
+      await retry.tryForTime(30 * 1000, async () => {
+        await this.refreshTransformList();
+        const rows = await this.parseTransformTable();
+        const transformRow = rows.filter((row) => row.id === transformId)[0];
+        expect(transformRow.progress).to.greaterThan(
+          0,
+          `Expected transform row progress to be greater than '${expectedProgress}' (got '${transformRow.progress}')`
+        );
+      });
     }
 
     public async assertTransformRowStatusNotEql(transformId: string, status: string) {
@@ -214,7 +225,14 @@ export function TransformTableProvider(
       });
     }
 
-    public async assertTransformRowActions(isTransformRunning = false) {
+    public rowSelector(transformId: string, subSelector?: string) {
+      const row = `~transformListTable > ~row-${transformId}`;
+      return !subSelector ? row : `${row} > ${subSelector}`;
+    }
+
+    public async assertTransformRowActions(transformId: string, isTransformRunning = false) {
+      await testSubjects.click(this.rowSelector(transformId, 'euiCollapsedItemActionsButton'));
+
       await testSubjects.click('euiCollapsedItemActionsButton');
 
       await testSubjects.existOrFail('transformActionClone');
@@ -231,13 +249,16 @@ export function TransformTableProvider(
     }
 
     public async assertTransformRowActionEnabled(
+      transformId: string,
       action: 'Delete' | 'Start' | 'Stop' | 'Clone' | 'Edit',
       expectedValue: boolean
     ) {
       const selector = `transformAction${action}`;
       await retry.tryForTime(60 * 1000, async () => {
+        await this.refreshTransformList();
+
         await browser.pressKeys(browser.keys.ESCAPE);
-        await testSubjects.click('euiCollapsedItemActionsButton');
+        await testSubjects.click(this.rowSelector(transformId, 'euiCollapsedItemActionsButton'));
 
         await testSubjects.existOrFail(selector);
         const isEnabled = await testSubjects.isEnabled(selector);
@@ -250,10 +271,16 @@ export function TransformTableProvider(
       });
     }
 
-    public async clickTransformRowActionWithRetry(action: string) {
+    public async clickTransformRowActionWithRetry(
+      transformId: string,
+      action: 'Delete' | 'Start' | 'Stop' | 'Clone' | 'Edit'
+    ) {
       await retry.tryForTime(30 * 1000, async () => {
+        await browser.pressKeys(browser.keys.ESCAPE);
+        await testSubjects.click(this.rowSelector(transformId, 'euiCollapsedItemActionsButton'));
         await testSubjects.existOrFail(`transformAction${action}`);
         await testSubjects.click(`transformAction${action}`);
+        await testSubjects.missingOrFail(`transformAction${action}`);
       });
     }
 
@@ -287,17 +314,23 @@ export function TransformTableProvider(
       await testSubjects.missingOrFail('transformStartModal', { timeout: 60 * 1000 });
     }
 
-    public async clickDeleteTransform(transformId: string) {
-      const expectedNumRows = (await this.parseTransformTable()).length - 1;
-
+    public async confirmDeleteTransform() {
       await retry.tryForTime(30 * 1000, async () => {
         await this.assertTransformDeleteModalExists();
         await testSubjects.click('transformDeleteModal > confirmModalConfirmButton');
         await this.assertTransformDeleteModalNotExists();
+      });
+    }
 
+    public async assertTransformRowNotExists(transformId: string) {
+      await retry.tryForTime(30 * 1000, async () => {
         // If after deletion, and there's no transform left
-        if (expectedNumRows < 1) {
-          await management.assertNoTransformsFoundMessageExists();
+        const noTransformsFoundMessageExists = await testSubjects.exists(
+          'transformNoTransformsFound'
+        );
+
+        if (noTransformsFoundMessageExists) {
+          return true;
         } else {
           // Checks that the tranform was deleted
           await this.filterWithSearchString(transformId, 0);

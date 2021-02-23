@@ -6,7 +6,10 @@
  */
 
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { TransformLatestConfig } from '../../../../plugins/transform/common/types/transform';
+import {
+  TransformLatestConfig,
+  TransformPivotConfig,
+} from '../../../../plugins/transform/common/types/transform';
 
 export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
@@ -82,10 +85,32 @@ export function isLatestTransformTestData(arg: any): arg is LatestTransformTestD
   return arg.type === 'latest';
 }
 
-export function getLatestTransformConfig(): TransformLatestConfig {
+export function getPivotTransformConfig(
+  prefix: string,
+  continuous?: boolean
+): TransformPivotConfig {
   const timestamp = Date.now();
   return {
-    id: `ec_cloning_2_${timestamp}`,
+    id: `ec_${prefix}_pivot_${timestamp}_${continuous ? 'cont' : 'batch'}`,
+    source: { index: ['ft_ecommerce'] },
+    pivot: {
+      group_by: { category: { terms: { field: 'category.keyword' } } },
+      aggregations: { 'products.base_price.avg': { avg: { field: 'products.base_price' } } },
+    },
+    description:
+      'ecommerce batch transform with avg(products.base_price) grouped by terms(category.keyword)',
+    dest: { index: `user-ec_2_${timestamp}` },
+    ...(continuous ? { sync: { time: { field: 'order_date', delay: '60s' } } } : {}),
+  };
+}
+
+export function getLatestTransformConfig(
+  prefix: string,
+  continuous?: boolean
+): TransformLatestConfig {
+  const timestamp = Date.now();
+  return {
+    id: `ec_${prefix}_latest_${timestamp}_${continuous ? 'cont' : 'batch'}`,
     source: { index: ['ft_ecommerce'] },
     latest: {
       unique_key: ['category.keyword'],
@@ -97,5 +122,6 @@ export function getLatestTransformConfig(): TransformLatestConfig {
       max_page_search_size: 250,
     },
     dest: { index: `user-ec_3_${timestamp}` },
+    ...(continuous ? { sync: { time: { field: 'order_date', delay: '60s' } } } : {}),
   };
 }
