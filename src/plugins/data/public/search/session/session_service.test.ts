@@ -21,11 +21,13 @@ describe('Session service', () => {
   let state$: BehaviorSubject<SearchSessionState>;
   let nowProvider: jest.Mocked<NowProviderInternalContract>;
   let userHasAccessToSearchSessions = true;
+  let currentAppId$: BehaviorSubject<string>;
 
   beforeEach(() => {
     const initializerContext = coreMock.createPluginInitializerContext();
     const startService = coreMock.createSetup().getStartServices;
     nowProvider = createNowProviderMock();
+    currentAppId$ = new BehaviorSubject('app');
     sessionService = new SessionService(
       initializerContext,
       () =>
@@ -34,7 +36,7 @@ describe('Session service', () => {
             ...coreStart,
             application: {
               ...coreStart.application,
-              currentAppId$: new BehaviorSubject('app'),
+              currentAppId$,
               capabilities: {
                 ...coreStart.application.capabilities,
                 management: {
@@ -63,6 +65,23 @@ describe('Session service', () => {
       sessionService.clear();
       expect(sessionService.getSessionId()).toBeUndefined();
       expect(nowProvider.reset).toHaveBeenCalled();
+    });
+
+    it("Can't clear other apps' session", async () => {
+      sessionService.start();
+      expect(sessionService.getSessionId()).not.toBeUndefined();
+      currentAppId$.next('change');
+      sessionService.clear();
+      expect(sessionService.getSessionId()).not.toBeUndefined();
+    });
+
+    it("Can start a new session in case there is other apps' stale session", async () => {
+      const s1 = sessionService.start();
+      expect(sessionService.getSessionId()).not.toBeUndefined();
+      currentAppId$.next('change');
+      sessionService.start();
+      expect(sessionService.getSessionId()).not.toBeUndefined();
+      expect(sessionService.getSessionId()).not.toBe(s1);
     });
 
     it('Restores a session', async () => {
