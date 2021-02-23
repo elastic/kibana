@@ -19,7 +19,7 @@ import {
   TRANSACTION_PAGE_LOAD,
   TRANSACTION_REQUEST,
 } from '../../../common/transaction_types';
-import { environmentQuery, rangeQuery } from '../../../common/utils/queries';
+import { environmentQuery, rangeQuery } from '../../../server/utils/queries';
 import { withApmSpan } from '../../utils/with_apm_span';
 import {
   getDocumentTypeFilterForAggregatedTransactions,
