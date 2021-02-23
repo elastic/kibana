@@ -26,3 +26,7 @@ For domain-specific alerts, refer to the documentation for that app.
 * {security-guide}/prebuilt-rules.html[Security alerts]
 * <<geo-alerting, Maps alerts>>
 * <<xpack-ml, ML alerts>>
+
+include::stack-alerts/index-threshold.asciidoc[]
+include::stack-alerts/es-query.asciidoc[]
+include::maps-alerts/geo-alert-types.asciidoc[]

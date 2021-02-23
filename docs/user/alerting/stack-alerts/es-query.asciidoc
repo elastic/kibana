@@ -1,12 +1,12 @@
 [role="xpack"]
 [[alert-type-es-query]]
-== ES query
+=== ES query
 
 The ES query alert type is designed to run a user-configured {es} query over indices, compare the number of matches to a configured threshold, and schedule
 actions to run when the threshold condition is met.
 
 [float]
-=== Creating the alert
+==== Creating the alert
 
 An ES query alert can be created from the *Create* button in the <<alert-management, alert management UI>>. Fill in the <<defining-alerts-general-details, general alert details>>, then select *ES query*.
 
@@ -14,7 +14,7 @@ An ES query alert can be created from the *Create* button in the <<alert-managem
 image::user/alerting/images/alert-types-es-query-select.png[Choosing an ES query alert type]
 
 [float]
-=== Defining the conditions
+==== Defining the conditions
 
 The ES query alert has 5 clauses that define the condition to detect.
 
@@ -29,7 +29,7 @@ Threshold:: This clause defines a threshold value and a comparison operator  (`i
 Time window:: This clause determines how far back to search for documents, using the *time field* set in the *index* clause. Generally this value should be set to a value higher than the *check every* value in the <<defining-alerts-general-details, general alert details>>, to avoid gaps in detection. 
 
 [float]
-=== Testing your query
+==== Testing your query
 
 Use the *Test query* feature to verify that your query DSL is valid.
 
