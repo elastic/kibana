@@ -209,6 +209,29 @@ a set of entities. Each entity is represented by a node. Connections between
 nodes are represented by <<glossary-edge,edges>>.  See {kibana-ref}/xpack-graph.html[Graph].
 // end::graph-def[]
 
+[[glossary-geojson]] GeoJSON ::
+// tag::geojson-def[]
+A format for representing geospatial data. GeoJSON is also a file-type,
+commonly used in the *Maps* application to upload a file of geospatial data.
+See {kibana-ref}/indexing-geojson-data-tutorial.html[GeoJSON data].
+// end::geojson-def[]
+
+[[glossary-geo-point]] geo-point ::
+// tag::geo-point-def[]
+A field type in {es}. A geo-point field accepts latitude-longitude pairs
+for storing point locations. The latitude-longitude format can be from a string,
+geohash, array, WKT, or object.
+See {ref}/geo-point.html[geo-point].
+// end::geo-point-def[]
+
+[[glossary-geo-shape]] geo-shape ::
+// tag::geo-shape-def[]
+A field type in {es}. A geo-shape field accepts arbitrary geographic primitives,
+like polygons, lines, or rectangles (and more). You can populate a geo-shape
+field from GeoJSON or WKT.
+See {ref}/geo-shape.html[geo-shape].
+// end::geo-shape-def[]
+
 [[glossary-grok-debugger]] Grok Debugger ::
 // tag::grok-debugger-def[]
 A tool for building and debugging grok patterns. Grok is good for parsing
