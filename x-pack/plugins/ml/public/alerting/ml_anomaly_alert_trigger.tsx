@@ -77,7 +77,9 @@ const MlAnomalyAlertTrigger: FC<MlAnomalyAlertTriggerProps> = ({
   }, [jobsAndGroupIds]);
 
   const availableResultTypes = useMemo(() => {
-    return (jobConfigs ?? []).every((v) => v.analysis_config.influencers.length > 0)
+    if (jobConfigs.length === 0) return Object.values(ANOMALY_RESULT_TYPE);
+
+    return (jobConfigs ?? []).some((v) => v.analysis_config.influencers.length > 0)
       ? Object.values(ANOMALY_RESULT_TYPE)
       : [ANOMALY_RESULT_TYPE.BUCKET, ANOMALY_RESULT_TYPE.RECORD];
   }, [jobConfigs]);

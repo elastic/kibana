@@ -7,11 +7,11 @@
 
 import React, { FC, useMemo } from 'react';
 
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { parseInterval, resolveBucketSpanInSeconds } from '../../common/util/parse_interval';
-import { CombinedJobWithStats } from '../../common/types/anomaly_detection_jobs';
+import { CombinedJobWithStats, JobId } from '../../common/types/anomaly_detection_jobs';
+import { DATAFEED_STATE, JOB_STATE } from '../../common/constants/states';
 
 interface ConfigValidatorProps {
   alertInterval: string;
@@ -23,32 +23,130 @@ interface ConfigValidatorProps {
  */
 export const ConfigValidator: FC<ConfigValidatorProps> = React.memo(
   ({ jobConfigs = [], alertInterval }) => {
-    const resultBucketSpan = useMemo(
+    const resultBucketSpanInSeconds = useMemo(
       () => resolveBucketSpanInSeconds(jobConfigs.map((v) => v.analysis_config.bucket_span)),
       [jobConfigs]
     );
+
+    const resultBucketSpanString =
+      resultBucketSpanInSeconds % 60 === 0
+        ? `${resultBucketSpanInSeconds / 60}m`
+        : `${resultBucketSpanInSeconds}s`;
 
     if (jobConfigs.length === 0) return null;
 
     const alertIntervalInSeconds = parseInterval(alertInterval)!.asSeconds();
 
-    const isAlertIntervalTooHigh = resultBucketSpan < alertIntervalInSeconds;
+    const isAlertIntervalTooHigh = resultBucketSpanInSeconds < alertIntervalInSeconds;
+
+    const jobIssues = jobConfigs.reduce(
+      (acc, job) => {
+        if (job.state === JOB_STATE.FAILED) {
+          acc.failedJobsIds.push(job.job_id);
+        }
+        if ([JOB_STATE.CLOSING, JOB_STATE.CLOSED].includes(job.state)) {
+          acc.closedJobIds.push(job.job_id);
+        }
+        if ([DATAFEED_STATE.STOPPING, DATAFEED_STATE.STOPPED].includes(job.datafeed_config.state)) {
+          acc.stoppedDatafeedJobIds.push(job.job_id);
+        }
+        if (job.datafeed_config.state === DATAFEED_STATE.DELETED) {
+          acc.deletedDatafeedJobIds.push(job.job_id);
+        }
+        return acc;
+      },
+      {
+        failedJobsIds: [],
+        closedJobIds: [],
+        stoppedDatafeedJobIds: [],
+        deletedDatafeedJobIds: [],
+      } as Record<
+        'failedJobsIds' | 'closedJobIds' | 'stoppedDatafeedJobIds' | 'deletedDatafeedJobIds',
+        JobId[]
+      >
+    );
+
+    const configContainsIssues =
+      isAlertIntervalTooHigh || Object.values(jobIssues).some((v) => v.length > 0);
+
+    if (!configContainsIssues) return null;
 
     return (
       <>
         <EuiSpacer size={'m'} />
         <EuiCallOut
-          title={i18n.translate('xpack.ml.alertConditionValidation.title', {
-            defaultMessage: 'Alert condition contains the following issues:',
-          })}
+          title={
+            <FormattedMessage
+              id="xpack.ml.alertConditionValidation.title"
+              defaultMessage="Alert condition contains the following issues:"
+            />
+          }
           color="warning"
+          size={'s'}
         >
           <ul>
             {isAlertIntervalTooHigh ? (
-              <FormattedMessage
-                id="xpack.ml.alertConditionValidation.alertIntervalTooHighMessage"
-                defaultMessage="Alert interval is too high. Be aware of some delay on receiving notification."
-              />
+              <li>
+                <FormattedMessage
+                  id="xpack.ml.alertConditionValidation.alertIntervalTooHighMessage"
+                  defaultMessage="The check interval is higher than results bucket span of {resultBucketSpan}. Be aware of a delay in receiving notification."
+                  values={{
+                    resultBucketSpan: resultBucketSpanString,
+                  }}
+                />
+              </li>
+            ) : null}
+
+            {jobIssues.failedJobsIds.length > 0 ? (
+              <li>
+                <FormattedMessage
+                  id="xpack.ml.alertConditionValidation.failedJobsMessage"
+                  defaultMessage="{jobIds} {count, plural, one {job is} other {jobs are}} failed"
+                  values={{
+                    count: jobIssues.failedJobsIds.length,
+                    jobIds: jobIssues.failedJobsIds.join(', '),
+                  }}
+                />
+              </li>
+            ) : null}
+
+            {jobIssues.closedJobIds.length > 0 ? (
+              <li>
+                <FormattedMessage
+                  id="xpack.ml.alertConditionValidation.closedJobsMessage"
+                  defaultMessage="{jobIds} {count, plural, one {job is} other {jobs are}} closed"
+                  values={{
+                    count: jobIssues.closedJobIds.length,
+                    jobIds: jobIssues.closedJobIds.join(', '),
+                  }}
+                />
+              </li>
+            ) : null}
+
+            {jobIssues.stoppedDatafeedJobIds.length > 0 ? (
+              <li>
+                <FormattedMessage
+                  id="xpack.ml.alertConditionValidation.stoppedDatafeedJobsMessage"
+                  defaultMessage="{jobIds} {count, plural, one {job has} other {jobs have}} datafeed closed"
+                  values={{
+                    count: jobIssues.stoppedDatafeedJobIds.length,
+                    jobIds: jobIssues.stoppedDatafeedJobIds.join(', '),
+                  }}
+                />
+              </li>
+            ) : null}
+
+            {jobIssues.deletedDatafeedJobIds.length > 0 ? (
+              <li>
+                <FormattedMessage
+                  id="xpack.ml.alertConditionValidation.deletedDatafeedJobsMessage"
+                  defaultMessage="{jobIds} {count, plural, one {job has} other {jobs have}} datafeed deleted"
+                  values={{
+                    count: jobIssues.deletedDatafeedJobIds.length,
+                    jobIds: jobIssues.deletedDatafeedJobIds.join(', '),
+                  }}
+                />
+              </li>
             ) : null}
           </ul>
         </EuiCallOut>
