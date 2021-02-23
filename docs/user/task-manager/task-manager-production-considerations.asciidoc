@@ -73,6 +73,10 @@ Finding the sweet spot between both strategies requires experimentation, but in 
 
 {kib} Task Manager, like the rest of the Elastic Stack, has been designed to scale horizontally, and we recommend taking advantage of this ability to ensure mission ciritcal services such as Alerting and Reporting always have the capacity they need.
 
+Scaling horizontally requires a higher degree of coordination between {kib} instances. One way by which {kib} Task Manager coordinates with other instances is delaying its polling schedule to avoid conflicting with other instances.
+By using <<task-manager-health-monitoring>> to evaluate the <<task-manager-health-evaluate-the-runtime,date of the `last_polling_delay`>> across a deployment, we can estimate the frequency at which Task Manager resets its delay mechanism.
+A higher frequency suggests {kib} instances conflict at a high rate, which can be addressed by scaling vertically rather than horizontally, in effect reducing the required coordination.
+
 [float]
 [[task-manager-rough-throughput-estimation]]
 ==== Rough Throughput Estimation
