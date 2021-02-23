@@ -213,9 +213,9 @@ export const CaseComponent = React.memo<CaseProps>(
     const handleUpdateCase = useCallback(
       (newCase: Case) => {
         updateCase(newCase);
-        fetchCaseUserActions(newCase.id);
+        fetchCaseUserActions(caseId, subCaseId);
       },
-      [updateCase, fetchCaseUserActions]
+      [updateCase, fetchCaseUserActions, caseId, subCaseId]
     );
 
     const { loading: isLoadingConnectors, connectors } = useConnectors();
@@ -283,9 +283,9 @@ export const CaseComponent = React.memo<CaseProps>(
     );
 
     const handleRefresh = useCallback(() => {
-      fetchCaseUserActions(caseData.id);
+      fetchCaseUserActions(caseId, subCaseId);
       fetchCase();
-    }, [caseData.id, fetchCase, fetchCaseUserActions]);
+    }, [caseId, fetchCase, fetchCaseUserActions, subCaseId]);
 
     const spyState = useMemo(() => ({ caseTitle: caseData.title }), [caseData.title]);
 
@@ -387,7 +387,7 @@ export const CaseComponent = React.memo<CaseProps>(
                       caseUserActions={caseUserActions}
                       connectors={connectors}
                       data={caseData}
-                      fetchUserActions={fetchCaseUserActions.bind(null, caseData.id)}
+                      fetchUserActions={fetchCaseUserActions.bind(null, caseId, subCaseId)}
                       isLoadingDescription={isLoading && updateKey === 'description'}
                       isLoadingUserActions={isLoadingUserActions}
                       onShowAlertDetails={showAlert}
