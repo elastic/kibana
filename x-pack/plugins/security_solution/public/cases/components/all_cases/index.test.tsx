@@ -424,6 +424,7 @@ describe('AllCases', () => {
   it('Bulk delete', async () => {
     useGetCasesMock.mockReturnValue({
       ...defaultGetCases,
+      filterOptions: { ...defaultGetCases.filterOptions, status: CaseStatuses.closed },
       selectedCases: useGetCasesMockState.data.cases,
     });
 

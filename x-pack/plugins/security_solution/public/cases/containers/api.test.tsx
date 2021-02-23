@@ -7,7 +7,12 @@
 
 import { KibanaServices } from '../../common/lib/kibana';
 
-import { ConnectorTypes, CommentType, CaseStatuses } from '../../../../case/common/api';
+import {
+  ConnectorTypes,
+  CommentType,
+  CaseStatuses,
+  AllCaseType,
+} from '../../../../case/common/api';
 import { CASES_URL } from '../../../../case/common/constants';
 
 import {
@@ -137,7 +142,7 @@ describe('Case Configuration API', () => {
           ...DEFAULT_QUERY_PARAMS,
           reporters: [],
           tags: [],
-          status: CaseStatuses.open,
+          status: AllCaseType,
         },
         signal: abortCtrl.signal,
       });

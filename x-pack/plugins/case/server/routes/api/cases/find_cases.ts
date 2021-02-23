@@ -54,10 +54,7 @@ export function initFindCasesApi({ caseService, caseConfigureService, router }: 
 
         const [openCases, inProgressCases, closedCases] = await Promise.all([
           ...caseStatuses.map((status) => {
-            const statusQuery = constructQueryOptions({
-              ...queryArgs,
-              status,
-            });
+            const statusQuery = constructQueryOptions({ ...queryArgs, status });
             return caseService.findCaseStatusStats({
               client,
               caseOptions: statusQuery.case,

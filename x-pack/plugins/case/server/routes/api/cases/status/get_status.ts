@@ -24,9 +24,7 @@ export function initGetCasesStatusApi({ caseService, router }: RouteDeps) {
 
         const [openCases, inProgressCases, closedCases] = await Promise.all([
           ...caseStatuses.map((status) => {
-            const statusQuery = constructQueryOptions({
-              status,
-            });
+            const statusQuery = constructQueryOptions({ status });
             return caseService.findCaseStatusStats({
               client,
               caseOptions: statusQuery.case,
