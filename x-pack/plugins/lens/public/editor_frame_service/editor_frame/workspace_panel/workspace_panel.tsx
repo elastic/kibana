@@ -14,7 +14,6 @@ import {
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
   EuiText,
   EuiButtonEmpty,
   EuiLink,
