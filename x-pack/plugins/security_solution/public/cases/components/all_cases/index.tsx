@@ -21,10 +21,10 @@ import { isEmpty, memoize } from 'lodash/fp';
 import styled, { css } from 'styled-components';
 import * as i18n from './translations';
 
-import { AllCaseType, CaseStatuses, CaseType } from '../../../../../case/common/api';
+import { CaseStatuses, CaseType } from '../../../../../case/common/api';
 import { getCasesColumns } from './columns';
 import { Case, DeleteCase, FilterOptions, SortFieldCase } from '../../containers/types';
-import { useGetCases, UpdateCase, DEFAULT_FILTER_OPTIONS } from '../../containers/use_get_cases';
+import { useGetCases, UpdateCase } from '../../containers/use_get_cases';
 import { useGetCasesStatus } from '../../containers/use_get_cases_status';
 import { useDeleteCases } from '../../containers/use_delete_cases';
 import { EuiBasicTableOnChange } from '../../../detections/pages/detection_engine/rules/types';
