@@ -55,7 +55,7 @@ image::images/alert-flyout-action-type-selection.png[UI for selecting an action 
 When an alert instance matches a condition, the alert is marked as _Active_ and assigned an action group.  The actions in that group are triggered.
 When the condition is no longer detected, the alert is assigned to the _Recovered_ action group, which triggers any actions assigned to that group.
 
-**Run When** allows you to assign an action to an _action group_, ensuring you are notified about alert instances in that group by triggering the action in accordance with your **Notify every** setting.
+**Run When** allows you to assign an action to an _action group_. This will trigger the action in accordance with your **Notify every** setting.
 
 Each action must specify a <<alerting-concepts-connectors, connector>> instance. If no connectors exist for that action type, click "Add new" to create one.
 
