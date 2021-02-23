@@ -234,7 +234,7 @@ export async function bulkUpdateAgents(
   }>
 ) {
   if (updateData.length === 0) {
-    return [];
+    return { items: [] };
   }
 
   const body = updateData.flatMap(({ agentId, data }) => [
