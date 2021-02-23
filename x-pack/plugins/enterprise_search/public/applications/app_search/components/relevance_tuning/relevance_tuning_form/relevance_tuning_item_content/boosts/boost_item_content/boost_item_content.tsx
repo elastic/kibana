@@ -44,7 +44,7 @@ export const BoostItemContent: React.FC<Props> = ({ boost, index, name }) => {
 
   return (
     <EuiPanel hasShadow={false} className="boosts__itemContent">
-      <div>{getBoostForm()}</div>
+      {getBoostForm()}
       <EuiSpacer />
       <EuiFormRow
         label={i18n.translate(
