@@ -49,12 +49,21 @@ import { DataGrid } from '../../../../../components/data_grid';
 import { fetchExplainData } from '../shared';
 import { useIndexData } from '../../hooks';
 import { ExplorationQueryBar } from '../../../analytics_exploration/components/exploration_query_bar';
-import { useSavedSearch } from './use_saved_search';
+import { useSavedSearch, SavedSearchQuery } from './use_saved_search';
 import { SEARCH_QUERY_LANGUAGE } from '../../../../../../../common/constants/search';
 import { ExplorationQueryBarProps } from '../../../analytics_exploration/components/exploration_query_bar/exploration_query_bar';
 import { Query } from '../../../../../../../../../../src/plugins/data/common/query';
 
 import { ScatterplotMatrix } from '../../../../../components/scatterplot_matrix';
+
+function getIndexDataQuery(savedSearchQuery: SavedSearchQuery, jobConfigQuery: any) {
+  // Return `undefined` if savedSearchQuery itself is `undefined`, meaning it hasn't been initialized yet.
+  if (savedSearchQuery === undefined) {
+    return;
+  }
+
+  return savedSearchQuery !== null ? savedSearchQuery : jobConfigQuery;
+}
 
 const requiredFieldsErrorText = i18n.translate(
   'xpack.ml.dataframe.analytics.createWizard.requiredFieldsErrorMessage',
@@ -129,7 +138,7 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
 
   const indexData = useIndexData(
     currentIndexPattern,
-    savedSearchQuery !== undefined ? savedSearchQuery : jobConfigQuery,
+    getIndexDataQuery(savedSearchQuery, jobConfigQuery),
     toastNotifications
   );
 
@@ -291,7 +300,7 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
   }, []);
 
   useEffect(() => {
-    if (savedSearchQueryStr !== undefined) {
+    if (typeof savedSearchQueryStr === 'string') {
       setFormState({ jobConfigQuery: savedSearchQuery, jobConfigQueryString: savedSearchQueryStr });
     }
   }, [JSON.stringify(savedSearchQuery), savedSearchQueryStr]);
@@ -338,12 +347,16 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
         !dependentVariableEmpty)) &&
     scatterplotFieldOptions.length > 1;
 
+  // Don't render until `savedSearchQuery` has been initialized.
+  // `undefined` means uninitialized, `null` means initialized but not used.
+  if (savedSearchQuery === undefined) return null;
+
   return (
     <Fragment>
       <Messages messages={requestMessages} />
       <SupportedFieldsMessage jobType={jobType} />
       <JobType type={jobType} setFormState={setFormState} />
-      {savedSearchQuery === undefined && (
+      {savedSearchQuery === null && (
         <EuiFormRow
           label={i18n.translate('xpack.ml.dataframe.analytics.create.sourceQueryLabel', {
             defaultMessage: 'Query',
@@ -360,7 +373,7 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
       <EuiFormRow
         label={
           <Fragment>
-            {savedSearchQuery !== undefined && (
+            {savedSearchQuery !== null && (
               <EuiText>
                 {i18n.translate('xpack.ml.dataframe.analytics.create.savedSearchLabel', {
                   defaultMessage: 'Saved search',
@@ -368,7 +381,7 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
               </EuiText>
             )}
             <EuiBadge color="hollow">
-              {savedSearchQuery !== undefined
+              {savedSearchQuery !== null
                 ? currentSavedSearch?.attributes.title
                 : currentIndexPattern.title}
             </EuiBadge>
