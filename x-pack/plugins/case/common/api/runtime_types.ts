@@ -9,14 +9,37 @@ import { either, fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
 import * as rt from 'io-ts';
-import { failure } from 'io-ts/lib/PathReporter';
+import { isObject } from 'lodash/fp';
 
 type ErrorFactory = (message: string) => Error;
+
+export const formatErrors = (errors: rt.Errors): string[] => {
+  const err = errors.map((error) => {
+    if (error.message != null) {
+      return error.message;
+    } else {
+      const keyContext = error.context
+        .filter(
+          (entry) => entry.key != null && !Number.isInteger(+entry.key) && entry.key.trim() !== ''
+        )
+        .map((entry) => entry.key)
+        .join(',');
+
+      const nameContext = error.context.find((entry) => entry.type?.name?.length > 0);
+      const suppliedValue =
+        keyContext !== '' ? keyContext : nameContext != null ? nameContext.type.name : '';
+      const value = isObject(error.value) ? JSON.stringify(error.value) : error.value;
+      return `Invalid value "${value}" supplied to "${suppliedValue}"`;
+    }
+  });
+
+  return [...new Set(err)];
+};
 
 export const createPlainError = (message: string) => new Error(message);
 
 export const throwErrors = (createError: ErrorFactory) => (errors: rt.Errors) => {
-  throw createError(failure(errors).join('\n'));
+  throw createError(formatErrors(errors).join());
 };
 
 export const decodeOrThrow = <A, O, I>(
