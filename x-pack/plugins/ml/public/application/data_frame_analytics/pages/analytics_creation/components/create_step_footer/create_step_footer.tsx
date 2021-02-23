@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useEffect, useState } from 'react';
+import React, { FC, useEffect, useRef, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -38,24 +38,19 @@ export interface AnalyticsProgressStats {
 }
 
 export const CreateStepFooter: FC<Props> = ({ isJobStarted, jobId, jobType, showProgress }) => {
-  const [initialized, setInitialized] = useState<boolean>(false);
   const [failedJobMessage, setFailedJobMessage] = useState<string | undefined>(undefined);
   const [jobFinished, setJobFinished] = useState<boolean>(false);
   const [currentProgress, setCurrentProgress] = useState<AnalyticsProgressStats | undefined>(
     undefined
   );
   const [showJobAssignWarning, setShowJobAssignWarning] = useState<boolean | undefined>(false);
-
+  const interval = useRef<ReturnType<typeof setInterval> | any>(null);
   const {
     services: { notifications },
   } = useMlKibana();
 
   useEffect(() => {
-    setInitialized(true);
-  }, []);
-
-  useEffect(() => {
-    const interval = setInterval(async () => {
+    interval.current = setInterval(async () => {
       try {
         const analyticsStats = await ml.dataFrameAnalytics.getDataFrameAnalyticsStats(jobId);
         const jobStats = isGetDataFrameAnalyticsStatsResponseOk(analyticsStats)
@@ -76,7 +71,7 @@ export const CreateStepFooter: FC<Props> = ({ isJobStarted, jobId, jobType, show
           const progressStats = getDataFrameAnalyticsProgressPhase(jobStats);
 
           if (jobStats.state === DATA_FRAME_TASK_STATE.FAILED) {
-            clearInterval(interval);
+            clearInterval(interval.current);
             setFailedJobMessage(
               jobStats.failure_reason ||
                 i18n.translate(
@@ -95,7 +90,7 @@ export const CreateStepFooter: FC<Props> = ({ isJobStarted, jobId, jobType, show
               progressStats.progress === 100) ||
             (jobStats.state === DATA_FRAME_TASK_STATE.STOPPED && !startRequestedButNotStartedYet)
           ) {
-            clearInterval(interval);
+            clearInterval(interval.current);
             // Check job has started. Jobs that fail to start will also have STOPPED state
             setJobFinished(
               progressStats.currentPhase === progressStats.totalPhases &&
@@ -103,7 +98,7 @@ export const CreateStepFooter: FC<Props> = ({ isJobStarted, jobId, jobType, show
             );
           }
         } else {
-          clearInterval(interval);
+          clearInterval(interval.current);
         }
       } catch (e) {
         notifications.toasts.addDanger(
@@ -112,12 +107,12 @@ export const CreateStepFooter: FC<Props> = ({ isJobStarted, jobId, jobType, show
             values: { jobId },
           })
         );
-        clearInterval(interval);
+        clearInterval(interval.current);
       }
     }, PROGRESS_REFRESH_INTERVAL_MS);
 
-    return () => clearInterval(interval);
-  }, [initialized]);
+    return () => clearInterval(interval.current);
+  }, []);
 
   return (
     <>
