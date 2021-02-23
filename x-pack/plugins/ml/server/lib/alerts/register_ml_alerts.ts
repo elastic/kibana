@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import { Logger } from 'kibana/server';
 import { AlertingPlugin } from '../../../../alerts/server';
 import { registerAnomalyDetectionAlertType } from './register_anomaly_detection_alert_type';
 import { SharedServices } from '../../shared_services';
 
 export interface RegisterAlertParams {
   alerts: AlertingPlugin['setup'];
+  logger: Logger;
   mlSharedServices: SharedServices;
   publicBaseUrl: string | undefined;
 }
