@@ -40,10 +40,10 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('should delete a sub case', async () => {
       const { newSubCaseInfo: caseInfo } = await createSubCase({ supertest, actionID });
-      expect(caseInfo.subCase?.id).to.not.eql(undefined);
+      expect(caseInfo.subCases![0].id).to.not.eql(undefined);
 
       const { body: subCase } = await supertest
-        .get(getSubCaseDetailsUrl(caseInfo.id, caseInfo.subCase!.id))
+        .get(getSubCaseDetailsUrl(caseInfo.id, caseInfo.subCases![0].id))
         .send()
         .expect(200);
 
@@ -57,20 +57,20 @@ export default function ({ getService }: FtrProviderContext) {
 
       expect(body).to.eql({});
       await supertest
-        .get(getSubCaseDetailsUrl(caseInfo.id, caseInfo.subCase!.id))
+        .get(getSubCaseDetailsUrl(caseInfo.id, caseInfo.subCases![0].id))
         .send()
         .expect(404);
     });
 
     it(`should delete a sub case's comments when that case gets deleted`, async () => {
       const { newSubCaseInfo: caseInfo } = await createSubCase({ supertest, actionID });
-      expect(caseInfo.subCase?.id).to.not.eql(undefined);
+      expect(caseInfo.subCases![0].id).to.not.eql(undefined);
 
       // there should be two comments on the sub case now
       const { body: patchedCaseWithSubCase }: { body: CaseResponse } = await supertest
         .post(`${CASES_URL}/${caseInfo.id}/comments`)
         .set('kbn-xsrf', 'true')
-        .query({ subCaseID: caseInfo.subCases![0].id })
+        .query({ subCaseId: caseInfo.subCases![0].id })
         .send(postCommentUserReq)
         .expect(200);
 

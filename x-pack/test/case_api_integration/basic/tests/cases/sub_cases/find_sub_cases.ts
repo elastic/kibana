@@ -74,7 +74,7 @@ export default ({ getService }: FtrProviderContext): void => {
         ...findSubCasesResp,
         total: 1,
         // find should not return the comments themselves only the stats
-        subCases: [{ ...caseInfo.subCase!, comments: [], totalComment: 1, totalAlerts: 2 }],
+        subCases: [{ ...caseInfo.subCases![0], comments: [], totalComment: 1, totalAlerts: 2 }],
         count_open_cases: 1,
       });
     });
@@ -101,7 +101,7 @@ export default ({ getService }: FtrProviderContext): void => {
             status: CaseStatuses.closed,
           },
           {
-            ...subCase2Resp.newSubCaseInfo.subCase,
+            ...subCase2Resp.newSubCaseInfo.subCases![0],
             comments: [],
             totalComment: 1,
             totalAlerts: 2,
@@ -157,8 +157,8 @@ export default ({ getService }: FtrProviderContext): void => {
         supertest,
         cases: [
           {
-            id: secondSub.subCase!.id,
-            version: secondSub.subCase!.version,
+            id: secondSub.subCases![0].id,
+            version: secondSub.subCases![0].version,
             status: CaseStatuses['in-progress'],
           },
         ],
@@ -231,8 +231,8 @@ export default ({ getService }: FtrProviderContext): void => {
         supertest,
         cases: [
           {
-            id: secondSub.subCase!.id,
-            version: secondSub.subCase!.version,
+            id: secondSub.subCases![0].id,
+            version: secondSub.subCases![0].version,
             status: CaseStatuses['in-progress'],
           },
         ],
