@@ -33,16 +33,22 @@ const chartBase: ChartBase = {
 };
 
 function getGcTimeChart({
+  environment,
+  kuery,
   setup,
   serviceName,
   serviceNodeName,
 }: {
+  environment?: string;
+  kuery?: string;
   setup: Setup & SetupTimeRange;
   serviceName: string;
   serviceNodeName?: string;
 }) {
   return withApmSpan('get_gc_time_charts', () =>
     fetchAndTransformGcMetrics({
+      environment,
+      kuery,
       setup,
       serviceName,
       serviceNodeName,

@@ -17,7 +17,11 @@ import {
 } from '../../../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../../../common/processor_event';
 import { joinByKey } from '../../../../../common/utils/join_by_key';
-import { rangeFilter } from '../../../../../common/utils/range_filter';
+import {
+  environmentQuery,
+  rangeQuery,
+  kqlQuery,
+} from '../../../../../server/utils/queries';
 import {
   getDocumentTypeFilterForAggregatedTransactions,
   getProcessorEventForAggregatedTransactions,
@@ -46,6 +50,8 @@ function getHistogramAggOptions({
 }
 
 export async function getBuckets({
+  environment,
+  kuery,
   serviceName,
   transactionName,
   transactionType,
@@ -56,6 +62,8 @@ export async function getBuckets({
   setup,
   searchAggregatedTransactions,
 }: {
+  environment?: string;
+  kuery?: string;
   serviceName: string;
   transactionName: string;
   transactionType: string;
@@ -69,14 +77,15 @@ export async function getBuckets({
   return withApmSpan(
     'get_latency_distribution_buckets_with_samples',
     async () => {
-      const { start, end, esFilter, apmEventClient } = setup;
+      const { start, end, apmEventClient } = setup;
 
       const commonFilters = [
         { term: { [SERVICE_NAME]: serviceName } },
         { term: { [TRANSACTION_TYPE]: transactionType } },
         { term: { [TRANSACTION_NAME]: transactionName } },
-        { range: rangeFilter(start, end) },
-        ...esFilter,
+        ...rangeQuery(start, end),
+        ...environmentQuery(environment),
+        ...kqlQuery(kuery),
       ];
 
       async function getSamplesForDistributionBuckets() {

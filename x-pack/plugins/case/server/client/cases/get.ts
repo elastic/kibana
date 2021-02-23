@@ -26,19 +26,24 @@ export const get = async ({
   includeComments = false,
   includeSubCaseComments = false,
 }: GetParams): Promise<CaseResponse> => {
-  const theCase = await caseService.getCase({
-    client: savedObjectsClient,
-    id,
-  });
+  const [theCase, subCasesForCaseId] = await Promise.all([
+    caseService.getCase({
+      client: savedObjectsClient,
+      id,
+    }),
+    caseService.findSubCasesByCaseId({ client: savedObjectsClient, ids: [id] }),
+  ]);
+
+  const subCaseIds = subCasesForCaseId.saved_objects.map((so) => so.id);
 
   if (!includeComments) {
     return CaseResponseRt.encode(
       flattenCaseSavedObject({
         savedObject: theCase,
+        subCaseIds,
       })
     );
   }
-
   const theComments = await caseService.getAllCaseComments({
     client: savedObjectsClient,
     id,
@@ -53,6 +58,7 @@ export const get = async ({
     flattenCaseSavedObject({
       savedObject: theCase,
       comments: theComments.saved_objects,
+      subCaseIds,
       totalComment: theComments.total,
       totalAlerts: countAlertsForID({ comments: theComments, id }),
     })

@@ -6,7 +6,8 @@
   "from": "now-9m",
   "index": [
     "winlogbeat-*",
-    "logs-endpoint.events.*"
+    "logs-endpoint.events.*",
+    "logs-windows.*"
   ],
   "language": "eql",
   "license": "Elastic License",
@@ -16,7 +17,7 @@
   "references": [
     "https://docs.microsoft.com/en-us/windows/win32/dlls/dynamic-link-library-redirection"
   ],
-  "risk_score": 43,
+  "risk_score": 47,
   "rule_id": "a3ea12f3-0d4e-4667-8b44-4230c63f3c75",
   "severity": "medium",
   "tags": [
@@ -45,5 +46,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 2
+  "version": 3
 }

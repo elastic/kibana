@@ -19,9 +19,8 @@ import {
   SPAN_SUBTYPE,
   SPAN_TYPE,
 } from '../../../../common/elasticsearch_fieldnames';
-import { rangeFilter } from '../../../../common/utils/range_filter';
 import { ProcessorEvent } from '../../../../common/processor_event';
-import { getEnvironmentUiFilterES } from '../../helpers/convert_ui_filters/get_environment_ui_filter_es';
+import { environmentQuery, rangeQuery } from '../../../../server/utils/queries';
 import { joinByKey } from '../../../../common/utils/join_by_key';
 import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 import { withApmSpan } from '../../../utils/with_apm_span';
@@ -33,7 +32,7 @@ export const getDestinationMap = ({
 }: {
   setup: Setup & SetupTimeRange;
   serviceName: string;
-  environment: string;
+  environment?: string;
 }) => {
   return withApmSpan('get_service_destination_map', async () => {
     const { start, end, apmEventClient } = setup;
@@ -50,8 +49,8 @@ export const getDestinationMap = ({
               filter: [
                 { term: { [SERVICE_NAME]: serviceName } },
                 { exists: { field: SPAN_DESTINATION_SERVICE_RESOURCE } },
-                { range: rangeFilter(start, end) },
-                ...getEnvironmentUiFilterES(environment),
+                ...rangeQuery(start, end),
+                ...environmentQuery(environment),
               ],
             },
           },
@@ -122,7 +121,7 @@ export const getDestinationMap = ({
                       ),
                     },
                   },
-                  { range: rangeFilter(start, end) },
+                  ...rangeQuery(start, end),
                 ],
               },
             },

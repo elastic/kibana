@@ -3,14 +3,16 @@
     "Elastic"
   ],
   "description": "Identifies a suspicious image load (wmiutils.dll) from Microsoft Office processes. This behavior may indicate adversarial activity where child processes are spawned via Windows Management Instrumentation (WMI). This technique can be used to execute code and evade traditional parent/child processes spawned from MS Office products.",
+  "from": "now-9m",
   "index": [
     "winlogbeat-*",
-    "logs-endpoint.events.*"
+    "logs-endpoint.events.*",
+    "logs-windows.*"
   ],
   "language": "eql",
   "license": "Elastic License",
   "name": "Suspicious WMI Image Load from MS Office",
-  "query": "library where process.name in (\"WINWORD.EXE\", \"EXCEL.EXE\", \"POWERPNT.EXE\", \"MSPUB.EXE\", \"MSACCESS.EXE\") and\n  event.action == \"load\" and\n  event.category == \"library\" and\n  file.name == \"wmiutils.dll\"\n",
+  "query": "library where process.name : (\"WINWORD.EXE\", \"EXCEL.EXE\", \"POWERPNT.EXE\", \"MSPUB.EXE\", \"MSACCESS.EXE\") and\n  event.action : \"load\" and\n  event.category : \"library\" and\n  dll.name : \"wmiutils.dll\"\n",
   "references": [
     "https://medium.com/threatpunter/detecting-adversary-tradecraft-with-image-load-event-logging-and-eql-8de93338c16"
   ],
@@ -43,5 +45,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 2
+  "version": 3
 }

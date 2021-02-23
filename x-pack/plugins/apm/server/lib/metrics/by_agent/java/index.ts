@@ -16,23 +16,35 @@ import { getGcRateChart } from './gc/get_gc_rate_chart';
 import { getGcTimeChart } from './gc/get_gc_time_chart';
 
 export function getJavaMetricsCharts({
+  environment,
+  kuery,
   setup,
   serviceName,
   serviceNodeName,
 }: {
+  environment?: string;
+  kuery?: string;
   setup: Setup & SetupTimeRange;
   serviceName: string;
   serviceNodeName?: string;
 }) {
   return withApmSpan('get_java_system_metric_charts', async () => {
+    const options = {
+      environment,
+      kuery,
+      setup,
+      serviceName,
+      serviceNodeName,
+    };
+
     const charts = await Promise.all([
-      getCPUChartData({ setup, serviceName, serviceNodeName }),
-      getMemoryChartData({ setup, serviceName, serviceNodeName }),
-      getHeapMemoryChart({ setup, serviceName, serviceNodeName }),
-      getNonHeapMemoryChart({ setup, serviceName, serviceNodeName }),
-      getThreadCountChart({ setup, serviceName, serviceNodeName }),
-      getGcRateChart({ setup, serviceName, serviceNodeName }),
-      getGcTimeChart({ setup, serviceName, serviceNodeName }),
+      getCPUChartData(options),
+      getMemoryChartData(options),
+      getHeapMemoryChart(options),
+      getNonHeapMemoryChart(options),
+      getThreadCountChart(options),
+      getGcRateChart(options),
+      getGcTimeChart(options),
     ]);
 
     return { charts };

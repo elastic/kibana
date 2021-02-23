@@ -7,7 +7,11 @@
 
 import { AggregationOptionsByType } from '../../../../../../typings/elasticsearch/aggregations';
 import { ESFilter } from '../../../../../../typings/elasticsearch';
-import { rangeFilter } from '../../../../common/utils/range_filter';
+import {
+  environmentQuery,
+  rangeQuery,
+  kqlQuery,
+} from '../../../../server/utils/queries';
 import {
   SERVICE_NAME,
   TRANSACTION_DURATION,
@@ -23,6 +27,8 @@ import { getLatencyDistribution } from './get_latency_distribution';
 import { withApmSpan } from '../../../utils/with_apm_span';
 
 export async function getCorrelationsForSlowTransactions({
+  environment,
+  kuery,
   serviceName,
   transactionType,
   transactionName,
@@ -30,6 +36,8 @@ export async function getCorrelationsForSlowTransactions({
   fieldNames,
   setup,
 }: {
+  environment?: string;
+  kuery?: string;
   serviceName: string | undefined;
   transactionType: string | undefined;
   transactionName: string | undefined;
@@ -38,12 +46,13 @@ export async function getCorrelationsForSlowTransactions({
   setup: Setup & SetupTimeRange;
 }) {
   return withApmSpan('get_correlations_for_slow_transactions', async () => {
-    const { start, end, esFilter, apmEventClient } = setup;
+    const { start, end, apmEventClient } = setup;
 
     const backgroundFilters: ESFilter[] = [
-      ...esFilter,
-      { range: rangeFilter(start, end) },
       { term: { [PROCESSOR_EVENT]: ProcessorEvent.transaction } },
+      ...rangeQuery(start, end),
+      ...environmentQuery(environment),
+      ...kqlQuery(kuery),
     ];
 
     if (serviceName) {

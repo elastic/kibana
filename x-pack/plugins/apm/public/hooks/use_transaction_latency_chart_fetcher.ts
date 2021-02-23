@@ -18,8 +18,14 @@ export function useTransactionLatencyChartsFetcher() {
   const { transactionType } = useApmServiceContext();
   const theme = useTheme();
   const {
-    urlParams: { start, end, transactionName, latencyAggregationType },
-    uiFilters,
+    urlParams: {
+      environment,
+      kuery,
+      start,
+      end,
+      transactionName,
+      latencyAggregationType,
+    },
   } = useUrlParams();
 
   const { data, error, status } = useFetcher(
@@ -37,11 +43,12 @@ export function useTransactionLatencyChartsFetcher() {
           params: {
             path: { serviceName },
             query: {
+              environment,
+              kuery,
               start,
               end,
               transactionType,
               transactionName,
-              uiFilters: JSON.stringify(uiFilters),
               latencyAggregationType,
             },
           },
@@ -49,12 +56,13 @@ export function useTransactionLatencyChartsFetcher() {
       }
     },
     [
+      environment,
+      kuery,
       serviceName,
       start,
       end,
       transactionName,
       transactionType,
-      uiFilters,
       latencyAggregationType,
     ]
   );

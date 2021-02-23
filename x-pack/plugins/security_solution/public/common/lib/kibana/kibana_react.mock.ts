@@ -118,6 +118,7 @@ export const createStartServicesMock = (): StartServices => {
           subscribe: jest.fn().mockImplementation(() => ({
             error: jest.fn(),
             next: jest.fn(),
+            unsubscribe: jest.fn(),
           })),
         })),
       },
