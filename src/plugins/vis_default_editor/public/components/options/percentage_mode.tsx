@@ -49,7 +49,7 @@ function PercentageModeOption({
         label={
           <FormattedMessage
             id="visDefaultEditor.options.percentageMode.numeralLabel"
-            defaultMessage="Numeral.js format pattern (Default: {defaultPattern})"
+            defaultMessage="Format pattern"
             values={{ defaultPattern: <EuiCode>{defaultPattern}</EuiCode> }}
           />
         }
@@ -58,7 +58,7 @@ function PercentageModeOption({
             <EuiLink target="_blank" href="https://adamwdraper.github.io/Numeral-js/">
               <FormattedMessage
                 id="visDefaultEditor.options.percentageMode.documentationLabel"
-                defaultMessage="Documentation"
+                defaultMessage="Numeral.js documentation"
               />
               &nbsp;
             </EuiLink>
