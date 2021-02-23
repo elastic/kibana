@@ -81,7 +81,7 @@ Using the https://mustache.github.io/[Mustache] template syntax `{{variable name
 `alertActionGroup`:: The ID of the action group of the alert instance that scheduled the action.
 `alertActionSubgroup`:: The action subgroup of the alert instance that scheduled the action.
 `alertActionGroupName`:: The name of the action group of the alert instance that scheduled the action.
-`kibanaBaseUrl`:: The configured `server.publicBaseUrl` value. If not configured, this will be empty.
+`kibanaBaseUrl`:: The configured <<server-publicBaseUrl, `server.publicBaseUrl`>>. If not configured, this will be empty.
 
 [role="screenshot"]
 image::images/alert-flyout-action-variables.png[Passing alert values to an action]
