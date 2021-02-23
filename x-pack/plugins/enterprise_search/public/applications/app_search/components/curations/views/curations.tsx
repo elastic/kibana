@@ -25,11 +25,13 @@ import { KibanaLogic } from '../../../../shared/kibana';
 import { Loading } from '../../../../shared/loading';
 import { EuiButtonTo, EuiLinkTo } from '../../../../shared/react_router_helpers';
 import { ENGINE_CURATIONS_NEW_PATH, ENGINE_CURATION_PATH } from '../../../routes';
+import { FormattedDateTime } from '../../../utils/formatted_date_time';
 import { generateEnginePath } from '../../engine';
 
 import { CURATIONS_OVERVIEW_TITLE, CREATE_NEW_CURATION_TITLE } from '../constants';
 import { CurationsLogic } from '../curations_logic';
 import { Curation } from '../types';
+import { convertToDate } from '../utils';
 
 export const Curations: React.FC = () => {
   const { dataLoading, curations, meta } = useValues(CurationsLogic);
@@ -101,6 +103,7 @@ export const CurationsTable: React.FC = () => {
       ),
       width: '30%',
       dataType: 'string',
+      render: (dateString: string) => <FormattedDateTime date={convertToDate(dateString)} />,
     },
     {
       width: '120px',
