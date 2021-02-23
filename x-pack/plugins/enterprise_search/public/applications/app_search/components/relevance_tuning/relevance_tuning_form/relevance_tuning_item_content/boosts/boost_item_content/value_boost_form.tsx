@@ -52,6 +52,7 @@ export const ValueBoostForm: React.FC<Props> = ({ boost, index, name }) => {
           <EuiFlexItem grow={false}>
             <EuiButtonIcon
               iconType="trash"
+              color="danger"
               onClick={() => removeBoostValue(name, index, valueIndex)}
               aria-label={i18n.translate(
                 'xpack.enterpriseSearch.appSearch.engine.relevanceTuning.boosts.value.removeValueAriaLabel',
