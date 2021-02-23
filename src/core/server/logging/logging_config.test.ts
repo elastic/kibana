@@ -48,35 +48,13 @@ test('`getLoggerContext()` returns correct joined context name.', () => {
 test('correctly fills in default config.', () => {
   const configValue = new LoggingConfig(config.schema.validate({}));
 
-  expect(configValue.appenders.size).toBe(3);
+  expect(configValue.appenders.size).toBe(2);
 
   expect(configValue.appenders.get('default')).toEqual({
     type: 'console',
     layout: { type: 'pattern', highlight: true },
   });
   expect(configValue.appenders.get('console')).toEqual({
-    type: 'rewrite',
-    appenders: ['rewrite-console'],
-    policy: {
-      type: 'meta',
-      mode: 'update',
-      properties: [
-        {
-          path: 'http.request.headers.authorization',
-          value: '[REDACTED]',
-        },
-        {
-          path: 'http.request.headers.cookie',
-          value: '[REDACTED]',
-        },
-        {
-          path: 'http.response.headers.set-cookie',
-          value: '[REDACTED]',
-        },
-      ],
-    },
-  });
-  expect(configValue.appenders.get('rewrite-console')).toEqual({
     type: 'console',
     layout: { type: 'pattern', highlight: true },
   });
@@ -94,7 +72,7 @@ test('correctly fills in custom `appenders` config.', () => {
     })
   );
 
-  expect(configValue.appenders.size).toBe(3);
+  expect(configValue.appenders.size).toBe(2);
 
   expect(configValue.appenders.get('default')).toEqual({
     type: 'console',
@@ -211,7 +189,6 @@ describe('extend', () => {
     expect([...mergedConfigValue.appenders.keys()]).toEqual([
       'default',
       'console',
-      'rewrite-console',
       'file1',
       'file2',
     ]);

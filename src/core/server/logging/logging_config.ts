@@ -28,21 +28,6 @@ const ROOT_CONTEXT_NAME = 'root';
  */
 const DEFAULT_APPENDER_NAME = 'default';
 
-/**
- * Sensitive `LogMeta` paths that we want to censor by default.
- * These paths are only filtered in a default logging configuration.
- */
-const SENSITIVE_META_PATHS = [
-  'http.request.headers.authorization',
-  'http.request.headers.cookie',
-  'http.response.headers.set-cookie',
-] as const;
-
-/**
- * Replacement text to use when censoring SENSITIVE_META_PATHS.
- */
-const REDACTED_META_TEXT = '[REDACTED]';
-
 const levelSchema = schema.oneOf(
   [
     schema.literal('all'),
@@ -168,26 +153,7 @@ export class LoggingConfig {
       } as AppenderConfigType,
     ],
     [
-      // By default, we transparently rewrite `LogMeta` sent to the
-      // console appender to remove potentially sensitive keys.
-      // This logic is also hardcoded in the http response logger
-      // itself, but included here as an additional measure for
-      // other loggers which might be logging the same data.
       'console',
-      {
-        type: 'rewrite',
-        appenders: ['rewrite-console'],
-        policy: {
-          type: 'meta',
-          mode: 'update',
-          properties: SENSITIVE_META_PATHS.map((path) => ({ path, value: REDACTED_META_TEXT })),
-        },
-      } as AppenderConfigType,
-    ],
-    [
-      // This is our actual console appender which the rewrite appender
-      // sends its records to.
-      'rewrite-console',
       {
         type: 'console',
         layout: { type: 'pattern', highlight: true },
