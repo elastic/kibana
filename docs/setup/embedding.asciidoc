@@ -1,5 +1,5 @@
 [[embedding]]
-== Embedding {kib} content in a web page
+== Embed {kib} content in a web page
 
 Once you create a dashboard or a visualization, you might want to share it with your colleagues or friends. The easiest way to do this is to share a direct link to your dashboard or visualization. However, some users might not have access to your {kib}.
 
@@ -7,7 +7,7 @@ With the {kib} embedding functionality, you can display the content you created 
 
 image::images/embed-kibana.png[Generate an HTML snippet to embed {kib}, align=center]
 
-NOTE: Embedding of any other part of {kib} is also generally possible, but you may need to craft the proper HTML code manually.
+NOTE: Embedding of any other part of {kib} is also generally possible, but you might need to craft the proper HTML code manually.
 
 [float]
 [[embedding-security]]

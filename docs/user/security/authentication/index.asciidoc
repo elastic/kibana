@@ -389,7 +389,7 @@ You can also use the *Public URL* toggle when you're generating permanent links 
 
 NOTE:  The *Public URL* toggle is only available if anonymous access is properly configured and your anonymous service account has privileges to access what you want to embed or share.
 
-For more information, refer to <<embedding, Embedding {kib} content in a web page>>.
+For more information, refer to <<embedding, Embed {kib} content in a web page>>.
 
 [[http-authentication]]
 ==== HTTP authentication
