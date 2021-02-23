@@ -24,7 +24,7 @@ export async function emptyKibanaIndexAction({
   const kibanaPluginIds = await kbnClient.plugins.getEnabledIds();
 
   await cleanKibanaIndices({ client, stats, log, kibanaPluginIds });
-  await migrateKibanaIndex(kbnClient);
+  await migrateKibanaIndex({ client, kbnClient });
   stats.createdIndex('.kibana');
   return stats.toJSON();
 }
