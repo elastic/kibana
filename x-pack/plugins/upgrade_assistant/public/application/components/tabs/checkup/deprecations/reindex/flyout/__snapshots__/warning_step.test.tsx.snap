@@ -26,8 +26,8 @@ exports[`WarningsFlyoutStep renders 1`] = `
     <WarningCheckbox
       checkedIds={
         Object {
-          "reindexWarning-2": false,
-          "reindexWarning-3": false,
+          "reindexWarning-0": false,
+          "reindexWarning-1": false,
         }
       }
       description={
@@ -58,13 +58,13 @@ exports[`WarningsFlyoutStep renders 1`] = `
         />
       }
       onChange={[Function]}
-      warning={3}
+      warning={1}
     />
     <WarningCheckbox
       checkedIds={
         Object {
-          "reindexWarning-2": false,
-          "reindexWarning-3": false,
+          "reindexWarning-0": false,
+          "reindexWarning-1": false,
         }
       }
       description={
@@ -83,7 +83,7 @@ exports[`WarningsFlyoutStep renders 1`] = `
         />
       }
       onChange={[Function]}
-      warning={2}
+      warning={0}
     />
   </EuiFlyoutBody>
   <EuiFlyoutFooter>
