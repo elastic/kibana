@@ -109,7 +109,7 @@ export function LatencyCorrelations({ onClose }: Props) {
     <>
       <EuiFlexGroup direction="column">
         <EuiFlexItem>
-          <EuiText size="s">
+          <EuiText size="s" color="subdued">
             <p>
               {i18n.translate('xpack.apm.correlations.latency.description', {
                 defaultMessage:
