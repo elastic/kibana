@@ -10,29 +10,32 @@ import { Prompt } from 'react-router-dom';
 
 import { i18n } from '@kbn/i18n';
 
+const DEFAULT_MESSAGE_TEXT = i18n.translate('xpack.enterpriseSearch.shared.unsavedChangesMessage', {
+  defaultMessage: 'Your changes have not been saved. Are you sure you want to leave?',
+});
 interface Props {
   hasUnsavedChanges: boolean;
+  messageText?: string;
 }
 
-export const UnsavedChangesPrompt: React.FC<Props> = ({ hasUnsavedChanges }) => {
-  const handler = (event: BeforeUnloadEvent) => {
-    if (hasUnsavedChanges) {
-      event.preventDefault();
-      event.returnValue = '';
-    }
-  };
-
+export const UnsavedChangesPrompt: React.FC<Props> = ({
+  hasUnsavedChanges,
+  messageText = DEFAULT_MESSAGE_TEXT,
+}) => {
   useEffect(() => {
+    const handler = (event: BeforeUnloadEvent) => {
+      if (hasUnsavedChanges) {
+        // These 2 lines of code are the recommendation from MDN for triggering a browser prompt for confirming
+        // whether or not a user wants to leave the current site.
+        event.preventDefault();
+        event.returnValue = '';
+      }
+    };
+    // Adding this handler will prompt users if they are navigating to a new page, outside of the Kibana SPA
     window.addEventListener('beforeunload', handler);
     return () => window.removeEventListener('beforeunload', handler);
   }, [hasUnsavedChanges]);
 
-  return (
-    <Prompt
-      when={hasUnsavedChanges}
-      message={i18n.translate('xpack.enterpriseSearch.shared.unsavedChangesMessage', {
-        defaultMessage: 'Your changes have not been saved. Are you sure you want to leave?',
-      })}
-    />
-  );
+  // Adding this Prompt will prompt users if they are navigating to a new page, within the Kibana SPA
+  return <Prompt when={hasUnsavedChanges} message={messageText} />;
 };
