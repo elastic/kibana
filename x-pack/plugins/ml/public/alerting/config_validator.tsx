@@ -90,7 +90,7 @@ export const ConfigValidator: FC<ConfigValidatorProps> = React.memo(
               <li>
                 <FormattedMessage
                   id="xpack.ml.alertConditionValidation.alertIntervalTooHighMessage"
-                  defaultMessage="The check interval is higher than the result bucket span of {resultBucketSpan}. Be aware of a delay in receiving notifications."
+                  defaultMessage="The check interval is greater than the maximum bucket span of the selected jobs. Reduce it to {resultBucketSpan} to avoid excessive delay in receiving notifications."
                   values={{
                     resultBucketSpan: resultBucketSpanString,
                   }}
@@ -102,7 +102,7 @@ export const ConfigValidator: FC<ConfigValidatorProps> = React.memo(
               <li>
                 <FormattedMessage
                   id="xpack.ml.alertConditionValidation.failedJobsMessage"
-                  defaultMessage="{jobIds} {count, plural, one {job is} other {jobs are}} failed"
+                  defaultMessage="{jobIds} {count, plural, one {job is} other {jobs are}} failed."
                   values={{
                     count: jobIssues.failedJobsIds.length,
                     jobIds: jobIssues.failedJobsIds.join(', '),
@@ -115,7 +115,7 @@ export const ConfigValidator: FC<ConfigValidatorProps> = React.memo(
               <li>
                 <FormattedMessage
                   id="xpack.ml.alertConditionValidation.closedJobsMessage"
-                  defaultMessage="{jobIds} {count, plural, one {job is} other {jobs are}} closed"
+                  defaultMessage="{jobIds} {count, plural, one {job is} other {jobs are}} closed."
                   values={{
                     count: jobIssues.closedJobIds.length,
                     jobIds: jobIssues.closedJobIds.join(', '),
@@ -128,7 +128,7 @@ export const ConfigValidator: FC<ConfigValidatorProps> = React.memo(
               <li>
                 <FormattedMessage
                   id="xpack.ml.alertConditionValidation.stoppedDatafeedJobsMessage"
-                  defaultMessage="{jobIds} {count, plural, one {job has} other {jobs have}} datafeed closed"
+                  defaultMessage="The datafeed is currently stopped for {count, plural, one {job has} other {jobs have}} {jobIds}."
                   values={{
                     count: jobIssues.stoppedDatafeedJobIds.length,
                     jobIds: jobIssues.stoppedDatafeedJobIds.join(', '),
@@ -141,7 +141,7 @@ export const ConfigValidator: FC<ConfigValidatorProps> = React.memo(
               <li>
                 <FormattedMessage
                   id="xpack.ml.alertConditionValidation.deletedDatafeedJobsMessage"
-                  defaultMessage="{jobIds} {count, plural, one {job has} other {jobs have}} datafeed deleted"
+                  defaultMessage="The datafeed is deleted for {count, plural, one {job has} other {jobs have}} {jobIds}."
                   values={{
                     count: jobIssues.deletedDatafeedJobIds.length,
                     jobIds: jobIssues.deletedDatafeedJobIds.join(', '),
