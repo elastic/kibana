@@ -196,7 +196,7 @@ const NoKibanaPrivilegesAtSpace1: NoKibanaPrivilegesAtSpace1 = {
 interface SuperuserAtSpace1 extends Scenario {
   id: 'superuser at space1';
 }
-export const SuperuserAtSpace1: SuperuserAtSpace1 = {
+const SuperuserAtSpace1: SuperuserAtSpace1 = {
   id: 'superuser at space1',
   user: Superuser,
   space: Space1,
