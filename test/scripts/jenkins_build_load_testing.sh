@@ -53,7 +53,8 @@ echo "fields.build: ${BUILD_ID}" >> cfg/metricbeat/metricbeat.yml
 echo "path.config: ${KIBANA_DIR}/metricbeat-install" >> cfg/metricbeat/metricbeat.yml
 echo "cloud.auth: ${USER_FROM_VAULT}:${PASS_FROM_VAULT}" >> cfg/metricbeat/metricbeat.yml
 cp cfg/metricbeat/metricbeat.yml $KIBANA_DIR/metricbeat-install/metricbeat.yml
-mv $KIBANA_DIR/metricbeat-install/modules.d/system.yml $KIBANA_DIR/metricbeat-install/modules.d/system.yml.disabled
+# Disable system monitoring: enabled for now to have more data
+#mv $KIBANA_DIR/metricbeat-install/modules.d/system.yml $KIBANA_DIR/metricbeat-install/modules.d/system.yml.disabled
 popd
 
 # doesn't persist, also set in kibanaPipeline.groovy
@@ -85,5 +86,6 @@ node scripts/functional_tests \
   --kibana-install-dir "$KIBANA_INSTALL_DIR" \
   --config test/load/config.ts
   
-echo "output of metricbeat.log" 
-cat $KIBANA_DIR/metricbeat-install/metricbeat.log
+# Show output of Metricbeat. Disabled. Enable for debug purposes
+#echo "output of metricbeat.log" 
+#cat $KIBANA_DIR/metricbeat-install/metricbeat.log
