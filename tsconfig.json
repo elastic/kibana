@@ -3,12 +3,49 @@
   "compilerOptions": {
     "incremental": false
   },
-  "include": ["kibana.d.ts", "src/**/*", "typings/**/*"],
-  "exclude": [
-    "src/**/__fixtures__/**/*",
-    "src/core/**/*",
-    "src/plugins/**/*"
+  "include": [
+    "kibana.d.ts",
+    "typings/**/*",
+
+    "src/fixtures/**/*",
+    "src/dev/**/*",
+    "src/legacy/**/*",
+    "src/optimize/**/*",
+
+    // tests
+    "src/**/*.test.ts",
+    "src/**/*.test.tsx",
+    "src/**/integration_tests/*",
+    "src/**/tests/*",
+    "src/**/__fixtures__/*",
+    "src/**/__stories__/*",
+    "src/**/__jest__/*",
+
+    // mocks
+    "src/**/__mocks__/*",
+    "src/**/mock/*",
+    "src/**/*/mock.ts",
+    "src/**/*/mocks.ts",
+    "src/**/*/mocks.tsx",
+    "src/**/*.mock.ts",
+    "src/**/*.mock.tsx",
+    "src/**/*.mocks.ts",
+    "src/**/*.mocks.tsx",
+
+    // test helpers
+    "src/**/test_helpers/*",
+    "src/**/test_utils/*",
+    "src/**/*/test_utils.ts",
+    "src/**/*/test_helpers.ts",
+    "src/**/*/test_helper.tsx",
+
+    // stubs
+    "src/**/*/stubs.ts",
+    "src/**/*.stub.ts",
+    "src/**/*.stories.tsx",
+    "src/**/*/_mock_handler_arguments.ts"
   ],
+  "exclude": [],
   "references": [
     { "path": "./src/core/tsconfig.json" },
     { "path": "./src/plugins/telemetry_management_section/tsconfig.json" },

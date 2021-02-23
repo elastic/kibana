@@ -7,6 +7,39 @@
     "plugins/case/**/*",
     "plugins/lists/**/*",
     "plugins/security_solution/**/*",
+
+    // tests
+    "plugins/**/*.test.ts",
+    "plugins/**/*.test.tsx",
+    "plugins/**/integration_tests/*",
+    "plugins/**/tests/*",
+    "plugins/**/__fixtures__/*",
+    "plugins/**/__stories__/*",
+    "plugins/**/__jest__/*",
+
+    // mocks
+    "plugins/**/__mocks__/*",
+    "plugins/**/mock/*",
+    "plugins/**/*/mock.ts",
+    "plugins/**/*/mocks.ts",
+    "plugins/**/*/mocks.tsx",
+    "plugins/**/*.mock.ts",
+    "plugins/**/*.mock.tsx",
+    "plugins/**/*.mocks.ts",
+    "plugins/**/*.mocks.tsx",
+
+    // test helpers
+    "plugins/**/test_helpers/*",
+    "plugins/**/test_utils/*",
+    "plugins/**/*/test_utils.ts",
+    "plugins/**/*/test_helpers.ts",
+    "plugins/**/*/test_helper.tsx",
+
+    // stubs
+    "plugins/**/*/stubs.ts",
+    "plugins/**/*.stub.ts",
+    "plugins/**/*.stories.tsx",
+    "plugins/**/*/_mock_handler_arguments.ts"
   ],
   "exclude": [
     "test/**/*",
@@ -17,7 +50,7 @@
   ],
   "compilerOptions": {
     // overhead is too significant
-    "incremental": false
+    "incremental": false,
   },
   "references": [
     { "path": "../src/core/tsconfig.json" },
