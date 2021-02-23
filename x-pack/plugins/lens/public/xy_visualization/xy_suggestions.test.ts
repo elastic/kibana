@@ -484,7 +484,7 @@ describe('xy_suggestions', () => {
     });
 
     expect(rest).toHaveLength(visualizationTypes.length - 1);
-    expect(suggestion.title).toEqual('Stacked bar');
+    expect(suggestion.title).toEqual('Bar vertical stacked');
     expect(suggestion.state).toEqual(
       expect.objectContaining({
         layers: [

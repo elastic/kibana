@@ -512,7 +512,7 @@ export const visualizationTypes: VisualizationType[] = [
     id: 'area_stacked',
     icon: LensIconChartAreaStacked,
     label: i18n.translate('xpack.lens.xyVisualization.stackedAreaLabel', {
-      defaultMessage: 'Area Stacked',
+      defaultMessage: 'Area stacked',
     }),
     groupLabel: groupLabelForLineAndArea,
   },
@@ -520,7 +520,7 @@ export const visualizationTypes: VisualizationType[] = [
     id: 'area_percentage_stacked',
     icon: LensIconChartAreaPercentage,
     label: i18n.translate('xpack.lens.xyVisualization.stackedPercentageAreaLabel', {
-      defaultMessage: 'Area Percentage',
+      defaultMessage: 'Area percentage',
     }),
     groupLabel: groupLabelForLineAndArea,
   },
