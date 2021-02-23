@@ -17,11 +17,7 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useState } from 'react';
 import { DashboardSavedObject } from '../..';
-import {
-  createConfirmStrings,
-  dashboardUnsavedListingStrings,
-  getNewDashboardTitle,
-} from '../../dashboard_strings';
+import { dashboardUnsavedListingStrings, getNewDashboardTitle } from '../../dashboard_strings';
 import { useKibana } from '../../services/kibana_react';
 import { DASHBOARD_PANELS_UNSAVED_ID } from '../lib/dashboard_panel_storage';
 import { DashboardAppServices, DashboardRedirect } from '../types';
@@ -106,7 +102,17 @@ interface UnsavedItemMap {
   [key: string]: DashboardSavedObject;
 }
 
-export const DashboardUnsavedListing = ({ redirectTo }: { redirectTo: DashboardRedirect }) => {
+export interface DashboardUnsavedListingProps {
+  refreshUnsavedDashboards: () => void;
+  redirectTo: DashboardRedirect;
+  unsavedDashboardIds: string[];
+}
+
+export const DashboardUnsavedListing = ({
+  redirectTo,
+  unsavedDashboardIds,
+  refreshUnsavedDashboards,
+}: DashboardUnsavedListingProps) => {
   const {
     services: {
       dashboardPanelStorage,
@@ -116,9 +122,6 @@ export const DashboardUnsavedListing = ({ redirectTo }: { redirectTo: DashboardR
   } = useKibana<DashboardAppServices>();
 
   const [items, setItems] = useState<UnsavedItemMap>({});
-  const [dashboardIds, setDashboardIds] = useState<string[]>(
-    dashboardPanelStorage.getDashboardIdsWithUnsavedChanges()
-  );
 
   const onOpen = useCallback(
     (id?: string) => {
@@ -129,52 +132,63 @@ export const DashboardUnsavedListing = ({ redirectTo }: { redirectTo: DashboardR
 
   const onDiscard = useCallback(
     (id?: string) => {
-      confirmDiscardUnsavedChanges(
-        overlays,
-        () => {
-          dashboardPanelStorage.clearPanels(id);
-          setDashboardIds(dashboardPanelStorage.getDashboardIdsWithUnsavedChanges());
-        },
-        createConfirmStrings.getCancelButtonText()
-      );
+      confirmDiscardUnsavedChanges(overlays, () => {
+        dashboardPanelStorage.clearPanels(id);
+        refreshUnsavedDashboards();
+      });
     },
-    [overlays, dashboardPanelStorage]
+    [overlays, refreshUnsavedDashboards, dashboardPanelStorage]
   );
 
   useEffect(() => {
-    if (dashboardIds?.length === 0) {
+    if (unsavedDashboardIds?.length === 0) {
       return;
     }
     let canceled = false;
-    const dashPromises = dashboardIds
+    const dashPromises = unsavedDashboardIds
       .filter((id) => id !== DASHBOARD_PANELS_UNSAVED_ID)
-      .map((dashboardId) => savedDashboards.get(dashboardId));
-    Promise.all(dashPromises).then((dashboards: DashboardSavedObject[]) => {
+      .map((dashboardId) => {
+        return (savedDashboards.get(dashboardId) as Promise<DashboardSavedObject>).catch(
+          () => dashboardId
+        );
+      });
+    Promise.all(dashPromises).then((dashboards: Array<string | DashboardSavedObject>) => {
       const dashboardMap = {};
       if (canceled) {
         return;
       }
-      setItems(
-        dashboards.reduce((map, dashboard) => {
-          return {
-            ...map,
-            [dashboard.id || DASHBOARD_PANELS_UNSAVED_ID]: dashboard,
-          };
-        }, dashboardMap)
-      );
+      let hasError = false;
+      const newItems = dashboards.reduce((map, dashboard) => {
+        if (typeof dashboard === 'string') {
+          hasError = true;
+          dashboardPanelStorage.clearPanels(dashboard);
+          return map;
+        }
+        return {
+          ...map,
+          [dashboard.id || DASHBOARD_PANELS_UNSAVED_ID]: dashboard,
+        };
+      }, dashboardMap);
+      if (hasError) {
+        refreshUnsavedDashboards();
+        return;
+      }
+      setItems(newItems);
     });
     return () => {
       canceled = true;
     };
-  }, [dashboardIds, savedDashboards]);
+  }, [savedDashboards, dashboardPanelStorage, refreshUnsavedDashboards, unsavedDashboardIds]);
 
-  return dashboardIds.length === 0 ? null : (
+  return unsavedDashboardIds.length === 0 ? null : (
     <>
       <EuiCallOut
         heading="h3"
-        title={dashboardUnsavedListingStrings.getUnsavedChangesTitle(dashboardIds.length > 1)}
+        title={dashboardUnsavedListingStrings.getUnsavedChangesTitle(
+          unsavedDashboardIds.length > 1
+        )}
       >
-        {dashboardIds.map((dashboardId: string) => {
+        {unsavedDashboardIds.map((dashboardId: string) => {
           const title: string | undefined =
             dashboardId === DASHBOARD_PANELS_UNSAVED_ID
               ? getNewDashboardTitle()

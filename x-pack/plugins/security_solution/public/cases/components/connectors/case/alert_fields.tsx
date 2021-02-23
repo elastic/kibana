@@ -26,9 +26,8 @@ const Container = styled.div`
 `;
 
 const defaultAlertComment = {
-  type: CommentType.alert,
-  alertId: '{{context.rule.id}}',
-  index: '{{context.rule.output_index}}',
+  type: CommentType.generatedAlert,
+  alerts: `[{{#context.alerts}}{"_id": "{{_id}}", "_index": "{{_index}}", "ruleId": "{{rule.id}}", "ruleName": "{{rule.name}}"}__SEPARATOR__{{/context.alerts}}]`,
 };
 
 const CaseParamsFields: React.FunctionComponent<ActionParamsProps<CaseActionParams>> = ({

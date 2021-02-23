@@ -51,7 +51,7 @@ interface Props {
 }
 
 export const Timeline: React.FC<Props> = ({ interval, yAxisFormatter, isVisible }) => {
-  const { sourceId } = useSourceContext();
+  const { sourceId, source } = useSourceContext();
   const { metric, nodeType, accountId, region } = useWaffleOptionsContext();
   const { currentTime, jumpToTime, stopAutoReload } = useWaffleTimeContext();
   const { filterQueryAsJson } = useWaffleFiltersContext();
@@ -70,6 +70,7 @@ export const Timeline: React.FC<Props> = ({ interval, yAxisFormatter, isVisible 
 
   const anomalyParams = {
     sourceId: 'default',
+    anomalyThreshold: source?.configuration.anomalyThreshold || 0,
     startTime,
     endTime,
     defaultSortOptions: {

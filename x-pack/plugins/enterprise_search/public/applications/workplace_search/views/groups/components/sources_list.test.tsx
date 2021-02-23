@@ -8,11 +8,12 @@
 import { contentSources } from '../../../__mocks__/content_sources.mock';
 
 import React from 'react';
+
 import { shallow } from 'enzyme';
 
-import { SourcesList } from './sources_list';
-
 import { EuiFilterSelectItem } from '@elastic/eui';
+
+import { SourcesList } from './sources_list';
 
 const addFilteredSource = jest.fn();
 const removeFilteredSource = jest.fn();

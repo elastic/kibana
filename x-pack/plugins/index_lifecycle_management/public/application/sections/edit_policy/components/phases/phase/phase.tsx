@@ -37,9 +37,13 @@ import './phase.scss';
 
 interface Props {
   phase: PhasesExceptDelete;
+  /**
+   * Settings that should always be visible on the phase when it is enabled.
+   */
+  topLevelSettings?: React.ReactNode;
 }
 
-export const Phase: FunctionComponent<Props> = ({ children, phase }) => {
+export const Phase: FunctionComponent<Props> = ({ children, topLevelSettings, phase }) => {
   const enabledPath = `_meta.${phase}.enabled`;
   const [formData] = useFormData<FormInternal>({
     watch: [enabledPath],
@@ -102,7 +106,15 @@ export const Phase: FunctionComponent<Props> = ({ children, phase }) => {
 
       {enabled && (
         <>
-          <EuiSpacer size="m" />
+          {!!topLevelSettings ? (
+            <>
+              <EuiSpacer />
+              {topLevelSettings}
+            </>
+          ) : (
+            <EuiSpacer size="m" />
+          )}
+
           <EuiAccordion
             id={`${phase}-settingsSwitch`}
             buttonContent={

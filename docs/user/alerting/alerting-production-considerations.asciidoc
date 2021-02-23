@@ -25,6 +25,11 @@ Because by default tasks are polled at 3 second intervals and only 10 tasks can 
 * Many alerts or actions must be *run at once*. In this case pending tasks will queue in {es}, and be pulled 10 at a time from the queue at 3 second intervals. 
 * *Long running tasks* occupy slots for an extended time, leaving fewer slots for other tasks. 
 
-For details on the settings that can influence the performance and throughput of Task Manager, see {task-manager-settings}.
+For details on the settings that can influence the performance and throughput of Task Manager, see <<task-manager-settings,`Task Manager Settings`>>.
 
 ==============================================
+
+[float]
+=== Deployment considerations
+
+{es} and {kib} instances use the system clock to determine the current time. To ensure schedules are triggered when expected, you should synchronize the clocks of all nodes in the cluster using a time service such as http://www.ntp.org/[Network Time Protocol].

@@ -185,6 +185,7 @@ export const SearchableSnapshotField: FunctionComponent<Props> = ({ phase }) => 
           <div className="ilmSearchableSnapshotField">
             <UseField<string>
               config={{
+                label: i18nTexts.editPolicy.searchableSnapshotsFieldLabel,
                 defaultValue: cloud?.isCloudEnabled ? CLOUD_DEFAULT_REPO : undefined,
                 validations: [
                   {
@@ -209,6 +210,7 @@ export const SearchableSnapshotField: FunctionComponent<Props> = ({ phase }) => 
                         value: singleSelectionArray,
                       } as any
                     }
+                    label={field.label}
                     fullWidth={false}
                     euiFieldProps={{
                       'data-test-subj': 'searchableSnapshotCombobox',
@@ -342,7 +344,7 @@ export const SearchableSnapshotField: FunctionComponent<Props> = ({ phase }) => 
           <EuiTextColor color="subdued">
             <FormattedMessage
               id="xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotFieldDescription"
-              defaultMessage="Take a snapshot of the managed index in the selected repository and mount it as a searchable snapshot. {learnMoreLink}."
+              defaultMessage="Take a snapshot of the managed index in the selected repository and mount it as a searchable snapshot. {learnMoreLink}"
               values={{
                 learnMoreLink: <LearnMoreLink docPath="ilm-searchable-snapshot.html" />,
               }}
