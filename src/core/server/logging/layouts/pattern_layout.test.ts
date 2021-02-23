@@ -108,7 +108,7 @@ test('`format()` correctly formats record with custom pattern.', () => {
 });
 
 test('`format()` correctly formats record with meta data.', () => {
-  const layout = new PatternLayout();
+  const layout = new PatternLayout('[%date][%level][%logger]%meta %message');
 
   expect(
     layout.format({
