@@ -99,6 +99,19 @@ export function Correlations() {
                   />
                 </h2>
               </EuiTitle>
+              <EuiTabs style={{ marginBottom: '-25px' }}>
+                {tabs.map(({ key, label }) => (
+                  <EuiTab
+                    key={key}
+                    isSelected={key === currentTab}
+                    onClick={() => {
+                      setCurrentTab(key);
+                    }}
+                  >
+                    {label}
+                  </EuiTab>
+                ))}
+              </EuiTabs>
             </EuiFlyoutHeader>
             <EuiFlyoutBody>
               <CorrelationsMetricsLicenseCheck>
