@@ -46,7 +46,7 @@ exports[`HistogramFormatEditor should render normally 1`] = `
         >
           <FormattedMessage
             defaultMessage="Documentation"
-            id="indexPatternManagement.number.documentationLabel"
+            id="indexPatternFieldEditor.number.documentationLabel"
             values={Object {}}
           />
            
