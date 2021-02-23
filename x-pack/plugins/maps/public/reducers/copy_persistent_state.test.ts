@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { copyPersistentState } from './util';
+import { copyPersistentState } from './copy_persistent_state';
 
 describe('reducers/util', () => {
   describe('copyPersistentState', () => {

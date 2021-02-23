@@ -7,27 +7,30 @@
 
 import { kea, MakeLogicType } from 'kea';
 
+import { Meta } from '../../../../../common/types';
+import { DEFAULT_META } from '../../../shared/constants';
 import { HttpLogic } from '../../../shared/http';
+import { updateMetaPageIndex } from '../../../shared/table_pagination';
 
 import { EngineDetails } from '../engine/types';
 
 interface EnginesValues {
   dataLoading: boolean;
   engines: EngineDetails[];
-  enginesTotal: number;
-  enginesPage: number;
+  enginesMeta: Meta;
+  enginesLoading: boolean;
   metaEngines: EngineDetails[];
-  metaEnginesTotal: number;
-  metaEnginesPage: number;
+  metaEnginesMeta: Meta; // keanu_whoa.jpg
+  metaEnginesLoading: boolean;
 }
 
-interface OnEnginesLoad {
-  engines: EngineDetails[];
-  total: number;
+interface EnginesAPIResponse {
+  results: EngineDetails[];
+  meta: Meta;
 }
 interface EnginesActions {
-  onEnginesLoad({ engines, total }: OnEnginesLoad): OnEnginesLoad;
-  onMetaEnginesLoad({ engines, total }: OnEnginesLoad): OnEnginesLoad;
+  onEnginesLoad({ results, meta }: EnginesAPIResponse): EnginesAPIResponse;
+  onMetaEnginesLoad({ results, meta }: EnginesAPIResponse): EnginesAPIResponse;
   onEnginesPagination(page: number): { page: number };
   onMetaEnginesPagination(page: number): { page: number };
   loadEngines(): void;
@@ -37,81 +40,87 @@ interface EnginesActions {
 export const EnginesLogic = kea<MakeLogicType<EnginesValues, EnginesActions>>({
   path: ['enterprise_search', 'app_search', 'engines_logic'],
   actions: {
-    onEnginesLoad: ({ engines, total }) => ({ engines, total }),
-    onMetaEnginesLoad: ({ engines, total }) => ({ engines, total }),
+    onEnginesLoad: ({ results, meta }) => ({ results, meta }),
+    onMetaEnginesLoad: ({ results, meta }) => ({ results, meta }),
     onEnginesPagination: (page) => ({ page }),
     onMetaEnginesPagination: (page) => ({ page }),
     loadEngines: true,
     loadMetaEngines: true,
   },
   reducers: {
-    dataLoading: [
-      true,
-      {
-        onEnginesLoad: () => false,
-      },
-    ],
     engines: [
       [],
       {
-        onEnginesLoad: (_, { engines }) => engines,
+        onEnginesLoad: (_, { results }) => results,
       },
     ],
-    enginesTotal: [
-      0,
+    enginesMeta: [
+      DEFAULT_META,
       {
-        onEnginesLoad: (_, { total }) => total,
+        onEnginesLoad: (_, { meta }) => meta,
+        onEnginesPagination: (state, { page }) => updateMetaPageIndex(state, page),
       },
     ],
-    enginesPage: [
-      1,
+    enginesLoading: [
+      true,
       {
-        onEnginesPagination: (_, { page }) => page,
+        loadEngines: () => true,
+        onEnginesLoad: () => false,
       },
     ],
     metaEngines: [
       [],
       {
-        onMetaEnginesLoad: (_, { engines }) => engines,
+        onMetaEnginesLoad: (_, { results }) => results,
       },
     ],
-    metaEnginesTotal: [
-      0,
+    metaEnginesMeta: [
+      DEFAULT_META,
       {
-        onMetaEnginesLoad: (_, { total }) => total,
+        onMetaEnginesLoad: (_, { meta }) => meta,
+        onMetaEnginesPagination: (state, { page }) => updateMetaPageIndex(state, page),
       },
     ],
-    metaEnginesPage: [
-      1,
+    metaEnginesLoading: [
+      true,
       {
-        onMetaEnginesPagination: (_, { page }) => page,
+        loadMetaEngines: () => true,
+        onMetaEnginesLoad: () => false,
       },
+    ],
+  },
+  selectors: {
+    dataLoading: [
+      (selectors) => [selectors.enginesLoading, selectors.engines],
+      (enginesLoading, engines) => enginesLoading && !engines.length,
     ],
   },
   listeners: ({ actions, values }) => ({
     loadEngines: async () => {
       const { http } = HttpLogic.values;
-      const { enginesPage } = values;
+      const { enginesMeta } = values;
 
       const response = await http.get('/api/app_search/engines', {
-        query: { type: 'indexed', pageIndex: enginesPage },
+        query: {
+          type: 'indexed',
+          'page[current]': enginesMeta.page.current,
+          'page[size]': enginesMeta.page.size,
+        },
       });
-      actions.onEnginesLoad({
-        engines: response.results,
-        total: response.meta.page.total_results,
-      });
+      actions.onEnginesLoad(response);
     },
     loadMetaEngines: async () => {
       const { http } = HttpLogic.values;
-      const { metaEnginesPage } = values;
+      const { metaEnginesMeta } = values;
 
       const response = await http.get('/api/app_search/engines', {
-        query: { type: 'meta', pageIndex: metaEnginesPage },
+        query: {
+          type: 'meta',
+          'page[current]': metaEnginesMeta.page.current,
+          'page[size]': metaEnginesMeta.page.size,
+        },
       });
-      actions.onMetaEnginesLoad({
-        engines: response.results,
-        total: response.meta.page.total_results,
-      });
+      actions.onMetaEnginesLoad(response);
     },
   }),
 });
