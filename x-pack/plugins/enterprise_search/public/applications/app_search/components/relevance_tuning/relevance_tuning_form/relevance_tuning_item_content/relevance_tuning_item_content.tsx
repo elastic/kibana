@@ -17,8 +17,6 @@ import { Boosts } from './boosts';
 import { TextSearchToggle } from './text_search_toggle';
 import { WeightSlider } from './weight_slider';
 
-import './relevance_tuning_item_content.scss';
-
 interface Props {
   name: string;
   type: SchemaTypes;
@@ -29,7 +27,7 @@ interface Props {
 export const RelevanceTuningItemContent: React.FC<Props> = ({ name, type, boosts, field }) => {
   return (
     <>
-      <EuiPanel hasShadow={false} className="relevanceTuningForm__itemContent">
+      <EuiPanel hasShadow={false} className="relevanceTuningAccordionItem">
         <TextSearchToggle name={name} type={type} field={field} />
         {field && <WeightSlider name={name} field={field} />}
       </EuiPanel>

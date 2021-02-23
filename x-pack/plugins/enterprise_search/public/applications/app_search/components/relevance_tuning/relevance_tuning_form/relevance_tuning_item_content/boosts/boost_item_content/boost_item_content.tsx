@@ -19,8 +19,6 @@ import { FunctionalBoostForm } from './functional_boost_form';
 import { ProximityBoostForm } from './proximity_boost_form';
 import { ValueBoostForm } from './value_boost_form';
 
-import './boost_item_content.scss';
-
 interface Props {
   boost: Boost;
   index: number;
@@ -43,7 +41,7 @@ export const BoostItemContent: React.FC<Props> = ({ boost, index, name }) => {
   };
 
   return (
-    <EuiPanel hasShadow={false} className="boosts__itemContent">
+    <EuiPanel hasShadow={false} className="relevanceTuningAccordionItem">
       {getBoostForm()}
       <EuiSpacer />
       <EuiFormRow
