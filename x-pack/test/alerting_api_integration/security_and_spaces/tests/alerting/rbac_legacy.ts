@@ -147,7 +147,6 @@ export default function alertTests({ getService }: FtrProviderContext) {
             .get(`${getUrlPrefix(space.id)}/api/alerts/alert/${alertId}`)
             .auth(user.username, user.password);
           expect(getResponse.status).to.eql(200);
-          console.log(`ensureLegacyAlertHasBeenMigrated - LEGACY ALERT HAS BEEN MIGRATED`);
         }
 
         async function updateMigratedAlertToUseApiKeyOfCurrentUser(alertId: string) {
@@ -171,13 +170,9 @@ export default function alertTests({ getService }: FtrProviderContext) {
               runAt: getRunAt(10000),
             })
             .expect(200);
-          console.log(
-            `updateMigratedAlertToUseApiKeyOfCurrentUser - API KEY OF LEGACY ALERT HAS BEEN UPDATED`
-          );
         }
 
         async function ensureAlertIsRunning() {
-          console.log(`ensureAlertIsRunning - ENSURE ALERT IS RUNNING`);
           // ensure the alert still runs and that it can schedule actions
           const numberOfAlertExecutions = (
             await esTestIndexTool.search('alert:test.always-firing', reference)
@@ -186,10 +181,6 @@ export default function alertTests({ getService }: FtrProviderContext) {
           const numberOfActionExecutions = (
             await esTestIndexTool.search('action:test.index-record', reference)
           ).hits.total.value;
-
-          console.log(
-            `numberOfAlertExecutions - ${numberOfAlertExecutions}; numberOfActionExecutions - ${numberOfActionExecutions}`
-          );
 
           // wait for alert to execute and for its action to be scheduled and run
           await retry.try(async () => {
@@ -201,10 +192,6 @@ export default function alertTests({ getService }: FtrProviderContext) {
             const actionSearchResult = await esTestIndexTool.search(
               'action:test.index-record',
               reference
-            );
-
-            console.log(
-              `alertSearchResult - ${alertSearchResult.hits.total.value}; actionSearchResult - ${actionSearchResult.hits.total.value}`
             );
 
             expect(alertSearchResult.hits.total.value).to.be.greaterThan(numberOfAlertExecutions);
@@ -225,7 +212,6 @@ export default function alertTests({ getService }: FtrProviderContext) {
               throttle: '2s',
             },
           });
-          console.log(`updateAlertSoThatItIsNoLongerLegacy - ALERT UPDATED NO LONGER LEGACY`);
         }
       });
     });
@@ -235,8 +221,6 @@ export default function alertTests({ getService }: FtrProviderContext) {
 
 function getRunAt(delayInMs: number) {
   const runAt = new Date();
-  console.log(`CURRENT TIME: ${runAt.toISOString()}`);
   runAt.setMilliseconds(new Date().getMilliseconds() + delayInMs);
-  console.log(`NEW RUN AT TIME: ${runAt.toISOString()}`);
   return runAt.toISOString();
 }
