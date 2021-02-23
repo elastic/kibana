@@ -9,6 +9,8 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { EuiDataGridSorting, EuiDataGridColumn } from '@elastic/eui';
 
+import { HITS_TOTAL_RELATION } from '../../../../common/types/es_client';
+
 import { INDEX_STATUS } from '../../data_frame_analytics/common';
 
 import { ColumnChart } from './column_chart';
@@ -21,6 +23,7 @@ import {
   OnChangeItemsPerPage,
   OnChangePage,
   OnSort,
+  RowCountRelation,
   UseDataGridReturnType,
 } from './types';
 import { ChartData } from './use_column_chart';
@@ -37,6 +40,7 @@ export const useDataGrid = (
   const [errorMessage, setErrorMessage] = useState('');
   const [status, setStatus] = useState(INDEX_STATUS.UNUSED);
   const [rowCount, setRowCount] = useState(0);
+  const [rowCountRelation, setRowCountRelation] = useState<RowCountRelation>(undefined);
   const [columnCharts, setColumnCharts] = useState<ChartData[]>([]);
   const [tableItems, setTableItems] = useState<DataGridItem[]>([]);
   const [pagination, setPagination] = useState(defaultPagination);
@@ -139,10 +143,13 @@ export const useDataGrid = (
   // Once we know how many rows have been returned,
   // we decide whether to show or hide the charts by default.
   useEffect(() => {
-    if (chartsVisible === undefined && rowCount > 0) {
-      setChartsVisible(rowCount < COLUMN_CHART_DEFAULT_VISIBILITY_ROWS_THRESHOLED);
+    if (chartsVisible === undefined && rowCount > 0 && rowCountRelation !== undefined) {
+      setChartsVisible(
+        rowCount <= COLUMN_CHART_DEFAULT_VISIBILITY_ROWS_THRESHOLED &&
+          rowCountRelation !== HITS_TOTAL_RELATION.GTE
+      );
     }
-  }, [chartsVisible, rowCount]);
+  }, [chartsVisible, rowCount, rowCountRelation]);
 
   return {
     chartsVisible,
@@ -157,11 +164,13 @@ export const useDataGrid = (
     pagination,
     resetPagination,
     rowCount,
+    rowCountRelation,
     setColumnCharts,
     setErrorMessage,
     setNoDataMessage,
     setPagination,
     setRowCount,
+    setRowCountRelation,
     setSortingColumns,
     setStatus,
     setTableItems,
