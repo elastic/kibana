@@ -9,11 +9,10 @@ import React from 'react';
 
 import { useActions } from 'kea';
 
-import { EuiBasicTable, EuiBasicTableColumn } from '@elastic/eui';
+import { EuiBasicTable, EuiBasicTableColumn, CriteriaWithPagination } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedNumber } from '@kbn/i18n/react';
 
-import { ENGINES_PAGE_SIZE } from '../../../../../common/constants';
 import { EuiLinkTo } from '../../../shared/react_router_helpers';
 import { TelemetryLogic } from '../../../shared/telemetry';
 import { UNIVERSAL_LANGUAGE } from '../../constants';
@@ -22,24 +21,23 @@ import { generateEncodedPath } from '../../utils/encode_path_params';
 import { FormattedDateTime } from '../../utils/formatted_date_time';
 import { EngineDetails } from '../engine/types';
 
-interface EnginesTablePagination {
-  totalEngines: number;
-  pageIndex: number;
-  onPaginate(pageIndex: number): void;
-}
 interface EnginesTableProps {
-  data: EngineDetails[];
-  pagination: EnginesTablePagination;
-}
-interface OnChange {
-  page: {
-    index: number;
+  items: EngineDetails[];
+  loading: boolean;
+  pagination: {
+    pageIndex: number;
+    pageSize: number;
+    totalItemCount: number;
+    hidePerPageOptions: boolean;
   };
+  onChange(criteria: CriteriaWithPagination<EngineDetails>): void;
 }
 
 export const EnginesTable: React.FC<EnginesTableProps> = ({
-  data,
-  pagination: { totalEngines, pageIndex, onPaginate },
+  items,
+  loading,
+  pagination,
+  onChange,
 }) => {
   const { sendAppSearchTelemetry } = useActions(TelemetryLogic);
 
@@ -145,18 +143,11 @@ export const EnginesTable: React.FC<EnginesTableProps> = ({
 
   return (
     <EuiBasicTable
-      items={data}
+      items={items}
       columns={columns}
-      pagination={{
-        pageIndex,
-        pageSize: ENGINES_PAGE_SIZE,
-        totalItemCount: totalEngines,
-        hidePerPageOptions: true,
-      }}
-      onChange={({ page }: OnChange) => {
-        const { index } = page;
-        onPaginate(index + 1); // Note on paging - App Search's API pages start at 1, EuiBasicTables' pages start at 0
-      }}
+      loading={loading}
+      pagination={pagination}
+      onChange={onChange}
     />
   );
 };
