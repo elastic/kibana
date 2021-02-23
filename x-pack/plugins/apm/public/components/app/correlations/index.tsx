@@ -66,7 +66,6 @@ export function Correlations() {
         onClick={() => {
           setIsFlyoutVisible(true);
         }}
-        iconType="visTagCloud"
       >
         {i18n.translate('xpack.apm.correlations.buttonLabel', {
           defaultMessage: 'View correlations',
