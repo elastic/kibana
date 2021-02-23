@@ -8,6 +8,7 @@
 import React, { memo, useCallback, useMemo } from 'react';
 import { EuiButton } from '@elastic/eui';
 
+import { get } from 'lodash';
 import { CaseStatuses, caseStatuses } from '../../../../../case/common/api';
 import { statuses } from './config';
 
@@ -45,7 +46,7 @@ const StatusActionButtonComponent: React.FC<Props> = ({
       isLoading={isLoading}
       onClick={onClick}
     >
-      {statuses[caseStatuses[nextStatusIndex]].button.label}
+      {get(statuses, `${caseStatuses[nextStatusIndex]}.button.label`)}
     </EuiButton>
   );
 };

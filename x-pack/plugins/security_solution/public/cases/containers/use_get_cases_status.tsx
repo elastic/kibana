@@ -18,7 +18,6 @@ interface CasesStatusState extends CasesStatus {
 }
 
 const initialData: CasesStatusState = {
-  countAllCases: null,
   countClosedCases: null,
   countInProgressCases: null,
   countOpenCases: null,
@@ -59,7 +58,6 @@ export const useGetCasesStatus = (): UseGetCasesStatus => {
             dispatchToaster,
           });
           setCasesStatusState({
-            countAllCases: 0,
             countClosedCases: 0,
             countInProgressCases: 0,
             countOpenCases: 0,
