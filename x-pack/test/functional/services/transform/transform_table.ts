@@ -233,8 +233,6 @@ export function TransformTableProvider({ getService }: FtrProviderContext) {
     public async assertTransformRowActions(transformId: string, isTransformRunning = false) {
       await testSubjects.click(this.rowSelector(transformId, 'euiCollapsedItemActionsButton'));
 
-      await testSubjects.click('euiCollapsedItemActionsButton');
-
       await testSubjects.existOrFail('transformActionClone');
       await testSubjects.existOrFail('transformActionDelete');
       await testSubjects.existOrFail('transformActionEdit');
