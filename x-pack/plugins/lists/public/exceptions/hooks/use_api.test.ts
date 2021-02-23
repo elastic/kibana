@@ -406,57 +406,61 @@ describe('useApi', () => {
     });
   });
 
-  test('it invokes "addExceptionListItem" when "addExceptionListItem" used', async () => {
-    const payload = getExceptionListItemSchemaMock();
-    const itemToCreate = getCreateExceptionListItemSchemaMock();
-    const spyOnFetchExceptionListItemById = jest
-      .spyOn(api, 'addExceptionListItem')
-      .mockResolvedValue(payload);
+  describe('addExceptionListItem', () => {
+    test('it removes exception item entry ids', async () => {
+      const payload = getExceptionListItemSchemaMock();
+      const itemToCreate = { ...getCreateExceptionListItemSchemaMock(), entries: ENTRIES_WITH_IDS };
+      const spyOnFetchExceptionListItemById = jest
+        .spyOn(api, 'addExceptionListItem')
+        .mockResolvedValue(payload);
 
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<HttpStart, ExceptionsApi>(() =>
-        useApi(mockKibanaHttpService)
-      );
-      await waitForNextUpdate();
+      await act(async () => {
+        const { result, waitForNextUpdate } = renderHook<HttpStart, ExceptionsApi>(() =>
+          useApi(mockKibanaHttpService)
+        );
+        await waitForNextUpdate();
 
-      await result.current.addExceptionListItem({
-        listItem: itemToCreate,
+        await result.current.addExceptionListItem({
+          listItem: itemToCreate,
+        });
+
+        const expected: AddExceptionListItemProps = {
+          http: mockKibanaHttpService,
+          listItem: getCreateExceptionListItemSchemaMock(),
+          signal: new AbortController().signal,
+        };
+
+        expect(spyOnFetchExceptionListItemById).toHaveBeenCalledWith(expected);
       });
-
-      const expected: AddExceptionListItemProps = {
-        http: mockKibanaHttpService,
-        listItem: itemToCreate,
-        signal: new AbortController().signal,
-      };
-
-      expect(spyOnFetchExceptionListItemById).toHaveBeenCalledWith(expected);
     });
   });
 
-  test('it invokes "updateExceptionListItem" when "getExceptionItem" used', async () => {
-    const payload = getExceptionListItemSchemaMock();
-    const itemToUpdate = getUpdateExceptionListItemSchemaMock();
-    const spyOnUpdateExceptionListItem = jest
-      .spyOn(api, 'updateExceptionListItem')
-      .mockResolvedValue(payload);
+  describe('updateExceptionListItem', () => {
+    test('it removes exception item entry ids', async () => {
+      const payload = getExceptionListItemSchemaMock();
+      const itemToUpdate = { ...getUpdateExceptionListItemSchemaMock(), entries: ENTRIES_WITH_IDS };
+      const spyOnUpdateExceptionListItem = jest
+        .spyOn(api, 'updateExceptionListItem')
+        .mockResolvedValue(payload);
 
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<HttpStart, ExceptionsApi>(() =>
-        useApi(mockKibanaHttpService)
-      );
-      await waitForNextUpdate();
+      await act(async () => {
+        const { result, waitForNextUpdate } = renderHook<HttpStart, ExceptionsApi>(() =>
+          useApi(mockKibanaHttpService)
+        );
+        await waitForNextUpdate();
 
-      await result.current.updateExceptionListItem({
-        listItem: itemToUpdate,
+        await result.current.updateExceptionListItem({
+          listItem: itemToUpdate,
+        });
+
+        const expected: UpdateExceptionListItemProps = {
+          http: mockKibanaHttpService,
+          listItem: getUpdateExceptionListItemSchemaMock(),
+          signal: new AbortController().signal,
+        };
+
+        expect(spyOnUpdateExceptionListItem).toHaveBeenCalledWith(expected);
       });
-
-      const expected: UpdateExceptionListItemProps = {
-        http: mockKibanaHttpService,
-        listItem: itemToUpdate,
-        signal: new AbortController().signal,
-      };
-
-      expect(spyOnUpdateExceptionListItem).toHaveBeenCalledWith(expected);
     });
   });
 });

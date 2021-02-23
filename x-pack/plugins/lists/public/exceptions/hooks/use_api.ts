@@ -14,10 +14,11 @@ import {
   ExceptionListItemSchema,
   ExceptionListSchema,
   UpdateExceptionListItemSchema,
+  createExceptionListItemSchema,
 } from '../../../common/schemas';
 import { ApiCallFindListsItemsMemoProps, ApiCallMemoProps, ApiListExportProps } from '../types';
 import { getIdsAndNamespaces } from '../utils';
-import { transformInput } from '../transforms';
+import { transformInput, transformOutput } from '../transforms';
 
 export interface ExceptionsApi {
   addExceptionListItem: (arg: {
@@ -47,12 +48,16 @@ export const useApi = (http: HttpStart): ExceptionsApi => {
         listItem: CreateExceptionListItemSchema;
       }): Promise<ExceptionListItemSchema> {
         const abortCtrl = new AbortController();
-
-        return Api.addExceptionListItem({
-          http,
-          listItem,
-          signal: abortCtrl.signal,
-        });
+        const sanitizedItem = transformOutput(listItem);
+        if (createExceptionListItemSchema.is(sanitizedItem)) {
+          return Api.addExceptionListItem({
+            http,
+            listItem: sanitizedItem,
+            signal: abortCtrl.signal,
+          });
+        } else {
+          throw new Error('Unable to create exception item. Item malformed.');
+        }
       },
       async deleteExceptionItem({
         id,
@@ -220,10 +225,11 @@ export const useApi = (http: HttpStart): ExceptionsApi => {
         listItem: UpdateExceptionListItemSchema;
       }): Promise<ExceptionListItemSchema> {
         const abortCtrl = new AbortController();
+        const sanitizedItem = transformOutput(listItem);
 
         return Api.updateExceptionListItem({
           http,
-          listItem,
+          listItem: sanitizedItem,
           signal: abortCtrl.signal,
         });
       },
