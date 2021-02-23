@@ -13,7 +13,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const listingTable = getService('listingTable');
 
   // FLAKY: https://github.com/elastic/kibana/issues/40912
-  describe.skip('visualize listing page', function describeIndexTests() {
+  describe('visualize listing page', function describeIndexTests() {
     const vizName = 'Visualize Listing Test';
 
     describe('create and delete', function () {

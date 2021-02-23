@@ -112,7 +112,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       // Can't figure out how to get this test to pass
-      it.skip(`create new dashboard shows addNew button`, async () => {
+      it(`create new dashboard shows addNew button`, async () => {
         await PageObjects.common.navigateToActualUrl(
           'dashboard',
           DashboardConstants.CREATE_NEW_DASHBOARD_URL,
@@ -324,7 +324,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       // Has this behavior changed?
-      it.skip(`create new dashboard redirects to the home page`, async () => {
+      it(`create new dashboard redirects to the home page`, async () => {
         await PageObjects.common.navigateToActualUrl(
           'dashboard',
           DashboardConstants.CREATE_NEW_DASHBOARD_URL,
@@ -442,7 +442,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       // Has this behavior changed?
-      it.skip(`create new dashboard redirects to the home page`, async () => {
+      it(`create new dashboard redirects to the home page`, async () => {
         await PageObjects.common.navigateToActualUrl(
           'dashboard',
           DashboardConstants.CREATE_NEW_DASHBOARD_URL,

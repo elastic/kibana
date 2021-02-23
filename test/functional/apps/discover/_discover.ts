@@ -224,7 +224,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('time zone switch', () => {
       // skipping this until we get an elastic-chart alternative to check the ticks value
-      it.skip('should show ticks in the correct time zone after switching', async function () {
+      it('should show ticks in the correct time zone after switching', async function () {
         await kibanaServer.uiSettings.replace({ 'dateFormat:tz': 'America/Phoenix' });
         await PageObjects.common.navigateToApp('discover');
         await PageObjects.header.awaitKibanaChrome();

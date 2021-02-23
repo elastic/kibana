@@ -91,7 +91,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   };
 
   // Failing: See https://github.com/elastic/kibana/issues/76245
-  describe.skip('dashboard embeddable rendering', function describeIndexTests() {
+  describe('dashboard embeddable rendering', function describeIndexTests() {
     before(async () => {
       await security.testUser.setRoles(['kibana_admin', 'animals', 'test_logstash_reader']);
       await esArchiver.load('dashboard/current/kibana');
