@@ -117,7 +117,7 @@ export function Correlations() {
               <CorrelationsMetricsLicenseCheck>
                 {urlParams.kuery ? (
                   <>
-                    <EuiCallOut size="m">
+                    <EuiCallOut size="s">
                       <span>
                         {i18n.translate(
                           'xpack.apm.correlations.filteringByLabel',
