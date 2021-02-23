@@ -153,8 +153,8 @@ async function getParentCases({
 
   return parentCases.saved_objects.reduce((acc, so) => {
     const subCaseIDsWithParent = parentIDInfo.parentIDToSubID.get(so.id);
-    subCaseIDsWithParent?.forEach((subCaseID) => {
-      acc.set(subCaseID, so);
+    subCaseIDsWithParent?.forEach((subCaseId) => {
+      acc.set(subCaseId, so);
     });
     return acc;
   }, new Map<string, SavedObject<ESCaseAttributes>>());

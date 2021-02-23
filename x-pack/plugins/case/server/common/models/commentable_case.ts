@@ -17,8 +17,8 @@ import {
   CaseSettings,
   CaseStatuses,
   CaseType,
-  CollectionWithSubCaseResponse,
-  CollectWithSubCaseResponseRt,
+  CaseResponse,
+  CaseResponseRt,
   CommentAttributes,
   CommentPatchRequest,
   CommentRequest,
@@ -254,7 +254,7 @@ export class CommentableCase {
     };
   }
 
-  public async encode(): Promise<CollectionWithSubCaseResponse> {
+  public async encode(): Promise<CaseResponse> {
     const collectionCommentStats = await this.service.getAllCaseComments({
       client: this.soClient,
       id: this.collection.id,
@@ -264,22 +264,6 @@ export class CommentableCase {
         perPage: 1,
       },
     });
-
-    if (this.subCase) {
-      const subCaseComments = await this.service.getAllSubCaseComments({
-        client: this.soClient,
-        id: this.subCase.id,
-      });
-
-      return CollectWithSubCaseResponseRt.encode({
-        subCase: flattenSubCaseSavedObject({
-          savedObject: this.subCase,
-          comments: subCaseComments.saved_objects,
-          totalAlerts: countAlertsForID({ comments: subCaseComments, id: this.subCase.id }),
-        }),
-        ...this.formatCollectionForEncoding(collectionCommentStats.total),
-      });
-    }
 
     const collectionComments = await this.service.getAllCaseComments({
       client: this.soClient,
@@ -291,10 +275,33 @@ export class CommentableCase {
       },
     });
 
-    return CollectWithSubCaseResponseRt.encode({
+    const collectionTotalAlerts =
+      countAlertsForID({ comments: collectionComments, id: this.collection.id }) ?? 0;
+
+    const caseResponse = {
       comments: flattenCommentSavedObjects(collectionComments.saved_objects),
-      totalAlerts: countAlertsForID({ comments: collectionComments, id: this.collection.id }),
+      totalAlerts: collectionTotalAlerts,
       ...this.formatCollectionForEncoding(collectionCommentStats.total),
-    });
+    };
+
+    if (this.subCase) {
+      const subCaseComments = await this.service.getAllSubCaseComments({
+        client: this.soClient,
+        id: this.subCase.id,
+      });
+
+      return CaseResponseRt.encode({
+        ...caseResponse,
+        comments: flattenCommentSavedObjects(subCaseComments.saved_objects),
+        subCases: [
+          flattenSubCaseSavedObject({
+            savedObject: this.subCase,
+            totalAlerts: countAlertsForID({ comments: subCaseComments, id: this.subCase.id }),
+          }),
+        ],
+      });
+    }
+
+    return CaseResponseRt.encode(caseResponse);
   }
 }
