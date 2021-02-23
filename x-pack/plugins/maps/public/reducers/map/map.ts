@@ -45,75 +45,37 @@ import {
   ROLLBACK_MAP_SETTINGS,
   TRACK_MAP_SETTINGS,
   UPDATE_MAP_SETTING,
-} from '../actions';
+} from '../../actions';
 
 import { getDefaultMapSettings } from './default_map_settings';
-import { copyPersistentState, TRACKED_LAYER_DESCRIPTOR } from './util';
-import { SOURCE_DATA_REQUEST_ID } from '../../common/constants';
+import {
+  getLayerIndex,
+  removeTrackedLayerState,
+  rollbackTrackedLayerState,
+  trackCurrentLayerState,
+  updateLayerInList,
+  updateLayerSourceDescriptorProp,
+} from './layer_utils';
+import { startDataRequest, stopDataRequest, updateSourceDataRequest } from './data_request_utils';
+import { MapState } from './types';
 
-const getLayerIndex = (list, layerId) => list.findIndex(({ id }) => layerId === id);
-
-const updateLayerInList = (state, layerId, attribute, newValue) => {
-  if (!layerId) {
-    return state;
-  }
-
-  const { layerList } = state;
-  const layerIdx = getLayerIndex(layerList, layerId);
-  if (layerIdx === -1) {
-    return state;
-  }
-
-  const updatedLayer = {
-    ...layerList[layerIdx],
-    // Update layer w/ new value. If no value provided, toggle boolean value
-    // allow empty strings, 0-value
-    [attribute]:
-      newValue || newValue === '' || newValue === 0 ? newValue : !layerList[layerIdx][attribute],
-  };
-  const updatedList = [
-    ...layerList.slice(0, layerIdx),
-    updatedLayer,
-    ...layerList.slice(layerIdx + 1),
-  ];
-  return { ...state, layerList: updatedList };
-};
-
-const updateLayerSourceDescriptorProp = (state, layerId, propName, value) => {
-  const { layerList } = state;
-  const layerIdx = getLayerIndex(layerList, layerId);
-  const updatedLayer = {
-    ...layerList[layerIdx],
-    sourceDescriptor: {
-      ...layerList[layerIdx].sourceDescriptor,
-      [propName]: value,
-    },
-  };
-  const updatedList = [
-    ...layerList.slice(0, layerIdx),
-    updatedLayer,
-    ...layerList.slice(layerIdx + 1),
-  ];
-  return { ...state, layerList: updatedList };
-};
-
-export const DEFAULT_MAP_STATE = {
+export const DEFAULT_MAP_STATE: MapState = {
   ready: false,
   mapInitError: null,
   goto: null,
   openTooltips: [],
   mapState: {
-    zoom: null, // setting this value does not adjust map zoom, read only value used to store current map zoom for persisting between sessions
-    center: null, // setting this value does not adjust map view, read only value used to store current map center for persisting between sessions
+    zoom: undefined, // setting this value does not adjust map zoom, read only value used to store current map zoom for persisting between sessions
+    center: undefined, // setting this value does not adjust map view, read only value used to store current map center for persisting between sessions
     scrollZoom: true,
-    extent: null,
-    mouseCoordinates: null,
-    timeFilters: null,
-    query: null,
+    extent: undefined,
+    mouseCoordinates: undefined,
+    timeFilters: undefined,
+    query: undefined,
     filters: [],
-    refreshConfig: null,
-    refreshTimerLastTriggeredAt: null,
-    drawState: null,
+    refreshConfig: undefined,
+    refreshTimerLastTriggeredAt: undefined,
+    drawState: undefined,
   },
   selectedLayerId: null,
   layerList: [],
@@ -122,7 +84,7 @@ export const DEFAULT_MAP_STATE = {
   __rollbackSettings: null,
 };
 
-export function map(state = DEFAULT_MAP_STATE, action) {
+export function map(state: MapState = DEFAULT_MAP_STATE, action: any) {
   switch (action.type) {
     case UPDATE_DRAW_STATE:
       return {
@@ -223,11 +185,24 @@ export function map(state = DEFAULT_MAP_STATE, action) {
     case UPDATE_SOURCE_DATA_REQUEST:
       return updateSourceDataRequest(state, action);
     case LAYER_DATA_LOAD_STARTED:
-      return updateWithDataRequest(state, action);
+      return startDataRequest(
+        state,
+        action.layerId,
+        action.dataId,
+        action.requestToken,
+        action.meta
+      );
     case LAYER_DATA_LOAD_ERROR:
-      return updateWithDataResponse(state, action);
+      return stopDataRequest(state, action.layerId, action.dataId, action.requestToken);
     case LAYER_DATA_LOAD_ENDED:
-      return updateWithDataResponse(state, action);
+      return stopDataRequest(
+        state,
+        action.layerId,
+        action.dataId,
+        action.requestToken,
+        action.meta,
+        action.data
+      );
     case MAP_READY:
       return { ...state, ready: true };
     case MAP_DESTROYED:
@@ -279,7 +254,7 @@ export function map(state = DEFAULT_MAP_STATE, action) {
     case UPDATE_LAYER_ORDER:
       return {
         ...state,
-        layerList: action.newLayerOrder.map((layerNumber) => state.layerList[layerNumber]),
+        layerList: action.newLayerOrder.map((layerNumber: number) => state.layerList[layerNumber]),
       };
     case UPDATE_LAYER_PROP:
       return updateLayerInList(state, action.id, action.propName, action.newValue);
@@ -359,159 +334,4 @@ export function map(state = DEFAULT_MAP_STATE, action) {
     default:
       return state;
   }
-}
-
-function findDataRequest(layerDescriptor, dataRequestAction) {
-  if (!layerDescriptor.__dataRequests) {
-    return;
-  }
-
-  return layerDescriptor.__dataRequests.find((dataRequest) => {
-    return dataRequest.dataId === dataRequestAction.dataId;
-  });
-}
-
-function updateWithDataRequest(state, action) {
-  let dataRequest = getValidDataRequest(state, action, false);
-  const layerRequestingData = findLayerById(state, action.layerId);
-
-  if (!dataRequest) {
-    dataRequest = {
-      dataId: action.dataId,
-    };
-    layerRequestingData.__dataRequests = [
-      ...(layerRequestingData.__dataRequests ? layerRequestingData.__dataRequests : []),
-      dataRequest,
-    ];
-  }
-  dataRequest.dataMetaAtStart = action.meta;
-  dataRequest.dataRequestToken = action.requestToken;
-  const layerList = [...state.layerList];
-  return { ...state, layerList };
-}
-
-function updateSourceDataRequest(state, action) {
-  const layerDescriptor = findLayerById(state, action.layerId);
-  if (!layerDescriptor) {
-    return state;
-  }
-  const dataRequest = layerDescriptor.__dataRequests.find((dataRequest) => {
-    return dataRequest.dataId === SOURCE_DATA_REQUEST_ID;
-  });
-  if (!dataRequest) {
-    return state;
-  }
-
-  dataRequest.data = action.newData;
-  return resetDataRequest(state, action, dataRequest);
-}
-
-function updateWithDataResponse(state, action) {
-  const dataRequest = getValidDataRequest(state, action);
-  if (!dataRequest) {
-    return state;
-  }
-
-  dataRequest.data = action.data;
-  dataRequest.dataMeta = { ...dataRequest.dataMetaAtStart, ...action.meta };
-  dataRequest.dataMetaAtStart = null;
-  return resetDataRequest(state, action, dataRequest);
-}
-
-export function resetDataRequest(state, action, request) {
-  const dataRequest = request || getValidDataRequest(state, action);
-  if (!dataRequest) {
-    return state;
-  }
-
-  const layer = findLayerById(state, action.layerId);
-  const dataRequestIndex = layer.__dataRequests.indexOf(dataRequest);
-
-  const newDataRequests = [...layer.__dataRequests];
-  newDataRequests[dataRequestIndex] = {
-    ...dataRequest,
-    dataRequestToken: null,
-  };
-
-  const layerIndex = state.layerList.indexOf(layer);
-  const newLayerList = [...state.layerList];
-  newLayerList[layerIndex] = {
-    ...layer,
-    __dataRequests: newDataRequests,
-  };
-  return { ...state, layerList: newLayerList };
-}
-
-function getValidDataRequest(state, action, checkRequestToken = true) {
-  const layer = findLayerById(state, action.layerId);
-  if (!layer) {
-    return;
-  }
-
-  const dataRequest = findDataRequest(layer, action);
-  if (!dataRequest) {
-    return;
-  }
-
-  if (
-    checkRequestToken &&
-    dataRequest.dataRequestToken &&
-    dataRequest.dataRequestToken !== action.requestToken
-  ) {
-    // ignore responses to outdated requests
-    return;
-  }
-  return dataRequest;
-}
-
-function findLayerById(state, id) {
-  return state.layerList.find((layer) => layer.id === id);
-}
-
-function trackCurrentLayerState(state, layerId) {
-  const layer = findLayerById(state, layerId);
-  const layerCopy = copyPersistentState(layer);
-  return updateLayerInList(state, layerId, TRACKED_LAYER_DESCRIPTOR, layerCopy);
-}
-
-function removeTrackedLayerState(state, layerId) {
-  const layer = findLayerById(state, layerId);
-  if (!layer) {
-    return state;
-  }
-
-  const copyLayer = { ...layer };
-  delete copyLayer[TRACKED_LAYER_DESCRIPTOR];
-
-  return {
-    ...state,
-    layerList: replaceInLayerList(state.layerList, layerId, copyLayer),
-  };
-}
-
-function rollbackTrackedLayerState(state, layerId) {
-  const layer = findLayerById(state, layerId);
-  if (!layer) {
-    return state;
-  }
-
-  const trackedLayerDescriptor = layer[TRACKED_LAYER_DESCRIPTOR];
-
-  //this assumes that any nested temp-state in the layer-descriptor (e.g. of styles), is not relevant and can be recovered easily (e.g. this is not the case for __dataRequests)
-  //That assumption is true in the context of this app, but not generalizable.
-  //consider rewriting copyPersistentState to only strip the first level of temp state.
-  const rolledbackLayer = { ...layer, ...trackedLayerDescriptor };
-  delete rolledbackLayer[TRACKED_LAYER_DESCRIPTOR];
-
-  return {
-    ...state,
-    layerList: replaceInLayerList(state.layerList, layerId, rolledbackLayer),
-  };
-}
-
-function replaceInLayerList(layerList, layerId, newLayerDescriptor) {
-  const layerIndex = getLayerIndex(layerList, layerId);
-  const newLayerList = [...layerList];
-  newLayerList[layerIndex] = newLayerDescriptor;
-  return newLayerList;
 }
