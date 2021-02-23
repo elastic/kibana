@@ -6,7 +6,7 @@
         "is_write_index": true
       }
     },
-    "index": "auditbeat-8.0.0-2019.02.19-000001",
+    "index": "auditbeat-uncommon-processes",
     "mappings": {
       "_meta": {
         "beat": "auditbeat",
