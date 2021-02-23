@@ -110,7 +110,8 @@ describe('utils', () => {
     });
 
     test('it throws given an invalid duration', () => {
-      expect(() => parseInterval('junk')).toThrow();
+      const duration = parseInterval('junk');
+      expect(duration).toBeNull();
     });
   });
 

@@ -324,8 +324,12 @@ export const wrapSignal = (signal: SignalHit, index: string): WrappedSignalHit =
   };
 };
 
-export const parseInterval = (intervalString: string): moment.Duration => {
-  return moment.duration(parseDuration(intervalString));
+export const parseInterval = (intervalString: string): moment.Duration | null => {
+  try {
+    return moment.duration(parseDuration(intervalString));
+  } catch (err) {
+    return null;
+  }
 };
 
 export const getDriftTolerance = ({
@@ -443,30 +447,29 @@ export const getRuleRangeTuples = ({
       maxSignals,
     },
   ];
-  let remainingGapMilliseconds = 0;
-  try {
-    const intervalDuration = parseInterval(interval);
-    const gap = getGapBetweenRuns({ previousStartedAt, intervalDuration, from, to });
-    const catchup = getNumCatchupIntervals({
-      gap,
-      intervalDuration,
-    });
-    const catchupTuples = getCatchupTuples({
-      to: originalTo,
-      from: originalFrom,
-      ruleParamsMaxSignals: maxSignals,
-      catchup,
-      intervalDuration,
-    });
-    tuples.push(...catchupTuples);
-    // Each extra tuple adds one extra intervalDuration to the time range this rule will cover.
-    remainingGapMilliseconds = Math.max(
-      gap.asMilliseconds() - catchup * intervalDuration.asMilliseconds(),
-      0
-    );
-  } catch (err) {
-    logger.error(`Failed to compute gap between rule runs: ${err}`);
+  const intervalDuration = parseInterval(interval);
+  if (intervalDuration == null) {
+    logger.error(`Failed to compute gap between rule runs: could not parse rule interval`);
+    return { tuples, remainingGap: moment.duration(0) };
   }
+  const gap = getGapBetweenRuns({ previousStartedAt, intervalDuration, from, to });
+  const catchup = getNumCatchupIntervals({
+    gap,
+    intervalDuration,
+  });
+  const catchupTuples = getCatchupTuples({
+    to: originalTo,
+    from: originalFrom,
+    ruleParamsMaxSignals: maxSignals,
+    catchup,
+    intervalDuration,
+  });
+  tuples.push(...catchupTuples);
+  // Each extra tuple adds one extra intervalDuration to the time range this rule will cover.
+  const remainingGapMilliseconds = Math.max(
+    gap.asMilliseconds() - catchup * intervalDuration.asMilliseconds(),
+    0
+  );
   return { tuples, remainingGap: moment.duration(remainingGapMilliseconds) };
 };
 
