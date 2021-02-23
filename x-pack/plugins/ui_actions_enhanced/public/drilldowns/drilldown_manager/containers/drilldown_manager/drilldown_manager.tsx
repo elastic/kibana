@@ -21,9 +21,7 @@ export const DrilldownManager: React.FC = ({}) => {
   const footer =
     screen === 'create' ? (
       <EuiButton
-        onClick={() => {
-          alert('CREATE DRILL');
-        }}
+        onClick={drilldowns.onCreateDrilldown}
         fill
         // isDisabled={!isActionValid(wizardConfig)}
         data-test-subj={'drilldownWizardSubmit'}

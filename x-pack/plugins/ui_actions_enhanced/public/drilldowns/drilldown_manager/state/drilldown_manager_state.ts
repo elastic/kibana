@@ -14,6 +14,7 @@ import {
 } from '../types';
 import { ActionFactory, BaseActionFactoryContext } from '../../../dynamic_actions';
 import { DrilldownState } from './drilldown_state';
+import { toastDrilldownCreated, toastDrilldownsCRUDError } from './i18n';
 
 const helloMessageStorageKey = `drilldowns:hidWelcomeMessage`;
 
@@ -146,6 +147,34 @@ export class DrilldownManagerState {
     const drilldownState = this.drilldownStateByFactoryId.get(actionFactory.id);
     return drilldownState;
   }
+
+  /**
+   * Callback called when user presses "Create drilldown" button to create the
+   * currently edited drilldown.
+   */
+  public readonly onCreateDrilldown = (): void => {
+    const { dynamicActionManager, toastService } = this.deps;
+    const drilldownState = this.getDrilldownState();
+
+    if (!drilldownState) return;
+
+    (async () => {
+      try {
+        await dynamicActionManager.createEvent(
+          drilldownState.serialize(),
+          drilldownState.triggers$.getValue()
+        );
+        toastService.addSuccess({
+          title: toastDrilldownCreated.title(drilldownState.name$.getValue()),
+          text: toastDrilldownCreated.text,
+        });
+      } catch (error) {
+        toastService.addError(error, {
+          title: toastDrilldownsCRUDError,
+        });
+      }
+    })();
+  };
 
   // Below are convenience React hooks for consuming observables in connected
   // React components.

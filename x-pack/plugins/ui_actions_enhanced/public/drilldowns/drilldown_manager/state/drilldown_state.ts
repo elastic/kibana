@@ -11,6 +11,7 @@ import {
   ActionFactory,
   BaseActionConfig,
   BaseActionFactoryContext,
+  SerializedAction,
 } from '../../../dynamic_actions';
 import { ActionFactoryPlaceContext } from '../types';
 
@@ -137,6 +138,18 @@ export class DrilldownState {
     return {
       ...this.placeContext,
       triggers: this.triggers$.getValue(),
+    };
+  }
+
+  /**
+   * Serialize the current drilldown draft into a serializable action which
+   * is persisted to disk.
+   */
+  public serialize(): SerializedAction {
+    return {
+      factoryId: this.factory.id,
+      name: this.name$.getValue(),
+      config: this.config$.getValue(),
     };
   }
 
