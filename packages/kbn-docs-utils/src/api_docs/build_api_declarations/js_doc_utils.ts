@@ -21,7 +21,7 @@ export function getCommentsFromNode(node: Node): TextWithLinks | undefined {
     comments = getTextWithLinks(
       node
         .getLeadingCommentRanges()
-        .map((c) => c.getText() + '\n')
+        .map((c) => c.getText())
         .join('\n')
     );
   }

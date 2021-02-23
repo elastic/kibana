@@ -7,3 +7,7 @@
  */
 
 export { commonFoo } from './foo';
+
+export interface ImACommonType {
+  goo: number;
+}

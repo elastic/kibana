@@ -6,6 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { ImACommonType } from '../common';
+import { FooType, ImNotExportedFromIndex } from './foo';
+
 /**
  * How should a potentially undefined type show up.
  */
@@ -13,7 +16,7 @@ export type StringOrUndefinedType = string | undefined;
 
 export type TypeWithGeneric<T> = T[];
 
-export type ImAType = string | number | TypeWithGeneric<string>;
+export type ImAType = string | number | TypeWithGeneric<string> | FooType | ImACommonType;
 
 /**
  * This is a type that defines a function.
@@ -30,3 +33,10 @@ export enum DayOfWeek {
   FRIDAY, // How about this comment, hmmm?
   SATURDAY,
 }
+
+/**
+ * Calling node.getSymbol().getDeclarations() will return > 1 declaration.
+ */
+export type MultipleDeclarationsType = TypeWithGeneric<typeof DayOfWeek>;
+
+export type IRefANotExportedType = ImNotExportedFromIndex | { zed: 'hi' };

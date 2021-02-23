@@ -7,3 +7,7 @@
  */
 
 export const doTheFooFnThing = () => {};
+
+export type FooType = () => 'foo';
+
+export type ImNotExportedFromIndex = () => { bar: string };

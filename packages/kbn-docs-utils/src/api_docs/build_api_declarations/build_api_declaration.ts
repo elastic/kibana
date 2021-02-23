@@ -31,9 +31,11 @@ import { getTypeKind } from './get_type_kind';
  * @param plugins The list of plugins registered is used for building cross plugin links by looking up
  * the plugin by import path. We could accomplish the same thing via a regex on the import path, but this lets us
  * decouple plugin path from plugin id.
- * @param parentAnchorLink Used to build a nested id for the API. If this is a top level plugin API, parentAnchorLink.apiId
- * will be undefined.
  * @param log Logs messages to console.
+ * @param pluginName The name of the plugin this declaration belongs to.
+ * @param scope The scope this declaration belongs to (server, public, or common).
+ * @param parentApiId If this declaration is nested inside another declaration, it should have a parent id. This
+ * is used to create the anchor link to this API item.
  * @param name An optional name to pass through which will be used instead of node.getName, if it
  * exists. For some types, like Parameters, the name comes on the parent node, but we want the doc def
  * to be built from the TypedNode

@@ -9,7 +9,7 @@
 import { PluginA, Setup, Start, SearchSpec } from './plugin';
 export { Setup, Start, SearchSpec };
 
-export { doTheFooFnThing } from './foo';
+export { doTheFooFnThing, FooType } from './foo';
 
 export * from './fns';
 export * from './classes';

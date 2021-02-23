@@ -6,9 +6,19 @@
  * Side Public License, v 1.
  */
 
+import { KibanaPlatformPlugin, ToolingLog } from '@kbn/dev-utils';
 import Path from 'path';
+import { Project } from 'ts-morph';
 import { findPlugins } from './find_plugins';
-import { getPluginForPath, getServiceForPath } from './utils';
+import { getPluginApi } from './get_plugin_api';
+import { getKibanaPlatformPlugin } from './tests/kibana_platform_plugin_mock';
+import { PluginApi } from './types';
+import { getPluginForPath, getServiceForPath, removeBrokenLinks } from './utils';
+
+const log = new ToolingLog({
+  level: 'debug',
+  writeTo: process.stdout,
+});
 
 it('test getPluginForPath', () => {
   const plugins = findPlugins();
@@ -24,4 +34,31 @@ it('test getServiceForPath', () => {
     'another_service'
   );
   expect(getServiceForPath('src/plugins/embed/server/f.ts')).toBeUndefined();
+});
+
+it('test removeBrokenLinks', () => {
+  const tsConfigFilePath = Path.resolve(__dirname, 'tests/__fixtures__/src/tsconfig.json');
+  const project = new Project({
+    tsConfigFilePath,
+  });
+
+  expect(project.getSourceFiles().length).toBeGreaterThan(0);
+
+  const pluginA = getKibanaPlatformPlugin('pluginA');
+  pluginA.manifest.serviceFolders = ['foo'];
+  const plugins: KibanaPlatformPlugin[] = [pluginA];
+
+  const pluginApiMap: { [key: string]: PluginApi } = {};
+  plugins.map((plugin) => {
+    pluginApiMap[plugin.manifest.id] = getPluginApi(project, plugin, plugins, log);
+  });
+
+  const missingApiItems: { [key: string]: string[] } = {};
+
+  plugins.forEach((plugin) => {
+    const id = plugin.manifest.id;
+    const pluginApi = pluginApiMap[id];
+    removeBrokenLinks(pluginApi, missingApiItems, pluginApiMap);
+  });
+  expect(missingApiItems.pluginA.indexOf('public.ImNotExportedFromIndex')).toBeGreaterThan(-1);
 });

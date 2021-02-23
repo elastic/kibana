@@ -45,6 +45,7 @@ function addSection(
   serviceFolders: readonly string[]
 ) {
   const serviceFolderName = getServiceForPath(dec.source.path);
+
   if (serviceFolderName && serviceFolders.find((f) => f === serviceFolderName)) {
     const service = snakeToCamel(serviceFolderName);
     if (!pluginServices[service]) {

@@ -7,7 +7,7 @@
  */
 
 import { KibanaPlatformPlugin, ToolingLog } from '@kbn/dev-utils';
-import { Node } from 'ts-morph';
+import { Node, Type } from 'ts-morph';
 import { isNamedNode } from '../tsmorph_utils';
 import { Reference } from '../types';
 import { extractImportReferences } from './extract_import_refs';
@@ -35,18 +35,7 @@ export function getSignature(
   // `export type Foo = string | number;` would show up with a signagure of `Foo` that is a link to itself, instead of
   //  `string | number`.
   if (Node.isTypeAliasDeclaration(node)) {
-    const symbol = node.getSymbol();
-    if (symbol) {
-      const declarations = symbol.getDeclarations();
-      if (declarations.length === 1) {
-        // Unfortunately we are losing some reference links here.
-        signature = declarations[0].getType().getText(node);
-      } else {
-        log.error(
-          `Node is type alias declaration with more than one declaration. This is not handled!`
-        );
-      }
-    }
+    signature = getSignatureForTypeAlias(node.getType(), log, node);
   } else if (Node.isFunctionDeclaration(node)) {
     // See https://github.com/dsherret/ts-morph/issues/907#issue-770284331.
     // Unfortunately this has to be manually pieced together, or it comes up as "typeof TheFunction"
@@ -74,6 +63,7 @@ export function getSignature(
   if (getTypeKind(node).toString() === signature) return undefined;
 
   const referenceLinks = extractImportReferences(signature, plugins, log);
+
   // Don't return the signature if it's a single self referential link.
   if (
     isNamedNode(node) &&
@@ -85,4 +75,43 @@ export function getSignature(
   }
 
   return referenceLinks;
+}
+
+/**
+ * Not all types are handled here, but does return links for the more common ones.
+ */
+function getSignatureForTypeAlias(type: Type, log: ToolingLog, node?: Node): string {
+  if (type.isUnion()) {
+    return type
+      .getUnionTypes()
+      .map((nestedType) => getSignatureForTypeAlias(nestedType, log))
+      .join(' | ');
+  } else if (node && type.getCallSignatures().length >= 1) {
+    return type
+      .getCallSignatures()
+      .map((sig) => {
+        const params = sig
+          .getParameters()
+          .map((p) => `${p.getName()}: ${p.getTypeAtLocation(node).getText()}`)
+          .join(', ');
+        const returnType = sig.getReturnType().getText();
+        return `(${params}) => ${returnType}`;
+      })
+      .join(' ');
+  } else if (node) {
+    const symbol = node.getSymbol();
+    if (symbol) {
+      const declarations = symbol
+        .getDeclarations()
+        .map((d) => d.getType().getText(node))
+        .join(' ');
+      if (symbol.getDeclarations().length !== 1) {
+        log.error(
+          `Node is type alias declaration with more than one declaration. This is not handled! ${declarations} and node is ${node.getText()}`
+        );
+      }
+      return declarations;
+    }
+  }
+  return type.getText();
 }

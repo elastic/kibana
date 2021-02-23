@@ -7,7 +7,7 @@
  */
 
 import Path from 'path';
-import { Node, Project } from 'ts-morph';
+import { Node, Project, Type } from 'ts-morph';
 import { ToolingLog, KibanaPlatformPlugin } from '@kbn/dev-utils';
 import { ApiScope, Lifecycle } from './types';
 import { ApiDeclaration, PluginApi } from './types';
@@ -50,7 +50,7 @@ function getDeclarations(
 ): ApiDeclaration[] {
   const nodes = getDeclarationNodesForPluginScope(project, plugin, scope, log);
 
-  const contractTypes = getContractTypeNames(project, plugin, scope);
+  const contractTypes = getContractTypes(project, plugin, scope);
 
   const declarations = nodes.reduce<ApiDeclaration[]>((acc, node) => {
     const apiDec = buildApiDeclaration(node, plugins, log, plugin.manifest.id, scope);
@@ -81,15 +81,15 @@ function getDeclarations(
  */
 function getLifecycle(
   node: Node,
-  contractTypeNames: { start?: string; setup?: string }
+  contractTypeNames: { start?: Type; setup?: Type }
 ): Lifecycle | undefined {
   // Note this logic is not tested if a plugin uses "as",
   // like export { Setup as MyPluginSetup } from ..."
-  if (contractTypeNames.start && node.getType().getText() === contractTypeNames.start) {
+  if (contractTypeNames.start && node.getType() === contractTypeNames.start) {
     return Lifecycle.START;
   }
 
-  if (contractTypeNames.setup && node.getType().getText() === contractTypeNames.setup) {
+  if (contractTypeNames.setup && node.getType() === contractTypeNames.setup) {
     return Lifecycle.SETUP;
   }
 }
@@ -103,12 +103,12 @@ function getLifecycle(
  * @returns the name of the two types used for Start and Setup contracts, if they
  * exist and were exported from the plugin class.
  */
-function getContractTypeNames(
+function getContractTypes(
   project: Project,
   plugin: KibanaPlatformPlugin,
   scope: ApiScope
-): { setup?: string; start?: string } {
-  const contractTypes: { setup?: string; start?: string } = {};
+): { setup?: Type; start?: Type } {
+  const contractTypes: { setup?: Type; start?: Type } = {};
   const file = getSourceFileMatching(
     project,
     Path.join(`${plugin.directory}`, scope.toString(), 'plugin.ts')
@@ -122,9 +122,9 @@ function getContractTypeNames(
           .forEach((arg) => {
             // Setup type comes first
             if (index === 0) {
-              contractTypes.setup = arg.getText();
+              contractTypes.setup = arg;
             } else if (index === 1) {
-              contractTypes.start = arg.getText();
+              contractTypes.start = arg;
             }
             index++;
           });

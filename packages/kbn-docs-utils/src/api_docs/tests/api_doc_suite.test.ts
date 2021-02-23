@@ -13,7 +13,7 @@ import { Project } from 'ts-morph';
 import { ToolingLog, KibanaPlatformPlugin } from '@kbn/dev-utils';
 
 import { writePluginDocs } from '../mdx/write_plugin_mdx_docs';
-import { ApiDeclaration, PluginApi, TextWithLinks, TypeKind } from '../types';
+import { ApiDeclaration, PluginApi, Reference, TextWithLinks, TypeKind } from '../types';
 import { getKibanaPlatformPlugin } from './kibana_platform_plugin_mock';
 import { getPluginApi } from '../get_plugin_api';
 import { groupPluginApi } from '../utils';
@@ -88,6 +88,7 @@ beforeAll(() => {
   const plugins: KibanaPlatformPlugin[] = [pluginA];
 
   doc = getPluginApi(project, plugins[0], plugins, log);
+
   mdxOutputFolder = Path.resolve(__dirname, 'snapshots');
   writePluginDocs(mdxOutputFolder, doc, log);
 });
@@ -185,8 +186,7 @@ describe('objects', () => {
       Array [
         "/**
          * The docs should show this inline comment.
-         */
-      ",
+         */",
       ]
     `);
 
@@ -246,13 +246,56 @@ describe('Misc types', () => {
     expect(fnType?.type).toBe(TypeKind.TypeKind);
     expect(fnType?.signature!).toMatchInlineSnapshot(`
       Array [
-        "<T>(t: T) => TypeWithGeneric<T>",
+        "(t: T) => ",
+        Object {
+          "docId": "kibPluginAPluginApi",
+          "pluginId": "pluginA",
+          "scope": "public",
+          "section": "def-public.TypeWithGeneric",
+          "text": "TypeWithGeneric",
+        },
+        "<T>",
+      ]
+    `);
+    expect(linkCount(fnType?.signature!)).toBe(1);
+  });
+
+  it('Union type is exported correctly', () => {
+    const type = doc.client.find((c) => c.label === 'ImAType');
+    expect(type).toBeDefined();
+    expect(type?.type).toBe(TypeKind.TypeKind);
+    expect(type?.signature).toBeDefined();
+    expect(type?.signature!).toMatchInlineSnapshot(`
+      Array [
+        "string | number | ",
+        Object {
+          "docId": "kibPluginAFooPluginApi",
+          "pluginId": "pluginA",
+          "scope": "public",
+          "section": "def-public.FooType",
+          "text": "FooType",
+        },
+        " | ",
+        Object {
+          "docId": "kibPluginAPluginApi",
+          "pluginId": "pluginA",
+          "scope": "public",
+          "section": "def-public.TypeWithGeneric",
+          "text": "TypeWithGeneric",
+        },
+        "<string> | ",
+        Object {
+          "docId": "kibPluginAPluginApi",
+          "pluginId": "pluginA",
+          "scope": "common",
+          "section": "def-common.ImACommonType",
+          "text": "ImACommonType",
+        },
       ]
     `);
 
-    // This is a known bug, links are not captured. https://github.com/dsherret/ts-morph/issues/923
-    // TODO: if we can fix this bug, uncomment this line.
-    // expect(linkCount(fnType?.signature!)).toBe(1);
+    expect(linkCount(type?.signature!)).toBe(3);
+    expect((type!.signature![1] as Reference).docId).toBe('kibPluginAFooPluginApi');
   });
 });
 

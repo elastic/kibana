@@ -60,9 +60,9 @@ export function groupPluginApi(declarations: ApiDeclaration[]): ScopeApi {
  * @param path
  */
 export function getServiceForPath(path: string): string | undefined {
-  const publicMatchGroups = path.match(/.*\/public\/(.*?)\/.*.ts/);
-  const serverMatchGroups = path.match(/.*\/server\/(.*?)\/.*.ts/);
-  const commonMatchGroups = path.match(/.*\/common\/(.*?)\/.*.ts/);
+  const publicMatchGroups = path.match(/.*\/public\/(.*?)\/.*/);
+  const serverMatchGroups = path.match(/.*\/server\/(.*?)\/.*/);
+  const commonMatchGroups = path.match(/.*\/common\/(.*?)\/.*/);
   if (publicMatchGroups && publicMatchGroups.length > 1) {
     return publicMatchGroups[1];
   } else if (serverMatchGroups && serverMatchGroups.length > 1) {

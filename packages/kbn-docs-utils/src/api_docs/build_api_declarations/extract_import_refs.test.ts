@@ -61,7 +61,7 @@ it('test extractImportReference with public folder nested under server folder', 
 
 it('test extractImportReference with two imports', () => {
   const results = extractImportReferences(
-    `<I extends import("${plugin.directory}/public/foo").FooFoo, O extends import("${plugin.directory}/public/bar").Bar>`,
+    `<I extends import("${plugin.directory}/public/foo/index").FooFoo, O extends import("${plugin.directory}/public/bar").Bar>`,
     plugins,
     log
   );
@@ -75,7 +75,7 @@ it('test extractImportReference with two imports', () => {
 
 it('test extractImportReference with unknown imports', () => {
   const results = extractImportReferences(
-    `<I extends import("/plugin_c/public/foo").FooFoo>`,
+    `<I extends import("/plugin_c/public/foo/index").FooFoo>`,
     plugins,
     log
   );
@@ -87,7 +87,7 @@ it('test extractImportReference with unknown imports', () => {
 
 it('test single link', () => {
   const results = extractImportReferences(
-    `import("${plugin.directory}/public/foo").FooFoo`,
+    `import("${plugin.directory}/public/foo/index").FooFoo`,
     plugins,
     log
   );
