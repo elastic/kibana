@@ -5,13 +5,9 @@
  * 2.0.
  */
 
-import { RouteComponentProps } from 'react-router-dom';
-import React, { Component, Fragment, ContextType } from 'react';
+import React, { Component } from 'react';
 import {
-  EuiCallOut,
   EuiPage,
-  EuiLoadingKibana,
-  EuiOverlayMask,
   EuiPageContent,
   EuiPageContentHeader,
   EuiSpacer,
@@ -19,15 +15,12 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import { cloneDeep, mapValues, set, get } from 'lodash';
+import { cloneDeep, mapValues, set } from 'lodash';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { withKibana } from '../../../../../../../src/plugins/kibana_react/public';
-
-import { AppContext } from '../../app_context';
-import { getPolicyEditPath, getPolicyCreatePath } from '../../services/navigation';
+import { RollupAction } from '../../../../../../common/types';
 
 import { serializeRollup, deserializeRollup } from './serialize_and_deserialize_rollup';
 import { InternalRollup } from './types';
@@ -88,11 +81,11 @@ const stepIdToTitleMap = {
   }),
 };
 
-type Props = RouteComponentProps<{ phase: string }> & {
-  isSaving: boolean;
-  saveError: { cause: string[]; message: string };
-  kibana: unknown;
-};
+interface Props {
+  rollupAction?: RollupAction;
+  onCancel: () => void;
+  onDone: (rollupAction: RollupAction) => void;
+}
 
 interface StepFields {
   STEP_LOGISTICS: { rollupIndexIlmPolicy?: string };
@@ -118,35 +111,21 @@ interface State {
 }
 
 export class RollupWizardUi extends Component<Props, State> {
-  static contextType = AppContext;
-
   lastIndexPatternValidationTime: number;
   // @ts-ignore
   private _isMounted = false;
 
-  context!: ContextType<typeof AppContext>;
-
   constructor(props: Props) {
     super(props);
 
+    console.log('props', props);
+
     // props.kibana.services.setBreadcrumbs([listBreadcrumb, createBreadcrumb]);
-
-    const { getCurrentPolicyData } = this.context;
-    const {
-      match: {
-        params: { phase },
-      },
-    } = props;
-
-    const currentPolicyData = getCurrentPolicyData();
-    if (!currentPolicyData) {
-      throw new Error('No policy data provided!');
-    }
-    const rollupAction = get(currentPolicyData.policy, `phases.${phase}.actions.rollup`);
-    const internalRollup = deserializeRollup(rollupAction);
+    const { rollupAction } = props;
+    const deserializedRollup = rollupAction ? deserializeRollup(rollupAction) : {};
 
     const stepsFields = mapValues(stepIdToStepConfigMap, (step) =>
-      cloneDeep(step.getDefaultFields(internalRollup))
+      cloneDeep(step.getDefaultFields(deserializedRollup))
     );
     this.state = {
       checkpointStepId: stepIds[0],
@@ -298,73 +277,13 @@ export class RollupWizardUi extends Component<Props, State> {
 
   save = () => {
     const rollupConfig = this.getAllFields();
-    const { getCurrentPolicyData, setCurrentPolicyData } = this.context;
-    const {
-      match: {
-        params: { phase },
-      },
-      history,
-    } = this.props;
-    const currentPolicyData = getCurrentPolicyData();
-    if (!currentPolicyData) {
-      throw new Error('No policy to update with rollup config!');
-    }
-    const { isNewPolicy, policy } = cloneDeep(currentPolicyData);
-    set(policy, `phases.${phase}.actions.rollup.config`, serializeRollup(rollupConfig));
-    set(policy, `phases.${phase}.actions.rollup.rollup_policy`, rollupConfig.rollupIndexIlmPolicy);
-    setCurrentPolicyData({ policy, isNewPolicy });
-    if (isNewPolicy) {
-      history.push(getPolicyCreatePath());
-    } else {
-      history.push(getPolicyEditPath(policy.name));
-    }
+    this.props.onDone({
+      config: serializeRollup(rollupConfig),
+      rollup_policy: rollupConfig.rollupIndexIlmPolicy,
+    });
   };
 
   render() {
-    const { isSaving, saveError } = this.props;
-
-    let savingFeedback;
-
-    if (isSaving) {
-      savingFeedback = (
-        <EuiOverlayMask>
-          <EuiLoadingKibana size="xl" />
-        </EuiOverlayMask>
-      );
-    }
-
-    let saveErrorFeedback;
-
-    if (saveError) {
-      const { message, cause } = saveError;
-
-      let errorBody;
-
-      if (cause) {
-        if (cause.length === 1) {
-          errorBody = <p>{cause[0]}</p>;
-        } else {
-          errorBody = (
-            <ul>
-              {cause.map((causeValue: any) => (
-                <li key={causeValue}>{causeValue}</li>
-              ))}
-            </ul>
-          );
-        }
-      }
-
-      saveErrorFeedback = (
-        <Fragment>
-          <EuiCallOut title={message} iconType="cross" color="danger">
-            {errorBody}
-          </EuiCallOut>
-
-          <EuiSpacer />
-        </Fragment>
-      );
-    }
-
     return (
       <EuiPage>
         <EuiPageContent>
@@ -379,8 +298,6 @@ export class RollupWizardUi extends Component<Props, State> {
             </EuiTitle>
           </EuiPageContentHeader>
 
-          {saveErrorFeedback}
-
           <EuiStepsHorizontal steps={this.getSteps()} />
 
           <EuiSpacer />
@@ -391,7 +308,6 @@ export class RollupWizardUi extends Component<Props, State> {
 
           {this.renderNavigation()}
         </EuiPageContent>
-        {savingFeedback}
       </EuiPage>
     );
   }
@@ -460,7 +376,6 @@ export class RollupWizardUi extends Component<Props, State> {
   renderNavigation() {
     const { nextStepId, previousStepId, areStepErrorsVisible } = this.state;
 
-    const { isSaving } = this.props;
     const hasNextStep = nextStepId != null;
 
     // Users can click the next step button as long as validation hasn't executed, and as long
@@ -469,7 +384,6 @@ export class RollupWizardUi extends Component<Props, State> {
 
     return (
       <Navigation
-        isSaving={isSaving}
         hasNextStep={hasNextStep}
         hasPreviousStep={previousStepId != null}
         goToNextStep={this.goToNextStep}
@@ -481,4 +395,4 @@ export class RollupWizardUi extends Component<Props, State> {
   }
 }
 
-export const RollupWizard = withKibana(RollupWizardUi as any);
+export const RollupWizard = RollupWizardUi;

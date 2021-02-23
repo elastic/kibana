@@ -20,9 +20,9 @@ import {
   EuiSuperSelect,
 } from '@elastic/eui';
 
-import { loadPolicies } from '../../../services/api';
+import { loadPolicies } from '../../../../../services/api';
 
-import { DescribedFormRow } from '../../components';
+import { DescribedFormRow } from '../../../../components';
 
 // @ts-ignore
 import { StepError } from './components';

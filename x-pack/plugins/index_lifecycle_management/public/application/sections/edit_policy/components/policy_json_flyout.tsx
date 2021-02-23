@@ -26,6 +26,8 @@ import { SerializedPolicy } from '../../../../../common/types';
 
 import { useFormContext, useFormData } from '../../../../shared_imports';
 
+import { useEditPolicyContext } from '../edit_policy_context';
+
 import { FormInternal } from '../types';
 
 interface Props {
@@ -56,6 +58,8 @@ export const PolicyJsonFlyout: React.FunctionComponent<Props> = ({ policyName, c
 
   const { validate: validateForm } = useFormContext();
   const [, getFormData] = useFormData<FormInternal>();
+
+  const { rollup } = useEditPolicyContext();
 
   const updatePolicy = useCallback(async () => {
     setPolicy(undefined);

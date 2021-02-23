@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RollupAction } from '../../../../common/types';
+import { RollupAction } from '../../../../../../common/types';
 
 import { InternalRollup } from './types';
 

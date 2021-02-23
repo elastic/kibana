@@ -23,7 +23,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import { search } from '../../../../../../../../src/plugins/data/public';
+import { search } from '../../../../../../../../../../src/plugins/data/public';
 const { parseEsInterval } = search.aggs;
 
 import { StepError } from './components';

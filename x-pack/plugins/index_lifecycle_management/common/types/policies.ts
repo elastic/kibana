@@ -165,7 +165,7 @@ export interface RollupAction {
         fields: string[];
       };
       histogram?: {
-        interval: string;
+        interval?: string;
         fields: string[];
       };
     };

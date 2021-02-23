@@ -15,3 +15,4 @@ export { FormErrorsCallout } from './form_errors_callout';
 export { PhaseFooter } from './phase_footer';
 export { InfinityIcon } from './infinity_icon';
 export * from './phases';
+export { RollupWizard } from './rollup_wizard';

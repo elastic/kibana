@@ -11,13 +11,11 @@ import { EuiButton, EuiEmptyPrompt, EuiLoadingSpinner } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { MIN_SEARCHABLE_SNAPSHOT_LICENSE } from '../../../../common/constants';
-import { SerializedPolicy } from '../../../../common/types';
 import { useKibana, attemptToURIDecode } from '../../../shared_imports';
 
 import { useLoadPoliciesList } from '../../services/api';
 import { getPolicyByName } from '../../lib/policies';
 import { defaultPolicy } from '../../constants';
-import { useAppContext } from '../../app_context';
 
 import { EditPolicy as PresentationComponent } from './edit_policy';
 import { EditPolicyContextProvider } from './edit_policy_context';
@@ -47,7 +45,6 @@ export const EditPolicy: React.FunctionComponent<Props & RouteComponentProps<Rou
     services: { breadcrumbService, license },
   } = useKibana();
   const { error, isLoading, data: policies, resendRequest } = useLoadPoliciesList(false);
-  const { getCurrentPolicyData, clearCurrentPolicyData } = useAppContext();
 
   useEffect(() => {
     breadcrumbService.setBreadcrumbs('editPolicy');
@@ -95,18 +92,8 @@ export const EditPolicy: React.FunctionComponent<Props & RouteComponentProps<Rou
     );
   }
 
-  let policy: SerializedPolicy | undefined;
-  let isNewPolicy: boolean;
-
-  const currentPolicyData = getCurrentPolicyData();
-  if (currentPolicyData) {
-    policy = currentPolicyData.policy;
-    isNewPolicy = currentPolicyData.isNewPolicy;
-    clearCurrentPolicyData();
-  } else {
-    policy = getPolicyByName(policies, attemptToURIDecode(policyName))?.policy;
-    isNewPolicy = !policy;
-  }
+  const policy = getPolicyByName(policies, attemptToURIDecode(policyName))?.policy;
+  const isNewPolicy = !policy;
 
   return (
     <EditPolicyContextProvider
