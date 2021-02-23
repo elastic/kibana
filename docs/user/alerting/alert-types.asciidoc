@@ -1,6 +1,6 @@
 [role="xpack"]
 [[alert-types]]
-== Alert types
+== Alerts
 
 {kib} supplies alert types in two ways: some are built into {kib} (these are known as stack alerts), while domain-specific alert types are registered by {kib} apps.
 
@@ -26,6 +26,3 @@ For domain-specific alerts, refer to the documentation for that app.
 * {security-guide}/prebuilt-rules.html[Security alerts]
 * <<geo-alerting, Maps alerts>>
 * <<xpack-ml, ML alerts>>
-
-include::stack-alerts/index-threshold.asciidoc[]
-include::stack-alerts/es-query.asciidoc[]
