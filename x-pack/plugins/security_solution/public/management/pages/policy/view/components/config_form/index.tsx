@@ -15,6 +15,7 @@ import {
   EuiText,
   EuiShowFor,
   EuiPanel,
+  EuiTextColor,
 } from '@elastic/eui';
 
 import { OperatingSystem } from '../../../../../../../common/endpoint/types';
@@ -38,6 +39,7 @@ interface ConfigFormProps {
    * Types of supported operating systems.
    */
   supportedOss: OperatingSystem[];
+  osRestriction?: ReactNode;
   dataTestSubj?: string;
   /** React Node to be put on the right corner of the card */
   rightCorner?: ReactNode;
@@ -52,7 +54,7 @@ export const ConfigFormHeading: FC = memo(({ children }) => (
 ConfigFormHeading.displayName = 'ConfigFormHeading';
 
 export const ConfigForm: FC<ConfigFormProps> = memo(
-  ({ type, supportedOss, dataTestSubj, rightCorner, children }) => (
+  ({ type, supportedOss, osRestriction, dataTestSubj, rightCorner, children }) => (
     <EuiPanel data-test-subj={dataTestSubj}>
       <EuiFlexGroup direction="row" gutterSize="none" alignItems="center">
         <EuiFlexItem>
@@ -62,6 +64,7 @@ export const ConfigForm: FC<ConfigFormProps> = memo(
         <EuiFlexItem grow={2}>
           <ConfigFormHeading>{TITLES.os}</ConfigFormHeading>
           <EuiText>{supportedOss.map((os) => OS_TITLES[os]).join(', ')}</EuiText>
+          {osRestriction ? <EuiTextColor color="subdued">{osRestriction}</EuiTextColor> : <></>}
         </EuiFlexItem>
         <EuiShowFor sizes={['m', 'l', 'xl']}>
           <EuiFlexItem grow={2}>

@@ -8,7 +8,8 @@
 import React, { memo, useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 import { i18n } from '@kbn/i18n';
-import { EuiSpacer, EuiSwitch, EuiText } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiSpacer, EuiSwitch, EuiText, EuiIconTip } from '@elastic/eui';
 
 import { OperatingSystem } from '../../../../../../../common/endpoint/types';
 import { isAntivirusRegistrationEnabled } from '../../../store/policy_details/selectors';
@@ -52,9 +53,20 @@ export const AntivirusRegistrationForm = memo(() => {
       }),
     [dispatch]
   );
-
   return (
-    <ConfigForm type={TRANSLATIONS.title} supportedOss={[OperatingSystem.WINDOWS]}>
+    <ConfigForm
+      type={TRANSLATIONS.title}
+      supportedOss={[OperatingSystem.WINDOWS]}
+      osRestriction={
+        <>
+          <FormattedMessage
+            id="xpack.securitySolution.endpoint.policy.details.antivirusRegistration.osRestriction"
+            defaultMessage="Restrictions"
+          />
+          <EuiIconTip type="info" content="hi" />
+        </>
+      }
+    >
       <EuiText size="s">{TRANSLATIONS.description}</EuiText>
       <EuiSpacer size="s" />
       <EuiSwitch
