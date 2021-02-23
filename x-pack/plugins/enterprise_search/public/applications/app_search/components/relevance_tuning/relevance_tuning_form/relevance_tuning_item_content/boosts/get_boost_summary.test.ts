@@ -35,6 +35,15 @@ describe('getBoostSummary', () => {
         })
       ).toEqual('');
     });
+
+    it('filters out empty values', () => {
+      expect(
+        getBoostSummary({
+          ...boost,
+          value: [' ', '', 'foo', '', 'bar'],
+        })
+      ).toEqual('foo,bar');
+    });
   });
 
   describe('when the boost type is "proximity"', () => {

@@ -9,7 +9,7 @@ import { Boost, BoostType } from '../../../types';
 
 export const getBoostSummary = (boost: Boost): string => {
   if (boost.type === BoostType.Value) {
-    return !boost.value ? '' : boost.value.join(',');
+    return !boost.value ? '' : boost.value.filter((v) => v.trim() !== '').join(',');
   } else if (boost.type === BoostType.Proximity) {
     return boost.function || '';
   } else {
