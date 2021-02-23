@@ -16,7 +16,7 @@ import { DrilldownHelloBar } from '../../components/drilldown_hello_bar';
 export const DrilldownManager: React.FC = ({}) => {
   const drilldowns = useDrilldownManager();
   const screen = drilldowns.useScreen();
-  const showWelcomeMessage = drilldowns.useWelcomeMessage();
+  const hideWelcomeMessage = drilldowns.useWelcomeMessage();
 
   const footer =
     screen === 'create' ? (
@@ -71,7 +71,7 @@ export const DrilldownManager: React.FC = ({}) => {
       // onBack={isCreateOnly ? undefined : () => setRoute(Routes.Manage)}
       // onBack={() => drilldowns.setScreen('list')}
       banner={
-        showWelcomeMessage && (
+        !hideWelcomeMessage && (
           <DrilldownHelloBar
             docsLink={drilldowns.deps.docsLink}
             onHideClick={drilldowns.hideWelcomeMessage}

@@ -42,9 +42,7 @@ export class DrilldownManagerState {
    * Whether a drilldowns welcome message should be displayed to the user at
    * the very top of the drilldowns manager flyout.
    */
-  public readonly showWelcomeMessage$ = new BehaviorSubject<boolean>(
-    this.deps.storage.get(helloMessageStorageKey) ?? false
-  );
+  public readonly hideWelcomeMessage$: BehaviorSubject<boolean>;
 
   /**
    * Currently selected action factory (drilldown type).
@@ -66,6 +64,8 @@ export class DrilldownManagerState {
 
   constructor(public readonly deps: DrilldownManagerStateDeps) {
     this.screen$ = new BehaviorSubject<DrilldownManagerScreen>(deps.screen || 'list');
+    const hideWelcomeMessage = deps.storage.get(helloMessageStorageKey);
+    this.hideWelcomeMessage$ = new BehaviorSubject<boolean>(hideWelcomeMessage ?? false);
     this.canUnlockMoreDrilldowns = deps.actionFactories.some(
       (factory) => !factory.isCompatibleLicense
     );
@@ -83,7 +83,7 @@ export class DrilldownManagerState {
    * storage that user opted to hide this message.
    */
   public readonly hideWelcomeMessage = (): void => {
-    this.showWelcomeMessage$.next(false);
+    this.hideWelcomeMessage$.next(true);
     this.deps.storage.set(helloMessageStorageKey, true);
   };
 
@@ -153,7 +153,7 @@ export class DrilldownManagerState {
   /* eslint-disable react-hooks/rules-of-hooks */
   public readonly useScreen = () => useObservable(this.screen$, this.screen$.getValue());
   public readonly useWelcomeMessage = () =>
-    useObservable(this.showWelcomeMessage$, this.showWelcomeMessage$.getValue());
+    useObservable(this.hideWelcomeMessage$, this.hideWelcomeMessage$.getValue());
   public readonly useActionFactory = () =>
     useObservable(this.actionFactory$, this.actionFactory$.getValue());
   /* eslint-enable react-hooks/rules-of-hooks */
