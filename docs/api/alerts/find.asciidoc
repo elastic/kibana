@@ -1,0 +1,117 @@
+[[alerts-api-find]]
+=== Find alerts API
+++++
+<titleabbrev>Find alerts</titleabbrev>
+++++
+
+Retrieve a paginated set of alerts based on condition.
+
+[[alerts-api-find-request]]
+==== Request
+
+`GET <kibana host>:<port>/api/alerts/_find`
+
+[[alerts-api-find-query-params]]
+==== Query Parameters
+
+`per_page`::
+  (Optional, number) The number of alerts to return per page.
+
+`page`::
+  (Optional, number) The page number.
+
+`search`::
+  (Optional, string) An Elasticsearch {ref}/query-dsl-simple-query-string-query.html[simple_query_string] query that filters the alerts in the response.
+
+`default_search_operator`::
+  (Optional, string) The operator to use for the `simple_query_string`. The default is 'OR'.
+
+`search_fields`::
+  (Optional, array|string) The fields to perform the `simple_query_string` parsed query against.
+
+`fields`::
+  (Optional, array|string) The fields to return in the `attributes` key of the response.
+
+`sort_field`::
+  (Optional, string) Sorts the response. Could be an alert fields returned in the `attributes` key of the response.
+
+`sort_order`::
+  (Optional, string) Sort direction, either `asc` or `desc`.
+
+`has_reference`::
+  (Optional, object) Filters the alerts that have a relations with the reference objects with the specific "type" and "ID".
+
+`filter`::
+  (Optional, string) A <<kuery-query, KQL>> string that you filter with an attribute from your saved object.
+  It should look like savedObjectType.attributes.title: "myTitle". However, If you used a direct attribute of a saved object, such as `updatedAt`,
+  you will have to define your filter, for example, savedObjectType.updatedAt > 2018-12-22.
+
+NOTE: As alerts change in {kib}, the results on each page of the response also
+change. Use the find API for traditional paginated results, but avoid using it to export large amounts of data.
+
+[[alerts-api-find-request-codes]]
+==== Response code
+
+`200`::
+    Indicates a successful call.
+
+==== Examples
+
+Find alerts with names that start with `my`:
+
+[source,sh]
+--------------------------------------------------
+$ curl -X GET api/alerts/_find?search_fields=name&search=my*
+--------------------------------------------------
+// KIBANA
+
+The API returns the following:
+
+[source,sh]
+--------------------------------------------------
+{
+  "page": 1,
+  "perPage": 10,
+  "total": 1,
+  "data": [
+    {
+      "id": "0a037d60-6b62-11eb-9e0d-85d233e3ee35",
+      "notifyWhen": "onActionGroupChange",
+      "params": {
+        "aggType": "avg",
+      },
+      "consumer": "alerts",
+      "alertTypeId": "test.alert.type",
+      "schedule": {
+        "interval": "1m"
+      },
+      "actions": [],
+      "tags": [],
+      "name": "test alert",
+      "enabled": true,
+      "throttle": null,
+      "apiKeyOwner": "elastic",
+      "createdBy": "elastic",
+      "updatedBy": "elastic",
+      "muteAll": false,
+      "mutedInstanceIds": [],
+      "updatedAt": "2021-02-10T05:37:19.086Z",
+      "createdAt": "2021-02-10T05:37:19.086Z",
+      "scheduledTaskId": "0b092d90-6b62-11eb-9e0d-85d233e3ee35",
+      "executionStatus": {
+        "lastExecutionDate": "2021-02-10T17:55:14.262Z",
+        "status": "ok"
+      }
+    },
+  ]
+}
+--------------------------------------------------
+
+For parameters that accept multiple values (e.g. `fields`), repeat the
+query parameter for each value:
+
+[source,sh]
+--------------------------------------------------
+$ curl -X GET api/alerts/_find?fields=id&fields=name
+--------------------------------------------------
+// KIBANA
