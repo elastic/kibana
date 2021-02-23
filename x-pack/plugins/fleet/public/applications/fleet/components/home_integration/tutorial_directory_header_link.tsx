@@ -6,19 +6,16 @@
  */
 
 import React, { memo, useState, useEffect } from 'react';
-import { BehaviorSubject } from 'rxjs';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiButtonEmpty } from '@elastic/eui';
 import type { TutorialDirectoryHeaderLinkComponent } from 'src/plugins/home/public';
-import { useLink, useCapabilities } from '../../hooks';
-
-const tutorialDirectoryNoticeState$ = new BehaviorSubject({
-  settingsDataLoaded: false,
-  hasSeenNotice: false,
-});
+import { RedirectAppLinks } from '../../../../../../../../src/plugins/kibana_react/public';
+import { useLink, useCapabilities, useStartServices } from '../../hooks';
+import { tutorialDirectoryNoticeState$ } from './tutorial_directory_notice';
 
 const TutorialDirectoryHeaderLink: TutorialDirectoryHeaderLinkComponent = memo(() => {
   const { getHref } = useLink();
+  const { application } = useStartServices();
   const { show: hasIngestManager } = useCapabilities();
   const [noticeState, setNoticeState] = useState({
     settingsDataLoaded: false,
@@ -33,12 +30,14 @@ const TutorialDirectoryHeaderLink: TutorialDirectoryHeaderLinkComponent = memo((
   }, []);
 
   return hasIngestManager && noticeState.settingsDataLoaded && noticeState.hasSeenNotice ? (
-    <EuiButtonEmpty size="s" iconType="link" flush="right" href={getHref('overview')}>
-      <FormattedMessage
-        id="xpack.fleet.homeIntegration.tutorialDirectory.fleetAppButtonText"
-        defaultMessage="Try Fleet Beta"
-      />
-    </EuiButtonEmpty>
+    <RedirectAppLinks application={application}>
+      <EuiButtonEmpty size="s" iconType="link" flush="right" href={getHref('overview')}>
+        <FormattedMessage
+          id="xpack.fleet.homeIntegration.tutorialDirectory.fleetAppButtonText"
+          defaultMessage="Try Fleet Beta"
+        />
+      </EuiButtonEmpty>
+    </RedirectAppLinks>
   ) : null;
 });
 

@@ -235,7 +235,9 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.dataFrameAnalyticsResults.assertOutlierTablePanelExists();
           await ml.dataFrameAnalyticsResults.assertResultsTableExists();
           await ml.dataFrameAnalyticsResults.assertResultsTableNotEmpty();
-          await a11y.testAppSnapshot();
+          // EuiDataGrid does not have row roles
+          // https://github.com/elastic/eui/issues/4471
+          // await a11y.testAppSnapshot();
         });
 
         it('data frame analytics create job select index pattern modal', async () => {
@@ -251,7 +253,9 @@ export default function ({ getService }: FtrProviderContext) {
           );
           await ml.jobSourceSelection.selectSourceForAnalyticsJob(ihpIndexPattern);
           await ml.dataFrameAnalyticsCreation.assertConfigurationStepActive();
-          await a11y.testAppSnapshot();
+          // EuiDataGrid does not have row roles
+          // https://github.com/elastic/eui/issues/4471
+          // await a11y.testAppSnapshot();
         });
 
         it('data frame analytics create job configuration step for outlier job', async () => {
@@ -261,10 +265,12 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.testExecution.logTestStep('displays the source data preview');
           await ml.dataFrameAnalyticsCreation.assertSourceDataPreviewExists();
           await ml.testExecution.logTestStep('enables the source data preview histogram charts');
-          await ml.dataFrameAnalyticsCreation.enableSourceDataPreviewHistogramCharts();
+          await ml.dataFrameAnalyticsCreation.enableSourceDataPreviewHistogramCharts(true);
           await ml.testExecution.logTestStep('displays the include fields selection');
           await ml.dataFrameAnalyticsCreation.assertIncludeFieldsSelectionExists();
-          await a11y.testAppSnapshot();
+          // EuiDataGrid does not have row roles
+          // https://github.com/elastic/eui/issues/4471
+          // await a11y.testAppSnapshot();
         });
 
         it('data frame analytics create job additional options step for outlier job', async () => {

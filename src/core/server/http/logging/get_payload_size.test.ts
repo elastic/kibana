@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { createGunzip } from 'zlib';
 import type { Request } from '@hapi/hapi';
 import Boom from '@hapi/boom';
 
@@ -96,6 +97,18 @@ describe('getPayloadSize', () => {
 
       expect(result).toBe(Buffer.byteLength(data));
     });
+
+    test('ignores streams that are not instances of ReadStream', async () => {
+      const result = getResponsePayloadBytes(
+        {
+          variety: 'stream',
+          source: createGunzip(),
+        } as Response,
+        logger
+      );
+
+      expect(result).toBe(undefined);
+    });
   });
 
   describe('handles plain responses', () => {
@@ -131,6 +144,17 @@ describe('getPayloadSize', () => {
         logger
       );
       expect(result).toBe(JSON.stringify(payload).length);
+    });
+
+    test('returns undefined when source is not a plain object', () => {
+      const result = getResponsePayloadBytes(
+        {
+          variety: 'plain',
+          source: [1, 2, 3],
+        } as Response,
+        logger
+      );
+      expect(result).toBe(undefined);
     });
   });
 

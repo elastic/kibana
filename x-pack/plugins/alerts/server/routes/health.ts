@@ -55,7 +55,7 @@ export function healthRoute(
 
         const frameworkHealth: AlertingFrameworkHealth = {
           isSufficientlySecure: !isSecurityEnabled || (isSecurityEnabled && isTLSEnabled),
-          hasPermanentEncryptionKey: !encryptedSavedObjects.usingEphemeralEncryptionKey,
+          hasPermanentEncryptionKey: encryptedSavedObjects.canEncrypt,
           alertingFrameworkHeath,
         };
 

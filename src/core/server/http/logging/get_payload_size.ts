@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { ReadStream } from 'fs';
+import { isPlainObject } from 'lodash';
+import { ReadStream } from 'fs';
 import { isBoom } from '@hapi/boom';
 import type { Request } from '@hapi/hapi';
 import { Logger } from '../../logging';
@@ -17,8 +18,15 @@ const isBuffer = (src: unknown, res: Response): src is Buffer => {
   return !isBoom(res) && res.variety === 'buffer' && res.source === src;
 };
 const isFsReadStream = (src: unknown, res: Response): src is ReadStream => {
-  return !isBoom(res) && res.variety === 'stream' && res.source === src;
+  return (
+    !isBoom(res) &&
+    res.variety === 'stream' &&
+    res.source === src &&
+    res.source instanceof ReadStream
+  );
 };
+const isString = (src: unknown, res: Response): src is string =>
+  !isBoom(res) && res.variety === 'plain' && typeof src === 'string';
 
 /**
  * Attempts to determine the size (in bytes) of a Hapi response
@@ -57,10 +65,12 @@ export function getResponsePayloadBytes(response: Response, log: Logger): number
       return response.source.bytesRead;
     }
 
-    if (response.variety === 'plain') {
-      return typeof response.source === 'string'
-        ? Buffer.byteLength(response.source)
-        : Buffer.byteLength(JSON.stringify(response.source));
+    if (isString(response.source, response)) {
+      return Buffer.byteLength(response.source);
+    }
+
+    if (response.variety === 'plain' && isPlainObject(response.source)) {
+      return Buffer.byteLength(JSON.stringify(response.source));
     }
   } catch (e) {
     // We intentionally swallow any errors as this information is

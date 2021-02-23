@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { vega } from '../lib/vega';
+import { View, parse } from 'vega';
 import { VegaBaseView } from './vega_base_view';
 
 export class VegaView extends VegaBaseView {
@@ -14,7 +14,7 @@ export class VegaView extends VegaBaseView {
     // In some cases, Vega may be initialized twice... TBD
     if (!this._$container) return;
 
-    const view = new vega.View(vega.parse(this._parser.spec), this._vegaViewConfig);
+    const view = new View(parse(this._parser.spec), this._vegaViewConfig);
 
     if (this._parser.useResize) this.updateVegaSize(view);
     view.initialize(this._$container.get(0), this._$controls.get(0));

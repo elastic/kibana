@@ -26,9 +26,7 @@ beforeEach(() => {
   actionTypeRegistryParams = {
     licensing: licensingMock.createSetup(),
     taskManager: mockTaskManager,
-    taskRunnerFactory: new TaskRunnerFactory(
-      new ActionExecutor({ isESOUsingEphemeralEncryptionKey: false })
-    ),
+    taskRunnerFactory: new TaskRunnerFactory(new ActionExecutor({ isESOCanEncrypt: true })),
     actionsConfigUtils: mockedActionsConfig,
     licenseState: mockedLicenseState,
     preconfiguredActions: [

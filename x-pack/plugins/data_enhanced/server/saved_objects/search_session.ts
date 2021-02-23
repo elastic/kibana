@@ -53,6 +53,15 @@ export const searchSessionMapping: SavedObjectsType = {
         type: 'object',
         enabled: false,
       },
+      realmType: {
+        type: 'keyword',
+      },
+      realmName: {
+        type: 'keyword',
+      },
+      username: {
+        type: 'keyword',
+      },
     },
   },
 };

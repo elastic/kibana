@@ -15,10 +15,9 @@ import {
   EuiFlexItem,
   EuiIcon,
   EuiText,
-  EuiTextColor,
   EuiButtonEmpty,
   EuiLink,
-  EuiTitle,
+  EuiPageContentBody,
 } from '@elastic/eui';
 import { CoreStart, CoreSetup } from 'kibana/public';
 import {
@@ -84,10 +83,36 @@ interface WorkspaceState {
   expandError: boolean;
 }
 
-const workspaceDropValue = { id: 'lnsWorkspace' };
+const dropProps = {
+  value: {
+    id: 'lnsWorkspace',
+    humanData: {
+      label: i18n.translate('xpack.lens.editorFrame.workspaceLabel', {
+        defaultMessage: 'Workspace',
+      }),
+    },
+  },
+  order: [1, 0, 0, 0],
+};
 
 // Exported for testing purposes only.
-export const WorkspacePanel = React.memo(function WorkspacePanel({
+export const WorkspacePanel = React.memo(function WorkspacePanel(props: WorkspacePanelProps) {
+  const { getSuggestionForField, ...restProps } = props;
+
+  const dragDropContext = useContext(DragContext);
+
+  const suggestionForDraggedField = useMemo(
+    () => dragDropContext.dragging && getSuggestionForField(dragDropContext.dragging),
+    [dragDropContext.dragging, getSuggestionForField]
+  );
+
+  return (
+    <InnerWorkspacePanel {...restProps} suggestionForDraggedField={suggestionForDraggedField} />
+  );
+});
+
+// Exported for testing purposes only.
+export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
   activeDatasourceId,
   activeVisualizationId,
   visualizationMap,
@@ -101,13 +126,10 @@ export const WorkspacePanel = React.memo(function WorkspacePanel({
   ExpressionRenderer: ExpressionRendererComponent,
   title,
   visualizeTriggerFieldContext,
-  getSuggestionForField,
-}: WorkspacePanelProps) {
-  const dragDropContext = useContext(DragContext);
-
-  const suggestionForDraggedField =
-    dragDropContext.dragging && getSuggestionForField(dragDropContext.dragging);
-
+  suggestionForDraggedField,
+}: Omit<WorkspacePanelProps, 'getSuggestionForField'> & {
+  suggestionForDraggedField: Suggestion | undefined;
+}) {
   const [localState, setLocalState] = useState<WorkspaceState>({
     expressionBuildError: undefined,
     expandError: false,
@@ -145,10 +167,7 @@ export const WorkspacePanel = React.memo(function WorkspacePanel({
             datasourceLayers: framePublicAPI.datasourceLayers,
           });
         } catch (e) {
-          const buildMessages = activeVisualization?.getErrorMessages(
-            visualizationState,
-            framePublicAPI
-          );
+          const buildMessages = activeVisualization?.getErrorMessages(visualizationState);
           const defaultMessage = {
             shortMessage: i18n.translate('xpack.lens.editorFrame.buildExpressionError', {
               defaultMessage: 'An unexpected error occurred while preparing the chart',
@@ -174,6 +193,8 @@ export const WorkspacePanel = React.memo(function WorkspacePanel({
       framePublicAPI.filters,
     ]
   );
+
+  const expressionExists = Boolean(expression);
 
   const onEvent = useCallback(
     (event: ExpressionRendererEvent) => {
@@ -204,23 +225,23 @@ export const WorkspacePanel = React.memo(function WorkspacePanel({
 
   useEffect(() => {
     // reset expression error if component attempts to run it again
-    if (expression && localState.expressionBuildError) {
+    if (expressionExists && localState.expressionBuildError) {
       setLocalState((s) => ({
         ...s,
         expressionBuildError: undefined,
       }));
     }
-  }, [expression, localState.expressionBuildError]);
+  }, [expressionExists, localState.expressionBuildError]);
 
-  function onDrop() {
+  const onDrop = useCallback(() => {
     if (suggestionForDraggedField) {
       trackUiEvent('drop_onto_workspace');
-      trackUiEvent(expression ? 'drop_non_empty' : 'drop_empty');
+      trackUiEvent(expressionExists ? 'drop_non_empty' : 'drop_empty');
       switchToSuggestion(dispatch, suggestionForDraggedField, 'SWITCH_VISUALIZATION');
     }
-  }
+  }, [suggestionForDraggedField, expressionExists, dispatch]);
 
-  function renderEmptyWorkspace() {
+  const renderEmptyWorkspace = () => {
     return (
       <EuiText
         className={classNames('lnsWorkspacePanel__emptyContent')}
@@ -231,7 +252,7 @@ export const WorkspacePanel = React.memo(function WorkspacePanel({
       >
         <h2>
           <strong>
-            {expression === null
+            {!expressionExists
               ? i18n.translate('xpack.lens.editorFrame.emptyWorkspace', {
                   defaultMessage: 'Drop some fields here to start',
                 })
@@ -241,7 +262,7 @@ export const WorkspacePanel = React.memo(function WorkspacePanel({
           </strong>
         </h2>
         <DropIllustration aria-hidden={true} className="lnsWorkspacePanel__dropIllustration" />
-        {expression === null && (
+        {!expressionExists && (
           <>
             <p>
               {i18n.translate('xpack.lens.editorFrame.emptyWorkspaceHeading', {
@@ -265,9 +286,9 @@ export const WorkspacePanel = React.memo(function WorkspacePanel({
         )}
       </EuiText>
     );
-  }
+  };
 
-  function renderVisualization() {
+  const renderVisualization = () => {
     // we don't want to render the emptyWorkspace on visualizing field from Discover
     // as it is specific for the drag and drop functionality and can confuse the users
     if (expression === null && !visualizeTriggerFieldContext) {
@@ -285,7 +306,7 @@ export const WorkspacePanel = React.memo(function WorkspacePanel({
         ExpressionRendererComponent={ExpressionRendererComponent}
       />
     );
-  }
+  };
 
   return (
     <WorkspacePanelWrapper
@@ -302,14 +323,15 @@ export const WorkspacePanel = React.memo(function WorkspacePanel({
         className="lnsWorkspacePanel__dragDrop"
         dataTestSubj="lnsWorkspace"
         draggable={false}
-        droppable={Boolean(suggestionForDraggedField)}
+        dropType={suggestionForDraggedField ? 'field_add' : undefined}
         onDrop={onDrop}
-        value={workspaceDropValue}
+        value={dropProps.value}
+        order={dropProps.order}
       >
-        <div>
+        <EuiPageContentBody className="lnsWorkspacePanelWrapper__pageContentBody">
           {renderVisualization()}
           {Boolean(suggestionForDraggedField) && expression !== null && renderEmptyWorkspace()}
-        </div>
+        </EuiPageContentBody>
       </DragDrop>
     </WorkspacePanelWrapper>
   );
@@ -411,16 +433,6 @@ export const InnerVisualizationWrapper = ({
       >
         <EuiFlexItem>
           <EuiIcon type="alert" size="xl" color="danger" />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiTitle size="s">
-            <EuiTextColor color="danger">
-              <FormattedMessage
-                id="xpack.lens.editorFrame.configurationFailure"
-                defaultMessage="Invalid configuration"
-              />
-            </EuiTextColor>
-          </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem className="eui-textBreakAll" data-test-subj="configuration-failure-error">
           {localState.configurationValidationError[0].longMessage}

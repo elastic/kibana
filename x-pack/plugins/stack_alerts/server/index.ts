@@ -11,16 +11,8 @@ import { configSchema, Config } from '../common/config';
 export { ID as INDEX_THRESHOLD_ID } from './alert_types/index_threshold/alert_type';
 
 export const config: PluginConfigDescriptor<Config> = {
-  exposeToBrowser: {
-    enableGeoAlerting: true,
-  },
+  exposeToBrowser: {},
   schema: configSchema,
-  deprecations: ({ renameFromRoot }) => [
-    renameFromRoot(
-      'xpack.triggers_actions_ui.enableGeoTrackingThresholdAlert',
-      'xpack.stack_alerts.enableGeoAlerting'
-    ),
-  ],
 };
 
 export const plugin = (ctx: PluginInitializerContext) => new AlertingBuiltinsPlugin(ctx);

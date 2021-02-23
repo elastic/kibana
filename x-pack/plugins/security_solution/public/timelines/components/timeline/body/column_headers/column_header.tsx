@@ -168,28 +168,40 @@ const ColumnHeaderComponent: React.FC<ColumneHeaderProps> = ({
               handleClosePopOverTrigger();
             },
           },
-          {
-            disabled: !header.aggregatable,
-            icon: <EuiIcon type="sortUp" size="s" />,
-            name: i18n.SORT_AZ,
-            onClick: () => {
-              onColumnSort(Direction.asc);
-              handleClosePopOverTrigger();
-            },
-          },
-          {
-            disabled: !header.aggregatable,
-            icon: <EuiIcon type="sortDown" size="s" />,
-            name: i18n.SORT_ZA,
-            onClick: () => {
-              onColumnSort(Direction.desc);
-              handleClosePopOverTrigger();
-            },
-          },
+          ...(tabType !== TimelineTabs.eql
+            ? [
+                {
+                  disabled: !header.aggregatable,
+                  icon: <EuiIcon type="sortUp" size="s" />,
+                  name: i18n.SORT_AZ,
+                  onClick: () => {
+                    onColumnSort(Direction.asc);
+                    handleClosePopOverTrigger();
+                  },
+                },
+                {
+                  disabled: !header.aggregatable,
+                  icon: <EuiIcon type="sortDown" size="s" />,
+                  name: i18n.SORT_ZA,
+                  onClick: () => {
+                    onColumnSort(Direction.desc);
+                    handleClosePopOverTrigger();
+                  },
+                },
+              ]
+            : []),
         ],
       },
     ],
-    [dispatch, handleClosePopOverTrigger, header.aggregatable, header.id, onColumnSort, timelineId]
+    [
+      dispatch,
+      handleClosePopOverTrigger,
+      header.aggregatable,
+      header.id,
+      onColumnSort,
+      tabType,
+      timelineId,
+    ]
   );
 
   const headerButton = useMemo(

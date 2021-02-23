@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { IScope } from 'angular';
 import { NormalizedCacheObject } from 'apollo-cache-inmemory';
 import ApolloClient from 'apollo-client';
 
@@ -38,10 +37,3 @@ export interface AppKibanaUIConfig {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   set(key: string, value: any): Promise<boolean>;
 }
-
-export interface AppKibanaAdapterServiceRefs {
-  config: AppKibanaUIConfig;
-  rootScope: IScope;
-}
-
-export type AppBufferedKibanaServiceCall<ServiceRefs> = (serviceRefs: ServiceRefs) => void;

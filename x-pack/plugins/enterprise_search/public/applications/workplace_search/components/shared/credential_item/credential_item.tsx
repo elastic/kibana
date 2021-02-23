@@ -78,20 +78,14 @@ export const CredentialItem: React.FC<CredentialItemProps> = ({
           </EuiFlexItem>
           <EuiFlexItem>
             {!isVisible ? (
-              <EuiFieldPassword
-                placeholder={label}
-                value={value}
-                readOnly
-                compressed={true}
-                disabled
-              />
+              <EuiFieldPassword placeholder={label} value={value} readOnly compressed disabled />
             ) : (
               <EuiFieldText
-                readOnly={true}
+                readOnly
                 placeholder="Compressed"
                 data-test-subj={`${testSubj}Input`}
                 value={value}
-                compressed={true}
+                compressed
                 onClick={inputSelectAll}
               />
             )}

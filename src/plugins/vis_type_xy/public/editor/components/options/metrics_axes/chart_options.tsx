@@ -11,13 +11,15 @@ import React, { useMemo, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 
-import { Vis } from '../../../../../../visualizations/public';
 import { SelectOption } from '../../../../../../vis_default_editor/public';
 
 import { SeriesParam, ValueAxis } from '../../../../types';
 import { LineOptions } from './line_options';
 import { SetParamByIndex, ChangeValueAxis } from '.';
 import { ChartType } from '../../../../../common';
+import { getConfigCollections } from '../../../collections';
+
+const collections = getConfigCollections();
 
 export type SetChart = <T extends keyof SeriesParam>(paramName: T, value: SeriesParam[T]) => void;
 
@@ -27,14 +29,12 @@ export interface ChartOptionsParams {
   changeValueAxis: ChangeValueAxis;
   setParamByIndex: SetParamByIndex;
   valueAxes: ValueAxis[];
-  vis: Vis;
 }
 
 function ChartOptions({
   chart,
   index,
   valueAxes,
-  vis,
   changeValueAxis,
   setParamByIndex,
 }: ChartOptionsParams) {
@@ -90,7 +90,7 @@ function ChartOptions({
             label={i18n.translate('visTypeXy.controls.pointSeries.series.chartTypeLabel', {
               defaultMessage: 'Chart type',
             })}
-            options={vis.type.editorConfig.collections.chartTypes}
+            options={collections.chartTypes}
             paramName="type"
             value={chart.type}
             setValue={setChart}
@@ -102,7 +102,7 @@ function ChartOptions({
             label={i18n.translate('visTypeXy.controls.pointSeries.series.modeLabel', {
               defaultMessage: 'Mode',
             })}
-            options={vis.type.editorConfig.collections.chartModes}
+            options={collections.chartModes}
             paramName="mode"
             value={chart.mode}
             setValue={setChart}
@@ -118,7 +118,7 @@ function ChartOptions({
             label={i18n.translate('visTypeXy.controls.pointSeries.series.lineModeLabel', {
               defaultMessage: 'Line mode',
             })}
-            options={vis.type.editorConfig.collections.interpolationModes}
+            options={collections.interpolationModes}
             paramName="interpolate"
             value={chart.interpolate}
             setValue={setChart}
@@ -126,7 +126,7 @@ function ChartOptions({
         </>
       )}
 
-      {chart.type === ChartType.Line && <LineOptions chart={chart} vis={vis} setChart={setChart} />}
+      {chart.type === ChartType.Line && <LineOptions chart={chart} setChart={setChart} />}
     </>
   );
 }

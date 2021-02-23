@@ -79,3 +79,15 @@ export async function generateEnrollmentAPIKey(
     return enrollmentApiKeyServiceSO.generateEnrollmentAPIKey(soClient, data);
   }
 }
+
+export async function getEnrollmentAPIKeyById(
+  soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient,
+  apiKeyId: string
+) {
+  if (appContextService.getConfig()?.agents?.fleetServerEnabled === true) {
+    return enrollmentApiKeyServiceFleetServer.getEnrollmentAPIKeyById(esClient, apiKeyId);
+  } else {
+    return enrollmentApiKeyServiceSO.getEnrollmentAPIKeyById(soClient, apiKeyId);
+  }
+}

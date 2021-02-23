@@ -12,8 +12,12 @@ import '../../plugins/core_provider_plugin/types';
 
 export default function ({ getService }: PluginFunctionalProviderContext) {
   const supertest = getService('supertest');
+  const esArchiver = getService('esArchiver');
 
   describe('index patterns', function () {
+    before(async () => {
+      await esArchiver.emptyKibanaIndex();
+    });
     let indexPatternId = '';
 
     it('can create an index pattern', async () => {

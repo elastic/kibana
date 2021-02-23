@@ -13,7 +13,7 @@ import { IRouter } from '../../http';
 import { CoreUsageDataSetup } from '../../core_usage_data';
 import { SavedObjectConfig } from '../saved_objects_config';
 import { SavedObjectsImportError } from '../import';
-import { createSavedObjectsStreamFromNdJson } from './utils';
+import { catchAndReturnBoomErrors, createSavedObjectsStreamFromNdJson } from './utils';
 
 interface RouteDependencies {
   config: SavedObjectConfig;
@@ -61,8 +61,9 @@ export const registerImportRoute = (
         }),
       },
     },
-    router.handleLegacyErrors(async (context, req, res) => {
+    catchAndReturnBoomErrors(async (context, req, res) => {
       const { overwrite, createNewCopies } = req.query;
+      const { getClient, getImporter, typeRegistry } = context.core.savedObjects;
 
       const usageStatsClient = coreUsageData.getClient();
       usageStatsClient
@@ -84,7 +85,15 @@ export const registerImportRoute = (
         });
       }
 
-      const { importer } = context.core.savedObjects;
+      const supportedTypes = typeRegistry.getImportableAndExportableTypes().map((t) => t.name);
+
+      const includedHiddenTypes = supportedTypes.filter((supportedType) =>
+        typeRegistry.isHidden(supportedType)
+      );
+
+      const client = getClient({ includedHiddenTypes });
+      const importer = getImporter(client);
+
       try {
         const result = await importer.import({
           readStream,

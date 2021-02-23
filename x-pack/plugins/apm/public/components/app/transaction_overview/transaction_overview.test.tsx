@@ -131,16 +131,18 @@ describe('TransactionOverview', () => {
       });
 
       expect(history.location.search).toEqual(
-        '?transactionType=secondType&rangeFrom=now-15m&rangeTo=now&comparisonEnabled=true&comparisonType=yesterday'
+        '?transactionType=secondType&rangeFrom=now-15m&rangeTo=now'
       );
       expect(getByText(container, 'firstType')).toBeInTheDocument();
       expect(getByText(container, 'secondType')).toBeInTheDocument();
 
-      fireEvent.click(getByText(container, 'firstType'));
+      fireEvent.change(getByText(container, 'firstType').parentElement!, {
+        target: { value: 'firstType' },
+      });
 
       expect(history.push).toHaveBeenCalled();
       expect(history.location.search).toEqual(
-        '?transactionType=firstType&rangeFrom=now-15m&rangeTo=now&comparisonEnabled=true&comparisonType=yesterday'
+        '?transactionType=firstType&rangeFrom=now-15m&rangeTo=now'
       );
     });
   });

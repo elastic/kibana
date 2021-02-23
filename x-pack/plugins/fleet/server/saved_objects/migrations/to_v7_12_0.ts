@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { SavedObjectMigrationFn } from 'kibana/server';
-import { Agent } from '../../types';
+import type { SavedObjectMigrationFn } from 'kibana/server';
+import type { Agent, AgentPolicy } from '../../types';
 
 export const migrateAgentToV7120: SavedObjectMigrationFn<Agent & { shared_id?: string }, Agent> = (
   agentDoc
@@ -14,4 +14,14 @@ export const migrateAgentToV7120: SavedObjectMigrationFn<Agent & { shared_id?: s
   delete agentDoc.attributes.shared_id;
 
   return agentDoc;
+};
+
+export const migrateAgentPolicyToV7120: SavedObjectMigrationFn<
+  Exclude<AgentPolicy, 'is_managed' & 'is_default_fleet_server'>,
+  AgentPolicy
+> = (agentPolicyDoc) => {
+  agentPolicyDoc.attributes.is_managed = false;
+  agentPolicyDoc.attributes.is_default_fleet_server = false;
+
+  return agentPolicyDoc;
 };

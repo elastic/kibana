@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+
 import { shallow } from 'enzyme';
 
 import { ResultHeader } from './result_header';
@@ -34,7 +35,7 @@ describe('ResultHeader', () => {
   describe('score', () => {
     it('renders score if showScore is true ', () => {
       const wrapper = shallow(
-        <ResultHeader showScore={true} resultMeta={resultMeta} isMetaEngine={false} />
+        <ResultHeader showScore resultMeta={resultMeta} isMetaEngine={false} />
       );
       expect(wrapper.find('[data-test-subj="ResultScore"]').prop('value')).toEqual(100);
     });
@@ -51,12 +52,12 @@ describe('ResultHeader', () => {
     it('renders engine name if this is a meta engine', () => {
       const wrapper = shallow(
         <ResultHeader
-          showScore={true}
+          showScore
           resultMeta={{
             ...resultMeta,
             id: '1',
           }}
-          isMetaEngine={true}
+          isMetaEngine
         />
       );
       expect(wrapper.find('[data-test-subj="ResultEngine"]').prop('value')).toBe('my-engine');
@@ -65,7 +66,7 @@ describe('ResultHeader', () => {
     it('does not render an engine if this is not a meta engine', () => {
       const wrapper = shallow(
         <ResultHeader
-          showScore={true}
+          showScore
           resultMeta={{
             ...resultMeta,
             id: '1',

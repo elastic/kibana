@@ -23,6 +23,7 @@ export interface ColumnState {
   columnId: string;
   width?: number;
   hidden?: boolean;
+  alignment?: 'left' | 'right' | 'center';
 }
 
 export interface SortingState {
@@ -98,6 +99,12 @@ export const datatableVisualization: Visualization<DatatableVisualizationState> 
     ) {
       return [];
     }
+    const oldColumnSettings: Record<string, ColumnState> = {};
+    if (state) {
+      state.columns.forEach((column) => {
+        oldColumnSettings[column.columnId] = column;
+      });
+    }
     const title =
       table.changeType === 'unchanged'
         ? i18n.translate('xpack.lens.datatable.suggestionLabel', {
@@ -126,8 +133,12 @@ export const datatableVisualization: Visualization<DatatableVisualizationState> 
         // table with >= 10 columns will have a score of 0.4, fewer columns reduce score
         score: (Math.min(table.columns.length, 10) / 10) * 0.4,
         state: {
+          ...(state || {}),
           layerId: table.layerId,
-          columns: table.columns.map((col) => ({ columnId: col.columnId })),
+          columns: table.columns.map((col) => ({
+            ...(oldColumnSettings[col.columnId] || {}),
+            columnId: col.columnId,
+          })),
         },
         previewIcon: LensIconChartDatatable,
         // tables are hidden from suggestion bar, but used for drag & drop and chart switching
@@ -254,6 +265,7 @@ export const datatableVisualization: Visualization<DatatableVisualizationState> 
                     columnId: [column.columnId],
                     hidden: typeof column.hidden === 'undefined' ? [] : [column.hidden],
                     width: typeof column.width === 'undefined' ? [] : [column.width],
+                    alignment: typeof column.alignment === 'undefined' ? [] : [column.alignment],
                   },
                 },
               ],
@@ -266,7 +278,7 @@ export const datatableVisualization: Visualization<DatatableVisualizationState> 
     };
   },
 
-  getErrorMessages(state, frame) {
+  getErrorMessages(state) {
     return undefined;
   },
 

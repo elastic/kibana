@@ -22,7 +22,6 @@ import {
   syncQueryStateWithUrl,
 } from '../../../../data/public';
 import { getSortArray } from './doc_table';
-import * as columnActions from './doc_table/actions/columns';
 import indexTemplateLegacy from './discover_legacy.html';
 import { addHelpMenuToAppChrome } from '../components/help_menu/help_menu_util';
 import { discoverResponseHandler } from './response_handler';
@@ -43,20 +42,15 @@ import {
   setBreadcrumbsTitle,
 } from '../helpers/breadcrumbs';
 import { validateTimeRange } from '../helpers/validate_time_range';
-import { popularizeField } from '../helpers/popularize_field';
-import { getSwitchIndexPatternAppState } from '../helpers/get_switch_index_pattern_app_state';
 import { addFatalError } from '../../../../kibana_legacy/public';
-import { METRIC_TYPE } from '@kbn/analytics';
 import {
   DEFAULT_COLUMNS_SETTING,
-  MODIFY_COLUMNS_ON_SWITCH,
   SAMPLE_SIZE_SETTING,
   SEARCH_FIELDS_FROM_SOURCE,
   SEARCH_ON_PAGE_LOAD_SETTING,
   SORT_DEFAULT_ORDER_SETTING,
 } from '../../../common';
 import { loadIndexPattern, resolveIndexPattern } from '../helpers/resolve_index_pattern';
-import { getTopNavLinks } from '../components/top_nav/get_top_nav_links';
 import { updateSearchSource } from '../helpers/update_search_source';
 import { calcFieldCounts } from '../helpers/calc_field_counts';
 import { getDefaultSort } from './doc_table/lib/get_default_sort';
@@ -70,12 +64,10 @@ const {
   chrome,
   data,
   history: getHistory,
-  indexPatterns,
   filterManager,
   timefilter,
   toastNotifications,
   uiSettings: config,
-  trackUiMetric,
 } = getServices();
 
 const fetchStatuses = {
@@ -118,7 +110,7 @@ app.config(($routeProvider) => {
         const history = getHistory();
         const savedSearchId = $route.current.params.id;
         return data.indexPatterns.ensureDefaultIndexPattern(history).then(() => {
-          const { appStateContainer } = getState({ history });
+          const { appStateContainer } = getState({ history, uiSettings: config });
           const { index } = appStateContainer.getState();
           return Promise.props({
             ip: loadIndexPattern(index, data.indexPatterns, config),
@@ -177,10 +169,10 @@ function discoverController($route, $scope, Promise) {
   let inspectorRequest;
   let isChangingIndexPattern = false;
   const savedSearch = $route.current.locals.savedObjects.savedSearch;
-  $scope.searchSource = savedSearch.searchSource;
+  const persistentSearchSource = savedSearch.searchSource;
   $scope.indexPattern = resolveIndexPattern(
     $route.current.locals.savedObjects.ip,
-    $scope.searchSource,
+    persistentSearchSource,
     toastNotifications
   );
   $scope.useNewFieldsApi = !config.get(SEARCH_FIELDS_FROM_SOURCE);
@@ -198,11 +190,12 @@ function discoverController($route, $scope, Promise) {
     session: data.search.session,
   });
 
-  const state = getState({
+  const stateContainer = getState({
     getStateDefaults,
     storeInSessionStorage: config.get('state:storeInSessionStorage'),
     history,
     toasts: core.notifications.toasts,
+    uiSettings: config,
   });
 
   const {
@@ -213,7 +206,7 @@ function discoverController($route, $scope, Promise) {
     replaceUrlAppState,
     kbnUrlStateStorage,
     getPreviousAppState,
-  } = state;
+  } = stateContainer;
 
   if (appStateContainer.getState().index !== $scope.indexPattern.id) {
     //used index pattern is different than the given by url/state which is invalid
@@ -246,7 +239,8 @@ function discoverController($route, $scope, Promise) {
 
     if (!_.isEqual(newStatePartial, oldStatePartial)) {
       $scope.$evalAsync(async () => {
-        if (oldStatePartial.index !== newStatePartial.index) {
+        // NOTE: this is also called when navigating from discover app to context app
+        if (newStatePartial.index && oldStatePartial.index !== newStatePartial.index) {
           //in case of index pattern switch the route has currently to be reloaded, legacy
           isChangingIndexPattern = true;
           $route.reload();
@@ -259,6 +253,12 @@ function discoverController($route, $scope, Promise) {
         const changes = ['interval', 'sort'].filter(
           (prop) => !_.isEqual(newStatePartial[prop], oldStatePartial[prop])
         );
+
+        if (oldStatePartial.hideChart && !newStatePartial.hideChart) {
+          // in case the histogram is hidden, no data is requested
+          // so when changing this state data needs to be fetched
+          changes.push(true);
+        }
 
         if (changes.length) {
           refetch$.next();
@@ -293,21 +293,6 @@ function discoverController($route, $scope, Promise) {
     }
   );
 
-  $scope.setIndexPattern = async (id) => {
-    const nextIndexPattern = await indexPatterns.get(id);
-    if (nextIndexPattern) {
-      const nextAppState = getSwitchIndexPatternAppState(
-        $scope.indexPattern,
-        nextIndexPattern,
-        $scope.state.columns,
-        $scope.state.sort,
-        config.get(MODIFY_COLUMNS_ON_SWITCH),
-        $scope.useNewFieldsApi
-      );
-      await setAppState(nextAppState);
-    }
-  };
-
   // update data source when filters update
   subscriptions.add(
     subscribeWithScope(
@@ -323,22 +308,29 @@ function discoverController($route, $scope, Promise) {
     )
   );
 
-  const inspectorAdapters = {
-    requests: new RequestAdapter(),
+  $scope.opts = {
+    // number of records to fetch, then paginate through
+    sampleSize: config.get(SAMPLE_SIZE_SETTING),
+    timefield: getTimeField(),
+    savedSearch: savedSearch,
+    services,
+    indexPatternList: $route.current.locals.savedObjects.ip.list,
+    config: config,
+    setHeaderActionMenu: getHeaderActionMenuMounter(),
+    filterManager,
+    setAppState,
+    data,
+    stateContainer,
+    searchSessionManager,
+    refetch$,
   };
 
-  $scope.timefilterUpdateHandler = (ranges) => {
-    timefilter.setTime({
-      from: moment(ranges.from).toISOString(),
-      to: moment(ranges.to).toISOString(),
-      mode: 'absolute',
-    });
-  };
+  const inspectorAdapters = ($scope.opts.inspectorAdapters = {
+    requests: new RequestAdapter(),
+  });
+
   $scope.minimumVisibleRows = 50;
   $scope.fetchStatus = fetchStatuses.UNINITIALIZED;
-  $scope.showSaveQuery = capabilities.discover.saveQuery;
-  $scope.showTimeCol =
-    !config.get('doc_table:hideTimeColumn', false) && $scope.indexPattern.timeFieldName;
 
   let abortController;
   $scope.$on('$destroy', () => {
@@ -358,7 +350,7 @@ function discoverController($route, $scope, Promise) {
     unlistenHistoryBasePath();
   });
 
-  const getFieldCounts = async () => {
+  $scope.opts.getFieldCounts = async () => {
     // the field counts aren't set until we have the data back,
     // so we wait for the fetch to be done before proceeding
     if ($scope.fetchStatus === fetchStatuses.COMPLETE) {
@@ -374,40 +366,25 @@ function discoverController($route, $scope, Promise) {
       });
     });
   };
+  $scope.opts.navigateTo = (path) => {
+    $scope.$evalAsync(() => {
+      history.push(path);
+    });
+  };
 
-  $scope.topNavMenu = getTopNavLinks({
-    getFieldCounts,
-    indexPattern: $scope.indexPattern,
-    inspectorAdapters,
-    navigateTo: (path) => {
-      $scope.$evalAsync(() => {
-        history.push(path);
-      });
-    },
-    savedSearch,
-    services,
-    state,
-  });
-
-  $scope.searchSource
-    .setField('index', $scope.indexPattern)
-    .setField('highlightAll', true)
-    .setField('version', true);
-
-  // Even when searching rollups, we want to use the default strategy so that we get back a
-  // document-like response.
-  $scope.searchSource.setPreferredSearchStrategyId('default');
+  persistentSearchSource.setField('index', $scope.indexPattern);
 
   // searchSource which applies time range
-  const timeRangeSearchSource = savedSearch.searchSource.create();
+  const volatileSearchSource = savedSearch.searchSource.create();
 
   if (isDefaultType($scope.indexPattern)) {
-    timeRangeSearchSource.setField('filter', () => {
+    volatileSearchSource.setField('filter', () => {
       return timefilter.createFilter($scope.indexPattern);
     });
   }
 
-  $scope.searchSource.setParent(timeRangeSearchSource);
+  volatileSearchSource.setParent(persistentSearchSource);
+  $scope.volatileSearchSource = volatileSearchSource;
 
   const pageTitleSuffix = savedSearch.id && savedSearch.title ? `: ${savedSearch.title}` : '';
   chrome.docTitle.change(`Discover${pageTitleSuffix}`);
@@ -422,7 +399,8 @@ function discoverController($route, $scope, Promise) {
   }
 
   function getStateDefaults() {
-    const query = $scope.searchSource.getField('query') || data.query.queryString.getDefaultQuery();
+    const query =
+      persistentSearchSource.getField('query') || data.query.queryString.getDefaultQuery();
     const sort = getSortArray(savedSearch.sort, $scope.indexPattern);
     const columns = getDefaultColumns();
 
@@ -434,10 +412,13 @@ function discoverController($route, $scope, Promise) {
       columns,
       index: $scope.indexPattern.id,
       interval: 'auto',
-      filters: _.cloneDeep($scope.searchSource.getOwnField('filter')),
+      filters: _.cloneDeep(persistentSearchSource.getOwnField('filter')),
     };
     if (savedSearch.grid) {
       defaultState.grid = savedSearch.grid;
+    }
+    if (savedSearch.hideChart) {
+      defaultState.hideChart = savedSearch.hideChart;
     }
 
     return defaultState;
@@ -445,19 +426,6 @@ function discoverController($route, $scope, Promise) {
 
   $scope.state.index = $scope.indexPattern.id;
   $scope.state.sort = getSortArray($scope.state.sort, $scope.indexPattern);
-
-  $scope.opts = {
-    // number of records to fetch, then paginate through
-    sampleSize: config.get(SAMPLE_SIZE_SETTING),
-    timefield: getTimeField(),
-    savedSearch: savedSearch,
-    indexPatternList: $route.current.locals.savedObjects.ip.list,
-    config: config,
-    setHeaderActionMenu: getHeaderActionMenuMounter(),
-    filterManager,
-    setAppState,
-    data,
-  };
 
   const shouldSearchOnPageLoad = () => {
     // A saved search is created on every page load, so we check the ID to see if we're loading a
@@ -503,12 +471,6 @@ function discoverController($route, $scope, Promise) {
           (error) => addFatalError(core.fatalErrors, error)
         )
       );
-
-      $scope.changeInterval = (interval) => {
-        if (interval) {
-          setAppState({ interval });
-        }
-      };
 
       $scope.$watchMulti(
         ['rows', 'fetchStatus'],
@@ -591,7 +553,7 @@ function discoverController($route, $scope, Promise) {
       .then(function () {
         $scope.fetchStatus = fetchStatuses.LOADING;
         logInspectorRequest({ searchSessionId });
-        return $scope.searchSource.fetch({
+        return $scope.volatileSearchSource.fetch({
           abortSignal: abortController.signal,
           sessionId: searchSessionId,
         });
@@ -606,26 +568,6 @@ function discoverController($route, $scope, Promise) {
 
         data.search.showError(error);
       });
-  };
-
-  $scope.handleRefresh = function (_payload, isUpdate) {
-    if (isUpdate === false) {
-      searchSessionManager.removeSearchSessionIdFromURL({ replace: false });
-      refetch$.next();
-    }
-  };
-
-  $scope.updateSavedQueryId = (newSavedQueryId) => {
-    if (newSavedQueryId) {
-      setAppState({ savedQuery: newSavedQueryId });
-    } else {
-      // remove savedQueryId from state
-      const state = {
-        ...appStateContainer.getState(),
-      };
-      delete state.savedQuery;
-      appStateContainer.set(state);
-    }
   };
 
   function getDimensions(aggs, timeRange) {
@@ -658,11 +600,13 @@ function discoverController($route, $scope, Promise) {
   }
 
   function onResults(resp) {
-    inspectorRequest.stats(getResponseInspectorStats(resp, $scope.searchSource)).ok({ json: resp });
+    inspectorRequest
+      .stats(getResponseInspectorStats(resp, $scope.volatileSearchSource))
+      .ok({ json: resp });
 
-    if (getTimeField()) {
+    if (getTimeField() && !$scope.state.hideChart) {
       const tabifiedData = tabifyAggResponse($scope.opts.chartAggConfigs, resp);
-      $scope.searchSource.rawResponse = resp;
+      $scope.volatileSearchSource.rawResponse = resp;
       $scope.histogramData = discoverResponseHandler(
         tabifiedData,
         getDimensions($scope.opts.chartAggConfigs.aggs, $scope.timeRange)
@@ -690,8 +634,8 @@ function discoverController($route, $scope, Promise) {
       defaultMessage: 'This request queries Elasticsearch to fetch the data for the search.',
     });
     inspectorRequest = inspectorAdapters.requests.start(title, { description, searchSessionId });
-    inspectorRequest.stats(getRequestInspectorStats($scope.searchSource));
-    $scope.searchSource.getSearchRequestBody().then((body) => {
+    inspectorRequest.stats(getRequestInspectorStats($scope.volatileSearchSource));
+    $scope.volatileSearchSource.getSearchRequestBody().then((body) => {
       inspectorRequest.json(body);
     });
   }
@@ -732,25 +676,18 @@ function discoverController($route, $scope, Promise) {
     history.push('/');
   };
 
-  const showUnmappedFieldsDefaultValue = $scope.useNewFieldsApi && !!$scope.opts.savedSearch.pre712;
-  let showUnmappedFields = showUnmappedFieldsDefaultValue;
-
-  const onChangeUnmappedFields = (value) => {
-    showUnmappedFields = value;
-    $scope.unmappedFieldsConfig.showUnmappedFields = value;
-    $scope.fetch();
-  };
+  const showUnmappedFields = $scope.useNewFieldsApi;
 
   $scope.unmappedFieldsConfig = {
-    showUnmappedFieldsDefaultValue,
     showUnmappedFields,
-    onChangeUnmappedFields,
   };
 
   $scope.updateDataSource = () => {
-    const { indexPattern, searchSource, useNewFieldsApi } = $scope;
+    const { indexPattern, useNewFieldsApi } = $scope;
     const { columns, sort } = $scope.state;
-    updateSearchSource(searchSource, {
+    updateSearchSource({
+      persistentSearchSource,
+      volatileSearchSource: $scope.volatileSearchSource,
       indexPattern,
       services,
       sort,
@@ -761,68 +698,9 @@ function discoverController($route, $scope, Promise) {
     return Promise.resolve();
   };
 
-  $scope.setSortOrder = function setSortOrder(sort) {
-    setAppState({ sort });
-  };
-
-  // TODO: On array fields, negating does not negate the combination, rather all terms
-  $scope.filterQuery = function (field, values, operation) {
-    const { indexPattern } = $scope;
-
-    popularizeField(indexPattern, field.name, indexPatterns);
-    const newFilters = esFilters.generateFilters(
-      filterManager,
-      field,
-      values,
-      operation,
-      $scope.indexPattern.id
-    );
-    if (trackUiMetric) {
-      trackUiMetric(METRIC_TYPE.CLICK, 'filter_added');
-    }
-    return filterManager.addFilters(newFilters);
-  };
-
-  $scope.addColumn = function addColumn(columnName) {
-    const { indexPattern, useNewFieldsApi } = $scope;
-    if (capabilities.discover.save) {
-      popularizeField(indexPattern, columnName, indexPatterns);
-    }
-    const columns = columnActions.addColumn($scope.state.columns, columnName, useNewFieldsApi);
-    setAppState({ columns });
-  };
-
-  $scope.removeColumn = function removeColumn(columnName) {
-    const { indexPattern, useNewFieldsApi } = $scope;
-    if (capabilities.discover.save) {
-      popularizeField(indexPattern, columnName, indexPatterns);
-    }
-    const columns = columnActions.removeColumn($scope.state.columns, columnName, useNewFieldsApi);
-    // The state's sort property is an array of [sortByColumn,sortDirection]
-    const sort = $scope.state.sort.length
-      ? $scope.state.sort.filter((subArr) => subArr[0] !== columnName)
-      : [];
-    setAppState({ columns, sort });
-  };
-
-  $scope.moveColumn = function moveColumn(columnName, newIndex) {
-    const columns = columnActions.moveColumn($scope.state.columns, columnName, newIndex);
-    setAppState({ columns });
-  };
-
-  $scope.setColumns = function setColumns(columns) {
-    // remove first element of columns if it's the configured timeFieldName, which is prepended automatically
-    const actualColumns =
-      $scope.indexPattern.timeFieldName && $scope.indexPattern.timeFieldName === columns[0]
-        ? columns.slice(1)
-        : columns;
-    $scope.state = { ...$scope.state, columns: actualColumns };
-    setAppState({ columns: actualColumns });
-  };
-
   async function setupVisualization() {
     // If no timefield has been specified we don't create a histogram of messages
-    if (!getTimeField()) return;
+    if (!getTimeField() || $scope.state.hideChart) return;
     const { interval: histogramInterval } = $scope.state;
 
     const visStateAggs = [
@@ -845,12 +723,12 @@ function discoverController($route, $scope, Promise) {
       visStateAggs
     );
 
-    $scope.searchSource.onRequestStart((searchSource, options) => {
+    $scope.volatileSearchSource.onRequestStart((searchSource, options) => {
       if (!$scope.opts.chartAggConfigs) return;
       return $scope.opts.chartAggConfigs.onSearchRequestStart(searchSource, options);
     });
 
-    $scope.searchSource.setField('aggs', function () {
+    $scope.volatileSearchSource.setField('aggs', function () {
       if (!$scope.opts.chartAggConfigs) return;
       return $scope.opts.chartAggConfigs.toDsl();
     });

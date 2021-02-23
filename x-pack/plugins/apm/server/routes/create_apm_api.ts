@@ -11,6 +11,7 @@ import {
   apmIndexPatternTitleRoute,
 } from './index_pattern';
 import { createApi } from './create_api';
+import { environmentsRoute } from './environments';
 import {
   errorDistributionRoute,
   errorGroupsRoute,
@@ -23,12 +24,15 @@ import {
   serviceNodeMetadataRoute,
   serviceAnnotationsRoute,
   serviceAnnotationsCreateRoute,
-  serviceErrorGroupsRoute,
+  serviceErrorGroupsPrimaryStatisticsRoute,
+  serviceErrorGroupsComparisonStatisticsRoute,
   serviceThroughputRoute,
   serviceDependenciesRoute,
   serviceMetadataDetailsRoute,
   serviceMetadataIconsRoute,
   serviceInstancesRoute,
+  serviceProfilingStatisticsRoute,
+  serviceProfilingTimelineRoute,
 } from './services';
 import {
   agentConfigurationRoute,
@@ -61,21 +65,11 @@ import {
   transactionChartsDistributionRoute,
   transactionChartsErrorRateRoute,
   transactionGroupsRoute,
-  transactionGroupsOverviewRoute,
-  transactionLatencyChatsRoute,
-  transactionThroughputChatsRoute,
+  transactionGroupsPrimaryStatisticsRoute,
+  transactionLatencyChartsRoute,
+  transactionThroughputChartsRoute,
+  transactionGroupsComparisonStatisticsRoute,
 } from './transactions';
-import {
-  errorGroupsLocalFiltersRoute,
-  metricsLocalFiltersRoute,
-  servicesLocalFiltersRoute,
-  tracesLocalFiltersRoute,
-  transactionGroupsLocalFiltersRoute,
-  transactionsLocalFiltersRoute,
-  serviceNodesLocalFiltersRoute,
-  uiFiltersEnvironmentsRoute,
-  rumOverviewLocalFiltersRoute,
-} from './ui_filters';
 import { serviceMapRoute, serviceMapServiceNodeRoute } from './service_map';
 import {
   createCustomLinkRoute,
@@ -98,6 +92,7 @@ import {
   rumClientMetricsRoute,
   rumJSErrors,
   rumLongTaskMetrics,
+  rumOverviewLocalFiltersRoute,
   rumPageLoadDistBreakdownRoute,
   rumPageLoadDistributionRoute,
   rumPageViewsTrendRoute,
@@ -119,6 +114,9 @@ const createApmApi = () => {
     .add(dynamicIndexPatternRoute)
     .add(apmIndexPatternTitleRoute)
 
+    // Environments
+    .add(environmentsRoute)
+
     // Errors
     .add(errorDistributionRoute)
     .add(errorGroupsRoute)
@@ -131,12 +129,15 @@ const createApmApi = () => {
     .add(serviceNodeMetadataRoute)
     .add(serviceAnnotationsRoute)
     .add(serviceAnnotationsCreateRoute)
-    .add(serviceErrorGroupsRoute)
+    .add(serviceErrorGroupsPrimaryStatisticsRoute)
     .add(serviceThroughputRoute)
     .add(serviceDependenciesRoute)
     .add(serviceMetadataDetailsRoute)
     .add(serviceMetadataIconsRoute)
     .add(serviceInstancesRoute)
+    .add(serviceErrorGroupsComparisonStatisticsRoute)
+    .add(serviceProfilingTimelineRoute)
+    .add(serviceProfilingStatisticsRoute)
 
     // Agent configuration
     .add(getSingleAgentConfigurationRoute)
@@ -171,19 +172,10 @@ const createApmApi = () => {
     .add(transactionChartsDistributionRoute)
     .add(transactionChartsErrorRateRoute)
     .add(transactionGroupsRoute)
-    .add(transactionGroupsOverviewRoute)
-    .add(transactionLatencyChatsRoute)
-    .add(transactionThroughputChatsRoute)
-
-    // UI filters
-    .add(errorGroupsLocalFiltersRoute)
-    .add(metricsLocalFiltersRoute)
-    .add(servicesLocalFiltersRoute)
-    .add(tracesLocalFiltersRoute)
-    .add(transactionGroupsLocalFiltersRoute)
-    .add(transactionsLocalFiltersRoute)
-    .add(serviceNodesLocalFiltersRoute)
-    .add(uiFiltersEnvironmentsRoute)
+    .add(transactionGroupsPrimaryStatisticsRoute)
+    .add(transactionLatencyChartsRoute)
+    .add(transactionThroughputChartsRoute)
+    .add(transactionGroupsComparisonStatisticsRoute)
 
     // Service map
     .add(serviceMapRoute)
