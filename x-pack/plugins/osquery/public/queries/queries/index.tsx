@@ -11,15 +11,24 @@ import {
   EuiButton,
   EuiButtonIcon,
   EuiCodeBlock,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
   RIGHT_ALIGNMENT,
 } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useQuery, useQueryClient, useMutation } from 'react-query';
 import { useHistory } from 'react-router-dom';
+import qs from 'query-string';
 
-import { useKibana, useRouterNavigate } from '../../common/lib/kibana';
+import { useKibana } from '../../common/lib/kibana';
 
-const QueriesPageComponent = () => {
+interface QueriesPageProps {
+  onEditClick: (savedQueryId: string) => void;
+  onNewClick: () => void;
+}
+
+const QueriesPageComponent: React.FC<QueriesPageProps> = ({ onEditClick, onNewClick }) => {
   const { push } = useHistory();
   const queryClient = useQueryClient();
   const [pageIndex, setPageIndex] = useState(0);
@@ -29,7 +38,6 @@ const QueriesPageComponent = () => {
   const [selectedItems, setSelectedItems] = useState([]);
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<Record<string, unknown>>({});
   const { http } = useKibana().services;
-  const newQueryLinkProps = useRouterNavigate('queries/new');
 
   const deleteSavedQueriesMutation = useMutation(
     (payload) => http.delete(`/internal/osquery/saved_query`, { body: JSON.stringify(payload) }),
@@ -65,7 +73,7 @@ const QueriesPageComponent = () => {
       } else {
         itemIdToExpandedRowMapValues[item.id] = (
           <EuiCodeBlock language="sql" fontSize="m" paddingSize="m">
-            {item.attributes.command}
+            {item.attributes.query}
           </EuiCodeBlock>
         );
       }
@@ -85,12 +93,28 @@ const QueriesPageComponent = () => {
     [itemIdToExpandedRowMap, toggleDetails]
   );
 
-  const handleEditClick = useCallback((item) => push(`/queries/${item.id}`), [push]);
+  const handleEditClick = useCallback((item) => onEditClick(item.id), [onEditClick]);
+
+  const handlePlayClick = useCallback(
+    (item) =>
+      push({
+        search: qs.stringify({
+          tab: 'live_query',
+        }),
+        state: {
+          query: {
+            id: item.id,
+            query: item.attributes.query,
+          },
+        },
+      }),
+    [push]
+  );
 
   const columns = useMemo(
     () => [
       {
-        field: 'attributes.title',
+        field: 'attributes.name',
         name: 'Query name',
         sortable: true,
         truncateText: true,
@@ -111,6 +135,13 @@ const QueriesPageComponent = () => {
         name: 'Actions',
         actions: [
           {
+            name: 'Live query',
+            description: 'Run live query',
+            type: 'icon',
+            icon: 'play',
+            onClick: handlePlayClick,
+          },
+          {
             name: 'Edit',
             description: 'Edit or run this query',
             type: 'icon',
@@ -126,7 +157,7 @@ const QueriesPageComponent = () => {
         render: renderExtendedItemToggle,
       },
     ],
-    [handleEditClick, renderExtendedItemToggle]
+    [handleEditClick, handlePlayClick, renderExtendedItemToggle]
   );
 
   const onTableChange = useCallback(({ page = {}, sort = {} }) => {
@@ -173,15 +204,21 @@ const QueriesPageComponent = () => {
 
   return (
     <div>
-      {!selectedItems.length ? (
-        <EuiButton fill {...newQueryLinkProps}>
-          {'New query'}
-        </EuiButton>
-      ) : (
-        <EuiButton color="danger" iconType="trash" onClick={handleDeleteClick}>
-          {`Delete ${selectedItems.length} Queries`}
-        </EuiButton>
-      )}
+      <EuiFlexGroup justifyContent="flexEnd">
+        <EuiFlexItem grow={false}>
+          {!selectedItems.length ? (
+            <EuiButton fill onClick={onNewClick}>
+              {'New query'}
+            </EuiButton>
+          ) : (
+            <EuiButton color="danger" iconType="trash" onClick={handleDeleteClick}>
+              {`Delete ${selectedItems.length} Queries`}
+            </EuiButton>
+          )}
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
+      <EuiSpacer />
 
       {savedQueries && (
         <EuiBasicTable

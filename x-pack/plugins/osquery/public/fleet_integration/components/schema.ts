@@ -25,20 +25,15 @@ export const schema = {
   policy_id: {
     type: FIELD_TYPES.TEXT,
   },
-  inputs: {
-    enabled: {
-      type: FIELD_TYPES.TOGGLE,
-    },
-    streams: {
-      type: FIELD_TYPES.MULTI_SELECT,
-      vars: {
-        query: {
-          type: {
-            type: FIELD_TYPES.TEXT,
-          },
-          value: {
-            type: FIELD_TYPES.TEXT,
-          },
+  streams: {
+    type: FIELD_TYPES.MULTI_SELECT,
+    vars: {
+      query: {
+        type: {
+          type: FIELD_TYPES.TEXT,
+        },
+        value: {
+          type: FIELD_TYPES.TEXT,
         },
       },
     },

@@ -73,6 +73,7 @@ export const useActionResults = ({
       };
     },
     {
+      refetchInterval: 1000,
       enabled: !skip && !!resultsRequest,
     }
   );

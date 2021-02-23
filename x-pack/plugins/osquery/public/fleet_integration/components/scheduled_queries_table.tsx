@@ -5,9 +5,16 @@
  * 2.0.
  */
 
-/* eslint-disable @typescript-eslint/no-shadow, react-perf/jsx-no-new-object-as-prop, react/jsx-no-bind, react/display-name, react-perf/jsx-no-new-function-as-prop, react-perf/jsx-no-new-array-as-prop */
+/* eslint-disable react-perf/jsx-no-new-function-as-prop */
 
-import { find } from 'lodash/fp';
+/* eslint-disable react/jsx-no-bind */
+
+/* eslint-disable react-perf/jsx-no-new-object-as-prop */
+
+/* eslint-disable react/display-name */
+
+/* eslint-disable react-perf/jsx-no-new-array-as-prop */
+
 import React, { useState } from 'react';
 import {
   EuiBasicTable,
@@ -18,25 +25,23 @@ import {
 } from '@elastic/eui';
 
 // @ts-expect-error update types
-const PackQueriesTableComponent = ({ items, config, handleRemoveQuery }) => {
+export const ScheduledQueryQueriesTable = ({ data }) => {
   const [pageIndex, setPageIndex] = useState(0);
-  const [pageSize, setPageSize] = useState(10);
+  const [pageSize, setPageSize] = useState(5);
   const [sortField, setSortField] = useState('firstName');
   const [sortDirection, setSortDirection] = useState('asc');
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState({});
-  const totalItemCount = 100;
 
   const onTableChange = ({ page = {}, sort = {} }) => {
     // @ts-expect-error update types
-    const { index: pageIndex, size: pageSize } = page;
-
+    const { index, size } = page;
     // @ts-expect-error update types
-    const { field: sortField, direction: sortDirection } = sort;
+    const { field, direction } = sort;
 
-    setPageIndex(pageIndex);
-    setPageSize(pageSize);
-    setSortField(sortField);
-    setSortDirection(sortDirection);
+    setPageIndex(index);
+    setPageSize(size);
+    setSortField(field);
+    setSortDirection(direction);
   };
 
   // @ts-expect-error update types
@@ -52,10 +57,6 @@ const PackQueriesTableComponent = ({ items, config, handleRemoveQuery }) => {
       const label = online ? 'Online' : 'Offline';
       const listItems = [
         {
-          title: 'Nationality',
-          description: `aa`,
-        },
-        {
           title: 'Online',
           description: <EuiHealth color={color}>{label}</EuiHealth>,
         },
@@ -68,23 +69,26 @@ const PackQueriesTableComponent = ({ items, config, handleRemoveQuery }) => {
 
   const columns = [
     {
-      field: 'name',
-      name: 'Query Name',
+      field: 'vars.id.value',
+      name: 'ID',
     },
     {
+      field: 'vars.interval.value',
       name: 'Interval',
-      // @ts-expect-error update types
-      render: (query) => find(['name', query.name], config).interval,
+    },
+    {
+      field: 'enabled',
+      name: 'Active',
     },
     {
       name: 'Actions',
       actions: [
         {
-          name: 'Remove',
-          description: 'Remove this query',
+          name: 'Clone',
+          description: 'Clone this person',
           type: 'icon',
-          icon: 'trash',
-          onClick: handleRemoveQuery,
+          icon: 'copy',
+          onClick: () => '',
         },
       ],
     },
@@ -108,7 +112,7 @@ const PackQueriesTableComponent = ({ items, config, handleRemoveQuery }) => {
   const pagination = {
     pageIndex,
     pageSize,
-    totalItemCount,
+    totalItemCount: data.inputs[0].streams.length,
     pageSizeOptions: [3, 5, 8],
   };
 
@@ -121,7 +125,7 @@ const PackQueriesTableComponent = ({ items, config, handleRemoveQuery }) => {
 
   return (
     <EuiBasicTable
-      items={items}
+      items={data.inputs[0].streams}
       itemId="id"
       itemIdToExpandedRowMap={itemIdToExpandedRowMap}
       isExpandable={true}
@@ -136,5 +140,3 @@ const PackQueriesTableComponent = ({ items, config, handleRemoveQuery }) => {
     />
   );
 };
-
-export const PackQueriesTable = React.memo(PackQueriesTableComponent);

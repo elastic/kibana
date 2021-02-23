@@ -22,23 +22,24 @@ export const createPackRoute = (router: IRouter) => {
       const savedObjectsClient = context.core.savedObjects.client;
 
       // @ts-expect-error update types
-      const { title, description, queries } = request.body;
+      const { name, description, queries } = request.body;
 
       // @ts-expect-error update types
       const references = queries.map((savedQuery) => ({
         type: savedQuerySavedObjectType,
         id: savedQuery.id,
-        name: savedQuery.title,
+        name: savedQuery.name,
       }));
 
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { attributes, references: _, ...restSO } = await savedObjectsClient.create(
         packSavedObjectType,
         {
-          title,
+          name,
           description,
           // @ts-expect-error update types
           // eslint-disable-next-line @typescript-eslint/no-unused-vars
-          queries: queries.map(({ id, ...rest }) => rest),
+          queries: queries.map(({ id, query, ...rest }) => rest),
         },
         {
           references,

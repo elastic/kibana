@@ -5,74 +5,28 @@
  * 2.0.
  */
 
-import { EuiSpacer } from '@elastic/eui';
 import React from 'react';
-import { useHistory } from 'react-router-dom';
 import { useMutation } from 'react-query';
 
-import { useForm, useFormData } from '../../shared_imports';
 import { useKibana } from '../../common/lib/kibana';
 import { SavedQueryForm } from '../form';
-import { LiveQueryForm } from '../../live_query/form';
-import { ResultTabs } from '../edit/tabs';
 
-const SAVED_QUERY_FORM_ID = 'savedQueryForm';
+interface NewSavedQueryPageProps {
+  onSuccess: () => void;
+}
 
-const NewSavedQueryPageComponent = () => {
+const NewSavedQueryPageComponent: React.FC<NewSavedQueryPageProps> = ({ onSuccess }) => {
   const { http } = useKibana().services;
-  const history = useHistory();
 
   const createSavedQueryMutation = useMutation(
     (payload) => http.post(`/internal/osquery/saved_query`, { body: JSON.stringify(payload) }),
     {
-      onSuccess: (data) => {
-        history.push(`/queries/${data.id}`);
-      },
+      onSuccess,
     }
   );
 
-  const { form: savedQueryForm } = useForm({
-    id: SAVED_QUERY_FORM_ID,
-    // schema: formSchema,
-    // @ts-expect-error update types
-    onSubmit: createSavedQueryMutation.mutate,
-    options: {
-      stripEmptyFields: false,
-    },
-    defaultValue: {},
-  });
-
-  const [savedQueryFormData] = useFormData({
-    watch: ['command'],
-    form: savedQueryForm,
-  });
-
-  const createActionMutation = useMutation((payload: Record<string, unknown>) =>
-    http.post('/internal/osquery/action', {
-      body: JSON.stringify({ ...payload, command: savedQueryFormData.command }),
-    })
-  );
-
-  // console.error('createActionMutation', createActionMutation);
-  // console.error('savedQueryFormData', savedQueryFormData);
-
-  return (
-    <>
-      <SavedQueryForm form={savedQueryForm} />
-      <EuiSpacer />
-      {
-        // @ts-expect-error update types
-        <LiveQueryForm onSubmit={createActionMutation.mutate} />
-      }
-
-      {createActionMutation.data && (
-        <>
-          <EuiSpacer />
-          <ResultTabs actionId={createActionMutation.data?.action.action_id} />
-        </>
-      )}
-    </>
-  );
+  // @ts-expect-error update types
+  return <SavedQueryForm handleSubmit={createSavedQueryMutation.mutate} />;
 };
 
 export const NewSavedQueryPage = React.memo(NewSavedQueryPageComponent);

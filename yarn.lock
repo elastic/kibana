@@ -24308,10 +24308,10 @@ react-popper@^1.3.7:
     typed-styles "^0.0.7"
     warning "^4.0.2"
 
-react-query@^3.11.0:
-  version "3.11.0"
-  resolved "https://registry.yarnpkg.com/react-query/-/react-query-3.11.0.tgz#138b8f6bffbdc53b9ae78d295df72402393ce069"
-  integrity sha512-C0pi1Y96DH4cIElzFd8N4hXYoQ4r6Z5jMRleSlote+qabF9N2SKtoea/Vhvb8URVYlIx7fwIbevnNt3Ij3Mjvg==
+react-query@^3.12.0:
+  version "3.12.0"
+  resolved "https://registry.yarnpkg.com/react-query/-/react-query-3.12.0.tgz#a2082a167f3e394e84dfd3cec0f8c7503abf33dc"
+  integrity sha512-WJYECeZ6xT2oxIlgqXUjLNLWRvJbeelXscVnAFfyUFgO21OYEYHMWPG61V9W57EUUqrXioQsNPsU9XyddfEvXQ==
   dependencies:
     "@babel/runtime" "^7.5.5"
     broadcast-channel "^3.4.1"

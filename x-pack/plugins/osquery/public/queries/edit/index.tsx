@@ -6,58 +6,30 @@
  */
 
 import { isEmpty } from 'lodash/fp';
-import { EuiSpacer } from '@elastic/eui';
-import React, { useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import React from 'react';
 import { useMutation, useQuery } from 'react-query';
 
-import { useForm, useFormData } from '../../shared_imports';
-import { ResultTabs } from './tabs';
 import { SavedQueryForm } from '../form';
 import { useKibana } from '../../common/lib/kibana';
-import { LiveQueryForm } from '../../live_query/form';
 
-const EDIT_QUERY_FORM_ID = 'editQueryForm';
+interface EditSavedQueryPageProps {
+  onSuccess: () => void;
+  savedQueryId: string;
+}
 
-const EditSavedQueryPageComponent = () => {
+const EditSavedQueryPageComponent: React.FC<EditSavedQueryPageProps> = ({
+  onSuccess,
+  savedQueryId,
+}) => {
   const { http } = useKibana().services;
-  const { savedQueryId } = useParams<{ savedQueryId: string }>();
 
-  const { isLoading, data: actionDetails } = useQuery(['savedQuery', { savedQueryId }], () =>
+  const { isLoading, data: savedQueryDetails } = useQuery(['savedQuery', { savedQueryId }], () =>
     http.get(`/internal/osquery/saved_query/${savedQueryId}`)
   );
-  const updateSavedQueryMutation = useMutation((payload) =>
-    http.put(`/internal/osquery/saved_query/${savedQueryId}`, { body: JSON.stringify(payload) })
-  );
-
-  const { form: savedQueryForm } = useForm({
-    id: EDIT_QUERY_FORM_ID,
-    // schema: formSchema,
-    // @ts-expect-error update types
-    onSubmit: updateSavedQueryMutation.mutate,
-    options: {
-      stripEmptyFields: false,
-    },
-  });
-
-  useEffect(() => {
-    if (actionDetails?.attributes) {
-      savedQueryForm.setFieldValue('title', actionDetails?.attributes?.title);
-      savedQueryForm.setFieldValue('description', actionDetails?.attributes?.description);
-      savedQueryForm.setFieldValue('command', actionDetails?.attributes?.command);
-    }
-  }, [actionDetails, savedQueryForm]);
-
-  const [savedQueryFormData] = useFormData({
-    watch: ['command'],
-    form: savedQueryForm,
-  });
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const createActionMutation = useMutation((payload: Record<string, any>) =>
-    http.post('/internal/osquery/action', {
-      body: JSON.stringify({ ...payload, command: savedQueryFormData.command }),
-    })
+  const updateSavedQueryMutation = useMutation(
+    (payload) =>
+      http.put(`/internal/osquery/saved_query/${savedQueryId}`, { body: JSON.stringify(payload) }),
+    { onSuccess }
   );
 
   if (isLoading) {
@@ -66,17 +38,13 @@ const EditSavedQueryPageComponent = () => {
 
   return (
     <>
-      {!isEmpty(actionDetails) && <SavedQueryForm form={savedQueryForm} />}
-      <EuiSpacer />
-      {
-        // @ts-expect-error update types
-        <LiveQueryForm onSubmit={createActionMutation.mutate} />
-      }
-      {createActionMutation.data && (
-        <>
-          <EuiSpacer />
-          <ResultTabs actionId={createActionMutation.data?.action.action_id} />
-        </>
+      {!isEmpty(savedQueryDetails) && (
+        <SavedQueryForm
+          defaultValue={savedQueryDetails}
+          // @ts-expect-error update types
+          handleSubmit={updateSavedQueryMutation.mutate}
+          type="edit"
+        />
       )}
     </>
   );

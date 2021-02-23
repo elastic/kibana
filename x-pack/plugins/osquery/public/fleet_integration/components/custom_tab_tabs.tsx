@@ -5,32 +5,32 @@
  * 2.0.
  */
 
-import { EuiTabbedContent, EuiTitle, EuiSpacer } from '@elastic/eui';
-import React, { Fragment, useState } from 'react';
+import React, { useMemo } from 'react';
+import { useLocation } from 'react-router-dom';
+import qs from 'query-string';
 
-import { QueriesPage } from '../../queries/queries';
+import { Queries } from '../../queries';
+import { Packs } from '../../packs';
+import { LiveQuery } from '../../live_query';
 
-const tabs = [
-  {
-    id: 'saved_queries',
-    name: 'Saved Queries',
-    content: (
-      <Fragment>
-        <EuiSpacer />
-        <EuiTitle>
-          <h3>{'Saved Queries'}</h3>
-        </EuiTitle>
-        <QueriesPage />
-      </Fragment>
-    ),
-  },
-];
+const CustomTabTabsComponent = () => {
+  const location = useLocation();
 
-const CustomTabsTabComponent = () => {
-  const [selectedTab, setSelectedTab] = useState(tabs[0]);
+  const selectedTab = useMemo(() => qs.parse(location.search)?.tab, [location.search]);
 
-  // @ts-expect-error update types
-  return <EuiTabbedContent tabs={tabs} selectedTab={selectedTab} onTabClick={setSelectedTab} />;
+  if (selectedTab === 'packs') {
+    return <Packs />;
+  }
+
+  if (selectedTab === 'saved_queries') {
+    return <Queries />;
+  }
+
+  if (selectedTab === 'live_query') {
+    return <LiveQuery />;
+  }
+
+  return <Packs />;
 };
 
-export const CustomTabsTab = React.memo(CustomTabsTabComponent);
+export const CustomTabTabs = React.memo(CustomTabTabsComponent);

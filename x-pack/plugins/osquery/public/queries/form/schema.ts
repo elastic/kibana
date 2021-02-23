@@ -8,14 +8,22 @@
 import { FIELD_TYPES, FormSchema } from '../../shared_imports';
 
 export const formSchema: FormSchema = {
-  title: {
+  name: {
     type: FIELD_TYPES.TEXT,
+    label: 'Query name',
   },
   description: {
     type: FIELD_TYPES.TEXTAREA,
+    label: 'Description',
     validations: [],
   },
-  command: {
+  platform: {
+    type: FIELD_TYPES.SELECT,
+    label: 'Platform',
+    defaultValue: 'all',
+  },
+  query: {
+    label: 'Query',
     type: FIELD_TYPES.TEXTAREA,
     validations: [],
   },

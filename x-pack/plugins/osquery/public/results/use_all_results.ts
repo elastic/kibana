@@ -75,6 +75,7 @@ export const useAllResults = ({
       };
     },
     {
+      refetchInterval: 1000,
       enabled: !skip && !!resultsRequest,
     }
   );

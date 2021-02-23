@@ -5,34 +5,32 @@
  * 2.0.
  */
 
-import React from 'react';
-import { Switch, Route, useRouteMatch } from 'react-router-dom';
+import React, { useCallback, useState } from 'react';
 
 import { QueriesPage } from './queries';
 import { NewSavedQueryPage } from './new';
 import { EditSavedQueryPage } from './edit';
-// import { QueryAgentResults } from './agent_results';
-// import { SavedQueriesPage } from './saved_query';
 
 const QueriesComponent = () => {
-  const match = useRouteMatch();
+  const [showNewSavedQueryForm, setShowNewSavedQueryForm] = useState(false);
+  const [editSavedQueryId, setEditSavedQueryId] = useState<string | null>(null);
 
-  return (
-    <Switch>
-      <Route path={`${match.url}/new`}>
-        <NewSavedQueryPage />
-      </Route>
-      {/* <Route path={`${match.url}/:savedQueryId/results/:agentId`}>
-        <QueryAgentResults />
-      </Route> */}
-      <Route path={`${match.url}/:savedQueryId`}>
-        <EditSavedQueryPage />
-      </Route>
-      <Route path={`${match.url}/`}>
-        <QueriesPage />
-      </Route>
-    </Switch>
-  );
+  const goBack = useCallback(() => {
+    setShowNewSavedQueryForm(false);
+    setEditSavedQueryId(null);
+  }, []);
+
+  const handleNewQueryClick = useCallback(() => setShowNewSavedQueryForm(true), []);
+
+  if (showNewSavedQueryForm) {
+    return <NewSavedQueryPage onSuccess={goBack} />;
+  }
+
+  if (editSavedQueryId?.length) {
+    return <EditSavedQueryPage onSuccess={goBack} savedQueryId={editSavedQueryId} />;
+  }
+
+  return <QueriesPage onNewClick={handleNewQueryClick} onEditClick={setEditSavedQueryId} />;
 };
 
 export const Queries = React.memo(QueriesComponent);

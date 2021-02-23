@@ -194,6 +194,7 @@ const ActionResultsTableComponent: React.FC<ActionResultsTableProps> = ({ action
         renderCellValue={renderCellValue}
         sorting={tableSorting}
         pagination={tablePagination}
+        height="300px"
       />
     </DataContext.Provider>
   );

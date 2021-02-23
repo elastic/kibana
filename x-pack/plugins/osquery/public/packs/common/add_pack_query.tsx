@@ -7,17 +7,21 @@
 
 /* eslint-disable react-perf/jsx-no-new-object-as-prop */
 
-import { EuiButton, EuiCodeBlock, EuiSpacer, EuiText } from '@elastic/eui';
-import React from 'react';
-import { useQuery } from 'react-query';
+import { EuiButton, EuiCodeBlock, EuiSpacer, EuiText, EuiLink, EuiPortal } from '@elastic/eui';
+import React, { useCallback, useMemo, useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from 'react-query';
 
 import { getUseField, useForm, Field, Form, FIELD_TYPES } from '../../shared_imports';
 import { useKibana } from '../../common/lib/kibana';
+import { AddNewPackQueryFlyout } from './add_new_pack_query_flyout';
 
 const CommonUseField = getUseField({ component: Field });
 
 // @ts-expect-error update types
 const AddPackQueryFormComponent = ({ handleSubmit }) => {
+  const queryClient = useQueryClient();
+  const [showAddQueryFlyout, setShowAddQueryFlyout] = useState(false);
+
   const { http } = useKibana().services;
   const { data } = useQuery('savedQueryList', () =>
     http.get('/internal/osquery/saved_query', {
@@ -32,9 +36,9 @@ const AddPackQueryFormComponent = ({ handleSubmit }) => {
 
   const { form } = useForm({
     id: 'addPackQueryForm',
-    onSubmit: (payload) => {
-      // console.error('subimt payload', payload);
-      return handleSubmit(payload);
+    onSubmit: handleSubmit,
+    defaultValue: {
+      query: {},
     },
     schema: {
       query: {
@@ -49,38 +53,74 @@ const AddPackQueryFormComponent = ({ handleSubmit }) => {
   });
   const { submit } = form;
 
-  // console.error('data', data);
+  const createSavedQueryMutation = useMutation(
+    (payload) => http.post(`/internal/osquery/saved_query`, { body: JSON.stringify(payload) }),
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries('savedQueryList');
+        setShowAddQueryFlyout(false);
+      },
+    }
+  );
 
-  const queryOptions =
-    // @ts-expect-error update types
-    data?.saved_objects.map((savedQuery) => ({
-      value: savedQuery,
-      inputDisplay: savedQuery.attributes.title,
-      dropdownDisplay: (
-        <>
-          <strong>{savedQuery.attributes.title}</strong>
-          <EuiText size="s" color="subdued">
-            <p className="euiTextColor--subdued">{savedQuery.attributes.description}</p>
-          </EuiText>
-          <EuiCodeBlock language="sql" fontSize="m" paddingSize="m">
-            {savedQuery.attributes.command}
-          </EuiCodeBlock>
-        </>
-      ),
-    })) ?? [];
+  const queryOptions = useMemo(
+    () =>
+      // @ts-expect-error update types
+      data?.saved_objects.map((savedQuery) => ({
+        value: {
+          id: savedQuery.id,
+          attributes: savedQuery.attributes,
+          type: savedQuery.type,
+        },
+        inputDisplay: savedQuery.attributes.name,
+        dropdownDisplay: (
+          <>
+            <strong>{savedQuery.attributes.name}</strong>
+            <EuiText size="s" color="subdued">
+              <p className="euiTextColor--subdued">{savedQuery.attributes.description}</p>
+            </EuiText>
+            <EuiCodeBlock language="sql" fontSize="m" paddingSize="m">
+              {savedQuery.attributes.query}
+            </EuiCodeBlock>
+          </>
+        ),
+      })) ?? [],
+    [data?.saved_objects]
+  );
 
-  // console.error('queryOptions', queryOptions);
+  const handleShowFlyout = useCallback(() => setShowAddQueryFlyout(true), []);
+  const handleCloseFlyout = useCallback(() => setShowAddQueryFlyout(false), []);
 
   return (
-    <Form form={form}>
-      <CommonUseField path="query" euiFieldProps={{ options: queryOptions }} />
-      <EuiSpacer />
-      <CommonUseField path="interval" />
-      <EuiSpacer />
-      <EuiButton fill onClick={submit}>
-        {'Add query'}
-      </EuiButton>
-    </Form>
+    <>
+      <Form form={form}>
+        <CommonUseField
+          path="query"
+          labelAppend={
+            <EuiText size="xs">
+              <EuiLink onClick={handleShowFlyout}>{'Add new saved query'}</EuiLink>
+            </EuiText>
+          }
+          euiFieldProps={{
+            options: queryOptions,
+          }}
+        />
+        <EuiSpacer />
+        <CommonUseField path="interval" />
+        <EuiSpacer />
+        <EuiButton fill onClick={submit}>
+          {'Add query'}
+        </EuiButton>
+      </Form>
+      {showAddQueryFlyout && (
+        <EuiPortal>
+          <AddNewPackQueryFlyout
+            handleClose={handleCloseFlyout}
+            handleSubmit={createSavedQueryMutation.mutate}
+          />
+        </EuiPortal>
+      )}
+    </>
   );
 };
 

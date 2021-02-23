@@ -21,11 +21,18 @@ export const readSavedQueryRoute = (router: IRouter) => {
     async (context, request, response) => {
       const savedObjectsClient = context.core.savedObjects.client;
 
-      // @ts-expect-error update types
-      const savedQuery = await savedObjectsClient.get(savedQuerySavedObjectType, request.params.id);
+      const { attributes, ...savedQuery } = await savedObjectsClient.get(
+        savedQuerySavedObjectType,
+        // @ts-expect-error update types
+        request.params.id
+      );
 
       return response.ok({
-        body: savedQuery,
+        body: {
+          ...savedQuery,
+          // @ts-expect-error update types
+          ...attributes,
+        },
       });
     }
   );

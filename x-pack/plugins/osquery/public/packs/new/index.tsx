@@ -7,28 +7,24 @@
 
 import React from 'react';
 import { useMutation } from 'react-query';
-import { useHistory } from 'react-router-dom';
 
 import { PackForm } from '../common/pack_form';
 import { useKibana } from '../../common/lib/kibana';
 
-const NewPackPageComponent = () => {
-  const history = useHistory();
+interface NewPackPageProps {
+  onSuccess: () => void;
+}
+
+const NewPackPageComponent: React.FC<NewPackPageProps> = ({ onSuccess }) => {
   const { http } = useKibana().services;
 
   const addPackMutation = useMutation(
     (payload) =>
       http.post(`/internal/osquery/pack`, {
-        body: JSON.stringify({
-          // @ts-expect-error update types
-          ...payload,
-          queries: [],
-        }),
+        body: JSON.stringify(payload),
       }),
     {
-      onSuccess: (data) => {
-        history.push(`/packs/${data.id}`);
-      },
+      onSuccess,
     }
   );
 

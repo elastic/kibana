@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { find } from 'lodash/fp';
+import { find, map } from 'lodash/fp';
 import { schema } from '@kbn/config-schema';
 
 import { IRouter } from '../../../../../../src/core/server';
-import { packSavedObjectType } from '../../../common/types';
+import { savedQuerySavedObjectType, packSavedObjectType } from '../../../common/types';
 
 export const readPackRoute = (router: IRouter) => {
   router.get(
@@ -23,7 +23,7 @@ export const readPackRoute = (router: IRouter) => {
       const savedObjectsClient = context.core.savedObjects.client;
 
       const { attributes, references, ...rest } = await savedObjectsClient.get<{
-        title: string;
+        name: string;
         description: string;
         queries: Array<{ name: string; interval: string }>;
       }>(
@@ -32,23 +32,53 @@ export const readPackRoute = (router: IRouter) => {
         request.params.id
       );
 
+      const queries =
+        attributes.queries?.map((packQuery) => {
+          const queryReference = find(['name', packQuery.name], references);
+
+          if (queryReference) {
+            return {
+              ...packQuery,
+              id: queryReference?.id,
+            };
+          }
+
+          return packQuery;
+        }) ?? [];
+
+      const queriesIds = map('id', queries);
+
+      const { saved_objects: savedQueries } = await savedObjectsClient.bulkGet<{}>(
+        queriesIds.map((queryId) => ({
+          type: savedQuerySavedObjectType,
+          id: queryId,
+        }))
+      );
+
+      // @ts-expect-error update types
+      const queriesWithQueries = queries.reduce((acc, query) => {
+        // @ts-expect-error update types
+        const querySavedObject = find(['id', query.id], savedQueries);
+        // @ts-expect-error update types
+        if (querySavedObject?.attributes?.query) {
+          return [
+            ...acc,
+            {
+              ...query,
+              // @ts-expect-error update types
+              query: querySavedObject.attributes.query,
+            },
+          ];
+        }
+
+        return acc;
+      }, []);
+
       return response.ok({
         body: {
           ...rest,
           ...attributes,
-          queries:
-            attributes.queries?.map((packQuery) => {
-              const queryReference = find(['name', packQuery.name], references);
-
-              if (queryReference) {
-                return {
-                  ...packQuery,
-                  id: queryReference?.id,
-                };
-              }
-
-              return packQuery;
-            }) ?? [],
+          queries: queriesWithQueries,
         },
       });
     }

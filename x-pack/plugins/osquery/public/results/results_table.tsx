@@ -152,6 +152,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({ actionId,
         renderCellValue={renderCellValue}
         sorting={tableSorting}
         pagination={tablePagination}
+        height="300px"
       />
     </DataContext.Provider>
   );

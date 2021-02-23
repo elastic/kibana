@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import React from 'react';
 import { QueryClient, QueryClientProvider } from 'react-query';
 
 import { PackageCustomExtensionComponentProps } from '../../../fleet/public';
-// import { InputStreamForm } from './components/input_stream_form';
-// import { EditScheduledQueryForm } from './components/form';
-// import { NewSavedQueryPage } from '../queries/new';
-import { CustomTabsTab } from './components/custom_tab_tabs';
+import { CustomTabTabs } from './components/custom_tab_tabs';
+import { Navigation } from './components/navigation';
 
 const queryClient = new QueryClient();
 
@@ -20,14 +19,18 @@ const queryClient = new QueryClient();
  * Exports Osquery-specific package policy instructions
  * for use in the Fleet app custom tab
  */
-export const OsqueryManagedCustomExtension = memo<PackageCustomExtensionComponentProps>((props) => {
-  // console.error('rpops', props);
-
-  return (
+export const OsqueryManagedCustomExtension = React.memo<PackageCustomExtensionComponentProps>(
+  () => (
     <QueryClientProvider client={queryClient}>
-      <CustomTabsTab />
-      {/* <NewSavedQueryPage /> */}
+      <EuiFlexGroup>
+        <EuiFlexItem grow={false}>
+          <Navigation />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <CustomTabTabs />
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </QueryClientProvider>
-  );
-});
+  )
+);
 OsqueryManagedCustomExtension.displayName = 'OsqueryManagedCustomExtension';

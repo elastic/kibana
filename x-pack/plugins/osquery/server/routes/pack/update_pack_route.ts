@@ -23,7 +23,7 @@ export const updatePackRoute = (router: IRouter) => {
       const savedObjectsClient = context.core.savedObjects.client;
 
       // @ts-expect-error update types
-      const { title, description, queries } = request.body;
+      const { name, description, queries } = request.body;
 
       // @ts-expect-error update types
       const updatedReferences = queries.map((savedQuery) => ({
@@ -38,11 +38,11 @@ export const updatePackRoute = (router: IRouter) => {
         // @ts-expect-error update types
         request.params.id,
         {
-          title,
+          name,
           description,
           // @ts-expect-error update types
           // eslint-disable-next-line @typescript-eslint/no-unused-vars
-          queries: queries.map(({ id, ...rest }) => rest),
+          queries: queries.map(({ id, query, ...rest }) => rest),
         },
         {
           references: updatedReferences,

@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { useForm, useFormData, Form, getUseField, Field, FIELD_TYPES } from '../../shared_imports';
+import { useForm, Form, getUseField, Field, FIELD_TYPES } from '../../shared_imports';
 
 const CommonUseField = getUseField({ component: Field });
 
@@ -53,16 +53,11 @@ const schema = {
 
 // @ts-expect-error update types
 const InputStreamFormComponent = ({ data }) => {
-  console.error('data', data);
   const { form } = useForm({
     id: FORM_ID,
     schema,
     defaultValue: data,
   });
-
-  const [formData] = useFormData({ form });
-
-  console.error('fss', formData);
 
   return (
     <Form form={form}>

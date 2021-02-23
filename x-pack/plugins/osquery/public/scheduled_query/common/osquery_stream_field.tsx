@@ -36,7 +36,7 @@ const OsqueryStreamFieldComponent = ({ field, removeItem }) => {
     () =>
       // @ts-expect-error update types
       (savedQueries ?? []).map((savedQuery) => ({
-        text: savedQuery.attributes.title,
+        text: savedQuery.attributes.name,
         value: savedQuery.id,
       })),
     [savedQueries]
@@ -60,7 +60,7 @@ const OsqueryStreamFieldComponent = ({ field, removeItem }) => {
             },
             query: {
               ...prev.vars.query,
-              value: savedQuery.attributes.command,
+              value: savedQuery.attributes.query,
             },
           },
         }));

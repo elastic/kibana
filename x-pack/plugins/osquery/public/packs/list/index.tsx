@@ -10,18 +10,23 @@ import {
   EuiBasicTable,
   EuiButton,
   EuiButtonIcon,
-  EuiCodeBlock,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiSpacer,
   RIGHT_ALIGNMENT,
 } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useQuery, useQueryClient, useMutation } from 'react-query';
-import { useHistory } from 'react-router-dom';
 
-import { useKibana, useRouterNavigate } from '../../common/lib/kibana';
+import { PackTableQueriesTable } from './pack_table_queries_table';
+import { useKibana } from '../../common/lib/kibana';
 
-const PacksPageComponent = () => {
-  const { push } = useHistory();
+interface PacksPageProps {
+  onEditClick: (packId: string) => void;
+  onNewClick: () => void;
+}
+
+const PacksPageComponent: React.FC<PacksPageProps> = ({ onNewClick, onEditClick }) => {
   const queryClient = useQueryClient();
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(5);
@@ -30,7 +35,6 @@ const PacksPageComponent = () => {
   const [selectedItems, setSelectedItems] = useState([]);
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<Record<string, unknown>>({});
   const { http } = useKibana().services;
-  const newQueryLinkProps = useRouterNavigate('packs/new');
 
   const deletePacksMutation = useMutation(
     (payload) => http.delete(`/internal/osquery/pack`, { body: JSON.stringify(payload) }),
@@ -65,9 +69,10 @@ const PacksPageComponent = () => {
         delete itemIdToExpandedRowMapValues[item.id];
       } else {
         itemIdToExpandedRowMapValues[item.id] = (
-          <EuiCodeBlock language="sql" fontSize="m" paddingSize="m">
-            {item.attributes.command}
-          </EuiCodeBlock>
+          <>
+            <PackTableQueriesTable items={item.queries} />
+            <EuiSpacer />
+          </>
         );
       }
       setItemIdToExpandedRowMap(itemIdToExpandedRowMapValues);
@@ -86,13 +91,13 @@ const PacksPageComponent = () => {
     [itemIdToExpandedRowMap, toggleDetails]
   );
 
-  const handleEditClick = useCallback((item) => push(`/packs/${item.id}`), [push]);
+  const handleEditClick = useCallback((item) => onEditClick(item.id), [onEditClick]);
 
   const columns = useMemo(
     () => [
       {
-        field: 'title',
-        name: 'Query name',
+        field: 'name',
+        name: 'Pack name',
         sortable: true,
         truncateText: true,
       },
@@ -181,15 +186,19 @@ const PacksPageComponent = () => {
 
   return (
     <div>
-      {!selectedItems.length ? (
-        <EuiButton fill {...newQueryLinkProps}>
-          {'New pack'}
-        </EuiButton>
-      ) : (
-        <EuiButton color="danger" iconType="trash" onClick={handleDeleteClick}>
-          {`Delete ${selectedItems.length} packs`}
-        </EuiButton>
-      )}
+      <EuiFlexGroup justifyContent="flexEnd">
+        <EuiFlexItem grow={false}>
+          {!selectedItems.length ? (
+            <EuiButton fill onClick={onNewClick}>
+              {'New pack'}
+            </EuiButton>
+          ) : (
+            <EuiButton color="danger" iconType="trash" onClick={handleDeleteClick}>
+              {`Delete ${selectedItems.length} packs`}
+            </EuiButton>
+          )}
+        </EuiFlexItem>
+      </EuiFlexGroup>
 
       <EuiSpacer />
 

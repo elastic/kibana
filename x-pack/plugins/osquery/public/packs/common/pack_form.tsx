@@ -9,6 +9,7 @@ import { EuiButton, EuiSpacer } from '@elastic/eui';
 import React from 'react';
 
 import { getUseField, useForm, Field, Form, FIELD_TYPES } from '../../shared_imports';
+import { PackQueriesField } from './pack_queries_field';
 
 const CommonUseField = getUseField({ component: Field });
 
@@ -19,9 +20,13 @@ const PackFormComponent = ({ data, handleSubmit }) => {
     onSubmit: (payload) => {
       return handleSubmit(payload);
     },
-    defaultValue: data,
+    defaultValue: data ?? {
+      name: '',
+      description: '',
+      queries: [],
+    },
     schema: {
-      title: {
+      name: {
         type: FIELD_TYPES.TEXT,
         label: 'Pack name',
       },
@@ -29,15 +34,21 @@ const PackFormComponent = ({ data, handleSubmit }) => {
         type: FIELD_TYPES.TEXTAREA,
         label: 'Description',
       },
+      queries: {
+        type: FIELD_TYPES.MULTI_SELECT,
+        label: 'Queries',
+      },
     },
   });
   const { submit } = form;
 
   return (
     <Form form={form}>
-      <CommonUseField path="title" />
+      <CommonUseField path="name" />
       <EuiSpacer />
       <CommonUseField path="description" />
+      <EuiSpacer />
+      <CommonUseField path="queries" component={PackQueriesField} />
       <EuiSpacer />
       <EuiButton fill onClick={submit}>
         {'Save pack'}

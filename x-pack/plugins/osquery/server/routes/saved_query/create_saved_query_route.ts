@@ -28,13 +28,13 @@ export const createSavedQueryRoute = (router: IRouter) => {
     async (context, request, response) => {
       const savedObjectsClient = context.core.savedObjects.client;
 
-      const { title, description, command } = request.body;
+      const { name, description, platform, query } = request.body;
 
       const savedQuerySO = await savedObjectsClient.create(savedQuerySavedObjectType, {
-        title,
+        name,
         description,
-        command,
-        created: Date.now(),
+        query,
+        platform,
       });
 
       return response.ok({

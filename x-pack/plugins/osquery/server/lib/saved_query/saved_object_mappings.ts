@@ -14,10 +14,10 @@ export const savedQuerySavedObjectMappings: SavedObjectsType['mappings'] = {
     description: {
       type: 'text',
     },
-    title: {
+    name: {
       type: 'text',
     },
-    command: {
+    query: {
       type: 'text',
     },
     created: {
@@ -25,6 +25,9 @@ export const savedQuerySavedObjectMappings: SavedObjectsType['mappings'] = {
     },
     createdBy: {
       type: 'text',
+    },
+    platform: {
+      type: 'keyword',
     },
     updated: {
       type: 'date',
@@ -47,7 +50,7 @@ export const packSavedObjectMappings: SavedObjectsType['mappings'] = {
     description: {
       type: 'text',
     },
-    title: {
+    name: {
       type: 'text',
     },
     created: {
