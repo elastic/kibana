@@ -27,6 +27,7 @@ export const createMockConfig = () => ({
     to: 'now',
   },
   packagerTaskInterval: '60s',
+  usePackageRegistryRules: false,
   validateArtifactDownloads: true,
 });
 

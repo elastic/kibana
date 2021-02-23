@@ -251,10 +251,10 @@ export const duplicateRules = async ({ rules }: DuplicateRulesProps): Promise<Bu
  * @throws An error if response is not OK
  */
 export const createPrepackagedRules = async ({
-  pkgVersion,
+  pkgVersion = null,
   signal,
 }: {
-  pkgVersion: string | undefined | null;
+  pkgVersion?: string | null | undefined;
   signal: AbortSignal;
 }): Promise<{
   rules_installed: number;

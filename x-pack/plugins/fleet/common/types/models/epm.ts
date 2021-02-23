@@ -36,7 +36,11 @@ export type EpmPackageInstallStatus = 'installed' | 'installing';
 export type DetailViewPanelName = 'overview' | 'policies' | 'settings' | 'custom';
 export type ServiceName = 'kibana' | 'elasticsearch';
 export type AgentAssetType = typeof agentAssetTypes;
-export type AssetType = KibanaAssetType | ElasticsearchAssetType | ValueOf<AgentAssetType> | 'rules';
+export type AssetType =
+ | KibanaAssetType
+ | ElasticsearchAssetType
+ | ValueOf<AgentAssetType>
+ | 'rules';
 
 /*
   Enum mapping of a saved object asset type to how it would appear in a package file path (snake cased)

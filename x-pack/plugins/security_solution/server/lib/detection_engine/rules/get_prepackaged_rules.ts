@@ -130,7 +130,7 @@ export const checkAndStageUpdate = async () => {
   }
 
   try {
-    const registryPackage = await fetchFindLatestPackage(DetectionRulesPackageName);
+    const registryPackage = await fetchFindLatestPackage(DETECTION_RULES_PACKAGE_NAME);
     if (!latestRulesPackageVersion || registryPackage.version !== latestRulesPackageVersion) {
       // automatically download and cache the latest in memory
       const downloaded = await getPackageRegistryRules(registryPackage.version);

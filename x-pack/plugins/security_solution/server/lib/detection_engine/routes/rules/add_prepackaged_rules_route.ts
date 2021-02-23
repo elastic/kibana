@@ -80,7 +80,7 @@ export const addPrepackedRulesRoute = (
           frameworkRequest,
           config.maxTimelineImportExportSize,
           undefined,
-          request.body.rules_package_version
+          request.body?.rules_package_version || undefined
         );
         return response.ok({ body: validated ?? {} });
       } catch (err) {
