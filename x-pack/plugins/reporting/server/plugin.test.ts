@@ -16,9 +16,9 @@ jest.mock('./browsers/install', () => ({
 }));
 
 import { coreMock } from 'src/core/server/mocks';
-import { featuresPluginMock } from '../../features/server/mocks';
 import { ReportingPlugin } from './plugin';
 import { createMockConfigSchema } from './test_helpers';
+import { featuresPluginMock } from '../../features/server/mocks';
 
 const sleep = (time: number) => new Promise((r) => setTimeout(r, time));
 

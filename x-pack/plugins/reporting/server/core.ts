@@ -68,7 +68,7 @@ export class ReportingCore {
   /*
    * Register startDeps
    */
-  public async pluginStart(startDeps: ReportingInternalStart) {
+  public pluginStart(startDeps: ReportingInternalStart) {
     this.pluginStart$.next(startDeps); // trigger the observer
     this.pluginStartDeps = startDeps; // cache
   }

@@ -29,8 +29,8 @@ export class ReportingPlugin
 
   constructor(context: PluginInitializerContext<ReportingConfigType>) {
     this.logger = new LevelLogger(context.logger.get());
-    this.reportingCore = new ReportingCore(this.logger);
     this.initializerContext = context;
+    this.reportingCore = new ReportingCore(this.logger);
   }
 
   public setup(core: CoreSetup, plugins: ReportingSetupDeps) {
@@ -117,7 +117,7 @@ export class ReportingPlugin
       const store = new ReportingStore(reportingCore, logger);
       const esqueue = await createQueueFactory(reportingCore, store, logger); // starts polling for pending jobs
 
-      await reportingCore.pluginStart({
+      reportingCore.pluginStart({
         browserDriverFactory,
         savedObjects: core.savedObjects,
         uiSettings: core.uiSettings,
