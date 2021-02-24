@@ -21,7 +21,10 @@ import { getDurationFormatter } from '../../../../common/utils/formatters';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import { APIReturnType } from '../../../services/rest/createCallApmApi';
-import { CorrelationsTable } from './correlations_table';
+import {
+  CorrelationsTable,
+  SelectedSignificantTerm,
+} from './correlations_table';
 import { ChartContainer } from '../../shared/charts/chart_container';
 import { useTheme } from '../../../hooks/use_theme';
 import { CustomFields, PercentileOption } from './custom_fields';
@@ -33,10 +36,6 @@ type CorrelationsApiResponse = NonNullable<
   APIReturnType<'GET /api/apm/correlations/slow_transactions'>
 >;
 
-type SignificantTerm = NonNullable<
-  CorrelationsApiResponse['significantTerms']
->[0];
-
 interface Props {
   onClose: () => void;
 }
@@ -45,12 +44,13 @@ export function LatencyCorrelations({ onClose }: Props) {
   const [
     selectedSignificantTerm,
     setSelectedSignificantTerm,
-  ] = useState<SignificantTerm | null>(null);
+  ] = useState<SelectedSignificantTerm | null>(null);
 
   const { serviceName } = useParams<{ serviceName?: string }>();
-  const { urlParams, uiFilters } = useUrlParams();
+  const { urlParams } = useUrlParams();
   const {
     environment,
+    kuery,
     transactionName,
     transactionType,
     start,
@@ -77,12 +77,12 @@ export function LatencyCorrelations({ onClose }: Props) {
           params: {
             query: {
               environment,
+              kuery,
               serviceName,
               transactionName,
               transactionType,
               start,
               end,
-              uiFilters: JSON.stringify(uiFilters),
               durationPercentile: durationPercentile.toString(10),
               fieldNames: fieldNames.join(','),
             },
@@ -92,12 +92,12 @@ export function LatencyCorrelations({ onClose }: Props) {
     },
     [
       environment,
+      kuery,
       serviceName,
       start,
       end,
       transactionName,
       transactionType,
-      uiFilters,
       durationPercentile,
       fieldNames,
     ]
@@ -110,7 +110,7 @@ export function LatencyCorrelations({ onClose }: Props) {
     <>
       <EuiFlexGroup direction="column">
         <EuiFlexItem>
-          <EuiText size="s">
+          <EuiText size="s" color="subdued">
             <p>
               {i18n.translate('xpack.apm.correlations.latency.description', {
                 defaultMessage:
@@ -178,13 +178,30 @@ function getDistributionYMax(data?: CorrelationsApiResponse) {
   return Math.max(...yValues);
 }
 
+function getSelectedDistribution(
+  data: CorrelationsApiResponse,
+  selectedSignificantTerm: SelectedSignificantTerm
+) {
+  const { significantTerms } = data;
+  if (!significantTerms) {
+    return [];
+  }
+  return (
+    significantTerms.find(
+      ({ fieldName, fieldValue }) =>
+        selectedSignificantTerm.fieldName === fieldName &&
+        selectedSignificantTerm.fieldValue === fieldValue
+    )?.distribution || []
+  );
+}
+
 function LatencyDistributionChart({
   data,
   selectedSignificantTerm,
   status,
 }: {
   data?: CorrelationsApiResponse;
-  selectedSignificantTerm: SignificantTerm | null;
+  selectedSignificantTerm: SelectedSignificantTerm | null;
   status: FETCH_STATUS;
 }) {
   const theme = useTheme();
@@ -233,12 +250,13 @@ function LatencyDistributionChart({
           yScaleType={ScaleType.Linear}
           xAccessor={'x'}
           yAccessors={['y']}
+          color={theme.eui.euiColorVis1}
           data={data?.overall?.distribution || []}
           minBarHeight={5}
           tickFormat={(d) => `${roundFloat(d)}%`}
         />
 
-        {selectedSignificantTerm !== null ? (
+        {data && selectedSignificantTerm ? (
           <BarSeries
             id={i18n.translate(
               'xpack.apm.correlations.latency.chart.selectedTermLatencyDistributionLabel',
@@ -254,8 +272,8 @@ function LatencyDistributionChart({
             yScaleType={ScaleType.Linear}
             xAccessor={'x'}
             yAccessors={['y']}
-            color={theme.eui.euiColorAccent}
-            data={selectedSignificantTerm.distribution}
+            color={theme.eui.euiColorVis2}
+            data={getSelectedDistribution(data, selectedSignificantTerm)}
             minBarHeight={5}
             tickFormat={(d) => `${roundFloat(d)}%`}
           />

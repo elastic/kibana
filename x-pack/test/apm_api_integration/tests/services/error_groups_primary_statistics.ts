@@ -32,7 +32,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             query: {
               start,
               end,
-              uiFilters: '{}',
               transactionType: 'request',
             },
           })
@@ -58,7 +57,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             query: {
               start,
               end,
-              uiFilters: '{}',
               transactionType: 'request',
               environment: 'production',
             },
