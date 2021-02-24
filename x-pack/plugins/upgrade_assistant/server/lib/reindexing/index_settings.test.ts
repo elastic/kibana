@@ -181,22 +181,24 @@ describe('getReindexWarnings', () => {
   });
 
   if (mockKibanaSemverVersion.major === 7) {
-    it('returns customTypeName for non-_doc mapping types', () => {
-      expect(
-        getReindexWarnings({
-          settings: {},
-          mappings: { doc: {} },
-        })
-      ).toEqual([ReindexWarning.customTypeName]);
-    });
+    describe('customTypeName warning', () => {
+      it('returns customTypeName for non-_doc mapping types', () => {
+        expect(
+          getReindexWarnings({
+            settings: {},
+            mappings: { doc: {} },
+          })
+        ).toEqual([ReindexWarning.customTypeName]);
+      });
 
-    it('does not return customTypeName for _doc mapping types', () => {
-      expect(
-        getReindexWarnings({
-          settings: {},
-          mappings: { _doc: {} },
-        })
-      ).toEqual([]);
+      it('does not return customTypeName for _doc mapping types', () => {
+        expect(
+          getReindexWarnings({
+            settings: {},
+            mappings: { _doc: {} },
+          })
+        ).toEqual([]);
+      });
     });
   }
 });
