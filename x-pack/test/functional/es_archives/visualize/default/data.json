@@ -146,8 +146,6 @@
 {
   "type": "doc",
   "value": {
-    "index": ".kibana",
-    "type": "doc",
     "id": "index-pattern:logstash-2015.09.22",
     "index": ".kibana_1",
     "source": {
