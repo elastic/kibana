@@ -243,7 +243,7 @@ describe('handlers', () => {
 
       await getTrustedAppsListHandler(
         createHandlerContextMock(),
-        httpServerMock.createKibanaRequest({ params: { page: 1, per_page: 20 } }),
+        httpServerMock.createKibanaRequest({ query: { page: 1, per_page: 20 } }),
         mockResponse
       );
 
@@ -268,6 +268,31 @@ describe('handlers', () => {
           mockResponse
         )
       ).rejects.toThrowError(error);
+    });
+
+    it('should pass all params to the service', async () => {
+      const mockResponse = httpServerMock.createResponseFactory();
+
+      exceptionsListClient.findExceptionListItem.mockResolvedValue({
+        data: [EXCEPTION_LIST_ITEM],
+        page: 5,
+        per_page: 13,
+        total: 100,
+      });
+
+      const requestContext = createHandlerContextMock();
+
+      await getTrustedAppsListHandler(
+        requestContext,
+        httpServerMock.createKibanaRequest({
+          query: { page: 5, per_page: 13, kuery: 'some-param.key: value' },
+        }),
+        mockResponse
+      );
+
+      expect(exceptionsListClient.findExceptionListItem).toHaveBeenCalledWith(
+        expect.objectContaining({ filter: 'some-param.key: value', page: 5, perPage: 13 })
+      );
     });
   });
 
@@ -354,7 +379,7 @@ describe('handlers', () => {
 
       await getOneHandler(
         createHandlerContextMock(),
-        httpServerMock.createKibanaRequest({ params: { page: 1, per_page: 20 } }),
+        httpServerMock.createKibanaRequest({ query: { page: 1, per_page: 20 } }),
         mockResponse
       );
 
@@ -370,7 +395,7 @@ describe('handlers', () => {
 
       await getOneHandler(
         createHandlerContextMock(),
-        httpServerMock.createKibanaRequest({ params: { page: 1, per_page: 20 } }),
+        httpServerMock.createKibanaRequest({ query: { page: 1, per_page: 20 } }),
         mockResponse
       );
 
@@ -388,7 +413,7 @@ describe('handlers', () => {
 
       await getOneHandler(
         createHandlerContextMock(),
-        httpServerMock.createKibanaRequest({ params: { page: 1, per_page: 20 } }),
+        httpServerMock.createKibanaRequest({ query: { page: 1, per_page: 20 } }),
         mockResponse
       );
 

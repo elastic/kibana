@@ -202,7 +202,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     registerLimitedConcurrencyRoutes(core);
     registerResolverRoutes(router);
     registerPolicyRoutes(router, endpointContext);
-    registerTrustedAppsRoutes(router);
+    registerTrustedAppsRoutes(router, endpointContext);
     registerDownloadArtifactRoute(router, endpointContext, this.artifactsCache);
 
     plugins.features.registerKibanaFeature({

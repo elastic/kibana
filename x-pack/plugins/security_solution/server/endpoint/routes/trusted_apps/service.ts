@@ -65,7 +65,7 @@ export const getTrustedApp = async (
 
 export const getTrustedAppsList = async (
   exceptionsListClient: ExceptionListClient,
-  { page, per_page: perPage }: GetTrustedAppsListRequest
+  { page, per_page: perPage, kuery }: GetTrustedAppsListRequest
 ): Promise<GetTrustedListAppsResponse> => {
   // Ensure list is created if it does not exist
   await exceptionsListClient.createTrustedAppsList();
@@ -74,7 +74,7 @@ export const getTrustedAppsList = async (
     listId: ENDPOINT_TRUSTED_APPS_LIST_ID,
     page,
     perPage,
-    filter: undefined,
+    filter: kuery,
     namespaceType: 'agnostic',
     sortField: 'name',
     sortOrder: 'asc',
