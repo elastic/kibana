@@ -43,7 +43,7 @@ interface IndexPatternSelectState {
 // eslint-disable-next-line import/no-default-export
 export default class IndexPatternSelect extends Component<IndexPatternSelectInternalProps> {
   static defaultProps: {
-    maxIndexPatterns: 1000
+    maxIndexPatterns: 1000;
   };
 
   private isMounted: boolean = false;
