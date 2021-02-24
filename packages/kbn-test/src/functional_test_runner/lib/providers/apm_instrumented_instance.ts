@@ -75,7 +75,7 @@ export const createApmInstrumentedInstance = <T extends object>(
       get(_, property: keyof T, receiver) {
         const value = Reflect.get(object, property, receiver);
 
-        // don't symbol properties
+        // don't wrap symbol properties
         if (typeof property !== 'string') {
           return value;
         }
