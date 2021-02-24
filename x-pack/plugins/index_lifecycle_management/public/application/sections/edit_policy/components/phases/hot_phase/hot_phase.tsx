@@ -39,6 +39,7 @@ import {
   SearchableSnapshotField,
   ReadonlyField,
   ShrinkField,
+  RollupField,
 } from '../shared_fields';
 import { Phase } from '../phase';
 
@@ -247,13 +248,18 @@ export const HotPhase: FunctionComponent = () => {
       </DescribedFormRow>
       {isUsingRollover && (
         <>
-          {<ForcemergeField phase={'hot'} />}
-          <ShrinkField phase={'hot'} />
-          {license.canUseSearchableSnapshot() && <SearchableSnapshotField phase={'hot'} />}
-          <ReadonlyField phase={'hot'} />
+          <ForcemergeField phase="hot" />
+
+          <ShrinkField phase="hot" />
+
+          {license.canUseSearchableSnapshot() && <SearchableSnapshotField phase="hot" />}
+
+          <RollupField phase="hot" />
+
+          <ReadonlyField phase="hot" />
         </>
       )}
-      <IndexPriorityField phase={'hot'} />
+      <IndexPriorityField phase="hot" />
     </Phase>
   );
 };
