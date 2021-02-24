@@ -10,6 +10,7 @@ import { EuiFilePicker, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { MB } from '../../common';
 import { getMaxBytes, getMaxBytesFormatted } from '../get_max_bytes';
+import { validateFile } from '../importer';
 import { GeoJsonImporter, GEOJSON_FILE_TYPES } from '../importer/geojson_importer';
 
 interface Props {
@@ -70,6 +71,7 @@ export class GeoJsonFilePicker extends Component<Props, State> {
     let previewError: string | null = null;
     let preview: { features: Feature[]; geoFieldTypes: string[]; previewCoverage: number };
     try {
+      validateFile(file, GEOJSON_FILE_TYPES);
       importer = new GeoJsonImporter(file);
       preview = await importer.previewFile(10000, MB * 3);
       if (preview.features.length === 0) {

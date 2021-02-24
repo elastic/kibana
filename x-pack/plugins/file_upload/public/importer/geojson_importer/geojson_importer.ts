@@ -24,7 +24,6 @@ import { callImportRoute, Importer, IMPORT_RETRIES } from '../importer';
 import { ES_FIELD_TYPES } from '../../../../../../src/plugins/data/public';
 // @ts-expect-error
 import { geoJsonCleanAndValidate } from './geojson_clean_and_validate';
-import { validateFile } from '../validate_file';
 import { MB } from '../../../common';
 
 export const GEOJSON_FILE_TYPES = ['.json', '.geojson'];
@@ -46,7 +45,6 @@ export class GeoJsonImporter extends Importer {
   constructor(file: File) {
     super();
 
-    validateFile(file, GEOJSON_FILE_TYPES);
     this._file = file;
   }
 
@@ -61,7 +59,9 @@ export class GeoJsonImporter extends Importer {
     await this._readUntil(rowLimit, sizeLimit);
     return {
       features: [...this._features],
-      previewCoverage: Math.round((this._unimportedBytesProcessed / this._file.size) * 100),
+      previewCoverage: this._hasNext
+        ? Math.round((this._unimportedBytesProcessed / this._file.size) * 100)
+        : 100,
       geoFieldTypes:
         this._geometryTypesMap.has('Point') || this._geometryTypesMap.has('MultiPoint')
           ? [ES_FIELD_TYPES.GEO_POINT, ES_FIELD_TYPES.GEO_SHAPE]
@@ -250,7 +250,7 @@ export class GeoJsonImporter extends Importer {
   }
 }
 
-function toEsDocs(
+export function toEsDocs(
   features: Feature[],
   geoFieldType: ES_FIELD_TYPES.GEO_POINT | ES_FIELD_TYPES.GEO_SHAPE
 ) {
