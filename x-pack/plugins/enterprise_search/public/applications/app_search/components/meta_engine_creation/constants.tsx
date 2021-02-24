@@ -37,14 +37,14 @@ export const META_ENGINE_CREATION_FORM_META_ENGINE_DESCRIPTION = i18n.translate(
   'xpack.enterpriseSearch.appSearch.metaEngineCreation.form.metaEngineDescription',
   {
     defaultMessage:
-      'Meta Engines allow you to combine multiple Engines into one, searchable Engine.',
+      'Meta engines allow you to combine multiple engines into one, searchable engine.',
   }
 );
 
 export const META_ENGINE_CREATION_FORM_DOCUMENTATION_LINK = i18n.translate(
   'xpack.enterpriseSearch.appSearch.metaEngineCreation.form.documentationLink',
   {
-    defaultMessage: 'Read the Documentation',
+    defaultMessage: 'Read the documentation',
   }
 );
 
@@ -68,7 +68,7 @@ export const META_ENGINE_CREATION_FORM_DOCUMENTATION_DESCRIPTION = (
 export const META_ENGINE_CREATION_FORM_ENGINE_NAME_LABEL = i18n.translate(
   'xpack.enterpriseSearch.appSearch.metaEngineCreation.form.engineName.label',
   {
-    defaultMessage: 'Engine name',
+    defaultMessage: 'Meta engine name',
   }
 );
 
@@ -89,14 +89,14 @@ export const SANITIZED_NAME_NOTE = i18n.translate(
 export const META_ENGINE_CREATION_FORM_ENGINE_NAME_PLACEHOLDER = i18n.translate(
   'xpack.enterpriseSearch.appSearch.metaEngineCreation.form.engineName.placeholder',
   {
-    defaultMessage: 'i.e., my-search-engine',
+    defaultMessage: 'i.e., my-meta-engine',
   }
 );
 
 export const META_ENGINE_CREATION_FORM_ENGINE_SOURCE_ENGINES_LABEL = i18n.translate(
   'xpack.enterpriseSearch.appSearch.metaEngineCreation.form.sourceEngines.label',
   {
-    defaultMessage: 'Add engines to this meta engine',
+    defaultMessage: 'Add source engines to this meta engine',
   }
 );
 
@@ -106,7 +106,7 @@ export const META_ENGINE_CREATION_FORM_MAX_SOURCE_ENGINES_WARNING_TITLE = (
   i18n.translate(
     'xpack.enterpriseSearch.appSearch.metaEngineCreation.form.sourceEngines.maxSourceEnginesWarningTitle',
     {
-      defaultMessage: 'Meta Engines have a limit of {maxEnginesPerMetaEngine} engines',
+      defaultMessage: 'Meta engines have a limit of {maxEnginesPerMetaEngine} source engines',
       values: { maxEnginesPerMetaEngine },
     }
   );
