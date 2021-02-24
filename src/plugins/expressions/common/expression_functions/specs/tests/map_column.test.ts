@@ -105,7 +105,7 @@ describe('mapColumn', () => {
       expect(result.columns[nameColumnIndex]).toEqual({
         id: 'name',
         name: 'name',
-        meta: { type: 'date', params: { type: 'date', digits: 2 } },
+        meta: { type: 'date', params: { id: 'number', params: { digits: 2 } } },
       });
     });
   });
