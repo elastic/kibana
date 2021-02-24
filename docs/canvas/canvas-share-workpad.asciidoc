@@ -4,7 +4,7 @@
 
 When you've finished your workpad, you can share it outside of {kib}.
 
-For information on how to create PDFs and POST URLs, refer to <<reporting-getting-started, Reporting from Kibana>>.
+For information on how to create PDFs and POST URLs, refer to <<reporting-getting-started, Reporting from {kib}>>.
 
 [float]
 [[export-single-workpad]]
