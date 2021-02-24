@@ -73,6 +73,7 @@ export interface UsageStats {
   'discover:sort:defaultOrder': string;
   'context:step': number;
   'accessibility:disableAnimations': boolean;
+  'fileUpload:maxFileSize': string;
   'ml:fileDataVisualizerMaxFileSize': string;
   'ml:anomalyDetection:results:enableTimeDefaults': boolean;
   'ml:anomalyDetection:results:timeDefaults': string;

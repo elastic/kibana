@@ -73,6 +73,7 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
   'discover:sort:defaultOrder': { type: 'keyword' },
   'context:step': { type: 'long' },
   'accessibility:disableAnimations': { type: 'boolean' },
+  'fileUpload:maxFileSize': { type: 'keyword' },
   'ml:fileDataVisualizerMaxFileSize': { type: 'keyword' },
   'ml:anomalyDetection:results:enableTimeDefaults': { type: 'boolean' },
   'ml:anomalyDetection:results:timeDefaults': { type: 'keyword' },

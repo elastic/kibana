@@ -4235,6 +4235,9 @@
         "accessibility:disableAnimations": {
           "type": "boolean"
         },
+        "fileUpload:maxFileSize": {
+          "type": "keyword"
+        },
         "ml:fileDataVisualizerMaxFileSize": {
           "type": "keyword"
         },
