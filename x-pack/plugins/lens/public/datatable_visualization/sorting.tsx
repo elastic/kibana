@@ -104,13 +104,13 @@ function getUndefinedHandler(
   return (rowA: Record<string, unknown>, rowB: Record<string, unknown>) => {
     const valueA = rowA[sortBy];
     const valueB = rowB[sortBy];
-    if (valueA != null && valueB != null) {
+    if (valueA != null && valueB != null && !Number.isNaN(valueA) && !Number.isNaN(valueB)) {
       return sortingCriteria(rowA, rowB);
     }
-    if (valueA == null) {
+    if (valueA == null || Number.isNaN(valueA)) {
       return 1;
     }
-    if (valueB == null) {
+    if (valueB == null || Number.isNaN(valueB)) {
       return -1;
     }
 

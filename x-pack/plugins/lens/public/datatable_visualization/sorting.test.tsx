@@ -85,6 +85,25 @@ describe('Data sorting criteria', () => {
         reverseOutput: false,
       });
     });
+
+    it(`should sort NaN to the end`, () => {
+      const now = Date.now();
+      testSorting({
+        input: [null, now, 0, undefined, Number.NaN, now - 150000],
+        output: [0, now - 150000, now, null, undefined, Number.NaN],
+        direction: 'asc',
+        type: 'number',
+        reverseOutput: false,
+      });
+
+      testSorting({
+        input: [null, now, 0, undefined, Number.NaN, now - 150000],
+        output: [now, now - 150000, 0, null, undefined, Number.NaN],
+        direction: 'desc',
+        type: 'number',
+        reverseOutput: false,
+      });
+    });
   });
 
   describe('String or anything else as string', () => {
