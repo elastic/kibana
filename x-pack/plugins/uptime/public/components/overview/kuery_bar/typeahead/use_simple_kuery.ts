@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 import { useUrlParams } from '../../../../hooks';
 
@@ -15,6 +15,10 @@ export const useSimpleQuery = () => {
   const { query } = getUrlParams();
 
   const [debouncedValue, setDebouncedValue] = useState(query ?? '');
+
+  useEffect(() => {
+    setDebouncedValue(query ?? '');
+  }, [query]);
 
   useDebounce(
     () => {
