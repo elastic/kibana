@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { mapKeys, mapValues } from 'lodash';
-import { rangeQuery, environmentQuery } from '../../../../common/utils/queries';
+import { rangeQuery, environmentQuery } from '../../../../server/utils/queries';
 import { ProcessorEvent } from '../../../../common/processor_event';
 import {
   PROFILE_ID,
@@ -18,6 +18,7 @@ import {
 import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 import { getBucketSize } from '../../helpers/get_bucket_size';
 import { withApmSpan } from '../../../utils/with_apm_span';
+import { kqlQuery } from '../../../utils/queries';
 
 const configMap = mapValues(
   mapKeys(ProfilingValueType, (val, key) => val),
@@ -27,16 +28,18 @@ const configMap = mapValues(
 const allFields = Object.values(configMap).map((config) => config.field);
 
 export async function getServiceProfilingTimeline({
+  kuery,
   serviceName,
   environment,
   setup,
 }: {
+  kuery?: string;
   serviceName: string;
   setup: Setup & SetupTimeRange;
   environment?: string;
 }) {
   return withApmSpan('get_service_profiling_timeline', async () => {
-    const { apmEventClient, start, end, esFilter } = setup;
+    const { apmEventClient, start, end } = setup;
 
     const response = await apmEventClient.search({
       apm: {
@@ -50,7 +53,7 @@ export async function getServiceProfilingTimeline({
               { term: { [SERVICE_NAME]: serviceName } },
               ...rangeQuery(start, end),
               ...environmentQuery(environment),
-              ...esFilter,
+              ...kqlQuery(kuery),
             ],
           },
         },
