@@ -170,29 +170,12 @@ describe('collector', () => {
 
     test('TS allows _meta.descriptions in schema', () => {
       const collector = new Collector(logger, {
-        type: 'my_test_collector_with_descriptions',
+        type: 'my_test_collector_with_description',
         isReady: () => false,
-        // Need to be explicit with the returned type because TS struggles to identify it
-        fetch: (): { testPass?: Array<{ name: string; value: number }>; otherProp?: number } => {
-          if (Math.random() > 0.5) {
-            return { testPass: [{ name: 'a', value: 100 }] };
-          }
-          return { otherProp: 1 };
-        },
-        // @ts-expect-error
+        fetch: () => ({ testPass: 100 }),
         schema: {
-          testPass: {
-            type: 'array',
-            items: {
-              name: {
-                type: 'keyword',
-                _meta: {
-                  description: 'testPass array item name as keyword',
-                },
-              },
-              value: { type: 'long' },
-            },
-          },
+          testPass: { type: 'long' },
+          _meta: { description: 'Count of testPass as number' },
         },
       });
       expect(collector).toBeDefined();
