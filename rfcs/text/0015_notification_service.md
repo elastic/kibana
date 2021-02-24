@@ -204,15 +204,12 @@ Notification model is responsible for:
 
 Processing a large number of incoming notifications might slow down Kibana and create a disproportionately high load on some Kibana instances.
 The use of a queue allows us to make the handling of incoming notifications asynchronous.
-The async mechanism lets Kibana cope with spikes in the number of messages created. The queue implementation is based on the Elasticsearch server.
+The async mechanism lets Kibana cope with spikes in the number of messages created.
+In the first phase, the queue implementation is based on in-memory storage. We can consider more fault-tolerant alternatives later.
 
-The logic is run as a background task. The usage of the single background task:
-- reduces the possibility of read- and write-conflicts
-- allows re-using task_manager built-in features: scheduling, retry, monitoring
-
-If Kibana processes notifications in asynchronous batches, we will need a prioritization mechanism to be sure events
+The server periodically picks up the queue of notifications and processes them in bathces. It uses a prioritization mechanism to be sure events
 with a higher severity are delivered first without a significant delay. The prioritization mechanism is based on
-priority property value: the notification with the higher value is processed earlier to provide an experience as close to real-time as possible.
+*priority* property value: the notification with the higher value is processed earlier to provide an experience as close to real-time as possible.
 
 ##### Notification storage
 
@@ -368,7 +365,7 @@ Integration with UNS is something that is not going to happen any time soon. The
 Kibana shows notifications created by the Newsfeed Kibana plugin in Notification flyout.
 ![img](../images/0014/kns_flyout.png)
 A notification cannot have a particular recipient in the lack of a way to identify a user in the system. A notification will be shown to all the users instead.
-User-specific notification state (*is_read*) is not stored in Kibana but browser Local Storage.
+User-specific notification state (*is_read*) is not stored.
 ### Phase II
 When [user profiles](https://github.com/elastic/kibana/issues/17888) are supported, Kibana UI starts showing user-specific notifications.
 Kibana UI supports applying filters to the notification list.
