@@ -5,9 +5,9 @@
 --
 **_Exploring and querying your data._**
 
-Discover is the window into your Elasticsearch data. It enables you to 
+Discover is the window into your data in Elasticsearch. It enables you to 
 quickly search and filter, get information about structure, 
-and quickly navigate to Visualize and Maps to present your data.
+and navigate to Visualize and Maps to present your data.
 You can customize and save your searches and place them on a Dashboard.
 
 ++++
@@ -111,6 +111,9 @@ which can be overwhelming. You’ll modify this table to display only your field
 
 . Scan through the list of **Available fields** to see
 what’s in your data. You can also search for a field by name.
++
+[role="screenshot"]
+image:images/discover-sidebar-available-fields.png[Fields list that displays the top five search results, width=50%]
 
 . Find the `manufacturer` field, and then click it to view the five most popular values for that field.
 +
@@ -135,7 +138,13 @@ column header, and then use the move and sort controls.
 
 One of the unique capabilities of **Discover** is the ability to combine
 free text search with filtering based on structured data.
-To search all fields, enter a simple string in the **Search** field. To search particular fields and
+To search all fields, enter a simple string in the **Search** field.
+
+[role="screenshot"]
+image:images/discover-search-field.png[Search field in Discover]
+
+
+To search particular fields and
 build more complex queries, use the <<kuery-query,Kibana Query language>>.
 As you type, KQL prompts you with the fields you can search and the operators
 you can use to build a structured query.
@@ -157,6 +166,9 @@ filters enable you to zero in on different subsets of those documents.
 You can filter results to include or exclude specific fields, filter for a value in a range,
 and more. The **Add filter** popup prompts you with the fields you can filter
 and the operators you can use.
+
+[role="screenshot"]
+image:images/discover-add-filter.png[Add filter dialog in Discover]
 
 Exclude documents where day of week is not Wednesday:
 
@@ -194,6 +206,9 @@ You can bookmark this document and share the link.
 
 Save your search so you can repeat it later, generate a CSV report, or use it in visualizations, dashboards, and Canvas workpads.
 Saving a search saves the query and the filters.
+
+[role="screenshot"]
+image:images/discover-save-saved-search.png[Save saved search in Discover, width=50%]
 
 . In the toolbar, click **Save**.
 
