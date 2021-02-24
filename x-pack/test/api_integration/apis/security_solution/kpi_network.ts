@@ -79,6 +79,7 @@ export default function ({ getService }: FtrProviderContext) {
             defaultIndex: ['filebeat-*'],
             docValueFields: [],
             inspect: false,
+            wait_for_completion_timeout: '10s',
           })
           .expect(200);
 
@@ -99,6 +100,7 @@ export default function ({ getService }: FtrProviderContext) {
             defaultIndex: ['filebeat-*'],
             docValueFields: [],
             inspect: false,
+            wait_for_completion_timeout: '10s',
           })
           .expect(200);
 
@@ -119,6 +121,7 @@ export default function ({ getService }: FtrProviderContext) {
             defaultIndex: ['filebeat-*'],
             docValueFields: [],
             inspect: false,
+            wait_for_completion_timeout: '10s',
           })
           .expect(200);
 
@@ -139,6 +142,7 @@ export default function ({ getService }: FtrProviderContext) {
             defaultIndex: ['filebeat-*'],
             docValueFields: [],
             inspect: false,
+            wait_for_completion_timeout: '10s',
           })
           .expect(200);
 
@@ -159,6 +163,7 @@ export default function ({ getService }: FtrProviderContext) {
             defaultIndex: ['filebeat-*'],
             docValueFields: [],
             inspect: false,
+            wait_for_completion_timeout: '10s',
           })
           .expect(200);
 
@@ -179,6 +184,7 @@ export default function ({ getService }: FtrProviderContext) {
             defaultIndex: ['filebeat-*'],
             docValueFields: [],
             inspect: false,
+            wait_for_completion_timeout: '10s',
           })
           .expect(200);
 
@@ -226,6 +232,7 @@ export default function ({ getService }: FtrProviderContext) {
             defaultIndex: ['packetbeat-*'],
             docValueFields: [],
             inspect: false,
+            wait_for_completion_timeout: '10s',
           })
           .expect(200);
 
@@ -246,6 +253,7 @@ export default function ({ getService }: FtrProviderContext) {
             defaultIndex: ['packetbeat-*'],
             docValueFields: [],
             inspect: false,
+            wait_for_completion_timeout: '10s',
           })
           .expect(200);
 
@@ -266,6 +274,7 @@ export default function ({ getService }: FtrProviderContext) {
             defaultIndex: ['packetbeat-*'],
             docValueFields: [],
             inspect: false,
+            wait_for_completion_timeout: '10s',
           })
           .expect(200);
 
@@ -286,6 +295,7 @@ export default function ({ getService }: FtrProviderContext) {
             defaultIndex: ['packetbeat-*'],
             docValueFields: [],
             inspect: false,
+            wait_for_completion_timeout: '10s',
           })
           .expect(200);
 
@@ -306,6 +316,7 @@ export default function ({ getService }: FtrProviderContext) {
             defaultIndex: ['packetbeat-*'],
             docValueFields: [],
             inspect: false,
+            wait_for_completion_timeout: '10s',
           })
           .expect(200);
 

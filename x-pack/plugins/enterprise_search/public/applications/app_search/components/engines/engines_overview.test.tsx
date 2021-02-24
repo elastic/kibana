@@ -22,11 +22,23 @@ describe('EnginesOverview', () => {
     hasPlatinumLicense: false,
     dataLoading: false,
     engines: [],
-    enginesTotal: 0,
-    enginesPage: 1,
+    enginesMeta: {
+      page: {
+        current: 1,
+        size: 10,
+        total_results: 0,
+      },
+    },
+    enginesLoading: false,
     metaEngines: [],
-    metaEnginesTotal: 0,
-    metaEnginesPage: 1,
+    metaEnginesMeta: {
+      page: {
+        current: 1,
+        size: 10,
+        total_results: 0,
+      },
+    },
+    metaEnginesLoading: false,
   };
   const actions = {
     loadEngines: jest.fn(),
@@ -62,8 +74,13 @@ describe('EnginesOverview', () => {
       ...values,
       dataLoading: false,
       engines: ['dummy-engine'],
-      enginesTotal: 100,
-      enginesPage: 1,
+      enginesMeta: {
+        page: {
+          current: 1,
+          size: 10,
+          total_results: 100,
+        },
+      },
     };
 
     beforeEach(() => {
@@ -107,18 +124,42 @@ describe('EnginesOverview', () => {
         const wrapper = shallow(<EnginesOverview />);
         const pagination = getTablePagination(wrapper);
 
-        expect(pagination.totalEngines).toEqual(100);
+        expect(pagination.totalItemCount).toEqual(100);
         expect(pagination.pageIndex).toEqual(0);
       });
 
       it('re-polls the API on page change', async () => {
         const wrapper = shallow(<EnginesOverview />);
 
-        setMockValues({ ...valuesWithEngines, enginesPage: 51 });
+        setMockValues({
+          ...valuesWithEngines,
+          enginesMeta: {
+            page: {
+              ...valuesWithEngines.enginesMeta.page,
+              current: 51,
+            },
+          },
+        });
         rerender(wrapper);
 
         expect(actions.loadEngines).toHaveBeenCalledTimes(2);
         expect(getTablePagination(wrapper).pageIndex).toEqual(50);
+      });
+
+      it('calls onPagination handlers', async () => {
+        setMockValues({
+          ...valuesWithEngines,
+          hasPlatinumLicense: true,
+          metaEngines: ['dummy-meta-engine'],
+        });
+        const wrapper = shallow(<EnginesOverview />);
+        const pageEvent = { page: { index: 0 } };
+
+        wrapper.find(EnginesTable).first().simulate('change', pageEvent);
+        expect(actions.onEnginesPagination).toHaveBeenCalledWith(1);
+
+        wrapper.find(EnginesTable).last().simulate('change', pageEvent);
+        expect(actions.onMetaEnginesPagination).toHaveBeenCalledWith(1);
       });
     });
   });
