@@ -16,6 +16,7 @@ import type {
   VisTypeTimeseriesRequestHandlerContext,
   VisTypeTimeseriesVisDataRequest,
 } from '../../../types';
+import { getIndexPatternObject } from '../lib/get_index_pattern';
 
 export const toSanitizedFieldType = (fields: FieldSpec[]) => {
   return fields
@@ -84,14 +85,14 @@ export abstract class AbstractSearchStrategy {
       requestContext.core.elasticsearch.client.asCurrentUser
     );
     const indexPatternsService = await this.framework.getIndexPatternsService(requestContext);
-    const kibanaIndexPattern = (await indexPatternsService.find(indexPattern)).find(
-      (index) => index.title === indexPattern
-    );
+    const { indexPatternObject } = await getIndexPatternObject(indexPattern, {
+      indexPatternsService,
+    });
 
     return toSanitizedFieldType(
-      kibanaIndexPattern
-        ? kibanaIndexPattern.getNonScriptedFields()
-        : await indexPatternsFetcher.getFieldsForWildcard({
+      indexPatternObject
+        ? indexPatternObject.getNonScriptedFields()
+        : await indexPatternsFetcher!.getFieldsForWildcard({
             pattern: indexPattern,
             fieldCapsOptions: { allow_no_indices: true },
             metaFields: [],

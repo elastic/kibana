@@ -44,6 +44,7 @@ describe('AbstractSearchStrategy', () => {
       getIndexPatternsService: jest.fn(() =>
         Promise.resolve({
           find: jest.fn(() => []),
+          getDefault: jest.fn(() => {}),
         })
       ),
     } as unknown) as Framework;
