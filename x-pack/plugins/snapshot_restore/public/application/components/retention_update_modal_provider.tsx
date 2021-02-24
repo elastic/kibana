@@ -23,8 +23,7 @@ import {
   EuiCallOut,
 } from '@elastic/eui';
 
-import { useServices, useToastNotifications } from '../app_context';
-import { documentationLinksService } from '../services/documentation';
+import { useCore, useServices, useToastNotifications } from '../app_context';
 import { Frequency, CronEditor } from '../../shared_imports';
 import { DEFAULT_RETENTION_SCHEDULE, DEFAULT_RETENTION_FREQUENCY } from '../constants';
 import { updateRetentionSchedule } from '../services/http';
@@ -44,6 +43,7 @@ export const RetentionSettingsUpdateModalProvider: React.FunctionComponent<Props
   children,
 }) => {
   const { i18n } = useServices();
+  const { docLinks } = useCore();
   const toastNotifications = useToastNotifications();
 
   const [retentionSchedule, setRetentionSchedule] = useState<string>(DEFAULT_RETENTION_SCHEDULE);
@@ -185,7 +185,7 @@ export const RetentionSettingsUpdateModalProvider: React.FunctionComponent<Props
                     defaultMessage="Use cron expression. {docLink}"
                     values={{
                       docLink: (
-                        <EuiLink href={documentationLinksService.getCronUrl()} target="_blank">
+                        <EuiLink href={docLinks.links.watcher.cronSchedule} target="_blank">
                           <FormattedMessage
                             id="xpack.snapshotRestore.policyForm.stepRetention.policyUpdateRetentionHelpTextDocLinkText"
                             defaultMessage="Learn more."
