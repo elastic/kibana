@@ -7,10 +7,13 @@
 
 import { Dispatch, useEffect, useState } from 'react';
 
-import { UpdateExceptionListItemSchema } from '../../../common/schemas';
+import {
+  CreateExceptionListItemSchema,
+  UpdateExceptionListItemSchema,
+} from '../../../common/schemas';
 import { addExceptionListItem, updateExceptionListItem } from '../api';
-import { transformOutput } from '../transforms';
-import { AddExceptionListItem, PersistHookProps } from '../types';
+import { transformNewItemOutput, transformOutput } from '../transforms';
+import { PersistHookProps } from '../types';
 
 interface PersistReturnExceptionItem {
   isLoading: boolean;
@@ -19,7 +22,7 @@ interface PersistReturnExceptionItem {
 
 export type ReturnPersistExceptionItem = [
   PersistReturnExceptionItem,
-  Dispatch<AddExceptionListItem | null>
+  Dispatch<CreateExceptionListItemSchema | UpdateExceptionListItemSchema | null>
 ];
 
 /**
@@ -33,7 +36,9 @@ export const usePersistExceptionItem = ({
   http,
   onError,
 }: PersistHookProps): ReturnPersistExceptionItem => {
-  const [exceptionListItem, setExceptionItem] = useState<AddExceptionListItem | null>(null);
+  const [exceptionListItem, setExceptionItem] = useState<
+    CreateExceptionListItemSchema | UpdateExceptionListItemSchema | null
+  >(null);
   const [isSaved, setIsSaved] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const isUpdateExceptionItem = (item: unknown): item is UpdateExceptionListItemSchema =>
@@ -48,17 +53,22 @@ export const usePersistExceptionItem = ({
       if (exceptionListItem != null) {
         try {
           setIsLoading(true);
-          // Please see `x-pack/plugins/lists/public/exceptions/transforms.ts` doc notes
-          // for context around the temporary `id`
-          const transformedList = transformOutput(exceptionListItem);
 
-          if (isUpdateExceptionItem(transformedList)) {
+          if (isUpdateExceptionItem(exceptionListItem)) {
+            // Please see `x-pack/plugins/lists/public/exceptions/transforms.ts` doc notes
+            // for context around the temporary `id`
+            const transformedList = transformOutput(exceptionListItem);
+
             await updateExceptionListItem({
               http,
               listItem: transformedList,
               signal: abortCtrl.signal,
             });
           } else {
+            // Please see `x-pack/plugins/lists/public/exceptions/transforms.ts` doc notes
+            // for context around the temporary `id`
+            const transformedList = transformNewItemOutput(exceptionListItem);
+
             await addExceptionListItem({
               http,
               listItem: transformedList,

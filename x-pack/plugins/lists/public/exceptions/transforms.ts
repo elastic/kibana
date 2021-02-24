@@ -34,12 +34,13 @@ import { addIdToItem, removeIdFromItem } from '../../common/shared_imports';
  * @returns The exceptionItem transformed from the output
  */
 export const transformOutput = (
-  exceptionItem:
-    | CreateExceptionListItemSchema
-    | UpdateExceptionListItemSchema
-    | ExceptionListItemSchema
-): CreateExceptionListItemSchema | UpdateExceptionListItemSchema | ExceptionListItemSchema =>
+  exceptionItem: UpdateExceptionListItemSchema | ExceptionListItemSchema
+): UpdateExceptionListItemSchema | ExceptionListItemSchema =>
   flow(removeIdFromExceptionItemsEntries)(exceptionItem);
+
+export const transformNewItemOutput = (
+  exceptionItem: CreateExceptionListItemSchema
+): CreateExceptionListItemSchema => flow(removeIdFromExceptionItemsEntries)(exceptionItem);
 
 /**
  * Transforms the output of rules to compensate for technical debt or UI concerns such as
@@ -95,13 +96,10 @@ export const addIdToExceptionItemEntries = (
  * @param exceptionItem The exceptionItem to remove an id from the entries.
  * @returns exceptionItem The exceptionItem but with id removed from the entries
  */
-export const removeIdFromExceptionItemsEntries = (
-  exceptionItem:
-    | CreateExceptionListItemSchema
-    | UpdateExceptionListItemSchema
-    | ExceptionListItemSchema
-): CreateExceptionListItemSchema | UpdateExceptionListItemSchema | ExceptionListItemSchema => {
-  const { entries, ...itemInfo } = exceptionItem;
+export const removeIdFromExceptionItemsEntries = <T extends { entries: EntriesArray }>(
+  exceptionItem: T
+): T => {
+  const { entries } = exceptionItem;
   const entriesNoId = entries.map((entry) => {
     if (entry.type === 'nested') {
       return removeIdFromItem({
@@ -112,5 +110,5 @@ export const removeIdFromExceptionItemsEntries = (
       return removeIdFromItem<Entry>(entry);
     }
   });
-  return { ...itemInfo, entries: entriesNoId as EntriesArray };
+  return { ...exceptionItem, entries: entriesNoId };
 };

@@ -37,6 +37,7 @@ export const FIELD_INPUT_LIST_BTN = '[data-test-subj="comboBoxToggleListButton"]
 export const CANCEL_BTN = '[data-test-subj="cancelExceptionAddButton"]';
 
 export const BUILDER_MODAL_BODY = '[data-test-subj="exceptionsBuilderWrapper"]';
+
 export const EXCEPTIONS_TABLE_TAB = '[data-test-subj="allRulesTableTab-exceptions"]';
 
 export const EXCEPTIONS_TABLE = '[data-test-subj="exceptions-table"]';

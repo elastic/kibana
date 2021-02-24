@@ -28,6 +28,7 @@ import {
   FIELD_INPUT,
   LOADING_SPINNER,
   EXCEPTION_ITEM_CONTAINER,
+  ADD_EXCEPTIONS_BTN,
 } from '../../screens/exceptions';
 
 import { DETECTIONS_URL } from '../../urls/navigation';
@@ -62,7 +63,8 @@ describe('Exceptions modal', () => {
   });
 
   it('Does not overwrite values and-ed together', () => {
-    // VALID VALUES
+    cy.get(ADD_EXCEPTIONS_BTN).click({ force: true });
+
     // add multiple entries with invalid field values
     addExceptionEntryFieldValue('agent.name', 0);
     cy.get(ADD_AND_BTN).click();
@@ -79,6 +81,8 @@ describe('Exceptions modal', () => {
   });
 
   it('Does not overwrite values or-ed together', () => {
+    cy.get(ADD_EXCEPTIONS_BTN).click({ force: true });
+
     // exception item 1
     addExceptionEntryFieldValueOfItemX('agent.name', 0, 0);
     cy.get(ADD_AND_BTN).click();
@@ -90,7 +94,7 @@ describe('Exceptions modal', () => {
     cy.get(ADD_AND_BTN).click();
     addExceptionEntryFieldValueOfItemX('user.last', 1, 1);
     cy.get(ADD_AND_BTN).click();
-    addExceptionEntryFieldValueOfItemX('e', 0, 2);
+    addExceptionEntryFieldValueOfItemX('e', 1, 2);
 
     // delete single entry from exception item 2
     cy.get(ENTRY_DELETE_BTN).eq(3).click();

@@ -14,13 +14,11 @@ import {
   ExceptionListItemSchema,
   ExceptionListSchema,
   UpdateExceptionListItemSchema,
-  createExceptionListItemSchema,
 } from '../../../common/schemas';
 import { ApiCallFindListsItemsMemoProps, ApiCallMemoProps, ApiListExportProps } from '../types';
 import { getIdsAndNamespaces } from '../utils';
-import { transformInput, transformOutput } from '../transforms';
+import { transformInput, transformNewItemOutput, transformOutput } from '../transforms';
 
-import * as i18n from './translations';
 export interface ExceptionsApi {
   addExceptionListItem: (arg: {
     listItem: CreateExceptionListItemSchema;
@@ -49,22 +47,13 @@ export const useApi = (http: HttpStart): ExceptionsApi => {
         listItem: CreateExceptionListItemSchema;
       }): Promise<ExceptionListItemSchema> {
         const abortCtrl = new AbortController();
-        const sanitizedItem = transformOutput(listItem);
+        const sanitizedItem: CreateExceptionListItemSchema = transformNewItemOutput(listItem);
 
-        // This was added to satisfy Typescript, which I don't love,
-        // but felt better than doing an `as` cast. Wasn't able to
-        // figure out how to do a generic to specify that input is of
-        // type A or B, and if it is A returns A, if B returns B. Can
-        // delete this if/else statement if figured out
-        if (createExceptionListItemSchema.is(sanitizedItem)) {
-          return Api.addExceptionListItem({
-            http,
-            listItem: sanitizedItem,
-            signal: abortCtrl.signal,
-          });
-        } else {
-          throw new Error(i18n.ADD_EXCEPTION_ITEM_TYPE_ERROR);
-        }
+        return Api.addExceptionListItem({
+          http,
+          listItem: sanitizedItem,
+          signal: abortCtrl.signal,
+        });
       },
       async deleteExceptionItem({
         id,
@@ -232,7 +221,7 @@ export const useApi = (http: HttpStart): ExceptionsApi => {
         listItem: UpdateExceptionListItemSchema;
       }): Promise<ExceptionListItemSchema> {
         const abortCtrl = new AbortController();
-        const sanitizedItem = transformOutput(listItem);
+        const sanitizedItem: UpdateExceptionListItemSchema = transformOutput(listItem);
 
         return Api.updateExceptionListItem({
           http,
