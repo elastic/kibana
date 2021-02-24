@@ -10,7 +10,7 @@ import {
   AGENT_NAME,
   SERVICE_NAME,
 } from '../../../common/elasticsearch_fieldnames';
-import { rangeQuery } from '../../../common/utils/queries';
+import { rangeQuery } from '../../../server/utils/queries';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import { getProcessorEventForAggregatedTransactions } from '../helpers/aggregated_transactions';
 import { withApmSpan } from '../../utils/with_apm_span';

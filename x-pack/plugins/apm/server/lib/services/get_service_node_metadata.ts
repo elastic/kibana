@@ -16,10 +16,12 @@ import { getServiceNodesProjection } from '../../projections/service_nodes';
 import { withApmSpan } from '../../utils/with_apm_span';
 
 export function getServiceNodeMetadata({
+  kuery,
   serviceName,
   serviceNodeName,
   setup,
 }: {
+  kuery?: string;
   serviceName: string;
   serviceNodeName: string;
   setup: Setup & SetupTimeRange;
@@ -29,6 +31,7 @@ export function getServiceNodeMetadata({
 
     const query = mergeProjection(
       getServiceNodesProjection({
+        kuery,
         setup,
         serviceName,
         serviceNodeName,

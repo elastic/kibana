@@ -265,7 +265,7 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.testExecution.logTestStep('displays the source data preview');
           await ml.dataFrameAnalyticsCreation.assertSourceDataPreviewExists();
           await ml.testExecution.logTestStep('enables the source data preview histogram charts');
-          await ml.dataFrameAnalyticsCreation.enableSourceDataPreviewHistogramCharts();
+          await ml.dataFrameAnalyticsCreation.enableSourceDataPreviewHistogramCharts(true);
           await ml.testExecution.logTestStep('displays the include fields selection');
           await ml.dataFrameAnalyticsCreation.assertIncludeFieldsSelectionExists();
           // EuiDataGrid does not have row roles

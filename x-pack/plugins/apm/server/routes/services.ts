@@ -16,22 +16,27 @@ import { getServiceAnnotations } from '../lib/services/annotations';
 import { getServices } from '../lib/services/get_services';
 import { getServiceAgentName } from '../lib/services/get_service_agent_name';
 import { getServiceDependencies } from '../lib/services/get_service_dependencies';
-import { getServiceErrorGroups } from '../lib/services/get_service_error_groups';
+import { getServiceErrorGroupPrimaryStatistics } from '../lib/services/get_service_error_groups/get_service_error_group_primary_statistics';
+import { getServiceErrorGroupComparisonStatistics } from '../lib/services/get_service_error_groups/get_service_error_group_comparison_statistics';
 import { getServiceInstances } from '../lib/services/get_service_instances';
 import { getServiceMetadataDetails } from '../lib/services/get_service_metadata_details';
 import { getServiceMetadataIcons } from '../lib/services/get_service_metadata_icons';
 import { getServiceNodeMetadata } from '../lib/services/get_service_node_metadata';
 import { getServiceTransactionTypes } from '../lib/services/get_service_transaction_types';
 import { getThroughput } from '../lib/services/get_throughput';
-import { offsetPreviousPeriodCoordinates } from '../utils/offset_previous_period_coordinate';
 import { createRoute } from './create_route';
+import { offsetPreviousPeriodCoordinates } from '../utils/offset_previous_period_coordinate';
+import { jsonRt } from '../../common/runtime_types/json_rt';
 import {
   comparisonRangeRt,
   environmentRt,
+  kueryRt,
   rangeRt,
-  uiFiltersRt,
 } from './default_api_types';
 import { withApmSpan } from '../utils/with_apm_span';
+import { getServiceProfilingStatistics } from '../lib/services/profiling/get_service_profiling_statistics';
+import { getServiceProfilingTimeline } from '../lib/services/profiling/get_service_profiling_timeline';
+import { ProfilingValueType } from '../../common/profiling';
 import {
   latencyAggregationTypeRt,
   LatencyAggregationType,
@@ -40,18 +45,19 @@ import {
 export const servicesRoute = createRoute({
   endpoint: 'GET /api/apm/services',
   params: t.type({
-    query: t.intersection([environmentRt, uiFiltersRt, rangeRt]),
+    query: t.intersection([environmentRt, kueryRt, rangeRt]),
   }),
   options: { tags: ['access:apm'] },
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
-    const { environment } = context.params.query;
+    const { environment, kuery } = context.params.query;
     const searchAggregatedTransactions = await getSearchAggregatedTransactions(
       setup
     );
 
     const services = await getServices({
       environment,
+      kuery,
       setup,
       searchAggregatedTransactions,
       logger: context.logger,
@@ -161,13 +167,20 @@ export const serviceNodeMetadataRoute = createRoute({
       serviceName: t.string,
       serviceNodeName: t.string,
     }),
-    query: t.intersection([uiFiltersRt, rangeRt]),
+    query: t.intersection([kueryRt, rangeRt]),
   }),
   options: { tags: ['access:apm'] },
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
     const { serviceName, serviceNodeName } = context.params.path;
-    return getServiceNodeMetadata({ setup, serviceName, serviceNodeName });
+    const { kuery } = context.params.query;
+
+    return getServiceNodeMetadata({
+      kuery,
+      setup,
+      serviceName,
+      serviceNodeName,
+    });
   },
 });
 
@@ -177,12 +190,7 @@ export const serviceAnnotationsRoute = createRoute({
     path: t.type({
       serviceName: t.string,
     }),
-    query: t.intersection([
-      rangeRt,
-      t.partial({
-        environment: t.string,
-      }),
-    ]),
+    query: t.intersection([environmentRt, rangeRt]),
   }),
   options: { tags: ['access:apm'] },
   handler: async ({ context, request }) => {
@@ -205,10 +213,10 @@ export const serviceAnnotationsRoute = createRoute({
     ]);
 
     return getServiceAnnotations({
+      environment,
       setup,
       searchAggregatedTransactions,
       serviceName,
-      environment,
       annotationsClient,
       client: context.core.elasticsearch.client.asCurrentUser,
       logger: context.logger,
@@ -276,26 +284,18 @@ export const serviceAnnotationsCreateRoute = createRoute({
   },
 });
 
-export const serviceErrorGroupsRoute = createRoute({
-  endpoint: 'GET /api/apm/services/{serviceName}/error_groups',
+export const serviceErrorGroupsPrimaryStatisticsRoute = createRoute({
+  endpoint:
+    'GET /api/apm/services/{serviceName}/error_groups/primary_statistics',
   params: t.type({
     path: t.type({
       serviceName: t.string,
     }),
     query: t.intersection([
       environmentRt,
+      kueryRt,
       rangeRt,
-      uiFiltersRt,
       t.type({
-        size: toNumberRt,
-        numBuckets: toNumberRt,
-        pageIndex: toNumberRt,
-        sortDirection: t.union([t.literal('asc'), t.literal('desc')]),
-        sortField: t.union([
-          t.literal('last_seen'),
-          t.literal('occurrences'),
-          t.literal('name'),
-        ]),
         transactionType: t.string,
       }),
     ]),
@@ -306,27 +306,53 @@ export const serviceErrorGroupsRoute = createRoute({
 
     const {
       path: { serviceName },
-      query: {
-        environment,
-        numBuckets,
-        pageIndex,
-        size,
-        sortDirection,
-        sortField,
-        transactionType,
-      },
+      query: { kuery, transactionType, environment },
     } = context.params;
-
-    return getServiceErrorGroups({
-      environment,
+    return getServiceErrorGroupPrimaryStatistics({
+      kuery,
       serviceName,
       setup,
-      size,
-      numBuckets,
-      pageIndex,
-      sortDirection,
-      sortField,
       transactionType,
+      environment,
+    });
+  },
+});
+
+export const serviceErrorGroupsComparisonStatisticsRoute = createRoute({
+  endpoint:
+    'GET /api/apm/services/{serviceName}/error_groups/comparison_statistics',
+  params: t.type({
+    path: t.type({
+      serviceName: t.string,
+    }),
+    query: t.intersection([
+      environmentRt,
+      kueryRt,
+      rangeRt,
+      t.type({
+        numBuckets: toNumberRt,
+        transactionType: t.string,
+        groupIds: jsonRt.pipe(t.array(t.string)),
+      }),
+    ]),
+  }),
+  options: { tags: ['access:apm'] },
+  handler: async ({ context, request }) => {
+    const setup = await setupRequest(context, request);
+
+    const {
+      path: { serviceName },
+      query: { environment, kuery, numBuckets, transactionType, groupIds },
+    } = context.params;
+
+    return getServiceErrorGroupComparisonStatistics({
+      environment,
+      kuery,
+      serviceName,
+      setup,
+      numBuckets,
+      transactionType,
+      groupIds,
     });
   },
 });
@@ -340,7 +366,7 @@ export const serviceThroughputRoute = createRoute({
     query: t.intersection([
       t.type({ transactionType: t.string }),
       environmentRt,
-      uiFiltersRt,
+      kueryRt,
       rangeRt,
       comparisonRangeRt,
     ]),
@@ -351,6 +377,7 @@ export const serviceThroughputRoute = createRoute({
     const { serviceName } = context.params.path;
     const {
       environment,
+      kuery,
       transactionType,
       comparisonStart,
       comparisonEnd,
@@ -362,6 +389,8 @@ export const serviceThroughputRoute = createRoute({
     const { start, end } = setup;
 
     const commonProps = {
+      environment,
+      kuery,
       searchAggregatedTransactions,
       serviceName,
       setup,
@@ -371,14 +400,12 @@ export const serviceThroughputRoute = createRoute({
     const [currentPeriod, previousPeriod] = await Promise.all([
       getThroughput({
         ...commonProps,
-        environment,
         start,
         end,
       }),
       comparisonStart && comparisonEnd
         ? getThroughput({
             ...commonProps,
-            environment,
             start: comparisonStart,
             end: comparisonEnd,
           }).then((coordinates) =>
@@ -411,7 +438,7 @@ export const serviceInstancesRoute = createRoute({
         numBuckets: toNumberRt,
       }),
       environmentRt,
-      uiFiltersRt,
+      kueryRt,
       rangeRt,
     ]),
   }),
@@ -419,7 +446,12 @@ export const serviceInstancesRoute = createRoute({
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
     const { serviceName } = context.params.path;
-    const { environment, transactionType, numBuckets } = context.params.query;
+    const {
+      environment,
+      kuery,
+      transactionType,
+      numBuckets,
+    } = context.params.query;
     const latencyAggregationType = (context.params.query
       .latencyAggregationType as unknown) as LatencyAggregationType;
 
@@ -429,6 +461,7 @@ export const serviceInstancesRoute = createRoute({
 
     return getServiceInstances({
       environment,
+      kuery,
       latencyAggregationType,
       serviceName,
       setup,
@@ -467,6 +500,79 @@ export const serviceDependenciesRoute = createRoute({
       environment,
       setup,
       numBuckets,
+    });
+  },
+});
+
+export const serviceProfilingTimelineRoute = createRoute({
+  endpoint: 'GET /api/apm/services/{serviceName}/profiling/timeline',
+  params: t.type({
+    path: t.type({
+      serviceName: t.string,
+    }),
+    query: t.intersection([environmentRt, kueryRt, rangeRt]),
+  }),
+  options: {
+    tags: ['access:apm'],
+  },
+  handler: async ({ context, request }) => {
+    const setup = await setupRequest(context, request);
+
+    const {
+      path: { serviceName },
+      query: { environment, kuery },
+    } = context.params;
+
+    return getServiceProfilingTimeline({
+      kuery,
+      setup,
+      serviceName,
+      environment,
+    });
+  },
+});
+
+export const serviceProfilingStatisticsRoute = createRoute({
+  endpoint: 'GET /api/apm/services/{serviceName}/profiling/statistics',
+  params: t.type({
+    path: t.type({
+      serviceName: t.string,
+    }),
+    query: t.intersection([
+      environmentRt,
+      kueryRt,
+      rangeRt,
+      t.type({
+        valueType: t.union([
+          t.literal(ProfilingValueType.wallTime),
+          t.literal(ProfilingValueType.cpuTime),
+          t.literal(ProfilingValueType.samples),
+          t.literal(ProfilingValueType.allocObjects),
+          t.literal(ProfilingValueType.allocSpace),
+          t.literal(ProfilingValueType.inuseObjects),
+          t.literal(ProfilingValueType.inuseSpace),
+        ]),
+      }),
+    ]),
+  }),
+  options: {
+    tags: ['access:apm'],
+  },
+  handler: async ({ context, request }) => {
+    const setup = await setupRequest(context, request);
+
+    const {
+      path: { serviceName },
+      query: { environment, kuery, valueType },
+    } = context.params;
+
+    return getServiceProfilingStatistics({
+      kuery,
+      serviceName,
+      environment,
+      valueType,
+      setup,
+      logger: context.logger,
     });
   },
 });
