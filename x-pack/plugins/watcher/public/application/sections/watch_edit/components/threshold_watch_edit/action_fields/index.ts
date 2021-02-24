@@ -9,6 +9,5 @@ export { IndexActionFields } from './index_action_fields';
 export { JiraActionFields } from './jira_action_fields';
 export { LoggingActionFields } from './logging_action_fields';
 export { PagerDutyActionFields } from './pagerduty_action_fields';
-export { SwimlaneActionFields } from './swimlane_action_fields';
 export { SlackActionFields } from './slack_action_fields';
 export { WebhookActionFields } from './webhook_action_fields';

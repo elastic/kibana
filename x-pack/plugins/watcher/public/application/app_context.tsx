@@ -26,7 +26,6 @@ const generateDocLinks = ({ ELASTIC_WEBSITE_URL, DOC_LINK_VERSION }: DocLinksSta
   const watchActionsConfigurationMap = {
     [ACTION_TYPES.SLACK]: `${esBase}/actions-slack.html#configuring-slack`,
     [ACTION_TYPES.PAGERDUTY]: `${esBase}/actions-pagerduty.html#configuring-pagerduty`,
-    [ACTION_TYPES.SWIMLANE]: `${esBase}/actions-swimlane.html#configuring-swimlane`,
     [ACTION_TYPES.JIRA]: `${esBase}/actions-jira.html#configuring-jira`,
   };
 

@@ -33,7 +33,6 @@ const SETTINGS = {
     index: { enabled: true },
     jira: { enabled: true },
     logging: { enabled: true },
-    swimlane: { enabled: true },
     pagerduty: { enabled: true },
     slack: { enabled: true },
     webhook: { enabled: true },

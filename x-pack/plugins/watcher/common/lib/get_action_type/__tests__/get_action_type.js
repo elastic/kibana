@@ -76,17 +76,6 @@ describe('get_action_type', () => {
       expect(type).to.be(ACTION_TYPES.PAGERDUTY);
     });
 
-    it(`correctly calculates ACTION_TYPES.SWIMLANE`, () => {
-      const actionJson = {
-        swimlane: {
-          foo: 'bar',
-        },
-      };
-      const type = getActionType(actionJson);
-
-      expect(type).to.be(ACTION_TYPES.SWIMLANE);
-    });
-
     it(`correctly calculates ACTION_TYPES.UNKNOWN`, () => {
       const actionJson = {
         this_is_not_a_valid_action_type: {

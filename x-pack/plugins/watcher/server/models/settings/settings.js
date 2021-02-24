@@ -23,7 +23,6 @@ function requiresAccountInfo(actionType) {
     case ACTION_TYPES.EMAIL:
     case ACTION_TYPES.SLACK:
     case ACTION_TYPES.JIRA:
-    case ACTION_TYPES.SWIMLANE:
     case ACTION_TYPES.PAGERDUTY:
       return true;
     default:

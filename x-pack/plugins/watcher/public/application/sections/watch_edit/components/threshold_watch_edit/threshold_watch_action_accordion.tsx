@@ -38,7 +38,6 @@ import {
   SlackActionFields,
   EmailActionFields,
   PagerDutyActionFields,
-  SwimlaneActionFileds,
   JiraActionFields,
 } from './action_fields';
 import { executeWatch } from '../../../../lib/api';
@@ -52,7 +51,6 @@ const actionFieldsComponentMap = {
   [ACTION_TYPES.INDEX]: IndexActionFields,
   [ACTION_TYPES.WEBHOOK]: WebhookActionFields,
   [ACTION_TYPES.PAGERDUTY]: PagerDutyActionFields,
-  [ACTION_TYPES.SWIMLANE]: SwimlaneActionFields,
   [ACTION_TYPES.JIRA]: JiraActionFields,
 };
 
