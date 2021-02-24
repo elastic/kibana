@@ -8,18 +8,22 @@
 
 import { i18n } from '@kbn/i18n';
 
-import type { PanelSchema } from 'src/plugins/vis_type_timeseries/common/types';
-import { getSeriesRequestParams } from './series/get_request_params';
+// not typed yet
+// @ts-expect-error
 import { handleResponseBody } from './series/handle_response_body';
+// @ts-expect-error
 import { handleErrorResponse } from './handle_error_response';
+// @ts-expect-error
 import { getAnnotations } from './get_annotations';
+import { getSeriesRequestParams } from './series/get_request_params';
 import { getEsQueryConfig } from './helpers/get_es_query_uisettings';
 import { getActiveSeries } from './helpers/get_active_series';
-import {
+import type {
   VisTypeTimeseriesRequestHandlerContext,
   VisTypeTimeseriesVisDataRequest,
 } from '../../types';
-import { Framework } from '../../plugin';
+import type { Framework } from '../../plugin';
+import type { PanelSchema } from '../../../common/types';
 
 export async function getSeriesData(
   requestContext: VisTypeTimeseriesRequestHandlerContext,
@@ -42,21 +46,26 @@ export async function getSeriesData(
   }
 
   const { searchStrategy, capabilities } = strategy;
-  const esQueryConfig = await getEsQueryConfig(requestContext);
+  const uiSettings = requestContext.core.uiSettings.client;
+  const esQueryConfig = await getEsQueryConfig(uiSettings);
   const meta = {
     type: panel.type,
     uiRestrictions: capabilities.uiRestrictions,
   };
+  const services = {
+    esQueryConfig,
+    capabilities,
+    framework,
+    uiSettings,
+    requestContext,
+  };
 
   try {
     const bodiesPromises = getActiveSeries(panel).map((series) =>
-      getSeriesRequestParams(req, panel, series, esQueryConfig, capabilities)
+      getSeriesRequestParams(req, panel, series, services)
     );
 
-    const searches = (await Promise.all(bodiesPromises)).reduce(
-      (acc, items) => acc.concat(items),
-      []
-    );
+    const searches = await Promise.all(bodiesPromises);
     const data = await searchStrategy.search(requestContext, req, searches);
 
     const handleResponseBodyFn = handleResponseBody(panel, req, searchStrategy, capabilities);
@@ -85,7 +94,7 @@ export async function getSeriesData(
       [panel.id]: {
         annotations,
         id: panel.id,
-        series: series.reduce((acc, series) => acc.concat(series), []),
+        series,
       },
     };
   } catch (err) {

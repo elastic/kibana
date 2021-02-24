@@ -6,11 +6,10 @@
  * Side Public License, v 1.
  */
 
+import { IUiSettingsClient } from 'kibana/server';
 import { UI_SETTINGS } from '../../../../../data/server';
-import { VisTypeTimeseriesRequestHandlerContext } from '../../../types';
 
-export async function getEsQueryConfig(requestContext: VisTypeTimeseriesRequestHandlerContext) {
-  const uiSettings = requestContext.core.uiSettings.client;
+export async function getEsQueryConfig(uiSettings: IUiSettingsClient) {
   const allowLeadingWildcards = await uiSettings.get(UI_SETTINGS.QUERY_ALLOW_LEADING_WILDCARDS);
   const queryStringOptions = await uiSettings.get(UI_SETTINGS.QUERY_STRING_OPTIONS);
   const ignoreFilterIfFieldNotInIndex = await uiSettings.get(

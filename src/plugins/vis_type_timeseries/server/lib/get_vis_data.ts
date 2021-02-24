@@ -31,7 +31,7 @@ export function getVisData(
 
   return Promise.all(promises).then((res) => {
     return res.reduce((acc, data) => {
-      return _.assign(acc as any, data);
+      return _.assign(acc, data);
     }, {});
   }) as Promise<TimeseriesVisData>;
 }

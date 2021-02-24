@@ -17,8 +17,8 @@ export function query(req, panel, series, esQueryConfig, indexPatternObject) {
 
     doc.size = 0;
     const ignoreGlobalFilter = panel.ignore_global_filter || series.ignore_global_filter;
-    const queries = !ignoreGlobalFilter ? req.payload.query : [];
-    const filters = !ignoreGlobalFilter ? req.payload.filters : [];
+    const queries = !ignoreGlobalFilter ? req.body.query : [];
+    const filters = !ignoreGlobalFilter ? req.body.filters : [];
     doc.query = esQuery.buildEsQuery(indexPatternObject, queries, filters, esQueryConfig);
 
     const timerange = {

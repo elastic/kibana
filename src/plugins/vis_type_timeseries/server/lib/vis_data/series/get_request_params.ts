@@ -6,16 +6,28 @@
  * Side Public License, v 1.
  */
 
+import { PanelSchema, SeriesItemsSchema } from '../../../../common/types';
 import { buildRequestBody } from './build_request_body';
 import { getIndexPatternObject } from '../../../lib/search_strategies/lib/get_index_pattern';
+import { VisTypeTimeseriesRequestServices, VisTypeTimeseriesVisDataRequest } from '../../../types';
 
-export async function getSeriesRequestParams(req, panel, series, esQueryConfig, capabilities) {
-  const uiSettings = req.getUiSettingsService();
+export async function getSeriesRequestParams(
+  req: VisTypeTimeseriesVisDataRequest,
+  panel: PanelSchema,
+  series: SeriesItemsSchema,
+  {
+    esQueryConfig,
+    capabilities,
+    uiSettings,
+    framework,
+    requestContext,
+  }: VisTypeTimeseriesRequestServices
+) {
   const indexPattern =
     (series.override_index_pattern && series.series_index_pattern) || panel.index_pattern;
 
   const { indexPatternObject, indexPatternString } = await getIndexPatternObject(indexPattern, {
-    indexPatternsService: await req.getIndexPatternsService(),
+    indexPatternsService: await framework.getIndexPatternsService(requestContext),
   });
 
   const request = await buildRequestBody(
@@ -27,7 +39,7 @@ export async function getSeriesRequestParams(req, panel, series, esQueryConfig, 
     capabilities,
     uiSettings
   );
-  const esShardTimeout = 'await getEsShardTimeout(req)';
+  const esShardTimeout = await framework.getEsShardTimeout();
 
   return {
     index: indexPatternString,

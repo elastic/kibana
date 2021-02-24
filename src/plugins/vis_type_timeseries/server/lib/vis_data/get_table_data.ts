@@ -9,19 +9,23 @@
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
 
-import { PanelSchema } from 'src/plugins/vis_type_timeseries/common/types';
+// not typed yet
+// @ts-expect-error
 import { buildRequestBody } from './table/build_request_body';
+// @ts-expect-error
 import { handleErrorResponse } from './handle_error_response';
+// @ts-expect-error
 import { processBucket } from './table/process_bucket';
 import { getEsQueryConfig } from './helpers/get_es_query_uisettings';
 import { getIndexPatternObject } from '../search_strategies/lib/get_index_pattern';
 import { createFieldsFetcher } from './helpers/fields_fetcher';
 import { extractFieldLabel } from '../../../common/calculate_label';
-import {
+import type {
   VisTypeTimeseriesRequestHandlerContext,
   VisTypeTimeseriesVisDataRequest,
 } from '../../types';
-import { Framework } from '../../plugin';
+import type { Framework } from '../../plugin';
+import type { PanelSchema } from '../../../common/types';
 
 export async function getTableData(
   requestContext: VisTypeTimeseriesRequestHandlerContext,
@@ -46,12 +50,13 @@ export async function getTableData(
   }
 
   const { searchStrategy, capabilities } = strategy;
-  const esQueryConfig = await getEsQueryConfig(req);
+  const uiSettings = requestContext.core.uiSettings.client;
+  const esQueryConfig = await getEsQueryConfig(uiSettings);
   const { indexPatternObject } = await getIndexPatternObject(panelIndexPattern, {
-    indexPatternsService: await req.getIndexPatternsService(),
+    indexPatternsService: await framework.getIndexPatternsService(requestContext),
   });
 
-  const extractFields = createFieldsFetcher(req, searchStrategy, capabilities);
+  const extractFields = createFieldsFetcher(requestContext, req, searchStrategy, capabilities);
 
   const calculatePivotLabel = async () => {
     if (panel.pivot_id && indexPatternObject?.title) {
@@ -69,7 +74,6 @@ export async function getTableData(
   };
 
   try {
-    const uiSettings = req.getUiSettingsService();
     const body = await buildRequestBody(
       req,
       panel,
@@ -79,7 +83,7 @@ export async function getTableData(
       uiSettings
     );
 
-    const [resp] = await searchStrategy.search(req, [
+    const [resp] = await searchStrategy.search(requestContext, req, [
       {
         body,
         index: panelIndexPattern,
