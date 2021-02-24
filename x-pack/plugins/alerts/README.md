@@ -129,11 +129,11 @@ For example, if the `context` has one variable `foo` which is an object that has
 
 ## Licensing
 
-Currently most of the alerts are licensed as "basic". But some alert types are at least "gold" level, eg tracking containment alert.
+Currently most of the alerts are free features. But some alert types are subscription features, such as the tracking containment alert.
 
 ## Documentation
 
-You should also create some asciidoc for the new alert type. An entry should be made in the alert type index - [`docs/user/alerting/alert-types.asciidoc`](../../../docs/user/alerting/alert-types.asciidoc) which points to a new document for the alert type that should be in the directory [`docs/user/alerting/alert-types`](../../../docs/user/alerting/alert-types).
+You should create documentation for the new alert type. Make an entry in the alert type index [`docs/user/alerting/alert-types.asciidoc`](../../../docs/user/alerting/alert-types.asciidoc) that points to a new document for the alert type that should be in the directory [`docs/user/alerting/alert-types`](../../../docs/user/alerting/alert-types).
 
 ## Tests
 
