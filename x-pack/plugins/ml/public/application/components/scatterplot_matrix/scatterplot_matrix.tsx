@@ -307,7 +307,7 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
                     label={i18n.translate('xpack.ml.splom.sampleSizeLabel', {
                       defaultMessage: 'Sample size',
                     })}
-                    tooltip={i18n.translate('xpack.ml.splom.sampleInfoTooltip', {
+                    tooltip={i18n.translate('xpack.ml.splom.sampleSizeInfoTooltip', {
                       defaultMessage: 'Amount of documents to display in the scatterplot matrix.',
                     })}
                   />
