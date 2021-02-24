@@ -85,6 +85,12 @@ export const commentAlertMultipleIds: CommentResponseAlertsType = {
   type: CommentType.alert as const,
 };
 
+export const commentGeneratedAlert: CommentResponseAlertsType = {
+  ...commentAlertMultipleIds,
+  id: 'mock-comment-3',
+  type: CommentType.generatedAlert as const,
+};
+
 export const defaultPipes = ['informationCreated'];
 export const basicParams: BasicParams = {
   description: 'a description',

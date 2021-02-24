@@ -18,6 +18,7 @@ import {
   userActions,
   commentAlert,
   commentAlertMultipleIds,
+  commentGeneratedAlert,
 } from './mock';
 
 import {
@@ -539,7 +540,35 @@ describe('utils', () => {
         },
         {
           comment: 'Elastic Security Alerts attached to the case: 3',
-          commentId: '',
+        },
+      ]);
+    });
+
+    it('it removes alerts correctly', async () => {
+      const res = await createIncident({
+        actionsClient: actionsMock,
+        theCase: {
+          ...theCase,
+          comments: [
+            { ...commentObj, id: 'comment-user-1' },
+            commentAlertMultipleIds,
+            commentGeneratedAlert,
+          ],
+        },
+        userActions,
+        connector,
+        mappings,
+        alerts: [],
+      });
+
+      expect(res.comments).toEqual([
+        {
+          comment:
+            'Wow, good luck catching that bad meanie! (added at 2019-11-25T21:55:00.177Z by elastic)',
+          commentId: 'comment-user-1',
+        },
+        {
+          comment: 'Elastic Security Alerts attached to the case: 4',
         },
       ]);
     });
