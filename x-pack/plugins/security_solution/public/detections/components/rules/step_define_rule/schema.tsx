@@ -298,16 +298,18 @@ export const schema: FormSchema<DefineStepRule> = {
             if (!needsValidation) {
               return;
             }
-            return fieldValidators.numberGreaterThanField({
-              than: 1,
-              message: i18n.translate(
-                'xpack.securitySolution.detectionEngine.validations.thresholdCardinalityValueFieldData.numberGreaterThanOrEqualOneErrorMessage',
-                {
-                  defaultMessage: 'Value must be greater than or equal to one.',
-                }
-              ),
-              allowEquality: true,
-            })(...args);
+            if (!isEmpty(formData['threshold.cardinality_field'])) {
+              return fieldValidators.numberGreaterThanField({
+                than: 1,
+                message: i18n.translate(
+                  'xpack.securitySolution.detectionEngine.validations.thresholdCardinalityValueFieldData.numberGreaterThanOrEqualOneErrorMessage',
+                  {
+                    defaultMessage: 'Value must be greater than or equal to one.',
+                  }
+                ),
+                allowEquality: true,
+              })(...args);
+            }
           },
         },
       ],

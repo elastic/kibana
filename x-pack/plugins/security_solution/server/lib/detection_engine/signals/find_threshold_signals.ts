@@ -117,7 +117,7 @@ export const findThresholdSignals = async ({
           threshold_0: {
             terms: {
               script: {
-                source: '',
+                source: '""',
                 lang: 'painless',
               },
               min_doc_count: threshold.value,
