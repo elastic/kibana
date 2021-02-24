@@ -102,7 +102,7 @@ export const constructQueryOptions = ({
 }: {
   tags?: string | string[];
   reporters?: string | string[];
-  status?: CaseStatuses | undefined;
+  status?: CaseStatuses;
   sortByField?: string;
   caseType?: CaseType;
 }): { case: SavedObjectFindOptions; subCase?: SavedObjectFindOptions } => {

@@ -21,7 +21,7 @@ import { isEmpty, memoize } from 'lodash/fp';
 import styled, { css } from 'styled-components';
 import * as i18n from './translations';
 
-import { AllCaseType, CaseStatuses, CaseType } from '../../../../../case/common/api';
+import { CaseStatuses, CaseType } from '../../../../../case/common/api';
 import { getCasesColumns } from './columns';
 import { Case, DeleteCase, FilterOptions, SortFieldCase } from '../../containers/types';
 import { useGetCases, UpdateCase } from '../../containers/use_get_cases';
@@ -391,6 +391,8 @@ export const AllCases = React.memo<AllCasesProps>(
       [isModal, onRowClick]
     );
 
+    const enableBuckActions = userCanCrud && !isModal;
+
     return (
       <>
         {!isEmpty(actionsErrors) && (
@@ -486,10 +488,12 @@ export const AllCases = React.memo<AllCasesProps>(
                   </UtilityBarGroup>
                   {!isModal && (
                     <UtilityBarGroup data-test-subj="case-table-utility-bar-actions">
-                      <UtilityBarText data-test-subj="case-table-selected-case-count">
-                        {i18n.SHOWING_SELECTED_CASES(selectedCases.length)}
-                      </UtilityBarText>
-                      {userCanCrud && (
+                      {enableBuckActions && (
+                        <UtilityBarText data-test-subj="case-table-selected-case-count">
+                          {i18n.SHOWING_SELECTED_CASES(selectedCases.length)}
+                        </UtilityBarText>
+                      )}
+                      {enableBuckActions && (
                         <UtilityBarAction
                           data-test-subj="case-table-bulk-actions"
                           iconSide="right"
@@ -509,7 +513,7 @@ export const AllCases = React.memo<AllCasesProps>(
               <BasicTable
                 columns={memoizedGetCasesColumns}
                 data-test-subj="cases-table"
-                isSelectable={userCanCrud && !isModal && filterOptions.status !== AllCaseType}
+                isSelectable={enableBuckActions}
                 itemId="id"
                 items={data.cases}
                 itemIdToExpandedRowMap={itemIdToExpandedRowMap}
@@ -536,7 +540,7 @@ export const AllCases = React.memo<AllCasesProps>(
                 onChange={tableOnChangeCallback}
                 pagination={memoizedPagination}
                 rowProps={tableRowProps}
-                selection={userCanCrud && !isModal ? euiBasicTableSelectionProps : undefined}
+                selection={enableBuckActions ? euiBasicTableSelectionProps : undefined}
                 sorting={sorting}
               />
             </Div>
