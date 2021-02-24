@@ -19,6 +19,9 @@ import { RelevanceTuningForm } from './relevance_tuning_form';
 describe('RelevanceTuning', () => {
   const values = {
     engineHasSchemaFields: true,
+    engine: {
+      invalidBoosts: false,
+    },
   };
 
   const actions = {
@@ -36,7 +39,11 @@ describe('RelevanceTuning', () => {
   });
 
   it('renders', () => {
-    expect(subject().find(RelevanceTuningForm).exists()).toBe(true);
+    const wrapper = subject();
+    expect(wrapper.find(RelevanceTuningForm).exists()).toBe(true);
+    expect(wrapper.find('[data-test-subj="RelevanceTuningInvalidBoostsCallout"]').exists()).toBe(
+      false
+    );
   });
 
   it('initializes relevance tuning data', () => {
@@ -52,7 +59,7 @@ describe('RelevanceTuning', () => {
     expect(actions.updateSearchSettings).toHaveBeenCalled();
   });
 
-  it('renders a Reset button that will reset the current changes', () => {
+  it('renders a Reset button that will remove all weights and boosts', () => {
     const buttons = subject().find(EuiPageHeader).prop('rightSideItems') as React.ReactElement[];
     expect(buttons.length).toBe(2);
     const resetButton = shallow(buttons[1]);
@@ -61,10 +68,28 @@ describe('RelevanceTuning', () => {
   });
 
   it('will not render buttons if the engine has no schema', () => {
+    // An eninge would have no schema if it is newly created, and no documents have been indexed
+    // yet.
     setMockValues({
+      ...values,
       engineHasSchemaFields: false,
     });
     const buttons = subject().find(EuiPageHeader).prop('rightSideItems') as React.ReactElement[];
     expect(buttons.length).toBe(0);
+  });
+
+  it('shows a message when there are invalid boosts', () => {
+    // An invalid boost would be if a user creats a functional boost on a number field, then that
+    // field later changes to text. At this point, the boost still exists but is invalid for
+    // a text field.
+    setMockValues({
+      ...values,
+      engine: {
+        invalidBoosts: true,
+      },
+    });
+    expect(subject().find('[data-test-subj="RelevanceTuningInvalidBoostsCallout"]').exists()).toBe(
+      true
+    );
   });
 });

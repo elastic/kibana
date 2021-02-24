@@ -9,13 +9,22 @@ import React, { useEffect } from 'react';
 
 import { useActions, useValues } from 'kea';
 
-import { EuiPageHeader, EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiButton } from '@elastic/eui';
+import {
+  EuiPageHeader,
+  EuiSpacer,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButton,
+  EuiCallOut,
+} from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
 import { FlashMessages } from '../../../shared/flash_messages';
 import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
 import { UnsavedChangesPrompt } from '../../../shared/unsaved_changes_prompt';
+
+import { EngineLogic } from '../engine';
 
 import { RELEVANCE_TUNING_TITLE } from './constants';
 import { RelevanceTuningForm } from './relevance_tuning_form';
@@ -30,6 +39,9 @@ export const RelevanceTuning: React.FC<Props> = ({ engineBreadcrumb }) => {
     RelevanceTuningLogic
   );
   const { engineHasSchemaFields, unsavedChanges } = useValues(RelevanceTuningLogic);
+  const {
+    engine: { invalidBoosts },
+  } = useValues(EngineLogic);
 
   useEffect(() => {
     initializeRelevanceTuning();
@@ -83,6 +95,31 @@ export const RelevanceTuning: React.FC<Props> = ({ engineBreadcrumb }) => {
 
       <EuiSpacer />
       <FlashMessages />
+      <div>{invalidBoosts}</div>
+      {invalidBoosts && (
+        <EuiCallOut
+          color="warning"
+          iconType="alert"
+          title={i18n.translate(
+            'xpack.enterpriseSearch.appSearch.engine.relevanceTuning.invalidBoostsBannerLabel',
+            {
+              defaultMessage: 'You have invalid boosts!',
+            }
+          )}
+          data-test-subj="RelevanceTuningInvalidBoostsCallout"
+        >
+          <p>
+            {i18n.translate(
+              'xpack.enterpriseSearch.appSearch.engine.relevanceTuning.invalidBoostsErrorMessage',
+              {
+                defaultMessage:
+                  'One or more of your boosts is no longer valid, possibly due to a schema type change. Delete any old or invalid boosts to dismiss this alert.',
+              }
+            )}
+          </p>
+        </EuiCallOut>
+      )}
+      <EuiSpacer />
       <EuiFlexGroup>
         <EuiFlexItem>
           <RelevanceTuningForm />

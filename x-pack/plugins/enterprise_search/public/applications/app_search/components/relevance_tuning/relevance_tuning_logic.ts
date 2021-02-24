@@ -330,6 +330,12 @@ export const RelevanceTuningLogic = kea<
       } catch (e) {
         flashAPIErrors(e);
         actions.onSearchSettingsError();
+      } finally {
+        const { invalidBoosts } = EngineLogic.values.engine;
+        if (invalidBoosts) {
+          // Re-fetch engine data so that any navigation flags are updated dynamically
+          EngineLogic.actions.initializeEngine();
+        }
       }
     },
     resetSearchSettings: async () => {

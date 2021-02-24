@@ -9,13 +9,19 @@ import { LogicMounter, mockFlashMessageHelpers, mockHttpValues } from '../../../
 
 import { nextTick } from '@kbn/test/jest';
 
+jest.mock('../engine', () => ({
+  EngineLogic: {
+    values: {},
+    actions: {
+      initializeEngine: jest.fn(),
+    },
+  },
+}));
+import { EngineLogic } from '../engine';
+
 import { Boost, BoostOperation, BoostType, FunctionalBoostFunction } from './types';
 
 import { RelevanceTuningLogic } from './';
-
-jest.mock('../engine', () => ({
-  EngineLogic: { values: { engineName: 'test-engine' } },
-}));
 
 describe('RelevanceTuningLogic', () => {
   const { mount } = new LogicMounter(RelevanceTuningLogic);
@@ -74,6 +80,13 @@ describe('RelevanceTuningLogic', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    // cast to any so that we don't have to provide a value for all of EngineLogic's values
+    EngineLogic.values = {
+      engineName: 'test-engine',
+      engine: {
+        invalidBoosts: false,
+      },
+    } as any;
   });
 
   it('has expected default values', () => {
@@ -544,6 +557,18 @@ describe('RelevanceTuningLogic', () => {
 
         expect(flashAPIErrors).toHaveBeenCalledWith('error');
         expect(RelevanceTuningLogic.actions.onSearchSettingsError).toHaveBeenCalled();
+      });
+
+      it('will sometimes re-fetch the current engine after settings are updated', async () => {
+        // If there were invalidBoosts before this update, it should trigger an update
+        EngineLogic.values.engine.invalidBoosts = true;
+        mount({});
+        http.put.mockReturnValueOnce(Promise.resolve(searchSettings));
+
+        RelevanceTuningLogic.actions.updateSearchSettings();
+        await nextTick();
+
+        expect(EngineLogic.actions.initializeEngine).toHaveBeenCalled();
       });
     });
 
