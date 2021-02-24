@@ -58,7 +58,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await esClient.ilm.deleteLifecycle({ policy: TEST_POLICY_NAME });
     });
 
-    it('Create policy Wizard', async () => {
+    it('Create Policy Form', async () => {
       await retry.waitFor('Index Lifecycle Policy create/edit view to be present', async () => {
         return testSubjects.isDisplayed('createPolicyButton');
       });
@@ -68,12 +68,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await retry.waitFor('Index Lifecycle Policy create/edit view to be present', async () => {
         return (await testSubjects.getVisibleText('policyTitle')) === 'Create policy';
       });
-      await a11y.testAppSnapshot();
 
       // Fill out form after enabling all phases and take snapshot.
-      await indexLifecycleManagement.fillNewPolicyForm('testPolicy', true, true, true);
+      await indexLifecycleManagement.fillNewPolicyForm('testPolicy', true, true, false);
       await a11y.testAppSnapshot();
+    });
 
+    it('Send Request Flyout on New Policy Page', async () => {
       // Take snapshot of the show request panel
       await testSubjects.click('requestButton');
       await a11y.testAppSnapshot();

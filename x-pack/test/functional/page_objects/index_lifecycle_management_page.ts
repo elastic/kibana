@@ -20,9 +20,9 @@ export function IndexLifecycleManagementPageProvider({ getService }: FtrProvider
     },
     async fillNewPolicyForm(
       policyName: string,
-      warmEnabled: boolean,
-      coldEnabled: boolean,
-      deletePhaseEnabled: boolean
+      warmEnabled: boolean = false,
+      coldEnabled: boolean = false,
+      deletePhaseEnabled: boolean = false
     ) {
       await testSubjects.setValue('policyNameField', policyName);
       if (warmEnabled) {
@@ -46,9 +46,9 @@ export function IndexLifecycleManagementPageProvider({ getService }: FtrProvider
     },
     async createNewPolicyAndSave(
       policyName: string,
-      warmEnabled: boolean,
-      coldEnabled: boolean,
-      deletePhaseEnabled: boolean
+      warmEnabled: boolean = false,
+      coldEnabled: boolean = false,
+      deletePhaseEnabled: boolean = false
     ) {
       await this.fillNewPolicyForm(policyName, warmEnabled, coldEnabled, deletePhaseEnabled);
       await this.saveNewPolicy();
