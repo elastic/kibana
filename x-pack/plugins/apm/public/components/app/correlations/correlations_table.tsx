@@ -31,11 +31,16 @@ type SignificantTerm = NonNullable<
   NonNullable<CorrelationsApiResponse>['significantTerms']
 >[0];
 
+export type SelectedSignificantTerm = Pick<
+  SignificantTerm,
+  'fieldName' | 'fieldValue'
+>;
+
 interface Props<T> {
   significantTerms?: T[];
   status: FETCH_STATUS;
   percentageColumnName: string;
-  setSelectedSignificantTerm: (term: T | null) => void;
+  setSelectedSignificantTerm: (term: SelectedSignificantTerm | null) => void;
   onFilter: () => void;
 }
 
@@ -58,14 +63,14 @@ export function CorrelationsTable<T extends SignificantTerm>({
   const history = useHistory();
   const columns: Array<EuiBasicTableColumn<T>> = [
     {
-      width: '100px',
+      width: '116px',
       field: 'impact',
       name: i18n.translate(
         'xpack.apm.correlations.correlationsTable.impactLabel',
         { defaultMessage: 'Impact' }
       ),
       render: (_: any, term: T) => {
-        return <ImpactBar value={term.impact * 100} />;
+        return <ImpactBar size="m" value={term.impact * 100} />;
       },
     },
     {
