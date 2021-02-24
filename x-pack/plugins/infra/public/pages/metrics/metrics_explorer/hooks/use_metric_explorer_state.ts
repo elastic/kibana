@@ -24,7 +24,7 @@ export interface MetricExplorerViewState {
   chartOptions: MetricsExplorerChartOptions;
   currentTimerange: MetricsExplorerTimeOptions;
   options: MetricsExplorerOptions;
-  id: string;
+  id?: string;
 }
 
 export const useMetricsExplorerState = (
