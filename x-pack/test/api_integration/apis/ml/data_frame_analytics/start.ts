@@ -40,13 +40,14 @@ export default ({ getService }: FtrProviderContext) => {
     allow_lazy_start: false, // default value
     max_num_threads: 1, // default value
   };
+  const destinationIndex = generateDestinationIndex(`${jobId}_0`);
 
   const testJobConfigs: Array<DeepPartial<DataFrameAnalyticsConfig>> = [
     {
       id: `${jobId}_0`,
-      description: 'Test start and stop for analytics',
+      description: 'Test start for analytics',
       dest: {
-        index: generateDestinationIndex(`${jobId}_0`),
+        index: destinationIndex,
         results_field: 'ml',
       },
       ...commonJobConfig,
@@ -59,7 +60,7 @@ export default ({ getService }: FtrProviderContext) => {
     }
   }
 
-  describe('POST data_frame/analytics', () => {
+  describe('POST data_frame/analytics/{analyticsId}/_start', () => {
     before(async () => {
       await esArchiver.loadIfNeeded('ml/bm_classification');
       await ml.testResources.setKibanaTimeZoneToUTC();
@@ -68,6 +69,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     after(async () => {
       await ml.api.cleanMlIndices();
+      await ml.api.deleteIndices(destinationIndex);
     });
 
     describe('StartDataFrameAnalyticsJob', () => {
@@ -111,42 +113,13 @@ export default ({ getService }: FtrProviderContext) => {
         expect(body.error).to.eql('Forbidden');
         expect(body.message).to.eql('Forbidden');
       });
-    });
 
-    describe('StopsDataFrameAnalyticsJob', () => {
-      it('should stop analytics job for specified id when job exists', async () => {
+      it('should not allow to start analytics job for user with view only permission', async () => {
         const analyticsId = `${jobId}_0`;
 
         const { body } = await supertest
-          .post(`/api/ml/data_frame/analytics/${analyticsId}/_stop`)
-          .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
-          .set(COMMON_REQUEST_HEADERS)
-          .expect(200);
-
-        expect(body).not.to.be(undefined);
-        expect(body.stopped).to.be(true);
-      });
-
-      it('should show 404 error if job does not exist', async () => {
-        const id = `${jobId}_invalid`;
-        const message = `No known job with id '${id}'`;
-
-        const { body } = await supertest
-          .post(`/api/ml/data_frame/analytics/${id}/_stop`)
-          .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
-          .set(COMMON_REQUEST_HEADERS)
-          .expect(404);
-
-        expect(body.error).to.eql('Not Found');
-        expect(body.message).to.eql(message);
-      });
-
-      it('should not allow to stop analytics job for unauthorized user', async () => {
-        const analyticsId = `${jobId}_0`;
-
-        const { body } = await supertest
-          .post(`/api/ml/data_frame/analytics/${analyticsId}/_stop`)
-          .auth(USER.ML_UNAUTHORIZED, ml.securityCommon.getPasswordForUser(USER.ML_UNAUTHORIZED))
+          .post(`/api/ml/data_frame/analytics/${analyticsId}/_start`)
+          .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
           .set(COMMON_REQUEST_HEADERS)
           .expect(403);
 
