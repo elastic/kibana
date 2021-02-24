@@ -16,6 +16,7 @@ import {
   EuiPageContentBody,
   EuiTitle,
   EuiSpacer,
+  EuiEmptyPrompt,
 } from '@elastic/eui';
 
 import { FlashMessages } from '../../../shared/flash_messages';
@@ -33,6 +34,8 @@ import {
   CREATE_AN_ENGINE_BUTTON_LABEL,
   CREATE_A_META_ENGINE_BUTTON_LABEL,
   ENGINES_TITLE,
+  META_ENGINE_EMPTY_PROMPT_DESCRIPTION,
+  META_ENGINE_EMPTY_PROMPT_TITLE,
   META_ENGINES_TITLE,
 } from './constants';
 import { EnginesLogic } from './engines_logic';
@@ -139,6 +142,21 @@ export const EnginesOverview: React.FC = () => {
                   ...convertMetaToPagination(metaEnginesMeta),
                   hidePerPageOptions: true,
                 }}
+                noItemsMessage={
+                  <EuiEmptyPrompt
+                    title={<h2>{META_ENGINE_EMPTY_PROMPT_TITLE}</h2>}
+                    body={<p>{META_ENGINE_EMPTY_PROMPT_DESCRIPTION}</p>}
+                    actions={
+                      <EuiButtonTo
+                        data-test-subj="appSearchMetaEnginesEmptyStateCreationButton"
+                        fill
+                        to={META_ENGINE_CREATION_PATH}
+                      >
+                        {CREATE_A_META_ENGINE_BUTTON_LABEL}
+                      </EuiButtonTo>
+                    }
+                  />
+                }
                 onChange={handlePageChange(onMetaEnginesPagination)}
               />
             </EuiPageContentBody>
