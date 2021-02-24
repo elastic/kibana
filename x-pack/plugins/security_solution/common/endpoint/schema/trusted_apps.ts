@@ -31,6 +31,7 @@ export const GetTrustedAppsRequestSchema = {
   query: schema.object({
     page: schema.maybe(schema.number({ defaultValue: 1, min: 1 })),
     per_page: schema.maybe(schema.number({ defaultValue: 20, min: 1 })),
+    kuery: schema.maybe(schema.string()),
   }),
 };
 
