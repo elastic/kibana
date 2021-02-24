@@ -58,7 +58,6 @@ export function ServiceOverviewTransactionsTable({ serviceName }: Props) {
 
   const { transactionType } = useApmServiceContext();
   const {
-    uiFilters,
     urlParams: {
       start,
       end,
@@ -66,6 +65,7 @@ export function ServiceOverviewTransactionsTable({ serviceName }: Props) {
       comparisonType,
       comparisonEnabled,
       environment,
+      kuery,
     },
   } = useUrlParams();
 
@@ -87,9 +87,9 @@ export function ServiceOverviewTransactionsTable({ serviceName }: Props) {
           path: { serviceName },
           query: {
             environment,
+            kuery,
             start,
             end,
-            uiFilters: JSON.stringify(uiFilters),
             transactionType,
             latencyAggregationType,
           },
@@ -104,10 +104,10 @@ export function ServiceOverviewTransactionsTable({ serviceName }: Props) {
     },
     [
       environment,
+      kuery,
       serviceName,
       start,
       end,
-      uiFilters,
       transactionType,
       latencyAggregationType,
     ]
@@ -144,9 +144,9 @@ export function ServiceOverviewTransactionsTable({ serviceName }: Props) {
             path: { serviceName },
             query: {
               environment,
+              kuery,
               start,
               end,
-              uiFilters: JSON.stringify(uiFilters),
               numBuckets: 20,
               transactionType,
               latencyAggregationType,

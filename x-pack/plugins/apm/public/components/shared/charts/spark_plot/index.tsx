@@ -81,7 +81,16 @@ export function SparkPlot({
     <EuiFlexGroup gutterSize="m" responsive={false}>
       <EuiFlexItem grow={false}>
         {!series || isEmptyTimeseries(series) ? (
-          <EuiIcon type="visLine" color="subdued" style={chartSize} />
+          <div
+            style={{
+              ...chartSize,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            <EuiIcon type="visLine" color={theme.eui.euiColorMediumShade} />
+          </div>
         ) : (
           <Chart size={chartSize}>
             <Settings
