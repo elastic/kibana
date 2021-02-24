@@ -43,14 +43,17 @@ export class FunctionalTestRunner {
   }
 
   async run() {
-    // load APM config and start shipping stats for "ftr" service
     // eslint-disable-next-line @typescript-eslint/no-var-requires
-    require('elastic-apm-node').start(loadConfiguration([], REPO_ROOT, false).getConfig('ftr'));
+    const apm = require('elastic-apm-node');
+    // load APM config and start shipping stats for "ftr" service
+    apm.start(loadConfiguration([], REPO_ROOT, false).getConfig('ftr'));
+    // use a single transaction for now
+    const transaction = apm.startTransaction('functional tests');
 
     return await this._run(async (config, coreProviders) => {
       SuiteTracker.startTracking(this.lifecycle, this.configFile);
 
-      const providers = new ProviderCollection(this.log, [
+      const providers = new ProviderCollection(this.log, transaction, [
         ...coreProviders,
         ...readProviderSpec('Service', config.get('services')),
         ...readProviderSpec('PageObject', config.get('pageObjects')),
@@ -68,6 +71,7 @@ export class FunctionalTestRunner {
 
       const mocha = await setupMocha(this.lifecycle, this.log, config, providers);
       await this.lifecycle.beforeTests.trigger(mocha.suite);
+
       this.log.info('Starting tests');
 
       return await runTests(this.lifecycle, mocha);

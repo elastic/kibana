@@ -6,7 +6,9 @@
  * Side Public License, v 1.
  */
 
-import apm from 'elastic-apm-node';
+import type { startTransaction } from 'elastic-apm-node';
+
+type ApmTransaction = NonNullable<ReturnType<typeof startTransaction>>;
 
 type SomeFn = (...args: any[]) => unknown;
 
@@ -24,6 +26,7 @@ const isObj = (value: any): value is object => {
 };
 
 export const createApmInstrumentedInstance = <T extends object>(
+  apmTransaction: ApmTransaction,
   instance: T,
   type: string,
   instanceName: string
@@ -33,7 +36,7 @@ export const createApmInstrumentedInstance = <T extends object>(
 
   const createFnWrapper = (path: string, context: object, fn: SomeFn): SomeFn => {
     return (...args: any[]) => {
-      const span = apm.startSpan(`${instanceName}.${path}()`, type, instanceName, path);
+      const span = apmTransaction.startSpan(`${instanceName}.${path}()`, type, instanceName, path);
 
       if (!span) {
         return fn.apply(context, args);
