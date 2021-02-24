@@ -21,6 +21,7 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 import { FlashMessages } from '../../../shared/flash_messages';
 import { Loading } from '../../../shared/loading';
@@ -29,8 +30,18 @@ import {
   DeleteMappingCallout,
   RoleSelector,
 } from '../../../shared/role_mapping';
+import { ROLE_LABEL } from '../../../shared/role_mapping/constants';
 import { ViewContentHeader } from '../../components/shared/view_content_header';
 import { Role } from '../../types';
+
+import {
+  ADMIN_ROLE_TYPE_DESCRIPTION,
+  USER_ROLE_TYPE_DESCRIPTION,
+  ROLE_SELECTOR_DISABLED_TEXT,
+  GROUP_ASSIGNMENT_TITLE,
+  GROUP_ASSIGNMENT_INVALID_ERROR,
+  GROUP_ASSIGNMENT_ALL_GROUPS_LABEL,
+} from './constants';
 
 import { RoleMappingsLogic } from './role_mappings_logic';
 
@@ -42,13 +53,11 @@ interface RoleType {
 const roleTypes = [
   {
     type: 'admin',
-    description:
-      'Admins have complete access to all organization-wide settings, including content source, group and user management functionality.',
+    description: ADMIN_ROLE_TYPE_DESCRIPTION,
   },
   {
     type: 'user',
-    description:
-      "Users' feature access is limited to search interfaces and personal settings management.",
+    description: USER_ROLE_TYPE_DESCRIPTION,
   },
 ] as RoleType[];
 
@@ -98,9 +107,17 @@ export const RoleMapping: React.FC<RoleMappingProps> = ({ isNew }) => {
 
   const hasGroupAssignment = selectedGroups.size > 0 || includeInAllGroups;
 
+  const SAVE_ROLE_MAPPING_LABEL = i18n.translate(
+    'xpack.enterpriseSearch.workplaceSearch.roleMapping.saveRoleMappingButtonMessage',
+    {
+      defaultMessage: '{operation} role mapping',
+      values: { operation: isNew ? 'Save' : 'Update' },
+    }
+  );
+
   const saveRoleMappingButton = (
     <EuiButton disabled={!hasGroupAssignment} onClick={handleSaveMapping} fill>
-      {isNew ? 'Save' : 'Update'} role mapping
+      {SAVE_ROLE_MAPPING_LABEL}
     </EuiButton>
   );
 
@@ -111,10 +128,7 @@ export const RoleMapping: React.FC<RoleMappingProps> = ({ isNew }) => {
 
   return (
     <>
-      <ViewContentHeader
-        title={`${isNew ? 'Save' : 'Update'} role mapping`}
-        action={saveRoleMappingButton}
-      />
+      <ViewContentHeader title={SAVE_ROLE_MAPPING_LABEL} action={saveRoleMappingButton} />
       <EuiSpacer size="l" />
       <div>
         <FlashMessages />
@@ -136,7 +150,7 @@ export const RoleMapping: React.FC<RoleMappingProps> = ({ isNew }) => {
           <EuiFlexItem>
             <EuiPanel paddingSize="l">
               <EuiTitle size="s">
-                <h3>Role</h3>
+                <h3>{ROLE_LABEL}</h3>
               </EuiTitle>
               <EuiSpacer />
               {roleTypes.map(({ type, description }) => (
@@ -147,9 +161,7 @@ export const RoleMapping: React.FC<RoleMappingProps> = ({ isNew }) => {
                   roleTypeOption={type}
                   description={description}
                   disabled={!(type === 'admin' || hasAdminRoleMapping)}
-                  disabledText={
-                    'You need at least one admin role mapping before you can create a user role mapping.'
-                  }
+                  disabledText={ROLE_SELECTOR_DISABLED_TEXT}
                 />
               ))}
             </EuiPanel>
@@ -157,13 +169,13 @@ export const RoleMapping: React.FC<RoleMappingProps> = ({ isNew }) => {
           <EuiFlexItem>
             <EuiPanel paddingSize="l">
               <EuiTitle size="s">
-                <h3>Group assignment</h3>
+                <h3>{GROUP_ASSIGNMENT_TITLE}</h3>
               </EuiTitle>
               <EuiSpacer />
               <div className="engines-list">
                 <EuiFormRow
                   isInvalid={!hasGroupAssignment}
-                  error={['At least one assigned group is required.']}
+                  error={[GROUP_ASSIGNMENT_INVALID_ERROR]}
                 >
                   <>
                     {availableGroups.map(({ id, name }) => (
@@ -188,7 +200,7 @@ export const RoleMapping: React.FC<RoleMappingProps> = ({ isNew }) => {
                       onChange={(e) => {
                         handleAllGroupsSelectionChange(e.target.checked);
                       }}
-                      label="Include in all groups, including future groups"
+                      label={GROUP_ASSIGNMENT_ALL_GROUPS_LABEL}
                     />
                   </>
                 </EuiFormRow>

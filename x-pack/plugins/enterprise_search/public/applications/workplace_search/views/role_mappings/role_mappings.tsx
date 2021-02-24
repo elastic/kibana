@@ -17,6 +17,14 @@ import { AddRoleMappingButton, RoleMappingsTable } from '../../../shared/role_ma
 import { ViewContentHeader } from '../../components/shared/view_content_header';
 import { getRoleMappingPath, ROLE_MAPPING_NEW_PATH } from '../../routes';
 
+import {
+  EMPTY_ROLE_MAPPINGS_TITLE,
+  EMPTY_ROLE_MAPPINGS_BODY,
+  ROLE_MAPPINGS_TABLE_HEADER,
+  ROLE_MAPPINGS_TITLE,
+  ROLE_MAPPINGS_DESCRIPTION,
+} from './constants';
+
 import { RoleMappingsLogic } from './role_mappings_logic';
 
 export const RoleMappings: React.FC = () => {
@@ -34,13 +42,8 @@ export const RoleMappings: React.FC = () => {
   const emptyPrompt = (
     <EuiEmptyPrompt
       iconType="usersRolesApp"
-      title={<h2>No role mappings yet</h2>}
-      body={
-        <p>
-          New team members are assigned the admin role by default. An admin can access everything.
-          Create a new role to override the default.
-        </p>
-      }
+      title={<h2>{EMPTY_ROLE_MAPPINGS_TITLE}</h2>}
+      body={<p>{EMPTY_ROLE_MAPPINGS_BODY}</p>}
       actions={addMappingButton}
     />
   );
@@ -48,7 +51,7 @@ export const RoleMappings: React.FC = () => {
     <RoleMappingsTable
       roleMappings={roleMappings}
       accessItemKey="groups"
-      accessHeader="Group Access"
+      accessHeader={ROLE_MAPPINGS_TABLE_HEADER}
       addMappingButton={addMappingButton}
       getRoleMappingPath={getRoleMappingPath}
       shouldShowAuthProvider={multipleAuthProvidersConfig}
@@ -57,10 +60,7 @@ export const RoleMappings: React.FC = () => {
 
   return (
     <>
-      <ViewContentHeader
-        title="Users &amp; roles"
-        description="Define role mappings for elasticsearch-native and elasticsearch-saml authentication."
-      />
+      <ViewContentHeader title={ROLE_MAPPINGS_TITLE} description={ROLE_MAPPINGS_DESCRIPTION} />
       <div>
         <FlashMessages />
         {roleMappings.length === 0 ? emptyPrompt : roleMappingsTable}

@@ -15,9 +15,7 @@ import { ANY_AUTH_PROVIDER } from '../../../shared/role_mapping/constants';
 import { ROLE_MAPPINGS_PATH } from '../../routes';
 import { RoleGroup, WSRoleMapping, Role } from '../../types';
 
-const DELETE_MESSAGE =
-  'Are you sure you want to permanently delete this mapping? This action is not reversible and some users might lose access.';
-const DEFAULT_GROUP_NAME = 'Default';
+import { DELETE_ROLE_MAPPING_MESSAGE, DEFAULT_GROUP_NAME } from './constants';
 
 interface RoleMappingsServerDetails {
   multipleAuthProvidersConfig: boolean;
@@ -263,7 +261,7 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
         return;
       }
       const route = `/api/workplace_search/org/role_mappings/${roleMapping.id}`;
-      if (window.confirm(DELETE_MESSAGE)) {
+      if (window.confirm(DELETE_ROLE_MAPPING_MESSAGE)) {
         try {
           await http.delete(route);
           navigateToUrl(ROLE_MAPPINGS_PATH);
