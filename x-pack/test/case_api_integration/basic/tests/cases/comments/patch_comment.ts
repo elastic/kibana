@@ -64,19 +64,17 @@ export default ({ getService }: FtrProviderContext): void => {
           .patch(`${CASES_URL}/${caseInfo.id}/comments?subCaseId=${caseInfo.subCases![0].id}`)
           .set('kbn-xsrf', 'true')
           .send({
-            id: patchedSubCase.subCases![0].comments![1].id,
-            version: patchedSubCase.subCases![0].comments![1].version,
+            id: patchedSubCase.comments![1].id,
+            version: patchedSubCase.comments![1].version,
             comment: newComment,
             type: CommentType.user,
           })
           .expect(200);
 
-        expect(patchedSubCaseUpdatedComment.subCases![0].comments.length).to.be(2);
-        expect(patchedSubCaseUpdatedComment.subCases![0].comments[0].type).to.be(
-          CommentType.generatedAlert
-        );
-        expect(patchedSubCaseUpdatedComment.subCases![0].comments[1].type).to.be(CommentType.user);
-        expect(patchedSubCaseUpdatedComment.subCases![0].comments[1].comment).to.be(newComment);
+        expect(patchedSubCaseUpdatedComment.comments.length).to.be(2);
+        expect(patchedSubCaseUpdatedComment.comments[0].type).to.be(CommentType.generatedAlert);
+        expect(patchedSubCaseUpdatedComment.comments[1].type).to.be(CommentType.user);
+        expect(patchedSubCaseUpdatedComment.comments[1].comment).to.be(newComment);
       });
 
       it('fails to update the generated alert comment type', async () => {
@@ -85,8 +83,8 @@ export default ({ getService }: FtrProviderContext): void => {
           .patch(`${CASES_URL}/${caseInfo.id}/comments?subCaseId=${caseInfo.subCases![0].id}`)
           .set('kbn-xsrf', 'true')
           .send({
-            id: caseInfo.subCases![0].comments![0].id,
-            version: caseInfo.subCases![0].comments![0].version,
+            id: caseInfo.comments![0].id,
+            version: caseInfo.comments![0].version,
             type: CommentType.alert,
             alertId: 'test-id',
             index: 'test-index',
@@ -104,8 +102,8 @@ export default ({ getService }: FtrProviderContext): void => {
           .patch(`${CASES_URL}/${caseInfo.id}/comments?subCaseId=${caseInfo.subCases![0].id}`)
           .set('kbn-xsrf', 'true')
           .send({
-            id: caseInfo.subCases![0].comments![0].id,
-            version: caseInfo.subCases![0].comments![0].version,
+            id: caseInfo.comments![0].id,
+            version: caseInfo.comments![0].version,
             type: CommentType.generatedAlert,
             alerts: [{ _id: 'id1' }],
             index: 'test-index',

@@ -132,7 +132,7 @@ export default ({ getService }: FtrProviderContext): void => {
           .expect(200);
 
         const subCaseCommentUrl = `${CASES_URL}/${patchedCaseWithSubCase.id}/comments/${
-          patchedCaseWithSubCase.subCases![0].comments![1].id
+          patchedCaseWithSubCase.comments![1].id
         }`;
         // make sure we can get the second comment
         await supertest.get(subCaseCommentUrl).set('kbn-xsrf', 'true').send().expect(200);

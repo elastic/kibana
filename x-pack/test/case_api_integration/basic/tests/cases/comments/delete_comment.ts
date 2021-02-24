@@ -101,9 +101,9 @@ export default ({ getService }: FtrProviderContext): void => {
         const { newSubCaseInfo: caseInfo } = await createSubCase({ supertest, actionID });
         await supertest
           .delete(
-            `${CASES_URL}/${caseInfo.id}/comments/${
-              caseInfo.subCases![0].comments![0].id
-            }?subCaseId=${caseInfo.subCases![0].id}`
+            `${CASES_URL}/${caseInfo.id}/comments/${caseInfo.comments![0].id}?subCaseId=${
+              caseInfo.subCases![0].id
+            }`
           )
           .set('kbn-xsrf', 'true')
           .send()

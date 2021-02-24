@@ -60,9 +60,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       expect(removeServerGeneratedPropertiesFromComments(body.comments)).to.eql(
         commentsResp({
-          comments: [
-            { comment: defaultCreateSubComment, id: caseInfo.subCases![0].comments![0].id },
-          ],
+          comments: [{ comment: defaultCreateSubComment, id: caseInfo.comments![0].id }],
           associationType: AssociationType.subCase,
         })
       );
@@ -91,10 +89,10 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(removeServerGeneratedPropertiesFromComments(body.comments)).to.eql(
         commentsResp({
           comments: [
-            { comment: defaultCreateSubComment, id: caseInfo.subCases![0].comments![0].id },
+            { comment: defaultCreateSubComment, id: caseInfo.comments![0].id },
             {
               comment: postCommentAlertReq,
-              id: singleAlert.subCases![0].comments![1].id,
+              id: singleAlert.comments![1].id,
             },
           ],
           associationType: AssociationType.subCase,

@@ -293,6 +293,14 @@ export class CommentableCase {
 
       return CaseResponseRt.encode({
         ...caseResponse,
+        /**
+         * For now we need the sub case comments and totals to be exposed on the top level of the response so that the UI
+         * functionality can stay the same. Ideally in the future we can refactor this so that the UI will look for the
+         * comments either in the top level for a case or a collection or in the subCases field if it is a sub case.
+         *
+         * If we ever need to return both the collection's comments and the sub case comments we'll need to refactor it then
+         * as well.
+         */
         comments: flattenCommentSavedObjects(subCaseComments.saved_objects),
         totalComment: subCaseComments.saved_objects.length,
         totalAlerts,
