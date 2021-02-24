@@ -19,12 +19,15 @@ import {
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import { FlashMessages } from '../../../shared/flash_messages';
 import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
+import { EuiLinkTo } from '../../../shared/react_router_helpers';
 import { UnsavedChangesPrompt } from '../../../shared/unsaved_changes_prompt';
 
-import { EngineLogic } from '../engine';
+import { ENGINE_SCHEMA_PATH } from '../../routes';
+import { EngineLogic, generateEnginePath } from '../engine';
 
 import { RELEVANCE_TUNING_TITLE } from './constants';
 import { RelevanceTuningForm } from './relevance_tuning_form';
@@ -40,7 +43,7 @@ export const RelevanceTuning: React.FC<Props> = ({ engineBreadcrumb }) => {
   );
   const { engineHasSchemaFields, unsavedChanges } = useValues(RelevanceTuningLogic);
   const {
-    engine: { invalidBoosts },
+    engine: { invalidBoosts, unsearchedUnconfirmedFields },
   } = useValues(EngineLogic);
 
   useEffect(() => {
@@ -95,7 +98,6 @@ export const RelevanceTuning: React.FC<Props> = ({ engineBreadcrumb }) => {
 
       <EuiSpacer />
       <FlashMessages />
-      <div>{invalidBoosts}</div>
       {invalidBoosts && (
         <EuiCallOut
           color="warning"
@@ -115,6 +117,36 @@ export const RelevanceTuning: React.FC<Props> = ({ engineBreadcrumb }) => {
                 'One or more of your boosts is no longer valid, possibly due to a schema type change. Delete any old or invalid boosts to dismiss this alert.',
             }
           )}
+        </EuiCallOut>
+      )}
+      {unsearchedUnconfirmedFields && (
+        <EuiCallOut
+          color="warning"
+          iconType="alert"
+          title={i18n.translate(
+            'xpack.enterpriseSearch.appSearch.engine.relevanceTuning.uncofirmedFieldsBannerLabel',
+            {
+              defaultMessage: 'Recently added fields are not being searched by default',
+            }
+          )}
+          data-test-subj="RelevanceTuningUnsearchedFieldsCallout"
+        >
+          <FormattedMessage
+            id="xpack.enterpriseSearch.appSearch.engine.relevanceTuning.uncofirmedFieldsErrorMessage"
+            defaultMessage="If these new fields should be searchable, turn them on here by toggling Text Search. Otherwise, confirm your new {schemaLink} to dismiss this alert."
+            values={{
+              schemaLink: (
+                <EuiLinkTo to={generateEnginePath(ENGINE_SCHEMA_PATH)}>
+                  {i18n.translate(
+                    'xpack.enterpriseSearch.appSearch.engine.relevanceTuning.schemaFieldsLinkLabel',
+                    {
+                      defaultMessage: 'schema fields',
+                    }
+                  )}
+                </EuiLinkTo>
+              ),
+            }}
+          />
         </EuiCallOut>
       )}
       <EuiSpacer />

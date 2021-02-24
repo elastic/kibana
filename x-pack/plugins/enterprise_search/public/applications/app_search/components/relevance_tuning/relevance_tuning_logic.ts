@@ -331,8 +331,8 @@ export const RelevanceTuningLogic = kea<
         flashAPIErrors(e);
         actions.onSearchSettingsError();
       } finally {
-        const { invalidBoosts } = EngineLogic.values.engine;
-        if (invalidBoosts) {
+        const { invalidBoosts, unsearchedUnconfirmedFields } = EngineLogic.values.engine;
+        if (invalidBoosts || unsearchedUnconfirmedFields) {
           // Re-fetch engine data so that any navigation flags are updated dynamically
           EngineLogic.actions.initializeEngine();
         }

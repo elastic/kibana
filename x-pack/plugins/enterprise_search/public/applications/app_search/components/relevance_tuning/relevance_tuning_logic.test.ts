@@ -85,6 +85,7 @@ describe('RelevanceTuningLogic', () => {
       engineName: 'test-engine',
       engine: {
         invalidBoosts: false,
+        unsearchedUnconfirmedFields: false,
       },
     } as any;
   });
@@ -559,9 +560,19 @@ describe('RelevanceTuningLogic', () => {
         expect(RelevanceTuningLogic.actions.onSearchSettingsError).toHaveBeenCalled();
       });
 
-      it('will sometimes re-fetch the current engine after settings are updated', async () => {
-        // If there were invalidBoosts before this update, it should trigger an update
+      it('will re-fetch the current engine after settings are updated if there were invalid boosts', async () => {
         EngineLogic.values.engine.invalidBoosts = true;
+        mount({});
+        http.put.mockReturnValueOnce(Promise.resolve(searchSettings));
+
+        RelevanceTuningLogic.actions.updateSearchSettings();
+        await nextTick();
+
+        expect(EngineLogic.actions.initializeEngine).toHaveBeenCalled();
+      });
+
+      it('will re-fetch the current engine after settings are updated if there were unconfirmed search fieldds', async () => {
+        EngineLogic.values.engine.unsearchedUnconfirmedFields = true;
         mount({});
         http.put.mockReturnValueOnce(Promise.resolve(searchSettings));
 

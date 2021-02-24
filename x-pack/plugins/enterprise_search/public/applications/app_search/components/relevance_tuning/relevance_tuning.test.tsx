@@ -7,6 +7,11 @@
 import '../../../__mocks__/shallow_useeffect.mock';
 import { setMockActions, setMockValues } from '../../../__mocks__/kea.mock';
 
+// We mock this because otherwise we will get an EngineLogic not mounted error
+jest.mock('../engine', () => ({
+  generateEnginePath: jest.fn(),
+}));
+
 import React from 'react';
 
 import { shallow } from 'enzyme';
@@ -21,6 +26,7 @@ describe('RelevanceTuning', () => {
     engineHasSchemaFields: true,
     engine: {
       invalidBoosts: false,
+      unsearchedUnconfirmedFields: false,
     },
   };
 
@@ -42,6 +48,9 @@ describe('RelevanceTuning', () => {
     const wrapper = subject();
     expect(wrapper.find(RelevanceTuningForm).exists()).toBe(true);
     expect(wrapper.find('[data-test-subj="RelevanceTuningInvalidBoostsCallout"]').exists()).toBe(
+      false
+    );
+    expect(wrapper.find('[data-test-subj="RelevanceTuningUnsearchedFieldsCallout"]').exists()).toBe(
       false
     );
   });
@@ -86,10 +95,27 @@ describe('RelevanceTuning', () => {
       ...values,
       engine: {
         invalidBoosts: true,
+        unsearchedUnconfirmedFields: false,
       },
     });
     expect(subject().find('[data-test-subj="RelevanceTuningInvalidBoostsCallout"]').exists()).toBe(
       true
     );
+  });
+
+  it('shows a message when there are unconfirmed fields', () => {
+    // An invalid boost would be if a user creats a functional boost on a number field, then that
+    // field later changes to text. At this point, the boost still exists but is invalid for
+    // a text field.
+    setMockValues({
+      ...values,
+      engine: {
+        invalidBoosts: false,
+        unsearchedUnconfirmedFields: true,
+      },
+    });
+    expect(
+      subject().find('[data-test-subj="RelevanceTuningUnsearchedFieldsCallout"]').exists()
+    ).toBe(true);
   });
 });
