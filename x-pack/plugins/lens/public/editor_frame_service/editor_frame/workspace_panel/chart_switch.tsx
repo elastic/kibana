@@ -15,6 +15,7 @@ import {
   EuiFlexItem,
   EuiSelectable,
   EuiIconTip,
+  EuiSelectableOption,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -51,17 +52,7 @@ interface Props {
   >;
 }
 
-interface SelectableEntry {
-  'aria-label'?: string;
-  checked?: 'on';
-  isGroupLabel: boolean;
-  key: string;
-  value?: string;
-  'data-test-subj'?: string;
-  label: string;
-  prepend?: React.ReactNode;
-  append?: React.ReactNode;
-}
+type SelectableEntry = EuiSelectableOption<{ value: string }>;
 
 function VisualizationSummary(props: Props) {
   const visualization = props.visualizationMap[props.visualizationId || ''];
@@ -269,42 +260,53 @@ export const ChartSwitch = memo(function ChartSwitch(props: Props) {
             if (visualizations.length === 0) {
               return [];
             }
-            return [{ key: group, label: group, isGroupLabel: true }].concat(
+            return [
+              {
+                key: group,
+                label: group,
+                isGroupLabel: true,
+                'aria-label': group,
+                'data-test-subj': `lnsChartSwitchPopover_${group}`,
+              } as SelectableEntry,
+            ].concat(
               visualizations
                 // alphabetical order within each group
                 .sort((a, b) => {
                   return (a.fullLabel || a.label).localeCompare(b.fullLabel || b.label);
                 })
-                .map((v) => ({
-                  'aria-label': v.fullLabel || v.label,
-                  checked: subVisualizationId === v.id ? 'on' : null,
-                  isGroupLabel: false,
-                  key: `${v.visualizationId}:${v.id}`,
-                  value: `${v.visualizationId}:${v.id}`,
-                  'data-test-subj': `lnsChartSwitchPopover_${v.id}`,
-                  label: v.fullLabel || v.label,
-                  prepend: (
-                    <EuiIcon className="lnsChartSwitch__chartIcon" type={v.icon || 'empty'} />
-                  ),
-                  append:
-                    v.selection.dataLoss !== 'nothing' ? (
-                      <EuiIconTip
-                        aria-label={i18n.translate('xpack.lens.chartSwitch.dataLossLabel', {
-                          defaultMessage: 'Warning',
-                        })}
-                        type="alert"
-                        color="warning"
-                        content={i18n.translate('xpack.lens.chartSwitch.dataLossDescription', {
-                          defaultMessage:
-                            'Selecting this chart type will result in a partial loss of currently applied configuration selections.',
-                        })}
-                        iconProps={{
-                          className: 'lnsChartSwitch__chartIcon',
-                          'data-test-subj': `lnsChartSwitchPopoverAlert_${v.id}`,
-                        }}
-                      />
-                    ) : null,
-                }))
+                .map(
+                  (v): SelectableEntry => ({
+                    'aria-label': v.fullLabel || v.label,
+                    isGroupLabel: false,
+                    key: `${v.visualizationId}:${v.id}`,
+                    value: `${v.visualizationId}:${v.id}`,
+                    'data-test-subj': `lnsChartSwitchPopover_${v.id}`,
+                    label: v.fullLabel || v.label,
+                    prepend: (
+                      <EuiIcon className="lnsChartSwitch__chartIcon" type={v.icon || 'empty'} />
+                    ),
+                    append:
+                      v.selection.dataLoss !== 'nothing' ? (
+                        <EuiIconTip
+                          aria-label={i18n.translate('xpack.lens.chartSwitch.dataLossLabel', {
+                            defaultMessage: 'Warning',
+                          })}
+                          type="alert"
+                          color="warning"
+                          content={i18n.translate('xpack.lens.chartSwitch.dataLossDescription', {
+                            defaultMessage:
+                              'Selecting this chart type will result in a partial loss of currently applied configuration selections.',
+                          })}
+                          iconProps={{
+                            className: 'lnsChartSwitch__chartIcon',
+                            'data-test-subj': `lnsChartSwitchPopoverAlert_${v.id}`,
+                          }}
+                        />
+                      ) : null,
+                    // Apparently checked: null is not valid for TS
+                    ...(subVisualizationId === v.id && { checked: 'on' }),
+                  })
+                )
             );
           }),
         visualizationsLookup: lookup,
