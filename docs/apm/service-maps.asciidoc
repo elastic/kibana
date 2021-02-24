@@ -87,10 +87,11 @@ Type and subtype are based on `span.type`, and `span.subtype`.
 Service maps are supported for the following Agent versions:
 
 [horizontal]
-Go Agent:: ≥ v1.7.0
-Java Agent:: ≥ v1.13.0
-.NET Agent:: ≥ v1.3.0
-Node.js Agent:: ≥ v3.6.0
-Python Agent:: ≥ v5.5.0
-Ruby Agent:: ≥ v3.6.0
-Real User Monitoring (RUM) Agent:: ≥ v4.7.0
+Go agent:: ≥ v1.7.0
+Java agent:: ≥ v1.13.0
+.NET agent:: ≥ v1.3.0
+Node.js agent:: ≥ v3.6.0
+PHP agent:: _Not yet supported_
+Python agent:: ≥ v5.5.0
+Ruby agent:: ≥ v3.6.0
+Real User Monitoring (RUM) agent:: ≥ v4.7.0

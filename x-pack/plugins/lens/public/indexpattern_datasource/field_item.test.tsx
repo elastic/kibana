@@ -116,27 +116,6 @@ describe('IndexPattern Field Item', () => {
     );
   });
 
-  it('should request field stats without a time field, if the index pattern has none', async () => {
-    indexPattern.timeFieldName = undefined;
-    core.http.post.mockImplementationOnce(() => {
-      return Promise.resolve({});
-    });
-    const wrapper = mountWithIntl(<InnerFieldItem {...defaultProps} />);
-
-    await act(async () => {
-      clickField(wrapper, 'bytes');
-    });
-
-    expect(core.http.post).toHaveBeenCalledWith(
-      '/api/lens/index_stats/my-fake-index-pattern/field',
-      expect.anything()
-    );
-    // Function argument types not detected correctly (https://github.com/microsoft/TypeScript/issues/26591)
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { body } = (core.http.post.mock.calls[0] as any)[1];
-    expect(JSON.parse(body)).not.toHaveProperty('timeFieldName');
-  });
-
   it('should request field stats every time the button is clicked', async () => {
     let resolveFunction: (arg: unknown) => void;
 
@@ -150,31 +129,21 @@ describe('IndexPattern Field Item', () => {
 
     clickField(wrapper, 'bytes');
 
-    expect(core.http.post).toHaveBeenCalledWith(
-      `/api/lens/index_stats/my-fake-index-pattern/field`,
-      {
-        body: JSON.stringify({
-          dslQuery: {
-            bool: {
-              must: [{ match_all: {} }],
-              filter: [],
-              should: [],
-              must_not: [],
-            },
+    expect(core.http.post).toHaveBeenCalledWith(`/api/lens/index_stats/1/field`, {
+      body: JSON.stringify({
+        dslQuery: {
+          bool: {
+            must: [{ match_all: {} }],
+            filter: [],
+            should: [],
+            must_not: [],
           },
-          fromDate: 'now-7d',
-          toDate: 'now',
-          timeFieldName: 'timestamp',
-          field: {
-            name: 'bytes',
-            displayName: 'bytesLabel',
-            type: 'number',
-            aggregatable: true,
-            searchable: true,
-          },
-        }),
-      }
-    );
+        },
+        fromDate: 'now-7d',
+        toDate: 'now',
+        fieldName: 'bytes',
+      }),
+    });
 
     expect(wrapper.find(EuiPopover).prop('isOpen')).toEqual(true);
 
@@ -227,40 +196,30 @@ describe('IndexPattern Field Item', () => {
     clickField(wrapper, 'bytes');
 
     expect(core.http.post).toHaveBeenCalledTimes(2);
-    expect(core.http.post).toHaveBeenLastCalledWith(
-      `/api/lens/index_stats/my-fake-index-pattern/field`,
-      {
-        body: JSON.stringify({
-          dslQuery: {
-            bool: {
-              must: [],
-              filter: [
-                {
-                  bool: {
-                    should: [{ match_phrase: { 'geo.src': 'US' } }],
-                    minimum_should_match: 1,
-                  },
+    expect(core.http.post).toHaveBeenLastCalledWith(`/api/lens/index_stats/1/field`, {
+      body: JSON.stringify({
+        dslQuery: {
+          bool: {
+            must: [],
+            filter: [
+              {
+                bool: {
+                  should: [{ match_phrase: { 'geo.src': 'US' } }],
+                  minimum_should_match: 1,
                 },
-                {
-                  match: { phrase: { 'geo.dest': 'US' } },
-                },
-              ],
-              should: [],
-              must_not: [],
-            },
+              },
+              {
+                match: { phrase: { 'geo.dest': 'US' } },
+              },
+            ],
+            should: [],
+            must_not: [],
           },
-          fromDate: 'now-14d',
-          toDate: 'now-7d',
-          timeFieldName: 'timestamp',
-          field: {
-            name: 'bytes',
-            displayName: 'bytesLabel',
-            type: 'number',
-            aggregatable: true,
-            searchable: true,
-          },
-        }),
-      }
-    );
+        },
+        fromDate: 'now-14d',
+        toDate: 'now-7d',
+        fieldName: 'bytes',
+      }),
+    });
   });
 });

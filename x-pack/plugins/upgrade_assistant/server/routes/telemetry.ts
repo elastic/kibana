@@ -24,18 +24,14 @@ export function registerTelemetryRoutes({ router, getSavedObjectsService }: Rout
     },
     async (ctx, request, response) => {
       const { cluster, indices, overview } = request.body;
-      try {
-        return response.ok({
-          body: await upsertUIOpenOption({
-            savedObjects: getSavedObjectsService(),
-            cluster,
-            indices,
-            overview,
-          }),
-        });
-      } catch (e) {
-        return response.internalError({ body: e });
-      }
+      return response.ok({
+        body: await upsertUIOpenOption({
+          savedObjects: getSavedObjectsService(),
+          cluster,
+          indices,
+          overview,
+        }),
+      });
     }
   );
 
@@ -53,19 +49,15 @@ export function registerTelemetryRoutes({ router, getSavedObjectsService }: Rout
     },
     async (ctx, request, response) => {
       const { close, open, start, stop } = request.body;
-      try {
-        return response.ok({
-          body: await upsertUIReindexOption({
-            savedObjects: getSavedObjectsService(),
-            close,
-            open,
-            start,
-            stop,
-          }),
-        });
-      } catch (e) {
-        return response.internalError({ body: e });
-      }
+      return response.ok({
+        body: await upsertUIReindexOption({
+          savedObjects: getSavedObjectsService(),
+          close,
+          open,
+          start,
+          stop,
+        }),
+      });
     }
   );
 }

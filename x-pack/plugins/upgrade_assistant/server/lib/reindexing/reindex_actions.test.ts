@@ -89,24 +89,6 @@ describe('ReindexActions', () => {
       });
     });
 
-    // in v5.6, the upgrade assistant appended to the index name instead of prepending
-    it(`prepends reindexed-v${currentMajor}- and removes reindex appended in v5`, async () => {
-      const indexName = 'myIndex-reindexed-v5';
-      await actions.createReindexOp(indexName);
-      expect(client.create).toHaveBeenCalledWith(REINDEX_OP_TYPE, {
-        indexName,
-        newIndexName: `reindexed-v${currentMajor}-myIndex`,
-        reindexOptions: undefined,
-        status: ReindexStatus.inProgress,
-        lastCompletedStep: ReindexStep.created,
-        locked: null,
-        reindexTaskId: null,
-        reindexTaskPercComplete: null,
-        errorMessage: null,
-        runningReindexCount: null,
-      });
-    });
-
     it(`replaces reindexed-v${prevMajor} with reindexed-v${currentMajor}`, async () => {
       await actions.createReindexOp(`reindexed-v${prevMajor}-myIndex`);
       expect(client.create).toHaveBeenCalledWith(REINDEX_OP_TYPE, {
