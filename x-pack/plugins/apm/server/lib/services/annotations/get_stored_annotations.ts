@@ -7,7 +7,7 @@
 
 import { ResponseError } from '@elastic/elasticsearch/lib/errors';
 import { ElasticsearchClient, Logger } from 'kibana/server';
-import { environmentQuery, rangeQuery } from '../../../../common/utils/queries';
+import { environmentQuery, rangeQuery } from '../../../../server/utils/queries';
 import {
   unwrapEsResponse,
   WrappedElasticsearchClientError,

@@ -26,10 +26,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     'Latency with a basic license when data is not loaded ',
     { config: 'basic', archives: [] },
     () => {
-      const uiFilters = encodeURIComponent(JSON.stringify({}));
       it('returns 400 when latencyAggregationType is not informed', async () => {
         const response = await supertest.get(
-          `/api/apm/services/opbeans-node/transactions/charts/latency?environment=testing&start=${start}&end=${end}&uiFilters=${uiFilters}&transactionType=request`
+          `/api/apm/services/opbeans-node/transactions/charts/latency?environment=testing&start=${start}&end=${end}&transactionType=request`
         );
 
         expect(response.status).to.be(400);
@@ -37,7 +36,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       it('returns 400 when transactionType is not informed', async () => {
         const response = await supertest.get(
-          `/api/apm/services/opbeans-node/transactions/charts/latency?environment=testing&start=${start}&end=${end}&uiFilters=${uiFilters}&latencyAggregationType=avg`
+          `/api/apm/services/opbeans-node/transactions/charts/latency?environment=testing&start=${start}&end=${end}&latencyAggregationType=avg`
         );
 
         expect(response.status).to.be(400);
@@ -45,7 +44,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       it('handles the empty state', async () => {
         const response = await supertest.get(
-          `/api/apm/services/opbeans-node/transactions/charts/latency?environment=testing&start=${start}&end=${end}&uiFilters=${uiFilters}&latencyAggregationType=avg&transactionType=request`
+          `/api/apm/services/opbeans-node/transactions/charts/latency?environment=testing&start=${start}&end=${end}&latencyAggregationType=avg&transactionType=request`
         );
 
         expect(response.status).to.be(200);
@@ -62,12 +61,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     () => {
       let response: PromiseReturnType<typeof supertest.get>;
 
-      const uiFilters = encodeURIComponent(JSON.stringify({}));
-
       describe('average latency type', () => {
         before(async () => {
           response = await supertest.get(
-            `/api/apm/services/opbeans-node/transactions/charts/latency?environment=testing&start=${start}&end=${end}&uiFilters=${uiFilters}&transactionType=request&latencyAggregationType=avg`
+            `/api/apm/services/opbeans-node/transactions/charts/latency?environment=testing&start=${start}&end=${end}&transactionType=request&latencyAggregationType=avg`
           );
         });
 
@@ -81,7 +78,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       describe('95th percentile latency type', () => {
         before(async () => {
           response = await supertest.get(
-            `/api/apm/services/opbeans-node/transactions/charts/latency?environment=testing&start=${start}&end=${end}&uiFilters=${uiFilters}&transactionType=request&latencyAggregationType=p95`
+            `/api/apm/services/opbeans-node/transactions/charts/latency?environment=testing&start=${start}&end=${end}&transactionType=request&latencyAggregationType=p95`
           );
         });
 
@@ -95,7 +92,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       describe('99th percentile latency type', () => {
         before(async () => {
           response = await supertest.get(
-            `/api/apm/services/opbeans-node/transactions/charts/latency?environment=testing&start=${start}&end=${end}&uiFilters=${uiFilters}&transactionType=request&latencyAggregationType=p99`
+            `/api/apm/services/opbeans-node/transactions/charts/latency?environment=testing&start=${start}&end=${end}&transactionType=request&latencyAggregationType=p99`
           );
         });
 
@@ -117,10 +114,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       const transactionType = 'request';
 
       describe('without an environment', () => {
-        const uiFilters = encodeURIComponent(JSON.stringify({}));
         before(async () => {
           response = await supertest.get(
-            `/api/apm/services/opbeans-java/transactions/charts/latency?start=${start}&end=${end}&transactionType=${transactionType}&uiFilters=${uiFilters}&latencyAggregationType=avg`
+            `/api/apm/services/opbeans-java/transactions/charts/latency?start=${start}&end=${end}&transactionType=${transactionType}&latencyAggregationType=avg`
           );
         });
 
@@ -129,22 +125,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
       });
 
-      describe('without uiFilters', () => {
-        before(async () => {
-          response = await supertest.get(
-            `/api/apm/services/opbeans-java/transactions/charts/latency?start=${start}&end=${end}&transactionType=${transactionType}&latencyAggregationType=avg`
-          );
-        });
-        it('should return an error response', () => {
-          expect(response.status).to.eql(400);
-        });
-      });
-
       describe('with environment selected', () => {
-        const uiFilters = encodeURIComponent(JSON.stringify({}));
         before(async () => {
           response = await supertest.get(
-            `/api/apm/services/opbeans-java/transactions/charts/latency?environment=production&start=${start}&end=${end}&transactionType=${transactionType}&uiFilters=${uiFilters}&latencyAggregationType=avg`
+            `/api/apm/services/opbeans-java/transactions/charts/latency?environment=production&start=${start}&end=${end}&transactionType=${transactionType}&latencyAggregationType=avg`
           );
         });
 
@@ -168,10 +152,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       describe('when not defined environment is selected', () => {
-        const uiFilters = encodeURIComponent(JSON.stringify({}));
         before(async () => {
           response = await supertest.get(
-            `/api/apm/services/opbeans-python/transactions/charts/latency?environment=ENVIRONMENT_NOT_DEFINED&start=${start}&end=${end}&transactionType=${transactionType}&uiFilters=${uiFilters}&latencyAggregationType=avg`
+            `/api/apm/services/opbeans-python/transactions/charts/latency?environment=ENVIRONMENT_NOT_DEFINED&start=${start}&end=${end}&transactionType=${transactionType}&latencyAggregationType=avg`
           );
         });
 
@@ -194,10 +177,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       describe('with all environments selected', () => {
-        const uiFilters = encodeURIComponent(JSON.stringify({}));
         before(async () => {
           response = await supertest.get(
-            `/api/apm/services/opbeans-java/transactions/charts/latency?environment=ENVIRONMENT_ALL&start=${start}&end=${end}&transactionType=${transactionType}&uiFilters=${uiFilters}&latencyAggregationType=avg`
+            `/api/apm/services/opbeans-java/transactions/charts/latency?environment=ENVIRONMENT_ALL&start=${start}&end=${end}&transactionType=${transactionType}&latencyAggregationType=avg`
           );
         });
 
@@ -211,10 +193,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       describe('with environment selected and empty kuery filter', () => {
-        const uiFilters = encodeURIComponent(JSON.stringify({ kuery: '' }));
         before(async () => {
           response = await supertest.get(
-            `/api/apm/services/opbeans-java/transactions/charts/latency?environment=production&start=${start}&end=${end}&transactionType=${transactionType}&uiFilters=${uiFilters}&latencyAggregationType=avg`
+            `/api/apm/services/opbeans-java/transactions/charts/latency?environment=production&start=${start}&end=${end}&transactionType=${transactionType}&latencyAggregationType=avg`
           );
         });
 
