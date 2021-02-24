@@ -37,14 +37,10 @@ done;
 echo "untar metricbeat and config"
 #tar -xzf metricbeat-${MB_BUILD}-linux-x86_64.tar.gz
 tar -xzf metricbeat-7.11.0-linux-x86_64.tar.gz
-#--directory "$KIBANA_DIR"
-ls -l
-echo "rename"
 #mv metricbeat-${MB_BUILD}-linux-x86_64 metricbeat-install
 mv metricbeat-7.11.0-linux-x86_64 metricbeat-install
-ls -l
-# Configure Metricbeat
 
+# Configure Metricbeat
 echo " -> Changing metricbeat config"
 pushd ../kibana-load-testing
 cp cfg/metricbeat/elasticsearch-xpack.yml $KIBANA_DIR/metricbeat-install/modules.d/elasticsearch-xpack.yml
