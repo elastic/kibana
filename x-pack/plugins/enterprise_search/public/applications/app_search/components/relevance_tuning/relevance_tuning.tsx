@@ -15,6 +15,7 @@ import { i18n } from '@kbn/i18n';
 
 import { FlashMessages } from '../../../shared/flash_messages';
 import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
+import { UnsavedChangesPrompt } from '../../../shared/unsaved_changes_prompt';
 
 import { RELEVANCE_TUNING_TITLE } from './constants';
 import { RelevanceTuningForm } from './relevance_tuning_form';
@@ -28,7 +29,7 @@ export const RelevanceTuning: React.FC<Props> = ({ engineBreadcrumb }) => {
   const { resetSearchSettings, initializeRelevanceTuning, updateSearchSettings } = useActions(
     RelevanceTuningLogic
   );
-  const { engineHasSchemaFields } = useValues(RelevanceTuningLogic);
+  const { engineHasSchemaFields, unsavedChanges } = useValues(RelevanceTuningLogic);
 
   useEffect(() => {
     initializeRelevanceTuning();
@@ -36,6 +37,7 @@ export const RelevanceTuning: React.FC<Props> = ({ engineBreadcrumb }) => {
 
   return (
     <>
+      <UnsavedChangesPrompt hasUnsavedChanges={unsavedChanges} />
       <SetPageChrome trail={[...engineBreadcrumb, RELEVANCE_TUNING_TITLE]} />
       <EuiPageHeader
         className="relevanceTuningHeader"
