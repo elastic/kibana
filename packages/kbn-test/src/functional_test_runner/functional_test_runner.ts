@@ -134,7 +134,7 @@ export class FunctionalTestRunner {
 
   async _run<T = any>(
     handler: (config: Config, coreProvider: ReturnType<typeof readProviderSpec>) => Promise<T>,
-    apmTransaction?: ApmTransaction
+    apmTransaction?: ApmTransaction | null
   ): Promise<T> {
     let runErrorOccurred = false;
 
