@@ -52,6 +52,10 @@ export function groupPluginApi(declarations: ApiDeclaration[]): ScopeApi {
   return scope;
 }
 
+function escapeRegExp(regexp: string) {
+  return regexp.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
+}
+
 /**
  * If the file is at the top level, returns undefined, otherwise returns the
  * name of the first nested folder in the plugin. For example a path of
@@ -60,9 +64,10 @@ export function groupPluginApi(declarations: ApiDeclaration[]): ScopeApi {
  * @param path
  */
 export function getServiceForPath(path: string, pluginDirectory: string): string | undefined {
-  const publicMatchGroups = path.match(`${pluginDirectory}\/public\/([^\/]*)\/`);
-  const serverMatchGroups = path.match(`${pluginDirectory}\/server\/([^\/]*)\/`);
-  const commonMatchGroups = path.match(`${pluginDirectory}\/common\/([^\/]*)\/`);
+  const dir = escapeRegExp(pluginDirectory);
+  const publicMatchGroups = path.match(`${dir}\/public\/([^\/]*)\/`);
+  const serverMatchGroups = path.match(`${dir}\/server\/([^\/]*)\/`);
+  const commonMatchGroups = path.match(`${dir}\/common\/([^\/]*)\/`);
 
   if (publicMatchGroups && publicMatchGroups.length > 1) {
     return publicMatchGroups[1];

@@ -37,12 +37,22 @@ it('test getServiceForPath', () => {
     getServiceForPath('src/plugins/embed/public/file.ts', 'src/plugins/embed')
   ).toBeUndefined();
   expect(
-    getServiceForPath('src/plugins/embed/server/another_service/file.ts', 'src/plugins/embed')
+    getServiceForPath('/src/plugins/embed/server/another_service/index', '/src/plugins/embed')
   ).toBe('another_service');
+  expect(getServiceForPath('src/plugins/embed/server/no_ending', 'src/plugins/embed')).toBe(
+    undefined
+  );
   expect(
     getServiceForPath('src/plugins/embed/server/routes/public/foo/index.ts', 'src/plugins/embed')
   ).toBe('routes');
   expect(getServiceForPath('src/plugins/embed/server/f.ts', 'src/plugins/embed')).toBeUndefined();
+
+  expect(
+    getServiceForPath(
+      '/var/lib/jenkins/workspace/elastic+kibana+pipeline-pull-request/kibana/packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/foo/index',
+      '/var/lib/jenkins/workspace/elastic+kibana+pipeline-pull-request/kibana/packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a'
+    )
+  ).toBe('foo');
 });
 
 it('test removeBrokenLinks', () => {
