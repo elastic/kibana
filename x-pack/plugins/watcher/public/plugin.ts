@@ -111,7 +111,7 @@ export class WatcherUIPlugin implements Plugin<void, void, Dependencies, any> {
       // The race condition still exists, but it will result in the item rendering when it shouldn't
       // (e.g. on a license it's not available for), instead of *not* rendering when it *should*,
       // which is a less frustrating UX.
-      if (valid && capabilities.management.admin?.watcher === true) {
+      if (valid && capabilities.management.insightsAndAlerting?.watcher === true) {
         watcherESApp.enable();
       } else {
         watcherESApp.disable();
