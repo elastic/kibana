@@ -76,10 +76,10 @@ export const ACTIONS_COLUMN = {
       }),
       description: i18n.translate(
         'xpack.enterpriseSearch.appSearch.engine.analytics.table.editTooltip',
-        { defaultMessage: 'Edit query' }
+        { defaultMessage: 'Manage curation' }
       ),
       type: 'icon',
-      icon: 'pencil',
+      icon: 'package',
       onClick: async (item: Query | RecentQuery) => {
         const { http } = HttpLogic.values;
         const { navigateToUrl } = KibanaLogic.values;
@@ -107,7 +107,7 @@ export const TAGS_COLUMN = {
     defaultMessage: 'Analytics tags',
   }),
   truncateText: true,
-  render: (tags: Query['tags']) => <InlineTagsList tags={tags} />,
+  render: (tags: Query['tags']) => <InlineTagsList displayCountOnly tags={tags} />,
 };
 
 export const COUNT_COLUMN_PROPS = {

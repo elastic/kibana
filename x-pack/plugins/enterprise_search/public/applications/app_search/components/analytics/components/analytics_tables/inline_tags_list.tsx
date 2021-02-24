@@ -14,33 +14,38 @@ import { Query } from '../../types';
 
 interface Props {
   tags?: Query['tags'];
+  displayCountOnly?: boolean;
 }
-export const InlineTagsList: React.FC<Props> = ({ tags }) => {
+export const InlineTagsList: React.FC<Props> = ({ displayCountOnly, tags }) => {
   if (!tags?.length) return null;
 
   const displayedTags = tags.slice(0, 2);
-  const tooltipTags = tags.slice(2);
+  const tooltipTags = tags.slice(displayCountOnly ? 0 : 2);
+  const moreTagsMessage = displayCountOnly
+    ? `${tooltipTags.length} tags`
+    : `and ${tooltipTags.length} more`;
 
-  return (
+  const TagToolTip = () => (
+    <EuiToolTip position="bottom" content={tooltipTags.join(', ')}>
+      <EuiBadge color={displayCountOnly ? 'hollow' : 'default'}>
+        {i18n.translate('xpack.enterpriseSearch.appSearch.engine.analytics.table.moreTagsBadge', {
+          defaultMessage: moreTagsMessage,
+          values: { moreTagsCount: tooltipTags.length },
+        })}
+      </EuiBadge>
+    </EuiToolTip>
+  );
+
+  const TagList = () => (
     <EuiBadgeGroup>
       {displayedTags.map((tag: string) => (
         <EuiBadge color="hollow" key={tag}>
           {tag}
         </EuiBadge>
       ))}
-      {tooltipTags.length > 0 && (
-        <EuiToolTip position="bottom" content={tooltipTags.join(', ')}>
-          <EuiBadge>
-            {i18n.translate(
-              'xpack.enterpriseSearch.appSearch.engine.analytics.table.moreTagsBadge',
-              {
-                defaultMessage: 'and {moreTagsCount} more',
-                values: { moreTagsCount: tooltipTags.length },
-              }
-            )}
-          </EuiBadge>
-        </EuiToolTip>
-      )}
+      {tooltipTags.length > 0 && <TagToolTip />}
     </EuiBadgeGroup>
   );
+
+  return displayCountOnly ? <TagToolTip /> : <TagList />;
 };

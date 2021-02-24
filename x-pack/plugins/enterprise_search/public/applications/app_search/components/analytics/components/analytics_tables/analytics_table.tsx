@@ -19,6 +19,8 @@ import {
   ACTIONS_COLUMN,
 } from './shared_columns';
 
+import './analytics_table.scss';
+
 interface Props {
   items: Query[];
   hasClicks?: boolean;
@@ -53,6 +55,7 @@ export const AnalyticsTable: React.FC<Props> = ({ items, hasClicks }) => {
 
   return (
     <EuiBasicTable
+      className="entSearch__table--noBackground"
       columns={[TERM_COLUMN, TAGS_COLUMN, ...COUNT_COLUMNS, ACTIONS_COLUMN] as Columns}
       items={items}
       responsive
