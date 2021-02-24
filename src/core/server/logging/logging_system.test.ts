@@ -138,8 +138,15 @@ test('attaches appenders to appenders that declare refs', async () => {
   await system.upgrade(
     config.schema.validate({
       appenders: {
-        console: { type: 'console', layout: { type: 'pattern' } },
-        file: { type: 'file', layout: { type: 'pattern' }, fileName: 'path' },
+        console: {
+          type: 'console',
+          layout: { type: 'pattern', pattern: '[%logger] %message %meta' },
+        },
+        file: {
+          type: 'file',
+          layout: { type: 'pattern', pattern: '[%logger] %message %meta' },
+          fileName: 'path',
+        },
         rewrite: {
           type: 'rewrite',
           appenders: ['console', 'file'],
@@ -155,12 +162,12 @@ test('attaches appenders to appenders that declare refs', async () => {
 
   expect(mockConsoleLog).toHaveBeenCalledTimes(1);
   expect(mockConsoleLog.mock.calls[0][0]).toMatchInlineSnapshot(
-    `"[2012-01-30T22:33:22.011-05:00][WARN ][tests]{\\"a\\":\\"hi\\"} This message goes to a test context."`
+    `"[tests] This message goes to a test context. {\\"a\\":\\"hi\\"}"`
   );
 
   expect(mockStreamWrite).toHaveBeenCalledTimes(1);
   expect(mockStreamWrite.mock.calls[0][0]).toMatchInlineSnapshot(`
-    "[2012-01-30T17:33:22.011-05:00][WARN ][tests]{\\"a\\":\\"hi\\"} This message goes to a test context.
+    "[tests] This message goes to a test context. {\\"a\\":\\"hi\\"}
     "
   `);
 });
