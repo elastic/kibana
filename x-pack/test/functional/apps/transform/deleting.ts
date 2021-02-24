@@ -19,7 +19,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     const testDataList = [
       {
-        suiteTitle: 'transform with pivot configuration',
+        suiteTitle: 'batch transform with pivot configuration',
         originalConfig: getPivotTransformConfig(PREFIX, false),
         expected: {
           row: {
@@ -41,7 +41,7 @@ export default function ({ getService }: FtrProviderContext) {
         },
       },
       {
-        suiteTitle: 'delete transform with latest configuration',
+        suiteTitle: 'batch transform with latest configuration',
         originalConfig: getLatestTransformConfig(PREFIX),
         transformDescription: 'updated description',
         transformDocsPerSecond: '1000',
@@ -51,7 +51,7 @@ export default function ({ getService }: FtrProviderContext) {
           row: {
             status: TRANSFORM_STATE.STOPPED,
             mode: 'batch',
-            progress: '100',
+            progress: 100,
           },
         },
       },
@@ -103,16 +103,16 @@ export default function ({ getService }: FtrProviderContext) {
               testData.originalConfig.id,
               'Stop'
             );
-
-            await transform.testExecution.logTestStep('should display the stopped transform');
-            await transform.table.assertTransformRowFields(testData.originalConfig.id, {
-              id: testData.originalConfig.id,
-              description: testData.originalConfig.description,
-              status: testData.expected.row.status,
-              mode: testData.expected.row.mode,
-              progress: testData.expected.row.progress,
-            });
           }
+
+          await transform.testExecution.logTestStep('should display the stopped transform');
+          await transform.table.assertTransformRowFields(testData.originalConfig.id, {
+            id: testData.originalConfig.id,
+            description: testData.originalConfig.description,
+            status: testData.expected.row.status,
+            mode: testData.expected.row.mode,
+            progress: testData.expected.row.progress,
+          });
 
           await transform.testExecution.logTestStep('should show the delete modal');
           await transform.table.assertTransformRowActionEnabled(

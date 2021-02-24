@@ -160,7 +160,10 @@ export function TransformTableProvider({ getService }: FtrProviderContext) {
       });
     }
 
-    public async assertTransformRowProgress(transformId: string, expectedProgress: number) {
+    public async assertTransformRowProgressGreaterThan(
+      transformId: string,
+      expectedProgress: number
+    ) {
       await retry.tryForTime(30 * 1000, async () => {
         await this.refreshTransformList();
         const rows = await this.parseTransformTable();

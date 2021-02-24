@@ -32,7 +32,7 @@ export default function ({ getService }: FtrProviderContext) {
         mode: 'batch',
       },
       {
-        suiteTitle: 'batch transform with latest configuration',
+        suiteTitle: 'continuous transform with latest configuration',
         originalConfig: getLatestTransformConfig(PREFIX, true),
         mode: 'continuous',
       },
@@ -88,8 +88,17 @@ export default function ({ getService }: FtrProviderContext) {
               TRANSFORM_STATE.STOPPED
             );
           } else {
-            await transform.table.assertTransformRowProgress(transformId, 0);
+            await transform.table.assertTransformRowProgressGreaterThan(transformId, 0);
           }
+
+          await transform.table.assertTransformRowStatusNotEql(
+            testData.originalConfig.id,
+            TRANSFORM_STATE.FAILED
+          );
+          await transform.table.assertTransformRowStatusNotEql(
+            testData.originalConfig.id,
+            TRANSFORM_STATE.ABORTING
+          );
         });
       });
     }

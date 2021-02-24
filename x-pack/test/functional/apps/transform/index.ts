@@ -97,8 +97,9 @@ export function getPivotTransformConfig(
       group_by: { category: { terms: { field: 'category.keyword' } } },
       aggregations: { 'products.base_price.avg': { avg: { field: 'products.base_price' } } },
     },
-    description:
-      'ecommerce batch transform with avg(products.base_price) grouped by terms(category.keyword)',
+    description: `ecommerce ${
+      continuous ? 'continuous' : 'batch'
+    } transform with avg(products.base_price) grouped by terms(category.keyword)`,
     dest: { index: `user-ec_2_${timestamp}` },
     ...(continuous ? { sync: { time: { field: 'order_date', delay: '60s' } } } : {}),
   };
@@ -116,7 +117,9 @@ export function getLatestTransformConfig(
       unique_key: ['category.keyword'],
       sort: 'order_date',
     },
-    description: 'ecommerce batch transform with category unique key and sorted by order date',
+    description: `ecommerce ${
+      continuous ? 'continuous' : 'batch'
+    } transform with category unique key and sorted by order date`,
     frequency: '3s',
     settings: {
       max_page_search_size: 250,
