@@ -93,7 +93,7 @@ describe('mapColumn', () => {
           {
             id: 'myId',
             name: 'myName',
-            meta: { type: 'date', params: { type: 'date', digits: 2 } },
+            meta: { type: 'date', params: { id: 'number', params: { digits: 2 } } },
           },
         ],
         rows: testTable.rows.map((row) => ({ ...row, myId: Date.now() })),
