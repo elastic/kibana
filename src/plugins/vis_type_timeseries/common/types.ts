@@ -49,8 +49,11 @@ export interface PanelData {
   data: Array<[number, number]>;
 }
 
-export const isVisDataTable = (data: TimeseriesVisData): data is TableData =>
-  (data as TableData).type === PANEL_TYPES.TABLE;
+export const isVisTableData = (data: TimeseriesVisData): data is TableData =>
+  data.type === PANEL_TYPES.TABLE;
+
+export const isVisSeriesData = (data: TimeseriesVisData): data is SeriesData =>
+  data.type !== PANEL_TYPES.TABLE;
 
 export interface SanitizedFieldType {
   name: string;

@@ -13,7 +13,7 @@ import { search } from '../../../../../../plugins/data/public';
 const { parseEsInterval } = search.aggs;
 import { GTE_INTERVAL_RE } from '../../../../common/interval_regexp';
 import { AUTO_INTERVAL } from '../../../../common/constants';
-import { isVisDataTable, PanelData, TimeseriesVisData } from '../../../../common/types';
+import { isVisTableData, PanelData, TimeseriesVisData } from '../../../../common/types';
 import { TimeseriesVisParams } from '../../../metrics_fn';
 
 export const unitLookup = {
@@ -70,7 +70,7 @@ export const validateReInterval = (intervalValue: string) => {
 export const getInterval = (visData: TimeseriesVisData, model: TimeseriesVisParams) => {
   const series = get(
     visData,
-    isVisDataTable(visData) ? `series[0].series` : `${model.id}.series`,
+    isVisTableData(visData) ? `series[0].series` : `${model.id}.series`,
     []
   ) as PanelData[];
 
