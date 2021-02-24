@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { PNG_JOB_TYPE } from '../../../../common/constants';
 import { cryptoFactory } from '../../../lib';
 import { CreateJobFn, CreateJobFnFactory } from '../../../types';
 import { validateUrls } from '../../common';
@@ -12,7 +13,8 @@ import { JobParamsPNG, TaskPayloadPNG } from '../types';
 
 export const createJobFnFactory: CreateJobFnFactory<
   CreateJobFn<JobParamsPNG, TaskPayloadPNG>
-> = function createJobFactoryFn(reporting, logger) {
+> = function createJobFactoryFn(reporting, parentLogger) {
+  const logger = parentLogger.clone([PNG_JOB_TYPE, 'execute-job']);
   const config = reporting.getConfig();
   const crypto = cryptoFactory(config.get('encryptionKey'));
 
