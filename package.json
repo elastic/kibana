@@ -96,6 +96,8 @@
     "**",
 
     "!src/core/**",
+    "!x-pack/plugins/spaces/**",
+
 
     "**/public/index.(js|ts)"
   ],

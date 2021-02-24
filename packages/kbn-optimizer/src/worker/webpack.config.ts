@@ -115,7 +115,6 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
               },
             },
           ],
-          sideEffects: true,
         },
         {
           test: /\.css$/,
