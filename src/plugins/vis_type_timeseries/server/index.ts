@@ -29,3 +29,5 @@ export const config: PluginConfigDescriptor<VisTypeTimeseriesConfig> = {
 export function plugin(initializerContext: PluginInitializerContext) {
   return new VisTypeTimeseriesPlugin(initializerContext);
 }
+
+export { TimeseriesVisData, PanelSeries } from '../common/types';

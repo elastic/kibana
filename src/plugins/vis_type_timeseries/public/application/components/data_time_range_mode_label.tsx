@@ -36,8 +36,8 @@ export const DataTimeRangeModeLabel = ({
   modelInterval,
   modelTimeRangeMode,
 }: DataTimeRangeModeLabelProps) => {
-  const hasShowPanelIntervalValue = () =>
-    isAutoInterval(modelInterval) || isGteInterval(modelInterval);
+  const dateFormat = getUISettings().get('dateFormat');
+  const scaledDataFormat = getUISettings().get('dateFormat:scaled');
 
   const getFormattedPanelInterval = () => {
     const interval = convertIntervalIntoUnit(panelInterval, false);
@@ -45,12 +45,12 @@ export const DataTimeRangeModeLabel = ({
   };
 
   const getLastValueLabelWithTooltip = () => {
-    const dateFormat = getUISettings().get('dateFormat');
-    const scaledDataFormat = getUISettings().get('dateFormat:scaled');
     const formatter = createIntervalBasedFormatter(panelInterval, scaledDataFormat, dateFormat);
-
     const lastBucketDate = formatter(seriesData[seriesData.length - 1][0]);
-    const formattedPanelInterval = hasShowPanelIntervalValue() && getFormattedPanelInterval();
+    const formattedPanelInterval =
+      (isAutoInterval(modelInterval) || isGteInterval(modelInterval)) &&
+      getFormattedPanelInterval();
+
     const tooltipContent = (
       <FormattedMessage
         id="visTypeTimeseries.dataTimeRangeModeLabel.lastValueTooltip"

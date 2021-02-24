@@ -17,26 +17,7 @@ export type PanelSchema = TypeOf<typeof panel>;
 export type VisPayload = TypeOf<typeof visPayloadSchema>;
 export type FieldObject = TypeOf<typeof fieldObject>;
 
-export interface PanelData {
-  id: string;
-  label: string;
-  data: Array<[number, number]>;
-}
-
-// series data is not fully typed yet
-type SeriesData = {
-  type: Exclude<PANEL_TYPES, PANEL_TYPES.TABLE>;
-  uiRestrictions: TimeseriesUIRestrictions;
-} & {
-  [key: string]: {
-    annotations: {
-      [key: string]: unknown[];
-    };
-    id: string;
-    series: PanelData[];
-    error?: unknown;
-  };
-};
+export type TimeseriesVisData = SeriesData | TableData;
 
 interface TableData {
   type: PANEL_TYPES.TABLE;
@@ -45,7 +26,28 @@ interface TableData {
   pivot_label?: string;
 }
 
-export type TimeseriesVisData = SeriesData | TableData;
+// series data is not fully typed yet
+export type SeriesData = {
+  type: Exclude<PANEL_TYPES, PANEL_TYPES.TABLE>;
+  uiRestrictions: TimeseriesUIRestrictions;
+} & {
+  [key: string]: PanelSeries;
+};
+
+export interface PanelSeries {
+  annotations: {
+    [key: string]: unknown[];
+  };
+  id: string;
+  series: PanelData[];
+  error?: unknown;
+}
+
+export interface PanelData {
+  id: string;
+  label: string;
+  data: Array<[number, number]>;
+}
 
 export const isVisDataTable = (data: TimeseriesVisData): data is TableData =>
   (data as TableData).type === PANEL_TYPES.TABLE;

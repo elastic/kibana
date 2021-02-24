@@ -21,6 +21,10 @@ import {
 import { calculateMetricInterval } from '../../../utils/calculate_metric_interval';
 import { CallWithRequestParams, InfraDatabaseSearchResponse } from '../framework';
 import type { InfraPluginRequestHandlerContext } from '../../../types';
+import {
+  TimeseriesVisData,
+  PanelSeries,
+} from '../../../../../../../src/plugins/vis_type_timeseries/server';
 
 export class KibanaMetricsAdapter implements InfraMetricsAdapter {
   private framework: KibanaFramework;
@@ -55,7 +59,7 @@ export class KibanaMetricsAdapter implements InfraMetricsAdapter {
 
     const requests = options.metrics.map((metricId) =>
       this.makeTSVBRequest(metricId, options, nodeField, requestContext, rawRequest)
-    );
+    ) as Array<Promise<TimeseriesVisData>>;
 
     return Promise.all(requests)
       .then((results) => {
@@ -75,7 +79,7 @@ export class KibanaMetricsAdapter implements InfraMetricsAdapter {
                 })
               );
             }
-            const panel = result[id];
+            const panel = (result[id] as unknown) as PanelSeries;
             return {
               id,
               series: panel.series.map((series) => {

@@ -7,7 +7,6 @@
 
 import {
   InfraRouteConfig,
-  InfraTSVBResponse,
   InfraServerPluginSetupDeps,
   CallWithRequestParams,
   InfraDatabaseSearchResponse,
@@ -27,6 +26,7 @@ import { RequestHandler } from '../../../../../../../src/core/server';
 import { InfraConfig } from '../../../plugin';
 import type { InfraPluginRequestHandlerContext } from '../../../types';
 import { IndexPatternsFetcher, UI_SETTINGS } from '../../../../../../../src/plugins/data/server';
+import { TimeseriesVisData } from '../../../../../../../src/plugins/vis_type_timeseries/common/types';
 
 export class KibanaFramework {
   public router: IRouter<InfraPluginRequestHandlerContext>;
@@ -166,7 +166,7 @@ export class KibanaFramework {
     model: TSVBMetricModel,
     timerange: { min: number; max: number },
     filters: any[]
-  ): Promise<InfraTSVBResponse> {
+  ): Promise<TimeseriesVisData> {
     const { getVisData } = this.plugins.visTypeTimeseries;
     if (typeof getVisData !== 'function') {
       throw new Error('TSVB is not available');
@@ -176,6 +176,6 @@ export class KibanaFramework {
       panels: [model],
       filters,
     };
-    return getVisData(requestContext, rawRequest, options) as Promise<InfraTSVBResponse>;
+    return getVisData(requestContext, rawRequest, options);
   }
 }
