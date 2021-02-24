@@ -40,6 +40,15 @@ import {
 } from './types';
 import { getAlertIds } from '../../routes/api/utils';
 
+interface CreateIncidentArgs {
+  actionsClient: ActionsClient;
+  theCase: CaseResponse;
+  userActions: CaseUserActionsResponse;
+  connector: ActionConnector;
+  mappings: ConnectorMappingsAttributes[];
+  alerts: CaseClientGetAlertsResponse;
+}
+
 export const getLatestPushInfo = (
   connectorId: string,
   userActions: CaseUserActionsResponse
@@ -75,14 +84,13 @@ const getCommentContent = (comment: CommentResponse): string => {
   return '';
 };
 
-interface CreateIncidentArgs {
-  actionsClient: ActionsClient;
-  theCase: CaseResponse;
-  userActions: CaseUserActionsResponse;
-  connector: ActionConnector;
-  mappings: ConnectorMappingsAttributes[];
-  alerts: CaseClientGetAlertsResponse;
-}
+const countAlerts = (comments: CaseResponse['comments']): number =>
+  comments?.reduce<number>((total, comment) => {
+    if (comment.type === CommentType.alert || comment.type === CommentType.generatedAlert) {
+      return total + (Array.isArray(comment.alertId) ? comment.alertId.length : 1);
+    }
+    return total;
+  }, 0) ?? 0;
 
 export const createIncident = async ({
   actionsClient,
@@ -163,13 +171,7 @@ export const createIncident = async ({
       comment.type === CommentType.user && commentsIdsToBeUpdated.has(comment.id)
   );
 
-  const totalAlerts =
-    caseComments?.reduce<number>((total, comment) => {
-      if (comment.type === CommentType.alert || comment.type === CommentType.generatedAlert) {
-        return total + (Array.isArray(comment.alertId) ? comment.alertId.length : 1);
-      }
-      return total;
-    }, 0) ?? 0;
+  const totalAlerts = countAlerts(caseComments);
 
   let comments: ExternalServiceComment[] = [];
 
@@ -183,7 +185,6 @@ export const createIncident = async ({
   if (totalAlerts > 0) {
     comments.push({
       comment: `Elastic Security Alerts attached to the case: ${totalAlerts}`,
-      commentId: '',
     });
   }
 
