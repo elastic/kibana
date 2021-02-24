@@ -28,6 +28,7 @@ describe('RelevanceTuning', () => {
       invalidBoosts: false,
       unsearchedUnconfirmedFields: false,
     },
+    schemaFieldsWithConflicts: [],
   };
 
   const actions = {
@@ -53,6 +54,7 @@ describe('RelevanceTuning', () => {
     expect(wrapper.find('[data-test-subj="RelevanceTuningUnsearchedFieldsCallout"]').exists()).toBe(
       false
     );
+    expect(subject().find('[data-test-subj="SchemaConflictsCallout"]').exists()).toBe(false);
   });
 
   it('initializes relevance tuning data', () => {
@@ -117,5 +119,15 @@ describe('RelevanceTuning', () => {
     expect(
       subject().find('[data-test-subj="RelevanceTuningUnsearchedFieldsCallout"]').exists()
     ).toBe(true);
+  });
+
+  it('shows a message when there are schema field conflicts', () => {
+    // Schema conflicts occur when a meta engine has fields in source engines with have differing types,
+    // hence relevance tuning cannot be applied as we don't know the actual type
+    setMockValues({
+      ...values,
+      schemaFieldsWithConflicts: ['fe', 'fi', 'fo'],
+    });
+    expect(subject().find('[data-test-subj="SchemaConflictsCallout"]').exists()).toBe(true);
   });
 });

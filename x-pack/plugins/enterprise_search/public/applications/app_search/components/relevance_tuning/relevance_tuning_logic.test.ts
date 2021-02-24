@@ -70,7 +70,6 @@ describe('RelevanceTuningLogic', () => {
     query: '',
     resultsLoading: false,
     searchResults: null,
-    showSchemaConflictCallout: true,
     engineHasSchemaFields: false,
     schemaFields: [],
     schemaFieldsWithConflicts: [],
@@ -217,20 +216,6 @@ describe('RelevanceTuningLogic', () => {
         expect(RelevanceTuningLogic.values).toEqual({
           ...DEFAULT_VALUES,
           dataLoading: true,
-        });
-      });
-    });
-
-    describe('dismissSchemaConflictCallout', () => {
-      it('should set showSchemaConflictCallout to false', () => {
-        mount({
-          showSchemaConflictCallout: true,
-        });
-        RelevanceTuningLogic.actions.dismissSchemaConflictCallout();
-
-        expect(RelevanceTuningLogic.values).toEqual({
-          ...DEFAULT_VALUES,
-          showSchemaConflictCallout: false,
         });
       });
     });

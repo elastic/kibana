@@ -17,6 +17,12 @@ import {
   EuiSpacer,
   EuiAccordion,
   EuiPanel,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHealth,
+  EuiCallOut,
+  EuiText,
+  EuiLink,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -34,6 +40,7 @@ export const RelevanceTuningForm: React.FC = () => {
     filterInputValue,
     schemaFields,
     filteredSchemaFields,
+    filteredSchemaFieldsWithConflicts,
     schema,
     searchSettings,
   } = useValues(RelevanceTuningLogic);
@@ -100,6 +107,40 @@ export const RelevanceTuningForm: React.FC = () => {
             </EuiAccordion>
           </EuiPanel>
         ))}
+        <EuiSpacer />
+        {filteredSchemaFieldsWithConflicts.length > 0 && (
+          <>
+            <EuiTitle size="s" data-test-subj="DisabledFieldsSection">
+              <h3>
+                {i18n.translate(
+                  'xpack.enterpriseSearch.appSearch.engine.relevanceTuning.disabledFields.title',
+                  {
+                    defaultMessage: 'Disabled fields',
+                  }
+                )}
+              </h3>
+            </EuiTitle>
+            <EuiSpacer />
+            <EuiFlexGroup direction="column">
+              {filteredSchemaFieldsWithConflicts.map((fieldName) => (
+                <EuiFlexItem key={fieldName} style={{ alignItems: 'flex-start' }}>
+                  <EuiTitle size="xs">
+                    <h4 data-test-subj="DisabledField">{fieldName}</h4>
+                  </EuiTitle>
+                  <EuiHealth color="warning">
+                    {i18n.translate(
+                      'xpack.enterpriseSearch.appSearch.engine.relevanceTuning.disabledFieldsExplanationMessage',
+                      {
+                        defaultMessage: 'Inactive due to field-type conflict',
+                      }
+                    )}
+                  </EuiHealth>
+                </EuiFlexItem>
+              ))}
+            </EuiFlexGroup>
+            <EuiSpacer />
+          </>
+        )}
       </form>
     </section>
   );

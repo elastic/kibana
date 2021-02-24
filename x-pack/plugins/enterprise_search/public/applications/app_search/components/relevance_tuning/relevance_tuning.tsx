@@ -16,6 +16,8 @@ import {
   EuiFlexItem,
   EuiButton,
   EuiCallOut,
+  EuiText,
+  EuiLink,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -26,7 +28,7 @@ import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chro
 import { EuiLinkTo } from '../../../shared/react_router_helpers';
 import { UnsavedChangesPrompt } from '../../../shared/unsaved_changes_prompt';
 
-import { ENGINE_SCHEMA_PATH } from '../../routes';
+import { DOCS_PREFIX, ENGINE_SCHEMA_PATH } from '../../routes';
 import { EngineLogic, generateEnginePath } from '../engine';
 
 import { RELEVANCE_TUNING_TITLE } from './constants';
@@ -41,10 +43,14 @@ export const RelevanceTuning: React.FC<Props> = ({ engineBreadcrumb }) => {
   const { resetSearchSettings, initializeRelevanceTuning, updateSearchSettings } = useActions(
     RelevanceTuningLogic
   );
-  const { engineHasSchemaFields, unsavedChanges } = useValues(RelevanceTuningLogic);
+  const { schemaFieldsWithConflicts, engineHasSchemaFields, unsavedChanges } = useValues(
+    RelevanceTuningLogic
+  );
   const {
     engine: { invalidBoosts, unsearchedUnconfirmedFields },
   } = useValues(EngineLogic);
+
+  const schemaFieldsWithConflictsCount = schemaFieldsWithConflicts.length;
 
   useEffect(() => {
     initializeRelevanceTuning();
@@ -144,6 +150,37 @@ export const RelevanceTuning: React.FC<Props> = ({ engineBreadcrumb }) => {
                     }
                   )}
                 </EuiLinkTo>
+              ),
+            }}
+          />
+        </EuiCallOut>
+      )}
+      {schemaFieldsWithConflictsCount > 0 && (
+        <EuiCallOut
+          color="warning"
+          iconType="alert"
+          title={i18n.translate(
+            'xpack.enterpriseSearch.appSearch.engine.relevanceTuning.schemaConflictsBannerLabel',
+            {
+              defaultMessage: 'Disabled fields',
+            }
+          )}
+          data-test-subj="SchemaConflictsCallout"
+        >
+          <FormattedMessage
+            id="xpack.enterpriseSearch.appSearch.engine.relevanceTuning.schemaConflictsErrorMessage"
+            defaultMessage="{schemaFieldsWithConflictsCount, number} inactive {schemaFieldsWithConflictsCount, plural, one {field} other {fields}} due to field-type conflicts. {link}"
+            values={{
+              schemaFieldsWithConflictsCount,
+              link: (
+                <EuiLink href={`${DOCS_PREFIX}/meta-engines-guide.html`} target="_blank">
+                  {i18n.translate(
+                    'xpack.enterpriseSearch.appSearch.engine.relevanceTuning.whatsThisLinkLabel',
+                    {
+                      defaultMessage: "What's this?",
+                    }
+                  )}
+                </EuiLink>
               ),
             }}
           />
