@@ -136,6 +136,31 @@ export function TransformWizardProvider({ getService }: FtrProviderContext) {
       });
     },
 
+    async assertEuiDataGridColumnHasValues(
+      tableSubj: string,
+      column: number,
+      expectedColumnValues: string[]
+    ) {
+      await retry.tryForTime(2000, async () => {
+        // get a 2D array of rows and cell values
+        const rows = await this.parseEuiDataGrid(tableSubj);
+
+        // reduce the rows data to an array of unique values in the specified column
+        const uniqueColumnValues = rows
+          .map((row) => row[column])
+          .flat()
+          .filter((v, i, a) => a.indexOf(v) === i);
+
+        uniqueColumnValues.sort();
+
+        // check if the returned unique value matches the supplied filter value
+        expect(uniqueColumnValues).to.eql(
+          expectedColumnValues,
+          `Unique EuiDataGrid column values should be '${expectedColumnValues.join()}' (got ${uniqueColumnValues.join()})`
+        );
+      });
+    },
+
     async assertIndexPreview(columns: number, expectedNumberOfRows: number) {
       await retry.tryForTime(2000, async () => {
         // get a 2D array of rows and cell values
@@ -280,6 +305,68 @@ export function TransformWizardProvider({ getService }: FtrProviderContext) {
         expectedCheckState,
         `Advanced query editor switch check state should be '${expectedCheckState}' (got '${actualCheckState}')`
       );
+    },
+
+    async assertRuntimeMappingsEditorSwitchExists() {
+      await testSubjects.existOrFail(`transformAdvancedRuntimeMappingsEditorSwitch`);
+    },
+
+    async assertRuntimeMappingsEditorSwitchCheckState(expectedCheckState: boolean) {
+      const actualCheckState =
+        (await testSubjects.getAttribute(
+          'transformAdvancedRuntimeMappingsEditorSwitch',
+          'aria-checked'
+        )) === 'true';
+      expect(actualCheckState).to.eql(
+        expectedCheckState,
+        `Advanced runtime mappings editor switch check state should be '${expectedCheckState}' (got '${actualCheckState}')`
+      );
+    },
+
+    async getRuntimeMappingsEditorSwitchCheckedState(): Promise<boolean> {
+      const subj = 'transformAdvancedRuntimeMappingsEditorSwitch';
+      const isSelected = await testSubjects.getAttribute(subj, 'aria-checked');
+      return isSelected === 'true';
+    },
+
+    async toggleRuntimeMappingsEditorSwitch(toggle: boolean) {
+      const subj = 'transformAdvancedRuntimeMappingsEditorSwitch';
+      if ((await this.getRuntimeMappingsEditorSwitchCheckedState()) !== toggle) {
+        await retry.tryForTime(5 * 1000, async () => {
+          await testSubjects.clickWhenNotDisabled(subj);
+          await this.assertRuntimeMappingsEditorSwitchCheckState(toggle);
+        });
+      }
+    },
+
+    async assertRuntimeMappingsEditorExists() {
+      await testSubjects.existOrFail('transformAdvancedRuntimeMappingsEditor');
+    },
+
+    async assertRuntimeMappingsEditorMissing() {
+      await testSubjects.missingOrFail('transformAdvancedRuntimeMappingsEditor');
+    },
+
+    async assertRuntimeMappingsEditorContent(expectedContent: string[]) {
+      await this.assertRuntimeMappingsEditorExists();
+
+      const runtimeMappingsEditorString = await aceEditor.getValue(
+        'transformAdvancedRuntimeMappingsEditor'
+      );
+      // Not all lines may be visible in the editor and thus aceEditor may not return all lines.
+      // This means we might not get back valid JSON so we only test against the first few lines
+      // and see if the string matches.
+      const splicedAdvancedEditorValue = runtimeMappingsEditorString.split('\n').splice(0, 3);
+      expect(splicedAdvancedEditorValue).to.eql(
+        expectedContent,
+        `Expected the first editor lines to be '${expectedContent}' (got '${splicedAdvancedEditorValue}')`
+      );
+    },
+
+    async setRuntimeMappingsEditorContent(input: string, expectedContent: string[]) {
+      await this.assertRuntimeMappingsEditorExists();
+      await aceEditor.setValue('transformAdvancedRuntimeMappingsEditor', input);
+      await this.assertRuntimeMappingsEditorContent(expectedContent);
     },
 
     async assertSelectedTransformFunction(transformFunction: 'pivot' | 'latest') {
