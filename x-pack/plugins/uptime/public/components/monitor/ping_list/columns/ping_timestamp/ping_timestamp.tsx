@@ -73,7 +73,7 @@ export const PingTimestamp = ({ timestamp, ping }: Props) => {
     }
   }, [data]);
 
-  const imgSrc = stepImages[stepNumber] || data?.src;
+  const imgSrc = stepImages?.[stepNumber - 1] ?? data?.src;
 
   const captionContent = formatCaptionContent(stepNumber, data?.maxSteps);
 
@@ -85,6 +85,7 @@ export const PingTimestamp = ({ timestamp, ping }: Props) => {
       setStepNumber={setStepNumber}
       stepNumber={stepNumber}
       timestamp={timestamp}
+      isLoading={status === FETCH_STATUS.LOADING || status === FETCH_STATUS.PENDING}
     />
   );
 

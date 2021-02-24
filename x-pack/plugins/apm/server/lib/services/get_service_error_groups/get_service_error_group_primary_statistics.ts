@@ -14,24 +14,30 @@ import {
 } from '../../../../common/elasticsearch_fieldnames';
 import { NOT_AVAILABLE_LABEL } from '../../../../common/i18n';
 import { ProcessorEvent } from '../../../../common/processor_event';
-import { environmentQuery, rangeQuery } from '../../../../common/utils/queries';
+import {
+  environmentQuery,
+  rangeQuery,
+  kqlQuery,
+} from '../../../../server/utils/queries';
 import { withApmSpan } from '../../../utils/with_apm_span';
 import { getErrorName } from '../../helpers/get_error_name';
 import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 
 export function getServiceErrorGroupPrimaryStatistics({
+  kuery,
   serviceName,
   setup,
   transactionType,
   environment,
 }: {
+  kuery?: string;
   serviceName: string;
   setup: Setup & SetupTimeRange;
   transactionType: string;
   environment?: string;
 }) {
   return withApmSpan('get_service_error_group_primary_statistics', async () => {
-    const { apmEventClient, start, end, esFilter } = setup;
+    const { apmEventClient, start, end } = setup;
 
     const response = await apmEventClient.search({
       apm: {
@@ -46,7 +52,7 @@ export function getServiceErrorGroupPrimaryStatistics({
               { term: { [TRANSACTION_TYPE]: transactionType } },
               ...rangeQuery(start, end),
               ...environmentQuery(environment),
-              ...esFilter,
+              ...kqlQuery(kuery),
             ],
           },
         },
