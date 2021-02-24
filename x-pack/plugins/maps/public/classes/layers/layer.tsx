@@ -401,10 +401,10 @@ export class AbstractLayer implements ILayer {
 
   isLayerLoading(): boolean {
     const areTilesLoading =
-      typeof this._descriptor.__areTilesLoaded === 'boolean'
-        ? this._descriptor.__areTilesLoaded
+      typeof this._descriptor.__areTilesLoaded !== 'undefined'
+        ? !this._descriptor.__areTilesLoaded
         : false;
-    return !areTilesLoading || this._dataRequests.some((dataRequest) => dataRequest.isLoading());
+    return areTilesLoading || this._dataRequests.some((dataRequest) => dataRequest.isLoading());
   }
 
   isLoadingBounds() {
