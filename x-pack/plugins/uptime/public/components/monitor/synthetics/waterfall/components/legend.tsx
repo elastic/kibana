@@ -8,7 +8,6 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { IWaterfallContext } from '../context/waterfall_chart';
-import { WaterfallChartLegendContainer } from './styles';
 import { WaterfallChartProps } from './waterfall_chart';
 import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common';
 
@@ -25,12 +24,10 @@ const StyledFlexItem = euiStyled(EuiFlexItem)`
 
 export const Legend: React.FC<LegendProps> = ({ items, render }) => {
   return (
-    <WaterfallChartLegendContainer>
-      <EuiFlexGroup gutterSize="s" wrap>
-        {items.map((item, index) => (
-          <StyledFlexItem key={index}>{render(item, index)}</StyledFlexItem>
-        ))}
-      </EuiFlexGroup>
-    </WaterfallChartLegendContainer>
+    <EuiFlexGroup gutterSize="s" wrap>
+      {items.map((item, index) => (
+        <StyledFlexItem key={index}>{render(item, index)}</StyledFlexItem>
+      ))}
+    </EuiFlexGroup>
   );
 };
