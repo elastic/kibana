@@ -67,9 +67,8 @@ type ErrorGroupDetailsProps = RouteComponentProps<{
 
 export function ErrorGroupDetails({ location, match }: ErrorGroupDetailsProps) {
   const { serviceName, groupId } = match.params;
-  const { urlParams, uiFilters } = useUrlParams();
-  const { environment, start, end } = urlParams;
-
+  const { urlParams } = useUrlParams();
+  const { environment, kuery, start, end } = urlParams;
   const { data: errorGroupData } = useFetcher(
     (callApmApi) => {
       if (start && end) {
@@ -82,15 +81,15 @@ export function ErrorGroupDetails({ location, match }: ErrorGroupDetailsProps) {
             },
             query: {
               environment,
+              kuery,
               start,
               end,
-              uiFilters: JSON.stringify(uiFilters),
             },
           },
         });
       }
     },
-    [environment, serviceName, start, end, groupId, uiFilters]
+    [environment, kuery, serviceName, start, end, groupId]
   );
 
   const { errorDistributionData } = useErrorGroupDistributionFetcher({
