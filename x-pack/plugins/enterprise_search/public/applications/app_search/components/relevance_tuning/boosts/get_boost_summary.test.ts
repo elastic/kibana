@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Boost, BoostFunction, BoostType, BoostOperation } from '../../../types';
+import { Boost, BoostFunction, BoostType, BoostOperation, FunctionalBoostFunction } from '../types';
 
 import { getBoostSummary } from './get_boost_summary';
 
@@ -28,6 +28,15 @@ describe('getBoostSummary', () => {
           value: undefined,
         })
       ).toEqual('');
+    });
+
+    it('filters out empty values', () => {
+      expect(
+        getBoostSummary({
+          ...boost,
+          value: [' ', '', 'foo', '', 'bar'],
+        })
+      ).toEqual('foo,bar');
     });
   });
 
@@ -55,18 +64,20 @@ describe('getBoostSummary', () => {
   describe('when the boost type is "functional"', () => {
     const boost: Boost = {
       type: BoostType.Functional,
-      function: BoostFunction.Gaussian,
+      function: FunctionalBoostFunction.Logarithmic,
       operation: BoostOperation.Add,
       factor: 5,
     };
 
     it('creates a summary that is name of the function and operation', () => {
-      expect(getBoostSummary(boost)).toEqual('gaussian add');
+      expect(getBoostSummary(boost)).toEqual('logarithmic add');
     });
 
     it('prints empty if function or operation is missing', () => {
       expect(getBoostSummary({ ...boost, function: undefined })).toEqual(BoostOperation.Add);
-      expect(getBoostSummary({ ...boost, operation: undefined })).toEqual(BoostFunction.Gaussian);
+      expect(getBoostSummary({ ...boost, operation: undefined })).toEqual(
+        FunctionalBoostFunction.Logarithmic
+      );
       expect(getBoostSummary({ ...boost, function: undefined, operation: undefined })).toEqual('');
     });
   });
