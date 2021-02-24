@@ -74,6 +74,12 @@ export const createApmInstrumentedInstance = <T extends object>(
     return new Proxy(object, {
       get(_, property: keyof T, receiver) {
         const value = Reflect.get(object, property, receiver);
+
+        // don't symbol properties
+        if (typeof property !== 'string') {
+          return value;
+        }
+
         const subPath = path ? `${path}.${property}` : `${property}`;
 
         // wrap function properties

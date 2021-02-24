@@ -47,6 +47,8 @@ beforeEach(() => {
 });
 
 it('deeply wraps objects so that methods start and end spans', () => {
+  const hidden = Symbol();
+
   const instance = {
     foo() {
       return 'foo';
@@ -54,6 +56,17 @@ it('deeply wraps objects so that methods start and end spans', () => {
     bar() {
       throw new Error('bar');
     },
+    [hidden]() {
+      return 'hidden';
+    },
+    items: [
+      {
+        foo: 1,
+        inArray() {
+          return 'inArray';
+        },
+      },
+    ],
     sub: {
       api: {
         subFoo() {
@@ -70,6 +83,8 @@ it('deeply wraps objects so that methods start and end spans', () => {
 
   expect(instrumented.foo()).toBe('foo');
   expect(instrumented.sub.api.subFoo()).toBe('subFoo');
+  expect(instrumented[hidden]()).toBe('hidden');
+  expect(instrumented.items[0].inArray()).toBe('inArray');
   expect(() => instrumented.bar()).toThrowErrorMatchingInlineSnapshot(`"bar"`);
   expect(() => instrumented.sub.api.subBar()).toThrowErrorMatchingInlineSnapshot(`"subBar"`);
 
@@ -87,6 +102,12 @@ it('deeply wraps objects so that methods start and end spans', () => {
           "service",
           "myInstance",
           "sub.api.subFoo",
+        ],
+        Array [
+          "myInstance.items.0.inArray()",
+          "service",
+          "myInstance",
+          "items.0.inArray",
         ],
         Array [
           "myInstance.bar()",
@@ -109,6 +130,10 @@ it('deeply wraps objects so that methods start and end spans', () => {
         Object {
           "type": "return",
           "value": "SPAN[name=myInstance.sub.api.subFoo()/service/myInstance/sub.api.subFoo, outcome=success, ended=true]",
+        },
+        Object {
+          "type": "return",
+          "value": "SPAN[name=myInstance.items.0.inArray()/service/myInstance/items.0.inArray, outcome=success, ended=true]",
         },
         Object {
           "type": "return",
