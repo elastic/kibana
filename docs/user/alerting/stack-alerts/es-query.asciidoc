@@ -33,16 +33,16 @@ Time window:: This clause determines how far back to search for documents, using
 
 When the ES query alert condition is met, the following variables are available to use inside each action:
 
-`context.title`:: A pre-constructed title for the alert. Example: `alert term match alert query matched`.
-`context.message`:: A pre-constructed message for the alert. +
-Example: `alert 'term match alert' is active:` +
+`context.title`:: A preconstructed title for the alert. Example: `alert term match alert query matched`.
+`context.message`:: A preconstructed message for the alert. Example: +
+`alert 'term match alert' is active:` +
 `- Value: 42` +
 `- Conditions Met: count greater than 4 over 5m` +
 `- Timestamp: 2020-01-01T00:00:00.000Z`
 
 `context.group`:: The name of the action group associated with the condition. Example: `query matched`.
-`context.date`:: The date the alert met the condition in ISO format. Example: `2020-01-01T00:00:00.000Z`.
-`context.value`:: The value for the alert that met the condition.
+`context.date`:: The date, in ISO format, that the alert met the condition. Example: `2020-01-01T00:00:00.000Z`.
+`context.value`:: The value of the alert that met the condition.
 `context.conditions`:: A description of the condition. Example: `count greater than 4`.
 `context.hits`:: The most recent ES documents that matched the query. Using the https://mustache.github.io/[Mustache] template array syntax, you can iterate over these hits to get values from the ES documents into your actions.
 

@@ -59,7 +59,7 @@ image::images/alert-flyout-action-type-selection.png[UI for selecting an action 
 When an alert instance matches a condition, the alert is marked as _Active_ and assigned an action group.  The actions in that group are triggered.
 When the condition is no longer detected, the alert is assigned to the _Recovered_ action group, which triggers any actions assigned to that group.
 
-**Run When** allows you to assign an action to an _action group_. This will trigger the action in accordance with your **Notify** setting.
+**Run When** allows you to assign an action to an action group. This will trigger the action in accordance with your **Notify** setting.
 
 Each action must specify a <<alerting-concepts-connectors, connector>> instance. If no connectors exist for that action type, click *Add action* to create one.
 
@@ -70,7 +70,7 @@ image::images/alert-flyout-action-details.png[UI for defining an email action]
 
 [float]
 ==== Action variables
-Using the https://mustache.github.io/[Mustache] template syntax `{{variable name}}`, you can pass alert values at the time a condition is detected to an action. The list of available variables can be accessed using the "add variable" button. While available variables differ by alert type, all alert types pass the following variables:
+Using the https://mustache.github.io/[Mustache] template syntax `{{variable name}}`, you can pass alert values at the time a condition is detected to an action. You can access the list of available variables using the "add variable" button. Although available variables differ by alert type, all alert types pass the following variables:
 
 `alertId`:: The ID of the alert.
 `alertName`:: The name of the alert.
