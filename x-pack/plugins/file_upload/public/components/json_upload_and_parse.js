@@ -12,6 +12,7 @@ import PropTypes from 'prop-types';
 import { IndexSettings } from './index_settings';
 import { getIndexPatternService } from '../kibana_services';
 import { GeoJsonFilePicker } from './geojson_file_picker';
+import { ImportCompleteView } from './import_complete_view';
 
 const PHASE = {
   CONFIGURE: 'CONFIGURE',
@@ -38,8 +39,8 @@ export class JsonUploadAndParse extends Component {
     // Progress-tracking state
     importStatus: '',
     phase: PHASE.CONFIGURE,
-    indexDataResp: '',
-    indexPatternResp: '',
+    importResp: undefined,
+    indexPatternResp: undefined,
   };
 
   componentDidMount() {
@@ -60,21 +61,6 @@ export class JsonUploadAndParse extends Component {
       this._import();
     }
   }
-
-  _resetFileAndIndexSettings = () => {
-    if (this._geojsonImporter) {
-      this._geojsonImporter.destroy();
-      this._geojsonImporter = undefined;
-    }
-
-    this.props.onFileRemove();
-
-    this.setState({
-      indexTypes: [],
-      selectedIndexType: '',
-      indexName: '',
-    });
-  };
 
   _setIndexReady = () => {
     const isIndexReady =
@@ -153,7 +139,7 @@ export class JsonUploadAndParse extends Component {
 
     if (!importResp.success) {
       this.setState({
-        indexDataResp: importResp,
+        importResp,
         importStatus: i18n.translate('xpack.fileUpload.jsonUploadAndParse.dataIndexingError', {
           defaultMessage: 'Data indexing error',
         }),
@@ -167,7 +153,7 @@ export class JsonUploadAndParse extends Component {
     // create index pattern
     //
     this.setState({
-      indexDataResp: importResp,
+      importResp,
       importStatus: i18n.translate('xpack.fileUpload.jsonUploadAndParse.creatingIndexPattern', {
         defaultMessage: 'Creating index pattern: {indexName}',
         values: { indexName: this.state.indexName },
@@ -243,6 +229,21 @@ export class JsonUploadAndParse extends Component {
     );
   };
 
+  _onFileClear = () => {
+    if (this._geojsonImporter) {
+      this._geojsonImporter.destroy();
+      this._geojsonImporter = undefined;
+    }
+
+    this.props.onFileRemove();
+
+    this.setState({
+      indexTypes: [],
+      selectedIndexType: '',
+      indexName: '',
+    });
+  };
+
   render() {
     if (this.state.phase === PHASE.IMPORT) {
       return (
@@ -256,15 +257,17 @@ export class JsonUploadAndParse extends Component {
     }
 
     if (this.state.phase === PHASE.COMPLETE) {
-      return <div>complete</div>;
+      return (
+        <ImportCompleteView
+          importResp={this.state.importResp}
+          indexPatternResp={this.state.indexPatternResp}
+        />
+      );
     }
 
     return (
       <EuiForm>
-        <GeoJsonFilePicker
-          onSelect={this._onFileSelect}
-          onClear={this._resetFileAndIndexSettings}
-        />
+        <GeoJsonFilePicker onSelect={this._onFileSelect} onClear={this._onFileClear} />
         <IndexSettings
           disabled={this._geojsonImporter === undefined}
           indexName={this.state.indexName}

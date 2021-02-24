@@ -159,7 +159,7 @@ export class GeoJsonImporter extends Importer {
     const result: ImportResults = {
       success,
       failures,
-      docCount: this._docArray.length,
+      docCount: this._totalFeatures,
     };
 
     if (success) {
