@@ -83,6 +83,10 @@ specific dashboard, application, or saved object as they enter each space.
 [[fields-popularlimit]]`fields:popularLimit`::
 The top N most popular fields to show.
 
+[[fileupload-maxfilesize]]`fileUpload:maxFileSize`::
+Sets the file size limit when importing files. The default
+value is `100MB`. The highest supported value for this setting is `1GB`.
+
 [[filtereditor-suggestvalues]]`filterEditor:suggestValues`::
 Set this property to `false` to prevent the filter editor from suggesting values
 for fields.
@@ -257,7 +261,7 @@ Hides the "Time" column in *Discover* and in all saved searches on dashboards.
 Highlights results in *Discover* and saved searches on dashboards. Highlighting
 slows requests when working on big documents.
 
-[[doctable-legacy]]`doc_table:legacy`:: 
+[[doctable-legacy]]`doc_table:legacy`::
 Controls the way the document table looks and works. Set this property to `true` to revert to the legacy implementation.
 
 [[discover-searchFieldsFromSource]]`discover:searchFieldsFromSource`::
@@ -280,10 +284,6 @@ Sets the default time filter for viewing {anomaly-job} results. This setting
 must contain `from` and `to` values (see
 {ref}/common-options.html#date-math[accepted formats]). It is ignored unless
 `ml:anomalyDetection:results:enableTimeDefaults` is enabled.
-
-[[ml-filedatavisualizermaxfilesize]]`ml:fileDataVisualizerMaxFileSize`::
-Sets the file size limit when importing data in the {data-viz}. The default
-value is `100MB`. The highest supported value for this setting is `1GB`.
 
 
 [float]
