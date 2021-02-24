@@ -22,12 +22,14 @@ import { Setup, SetupTimeRange } from '../helpers/setup_request';
 
 export function getErrorGroups({
   environment,
+  kuery,
   serviceName,
   sortField,
   sortDirection = 'desc',
   setup,
 }: {
   environment?: string;
+  kuery?: string;
   serviceName: string;
   sortField?: string;
   sortDirection?: 'asc' | 'desc';
@@ -41,6 +43,7 @@ export function getErrorGroups({
 
     const projection = getErrorGroupsProjection({
       environment,
+      kuery,
       setup,
       serviceName,
     });

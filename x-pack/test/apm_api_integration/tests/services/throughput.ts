@@ -29,7 +29,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         `/api/apm/services/opbeans-java/throughput?${qs.stringify({
           start: metadata.start,
           end: metadata.end,
-          uiFilters: encodeURIComponent('{}'),
           transactionType: 'request',
         })}`
       );
@@ -49,7 +48,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           `/api/apm/services/opbeans-java/throughput?${qs.stringify({
             start: metadata.start,
             end: metadata.end,
-            uiFilters: encodeURIComponent('{}'),
             transactionType: 'request',
           })}`
         );
@@ -96,7 +94,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       before(async () => {
         const response = await supertest.get(
           `/api/apm/services/opbeans-java/throughput?${qs.stringify({
-            uiFilters: encodeURIComponent('{}'),
             transactionType: 'request',
             start: moment(metadata.end).subtract(15, 'minutes').toISOString(),
             end: metadata.end,
