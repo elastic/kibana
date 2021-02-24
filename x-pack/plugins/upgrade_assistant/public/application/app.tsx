@@ -11,6 +11,8 @@ import { EuiPageHeader, EuiPageHeaderSection, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { UpgradeAssistantTabs } from './components/tabs';
 import { AppContextProvider, ContextValue, AppContext } from './app_context';
+import { ComingSoonPrompt } from './components/coming_soon_prompt';
+import { UA_READONLY_MODE } from '../../common/constants';
 
 export interface AppDependencies extends ContextValue {
   i18n: I18nStart;
@@ -22,22 +24,30 @@ export const RootComponent = ({ i18n, ...contextValue }: AppDependencies) => {
     <i18n.Context>
       <AppContextProvider value={contextValue}>
         <div data-test-subj="upgradeAssistantRoot">
-          <EuiPageHeader>
-            <EuiPageHeaderSection>
-              <EuiTitle size="l">
-                <h1>
-                  <FormattedMessage
-                    id="xpack.upgradeAssistant.appTitle"
-                    defaultMessage="{version} Upgrade Assistant"
-                    values={{ version: `${nextMajor}.0` }}
-                  />
-                </h1>
-              </EuiTitle>
-            </EuiPageHeaderSection>
-          </EuiPageHeader>
-          <AppContext.Consumer>
-            {({ http }) => <UpgradeAssistantTabs http={http} />}
-          </AppContext.Consumer>
+          {/* Read-only mode will be enabled up until the last minor before the next major release */}
+          {UA_READONLY_MODE ? (
+            <ComingSoonPrompt />
+          ) : (
+            <>
+              <EuiPageHeader>
+                <EuiPageHeaderSection>
+                  <EuiTitle size="l">
+                    <h1>
+                      <FormattedMessage
+                        id="xpack.upgradeAssistant.appTitle"
+                        defaultMessage="{version} Upgrade Assistant"
+                        values={{ version: `${nextMajor}.0` }}
+                      />
+                    </h1>
+                  </EuiTitle>
+                </EuiPageHeaderSection>
+              </EuiPageHeader>
+
+              <AppContext.Consumer>
+                {({ http }) => <UpgradeAssistantTabs http={http} />}
+              </AppContext.Consumer>
+            </>
+          )}
         </div>
       </AppContextProvider>
     </i18n.Context>
