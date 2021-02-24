@@ -602,6 +602,55 @@ describe('IndexPattern Data Source', () => {
       `);
     });
 
+    it('should put column formatters after calculated columns', async () => {
+      const queryBaseState: IndexPatternBaseState = {
+        currentIndexPatternId: '1',
+        layers: {
+          first: {
+            indexPatternId: '1',
+            columnOrder: ['bucket', 'metric', 'calculated'],
+            columns: {
+              bucket: {
+                label: 'Date',
+                dataType: 'date',
+                isBucketed: true,
+                operationType: 'date_histogram',
+                sourceField: 'timestamp',
+                params: {
+                  interval: 'auto',
+                },
+              },
+              metric: {
+                label: 'Count of records',
+                dataType: 'number',
+                isBucketed: false,
+                sourceField: 'Records',
+                operationType: 'count',
+                timeScale: 'h',
+              },
+              calculated: {
+                label: 'Moving average of bytes',
+                dataType: 'number',
+                isBucketed: false,
+                operationType: 'moving_average',
+                references: ['metric'],
+                params: {
+                  window: 5,
+                },
+              },
+            },
+          },
+        },
+      };
+
+      const state = enrichBaseState(queryBaseState);
+
+      const ast = indexPatternDatasource.toExpression(state, 'first') as Ast;
+      const formatIndex = ast.chain.findIndex((fn) => fn.function === 'lens_format_column');
+      const calculationIndex = ast.chain.findIndex((fn) => fn.function === 'moving_average');
+      expect(calculationIndex).toBeLessThan(formatIndex);
+    });
+
     it('should rename the output from esaggs when using flat query', () => {
       const queryBaseState: IndexPatternBaseState = {
         currentIndexPatternId: '1',
