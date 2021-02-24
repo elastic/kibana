@@ -299,7 +299,6 @@ function onDataLoadError(
     dispatch(cleanTooltipStateForLayer(layerId));
     dispatch({
       type: LAYER_DATA_LOAD_ERROR,
-      data: null,
       layerId,
       dataId,
       requestToken,
