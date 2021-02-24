@@ -160,7 +160,7 @@ export const getFormattedBuilderEntry = (
           ? { ...foundField, name: foundField.name.split('.').slice(-1)[0] }
           : foundField,
       correspondingKeywordField,
-      id: (item as typeof item & { id?: string }).id ?? `${itemIndex}`,
+      id: item.id ?? `${itemIndex}`,
       operator: getExceptionOperatorSelect(item),
       value: getEntryValue(item),
       nested: 'child',
@@ -170,7 +170,7 @@ export const getFormattedBuilderEntry = (
   } else {
     return {
       field: foundField,
-      id: (item as typeof item & { id?: string }).id ?? `${itemIndex}`,
+      id: item.id ?? `${itemIndex}`,
       correspondingKeywordField,
       operator: getExceptionOperatorSelect(item),
       value: getEntryValue(item),
@@ -217,7 +217,7 @@ export const getFormattedBuilderEntries = (
     } else {
       const parentEntry: FormattedBuilderEntry = {
         operator: isOperator,
-        id: (item as typeof item & { id?: string }).id ?? `${index}`,
+        id: item.id ?? `${index}`,
         nested: 'parent',
         field: isNewNestedEntry
           ? undefined
@@ -285,7 +285,7 @@ export const getUpdatedEntriesOnDelete = (
       const { field } = itemOfInterest;
       const updatedItemOfInterest: EntryNested | EmptyNestedEntry = {
         field,
-        id: (itemOfInterest as typeof itemOfInterest & { id?: string }).id ?? `${entryIndex}`,
+        id: itemOfInterest.id ?? `${entryIndex}`,
         type: OperatorTypeEnum.NESTED,
         entries: updatedEntryEntries,
       };
@@ -405,7 +405,7 @@ export const getEntryOnFieldChange = (
 
   if (nested === 'parent') {
     // For nested entries, when user first selects to add a nested
-    // entry, they first see a row similiar to what is shown for when
+    // entry, they first see a row similar to what is shown for when
     // a user selects "exists", as soon as they make a selection
     // we can now identify the 'parent' and 'child' this is where
     // we first convert the entry into type "nested"
