@@ -132,7 +132,7 @@ export class RefOutputCache {
       this.log.debug(`[${relative}] clearing outDir and replacing with cache`);
       await del(outDir);
       await unzip(Path.resolve(tmpDir, cacheName), outDir);
-      await Fs.writeFile(Path.resolve(outDir, OUTDIR_MERGE_BASE_FILENAME), archive.sha);
+      await Fs.writeFile(Path.resolve(outDir, OUTDIR_MERGE_BASE_FILENAME), this.mergeBase);
     });
   }
 
