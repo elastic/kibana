@@ -282,13 +282,13 @@ Query:
 |per_page|The number of events to return per page.|number|
 |sort_field|Sorts the response. Could be an event fields returned in the response.|string|
 |sort_order|Sort direction, either `asc` or `desc`.|string|
-|filter|A KQL string that you filter with an attribute from the event. It should look like event.action: "execute".|string|
+|filter|A KQL string that you filter with an attribute from the event. It should look like `event.action:(execute)`.|string|
 |start|The date to start looking for saved object events in the event log. Either an ISO date string, or a duration string that indicates the time since now.|string|
 |end|The date to stop looking for saved object events in the event log. Either an ISO date string, or a duration string that indicates the time since now.|string|
 
 ### `POST /api/event_log/{type}/_find`: Retrive events for a given saved object type by the IDs
 
-Collects event information from the event log for the selected saved object by type and a set of the IDs.
+Collects event information from the event log for the selected saved object by type and by IDs.
 
 Params:
 
@@ -304,7 +304,7 @@ Query:
 |per_page|The number of events to return per page.|number|
 |sort_field|Sorts the response. Could be an event field returned in the response.|string|
 |sort_order|Sort direction, either `asc` or `desc`.|string|
-|filter|A KQL string that you filter with an attribute from the event. It should look like event.action: "execute".|string|
+|filter|A KQL string that you filter with an attribute from the event. It should look like `event.action:(execute)`.|string|
 |start|The date to start looking for saved object events in the event log. Either an ISO date string, or a duration string that indicates the time since now.|string|
 |end|The date to stop looking for saved object events in the event log. Either an ISO date string, or a duration string that indicates the time since now.|string|
 
