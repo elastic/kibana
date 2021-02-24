@@ -20,11 +20,13 @@ const MAX_NUMBER_OF_SERVICES = 500;
 
 export async function getServicesItems({
   environment,
+  kuery,
   setup,
   searchAggregatedTransactions,
   logger,
 }: {
   environment?: string;
+  kuery?: string;
   setup: ServicesItemsSetup;
   searchAggregatedTransactions: boolean;
   logger: Logger;
@@ -32,6 +34,7 @@ export async function getServicesItems({
   return withApmSpan('get_services_items', async () => {
     const params = {
       environment,
+      kuery,
       setup,
       searchAggregatedTransactions,
       maxNumServices: MAX_NUMBER_OF_SERVICES,

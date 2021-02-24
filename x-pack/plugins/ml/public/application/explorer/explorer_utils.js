@@ -631,7 +631,7 @@ export function escapeParens(string) {
 }
 
 export function escapeDoubleQuotes(string) {
-  return string.replace(/\"/g, '\\$&');
+  return string.replace(/[\\"]/g, '\\$&');
 }
 
 export function getQueryPattern(fieldName, fieldValue) {

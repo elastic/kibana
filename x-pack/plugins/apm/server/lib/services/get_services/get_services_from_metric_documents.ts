@@ -11,7 +11,7 @@ import {
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
 } from '../../../../common/elasticsearch_fieldnames';
-import { environmentQuery, rangeQuery } from '../../../../common/utils/queries';
+import { environmentQuery, kqlQuery, rangeQuery } from '../../../utils/queries';
 import { ProcessorEvent } from '../../../../common/processor_event';
 import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 import { withApmSpan } from '../../../utils/with_apm_span';
@@ -20,13 +20,15 @@ export function getServicesFromMetricDocuments({
   environment,
   setup,
   maxNumServices,
+  kuery,
 }: {
   setup: Setup & SetupTimeRange;
   environment?: string;
   maxNumServices: number;
+  kuery?: string;
 }) {
   return withApmSpan('get_services_from_metric_documents', async () => {
-    const { apmEventClient, start, end, esFilter } = setup;
+    const { apmEventClient, start, end } = setup;
 
     const response = await apmEventClient.search({
       apm: {
@@ -39,7 +41,7 @@ export function getServicesFromMetricDocuments({
             filter: [
               ...rangeQuery(start, end),
               ...environmentQuery(environment),
-              ...esFilter,
+              ...kqlQuery(kuery),
             ],
           },
         },

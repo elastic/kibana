@@ -7,10 +7,10 @@
  */
 
 import React from 'react';
-import { i18n } from '@kbn/i18n';
 import { getDisplayName } from './lib/get_display_name';
 import { labelDateFormatter } from './lib/label_date_formatter';
 import { findIndex, first } from 'lodash';
+import { emptyLabel } from '../../../common/empty_label';
 
 export function visWithSplits(WrappedComponent) {
   function SplitVisComponent(props) {
@@ -81,12 +81,7 @@ export function visWithSplits(WrappedComponent) {
             model={model}
             visData={newVisData}
             onBrush={props.onBrush}
-            additionalLabel={
-              additionalLabel ||
-              i18n.translate('visTypeTimeseries.emptyTextValue', {
-                defaultMessage: '(empty)',
-              })
-            }
+            additionalLabel={additionalLabel || emptyLabel}
             backgroundColor={props.backgroundColor}
             getConfig={props.getConfig}
           />
