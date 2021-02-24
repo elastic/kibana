@@ -74,7 +74,7 @@ export const BoostItemContent: React.FC<Props> = ({ boost, index, name }) => {
         {i18n.translate(
           'xpack.enterpriseSearch.appSearch.engine.relevanceTuning.boosts.deleteBoostButtonLabel',
           {
-            defaultMessage: 'Delete Boost',
+            defaultMessage: 'Delete boost',
           }
         )}
       </EuiButton>

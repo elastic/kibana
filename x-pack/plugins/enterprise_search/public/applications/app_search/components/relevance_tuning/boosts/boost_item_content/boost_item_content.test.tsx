@@ -85,7 +85,7 @@ describe('BoostItemContent', () => {
     expect(actions.updateBoostFactor).toHaveBeenCalledWith('foo', 3, 2);
   });
 
-  it("will delete the current boost if the 'Delete Boost' button is clicked", () => {
+  it("will delete the current boost if the 'Delete boost' button is clicked", () => {
     const boost = {
       factor: 8,
       type: 'proximity' as BoostType,
