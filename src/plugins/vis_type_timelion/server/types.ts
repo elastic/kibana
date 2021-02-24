@@ -6,4 +6,14 @@
  * Side Public License, v 1.
  */
 
+import { Observable } from 'rxjs';
+import { SharedGlobalConfig } from 'kibana/server';
+import { UsageCollectionSetup } from '../../usage_collection/server';
+
 export { TimelionFunctionInterface, TimelionFunctionConfig } from './lib/classes/timelion_function';
+
+export type ConfigObservable = Observable<SharedGlobalConfig>;
+
+export interface VisTypeTimelionPluginSetupDependencies {
+  usageCollection?: UsageCollectionSetup;
+}

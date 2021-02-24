@@ -19,6 +19,8 @@ import { functionsRoute } from './routes/functions';
 import { validateEsRoute } from './routes/validate_es';
 import { runRoute } from './routes/run';
 import { ConfigManager } from './lib/config_manager';
+import { registerVegaUsageCollector } from './usage_collector';
+import { VisTypeTimelionPluginSetupDependencies } from './types';
 
 const experimentalLabel = i18n.translate('timelion.uiSettings.experimentalLabel', {
   defaultMessage: 'experimental',
@@ -39,10 +41,10 @@ export interface TimelionPluginStartDeps {
  * Represents Timelion Plugin instance that will be managed by the Kibana plugin system.
  */
 export class TimelionPlugin
-  implements Plugin<RecursiveReadonly<PluginSetupContract>, void, TimelionPluginStartDeps> {
+  implements Plugin<RecursiveReadonly<PluginSetupContract>, void, VisTypeTimelionPluginSetupDependencies, TimelionPluginStartDeps> {
   constructor(private readonly initializerContext: PluginInitializerContext) {}
 
-  public setup(core: CoreSetup<TimelionPluginStartDeps>): RecursiveReadonly<PluginSetupContract> {
+  public setup(core: CoreSetup<TimelionPluginStartDeps>, { usageCollection } : VisTypeTimelionPluginSetupDependencies): RecursiveReadonly<PluginSetupContract> {
     const config = this.initializerContext.config.get<TypeOf<typeof configSchema>>();
 
     const configManager = new ConfigManager(this.initializerContext.config);
@@ -169,6 +171,10 @@ export class TimelionPlugin
         schema: schema.string(),
       },
     });
+
+    if (usageCollection) {
+      registerVegaUsageCollector(usageCollection, this.initializerContext.config.legacy.globalConfig$, {});
+    }
 
     return deepFreeze({ uiEnabled: config.ui.enabled });
   }
