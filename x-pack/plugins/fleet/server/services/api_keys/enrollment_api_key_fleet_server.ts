@@ -116,6 +116,19 @@ export async function generateEnrollmentAPIKey(
   }
   const agentPolicyId =
     data.agentPolicyId ?? (await agentPolicyService.getDefaultAgentPolicyId(soClient));
+
+  if (providedKeyName) {
+    const { items } = await listEnrollmentApiKeys(esClient, {
+      kuery: `policy_id:"${agentPolicyId}" AND name:${providedKeyName.replace(/ /g, '\\ ')}*`,
+    });
+
+    if (items.length > 0) {
+      throw new Error(
+        `An enrollment key named ${providedKeyName} already exists for agent policy ${agentPolicyId}`
+      );
+    }
+  }
+
   const name = providedKeyName ? `${providedKeyName} (${id})` : id;
   const key = await createAPIKey(soClient, name, {
     // Useless role to avoid to have the privilege of the user that created the key
