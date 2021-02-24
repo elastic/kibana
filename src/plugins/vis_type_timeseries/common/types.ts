@@ -34,7 +34,7 @@ export type SeriesData = {
   [key: string]: PanelSeries;
 };
 
-export interface PanelSeries {
+interface PanelSeries {
   annotations: {
     [key: string]: unknown[];
   };

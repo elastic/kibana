@@ -30,4 +30,4 @@ export function plugin(initializerContext: PluginInitializerContext) {
   return new VisTypeTimeseriesPlugin(initializerContext);
 }
 
-export { TimeseriesVisData, PanelSeries, isVisSeriesData, isVisTableData } from '../common/types';
+export { TimeseriesVisData, isVisSeriesData, isVisTableData } from '../common/types';
