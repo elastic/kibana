@@ -34,7 +34,7 @@ export class FileUploadPlugin implements Plugin {
         schema: schema.string(),
         validation: {
           regexString: '\\d+[mMgG][bB]',
-          message: i18n.translate('xpack.ml.maxFileSizeUiSetting.error', {
+          message: i18n.translate('xpack.fileUpload.maxFileSizeUiSetting.error', {
             defaultMessage: 'Should be a valid data size. e.g. 200MB, 1GB',
           }),
         },
