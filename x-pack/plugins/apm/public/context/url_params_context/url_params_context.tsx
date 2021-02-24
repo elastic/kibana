@@ -37,7 +37,7 @@ function useUiFilters(params: IUrlParams): UIFilters {
   ) as Partial<Record<LocalUIFilterName, string[]>>;
 
   return useDeepObjectIdentity({
-    kuery,
+    environment: params.environment,
     ...localUiFilters,
   });
 }
