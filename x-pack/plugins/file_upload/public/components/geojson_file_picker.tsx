@@ -6,10 +6,11 @@
  */
 
 import React, { Component } from 'react';
+import { Feature } from 'geojson';
 import { EuiFilePicker, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { MB } from '../../common';
-import { getMaxBytes, getMaxBytesFormatted } from '../get_max_bytes';
+import { getMaxBytesFormatted } from '../get_max_bytes';
 import { validateFile } from '../importer';
 import { GeoJsonImporter, GEOJSON_FILE_TYPES } from '../importer/geojson_importer';
 
@@ -22,7 +23,7 @@ interface Props {
   }: {
     features: Feature[];
     indexName: string;
-    importer: Importer;
+    importer: GeoJsonImporter;
     geoFieldTypes: string[];
   }) => void;
   onClear: () => void;
@@ -51,7 +52,7 @@ export class GeoJsonFilePicker extends Component<Props, State> {
     this._isMounted = false;
   }
 
-  _onFileSelect = async (files: FileList) => {
+  _onFileSelect = (files: FileList | null) => {
     this.props.onClear();
 
     this.setState({
@@ -60,16 +61,21 @@ export class GeoJsonFilePicker extends Component<Props, State> {
       previewSummary: null,
     });
 
-    if (files.length === 0) {
-      return;
+    if (files && files.length) {
+      this._loadFilePreview(files[0]);
     }
+  };
 
-    const file = files[0];
+  async _loadFilePreview(file: File) {
     this.setState({ isLoadingPreview: true });
 
-    let importer: GeoJsonImporter;
+    let importer: GeoJsonImporter | null = null;
     let previewError: string | null = null;
-    let preview: { features: Feature[]; geoFieldTypes: string[]; previewCoverage: number };
+    let preview: {
+      features: Feature[];
+      geoFieldTypes: string[];
+      previewCoverage: number;
+    } | null = null;
     try {
       validateFile(file, GEOJSON_FILE_TYPES);
       importer = new GeoJsonImporter(file);
@@ -91,7 +97,7 @@ export class GeoJsonFilePicker extends Component<Props, State> {
       error: previewError,
       isLoadingPreview: false,
       previewSummary:
-        previewError === null
+        !previewError && preview
           ? i18n.translate('xpack.fileUpload.geojsonFilePicker.previewSummary', {
               defaultMessage: 'Previewing {numFeatures} features, {previewCoverage}% of file.',
               values: {
@@ -109,7 +115,7 @@ export class GeoJsonFilePicker extends Component<Props, State> {
         indexName: file.name.split('.')[0],
       });
     }
-  };
+  }
 
   _renderHelpText() {
     return this.state.previewSummary !== null ? (

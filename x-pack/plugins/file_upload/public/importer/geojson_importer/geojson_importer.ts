@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import _ from 'lodash';
 import {
   Feature,
-  FeatureCollection,
   Point,
   MultiPoint,
   LineString,
@@ -19,28 +17,29 @@ import {
 import { i18n } from '@kbn/i18n';
 // @ts-expect-error
 import { JSONLoader, loadInBatches } from './loaders';
-import { CreateDocsResponse } from '../types';
+import { CreateDocsResponse, ImportResults } from '../types';
 import { callImportRoute, Importer, IMPORT_RETRIES } from '../importer';
 import { ES_FIELD_TYPES } from '../../../../../../src/plugins/data/public';
 // @ts-expect-error
 import { geoJsonCleanAndValidate } from './geojson_clean_and_validate';
-import { MB } from '../../../common';
+import { ImportFailure, ImportResponse, MB } from '../../../common';
 
 export const GEOJSON_FILE_TYPES = ['.json', '.geojson'];
 
 export class GeoJsonImporter extends Importer {
   private _file: File;
   private _isActive = true;
-  private _iterator?: Iterator;
+  private _iterator?: Iterator<unknown>;
   private _hasNext = true;
   private _features: Feature[] = [];
   private _totalBytesProcessed = 0;
   private _unimportedBytesProcessed = 0;
   private _totalFeatures = 0;
   private _geometryTypesMap = new Map<string, boolean>();
-  private _invalidCount = 0;
+  private _invalidFeatures: ImportFailure[] = [];
   private _prevBatchLastFeature?: Feature;
-  private _geoFieldType?: ES_FIELD_TYPES.GEO_POINT | ES_FIELD_TYPES.GEO_SHAPE;
+  private _geoFieldType: ES_FIELD_TYPES.GEO_POINT | ES_FIELD_TYPES.GEO_SHAPE =
+    ES_FIELD_TYPES.GEO_SHAPE;
 
   constructor(file: File) {
     super();
@@ -55,7 +54,7 @@ export class GeoJsonImporter extends Importer {
   public async previewFile(
     rowLimit?: number,
     sizeLimit?: number
-  ): { features: Feature[]; geoFieldTypes: string[]; previewCoverage: number } {
+  ): Promise<{ features: Feature[]; geoFieldTypes: string[]; previewCoverage: number }> {
     await this._readUntil(rowLimit, sizeLimit);
     return {
       features: [...this._features],
@@ -93,7 +92,7 @@ export class GeoJsonImporter extends Importer {
     };
 
     let success = true;
-    const failures: ImportFailure[] = [];
+    const failures: ImportFailure[] = [...this._invalidFeatures];
     let error;
 
     while (this._features.length > 0 || (this._hasNext && this._isActive)) {
@@ -144,16 +143,15 @@ export class GeoJsonImporter extends Importer {
         }
       }
 
-      if (resp.success) {
-        setImportProgress(progress);
-      } else {
+      failures.push(...resp.failures);
+
+      if (!resp.success) {
         success = false;
         error = resp.error;
-        failures.push(...resp.failures);
         break;
       }
 
-      failures.push(...resp.failures);
+      setImportProgress(progress);
     }
 
     const result: ImportResults = {
@@ -192,7 +190,7 @@ export class GeoJsonImporter extends Importer {
       });
     }
 
-    if (!this._isActive) {
+    if (!this._isActive || !this._iterator) {
       return;
     }
 
@@ -231,7 +229,13 @@ export class GeoJsonImporter extends Importer {
 
       this._totalFeatures++;
       if (!rawFeature.geometry || !rawFeature.geometry.type) {
-        this._invalidCount++;
+        this._invalidFeatures.push({
+          item: this._totalFeatures,
+          reason: i18n.translate('xpack.fileUpload.geojsonImporter.noGeometry', {
+            defaultMessage: 'Feature does not contain required field "geometry"',
+          }),
+          doc: rawFeature,
+        });
       } else {
         if (!this._geometryTypesMap.has(rawFeature.geometry.type)) {
           this._geometryTypesMap.set(rawFeature.geometry.type, true);
