@@ -11,6 +11,7 @@ import { loadConfiguration } from '@kbn/apm-config-loader';
 import type { start } from 'elastic-apm-node';
 
 type Agent = ReturnType<typeof start>;
+type ApmTransaction = NonNullable<ReturnType<Agent['startTransaction']>>;
 
 import { Suite, Test } from './fake_mocha_types';
 import {
@@ -64,40 +65,36 @@ export class FunctionalTestRunner {
     // use a single transaction for now
     const transaction = loadApm().startTransaction('functional tests');
 
-    try {
-      return await this._run(async (config, coreProviders) => {
-        SuiteTracker.startTracking(this.lifecycle, this.configFile);
+    return await this._run(async (config, coreProviders) => {
+      SuiteTracker.startTracking(this.lifecycle, this.configFile);
 
-        const providers = new ProviderCollection(
-          this.log,
-          transaction ? (x0, x1, x2, x3) => transaction?.startSpan(x0, x1, x2, x3) : null,
-          [
-            ...coreProviders,
-            ...readProviderSpec('Service', config.get('services')),
-            ...readProviderSpec('PageObject', config.get('pageObjects')),
-          ]
+      const providers = new ProviderCollection(
+        this.log,
+        transaction ? (x0, x1, x2, x3) => transaction?.startSpan(x0, x1, x2, x3) : null,
+        [
+          ...coreProviders,
+          ...readProviderSpec('Service', config.get('services')),
+          ...readProviderSpec('PageObject', config.get('pageObjects')),
+        ]
+      );
+
+      await providers.loadAll();
+
+      const customTestRunner = config.get('testRunner');
+      if (customTestRunner) {
+        this.log.warning(
+          'custom test runner defined, ignoring all mocha/suite/filtering related options'
         );
+        return (await providers.invokeProviderFn(customTestRunner)) || 0;
+      }
 
-        await providers.loadAll();
+      const mocha = await setupMocha(this.lifecycle, this.log, config, providers);
+      await this.lifecycle.beforeTests.trigger(mocha.suite);
 
-        const customTestRunner = config.get('testRunner');
-        if (customTestRunner) {
-          this.log.warning(
-            'custom test runner defined, ignoring all mocha/suite/filtering related options'
-          );
-          return (await providers.invokeProviderFn(customTestRunner)) || 0;
-        }
+      this.log.info('Starting tests');
 
-        const mocha = await setupMocha(this.lifecycle, this.log, config, providers);
-        await this.lifecycle.beforeTests.trigger(mocha.suite);
-
-        this.log.info('Starting tests');
-
-        return await runTests(this.lifecycle, mocha);
-      });
-    } finally {
-      transaction?.end();
-    }
+      return await runTests(this.lifecycle, mocha);
+    }, transaction);
   }
 
   async getTestStats() {
@@ -136,7 +133,8 @@ export class FunctionalTestRunner {
   }
 
   async _run<T = any>(
-    handler: (config: Config, coreProvider: ReturnType<typeof readProviderSpec>) => Promise<T>
+    handler: (config: Config, coreProvider: ReturnType<typeof readProviderSpec>) => Promise<T>,
+    apmTransaction?: ApmTransaction
   ): Promise<T> {
     let runErrorOccurred = false;
 
@@ -171,6 +169,8 @@ export class FunctionalTestRunner {
       runErrorOccurred = true;
       throw runError;
     } finally {
+      apmTransaction?.end();
+
       try {
         await this.close();
       } catch (closeError) {
