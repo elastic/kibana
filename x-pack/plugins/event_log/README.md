@@ -255,17 +255,17 @@ export interface IEventLogClient {
 }
 ```
 
-The plugin exposes an `IEventLogClientService` object to plugins that pre-req it.
-Those plugins need to call `getClient(request)` to get the event log client.
+The plugin exposes an `IEventLogClientService` object to plugins that request it.
+These plugins must call `getClient(request)` to get the event log client.
 
 ## Experimental RESTful API
 
-Using of the event log allows you to retrive the events for a given saved object type by the specified set of IDs.
-API listed below is experimental and could be changed or removed in the future.
+Usage of the event log allows you to retrieve the events for a given saved object type by the specified set of IDs.
+The following API is experimental and can change or be removed in a future release.
 
 ### `GET /api/event_log/{type}/{id}/_find`: Get events for a given saved object type by the ID
 
-Collects events information from the event log for the selected saved object by type and ID.
+Collects event information from the event log for the selected saved object by type and ID.
 
 Params:
 
@@ -279,16 +279,16 @@ Query:
 |Property|Description|Type|
 |---|---|---|
 |page|The page number.|number|
-|per_page|The number of alerts to return per page.|number|
+|per_page|The number of events to return per page.|number|
 |sort_field|Sorts the response. Could be an event fields returned in the response.|string|
 |sort_order|Sort direction, either `asc` or `desc`.|string|
-|filter|A <<kuery-query, KQL>> string that you filter with an attribute from the event. It should look like event.action: "execute".|string|
-|start|The date to start looking for saved object events in the event log. Either an ISO date string, or a duration string indicating time since now.|string|
-|end|The date to end looking for saved object events in the event log. Either an ISO date string, or a duration string indicating time since now.|string|
+|filter|A KQL string that you filter with an attribute from the event. It should look like event.action: "execute".|string|
+|start|The date to start looking for saved object events in the event log. Either an ISO date string, or a duration string that indicates the time since now.|string|
+|end|The date to stop looking for saved object events in the event log. Either an ISO date string, or a duration string that indicates the time since now.|string|
 
 ### `POST /api/event_log/{type}/_find`: Retrive events for a given saved object type by the IDs
 
-Collects events information from the event log for the selected saved object by type and a set of the IDs.
+Collects event information from the event log for the selected saved object by type and a set of the IDs.
 
 Params:
 
@@ -301,12 +301,12 @@ Query:
 |Property|Description|Type|
 |---|---|---|
 |page|The page number.|number|
-|per_page|The number of alerts to return per page.|number|
-|sort_field|Sorts the response. Could be an event fields returned in the response.|string|
+|per_page|The number of events to return per page.|number|
+|sort_field|Sorts the response. Could be an event field returned in the response.|string|
 |sort_order|Sort direction, either `asc` or `desc`.|string|
-|filter|A <<kuery-query, KQL>> string that you filter with an attribute from the event. It should look like event.action: "execute".|string|
-|start|The date to start looking for saved object events in the event log. Either an ISO date string, or a duration string indicating time since now.|string|
-|end|The date to end looking for saved object events in the event log. Either an ISO date string, or a duration string indicating time since now.|string|
+|filter|A KQL string that you filter with an attribute from the event. It should look like event.action: "execute".|string|
+|start|The date to start looking for saved object events in the event log. Either an ISO date string, or a duration string that indicates the time since now.|string|
+|end|The date to stop looking for saved object events in the event log. Either an ISO date string, or a duration string that indicates the time since now.|string|
 
 Body:
 
@@ -379,4 +379,3 @@ For more relevant information on ILM, see:
 
 [getting started with ILM doc]: https://www.elastic.co/guide/en/elasticsearch/reference/current/getting-started-index-lifecycle-management.html
 [write index alias behavior]: https://www.elastic.co/guide/en/elasticsearch/reference/master/indices-rollover-index.html#indices-rollover-is-write-index
-
