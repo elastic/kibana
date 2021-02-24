@@ -28,7 +28,10 @@ const TEST_POLICY_ALL_PHASES = {
 };
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const { common } = getPageObjects(['common']);
+  const { common, indexLifecycleManagement } = getPageObjects([
+    'common',
+    'indexLifecycleManagement',
+  ]);
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
   const esClient = getService('es');
@@ -53,6 +56,31 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     after(async () => {
       await esClient.ilm.deleteLifecycle({ policy: TEST_POLICY_NAME });
+    });
+
+    it('Create policy Wizard', async () => {
+      await retry.waitFor('Index Lifecycle Policy create/edit view to be present', async () => {
+        return testSubjects.isDisplayed('createPolicyButton');
+      });
+
+      // Navigate to create policy page and take snapshot
+      await testSubjects.click('createPolicyButton');
+      await retry.waitFor('Index Lifecycle Policy create/edit view to be present', async () => {
+        return (await testSubjects.getVisibleText('policyTitle')) === 'Create policy';
+      });
+      await a11y.testAppSnapshot();
+
+      // Fill out form after enabling all phases and take snapshot.
+      await indexLifecycleManagement.fillNewPolicyForm('testPolicy', true, true, true);
+      await a11y.testAppSnapshot();
+
+      // Take snapshot of the show request panel
+      await testSubjects.click('requestButton');
+      await a11y.testAppSnapshot();
+
+      // Close panel and save policy
+      await testSubjects.click('euiFlyoutCloseButton');
+      await indexLifecycleManagement.saveNewPolicy();
     });
 
     it('List policies view', async () => {
