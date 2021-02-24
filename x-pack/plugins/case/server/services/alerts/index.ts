@@ -10,21 +10,19 @@ import _ from 'lodash';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
 import { ElasticsearchClient } from 'kibana/server';
-import { CaseStatuses } from '../../../common/api';
 import { MAX_ALERTS_PER_SUB_CASE } from '../../../common/constants';
+import { UpdateAlertRequest } from '../../client/types';
+import { AlertInfo } from '../../common';
 
 export type AlertServiceContract = PublicMethodsOf<AlertService>;
 
 interface UpdateAlertsStatusArgs {
-  ids: string[];
-  status: CaseStatuses;
-  indices: Set<string>;
+  alerts: UpdateAlertRequest[];
   scopedClusterClient: ElasticsearchClient;
 }
 
 interface GetAlertsArgs {
-  ids: string[];
-  indices: Set<string>;
+  alertsInfo: AlertInfo[];
   scopedClusterClient: ElasticsearchClient;
 }
 
@@ -35,78 +33,42 @@ interface Alert {
 }
 
 interface AlertsResponse {
-  hits: {
-    hits: Alert[];
-  };
-}
-
-/**
- * remove empty strings from the indices, I'm not sure how likely this is but in the case that
- * the document doesn't have _index set the security_solution code sets the value to an empty string
- * instead
- */
-function getValidIndices(indices: Set<string>): string[] {
-  return [...indices].filter((index) => !_.isEmpty(index));
+  docs: Alert[];
 }
 
 export class AlertService {
   constructor() {}
 
-  public async updateAlertsStatus({
-    ids,
-    status,
-    indices,
-    scopedClusterClient,
-  }: UpdateAlertsStatusArgs) {
-    const sanitizedIndices = getValidIndices(indices);
-    if (sanitizedIndices.length <= 0) {
-      // log that we only had invalid indices
+  public async updateAlertsStatus({ alerts, scopedClusterClient }: UpdateAlertsStatusArgs) {
+    const body = alerts
+      .filter((alert) => !_.isEmpty(alert.id) && !_.isEmpty(alert.index))
+      .flatMap((alert) => [
+        { update: { _id: alert.id, _index: alert.index } },
+        { script: { source: `ctx._source.signal.status = '${alert.status}'`, lang: 'painless' } },
+      ]);
+
+    if (body.length <= 0) {
       return;
     }
 
-    const result = await scopedClusterClient.updateByQuery({
-      index: sanitizedIndices,
-      conflicts: 'abort',
-      body: {
-        script: {
-          source: `ctx._source.signal.status = '${status}'`,
-          lang: 'painless',
-        },
-        query: { ids: { values: ids } },
-      },
-      ignore_unavailable: true,
-    });
-
-    return result;
+    return scopedClusterClient.bulk({ body });
   }
 
   public async getAlerts({
     scopedClusterClient,
-    ids,
-    indices,
+    alertsInfo,
   }: GetAlertsArgs): Promise<AlertsResponse | undefined> {
-    const index = getValidIndices(indices);
-    if (index.length <= 0) {
+    const docs = alertsInfo
+      .filter((alert) => !_.isEmpty(alert.id) && !_.isEmpty(alert.index))
+      .slice(0, MAX_ALERTS_PER_SUB_CASE)
+      .map((alert) => ({ _id: alert.id, _index: alert.index }));
+
+    if (docs.length <= 0) {
       return;
     }
 
-    const result = await scopedClusterClient.search<AlertsResponse>({
-      index,
-      body: {
-        query: {
-          bool: {
-            filter: {
-              ids: {
-                values: ids,
-              },
-            },
-          },
-        },
-      },
-      size: MAX_ALERTS_PER_SUB_CASE,
-      ignore_unavailable: true,
-    });
+    const results = await scopedClusterClient.mget<AlertsResponse>({ body: { docs } });
 
-    return result.body;
+    return results.body;
   }
 }

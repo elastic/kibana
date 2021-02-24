@@ -94,12 +94,11 @@ export const push = async ({
     );
   }
 
-  const { ids, indices } = getAlertIndicesAndIDs(theCase?.comments);
+  const alertsInfo = getAlertIndicesAndIDs(theCase?.comments);
 
   try {
     alerts = await caseClient.getAlerts({
-      ids,
-      indices,
+      alertsInfo,
     });
   } catch (e) {
     throw new Error(`Error getting alerts for case with id ${theCase.id}: ${e.message}`);

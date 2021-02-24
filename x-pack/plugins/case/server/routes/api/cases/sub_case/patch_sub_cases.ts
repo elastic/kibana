@@ -38,7 +38,6 @@ import {
 import { SUB_CASES_PATCH_DEL_URL } from '../../../../../common/constants';
 import { RouteDeps } from '../../types';
 import {
-  AlertInfo,
   escapeHatch,
   flattenSubCaseSavedObject,
   isCommentRequestTypeAlertOrGenAlert,
@@ -46,7 +45,8 @@ import {
 } from '../../utils';
 import { getCaseToUpdate } from '../helpers';
 import { buildSubCaseUserActions } from '../../../../services/user_actions/helpers';
-import { addAlertInfoToStatusMap } from '../../../../common';
+import { createAlertUpdateRequest } from '../../../../common';
+import { UpdateAlertRequest } from '../../../../client/types';
 
 interface UpdateArgs {
   client: SavedObjectsClientContract;
@@ -229,29 +229,23 @@ async function updateAlerts({
   // get all the alerts for all sub cases that need to be synced
   const totalAlerts = await getAlertComments({ caseService, client, subCasesToSync });
   // create a map of the status (open, closed, etc) to alert info that needs to be updated
-  const alertsToUpdate = totalAlerts.saved_objects.reduce((acc, alertComment) => {
-    if (isCommentRequestTypeAlertOrGenAlert(alertComment.attributes)) {
-      const id = getID(alertComment);
-      const status =
-        id !== undefined
-          ? subCasesToSyncMap.get(id)?.status ?? CaseStatuses.open
-          : CaseStatuses.open;
+  const alertsToUpdate = totalAlerts.saved_objects.reduce(
+    (acc: UpdateAlertRequest[], alertComment) => {
+      if (isCommentRequestTypeAlertOrGenAlert(alertComment.attributes)) {
+        const id = getID(alertComment);
+        const status =
+          id !== undefined
+            ? subCasesToSyncMap.get(id)?.status ?? CaseStatuses.open
+            : CaseStatuses.open;
 
-      addAlertInfoToStatusMap({ comment: alertComment.attributes, statusMap: acc, status });
-    }
-    return acc;
-  }, new Map<CaseStatuses, AlertInfo>());
+        acc.push(...createAlertUpdateRequest({ comment: alertComment.attributes, status }));
+      }
+      return acc;
+    },
+    []
+  );
 
-  // This does at most 3 calls to Elasticsearch to update the status of the alerts to either open, closed, or in-progress
-  for (const [status, alertInfo] of alertsToUpdate.entries()) {
-    if (alertInfo.ids.length > 0 && alertInfo.indices.size > 0) {
-      caseClient.updateAlertsStatus({
-        ids: alertInfo.ids,
-        status,
-        indices: alertInfo.indices,
-      });
-    }
-  }
+  caseClient.updateAlertsStatus({ alerts: alertsToUpdate });
 }
 
 async function update({

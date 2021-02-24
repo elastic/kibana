@@ -11,11 +11,7 @@ import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 
 import { SavedObject, SavedObjectsClientContract } from 'src/core/server';
-import {
-  decodeCommentRequest,
-  getAlertIds,
-  isCommentRequestTypeGenAlert,
-} from '../../routes/api/utils';
+import { decodeCommentRequest, isCommentRequestTypeGenAlert } from '../../routes/api/utils';
 
 import {
   throwErrors,
@@ -36,7 +32,7 @@ import {
 } from '../../services/user_actions/helpers';
 
 import { CaseServiceSetup, CaseUserActionServiceSetup } from '../../services';
-import { CommentableCase } from '../../common';
+import { CommentableCase, createAlertUpdateRequest } from '../../common';
 import { CaseClientHandler } from '..';
 import { CASE_COMMENT_SAVED_OBJECT } from '../../saved_object_types';
 import { MAX_GENERATED_ALERTS_PER_SUB_CASE } from '../../../common/constants';
@@ -171,15 +167,13 @@ const addGeneratedAlerts = async ({
       newComment.attributes.type === CommentType.generatedAlert) &&
     caseInfo.attributes.settings.syncAlerts
   ) {
-    const ids = getAlertIds(query);
-    await caseClient.updateAlertsStatus({
-      ids,
+    const alertsToUpdate = createAlertUpdateRequest({
+      comment: query,
       status: subCase.attributes.status,
-      indices: new Set([
-        ...(Array.isArray(newComment.attributes.index)
-          ? newComment.attributes.index
-          : [newComment.attributes.index]),
-      ]),
+    });
+
+    await caseClient.updateAlertsStatus({
+      alerts: alertsToUpdate,
     });
   }
 
@@ -297,15 +291,13 @@ export const addComment = async ({
   });
 
   if (newComment.attributes.type === CommentType.alert && updatedCase.settings.syncAlerts) {
-    const ids = getAlertIds(query);
-    await caseClient.updateAlertsStatus({
-      ids,
+    const alertsToUpdate = createAlertUpdateRequest({
+      comment: query,
       status: updatedCase.status,
-      indices: new Set([
-        ...(Array.isArray(newComment.attributes.index)
-          ? newComment.attributes.index
-          : [newComment.attributes.index]),
-      ]),
+    });
+
+    await caseClient.updateAlertsStatus({
+      alerts: alertsToUpdate,
     });
   }
 

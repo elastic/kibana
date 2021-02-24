@@ -5,6 +5,10 @@
  * 2.0.
  */
 
-export * from './models';
-export * from './utils';
-export * from './types';
+/**
+ * This structure holds the alert ID and index from an alert comment
+ */
+export interface AlertInfo {
+  id: string;
+  index: string;
+}

@@ -45,6 +45,7 @@ import {
 import { transformESConnectorToCaseConnector } from './cases/helpers';
 
 import { SortFieldCase } from './types';
+import { AlertInfo } from '../../common';
 
 export const transformNewSubCase = ({
   createdAt,
@@ -111,54 +112,47 @@ export const getAlertIds = (comment: CommentRequest): string[] => {
 };
 
 /**
- * This structure holds the alert IDs and indices found from multiple alert comments
+ * This functions extracts the ids and indices from an alert comment. It enforces that the alertId and index are either
+ * both strings or string arrays that are the same length. If they are arrays they represent a 1-to-1 mapping of
+ * id existing in an index at each position in the array. This is not ideal. Ideally an alert comment request would
+ * accept an array of objects like this: Array<{id: string; index: string; ruleName: string ruleID: string}> instead.
+ *
+ * To reformat the alert comment request requires a migration and a breaking API change.
  */
-export interface AlertInfo {
-  ids: string[];
-  indices: Set<string>;
-}
-
-const accumulateIndicesAndIDs = (comment: CommentAttributes, acc: AlertInfo): AlertInfo => {
-  if (isCommentRequestTypeAlertOrGenAlert(comment)) {
-    acc.ids.push(...getAlertIds(comment));
-    const indices = Array.isArray(comment.index) ? comment.index : [comment.index];
-    indices.forEach((index) => acc.indices.add(index));
+const getAndValidateAlertInfoFromComment = (comment: CommentRequest): AlertInfo[] => {
+  if (!isCommentRequestTypeAlertOrGenAlert(comment)) {
+    return [];
   }
-  return acc;
+
+  const ids = Array.isArray(comment.alertId) ? comment.alertId : [comment.alertId];
+  const indices = Array.isArray(comment.index) ? comment.index : [comment.index];
+
+  if (ids.length !== indices.length) {
+    // TODO: add logger
+    /* logger.warn(
+      `Alert ids and indices arrays must have the same length ids: ${JSON.stringify(
+        ids
+      )} indices: ${JSON.stringify(indices)}`
+    );*/
+    return [];
+  }
+
+  return ids.map((id, index) => ({ id, index: indices[index] }));
 };
 
 /**
  * Builds an AlertInfo object accumulating the alert IDs and indices for the passed in alerts.
  */
-export const getAlertIndicesAndIDs = (comments: CommentAttributes[] | undefined): AlertInfo => {
+export const getAlertIndicesAndIDs = (comments: CommentRequest[] | undefined): AlertInfo[] => {
   if (comments === undefined) {
-    return { ids: [], indices: new Set<string>() };
+    return [];
   }
 
-  return comments.reduce(
-    (acc: AlertInfo, comment) => {
-      return accumulateIndicesAndIDs(comment, acc);
-    },
-    { ids: [], indices: new Set<string>() }
-  );
-};
-
-/**
- * Builds an AlertInfo object accumulating the alert IDs and indices for the passed in alert saved objects.
- */
-export const getAlertIndicesAndIDsFromSO = (
-  comments: SavedObjectsFindResponse<CommentAttributes> | undefined
-): AlertInfo => {
-  if (comments === undefined) {
-    return { ids: [], indices: new Set<string>() };
-  }
-
-  return comments.saved_objects.reduce(
-    (acc: AlertInfo, comment) => {
-      return accumulateIndicesAndIDs(comment.attributes, acc);
-    },
-    { ids: [], indices: new Set<string>() }
-  );
+  return comments.reduce((acc: AlertInfo[], comment) => {
+    const alertInfo = getAndValidateAlertInfoFromComment(comment);
+    acc.push(...alertInfo);
+    return acc;
+  }, []);
 };
 
 export const transformNewComment = ({
