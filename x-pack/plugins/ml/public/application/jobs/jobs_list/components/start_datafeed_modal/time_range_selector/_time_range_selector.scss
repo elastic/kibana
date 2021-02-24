@@ -49,6 +49,9 @@
       }
     }
     & > li.has-body.active {
+      .euiDatePicker > .euiFormControlLayout {
+        height: 275px;
+      }
       & > a {
         border-radius: $euiBorderRadius $euiBorderRadius 0 0;
       }
