@@ -6,22 +6,46 @@
  * Side Public License, v 1.
  */
 
+import { i18n } from '@kbn/i18n';
+import { get } from 'lodash';
+
+import { PanelSchema } from 'src/plugins/vis_type_timeseries/common/types';
 import { buildRequestBody } from './table/build_request_body';
 import { handleErrorResponse } from './handle_error_response';
-import { get } from 'lodash';
 import { processBucket } from './table/process_bucket';
 import { getEsQueryConfig } from './helpers/get_es_query_uisettings';
 import { getIndexPatternObject } from './helpers/get_index_pattern';
 import { createFieldsFetcher } from './helpers/fields_fetcher';
 import { extractFieldLabel } from '../../../common/calculate_label';
+import {
+  VisTypeTimeseriesRequestHandlerContext,
+  VisTypeTimeseriesVisDataRequest,
+} from '../../types';
+import { Framework } from '../../plugin';
 
-export async function getTableData(searchStrategyRegistry, req, panel) {
+export async function getTableData(
+  requestContext: VisTypeTimeseriesRequestHandlerContext,
+  req: VisTypeTimeseriesVisDataRequest,
+  panel: PanelSchema,
+  framework: Framework
+) {
   const panelIndexPattern = panel.index_pattern;
 
-  const { searchStrategy, capabilities } = await searchStrategyRegistry.getViableStrategy(
+  const strategy = await framework.searchStrategyRegistry.getViableStrategy(
+    requestContext,
     req,
     panelIndexPattern
   );
+
+  if (!strategy) {
+    throw new Error(
+      i18n.translate('visTypeTimeseries.searchStrategyUndefinedErrorMessage', {
+        defaultMessage: 'Search strategy was not defined',
+      })
+    );
+  }
+
+  const { searchStrategy, capabilities } = strategy;
   const esQueryConfig = await getEsQueryConfig(req);
   const { indexPatternObject } = await getIndexPatternObject(req, panelIndexPattern);
   const extractFields = createFieldsFetcher(req, searchStrategy, capabilities);

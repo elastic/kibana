@@ -7,7 +7,6 @@
  */
 
 import { buildRequestBody } from './build_request_body';
-import { getEsShardTimeout } from '../helpers/get_es_shard_timeout';
 import { getIndexPatternObject } from '../helpers/get_index_pattern';
 
 export async function getSeriesRequestParams(req, panel, series, esQueryConfig, capabilities) {
@@ -25,7 +24,7 @@ export async function getSeriesRequestParams(req, panel, series, esQueryConfig, 
     capabilities,
     uiSettings
   );
-  const esShardTimeout = await getEsShardTimeout(req);
+  const esShardTimeout = 'await getEsShardTimeout(req)';
 
   return {
     index: indexPatternString,

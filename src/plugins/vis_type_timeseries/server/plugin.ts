@@ -16,13 +16,13 @@ import {
 } from 'src/core/server';
 import { Observable } from 'rxjs';
 import { Server } from '@hapi/hapi';
+import { first, map } from 'rxjs/operators';
 import { VisTypeTimeseriesConfig } from './config';
 import { getVisData } from './lib/get_vis_data';
 import { UsageCollectionSetup } from '../../usage_collection/server';
 import { PluginStart } from '../../data/server';
 import { IndexPatternsService } from '../../data/common';
 import { visDataRoutes } from './routes/vis';
-// @ts-ignore
 import { fieldsRoutes } from './routes/fields';
 import { uiSettings } from './ui_settings';
 import type { VisTypeTimeseriesRequestHandlerContext, VisTypeTimeseriesRouter } from './types';
@@ -65,6 +65,7 @@ export interface Framework {
   getIndexPatternsService: (
     requestContext: VisTypeTimeseriesRequestHandlerContext
   ) => Promise<IndexPatternsService>;
+  getEsShardTimeout: () => Promise<number>;
 }
 
 export class VisTypeTimeseriesPlugin implements Plugin<VisTypeTimeseriesSetup> {
@@ -91,6 +92,13 @@ export class VisTypeTimeseriesPlugin implements Plugin<VisTypeTimeseriesSetup> {
       logger,
       router,
       searchStrategyRegistry,
+      getEsShardTimeout: () =>
+        globalConfig$
+          .pipe(
+            first(),
+            map((config) => config.elasticsearch.shardTimeout.asMilliseconds())
+          )
+          .toPromise(),
       getIndexPatternsService: async (requestContext) => {
         const [, { data }] = await core.getStartServices();
 

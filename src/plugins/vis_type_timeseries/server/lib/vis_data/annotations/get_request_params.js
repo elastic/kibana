@@ -7,7 +7,6 @@
  */
 
 import { buildAnnotationRequest } from './build_request_body';
-import { getEsShardTimeout } from '../helpers/get_es_shard_timeout';
 import { getIndexPatternObject } from '../helpers/get_index_pattern';
 
 export async function getAnnotationRequestParams(
@@ -18,7 +17,7 @@ export async function getAnnotationRequestParams(
   capabilities
 ) {
   const uiSettings = req.getUiSettingsService();
-  const esShardTimeout = await getEsShardTimeout(req);
+  const esShardTimeout = 'await getEsShardTimeout(req)';
   const indexPattern = annotation.index_pattern;
   const { indexPatternObject, indexPatternString } = await getIndexPatternObject(req, indexPattern);
   const request = await buildAnnotationRequest(

@@ -7,9 +7,10 @@
  */
 
 import { UI_SETTINGS } from '../../../../../data/server';
+import { VisTypeTimeseriesRequestHandlerContext } from '../../../types';
 
-export async function getEsQueryConfig(req) {
-  const uiSettings = req.getUiSettingsService();
+export async function getEsQueryConfig(requestContext: VisTypeTimeseriesRequestHandlerContext) {
+  const uiSettings = requestContext.core.uiSettings.client;
   const allowLeadingWildcards = await uiSettings.get(UI_SETTINGS.QUERY_ALLOW_LEADING_WILDCARDS);
   const queryStringOptions = await uiSettings.get(UI_SETTINGS.QUERY_STRING_OPTIONS);
   const ignoreFilterIfFieldNotInIndex = await uiSettings.get(

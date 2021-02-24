@@ -66,7 +66,7 @@ export abstract class AbstractSearchStrategy {
     requestContext: VisTypeTimeseriesRequestHandlerContext,
     req: T,
     indexPattern: string
-  ): Promise<{ isViable: boolean; capabilities: unknown }> {
+  ): Promise<{ isViable: boolean; capabilities: any }> {
     throw new TypeError('Must override method');
   }
 

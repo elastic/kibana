@@ -6,19 +6,43 @@
  * Side Public License, v 1.
  */
 
+import { i18n } from '@kbn/i18n';
+
+import type { PanelSchema } from 'src/plugins/vis_type_timeseries/common/types';
 import { getSeriesRequestParams } from './series/get_request_params';
 import { handleResponseBody } from './series/handle_response_body';
 import { handleErrorResponse } from './handle_error_response';
 import { getAnnotations } from './get_annotations';
 import { getEsQueryConfig } from './helpers/get_es_query_uisettings';
 import { getActiveSeries } from './helpers/get_active_series';
+import {
+  VisTypeTimeseriesRequestHandlerContext,
+  VisTypeTimeseriesVisDataRequest,
+} from '../../types';
+import { Framework } from '../../plugin';
 
-export async function getSeriesData(req, panel) {
-  const {
-    searchStrategy,
-    capabilities,
-  } = await req.framework.searchStrategyRegistry.getViableStrategyForPanel(req, panel);
-  const esQueryConfig = await getEsQueryConfig(req);
+export async function getSeriesData(
+  requestContext: VisTypeTimeseriesRequestHandlerContext,
+  req: VisTypeTimeseriesVisDataRequest,
+  panel: PanelSchema,
+  framework: Framework
+) {
+  const strategy = await framework.searchStrategyRegistry.getViableStrategyForPanel(
+    requestContext,
+    req,
+    panel
+  );
+
+  if (!strategy) {
+    throw new Error(
+      i18n.translate('visTypeTimeseries.searchStrategyUndefinedErrorMessage', {
+        defaultMessage: 'Search strategy was not defined',
+      })
+    );
+  }
+
+  const { searchStrategy, capabilities } = strategy;
+  const esQueryConfig = await getEsQueryConfig(requestContext);
   const meta = {
     type: panel.type,
     uiRestrictions: capabilities.uiRestrictions,
@@ -33,7 +57,7 @@ export async function getSeriesData(req, panel) {
       (acc, items) => acc.concat(items),
       []
     );
-    const data = await searchStrategy.search(req, searches);
+    const data = await searchStrategy.search(requestContext, req, searches);
 
     const handleResponseBodyFn = handleResponseBody(panel, req, searchStrategy, capabilities);
 
