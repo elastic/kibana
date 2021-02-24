@@ -12,6 +12,7 @@ import { loadTracer } from '../load_tracer';
 import { createAsyncInstance, isAsyncInstance } from './async_instance';
 import { Providers } from './read_provider_spec';
 import { createVerboseInstance } from './verbose_instance';
+import { createApmInstrumentedInstance } from './apm_instrumented_instance';
 
 export class ProviderCollection {
   private readonly instances = new Map();
@@ -100,10 +101,13 @@ export class ProviderCollection {
           instance &&
           typeof instance === 'object'
         ) {
-          instance = createVerboseInstance(
-            this.log,
+          instance = createApmInstrumentedInstance(
             type === 'PageObject' ? `PageObjects.${name}` : name,
-            instance
+            createVerboseInstance(
+              this.log,
+              type === 'PageObject' ? `PageObjects.${name}` : name,
+              instance
+            )
           );
         }
 
