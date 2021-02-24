@@ -14,7 +14,11 @@ import {
   TRANSACTION_TYPE,
 } from '../../../common/elasticsearch_fieldnames';
 import { EventOutcome } from '../../../common/event_outcome';
-import { rangeFilter } from '../../../common/utils/range_filter';
+import {
+  environmentQuery,
+  rangeQuery,
+  kqlQuery,
+} from '../../../server/utils/queries';
 import {
   getDocumentTypeFilterForAggregatedTransactions,
   getProcessorEventForAggregatedTransactions,
@@ -29,12 +33,16 @@ import {
 import { withApmSpan } from '../../utils/with_apm_span';
 
 export async function getErrorRate({
+  environment,
+  kuery,
   serviceName,
   transactionType,
   transactionName,
   setup,
   searchAggregatedTransactions,
 }: {
+  environment?: string;
+  kuery?: string;
   serviceName: string;
   transactionType?: string;
   transactionName?: string;
@@ -46,7 +54,7 @@ export async function getErrorRate({
   average: number | null;
 }> {
   return withApmSpan('get_transaction_group_error_rate', async () => {
-    const { start, end, esFilter, apmEventClient } = setup;
+    const { start, end, apmEventClient } = setup;
 
     const transactionNamefilter = transactionName
       ? [{ term: { [TRANSACTION_NAME]: transactionName } }]
@@ -57,18 +65,19 @@ export async function getErrorRate({
 
     const filter = [
       { term: { [SERVICE_NAME]: serviceName } },
-      { range: rangeFilter(start, end) },
       {
         terms: {
           [EVENT_OUTCOME]: [EventOutcome.failure, EventOutcome.success],
         },
       },
+      ...transactionNamefilter,
+      ...transactionTypefilter,
       ...getDocumentTypeFilterForAggregatedTransactions(
         searchAggregatedTransactions
       ),
-      ...transactionNamefilter,
-      ...transactionTypefilter,
-      ...esFilter,
+      ...rangeQuery(start, end),
+      ...environmentQuery(environment),
+      ...kqlQuery(kuery),
     ];
 
     const outcomes = getOutcomeAggregation();

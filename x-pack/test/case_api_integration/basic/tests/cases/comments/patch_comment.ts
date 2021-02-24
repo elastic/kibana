@@ -95,6 +95,10 @@ export default ({ getService }: FtrProviderContext): void => {
             type: CommentType.alert,
             alertId: 'test-id',
             index: 'test-index',
+            rule: {
+              id: 'id',
+              name: 'name',
+            },
           })
           .expect(400);
       });
@@ -110,6 +114,10 @@ export default ({ getService }: FtrProviderContext): void => {
             type: CommentType.generatedAlert,
             alerts: [{ _id: 'id1' }],
             index: 'test-index',
+            rule: {
+              id: 'id',
+              name: 'name',
+            },
           })
           .expect(400);
       });
@@ -167,6 +175,10 @@ export default ({ getService }: FtrProviderContext): void => {
           type: CommentType.alert,
           alertId: 'new-id',
           index: postCommentAlertReq.index,
+          rule: {
+            id: 'id',
+            name: 'name',
+          },
         })
         .expect(200);
 
@@ -230,6 +242,10 @@ export default ({ getService }: FtrProviderContext): void => {
           type: CommentType.alert,
           alertId: 'test-id',
           index: 'test-index',
+          rule: {
+            id: 'id',
+            name: 'name',
+          },
         })
         .expect(400);
     });
@@ -302,6 +318,10 @@ export default ({ getService }: FtrProviderContext): void => {
         type: CommentType.alert,
         index: 'test-index',
         alertId: 'test-id',
+        rule: {
+          id: 'id',
+          name: 'name',
+        },
       };
 
       for (const attribute of ['alertId', 'index']) {
@@ -341,6 +361,10 @@ export default ({ getService }: FtrProviderContext): void => {
             type: CommentType.alert,
             index: 'test-index',
             alertId: 'test-id',
+            rule: {
+              id: 'id',
+              name: 'name',
+            },
             [attribute]: attribute,
           })
           .expect(400);

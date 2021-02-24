@@ -53,16 +53,22 @@ const chartBase: ChartBase = {
 };
 
 export function getHeapMemoryChart({
+  environment,
+  kuery,
   setup,
   serviceName,
   serviceNodeName,
 }: {
+  environment?: string;
+  kuery?: string;
   setup: Setup & SetupTimeRange;
   serviceName: string;
   serviceNodeName?: string;
 }) {
   return withApmSpan('get_heap_memory_charts', () =>
     fetchAndTransformMetrics({
+      environment,
+      kuery,
       setup,
       serviceName,
       serviceNodeName,
