@@ -6,7 +6,11 @@
  */
 
 import { AggregationOptionsByType } from '../../../../../../typings/elasticsearch';
-import { environmentQuery, rangeQuery } from '../../../../common/utils/queries';
+import {
+  environmentQuery,
+  rangeQuery,
+  kqlQuery,
+} from '../../../../server/utils/queries';
 import { SERVICE_NODE_NAME_MISSING } from '../../../../common/service_nodes';
 import {
   METRIC_CGROUP_MEMORY_USAGE_BYTES,
@@ -27,13 +31,14 @@ import { withApmSpan } from '../../../utils/with_apm_span';
 
 export async function getServiceInstanceSystemMetricStats({
   environment,
+  kuery,
   setup,
   serviceName,
   size,
   numBuckets,
 }: ServiceInstanceParams) {
   return withApmSpan('get_service_instance_system_metric_stats', async () => {
-    const { apmEventClient, start, end, esFilter } = setup;
+    const { apmEventClient, start, end } = setup;
 
     const { intervalString } = getBucketSize({ start, end, numBuckets });
 
@@ -99,7 +104,7 @@ export async function getServiceInstanceSystemMetricStats({
               { term: { [SERVICE_NAME]: serviceName } },
               ...rangeQuery(start, end),
               ...environmentQuery(environment),
-              ...esFilter,
+              ...kqlQuery(kuery),
             ],
             should: [cgroupMemoryFilter, systemMemoryFilter, cpuUsageFilter],
             minimum_should_match: 1,

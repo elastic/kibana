@@ -47,8 +47,7 @@
         }
       },
       "params": {
-        "enabled": false,
-        "type": "object"
+        "type": "flattened"
       },
       "scheduledTaskId": {
         "type": "keyword"
