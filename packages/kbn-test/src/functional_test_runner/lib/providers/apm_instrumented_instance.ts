@@ -94,7 +94,7 @@ export const createApmInstrumentedInstance = <T extends object>(
         const subPath = path ? `${path}.${property}` : `${property}`;
 
         // wrap function properties
-        if (typeof value === 'function') {
+        if (typeof value === 'function' && subPath !== 'init') {
           const cached = fnWrappers.get(value);
           if (cached) {
             return cached;
