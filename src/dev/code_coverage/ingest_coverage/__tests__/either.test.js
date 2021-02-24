@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import * as Either from './either';
-import { noop } from './utils';
+import * as Either from '../either';
+import { noop } from '../utils';
 
 const pluck = (x) => (obj) => obj[x];
 const expectNull = (x) => expect(x).toBeNull();

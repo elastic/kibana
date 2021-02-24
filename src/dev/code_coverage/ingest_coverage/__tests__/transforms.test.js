@@ -13,7 +13,7 @@ import {
   prokPrevious,
   teamAssignment,
   last,
-} from './transforms';
+} from '../transforms';
 import { ToolingLog } from '@kbn/dev-utils';
 
 describe(`Transform fns`, () => {
