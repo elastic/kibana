@@ -31,9 +31,10 @@ export function TransactionErrorRateChart({
 }: Props) {
   const theme = useTheme();
   const { serviceName } = useParams<{ serviceName?: string }>();
-  const { urlParams, uiFilters } = useUrlParams();
+  const {
+    urlParams: { environment, kuery, start, end, transactionName },
+  } = useUrlParams();
   const { transactionType } = useApmServiceContext();
-  const { environment, start, end, transactionName } = urlParams;
 
   const { data, status } = useFetcher(
     (callApmApi) => {
@@ -47,11 +48,11 @@ export function TransactionErrorRateChart({
             },
             query: {
               environment,
+              kuery,
               start,
               end,
               transactionType,
               transactionName,
-              uiFilters: JSON.stringify(uiFilters),
             },
           },
         });
@@ -59,10 +60,10 @@ export function TransactionErrorRateChart({
     },
     [
       environment,
+      kuery,
       serviceName,
       start,
       end,
-      uiFilters,
       transactionType,
       transactionName,
     ]
