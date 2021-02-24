@@ -70,8 +70,8 @@ export const useUpdateComment = (): UseUpdateComment => {
     isError: false,
   });
   const [, dispatchToaster] = useStateToaster();
-  const didCancel = useRef(false);
-  const abortCtrl = useRef(new AbortController());
+  const isCancelledRef = useRef(false);
+  const abortCtrlRef = useRef(new AbortController());
 
   const dispatchUpdateComment = useCallback(
     async ({
@@ -84,9 +84,9 @@ export const useUpdateComment = (): UseUpdateComment => {
       version,
     }: UpdateComment) => {
       try {
-        didCancel.current = false;
-        abortCtrl.current.abort();
-        abortCtrl.current = new AbortController();
+        isCancelledRef.current = false;
+        abortCtrlRef.current.abort();
+        abortCtrlRef.current = new AbortController();
         dispatch({ type: 'FETCH_INIT', payload: commentId });
 
         const response = await patchComment(
@@ -94,17 +94,17 @@ export const useUpdateComment = (): UseUpdateComment => {
           commentId,
           commentUpdate,
           version,
-          abortCtrl.current.signal,
+          abortCtrlRef.current.signal,
           subCaseId
         );
 
-        if (!didCancel.current) {
+        if (!isCancelledRef.current) {
           updateCase(response);
           fetchUserActions();
           dispatch({ type: 'FETCH_SUCCESS', payload: { commentId } });
         }
       } catch (error) {
-        if (!didCancel.current) {
+        if (!isCancelledRef.current) {
           if (error.name !== 'AbortError') {
             errorToToaster({
               title: i18n.ERROR_TITLE,
@@ -122,8 +122,8 @@ export const useUpdateComment = (): UseUpdateComment => {
 
   useEffect(() => {
     return () => {
-      didCancel.current = true;
-      abortCtrl.current.abort();
+      isCancelledRef.current = true;
+      abortCtrlRef.current.abort();
     };
   }, []);
 

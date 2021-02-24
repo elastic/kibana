@@ -95,8 +95,8 @@ export const useGetCase = (caseId: string, subCaseId?: string): UseGetCase => {
     data: initialData,
   });
   const [, dispatchToaster] = useStateToaster();
-  const didCancel = useRef(false);
-  const abortCtrl = useRef(new AbortController());
+  const isCancelledRef = useRef(false);
+  const abortCtrlRef = useRef(new AbortController());
 
   const updateCase = useCallback((newCase: Case) => {
     dispatch({ type: 'UPDATE_CASE', payload: newCase });
@@ -104,20 +104,20 @@ export const useGetCase = (caseId: string, subCaseId?: string): UseGetCase => {
 
   const callFetch = useCallback(async () => {
     try {
-      didCancel.current = false;
-      abortCtrl.current.abort();
-      abortCtrl.current = new AbortController();
+      isCancelledRef.current = false;
+      abortCtrlRef.current.abort();
+      abortCtrlRef.current = new AbortController();
       dispatch({ type: 'FETCH_INIT' });
 
       const response = await (subCaseId
-        ? getSubCase(caseId, subCaseId, true, abortCtrl.current.signal)
-        : getCase(caseId, true, abortCtrl.current.signal));
+        ? getSubCase(caseId, subCaseId, true, abortCtrlRef.current.signal)
+        : getCase(caseId, true, abortCtrlRef.current.signal));
 
-      if (!didCancel.current) {
+      if (!isCancelledRef.current) {
         dispatch({ type: 'FETCH_SUCCESS', payload: response });
       }
     } catch (error) {
-      if (!didCancel.current) {
+      if (!isCancelledRef.current) {
         if (error.name !== 'AbortError') {
           errorToToaster({
             title: i18n.ERROR_TITLE,
@@ -135,8 +135,8 @@ export const useGetCase = (caseId: string, subCaseId?: string): UseGetCase => {
     callFetch();
 
     return () => {
-      didCancel.current = true;
-      abortCtrl.current.abort();
+      isCancelledRef.current = true;
+      abortCtrlRef.current.abort();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [caseId, subCaseId]);

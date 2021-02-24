@@ -78,25 +78,25 @@ export const useDeleteCases = (): UseDeleteCase => {
     isDeleted: false,
   });
   const [, dispatchToaster] = useStateToaster();
-  const didCancel = useRef(false);
-  const abortCtrl = useRef(new AbortController());
+  const isCancelledRef = useRef(false);
+  const abortCtrlRef = useRef(new AbortController());
 
   const dispatchDeleteCases = useCallback(async (cases: DeleteCase[]) => {
     try {
-      didCancel.current = false;
-      abortCtrl.current.abort();
-      abortCtrl.current = new AbortController();
+      isCancelledRef.current = false;
+      abortCtrlRef.current.abort();
+      abortCtrlRef.current = new AbortController();
       dispatch({ type: 'FETCH_INIT' });
 
       const caseIds = cases.map((theCase) => theCase.id);
       // We don't allow user batch delete sub cases on UI at the moment.
       if (cases[0].type != null || cases.length > 1) {
-        await deleteCases(caseIds, abortCtrl.current.signal);
+        await deleteCases(caseIds, abortCtrlRef.current.signal);
       } else {
-        await deleteSubCases(caseIds, abortCtrl.current.signal);
+        await deleteSubCases(caseIds, abortCtrlRef.current.signal);
       }
 
-      if (!didCancel.current) {
+      if (!isCancelledRef.current) {
         dispatch({ type: 'FETCH_SUCCESS', payload: true });
         displaySuccessToast(
           i18n.DELETED_CASES(cases.length, cases.length === 1 ? cases[0].title : ''),
@@ -104,7 +104,7 @@ export const useDeleteCases = (): UseDeleteCase => {
         );
       }
     } catch (error) {
-      if (!didCancel.current) {
+      if (!isCancelledRef.current) {
         if (error.name !== 'AbortError') {
           errorToToaster({
             title: i18n.ERROR_DELETING,
@@ -142,8 +142,8 @@ export const useDeleteCases = (): UseDeleteCase => {
 
   useEffect(() => {
     return () => {
-      didCancel.current = true;
-      abortCtrl.current.abort();
+      isCancelledRef.current = true;
+      abortCtrlRef.current.abort();
     };
   }, []);
 

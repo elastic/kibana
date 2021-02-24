@@ -244,26 +244,26 @@ export const useGetCaseUserActions = (
   const [caseUserActionsState, setCaseUserActionsState] = useState<CaseUserActionsState>(
     initialData
   );
-  const abortCtrl = useRef(new AbortController());
-  const didCancel = useRef(false);
+  const abortCtrlRef = useRef(new AbortController());
+  const isCancelledRef = useRef(false);
   const [, dispatchToaster] = useStateToaster();
 
   const fetchCaseUserActions = useCallback(
     async (thisCaseId: string, thisSubCaseId?: string) => {
       try {
-        didCancel.current = false;
-        abortCtrl.current.abort();
-        abortCtrl.current = new AbortController();
+        isCancelledRef.current = false;
+        abortCtrlRef.current.abort();
+        abortCtrlRef.current = new AbortController();
         setCaseUserActionsState({
           ...caseUserActionsState,
           isLoading: true,
         });
 
         const response = await (thisSubCaseId
-          ? getSubCaseUserActions(thisCaseId, thisSubCaseId, abortCtrl.current.signal)
-          : getCaseUserActions(thisCaseId, abortCtrl.current.signal));
+          ? getSubCaseUserActions(thisCaseId, thisSubCaseId, abortCtrlRef.current.signal)
+          : getCaseUserActions(thisCaseId, abortCtrlRef.current.signal));
 
-        if (!didCancel.current) {
+        if (!isCancelledRef.current) {
           // Attention Future developer
           // We are removing the first item because it will always be the creation of the case
           // and we do not want it to simplify our life
@@ -286,7 +286,7 @@ export const useGetCaseUserActions = (
           });
         }
       } catch (error) {
-        if (!didCancel.current) {
+        if (!isCancelledRef.current) {
           if (error.name !== 'AbortError') {
             errorToToaster({
               title: i18n.ERROR_TITLE,
@@ -316,8 +316,8 @@ export const useGetCaseUserActions = (
     }
 
     return () => {
-      didCancel.current = true;
-      abortCtrl.current.abort();
+      isCancelledRef.current = true;
+      abortCtrlRef.current.abort();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [caseId, subCaseId]);

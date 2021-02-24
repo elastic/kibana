@@ -87,19 +87,19 @@ export const useUpdateCases = (): UseUpdateCases => {
     isUpdated: false,
   });
   const [, dispatchToaster] = useStateToaster();
-  const didCancel = useRef(false);
-  const abortCtrl = useRef(new AbortController());
+  const isCancelledRef = useRef(false);
+  const abortCtrlRef = useRef(new AbortController());
 
   const dispatchUpdateCases = useCallback(async (cases: BulkUpdateStatus[], action: string) => {
     try {
-      didCancel.current = false;
-      abortCtrl.current.abort();
-      abortCtrl.current = new AbortController();
+      isCancelledRef.current = false;
+      abortCtrlRef.current.abort();
+      abortCtrlRef.current = new AbortController();
 
       dispatch({ type: 'FETCH_INIT' });
-      const patchResponse = await patchCasesStatus(cases, abortCtrl.current.signal);
+      const patchResponse = await patchCasesStatus(cases, abortCtrlRef.current.signal);
 
-      if (!didCancel.current) {
+      if (!isCancelledRef.current) {
         const resultCount = Object.keys(patchResponse).length;
         const firstTitle = patchResponse[0].title;
 
@@ -115,7 +115,7 @@ export const useUpdateCases = (): UseUpdateCases => {
         displaySuccessToast(message, dispatchToaster);
       }
     } catch (error) {
-      if (!didCancel.current) {
+      if (!isCancelledRef.current) {
         if (error.name !== 'AbortError') {
           errorToToaster({
             title: i18n.ERROR_TITLE,
@@ -148,8 +148,8 @@ export const useUpdateCases = (): UseUpdateCases => {
 
   useEffect(() => {
     return () => {
-      didCancel.current = true;
-      abortCtrl.current.abort();
+      isCancelledRef.current = true;
+      abortCtrlRef.current.abort();
     };
   }, []);
 

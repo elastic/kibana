@@ -35,25 +35,25 @@ export const useGetReporters = (): UseGetReporters => {
   const [reportersState, setReporterState] = useState<ReportersState>(initialData);
 
   const [, dispatchToaster] = useStateToaster();
-  const didCancel = useRef(false);
-  const abortCtrl = useRef(new AbortController());
+  const isCancelledRef = useRef(false);
+  const abortCtrlRef = useRef(new AbortController());
 
   const fetchReporters = useCallback(async () => {
     try {
-      didCancel.current = false;
-      abortCtrl.current.abort();
-      abortCtrl.current = new AbortController();
+      isCancelledRef.current = false;
+      abortCtrlRef.current.abort();
+      abortCtrlRef.current = new AbortController();
       setReporterState({
         ...reportersState,
         isLoading: true,
       });
 
-      const response = await getReporters(abortCtrl.current.signal);
+      const response = await getReporters(abortCtrlRef.current.signal);
       const myReporters = response
         .map((r) => (r.full_name == null || isEmpty(r.full_name) ? r.username ?? '' : r.full_name))
         .filter((u) => !isEmpty(u));
 
-      if (!didCancel.current) {
+      if (!isCancelledRef.current) {
         setReporterState({
           reporters: myReporters,
           respReporters: response,
@@ -62,7 +62,7 @@ export const useGetReporters = (): UseGetReporters => {
         });
       }
     } catch (error) {
-      if (!didCancel.current) {
+      if (!isCancelledRef.current) {
         if (error.name !== 'AbortError') {
           errorToToaster({
             title: i18n.ERROR_TITLE,
@@ -85,8 +85,8 @@ export const useGetReporters = (): UseGetReporters => {
   useEffect(() => {
     fetchReporters();
     return () => {
-      didCancel.current = true;
-      abortCtrl.current.abort();
+      isCancelledRef.current = true;
+      abortCtrlRef.current.abort();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

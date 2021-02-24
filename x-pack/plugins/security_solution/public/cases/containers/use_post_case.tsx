@@ -50,24 +50,24 @@ export const usePostCase = (): UsePostCase => {
     isError: false,
   });
   const [, dispatchToaster] = useStateToaster();
-  const didCancel = useRef(false);
-  const abortCtrl = useRef(new AbortController());
+  const isCancelledRef = useRef(false);
+  const abortCtrlRef = useRef(new AbortController());
 
   const postMyCase = useCallback(async (data: CasePostRequest) => {
     try {
-      didCancel.current = false;
-      abortCtrl.current.abort();
-      abortCtrl.current = new AbortController();
+      isCancelledRef.current = false;
+      abortCtrlRef.current.abort();
+      abortCtrlRef.current = new AbortController();
 
       dispatch({ type: 'FETCH_INIT' });
-      const response = await postCase(data, abortCtrl.current.signal);
+      const response = await postCase(data, abortCtrlRef.current.signal);
 
-      if (!didCancel.current) {
+      if (!isCancelledRef.current) {
         dispatch({ type: 'FETCH_SUCCESS' });
       }
       return response;
     } catch (error) {
-      if (!didCancel.current) {
+      if (!isCancelledRef.current) {
         if (error.name !== 'AbortError') {
           errorToToaster({
             title: i18n.ERROR_TITLE,
@@ -83,8 +83,8 @@ export const usePostCase = (): UsePostCase => {
 
   useEffect(() => {
     return () => {
-      didCancel.current = true;
-      abortCtrl.current.abort();
+      isCancelledRef.current = true;
+      abortCtrlRef.current.abort();
     };
   }, []);
   return { ...state, postCase: postMyCase };

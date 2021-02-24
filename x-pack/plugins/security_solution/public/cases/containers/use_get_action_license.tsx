@@ -29,22 +29,22 @@ const MINIMUM_LICENSE_REQUIRED_CONNECTOR = '.jira';
 export const useGetActionLicense = (): ActionLicenseState => {
   const [actionLicenseState, setActionLicensesState] = useState<ActionLicenseState>(initialData);
   const [, dispatchToaster] = useStateToaster();
-  const didCancel = useRef(false);
-  const abortCtrl = useRef(new AbortController());
+  const isCancelledRef = useRef(false);
+  const abortCtrlRef = useRef(new AbortController());
 
   const fetchActionLicense = useCallback(async () => {
     try {
-      didCancel.current = false;
-      abortCtrl.current.abort();
-      abortCtrl.current = new AbortController();
+      isCancelledRef.current = false;
+      abortCtrlRef.current.abort();
+      abortCtrlRef.current = new AbortController();
       setActionLicensesState({
         ...initialData,
         isLoading: true,
       });
 
-      const response = await getActionLicense(abortCtrl.current.signal);
+      const response = await getActionLicense(abortCtrlRef.current.signal);
 
-      if (!didCancel.current) {
+      if (!isCancelledRef.current) {
         setActionLicensesState({
           actionLicense: response.find((l) => l.id === MINIMUM_LICENSE_REQUIRED_CONNECTOR) ?? null,
           isLoading: false,
@@ -52,7 +52,7 @@ export const useGetActionLicense = (): ActionLicenseState => {
         });
       }
     } catch (error) {
-      if (!didCancel.current) {
+      if (!isCancelledRef.current) {
         if (error.name !== 'AbortError') {
           errorToToaster({
             title: i18n.ERROR_TITLE,
@@ -75,8 +75,8 @@ export const useGetActionLicense = (): ActionLicenseState => {
     fetchActionLicense();
 
     return () => {
-      didCancel.current = true;
-      abortCtrl.current.abort();
+      isCancelledRef.current = true;
+      abortCtrlRef.current.abort();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
