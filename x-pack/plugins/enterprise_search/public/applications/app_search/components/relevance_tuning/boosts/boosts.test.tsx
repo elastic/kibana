@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { setMockActions } from '../../../../../../__mocks__/kea.mock';
+import { setMockActions } from '../../../../__mocks__/kea.mock';
 
 import React from 'react';
 
@@ -13,8 +13,11 @@ import { shallow } from 'enzyme';
 
 import { EuiSuperSelect } from '@elastic/eui';
 
-import { SchemaTypes } from '../../../../../../shared/types';
+import { SchemaTypes } from '../../../../shared/types';
 
+import { BoostType } from '../types';
+
+import { BoostItem } from './boost_item';
 import { Boosts } from './boosts';
 
 describe('Boosts', () => {
@@ -67,5 +70,34 @@ describe('Boosts', () => {
     wrapper.find(EuiSuperSelect).simulate('change', 'functional');
 
     expect(actions.addBoost).toHaveBeenCalledWith('foo', 'functional');
+  });
+
+  it('will render a list of boosts', () => {
+    const boost1 = {
+      factor: 2,
+      type: 'value' as BoostType,
+    };
+    const boost2 = {
+      factor: 10,
+      type: 'functional' as BoostType,
+    };
+    const boost3 = {
+      factor: 8,
+      type: 'proximity' as BoostType,
+    };
+
+    const wrapper = shallow(
+      <Boosts
+        {...{
+          ...props,
+          boosts: [boost1, boost2, boost3],
+        }}
+      />
+    );
+
+    const boostItems = wrapper.find(BoostItem);
+    expect(boostItems.at(0).prop('boost')).toEqual(boost1);
+    expect(boostItems.at(1).prop('boost')).toEqual(boost2);
+    expect(boostItems.at(2).prop('boost')).toEqual(boost3);
   });
 });
