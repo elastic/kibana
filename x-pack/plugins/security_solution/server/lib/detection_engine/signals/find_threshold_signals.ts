@@ -52,6 +52,25 @@ export const findThresholdSignals = async ({
 }> => {
   const thresholdFields = Array.isArray(threshold.field) ? threshold.field : [threshold.field];
 
+  const topHitsAgg = {
+    top_hits: {
+      sort: [
+        {
+          [timestampOverride ?? '@timestamp']: {
+            order: 'desc',
+          },
+        },
+      ],
+      fields: [
+        {
+          field: '*',
+          include_unmapped: true,
+        },
+      ],
+      size: 1,
+    },
+  };
+
   const aggregations =
     threshold && !isEmpty(threshold.field)
       ? thresholdFields.reduce((acc, field, i) => {
@@ -67,28 +86,11 @@ export const findThresholdSignals = async ({
               size: 10000, // max 10k buckets
             },
           });
-          if (i === threshold.field.length - 1) {
-            const topHitsAgg = {
-              top_hits: {
-                sort: [
-                  {
-                    [timestampOverride ?? '@timestamp']: {
-                      order: 'desc',
-                    },
-                  },
-                ],
-                fields: [
-                  {
-                    field: '*',
-                    include_unmapped: true,
-                  },
-                ],
-                size: 1,
-              },
-            };
+          if (i === (threshold.field?.length ?? 0) - 1) {
             // TODO: support case where threshold fields are not supplied, but cardinality is?
             if (!isEmpty(threshold.cardinality_field)) {
               set(acc, `${aggPath}['aggs']`, {
+                // FIXME: top hits might contain hits that are eliminated by the cardinality check
                 top_threshold_hits: topHitsAgg,
                 cardinality_count: {
                   cardinality: {
@@ -112,7 +114,39 @@ export const findThresholdSignals = async ({
           }
           return acc;
         }, {})
-      : {};
+      : {
+          threshold_0: {
+            terms: {
+              script: {
+                source: '',
+                lang: 'painless',
+              },
+              min_doc_count: threshold.value,
+            },
+            aggs: {
+              top_threshold_hits: topHitsAgg,
+              ...(!isEmpty(threshold.cardinality_field)
+                ? {
+                    cardinality_count: {
+                      cardinality: {
+                        field: threshold.cardinality_field,
+                      },
+                    },
+                    cardinality_check: {
+                      bucket_selector: {
+                        buckets_path: {
+                          cardinalityCount: 'cardinality_count',
+                        },
+                        script: `params.cardinalityCount >= ${threshold.cardinality_value}`, // TODO: cardinality operator
+                      },
+                    },
+                  }
+                : {}),
+            },
+          },
+        };
+
+  // console.log(JSON.stringify(aggregations));
 
   return singleSearchAfter({
     aggregations,

@@ -388,7 +388,7 @@ export const signalRulesAlertType = ({
             services,
             logger,
             ruleId,
-            bucketByFields: thresholdFields,
+            bucketByFields: thresholdFields as string[], // FIXME
             timestampOverride,
             buildRuleMessage,
           });
