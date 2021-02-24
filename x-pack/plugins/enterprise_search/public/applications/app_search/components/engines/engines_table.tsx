@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { ReactNode } from 'react';
 
 import { useActions } from 'kea';
 
@@ -24,6 +24,7 @@ import { EngineDetails } from '../engine/types';
 interface EnginesTableProps {
   items: EngineDetails[];
   loading: boolean;
+  noItemsMessage?: ReactNode;
   pagination: {
     pageIndex: number;
     pageSize: number;
@@ -36,6 +37,7 @@ interface EnginesTableProps {
 export const EnginesTable: React.FC<EnginesTableProps> = ({
   items,
   loading,
+  noItemsMessage,
   pagination,
   onChange,
 }) => {
@@ -148,6 +150,7 @@ export const EnginesTable: React.FC<EnginesTableProps> = ({
       loading={loading}
       pagination={pagination}
       onChange={onChange}
+      noItemsMessage={noItemsMessage}
     />
   );
 };

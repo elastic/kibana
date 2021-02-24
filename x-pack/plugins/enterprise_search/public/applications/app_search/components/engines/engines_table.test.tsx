@@ -88,6 +88,13 @@ describe('EnginesTable', () => {
     });
   });
 
+  describe('noItemsMessage', () => {
+    it('passes the noItemsMessage prop', () => {
+      const wrapper = mountWithIntl(<EnginesTable {...props} noItemsMessage={'No items.'} />);
+      expect(wrapper.find(EuiBasicTable).prop('noItemsMessage')).toEqual('No items.');
+    });
+  });
+
   describe('language field', () => {
     it('renders language when available', () => {
       const wrapper = mountWithIntl(
