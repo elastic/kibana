@@ -8,7 +8,6 @@
 
 import Boom from '@hapi/boom';
 import { getProperty, IndexMapping } from '../../../mappings';
-import { SavedObjectsPitParams } from '../../../types';
 
 const TOP_LEVEL_FIELDS = ['_id', '_score'];
 
@@ -16,8 +15,7 @@ export function getSortingParams(
   mappings: IndexMapping,
   type: string | string[],
   sortField?: string,
-  sortOrder?: string,
-  pit?: SavedObjectsPitParams
+  sortOrder?: string
 ) {
   if (!sortField) {
     return {};
