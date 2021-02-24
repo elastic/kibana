@@ -39,34 +39,34 @@ export const createApmInstrumentedInstance = <T extends object>(
         return fn.apply(context, args);
       }
 
+      let value;
       try {
-        let value = fn.apply(context, args);
-
-        if (isPromise(value)) {
-          value = value.then(
-            (v) => {
-              span.setOutcome('success');
-              span.end();
-              return v;
-            },
-            (error) => {
-              span.setOutcome('failure');
-              span.end();
-              throw error;
-            }
-          );
-        } else {
-          span.setOutcome('success');
-          span.end();
-        }
-
-        return value;
+        value = fn.apply(context, args);
       } catch (error) {
         span.setOutcome('failure');
         span.end();
 
         throw error;
       }
+
+      if (!isPromise(value)) {
+        span.setOutcome('success');
+        span.end();
+        return value;
+      }
+
+      return value.then(
+        (v) => {
+          span.setOutcome('success');
+          span.end();
+          return v;
+        },
+        (error) => {
+          span.setOutcome('failure');
+          span.end();
+          throw error;
+        }
+      );
     };
   };
 

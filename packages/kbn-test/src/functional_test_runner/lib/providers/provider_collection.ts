@@ -101,15 +101,23 @@ export class ProviderCollection {
           instance &&
           typeof instance === 'object'
         ) {
-          instance = createApmInstrumentedInstance(
-            createVerboseInstance(
-              this.log,
-              type === 'PageObject' ? `PageObjects.${name}` : name,
-              instance
-            ),
-            type,
-            name
+          instance = createVerboseInstance(
+            this.log,
+            type === 'PageObject' ? `PageObjects.${name}` : name,
+            instance
           );
+        }
+
+        if (
+          name !== '__webdriver__' &&
+          name !== 'log' &&
+          name !== 'config' &&
+          name !== 'lifecycle' &&
+          name !== 'failureMetadata' &&
+          typeof instance === 'object' &&
+          instance
+        ) {
+          instance = createApmInstrumentedInstance(instance, type, name);
         }
 
         instances.set(provider, instance);
