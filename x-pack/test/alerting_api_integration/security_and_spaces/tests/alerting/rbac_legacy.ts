@@ -144,6 +144,11 @@ export default function alertTests({ getService }: FtrProviderContext) {
           }
 
           async function resetTaskStatus(alertId: string) {
+            // occasionally when the task manager starts running while the alert saved objects
+            // are mid-migration, the task will fail and set its status to "failed". this prevents
+            // the alert from running ever again and downstream tasks that depend on successful alert
+            // execution will fail. this ensures the task status is set to "idle" so the
+            // task manager will continue claiming and executing it.
             await supertest
               .put(`${getUrlPrefix(space.id)}/api/alerts_fixture/${alertId}/reset_task_status`)
               .set('kbn-xsrf', 'foo')
