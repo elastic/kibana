@@ -49,15 +49,6 @@ describe('7.12.0 Endpoint Package Policy migration', () => {
                       },
                     },
                   },
-                  mac: {
-                    // @ts-expect-error
-                    popup: {
-                      malware: {
-                        message: '',
-                        enabled: false,
-                      },
-                    },
-                  },
                 },
               },
             },
@@ -96,21 +87,6 @@ describe('7.12.0 Endpoint Package Policy migration', () => {
               policy: {
                 value: {
                   windows: {
-                    ransomware: {
-                      mode: ProtectionModes.off,
-                    },
-                    popup: {
-                      malware: {
-                        message: '',
-                        enabled: false,
-                      },
-                      ransomware: {
-                        message: '',
-                        enabled: false,
-                      },
-                    },
-                  },
-                  mac: {
                     ransomware: {
                       mode: ProtectionModes.off,
                     },

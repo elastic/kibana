@@ -29,9 +29,7 @@ export const migratePackagePolicyToV7120: SavedObjectMigrationFn<PackagePolicy, 
       const policy = input.config.policy.value;
 
       policy.windows.ransomware = ransomware;
-      policy.mac.ransomware = ransomware;
       policy.windows.popup.ransomware = ransomwarePopup;
-      policy.mac.popup.ransomware = ransomwarePopup;
     }
   }
 
