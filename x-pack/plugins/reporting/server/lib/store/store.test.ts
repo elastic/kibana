@@ -203,7 +203,6 @@ describe('ReportingStore', () => {
         browserTimezone: 'ABC',
       },
       timeout: 30000,
-      priority: 1,
     });
 
     await store.setReportClaimed(report, { testDoc: 'test' } as any);
@@ -244,7 +243,6 @@ describe('ReportingStore', () => {
         browserTimezone: 'BCD',
       },
       timeout: 30000,
-      priority: 1,
     });
 
     await store.setReportFailed(report, { errors: 'yes' } as any);
@@ -285,7 +283,6 @@ describe('ReportingStore', () => {
         browserTimezone: 'CDE',
       },
       timeout: 30000,
-      priority: 1,
     });
 
     await store.setReportCompleted(report, { certainly_completed: 'yes' } as any);
@@ -326,7 +323,6 @@ describe('ReportingStore', () => {
         browserTimezone: 'utc',
       },
       timeout: 30000,
-      priority: 1,
     });
 
     await store.setReportCompleted(report, {
