@@ -18,6 +18,8 @@ import { createAPIKey, invalidateAPIKeys } from './security';
 import { agentPolicyService } from '../agent_policy';
 import { escapeSearchQueryPhrase } from '../saved_object';
 
+const uuidRegex = /^\([0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}\)$/;
+
 export async function listEnrollmentApiKeys(
   esClient: ElasticsearchClient,
   options: {
@@ -119,11 +121,30 @@ export async function generateEnrollmentAPIKey(
     data.agentPolicyId ?? (await agentPolicyService.getDefaultAgentPolicyId(soClient));
 
   if (providedKeyName) {
-    const { items } = await listEnrollmentApiKeys(esClient, {
-      kuery: `policy_id:"${agentPolicyId}" AND name:${providedKeyName.replace(/ /g, '\\ ')}*`,
-    });
+    let hasMore = true;
+    let page = 1;
+    let keys: EnrollmentAPIKey[] = [];
+    while (hasMore) {
+      const { items } = await listEnrollmentApiKeys(esClient, {
+        page: page++,
+        perPage: 100,
+        kuery: `policy_id:"${agentPolicyId}" AND name:${providedKeyName.replace(/ /g, '\\ ')}*`,
+      });
+      if (items.length === 0) {
+        hasMore = false;
+      } else {
+        keys = keys.concat(items);
+      }
+    }
 
-    if (items.length > 0) {
+    if (
+      keys.length > 0 &&
+      keys.some((k: EnrollmentAPIKey) =>
+        // Prevent false positives when the providedKeyName is a prefix of a token name that already exists
+        // After removing the providedKeyName and trimming whitespace, the only string left should be a uuid in parens.
+        k.name?.replace(providedKeyName, '').trim().match(uuidRegex)
+      )
+    ) {
       throw new Error(
         i18n.translate('xpack.fleet.serverError.enrollmentKeyDuplicate', {
           defaultMessage:
