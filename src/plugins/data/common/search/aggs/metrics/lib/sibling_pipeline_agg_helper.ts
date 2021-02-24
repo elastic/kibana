@@ -39,12 +39,12 @@ export const siblingPipelineType = i18n.translate(
 
 export const siblingPipelineAggHelper = {
   subtype: siblingPipelineType,
-  params() {
+  params(bucketFilter = bucketAggFilter) {
     return [
       {
         name: 'customBucket',
         type: 'agg',
-        allowedAggs: bucketAggFilter,
+        allowedAggs: bucketFilter,
         default: null,
         makeAgg(agg: IMetricAggConfig, state = { type: 'date_histogram' }) {
           const orderAgg = agg.aggConfigs.createAggConfig(state, { addToAggConfigs: false });

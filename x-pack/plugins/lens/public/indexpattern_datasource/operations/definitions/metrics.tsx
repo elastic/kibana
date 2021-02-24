@@ -121,6 +121,7 @@ function buildMetricOperation<T extends MetricColumn<string>>({
     },
     getErrorMessage: (layer, columnId, indexPattern) =>
       getInvalidFieldMessage(layer.columns[columnId] as FieldBasedIndexPatternColumn, indexPattern),
+    filterable: true,
   } as OperationDefinition<T, 'field'>;
 }
 

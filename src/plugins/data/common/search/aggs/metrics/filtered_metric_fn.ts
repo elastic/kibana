@@ -9,71 +9,71 @@
 import { i18n } from '@kbn/i18n';
 import { Assign } from '@kbn/utility-types';
 import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
-import { AggExpressionType, AggExpressionFunctionArgs, BUCKET_TYPES } from '../';
-import { getParsedValue } from '../utils/get_parsed_value';
+import { AggExpressionType, AggExpressionFunctionArgs, METRIC_TYPES } from '../';
 
-export const aggFilterFnName = 'aggFilter';
+export const aggBucketAvgFnName = 'aggFilteredMetric';
 
 type Input = any;
-type AggArgs = AggExpressionFunctionArgs<typeof BUCKET_TYPES.FILTER>;
-
-type Arguments = Assign<AggArgs, { geo_bounding_box?: string; filter?: string }>;
-
+type AggArgs = AggExpressionFunctionArgs<typeof METRIC_TYPES.AVG_BUCKET>;
+type Arguments = Assign<
+  AggArgs,
+  { customBucket?: AggExpressionType; customMetric?: AggExpressionType }
+>;
 type Output = AggExpressionType;
 type FunctionDefinition = ExpressionFunctionDefinition<
-  typeof aggFilterFnName,
+  typeof aggBucketAvgFnName,
   Input,
   Arguments,
   Output
 >;
 
-export const aggFilter = (): FunctionDefinition => ({
-  name: aggFilterFnName,
-  help: i18n.translate('data.search.aggs.function.buckets.filter.help', {
-    defaultMessage: 'Generates a serialized agg config for a Filter agg',
+export const aggBucketAvg = (): FunctionDefinition => ({
+  name: aggBucketAvgFnName,
+  help: i18n.translate('data.search.aggs.function.metrics.bucket_avg.help', {
+    defaultMessage: 'Generates a serialized agg config for a Avg Bucket agg',
   }),
   type: 'agg_type',
   args: {
     id: {
       types: ['string'],
-      help: i18n.translate('data.search.aggs.buckets.filter.id.help', {
+      help: i18n.translate('data.search.aggs.metrics.bucket_avg.id.help', {
         defaultMessage: 'ID for this aggregation',
       }),
     },
     enabled: {
       types: ['boolean'],
       default: true,
-      help: i18n.translate('data.search.aggs.buckets.filter.enabled.help', {
+      help: i18n.translate('data.search.aggs.metrics.bucket_avg.enabled.help', {
         defaultMessage: 'Specifies whether this aggregation should be enabled',
       }),
     },
     schema: {
       types: ['string'],
-      help: i18n.translate('data.search.aggs.buckets.filter.schema.help', {
+      help: i18n.translate('data.search.aggs.metrics.bucket_avg.schema.help', {
         defaultMessage: 'Schema to use for this aggregation',
       }),
     },
-    geo_bounding_box: {
-      types: ['string'],
-      help: i18n.translate('data.search.aggs.buckets.filter.geoBoundingBox.help', {
-        defaultMessage: 'Filter results based on a point location within a bounding box',
+    customBucket: {
+      types: ['agg_type'],
+      help: i18n.translate('data.search.aggs.metrics.bucket_avg.customBucket.help', {
+        defaultMessage: 'Agg config to use for building sibling pipeline aggregations',
       }),
     },
-    filter: {
-      types: ['string'],
-      help: i18n.translate('data.search.aggs.buckets.filter.filter.help', {
-        defaultMessage: 'Filter results based on a kql query',
+    customMetric: {
+      types: ['agg_type'],
+      help: i18n.translate('data.search.aggs.metrics.bucket_avg.customMetric.help', {
+        defaultMessage: 'Agg config to use for building sibling pipeline aggregations',
       }),
     },
     json: {
       types: ['string'],
-      help: i18n.translate('data.search.aggs.buckets.filter.json.help', {
+      help: i18n.translate('data.search.aggs.metrics.bucket_avg.json.help', {
         defaultMessage: 'Advanced json to include when the agg is sent to Elasticsearch',
       }),
     },
     customLabel: {
       types: ['string'],
-      help: i18n.translate('data.search.aggs.buckets.filter.customLabel.help', {
+      help: i18n.translate('data.search.aggs.metrics.bucket_avg.customLabel.help', {
         defaultMessage: 'Represents a custom label for this aggregation',
       }),
     },
@@ -87,11 +87,11 @@ export const aggFilter = (): FunctionDefinition => ({
         id,
         enabled,
         schema,
-        type: BUCKET_TYPES.FILTER,
+        type: METRIC_TYPES.AVG_BUCKET,
         params: {
           ...rest,
-          geo_bounding_box: getParsedValue(args, 'geo_bounding_box'),
-          filter: getParsedValue(args, 'filter'),
+          customBucket: args.customBucket?.value,
+          customMetric: args.customMetric?.value,
         },
       },
     };

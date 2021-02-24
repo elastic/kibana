@@ -228,11 +228,12 @@ export class AggConfig {
    *                         returned, else undefined is returned
    */
   toDsl(aggConfigs?: IAggConfigs) {
-    if (this.type.hasNoDsl) return;
-    const output = this.write(aggConfigs) as any;
+    const output = this.type.hasNoDsl ? undefined : (this.write(aggConfigs) as any);
 
     const configDsl = {} as any;
-    configDsl[this.type.dslName || this.type.name] = output.params;
+    if (!this.type.hasNoDsl) {
+      configDsl[this.type.dslName || this.type.name] = output.params;
+    }
 
     // if the config requires subAggs, write them to the dsl as well
     if (this.subAggs.length && !output.subAggs) output.subAggs = this.subAggs;
@@ -249,6 +250,9 @@ export class AggConfig {
         subDslLvl[subAggConfig.id] = subAggConfig.toDsl(aggConfigs);
       });
     }
+
+    // if neuther parentAggs nor subAgs have been written, return
+    if (this.type.hasNoDsl && Object.keys(configDsl).length === 0) return;
 
     return configDsl;
   }

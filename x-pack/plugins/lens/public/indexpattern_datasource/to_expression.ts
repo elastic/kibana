@@ -7,6 +7,7 @@
 
 import type { IUiSettingsClient } from 'kibana/public';
 import {
+  AggFunctionsMapping,
   EsaggsExpressionFunctionDefinition,
   IndexPatternLoadExpressionFunctionDefinition,
 } from '../../../../../src/plugins/data/public';
@@ -44,10 +45,37 @@ function getExpressionForLayer(
       if (def.input === 'fullReference') {
         expressions.push(...def.toExpression(layer, colId, indexPattern));
       } else {
+        const wrapInFilter = Boolean(def.filterable && col.filter);
+        let aggAst = def.toEsAggsFn(
+          col,
+          wrapInFilter ? `${colId}-metric` : colId,
+          indexPattern,
+          layer,
+          uiSettings
+        );
+        if (wrapInFilter) {
+          aggAst = buildExpressionFunction<AggFunctionsMapping['aggBucketAvg']>(
+            'aggBucketAvg', //aggFilteredMetric
+            {
+              id: colId,
+              enabled: true,
+              schema: 'metric',
+              customBucket: buildExpression([
+                buildExpressionFunction<AggFunctionsMapping['aggFilter']>('aggFilter', {
+                  id: `${colId}-filter`,
+                  enabled: true,
+                  schema: 'bucket',
+                  filter: JSON.stringify(col.filter),
+                }),
+              ]),
+              customMetric: buildExpression({ type: 'expression', chain: [aggAst] }),
+            }
+          ).toAst();
+        }
         aggs.push(
           buildExpression({
             type: 'expression',
-            chain: [def.toEsAggsFn(col, colId, indexPattern, layer, uiSettings)],
+            chain: [aggAst],
           })
         );
       }

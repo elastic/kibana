@@ -42,6 +42,7 @@ import { trackUiEvent } from '../../lens_ui_telemetry';
 import { FormatSelector } from './format_selector';
 import { ReferenceEditor } from './reference_editor';
 import { TimeScaling } from './time_scaling';
+import { Filtering } from './filtering';
 
 const operationPanels = getOperationDisplay();
 
@@ -446,7 +447,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
         )}
 
         {!currentFieldIsInvalid && !incompleteInfo && selectedColumn && (
-          <TimeScaling
+          <Filtering
             selectedColumn={selectedColumn}
             columnId={columnId}
             layer={state.layers[layerId]}

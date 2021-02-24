@@ -6,12 +6,16 @@
  * Side Public License, v 1.
  */
 
+import { cloneDeep } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { BucketAggType } from './bucket_agg_type';
 import { BUCKET_TYPES } from './bucket_agg_types';
 import { GeoBoundingBox } from './lib/geo_point';
 import { aggFilterFnName } from './filter_fn';
 import { BaseAggParams } from '../types';
+import { UI_SETTINGS } from '../../../constants';
+import { Query } from '../../../types';
+import { buildEsQuery, getEsQueryConfig } from '../../../es_query';
 
 const filterTitle = i18n.translate('data.search.aggs.buckets.filterTitle', {
   defaultMessage: 'Filter',
@@ -21,7 +25,13 @@ export interface AggParamsFilter extends BaseAggParams {
   geo_bounding_box?: GeoBoundingBox;
 }
 
-export const getFilterBucketAgg = () =>
+interface FilterValue {
+  input: Query;
+  label: string;
+  id: string;
+}
+
+export const getFilterBucketAgg = ({ getConfig }: { getConfig: <T = any>(key: string) => any }) =>
   new BucketAggType({
     name: BUCKET_TYPES.FILTER,
     expressionName: aggFilterFnName,
@@ -30,6 +40,36 @@ export const getFilterBucketAgg = () =>
     params: [
       {
         name: 'geo_bounding_box',
+      },
+      {
+        name: 'filter',
+        default: () => [
+          {
+            input: { query: '', language: getConfig(UI_SETTINGS.SEARCH_QUERY_LANGUAGE) },
+            label: '',
+          },
+        ],
+        write(aggConfig, output) {
+          const filter: FilterValue = aggConfig.params.filter;
+
+          const input = cloneDeep(filter.input);
+
+          if (!input) {
+            console.log('malformed filter agg params, missing "input" query'); // eslint-disable-line no-console
+            return;
+          }
+
+          const esQueryConfigs = getEsQueryConfig({ get: getConfig });
+          const query = buildEsQuery(aggConfig.getIndexPattern(), [input], [], esQueryConfigs);
+
+          if (!query) {
+            console.log('malformed filter agg params, missing "query" on input'); // eslint-disable-line no-console
+            return;
+          }
+
+          const params = output.params || (output.params = {});
+          params.filter = query;
+        },
       },
     ],
   });
