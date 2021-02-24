@@ -9,13 +9,13 @@ import { kea, MakeLogicType } from 'kea';
 
 import { Meta } from '../../../../../common/types';
 import { DEFAULT_META } from '../../../shared/constants';
-
 import {
   clearFlashMessages,
   setSuccessMessage,
   flashAPIErrors,
 } from '../../../shared/flash_messages';
 import { HttpLogic } from '../../../shared/http';
+import { updateMetaPageIndex } from '../../../shared/table_pagination';
 import { EngineLogic } from '../engine';
 
 import { DELETE_MESSAGE, SUCCESS_MESSAGE } from './constants';
@@ -60,11 +60,7 @@ export const CurationsLogic = kea<MakeLogicType<CurationsValues, CurationsAction
       DEFAULT_META,
       {
         onCurationsLoad: (_, { meta }) => meta,
-        onPaginate: (state, { newPageIndex }) => {
-          const newState = { page: { ...state.page } };
-          newState.page.current = newPageIndex;
-          return newState;
-        },
+        onPaginate: (state, { newPageIndex }) => updateMetaPageIndex(state, newPageIndex),
       },
     ],
   }),
