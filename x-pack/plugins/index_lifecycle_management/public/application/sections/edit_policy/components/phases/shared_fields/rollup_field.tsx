@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import qs from 'query-string';
-import React, { FunctionComponent, useState } from 'react';
+import React, { FunctionComponent } from 'react';
 import { useHistory } from 'react-router-dom';
 import { EuiButtonEmpty } from '@elastic/eui';
 

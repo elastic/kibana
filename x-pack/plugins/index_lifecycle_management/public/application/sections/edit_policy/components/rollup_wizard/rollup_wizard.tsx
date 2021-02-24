@@ -15,7 +15,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import { cloneDeep, mapValues, set } from 'lodash';
+import { cloneDeep, mapValues } from 'lodash';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -40,7 +40,6 @@ import {
   StepTerms,
   StepHistogram,
   StepMetrics,
-  StepReview,
   // @ts-ignore
 } from './steps';
 

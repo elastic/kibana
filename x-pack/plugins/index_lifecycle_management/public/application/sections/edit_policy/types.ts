@@ -45,12 +45,12 @@ interface WarmPhaseMetaFields extends DataAllocationMetaFields, MinAgeField, For
   enabled: boolean;
   warmPhaseOnRollover: boolean;
   readonlyEnabled: boolean;
-  rollupEnabled: boolean;
 }
 
 interface ColdPhaseMetaFields extends DataAllocationMetaFields, MinAgeField {
   enabled: boolean;
   freezeEnabled: boolean;
+  rollupEnabled: boolean;
 }
 
 interface DeletePhaseMetaFields extends MinAgeField {

@@ -80,6 +80,7 @@ export interface SerializedHotPhase extends SerializedPhase {
      * Only available on enterprise license
      */
     searchable_snapshot?: SearchableSnapshotAction;
+    rollup?: RollupAction;
   };
 }
 
@@ -108,6 +109,7 @@ export interface SerializedColdPhase extends SerializedPhase {
      * Only available on enterprise license
      */
     searchable_snapshot?: SearchableSnapshotAction;
+    rollup?: RollupAction;
   };
 }
 
