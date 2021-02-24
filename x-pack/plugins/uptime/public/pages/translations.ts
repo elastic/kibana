@@ -31,6 +31,6 @@ export const BLANK_STR = i18n.translate('xpack.uptime.settings.blank.error', {
   defaultMessage: 'May not be blank.',
 });
 
-export const SPACE_STR = i18n.translate('xpack.uptime.settings.blank.error', {
+export const SPACE_STR = i18n.translate('xpack.uptime.settings.noSpace.error', {
   defaultMessage: 'Index names must not contain space',
 });
