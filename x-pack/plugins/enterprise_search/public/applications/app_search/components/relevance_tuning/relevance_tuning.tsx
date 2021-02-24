@@ -108,15 +108,13 @@ export const RelevanceTuning: React.FC<Props> = ({ engineBreadcrumb }) => {
           )}
           data-test-subj="RelevanceTuningInvalidBoostsCallout"
         >
-          <p>
-            {i18n.translate(
-              'xpack.enterpriseSearch.appSearch.engine.relevanceTuning.invalidBoostsErrorMessage',
-              {
-                defaultMessage:
-                  'One or more of your boosts is no longer valid, possibly due to a schema type change. Delete any old or invalid boosts to dismiss this alert.',
-              }
-            )}
-          </p>
+          {i18n.translate(
+            'xpack.enterpriseSearch.appSearch.engine.relevanceTuning.invalidBoostsErrorMessage',
+            {
+              defaultMessage:
+                'One or more of your boosts is no longer valid, possibly due to a schema type change. Delete any old or invalid boosts to dismiss this alert.',
+            }
+          )}
         </EuiCallOut>
       )}
       <EuiSpacer />
