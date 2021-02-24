@@ -93,7 +93,7 @@ describe('mapColumn', () => {
           {
             id: 'myId',
             name: 'myName',
-            meta: { type: 'date' },
+            meta: { type: 'date', params: { type: 'date', digits: 2 } },
           },
         ],
         rows: testTable.rows.map((row) => ({ ...row, myId: Date.now() })),
@@ -105,7 +105,7 @@ describe('mapColumn', () => {
       expect(result.columns[nameColumnIndex]).toEqual({
         id: 'name',
         name: 'name',
-        meta: { type: 'date' },
+        meta: { type: 'date', params: { type: 'date', digits: 2 } },
       });
     });
   });
@@ -120,6 +120,19 @@ describe('mapColumn', () => {
         expect(result.columns[0].meta).toHaveProperty('type', 'null');
       }
     );
+  });
+
+  it('should correctly infer the type fromt he first row if the references column for meta information does not exists', () => {
+    return runFn(
+      { ...emptyTable, rows: [...emptyTable.rows, { value: 5 }] },
+      { name: 'value', copyMetaFrom: 'time', expression: pricePlusTwo }
+    ).then((result) => {
+      expect(result.type).toBe('datatable');
+      expect(result.columns).toHaveLength(1);
+      expect(result.columns[0]).toHaveProperty('name', 'value');
+      expect(result.columns[0]).toHaveProperty('id', 'value');
+      expect(result.columns[0].meta).toHaveProperty('type', 'number');
+    });
   });
 
   describe('expression', () => {
