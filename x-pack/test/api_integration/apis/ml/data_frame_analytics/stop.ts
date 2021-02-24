@@ -29,23 +29,24 @@ export default ({ getService }: FtrProviderContext) => {
     analysis: {
       classification: {
         dependent_variable: 'y',
-        training_percent: 20,
+        training_percent: 80, // increase to ensure slow running job
       },
     },
     analyzed_fields: {
       includes: [],
       excludes: [],
     },
-    model_memory_limit: '60mb',
+    model_memory_limit: '80mb',
     allow_lazy_start: false, // default value
     max_num_threads: 1, // default value
   };
 
-  const destinationIndex = generateDestinationIndex(`${jobId}_0`);
+  const analyticsId = `${jobId}_1`;
+  const destinationIndex = generateDestinationIndex(analyticsId);
 
   const testJobConfigs: Array<DeepPartial<DataFrameAnalyticsConfig>> = [
     {
-      id: `${jobId}_0`,
+      id: analyticsId,
       description: 'Test stop for analytics',
       dest: {
         index: destinationIndex,
@@ -57,7 +58,10 @@ export default ({ getService }: FtrProviderContext) => {
 
   async function createJobs(mockJobConfigs: Array<DeepPartial<DataFrameAnalyticsConfig>>) {
     for (const jobConfig of mockJobConfigs) {
-      await ml.api.createDataFrameAnalyticsJob(jobConfig as DataFrameAnalyticsConfig);
+      if (jobConfig) {
+        await ml.api.createDataFrameAnalyticsJob(jobConfig as DataFrameAnalyticsConfig);
+        await ml.api.runDFAJob(jobConfig.id!);
+      }
     }
   }
 
@@ -75,8 +79,6 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('StopsDataFrameAnalyticsJob', () => {
       it('should stop analytics job for specified id when job exists', async () => {
-        const analyticsId = `${jobId}_0`;
-
         const { body } = await supertest
           .post(`/api/ml/data_frame/analytics/${analyticsId}/_stop`)
           .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
@@ -102,8 +104,6 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should not allow to stop analytics job for unauthorized user', async () => {
-        const analyticsId = `${jobId}_0`;
-
         const { body } = await supertest
           .post(`/api/ml/data_frame/analytics/${analyticsId}/_stop`)
           .auth(USER.ML_UNAUTHORIZED, ml.securityCommon.getPasswordForUser(USER.ML_UNAUTHORIZED))
@@ -115,8 +115,6 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should not allow to stop analytics job for user with view only permission', async () => {
-        const analyticsId = `${jobId}_0`;
-
         const { body } = await supertest
           .post(`/api/ml/data_frame/analytics/${analyticsId}/_stop`)
           .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))

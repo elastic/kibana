@@ -17,12 +17,10 @@ export default ({ getService }: FtrProviderContext) => {
   const spacesService = getService('spaces');
   const supertest = getService('supertestWithoutAuth');
 
-  const jobIdSpace1 = 'ihp_od_space1';
-  const jobIdSpace2 = 'ihp_od_space2';
-  const idSpace1 = 'space1';
-  const idSpace2 = 'space2';
-
-  const initialModelMemoryLimit = '17mb';
+  const jobIdSpace3 = 'ihp_od_space3';
+  const jobIdSpace4 = 'ihp_od_space4';
+  const idSpace3 = 'space3';
+  const idSpace4 = 'space4';
 
   async function runStopRequest(jobId: string, space: string, expectedStatusCode: number) {
     const { body } = await supertest
@@ -37,48 +35,42 @@ export default ({ getService }: FtrProviderContext) => {
     return body;
   }
 
-  let jobConfigSpace1: any;
-  let jobConfigSpace2: any;
+  let space3JobDestIndex: string;
+  let space4JobDestIndex: string;
 
   describe('POST data_frame/analytics/{analyticsId}/_stop with spaces', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('ml/ihp_outlier');
-      await spacesService.create({ id: idSpace1, name: 'space_one', disabledFeatures: [] });
-      await spacesService.create({ id: idSpace2, name: 'space_two', disabledFeatures: [] });
+      await spacesService.create({ id: idSpace3, name: 'space_one', disabledFeatures: [] });
+      await spacesService.create({ id: jobIdSpace4, name: 'space_two', disabledFeatures: [] });
+      // job config with high training percent so it takes longer to run
+      const jobConfigSpace3 = ml.commonConfig.getDFABmClassificationJobConfig(jobIdSpace3);
+      await ml.api.createDataFrameAnalyticsJob(jobConfigSpace3, idSpace3);
 
-      jobConfigSpace1 = ml.commonConfig.getDFAIhpOutlierDetectionJobConfig(jobIdSpace1);
-      await ml.api.createDataFrameAnalyticsJob(
-        { ...jobConfigSpace1, model_memory_limit: initialModelMemoryLimit },
-        idSpace1
-      );
-
-      jobConfigSpace2 = ml.commonConfig.getDFAIhpOutlierDetectionJobConfig(jobIdSpace2);
-      await ml.api.createDataFrameAnalyticsJob(
-        { ...jobConfigSpace2, model_memory_limit: initialModelMemoryLimit },
-        idSpace2
-      );
+      const jobConfigSpace4 = ml.commonConfig.getDFABmClassificationJobConfig(jobIdSpace4);
+      await ml.api.createDataFrameAnalyticsJob(jobConfigSpace4, idSpace4);
       await ml.testResources.setKibanaTimeZoneToUTC();
+
+      space3JobDestIndex = jobConfigSpace3.dest.index;
+      space4JobDestIndex = jobConfigSpace4.dest.index;
     });
 
     after(async () => {
-      const space1JobDestIndex = jobConfigSpace1.dest.index;
-      const space2JobDestIndex = jobConfigSpace2.dest.index;
-
-      await spacesService.delete(idSpace1);
-      await spacesService.delete(idSpace2);
+      await spacesService.delete(idSpace3);
+      await spacesService.delete(idSpace4);
+      await ml.api.deleteIndices(space3JobDestIndex);
+      await ml.api.deleteIndices(space4JobDestIndex);
       await ml.api.cleanMlIndices();
-      await ml.api.deleteIndices(space1JobDestIndex);
-      await ml.api.deleteIndices(space2JobDestIndex);
       await ml.testResources.cleanMLSavedObjects();
     });
 
     it('should stop job from same space', async () => {
-      const body = await runStopRequest(jobIdSpace1, idSpace1, 200);
+      const body = await runStopRequest(jobIdSpace3, idSpace3, 200);
       expect(body).to.have.property('stopped', true);
     });
 
     it('should fail to stop job from different space', async () => {
-      const body = await runStopRequest(jobIdSpace2, idSpace1, 404);
+      const body = await runStopRequest(jobIdSpace4, idSpace3, 404);
       expect(body.error).to.eql('Not Found');
     });
   });

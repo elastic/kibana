@@ -10,6 +10,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common_api';
 import { USER } from '../../../../functional/services/ml/security_common';
+import { DATA_FRAME_TASK_STATE } from '../../../../../plugins/ml/common/constants/data_frame_analytics';
 
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
@@ -37,8 +38,8 @@ export default ({ getService }: FtrProviderContext) => {
     return body;
   }
 
-  let jobConfigSpace1: any;
-  let jobConfigSpace2: any;
+  let space1JobDestIndex: string;
+  let space2JobDestIndex: string;
 
   describe('POST data_frame/analytics/{analyticsId}/_start with spaces', function () {
     before(async () => {
@@ -46,25 +47,25 @@ export default ({ getService }: FtrProviderContext) => {
       await spacesService.create({ id: idSpace1, name: 'space_one', disabledFeatures: [] });
       await spacesService.create({ id: idSpace2, name: 'space_two', disabledFeatures: [] });
 
-      jobConfigSpace1 = ml.commonConfig.getDFAIhpOutlierDetectionJobConfig(jobIdSpace1);
+      const jobConfigSpace1 = ml.commonConfig.getDFAIhpOutlierDetectionJobConfig(jobIdSpace1);
       await ml.api.createDataFrameAnalyticsJob(
         { ...jobConfigSpace1, model_memory_limit: initialModelMemoryLimit },
         idSpace1
       );
 
-      jobConfigSpace2 = ml.commonConfig.getDFAIhpOutlierDetectionJobConfig(jobIdSpace2);
+      const jobConfigSpace2 = ml.commonConfig.getDFAIhpOutlierDetectionJobConfig(jobIdSpace2);
       await ml.api.createDataFrameAnalyticsJob(
         { ...jobConfigSpace2, model_memory_limit: initialModelMemoryLimit },
         idSpace2
       );
 
+      space1JobDestIndex = jobConfigSpace1.dest.index;
+      space2JobDestIndex = jobConfigSpace2.dest.index;
+
       await ml.testResources.setKibanaTimeZoneToUTC();
     });
 
     after(async () => {
-      const space1JobDestIndex = jobConfigSpace1.dest.index;
-      const space2JobDestIndex = jobConfigSpace2.dest.index;
-
       await spacesService.delete(idSpace1);
       await spacesService.delete(idSpace2);
       await ml.api.cleanMlIndices();
@@ -76,6 +77,9 @@ export default ({ getService }: FtrProviderContext) => {
     it('should start job from same space', async () => {
       const body = await runStartRequest(jobIdSpace1, idSpace1, 200);
       expect(body).to.have.property('acknowledged', true);
+
+      await ml.api.waitForAnalyticsState(jobIdSpace1, DATA_FRAME_TASK_STATE.STARTED);
+      await ml.api.assertIndicesExist(space1JobDestIndex);
     });
 
     it('should fail to start job from different space', async () => {

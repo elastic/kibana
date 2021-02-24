@@ -11,6 +11,7 @@ import { USER } from '../../../../functional/services/ml/security_common';
 import { DataFrameAnalyticsConfig } from '../../../../../plugins/ml/public/application/data_frame_analytics/common';
 import { DeepPartial } from '../../../../../plugins/ml/common/types/common';
 import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common_api';
+import { DATA_FRAME_TASK_STATE } from '../../../../../plugins/ml/common/constants/data_frame_analytics';
 
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
@@ -85,6 +86,9 @@ export default ({ getService }: FtrProviderContext) => {
         expect(body).not.to.be(undefined);
         expect(body.acknowledged).to.be(true);
         expect(body.node).not.to.be('');
+
+        await ml.api.waitForAnalyticsState(analyticsId, DATA_FRAME_TASK_STATE.STARTED);
+        await ml.api.assertIndicesExist(destinationIndex);
       });
 
       it('should show 404 error if job does not exist', async () => {
