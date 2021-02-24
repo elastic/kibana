@@ -10,12 +10,13 @@ import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export function TransformWizardProvider({ getService }: FtrProviderContext) {
+export function TransformWizardProvider({ getService, getPageObjects }: FtrProviderContext) {
   const aceEditor = getService('aceEditor');
   const canvasElement = getService('canvasElement');
   const testSubjects = getService('testSubjects');
   const comboBox = getService('comboBox');
   const retry = getService('retry');
+  const PageObjects = getPageObjects(['discover']);
 
   return {
     async clickNextButton() {
@@ -136,11 +137,7 @@ export function TransformWizardProvider({ getService }: FtrProviderContext) {
       });
     },
 
-    async assertEuiDataGridColumnHasValues(
-      tableSubj: string,
-      column: number,
-      expectedColumnValues: string[]
-    ) {
+    async assertEuiDataGridColumnValuesNotEmpty(tableSubj: string, column: number) {
       await retry.tryForTime(2000, async () => {
         // get a 2D array of rows and cell values
         const rows = await this.parseEuiDataGrid(tableSubj);
@@ -151,13 +148,10 @@ export function TransformWizardProvider({ getService }: FtrProviderContext) {
           .flat()
           .filter((v, i, a) => a.indexOf(v) === i);
 
-        uniqueColumnValues.sort();
-
-        // check if the returned unique value matches the supplied filter value
-        expect(uniqueColumnValues).to.eql(
-          expectedColumnValues,
-          `Unique EuiDataGrid column values should be '${expectedColumnValues.join()}' (got ${uniqueColumnValues.join()})`
-        );
+        uniqueColumnValues.forEach((value) => {
+          // check if the returned unique value matches the supplied filter value
+          expect(value).to.not.eql('');
+        });
       });
     },
 
@@ -186,8 +180,16 @@ export function TransformWizardProvider({ getService }: FtrProviderContext) {
       await this.assertEuiDataGridColumnValues('transformIndexPreview', column, values);
     },
 
+    async assertIndexPreviewColumnValuesNotEmpty(column: number) {
+      await this.assertEuiDataGridColumnValuesNotEmpty('transformIndexPreview', column);
+    },
+
     async assertPivotPreviewColumnValues(column: number, values: string[]) {
       await this.assertEuiDataGridColumnValues('transformPivotPreview', column, values);
+    },
+
+    async assertPivotPreviewColumnValuesNotEmpty(column: number) {
+      await this.assertEuiDataGridColumnValuesNotEmpty('transformIndexPreview', column);
     },
 
     async assertPivotPreviewLoaded() {
@@ -363,10 +365,20 @@ export function TransformWizardProvider({ getService }: FtrProviderContext) {
       );
     },
 
-    async setRuntimeMappingsEditorContent(input: string, expectedContent: string[]) {
+    async setRuntimeMappingsEditorContent(input: string) {
       await this.assertRuntimeMappingsEditorExists();
       await aceEditor.setValue('transformAdvancedRuntimeMappingsEditor', input);
-      await this.assertRuntimeMappingsEditorContent(expectedContent);
+    },
+
+    async applyRuntimeMappings() {
+      const subj = 'transformRuntimeMappingsApplyButton';
+      await testSubjects.existOrFail(subj);
+      await testSubjects.clickWhenNotDisabled(subj);
+      const isEnabled = await testSubjects.isEnabled(subj);
+      expect(isEnabled).to.eql(
+        false,
+        `Expected runtime mappings 'Apply changes' button to be disabled, got enabled.`
+      );
     },
 
     async assertSelectedTransformFunction(transformFunction: 'pivot' | 'latest') {
@@ -837,6 +849,28 @@ export function TransformWizardProvider({ getService }: FtrProviderContext) {
 
     async assertDiscoverCardExists() {
       await testSubjects.existOrFail(`transformWizardCardDiscover`);
+    },
+
+    async redirectToDiscover() {
+      await retry.tryForTime(60 * 1000, async () => {
+        await testSubjects.click('transformWizardCardDiscover');
+        await PageObjects.discover.isDiscoverAppOnScreen();
+      });
+    },
+
+    async assertDiscoverContainField(field: string) {
+      await PageObjects.discover.isDiscoverAppOnScreen();
+      await retry.tryForTime(60 * 1000, async () => {
+        const allFields = await PageObjects.discover.getAllFieldNames();
+        if (Array.isArray(allFields)) {
+          // For some reasons, Discover returns fields with dot (e.g '.avg') with space
+          const fields = allFields.map((n) => n.replace('.​', '.'));
+          expect(fields).to.contain(
+            field,
+            `Expected Discover to contain field ${field}, got ${allFields.join()}`
+          );
+        }
+      });
     },
 
     async assertProgressbarExists() {
