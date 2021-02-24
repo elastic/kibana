@@ -24,7 +24,7 @@ const lastValueFormattedMessage = i18n.translate(
 );
 
 interface DataTimeRangeModeLabelProps {
-  seriesData: PanelData['data'];
+  seriesData?: PanelData['data'];
   panelInterval: number;
   modelInterval: string;
   modelTimeRangeMode: TIME_RANGE_DATA_MODES;
@@ -46,7 +46,7 @@ export const DataTimeRangeModeLabel = ({
 
   const getLastValueLabelWithTooltip = () => {
     const formatter = createIntervalBasedFormatter(panelInterval, scaledDataFormat, dateFormat);
-    const lastBucketDate = formatter(seriesData[seriesData.length - 1][0]);
+    const lastBucketDate = formatter(seriesData![seriesData!.length - 1][0]);
     const formattedPanelInterval =
       (isAutoInterval(modelInterval) || isGteInterval(modelInterval)) &&
       getFormattedPanelInterval();

@@ -15,7 +15,7 @@ import { getInterval } from './lib/get_interval';
 import { AUTO_INTERVAL } from '../../../common/constants';
 import { PANEL_TYPES } from '../../../common/panel_types';
 import { DataTimeRangeModeLabel } from './data_time_range_mode_label';
-import { isVisTableData } from '../../../common/types';
+import { isVisSeriesData } from '../../../common/types';
 
 const MIN_CHART_HEIGHT = 300;
 
@@ -64,12 +64,12 @@ class VisEditorVisualizationUI extends Component {
 
     this._subscription = this._handler.handler.data$.subscribe((data) => {
       const visData = data.value?.visData;
-      const series = get(visData, `${this.props.model.id}.series`, []);
-      this.setState({
-        seriesData: isVisTableData(visData)
-          ? visData?.series && visData.series[0]?.series[0]?.data
-          : series?.length && series[0].data,
-      });
+      const seriesData = get(
+        visData,
+        `${isVisSeriesData(visData) ? this.props.model.id : 'series[0]'}.series[0].data`,
+        undefined
+      );
+      this.setState({ seriesData });
 
       this.setPanelInterval(visData);
       onDataChange(data.value);

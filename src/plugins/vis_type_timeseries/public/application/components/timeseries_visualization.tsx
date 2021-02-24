@@ -16,7 +16,7 @@ import { PersistedState } from 'src/plugins/visualizations/public';
 import { ErrorComponent } from './error';
 import { TimeseriesVisTypes } from './vis_types';
 import { TimeseriesVisParams } from '../../metrics_fn';
-import { isVisTableData, TimeseriesVisData } from '../../../common/types';
+import { isVisSeriesData, TimeseriesVisData } from '../../../common/types';
 
 interface TimeseriesVisualizationProps {
   className?: string;
@@ -71,7 +71,7 @@ function TimeseriesVisualization({
   });
 
   // Show the error panel
-  const error = !isVisTableData(visData) && visData[model.id]?.error;
+  const error = isVisSeriesData(visData) && visData[model.id]?.error;
   if (error) {
     return (
       <div className={className}>
