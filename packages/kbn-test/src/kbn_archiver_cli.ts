@@ -43,7 +43,7 @@ export function runKbnArchiverCli() {
   new RunWithCommands({
     description: 'Import/export saved objects from archives, for testing',
     globalFlags: {
-      string: ['config'],
+      string: ['config', 'space', 'kibana-url', 'dir'],
       help: `
         --space            space id to operate on, defaults to the default space
         --config           optional path to an FTR config file that will be parsed and used for defaults
