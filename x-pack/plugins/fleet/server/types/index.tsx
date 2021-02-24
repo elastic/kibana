@@ -95,3 +95,4 @@ export type AgentPolicyUpdateHandler = (
 
 export * from './models';
 export * from './rest_spec';
+export * from './extensions';

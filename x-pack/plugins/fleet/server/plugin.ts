@@ -17,8 +17,6 @@ import {
   SavedObjectsServiceStart,
   HttpServiceSetup,
   SavedObjectsClientContract,
-  RequestHandlerContext,
-  KibanaRequest,
 } from 'kibana/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
@@ -55,12 +53,7 @@ import {
   registerSettingsRoutes,
   registerAppRoutes,
 } from './routes';
-import {
-  EsAssetReference,
-  FleetConfigType,
-  NewPackagePolicy,
-  UpdatePackagePolicy,
-} from '../common';
+import { EsAssetReference, FleetConfigType } from '../common';
 import {
   appContextService,
   licenseService,
@@ -84,6 +77,7 @@ import { registerFleetUsageCollector } from './collectors/register';
 import { getInstallation } from './services/epm/packages';
 import { makeRouterEnforcingSuperuser } from './routes/security';
 import { startFleetServerSetup } from './services/fleet_server';
+import { ExternalCallback } from './types';
 
 export interface FleetSetupDeps {
   licensing: LicensingPluginSetup;
@@ -125,29 +119,6 @@ const allSavedObjectTypes = [
   AGENT_EVENT_SAVED_OBJECT_TYPE,
   ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE,
 ];
-
-/**
- * Callbacks supported by the Fleet plugin
- */
-export type ExternalCallback =
-  | [
-      'packagePolicyCreate',
-      (
-        newPackagePolicy: NewPackagePolicy,
-        context: RequestHandlerContext,
-        request: KibanaRequest
-      ) => Promise<NewPackagePolicy>
-    ]
-  | [
-      'packagePolicyUpdate',
-      (
-        newPackagePolicy: UpdatePackagePolicy,
-        context: RequestHandlerContext,
-        request: KibanaRequest
-      ) => Promise<UpdatePackagePolicy>
-    ];
-
-export type ExternalCallbacksStorage = Map<ExternalCallback[0], Set<ExternalCallback[1]>>;
 
 /**
  * Describes public Fleet plugin contract returned at the `startup` stage.

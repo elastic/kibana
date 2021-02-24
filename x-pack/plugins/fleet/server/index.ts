@@ -22,7 +22,8 @@ export {
   PackageService,
   AgentPolicyServiceInterface,
 } from './services';
-export { FleetSetupContract, FleetSetupDeps, FleetStartContract, ExternalCallback } from './plugin';
+export { FleetSetupContract, FleetSetupDeps, FleetStartContract } from './plugin';
+export type { ExternalCallback } from './types';
 
 export const config: PluginConfigDescriptor = {
   exposeToBrowser: {
