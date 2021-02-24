@@ -52,7 +52,7 @@ export class StepHistogram extends Component {
   };
 
   render() {
-    const { fields, histogramFields } = this.props;
+    const { fields } = this.props;
 
     const { histogram } = fields;
 
@@ -71,7 +71,7 @@ export class StepHistogram extends Component {
             <EuiTitle data-test-subj="rollupJobCreateHistogramTitle">
               <h2>
                 <FormattedMessage
-                  id="xpack.rollupJobs.create.stepHistogramTitle"
+                  id="xpack.indexLifecycleMgmt.rollup.create.stepHistogramTitle"
                   defaultMessage="Histogram (optional)"
                 />
               </h2>
@@ -82,7 +82,7 @@ export class StepHistogram extends Component {
             <EuiText>
               <p>
                 <FormattedMessage
-                  id="xpack.rollupJobs.create.stepHistogram.histogramDescription"
+                  id="xpack.indexLifecycleMgmt.rollup.create.stepHistogram.histogramDescription"
                   defaultMessage="Select the fields you want to bucket using numeric intervals."
                 />
               </p>
@@ -101,7 +101,7 @@ export class StepHistogram extends Component {
             <FieldChooser
               buttonLabel={
                 <FormattedMessage
-                  id="xpack.rollupJobs.create.stepHistogram.fieldsChooserLabel"
+                  id="xpack.indexLifecycleMgmt.rollup.create.stepHistogram.fieldsChooserLabel"
                   defaultMessage="Add histogram fields"
                 />
               }
@@ -142,7 +142,7 @@ export class StepHistogram extends Component {
             <EuiTitle size="s">
               <h3>
                 <FormattedMessage
-                  id="xpack.rollupJobs.create.stepHistogram.sectionHistogramIntervalTitle"
+                  id="xpack.indexLifecycleMgmt.rollup.create.stepHistogram.sectionHistogramIntervalTitle"
                   defaultMessage="Histogram interval"
                 />
               </h3>
@@ -150,7 +150,7 @@ export class StepHistogram extends Component {
           }
           description={
             <FormattedMessage
-              id="xpack.rollupJobs.create.stepHistogram.sectionHistogramIntervalDescription"
+              id="xpack.indexLifecycleMgmt.rollup.create.stepHistogram.sectionHistogramIntervalDescription"
               defaultMessage="This is the interval of histogram buckets to be generated when rolling
                 up, e.g. 5 will create buckets that are five units wide (0-5, 5-10, etc). Note that
                 only one interval can be specified in the histogram group, meaning that all fields
@@ -162,7 +162,7 @@ export class StepHistogram extends Component {
           <EuiFormRow
             label={
               <FormattedMessage
-                id="xpack.rollupJobs.create.stepHistogram.fieldHistogramIntervalLabel"
+                id="xpack.indexLifecycleMgmt.rollup.create.stepHistogram.fieldHistogramIntervalLabel"
                 defaultMessage="Interval"
               />
             }

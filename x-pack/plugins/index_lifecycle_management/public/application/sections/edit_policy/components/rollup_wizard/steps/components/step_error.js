@@ -14,7 +14,7 @@ import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 export function StepError({
   title = (
     <FormattedMessage
-      id="xpack.rollupJobs.create.stepErrorTitle"
+      id="xpack.indexLifecycleMgmt.rollup.create.stepErrorTitle"
       defaultMessage="Fix errors before continuing."
     />
   ),

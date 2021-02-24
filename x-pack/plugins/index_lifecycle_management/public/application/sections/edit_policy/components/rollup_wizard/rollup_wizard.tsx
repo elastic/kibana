@@ -26,7 +26,7 @@ import { serializeRollup, deserializeRollup } from './serialize_and_deserialize_
 import { InternalRollup } from './types';
 
 // const createBreadcrumb = {
-//   text: i18n.translate('xpack.rollupJobs.createBreadcrumbTitle', {
+//   text: i18n.translate('xpack.indexLifecycleMgmt.rollup.createBreadcrumbTitle', {
 //     defaultMessage: 'Create',
 //   }),
 // };
@@ -59,19 +59,28 @@ import {
 // TODO: fix anys in this file!
 
 const stepIdToTitleMap = {
-  [STEP_LOGISTICS]: i18n.translate('xpack.rollupJobs.create.steps.stepLogisticsTitle', {
-    defaultMessage: 'Logistics',
-  }),
-  [STEP_DATE_HISTOGRAM]: i18n.translate('xpack.rollupJobs.create.steps.stepDateHistogramTitle', {
-    defaultMessage: 'Date histogram',
-  }),
-  [STEP_TERMS]: i18n.translate('xpack.rollupJobs.create.steps.stepTermsTitle', {
+  [STEP_LOGISTICS]: i18n.translate(
+    'xpack.indexLifecycleMgmt.rollup.create.steps.stepLogisticsTitle',
+    {
+      defaultMessage: 'Logistics',
+    }
+  ),
+  [STEP_DATE_HISTOGRAM]: i18n.translate(
+    'xpack.indexLifecycleMgmt.rollupJob.create.steps.stepDateHistogramTitle',
+    {
+      defaultMessage: 'Date histogram',
+    }
+  ),
+  [STEP_TERMS]: i18n.translate('xpack.indexLifecycleMgmt.rollup.create.steps.stepTermsTitle', {
     defaultMessage: 'Terms',
   }),
-  [STEP_HISTOGRAM]: i18n.translate('xpack.rollupJobs.create.steps.stepHistogramTitle', {
-    defaultMessage: 'Histogram',
-  }),
-  [STEP_METRICS]: i18n.translate('xpack.rollupJobs.create.steps.stepMetricsTitle', {
+  [STEP_HISTOGRAM]: i18n.translate(
+    'xpack.indexLifecycleMgmt.rollup.create.steps.stepHistogramTitle',
+    {
+      defaultMessage: 'Histogram',
+    }
+  ),
+  [STEP_METRICS]: i18n.translate('xpack.indexLifecycleMgmt.rollup.create.steps.stepMetricsTitle', {
     defaultMessage: 'Metrics',
   }),
 };
@@ -285,7 +294,7 @@ export class RollupWizard extends Component<Props, State> {
             <EuiTitle size="l">
               <h1>
                 <FormattedMessage
-                  id="xpack.rollupJobs.createTitle"
+                  id="xpack.indexLifecycleMgmt.rollup.createTitle"
                   defaultMessage="Configure rollup action"
                 />
               </h1>

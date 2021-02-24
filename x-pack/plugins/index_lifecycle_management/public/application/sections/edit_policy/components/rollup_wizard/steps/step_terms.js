@@ -66,7 +66,7 @@ export class StepTerms extends Component {
             <EuiTitle data-test-subj="rollupJobCreateTermsTitle">
               <h2>
                 <FormattedMessage
-                  id="xpack.rollupJobs.create.stepTermsTitle"
+                  id="xpack.indexLifecycleMgmt.rollup.create.stepTermsTitle"
                   defaultMessage="Terms (optional)"
                 />
               </h2>
@@ -77,7 +77,7 @@ export class StepTerms extends Component {
             <EuiText>
               <p>
                 <FormattedMessage
-                  id="xpack.rollupJobs.create.stepTermsDescription"
+                  id="xpack.indexLifecycleMgmt.rollup.create.stepTermsDescription"
                   defaultMessage="Select the fields you want to bucket using terms aggregations.
                     This can be costly for high-cardinality fields such as IP addresses,
                     if the time bucket is sparse."
@@ -98,7 +98,7 @@ export class StepTerms extends Component {
             <FieldChooser
               buttonLabel={
                 <FormattedMessage
-                  id="xpack.rollupJobs.create.stepTerms.fieldsChooserLabel"
+                  id="xpack.indexLifecycleMgmt.rollup.create.stepTerms.fieldsChooserLabel"
                   defaultMessage="Add terms fields"
                 />
               }

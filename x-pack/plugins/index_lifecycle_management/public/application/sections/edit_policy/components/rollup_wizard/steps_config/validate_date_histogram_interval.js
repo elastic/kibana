@@ -18,7 +18,7 @@ export function validateDateHistogramInterval(dateHistogramInterval) {
   if (!dateHistogramInterval || !dateHistogramInterval.trim()) {
     return [
       <FormattedMessage
-        id="xpack.rollupJobs.create.errors.dateHistogramIntervalMissing"
+        id="xpack.indexLifecycleMgmt.rollup.create.errors.dateHistogramIntervalMissing"
         defaultMessage="Interval is required."
       />,
     ];
@@ -30,7 +30,7 @@ export function validateDateHistogramInterval(dateHistogramInterval) {
     if (error instanceof InvalidEsIntervalFormatError) {
       return [
         <FormattedMessage
-          id="xpack.rollupJobs.create.errors.dateHistogramIntervalInvalidFormat"
+          id="xpack.indexLifecycleMgmt.rollup.create.errors.dateHistogramIntervalInvalidFormat"
           defaultMessage="Invalid interval format."
         />,
       ];
@@ -40,14 +40,14 @@ export function validateDateHistogramInterval(dateHistogramInterval) {
       const { unit } = error;
       return [
         <FormattedMessage
-          id="xpack.rollupJobs.create.errors.dateHistogramIntervalInvalidCalendarInterval"
+          id="xpack.indexLifecycleMgmt.rollup.create.errors.dateHistogramIntervalInvalidCalendarInterval"
           defaultMessage="The '{unit}' unit only allows values of 1. Try {suggestion}."
           values={{
             unit,
             suggestion: (
               <strong>
                 <FormattedMessage
-                  id="xpack.rollupJobs.create.errors.dateHistogramIntervalInvalidCalendarIntervalSuggestion"
+                  id="xpack.indexLifecycleMgmt.rollup.create.errors.dateHistogramIntervalInvalidCalendarIntervalSuggestion"
                   defaultMessage="1{unit}"
                   values={{ unit }}
                 />

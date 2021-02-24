@@ -22,8 +22,8 @@ export function validateMetrics(metrics) {
 
     return [
       <FormattedMessage
-        id="xpack.rollupJobs.create.errors.metricsTypesMissing"
-        key="xpack.rollupJobs.create.errors.metricsTypesMissing"
+        id="xpack.indexLifecycleMgmt.rollup.create.errors.metricsTypesMissing"
+        key="xpack.indexLifecycleMgmt.rollup.create.errors.metricsTypesMissing"
         defaultMessage="Select metrics types for these fields or remove them: {allMissingTypes}."
         values={{ allMissingTypes }}
       />,

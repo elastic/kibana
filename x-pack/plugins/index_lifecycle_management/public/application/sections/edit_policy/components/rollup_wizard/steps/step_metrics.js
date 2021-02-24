@@ -28,33 +28,39 @@ import { FieldChooser, StepError } from './components';
 export const METRICS_CONFIG = [
   {
     type: 'avg',
-    label: i18n.translate('xpack.rollupJobs.create.stepMetrics.checkboxAverageLabel', {
-      defaultMessage: 'Average',
-    }),
+    label: i18n.translate(
+      'xpack.indexLifecycleMgmt.rollup.create.stepMetrics.checkboxAverageLabel',
+      {
+        defaultMessage: 'Average',
+      }
+    ),
   },
   {
     type: 'max',
-    label: i18n.translate('xpack.rollupJobs.create.stepMetrics.checkboxMaxLabel', {
+    label: i18n.translate('xpack.indexLifecycleMgmt.rollup.create.stepMetrics.checkboxMaxLabel', {
       defaultMessage: 'Maximum',
     }),
   },
   {
     type: 'min',
-    label: i18n.translate('xpack.rollupJobs.create.stepMetrics.checkboxMinLabel', {
+    label: i18n.translate('xpack.indexLifecycleMgmt.rollup.create.stepMetrics.checkboxMinLabel', {
       defaultMessage: 'Minimum',
     }),
   },
   {
     type: 'sum',
-    label: i18n.translate('xpack.rollupJobs.create.stepMetrics.checkboxSumLabel', {
+    label: i18n.translate('xpack.indexLifecycleMgmt.rollup.create.stepMetrics.checkboxSumLabel', {
       defaultMessage: 'Sum',
     }),
   },
   {
     type: 'value_count',
-    label: i18n.translate('xpack.rollupJobs.create.stepMetrics.checkboxValueCountLabel', {
-      defaultMessage: 'Value count',
-    }),
+    label: i18n.translate(
+      'xpack.indexLifecycleMgmt.rollup.create.stepMetrics.checkboxValueCountLabel',
+      {
+        defaultMessage: 'Value count',
+      }
+    ),
   },
 ];
 
@@ -133,7 +139,7 @@ export class StepMetrics extends Component {
      */
     const checkboxElements = [
       {
-        label: i18n.translate('xpack.rollupJobs.create.stepMetrics.allCheckbox', {
+        label: i18n.translate('xpack.indexLifecycleMgmt.rollup.create.stepMetrics.allCheckbox', {
           defaultMessage: 'All',
         }),
         type: 'all',
@@ -225,9 +231,12 @@ export class StepMetrics extends Component {
               onClick={this.openMetricsPopover}
               data-test-subj="rollupJobSelectAllMetricsPopoverButton"
             >
-              {i18n.translate('xpack.rollupJobs.create.stepMetrics.selectAllPopoverButtonLabel', {
-                defaultMessage: 'Select metrics',
-              })}
+              {i18n.translate(
+                'xpack.indexLifecycleMgmt.rollup.create.stepMetrics.selectAllPopoverButtonLabel',
+                {
+                  defaultMessage: 'Select metrics',
+                }
+              )}
             </EuiButton>
           }
         >
@@ -247,9 +256,12 @@ export class StepMetrics extends Component {
     const maxItemsToBeSelected = Object.keys(whiteListedMetricByFieldType[fieldType]).length;
     const allSelected = maxItemsToBeSelected === types.length;
 
-    const label = i18n.translate('xpack.rollupJobs.create.stepMetrics.selectAllRowLabel', {
-      defaultMessage: 'All',
-    });
+    const label = i18n.translate(
+      'xpack.indexLifecycleMgmt.rollup.create.stepMetrics.selectAllRowLabel',
+      {
+        defaultMessage: 'All',
+      }
+    );
 
     const onChange = () => {
       const isSelected = hasSelectedItems ? types.length !== maxItemsToBeSelected : true;
@@ -275,9 +287,12 @@ export class StepMetrics extends Component {
   getListColumns() {
     return StepMetrics.chooserColumns.concat({
       type: 'metrics',
-      name: i18n.translate('xpack.rollupJobs.create.stepMetrics.metricsColumnHeader', {
-        defaultMessage: 'Metrics',
-      }),
+      name: i18n.translate(
+        'xpack.indexLifecycleMgmt.rollup.create.stepMetrics.metricsColumnHeader',
+        {
+          defaultMessage: 'Metrics',
+        }
+      ),
       render: ({ name: fieldName, type: fieldType, types }) => {
         const { onFieldsChange } = this.props;
         const checkboxes = metricTypesConfig
@@ -387,7 +402,7 @@ export class StepMetrics extends Component {
             <EuiTitle data-test-subj="rollupJobCreateMetricsTitle">
               <h2>
                 <FormattedMessage
-                  id="xpack.rollupJobs.create.stepMetricsTitle"
+                  id="xpack.indexLifecycleMgmt.rollup.create.stepMetricsTitle"
                   defaultMessage="Metrics (optional)"
                 />
               </h2>
@@ -398,7 +413,7 @@ export class StepMetrics extends Component {
             <EuiText>
               <p>
                 <FormattedMessage
-                  id="xpack.rollupJobs.create.stepMetricsDescription"
+                  id="xpack.indexLifecycleMgmt.rollup.create.stepMetricsDescription"
                   defaultMessage="Select the metrics to collect while rolling up data. By default,
                     only doc_counts are collected for each group."
                 />
@@ -415,7 +430,7 @@ export class StepMetrics extends Component {
           onRemoveField={this.onRemoveField}
           emptyMessage={
             <p>
-              {i18n.translate('xpack.rollupJobs.create.stepMetrics.emptyListLabel', {
+              {i18n.translate('xpack.indexLifecycleMgmt.rollup.create.stepMetrics.emptyListLabel', {
                 defaultMessage: 'No metrics fields added',
               })}
             </p>
@@ -427,7 +442,7 @@ export class StepMetrics extends Component {
                   key="stepMetricsFieldChooser"
                   buttonLabel={
                     <FormattedMessage
-                      id="xpack.rollupJobs.create.stepMetrics.fieldsChooserLabel"
+                      id="xpack.indexLifecycleMgmt.rollup.create.stepMetrics.fieldsChooserLabel"
                       defaultMessage="Add metrics fields"
                     />
                   }
@@ -465,7 +480,7 @@ export class StepMetrics extends Component {
   static chooserColumns = [
     {
       field: 'name',
-      name: i18n.translate('xpack.rollupJobs.create.stepMetrics.fieldColumnLabel', {
+      name: i18n.translate('xpack.indexLifecycleMgmt.rollup.create.stepMetrics.fieldColumnLabel', {
         defaultMessage: 'Field',
       }),
       sortable: true,
@@ -473,7 +488,7 @@ export class StepMetrics extends Component {
     },
     {
       field: 'type',
-      name: i18n.translate('xpack.rollupJobs.create.stepMetrics.typeColumnLabel', {
+      name: i18n.translate('xpack.indexLifecycleMgmt.rollup.create.stepMetrics.typeColumnLabel', {
         defaultMessage: 'Type',
       }),
       truncateText: true,

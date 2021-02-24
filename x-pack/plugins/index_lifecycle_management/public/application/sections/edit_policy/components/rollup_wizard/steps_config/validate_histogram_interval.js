@@ -17,7 +17,7 @@ export function validateHistogramInterval(histogram, histogramInterval) {
   if (histogramInterval <= 0) {
     return [
       <FormattedMessage
-        id="xpack.rollupJobs.create.errors.histogramIntervalZero"
+        id="xpack.indexLifecycleMgmt.rollup.create.errors.histogramIntervalZero"
         defaultMessage="Interval must be greater than zero."
       />,
     ];
@@ -26,7 +26,7 @@ export function validateHistogramInterval(histogram, histogramInterval) {
   if (Math.round(histogramInterval) !== Number(histogramInterval)) {
     return [
       <FormattedMessage
-        id="xpack.rollupJobs.create.errors.histogramIntervalWholeNumber"
+        id="xpack.indexLifecycleMgmt.rollup.create.errors.histogramIntervalWholeNumber"
         defaultMessage="Interval must be a whole number."
       />,
     ];
@@ -35,7 +35,7 @@ export function validateHistogramInterval(histogram, histogramInterval) {
   if (!histogramInterval) {
     return [
       <FormattedMessage
-        id="xpack.rollupJobs.create.errors.histogramIntervalMissing"
+        id="xpack.indexLifecycleMgmt.rollup.create.errors.histogramIntervalMissing"
         defaultMessage="An interval is required to roll up these histogram fields."
       />,
     ];

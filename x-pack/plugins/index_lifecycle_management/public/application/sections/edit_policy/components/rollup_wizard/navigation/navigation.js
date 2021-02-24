@@ -26,7 +26,10 @@ export const Navigation = ({
         onClick={goToPreviousStep}
         data-test-subj="rollupJobBackButton"
       >
-        <FormattedMessage id="xpack.rollupJobs.create.backButton.label" defaultMessage="Back" />
+        <FormattedMessage
+          id="xpack.indexLifecycleMgmt.rollup.create.backButton.label"
+          defaultMessage="Back"
+        />
       </EuiButtonEmpty>
     </EuiFlexItem>
   );
@@ -41,7 +44,10 @@ export const Navigation = ({
         fill
         data-test-subj="rollupJobNextButton"
       >
-        <FormattedMessage id="xpack.rollupJobs.create.nextButton.label" defaultMessage="Next" />
+        <FormattedMessage
+          id="xpack.indexLifecycleMgmt.rollup.create.nextButton.label"
+          defaultMessage="Next"
+        />
       </EuiButton>
     </EuiFlexItem>
   );
@@ -55,7 +61,10 @@ export const Navigation = ({
         fill
         data-test-subj="rollupJobSaveButton"
       >
-        <FormattedMessage id="xpack.rollupJobs.create.saveButton.label" defaultMessage="Save" />
+        <FormattedMessage
+          id="xpack.indexLifecycleMgmt.rollup.create.saveButton.label"
+          defaultMessage="Save"
+        />
       </EuiButton>
     </EuiFlexItem>
   );
