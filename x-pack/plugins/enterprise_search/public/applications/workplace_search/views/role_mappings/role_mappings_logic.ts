@@ -10,6 +10,7 @@ import { kea, MakeLogicType } from 'kea';
 import { clearFlashMessages, flashAPIErrors } from '../../../shared/flash_messages';
 import { HttpLogic } from '../../../shared/http';
 import { KibanaLogic } from '../../../shared/kibana';
+import { AttributeName } from '../../../shared/role_mapping/attribute_selector';
 import { ANY_AUTH_PROVIDER } from '../../../shared/role_mapping/constants';
 import { ROLE_MAPPINGS_PATH } from '../../routes';
 import { RoleGroup, WSRoleMapping, Role } from '../../types';
@@ -38,9 +39,9 @@ interface RoleMappingsActions {
   handleRoleChange(roleType: Role): { roleType: Role };
   handleAllGroupsSelectionChange(selected: boolean): { selected: boolean };
   handleAttributeSelectorChange(
-    value: string,
+    value: AttributeName,
     firstElasticsearchRole: string
-  ): { value: string; firstElasticsearchRole: string };
+  ): { value: AttributeName; firstElasticsearchRole: string };
   handleAttributeValueChange(value: string): { value: string };
   handleGroupSelectionChange(
     groupId: string,
@@ -62,7 +63,7 @@ interface RoleMappingsValues {
   roleMappings: WSRoleMapping[];
   roleType: Role;
   attributeValue: string;
-  attributeName: string;
+  attributeName: AttributeName;
   dataLoading: boolean;
   multipleAuthProvidersConfig: boolean;
   availableGroups: RoleGroup[];
@@ -71,8 +72,8 @@ interface RoleMappingsValues {
   selectedAuthProviders: string[];
 }
 
-const getFirstAttributeName = (roleMapping: WSRoleMapping): string =>
-  Object.entries(roleMapping.rules)[0][0] as string;
+const getFirstAttributeName = (roleMapping: WSRoleMapping): AttributeName =>
+  Object.entries(roleMapping.rules)[0][0] as AttributeName;
 const getFirstAttributeValue = (roleMapping: WSRoleMapping): string =>
   Object.entries(roleMapping.rules)[0][1] as string;
 
