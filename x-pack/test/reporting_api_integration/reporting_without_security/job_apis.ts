@@ -45,7 +45,6 @@ export default function ({ getService }: FtrProviderContext) {
         created_by: false,
         jobtype: 'csv',
         max_attempts: 1,
-        priority: 10,
         status: 'pending',
         timeout: 120000,
         browser_type: 'chromium', // TODO: remove this field from the API response
