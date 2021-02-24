@@ -25,7 +25,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await esArchiver.load('discover');
       await kibanaServer.uiSettings.replace({
         defaultIndex: 'logstash-*',
-        'discover:searchFieldsFromSource': false,
       });
       await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await PageObjects.common.navigateToApp('discover');
