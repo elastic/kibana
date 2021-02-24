@@ -10,7 +10,6 @@ import { EuiPanel } from '@elastic/eui';
 import { EmsTmsSourceConfig, TileServiceSelect } from './tile_service_select';
 
 interface Props {
-  initialConfig: EmsTmsSourceConfig;
   onTileSelect: (sourceConfig: EmsTmsSourceConfig) => void;
 }
 

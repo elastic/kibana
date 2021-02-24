@@ -7,7 +7,6 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiPanel } from '@elastic/eui';
 import { LayerWizard, RenderWizardArguments } from '../../layers/layer_wizard_registry';
 // @ts-ignore
 import { EMSTMSSource, getSourceTitle } from './ems_tms_source';

@@ -80,9 +80,9 @@ export class TileServiceSelect extends Component<Props, State> {
   render() {
     const helpText = this.state.emsTmsOptions.length === 0 ? getEmsUnavailableMessage() : null;
 
-    let selectedId;
+    let selectedId: string | undefined;
     if (this.props.config) {
-      selectedId = this.props.config.isAutoSelect ? AUTO_SELECT : this.props.config.id;
+      selectedId = this.props.config.isAutoSelect ? AUTO_SELECT : this.props.config.id!;
     }
 
     return (
