@@ -18,6 +18,7 @@ import {
   EuiCallOut,
   EuiText,
   EuiLink,
+  EuiEmptyPrompt,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -187,12 +188,48 @@ export const RelevanceTuning: React.FC<Props> = ({ engineBreadcrumb }) => {
         </EuiCallOut>
       )}
       <EuiSpacer />
-      <EuiFlexGroup>
-        <EuiFlexItem>
-          <RelevanceTuningForm />
-        </EuiFlexItem>
-        <EuiFlexItem />
-      </EuiFlexGroup>
+      {engineHasSchemaFields ? (
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <RelevanceTuningForm />
+          </EuiFlexItem>
+          <EuiFlexItem />
+        </EuiFlexGroup>
+      ) : (
+        <EuiEmptyPrompt
+          title={
+            <h2>
+              {i18n.translate(
+                'xpack.enterpriseSearch.appSearch.engine.relevanceTuning.emptyErrorMessageTitle',
+                {
+                  defaultMessage: 'Tuning requires schema fields',
+                }
+              )}
+            </h2>
+          }
+          body={i18n.translate(
+            'xpack.enterpriseSearch.appSearch.engine.relevanceTuning.emptyErrorMessage',
+            {
+              defaultMessage: 'Index documents to tune relevance.',
+            }
+          )}
+          actions={
+            <EuiButton
+              size="s"
+              color="primary"
+              href={`${DOCS_PREFIX}/relevance-tuning-guide.html`}
+              fill
+            >
+              {i18n.translate(
+                'xpack.enterpriseSearch.appSearch.engine.relevanceTuning.emptyButtonLabel',
+                {
+                  defaultMessage: 'Read the relevance tuning guide',
+                }
+              )}
+            </EuiButton>
+          }
+        />
+      )}
     </>
   );
 };

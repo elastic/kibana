@@ -14,9 +14,9 @@ jest.mock('../engine', () => ({
 
 import React from 'react';
 
-import { shallow } from 'enzyme';
+import { shallow, ShallowWrapper } from 'enzyme';
 
-import { EuiPageHeader } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiPageHeader } from '@elastic/eui';
 
 import { RelevanceTuning } from './relevance_tuning';
 import { RelevanceTuningForm } from './relevance_tuning_form';
@@ -78,15 +78,36 @@ describe('RelevanceTuning', () => {
     expect(actions.resetSearchSettings).toHaveBeenCalled();
   });
 
-  it('will not render buttons if the engine has no schema', () => {
-    // An eninge would have no schema if it is newly created, and no documents have been indexed
-    // yet.
-    setMockValues({
-      ...values,
-      engineHasSchemaFields: false,
+  describe('when the engine has no schema', () => {
+    let wrapper: ShallowWrapper;
+
+    beforeAll(() => {
+      // An eninge would have no schema if it is newly created, and no documents have been indexed
+      // yet.
+      setMockValues({
+        ...values,
+        engineHasSchemaFields: false,
+      });
+      wrapper = subject();
     });
-    const buttons = subject().find(EuiPageHeader).prop('rightSideItems') as React.ReactElement[];
-    expect(buttons.length).toBe(0);
+
+    it('will not render buttons if the engine has no schema', () => {
+      setMockValues({
+        ...values,
+        engineHasSchemaFields: false,
+      });
+      const buttons = wrapper.find(EuiPageHeader).prop('rightSideItems') as React.ReactElement[];
+      expect(buttons.length).toBe(0);
+    });
+
+    it('will render an empty message', () => {
+      setMockValues({
+        ...values,
+        engineHasSchemaFields: false,
+      });
+      expect(wrapper.find(EuiEmptyPrompt).exists()).toBe(true);
+      expect(wrapper.find(RelevanceTuningForm).exists()).toBe(false);
+    });
   });
 
   it('shows a message when there are invalid boosts', () => {
