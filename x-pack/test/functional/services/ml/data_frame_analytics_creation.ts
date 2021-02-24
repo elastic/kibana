@@ -116,10 +116,12 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
       await testSubjects.existOrFail('mlAnalyticsCreationDataGridHistogramButton');
     },
 
-    async enableSourceDataPreviewHistogramCharts() {
-      await this.assertSourceDataPreviewHistogramChartButtonCheckState(false);
-      await testSubjects.click('mlAnalyticsCreationDataGridHistogramButton');
-      await this.assertSourceDataPreviewHistogramChartButtonCheckState(true);
+    async enableSourceDataPreviewHistogramCharts(expectedDefaultButtonState: boolean) {
+      await this.assertSourceDataPreviewHistogramChartButtonCheckState(expectedDefaultButtonState);
+      if (expectedDefaultButtonState === false) {
+        await testSubjects.click('mlAnalyticsCreationDataGridHistogramButton');
+        await this.assertSourceDataPreviewHistogramChartButtonCheckState(true);
+      }
     },
 
     async assertSourceDataPreviewHistogramChartButtonCheckState(expectedCheckState: boolean) {

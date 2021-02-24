@@ -22,14 +22,20 @@ Webhook URL::   The URL of the incoming webhook. See https://docs.microsoft.com/
  my-teams:
    name: preconfigured-teams-action-type
    actionTypeId: .teams
-   config:
+   secrets:
      webhookUrl: 'https://outlook.office.com/webhook/abcd@0123456/IncomingWebhook/abcdefgh/ijklmnopqrstuvwxyz'
 --
 
 [[teams-connector-config-properties]]
-`config` defines the action type specific to the configuration.
-`config` contains
-`webhookUrl`, a string that corresponds to *Webhook URL*.
+**`secrets`** defines sensitive information for the action type and contains the following properties:
+
+[cols="2*<"]
+|===
+
+| `webhookUrl`
+| A string that corresponds to *Webhook URL*.
+
+|===
 
 
 [float]
