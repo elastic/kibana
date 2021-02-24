@@ -13,20 +13,20 @@ export interface SnapShotQueryParams {
   dateRangeStart: string;
   dateRangeEnd: string;
   filters?: string;
-  statusFilter?: string;
+  query?: string;
 }
 
 export const fetchSnapshotCount = async ({
   dateRangeStart,
   dateRangeEnd,
   filters,
-  statusFilter,
+  query,
 }: SnapShotQueryParams): Promise<Snapshot> => {
   const queryParams = {
     dateRangeStart,
     dateRangeEnd,
     ...(filters && { filters }),
-    ...(statusFilter && { statusFilter }),
+    ...(query && { query }),
   };
 
   return await apiService.get(API_URLS.SNAPSHOT_COUNT, queryParams, SnapshotType);
