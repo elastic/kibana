@@ -21831,7 +21831,6 @@
     "xpack.uptime.filterPopout.searchMessage.ariaLabel": "搜索 {title}",
     "xpack.uptime.integrationLink.missingDataMessage": "未找到此集成的所需数据。",
     "xpack.uptime.kueryBar.indexPatternMissingWarningMessage": "检索索引模式时出错。",
-    "xpack.uptime.kueryBar.searchPlaceholder": "搜索监测 ID、名称和协议类型......",
     "xpack.uptime.locationAvailabilityViewToggleLegend": "视图切换",
     "xpack.uptime.locationMap.locations.missing.message": "重要的地理位置配置缺失。您可以使用 {codeBlock} 字段为您的运行时间检查创建独特的地理区域。",
     "xpack.uptime.locationMap.locations.missing.message1": "在我们的文档中获取更多的信息。",

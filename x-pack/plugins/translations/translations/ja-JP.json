@@ -21781,7 +21781,6 @@
     "xpack.uptime.filterPopout.searchMessage.ariaLabel": "{title} を検索",
     "xpack.uptime.integrationLink.missingDataMessage": "この統合に必要なデータが見つかりませんでした。",
     "xpack.uptime.kueryBar.indexPatternMissingWarningMessage": "インデックスパターンの取得中にエラーが発生しました。",
-    "xpack.uptime.kueryBar.searchPlaceholder": "モニター ID、名前、プロトコルタイプなどを検索…",
     "xpack.uptime.locationAvailabilityViewToggleLegend": "トグルを表示",
     "xpack.uptime.locationMap.locations.missing.message": "重要な位置情報構成がありません。{codeBlock}フィールドを使用して、アップタイムチェック用に一意の地域を作成できます。",
     "xpack.uptime.locationMap.locations.missing.message1": "詳細については、ドキュメンテーションを参照してください。",
