@@ -18,12 +18,7 @@ export function isPrivate(node: ParameterDeclaration | ClassMemberTypes): boolea
  * Change the absolute path into a relative one.
  */
 function getRelativePath(fullPath: string): string {
-  const index = fullPath.indexOf(REPO_ROOT);
-  if (index >= 0) {
-    return fullPath.slice(REPO_ROOT.length);
-  } else {
-    return fullPath;
-  }
+  return Path.relative(REPO_ROOT, fullPath)
 }
 
 export function getSourceForNode(node: Node): SourceLink {
