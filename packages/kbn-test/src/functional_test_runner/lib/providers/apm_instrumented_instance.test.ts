@@ -21,7 +21,7 @@ expect.addSnapshotSerializer(
 
 jest.mock('elastic-apm-node', () => {
   return {
-    startSpan: jest.fn(() => {
+    startSpan: jest.fn((...names: string[]) => {
       let outcome: string | null = null;
       let ended = false;
 
@@ -33,7 +33,7 @@ jest.mock('elastic-apm-node', () => {
           ended = true;
         },
         [mockPrint]() {
-          return `SPAN[outcome=${outcome}, ended=${ended}]`;
+          return `SPAN[name=${names.join('/')}, outcome=${outcome}, ended=${ended}]`;
         },
       };
     }),
@@ -66,7 +66,7 @@ it('deeply wraps objects so that methods start and end spans', () => {
     },
   };
 
-  const instrumented = createApmInstrumentedInstance('myInstance', instance);
+  const instrumented = createApmInstrumentedInstance(instance, 'service', 'myInstance');
 
   expect(instrumented.foo()).toBe('foo');
   expect(instrumented.sub.api.subFoo()).toBe('subFoo');
@@ -78,33 +78,45 @@ it('deeply wraps objects so that methods start and end spans', () => {
       "calls": Array [
         Array [
           "myInstance.foo()",
+          "service",
+          "myInstance",
+          "foo",
         ],
         Array [
           "myInstance.sub.api.subFoo()",
+          "service",
+          "myInstance",
+          "sub.api.subFoo",
         ],
         Array [
           "myInstance.bar()",
+          "service",
+          "myInstance",
+          "bar",
         ],
         Array [
           "myInstance.sub.api.subBar()",
+          "service",
+          "myInstance",
+          "sub.api.subBar",
         ],
       ],
       "results": Array [
         Object {
           "type": "return",
-          "value": "SPAN[outcome=success, ended=true]",
+          "value": "SPAN[name=myInstance.foo()/service/myInstance/foo, outcome=success, ended=true]",
         },
         Object {
           "type": "return",
-          "value": "SPAN[outcome=success, ended=true]",
+          "value": "SPAN[name=myInstance.sub.api.subFoo()/service/myInstance/sub.api.subFoo, outcome=success, ended=true]",
         },
         Object {
           "type": "return",
-          "value": "SPAN[outcome=failure, ended=true]",
+          "value": "SPAN[name=myInstance.bar()/service/myInstance/bar, outcome=failure, ended=true]",
         },
         Object {
           "type": "return",
-          "value": "SPAN[outcome=failure, ended=true]",
+          "value": "SPAN[name=myInstance.sub.api.subBar()/service/myInstance/sub.api.subBar, outcome=failure, ended=true]",
         },
       ],
     }

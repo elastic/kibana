@@ -102,12 +102,13 @@ export class ProviderCollection {
           typeof instance === 'object'
         ) {
           instance = createApmInstrumentedInstance(
-            type === 'PageObject' ? `PageObjects.${name}` : name,
             createVerboseInstance(
               this.log,
               type === 'PageObject' ? `PageObjects.${name}` : name,
               instance
-            )
+            ),
+            type,
+            name
           );
         }
 

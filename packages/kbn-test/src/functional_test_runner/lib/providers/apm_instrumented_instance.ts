@@ -24,15 +24,16 @@ const isObj = (value: any): value is object => {
 };
 
 export const createApmInstrumentedInstance = <T extends object>(
-  instanceName: string,
-  instance: T
+  instance: T,
+  type: string,
+  instanceName: string
 ) => {
   const fnWrappers = new WeakMap<SomeFn, SomeFn>();
   const objWrappers = new WeakMap<object, object>();
 
   const createFnWrapper = (path: string, context: object, fn: SomeFn): SomeFn => {
     return (...args: any[]) => {
-      const span = apm.startSpan(`${path}()`);
+      const span = apm.startSpan(`${instanceName}.${path}()`, type, instanceName, path);
 
       if (!span) {
         return fn.apply(context, args);
@@ -73,6 +74,7 @@ export const createApmInstrumentedInstance = <T extends object>(
     return new Proxy(object, {
       get(_, property: keyof T, receiver) {
         const value = Reflect.get(object, property, receiver);
+        const subPath = path ? `${path}.${property}` : `${property}`;
 
         // wrap function properties
         if (typeof value === 'function') {
@@ -81,7 +83,7 @@ export const createApmInstrumentedInstance = <T extends object>(
             return cached;
           }
 
-          const wrapper = createFnWrapper(`${path}.${property}`, object, value);
+          const wrapper = createFnWrapper(subPath, object, value);
           fnWrappers.set(value, wrapper);
           return wrapper;
         }
@@ -93,7 +95,7 @@ export const createApmInstrumentedInstance = <T extends object>(
             return cached;
           }
 
-          const wrapper = createObjectWrapper(`${path}.${property}`, value);
+          const wrapper = createObjectWrapper(subPath, value);
           objWrappers.set(value, wrapper);
           return wrapper;
         }
@@ -103,5 +105,5 @@ export const createApmInstrumentedInstance = <T extends object>(
     });
   };
 
-  return createObjectWrapper(instanceName, instance) as T;
+  return createObjectWrapper('', instance) as T;
 };
