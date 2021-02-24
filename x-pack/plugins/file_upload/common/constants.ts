@@ -6,7 +6,6 @@
  */
 
 export const UI_SETTING_MAX_FILE_SIZE = 'fileUpload:maxFileSize';
-// export const FILE_DATA_VISUALIZER_MAX_FILE_SIZE = 'ml:fileDataVisualizerMaxFileSize';
 
 export const MB = Math.pow(2, 20);
 export const MAX_FILE_SIZE = '100MB';
