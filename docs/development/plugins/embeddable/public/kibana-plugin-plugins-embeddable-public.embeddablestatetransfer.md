@@ -16,21 +16,22 @@ export declare class EmbeddableStateTransfer
 
 |  Constructor | Modifiers | Description |
 |  --- | --- | --- |
-|  [(constructor)(navigateToApp, appList, customStorage)](./kibana-plugin-plugins-embeddable-public.embeddablestatetransfer._constructor_.md) |  | Constructs a new instance of the <code>EmbeddableStateTransfer</code> class |
+|  [(constructor)(navigateToApp, currentAppId$, appList, customStorage)](./kibana-plugin-plugins-embeddable-public.embeddablestatetransfer._constructor_.md) |  | Constructs a new instance of the <code>EmbeddableStateTransfer</code> class |
 
 ## Properties
 
 |  Property | Modifiers | Type | Description |
 |  --- | --- | --- | --- |
 |  [getAppNameFromId](./kibana-plugin-plugins-embeddable-public.embeddablestatetransfer.getappnamefromid.md) |  | <code>(appId: string) =&gt; string &#124; undefined</code> | Fetches an internationalized app title when given an appId. |
+|  [isTransferInProgress](./kibana-plugin-plugins-embeddable-public.embeddablestatetransfer.istransferinprogress.md) |  | <code>boolean</code> |  |
 
 ## Methods
 
 |  Method | Modifiers | Description |
 |  --- | --- | --- |
-|  [clearEditorState()](./kibana-plugin-plugins-embeddable-public.embeddablestatetransfer.cleareditorstate.md) |  |  |
-|  [getIncomingEditorState(removeAfterFetch)](./kibana-plugin-plugins-embeddable-public.embeddablestatetransfer.getincomingeditorstate.md) |  | Fetches an [originating app](./kibana-plugin-plugins-embeddable-public.embeddableeditorstate.md) argument from the sessionStorage |
-|  [getIncomingEmbeddablePackage(removeAfterFetch)](./kibana-plugin-plugins-embeddable-public.embeddablestatetransfer.getincomingembeddablepackage.md) |  | Fetches an [embeddable package](./kibana-plugin-plugins-embeddable-public.embeddablepackagestate.md) argument from the sessionStorage |
+|  [clearEditorState(appId)](./kibana-plugin-plugins-embeddable-public.embeddablestatetransfer.cleareditorstate.md) |  | Clears the [editor state](./kibana-plugin-plugins-embeddable-public.embeddableeditorstate.md) from the sessionStorage for the provided app id |
+|  [getIncomingEditorState(appId, removeAfterFetch)](./kibana-plugin-plugins-embeddable-public.embeddablestatetransfer.getincomingeditorstate.md) |  | Fetches an [editor state](./kibana-plugin-plugins-embeddable-public.embeddableeditorstate.md) from the sessionStorage for the provided app id |
+|  [getIncomingEmbeddablePackage(appId, removeAfterFetch)](./kibana-plugin-plugins-embeddable-public.embeddablestatetransfer.getincomingembeddablepackage.md) |  | Fetches an [embeddable package](./kibana-plugin-plugins-embeddable-public.embeddablepackagestate.md) from the sessionStorage for the given AppId |
 |  [navigateToEditor(appId, options)](./kibana-plugin-plugins-embeddable-public.embeddablestatetransfer.navigatetoeditor.md) |  | A wrapper around the  method which navigates to the specified appId with [embeddable editor state](./kibana-plugin-plugins-embeddable-public.embeddableeditorstate.md) |
 |  [navigateToWithEmbeddablePackage(appId, options)](./kibana-plugin-plugins-embeddable-public.embeddablestatetransfer.navigatetowithembeddablepackage.md) |  | A wrapper around the  method which navigates to the specified appId with [embeddable package state](./kibana-plugin-plugins-embeddable-public.embeddablepackagestate.md) |
 

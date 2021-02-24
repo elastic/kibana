@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { AggName } from '../../../common/types/aggregations';
@@ -9,6 +10,7 @@ import { Dictionary } from '../../../common/types/common';
 import { EsFieldName } from '../../../common/types/fields';
 import { GenericAgg } from '../../../common/types/pivot_group_by';
 import { KBN_FIELD_TYPES } from '../../../../../../src/plugins/data/common';
+import { PivotAggsConfigWithUiSupport } from './pivot_aggs';
 
 export enum PIVOT_SUPPORTED_GROUP_BY_AGGS {
   DATE_HISTOGRAM = 'date_histogram',
@@ -115,4 +117,8 @@ export function getEsAggFromGroupByConfig(groupByConfig: GroupByConfigBase): Gen
   return {
     [agg]: esAgg,
   };
+}
+
+export function isPivotAggConfigWithUiSupport(arg: any): arg is PivotAggsConfigWithUiSupport {
+  return arg.hasOwnProperty('agg') && arg.hasOwnProperty('field');
 }

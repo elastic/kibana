@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -85,3 +86,31 @@ export const UNSAVED_TIMELINE_WARNING = (timelineType: TimelineTypeLiteral) =>
     values: { timeline: timelineType === TimelineType.template ? 'timeline template' : 'timeline' },
     defaultMessage: 'You have an unsaved {timeline}. Do you wish to save it?',
   });
+
+export const TITLE = i18n.translate(
+  'xpack.securitySolution.timeline.saveTimeline.modal.titleTitle',
+  {
+    defaultMessage: 'Title',
+  }
+);
+
+export const TIMELINE_TITLE = i18n.translate(
+  'xpack.securitySolution.timeline.saveTimeline.modal.titleAriaLabel',
+  {
+    defaultMessage: 'Title',
+  }
+);
+
+export const TIMELINE_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.timeline.saveTimeline.modal.descriptionLabel',
+  {
+    defaultMessage: 'Description',
+  }
+);
+
+export const OPTIONAL = i18n.translate(
+  'xpack.securitySolution.timeline.saveTimeline.modal.optionalLabel',
+  {
+    defaultMessage: 'Optional',
+  }
+);

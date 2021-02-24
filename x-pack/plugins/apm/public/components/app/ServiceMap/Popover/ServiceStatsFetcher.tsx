@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -31,8 +32,7 @@ export function ServiceStatsFetcher({
   serviceAnomalyStats,
 }: ServiceStatsFetcherProps) {
   const {
-    urlParams: { start, end },
-    uiFilters,
+    urlParams: { environment, start, end },
   } = useUrlParams();
 
   const {
@@ -45,19 +45,18 @@ export function ServiceStatsFetcher({
           endpoint: 'GET /api/apm/service-map/service/{serviceName}',
           params: {
             path: { serviceName },
-            query: { start, end, uiFilters: JSON.stringify(uiFilters) },
+            query: { environment, start, end },
           },
         });
       }
     },
-    [serviceName, start, end, uiFilters],
+    [environment, serviceName, start, end],
     {
       preservePreviousData: false,
     }
   );
 
-  const isLoading =
-    status === FETCH_STATUS.PENDING || status === FETCH_STATUS.LOADING;
+  const isLoading = status === FETCH_STATUS.LOADING;
 
   if (isLoading) {
     return <LoadingSpinner />;

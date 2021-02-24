@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import _ from 'lodash';
@@ -57,13 +58,20 @@ export function getSortScoreByPriority(
  * Returns all `OperationType`s that can build a column using `buildColumn` based on the
  * passed in field.
  */
-export function getOperationTypesForField(field: IndexPatternField): OperationType[] {
+export function getOperationTypesForField(
+  field: IndexPatternField,
+  filterOperations?: (operation: OperationMetadata) => boolean
+): OperationType[] {
   return operationDefinitions
-    .filter(
-      (operationDefinition) =>
-        operationDefinition.input === 'field' &&
-        operationDefinition.getPossibleOperationForField(field)
-    )
+    .filter((operationDefinition) => {
+      if (operationDefinition.input !== 'field') {
+        return false;
+      }
+      const possibleOperation = operationDefinition.getPossibleOperationForField(field);
+      return filterOperations
+        ? possibleOperation && filterOperations(possibleOperation)
+        : possibleOperation;
+    })
     .sort(getSortScoreByPriority)
     .map(({ type }) => type);
 }
@@ -167,10 +175,13 @@ export function getAvailableOperationsByMetadata(indexPattern: IndexPattern) {
         operationDefinition.getPossibleOperation()
       );
     } else if (operationDefinition.input === 'fullReference') {
-      addToMap(
-        { type: 'fullReference', operationType: operationDefinition.type },
-        operationDefinition.getPossibleOperation()
-      );
+      const validOperation = operationDefinition.getPossibleOperation(indexPattern);
+      if (validOperation) {
+        addToMap(
+          { type: 'fullReference', operationType: operationDefinition.type },
+          validOperation
+        );
+      }
     }
   });
 

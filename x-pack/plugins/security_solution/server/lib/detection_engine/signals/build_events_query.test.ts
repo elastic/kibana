@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { buildEventsSearchQuery } from './build_events_query';
@@ -16,6 +17,7 @@ describe('create_signals', () => {
       size: 100,
       searchAfterSortId: undefined,
       timestampOverride: undefined,
+      excludeDocsWithTimestampOverride: false,
     });
     expect(query).toEqual({
       allowNoIndices: true,
@@ -37,33 +39,12 @@ describe('create_signals', () => {
                 bool: {
                   filter: [
                     {
-                      bool: {
-                        should: [
-                          {
-                            range: {
-                              '@timestamp': {
-                                gte: 'now-5m',
-                                format: 'strict_date_optional_time',
-                              },
-                            },
-                          },
-                        ],
-                        minimum_should_match: 1,
-                      },
-                    },
-                    {
-                      bool: {
-                        should: [
-                          {
-                            range: {
-                              '@timestamp': {
-                                lte: 'today',
-                                format: 'strict_date_optional_time',
-                              },
-                            },
-                          },
-                        ],
-                        minimum_should_match: 1,
+                      range: {
+                        '@timestamp': {
+                          gte: 'now-5m',
+                          lte: 'today',
+                          format: 'strict_date_optional_time',
+                        },
                       },
                     },
                   ],
@@ -75,7 +56,12 @@ describe('create_signals', () => {
             ],
           },
         },
-
+        fields: [
+          {
+            field: '*',
+            include_unmapped: true,
+          },
+        ],
         sort: [
           {
             '@timestamp': {
@@ -95,6 +81,7 @@ describe('create_signals', () => {
       size: 100,
       searchAfterSortId: '',
       timestampOverride: undefined,
+      excludeDocsWithTimestampOverride: false,
     });
     expect(query).toEqual({
       allowNoIndices: true,
@@ -116,33 +103,12 @@ describe('create_signals', () => {
                 bool: {
                   filter: [
                     {
-                      bool: {
-                        should: [
-                          {
-                            range: {
-                              '@timestamp': {
-                                gte: 'now-5m',
-                                format: 'strict_date_optional_time',
-                              },
-                            },
-                          },
-                        ],
-                        minimum_should_match: 1,
-                      },
-                    },
-                    {
-                      bool: {
-                        should: [
-                          {
-                            range: {
-                              '@timestamp': {
-                                lte: 'today',
-                                format: 'strict_date_optional_time',
-                              },
-                            },
-                          },
-                        ],
-                        minimum_should_match: 1,
+                      range: {
+                        '@timestamp': {
+                          gte: 'now-5m',
+                          lte: 'today',
+                          format: 'strict_date_optional_time',
+                        },
                       },
                     },
                   ],
@@ -154,7 +120,12 @@ describe('create_signals', () => {
             ],
           },
         },
-
+        fields: [
+          {
+            field: '*',
+            include_unmapped: true,
+          },
+        ],
         sort: [
           {
             '@timestamp': {
@@ -175,6 +146,7 @@ describe('create_signals', () => {
       size: 100,
       searchAfterSortId: fakeSortId,
       timestampOverride: undefined,
+      excludeDocsWithTimestampOverride: false,
     });
     expect(query).toEqual({
       allowNoIndices: true,
@@ -196,33 +168,12 @@ describe('create_signals', () => {
                 bool: {
                   filter: [
                     {
-                      bool: {
-                        should: [
-                          {
-                            range: {
-                              '@timestamp': {
-                                gte: 'now-5m',
-                                format: 'strict_date_optional_time',
-                              },
-                            },
-                          },
-                        ],
-                        minimum_should_match: 1,
-                      },
-                    },
-                    {
-                      bool: {
-                        should: [
-                          {
-                            range: {
-                              '@timestamp': {
-                                lte: 'today',
-                                format: 'strict_date_optional_time',
-                              },
-                            },
-                          },
-                        ],
-                        minimum_should_match: 1,
+                      range: {
+                        '@timestamp': {
+                          gte: 'now-5m',
+                          lte: 'today',
+                          format: 'strict_date_optional_time',
+                        },
                       },
                     },
                   ],
@@ -234,7 +185,12 @@ describe('create_signals', () => {
             ],
           },
         },
-
+        fields: [
+          {
+            field: '*',
+            include_unmapped: true,
+          },
+        ],
         sort: [
           {
             '@timestamp': {
@@ -256,6 +212,7 @@ describe('create_signals', () => {
       size: 100,
       searchAfterSortId: fakeSortIdNumber,
       timestampOverride: undefined,
+      excludeDocsWithTimestampOverride: false,
     });
     expect(query).toEqual({
       allowNoIndices: true,
@@ -277,33 +234,12 @@ describe('create_signals', () => {
                 bool: {
                   filter: [
                     {
-                      bool: {
-                        should: [
-                          {
-                            range: {
-                              '@timestamp': {
-                                gte: 'now-5m',
-                                format: 'strict_date_optional_time',
-                              },
-                            },
-                          },
-                        ],
-                        minimum_should_match: 1,
-                      },
-                    },
-                    {
-                      bool: {
-                        should: [
-                          {
-                            range: {
-                              '@timestamp': {
-                                lte: 'today',
-                                format: 'strict_date_optional_time',
-                              },
-                            },
-                          },
-                        ],
-                        minimum_should_match: 1,
+                      range: {
+                        '@timestamp': {
+                          gte: 'now-5m',
+                          lte: 'today',
+                          format: 'strict_date_optional_time',
+                        },
                       },
                     },
                   ],
@@ -315,7 +251,12 @@ describe('create_signals', () => {
             ],
           },
         },
-
+        fields: [
+          {
+            field: '*',
+            include_unmapped: true,
+          },
+        ],
         sort: [
           {
             '@timestamp': {
@@ -336,6 +277,7 @@ describe('create_signals', () => {
       size: 100,
       searchAfterSortId: undefined,
       timestampOverride: undefined,
+      excludeDocsWithTimestampOverride: false,
     });
     expect(query).toEqual({
       allowNoIndices: true,
@@ -357,33 +299,12 @@ describe('create_signals', () => {
                 bool: {
                   filter: [
                     {
-                      bool: {
-                        should: [
-                          {
-                            range: {
-                              '@timestamp': {
-                                gte: 'now-5m',
-                                format: 'strict_date_optional_time',
-                              },
-                            },
-                          },
-                        ],
-                        minimum_should_match: 1,
-                      },
-                    },
-                    {
-                      bool: {
-                        should: [
-                          {
-                            range: {
-                              '@timestamp': {
-                                lte: 'today',
-                                format: 'strict_date_optional_time',
-                              },
-                            },
-                          },
-                        ],
-                        minimum_should_match: 1,
+                      range: {
+                        '@timestamp': {
+                          gte: 'now-5m',
+                          lte: 'today',
+                          format: 'strict_date_optional_time',
+                        },
                       },
                     },
                   ],
@@ -395,7 +316,12 @@ describe('create_signals', () => {
             ],
           },
         },
-
+        fields: [
+          {
+            field: '*',
+            include_unmapped: true,
+          },
+        ],
         sort: [
           {
             '@timestamp': {
@@ -423,6 +349,7 @@ describe('create_signals', () => {
       size: 100,
       searchAfterSortId: undefined,
       timestampOverride: undefined,
+      excludeDocsWithTimestampOverride: false,
     });
     expect(query).toEqual({
       allowNoIndices: true,
@@ -439,33 +366,12 @@ describe('create_signals', () => {
                 bool: {
                   filter: [
                     {
-                      bool: {
-                        should: [
-                          {
-                            range: {
-                              '@timestamp': {
-                                gte: 'now-5m',
-                                format: 'strict_date_optional_time',
-                              },
-                            },
-                          },
-                        ],
-                        minimum_should_match: 1,
-                      },
-                    },
-                    {
-                      bool: {
-                        should: [
-                          {
-                            range: {
-                              '@timestamp': {
-                                lte: 'today',
-                                format: 'strict_date_optional_time',
-                              },
-                            },
-                          },
-                        ],
-                        minimum_should_match: 1,
+                      range: {
+                        '@timestamp': {
+                          gte: 'now-5m',
+                          lte: 'today',
+                          format: 'strict_date_optional_time',
+                        },
                       },
                     },
                   ],
@@ -477,6 +383,12 @@ describe('create_signals', () => {
             ],
           },
         },
+        fields: [
+          {
+            field: '*',
+            include_unmapped: true,
+          },
+        ],
         aggregations: {
           tags: {
             terms: {

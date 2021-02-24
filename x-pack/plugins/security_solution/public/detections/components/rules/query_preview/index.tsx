@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React, { Fragment, useCallback, useEffect, useReducer, useRef } from 'react';
 import { Unit } from '@elastic/datemath';
 import styled from 'styled-components';
@@ -54,7 +56,14 @@ export const initialState: State = {
   showNonEqlHistogram: false,
 };
 
-export type Threshold = { field: string | undefined; value: number } | undefined;
+export type Threshold =
+  | {
+      field: string | string[] | undefined;
+      value: number;
+      cardinality_field: string | undefined;
+      cardinality_value: number | undefined;
+    }
+  | undefined;
 
 interface PreviewQueryProps {
   dataTestSubj: string;

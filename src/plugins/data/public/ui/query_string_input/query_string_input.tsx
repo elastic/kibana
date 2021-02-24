@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React, { Component, RefObject, createRef } from 'react';
@@ -32,11 +21,13 @@ import {
   htmlIdGenerator,
   EuiPortal,
   EuiIcon,
+  EuiIconProps,
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 import { debounce, compact, isEqual, isFunction } from 'lodash';
 import { Toast } from 'src/core/public';
+import { METRIC_TYPE } from '@kbn/analytics';
 import { IDataPluginServices, IIndexPattern, Query } from '../..';
 import { QuerySuggestion, QuerySuggestionTypes } from '../../autocomplete';
 
@@ -66,7 +57,15 @@ export interface QueryStringInputProps {
   size?: SuggestionsListSize;
   className?: string;
   isInvalid?: boolean;
-  iconType?: string;
+  isClearable?: boolean;
+  iconType?: EuiIconProps['type'];
+
+  /**
+   * @param nonKqlMode by default if language switch is enabled, user can switch between kql and lucene syntax mode
+   * this params add another option text, which is just a  simple keyword search mode, the way a simple search box works
+   */
+  nonKqlMode?: 'lucene' | 'text';
+  nonKqlModeHelpText?: string;
 }
 
 interface Props extends QueryStringInputProps {
@@ -116,6 +115,10 @@ export default class QueryStringInputUI extends Component<Props, State> {
   private abortController?: AbortController;
   private fetchIndexPatternsAbortController?: AbortController;
   private services = this.props.kibana.services;
+  private reportUiCounter = this.services.usageCollection?.reportUiCounter.bind(
+    this.services.usageCollection,
+    this.services.appName
+  );
   private componentIsUnmounting = false;
   private queryBarInputDivRefInstance: RefObject<HTMLDivElement> = createRef();
 
@@ -189,12 +192,14 @@ export default class QueryStringInputUI extends Component<Props, State> {
           selectionEnd,
           signal: this.abortController.signal,
         })) || [];
-
       return [...suggestions, ...recentSearchSuggestions];
     } catch (e) {
       // TODO: Waiting on https://github.com/elastic/kibana/issues/51406 for a properly typed error
       // Ignore aborted requests
       if (e.message === 'The user aborted a request.') return;
+
+      this.reportUiCounter?.(METRIC_TYPE.LOADED, `query_string:suggestions_error`);
+
       throw e;
     }
   };
@@ -313,7 +318,7 @@ export default class QueryStringInputUI extends Component<Props, State> {
           }
           if (isSuggestionsVisible && index !== null && this.state.suggestions[index]) {
             event.preventDefault();
-            this.selectSuggestion(this.state.suggestions[index]);
+            this.selectSuggestion(this.state.suggestions[index], index);
           } else {
             this.onSubmit(this.props.query);
             this.setState({
@@ -346,7 +351,7 @@ export default class QueryStringInputUI extends Component<Props, State> {
     }
   };
 
-  private selectSuggestion = (suggestion: QuerySuggestion) => {
+  private selectSuggestion = (suggestion: QuerySuggestion, listIndex: number) => {
     if (!this.inputRef) {
       return;
     }
@@ -362,6 +367,17 @@ export default class QueryStringInputUI extends Component<Props, State> {
 
     const value = query.substr(0, selectionStart) + query.substr(selectionEnd);
     const newQueryString = value.substr(0, start) + text + value.substr(end);
+
+    this.reportUiCounter?.(
+      METRIC_TYPE.LOADED,
+      `query_string:${type}:suggestions_select_position`,
+      listIndex
+    );
+    this.reportUiCounter?.(
+      METRIC_TYPE.LOADED,
+      `query_string:${type}:suggestions_select_q_length`,
+      end - start
+    );
 
     this.onQueryStringChange(newQueryString);
 
@@ -469,6 +485,7 @@ export default class QueryStringInputUI extends Component<Props, State> {
     const newQuery = { query: '', language };
     this.onChange(newQuery);
     this.onSubmit(newQuery);
+    this.reportUiCounter?.(METRIC_TYPE.LOADED, `query_string:language:${language}`);
   };
 
   private onOutsideClick = () => {
@@ -491,11 +508,11 @@ export default class QueryStringInputUI extends Component<Props, State> {
     }
   };
 
-  private onClickSuggestion = (suggestion: QuerySuggestion) => {
+  private onClickSuggestion = (suggestion: QuerySuggestion, index: number) => {
     if (!this.inputRef) {
       return;
     }
-    this.selectSuggestion(suggestion);
+    this.selectSuggestion(suggestion, index);
     this.inputRef.focus();
   };
 
@@ -599,6 +616,7 @@ export default class QueryStringInputUI extends Component<Props, State> {
     if (this.props.onChangeQueryInputFocus) {
       this.props.onChangeQueryInputFocus(true);
     }
+
     requestAnimationFrame(() => {
       this.handleAutoHeight();
     });
@@ -689,8 +707,24 @@ export default class QueryStringInputUI extends Component<Props, State> {
                   <EuiIcon
                     className="euiFormControlLayoutCustomIcon__icon"
                     aria-hidden="true"
-                    type="search"
+                    type={this.props.iconType}
                   />
+                </div>
+              ) : null}
+              {this.props.isClearable && this.props.query.query ? (
+                <div className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right">
+                  <button
+                    type="button"
+                    className="euiFormControlLayoutClearButton"
+                    title={i18n.translate('data.query.queryBar.clearInputLabel', {
+                      defaultMessage: 'Clear input',
+                    })}
+                    onClick={() => {
+                      this.onQueryStringChange('');
+                    }}
+                  >
+                    <EuiIcon className="euiFormControlLayoutClearButton__icon" type="cross" />
+                  </button>
                 </div>
               ) : null}
             </div>
@@ -713,6 +747,8 @@ export default class QueryStringInputUI extends Component<Props, State> {
             language={this.props.query.language}
             anchorPosition={this.props.languageSwitcherPopoverAnchorPosition}
             onSelectLanguage={this.onSelectLanguage}
+            nonKqlMode={this.props.nonKqlMode}
+            nonKqlModeHelpText={this.props.nonKqlModeHelpText}
           />
         )}
       </div>

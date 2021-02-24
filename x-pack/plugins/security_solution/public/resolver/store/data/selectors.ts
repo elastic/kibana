@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import rbush from 'rbush';
@@ -63,11 +64,24 @@ export function resolverComponentInstanceID(state: DataState): string {
 }
 
 /**
+ * The indices resolver should use, passed in as external props.
+ */
+const currentIndices = (state: DataState): string[] => {
+  return state.indices;
+};
+
+/**
  * The last NewResolverTree we received, if any. It may be stale (it might not be for the same databaseDocumentID that
  * we're currently interested in.
  */
 const resolverTreeResponse = (state: DataState): NewResolverTree | undefined => {
   return state.tree?.lastResponse?.successful ? state.tree?.lastResponse.result : undefined;
+};
+
+const lastResponseIndices = (state: DataState): string[] | undefined => {
+  return state.tree?.lastResponse?.successful
+    ? state.tree?.lastResponse?.parameters?.indices
+    : undefined;
 };
 
 /**
@@ -95,40 +109,6 @@ export const originID: (state: DataState) => string | undefined = createSelector
   }
 );
 
-function currentRelatedEventRequestID(state: DataState): number | undefined {
-  if (state.currentRelatedEvent) {
-    return state.currentRelatedEvent?.dataRequestID;
-  } else {
-    return undefined;
-  }
-}
-
-function currentNodeEventsInCategoryRequestID(state: DataState): number | undefined {
-  if (state.nodeEventsInCategory?.pendingRequest) {
-    return state.nodeEventsInCategory.pendingRequest?.dataRequestID;
-  } else if (state.nodeEventsInCategory) {
-    return state.nodeEventsInCategory?.dataRequestID;
-  } else {
-    return undefined;
-  }
-}
-
-export const eventsInCategoryResultIsStale = createSelector(
-  currentNodeEventsInCategoryRequestID,
-  refreshCount,
-  function eventsInCategoryResultIsStale(oldID, newID) {
-    return oldID !== undefined && oldID !== newID;
-  }
-);
-
-export const currentRelatedEventIsStale = createSelector(
-  currentRelatedEventRequestID,
-  refreshCount,
-  function currentRelatedEventIsStale(oldID, newID) {
-    return oldID !== undefined && oldID !== newID;
-  }
-);
-
 /**
  * Returns a data structure for accessing events for specific nodes in a graph. For Endpoint graphs these nodes will be
  * process lifecycle events.
@@ -149,42 +129,15 @@ export const nodeDataForID: (
   };
 });
 
-const nodeDataRequestID: (state: DataState) => (id: string) => number | undefined = createSelector(
-  nodeDataForID,
-  (nodeInfo) => {
-    return (id: string) => {
-      return nodeInfo(id)?.dataRequestID;
-    };
-  }
-);
-
-/**
- * Returns true if a specific node's data is outdated. It will be outdated if a user clicked the refresh/update button
- * after the node data was retrieved.
- */
-export const nodeDataIsStale: (state: DataState) => (id: string) => boolean = createSelector(
-  nodeDataRequestID,
-  refreshCount,
-  (nodeRequestID, newID) => {
-    return (id: string) => {
-      const oldID = nodeRequestID(id);
-      // if we don't have the node in the map then it's data must be stale or if the refreshCount is greater than the
-      // node's requestID then it is also stale
-      return oldID === undefined || newID > oldID;
-    };
-  }
-);
-
 /**
  * Returns a function that can be called to retrieve the state of the node, running, loading, or terminated.
  */
 export const nodeDataStatus: (state: DataState) => (id: string) => NodeDataStatus = createSelector(
   nodeDataForID,
-  nodeDataIsStale,
-  (nodeInfo, isStale) => {
+  (nodeInfo) => {
     return (id: string) => {
       const info = nodeInfo(id);
-      if (!info || isStale(id)) {
+      if (!info) {
         return 'loading';
       }
 
@@ -286,13 +239,6 @@ export const relatedEventCountByCategory: (
     };
   }
 );
-
-/**
- * Retrieves the number of times the update/refresh button was clicked to be compared against various dataRequestIDs
- */
-export function refreshCount(state: DataState) {
-  return state.refreshCount;
-}
 
 /**
  * Returns true if there might be more generations in the graph that we didn't get because we reached
@@ -403,9 +349,21 @@ export const timeRangeFilters = createSelector(
 /**
  * The indices to use for the requests with the backend.
  */
-export const treeParamterIndices = createSelector(treeParametersToFetch, (parameters) => {
+export const treeParameterIndices = createSelector(treeParametersToFetch, (parameters) => {
   return parameters?.indices ?? [];
 });
+
+/**
+ * Panel requests should not use indices derived from the tree parameter selector, as this is only defined briefly while the resolver_tree_fetcher middleware is running.
+ * Instead, panel requests should use the indices used by the last good request, falling back to the indices passed as external props.
+ */
+export const eventIndices = createSelector(
+  lastResponseIndices,
+  currentIndices,
+  function eventIndices(lastIndices, current): string[] {
+    return lastIndices ?? current ?? [];
+  }
+);
 
 export const layout: (state: DataState) => IsometricTaxiLayout = createSelector(
   tree,

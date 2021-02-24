@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { NotificationsStart } from 'src/core/public';
@@ -44,10 +46,19 @@ export class CopyToSpaceSavedObjectsManagementAction extends SavedObjectsManagem
     if (!this.record) {
       throw new Error('No record available! `render()` was likely called before `start()`.');
     }
+
+    const savedObjectTarget = {
+      type: this.record.type,
+      id: this.record.id,
+      namespaces: this.record.namespaces ?? [],
+      title: this.record.meta.title,
+      icon: this.record.meta.icon,
+    };
+
     return (
       <CopySavedObjectsToSpaceFlyout
         onClose={this.onClose}
-        savedObject={this.record}
+        savedObjectTarget={savedObjectTarget}
         spacesManager={this.spacesManager}
         toastNotifications={this.notifications.toasts}
       />

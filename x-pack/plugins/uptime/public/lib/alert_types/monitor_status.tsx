@@ -1,11 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
 import { AlertTypeModel, ValidationResult } from '../../../../triggers_actions_ui/public';
 import { AlertTypeInitializer } from '.';
 
@@ -23,12 +23,6 @@ export const initMonitorStatusAlertType: AlertTypeInitializer = ({
   plugins,
 }): AlertTypeModel => ({
   id: CLIENT_ALERT_TYPES.MONITOR_STATUS,
-  name: (
-    <FormattedMessage
-      id="xpack.uptime.alerts.monitorStatus.title.label"
-      defaultMessage="Uptime monitor status"
-    />
-  ),
   description,
   iconClass: 'uptimeApp',
   documentationUrl(docLinks) {

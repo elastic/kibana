@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
+import { withApmSpan } from '../../../../../utils/with_apm_span';
 import {
   METRIC_CGROUP_MEMORY_LIMIT_BYTES,
   METRIC_CGROUP_MEMORY_USAGE_BYTES,
@@ -69,44 +71,60 @@ export const percentCgroupMemoryUsedScript = {
 };
 
 export async function getMemoryChartData({
+  environment,
+  kuery,
   setup,
   serviceName,
   serviceNodeName,
 }: {
+  environment?: string;
+  kuery?: string;
   setup: Setup & SetupTimeRange;
   serviceName: string;
   serviceNodeName?: string;
 }) {
-  const cgroupResponse = await fetchAndTransformMetrics({
-    setup,
-    serviceName,
-    serviceNodeName,
-    chartBase,
-    aggs: {
-      memoryUsedAvg: { avg: { script: percentCgroupMemoryUsedScript } },
-      memoryUsedMax: { max: { script: percentCgroupMemoryUsedScript } },
-    },
-    additionalFilters: [
-      { exists: { field: METRIC_CGROUP_MEMORY_USAGE_BYTES } },
-    ],
+  return withApmSpan('get_memory_metrics_charts', async () => {
+    const cgroupResponse = await withApmSpan(
+      'get_cgroup_memory_metrics_charts',
+      () =>
+        fetchAndTransformMetrics({
+          environment,
+          kuery,
+          setup,
+          serviceName,
+          serviceNodeName,
+          chartBase,
+          aggs: {
+            memoryUsedAvg: { avg: { script: percentCgroupMemoryUsedScript } },
+            memoryUsedMax: { max: { script: percentCgroupMemoryUsedScript } },
+          },
+          additionalFilters: [
+            { exists: { field: METRIC_CGROUP_MEMORY_USAGE_BYTES } },
+          ],
+        })
+    );
+
+    if (cgroupResponse.noHits) {
+      return await withApmSpan('get_system_memory_metrics_charts', () =>
+        fetchAndTransformMetrics({
+          environment,
+          kuery,
+          setup,
+          serviceName,
+          serviceNodeName,
+          chartBase,
+          aggs: {
+            memoryUsedAvg: { avg: { script: percentSystemMemoryUsedScript } },
+            memoryUsedMax: { max: { script: percentSystemMemoryUsedScript } },
+          },
+          additionalFilters: [
+            { exists: { field: METRIC_SYSTEM_FREE_MEMORY } },
+            { exists: { field: METRIC_SYSTEM_TOTAL_MEMORY } },
+          ],
+        })
+      );
+    }
+
+    return cgroupResponse;
   });
-
-  if (cgroupResponse.noHits) {
-    return await fetchAndTransformMetrics({
-      setup,
-      serviceName,
-      serviceNodeName,
-      chartBase,
-      aggs: {
-        memoryUsedAvg: { avg: { script: percentSystemMemoryUsedScript } },
-        memoryUsedMax: { max: { script: percentSystemMemoryUsedScript } },
-      },
-      additionalFilters: [
-        { exists: { field: METRIC_SYSTEM_FREE_MEMORY } },
-        { exists: { field: METRIC_SYSTEM_TOTAL_MEMORY } },
-      ],
-    });
-  }
-
-  return cgroupResponse;
 }

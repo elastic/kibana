@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import RE2 from 're2';
@@ -77,7 +78,17 @@ export function jobSavedObjectServiceFactory(
     const id = savedObjectId(job);
 
     try {
-      await savedObjectsClient.delete(ML_SAVED_OBJECT_TYPE, id, { force: true });
+      const [existingJobObject] = await getAllJobObjectsForAllSpaces(jobType, jobId);
+      if (existingJobObject !== undefined) {
+        // a saved object for this job already exists, this may be left over from a previously deleted job
+        if (existingJobObject.namespaces?.length) {
+          // use a force delete just in case the saved object exists only in another space.
+          await _forceDeleteJob(jobType, jobId, existingJobObject.namespaces[0]);
+        } else {
+          // the saved object has no spaces, this is unexpected, attempt a normal delete
+          await savedObjectsClient.delete(ML_SAVED_OBJECT_TYPE, id, { force: true });
+        }
+      }
     } catch (error) {
       // the saved object may exist if a previous job with the same ID has been deleted.
       // if not, this error will be throw which we ignore.
@@ -121,8 +132,10 @@ export function jobSavedObjectServiceFactory(
       type: jobType,
     });
 
+    // * space cannot be used in a delete call, so use undefined which
+    // is the same as specifying the default space
     await internalSavedObjectsClient.delete(ML_SAVED_OBJECT_TYPE, id, {
-      namespace,
+      namespace: namespace === '*' ? undefined : namespace,
       force: true,
     });
   }
@@ -168,12 +181,16 @@ export function jobSavedObjectServiceFactory(
     return jobObject;
   }
 
-  async function getAllJobObjectsForAllSpaces(jobType?: JobType) {
+  async function getAllJobObjectsForAllSpaces(jobType?: JobType, jobId?: string) {
     await isMlReady();
     const filterObject: JobObjectFilter = {};
 
     if (jobType !== undefined) {
       filterObject.type = jobType;
+    }
+
+    if (jobId !== undefined) {
+      filterObject.job_id = jobId;
     }
 
     const { filter, searchFields } = createSavedObjectFilter(filterObject);

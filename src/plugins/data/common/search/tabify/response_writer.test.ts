@@ -1,24 +1,13 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { TabbedAggResponseWriter } from './response_writer';
-import { AggConfigs, BUCKET_TYPES } from '../aggs';
+import { AggConfigs, BUCKET_TYPES, METRIC_TYPES } from '../aggs';
 import { mockAggTypesRegistry } from '../aggs/test_helpers';
 import { TabbedResponseWriterOptions } from './types';
 
@@ -34,7 +23,12 @@ describe('TabbedAggResponseWriter class', () => {
         field: 'geo.src',
       },
     },
-    { type: 'count' },
+    {
+      type: METRIC_TYPES.CARDINALITY,
+      params: {
+        field: 'machine.os.raw',
+      },
+    },
   ];
 
   const twoSplitsAggConfig = [
@@ -50,7 +44,12 @@ describe('TabbedAggResponseWriter class', () => {
         field: 'machine.os.raw',
       },
     },
-    { type: 'count' },
+    {
+      type: METRIC_TYPES.CARDINALITY,
+      params: {
+        field: 'machine.os.raw',
+      },
+    },
   ];
 
   const createResponseWritter = (aggs: any[] = [], opts?: Partial<TabbedResponseWriterOptions>) => {
@@ -70,6 +69,7 @@ describe('TabbedAggResponseWriter class', () => {
         getByName: (name: string) => fields.find((f) => f.name === name),
         filter: () => fields,
       },
+      getFormatterForField: () => ({ toJSON: () => '' }),
     } as any;
 
     return new TabbedAggResponseWriter(new AggConfigs(indexPattern, aggs, { typesRegistry }), {
@@ -147,31 +147,124 @@ describe('TabbedAggResponseWriter class', () => {
 
         const response = responseWriter.response();
 
+        expect(response).toHaveProperty('type', 'datatable');
         expect(response).toHaveProperty('rows');
         expect(response.rows).toEqual([{ 'col-0-1': 'US', 'col-1-2': 5 }]);
         expect(response).toHaveProperty('columns');
         expect(response.columns.length).toEqual(2);
         expect(response.columns[0]).toHaveProperty('id', 'col-0-1');
         expect(response.columns[0]).toHaveProperty('name', 'geo.src: Descending');
-        expect(response.columns[0]).toHaveProperty('aggConfig');
+        expect(response.columns[0]).toHaveProperty('meta', {
+          index: 'logstash-*',
+          params: {
+            id: 'terms',
+            params: {
+              missingBucketLabel: 'Missing',
+              otherBucketLabel: 'Other',
+            },
+          },
+          field: 'geo.src',
+          source: 'esaggs',
+          sourceParams: {
+            enabled: true,
+            id: '1',
+            indexPatternId: '1234',
+            params: {
+              field: 'geo.src',
+              missingBucket: false,
+              missingBucketLabel: 'Missing',
+              order: 'desc',
+              otherBucket: false,
+              otherBucketLabel: 'Other',
+              size: 5,
+            },
+            type: 'terms',
+          },
+          type: 'number',
+        });
+
         expect(response.columns[1]).toHaveProperty('id', 'col-1-2');
-        expect(response.columns[1]).toHaveProperty('name', 'Count');
-        expect(response.columns[1]).toHaveProperty('aggConfig');
+        expect(response.columns[1]).toHaveProperty('name', 'Unique count of machine.os.raw');
+        expect(response.columns[1]).toHaveProperty('meta', {
+          index: 'logstash-*',
+          field: 'machine.os.raw',
+          params: {
+            id: 'number',
+          },
+          source: 'esaggs',
+          sourceParams: {
+            appliedTimeRange: undefined,
+            enabled: true,
+            id: '2',
+            indexPatternId: '1234',
+            params: {
+              field: 'machine.os.raw',
+            },
+            type: 'cardinality',
+          },
+          type: 'number',
+        });
       });
 
       test('produces correct response for no data', () => {
         const response = responseWriter.response();
-
+        expect(response).toHaveProperty('type', 'datatable');
         expect(response).toHaveProperty('rows');
         expect(response.rows.length).toBe(0);
         expect(response).toHaveProperty('columns');
         expect(response.columns.length).toEqual(2);
         expect(response.columns[0]).toHaveProperty('id', 'col-0-1');
         expect(response.columns[0]).toHaveProperty('name', 'geo.src: Descending');
-        expect(response.columns[0]).toHaveProperty('aggConfig');
+        expect(response.columns[0]).toHaveProperty('meta', {
+          index: 'logstash-*',
+          params: {
+            id: 'terms',
+            params: {
+              missingBucketLabel: 'Missing',
+              otherBucketLabel: 'Other',
+            },
+          },
+          field: 'geo.src',
+          source: 'esaggs',
+          sourceParams: {
+            enabled: true,
+            id: '1',
+            indexPatternId: '1234',
+            params: {
+              field: 'geo.src',
+              missingBucket: false,
+              missingBucketLabel: 'Missing',
+              order: 'desc',
+              otherBucket: false,
+              otherBucketLabel: 'Other',
+              size: 5,
+            },
+            type: 'terms',
+          },
+          type: 'number',
+        });
+
         expect(response.columns[1]).toHaveProperty('id', 'col-1-2');
-        expect(response.columns[1]).toHaveProperty('name', 'Count');
-        expect(response.columns[1]).toHaveProperty('aggConfig');
+        expect(response.columns[1]).toHaveProperty('name', 'Unique count of machine.os.raw');
+        expect(response.columns[1]).toHaveProperty('meta', {
+          index: 'logstash-*',
+          field: 'machine.os.raw',
+          params: {
+            id: 'number',
+          },
+          source: 'esaggs',
+          sourceParams: {
+            appliedTimeRange: undefined,
+            enabled: true,
+            id: '2',
+            indexPatternId: '1234',
+            params: {
+              field: 'machine.os.raw',
+            },
+            type: 'cardinality',
+          },
+          type: 'number',
+        });
       });
     });
   });

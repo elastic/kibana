@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { ChangeEvent } from 'react';
@@ -260,6 +261,8 @@ describe('IndexPattern Data Panel', () => {
       query: { query: '', language: 'lucene' },
       filters: [],
       showNoDataPopover: jest.fn(),
+      dropOntoWorkspace: jest.fn(),
+      hasSuggestionForField: jest.fn(() => false),
     };
   });
 
@@ -276,7 +279,10 @@ describe('IndexPattern Data Panel', () => {
         {...defaultProps}
         state={state}
         setState={setStateSpy}
-        dragDropContext={{ dragging: { id: '1' }, setDragging: () => {} }}
+        dragDropContext={{
+          ...createMockedDragDropContext(),
+          dragging: { id: '1', humanData: { label: 'Label' } },
+        }}
       />
     );
 
@@ -295,7 +301,10 @@ describe('IndexPattern Data Panel', () => {
           indexPatterns: {},
         }}
         setState={jest.fn()}
-        dragDropContext={{ dragging: { id: '1' }, setDragging: () => {} }}
+        dragDropContext={{
+          ...createMockedDragDropContext(),
+          dragging: { id: '1', humanData: { label: 'Label' } },
+        }}
         changeIndexPattern={jest.fn()}
       />
     );
@@ -327,7 +336,10 @@ describe('IndexPattern Data Panel', () => {
         ...defaultProps,
         changeIndexPattern: jest.fn(),
         setState,
-        dragDropContext: { dragging: { id: '1' }, setDragging: () => {} },
+        dragDropContext: {
+          ...createMockedDragDropContext(),
+          dragging: { id: '1', humanData: { label: 'Label' } },
+        },
         dateRange: { fromDate: '2019-01-01', toDate: '2020-01-01' },
         state: {
           indexPatternRefs: [],

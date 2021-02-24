@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 /* eslint-disable @kbn/eslint/no-restricted-paths */
@@ -176,18 +177,11 @@ export const newRule: CustomRule = {
 };
 
 export const existingRule: CustomRule = {
-  customQuery: 'host.name:*',
+  customQuery: 'host.name: *',
   name: 'Rule 1',
   description: 'Description for Rule 1',
-  index: [
-    'apm-*-transaction*',
-    'auditbeat-*',
-    'endgame-*',
-    'filebeat-*',
-    'packetbeat-*',
-    'winlogbeat-*',
-  ],
-  interval: '4m',
+  index: ['auditbeat-*'],
+  interval: '10s',
   severity: 'High',
   riskScore: '19',
   tags: ['rule1'],
@@ -203,7 +197,7 @@ export const existingRule: CustomRule = {
 export const newOverrideRule: OverrideRule = {
   customQuery: 'host.name: *',
   index: indexPatterns,
-  name: 'New Rule Test',
+  name: 'Override Rule',
   description: 'The new rule description.',
   severity: 'High',
   riskScore: '17',
@@ -224,7 +218,7 @@ export const newOverrideRule: OverrideRule = {
 export const newThresholdRule: ThresholdRule = {
   customQuery: 'host.name: *',
   index: indexPatterns,
-  name: 'New Rule Test',
+  name: 'Threshold Rule',
   description: 'The new rule description.',
   severity: 'High',
   riskScore: '17',

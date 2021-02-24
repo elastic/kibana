@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { schema } from '@kbn/config-schema';
 import { AlertsClient, ConstructorOptions, CreateOptions } from '../alerts_client';
 import { savedObjectsClientMock, loggingSystemMock } from '../../../../../../src/core/server/mocks';
@@ -59,7 +61,11 @@ beforeEach(() => {
 
 setGlobalDate();
 
-function getMockData(overwrites: Record<string, unknown> = {}): CreateOptions['data'] {
+function getMockData(
+  overwrites: Record<string, unknown> = {}
+): CreateOptions<{
+  bar: boolean;
+}>['data'] {
   return {
     enabled: true,
     name: 'abc',
@@ -93,7 +99,11 @@ describe('create()', () => {
   });
 
   describe('authorization', () => {
-    function tryToExecuteOperation(options: CreateOptions): Promise<unknown> {
+    function tryToExecuteOperation(
+      options: CreateOptions<{
+        bar: boolean;
+      }>
+    ): Promise<unknown> {
       unsecuredSavedObjectsClient.bulkGet.mockResolvedValueOnce({
         saved_objects: [
           {
@@ -452,6 +462,73 @@ describe('create()', () => {
     `);
     const actionsClient = (await alertsClientParams.getActionsClient()) as jest.Mocked<ActionsClient>;
     expect(actionsClient.isActionTypeEnabled).toHaveBeenCalledWith('test', { notifyUsage: true });
+  });
+
+  test('creates an alert with a custom id', async () => {
+    const data = getMockData();
+    const createdAttributes = {
+      ...data,
+      alertTypeId: '123',
+      schedule: { interval: '10s' },
+      params: {
+        bar: true,
+      },
+      createdAt: '2019-02-12T21:01:22.479Z',
+      createdBy: 'elastic',
+      updatedBy: 'elastic',
+      updatedAt: '2019-02-12T21:01:22.479Z',
+      muteAll: false,
+      mutedInstanceIds: [],
+      actions: [
+        {
+          group: 'default',
+          actionRef: 'action_0',
+          actionTypeId: 'test',
+          params: {
+            foo: true,
+          },
+        },
+      ],
+    };
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+      id: '123',
+      type: 'alert',
+      attributes: createdAttributes,
+      references: [
+        {
+          name: 'action_0',
+          type: 'action',
+          id: '1',
+        },
+      ],
+    });
+    taskManager.schedule.mockResolvedValueOnce({
+      id: 'task-123',
+      taskType: 'alerting:123',
+      scheduledAt: new Date(),
+      attempts: 1,
+      status: TaskStatus.Idle,
+      runAt: new Date(),
+      startedAt: null,
+      retryAt: null,
+      state: {},
+      params: {},
+      ownerId: null,
+    });
+    const result = await alertsClient.create({ data, options: { id: '123' } });
+    expect(result.id).toEqual('123');
+    expect(unsecuredSavedObjectsClient.create.mock.calls[0][2]).toMatchInlineSnapshot(`
+      Object {
+        "id": "123",
+        "references": Array [
+          Object {
+            "id": "1",
+            "name": "action_0",
+            "type": "action",
+          },
+        ],
+      }
+    `);
   });
 
   test('creates an alert with multiple actions', async () => {

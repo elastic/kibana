@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -11,6 +12,13 @@ export const i18nTexts = {
     shrinkLabel: i18n.translate('xpack.indexLifecycleMgmt.shrink.indexFieldLabel', {
       defaultMessage: 'Shrink index',
     }),
+    rolloverOffsetsHotPhaseTiming: i18n.translate(
+      'xpack.indexLifecycleMgmt.rollover.rolloverOffsetsPhaseTimingDescription',
+      {
+        defaultMessage:
+          'How long it takes to reach the rollover criteria in the hot phase can vary.',
+      }
+    ),
     searchableSnapshotInHotPhase: {
       searchableSnapshotDisallowed: {
         calloutTitle: i18n.translate(
@@ -40,10 +48,10 @@ export const i18nTexts = {
         defaultMessage: 'Number of segments',
       }
     ),
-    setPriorityFieldLabel: i18n.translate(
+    indexPriorityFieldLabel: i18n.translate(
       'xpack.indexLifecycleMgmt.editPolicy.indexPriorityLabel',
       {
-        defaultMessage: 'Index priority (optional)',
+        defaultMessage: 'Index priority',
       }
     ),
     bestCompressionFieldLabel: i18n.translate(
@@ -167,6 +175,40 @@ export const i18nTexts = {
         'xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotRepoRequiredError',
         {
           defaultMessage: 'A snapshot repository name is required.',
+        }
+      ),
+    },
+    titles: {
+      hot: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.hotPhase.hotPhaseTitle', {
+        defaultMessage: 'Hot phase',
+      }),
+      warm: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.warmPhase.warmPhaseTitle', {
+        defaultMessage: 'Warm phase',
+      }),
+      cold: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.coldPhase.coldPhaseTitle', {
+        defaultMessage: 'Cold phase',
+      }),
+      delete: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.deletePhase.deletePhaseTitle', {
+        defaultMessage: 'Delete phase',
+      }),
+    },
+    descriptions: {
+      hot: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.hotPhase.hotPhaseDescription', {
+        defaultMessage:
+          'Store your most-recent, most frequently-searched data in the hot tier, which provides the best indexing and search performance at the highest cost.',
+      }),
+      warm: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.warmPhase.warmPhaseDescription', {
+        defaultMessage:
+          'Move data to the warm tier, which is optimized for search performance over indexing performance. Data is infrequently added or updated in the warm phase.',
+      }),
+      cold: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.coldPhase.coldPhaseDescription', {
+        defaultMessage:
+          'Move data to the cold tier, which is optimized for cost savings over search performance. Data is normally read-only in the cold phase.',
+      }),
+      delete: i18n.translate(
+        'xpack.indexLifecycleMgmt.editPolicy.deletePhase.deletePhaseDescription',
+        {
+          defaultMessage: 'Delete data you no longer need.',
         }
       ),
     },

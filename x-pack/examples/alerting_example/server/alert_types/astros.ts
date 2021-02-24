@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import axios from 'axios';
@@ -38,7 +39,14 @@ function getCraftFilter(craft: string) {
     craft === Craft.OuterSpace ? true : craft === person.craft;
 }
 
-export const alertType: AlertType = {
+export const alertType: AlertType<
+  { outerSpaceCapacity: number; craft: string; op: string },
+  { peopleInSpace: number },
+  { craft: string },
+  never,
+  'default',
+  'hasLandedBackOnEarth'
+> = {
   id: 'example.people-in-space',
   name: 'People In Space Right Now',
   actionGroups: [{ id: 'default', name: 'default' }],

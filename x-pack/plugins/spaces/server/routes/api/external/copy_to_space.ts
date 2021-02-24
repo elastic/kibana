@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { schema } from '@kbn/config-schema';
@@ -21,13 +22,7 @@ const areObjectsUnique = (objects: SavedObjectIdentifier[]) =>
   _.uniqBy(objects, (o: SavedObjectIdentifier) => `${o.type}:${o.id}`).length === objects.length;
 
 export function initCopyToSpacesApi(deps: ExternalRouteDeps) {
-  const {
-    externalRouter,
-    getSpacesService,
-    usageStatsServicePromise,
-    getImportExportObjectLimit,
-    getStartServices,
-  } = deps;
+  const { externalRouter, getSpacesService, usageStatsServicePromise, getStartServices } = deps;
   const usageStatsClientPromise = usageStatsServicePromise.then(({ getClient }) => getClient());
 
   externalRouter.post(
@@ -99,7 +94,6 @@ export function initCopyToSpacesApi(deps: ExternalRouteDeps) {
 
       const copySavedObjectsToSpaces = copySavedObjectsToSpacesFactory(
         startServices.savedObjects,
-        getImportExportObjectLimit,
         request
       );
       const sourceSpaceId = getSpacesService().getSpaceId(request);
@@ -169,7 +163,6 @@ export function initCopyToSpacesApi(deps: ExternalRouteDeps) {
 
       const resolveCopySavedObjectsToSpacesConflicts = resolveCopySavedObjectsToSpacesConflictsFactory(
         startServices.savedObjects,
-        getImportExportObjectLimit,
         request
       );
       const sourceSpaceId = getSpacesService().getSpaceId(request);

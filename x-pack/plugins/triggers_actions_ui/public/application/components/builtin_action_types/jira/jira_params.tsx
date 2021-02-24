@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { Fragment, useCallback, useEffect, useMemo, useRef } from 'react';
@@ -64,14 +65,27 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
   });
   const editSubActionProperty = useCallback(
     (key: string, value: any) => {
-      const newProps =
-        key !== 'comments'
-          ? {
-              incident: { ...incident, [key]: value },
-              comments,
-            }
-          : { incident, [key]: value };
-      editAction('subActionParams', newProps, index);
+      if (key === 'issueType') {
+        return editAction(
+          'subActionParams',
+          {
+            incident: { issueType: value },
+            comments,
+          },
+          index
+        );
+      }
+      if (key === 'comments') {
+        return editAction('subActionParams', { incident, comments: value }, index);
+      }
+      return editAction(
+        'subActionParams',
+        {
+          incident: { ...incident, [key]: value },
+          comments,
+        },
+        index
+      );
     },
     [comments, editAction, incident, index]
   );
@@ -114,6 +128,7 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
     if (incident.issueType != null && fields != null) {
       const priorities = fields.priority != null ? fields.priority.allowedValues : [];
       const doesPriorityExist = priorities.some((p) => p.name === incident.priority);
+
       if ((!incident.priority || !doesPriorityExist) && priorities.length > 0) {
         editSubActionProperty('priority', priorities[0].name ?? '');
       }
@@ -126,6 +141,12 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
     }
     return [];
   }, [editSubActionProperty, fields, incident.issueType, incident.priority]);
+  useEffect(() => {
+    if (!hasPriority && incident.priority != null) {
+      editSubActionProperty('priority', null);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hasPriority]);
 
   const labelOptions = useMemo(
     () => (incident.labels ? incident.labels.map((label: string) => ({ label })) : []),
@@ -162,6 +183,11 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [actionParams]);
+
+  const areLabelsInvalid =
+    errors['subActionParams.incident.labels'] != null &&
+    errors['subActionParams.incident.labels'].length > 0 &&
+    incident.labels !== undefined;
 
   return (
     <Fragment>
@@ -249,8 +275,11 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
           <EuiFormRow
             data-test-subj="summary-row"
             fullWidth
-            error={errors.summary}
-            isInvalid={errors.summary.length > 0 && incident.summary !== undefined}
+            error={errors['subActionParams.incident.summary']}
+            isInvalid={
+              errors['subActionParams.incident.summary'].length > 0 &&
+              incident.summary !== undefined
+            }
             label={i18n.translate(
               'xpack.triggersActionsUI.components.builtinActionTypes.jira.summaryFieldLabel',
               {
@@ -264,7 +293,7 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
               messageVariables={messageVariables}
               paramsProperty={'summary'}
               inputTargetValue={incident.summary ?? undefined}
-              errors={errors.summary as string[]}
+              errors={errors['subActionParams.incident.summary'] as string[]}
             />
           </EuiFormRow>
           <EuiSpacer size="m" />
@@ -280,6 +309,8 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
                         defaultMessage: 'Labels',
                       }
                     )}
+                    error={errors['subActionParams.incident.labels'] as string[]}
+                    isInvalid={areLabelsInvalid}
                   >
                     <EuiComboBox
                       noSuggestions
@@ -307,6 +338,7 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
                       }}
                       isClearable={true}
                       data-test-subj="labelsComboBox"
+                      isInvalid={areLabelsInvalid}
                     />
                   </EuiFormRow>
                 </EuiFlexItem>
@@ -327,7 +359,6 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
                   defaultMessage: 'Description',
                 }
               )}
-              errors={errors.description as string[]}
             />
           )}
           <TextAreaWithMessageVariables
@@ -342,7 +373,6 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
                 defaultMessage: 'Additional comments',
               }
             )}
-            errors={errors.comments as string[]}
           />
         </>
       </>

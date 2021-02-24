@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { APIFn } from './types';
@@ -26,6 +27,7 @@ export const fetchPingHistogram: APIFn<GetPingHistogramParams, HistogramResult> 
   dateEnd,
   filters,
   bucketSize,
+  query,
 }) => {
   const queryParams = {
     dateStart,
@@ -33,6 +35,7 @@ export const fetchPingHistogram: APIFn<GetPingHistogramParams, HistogramResult> 
     monitorId,
     filters,
     bucketSize,
+    query,
   };
 
   return await apiService.get(API_URLS.PING_HISTOGRAM, queryParams);

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -151,7 +152,9 @@ export const buildThreatDescription = ({ label, threat }: BuildThreatDescription
                     href={singleThreat.tactic.reference}
                     target="_blank"
                   >
-                    {tactic != null ? tactic.text : ''}
+                    {tactic != null
+                      ? tactic.text
+                      : `${singleThreat.tactic.name} (${singleThreat.tactic.id})`}
                   </EuiLink>
                   <EuiFlexGroup gutterSize="none" alignItems="flexStart" direction="column">
                     {singleThreat.technique.map((technique, techniqueIndex) => {
@@ -165,7 +168,9 @@ export const buildThreatDescription = ({ label, threat }: BuildThreatDescription
                             iconType={ListTreeIcon}
                             size="xs"
                           >
-                            {myTechnique != null ? myTechnique.label : ''}
+                            {myTechnique != null
+                              ? myTechnique.label
+                              : `${technique.name} (${technique.id})`}
                           </TechniqueLinkItem>
                           <EuiFlexGroup gutterSize="none" alignItems="flexStart" direction="column">
                             {technique.subtechnique != null &&
@@ -184,7 +189,9 @@ export const buildThreatDescription = ({ label, threat }: BuildThreatDescription
                                       iconType={ListTreeIcon}
                                       size="xs"
                                     >
-                                      {mySubtechnique != null ? mySubtechnique.label : ''}
+                                      {mySubtechnique != null
+                                        ? mySubtechnique.label
+                                        : `${subtechnique.name} (${subtechnique.id})`}
                                     </TechniqueLinkItem>
                                   </SubtechniqueFlexItem>
                                 );

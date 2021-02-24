@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { extname } from 'path';
 import { Readable } from 'stream';
 
-import { IRouter } from '../../../../../../../src/core/server';
+import type { SecuritySolutionPluginRouter } from '../../../types';
 
 import { TIMELINE_IMPORT_URL } from '../../../../common/constants';
 
@@ -21,7 +22,7 @@ import { ImportTimelinesPayloadSchemaRt } from './schemas/import_timelines_schem
 import { buildFrameworkRequest } from './utils/common';
 
 export const importTimelinesRoute = (
-  router: IRouter,
+  router: SecuritySolutionPluginRouter,
   config: ConfigType,
   security: SetupPlugins['security']
 ) => {

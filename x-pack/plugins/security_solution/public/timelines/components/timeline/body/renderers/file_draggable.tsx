@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -18,10 +19,19 @@ interface Props {
   eventId: string;
   fileName: string | null | undefined;
   filePath: string | null | undefined;
+  fileExtOriginalPath: string | null | undefined;
 }
 
 export const FileDraggable = React.memo<Props>(
-  ({ contextId, endgameFileName, endgameFilePath, eventId, fileName, filePath }) => {
+  ({
+    contextId,
+    endgameFileName,
+    endgameFilePath,
+    eventId,
+    fileExtOriginalPath,
+    fileName,
+    filePath,
+  }) => {
     if (
       isNillEmptyOrNotFinite(fileName) &&
       isNillEmptyOrNotFinite(endgameFileName) &&
@@ -85,6 +95,23 @@ export const FileDraggable = React.memo<Props>(
             />
           </TokensFlexItem>
         ) : null}
+
+        {!isNillEmptyOrNotFinite(fileExtOriginalPath) && (
+          <>
+            <TokensFlexItem grow={false} component="span">
+              {i18n.FROM_ITS_ORIGINAL_PATH}
+            </TokensFlexItem>
+            <TokensFlexItem grow={false} component="span">
+              <DraggableBadge
+                contextId={contextId}
+                eventId={eventId}
+                field="file.Ext.original.path"
+                value={fileExtOriginalPath}
+                iconType="document"
+              />
+            </TokensFlexItem>
+          </>
+        )}
       </>
     );
   }

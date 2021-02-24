@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { HttpSetup } from 'kibana/public';
 import { FetchOptions } from '../../../common/fetch_options';
 import { callApi } from './callApi';
@@ -12,11 +14,14 @@ import { APMAPI } from '../../../server/routes/create_apm_api';
 import { Client } from '../../../server/routes/typings';
 
 export type APMClient = Client<APMAPI['_S']>;
+export type AutoAbortedAPMClient = Client<APMAPI['_S'], { abortable: false }>;
+
 export type APMClientOptions = Omit<
   FetchOptions,
-  'query' | 'body' | 'pathname'
+  'query' | 'body' | 'pathname' | 'signal'
 > & {
   endpoint: string;
+  signal: AbortSignal | null;
   params?: {
     body?: any;
     query?: any;

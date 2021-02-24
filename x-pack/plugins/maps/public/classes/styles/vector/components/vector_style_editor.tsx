@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import _ from 'lodash';
@@ -48,7 +49,7 @@ import { SymbolizeAsProperty } from '../properties/symbolize_as_property';
 import { LabelBorderSizeProperty } from '../properties/label_border_size_property';
 import { StaticTextProperty } from '../properties/static_text_property';
 import { StaticSizeProperty } from '../properties/static_size_property';
-import { IVectorLayer } from '../../../layers/vector_layer/vector_layer';
+import { IVectorLayer } from '../../../layers/vector_layer';
 
 export interface StyleProperties {
   [key: string]: IStyleProperty<StylePropertyOptions>;
@@ -117,7 +118,10 @@ export class VectorStyleEditor extends Component<Props, State> {
       await this.props.layer.getStyleEditorFields()
     );
     const styleFields = styleFieldsHelper.getStyleFields();
-    if (!this._isMounted || _.isEqual(styleFields, this.state.styleFields)) {
+    if (
+      !this._isMounted ||
+      (_.isEqual(styleFields, this.state.styleFields) && this.state.styleFieldsHelper !== undefined)
+    ) {
       return;
     }
 
@@ -464,6 +468,9 @@ export class VectorStyleEditor extends Component<Props, State> {
         <EuiSpacer size="m" />
 
         {this._renderLineWidth()}
+        <EuiSpacer size="m" />
+
+        {this._renderLabelProperties()}
       </Fragment>
     );
   }
@@ -478,6 +485,9 @@ export class VectorStyleEditor extends Component<Props, State> {
         <EuiSpacer size="m" />
 
         {this._renderLineWidth()}
+        <EuiSpacer size="m" />
+
+        {this._renderLabelProperties()}
       </Fragment>
     );
   }

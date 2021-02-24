@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { flow, omit } from 'lodash';
 import { ReindexWarning } from '../../../common/types';
-import { CURRENT_MAJOR_VERSION, PREV_MAJOR_VERSION } from '../../../common/version';
+import { versionService } from '../version';
 import { FlatSettings } from './types';
 
 export interface ParsedIndexName {
@@ -42,9 +43,8 @@ export const sourceNameForIndex = (indexName: string): string => {
   const internal = matches[1] || '';
   const baseName = matches[2];
 
-  // in 5.6 the upgrade assistant appended to the index, in 6.7+ we prepend to
-  // avoid conflicts with index patterns/templates/etc
-  const reindexedMatcher = new RegExp(`(-reindexed-v5$|reindexed-v${PREV_MAJOR_VERSION}-)`, 'g');
+  // in 6.7+ we prepend to avoid conflicts with index patterns/templates/etc
+  const reindexedMatcher = new RegExp(`reindexed-v${versionService.getPrevMajorVersion()}-`, 'g');
 
   const cleanBaseName = baseName.replace(reindexedMatcher, '');
   return `${internal}${cleanBaseName}`;
@@ -58,7 +58,7 @@ export const sourceNameForIndex = (indexName: string): string => {
  */
 export const generateNewIndexName = (indexName: string): string => {
   const sourceName = sourceNameForIndex(indexName);
-  const currentVersion = `reindexed-v${CURRENT_MAJOR_VERSION}`;
+  const currentVersion = `reindexed-v${versionService.getMajorVersion()}`;
 
   return indexName.startsWith('.')
     ? `.${currentVersion}-${sourceName.substr(1)}`
@@ -79,23 +79,60 @@ export const getReindexWarnings = (flatSettings: FlatSettings): ReindexWarning[]
 
 const removeUnsettableSettings = (settings: FlatSettings['settings']) =>
   omit(settings, [
-    'index.uuid',
+    // Private ES settings
+    'index.allocation.existing_shards_allocator',
     'index.blocks.write',
     'index.creation_date',
-    'index.legacy',
-    'index.mapping.single_type',
+    'index.frozen',
+    'index.history.uuid',
+    'index.merge.enabled',
     'index.provided_name',
+    'index.resize.source.name',
+    'index.resize.source.uuid',
     'index.routing.allocation.initial_recovery._id',
-    'index.version.created',
-    'index.version.upgraded',
+    'index.search.throttled',
+    'index.source_only',
+    'index.shrink.source.name',
+    'index.shrink.source.uuid',
+    'index.store.snapshot.repository_name',
+    'index.store.snapshot.snapshot_name',
+    'index.store.snapshot.snapshot_uuid',
+    'index.store.snapshot.index_name',
+    'index.store.snapshot.index_uuid',
+    'index.uuid',
     'index.verified_before_close',
+    'index.version.created',
+
+    // Deprecated in 9.0
+    'index.version.upgraded',
   ]);
 
+const validateSettings = (settings: FlatSettings['settings']) => {
+  if (settings['index.mapper.dynamic']) {
+    throw new Error(`'index.mapper.dynamic' is no longer supported.`);
+  }
+
+  if (settings['index.merge.policy.reclaim_deletes_weight']) {
+    throw new Error(`'index.merge.policy.reclaim_deletes_weight' is no longer supported.`);
+  }
+
+  if (settings['index.force_memory_term_dictionary']) {
+    throw new Error(`'index.force_memory_term_dictionary' is no longer supported.`);
+  }
+
+  if (settings['index.max_adjacency_matrix_filters']) {
+    throw new Error(
+      `'index.max_adjacency_matrix_filters' is no longer supported; use 'indices.query.bool.max_clause_count' as an alternative.`
+    );
+  }
+
+  return settings;
+};
+
 // Use `flow` to pipe the settings through each function.
-const transformSettings = flow(removeUnsettableSettings);
+const transformSettings = flow(removeUnsettableSettings, validateSettings);
 
 const updateFixableMappings = (mappings: FlatSettings['mappings']) => {
-  // TODO: change type to _doc
   return mappings;
 };
 

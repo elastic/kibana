@@ -1,13 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { KibanaRequest } from 'kibana/server';
-import { savedObjectsClientMock } from 'src/core/server/mocks';
+import { savedObjectsClientMock, elasticsearchServiceMock } from 'src/core/server/mocks';
 
 import { authenticateAgentWithAccessToken } from './authenticate';
+
+const mockEsClient = elasticsearchServiceMock.createInternalClient();
 
 describe('test agent autenticate services', () => {
   it('should succeed with a valid API key and an active agent', async () => {
@@ -31,7 +34,7 @@ describe('test agent autenticate services', () => {
         ],
       })
     );
-    await authenticateAgentWithAccessToken(mockSavedObjectsClient, {
+    await authenticateAgentWithAccessToken(mockSavedObjectsClient, mockEsClient, {
       auth: { isAuthenticated: true },
       headers: {
         authorization: 'ApiKey cGVkVHVISUJURUR0OTN3VzBGaHI6TnU1U0JtbHJSeC12Rm9qQWpoSHlUZw==',
@@ -61,7 +64,7 @@ describe('test agent autenticate services', () => {
       })
     );
     expect(
-      authenticateAgentWithAccessToken(mockSavedObjectsClient, {
+      authenticateAgentWithAccessToken(mockSavedObjectsClient, mockEsClient, {
         auth: { isAuthenticated: false },
         headers: {
           authorization: 'ApiKey cGVkVHVISUJURUR0OTN3VzBGaHI6TnU1U0JtbHJSeC12Rm9qQWpoSHlUZw==',
@@ -92,7 +95,7 @@ describe('test agent autenticate services', () => {
       })
     );
     expect(
-      authenticateAgentWithAccessToken(mockSavedObjectsClient, {
+      authenticateAgentWithAccessToken(mockSavedObjectsClient, mockEsClient, {
         auth: { isAuthenticated: true },
         headers: {
           authorization: 'aaaa',
@@ -123,7 +126,7 @@ describe('test agent autenticate services', () => {
       })
     );
     expect(
-      authenticateAgentWithAccessToken(mockSavedObjectsClient, {
+      authenticateAgentWithAccessToken(mockSavedObjectsClient, mockEsClient, {
         auth: { isAuthenticated: true },
         headers: {
           authorization: 'ApiKey cGVkVHVISUJURUR0OTN3VzBGaHI6TnU1U0JtbHJSeC12Rm9qQWpoSHlUZw==',
@@ -143,7 +146,7 @@ describe('test agent autenticate services', () => {
       })
     );
     expect(
-      authenticateAgentWithAccessToken(mockSavedObjectsClient, {
+      authenticateAgentWithAccessToken(mockSavedObjectsClient, mockEsClient, {
         auth: { isAuthenticated: true },
         headers: {
           authorization: 'ApiKey cGVkVHVISUJURUR0OTN3VzBGaHI6TnU1U0JtbHJSeC12Rm9qQWpoSHlUZw==',

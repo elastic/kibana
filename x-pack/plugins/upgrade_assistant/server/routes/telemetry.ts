@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { schema } from '@kbn/config-schema';
@@ -23,18 +24,14 @@ export function registerTelemetryRoutes({ router, getSavedObjectsService }: Rout
     },
     async (ctx, request, response) => {
       const { cluster, indices, overview } = request.body;
-      try {
-        return response.ok({
-          body: await upsertUIOpenOption({
-            savedObjects: getSavedObjectsService(),
-            cluster,
-            indices,
-            overview,
-          }),
-        });
-      } catch (e) {
-        return response.internalError({ body: e });
-      }
+      return response.ok({
+        body: await upsertUIOpenOption({
+          savedObjects: getSavedObjectsService(),
+          cluster,
+          indices,
+          overview,
+        }),
+      });
     }
   );
 
@@ -52,19 +49,15 @@ export function registerTelemetryRoutes({ router, getSavedObjectsService }: Rout
     },
     async (ctx, request, response) => {
       const { close, open, start, stop } = request.body;
-      try {
-        return response.ok({
-          body: await upsertUIReindexOption({
-            savedObjects: getSavedObjectsService(),
-            close,
-            open,
-            start,
-            stop,
-          }),
-        });
-      } catch (e) {
-        return response.internalError({ body: e });
-      }
+      return response.ok({
+        body: await upsertUIReindexOption({
+          savedObjects: getSavedObjectsService(),
+          close,
+          open,
+          start,
+          stop,
+        }),
+      });
     }
   );
 }

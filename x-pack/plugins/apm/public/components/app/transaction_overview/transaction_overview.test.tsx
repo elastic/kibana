@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { fireEvent, getByText, queryByLabelText } from '@testing-library/react';
@@ -135,7 +136,9 @@ describe('TransactionOverview', () => {
       expect(getByText(container, 'firstType')).toBeInTheDocument();
       expect(getByText(container, 'secondType')).toBeInTheDocument();
 
-      fireEvent.click(getByText(container, 'firstType'));
+      fireEvent.change(getByText(container, 'firstType').parentElement!, {
+        target: { value: 'firstType' },
+      });
 
       expect(history.push).toHaveBeenCalled();
       expect(history.location.search).toEqual(

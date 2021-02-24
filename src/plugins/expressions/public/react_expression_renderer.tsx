@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React, { useRef, useEffect, useState, useLayoutEffect } from 'react';
@@ -90,21 +79,28 @@ export const ReactExpressionRenderer = ({
     null
   );
   const [debouncedExpression, setDebouncedExpression] = useState(expression);
-  useEffect(() => {
+  const [waitingForDebounceToComplete, setDebouncePending] = useState(false);
+  const firstRender = useRef(true);
+  useShallowCompareEffect(() => {
+    if (firstRender.current) {
+      firstRender.current = false;
+      return;
+    }
     if (debounce === undefined) {
       return;
     }
+    setDebouncePending(true);
     const handler = setTimeout(() => {
       setDebouncedExpression(expression);
+      setDebouncePending(false);
     }, debounce);
 
     return () => {
       clearTimeout(handler);
     };
-  }, [expression, debounce]);
+  }, [expression, expressionLoaderOptions, debounce]);
 
   const activeExpression = debounce !== undefined ? debouncedExpression : expression;
-  const waitingForDebounceToComplete = debounce !== undefined && expression !== debouncedExpression;
 
   /* eslint-disable react-hooks/exhaustive-deps */
   // OK to ignore react-hooks/exhaustive-deps because options update is handled by calling .update()
@@ -168,7 +164,12 @@ export const ReactExpressionRenderer = ({
 
       errorRenderHandlerRef.current = null;
     };
-  }, [hasCustomRenderErrorHandler, onEvent]);
+  }, [
+    hasCustomRenderErrorHandler,
+    onEvent,
+    expressionLoaderOptions.renderMode,
+    expressionLoaderOptions.syncColors,
+  ]);
 
   useEffect(() => {
     const subscription = reload$?.subscribe(() => {
@@ -182,12 +183,16 @@ export const ReactExpressionRenderer = ({
   // Re-fetch data automatically when the inputs change
   useShallowCompareEffect(
     () => {
-      if (expressionLoaderRef.current) {
+      // only update the loader if the debounce period is over
+      if (expressionLoaderRef.current && !waitingForDebounceToComplete) {
         expressionLoaderRef.current.update(activeExpression, expressionLoaderOptions);
       }
     },
-    // when expression is changed by reference and when any other loaderOption is changed by reference
-    [{ activeExpression, ...expressionLoaderOptions }]
+    // when debounced, wait for debounce status to change to update loader.
+    // Otherwise, update when expression is changed by reference and when any other loaderOption is changed by reference
+    debounce === undefined
+      ? [{ activeExpression, ...expressionLoaderOptions }]
+      : [{ waitingForDebounceToComplete }]
   );
 
   /* eslint-enable react-hooks/exhaustive-deps */
@@ -200,10 +205,9 @@ export const ReactExpressionRenderer = ({
     }
   }, [state.error]);
 
-  const classes = classNames('expExpressionRenderer', {
+  const classes = classNames('expExpressionRenderer', className, {
     'expExpressionRenderer-isEmpty': state.isEmpty,
     'expExpressionRenderer-hasError': !!state.error,
-    className,
   });
 
   const expressionStyles: React.CSSProperties = {};

@@ -1,20 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { savedObjectsClientMock } from 'src/core/server/mocks';
+import { elasticsearchServiceMock, savedObjectsClientMock } from 'src/core/server/mocks';
 import { createPackagePolicyMock } from '../../common/mocks';
 import { packagePolicyService } from './package_policy';
 import { PackageInfo, PackagePolicySOAttributes } from '../types';
 import { SavedObjectsUpdateResponse } from 'src/core/server';
 import { httpServerMock } from 'src/core/server/mocks';
 import { KibanaRequest } from 'kibana/server';
-import { xpackMocks } from '../../../../mocks';
 import { ExternalCallback } from '..';
 import { appContextService } from './app_context';
-import { createAppContextStartContractMock } from '../mocks';
+import { createAppContextStartContractMock, xpackMocks } from '../mocks';
 
 async function mockedGetAssetsData(_a: any, _b: any, dataset: string) {
   if (dataset === 'dataset1') {
@@ -295,6 +295,36 @@ describe('Package policy service', () => {
         },
       ]);
     });
+
+    it('should work with a package without input', async () => {
+      const inputs = await packagePolicyService.compilePackagePolicyInputs(
+        ({
+          policy_templates: [
+            {
+              inputs: undefined,
+            },
+          ],
+        } as unknown) as PackageInfo,
+        []
+      );
+
+      expect(inputs).toEqual([]);
+    });
+
+    it('should work with a package with a empty inputs array', async () => {
+      const inputs = await packagePolicyService.compilePackagePolicyInputs(
+        ({
+          policy_templates: [
+            {
+              inputs: [],
+            },
+          ],
+        } as unknown) as PackageInfo,
+        []
+      );
+
+      expect(inputs).toEqual([]);
+    });
   });
 
   describe('update', () => {
@@ -315,9 +345,11 @@ describe('Package policy service', () => {
           throw savedObjectsClient.errors.createConflictError('abc', '123');
         }
       );
+      const elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
       await expect(
         packagePolicyService.update(
           savedObjectsClient,
+          elasticsearchClient,
           'the-package-policy-id',
           createPackagePolicyMock()
         )

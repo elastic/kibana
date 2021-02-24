@@ -977,7 +977,51 @@
         },
         "indices": 1,
         "plugins": {}
-      }
+      },
+      "logstash": {
+        "count":  1,
+        "cluster_stats": {
+          "collection_types": {
+            "internal_collection": 1
+        },
+        "pipelines": {
+          "batch_size_min": 125,
+          "batch_size_max": 125,
+          "batch_size_avg": 125,
+          "batch_size_total": 125,
+          "count": 1,
+          "sources": {
+            "string": true
+          },
+          "workers_avg": 4,
+          "workers_total": 4,
+          "workers_min": 4,
+          "workers_max": 4
+        },
+        "plugins": [
+              {
+                  "count": 1,
+                  "name": "logstash-input-twitter"
+                },
+              {
+                  "count": 1,
+                  "name": "logstash-output-stdout"
+                },
+              {
+                  "count": 1,
+                  "name": "logstash-output-elasticsearch"
+                }
+        ],
+          "queues": {
+            "memory": 1
+          }
+        },
+        "versions": [
+                  {
+                      "count": 1,
+                      "version": "7.0.0-alpha1"
+                    }
+                ]}
     },
     "timestamp": "2017-08-15T22:10:52.642Z",
     "version": "7.0.0-alpha1",

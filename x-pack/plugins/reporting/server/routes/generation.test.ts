@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { UnwrapPromise } from '@kbn/utility-types';
@@ -13,6 +14,7 @@ import { ReportingCore } from '..';
 import { ExportTypesRegistry } from '../lib/export_types_registry';
 import { createMockReportingCore, createMockLevelLogger } from '../test_helpers';
 import { registerJobGenerationRoutes } from './generation';
+import type { ReportingRequestHandlerContext } from '../types';
 
 type SetupServerReturn = UnwrapPromise<ReturnType<typeof setupServer>>;
 
@@ -46,7 +48,11 @@ describe('POST /api/reporting/generate', () => {
 
   beforeEach(async () => {
     ({ server, httpSetup } = await setupServer(reportingSymbol));
-    httpSetup.registerRouteHandlerContext(reportingSymbol, 'reporting', () => ({}));
+    httpSetup.registerRouteHandlerContext<ReportingRequestHandlerContext, 'reporting'>(
+      reportingSymbol,
+      'reporting',
+      () => ({})
+    );
 
     callClusterStub = sinon.stub().resolves({});
 

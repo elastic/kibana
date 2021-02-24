@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { summarizeCopyResult } from './summarize_copy_result';
@@ -10,6 +11,7 @@ import {
   FailedImport,
   SavedObjectsManagementRecord,
 } from 'src/plugins/saved_objects_management/public';
+import { SavedObjectTarget } from './types';
 
 // Sample data references:
 //
@@ -20,6 +22,13 @@ import {
 // Dashboard has references to visualizations, and transitive references to index patterns
 
 const OBJECTS = {
+  COPY_TARGET: {
+    type: 'dashboard',
+    id: 'foo',
+    namespaces: [],
+    icon: 'dashboardApp',
+    title: 'my-dashboard-title',
+  } as Required<SavedObjectTarget>,
   MY_DASHBOARD: {
     type: 'dashboard',
     id: 'foo',
@@ -131,7 +140,7 @@ const createCopyResult = (
 describe('summarizeCopyResult', () => {
   it('indicates the result is processing when not provided', () => {
     const copyResult = undefined;
-    const summarizedResult = summarizeCopyResult(OBJECTS.MY_DASHBOARD, copyResult);
+    const summarizedResult = summarizeCopyResult(OBJECTS.COPY_TARGET, copyResult);
 
     expect(summarizedResult).toMatchInlineSnapshot(`
       Object {
@@ -154,7 +163,7 @@ describe('summarizeCopyResult', () => {
 
   it('processes failedImports to extract conflicts, including transitive conflicts', () => {
     const copyResult = createCopyResult({ withConflicts: true });
-    const summarizedResult = summarizeCopyResult(OBJECTS.MY_DASHBOARD, copyResult);
+    const summarizedResult = summarizeCopyResult(OBJECTS.COPY_TARGET, copyResult);
 
     expect(summarizedResult).toMatchInlineSnapshot(`
       Object {
@@ -234,7 +243,7 @@ describe('summarizeCopyResult', () => {
 
   it('processes failedImports to extract missing references errors', () => {
     const copyResult = createCopyResult({ withMissingReferencesError: true });
-    const summarizedResult = summarizeCopyResult(OBJECTS.MY_DASHBOARD, copyResult);
+    const summarizedResult = summarizeCopyResult(OBJECTS.COPY_TARGET, copyResult);
 
     expect(summarizedResult).toMatchInlineSnapshot(`
       Object {
@@ -291,7 +300,7 @@ describe('summarizeCopyResult', () => {
 
   it('processes failedImports to extract unresolvable errors', () => {
     const copyResult = createCopyResult({ withUnresolvableError: true });
-    const summarizedResult = summarizeCopyResult(OBJECTS.MY_DASHBOARD, copyResult);
+    const summarizedResult = summarizeCopyResult(OBJECTS.COPY_TARGET, copyResult);
 
     expect(summarizedResult).toMatchInlineSnapshot(`
       Object {
@@ -358,7 +367,7 @@ describe('summarizeCopyResult', () => {
 
   it('processes a result without errors', () => {
     const copyResult = createCopyResult();
-    const summarizedResult = summarizeCopyResult(OBJECTS.MY_DASHBOARD, copyResult);
+    const summarizedResult = summarizeCopyResult(OBJECTS.COPY_TARGET, copyResult);
 
     expect(summarizedResult).toMatchInlineSnapshot(`
       Object {
@@ -425,7 +434,7 @@ describe('summarizeCopyResult', () => {
 
   it('indicates when successes and failures have been overwritten', () => {
     const copyResult = createCopyResult({ withMissingReferencesError: true, overwrite: true });
-    const summarizedResult = summarizeCopyResult(OBJECTS.MY_DASHBOARD, copyResult);
+    const summarizedResult = summarizeCopyResult(OBJECTS.COPY_TARGET, copyResult);
 
     expect(summarizedResult.objects).toHaveLength(4);
     for (const obj of summarizedResult.objects) {

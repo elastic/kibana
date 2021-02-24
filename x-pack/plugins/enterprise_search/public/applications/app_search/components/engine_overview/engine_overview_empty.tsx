@@ -1,12 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
 
-import { i18n } from '@kbn/i18n';
 import {
   EuiPageHeader,
   EuiPageHeaderSection,
@@ -14,9 +14,11 @@ import {
   EuiTitle,
   EuiButton,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
+import { FlashMessages } from '../../../shared/flash_messages';
 import { DOCS_PREFIX } from '../../routes';
-import { DocumentCreationButtons, DocumentCreationModal } from '../document_creation';
+import { DocumentCreationButtons, DocumentCreationFlyout } from '../document_creation';
 
 export const EmptyEngineOverview: React.FC = () => {
   return (
@@ -40,9 +42,10 @@ export const EmptyEngineOverview: React.FC = () => {
           </EuiButton>
         </EuiPageHeaderSection>
       </EuiPageHeader>
+      <FlashMessages />
       <EuiPageContentBody>
         <DocumentCreationButtons />
-        <DocumentCreationModal />
+        <DocumentCreationFlyout />
       </EuiPageContentBody>
     </>
   );

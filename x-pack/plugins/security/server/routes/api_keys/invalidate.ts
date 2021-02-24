@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { schema } from '@kbn/config-schema';
@@ -33,7 +34,7 @@ export function defineInvalidateApiKeysRoutes({ router }: RouteDefinitionParams)
           await Promise.all(
             request.body.apiKeys.map(async (key) => {
               try {
-                const body: { id: string; owner?: boolean } = { id: key.id };
+                const body: { ids: string[]; owner?: boolean } = { ids: [key.id] };
                 if (!request.body.isAdmin) {
                   body.owner = true;
                 }

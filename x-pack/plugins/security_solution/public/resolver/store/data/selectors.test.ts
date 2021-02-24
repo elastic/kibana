@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import * as selectors from './selectors';
@@ -159,7 +160,7 @@ describe('data state', () => {
         has an error: false
         has more children: false
         has more ancestors: false
-        parameters to fetch: {\\"databaseDocumentID\\":\\"databaseDocumentID\\",\\"indices\\":[],\\"filters\\":{},\\"dataRequestID\\":0}
+        parameters to fetch: {\\"databaseDocumentID\\":\\"databaseDocumentID\\",\\"indices\\":[],\\"filters\\":{}}
         requires a pending request to be aborted: null"
       `);
     });
@@ -220,14 +221,17 @@ describe('data state', () => {
     it('should be loading', () => {
       expect(selectors.isTreeLoading(state())).toBe(true);
     });
+    it('should not have a request to abort', () => {
+      expect(selectors.treeRequestParametersToAbort(state())).toBe(null);
+    });
     it('should not have an error, more children, more ancestors, a request to make, or a pending request that should be aborted.', () => {
       expect(viewAsAString(state())).toMatchInlineSnapshot(`
         "is loading: true
         has an error: false
         has more children: false
         has more ancestors: false
-        parameters to fetch: {\\"databaseDocumentID\\":\\"databaseDocumentID\\",\\"indices\\":[],\\"filters\\":{},\\"dataRequestID\\":0}
-        requires a pending request to be aborted: {\\"databaseDocumentID\\":\\"databaseDocumentID\\",\\"indices\\":[],\\"filters\\":{}}"
+        parameters to fetch: null
+        requires a pending request to be aborted: null"
       `);
     });
     describe('when the pending request fails', () => {
@@ -249,7 +253,7 @@ describe('data state', () => {
           has an error: true
           has more children: false
           has more ancestors: false
-          parameters to fetch: {\\"databaseDocumentID\\":\\"databaseDocumentID\\",\\"indices\\":[],\\"filters\\":{},\\"dataRequestID\\":0}
+          parameters to fetch: null
           requires a pending request to be aborted: null"
         `);
       });
@@ -317,7 +321,7 @@ describe('data state', () => {
         has an error: false
         has more children: false
         has more ancestors: false
-        parameters to fetch: {\\"databaseDocumentID\\":\\"second databaseDocumentID\\",\\"indices\\":[],\\"filters\\":{},\\"dataRequestID\\":0}
+        parameters to fetch: {\\"databaseDocumentID\\":\\"second databaseDocumentID\\",\\"indices\\":[],\\"filters\\":{}}
         requires a pending request to be aborted: {\\"databaseDocumentID\\":\\"first databaseDocumentID\\",\\"indices\\":[],\\"filters\\":{}}"
       `);
     });
@@ -345,7 +349,7 @@ describe('data state', () => {
           has an error: false
           has more children: false
           has more ancestors: false
-          parameters to fetch: {\\"databaseDocumentID\\":\\"second databaseDocumentID\\",\\"indices\\":[],\\"filters\\":{},\\"dataRequestID\\":0}
+          parameters to fetch: {\\"databaseDocumentID\\":\\"second databaseDocumentID\\",\\"indices\\":[],\\"filters\\":{}}
           requires a pending request to be aborted: null"
         `);
       });
@@ -356,6 +360,9 @@ describe('data state', () => {
             payload: { databaseDocumentID: secondDatabaseDocumentID, indices: [], filters: {} },
           });
         });
+        it('should not have a document ID to fetch', () => {
+          expect(selectors.treeParametersToFetch(state())).toBe(null);
+        });
         it('should be loading', () => {
           expect(selectors.isTreeLoading(state())).toBe(true);
         });
@@ -365,66 +372,10 @@ describe('data state', () => {
             has an error: false
             has more children: false
             has more ancestors: false
-            parameters to fetch: {\\"databaseDocumentID\\":\\"second databaseDocumentID\\",\\"indices\\":[],\\"filters\\":{},\\"dataRequestID\\":0}
-            requires a pending request to be aborted: {\\"databaseDocumentID\\":\\"second databaseDocumentID\\",\\"indices\\":[],\\"filters\\":{}}"
+            parameters to fetch: null
+            requires a pending request to be aborted: null"
           `);
         });
-      });
-    });
-  });
-  describe('when resolver receives external properties indicating it should refresh', () => {
-    beforeEach(() => {
-      actions = [
-        {
-          type: 'appReceivedNewExternalProperties',
-          payload: {
-            databaseDocumentID: 'doc id',
-            resolverComponentInstanceID: 'instance',
-            locationSearch: '',
-            indices: [],
-            shouldUpdate: true,
-            filters: {},
-          },
-        },
-      ];
-    });
-    it('should indicate that all node data is stale before the server returned node data', () => {
-      // the map does not exist yet so nothing should be in it
-      expect(selectors.nodeDataIsStale(state())('a')).toBeTruthy();
-    });
-    describe('when resolver receives some data for nodes', () => {
-      beforeEach(() => {
-        actions = [
-          ...actions,
-          {
-            type: 'serverReturnedNodeData',
-            payload: {
-              nodeData: [],
-              requestedIDs: new Set(['a', 'b']),
-              numberOfRequestedEvents: 500,
-              // the refreshCount should be at 1 right now
-              dataRequestID: 0,
-            },
-          },
-          {
-            type: 'serverReturnedNodeData',
-            payload: {
-              nodeData: [],
-              requestedIDs: new Set(['c', 'd']),
-              numberOfRequestedEvents: 500,
-              // the refreshCount should be at 1 right now
-              dataRequestID: 1,
-            },
-          },
-        ];
-      });
-      it('should indicate that nodes a and b are stale', () => {
-        expect(selectors.nodeDataIsStale(state())('a')).toBeTruthy();
-        expect(selectors.nodeDataIsStale(state())('b')).toBeTruthy();
-      });
-      it('should indicate that nodes c and d are up to date', () => {
-        expect(selectors.nodeDataIsStale(state())('c')).toBeFalsy();
-        expect(selectors.nodeDataIsStale(state())('d')).toBeFalsy();
       });
     });
   });
@@ -456,7 +407,7 @@ describe('data state', () => {
           },
           {
             type: 'appRequestedResolverData',
-            payload: { databaseDocumentID, indices: [], dataRequestID: 0, filters: {} },
+            payload: { databaseDocumentID, indices: [], filters: {} },
           },
           {
             type: 'serverReturnedResolverData',
@@ -464,7 +415,7 @@ describe('data state', () => {
               result: resolverTree,
               dataSource,
               schema,
-              parameters: { databaseDocumentID, indices: [], dataRequestID: 0, filters: {} },
+              parameters: { databaseDocumentID, indices: [], filters: {} },
             },
           },
         ];
@@ -497,7 +448,6 @@ describe('data state', () => {
               payload: {
                 databaseDocumentID,
                 indices: [],
-                dataRequestID: 0,
                 filters: timeRangeFilters,
               },
             },
@@ -510,7 +460,6 @@ describe('data state', () => {
                 parameters: {
                   databaseDocumentID,
                   indices: [],
-                  dataRequestID: 0,
                   filters: timeRangeFilters,
                 },
               },
@@ -521,83 +470,6 @@ describe('data state', () => {
           expect(selectors.timeRangeFilters(state())?.from).toBe('from');
           expect(selectors.timeRangeFilters(state())?.to).toBe('to');
         });
-      });
-    });
-    describe('when after initial load resolver is told to refresh', () => {
-      beforeEach(() => {
-        actions = [
-          // receive the document ID, this would cause the middleware to start the request
-          {
-            type: 'appReceivedNewExternalProperties',
-            payload: {
-              databaseDocumentID,
-              resolverComponentInstanceID,
-              locationSearch: '',
-              indices: [],
-              shouldUpdate: false,
-              filters: {},
-            },
-          },
-          // this happens when the middleware starts the request
-          {
-            type: 'appRequestedResolverData',
-            payload: { databaseDocumentID, indices: [], dataRequestID: 99, filters: {} },
-          },
-          {
-            type: 'serverReturnedResolverData',
-            payload: {
-              result: resolverTree,
-              dataSource,
-              schema,
-              parameters: { databaseDocumentID, indices: [], dataRequestID: 0, filters: {} },
-            },
-          },
-          // receive all the same parameters except shouldUpdate is true
-          {
-            type: 'appReceivedNewExternalProperties',
-            payload: {
-              databaseDocumentID,
-              resolverComponentInstanceID,
-              locationSearch: '',
-              indices: [],
-              shouldUpdate: true,
-              filters: {},
-            },
-          },
-          {
-            type: 'appReceivedNewExternalProperties',
-            payload: {
-              databaseDocumentID,
-              resolverComponentInstanceID,
-              locationSearch: '',
-              indices: [],
-              shouldUpdate: false,
-              filters: {},
-            },
-          },
-          {
-            type: 'appRequestedResolverData',
-            payload: { databaseDocumentID, indices: [], dataRequestID: 2, filters: {} },
-          },
-        ];
-      });
-      it('should need to request the tree using the same parameters as the first request', () => {
-        expect(selectors.treeParametersToFetch(state())?.databaseDocumentID).toBe(
-          databaseDocumentID
-        );
-      });
-      it('should have a newer id', () => {
-        expect(selectors.treeParametersToFetch(state())?.dataRequestID).toBe(1);
-      });
-      it('should not have an error, more children, or more ancestors.', () => {
-        expect(viewAsAString(state())).toMatchInlineSnapshot(`
-          "is loading: true
-          has an error: false
-          has more children: false
-          has more ancestors: false
-          parameters to fetch: {\\"databaseDocumentID\\":\\"doc id\\",\\"indices\\":[],\\"filters\\":{},\\"dataRequestID\\":1}
-          requires a pending request to be aborted: {\\"databaseDocumentID\\":\\"doc id\\",\\"indices\\":[],\\"dataRequestID\\":2,\\"filters\\":{}}"
-        `);
       });
     });
   });
@@ -653,7 +525,6 @@ describe('data state', () => {
             // mock the requested size being larger than the returned number of events so we
             // avoid the case where the limit was reached
             numberOfRequestedEvents: nodeData.length + 1,
-            dataRequestID: 0,
           },
         },
       ];
@@ -791,6 +662,87 @@ describe('data state', () => {
           "processNodePositions": Map {},
         }
       `);
+    });
+  });
+  describe('when the resolver tree response is complete, still use non-default indices', () => {
+    beforeEach(() => {
+      const { resolverTree } = mockTreeWithNoAncestorsAnd2Children({
+        originID: 'a',
+        firstChildID: 'b',
+        secondChildID: 'c',
+      });
+      const { schema, dataSource } = endpointSourceSchema();
+      actions = [
+        {
+          type: 'serverReturnedResolverData',
+          payload: {
+            result: resolverTree,
+            dataSource,
+            schema,
+            parameters: {
+              databaseDocumentID: '',
+              indices: ['someNonDefaultIndex'],
+              filters: {},
+            },
+          },
+        },
+      ];
+    });
+    it('should have an empty array for tree parameter indices, and a non empty array for event indices', () => {
+      const treeParameterIndices = selectors.treeParameterIndices(state());
+      expect(treeParameterIndices.length).toBe(0);
+      const eventIndices = selectors.eventIndices(state());
+      expect(eventIndices.length).toBe(1);
+    });
+  });
+  describe('when the resolver tree response is pending use the same indices the user is currently looking at data from', () => {
+    beforeEach(() => {
+      const { resolverTree } = mockTreeWithNoAncestorsAnd2Children({
+        originID: 'a',
+        firstChildID: 'b',
+        secondChildID: 'c',
+      });
+      const { schema, dataSource } = endpointSourceSchema();
+      actions = [
+        {
+          type: 'serverReturnedResolverData',
+          payload: {
+            result: resolverTree,
+            dataSource,
+            schema,
+            parameters: {
+              databaseDocumentID: '',
+              indices: ['defaultIndex'],
+              filters: {},
+            },
+          },
+        },
+        {
+          type: 'appReceivedNewExternalProperties',
+          payload: {
+            databaseDocumentID: '',
+            resolverComponentInstanceID: '',
+            locationSearch: '',
+            indices: ['someNonDefaultIndex', 'someOtherIndex'],
+            shouldUpdate: false,
+            filters: {},
+          },
+        },
+        {
+          type: 'appRequestedResolverData',
+          payload: {
+            databaseDocumentID: '',
+            indices: ['someNonDefaultIndex', 'someOtherIndex'],
+            filters: {},
+          },
+        },
+      ];
+    });
+    it('should have an empty array for tree parameter indices, and the same set of indices as the last tree response', () => {
+      const treeParameterIndices = selectors.treeParameterIndices(state());
+      expect(treeParameterIndices.length).toBe(0);
+      const eventIndices = selectors.eventIndices(state());
+      expect(eventIndices.length).toBe(1);
     });
   });
 });

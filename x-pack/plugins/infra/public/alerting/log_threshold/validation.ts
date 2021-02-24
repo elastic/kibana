@@ -1,49 +1,58 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
+import * as rt from 'io-ts';
 import { isNumber, isFinite } from 'lodash';
-import { ValidationResult } from '../../../../triggers_actions_ui/public';
+import { IErrorObject, ValidationResult } from '../../../../triggers_actions_ui/public';
 import {
-  AlertParams,
-  Criteria,
-  RatioCriteria,
+  PartialCountCriteria,
   isRatioAlert,
   getNumerator,
   getDenominator,
+  PartialRequiredAlertParams,
+  PartialCriteria,
 } from '../../../common/alerting/logs/log_threshold/types';
 
-export interface CriterionErrors {
-  [id: string]: {
-    field: string[];
-    comparator: string[];
-    value: string[];
-  };
-}
+export const criterionErrorRT = rt.type({
+  field: rt.array(rt.string),
+  comparator: rt.array(rt.string),
+  value: rt.array(rt.string),
+});
 
-export interface Errors {
-  threshold: {
-    value: string[];
-  };
+export const criterionErrorsRT = rt.record(rt.string, criterionErrorRT);
+
+export type CriterionErrors = rt.TypeOf<typeof criterionErrorsRT>;
+
+const alertingErrorRT: rt.Type<IErrorObject> = rt.recursion('AlertingError', () =>
+  rt.record(rt.string, rt.union([rt.string, rt.array(rt.string), alertingErrorRT]))
+);
+
+export const errorsRT = rt.type({
+  threshold: rt.type({
+    value: rt.array(rt.string),
+  }),
   // NOTE: The data structure for criteria errors isn't 100%
   // ideal but we need to conform to the interfaces that the alerting
   // framework expects.
-  criteria: {
-    [id: string]: CriterionErrors;
-  };
-  timeWindowSize: string[];
-  timeSizeUnit: string[];
-}
+  criteria: rt.record(rt.string, criterionErrorsRT),
+  timeWindowSize: rt.array(rt.string),
+  timeSizeUnit: rt.array(rt.string),
+});
+
+export type Errors = rt.TypeOf<typeof errorsRT>;
 
 export function validateExpression({
   count,
   criteria,
   timeSize,
-  timeUnit,
-}: Partial<AlertParams>): ValidationResult {
+}: PartialRequiredAlertParams & {
+  criteria: PartialCriteria;
+}): ValidationResult {
   const validationResult = { errors: {} };
 
   // NOTE: In the case of components provided by the Alerting framework the error property names
@@ -79,7 +88,7 @@ export function validateExpression({
 
   // Criteria validation
   if (criteria && criteria.length > 0) {
-    const getCriterionErrors = (_criteria: Criteria): CriterionErrors => {
+    const getCriterionErrors = (_criteria: PartialCountCriteria): CriterionErrors => {
       const _errors: CriterionErrors = {};
 
       _criteria.forEach((criterion, idx) => {
@@ -114,12 +123,12 @@ export function validateExpression({
     };
 
     if (!isRatioAlert(criteria)) {
-      const criteriaErrors = getCriterionErrors(criteria as Criteria);
+      const criteriaErrors = getCriterionErrors(criteria);
       errors.criteria[0] = criteriaErrors;
     } else {
-      const numeratorErrors = getCriterionErrors(getNumerator(criteria as RatioCriteria));
+      const numeratorErrors = getCriterionErrors(getNumerator(criteria));
       errors.criteria[0] = numeratorErrors;
-      const denominatorErrors = getCriterionErrors(getDenominator(criteria as RatioCriteria));
+      const denominatorErrors = getCriterionErrors(getDenominator(criteria));
       errors.criteria[1] = denominatorErrors;
     }
   }

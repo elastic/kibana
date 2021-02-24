@@ -1,16 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { Fragment, Component } from 'react';
 import { EuiFilePicker, EuiFormRow, EuiProgress } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { parseFile } from '../util/file_parser';
-import { MAX_FILE_SIZE } from '../../common/constants/file_import';
 
+const MAX_FILE_SIZE = 52428800;
 const ACCEPTABLE_FILETYPES = ['json', 'geojson'];
 const acceptedFileTypeString = ACCEPTABLE_FILETYPES.map((type) => `.${type}`).join(',');
 const acceptedFileTypeStringMessage = ACCEPTABLE_FILETYPES.map((type) => `.${type}`).join(', ');
@@ -32,7 +32,7 @@ export class JsonIndexFilePicker extends Component {
     this._isMounted = false;
   }
 
-  getFileParseActive = () => this._isMounted && this.state.fileParseActive;
+  isFileParseActive = () => this._isMounted && this.state.fileParseActive;
 
   _fileHandler = (fileList) => {
     const fileArr = Array.from(fileList);
@@ -58,36 +58,6 @@ export class JsonIndexFilePicker extends Component {
       },
       () => this._parseFile(file)
     );
-  };
-
-  _checkFileSize = ({ size }) => {
-    const fileSizeValid = true;
-    try {
-      if (size > MAX_FILE_SIZE) {
-        const humanReadableSize = bytesToSize(size);
-        const humanReadableMaxSize = bytesToSize(MAX_FILE_SIZE);
-        throw new Error(
-          i18n.translate('xpack.fileUpload.jsonIndexFilePicker.acceptableFileSize', {
-            defaultMessage: 'File size {fileSize} exceeds max file size of {maxFileSize}',
-            values: {
-              fileSize: humanReadableSize,
-              maxFileSize: humanReadableMaxSize,
-            },
-          })
-        );
-      }
-    } catch (error) {
-      this.setState({
-        fileUploadError: i18n.translate('xpack.fileUpload.jsonIndexFilePicker.fileSizeError', {
-          defaultMessage: 'File size error: {errorMessage}',
-          values: {
-            errorMessage: error.message,
-          },
-        }),
-      });
-      return;
-    }
-    return fileSizeValid;
   };
 
   _getFileNameAndCheckType({ name }) {
@@ -135,54 +105,58 @@ export class JsonIndexFilePicker extends Component {
 
   setFileProgress = ({ featuresProcessed, bytesProcessed, totalBytes }) => {
     const percentageProcessed = parseInt((100 * bytesProcessed) / totalBytes);
-    if (this.getFileParseActive()) {
+    if (this.isFileParseActive()) {
       this.setState({ featuresProcessed, percentageProcessed });
     }
   };
 
   async _parseFile(file) {
     const { currentFileTracker } = this.state;
-    const {
-      setFileRef,
-      setParsedFile,
-      resetFileAndIndexSettings,
-      onFileUpload,
-      transformDetails,
-      setIndexName,
-    } = this.props;
+    const { setFileRef, setParsedFile, resetFileAndIndexSettings } = this.props;
 
-    const fileSizeValid = this._checkFileSize(file);
-    const defaultIndexName = this._getFileNameAndCheckType(file);
-    if (!fileSizeValid || !defaultIndexName) {
+    if (file.size > MAX_FILE_SIZE) {
+      this.setState({
+        fileUploadError: i18n.translate('xpack.fileUpload.jsonIndexFilePicker.acceptableFileSize', {
+          defaultMessage: 'File size {fileSize} exceeds maximum file size of {maxFileSize}',
+          values: {
+            fileSize: bytesToSize(file.size),
+            maxFileSize: bytesToSize(MAX_FILE_SIZE),
+          },
+        }),
+      });
       resetFileAndIndexSettings();
       return;
     }
-    // Parse file
 
-    const fileResult = await parseFile({
-      file,
-      transformDetails,
-      onFileUpload,
-      setFileProgress: this.setFileProgress,
-      getFileParseActive: this.getFileParseActive,
-    }).catch((err) => {
-      if (this._isMounted) {
-        this.setState({
-          fileParseActive: false,
-          percentageProcessed: 0,
-          featuresProcessed: 0,
-          fileUploadError: (
-            <FormattedMessage
-              id="xpack.fileUpload.jsonIndexFilePicker.unableParseFile"
-              defaultMessage="Unable to parse file: {error}"
-              values={{
-                error: err.message,
-              }}
-            />
-          ),
-        });
-      }
-    });
+    const defaultIndexName = this._getFileNameAndCheckType(file);
+    if (!defaultIndexName) {
+      resetFileAndIndexSettings();
+      return;
+    }
+
+    const fileResult = await this.props.geojsonImporter
+      .readFile(file, this.setFileProgress, this.isFileParseActive)
+      .catch((err) => {
+        if (this._isMounted) {
+          this.setState({
+            fileParseActive: false,
+            percentageProcessed: 0,
+            featuresProcessed: 0,
+            fileUploadError: (
+              <FormattedMessage
+                id="xpack.fileUpload.jsonIndexFilePicker.unableParseFile"
+                defaultMessage="Unable to parse file: {error}"
+                values={{
+                  error: err.message,
+                }}
+              />
+            ),
+          });
+          resetFileAndIndexSettings();
+          return;
+        }
+      });
+
     if (!this._isMounted) {
       return;
     }
@@ -197,25 +171,20 @@ export class JsonIndexFilePicker extends Component {
       resetFileAndIndexSettings();
       return;
     }
-    const { errors, parsedGeojson } = fileResult;
 
-    if (errors.length) {
-      // Set only the first error for now (since there's only one).
-      // TODO: Add handling in case of further errors
-      const error = errors[0];
+    if (fileResult.errors.length) {
       this.setState({
         fileUploadError: (
           <FormattedMessage
             id="xpack.fileUpload.jsonIndexFilePicker.fileParseError"
             defaultMessage="File parse error(s) detected: {error}"
-            values={{ error }}
+            values={{ error: fileResult.errors[0] }}
           />
         ),
       });
     }
-    setIndexName(defaultIndexName);
     setFileRef(file);
-    setParsedFile(parsedGeojson);
+    setParsedFile(fileResult, defaultIndexName);
   }
 
   render() {

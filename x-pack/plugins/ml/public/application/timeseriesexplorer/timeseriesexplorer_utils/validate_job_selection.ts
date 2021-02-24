@@ -1,15 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { difference, without } from 'lodash';
 
 import { i18n } from '@kbn/i18n';
 
-import { getToastNotifications } from '../../util/dependency_cache';
-
+import { ToastsStart } from 'kibana/public';
 import { MlJobWithTimeRange } from '../../../../common/types/anomaly_detection_jobs';
 
 import { getTimeRangeFromSelection } from '../../components/job_selector/job_select_service_utils';
@@ -24,9 +24,9 @@ import { createTimeSeriesJobData } from './timeseriesexplorer_utils';
 export function validateJobSelection(
   jobsWithTimeRange: MlJobWithTimeRange[],
   selectedJobIds: string[],
-  setGlobalState: (...args: any) => void
+  setGlobalState: (...args: any) => void,
+  toastNotifications: ToastsStart
 ) {
-  const toastNotifications = getToastNotifications();
   const jobs = createTimeSeriesJobData(mlJobService.jobs);
   const timeSeriesJobIds: string[] = jobs.map((j: any) => j.id);
 

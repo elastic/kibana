@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { get } from 'lodash';
@@ -12,10 +13,13 @@ export function handleResponse(response, isCloudEnabled) {
   for (const source of sources) {
     const monitoringSettings = get(response[source], 'xpack.monitoring');
     if (monitoringSettings !== undefined) {
-      const check = findReason(monitoringSettings, {
-        context: `cluster ${source}`,
-        isCloudEnabled,
-      });
+      const check = findReason(
+        monitoringSettings,
+        {
+          context: `cluster ${source}`,
+        },
+        isCloudEnabled
+      );
 
       if (check.found) {
         return check;

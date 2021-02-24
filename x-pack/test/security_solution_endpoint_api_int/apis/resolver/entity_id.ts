@@ -1,14 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import expect from '@kbn/expect';
-import { entityIDSafeVersion } from '../../../../plugins/security_solution/common/endpoint/models/event';
+import {
+  entityIDSafeVersion,
+  timestampAsDateSafeVersion,
+} from '../../../../plugins/security_solution/common/endpoint/models/event';
 import { eventsIndexPattern } from '../../../../plugins/security_solution/common/endpoint/constants';
 import {
-  SafeResolverTree,
   ResolverEntityIndex,
+  ResolverNode,
 } from '../../../../plugins/security_solution/common/endpoint/types';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import {
@@ -16,7 +21,7 @@ import {
   Event,
 } from '../../../../plugins/security_solution/common/endpoint/generate_data';
 import { InsertedEvents, processEventsIndex } from '../../services/resolver';
-import { createAncestryArray } from './common';
+import { createAncestryArray, schemaWithAncestry } from './common';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -93,11 +98,23 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('does not find children without a process entity_id', async () => {
-        const { body }: { body: SafeResolverTree } = await supertest
-          .get(`/api/endpoint/resolver/${origin.process?.entity_id}`)
+        const { body }: { body: ResolverNode[] } = await supertest
+          .post('/api/endpoint/resolver/tree')
+          .set('kbn-xsrf', 'xxx')
+          .send({
+            descendants: 100,
+            ancestors: 0,
+            schema: schemaWithAncestry,
+            nodes: [origin.process?.entity_id],
+            timeRange: {
+              from: timestampAsDateSafeVersion(origin)?.toISOString(),
+              to: timestampAsDateSafeVersion(childWithEntityID)?.toISOString(),
+            },
+            indexPatterns: ['logs-*'],
+          })
           .expect(200);
-        expect(body.children.childNodes.length).to.be(1);
-        expect(body.children.childNodes[0].entityID).to.be(childWithEntityID.process?.entity_id);
+        expect(body.length).to.be(1);
+        expect(body[0].id).to.be(childWithEntityID.process?.entity_id);
       });
     });
 
@@ -147,11 +164,32 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('does not query for ancestors that have an empty string for the entity_id', async () => {
-        const { body }: { body: SafeResolverTree } = await supertest
-          .get(`/api/endpoint/resolver/${origin.process?.entity_id}`)
+        const hasID = (nodes: ResolverNode[], id: string | undefined): boolean => {
+          if (!id) {
+            return false;
+          }
+          return nodes.find((node) => node.id === id) !== undefined;
+        };
+        const { body }: { body: ResolverNode[] } = await supertest
+          .post('/api/endpoint/resolver/tree')
+          .set('kbn-xsrf', 'xxx')
+          .send({
+            descendants: 0,
+            ancestors: 10,
+            schema: schemaWithAncestry,
+            nodes: [origin.process?.entity_id],
+            timeRange: {
+              from: timestampAsDateSafeVersion(ancestor2)?.toISOString(),
+              to: timestampAsDateSafeVersion(origin)?.toISOString(),
+            },
+            indexPatterns: ['logs-*'],
+          })
           .expect(200);
-        expect(body.ancestry.ancestors.length).to.be(1);
-        expect(body.ancestry.ancestors[0].entityID).to.be(ancestor2.process?.entity_id);
+        // the origin itself will be returned as part of the /tree request
+        // and it's single valid ancestor
+        expect(body.length).to.be(2);
+        expect(hasID(body, entityIDSafeVersion(origin))).to.be(true);
+        expect(hasID(body, entityIDSafeVersion(ancestor2))).to.be(true);
       });
     });
   });

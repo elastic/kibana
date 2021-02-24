@@ -1,16 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { Action } from 'redux-actions';
 import { Snapshot } from '../../../common/runtime_types';
-import {
-  getSnapshotCountAction,
-  getSnapshotCountActionSuccess,
-  getSnapshotCountActionFail,
-} from '../actions';
+import { getSnapshotCountAction } from '../actions';
 
 export interface SnapshotState {
   count: Snapshot;
@@ -30,18 +27,18 @@ const initialState: SnapshotState = {
 
 export function snapshotReducer(state = initialState, action: Action<any>): SnapshotState {
   switch (action.type) {
-    case String(getSnapshotCountAction):
+    case String(getSnapshotCountAction.get):
       return {
         ...state,
         loading: true,
       };
-    case String(getSnapshotCountActionSuccess):
+    case String(getSnapshotCountAction.success):
       return {
         ...state,
         count: action.payload,
         loading: false,
       };
-    case String(getSnapshotCountActionFail):
+    case String(getSnapshotCountAction.fail):
       return {
         ...state,
         errors: [...state.errors, action.payload],

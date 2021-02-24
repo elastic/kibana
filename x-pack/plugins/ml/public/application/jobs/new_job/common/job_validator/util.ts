@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -13,8 +14,6 @@ import {
 } from '../../../../../../common/constants/validation';
 import { getNewJobLimits } from '../../../../services/ml_server_info';
 import { ValidationResults } from '../../../../../../common/util/job_utils';
-import { ExistingJobsAndGroups } from '../../../../services/job_service';
-import { JobValidationMessage } from '../../../../../../common/constants/messages';
 
 export function populateValidationMessages(
   validationResults: ValidationResults,
@@ -204,37 +203,7 @@ export function populateValidationMessages(
   }
 }
 
-export function checkForExistingJobAndGroupIds(
-  jobId: string,
-  groupIds: string[],
-  existingJobsAndGroups: ExistingJobsAndGroups
-): ValidationResults {
-  const messages: JobValidationMessage[] = [];
-
-  // check that job id does not already exist as a job or group or a newly created group
-  if (
-    existingJobsAndGroups.jobIds.includes(jobId) ||
-    existingJobsAndGroups.groupIds.includes(jobId) ||
-    groupIds.includes(jobId)
-  ) {
-    messages.push({ id: 'job_id_already_exists' });
-  }
-
-  // check that groups that have been newly added in this job do not already exist as job ids
-  const newGroups = groupIds.filter((g) => !existingJobsAndGroups.groupIds.includes(g));
-  if (existingJobsAndGroups.jobIds.some((g) => newGroups.includes(g))) {
-    messages.push({ id: 'job_group_id_already_exists' });
-  }
-
-  return {
-    messages,
-    valid: messages.length === 0,
-    contains: (id: string) => messages.some((m) => id === m.id),
-    find: (id: string) => messages.find((m) => id === m.id),
-  };
-}
-
-function invalidTimeIntervalMessage(value: string | undefined) {
+export function invalidTimeIntervalMessage(value: string | undefined) {
   return i18n.translate(
     'xpack.ml.newJob.wizard.validateJob.frequencyInvalidTimeIntervalFormatErrorMessage',
     {

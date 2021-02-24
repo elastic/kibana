@@ -1,9 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-import { ElasticsearchClient, SavedObjectsClientContract, KibanaRequest } from 'kibana/server';
+
+import {
+  ElasticsearchClient,
+  SavedObjectsClientContract,
+  KibanaRequest,
+  ISavedObjectsRepository,
+} from 'kibana/server';
 import chalk from 'chalk';
 import { UMBackendFrameworkAdapter } from './adapters';
 import { UMLicenseCheck } from './domains';
@@ -20,7 +27,7 @@ export interface UMServerLibs extends UMDomainLibs {
   framework: UMBackendFrameworkAdapter;
 }
 
-interface CountResponse {
+export interface CountResponse {
   body: {
     count: number;
     _shards: {
@@ -41,7 +48,7 @@ export function createUptimeESClient({
 }: {
   esClient: ElasticsearchClient;
   request?: KibanaRequest;
-  savedObjectsClient: SavedObjectsClientContract;
+  savedObjectsClient: SavedObjectsClientContract | ISavedObjectsRepository;
 }) {
   const { _debug = false } = (request?.query as { _debug: boolean }) ?? {};
 

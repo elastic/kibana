@@ -1,11 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { xpackMocks } from '../../../../../x-pack/mocks';
-import { createAppContextStartContractMock } from '../mocks';
+import { createAppContextStartContractMock, xpackMocks } from '../mocks';
 import { appContextService } from './app_context';
 import { setupIngestManager } from './setup';
 
@@ -41,8 +41,9 @@ describe('setupIngestManager', () => {
       soClient.find = mockedMethodThrowsError();
       soClient.get = mockedMethodThrowsError();
       soClient.update = mockedMethodThrowsError();
+      const esClient = context.core.elasticsearch.client.asCurrentUser;
 
-      const setupPromise = setupIngestManager(soClient, jest.fn());
+      const setupPromise = setupIngestManager(soClient, esClient, jest.fn());
       await expect(setupPromise).rejects.toThrow('SO method mocked to throw');
       await expect(setupPromise).rejects.toThrow(Error);
     });
@@ -53,8 +54,9 @@ describe('setupIngestManager', () => {
       soClient.find = mockedMethodThrowsCustom();
       soClient.get = mockedMethodThrowsCustom();
       soClient.update = mockedMethodThrowsCustom();
+      const esClient = context.core.elasticsearch.client.asCurrentUser;
 
-      const setupPromise = setupIngestManager(soClient, jest.fn());
+      const setupPromise = setupIngestManager(soClient, esClient, jest.fn());
       await expect(setupPromise).rejects.toThrow('method mocked to throw');
       await expect(setupPromise).rejects.toThrow(CustomTestError);
     });

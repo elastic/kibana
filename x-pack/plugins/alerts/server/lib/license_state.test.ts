@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { AlertType } from '../types';
@@ -56,7 +57,7 @@ describe('getLicenseCheckForAlertType', () => {
   let license: Subject<ILicense>;
   let licenseState: ILicenseState;
   const mockNotifyUsage = jest.fn();
-  const alertType: AlertType = {
+  const alertType: AlertType<never, never, never, never, 'default', 'recovered'> = {
     id: 'test',
     name: 'Test',
     actionGroups: [
@@ -190,7 +191,7 @@ describe('ensureLicenseForAlertType()', () => {
   let license: Subject<ILicense>;
   let licenseState: ILicenseState;
   const mockNotifyUsage = jest.fn();
-  const alertType: AlertType = {
+  const alertType: AlertType<never, never, never, never, string, string> = {
     id: 'test',
     name: 'Test',
     actionGroups: [
@@ -247,7 +248,7 @@ describe('ensureLicenseForAlertType()', () => {
     expect(() =>
       licenseState.ensureLicenseForAlertType(alertType)
     ).toThrowErrorMatchingInlineSnapshot(
-      `"Alert test is disabled because it requires a Gold license. Contact your administrator to upgrade your license."`
+      `"Alert test is disabled because it requires a Gold license. Go to License Management to view upgrade options."`
     );
   });
 

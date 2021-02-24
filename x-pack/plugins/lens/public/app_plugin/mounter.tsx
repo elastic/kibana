@@ -1,13 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-import React from 'react';
+
+import React, { FC, useCallback } from 'react';
 
 import { AppMountParameters, CoreSetup } from 'kibana/public';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
 import { HashRouter, Route, RouteComponentProps, Switch } from 'react-router-dom';
+import { History } from 'history';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { i18n } from '@kbn/i18n';
 
@@ -20,7 +23,7 @@ import { App } from './app';
 import { EditorFrameStart } from '../types';
 import { addHelpMenuToAppChrome } from '../help_menu_util';
 import { LensPluginStartDependencies } from '../plugin';
-import { LENS_EMBEDDABLE_TYPE, LENS_EDIT_BY_VALUE } from '../../common';
+import { LENS_EMBEDDABLE_TYPE, LENS_EDIT_BY_VALUE, APP_ID } from '../../common';
 import {
   LensEmbeddableInput,
   LensByReferenceInput,
@@ -38,9 +41,15 @@ export async function mountApp(
     createEditorFrame: EditorFrameStart['createInstance'];
     getByValueFeatureFlag: () => Promise<DashboardFeatureFlagConfig>;
     attributeService: () => Promise<LensAttributeService>;
+    getPresentationUtilContext: () => Promise<FC>;
   }
 ) {
-  const { createEditorFrame, getByValueFeatureFlag, attributeService } = mountProps;
+  const {
+    createEditorFrame,
+    getByValueFeatureFlag,
+    attributeService,
+    getPresentationUtilContext,
+  } = mountProps;
   const [coreStart, startDependencies] = await core.getStartServices();
   const { data, navigation, embeddable, savedObjectsTagging } = startDependencies;
 
@@ -48,7 +57,7 @@ export async function mountApp(
   const storage = new Storage(localStorage);
   const stateTransfer = embeddable?.getStateTransfer();
   const historyLocationState = params.history.location.state as HistoryLocationState;
-  const embeddableEditorIncomingState = stateTransfer?.getIncomingEditorState();
+  const embeddableEditorIncomingState = stateTransfer?.getIncomingEditorState(APP_ID);
 
   const lensServices: LensAppServices = {
     data,
@@ -86,25 +95,22 @@ export async function mountApp(
     })
   );
 
-  const getInitialInput = (
-    routeProps: RouteComponentProps<{ id?: string }>,
-    editByValue?: boolean
-  ): LensEmbeddableInput | undefined => {
+  const getInitialInput = (id?: string, editByValue?: boolean): LensEmbeddableInput | undefined => {
     if (editByValue) {
       return embeddableEditorIncomingState?.valueInput as LensByValueInput;
     }
-    if (routeProps.match.params.id) {
-      return { savedObjectId: routeProps.match.params.id } as LensByReferenceInput;
+    if (id) {
+      return { savedObjectId: id } as LensByReferenceInput;
     }
   };
 
-  const redirectTo = (routeProps: RouteComponentProps<{ id?: string }>, savedObjectId?: string) => {
+  const redirectTo = (history: History<unknown>, savedObjectId?: string) => {
     if (!savedObjectId) {
-      routeProps.history.push({ pathname: '/', search: routeProps.history.location.search });
+      history.push({ pathname: '/', search: history.location.search });
     } else {
-      routeProps.history.push({
+      history.push({
         pathname: `/edit/${savedObjectId}`,
-        search: routeProps.history.location.search,
+        search: history.location.search,
       });
     }
   };
@@ -144,27 +150,45 @@ export async function mountApp(
     }
   };
 
-  const renderEditor = (
-    routeProps: RouteComponentProps<{ id?: string }>,
-    editByValue?: boolean
+  // const featureFlagConfig = await getByValueFeatureFlag();
+  const EditorRenderer = React.memo(
+    (props: { id?: string; history: History<unknown>; editByValue?: boolean }) => {
+      const redirectCallback = useCallback(
+        (id?: string) => {
+          redirectTo(props.history, id);
+        },
+        [props.history]
+      );
+      trackUiEvent('loaded');
+      return (
+        <App
+          incomingState={embeddableEditorIncomingState}
+          editorFrame={instance}
+          initialInput={getInitialInput(props.id, props.editByValue)}
+          redirectTo={redirectCallback}
+          redirectToOrigin={redirectToOrigin}
+          redirectToDashboard={redirectToDashboard}
+          onAppLeave={params.onAppLeave}
+          setHeaderActionMenu={params.setHeaderActionMenu}
+          history={props.history}
+          initialContext={
+            historyLocationState && historyLocationState.type === ACTION_VISUALIZE_LENS_FIELD
+              ? historyLocationState.payload
+              : undefined
+          }
+        />
+      );
+    }
+  );
+
+  const EditorRoute = (
+    routeProps: RouteComponentProps<{ id?: string }> & { editByValue?: boolean }
   ) => {
-    trackUiEvent('loaded');
     return (
-      <App
-        incomingState={embeddableEditorIncomingState}
-        editorFrame={instance}
-        initialInput={getInitialInput(routeProps, editByValue)}
-        redirectTo={(savedObjectId?: string) => redirectTo(routeProps, savedObjectId)}
-        redirectToOrigin={redirectToOrigin}
-        redirectToDashboard={redirectToDashboard}
-        onAppLeave={params.onAppLeave}
-        setHeaderActionMenu={params.setHeaderActionMenu}
+      <EditorRenderer
+        id={routeProps.match.params.id}
         history={routeProps.history}
-        initialContext={
-          historyLocationState && historyLocationState.type === ACTION_VISUALIZE_LENS_FIELD
-            ? historyLocationState.payload
-            : undefined
-        }
+        editByValue={routeProps.editByValue}
       />
     );
   };
@@ -180,26 +204,32 @@ export async function mountApp(
   });
 
   params.element.classList.add('lnsAppWrapper');
+
+  const PresentationUtilContext = await getPresentationUtilContext();
+
   render(
     <I18nProvider>
       <KibanaContextProvider services={lensServices}>
-        <HashRouter>
-          <Switch>
-            <Route exact path="/edit/:id" render={renderEditor} />
-            <Route
-              exact
-              path={`/${LENS_EDIT_BY_VALUE}`}
-              render={(routeProps) => renderEditor(routeProps, true)}
-            />
-            <Route exact path="/" render={renderEditor} />
-            <Route path="/" component={NotFound} />
-          </Switch>
-        </HashRouter>
+        <PresentationUtilContext>
+          <HashRouter>
+            <Switch>
+              <Route exact path="/edit/:id" component={EditorRoute} />
+              <Route
+                exact
+                path={`/${LENS_EDIT_BY_VALUE}`}
+                render={(routeProps) => <EditorRoute {...routeProps} editByValue />}
+              />
+              <Route exact path="/" component={EditorRoute} />
+              <Route path="/" component={NotFound} />
+            </Switch>
+          </HashRouter>
+        </PresentationUtilContext>
       </KibanaContextProvider>
     </I18nProvider>,
     params.element
   );
   return () => {
+    data.search.session.clear();
     instance.unmount();
     unmountComponentAtNode(params.element);
     unlistenParentHistory();

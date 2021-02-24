@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { createMemoryHistory, History as HistoryPackageHistoryInterface } from 'history';
 
 import { oneNodeWithPaginatedEvents } from '../../data_access_layer/mocks/one_node_with_paginated_related_events';
@@ -14,8 +16,7 @@ import { urlSearch } from '../../test_utilities/url_search';
 // the resolver component instance ID, used by the react code to distinguish piece of global state from those used by other resolver instances
 const resolverComponentInstanceID = 'resolverComponentInstanceID';
 
-// FLAKY: https://github.com/elastic/kibana/issues/85714
-describe.skip(`Resolver: when analyzing a tree with only the origin and paginated related events, and when the component instance ID is ${resolverComponentInstanceID}`, () => {
+describe(`Resolver: when analyzing a tree with only the origin and paginated related events, and when the component instance ID is ${resolverComponentInstanceID}`, () => {
   /**
    * Get (or lazily create and get) the simulator.
    */

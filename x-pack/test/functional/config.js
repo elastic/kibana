@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { resolve } from 'path';
@@ -95,6 +96,7 @@ export default async function ({ readConfigFile }) {
       defaults: {
         'accessibility:disableAnimations': true,
         'dateFormat:tz': 'UTC',
+        'visualization:visualize:legacyChartsLibrary': true,
       },
     },
     // the apps section defines the urls that
@@ -231,6 +233,7 @@ export default async function ({ readConfigFile }) {
             {
               feature: {
                 canvas: ['all'],
+                visualize: ['all'],
               },
               spaces: ['*'],
             },
@@ -372,6 +375,28 @@ export default async function ({ readConfigFile }) {
               },
             ],
           },
+        },
+
+        geoall_data_writer: {
+          elasticsearch: {
+            indices: [
+              {
+                names: ['*'],
+                privileges: ['create', 'read', 'view_index_metadata', 'monitor', 'create_index'],
+              },
+            ],
+          },
+        },
+
+        global_index_pattern_management_all: {
+          kibana: [
+            {
+              feature: {
+                indexPatterns: ['all'],
+              },
+              spaces: ['*'],
+            },
+          ],
         },
 
         global_devtools_read: {

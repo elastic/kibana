@@ -1,23 +1,24 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import {
   RequestHandler,
   RouteConfig,
   kibanaResponseFactory,
-  IRouter,
   HttpResources,
   HttpResourcesRequestHandler,
-  RequestHandlerContext,
 } from '../../../../../../src/core/server';
 import { SecurityLicense, SecurityLicenseFeatures } from '../../../common/licensing';
 import type { AuthenticationProvider } from '../../../common/model';
 import { ConfigType } from '../../config';
 import { Session } from '../../session_management';
 import { defineAccessAgreementRoutes } from './access_agreement';
+import type { SecurityRouter, SecurityRequestHandlerContext } from '../../types';
 
 import { httpResourcesMock, httpServerMock } from '../../../../../../src/core/server/mocks';
 import { sessionMock } from '../../session_management/session.mock';
@@ -25,18 +26,20 @@ import { routeDefinitionParamsMock } from '../index.mock';
 
 describe('Access agreement view routes', () => {
   let httpResources: jest.Mocked<HttpResources>;
-  let router: jest.Mocked<IRouter>;
+  let router: jest.Mocked<SecurityRouter>;
   let config: ConfigType;
   let session: jest.Mocked<PublicMethodsOf<Session>>;
   let license: jest.Mocked<SecurityLicense>;
-  let mockContext: RequestHandlerContext;
+  let mockContext: SecurityRequestHandlerContext;
   beforeEach(() => {
     const routeParamsMock = routeDefinitionParamsMock.create();
     router = routeParamsMock.router;
     httpResources = routeParamsMock.httpResources;
-    session = routeParamsMock.session;
     config = routeParamsMock.config;
     license = routeParamsMock.license;
+
+    session = sessionMock.create();
+    routeParamsMock.getSession.mockReturnValue(session);
 
     license.getFeatures.mockReturnValue({
       allowAccessAgreement: true,
@@ -46,7 +49,7 @@ describe('Access agreement view routes', () => {
       licensing: {
         license: { check: jest.fn().mockReturnValue({ check: 'valid' }) },
       },
-    } as unknown) as RequestHandlerContext;
+    } as unknown) as SecurityRequestHandlerContext;
 
     defineAccessAgreementRoutes(routeParamsMock);
   });
@@ -93,7 +96,7 @@ describe('Access agreement view routes', () => {
   });
 
   describe('Access agreement state route', () => {
-    let routeHandler: RequestHandler<any, any, any, 'get'>;
+    let routeHandler: RequestHandler<any, any, any, SecurityRequestHandlerContext, 'get'>;
     let routeConfig: RouteConfig<any, any, any, 'get'>;
     beforeEach(() => {
       const [loginStateRouteConfig, loginStateRouteHandler] = router.get.mock.calls.find(

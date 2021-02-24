@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -15,7 +16,7 @@ import {
   BaseActionFactoryContext,
 } from '../../../dynamic_actions';
 import { ActionWizard } from '../../../components/action_wizard';
-import { Trigger, TriggerId } from '../../../../../../../src/plugins/ui_actions/public';
+import { Trigger } from '../../../../../../../src/plugins/ui_actions/public';
 import { txtGetMoreActions } from './i18n';
 
 const GET_MORE_ACTIONS_LINK = 'https://www.elastic.co/subscriptions';
@@ -41,14 +42,14 @@ export interface FormDrilldownWizardProps<
    * Trigger selection has changed
    * @param triggers
    */
-  onSelectedTriggersChange: (triggers?: TriggerId[]) => void;
+  onSelectedTriggersChange: (triggers?: string[]) => void;
 
-  getTriggerInfo: (triggerId: TriggerId) => Trigger;
+  getTriggerInfo: (triggerId: string) => Trigger;
 
   /**
    * List of possible triggers in current context
    */
-  triggers: TriggerId[];
+  triggers: string[];
 
   triggerPickerDocsLink?: string;
 }

@@ -1,16 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import React, { useState, FunctionComponent } from 'react';
 import { get } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { i18n } from '@kbn/i18n';
 import { EuiButtonEmpty, EuiText, EuiSpacer } from '@elastic/eui';
 
-import { UseField, SelectField, useFormData } from '../../../../../../../../shared_imports';
+import { SelectField, useFormData } from '../../../../../../../../shared_imports';
+
+import { UseField } from '../../../../../form';
 
 import { LearnMoreLink } from '../../../../learn_more_link';
 

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { act } from 'react-dom/test-utils';
@@ -71,7 +72,7 @@ describe('Data Streams tab', () => {
 
     test('when Fleet is enabled, links to Fleet', async () => {
       testBed = await setup({
-        plugins: { fleet: { hi: 'ok' } },
+        plugins: { isFleetEnabled: true },
       });
 
       await act(async () => {
@@ -469,12 +470,12 @@ describe('Data Streams tab', () => {
       testBed.component.update();
     });
 
-    test('listed in the table with Managed label', () => {
+    test('listed in the table with Fleet-managed label', () => {
       const { table } = testBed;
       const { tableCellsValues } = table.getMetaData('dataStreamTable');
 
       expect(tableCellsValues).toEqual([
-        ['', `managed-data-stream${nonBreakingSpace}Managed`, 'green', '1', 'Delete'],
+        ['', `managed-data-stream${nonBreakingSpace}Fleet-managed`, 'green', '1', 'Delete'],
         ['', 'non-managed-data-stream', 'green', '1', 'Delete'],
       ]);
     });
@@ -484,7 +485,7 @@ describe('Data Streams tab', () => {
       let { tableCellsValues } = table.getMetaData('dataStreamTable');
 
       expect(tableCellsValues).toEqual([
-        ['', `managed-data-stream${nonBreakingSpace}Managed`, 'green', '1', 'Delete'],
+        ['', `managed-data-stream${nonBreakingSpace}Fleet-managed`, 'green', '1', 'Delete'],
         ['', 'non-managed-data-stream', 'green', '1', 'Delete'],
       ]);
 

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiButton, EuiCheckboxProps } from '@elastic/eui';
@@ -58,7 +59,6 @@ describe('ManageSpacePage', () => {
         spacesManager={(spacesManager as unknown) as SpacesManager}
         getFeatures={featuresStart.getFeatures}
         notifications={notificationServiceMock.createStartContract()}
-        securityEnabled={true}
         getUrlForApp={getUrlForApp}
         history={history}
         capabilities={{
@@ -120,7 +120,6 @@ describe('ManageSpacePage', () => {
         onLoadSpace={onLoadSpace}
         getFeatures={featuresStart.getFeatures}
         notifications={notificationServiceMock.createStartContract()}
-        securityEnabled={true}
         getUrlForApp={getUrlForApp}
         history={history}
         capabilities={{
@@ -173,7 +172,6 @@ describe('ManageSpacePage', () => {
         spacesManager={(spacesManager as unknown) as SpacesManager}
         getFeatures={() => Promise.reject(error)}
         notifications={notifications}
-        securityEnabled={true}
         getUrlForApp={getUrlForApp}
         history={history}
         capabilities={{
@@ -211,7 +209,6 @@ describe('ManageSpacePage', () => {
         spacesManager={(spacesManager as unknown) as SpacesManager}
         getFeatures={featuresStart.getFeatures}
         notifications={notificationServiceMock.createStartContract()}
-        securityEnabled={true}
         getUrlForApp={getUrlForApp}
         history={history}
         capabilities={{
@@ -273,7 +270,6 @@ describe('ManageSpacePage', () => {
         spacesManager={(spacesManager as unknown) as SpacesManager}
         getFeatures={featuresStart.getFeatures}
         notifications={notificationServiceMock.createStartContract()}
-        securityEnabled={true}
         getUrlForApp={getUrlForApp}
         history={history}
         capabilities={{

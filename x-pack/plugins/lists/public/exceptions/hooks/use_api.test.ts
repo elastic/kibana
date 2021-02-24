@@ -1,18 +1,26 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { act, renderHook } from '@testing-library/react-hooks';
 
+import { getUpdateExceptionListItemSchemaMock } from '../../../common/schemas/request/update_exception_list_item_schema.mock';
 import { coreMock } from '../../../../../../src/core/public/mocks';
 import * as api from '../api';
 import { getExceptionListSchemaMock } from '../../../common/schemas/response/exception_list_schema.mock';
 import { getFoundExceptionListItemSchemaMock } from '../../../common/schemas/response/found_exception_list_item_schema.mock';
 import { getExceptionListItemSchemaMock } from '../../../common/schemas/response/exception_list_item_schema.mock';
+import { getCreateExceptionListItemSchemaMock } from '../../../common/schemas/request/create_exception_list_item_schema.mock';
 import { HttpStart } from '../../../../../../src/core/public';
-import { ApiCallByIdProps, ApiCallByListIdProps } from '../types';
+import {
+  AddExceptionListItemProps,
+  ApiCallByIdProps,
+  ApiCallByListIdProps,
+  UpdateExceptionListItemProps,
+} from '../types';
 
 import { ExceptionsApi, useApi } from './use_api';
 
@@ -363,6 +371,60 @@ describe('useApi', () => {
       });
 
       expect(onErrorMock).toHaveBeenCalledWith(mockError);
+    });
+  });
+
+  test('it invokes "addExceptionListItem" when "addExceptionListItem" used', async () => {
+    const payload = getExceptionListItemSchemaMock();
+    const itemToCreate = getCreateExceptionListItemSchemaMock();
+    const spyOnFetchExceptionListItemById = jest
+      .spyOn(api, 'addExceptionListItem')
+      .mockResolvedValue(payload);
+
+    await act(async () => {
+      const { result, waitForNextUpdate } = renderHook<HttpStart, ExceptionsApi>(() =>
+        useApi(mockKibanaHttpService)
+      );
+      await waitForNextUpdate();
+
+      await result.current.addExceptionListItem({
+        listItem: itemToCreate,
+      });
+
+      const expected: AddExceptionListItemProps = {
+        http: mockKibanaHttpService,
+        listItem: itemToCreate,
+        signal: new AbortController().signal,
+      };
+
+      expect(spyOnFetchExceptionListItemById).toHaveBeenCalledWith(expected);
+    });
+  });
+
+  test('it invokes "updateExceptionListItem" when "getExceptionItem" used', async () => {
+    const payload = getExceptionListItemSchemaMock();
+    const itemToUpdate = getUpdateExceptionListItemSchemaMock();
+    const spyOnUpdateExceptionListItem = jest
+      .spyOn(api, 'updateExceptionListItem')
+      .mockResolvedValue(payload);
+
+    await act(async () => {
+      const { result, waitForNextUpdate } = renderHook<HttpStart, ExceptionsApi>(() =>
+        useApi(mockKibanaHttpService)
+      );
+      await waitForNextUpdate();
+
+      await result.current.updateExceptionListItem({
+        listItem: itemToUpdate,
+      });
+
+      const expected: UpdateExceptionListItemProps = {
+        http: mockKibanaHttpService,
+        listItem: itemToUpdate,
+        signal: new AbortController().signal,
+      };
+
+      expect(spyOnUpdateExceptionListItem).toHaveBeenCalledWith(expected);
     });
   });
 });

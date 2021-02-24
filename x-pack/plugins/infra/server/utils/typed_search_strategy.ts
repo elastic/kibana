@@ -1,12 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import * as rt from 'io-ts';
 import stringify from 'json-stable-stringify';
-import { JsonValue, jsonValueRT } from '../../common/typed_json';
+import { JsonValue } from '../../../../../src/plugins/kibana_utils/common';
+import { jsonValueRT } from '../../common/typed_json';
 import { SearchStrategyError } from '../../common/search_strategies/common/errors';
 import { ShardFailure } from './elasticsearch_runtime_types';
 

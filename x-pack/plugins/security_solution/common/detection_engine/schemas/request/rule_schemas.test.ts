@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { createRulesSchema, CreateRulesSchema, SavedQueryCreateSchema } from './rule_schemas';
@@ -1151,7 +1152,7 @@ describe('create rules schema', () => {
     });
   });
 
-  describe('threat_mapping', () => {
+  describe('threat_match', () => {
     test('You can set a threat query, index, mapping, filters when creating a rule', () => {
       const payload = getCreateThreatMatchRulesSchemaMock();
       const decoded = createRulesSchema.decode(payload);

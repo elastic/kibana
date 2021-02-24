@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import moment from 'moment';
@@ -14,7 +15,8 @@ import { createBeatsQuery } from './create_beats_query';
 import { calculateRate } from '../calculate_rate';
 // @ts-ignore
 import { getDiffCalculation } from './_beats_stats';
-import { ElasticsearchResponse, LegacyRequest } from '../../types';
+import { LegacyRequest } from '../../types';
+import { ElasticsearchResponse } from '../../../common/types/es';
 
 interface Beat {
   uuid: string | undefined;
@@ -151,7 +153,7 @@ export async function getBeats(req: LegacyRequest, beatsIndexPattern: string, cl
         inner_hits: {
           name: 'earliest',
           size: 1,
-          sort: [{ 'beats_stats.timestamp': 'asc' }],
+          sort: [{ 'beats_stats.timestamp': { order: 'asc', unmapped_type: 'long' } }],
         },
       },
       sort: [

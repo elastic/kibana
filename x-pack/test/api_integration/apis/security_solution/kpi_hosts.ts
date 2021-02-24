@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -97,6 +98,7 @@ export default function ({ getService }: FtrProviderContext) {
             defaultIndex: ['filebeat-*'],
             docValueFields: [],
             inspect: false,
+            wait_for_completion_timeout: '10s',
           })
           .expect(200);
 
@@ -118,11 +120,15 @@ export default function ({ getService }: FtrProviderContext) {
             defaultIndex: ['filebeat-*'],
             docValueFields: [],
             inspect: false,
+            /* We need a very long timeout to avoid returning just partial data.
+             ** https://github.com/elastic/kibana/blob/master/x-pack/test/api_integration/apis/search/search.ts#L18
+             */
+            wait_for_completion_timeout: '10s',
           })
           .expect(200);
         expect(body.authenticationsSuccess!).to.eql(expectedResult.authSuccess);
         expect(body.authenticationsSuccessHistogram!).to.eql(expectedResult.authSuccessHistogram);
-        expect(body.authenticationsFailure!).to.eql(expectedResult.authSuccess);
+        expect(body.authenticationsFailure!).to.eql(expectedResult.authFailure);
         expect(body.authenticationsFailureHistogram!).to.eql(expectedResult.authFailureHistogram);
       });
 
@@ -140,6 +146,7 @@ export default function ({ getService }: FtrProviderContext) {
             defaultIndex: ['filebeat-*'],
             docValueFields: [],
             inspect: false,
+            wait_for_completion_timeout: '10s',
           })
           .expect(200);
         expect(body.uniqueDestinationIps!).to.eql(expectedResult.uniqueDestinationIps);
@@ -185,14 +192,28 @@ export default function ({ getService }: FtrProviderContext) {
             y: 6,
           },
         ],
-        authSuccess: null,
+        authSuccess: 0,
         authSuccessHistogram: null,
         authFailure: 0,
         authFailureHistogram: null,
-        uniqueSourceIps: null,
-        uniqueSourceIpsHistogram: null,
-        uniqueDestinationIps: null,
-        uniqueDestinationIpsHistogram: null,
+        uniqueSourceIps: 370,
+        uniqueSourceIpsHistogram: [
+          { x: 1543276800000, y: 74 },
+          { x: 1543278600000, y: 52 },
+          { x: 1543280400000, y: 71 },
+          { x: 1543282200000, y: 76 },
+          { x: 1543284000000, y: 71 },
+          { x: 1543285800000, y: 89 },
+        ],
+        uniqueDestinationIps: 1,
+        uniqueDestinationIpsHistogram: [
+          { x: 1543276800000, y: 0 },
+          { x: 1543278600000, y: 0 },
+          { x: 1543280400000, y: 0 },
+          { x: 1543282200000, y: 0 },
+          { x: 1543284000000, y: 0 },
+          { x: 1543285800000, y: 1 },
+        ],
       };
 
       it('Make sure that we get KpiHosts data', async () => {
@@ -209,6 +230,7 @@ export default function ({ getService }: FtrProviderContext) {
             defaultIndex: ['auditbeat-*'],
             docValueFields: [],
             inspect: false,
+            wait_for_completion_timeout: '10s',
           })
           .expect(200);
 
@@ -227,14 +249,15 @@ export default function ({ getService }: FtrProviderContext) {
               to: TO,
               from: FROM,
             },
-            defaultIndex: ['filebeat-*'],
+            defaultIndex: ['auditbeat-*'],
             docValueFields: [],
             inspect: false,
+            wait_for_completion_timeout: '10s',
           })
           .expect(200);
         expect(body.authenticationsSuccess!).to.eql(expectedResult.authSuccess);
         expect(body.authenticationsSuccessHistogram!).to.eql(expectedResult.authSuccessHistogram);
-        expect(body.authenticationsFailure!).to.eql(expectedResult.authSuccess);
+        expect(body.authenticationsFailure!).to.eql(expectedResult.authFailure);
         expect(body.authenticationsFailureHistogram!).to.eql(expectedResult.authFailureHistogram);
       });
 
@@ -249,9 +272,10 @@ export default function ({ getService }: FtrProviderContext) {
               to: TO,
               from: FROM,
             },
-            defaultIndex: ['filebeat-*'],
+            defaultIndex: ['auditbeat-*'],
             docValueFields: [],
             inspect: false,
+            wait_for_completion_timeout: '10s',
           })
           .expect(200);
         expect(body.uniqueDestinationIps!).to.eql(expectedResult.uniqueDestinationIps);

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { DEFAULT_SPACE_ID } from '../../common/constants';
@@ -97,6 +98,37 @@ const ERROR_NAMESPACE_SPECIFIED = 'Spaces currently determines the namespaces';
 
         expect(actualReturnValue).toBe(expectedReturnValue);
         expect(baseClient.get).toHaveBeenCalledWith(type, id, {
+          foo: 'bar',
+          namespace: currentSpace.expectedNamespace,
+        });
+      });
+    });
+
+    describe('#resolve', () => {
+      test(`throws error if options.namespace is specified`, async () => {
+        const { client } = createSpacesSavedObjectsClient();
+
+        await expect(client.resolve('foo', '', { namespace: 'bar' })).rejects.toThrow(
+          ERROR_NAMESPACE_SPECIFIED
+        );
+      });
+
+      test(`supplements options with the current namespace`, async () => {
+        const { client, baseClient } = createSpacesSavedObjectsClient();
+        const expectedReturnValue = {
+          saved_object: createMockResponse(),
+          outcome: 'exactMatch' as 'exactMatch', // outcome doesn't matter, just including it for type safety
+        };
+        baseClient.resolve.mockReturnValue(Promise.resolve(expectedReturnValue));
+
+        const type = Symbol();
+        const id = Symbol();
+        const options = Object.freeze({ foo: 'bar' });
+        // @ts-expect-error
+        const actualReturnValue = await client.resolve(type, id, options);
+
+        expect(actualReturnValue).toBe(expectedReturnValue);
+        expect(baseClient.resolve).toHaveBeenCalledWith(type, id, {
           foo: 'bar',
           namespace: currentSpace.expectedNamespace,
         });
@@ -552,6 +584,58 @@ const ERROR_NAMESPACE_SPECIFIED = 'Spaces currently determines the namespaces';
 
         expect(actualReturnValue).toBe(expectedReturnValue);
         expect(baseClient.removeReferencesTo).toHaveBeenCalledWith(type, id, {
+          foo: 'bar',
+          namespace: currentSpace.expectedNamespace,
+        });
+      });
+    });
+
+    describe('#openPointInTimeForType', () => {
+      test(`throws error if options.namespace is specified`, async () => {
+        const { client } = createSpacesSavedObjectsClient();
+
+        await expect(client.openPointInTimeForType('foo', { namespace: 'bar' })).rejects.toThrow(
+          ERROR_NAMESPACE_SPECIFIED
+        );
+      });
+
+      test(`supplements options with the current namespace`, async () => {
+        const { client, baseClient } = createSpacesSavedObjectsClient();
+        const expectedReturnValue = { id: 'abc123' };
+        baseClient.openPointInTimeForType.mockReturnValue(Promise.resolve(expectedReturnValue));
+
+        const options = Object.freeze({ foo: 'bar' });
+        // @ts-expect-error
+        const actualReturnValue = await client.openPointInTimeForType('foo', options);
+
+        expect(actualReturnValue).toBe(expectedReturnValue);
+        expect(baseClient.openPointInTimeForType).toHaveBeenCalledWith('foo', {
+          foo: 'bar',
+          namespace: currentSpace.expectedNamespace,
+        });
+      });
+    });
+
+    describe('#closePointInTime', () => {
+      test(`throws error if options.namespace is specified`, async () => {
+        const { client } = createSpacesSavedObjectsClient();
+
+        await expect(client.closePointInTime('foo', { namespace: 'bar' })).rejects.toThrow(
+          ERROR_NAMESPACE_SPECIFIED
+        );
+      });
+
+      test(`supplements options with the current namespace`, async () => {
+        const { client, baseClient } = createSpacesSavedObjectsClient();
+        const expectedReturnValue = { succeeded: true, num_freed: 1 };
+        baseClient.closePointInTime.mockReturnValue(Promise.resolve(expectedReturnValue));
+
+        const options = Object.freeze({ foo: 'bar' });
+        // @ts-expect-error
+        const actualReturnValue = await client.closePointInTime('foo', options);
+
+        expect(actualReturnValue).toBe(expectedReturnValue);
+        expect(baseClient.closePointInTime).toHaveBeenCalledWith('foo', {
           foo: 'bar',
           namespace: currentSpace.expectedNamespace,
         });

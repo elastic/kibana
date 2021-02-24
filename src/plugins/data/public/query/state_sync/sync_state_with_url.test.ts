@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { Subscription } from 'rxjs';
@@ -33,6 +22,7 @@ import { StubBrowserStorage } from '@kbn/test/jest';
 import { TimefilterContract } from '../timefilter';
 import { syncQueryStateWithUrl } from './sync_state_with_url';
 import { QueryState } from './types';
+import { createNowProviderMock } from '../../now_provider/mocks';
 
 const setupMock = coreMock.createSetup();
 const startMock = coreMock.createStart();
@@ -73,6 +63,7 @@ describe('sync_query_state_with_url', () => {
     queryService.setup({
       uiSettings: setupMock.uiSettings,
       storage: new Storage(new StubBrowserStorage()),
+      nowProvider: createNowProviderMock(),
     });
     queryServiceStart = queryService.start({
       uiSettings: startMock.uiSettings,
@@ -99,7 +90,7 @@ describe('sync_query_state_with_url', () => {
   test('url is actually changed when data in services changes', () => {
     const { stop } = syncQueryStateWithUrl(queryServiceStart, kbnUrlStateStorage);
     filterManager.setFilters([gF, aF]);
-    kbnUrlStateStorage.flush(); // sync force location change
+    kbnUrlStateStorage.kbnUrlControls.flush(); // sync force location change
     expect(history.location.hash).toMatchInlineSnapshot(
       `"#?_g=(filters:!(('$state':(store:globalState),meta:(alias:!n,disabled:!t,index:'logstash-*',key:query,negate:!t,type:custom,value:'%7B%22match%22:%7B%22key1%22:%22value1%22%7D%7D'),query:(match:(key1:value1)))),refreshInterval:(pause:!t,value:0),time:(from:now-15m,to:now))"`
     );
@@ -135,7 +126,7 @@ describe('sync_query_state_with_url', () => {
 
   test('when url is changed, filters synced back to filterManager', () => {
     const { stop } = syncQueryStateWithUrl(queryServiceStart, kbnUrlStateStorage);
-    kbnUrlStateStorage.cancel(); // stop initial syncing pending update
+    kbnUrlStateStorage.kbnUrlControls.cancel(); // stop initial syncing pending update
     history.push(pathWithFilter);
     expect(filterManager.getGlobalFilters()).toHaveLength(1);
     stop();

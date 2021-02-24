@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { ToolingLog } from '@kbn/dev-utils';
@@ -30,8 +19,9 @@ export interface BuildOptions {
   createArchives: boolean;
   createRpmPackage: boolean;
   createDebPackage: boolean;
-  createDockerPackage: boolean;
-  createDockerUbiPackage: boolean;
+  createDockerUBI: boolean;
+  createDockerCentOS: boolean;
+  createDockerContexts: boolean;
   versionQualifier: string | undefined;
   targetAllPlatforms: boolean;
 }
@@ -61,8 +51,10 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
    */
   await run(Tasks.CopySource);
   await run(Tasks.CopyBinScripts);
+  await run(Tasks.ReplaceFavicon);
   await run(Tasks.CreateEmptyDirsAndFiles);
   await run(Tasks.CreateReadme);
+  await run(Tasks.BuildBazelPackages);
   await run(Tasks.BuildPackages);
   await run(Tasks.BuildKibanaPlatformPlugins);
   await run(Tasks.TranspileBabel);
@@ -105,12 +97,19 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
     // control w/ --rpm or --skip-os-packages
     await run(Tasks.CreateRpmPackage);
   }
-  if (options.createDockerPackage) {
-    // control w/ --docker or --skip-docker-ubi or --skip-os-packages
-    await run(Tasks.CreateDockerPackage);
-    if (options.createDockerUbiPackage) {
-      await run(Tasks.CreateDockerUbiPackage);
-    }
+  if (options.createDockerUBI) {
+    // control w/ --docker-images or --skip-docker-ubi or --skip-os-packages
+    await run(Tasks.CreateDockerUBI);
+  }
+
+  if (options.createDockerCentOS) {
+    // control w/ --docker-images or --skip-docker-centos or --skip-os-packages
+    await run(Tasks.CreateDockerCentOS);
+  }
+
+  if (options.createDockerContexts) {
+    // control w/ --skip-docker-contexts
+    await run(Tasks.CreateDockerContexts);
   }
 
   /**

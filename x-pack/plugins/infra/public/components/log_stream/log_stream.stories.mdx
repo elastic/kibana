@@ -1,0 +1,381 @@
+import { Meta, Story, Canvas, ArgsTable } from '@storybook/addon-docs/blocks';
+import { defer, of, Subject } from 'rxjs';
+import { delay } from 'rxjs/operators';
+
+import { I18nProvider } from '@kbn/i18n/react';
+import { EuiThemeProvider } from '../../../../../../src/plugins/kibana_react/common';
+import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
+
+import { LOG_ENTRIES_SEARCH_STRATEGY } from '../../../common/search_strategies/log_entries/log_entries';
+import { DEFAULT_SOURCE_CONFIGURATION } from '../../test_utils/source_configuration';
+import { generateFakeEntries, ENTRIES_EMPTY } from '../../test_utils/entries';
+
+import { LogStream } from './';
+
+<!-- Prework -->
+
+export const startTimestamp = 1595145600000;
+export const endTimestamp = startTimestamp + 15 * 60 * 1000;
+
+export const dataMock = {
+  search: {
+    search: ({ params }, options) => {
+      return defer(() => {
+        switch (options.strategy) {
+          case LOG_ENTRIES_SEARCH_STRATEGY:
+            if (params.after?.time === params.endTimestamp || params.before?.time === params.startTimestamp) {
+              return of({
+                id: 'EMPTY_FAKE_RESPONSE',
+                total: 1,
+                loaded: 1,
+                isRunning: false,
+                isPartial: false,
+                rawResponse: ENTRIES_EMPTY,
+              });
+            } else {
+              const entries = generateFakeEntries(
+                200,
+                params.startTimestamp,
+                params.endTimestamp,
+                params.columns || DEFAULT_SOURCE_CONFIGURATION.data.configuration.logColumns
+              );
+              return of({
+                id: 'FAKE_RESPONSE',
+                total: 1,
+                loaded: 1,
+                isRunning: false,
+                isPartial: false,
+                rawResponse: {
+                  data: {
+                    entries,
+                    topCursor: entries[0].cursor,
+                    bottomCursor: entries[entries.length - 1].cursor,
+                    hasMoreBefore: false,
+                  },
+                  errors: [],
+                }
+              });
+            }
+          default:
+            return of({
+              id: 'FAKE_RESPONSE',
+              rawResponse: {},
+            });
+        }
+      }).pipe(delay(2000));
+    },
+  },
+};
+
+
+export const fetch = function (url, params) {
+  switch (url) {
+    case '/api/infra/log_source_configurations/default':
+      return DEFAULT_SOURCE_CONFIGURATION;
+    default:
+      return {};
+  }
+};
+
+export const uiSettings = {
+  get: (setting) => {
+    switch (setting) {
+      case 'dateFormat':
+        return 'MMM D, YYYY @ HH:mm:ss.SSS';
+      case 'dateFormat:scaled':
+        return [['', 'HH:mm:ss.SSS']];
+    }
+  },
+  get$: () => {
+    return new Subject();
+  },
+};
+
+export const Template = (args) => <LogStream {...args} />;
+
+<Meta
+  title="infra/LogStream"
+  component={LogStream}
+  decorators={[
+    (story) => (
+      <I18nProvider>
+        <EuiThemeProvider>
+          <KibanaContextProvider services={{ data: dataMock, http: { fetch }, uiSettings }}>
+            {story()}
+          </KibanaContextProvider>
+        </EuiThemeProvider>
+      </I18nProvider>
+    ),
+  ]}
+/>
+
+# Embeddable `<LogStream />` component
+
+The purpose of this component is to allow you, the developer, to have your very own Log Stream in your plugin.
+
+The component is exposed through `infra/public`. Since Kibana uses relative paths is up to you to find how to import it (sorry).
+
+```tsx
+import { LogStream } from '../../../../../../infra/public';
+//                         ^^ Modify appropriately
+```
+
+## Prerequisites
+
+To use the component your plugin needs to follow certain criteria:
+
+- Ensure `"infra"` is specified as a `requiredPlugins` in your plugin's `kibana.json`.
+- Ensure the `<LogStream />` component is mounted inside the hiearchy of a [`kibana-react` provider](https://github.com/elastic/kibana/blob/b2d0aa7b7fae1c89c8f9e8854ae73e71be64e765/src/plugins/kibana_react/README.md#L45).
+
+## Usage
+
+The simplest way to use the component is with a date range
+
+```tsx
+const endTimestamp = Date.now();
+const startTimestamp = endTimestamp - 15 * 60 * 1000; // 15 minutes
+
+<LogStream startTimestamp={startTimestamp} endTimestamp={endTimestamp} />;
+```
+
+This will show a list of log entries between the specified timestamps.
+
+<Canvas>
+  <Story name="Default" args={{ startTimestamp, endTimestamp }}>
+    {Template.bind({})}
+  </Story>
+</Canvas>
+
+## Query log entries
+
+You might want to show specific log entries in your plugin. Maybe you want to show log lines from a specific host, or for an AMP trace. The component has a `query` prop that accepts valid KQL expressions.
+
+```tsx
+<LogStream
+  startTimestamp={startTimestamp}
+  endTimestamp={endTimestamp}
+  query="trace.id: 18fabada9384abd4"
+/>
+```
+
+## Center the view on a specific entry
+
+By default the component will load at the bottom of the list, showing the newest entries. You can change the rendering point with the `center` prop. The prop takes a [`LogEntriesCursor`](https://github.com/elastic/kibana/blob/0a6c748cc837c016901f69ff05d81395aa2d41c8/x-pack/plugins/infra/common/http_api/log_entries/common.ts#L9-L13).
+
+```tsx
+<LogStream
+  startTimestamp={startTimestamp}
+  endTimestamp={endTimestamp}
+  center={{ time: 1595146275000, tiebreaker: 150 }}
+/>
+```
+
+<Canvas>
+  <Story
+    name="CenteredView"
+    args={{ startTimestamp, endTimestamp, center: { time: 1595146275000, tiebreaker: 150 } }}
+  >
+    {Template.bind({})}
+  </Story>
+</Canvas>
+
+## Highlight a specific entry
+
+The component can highlight a specific line via the `highlight` prop. It takes the `id` of the log entry. Note that this prop doesn't center the view around that log line.
+
+```tsx
+<LogStream startTimestamp={startTimestamp} endTimestamp={endTimestamp} highlight="entry-197" />
+```
+
+<Canvas>
+  <Story name="HighlightedEntry" args={{ startTimestamp, endTimestamp, highlight: 'entry-197' }}>
+    {Template.bind({})}
+  </Story>
+</Canvas>
+
+## Column configuration
+
+By default the component will use the same columns as the Logs UI:
+
+- `@timestamp` of the log.
+- `event.dataset` field.
+- The log message. This might be the `message` field, or a reconstruction based on other fields.
+
+These columns are user-configurable. When the end user changes the default columns those changes will be reflected in the `<LogStream />` component.
+
+If the default columns don't work for the use case of your plugin, or you don't want your plugin to be affected by user changes, you can specify which columns you want. We offer two mechanisms for this.
+
+### With a `columns` prop
+
+The easiest way is to specify what columns you want with the `columns` prop.
+
+```tsx
+<LogStream
+  startTimestamp={startTimestamp}
+  endTimestamp={endTimestamp}
+  columns={[
+    { type: 'timestamp' },
+    { type: 'field', field: 'log.level' },
+    { type: 'field', field: 'host.name' },
+    { type: 'message' },
+  ]}
+/>
+```
+
+<Canvas>
+  <Story
+    name="CustomColumns"
+    args={{
+      startTimestamp,
+      endTimestamp,
+      columns: [
+        { type: 'timestamp' },
+        { type: 'field', field: 'log.level' },
+        { type: 'field', field: 'host.name' },
+        { type: 'message' },
+      ],
+    }}
+  >
+    {Template.bind({})}
+  </Story>
+</Canvas>
+
+The rendering of the column headers and the cell contents can also be customized with the following properties:
+
+<table>
+  <tbody>
+    <tr>
+      <td>
+        <code>width</code>
+      </td>
+      <td>
+        <code>number | string</code>
+      </td>
+      <td>The width of the column. Accepts any valid `flex-basis` value.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>header</code>
+      </td>
+      <td>
+        <code>boolean | string</code>
+        <br />
+        Defaults to <code>true</code>
+      </td>
+      <td>
+        When `boolean`, decide if the header should render or not.
+        <br />
+        When `string`, show the string contents in the header.
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <code>render</code>
+      </td>
+      <td>
+        <code>(timestamp: number) => ReactNode</code> for the `timestamp` column
+        <br />
+        <code>(message: string) => ReactNode</code> for the `message` column.
+        <br />
+        <code>(value: JsonValue) => ReactNode</code> for the `field` columns.
+      </td>
+      <td>How should the column value render</td>
+    </tr>
+  </tbody>
+</table>
+
+```tsx
+<LogStream
+  startTimestamp={startTimestamp}
+  endTimestamp={endTimestamp}
+  columns={[
+    { type: 'timestamp', header: 'When?' },
+    {
+      type: 'field',
+      field: 'log.level',
+      header: false,
+      width: 24,
+      render: (value) => {
+        switch (value) {
+          case 'debug':
+            return '🐞';
+          case 'info':
+            return 'ℹ️';
+          case 'warn':
+            return '⚠️';
+          case 'error':
+            return '❌';
+        }
+      },
+    },
+    { type: 'message' },
+  ]}
+/>
+```
+
+<Canvas>
+  <Story
+    name="CustomColumnRendering"
+    args={{
+      startTimestamp,
+      endTimestamp,
+      columns: [
+        { type: 'timestamp', header: 'When?' },
+        {
+          type: 'field',
+          field: 'log.level',
+          header: false,
+          width: 24,
+          render: (value) => {
+            switch (value) {
+              case 'debug':
+                return '🐞';
+              case 'info':
+                return 'ℹ️';
+              case 'warn':
+                return '⚠️';
+              case 'error':
+                return '❌';
+            }
+          },
+        },
+        { type: 'message' },
+      ],
+    }}
+  >
+    {Template.bind({})}
+  </Story>
+</Canvas>
+
+### With a source configuration
+
+The infra plugin has the concept of a "source configuration", a collection of settings that apply to the logs and metrics UIs. The component uses the source configuration to determine which indices to query or what columns to show.
+
+The `<LogStream />` component will use the `"default"` source configuration. If you want to use your own configuration, you need to first create it when you initialize your plugin, and then specify it in the `<LogStream />` component with the `sourceId` prop.
+
+```tsx
+//  Your `plugin/init.ts`
+class MyPlugin {
+  // ...
+  setup(core, plugins) {
+    plugins.infra.defineInternalSourceConfiguration(
+      'my_source',  // ID for your source configuration
+      {
+        logAlias: 'some-index-*',  // Optional. what ES index to query.
+        logColumns: [
+          { timestampColumn: { id: '...uuid4' },                   // The `@timestamp` column.
+          { fieldColumn: { id: '...uuid4', field: 'some_field' }}, // Any column(s) you want.
+          { messageColumn: { id: '...uuid' }}                      // The `message` column.
+        ]
+      }
+    );
+  }
+}
+
+// Somewhere else on your code
+<LogStream
+  sourceId="my_source"
+  startTimestamp={...}
+  endTimestamp={...}
+/>
+```

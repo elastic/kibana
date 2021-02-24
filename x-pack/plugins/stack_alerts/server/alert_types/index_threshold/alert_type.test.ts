@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import type { Writable } from '@kbn/utility-types';
 import { loggingSystemMock } from '../../../../../../src/core/server/mocks';
 import { getAlertType } from './alert_type';
@@ -19,7 +21,7 @@ describe('alertType', () => {
   it('alert type creation structure is the expected value', async () => {
     expect(alertType.id).toBe('.index-threshold');
     expect(alertType.name).toBe('Index threshold');
-    expect(alertType.actionGroups).toEqual([{ id: 'threshold met', name: 'Threshold Met' }]);
+    expect(alertType.actionGroups).toEqual([{ id: 'threshold met', name: 'Threshold met' }]);
 
     expect(alertType.actionVariables).toMatchInlineSnapshot(`
       Object {

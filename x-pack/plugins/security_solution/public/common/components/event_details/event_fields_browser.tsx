@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { getOr, noop, sortBy } from 'lodash/fp';
@@ -29,12 +30,14 @@ import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
 import { getColumns } from './columns';
 import { EVENT_FIELDS_TABLE_CLASS_NAME, onEventDetailsTabKeyPressed, search } from './helpers';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
+import { TimelineTabs } from '../../../../common/types/timeline';
 
 interface Props {
   browserFields: BrowserFields;
   data: TimelineEventsDetailsItem[];
   eventId: string;
   timelineId: string;
+  timelineTabType: TimelineTabs | 'flyout';
 }
 
 const TableWrapper = styled.div`
@@ -87,7 +90,7 @@ const getAriaRowindex = (timelineEventsDetailsItem: TimelineEventsDetailsItem) =
 
 /** Renders a table view or JSON view of the `ECS` `data` */
 export const EventFieldsBrowser = React.memo<Props>(
-  ({ browserFields, data, eventId, timelineId }) => {
+  ({ browserFields, data, eventId, timelineTabType, timelineId }) => {
     const containerElement = useRef<HTMLDivElement | null>(null);
     const dispatch = useDispatch();
     const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
@@ -156,7 +159,7 @@ export const EventFieldsBrowser = React.memo<Props>(
           columnHeaders,
           eventId,
           onUpdateColumns,
-          contextId: `event-fields-browser-for-${timelineId}`,
+          contextId: `event-fields-browser-for-${timelineId}-${timelineTabType}`,
           timelineId,
           toggleColumn,
           getLinkValue,
@@ -167,6 +170,7 @@ export const EventFieldsBrowser = React.memo<Props>(
         eventId,
         onUpdateColumns,
         timelineId,
+        timelineTabType,
         toggleColumn,
         getLinkValue,
       ]

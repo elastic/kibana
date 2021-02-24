@@ -1,13 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { ReactWrapper, ShallowWrapper } from 'enzyme';
 import React, { ChangeEvent, MouseEvent } from 'react';
 import { act } from 'react-dom/test-utils';
-import { EuiComboBox, EuiListGroupItemProps, EuiListGroup, EuiRange } from '@elastic/eui';
+import {
+  EuiComboBox,
+  EuiListGroupItemProps,
+  EuiListGroup,
+  EuiRange,
+  EuiSelect,
+  EuiButtonIcon,
+} from '@elastic/eui';
 import { DataPublicPluginStart } from '../../../../../../src/plugins/data/public';
 import {
   IndexPatternDimensionEditorComponent,
@@ -23,8 +31,6 @@ import { OperationMetadata } from '../../types';
 import { DateHistogramIndexPatternColumn } from '../operations/definitions/date_histogram';
 import { getFieldByNameFactory } from '../pure_helpers';
 import { TimeScaling } from './time_scaling';
-import { EuiSelect } from '@elastic/eui';
-import { EuiButtonIcon } from '@elastic/eui';
 import { DimensionEditor } from './dimension_editor';
 
 jest.mock('../loader');
@@ -105,9 +111,6 @@ const bytesColumn: IndexPatternColumn = {
  *
  * - Dimension trigger: Not tested here
  * - Dimension editor component: First half of the tests
- *
- * - canHandleDrop: Tests for dropping of fields or other dimensions
- * - onDrop: Correct application of drop logic
  */
 describe('IndexPatternDimensionEditorPanel', () => {
   let state: IndexPatternPrivateState;
@@ -186,6 +189,9 @@ describe('IndexPatternDimensionEditorPanel', () => {
           getDefaultType: jest.fn().mockReturnValue({
             id: 'bytes',
             title: 'Bytes',
+          }),
+          deserialize: jest.fn().mockReturnValue({
+            convert: () => 'formatted',
           }),
         } as unknown) as DataPublicPluginStart['fieldFormats'],
       } as unknown) as DataPublicPluginStart,
@@ -337,17 +343,124 @@ describe('IndexPatternDimensionEditorPanel', () => {
 
     const items: EuiListGroupItemProps[] = wrapper.find(EuiListGroup).prop('listItems') || [];
 
-    expect(items.find(({ label }) => label === 'Minimum')!['data-test-subj']).not.toContain(
+    expect(items.find(({ id }) => id === 'min')!['data-test-subj']).not.toContain('incompatible');
+    expect(items.find(({ id }) => id === 'date_histogram')!['data-test-subj']).toContain(
+      'incompatible'
+    );
+    // Incompatible because there is no date field
+    expect(items.find(({ id }) => id === 'cumulative_sum')!['data-test-subj']).toContain(
       'incompatible'
     );
 
-    expect(items.find(({ label }) => label === 'Date histogram')!['data-test-subj']).toContain(
+    expect(items.find(({ id }) => id === 'filters')!['data-test-subj']).not.toContain(
+      'incompatible'
+    );
+  });
+
+  it('should indicate when a transition is invalid due to filterOperations', () => {
+    wrapper = mount(
+      <IndexPatternDimensionEditorComponent
+        {...defaultProps}
+        state={getStateWithColumns({
+          col1: {
+            label: 'Unique count of source',
+            dataType: 'number',
+            isBucketed: false,
+            operationType: 'cardinality',
+            sourceField: 'source,',
+          },
+        })}
+        filterOperations={(meta) => meta.dataType === 'number' && !meta.isBucketed}
+      />
+    );
+
+    const items: EuiListGroupItemProps[] = wrapper.find(EuiListGroup).prop('listItems') || [];
+
+    expect(items.find(({ id }) => id === 'min')!['data-test-subj']).toContain('incompatible');
+    expect(items.find(({ id }) => id === 'cumulative_sum')!['data-test-subj']).toContain(
+      'incompatible'
+    );
+  });
+
+  it('should indicate that reference-based operations are not compatible when they are incomplete', () => {
+    wrapper = mount(
+      <IndexPatternDimensionEditorComponent
+        {...defaultProps}
+        state={getStateWithColumns({
+          date: {
+            label: 'Date',
+            dataType: 'date',
+            isBucketed: true,
+            operationType: 'date_histogram',
+            sourceField: '@timestamp',
+            params: { interval: 'auto' },
+          },
+          col1: {
+            label: 'Counter rate',
+            dataType: 'number',
+            isBucketed: false,
+            operationType: 'counter_rate',
+            references: ['ref'],
+          },
+        })}
+      />
+    );
+
+    const items: EuiListGroupItemProps[] = wrapper.find(EuiListGroup).prop('listItems') || [];
+
+    expect(items.find(({ id }) => id === 'derivative')!['data-test-subj']).toContain(
+      'incompatible'
+    );
+    expect(items.find(({ id }) => id === 'cumulative_sum')!['data-test-subj']).toContain(
+      'incompatible'
+    );
+    expect(items.find(({ id }) => id === 'moving_average')!['data-test-subj']).toContain(
+      'incompatible'
+    );
+  });
+
+  it('should indicate that reference-based operations are compatible sometimes', () => {
+    wrapper = mount(
+      <IndexPatternDimensionEditorComponent
+        {...defaultProps}
+        state={getStateWithColumns({
+          date: {
+            label: 'Date',
+            dataType: 'date',
+            isBucketed: true,
+            operationType: 'date_histogram',
+            sourceField: '@timestamp',
+            params: { interval: 'auto' },
+          },
+          col1: {
+            label: 'Cumulative sum',
+            dataType: 'number',
+            isBucketed: false,
+            operationType: 'cumulative_sum',
+            references: ['ref'],
+          },
+          ref: {
+            label: 'Count',
+            dataType: 'number',
+            isBucketed: false,
+            operationType: 'count',
+            sourceField: 'Records',
+          },
+        })}
+      />
+    );
+
+    const items: EuiListGroupItemProps[] = wrapper.find(EuiListGroup).prop('listItems') || [];
+
+    expect(items.find(({ id }) => id === 'counter_rate')!['data-test-subj']).toContain(
       'incompatible'
     );
 
-    // Fieldless operation is compatible with field
-    expect(items.find(({ label }) => label === 'Filters')!['data-test-subj']).toContain(
-      'compatible'
+    expect(items.find(({ id }) => id === 'derivative')!['data-test-subj']).not.toContain(
+      'incompatible'
+    );
+    expect(items.find(({ id }) => id === 'moving_average')!['data-test-subj']).not.toContain(
+      'incompatible'
     );
   });
 
@@ -385,7 +498,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
           },
         },
       },
-      true
+      { shouldRemoveDimension: false, shouldReplaceDimension: true }
     );
   });
 
@@ -418,7 +531,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
           },
         },
       },
-      true
+      { shouldRemoveDimension: false, shouldReplaceDimension: true }
     );
   });
 
@@ -452,7 +565,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
           },
         },
       },
-      true
+      { shouldRemoveDimension: false, shouldReplaceDimension: true }
     );
   });
 
@@ -522,7 +635,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
           },
         },
       },
-      true
+      { shouldRemoveDimension: false, shouldReplaceDimension: true }
     );
   });
 
@@ -560,7 +673,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
           },
         },
       },
-      true
+      { shouldRemoveDimension: false, shouldReplaceDimension: true }
     );
   });
 
@@ -589,7 +702,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
             },
           },
         },
-        true
+        { shouldRemoveDimension: false, shouldReplaceDimension: true }
       );
     });
 
@@ -634,15 +747,15 @@ describe('IndexPatternDimensionEditorPanel', () => {
     });
 
     it('should leave error state when switching from incomplete state to fieldless operation', () => {
+      // @ts-expect-error
+      window['__react-beautiful-dnd-disable-dev-warnings'] = true; // issue with enzyme & react-beautiful-dnd throwing errors: https://github.com/atlassian/react-beautiful-dnd/issues/1593
       wrapper = mount(<IndexPatternDimensionEditorComponent {...defaultProps} />);
 
       wrapper
         .find('button[data-test-subj="lns-indexPatternDimension-terms incompatible"]')
         .simulate('click');
 
-      wrapper
-        .find('button[data-test-subj="lns-indexPatternDimension-filters incompatible"]')
-        .simulate('click');
+      wrapper.find('button[data-test-subj="lns-indexPatternDimension-filters"]').simulate('click');
 
       expect(wrapper.find('[data-test-subj="indexPattern-invalid-operation"]')).toHaveLength(0);
     });
@@ -711,7 +824,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
             },
           },
         },
-        false
+        { shouldRemoveDimension: false, shouldReplaceDimension: false }
       );
 
       const comboBox = wrapper
@@ -742,7 +855,47 @@ describe('IndexPatternDimensionEditorPanel', () => {
             },
           },
         },
-        true
+        { shouldRemoveDimension: false, shouldReplaceDimension: true }
+      );
+    });
+
+    it('should clean up when transitioning from incomplete reference-based operations to field operation', () => {
+      wrapper = mount(
+        <IndexPatternDimensionEditorComponent
+          {...defaultProps}
+          state={getStateWithColumns({
+            ...defaultProps.state.layers.first.columns,
+            col2: {
+              label: 'Counter rate',
+              dataType: 'number',
+              isBucketed: false,
+              operationType: 'counter_rate',
+              references: ['ref'],
+            },
+          })}
+          columnId={'col2'}
+        />
+      );
+
+      // Transition to a field operation (incompatible)
+      wrapper
+        .find('button[data-test-subj="lns-indexPatternDimension-avg incompatible"]')
+        .simulate('click');
+
+      // Now check that the dimension gets cleaned up on state update
+      expect(setState).toHaveBeenCalledWith(
+        {
+          ...state,
+          layers: {
+            first: {
+              ...state.layers.first,
+              incompleteColumns: {
+                col2: { operationType: 'avg' },
+              },
+            },
+          },
+        },
+        { shouldRemoveDimension: true, shouldReplaceDimension: false }
       );
     });
 
@@ -840,7 +993,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
             },
           },
         },
-        true
+        { shouldRemoveDimension: false, shouldReplaceDimension: true }
       );
     });
   });
@@ -854,6 +1007,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
             dataType: 'date',
             isBucketed: true,
             label: '',
+            customLabel: true,
             operationType: 'date_histogram',
             sourceField: 'ts',
             params: {
@@ -872,6 +1026,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
         columnId: 'col2',
       };
     }
+
     it('should not show custom options if time scaling is not available', () => {
       wrapper = mount(
         <IndexPatternDimensionEditorComponent
@@ -930,7 +1085,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
             },
           },
         },
-        true
+        { shouldRemoveDimension: false, shouldReplaceDimension: true }
       );
     });
 
@@ -961,7 +1116,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
             },
           },
         },
-        true
+        { shouldRemoveDimension: false, shouldReplaceDimension: true }
       );
     });
 
@@ -990,7 +1145,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
             },
           },
         },
-        true
+        { shouldRemoveDimension: false, shouldReplaceDimension: true }
       );
     });
 
@@ -1019,7 +1174,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
             },
           },
         },
-        true
+        { shouldRemoveDimension: false, shouldReplaceDimension: true }
       );
     });
 
@@ -1048,7 +1203,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
             },
           },
         },
-        true
+        { shouldRemoveDimension: false, shouldReplaceDimension: true }
       );
     });
 
@@ -1078,7 +1233,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
             },
           },
         },
-        true
+        { shouldRemoveDimension: false, shouldReplaceDimension: true }
       );
     });
   });
@@ -1131,7 +1286,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
           },
         },
       },
-      false
+      { shouldRemoveDimension: false, shouldReplaceDimension: false }
     );
 
     const comboBox = wrapper
@@ -1149,19 +1304,19 @@ describe('IndexPatternDimensionEditorPanel', () => {
         layers: {
           first: {
             ...state.layers.first,
+            columnOrder: ['col1', 'col2'],
             columns: {
               ...state.layers.first.columns,
               col2: expect.objectContaining({
-                sourceField: 'bytes',
                 operationType: 'avg',
-                // Other parts of this don't matter for this test
+                sourceField: 'bytes',
               }),
             },
-            columnOrder: ['col1', 'col2'],
+            incompleteColumns: {},
           },
         },
       },
-      true
+      { shouldRemoveDimension: false, shouldReplaceDimension: true }
     );
   });
 
@@ -1204,7 +1359,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
           },
         },
       },
-      true
+      { shouldRemoveDimension: false, shouldReplaceDimension: true }
     );
   });
 
@@ -1230,14 +1385,16 @@ describe('IndexPatternDimensionEditorPanel', () => {
           },
         },
       },
-      true
+      { shouldRemoveDimension: false, shouldReplaceDimension: true }
     );
   });
 
   it('should indicate compatible fields when selecting the operation first', () => {
     wrapper = mount(<IndexPatternDimensionEditorComponent {...defaultProps} columnId={'col2'} />);
 
-    wrapper.find('button[data-test-subj="lns-indexPatternDimension-avg"]').simulate('click');
+    act(() => {
+      wrapper.find('button[data-test-subj="lns-indexPatternDimension-avg"]').simulate('click');
+    });
 
     const options = wrapper
       .find(EuiComboBox)
@@ -1317,12 +1474,18 @@ describe('IndexPatternDimensionEditorPanel', () => {
     expect(items.map(({ label }: { label: React.ReactNode }) => label)).toEqual([
       'Average',
       'Count',
+      'Counter rate',
+      'Cumulative sum',
+      'Differences',
       'Last value',
       'Maximum',
       'Median',
       'Minimum',
+      'Moving average',
+      'Percentile',
       'Sum',
       'Unique count',
+      '\u00a0',
     ]);
   });
 
@@ -1359,7 +1522,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
           },
         },
       },
-      true
+      { shouldRemoveDimension: false, shouldReplaceDimension: true }
     );
   });
 
@@ -1408,7 +1571,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
           },
         },
       },
-      false
+      { shouldRemoveDimension: false, shouldReplaceDimension: false }
     );
   });
 
@@ -1535,5 +1698,110 @@ describe('IndexPatternDimensionEditorPanel', () => {
         },
       },
     });
+  });
+
+  it('should hide the top level field selector when switching from non-reference to reference', () => {
+    wrapper = mount(<IndexPatternDimensionEditorComponent {...defaultProps} />);
+
+    expect(wrapper.find('ReferenceEditor')).toHaveLength(0);
+
+    wrapper
+      .find('button[data-test-subj="lns-indexPatternDimension-derivative incompatible"]')
+      .simulate('click');
+
+    expect(wrapper.find('ReferenceEditor')).toHaveLength(1);
+  });
+
+  it('should hide the reference editors when switching from reference to non-reference', () => {
+    const stateWithReferences: IndexPatternPrivateState = getStateWithColumns({
+      col1: {
+        label: 'Differences of (incomplete)',
+        dataType: 'number',
+        isBucketed: false,
+        operationType: 'derivative',
+        references: ['col2'],
+        params: {},
+      },
+    });
+
+    wrapper = mount(
+      <IndexPatternDimensionEditorComponent {...defaultProps} state={stateWithReferences} />
+    );
+
+    expect(wrapper.find('ReferenceEditor')).toHaveLength(1);
+
+    wrapper
+      .find('button[data-test-subj="lns-indexPatternDimension-avg incompatible"]')
+      .simulate('click');
+
+    expect(wrapper.find('ReferenceEditor')).toHaveLength(0);
+  });
+
+  it('should show a warning when the current dimension is no longer configurable', () => {
+    const stateWithInvalidCol: IndexPatternPrivateState = getStateWithColumns({
+      col1: {
+        label: 'Invalid derivative',
+        dataType: 'number',
+        isBucketed: false,
+        operationType: 'derivative',
+        references: ['ref1'],
+      },
+    });
+
+    wrapper = mount(
+      <IndexPatternDimensionEditorComponent {...defaultProps} state={stateWithInvalidCol} />
+    );
+
+    expect(
+      wrapper
+        .find('[data-test-subj="lns-indexPatternDimension-derivative incompatible"]')
+        .find('EuiText[color="danger"]')
+        .first()
+    ).toBeTruthy();
+  });
+
+  it('should remove options to select references when there are no time fields', () => {
+    const stateWithoutTime: IndexPatternPrivateState = {
+      ...getStateWithColumns({
+        col1: {
+          label: 'Avg',
+          dataType: 'number',
+          isBucketed: false,
+          operationType: 'avg',
+          sourceField: 'bytes',
+        },
+      }),
+      indexPatterns: {
+        1: {
+          id: '1',
+          title: 'my-fake-index-pattern',
+          hasRestrictions: false,
+          fields: [
+            {
+              name: 'bytes',
+              displayName: 'bytes',
+              type: 'number',
+              aggregatable: true,
+              searchable: true,
+            },
+          ],
+          getFieldByName: getFieldByNameFactory([
+            {
+              name: 'bytes',
+              displayName: 'bytes',
+              type: 'number',
+              aggregatable: true,
+              searchable: true,
+            },
+          ]),
+        },
+      },
+    };
+
+    wrapper = mount(
+      <IndexPatternDimensionEditorComponent {...defaultProps} state={stateWithoutTime} />
+    );
+
+    expect(wrapper.find('[data-test-subj="lns-indexPatternDimension-derivative"]')).toHaveLength(0);
   });
 });

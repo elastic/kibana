@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { SavedObject, SavedObjectsFindResponse } from 'kibana/server';
@@ -31,9 +32,10 @@ import {
 import { createBulkErrorObject, BulkError } from '../utils';
 import { transformFindAlerts, transform, transformAlertToRule } from './utils';
 import { RuleActions } from '../../rule_actions/types';
+import { RuleTypeParams } from '../../types';
 
 export const transformValidateFindAlerts = (
-  findResults: FindResult,
+  findResults: FindResult<RuleTypeParams>,
   ruleActions: Array<RuleActions | null>,
   ruleStatuses?: Array<SavedObjectsFindResponse<IRuleSavedAttributesSavedObjectAttributes>>
 ): [
@@ -63,7 +65,7 @@ export const transformValidateFindAlerts = (
 };
 
 export const transformValidate = (
-  alert: PartialAlert,
+  alert: PartialAlert<RuleTypeParams>,
   ruleActions?: RuleActions | null,
   ruleStatus?: SavedObject<IRuleSavedAttributesSavedObjectAttributes>
 ): [RulesSchema | null, string | null] => {
@@ -76,7 +78,7 @@ export const transformValidate = (
 };
 
 export const newTransformValidate = (
-  alert: PartialAlert,
+  alert: PartialAlert<RuleTypeParams>,
   ruleActions?: RuleActions | null,
   ruleStatus?: SavedObject<IRuleSavedAttributesSavedObjectAttributes>
 ): [FullResponseSchema | null, string | null] => {
@@ -90,7 +92,7 @@ export const newTransformValidate = (
 
 export const transformValidateBulkError = (
   ruleId: string,
-  alert: PartialAlert,
+  alert: PartialAlert<RuleTypeParams>,
   ruleActions?: RuleActions | null,
   ruleStatus?: SavedObjectsFindResponse<IRuleStatusSOAttributes>
 ): RulesSchema | BulkError => {

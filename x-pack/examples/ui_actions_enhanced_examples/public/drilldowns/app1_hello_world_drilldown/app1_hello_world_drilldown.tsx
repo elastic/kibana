@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -23,7 +24,7 @@ export type CollectConfigProps = CollectConfigPropsBase<Config, { triggers: Trig
 
 export const APP1_HELLO_WORLD_DRILLDOWN = 'APP1_HELLO_WORLD_DRILLDOWN';
 
-export class App1HelloWorldDrilldown implements Drilldown<Config, Trigger> {
+export class App1HelloWorldDrilldown implements Drilldown<Config, Context> {
   public readonly id = APP1_HELLO_WORLD_DRILLDOWN;
 
   public readonly order = 8;

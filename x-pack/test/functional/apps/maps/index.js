@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 export default function ({ loadTestFile, getService }) {
@@ -46,6 +47,7 @@ export default function ({ loadTestFile, getService }) {
       loadTestFile(require.resolve('./es_geo_grid_source'));
       loadTestFile(require.resolve('./es_pew_pew_source'));
       loadTestFile(require.resolve('./joins'));
+      loadTestFile(require.resolve('./mapbox_styles'));
       loadTestFile(require.resolve('./mvt_scaling'));
       loadTestFile(require.resolve('./mvt_super_fine'));
       loadTestFile(require.resolve('./add_layer_panel'));

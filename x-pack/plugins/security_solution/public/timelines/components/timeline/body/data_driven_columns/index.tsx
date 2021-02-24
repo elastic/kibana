@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiScreenReaderOnly } from '@elastic/eui';
@@ -11,7 +12,8 @@ import { getOr } from 'lodash/fp';
 import { DRAGGABLE_KEYBOARD_WRAPPER_CLASS_NAME } from '../../../../../common/components/drag_and_drop/helpers';
 import { Ecs } from '../../../../../../common/ecs';
 import { TimelineNonEcsData } from '../../../../../../common/search_strategy/timeline';
-import { ColumnHeaderOptions, TimelineTabs } from '../../../../../timelines/store/timeline/model';
+import { TimelineTabs } from '../../../../../../common/types/timeline';
+import { ColumnHeaderOptions } from '../../../../../timelines/store/timeline/model';
 import { ARIA_COLUMN_INDEX_OFFSET } from '../../helpers';
 import { EventsTd, EVENTS_TD_CLASS_NAME, EventsTdContent, EventsTdGroupData } from '../../styles';
 import { ColumnRenderer } from '../renderers/column_renderer';
@@ -21,12 +23,14 @@ import * as i18n from './translations';
 
 interface Props {
   _id: string;
-  activeTab?: TimelineTabs;
   ariaRowindex: number;
   columnHeaders: ColumnHeaderOptions[];
   columnRenderers: ColumnRenderer[];
   data: TimelineNonEcsData[];
   ecsData: Ecs;
+  hasRowRenderers: boolean;
+  notesCount: number;
+  tabType?: TimelineTabs;
   timelineId: string;
 }
 
@@ -74,12 +78,23 @@ export const onKeyDown = (keyboardEvent: React.KeyboardEvent) => {
 };
 
 export const DataDrivenColumns = React.memo<Props>(
-  ({ _id, activeTab, ariaRowindex, columnHeaders, columnRenderers, data, ecsData, timelineId }) => (
+  ({
+    _id,
+    ariaRowindex,
+    columnHeaders,
+    columnRenderers,
+    data,
+    ecsData,
+    hasRowRenderers,
+    notesCount,
+    tabType,
+    timelineId,
+  }) => (
     <EventsTdGroupData data-test-subj="data-driven-columns">
       {columnHeaders.map((header, i) => (
         <EventsTd
           $ariaColumnIndex={i + ARIA_COLUMN_INDEX_OFFSET}
-          key={activeTab != null ? `${header.id}_${activeTab}` : `${header.id}`}
+          key={tabType != null ? `${header.id}_${tabType}` : `${header.id}`}
           onKeyDown={onKeyDown}
           role="button"
           tabIndex={0}
@@ -95,7 +110,7 @@ export const DataDrivenColumns = React.memo<Props>(
                 eventId: _id,
                 field: header,
                 linkValues: getOr([], header.linkField ?? '', ecsData),
-                timelineId: activeTab != null ? `${timelineId}-${activeTab}` : timelineId,
+                timelineId: tabType != null ? `${timelineId}-${tabType}` : timelineId,
                 truncate: true,
                 values: getMappedNonEcsValue({
                   data,
@@ -104,6 +119,17 @@ export const DataDrivenColumns = React.memo<Props>(
               })}
             </>
           </EventsTdContent>
+          {hasRowRenderers ? (
+            <EuiScreenReaderOnly data-test-subj="hasRowRendererScreenReaderOnly">
+              <p>{i18n.EVENT_HAS_AN_EVENT_RENDERER(ariaRowindex)}</p>
+            </EuiScreenReaderOnly>
+          ) : null}
+
+          {notesCount ? (
+            <EuiScreenReaderOnly data-test-subj="hasNotesScreenReaderOnly">
+              <p>{i18n.EVENT_HAS_NOTES({ row: ariaRowindex, notesCount })}</p>
+            </EuiScreenReaderOnly>
+          ) : null}
         </EventsTd>
       ))}
     </EventsTdGroupData>

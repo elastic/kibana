@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -38,7 +39,6 @@ interface AppRequestedNodeEventsInCategory {
   readonly type: 'appRequestedNodeEventsInCategory';
   readonly payload: {
     parameters: PanelViewAndParameters;
-    dataRequestID: number;
   };
 }
 interface AppRequestedResolverData {
@@ -106,8 +106,6 @@ interface ServerReturnedNodeEventsInCategory {
      * The category that `events` have in common.
      */
     eventCategory: string;
-
-    dataRequestID: number;
   };
 }
 
@@ -135,8 +133,6 @@ interface ServerReturnedNodeData {
      * that we'll request their data in a subsequent request.
      */
     numberOfRequestedEvents: number;
-
-    dataRequestID: number;
   };
 }
 
@@ -150,7 +146,6 @@ interface AppRequestingNodeData {
      * The list of IDs that will be sent to the server to retrieve data for.
      */
     requestedIDs: Set<string>;
-    dataRequestID: number;
   };
 }
 
@@ -175,7 +170,6 @@ interface ServerFailedToReturnNodeData {
      * The list of IDs that were sent to the server to retrieve data for.
      */
     requestedIDs: Set<string>;
-    dataRequestID: number;
   };
 }
 
@@ -189,7 +183,7 @@ interface ServerFailedToReturnCurrentRelatedEventData {
 
 interface ServerReturnedCurrentRelatedEventData {
   readonly type: 'serverReturnedCurrentRelatedEventData';
-  readonly payload: { data: SafeResolverEvent; dataRequestID: number };
+  readonly payload: SafeResolverEvent;
 }
 
 export type DataAction =

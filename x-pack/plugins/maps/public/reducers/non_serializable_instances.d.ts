@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
 import { Adapters } from 'src/plugins/inspector/public';
@@ -13,6 +15,7 @@ export type NonSerializableState = {
   inspectorAdapters: Adapters;
   cancelRequestCallbacks: Map<symbol, () => {}>; // key is request token, value is cancel callback
   eventHandlers: Partial<EventHandlers>;
+  chartsPaletteServiceGetColor: (value: string) => string | null;
 };
 
 export interface ResultMeta {
@@ -55,6 +58,14 @@ export function setEventHandlers(eventHandlers?: EventHandlers): AnyAction;
 export function getInspectorAdapters(state: MapStoreState): Adapters;
 
 export function getEventHandlers(state: MapStoreState): Partial<EventHandlers>;
+
+export function getChartsPaletteServiceGetColor(
+  state: MapStoreState
+): (value: string) => string | null;
+
+export function setChartsPaletteServiceGetColor(
+  chartsPaletteServiceGetColor: ((value: string) => string) | null
+): AnyAction;
 
 export function cancelRequest(requestToken?: symbol): AnyAction;
 

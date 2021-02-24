@@ -1,11 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { get } from 'lodash';
-import { LegacyAPICaller } from 'kibana/server';
+import { ElasticsearchClient, SearchResponse } from 'kibana/server';
 import { ReportingConfig } from '../';
 import { ExportTypesRegistry } from '../lib/export_types_registry';
 import { GetLicense } from './';
@@ -18,7 +19,7 @@ import {
   KeyCountBucket,
   RangeStats,
   ReportingUsageType,
-  SearchResponse,
+  ReportingUsageSearchResponse,
   StatusByAppBucket,
 } from './types';
 
@@ -99,7 +100,9 @@ type RangeStatSets = Partial<RangeStats> & {
   last7Days: Partial<RangeStats>;
 };
 
-async function handleResponse(response: SearchResponse): Promise<Partial<RangeStatSets>> {
+type ESResponse = Partial<SearchResponse<ReportingUsageSearchResponse>>;
+
+async function handleResponse(response: ESResponse): Promise<Partial<RangeStatSets>> {
   const buckets = get(response, 'aggregations.ranges.buckets');
   if (!buckets) {
     return {};
@@ -118,7 +121,7 @@ async function handleResponse(response: SearchResponse): Promise<Partial<RangeSt
 export async function getReportingUsage(
   config: ReportingConfig,
   getLicense: GetLicense,
-  callCluster: LegacyAPICaller,
+  esClient: ElasticsearchClient,
   exportTypesRegistry: ExportTypesRegistry
 ): Promise<ReportingUsageType> {
   const reportingIndex = config.get('index');
@@ -165,8 +168,9 @@ export async function getReportingUsage(
   };
 
   const featureAvailability = await getLicense();
-  return callCluster('search', params)
-    .then((response: SearchResponse) => handleResponse(response))
+  return esClient
+    .search(params)
+    .then(({ body: response }) => handleResponse(response))
     .then(
       (usage: Partial<RangeStatSets>): ReportingUsageType => {
         // Allow this to explicitly throw an exception if/when this config is deprecated,

@@ -1,11 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { SavedObject, SavedObjectsClientContract } from 'src/core/server';
-import { InstallablePackage, InstallSource, MAX_TIME_COMPLETE_INSTALL } from '../../../../common';
+import {
+  InstallablePackage,
+  InstallSource,
+  PackageAssetReference,
+  MAX_TIME_COMPLETE_INSTALL,
+  ASSETS_SAVED_OBJECT_TYPE,
+} from '../../../../common';
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../constants';
 import {
   AssetReference,
@@ -24,6 +31,7 @@ import { deleteKibanaSavedObjectsAssets } from './remove';
 import { installTransform } from '../elasticsearch/transform/install';
 import { createInstallation, saveKibanaAssetsRefs, updateVersion } from './install';
 import { installIlmForDataStream } from '../elasticsearch/datastream_ilm/install';
+import { saveArchiveEntries } from '../archive/storage';
 import { ConcurrentInstallOperationError } from '../../../errors';
 
 // this is only exported for testing
@@ -188,11 +196,26 @@ export async function _installPackage({
     if (installKibanaAssetsError) throw installKibanaAssetsError;
     await Promise.all([installKibanaAssetsPromise, installIndexPatternPromise]);
 
+    const packageAssetResults = await saveArchiveEntries({
+      savedObjectsClient,
+      paths,
+      packageInfo,
+      installSource,
+    });
+    const packageAssetRefs: PackageAssetReference[] = packageAssetResults.saved_objects.map(
+      (result) => ({
+        id: result.id,
+        type: ASSETS_SAVED_OBJECT_TYPE,
+      })
+    );
+
     // update to newly installed version when all assets are successfully installed
     if (installedPkg) await updateVersion(savedObjectsClient, pkgName, pkgVersion);
+
     await savedObjectsClient.update(PACKAGES_SAVED_OBJECT_TYPE, pkgName, {
       install_version: pkgVersion,
       install_status: 'installed',
+      package_assets: packageAssetRefs,
     });
 
     return [

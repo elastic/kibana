@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { DatatableColumnType } from '../../../../../../../src/plugins/expressions/common';
+import { Query, Filter, TimeRange } from '../../../../../../../src/plugins/data/public';
 import {
   Embeddable,
   EmbeddableInput,
@@ -159,6 +161,9 @@ export const rowClickData = {
 
 interface TestInput extends EmbeddableInput {
   savedObjectId?: string;
+  query?: Query;
+  filters?: Filter[];
+  timeRange?: TimeRange;
 }
 
 interface TestOutput extends EmbeddableOutput {
