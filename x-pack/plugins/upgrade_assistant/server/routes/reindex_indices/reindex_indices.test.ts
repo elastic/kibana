@@ -89,7 +89,7 @@ describe('reindex API', () => {
       mockReindexService.findReindexOperation.mockResolvedValueOnce({
         attributes: { indexName: 'wowIndex', status: ReindexStatus.inProgress },
       });
-      mockReindexService.detectReindexWarnings.mockResolvedValueOnce([ReindexWarning.allField]);
+      mockReindexService.detectReindexWarnings.mockResolvedValueOnce([ReindexWarning.apmReindex]);
 
       const resp = await routeDependencies.router.getHandler({
         method: 'get',

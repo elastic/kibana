@@ -16,11 +16,11 @@ export default function createGetTests({ getService }: FtrProviderContext) {
 
   describe('migrations', () => {
     before(async () => {
-      await esArchiver.load('cases');
+      await esArchiver.load('cases/migrations');
     });
 
     after(async () => {
-      await esArchiver.unload('cases');
+      await esArchiver.unload('cases/migrations');
     });
 
     it('7.10.0 migrates user actions connector', async () => {
