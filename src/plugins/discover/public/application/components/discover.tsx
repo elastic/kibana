@@ -104,13 +104,14 @@ export function Discover({
     () =>
       getStateColumnActions({
         capabilities,
+        config,
         indexPattern,
         indexPatterns,
         setAppState,
         state,
         useNewFieldsApi,
       }),
-    [capabilities, indexPattern, indexPatterns, setAppState, state, useNewFieldsApi]
+    [capabilities, config, indexPattern, indexPatterns, setAppState, state, useNewFieldsApi]
   );
 
   const onOpenInspector = useCallback(() => {
@@ -410,6 +411,7 @@ export function Discover({
                               onSetColumns={onSetColumns}
                               onSort={onSort}
                               onResize={onResize}
+                              useNewFieldsApi={useNewFieldsApi}
                             />
                           </div>
                         )}
