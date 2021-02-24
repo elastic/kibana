@@ -76,7 +76,6 @@ export const RoleMapping: React.FC<RoleMappingProps> = ({ isNew }) => {
     attributes,
     elasticsearchRoles,
     dataLoading,
-    flashMessages,
     roleType,
     roleMappings,
     attributeValue,
@@ -118,7 +117,7 @@ export const RoleMapping: React.FC<RoleMappingProps> = ({ isNew }) => {
       />
       <EuiSpacer size="l" />
       <div>
-        {flashMessages && <FlashMessages {...flashMessages} />}
+        <FlashMessages />
         <AttributeSelector
           attributeName={attributeName}
           attributeValue={attributeValue}
