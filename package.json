@@ -93,15 +93,25 @@
     "yarn": "^1.21.1"
   },
   "sideEffects": [
+    "src/plugins/*/public/index.(js|ts)",
+    "x-pack/plugins/*/public/index.(js|ts)",
+
     "packages/kbn-i18n/**",
+    "src/plugins/console/**",
+    "x-pack/plugins/grokdebugger/**",
+    "x-pack/plugins/index_management/**",
     "src/plugins/discover/**",
     "src/plugins/kibana_legacy/**",
     "src/plugins/timelion/**",
     "src/plugins/vis_type_table/**",
-    "x-pack/**",
-
-    "src/plugins/*/public/index.(js|ts)",
-    "x-pack/plugins/*/public/index.(js|ts)"
+    "x-pack/plugins/graph/**",
+    "x-pack/plugins/monitoring/**",
+    "x-pack/plugins/watcher/**",
+    "x-pack/plugins/triggers_actions_ui/**",
+    "x-pack/plugins/transform/**",
+    "x-pack/plugins/stack_alerts/**",
+    "x-pack/plugins/searchprofiler/**",
+    "x-pack/plugins/ml/**"
   ],
   "dependencies": {
     "@elastic/datemath": "link:packages/elastic-datemath",
