@@ -3,7 +3,7 @@
 === Managing Alerts
 
 
-The *Alerts* tab provides a cross-app view of alerting. Different {kib} apps like <<metrics-app,Metrics>>, <<xpack-apm,APM>>, <<uptime-app,Uptime>>, and <<xpack-siem,SIEM>> can offer their own alerts, and the *Alerts* tab provides a central place to:
+The *Alerts* tab provides a cross-app view of alerting. Different {kib} apps like {observability-guide}/create-alerts.html[*Observability*], {security-guide}/prebuilt-rules.html[*Security*], <<geo-alerting, *Maps*>> and <<xpack-ml, *Machine Learning*>> can offer their own alerts. The *Alerts* tab provides a central place to:
 
 * <<create-edit-alerts, Create and edit>> alerts
 * <<controlling-alerts, Control alerts>> including enabling/disabling, muting/unmuting, and deleting

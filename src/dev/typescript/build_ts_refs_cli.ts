@@ -23,7 +23,7 @@ export async function runBuildRefsCli() {
     async ({ log, flags }) => {
       const outDirs = getOutputsDeep(REF_CONFIG_PATHS);
 
-      const cacheEnabled = process.env.BUILD_TS_REFS_CACHE_ENABLE === 'true' || !!flags.cache;
+      const cacheEnabled = process.env.BUILD_TS_REFS_CACHE_ENABLE !== 'false' && !!flags.cache;
       const doCapture = process.env.BUILD_TS_REFS_CACHE_CAPTURE === 'true';
       const doClean = !!flags.clean || doCapture;
       const doInitCache = cacheEnabled && !doClean;
@@ -62,6 +62,9 @@ export async function runBuildRefsCli() {
       description: 'Build TypeScript projects',
       flags: {
         boolean: ['clean', 'cache'],
+        default: {
+          cache: true,
+        },
       },
       log: {
         defaultLevel: 'debug',
