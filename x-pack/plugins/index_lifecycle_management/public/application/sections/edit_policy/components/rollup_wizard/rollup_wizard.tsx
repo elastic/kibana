@@ -50,7 +50,6 @@ import {
   STEP_TERMS,
   STEP_HISTOGRAM,
   STEP_METRICS,
-  STEP_REVIEW,
   stepIds,
   stepIdToStepConfigMap,
   getAffectedStepsFields,
@@ -58,7 +57,7 @@ import {
   // @ts-ignore
 } from './steps_config';
 
-// TODO: fix anys!
+// TODO: fix anys in this file!
 
 const stepIdToTitleMap = {
   [STEP_LOGISTICS]: i18n.translate('xpack.rollupJobs.create.steps.stepLogisticsTitle', {
@@ -76,15 +75,15 @@ const stepIdToTitleMap = {
   [STEP_METRICS]: i18n.translate('xpack.rollupJobs.create.steps.stepMetricsTitle', {
     defaultMessage: 'Metrics',
   }),
-  [STEP_REVIEW]: i18n.translate('xpack.rollupJobs.create.steps.stepReviewTitle', {
-    defaultMessage: 'Review and save',
-  }),
 };
 
 interface Props {
-  rollupAction?: RollupAction;
+  /**
+   * The rollup action to configure, otherwise default to empty rollup action.
+   */
+  value?: RollupAction;
   onCancel: () => void;
-  onDone: (rollupAction: RollupAction) => void;
+  onDone: (value: RollupAction) => void;
 }
 
 interface StepFields {
@@ -97,7 +96,6 @@ interface StepFields {
   STEP_TERMS: { terms: Array<{ name: string }> };
   STEP_HISTOGRAM: { histogram: Array<{ name: string }>; histogramInterval: string };
   STEP_METRICS: { metrics: Array<{ name: string; types: string[] }> };
-  STEP_REVIEW: {};
 }
 
 interface State {
@@ -110,7 +108,7 @@ interface State {
   stepsFields: StepFields;
 }
 
-export class RollupWizardUi extends Component<Props, State> {
+export class RollupWizard extends Component<Props, State> {
   lastIndexPatternValidationTime: number;
   // @ts-ignore
   private _isMounted = false;
@@ -118,11 +116,9 @@ export class RollupWizardUi extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
 
-    console.log('props', props);
-
     // props.kibana.services.setBreadcrumbs([listBreadcrumb, createBreadcrumb]);
-    const { rollupAction } = props;
-    const deserializedRollup = rollupAction ? deserializeRollup(rollupAction) : {};
+    const { value } = props;
+    const deserializedRollup = value ? deserializeRollup(value) : {};
 
     const stepsFields = mapValues(stepIdToStepConfigMap, (step) =>
       cloneDeep(step.getDefaultFields(deserializedRollup))
@@ -259,7 +255,6 @@ export class RollupWizardUi extends Component<Props, State> {
         STEP_TERMS: { terms },
         STEP_HISTOGRAM: { histogram, histogramInterval },
         STEP_METRICS: { metrics },
-        STEP_REVIEW: {},
       },
     } = this.state;
 
@@ -365,9 +360,6 @@ export class RollupWizardUi extends Component<Props, State> {
           />
         );
 
-      case STEP_REVIEW:
-        return <StepReview job={this.getAllFields()} />;
-
       default:
         return null;
     }
@@ -394,5 +386,3 @@ export class RollupWizardUi extends Component<Props, State> {
     );
   }
 }
-
-export const RollupWizard = RollupWizardUi;

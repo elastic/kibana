@@ -19,6 +19,7 @@ import { defaultPolicy } from '../../constants';
 
 import { EditPolicy as PresentationComponent } from './edit_policy';
 import { EditPolicyContextProvider } from './edit_policy_context';
+import { RollupFormContextProvider } from './rollup_form_context';
 
 interface RouterProps {
   policyName: string;
@@ -92,7 +93,7 @@ export const EditPolicy: React.FunctionComponent<Props & RouteComponentProps<Rou
     );
   }
 
-  const policy = getPolicyByName(policies, attemptToURIDecode(policyName))?.policy;
+  const policy = getPolicyByName(policies, attemptToURIDecode(policyName))?.policy ?? defaultPolicy;
   const isNewPolicy = !policy;
 
   return (
@@ -100,7 +101,7 @@ export const EditPolicy: React.FunctionComponent<Props & RouteComponentProps<Rou
       value={{
         isNewPolicy,
         policyName: attemptToURIDecode(policyName),
-        policy: policy ?? defaultPolicy,
+        policy,
         existingPolicies: policies,
         getUrlForApp,
         license: {
@@ -108,7 +109,9 @@ export const EditPolicy: React.FunctionComponent<Props & RouteComponentProps<Rou
         },
       }}
     >
-      <PresentationComponent history={history} />
+      <RollupFormContextProvider policy={policy}>
+        <PresentationComponent history={history} />
+      </RollupFormContextProvider>
     </EditPolicyContextProvider>
   );
 };

@@ -6,12 +6,11 @@
  */
 
 import { useLocation } from 'react-router-dom';
-import React, { createContext, ReactChild, useContext, useRef, useCallback, useMemo } from 'react';
+import React, { createContext, ReactChild, useContext, useMemo } from 'react';
 import qs from 'query-string';
-import { get } from 'lodash';
 import { ApplicationStart } from 'kibana/public';
 
-import { PolicyFromES, SerializedPolicy, RollupAction } from '../../../../common/types';
+import { PolicyFromES, SerializedPolicy } from '../../../../common/types';
 
 type PolicyView = { id: 'policy' } | { id: 'rollupAction'; phase: 'hot' | 'cold' };
 
@@ -26,23 +25,8 @@ export interface EditPolicyContextValue {
   policyName?: string;
 }
 
-interface PolicyRollupConfig {
-  hot: {
-    enabled: boolean;
-    action: RollupAction;
-  };
-  cold: {
-    enabled: boolean;
-    action: RollupAction;
-  };
-}
-
 interface InternalEditPolicyContextValue extends EditPolicyContextValue {
   currentView: PolicyView;
-  rollup: {
-    getCurrent: () => PolicyRollupConfig;
-    setCurrent: (rollupConfig: PolicyRollupConfig) => void;
-  };
 }
 
 const EditPolicyContext = createContext<InternalEditPolicyContextValue>(null as any);
@@ -55,18 +39,6 @@ export const EditPolicyContextProvider = ({
   children: ReactChild;
 }) => {
   const { search } = useLocation();
-  const hotConfig = get(value.policy, 'phases.hot.actions.rollup');
-  const coldConfig = get(value.policy, 'phases.cold.actions.rollup');
-  const rollupActionRef = useRef<PolicyRollupConfig>({
-    hot: {
-      enabled: Boolean(hotConfig),
-      action: hotConfig,
-    },
-    cold: {
-      enabled: Boolean(coldConfig),
-      action: coldConfig,
-    },
-  });
   const currentView = useMemo<PolicyView>(() => {
     const { rollup } = qs.parse(search) as { rollup: 'hot' | 'cold' };
     if (rollup) {
@@ -75,17 +47,11 @@ export const EditPolicyContextProvider = ({
     return { id: 'policy' };
   }, [search]);
 
-  const getCurrentRollupAction = useCallback(() => rollupActionRef.current, []);
-  const setCurrentRollupAction = useCallback((policyRollupConfig: PolicyRollupConfig) => {
-    rollupActionRef.current = policyRollupConfig;
-  }, []);
-
   return (
     <EditPolicyContext.Provider
       value={{
         ...value,
         currentView,
-        rollup: { getCurrent: getCurrentRollupAction, setCurrent: setCurrentRollupAction },
       }}
     >
       {children}

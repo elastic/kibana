@@ -12,7 +12,7 @@ import { useHistory } from 'react-router-dom';
 import { EuiButtonEmpty } from '@elastic/eui';
 
 import { DescribedFormRow } from '../../../../components';
-import { useEditPolicyContext } from '../../../edit_policy_context';
+import { useRollupFormContext } from '../../../rollup_form_context';
 
 interface Props {
   phase: 'hot' | 'cold';
@@ -20,8 +20,10 @@ interface Props {
 
 export const RollupField: FunctionComponent<Props> = ({ phase }) => {
   const history = useHistory();
-  const { rollup } = useEditPolicyContext();
-  const [enabled, setEnabled] = useState(() => rollup.getCurrent()[phase].enabled);
+  const { getCurrent, setCurrent } = useRollupFormContext();
+  const {
+    [phase]: { enabled },
+  } = getCurrent();
   return (
     <DescribedFormRow
       title={<h3>Rollup</h3>}
@@ -33,15 +35,13 @@ export const RollupField: FunctionComponent<Props> = ({ phase }) => {
         }),
         checked: enabled,
         onChange: (value) => {
-          const currentConfig = rollup.getCurrent();
-          rollup.setCurrent({
+          setCurrent((currentConfig) => ({
             ...currentConfig,
             [phase]: {
               ...currentConfig[phase],
               enabled: value,
             },
-          });
-          setEnabled(value);
+          }));
         },
       }}
       fullWidth

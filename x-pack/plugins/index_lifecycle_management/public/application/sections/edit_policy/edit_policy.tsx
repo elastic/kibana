@@ -48,14 +48,15 @@ import {
   WarmPhase,
   Timeline,
   FormErrorsCallout,
+  RollupWizard,
 } from './components';
 
 import { createPolicyNameValidations, createSerializer, deserializer, Form, schema } from './form';
 
 import { useEditPolicyContext } from './edit_policy_context';
+import { useRollupFormContext } from './rollup_form_context';
 
 import { FormInternal } from './types';
-import { RollupWizard } from './components/rollup_wizard/rollup_wizard.container';
 
 export interface Props {
   history: RouteComponentProps['history'];
@@ -75,10 +76,13 @@ export const EditPolicy: React.FunctionComponent<Props> = ({ history }) => {
     existingPolicies,
     policyName,
     currentView,
-    rollup,
   } = useEditPolicyContext();
 
-  const { getCurrent: getCurrentRollup, setCurrent: setCurrentRollup } = rollup;
+  const {
+    getCurrent: getCurrentRollupForm,
+    setCurrent: setCurrentRollupForm,
+    addRollupConfigToPolicy,
+  } = useRollupFormContext();
 
   const serializer = useMemo(() => {
     return createSerializer(isNewPolicy ? undefined : currentPolicy);
@@ -125,7 +129,10 @@ export const EditPolicy: React.FunctionComponent<Props> = ({ history }) => {
       );
     } else {
       const success = await savePolicy(
-        { ...policy, name: saveAsNew || isNewPolicy ? currentPolicyName : originalPolicyName },
+        {
+          ...addRollupConfigToPolicy(policy),
+          name: saveAsNew || isNewPolicy ? currentPolicyName : originalPolicyName,
+        },
         isNewPolicy || saveAsNew
       );
       if (success) {
@@ -338,13 +345,12 @@ export const EditPolicy: React.FunctionComponent<Props> = ({ history }) => {
       </div>
       {currentView.id === 'rollupAction' && (
         <RollupWizard
-          rollupAction={rollup.getCurrent()[currentView.phase].action}
+          value={getCurrentRollupForm()[currentView.phase].action}
           onDone={(rollupAction) => {
-            const currentRollup = getCurrentRollup();
-            setCurrentRollup({
+            setCurrentRollupForm((currentRollup) => ({
               ...currentRollup,
-              [currentView.phase]: rollupAction,
-            });
+              [currentView.phase]: { enabled: true, action: rollupAction },
+            }));
             const { search } = history.location;
             const newQueryParams = qs.parse(search);
             delete newQueryParams.rollup;
