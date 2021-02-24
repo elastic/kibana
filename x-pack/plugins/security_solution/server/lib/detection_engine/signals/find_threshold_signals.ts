@@ -90,7 +90,6 @@ export const findThresholdSignals = async ({
             // TODO: support case where threshold fields are not supplied, but cardinality is?
             if (!isEmpty(threshold.cardinality_field)) {
               set(acc, `${aggPath}['aggs']`, {
-                // FIXME: top hits might contain hits that are eliminated by the cardinality check
                 top_threshold_hits: topHitsAgg,
                 cardinality_count: {
                   cardinality: {
