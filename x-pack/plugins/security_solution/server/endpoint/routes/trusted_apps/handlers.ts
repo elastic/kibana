@@ -116,7 +116,7 @@ export const getTrustedAppsListRouteHandler = (
   return async (context, req, res) => {
     try {
       return res.ok({
-        body: await getTrustedAppsList(exceptionListClientFromContext(context), { ...req.query }),
+        body: await getTrustedAppsList(exceptionListClientFromContext(context), req.query),
       });
     } catch (error) {
       return errorHandler(logger, res, error);
