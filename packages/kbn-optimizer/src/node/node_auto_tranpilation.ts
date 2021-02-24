@@ -91,7 +91,7 @@ function determineCachePrefix() {
     tsx: getBabelOptions(Path.resolve(REPO_ROOT, 'foo.tsx')),
   });
 
-  const checksum = Crypto.createHash('sha256').update(json).digest('hex').slice(0, 8);
+  const checksum = Crypto.createHash('sha256').update(json).digest('hex');
   return `${checksum}:`;
 }
 
