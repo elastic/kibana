@@ -164,10 +164,12 @@ history records associated with specific saved object ids.
 
 ## API
 
+Event Log plugin returns a service instance from setup() and client service from start() methods.
+
+### Setup
 ```typescript
 // IEvent is a TS type generated from the subset of ECS supported
 
-// the NP plugin returns a service instance from setup() and start()
 export interface IEventLogService {
   registerProviderActions(provider: string, actions: string[]): void;
   isProviderActionRegistered(provider: string, action: string): boolean;
@@ -237,6 +239,80 @@ properties `start`, `end`, and `duration` in the event.  For example:
 It's anticipated that more "helper" methods like this will be provided in the
 future.
 
+### Start
+```typescript
+
+export interface IEventLogClientService {
+  getClient(request: KibanaRequest): IEventLogClient;
+}
+
+export interface IEventLogClient {
+  findEventsBySavedObjectIds(
+    type: string,
+    ids: string[],
+    options?: Partial<FindOptionsType>
+  ): Promise<QueryEventsBySavedObjectResult>;
+}
+```
+
+The plugin exposes an `IEventLogClientService` object to plugins that pre-req it.
+Those plugins need to call `getClient(request)` to get the event log client.
+
+## Experimental RESTful API
+
+Using of the event log allows you to retrive the events for a given saved object type by the specified set of IDs.
+API listed below is experimental and could be changed or removed in the future.
+
+### `GET /api/event_log/{type}/{id}/_find`: Get events for a given saved object type by the ID
+
+Collects events information from the event log for the selected saved object by type and ID.
+
+Params:
+
+|Property|Description|Type|
+|---|---|---|
+|type|The type of the saved object whose events you're trying to get.|string|
+|id|The id of the saved object.|string|
+
+Query:
+
+|Property|Description|Type|
+|---|---|---|
+|page|The page number.|number|
+|per_page|The number of alerts to return per page.|number|
+|sort_field|Sorts the response. Could be an event fields returned in the response.|string|
+|sort_order|Sort direction, either `asc` or `desc`.|string|
+|filter|A <<kuery-query, KQL>> string that you filter with an attribute from the event. It should look like event.action: "execute".|string|
+|start|The date to start looking for saved object events in the event log. Either an ISO date string, or a duration string indicating time since now.|string|
+|end|The date to end looking for saved object events in the event log. Either an ISO date string, or a duration string indicating time since now.|string|
+
+### `POST /api/event_log/{type}/_find`: Retrive events for a given saved object type by the IDs
+
+Collects events information from the event log for the selected saved object by type and a set of the IDs.
+
+Params:
+
+|Property|Description|Type|
+|---|---|---|
+|type|The type of the saved object whose events you're trying to get.|string|
+
+Query:
+
+|Property|Description|Type|
+|---|---|---|
+|page|The page number.|number|
+|per_page|The number of alerts to return per page.|number|
+|sort_field|Sorts the response. Could be an event fields returned in the response.|string|
+|sort_order|Sort direction, either `asc` or `desc`.|string|
+|filter|A <<kuery-query, KQL>> string that you filter with an attribute from the event. It should look like event.action: "execute".|string|
+|start|The date to start looking for saved object events in the event log. Either an ISO date string, or a duration string indicating time since now.|string|
+|end|The date to end looking for saved object events in the event log. Either an ISO date string, or a duration string indicating time since now.|string|
+
+Body:
+
+|Property|Description|Type|
+|---|---|---|
+|ids|The array ids of the saved object.|string array|
 
 ## Stored data
 
