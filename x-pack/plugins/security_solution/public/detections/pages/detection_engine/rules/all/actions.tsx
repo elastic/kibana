@@ -44,6 +44,8 @@ export const duplicateRulesAction = async (
   try {
     dispatch({ type: 'loadingRuleIds', ids: ruleIds, actionType: 'duplicate' });
     const response = await duplicateRules({
+      // We cast this back and forth here as the front end types are not really the right io-ts ones
+      // and the two types conflict with each other.
       rules: rules.map((rule) => transformOutput(rule as CreateRulesSchema) as Rule),
     });
     const { errors } = bucketRulesResponse(response);
