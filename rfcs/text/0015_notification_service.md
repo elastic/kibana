@@ -92,7 +92,7 @@ Compatible with all the types supported by euiIcon type: a predefined EUI icon n
 Locale might be changed on the Space level (on the User level in the future).
 Thus, we cannot determine a message locale during notification creation.
 Considering that Kibana notifications might be rendered outside of Kibana UI (in Cloud UI, for example), the message must contain translations for all the supported locales.
-- `title: TranslatedContent & { url?: string } | { text: string; url?: string }` - notification header. URL must be relative in order to support SPA navigation for on-prem Kibana. UNS will have to convert it to the absolute format to enable cross-cluster navigation.
+- `title: TranslatedContent & { url?: string } | { text: string; url?: string }` - notification header. URL must be relative for Kibana-sourced notifications in order to support SPA navigation for on-prem Kibana. UNS will have to convert it to the absolute format to enable cross-cluster navigation.
 - `action: TranslatedContent & { url: string } | { text: string; url: string }` - notification CTA. URL must be relative.
 
 ```typescript
