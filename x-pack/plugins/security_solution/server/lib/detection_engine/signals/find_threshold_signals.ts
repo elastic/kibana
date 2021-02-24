@@ -87,7 +87,6 @@ export const findThresholdSignals = async ({
             },
           });
           if (i === (threshold.field?.length ?? 0) - 1) {
-            // TODO: support case where threshold fields are not supplied, but cardinality is?
             if (!isEmpty(threshold.cardinality_field)) {
               set(acc, `${aggPath}['aggs']`, {
                 top_threshold_hits: topHitsAgg,
@@ -144,8 +143,6 @@ export const findThresholdSignals = async ({
             },
           },
         };
-
-  // console.log(JSON.stringify(aggregations));
 
   return singleSearchAfter({
     aggregations,

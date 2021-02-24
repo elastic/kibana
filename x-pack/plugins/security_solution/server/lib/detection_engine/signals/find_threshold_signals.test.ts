@@ -52,7 +52,7 @@ describe('findThresholdSignals', () => {
           threshold_0: {
             terms: {
               script: {
-                source: '',
+                source: '""',
                 lang: 'painless',
               },
               min_doc_count: 100,
@@ -287,15 +287,14 @@ describe('findThresholdSignals', () => {
           threshold_0: {
             terms: {
               script: {
-                source: '',
+                source: '""',
                 lang: 'painless',
               },
-              min_doc_count: 100,
             },
             aggs: {
               cardinality_count: {
                 cardinality: {
-                  field: 'destination.ip',
+                  field: 'source.ip',
                 },
               },
               cardinality_check: {
@@ -303,7 +302,7 @@ describe('findThresholdSignals', () => {
                   buckets_path: {
                     cardinalityCount: 'cardinality_count',
                   },
-                  script: 'params.cardinalityCount >= 2',
+                  script: 'params.cardinalityCount >= 5',
                 },
               },
               top_threshold_hits: {
