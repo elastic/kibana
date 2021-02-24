@@ -10,19 +10,25 @@ import {
   SERVICE_NAME,
   ERROR_GROUP_ID,
 } from '../../common/elasticsearch_fieldnames';
-import { environmentQuery, rangeQuery } from '../../common/utils/queries';
+import {
+  environmentQuery,
+  rangeQuery,
+  kqlQuery,
+} from '../../server/utils/queries';
 import { ProcessorEvent } from '../../common/processor_event';
 
 export function getErrorGroupsProjection({
   environment,
+  kuery,
   setup,
   serviceName,
 }: {
   environment?: string;
+  kuery?: string;
   setup: Setup & SetupTimeRange;
   serviceName: string;
 }) {
-  const { start, end, esFilter } = setup;
+  const { start, end } = setup;
 
   return {
     apm: {
@@ -35,7 +41,7 @@ export function getErrorGroupsProjection({
             { term: { [SERVICE_NAME]: serviceName } },
             ...rangeQuery(start, end),
             ...environmentQuery(environment),
-            ...esFilter,
+            ...kqlQuery(kuery),
           ],
         },
       },
