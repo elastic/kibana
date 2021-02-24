@@ -1,5 +1,8 @@
 # Event Log
 
+The event log plugin provides a persistent history of alerting and action
+actitivies.
+
 ## Overview
 
 This plugin provides a persistent log of "events" that can be used by other
