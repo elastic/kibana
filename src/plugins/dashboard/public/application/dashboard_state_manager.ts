@@ -139,6 +139,7 @@ export class DashboardStateManager {
     // setup initial state by merging defaults with state from url & panels storage
     // also run migration, as state in url could be of older version
     const initialUrlState = this.kbnUrlStateStorage.get<DashboardAppState>(STATE_STORAGE_KEY);
+
     const initialState = migrateAppState(
       {
         ...this.stateDefaults,
@@ -366,9 +367,10 @@ export class DashboardStateManager {
     this.stateDefaults.query = this.lastSavedDashboardFilters.query;
     // Need to make a copy to ensure they are not overwritten.
     this.stateDefaults.filters = [...this.getLastSavedFilterBars()];
-
     this.isDirty = false;
-    this.stateContainer.set(this.stateDefaults);
+
+    const currentViewMode = this.stateContainer.get().viewMode;
+    this.stateContainer.set({ ...this.stateDefaults, viewMode: currentViewMode });
   }
 
   /**
