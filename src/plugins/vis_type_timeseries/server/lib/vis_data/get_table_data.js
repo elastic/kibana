@@ -15,13 +15,13 @@ import { getIndexPatternObject } from './helpers/get_index_pattern';
 import { createFieldsFetcher } from './helpers/fields_fetcher';
 import { extractFieldLabel } from '../../../common/calculate_label';
 
-export async function getTableData(req, panel) {
+export async function getTableData(searchStrategyRegistry, req, panel) {
   const panelIndexPattern = panel.index_pattern;
 
-  const {
-    searchStrategy,
-    capabilities,
-  } = await req.framework.searchStrategyRegistry.getViableStrategy(req, panelIndexPattern);
+  const { searchStrategy, capabilities } = await searchStrategyRegistry.getViableStrategy(
+    req,
+    panelIndexPattern
+  );
   const esQueryConfig = await getEsQueryConfig(req);
   const { indexPatternObject } = await getIndexPatternObject(req, panelIndexPattern);
   const extractFields = createFieldsFetcher(req, searchStrategy, capabilities);

@@ -6,33 +6,16 @@
  * Side Public License, v 1.
  */
 
-import type { FakeRequest, IUiSettingsClient, SavedObjectsClientContract } from 'kibana/server';
-
 import { indexPatterns, IndexPatternsFetcher } from '../../../../../data/server';
 
 import type { Framework } from '../../../plugin';
-import type { FieldSpec, IndexPatternsService } from '../../../../../data/common';
-import type { VisPayload, SanitizedFieldType } from '../../../../common/types';
-import type { VisTypeTimeseriesRequestHandlerContext } from '../../../types';
-
-/**
- * ReqFacade is a regular KibanaRequest object extended with additional service
- * references to ensure backwards compatibility for existing integrations.
- *
- * This will be replaced by standard KibanaRequest and RequestContext objects in a later version.
- */
-export interface ReqFacade<T = unknown> extends FakeRequest {
-  requestContext: VisTypeTimeseriesRequestHandlerContext;
-  framework: Framework;
-  payload: T;
-  pre: {
-    indexPatternsFetcher?: IndexPatternsFetcher;
-  };
-  getUiSettingsService: () => IUiSettingsClient;
-  getSavedObjectsClient: () => SavedObjectsClientContract;
-  getEsShardTimeout: () => Promise<number>;
-  getIndexPatternsService: () => Promise<IndexPatternsService>;
-}
+import type { FieldSpec } from '../../../../../data/common';
+import type { SanitizedFieldType } from '../../../../common/types';
+import type {
+  VisTypeTimeseriesRequest,
+  VisTypeTimeseriesRequestHandlerContext,
+  VisTypeTimeseriesVisDataRequest,
+} from '../../../types';
 
 export const toSanitizedFieldType = (fields: FieldSpec[]) => {
   return fields
@@ -52,12 +35,18 @@ export const toSanitizedFieldType = (fields: FieldSpec[]) => {
 };
 
 export abstract class AbstractSearchStrategy {
-  async search(req: ReqFacade<VisPayload>, bodies: any[], indexType?: string) {
+  constructor(private framework: Framework) {}
+  async search(
+    requestContext: VisTypeTimeseriesRequestHandlerContext,
+    req: VisTypeTimeseriesVisDataRequest,
+    bodies: any[],
+    indexType?: string
+  ) {
     const requests: any[] = [];
 
     bodies.forEach((body) => {
       requests.push(
-        req.requestContext.search
+        requestContext.search
           .search(
             {
               indexType,
@@ -65,7 +54,7 @@ export abstract class AbstractSearchStrategy {
                 ...body,
               },
             },
-            req.payload.searchSession
+            req.body.searchSession
           )
           .toPromise()
       );
@@ -73,15 +62,17 @@ export abstract class AbstractSearchStrategy {
     return Promise.all(requests);
   }
 
-  checkForViability(
-    req: ReqFacade<VisPayload>,
+  checkForViability<T extends VisTypeTimeseriesRequest>(
+    requestContext: VisTypeTimeseriesRequestHandlerContext,
+    req: T,
     indexPattern: string
   ): Promise<{ isViable: boolean; capabilities: unknown }> {
     throw new TypeError('Must override method');
   }
 
-  async getFieldsForWildcard<TPayload = unknown>(
-    req: ReqFacade<TPayload>,
+  async getFieldsForWildcard<T extends VisTypeTimeseriesRequest>(
+    requestContext: VisTypeTimeseriesRequestHandlerContext,
+    req: T,
     indexPattern: string,
     capabilities?: unknown,
     options?: Partial<{
@@ -89,8 +80,10 @@ export abstract class AbstractSearchStrategy {
       rollupIndex: string;
     }>
   ) {
-    const { indexPatternsFetcher } = req.pre;
-    const indexPatternsService = await req.getIndexPatternsService();
+    const indexPatternsFetcher = new IndexPatternsFetcher(
+      requestContext.core.elasticsearch.client.asCurrentUser
+    );
+    const indexPatternsService = await this.framework.getIndexPatternsService(requestContext);
     const kibanaIndexPattern = (await indexPatternsService.find(indexPattern)).find(
       (index) => index.title === indexPattern
     );
@@ -98,7 +91,7 @@ export abstract class AbstractSearchStrategy {
     return toSanitizedFieldType(
       kibanaIndexPattern
         ? kibanaIndexPattern.getNonScriptedFields()
-        : await indexPatternsFetcher!.getFieldsForWildcard({
+        : await indexPatternsFetcher.getFieldsForWildcard({
             pattern: indexPattern,
             fieldCapsOptions: { allow_no_indices: true },
             metaFields: [],

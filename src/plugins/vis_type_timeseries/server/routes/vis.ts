@@ -9,11 +9,12 @@
 import { KibanaRequest } from 'kibana/server';
 import { schema } from '@kbn/config-schema';
 import { ensureNoUnsafeProperties } from '@kbn/std';
-import { getVisData, GetVisDataOptions } from '../lib/get_vis_data';
+import { getVisData } from '../lib/get_vis_data';
 import { visPayloadSchema } from '../../common/vis_schema';
 import { ROUTES } from '../../common/constants';
 import { Framework } from '../plugin';
 import type { VisTypeTimeseriesRouter } from '../types';
+import type { VisPayload } from '../../common/types';
 
 const escapeHatch = schema.object({}, { unknowns: 'allow' });
 
@@ -44,7 +45,7 @@ export const visDataRoutes = (router: VisTypeTimeseriesRouter, framework: Framew
 
       const results = await getVisData(
         requestContext,
-        request as KibanaRequest<{}, {}, GetVisDataOptions>,
+        request as KibanaRequest<{}, {}, VisPayload>,
         framework
       );
       return response.ok({ body: results });

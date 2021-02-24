@@ -13,16 +13,15 @@ import {
   getSuitableUnit,
 } from '../../vis_data/helpers/unit_to_seconds';
 import { RESTRICTIONS_KEYS } from '../../../../common/ui_restrictions';
-import type { ReqFacade } from '../strategies/abstract_search_strategy';
-import type { VisPayload } from '../../../../common/types';
+import { VisTypeTimeseriesRequest, VisTypeTimeseriesVisDataRequest } from '../../../types';
 
-const getTimezoneFromRequest = (request: ReqFacade<VisPayload>) => {
-  return request.payload.timerange.timezone;
+const getTimezoneFromRequest = (request: VisTypeTimeseriesVisDataRequest) => {
+  return request.body.timerange.timezone;
 };
 
 export class DefaultSearchCapabilities {
   constructor(
-    public request: ReqFacade<VisPayload>,
+    public request: VisTypeTimeseriesRequest,
     public fieldsCapabilities: Record<string, any> = {}
   ) {}
 
@@ -51,7 +50,7 @@ export class DefaultSearchCapabilities {
   }
 
   public get searchTimezone() {
-    return getTimezoneFromRequest(this.request);
+    return getTimezoneFromRequest(this.request as VisTypeTimeseriesVisDataRequest);
   }
 
   createUiRestriction(restrictionsObject?: Record<string, any>) {

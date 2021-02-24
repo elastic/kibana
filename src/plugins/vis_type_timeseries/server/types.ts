@@ -6,8 +6,11 @@
  * Side Public License, v 1.
  */
 
-import type { IRouter } from 'src/core/server';
+import type { IRouter, FakeRequest } from 'src/core/server';
 import type { DataRequestHandlerContext } from '../../data/server';
+import { VisPayload } from '../common/types';
 
 export type VisTypeTimeseriesRequestHandlerContext = DataRequestHandlerContext;
 export type VisTypeTimeseriesRouter = IRouter<VisTypeTimeseriesRequestHandlerContext>;
+export type VisTypeTimeseriesRequest<TPayload = unknown> = FakeRequest & { body: TPayload };
+export type VisTypeTimeseriesVisDataRequest = VisTypeTimeseriesRequest<VisPayload>;
