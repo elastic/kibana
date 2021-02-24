@@ -289,17 +289,18 @@ export class CommentableCase {
         client: this.soClient,
         id: this.subCase.id,
       });
+      const totalAlerts = countAlertsForID({ comments: subCaseComments, id: this.subCase.id }) ?? 0;
 
       return CaseResponseRt.encode({
         ...caseResponse,
-        // Do we always want to return the parent's comments? This might be too much data so I'm going to mark this as
-        // undefined
-        comments: undefined,
+        comments: flattenCommentSavedObjects(subCaseComments.saved_objects),
+        totalComment: subCaseComments.saved_objects.length,
+        totalAlerts,
         subCases: [
           flattenSubCaseSavedObject({
-            comments: subCaseComments.saved_objects,
             savedObject: this.subCase,
-            totalAlerts: countAlertsForID({ comments: subCaseComments, id: this.subCase.id }),
+            totalComment: subCaseComments.saved_objects.length,
+            totalAlerts,
           }),
         ],
       });
