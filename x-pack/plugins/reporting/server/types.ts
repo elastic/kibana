@@ -14,11 +14,11 @@ import { LicensingPluginSetup } from '../../licensing/server';
 import { AuthenticatedUser, SecurityPluginSetup } from '../../security/server';
 import { SpacesPluginSetup } from '../../spaces/server';
 import { CancellationToken } from '../common';
-import { BaseParams } from '../common/types';
+import { BaseParams, TaskRunResult } from '../common/types';
 import { ReportingConfigType } from './config';
 import { ReportingCore } from './core';
 import { LevelLogger } from './lib';
-import { ReportTaskParams, TaskRunResult } from './lib/tasks';
+import { ReportTaskParams } from './lib/tasks';
 
 /*
  * Plugin Contract

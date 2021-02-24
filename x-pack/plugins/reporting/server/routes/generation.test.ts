@@ -12,7 +12,8 @@ import { setupServer } from 'src/core/server/test_utils';
 import supertest from 'supertest';
 import { ReportingCore } from '..';
 import { ExportTypesRegistry } from '../lib/export_types_registry';
-import { createMockReportingCore, createMockLevelLogger } from '../test_helpers';
+import { createMockLevelLogger, createMockReportingCore } from '../test_helpers';
+import { createMockPluginSetup } from '../test_helpers/create_mock_reportingplugin';
 import { registerJobGenerationRoutes } from './generation';
 import type { ReportingRequestHandlerContext } from '../types';
 
@@ -37,7 +38,7 @@ describe('POST /api/reporting/generate', () => {
         case 'index':
           return '.reporting';
         case 'queue.pollEnabled':
-          return false;
+          return true;
         default:
           return;
       }
@@ -56,7 +57,7 @@ describe('POST /api/reporting/generate', () => {
 
     callClusterStub = sinon.stub().resolves({});
 
-    const mockSetupDeps = ({
+    const mockSetupDeps = createMockPluginSetup({
       elasticsearch: {
         legacy: { client: { callAsInternalUser: callClusterStub } },
       },
@@ -68,7 +69,7 @@ describe('POST /api/reporting/generate', () => {
       },
       router: httpSetup.createRouter(''),
       licensing: { license$: of({ isActive: true, isAvailable: true, type: 'gold' }) },
-    } as unknown) as any;
+    });
 
     core = await createMockReportingCore(config, mockSetupDeps);
 
