@@ -8,6 +8,9 @@
 
 import { ToolingLog, REPO_ROOT } from '@kbn/dev-utils';
 import { loadConfiguration } from '@kbn/apm-config-loader';
+import type { start } from 'elastic-apm-node';
+
+type Agent = ReturnType<typeof start>;
 
 import { Suite, Test } from './fake_mocha_types';
 import {
@@ -23,6 +26,21 @@ import {
   Config,
   SuiteTracker,
 } from './lib';
+
+let LOADED_APM: Agent | null = null;
+function loadApm() {
+  if (LOADED_APM) {
+    return LOADED_APM;
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  LOADED_APM = require('elastic-apm-node') as Agent;
+
+  // load APM config and start shipping stats for "ftr" service
+  LOADED_APM.start(loadConfiguration([], REPO_ROOT, false).getConfig('ftr'));
+
+  return LOADED_APM;
+}
 
 export class FunctionalTestRunner {
   public readonly lifecycle = new Lifecycle();
@@ -43,43 +61,43 @@ export class FunctionalTestRunner {
   }
 
   async run() {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const apm = require('elastic-apm-node');
-    // load APM config and start shipping stats for "ftr" service
-    apm.start(loadConfiguration([], REPO_ROOT, false).getConfig('ftr'));
     // use a single transaction for now
-    const transaction = apm.startTransaction('functional tests');
+    const transaction = loadApm().startTransaction('functional tests');
 
-    return await this._run(async (config, coreProviders) => {
-      SuiteTracker.startTracking(this.lifecycle, this.configFile);
+    try {
+      return await this._run(async (config, coreProviders) => {
+        SuiteTracker.startTracking(this.lifecycle, this.configFile);
 
-      const providers = new ProviderCollection(
-        this.log,
-        transaction ? (x0, x1, x2, x3) => transaction?.startSpan(x0, x1, x2, x3) : null,
-        [
-          ...coreProviders,
-          ...readProviderSpec('Service', config.get('services')),
-          ...readProviderSpec('PageObject', config.get('pageObjects')),
-        ]
-      );
-
-      await providers.loadAll();
-
-      const customTestRunner = config.get('testRunner');
-      if (customTestRunner) {
-        this.log.warning(
-          'custom test runner defined, ignoring all mocha/suite/filtering related options'
+        const providers = new ProviderCollection(
+          this.log,
+          transaction ? (x0, x1, x2, x3) => transaction?.startSpan(x0, x1, x2, x3) : null,
+          [
+            ...coreProviders,
+            ...readProviderSpec('Service', config.get('services')),
+            ...readProviderSpec('PageObject', config.get('pageObjects')),
+          ]
         );
-        return (await providers.invokeProviderFn(customTestRunner)) || 0;
-      }
 
-      const mocha = await setupMocha(this.lifecycle, this.log, config, providers);
-      await this.lifecycle.beforeTests.trigger(mocha.suite);
+        await providers.loadAll();
 
-      this.log.info('Starting tests');
+        const customTestRunner = config.get('testRunner');
+        if (customTestRunner) {
+          this.log.warning(
+            'custom test runner defined, ignoring all mocha/suite/filtering related options'
+          );
+          return (await providers.invokeProviderFn(customTestRunner)) || 0;
+        }
 
-      return await runTests(this.lifecycle, mocha);
-    });
+        const mocha = await setupMocha(this.lifecycle, this.log, config, providers);
+        await this.lifecycle.beforeTests.trigger(mocha.suite);
+
+        this.log.info('Starting tests');
+
+        return await runTests(this.lifecycle, mocha);
+      });
+    } finally {
+      transaction?.end();
+    }
   }
 
   async getTestStats() {
