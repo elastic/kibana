@@ -8,9 +8,9 @@
 
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import { i18n } from '@kbn/i18n';
 import { getLastValue } from '../../../../common/get_last_value';
 import { labelDateFormatter } from '../../components/lib/label_date_formatter';
+import { emptyLabel } from '../../../../common/empty_label';
 import reactcss from 'reactcss';
 
 const RENDER_MODES = {
@@ -130,10 +130,7 @@ export class TopN extends Component {
       return (
         <tr key={key} onClick={this.handleClick({ lastValue, ...item })} style={styles.row}>
           <td title={item.label} className="tvbVisTopN__label" style={styles.label}>
-            {label ||
-              i18n.translate('visTypeTimeseries.emptyTextValue', {
-                defaultMessage: '(empty)',
-              })}
+            {label || emptyLabel}
           </td>
           <td width="100%" className="tvbVisTopN__bar">
             <div className="tvbVisTopN__innerBar" style={styles.innerBar}>
