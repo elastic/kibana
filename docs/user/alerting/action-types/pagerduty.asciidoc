@@ -151,14 +151,25 @@ Integration Key::   A 32 character PagerDuty Integration Key for an integration 
 --
 
 [[pagerduty-connector-config-properties]]
-`config` defines the action type specific to the configuration.
-`config` contains
-`apiURL`, a string that corresponds to *API URL*.
+**`config`** defines the action type specific to the configuration and contains the following properties:
 
-`secrets` defines sensitive information for the action type.
-`secrets` contains
-`routingKey`, a string that corresponds to *Integration Key*.
+[cols="2*<"]
+|===
 
+|`apiURL`
+| A URL string that corresponds to *API URL*.
+
+|===
+
+**`secrets`** defines sensitive information for the action type and contains the following properties:
+
+[cols="2*<"]
+|===
+
+|`routingKey`
+| A string that corresponds to *Integration Key*.
+
+|===
 
 [float]
 [[pagerduty-action-configuration]]

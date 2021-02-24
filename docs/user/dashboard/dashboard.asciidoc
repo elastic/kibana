@@ -253,10 +253,8 @@ When you're finished making changes, save the dashboard.
 
 To share the dashboard with a larger audience, click *Share* in the toolbar, then choose one of the following options:
 
-* *Embed code* &mdash; Embed the dashboard as an iframe on a web page. Embedded dashboards are fully interactive, but you can
-  hide some parts of the dashboard using the menu options. User authentication is required, which the user provides or via reverse proxy. 
-  <<anonymous-authentication, Anonymous access>> is also supported. For more details,
-  learn about <<kibana-authentication>>.
+* *Embed code* &mdash; Embed a fully interactive dashboard as an iframe on a web page. To access embedded dashboards, you can require users to
+log in using their {kib} credentials, via reverse proxy, or enable <<anonymous-access-and-embedding, anonymous access>>.
 
 * *Permalinks* &mdash; Share a direct link to a {kib} dashboard. User authentication is required.
 

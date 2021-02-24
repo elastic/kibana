@@ -15,6 +15,39 @@ export function registerCurationsRoutes({
 }: RouteDependencies) {
   router.get(
     {
+      path: '/api/app_search/engines/{engineName}/curations',
+      validate: {
+        params: schema.object({
+          engineName: schema.string(),
+        }),
+        query: schema.object({
+          'page[current]': schema.number(),
+          'page[size]': schema.number(),
+        }),
+      },
+    },
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/as/engines/:engineName/curations/collection',
+    })
+  );
+
+  router.delete(
+    {
+      path: '/api/app_search/engines/{engineName}/curations/{curationId}',
+      validate: {
+        params: schema.object({
+          engineName: schema.string(),
+          curationId: schema.string(),
+        }),
+      },
+    },
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/as/engines/:engineName/curations/:curationId',
+    })
+  );
+
+  router.get(
+    {
       path: '/api/app_search/engines/{engineName}/curations/find_or_create',
       validate: {
         params: schema.object({
