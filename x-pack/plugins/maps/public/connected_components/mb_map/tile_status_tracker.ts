@@ -22,9 +22,49 @@ interface Tile {
 }
 
 export class TileStatusTracker {
-  private _tileCache: Tile[] | null;
+  private _tileCache: Tile[];
+  private readonly _mbMap: MapboxMap;
   private readonly _setAreTilesLoaded: (layerId: string, areTilesLoaded: boolean) => void;
   private readonly _getCurrentLayerList: () => ILayer[];
+  private readonly _onSourceDataLoading = (e: MapDataEvent & { sourceId: string }) => {
+    if (
+      e.sourceId &&
+      e.sourceId !== SPATIAL_FILTERS_LAYER_ID &&
+      e.dataType === 'source' &&
+      e.tile
+    ) {
+      const tracked = this._tileCache.find((tile) => {
+        return (
+          tile.mbKey === ((e.coord.key as unknown) as string) && tile.mbSourceId === e.sourceId
+        );
+      });
+
+      if (!tracked) {
+        this._tileCache.push({
+          mbKey: (e.coord.key as unknown) as string,
+          mbSourceId: e.sourceId,
+          mbTile: e.tile,
+        });
+        this._updateTileStatus();
+      }
+    }
+  };
+
+  private readonly _onError = (e: MapDataEvent & { sourceId: string; tile: MbTile }) => {
+    if (e.sourceId && e.sourceId !== SPATIAL_FILTERS_LAYER_ID && e.tile) {
+      this._removeTileFromCache(e.sourceId, e.tile.tileID.key);
+    }
+  };
+  private readonly _onSourceData = (e: MapDataEvent & { sourceId: string }) => {
+    if (
+      e.sourceId &&
+      e.sourceId !== SPATIAL_FILTERS_LAYER_ID &&
+      e.dataType === 'source' &&
+      e.tile
+    ) {
+      this._removeTileFromCache(e.sourceId, (e.coord.key as unknown) as string);
+    }
+  };
 
   constructor({
     mbMap,
@@ -39,61 +79,16 @@ export class TileStatusTracker {
     this._setAreTilesLoaded = setAreTilesLoaded;
     this._getCurrentLayerList = getCurrentLayerList;
 
-    mbMap.on('sourcedataloading', (e) => {
-      if (!this._tileCache) {
-        return;
-      }
-
-      if (
-        e.sourceId &&
-        e.sourceId !== SPATIAL_FILTERS_LAYER_ID &&
-        e.dataType === 'source' &&
-        e.tile
-      ) {
-        const tracked = this._tileCache.find((tile) => {
-          return (
-            tile.mbKey === ((e.coord.key as unknown) as string) && tile.mbSourceId === e.sourceId
-          );
-        });
-
-        if (!tracked) {
-          this._tileCache.push({
-            mbKey: (e.coord.key as unknown) as string,
-            mbSourceId: e.sourceId,
-            mbTile: e.tile,
-          });
-          this._updateTileStatus();
-        }
-      }
-    });
-
-    mbMap.on('error', (e) => {
-      if (e.sourceId && e.sourceId !== SPATIAL_FILTERS_LAYER_ID && e.tile) {
-        this._removeTileFromCache(e.sourceId, e.tile.tileID.key);
-      }
-    });
-
-    mbMap.on('sourcedata', (e: MapDataEvent & { sourceId: string }) => {
-      if (
-        e.sourceId &&
-        e.sourceId !== SPATIAL_FILTERS_LAYER_ID &&
-        e.dataType === 'source' &&
-        e.tile
-      ) {
-        this._removeTileFromCache(e.sourceId, (e.coord.key as unknown) as string);
-      }
-    });
+    this._mbMap = mbMap;
+    this._mbMap.on('sourcedataloading', this._onSourceDataLoading);
+    this._mbMap.on('error', this._onError);
+    this._mbMap.on('sourcedata', this._onSourceData);
   }
 
   _updateTileStatus = _.debounce(() => {
-    if (!this._tileCache) {
-      return;
-    }
-
     this._tileCache = this._tileCache.filter((tile) => {
       return typeof tile.mbTile.aborted === 'boolean' ? !tile.mbTile.aborted : true;
     });
-
     const layerList = this._getCurrentLayerList();
     for (let i = 0; i < layerList.length; i++) {
       const layer: ILayer = layerList[i];
@@ -110,9 +105,6 @@ export class TileStatusTracker {
   }, 100);
 
   _removeTileFromCache = (mbSourceId: string, mbKey: string) => {
-    if (!this._tileCache) {
-      return;
-    }
     const trackedIndex = this._tileCache.findIndex((tile) => {
       return tile.mbKey === ((mbKey as unknown) as string) && tile.mbSourceId === mbSourceId;
     });
@@ -124,6 +116,9 @@ export class TileStatusTracker {
   };
 
   destroy() {
-    this._tileCache = null;
+    this._mbMap.off('error', this._onError);
+    this._mbMap.off('sourcedata', this._onSourceData);
+    this._mbMap.off('sourcedataloading', this._onSourceDataLoading);
+    this._tileCache.length = 0;
   }
 }
