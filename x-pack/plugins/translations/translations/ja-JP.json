@@ -21526,8 +21526,6 @@
     "xpack.upgradeAssistant.checkupTab.reindexing.flyout.indexClosedCallout.calloutDetails.reindexingTakesLongerEmphasis": "再インデックスには通常よりも時間がかかることがあります",
     "xpack.upgradeAssistant.checkupTab.reindexing.flyout.indexClosedCallout.calloutTitle": "インデックスが閉じました",
     "xpack.upgradeAssistant.checkupTab.reindexing.flyout.openAndCloseDocumentation": "ドキュメンテーション",
-    "xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.apmReindexWarningDetail": "バージョン 7.0.0 以降、APM データは Elastic Common Schema で表示されます。過去の APM データは再インデックスされるまで表示されません。",
-    "xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.apmReindexWarningTitle": "このインデックスは ECS 形式に変換されます",
     "xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.destructiveCallout.calloutDetail": "インデックスをバックアップして、互換性を破るそれぞれの変更に同意することで再インデックスしてください。",
     "xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.destructiveCallout.calloutTitle": "このインデックスには元に戻すことのできない破壊的な変更が含まれています",
     "xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.documentationLinkLabel": "ドキュメント",
