@@ -60,7 +60,7 @@ import { IDynamicStyleProperty } from '../../styles/vector/properties/dynamic_st
 import { IESSource } from '../../sources/es_source';
 import { PropertiesMap } from '../../../../common/elasticsearch_util';
 import { ITermJoinSource } from '../../sources/term_join_source';
-import { addGeoJsonMbSource, syncVectorSource } from './utils';
+import { addGeoJsonMbSource, getVectorSourceBounds, syncVectorSource } from './utils';
 
 interface SourceResult {
   refreshed: boolean;
@@ -241,47 +241,16 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
     return this.getCurrentStyle().renderLegendDetails();
   }
 
-  async getBounds({
-    startLoading,
-    stopLoading,
-    registerCancelCallback,
-    dataFilters,
-  }: DataRequestContext) {
+  async getBounds(syncContext: DataRequestContext) {
     const isStaticLayer = !this.getSource().isBoundsAware();
-    if (isStaticLayer || this.hasJoins()) {
-      return getFeatureCollectionBounds(this._getSourceFeatureCollection(), this.hasJoins());
-    }
-
-    const requestToken = Symbol(`${SOURCE_BOUNDS_DATA_REQUEST_ID}-${this.getId()}`);
-    const searchFilters: VectorSourceRequestMeta = this._getSearchFilters(
-      dataFilters,
-      this.getSource(),
-      this.getCurrentStyle()
-    );
-    // Do not pass all searchFilters to source.getBoundsForFilters().
-    // For example, do not want to filter bounds request by extent and buffer.
-    const boundsFilters = {
-      sourceQuery: searchFilters.sourceQuery,
-      query: searchFilters.query,
-      timeFilters: searchFilters.timeFilters,
-      filters: searchFilters.filters,
-      applyGlobalQuery: searchFilters.applyGlobalQuery,
-      applyGlobalTime: searchFilters.applyGlobalTime,
-    };
-
-    let bounds = null;
-    try {
-      startLoading(SOURCE_BOUNDS_DATA_REQUEST_ID, requestToken, boundsFilters);
-      bounds = await this.getSource().getBoundsForFilters(
-        boundsFilters,
-        registerCancelCallback.bind(null, requestToken)
-      );
-    } finally {
-      // Use stopLoading callback instead of onLoadError callback.
-      // Function is loading bounds and not feature data.
-      stopLoading(SOURCE_BOUNDS_DATA_REQUEST_ID, requestToken, bounds ? bounds : {}, boundsFilters);
-    }
-    return bounds;
+    return isStaticLayer || this.hasJoins()
+      ? getFeatureCollectionBounds(this._getSourceFeatureCollection(), this.hasJoins())
+      : getVectorSourceBounds({
+          layerId: this.getId(),
+          syncContext,
+          source: this.getSource(),
+          sourceQuery: this.getQuery() as MapQuery,
+        });
   }
 
   async getLeftJoinFields() {
