@@ -58,12 +58,12 @@ const TOGGLE_OFF = i18n.translate('xpack.ml.splom.toggleOff', {
 
 const sampleSizeOptions = [100, 1000, 10000].map((d) => ({ value: d, text: '' + d }));
 
-interface OptionLabelWithIconItipProps {
+interface OptionLabelWithIconTipProps {
   label: string;
   tooltip: string;
 }
 
-const OptionLabelWithIconTip: FC<OptionLabelWithIconItipProps> = ({ label, tooltip }) => (
+const OptionLabelWithIconTip: FC<OptionLabelWithIconTipProps> = ({ label, tooltip }) => (
   <>
     {label}
     <EuiIconTip
