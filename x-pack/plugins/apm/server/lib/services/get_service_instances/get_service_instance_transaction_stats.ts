@@ -6,7 +6,11 @@
  */
 
 import { EventOutcome } from '../../../../common/event_outcome';
-import { environmentQuery, rangeQuery } from '../../../../common/utils/queries';
+import {
+  environmentQuery,
+  rangeQuery,
+  kqlQuery,
+} from '../../../../server/utils/queries';
 import { SERVICE_NODE_NAME_MISSING } from '../../../../common/service_nodes';
 import {
   EVENT_OUTCOME,
@@ -29,6 +33,7 @@ import {
 
 export async function getServiceInstanceTransactionStats({
   environment,
+  kuery,
   latencyAggregationType,
   setup,
   transactionType,
@@ -38,7 +43,7 @@ export async function getServiceInstanceTransactionStats({
   numBuckets,
 }: ServiceInstanceParams) {
   return withApmSpan('get_service_instance_transaction_stats', async () => {
-    const { apmEventClient, start, end, esFilter } = setup;
+    const { apmEventClient, start, end } = setup;
 
     const { intervalString, bucketSize } = getBucketSize({
       start,
@@ -78,7 +83,7 @@ export async function getServiceInstanceTransactionStats({
               { term: { [TRANSACTION_TYPE]: transactionType } },
               ...rangeQuery(start, end),
               ...environmentQuery(environment),
-              ...esFilter,
+              ...kqlQuery(kuery),
             ],
           },
         },
