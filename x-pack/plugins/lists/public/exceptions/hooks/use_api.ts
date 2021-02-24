@@ -9,11 +9,22 @@ import { useMemo } from 'react';
 
 import * as Api from '../api';
 import { HttpStart } from '../../../../../../src/core/public';
-import { ExceptionListItemSchema, ExceptionListSchema } from '../../../common/schemas';
+import {
+  CreateExceptionListItemSchema,
+  ExceptionListItemSchema,
+  ExceptionListSchema,
+  UpdateExceptionListItemSchema,
+} from '../../../common/schemas';
 import { ApiCallFindListsItemsMemoProps, ApiCallMemoProps, ApiListExportProps } from '../types';
 import { getIdsAndNamespaces } from '../utils';
 
 export interface ExceptionsApi {
+  addExceptionListItem: (arg: {
+    listItem: CreateExceptionListItemSchema;
+  }) => Promise<ExceptionListItemSchema>;
+  updateExceptionListItem: (arg: {
+    listItem: UpdateExceptionListItemSchema;
+  }) => Promise<ExceptionListItemSchema>;
   deleteExceptionItem: (arg: ApiCallMemoProps) => Promise<void>;
   deleteExceptionList: (arg: ApiCallMemoProps) => Promise<void>;
   getExceptionItem: (
@@ -29,6 +40,19 @@ export interface ExceptionsApi {
 export const useApi = (http: HttpStart): ExceptionsApi => {
   return useMemo(
     (): ExceptionsApi => ({
+      async addExceptionListItem({
+        listItem,
+      }: {
+        listItem: CreateExceptionListItemSchema;
+      }): Promise<ExceptionListItemSchema> {
+        const abortCtrl = new AbortController();
+
+        return Api.addExceptionListItem({
+          http,
+          listItem,
+          signal: abortCtrl.signal,
+        });
+      },
       async deleteExceptionItem({
         id,
         namespaceType,
@@ -183,6 +207,19 @@ export const useApi = (http: HttpStart): ExceptionsApi => {
         } catch (error) {
           onError(error);
         }
+      },
+      async updateExceptionListItem({
+        listItem,
+      }: {
+        listItem: UpdateExceptionListItemSchema;
+      }): Promise<ExceptionListItemSchema> {
+        const abortCtrl = new AbortController();
+
+        return Api.updateExceptionListItem({
+          http,
+          listItem,
+          signal: abortCtrl.signal,
+        });
       },
     }),
     [http]
