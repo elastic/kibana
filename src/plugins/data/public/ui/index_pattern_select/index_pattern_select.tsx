@@ -42,8 +42,8 @@ interface IndexPatternSelectState {
 // Needed for React.lazy
 // eslint-disable-next-line import/no-default-export
 export default class IndexPatternSelect extends Component<IndexPatternSelectInternalProps> {
-  static defaultProps = {
-    maxIndexPatterns: 1000,
+  static defaultProps: {
+    maxIndexPatterns: 1000
   };
 
   private isMounted: boolean = false;
