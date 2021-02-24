@@ -15,6 +15,7 @@ import { ToolingLog } from '@kbn/dev-utils';
 import { Stats } from '../stats';
 import { deleteKibanaIndices } from './kibana_index';
 import { deleteIndex } from './delete_index';
+import { ES_CLIENT_HEADERS } from '../../client_headers';
 
 interface DocRecord {
   value: {
@@ -63,15 +64,20 @@ export function createCreateIndexStream({
           kibanaIndexAlreadyDeleted = true;
         }
 
-        await client.indices.create({
-          method: 'PUT',
-          index,
-          body: {
-            settings,
-            mappings,
-            aliases,
+        await client.indices.create(
+          {
+            method: 'PUT',
+            index,
+            body: {
+              settings,
+              mappings,
+              aliases,
+            },
           },
-        });
+          {
+            headers: ES_CLIENT_HEADERS,
+          }
+        );
 
         stats.createdIndex(index, { settings });
       } catch (err) {
