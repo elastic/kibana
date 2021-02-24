@@ -25,7 +25,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await esArchiver.load('discover');
       await kibanaServer.uiSettings.replace({
         defaultIndex: 'logstash-*',
-        'discover:searchFieldsFromSource': true,
+        'discover:searchFieldsFromSource': false,
       });
       await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await PageObjects.common.navigateToApp('discover');
@@ -44,7 +44,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('the search term should be highlighted in the field data', async function () {
         // marks is the style that highlights the text in yellow
         const marks = await PageObjects.discover.getMarks();
-        expect(marks.length).to.be(50);
+        expect(marks.length).to.be(100);
         expect(marks.indexOf('php')).to.be(0);
       });
 
@@ -58,8 +58,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
 
-      it('doc view should show Time and _source columns', async function () {
-        const expectedHeader = 'Time _source';
+      it('doc view should show Time and Document columns', async function () {
+        const expectedHeader = 'Time Document';
         const Docheader = await PageObjects.discover.getDocHeader();
         expect(Docheader).to.be(expectedHeader);
       });
