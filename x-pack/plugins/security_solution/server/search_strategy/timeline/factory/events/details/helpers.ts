@@ -73,22 +73,61 @@ export const getDataFromSourceHits = (
   }, []);
 
 export const getDataFromFieldsHits = (
-  fields: Record<string, unknown[]>
+  fields: Record<string, unknown[]>,
+  prependField?: string,
+  prependFieldCategory?: string
 ): TimelineEventsDetailsItem[] =>
   Object.keys(fields).reduce<TimelineEventsDetailsItem[]>((accumulator, field) => {
     const item: unknown[] = fields[field];
-    const fieldCategory = getFieldCategory(field);
+    const fieldCategory =
+      prependFieldCategory != null ? prependFieldCategory : getFieldCategory(field);
     const objArrStr = toObjectArrayOfStrings(item);
     const strArr = objArrStr.map(({ str }) => str);
     const isObjectArray = objArrStr.some((o) => o.isObjectArray);
-    return [
-      ...accumulator,
-      {
-        category: fieldCategory,
-        field,
-        values: isGeoField(field) ? formatGeoLocation(item) : strArr,
-        originalValue: strArr,
-        isObjectArray,
-      } as TimelineEventsDetailsItem,
-    ];
+    const preKey = prependField ? `${prependField}.${field}` : field;
+    if (!isObjectArray) {
+      return [
+        ...accumulator,
+        {
+          category: fieldCategory,
+          field: preKey,
+          values: isGeoField(field) ? formatGeoLocation(item) : strArr,
+          originalValue: strArr,
+          isObjectArray,
+        } as TimelineEventsDetailsItem,
+      ];
+    }
+    let yay;
+    if (Array.isArray(item)) {
+      yay = item.reduce((acc, i) => [...acc, getDataFromFieldsHits(i, preKey, fieldCategory)], []);
+    } else {
+      yay = getDataFromFieldsHits(item, prependField, fieldCategory);
+    }
+    const flat = [...accumulator, ...yay].flat().reduce(
+      (acc, f) => ({
+        ...acc,
+        ...(acc[f.field] != null
+          ? {
+              [f.field]: {
+                ...f,
+                originalValue: [...acc[f.field].originalValue, ...f.originalValue],
+                values: [...acc[f.field].values, ...f.values],
+              },
+            }
+          : { [f.field]: f }),
+      }),
+      {}
+    );
+
+    return Object.values(flat);
   }, []);
+
+export const getDataFromFieldsHitsSafety = (
+  fields: Record<string, unknown[]>
+): Promise<TimelineEventsDetailsItem[]> => {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve(getDataFromFieldsHits(fields));
+    });
+  });
+};

@@ -17,7 +17,7 @@ import {
 import { inspectStringifyObject } from '../../../../../utils/build_query';
 import { SecuritySolutionTimelineFactory } from '../../types';
 import { buildTimelineDetailsQuery } from './query.events_details.dsl';
-import { getDataFromFieldsHits, getDataFromSourceHits } from './helpers';
+import { getDataFromFieldsHitsSafety, getDataFromSourceHits } from './helpers';
 
 export const timelineEventsDetails: SecuritySolutionTimelineFactory<TimelineEventsQueries.details> = {
   buildDsl: (options: TimelineEventsDetailsRequestOptions) => {
@@ -33,7 +33,6 @@ export const timelineEventsDetails: SecuritySolutionTimelineFactory<TimelineEven
     const inspect = {
       dsl: [inspectStringifyObject(buildTimelineDetailsQuery(indexName, eventId, docValueFields))],
     };
-
     if (response.isRunning) {
       return {
         ...response,
@@ -43,10 +42,9 @@ export const timelineEventsDetails: SecuritySolutionTimelineFactory<TimelineEven
     }
 
     const sourceData = getDataFromSourceHits(_source);
-    const fieldsData = getDataFromFieldsHits(merge(fields, hitsData));
+    const fieldsData = await getDataFromFieldsHitsSafety(merge(fields, hitsData));
 
     const data = unionBy('field', fieldsData, sourceData);
-
     return {
       ...response,
       data,
