@@ -125,7 +125,14 @@ export class ProviderCollection {
           typeof instance === 'object' &&
           instance
         ) {
-          instance = createApmInstrumentedInstance(this.apmTransaction, instance, type, name);
+          instance = createApmInstrumentedInstance(
+            this.apmTransaction
+              ? (x0, x1, x2, x3) => this.apmTransaction?.startSpan(x0, x1, x2, x3)
+              : null,
+            instance,
+            type,
+            name
+          );
         }
 
         instances.set(provider, instance);

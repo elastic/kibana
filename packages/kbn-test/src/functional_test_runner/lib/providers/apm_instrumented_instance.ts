@@ -6,10 +6,16 @@
  * Side Public License, v 1.
  */
 
-import type { startTransaction } from 'elastic-apm-node';
-
-type ApmTransaction = NonNullable<ReturnType<typeof startTransaction>>;
-
+interface ApmSpan {
+  setOutcome(outcome: 'success' | 'failure' | 'unknown'): void;
+  end(): void;
+}
+type StartSpanFn = (
+  name: string,
+  type: string,
+  subType: string,
+  action: string
+) => ApmSpan | null | undefined;
 type SomeFn = (...args: any[]) => unknown;
 
 const isPromise = (val: any): val is Promise<unknown> => {
@@ -26,7 +32,7 @@ const isObj = (value: any): value is object => {
 };
 
 export const createApmInstrumentedInstance = <T extends object>(
-  apmTransaction: ApmTransaction,
+  startSpan: StartSpanFn | null,
   instance: T,
   type: string,
   instanceName: string
@@ -36,7 +42,10 @@ export const createApmInstrumentedInstance = <T extends object>(
 
   const createFnWrapper = (path: string, context: object, fn: SomeFn): SomeFn => {
     return (...args: any[]) => {
-      const span = apmTransaction.startSpan(`${instanceName}.${path}()`, type, instanceName, path);
+      let span: ApmSpan | null | undefined;
+      if (startSpan) {
+        span = startSpan(`${instanceName}.${path}()`, type, instanceName, path);
+      }
 
       if (!span) {
         return fn.apply(context, args);

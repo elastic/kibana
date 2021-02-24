@@ -10,45 +10,37 @@ import { createRecursiveSerializer } from '@kbn/dev-utils';
 
 import { createApmInstrumentedInstance } from './apm_instrumented_instance';
 
-const mockPrint = Symbol('print');
+const printSymbol = Symbol('print');
 
-expect.addSnapshotSerializer(
-  createRecursiveSerializer(
-    (v) => typeof v === 'object' && v && mockPrint in v,
-    (v) => v[mockPrint]()
-  )
-);
-
-jest.mock('elastic-apm-node', () => {
+const getSpan = jest.fn((...names: string[]) => {
+  let outcome: string | null = null;
+  let ended = false;
   return {
-    startSpan: jest.fn((...names: string[]) => {
-      let outcome: string | null = null;
-      let ended = false;
-
-      return {
-        setOutcome(_: string) {
-          outcome = _;
-        },
-        end() {
-          ended = true;
-        },
-        [mockPrint]() {
-          return `SPAN[name=${names.join('/')}, outcome=${outcome}, ended=${ended}]`;
-        },
-      };
-    }),
+    setOutcome(_: string) {
+      outcome = _;
+    },
+    end() {
+      ended = true;
+    },
+    [printSymbol]() {
+      return `SPAN[name=${names.join('/')}, outcome=${outcome}, ended=${ended}]`;
+    },
   };
 });
 
-const apm = jest.requireMock('elastic-apm-node');
-
-beforeEach(() => {
+afterEach(() => {
   jest.clearAllMocks();
 });
 
+expect.addSnapshotSerializer(
+  createRecursiveSerializer(
+    (v) => typeof v === 'object' && v && printSymbol in v,
+    (v) => v[printSymbol]()
+  )
+);
+
 it('deeply wraps objects so that methods start and end spans', () => {
   const hidden = Symbol();
-
   const instance = {
     foo() {
       return 'foo';
@@ -79,7 +71,7 @@ it('deeply wraps objects so that methods start and end spans', () => {
     },
   };
 
-  const instrumented = createApmInstrumentedInstance(instance, 'service', 'myInstance');
+  const instrumented = createApmInstrumentedInstance(getSpan, instance, 'service', 'myInstance');
 
   expect(instrumented.foo()).toBe('foo');
   expect(instrumented.sub.api.subFoo()).toBe('subFoo');
@@ -88,7 +80,7 @@ it('deeply wraps objects so that methods start and end spans', () => {
   expect(() => instrumented.bar()).toThrowErrorMatchingInlineSnapshot(`"bar"`);
   expect(() => instrumented.sub.api.subBar()).toThrowErrorMatchingInlineSnapshot(`"subBar"`);
 
-  expect(apm.startSpan).toMatchInlineSnapshot(`
+  expect(getSpan).toMatchInlineSnapshot(`
     [MockFunction] {
       "calls": Array [
         Array [
