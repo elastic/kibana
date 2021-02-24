@@ -132,7 +132,7 @@ export async function getVectorSourceBounds({
   // Do not pass all searchFilters to source.getBoundsForFilters().
   // For example, do not want to filter bounds request by extent and buffer.
   const boundsFilters = {
-    sourceQuery,
+    sourceQuery: sourceQuery ? sourceQuery : undefined,
     query: dataFilters.query,
     timeFilters: dataFilters.timeFilters,
     filters: dataFilters.filters,
