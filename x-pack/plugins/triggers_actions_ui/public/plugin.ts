@@ -12,7 +12,6 @@ import { ReactElement } from 'react';
 import { FeaturesPluginStart } from '../../features/public';
 import { KibanaFeature } from '../../features/common';
 import { registerBuiltInActionTypes } from './application/components/builtin_action_types';
-import { ActionTypeModel, AlertTypeModel } from './types';
 import { TypeRegistry } from './application/type_registry';
 import {
   ManagementAppMountParams,
@@ -32,6 +31,7 @@ import { getEditConnectorFlyoutLazy } from './common/get_edit_connector_flyout';
 import { getAddAlertFlyoutLazy } from './common/get_add_alert_flyout';
 import { getEditAlertFlyoutLazy } from './common/get_edit_alert_flyout';
 
+import type { ActionTypeModel, AlertTypeModel } from './types';
 import type { ConnectorAddFlyoutProps } from './application/sections/action_connector_form/connector_add_flyout';
 import type { ConnectorEditFlyoutProps } from './application/sections/action_connector_form/connector_edit_flyout';
 import type { AlertAddProps } from './application/sections/alert_form/alert_add';
