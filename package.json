@@ -93,13 +93,15 @@
     "yarn": "^1.21.1"
   },
   "sideEffects": [
-    "**",
+    "packages/kbn-i18n/**",
+    "src/plugins/discover/**",
+    "src/plugins/kibana_legacy/**",
+    "src/plugins/timelion/**",
+    "src/plugins/vis_type_table/**",
+    "x-pack/**",
 
-    "!src/core/**",
-    "!x-pack/plugins/spaces/**",
-
-
-    "**/public/index.(js|ts)"
+    "src/plugins/*/public/index.(js|ts)",
+    "x-pack/plugins/*/public/index.(js|ts)"
   ],
   "dependencies": {
     "@elastic/datemath": "link:packages/elastic-datemath",
