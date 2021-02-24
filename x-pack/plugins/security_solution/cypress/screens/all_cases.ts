@@ -25,6 +25,8 @@ export const ALL_CASES_NAME = '[data-test-subj="case-details-link"]';
 
 export const ALL_CASES_OPEN_CASES_COUNT = '[data-test-subj="case-status-filter"]';
 
+export const ALL_CASES_OPEN_FILTER = '[data-test-subj="case-status-filter-open"]';
+
 export const ALL_CASES_OPEN_CASES_STATS = '[data-test-subj="openStatsHeader"]';
 
 export const ALL_CASES_OPENED_ON = '[data-test-subj="case-table-column-createdAt"]';
