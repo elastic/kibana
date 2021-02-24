@@ -69,16 +69,11 @@ export function ServiceOverviewTransactionsTable({ serviceName }: Props) {
     },
   } = useUrlParams();
 
-  const {
-    comparisonStart = undefined,
-    comparisonEnd = undefined,
-  } = comparisonType
-    ? getTimeRangeComparison({
-        start,
-        end,
-        comparisonType,
-      })
-    : {};
+  const { comparisonStart, comparisonEnd } = getTimeRangeComparison({
+    start,
+    end,
+    comparisonType,
+  });
 
   const { data = INITIAL_STATE, status } = useFetcher(
     (callApmApi) => {
@@ -101,6 +96,7 @@ export function ServiceOverviewTransactionsTable({ serviceName }: Props) {
         },
       }).then((response) => {
         return {
+          // Used to refetch the comparison statistics when a new primary statistics were fetched.
           requestId: uuid(),
           ...response,
         };
@@ -134,6 +130,7 @@ export function ServiceOverviewTransactionsTable({ serviceName }: Props) {
   } = useFetcher(
     (callApmApi) => {
       if (
+        status !== FETCH_STATUS.LOADING &&
         currentPageTransactionGroups.length &&
         start &&
         end &&
@@ -161,9 +158,12 @@ export function ServiceOverviewTransactionsTable({ serviceName }: Props) {
         });
       }
     },
-    // only fetches statistics when requestId, transaction names or comparison range change
+    // only fetches statistics when requestId, transaction names or comparison type change
+    // requestId: Is used to refetch the comparison data when a new primary statistics were fetched.
+    // transactionNams: Is used to fetch the comparison data when a user navigate to a different page within the table
+    // comparison type: Is used to refetch the comparison when the comparison type is changed, either manually by a user or automatically when the date picker is changed
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [requestId, transactionNames, comparisonStart, comparisonEnd],
+    [requestId, transactionNames, comparisonType],
     { preservePreviousData: false }
   );
 
