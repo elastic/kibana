@@ -7,6 +7,7 @@
 
 import uuid from 'uuid';
 import Boom from '@hapi/boom';
+import { i18n } from '@kbn/i18n';
 import { SavedObjectsClientContract, SavedObject } from 'src/core/server';
 import { EnrollmentAPIKey, EnrollmentAPIKeySOAttributes } from '../../types';
 import { ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE } from '../../constants';
@@ -123,7 +124,14 @@ export async function generateEnrollmentAPIKey(
 
     if (items.length > 0) {
       throw new Error(
-        `An enrollment key named ${providedKeyName} already exists for agent policy ${agentPolicyId}`
+        i18n.translate('xpack.fleet.serverError.enrollmentKeyDuplicate', {
+          defaultMessage:
+            'An enrollment key named {providedKeyName} already exists for agent policy {agentPolicyId}',
+          values: {
+            providedKeyName,
+            agentPolicyId,
+          },
+        })
       );
     }
   }
@@ -145,7 +153,11 @@ export async function generateEnrollmentAPIKey(
   });
 
   if (!key) {
-    throw new Error('Unable to create an enrollment api key');
+    throw new Error(
+      i18n.translate('xpack.fleet.serverError.unableToCreateEnrollmentKey', {
+        defaultMessage: 'Unable to create an enrollment api key',
+      })
+    );
   }
 
   const apiKey = Buffer.from(`${key.id}:${key.api_key}`).toString('base64');
@@ -170,7 +182,12 @@ async function validateAgentPolicyId(soClient: SavedObjectsClientContract, agent
     await agentPolicyService.get(soClient, agentPolicyId);
   } catch (e) {
     if (e.isBoom && e.output.statusCode === 404) {
-      throw Boom.badRequest(`Agent policy ${agentPolicyId} does not exist`);
+      throw Boom.badRequest(
+        i18n.translate('xpack.fleet.serverError.agentPolicyDoesNotExist', {
+          defaultMessage: 'Agent policy {agentPolicyId} does not exist',
+          values: { agentPolicyId },
+        })
+      );
     }
     throw e;
   }
@@ -189,7 +206,11 @@ export async function getEnrollmentAPIKeyById(
   ).saved_objects.map(savedObjectToEnrollmentApiKey);
 
   if (enrollmentAPIKey?.api_key_id !== apiKeyId) {
-    throw new Error('find enrollmentKeyById returned an incorrect key');
+    throw new Error(
+      i18n.translate('xpack.fleet.serverError.returnedIncorrectKey', {
+        defaultMessage: 'find enrollmentKeyById returned an incorrect key',
+      })
+    );
   }
 
   return enrollmentAPIKey;
