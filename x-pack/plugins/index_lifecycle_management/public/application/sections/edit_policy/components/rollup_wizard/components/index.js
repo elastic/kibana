@@ -6,16 +6,3 @@
  */
 
 export { FieldList } from './field_list';
-
-export {
-  JobDetails,
-  JOB_DETAILS_TAB_SUMMARY,
-  JOB_DETAILS_TAB_TERMS,
-  JOB_DETAILS_TAB_HISTOGRAM,
-  JOB_DETAILS_TAB_METRICS,
-  JOB_DETAILS_TAB_JSON,
-  JOB_DETAILS_TAB_REQUEST,
-  tabToHumanizedMap,
-} from './job_details';
-
-export { JobStatus } from './job_status';
