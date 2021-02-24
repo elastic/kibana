@@ -42,10 +42,9 @@ export const createApmInstrumentedInstance = <T extends object>(
 
   const createFnWrapper = (path: string, context: object, fn: SomeFn): SomeFn => {
     return (...args: any[]) => {
-      let span: ApmSpan | null | undefined;
-      if (startSpan) {
-        span = startSpan(`${instanceName}.${path}()`, type, instanceName, path);
-      }
+      const span = startSpan
+        ? startSpan(`${instanceName}.${path}()`, type, instanceName, path)
+        : undefined;
 
       if (!span) {
         return fn.apply(context, args);
