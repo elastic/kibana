@@ -10,6 +10,7 @@ import { generatePath } from 'react-router-dom';
 import { kea, MakeLogicType } from 'kea';
 
 import { Meta } from '../../../../../common/types';
+import { DEFAULT_META } from '../../../shared/constants';
 import { flashAPIErrors, setQueuedSuccessMessage } from '../../../shared/flash_messages';
 import { HttpLogic } from '../../../shared/http';
 import { KibanaLogic } from '../../../shared/kibana';
@@ -44,7 +45,7 @@ export const MetaEngineCreationLogic = kea<
 >({
   path: ['enterprise_search', 'app_search', 'meta_engine_creation_logic'],
   actions: {
-    fetchIndexedEngineNames: (page = 1) => ({ page }),
+    fetchIndexedEngineNames: (page = DEFAULT_META.page.current) => ({ page }),
     onEngineCreationSuccess: true,
     setIndexedEngineNames: (indexedEngineNames) => ({ indexedEngineNames }),
     setRawName: (rawName) => ({ rawName }),
@@ -82,7 +83,7 @@ export const MetaEngineCreationLogic = kea<
 
       try {
         response = (await http.get('/api/app_search/engines', {
-          query: { type: 'indexed', pageIndex: page },
+          query: { type: 'indexed', 'page[current]': page, 'page[size]': DEFAULT_META.page.size },
         })) as { results: EngineDetails[]; meta: Meta };
       } catch (e) {
         flashAPIErrors(e);
