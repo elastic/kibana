@@ -80,7 +80,7 @@ export default function ({ getService }: FtrProviderContext) {
               direction: Direction.desc,
             },
             fieldRequested: ['@timestamp', 'host.name'],
-            defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+            defaultIndex: ['auditbeat-*'],
             docValueFields: [],
             inspect: false,
             timerange: {
@@ -88,6 +88,7 @@ export default function ({ getService }: FtrProviderContext) {
               to: TO,
               interval: '12h',
             },
+            wait_for_completion_timeout: '10s',
           },
         })
         .then((resp) => {
@@ -124,6 +125,7 @@ export default function ({ getService }: FtrProviderContext) {
               to: TO,
               interval: '12h',
             },
+            wait_for_completion_timeout: '10s',
           },
         })
         .then((resp) => {

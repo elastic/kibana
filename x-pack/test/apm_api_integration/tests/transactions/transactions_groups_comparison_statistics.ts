@@ -33,7 +33,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             query: {
               start,
               end,
-              uiFilters: '{}',
               numBuckets: 20,
               latencyAggregationType: 'avg',
               transactionType: 'request',
@@ -59,7 +58,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             query: {
               start,
               end,
-              uiFilters: '{}',
               numBuckets: 20,
               transactionType: 'request',
               latencyAggregationType: 'avg',
@@ -103,7 +101,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             query: {
               start,
               end,
-              uiFilters: '{}',
               numBuckets: 20,
               transactionType: 'request',
               latencyAggregationType: 'p99',
@@ -141,7 +138,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             query: {
               start,
               end,
-              uiFilters: '{}',
               numBuckets: 20,
               transactionType: 'request',
               latencyAggregationType: 'avg',
