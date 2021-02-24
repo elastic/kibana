@@ -453,6 +453,7 @@ export default function ({ getService }: FtrProviderContext) {
           indexName: INDEX_NAME,
           inspect: false,
           eventId: ID,
+          wait_for_completion_timeout: '10s',
         })
         .expect(200);
       expect(sortBy(detailsData, 'name')).to.eql(sortBy(EXPECTED_DATA, 'name'));
@@ -470,6 +471,7 @@ export default function ({ getService }: FtrProviderContext) {
           indexName: INDEX_NAME,
           inspect: false,
           eventId: ID,
+          wait_for_completion_timeout: '10s',
         })
         .expect(200);
       expect({ destinationIpCount, hostCount, processCount, sourceIpCount, userCount }).to.eql(
