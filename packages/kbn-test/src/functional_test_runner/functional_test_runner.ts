@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { ToolingLog } from '@kbn/dev-utils';
+import { ToolingLog, REPO_ROOT } from '@kbn/dev-utils';
+import { loadConfiguration } from '@kbn/apm-config-loader';
 
 import { Suite, Test } from './fake_mocha_types';
 import {
@@ -42,6 +43,10 @@ export class FunctionalTestRunner {
   }
 
   async run() {
+    // load APM config and start shipping stats for "ftr" service
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    require('elastic-apm-node').start(loadConfiguration([], REPO_ROOT, false).getConfig('ftr'));
+
     return await this._run(async (config, coreProviders) => {
       SuiteTracker.startTracking(this.lifecycle, this.configFile);
 
