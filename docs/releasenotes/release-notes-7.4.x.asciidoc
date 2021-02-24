@@ -1,0 +1,375 @@
+[[release-notes-7.4.2]]
+== {kib} 7.4.2
+
+For detailed information about the {kib} 7.4.2 release, review the following information.
+
+[float]
+[[breaking-changes-v7.4.2]]
+=== Breaking changes
+
+For information about the breaking changes, refer to the <<breaking-changes-7.4, breaking changes in 7.4>.
+
+[float]
+[[bug-7.4.2]]
+=== Bug fix
+Discover::
+* Fixes missing HTML formatting in Doc_Viewer {kib-pull}49326[#49326]
+* Fixes the URL field formatter {kib-pull}46332[#46332]
+Visualizations::
+* Fixes the loss of filters in TSVB after upgrade from 7.2 to 7.3 {kib-pull}48710[#48710]
+
+
+[[release-notes-7.4.1]]
+== {kib} 7.4.1
+
+For detailed information about the {kib} 7.4.1 release, review the following information.
+
+[float]
+[[breaking-changes-v7.4.1]]
+=== Breaking changes
+
+For information about the breaking changes, refer to the <<breaking-changes-7.4, breaking changes in 7.4>.
+
+[float]
+[[enhancement-7.4.1]]
+=== Enhancement
+Monitoring::
+*  Server side pagination for ES Nodes listing table {kib-pull}47224[#47224]
+
+[float]
+[[bug-7.4.1]]
+=== Bug fixes
+Canvas::
+* Fixes workpad fullscreen view due to max-width limitation {kib-pull}47371[#47371]
+Infrastructure::
+* Loads initial page state into the URL when empty for Metrics Explorer {kib-pull}45683[#45683]
+* Removes internal Hapi request for `makeTSVBRequest` {kib-pull}45598[#45598]
+Machine Learning::
+* Fixes selection of dedicated index when cloning job {kib-pull}46486[#46486]
+* Fixes job clone time range auto selection {kib-pull}46582[#46582]
+* Enables wizard start real time button only when job is closed {kib-pull}46127[#46127]
+* Adds listener for time filter refresh to data visualizer {kib-pull}46708[#46708]
+* Fixes view examples link in anomalies table {kib-pull}47954[#47954]
+* Data Frame Analytics: Fixes permissions check {kib-pull}46110[#46110]
+Management::
+* ILM: Deletes `min_age` field if warm phase on rollover is enabled {kib-pull}45412[#45412]
+* Console: Fixes actions menu alignment {kib-pull}47227[#47227]
+Monitoring::
+* Ensures all charts use the configured timezone {kib-pull}45949[#45949]
+* Uses server side pagination for Logstash Pipelines page {kib-pull}46587[#46587]
+* Fixes time filter woes {kib-pull}47486[#47486]
+* Allows `isCollectionEnabledUpdated` to hang until data is available {kib-pull}46279[#46279]
+Platform::
+* Fixes issue with `saved_objects` API overwriting saved object references if not specified {kib-pull}47248[#47248]
+Reporting::
+* Fixes ESQueue worker error logging {kib-pull}46308[#46308]
+* Fixes functionality of "Download CSV" from a Saved Search panel in a Dashboard {kib-pull}47891[#47891]
+SIEM::
+* Fixes map global refresh when the time filter is set to an absolute value {kib-pull}47426[#47426]
+Security::
+* Makes sure all URLs are relative on intake and execute {kib-pull}46528[#46528]
+* Spaces: Fixes `SecureSpaceMessage` visibility {kib-pull}44829[#44829]
+Uptime::
+* Fixes empty name filter {kib-pull}46962[#46962]
+* Fixes jerky monitor list expanded row behavior {kib-pull}47080[#47080]
+
+[[release-notes-7.4.0]]
+== {kib} 7.4.0
+
+For detailed information about the Kibana 7.4.0 release, review the following information.
+
+[float]
+[[breaking-changes-7.4]]
+=== Breaking changes
+
+Breaking changes can prevent your application from optimal operation and performance. 
+Before you upgrade to 7.4.0, review the breaking change, then mitigate the impact to your application.
+
+//NOTE: The notable-breaking-changes tagged regions are re-used in the
+//Installation and Upgrade Guide
+
+////
+The following section is re-used in the Installation and Upgrade Guide
+[[breaking_70_notable]]
+=== Notable breaking changes
+////
+// tag::notable-breaking-changes[]
+
+[float]
+[[breaking_74_search_instead_of-msearch]]
+=== Use search instead of msearch when batching is disabled 
+
+*Details:*
+When the advanced setting `courier:batchSearches` is disabled, we 
+previously sent the search requests as `_msearch` requests.
+We now use `_search` when batching is disabled.
+
+*Impact:*
+When the advanced setting `courier:batchSearches` is disabled, 
+requests from *Discover*, *Visualize*, and *Dashboard* will now query {es} 
+using the `_search` endpoint rather than the `_msearch` endpoint.
+
+
+// end::notable-breaking-changes[]
+
+[float]
+[[enhancement-7.4.0]]
+=== Enhancements
+APM::
+* Surface http errors to users {kib-pull}42160[#42160]
+* Transaction duration chart always shows duration in `ms` {kib-pull}42375[#42375]
+* Use rounded bucket sizes for transaction distribution {kib-pull}42830[#42830]
+* Show loading state on waterfall and avoid re-fetching distribution chart when changing bucket {kib-pull}44093[#44093]
+* Make number of x ticks responsive to the plot width {kib-pull}44870[#44870]
+* Persist table parameters to URL {kib-pull}39912[#39912]
+* Local UI filters {kib-pull}41588[#41588]
+* Use transaction indices to create ML job {kib-pull}43750[#43750]
+* Update query input when url changes {kib-pull}43773[#43773]
+* Only show &quot;Clear filters&quot; button when values are not empty {kib-pull}43967[#43967]
+Canvas::
+* Format argument for the metric element {kib-pull}42007[#42007]
+* Query default index when index is unspecified {kib-pull}41515[#41515]
+* Added formatnumber and formatdate UIs to sidebar {kib-pull}43059[#43059]
+* Add Monaco to the Canvas Expression Editor {kib-pull}41790[#41790]
+Dashboard::
+* Reset dirty saved query on reload {kib-pull}43927[#43927]
+Design::
+* Add {kib} App specific URL to the help menu (#34739) {kib-pull}42580[#42580]
+Discover::
+* Add advanced setting to turn off search on Discover's initial page load {kib-pull}42036[#42036]
+* Allow sorting on multiple columns in Discover {kib-pull}41918[#41918]
+* Add icon for geo_shape fields in Discover {kib-pull}42087[#42087]
+Infrastructure::
+* Add UI to customize Metrics Explorer chart style {kib-pull}41022[#41022]
+* Add cloud metrics and cloud/host info to metadata endpoint {kib-pull}41836[#41836]
+* Add APM to Metadata Endpoint {kib-pull}42197[#42197]
+* Add AWS metrics to node detail page {kib-pull}42153[#42153]
+* Clarify confusing message about time period {kib-pull}44168[#44168]
+Logs::
+* Allow for jumping to the previous and next highlight {kib-pull}40010[#40010]
+* Show highlighted log entries in the minimap {kib-pull}40745[#40745]
+* Add a time cursor to the log minimap {kib-pull}39538[#39538]
+* Make column configurations reorderable {kib-pull}41035[#41035]
+* Add link from the sample web logs to the Logs UI {kib-pull}42635[#42635]
+* Allow dragging of the log minimap to change visible logs {kib-pull}40092[#40092]
+
+Machine Learning::
+* Cards as links {kib-pull}45254[#45254]
+* Adding datafeed timing stats to Job Management list {kib-pull}40993[#40993]
+* Relaxing index pattern restriction on module setup {kib-pull}42619[#42619]
+* Adding job overrides to the module setup endpoint {kib-pull}42946[#42946]
+* Search bar on list page {kib-pull}41415[#41415]
+* KQL bar for querying source data in creation wizard {kib-pull}41779[#41779]
+* Creation wizard editor for source config {kib-pull}41937[#41937]
+* {kib} management jobs list {kib-pull}42570[#42570]
+* Adds Transform Analytics list to {kib} management {kib-pull}43151[#43151]
+* Ensure proper title, tagline, and link to documentation {kib-pull}43418[#43418]
+* DataFrame bulk actions {kib-pull}43331[#43331]
+* Data Frames Summary Stats Bar {kib-pull}43986[#43986]
+* Transform UI updates {kib-pull}44175[#44175]
+* Converts index based data visualizer to React {kib-pull}42685[#42685]
+* Enables cell range selection. {kib-pull}44066[#44066]
+* Analytics jobs list. {kib-pull}42598[#42598]
+* Analytics job creation. {kib-pull}43102[#43102]
+* Outlier detection results page {kib-pull}43578[#43578]
+* Advanced editor. {kib-pull}43989[#43989]
+Management::
+* Index Templates UI list view {kib-pull}39922[#39922]
+* Index Templates UI details view {kib-pull}41602[#41602]
+* Index templates form wizard {kib-pull}42457[#42457]
+* Show endpoint in JSON preview of index lifecycle policy editor. {kib-pull}42791[#42791]
+* Add API endpoint to Rollup Job JSON summary. {kib-pull}42789[#42789]
+* Add request flyout to Remote Clusters. {kib-pull}42900[#42900]
+* Show requests for creating a follower index and creating/updating an auto-follow pattern in CCR. {kib-pull}42924[#42924]
+* Option to start rollup job right after it gets created {kib-pull}41573[#41573]
+* Clone an existing rollup job {kib-pull}41891[#41891]
+* Metrics multiple selection {kib-pull}42927[#42927]
+* Add SLM policies list and detail views {kib-pull}41302[#41302]
+* Sorts the indexPatternDateFields which are listed in the date field dropdown on Date Histogram Step  {kib-pull}41853[#41853]
+* Delete and execute SLM policies {kib-pull}41934[#41934]
+* SLM create and edit policies {kib-pull}43390[#43390]
+* Form validation errors announce themself {kib-pull}39656[#39656]
+* Switch default decimal places to 1 {kib-pull}43785[#43785]
+* Add custom formatting for Date Nanos Format {kib-pull}42445[#42445]
+Maps::
+* Change border color to be darker version of fill color {kib-pull}43211[#43211]
+* Add attribution handling for TMS (config &amp; UI-entry) and WMS {kib-pull}44147[#44147]
+* Make default EMS tile layer auto select light or dark tiles based on isDark mode advanced setting {kib-pull}40892[#40892]
+* Add filter bar to maps application {kib-pull}42756[#42756]
+* Filter by shape {kib-pull}43141[#43141]
+* Custom color ramp {kib-pull}41603[#41603]
+* Add indicator when layer is filtered by search bar {kib-pull}43283[#43283]
+* Add cancel draw button and draw instructions {kib-pull}43593[#43593]
+* Pew pew source {kib-pull}41504[#41504]
+* Load Maki icons from spritesheet {kib-pull}42499[#42499]
+* Enable borders for icon symbols {kib-pull}43066[#43066]
+* Provide indication in LayerTOC when results are incomplete {kib-pull}41271[#41271]
+* Use EMS vector tiles {kib-pull}42846[#42846]
+Monitoring::
+* Update APM metric titles {kib-pull}44091[#44091]
+Platform::
+* Feature/default enable csv dashboard {kib-pull}44048[#44048]
+* Chore/bump chromium webgl+kerberos {kib-pull}42751[#42751]
+* Cancel visualize fetches when navigating away or re-fetching {kib-pull}42035[#42035]
+* Ability to enable and disable alerts {kib-pull}40543[#40543]
+* Per panel time range {kib-pull}43153[#43153]
+* Promote many `debug` log events to `info`  {kib-pull}43241[#43241]
+* Instantiate a logger top level, and use it throughout the job {kib-pull}43636[#43636]
+* Add capture.maxAttempts setting {kib-pull}44011[#44011]
+Queries::
+* Implement saved queries and filters {kib-pull}39140[#39140]
+Reporting::
+* Rewrite telemetry collection to use a single query {kib-pull}34327[#34327]
+* Truncate base64 urls in logs {kib-pull}41304[#41304]
+* Sanitize 409 error log message {kib-pull}42495[#42495]
+Security::
+* PKI authentication in Kibana via Elasticsearch PKI realm {kib-pull}42606[#42606]
+* OIDC authentication now supports the implicit flow {kib-pull}42069[#42069]
+* Telemetry for csp configuration {kib-pull}43223[#43223]
+* Copy Saved Objects to Spaces UI {kib-pull}39002[#39002]
+* Allow for custom cluster privileges {kib-pull}43817[#43817]
+SIEM::
+* Customizable columns, row renderers, and expandable events in the `Events` widget {kib-pull}44324[#44324]
+* Adds events and Timeline Style / ID Updates {kib-pull}44965[#44965]
+* Applies highlighting to the Timeline data providers drop area and flyout button {kib-pull}45173[#45173]
+* Sets page titles to the current page you are on  {kib-pull}42157[#42157]
+* Update date picker after brush selection on charts {kib-pull}42440[#42440]
+* Upgrades react-redux and utilize React.memo for performance gains  {kib-pull}43029[#43029]
+* Changes network to use ECS fields {kib-pull}44392[#44392]
+* Adds a configuraton option for the default SIEM date time range {kib-pull}44540[#44540]
+* Fixes the columns to not show duplicate information when on detail pages.   {kib-pull}45031[#45031]
+* Adds process_started ECS fields to Uncommon Process Table {kib-pull}45664[#45664]
+* Adds Connections (Pewpew) Map to Network Page {kib-pull}43965[#43965]
+* Adds telemetry for ML functionality {kib-pull}43926[#43926]
+* Adds new jobs for SIEM ML Integration {kib-pull}44301[#44301]
+* Moves installation of jobs from initial page load to opening of Anomaly Detection UI {kib-pull}45536[#45536]
+* Adding new jobs to siem module {kib-pull}43783[#43783]
+* Changes table widget loading to elastic user interface's loading content {kib-pull}41596[#41596]
+* Changes hosts and network tables from load more to paginated {kib-pull}41532[#41532]
+* Uses autonomous_system as new ECS field {kib-pull}43925[#43925]
+* Makes ip details heading draggable {kib-pull}45179[#45179]
+* Split into Source and Destination  {kib-pull}43719[#43719]
+* Inject/apply KQL changed in refresh button {kib-pull}45065[#45065]
+* Improves the timeline performance by optimizing the width, removing wasted renderers, and adding a visibility sensor  {kib-pull}43560[#43560]
+Uptime::
+* Improve `useUrlParams` hook for Uptime app {kib-pull}41545[#41545]
+Visualizations::
+* Introducing Timerange Data Mode for TSVB Metric Style Visualizations {kib-pull}37185[#37185]
+* Allow other apps to list their custom visualizations in the Visualize app {kib-pull}43386[#43386]
+* Threshold line on bar/line/area charts {kib-pull}42632[#42632]
+* Adds capability to show percentages for data table columns {kib-pull}39572[#39572]
+
+[float]
+[[bug-7.4.0]]
+=== Bug fixes
+APM::
+* Avoid APM failing to start when ml is disabled {kib-pull}42815[#42815]
+* Fix missing RUM url {kib-pull}42940[#42940]
+* Correctly pass service language for syntax highlighting {kib-pull}43771[#43771]
+* Make sure histogram is responsive when resizing window {kib-pull}43759[#43759]
+* Don't hide all legends if user has hidden one {kib-pull}43667[#43667]
+* Fill in vertical gaps in breakdown metrics data {kib-pull}43663[#43663]
+* Display all errors in child transactions/spans in trace overview {kib-pull}44274[#44274]
+* Fix indefinite loading state in agent settings for unauthorized user roles {kib-pull}44970[#44970]
+Canvas::
+* Adds support for uppercase cluster names in esdocs and other datasource bug fixes {kib-pull}44311[#44311]
+Dashboard::
+* No reload on changes to disabled filters in dashboard {kib-pull}41144[#41144]
+* Update assumption that panelIndex may be missing {kib-pull}44793[#44793]
+Design::
+* Update heading hierarchy for instructions {kib-pull}41970[#41970]
+Discover::
+* Fix TypeError at Discover's context view {kib-pull}43661[#43661]
+Filters::
+* Fix truncation of long filter bar items {kib-pull}43874[#43874]
+* Keep disabled state on filter edit {kib-pull}42346[#42346]
+* Put filters back in the filter context where they belong {kib-pull}42095[#42095]
+Graph::
+* Replace all occurences of placeholder in drilldown URL template {kib-pull}41673[#41673]
+Infrastructure::
+* Replace EUI Charts with Elastic Charts on node detail page {kib-pull}41262[#41262]
+* Use {kib} date format for chart headers {kib-pull}41715[#41715]
+* Change contextual menu position on infrastructure view {kib-pull}41810[#41810]
+* Cleanup loading states for node detail page. {kib-pull}43311[#43311]
+Logs UI::
+* Fix rendering of complex field column values {kib-pull}44906[#44906]
+* Announce name of column on remove column button {kib-pull}41695[#41695]
+* Sentence case copy changes {kib-pull}43215[#43215]
+Machine Learning::
+* Allow zero delay for transforms wizard {kib-pull}45115[#45115]
+* Fix jobs list loading when auto refresh is off {kib-pull}42076[#42076]
+* Allow index patterns containing commas in recogniser modules {kib-pull}43686[#43686]
+* File data viz limiting uploaded doc chunk size {kib-pull}44768[#44768]
+* Fixing job management expanded rows in dark mode {kib-pull}45159[#45159]
+* Adjusting module jobs model memory limit {kib-pull}45502[#45502]
+* Ensure Anomaly Explorer chart label badge can be seen {kib-pull}44259[#44259]
+* Fix {kib} management stats bar style {kib-pull}44658[#44658]
+* Ensure preview table displays scripted fields and timestamps are formatted correctly. {kib-pull}44701[#44701]
+* Enable data visualizer link on job types page for non-time index {kib-pull}44667[#44667]
+* Fixes messages in data frame action request notifications {kib-pull}44872[#44872]
+* Fixes JSON pane. {kib-pull}42816[#42816]
+* Fix IE11 issue, update types. {kib-pull}43743[#43743]
+* Fixes table sorting. {kib-pull}43859[#43859]
+Management::
+* Fix rendering `undefined` from job status map {kib-pull}41438[#41438]
+* Added doc_values to list of completion items for mapping {kib-pull}42581[#42581]
+* Fix date_nanos formatting for formats without fractional seconds {kib-pull}43114[#43114]
+Maps::
+* Reverse the attribution order so left-to-right order matches top-to-bottom {kib-pull}44415[#44415]
+* Set complete on index pattern creation {kib-pull}44423[#44423]
+* Unknown provider regionMapsConfigProvider {kib-pull}42821[#42821]
+* Only color legend icon with dynamic color when dynamic config is complete {kib-pull}41607[#41607]
+* Populate _id in tooltip {kib-pull}41684[#41684]
+* Only show top hits checkbox if index has date fields {kib-pull}43056[#43056]
+* Reposition tooltip when tooltip size changes {kib-pull}43152[#43152]
+* Exclude index pattern from draw tools and shape filtering when layer ignores global filter {kib-pull}43380[#43380]
+* Increase tooltip max width so create filter button not clipped {kib-pull}43602[#43602]
+* Add i18n wrappers around missed text {kib-pull}43635[#43635]
+* Only display fields contained in _source for Documents source term join left field options {kib-pull}44386[#44386]
+* Fix side panel scrolling in safari {kib-pull}44700[#44700]
+* Name space dynamic property style names to avoid collisions {kib-pull}44676[#44676]
+* Unmount map embeddable component on destroy {kib-pull}45183[#45183]
+* Set mapbox Popup maxWidth {kib-pull}45253[#45253]
+Monitoring::
+* Ensure we pass down all the parameters for fetching logs {kib-pull}43869[#43869]
+* Issue 25323: Fixed error catch and route handling v2 {kib-pull}44800[#44800]
+* Respect xpack.monitoring.show_license_expiration {kib-pull}45537[#45537]
+Operations::
+* Configurable global socket timeouts {kib-pull}31603[#31603]
+* Only provide obsoleteIndexTemplatePattern to the default index migrator to avoid race conditions {kib-pull}42016[#42016]
+Platform::
+* Modify I18nProvider so that it does not generate new React components {kib-pull}43556[#43556]
+* Fix rawChecksums in chromium build and rename for clarity {kib-pull}44665[#44665]
+* Resolve filter index references when importing saved objects {kib-pull}42974[#42974]
+Queries::
+* Saved query requires title {kib-pull}45029[#45029]
+* Save query form validation on blur {kib-pull}43726[#43726]
+Reporting::
+* Fix Relative Date format in CSV export {kib-pull}40544[#40544]
+* Fix TypeError with pending job info {kib-pull}43924[#43924]
+* Use pipes for communication with chrome to avoid networking snafus {kib-pull}42097[#42097]
+Security::
+* Allow for hex color codes that include uppercase characters {kib-pull}43470[#43470]
+* Prevent space identifier url example from overflowing panel {kib-pull}44871[#44871]
+SIEM::
+* Toggle Column / Code Coverage and Cypress {kib-pull}42766[#42766]
+* Show all popover items / Timeline flyout button rendering {kib-pull}45745[#45745]
+* Upgrade elastic charts library - v12.0.2 {kib-pull}45853[#45853]
+* Adds performance enhancements such by removing wasted renderers and adding incremental DOM rendering {kib-pull}43157[#43157]
+* Fixes the Suricata row renderer not being activated {kib-pull}44728[#44728]
+* Changes ML conditional links to use tabs, fixes a small bug with null filterQuery {kib-pull}45218[#45218]
+* Fixes index substring incorrectly matching configured indices and failing to install ML job {kib-pull}43409[#43409]
+* Fix timeline/kql search disparity {kib-pull}42843[#42843]
+* Formats the bytes columns in timeline {kib-pull}43147[#43147]
+* Capitalizes SIEM in {kib} Advanced Settings {kib-pull}44886[#44886]
+* Removes expensive global CSS calculations of resize handle {kib-pull}43898[#43898]
+Uptime::
+* Encode Monitor Id React Router params to validate {kib-pull}43113[#43113]
+* Context Menu Improved for integrations links in monitors list {kib-pull}43068[#43068]
+* Update monitor list configs for mobile view {kib-pull}43218[#43218]
+Visualizations::
+* No longer registering Timelion feature if it's disabled {kib-pull}42193[#42193]
+* Fix Timelion color error when filtering data {kib-pull}23876[#23876]
+* Fix truncated formatting on tooltip {kib-pull}41769[#41769]
+* Ensure visualizations in percentage mode respect the advanced settings percent format {kib-pull}39044[#39044]
+* Fix duplicate fetch in Visualize {kib-pull}41204[#41204]

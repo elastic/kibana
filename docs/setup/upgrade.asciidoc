@@ -12,7 +12,7 @@ WARNING: {kib} automatically runs upgrade migrations when required. To roll back
 
 Before you upgrade {kib}:
 
-* Consult the <<breaking-changes,breaking changes>>.
+* Consult the breaking changes in the <<release-notes,Release notes>>.
 * Back up your data with <<snapshot-repositories, Snapshot and Restore>>. To roll back to an earlier version, you **must** have a snapshot of the `.kibana*` indices. 
 * Although not a requirement for rollbacks, we recommend taking a snapshot of all {kib} indices created by the plugins you use such as the `.reporting*` indices created by the reporting plugin.  
 * Before you upgrade production servers, test the upgrades in a dev environment.

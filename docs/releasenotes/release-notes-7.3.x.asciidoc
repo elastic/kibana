@@ -1,0 +1,360 @@
+[[release-notes-7.3.2]]
+== {kib} 7.3.2
+
+For detailed information about the {kib} 7.3.2 release, review the following information.
+
+[float]
+[[breaking-changes-v7.3.2]]
+=== Breaking changes
+
+For information about the breaking changes, refer to the <<breaking-changes-7.3, breaking changes in 7.3>.
+
+[float]
+[[bug-7.3.2]]
+=== Bug fix
+Monitoring::
+* Ensures all the parameters for fetching logs are passed down {kib-pull}43869[#43869]
+Platform::
+* Resolves filter index references when importing saved objects {kib-pull}42974[#42974]
+Security::
+* In Spaces, allows for hex color codes that include uppercase characters {kib-pull}43470[#43470]
+SIEM::
+* Fixes the Suricata row renderer not being activated {kib-pull}44728[#44728]
+* When adding the 2*nth note on an event, does not unpin it {kib-pull}44941[#44941]
+* Fixes duplicate columns in timeline and the errors on multiple click on pinned event {kib-pull}44010[#44010]
+
+
+[[release-notes-7.3.1]]
+== {kib} 7.3.1
+
+For detailed information about the {kib} 7.3.1 release, review the following information.
+
+[float]
+[[breaking-7.3.1]]
+=== Breaking Changes
+
+For information about the breaking changes, refer to the <<breaking-changes-7.3, breaking changes in 7.3>.
+
+[float]
+[[bug-7.3.1]]
+=== Bug fixes
+APM::
+* Makes sure tooltips for metric charts are synced {kib-pull}42139[#42139]
+Canvas::
+* Fixes IE11 fullscreen behavior to properly position workpad {kib-pull}42544[#42544]
+Discover::
+* Fixes a bug where selecting a period in the discover histogram did not result in a refresh. {kib-pull}43097[#43097]
+Filters::
+* Fixes Firefox continuously changing filter position order when
+applying more than 1 filter. See https://github.com/elastic/kibana/issues/41567[issue #41567].
+Geo::
+* Moves Geojson deep clone logic to Elasticsearch, making Geojson
+upload more stable when uploading large geometries. {kib-pull}41835[#41835]
+* Fixes maps Geojson upload hanging on index step {kib-pull}42623[#42623]
+* Formats doc-ids as strings {kib-pull}42011[#42011]
+* Modifies Fit-to-data action to fit to all visible features, even ones
+without a corresponding result in the join. {kib-pull}42020[#42020]
+Infra Logs UI::
+* Fixes section mapping bug in node detail page {kib-pull}41641[#41641]
+* Fixes autocomplete to use proper derived index pattern {kib-pull}42287[#42287]
+Machine Learning::
+* Fixes basic license redirect {kib-pull}41876[#41876]
+* Fixes file datavisualizer mapping overrides {kib-pull}42047[#42047]
+* Fixes ml when spaces feature is disabled {kib-pull}42564[#42564]
+* Fixes check for watcher being enabled {kib-pull}43025[#43025]
+Management::
+* Removes validation for email action body attribute in Watcher {kib-pull}42009[#42009]
+* Fixes minor Console regressions introduced during EUIfication. {kib-pull}41089[#41089]
+* Fixes issue when removing scripted fields {kib-pull}42838[#42838]
+Monitoring::
+* Only fetches a single cluster data instead of all clusters when possible {kib-pull}42469[#42469]
+* Uses async/await pattern which should address weird bug {kib-pull}42876[#42876]
+* Uses fixed_interval explicitly for date_histogram aggregations {kib-pull}37023[#37023]
+Operations::
+* Overrides `org.label-schema.license` Docker label {kib-pull}42836[#42836]
+Platform::
+* Fixes CSV export of saved searches that have _source field {kib-pull}43123[#43123]
+* Correctly sets `kibanaRoot` on {kib} plugin helpers for new generated plugins {kib-pull}42616[#42616]
+* Fixes scaling logic to check agg type instead schema {kib-pull}42574[#42574]
+Reporting::
+* Fixes an issue in the Reporting jobs listing page that sometimes prevented it from rendering {kib-pull}42419[#42419]
+Visualizations::
+* Fixes problem in TSVB when group by &quot;Everything&quot; fails to calculate data with &quot;Overall&quot; metrics {kib-pull}42074[#42074]
+* Fixes error when filters agg filters are a query_string query {kib-pull}43310[#43310]
+* Fixes tooltip text overflow {kib-pull}41703[#41703]
+
+[[release-notes-7.3.0]]
+== {kib} 7.3.0
+
+For detailed information about the {kib} 7.3.0 release, review the following information.
+
+[float]
+[[breaking-changes-7.3]]
+=== Breaking changes
+
+Breaking changes can prevent your application from optimal operation and performance. 
+Before you upgrade to 7.3.0, review the breaking change, then mitigate the impact to your application.
+
+See also {kibana-ref-all}/7.3/release-highlights-7.3.0.html[release highlights].
+
+//NOTE: The notable-breaking-changes tagged regions are re-used in the
+//Installation and Upgrade Guide
+
+////
+The following section is re-used in the Installation and Upgrade Guide
+[[breaking_70_notable]]
+=== Notable breaking changes
+////
+// tag::notable-breaking-changes[]
+
+[float]
+=== Visibility of features after configuring a term join in Maps
+*Details:* When performing a terms join in a vector layer in the Maps app, features that do not have a matching term in the join will no longer be visible on the map. Before, these features would remain visible, although they would not show any results for the join in their corresponding tooltip. This aligns the behavior of this functionality with the behavior in the Region Maps visualization. The old behavior, in which features without a corresponding record in the term-query result would still be visible on the map, is no longer supported.
+
+*Impact:* This affects all maps that have a term join configured on a vector layer. The effect is primarily a change in the visual representation of the layer. In practice, fewer features will be visible if the results of the term-query have no corresponding record for all features on the map. This also means that all fields in a tooltip will have a corresponding value. Previously, the aggregation metrics for some rows in the tooltip would just be empty if there was no corresponing result in the term-query.
+
+[float]
+[[breaking_73_data_frames_date_format]]
+=== Removed support for date histogram format specifications in {transforms}
+
+*Details:* If your {transform} groups your data by using a date
+histogram, the `format` property is no longer supported.
+
+*Impact:* {transforms-cap} that were created in 7.2 and use date
+histograms might no longer work in 7.3. If you run into issues starting a
+{transform}, recreate it by copying the `pivot` part of the configuration into the
+advanced editor of the {transforms} wizard. The advanced editor will
+remove the unsupported attribute once the configuration gets applied.
+
+// end::notable-breaking-changes[]
+
+[float]
+[[enhancement-7.3.0]]
+=== Enhancements
+Canvas::
+* Add new dashboard template {kib-pull}37520[#37520]
+* Keyboard shortcuts for nudging elements {kib-pull}39208[#39208]
+* [Fixes #27123] Zoom In/Out {kib-pull}38832[#38832]
+* Add joinRows Canvas expression function {kib-pull}38680[#38680]
+* [Fixes #27124] Fit Workpad to Window {kib-pull}39864[#39864]
+* [Fixes #23061, #23144, #29526] Enable Canvas URL Parameters {kib-pull}40061[#40061]
+* Alignment and distribution {kib-pull}39132[#39132]
+* [Fixes #30841] Box select {kib-pull}32995[#32995]
+Infrastructure::
+* Link to node detail page from Metrics Explorer {kib-pull}37136[#37136]
+* Adds tooltip (with name / id) to Table view {kib-pull}38904[#38904]
+* Improve accuracy of system network metrics {kib-pull}39513[#39513]
+* Add default metrics to metrics explorer. {kib-pull}39787[#39787]
+* Use max instead of avg for correct derivative in network metrics {kib-pull}41009[#41009]
+Logs UI::
+* Add single phrase highlighting {kib-pull}39569[#39569]
+* [Fixes #38167] Add &quot;View in APM&quot; link to log flyout actions menu  {kib-pull}39540[#39540]
+Machine Learning::
+* [Fixes #39240] When importing CSV through file data viz, omit empty values {kib-pull}39524[#39524]
+* [Fixes #39242] Don't quote numbers when importing CSV in file data viz {kib-pull}39579[#39579]
+* Adds data frame messages to data frames list {kib-pull}39609[#39609]
+* Adds icon to data frame messages expanded row tab {kib-pull}39817[#39817]
+* Adds Preview table tab to Data Frames list expanded row {kib-pull}39983[#39983]
+* Data Frames list expanded row preview: Fixes transform list paging and sorting. {kib-pull}40163[#40163]
+* [Fixes #37312] Only add ML links for sample data sets if full license {kib-pull}38120[#38120]
+* [Fixes #37994] Adds check that forecast duration is no more than 3650 days {kib-pull}38408[#38408]
+* Adds SIEM Auditbeat and metricbeat data recognizer modules {kib-pull}39678[#39678]
+* [Fixes #28390] [Accessibility] Add job ID to select row checkbox aria-label in Jobs List {kib-pull}40149[#40149]
+* Data Frames: Advanced editor {kib-pull}39659[#39659]
+* Data Frames: Continuous mode support for wizard {kib-pull}39804[#39804]
+* Data Frames: Updated progress reporting. {kib-pull}39920[#39920]
+* Data Frames: Transform list refresh button. {kib-pull}40129[#40129]
+* [Fixes #38776] Data Frames: Adds support for transform description {kib-pull}40153[#40153]
+Management::
+* [Fixes #13804, #17894, #17956, #17969, #17978, #18008, #18008, #18031, #18047, #18052, #18151, #18191, #18245, #18246, #18256, #18268, #18271, #18296, #18353, #18506, #18508, #18532, #18536, #18794, #22615, #29167, #33207, #33917, #34932, #39828] EUIfy Watcher {kib-pull}35301[#35301]
+* Add repository-azure autocompletion settings {kib-pull}37935[#37935]
+* [Fixes #32132] Allow users to disable polling in Console {kib-pull}38949[#38949]
+* [Fixes #15628] Add setting for disabling use of triple quotes in the Console output pane. {kib-pull}39114[#39114]
+* Separate Console History panel from editor with a drop-shadow, and add a Close button {kib-pull}39972[#39972]
+* [Fixes #39985] Accept triple quoted input in Search Profiler. {kib-pull}39984[#39984]
+* Snapshot and Restore UI {kib-pull}39193[#39193]
+* EUIfy Console - partially de-angularize and move custom views out of top_nav {kib-pull}39341[#39341]
+* Console update autocomplete definitions {kib-pull}39508[#39508]
+Maps::
+* [File upload] New plugin: file upload {kib-pull}36404[#36404]
+* [File upload] Geojson upload {kib-pull}36410[#36410]
+* [Fixes #35659] Heatmap color ramp select and legend details {kib-pull}37187[#37187]
+* [Fixes #30738] Add support for Top Hits to Documents source {kib-pull}38052[#38052]
+* [Fixes #30738] Symbolize points with maki icons {kib-pull}37822[#37822]
+* Add Symbol orientation style property {kib-pull}39129[#39129]
+* [Fixes #35978] Move set view to toolbar control, show zoom level in view control {kib-pull}38925[#38925]
+* [Fixes #34399] Add Where clause to terms joins {kib-pull}39593[#39593]
+* Increase document limit from 2048 to 10000 {kib-pull}39697[#39697]
+* Remove beta labeling from application and docs {kib-pull}39871[#39871]
+* [Fixes #31697] Custom labels for metric aggregations {kib-pull}39914[#39914]
+* Replace legacy map visualizations with maps in sample data dashboards {kib-pull}35997[#35997]
+* [Fixes #34026] Make EMS tooltips configurable {kib-pull}34325[#34325]
+* [Fixes #29005] Add multiple feature selection in tooltips {kib-pull}39629[#39629]
+Monitoring::
+* Removed dead code {kib-pull}39545[#39545]
+* [Fixes #5429] Added a shortcut to ML jobs {kib-pull}39147[#39147]
+Platform::
+* Query Filter \ Filter Manager: de-angularize and move to data plugin {kib-pull}37311[#37311]
+* Introduce setting to disable batching in courier {kib-pull}39470[#39470]
+Reporting::
+* Export Saved Search CSV as Dashboard Panel Action {kib-pull}34571[#34571]
+* Check if CSV cells (including headers) start with known formula characters {kib-pull}37930[#37930]
+SIEM::
+* Kpi on host details page {kib-pull}39681[#39681]
+* Adds Machine Learning table anomalies, a pop over UI for anomalies, and machine learning details score  {kib-pull}39483[#39483]
+* Adds Machine Learning Permissions to hide or show UI elements based on the permissions {kib-pull}40119[#40119]
+* Adds Machine Learning Anomaly Table to Host Details and Network Details {kib-pull}40223[#40223]
+* Adds conditional linking within the application for machine learning jobs {kib-pull}40547[#40547]
+* Adds ML Integration for Installing &amp; Starting/Stopping embedded ML jobs {kib-pull}39766[#39766]
+* Fix URL state request once initial state {kib-pull}38955[#38955]
+* SIEM inspect query {kib-pull}39980[#39980]
+* Enhance inspect modal  {kib-pull}40530[#40530]
+Security::
+* Hiding management link {kib-pull}38472[#38472]
+* [Fixes #36626] Display message when logging out of Kibana {kib-pull}37234[#37234]
+* [Fixes #38563] Allow roles to be cloned {kib-pull}39303[#39303]
+* Make SAML realm name configurable {kib-pull}37346[#37346]
+Uptime::
+* Summary based monitors Page {kib-pull}39751[#39751]
+* [Fixes #38786, #57711] Add monitor summaries {kib-pull}38895[#38895]
+* Replace deprecated EUI charts {kib-pull}34313[#34313]
+* [Fixes #46] Add error callout for uptime filter bar {kib-pull}38140[#38140]
+* Add telemetry collector {kib-pull}34437[#34437]
+* Add link for logs host integration {kib-pull}38010[#38010]
+* [Fixes #40589] Add link to Uptime documentation from header help menu {kib-pull}40645[#40645]
+Visualize::
+* Visual Builder duration in second showing as number {kib-pull}35813[#35813]
+* Get rid of default export on TSVB {kib-pull}36872[#36872]
+* KQL in TSVB {kib-pull}36784[#36784]
+* Add configs for terminate_after {kib-pull}37643[#37643]
+* Enable use of KQL and autocomplete in filters agg editor {kib-pull}37287[#37287]
+* Add automatic alignment to gauge visualisation {kib-pull}34845[#34845]
+* Support Elasticsearch date_nanos datatype {kib-pull}36111[#36111]
+* Support for date_nanos type timestamps in context view  {kib-pull}38023[#38023]
+* [Fixes #38424] Show link to Maps application in create new visualize menu {kib-pull}39191[#39191]
+* Rename Visual Builder to TSVB {kib-pull}39125[#39125]
+* [Fixes #7116] Show values of bars inside bar charts {kib-pull}36511[#36511]
+* Add dateHistogramInterval utility {kib-pull}39091[#39091]
+
+[float]
+[[bug-7.3.0]]
+=== Bug fixes
+APM::
+* [Fixes #34866] Fix encoding issue with forward slash in path {kib-pull}37072[#37072]
+* [Fixes #34697] Distinguish between loading state and empty state {kib-pull}40651[#40651]
+* [Fixes elastic/kibana#40477] [APM Tutorial] Fix APM Server link on Cloud {kib-pull}40711[#40711]
+* [Fixes #40351] Make sure stacked area charts handle no data points incorrectly {kib-pull}40353[#40353]
+Canvas::
+* [Fixes #41296] Apply global CSS to export workpad view {kib-pull}41298[#41298]
+* [Fixes #39852] Native HTML5 drag&amp;drop shouldn't kick in {kib-pull}39861[#39861]
+* [Fixes #24773]  Fix workpad list overflow {kib-pull}37345[#37345]
+Discover::
+* [Fixes #41348] Bugfix for exception at discover context view using date_nanos  {kib-pull}41353[#41353]
+Infrastructure::
+* Support metrics for different docs in Metric Explorer {kib-pull}38153[#38153]
+* [Fixes #38141] Allow Metrics Explorer to set KQL filters in TSVB {kib-pull}38280[#38280]
+* [Fixes #36818] Metrics Explorer action menu should honor UI capabilities {kib-pull}36824[#36824]
+* [Fixes #39809] Sync state with localStorage for Metrics Explorer {kib-pull}40099[#40099]
+* [Fixes #40138] Convert bytes to bits before formatting for bits {kib-pull}40523[#40523]
+* [Fixes #38130, #37694] Fix CSS to improve IE11 experience {kib-pull}40309[#40309]
+* [Fixes #40251] Change GraphQL fetchPolicy for Inventory View {kib-pull}40814[#40814]
+* [Fixes #40914] Fix Metric Explorer title truncation {kib-pull}40913[#40913]
+* [Fixes #40493] Inventory should display nodes without names {kib-pull}40804[#40804]
+* Make queries more robust against missing indices {kib-pull}38976[#38976]
+* [Fixes #35975] Fixes text overflow for values in waffle map squares {kib-pull}39068[#39068]
+* Add temporary workaround for too small max-width. {kib-pull}39890[#39890]
+* [Fixes #39892] Remove queries for log-related metadata {kib-pull}40130[#40130]
+* [Fixes #37362] Make arrays of values more readable in log columns {kib-pull}38692[#38692]
+* [Fixes #38734] Capitalize 'explorer' in 'Metrics Explorer' {kib-pull}39101[#39101]
+* [Fixes #35784] Shrink log stream when window is resized {kib-pull}38937[#38937]
+* [Fixes #39913] Widen Group By dropdown and add tooltips to custom metrics {kib-pull}40692[#40692]
+Logs UI::
+* [Fixes #39991] Fixes &quot;sticky filter&quot; problem {kib-pull}40226[#40226]
+* [Fixes #39944] Fix inaccuracy when jumping to a faraway time target {kib-pull}40303[#40303]
+Machine Learning::
+* Data Frame: Disable link to create new data frame job when no permissions {kib-pull}40268[#40268]
+* Data Frame: ensure pivot preview works with comma-separated index patterns  {kib-pull}40282[#40282]
+* [Fixes #40562] Single Metric View: ensure charts loaded correctly when using scripted fields {kib-pull}40682[#40682]
+* [Fixes #18076] Fixes loading of Single Metric Viewer if partition field is text {kib-pull}37975[#37975]
+* [Fixes #37974] Close job after forecast errors if starting from closed {kib-pull}38253[#38253]
+* [Fixes #38661] Show time range button on index data viz when not on full license {kib-pull}38789[#38789]
+* [Fixes #38559] Increase max data frame transforms in list from 100 to 1000 {kib-pull}38973[#38973]
+* [Fixes #39770] Fixes results time range if anomalies occur after data stops {kib-pull}40503[#40503]
+* [Fixes #32304] Fixes positioning of annotations brush after window resize {kib-pull}40780[#40780]
+* [Fixes #33416] Fixes positioning of Single Metric zoom when at start of range {kib-pull}40854[#40854]
+* [Fixes #41135] Fixes model memory limit for metricbeat system module jobs {kib-pull}41747[#41747]
+* Data Frame: Rename target index to destination index. {kib-pull}39239[#39239]
+* [Fixes #38872] Data Frame: Fixes crash of the source table for complex field values. {kib-pull}39878[#39878]
+* Data Frame: Fixes transform list paging and sorting. {kib-pull}40009[#40009]
+* [Fixes #38654] Data Frame: Fix form validation {kib-pull}40427[#40427]
+* [Fixes #38395] Data Frame: Fixes search triggering onChange on every keystroke. {kib-pull}40607[#40607]
+* [Fixes #40960] Fix loading forecasts from anomaly job list. {kib-pull}41034[#41034]
+* Data Frame: Fix source table for cells of type object. {kib-pull}41234[#41234]
+Management::
+* [Fixes #33424, #18851] [IM] Improve UX for permissions error {kib-pull}38916[#38916]
+* [Fixes #34751, #19249] [LICENSE] Check permissions before loading license management actions {kib-pull}39183[#39183]
+* [Fixes #21484] [IM] warn user before closing or deleting kibana index {kib-pull}39018[#39018]
+* [Fixes #38940] Fix Console bug caused by rapidly opening and closing the History tab. {kib-pull}38950[#38950]
+* [Fixes #38562] Fix Search Profiler's 'Index' input's placeholder color contrast accessibility. {kib-pull}38952[#38952]
+* [Fixes #36983] Fix field autocomplete suggestions in Console {kib-pull}38948[#38948]
+* [Fixes #40254] Fix aggs autocompletion in Console. {kib-pull}40816[#40816]
+* [Fixes #39087] Remove config from IndexPattern instance {kib-pull}40146[#40146]
+* Fix `Rollup` tag not showing on rollup index patterns in list {kib-pull}40297[#40297]
+Maps::
+* [Fixes #38021] Use coalesce to ensure number always passed to interpolate for data driven size styling {kib-pull}38427[#38427]
+* Provide IntlProvider to map listing page {kib-pull}39459[#39459]
+* [Fixes #37369] Do not allow save when map has unsaved layer changes {kib-pull}39529[#39529]
+* [Fixes #38962] Documents source - top hits - support script fields {kib-pull}39371[#39371]
+* [Fixes #40307] Fix react typing for style property type {kib-pull}40518[#40518]
+* Use custom labels in legend details {kib-pull}40308[#40308]
+* Fix symbol anchor position {kib-pull}40524[#40524]
+* [Fixes #40337] Use default locale as fallback for EMS tile layers {kib-pull}40433[#40433]
+* [Fixes #40085] Show dialog to save map when leaving app {kib-pull}40215[#40215]
+* Shuffle feature ids to avoid mapbox-gl crashes {kib-pull}40803[#40803]
+* [Fixes #40646] Remove data on error {kib-pull}41358[#41358]
+* [Fixes #41491] Coerce term join values to string {kib-pull}41503[#41503]
+Monitoring::
+* Add log message for error scenario around missing licensing {kib-pull}40660[#40660]
+* [Fixes #36738] Issue 36738: Added zoomout functionality to all charts {kib-pull}39072[#39072]
+* [Fixes #28471] Issue 28471: Added strict id checking {kib-pull}40673[#40673]
+Operations::
+* Fixes an issue where headless_shell doesn't get properly closed (and … {kib-pull}40924[#40924]
+* [Fixes #31549] Configurable global socket timeouts {kib-pull}31603[#31603]
+Platform::
+* [Fixes #14544] Cancel Discover fetch requests if a new one is submitted {kib-pull}39963[#39963]
+* [Fixes #38127] Add required default markdown visState {kib-pull}38390[#38390]
+* Fixing custom vis types buildPipeline {kib-pull}39874[#39874]
+Reporting::
+* Bugfix/reporting png is cancelled {kib-pull}37513[#37513]
+* Addresses an issue where Chromium user-data-dirs aren't removed {kib-pull}40284[#40284]
+SIEM::
+* Update translation {kib-pull}40038[#40038]
+* Styling KQL bar {kib-pull}40487[#40487]
+Security::
+* [Fixes #40014] Spaces API - default disabledFeatures to empty array {kib-pull}40017[#40017]
+* [Fixes #39837] Feature Controls - only navigate to index pattern management if available {kib-pull}40067[#40067]
+Uptime::
+* [Fixes #39679] Fix filter status bar location selection {kib-pull}41382[#41382]
+* [Fixes #40171] [Bug] Handle all supported empty states {kib-pull}40194[#40194]
+* Fix unsigned integer parsing error and add tests {kib-pull}40526[#40526]
+* [Fixes #40582] Change page headlines to use h1 element {kib-pull}40637[#40637]
+* [Fixes #40583] Add explicit alignments to table columns {kib-pull}40680[#40680]
+* Fix duration chart for Safari {kib-pull}41619[#41619]
+Visualize::
+* VisualBuilder Metric: Zero values ends in a changed behavior of the color rules {kib-pull}39583[#39583]
+* Wrap long text inside of TSVB chart tooltip. {kib-pull}39630[#39630]
+* [Fixes #34535] Adds time zone to date_range bucket aggregation {kib-pull}37576[#37576]
+* [Fixes #39580] Corrects index pattern for fields in split_by_terms {kib-pull}39723[#39723
+* [Fixes #40351] Make sure stacked area charts handle no data points incorrectly {kib-pull}40353[#40353]
+* Fix `Rollup` tag not showing on rollup index patterns in list {kib-pull}40297[#40297]
+* [Fixes #37940] Don't show listing limit exceeded warning falsely {kib-pull}38246[#38246]
+* Add default values for filter labels property for xy charts {kib-pull}38644[#38644]
+* [Fixes #39788, #39655] Fix tooltip label name rendering in pie charts. {kib-pull}40105[#40105]
+* Fix autorefresh in visualize editor {kib-pull}41657[#41657]
+* [Fixes #41357] Bugfix displaying date_nanos formated min/max aggs {kib-pull}41472[#41472]
+* [Fixes #39083] Fix visualization migration when savedSearchId is empty string {kib-pull}40172[#40172]
+* Change help URL in timelion to point to current docs {kib-pull}39885[#39885]
+* Check whether vis type exists {kib-pull}39803[#39803]
+* [Fixes #28842] Fix issue with long values in TSVB static metric {kib-pull}40256[#40256]
+* [Fixes #36295] Fix visualizations for rollups using fixed_interval or calendar_interval {kib-pull}39537[#39537]
+* Fix bug in Filters aggregation and Terms aggregation with Other bucket {kib-pull}40698[#40698]

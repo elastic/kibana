@@ -1,11 +1,11 @@
-[[breaking-changes-7.9]]
-== Breaking changes in 7.9
+[[general-plugin-API-changes-79]]
+== Plugin API changes in 7.9
 ++++
 <titleabbrev>7.9</titleabbrev>
 ++++
 
-This page discusses the breaking changes for plugin developers that you need to be aware of when migrating
-your application to Kibana 7.9.
+This page discusses the plugin API changes that you need to be aware of when migrating
+your application to {kib} 7.9.
 
 [[breaking_79_actions_api]]
 .aborted$ event fixed and completed$ event added to `KibanaRequest`

@@ -1,0 +1,60 @@
+[[release-notes]]
+= Release notes
+
+[partintro]
+--
+Review important information about {kib} releases.
+
+* <<release-notes-7.12.0>>
+* <<release-notes-7.11.1>>
+* <<release-notes-7.11.0>>
+* <<release-notes-7.10.2>>
+* <<release-notes-7.10.1>>
+* <<release-notes-7.10.0>>
+* <<release-notes-7.9.3>>
+* <<release-notes-7.9.2>>
+* <<release-notes-7.9.1>>
+* <<release-notes-7.9.0>>
+* <<release-notes-7.8.1>>
+* <<release-notes-7.8.0>>
+* <<release-notes-7.7.1>>
+* <<release-notes-7.7.0>>
+* <<release-notes-7.6.2>>
+* <<release-notes-7.6.1>>
+* <<release-notes-7.6.0>>
+* <<release-notes-7.5.2>>
+* <<release-notes-7.5.1>>
+* <<release-notes-7.5.0>>
+* <<release-notes-7.4.2>>
+* <<release-notes-7.4.1>>
+* <<release-notes-7.4.0>>
+* <<release-notes-7.3.2>>
+* <<release-notes-7.3.1>>
+* <<release-notes-7.3.0>>
+* <<release-notes-7.2.1>>
+* <<release-notes-7.2.0>>
+* <<release-notes-7.1.1>>
+* <<release-notes-7.1.0>>
+* <<release-notes-7.0.1>>
+* <<release-notes-7.0.0>>
+* <<release-notes-7.0.0-rc2>>
+* <<release-notes-7.0.0-rc1>>
+* <<release-notes-7.0.0-beta1>>
+* <<release-notes-7.0.0-alpha2>>
+* <<release-notes-7.0.0-alpha1>>
+
+--
+
+include::release-notes-7.12.x.asciidoc[]
+include::release-notes-7.11.x.asciidoc[]
+include::release-notes-7.10.x.asciidoc[]
+include::release-notes-7.9.x.asciidoc[]
+include::release-notes-7.8.x.asciidoc[]
+include::release-notes-7.7.x.asciidoc[]
+include::release-notes-7.6.x.asciidoc[]
+include::release-notes-7.5.x.asciidoc[]
+include::release-notes-7.4.x.asciidoc[]
+include::release-notes-7.3.x.asciidoc[]
+include::release-notes-7.2.x.asciidoc[]
+include::release-notes-7.1.x.asciidoc[]
+include::release-notes-7.0.x.asciidoc[]

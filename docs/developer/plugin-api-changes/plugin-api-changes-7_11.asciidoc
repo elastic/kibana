@@ -11,7 +11,6 @@ your application to {kib} 7.11.
 .Custom visualizations plugin need to build their own expression AST
 [%collapsible]
 ====
-
 In {kib} all visualizations underneath render using {kib} expressions (that you can see user facing inside Canvas expression editor).
 Right now old custom visualization plugins are all using the same `visualizations` expression function underneath.
 We're going to remove this function in one of the upcoming minors, meaning your custom visualization plugin will require to register
@@ -20,14 +19,12 @@ its own renderer and expression function and provide a `toExpressionAst` functio
 You can check any of the https://github.com/elastic/kibana/issues/46801[PRs for core visualizations] as a reference how those migration need to look like.
 
 *via https://github.com/elastic/kibana/pull/85234[#85234]*
-
 ====
 
 [[breaking_plugin_v7.11.0_84973]]
 .`esaggs` expression function changed
 [%collapsible]
 ====
-
 The `esaggs` expression function, which is the default method of requesting aggregations for visualizations,
 has had some changes to the arguments it accepts.
 
@@ -46,38 +43,31 @@ esaggs
 ```
 
 *via https://github.com/elastic/kibana/pull/84973[#84973]*
-
 ====
 
 [[breaking_plugin_v7.11.0_84791]]
 .`server.xsrf.whitelist` rename `server.xsrf.allowlist`
 [%collapsible]
 ====
-
 `server.xsrf.whitelist` was deprecated in favor of `server.xsrf.allowlist`.
 
 *via https://github.com/elastic/kibana/pull/84791[#84791]*
-
 ====
 
 [[breaking_plugin_v7.11.0_84326]]
 .`SavedObjectsRepository.incrementCounter` supports array of fields
 [%collapsible]
 ====
-
 The `SavedObjectsRepository.incrementCounter` method no longer accepts a string field name.
 An array of field names to increment must be provided.
 
 *via https://github.com/elastic/kibana/pull/84326[#84326]*
-
-
 ====
 
 [[breaking_plugin_v7.11.0_84224]]
 .UI counters introduced
 [%collapsible]
 ====
-
 This change adds `incrementBy` to the config `SavedObjectsIncrementCounterOptions` for
 `SavedObjectsRepository.incrementCounter()`.
 
@@ -93,26 +83,22 @@ await internalRepository.incrementCounter(type, id, counterFieldName, {
 ```
 
 *via https://github.com/elastic/kibana/pull/84224[#84224]*
-
 ====
 
 [[breaking_plugin_v7.11.0_83575]]
 .Conflict checking is now disabled by default when copying saved objects
 [%collapsible]
 ====
-
 See the `createNewCopies` parameter in
 the <<spaces-api-copy-saved-objects,Copy saved objects to space API documentation>> for more information.
 
 *via https://github.com/elastic/kibana/pull/83575[#83575]*
-
 ====
 
 [[breaking_plugin_v7.11.0_83482]]
 .Predefined IDs allowed for encrypted saved objects
 [%collapsible]
 ====
-
 Task Manager now uses predefined IDs with encrypted saved objects.
 {kib} previously generated the ID within the
 `EncryptedSavedObjectsClientWrapper` in order to use a UUID v4.
@@ -123,28 +109,24 @@ all saved object types used with the encrypted saved objects plugin,
 this PR allows certain saved object types to opt-out of this protection.
 
 *via https://github.com/elastic/kibana/pull/83482[#83482]*
-
 ====
 
 [[breaking_plugin_v7.11.0_83037]]
 .Schema for `UiSettings` is now required
 [%collapsible]
 ====
-
 `UiSettings` registration without a validation `schema` will throw an exception.
 ```js
 uiSettings.register({ mySetting: { value: 42 } });
 ```
 
 *via https://github.com/elastic/kibana/pull/83037[#83037]*
-
 ====
 
 [[breaking_plugin_v7.11.0_82715]]
 .User and alert comment types added
 [%collapsible]
 ====
-
 To create or update a comment, you must provide the type of comment and
 the attributes of each type. Specifically:
 
@@ -173,14 +155,12 @@ the attributes of each type. Specifically:
 |===
 
 *via https://github.com/elastic/kibana/pull/82715[#82715]*
-
 ====
 
 [[breaking_plugin_v7.11.0_82383]]
 .SearchSource updated to use fields API
 [%collapsible]
 ====
-
 **SearchSource now uses the search fields param by default**
 
 The `data` plugin's high-level search API, `SearchSource`,
@@ -229,39 +209,33 @@ via `setField('fields', [...])`, in which case only the relevant ones will be re
 If you do not provide a `format` for the fields you are requesting, one will automatically be added for you.
 
 *via https://github.com/elastic/kibana/pull/82383[#82383]*
-
 ====
 
 [[breaking_plugin_v7.11.0_81739]]
 .Global types removed
 [%collapsible]
 ====
-
 This requires the following changes:
 
 * `PublicMethodsOf`, `MethodKeysOf`, and `Writable` should be imported from `@kbn/utility-types`.
 * `DeeplyMockedKeys` bands `MockedKeys` should be imported from `@kbn/utility-types/jest`.
 
 *via https://github.com/elastic/kibana/pull/81739[#81739]*
-
 ====
 
 [[breaking_plugin_v7.11.0_81582]]
 .Support for `SavedObjects` export API enhanced
 [%collapsible]
 ====
-
 The `SavedObjects` export API now supports the export of `SavedObjects` with circular references.
 
 *via https://github.com/elastic/kibana/pull/81582[#81582]*
-
 ====
 
 [[breaking_plugin_v7.11.0_80909]]
 .Feature registration improved
 [%collapsible]
 ====
-
 The `icon` and `navLinkId` options were removed from Feature registration:
 
 * `icon` was used on the Spaces and Role Management interfaces, but a recent redesign of these screens rendered the icon unnecessary.
@@ -271,14 +245,12 @@ The `validLicenses` property was renamed `minimumLicense`.
 The existing property was unnecessarily configurable. This rename aligns the property with the `licensing` plugin's functionality, which has built-in support for checking a minimum license against the current license.
 
 *via https://github.com/elastic/kibana/pull/80909[#80909]*
-
 ====
 
 [[breaking_plugin_v7.11.0_80905]]
 .`independent` sub-feature privileges can now be licensed
 [%collapsible]
 ====
-
 Features support defining a set of valid licenses for which they are available.
 Although this works for conditionally supporting top-level features,
 it doesn't scale to sub-feature privileges.
@@ -298,14 +270,12 @@ The privilege registration system is already configured to listen to license cha
 so the set of available/registered sub-feature privileges will always be kept in sync.
 
 *via https://github.com/elastic/kibana/pull/80905[#80905]*
-
 ====
 
 [[breaking_plugin_v7.11.0_80870]]
 .A field for cases' comments was added
 [%collapsible]
 ====
-
 A new field was introduced to cases' comments. It must be provided when adding a
 comment to a case. Specifically:
 
@@ -325,38 +295,32 @@ comment to a case. Specifically:
 |===
 
 *via https://github.com/elastic/kibana/pull/80870[#80870]*
-
 ====
 
 [[breaking_plugin_v7.11.0_80810]]
 .URL rewritten in `onPreRouting` interceptor now provided in setting
 [%collapsible]
 ====
-
 The original URL rewritten in the `onPreRouting` interceptor is now
 provided in the `KibanaRequest.rewrittenUrl` property.
 
 *via https://github.com/elastic/kibana/pull/80810[#80810]*
-
 ====
 
 [[breaking_plugin_v7.11.0_78352]]
 .API added for index pattern edit field formatter
 [%collapsible]
 ====
-
 These methods were added for setting field formatters: `indexPattern.setFieldFormat` and `indexPattern.deleteFieldFormat`.
 `indexPattern.getFormatterForFieldNoDefault` was also added, which is used by the management interface.
 
 *via https://github.com/elastic/kibana/pull/78352[#78352]*
-
 ====
 
 [[breaking_plugin_v7.11.0_76889]]
 .Client side session service introduced
 [%collapsible]
 ====
-
 This PR introduces the frontend session management service
 and integrates it into Discover
 by initializing a session before fetching fresh data from the server.
@@ -365,14 +329,12 @@ This PR also uses the session service to show the timeout
 error once per session instead of using a debounce.
 
 *via https://github.com/elastic/kibana/pull/76889[#76889]*
-
 ====
 
 [[breaking_plugin_v7.11.0_74640]]
 .New audit logging events and event filtering added
 [%collapsible]
 ====
-
 The following audit events are logged when enabled:
 
 - `user_login`
@@ -386,5 +348,4 @@ The following audit events are logged when enabled:
 - `saved_object_delete_from_spaces`
 
 *via https://github.com/elastic/kibana/pull/74640[#74640]*
-
 ====

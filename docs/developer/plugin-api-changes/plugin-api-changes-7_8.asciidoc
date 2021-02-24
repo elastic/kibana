@@ -1,15 +1,11 @@
-[[breaking-changes-7.8]]
-== Breaking changes in 7.8
+[[general-plugin-API-changes-78]]
+== Plugin API changes in 7.8
 ++++
 <titleabbrev>7.8</titleabbrev>
 ++++
 
-This page discusses the breaking changes for plugin developers that you need to be aware of when migrating
-your application to Kibana 7.8.
-
-[float]
-[[general-plugin-API-changes-78]]
-=== Breaking changes for plugin developers
+This page discusses the plugin API changes that you need to be aware of when migrating
+your application to {kib} 7.8.
 
 [[breaking_78_actions_api]]
 .The actions API endpoint changed
@@ -31,7 +27,7 @@ The following action plugin REST APIs changed so that they are consistent with t
 
 ====
 
-
+[discrete]
 [[breaking_78_canvas]]
 .Canvas applications now run on the new {kib} platform
 [%collapsible]
@@ -44,6 +40,7 @@ Canvas functionality must also move to the Kibana Platform to continue extending
 
 ====
 
+[discrete]
 [[breaking-78-filter-expression-function]]
 .The `filter` function uses `filterType` instead of `type`
 [%collapsible]
@@ -73,6 +70,7 @@ After this change, all expression values will consistently use `type` to determi
 
 ====
 
+[discrete]
 [[breaking_78_redirect-to-full-path]]
 .Calling `navigateToApp` to a legacy app redirects to full path
 [%collapsible]
@@ -84,6 +82,7 @@ application now retains the `path` specified.
 
 ====
 
+[discrete]
 [[breaking_78_remove_aggs]]
 .The legacy aggs APIs were removed
 [%collapsible]
@@ -122,6 +121,7 @@ search.aggs.convertIPRangeToString,
 
 ====
 
+[discrete]
 [[breaking_78_update_default_path]]
 .Applications are now allowed to define and update a `defaultPath`
 [%collapsible]
@@ -155,6 +155,7 @@ appUpdater.next(() => ({ defaultPath: '/some-updated-path' }));
 
 ====
 
+[discrete]
 [[breaking_78_cache_busting]]
 .Static assets are now served under a release-specific URL
 [%collapsible]
@@ -175,6 +176,7 @@ http://localhost:5601/bundles/8467/plugin/dashboard/dashboard.plugin.js
 
 ====
 
+[discrete]
 [[breaking_78_add_example_plugins]]
 .Example plugins are now allowed in X-Pack
 [%collapsible]
@@ -191,6 +193,7 @@ yarn start --run-examples
 
 ====
 
+[discrete]
 [[breaking_78_improves_drilldows]]
 .`action.getHref()` has improvements for drilldowns
 [%collapsible]
@@ -204,6 +207,7 @@ yarn start --run-examples
 
 ====
 
+[discrete]
 [[breaking_78_scopedhistory]]
 .State syncing utils now support `ScopedHistory`
 [%collapsible]
@@ -215,6 +219,7 @@ State syncing utils now seamlessly support the platform's `ScopedHistory`.
 
 ====
 
+[discrete]
 [[breaking_78_tsvb]]
 .Configuration properties were removed from TSVB
 [%collapsible]
@@ -231,6 +236,7 @@ properties for TSVB.
 
 ====
 
+[discrete]
 [[breaking_add_subservice]]
 .The `HttpResources` service is available for responding to requests
 [%collapsible]
@@ -258,6 +264,7 @@ httpResources.register({ path: 'my_app/bar', validate: false }, (context, req, r
 
 ====
 
+[discrete]
 [[breaking_delete_embeddable_plugin]]
 .The legacy `embeddable_api` plugin has been removed
 [%collapsible]
@@ -323,6 +330,7 @@ either a required or optional dependency in your `kibana.json`:
 
 ====
 
+[discrete]
 [[breaking_move_to_data_plugin]]
 .`src/legacy/server/index_patterns` has moved to data plugin
 [%collapsible]
@@ -340,6 +348,7 @@ in `src/core/MIGRATION.md`.
 
 ====
 
+[discrete]
 [[breaking_78_static_assets]]
 .Static assets are now served from the new platform
 [%collapsible]
@@ -352,6 +361,7 @@ The {kib} Platform serves plugin static assets from the
 
 ====
 
+[discrete]
 [[breaking_78_refactor_connectors]]
 .Connectors have been refactored
 [%collapsible]

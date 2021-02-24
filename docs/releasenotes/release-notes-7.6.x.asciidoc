@@ -1,0 +1,534 @@
+[[release-notes-7.6.2]]
+== {kib} 7.6.2
+
+For detailed information about the {kib} 7.6.2 release, review the following information.
+
+[float]
+[[breaking-changes-v7.6.2]]
+=== Breaking changes
+
+For information about the breaking changes, refer to the <<breaking-changes-7.6,breaking changes in 7.6>>.
+
+[float]
+[[known-issue-7.6.2]]
+=== Known issue
+
+Configuration::
+* The `server.customResponseHeaders` option prevents {kib} from starting if headers are set using a type other than string.
+To fix this, convert your boolean and number headers to strings.  For example, use`my-header: "true"` instead of `my-header: true`.
+{kib-issue}66146[#66146]
+
+[float]
+[[bug-7.6.2]]
+=== Bug fixes
+Discover::
+* Fixes infinite loop for view single document on discover {kib-pull}60236[#60236]
+Machine Learning::
+* Shows view series link in anomalies table for machine_learning_user role {kib-pull}59549[#59549]
+* Fixes bucket span estimators loading of max_buckets setting {kib-pull}59639[#59639]
+Management::
+* Improperly defined Watcher Logging Action text parameters will now be handled elegantly by {kib} instead of causing {kib} to crash {kib-pull}60169[#60169]
+* Fixes the namespace for indices autocompletion {kib-pull}59043[#59043]
+* We fixed a bug in Console's proxy that would always override the "host" header {kib-pull}59143[#59143]
+* Spacing between rendered shards {kib-pull}60238[#60238]
+Maps::
+* Adds missing license to requests in maps embeddables {kib-pull}59207[#59207]
+* Fixes custom color ramp on save {kib-pull}59953[#59953]
+Metrics::
+* Ensures inventory view buckets never drop below 60 seconds {kib-pull}58503[#58503]
+Monitoring::
+* Ensures we use the monitoring cluster for retrieving xpack info {kib-pull}59075[#59075]
+Operations::
+* Fixes the watchers usage in the log rotation {kib-pull}60956[#60956]
+Platform::
+* Edits to filter's custom label are ignored {kib-pull}59169[#59169]
+* Fixes a bug that could cause saved object migrations to fail when an {es} snapshot is currently in progress {kib-pull}58884[#58884]
+Security::
+* Fixes base path prepending for session storage short url redirects {kib-pull}59871[#59871]
+SIEM::
+* Default the Timeline events filter to show All events {kib-pull}58953[#58953]
+* Fixes dragging entries to the Timeline while data is loading may trigger a partial page reload {kib-pull}59476[#59476]
+* Detection Fix typo in Adobe Hijack Persistence rule {kib-pull}58804[#58804]
+* Fixes rule delete/duplicate actions {kib-pull}59306[#59306]
+* Fixes minor UI bug on all rules table pagination {kib-pull}59094[#59094]
+Visualizations::
+* Adds validation support for legacy filter values {kib-pull}58436[#58436]
+* Fixes text color when using custom background color {kib-pull}60261[#60261]
+
+[[release-notes-7.6.1]]
+== {kib} 7.6.1
+
+For detailed information about the {kib} 7.6.1 release, review the following information.
+
+[float]
+[[security-fix-7.6.1]]
+=== Security issues
+In {kib} 7.6.0 and earlier, Node.js contains the following security issues:
+
+* The TLS handling code for Node.js includes a Denial of Service (DoS) issue. Successful exploitation of the flaw could result in {kib} crashing. Refer to  https://www.elastic.co/community/security/, CVE-2019-15604.
++
+There are no known workarounds for this issue.
+
+* There are issues with how Node.js handles malformed HTTP headers. The malformed headers could result in an HTTP request smuggling attack when {kib} is running behind a proxy that is vulnerable to HTTP request smuggling attacks. Refer to https://www.elastic.co/community/security/, CVE-2019-15605 and CVE-2019-15606.
++
+For instructions on how to mitigate HTTP request smuggling attacks, contact your proxy vendor.
+
+Administrators running {kib} in an environment with untrusted users should upgrade to {kib} 7.6.1, which updates Node.js to 10.19.0.
+
+[float]
+[[breaking-changes-v7.6.1]]
+=== Breaking changes
+
+For information about the breaking changes, refer to the <<breaking-changes-7.6,breaking changes in 7.6>>.
+
+[float]
+[[known-issue-7.6.1]]
+=== Known issue
+
+Configuration::
+* The `server.customResponseHeaders` option prevents {kib} from starting if headers are set using a type other than string.
+To fix this, convert your boolean and number headers to strings. For example, use `my-header: "true"` instead of `my-header: true`.
+{kib-issue}66146[#66146]
+
+[float]
+[[enhancement-7.6.1]]
+=== Enhancements
+SIEM::
+* Imports rules unit tests {kib-pull}57466[#57466]
+
+[float]
+[[bug-7.6.1]]
+=== Bug fixes
+APM::
+* Fixes cloud env in APM tutorial {kib-pull}57817[#57817]
+* Adds `xpack.apm.enabled` key to config schema {kib-pull}57539[#57539]
+* X-axis labels on Error occurrences chart are incorrect based on {kib} timezone {kib-pull}55686[#55686]
+Canvas::
+*  Sanitizes workpad before sending to API {kib-pull}57704[#57704]
+Lens and visualizations::
+* Fixes bugs in Lens filters (#56441) {kib-pull}56648[#56648]
+* Makes field stats work for index patterns without time fields {kib-pull}56759[#56759]
+* Fixes auto refresh in visualizations and Lens {kib-pull}57667[#57667]
+Machine Learning::
+* Fixes Data Visualizer responsive layout  {kib-pull}56372[#56372]
+* Fixes overall stats for saved search on the Data Visualizer page {kib-pull}57312[#57312]
+* Fixes jobs list default refresh {kib-pull}57086[#57086]
+* Updates schema definition for create route {kib-pull}56979[#56979]
+* Fixes brush visibility. {kib-pull}57564[#57564]
+* Fixes chart resize after browser refresh {kib-pull}57578[#57578]
+* Fixes hiding date picker for settings pages {kib-pull}57544[#57544]
+Management::
+* Allows support for nested multi-fields {kib-pull}58203[#58203]
+* Fixes performance bottleneck for large JSON payloads {kib-pull}57668[#57668]
+* Fixes filter deprecations search filter {kib-pull}57541[#57541]
+Maps::
+* Sets filter.meta.key to geoFieldName so query passes filterMatchesIndex when ignoreFilterIfFieldNotInIndex is true {kib-pull}56692[#56692]
+* Fixes document source top hits split by scripted field {kib-pull}57481[#57481]
+* Only request field in docvalue_fields when the field supports doc values {kib-pull}57372[#57372]
+Monitoring::
+* Fixes issue when index pattern has no fields {kib-pull}58242[#58242]
+* Fixes inaccuracies in Logstash pipeline listing metrics {kib-pull}55868[#55868]
+Platform::
+* Limits fetching index patterns {kib-pull}56603[#56603]
+* Fixes browser date format {kib-pull}57714[#57714]
+* Prepends basePath in getUrlForApp {kib-pull}57316[#57316]
+* Uses app id instead of pluginId to generate navlink from legacy apps {kib-pull}57542[#57542]
+* Retries ES API calls that fail with 410/Gone to prevent {kib} from crashing at startup {kib-pull}56950[#56950]
+* Removes injected reference from home app {kib-pull}57836[#57836]
+Security::
+* Logout should redirect to the login screen at the server base path {kib-pull}56786[#56786]
+* Adds xpack.encryptedSavedObjects.encryptionKey to docker allow-list {kib-pull}58291[#58291]
+* Fixes short url in spaces {kib-pull}58313[#58313]
+SIEM::
+* Backend end-to-end tests {kib-pull}57166[#57166]
+* Removes internal tags when copying signals from rules {kib-pull}57744[#57744]
+* Fixes return codes where some were rule_id instead of id {kib-pull}57939[#57939]
+* Fixes Host Details Events Table to only show events for specified Host {kib-pull}57388[#57388]
+Uptime::
+* Uses scripted metric for snapshot calculation {kib-pull}58247[#58247]
+
+[[release-notes-7.6.0]]
+== {kib} 7.6.0
+
+For detailed information about the Kibana 7.6.0 release, review the following information.
+
+[[breaking-changes-7.6]]
+=== Breaking changes
+
+There are no breaking changes in 7.6.0.
+
+// The following section is re-used in the Installation and Upgrade Guide
+//tag::notable-breaking-changes[]
+
+// end::notable-breaking-changes[]
+
+[float]
+[[deprecation-7.6.0]]
+=== Deprecations
+Metrics::
+* Deprecates the override fields in settings {kib-pull}54206[#54206]
+Security::
+* Additional validation for elasticsearch username {kib-pull}48247[#48247]
+
+[float]
+[[known-issue-7.6.0]]
+=== Known issues
+
+* When you use the default `dateFormat:tz: browser` setting, the timestamps appear in UTC instead of the local time of the user browser. To use the local time of the user browser, set `dateFormat:tz:` to the timezone of the user. {kib-issue}57457[#57457]
+* The `server.customResponseHeaders` option prevents {kib} from starting if headers are set using a type other than string.
+To fix this, convert your boolean and number headers to strings. For example, use `my-header: "true"` instead of `my-header: true`.
+{kib-issue}66146[#66146]
+
+[float]
+[[enhancement-7.6.0]]
+=== Enhancements
+APM::
+* Updates apm index pattern {kib-pull}54095[#54095]
+* Adds service name to jvm {kib-pull}50830[#50830]
+* Adds filter option to Metadata table {kib-pull}48520[#48520]
+* Updates Error occurrences graph tooltip to display start and end for bucket period {kib-pull}49638[#49638]
+* Pagination of top 10 trace samples {kib-pull}51911[#51911]
+* Makes it possible to link directly to a trace with just the trace.id {kib-pull}51450[#51450]
+* Transaction page throws unhandled exception if transactions doesn't have  `http.request` {kib-pull}53760[#53760]
+* Adds `message` fields to metadata table {kib-pull}54017[#54017]
+* Shows errors on the timeline instead of under the transaction {kib-pull}53756[#53756]
+* Traces with identical transactions names are combined, even though they are from different services {kib-pull}54247[#54247]
+* Uses indexPatternsService for kuery bar suggestions {kib-pull}49169[#49169]
+* Migrates server routes to NP {kib-pull}49455[#49455]
+* Adds `service.version` filter to transaction views {kib-pull}52748[#52748]
+* Adds version annotations to timeseries charts {kib-pull}52640[#52640]
+* Error stack trace improvements {kib-pull}49254[#49254]
+* Performance comparison charts by user agent (browser) {kib-pull}49582[#49582]
+* Adds UI Indices runtime configuration {kib-pull}48079[#48079]
+* Updates apm index pattern {kib-pull}54693[#54693]
+* Clears cache when updating indices via UI {kib-pull}51767[#51767]
+Canvas::
+* Enables Embeddable maps {kib-pull}53971[#53971]
+* Uses compressed forms in sidebar {kib-pull}49419[#49419]
+Dashboard::
+* Redesigns empty screen {kib-pull}53681[#53681]
+* Adds visualization from dasbhoard empty screen {kib-pull}52670[#52670]
+* Redesigns empty screen in readonly mode {kib-pull}54073[#54073]
+* Adds Lens to Dashboard {kib-pull}53110[#53110]
+* Improves &quot;Create new&quot; UI in dashboard {kib-pull}49189[#49189]
+Discover::
+* Refactors discover index pattern selector to Lens `ChangeIndexPattern` Component {kib-pull}51973[#51973]
+* Adds nested field support to KQL {kib-pull}47070[#47070]
+* Supports nested fields in existing filter types {kib-pull}49537[#49537]
+* Disables/enables filter with click+shift on a filter badge {kib-pull}52751[#52751]
+* Possibility to filter when testing scripted fields (#35379) {kib-pull}44220[#44220]
+* Adds label and icon to nested fields in the doc table {kib-pull}54199[#54199]
+Graph::
+* Improves error message on graph requests {kib-pull}54230[#54230]
+* Adds sample data {kib-pull}54558[#54558]
+Lens::
+* Allows numeric terms aggs {kib-pull}50177[#50177]
+* Adds support for scripted fields and default index pattern {kib-pull}53948[#53948]
+* Loads Lens together with kibana app {kib-pull}50164[#50164]
+* Disables saving visualization until there are no changes to the document {kib-pull}52982[#52982]
+* Adds clear layer feature {kib-pull}53627[#53627]
+* Adds support for scripted fields and aliases to the existence API {kib-pull}54064[#54064]
+Logs::
+* Log rate setup index validation {kib-pull}50008[#50008]
+* Adds categories table to the categorization tab {kib-pull}53004[#53004]
+* Disables ML job setup form while setup is pending {kib-pull}54705[#54705]
+Machine Learning::
+* Updates Anomaly Detection job wizard button styles, page panel and titles {kib-pull}53340[#53340]
+* Improves processing of groups in data recognizer wizard {kib-pull}49310[#49310]
+* Indicates missing required privileges for import in File Data Visualizer {kib-pull}50147[#50147]
+* Stats bar for data frame analytics {kib-pull}49464[#49464]
+* Adds the job message tab to data frame analytics {kib-pull}50468[#50468]
+* Reactive time-range selection in Single Metric Viewer {kib-pull}51008[#51008]
+* Adds Custom URLs and Calendars to the Job wizards {kib-pull}51281[#51281]
+* Performs cardinality check on enabling the model plot {kib-pull}51915[#51915]
+* Fetches the latest job messages and enables sorting by time {kib-pull}52388[#52388]
+* Persists the time range brush when expanded to full width {kib-pull}54020[#54020]
+* Supports search for partitions on Single Metric Viewer {kib-pull}53879[#53879]
+* APM modules configs for RUM Javascript and NodeJS {kib-pull}53792[#53792]
+* Model memory limit calculator enhancements for multi-metric job wizard  {kib-pull}54573[#54573]
+* Data Visualizer redesign {kib-pull}54358[#54358]
+* Formatting for additional timing and model size stats {kib-pull}55062[#55062]
+* Adds ML node warning to overview and analytics pages {kib-pull}50766[#50766]
+* Enables lat_long detector function in advanced wizard {kib-pull}50787[#50787]
+* Categorization wizard {kib-pull}53009[#53009]
+* Regression results view {kib-pull}49667[#49667]
+* Auto-populate model_memory_limit {kib-pull}50714[#50714]
+* Reruns evaluate endpoint for search bar queries {kib-pull}50991[#50991]
+* Adds search bar {kib-pull}51235[#51235]
+* Creates classification jobs via the UI {kib-pull}51619[#51619]
+* Adds description field to job creation and display in jobs list {kib-pull}52217[#52217]
+* Creates classification jobs results view {kib-pull}52584[#52584]
+* Adds 'excludes' input field to form {kib-pull}53856[#53856]
+* Adds link to docs {kib-pull}54189[#54189]
+* Uses field caps api to set column type {kib-pull}54543[#54543]
+* Truncates text in Overview page 'Latest timestamp' column {kib-pull}50004[#50004]
+* Color Range Legend component {kib-pull}52794[#52794]
+Management::
+* Support scheme field when creating a Threshold alert with a Webhook action {kib-pull}53757[#53757]
+* Adds Mappings Editor to Index Template Wizard {kib-pull}47562[#47562]
+* SearchProfiler to NP {kib-pull}48795[#48795]
+* Upgrade Assistant to New Platform Ready {kib-pull}50163[#50163]
+* License Management to New Platform {kib-pull}51886[#51886]
+* New Platform (NP) Migration {kib-pull}50908[#50908]
+* Console with better SQL support {kib-pull}51446[#51446]
+* Allows User to Cleanup Repository from UI  {kib-pull}53047[#53047]
+* Updates advanced settings text for usage data {kib-pull}52657[#52657]
+Maps::
+* Makes grid rectangles the default symbolization for geo grid source {kib-pull}50169[#50169]
+* Focuses inputs when editor opens popovers {kib-pull}51487[#51487]
+* Uses style metadata to calculate symbolization bands {kib-pull}51713[#51713]
+* Better style defaults {kib-pull}52420[#52420]
+* Vector style UI redesign {kib-pull}53946[#53946]
+* Allows editing EMS basemap selection {kib-pull}53631[#53631]
+* Adds text halo color and width style properties {kib-pull}53827[#53827]
+* Adds labels to sample data maps {kib-pull}54671[#54671]
+* Adds categorical styling {kib-pull}54408[#54408]
+* Hides map visualization types with default kibana.yml settings {kib-pull}49103[#49103]
+* Hides header panel in embeddable panel {kib-pull}50728[#50728]
+Metrics::
+* Calculates interval based on the dataset's period {kib-pull}50194[#50194]
+* Ports graphql query for snapshot and node details to hapijs {kib-pull}50730[#50730]
+* Adds ability to filter snapshot view by account and region {kib-pull}53307[#53307]
+* Adds inventory metadata api with regions and accounts {kib-pull}52660[#52660]
+* Removes graphql types {kib-pull}54176[#54176]
+* Adds AWS Metricsets to Inventory Models {kib-pull}49983[#49983]
+Monitoring::
+* Fetches shard data more efficiently {kib-pull}54028[#54028]
+* Displays APM server memory in bytes {kib-pull}54275[#54275]
+Operations::
+* Adds support for log rotation  {kib-pull}49750[#49750]
+Monitoring::
+* h1 elements for accessibility {kib-pull}52276[#52276]
+Platform::
+* Allows routes to define some payload config values {kib-pull}50783[#50783]
+* Moves IndexPatterns into the NP {kib-pull}51199[#51199]
+* Moves configuration validation to new platform {kib-pull}51880[#51880]
+* Improves &quot;Browser client is out of date&quot; error message {kib-pull}50296[#50296]
+Reporting::
+* Converts main Reporting index to TS {kib-pull}49129[#49129]
+* Removes any types and references to Hapi {kib-pull}49250[#49250]
+* Updates some runtime validations {kib-pull}53975[#53975]
+Security::
+* Role Mappings UI {kib-pull}53620[#53620]
+* Adds message to login page {kib-pull}51557[#51557]
+* Updates Node.js to version 10.18.0 {kib-pull}52865[#52865]
+* Improves session idle timeout, add session lifespan {kib-pull}49855[#49855]
+* Adds support for certificates in PKCS#12 (P12) key stores {kib-pull}53810[#53810]
+SIEM::
+* New Overview Page {kib-pull}54783[#54783]
+* Adds DNS histogram {kib-pull}50409[#50409]
+* Adds alerts table {kib-pull}51959[#51959]
+* Histogram enhancement {kib-pull}54544[#54544]
+* Dns histogram enhancement {kib-pull}54902[#54902]
+* Tests for search_after and bulk index {kib-pull}50129[#50129]
+* Adds ecs threat properties to rules {kib-pull}51782[#51782]
+* Sets Signal status open closed REST API {kib-pull}52356[#52356]
+* Search signals index {kib-pull}52661[#52661]
+* Adds created_at and updated_at timestamps to rules {kib-pull}53137[#53137]
+* Rule Status Monitoring {kib-pull}54452[#54452]
+* Adds filtering abilities to the KQL REST API {kib-pull}49451[#49451]
+* REST API Additions {kib-pull}50514[#50514]
+* REST API improvements and changes from UI/UX feedback {kib-pull}50797[#50797]
+* Adds of risk score, output index, rule copying, and more  {kib-pull}51190[#51190]
+* Adds signal data index per spaces through index naming conventions {kib-pull}52237[#52237]
+* Adds privileges API endpoint {kib-pull}52707[#52707]
+* Adds a tags service and optimizes alert_id lookups {kib-pull}52838[#52838]
+* Adds prepackaging rules capability {kib-pull}53062[#53062]
+* Adds timeline_id string to rules {kib-pull}53343[#53343]
+* Bulk REST API for create, update, and delete {kib-pull}53543[#53543]
+* Import/Export REST endpoints {kib-pull}54332[#54332]
+* Time gap detection and logging {kib-pull}54547[#54547]
+* Adds Rules Table {kib-pull}50839[#50839]
+* Adds Signals Table and additional configuration options to StatefulEventsViewer {kib-pull}52044[#52044]
+* Adds support for apm-* to the network map {kib-pull}54876[#54876]
+* HTTP Requests table {kib-pull}49955[#49955]
+* Adds Authentications histogram {kib-pull}48260[#48260]
+* Adds hosts and network anomalies histogram {kib-pull}50295[#50295]
+* Detection engine placeholders {kib-pull}50220[#50220]
+* Adds SavedQuery in Timeline {kib-pull}49813[#49813]
+* Adds creation rule {kib-pull}51376[#51376]
+* Adds edit on rule creation {kib-pull}51670[#51670]
+* Adds MITRE ATT&amp;CK {kib-pull}52398[#52398]
+* Details and Edit view for a rule {kib-pull}53252[#53252]
+* Permission II {kib-pull}54292[#54292]
+* Adds status to rule details {kib-pull}54812[#54812]
+* From signals to timeline {kib-pull}54769[#54769]
+* Detections create prepackage rules {kib-pull}55403[#55403]
+* Feedback to user about generated encryption key {kib-pull}56464[#56464]
+Uptime::
+* Updates snapshot counts {kib-pull}48035[#48035]
+* Migrates Uptime server routing to new platform {kib-pull}51125[#51125]
+* Adds tags dropdown to Overview filters group {kib-pull}50837[#50837]
+* New monitor list expanded row {kib-pull}46567[#46567]
+* Adds options to disable zoom, hide tool tips, widgets/overlays in embeddable maps {kib-pull}50663[#50663]
+* New details panel and location map {kib-pull}50518[#50518]
+* Lists external linking {kib-pull}53098[#53098]
+* Monitor details page left side title {kib-pull}53529[#53529]
+* Monitor SSL Certificate Color version for warning {kib-pull}54040[#54040]
+
+[float]
+[[bug-7.6.0]]
+=== Bug fixes
+APM::
+* Upgrades APM migration script v1 support {kib-pull}52824[#52824]
+* Adds missing semi-colon to styled component {kib-pull}51436[#51436]
+* Quick fix for ACM to ensure more than 10 items are displayed {kib-pull}52262[#52262]
+* Sets no of ticks based on available width for chart {kib-pull}50904[#50904]
+* Make sure errors per minute are reported correctly {kib-pull}54751[#54751]
+* Fixes firefox SVG NaN errors when rendering charts {kib-pull}56578[#56578]
+* Fixes initial error sort field {kib-pull}56577[#56577]
+* Empty message &quot;No data available&quot; for Labels and User metadata sections missing {kib-pull}49846[#49846]
+Canvas::
+* Fixes axisConfig position argument UI {kib-pull}50717[#50717]
+* Fixes #45896 {kib-pull}50229[#50229]
+* Fixes bugs with full screen filters {kib-pull}54792[#54792]
+* Fixes the Copy Post Url link {kib-pull}54831[#54831]
+* Fixes color and toggle accessibility {kib-pull}54661[#54661]
+Dashboard::
+* Removes double handler {kib-pull}53707[#53707]
+* Decodes url params, so they are not encoded twice {kib-pull}54738[#54738]
+* Changes background color to align with EUI color {kib-pull}54060[#54060]
+* Fixes hide 'edit' button for mobile for dashboards {kib-pull}50639[#50639]
+Discover::
+* Fixes histogram min interval {kib-pull}53979[#53979]
+* Improves kql error message handling and avoid fetching twice {kib-pull}54239[#54239]
+* Fixes double fetch errors {kib-pull}54701[#54701]
+* Fixes pagination controls should not scroll horizontally for saved search {kib-pull}50764[#50764]
+* Don't throw exception when refreshing fields of an index pattern {kib-pull}55836[#55836]
+* Fixes filter pill label for filters with negated alias {kib-pull}50743[#50743]
+* Filters scripted fields preview field list to source fields {kib-pull}53826[#53826]
+* Fixes operator overflowing out popover {kib-pull}50030[#50030]
+Graph::
+* Only show explorable fields {kib-pull}54101[#54101]
+Lens::
+* Modifies merge tables to use the same logic as auto date {kib-pull}52931[#52931]
+* Selects Records field when count operation is chosen {kib-pull}53911[#53911]
+* Shows keyword fields for pre-7.3 index patterns {kib-pull}52410[#52410]
+* Fixes sorting crash when removing a Y axis that is being used for sorting {kib-pull}52694[#52694]
+* Shows fields when using index pattern without time field {kib-pull}54804[#54804]
+* Fixes bugs in Lens filters {kib-pull}56441[#56441]
+Logs::
+* Adds missing headers in Logs &amp; metrics {kib-pull}52405[#52405]
+* Uses the correct icons and labels in the feature cont… {kib-pull}55292[#55292]
+* Allows Logs/ML integration result access with machine… {kib-pull}55884[#55884]
+* Fixes the scale of the search markers {kib-pull}55731[#55731]
+Machine Learning::
+* Fixes escape special characters for Lucene query language   {kib-pull}50494[#50494]
+* Keeps rule editor flyout open on refresh {kib-pull}53458[#53458]
+* Fixes counters and percentages for array fields on the Data Visualizer page {kib-pull}55209[#55209]
+* Fixes tooltip's persistence on mouse leave {kib-pull}55694[#55694]
+* Fixes Anomaly Explorer swimlane tooltip issue  {kib-pull}55827[#55827]
+* Fixes the annotation area tooltip offset {kib-pull}55955[#55955]
+* Fixes info content detector field selection {kib-pull}51914[#51914]
+* Job validation loading spinner {kib-pull}54450[#54450]
+* Improves job wizards with datafeed aggregations {kib-pull}55180[#55180]
+* Fixes missing job_type in job messages search {kib-pull}55330[#55330]
+* Fixes module setup error for insufficient index pattern privileges {kib-pull}55989[#55989]
+* Ensures advanced editor can be validated when empty {kib-pull}52831[#52831]
+* Ensures advanced editor validates model memory unit correctly {kib-pull}54011[#54011]
+* Ensures result field columns can be deselected and re-selected {kib-pull}54766[#54766]
+* Only render tablist if it contains tabs {kib-pull}54838[#54838]
+* Improves handling of text fields {kib-pull}55002[#55002]
+* Filters out docs with no prediction data from results table {kib-pull}54826[#54826]
+* Fixes word wrap in Overview page sidebar on IE {kib-pull}50668[#50668]
+* Fixes lat_long anomalies table links menu and value formatting {kib-pull}50916[#50916]
+* Fixes loading of Data Visualizer with KQL saved search {kib-pull}51882[#51882]
+* Corrects URL of the create job tips docs page {kib-pull}53576[#53576]
+* Displays anomaly actual in chart tooltip when model plot enabled {kib-pull}54364[#54364]
+* Fixes permissions checks for Data Visualizer create job links {kib-pull}55431[#55431]
+* Fixes empty table header cell and duplicate ID accessibility issues {kib-pull}54917[#54917]
+* Accessibility fix for structural markup on table rows {kib-pull}55075[#55075]
+Management::
+* {kib} should allow a min_age setting of 0ms in ILM policy phases {kib-pull}53719[#53719]
+* Adds try/catch when parsing index filter from URI {kib-pull}56051[#56051]
+* Passes termOrder and hasTermsAgg properties to serializeThresholdWatch function {kib-pull}54391[#54391]
+* Adds support for capitalized date formats in snapshot names {kib-pull}53751[#53751]
+* Index Lifecycle Policies show wrong unit in {kib} UI {kib-pull}55228[#55228]
+* Theme and Mode imports {kib-pull}50473[#50473]
+* Proxy fallback {kib-pull}50185[#50185]
+* Fixes load from remote {kib-pull}52814[#52814]
+* Fixes suggested value for time_zone in range query {kib-pull}53841[#53841]
+* Handle double quote special case {kib-pull}54474[#54474]
+* Fixes handling of bad profile data and update tab behavior {kib-pull}55806[#55806]
+* Fixes icon path in tutorial introduction {kib-pull}49684[#49684]
+* Fixes index templates editor to support mappings types {kib-pull}55804[#55804]
+Maps::
+* Fixes regression preventing maps telemetry from populating &amp; remove task manager logic {kib-pull}52834[#52834]
+* Categorical palettes {kib-pull}54918[#54918]
+* Do not re-fetch data on empty filter setting changes {kib-pull}49382[#49382]
+* Fixes removal of multi fields for tooltip field selection {kib-pull}49816[#49816]
+* Prevents users from overflowing URL when filtering by shape {kib-pull}50747[#50747]
+* Only provide visibility check when vector layer has joins {kib-pull}51388[#51388]
+* Fixes too_many_buckets_exception for top hits {kib-pull}51497[#51497]
+* Only show styles that apply to layer feature types in legend {kib-pull}52335[#52335]
+* Fixes tooltips for CCS {kib-pull}52793[#52793]
+* Passes getFieldFormatter to DynamicTextProperty {kib-pull}53937[#53937]
+* Expands extent filter to tile boundaries {kib-pull}54276[#54276]
+* Fixes warning about missing key in react element {kib-pull}55372[#55372]
+* Fixes join metric field selection bugs {kib-pull}56044[#56044]
+* Adds mapbox-gl-rtl-text library for RTL languages {kib-pull}54842[#54842]
+* Ensures the query-object is populated {kib-pull}49917[#49917]
+* Delays vector tile layer syncing until spritesheet is loaded {kib-pull}48955[#48955]
+* Sanitizes attribution {kib-pull}52309[#52309]
+* Only show legend when layer is visible {kib-pull}53781[#53781]
+* Shows custom color ramps in legend {kib-pull}53780[#53780]
+* Enforces file-type check in file dialog {kib-pull}55063[#55063]
+Metrics::
+* Fixes Metrics Explorer exception when deleting metric {kib-pull}55893[#55893]
+* Fixes title truncation in Metrics Explorer {kib-pull}55917[#55917]
+* Passes relevant shouldAllowEdit capabilities into SettingsPage {kib-pull}49781[#49781]
+* Don't allow duplicate saved views with the same name {kib-pull}52040[#52040]
+* Adds aria labels to fields {kib-pull}54510[#54510]
+Monitoring::
+* Fixes Logstash pipelines page in multi-cluster environment {kib-pull}50166[#50166]
+* Improves permissions required around setup mode {kib-pull}50421[#50421]
+* Adds error state for unstructured logs {kib-pull}53299[#53299]
+* Ensures setup mode work in a CCS environment {kib-pull}54361[#54361]
+* Clarifies that these auth settings are for sending data {kib-pull}48437[#48437]
+Operations::
+* Adds missing docker settings {kib-pull}56411[#56411]
+* Prevents xpack.task_manager.index being set to .tasks {kib-pull}52002[#52002]
+Platform::
+* Displays changed field formats without requiring hard page refresh. {kib-pull}52874[#52874]
+* {kib} 7.0.0 URL field formatter doesn't render relative hyperlinks properly {kib-pull}53265[#53265]
+* Interpreter conversion of string to number should throw on NaN #27788 {kib-pull}50063[#50063]
+* Cancels discarded KQL value suggestion requests {kib-pull}51411[#51411]
+* Performs successful Elasticsearch version check before migrations {kib-pull}51311[#51311]
+Reporting::
+* Do not fail the report if request is aborted {kib-pull}52344[#52344]
+* Fixes map tiles not loading by using Chrome's Remote Protocol {kib-pull}55137[#55137]
+* Corrects the docvalue_fields params in the search query Download CSV from Dashboard Panel {kib-pull}52833[#52833]
+Security::
+* Uses the server's basePath when building the SAML ACS {kib-pull}51391[#51391]
+* Fixes elasticsearch.ssl.alwaysPresentCertificate default {kib-pull}52242[#52242]
+* Forces line-break if username is a solid long string {kib-pull}50807[#50807]
+* Fixes infinite redirect loop when multiple cookies are sent {kib-pull}50452[#50452]
+* Honors configured base path when logging out {kib-pull}50946[#50946]
+SIEM::
+* Fixes Empty `Source` / `Destination` shown when only ports are populated {kib-pull}50843[#50843]
+* Removes placeholder from pinned event tooltips {kib-pull}52361[#52361]
+* Adds filter feature and fixes misc bugs around false values {kib-pull}50999[#50999]
+* Fixes a bug to allow empty query string when filters are set {kib-pull}51398[#51398]
+* Adds signal to ECS event.kind and fixes status in signals  {kib-pull}51772[#51772]
+Uptime::
+* Removes react-router-dom warning in browse {kib-pull}52008[#52008]
+* Fixes broken functional tests in `master` {kib-pull}54395[#54395]
+* Donut chart loader position centered vertically  {kib-pull}50219[#50219]
+* Fixes monitor list pagination arrows {kib-pull}51912[#51912]
+* Expanded list update most recent error timestamp {kib-pull}51935[#51935]
+* Feature/monitor details view avoid empty column {kib-pull}51892[#51892]
+* Feature/expandable row in details ping list {kib-pull}51890[#51890]
+* Date picker will use commonly used ranges from advance settings {kib-pull}52944[#52944]
+* Fixes broken Duration chart on Monitor Page {kib-pull}54251[#54251]
+* Ping List Disable expand row if no body present {kib-pull}54898[#54898]
+* Fixes Date Range picker stop refresh button {kib-pull}55499[#55499]
+* Ping histogram uses auto date histogram {kib-pull}55605[#55605]
+* Uses dynamic index pattern in Uptime {kib-pull}55446[#55446]
+* Refreshes absolute date ranges for Ping Histogram {kib-pull}56381[#56381]
+Visualizations::
+* Adds domain fit option for 0 opacity TSVB line charts {kib-pull}54314[#54314]
+* Adds default filename when exporting CSV {kib-pull}54003[#54003]
+* Fixes height of CodeEditor - Safari {kib-pull}56050[#56050]
+* Fixes missing labels on certain axes and label filter configurations {kib-pull}47563[#47563]
+* Formats CSV properly {kib-pull}54127[#54127]
+* Flags nested fields as non-aggregatable {kib-pull}51774[#51774]

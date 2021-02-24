@@ -1,0 +1,40 @@
+[[release-notes-7.1.1]]
+== {kib} 7.1.1
+
+There are no {kib} changes in the 7.1.1 release.
+
+[[release-notes-7.1.0]]
+== {kib} 7.1.0
+
+For detailed information about the {kib} 7.1.0 release, review the following information.
+
+[float]
+[[breaking-changes-7.1]]
+== Breaking changes
+
+There are no {kib} breaking changes in 7.1.0.
+
+//NOTE: The notable-breaking-changes tagged regions are re-used in the
+//Installation and Upgrade Guide
+
+//tag::notable-breaking-changes[]
+
+// end::notable-breaking-changes[]
+
+[float]
+[[enhancements-7.1.0]]
+=== Enhancement
+Security::
+* Updates {kib} to support changes to licensing of security features {kib-pull}35890[#35890]
+
+[float]
+[[bug-7.1.0]]
+=== Bug fixes
+Geo::
+* Improves ES search decoding to deal with large geometries {kib-pull}36062[#36062]
+Index Lifecycle Management::
+* Fixes surface shrink action in edit form if it's already been set on the policy {kib-pull}35987[#35987]
+Machine Learning::
+* Fixes URL of link to detector function reference docs {kib-pull}35734[#35734]
+Monitoring::
+* Fixes default timestamp sort and added tests {kib-pull}35640[#35640]

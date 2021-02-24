@@ -1,0 +1,2725 @@
+[[release-notes-7.0.1]]
+== {kib} 7.0.1
+
+For detailed information about the {kib} 7.0.1 release, review the following information.
+
+[float]
+[[breaking-changes-v7.0.1]]
+=== Breaking changes
+
+For information about the breaking changes, refer to the <<breaking-changes-7.0, breaking changes in 7.0>.
+
+[float]
+[[enhancement-7.0.1]]
+=== Enhancements
+Management::
+* Enhances design for Search Profiler, including dark mode {kib-pull}33445[#33445]
+Visualize::
+* Sets a default timeout for all "waitFor" methods {kib-pull}34756[#34756]
+
+[float]
+[[bug-7.0.1]]
+=== Bug fixes
+APM::
+* Updates APM migration reindex script {kib-pull}34801[#34801]
+Canvas::
+* Recreates handlers and resets completed state on expression change {kib-pull}33900[#33900]
+* Fixes bad context check {kib-pull}35621[#35621]
+Design::
+* Updates README for KUI to note deprecation {kib-pull}34389[#34389]
+* Resets heading and p tags to EUI font reset {kib-pull}33717[#33717]
+Console::
+* Changes autocomplete suggest for `number_of_shards` to default (1) {kib-pull}35657[#35657]
+Cross-Cluster Replication::
+* Updates the Delete Remote Cluster API to support multiple comma-delimited clusters {kib-pull}34595[#34595]
+* Allows user to use CCR when security is not enabled {kib-pull}35333[#35333]
+* Retrieves paused state of follower index from ES instead of depending upon the client to provide it {kib-pull}35342[#35342]
+* Fixes filling x-axis values for date histogram {kib-pull}35247[#35247]
+Geo::
+* Updates map name in breadcrumb when changed {kib-pull}34287[#34287]
+* Filters fields properly for join right field select {kib-pull}35098[#35098]
+* Clears data load error when layer gets correct data {kib-pull}34484[#34484]
+Index Lifecycle Management::
+* Fixes crash when zero replicas configured in a phase for policy {kib-pull}34480[#34480]
+Infrastructure::
+* Fixes metrics chart tooltip alignment {kib-pull}34749[#34749]
+* Sets [System][auth] program name correctly {kib-pull}34212[#34212]
+Kibana Home & Add Data::
+* Adds documentation link to Functionbeat to fix Getting Started Guide {kib-pull}35174[#35174]
+Machine Learning::
+* Ensures cardinality warning is only shown on validity fail {kib-pull}34874[#34874]
+* Adds data-test-subj to some job management elements {kib-pull}35284[#35284]
+* Ensures `viewByFieldName` is retained on Anomaly Explorer initialize {kib-pull}35260[#35260]
+Monitoring::
+* Monitors internal telemetry collection {kib-pull}34609[#34609]
+* Addresses shard allocation color mismatch {kib-pull}34086[#34086]
+* Protects against fields not existing in Logstash Nodes listing {kib-pull}34939[#34939]
+* Fixes field name for "Events Ingested" in Logstash Node List page {kib-pull}35122[#35122]
+* Swaps KUI base class with EUI equivalent {kib-pull}34644[#34644]
+* Allows empty and null key types {kib-pull}35016[#35016]
+* Adds sorting to all columns {kib-pull}35410[#35410]
+* Shows node name instead of UID in breadcrumbs {kib-pull}35553[#35553]
+Observability::
+* Removes crosshair synchronization to avoid display bug {kib-pull}33660[#33660]
+* Switches GQL field from Int to String {kib-pull}33746[#33746]
+Operations::
+* Links stylesheets with `type=text/css` {kib-pull}35546[#35546]
+* Deletes empty stylesheet for status page {kib-pull}35540[#35540]
+* Enables delete of `watch_optimizer_cache_state.json` when data folder is outside of {kib} folder {kib-pull}32446[#32446]
+* Fixes missing flag checks {kib-pull}35187[#35187]
+* Adds ability to register callback for clean up {kib-pull}35119[#35119]
+Platform::
+* Fixes import UI to not fail silently when a record other than index-pattern and search is missing {kib-pull}33080[#33080]
+* Avoids validating saved object migrationVersion in tests where not needed {kib-pull}35010[#35010]
+* Exclude usage stats when `exclude_usage` flag is specified {kib-pull}35691[#35691]
+Upgrade Assistant::
+* Specifies `allow_restricted_indices` for `_has_privileges` {kib-pull}35125[#35125]
+* Shows different interstitial text when cluster is upgraded {kib-pull}34762[#34762]
+Visualizations::
+* Prevents saving the current timezone in visualizations {kib-pull}34795[#34795]
+* Fixes timepicker problem in Firefox {kib-pull}35279[#35279]
+* Fixes timepicker quick select {kib-pull}34354[#34354]
+* Applies timezone correctly to formatted dates and ticks {kib-pull}33831[#33831]
+
+
+
+[[release-notes-7.0.0]]
+== {kib} 7.0.0
+
+For detailed information about the {kib} 7.0.0 release, review the following information.
+
+[float]
+=== Known issue
+Monitoring::
+* If you have a version 7.0 monitoring cluster, a version 6.7 production
+cluster and {kib} version 6.7.0 or 6.7.1, you cannot see the monitoring data in
+{kib}. {kib-issue}34357[#34357]
+
+[float]
+[[breaking-changes-7.0]]
+=== Breaking changes
+
+Breaking changes can prevent your application from optimal operation and performance. 
+Before you upgrade to 7.0.0, review the breaking change, then mitigate the impact to your application.
+
+////
+The following section is re-used in the Installation and Upgrade Guide
+[[breaking_70_notable]]
+=== Notable breaking changes
+////
+// tag::notable-breaking-changes[]
+
+// end::notable-breaking-changes[]
+
+[discrete]
+[[browser-support-7.0.0-breaking-change]]
+==== Browser support changes
+.Removed support for using PhantomJS browser for screenshots in Reporting
+[%collapsible]
+====
+*Details:* +
+Since the first release of Kibana Reporting, PhantomJS was used as
+the headless browser to capture screenshots of Kibana dashboards and
+visualizations. In that short time, Chromium has started offering a new
+headless browser library and the PhantomJS maintainers abandoned their project.
+We started planning for a transition in 6.5.0, when we made Chromium the
+default option, but allowed users to continue using Phantom with the
+`xpack.reporting.capture.browser.type: phantom` setting. In 7.0, that setting
+will still exist for compatibility, but the only valid option will be
+`chromium`.
+
+*Impact* +
+Before upgrading to 7.0, if you have `xpack.reporting.capture.browser.type`
+set in kibana.yml, make sure it is set to `chromium`.
+
+[NOTE]
+============
+Reporting 7.0 uses a version of the Chromium headless browser that RHEL 6,
+CentOS 6.x, and other old versions of Linux derived from RHEL 6. This change
+effectively removes RHEL 6 OS server support from Kibana Reporting. Users with
+RHEL 6 must upgrade to RHEL 7 to use Kibana Reporting starting with version
+7.0.0 of the Elastic stack.
+============
+
+.Legacy browsers (namely IE11) will see a security warning message whenever they load Kibana
+[%collapsible]
+====
+*Details:* +
+Kibana now has a Content Security Policy, but it's only effective if browsers enforce it, and since older
+browsers like Internet Explorer 11 do not support CSP, we show them a warning message whenever they load Kibana.
+
+*Impact* +
+Nothing needs to be done necessarily, but if you don't need to support legacy browsers like IE11, we recommend
+that you set `csp.strict: true` in your kibana.yml to block access to those browsers entirely. If your organization requires
+users to use IE11, you might like to disable the warning entirely with `csp.warnLegacyBrowsers: false` in your kibana.yml.
+====
+
+[discrete]
+[[breaking_70_ems_changes]]
+==== Elastic Maps Service changes
+.Removed overseas territories from France Departments vector layer
+[%collapsible]
+====
+*Details:* +
+Overseas territories in the France Departments vector layer have 
+been removed. These territories have no ISO 3166-2 or INSEE codes to join to 
+{es} data.
+
+*Impact* +
+Region Map, Vega, and Maps plugin visualizations using the France 
+Departments layer will not show overseas territories.
+
+.USA Zip Codes vector layer updated with latest US Census data
+[%collapsible]
+====
+*Details:* +
+The USA Zip Codes layer has been updated based on the 
+https://www.census.gov/geo/reference/zctas.html[2018 Zip Code Tabulation 
+Areas (ZCTAs)] distributed by the US Census Bureau. ZCTA boundaries have been 
+generalized from the source data for visualization and locations are approximate.
+
+*Impact* +
+Region Map, Vega, and Maps plugin visualizations using the USA Zip 
+Codes layer will appear differently. ZCTA boundaries have changed dramatically 
+in some areas. Also, some zip codes have been deprecated and new ones have been added.
+====
+
+[discrete]
+[[breaking_70_packaging_changes]]
+==== Packaging change
+.Removed support for running Kibana with a global Node.js installation
+[%collapsible]
+====
+*Details:* +
+Previous versions of Kibana would fallback to using a global installation of Node.js if the distribution included with Kibana was not found.
+Kibana 7.0 will only use the Node.js distribution included in the package.
+
+*Impact* +
+There is no expected impact unless Kibana is installed in a non-standard way.
+====
+
+[discrete]
+[[breaking_70_security_changes]]
+==== Security change
+.Removed support for users relying on direct index privileges to the Kibana index in Elasticsearch
+[%collapsible]
+====
+*Details:* +
+With the introduction of Kibana RBAC in 6.4, users no longer require privileges to the Kibana index in Elasticsearch. Instead, users
+should be granted <<kibana-privileges>>. Prior to 7.0, when a user who relies upon direct index privileges logged into Kibana, a deprecation warning was logged.
+
+*Impact* +
+You must change any roles that grant access to Kibana using index privileges to use <<kibana-privileges>> instead. 
+Watcher jobs using the Reporting attachment type must also be updated.
+
+If you use a custom `kibana.index` for multitenancy, you can 
+no longer use `kibana_user` or `kibana_dashboard_only_user` to provide access, 
+and will have to start using {kib} privileges.
+
+In addition, roles cannot be shared across Kibana tenants when granting access to Kibana privileges.
+For example, a tenant using `kibana.index: .kibana` will have its own set 
+of roles created to grant access to Kibana. If you create another tenant 
+at `kibana.index: .some-other-index`, it will need its own set of roles 
+to grant access to that tenant.
+====
+
+[discrete]
+[[breaking_70_setting_changes]]
+==== Settings changes
+.Removed support for tribe nodes
+[%collapsible]
+====
+*Details:* +
+With the introduction of Kibana RBAC in 6.4, users no longer require privileges to the Kibana index in Elasticsearch. Instead, users
+should be granted <<kibana-privileges>>. Prior to 7.0, when a user who relies upon direct index privileges logged into Kibana, a deprecation warning was logged.
+
+*Impact* +
+You must remove any tribe node configurations in Kibana. Consider using <<management-cross-cluster-search>> instead, which does not require kibana.yml configurations in Kibana.
+
+.`elasticsearch.ssl.ca` is no longer valid
+[%collapsible]
+====
+*Details:* +
+The deprecated `elasticsearch.ssl.ca` setting in the `kibana.yml` 
+file has been removed.
+
+*Impact* +
+Use `elasticsearch.ssl.certificateAuthorities` instead.
+
+.`elasticsearch.ssl.cert` is no longer valid
+[%collapsible]
+====
+*Details:* +
+The deprecated `elasticsearch.ssl.cert` setting in the `kibana.yml`
+file has been removed.
+
+*Impact* +
+Use `elasticsearch.ssl.certificate` instead.
+
+.`elasticsearch.ssl.verify` is no longer valid
+[%collapsible]
+====
+*Details:* +
+The deprecated `elasticsearch.ssl.verify` setting in the `kibana.yml`
+file has been removed.
+
+*Impact* +
+Use `elasticsearch.ssl.verificationMode` instead. If you set
+`elasticsearch.ssl.verify` to `true`, that is equal to setting 
+`elasticsearch.ssl.verificationMode` to `full`.
+
+.`elasticsearch.url` is no longer valid
+[%collapsible]
+====
+*Details:* +
+The deprecated `elasticsearch.url` setting in the `kibana.yml` file
+has been removed.
+
+*Impact* +
+Use `elasticsearch.hosts` instead. In prior versions of Kibana, if no
+port was specified in `elasticsearch.url`, a default of 9200 was chosen. The
+port in `elasticsearch.hosts` is protocol dependent: https ports will use 443,
+and http ports will use 80. If your `elasticsearch.url` setting was dependent on
+an unspecified port set to 9200, append `:9200` to the url in the
+`elasticsearch.hosts` setting.
+
+.`i18n.defaultLocale` is no longer valid
+[%collapsible]
+====
+*Details:* +
+The deprecated `i18n.defaultLocale` setting in the `kibana.yml` file
+has been removed.
+
+*Impact* +
+Use `i18n.locale` instead.
+
+.`index_management.<any setting>` is no longer valid
+[%collapsible]
+====
+*Details:* +
+The deprecated `index_management.*` settings in the `kibana.yml`
+file have been removed.
+
+*Impact* +
+Use `xpack.index_management.<any setting>` instead.
+
+.`license_management.<any setting>` is no longer valid
+[%collapsible]
+====
+*Details:* +
+The deprecated `license_management.*` settings in the `kibana.yml`
+file have been removed.
+
+*Impact* +
+Use `xpack.license_management.<any setting>` instead.
+
+.`logging.useUTC` is no longer valid
+[%collapsible]
+====
+*Details:* +
+The deprecated `logging.useUTC` setting in the `kibana.yml` file has
+been removed.
+
+*Impact* +
+If `logging.useUTC` was set to `true` (its default value), the
+timezone id was `UTC`. Use `logging.timezone` instead. Any timezone can now be
+specified by canonical id. 
+
+.`regionmap` is no longer valid
+[%collapsible]
+====
+*Details:* +
+The deprecated `regionmap` setting in the `kibana.yml` file has been
+removed.
+
+*Impact* +
+Use `map.regionmap` instead.
+
+.`rollup.<any setting>` is no longer valid
+[%collapsible]
+====
+*Details:* +
+The deprecated `rollup.*` settings in the `kibana.yml` file have been
+removed.
+
+*Impact* +
+Use `xpack.rollup.<any setting>` instead.
+
+.`server.ssl.cert` is no longer valid
+[%collapsible]
+====
+*Details:* +
+The deprecated `server.ssl.cert` setting in the `kibana.yml` file has
+been removed.
+
+*Impact* +
+Use `server.ssl.certificate` instead.
+
+.`server.ssl.enabled` must be set to `true` to enable SSL
+[%collapsible]
+====
+*Details:* +
+Previously, if the `server.ssl.certificate` and `server.ssl.key`
+settins were specified in the `kibana.yml` file, SSL would be automatically
+enabled. It's now required that you set `server.ssl.enabled` to `true` for this
+to occur.
+
+*Impact* +
+Users with both `server.ssl.certificate` and `server.ssl.key` set must
+now also set `server.ssl.enabled` to enable SSL.
+
+.`server.ssl.supportedProtocols` excludes TLSv1 by default
+[%collapsible]
+====
+*Details:* +
+By default, TLSv1 support has been removed. It's still possible to
+opt-in to TLSv1 support by explicitly setting `server.ssl.supportedProtocols` in
+the `kibana.yml` file.
+
+*Impact* +
+Users relying on TLSv1 will be unable to use Kibana unless
+`server.ssl.supportedProtocols` is explicitly set.
+
+.`tilemap` is no longer valid
+[%collapsible]
+====
+*Details:* +
+The deprecated `tilemap` setting in the `kibana.yml` file has been
+removed.
+
+*Impact* +
+Use `map.tilemap` instead.
+
+.`upgrade_assistant.<any setting>` is no longer valid
+[%collapsible]
+====
+*Details:* +
+The deprecated `upgrade_assistant.*` settings in the `kibana.yml`
+file have been removed.
+
+*Impact* +
+Use `xpack.upgrade_assistant.<any setting>` instead.
+
+.`xpack.monitoring.beats.index_pattern` is no longer valid
+[%collapsible]
+====
+*Details:* +
+The unsupported `xpack.monitoring.beats.index_pattern` setting in the
+`kibana.yml` file has been officially removed.
+
+*Impact* +
+The ability to customize this pattern is no longer supported.
+
+.`xpack.monitoring.cluster_alerts.index` is no longer valid
+[%collapsible]
+====
+*Details:* +
+The unsupported `xpack.monitoring.cluster_alerts.index` setting in
+the `kibana.yml` file has been officially removed.
+
+*Impact* +
+The ability to customize this index is no longer supported.
+
+.`xpack.monitoring.elasticsearch.index_pattern` is no longer valid
+[%collapsible]
+====
+*Details:* +
+The unsupported `xpack.monitoring.elasticsearch.index_pattern`
+setting in the `kibana.yml` file has been officially removed.
+
+*Impact* +
+The ability to customize this pattern is no longer supported.
+
+.`xpack.monitoring.elasticsearch.ssl.ca` is no longer valid
+[%collapsible]
+====
+*Details:* +
+The deprecated `xpack.monitoring.elasticsearch.ssl.ca` setting in the
+`kibana.yml` file has been removed. 
+
+*Impact* +
+Use `xpack.monitoring.elasticsearch.ssl.certificateAuthorities` instead.
+
+.`xpack.monitoring.elasticsearch.ssl.cert` is no longer valid
+[%collapsible]
+====
+*Details:* +
+The deprecated `xpack.monitoring.elasticsearch.ssl.cert` setting in
+the `kibana.yml` file has been removed.
+
+*Impact* +
+Use `xpack.monitoring.elasticsearch.ssl.certificate` instead.
+
+.`xpack.monitoring.elasticsearch.ssl.verify` is no longer valid
+[%collapsible]
+====
+*Details:* +
+The deprecated `xpack.monitoring.elasticsearch.ssl.verify` setting in
+the `kibana.yml` file has been removed. 
+
+*Impact* +
+Use `xpack.monitoring.elasticsearch.ssl.verificationMode` instead. If
+you previously set `xpack.monitoring.elasticsearch.ssl.verify` to `true`, it is
+equal to setting `xpack.monitoring.elasticsearch.ssl.verificationMode` to `full`.
+
+.`xpack.monitoring.elasticsearch.url` is no longer valid
+[%collapsible]
+====
+*Details:* +
+The deprecated `xpack.monitoring.elasticsearch.url` setting in the
+`kibana.yml` file has been removed.  
+
+*Impact* +
+Use `xpack.monitoring.elasticsearch.hosts` instead. In prior versions
+of Kibana, if no port was specified in `xpack.monitoring.elasticsearch.url` a
+default of 9200 was chosen. The port in `xpack.monitoring.elasticsearch.hosts`
+is protocol dependent: https ports will use 443, and http ports will use 80. If
+`xpack.monitoring.elasticsearch.url` was dependent on an unspecified port set to
+9200, append `:9200` to the url in `xpack.monitoring.elasticsearch.hosts`.
+
+.`xpack.monitoring.index_pattern` is no longer valid
+[%collapsible]
+====
+*Details:* +
+The unsupported `xpack.monitoring.index_pattern` setting in the
+`kibana.yml` file has been officially removed. 
+
+*Impact* +
+The ability to customize this pattern is no longer supported.
+
+.`xpack.monitoring.kibana.index_pattern` is no longer valid
+[%collapsible]
+====
+*Details:* +
+The unsupported `xpack.monitoring.kibana.index_pattern` setting in
+the `kibana.yml` file has been officially removed.
+
+*Impact* +
+The ability to customize this pattern is no longer supported.
+
+.`xpack.monitoring.logstash.index_pattern` is no longer valid
+[%collapsible]
+====
+*Details:* +
+The unsupported `xpack.monitoring.logstash.index_pattern` setting in
+the `kibana.yml` file has been officially removed.
+
+*Impact* +
+The ability to customize this pattern is no longer supported.
+
+.`xpack.monitoring.node_resolver` is no longer valid
+[%collapsible]
+====
+*Details:* +
+The deprecated `xpack.monitoring.node_resolver` setting in the
+`kibana.yml` file has been removed. This setting has been deprecated since 5.6,
+when it was explicitly recommended to use `uuid` as its value.
+
+*Impact* +
+This setting is no longer necessary. If you enable the {stack}
+{monitor-features}, a monitoring agent runs on each Elasticsearch node, Logstash
+node, Kibana instance, and Beat to collect and index metrics. Each node and
+instance is considered unique based on its persistent UUID, which is written to
+the `path.data` directory when the node or instance starts.
+
+.`xpack.monitoring.report_stats` is no longer valid
+[%collapsible]
+====
+*Details:* +
+The deprecated `xpack.monitoring.report_stats` setting in the
+`kibana.yml` file has been removed.
+
+*Impact* +
+Use `xpack.xpack_main.telemetry.enabled` instead.
+
+.`management/kibana/(index|indices)` => `management/kibana/index_pattern(?s)`
+[%collapsible]
+====
+*Details:* +
+Kibana management URLs pertaining to index patterns have been changed
+to accurately reflect their content, from `management/kibana/index` or
+`management/kibana/indices` to `managemen/kibana/index_pattern` or
+`management/kibana/index_patterns`.
+
+*Impact* +
+References to these URLs will need to be updated.
+====
+
+[discrete]
+[[breaking_70_advanced_settings_changes]]
+==== Advanced settings changes
+.Advanced setting query:queryString:options no longer applies to filters
+[%collapsible]
+====
+*Details:* +
+In previous versions of Kibana the Advanced Setting `query:queryString:options` was applied to both queries
+and custom filters using the `query_string` query. This could cause errors if a custom filter used options that
+conflicted with the Advanced Setting. In 7.0 `query:queryString:options` will no longer be applied to filters so that
+users can have full control over their custom filters.
+
+*Impact* +
+You must ensure that any saved searches with a `query_string` filter aren't relying implicitly on
+`query:queryString:options`.
+
+.Advanced setting query:queryString:options no longer applies `default_field: *` by default
+[%collapsible]
+====
+*Details:* +
+Elasticsearch removed the ability to create indices with an _all field in 6.0. As a result, a user could end
+up with a mix of indices with and without _all fields if they upgraded from an older version of ES. This could lead to
+inconsistent highlighting in Discover. To work around this issue we added `default_field: *` to query:queryString:options
+to force consistent querying across indices with and without _all. In 7.0 the _all field will be gone from all indices
+so we no longer need this workaround.
+
+*Impact* +
+Since we'll no longer send the `default_field` parameter in Kibana's query_string query, Elasticsearch
+will use the index setting instead. The default for the index setting is also `*`, so most users should not be impacted.
+If some of your indices have a non-default `default_field` setting, you may want to update it or re-add the parameter
+to Kibana's advanced setting.
+====
+
+[discrete]
+[[breaking_70_UI_changes]]
+==== UI changes
+.Dark mode is now global
+[%collapsible]
+====
+*Details:* +
+Both the Dashboard and Maps applications offer "Dark Mode" options which have been removed in favor of a global dark mode advanced setting. 
+This means that instead of having to turn on dark mode in many places, users can choose to turn on the `theme:darkMode` advanced setting and 
+it will apply to all applications.
+
+*Impact* +
+The dark mode setting for Dashboards and Maps will be ignored and the global setting will be used instead.
+
+.KQL is now the default query language in the global search bar
+[%collapsible]
+====
+*Details:* +
+Language enhancements that were introduced in 6.3 on an opt-in basis are now turned on by default. This
+is considered a breaking change because the enhancements include a simplifed syntax that has some small incompatibilities
+with the old Lucene syntax. 
+
+*Impact* +
+Users simply need to familiarize themselves with the new syntax. Existing saved searches, visualizations, and dashboards
+that use the old Lucene syntax will continue to work, but users should consider migrating them to KQL to enjoy the other benefits
+that come along with it. For the time being, individual users can still opt-out of KQL under the options menu in the query bar
+and admins can still change the global default using the `search:queryLanguage` advanced setting.
+
+.Removed support for deeply nested table splits in data table visualizations
+[%collapsible]
+====
+*Details:* +
+Previously a user was able to create multiple "split table" aggregations in one table on arbitrary levels.
+The potential for deeply nested tables posed maintenance and accessibility challenges, and was inconsistent with other
+visualizations that only allow one table split. This change does not limit the number of split rows a user can put into
+a table; it only restricts the number of split tables to one.
+
+*Impact* +
+To prevent breaking existing visualizations, saved objects containing nested table splits will be automatically
+migrated to contain only one split table, converting any existing split tables beyond the first to split rows. No action
+should be required as a result of this change, but be aware that users with saved data table visualizations that contain
+multiple split tables will now see those tables rendered differently.
+
+.Imported Kibana dashboards might require small grid layout adjustments due to design changes
+[%collapsible]
+====
+*Details:* +
+Kibana 7.0 introduces a new default font for the application and also comes with several design changes in dashboards that 
+slightly change padding and margin for dashboard panels. You may find you need to adjust grid layouts to compensate.
+
+*Impact* +
+Minimal. In most cases, the dashboards should render as they did previously. In some cases, panels might overflow and 
+require scroll bars where they did not previously. Simply adjust the panel sizes and edit your dashboard layouts if these bother you.
+
+.Timelion no longer appears in the side navigation
+[%collapsible]
+====
+*Details:* +
+Timelion sheets will continue to work in *Visualize*, but the 
+Timelion application no longer appears by default in the {kib} side navigation.
+
+*Impact* +
+To create a Timelion visualization, go to *Visualize* and select 
+*Timelion* from the visualization types. If you have a lot of existing Timelion 
+visualizations and want to add Timelion back in the side
+navigation, set `timelion.ui.enabled` to `true` in `kibana.yml`.
+====
+
+[float]
+[[deprecation-7.0.0]]
+=== Deprecations
+
+Geo::
+* Fixes legacy tilemap loading {kib-pull}22095[#22095]
+Machine Learning::
+* Updates REST endpoint calls to remove _xpack {kib-pull}28069[#28069]
+Visualizations::
+* Removes old visualize wizard URL {kib-pull}28982[#28982]
+* Removes legacy response handler {kib-pull}28985[#28985]
+* Removes `legacyIcon` from visualizations {kib-pull}28981[#28981]
+
+[float]
+[[enhancement-7.0.0]]
+=== Enhancements
+Canvas::
+* Removes WebSockets from Canvas expressions interpreter {kib-pull}29792[#29792]
+* Optimizes Canvas REST calls via batching {kib-pull}29847[#29847]
+* Implements a clipboard and stores the copied elements in `localStorage` {kib-pull}25890[#25890]
+* Adds the ability to reuse assets without editing an element's expression {kib-pull}25764[#25764]
+* Adds the `clear` function {kib-pull}26397[#26397]
+* Adds workpad-level CSS {kib-pull}24143[#24143]
+* Improvements to expression editor {kib-pull}32336[#32336]
+* Adds `aria-label` attribute for Color: Auto Color to button inside chart style {kib-pull}32633[#32633]
+* Adds `aria-label` attribute for Copy to clipboard {kib-pull}32880[#32880]
+Dashboard::
+* Adds `href` option in addition to `onClick` for navigational links {kib-pull}25233[#25233]
+Design::
+* Implements a new design for {kib} called K7
+* Updates logos for marketing {kib-pull}25489[#25489]
+* Adds Kibana 7.0 breadcrumbs to home screen {kib-pull}26605[#26605]
+* Moves elastic/eui typings to single file {kib-pull}23950[#23950]
+Discover::
+* Renames the kuery setting to KQL {kib-pull}29587[#29587]
+* Adds visual indication of selected language in query bar {kib-pull}30899[#30899]
+Logstash::
+* Adopts {es} typeless API for Logstash central management {kib-pull}30546[#30546]
+Management::
+* Adds `Request timestamp` to request inspector stats {kib-pull}25667[#25667]
+* Adds "Reload indices" button to Index Management {kib-pull}27033[#27033]
+Machine Learning::
+* Adds `created_by` field to Auditbeat and APM data recognizer jobs {kib-pull}33863[#33863]
+* Adds the time of the anomaly to the `aria-label` of the actions button in each row of the anomalies table {kib-pull}32777[#32777]
+* Adds `role="alert"` callouts on the Job Management page to ensure the information is read out by screen readers {kib-pull}32911[#32911]
+* Adds EUI `ScreenReaderOnly` component to the "Analyzing data" modal {kib-pull}32472[#32472]
+* Updates job type and APM module icon to new designs {kib-pull}25380[#25380]
+* Allows model plot enablement via checkbox in  MultiMetric/Population Job creation {kib-pull}24914[#24914]
+* Adds support for the rare detector for charts in Anomaly Explorer and Singe Metric viewer {kib-pull}21524[#21524]
+* Updates HTTP access modules for ECS {kib-pull}29383[#29383]
+* Updates auditbeat modules for ECS {kib-pull}29934[#29934]
+* Removes non ECS apache, nginx and auditbeat data recognizer modules {kib-pull}30537[#30537]
+* Adds the configuration files for two new auditbeat data recognizer modules for
+detecting unusual processes on hosts and Docker containers {kib-pull}25716[#25716]
+* Adds support for saved searches created using Kuery to the job wizards {kib-pull}26094[#26094]
+* Allows users to enter their own query in the Discover page; stops passing the query
+from the job datafeed config in custom URLs {kib-pull}26957[#26957]
+* Rewrites Calendar to React/EUI {kib-pull}26741[#26741]
+* Converts Setting page to React/EUI {kib-pull}27144[#27144]
+* Ensures loading indicator is present on initial jobs load {kib-pull}27151[#27151]
+* Prevents a new calendar save if a calendar with that id already exists {kib-pull}27104[#27104]
+* Edits data recognizer modules to use KQL in saved objects {kib-pull}32766[#32766]
+Observability::
+* Converts monitor sparklines to histogram {kib-pull}28502[#28502]
+* Adds crosshair sync for monitor page charts {kib-pull}28631[#28631]
+* Adds a new plugin for Uptime Monitoring {kib-pull}25480[#25480]
+Operations::
+* Adds support for reindexing APM indices {kib-pull}29845[#29845]
+* Adds a reindex warning for mapping type changes {kib-pull}32081[#32081]
+* Adds warning callout to update APM index pattern {kib-pull}33661[#33661]
+Platform::
+* Adds help menu item to header {kib-pull}29664[#29664]
+* Implements global dark theme {kib-pull}28445[#28445]
+* Removes support for the K6 navigation style {kib-pull}29565[#29565]
+* Adds `rest_total_hits_as_int` to all requests in platform code that eventually
+look up `hits.total` {kib-pull}26432[#26432]
+* Adds `dist` flag to the configuration context {kib-pull}26545[#26545]
+* Prepares `@kbn/datemath` to be republished as `@elastic/datemath` {kib-pull}26559[#26559]
+* Wraps `remote` methods in `browser` service {kib-pull}26394[#26394]
+* Uses `stream.pipeline` to manage error handling {kib-pull}27246[#27246]
+Querying & Filtering::
+* Moves the `buildESQuery` module (including filters and Kuery) into a separate package {kib-pull}23345[#23345]
+* Adds comment explaining why `getComputedFields` adds a `docvalue` to `docvalue_fields`
+for each date field in an index pattern. {kib-pull}25725[#25725]
+* Moves filtering functions out of `vis.API.events` {kib-pull}25280[#25280]
+Reporting::
+* Adds png output to reports {kib-pull}24759[#24759]
+* Sorts ascending on sort order first then ascending on name. Any menu item
+without a sort order gets set to zero. {kib-pull}25058[#25058]
+* In the Visualization Editor, removes the "Optimize for printing" option when
+exporting the visualization as PNG or PDF. The single visualization will automatically
+be optimized for printing {kib-pull}30456[#30456]
+* Adds browser type to the reporting side panel {kib-pull}26307[#26307]
+* Adds better logging for `waitForSelector` failure {kib-pull}25762[#25762]
+* Enhances error messaging and handling {kib-pull}26299[#26299]
+* Adds "Info" button in the Reporting listing {kib-pull}25421[#25421]
+* Adds new inspector for chromium-backed reports {kib-pull}32430[#32430]
+Rollups::
+* Adds support for rolling up metrics of date fields {kib-pull}26450[#26450]
+Security::
+* Introduces content security policy (CSP) {kib-pull}29545[#29545]
+* Warns legacy browsers that do not support content security policy {kib-pull}29957[#29957]
+* Adds content security policy strict mode {kib-pull}29856[#29856]
+* Updates the GET `/api/security/role` endpoint to return the list of roles sorted
+by name, rather than creation date {kib-pull}26491[#26491]
+* Updates the Account Settings screen to show the change password form only when
+a password change is possible for the authentication realm {kib-pull}26779[#26779]
+* Makes space selector a `button` {kib-pull}26889[#26889]
+Visualizations::
+* Replaces Angular timepicker with EuiSuperDatePicker {kib-pull}29204[#29204]
+* Upgrades Kibana to Elasticsearch 7.0 {kib-pull}29184[#29184]
+* Maps inspector requests by id so single requests can be reset at a time {kib-pull}26770[#26770]
+* Adds ODBC to blurb for start trail {kib-pull}27223[#27223]
+* Adds a `console.error` for visualize errors {kib-pull}24581[#24581]
+* Adds a timeout so that Vega respects `elasticsearch.shardTimeout` setting {kib-pull}30482[#30482]
+* Removes experimental flag from Visual Builder (TSVB) {kib-pull}25634[#25634]
+* Implements new visualization type selection {kib-pull}23833[#23833]
+* Removes `lab` stage for visualizations, making `experimental` the only non-production
+stage available {kib-pull}25702[#25702]
+* Makes markdown consistent across {kib} {kib-pull}31890[#31890]
+* Adds option to open links in new tab in Time Series Visual Builder {kib-pull}31906[#31906]
+* Adds max, min, placeholder to percentile in Time Series Visual Builder {kib-pull}32389[#32389]
+* Displays interval information in Time Series Visual Builder when building {kib-pull}32117[#32117]
+* Adds controls to toggle disable/enable individual series and annotations {kib-pull}33107[#33107]
+* Updates Vega to version 4 {kib-pull}30628[#30628]
+
+[float]
+[[bug-7.0.0]]
+=== Bug fixes
+APM::
+* Fixes missing Machine Learning data and NaN issue {kib-pull}34333[#34333]
+* Fixes transaction sample on error page {kib-pull}34048[#34048]
+* Uses form label for Transaction type selector {kib-pull}28322[#28322]
+* Fixes icon for View trace button {kib-pull}28908[#28908]
+* Shows metric-only services in service overview {kib-pull}30397[#30397]
+* Adds span subtype and action to Span Flyout {kib-pull}30041[#30041]
+* Updates head title and fixes breadcrumb string issues {kib-pull}29960[#29960]
+* Adds fixes for `service.name` scripted field {kib-pull}28488[#28488]
+* Updates APM index pattern {kib-pull}30837[#30837]
+* Updates APM reindex script {kib-pull}30761[#30761]
+* Sets Index Pattern version as string {kib-pull}30789[#30789]
+* Overrides EUI chart default styles for gridlines {kib-pull}21723[#21723]
+* Adds section titles to span detail modal {kib-pull}20717[#20717]
+* Fixes upgrade assistant label and copy {kib-pull}31750[#31750]
+* Changes `context.system.hostname` to `host.hostname` for APM link {kib-pull}30884[#30884]
+* Updates APM reindex script {kib-pull}31965[#31965]
+* Updates APM index pattern {kib-pull}33595[#33595]
+Canvas::
+* Excludes assets from Canvas usage query {kib-pull}34516[#34516]
+* Adds datetime as a date identifier {kib-pull}29537[#29537]
+* Switches sample web logs fonts to 48px {kib-pull}30747[#30747]
+* Fixes related to K7 design {kib-pull}30833[#30833]
+* Fixes page preview size issue {kib-pull}26795[#26795]
+* Fixes visual bug when opening the workpad loader {kib-pull}26647[#26647]
+* Fixes page thumbnail sizes {kib-pull}26573[#26573]
+* Decreases size of tray toggle {kib-pull}25470[#25470]
+* Makes selection border 1px {kib-pull}26739[#26739]
+* Fixes interpreter socket error {kib-pull}26870[#26870]
+* Fixes duplicate `Value` options in math select value {kib-pull}25556[#25556]
+* Gets correct plugins path {kib-pull}25448[#25448]
+* Quotes the index pattern in SQL input {kib-pull}25488[#25488]
+* Decreases the size of tray toggle {kib-pull}25470[#25470]
+* Fixes the hours label container size {kib-pull}31838[#31838]
+* Removes ID attribute {kib-pull}30736[#30736]
+* Improves the plugin pre-build {kib-pull}25267[#25267]
+Dashboard::
+* Removes `dashboardContext` function and makes Timelion, Vega, and Time Series
+Visual Builder use `buildEsQuery` {kib-pull}23227[#23227]
+* Shows the filter bar in dashboard embed mode {kib-pull}32222[#32222]
+Design::
+* Updates dashboard design {kib-pull}29896[#29896]
+* Adjusts side navigation interaction {kib-pull}29978[#29978]
+* Converts Security UI from LESS to Sass {kib-pull}25079[#25079]
+* Adds boilerplate Sass for Kibana core {kib-pull}21185[#21185]
+* Makes dark mode overrides global {kib-pull}31628[#31628]
+Discover::
+* Adds debug code to flaky field_data test {kib-pull}15535[#15535]
+* Gets even more debug info for flaky field_data test {kib-pull}17627[#17627]
+* Allows time ranges before the epoch in Discover {kib-pull}31807[#31807]
+* Fixes Kibana Query Language handling of carriage return {kib-pull}32150[#32150]
+* Improves warning messages when using Lucene-like syntax {kib-pull}31837[#31837]
+* Update capitalization of KQL full name {kib-pull}31631[#31631]
+* Adds placeholder text indicating the filters aggregation takes only Lucene and Query DSL {kib-pull}31296[#31296]
+* Prevents sending request if it already failed during query parsing {kib-pull}31219[#31219]
+* Fixes apps to always migrate legacy queries on state change {kib-pull}33276[#33276]
+Geo::
+* Fixes panel cut off in K7 design {kib-pull}29209[#29209]
+* Removes left-over geohash grid code {kib-pull}30312[#30312]
+* Uses geo-tile aggregation instead of geohash precision {kib-pull}29776[#29776]
+* Resolves URL dynamically when requesting EMS data {kib-pull}25685[#25685]
+* Fixes EMS hotlink {kib-pull}26868[#26868]
+* Fixes feature/align map config settings {kib-pull}19450[#19450]
+* Removes `geotile_grid` aggregation from non-geospatial visualizations {kib-pull}31354[#31354]
+* Coerces string doc-values to numbers if used in styling {kib-pull}33657[#33657]
+Infrastructure::
+* Fixes server-side retrieval of the {kib} version {kib-pull}31440[#31440]
+* Fixes react router import {kib-pull}33659[#33659]
+* Adapts settings ui to saved object version type change {kib-pull}30082[#30082]
+* Fixes potential color bugs {kib-pull}26292[#26292]
+* Fixes auto refresh button on node detail page {kib-pull}26426[#26426]
+* Changes the time range from the last hour to the last 5 minutes for the Waffle Map {kib-pull}26278[#26278]
+* Passes flag in request to force BWC hit count {kib-pull}26517[#26517]
+* Replaces redux source slice with constate container {kib-pull}26121[#26121]
+* Changes node detail link to set time range to 1 hour {kib-pull}26977[#26977]
+* Stops showing sidenav while loading. {kib-pull}27119[#27119]
+* Fixes styling after breaking EUI changes {kib-pull}27021[#27021]
+* Fixes graphql type generation after package upgrades {kib-pull}26991[#26991]
+* Removes usage of `ts-optchain` in the browser {kib-pull}27148[#27148]
+Machine Learning::
+* Fixes filter and icon for APM Data Recognizer module {kib-pull}31112[#31112]
+* Ensures cardinality related messages in Advanced job wizard are formatted correctly {kib-pull}33599[#33599]
+* Adds title elements which were missing from Calendars pages {kib-pull}33257[#33257]
+* Changes job wizard query to use `match_all` {kib-pull}32008[#32008]
+* Adds calendars list to job management {kib-pull}32566[#32566]
+* Fixes Job Selector text to take group selection into account {kib-pull}31333[#31333]
+* Ensures that Job Selector description text is accurate {kib-pull}32441[#32441]
+* Reduces space between headings in the expanded row for Category examples in Anomalies Table {kib-pull}32417[#32417]
+* Removes use of types in datafeeds  {kib-pull}27572[#27572]
+* Fixes metric select double caret {kib-pull}30357[#30357]
+* Removes old angular based start datafeed modal {kib-pull}30392[#30392]
+* Handles removal of backend ml.enabled node attribute {kib-pull}27604[#27604]
+* Edits labels in the Apache and Nginx ECS data recognizer modules {kib-pull}29935[#29935]
+* Fixes for K7 compatibility {kib-pull}30536[#30536]
+* Fixes broken label style in advanced wizard {kib-pull}30847[#30847]
+* Adds ml-ui team to .github/CODEOWNERS {kib-pull}29810[#29810]
+* Allows user to add/edit/delete annotations in the Single Series Viewer {kib-pull}26034[#26034]
+* Does not pass datafeed query to Discover in custom URL {kib-pull}26957[#26957]
+* Fixes word break in Anomalies and Jobs tables {kib-pull}26978[#26978]
+* Fixes alignment of filter icons in the Anomalies table {kib-pull}26253[#26253]
+* Shows useful error on invalid query in JobList search bar {kib-pull}25153[#25153]
+* Adds user privilege check to Jobs List group selector control {kib-pull}25225[#25225]
+* Fixes file data viz file size check and formats as bytes {kib-pull}25295[#25295]
+* Fixes the layout of the cards in the Data Visualizer on IE {kib-pull}25383[#25383]
+* Adds better error reporting for reading and importing data {kib-pull}24269[#24269]
+* Displays an ordinal y axis for low cardinality rare charts {kib-pull}24852[#24852]
+* Fixes typo in job validation message {kib-pull}25130[#25130]
+* Removes deprecated `angularjs` based jobs list and related code {kib-pull}25216[#25216]
+* Skips invalid modules when data recognizer lists matches {kib-pull}33703[#33703]
+Management::
+* Filters only on name in Index Management {kib-pull}34372[#34372]
+* Removes grunt sterilize - its been replaced by `kbn clean` {kib-pull}27825[#27825]
+* Makes Index management table more responsive {kib-pull}28882[#28882]
+* Fixes index pattern wizard when there are remote clusters but no local indices  {kib-pull}24339[#24339]
+* Uses new `_graph` endpoints {kib-pull}26956[#26956]
+* Adjusts spacing of Management navigation items {kib-pull}25666[#25666]
+* Updates "Disenroll" text to be consistent with menu option "Unenroll" {kib-pull}26816[#26816]
+* Fixes broken breadcrumb link for index management {kib-pull}27164[#27164]
+* Fixes issue with multiple execution in Console {kib-pull}26933[#26933]
+* Reloads full index list when reload hits missing index {kib-pull}27197[#27197]
+* Adds boilerplate for remote clusters management app {kib-pull}25369[#25369]
+* Adds `ignore_failure` to ingest common auto complete in console {kib-pull}24915[#24915]
+* Removes support for expression-based scripted fields {kib-pull}14310[#14310]
+* Adds WatchErrors to capture invalid watches {kib-pull}23887[#23887]
+* Rewords the translation id for error with missing property in Watcher {kib-pull}24753[#24753]
+* Triggers full load when encountering 403 for index list reload {kib-pull}28243[#28243]
+* Updates X-Pack console specs {kib-pull}29506[#29506]
+* Fixes API integration test for follower indices {kib-pull}30260[#30260]
+* Fixes management footer logo spacing bug {kib-pull}30654[#30654]
+Monitoring::
+* Updates to read from `.monitoring-*-7-*` indices {kib-pull}32654[#32654]
+* Adds in explicit mappings {kib-pull}33004[#33004]
+* Stops using the normalized derivative value {kib-pull}27416[#27416]
+* Updates the title in the left nav to Stack Monitoring {kib-pull}28102[#28102]
+* Prepares the Monitoring UI codebase for the incoming changes to `hits.total` {kib-pull}26442[#26442]
+* Updates browser title to Stack Monitoring {kib-pull}29638[#29638]
+* Fixes Monitoring design {kib-pull}29479[#29479]
+* Removes old index patterns that are not expected in 7.0.0 onwards {kib-pull}27915[#27915]
+* Removes deprecated `xpack.monitoring.report_stats` setting {kib-pull}30017[#30017]
+* Fixes monitoring tests to work with mapping changes {kib-pull}29188[#29188]
+* Removes type filter helper {kib-pull}30887[#30887]
+* Fixes error handling for local stats collection/permissions {kib-pull}26560[#26560]
+* Removes initial delay to check and send Telemetry data {kib-pull}26575[#26575]
+* Pulls local Kibana usage stats {kib-pull}26496[#26496]
+* Converts the Elasticsearch monitoring UIs to using EUI tables and page layout {kib-pull}26217[#26217]
+* Renames Monitoring `FormattedMessage` to `FormattedAlert` {kib-pull}24197[#24197]
+* Uses the cluster name from metadata if it exists {kib-pull}24495[#24495]
+Observability::
+* Fixes 7.x references to tcp.port {kib-pull}29132[#29132]
+* Ports functional tests to 7.x {kib-pull}29398[#29398]
+* Ports unit tests to master {kib-pull}29876[#29876]
+* Adds missing loading states for filter bar and snapshot components {kib-pull}30122[#30122]
+* Removes double-format for duration value {kib-pull}30664[#30664]
+* Switches Uptime localization from i18n provider to context {kib-pull}31601[#31601]
+* Improves monitor charts query {kib-pull}30561[#30561]
+* Adds global help support to Uptime {kib-pull}31493[#31493]
+* Updates targeted index pattern for 7.0.0 {kib-pull}30998[#30998]
+Operations::
+* Removes the usage of types from Esqueue used for the `.reporting index` {kib-pull}32146[#32146]
+* Fixes IPv6 addresses used with Angular connector {kib-pull}29891[#29891]
+* Fixes `makelogs` dependency {kib-pull}31428[#31428]
+* Runs the {kib} server in production mode for functional testing {kib-pull}31346[#31346]
+* Uses `fs.copyFile` to avoid race condition {kib-pull}32220[#32220]
+* Removes `hash -r` {kib-pull}32616[#32616]
+* Fixes JUnit reporter {kib-pull}32686[#32686]
+* Adds options to `run()` that can modify help and show help on errors {kib-pull}33466[#33466]
+* Captures values from boolean flags {kib-pull}33528[#33528]
+* Fixes incorrect environment name for V8 options {kib-pull}31052[#31052]
+* Removes svg from url-loader, as it conflicts with other loaders {kib-pull}30888[#30888]
+* Uses apiVersion from es plugin in x-pack {kib-pull}30853[#30853]
+* Clones saved object document before migrating to prevent accidental mutations {kib-pull}30475[#30475]
+* Removes node fallback from kibana-keystore {kib-pull}15066[#15066]
+* Adds debug script to set inspect flags {kib-pull}15967[#15967]
+* Uses snake case for scripts/kibana-keystore.js and scripts/kibana-plugin.js {kib-pull}15331[#15331]
+* Updates license info in package.json {kib-pull}20353[#20353]
+* Fixes error log formatting {kib-pull}24788[#24788]
+* Matches chalk dependency version on Kibana with the one used on X-Pack {kib-pull}20621[#20621]
+* Fixes non-conforming licenses on devDependencies and adds the ability to whitelist devOnly licenses {kib-pull}23859[#23859]
+* Adds jsxa11y into eslint rules {kib-pull}23932[#23932]
+* Reverts Bump react-grid-layout to 0.16.0 {kib-pull}14912[#14912]
+* Reverts breaking change for Status API {kib-pull}21927[#21927]
+* Converts `utils/collection` to TypeScript {kib-pull}23992[#23992]
+* Removes usage of update_all_types {kib-pull}16406[#16406]
+* Improves the `yarn kbn bootstrap` speed by using yarn workspaces for packages inside `packages/*` and `x-pack` {kib-pull}24095[#24095]
+* Runs jenkins:unit task with dev flag in order to run license check {kib-pull}19832[#19832]
+* Does not break on startup in debug mode {kib-pull}19219[#19219]
+Platform::
+* Removes types from `saved_objects` repository {kib-pull}32286[#32286]
+* Fixes custom icon image paths in `NavDrawer` {kib-pull}33573[#33573]
+* Fixes back button navigation {kib-pull}32372[#32372]
+* Improves types for ftr and expect.js and cleans up `tsconfig` files {kib-pull}31948[#31948]
+* Strips # from hash before updating ``$location` {kib-pull}32732[#32732]
+* Removes `disableAutoAngularUrlEncodingFix()`` {kib-pull}33136[#33136]
+* Removes unused system-loader implementation {kib-pull}33747[#33747]
+* Moves the table vis migration to {kib} plugin {kib-pull}29478[#29478]
+* Allows passing a default operator to use on saved object client find operations {kib-pull}29339[#29339]
+* Fixes saved object repository `bulkCreate` to return migrated references and attributes {kib-pull}29754[#29754]
+* Adds missing saved object reference handling for searchSourceJSON filter attribute {kib-pull}29840[#29840]
+* Excludes `migrationVersion` and references from `getRootPropertiesObjects` result {kib-pull}30081[#30081]
+* Removes dependency on doc versions {kib-pull}29906[#29906]
+* Adds typings for saved object client {kib-pull}29951[#29951]
+* Uses `lastSubUrl` when appropriate {kib-pull}28735[#28735]
+* Removes es _xpack endpoint usage {kib-pull}29465[#29465]
+* Adds typings for the `saved_object_finder` react component {kib-pull}30067[#30067]
+* Fixes the confirm overwrite modal of saved objects to handle large titles {kib-pull}28590[#28590]
+* Decreases start limit and interval {kib-pull}25474[#25474]
+* Adds `--download` flag to snapshot command to warm the cache {kib-pull}25830[#25830]
+* Implements `--prefer-offline` flag {kib-pull}25840[#25840]
+* Fixes watcher routes broken by Hapi upgrade {kib-pull}26713[#26713]
+* Fixes non-conforming licenses on devDependencies and adds the ability to whitelist devOnly licenses {kib-pull}23859[#23859]
+* Watches optimizer cache invalidation  {kib-pull}24172[#24172]
+* Adds `normalizePath` in order to fix watch optimizer when running on Windows {kib-pull}26486[#26486]
+* Creates vendor dll for the client modules {kib-pull}22618[#22618]
+* Upgrades to NodeJS 10 {kib-pull}25157[#25157]
+* Improves plugin version mismatch error message {kib-pull}25774[#25774]
+* Improves build/packaging {kib-pull}26096[#26096]
+* Swaps `jstimezonedetect` with `moment.tz.guess` {kib-pull}21800[#21800]
+* Upgrades resize-observer-polyfill version {kib-pull}26990[#26990]
+* Fixes saved objects client `_processBatchQueue` function to handle errors {kib-pull}26763[#26763]
+* Changes kbn pm webpack config to generate dist files in mode=none {kib-pull}26847[#26847]
+* Hides logs from deleteAll on task: clean client modules into dll {kib-pull}26884[#26884]
+* Upgrades `resize-observer-polyfill` version {kib-pull}26990[#26990]
+* Uses `single-node` discovery type for the test ES node/cluster {kib-pull}27125[#27125]
+* Moves moment to peerDependency in elastic-datemath {kib-pull}27264[#27264]
+* Transforms plugin deprecations before checking for unused settings {kib-pull}21294[#21294]
+* Expands list of restricted globals in `eslint-config-kibana` {kib-pull}15798[#15798]
+* Makes logs easier to read on Windows with chalk colors {kib-pull}15557[#15557]
+* Fixes `includeFields` function to return root saved object properties {kib-pull}33847[#33847]
+Reporting::
+* Refactors routes files and helpers {kib-pull}30111[#30111]
+* Deletes `sortOrder` once items have been sorted and does not pass to `EuiContextMenuItem`
+in the share context menu {kib-pull}26890[#26890]
+* Fixes a regression bug in detection of Error and Warning toast notifications {kib-pull}25482[#25482]
+* Stops passing an empty `formatConfig` to the fieldFormats helper {kib-pull}27168[#27168]
+* Returns promise in Reporting jobs API {kib-pull}24769[#24769]
+* Uses `content-disposition` package for non-US font titles in reporting {kib-pull}30895[#30895]
+* Uses lowercased server host settings {kib-pull}33020[#33020]
+Rollups::
+* Shows loading state in Rollup Job detail panel. {kib-pull}25752[#25752]
+* Specifies Rollup Jobs breadcrumbs in header. {kib-pull}26590[#26590]
+* Requires histogram interval in Rollup Job wizard to be a whole number. {kib-pull}26596[#26596]
+* Removes duplicate rendered sections {kib-pull}[#28566]
+Security::
+* Adds tests for interpreter `createSocket` {kib-pull}29459[#29459]
+* Moves the server-side `SavedObjectClient` types from the `spaces` plugin to the
+same location as the corresponding JavaScript source files {kib-pull}26448[#26448]
+* Respects the `basePath` for the link to the user profile in the k7 header {kib-pull}26417[#26417]
+* Fixes `prettier` throw rule error  {kib-pull}26071[#26071]
+* Fixes authentication logic to fail out of auth flow on first provider failure {kib-pull}26648[#26648]
+* Fixes issues with the `url.search` being null in Node 10 {kib-pull}26992[#26992]
+* Fixes DLS query toggle on the role management page {kib-pull}27213[#27213]
+* Implements the K7 login screen {kib-pull}23512[#23512]
+Visualizations::
+* Fixes missing column totals in data table {kib-pull}34169[#34169]
+* Hides gauge labels when value is hidden {kib-pull}34171[#34171]
+* Changes sample data sets to use `auto_expand_replicas` of `0-1` for added data
+resiliency and ease of administration {kib-pull}33736[#33736]
+* Fixes broken CSV export from data table {kib-pull}34131[#34131]
+* Hides gauge labels when value is hidden {kib-pull}34171[#34171]
+* Removes dangerously set inner HTML {kib-pull}33976[#33976]
+* Fixes gauge filters {kib-pull}30057[#30057]
+* Fixes fieldformatter calls in pipeline helper {kib-pull}29842[#29842]
+* Adds pipeline field formatting {kib-pull}28746[#28746]
+* Removes `kibana_table` pipeline type {kib-pull}28979[#28979]
+* Moves renderers registry to OSS {kib-pull}28986[#28986]
+* Prepares for cut over to the visualize data loader from the current expression
+pipeline data loader {kib-pull}29873[#29873]
+* Toggles between Expression Pipeline & Visualize Data loader {kib-pull}29874[#29874]
+* Fixes every app that was wrapping `query` in an array unnecessarily {kib-pull}27636[#27636]
+* Fixes build issue and reintroduces new filter bar {kib-pull}29752[#29752]
+* Adds index pattern URL change notes {kib-pull}30779[#30779]
+* Fixes visualization filters to ignore invalid entries {kib-pull}30633[#30633]
+* Expands the size of add panels flyout and increases default rows per page {kib-pull}30508[#30508]
+* Fixes support for React 16.4+ by only resetting state if adaptors are updated {kib-pull}26138[#26138]
+* Fixes scrolling list on Firefox {kib-pull}26246[#26246]
+* Guards against empty and undefined index pattern arrays passed to QueryBar {kib-pull}24607[#24607]
+* Removes unused indexPattern from vega/tsvb/timelion request handler {kib-pull}26007[#26007]
+* Passes global filters from editor down to visualize  {kib-pull}26009[#26009]
+* Stops using schemas in aggconfigs to output DSL {kib-pull}26010[#26010]
+* Fixes `kbn-interpreter` package to not import from UI {kib-pull}26161[#26161]
+* Fixes OSS dynamic plugin loading by reverting to Canvas way of loading plugins {kib-pull}26463[#26463]
+* Fixes other bucket option to correctly apply without having to change other settings {kib-pull}26874[#26874]
+* Adds `en` as a valid numeral locale setting {kib-pull}25948[#25948]
+* Adds `rest_total_hits_as_int` into Kibana App {kib-pull}26404[#26404]
+* Uses Canvas pipeline to fetch data inside Visualize {kib-pull}25996[#25996]
+* Adds warning to the `documentation_links` file about link validation gotcha {kib-pull}24786[#24786]
+* Adds workaround for `getDerivedStateFromProps` change in react 16.4 {kib-pull}25142[#25142]
+* Fixes "Set up index patterns" link on home page {kib-pull}16128[#16128]
+* Fixes Time Series Visual Builder so that auto apply changes on every click {kib-pull}33710[#33710]
+* Removes the `geo_centroid` and `geo_bounds` aggregations from nested metrics {kib-pull}34042[#34042]
+* Replaces deprecated `moving_avg` by `moving_fn` aggregation {kib-pull}34155[#34155]
+* Adds autocomplete to Time Series Visual Builder {kib-pull}30158[#30158]
+* Fixes missing Markdown variables {kib-pull}28173[#28173]
+* Removes filter bar for Markdown visualizations {kib-pull}30354[#30354]
+* Corrects label for OS visualization in logs sample data {kib-pull}30249[#30249]
+* Fixes filter function on pie chart segment {kib-pull}26321[#26321]
+* Rewrites URL when closing vis type selection modal {kib-pull}26327[#26327]
+* Changes unbind calls from `.on` to `.off` {kib-pull}24575[#24575]
+* Fixes date field in controls visualization by generating labels with the field
+formatter {kib-pull}25654[#25654]
+* Replaces LESS files with Sass in `ui/public/vis`, `visLib`, and `visualize` {kib-pull}25333[#25333]
+* Replaces LESS files with Sass for the visualization types in `core_plugin/metrics` {kib-pull}24250[#24250]
+* Moves `timeout` to `_msearch` body to fix time series visual builder requests {kib-pull}26510[#26510]
+* Adds description for all visualization types {kib-pull}26243[#26243]
+* Defaults the scroll wheel zoom to false on Vega maps {kib-pull}21169[#21169]
+* Fixes problem within the input_vis_control plugin that prevents it from updating correctly
+if the field is switched, and then switched back to the previous field {kib-pull}25164[#25164]
+* Uses `vega-nocanvas` instead of Vega lib {kib-pull}16137[#16137]
+* Migrates visualization from Angular to React {kib-pull}16425[#16425]
+* Fixes maps for reporting (#15272) {kib-pull}15358[#15358]
+* Stops creation of nested search source per postflightrequest {kib-pull}20373[#20373]
+* Moves inspector code from Vis to embeddable visualize handler {kib-pull}24112[#24112]
+* Removes inspector from Vis {kib-pull}24112[#24112]
+* Fixes issue with debounce function running after component was unmounted {kib-pull}15045[#15045]
+* Fixes for dark mode fixes for Visualize charts, Time Series Visual Builder, and Timelion {kib-pull}30478[#30478]
+* Fixes geohash checkbox group spacing {kib-pull}32664[#32664]
+* Removes deep clone from courier request handler {kib-pull}32806[#32806]
+* Ensures saved filters from `searchSource` are always passed to response handlers {kib-pull}33074[#33074]
+* Adds new visualization search selection {kib-pull}30196[#30196]
+* Changes visualization save dialog when adding to dashboard {kib-pull}32883[#32883]
+* Fixes missing variables preview in Time Series Visual Builder markdown {kib-pull}30830[#30830]
+* Fixes incorrect behavior when filling the 'interval' field with values: s,m,d,M,y {kib-pull}32542[#32542]
+* Fixes multi-metric gauge with vertical sizing {kib-pull}33245[#33245]
+* Fixes Time Series Visual Builder display on small screen resolution {kib-pull}33299[#33299]
+* Fixes Time Series Visual Builder metric and gauge panels when splitting data by numbers {kib-pull}33304[#33304]
+* Fixes Time Series Visual Builder percentile ranks with integer values that return no results {kib-pull}33397[#33397]
+* Fixes Time Series Visual Builder issue with table view {kib-pull}33645[#33645]
+* Fixes Time Series Visual Builder issue with wrong color rules on multiple metrics {kib-pull}31455[#31455]
+* Fixes Time Series Visual Builder issue with percentiles for table {kib-pull}32084[#32084]
+* Switches all Time Series Visual Builder comboboxes to plain text single selection {kib-pull}31879[#31879]
+* Fixes table visualization to format date string when grouping by date field {kib-pull}31783[#31783]
+* Adds flex wrap to metric visualization container {kib-pull}31891[#31891]
+* Fixes missing axis labels when moving position {kib-pull}32628[#32628]
+* Fixes vislib legend entry width {kib-pull}33303[#33303]
+* Fixes legend / color picker overflow {kib-pull}30960[#30960]
+* Fixes total Metric Count inside donut pie charts  {kib-pull}29086[#29086]
+* Adds labels for sort order and request preference setting {kib-pull}31236[#31236]
+* Fixes time picker quick ranges description {kib-pull}32455[#32455]
+* Adds check for `extraMetric` in point server tooltip hovers {kib-pull}32641[#32641]
+* Switches sample data objects to KQL {kib-pull}32718[#32718]
+* Migrate visualization controls to use references {kib-pull}30880[#30880]
+* Dedupes by index pattern ID rather than object identity {kib-pull}32350[#32350]
+* Ensures extra columns are not shown in table visualization when `showPartialRows:true` {kib-pull}27154[#27154]
+* Uses default index pattern when one is not present in Visualize {kib-pull}30574[#30574]
+* Surfaces visualization loader errors in the UI {kib-pull}30594[#30594]
+
+
+
+[[release-notes-7.0.0-rc2]]
+== {kib} 7.0.0-rc2
+
+For detailed information about the {kib} 7.0.0-rc2 release, review the following information.
+
+[float]
+=== Known issue
+Monitoring::
+* If you have a version 7.0 monitoring cluster, a version 6.7 production
+cluster and {kib} version 6.7.0 or 6.7.1, you cannot see the monitoring data in
+{kib}. {kib-issue}34357[#34357]
+
+[float]
+[[breaking-7.0.0-rc2]]
+=== Breaking changes
+
+Breaking changes can prevent your application from optimal operation and performance. 
+Before you upgrade to 7.0.0-rc2, review the breaking change, then mitigate the impact to your application.
+
+Discover::
+* Allows user to use advanced query DSL directly, and does not apply `query:queryString:options` to `query_string` filters automatically {kib-pull}15640[#15640]
+* Removes `default_field` from `query:queryString:options` {kib-pull}18966[#18966]
+* Makes KQL the default query language for new searches {kib-pull}27092[#27092]
+Design::
+* Removes references to K6 EUI, using the default UI theme in its place {kib-pull}29152[#29152]
+Geo::
+* Removes the deprecated `regionmap` and `tilemap` kibana.yml configurations.
+Removes the backwards compatibility logic that checked for duplicative settings
+`map.regionmap` and `map.tilemap`. {kib-pull}28609[#28609]
+Monitoring::
+* Refactors index patterns from configurable to constants {kib-pull}29528[#29528]
+* Removes `node_resolver` setting {kib-pull}21181[#21181]
+Management::
+* Adds `configPrefix` to Index Management, License Management, Rollup Jobs, and
+Upgrade Assistant {kib-pull}30149[#30149]
+* Removes nested table splits from table visualization {kib-pull}26057[#26057]
+* Standardizes use of `index_pattern` in UI code and URLs, replacing `indices`
+and `index`  {kib-pull}29151[#29151] and {kib-pull}29481[#29481]
+* Removes app-specific dark mode options and replaces with a global dark mode uiSetting {kib-pull}29017[#29017]
+Operations::
+* Defers the optimize step in the plugin installer to server start {kib-pull}26983[#26983]
+* Removes tribe node support {kib-pull}16397[#16397]
+* Creates separate startup scripts for development and production {kib-pull}13806[#13806]
+* Sets default port based on protocol  {kib-pull}21564[#21564]
+* Removes deprecated `/shorten` API {kib-pull}21861[#21861]
+Platform::
+* Removes deprecated `i18n.defaultLocale` setting {kib-pull}29325[#29325]
+* Removes previously deprecated `elasticsearch*` settings. {kib-pull}29496[#29496]
+* Adds new "references" attribute to saved objects for relationships {kib-pull}28199[#28199]
+Reporting::
+* Removes Phantom dependency {kib-pull}27142[#27142]
+Security::
+* Removes deprecated SSL settings {kib-pull}28622[#28622]
+* Removes legacy fallback {kib-pull}29107[#29107]
+Visualizations::
+* Removes Timelion from the app switcher by default {kib-pull}30131[#30131]
+
+For more details about the breaking changes in the 7.0.0 release, refer to the
+<<breaking-changes-7.0, breaking changes in 7.0>>.
+
+[float]
+[[deprecation-7.0.0-rc2]]
+=== Deprecations
+Geo::
+* Fixes legacy tilemap loading {kib-pull}22095[#22095]
+Machine Learning::
+* Updates REST endpoint calls to remove _xpack {kib-pull}28069[#28069]
+Visualizations::
+* Removes old visualize wizard URL {kib-pull}28982[#28982]
+* Removes legacy response handler {kib-pull}28985[#28985]
+* Removes `legacyIcon` from visualizations {kib-pull}28981[#28981]
+
+
+[float]
+[[enhancement-7.0.0-rc2]]
+=== Enhancements
+Canvas::
+* Removes WebSockets from Canvas expressions interpreter {kib-pull}29792[#29792]
+* Optimizes Canvas REST calls via batching {kib-pull}29847[#29847]
+* Implements a clipboard and stores the copied elements in `localStorage` {kib-pull}25890[#25890]
+* Adds the ability to reuse assets without editing an element's expression {kib-pull}25764[#25764]
+* Adds the `clear` function {kib-pull}26397[#26397]
+* Adds workpad-level CSS {kib-pull}24143[#24143]
+* Improvements to expression editor {kib-pull}32336[#32336]
+* Adds `aria-label` attribute for Color: Auto Color to button inside chart style {kib-pull}32633[#32633]
+* Adds `aria-label` attribute for Copy to clipboard {kib-pull}32880[#32880]
+Dashboard::
+* Adds `href` option in addition to `onClick` for navigational links {kib-pull}25233[#25233]
+Design::
+* Implements a new design for {kib} called K7
+* Updates logos for marketing {kib-pull}25489[#25489]
+* Adds Kibana 7.0 breadcrumbs to home screen {kib-pull}26605[#26605]
+* Moves elastic/eui typings to single file {kib-pull}23950[#23950]
+Discover::
+* Renames the kuery setting to KQL {kib-pull}29587[#29587]
+* Adds visual indication of selected language in query bar {kib-pull}30899[#30899]
+Logstash::
+* Adopts {es} typeless API for Logstash central management {kib-pull}30546[#30546]
+Management::
+* Adds `Request timestamp` to request inspector stats {kib-pull}25667[#25667]
+* Adds "Reload indices" button to Index Management {kib-pull}27033[#27033]
+Machine Learning::
+* Adds `created_by` field to Auditbeat and APM data recognizer jobs {kib-pull}33863[#33863]
+* Adds the time of the anomaly to the `aria-label` of the actions button in each row of the anomalies table {kib-pull}32777[#32777]
+* Adds `role="alert"` callouts on the Job Management page to ensure the information is read out by screen readers {kib-pull}32911[#32911]
+* Adds EUI `ScreenReaderOnly` component to the "Analyzing data" modal {kib-pull}32472[#32472]
+* Updates job type and APM module icon to new designs {kib-pull}25380[#25380]
+* Allows model plot enablement via checkbox in  MultiMetric/Population Job creation {kib-pull}24914[#24914]
+* Adds support for the rare detector for charts in Anomaly Explorer and Singe Metric viewer {kib-pull}21524[#21524]
+* Updates HTTP access modules for ECS {kib-pull}29383[#29383]
+* Updates auditbeat modules for ECS {kib-pull}29934[#29934]
+* Removes non ECS apache, nginx and auditbeat data recognizer modules {kib-pull}30537[#30537]
+* Adds the configuration files for two new auditbeat data recognizer modules for
+detecting unusual processes on hosts and Docker containers {kib-pull}25716[#25716]
+* Adds support for saved searches created using Kuery to the job wizards {kib-pull}26094[#26094]
+* Allows users to enter their own query in the Discover page; stops passing the query
+from the job datafeed config in custom URLs {kib-pull}26957[#26957]
+* Rewrites Calendar to React/EUI {kib-pull}26741[#26741]
+* Converts Setting page to React/EUI {kib-pull}27144[#27144]
+* Ensures loading indicator is present on initial jobs load {kib-pull}27151[#27151]
+* Prevents a new calendar save if a calendar with that id already exists {kib-pull}27104[#27104]
+* Edits data recognizer modules to use KQL in saved objects {kib-pull}32766[#32766]
+Observability::
+* Converts monitor sparklines to histogram {kib-pull}28502[#28502]
+* Adds crosshair sync for monitor page charts {kib-pull}28631[#28631]
+* Adds a new plugin for Uptime Monitoring {kib-pull}25480[#25480]
+Operations::
+* Adds support for reindexing APM indices {kib-pull}29845[#29845]
+* Adds a reindex warning for mapping type changes {kib-pull}32081[#32081]
+* Adds warning callout to update APM index pattern {kib-pull}33661[#33661]
+Platform::
+* Adds help menu item to header {kib-pull}29664[#29664]
+* Implements global dark theme {kib-pull}28445[#28445]
+* Removes support for the K6 navigation style {kib-pull}29565[#29565]
+* Adds `rest_total_hits_as_int` to all requests in platform code that eventually
+look up `hits.total` {kib-pull}26432[#26432]
+* Adds `dist` flag to the configuration context {kib-pull}26545[#26545]
+* Prepares `@kbn/datemath` to be republished as `@elastic/datemath` {kib-pull}26559[#26559]
+* Wraps `remote` methods in `browser` service {kib-pull}26394[#26394]
+* Uses `stream.pipeline` to manage error handling {kib-pull}27246[#27246]
+Querying & Filtering::
+* Moves the `buildESQuery` module (including filters and Kuery) into a separate package {kib-pull}23345[#23345]
+* Adds comment explaining why `getComputedFields` adds a `docvalue` to `docvalue_fields`
+for each date field in an index pattern. {kib-pull}25725[#25725]
+* Moves filtering functions out of `vis.API.events` {kib-pull}25280[#25280]
+Reporting::
+* Adds png output to reports {kib-pull}24759[#24759]
+* Sorts ascending on sort order first then ascending on name. Any menu item
+without a sort order gets set to zero. {kib-pull}25058[#25058]
+* In the Visualization Editor, removes the "Optimize for printing" option when
+exporting the visualization as PNG or PDF. The single visualization will automatically
+be optimized for printing {kib-pull}30456[#30456]
+* Adds browser type to the reporting side panel {kib-pull}26307[#26307]
+* Adds better logging for `waitForSelector` failure {kib-pull}25762[#25762]
+* Enhances error messaging and handling {kib-pull}26299[#26299]
+* Adds "Info" button in the Reporting listing {kib-pull}25421[#25421]
+* Adds new inspector for chromium-backed reports {kib-pull}32430[#32430]
+Rollups::
+* Adds support for rolling up metrics of date fields {kib-pull}26450[#26450]
+Security::
+* Introduces content security policy (CSP) {kib-pull}29545[#29545]
+* Warns legacy browsers that do not support content security policy {kib-pull}29957[#29957]
+* Adds content security policy strict mode {kib-pull}29856[#29856]
+* Updates the GET `/api/security/role` endpoint to return the list of roles sorted
+by name, rather than creation date {kib-pull}26491[#26491]
+* Updates the Account Settings screen to show the change password form only when
+a password change is possible for the authentication realm {kib-pull}26779[#26779]
+* Makes space selector a `button` {kib-pull}26889[#26889]
+Visualizations::
+* Replaces Angular timepicker with EuiSuperDatePicker {kib-pull}29204[#29204]
+* Upgrades Kibana to Elasticsearch 7.0 {kib-pull}29184[#29184]
+* Maps inspector requests by id so single requests can be reset at a time {kib-pull}26770[#26770]
+* Adds ODBC to blurb for start trail {kib-pull}27223[#27223]
+* Adds a `console.error` for visualize errors {kib-pull}24581[#24581]
+* Adds a timeout so that Vega respects `elasticsearch.shardTimeout` setting {kib-pull}30482[#30482]
+* Removes experimental flag from Visual Builder (TSVB) {kib-pull}25634[#25634]
+* Implements new visualization type selection {kib-pull}23833[#23833]
+* Removes `lab` stage for visualizations, making `experimental` the only non-production
+stage available {kib-pull}25702[#25702]
+* Makes markdown consistent across {kib} {kib-pull}31890[#31890]
+* Adds option to open links in new tab in Time Series Visual Builder {kib-pull}31906[#31906]
+* Adds max, min, placeholder to percentile in Time Series Visual Builder {kib-pull}32389[#32389]
+* Displays interval information in Time Series Visual Builder when building {kib-pull}32117[#32117]
+* Adds controls to toggle disable/enable individual series and annotations {kib-pull}33107[#33107]
+* Updates Vega to version 4 {kib-pull}30628[#30628]
+
+[float]
+[[bug-7.0.0-rc2]]
+=== Bug fixes
+APM::
+* Fixes transaction sample on error page {kib-pull}34048[#34048]
+* Uses form label for Transaction type selector {kib-pull}28322[#28322]
+* Fixes icon for View trace button {kib-pull}28908[#28908]
+* Shows metric-only services in service overview {kib-pull}30397[#30397]
+* Adds span subtype and action to Span Flyout {kib-pull}30041[#30041]
+* Updates head title and fixes breadcrumb string issues {kib-pull}29960[#29960]
+* Adds fixes for `service.name` scripted field {kib-pull}28488[#28488]
+* Updates APM index pattern {kib-pull}30837[#30837]
+* Updates APM reindex script {kib-pull}30761[#30761]
+* Sets Index Pattern version as string {kib-pull}30789[#30789]
+* Overrides EUI chart default styles for gridlines {kib-pull}21723[#21723]
+* Adds section titles to span detail modal {kib-pull}20717[#20717]
+* Fixes upgrade assistant label and copy {kib-pull}31750[#31750]
+* Changes `context.system.hostname` to `host.hostname` for APM link {kib-pull}30884[#30884]
+* Updates APM reindex script {kib-pull}31965[#31965]
+* Updates APM index pattern {kib-pull}33595[#33595]
+Canvas::
+* Adds datetime as a date identifier {kib-pull}29537[#29537]
+* Switches sample web logs fonts to 48px {kib-pull}30747[#30747]
+* Fixes related to K7 design {kib-pull}30833[#30833]
+* Fixes page preview size issue {kib-pull}26795[#26795]
+* Fixes visual bug when opening the workpad loader {kib-pull}26647[#26647]
+* Fixes page thumbnail sizes {kib-pull}26573[#26573]
+* Decreases size of tray toggle {kib-pull}25470[#25470]
+* Makes selection border 1px {kib-pull}26739[#26739]
+* Fixes interpreter socket error {kib-pull}26870[#26870]
+* Fixes duplicate `Value` options in math select value {kib-pull}25556[#25556]
+* Gets correct plugins path {kib-pull}25448[#25448]
+* Quotes the index pattern in SQL input {kib-pull}25488[#25488]
+* Decreases the size of tray toggle {kib-pull}25470[#25470]
+* Fixes the hours label container size {kib-pull}31838[#31838]
+* Removes ID attribute {kib-pull}30736[#30736]
+* Improves the plugin pre-build {kib-pull}25267[#25267]
+Dashboard::
+* Removes `dashboardContext` function and makes Timelion, Vega, and Time Series
+Visual Builder use `buildEsQuery` {kib-pull}23227[#23227]
+* Shows the filter bar in dashboard embed mode {kib-pull}32222[#32222]
+Design::
+* Updates dashboard design {kib-pull}29896[#29896]
+* Adjusts side navigation interaction {kib-pull}29978[#29978]
+* Converts Security UI from LESS to Sass {kib-pull}25079[#25079]
+* Adds boilerplate Sass for Kibana core {kib-pull}21185[#21185]
+* Makes dark mode overrides global {kib-pull}31628[#31628]
+Discover::
+* Adds debug code to flaky field_data test {kib-pull}15535[#15535]
+* Gets even more debug info for flaky field_data test {kib-pull}17627[#17627]
+* Allows time ranges before the epoch in Discover {kib-pull}31807[#31807]
+* Fixes Kibana Query Language handling of carriage return {kib-pull}32150[#32150]
+* Improves warning messages when using Lucene-like syntax {kib-pull}31837[#31837]
+* Update capitalization of KQL full name {kib-pull}31631[#31631]
+* Adds placeholder text indicating the filters aggregation takes only Lucene and Query DSL {kib-pull}31296[#31296]
+* Prevents sending request if it already failed during query parsing {kib-pull}31219[#31219]
+* Fixes apps to always migrate legacy queries on state change {kib-pull}33276[#33276]
+Geo::
+* Fixes panel cut off in K7 design {kib-pull}29209[#29209]
+* Removes left-over geohash grid code {kib-pull}30312[#30312]
+* Uses geo-tile aggregation instead of geohash precision {kib-pull}29776[#29776]
+* Resolves URL dynamically when requesting EMS data {kib-pull}25685[#25685]
+* Fixes EMS hotlink {kib-pull}26868[#26868]
+* Fixes feature/align map config settings {kib-pull}19450[#19450]
+* Removes `geotile_grid` aggregation from non-geospatial visualizations {kib-pull}31354[#31354]
+* Coerces string doc-values to numbers if used in styling {kib-pull}33657[#33657]
+Infrastructure::
+* Fixes server-side retrieval of the {kib} version {kib-pull}31440[#31440]
+* Fixes react router import {kib-pull}33659[#33659]
+* Adapts settings ui to saved object version type change {kib-pull}30082[#30082]
+* Fixes potential color bugs {kib-pull}26292[#26292]
+* Fixes auto refresh button on node detail page {kib-pull}26426[#26426]
+* Changes the time range from the last hour to the last 5 minutes for the Waffle Map {kib-pull}26278[#26278]
+* Passes flag in request to force BWC hit count {kib-pull}26517[#26517]
+* Replaces redux source slice with constate container {kib-pull}26121[#26121]
+* Changes node detail link to set time range to 1 hour {kib-pull}26977[#26977]
+* Stops showing sidenav while loading. {kib-pull}27119[#27119]
+* Fixes styling after breaking EUI changes {kib-pull}27021[#27021]
+* Fixes graphql type generation after package upgrades {kib-pull}26991[#26991]
+* Removes usage of `ts-optchain` in the browser {kib-pull}27148[#27148]
+Machine Learning::
+* Fixes filter and icon for APM Data Recognizer module {kib-pull}31112[#31112]
+* Ensures cardinality related messages in Advanced job wizard are formatted correctly {kib-pull}33599[#33599]
+* Adds title elements which were missing from Calendars pages {kib-pull}33257[#33257]
+* Changes job wizard query to use `match_all` {kib-pull}32008[#32008]
+* Adds calendars list to job management {kib-pull}32566[#32566]
+* Fixes Job Selector text to take group selection into account {kib-pull}31333[#31333]
+* Ensures that Job Selector description text is accurate {kib-pull}32441[#32441]
+* Reduces space between headings in the expanded row for Category examples in Anomalies Table {kib-pull}32417[#32417]
+* Removes use of types in datafeeds  {kib-pull}27572[#27572]
+* Fixes metric select double caret {kib-pull}30357[#30357]
+* Removes old angular based start datafeed modal {kib-pull}30392[#30392]
+* Handles removal of backend ml.enabled node attribute {kib-pull}27604[#27604]
+* Edits labels in the Apache and Nginx ECS data recognizer modules {kib-pull}29935[#29935]
+* Fixes for K7 compatibility {kib-pull}30536[#30536]
+* Fixes broken label style in advanced wizard {kib-pull}30847[#30847]
+* Adds ml-ui team to .github/CODEOWNERS {kib-pull}29810[#29810]
+* Allows user to add/edit/delete annotations in the Single Series Viewer {kib-pull}26034[#26034]
+* Does not pass datafeed query to Discover in custom URL {kib-pull}26957[#26957]
+* Fixes word break in Anomalies and Jobs tables {kib-pull}26978[#26978]
+* Fixes alignment of filter icons in the Anomalies table {kib-pull}26253[#26253]
+* Shows useful error on invalid query in JobList search bar {kib-pull}25153[#25153]
+* Adds user privilege check to Jobs List group selector control {kib-pull}25225[#25225]
+* Fixes file data viz file size check and formats as bytes {kib-pull}25295[#25295]
+* Fixes the layout of the cards in the Data Visualizer on IE {kib-pull}25383[#25383]
+* Adds better error reporting for reading and importing data {kib-pull}24269[#24269]
+* Displays an ordinal y axis for low cardinality rare charts {kib-pull}24852[#24852]
+* Fixes typo in job validation message {kib-pull}25130[#25130]
+* Removes deprecated `angularjs` based jobs list and related code {kib-pull}25216[#25216]
+* Skips invalid modules when data recognizer lists matches {kib-pull}33703[#33703]
+Management::
+* Removes grunt sterilize - its been replaced by `kbn clean` {kib-pull}27825[#27825]
+* Makes Index management table more responsive {kib-pull}28882[#28882]
+* Fixes index pattern wizard when there are remote clusters but no local indices  {kib-pull}24339[#24339]
+* Uses new `_graph` endpoints {kib-pull}26956[#26956]
+* Adjusts spacing of Management navigation items {kib-pull}25666[#25666]
+* Updates "Disenroll" text to be consistent with menu option "Unenroll" {kib-pull}26816[#26816]
+* Fixes broken breadcrumb link for index management {kib-pull}27164[#27164]
+* Fixes issue with multiple execution in Console {kib-pull}26933[#26933]
+* Reloads full index list when reload hits missing index {kib-pull}27197[#27197]
+* Adds boilerplate for remote clusters management app {kib-pull}25369[#25369]
+* Adds `ignore_failure` to ingest common auto complete in console {kib-pull}24915[#24915]
+* Removes support for expression-based scripted fields {kib-pull}14310[#14310]
+* Adds WatchErrors to capture invalid watches {kib-pull}23887[#23887]
+* Rewords the translation id for error with missing property in Watcher {kib-pull}24753[#24753]
+* Triggers full load when encountering 403 for index list reload {kib-pull}28243[#28243]
+* Updates X-Pack console specs {kib-pull}29506[#29506]
+* Fixes API integration test for follower indices {kib-pull}30260[#30260]
+* Fixes management footer logo spacing bug {kib-pull}30654[#30654]
+Monitoring::
+* Updates to read from `.monitoring-*-7-*` indices {kib-pull}32654[#32654]
+* Adds in explicit mappings {kib-pull}33004[#33004]
+* Stops using the normalized derivative value {kib-pull}27416[#27416]
+* Updates the title in the left nav to Stack Monitoring {kib-pull}28102[#28102]
+* Prepares the Monitoring UI codebase for the incoming changes to `hits.total` {kib-pull}26442[#26442]
+* Updates browser title to Stack Monitoring {kib-pull}29638[#29638]
+* Fixes Monitoring design {kib-pull}29479[#29479]
+* Removes old index patterns that are not expected in 7.0.0 onwards {kib-pull}27915[#27915]
+* Removes deprecated `xpack.monitoring.report_stats` setting {kib-pull}30017[#30017]
+* Fixes monitoring tests to work with mapping changes {kib-pull}29188[#29188]
+* Removes type filter helper {kib-pull}30887[#30887]
+* Fixes error handling for local stats collection/permissions {kib-pull}26560[#26560]
+* Removes initial delay to check and send Telemetry data {kib-pull}26575[#26575]
+* Pulls local Kibana usage stats {kib-pull}26496[#26496]
+* Converts the Elasticsearch monitoring UIs to using EUI tables and page layout {kib-pull}26217[#26217]
+* Renames Monitoring `FormattedMessage` to `FormattedAlert` {kib-pull}24197[#24197]
+* Uses the cluster name from metadata if it exists {kib-pull}24495[#24495]
+Observability::
+* Fixes 7.x references to tcp.port {kib-pull}29132[#29132]
+* Ports functional tests to 7.x {kib-pull}29398[#29398]
+* Ports unit tests to master {kib-pull}29876[#29876]
+* Adds missing loading states for filter bar and snapshot components {kib-pull}30122[#30122]
+* Removes double-format for duration value {kib-pull}30664[#30664]
+* Switches Uptime localization from i18n provider to context {kib-pull}31601[#31601]
+* Improves monitor charts query {kib-pull}30561[#30561]
+* Adds global help support to Uptime {kib-pull}31493[#31493]
+* Updates targeted index pattern for 7.0.0 {kib-pull}30998[#30998]
+Operations::
+* Removes the usage of types from Esqueue used for the `.reporting index` {kib-pull}32146[#32146]
+* Fixes IPv6 addresses used with Angular connector {kib-pull}29891[#29891]
+* Fixes `makelogs` dependency {kib-pull}31428[#31428]
+* Runs the {kib} server in production mode for functional testing {kib-pull}31346[#31346]
+* Uses `fs.copyFile` to avoid race condition {kib-pull}32220[#32220]
+* Removes `hash -r` {kib-pull}32616[#32616]
+* Fixes JUnit reporter {kib-pull}32686[#32686]
+* Adds options to `run()` that can modify help and show help on errors {kib-pull}33466[#33466]
+* Captures values from boolean flags {kib-pull}33528[#33528]
+* Fixes incorrect environment name for V8 options {kib-pull}31052[#31052]
+* Removes svg from url-loader, as it conflicts with other loaders {kib-pull}30888[#30888]
+* Uses apiVersion from es plugin in x-pack {kib-pull}30853[#30853]
+* Clones saved object document before migrating to prevent accidental mutations {kib-pull}30475[#30475]
+* Removes node fallback from kibana-keystore {kib-pull}15066[#15066]
+* Adds debug script to set inspect flags {kib-pull}15967[#15967]
+* Uses snake case for scripts/kibana-keystore.js and scripts/kibana-plugin.js {kib-pull}15331[#15331]
+* Updates license info in package.json {kib-pull}20353[#20353]
+* Fixes error log formatting {kib-pull}24788[#24788]
+* Matches chalk dependency version on Kibana with the one used on X-Pack {kib-pull}20621[#20621]
+* Fixes non-conforming licenses on devDependencies and adds the ability to whitelist devOnly licenses {kib-pull}23859[#23859]
+* Adds jsxa11y into eslint rules {kib-pull}23932[#23932]
+* Reverts Bump react-grid-layout to 0.16.0 {kib-pull}14912[#14912]
+* Reverts breaking change for Status API {kib-pull}21927[#21927]
+* Converts `utils/collection` to TypeScript {kib-pull}23992[#23992]
+* Removes usage of update_all_types {kib-pull}16406[#16406]
+* Improves the `yarn kbn bootstrap` speed by using yarn workspaces for packages inside `packages/*` and `x-pack` {kib-pull}24095[#24095]
+* Runs jenkins:unit task with dev flag in order to run license check {kib-pull}19832[#19832]
+* Does not break on startup in debug mode {kib-pull}19219[#19219]
+Platform::
+* Removes types from `saved_objects` repository {kib-pull}32286[#32286]
+* Fixes custom icon image paths in `NavDrawer` {kib-pull}33573[#33573]
+* Fixes back button navigation {kib-pull}32372[#32372]
+* Improves types for ftr and expect.js and cleans up `tsconfig` files {kib-pull}31948[#31948]
+* Strips # from hash before updating ``$location` {kib-pull}32732[#32732]
+* Removes `disableAutoAngularUrlEncodingFix()`` {kib-pull}33136[#33136]
+* Removes unused system-loader implementation {kib-pull}33747[#33747]
+* Moves the table vis migration to {kib} plugin {kib-pull}29478[#29478]
+* Allows passing a default operator to use on saved object client find operations {kib-pull}29339[#29339]
+* Fixes saved object repository `bulkCreate` to return migrated references and attributes {kib-pull}29754[#29754]
+* Adds missing saved object reference handling for searchSourceJSON filter attribute {kib-pull}29840[#29840]
+* Excludes `migrationVersion` and references from `getRootPropertiesObjects` result {kib-pull}30081[#30081]
+* Removes dependency on doc versions {kib-pull}29906[#29906]
+* Adds typings for saved object client {kib-pull}29951[#29951]
+* Uses `lastSubUrl` when appropriate {kib-pull}28735[#28735]
+* Removes es _xpack endpoint usage {kib-pull}29465[#29465]
+* Adds typings for the `saved_object_finder` react component {kib-pull}30067[#30067]
+* Fixes the confirm overwrite modal of saved objects to handle large titles {kib-pull}28590[#28590]
+* Decreases start limit and interval {kib-pull}25474[#25474]
+* Adds `--download` flag to snapshot command to warm the cache {kib-pull}25830[#25830]
+* Implements `--prefer-offline` flag {kib-pull}25840[#25840]
+* Fixes watcher routes broken by Hapi upgrade {kib-pull}26713[#26713]
+* Fixes non-conforming licenses on devDependencies and adds the ability to whitelist devOnly licenses {kib-pull}23859[#23859]
+* Watches optimizer cache invalidation  {kib-pull}24172[#24172]
+* Adds `normalizePath` in order to fix watch optimizer when running on Windows {kib-pull}26486[#26486]
+* Creates vendor dll for the client modules {kib-pull}22618[#22618]
+* Upgrades to NodeJS 10 {kib-pull}25157[#25157]
+* Improves plugin version mismatch error message {kib-pull}25774[#25774]
+* Improves build/packaging {kib-pull}26096[#26096]
+* Swaps `jstimezonedetect` with `moment.tz.guess` {kib-pull}21800[#21800]
+* Upgrades resize-observer-polyfill version {kib-pull}26990[#26990]
+* Fixes saved objects client `_processBatchQueue` function to handle errors {kib-pull}26763[#26763]
+* Changes kbn pm webpack config to generate dist files in mode=none {kib-pull}26847[#26847]
+* Hides logs from deleteAll on task: clean client modules into dll {kib-pull}26884[#26884]
+* Upgrades `resize-observer-polyfill` version {kib-pull}26990[#26990]
+* Uses `single-node` discovery type for the test ES node/cluster {kib-pull}27125[#27125]
+* Moves moment to peerDependency in elastic-datemath {kib-pull}27264[#27264]
+* Transforms plugin deprecations before checking for unused settings {kib-pull}21294[#21294]
+* Expands list of restricted globals in `eslint-config-kibana` {kib-pull}15798[#15798]
+* Makes logs easier to read on Windows with chalk colors {kib-pull}15557[#15557]
+* Fixes `includeFields` function to return root saved object properties {kib-pull}33847[#33847]
+Reporting::
+* Refactors routes files and helpers {kib-pull}30111[#30111]
+* Deletes `sortOrder` once items have been sorted and does not pass to `EuiContextMenuItem`
+in the share context menu {kib-pull}26890[#26890]
+* Fixes a regression bug in detection of Error and Warning toast notifications {kib-pull}25482[#25482]
+* Stops passing an empty `formatConfig` to the fieldFormats helper {kib-pull}27168[#27168]
+* Returns promise in Reporting jobs API {kib-pull}24769[#24769]
+* Uses `content-disposition` package for non-US font titles in reporting {kib-pull}30895[#30895]
+* Uses lowercased server host settings {kib-pull}33020[#33020]
+Rollups::
+* Shows loading state in Rollup Job detail panel. {kib-pull}25752[#25752]
+* Specifies Rollup Jobs breadcrumbs in header. {kib-pull}26590[#26590]
+* Requires histogram interval in Rollup Job wizard to be a whole number. {kib-pull}26596[#26596]
+* Removes duplicate rendered sections {kib-pull}[#28566]
+Security::
+* Adds tests for interpreter `createSocket` {kib-pull}29459[#29459]
+* Moves the server-side `SavedObjectClient` types from the `spaces` plugin to the
+same location as the corresponding JavaScript source files {kib-pull}26448[#26448]
+* Respects the `basePath` for the link to the user profile in the k7 header {kib-pull}26417[#26417]
+* Fixes `prettier` throw rule error  {kib-pull}26071[#26071]
+* Fixes authentication logic to fail out of auth flow on first provider failure {kib-pull}26648[#26648]
+* Fixes issues with the `url.search` being null in Node 10 {kib-pull}26992[#26992]
+* Fixes DLS query toggle on the role management page {kib-pull}27213[#27213]
+* Implements the K7 login screen {kib-pull}23512[#23512]
+Visualizations::
+* Hides gauge labels when value is hidden {kib-pull}34171[#34171]
+* Removes dangerously set inner HTML {kib-pull}33976[#33976]
+* Fixes gauge filters {kib-pull}30057[#30057]
+* Fixes fieldformatter calls in pipeline helper {kib-pull}29842[#29842]
+* Adds pipeline field formatting {kib-pull}28746[#28746]
+* Removes `kibana_table` pipeline type {kib-pull}28979[#28979]
+* Moves renderers registry to OSS {kib-pull}28986[#28986]
+* Prepares for cut over to the visualize data loader from the current expression
+pipeline data loader {kib-pull}29873[#29873]
+* Toggles between Expression Pipeline & Visualize Data loader {kib-pull}29874[#29874]
+* Fixes every app that was wrapping `query` in an array unnecessarily {kib-pull}27636[#27636]
+* Fixes build issue and reintroduces new filter bar {kib-pull}29752[#29752]
+* Adds index pattern URL change notes {kib-pull}30779[#30779]
+* Fixes visualization filters to ignore invalid entries {kib-pull}30633[#30633]
+* Expands the size of add panels flyout and increases default rows per page {kib-pull}30508[#30508]
+* Fixes support for React 16.4+ by only resetting state if adaptors are updated {kib-pull}26138[#26138]
+* Fixes scrolling list on Firefox {kib-pull}26246[#26246]
+* Guards against empty and undefined index pattern arrays passed to QueryBar {kib-pull}24607[#24607]
+* Removes unused indexPattern from vega/tsvb/timelion request handler {kib-pull}26007[#26007]
+* Passes global filters from editor down to visualize  {kib-pull}26009[#26009]
+* Stops using schemas in aggconfigs to output DSL {kib-pull}26010[#26010]
+* Fixes `kbn-interpreter` package to not import from UI {kib-pull}26161[#26161]
+* Fixes OSS dynamic plugin loading by reverting to Canvas way of loading plugins {kib-pull}26463[#26463]
+* Fixes other bucket option to correctly apply without having to change other settings {kib-pull}26874[#26874]
+* Adds `en` as a valid numeral locale setting {kib-pull}25948[#25948]
+* Adds `rest_total_hits_as_int` into Kibana App {kib-pull}26404[#26404]
+* Uses Canvas pipeline to fetch data inside Visualize {kib-pull}25996[#25996]
+* Adds warning to the `documentation_links` file about link validation gotcha {kib-pull}24786[#24786]
+* Adds workaround for `getDerivedStateFromProps` change in react 16.4 {kib-pull}25142[#25142]
+* Fixes "Set up index patterns" link on home page {kib-pull}16128[#16128]
+* Fixes Time Series Visual Builder so that auto apply changes on every click {kib-pull}33710[#33710]
+* Removes the `geo_centroid` and `geo_bounds` aggregations from nested metrics {kib-pull}34042[#34042]
+* Replaces deprecated `moving_avg` by `moving_fn` aggregation {kib-pull}34155[#34155]
+* Adds autocomplete to Time Series Visual Builder {kib-pull}30158[#30158]
+* Fixes missing Markdown variables {kib-pull}28173[#28173]
+* Removes filter bar for Markdown visualizations {kib-pull}30354[#30354]
+* Corrects label for OS visualization in logs sample data {kib-pull}30249[#30249]
+* Fixes filter function on pie chart segment {kib-pull}26321[#26321]
+* Rewrites URL when closing vis type selection modal {kib-pull}26327[#26327]
+* Changes unbind calls from `.on` to `.off` {kib-pull}24575[#24575]
+* Fixes date field in controls visualization by generating labels with the field
+formatter {kib-pull}25654[#25654]
+* Replaces LESS files with Sass in `ui/public/vis`, `visLib`, and `visualize` {kib-pull}25333[#25333]
+* Replaces LESS files with Sass for the visualization types in `core_plugin/metrics` {kib-pull}24250[#24250]
+* Moves `timeout` to `_msearch` body to fix time series visual builder requests {kib-pull}26510[#26510]
+* Adds description for all visualization types {kib-pull}26243[#26243]
+* Defaults the scroll wheel zoom to false on Vega maps {kib-pull}21169[#21169]
+* Fixes problem within the input_vis_control plugin that prevents it from updating correctly
+if the field is switched, and then switched back to the previous field {kib-pull}25164[#25164]
+* Uses `vega-nocanvas` instead of Vega lib {kib-pull}16137[#16137]
+* Migrates visualization from Angular to React {kib-pull}16425[#16425]
+* Fixes maps for reporting (#15272) {kib-pull}15358[#15358]
+* Stops creation of nested search source per postflightrequest {kib-pull}20373[#20373]
+* Moves inspector code from Vis to embeddable visualize handler {kib-pull}24112[#24112]
+* Removes inspector from Vis {kib-pull}24112[#24112]
+* Fixes issue with debounce function running after component was unmounted {kib-pull}15045[#15045]
+* Fixes for dark mode fixes for Visualize charts, Time Series Visual Builder, and Timelion {kib-pull}30478[#30478]
+* Fixes geohash checkbox group spacing {kib-pull}32664[#32664]
+* Removes deep clone from courier request handler {kib-pull}32806[#32806]
+* Ensures saved filters from `searchSource` are always passed to response handlers {kib-pull}33074[#33074]
+* Adds new visualization search selection {kib-pull}30196[#30196]
+* Changes visualization save dialog when adding to dashboard {kib-pull}32883[#32883]
+* Fixes missing variables preview in Time Series Visual Builder markdown {kib-pull}30830[#30830]
+* Fixes incorrect behavior when filling the 'interval' field with values: s,m,d,M,y {kib-pull}32542[#32542]
+* Fixes multi-metric gauge with vertical sizing {kib-pull}33245[#33245]
+* Fixes Time Series Visual Builder display on small screen resolution {kib-pull}33299[#33299]
+* Fixes Time Series Visual Builder metric and gauge panels when splitting data by numbers {kib-pull}33304[#33304]
+* Fixes Time Series Visual Builder percentile ranks with integer values that return no results {kib-pull}33397[#33397]
+* Fixes Time Series Visual Builder issue with table view {kib-pull}33645[#33645]
+* Fixes Time Series Visual Builder issue with wrong color rules on multiple metrics {kib-pull}31455[#31455]
+* Fixes Time Series Visual Builder issue with percentiles for table {kib-pull}32084[#32084]
+* Switches all Time Series Visual Builder comboboxes to plain text single selection {kib-pull}31879[#31879]
+* Fixes table visualization to format date string when grouping by date field {kib-pull}31783[#31783]
+* Adds flex wrap to metric visualization container {kib-pull}31891[#31891]
+* Fixes missing axis labels when moving position {kib-pull}32628[#32628]
+* Fixes vislib legend entry width {kib-pull}33303[#33303]
+* Fixes legend / color picker overflow {kib-pull}30960[#30960]
+* Fixes total Metric Count inside donut pie charts  {kib-pull}29086[#29086]
+* Adds labels for sort order and request preference setting {kib-pull}31236[#31236]
+* Fixes time picker quick ranges description {kib-pull}32455[#32455]
+* Adds check for `extraMetric` in point server tooltip hovers {kib-pull}32641[#32641]
+* Switches sample data objects to KQL {kib-pull}32718[#32718]
+* Migrate visualization controls to use references {kib-pull}30880[#30880]
+* Dedupes by index pattern ID rather than object identity {kib-pull}32350[#32350]
+* Ensures extra columns are not shown in table visualization when `showPartialRows:true` {kib-pull}27154[#27154]
+* Uses default index pattern when one is not present in Visualize {kib-pull}30574[#30574]
+* Surfaces visualization loader errors in the UI {kib-pull}30594[#30594]
+
+
+
+[[release-notes-7.0.0-rc1]]
+== {kib} 7.0.0-rc1
+
+For detailed information about the {kib} 7.0.0-rc1 release, review the following information.
+
+[float]
+[[breaking-7.0.0-rc1]]
+=== Breaking changes
+
+Breaking changes can prevent your application from optimal operation and performance. 
+Before you upgrade to 7.0.0-rc1, review the breaking change, then mitigate the impact to your application.
+
+Discover::
+* Allows user to use advanced query DSL directly, and does not apply `query:queryString:options` to `query_string` filters automatically {kib-pull}15640[#15640]
+* Removes `default_field` from `query:queryString:options` {kib-pull}18966[#18966]
+* Makes KQL the default query language for new searches {kib-pull}27092[#27092]
+Design::
+* Removes references to K6 EUI, using the default UI theme in its place {kib-pull}29152[#29152]
+Geo::
+* Removes the deprecated `regionmap` and `tilemap` kibana.yml configurations.
+Removes the backwards compatibility logic that checked for duplicative settings
+`map.regionmap` and `map.tilemap`. {kib-pull}28609[#28609]
+Monitoring::
+* Refactors index patterns from configurable to constants {kib-pull}29528[#29528]
+* Removes `node_resolver` setting {kib-pull}21181[#21181]
+Management::
+* Adds `configPrefix` to Index Management, License Management, Rollup Jobs, and
+Upgrade Assistant {kib-pull}30149[#30149]
+* Removes nested table splits from table visualization {kib-pull}26057[#26057]
+* Standardizes use of `index_pattern` in UI code and URLs, replacing `indices`
+and `index`  {kib-pull}29151[#29151] and {kib-pull}29481[#29481]
+* Removes app-specific dark mode options and replaces with a global dark mode uiSetting {kib-pull}29017[#29017]
+Operations::
+* Defers the optimize step in the plugin installer to server start {kib-pull}26983[#26983]
+* Removes tribe node support {kib-pull}16397[#16397]
+* Creates separate startup scripts for development and production {kib-pull}13806[#13806]
+* Sets default port based on protocol  {kib-pull}21564[#21564]
+* Removes deprecated `/shorten` API {kib-pull}21861[#21861]
+Platform::
+* Removes deprecated `i18n.defaultLocale` setting {kib-pull}29325[#29325]
+* Removes previously deprecated `elasticsearch*` settings. {kib-pull}29496[#29496]
+* Adds new "references" attribute to saved objects for relationships {kib-pull}28199[#28199]
+Reporting::
+* Removes Phantom dependency {kib-pull}27142[#27142]
+Security::
+* Removes deprecated SSL settings {kib-pull}28622[#28622]
+* Removes legacy fallback {kib-pull}29107[#29107]
+Visualizations::
+* Removes Timelion from the app switcher by default {kib-pull}30131[#30131]
+
+For more details about breaking changes in the 7.0.0 release, refer to the
+<<breaking-changes-7.0, breaking changes in 7.0>>.
+
+[float]
+[[deprecation-7.0.0-rc1]]
+=== Deprecations
+Geo::
+* Fixes legacy tilemap loading {kib-pull}22095[#22095]
+Machine Learning::
+* Updates REST endpoint calls to remove _xpack {kib-pull}28069[#28069]
+Visualizations::
+* Removes old visualize wizard URL {kib-pull}28982[#28982]
+* Removes legacy response handler {kib-pull}28985[#28985]
+* Removes `legacyIcon` from visualizations {kib-pull}28981[#28981]
+
+
+[float]
+[[enhancement-7.0.0-rc1]]
+=== Enhancements
+Canvas::
+* Removes WebSockets from Canvas expressions interpreter {kib-pull}29792[#29792]
+* Optimizes Canvas REST calls via batching {kib-pull}29847[#29847]
+* Implements a clipboard and stores the copied elements in `localStorage` {kib-pull}25890[#25890]
+* Adds the ability to reuse assets without editing an element's expression {kib-pull}25764[#25764]
+* Adds the `clear` function {kib-pull}26397[#26397]
+* Adds workpad-level CSS {kib-pull}24143[#24143]
+* Improvements to expression editor {kib-pull}32336[#32336]
+* Adds `aria-label` attribute for Color: Auto Color to button inside chart style {kib-pull}32633[#32633]
+* Adds `aria-label` attribute for Copy to clipboard {kib-pull}32880[#32880]
+Dashboard::
+* Adds `href` option in addition to `onClick` for navigational links {kib-pull}25233[#25233]
+Design::
+* Implements a new design for {kib} called K7
+* Updates logos for marketing {kib-pull}25489[#25489]
+* Adds Kibana 7.0 breadcrumbs to home screen {kib-pull}26605[#26605]
+* Moves elastic/eui typings to single file {kib-pull}23950[#23950]
+Discover::
+* Renames the kuery setting to KQL {kib-pull}29587[#29587]
+* Adds visual indication of selected language in query bar {kib-pull}30899[#30899]
+Kibana App::
+* Replaces Angular timepicker with EuiSuperDatePicker {kib-pull}29204[#29204]
+* Upgrades Kibana to Elasticsearch 7.0 {kib-pull}29184[#29184]
+* Maps inspector requests by id so single requests can be reset at a time {kib-pull}26770[#26770]
+* Adds ODBC to blurb for start trail {kib-pull}27223[#27223]
+Logstash::
+* Adopts {es} typeless API for Logstash central management {kib-pull}30546[#30546]
+Management::
+* Adds `Request timestamp` to request inspector stats {kib-pull}25667[#25667]
+* Adds "Reload indices" button to Index Management {kib-pull}27033[#27033]
+Machine Learning::
+* Adds the time of the anomaly to the `aria-label` of the actions button in each row of the anomalies table {kib-pull}32777[#32777]
+* Adds `role="alert"` callouts on the Job Management page to ensure the information is read out by screen readers {kib-pull}32911[#32911]
+* Adds EUI `ScreenReaderOnly` component to the "Analyzing data" modal {kib-pull}32472[#32472]
+* Updates job type and APM module icon to new designs {kib-pull}25380[#25380]
+* Allows model plot enablement via checkbox in  MultiMetric/Population Job creation {kib-pull}24914[#24914]
+* Adds support for the rare detector for charts in Anomaly Explorer and Singe Metric viewer {kib-pull}21524[#21524]
+* Updates HTTP access modules for ECS {kib-pull}29383[#29383]
+* Updates auditbeat modules for ECS {kib-pull}29934[#29934]
+* Removes non ECS apache, nginx and auditbeat data recognizer modules {kib-pull}30537[#30537]
+* Adds the configuration files for two new auditbeat data recognizer modules for
+detecting unusual processes on hosts and Docker containers {kib-pull}25716[#25716]
+* Adds support for saved searches created using Kuery to the job wizards {kib-pull}26094[#26094]
+* Allows users to enter their own query in the Discover page; stops passing the query
+from the job datafeed config in custom URLs {kib-pull}26957[#26957]
+* Rewrites Calendar to React/EUI {kib-pull}26741[#26741]
+* Converts Setting page to React/EUI {kib-pull}27144[#27144]
+* Ensures loading indicator is present on initial jobs load {kib-pull}27151[#27151]
+* Prevents a new calendar save if a calendar with that id already exists {kib-pull}27104[#27104]
+* Edits data recognizer modules to use KQL in saved objects {kib-pull}32766[#32766]
+Observability::
+* Converts monitor sparklines to histogram {kib-pull}28502[#28502]
+* Adds crosshair sync for monitor page charts {kib-pull}28631[#28631]
+* Adds a new plugin for Uptime Monitoring {kib-pull}25480[#25480]
+Operations::
+* Adds support for reindexing APM indices {kib-pull}29845[#29845]
+* Adds a reindex warning for mapping type changes {kib-pull}32081[#32081]
+* Adds warning callout to update APM index pattern {kib-pull}33661[#33661]
+Platform::
+* Adds help menu item to header {kib-pull}29664[#29664]
+* Implements global dark theme {kib-pull}28445[#28445]
+* Removes support for the K6 navigation style {kib-pull}29565[#29565]
+* Adds `rest_total_hits_as_int` to all requests in platform code that eventually
+look up `hits.total` {kib-pull}26432[#26432]
+* Adds `dist` flag to the configuration context {kib-pull}26545[#26545]
+* Prepares `@kbn/datemath` to be republished as `@elastic/datemath` {kib-pull}26559[#26559]
+* Wraps `remote` methods in `browser` service {kib-pull}26394[#26394]
+* Uses `stream.pipeline` to manage error handling {kib-pull}27246[#27246]
+Querying & Filtering::
+* Moves the `buildESQuery` module (including filters and Kuery) into a separate package {kib-pull}23345[#23345]
+* Adds comment explaining why `getComputedFields` adds a `docvalue` to `docvalue_fields`
+for each date field in an index pattern. {kib-pull}25725[#25725]
+* Moves filtering functions out of `vis.API.events` {kib-pull}25280[#25280]
+Reporting::
+* Adds png output to reports {kib-pull}24759[#24759]
+* Sorts ascending on sort order first then ascending on name. Any menu item
+without a sort order gets set to zero. {kib-pull}25058[#25058]
+* In the Visualization Editor, removes the "Optimize for printing" option when
+exporting the visualization as PNG or PDF. The single visualization will automatically
+be optimized for printing {kib-pull}30456[#30456]
+* Adds browser type to the reporting side panel {kib-pull}26307[#26307]
+* Adds better logging for `waitForSelector` failure {kib-pull}25762[#25762]
+* Enhances error messaging and handling {kib-pull}26299[#26299]
+* Adds "Info" button in the Reporting listing {kib-pull}25421[#25421]
+* Adds new inspector for chromium-backed reports {kib-pull}32430[#32430]
+Rollups::
+* Adds support for rolling up metrics of date fields {kib-pull}26450[#26450]
+Security::
+* Introduces content security policy (CSP) {kib-pull}29545[#29545]
+* Warns legacy browsers that do not support content security policy {kib-pull}29957[#29957]
+* Adds content security policy strict mode {kib-pull}29856[#29856]
+* Updates the GET `/api/security/role` endpoint to return the list of roles sorted
+by name, rather than creation date {kib-pull}26491[#26491]
+* Updates the Account Settings screen to show the change password form only when
+a password change is possible for the authentication realm {kib-pull}26779[#26779]
+* Makes space selector a `button` {kib-pull}26889[#26889]
+Visualizations::
+* Adds a `console.error` for visualize errors {kib-pull}24581[#24581]
+* Adds a timeout so that Vega respects `elasticsearch.shardTimeout` setting {kib-pull}30482[#30482]
+* Removes experimental flag from Visual Builder (TSVB) {kib-pull}25634[#25634]
+* Implements new visualization type selection {kib-pull}23833[#23833]
+* Removes `lab` stage for visualizations, making `experimental` the only non-production
+stage available {kib-pull}25702[#25702]
+* Makes markdown consistent across {kib} {kib-pull}31890[#31890]
+* Adds option to open links in new tab in Time Series Visual Builder {kib-pull}31906[#31906]
+* Adds max, min, placeholder to percentile in Time Series Visual Builder {kib-pull}32389[#32389]
+* Displays interval information in Time Series Visual Builder when building {kib-pull}32117[#32117]
+* Adds controls to toggle disable/enable individual series and annotations {kib-pull}33107[#33107]
+* Updates Vega to version 4 {kib-pull}30628[#30628]
+
+[float]
+[[bug-7.0.0-rc1]]
+=== Bug fixes
+APM::
+* Uses form label for Transaction type selector {kib-pull}28322[#28322]
+* Fixes icon for View trace button {kib-pull}28908[#28908]
+* Shows metric-only services in service overview {kib-pull}30397[#30397]
+* Adds span subtype and action to Span Flyout {kib-pull}30041[#30041]
+* Updates head title and fixes breadcrumb string issues {kib-pull}29960[#29960]
+* Adds fixes for `service.name` scripted field {kib-pull}28488[#28488]
+* Updates APM index pattern {kib-pull}30837[#30837]
+* Updates APM reindex script {kib-pull}30761[#30761]
+* Sets Index Pattern version as string {kib-pull}30789[#30789]
+* Overrides EUI chart default styles for gridlines {kib-pull}21723[#21723]
+* Adds section titles to span detail modal {kib-pull}20717[#20717]
+* Fixes upgrade assistant label and copy {kib-pull}31750[#31750]
+* Changes `context.system.hostname` to `host.hostname` for APM link {kib-pull}30884[#30884]
+* Updates APM reindex script {kib-pull}31965[#31965]
+* Updates APM index pattern {kib-pull}33595[#33595]
+Canvas::
+* Adds datetime as a date identifier {kib-pull}29537[#29537]
+* Switches sample web logs fonts to 48px {kib-pull}30747[#30747]
+* Fixes related to K7 design {kib-pull}30833[#30833]
+* Fixes page preview size issue {kib-pull}26795[#26795]
+* Fixes visual bug when opening the workpad loader {kib-pull}26647[#26647]
+* Fixes page thumbnail sizes {kib-pull}26573[#26573]
+* Decreases size of tray toggle {kib-pull}25470[#25470]
+* Makes selection border 1px {kib-pull}26739[#26739]
+* Fixes interpreter socket error {kib-pull}26870[#26870]
+* Fixes duplicate `Value` options in math select value {kib-pull}25556[#25556]
+* Gets correct plugins path {kib-pull}25448[#25448]
+* Quotes the index pattern in SQL input {kib-pull}25488[#25488]
+* Decreases the size of tray toggle {kib-pull}25470[#25470]
+* Fixes the hours label container size {kib-pull}31838[#31838]
+* Removes ID attribute {kib-pull}30736[#30736]
+* Improves the plugin pre-build {kib-pull}25267[#25267]
+Dashboard::
+* Removes `dashboardContext` function and makes Timelion, Vega, and Time Series
+Visual Builder use `buildEsQuery` {kib-pull}23227[#23227]
+* Shows the filter bar in dashboard embed mode {kib-pull}32222[#32222]
+Design::
+* Updates dashboard design {kib-pull}29896[#29896]
+* Adjusts side navigation interaction {kib-pull}29978[#29978]
+* Converts Security UI from LESS to Sass {kib-pull}25079[#25079]
+* Adds boilerplate Sass for Kibana core {kib-pull}21185[#21185]
+* Makes dark mode overrides global {kib-pull}31628[#31628]
+Discover::
+* Adds debug code to flaky field_data test {kib-pull}15535[#15535]
+* Gets even more debug info for flaky field_data test {kib-pull}17627[#17627]
+* Allows time ranges before the epoch in Discover {kib-pull}31807[#31807]
+* Fixes Kibana Query Language handling of carriage return {kib-pull}32150[#32150]
+* Improves warning messages when using Lucene-like syntax {kib-pull}31837[#31837]
+* Update capitalization of KQL full name {kib-pull}31631[#31631]
+* Adds placeholder text indicating the filters aggregation takes only Lucene and Query DSL {kib-pull}31296[#31296]
+* Prevents sending request if it already failed during query parsing {kib-pull}31219[#31219]
+* Fixes apps to always migrate legacy queries on state change {kib-pull}33276[#33276]
+Geo::
+* Fixes panel cut off in K7 design {kib-pull}29209[#29209]
+* Removes left-over geohash grid code {kib-pull}30312[#30312]
+* Uses geo-tile aggregation instead of geohash precision {kib-pull}29776[#29776]
+* Resolves URL dynamically when requesting EMS data {kib-pull}25685[#25685]
+* Fixes EMS hotlink {kib-pull}26868[#26868]
+* Fixes feature/align map config settings {kib-pull}19450[#19450]
+* Removes `geotile_grid` aggregation from non-geospatial visualizations {kib-pull}31354[#31354]
+* Coerces string doc-values to numbers if used in styling {kib-pull}33657[#33657]
+Infrastructure::
+* Fixes server-side retrieval of the {kib} version {kib-pull}31440[#31440]
+* Fixes react router import {kib-pull}33659[#33659]
+* Adapts settings ui to saved object version type change {kib-pull}30082[#30082]
+* Fixes potential color bugs {kib-pull}26292[#26292]
+* Fixes auto refresh button on node detail page {kib-pull}26426[#26426]
+* Changes the time range from the last hour to the last 5 minutes for the Waffle Map {kib-pull}26278[#26278]
+* Passes flag in request to force BWC hit count {kib-pull}26517[#26517]
+* Replaces redux source slice with constate container {kib-pull}26121[#26121]
+* Changes node detail link to set time range to 1 hour {kib-pull}26977[#26977]
+* Stops showing sidenav while loading. {kib-pull}27119[#27119]
+* Fixes styling after breaking EUI changes {kib-pull}27021[#27021]
+* Fixes graphql type generation after package upgrades {kib-pull}26991[#26991]
+* Removes usage of `ts-optchain` in the browser {kib-pull}27148[#27148]
+Kibana App::
+* Fixes gauge filters {kib-pull}30057[#30057]
+* Fixes fieldformatter calls in pipeline helper {kib-pull}29842[#29842]
+* Adds pipeline field formatting {kib-pull}28746[#28746]
+* Removes `kibana_table` pipeline type {kib-pull}28979[#28979]
+* Moves renderers registry to OSS {kib-pull}28986[#28986]
+* Prepares for cut over to the visualize data loader from the current expression
+pipeline data loader {kib-pull}29873[#29873]
+* Toggles between Expression Pipeline & Visualize Data loader {kib-pull}29874[#29874]
+* Fixes every app that was wrapping `query` in an array unnecessarily {kib-pull}27636[#27636]
+* Fixes build issue and reintroduces new filter bar {kib-pull}29752[#29752]
+* Adds index pattern URL change notes {kib-pull}30779[#30779]
+* Fixes visualization filters to ignore invalid entries {kib-pull}30633[#30633]
+* Expands the size of add panels flyout and increases default rows per page {kib-pull}30508[#30508]
+* Fixes support for React 16.4+ by only resetting state if adaptors are updated {kib-pull}26138[#26138]
+* Fixes scrolling list on Firefox {kib-pull}26246[#26246]
+* Guards against empty and undefined index pattern arrays passed to QueryBar {kib-pull}24607[#24607]
+* Removes unused indexPattern from vega/tsvb/timelion request handler {kib-pull}26007[#26007]
+* Passes global filters from editor down to visualize  {kib-pull}26009[#26009]
+* Stops using schemas in aggconfigs to output DSL {kib-pull}26010[#26010]
+* Fixes `kbn-interpreter` package to not import from UI {kib-pull}26161[#26161]
+* Fixes OSS dynamic plugin loading by reverting to Canvas way of loading plugins {kib-pull}26463[#26463]
+* Fixes other bucket option to correctly apply without having to change other settings {kib-pull}26874[#26874]
+* Adds `en` as a valid numeral locale setting {kib-pull}25948[#25948]
+* Adds `rest_total_hits_as_int` into Kibana App {kib-pull}26404[#26404]
+* Uses Canvas pipeline to fetch data inside Visualize {kib-pull}25996[#25996]
+* Adds warning to the `documentation_links` file about link validation gotcha {kib-pull}24786[#24786]
+* Adds workaround for `getDerivedStateFromProps` change in react 16.4 {kib-pull}25142[#25142]
+* Fixes "Set up index patterns" link on home page {kib-pull}16128[#16128]
+Machine Learning::
+* Fixes filter and icon for APM Data Recognizer module {kib-pull}31112[#31112]
+* Ensures cardinality related messages in Advanced job wizard are formatted correctly {kib-pull}33599[#33599]
+* Adds title elements which were missing from Calendars pages {kib-pull}33257[#33257]
+* Changes job wizard query to use `match_all` {kib-pull}32008[#32008]
+* Adds calendars list to job management {kib-pull}32566[#32566]
+* Fixes Job Selector text to take group selection into account {kib-pull}31333[#31333]
+* Ensures that Job Selector description text is accurate {kib-pull}32441[#32441]
+* Reduces space between headings in the expanded row for Category examples in Anomalies Table {kib-pull}32417[#32417]
+* Removes use of types in datafeeds  {kib-pull}27572[#27572]
+* Fixes metric select double caret {kib-pull}30357[#30357]
+* Removes old angular based start datafeed modal {kib-pull}30392[#30392]
+* Handles removal of backend ml.enabled node attribute {kib-pull}27604[#27604]
+* Edits labels in the Apache and Nginx ECS data recognizer modules {kib-pull}29935[#29935]
+* Fixes for K7 compatibility {kib-pull}30536[#30536]
+* Fixes broken label style in advanced wizard {kib-pull}30847[#30847]
+* Adds ml-ui team to .github/CODEOWNERS {kib-pull}29810[#29810]
+* Allows user to add/edit/delete annotations in the Single Series Viewer {kib-pull}26034[#26034]
+* Does not pass datafeed query to Discover in custom URL {kib-pull}26957[#26957]
+* Fixes word break in Anomalies and Jobs tables {kib-pull}26978[#26978]
+* Fixes alignment of filter icons in the Anomalies table {kib-pull}26253[#26253]
+* Shows useful error on invalid query in JobList search bar {kib-pull}25153[#25153]
+* Adds user privilege check to Jobs List group selector control {kib-pull}25225[#25225]
+* Fixes file data viz file size check and formats as bytes {kib-pull}25295[#25295]
+* Fixes the layout of the cards in the Data Visualizer on IE {kib-pull}25383[#25383]
+* Adds better error reporting for reading and importing data {kib-pull}24269[#24269]
+* Displays an ordinal y axis for low cardinality rare charts {kib-pull}24852[#24852]
+* Fixes typo in job validation message {kib-pull}25130[#25130]
+* Removes deprecated `angularjs` based jobs list and related code {kib-pull}25216[#25216]
+* Skips invalid modules when data recognizer lists matches {kib-pull}33703[#33703]
+Management::
+* Removes grunt sterilize - its been replaced by `kbn clean` {kib-pull}27825[#27825]
+* Makes Index management table more responsive {kib-pull}28882[#28882]
+* Fixes index pattern wizard when there are remote clusters but no local indices  {kib-pull}24339[#24339]
+* Uses new `_graph` endpoints {kib-pull}26956[#26956]
+* Adjusts spacing of Management navigation items {kib-pull}25666[#25666]
+* Updates "Disenroll" text to be consistent with menu option "Unenroll" {kib-pull}26816[#26816]
+* Fixes broken breadcrumb link for index management {kib-pull}27164[#27164]
+* Fixes issue with multiple execution in Console {kib-pull}26933[#26933]
+* Reloads full index list when reload hits missing index {kib-pull}27197[#27197]
+* Adds boilerplate for remote clusters management app {kib-pull}25369[#25369]
+* Adds `ignore_failure` to ingest common auto complete in console {kib-pull}24915[#24915]
+* Removes support for expression-based scripted fields {kib-pull}14310[#14310]
+* Adds WatchErrors to capture invalid watches {kib-pull}23887[#23887]
+* Rewords the translation id for error with missing property in Watcher {kib-pull}24753[#24753]
+* Triggers full load when encountering 403 for index list reload {kib-pull}28243[#28243]
+* Updates X-Pack console specs {kib-pull}29506[#29506]
+* Fixes API integration test for follower indices {kib-pull}30260[#30260]
+* Fixes management footer logo spacing bug {kib-pull}30654[#30654]
+Monitoring::
+* Updates to read from `.monitoring-*-7-*` indices {kib-pull}32654[#32654]
+* Adds in explicit mappings {kib-pull}33004[#33004]
+* Stops using the normalized derivative value {kib-pull}27416[#27416]
+* Updates the title in the left nav to Stack Monitoring {kib-pull}28102[#28102]
+* Prepares the Monitoring UI codebase for the incoming changes to `hits.total` {kib-pull}26442[#26442]
+* Updates browser title to Stack Monitoring {kib-pull}29638[#29638]
+* Fixes Monitoring design {kib-pull}29479[#29479]
+* Removes old index patterns that are not expected in 7.0.0 onwards {kib-pull}27915[#27915]
+* Removes deprecated `xpack.monitoring.report_stats` setting {kib-pull}30017[#30017]
+* Fixes monitoring tests to work with mapping changes {kib-pull}29188[#29188]
+* Removes type filter helper {kib-pull}30887[#30887]
+* Fixes error handling for local stats collection/permissions {kib-pull}26560[#26560]
+* Removes initial delay to check and send Telemetry data {kib-pull}26575[#26575]
+* Pulls local Kibana usage stats {kib-pull}26496[#26496]
+* Converts the Elasticsearch monitoring UIs to using EUI tables and page layout {kib-pull}26217[#26217]
+* Renames Monitoring `FormattedMessage` to `FormattedAlert` {kib-pull}24197[#24197]
+* Uses the cluster name from metadata if it exists {kib-pull}24495[#24495]
+Observability::
+* Fixes 7.x references to tcp.port {kib-pull}29132[#29132]
+* Ports functional tests to 7.x {kib-pull}29398[#29398]
+* Ports unit tests to master {kib-pull}29876[#29876]
+* Adds missing loading states for filter bar and snapshot components {kib-pull}30122[#30122]
+* Removes double-format for duration value {kib-pull}30664[#30664]
+* Switches Uptime localization from i18n provider to context {kib-pull}31601[#31601]
+* Improves monitor charts query {kib-pull}30561[#30561]
+* Adds global help support to Uptime {kib-pull}31493[#31493]
+* Updates targeted index pattern for 7.0.0 {kib-pull}30998[#30998]
+Operations::
+* Removes the usage of types from Esqueue used for the `.reporting index` {kib-pull}32146[#32146]
+* Fixes IPv6 addresses used with Angular connector {kib-pull}29891[#29891]
+* Fixes `makelogs` dependency {kib-pull}31428[#31428]
+* Runs the {kib} server in production mode for functional testing {kib-pull}31346[#31346]
+* Uses `fs.copyFile` to avoid race condition {kib-pull}32220[#32220]
+* Removes `hash -r` {kib-pull}32616[#32616]
+* Fixes JUnit reporter {kib-pull}32686[#32686]
+* Adds options to `run()` that can modify help and show help on errors {kib-pull}33466[#33466]
+* Captures values from boolean flags {kib-pull}33528[#33528]
+* Fixes incorrect environment name for V8 options {kib-pull}31052[#31052]
+* Removes svg from url-loader, as it conflicts with other loaders {kib-pull}30888[#30888]
+* Uses apiVersion from es plugin in x-pack {kib-pull}30853[#30853]
+* Clones saved object document before migrating to prevent accidental mutations {kib-pull}30475[#30475]
+* Removes node fallback from kibana-keystore {kib-pull}15066[#15066]
+* Adds debug script to set inspect flags {kib-pull}15967[#15967]
+* Uses snake case for scripts/kibana-keystore.js and scripts/kibana-plugin.js {kib-pull}15331[#15331]
+* Updates license info in package.json {kib-pull}20353[#20353]
+* Fixes error log formatting {kib-pull}24788[#24788]
+* Matches chalk dependency version on Kibana with the one used on X-Pack {kib-pull}20621[#20621]
+* Fixes non-conforming licenses on devDependencies and adds the ability to whitelist devOnly licenses {kib-pull}23859[#23859]
+* Adds jsxa11y into eslint rules {kib-pull}23932[#23932]
+* Reverts Bump react-grid-layout to 0.16.0 {kib-pull}14912[#14912]
+* Reverts breaking change for Status API {kib-pull}21927[#21927]
+* Converts `utils/collection` to TypeScript {kib-pull}23992[#23992]
+* Removes usage of update_all_types {kib-pull}16406[#16406]
+* Improves the `yarn kbn bootstrap` speed by using yarn workspaces for packages inside `packages/*` and `x-pack` {kib-pull}24095[#24095]
+* Runs jenkins:unit task with dev flag in order to run license check {kib-pull}19832[#19832]
+* Does not break on startup in debug mode {kib-pull}19219[#19219]
+Platform::
+* Removes types from `saved_objects` repository {kib-pull}32286[#32286]
+* Fixes custom icon image paths in `NavDrawer` {kib-pull}33573[#33573]
+* Fixes back button navigation {kib-pull}32372[#32372]
+* Improves types for ftr and expect.js and cleans up `tsconfig` files {kib-pull}31948[#31948]
+* Strips # from hash before updating ``$location` {kib-pull}32732[#32732]
+* Removes `disableAutoAngularUrlEncodingFix()`` {kib-pull}33136[#33136]
+* Removes unused system-loader implementation {kib-pull}33747[#33747]
+* Moves the table vis migration to {kib} plugin {kib-pull}29478[#29478]
+* Allows passing a default operator to use on saved object client find operations {kib-pull}29339[#29339]
+* Fixes saved object repository `bulkCreate` to return migrated references and attributes {kib-pull}29754[#29754]
+* Adds missing saved object reference handling for searchSourceJSON filter attribute {kib-pull}29840[#29840]
+* Excludes `migrationVersion` and references from `getRootPropertiesObjects` result {kib-pull}30081[#30081]
+* Removes dependency on doc versions {kib-pull}29906[#29906]
+* Adds typings for saved object client {kib-pull}29951[#29951]
+* Uses `lastSubUrl` when appropriate {kib-pull}28735[#28735]
+* Removes es _xpack endpoint usage {kib-pull}29465[#29465]
+* Adds typings for the `saved_object_finder` react component {kib-pull}30067[#30067]
+* Fixes the confirm overwrite modal of saved objects to handle large titles {kib-pull}28590[#28590]
+* Decreases start limit and interval {kib-pull}25474[#25474]
+* Adds `--download` flag to snapshot command to warm the cache {kib-pull}25830[#25830]
+* Implements `--prefer-offline` flag {kib-pull}25840[#25840]
+* Fixes watcher routes broken by Hapi upgrade {kib-pull}26713[#26713]
+* Fixes non-conforming licenses on devDependencies and adds the ability to whitelist devOnly licenses {kib-pull}23859[#23859]
+* Watches optimizer cache invalidation  {kib-pull}24172[#24172]
+* Adds `normalizePath` in order to fix watch optimizer when running on Windows {kib-pull}26486[#26486]
+* Creates vendor dll for the client modules {kib-pull}22618[#22618]
+* Upgrades to NodeJS 10 {kib-pull}25157[#25157]
+* Improves plugin version mismatch error message {kib-pull}25774[#25774]
+* Improves build/packaging {kib-pull}26096[#26096]
+* Swaps `jstimezonedetect` with `moment.tz.guess` {kib-pull}21800[#21800]
+* Upgrades resize-observer-polyfill version {kib-pull}26990[#26990]
+* Fixes saved objects client `_processBatchQueue` function to handle errors {kib-pull}26763[#26763]
+* Changes kbn pm webpack config to generate dist files in mode=none {kib-pull}26847[#26847]
+* Hides logs from deleteAll on task: clean client modules into dll {kib-pull}26884[#26884]
+* Upgrades `resize-observer-polyfill` version {kib-pull}26990[#26990]
+* Uses `single-node` discovery type for the test ES node/cluster {kib-pull}27125[#27125]
+* Moves moment to peerDependency in elastic-datemath {kib-pull}27264[#27264]
+* Transforms plugin deprecations before checking for unused settings {kib-pull}21294[#21294]
+* Expands list of restricted globals in `eslint-config-kibana` {kib-pull}15798[#15798]
+* Makes logs easier to read on Windows with chalk colors {kib-pull}15557[#15557]
+Reporting::
+* Refactors routes files and helpers {kib-pull}30111[#30111]
+* Deletes `sortOrder` once items have been sorted and does not pass to `EuiContextMenuItem`
+in the share context menu {kib-pull}26890[#26890]
+* Fixes a regression bug in detection of Error and Warning toast notifications {kib-pull}25482[#25482]
+* Stops passing an empty `formatConfig` to the fieldFormats helper {kib-pull}27168[#27168]
+* Returns promise in Reporting jobs API {kib-pull}24769[#24769]
+* Uses `content-disposition` package for non-US font titles in reporting {kib-pull}30895[#30895]
+* Uses lowercased server host settings {kib-pull}33020[#33020]
+Rollups::
+* Shows loading state in Rollup Job detail panel. {kib-pull}25752[#25752]
+* Specifies Rollup Jobs breadcrumbs in header. {kib-pull}26590[#26590]
+* Requires histogram interval in Rollup Job wizard to be a whole number. {kib-pull}26596[#26596]
+* Removes duplicate rendered sections {kib-pull}[#28566]
+Security::
+* Adds tests for interpreter `createSocket` {kib-pull}29459[#29459]
+* Moves the server-side `SavedObjectClient` types from the `spaces` plugin to the
+same location as the corresponding JavaScript source files {kib-pull}26448[#26448]
+* Respects the `basePath` for the link to the user profile in the k7 header {kib-pull}26417[#26417]
+* Fixes `prettier` throw rule error  {kib-pull}26071[#26071]
+* Fixes authentication logic to fail out of auth flow on first provider failure {kib-pull}26648[#26648]
+* Fixes issues with the `url.search` being null in Node 10 {kib-pull}26992[#26992]
+* Fixes DLS query toggle on the role management page {kib-pull}27213[#27213]
+* Implements the K7 login screen {kib-pull}23512[#23512]
+Visualizations::
+* Adds autocomplete to Time Series Visual Builder {kib-pull}30158[#30158]
+* Fixes missing Markdown variables {kib-pull}28173[#28173]
+* Removes filter bar for Markdown visualizations {kib-pull}30354[#30354]
+* Corrects label for OS visualization in logs sample data {kib-pull}30249[#30249]
+* Fixes filter function on pie chart segment {kib-pull}26321[#26321]
+* Rewrites URL when closing vis type selection modal {kib-pull}26327[#26327]
+* Changes unbind calls from `.on` to `.off` {kib-pull}24575[#24575]
+* Fixes date field in controls visualization by generating labels with the field
+formatter {kib-pull}25654[#25654]
+* Replaces LESS files with Sass in `ui/public/vis`, `visLib`, and `visualize` {kib-pull}25333[#25333]
+* Replaces LESS files with Sass for the visualization types in `core_plugin/metrics` {kib-pull}24250[#24250]
+* Moves `timeout` to `_msearch` body to fix time series visual builder requests {kib-pull}26510[#26510]
+* Adds description for all visualization types {kib-pull}26243[#26243]
+* Defaults the scroll wheel zoom to false on Vega maps {kib-pull}21169[#21169]
+* Fixes problem within the input_vis_control plugin that prevents it from updating correctly
+if the field is switched, and then switched back to the previous field {kib-pull}25164[#25164]
+* Uses `vega-nocanvas` instead of Vega lib {kib-pull}16137[#16137]
+* Migrates visualization from Angular to React {kib-pull}16425[#16425]
+* Fixes maps for reporting (#15272) {kib-pull}15358[#15358]
+* Stops creation of nested search source per postflightrequest {kib-pull}20373[#20373]
+* Moves inspector code from Vis to embeddable visualize handler {kib-pull}24112[#24112]
+* Removes inspector from Vis {kib-pull}24112[#24112]
+* Fixes issue with debounce function running after component was unmounted {kib-pull}15045[#15045]
+* Fixes for dark mode fixes for Visualize charts, Time Series Visual Builder, and Timelion {kib-pull}30478[#30478]
+* Fixes geohash checkbox group spacing {kib-pull}32664[#32664]
+* Removes deep clone from courier request handler {kib-pull}32806[#32806]
+* Ensures saved filters from `searchSource` are always passed to response handlers {kib-pull}33074[#33074]
+* Adds new visualization search selection {kib-pull}30196[#30196]
+* Changes visualization save dialog when adding to dashboard {kib-pull}32883[#32883]
+* Fixes missing variables preview in Time Series Visual Builder markdown {kib-pull}30830[#30830]
+* Fixes incorrect behavior when filling the 'interval' field with values: s,m,d,M,y {kib-pull}32542[#32542]
+* Fixes multi-metric gauge with vertical sizing {kib-pull}33245[#33245]
+* Fixes Time Series Visual Builder display on small screen resolution {kib-pull}33299[#33299]
+* Fixes Time Series Visual Builder metric and gauge panels when splitting data by numbers {kib-pull}33304[#33304]
+* Fixes Time Series Visual Builder percentile ranks with integer values that return no results {kib-pull}33397[#33397]
+* Fixes Time Series Visual Builder issue with table view {kib-pull}33645[#33645]
+* Fixes Time Series Visual Builder issue with wrong color rules on multiple metrics {kib-pull}31455[#31455]
+* Fixes Time Series Visual Builder issue with percentiles for table {kib-pull}32084[#32084]
+* Switches all Time Series Visual Builder comboboxes to plain text single selection {kib-pull}31879[#31879]
+* Fixes table visualization to format date string when grouping by date field {kib-pull}31783[#31783]
+* Adds flex wrap to metric visualization container {kib-pull}31891[#31891]
+* Fixes missing axis labels when moving position {kib-pull}32628[#32628]
+* Fixes vislib legend entry width {kib-pull}33303[#33303]
+* Fixes legend / color picker overflow {kib-pull}30960[#30960]
+* Fixes total Metric Count inside donut pie charts  {kib-pull}29086[#29086]
+* Adds labels for sort order and request preference setting {kib-pull}31236[#31236]
+* Fixes time picker quick ranges description {kib-pull}32455[#32455]
+* Adds check for `extraMetric` in point server tooltip hovers {kib-pull}32641[#32641]
+* Switches sample data objects to KQL {kib-pull}32718[#32718]
+* Migrate visualization controls to use references {kib-pull}30880[#30880]
+* Dedupes by index pattern ID rather than object identity {kib-pull}32350[#32350]
+* Ensures extra columns are not shown in table visualization when `showPartialRows:true` {kib-pull}27154[#27154]
+* Uses default index pattern when one is not present in Visualize {kib-pull}30574[#30574]
+* Surfaces visualization loader errors in the UI {kib-pull}30594[#30594]
+
+
+[[release-notes-7.0.0-beta1]]
+== {kib} 7.0.0-beta1
+
+For detailed information about the {kib} 7.0.0-beta1 release, review the following information.
+
+[float]
+[[breaking-7.0.0-beta1]]
+=== Breaking changes
+
+Breaking changes can prevent your application from optimal operation and performance. 
+Before you upgrade to 7.0.0-beta1, review the breaking change, then mitigate the impact to your application.
+
+Design::
+* Removes references to K6 EUI, using the default UI theme in its place {kib-pull}29152[#29152]
+Geo::
+* Removes the deprecated `regionmap` and `tilemap` kibana.yml configurations.
+Removes the backwards compatibility logic that checked for duplicative settings
+`map.regionmap` and `map.tilemap`. {kib-pull}28609[#28609]
+Monitoring::
+* Refactors index patterns from configurable to constants {kib-pull}29528[#29528]
+Management::
+* Adds `configPrefix` to Index Management, License Management, Rollup Jobs, and
+Upgrade Assistant {kib-pull}30149[#30149]
+* Removes nested table splits from table visualization {kib-pull}26057[#26057]
+* Standardizes use of `index_pattern` in UI code and URLs, replacing `indices`
+and `index`  {kib-pull}29151[#29151] and {kib-pull}29481[#29481]
+* Removes app-specific dark mode options and replaces with a global dark mode uiSetting {kib-pull}29017[#29017]
+Operations::
+* Defers the optimize step in the plugin installer to server start {kib-pull}26983[#26983]
+Platform::
+* Removes deprecated `i18n.defaultLocale` setting {kib-pull}29325[#29325]
+* Removes previously deprecated `elasticsearch*` settings. {kib-pull}29496[#29496]
+* Adds new "references" attribute to saved objects for relationships {kib-pull}28199[#28199]
+Querying & Filtering::
+* Makes KQL the default query language for new searches {kib-pull}27092[#27092]
+Reporting::
+* Removes Phantom dependency {kib-pull}27142[#27142]
+Security::
+* Removes deprecated SSL settings {kib-pull}28622[#28622]
+* Removes legacy fallback {kib-pull}29107[#29107]
+Visualizations::
+* Removes Timelion from the app switcher by default {kib-pull}30131[#30131]
+
+For more details about breaking changes in the 7.0.0 release, see
+<<breaking-changes-7.0, Breaking changes in 7.0>>.
+
+[float]
+[[deprecation-7.0.0-beta1]]
+=== Deprecations
+Machine Learning::
+* Updates REST endpoint calls to remove _xpack {kib-pull}28069[#28069]
+Visualizations::
+* Removes old visualize wizard URL {kib-pull}28982[#28982]
+* Removes legacy response handler {kib-pull}28985[#28985]
+* Removes `legacyIcon` from visualizations {kib-pull}28981[#28981]
+
+
+[float]
+[[enhancement-7.0.0-beta1]]
+=== Enhancements
+Canvas::
+* Removes WebSockets from Canvas expressions interpreter {kib-pull}29792[#29792]
+* Optimizes Canvas REST calls via batching {kib-pull}29847[#29847]
+Kibana App::
+* Replaces Angular timepicker with EuiSuperDatePicker {kib-pull}29204[#29204]
+* Upgrades Kibana to Elasticsearch 7.0 {kib-pull}29184[#29184]
+Machine Learning::
+* Updates HTTP access modules for ECS {kib-pull}29383[#29383]
+* Updates auditbeat modules for ECS {kib-pull}29934[#29934]
+* Removes non ECS apache, nginx and auditbeat data recognizer modules {kib-pull}30537[#30537]
+Observability::
+* Converts monitor sparklines to histogram {kib-pull}28502[#28502]
+* Adds crosshair sync for monitor page charts {kib-pull}28631[#28631]
+Operations::
+* Adds support for reindexing APM indices {kib-pull}29845[#29845]
+Platform::
+* Adds help menu item to header {kib-pull}29664[#29664]
+* Implements global dark theme {kib-pull}28445[#28445]
+* Removes support for the K6 navigation style {kib-pull}29565[#29565]
+Reporting::
+* In the Visualization Editor, removes the "Optimize for printing" option when
+exporting the visualization as PNG or PDF. The single visualization will automatically
+be optimized for printing {kib-pull}30456[#30456]
+Security::
+* Introduces content security policy (CSP) {kib-pull}29545[#29545]
+* Warns legacy browsers that do not support content security policy {kib-pull}29957[#29957]
+* Adds content security policy strict mode {kib-pull}29856[#29856]
+Visualizations::
+* Adds a timeout so that Vega respects `elasticsearch.shardTimeout` setting {kib-pull}30482[#30482]
+
+
+[float]
+[[bug-7.0.0-beta1]]
+=== Bug fixes
+APM::
+* Uses form label for Transaction type selector {kib-pull}28322[#28322]
+* Fixes icon for View trace button {kib-pull}28908[#28908]
+* Shows metric-only services in service overview {kib-pull}30397[#30397]
+* Adds span subtype and action to Span Flyout {kib-pull}30041[#30041]
+* Updates head title and fixes breadcrumb string issues {kib-pull}29960[#29960]
+* Adds fixes for `service.name` scripted field {kib-pull}28488[#28488]
+* Updates APM index pattern {kib-pull}30837[#30837]
+* Updates APM reindex script {kib-pull}30761[#30761]
+* Sets Index Pattern version as string {kib-pull}30789[#30789]
+Canvas::
+* Adds datetime as a date identifier {kib-pull}29537[#29537]
+* Switches sample web logs fonts to 48px {kib-pull}30747[#30747]
+* Fixes related to K7 design {kib-pull}30833[#30833]
+Design::
+* Updates dashboard design {kib-pull}29896[#29896]
+* Adjusts side navigation interaction {kib-pull}29978[#29978]
+Elasticsearch UI::
+* Triggers full load when encountering 403 for index list reload {kib-pull}28243[#28243]
+* Updates xpack console specs {kib-pull}29506[#29506]
+* Fixes API integration test for follower indices {kib-pull}30260[#30260]
+Geo::
+* Fixes panel cut off in K7 design {kib-pull}29209[#29209]
+* Removes left-over geohash grid code {kib-pull}30312[#30312]
+* Uses geo-tile aggregation instead of geohash precision {kib-pull}29776[#29776]
+Infrastructure UI::
+* Adapts settings ui to saved object version type change {kib-pull}30082[#30082]
+Kibana App::
+* Fixes gauge filters {kib-pull}30057[#30057]
+* Fixes fieldformatter calls in pipeline helper {kib-pull}29842[#29842]
+* Adds pipeline field formatting {kib-pull}28746[#28746]
+* Removes `kibana_table` pipeline type {kib-pull}28979[#28979]
+* Moves renderers registry to OSS {kib-pull}28986[#28986]
+* Prepares for cut over to the visualize data loader from the current expression
+pipeline data loader {kib-pull}29873[#29873]
+* Toggles between Expression Pipeline & Visualize Data loader {kib-pull}29874[#29874]
+* Fixes every app that was wrapping `query` in an array unnecessarily {kib-pull}27636[#27636]
+* Fixes build issue and reintroduces new filter bar {kib-pull}29752[#29752]
+* Adds index pattern URL change notes {kib-pull}30779[#30779]
+* Fixes visualization filters to ignore invalid entries {kib-pull}30633[#30633]
+* Expands the size of add panels flyout and increases default rows per page {kib-pull}30508[#30508]
+Machine Learning::
+* Removes use of types in datafeeds  {kib-pull}27572[#27572]
+* Fixes metric select double caret {kib-pull}30357[#30357]
+* Removes old angular based start datafeed modal {kib-pull}30392[#30392]
+* Handles removal of backend ml.enabled node attribute {kib-pull}27604[#27604]
+* Edits labels in the Apache and Nginx ECS data recognizer modules {kib-pull}29935[#29935]
+* Fixes for K7 compatibility {kib-pull}30536[#30536]
+* Fixes broken label style in advanced wizard {kib-pull}30847[#30847]
+* Adds ml-ui team to .github/CODEOWNERS {kib-pull}29810[#29810]
+Management::
+* Removes grunt sterilize - its been replaced by `kbn clean` {kib-pull}27825[#27825]
+* Makes Index management table more responsive {kib-pull}28882[#28882]
+Monitoring::
+* Stops using the normalized derivative value {kib-pull}27416[#27416]
+* Updates the title in the left nav to Stack Monitoring {kib-pull}28102[#28102]
+* Prepares the Monitoring UI codebase for the incoming changes to `hits.total` {kib-pull}26442[#26442]
+* Updates browser title to Stack Monitoring {kib-pull}29638[#29638]
+* Fixes Monitoring design {kib-pull}29479[#29479]
+* Removes old index patterns that are not expected in 7.0.0 onwards {kib-pull}27915[#27915]
+* Removes deprecated `xpack.monitoring.report_stats` setting {kib-pull}30017[#30017]
+* Fixes monitoring tests to work with mapping changes {kib-pull}29188[#29188]
+* Removes type filter helper {kib-pull}30887[#30887]
+Operations::
+* Removes svg from url-loader, as it conflicts with other loaders {kib-pull}30888[#30888]
+* Uses apiVersion from es plugin in x-pack {kib-pull}30853[#30853]
+* Clones saved object document before migrating to prevent accidental mutations {kib-pull}30475[#30475]
+Observability::
+* Fixes 7.x references to tcp.port {kib-pull}29132[#29132]
+* Ports functional tests to 7.x {kib-pull}29398[#29398]
+* Ports unit tests to master {kib-pull}29876[#29876]
+* Adds missing loading states for filter bar and snapshot components {kib-pull}30122[#30122]
+* Removes double-format for duration value {kib-pull}30664[#30664]
+Platform::
+* Moves the table vis migration to {kib} plugin {kib-pull}29478[#29478]
+* Allows passing a default operator to use on saved object client find operations {kib-pull}29339[#29339]
+* Fixes saved object repository `bulkCreate` to return migrated references and attributes {kib-pull}29754[#29754]
+* Adds missing saved object reference handling for searchSourceJSON filter attribute {kib-pull}29840[#29840]
+* Excludes `migrationVersion` and references from `getRootPropertiesObjects` result {kib-pull}30081[#30081]
+* Removes dependency on doc versions {kib-pull}29906[#29906]
+* Adds typings for saved object client {kib-pull}29951[#29951]
+* Uses `lastSubUrl` when appropriate {kib-pull}28735[#28735]
+* Removes es _xpack endpoint usage {kib-pull}29465[#29465]
+* Adds typings for the `saved_object_finder` react component {kib-pull}30067[#30067]
+* Fixes the confirm overwrite modal of saved objects to handle large titles {kib-pull}28590[#28590]
+Reporting::
+* Refactors routes files and helpers {kib-pull}30111[#30111]
+Rollups::
+* Removes duplicate rendered sections {kib-pull}28566[#28566]
+Security::
+* Adds tests for interpreter `createSocket` {kib-pull}29459[#29459]
+Visualizations::
+* Adds autocomplete to Time Series Visual Builder {kib-pull}30158[#30158]
+* Fixes missing Markdown variables {kib-pull}28173[#28173]
+* Removes filter bar for Markdown visualizations {kib-pull}30354[#30354]
+* Corrects label for OS visualization in logs sample data {kib-pull}30249[#30249]
+
+
+
+
+
+[[release-notes-7.0.0-alpha2]]
+== {kib} 7.0.0-alpha2
+
+For detailed information about the {kib} 7.0.0-alpha2 release, review the following information.
+
+[float]
+[[breaking-7.0.0-alpha2]]
+=== Breaking changes
+
+For more details about breaking changes in the 7.0.0 release, refer to the
+<<breaking-changes-7.0, breaking changes in 7.0.0>>.
+
+[float]
+[[highlight-7.0.0-alpha2]]
+=== Highlights
+Canvas::
+* Canvas now has a template tab in the workpad manager where users can find workpad templates,
+demos, and tutorials to help them get started. See {kib-pull}23966[#23966] for more information.
+Kibana App::
+* Visualizations in Kibana will use a new data pipeline introduced as part of Canvas.
+The change does not yet apply to Vega, Timelion, or Time Series Visual Builder (TSVB).
+See {kib-pull}25711[#25711] for more information.
+Index Lifecyle Management::
+* Implements a user interface to create, update, edit, or delete index lifecyle policies.
+See {kib-pull}25553[#25553] for more information.
+
+[float]
+[[enhancement-7.0.0-alpha2]]
+=== Enhancements
+Canvas::
+* Implements a clipboard and stores the copied elements in `localStorage` {kib-pull}25890[#25890]
+* Adds the ability to reuse assets without editing an element's expression {kib-pull}25764[#25764]
+* Adds the `clear` function {kib-pull}26397[#26397]
+* Adds workpad-level CSS {kib-pull}24143[#24143]
+Dashboard::
+* Adds `href` option in addition to `onClick` for navigational links {kib-pull}25233[#25233]
+Design::
+* Updates logos for marketing {kib-pull}25489[#25489]
+* Adds Kibana 7.0 breadcrumbs to home screen {kib-pull}26605[#26605]
+* Moves elastic/eui typings to single file {kib-pull}23950[#23950]
+Kibana App::
+* Maps inspector requests by id so single requests can be reset at a time {kib-pull}26770[#26770]
+* Adds ODBC to blurb for start trail {kib-pull}27223[#27223]
+Management::
+* Adds `Request timestamp` to request inspector stats {kib-pull}25667[#25667]
+* Adds "Reload indices" button to Index Management {kib-pull}27033[#27033]
+Machine Learning::
+* Adds the configuration files for two new auditbeat data recognizer modules for
+detecting unusual processes on hosts and Docker containers {kib-pull}25716[#25716]
+* Adds support for saved searches created using Kuery to the job wizards {kib-pull}26094[#26094]
+* Allows users to enter their own query in the Discover page; stops passing the query
+from the job datafeed config in custom URLs {kib-pull}26957[#26957]
+* Rewrites Calendar to React/EUI {kib-pull}26741[#26741]
+* Converts Setting page to React/EUI {kib-pull}27144[#27144]
+* Ensures loading indicator is present on initial jobs load {kib-pull}27151[#27151]
+* Prevents a new calendar save if a calendar with that id already exists {kib-pull}27104[#27104]
+Observability::
+* Adds a new plugin for Uptime Monitoring {kib-pull}25480[#25480]
+Platform::
+* Adds `rest_total_hits_as_int` to all requests in platform code that eventually
+look up `hits.total` {kib-pull}26432[#26432]
+* Adds `dist` flag to the configuration context {kib-pull}26545[#26545]
+* Prepares `@kbn/datemath` to be republished as `@elastic/datemath` {kib-pull}26559[#26559]
+* Wraps `remote` methods in `browser` service {kib-pull}26394[#26394]
+* Uses `stream.pipeline` to manage error handling {kib-pull}27246[#27246]
+Querying & Filtering::
+* Moves the `buildESQuery` module (including filters and Kuery) into a separate package {kib-pull}23345[#23345]
+* Adds comment explaining why `getComputedFields` adds a `docvalue` to `docvalue_fields`
+for each date field in an index pattern. {kib-pull}25725[#25725]
+* Moves filtering functions out of `vis.API.events` {kib-pull}25280[#25280]
+Reporting::
+* Adds browser type to the reporting side panel {kib-pull}26307[#26307]
+* Adds better logging for `waitForSelector` failure {kib-pull}25762[#25762]
+* Enhances error messaging and handling {kib-pull}26299[#26299]
+* Adds "Info" button in the Reporting listing {kib-pull}25421[#25421]
+Rollups::
+* Adds support for rolling up metrics of date fields {kib-pull}26450[#26450]
+Security::
+* Updates the GET `/api/security/role` endpoint to return the list of roles sorted
+by name, rather than creation date {kib-pull}26491[#26491]
+* Updates the Account Settings screen to show the change password form only when
+a password change is possible for the authentication realm {kib-pull}26779[#26779]
+* Makes space selector a `button` {kib-pull}26889[#26889]
+Visualizations::
+* Removes experimental flag from Visual Builder (TSVB) {kib-pull}25634[#25634]
+* Implements new visualization type selection {kib-pull}23833[#23833]
+* Removes `lab` stage for visualizations, making `experimental` the only non-production
+stage available {kib-pull}25702[#25702]
+
+[float]
+[[bug-7.0.0-alpha2]]
+=== Bug fixes
+Canvas::
+* Fixes page preview size issue {kib-pull}26795[#26795]
+* Fixes visual bug when opening the workpad loader {kib-pull}26647[#26647]
+* Fixes page thumbnail sizes {kib-pull}26573[#26573]
+* Decreases size of tray toggle {kib-pull}25470[#25470]
+* Makes selection border 1px {kib-pull}26739[#26739]
+* Fixes interpreter socket error {kib-pull}26870[#26870]
+Geo::
+* Resolves URL dynamically when requesting EMS data {kib-pull}25685[#25685]
+* Fixes EMS hotlink {kib-pull}26868[#26868]
+Infrastructure UI::
+* Fixes potential color bugs {kib-pull}26292[#26292]
+* Fixes auto refresh button on node detail page {kib-pull}26426[#26426]
+* Changes the time range from the last hour to the last 5 minutes for the Waffle Map {kib-pull}26278[#26278]
+* Passes flag in request to force BWC hit count {kib-pull}26517[#26517]
+* Replaces redux source slice with constate container {kib-pull}26121[#26121]
+* Changes node detail link to set time range to 1 hour {kib-pull}26977[#26977]
+* Stops showing sidenav while loading. {kib-pull}27119[#27119]
+* Fixes styling after breaking EUI changes {kib-pull}27021[#27021]
+* Fixes graphql type generation after package upgrades {kib-pull}26991[#26991]
+* Removes usage of `ts-optchain` in the browser {kib-pull}27148[#27148]
+Kibana App::
+* Fixes support for React 16.4+ by only resetting state if adaptors are updated {kib-pull}26138[#26138]
+* Fixes scrolling list on Firefox {kib-pull}26246[#26246]
+* Guards against empty and undefined index pattern arrays passed to QueryBar {kib-pull}24607[#24607]
+* Removes unused indexPattern from vega/tsvb/timelion request handler {kib-pull}26007[#26007]
+* Passes global filters from editor down to visualize  {kib-pull}26009[#26009]
+* Stops using schemas in aggconfigs to output DSL {kib-pull}26010[#26010]
+* Fixes `kbn-interpreter` package to not import from UI {kib-pull}26161[#26161]
+* Fixes OSS dynamic plugin loading by reverting to Canvas way of loading plugins {kib-pull}26463[#26463]
+* Fixes other bucket option to correctly apply without having to change other settings {kib-pull}26874[#26874]
+* Adds `en` as a valid numeral locale setting {kib-pull}25948[#25948]
+* Adds `rest_total_hits_as_int` into Kibana App {kib-pull}26404[#26404]
+* Uses Canvas pipeline to fetch data inside Visualize {kib-pull}25996[#25996]
+Management::
+* Fixes index pattern wizard when there are remote clusters but no local indices  {kib-pull}24339[#24339]
+* Uses new `_graph` endpoints {kib-pull}26956[#26956]
+* Adjusts spacing of Management navigation items {kib-pull}25666[#25666]
+* Updates "Disenroll" text to be consistent with menu option "Unenroll" {kib-pull}26816[#26816]
+* Fixes broken breadcrumb link for index management {kib-pull}27164[#27164]
+* Fixes issue with multiple execution in Console {kib-pull}26933[#26933]
+* Reloads full index list when reload hits missing index {kib-pull}27197[#27197]
+Machine Learning::
+* Allows user to add/edit/delete annotations in the Single Series Viewer {kib-pull}26034[#26034]
+* Does not pass datafeed query to Discover in custom URL {kib-pull}26957[#26957]
+* Fixes word break in Anomalies and Jobs tables {kib-pull}26978[#26978]
+* Fixes alignment of filter icons in the Anomalies table {kib-pull}26253[#26253]
+Monitoring::
+* Fixes error handling for local stats collection/permissions {kib-pull}26560[#26560]
+* Removes initial delay to check and send Telemetry data {kib-pull}26575[#26575]
+* Pulls local Kibana usage stats {kib-pull}26496[#26496]
+* Converts the Elasticsearch monitoring UIs to using EUI tables and page layout {kib-pull}26217[#26217]
+Platform & Operations::
+* Decreases start limit and interval {kib-pull}25474[#25474]
+* Adds `--download` flag to snapshot command to warm the cache {kib-pull}25830[#25830]
+* Implements `--prefer-offline` flag {kib-pull}25840[#25840]
+* Fixes watcher routes broken by Hapi upgrade {kib-pull}26713[#26713]
+* Fixes non-conforming licenses on devDependencies and adds the ability to whitelist devOnly licenses {kib-pull}23859[#23859]
+* Watches optimizer cache invalidation  {kib-pull}24172[#24172]
+* Adds `normalizePath` in order to fix watch optimizer when running on Windows {kib-pull}26486[#26486]
+* Creates vendor dll for the client modules {kib-pull}22618[#22618]
+* Upgrades to NodeJS 10 {kib-pull}25157[#25157]
+* Improves plugin version mismatch error message {kib-pull}25774[#25774]
+* Improves build/packaging {kib-pull}26096[#26096]
+* Swaps `jstimezonedetect` with `moment.tz.guess` {kib-pull}21800[#21800]
+* Upgrades resize-observer-polyfill version {kib-pull}26990[#26990]
+* Fixes saved objects client `_processBatchQueue` function to handle errors {kib-pull}26763[#26763]
+* Changes kbn pm webpack config to generate dist files in mode=none {kib-pull}26847[#26847]
+* Hides logs from deleteAll on task: clean client modules into dll {kib-pull}26884[#26884]
+* Upgrades `resize-observer-polyfill` version {kib-pull}26990[#26990]
+* Uses `single-node` discovery type for the test ES node/cluster {kib-pull}27125[#27125]
+* Moves moment to peerDependency in elastic-datemath {kib-pull}27264[#27264]
+Reporting::
+* Deletes `sortOrder` once items have been sorted and does not pass to `EuiContextMenuItem`
+in the share context menu {kib-pull}26890[#26890]
+* Fixes a regression bug in detection of Error and Warning toast notifications {kib-pull}25482[#25482]
+* Stops passing an empty `formatConfig` to the fieldFormats helper {kib-pull}27168[#27168]
+Rollups::
+* Shows loading state in Rollup Job detail panel. {kib-pull}25752[#25752]
+* Specifies Rollup Jobs breadcrumbs in header. {kib-pull}26590[#26590]
+* Requires histogram interval in Rollup Job wizard to be a whole number. {kib-pull}26596[#26596]
+Security::
+* Moves the server-side `SavedObjectClient` types from the `spaces` plugin to the
+same location as the corresponding JavaScript source files {kib-pull}26448[#26448]
+* Respects the `basePath` for the link to the user profile in the k7 header {kib-pull}26417[#26417]
+* Fixes `prettier` throw rule error  {kib-pull}26071[#26071]
+* Fixes authentication logic to fail out of auth flow on first provider failure {kib-pull}26648[#26648]
+* Fixes issues with the `url.search` being null in Node 10 {kib-pull}26992[#26992]
+* Fixes DLS query toggle on the role management page {kib-pull}27213[#27213]
+Visualizations::
+* Fixes filter function on pie chart segment {kib-pull}26321[#26321]
+* Rewrites URL when closing vis type selection modal {kib-pull}26327[#26327]
+* Changes unbind calls from `.on` to `.off` {kib-pull}24575[#24575]
+* Fixes date field in controls visualization by generating labels with the field
+formatter {kib-pull}25654[#25654]
+* Replaces LESS files with Sass in `ui/public/vis`, `visLib`, and `visualize` {kib-pull}25333[#25333]
+* Replaces LESS files with Sass for the visualization types in `core_plugin/metrics` {kib-pull}24250[#24250]
+* Moves `timeout` to `_msearch` body to fix time series visual builder requests {kib-pull}26510[#26510]
+* Adds description for all visualization types {kib-pull}26243[#26243]
+
+
+
+
+
+
+[[release-notes-7.0.0-alpha1]]
+== {kib} 7.0.0-alpha1
+
+For detailed information about the {kib} 7.0.0-alpha1 release, review the following information.
+
+[float]
+[[breaking-7.0.0-alpha1]]
+=== Breaking changes
+
+Breaking changes can prevent your application from optimal operation and performance. 
+Before you upgrade to 7.0.0-alpha1, review the breaking change, then mitigate the impact to your application.
+
+For more details about breaking changes in te 7.0.0 release, refer to the
+<<breaking-changes-7.0, breaking changes in 7.0.0>>.
+
+Discover::
+* Does not apply `query:queryString:options` to `query_string` filters {kib-pull}15640[#15640]
+* Removes `default_field` from `query:queryString:options` {kib-pull}18966[#18966]
+Monitoring::
+* Removes `node_resolver` setting {kib-pull}21181[#21181]
+Operations::
+* Removes tribe node support {kib-pull}16397[#16397]
+* Creates separate startup scripts for development and production {kib-pull}13806[#13806]
+* Sets default port based on protocol  {kib-pull}21564[#21564]
+* Removes deprecated `/shorten` API {kib-pull}21861[#21861]
+* Plugin installer defers optimization step until server start {kib-pull}26983[#26983]
+
+[float]
+[[deprecation-7.0.0-alpha1]]
+=== Deprecations
+Geo::
+* Fixes legacy tilemap loading {kib-pull}22095[#22095]
+
+[float]
+[[K7-design-7.0.0-alpha1]]
+=== K7 UI Design
+
+{kib} 7.0.0-alpha1 includes a new design for {kib} called K7. In this early stage,
+K7 is still a little rough around the edges. If you'd like to switch back to the
+existing K6 design, go to *Management > Advanced Settings* and turn
+off the *k7design* setting. The option to switch to the old design
+will be removed before 7.0.0 GA.
+
+[float]
+[[enhancement-7.0.0-alpha1]]
+=== Enhancements
+
+Machine Learning::
+* Updates job type and APM module icon to new designs {kib-pull}25380[#25380]
+* Allows model plot enablement via checkbox in  MultiMetric/Population Job creation {kib-pull}24914[#24914]
+* Adds support for the rare detector for charts in Anomaly Explorer and Singe Metric viewer {kib-pull}21524[#21524]
+
+Reporting::
+* Adds png output to reports {kib-pull}24759[#24759]
+* Sorts ascending on sort order first then ascending on name. Any menu item
+without a sort order gets set to zero. {kib-pull}25058[#25058]
+
+Visualizations::
+* Adds a console.error for visualize errors {kib-pull}24581[#24581]
+
+[float]
+[[bug-7.0.0-alpha1]]
+=== Bug fixes
+
+APM::
+* Overrides EUI chart default styles for gridlines {kib-pull}21723[#21723]
+* Adds section titles to span detail modal {kib-pull}20717[#20717]
+
+Canvas::
+* Fixes duplicate `Value` options in math select value {kib-pull}25556[#25556]
+* Gets correct plugins path {kib-pull}25448[#25448]
+* Quotes the index pattern in SQL input {kib-pull}25488[#25488]
+* Decreases the size of tray toggle {kib-pull}25470[#25470]
+* Improves the plugin pre-build {kib-pull}25267[#25267]
+
+Dashboard::
+* Removes `dashboardContext` function and makes Timelion, Vega, and Time Series
+Visual Builder use `buildEsQuery` {kib-pull}23227[#23227]
+
+Design::
+* Converts Security UI from LESS to Sass {kib-pull}25079[#25079]
+* Adds boilerplate Sass for Kibana core {kib-pull}21185[#21185]
+
+Discover::
+* Adds debug code to flaky field_data test {kib-pull}15535[#15535]
+* Gets even more debug info for flaky field_data test {kib-pull}17627[#17627]
+
+Geo::
+* Fixes feature/align map config settings {kib-pull}19450[#19450]
+
+Kibana App::
+
+* Adds warning to the `documentation_links` file about link validation gotcha {kib-pull}24786[#24786]
+* Adds workaround for `getDerivedStateFromProps` change in react 16.4 {kib-pull}25142[#25142]
+
+Kibana Home &amp; Add Data::
+* Fixes "Set up index patterns" link on home page {kib-pull}16128[#16128]
+
+Machine Learning::
+* Shows useful error on invalid query in JobList search bar {kib-pull}25153[#25153]
+* Adds user privilege check to Jobs List group selector control {kib-pull}25225[#25225]
+* Fixes file data viz file size check and formats as bytes {kib-pull}25295[#25295]
+* Fixes the layout of the cards in the Data Visualizer on IE {kib-pull}25383[#25383]
+* Adds better error reporting for reading and importing data {kib-pull}24269[#24269]
+* Displays an ordinal y axis for low cardinality rare charts {kib-pull}24852[#24852]
+* Fixes typo in job validation message {kib-pull}25130[#25130]
+* Removes deprecated `angularjs` based jobs list and related code {kib-pull}25216[#25216]
+
+Management::
+* Adds boilerplate for remote clusters management app {kib-pull}25369[#25369]
+* Adds `ignore_failure` to ingest common auto complete in console {kib-pull}24915[#24915]
+* Removes support for expression-based scripted fields {kib-pull}14310[#14310]
+* Adds WatchErrors to capture invalid watches {kib-pull}23887[#23887]
+* Rewords the translation id for error with missing property in Watcher {kib-pull}24753[#24753]
+
+Monitoring::
+* Renames Monitoring `FormattedMessage` to `FormattedAlert` {kib-pull}24197[#24197]
+* Uses the cluster name from metadata if it exists {kib-pull}24495[#24495]
+
+Operations::
+* Removes node fallback from kibana-keystore {kib-pull}15066[#15066]
+* Adds debug script to set inspect flags {kib-pull}15967[#15967]
+* Uses snake case for scripts/kibana-keystore.js and scripts/kibana-plugin.js {kib-pull}15331[#15331]
+* Updates license info in package.json {kib-pull}20353[#20353]
+* Fixes error log formatting {kib-pull}24788[#24788]
+* Matches chalk dependency version on Kibana with the one used on X-Pack {kib-pull}20621[#20621]
+* Fixes non-conforming licenses on devDependencies and adds the ability to whitelist devOnly licenses {kib-pull}23859[#23859]
+* Adds jsxa11y into eslint rules {kib-pull}23932[#23932]
+* Reverts Bump react-grid-layout to 0.16.0 {kib-pull}14912[#14912]
+* Reverts breaking change for Status API {kib-pull}21927[#21927]
+* Converts `utils/collection` to TypeScript {kib-pull}23992[#23992]
+* Removes usage of update_all_types {kib-pull}16406[#16406]
+* Improves the `yarn kbn bootstrap` speed by using yarn workspaces for packages inside `packages/*` and `x-pack` {kib-pull}24095[#24095]
+* Runs jenkins:unit task with dev flag in order to run license check {kib-pull}19832[#19832]
+* Does not break on startup in debug mode {kib-pull}19219[#19219]
+
+
+Platform::
+* Transforms plugin deprecations before checking for unused settings {kib-pull}21294[#21294]
+* Expands list of restricted globals in `eslint-config-kibana` {kib-pull}15798[#15798]
+* Makes logs easier to read on Windows with chalk colors {kib-pull}15557[#15557]
+
+Querying &amp; Filtering::
+* Fixes wildcard queries against the default field {kib-pull}24778[#24778]
+
+Reporting::
+* Returns promise in Reporting jobs API {kib-pull}24769[#24769]
+
+Security::
+* Implements the K7 login screen {kib-pull}23512[#23512]
+
+Sharing::
+* Fixes issue with debounce function running after component was unmounted {kib-pull}15045[#15045]
+
+Visualizations::
+* Defaults the scroll wheel zoom to false on Vega maps {kib-pull}21169[#21169]
+* Fixes problem within the input_vis_control plugin that prevents it from updating correctly
+if the field is switched, and then switched back to the previous field {kib-pull}25164[#25164]
+* Uses `vega-nocanvas` instead of vega lib {kib-pull}16137[#16137]
+* Migrates visualization from Angular to React {kib-pull}16425[#16425]
+* Fixes maps for reporting (#15272) {kib-pull}15358[#15358]
+* Stops creation of nested search source per postflightrequest {kib-pull}20373[#20373]
+* Moves inspector code from Vis to embeddable visualize handler {kib-pull}24112[#24112]
+* Removes inspector from Vis {kib-pull}24112[#24112]
