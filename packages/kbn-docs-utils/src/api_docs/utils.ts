@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { KibanaPlatformPlugin } from '@kbn/dev-utils';
+import { KibanaPlatformPlugin, ToolingLog } from '@kbn/dev-utils';
 import {
   AnchorLink,
   ApiDeclaration,
@@ -60,9 +60,9 @@ export function groupPluginApi(declarations: ApiDeclaration[]): ScopeApi {
  * @param path
  */
 export function getServiceForPath(path: string, pluginDirectory: string): string | undefined {
-  const publicMatchGroups = path.match(`${pluginDirectory}/public\/([^\/]*)\/`);
-  const serverMatchGroups = path.match(`${pluginDirectory}/server\/([^\/]*)\/`);
-  const commonMatchGroups = path.match(`${pluginDirectory}/common\/([^\/]*)\/`);
+  const publicMatchGroups = path.match(`${pluginDirectory}\/public\/([^\/]*)\/`);
+  const serverMatchGroups = path.match(`${pluginDirectory}\/server\/([^\/]*)\/`);
+  const commonMatchGroups = path.match(`${pluginDirectory}\/common\/([^\/]*)\/`);
 
   if (publicMatchGroups && publicMatchGroups.length > 1) {
     return publicMatchGroups[1];
@@ -75,6 +75,7 @@ export function getServiceForPath(path: string, pluginDirectory: string): string
 
 export function getPluginApiDocId(
   id: string,
+  log: ToolingLog,
   serviceInfo?: {
     serviceFolders: readonly string[];
     apiPath: string;
@@ -85,6 +86,9 @@ export function getPluginApiDocId(
   const cleanName = id.replace('.', '_');
   if (serviceInfo) {
     const serviceName = getServiceForPath(serviceInfo.apiPath, serviceInfo.directory);
+    log.debug(
+      `Service for path ${serviceInfo.apiPath} and ${serviceInfo.directory} is ${serviceName}`
+    );
     const serviceFolder = serviceInfo.serviceFolders?.find((f) => f === serviceName);
 
     if (serviceFolder) {
