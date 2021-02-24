@@ -28,8 +28,9 @@ allowing users to configure their advanced settings, also known
 as uiSettings within the code.
 
 
-|{kib-repo}blob/{branch}/src/plugins/apm_oss/README.asciidoc[apmOss]
-|
+|{kib-repo}blob/{branch}/src/plugins/apm_oss/README.md[apmOss]
+|OSS plugin for APM. Includes index configuration and tutorial resources.
+
 
 |{kib-repo}blob/{branch}/src/plugins/bfetch/README.md[bfetch]
 |bfetch allows to batch HTTP requests and streams responses back.
