@@ -9,8 +9,6 @@
 import { TileStatusTracker } from './tile_status_tracker';
 import { Map as MbMap } from 'mapbox-gl';
 import { ILayer } from '../../classes/layers/layer';
-import { SPATIAL_FILTERS_LAYER_ID } from '../../../common/constants';
-import { string } from '../../../../security_solution/public/resolver/models/schema';
 
 class MockMbMap {
   public listeners: Array<{ type: string; callback: (e: unknown) => void }> = [];
