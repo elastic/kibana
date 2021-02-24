@@ -11,6 +11,7 @@
   min-height: $euiSizeXXL * 10;
   overflow: visible;
   border: none;
+  height: 100%;
 
   .lnsWorkspacePanelWrapper__pageContentBody {
     @include euiScrollBar;
@@ -18,7 +19,6 @@
     display: flex;
     align-items: stretch;
     justify-content: stretch;
-    position: absolute;
 
     > * {
       flex: 1 1 100%;
