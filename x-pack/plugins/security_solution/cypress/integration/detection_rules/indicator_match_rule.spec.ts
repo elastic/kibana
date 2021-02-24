@@ -59,12 +59,11 @@ import {
   waitForAlertsPanelToBeLoaded,
 } from '../../tasks/alerts';
 import {
-  changeToThreeHundredRowsPerPage,
+  changeRowsPerPageTo300,
   filterByCustomRules,
   goToCreateNewRule,
   goToRuleDetails,
-  waitForLoadElasticPrebuiltDetectionRulesTableToBeLoaded,
-  waitForRulesToBeLoaded,
+  waitForRulesTableToBeLoaded,
 } from '../../tasks/alerts_detection_rules';
 import { cleanKibana } from '../../tasks/common';
 import {
@@ -98,8 +97,7 @@ import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
 
 import { DETECTIONS_URL, RULE_CREATION } from '../../urls/navigation';
 
-// Skipped for 7.12 FF - flaky tests
-describe.skip('indicator match', () => {
+describe('indicator match', () => {
   describe('Detection rules, Indicator Match', () => {
     const expectedUrls = newThreatIndicatorRule.referenceUrls.join('');
     const expectedFalsePositives = newThreatIndicatorRule.falsePositivesExamples.join('');
@@ -376,7 +374,7 @@ describe.skip('indicator match', () => {
         waitForAlertsPanelToBeLoaded();
         waitForAlertsIndexToBeCreated();
         goToManageAlertsDetectionRules();
-        waitForLoadElasticPrebuiltDetectionRulesTableToBeLoaded();
+        waitForRulesTableToBeLoaded();
         goToCreateNewRule();
         selectIndicatorMatchType();
       });
@@ -389,8 +387,7 @@ describe.skip('indicator match', () => {
 
         cy.get(CUSTOM_RULES_BTN).should('have.text', 'Custom rules (1)');
 
-        changeToThreeHundredRowsPerPage();
-        waitForRulesToBeLoaded();
+        changeRowsPerPageTo300();
 
         cy.get(RULES_TABLE).then(($table) => {
           cy.wrap($table.find(RULES_ROW).length).should('eql', expectedNumberOfRules);
