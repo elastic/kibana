@@ -177,10 +177,12 @@ export function TransformWizardProvider({ getService }: FtrProviderContext) {
       await testSubjects.existOrFail('transformIndexPreviewHistogramButton');
     },
 
-    async enableIndexPreviewHistogramCharts() {
-      await this.assertIndexPreviewHistogramChartButtonCheckState(false);
-      await testSubjects.click('transformIndexPreviewHistogramButton');
-      await this.assertIndexPreviewHistogramChartButtonCheckState(true);
+    async enableIndexPreviewHistogramCharts(expectedDefaultButtonState: boolean) {
+      await this.assertIndexPreviewHistogramChartButtonCheckState(expectedDefaultButtonState);
+      if (expectedDefaultButtonState === false) {
+        await testSubjects.click('transformIndexPreviewHistogramButton');
+        await this.assertIndexPreviewHistogramChartButtonCheckState(true);
+      }
     },
 
     async assertIndexPreviewHistogramChartButtonCheckState(expectedCheckState: boolean) {
