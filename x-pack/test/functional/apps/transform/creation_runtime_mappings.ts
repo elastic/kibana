@@ -297,7 +297,7 @@ export default function ({ getService }: FtrProviderContext) {
           await transform.testExecution.logTestStep('shows the transform preview');
           await transform.wizard.assertPivotPreviewChartHistogramButtonMissing();
           for (const { column } of testData.expected.previewData) {
-            await transform.wizard.assertIndexPreviewColumnValuesNotEmpty(column);
+            await transform.wizard.assertPivotPreviewColumnValuesNotEmpty(column);
           }
 
           // cell virtualization means the last column is cutoff in the functional tests
@@ -349,7 +349,7 @@ export default function ({ getService }: FtrProviderContext) {
           await transform.wizard.assertCopyToClipboardButtonEnabled(true);
         });
 
-        it('runs the transform and displays it correctly in the job list', async () => {
+        it('runs the transform and displays it correctly in Discover page', async () => {
           await transform.testExecution.logTestStep('creates the transform');
           await transform.wizard.createTransform();
 

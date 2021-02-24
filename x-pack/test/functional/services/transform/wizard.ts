@@ -149,7 +149,7 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
           .filter((v, i, a) => a.indexOf(v) === i);
 
         uniqueColumnValues.forEach((value) => {
-          // check if the returned unique value matches the supplied filter value
+          // check if the returned unique value is not empty
           expect(value).to.not.eql('');
         });
       });
@@ -189,7 +189,7 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
     },
 
     async assertPivotPreviewColumnValuesNotEmpty(column: number) {
-      await this.assertEuiDataGridColumnValuesNotEmpty('transformIndexPreview', column);
+      await this.assertEuiDataGridColumnValuesNotEmpty('transformPivotPreview', column);
     },
 
     async assertPivotPreviewLoaded() {
@@ -863,7 +863,7 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
       await retry.tryForTime(60 * 1000, async () => {
         const allFields = await PageObjects.discover.getAllFieldNames();
         if (Array.isArray(allFields)) {
-          // For some reasons, Discover returns fields with dot (e.g '.avg') with space
+          // For some reasons, Discover returns fields with dot (e.g '.avg') with extra space
           const fields = allFields.map((n) => n.replace('.​', '.'));
           expect(fields).to.contain(
             field,
