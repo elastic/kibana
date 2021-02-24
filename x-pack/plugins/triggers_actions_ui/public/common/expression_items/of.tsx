@@ -22,7 +22,7 @@ import { IErrorObject } from '../../types';
 import { ClosablePopoverTitle } from './components';
 import './of.scss';
 
-interface OfExpressionProps {
+export interface OfExpressionProps {
   aggType: string;
   aggField?: string;
   errors: IErrorObject;
@@ -152,3 +152,6 @@ export const OfExpression = ({
     </EuiPopover>
   );
 };
+
+// eslint-disable-next-line import/no-default-export
+export { OfExpression as default };

@@ -17,7 +17,7 @@ import { TriggersAndActionsUIPublicPluginStart } from './plugin';
 import { TypeRegistry } from './application/type_registry';
 import { ActionTypeModel, AlertTypeModel } from './types';
 
-export function createTriggerActionUIMock(): TriggersAndActionsUIPublicPluginStart {
+function createStartMock(): TriggersAndActionsUIPublicPluginStart {
   const actionTypeRegistry = new TypeRegistry<ActionTypeModel>();
   const alertTypeRegistry = new TypeRegistry<AlertTypeModel>();
   return {
@@ -50,3 +50,7 @@ export function createTriggerActionUIMock(): TriggersAndActionsUIPublicPluginSta
     },
   };
 }
+
+export const triggersActionsUiMock = {
+  createStart: createStartMock,
+};
