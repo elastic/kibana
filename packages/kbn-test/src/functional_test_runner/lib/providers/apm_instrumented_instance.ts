@@ -10,7 +10,7 @@ interface ApmSpan {
   setOutcome(outcome: 'success' | 'failure' | 'unknown'): void;
   end(): void;
 }
-type StartSpanFn = (
+export type StartSpanFn = (
   name: string,
   type: string,
   subType: string,

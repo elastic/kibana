@@ -53,11 +53,15 @@ export class FunctionalTestRunner {
     return await this._run(async (config, coreProviders) => {
       SuiteTracker.startTracking(this.lifecycle, this.configFile);
 
-      const providers = new ProviderCollection(this.log, transaction, [
-        ...coreProviders,
-        ...readProviderSpec('Service', config.get('services')),
-        ...readProviderSpec('PageObject', config.get('pageObjects')),
-      ]);
+      const providers = new ProviderCollection(
+        this.log,
+        transaction ? (x0, x1, x2, x3) => transaction?.startSpan(x0, x1, x2, x3) : null,
+        [
+          ...coreProviders,
+          ...readProviderSpec('Service', config.get('services')),
+          ...readProviderSpec('PageObject', config.get('pageObjects')),
+        ]
+      );
 
       await providers.loadAll();
 
@@ -95,7 +99,7 @@ export class FunctionalTestRunner {
           }),
         }));
 
-      const providers = new ProviderCollection(this.log, [
+      const providers = new ProviderCollection(this.log, null, [
         ...coreProviders,
         ...readStubbedProviderSpec('Service', config.get('services')),
         ...readStubbedProviderSpec('PageObject', config.get('pageObjects')),

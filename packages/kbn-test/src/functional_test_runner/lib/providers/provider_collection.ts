@@ -7,22 +7,19 @@
  */
 
 import { ToolingLog } from '@kbn/dev-utils';
-import type { startTransaction } from 'elastic-apm-node';
-
-type ApmTransaction = NonNullable<ReturnType<typeof startTransaction>>;
 
 import { loadTracer } from '../load_tracer';
 import { createAsyncInstance, isAsyncInstance } from './async_instance';
 import { Providers } from './read_provider_spec';
 import { createVerboseInstance } from './verbose_instance';
-import { createApmInstrumentedInstance } from './apm_instrumented_instance';
+import { createApmInstrumentedInstance, StartSpanFn } from './apm_instrumented_instance';
 
 export class ProviderCollection {
   private readonly instances = new Map();
 
   constructor(
     private readonly log: ToolingLog,
-    private readonly apmTransaction: ApmTransaction | null,
+    private readonly startApmSpan: StartSpanFn | null,
     private readonly providers: Providers
   ) {}
 
@@ -116,7 +113,7 @@ export class ProviderCollection {
         }
 
         if (
-          this.apmTransaction &&
+          this.startApmSpan &&
           name !== '__webdriver__' &&
           name !== 'log' &&
           name !== 'config' &&
@@ -125,14 +122,7 @@ export class ProviderCollection {
           typeof instance === 'object' &&
           instance
         ) {
-          instance = createApmInstrumentedInstance(
-            this.apmTransaction
-              ? (x0, x1, x2, x3) => this.apmTransaction?.startSpan(x0, x1, x2, x3)
-              : null,
-            instance,
-            type,
-            name
-          );
+          instance = createApmInstrumentedInstance(this.startApmSpan, instance, type, name);
         }
 
         instances.set(provider, instance);
