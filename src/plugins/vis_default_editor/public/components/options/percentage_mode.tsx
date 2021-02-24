@@ -53,15 +53,12 @@ function PercentageModeOption({
           />
         }
         helpText={
-          <span>
-            <EuiLink target="_blank" href="https://adamwdraper.github.io/Numeral-js/">
-              <FormattedMessage
-                id="visDefaultEditor.options.percentageMode.documentationLabel"
-                defaultMessage="Numeral.js documentation"
-              />
-              &nbsp;
-            </EuiLink>
-          </span>
+          <EuiLink target="_blank" href="https://adamwdraper.github.io/Numeral-js/">
+            <FormattedMessage
+              id="visDefaultEditor.options.percentageMode.documentationLabel"
+              defaultMessage="Numeral.js documentation"
+            />
+          </EuiLink>
         }
       >
         <EuiFieldText
