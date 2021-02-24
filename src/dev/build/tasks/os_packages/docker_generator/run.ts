@@ -88,8 +88,8 @@ export async function runDockerGenerator(
     x64: 'x64',
     arm64: 'aarch64',
   };
-  const buildArchitectureSupported = hostTarget[process.arch] === flags.architecture && flags.image;
-  if (!buildArchitectureSupported) {
+  const buildArchitectureSupported = hostTarget[process.arch] === flags.architecture;
+  if (flags.architecture && !buildArchitectureSupported) {
     return;
   }
 
@@ -142,11 +142,12 @@ export async function runDockerGenerator(
   await chmodAsync(`${resolve(dockerBuildDir, 'build_docker.sh')}`, '755');
 
   // Only build images on native targets
-
-  await exec(log, `./build_docker.sh`, [], {
-    cwd: dockerBuildDir,
-    level: 'info',
-  });
+  if (flags.image) {
+    await exec(log, `./build_docker.sh`, [], {
+      cwd: dockerBuildDir,
+      level: 'info',
+    });
+  }
 
   // Pack Dockerfiles and create a target for them
   if (flags.context) {
