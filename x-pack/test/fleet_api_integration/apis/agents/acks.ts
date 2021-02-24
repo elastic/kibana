@@ -14,7 +14,6 @@ export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const esArchiver = getService('esArchiver');
   const esClient = getService('es');
-  const kibanaServer = getService('kibanaServer');
 
   const supertestWithoutAuth = getSupertestWithoutAuth(providerContext);
   const supertest = getService('supertest');

@@ -122,6 +122,7 @@ describe('test agent checkin new action services', () => {
       current_error_events: [],
       packages: [],
       enrolled_at: '2020-03-14T19:45:02.620Z',
+      default_api_key: 'MOCK_API_KEY',
     };
     const mockPolicyAction: AgentPolicyAction = {
       id: 'action1',
