@@ -139,6 +139,10 @@ which indicates the type of data the field contains in {es},
 such as strings or boolean values. The field mapping also determines
 how you can use the field, such as whether it can be searched or aggregated.
 
+When a new field is added to the index, the index pattern field list is updated
+the next time the index pattern is loaded, for example, when you load the page or
+move between {kib} apps.
+
 [role="screenshot"]
 image:management/index-patterns/images/new-index-pattern.png["Create index pattern"]
 
@@ -158,7 +162,7 @@ date values in {es}, you can use a {kib} field formatter to change the display t
 <<field-formatters-geopoint, geopoints>>,
 and <<field-formatters-numeric, numbers>>.
 
-To customize the displayed field name provided by {es}, you can 
+To customize the displayed field name provided by {es}, you can
 use *Custom Label* .
 
 A popularity counter keeps track of the fields you use most often.
@@ -169,13 +173,6 @@ To edit the field display, click the edit icon
 
 [role="screenshot"]
 image:management/index-patterns/images/edit-field-format.png["Edit field format"]
-
-[float]
-==== Refresh the data fields
-
-To pick up newly-added fields,
-refresh (image:management/index-patterns/images/refresh-icon.png[Refresh icon]) the index fields list.
-This action also resets the {kib} popularity counters for the fields.
 
 [float]
 [[default-index-pattern]]
