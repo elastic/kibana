@@ -18,6 +18,7 @@
     display: flex;
     align-items: stretch;
     justify-content: stretch;
+    position: absolute;
 
     > * {
       flex: 1 1 100%;
