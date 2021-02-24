@@ -8,15 +8,17 @@
 jest.mock('./api_keys_grid', () => ({
   APIKeysGridPage: (props: any) => `Page: ${JSON.stringify(props)}`,
 }));
-import { coreMock, scopedHistoryMock } from 'src/core/public/mocks';
 
 import { apiKeysManagementApp } from './api_keys_management_app';
+import { coreMock, scopedHistoryMock } from '../../../../../../src/core/public/mocks';
+import { securityMock } from '../../mocks';
 
 describe('apiKeysManagementApp', () => {
   it('create() returns proper management app descriptor', () => {
     const { getStartServices } = coreMock.createSetup();
+    const { authc } = securityMock.createSetup();
 
-    expect(apiKeysManagementApp.create({ getStartServices: getStartServices as any }))
+    expect(apiKeysManagementApp.create({ authc, getStartServices: getStartServices as any }))
       .toMatchInlineSnapshot(`
       Object {
         "id": "api_keys",
@@ -29,6 +31,7 @@ describe('apiKeysManagementApp', () => {
 
   it('mount() works for the `grid` page', async () => {
     const { getStartServices } = coreMock.createSetup();
+    const { authc } = securityMock.createSetup();
 
     const startServices = await getStartServices();
     const docTitle = startServices[0].chrome.docTitle;
@@ -37,7 +40,7 @@ describe('apiKeysManagementApp', () => {
 
     const setBreadcrumbs = jest.fn();
     const unmount = await apiKeysManagementApp
-      .create({ getStartServices: () => Promise.resolve(startServices) as any })
+      .create({ authc, getStartServices: () => Promise.resolve(startServices) as any })
       .mount({
         basePath: '/some-base-path',
         element: container,

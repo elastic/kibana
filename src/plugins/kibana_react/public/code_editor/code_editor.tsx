@@ -9,7 +9,6 @@
 import React from 'react';
 import ReactResizeDetector from 'react-resize-detector';
 import MonacoEditor from 'react-monaco-editor';
-
 import { monaco } from '@kbn/monaco';
 
 import { LIGHT_THEME, DARK_THEME } from './editor_theme';
@@ -152,20 +151,33 @@ export class CodeEditor extends React.Component<Props, {}> {
     const { languageId, value, onChange, width, height, options } = this.props;
 
     return (
-      <React.Fragment>
+      <>
         <MonacoEditor
           theme="euiColors"
           language={languageId}
           value={value}
           onChange={onChange}
-          editorWillMount={this._editorWillMount}
-          editorDidMount={this._editorDidMount}
           width={width}
           height={height}
-          options={options}
+          editorWillMount={this._editorWillMount}
+          editorDidMount={this._editorDidMount}
+          options={{
+            renderLineHighlight: 'none',
+            scrollBeyondLastLine: false,
+            minimap: {
+              enabled: false,
+            },
+            scrollbar: {
+              useShadows: false,
+            },
+            wordBasedSuggestions: false,
+            wordWrap: 'on',
+            wrappingIndent: 'indent',
+            ...options,
+          }}
         />
         <ReactResizeDetector handleWidth handleHeight onResize={this._updateDimensions} />
-      </React.Fragment>
+      </>
     );
   }
 

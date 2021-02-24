@@ -13,6 +13,7 @@ import { mountWithIntl } from '@kbn/test/jest';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { coreMock } from 'src/core/public/mocks';
 import { KibanaContextProvider } from 'src/plugins/kibana_react/public';
+import { createMemoryHistory } from 'history';
 
 import type { APIKeysAPIClient } from '../api_keys_api_client';
 import { apiKeysAPIClientMock } from '../index.mock';
@@ -68,9 +69,14 @@ describe('APIKeysGridPage', () => {
 
   const coreStart = coreMock.createStart();
   const renderView = () => {
+    const history = createMemoryHistory({ initialEntries: ['/create'] });
     return mountWithIntl(
       <KibanaContextProvider services={coreStart}>
-        <APIKeysGridPage apiKeysAPIClient={apiClientMock} notifications={coreStart.notifications} />
+        <APIKeysGridPage
+          apiKeysAPIClient={apiClientMock}
+          notifications={coreStart.notifications}
+          history={history}
+        />
       </KibanaContextProvider>
     );
   };

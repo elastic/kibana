@@ -24,6 +24,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
+import { useInitialFocus } from '../../../components/use_initial_focus';
 import { FormFlyout } from '../../../components/form_flyout';
 import { useCurrentUser } from '../../../components/use_current_user';
 import type { ValidationErrors } from '../../../components/use_form';
@@ -147,6 +148,8 @@ export const ChangePasswordFlyout: FunctionComponent<ChangePasswordFlyoutProps> 
     defaultValues,
   });
 
+  const firstFieldRef = useInitialFocus<HTMLInputElement>([isLoading]);
+
   return (
     <FormFlyout
       title={i18n.translate('xpack.security.management.users.changePasswordFlyout.title', {
@@ -242,6 +245,7 @@ export const ChangePasswordFlyout: FunctionComponent<ChangePasswordFlyoutProps> 
                 defaultValue={form.values.current_password}
                 isInvalid={form.touched.current_password && !!form.errors.current_password}
                 autoComplete="current-password"
+                inputRef={firstFieldRef}
               />
             </EuiFormRow>
           ) : null}
@@ -263,6 +267,7 @@ export const ChangePasswordFlyout: FunctionComponent<ChangePasswordFlyoutProps> 
               defaultValue={form.values.password}
               isInvalid={form.touched.password && !!form.errors.password}
               autoComplete="new-password"
+              inputRef={isCurrentUser ? undefined : firstFieldRef}
             />
           </EuiFormRow>
           <EuiFormRow

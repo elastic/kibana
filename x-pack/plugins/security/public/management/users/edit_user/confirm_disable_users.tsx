@@ -89,7 +89,7 @@ export const ConfirmDisableUsers: FunctionComponent<ConfirmDisableUsersProps> = 
           <p>
             <FormattedMessage
               id="xpack.security.management.users.confirmDisableUsers.systemUserWarning"
-              defaultMessage="Deactivating the system user will prevent Kibana from communicating with Elasticsearch."
+              defaultMessage="Deactivating this user will prevent Kibana from communicating with Elasticsearch."
             />
           </p>
           <p>

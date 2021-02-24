@@ -7,23 +7,53 @@
  */
 
 import React from 'react';
-import { EuiDelayRender, EuiLoadingContent } from '@elastic/eui';
+import { EuiErrorBoundary, EuiLoadingContent, EuiFormControlLayout } from '@elastic/eui';
+import euiThemeDark from '@elastic/eui/dist/eui_theme_dark.json';
+import euiThemeLight from '@elastic/eui/dist/eui_theme_light.json';
 import { useUiSetting } from '../ui_settings';
 import type { Props } from './code_editor';
 
 const LazyBaseEditor = React.lazy(() => import('./code_editor'));
 
-const Fallback = () => (
-  <EuiDelayRender>
-    <EuiLoadingContent lines={3} />
-  </EuiDelayRender>
-);
-
 export const CodeEditor: React.FunctionComponent<Props> = (props) => {
+  const { width, height, options } = props;
+
   const darkMode = useUiSetting<boolean>('theme:darkMode');
+  const theme = darkMode ? euiThemeDark : euiThemeLight;
+
+  // TODO: Render EuiTextArea as fallback when lazy loading Monaco fails, once EuiErrorBoundary allows
   return (
-    <React.Suspense fallback={<Fallback />}>
-      <LazyBaseEditor {...props} useDarkTheme={darkMode} />
-    </React.Suspense>
+    <EuiErrorBoundary>
+      <React.Suspense
+        fallback={
+          <EuiFormControlLayout
+            append={<div hidden />}
+            style={{
+              width,
+              height,
+              backgroundColor: theme.euiFormBackgroundDisabledColor,
+              padding: theme.paddingSizes.m,
+            }}
+            isDisabled
+          >
+            <EuiLoadingContent />
+          </EuiFormControlLayout>
+        }
+      >
+        <EuiFormControlLayout
+          append={<div hidden />}
+          style={{
+            width,
+            height,
+            backgroundColor: options?.readOnly
+              ? theme.euiFormBackgroundReadOnlyColor
+              : theme.euiFormBackgroundColor,
+          }}
+          readOnly={options?.readOnly}
+        >
+          <LazyBaseEditor {...props} useDarkTheme={darkMode} />
+        </EuiFormControlLayout>
+      </React.Suspense>
+    </EuiErrorBoundary>
   );
 };

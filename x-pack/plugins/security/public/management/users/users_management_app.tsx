@@ -19,8 +19,12 @@ import type { RegisterManagementAppArgs } from 'src/plugins/management/public';
 
 import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
 import type { AuthenticationServiceSetup } from '../../authentication';
-import type { BreadcrumbsChangeHandler } from '../../components/breadcrumb';
-import { Breadcrumb, BreadcrumbsProvider, getDocTitle } from '../../components/breadcrumb';
+import {
+  BreadcrumbsProvider,
+  BreadcrumbsChangeHandler,
+  Breadcrumb,
+  createBreadcrumbsChangeHandler,
+} from '../../components/breadcrumb';
 import { AuthenticationProvider } from '../../components/use_current_user';
 import type { PluginStartDependencies } from '../../plugin';
 import { tryDecodeURIComponent } from '../url_utils';
@@ -64,10 +68,7 @@ export const usersManagementApp = Object.freeze({
             services={coreStart}
             history={history}
             authc={authc}
-            onChange={(breadcrumbs) => {
-              setBreadcrumbs(breadcrumbs);
-              coreStart.chrome.docTitle.change(getDocTitle(breadcrumbs));
-            }}
+            onChange={createBreadcrumbsChangeHandler(coreStart.chrome, setBreadcrumbs)}
           >
             <Breadcrumb
               text={i18n.translate('xpack.security.users.breadcrumb', {
