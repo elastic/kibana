@@ -17,8 +17,7 @@ import {
   ReindexStep,
   ReindexWarning,
 } from '../../../common/types';
-import { apmReindexScript, isLegacyApmIndex } from '../apm';
-import apmMappings from '../apm/mapping.json';
+
 
 import { esIndicesStateCheck } from '../es_indices_state_check';
 
@@ -137,7 +136,6 @@ export const reindexServiceFactory = (
   actions: ReindexActions,
   log: Logger,
   licensing: LicensingPluginSetup,
-  apmIndexPatterns: string[] = []
 ): ReindexService => {
   // ------ Utility functions
 
@@ -318,13 +316,12 @@ export const reindexServiceFactory = (
     }
 
     const { settings, mappings } = transformFlatSettings(flatSettings);
-    const legacyApmIndex = isLegacyApmIndex(indexName, apmIndexPatterns, flatSettings.mappings);
 
     const { body: createIndex } = await esClient.indices.create({
       index: newIndexName,
       body: {
         settings,
-        mappings: legacyApmIndex ? apmMappings : mappings,
+        mappings,
       },
     });
 
@@ -353,28 +350,18 @@ export const reindexServiceFactory = (
       await esClient.indices.open({ index: indexName });
     }
 
-    const reindexBody = {
-      source: { index: indexName },
-      dest: { index: reindexOp.attributes.newIndexName },
-    } as any;
-
     const flatSettings = await actions.getFlatSettings(indexName);
     if (!flatSettings) {
       throw error.indexNotFound(`Index ${indexName} does not exist.`);
     }
 
-    const legacyApmIndex = isLegacyApmIndex(indexName, apmIndexPatterns, flatSettings.mappings);
-    if (legacyApmIndex) {
-      reindexBody.script = {
-        lang: 'painless',
-        source: apmReindexScript,
-      };
-    }
-
     const { body: startReindexResponse } = await esClient.reindex({
       refresh: true,
       wait_for_completion: false,
-      body: reindexBody,
+      body: {
+        source: { index: indexName },
+        dest: { index: reindexOp.attributes.newIndexName },
+      },
     });
 
     return actions.updateReindexOp(reindexOp, {
@@ -569,7 +556,7 @@ export const reindexServiceFactory = (
       if (!flatSettings) {
         return null;
       } else {
-        return getReindexWarnings(flatSettings, apmIndexPatterns);
+        return getReindexWarnings(flatSettings);
       }
     },
 

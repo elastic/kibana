@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { first } from 'rxjs/operators';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 
 import {
@@ -21,9 +20,6 @@ import {
 import { CloudSetup } from '../../cloud/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
 import { LicensingPluginSetup } from '../../licensing/server';
-import { APMOSSPluginSetup } from '../../../../src/plugins/apm_oss/server';
-
-import { extractIndexPatterns } from './lib/apm/extract_index_patterns';
 
 import { CredentialStore, credentialStoreFactory } from './lib/reindexing/credential_store';
 import { ReindexWorker } from './lib/reindexing';
@@ -41,7 +37,6 @@ import { RouteDependencies } from './types';
 interface PluginsSetup {
   usageCollection: UsageCollectionSetup;
   licensing: LicensingPluginSetup;
-  apmOss: APMOSSPluginSetup;
   features: FeaturesPluginSetup;
   cloud?: CloudSetup;
 }
@@ -53,7 +48,6 @@ export class UpgradeAssistantServerPlugin implements Plugin {
 
   // Properties set at setup
   private licensing?: LicensingPluginSetup;
-  private apmOSS?: APMOSSPluginSetup;
 
   // Properties set at start
   private savedObjectsServiceStart?: SavedObjectsServiceStart;
@@ -74,10 +68,9 @@ export class UpgradeAssistantServerPlugin implements Plugin {
 
   setup(
     { http, getStartServices, capabilities, savedObjects }: CoreSetup,
-    { usageCollection, cloud, features, licensing, apmOss: apmOSS }: PluginsSetup
+    { usageCollection, cloud, features, licensing }: PluginsSetup
   ) {
     this.licensing = licensing;
-    this.apmOSS = apmOSS;
 
     savedObjects.registerType(reindexOperationSavedObjectType);
     savedObjects.registerType(telemetrySavedObjectType);
@@ -100,7 +93,6 @@ export class UpgradeAssistantServerPlugin implements Plugin {
     const dependencies: RouteDependencies = {
       cloud,
       router,
-      apmOSS,
       credentialStore: this.credentialStore,
       log: this.logger,
       getSavedObjectsService: () => {
@@ -143,10 +135,6 @@ export class UpgradeAssistantServerPlugin implements Plugin {
     // process jobs without the browser staying on the page, but will require that jobs go into
     // a paused state if no Kibana nodes have the required credentials.
 
-    const apmIndexPatterns = extractIndexPatterns(
-      await this.apmOSS!.config$.pipe(first()).toPromise()
-    );
-
     this.worker = createReindexWorker({
       credentialStore: this.credentialStore,
       licensing: this.licensing!,
@@ -155,7 +143,6 @@ export class UpgradeAssistantServerPlugin implements Plugin {
       savedObjects: new SavedObjectsClient(
         this.savedObjectsServiceStart.createInternalRepository()
       ),
-      apmIndexPatterns,
     });
 
     this.worker!.start();

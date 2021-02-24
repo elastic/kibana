@@ -53,7 +53,6 @@ export class ReindexWorker {
     private clusterClient: IClusterClient,
     log: Logger,
     private licensing: LicensingPluginSetup,
-    private apmIndexPatterns: string[]
   ) {
     this.log = log.get('reindex_worker');
     if (ReindexWorker.workerSingleton) {
@@ -67,7 +66,6 @@ export class ReindexWorker {
       reindexActionsFactory(this.client, callAsInternalUser),
       log,
       this.licensing,
-      apmIndexPatterns
     );
 
     ReindexWorker.workerSingleton = this;
@@ -157,7 +155,6 @@ export class ReindexWorker {
       actions,
       this.log,
       this.licensing,
-      this.apmIndexPatterns
     );
   };
 
@@ -239,7 +236,6 @@ export class ReindexWorker {
       actions,
       this.log,
       this.licensing,
-      this.apmIndexPatterns
     );
     reindexOp = await swallowExceptions(service.processNextStep, this.log)(reindexOp);
 

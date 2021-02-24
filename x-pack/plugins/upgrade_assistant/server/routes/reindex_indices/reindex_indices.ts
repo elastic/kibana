@@ -45,7 +45,6 @@ interface CreateReindexWorker {
   credentialStore: CredentialStore;
   savedObjects: SavedObjectsClient;
   licensing: LicensingPluginSetup;
-  apmIndexPatterns: string[];
 }
 
 export function createReindexWorker({
@@ -54,7 +53,6 @@ export function createReindexWorker({
   credentialStore,
   savedObjects,
   licensing,
-  apmIndexPatterns,
 }: CreateReindexWorker) {
   const esClient = elasticsearchService.client;
   return new ReindexWorker(
@@ -63,7 +61,6 @@ export function createReindexWorker({
     esClient,
     logger,
     licensing,
-    apmIndexPatterns
   );
 }
 

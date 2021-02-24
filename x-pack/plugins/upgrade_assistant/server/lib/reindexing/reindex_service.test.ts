@@ -20,12 +20,11 @@ import {
   ReindexStatus,
   ReindexStep,
 } from '../../../common/types';
+import { mockKibanaVersion } from '../../../common/constants';
 import { licensingMock } from '../../../../licensing/server/mocks';
 import { LicensingPluginSetup } from '../../../../licensing/server';
-import { apmReindexScript } from '../apm';
-import apmMappings from '../apm/mapping.json';
 
-import { MOCK_VERSION_STRING, getMockVersionInfo } from '../__fixtures__/version';
+import { getMockVersionInfo } from '../__fixtures__/version';
 import { esIndicesStateCheck } from '../es_indices_state_check';
 import { versionService } from '../version';
 
@@ -89,10 +88,9 @@ describe('reindexService', () => {
       actions,
       log,
       licensingPluginSetup,
-      ['apm-*']
     );
 
-    versionService.setup(MOCK_VERSION_STRING);
+    versionService.setup(mockKibanaVersion);
   });
 
   describe('hasRequiredPrivileges', () => {
@@ -846,46 +844,6 @@ describe('reindexService', () => {
         });
       });
 
-      it('used APM mapping for legacy APM index', async () => {
-        const indexName = 'apm-1';
-        const newIndexName = 'apm-1-reindexed';
-
-        actions.getFlatSettings.mockResolvedValueOnce({
-          settings: {
-            'index.number_of_replicas': 5,
-          },
-          mappings: {
-            _meta: {
-              version: '6.7.0',
-            },
-          },
-        });
-
-        clusterClient.asCurrentUser.indices.create.mockResolvedValueOnce(
-          asApiResponse({ acknowledged: true })
-        );
-
-        await service.processNextStep({
-          id: '1',
-          attributes: {
-            ...defaultAttributes,
-            indexName,
-            newIndexName,
-            lastCompletedStep: ReindexStep.readonly,
-          },
-        } as ReindexSavedObject);
-
-        expect(clusterClient.asCurrentUser.indices.create).toHaveBeenCalledWith({
-          index: newIndexName,
-          body: {
-            mappings: apmMappings,
-            settings: {
-              'index.number_of_replicas': 5,
-            },
-          },
-        });
-      });
-
       it('fails if create index is not acknowledged', async () => {
         clusterClient.asCurrentUser.indices.get.mockResolvedValueOnce(
           asApiResponse({ myIndex: settingsMappings })
@@ -954,44 +912,6 @@ describe('reindexService', () => {
           body: {
             source: { index: 'myIndex' },
             dest: { index: 'myIndex-reindex-0' },
-          },
-        });
-      });
-
-      it('uses APM script for legacy APM index', async () => {
-        const indexName = 'apm-1';
-        const newIndexName = 'apm-1-reindexed';
-
-        clusterClient.asCurrentUser.reindex.mockResolvedValueOnce(asApiResponse({ task: 'xyz' }));
-
-        actions.getFlatSettings.mockResolvedValueOnce({
-          settings: {},
-          mappings: {
-            _meta: {
-              version: '6.7.0',
-            },
-          },
-        });
-
-        await service.processNextStep({
-          id: '1',
-          attributes: {
-            ...defaultAttributes,
-            indexName,
-            newIndexName,
-            lastCompletedStep: ReindexStep.newIndexCreated,
-          },
-        } as ReindexSavedObject);
-        expect(clusterClient.asCurrentUser.reindex).toHaveBeenLastCalledWith({
-          refresh: true,
-          wait_for_completion: false,
-          body: {
-            source: { index: indexName },
-            dest: { index: newIndexName },
-            script: {
-              lang: 'painless',
-              source: apmReindexScript,
-            },
           },
         });
       });

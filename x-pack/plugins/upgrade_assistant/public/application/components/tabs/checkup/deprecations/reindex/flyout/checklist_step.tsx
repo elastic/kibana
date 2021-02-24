@@ -135,34 +135,6 @@ export const ChecklistFlyoutStep: React.FunctionComponent<{
           </h3>
         </EuiTitle>
         <ReindexProgress reindexState={reindexState} cancelReindex={cancelReindex} />
-        {reindexWarnings && reindexWarnings.includes(ReindexWarning.apmReindex) && (
-          <Fragment>
-            <EuiSpacer />
-            <EuiCallOut
-              title={
-                <FormattedMessage
-                  id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.apmIndexPatternCallout.calloutTitle"
-                  defaultMessage="After reindexing APM indices, return to the {apmSetupLink} to reload Kibana objects. You only need to do this once."
-                  values={{
-                    apmSetupLink: (
-                      <EuiLink
-                        href={http.basePath.prepend(`/app/kibana#/home/tutorial/apm`)}
-                        target="_blank"
-                      >
-                        <FormattedMessage
-                          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.apmIndexPatternCallout.apmSetupLinkLabel"
-                          defaultMessage="APM Setup Instructions"
-                        />
-                      </EuiLink>
-                    ),
-                  }}
-                />
-              }
-              color="warning"
-              iconType="alert"
-            />
-          </Fragment>
-        )}
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">

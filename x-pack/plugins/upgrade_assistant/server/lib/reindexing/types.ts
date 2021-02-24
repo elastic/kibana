@@ -28,6 +28,10 @@ export interface FlatSettings {
   };
 }
 
+<<<<<<< HEAD
+=======
+// Specific to 7.x-8 upgrade
+>>>>>>> fe6bd2ecbb4... [Upgrade Assistant] Align code between branches (#91862)
 export interface FlatSettingsWithTypeName {
   settings: {
     [key: string]: string;
