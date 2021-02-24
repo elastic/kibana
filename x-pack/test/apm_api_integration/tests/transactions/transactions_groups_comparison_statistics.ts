@@ -182,7 +182,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             url.format({
               pathname: `/api/apm/services/opbeans-java/transactions/groups/comparison_statistics`,
               query: {
-                uiFilters: '{}',
                 numBuckets: 20,
                 transactionType: 'request',
                 latencyAggregationType: 'avg',
