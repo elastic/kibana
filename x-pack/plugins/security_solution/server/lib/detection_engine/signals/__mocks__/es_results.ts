@@ -460,11 +460,38 @@ export const sampleThresholdSignalHit = (): SignalHit => ({
   },
 });
 
+const sampleThresholdHit = sampleThresholdSignalHit();
+export const sampleLegacyThresholdSignalHit = (): unknown => ({
+  ...sampleThresholdHit,
+  signal: {
+    ...sampleThresholdHit.signal,
+    rule: {
+      ...sampleThresholdHit.signal.rule,
+      threshold: {
+        field: 'host.name',
+        value: 5,
+      },
+    },
+    threshold_result: {
+      count: 72,
+      value: 'a hostname',
+    },
+  },
+});
+
 export const sampleWrappedThresholdSignalHit = (): WrappedSignalHit => {
   return {
     _index: 'myFakeSignalIndex',
     _id: sampleIdGuid,
     _source: sampleThresholdSignalHit(),
+  };
+};
+
+export const sampleWrappedLegacyThresholdSignalHit = (): WrappedSignalHit => {
+  return {
+    _index: 'myFakeSignalIndex',
+    _id: 'adb9d636-fbbe-4962-ac1c-e282f3ec5879',
+    _source: sampleLegacyThresholdSignalHit() as SignalHit,
   };
 };
 

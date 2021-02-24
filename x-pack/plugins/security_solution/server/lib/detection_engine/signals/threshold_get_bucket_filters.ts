@@ -74,8 +74,9 @@ export const getThresholdBucketFilters = async ({
         if (signalTerms == null) {
           signalTerms = [
             {
-              field: (((hit._source.rule as RulesSchema).threshold as unknown) as { field: string })
-                .field,
+              field: (((hit._source.signal?.rule as RulesSchema).threshold as unknown) as {
+                field: string;
+              }).field,
               value: ((hit._source.signal?.threshold_result as unknown) as { value: string }).value,
             },
           ];
