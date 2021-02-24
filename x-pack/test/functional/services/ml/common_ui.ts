@@ -219,6 +219,14 @@ export function MachineLearningCommonUIProvider({ getService }: FtrProviderConte
       );
     },
 
+    async disableAntiAliasing() {
+      await canvasElement.disableAntiAliasing();
+    },
+
+    async resetAntiAliasing() {
+      await canvasElement.resetAntiAliasing();
+    },
+
     async assertCanvasElement(
       dataTestSubj: string,
       expectedColorStats: CanvasElementColorStats,

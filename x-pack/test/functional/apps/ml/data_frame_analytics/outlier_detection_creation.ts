@@ -52,13 +52,13 @@ export default function ({ getService }: FtrProviderContext) {
           ],
           scatterplotMatrixColorStatsWizard: [
             // tick/grid/axis, grey markers
-            { key: '#6A717D', value: 21 },
-            { key: '#D3DAE6', value: 7 },
+            { key: '#6A717D', value: 25 },
+            { key: '#D3DAE6', value: 8 },
             // scatterplot circles
-            { key: '#54B399', value: 6 },
-            { key: '#54B39A', value: 9 },
+            { key: '#54B399', value: 7 },
+            { key: '#54B39A', value: 10 },
             // anti-aliasing
-            { key: '#F5F7FA', value: 26 },
+            { key: '#F5F7FA', value: 30 },
           ],
           scatterplotMatrixColorStatsResults: [
             // tick/grid/axis, grey markers
@@ -92,6 +92,10 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.navigation.navigateToDataFrameAnalytics();
 
           await ml.testExecution.logTestStep('loads the source selection modal');
+
+          // Disable anti-aliasing to stabilize canvas image rendering assertions
+          await ml.commonUI.disableAntiAliasing();
+
           await ml.dataFrameAnalytics.startAnalyticsCreation();
 
           await ml.testExecution.logTestStep(

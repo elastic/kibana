@@ -267,7 +267,7 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
         'mlAnalyticsCreateJobWizardScatterplotMatrixPanel',
         expectedValue,
         ['#000000'],
-        5
+        6
       );
     },
 

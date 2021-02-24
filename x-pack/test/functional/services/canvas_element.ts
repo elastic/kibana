@@ -64,6 +64,28 @@ export async function CanvasElementProvider({ getService }: FtrProviderContext) 
   const { driver } = await getService('__webdriver__').init();
 
   return new (class CanvasElementService {
+    // disable font anti-aliasing to be more resilient
+    // against OS rendering differences
+    public async disableAntiAliasing() {
+      await driver.executeScript(
+        `
+        document.body.style["font-smooth"] = "never";
+        document.body.style["-webkit-font-smoothing"] = "none";
+        document.body.classList.add("mlDisableAntiAliasing");
+        `
+      );
+    }
+
+    public async resetAntiAliasing() {
+      await driver.executeScript(
+        `
+        document.body.style["font-smooth"] = "";
+        document.body.style["-webkit-font-smoothing"] = "";
+        document.body.classList.remove("mlDisableAntiAliasing");
+        `
+      );
+    }
+
     /**
      * Gets the image data of a canvas element
      * @param selector querySelector to access the canvas element.
