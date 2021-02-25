@@ -6,5 +6,5 @@
  * Side Public License, v 1.
  */
 
-require('../src/setup_node_env/no_transpilation');
-require('@kbn/docs-utils').runReleaseNotesCli();
+require('../src/setup_node_env');
+require('@kbn/docs-utils').runBuildApiDocsCli();
