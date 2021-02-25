@@ -13,7 +13,7 @@ a flight that arrived or departed from `Warsaw` or `Venice` when the weather was
 . Search for `Warsaw OR Venice OR Clear`.
 .  If you don't see any results, open the time filter and select a time range that contains data.
 .  From the list of *Available fields*, add `_score` to the document table.
-. Click the header for the `_score` column and sort it  by descending scores.
+. In the document table, click the header for the `_score` column, and then sort the column by descending scores.
 +
 The results are currently sorted by first `Time`, and then by `_score`.
 . To sort only by `_score`, remove the `Time` field.
