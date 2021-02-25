@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { LogicMounter, mockHttpValues } from '../../../__mocks__';
+import { LogicMounter, mockHttpValues, mockFlashMessageHelpers } from '../../../__mocks__';
 
 import { nextTick } from '@kbn/test/jest';
 
@@ -18,6 +18,7 @@ import { EnginesLogic } from './';
 describe('EnginesLogic', () => {
   const { mount } = new LogicMounter(EnginesLogic);
   const { http } = mockHttpValues;
+  const { flashAPIErrors } = mockFlashMessageHelpers;
 
   const DEFAULT_VALUES = {
     dataLoading: true,
@@ -123,6 +124,26 @@ describe('EnginesLogic', () => {
   });
 
   describe('listeners', () => {
+    describe('deleteEngine', () => {
+      it('should call the engine API endpoint', async () => {
+        http.delete.mockReturnValueOnce(Promise.resolve());
+        mount();
+        EnginesLogic.actions.deleteEngine('test-engine');
+        await nextTick();
+
+        expect(http.delete).toHaveBeenCalledWith('/api/app_search/engines/test-engine');
+      });
+
+      it('calls flashAPIErrors on API Error', async () => {
+        http.delete.mockReturnValueOnce(Promise.reject());
+        mount();
+        EnginesLogic.actions.deleteEngine('test-engine');
+        await nextTick();
+
+        expect(flashAPIErrors).toHaveBeenCalledTimes(1);
+      });
+    });
+
     describe('loadEngines', () => {
       it('should call the engines API endpoint and set state based on the results', async () => {
         http.get.mockReturnValueOnce(Promise.resolve(MOCK_ENGINES_API_RESPONSE));
