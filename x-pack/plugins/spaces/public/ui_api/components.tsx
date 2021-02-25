@@ -34,17 +34,17 @@ export const getComponents = ({
   /**
    * Returns a function that creates a lazy-loading version of a component.
    */
-  function lazy<T>(fn: () => Promise<FC<T>>) {
+  function wrapLazy<T>(fn: () => Promise<FC<T>>) {
     return (props: JSX.IntrinsicAttributes & PropsWithRef<PropsWithChildren<T>>) => (
-      <LazyWrapper fn={fn} props={props} />
+      <LazyWrapper fn={fn} getStartServices={getStartServices} props={props} />
     );
   }
 
   return {
-    getSpacesContext: lazy(() => getSpacesContextWrapper({ spacesManager, getStartServices })),
-    getShareToSpaceFlyout: lazy(getShareToSpaceFlyoutComponent),
-    getSpaceList: lazy(getSpaceListComponent),
-    getLegacyUrlConflict: lazy(() => getLegacyUrlConflict({ getStartServices })),
-    getSpaceAvatar: lazy(getSpaceAvatarComponent),
+    getSpacesContext: wrapLazy(() => getSpacesContextWrapper({ spacesManager, getStartServices })),
+    getShareToSpaceFlyout: wrapLazy(getShareToSpaceFlyoutComponent),
+    getSpaceList: wrapLazy(getSpaceListComponent),
+    getLegacyUrlConflict: wrapLazy(() => getLegacyUrlConflict({ getStartServices })),
+    getSpaceAvatar: wrapLazy(getSpaceAvatarComponent),
   };
 };

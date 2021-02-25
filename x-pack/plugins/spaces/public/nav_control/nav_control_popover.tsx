@@ -7,7 +7,7 @@
 
 import type { PopoverAnchorPosition } from '@elastic/eui';
 import { EuiHeaderSectionItemButton, EuiLoadingSpinner, EuiPopover } from '@elastic/eui';
-import React, { Component } from 'react';
+import React, { Component, lazy, Suspense } from 'react';
 import type { Subscription } from 'rxjs';
 
 import type { ApplicationStart, Capabilities } from 'src/core/public';
@@ -17,6 +17,11 @@ import { getSpaceAvatarComponent } from '../space_avatar';
 import type { SpacesManager } from '../spaces_manager';
 import { SpacesDescription } from './components/spaces_description';
 import { SpacesMenu } from './components/spaces_menu';
+
+// No need to wrap LazySpaceAvatar in an error boundary, because it is one of the first chunks loaded when opening Kibana.
+const LazySpaceAvatar = lazy(() =>
+  getSpaceAvatarComponent().then((component) => ({ default: component }))
+);
 
 interface Props {
   spacesManager: SpacesManager;
@@ -137,14 +142,10 @@ export class NavControlPopover extends Component<Props, State> {
       return this.getButton(<EuiLoadingSpinner size="m" />, 'loading');
     }
 
-    const LazySpaceAvatar = React.lazy(() =>
-      getSpaceAvatarComponent().then((component) => ({ default: component }))
-    );
-
     return this.getButton(
-      <React.Suspense fallback={<EuiLoadingSpinner />}>
+      <Suspense fallback={<EuiLoadingSpinner />}>
         <LazySpaceAvatar space={activeSpace} size={'s'} />
-      </React.Suspense>,
+      </Suspense>,
       (activeSpace as Space).name
     );
   };

@@ -5,20 +5,41 @@
  * 2.0.
  */
 
-import { EuiLoadingSpinner } from '@elastic/eui';
 import type { FC, PropsWithChildren, PropsWithRef, ReactElement } from 'react';
-import React, { lazy, Suspense, useMemo } from 'react';
+import React, { lazy, useEffect, useMemo, useState } from 'react';
+
+import type { NotificationsStart, StartServicesAccessor } from 'src/core/public';
+
+import type { PluginsStart } from '../plugin';
+import { SuspenseErrorBoundary } from '../suspense_error_boundary';
 
 interface InternalProps<T> {
   fn: () => Promise<FC<T>>;
+  getStartServices: StartServicesAccessor<PluginsStart>;
   props: JSX.IntrinsicAttributes & PropsWithRef<PropsWithChildren<T>>;
 }
 
-export const LazyWrapper: <T>(props: InternalProps<T>) => ReactElement = ({ fn, props }) => {
+export const LazyWrapper: <T>(props: InternalProps<T>) => ReactElement = ({
+  fn,
+  getStartServices,
+  props,
+}) => {
+  const [notifications, setNotifications] = useState<NotificationsStart | undefined>(undefined);
+  useEffect(() => {
+    getStartServices().then(([coreStart]) => {
+      setNotifications(coreStart.notifications);
+    });
+  });
+
   const LazyComponent = useMemo(() => lazy(() => fn().then((x) => ({ default: x }))), [fn]);
+
+  if (!notifications) {
+    return <></>;
+  }
+
   return (
-    <Suspense fallback={<EuiLoadingSpinner />}>
+    <SuspenseErrorBoundary notifications={notifications}>
       <LazyComponent {...props} />
-    </Suspense>
+    </SuspenseErrorBoundary>
   );
 };

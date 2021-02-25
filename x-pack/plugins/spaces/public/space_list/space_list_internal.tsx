@@ -14,7 +14,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import type { ReactNode } from 'react';
-import React, { useEffect, useState } from 'react';
+import React, { lazy, Suspense, useEffect, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -24,6 +24,11 @@ import { ALL_SPACES_ID, UNKNOWN_SPACE } from '../../common/constants';
 import { getSpaceAvatarComponent } from '../space_avatar';
 import { useSpaces } from '../spaces_context';
 import type { ShareToSpacesData, ShareToSpaceTarget } from '../types';
+
+// No need to wrap LazySpaceAvatar in an error boundary, because it is one of the first chunks loaded when opening Kibana.
+const LazySpaceAvatar = lazy(() =>
+  getSpaceAvatarComponent().then((component) => ({ default: component }))
+);
 
 const DEFAULT_DISPLAY_LIMIT = 5;
 
@@ -133,12 +138,8 @@ export const SpaceListInternal = ({
       </EuiFlexItem>
     ) : null;
 
-  const LazySpaceAvatar = React.lazy(() =>
-    getSpaceAvatarComponent().then((component) => ({ default: component }))
-  );
-
   return (
-    <React.Suspense fallback={<EuiLoadingSpinner />}>
+    <Suspense fallback={<EuiLoadingSpinner />}>
       <EuiFlexGroup wrap responsive={false} gutterSize="xs">
         {displayedSpaces.map((space) => {
           // color may be undefined, which is intentional; SpacesAvatar calls the getSpaceColor function before rendering
@@ -152,6 +153,6 @@ export const SpaceListInternal = ({
         {unauthorizedSpacesCountBadge}
         {button}
       </EuiFlexGroup>
-    </React.Suspense>
+    </Suspense>
   );
 };

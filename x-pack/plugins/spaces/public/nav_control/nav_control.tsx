@@ -6,7 +6,7 @@
  */
 
 import { EuiLoadingSpinner } from '@elastic/eui';
-import React from 'react';
+import React, { lazy, Suspense } from 'react';
 import ReactDOM from 'react-dom';
 
 import type { CoreStart } from 'src/core/public';
@@ -22,7 +22,7 @@ export function initSpacesNavControl(spacesManager: SpacesManager, core: CoreSta
         return () => null;
       }
 
-      const LazyNavControlPopover = React.lazy(() =>
+      const LazyNavControlPopover = lazy(() =>
         import('./nav_control_popover').then(({ NavControlPopover }) => ({
           default: NavControlPopover,
         }))
@@ -30,7 +30,7 @@ export function initSpacesNavControl(spacesManager: SpacesManager, core: CoreSta
 
       ReactDOM.render(
         <I18nContext>
-          <React.Suspense fallback={<EuiLoadingSpinner />}>
+          <Suspense fallback={<EuiLoadingSpinner />}>
             <LazyNavControlPopover
               spacesManager={spacesManager}
               serverBasePath={core.http.basePath.serverBasePath}
@@ -38,7 +38,7 @@ export function initSpacesNavControl(spacesManager: SpacesManager, core: CoreSta
               capabilities={core.application.capabilities}
               navigateToApp={core.application.navigateToApp}
             />
-          </React.Suspense>
+          </Suspense>
         </I18nContext>,
         targetDomElement
       );

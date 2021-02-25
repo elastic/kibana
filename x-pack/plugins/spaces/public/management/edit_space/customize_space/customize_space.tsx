@@ -17,7 +17,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import type { ChangeEvent } from 'react';
-import React, { Component, Fragment } from 'react';
+import React, { Component, Fragment, lazy, Suspense } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -30,6 +30,11 @@ import { toSpaceIdentifier } from '../../lib';
 import { SectionPanel } from '../section_panel';
 import { CustomizeSpaceAvatar } from './customize_space_avatar';
 import { SpaceIdentifier } from './space_identifier';
+
+// No need to wrap LazySpaceAvatar in an error boundary, because it is one of the first chunks loaded when opening Kibana.
+const LazySpaceAvatar = lazy(() =>
+  getSpaceAvatarComponent().then((component) => ({ default: component }))
+);
 
 interface Props {
   validator: SpaceValidator;
@@ -62,10 +67,6 @@ export class CustomizeSpace extends Component<Props, State> {
     const extraPopoverProps: Partial<EuiPopoverProps> = {
       initialFocus: 'input[name="spaceInitials"]',
     };
-
-    const LazySpaceAvatar = React.lazy(() =>
-      getSpaceAvatarComponent().then((component) => ({ default: component }))
-    );
 
     return (
       <SectionPanel title={panelTitle} description={panelTitle}>
@@ -162,9 +163,9 @@ export class CustomizeSpace extends Component<Props, State> {
                   )}
                   onClick={this.togglePopover}
                 >
-                  <React.Suspense fallback={<EuiLoadingSpinner />}>
+                  <Suspense fallback={<EuiLoadingSpinner />}>
                     <LazySpaceAvatar space={this.props.space} size="l" />
-                  </React.Suspense>
+                  </Suspense>
                 </button>
               }
               closePopover={this.closePopover}

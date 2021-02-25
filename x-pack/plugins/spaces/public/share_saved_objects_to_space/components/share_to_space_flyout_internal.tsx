@@ -20,7 +20,7 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { lazy, Suspense, useEffect, useMemo, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -38,6 +38,12 @@ import type { ShareToSpaceTarget } from '../../types';
 import type { ShareOptions } from '../types';
 import { DEFAULT_OBJECT_NOUN } from './constants';
 import { ShareToSpaceForm } from './share_to_space_form';
+
+// No need to wrap LazyCopyToSpaceFlyout in an error boundary, because the ShareToSpaceFlyoutInternal component itself is only ever used in
+// a lazy-loaded fashion with an error boundary.
+const LazyCopyToSpaceFlyout = lazy(() =>
+  getCopyToSpaceFlyoutComponent().then((component) => ({ default: component }))
+);
 
 const ALL_SPACES_TARGET = i18n.translate('xpack.spaces.shareToSpace.allSpacesTarget', {
   defaultMessage: 'all',
@@ -270,14 +276,10 @@ export const ShareToSpaceFlyoutInternal = (props: ShareToSpaceFlyoutProps) => {
   };
 
   if (showMakeCopy) {
-    const LazyCopyToSpaceFlyout = React.lazy(() =>
-      getCopyToSpaceFlyoutComponent().then((component) => ({ default: component }))
-    );
-
     return (
-      <React.Suspense fallback={<EuiLoadingSpinner />}>
+      <Suspense fallback={<EuiLoadingSpinner />}>
         <LazyCopyToSpaceFlyout onClose={onClose} savedObjectTarget={savedObjectTarget} />
-      </React.Suspense>
+      </Suspense>
     );
   }
 

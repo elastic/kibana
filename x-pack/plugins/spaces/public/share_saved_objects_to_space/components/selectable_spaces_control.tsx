@@ -20,7 +20,7 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-import React from 'react';
+import React, { lazy, Suspense } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -32,6 +32,11 @@ import { useSpaces } from '../../spaces_context';
 import type { ShareToSpaceTarget } from '../../types';
 import type { ShareOptions } from '../types';
 import { NoSpacesAvailable } from './no_spaces_available';
+
+// No need to wrap LazySpaceAvatar in an error boundary, because it is one of the first chunks loaded when opening Kibana.
+const LazySpaceAvatar = lazy(() =>
+  getSpaceAvatarComponent().then((component) => ({ default: component }))
+);
 
 interface Props {
   spaces: ShareToSpaceTarget[];
@@ -89,10 +94,6 @@ export const SelectableSpacesControl = (props: Props) => {
   const { services } = useSpaces();
   const { application, docLinks } = services;
   const { selectedSpaceIds, initiallySelectedSpaceIds } = shareOptions;
-
-  const LazySpaceAvatar = React.lazy(() =>
-    getSpaceAvatarComponent().then((component) => ({ default: component }))
-  );
 
   const activeSpaceId =
     !enableSpaceAgnosticBehavior && spaces.find((space) => space.isActiveSpace)!.id;
@@ -200,7 +201,7 @@ export const SelectableSpacesControl = (props: Props) => {
       fullWidth
     >
       <>
-        <React.Suspense fallback={<EuiLoadingSpinner />}>
+        <Suspense fallback={<EuiLoadingSpinner />}>
           <EuiSelectable
             options={options}
             onChange={(newOptions) => updateSelectedSpaces(newOptions as SpaceOption[])}
@@ -222,7 +223,7 @@ export const SelectableSpacesControl = (props: Props) => {
               );
             }}
           </EuiSelectable>
-        </React.Suspense>
+        </Suspense>
         {getUnknownSpacesLabel()}
         {getNoSpacesAvailable()}
       </>

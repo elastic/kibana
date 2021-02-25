@@ -18,7 +18,7 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import React, { Component, Fragment } from 'react';
+import React, { Component, Fragment, lazy, Suspense } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -39,6 +39,11 @@ import { getSpaceAvatarComponent } from '../../space_avatar';
 import type { SpacesManager } from '../../spaces_manager';
 import { ConfirmDeleteModal, UnauthorizedPrompt } from '../components';
 import { getEnabledFeatures } from '../lib/feature_utils';
+
+// No need to wrap LazySpaceAvatar in an error boundary, because it is one of the first chunks loaded when opening Kibana.
+const LazySpaceAvatar = lazy(() =>
+  getSpaceAvatarComponent().then((component) => ({ default: component }))
+);
 
 interface Props {
   spacesManager: SpacesManager;
@@ -259,15 +264,12 @@ export class SpacesGridPage extends Component<Props, State> {
         name: '',
         width: '50px',
         render: (value: string, record: Space) => {
-          const LazySpaceAvatar = React.lazy(() =>
-            getSpaceAvatarComponent().then((component) => ({ default: component }))
-          );
           return (
-            <React.Suspense fallback={<EuiLoadingSpinner />}>
+            <Suspense fallback={<EuiLoadingSpinner />}>
               <EuiLink {...reactRouterNavigate(this.props.history, this.getEditSpacePath(record))}>
                 <LazySpaceAvatar space={record} size="s" />
               </EuiLink>
-            </React.Suspense>
+            </Suspense>
           );
         },
       },

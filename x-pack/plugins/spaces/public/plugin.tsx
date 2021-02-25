@@ -86,6 +86,7 @@ export class SpacesPlugin implements Plugin<SpacesPluginSetup, SpacesPluginStart
       const copySavedObjectsToSpaceService = new CopySavedObjectsToSpaceService();
       copySavedObjectsToSpaceService.setup({
         savedObjectsManagementSetup: plugins.savedObjectsManagement,
+        getStartServices: core.getStartServices,
       });
     }
 

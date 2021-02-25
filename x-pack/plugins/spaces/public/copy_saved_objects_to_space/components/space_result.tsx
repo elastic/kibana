@@ -15,7 +15,7 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-import React, { useState } from 'react';
+import React, { lazy, Suspense, useState } from 'react';
 
 import type { Space } from 'src/plugins/spaces_oss/common';
 
@@ -24,6 +24,11 @@ import type { SummarizedCopyToSpaceResult } from '../lib';
 import type { ImportRetry } from '../types';
 import { CopyStatusSummaryIndicator } from './copy_status_summary_indicator';
 import { SpaceCopyResultDetails } from './space_result_details';
+
+// No need to wrap LazySpaceAvatar in an error boundary, because it is one of the first chunks loaded when opening Kibana.
+const LazySpaceAvatar = lazy(() =>
+  getSpaceAvatarComponent().then((component) => ({ default: component }))
+);
 
 interface Props {
   space: Space;
@@ -43,9 +48,6 @@ const getInitialDestinationMap = (objects: SummarizedCopyToSpaceResult['objects'
 
 export const SpaceResultProcessing = (props: Pick<Props, 'space'>) => {
   const { space } = props;
-  const LazySpaceAvatar = React.lazy(() =>
-    getSpaceAvatarComponent().then((component) => ({ default: component }))
-  );
 
   return (
     <EuiAccordion
@@ -55,9 +57,9 @@ export const SpaceResultProcessing = (props: Pick<Props, 'space'>) => {
       buttonContent={
         <EuiFlexGroup responsive={false}>
           <EuiFlexItem grow={false}>
-            <React.Suspense fallback={<EuiLoadingSpinner />}>
+            <Suspense fallback={<EuiLoadingSpinner />}>
               <LazySpaceAvatar space={space} size="s" />
-            </React.Suspense>
+            </Suspense>
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiText>{space.name}</EuiText>
@@ -86,9 +88,6 @@ export const SpaceResult = (props: Props) => {
   const onDestinationMapChange = (value?: Map<string, string>) => {
     setDestinationMap(value || getInitialDestinationMap(objects));
   };
-  const LazySpaceAvatar = React.lazy(() =>
-    getSpaceAvatarComponent().then((component) => ({ default: component }))
-  );
 
   return (
     <EuiAccordion
@@ -98,9 +97,9 @@ export const SpaceResult = (props: Props) => {
       buttonContent={
         <EuiFlexGroup responsive={false}>
           <EuiFlexItem grow={false}>
-            <React.Suspense fallback={<EuiLoadingSpinner />}>
+            <Suspense fallback={<EuiLoadingSpinner />}>
               <LazySpaceAvatar space={space} size="s" />
-            </React.Suspense>
+            </Suspense>
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiText>{space.name}</EuiText>

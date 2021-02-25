@@ -16,7 +16,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import type { ReactElement } from 'react';
-import React, { Component } from 'react';
+import React, { Component, lazy, Suspense } from 'react';
 
 import type { InjectedIntl } from '@kbn/i18n/react';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
@@ -26,6 +26,11 @@ import type { Space } from 'src/plugins/spaces_oss/common';
 import { addSpaceIdToPath, ENTER_SPACE_PATH, SPACE_SEARCH_COUNT_THRESHOLD } from '../../../common';
 import { getSpaceAvatarComponent } from '../../space_avatar';
 import { ManageSpacesButton } from './manage_spaces_button';
+
+// No need to wrap LazySpaceAvatar in an error boundary, because it is one of the first chunks loaded when opening Kibana.
+const LazySpaceAvatar = lazy(() =>
+  getSpaceAvatarComponent().then((component) => ({ default: component }))
+);
 
 interface Props {
   id: string;
@@ -187,13 +192,10 @@ class SpacesMenuUI extends Component<Props, State> {
   };
 
   private renderSpaceMenuItem = (space: Space): JSX.Element => {
-    const LazySpaceAvatar = React.lazy(() =>
-      getSpaceAvatarComponent().then((component) => ({ default: component }))
-    );
     const icon = (
-      <React.Suspense fallback={<EuiLoadingSpinner />}>
+      <Suspense fallback={<EuiLoadingSpinner />}>
         <LazySpaceAvatar space={space} size={'s'} />
-      </React.Suspense>
+      </Suspense>
     );
     return (
       <EuiContextMenuItem
