@@ -29,6 +29,7 @@ import {
   ModuleDatafeed,
   ModuleJob,
   Module,
+  Logo,
   JobOverride,
   DatafeedOverride,
   GeneralJobsOverride,
@@ -65,14 +66,7 @@ export const SAVED_OBJECT_TYPES = {
   VISUALIZATION: 'visualization',
 };
 
-interface FileBasedModule {
-  id: string;
-  title: string;
-  description: string;
-  type: string;
-  logoFile: string;
-  defaultIndexPattern: string;
-  query: any;
+interface FileBasedModule extends Omit<Module, 'jobs' | 'datafeeds' | 'kibana'> {
   jobs: Array<{ file: string; id: string }>;
   datafeeds: Array<{ file: string; job_id: string; id: string }>;
   kibana: {
@@ -95,8 +89,6 @@ interface Config {
   module: FileBasedModule | Module;
   isSavedObject: boolean;
 }
-
-type Logo = { icon: string } | null;
 
 export interface RecognizeResult {
   id: string;
@@ -270,7 +262,7 @@ export class DataRecognizer {
         if (match === true) {
           let logo: Logo = null;
           if (isModule(moduleConfig) && moduleConfig.logo) {
-            logo = { icon: moduleConfig.logo };
+            logo = moduleConfig.logo;
           } else if (moduleConfig.logoFile) {
             try {
               const logoFile = await this.readFile(

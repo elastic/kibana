@@ -50,13 +50,15 @@ export interface Module {
   description: string;
   type: string;
   logoFile?: string;
-  logo?: string;
+  logo?: { icon: string } | null;
   defaultIndexPattern: string;
   query: any;
   jobs: ModuleJob[];
   datafeeds: ModuleDatafeed[];
   kibana: KibanaObjects;
 }
+
+export type Logo = { icon: string } | null;
 
 export interface ResultItem {
   id: string;

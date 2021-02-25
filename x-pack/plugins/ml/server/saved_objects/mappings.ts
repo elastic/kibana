@@ -68,7 +68,7 @@ export const mlModule: SavedObjectsTypeMappingDefinition = {
       },
     },
     logo: {
-      type: 'text',
+      type: 'object',
     },
     defaultIndexPattern: {
       type: 'text',
