@@ -204,6 +204,7 @@ export class DrilldownManagerState {
           title: toastDrilldownCreated.title(drilldownState.name$.getValue()),
           text: toastDrilldownCreated.text,
         });
+        this.setScreen('list');
       } catch (error) {
         toastService.addError(error, {
           title: toastDrilldownsCRUDError,
