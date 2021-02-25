@@ -11,7 +11,7 @@ import MarkdownIt from 'markdown-it';
 import { EMSClient, FileLayer as EMSFileLayer, TMSService } from '@elastic/ems-client';
 import { i18n } from '@kbn/i18n';
 import { TypeOf } from '@kbn/config-schema';
-import { getKibanaVersion } from '../../kibana_services';
+import { getKibanaVersion } from '../kibana_services';
 import { ORIGIN, TMS_IN_YML_ID } from '../../common';
 import { FileLayer, IServiceSettings, TmsLayer } from './service_settings_types';
 import { MapsEmsConfig, TileMapConfig, tileMapConfigOptionsSchema } from '../../config';

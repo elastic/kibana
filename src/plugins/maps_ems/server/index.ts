@@ -6,8 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { Plugin, PluginConfigDescriptor } from 'kibana/server';
-import { CoreSetup, PluginInitializerContext } from 'src/core/server';
+import {
+  CoreSetup,
+  PluginInitializerContext,
+  Plugin,
+  PluginConfigDescriptor,
+} from 'src/core/server';
 import { emsConfigSchema, MapsEmsConfig } from '../config';
 
 export const config: PluginConfigDescriptor<MapsEmsConfig> = {

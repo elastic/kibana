@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { MapsEmsConfig } from './config';
+import { MapsEmsConfig } from '../config';
 
 let kibanaVersion: string;
 export const setKibanaVersion = (version: string) => (kibanaVersion = version);

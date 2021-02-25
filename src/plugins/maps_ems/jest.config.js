@@ -6,18 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { TmsLayer } from '../../../maps_ems/public';
-
-export interface WMSOptions {
-  selectedTmsLayer?: TmsLayer;
-  enabled: boolean;
-  url?: string;
-  options: {
-    version?: string;
-    layers?: string;
-    format: string;
-    transparent: boolean;
-    attribution?: string;
-    styles?: string;
-  };
-}
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../../..',
+  roots: ['<rootDir>/src/plugins/maps_ems'],
+};

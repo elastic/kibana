@@ -22,6 +22,11 @@ export interface FileLayer {
   fields: FileLayerField[];
   url?: string;
   layerId?: string;
+  created_at?: string;
+  attribution?: string;
+  meta?: {
+    [key: string]: string;
+  };
 }
 
 export interface FileLayerField {

@@ -6,8 +6,14 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from 'src/core/server';
-import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
+import {
+  CoreSetup,
+  CoreStart,
+  Logger,
+  Plugin,
+  PluginInitializerContext,
+  DEFAULT_APP_CATEGORIES,
+} from 'src/core/server';
 import { PluginSetupContract as FeaturesPluginSetupContract } from '../../features/server';
 // @ts-ignore
 import { getEcommerceSavedObjects } from './sample_data/ecommerce_saved_objects';
