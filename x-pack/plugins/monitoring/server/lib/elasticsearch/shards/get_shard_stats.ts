@@ -38,7 +38,11 @@ export function handleResponse(
   }
 
   if (includeNodes) {
-    const masterNode = get(cluster, 'cluster_state.master_node');
+    const masterNode = get(
+      cluster,
+      'elasticsearch.cluster.stats.state.master_node',
+      get(cluster, 'cluster_state.master_node')
+    );
     nodes = resp.aggregations.nodes.buckets.reduce(normalizeNodeShards(masterNode), {});
   }
 
@@ -84,7 +88,7 @@ export function getShardStats(
       bool: {
         should: [
           { term: { 'shard.node': nodeUuid } },
-          { term: { 'elasticsearch.node.name': nodeUuid } },
+          { term: { 'elasticsearch.node.id': nodeUuid } },
         ],
       },
     });

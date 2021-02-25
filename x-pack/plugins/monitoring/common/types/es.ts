@@ -303,8 +303,39 @@ export interface ElasticsearchLegacySource {
 }
 
 export interface ElasticsearchIndexRecoveryShard {
-  start_time_in_millis: number;
-  stop_time_in_millis: number;
+  id?: number;
+  name?: string;
+  stage?: string;
+  type?: string;
+  primary?: boolean;
+  source?: {
+    name?: string;
+    transport_address?: string;
+  };
+  target?: {
+    name?: string;
+    transport_address?: string;
+  };
+  index?: {
+    files?: {
+      percent?: string;
+      recovered?: number;
+      total?: number;
+      reused?: number;
+    };
+    size?: {
+      recovered_in_bytes?: number;
+      reused_in_bytes?: number;
+      total_in_bytes?: number;
+    };
+  };
+  start_time_in_millis?: number;
+  stop_time_in_millis?: number;
+  translog?: {
+    total?: number;
+    percent?: string;
+    total_on_start?: number;
+  };
 }
 
 export interface ElasticsearchMetricbeatNode {
@@ -316,7 +347,9 @@ export interface ElasticsearchMetricbeatSource {
   '@timestamp'?: string;
   elasticsearch?: {
     node?: ElasticsearchLegacySource['source_node'] & ElasticsearchMetricbeatNode;
-    index?: ElasticsearchIndexStats;
+    index?: ElasticsearchIndexStats & {
+      recovery?: ElasticsearchIndexRecoveryShard;
+    };
     version?: string;
     shard?: ElasticsearchLegacySource['shard'] & {
       number?: string;

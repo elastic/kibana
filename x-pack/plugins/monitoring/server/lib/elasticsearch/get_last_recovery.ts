@@ -28,9 +28,12 @@ import { LegacyRequest } from '../../types';
  * @returns {boolean} true to keep
  */
 export function filterOldShardActivity(startMs: number) {
-  return (activity: ElasticsearchIndexRecoveryShard) => {
+  return (activity?: ElasticsearchIndexRecoveryShard) => {
     // either it's still going and there is no stop time, or the stop time happened after we started looking for one
-    return !_.isNumber(activity.stop_time_in_millis) || activity.stop_time_in_millis >= startMs;
+    return (
+      activity &&
+      (!_.isNumber(activity.stop_time_in_millis) || activity.stop_time_in_millis >= startMs)
+    );
   };
 }
 
@@ -42,7 +45,7 @@ export function filterOldShardActivity(startMs: number) {
  * @param {Date} start The start time from the request payload (expected to be of type {@code Date})
  * @returns {Object[]} An array of shards representing active shard activity from {@code _source.index_recovery.shards}.
  */
-export function handleLastRecoveries(resp: ElasticsearchResponse, start: number) {
+export function handleLegacyLastRecoveries(resp: ElasticsearchResponse, start: number) {
   if (resp.hits?.hits.length === 1) {
     const data = (resp.hits?.hits[0]?._source.index_recovery?.shards ?? []).filter(
       filterOldShardActivity(moment.utc(start).valueOf())
@@ -54,7 +57,15 @@ export function handleLastRecoveries(resp: ElasticsearchResponse, start: number)
   return [];
 }
 
-export function getLastRecovery(req: LegacyRequest, esIndexPattern: string) {
+function handleMbLastRecoveries(resp: ElasticsearchResponse, start: number) {
+  const data = (resp.hits?.hits ?? [])
+    .map((hit) => hit._source.elasticsearch?.index?.recovery)
+    .filter(filterOldShardActivity(moment.utc(start).valueOf()));
+  data.sort((a, b) => (a && b ? b.start_time_in_millis - a.start_time_in_millis : 0));
+  return data;
+}
+
+export async function getLastRecovery(req: LegacyRequest, esIndexPattern: string) {
   checkParam(esIndexPattern, 'esIndexPattern in elasticsearch/getLastRecovery');
 
   const start = req.payload.timeRange.min;
@@ -62,7 +73,7 @@ export function getLastRecovery(req: LegacyRequest, esIndexPattern: string) {
   const clusterUuid = req.params.clusterUuid;
 
   const metric = ElasticsearchMetric.getMetricFields();
-  const params = {
+  const legacyParams = {
     index: esIndexPattern,
     size: 1,
     ignoreUnavailable: true,
@@ -72,9 +83,24 @@ export function getLastRecovery(req: LegacyRequest, esIndexPattern: string) {
       query: createQuery({ type: 'index_recovery', start, end, clusterUuid, metric }),
     },
   };
+  const mbParams = {
+    index: esIndexPattern,
+    size: 10000,
+    ignoreUnavailable: true,
+    body: {
+      _source: ['elasticsearch.index.recovery'],
+      sort: { timestamp: { order: 'desc', unmapped_type: 'long' } },
+      query: createQuery({ type: 'index_recovery', start, end, clusterUuid, metric }),
+    },
+  };
 
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
-  return callWithRequest(req, 'search', params).then((resp) => {
-    return handleLastRecoveries(resp, start);
-  });
+  const [legacyResp, mbResp] = await Promise.all([
+    callWithRequest(req, 'search', legacyParams),
+    callWithRequest(req, 'search', mbParams),
+  ]);
+  const legacyResult = handleLegacyLastRecoveries(legacyResp, start);
+  const mbResult = handleMbLastRecoveries(mbResp, start);
+
+  return [...legacyResult, ...mbResult];
 }
