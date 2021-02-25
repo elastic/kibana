@@ -6,12 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { IUiSettingsClient } from '../../../../core/public';
+import { IUiSettingsClient } from 'kibana/public';
+import { SORT_DEFAULT_ORDER_SETTING } from '../../common';
 
 export const configMock = ({
   get: (key: string) => {
     if (key === 'defaultIndex') {
       return 'the-index-pattern-id';
+    } else if (key === SORT_DEFAULT_ORDER_SETTING) {
+      return 'desc';
     }
 
     return '';

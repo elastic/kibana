@@ -9,8 +9,11 @@ import { usePageUrlState } from '../../../../util/url_state';
 import { ML_PAGES } from '../../../../../../common/constants/ml_url_generator';
 import { SEARCH_QUERY_LANGUAGE } from '../../../../../../common/constants/search';
 import { ExplorationPageUrlState } from '../../../../../../common/types/ml_url_generator';
+import { isPopulatedObject } from '../../../../../../common/util/object_utils';
 
-export function getDefaultExplorationPageUrlState(): ExplorationPageUrlState {
+export function getDefaultExplorationPageUrlState(
+  overrides?: Partial<ExplorationPageUrlState>
+): ExplorationPageUrlState {
   return {
     queryText: '',
     queryLanguage: SEARCH_QUERY_LANGUAGE.KUERY,
@@ -21,12 +24,13 @@ export function getDefaultExplorationPageUrlState(): ExplorationPageUrlState {
     feature_importance: true,
     results: true,
     splom: true,
+    ...(isPopulatedObject(overrides) ? overrides : {}),
   };
 }
 
-export function useExplorationUrlState() {
+export function useExplorationUrlState(overrides?: Partial<ExplorationPageUrlState>) {
   return usePageUrlState<ExplorationPageUrlState>(
     ML_PAGES.DATA_FRAME_ANALYTICS_EXPLORATION,
-    getDefaultExplorationPageUrlState()
+    getDefaultExplorationPageUrlState(overrides)
   );
 }
