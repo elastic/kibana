@@ -6,9 +6,9 @@
  */
 
 import nodeCrypto from '@elastic/node-crypto';
-import type { Logger, PluginInitializerContext, CoreSetup, Plugin } from 'src/core/server';
-import type { SecurityPluginSetup } from '../../security/server';
-import type { ConfigType } from './config';
+import { Logger, PluginInitializerContext, CoreSetup, Plugin } from 'src/core/server';
+import { SecurityPluginSetup } from '../../security/server';
+import { ConfigType } from './config';
 import {
   EncryptedSavedObjectsService,
   EncryptedSavedObjectTypeRegistration,
