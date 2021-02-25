@@ -313,7 +313,7 @@ describe('<EditPolicy /> node allocation', () => {
   });
 
   describe('on cloud', () => {
-    describe('with deprecated data role config', () => {
+    describe('using legacy data role config', () => {
       test('should hide data tier option on cloud', async () => {
         httpRequestsMockHelpers.setListNodes({
           nodesByAttributes: { test: ['123'] },
@@ -324,7 +324,7 @@ describe('<EditPolicy /> node allocation', () => {
         await act(async () => {
           testBed = await setup({ appServicesContext: { cloud: { isCloudEnabled: true } } });
         });
-        const { actions, component, exists } = testBed;
+        const { actions, component, exists, find } = testBed;
 
         component.update();
         await actions.warm.enable(true);
@@ -335,30 +335,13 @@ describe('<EditPolicy /> node allocation', () => {
         expect(exists('defaultDataAllocationOption')).toBeFalsy();
         expect(exists('customDataAllocationOption')).toBeTruthy();
         expect(exists('noneDataAllocationOption')).toBeTruthy();
-      });
-
-      test('should ask users to migrate to node roles when on cloud using legacy data role', async () => {
-        httpRequestsMockHelpers.setListNodes({
-          nodesByAttributes: { test: ['123'] },
-          // On cloud, if using legacy config there will not be any "data_*" roles set.
-          nodesByRoles: { data: ['test'] },
-          isUsingDeprecatedDataRoleConfig: true,
-        });
-        await act(async () => {
-          testBed = await setup({ appServicesContext: { cloud: { isCloudEnabled: true } } });
-        });
-        const { actions, component, exists } = testBed;
-
-        component.update();
-        await actions.warm.enable(true);
-        expect(component.find('.euiLoadingSpinner').exists()).toBeFalsy();
-
-        expect(exists('cloudDataTierCallout')).toBeTruthy();
+        // Show the call-to-action for users to migrate their cluster to use node roles
+        expect(find('cloudDataTierCallout').exists()).toBeTruthy();
       });
     });
 
-    describe('with node role config', () => {
-      test('shows data role, custom and "off" options on cloud with data roles', async () => {
+    describe('using node role config', () => {
+      test('shows recommended, custom and "off" options on cloud with data roles', async () => {
         httpRequestsMockHelpers.setListNodes({
           nodesByAttributes: { test: ['123'] },
           nodesByRoles: { data: ['test'], data_hot: ['test'], data_warm: ['test'] },
@@ -367,7 +350,7 @@ describe('<EditPolicy /> node allocation', () => {
         await act(async () => {
           testBed = await setup({ appServicesContext: { cloud: { isCloudEnabled: true } } });
         });
-        const { actions, component, exists } = testBed;
+        const { actions, component, exists, find } = testBed;
 
         component.update();
         await actions.warm.enable(true);
@@ -377,8 +360,10 @@ describe('<EditPolicy /> node allocation', () => {
         expect(exists('defaultDataAllocationOption')).toBeTruthy();
         expect(exists('customDataAllocationOption')).toBeTruthy();
         expect(exists('noneDataAllocationOption')).toBeTruthy();
-        // We should not be showing the call-to-action for users to activate data tiers in cloud
+        // We should not be showing the call-to-action for users to activate data tier in cloud
         expect(exists('cloudDataTierCallout')).toBeFalsy();
+        // Do not show the call-to-action for users to migrate their cluster to use node roles
+        expect(find('cloudDataTierCallout').exists()).toBeFalsy();
       });
 
       test('shows cloud notice when cold tier nodes do not exist', async () => {
