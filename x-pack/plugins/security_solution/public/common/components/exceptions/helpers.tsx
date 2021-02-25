@@ -44,6 +44,7 @@ import { validate } from '../../../../common/validate';
 import { Ecs } from '../../../../common/ecs';
 import { CodeSignature } from '../../../../common/ecs/file';
 import { WithCopyToClipboard } from '../../lib/clipboard/with_copy_to_clipboard';
+import { addIdToItem, removeIdFromItem } from '../../../../common';
 
 /**
  * Returns the operator type, may not need this if using io-ts types
@@ -150,12 +151,12 @@ export const getNewExceptionItem = ({
     comments: [],
     description: `${ruleName} - exception list item`,
     entries: [
-      {
+      addIdToItem({
         field: '',
         operator: 'included',
         type: 'match',
         value: '',
-      },
+      }),
     ],
     item_id: undefined,
     list_id: listId,
@@ -175,26 +176,32 @@ export const filterExceptionItems = (
   return exceptions.reduce<Array<ExceptionListItemSchema | CreateExceptionListItemSchema>>(
     (acc, exception) => {
       const entries = exception.entries.reduce<BuilderEntry[]>((nestedAcc, singleEntry) => {
-        if (singleEntry.type === 'nested') {
-          const nestedEntriesArray = singleEntry.entries.filter((singleNestedEntry) => {
-            const [validatedNestedEntry] = validate(singleNestedEntry, nestedEntryItem);
+        const strippedSingleEntry = removeIdFromItem(singleEntry);
+
+        if (entriesNested.is(strippedSingleEntry)) {
+          const nestedEntriesArray = strippedSingleEntry.entries.filter((singleNestedEntry) => {
+            const noIdSingleNestedEntry = removeIdFromItem(singleNestedEntry);
+            const [validatedNestedEntry] = validate(noIdSingleNestedEntry, nestedEntryItem);
             return validatedNestedEntry != null;
           });
+          const noIdNestedEntries = nestedEntriesArray.map((singleNestedEntry) =>
+            removeIdFromItem(singleNestedEntry)
+          );
 
           const [validatedNestedEntry] = validate(
-            { ...singleEntry, entries: nestedEntriesArray },
+            { ...strippedSingleEntry, entries: noIdNestedEntries },
             entriesNested
           );
 
           if (validatedNestedEntry != null) {
-            return [...nestedAcc, validatedNestedEntry];
+            return [...nestedAcc, { ...singleEntry, entries: nestedEntriesArray }];
           }
           return nestedAcc;
         } else {
-          const [validatedEntry] = validate(singleEntry, entry);
+          const [validatedEntry] = validate(strippedSingleEntry, entry);
 
           if (validatedEntry != null) {
-            return [...nestedAcc, validatedEntry];
+            return [...nestedAcc, singleEntry];
           }
           return nestedAcc;
         }
