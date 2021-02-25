@@ -177,6 +177,7 @@ function help() {
         --skip-kibana-plugins   Filter all plugins in ./plugins and ../kibana-extra when running command.
         --no-cache              Disable the kbn packages bootstrap cache
         --no-validate           Disable the bootstrap yarn.lock validation
+        --offline               Run in offline mode
         --verbose               Set log level to verbose
         --debug                 Set log level to debug
         --quiet                 Set log level to error
@@ -207,9 +208,10 @@ async function run(argv) {
     },
     default: {
       cache: true,
+      offline: false,
       validate: true
     },
-    boolean: ['cache', 'validate']
+    boolean: ['cache', 'offline', 'validate']
   });
   const args = options._;
 
@@ -8901,8 +8903,8 @@ const BootstrapCommand = {
 
     const nonBazelProjectsOnly = await Object(_utils_projects__WEBPACK_IMPORTED_MODULE_4__["getNonBazelProjectsOnly"])(projects);
     const batchedNonBazelProjects = Object(_utils_projects__WEBPACK_IMPORTED_MODULE_4__["topologicallyBatchProjects"])(nonBazelProjectsOnly, projectGraph);
-    const kibanaProjectPath = (_projects$get = projects.get('kibana')) === null || _projects$get === void 0 ? void 0 : _projects$get.path; // TODO: make an --offline flag
-    // Ensure we have a `node_modules/.yarn-integrity` file as we depend on it
+    const kibanaProjectPath = (_projects$get = projects.get('kibana')) === null || _projects$get === void 0 ? void 0 : _projects$get.path;
+    const runOffline = (options === null || options === void 0 ? void 0 : options.offline) === true; // Ensure we have a `node_modules/.yarn-integrity` file as we depend on it
     // for bazel to know it has to re-install the node_modules after a reset or a clean
 
     await Object(_utils_bazel__WEBPACK_IMPORTED_MODULE_9__["ensureYarnIntegrityFileExists"])(`${kibanaProjectPath}${path__WEBPACK_IMPORTED_MODULE_0__["sep"]}node_modules`); // Install bazel machinery tools if needed
@@ -8918,9 +8920,10 @@ const BootstrapCommand = {
     //
     // Until we have our first package build within Bazel we will always need to directly call the yarn rule
     // otherwise yarn install won't trigger as we don't have any npm dependency within Bazel
+    // TODO: Remove the first run statement as soon as we add the first Bazel package build
 
-    await Object(_utils_bazel__WEBPACK_IMPORTED_MODULE_9__["runBazel"])(['run', '@nodejs//:yarn']);
-    await Object(_utils_bazel__WEBPACK_IMPORTED_MODULE_9__["runBazel"])(['build', '//packages:build']); // Install monorepo npm dependencies outside of the Bazel managed ones
+    await Object(_utils_bazel__WEBPACK_IMPORTED_MODULE_9__["runBazel"])(['run', '@nodejs//:yarn'], runOffline);
+    await Object(_utils_bazel__WEBPACK_IMPORTED_MODULE_9__["runBazel"])(['build', '//packages:build'], runOffline); // Install monorepo npm dependencies outside of the Bazel managed ones
 
     for (const batch of batchedNonBazelProjects) {
       for (const project of batch) {
@@ -48257,11 +48260,15 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
 
 
-async function runBazel(bazelArgs, runOpts = {}) {
+async function runBazel(bazelArgs, offline = false, runOpts = {}) {
   // Force logs to pipe in order to control the output of them
   const bazelOpts = _objectSpread(_objectSpread({}, runOpts), {}, {
     stdio: 'pipe'
   });
+
+  if (offline) {
+    bazelArgs.push('--config=offline');
+  }
 
   const bazelProc = Object(_child_process__WEBPACK_IMPORTED_MODULE_4__["spawn"])('bazel', bazelArgs, bazelOpts);
   const bazelLogs$ = new rxjs__WEBPACK_IMPORTED_MODULE_1__["Subject"](); // Bazel outputs machine readable output into stdout and human readable output goes to stderr.

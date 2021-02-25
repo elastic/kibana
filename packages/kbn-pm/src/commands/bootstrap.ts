@@ -27,8 +27,7 @@ export const BootstrapCommand: ICommand = {
     const nonBazelProjectsOnly = await getNonBazelProjectsOnly(projects);
     const batchedNonBazelProjects = topologicallyBatchProjects(nonBazelProjectsOnly, projectGraph);
     const kibanaProjectPath = projects.get('kibana')?.path;
-
-    // TODO: make an --offline flag
+    const runOffline = options?.offline === true;
 
     // Ensure we have a `node_modules/.yarn-integrity` file as we depend on it
     // for bazel to know it has to re-install the node_modules after a reset or a clean
@@ -49,8 +48,8 @@ export const BootstrapCommand: ICommand = {
     // Until we have our first package build within Bazel we will always need to directly call the yarn rule
     // otherwise yarn install won't trigger as we don't have any npm dependency within Bazel
     // TODO: Remove the first run statement as soon as we add the first Bazel package build
-    await runBazel(['run', '@nodejs//:yarn']);
-    await runBazel(['build', '//packages:build']);
+    await runBazel(['run', '@nodejs//:yarn'], runOffline);
+    await runBazel(['build', '//packages:build'], runOffline);
 
     // Install monorepo npm dependencies outside of the Bazel managed ones
     for (const batch of batchedNonBazelProjects) {

@@ -37,6 +37,7 @@ function help() {
         --skip-kibana-plugins   Filter all plugins in ./plugins and ../kibana-extra when running command.
         --no-cache              Disable the kbn packages bootstrap cache
         --no-validate           Disable the bootstrap yarn.lock validation
+        --offline               Run in offline mode
         --verbose               Set log level to verbose
         --debug                 Set log level to debug
         --quiet                 Set log level to error
@@ -73,9 +74,10 @@ export async function run(argv: string[]) {
     },
     default: {
       cache: true,
+      offline: false,
       validate: true,
     },
-    boolean: ['cache', 'validate'],
+    boolean: ['cache', 'offline', 'validate'],
   });
 
   const args = options._;
