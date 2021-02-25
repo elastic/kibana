@@ -26,7 +26,7 @@ describe('AnalyticsTable', () => {
     },
     {
       key: 'another search',
-      tags: ['tagB'],
+      tags: ['tagB', 'tagC'],
       searches: { doc_count: 99 },
       clicks: { doc_count: 9 },
     },
@@ -48,9 +48,9 @@ describe('AnalyticsTable', () => {
     expect(tableContent).toContain('""');
 
     expect(tableContent).toContain('Analytics tags');
-    expect(tableContent).toContain('tagA');
-    expect(tableContent).toContain('tagB');
-    expect(wrapper.find(EuiBadge)).toHaveLength(4);
+    expect(tableContent).toContain('1 tag');
+    expect(tableContent).toContain('2 tags');
+    expect(wrapper.find(EuiBadge)).toHaveLength(3);
 
     expect(tableContent).toContain('Queries');
     expect(tableContent).toContain('100');

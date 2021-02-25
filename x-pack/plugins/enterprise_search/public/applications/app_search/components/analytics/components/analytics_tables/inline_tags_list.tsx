@@ -21,8 +21,9 @@ export const InlineTagsList: React.FC<Props> = ({ displayCountOnly, tags }) => {
 
   const displayedTags = tags.slice(0, 2);
   const tooltipTags = tags.slice(displayCountOnly ? 0 : 2);
+  const tagsText = tags.length === 1 ? 'tag' : 'tags';
   const moreTagsMessage = displayCountOnly
-    ? `${tooltipTags.length} tags`
+    ? `${tooltipTags.length} ${tagsText}`
     : `and ${tooltipTags.length} more`;
 
   const TagToolTip = () => (

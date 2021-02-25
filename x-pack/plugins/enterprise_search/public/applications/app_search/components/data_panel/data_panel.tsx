@@ -39,20 +39,24 @@ export const DataPanel: React.FC<Props> = ({
         <EuiFlexGroup>
           {iconType ? (
             <EuiFlexItem>
-              <EuiIcon type={iconType} />
+              <EuiIcon data-test-subj="dataPanelIcon" type={iconType} />
             </EuiFlexItem>
           ) : null}
           <EuiFlexItem>
-            <EuiTitle size="xs">
+            <EuiTitle data-test-subj="dataPanelTitle" size="xs">
               <h4>{title}</h4>
             </EuiTitle>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>{action}</EuiFlexItem>
+      {action ? (
+        <EuiFlexItem data-test-subj="dataPanelAction" grow={false}>
+          {action}
+        </EuiFlexItem>
+      ) : null}
     </EuiFlexGroup>
     {subtitle ? (
-      <EuiText size="s" color="subdued">
+      <EuiText data-test-subj="dataPanelSubtitle" size="s" color="subdued">
         <p>{subtitle}</p>
       </EuiText>
     ) : null}

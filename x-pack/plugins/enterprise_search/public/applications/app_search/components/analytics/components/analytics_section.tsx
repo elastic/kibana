@@ -15,12 +15,13 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  IconType,
 } from '@elastic/eui';
 
 interface Props {
   title: string;
   subtitle: string;
-  iconType?: React.ComponentProps<typeof EuiIcon>;
+  iconType?: IconType;
 }
 export const AnalyticsSection: React.FC<Props> = ({ title, subtitle, iconType, children }) => (
   <section>
