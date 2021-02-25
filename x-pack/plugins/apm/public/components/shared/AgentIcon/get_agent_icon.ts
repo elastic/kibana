@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { IconType } from '@elastic/eui';
 import {
   OPEN_TELEMETRY_AGENT_NAMES,
   RUM_AGENT_NAMES,
@@ -23,10 +22,10 @@ import phpIcon from './icons/php.svg';
 import pythonIcon from './icons/python.svg';
 import rubyIcon from './icons/ruby.svg';
 import rumJsIcon from './icons/rumjs.svg';
-// import darkPhpIcon from './icons/php_dark.svg';
-// import darkRumJsIcon from './icons/rumjs_dark.svg';
+import darkPhpIcon from './icons/php_dark.svg';
+import darkRumJsIcon from './icons/rumjs_dark.svg';
 
-const agentIcons: { [key: string]: IconType } = {
+const agentIcons: { [key: string]: string } = {
   dotnet: dotNetIcon,
   erlang: erlangIcon,
   go: goIcon,
@@ -40,10 +39,10 @@ const agentIcons: { [key: string]: IconType } = {
   rum: rumJsIcon,
 };
 
-// const darkAgentIcons: { [key: string]: string } = {
-//   php: darkPhpIcon,
-//   rum: darkRumJsIcon,
-// };
+const darkAgentIcons: { [key: string]: string } = {
+  php: darkPhpIcon,
+  rum: darkRumJsIcon,
+};
 
 // This only needs to be exported for testing purposes, since we stub the SVG
 // import values in test.
@@ -72,7 +71,13 @@ export function getAgentIconKey(agentName: string) {
   }
 }
 
-export function getAgentIcon(agentName?: string) {
+export function getAgentIcon(
+  agentName: string | undefined,
+  isDarkMode: boolean
+) {
   const key = agentName && getAgentIconKey(agentName);
-  return (key && agentIcons[key]) ?? defaultIcon;
+  if (!key) {
+    return defaultIcon;
+  }
+  return (isDarkMode ? darkAgentIcons[key] : agentIcons[key]) ?? defaultIcon;
 }
