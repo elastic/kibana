@@ -10,7 +10,6 @@ import _ from 'lodash';
 import React, { useEffect, useRef } from 'react';
 import { CoreStart } from 'src/core/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
-import { UiCounterMetricType } from '@kbn/analytics';
 import { KibanaContextProvider } from '../../../../kibana_react/public';
 import { QueryStart, SavedQuery } from '../../query';
 import { SearchBar, SearchBarOwnProps } from './';
@@ -20,12 +19,13 @@ import { useSavedQuery } from './lib/use_saved_query';
 import { DataPublicPluginStart } from '../../types';
 import { Filter, Query, TimeRange } from '../../../common';
 import { useQueryStringManager } from './lib/use_query_string_manager';
+import { UsageCollectionSetup } from '../../../../usage_collection/public';
 
 interface StatefulSearchBarDeps {
   core: CoreStart;
   data: Omit<DataPublicPluginStart, 'ui'>;
   storage: IStorageWrapper;
-  trackUiMetric?: (metricType: UiCounterMetricType, eventName: string | string[]) => void;
+  usageCollection?: UsageCollectionSetup;
 }
 
 export type StatefulSearchBarProps = SearchBarOwnProps & {
@@ -110,7 +110,7 @@ const overrideDefaultBehaviors = (props: StatefulSearchBarProps) => {
   return props.useDefaultBehaviors ? {} : props;
 };
 
-export function createSearchBar({ core, storage, data, trackUiMetric }: StatefulSearchBarDeps) {
+export function createSearchBar({ core, storage, data, usageCollection }: StatefulSearchBarDeps) {
   // App name should come from the core application service.
   // Until it's available, we'll ask the user to provide it for the pre-wired component.
   return (props: StatefulSearchBarProps) => {
@@ -161,6 +161,7 @@ export function createSearchBar({ core, storage, data, trackUiMetric }: Stateful
           appName: props.appName,
           data,
           storage,
+          usageCollection,
           ...core,
         }}
       >
@@ -188,7 +189,12 @@ export function createSearchBar({ core, storage, data, trackUiMetric }: Stateful
           onClearSavedQuery={defaultOnClearSavedQuery(props, clearSavedQuery)}
           onSavedQueryUpdated={defaultOnSavedQueryUpdated(props, setSavedQuery)}
           onSaved={defaultOnSavedQueryUpdated(props, setSavedQuery)}
-          trackUiMetric={trackUiMetric}
+          iconType={props.iconType}
+          nonKqlMode={props.nonKqlMode}
+          nonKqlModeHelpText={props.nonKqlModeHelpText}
+          customSubmitButton={props.customSubmitButton}
+          isClearable={props.isClearable}
+          placeholder={props.placeholder}
           {...overrideDefaultBehaviors(props)}
         />
       </KibanaContextProvider>

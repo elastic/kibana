@@ -80,8 +80,13 @@ export const treeRequestParametersToAbort = composeSelectors(
  */
 export const treeParameterIndices = composeSelectors(
   dataStateSelector,
-  dataSelectors.treeParamterIndices
+  dataSelectors.treeParameterIndices
 );
+
+/**
+ * An array of indices to use for resolver panel requests.
+ */
+export const eventIndices = composeSelectors(dataStateSelector, dataSelectors.eventIndices);
 
 export const resolverComponentInstanceID = composeSelectors(
   dataStateSelector,

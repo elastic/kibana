@@ -6,7 +6,11 @@
  */
 
 import { EventOutcome } from '../../../../common/event_outcome';
-import { rangeFilter } from '../../../../common/utils/range_filter';
+import {
+  environmentQuery,
+  rangeQuery,
+  kqlQuery,
+} from '../../../../server/utils/queries';
 import { SERVICE_NODE_NAME_MISSING } from '../../../../common/service_nodes';
 import {
   EVENT_OUTCOME,
@@ -21,8 +25,16 @@ import {
   getTransactionDurationFieldForAggregatedTransactions,
 } from '../../helpers/aggregated_transactions';
 import { calculateThroughput } from '../../helpers/calculate_throughput';
+import { withApmSpan } from '../../../utils/with_apm_span';
+import {
+  getLatencyAggregation,
+  getLatencyValue,
+} from '../../helpers/latency_aggregation_type';
 
 export async function getServiceInstanceTransactionStats({
+  environment,
+  kuery,
+  latencyAggregationType,
   setup,
   transactionType,
   serviceName,
@@ -30,120 +42,125 @@ export async function getServiceInstanceTransactionStats({
   searchAggregatedTransactions,
   numBuckets,
 }: ServiceInstanceParams) {
-  const { apmEventClient, start, end, esFilter } = setup;
+  return withApmSpan('get_service_instance_transaction_stats', async () => {
+    const { apmEventClient, start, end } = setup;
 
-  const { intervalString, bucketSize } = getBucketSize({
-    start,
-    end,
-    numBuckets,
-  });
+    const { intervalString, bucketSize } = getBucketSize({
+      start,
+      end,
+      numBuckets,
+    });
 
-  const field = getTransactionDurationFieldForAggregatedTransactions(
-    searchAggregatedTransactions
-  );
+    const field = getTransactionDurationFieldForAggregatedTransactions(
+      searchAggregatedTransactions
+    );
 
-  const subAggs = {
-    avg_transaction_duration: {
-      avg: {
-        field,
-      },
-    },
-    failures: {
-      filter: {
-        term: {
-          [EVENT_OUTCOME]: EventOutcome.failure,
-        },
-      },
-    },
-  };
-
-  const response = await apmEventClient.search({
-    apm: {
-      events: [
-        getProcessorEventForAggregatedTransactions(
-          searchAggregatedTransactions
-        ),
-      ],
-    },
-    body: {
-      size: 0,
-      query: {
-        bool: {
-          filter: [
-            { range: rangeFilter(start, end) },
-            { term: { [SERVICE_NAME]: serviceName } },
-            { term: { [TRANSACTION_TYPE]: transactionType } },
-            ...esFilter,
-          ],
-        },
-      },
-      aggs: {
-        [SERVICE_NODE_NAME]: {
-          terms: {
-            field: SERVICE_NODE_NAME,
-            missing: SERVICE_NODE_NAME_MISSING,
-            size,
+    const subAggs = {
+      ...getLatencyAggregation(latencyAggregationType, field),
+      failures: {
+        filter: {
+          term: {
+            [EVENT_OUTCOME]: EventOutcome.failure,
           },
-          aggs: {
-            ...subAggs,
-            timeseries: {
-              date_histogram: {
-                field: '@timestamp',
-                fixed_interval: intervalString,
-                min_doc_count: 0,
-                extended_bounds: {
-                  min: start,
-                  max: end,
+        },
+      },
+    };
+
+    const response = await apmEventClient.search({
+      apm: {
+        events: [
+          getProcessorEventForAggregatedTransactions(
+            searchAggregatedTransactions
+          ),
+        ],
+      },
+      body: {
+        size: 0,
+        query: {
+          bool: {
+            filter: [
+              { term: { [SERVICE_NAME]: serviceName } },
+              { term: { [TRANSACTION_TYPE]: transactionType } },
+              ...rangeQuery(start, end),
+              ...environmentQuery(environment),
+              ...kqlQuery(kuery),
+            ],
+          },
+        },
+        aggs: {
+          [SERVICE_NODE_NAME]: {
+            terms: {
+              field: SERVICE_NODE_NAME,
+              missing: SERVICE_NODE_NAME_MISSING,
+              size,
+            },
+            aggs: {
+              ...subAggs,
+              timeseries: {
+                date_histogram: {
+                  field: '@timestamp',
+                  fixed_interval: intervalString,
+                  min_doc_count: 0,
+                  extended_bounds: {
+                    min: start,
+                    max: end,
+                  },
                 },
-              },
-              aggs: {
-                ...subAggs,
+                aggs: {
+                  ...subAggs,
+                },
               },
             },
           },
         },
       },
-    },
+    });
+
+    const bucketSizeInMinutes = bucketSize / 60;
+
+    return (
+      response.aggregations?.[SERVICE_NODE_NAME].buckets.map(
+        (serviceNodeBucket) => {
+          const {
+            doc_count: count,
+            latency,
+            key,
+            failures,
+            timeseries,
+          } = serviceNodeBucket;
+
+          return {
+            serviceNodeName: String(key),
+            errorRate: {
+              value: failures.doc_count / count,
+              timeseries: timeseries.buckets.map((dateBucket) => ({
+                x: dateBucket.key,
+                y: dateBucket.failures.doc_count / dateBucket.doc_count,
+              })),
+            },
+            throughput: {
+              value: calculateThroughput({ start, end, value: count }),
+              timeseries: timeseries.buckets.map((dateBucket) => ({
+                x: dateBucket.key,
+                y: dateBucket.doc_count / bucketSizeInMinutes,
+              })),
+            },
+            latency: {
+              value: getLatencyValue({
+                aggregation: latency,
+                latencyAggregationType,
+              }),
+              timeseries: timeseries.buckets.map((dateBucket) => ({
+                x: dateBucket.key,
+                y: getLatencyValue({
+                  aggregation: dateBucket.latency,
+                  latencyAggregationType,
+                }),
+              })),
+            },
+          };
+        }
+      ) ?? []
+    );
   });
-
-  const bucketSizeInMinutes = bucketSize / 60;
-
-  return (
-    response.aggregations?.[SERVICE_NODE_NAME].buckets.map(
-      (serviceNodeBucket) => {
-        const {
-          doc_count: count,
-          avg_transaction_duration: avgTransactionDuration,
-          key,
-          failures,
-          timeseries,
-        } = serviceNodeBucket;
-
-        return {
-          serviceNodeName: String(key),
-          errorRate: {
-            value: failures.doc_count / count,
-            timeseries: timeseries.buckets.map((dateBucket) => ({
-              x: dateBucket.key,
-              y: dateBucket.failures.doc_count / dateBucket.doc_count,
-            })),
-          },
-          throughput: {
-            value: calculateThroughput({ start, end, value: count }),
-            timeseries: timeseries.buckets.map((dateBucket) => ({
-              x: dateBucket.key,
-              y: dateBucket.doc_count / bucketSizeInMinutes,
-            })),
-          },
-          latency: {
-            value: avgTransactionDuration.value,
-            timeseries: timeseries.buckets.map((dateBucket) => ({
-              x: dateBucket.key,
-              y: dateBucket.avg_transaction_duration.value,
-            })),
-          },
-        };
-      }
-    ) ?? []
-  );
 }

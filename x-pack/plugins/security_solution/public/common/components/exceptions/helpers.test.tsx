@@ -25,11 +25,12 @@ import {
   entryHasNonEcsType,
   prepareExceptionItemsForBulkClose,
   lowercaseHashValues,
-  getPrepopulatedItem,
-  getCodeSignatureValue,
+  getPrepopulatedEndpointException,
   defaultEndpointExceptionItems,
+  getFileCodeSignature,
+  getProcessCodeSignature,
 } from './helpers';
-import { EmptyEntry } from './types';
+import { AlertData, EmptyEntry } from './types';
 import {
   isOperator,
   isNotOperator,
@@ -47,7 +48,11 @@ import { getEntryMatchAnyMock } from '../../../../../lists/common/schemas/types/
 import { getEntryExistsMock } from '../../../../../lists/common/schemas/types/entry_exists.mock';
 import { getEntryListMock } from '../../../../../lists/common/schemas/types/entry_list.mock';
 import { getCommentsArrayMock } from '../../../../../lists/common/schemas/types/comment.mock';
-import { ENTRIES, OLD_DATE_RELATIVE_TO_DATE_NOW } from '../../../../../lists/common/constants.mock';
+import {
+  ENTRIES,
+  ENTRIES_WITH_IDS,
+  OLD_DATE_RELATIVE_TO_DATE_NOW,
+} from '../../../../../lists/common/constants.mock';
 import {
   CreateExceptionListItemSchema,
   ExceptionListItemSchema,
@@ -55,6 +60,10 @@ import {
   OsTypeArray,
 } from '../../../../../lists/common/schemas';
 import { IIndexPattern } from 'src/plugins/data/common';
+
+jest.mock('uuid', () => ({
+  v4: jest.fn().mockReturnValue('123'),
+}));
 
 describe('Exception helpers', () => {
   beforeEach(() => {
@@ -228,9 +237,22 @@ describe('Exception helpers', () => {
   });
 
   describe('#filterExceptionItems', () => {
+    // Please see `x-pack/plugins/lists/public/exceptions/transforms.ts` doc notes
+    // for context around the temporary `id`
+    test('it correctly validates entries that include a temporary `id`', () => {
+      const output: Array<
+        ExceptionListItemSchema | CreateExceptionListItemSchema
+      > = filterExceptionItems([
+        { ...getExceptionListItemSchemaMock(), entries: ENTRIES_WITH_IDS },
+      ]);
+
+      expect(output).toEqual([{ ...getExceptionListItemSchemaMock(), entries: ENTRIES_WITH_IDS }]);
+    });
+
     test('it removes entry items with "value" of "undefined"', () => {
       const { entries, ...rest } = getExceptionListItemSchemaMock();
       const mockEmptyException: EmptyEntry = {
+        id: '123',
         field: 'host.name',
         type: OperatorTypeEnum.MATCH,
         operator: OperatorEnum.INCLUDED,
@@ -249,6 +271,7 @@ describe('Exception helpers', () => {
     test('it removes "match" entry items with "value" of empty string', () => {
       const { entries, ...rest } = { ...getExceptionListItemSchemaMock() };
       const mockEmptyException: EmptyEntry = {
+        id: '123',
         field: 'host.name',
         type: OperatorTypeEnum.MATCH,
         operator: OperatorEnum.INCLUDED,
@@ -269,6 +292,7 @@ describe('Exception helpers', () => {
     test('it removes "match" entry items with "field" of empty string', () => {
       const { entries, ...rest } = { ...getExceptionListItemSchemaMock() };
       const mockEmptyException: EmptyEntry = {
+        id: '123',
         field: '',
         type: OperatorTypeEnum.MATCH,
         operator: OperatorEnum.INCLUDED,
@@ -289,6 +313,7 @@ describe('Exception helpers', () => {
     test('it removes "match_any" entry items with "field" of empty string', () => {
       const { entries, ...rest } = { ...getExceptionListItemSchemaMock() };
       const mockEmptyException: EmptyEntry = {
+        id: '123',
         field: '',
         type: OperatorTypeEnum.MATCH_ANY,
         operator: OperatorEnum.INCLUDED,
@@ -312,6 +337,52 @@ describe('Exception helpers', () => {
         field: '',
         type: OperatorTypeEnum.NESTED,
         entries: [getEntryMatchMock()],
+      };
+      const output: Array<
+        ExceptionListItemSchema | CreateExceptionListItemSchema
+      > = filterExceptionItems([
+        {
+          ...rest,
+          entries: [...entries, mockEmptyException],
+        },
+      ]);
+
+      expect(output).toEqual([{ ...getExceptionListItemSchemaMock() }]);
+    });
+
+    test('it removes the "nested" entry entries with "value" of empty string', () => {
+      const { entries, ...rest } = { ...getExceptionListItemSchemaMock() };
+      const mockEmptyException: EntryNested = {
+        field: 'host.name',
+        type: OperatorTypeEnum.NESTED,
+        entries: [getEntryMatchMock(), { ...getEntryMatchMock(), value: '' }],
+      };
+      const output: Array<
+        ExceptionListItemSchema | CreateExceptionListItemSchema
+      > = filterExceptionItems([
+        {
+          ...rest,
+          entries: [...entries, mockEmptyException],
+        },
+      ]);
+
+      expect(output).toEqual([
+        {
+          ...getExceptionListItemSchemaMock(),
+          entries: [
+            ...getExceptionListItemSchemaMock().entries,
+            { ...mockEmptyException, entries: [getEntryMatchMock()] },
+          ],
+        },
+      ]);
+    });
+
+    test('it removes the "nested" entry item if all its entries are invalid', () => {
+      const { entries, ...rest } = { ...getExceptionListItemSchemaMock() };
+      const mockEmptyException: EntryNested = {
+        field: 'host.name',
+        type: OperatorTypeEnum.NESTED,
+        entries: [{ ...getEntryMatchMock(), value: '' }],
       };
       const output: Array<
         ExceptionListItemSchema | CreateExceptionListItemSchema
@@ -635,14 +706,18 @@ describe('Exception helpers', () => {
   });
 
   describe('getPrepopulatedItem', () => {
-    test('it returns prepopulated items', () => {
-      const prepopulatedItem = getPrepopulatedItem({
+    const alertDataMock: AlertData = {
+      '@timestamp': '1234567890',
+      _id: 'test-id',
+      file: { path: 'some-file-path', hash: { sha256: 'some-hash' } },
+    };
+    test('it returns prepopulated fields with empty values', () => {
+      const prepopulatedItem = getPrepopulatedEndpointException({
         listId: 'some_id',
         ruleName: 'my rule',
         codeSignature: { subjectName: '', trusted: '' },
-        filePath: '',
-        sha256Hash: '',
         eventCode: '',
+        alertEcsData: { ...alertDataMock, file: { path: '', hash: { sha256: '' } } },
       });
 
       expect(prepopulatedItem.entries).toEqual([
@@ -660,14 +735,13 @@ describe('Exception helpers', () => {
       ]);
     });
 
-    test('it returns prepopulated items with values', () => {
-      const prepopulatedItem = getPrepopulatedItem({
+    test('it returns prepopulated items with actual values', () => {
+      const prepopulatedItem = getPrepopulatedEndpointException({
         listId: 'some_id',
         ruleName: 'my rule',
         codeSignature: { subjectName: 'someSubjectName', trusted: 'false' },
-        filePath: 'some-file-path',
-        sha256Hash: 'some-hash',
         eventCode: 'some-event-code',
+        alertEcsData: alertDataMock,
       });
 
       expect(prepopulatedItem.entries).toEqual([
@@ -696,15 +770,15 @@ describe('Exception helpers', () => {
     });
   });
 
-  describe('getCodeSignatureValue', () => {
+  describe('getFileCodeSignature', () => {
     test('it works when file.Ext.code_signature is an object', () => {
-      const codeSignatures = getCodeSignatureValue({
+      const codeSignatures = getFileCodeSignature({
         _id: '123',
         file: {
           Ext: {
             code_signature: {
-              subject_name: ['some_subject'],
-              trusted: ['false'],
+              subject_name: 'some_subject',
+              trusted: 'false',
             },
           },
         },
@@ -714,13 +788,13 @@ describe('Exception helpers', () => {
     });
 
     test('it works when file.Ext.code_signature is nested type', () => {
-      const codeSignatures = getCodeSignatureValue({
+      const codeSignatures = getFileCodeSignature({
         _id: '123',
         file: {
           Ext: {
             code_signature: [
-              { subject_name: ['some_subject'], trusted: ['false'] },
-              { subject_name: ['some_subject_2'], trusted: ['true'] },
+              { subject_name: 'some_subject', trusted: 'false' },
+              { subject_name: 'some_subject_2', trusted: 'true' },
             ],
           },
         },
@@ -736,11 +810,11 @@ describe('Exception helpers', () => {
     });
 
     test('it returns default when file.Ext.code_signatures values are empty', () => {
-      const codeSignatures = getCodeSignatureValue({
+      const codeSignatures = getFileCodeSignature({
         _id: '123',
         file: {
           Ext: {
-            code_signature: { subject_name: [], trusted: [] },
+            code_signature: { subject_name: '', trusted: '' },
           },
         },
       });
@@ -749,7 +823,7 @@ describe('Exception helpers', () => {
     });
 
     test('it returns default when file.Ext.code_signatures is empty array', () => {
-      const codeSignatures = getCodeSignatureValue({
+      const codeSignatures = getFileCodeSignature({
         _id: '123',
         file: {
           Ext: {
@@ -762,7 +836,81 @@ describe('Exception helpers', () => {
     });
 
     test('it returns default when file.Ext.code_signatures does not exist', () => {
-      const codeSignatures = getCodeSignatureValue({
+      const codeSignatures = getFileCodeSignature({
+        _id: '123',
+      });
+
+      expect(codeSignatures).toEqual([{ subjectName: '', trusted: '' }]);
+    });
+  });
+
+  describe('getProcessCodeSignature', () => {
+    test('it works when file.Ext.code_signature is an object', () => {
+      const codeSignatures = getProcessCodeSignature({
+        _id: '123',
+        process: {
+          Ext: {
+            code_signature: {
+              subject_name: 'some_subject',
+              trusted: 'false',
+            },
+          },
+        },
+      });
+
+      expect(codeSignatures).toEqual([{ subjectName: 'some_subject', trusted: 'false' }]);
+    });
+
+    test('it works when file.Ext.code_signature is nested type', () => {
+      const codeSignatures = getProcessCodeSignature({
+        _id: '123',
+        process: {
+          Ext: {
+            code_signature: [
+              { subject_name: 'some_subject', trusted: 'false' },
+              { subject_name: 'some_subject_2', trusted: 'true' },
+            ],
+          },
+        },
+      });
+
+      expect(codeSignatures).toEqual([
+        { subjectName: 'some_subject', trusted: 'false' },
+        {
+          subjectName: 'some_subject_2',
+          trusted: 'true',
+        },
+      ]);
+    });
+
+    test('it returns default when file.Ext.code_signatures values are empty', () => {
+      const codeSignatures = getProcessCodeSignature({
+        _id: '123',
+        process: {
+          Ext: {
+            code_signature: { subject_name: '', trusted: '' },
+          },
+        },
+      });
+
+      expect(codeSignatures).toEqual([{ subjectName: '', trusted: '' }]);
+    });
+
+    test('it returns default when file.Ext.code_signatures is empty array', () => {
+      const codeSignatures = getProcessCodeSignature({
+        _id: '123',
+        process: {
+          Ext: {
+            code_signature: [],
+          },
+        },
+      });
+
+      expect(codeSignatures).toEqual([{ subjectName: '', trusted: '' }]);
+    });
+
+    test('it returns default when file.Ext.code_signatures does not exist', () => {
+      const codeSignatures = getProcessCodeSignature({
         _id: '123',
       });
 
@@ -771,23 +919,23 @@ describe('Exception helpers', () => {
   });
 
   describe('defaultEndpointExceptionItems', () => {
-    test('it should return pre-populated items', () => {
+    test('it should return pre-populated Endpoint items for non-specified event code', () => {
       const defaultItems = defaultEndpointExceptionItems('list_id', 'my_rule', {
         _id: '123',
         file: {
           Ext: {
             code_signature: [
-              { subject_name: ['some_subject'], trusted: ['false'] },
-              { subject_name: ['some_subject_2'], trusted: ['true'] },
+              { subject_name: 'some_subject', trusted: 'false' },
+              { subject_name: 'some_subject_2', trusted: 'true' },
             ],
           },
-          path: ['some file path'],
+          path: 'some file path',
           hash: {
-            sha256: ['some hash'],
+            sha256: 'some hash',
           },
         },
         event: {
-          code: ['some event code'],
+          code: 'some event code',
         },
       });
 
@@ -836,6 +984,89 @@ describe('Exception helpers', () => {
         },
         { field: 'file.hash.sha256', operator: 'included', type: 'match', value: 'some hash' },
         { field: 'event.code', operator: 'included', type: 'match', value: 'some event code' },
+      ]);
+    });
+
+    test('it should return pre-populated ransomware items for event code `ransomware`', () => {
+      const defaultItems = defaultEndpointExceptionItems('list_id', 'my_rule', {
+        _id: '123',
+        process: {
+          Ext: {
+            code_signature: [
+              { subject_name: 'some_subject', trusted: 'false' },
+              { subject_name: 'some_subject_2', trusted: 'true' },
+            ],
+          },
+          executable: 'some file path',
+          hash: {
+            sha256: 'some hash',
+          },
+        },
+        Ransomware: {
+          feature: 'some ransomware feature',
+        },
+        event: {
+          code: 'ransomware',
+        },
+      });
+
+      expect(defaultItems[0].entries).toEqual([
+        {
+          entries: [
+            {
+              field: 'subject_name',
+              operator: 'included',
+              type: 'match',
+              value: 'some_subject',
+            },
+            { field: 'trusted', operator: 'included', type: 'match', value: 'false' },
+          ],
+          field: 'process.Ext.code_signature',
+          type: 'nested',
+        },
+        {
+          field: 'process.executable',
+          operator: 'included',
+          type: 'match',
+          value: 'some file path',
+        },
+        { field: 'process.hash.sha256', operator: 'included', type: 'match', value: 'some hash' },
+        {
+          field: 'Ransomware.feature',
+          operator: 'included',
+          type: 'match',
+          value: 'some ransomware feature',
+        },
+        { field: 'event.code', operator: 'included', type: 'match', value: 'ransomware' },
+      ]);
+      expect(defaultItems[1].entries).toEqual([
+        {
+          entries: [
+            {
+              field: 'subject_name',
+              operator: 'included',
+              type: 'match',
+              value: 'some_subject_2',
+            },
+            { field: 'trusted', operator: 'included', type: 'match', value: 'true' },
+          ],
+          field: 'process.Ext.code_signature',
+          type: 'nested',
+        },
+        {
+          field: 'process.executable',
+          operator: 'included',
+          type: 'match',
+          value: 'some file path',
+        },
+        { field: 'process.hash.sha256', operator: 'included', type: 'match', value: 'some hash' },
+        {
+          field: 'Ransomware.feature',
+          operator: 'included',
+          type: 'match',
+          value: 'some ransomware feature',
+        },
+        { field: 'event.code', operator: 'included', type: 'match', value: 'ransomware' },
       ]);
     });
   });

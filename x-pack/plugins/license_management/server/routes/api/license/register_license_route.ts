@@ -23,18 +23,14 @@ export function registerLicenseRoute({ router, plugins: { licensing } }: RouteDe
     },
     async (ctx, req, res) => {
       const { callAsCurrentUser } = ctx.core.elasticsearch.legacy.client;
-      try {
-        return res.ok({
-          body: await putLicense({
-            acknowledge: Boolean(req.query.acknowledge),
-            callAsCurrentUser,
-            licensing,
-            license: req.body,
-          }),
-        });
-      } catch (e) {
-        return res.internalError({ body: e });
-      }
+      return res.ok({
+        body: await putLicense({
+          acknowledge: Boolean(req.query.acknowledge),
+          callAsCurrentUser,
+          licensing,
+          license: req.body,
+        }),
+      });
     }
   );
 }

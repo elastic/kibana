@@ -76,9 +76,9 @@ describe('#setup', () => {
       config: {
         enabled: true,
         appender: {
-          kind: 'console',
+          type: 'console',
           layout: {
-            kind: 'pattern',
+            type: 'pattern',
           },
         },
       },
@@ -102,9 +102,9 @@ describe('#setup', () => {
       config: {
         enabled: true,
         appender: {
-          kind: 'console',
+          type: 'console',
           layout: {
-            kind: 'pattern',
+            type: 'pattern',
           },
         },
       },
@@ -251,9 +251,9 @@ describe('#createLoggingConfig', () => {
         createLoggingConfig({
           enabled: true,
           appender: {
-            kind: 'console',
+            type: 'console',
             layout: {
-              kind: 'pattern',
+              type: 'pattern',
             },
           },
         })
@@ -264,10 +264,10 @@ describe('#createLoggingConfig', () => {
       Object {
         "appenders": Object {
           "auditTrailAppender": Object {
-            "kind": "console",
             "layout": Object {
-              "kind": "pattern",
+              "type": "pattern",
             },
+            "type": "console",
           },
         },
         "loggers": Array [
@@ -275,8 +275,8 @@ describe('#createLoggingConfig', () => {
             "appenders": Array [
               "auditTrailAppender",
             ],
-            "context": "audit.ecs",
             "level": "info",
+            "name": "audit.ecs",
           },
         ],
       }
@@ -293,9 +293,9 @@ describe('#createLoggingConfig', () => {
         createLoggingConfig({
           enabled: false,
           appender: {
-            kind: 'console',
+            type: 'console',
             layout: {
-              kind: 'pattern',
+              type: 'pattern',
             },
           },
         })
@@ -331,9 +331,9 @@ describe('#createLoggingConfig', () => {
         createLoggingConfig({
           enabled: true,
           appender: {
-            kind: 'console',
+            type: 'console',
             layout: {
-              kind: 'pattern',
+              type: 'pattern',
             },
           },
         })

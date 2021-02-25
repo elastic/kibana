@@ -5,14 +5,28 @@
  * 2.0.
  */
 
-import { RegisterConnectorsArgs, ExternalServiceFormatterMapper } from './types';
+import {
+  RegisterConnectorsArgs,
+  ExternalServiceFormatterMapper,
+  CommentSchemaType,
+  ContextTypeGeneratedAlertType,
+  ContextTypeAlertSchemaType,
+} from './types';
 import { getActionType as getCaseConnector } from './case';
 import { serviceNowITSMExternalServiceFormatter } from './servicenow/itsm_formatter';
 import { serviceNowSIRExternalServiceFormatter } from './servicenow/sir_formatter';
 import { jiraExternalServiceFormatter } from './jira/external_service_formatter';
 import { resilientExternalServiceFormatter } from './resilient/external_service_formatter';
+import { CommentRequest, CommentType } from '../../common/api';
 
 export * from './types';
+export { transformConnectorComment } from './case';
+
+/**
+ * Separator used for creating a json parsable array from the mustache syntax that the alerting framework
+ * sends.
+ */
+export const separator = '__SEPARATOR__';
 
 export const registerConnectors = ({
   actionsRegisterType,
@@ -41,3 +55,38 @@ export const externalServiceFormatters: ExternalServiceFormatterMapper = {
   '.jira': jiraExternalServiceFormatter,
   '.resilient': resilientExternalServiceFormatter,
 };
+
+export const isCommentGeneratedAlert = (
+  comment: CommentSchemaType | CommentRequest
+): comment is ContextTypeGeneratedAlertType => {
+  return (
+    comment.type === CommentType.generatedAlert &&
+    'alerts' in comment &&
+    comment.alerts !== undefined
+  );
+};
+
+export const isCommentAlert = (
+  comment: CommentSchemaType
+): comment is ContextTypeAlertSchemaType => {
+  return comment.type === CommentType.alert;
+};
+
+interface AlertIDIndex {
+  _id: string;
+  _index: string;
+  ruleId: string;
+  ruleName: string;
+}
+
+/**
+ * Creates the format that the connector's parser is expecting, it should result in something like this:
+ * [{"_id":"1","_index":"index1"}__SEPARATOR__{"_id":"id2","_index":"index2"}__SEPARATOR__]
+ *
+ * This should only be used for testing purposes.
+ */
+export function createAlertsString(alerts: AlertIDIndex[]) {
+  return `[${alerts.reduce((acc, alert) => {
+    return `${acc}${JSON.stringify(alert)}${separator}`;
+  }, '')}]`;
+}

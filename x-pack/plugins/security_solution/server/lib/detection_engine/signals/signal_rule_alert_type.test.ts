@@ -94,6 +94,7 @@ describe('rules_notification_alert_type', () => {
     mlSystemProvider: jest.fn(),
     modulesProvider: jest.fn(),
     resultsServiceProvider: jest.fn(),
+    alertingServiceProvider: jest.fn(),
   };
   let payload: jest.Mocked<RuleExecutorOptions>;
   let alert: ReturnType<typeof signalRulesAlertType>;
@@ -109,7 +110,7 @@ describe('rules_notification_alert_type', () => {
       find: jest.fn(),
       goingToRun: jest.fn(),
       error: jest.fn(),
-      partialFailure: jest.fn(),
+      warning: jest.fn(),
     };
     (ruleStatusServiceFactory as jest.Mock).mockReturnValue(ruleStatusService);
     (getGapBetweenRuns as jest.Mock).mockReturnValue(moment.duration(0));
@@ -206,7 +207,7 @@ describe('rules_notification_alert_type', () => {
       });
     });
 
-    it('should set a partial failure for when rules cannot read ALL provided indices', async () => {
+    it('should set a warning for when rules cannot read ALL provided indices', async () => {
       (checkPrivileges as jest.Mock).mockResolvedValueOnce({
         username: 'elastic',
         has_all_requested: false,
@@ -226,8 +227,8 @@ describe('rules_notification_alert_type', () => {
       });
       payload.params.index = ['some*', 'myfa*', 'anotherindex*'];
       await alert.executor(payload);
-      expect(ruleStatusService.partialFailure).toHaveBeenCalled();
-      expect(ruleStatusService.partialFailure.mock.calls[0][0]).toContain(
+      expect(ruleStatusService.warning).toHaveBeenCalled();
+      expect(ruleStatusService.warning.mock.calls[0][0]).toContain(
         'Missing required read privileges on the following indices: ["some*"]'
       );
     });
@@ -249,8 +250,8 @@ describe('rules_notification_alert_type', () => {
       });
       payload.params.index = ['some*', 'myfa*'];
       await alert.executor(payload);
-      expect(ruleStatusService.partialFailure).toHaveBeenCalled();
-      expect(ruleStatusService.partialFailure.mock.calls[0][0]).toContain(
+      expect(ruleStatusService.warning).toHaveBeenCalled();
+      expect(ruleStatusService.warning.mock.calls[0][0]).toContain(
         'This rule may not have the required read privileges to the following indices: ["myfa*","some*"]'
       );
     });

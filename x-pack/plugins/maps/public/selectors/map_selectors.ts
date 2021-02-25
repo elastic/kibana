@@ -22,7 +22,7 @@ import {
   getInspectorAdapters,
 } from '../reducers/non_serializable_instances';
 import { TiledVectorLayer } from '../classes/layers/tiled_vector_layer/tiled_vector_layer';
-import { copyPersistentState, TRACKED_LAYER_DESCRIPTOR } from '../reducers/util';
+import { copyPersistentState, TRACKED_LAYER_DESCRIPTOR } from '../reducers/copy_persistent_state';
 import { InnerJoin } from '../classes/joins/inner_join';
 import { getSourceByType } from '../classes/sources/source_registry';
 import { GeoJsonFileSource } from '../classes/sources/geojson_file_source';
@@ -183,6 +183,9 @@ export const getFilters = ({ map }: MapStoreState): Filter[] => map.mapState.fil
 export const getSearchSessionId = ({ map }: MapStoreState): string | undefined =>
   map.mapState.searchSessionId;
 
+export const getSearchSessionMapBuffer = ({ map }: MapStoreState): MapExtent | undefined =>
+  map.mapState.searchSessionMapBuffer;
+
 export const isUsingSearch = (state: MapStoreState): boolean => {
   const filters = getFilters(state).filter((filter) => !filter.meta.disabled);
   const queryString = _.get(getQuery(state), 'query', '');
@@ -235,6 +238,7 @@ export const getDataFilters = createSelector(
   getQuery,
   getFilters,
   getSearchSessionId,
+  getSearchSessionMapBuffer,
   (
     mapExtent,
     mapBuffer,
@@ -243,11 +247,12 @@ export const getDataFilters = createSelector(
     refreshTimerLastTriggeredAt,
     query,
     filters,
-    searchSessionId
+    searchSessionId,
+    searchSessionMapBuffer
   ) => {
     return {
       extent: mapExtent,
-      buffer: mapBuffer,
+      buffer: searchSessionId && searchSessionMapBuffer ? searchSessionMapBuffer : mapBuffer,
       zoom: mapZoom,
       timeFilters,
       refreshTimerLastTriggeredAt,
@@ -428,7 +433,12 @@ export const areLayersLoaded = createSelector(
 
     for (let i = 0; i < layerList.length; i++) {
       const layer = layerList[i];
-      if (layer.isVisible() && layer.showAtZoomLevel(zoom) && !layer.isDataLoaded()) {
+      if (
+        layer.isVisible() &&
+        layer.showAtZoomLevel(zoom) &&
+        !layer.hasErrors() &&
+        !layer.isInitialDataLoadComplete()
+      ) {
         return false;
       }
     }

@@ -1,8 +1,10 @@
+@import '../../../../../core/public/mixins';
+
 .homWrapper {
+  @include kibanaFullBodyMinHeight();
   background-color: $euiColorEmptyShade;
   display: flex;
   flex-direction: column;
-  min-height: calc(100vh - #{$euiHeaderHeightCompensation});
 }
 
 .homContent {

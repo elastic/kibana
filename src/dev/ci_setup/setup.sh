@@ -21,11 +21,24 @@ cp "src/dev/ci_setup/.bazelrc-ci" "$HOME/.bazelrc";
 echo "# Appended by src/dev/ci_setup/setup.sh" >> "$HOME/.bazelrc"
 echo "build --remote_header=x-buildbuddy-api-key=$KIBANA_BUILDBUDDY_CI_API_KEY" >> "$HOME/.bazelrc"
 
+if [[ "$BUILD_TS_REFS_CACHE_ENABLE" != "true" ]]; then
+  export BUILD_TS_REFS_CACHE_ENABLE=false
+fi
+
 ###
 ### install dependencies
 ###
 echo " -- installing node.js dependencies"
-yarn kbn bootstrap
+yarn kbn bootstrap --verbose
+
+###
+### upload ts-refs-cache artifacts as quickly as possible so they are available for download
+###
+if [[ "$BUILD_TS_REFS_CACHE_CAPTURE" == "true" ]]; then
+  cd "$KIBANA_DIR/target/ts_refs_cache"
+  gsutil cp "*.zip" 'gs://kibana-ci-ts-refs-cache/'
+  cd "$KIBANA_DIR"
+fi
 
 ###
 ### Download es snapshots
