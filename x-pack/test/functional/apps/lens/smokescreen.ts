@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { range } from 'lodash';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -437,6 +438,42 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // Two Y axes that are both valid
       expect(await find.allByCssSelector('.echLegendItem')).to.have.length(2);
+    });
+
+    it('should allow formatting on references', async () => {
+      await PageObjects.visualize.navigateToNewVisualization();
+      await PageObjects.visualize.clickVisType('lens');
+      await PageObjects.lens.goToTimeRange();
+      await PageObjects.lens.switchToVisualization('lnsDatatable');
+
+      await PageObjects.lens.configureDimension({
+        dimension: 'lnsDatatable_column > lns-empty-dimension',
+        operation: 'date_histogram',
+        field: '@timestamp',
+      });
+      await PageObjects.lens.configureDimension({
+        dimension: 'lnsDatatable_metrics > lns-empty-dimension',
+        operation: 'moving_average',
+        keepOpen: true,
+      });
+      await PageObjects.lens.configureReference({
+        operation: 'sum',
+        field: 'bytes',
+      });
+      await PageObjects.lens.editDimensionFormat('Number');
+      await PageObjects.lens.closeDimensionEditor();
+
+      const values = await Promise.all(
+        range(0, 6).map((index) => PageObjects.lens.getDatatableCellText(index, 1))
+      );
+      expect(values).to.eql([
+        '-',
+        '222,420.00',
+        '702,050.00',
+        '1,879,613.33',
+        '3,482,256.25',
+        '4,359,953.00',
+      ]);
     });
 
     /**
