@@ -45,11 +45,20 @@ export const bootstrapRendererFactory: BootstrapRendererFactory = ({
   const templateInterpolator = new BootstrapTemplateInterpolator();
 
   return async ({ uiSettingsClient, request }) => {
-    const { status: authStatus } = getAuthStatus(request);
-    const canUseSettings = authStatus !== 'unauthenticated'; // unknown is when auth is not present - oss
+    let darkMode: boolean;
+    let themeVersion: string;
 
-    const darkMode = canUseSettings ? await uiSettingsClient.get('theme:darkMode') : false;
-    const themeVersion = canUseSettings ? await uiSettingsClient.get('theme:version') : 'v7';
+    try {
+      const { status: authStatus } = getAuthStatus(request);
+      const canUseSettings = authStatus !== 'unauthenticated'; // unknown is when auth is not present - oss
+      darkMode = canUseSettings ? await uiSettingsClient.get('theme:darkMode') : false;
+      themeVersion = canUseSettings ? await uiSettingsClient.get('theme:version') : 'v7';
+    } catch (e) {
+      // need to be resilient to ES connectivity issues
+      darkMode = false;
+      themeVersion = 'v7';
+    }
+
     const themeTag = `${themeVersion === 'v7' ? 'v7' : 'v8'}${darkMode ? 'dark' : 'light'}`;
     const buildHash = packageInfo.buildNum;
     const basePath = serverBasePath;
