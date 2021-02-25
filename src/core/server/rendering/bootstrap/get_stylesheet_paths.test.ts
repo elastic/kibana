@@ -17,12 +17,12 @@ describe('getStylesheetPaths', () => {
             darkMode: true,
             themeVersion: 'v7',
             basePath: '/base-path',
-            regularBundlePath: '/base-path/bundles',
+            buildNum: 9000,
           })
         ).toMatchInlineSnapshot(`
           Array [
-            "/base-path/bundles/kbn-ui-shared-deps/kbn-ui-shared-deps.css",
-            "/base-path/bundles/kbn-ui-shared-deps/kbn-ui-shared-deps.v7.dark.css",
+            "/base-path/9000/bundles/kbn-ui-shared-deps/kbn-ui-shared-deps.css",
+            "/base-path/9000/bundles/kbn-ui-shared-deps/kbn-ui-shared-deps.v7.dark.css",
             "/base-path/node_modules/@kbn/ui-framework/dist/kui_dark.css",
             "/base-path/ui/legacy_dark_theme.css",
           ]
@@ -36,12 +36,12 @@ describe('getStylesheetPaths', () => {
             darkMode: true,
             themeVersion: 'v8',
             basePath: '/base-path',
-            regularBundlePath: '/base-path/bundles',
+            buildNum: 17,
           })
         ).toMatchInlineSnapshot(`
           Array [
-            "/base-path/bundles/kbn-ui-shared-deps/kbn-ui-shared-deps.css",
-            "/base-path/bundles/kbn-ui-shared-deps/kbn-ui-shared-deps.v8.dark.css",
+            "/base-path/17/bundles/kbn-ui-shared-deps/kbn-ui-shared-deps.css",
+            "/base-path/17/bundles/kbn-ui-shared-deps/kbn-ui-shared-deps.v8.dark.css",
             "/base-path/node_modules/@kbn/ui-framework/dist/kui_dark.css",
             "/base-path/ui/legacy_dark_theme.css",
           ]
@@ -57,12 +57,12 @@ describe('getStylesheetPaths', () => {
             darkMode: false,
             themeVersion: 'v7',
             basePath: '/base-path',
-            regularBundlePath: '/base-path/bundles',
+            buildNum: 42,
           })
         ).toMatchInlineSnapshot(`
           Array [
-            "/base-path/bundles/kbn-ui-shared-deps/kbn-ui-shared-deps.css",
-            "/base-path/bundles/kbn-ui-shared-deps/kbn-ui-shared-deps.v7.light.css",
+            "/base-path/42/bundles/kbn-ui-shared-deps/kbn-ui-shared-deps.css",
+            "/base-path/42/bundles/kbn-ui-shared-deps/kbn-ui-shared-deps.v7.light.css",
             "/base-path/node_modules/@kbn/ui-framework/dist/kui_light.css",
             "/base-path/ui/legacy_light_theme.css",
           ]
@@ -76,12 +76,12 @@ describe('getStylesheetPaths', () => {
             darkMode: false,
             themeVersion: 'v8',
             basePath: '/base-path',
-            regularBundlePath: '/base-path/bundles',
+            buildNum: 69,
           })
         ).toMatchInlineSnapshot(`
           Array [
-            "/base-path/bundles/kbn-ui-shared-deps/kbn-ui-shared-deps.css",
-            "/base-path/bundles/kbn-ui-shared-deps/kbn-ui-shared-deps.v8.light.css",
+            "/base-path/69/bundles/kbn-ui-shared-deps/kbn-ui-shared-deps.css",
+            "/base-path/69/bundles/kbn-ui-shared-deps/kbn-ui-shared-deps.v8.light.css",
             "/base-path/node_modules/@kbn/ui-framework/dist/kui_light.css",
             "/base-path/ui/legacy_light_theme.css",
           ]
