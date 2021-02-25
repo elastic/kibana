@@ -122,8 +122,8 @@ export const RoleMapping: React.FC<RoleMappingProps> = ({ isNew }) => {
   );
 
   const hasAdminRoleMapping = roleMappings.some(
-    ({ roleType: roleMappingRoleType }: { roleType: Role }) =>
-      roleMappingRoleType === ('admin' as Role)
+    ({ roleType: roleMappingRoleType }: { roleType: string }) =>
+      roleMappingRoleType === ('admin' as string)
   );
 
   return (

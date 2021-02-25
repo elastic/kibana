@@ -216,5 +216,4 @@ export interface RoleGroup {
 export interface WSRoleMapping extends RoleMapping {
   allGroups: boolean;
   groups: RoleGroup[];
-  roleType: Role;
 }
