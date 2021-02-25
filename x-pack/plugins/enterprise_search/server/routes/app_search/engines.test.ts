@@ -162,6 +162,29 @@ describe('engine routes', () => {
     });
   });
 
+  describe('DELETE /api/app_search/engines/{name}', () => {
+    let mockRouter: MockRouter;
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      mockRouter = new MockRouter({
+        method: 'delete',
+        path: '/api/app_search/engines/{name}',
+      });
+
+      registerEnginesRoutes({
+        ...mockDependencies,
+        router: mockRouter.router,
+      });
+    });
+
+    it('creates a request to enterprise search', () => {
+      expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
+        path: '/as/engines/:name',
+      });
+    });
+  });
+
   describe('GET /api/app_search/engines/{name}/overview', () => {
     let mockRouter: MockRouter;
 
