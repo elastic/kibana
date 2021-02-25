@@ -6,18 +6,9 @@
  */
 
 import { LogicMounter, mockFlashMessageHelpers, mockHttpValues } from '../../../__mocks__';
+import { mockEngineValues, mockEngineActions } from '../../__mocks__';
 
 import { nextTick } from '@kbn/test/jest';
-
-jest.mock('../engine', () => ({
-  EngineLogic: {
-    values: {},
-    actions: {
-      initializeEngine: jest.fn(),
-    },
-  },
-}));
-import { EngineLogic } from '../engine';
 
 import { Boost, BoostOperation, BoostType, FunctionalBoostFunction } from './types';
 
@@ -79,14 +70,9 @@ describe('RelevanceTuningLogic', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    // cast to any so that we don't have to provide a value for all of EngineLogic's values
-    EngineLogic.values = {
-      engineName: 'test-engine',
-      engine: {
-        invalidBoosts: false,
-        unsearchedUnconfirmedFields: false,
-      },
-    } as any;
+    mockEngineValues.engineName = 'test-engine';
+    mockEngineValues.engine.invalidBoosts = false;
+    mockEngineValues.engine.unsearchedUnconfirmedFields = false;
   });
 
   it('has expected default values', () => {
@@ -546,25 +532,25 @@ describe('RelevanceTuningLogic', () => {
       });
 
       it('will re-fetch the current engine after settings are updated if there were invalid boosts', async () => {
-        EngineLogic.values.engine.invalidBoosts = true;
+        mockEngineValues.engine.invalidBoosts = true;
         mount({});
         http.put.mockReturnValueOnce(Promise.resolve(searchSettings));
 
         RelevanceTuningLogic.actions.updateSearchSettings();
         await nextTick();
 
-        expect(EngineLogic.actions.initializeEngine).toHaveBeenCalled();
+        expect(mockEngineActions.initializeEngine).toHaveBeenCalled();
       });
 
       it('will re-fetch the current engine after settings are updated if there were unconfirmed search fieldds', async () => {
-        EngineLogic.values.engine.unsearchedUnconfirmedFields = true;
+        mockEngineValues.engine.unsearchedUnconfirmedFields = true;
         mount({});
         http.put.mockReturnValueOnce(Promise.resolve(searchSettings));
 
         RelevanceTuningLogic.actions.updateSearchSettings();
         await nextTick();
 
-        expect(EngineLogic.actions.initializeEngine).toHaveBeenCalled();
+        expect(mockEngineActions.initializeEngine).toHaveBeenCalled();
       });
     });
 
