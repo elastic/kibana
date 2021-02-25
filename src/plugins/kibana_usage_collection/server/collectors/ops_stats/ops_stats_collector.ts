@@ -12,14 +12,6 @@ import moment from 'moment';
 import { OpsMetrics } from 'kibana/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { KIBANA_STATS_TYPE } from '../../../common/constants';
-
-// interface OpsStatsMetrics extends Omit<OpsMetrics, 'response_times' | 'collected_at'> {
-//   timestamp: string;
-//   response_times: {
-//     average: number;
-//     max: number;
-//   };
-// }
 interface OpsStatsMetricsUsage {
   timestamp: string;
   response_times: {
