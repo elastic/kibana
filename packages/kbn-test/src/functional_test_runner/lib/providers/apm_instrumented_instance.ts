@@ -127,26 +127,26 @@ export const createApmInstrumentedInstance = <T extends object>(
         getOwnPropertyDescriptor(_, property) {
           return Reflect.getOwnPropertyDescriptor(object, property);
         },
-        defineProperty() {
-          throw new Error(`please don't mutate service objects`);
+        defineProperty(_, property, attributes) {
+          return Reflect.defineProperty(object, property, attributes);
         },
-        deleteProperty() {
-          throw new Error(`please don't mutate service objects`);
+        deleteProperty(_, property) {
+          return Reflect.deleteProperty(object, property);
         },
-        set() {
-          throw new Error(`please don't mutate service objects`);
+        set(_, property, value) {
+          return Reflect.set(object, property, value);
         },
-        setPrototypeOf() {
-          throw new Error(`please don't mutate service objects`);
+        setPrototypeOf(_, prototype) {
+          return Reflect.setPrototypeOf(object, prototype);
         },
         isExtensible() {
-          return false;
+          return Reflect.isExtensible(object);
         },
         getPrototypeOf() {
           return Reflect.getPrototypeOf(object);
         },
         preventExtensions() {
-          return true;
+          return Reflect.preventExtensions(object);
         },
         ownKeys() {
           return Reflect.ownKeys(object);
