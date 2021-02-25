@@ -125,7 +125,7 @@ describe('<EditPolicy /> node allocation', () => {
       expect(actions.warm.hasDefaultAllocationWarning()).toBeTruthy();
     });
 
-    test('shows default allocation notice when hot tier exists, but not warm tier', async () => {
+    test('when configuring warm phase shows default allocation notice when hot tier exists, but not warm tier', async () => {
       httpRequestsMockHelpers.setListNodes({
         nodesByAttributes: {},
         nodesByRoles: { data_hot: ['test'], data_cold: ['test'] },
@@ -309,7 +309,7 @@ describe('<EditPolicy /> node allocation', () => {
 
   describe('on cloud', () => {
     describe('with deprecated data role config', () => {
-      test('should hide data tier option on cloud using legacy node role configuration', async () => {
+      test('should hide data tier option on cloud', async () => {
         httpRequestsMockHelpers.setListNodes({
           nodesByAttributes: { test: ['123'] },
           // On cloud, if using legacy config there will not be any "data_*" roles set.
@@ -331,10 +331,29 @@ describe('<EditPolicy /> node allocation', () => {
         expect(exists('customDataAllocationOption')).toBeTruthy();
         expect(exists('noneDataAllocationOption')).toBeTruthy();
       });
+
+      test('should ask users to migrate to node roles when on cloud using legacy data role', async () => {
+        httpRequestsMockHelpers.setListNodes({
+          nodesByAttributes: { test: ['123'] },
+          // On cloud, if using legacy config there will not be any "data_*" roles set.
+          nodesByRoles: { data: ['test'] },
+          isUsingDeprecatedDataRoleConfig: true,
+        });
+        await act(async () => {
+          testBed = await setup({ appServicesContext: { cloud: { isCloudEnabled: true } } });
+        });
+        const { actions, component, exists } = testBed;
+
+        component.update();
+        await actions.warm.enable(true);
+        expect(component.find('.euiLoadingSpinner').exists()).toBeFalsy();
+
+        expect(exists('cloudDataTierCallout')).toBeTruthy();
+      });
     });
 
     describe('with node role config', () => {
-      test('shows off, custom and data role options on cloud with data roles', async () => {
+      test('shows data role, custom and "off" options on cloud with data roles', async () => {
         httpRequestsMockHelpers.setListNodes({
           nodesByAttributes: { test: ['123'] },
           nodesByRoles: { data: ['test'], data_hot: ['test'], data_warm: ['test'] },
@@ -372,7 +391,7 @@ describe('<EditPolicy /> node allocation', () => {
         await actions.cold.enable(true);
         expect(component.find('.euiLoadingSpinner').exists()).toBeFalsy();
 
-        expect(exists('cloudDataTierCallout')).toBeTruthy();
+        expect(exists('cloudMissingColdTierCallout')).toBeTruthy();
         // Assert that other notices are not showing
         expect(actions.cold.hasDefaultAllocationNotice()).toBeFalsy();
         expect(actions.cold.hasNoNodeAttrsWarning()).toBeFalsy();
