@@ -7,7 +7,6 @@
 
 import uuid from 'uuid';
 import { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
-import { CallESAsCurrentUser } from '../types';
 import { agentPolicyService } from './agent_policy';
 import { outputService } from './output';
 import {
@@ -44,16 +43,14 @@ export interface SetupStatus {
 
 export async function setupIngestManager(
   soClient: SavedObjectsClientContract,
-  esClient: ElasticsearchClient,
-  callCluster: CallESAsCurrentUser
+  esClient: ElasticsearchClient
 ): Promise<SetupStatus> {
-  return awaitIfPending(async () => createSetupSideEffects(soClient, esClient, callCluster));
+  return awaitIfPending(async () => createSetupSideEffects(soClient, esClient));
 }
 
 async function createSetupSideEffects(
   soClient: SavedObjectsClientContract,
-  esClient: ElasticsearchClient,
-  callCluster: CallESAsCurrentUser
+  esClient: ElasticsearchClient
 ): Promise<SetupStatus> {
   const isFleetServerEnabled = appContextService.getConfig()?.agents.fleetServerEnabled;
   const [
@@ -69,7 +66,7 @@ async function createSetupSideEffects(
     isFleetServerEnabled
       ? agentPolicyService.ensureDefaultFleetServerAgentPolicy(soClient, esClient)
       : {},
-    updateFleetRoleIfExists(callCluster),
+    updateFleetRoleIfExists(esClient),
     settingsService.getSettings(soClient).catch((e: any) => {
       if (e.isBoom && e.output.statusCode === 404) {
         const defaultSettings = createDefaultSettings();
@@ -158,25 +155,25 @@ async function createSetupSideEffects(
   return { isIntialized: true };
 }
 
-async function updateFleetRoleIfExists(callCluster: CallESAsCurrentUser) {
+async function updateFleetRoleIfExists(esClient: ElasticsearchClient) {
   try {
-    await callCluster('transport.request', {
+    await esClient.transport.request({
       method: 'GET',
       path: `/_security/role/${FLEET_ENROLL_ROLE}`,
     });
   } catch (e) {
-    if (e.status === 404) {
+    if (e.statusCode === 404) {
       return;
     }
 
     throw e;
   }
 
-  return putFleetRole(callCluster);
+  return putFleetRole(esClient);
 }
 
-async function putFleetRole(callCluster: CallESAsCurrentUser) {
-  return callCluster('transport.request', {
+async function putFleetRole(esClient: ElasticsearchClient) {
+  return await esClient.transport.request({
     method: 'PUT',
     path: `/_security/role/${FLEET_ENROLL_ROLE}`,
     body: {
@@ -194,12 +191,11 @@ async function putFleetRole(callCluster: CallESAsCurrentUser) {
 export async function setupFleet(
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
-  callCluster: CallESAsCurrentUser,
   options?: { forceRecreate?: boolean }
 ) {
   // Create fleet_enroll role
   // This should be done directly in ES at some point
-  const res = await putFleetRole(callCluster);
+  const { body: res } = await putFleetRole(esClient);
 
   // If the role is already created skip the rest unless you have forceRecreate set to true
   if (options?.forceRecreate !== true && res.role.created === false) {
@@ -207,7 +203,7 @@ export async function setupFleet(
   }
   const password = generateRandomPassword();
   // Create fleet enroll user
-  await callCluster('transport.request', {
+  await esClient.transport.request({
     method: 'PUT',
     path: `/_security/user/${FLEET_ENROLL_USERNAME}`,
     body: {
