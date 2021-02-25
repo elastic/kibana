@@ -626,7 +626,7 @@ describe('<EditPolicy />', () => {
       expect(warmPhase.actions.migrate).toEqual({ enabled: false });
     });
 
-    describe('legacy data role on cloud', async () => {
+    describe('legacy data role on cloud', () => {
       beforeEach(async () => {
         httpRequestsMockHelpers.setLoadPolicies([getDefaultHotPhasePolicy('my_policy')]);
         httpRequestsMockHelpers.setListNodes({
