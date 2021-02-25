@@ -226,7 +226,7 @@ export class HttpServer {
 
   private getAuthOption(
     authRequired: RouteConfigOptions<any>['authRequired'] = true
-  ): undefined | false | { mode: 'required' | 'optional' } {
+  ): undefined | false | { mode: 'required' | 'optional' | 'try' } {
     if (this.authRegistered === false) return undefined;
 
     if (authRequired === true) {
@@ -234,6 +234,9 @@ export class HttpServer {
     }
     if (authRequired === 'optional') {
       return { mode: 'optional' };
+    }
+    if (authRequired === 'try') {
+      return { mode: 'try' };
     }
     if (authRequired === false) {
       return false;

@@ -107,12 +107,6 @@ if (window.__kbnStrictCsp__ && window.__kbnCspNotEnforced__) {
       {{/each}}
     ], function () {
       __kbnBundles__.get('entry/core/public').__kbnBootstrap__();
-
-      load([
-        {{#each styleSheetPaths}}
-          '{{this}}',
-        {{/each}}
-      ]);
     });
   }
 }

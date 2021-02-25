@@ -24,6 +24,7 @@ export interface RenderingMetadata {
   i18n: typeof i18n.translate;
   locale: string;
   darkMode: boolean;
+  stylesheetPaths: string[];
   injectedMetadata: {
     version: string;
     buildNumber: number;

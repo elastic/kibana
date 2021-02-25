@@ -21,6 +21,7 @@ import {
   RenderingMetadata,
 } from './types';
 import { registerBootstrapRoute, bootstrapRendererFactory } from './bootstrap';
+import { getStylesheetPaths } from './bootstrap/get_stylesheet_paths';
 
 /** @internal */
 export class RenderingService {
@@ -51,21 +52,36 @@ export class RenderingService {
           mode: this.coreContext.env.mode,
           packageInfo: this.coreContext.env.packageInfo,
         };
+        const buildNum = env.packageInfo.buildNum;
         const basePath = http.basePath.get(request);
         const { serverBasePath, publicBaseUrl } = http.basePath;
         const settings = {
           defaults: uiSettings.getRegistered(),
           user: includeUserSettings ? await uiSettings.getUserProvided() : {},
         };
+
+        const darkMode = settings.user?.['theme:darkMode']?.userValue
+          ? Boolean(settings.user['theme:darkMode'].userValue)
+          : false;
+        const themeVersion = settings.user?.['theme:version']?.userValue
+          ? String(settings.user['theme:version'].userValue)
+          : 'v7';
+
+        const stylesheetPaths = getStylesheetPaths({
+          darkMode,
+          themeVersion,
+          basePath: serverBasePath,
+          buildNum,
+        });
+
         const metadata: RenderingMetadata = {
           strictCsp: http.csp.strict,
           uiPublicUrl: `${basePath}/ui`,
           bootstrapScriptUrl: `${basePath}/bootstrap.js`,
           i18n: i18n.translate,
           locale: i18n.getLocale(),
-          darkMode: settings.user?.['theme:darkMode']?.userValue
-            ? Boolean(settings.user['theme:darkMode'].userValue)
-            : false,
+          darkMode,
+          stylesheetPaths,
           injectedMetadata: {
             version: env.packageInfo.version,
             buildNumber: env.packageInfo.buildNum,

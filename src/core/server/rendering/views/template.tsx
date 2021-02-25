@@ -22,6 +22,8 @@ export const Template: FunctionComponent<Props> = ({
     uiPublicUrl,
     locale,
     darkMode,
+    stylesheetPaths,
+    themeTag,
     injectedMetadata,
     i18n,
     bootstrapScriptUrl,
@@ -41,7 +43,7 @@ export const Template: FunctionComponent<Props> = ({
         <link rel="icon" type="image/svg+xml" href={`${uiPublicUrl}/favicons/favicon.svg`} />
         <meta name="theme-color" content="#ffffff" />
         <meta name="color-scheme" content="light dark" />
-        <Styles darkMode={darkMode} />
+        <Styles darkMode={darkMode} stylesheetPaths={stylesheetPaths} />
 
         {/* Inject stylesheets into the <head> before scripts so that KP plugins with bundled styles will override them */}
         <meta name="add-styles-here" />
@@ -96,6 +98,12 @@ export const Template: FunctionComponent<Props> = ({
             // intentional as we check for the existence of __kbnCspNotEnforced__ in
             // bootstrap.
             window.__kbnCspNotEnforced__ = true;
+          `}
+        </script>
+        <script unsafe-inline>
+          {`
+            console.log("*** TA MERE ${themeTag}");
+            window.__kbnThemeTag__ = "${themeTag}";
           `}
         </script>
         <script src={bootstrapScriptUrl} />

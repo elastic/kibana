@@ -13,7 +13,6 @@ import { resolve } from 'path';
 export interface BootstrapTemplateData {
   themeTag: string;
   jsDependencyPaths: string[];
-  styleSheetPaths: string[];
   publicPathMap: string;
 }
 

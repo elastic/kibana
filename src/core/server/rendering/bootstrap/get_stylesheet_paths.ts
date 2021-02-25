@@ -12,13 +12,14 @@ export const getStylesheetPaths = ({
   themeVersion,
   darkMode,
   basePath,
-  regularBundlePath,
+  buildNum,
 }: {
   themeVersion: string;
   darkMode: boolean;
-  regularBundlePath: string;
+  buildNum: number;
   basePath: string;
 }) => {
+  const regularBundlePath = `${basePath}/${buildNum}/bundles`;
   return [
     `${regularBundlePath}/kbn-ui-shared-deps/${UiSharedDeps.baseCssDistFilename}`,
     ...(darkMode

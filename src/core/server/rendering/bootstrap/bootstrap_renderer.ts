@@ -12,7 +12,6 @@ import { PackageInfo } from '@kbn/config';
 import { UiPlugins } from '../../plugins';
 import { IUiSettingsClient } from '../../ui_settings';
 import { HttpAuth, KibanaRequest } from '../../http';
-import { getStylesheetPaths } from './get_stylesheet_paths';
 import { getPluginsBundlePaths } from './get_plugin_bundle_paths';
 import { BootstrapTemplateInterpolator } from './render_template';
 
@@ -49,7 +48,7 @@ export const bootstrapRendererFactory: BootstrapRendererFactory = ({
       return true;
     }
     const { status: authStatus } = auth.get(request);
-    // status is unknown when auth is disabled. we just need to not be `unauthenticated` here.
+    // status is 'unknown' when auth is disabled. we just need to not be `unauthenticated` here.
     return authStatus !== 'unauthenticated';
   };
 
@@ -69,15 +68,7 @@ export const bootstrapRendererFactory: BootstrapRendererFactory = ({
 
     const themeTag = `${themeVersion === 'v7' ? 'v7' : 'v8'}${darkMode ? 'dark' : 'light'}`;
     const buildHash = packageInfo.buildNum;
-    const basePath = serverBasePath;
-    const regularBundlePath = `${basePath}/${buildHash}/bundles`;
-
-    const styleSheetPaths = getStylesheetPaths({
-      themeVersion,
-      darkMode,
-      basePath,
-      regularBundlePath,
-    });
+    const regularBundlePath = `${serverBasePath}/${buildHash}/bundles`;
 
     const bundlePaths = getPluginsBundlePaths({
       uiPlugins,
@@ -106,7 +97,6 @@ export const bootstrapRendererFactory: BootstrapRendererFactory = ({
     const body = await templateInterpolator.interpolate({
       themeTag,
       jsDependencyPaths,
-      styleSheetPaths,
       publicPathMap,
     });
 
