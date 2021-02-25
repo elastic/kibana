@@ -31,6 +31,23 @@ export function registerCurationsRoutes({
     })
   );
 
+  router.post(
+    {
+      path: '/api/app_search/engines/{engineName}/curations',
+      validate: {
+        params: schema.object({
+          engineName: schema.string(),
+        }),
+        body: schema.object({
+          queries: schema.arrayOf(schema.string({ minLength: 1 }), { minSize: 1 }),
+        }),
+      },
+    },
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/as/engines/:engineName/curations/collection',
+    })
+  );
+
   router.delete(
     {
       path: '/api/app_search/engines/{engineName}/curations/{curationId}',

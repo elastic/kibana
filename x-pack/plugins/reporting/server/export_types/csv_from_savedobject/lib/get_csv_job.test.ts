@@ -5,8 +5,11 @@
  * 2.0.
  */
 
+import { createMockLevelLogger } from '../../../test_helpers';
 import { JobParamsPanelCsv, SearchPanel } from '../types';
 import { getGenerateCsvParams } from './get_csv_job';
+
+const logger = createMockLevelLogger();
 
 describe('Get CSV Job', () => {
   let mockJobParams: JobParamsPanelCsv;
@@ -42,7 +45,8 @@ describe('Get CSV Job', () => {
       mockJobParams,
       mockSearchPanel,
       mockSavedObjectsClient,
-      mockUiSettingsClient
+      mockUiSettingsClient,
+      logger
     );
     expect(result).toMatchInlineSnapshot(`
       Object {
@@ -94,7 +98,8 @@ describe('Get CSV Job', () => {
       mockJobParams,
       mockSearchPanel,
       mockSavedObjectsClient,
-      mockUiSettingsClient
+      mockUiSettingsClient,
+      logger
     );
     expect(result).toMatchInlineSnapshot(`
       Object {
@@ -149,7 +154,8 @@ describe('Get CSV Job', () => {
       mockJobParams,
       mockSearchPanel,
       mockSavedObjectsClient,
-      mockUiSettingsClient
+      mockUiSettingsClient,
+      logger
     );
     expect(result).toMatchInlineSnapshot(`
       Object {
@@ -203,7 +209,8 @@ describe('Get CSV Job', () => {
       mockJobParams,
       mockSearchPanel,
       mockSavedObjectsClient,
-      mockUiSettingsClient
+      mockUiSettingsClient,
+      logger
     );
     expect(result).toMatchInlineSnapshot(`
       Object {
@@ -275,7 +282,8 @@ describe('Get CSV Job', () => {
       mockJobParams,
       mockSearchPanel,
       mockSavedObjectsClient,
-      mockUiSettingsClient
+      mockUiSettingsClient,
+      logger
     );
     expect(result).toMatchInlineSnapshot(`
       Object {

@@ -146,10 +146,7 @@ export const getBreadcrumbsForRoute = (
   }
   if (isTimelinesRoutes(spyState) && object.navTabs) {
     const tempNav: SearchNavTab = { urlKey: 'timeline', isDetailPage: false };
-    let urlStateKeys = [getOr(tempNav, spyState.pageName, object.navTabs)];
-    if (spyState.tabName != null) {
-      urlStateKeys = [...urlStateKeys, getOr(tempNav, spyState.tabName, object.navTabs)];
-    }
+    const urlStateKeys = [getOr(tempNav, spyState.pageName, object.navTabs)];
 
     return [
       siemRootBreadcrumb,
