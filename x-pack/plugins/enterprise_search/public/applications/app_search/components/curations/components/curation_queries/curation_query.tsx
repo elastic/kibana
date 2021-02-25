@@ -10,8 +10,6 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiFieldText, EuiButtonIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import './curation_queries.scss';
-
 interface Props {
   queryValue: string;
   onChange(newValue: string): void;
