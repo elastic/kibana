@@ -130,13 +130,13 @@ This example receives server and threshold as parameters. It will read the CPU u
 
 ```typescript
 import { schema } from '@kbn/config-schema';
-import { AlertType, AlertExecutorOptions } from '../../../alerts/server';
+import { AlertType, AlertExecutorOptions } from '../../../alerting/server';
 import {
   AlertTypeParams,
   AlertTypeState,
   AlertInstanceState,
   AlertInstanceContext,
-} from '../../../alerts/common';
+} from '../../../alerting/common';
 ...
 interface MyAlertTypeParams extends AlertTypeParams {
 	server: string;
