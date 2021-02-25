@@ -156,7 +156,7 @@ export async function handleInstallPackageFailure({
     const installType = getInstallType({ pkgVersion, installedPkg });
     if (installType === 'install' || installType === 'reinstall') {
       logger.error(`uninstalling ${pkgkey} after error installing`);
-      await removeInstallation({ savedObjectsClient, pkgkey, callCluster, esClient });
+      await removeInstallation({ savedObjectsClient, pkgkey, esClient });
     }
 
     if (installType === 'update') {

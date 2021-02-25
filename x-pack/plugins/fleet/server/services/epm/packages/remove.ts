@@ -11,7 +11,6 @@ import { PACKAGE_POLICY_SAVED_OBJECT_TYPE, PACKAGES_SAVED_OBJECT_TYPE } from '..
 import {
   AssetReference,
   AssetType,
-  CallESAsCurrentUser,
   ElasticsearchAssetType,
   EsAssetReference,
   KibanaAssetReference,
@@ -30,10 +29,9 @@ import { removeArchiveEntries } from '../archive/storage';
 export async function removeInstallation(options: {
   savedObjectsClient: SavedObjectsClientContract;
   pkgkey: string;
-  callCluster: CallESAsCurrentUser;
   esClient: ElasticsearchClient;
 }): Promise<AssetReference[]> {
-  const { savedObjectsClient, pkgkey, callCluster, esClient } = options;
+  const { savedObjectsClient, pkgkey, esClient } = options;
   // TODO:  the epm api should change to /name/version so we don't need to do this
   const { pkgName, pkgVersion } = splitPkgKey(pkgkey);
   const installation = await getInstallation({ savedObjectsClient, pkgName });
