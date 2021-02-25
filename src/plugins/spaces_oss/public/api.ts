@@ -7,7 +7,7 @@
  */
 
 import { Observable } from 'rxjs';
-import type { FunctionComponent } from 'react';
+import type { ReactElement } from 'react';
 import { Space } from '../common';
 
 /**
@@ -27,7 +27,7 @@ export interface SpacesApi {
  *
  * @public
  */
-export type LazyComponentFn<T> = () => Promise<{ default: FunctionComponent<T> }>;
+export type LazyComponentFn<T> = (props: T) => ReactElement;
 
 /**
  * @public

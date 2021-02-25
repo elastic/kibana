@@ -17,9 +17,10 @@ import {
   EuiPopover,
 } from '@elastic/eui';
 import type { Space } from 'src/plugins/spaces_oss/common';
-import { uiApiMock as spacesUiApiMock } from '../../../../../../spaces/public/ui_api/mocks';
-import { getSpaceAvatarComponent } from '../../../../../../spaces/public/space_avatar';
+import { spacesManagerMock } from '../../../../../../spaces/public/spaces_manager/mocks';
+import { getUiApi } from '../../../../../../spaces/public/ui_api';
 import { SpaceAvatarInternal } from '../../../../../../spaces/public/space_avatar/space_avatar_internal';
+import { coreMock } from 'src/core/public/mocks';
 
 const mockSpaces = [
   {
@@ -39,9 +40,9 @@ const mockSpaces = [
     disabledFeatures: [],
   },
 ];
-const spacesApiUi = spacesUiApiMock.create();
-spacesApiUi.components.getSpaceAvatar = () =>
-  getSpaceAvatarComponent().then((component) => ({ default: component }));
+const spacesManager = spacesManagerMock.create();
+const { getStartServices } = coreMock.createSetup();
+const spacesApiUi = getUiApi({ spacesManager, getStartServices });
 
 describe('SpacesPopoverList', () => {
   async function setup(spaces: Space[]) {

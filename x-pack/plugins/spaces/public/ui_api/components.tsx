@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import type { FC, PropsWithChildren, PropsWithRef } from 'react';
+import React from 'react';
+
 import type { StartServicesAccessor } from 'src/core/public';
 import type { SpacesApiUiComponent } from 'src/plugins/spaces_oss/public';
 
@@ -17,6 +20,7 @@ import { getSpaceAvatarComponent } from '../space_avatar';
 import { getSpaceListComponent } from '../space_list';
 import { getSpacesContextWrapper } from '../spaces_context';
 import type { SpacesManager } from '../spaces_manager';
+import { LazyWrapper } from './lazy_wrapper';
 
 export interface GetComponentsOptions {
   spacesManager: SpacesManager;
@@ -27,6 +31,15 @@ export const getComponents = ({
   spacesManager,
   getStartServices,
 }: GetComponentsOptions): SpacesApiUiComponent => {
+  /**
+   * Returns a function that creates a lazy-loading version of a component.
+   */
+  function lazy<T>(fn: () => Promise<FC<T>>) {
+    return (props: JSX.IntrinsicAttributes & PropsWithRef<PropsWithChildren<T>>) => (
+      <LazyWrapper fn={fn} props={props} />
+    );
+  }
+
   return {
     getSpacesContext: lazy(() => getSpacesContextWrapper({ spacesManager, getStartServices })),
     getShareToSpaceFlyout: lazy(getShareToSpaceFlyoutComponent),
@@ -35,10 +48,3 @@ export const getComponents = ({
     getSpaceAvatar: lazy(getSpaceAvatarComponent),
   };
 };
-
-/**
- * Returns a lazy-loadable version of a component. React expects these to be default exports.
- */
-function lazy<T>(fn: () => Promise<React.FunctionComponent<T>>) {
-  return () => fn().then((component) => ({ default: component }));
-}

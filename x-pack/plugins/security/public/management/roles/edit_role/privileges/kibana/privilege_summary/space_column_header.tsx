@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { EuiLoadingSpinner } from '@elastic/eui';
-import React, { Fragment } from 'react';
+import React, { Fragment, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import type { Space } from 'src/plugins/spaces_oss/common';
@@ -35,27 +34,25 @@ export const SpaceColumnHeader = (props: SpaceColumnHeaderProps) => {
       }
     );
   });
-  const LazySpaceAvatar = React.lazy(spacesApiUi.components.getSpaceAvatar);
+  const LazySpaceAvatar = useMemo(() => spacesApiUi.components.getSpaceAvatar, [spacesApiUi]);
 
   return (
     <div>
-      <React.Suspense fallback={<EuiLoadingSpinner />}>
-        {entrySpaces.slice(0, SPACES_DISPLAY_COUNT).map((space) => {
-          return (
-            <span key={space.id}>
-              <LazySpaceAvatar size="s" space={space} />{' '}
-              {isGlobal && (
-                <span>
-                  <FormattedMessage
-                    id="xpack.security.management.editRole.spacePrivilegeMatrix.globalSpaceName"
-                    defaultMessage="All Spaces"
-                  />
-                </span>
-              )}
-            </span>
-          );
-        })}
-      </React.Suspense>
+      {entrySpaces.slice(0, SPACES_DISPLAY_COUNT).map((space) => {
+        return (
+          <span key={space.id}>
+            <LazySpaceAvatar size="s" space={space} />{' '}
+            {isGlobal && (
+              <span>
+                <FormattedMessage
+                  id="xpack.security.management.editRole.spacePrivilegeMatrix.globalSpaceName"
+                  defaultMessage="All Spaces"
+                />
+              </span>
+            )}
+          </span>
+        );
+      })}
       {entrySpaces.length > SPACES_DISPLAY_COUNT && (
         <Fragment>
           <br />

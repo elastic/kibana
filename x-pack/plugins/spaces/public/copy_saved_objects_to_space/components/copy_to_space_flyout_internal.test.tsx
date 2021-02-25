@@ -33,13 +33,14 @@ const setup = async (opts: SetupOpts = {}) => {
 
   const mockSpacesManager = spacesManagerMock.create();
 
-  mockSpacesManager.getActiveSpace.mockResolvedValue({
+  const getActiveSpace = Promise.resolve({
     id: 'my-active-space',
     name: 'my active space',
     disabledFeatures: [],
   });
+  mockSpacesManager.getActiveSpace.mockReturnValue(getActiveSpace);
 
-  mockSpacesManager.getSpaces.mockResolvedValue(
+  const getSpaces = Promise.resolve(
     opts.mockSpaces || [
       {
         id: 'space-1',
@@ -63,6 +64,7 @@ const setup = async (opts: SetupOpts = {}) => {
       },
     ]
   );
+  mockSpacesManager.getSpaces.mockReturnValue(getSpaces);
 
   const { getStartServices } = coreMock.createSetup();
   const startServices = coreMock.createStart();
@@ -71,7 +73,8 @@ const setup = async (opts: SetupOpts = {}) => {
     spaces: { manage: true },
   };
   const mockToastNotifications = startServices.notifications.toasts;
-  getStartServices.mockResolvedValue([startServices, , ,]);
+  const getStartServicesPromise = Promise.resolve<any>([startServices, , ,]);
+  getStartServices.mockReturnValue(getStartServicesPromise);
 
   const savedObjectToCopy = {
     type: 'dashboard',
@@ -95,15 +98,14 @@ const setup = async (opts: SetupOpts = {}) => {
 
   // wait for context wrapper to rerender
   await act(async () => {
-    await nextTick();
+    await getStartServicesPromise;
     wrapper.update();
   });
 
+  await getActiveSpace;
+  await getSpaces;
   if (!opts.returnBeforeSpacesLoad) {
-    // Wait for spaces manager to complete and flyout to rerender
-    await act(async () => {
-      await nextTick();
-    });
+    // rerender after spaces manager API calls are completed
     wrapper.update();
   }
 

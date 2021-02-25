@@ -6,14 +6,15 @@
  */
 
 import React from 'react';
-import { uiApiMock as spacesUiApiMock } from '../../../../../../../../spaces/public/ui_api/mocks';
-import { getSpaceAvatarComponent } from '../../../../../../../../spaces/public/space_avatar';
+import { spacesManagerMock } from '../../../../../../../../spaces/public/spaces_manager/mocks';
+import { getUiApi } from '../../../../../../../../spaces/public/ui_api';
 import { createKibanaPrivileges } from '../../../../__fixtures__/kibana_privileges';
 import { kibanaFeatures } from '../../../../__fixtures__/kibana_features';
 import { mountWithIntl } from '@kbn/test/jest';
 import { PrivilegeSummaryTable } from './privilege_summary_table';
 import { RoleKibanaPrivilege } from '../../../../../../../common/model';
 import { getDisplayedFeaturePrivileges } from './__fixtures__';
+import { coreMock } from 'src/core/public/mocks';
 
 const createRole = (roleKibanaPrivileges: RoleKibanaPrivilege[]) => ({
   name: 'some-role',
@@ -42,9 +43,9 @@ const spaces = [
     disabledFeatures: [],
   },
 ];
-const spacesApiUi = spacesUiApiMock.create();
-spacesApiUi.components.getSpaceAvatar = () =>
-  getSpaceAvatarComponent().then((component) => ({ default: component }));
+const spacesManager = spacesManagerMock.create();
+const { getStartServices } = coreMock.createSetup();
+const spacesApiUi = getUiApi({ spacesManager, getStartServices });
 
 const maybeExpectSubFeaturePrivileges = (expect: boolean, subFeaturesPrivileges: unknown) => {
   return expect ? { subFeaturesPrivileges } : {};

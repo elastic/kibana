@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { EuiLoadingSpinner } from '@elastic/eui';
-import React from 'react';
+import React, { useMemo } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import type { SavedObjectsManagementRecord } from 'src/plugins/saved_objects_management/public';
@@ -14,18 +13,15 @@ import type { SpacesApiUi, ShareToSpaceFlyoutProps } from 'src/plugins/spaces_os
 
 import { SavedObjectsManagementAction } from '../../../../../src/plugins/saved_objects_management/public';
 
-type WrapperProps = ShareToSpaceFlyoutProps & {
+interface WrapperProps {
   spacesApiUi: SpacesApiUi;
-};
+  props: ShareToSpaceFlyoutProps;
+}
 
-const Wrapper = ({ spacesApiUi, ...props }: WrapperProps) => {
-  const LazyComponent = React.lazy(spacesApiUi.components.getShareToSpaceFlyout);
+const Wrapper = ({ spacesApiUi, props }: WrapperProps) => {
+  const LazyComponent = useMemo(() => spacesApiUi.components.getShareToSpaceFlyout, [spacesApiUi]);
 
-  return (
-    <React.Suspense fallback={<EuiLoadingSpinner />}>
-      <LazyComponent {...props} />
-    </React.Suspense>
-  );
+  return <LazyComponent {...props} />;
 };
 
 export class ShareToSpaceSavedObjectsManagementAction extends SavedObjectsManagementAction {
@@ -79,7 +75,7 @@ export class ShareToSpaceSavedObjectsManagementAction extends SavedObjectsManage
       enableCreateNewSpaceLink: true,
     };
 
-    return <Wrapper spacesApiUi={this.spacesApiUi} {...props} />;
+    return <Wrapper spacesApiUi={this.spacesApiUi} props={props} />;
   };
 
   private onClose = () => {

@@ -5,25 +5,21 @@
  * 2.0.
  */
 
-import { EuiLoadingSpinner } from '@elastic/eui';
-import React from 'react';
+import React, { useMemo } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import type { SavedObjectsManagementColumn } from 'src/plugins/saved_objects_management/public';
 import type { SpacesApiUi, SpaceListProps } from 'src/plugins/spaces_oss/public';
 
-type WrapperProps = SpaceListProps & {
+interface WrapperProps {
   spacesApiUi: SpacesApiUi;
-};
+  props: SpaceListProps;
+}
 
-const Wrapper = ({ spacesApiUi, ...props }: WrapperProps) => {
-  const LazyComponent = React.lazy(spacesApiUi.components.getSpaceList);
+const Wrapper = ({ spacesApiUi, props }: WrapperProps) => {
+  const LazyComponent = useMemo(() => spacesApiUi.components.getSpaceList, [spacesApiUi]);
 
-  return (
-    <React.Suspense fallback={<EuiLoadingSpinner />}>
-      <LazyComponent {...props} />
-    </React.Suspense>
-  );
+  return <LazyComponent {...props} />;
 };
 
 export class ShareToSpaceSavedObjectsManagementColumn
@@ -47,7 +43,7 @@ export class ShareToSpaceSavedObjectsManagementColumn
         namespaces,
       };
 
-      return <Wrapper spacesApiUi={this.spacesApiUi} {...props} />;
+      return <Wrapper spacesApiUi={this.spacesApiUi} props={props} />;
     },
   };
 

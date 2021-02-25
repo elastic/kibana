@@ -6,7 +6,7 @@
  */
 
 import { EuiLoadingSpinner } from '@elastic/eui';
-import React from 'react';
+import React, { lazy, useMemo } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import type { SavedObjectsManagementRecord } from 'src/plugins/saved_objects_management/public';
@@ -16,8 +16,9 @@ import type { CopyToSpaceFlyoutProps } from './components';
 import { getCopyToSpaceFlyoutComponent } from './components';
 
 const Wrapper = (props: CopyToSpaceFlyoutProps) => {
-  const LazyComponent = React.lazy(() =>
-    getCopyToSpaceFlyoutComponent().then((component) => ({ default: component }))
+  const LazyComponent = useMemo(
+    () => lazy(() => getCopyToSpaceFlyoutComponent().then((component) => ({ default: component }))),
+    []
   );
 
   return (

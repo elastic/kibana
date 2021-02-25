@@ -8,12 +8,13 @@
 import { act } from '@testing-library/react';
 import React from 'react';
 import { mountWithIntl } from '@kbn/test/jest';
-import { uiApiMock as spacesUiApiMock } from '../../../../../../../../spaces/public/ui_api/mocks';
-import { getSpaceAvatarComponent } from '../../../../../../../../spaces/public/space_avatar';
+import { spacesManagerMock } from '../../../../../../../../spaces/public/spaces_manager/mocks';
+import { getUiApi } from '../../../../../../../../spaces/public/ui_api';
 import { SpaceAvatarInternal } from '../../../../../../../../spaces/public/space_avatar/space_avatar_internal';
 import type { RoleKibanaPrivilege } from '../../../../../../../common/model';
 import { SpaceColumnHeader } from './space_column_header';
 import { SpacesPopoverList } from '../../../spaces_popover_list';
+import { coreMock } from 'src/core/public/mocks';
 
 const spaces = [
   {
@@ -47,9 +48,9 @@ const spaces = [
     disabledFeatures: [],
   },
 ];
-const spacesApiUi = spacesUiApiMock.create();
-spacesApiUi.components.getSpaceAvatar = () =>
-  getSpaceAvatarComponent().then((component) => ({ default: component }));
+const spacesManager = spacesManagerMock.create();
+const { getStartServices } = coreMock.createSetup();
+const spacesApiUi = getUiApi({ spacesManager, getStartServices });
 
 describe('SpaceColumnHeader', () => {
   async function setup(entry: RoleKibanaPrivilege) {

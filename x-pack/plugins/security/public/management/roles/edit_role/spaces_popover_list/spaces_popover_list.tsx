@@ -12,13 +12,12 @@ import {
   EuiContextMenuItem,
   EuiContextMenuPanel,
   EuiFieldSearch,
-  EuiLoadingSpinner,
   EuiPopover,
   EuiText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import React, { Component } from 'react';
+import React, { Component, memo } from 'react';
 import type { Space } from 'src/plugins/spaces_oss/common';
 import type { SpacesApiUi } from 'src/plugins/spaces_oss/public';
 import { SPACE_SEARCH_COUNT_THRESHOLD } from '../../../../../../spaces/common';
@@ -59,7 +58,7 @@ export class SpacesPopoverList extends Component<Props, State> {
         anchorPosition="downLeft"
         ownFocus
       >
-        <React.Suspense fallback={<EuiLoadingSpinner />}>{this.getMenuPanel()}</React.Suspense>
+        {this.getMenuPanel()}
       </EuiPopover>
     );
   }
@@ -194,7 +193,7 @@ export class SpacesPopoverList extends Component<Props, State> {
   };
 
   private renderSpaceMenuItem = (space: Space): JSX.Element => {
-    const LazySpaceAvatar = React.lazy(this.props.spacesApiUi.components.getSpaceAvatar);
+    const LazySpaceAvatar = memo(this.props.spacesApiUi.components.getSpaceAvatar);
     const icon = <LazySpaceAvatar space={space} size={'s'} />; // wrapped in a Suspense above
     return (
       <EuiContextMenuItem
