@@ -64,6 +64,8 @@ export const ConfigForm: FC<ConfigFormProps> = memo(
         <EuiFlexItem grow={2}>
           <ConfigFormHeading>{TITLES.os}</ConfigFormHeading>
           <EuiText>{supportedOss.map((os) => OS_TITLES[os]).join(', ')}</EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem>
           {osRestriction ? <EuiTextColor color="subdued">{osRestriction}</EuiTextColor> : <></>}
         </EuiFlexItem>
         <EuiShowFor sizes={['m', 'l', 'xl']}>

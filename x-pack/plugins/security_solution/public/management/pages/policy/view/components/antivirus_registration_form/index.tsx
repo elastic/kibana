@@ -63,7 +63,13 @@ export const AntivirusRegistrationForm = memo(() => {
             id="xpack.securitySolution.endpoint.policy.details.antivirusRegistration.osRestriction"
             defaultMessage="Restrictions"
           />
-          <EuiIconTip type="info" content="hi" />
+          <EuiIconTip
+            type="iInCircle"
+            content={i18n.translate(
+              'xpack.securitySolution.endpoint.policy.details.av.windowsServerNotSupported',
+              { defaultMessage: 'Windows Server operating systems unsupported' }
+            )}
+          />
         </>
       }
     >
