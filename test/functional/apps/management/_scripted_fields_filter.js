@@ -27,7 +27,7 @@ export default function ({ getService, getPageObjects }) {
     });
 
     after(async function () {
-      await esArchiver.unload('management');
+      await esArchiver.load('empty_kibana');
     });
 
     const scriptedPainlessFieldName = 'ram_pain1';
