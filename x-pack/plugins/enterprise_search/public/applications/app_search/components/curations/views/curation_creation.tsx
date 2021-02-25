@@ -9,14 +9,7 @@ import React from 'react';
 
 import { useActions } from 'kea';
 
-import {
-  EuiPageHeader,
-  EuiPageHeaderSection,
-  EuiPageContent,
-  EuiTitle,
-  EuiText,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiPageHeader, EuiPageContent, EuiTitle, EuiText, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { FlashMessages } from '../../../../shared/flash_messages';
@@ -30,13 +23,7 @@ export const CurationCreation: React.FC = () => {
 
   return (
     <>
-      <EuiPageHeader>
-        <EuiPageHeaderSection>
-          <EuiTitle size="l">
-            <h1>{CREATE_NEW_CURATION_TITLE}</h1>
-          </EuiTitle>
-        </EuiPageHeaderSection>
-      </EuiPageHeader>
+      <EuiPageHeader pageTitle={CREATE_NEW_CURATION_TITLE} />
       <FlashMessages />
       <EuiPageContent>
         <EuiTitle>
