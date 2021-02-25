@@ -70,8 +70,8 @@ describe('usePersistExceptionItem', () => {
   });
 
   test('it invokes "updateExceptionListItem" when payload has "id"', async () => {
-    const addExceptionItem = jest.spyOn(api, 'addExceptionListItem');
-    const updateExceptionItem = jest.spyOn(api, 'updateExceptionListItem');
+    const addExceptionListItem = jest.spyOn(api, 'addExceptionListItem');
+    const updateExceptionListItem = jest.spyOn(api, 'updateExceptionListItem');
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook<
         PersistHookProps,
@@ -86,8 +86,8 @@ describe('usePersistExceptionItem', () => {
       await waitForNextUpdate();
 
       expect(result.current).toEqual([{ isLoading: false, isSaved: true }, result.current[1]]);
-      expect(addExceptionItem).not.toHaveBeenCalled();
-      expect(updateExceptionItem).toHaveBeenCalledWith({
+      expect(addExceptionListItem).not.toHaveBeenCalled();
+      expect(updateExceptionListItem).toHaveBeenCalledWith({
         http: mockKibanaHttpService,
         listItem: getUpdateExceptionListItemSchemaMock(),
         signal: new AbortController().signal,
@@ -95,9 +95,9 @@ describe('usePersistExceptionItem', () => {
     });
   });
 
-  test('it invokes "addExceptionListItem" when payload has "id"', async () => {
-    const updateExceptionItem = jest.spyOn(api, 'updateExceptionListItem');
-    const createExceptionItem = jest.spyOn(api, 'addExceptionListItem');
+  test('it invokes "addExceptionListItem" when payload does not have "id"', async () => {
+    const updateExceptionListItem = jest.spyOn(api, 'updateExceptionListItem');
+    const addExceptionListItem = jest.spyOn(api, 'addExceptionListItem');
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook<
         PersistHookProps,
@@ -112,8 +112,8 @@ describe('usePersistExceptionItem', () => {
       await waitForNextUpdate();
 
       expect(result.current).toEqual([{ isLoading: false, isSaved: true }, result.current[1]]);
-      expect(updateExceptionItem).not.toHaveBeenCalled();
-      expect(createExceptionItem).toHaveBeenCalledWith({
+      expect(updateExceptionListItem).not.toHaveBeenCalled();
+      expect(addExceptionListItem).toHaveBeenCalledWith({
         http: mockKibanaHttpService,
         listItem: getCreateExceptionListItemSchemaMock(),
         signal: new AbortController().signal,

@@ -6,6 +6,11 @@
         "is_write_index": false
       }
     },
+    "settings": {
+      "index": {
+        "refresh_interval": "5s"
+      }
+    },
     "index": "exceptions-0001",
     "mappings": {
       "properties": {
