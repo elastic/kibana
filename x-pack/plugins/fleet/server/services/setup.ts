@@ -57,7 +57,7 @@ async function createSetupSideEffects(
     installedPackages,
     defaultOutput,
     { created: defaultAgentPolicyCreated, defaultAgentPolicy },
-    { created: defaultFleetServerPolicyCreated, policy: defaultFleetServerPolicy },
+    defaultFleetServerPolicy,
   ] = await Promise.all([
     // packages installed by default
     ensureInstalledDefaultPackages(soClient, esClient),
@@ -65,7 +65,7 @@ async function createSetupSideEffects(
     agentPolicyService.ensureDefaultAgentPolicy(soClient, esClient),
     isFleetServerEnabled
       ? agentPolicyService.ensureDefaultFleetServerAgentPolicy(soClient, esClient)
-      : {},
+      : undefined,
     updateFleetRoleIfExists(esClient),
     settingsService.getSettings(soClient).catch((e: any) => {
       if (e.isBoom && e.output.statusCode === 404) {
@@ -94,12 +94,12 @@ async function createSetupSideEffects(
       esClient,
     });
 
-    if (defaultFleetServerPolicyCreated) {
+    if (defaultFleetServerPolicy && defaultFleetServerPolicy.created) {
       await addPackageToAgentPolicy(
         soClient,
         esClient,
         fleetServerPackage,
-        defaultFleetServerPolicy,
+        defaultFleetServerPolicy.policy,
         defaultOutput
       );
     }
