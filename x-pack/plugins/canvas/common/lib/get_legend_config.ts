@@ -5,7 +5,15 @@
  * 2.0.
  */
 
-export const getLegendConfig = (legend, size) => {
+import { Legend } from '../../types';
+const acceptedPositions: Legend[] = [
+  Legend.NORTH_WEST,
+  Legend.SOUTH_WEST,
+  Legend.NORTH_EAST,
+  Legend.SOUTH_EAST,
+];
+
+export const getLegendConfig = (legend: boolean | Legend, size: number) => {
   if (!legend || size < 2) {
     return { show: false };
   }
@@ -16,8 +24,7 @@ export const getLegendConfig = (legend, size) => {
     labelBoxBorderColor: 'transparent',
   };
 
-  const acceptedPositions = ['nw', 'ne', 'sw', 'se'];
-
+  // @ts-expect-error
   config.position = !legend || acceptedPositions.includes(legend) ? legend : 'ne';
 
   return config;
