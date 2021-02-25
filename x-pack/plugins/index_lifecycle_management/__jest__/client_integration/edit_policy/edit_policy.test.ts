@@ -636,6 +636,7 @@ describe('<EditPolicy />', () => {
           nodesByRoles: { data_hot: ['123'] },
           isUsingDeprecatedDataRoleConfig: true,
         });
+
         await act(async () => {
           testBed = await setup({
             appServicesContext: {
@@ -646,10 +647,13 @@ describe('<EditPolicy />', () => {
             },
           });
         });
+
+        const { component } = testBed;
+        component.update();
       });
 
       test('removes default, recommended option', async () => {
-        const { actions, find } = testBed;
+        const { actions, find, component } = testBed;
         await actions.warm.enable(true);
         actions.warm.showDataAllocationOptions();
 
@@ -658,15 +662,6 @@ describe('<EditPolicy />', () => {
         expect(find('noneDataAllocationOption').exists()).toBeTruthy();
         // Show the call-to-action for users to migrate their cluster to use node roles
         expect(find('cloudDataTierCallout').exists()).toBeTruthy();
-      });
-
-      test('should show cloud notice when cold tier nodes do not exist', async () => {
-        const { actions, find } = testBed;
-        expect(find('cloudMissingColdTierCallout').exists()).toBeTruthy();
-        await actions.cold.enable(true);
-        // Assert that other notices are not showing
-        expect(find('defaultAllocationNotice').exists()).toBeFalsy();
-        expect(find('noNodeAttributesWarning').exists()).toBeFalsy();
       });
     });
 
@@ -712,6 +707,40 @@ describe('<EditPolicy />', () => {
             },
           }
         `);
+      });
+
+      describe('on cloud', () => {
+        beforeEach(async () => {
+          httpRequestsMockHelpers.setLoadPolicies([getDefaultHotPhasePolicy('my_policy')]);
+          httpRequestsMockHelpers.setListNodes({
+            nodesByAttributes: { test: ['123'] },
+            nodesByRoles: { data_hot: ['123'] },
+            isUsingDeprecatedDataRoleConfig: false,
+          });
+
+          await act(async () => {
+            testBed = await setup({
+              appServicesContext: {
+                cloud: {
+                  isCloudEnabled: true,
+                },
+                license: licensingMock.createLicense({ license: { type: 'basic' } }),
+              },
+            });
+          });
+
+          const { component } = testBed;
+          component.update();
+        });
+
+        test('should show cloud notice when cold tier nodes do not exist', async () => {
+          const { actions, find } = testBed;
+          await actions.cold.enable(true);
+          expect(find('cloudMissingColdTierCallout').exists()).toBeTruthy();
+          // Assert that other notices are not showing
+          expect(find('defaultAllocationNotice').exists()).toBeFalsy();
+          expect(find('noNodeAttributesWarning').exists()).toBeFalsy();
+        });
       });
     });
 
