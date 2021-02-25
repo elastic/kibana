@@ -147,8 +147,8 @@ export const EnginesTable: React.FC<EnginesTableProps> = ({
               defaultMessage: 'Manage this engine',
             }
           ),
-          type: 'button',
-          color: 'primary',
+          type: 'icon',
+          icon: 'eye',
           onClick: (engineDetails) => {
             sendEngineTableLinkClickTelemetry();
             navigateToUrl(generteEncodedEnginePath(engineDetails.name));
