@@ -5,31 +5,13 @@
  * 2.0.
  */
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 
 export function useLocalStorage<T>(key: string, defaultValue: T) {
-  const getFromStorage = useCallback(() => {
-    const storedItem = window.localStorage.getItem(key);
-
-    let toStore: T = defaultValue;
-
-    if (storedItem !== null) {
-      try {
-        toStore = JSON.parse(storedItem) as T;
-      } catch (err) {
-        window.localStorage.removeItem(key);
-        // eslint-disable-next-line no-console
-        console.log(`Unable to decode: ${key}`);
-      }
-    }
-
-    return toStore;
-  }, [key, defaultValue]);
-
-  const [item, setItem] = useState<T>(getFromStorage());
+  const [item, setItem] = useState<T>(getFromStorage(key, defaultValue));
 
   const updateFromStorage = () => {
-    const storedItem = getFromStorage();
+    const storedItem = getFromStorage(key, defaultValue);
     setItem(storedItem);
   };
 
@@ -51,9 +33,25 @@ export function useLocalStorage<T>(key: string, defaultValue: T) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // item state must be updated with a new key or default value
   useEffect(() => {
-    setItem(getFromStorage());
-  }, [getFromStorage]);
+    setItem(getFromStorage(key, defaultValue));
+  }, [key, defaultValue]);
 
   return [item, saveToStorage] as const;
+}
+
+function getFromStorage<T>(keyName: string, defaultValue: T) {
+  const storedItem = window.localStorage.getItem(keyName);
+
+  if (storedItem !== null) {
+    try {
+      return JSON.parse(storedItem) as T;
+    } catch (err) {
+      window.localStorage.removeItem(keyName);
+      // eslint-disable-next-line no-console
+      console.log(`Unable to decode: ${keyName}`);
+    }
+  }
+  return defaultValue;
 }
