@@ -6,16 +6,11 @@
  */
 
 import { Type } from '@kbn/config-schema';
-import {
-  IRouter,
-  kibanaResponseFactory,
-  RequestHandler,
-  RequestHandlerContext,
-  RouteConfig,
-} from 'src/core/server';
+import type { IRouter, RequestHandler, RequestHandlerContext, RouteConfig } from 'src/core/server';
+import { kibanaResponseFactory } from 'src/core/server';
 import { httpServerMock } from 'src/core/server/mocks';
 
-import { EncryptionKeyRotationService } from '../crypto';
+import type { EncryptionKeyRotationService } from '../crypto';
 import { routeDefinitionParamsMock } from './index.mock';
 import { defineKeyRotationRoutes } from './key_rotation';
 

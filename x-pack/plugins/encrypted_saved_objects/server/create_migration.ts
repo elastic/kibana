@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import {
+import type {
   SavedObjectMigrationContext,
   SavedObjectMigrationFn,
   SavedObjectUnsanitizedDoc,
 } from 'src/core/server';
 
-import { EncryptedSavedObjectsService, EncryptedSavedObjectTypeRegistration } from './crypto';
+import type { EncryptedSavedObjectsService, EncryptedSavedObjectTypeRegistration } from './crypto';
 import { normalizeNamespace } from './saved_objects';
 
 type SavedObjectOptionalMigrationFn<InputAttributes, MigratedAttributes> = (

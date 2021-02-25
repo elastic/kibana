@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { ISavedObjectsRepository, ISavedObjectTypeRegistry, SavedObject } from 'src/core/server';
+import type {
+  ISavedObjectsRepository,
+  ISavedObjectTypeRegistry,
+  SavedObject,
+} from 'src/core/server';
 import {
   coreMock,
   httpServerMock,
@@ -15,9 +19,10 @@ import {
 } from 'src/core/server/mocks';
 
 import { securityMock } from '../../../security/server/mocks';
-import { EncryptedSavedObjectsService } from '../crypto';
+import type { EncryptedSavedObjectsService } from '../crypto';
 import { encryptedSavedObjectsServiceMock } from '../crypto/index.mock';
-import { ClientInstanciator, setupSavedObjects } from './';
+import type { ClientInstanciator } from './';
+import { setupSavedObjects } from './';
 import { EncryptedSavedObjectsClientWrapper } from './encrypted_saved_objects_client_wrapper';
 
 describe('#setupSavedObjects', () => {

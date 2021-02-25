@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import nodeCrypto, { Crypto } from '@elastic/node-crypto';
+import type { Crypto } from '@elastic/node-crypto';
+import nodeCrypto from '@elastic/node-crypto';
 
 import { loggingSystemMock } from 'src/core/server/mocks';
 
 import { mockAuthenticatedUser } from '../../../security/common/model/authenticated_user.mock';
-import { EncryptedSavedObjectsAuditLogger } from '../audit';
+import type { EncryptedSavedObjectsAuditLogger } from '../audit';
 import { encryptedSavedObjectsAuditLoggerMock } from '../audit/index.mock';
 import { EncryptedSavedObjectsService } from './encrypted_saved_objects_service';
 import { EncryptionError } from './encryption_error';

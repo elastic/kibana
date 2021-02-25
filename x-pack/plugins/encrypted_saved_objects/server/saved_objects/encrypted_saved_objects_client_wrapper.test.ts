@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract } from 'src/core/server';
+import type { SavedObjectsClientContract } from 'src/core/server';
 import { savedObjectsClientMock, savedObjectsTypeRegistryMock } from 'src/core/server/mocks';
 
 import { mockAuthenticatedUser } from '../../../security/common/model/authenticated_user.mock';
-import { EncryptedSavedObjectsService, EncryptionError } from '../crypto';
+import type { EncryptedSavedObjectsService } from '../crypto';
+import { EncryptionError } from '../crypto';
 import { EncryptionErrorOperation } from '../crypto/encryption_error';
 import { encryptedSavedObjectsServiceMock } from '../crypto/index.mock';
 import { EncryptedSavedObjectsClientWrapper } from './encrypted_saved_objects_client_wrapper';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import {
+import type {
   ISavedObjectTypeRegistry,
   SavedObject,
   SavedObjectsAddToNamespacesOptions,
@@ -25,11 +25,13 @@ import {
   SavedObjectsOpenPointInTimeOptions,
   SavedObjectsRemoveReferencesToOptions,
   SavedObjectsRemoveReferencesToResponse,
+  SavedObjectsUpdateOptions,
+  SavedObjectsUpdateResponse,
 } from 'src/core/server';
 
 import { SavedObjectsUtils } from '../../../../../src/core/server';
-import { AuthenticatedUser } from '../../../security/common/model';
-import { EncryptedSavedObjectsService } from '../crypto';
+import type { AuthenticatedUser } from '../../../security/common/model';
+import type { EncryptedSavedObjectsService } from '../crypto';
 import { getDescriptorNamespace } from './get_descriptor_namespace';
 
 interface EncryptedSavedObjectsClientOptions {

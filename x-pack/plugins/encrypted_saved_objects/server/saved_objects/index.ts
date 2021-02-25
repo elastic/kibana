@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { PublicMethodsOf } from '@kbn/utility-types';
-import {
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import type {
   ISavedObjectsRepository,
   ISavedObjectTypeRegistry,
   SavedObject,
@@ -15,8 +15,8 @@ import {
   StartServicesAccessor,
 } from 'src/core/server';
 
-import { SecurityPluginSetup } from '../../../security/server';
-import { EncryptedSavedObjectsService } from '../crypto';
+import type { SecurityPluginSetup } from '../../../security/server';
+import type { EncryptedSavedObjectsService } from '../crypto';
 import { EncryptedSavedObjectsClientWrapper } from './encrypted_saved_objects_client_wrapper';
 import { getDescriptorNamespace, normalizeNamespace } from './get_descriptor_namespace';
 

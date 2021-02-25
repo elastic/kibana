@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { Crypto, EncryptOutput } from '@elastic/node-crypto';
+import type { Crypto, EncryptOutput } from '@elastic/node-crypto';
 import stringify from 'json-stable-stringify';
 import typeDetect from 'type-detect';
 
-import { Logger } from 'src/core/server';
+import type { Logger } from 'src/core/server';
 
-import { AuthenticatedUser } from '../../../security/common/model';
-import { EncryptedSavedObjectsAuditLogger } from '../audit';
+import type { AuthenticatedUser } from '../../../security/common/model';
+import type { EncryptedSavedObjectsAuditLogger } from '../audit';
 import { EncryptedSavedObjectAttributesDefinition } from './encrypted_saved_object_type_definition';
 import { EncryptionError, EncryptionErrorOperation } from './encryption_error';
 

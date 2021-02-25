@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObjectUnsanitizedDoc } from 'kibana/server';
+import type { SavedObjectUnsanitizedDoc } from 'src/core/server';
 import { migrationMocks } from 'src/core/server/mocks';
 
 import { getCreateMigration } from './create_migration';
