@@ -313,7 +313,10 @@ export async function getMapsTelemetry(config: MapsConfigType): Promise<MapsUsag
     MAP_SAVED_OBJECT_TYPE,
     (savedObjects) => {
       const savedObjectsWithIndexPatternIds = savedObjects.map((savedObject) => {
-        return injectReferences(savedObject);
+        return {
+          ...savedObject,
+          ...injectReferences(savedObject),
+        };
       });
       return layerLists.push(...getLayerLists(savedObjectsWithIndexPatternIds));
     }
