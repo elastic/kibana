@@ -97,7 +97,7 @@ function deleteESAssets(
     if (assetType === ElasticsearchAssetType.ingestPipeline) {
       return deletePipeline(esClient, id);
     } else if (assetType === ElasticsearchAssetType.indexTemplate) {
-      return deleteTemplate(callCluster, id);
+      return deleteTemplate(esClient, id);
     } else if (assetType === ElasticsearchAssetType.transform) {
       return deleteTransforms(callCluster, [id]);
     } else if (assetType === ElasticsearchAssetType.dataStreamIlmPolicy) {
@@ -129,25 +129,23 @@ async function deleteAssets(
   }
 }
 
-async function deleteTemplate(callCluster: CallESAsCurrentUser, name: string): Promise<void> {
+async function deleteTemplate(esClient: ElasticsearchClient, name: string): Promise<void> {
   // '*' shouldn't ever appear here, but it still would delete all templates
   if (name && name !== '*') {
     try {
-      const callClusterParams: {
+      const esClientParams: {
         method: string;
         path: string;
-        ignore: number[];
       } = {
         method: 'DELETE',
         path: `/_index_template/${name}`,
-        ignore: [404],
       };
       // This uses the catch-all endpoint 'transport.request' because there is no
       // convenience endpoint using the new _index_template API yet.
       // The existing convenience endpoint `indices.putTemplate` only sends to _template,
       // which does not support v2 templates.
       // See src/core/server/elasticsearch/api_types.ts for available endpoints.
-      await callCluster('transport.request', callClusterParams);
+      await esClient.transport.request(esClientParams, { ignore: [404] });
     } catch {
       throw new Error(`error deleting template ${name}`);
     }
