@@ -30,7 +30,7 @@ export class SuspenseErrorBoundary extends Component<PropsWithChildren<Props>, S
     return { error };
   }
 
-  public componentDidCatch(error: Error, { componentStack }: React.ErrorInfo) {
+  public componentDidCatch(error: Error) {
     const { notifications } = this.props;
     if (notifications) {
       const title = i18n.translate('xpack.spaces.uiApi.errorBoundaryToastTitle', {
