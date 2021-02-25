@@ -20,7 +20,7 @@ import { TimelineStatus, TimelineId, TimelineType } from '../../../../../common/
 import { getCreateCaseUrl, getCaseDetailsUrl } from '../../../../common/components/link_to';
 import { SecurityPageName } from '../../../../app/types';
 import { timelineDefaults } from '../../../../timelines/store/timeline/defaults';
-import { Case } from '../../../../cases/containers/types';
+import { Case, SubCase } from '../../../../cases/containers/types';
 import * as i18n from '../../timeline/properties/translations';
 
 interface Props {
@@ -46,7 +46,7 @@ const AddToCaseButtonComponent: React.FC<Props> = ({ timelineId }) => {
   const [isPopoverOpen, setPopover] = useState(false);
 
   const onRowClick = useCallback(
-    async (theCase?: Case) => {
+    async (theCase?: Case | SubCase) => {
       await navigateToApp(`${APP_ID}:${SecurityPageName.case}`, {
         path: theCase != null ? getCaseDetailsUrl({ id: theCase.id }) : getCreateCaseUrl(),
       });

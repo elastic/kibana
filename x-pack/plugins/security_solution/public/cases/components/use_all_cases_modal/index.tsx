@@ -7,11 +7,11 @@
 
 import React, { useState, useCallback, useMemo } from 'react';
 import { CaseStatuses } from '../../../../../case/common/api';
-import { Case } from '../../containers/types';
+import { Case, SubCase } from '../../containers/types';
 import { AllCasesModal } from './all_cases_modal';
 
 export interface UseAllCasesModalProps {
-  onRowClick: (theCase?: Case) => void;
+  onRowClick: (theCase?: Case | SubCase) => void;
   disabledStatuses?: CaseStatuses[];
 }
 
@@ -30,7 +30,7 @@ export const useAllCasesModal = ({
   const closeModal = useCallback(() => setIsModalOpen(false), []);
   const openModal = useCallback(() => setIsModalOpen(true), []);
   const onClick = useCallback(
-    (theCase?: Case) => {
+    (theCase?: Case | SubCase) => {
       closeModal();
       onRowClick(theCase);
     },

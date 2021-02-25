@@ -42,7 +42,7 @@ describe('StatusActionButton', () => {
 
       expect(
         wrapper.find(`[data-test-subj="case-view-status-action-button"]`).first().prop('iconType')
-      ).toBe('folderClosed');
+      ).toBe('folderCheck');
     });
 
     it('it renders the correct button icon: status closed', () => {

@@ -49,18 +49,25 @@ jest.mock('../create/form_context', () => {
     FormContext: ({
       children,
       onSuccess,
+      afterCaseCreated,
     }: {
       children: ReactNode;
-      onSuccess: (theCase: Partial<Case>) => void;
+      onSuccess: (theCase: Partial<Case>) => Promise<void>;
+      afterCaseCreated: (theCase: Partial<Case>) => Promise<void>;
     }) => {
       return (
         <>
           <button
             type="button"
             data-test-subj="form-context-on-success"
-            onClick={() =>
-              onSuccess({ id: 'new-case', title: 'the new case', settings: { syncAlerts: true } })
-            }
+            onClick={() => {
+              afterCaseCreated({
+                id: 'new-case',
+                title: 'the new case',
+                settings: { syncAlerts: true },
+              });
+              onSuccess({ id: 'new-case', title: 'the new case', settings: { syncAlerts: true } });
+            }}
           >
             {'submit'}
           </button>
@@ -213,13 +220,6 @@ describe('AddToCaseAction', () => {
   });
 
   it('navigates to case view', async () => {
-    usePostCommentMock.mockImplementation(() => {
-      return {
-        ...defaultPostComment,
-        postComment: jest.fn().mockImplementation(({ caseId, data, updateCase }) => updateCase()),
-      };
-    });
-
     const wrapper = mount(
       <TestProviders>
         <AddToCaseAction {...props} />
