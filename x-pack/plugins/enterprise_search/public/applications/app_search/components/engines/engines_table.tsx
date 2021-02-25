@@ -9,13 +9,19 @@ import React from 'react';
 
 import { useActions, useValues } from 'kea';
 
-import { EuiBasicTable, EuiBasicTableColumn, CriteriaWithPagination } from '@elastic/eui';
+import {
+  EuiBasicTable,
+  EuiBasicTableColumn,
+  CriteriaWithPagination,
+  EuiTableActionsColumnType,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedNumber } from '@kbn/i18n/react';
 
 import { KibanaLogic } from '../../../shared/kibana';
 import { EuiLinkTo } from '../../../shared/react_router_helpers';
 import { TelemetryLogic } from '../../../shared/telemetry';
+import { AppLogic } from '../../app_logic';
 import { UNIVERSAL_LANGUAGE } from '../../constants';
 import { ENGINE_PATH } from '../../routes';
 import { generateEncodedPath } from '../../utils/encode_path_params';
@@ -44,6 +50,9 @@ export const EnginesTable: React.FC<EnginesTableProps> = ({
 }) => {
   const { sendAppSearchTelemetry } = useActions(TelemetryLogic);
   const { navigateToUrl } = useValues(KibanaLogic);
+  const {
+    myRole: { canManageEngines },
+  } = useValues(AppLogic);
 
   const generteEncodedEnginePath = (engineName: string) =>
     generateEncodedPath(ENGINE_PATH, { engineName });
@@ -126,71 +135,73 @@ export const EnginesTable: React.FC<EnginesTableProps> = ({
       render: (number: number) => <FormattedNumber value={number} />,
       truncateText: true,
     },
-    {
-      name: i18n.translate(
-        'xpack.enterpriseSearch.appSearch.enginesOverview.table.column.actions',
-        {
-          defaultMessage: 'Actions',
-        }
-      ),
-      actions: [
-        {
-          name: i18n.translate(
-            'xpack.enterpriseSearch.appSearch.enginesOverview.table.action.manage',
-            {
-              defaultMessage: 'Manage',
-            }
-          ),
-          description: i18n.translate(
-            'xpack.enterpriseSearch.appSearch.enginesOverview.table.action.manage.buttonDescription',
-            {
-              defaultMessage: 'Manage this engine',
-            }
-          ),
-          type: 'icon',
-          icon: 'eye',
-          onClick: (engineDetails) => {
-            sendEngineTableLinkClickTelemetry();
-            navigateToUrl(generteEncodedEnginePath(engineDetails.name));
-          },
-        },
-        {
-          name: i18n.translate(
-            'xpack.enterpriseSearch.appSearch.enginesOverview.table.action.delete.buttonLabel',
-            {
-              defaultMessage: 'Delete',
-            }
-          ),
-          description: i18n.translate(
-            'xpack.enterpriseSearch.appSearch.enginesOverview.table.action.delete.buttonDescription',
-            {
-              defaultMessage: 'Delete this engine',
-            }
-          ),
-          type: 'icon',
-          icon: 'trash',
-          onClick: ({ name }) => {
-            if (
-              window.confirm(
-                i18n.translate(
-                  'xpack.enterpriseSearch.appSearch.enginesOverview.table.action.delete.confirmationPopupMessage',
-                  {
-                    defaultMessage:
-                      'Are you sure you want to permanently delete "{name}" and all of its content?',
-                    values: {
-                      name,
-                    },
-                  }
-                )
-              )
-            ) {
-              onDeleteEngine(name);
-            }
-          },
-        },
-      ],
-    },
   ];
+
+  const actionsColumn: EuiTableActionsColumnType<EngineDetails> = {
+    name: i18n.translate('xpack.enterpriseSearch.appSearch.enginesOverview.table.column.actions', {
+      defaultMessage: 'Actions',
+    }),
+    actions: [
+      {
+        name: i18n.translate(
+          'xpack.enterpriseSearch.appSearch.enginesOverview.table.action.manage',
+          {
+            defaultMessage: 'Manage',
+          }
+        ),
+        description: i18n.translate(
+          'xpack.enterpriseSearch.appSearch.enginesOverview.table.action.manage.buttonDescription',
+          {
+            defaultMessage: 'Manage this engine',
+          }
+        ),
+        type: 'icon',
+        icon: 'eye',
+        onClick: (engineDetails) => {
+          sendEngineTableLinkClickTelemetry();
+          navigateToUrl(generteEncodedEnginePath(engineDetails.name));
+        },
+      },
+      {
+        name: i18n.translate(
+          'xpack.enterpriseSearch.appSearch.enginesOverview.table.action.delete.buttonLabel',
+          {
+            defaultMessage: 'Delete',
+          }
+        ),
+        description: i18n.translate(
+          'xpack.enterpriseSearch.appSearch.enginesOverview.table.action.delete.buttonDescription',
+          {
+            defaultMessage: 'Delete this engine',
+          }
+        ),
+        type: 'icon',
+        icon: 'trash',
+        onClick: ({ name }) => {
+          if (
+            window.confirm(
+              i18n.translate(
+                'xpack.enterpriseSearch.appSearch.enginesOverview.table.action.delete.confirmationPopupMessage',
+                {
+                  defaultMessage:
+                    'Are you sure you want to permanently delete "{name}" and all of its content?',
+                  values: {
+                    name,
+                  },
+                }
+              )
+            )
+          ) {
+            onDeleteEngine(name);
+          }
+        },
+      },
+    ],
+  };
+
+  if (canManageEngines) {
+    columns.push(actionsColumn);
+  }
 
   return (
     <EuiBasicTable
