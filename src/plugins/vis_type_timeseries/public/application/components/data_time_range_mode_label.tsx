@@ -6,13 +6,15 @@
  * Side Public License, v 1.
  */
 
+import './data_time_range_mode_label.scss';
+
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiFlexItem, EuiLink, EuiText, EuiToolTip, EuiFlexGroup } from '@elastic/eui';
+import { EuiFlexItem, EuiText, EuiToolTip, EuiFlexGroup } from '@elastic/eui';
 import { getUISettings } from '../../services';
 import { convertIntervalIntoUnit, isAutoInterval, isGteInterval } from './lib/get_interval';
-import { createIntervalBasedFormatter } from '../components/lib/create_interval_based_formatter';
+import { createIntervalBasedFormatter } from './lib/create_interval_based_formatter';
 import { TIME_RANGE_DATA_MODES } from '../../../common/timerange_data_modes';
 import { PanelData } from '../../../common/types';
 
@@ -72,7 +74,9 @@ export const DataTimeRangeModeLabel = ({
 
     return (
       <EuiToolTip position="top" content={tooltipContent}>
-        <EuiLink onClick={() => {}}>{lastValueFormattedMessage}</EuiLink>
+        <EuiText className="tvbLastValueLabel" color="subdued" size="xs">
+          {lastValueFormattedMessage}
+        </EuiText>
       </EuiToolTip>
     );
   };
