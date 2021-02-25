@@ -31,6 +31,8 @@ import {
   RULE_AUTO_REFRESH_IDLE_MODAL_CONTINUE,
   rowsPerPageSelector,
   pageSelector,
+  DUPLICATE_RULE_ACTION_BTN,
+  DUPLICATE_RULE_MENU_PANEL_BTN,
 } from '../screens/alerts_detection_rules';
 import { ALL_ACTIONS, DELETE_RULE } from '../screens/rule_details';
 
@@ -43,6 +45,33 @@ export const editFirstRule = () => {
   cy.get(COLLAPSED_ACTION_BTN).first().click({ force: true });
   cy.get(EDIT_RULE_ACTION_BTN).should('be.visible');
   cy.get(EDIT_RULE_ACTION_BTN).click();
+};
+
+export const duplicateFirstRule = () => {
+  cy.get(COLLAPSED_ACTION_BTN).should('be.visible');
+  cy.get(COLLAPSED_ACTION_BTN).first().click({ force: true });
+  cy.get(DUPLICATE_RULE_ACTION_BTN).should('be.visible');
+  cy.get(DUPLICATE_RULE_ACTION_BTN).click();
+};
+
+/**
+ * Duplicates the rule from the menu and does additional
+ * pipes and checking that the elements are present on the
+ * page as well as removed when doing the clicks to help reduce
+ * flake.
+ */
+export const duplicateRuleFromMenu = () => {
+  cy.get(ALL_ACTIONS).should('be.visible');
+  cy.root()
+    .pipe(($el) => {
+      $el.find(ALL_ACTIONS).trigger('click');
+      return $el.find(DUPLICATE_RULE_MENU_PANEL_BTN);
+    })
+    .should(($el) => expect($el).to.be.visible);
+  // Because of a fade effect and fast clicking this can produce more than one click
+  cy.get(DUPLICATE_RULE_MENU_PANEL_BTN)
+    .pipe(($el) => $el.trigger('click'))
+    .should('not.be.visible');
 };
 
 export const deleteFirstRule = () => {
