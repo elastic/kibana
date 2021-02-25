@@ -11,7 +11,7 @@ import * as UiSharedDeps from '@kbn/ui-shared-deps';
 import { PackageInfo } from '@kbn/config';
 import { UiPlugins } from '../../plugins';
 import { IUiSettingsClient } from '../../ui_settings';
-import { GetAuthState, KibanaRequest } from '../../http';
+import { HttpAuth, KibanaRequest } from '../../http';
 import { getStylesheetPaths } from './get_stylesheet_paths';
 import { getPluginsBundlePaths } from './get_plugin_bundle_paths';
 import { BootstrapTemplateInterpolator } from './render_template';
@@ -23,7 +23,7 @@ interface FactoryOptions {
   serverBasePath: string;
   packageInfo: PackageInfo;
   uiPlugins: UiPlugins;
-  getAuthStatus: GetAuthState;
+  auth: HttpAuth;
 }
 
 interface RenderedOptions {
@@ -40,19 +40,27 @@ export const bootstrapRendererFactory: BootstrapRendererFactory = ({
   packageInfo,
   serverBasePath,
   uiPlugins,
-  getAuthStatus,
+  auth,
 }) => {
   const templateInterpolator = new BootstrapTemplateInterpolator();
+
+  const isAuthenticated = (request: KibanaRequest) => {
+    if (!auth.isEnabled()) {
+      return true;
+    }
+    const { status: authStatus } = auth.get(request);
+    // status is unknown when auth is disabled. we just need to not be `unauthenticated` here.
+    return authStatus !== 'unauthenticated';
+  };
 
   return async ({ uiSettingsClient, request }) => {
     let darkMode: boolean;
     let themeVersion: string;
 
     try {
-      const { status: authStatus } = getAuthStatus(request);
-      const canUseSettings = authStatus !== 'unauthenticated'; // unknown is when auth is not present - oss
-      darkMode = canUseSettings ? await uiSettingsClient.get('theme:darkMode') : false;
-      themeVersion = canUseSettings ? await uiSettingsClient.get('theme:version') : 'v7';
+      const authenticated = isAuthenticated(request);
+      darkMode = authenticated ? await uiSettingsClient.get('theme:darkMode') : false;
+      themeVersion = authenticated ? await uiSettingsClient.get('theme:version') : 'v7';
     } catch (e) {
       // need to be resilient to ES connectivity issues
       darkMode = false;

@@ -252,6 +252,7 @@ export class LegacyService implements CoreService {
         auth: {
           get: setupDeps.core.http.auth.get,
           isAuthenticated: setupDeps.core.http.auth.isAuthenticated,
+          isEnabled: setupDeps.core.http.auth.isEnabled,
         },
         csp: setupDeps.core.http.csp,
         getServerInfo: setupDeps.core.http.getServerInfo,

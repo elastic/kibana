@@ -54,6 +54,10 @@ export interface HttpAuth {
    * {@link IsAuthenticated}
    */
   isAuthenticated: IsAuthenticated;
+  /**
+   * Returns true if authentication is enabled for the http server
+   */
+  isEnabled: () => boolean;
 }
 
 /**
