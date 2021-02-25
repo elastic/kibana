@@ -6,6 +6,4 @@
  * Side Public License, v 1.
  */
 
-export const TMS_IN_YML_ID = 'TMS in config/kibana.yml';
-
-export { ORIGIN } from './origin';
+export { getServiceSettings } from './get_service_settings';

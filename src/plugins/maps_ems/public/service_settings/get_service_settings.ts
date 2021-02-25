@@ -6,10 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { lazyLoadMapsLegacyModules } from './lazy_load_bundle';
-// @ts-expect-error
-import { getMapsLegacyConfig } from './kibana_services';
-import { IServiceSettings } from './map/service_settings_types';
+import { IServiceSettings } from './service_settings_types';
+import { getMapsEmsConfig } from '../kibana_services';
+import { ServiceSettings } from './service_settings';
 
 let loadPromise: Promise<IServiceSettings>;
 
@@ -19,10 +18,8 @@ export async function getServiceSettings(): Promise<IServiceSettings> {
   }
 
   loadPromise = new Promise(async (resolve) => {
-    const modules = await lazyLoadMapsLegacyModules();
-    const config = getMapsLegacyConfig();
-    // @ts-expect-error
-    resolve(new modules.ServiceSettings(config, config.tilemap));
+    const config = getMapsEmsConfig();
+    resolve(new ServiceSettings(config, config.tilemap));
   });
   return loadPromise;
 }
