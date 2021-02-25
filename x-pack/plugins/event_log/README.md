@@ -164,10 +164,12 @@ history records associated with specific saved object ids.
 
 ## API
 
+Event Log plugin returns a service instance from setup() and client service from start() methods.
+
+### Setup
 ```typescript
 // IEvent is a TS type generated from the subset of ECS supported
 
-// the NP plugin returns a service instance from setup() and start()
 export interface IEventLogService {
   registerProviderActions(provider: string, actions: string[]): void;
   isProviderActionRegistered(provider: string, action: string): boolean;
@@ -237,6 +239,80 @@ properties `start`, `end`, and `duration` in the event.  For example:
 It's anticipated that more "helper" methods like this will be provided in the
 future.
 
+### Start
+```typescript
+
+export interface IEventLogClientService {
+  getClient(request: KibanaRequest): IEventLogClient;
+}
+
+export interface IEventLogClient {
+  findEventsBySavedObjectIds(
+    type: string,
+    ids: string[],
+    options?: Partial<FindOptionsType>
+  ): Promise<QueryEventsBySavedObjectResult>;
+}
+```
+
+The plugin exposes an `IEventLogClientService` object to plugins that request it.
+These plugins must call `getClient(request)` to get the event log client.
+
+## Experimental RESTful API
+
+Usage of the event log allows you to retrieve the events for a given saved object type by the specified set of IDs.
+The following API is experimental and can change or be removed in a future release.
+
+### `GET /api/event_log/{type}/{id}/_find`: Get events for a given saved object type by the ID
+
+Collects event information from the event log for the selected saved object by type and ID.
+
+Params:
+
+|Property|Description|Type|
+|---|---|---|
+|type|The type of the saved object whose events you're trying to get.|string|
+|id|The id of the saved object.|string|
+
+Query:
+
+|Property|Description|Type|
+|---|---|---|
+|page|The page number.|number|
+|per_page|The number of events to return per page.|number|
+|sort_field|Sorts the response. Could be an event fields returned in the response.|string|
+|sort_order|Sort direction, either `asc` or `desc`.|string|
+|filter|A KQL string that you filter with an attribute from the event. It should look like `event.action:(execute)`.|string|
+|start|The date to start looking for saved object events in the event log. Either an ISO date string, or a duration string that indicates the time since now.|string|
+|end|The date to stop looking for saved object events in the event log. Either an ISO date string, or a duration string that indicates the time since now.|string|
+
+### `POST /api/event_log/{type}/_find`: Retrive events for a given saved object type by the IDs
+
+Collects event information from the event log for the selected saved object by type and by IDs.
+
+Params:
+
+|Property|Description|Type|
+|---|---|---|
+|type|The type of the saved object whose events you're trying to get.|string|
+
+Query:
+
+|Property|Description|Type|
+|---|---|---|
+|page|The page number.|number|
+|per_page|The number of events to return per page.|number|
+|sort_field|Sorts the response. Could be an event field returned in the response.|string|
+|sort_order|Sort direction, either `asc` or `desc`.|string|
+|filter|A KQL string that you filter with an attribute from the event. It should look like `event.action:(execute)`.|string|
+|start|The date to start looking for saved object events in the event log. Either an ISO date string, or a duration string that indicates the time since now.|string|
+|end|The date to stop looking for saved object events in the event log. Either an ISO date string, or a duration string that indicates the time since now.|string|
+
+Body:
+
+|Property|Description|Type|
+|---|---|---|
+|ids|The array ids of the saved object.|string array|
 
 ## Stored data
 
@@ -303,4 +379,3 @@ For more relevant information on ILM, see:
 
 [getting started with ILM doc]: https://www.elastic.co/guide/en/elasticsearch/reference/current/getting-started-index-lifecycle-management.html
 [write index alias behavior]: https://www.elastic.co/guide/en/elasticsearch/reference/master/indices-rollover-index.html#indices-rollover-is-write-index
-

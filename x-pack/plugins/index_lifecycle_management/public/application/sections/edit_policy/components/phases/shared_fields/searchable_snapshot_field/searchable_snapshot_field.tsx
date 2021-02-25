@@ -52,7 +52,7 @@ export const SearchableSnapshotField: FunctionComponent<Props> = ({ phase }) => 
     services: { cloud },
   } = useKibana();
   const { getUrlForApp, policy, license, isNewPolicy } = useEditPolicyContext();
-  const { isUsingSearchableSnapshotInHotPhase, isUsingRollover } = useConfigurationIssues();
+  const { isUsingSearchableSnapshotInHotPhase } = useConfigurationIssues();
 
   const searchableSnapshotPath = `phases.${phase}.actions.searchable_snapshot.snapshot_repository`;
 
@@ -62,10 +62,8 @@ export const SearchableSnapshotField: FunctionComponent<Props> = ({ phase }) => 
   const isColdPhase = phase === 'cold';
   const isDisabledDueToLicense = !license.canUseSearchableSnapshot();
   const isDisabledInColdDueToHotPhase = isColdPhase && isUsingSearchableSnapshotInHotPhase;
-  const isDisabledInColdDueToRollover = isColdPhase && !isUsingRollover;
 
-  const isDisabled =
-    isDisabledDueToLicense || isDisabledInColdDueToHotPhase || isDisabledInColdDueToRollover;
+  const isDisabled = isDisabledDueToLicense || isDisabledInColdDueToHotPhase;
 
   const [isFieldToggleChecked, setIsFieldToggleChecked] = useState(() =>
     Boolean(
@@ -290,20 +288,6 @@ export const SearchableSnapshotField: FunctionComponent<Props> = ({ phase }) => 
             {
               defaultMessage:
                 'Cannot create a searchable snapshot in cold when it is configured in hot phase.',
-            }
-          )}
-        />
-      );
-    } else if (isDisabledInColdDueToRollover) {
-      infoCallout = (
-        <EuiCallOut
-          size="s"
-          data-test-subj="searchableSnapshotFieldsNoRolloverCallout"
-          title={i18n.translate(
-            'xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotNoRolloverCalloutBody',
-            {
-              defaultMessage:
-                'Cannot create a searchable snapshot when rollover is disabled in the hot phase.',
             }
           )}
         />
