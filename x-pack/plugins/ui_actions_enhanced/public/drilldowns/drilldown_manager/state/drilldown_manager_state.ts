@@ -6,7 +6,7 @@
  */
 
 import useObservable from 'react-use/lib/useObservable';
-import { Observable, BehaviorSubject } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import { map } from 'rxjs/operators';
 import {
   PublicDrilldownManagerProps,

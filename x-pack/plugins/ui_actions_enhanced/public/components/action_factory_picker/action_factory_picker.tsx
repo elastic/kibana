@@ -28,6 +28,7 @@ export const ActionFactoryPicker: React.FC<ActionFactoryPickerProps> = ({
         getDisplayName: (ctx: unknown) =>
           actionFactory.getDisplayName(ctx as BaseActionFactoryContext),
         getIconType: (ctx: unknown) => actionFactory.getIconType(ctx as BaseActionFactoryContext),
+        getDisplayNameTooltip: () => '',
         isCompatible: (ctx: unknown) => actionFactory.isCompatible(ctx as BaseActionFactoryContext),
         MenuItem: actionFactory.MenuItem,
         isBeta: actionFactory.isBeta,
