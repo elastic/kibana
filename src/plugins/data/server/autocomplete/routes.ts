@@ -9,9 +9,10 @@
 import { Observable } from 'rxjs';
 import { CoreSetup, SharedGlobalConfig } from 'kibana/server';
 import { registerValueSuggestionsRoute } from './value_suggestions_route';
+import { DataRequestHandlerContext } from '../types';
 
 export function registerRoutes({ http }: CoreSetup, config$: Observable<SharedGlobalConfig>): void {
-  const router = http.createRouter();
+  const router = http.createRouter<DataRequestHandlerContext>();
 
   registerValueSuggestionsRoute(router, config$);
 }

@@ -8,12 +8,10 @@
 
 import { Observable } from 'rxjs';
 import type {
-  IRouter,
   IScopedClusterClient,
   IUiSettingsClient,
   SavedObjectsClientContract,
   KibanaRequest,
-  RequestHandlerContext,
 } from 'src/core/server';
 import {
   ISearchOptions,
@@ -116,12 +114,3 @@ export interface ISearchStart<
 }
 
 export type SearchRequestHandlerContext = IScopedSearchClient;
-
-/**
- * @internal
- */
-export interface DataRequestHandlerContext extends RequestHandlerContext {
-  search: SearchRequestHandlerContext;
-}
-
-export type DataPluginRouter = IRouter<DataRequestHandlerContext>;

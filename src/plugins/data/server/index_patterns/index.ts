@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { IndexPatternsService } from '../../common/index_patterns';
+
 export * from './utils';
 export {
   IndexPatternsFetcher,
@@ -15,3 +17,5 @@ export {
   getCapabilitiesForRollupIndices,
 } from './fetcher';
 export { IndexPatternsServiceProvider, IndexPatternsServiceStart } from './index_patterns_service';
+
+export type IndexPatternsHandlerContext = IndexPatternsService;
