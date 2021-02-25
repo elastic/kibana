@@ -18,7 +18,7 @@ import type { AllowedSchemaTypes } from 'src/plugins/usage_collection/server';
  */
 export type TelemetrySchemaValue =
   | {
-      type: AllowedSchemaTypes | string;
+      type: AllowedSchemaTypes | 'pass_through' | string;
     }
   | { type: 'array'; items: TelemetrySchemaValue }
   | TelemetrySchemaObject;
@@ -48,6 +48,8 @@ function valueSchemaToConfigSchema(value: TelemetrySchemaValue): Type<unknown> {
   } else {
     const valueType = value.type; // Copied in here because of TS reasons, it's not available in the `default` case
     switch (value.type) {
+      case 'pass_through':
+        return schema.any();
       case 'boolean':
         return schema.boolean();
       case 'keyword':

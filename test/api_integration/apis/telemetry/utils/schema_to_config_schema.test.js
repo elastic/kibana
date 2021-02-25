@@ -134,4 +134,22 @@ describe(`assertTelemetryPayload`, () => {
       )
     ).not.toThrow();
   });
+
+  test('allow pass_through properties', () => {
+    expect(() =>
+      assertTelemetryPayload(
+        {
+          root: {
+            properties: {
+              im_only_passing_through_data: {
+                type: 'pass_through',
+              },
+            },
+          },
+          plugins: { properties: {} },
+        },
+        { im_only_passing_through_data: [{ docs: { field: 1 } }] }
+      )
+    ).not.toThrow();
+  });
 });
