@@ -6,16 +6,21 @@
  */
 
 import '../../../__mocks__/enterprise_search_url.mock';
-import { mockTelemetryActions, mountWithIntl } from '../../../__mocks__';
+import { mockTelemetryActions, mountWithIntl, setMockValues } from '../../../__mocks__';
 
 import React from 'react';
 
-import { EuiBasicTable, EuiPagination, EuiButtonEmpty } from '@elastic/eui';
+import { ReactWrapper } from 'enzyme';
 
+import { EuiBasicTable, EuiPagination, EuiButtonEmpty, EuiIcon, EuiTableRow } from '@elastic/eui';
+
+import { KibanaLogic } from '../../../shared/kibana';
 import { EuiLinkTo } from '../../../shared/react_router_helpers';
 
+import { TelemetryLogic } from '../../../shared/telemetry';
 import { EngineDetails } from '../engine/types';
 
+import { EnginesLogic } from './engines_logic';
 import { EnginesTable } from './engines_table';
 
 describe('EnginesTable', () => {
@@ -47,8 +52,18 @@ describe('EnginesTable', () => {
   };
 
   describe('basic table', () => {
-    const wrapper = mountWithIntl(<EnginesTable {...props} />);
-    const table = wrapper.find(EuiBasicTable);
+    let wrapper: ReactWrapper<any>;
+    let table: ReactWrapper<any>;
+
+    beforeAll(() => {
+      jest.clearAllMocks();
+      setMockValues({
+        // AppLogic
+        myRole: {},
+      });
+      wrapper = mountWithIntl(<EnginesTable {...props} />);
+      table = wrapper.find(EuiBasicTable);
+    });
 
     it('renders', () => {
       expect(table).toHaveLength(1);
@@ -86,12 +101,26 @@ describe('EnginesTable', () => {
 
   describe('loading', () => {
     it('passes the loading prop', () => {
+      jest.clearAllMocks();
+      setMockValues({
+        // AppLogic
+        myRole: {},
+      });
       const wrapper = mountWithIntl(<EnginesTable {...props} loading />);
+
       expect(wrapper.find(EuiBasicTable).prop('loading')).toEqual(true);
     });
   });
 
   describe('language field', () => {
+    beforeAll(() => {
+      jest.clearAllMocks();
+      setMockValues({
+        // AppLogic
+        myRole: {},
+      });
+    });
+
     it('renders language when available', () => {
       const wrapper = mountWithIntl(
         <EnginesTable
@@ -141,6 +170,77 @@ describe('EnginesTable', () => {
       );
       const tableContent = wrapper.find(EuiBasicTable).text();
       expect(tableContent).not.toContain('Universal');
+    });
+  });
+
+  describe('actions', () => {
+    it('when AppLogic.values.myRole.canManageEngines is false actions are hidden', () => {
+      jest.clearAllMocks();
+      setMockValues({
+        // AppLogic
+        myRole: {
+          canManageEngines: false,
+        },
+      });
+      const wrapper = mountWithIntl(<EnginesTable {...props} />);
+      const tableRow = wrapper.find(EuiTableRow).first();
+
+      expect(tableRow.find(EuiIcon)).toHaveLength(0);
+    });
+
+    describe('when AppLogic.values.myRole.canManageEngines is true', () => {
+      let wrapper: ReactWrapper<any>;
+      let tableRow: ReactWrapper<any>;
+      let actions: ReactWrapper<any>;
+
+      beforeEach(() => {
+        jest.clearAllMocks();
+        setMockValues({
+          // AppLogic
+          myRole: {
+            canManageEngines: true,
+          },
+        });
+        wrapper = mountWithIntl(<EnginesTable {...props} />);
+        tableRow = wrapper.find(EuiTableRow).first();
+        actions = tableRow.find(EuiIcon);
+        EnginesLogic.mount();
+      });
+
+      it('renders a manage action', () => {
+        jest.spyOn(TelemetryLogic.actions, 'sendAppSearchTelemetry');
+        jest.spyOn(KibanaLogic.values, 'navigateToUrl');
+        actions.at(0).simulate('click');
+
+        expect(TelemetryLogic.actions.sendAppSearchTelemetry).toHaveBeenCalled();
+        expect(KibanaLogic.values.navigateToUrl).toHaveBeenCalledWith('/engines/test-engine');
+      });
+
+      describe('delete action', () => {
+        it('has an onClick action that calls window.confirm', () => {
+          jest.spyOn(global, 'confirm' as any).mockReturnValueOnce(true);
+          actions.at(1).simulate('click');
+          expect(global.confirm).toHaveBeenCalled();
+        });
+
+        it('clicking the action and confirming calls EnginesLogic.deleteEngine', () => {
+          jest.spyOn(global, 'confirm' as any).mockReturnValueOnce(true);
+          jest.spyOn(EnginesLogic.actions, 'deleteEngine');
+
+          actions.at(1).simulate('click');
+
+          expect(onDeleteEngine).toHaveBeenCalled();
+        });
+
+        it('clicking the action and not confirming does not call EnginesLogic.deleteEngine', () => {
+          jest.spyOn(global, 'confirm' as any).mockReturnValueOnce(false);
+          jest.spyOn(EnginesLogic.actions, 'deleteEngine');
+
+          actions.at(1).simulate('click');
+
+          expect(onDeleteEngine).toHaveBeenCalledTimes(0);
+        });
+      });
     });
   });
 });
