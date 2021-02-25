@@ -38,7 +38,11 @@ function loadApm() {
   LOADED_APM = require('elastic-apm-node') as Agent;
 
   // load APM config and start shipping stats for "ftr" service
-  LOADED_APM.start(loadConfiguration([], REPO_ROOT, false).getConfig('ftr'));
+  LOADED_APM.start({
+    ...loadConfiguration([], REPO_ROOT, false).getConfig('ftr'),
+    // disable raw HTTP instrumentation, capture higher level spans instead via services
+    disableInstrumentations: ['http', 'https'],
+  });
 
   return LOADED_APM;
 }
