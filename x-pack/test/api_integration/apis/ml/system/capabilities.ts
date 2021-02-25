@@ -51,69 +51,73 @@ export default ({ getService }: FtrProviderContext) => {
       it('should get viewer capabilities', async () => {
         const { capabilities } = await runRequest(USER.ML_VIEWER);
 
-        expect(capabilities.canCreateJob).to.eql(false);
-        expect(capabilities.canDeleteJob).to.eql(false);
-        expect(capabilities.canOpenJob).to.eql(false);
-        expect(capabilities.canCloseJob).to.eql(false);
-        expect(capabilities.canUpdateJob).to.eql(false);
-        expect(capabilities.canForecastJob).to.eql(false);
-        expect(capabilities.canCreateDatafeed).to.eql(false);
-        expect(capabilities.canDeleteDatafeed).to.eql(false);
-        expect(capabilities.canStartStopDatafeed).to.eql(false);
-        expect(capabilities.canUpdateDatafeed).to.eql(false);
-        expect(capabilities.canPreviewDatafeed).to.eql(false);
-        expect(capabilities.canGetFilters).to.eql(false);
-        expect(capabilities.canCreateCalendar).to.eql(false);
-        expect(capabilities.canDeleteCalendar).to.eql(false);
-        expect(capabilities.canCreateFilter).to.eql(false);
-        expect(capabilities.canDeleteFilter).to.eql(false);
-        expect(capabilities.canCreateDataFrameAnalytics).to.eql(false);
-        expect(capabilities.canDeleteDataFrameAnalytics).to.eql(false);
-        expect(capabilities.canStartStopDataFrameAnalytics).to.eql(false);
-        expect(capabilities.canCreateMlAlerts).to.eql(false);
-        expect(capabilities.canAccessML).to.eql(true);
-        expect(capabilities.canGetJobs).to.eql(true);
-        expect(capabilities.canGetDatafeeds).to.eql(true);
-        expect(capabilities.canGetCalendars).to.eql(true);
-        expect(capabilities.canFindFileStructure).to.eql(true);
-        expect(capabilities.canGetDataFrameAnalytics).to.eql(true);
-        expect(capabilities.canGetAnnotations).to.eql(true);
-        expect(capabilities.canCreateAnnotation).to.eql(true);
-        expect(capabilities.canDeleteAnnotation).to.eql(true);
+        expect(capabilities).to.eql({
+          canCreateJob: false,
+          canDeleteJob: false,
+          canOpenJob: false,
+          canCloseJob: false,
+          canUpdateJob: false,
+          canForecastJob: false,
+          canCreateDatafeed: false,
+          canDeleteDatafeed: false,
+          canStartStopDatafeed: false,
+          canUpdateDatafeed: false,
+          canPreviewDatafeed: false,
+          canGetFilters: false,
+          canCreateCalendar: false,
+          canDeleteCalendar: false,
+          canCreateFilter: false,
+          canDeleteFilter: false,
+          canCreateDataFrameAnalytics: false,
+          canDeleteDataFrameAnalytics: false,
+          canStartStopDataFrameAnalytics: false,
+          canCreateMlAlerts: false,
+          canAccessML: true,
+          canGetJobs: true,
+          canGetDatafeeds: true,
+          canGetCalendars: true,
+          canFindFileStructure: true,
+          canGetDataFrameAnalytics: true,
+          canGetAnnotations: true,
+          canCreateAnnotation: true,
+          canDeleteAnnotation: true,
+        });
       });
 
       it('should get power user capabilities', async () => {
         const { capabilities } = await runRequest(USER.ML_POWERUSER);
 
-        expect(capabilities.canCreateJob).to.eql(true);
-        expect(capabilities.canDeleteJob).to.eql(true);
-        expect(capabilities.canOpenJob).to.eql(true);
-        expect(capabilities.canCloseJob).to.eql(true);
-        expect(capabilities.canUpdateJob).to.eql(true);
-        expect(capabilities.canForecastJob).to.eql(true);
-        expect(capabilities.canCreateDatafeed).to.eql(true);
-        expect(capabilities.canDeleteDatafeed).to.eql(true);
-        expect(capabilities.canStartStopDatafeed).to.eql(true);
-        expect(capabilities.canUpdateDatafeed).to.eql(true);
-        expect(capabilities.canPreviewDatafeed).to.eql(true);
-        expect(capabilities.canGetFilters).to.eql(true);
-        expect(capabilities.canCreateCalendar).to.eql(true);
-        expect(capabilities.canDeleteCalendar).to.eql(true);
-        expect(capabilities.canCreateFilter).to.eql(true);
-        expect(capabilities.canDeleteFilter).to.eql(true);
-        expect(capabilities.canCreateDataFrameAnalytics).to.eql(true);
-        expect(capabilities.canDeleteDataFrameAnalytics).to.eql(true);
-        expect(capabilities.canStartStopDataFrameAnalytics).to.eql(true);
-        expect(capabilities.canCreateMlAlerts).to.eql(true);
-        expect(capabilities.canAccessML).to.eql(true);
-        expect(capabilities.canGetJobs).to.eql(true);
-        expect(capabilities.canGetDatafeeds).to.eql(true);
-        expect(capabilities.canGetCalendars).to.eql(true);
-        expect(capabilities.canFindFileStructure).to.eql(true);
-        expect(capabilities.canGetDataFrameAnalytics).to.eql(true);
-        expect(capabilities.canGetAnnotations).to.eql(true);
-        expect(capabilities.canCreateAnnotation).to.eql(true);
-        expect(capabilities.canDeleteAnnotation).to.eql(true);
+        expect(capabilities).to.eql({
+          canCreateJob: true,
+          canDeleteJob: true,
+          canOpenJob: true,
+          canCloseJob: true,
+          canUpdateJob: true,
+          canForecastJob: true,
+          canCreateDatafeed: true,
+          canDeleteDatafeed: true,
+          canStartStopDatafeed: true,
+          canUpdateDatafeed: true,
+          canPreviewDatafeed: true,
+          canGetFilters: true,
+          canCreateCalendar: true,
+          canDeleteCalendar: true,
+          canCreateFilter: true,
+          canDeleteFilter: true,
+          canCreateDataFrameAnalytics: true,
+          canDeleteDataFrameAnalytics: true,
+          canStartStopDataFrameAnalytics: true,
+          canCreateMlAlerts: true,
+          canAccessML: true,
+          canGetJobs: true,
+          canGetDatafeeds: true,
+          canGetCalendars: true,
+          canFindFileStructure: true,
+          canGetDataFrameAnalytics: true,
+          canGetAnnotations: true,
+          canCreateAnnotation: true,
+          canDeleteAnnotation: true,
+        });
       });
     });
   });
