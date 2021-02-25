@@ -6,7 +6,6 @@
  */
 
 import { ExpressionFunctionDefinition, ExpressionValueRender } from 'src/plugins/expressions';
-// @ts-expect-error untyped local
 import { resolveWithMissingImage } from '../../../common/lib/resolve_dataurl';
 import { elasticOutline } from '../../lib/elastic_outline';
 import { getFunctionHelp, getFunctionErrors } from '../../../i18n';
