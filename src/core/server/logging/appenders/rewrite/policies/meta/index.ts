@@ -8,6 +8,7 @@
 
 export {
   MetaRewritePolicy,
-  MetaRewritePolicyConfig,
   metaRewritePolicyConfigSchema,
 } from './meta_policy';
+
+export type { MetaRewritePolicyConfig } from './meta_policy';
