@@ -31,6 +31,7 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
      * @default true
      */
     waitDialogIsClosed?: boolean;
+    exitFromEditMode?: boolean;
     needsConfirm?: boolean;
     storeTimeWithDashboard?: boolean;
     saveAsNew?: boolean;
@@ -246,14 +247,26 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
       return await testSubjects.exists('dashboardEditMode');
     }
 
-    public async clickCancelOutOfEditMode() {
+    public async clickCancelOutOfEditMode(accept = true) {
       log.debug('clickCancelOutOfEditMode');
       await testSubjects.click('dashboardViewOnlyMode');
+      if (accept) {
+        const confirmation = await testSubjects.exists('dashboardDiscardConfirmKeep');
+        if (confirmation) {
+          await testSubjects.click('dashboardDiscardConfirmKeep');
+        }
+      }
     }
 
-    public async clickDiscardChanges() {
+    public async clickDiscardChanges(accept = true) {
       log.debug('clickDiscardChanges');
-      await testSubjects.click('dashboardDiscardChanges');
+      await testSubjects.click('dashboardViewOnlyMode');
+      if (accept) {
+        const confirmation = await testSubjects.exists('dashboardDiscardConfirmDiscard');
+        if (confirmation) {
+          await testSubjects.click('dashboardDiscardConfirmDiscard');
+        }
+      }
     }
 
     public async clickQuickSave() {
@@ -364,7 +377,7 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
      */
     public async saveDashboard(
       dashboardName: string,
-      saveOptions: SaveDashboardOptions = { waitDialogIsClosed: true }
+      saveOptions: SaveDashboardOptions = { waitDialogIsClosed: true, exitFromEditMode: true }
     ) {
       await retry.try(async () => {
         await this.enterDashboardTitleAndClickSave(dashboardName, saveOptions);
@@ -380,6 +393,12 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
       const message = await PageObjects.common.closeToast();
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.common.waitForSaveModalToClose();
+
+      const isInViewMode = await testSubjects.exists('dashboardEditMode');
+      if (saveOptions.exitFromEditMode && !isInViewMode) {
+        await this.clickCancelOutOfEditMode();
+      }
+      await PageObjects.header.waitUntilLoadingHasFinished();
 
       return message;
     }
@@ -413,8 +432,9 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
         await this.setStoreTimeWithDashboard(saveOptions.storeTimeWithDashboard);
       }
 
-      if (saveOptions.saveAsNew !== undefined) {
-        await this.setSaveAsNewCheckBox(saveOptions.saveAsNew);
+      const saveAsNewCheckboxExists = await testSubjects.exists('saveAsNewCheckbox');
+      if (saveAsNewCheckboxExists) {
+        await this.setSaveAsNewCheckBox(Boolean(saveOptions.saveAsNew));
       }
 
       if (saveOptions.tags) {

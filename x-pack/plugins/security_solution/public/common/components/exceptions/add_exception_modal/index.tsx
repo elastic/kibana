@@ -14,7 +14,6 @@ import {
   EuiModalHeader,
   EuiModalHeaderTitle,
   EuiModalFooter,
-  EuiOverlayMask,
   EuiButton,
   EuiButtonEmpty,
   EuiHorizontalRule,
@@ -34,7 +33,6 @@ import {
 import * as i18nCommon from '../../../translations';
 import * as i18n from './translations';
 import * as sharedI18n from '../translations';
-import { Ecs } from '../../../../../common/ecs';
 import { osTypeArray, OsTypeArray } from '../../../../../common/shared_imports';
 import { useAppToasts } from '../../../hooks/use_app_toasts';
 import { useKibana } from '../../../lib/kibana';
@@ -54,7 +52,7 @@ import {
   entryHasNonEcsType,
 } from '../helpers';
 import { ErrorInfo, ErrorCallout } from '../error_callout';
-import { ExceptionsBuilderExceptionItem } from '../types';
+import { AlertData, ExceptionsBuilderExceptionItem } from '../types';
 import { useFetchIndex } from '../../../containers/source';
 import { useGetInstalledJob } from '../../ml/hooks/use_get_jobs';
 
@@ -63,7 +61,14 @@ export interface AddExceptionModalProps {
   ruleId: string;
   exceptionListType: ExceptionListType;
   ruleIndices: string[];
-  alertData?: Ecs;
+  alertData?: AlertData;
+  /**
+   * The components that use this may or may not define `alertData`
+   * If they do, they need to fetch it async. In that case `alertData` will be
+   * undefined while `isAlertDataLoading` will be true. In the case that `alertData`
+   *  is not used, `isAlertDataLoading` will be undefined
+   */
+  isAlertDataLoading?: boolean;
   alertStatus?: Status;
   onCancel: () => void;
   onConfirm: (didCloseAlert: boolean, didBulkCloseAlert: boolean) => void;
@@ -104,6 +109,7 @@ export const AddExceptionModal = memo(function AddExceptionModal({
   ruleIndices,
   exceptionListType,
   alertData,
+  isAlertDataLoading,
   onCancel,
   onConfirm,
   onRuleChange,
@@ -240,7 +246,7 @@ export const AddExceptionModal = memo(function AddExceptionModal({
     } else {
       return [];
     }
-  }, [alertData, exceptionListType, ruleExceptionList, ruleName]);
+  }, [exceptionListType, ruleExceptionList, ruleName, alertData]);
 
   useEffect((): void => {
     if (isSignalIndexPatternLoading === false && isSignalIndexLoading === false) {
@@ -348,133 +354,133 @@ export const AddExceptionModal = memo(function AddExceptionModal({
   }, [maybeRule]);
 
   return (
-    <EuiOverlayMask onClick={onCancel}>
-      <Modal onClose={onCancel} data-test-subj="add-exception-modal">
-        <ModalHeader>
-          <EuiModalHeaderTitle>{addExceptionMessage}</EuiModalHeaderTitle>
-          <ModalHeaderSubtitle className="eui-textTruncate" title={ruleName}>
-            {ruleName}
-          </ModalHeaderSubtitle>
-        </ModalHeader>
+    <Modal onClose={onCancel} data-test-subj="add-exception-modal">
+      <ModalHeader>
+        <EuiModalHeaderTitle>{addExceptionMessage}</EuiModalHeaderTitle>
+        <ModalHeaderSubtitle className="eui-textTruncate" title={ruleName}>
+          {ruleName}
+        </ModalHeaderSubtitle>
+      </ModalHeader>
 
-        {fetchOrCreateListError != null && (
-          <EuiModalFooter>
-            <ErrorCallout
-              http={http}
-              errorInfo={fetchOrCreateListError}
-              rule={maybeRule}
-              onCancel={onCancel}
-              onSuccess={handleDissasociationSuccess}
-              onError={handleDissasociationError}
-              data-test-subj="addExceptionModalErrorCallout"
-            />
-          </EuiModalFooter>
+      {fetchOrCreateListError != null && (
+        <EuiModalFooter>
+          <ErrorCallout
+            http={http}
+            errorInfo={fetchOrCreateListError}
+            rule={maybeRule}
+            onCancel={onCancel}
+            onSuccess={handleDissasociationSuccess}
+            onError={handleDissasociationError}
+            data-test-subj="addExceptionModalErrorCallout"
+          />
+        </EuiModalFooter>
+      )}
+      {fetchOrCreateListError == null &&
+        (isLoadingExceptionList ||
+          isIndexPatternLoading ||
+          isSignalIndexLoading ||
+          isAlertDataLoading ||
+          isSignalIndexPatternLoading) && (
+          <Loader data-test-subj="loadingAddExceptionModal" size="xl" />
         )}
-        {fetchOrCreateListError == null &&
-          (isLoadingExceptionList ||
-            isIndexPatternLoading ||
-            isSignalIndexLoading ||
-            isSignalIndexPatternLoading) && (
-            <Loader data-test-subj="loadingAddExceptionModal" size="xl" />
-          )}
-        {fetchOrCreateListError == null &&
-          !isSignalIndexLoading &&
-          !isSignalIndexPatternLoading &&
-          !isLoadingExceptionList &&
-          !isIndexPatternLoading &&
-          !isRuleLoading &&
-          !mlJobLoading &&
-          ruleExceptionList && (
-            <>
-              <ModalBodySection className="builder-section">
-                {isRuleEQLSequenceStatement && (
-                  <>
-                    <EuiCallOut
-                      data-test-subj="eql-sequence-callout"
-                      title={i18n.ADD_EXCEPTION_SEQUENCE_WARNING}
-                    />
-                    <EuiSpacer />
-                  </>
-                )}
-                <EuiText>{i18n.EXCEPTION_BUILDER_INFO}</EuiText>
-                <EuiSpacer />
-                <ExceptionBuilderComponent
-                  exceptionListItems={initialExceptionItems}
-                  listType={exceptionListType}
-                  listId={ruleExceptionList.list_id}
-                  listNamespaceType={ruleExceptionList.namespace_type}
-                  ruleName={ruleName}
-                  indexPatterns={indexPatterns}
-                  isOrDisabled={false}
-                  isAndDisabled={false}
-                  isNestedDisabled={false}
-                  data-test-subj="alert-exception-builder"
-                  id-aria="alert-exception-builder"
-                  onChange={handleBuilderOnChange}
-                  ruleType={maybeRule?.type}
-                />
+      {fetchOrCreateListError == null &&
+        !isSignalIndexLoading &&
+        !isSignalIndexPatternLoading &&
+        !isLoadingExceptionList &&
+        !isIndexPatternLoading &&
+        !isRuleLoading &&
+        !mlJobLoading &&
+        !isAlertDataLoading &&
+        ruleExceptionList && (
+          <>
+            <ModalBodySection className="builder-section">
+              {isRuleEQLSequenceStatement && (
+                <>
+                  <EuiCallOut
+                    data-test-subj="eql-sequence-callout"
+                    title={i18n.ADD_EXCEPTION_SEQUENCE_WARNING}
+                  />
+                  <EuiSpacer />
+                </>
+              )}
+              <EuiText>{i18n.EXCEPTION_BUILDER_INFO}</EuiText>
+              <EuiSpacer />
+              <ExceptionBuilderComponent
+                exceptionListItems={initialExceptionItems}
+                listType={exceptionListType}
+                listId={ruleExceptionList.list_id}
+                listNamespaceType={ruleExceptionList.namespace_type}
+                ruleName={ruleName}
+                indexPatterns={indexPatterns}
+                isOrDisabled={false}
+                isAndDisabled={false}
+                isNestedDisabled={false}
+                data-test-subj="alert-exception-builder"
+                id-aria="alert-exception-builder"
+                onChange={handleBuilderOnChange}
+                ruleType={maybeRule?.type}
+              />
 
-                <EuiSpacer />
+              <EuiSpacer />
 
-                <AddExceptionComments
-                  newCommentValue={comment}
-                  newCommentOnChange={onCommentChange}
-                />
-              </ModalBodySection>
-              <EuiHorizontalRule />
-              <ModalBodySection>
-                {alertData !== undefined && alertStatus !== 'closed' && (
-                  <EuiFormRow fullWidth>
-                    <EuiCheckbox
-                      data-test-subj="close-alert-on-add-add-exception-checkbox"
-                      id="close-alert-on-add-add-exception-checkbox"
-                      label="Close this alert"
-                      checked={shouldCloseAlert}
-                      onChange={onCloseAlertCheckboxChange}
-                    />
-                  </EuiFormRow>
-                )}
+              <AddExceptionComments
+                newCommentValue={comment}
+                newCommentOnChange={onCommentChange}
+              />
+            </ModalBodySection>
+            <EuiHorizontalRule />
+            <ModalBodySection>
+              {alertData != null && alertStatus !== 'closed' && (
                 <EuiFormRow fullWidth>
                   <EuiCheckbox
-                    data-test-subj="bulk-close-alert-on-add-add-exception-checkbox"
-                    id="bulk-close-alert-on-add-add-exception-checkbox"
-                    label={
-                      shouldDisableBulkClose
-                        ? i18n.BULK_CLOSE_LABEL_DISABLED
-                        : i18n.BULK_CLOSE_LABEL
-                    }
-                    checked={shouldBulkCloseAlert}
-                    onChange={onBulkCloseAlertCheckboxChange}
-                    disabled={shouldDisableBulkClose}
+                    data-test-subj="close-alert-on-add-add-exception-checkbox"
+                    id="close-alert-on-add-add-exception-checkbox"
+                    label="Close this alert"
+                    checked={shouldCloseAlert}
+                    onChange={onCloseAlertCheckboxChange}
                   />
                 </EuiFormRow>
-                {exceptionListType === 'endpoint' && (
-                  <>
-                    <EuiSpacer />
-                    <EuiText data-test-subj="add-exception-endpoint-text" color="subdued" size="s">
-                      {i18n.ENDPOINT_QUARANTINE_TEXT}
-                    </EuiText>
-                  </>
-                )}
-              </ModalBodySection>
-            </>
-          )}
-        {fetchOrCreateListError == null && (
-          <EuiModalFooter>
-            <EuiButtonEmpty onClick={onCancel}>{i18n.CANCEL}</EuiButtonEmpty>
-
-            <EuiButton
-              data-test-subj="add-exception-confirm-button"
-              onClick={onAddExceptionConfirm}
-              isLoading={addExceptionIsLoading}
-              isDisabled={isSubmitButtonDisabled}
-              fill
-            >
-              {addExceptionMessage}
-            </EuiButton>
-          </EuiModalFooter>
+              )}
+              <EuiFormRow fullWidth>
+                <EuiCheckbox
+                  data-test-subj="bulk-close-alert-on-add-add-exception-checkbox"
+                  id="bulk-close-alert-on-add-add-exception-checkbox"
+                  label={
+                    shouldDisableBulkClose ? i18n.BULK_CLOSE_LABEL_DISABLED : i18n.BULK_CLOSE_LABEL
+                  }
+                  checked={shouldBulkCloseAlert}
+                  onChange={onBulkCloseAlertCheckboxChange}
+                  disabled={shouldDisableBulkClose}
+                />
+              </EuiFormRow>
+              {exceptionListType === 'endpoint' && (
+                <>
+                  <EuiSpacer />
+                  <EuiText data-test-subj="add-exception-endpoint-text" color="subdued" size="s">
+                    {i18n.ENDPOINT_QUARANTINE_TEXT}
+                  </EuiText>
+                </>
+              )}
+            </ModalBodySection>
+          </>
         )}
-      </Modal>
-    </EuiOverlayMask>
+      {fetchOrCreateListError == null && (
+        <EuiModalFooter>
+          <EuiButtonEmpty data-test-subj="cancelExceptionAddButton" onClick={onCancel}>
+            {i18n.CANCEL}
+          </EuiButtonEmpty>
+
+          <EuiButton
+            data-test-subj="add-exception-confirm-button"
+            onClick={onAddExceptionConfirm}
+            isLoading={addExceptionIsLoading}
+            isDisabled={isSubmitButtonDisabled}
+            fill
+          >
+            {addExceptionMessage}
+          </EuiButton>
+        </EuiModalFooter>
+      )}
+    </Modal>
   );
 });

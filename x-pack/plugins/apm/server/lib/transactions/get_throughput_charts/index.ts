@@ -13,7 +13,11 @@ import {
   TRANSACTION_RESULT,
   TRANSACTION_TYPE,
 } from '../../../../common/elasticsearch_fieldnames';
-import { rangeFilter } from '../../../../common/utils/range_filter';
+import {
+  environmentQuery,
+  rangeQuery,
+  kqlQuery,
+} from '../../../../server/utils/queries';
 import {
   getDocumentTypeFilterForAggregatedTransactions,
   getProcessorEventForAggregatedTransactions,
@@ -28,6 +32,8 @@ export type ThroughputChartsResponse = PromiseReturnType<
 >;
 
 function searchThroughput({
+  environment,
+  kuery,
   serviceName,
   transactionType,
   transactionName,
@@ -35,6 +41,8 @@ function searchThroughput({
   searchAggregatedTransactions,
   intervalString,
 }: {
+  environment?: string;
+  kuery?: string;
   serviceName: string;
   transactionType: string;
   transactionName: string | undefined;
@@ -46,12 +54,13 @@ function searchThroughput({
 
   const filter: ESFilter[] = [
     { term: { [SERVICE_NAME]: serviceName } },
-    { range: rangeFilter(start, end) },
+    { term: { [TRANSACTION_TYPE]: transactionType } },
     ...getDocumentTypeFilterForAggregatedTransactions(
       searchAggregatedTransactions
     ),
-    { term: { [TRANSACTION_TYPE]: transactionType } },
-    ...setup.esFilter,
+    ...rangeQuery(start, end),
+    ...environmentQuery(environment),
+    ...kqlQuery(kuery),
   ];
 
   if (transactionName) {
@@ -91,12 +100,16 @@ function searchThroughput({
 }
 
 export async function getThroughputCharts({
+  environment,
+  kuery,
   serviceName,
   transactionType,
   transactionName,
   setup,
   searchAggregatedTransactions,
 }: {
+  environment?: string;
+  kuery?: string;
   serviceName: string;
   transactionType: string;
   transactionName: string | undefined;
@@ -107,6 +120,8 @@ export async function getThroughputCharts({
     const { bucketSize, intervalString } = getBucketSize(setup);
 
     const response = await searchThroughput({
+      environment,
+      kuery,
       serviceName,
       transactionType,
       transactionName,

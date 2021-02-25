@@ -45,6 +45,11 @@ export const DEFAULT_RULE_REFRESH_INTERVAL_VALUE = 60000; // ms
 export const DEFAULT_RULE_REFRESH_IDLE_VALUE = 2700000; // ms
 export const DEFAULT_RULE_NOTIFICATION_QUERY_SIZE = 100;
 
+// Document path where threat indicator fields are expected. Fields are used
+// to enrich signals, and are copied to threat.indicator.
+export const DEFAULT_INDICATOR_SOURCE_PATH = 'threatintel.indicator';
+export const INDICATOR_DESTINATION_PATH = 'threat.indicator';
+
 export enum SecurityPageName {
   detections = 'detections',
   overview = 'overview',
@@ -166,7 +171,7 @@ export const ML_GROUP_IDS = [ML_GROUP_ID, LEGACY_ML_GROUP_ID];
 /*
   Rule notifications options
 */
-export const ENABLE_CASE_CONNECTOR = false;
+export const ENABLE_CASE_CONNECTOR = true;
 export const NOTIFICATION_SUPPORTED_ACTION_TYPES_IDS = [
   '.email',
   '.slack',

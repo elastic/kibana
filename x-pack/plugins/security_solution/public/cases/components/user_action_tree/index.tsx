@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import classNames from 'classnames';
-
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -14,9 +12,12 @@ import {
   EuiCommentList,
   EuiCommentProps,
 } from '@elastic/eui';
+import classNames from 'classnames';
+import { isEmpty } from 'lodash';
 import React, { useCallback, useMemo, useRef, useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
+import { isRight } from 'fp-ts/Either';
 
 import * as i18n from './translations';
 
@@ -24,23 +25,31 @@ import { Case, CaseUserActions } from '../../containers/types';
 import { useUpdateComment } from '../../containers/use_update_comment';
 import { useCurrentUser } from '../../../common/lib/kibana';
 import { AddComment, AddCommentRefObject } from '../add_comment';
-import { ActionConnector, CommentType } from '../../../../../case/common/api';
+import {
+  ActionConnector,
+  AlertCommentRequestRt,
+  CommentType,
+  ContextTypeUserRt,
+} from '../../../../../case/common/api';
 import { CaseServices } from '../../containers/use_get_case_user_actions';
 import { parseString } from '../../containers/utils';
-import { Alert, OnUpdateFields } from '../case_view';
+import { OnUpdateFields } from '../case_view';
 import {
   getConnectorLabelTitle,
   getLabelTitle,
   getPushedServiceLabelTitle,
   getPushInfo,
   getUpdateAction,
-  getAlertComment,
+  getAlertAttachment,
+  getGeneratedAlertsAttachment,
+  useFetchAlertData,
 } from './helpers';
 import { UserActionAvatar } from './user_action_avatar';
 import { UserActionMarkdown } from './user_action_markdown';
 import { UserActionTimestamp } from './user_action_timestamp';
 import { UserActionUsername } from './user_action_username';
 import { UserActionContentToolbar } from './user_action_content_toolbar';
+import { getManualAlertIdsWithNoRuleId } from '../case_view/helpers';
 
 export interface UserActionTreeProps {
   caseServices: CaseServices;
@@ -53,7 +62,6 @@ export interface UserActionTreeProps {
   onUpdateField: ({ key, value, onSuccess, onError }: OnUpdateFields) => void;
   updateCase: (newCase: Case) => void;
   userCanCrud: boolean;
-  alerts: Record<string, Alert>;
   onShowAlertDetails: (alertId: string, index: string) => void;
 }
 
@@ -112,10 +120,9 @@ export const UserActionTree = React.memo(
     onUpdateField,
     updateCase,
     userCanCrud,
-    alerts,
     onShowAlertDetails,
   }: UserActionTreeProps) => {
-    const { commentId } = useParams<{ commentId?: string }>();
+    const { commentId, subCaseId } = useParams<{ commentId?: string; subCaseId?: string }>();
     const handlerTimeoutId = useRef(0);
     const addCommentRef = useRef<AddCommentRefObject>(null);
     const [initLoading, setInitLoading] = useState(true);
@@ -123,6 +130,10 @@ export const UserActionTree = React.memo(
     const { isLoadingIds, patchComment } = useUpdateComment();
     const currentUser = useCurrentUser();
     const [manageMarkdownEditIds, setManangeMardownEditIds] = useState<string[]>([]);
+
+    const [loadingAlertData, manualAlertsData] = useFetchAlertData(
+      getManualAlertIdsWithNoRuleId(caseData.comments)
+    );
 
     const handleManageMarkdownEditId = useCallback(
       (id: string) => {
@@ -218,9 +229,10 @@ export const UserActionTree = React.memo(
           onCommentPosted={handleUpdate}
           onCommentSaving={handleManageMarkdownEditId.bind(null, NEW_ID)}
           showLoading={false}
+          subCaseId={subCaseId}
         />
       ),
-      [caseData.id, handleUpdate, userCanCrud, handleManageMarkdownEditId]
+      [caseData.id, handleUpdate, userCanCrud, handleManageMarkdownEditId, subCaseId]
     );
 
     useEffect(() => {
@@ -279,11 +291,16 @@ export const UserActionTree = React.memo(
     const userActions: EuiCommentProps[] = useMemo(
       () =>
         caseUserActions.reduce<EuiCommentProps[]>(
+          // eslint-disable-next-line complexity
           (comments, action, index) => {
             // Comment creation
             if (action.commentId != null && action.action === 'create') {
               const comment = caseData.comments.find((c) => c.id === action.commentId);
-              if (comment != null && comment.type === CommentType.user) {
+              if (
+                comment != null &&
+                isRight(ContextTypeUserRt.decode(comment)) &&
+                comment.type === CommentType.user
+              ) {
                 return [
                   ...comments,
                   {
@@ -335,16 +352,65 @@ export const UserActionTree = React.memo(
                     ),
                   },
                 ];
-                // TODO: need to handle CommentType.generatedAlert here to
-              } else if (comment != null && comment.type === CommentType.alert) {
+              } else if (
+                comment != null &&
+                isRight(AlertCommentRequestRt.decode(comment)) &&
+                comment.type === CommentType.alert
+              ) {
                 // TODO: clean this up
                 const alertId = Array.isArray(comment.alertId)
                   ? comment.alertId.length > 0
                     ? comment.alertId[0]
                     : ''
                   : comment.alertId;
-                const alert = alerts[alertId];
-                return [...comments, getAlertComment({ action, alert, onShowAlertDetails })];
+
+                const alertIndex = Array.isArray(comment.index)
+                  ? comment.index.length > 0
+                    ? comment.index[0]
+                    : ''
+                  : comment.index;
+
+                if (isEmpty(alertId)) {
+                  return comments;
+                }
+
+                const ruleId = comment?.rule?.id ?? manualAlertsData[alertId]?.rule?.id?.[0] ?? '';
+                const ruleName =
+                  comment?.rule?.name ??
+                  manualAlertsData[alertId]?.rule?.name?.[0] ??
+                  i18n.UNKNOWN_RULE;
+
+                return [
+                  ...comments,
+                  getAlertAttachment({
+                    action,
+                    alertId,
+                    index: alertIndex,
+                    loadingAlertData,
+                    ruleId,
+                    ruleName,
+                    onShowAlertDetails,
+                  }),
+                ];
+              } else if (comment != null && comment.type === CommentType.generatedAlert) {
+                // TODO: clean this up
+                const alertIds = Array.isArray(comment.alertId)
+                  ? comment.alertId
+                  : [comment.alertId];
+
+                if (isEmpty(alertIds)) {
+                  return comments;
+                }
+
+                return [
+                  ...comments,
+                  getGeneratedAlertsAttachment({
+                    action,
+                    alertIds,
+                    ruleId: comment.rule?.id ?? '',
+                    ruleName: comment.rule?.name ?? i18n.UNKNOWN_RULE,
+                  }),
+                ];
               }
             }
 
@@ -438,10 +504,11 @@ export const UserActionTree = React.memo(
         handleManageQuote,
         handleSaveComment,
         isLoadingIds,
+        loadingAlertData,
+        manualAlertsData,
         manageMarkdownEditIds,
         selectedOutlineCommentId,
         userCanCrud,
-        alerts,
         onShowAlertDetails,
       ]
     );

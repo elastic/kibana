@@ -26,11 +26,10 @@ import {
 
 import { Repository } from '../../../../../common/types';
 import { Frequency, CronEditor, SectionError } from '../../../../shared_imports';
-import { useServices } from '../../../app_context';
+import { useCore, useServices } from '../../../app_context';
 import { DEFAULT_POLICY_SCHEDULE, DEFAULT_POLICY_FREQUENCY } from '../../../constants';
 import { useLoadRepositories } from '../../../services/http';
 import { linkToAddRepository } from '../../../services/navigation';
-import { documentationLinksService } from '../../../services/documentation';
 import { SectionLoading } from '../../';
 import { StepProps } from './';
 
@@ -57,6 +56,7 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
   } = useLoadRepositories();
 
   const { i18n, history } = useServices();
+  const { docLinks } = useCore();
 
   const [showRepositoryNotFoundWarning, setShowRepositoryNotFoundWarning] = useState<boolean>(
     false
@@ -338,10 +338,7 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
             defaultMessage="Supports date math expressions. {docLink}"
             values={{
               docLink: (
-                <EuiLink
-                  href={documentationLinksService.getDateMathIndexNamesUrl()}
-                  target="_blank"
-                >
+                <EuiLink href={docLinks.links.date.dateMathIndexNames} target="_blank">
                   <FormattedMessage
                     id="xpack.snapshotRestore.policyForm.stepLogistics.policySnapshotNameHelpTextDocLink"
                     defaultMessage="Learn more."
@@ -420,7 +417,7 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
                 defaultMessage="Use cron expression. {docLink}"
                 values={{
                   docLink: (
-                    <EuiLink href={documentationLinksService.getCronUrl()} target="_blank">
+                    <EuiLink href={docLinks.links.apis.cronExpressions} target="_blank">
                       <FormattedMessage
                         id="xpack.snapshotRestore.policyForm.stepLogistics.policyScheduleHelpTextDocLink"
                         defaultMessage="Learn more."
@@ -548,7 +545,7 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
           <EuiButtonEmpty
             size="s"
             flush="right"
-            href={documentationLinksService.getSlmUrl()}
+            href={docLinks.links.apis.putSnapshotLifecyclePolicy}
             target="_blank"
             iconType="help"
           >

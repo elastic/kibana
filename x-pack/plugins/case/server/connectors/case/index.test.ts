@@ -717,6 +717,10 @@ describe('case connector', () => {
               type: CommentType.alert,
               alertId: 'test-id',
               index: 'test-index',
+              rule: {
+                id: null,
+                name: null,
+              },
             },
           },
         };

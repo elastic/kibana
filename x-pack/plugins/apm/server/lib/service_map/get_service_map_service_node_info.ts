@@ -19,14 +19,13 @@ import {
   TRANSACTION_PAGE_LOAD,
   TRANSACTION_REQUEST,
 } from '../../../common/transaction_types';
-import { rangeFilter } from '../../../common/utils/range_filter';
+import { environmentQuery, rangeQuery } from '../../../server/utils/queries';
 import { withApmSpan } from '../../utils/with_apm_span';
 import {
   getDocumentTypeFilterForAggregatedTransactions,
   getProcessorEventForAggregatedTransactions,
   getTransactionDurationFieldForAggregatedTransactions,
 } from '../helpers/aggregated_transactions';
-import { getEnvironmentUiFilterES } from '../helpers/convert_ui_filters/get_environment_ui_filter_es';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import {
   percentCgroupMemoryUsedScript,
@@ -51,22 +50,23 @@ interface TaskParameters {
 }
 
 export function getServiceMapServiceNodeInfo({
+  environment,
   serviceName,
   setup,
   searchAggregatedTransactions,
 }: Options & { serviceName: string }) {
   return withApmSpan('get_service_map_node_stats', async () => {
-    const { start, end, uiFilters } = setup;
+    const { start, end } = setup;
 
     const filter: ESFilter[] = [
-      { range: rangeFilter(start, end) },
       { term: { [SERVICE_NAME]: serviceName } },
-      ...getEnvironmentUiFilterES(uiFilters.environment),
+      ...rangeQuery(start, end),
+      ...environmentQuery(environment),
     ];
 
     const minutes = Math.abs((end - start) / (1000 * 60));
     const taskParams = {
-      environment: uiFilters.environment,
+      environment,
       filter,
       searchAggregatedTransactions,
       minutes,
@@ -106,16 +106,13 @@ async function getErrorStats({
   searchAggregatedTransactions: boolean;
 }) {
   return withApmSpan('get_error_rate_for_service_map_node', async () => {
-    const setupWithBlankUiFilters = {
-      ...setup,
-      uiFilters: { environment },
-      esFilter: getEnvironmentUiFilterES(environment),
-    };
     const { noHits, average } = await getErrorRate({
-      setup: setupWithBlankUiFilters,
+      environment,
+      setup,
       serviceName,
       searchAggregatedTransactions,
     });
+
     return { avgErrorRate: noHits ? null : average };
   });
 }

@@ -59,6 +59,7 @@ export interface CaseClientGetAlerts {
 
 export interface CaseClientGetUserActions {
   caseId: string;
+  subCaseId?: string;
 }
 
 export interface MappingsClient {

@@ -61,7 +61,7 @@ export function registerAcknowledgeRoute(deps: RouteDependencies) {
         }
 
         // Case: default
-        return response.internalError({ body: e });
+        throw e;
       }
     })
   );

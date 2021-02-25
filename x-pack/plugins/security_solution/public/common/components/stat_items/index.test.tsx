@@ -7,7 +7,6 @@
 
 /* eslint-disable react/display-name */
 
-import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import { mount, ReactWrapper } from 'enzyme';
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
@@ -57,7 +56,7 @@ jest.mock('../charts/barchart', () => {
 });
 
 describe('Stat Items Component', () => {
-  const theme = () => ({ eui: euiDarkVars, darkMode: true });
+  const mockTheme = { eui: { euiColorMediumShade: '#ece' } };
   const state: State = mockGlobalState;
   const { storage } = createSecuritySolutionStorageMock();
   const store = createStore(
@@ -71,7 +70,7 @@ describe('Stat Items Component', () => {
   describe.each([
     [
       mount(
-        <ThemeProvider theme={theme}>
+        <ThemeProvider theme={mockTheme}>
           <ReduxStoreProvider store={store}>
             <StatItemsComponent
               description="HOSTS"
@@ -88,7 +87,7 @@ describe('Stat Items Component', () => {
     ],
     [
       mount(
-        <ThemeProvider theme={theme}>
+        <ThemeProvider theme={mockTheme}>
           <ReduxStoreProvider store={store}>
             <StatItemsComponent
               areaChart={[]}

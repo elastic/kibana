@@ -9,7 +9,6 @@ import { render } from '@testing-library/react';
 import React from 'react';
 import { Provider } from 'react-redux';
 import { ThemeProvider } from 'styled-components';
-import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 
 import {
   createSampleTrustedApp,
@@ -23,6 +22,12 @@ import {
 
 import { TrustedAppsGrid } from '.';
 
+const mockTheme = {
+  eui: {
+    euiSize: '16px',
+  },
+};
+
 jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
   htmlIdGenerator: () => () => 'mockId',
 }));
@@ -32,9 +37,7 @@ const now = 111111;
 const renderList = (store: ReturnType<typeof createGlobalNoMiddlewareStore>) => {
   const Wrapper: React.FC = ({ children }) => (
     <Provider store={store}>
-      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
-        {children}
-      </ThemeProvider>
+      <ThemeProvider theme={mockTheme}>{children}</ThemeProvider>
     </Provider>
   );
 

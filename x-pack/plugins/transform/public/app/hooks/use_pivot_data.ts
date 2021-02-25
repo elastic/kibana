@@ -18,7 +18,7 @@ import type { PreviewMappingsProperties } from '../../../common/api_schemas/tran
 import { isPostTransformsPreviewResponseSchema } from '../../../common/api_schemas/type_guards';
 import { getNestedProperty } from '../../../common/utils/object_utils';
 
-import { RenderCellValue, UseIndexDataReturnType } from '../../shared_imports';
+import { RenderCellValue, UseIndexDataReturnType, HITS_TOTAL_RELATION } from '../../shared_imports';
 import { getErrorMessage } from '../../../common/utils/errors';
 
 import { useAppDependencies } from '../app_dependencies';
@@ -71,7 +71,8 @@ export const usePivotData = (
   indexPatternTitle: SearchItems['indexPattern']['title'],
   query: PivotQuery,
   validationStatus: StepDefineExposedState['validationStatus'],
-  requestPayload: StepDefineExposedState['previewRequest']
+  requestPayload: StepDefineExposedState['previewRequest'],
+  combinedRuntimeMappings?: StepDefineExposedState['runtimeMappings']
 ): UseIndexDataReturnType => {
   const [
     previewMappingsProperties,
@@ -79,7 +80,13 @@ export const usePivotData = (
   ] = useState<PreviewMappingsProperties>({});
   const api = useApi();
   const {
-    ml: { formatHumanReadableDateTimeSeconds, multiColumnSortFactory, useDataGrid, INDEX_STATUS },
+    ml: {
+      getDataGridSchemaFromESFieldType,
+      formatHumanReadableDateTimeSeconds,
+      multiColumnSortFactory,
+      useDataGrid,
+      INDEX_STATUS,
+    },
   } = useAppDependencies();
 
   // Filters mapping properties of type `object`, which get returned for nested field parents.
@@ -97,38 +104,7 @@ export const usePivotData = (
   // EuiDataGrid State
   const columns: EuiDataGridColumn[] = columnKeys.map((id) => {
     const field = previewMappingsProperties[id];
-
-    // Built-in values are ['boolean', 'currency', 'datetime', 'numeric', 'json']
-    // To fall back to the default string schema it needs to be undefined.
-    let schema;
-
-    switch (field?.type) {
-      case ES_FIELD_TYPES.GEO_POINT:
-      case ES_FIELD_TYPES.GEO_SHAPE:
-        schema = 'json';
-        break;
-      case ES_FIELD_TYPES.BOOLEAN:
-        schema = 'boolean';
-        break;
-      case ES_FIELD_TYPES.DATE:
-      case ES_FIELD_TYPES.DATE_NANOS:
-        schema = 'datetime';
-        break;
-      case ES_FIELD_TYPES.BYTE:
-      case ES_FIELD_TYPES.DOUBLE:
-      case ES_FIELD_TYPES.FLOAT:
-      case ES_FIELD_TYPES.HALF_FLOAT:
-      case ES_FIELD_TYPES.INTEGER:
-      case ES_FIELD_TYPES.LONG:
-      case ES_FIELD_TYPES.SCALED_FLOAT:
-      case ES_FIELD_TYPES.SHORT:
-        schema = 'numeric';
-        break;
-      // keep schema undefined for text based columns
-      case ES_FIELD_TYPES.KEYWORD:
-      case ES_FIELD_TYPES.TEXT:
-        break;
-    }
+    const schema = getDataGridSchemaFromESFieldType(field?.type);
 
     return { id, schema };
   });
@@ -141,6 +117,7 @@ export const usePivotData = (
     setErrorMessage,
     setNoDataMessage,
     setRowCount,
+    setRowCountRelation,
     setStatus,
     setTableItems,
     sortingColumns,
@@ -151,6 +128,7 @@ export const usePivotData = (
     if (!validationStatus.isValid) {
       setTableItems([]);
       setRowCount(0);
+      setRowCountRelation(HITS_TOTAL_RELATION.EQ);
       setNoDataMessage(validationStatus.errorMessage!);
       return;
     }
@@ -159,13 +137,19 @@ export const usePivotData = (
     setNoDataMessage('');
     setStatus(INDEX_STATUS.LOADING);
 
-    const previewRequest = getPreviewTransformRequestBody(indexPatternTitle, query, requestPayload);
+    const previewRequest = getPreviewTransformRequestBody(
+      indexPatternTitle,
+      query,
+      requestPayload,
+      combinedRuntimeMappings
+    );
     const resp = await api.getTransformsPreview(previewRequest);
 
     if (!isPostTransformsPreviewResponseSchema(resp)) {
       setErrorMessage(getErrorMessage(resp));
       setTableItems([]);
       setRowCount(0);
+      setRowCountRelation(HITS_TOTAL_RELATION.EQ);
       setPreviewMappingsProperties({});
       setStatus(INDEX_STATUS.ERROR);
       return;
@@ -173,6 +157,7 @@ export const usePivotData = (
 
     setTableItems(resp.preview);
     setRowCount(resp.preview.length);
+    setRowCountRelation(HITS_TOTAL_RELATION.EQ);
     setPreviewMappingsProperties(resp.generated_dest_index.mappings.properties);
     setStatus(INDEX_STATUS.LOADED);
 
@@ -196,11 +181,7 @@ export const usePivotData = (
     getPreviewData();
     // custom comparison
     /* eslint-disable react-hooks/exhaustive-deps */
-  }, [
-    indexPatternTitle,
-    JSON.stringify([requestPayload, query]),
-    /* eslint-enable react-hooks/exhaustive-deps */
-  ]);
+  }, [indexPatternTitle, JSON.stringify([requestPayload, query, combinedRuntimeMappings])]);
 
   if (sortingColumns.length > 0) {
     tableItems.sort(multiColumnSortFactory(sortingColumns));
