@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { shallow } from 'enzyme';
+import { shallow, mount } from 'enzyme';
 
 import { EuiBadge, EuiToolTip } from '@elastic/eui';
 
@@ -15,14 +15,14 @@ import { InlineTagsList } from './inline_tags_list';
 
 describe('InlineTagsList', () => {
   it('renders', () => {
-    const wrapper = shallow(<InlineTagsList tags={['test']} />);
+    const wrapper = mount(<InlineTagsList tags={['test']} />);
 
     expect(wrapper.find(EuiBadge)).toHaveLength(1);
     expect(wrapper.find(EuiBadge).prop('children')).toEqual('test');
   });
 
   it('renders >2 badges in a tooltip list', () => {
-    const wrapper = shallow(<InlineTagsList tags={['1', '2', '3', '4', '5']} />);
+    const wrapper = mount(<InlineTagsList tags={['1', '2', '3', '4', '5']} />);
 
     expect(wrapper.find(EuiBadge)).toHaveLength(3);
     expect(wrapper.find(EuiToolTip)).toHaveLength(1);
@@ -31,6 +31,15 @@ describe('InlineTagsList', () => {
     expect(wrapper.find(EuiBadge).at(1).prop('children')).toEqual('2');
     expect(wrapper.find(EuiBadge).at(2).prop('children')).toEqual('and 3 more');
     expect(wrapper.find(EuiToolTip).prop('content')).toEqual('3, 4, 5');
+  });
+
+  it('renders a count and all tags in a tooltip', () => {
+    const wrapper = mount(<InlineTagsList displayCountOnly tags={['1', '2', '3']} />);
+
+    expect(wrapper.find(EuiToolTip)).toHaveLength(1);
+    expect(wrapper.find(EuiBadge)).toHaveLength(1);
+    expect(wrapper.find(EuiBadge).at(0).prop('children')).toEqual('3 tags');
+    expect(wrapper.find(EuiToolTip).prop('content')).toEqual('1, 2, 3');
   });
 
   it('does not render with no tags', () => {
