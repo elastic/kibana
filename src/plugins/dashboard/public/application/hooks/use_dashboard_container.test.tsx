@@ -37,6 +37,7 @@ const createDashboardState = () =>
     hideWriteControls: false,
     allowByValueEmbeddables: false,
     history: createBrowserHistory(),
+    hasPendingEmbeddable: () => false,
     kbnUrlStateStorage: createKbnUrlStateStorage(),
     hasTaggingCapabilities: mockHasTaggingCapabilities,
     toasts: coreMock.createStart().notifications.toasts,
@@ -52,6 +53,8 @@ const defaultCapabilities: DashboardCapabilities = {
   visualizeCapabilities: { save: false },
   storeSearchSession: true,
 };
+
+const getIncomingEmbeddable = () => undefined;
 
 const services = {
   dashboardCapabilities: defaultCapabilities,
@@ -87,7 +90,12 @@ test('container is destroyed on unmount', async () => {
 
   const dashboardStateManager = createDashboardState();
   const { result, unmount, waitForNextUpdate } = renderHook(
-    () => useDashboardContainer({ dashboardStateManager, history }),
+    () =>
+      useDashboardContainer({
+        getIncomingEmbeddable,
+        dashboardStateManager,
+        history,
+      }),
     {
       wrapper: ({ children }) => (
         <KibanaContextProvider services={services}>{children}</KibanaContextProvider>
@@ -115,12 +123,20 @@ test('old container is destroyed on new dashboardStateManager', async () => {
   const { result, waitForNextUpdate, rerender } = renderHook<
     DashboardStateManager,
     DashboardContainer | null
-  >((dashboardStateManager) => useDashboardContainer({ dashboardStateManager, history }), {
-    wrapper: ({ children }) => (
-      <KibanaContextProvider services={services}>{children}</KibanaContextProvider>
-    ),
-    initialProps: createDashboardState(),
-  });
+  >(
+    (dashboardStateManager) =>
+      useDashboardContainer({
+        getIncomingEmbeddable,
+        dashboardStateManager,
+        history,
+      }),
+    {
+      wrapper: ({ children }) => (
+        <KibanaContextProvider services={services}>{children}</KibanaContextProvider>
+      ),
+      initialProps: createDashboardState(),
+    }
+  );
 
   expect(result.current).toBeNull(); // null on initial render
 
@@ -150,12 +166,20 @@ test('destroyed if rerendered before resolved', async () => {
   const { result, waitForNextUpdate, rerender } = renderHook<
     DashboardStateManager,
     DashboardContainer | null
-  >((dashboardStateManager) => useDashboardContainer({ dashboardStateManager, history }), {
-    wrapper: ({ children }) => (
-      <KibanaContextProvider services={services}>{children}</KibanaContextProvider>
-    ),
-    initialProps: createDashboardState(),
-  });
+  >(
+    (dashboardStateManager) =>
+      useDashboardContainer({
+        getIncomingEmbeddable,
+        dashboardStateManager,
+        history,
+      }),
+    {
+      wrapper: ({ children }) => (
+        <KibanaContextProvider services={services}>{children}</KibanaContextProvider>
+      ),
+      initialProps: createDashboardState(),
+    }
+  );
 
   expect(result.current).toBeNull(); // null on initial render
 

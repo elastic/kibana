@@ -12,8 +12,8 @@ import { DashboardSavedObject } from '../../saved_dashboards';
 import { DashboardAppStateDefaults } from '../../types';
 
 export function getAppStateDefaults(
+  viewMode: ViewMode,
   savedDashboard: DashboardSavedObject,
-  hideWriteControls: boolean,
   hasTaggingCapabilities: SavedObjectTagDecoratorTypeGuard
 ): DashboardAppStateDefaults {
   return {
@@ -26,6 +26,6 @@ export function getAppStateDefaults(
     options: savedDashboard.optionsJSON ? JSON.parse(savedDashboard.optionsJSON) : {},
     query: savedDashboard.getQuery(),
     filters: savedDashboard.getFilters(),
-    viewMode: savedDashboard.id || hideWriteControls ? ViewMode.VIEW : ViewMode.EDIT,
+    viewMode,
   };
 }
