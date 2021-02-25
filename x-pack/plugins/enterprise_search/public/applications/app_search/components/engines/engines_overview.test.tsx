@@ -183,13 +183,6 @@ describe('EnginesOverview', () => {
           ...valuesWithEngines,
           myRole: { canViewMetaEngines: true },
           metaEngines: ['test-meta-engine'],
-          metaEnginesMeta: {
-            page: {
-              current: 1,
-              size: 10,
-              total_results: 100,
-            },
-          },
         });
         const wrapper = shallow(<EnginesOverview />);
         const pageEvent = { page: { index: 0 } };

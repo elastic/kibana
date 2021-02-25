@@ -67,8 +67,8 @@ export const EnginesOverview: React.FC = () => {
   }, [enginesMeta.page.current]);
 
   useEffect(() => {
-    if (canViewMetaEngines) loadMetaEngines();
-  }, [canViewMetaEngines, metaEnginesMeta.page.current]);
+    if (hasPlatinumLicense) loadMetaEngines();
+  }, [hasPlatinumLicense, metaEnginesMeta.page.current]);
 
   if (dataLoading) return <LoadingState />;
   if (!engines.length) return <EmptyState />;
@@ -112,7 +112,7 @@ export const EnginesOverview: React.FC = () => {
           />
         </EuiPageContentBody>
 
-        {canViewMetaEngines && (
+        {hasPlatinumLicense && (
           <>
             <EuiSpacer size="xl" />
             <EuiPageContentHeader>

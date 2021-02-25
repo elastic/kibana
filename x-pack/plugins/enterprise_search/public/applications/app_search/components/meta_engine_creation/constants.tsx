@@ -37,7 +37,7 @@ export const META_ENGINE_CREATION_FORM_META_ENGINE_DESCRIPTION = i18n.translate(
   'xpack.enterpriseSearch.appSearch.metaEngineCreation.form.metaEngineDescription',
   {
     defaultMessage:
-      'Meta engines allow you to combine multiple engines into one, searchable engine.',
+      'Meta engines allow you to combine multiple engines into one searchable engine.',
   }
 );
 
@@ -54,12 +54,12 @@ export const META_ENGINE_CREATION_FORM_DOCUMENTATION_DESCRIPTION = (
     defaultMessage="{documentationLink} for information about how to get started."
     values={{
       documentationLink: (
-        <a
-          href="https://www.elastic.co/guide/en/app-search/current/meta-engines-guide.html"
+        <EuiLink
+          href={`${DOCS_PREFIX}/meta-engines-guide.html`}
           target="_blank"
         >
           {META_ENGINE_CREATION_FORM_DOCUMENTATION_LINK}
-        </a>
+        </EuiLink>
       ),
     }}
   />

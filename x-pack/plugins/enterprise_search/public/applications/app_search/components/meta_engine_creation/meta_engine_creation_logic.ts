@@ -79,12 +79,12 @@ export const MetaEngineCreationLogic = kea<
   listeners: ({ values, actions }) => ({
     fetchIndexedEngineNames: async ({ page }) => {
       const { http } = HttpLogic.values;
-      let response;
+      let response: { results: EngineDetails[]; meta: Meta } | undefined;
 
       try {
-        response = (await http.get('/api/app_search/engines', {
+        response = await http.get('/api/app_search/engines', {
           query: { type: 'indexed', 'page[current]': page, 'page[size]': DEFAULT_META.page.size },
-        })) as { results: EngineDetails[]; meta: Meta };
+        });
       } catch (e) {
         flashAPIErrors(e);
       }
