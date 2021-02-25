@@ -8,7 +8,7 @@
 
 import { PluginConfigDescriptor, PluginInitializerContext } from '../../../../src/core/server';
 import { configSchema, ConfigSchema } from '../config';
-import { Plugin } from './plugin';
+import { TimelionPlugin } from './plugin';
 
 export { PluginSetupContract } from './plugin';
 
@@ -25,4 +25,4 @@ export const config: PluginConfigDescriptor<ConfigSchema> = {
   ],
 };
 export const plugin = (initializerContext: PluginInitializerContext) =>
-  new Plugin(initializerContext);
+  new TimelionPlugin(initializerContext);

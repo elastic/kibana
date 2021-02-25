@@ -33,14 +33,13 @@ export function initGetCaseConfigure({ caseConfigureService, router }: RouteDeps
             throw Boom.badRequest('RouteHandlerContext is not registered for cases');
           }
           const caseClient = context.case.getCaseClient();
-          const actionsClient = await context.actions?.getActionsClient();
+          const actionsClient = context.actions?.getActionsClient();
           if (actionsClient == null) {
-            throw Boom.notFound('Action client have not been found');
+            throw Boom.notFound('Action client not found');
           }
           try {
             mappings = await caseClient.getMappings({
               actionsClient,
-              caseClient,
               connectorId: connector.id,
               connectorType: connector.type,
             });

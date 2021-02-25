@@ -16,6 +16,7 @@ interface NewCaseState {
   isError: boolean;
 }
 type Action = { type: 'FETCH_INIT' } | { type: 'FETCH_SUCCESS' } | { type: 'FETCH_FAILURE' };
+
 const dataFetchReducer = (state: NewCaseState, action: Action): NewCaseState => {
   switch (action.type) {
     case 'FETCH_INIT':
@@ -49,37 +50,41 @@ export const usePostCase = (): UsePostCase => {
     isError: false,
   });
   const [, dispatchToaster] = useStateToaster();
-  const cancel = useRef(false);
-  const abortCtrl = useRef(new AbortController());
-  const postMyCase = useCallback(
-    async (data: CasePostRequest) => {
-      try {
-        dispatch({ type: 'FETCH_INIT' });
-        abortCtrl.current.abort();
-        cancel.current = false;
-        abortCtrl.current = new AbortController();
-        const response = await postCase(data, abortCtrl.current.signal);
-        if (!cancel.current) {
-          dispatch({ type: 'FETCH_SUCCESS' });
-        }
-        return response;
-      } catch (error) {
-        if (!cancel.current) {
+  const isCancelledRef = useRef(false);
+  const abortCtrlRef = useRef(new AbortController());
+
+  const postMyCase = useCallback(async (data: CasePostRequest) => {
+    try {
+      isCancelledRef.current = false;
+      abortCtrlRef.current.abort();
+      abortCtrlRef.current = new AbortController();
+
+      dispatch({ type: 'FETCH_INIT' });
+      const response = await postCase(data, abortCtrlRef.current.signal);
+
+      if (!isCancelledRef.current) {
+        dispatch({ type: 'FETCH_SUCCESS' });
+      }
+      return response;
+    } catch (error) {
+      if (!isCancelledRef.current) {
+        if (error.name !== 'AbortError') {
           errorToToaster({
             title: i18n.ERROR_TITLE,
             error: error.body && error.body.message ? new Error(error.body.message) : error,
             dispatchToaster,
           });
-          dispatch({ type: 'FETCH_FAILURE' });
         }
+        dispatch({ type: 'FETCH_FAILURE' });
       }
-    },
-    [dispatchToaster]
-  );
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   useEffect(() => {
     return () => {
-      abortCtrl.current.abort();
-      cancel.current = true;
+      isCancelledRef.current = true;
+      abortCtrlRef.current.abort();
     };
   }, []);
   return { ...state, postCase: postMyCase };

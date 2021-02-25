@@ -211,6 +211,7 @@ export class OptimizerConfig {
   }
 
   static create(inputOptions: Options) {
+    const limits = readLimits();
     const options = OptimizerConfig.parseOptions(inputOptions);
     const plugins = findKibanaPlatformPlugins(options.pluginScanDirs, options.pluginPaths);
     const bundles = [
@@ -223,10 +224,11 @@ export class OptimizerConfig {
               sourceRoot: options.repoRoot,
               contextDir: Path.resolve(options.repoRoot, 'src/core'),
               outputDir: Path.resolve(options.outputRoot, 'src/core/target/public'),
+              pageLoadAssetSizeLimit: limits.pageLoadAssetSize?.core,
             }),
           ]
         : []),
-      ...getPluginBundles(plugins, options.repoRoot, options.outputRoot),
+      ...getPluginBundles(plugins, options.repoRoot, options.outputRoot, limits),
     ];
 
     return new OptimizerConfig(
@@ -239,8 +241,7 @@ export class OptimizerConfig {
       options.maxWorkerCount,
       options.dist,
       options.profileWebpack,
-      options.themeTags,
-      readLimits()
+      options.themeTags
     );
   }
 
@@ -254,8 +255,7 @@ export class OptimizerConfig {
     public readonly maxWorkerCount: number,
     public readonly dist: boolean,
     public readonly profileWebpack: boolean,
-    public readonly themeTags: ThemeTags,
-    public readonly limits: Limits
+    public readonly themeTags: ThemeTags
   ) {}
 
   getWorkerConfig(optimizerCacheKey: unknown): WorkerConfig {

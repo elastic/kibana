@@ -46,12 +46,11 @@ import {
   waitForAlertsPanelToBeLoaded,
 } from '../../tasks/alerts';
 import {
-  changeToThreeHundredRowsPerPage,
+  changeRowsPerPageTo300,
   filterByCustomRules,
   goToCreateNewRule,
   goToRuleDetails,
-  waitForLoadElasticPrebuiltDetectionRulesTableToBeLoaded,
-  waitForRulesToBeLoaded,
+  waitForRulesTableToBeLoaded,
 } from '../../tasks/alerts_detection_rules';
 import { cleanKibana } from '../../tasks/common';
 import {
@@ -81,7 +80,7 @@ describe('Detection rules, machine learning', () => {
     waitForAlertsPanelToBeLoaded();
     waitForAlertsIndexToBeCreated();
     goToManageAlertsDetectionRules();
-    waitForLoadElasticPrebuiltDetectionRulesTableToBeLoaded();
+    waitForRulesTableToBeLoaded();
     goToCreateNewRule();
     selectMachineLearningRuleType();
     fillDefineMachineLearningRuleAndContinue(machineLearningRule);
@@ -91,8 +90,7 @@ describe('Detection rules, machine learning', () => {
 
     cy.get(CUSTOM_RULES_BTN).should('have.text', 'Custom rules (1)');
 
-    changeToThreeHundredRowsPerPage();
-    waitForRulesToBeLoaded();
+    changeRowsPerPageTo300();
 
     cy.get(RULES_TABLE).then(($table) => {
       cy.wrap($table.find(RULES_ROW).length).should('eql', expectedNumberOfRules);

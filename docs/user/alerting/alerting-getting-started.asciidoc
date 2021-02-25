@@ -5,7 +5,7 @@
 
 --
 
-Alerting allows you to detect complex conditions within different {kib} apps and trigger actions when those conditions are met. Alerting is integrated with <<xpack-apm,*APM*>>, <<metrics-app,*Metrics*>>, <<xpack-siem,*Security*>>, <<uptime-app,*Uptime*>>, can be centrally managed from the <<management,*Management*>> UI, and provides a set of built-in <<action-types, actions>> and <<alert-types, alerts>> (known as stack alerts) for you to use.
+Alerting allows you to detect complex conditions within different {kib} apps and trigger actions when those conditions are met. Alerting is integrated with {observability-guide}/create-alerts.html[*Observability*], {security-guide}/prebuilt-rules.html[*Security*], <<geo-alerting,*Maps*>> and <<xpack-ml,*ML*>>, can be centrally managed from the <<management,*Management*>> UI, and provides a set of built-in <<action-types, actions>> and <<alert-types, alerts>> (known as stack alerts) for you to use.
 
 image::images/alerting-overview.png[Alerts and actions UI]
 
@@ -158,6 +158,7 @@ Pre-packaged *alert types* simplify setup, hide the details complex domain-speci
 If you are using an *on-premises* Elastic Stack deployment:
 
 * In the kibana.yml configuration file, add the <<alert-action-settings-kb,`xpack.encryptedSavedObjects.encryptionKey`>> setting.
+* For emails to have a footer with a link back to {kib}, set the <<server-publicBaseUrl, `server.publicBaseUrl`>> configuration setting.
 
 If you are using an *on-premises* Elastic Stack deployment with <<using-kibana-with-security, *security*>>:
 
@@ -172,6 +173,7 @@ To access alerting in a space, a user must have access to one of the following f
 * Alerting
 * <<xpack-apm,*APM*>>
 * <<logs-app,*Logs*>>
+* <<xpack-ml,*{ml-cap}*>>
 * <<metrics-app,*Metrics*>>
 * <<xpack-siem,*Security*>>
 * <<uptime-app,*Uptime*>>
@@ -200,6 +202,6 @@ If an alert requires certain privileges to run such as index privileges, keep in
 [[alerting-restricting-actions]]
 === Restricting actions
 
-For security reasons you may wish to limit the extent to which {kib} can connect to external services. <<action-settings>> allows you to disable certain <<action-types>> and whitelist the hostnames that {kib} can connect with. 
+For security reasons you may wish to limit the extent to which {kib} can connect to external services. <<action-settings>> allows you to disable certain <<action-types>> and allowlist the hostnames that {kib} can connect with. 
 
 --

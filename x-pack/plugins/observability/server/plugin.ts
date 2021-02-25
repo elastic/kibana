@@ -6,7 +6,6 @@
  */
 
 import { PluginInitializerContext, Plugin, CoreSetup } from 'src/core/server';
-import { take } from 'rxjs/operators';
 import { ObservabilityConfig } from '.';
 import {
   bootstrapAnnotations,
@@ -28,10 +27,8 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
     this.initContext = initContext;
   }
 
-  public async setup(core: CoreSetup, plugins: {}): Promise<ObservabilityPluginSetup> {
-    const config$ = this.initContext.config.create<ObservabilityConfig>();
-
-    const config = await config$.pipe(take(1)).toPromise();
+  public setup(core: CoreSetup, plugins: {}): ObservabilityPluginSetup {
+    const config = this.initContext.config.get<ObservabilityConfig>();
 
     let annotationsApiPromise: Promise<AnnotationsAPI> | undefined;
 

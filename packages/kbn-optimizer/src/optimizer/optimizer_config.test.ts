@@ -435,7 +435,6 @@ describe('OptimizerConfig::create()', () => {
         "cache": Symbol(parsed cache),
         "dist": Symbol(parsed dist),
         "inspectWorkers": Symbol(parsed inspect workers),
-        "limits": Symbol(limits),
         "maxWorkerCount": Symbol(parsed max worker count),
         "plugins": Symbol(new platform plugins),
         "profileWebpack": Symbol(parsed profile webpack),
@@ -457,7 +456,7 @@ describe('OptimizerConfig::create()', () => {
           [Window],
         ],
         "invocationCallOrder": Array [
-          21,
+          22,
         ],
         "results": Array [
           Object {
@@ -480,7 +479,7 @@ describe('OptimizerConfig::create()', () => {
           [Window],
         ],
         "invocationCallOrder": Array [
-          24,
+          25,
         ],
         "results": Array [
           Object {
@@ -498,13 +497,14 @@ describe('OptimizerConfig::create()', () => {
             Symbol(new platform plugins),
             Symbol(parsed repo root),
             Symbol(parsed output root),
+            Symbol(limits),
           ],
         ],
         "instances": Array [
           [Window],
         ],
         "invocationCallOrder": Array [
-          22,
+          23,
         ],
         "results": Array [
           Object {

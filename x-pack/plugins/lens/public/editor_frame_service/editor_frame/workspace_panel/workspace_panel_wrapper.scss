@@ -2,7 +2,6 @@
 
 .lnsWorkspacePanelWrapper {
   @include euiScrollBar;
-  overflow: hidden;
   // Override panel size padding
   padding: 0 !important; // sass-lint:disable-line no-important
   margin-bottom: $euiSize;
@@ -10,6 +9,9 @@
   flex-direction: column;
   position: relative; // For positioning the dnd overlay
   min-height: $euiSizeXXL * 10;
+  overflow: visible;
+  border: none;
+  height: 100%;
 
   .lnsWorkspacePanelWrapper__pageContentBody {
     @include euiScrollBar;
@@ -17,7 +19,6 @@
     display: flex;
     align-items: stretch;
     justify-content: stretch;
-    overflow: auto;
 
     > * {
       flex: 1 1 100%;
@@ -30,17 +31,33 @@
 }
 
 .lnsWorkspacePanel__dragDrop {
-  // Disable the coloring of the DnD for this element as we'll
-  // Color the whole panel instead
-  background-color: transparent !important; // sass-lint:disable-line no-important
-  border: none !important; // sass-lint:disable-line no-important
-}
+  width: 100%;
+  height: 100%;
+  border: $euiBorderThin;
+  border-radius: $euiBorderRadius;
 
-.lnsExpressionRenderer {
-  .lnsDragDrop-isDropTarget & {
-    transition: filter $euiAnimSpeedNormal ease-in-out, opacity $euiAnimSpeedNormal ease-in-out;
-    filter: blur($euiSizeXS);
-    opacity: .25;
+  &.lnsDragDrop-isDropTarget {
+    @include lnsDroppable;
+    @include lnsDroppableActive;
+
+    p {
+      transition: filter $euiAnimSpeedFast ease-in-out;
+      filter: blur(5px);
+    }
+
+    .lnsExpressionRenderer {
+      transition: filter $euiAnimSpeedNormal ease-in-out, opacity $euiAnimSpeedNormal ease-in-out;
+      filter: blur($euiSizeXS);
+      opacity: .25;
+    }
+  }
+
+  &.lnsDragDrop-isActiveDropTarget {
+    @include lnsDroppableActiveHover;
+
+    .lnsDropIllustration__hand {
+      animation: lnsWorkspacePanel__illustrationPulseContinuous 1.5s ease-in-out 0s infinite normal forwards;
+    }
   }
 }
 
@@ -54,24 +71,6 @@
   justify-content: center;
   align-items: center;
   transition: background-color $euiAnimSpeedFast ease-in-out;
-
-  .lnsDragDrop-isDropTarget & {
-    @include lnsDroppable;
-    @include lnsDroppableActive;
-
-    p {
-      transition: filter $euiAnimSpeedFast ease-in-out;
-      filter: blur(5px);
-    }
-  }
-
-  .lnsDragDrop-isActiveDropTarget & {
-    @include lnsDroppableActiveHover;
-
-    .lnsDropIllustration__hand {
-      animation: lnsWorkspacePanel__illustrationPulseContinuous 1.5s ease-in-out 0s infinite normal forwards;
-    }
-  }
 }
 
 .lnsWorkspacePanelWrapper__toolbar {

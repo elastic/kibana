@@ -7,13 +7,13 @@
 
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useEffect } from 'react';
+import { SubscriptionSplashContent } from '../../../components/subscription_splash_content';
 import { isJobStatusWithResults } from '../../../../common/log_analysis';
 import { LoadingPage } from '../../../components/loading_page';
 import {
   LogAnalysisSetupStatusUnknownPrompt,
   MissingResultsPrivilegesPrompt,
   MissingSetupPrivilegesPrompt,
-  SubscriptionSplashContent,
 } from '../../../components/logging/log_analysis_setup';
 import {
   LogAnalysisSetupFlyout,

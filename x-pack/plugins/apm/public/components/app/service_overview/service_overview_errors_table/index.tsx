@@ -7,38 +7,24 @@
 
 import {
   EuiBasicTable,
-  EuiBasicTableColumn,
   EuiFlexGroup,
   EuiFlexItem,
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { orderBy } from 'lodash';
 import React, { useState } from 'react';
-import { asInteger } from '../../../../../common/utils/formatters';
+import uuid from 'uuid';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
-import { px, unit } from '../../../../style/variables';
-import { SparkPlot } from '../../../shared/charts/spark_plot';
-import { ErrorDetailLink } from '../../../shared/Links/apm/ErrorDetailLink';
 import { ErrorOverviewLink } from '../../../shared/Links/apm/ErrorOverviewLink';
 import { TableFetchWrapper } from '../../../shared/table_fetch_wrapper';
-import { TimestampTooltip } from '../../../shared/TimestampTooltip';
-import { TruncateWithTooltip } from '../../../shared/truncate_with_tooltip';
 import { ServiceOverviewTableContainer } from '../service_overview_table_container';
+import { getColumns } from './get_column';
 
 interface Props {
   serviceName: string;
-}
-
-interface ErrorGroupItem {
-  name: string;
-  last_seen: number;
-  group_id: string;
-  occurrences: {
-    value: number;
-    timeseries: Array<{ x: number; y: number }> | null;
-  };
 }
 
 type SortDirection = 'asc' | 'desc';
@@ -50,10 +36,14 @@ const DEFAULT_SORT = {
   field: 'occurrences' as const,
 };
 
+const INITIAL_STATE = {
+  items: [],
+  requestId: undefined,
+};
+
 export function ServiceOverviewErrorsTable({ serviceName }: Props) {
   const {
-    urlParams: { start, end },
-    uiFilters,
+    urlParams: { environment, kuery, start, end },
   } = useUrlParams();
   const { transactionType } = useApmServiceContext();
   const [tableOptions, setTableOptions] = useState<{
@@ -67,133 +57,86 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
     sort: DEFAULT_SORT,
   });
 
-  const columns: Array<EuiBasicTableColumn<ErrorGroupItem>> = [
-    {
-      field: 'name',
-      name: i18n.translate('xpack.apm.serviceOverview.errorsTableColumnName', {
-        defaultMessage: 'Name',
-      }),
-      render: (_, { name, group_id: errorGroupId }) => {
-        return (
-          <TruncateWithTooltip
-            text={name}
-            content={
-              <ErrorDetailLink
-                serviceName={serviceName}
-                errorGroupId={errorGroupId}
-              >
-                {name}
-              </ErrorDetailLink>
-            }
-          />
-        );
-      },
-    },
-    {
-      field: 'last_seen',
-      name: i18n.translate(
-        'xpack.apm.serviceOverview.errorsTableColumnLastSeen',
-        {
-          defaultMessage: 'Last seen',
-        }
-      ),
-      render: (_, { last_seen: lastSeen }) => {
-        return <TimestampTooltip time={lastSeen} timeUnit="minutes" />;
-      },
-      width: px(unit * 9),
-    },
-    {
-      field: 'occurrences',
-      name: i18n.translate(
-        'xpack.apm.serviceOverview.errorsTableColumnOccurrences',
-        {
-          defaultMessage: 'Occurrences',
-        }
-      ),
-      width: px(unit * 12),
-      render: (_, { occurrences }) => {
-        return (
-          <SparkPlot
-            color="euiColorVis7"
-            series={occurrences.timeseries ?? undefined}
-            valueLabel={i18n.translate(
-              'xpack.apm.serviceOveriew.errorsTableOccurrences',
-              {
-                defaultMessage: `{occurrencesCount} occ.`,
-                values: {
-                  occurrencesCount: asInteger(occurrences.value),
-                },
-              }
-            )}
-          />
-        );
-      },
-    },
-  ];
+  const { pageIndex, sort } = tableOptions;
 
-  const {
-    data = {
-      totalItemCount: 0,
-      items: [],
-      tableOptions: {
-        pageIndex: 0,
-        sort: DEFAULT_SORT,
-      },
-    },
-    status,
-  } = useFetcher(
+  const { data = INITIAL_STATE, status } = useFetcher(
     (callApmApi) => {
       if (!start || !end || !transactionType) {
         return;
       }
-
       return callApmApi({
-        endpoint: 'GET /api/apm/services/{serviceName}/error_groups',
+        endpoint:
+          'GET /api/apm/services/{serviceName}/error_groups/primary_statistics',
         params: {
           path: { serviceName },
           query: {
+            environment,
+            kuery,
             start,
             end,
-            uiFilters: JSON.stringify(uiFilters),
-            size: PAGE_SIZE,
-            numBuckets: 20,
-            pageIndex: tableOptions.pageIndex,
-            sortField: tableOptions.sort.field,
-            sortDirection: tableOptions.sort.direction,
             transactionType,
           },
         },
       }).then((response) => {
         return {
+          requestId: uuid(),
           items: response.error_groups,
-          totalItemCount: response.total_error_groups,
-          tableOptions: {
-            pageIndex: tableOptions.pageIndex,
-            sort: {
-              field: tableOptions.sort.field,
-              direction: tableOptions.sort.direction,
-            },
-          },
         };
       });
     },
-    [
-      start,
-      end,
-      serviceName,
-      uiFilters,
-      tableOptions.pageIndex,
-      tableOptions.sort.field,
-      tableOptions.sort.direction,
-      transactionType,
-    ]
+    [environment, kuery, start, end, serviceName, transactionType]
   );
 
-  const {
+  const { requestId, items } = data;
+  const currentPageErrorGroups = orderBy(
     items,
-    totalItemCount,
-    tableOptions: { pageIndex, sort },
-  } = data;
+    sort.field,
+    sort.direction
+  ).slice(pageIndex * PAGE_SIZE, (pageIndex + 1) * PAGE_SIZE);
+
+  const groupIds = JSON.stringify(
+    currentPageErrorGroups.map(({ group_id: groupId }) => groupId).sort()
+  );
+  const {
+    data: errorGroupComparisonStatistics,
+    status: errorGroupComparisonStatisticsStatus,
+  } = useFetcher(
+    (callApmApi) => {
+      if (
+        requestId &&
+        currentPageErrorGroups.length &&
+        start &&
+        end &&
+        transactionType
+      ) {
+        return callApmApi({
+          endpoint:
+            'GET /api/apm/services/{serviceName}/error_groups/comparison_statistics',
+          params: {
+            path: { serviceName },
+            query: {
+              environment,
+              kuery,
+              start,
+              end,
+              numBuckets: 20,
+              transactionType,
+              groupIds,
+            },
+          },
+        });
+      }
+    },
+    // only fetches agg results when requestId or group ids change
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [requestId, groupIds],
+    { preservePreviousData: false }
+  );
+
+  const columns = getColumns({
+    serviceName,
+    errorGroupComparisonStatistics: errorGroupComparisonStatistics ?? {},
+  });
 
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
@@ -226,15 +169,18 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
           >
             <EuiBasicTable
               columns={columns}
-              items={items}
+              items={currentPageErrorGroups}
               pagination={{
                 pageIndex,
                 pageSize: PAGE_SIZE,
-                totalItemCount,
+                totalItemCount: items.length,
                 pageSizeOptions: [PAGE_SIZE],
                 hidePerPageOptions: true,
               }}
-              loading={status === FETCH_STATUS.LOADING}
+              loading={
+                status === FETCH_STATUS.LOADING ||
+                errorGroupComparisonStatisticsStatus === FETCH_STATUS.LOADING
+              }
               onChange={(newTableOptions: {
                 page?: {
                   index: number;
@@ -253,10 +199,7 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
               }}
               sorting={{
                 enableAllColumns: true,
-                sort: {
-                  direction: sort.direction,
-                  field: sort.field,
-                },
+                sort,
               }}
             />
           </ServiceOverviewTableContainer>

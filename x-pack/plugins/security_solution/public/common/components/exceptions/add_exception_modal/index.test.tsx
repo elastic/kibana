@@ -8,7 +8,6 @@
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
 import { mount, ReactWrapper } from 'enzyme';
-import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 import { waitFor } from '@testing-library/react';
 
 import { AddExceptionModal } from './';
@@ -20,7 +19,6 @@ import { stubIndexPattern } from 'src/plugins/data/common/index_patterns/index_p
 import { useAddOrUpdateException } from '../use_add_exception';
 import { useFetchOrCreateRuleExceptionList } from '../use_fetch_or_create_rule_exception_list';
 import { useSignalIndex } from '../../../../detections/containers/detection_engine/alerts/use_signal_index';
-import { Ecs } from '../../../../../common/ecs';
 import * as builder from '../builder';
 import * as helpers from '../helpers';
 import { getExceptionListItemSchemaMock } from '../../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
@@ -31,6 +29,18 @@ import {
   getRulesSchemaMock,
 } from '../../../../../common/detection_engine/schemas/response/rules_schema.mocks';
 import { useRuleAsync } from '../../../../detections/containers/detection_engine/rules/use_rule_async';
+import { AlertData } from '../types';
+
+const mockTheme = {
+  eui: {
+    euiBreakpoints: {
+      l: '1200px',
+    },
+    paddingSizes: {
+      m: '10px',
+    },
+  },
+};
 
 jest.mock('../../../../detections/containers/detection_engine/alerts/use_signal_index');
 jest.mock('../../../../common/lib/kibana');
@@ -101,7 +111,7 @@ describe('When the add exception modal is opened', () => {
         },
       ]);
       wrapper = mount(
-        <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
+        <ThemeProvider theme={mockTheme}>
           <AddExceptionModal
             ruleId={'123'}
             ruleIndices={[]}
@@ -122,7 +132,7 @@ describe('When the add exception modal is opened', () => {
     let wrapper: ReactWrapper;
     beforeEach(async () => {
       wrapper = mount(
-        <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
+        <ThemeProvider theme={mockTheme}>
           <AddExceptionModal
             ruleId={'123'}
             ruleIndices={['filebeat-*']}
@@ -157,10 +167,13 @@ describe('When the add exception modal is opened', () => {
   describe('when there is alert data passed to an endpoint list exception', () => {
     let wrapper: ReactWrapper;
     beforeEach(async () => {
-      const alertDataMock: Ecs = { _id: 'test-id', file: { path: ['test/path'] } };
-
+      const alertDataMock: AlertData = {
+        '@timestamp': '1234567890',
+        _id: 'test-id',
+        file: { path: 'test/path' },
+      };
       wrapper = mount(
-        <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
+        <ThemeProvider theme={mockTheme}>
           <AddExceptionModal
             ruleId={'123'}
             ruleIndices={['filebeat-*']}
@@ -211,10 +224,13 @@ describe('When the add exception modal is opened', () => {
   describe('when there is alert data passed to a detection list exception', () => {
     let wrapper: ReactWrapper;
     beforeEach(async () => {
-      const alertDataMock: Ecs = { _id: 'test-id', file: { path: ['test/path'] } };
-
+      const alertDataMock: AlertData = {
+        '@timestamp': '1234567890',
+        _id: 'test-id',
+        file: { path: 'test/path' },
+      };
       wrapper = mount(
-        <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
+        <ThemeProvider theme={mockTheme}>
           <AddExceptionModal
             ruleId={'123'}
             ruleIndices={['filebeat-*']}
@@ -262,7 +278,6 @@ describe('When the add exception modal is opened', () => {
   describe('when there is an exception being created on a sequence eql rule type', () => {
     let wrapper: ReactWrapper;
     beforeEach(async () => {
-      const alertDataMock: Ecs = { _id: 'test-id', file: { path: ['test/path'] } };
       (useRuleAsync as jest.Mock).mockImplementation(() => ({
         rule: {
           ...getRulesEqlSchemaMock(),
@@ -270,8 +285,13 @@ describe('When the add exception modal is opened', () => {
             'sequence [process where process.name = "test.exe"] [process where process.name = "explorer.exe"]',
         },
       }));
+      const alertDataMock: AlertData = {
+        '@timestamp': '1234567890',
+        _id: 'test-id',
+        file: { path: 'test/path' },
+      };
       wrapper = mount(
-        <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
+        <ThemeProvider theme={mockTheme}>
           <AddExceptionModal
             ruleId={'123'}
             ruleIndices={['filebeat-*']}
@@ -339,9 +359,13 @@ describe('When the add exception modal is opened', () => {
           },
         },
       ]);
-      const alertDataMock: Ecs = { _id: 'test-id', file: { path: ['test/path'] } };
+      const alertDataMock: AlertData = {
+        '@timestamp': '1234567890',
+        _id: 'test-id',
+        file: { path: 'test/path' },
+      };
       wrapper = mount(
-        <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
+        <ThemeProvider theme={mockTheme}>
           <AddExceptionModal
             ruleId={'123'}
             ruleIndices={['filebeat-*']}
@@ -411,7 +435,7 @@ describe('When the add exception modal is opened', () => {
 
   test('when there are exception builder errors submit button is disabled', async () => {
     const wrapper = mount(
-      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
+      <ThemeProvider theme={mockTheme}>
         <AddExceptionModal
           ruleId={'123'}
           ruleIndices={['filebeat-*']}

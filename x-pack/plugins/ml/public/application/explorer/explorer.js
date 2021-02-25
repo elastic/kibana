@@ -142,6 +142,7 @@ export class Explorer extends React.Component {
     setSelectedCells: PropTypes.func.isRequired,
     severity: PropTypes.number.isRequired,
     showCharts: PropTypes.bool.isRequired,
+    selectedJobsRunning: PropTypes.bool.isRequired,
   };
 
   state = { filterIconTriggeredQuery: undefined, language: DEFAULT_QUERY_LANG };
@@ -223,7 +224,7 @@ export class Explorer extends React.Component {
   updateLanguage = (language) => this.setState({ language });
 
   render() {
-    const { showCharts, severity, stoppedPartitions } = this.props;
+    const { showCharts, severity, stoppedPartitions, selectedJobsRunning } = this.props;
 
     const {
       annotations,
@@ -248,6 +249,9 @@ export class Explorer extends React.Component {
 
     const noJobsFound = selectedJobs === null || selectedJobs.length === 0;
     const hasResults = overallSwimlaneData.points && overallSwimlaneData.points.length > 0;
+    const hasResultsWithAnomalies =
+      (hasResults && overallSwimlaneData.points.some((v) => v.value > 0)) ||
+      tableData.anomalies?.length > 0;
 
     if (noJobsFound && !loading) {
       return (
@@ -257,10 +261,13 @@ export class Explorer extends React.Component {
       );
     }
 
-    if (noJobsFound && hasResults === false && !loading) {
+    if (hasResultsWithAnomalies === false && !loading) {
       return (
         <ExplorerPage jobSelectorProps={jobSelectorProps}>
-          <ExplorerNoResultsFound />
+          <ExplorerNoResultsFound
+            hasResults={hasResults}
+            selectedJobsRunning={selectedJobsRunning}
+          />
         </ExplorerPage>
       );
     }

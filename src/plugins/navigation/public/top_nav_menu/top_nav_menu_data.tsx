@@ -20,6 +20,7 @@ export interface TopNavMenuData {
   disableButton?: boolean | (() => boolean);
   tooltip?: string | (() => string | undefined);
   emphasize?: boolean;
+  isLoading?: boolean;
   iconType?: string;
   iconSide?: EuiButtonProps['iconSide'];
 }

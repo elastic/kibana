@@ -31,7 +31,8 @@ Password::  Password for HTTP Basic authentication.
      password: passwordkeystorevalue
 --
 
-`config` defines the action type specific to the configuration and contains the following properties:
+[[servicenow-connector-config-properties]]
+**`config`** defines the action type specific to the configuration and contains the following properties:
 
 [cols="2*<"]
 |===
@@ -41,7 +42,7 @@ Password::  Password for HTTP Basic authentication.
 
 |===
 
-`secrets` defines sensitive information for the action type:
+**`secrets`** defines sensitive information for the action type and contains the following properties:
 
 [cols="2*<"]
 |===
@@ -59,12 +60,33 @@ Password::  Password for HTTP Basic authentication.
 
 ServiceNow actions have the following configuration properties:
 
-Urgency::              The extent to which the incident resolution can delay.
-Severity::             The severity of the incident.
-Impact::               The effect an incident has on business. Can be measured by the number of affected users or by how critical it is to the business in question.
-Short description::    A short description for the incident, used for searching the contents of the knowledge base. 
-Description::          The details about the incident.
-Additional comments::  Additional information for the client, such as how to troubleshoot the issue.
+Subaction::        The subaction to perform: `pushToService`, `getFields`, `getIncident`, or `getChoices`.
+Subaction params:: The parameters of the subaction.
+
+==== `pushToService` subaction configuration
+
+Incident:: The ServiceNow incident has the following properties:
+* `short_description` - A short description for the incident, used for searching the contents of the knowledge base.
+* `description` - The details about the incident.
+* `externalId` - The ID of the incident in ServiceNow. If present, the incident is updated. Otherwise, a new incident is created.
+* `severity` - The severity of the incident.
+* `urgency` - The extent to which the incident resolution can delay.
+* `impact` - The effect an incident has on business. Can be measured by the number of affected users or by how critical it is to the business in question.
+* `category` - The name of the category in ServiceNow.
+* `subcategory` - The name of the subcategory in ServiceNow.
+Comments:: A comment in the form of `{ commentId: string, version: string, comment: string }`.
+
+===== `getFields` subaction configuration
+
+The `getFields` subaction has no parameters. Provide an empty object `{}`.
+
+===== `getIncident` subaction configuration
+
+External ID:: The ID of the incident in ServiceNow.
+
+===== `getChoices` subaction configuration
+
+Fields:: An array of fields. Example: `[priority, category, impact]`.
 
 [[configuring-servicenow]]
 ==== Configuring and testing ServiceNow

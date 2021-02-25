@@ -42,6 +42,7 @@ it('creates cache keys', () => {
         "id": "bar",
         "manifestPath": undefined,
         "outputDir": "/foo/bar/target",
+        "pageLoadAssetSizeLimit": undefined,
         "publicDirNames": Array [
           "public",
         ],
@@ -79,6 +80,7 @@ it('parses bundles from JSON specs', () => {
         "id": "bar",
         "manifestPath": undefined,
         "outputDir": "/foo/bar/target",
+        "pageLoadAssetSizeLimit": undefined,
         "publicDirNames": Array [
           "public",
         ],

@@ -90,7 +90,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         // the previous line resolves, the API may not be done creating the alert yet, so we
         // put the fetch code in a retry block with a timeout.
         let alert: any;
-        await retry.tryForTime(15000, async () => {
+        await retry.tryForTime(60 * 1000, async () => {
           const apiResponse = await supertest.get('/api/alerts/_find?search=uptime-test');
           const alertsFromThisTest = apiResponse.body.data.filter(
             ({ name }: { name: string }) => name === 'uptime-test'

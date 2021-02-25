@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { DEFAULT_INDICATOR_SOURCE_PATH } from '../../../constants';
 import {
   MachineLearningCreateSchema,
   MachineLearningUpdateSchema,
@@ -56,6 +57,7 @@ export const getCreateThreatMatchRulesSchemaMock = (
   rule_id: ruleId,
   threat_query: '*:*',
   threat_index: ['list-index'],
+  threat_indicator_path: DEFAULT_INDICATOR_SOURCE_PATH,
   threat_mapping: [
     {
       entries: [
