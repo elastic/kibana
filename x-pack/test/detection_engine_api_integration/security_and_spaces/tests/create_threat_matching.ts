@@ -273,6 +273,7 @@ export default ({ getService }: FtrProviderContext) => {
             rule_id: 'rule-1',
             from: '1900-01-01T00:00:00.000Z',
             query: '*:*',
+            threat_indicator_path: 'threat.indicator',
             threat_query: 'threat.indicator.domain: *', // narrow things down to indicators with a domain
             threat_index: ['filebeat-*'], // Mimics indicators from the filebeat MISP module
             threat_mapping: [
@@ -353,6 +354,7 @@ export default ({ getService }: FtrProviderContext) => {
             rule_id: 'rule-1',
             from: '1900-01-01T00:00:00.000Z',
             query: 'source.port: 57324', // narrow our query to a single record that matches two indicators
+            threat_indicator_path: 'threat.indicator',
             threat_query: 'threat.indicator.ip: *',
             threat_index: ['filebeat-*'], // Mimics indicators from the filebeat MISP module
             threat_mapping: [
@@ -422,6 +424,7 @@ export default ({ getService }: FtrProviderContext) => {
             rule_id: 'rule-1',
             from: '1900-01-01T00:00:00.000Z',
             query: 'source.port: 57324', // narrow our query to a single record that matches two indicators
+            threat_indicator_path: 'threat.indicator',
             threat_query: 'threat.indicator.ip: *',
             threat_index: ['filebeat-*'], // Mimics indicators from the filebeat MISP module
             threat_mapping: [
@@ -519,6 +522,7 @@ export default ({ getService }: FtrProviderContext) => {
             rule_id: 'rule-1',
             from: '1900-01-01T00:00:00.000Z',
             query: '*:*', // narrow our query to a single record that matches two indicators
+            threat_indicator_path: 'threat.indicator',
             threat_query: '',
             threat_index: ['filebeat-*'], // Mimics indicators from the filebeat MISP module
             threat_mapping: [

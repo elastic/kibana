@@ -19,6 +19,7 @@ import {
 import { AggCardinality } from '../../../common/types/fields';
 import { getDatafeedAggregations } from '../../../common/util/datafeed_utils';
 import { Datafeed } from '../../../common/types/anomaly_detection_jobs';
+import { isPopulatedObject } from '../../../common/util/object_utils';
 
 const SAMPLER_TOP_TERMS_THRESHOLD = 100000;
 const SAMPLER_TOP_TERMS_SHARD_SIZE = 5000;
@@ -638,7 +639,7 @@ export class DataVisualizer {
           filter: filterCriteria,
         },
       },
-      aggs: buildSamplerAggregation(aggs, samplerShardSize),
+      ...(isPopulatedObject(aggs) ? { aggs: buildSamplerAggregation(aggs, samplerShardSize) } : {}),
       ...runtimeMappings,
     };
 
@@ -648,6 +649,7 @@ export class DataVisualizer {
       size,
       body: searchBody,
     });
+
     const aggregations = body.aggregations;
     const totalCount = body.hits.total.value;
     const stats = {
