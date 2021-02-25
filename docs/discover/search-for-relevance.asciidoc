@@ -1,5 +1,5 @@
 [[discover-search-for-relevance]]
-=== Search for relevance
+== Search for relevance
 Sometimes you might be unsure which documents best match your question. 
 {es} assigns a relevancy, or score to each document, so you can
 can narrow your search to the documents with the most relevant results.
