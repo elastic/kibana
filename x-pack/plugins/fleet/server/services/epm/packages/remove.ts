@@ -101,7 +101,7 @@ function deleteESAssets(
     } else if (assetType === ElasticsearchAssetType.transform) {
       return deleteTransforms(callCluster, [id]);
     } else if (assetType === ElasticsearchAssetType.dataStreamIlmPolicy) {
-      return deleteIlms(callCluster, [id]);
+      return deleteIlms(esClient, [id]);
     }
   });
 }

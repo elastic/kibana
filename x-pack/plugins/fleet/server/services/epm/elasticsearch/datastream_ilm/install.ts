@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract } from 'kibana/server';
+import { ElasticsearchClient, SavedObjectsClientContract } from 'kibana/server';
 import {
   ElasticsearchAssetType,
   EsAssetReference,
@@ -32,6 +32,7 @@ export const installIlmForDataStream = async (
   registryPackage: InstallablePackage,
   paths: string[],
   callCluster: CallESAsCurrentUser,
+  esClient: ElasticsearchClient,
   savedObjectsClient: SavedObjectsClientContract
 ) => {
   const installation = await getInstallation({ savedObjectsClient, pkgName: registryPackage.name });
@@ -44,7 +45,7 @@ export const installIlmForDataStream = async (
 
   // delete all previous ilm
   await deleteIlms(
-    callCluster,
+    esClient,
     previousInstalledIlmEsAssets.map((asset) => asset.id)
   );
   // install the latest dataset
