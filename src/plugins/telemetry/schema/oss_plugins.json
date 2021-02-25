@@ -3497,149 +3497,266 @@
             "elasticsearch": {
               "properties": {
                 "sniffOnStart": {
-                  "type": "boolean"
+                  "type": "boolean",
+                  "_meta": {
+                    "description": "Indicates if an attempt should be made to find other Elasticsearch nodes on startup."
+                  }
                 },
                 "sniffIntervalMs": {
-                  "type": "long"
+                  "type": "long",
+                  "_meta": {
+                    "description": "Time in milliseconds between requests to check Elasticsearch for an updated list of nodes."
+                  }
                 },
                 "sniffOnConnectionFault": {
-                  "type": "boolean"
+                  "type": "boolean",
+                  "_meta": {
+                    "description": "Indicates if the list of Elasticsearch nodes should be updated immediately following a connection fault."
+                  }
                 },
                 "numberOfHostsConfigured": {
-                  "type": "long"
+                  "type": "long",
+                  "_meta": {
+                    "description": "Number of Elasticsearch instances configured to use for queries."
+                  }
                 },
                 "requestHeadersWhitelistConfigured": {
-                  "type": "boolean"
+                  "type": "boolean",
+                  "_meta": {
+                    "description": "Indicates if Kibana client-side headers to send to Elasticsearch is different to the default value."
+                  }
                 },
                 "customHeadersConfigured": {
-                  "type": "boolean"
+                  "type": "boolean",
+                  "_meta": {
+                    "description": "Indicates if any custom headers have been configured."
+                  }
                 },
                 "shardTimeoutMs": {
-                  "type": "long"
+                  "type": "long",
+                  "_meta": {
+                    "description": "Time in milliseconds for Elasticsearch to wait for responses from shards."
+                  }
                 },
                 "requestTimeoutMs": {
-                  "type": "long"
+                  "type": "long",
+                  "_meta": {
+                    "description": "Time in milliseconds to wait for responses from the back end or Elasticsearch."
+                  }
                 },
                 "pingTimeoutMs": {
-                  "type": "long"
+                  "type": "long",
+                  "_meta": {
+                    "description": "Time in milliseconds to wait for Elasticsearch to respond to pings."
+                  }
                 },
                 "logQueries": {
-                  "type": "boolean"
+                  "type": "boolean",
+                  "_meta": {
+                    "description": "Indicates if queries sent to Elasticsearch should be logged."
+                  }
                 },
                 "ssl": {
                   "properties": {
                     "verificationMode": {
-                      "type": "keyword"
+                      "type": "keyword",
+                      "_meta": {
+                        "description": "The verification of the server certificate that Kibana receives when making an outbound SSL or TLS connection to Elasticsearch"
+                      }
                     },
                     "certificateAuthoritiesConfigured": {
-                      "type": "boolean"
+                      "type": "boolean",
+                      "_meta": {
+                        "description": "Indicates if any PEM-encoded X.509 certificate authority certificates are configured."
+                      }
                     },
                     "certificateConfigured": {
-                      "type": "boolean"
+                      "type": "boolean",
+                      "_meta": {
+                        "description": "Indicates if a certificate authority is configured."
+                      }
                     },
                     "keyConfigured": {
-                      "type": "boolean"
+                      "type": "boolean",
+                      "_meta": {
+                        "description": "Indicates if a certificate key is configured."
+                      }
                     },
                     "keystoreConfigured": {
-                      "type": "boolean"
+                      "type": "boolean",
+                      "_meta": {
+                        "description": "Indicates if a keystore is configured."
+                      }
                     },
                     "truststoreConfigured": {
-                      "type": "boolean"
+                      "type": "boolean",
+                      "_meta": {
+                        "description": "Indicates if a path to a PKCS#12 trust store is configured."
+                      }
                     },
                     "alwaysPresentCertificate": {
-                      "type": "boolean"
+                      "type": "boolean",
+                      "_meta": {
+                        "description": "Indicates if a client certificate is presented when requested by Elasticsearch."
+                      }
                     }
                   }
                 },
                 "apiVersion": {
-                  "type": "keyword"
+                  "type": "keyword",
+                  "_meta": {
+                    "description": "Version of the Elasticsearch API used."
+                  }
                 },
                 "healthCheckDelayMs": {
-                  "type": "long"
+                  "type": "long",
+                  "_meta": {
+                    "description": "The interval in miliseconds between health check requests Kibana sends to the Elasticsearch."
+                  }
                 }
               }
             },
             "http": {
               "properties": {
                 "basePathConfigured": {
-                  "type": "boolean"
+                  "type": "boolean",
+                  "_meta": {
+                    "description": "Indicates if a base path has been configured."
+                  }
                 },
                 "maxPayloadInBytes": {
-                  "type": "long"
+                  "type": "long",
+                  "_meta": {
+                    "description": "Maximum payload size in bytes that is allowed."
+                  }
                 },
                 "rewriteBasePath": {
-                  "type": "boolean"
+                  "type": "boolean",
+                  "_meta": {
+                    "description": "Indicates if the base path should be rewritten."
+                  }
                 },
                 "keepaliveTimeout": {
-                  "type": "long"
+                  "type": "long",
+                  "_meta": {
+                    "description": "How long to keep sockets alive globally in milliseconds."
+                  }
                 },
                 "socketTimeout": {
-                  "type": "long"
+                  "type": "long",
+                  "_meta": {
+                    "description": "How long to wait before closing inactive sockets in milliseconds."
+                  }
                 },
                 "compression": {
                   "properties": {
                     "enabled": {
-                      "type": "boolean"
+                      "type": "boolean",
+                      "_meta": {
+                        "description": "Indicates if HTTP response compression is enabled."
+                      }
                     },
                     "referrerWhitelistConfigured": {
-                      "type": "boolean"
+                      "type": "boolean",
+                      "_meta": {
+                        "description": "Indicates if any responses should be compressed."
+                      }
                     }
                   }
                 },
                 "xsrf": {
                   "properties": {
                     "disableProtection": {
-                      "type": "boolean"
+                      "type": "boolean",
+                      "_meta": {
+                        "description": "Indicates if protection against xsrf should be disabled."
+                      }
                     },
                     "allowlistConfigured": {
-                      "type": "boolean"
+                      "type": "boolean",
+                      "_meta": {
+                        "description": "Indicates if any http headers have been whitelisted."
+                      }
                     }
                   }
                 },
                 "requestId": {
                   "properties": {
                     "allowFromAnyIp": {
-                      "type": "boolean"
+                      "type": "boolean",
+                      "_meta": {
+                        "description": "Indicates if any http headers have been whitelisted."
+                      }
                     },
                     "ipAllowlistConfigured": {
-                      "type": "boolean"
+                      "type": "boolean",
+                      "_meta": {
+                        "description": "Indicates if a list of specific IPs has been configured."
+                      }
                     }
                   }
                 },
                 "ssl": {
                   "properties": {
                     "certificateAuthoritiesConfigured": {
-                      "type": "boolean"
+                      "type": "boolean",
+                      "_meta": {
+                        "description": "Indicates if ssl certificate authorities have been configured."
+                      }
                     },
                     "certificateConfigured": {
-                      "type": "boolean"
+                      "type": "boolean",
+                      "_meta": {
+                        "description": "Indicates if an ssl certificate is configured."
+                      }
                     },
                     "cipherSuites": {
                       "type": "array",
                       "items": {
-                        "type": "keyword"
+                        "type": "keyword",
+                        "_meta": {
+                          "description": "The keyword of the cipher suite used."
+                        }
                       }
                     },
                     "keyConfigured": {
-                      "type": "boolean"
+                      "type": "boolean",
+                      "_meta": {
+                        "description": "Indicates if an ssl key has been configured."
+                      }
                     },
                     "keystoreConfigured": {
-                      "type": "boolean"
+                      "type": "boolean",
+                      "_meta": {
+                        "description": "Indicates if an ssl keystore has been configured."
+                      }
                     },
                     "truststoreConfigured": {
-                      "type": "boolean"
+                      "type": "boolean",
+                      "_meta": {
+                        "description": "Indicates if a path to a PKCS#12 trust store is configured."
+                      }
                     },
                     "redirectHttpFromPortConfigured": {
-                      "type": "boolean"
+                      "type": "boolean",
+                      "_meta": {
+                        "description": "Indicates if a port to redirect all http requests has been configured."
+                      }
                     },
                     "supportedProtocols": {
                       "type": "array",
                       "items": {
-                        "type": "keyword"
+                        "type": "keyword",
+                        "_meta": {
+                          "description": "The version of a supported protocol used."
+                        }
                       }
                     },
                     "clientAuthentication": {
-                      "type": "keyword"
+                      "type": "keyword",
+                      "_meta": {
+                        "description": "The behavior in Kibana for requesting a certificate from client connections."
+                      }
                     }
                   }
                 }
@@ -3650,24 +3767,39 @@
                 "appendersTypesUsed": {
                   "type": "array",
                   "items": {
-                    "type": "keyword"
+                    "type": "keyword",
+                    "_meta": {
+                      "description": "The type of logging appender confgured."
+                    }
                   }
                 },
                 "loggersConfiguredCount": {
-                  "type": "long"
+                  "type": "long",
+                  "_meta": {
+                    "description": "The total number of logging appenders configured."
+                  }
                 }
               }
             },
             "savedObjects": {
               "properties": {
                 "customIndex": {
-                  "type": "boolean"
+                  "type": "boolean",
+                  "_meta": {
+                    "description": "Indicates if the saved objects index is different to the standard internal .kibana index."
+                  }
                 },
                 "maxImportPayloadBytes": {
-                  "type": "long"
+                  "type": "long",
+                  "_meta": {
+                    "description": "Maximum size of the payload in bytes of saved objects that can be imported."
+                  }
                 },
                 "maxImportExportSizeBytes": {
-                  "type": "long"
+                  "type": "long",
+                  "_meta": {
+                    "description": "Maximum size in bytes of saved object that can be imported or exported."
+                  }
                 }
               }
             }
@@ -3678,13 +3810,22 @@
             "memory": {
               "properties": {
                 "heapSizeLimit": {
-                  "type": "long"
+                  "type": "long",
+                  "_meta": {
+                    "description": "Host memory heap size limit."
+                  }
                 },
                 "heapTotalBytes": {
-                  "type": "long"
+                  "type": "long",
+                  "_meta": {
+                    "description": "Total memory heap size of host that is available in bytes."
+                  }
                 },
                 "heapUsedBytes": {
-                  "type": "long"
+                  "type": "long",
+                  "_meta": {
+                    "description": "Total memory heap size of host that is used in bytes."
+                  }
                 }
               }
             }
@@ -3699,19 +3840,34 @@
                   "items": {
                     "properties": {
                       "docsCount": {
-                        "type": "long"
+                        "type": "long",
+                        "_meta": {
+                          "description": "The number of documents in the index, including hidden nested documents."
+                        }
                       },
                       "docsDeleted": {
-                        "type": "long"
+                        "type": "long",
+                        "_meta": {
+                          "description": "The number of deleted documents in the index, including hidden nested documents."
+                        }
                       },
                       "alias": {
-                        "type": "keyword"
+                        "type": "keyword",
+                        "_meta": {
+                          "description": "The alias used to map customized saved object index names to standard index names (.kibana or .kibana_task_manager)."
+                        }
                       },
                       "primaryStoreSizeBytes": {
-                        "type": "long"
+                        "type": "long",
+                        "_meta": {
+                          "description": "The size in bytes of the index, for primaries only."
+                        }
                       },
                       "storeSizeBytes": {
-                        "type": "long"
+                        "type": "long",
+                        "_meta": {
+                          "description": "The size in bytes of the index, for primaries and replicas."
+                        }
                       }
                     }
                   }
