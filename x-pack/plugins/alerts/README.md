@@ -67,7 +67,7 @@ Note that the `manage_own_api_key` cluster privilege is not enough - it can be u
 
 ## Plugin status
 
-Alerts plugin's status is customized by including information about checking framework decryption failures:
+The plugin status of an alert is customized by including information about checking failures for the framework decryption:
 ```
 core.status.set(
         combineLatest([
@@ -84,7 +84,7 @@ core.status.set(
         )
       );
 ```
-To check framework decryption failures we use task `alerting_health_check`, which runs with default interval 60 mins. To change the dafault schedule use kibana.yml configuration option `xpack.alerts.healthCheck.interval: 60m`.
+To check for framework decryption failures, we use the task `alerting_health_check`, which runs every 60 minutes by default. To change the default schedule, use the kibana.yml configuration option `xpack.alerts.healthCheck.interval`.
 
 ## Alert types
 
