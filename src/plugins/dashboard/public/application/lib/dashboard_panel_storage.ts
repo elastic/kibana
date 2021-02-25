@@ -24,11 +24,11 @@ export class DashboardPanelStorage {
 
   public clearPanels(id = DASHBOARD_PANELS_UNSAVED_ID) {
     try {
-      const sessionStoragePanels =
-        this.sessionStorage.get(DASHBOARD_PANELS_SESSION_KEY)?.[this.activeSpaceId] || {};
-      if (sessionStoragePanels[id]) {
-        delete sessionStoragePanels[id];
-        this.sessionStorage.set(DASHBOARD_PANELS_SESSION_KEY, sessionStoragePanels);
+      const sessionStorage = this.sessionStorage.get(DASHBOARD_PANELS_SESSION_KEY);
+      const sessionStorageForSpace = sessionStorage?.[this.activeSpaceId] || {};
+      if (sessionStorageForSpace[id]) {
+        delete sessionStorageForSpace[id];
+        this.sessionStorage.set(DASHBOARD_PANELS_SESSION_KEY, sessionStorage);
       }
     } catch (e) {
       this.toasts.addDanger({
