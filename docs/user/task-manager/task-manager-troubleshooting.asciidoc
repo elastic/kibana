@@ -5,12 +5,12 @@
 Task Manager is used by a wide range of services in {kib}, such as <<alerting-production-considerations, Alerting>>, Reporting and Telemetry.
 Unexpected behavior in these services might be a downstream issue originating in Task Manager.
 
-Use the information in this section to troubleshoot common problems and find answers for frequently asked questions.
+This page describes how to resolve common problems you might encounter with Task Manager.
+If your problem isn’t described here, please review open issues in the following GitHub repositories:
 
-For issues that you cannot fix yourself … we’re here to help.
-If you are an existing Elastic customer with a support contract, please create a ticket in the
-https://support.elastic.co/customers/s/login/[Elastic Support portal].
-Or post in the https://discuss.elastic.co/[Elastic forum].
+* [https://github.com/elastic/kibana/issues](kibana) ([https://github.com/elastic/kibana/issues?q=is%3Aopen+is%3Aissue+label%3A%22Feature%3ATask+Manager%22](Task Manager issues))
+
+Have a question? Contact us in the [https://discuss.elastic.co/](discuss forum).
 
 
 [[task-manager-health-scheduled-tasks-small-schedule-interval-run-late]]
