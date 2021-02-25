@@ -19,10 +19,12 @@ import javaIcon from './icons/java.svg';
 import nodeJsIcon from './icons/nodejs.svg';
 import ocamlIcon from './icons/ocaml.svg';
 import openTelemetryIcon from './icons/opentelemetry.svg';
-import { phpIcon } from './icons/php';
+import phpIcon from './icons/php.svg';
 import pythonIcon from './icons/python.svg';
 import rubyIcon from './icons/ruby.svg';
-import { rumJsIcon } from './icons/rumjs';
+import rumJsIcon from './icons/rumjs.svg';
+// import darkPhpIcon from './icons/php_dark.svg';
+// import darkRumJsIcon from './icons/rumjs_dark.svg';
 
 const agentIcons: { [key: string]: IconType } = {
   dotnet: dotNetIcon,
@@ -37,6 +39,11 @@ const agentIcons: { [key: string]: IconType } = {
   ruby: rubyIcon,
   rum: rumJsIcon,
 };
+
+// const darkAgentIcons: { [key: string]: string } = {
+//   php: darkPhpIcon,
+//   rum: darkRumJsIcon,
+// };
 
 // This only needs to be exported for testing purposes, since we stub the SVG
 // import values in test.
