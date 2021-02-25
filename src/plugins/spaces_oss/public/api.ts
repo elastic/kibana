@@ -69,7 +69,7 @@ export interface SpacesApiUiComponent {
   /**
    * Provides a context that is required to render some Spaces components.
    */
-  getSpacesContext: LazyComponentFn<SpacesContextProps>;
+  getSpacesContextProvider: LazyComponentFn<SpacesContextProps>;
   /**
    * Displays a flyout to edit the spaces that an object is shared to.
    *

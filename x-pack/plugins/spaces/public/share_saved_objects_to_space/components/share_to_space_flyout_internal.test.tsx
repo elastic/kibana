@@ -24,7 +24,7 @@ import type { Space } from 'src/plugins/spaces_oss/common';
 
 import { ALL_SPACES_ID } from '../../../common/constants';
 import { CopyToSpaceFlyoutInternal } from '../../copy_saved_objects_to_space/components/copy_to_space_flyout_internal';
-import { getSpacesContextWrapper } from '../../spaces_context';
+import { getSpacesContextProviderWrapper } from '../../spaces_context';
 import { spacesManagerMock } from '../../spaces_manager/mocks';
 import { NoSpacesAvailable } from './no_spaces_available';
 import { SelectableSpacesControl } from './selectable_spaces_control';
@@ -103,7 +103,7 @@ const setup = async (opts: SetupOpts = {}) => {
   const mockToastNotifications = startServices.notifications.toasts;
   getStartServices.mockResolvedValue([startServices, , ,]);
 
-  const SpacesContext = await getSpacesContextWrapper({
+  const SpacesContext = await getSpacesContextProviderWrapper({
     getStartServices,
     spacesManager: mockSpacesManager,
   });

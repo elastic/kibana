@@ -74,7 +74,8 @@ const SavedObjectsTablePage = ({
   }, [setBreadcrumbs]);
 
   const ContextWrapper = useMemo(
-    () => (spacesApi ? spacesApi.ui.components.getSpacesContext : getEmptyFunctionComponent),
+    () =>
+      spacesApi ? spacesApi.ui.components.getSpacesContextProvider : getEmptyFunctionComponent,
     [spacesApi]
   );
 

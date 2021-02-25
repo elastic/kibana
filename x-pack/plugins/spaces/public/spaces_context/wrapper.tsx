@@ -12,7 +12,7 @@ import type { SpacesContextProps } from 'src/plugins/spaces_oss/public';
 
 import type { InternalProps } from './types';
 
-export const getSpacesContextWrapper = async (
+export const getSpacesContextProviderWrapper = async (
   internalProps: InternalProps
 ): Promise<React.FC<SpacesContextProps>> => {
   const { SpacesContextWrapperInternal } = await import('./wrapper_internal');

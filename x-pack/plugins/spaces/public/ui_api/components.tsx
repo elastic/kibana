@@ -18,7 +18,7 @@ import {
 } from '../share_saved_objects_to_space';
 import { getSpaceAvatarComponent } from '../space_avatar';
 import { getSpaceListComponent } from '../space_list';
-import { getSpacesContextWrapper } from '../spaces_context';
+import { getSpacesContextProviderWrapper } from '../spaces_context';
 import type { SpacesManager } from '../spaces_manager';
 import { LazyWrapper } from './lazy_wrapper';
 
@@ -41,7 +41,9 @@ export const getComponents = ({
   }
 
   return {
-    getSpacesContext: wrapLazy(() => getSpacesContextWrapper({ spacesManager, getStartServices })),
+    getSpacesContextProvider: wrapLazy(() =>
+      getSpacesContextProviderWrapper({ spacesManager, getStartServices })
+    ),
     getShareToSpaceFlyout: wrapLazy(getShareToSpaceFlyoutComponent),
     getSpaceList: wrapLazy(getSpaceListComponent),
     getLegacyUrlConflict: wrapLazy(() => getLegacyUrlConflict({ getStartServices })),

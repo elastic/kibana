@@ -14,7 +14,7 @@ import { findTestSubject, mountWithIntl, nextTick } from '@kbn/test/jest';
 import { coreMock } from 'src/core/public/mocks';
 import type { Space } from 'src/plugins/spaces_oss/common';
 
-import { getSpacesContextWrapper } from '../../spaces_context';
+import { getSpacesContextProviderWrapper } from '../../spaces_context';
 import { spacesManagerMock } from '../../spaces_manager/mocks';
 import type { SavedObjectTarget } from '../types';
 import { CopyModeControl } from './copy_mode_control';
@@ -84,7 +84,7 @@ const setup = async (opts: SetupOpts = {}) => {
     title: 'foo',
   } as SavedObjectTarget;
 
-  const SpacesContext = await getSpacesContextWrapper({
+  const SpacesContext = await getSpacesContextProviderWrapper({
     getStartServices,
     spacesManager: mockSpacesManager,
   });

@@ -14,7 +14,7 @@ import { coreMock } from 'src/core/public/mocks';
 import type { Space } from 'src/plugins/spaces_oss/common';
 import type { SpaceListProps } from 'src/plugins/spaces_oss/public';
 
-import { getSpacesContextWrapper } from '../spaces_context';
+import { getSpacesContextProviderWrapper } from '../spaces_context';
 import { spacesManagerMock } from '../spaces_manager/mocks';
 import { SpaceListInternal } from './space_list_internal';
 
@@ -57,7 +57,10 @@ describe('SpaceListInternal', () => {
     spacesManager.getActiveSpace.mockResolvedValue(ACTIVE_SPACE);
     spacesManager.getSpaces.mockResolvedValue(spaces);
 
-    const SpacesContext = await getSpacesContextWrapper({ getStartServices, spacesManager });
+    const SpacesContext = await getSpacesContextProviderWrapper({
+      getStartServices,
+      spacesManager,
+    });
     const wrapper = mountWithIntl(
       <SpacesContext feature={feature}>
         <SpaceListInternal {...props} />
