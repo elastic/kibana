@@ -16,7 +16,7 @@ const continueButtonText = i18n.translate(
   }
 );
 
-export const ContinueButton: FC<{ isDisabled?: boolean; onClick: any }> = ({
+export const ContinueButton: FC<{ isDisabled: boolean; onClick: any }> = ({
   isDisabled,
   onClick,
 }) => (

@@ -32,7 +32,7 @@ type ValidationSearchResult = Omit<SearchResponse7, 'aggregations'> & {
 export const TRAINING_DOCS_UPPER = 200000;
 export const TRAINING_DOCS_LOWER = 200;
 export const INCLUDED_FIELDS_THRESHOLD = 100;
-export const MINIMUM_NUM_FIELD_FOR_CHECK = 24;
+export const MINIMUM_NUM_FIELD_FOR_CHECK = 25;
 export const PERCENT_EMPTY_LIMIT = 0.3;
 const defaultQuery = { match_all: {} };
 
@@ -117,19 +117,11 @@ async function analyzedFieldsCheck(
   analyzedFields: string[],
   index: string | string[],
   query: any = defaultQuery,
-  trainingPercent: number,
-  depVar: string
+  depVar: string,
+  trainingPercent?: number
 ) {
   const messages = [];
   const emptyFields: string[] = [];
-  const depVarAgg =
-    depVar !== ''
-      ? {
-          [`${depVar}_const`]: {
-            cardinality: { field: depVar },
-          },
-        }
-      : {};
 
   const fieldLimit =
     analyzedFields.length <= MINIMUM_NUM_FIELD_FOR_CHECK
@@ -142,6 +134,15 @@ async function analyzedFieldsCheck(
   }, {} as any);
 
   if (depVar !== '') {
+    const depVarAgg =
+      depVar !== ''
+        ? {
+            [`${depVar}_const`]: {
+              cardinality: { field: depVar },
+            },
+          }
+        : {};
+
     aggs = { ...aggs, ...depVarAgg };
   }
 
@@ -157,14 +158,16 @@ async function analyzedFieldsCheck(
     });
 
     const totalDocs = body.hits.total.value;
-    const trainingDocs = totalDocs * (trainingPercent / 100);
-    const trainingPercentAndNumFieldsMessages = getTrainingPercentAndNumFieldsMessages(
-      trainingDocs,
-      analyzedFields.length
-    );
 
-    if (trainingPercentAndNumFieldsMessages.length) {
-      messages.push(...trainingPercentAndNumFieldsMessages);
+    if (trainingPercent) {
+      const trainingDocs = totalDocs * (trainingPercent / 100);
+      const trainingPercentAndNumFieldsMessages = getTrainingPercentAndNumFieldsMessages(
+        trainingDocs,
+        analyzedFields.length
+      );
+      if (trainingPercentAndNumFieldsMessages.length) {
+        messages.push(...trainingPercentAndNumFieldsMessages);
+      }
     }
 
     if (body.aggregations) {
@@ -238,9 +241,9 @@ export async function validateAnalyticsJob(
       job.analyzed_fields.includes,
       job.source.index,
       job.source.query,
-      // @ts-ignore TODO handle when training percent isn't present (outlier)
-      analysis.training_percent,
-      depVar
+      depVar,
+      // @ts-ignore
+      analysis.training_percent
     ),
   ]);
   return messages.flat();

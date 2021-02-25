@@ -138,6 +138,7 @@ export const ValidationStep: FC<Props> = ({ state, setCurrentStep, setValidation
           {callouts}
           <EuiSpacer />
           <ContinueButton
+            isDisabled={false}
             onClick={() => {
               setCurrentStep(ANALYTICS_STEPS.CREATE);
             }}
