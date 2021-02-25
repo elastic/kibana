@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { registerBootstrapRouteMock, bootstrapRendererMock } from './rendering_service.test.mocks';
+
 import { load } from 'cheerio';
 
 import { httpServerMock } from '../http/http_server.mocks';
@@ -45,6 +47,16 @@ describe('RenderingService', () => {
   });
 
   describe('setup()', () => {
+    it('calls `registerBootstrapRoute` with the correct parameters', async () => {
+      await service.setup(mockRenderingSetupDeps);
+
+      expect(registerBootstrapRouteMock).toHaveBeenCalledTimes(1);
+      expect(registerBootstrapRouteMock).toHaveBeenCalledWith({
+        router: expect.any(Object),
+        renderer: bootstrapRendererMock,
+      });
+    });
+
     describe('render()', () => {
       let uiSettings: ReturnType<typeof uiSettingsServiceMock.createClient>;
       let render: InternalRenderingServiceSetup['render'];

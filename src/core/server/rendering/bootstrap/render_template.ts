@@ -10,7 +10,7 @@ import Handlebars, { TemplateDelegate } from 'handlebars';
 import { readFile } from 'fs/promises';
 import { resolve } from 'path';
 
-interface BootstrapTemplateData {
+export interface BootstrapTemplateData {
   themeTag: string;
   jsDependencyPaths: string[];
   styleSheetPaths: string[];
