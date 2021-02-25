@@ -17,6 +17,9 @@ Table of Contents
 	- [Alert types](#alert-types)
 		- [Methods](#methods)
 		- [Executor](#executor)
+		- [Licensing](#licensing)
+		- [Documentation](#documentation)
+		- [Tests](#tests)
 		- [Example](#example)
 	- [Role Based Access-Control](#role-based-access-control)
 	- [Alert Navigation](#alert-navigation)
@@ -123,6 +126,19 @@ For example, if the `context` has one variable `foo` which is an object that has
 	]
 }
 ```
+
+## Licensing
+
+Currently most of the alerts are free features. But some alert types are subscription features, such as the tracking containment alert.
+
+## Documentation
+
+You should create documentation for the new alert type. Make an entry in the alert type index [`docs/user/alerting/alert-types.asciidoc`](../../../docs/user/alerting/alert-types.asciidoc) that points to a new document for the alert type that should be in the proper application directory.
+
+## Tests
+
+The alert type should have jest tests and optionaly functional tests. 
+In the the tests we recomend to test the expected alert execution result with a different input params, the structure of the created alert and the params validation. The rest will be guaranteed as a framework functionality.
 
 ### Example
 
