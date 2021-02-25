@@ -25,13 +25,6 @@ export type ActionFactoryPlaceContext<
 > = Omit<ActionFactoryContext, 'triggers'>;
 
 /**
- * Represents a screen that Drilldown Manager can render, i.e. `create` screen
- * is where a new drilldown is being created, `edit` is where existing drilldown
- * is being edited, etc.
- */
-export type DrilldownManagerScreen = 'create' | 'edit' | 'list';
-
-/**
  * This are props of the public <DrilldownManager> React component which is
  * exposed from this plugin's contract, user can change these props every time
  * the public <DrilldownManager> is re-rendered.
@@ -46,9 +39,23 @@ export interface PublicDrilldownManagerProps {
   dynamicActionManager: DynamicActionManager;
 
   /**
-   * Current view to display to the user.
+   * Initial screen which Drilldown Manager should display when it first opens.
+   * Afterwards the state of the currently visible screen is controlled by the
+   * Drilldown Manager.
+   *
+   * Possible values of the route:
+   *
+   * - `/create` --- opens with "Create new" tab selected.
+   * - `/create/new` --- opens with the "Create new" tab selected showing new
+   *   drilldown form.
+   * - `/create/clone/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx` --- opens with the
+   *   "Create new" tab selected in a clone mode where drilldown with ID
+   *   `xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx` is being cloned.
+   * - `/manage` --- opens with selected "Manage" tab.
+   * - `/edit/yyyyyyyy-yyyy-yyyy-yyyy-yyyyyyyyyyyy` --- opens in edit mode where
+   *   drilldown with ID `yyyyyyyy-yyyy-yyyy-yyyy-yyyyyyyyyyyy` is being edited.
    */
-  screen: DrilldownManagerScreen;
+  initialRoute?: string;
 
   /**
    * Callback called when drilldown flyout should be closed.

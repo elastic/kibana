@@ -16,7 +16,7 @@ import { DrilldownList } from '../drilldown_list';
 
 export const DrilldownManager: React.FC = ({}) => {
   const drilldowns = useDrilldownManager();
-  const screen = drilldowns.useScreen();
+  const route = drilldowns.useRoute();
   const hideWelcomeMessage = drilldowns.useWelcomeMessage();
 
   const tabs: EuiTabbedContentProps['tabs'] = [
@@ -33,20 +33,20 @@ export const DrilldownManager: React.FC = ({}) => {
   ];
 
   const footer =
-    screen === 'create' ? (
+    route[0] === 'create' ? (
       <EuiButton
         onClick={drilldowns.onCreateDrilldown}
         fill
         // isDisabled={!isActionValid(wizardConfig)}
         data-test-subj={'drilldownWizardSubmit'}
       >
-        {screen === 'create' ? txtCreateDrilldownButtonLabel : txtEditDrilldownButtonLabel}
+        {route[0] === 'create' ? txtCreateDrilldownButtonLabel : txtEditDrilldownButtonLabel}
       </EuiButton>
     ) : null;
 
   let content: React.ReactNode = null;
-  if (screen === 'create') content = <FormDrilldownWizard />;
-  if (screen === 'list') content = <DrilldownList />;
+  if (route[0] === 'create') content = <FormDrilldownWizard />;
+  if (route[0] === 'manage') content = <DrilldownList />;
 
   const flyoutFrame = (
     <FlyoutFrame
@@ -64,7 +64,11 @@ export const DrilldownManager: React.FC = ({}) => {
         )
       }
     >
-      <EuiTabbedContent tabs={tabs} selectedTab={tabs[0]} onTabClick={() => {}} />
+      <EuiTabbedContent
+        tabs={tabs}
+        selectedTab={tabs.find(({ id }) => id === route[0])}
+        onTabClick={({ id }) => drilldowns.setRoute([id])}
+      />
       {content}
     </FlyoutFrame>
   );

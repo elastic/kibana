@@ -8,11 +8,7 @@
 import useObservable from 'react-use/lib/useObservable';
 import { BehaviorSubject } from 'rxjs';
 import { map } from 'rxjs/operators';
-import {
-  PublicDrilldownManagerProps,
-  DrilldownManagerDependencies,
-  DrilldownManagerScreen,
-} from '../types';
+import { PublicDrilldownManagerProps, DrilldownManagerDependencies } from '../types';
 import { ActionFactory, BaseActionFactoryContext, SerializedEvent } from '../../../dynamic_actions';
 import { DrilldownState } from './drilldown_state';
 import {
@@ -42,9 +38,16 @@ export interface DrilldownManagerStateDeps
  */
 export class DrilldownManagerState {
   /**
-   * Keeps track of the current view to display to the user.
+   * Route inside Drilldown Manager flyout that is displayed to the user. Some
+   * available routes are:
+   *
+   * - `['create']`
+   * - `['create', 'new']`
+   * - `['create', 'clone', 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx']`
+   * - `['manage']`
+   * - `['edit', 'yyyyyyyy-yyyy-yyyy-yyyy-yyyyyyyyyyyy']`
    */
-  public readonly screen$: BehaviorSubject<DrilldownManagerScreen>;
+  public readonly route$: BehaviorSubject<string[]>;
 
   /**
    * Whether a drilldowns welcome message should be displayed to the user at
@@ -96,7 +99,6 @@ export class DrilldownManagerState {
   public readonly canUnlockMoreDrilldowns: boolean;
 
   constructor(public readonly deps: DrilldownManagerStateDeps) {
-    this.screen$ = new BehaviorSubject<DrilldownManagerScreen>(deps.screen || 'list');
     const hideWelcomeMessage = deps.storage.get(helloMessageStorageKey);
     this.hideWelcomeMessage$ = new BehaviorSubject<boolean>(hideWelcomeMessage ?? false);
     this.canUnlockMoreDrilldowns = deps.actionFactories.some(
@@ -106,13 +108,18 @@ export class DrilldownManagerState {
     deps.dynamicActionManager.state.state$
       .pipe(map((state) => state.events.map(this.mapEventToDrilldownItem)))
       .subscribe(this.events$);
+
+    let { initialRoute = '' } = deps;
+    if (!initialRoute) initialRoute = 'manage';
+    else if (initialRoute[0] === '/') initialRoute = initialRoute.substr(1);
+    this.route$ = new BehaviorSubject(initialRoute.split('/'));
   }
 
   /**
    * Change the screen of Drilldown Manager.
    */
-  public setScreen(newScreen: DrilldownManagerScreen): void {
-    this.screen$.next(newScreen);
+  public setRoute(route: string[]): void {
+    this.route$.next(route);
   }
 
   /**
@@ -204,7 +211,7 @@ export class DrilldownManagerState {
           title: toastDrilldownCreated.title(drilldownState.name$.getValue()),
           text: toastDrilldownCreated.text,
         });
-        this.setScreen('list');
+        this.setRoute(['manage']);
       } catch (error) {
         toastService.addError(error, {
           title: toastDrilldownsCRUDError,
@@ -217,7 +224,7 @@ export class DrilldownManagerState {
   // React components.
 
   /* eslint-disable react-hooks/rules-of-hooks */
-  public readonly useScreen = () => useObservable(this.screen$, this.screen$.getValue());
+  public readonly useRoute = () => useObservable(this.route$, this.route$.getValue());
   public readonly useWelcomeMessage = () =>
     useObservable(this.hideWelcomeMessage$, this.hideWelcomeMessage$.getValue());
   public readonly useActionFactory = () =>
