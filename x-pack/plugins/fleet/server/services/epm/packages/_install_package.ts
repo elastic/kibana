@@ -162,7 +162,7 @@ export async function _installPackage({
     );
 
     // update current backing indices of each data stream
-    await updateCurrentWriteIndices(callCluster, installedTemplates);
+    await updateCurrentWriteIndices(esClient, installedTemplates);
 
     const installedTransforms = await installTransform(
       packageInfo,
