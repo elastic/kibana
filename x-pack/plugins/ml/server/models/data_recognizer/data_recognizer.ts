@@ -8,7 +8,13 @@
 import fs from 'fs';
 import Boom from '@hapi/boom';
 import numeral from '@elastic/numeral';
-import { KibanaRequest, IScopedClusterClient, SavedObjectsClientContract } from 'kibana/server';
+import {
+  KibanaRequest,
+  IScopedClusterClient,
+  SavedObjectsClientContract,
+  SavedObjectsFindOptions,
+} from 'kibana/server';
+
 import moment from 'moment';
 import { IndexPatternAttributes } from 'src/plugins/data/server';
 import { merge } from 'lodash';
@@ -16,6 +22,7 @@ import { AnalysisLimits } from '../../../common/types/anomaly_detection_jobs';
 import { getAuthorizationHeader } from '../../lib/request_authorization';
 import { MlInfoResponse } from '../../../common/types/ml_server_info';
 import type { MlClient } from '../../lib/ml_client';
+import { ML_MODULE_SAVED_OBJECT_TYPE } from '../../../common/types/saved_objects';
 import {
   KibanaObjects,
   KibanaObjectConfig,
@@ -45,6 +52,7 @@ import { jobServiceProvider } from '../job_service';
 import { resultsServiceProvider } from '../results_service';
 import { JobExistResult, JobStat } from '../../../common/types/data_recognizer';
 import { MlJobsStatsResponse } from '../../../common/types/job_service';
+import { Datafeed } from '../../../common/types/anomaly_detection_jobs';
 import { JobSavedObjectService } from '../../saved_objects';
 
 const ML_DIR = 'ml';
@@ -57,7 +65,7 @@ export const SAVED_OBJECT_TYPES = {
   VISUALIZATION: 'visualization',
 };
 
-interface RawModuleConfig {
+interface FileBasedModule {
   id: string;
   title: string;
   description: string;
@@ -74,17 +82,28 @@ interface RawModuleConfig {
   };
 }
 
+function isModule(arg: any): arg is Module {
+  return arg.jobs && arg.jobs.length && arg.jobs[0].config !== undefined;
+}
+
+function isFileBasedModule(arg: any): arg is FileBasedModule {
+  return arg.jobs && arg.jobs.length && arg.jobs[0].file !== undefined;
+}
+
 interface Config {
   dirName: any;
-  json: RawModuleConfig;
+  module: FileBasedModule | Module;
+  isSavedObject: boolean;
 }
+
+type Logo = { icon: string } | null;
 
 export interface RecognizeResult {
   id: string;
   title: string;
   query: any;
   description: string;
-  logo: { icon: string } | null;
+  logo: Logo;
 }
 
 interface ObjectExistResult {
@@ -176,7 +195,7 @@ export class DataRecognizer {
     });
   }
 
-  async loadManifestFiles(): Promise<Config[]> {
+  async loadConfigs(): Promise<Config[]> {
     const configs: Config[] = [];
     const dirs = await this.listDirs(this._modulesDir);
     await Promise.all(
@@ -192,7 +211,8 @@ export class DataRecognizer {
           try {
             configs.push({
               dirName: dir,
-              json: JSON.parse(file),
+              module: JSON.parse(file),
+              isSavedObject: false,
             });
           } catch (error) {
             mlLog.warn(`Data recognizer error parsing ${dir}/manifest.json. ${error}`);
@@ -201,23 +221,43 @@ export class DataRecognizer {
       })
     );
 
-    return configs;
+    const soConfigs = (await this.loadSavedObjectModules()).map((module) => ({
+      dirName: '',
+      module,
+      isSavedObject: true,
+    }));
+
+    return [...configs, ...soConfigs];
+  }
+
+  async loadSavedObjectModules() {
+    const options: SavedObjectsFindOptions = {
+      type: ML_MODULE_SAVED_OBJECT_TYPE,
+      perPage: 10000,
+      // ...(spacesEnabled === false || currentSpaceOnly === true ? {} : { namespaces: ['*'] }),
+      // searchFields,
+      // filter,
+    };
+
+    const jobs = await this._savedObjectsClient.find<Module>(options);
+
+    return jobs.saved_objects.map((o) => o.attributes);
   }
 
   // get the manifest.json file for a specified id, e.g. "nginx"
-  async getManifestFile(id: string) {
-    const manifestFiles = await this.loadManifestFiles();
-    return manifestFiles.find((i) => i.json.id === id);
+  async findConfig(id: string) {
+    const configs = await this.loadConfigs();
+    return configs.find((i) => i.module.id === id);
   }
 
   // called externally by an endpoint
   async findMatches(indexPattern: string): Promise<RecognizeResult[]> {
-    const manifestFiles = await this.loadManifestFiles();
+    const manifestFiles = await this.loadConfigs();
     const results: RecognizeResult[] = [];
 
     await Promise.all(
       manifestFiles.map(async (i) => {
-        const moduleConfig = i.json;
+        const moduleConfig = i.module;
         let match = false;
         try {
           match = await this.searchForFields(moduleConfig, indexPattern);
@@ -228,13 +268,15 @@ export class DataRecognizer {
         }
 
         if (match === true) {
-          let logo = null;
-          if (moduleConfig.logoFile) {
+          let logo: Logo = null;
+          if (isModule(moduleConfig) && moduleConfig.logo) {
+            logo = { icon: moduleConfig.logo };
+          } else if (moduleConfig.logoFile) {
             try {
-              logo = await this.readFile(
+              const logoFile = await this.readFile(
                 `${this._modulesDir}/${i.dirName}/${moduleConfig.logoFile}`
               );
-              logo = JSON.parse(logo);
+              logo = JSON.parse(logoFile);
             } catch (e) {
               logo = null;
             }
@@ -255,7 +297,7 @@ export class DataRecognizer {
     return results;
   }
 
-  async searchForFields(moduleConfig: RawModuleConfig, indexPattern: string) {
+  async searchForFields(moduleConfig: FileBasedModule | Module, indexPattern: string) {
     if (moduleConfig.query === undefined) {
       return false;
     }
@@ -276,28 +318,32 @@ export class DataRecognizer {
   }
 
   async listModules() {
-    const manifestFiles = await this.loadManifestFiles();
-    const ids = manifestFiles.map(({ json }) => json.id).sort((a, b) => a.localeCompare(b)); // sort as json files are read from disk and could be in any order.
+    const manifestFiles = await this.loadConfigs();
+    // const ids = manifestFiles.map(({ json }) => json.id).sort((a, b) => a.localeCompare(b)); // sort as json files are read from disk and could be in any order.
+    manifestFiles.sort((a, b) => a.module.id.localeCompare(b.module.id)); // sort as json files are read from disk and could be in any order.
 
-    const modules = [];
-    for (let i = 0; i < ids.length; i++) {
-      const module = await this.getModule(ids[i]);
-      modules.push(module);
+    const configs = [];
+    for (const config of manifestFiles) {
+      if (config.isSavedObject) {
+        configs.push(config.module);
+      } else {
+        configs.push(await this.getModule(config.module.id));
+      }
     }
-    return modules;
+    return configs;
   }
 
   // called externally by an endpoint
   // supplying an optional prefix will add the prefix
   // to the job and datafeed configs
   async getModule(id: string, prefix = ''): Promise<Module> {
-    let manifestJSON: RawModuleConfig | null = null;
+    let module: FileBasedModule | Module | null = null;
     let dirName: string | null = null;
 
-    const manifestFile = await this.getManifestFile(id);
-    if (manifestFile !== undefined) {
-      manifestJSON = manifestFile.json;
-      dirName = manifestFile.dirName;
+    const config = await this.findConfig(id);
+    if (config !== undefined) {
+      module = config.module;
+      dirName = config.dirName;
     } else {
       throw Boom.notFound(`Module with the id "${id}" not found`);
     }
@@ -306,81 +352,96 @@ export class DataRecognizer {
     const datafeeds: ModuleDatafeed[] = [];
     const kibana: KibanaObjects = {};
     // load all of the job configs
-    await Promise.all(
-      manifestJSON.jobs.map(async (job) => {
-        try {
-          const jobConfig = await this.readFile(
-            `${this._modulesDir}/${dirName}/${ML_DIR}/${job.file}`
-          );
-          // use the file name for the id
-          jobs.push({
-            id: `${prefix}${job.id}`,
-            config: JSON.parse(jobConfig),
-          });
-        } catch (error) {
-          mlLog.warn(
-            `Data recognizer error loading config for job ${job.id} for module ${id}. ${error}`
-          );
-        }
-      })
-    );
+    if (isModule(module)) {
+      const tempJobs = module.jobs.map((j) => ({ id: `${prefix}${j.id}`, config: j.config }));
+      jobs.push(...((tempJobs as unknown) as ModuleJob[]));
+      const tempDatafeeds = module.datafeeds.map((d) => ({
+        id: prefixDatafeedId(d.id, prefix),
+        config: {
+          ...d.config,
+          job_id: `${prefix}${d.job_id}`,
+        },
+      }));
+      datafeeds.push(...((tempDatafeeds as unknown) as ModuleDatafeed[]));
+    } else if (isFileBasedModule(module)) {
+      await Promise.all(
+        module.jobs.map(async (job) => {
+          try {
+            const jobConfig = await this.readFile(
+              `${this._modulesDir}/${dirName}/${ML_DIR}/${job.file}`
+            );
+            // use the file name for the id
+            jobs.push({
+              id: `${prefix}${job.id}`,
+              config: JSON.parse(jobConfig),
+            });
+          } catch (error) {
+            mlLog.warn(
+              `Data recognizer error loading config for job ${job.id} for module ${id}. ${error}`
+            );
+          }
+        })
+      );
 
-    // load all of the datafeed configs
-    await Promise.all(
-      manifestJSON.datafeeds.map(async (datafeed) => {
-        try {
-          const datafeedConfig = await this.readFile(
-            `${this._modulesDir}/${dirName}/${ML_DIR}/${datafeed.file}`
-          );
-          const config = JSON.parse(datafeedConfig);
-          // use the job id from the manifestFile
-          config.job_id = `${prefix}${datafeed.job_id}`;
+      // load all of the datafeed configs
+      await Promise.all(
+        module.datafeeds.map(async (datafeed) => {
+          try {
+            const datafeedConfigString = await this.readFile(
+              `${this._modulesDir}/${dirName}/${ML_DIR}/${datafeed.file}`
+            );
+            const datafeedConfig = JSON.parse(datafeedConfigString) as Datafeed;
+            // use the job id from the module
+            datafeedConfig.job_id = `${prefix}${datafeed.job_id}`;
 
-          datafeeds.push({
-            id: prefixDatafeedId(datafeed.id, prefix),
-            config,
-          });
-        } catch (error) {
-          mlLog.warn(
-            `Data recognizer error loading config for datafeed ${datafeed.id} for module ${id}. ${error}`
-          );
-        }
-      })
-    );
-
+            datafeeds.push({
+              id: prefixDatafeedId(datafeed.id, prefix),
+              job_id: datafeedConfig.job_id,
+              config: datafeedConfig,
+            });
+          } catch (error) {
+            mlLog.warn(
+              `Data recognizer error loading config for datafeed ${datafeed.id} for module ${id}. ${error}`
+            );
+          }
+        })
+      );
+    }
     // load all of the kibana saved objects
-    if (manifestJSON.kibana !== undefined) {
-      const kKeys = Object.keys(manifestJSON.kibana) as Array<keyof RawModuleConfig['kibana']>;
+    if (module.kibana !== undefined) {
+      const kKeys = Object.keys(module.kibana) as Array<keyof FileBasedModule['kibana']>;
       await Promise.all(
         kKeys.map(async (key) => {
           kibana[key] = [];
-          await Promise.all(
-            manifestJSON!.kibana[key].map(async (obj) => {
-              try {
-                const kConfig = await this.readFile(
-                  `${this._modulesDir}/${dirName}/${KIBANA_DIR}/${key}/${obj.file}`
-                );
-                // use the file name for the id
-                const kId = obj.file.replace('.json', '');
-                const config = JSON.parse(kConfig);
-                kibana[key]!.push({
-                  id: kId,
-                  title: config.title,
-                  config,
-                });
-              } catch (error) {
-                mlLog.warn(
-                  `Data recognizer error loading config for ${key} ${obj.id} for module ${id}. ${error}`
-                );
-              }
-            })
-          );
+          if (isFileBasedModule(module)) {
+            await Promise.all(
+              module!.kibana[key].map(async (obj) => {
+                try {
+                  const kConfigString = await this.readFile(
+                    `${this._modulesDir}/${dirName}/${KIBANA_DIR}/${key}/${obj.file}`
+                  );
+                  // use the file name for the id
+                  const kId = obj.file.replace('.json', '');
+                  const kConfig = JSON.parse(kConfigString);
+                  kibana[key]!.push({
+                    id: kId,
+                    title: kConfig.title,
+                    config: kConfig,
+                  });
+                } catch (error) {
+                  mlLog.warn(
+                    `Data recognizer error loading config for ${key} ${obj.id} for module ${id}. ${error}`
+                  );
+                }
+              })
+            );
+          }
         })
       );
     }
 
     return {
-      ...manifestJSON,
+      ...module,
       jobs,
       datafeeds,
       kibana,

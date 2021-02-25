@@ -16,6 +16,7 @@ export interface ModuleJob {
 
 export interface ModuleDatafeed {
   id: string;
+  job_id: string;
   config: Omit<Datafeed, 'datafeed_id'>;
 }
 
@@ -48,7 +49,8 @@ export interface Module {
   title: string;
   description: string;
   type: string;
-  logoFile: string;
+  logoFile?: string;
+  logo?: string;
   defaultIndexPattern: string;
   query: any;
   jobs: ModuleJob[];
