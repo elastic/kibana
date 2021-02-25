@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { BaseSyntheticEvent, useCallback, useMemo } from 'react';
+import React, { BaseSyntheticEvent, useCallback } from 'react';
 
 import { LegendColorPicker, Position, XYChartSeriesIdentifier, SeriesName } from '@elastic/charts';
 import { PopoverAnchorPosition, EuiWrappingPopover, EuiOutsideClickDetector } from '@elastic/eui';
@@ -36,52 +36,54 @@ export const useColorPicker = (
   getSeriesName: (series: XYChartSeriesIdentifier) => SeriesName,
   paletteName: string,
   uiState: PersistedState
-): LegendColorPicker =>
-  useMemo(
-    () => ({ anchor, color, onClose, onChange, seriesIdentifiers: [seriesIdentifier] }) => {
-      const seriesName = getSeriesName(seriesIdentifier as XYChartSeriesIdentifier);
-      const overwriteColors: Record<string, string> = uiState?.get('vis.colors', {});
-      const colorIsOverwritten = Object.keys(overwriteColors).includes(seriesName as string);
+): LegendColorPicker => ({
+  anchor,
+  color,
+  onClose,
+  onChange,
+  seriesIdentifiers: [seriesIdentifier],
+}) => {
+  const seriesName = getSeriesName(seriesIdentifier as XYChartSeriesIdentifier);
+  const overwriteColors: Record<string, string> = uiState?.get('vis.colors', {});
+  const colorIsOverwritten = Object.keys(overwriteColors).includes(seriesName as string);
 
-      const handlChange = (newColor: string | null, event: BaseSyntheticEvent) => {
-        if (!seriesName) {
-          return;
-        }
-        if (newColor) {
-          onChange(newColor);
-        }
-        setColor(newColor, seriesName, event);
-        // must be called after onChange
-        onClose();
-      };
+  const handlChange = (newColor: string | null, event: BaseSyntheticEvent) => {
+    if (!seriesName) {
+      return;
+    }
+    if (newColor) {
+      onChange(newColor);
+    }
+    setColor(newColor, seriesName, event);
+    // must be called after onChange
+    onClose();
+  };
 
-      // rule doesn't know this is inside a functional component
-      // eslint-disable-next-line react-hooks/rules-of-hooks
-      const handleOutsideClick = useCallback(() => {
-        onClose?.();
-      }, [onClose]);
+  // rule doesn't know this is inside a functional component
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  const handleOutsideClick = useCallback(() => {
+    onClose?.();
+  }, [onClose]);
 
-      return (
-        <EuiOutsideClickDetector onOutsideClick={handleOutsideClick}>
-          <EuiWrappingPopover
-            isOpen
-            ownFocus
-            display="block"
-            button={anchor}
-            anchorPosition={getAnchorPosition(legendPosition)}
-            closePopover={onClose}
-            panelPaddingSize="s"
-          >
-            <ColorPicker
-              color={color}
-              onChange={handlChange}
-              label={seriesName}
-              useLegacyColors={paletteName === 'kibana_palette'}
-              colorIsOverwritten={colorIsOverwritten}
-            />
-          </EuiWrappingPopover>
-        </EuiOutsideClickDetector>
-      );
-    },
-    [getSeriesName, legendPosition, paletteName, setColor, uiState]
+  return (
+    <EuiOutsideClickDetector onOutsideClick={handleOutsideClick}>
+      <EuiWrappingPopover
+        isOpen
+        ownFocus
+        display="block"
+        button={anchor}
+        anchorPosition={getAnchorPosition(legendPosition)}
+        closePopover={onClose}
+        panelPaddingSize="s"
+      >
+        <ColorPicker
+          color={color}
+          onChange={handlChange}
+          label={seriesName}
+          useLegacyColors={paletteName === 'kibana_palette'}
+          colorIsOverwritten={colorIsOverwritten}
+        />
+      </EuiWrappingPopover>
+    </EuiOutsideClickDetector>
   );
+};
