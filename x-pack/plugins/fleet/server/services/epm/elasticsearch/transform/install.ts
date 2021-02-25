@@ -14,7 +14,6 @@ import {
   EsAssetReference,
   InstallablePackage,
 } from '../../../../../common/types/models';
-import { CallESAsCurrentUser } from '../../../../types';
 import { getInstallation } from '../../packages';
 import { deleteTransforms, deleteTransformRefs } from './remove';
 import { getAsset } from './common';
@@ -29,7 +28,6 @@ interface TransformInstallation {
 export const installTransform = async (
   installablePackage: InstallablePackage,
   paths: string[],
-  callCluster: CallESAsCurrentUser,
   esClient: ElasticsearchClient,
   savedObjectsClient: SavedObjectsClientContract
 ) => {
@@ -86,7 +84,7 @@ export const installTransform = async (
     });
 
     const installationPromises = transforms.map(async (transform) => {
-      return handleTransformInstall({ callCluster, transform });
+      return handleTransformInstall({ esClient, transform });
     });
 
     installedTransforms = await Promise.all(installationPromises).then((results) => results.flat());
@@ -116,18 +114,18 @@ const isTransform = (path: string) => {
 };
 
 async function handleTransformInstall({
-  callCluster,
+  esClient,
   transform,
 }: {
-  callCluster: CallESAsCurrentUser;
+  esClient: ElasticsearchClient;
   transform: TransformInstallation;
 }): Promise<EsAssetReference> {
   try {
     // defer validation on put if the source index is not available
-    await callCluster('transport.request', {
+    await esClient.transport.request({
       method: 'PUT',
       path: `/_transform/${transform.installationName}`,
-      query: 'defer_validation=true',
+      querystring: 'defer_validation=true',
       body: transform.content,
     });
   } catch (err) {
@@ -138,12 +136,16 @@ async function handleTransformInstall({
       throw err;
     }
   }
-  await callCluster('transport.request', {
-    method: 'POST',
-    path: `/_transform/${transform.installationName}/_start`,
-    // Ignore error if the transform is already started
-    ignore: [409],
-  });
+  await esClient.transport.request(
+    {
+      method: 'POST',
+      path: `/_transform/${transform.installationName}/_start`,
+      // Ignore error if the transform is already started
+    },
+    {
+      ignore: [409],
+    }
+  );
 
   return { id: transform.installationName, type: ElasticsearchAssetType.transform };
 }

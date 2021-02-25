@@ -167,7 +167,6 @@ export async function _installPackage({
     const installedTransforms = await installTransform(
       packageInfo,
       paths,
-      callCluster,
       esClient,
       savedObjectsClient
     );

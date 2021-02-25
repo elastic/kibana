@@ -165,7 +165,6 @@ describe('test transform install', () => {
         'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata/default.json',
         'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/default.json',
       ],
-      legacyScopedClusterClient.callAsCurrentUser,
       esClient,
       savedObjectsClient
     );
@@ -339,7 +338,6 @@ describe('test transform install', () => {
         ],
       } as unknown) as RegistryPackage,
       ['endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/default.json'],
-      legacyScopedClusterClient.callAsCurrentUser,
       esClient,
       savedObjectsClient
     );
@@ -457,7 +455,6 @@ describe('test transform install', () => {
         ],
       } as unknown) as RegistryPackage,
       [],
-      legacyScopedClusterClient.callAsCurrentUser,
       esClient,
       savedObjectsClient
     );
@@ -575,7 +572,6 @@ describe('test transform install', () => {
         ],
       } as unknown) as RegistryPackage,
       ['endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/default.json'],
-      legacyScopedClusterClient.callAsCurrentUser,
       esClient,
       savedObjectsClient
     );
