@@ -67,6 +67,18 @@ describe('CurationQueries', () => {
     expect(actions.addQuery).toHaveBeenCalled();
   });
 
+  it('disables the add button if any query fields are empty', () => {
+    setMockValues({
+      ...values,
+      queries: ['a', '', 'c'],
+      hasEmptyQueries: true,
+    });
+    const wrapper = shallow(<CurationQueries {...props} />);
+    const button = wrapper.find('[data-test-subj="addCurationQueryButton"]');
+
+    expect(button.prop('isDisabled')).toEqual(true);
+  });
+
   it('calls the passed onSubmit callback when the submit button is clicked', () => {
     setMockValues({ ...values, queries: ['some query'] });
     const wrapper = shallow(<CurationQueries {...props} />);
