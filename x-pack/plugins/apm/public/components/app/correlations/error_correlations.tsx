@@ -49,9 +49,10 @@ export function ErrorCorrelations({ onClose }: Props) {
   ] = useState<SelectedSignificantTerm | null>(null);
 
   const { serviceName } = useParams<{ serviceName?: string }>();
-  const { urlParams, uiFilters } = useUrlParams();
+  const { urlParams } = useUrlParams();
   const {
     environment,
+    kuery,
     transactionName,
     transactionType,
     start,
@@ -71,12 +72,12 @@ export function ErrorCorrelations({ onClose }: Props) {
           params: {
             query: {
               environment,
+              kuery,
               serviceName,
               transactionName,
               transactionType,
               start,
               end,
-              uiFilters: JSON.stringify(uiFilters),
               fieldNames: fieldNames.join(','),
             },
           },
@@ -85,12 +86,12 @@ export function ErrorCorrelations({ onClose }: Props) {
     },
     [
       environment,
+      kuery,
       serviceName,
       start,
       end,
       transactionName,
       transactionType,
-      uiFilters,
       fieldNames,
     ]
   );
@@ -102,7 +103,7 @@ export function ErrorCorrelations({ onClose }: Props) {
     <>
       <EuiFlexGroup direction="column">
         <EuiFlexItem>
-          <EuiText size="s">
+          <EuiText size="s" color="subdued">
             <p>
               {i18n.translate('xpack.apm.correlations.error.description', {
                 defaultMessage:
