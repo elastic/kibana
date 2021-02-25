@@ -9,7 +9,6 @@ import React from 'react';
 import { of } from 'rxjs';
 import { ThemeProvider } from 'styled-components';
 import { mount } from 'enzyme';
-import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 
 import { TestProviders } from '../../../../common/mock';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -17,6 +16,12 @@ import { PreviewQuery } from './';
 import { getMockEqlResponse } from '../../../../common/hooks/eql/eql_search_response.mock';
 import { useMatrixHistogram } from '../../../../common/containers/matrix_histogram';
 import { useEqlPreview } from '../../../../common/hooks/eql/';
+
+const mockTheme = {
+  eui: {
+    euiSuperDatePickerWidth: '180px',
+  },
+};
 
 jest.mock('../../../../common/lib/kibana');
 jest.mock('../../../../common/containers/matrix_histogram');
@@ -63,7 +68,7 @@ describe('PreviewQuery', () => {
 
   test('it renders timeframe select and preview button on render', () => {
     const wrapper = mount(
-      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
+      <ThemeProvider theme={mockTheme}>
         <PreviewQuery
           ruleType="query"
           dataTestSubj="queryPreviewSelect"
@@ -87,7 +92,7 @@ describe('PreviewQuery', () => {
 
   test('it renders preview button disabled if "isDisabled" is true', () => {
     const wrapper = mount(
-      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
+      <ThemeProvider theme={mockTheme}>
         <PreviewQuery
           ruleType="query"
           dataTestSubj="queryPreviewSelect"
@@ -107,7 +112,7 @@ describe('PreviewQuery', () => {
 
   test('it renders preview button disabled if "query" is undefined', () => {
     const wrapper = mount(
-      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
+      <ThemeProvider theme={mockTheme}>
         <PreviewQuery
           ruleType="query"
           dataTestSubj="queryPreviewSelect"
@@ -127,7 +132,7 @@ describe('PreviewQuery', () => {
 
   test('it renders query histogram when rule type is query and preview button clicked', () => {
     const wrapper = mount(
-      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
+      <ThemeProvider theme={mockTheme}>
         <TestProviders>
           <PreviewQuery
             ruleType="query"
@@ -154,7 +159,7 @@ describe('PreviewQuery', () => {
 
   test('it renders noise warning when rule type is query, timeframe is last hour and hit average is greater than 1/hour', async () => {
     const wrapper = mount(
-      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
+      <ThemeProvider theme={mockTheme}>
         <TestProviders>
           <PreviewQuery
             ruleType="query"
@@ -190,7 +195,7 @@ describe('PreviewQuery', () => {
 
   test('it renders query histogram when rule type is saved_query and preview button clicked', () => {
     const wrapper = mount(
-      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
+      <ThemeProvider theme={mockTheme}>
         <TestProviders>
           <PreviewQuery
             ruleType="saved_query"
@@ -217,7 +222,7 @@ describe('PreviewQuery', () => {
 
   test('it renders eql histogram when preview button clicked and rule type is eql', () => {
     const wrapper = mount(
-      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
+      <ThemeProvider theme={mockTheme}>
         <TestProviders>
           <PreviewQuery
             ruleType="eql"
@@ -244,7 +249,7 @@ describe('PreviewQuery', () => {
 
   test('it renders noise warning when rule type is eql, timeframe is last hour and hit average is greater than 1/hour', async () => {
     const wrapper = mount(
-      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
+      <ThemeProvider theme={mockTheme}>
         <TestProviders>
           <PreviewQuery
             ruleType="eql"
@@ -280,7 +285,7 @@ describe('PreviewQuery', () => {
 
   test('it renders threshold histogram when preview button clicked, rule type is threshold, and threshold field is defined', () => {
     const wrapper = mount(
-      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
+      <ThemeProvider theme={mockTheme}>
         <TestProviders>
           <PreviewQuery
             ruleType="threshold"
@@ -327,7 +332,7 @@ describe('PreviewQuery', () => {
 
   test('it renders noise warning when rule type is threshold, and threshold field is defined, timeframe is last hour and hit average is greater than 1/hour', async () => {
     const wrapper = mount(
-      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
+      <ThemeProvider theme={mockTheme}>
         <TestProviders>
           <PreviewQuery
             ruleType="query"
@@ -371,7 +376,7 @@ describe('PreviewQuery', () => {
 
   test('it renders query histogram when preview button clicked, rule type is threshold, and threshold field is not defined', () => {
     const wrapper = mount(
-      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
+      <ThemeProvider theme={mockTheme}>
         <TestProviders>
           <PreviewQuery
             ruleType="threshold"
@@ -403,7 +408,7 @@ describe('PreviewQuery', () => {
 
   test('it renders query histogram when preview button clicked, rule type is threshold, and threshold field is empty string', () => {
     const wrapper = mount(
-      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
+      <ThemeProvider theme={mockTheme}>
         <TestProviders>
           <PreviewQuery
             ruleType="threshold"
@@ -435,7 +440,7 @@ describe('PreviewQuery', () => {
 
   test('it hides histogram when timeframe changes', () => {
     const wrapper = mount(
-      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
+      <ThemeProvider theme={mockTheme}>
         <TestProviders>
           <PreviewQuery
             ruleType="threshold"
