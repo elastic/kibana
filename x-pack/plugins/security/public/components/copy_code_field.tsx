@@ -14,42 +14,50 @@ import {
   EuiFlexItem,
   EuiFormControlLayout,
 } from '@elastic/eui';
+import { useTheme } from './use_theme';
 
 export interface CopyCodeFieldProps extends Omit<EuiFieldTextProps, 'append'> {
   value: string;
 }
 
-export const CopyCodeField: FunctionComponent<CopyCodeFieldProps> = (props) => (
-  <EuiFormControlLayout
-    style={{ display: 'inline-flex', width: 'auto', backgroundColor: 'transparent' }}
-    append={
-      <EuiCopy textToCopy={props.value}>
-        {(copyText) => (
-          <EuiButtonIcon
-            iconType="copyClipboard"
-            color="success"
-            style={{ backgroundColor: 'transparent' }}
-            onClick={copyText}
-          />
-        )}
-      </EuiCopy>
-    }
-    readOnly
-  >
-    <EuiFlexGroup
-      responsive={false}
-      gutterSize="none"
-      alignItems="center"
-      style={{ height: '100%' }}
+export const CopyCodeField: FunctionComponent<CopyCodeFieldProps> = (props) => {
+  const theme = useTheme();
+
+  return (
+    <EuiFormControlLayout
+      style={{ display: 'inline-flex', width: 'auto', backgroundColor: 'transparent' }}
+      append={
+        <EuiCopy textToCopy={props.value}>
+          {(copyText) => (
+            <EuiButtonIcon
+              iconType="copyClipboard"
+              color="success"
+              style={{ backgroundColor: 'transparent' }}
+              onClick={copyText}
+            />
+          )}
+        </EuiCopy>
+      }
+      readOnly
     >
-      <EuiFlexItem>
-        <EuiCode transparentBackground style={{ color: 'white', padding: '1em' }}>
-          {props.value}
-        </EuiCode>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  </EuiFormControlLayout>
-);
+      <EuiFlexGroup
+        responsive={false}
+        gutterSize="none"
+        alignItems="center"
+        style={{ height: '100%' }}
+      >
+        <EuiFlexItem>
+          <EuiCode
+            transparentBackground
+            style={{ color: theme.euiColorSuccessText, padding: theme.euiFormControlPadding }}
+          >
+            {props.value}
+          </EuiCode>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiFormControlLayout>
+  );
+};
 
 CopyCodeField.defaultProps = {
   readOnly: true,

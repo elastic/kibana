@@ -212,7 +212,7 @@ export class APIKeysGridPage extends Component<Props, State> {
             </EuiText>
           </EuiPageContentHeaderSection>
           <EuiPageContentHeaderSection>
-            <EuiButton {...reactRouterNavigate(this.props.history, '/create')} fill>
+            <EuiButton {...reactRouterNavigate(this.props.history, '/create')}>
               <FormattedMessage
                 id="xpack.security.management.apiKeys.table.createButton"
                 defaultMessage="Create API key"

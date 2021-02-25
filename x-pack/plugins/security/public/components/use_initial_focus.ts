@@ -16,6 +16,8 @@ import { useRef, useEffect, DependencyList } from 'react';
  * <EuiFieldText inputRef={firstInput} />
  * ```
  *
+ * Pass in a dependency list to focus conditionally rendered components:
+ *
  * @example
  * ```typescript
  * const firstInput = useInitialFocus([showField]);
