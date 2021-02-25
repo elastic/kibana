@@ -21,13 +21,13 @@ export function useTransactionLatencyChartsFetcher() {
   const {
     urlParams: {
       environment,
+      kuery,
       start,
       end,
       transactionName,
       latencyAggregationType,
       comparisonType,
     },
-    uiFilters,
   } = useUrlParams();
 
   const {
@@ -57,11 +57,11 @@ export function useTransactionLatencyChartsFetcher() {
             path: { serviceName },
             query: {
               environment,
+              kuery,
               start,
               end,
               transactionType,
               transactionName,
-              uiFilters: JSON.stringify(uiFilters),
               latencyAggregationType,
               comparisonStart,
               comparisonEnd,
@@ -72,12 +72,12 @@ export function useTransactionLatencyChartsFetcher() {
     },
     [
       environment,
+      kuery,
       serviceName,
       start,
       end,
       transactionName,
       transactionType,
-      uiFilters,
       latencyAggregationType,
       comparisonStart,
       comparisonEnd,

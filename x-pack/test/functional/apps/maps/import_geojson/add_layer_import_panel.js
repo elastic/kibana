@@ -11,7 +11,6 @@ import path from 'path';
 export default function ({ getPageObjects, getService }) {
   const PageObjects = getPageObjects(['maps', 'common']);
 
-  const IMPORT_FILE_PREVIEW_NAME = 'Import File';
   const FILE_LOAD_DIR = 'test_upload_files';
   const DEFAULT_LOAD_FILE_NAME = 'point.json';
   const security = getService('security');
@@ -39,8 +38,8 @@ export default function ({ getPageObjects, getService }) {
     });
 
     it('should add GeoJSON file to map', async () => {
-      const layerLoadedInToc = await PageObjects.maps.doesLayerExist(IMPORT_FILE_PREVIEW_NAME);
-      expect(layerLoadedInToc).to.be(true);
+      const numberOfLayers = await PageObjects.maps.getNumberOfLayers();
+      expect(numberOfLayers).to.be(2);
 
       const filePickerLoadedFile = await PageObjects.maps.hasFilePickerLoadedFile(
         DEFAULT_LOAD_FILE_NAME
@@ -51,9 +50,9 @@ export default function ({ getPageObjects, getService }) {
     it('should remove layer on cancel', async () => {
       await PageObjects.maps.cancelLayerAdd();
 
-      await PageObjects.maps.waitForLayerDeleted(IMPORT_FILE_PREVIEW_NAME);
-      const layerLoadedInToc = await PageObjects.maps.doesLayerExist(IMPORT_FILE_PREVIEW_NAME);
-      expect(layerLoadedInToc).to.be(false);
+      await PageObjects.maps.waitForLayerDeleted('point');
+      const numberOfLayers = await PageObjects.maps.getNumberOfLayers();
+      expect(numberOfLayers).to.be(1);
     });
 
     it('should replace layer on input change', async () => {
@@ -83,8 +82,8 @@ export default function ({ getPageObjects, getService }) {
       );
       expect(filePickerLoadedFile).to.be(true);
       // Check that no file is loaded in layer preview
-      const layerLoadedInToc = await PageObjects.maps.doesLayerExist(IMPORT_FILE_PREVIEW_NAME);
-      expect(layerLoadedInToc).to.be(false);
+      const numberOfLayers = await PageObjects.maps.getNumberOfLayers();
+      expect(numberOfLayers).to.be(1);
     });
 
     it('should prevent import button from activating unless valid index name provided', async () => {

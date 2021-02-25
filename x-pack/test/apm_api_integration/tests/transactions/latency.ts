@@ -27,7 +27,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     'Latency with a basic license when data is not loaded ',
     { config: 'basic', archives: [] },
     () => {
-      const uiFilters = JSON.stringify({});
       it('returns 400 when latencyAggregationType is not informed', async () => {
         const response = await supertest.get(
           url.format({
@@ -35,7 +34,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             query: {
               start,
               end,
-              uiFilters,
               transactionType: 'request',
               environment: 'testing',
             },
@@ -52,7 +50,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             query: {
               start,
               end,
-              uiFilters,
               latencyAggregationType: 'avg',
               environment: 'testing',
             },
@@ -69,7 +66,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             query: {
               start,
               end,
-              uiFilters,
               latencyAggregationType: 'avg',
               transactionType: 'request',
               environment: 'testing',
@@ -104,7 +100,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               query: {
                 start,
                 end,
-                uiFilters,
                 latencyAggregationType: 'avg',
                 transactionType: 'request',
                 environment: 'testing',
@@ -129,7 +124,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               query: {
                 start,
                 end,
-                uiFilters,
                 latencyAggregationType: 'p95',
                 transactionType: 'request',
                 environment: 'testing',
@@ -154,7 +148,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               query: {
                 start,
                 end,
-                uiFilters,
                 latencyAggregationType: 'p99',
                 transactionType: 'request',
                 environment: 'testing',
@@ -217,7 +210,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       const transactionType = 'request';
 
       describe('without an environment', () => {
-        const uiFilters = JSON.stringify({});
         before(async () => {
           response = await supertest.get(
             url.format({
@@ -225,7 +217,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               query: {
                 start,
                 end,
-                uiFilters,
                 latencyAggregationType: 'avg',
                 transactionType,
               },
@@ -238,35 +229,14 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
       });
 
-      describe('without uiFilters', () => {
+      describe('with environment selected', () => {
         before(async () => {
           response = await supertest.get(
             url.format({
-              pathname: `/api/apm/services/opbeans-java/transactions/charts/latency`,
+              pathname: `/api/apm/services/opbeans-python/transactions/charts/latency`,
               query: {
                 start,
                 end,
-                latencyAggregationType: 'avg',
-                transactionType,
-              },
-            })
-          );
-        });
-        it('should return an error response', () => {
-          expect(response.status).to.eql(400);
-        });
-      });
-
-      describe('with environment selected in uiFilters', () => {
-        const uiFilters = JSON.stringify({});
-        before(async () => {
-          response = await supertest.get(
-            url.format({
-              pathname: `/api/apm/services/opbeans-java/transactions/charts/latency`,
-              query: {
-                start,
-                end,
-                uiFilters,
                 latencyAggregationType: 'avg',
                 transactionType,
                 environment: 'production',
@@ -299,8 +269,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       describe('when not defined environments is seleted', () => {
-        const uiFilters = JSON.stringify({});
-
         before(async () => {
           response = await supertest.get(
             url.format({
@@ -308,7 +276,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               query: {
                 start,
                 end,
-                uiFilters,
                 latencyAggregationType: 'avg',
                 transactionType,
                 environment: 'ENVIRONMENT_NOT_DEFINED',
@@ -338,7 +305,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       describe('with all environments selected', () => {
-        const uiFilters = JSON.stringify({});
         before(async () => {
           response = await supertest.get(
             url.format({
@@ -346,7 +312,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               query: {
                 start,
                 end,
-                uiFilters,
                 latencyAggregationType: 'avg',
                 transactionType,
                 environment: 'ENVIRONMENT_ALL',
@@ -362,48 +327,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         it('should not return anomaly timeseries data', () => {
           const latencyChartReturn = response.body as LatencyChartReturnType;
           expect(latencyChartReturn).to.not.have.property('anomalyTimeseries');
-        });
-      });
-
-      describe('with environment selected and empty kuery filter', () => {
-        const uiFilters = JSON.stringify({ kuery: '' });
-
-        before(async () => {
-          response = await supertest.get(
-            url.format({
-              pathname: `/api/apm/services/opbeans-java/transactions/charts/latency`,
-              query: {
-                start,
-                end,
-                uiFilters,
-                latencyAggregationType: 'avg',
-                transactionType,
-                environment: 'production',
-              },
-            })
-          );
-        });
-
-        it('should have a successful response', () => {
-          expect(response.status).to.eql(200);
-        });
-
-        it('should return the ML job id for anomalies of the selected environment', () => {
-          const latencyChartReturn = response.body as LatencyChartReturnType;
-          expect(latencyChartReturn).to.have.property('anomalyTimeseries');
-          expect(latencyChartReturn.anomalyTimeseries).to.have.property('jobId');
-          expectSnapshot(latencyChartReturn.anomalyTimeseries?.jobId).toMatchInline(
-            `"apm-production-1369-high_mean_transaction_duration"`
-          );
-        });
-
-        it('should return a non-empty anomaly series', () => {
-          const latencyChartReturn = response.body as LatencyChartReturnType;
-          expect(latencyChartReturn).to.have.property('anomalyTimeseries');
-          expect(latencyChartReturn.anomalyTimeseries?.anomalyBoundaries?.length).to.be.greaterThan(
-            0
-          );
-          expectSnapshot(latencyChartReturn.anomalyTimeseries?.anomalyBoundaries).toMatch();
         });
       });
     }

@@ -13,7 +13,11 @@ import {
   TRANSACTION_TYPE,
 } from '../../../../common/elasticsearch_fieldnames';
 import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
-import { environmentQuery, rangeQuery } from '../../../../common/utils/queries';
+import {
+  environmentQuery,
+  rangeQuery,
+  kqlQuery,
+} from '../../../../server/utils/queries';
 import {
   getDocumentTypeFilterForAggregatedTransactions,
   getProcessorEventForAggregatedTransactions,
@@ -33,6 +37,7 @@ export type LatencyChartsSearchResponse = PromiseReturnType<
 
 function searchLatency({
   environment,
+  kuery,
   serviceName,
   transactionType,
   transactionName,
@@ -43,6 +48,7 @@ function searchLatency({
   end,
 }: {
   environment?: string;
+  kuery?: string;
   serviceName: string;
   transactionType: string | undefined;
   transactionName: string | undefined;
@@ -52,7 +58,7 @@ function searchLatency({
   start: number;
   end: number;
 }) {
-  const { esFilter, apmEventClient } = setup;
+  const { apmEventClient } = setup;
   const { intervalString } = getBucketSize({ start, end });
 
   const filter: ESFilter[] = [
@@ -62,7 +68,7 @@ function searchLatency({
     ),
     ...rangeQuery(start, end),
     ...environmentQuery(environment),
-    ...esFilter,
+    ...kqlQuery(kuery),
   ];
 
   if (transactionName) {
@@ -111,6 +117,7 @@ function searchLatency({
 
 export function getLatencyTimeseries({
   environment,
+  kuery,
   serviceName,
   transactionType,
   transactionName,
@@ -121,6 +128,7 @@ export function getLatencyTimeseries({
   end,
 }: {
   environment?: string;
+  kuery?: string;
   serviceName: string;
   transactionType: string | undefined;
   transactionName: string | undefined;
@@ -133,6 +141,7 @@ export function getLatencyTimeseries({
   return withApmSpan('get_latency_charts', async () => {
     const response = await searchLatency({
       environment,
+      kuery,
       serviceName,
       transactionType,
       transactionName,

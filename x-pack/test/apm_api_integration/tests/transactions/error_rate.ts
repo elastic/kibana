@@ -19,12 +19,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   // url parameters
   const { start, end } = archives_metadata[archiveName];
-  const uiFilters = '{}';
   const transactionType = 'request';
 
   const url = format({
     pathname: '/api/apm/services/opbeans-java/transactions/charts/error_rate',
-    query: { start, end, uiFilters, transactionType },
+    query: { start, end, transactionType },
   });
 
   registry.when('Error rate when data is not loaded', { config: 'basic', archives: [] }, () => {
