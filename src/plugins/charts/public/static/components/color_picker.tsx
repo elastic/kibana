@@ -100,7 +100,7 @@ interface ColorPickerProps {
   colorIsOverwritten?: boolean;
 }
 
-const euiColors = euiPaletteColorBlind({ rotations: 4 });
+const euiColors = euiPaletteColorBlind({ rotations: 4, order: 'group' });
 
 export const ColorPicker = ({
   onChange,
@@ -111,6 +111,7 @@ export const ColorPicker = ({
   colorIsOverwritten = true,
 }: ColorPickerProps) => {
   const legendColors = useLegacyColors ? legacyColors : euiColors;
+
   return (
     <div className="visColorPicker">
       <span id={`${id}ColorPickerDesc`} className="euiScreenReaderOnly">
