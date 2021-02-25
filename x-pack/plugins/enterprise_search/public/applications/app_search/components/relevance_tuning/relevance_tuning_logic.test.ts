@@ -9,7 +9,7 @@ import { LogicMounter, mockFlashMessageHelpers, mockHttpValues } from '../../../
 
 import { nextTick } from '@kbn/test/jest';
 
-import { Boost, BoostFunction, BoostOperation, BoostType } from './types';
+import { Boost, BoostOperation, BoostType, FunctionalBoostFunction } from './types';
 
 import { RelevanceTuningLogic } from './';
 
@@ -1053,14 +1053,14 @@ describe('RelevanceTuningLogic', () => {
           'foo',
           1,
           'function',
-          BoostFunction.Exponential
+          FunctionalBoostFunction.Exponential
         );
 
         expect(RelevanceTuningLogic.actions.setSearchSettings).toHaveBeenCalledWith(
           searchSettingsWithBoost({
             factor: 1,
             type: BoostType.Functional,
-            function: BoostFunction.Exponential,
+            function: FunctionalBoostFunction.Exponential,
           })
         );
       });
