@@ -17,7 +17,7 @@ import {
   EuiHorizontalRule,
 } from '@elastic/eui';
 
-import { CaseStatuses, CaseAttributes } from '../../../../../case/common/api';
+import { CaseStatuses, CaseAttributes, CaseType } from '../../../../../case/common/api';
 import { Case, CaseConnector } from '../../containers/types';
 import { getCaseDetailsUrl, getCaseUrl, useFormatUrl } from '../../../common/components/link_to';
 import { gutterTimeline } from '../../../common/lib/helpers';
@@ -345,6 +345,7 @@ export const CaseComponent = React.memo<CaseProps>(
         );
       }
     }, [dispatch]);
+
     return (
       <>
         <HeaderWrapper>
@@ -395,22 +396,29 @@ export const CaseComponent = React.memo<CaseProps>(
                       updateCase={updateCase}
                       userCanCrud={userCanCrud}
                     />
-                    <MyEuiHorizontalRule margin="s" />
-                    <EuiFlexGroup alignItems="center" gutterSize="s" justifyContent="flexEnd">
-                      <EuiFlexItem grow={false}>
-                        <StatusActionButton
-                          status={caseData.status}
-                          onStatusChanged={changeStatus}
-                          disabled={!userCanCrud}
-                          isLoading={isLoading && updateKey === 'status'}
+                    {(caseData.type !== CaseType.collection || hasDataToPush) && (
+                      <EuiFlexGroup alignItems="center" gutterSize="s" justifyContent="flexEnd">
+                        <MyEuiHorizontalRule
+                          margin="s"
+                          data-test-subj="case-view-bottom-actions-horizontal-rule"
                         />
-                      </EuiFlexItem>
-                      {hasDataToPush && (
-                        <EuiFlexItem data-test-subj="has-data-to-push-button" grow={false}>
-                          {pushButton}
-                        </EuiFlexItem>
-                      )}
-                    </EuiFlexGroup>
+                        {caseData.type !== CaseType.collection && (
+                          <EuiFlexItem grow={false}>
+                            <StatusActionButton
+                              status={caseData.status}
+                              onStatusChanged={changeStatus}
+                              disabled={!userCanCrud}
+                              isLoading={isLoading && updateKey === 'status'}
+                            />
+                          </EuiFlexItem>
+                        )}
+                        {hasDataToPush && (
+                          <EuiFlexItem data-test-subj="has-data-to-push-button" grow={false}>
+                            {pushButton}
+                          </EuiFlexItem>
+                        )}
+                      </EuiFlexGroup>
+                    )}
                   </>
                 )}
               </EuiFlexItem>
