@@ -13,5 +13,5 @@
     "patterns": [
       "_component_template/{name}"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/indices-component-templates.html"  }
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/indices-component-template.html"  }
 }
