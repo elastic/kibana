@@ -11,6 +11,7 @@ import uuid from 'uuid';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { getSupertestWithoutAuth, setupFleetAndAgents } from './services';
 import { skipIfNoDockerRegistry } from '../../helpers';
+import { AGENT_UPDATE_LAST_CHECKIN_INTERVAL_MS } from '../../../../plugins/fleet/common';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
@@ -48,6 +49,10 @@ export default function (providerContext: FtrProviderContext) {
       });
     });
     setupFleetAndAgents(providerContext);
+    after(async () => {
+      // Wait before agent status is updated
+      return new Promise((resolve) => setTimeout(resolve, AGENT_UPDATE_LAST_CHECKIN_INTERVAL_MS));
+    });
     after(async () => {
       await esArchiver.unload('fleet/agents');
     });

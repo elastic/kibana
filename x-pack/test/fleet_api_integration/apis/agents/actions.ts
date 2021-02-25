@@ -15,7 +15,7 @@ export default function (providerContext: FtrProviderContext) {
 
   describe('fleet_agents_actions', () => {
     before(async () => {
-      await esArchiver.loadIfNeeded('fleet/agents');
+      await esArchiver.load('fleet/agents');
     });
     after(async () => {
       await esArchiver.unload('fleet/agents');
