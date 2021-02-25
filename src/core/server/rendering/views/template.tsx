@@ -23,7 +23,6 @@ export const Template: FunctionComponent<Props> = ({
     locale,
     darkMode,
     stylesheetPaths,
-    themeTag,
     injectedMetadata,
     i18n,
     bootstrapScriptUrl,
@@ -98,12 +97,6 @@ export const Template: FunctionComponent<Props> = ({
             // intentional as we check for the existence of __kbnCspNotEnforced__ in
             // bootstrap.
             window.__kbnCspNotEnforced__ = true;
-          `}
-        </script>
-        <script unsafe-inline>
-          {`
-            console.log("*** TA MERE ${themeTag}");
-            window.__kbnThemeTag__ = "${themeTag}";
           `}
         </script>
         <script src={bootstrapScriptUrl} />
