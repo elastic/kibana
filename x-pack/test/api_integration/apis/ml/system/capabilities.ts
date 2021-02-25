@@ -28,7 +28,7 @@ export default ({ getService }: FtrProviderContext) => {
 
   describe('ml_capabilities', () => {
     describe('get capabilities', function () {
-      it('should have the right number of capabilities', async () => {
+      it('should be enabled in space', async () => {
         const { mlFeatureEnabledInSpace } = await runRequest(USER.ML_POWERUSER);
         expect(mlFeatureEnabledInSpace).to.eql(true);
       });

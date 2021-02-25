@@ -44,11 +44,11 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     describe('get capabilities', function () {
-      it('should have the right number of capabilities - space with ML - space with ML', async () => {
+      it('should be enabled in space - space with ML', async () => {
         const { mlFeatureEnabledInSpace } = await runRequest(USER.ML_POWERUSER, idSpaceWithMl);
         expect(mlFeatureEnabledInSpace).to.eql(true);
       });
-      it('should have the right number of capabilities - space without ML', async () => {
+      it('should not be enabled in space - space without ML', async () => {
         const { mlFeatureEnabledInSpace } = await runRequest(USER.ML_POWERUSER, idSpaceNoMl);
         expect(mlFeatureEnabledInSpace).to.eql(false);
       });
