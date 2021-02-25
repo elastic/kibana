@@ -25,7 +25,7 @@ import {
   createInitialLoadingStatusState,
   FAILURE_REASONS,
   LOADING_STATUS,
-  QueryActionsProvider,
+  queryActionsProvider,
 } from './context/query';
 import { callAfterBindingsWorkaround } from './context/helpers/call_after_bindings_workaround';
 
@@ -48,11 +48,11 @@ getAngularModule().directive('contextApp', function ContextApp() {
   };
 });
 
-function ContextAppController($scope, Private) {
+function ContextAppController($scope) {
   const { filterManager, indexPatterns, uiSettings, navigation } = getServices();
   const useNewFieldsApi = !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE);
   const queryParameterActions = getQueryParameterActions(filterManager, indexPatterns);
-  const queryActions = Private(QueryActionsProvider);
+  const queryActions = queryActionsProvider();
   this.state = createInitialState(
     parseInt(uiSettings.get(CONTEXT_STEP_SETTING), 10),
     getFirstSortableField(this.indexPattern, uiSettings.get(CONTEXT_TIE_BREAKER_FIELDS_SETTING)),

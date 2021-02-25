@@ -8,17 +8,16 @@
 
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
 import { getServices } from '../../../../kibana_services';
-
+// @ts-ignore
 import { fetchAnchorProvider } from '../api/anchor';
-import { fetchContextProvider } from '../api/context';
+import { fetchContextProvider, SurrDocType } from '../api/context';
+// @ts-ignore
 import { getQueryParameterActions } from '../query_parameters';
 import { FAILURE_REASONS, LOADING_STATUS } from './index';
-import { MarkdownSimple } from '../../../../../../kibana_react/public';
 import { SEARCH_FIELDS_FROM_SOURCE } from '../../../../../common';
 
-export function QueryActionsProvider(Promise) {
+export function queryActionsProvider() {
   const { filterManager, indexPatterns, data, uiSettings } = getServices();
   const useNewFieldsApi = !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE);
   const fetchAnchor = fetchAnchorProvider(
@@ -32,24 +31,24 @@ export function QueryActionsProvider(Promise) {
     indexPatterns
   );
 
-  const setFailedStatus = (state) => (subject, details = {}) =>
+  const setFailedStatus = (state: any) => (subject: string, details = {}) =>
     (state.loadingStatus[subject] = {
       status: LOADING_STATUS.FAILED,
       reason: FAILURE_REASONS.UNKNOWN,
       ...details,
     });
 
-  const setLoadedStatus = (state) => (subject) =>
+  const setLoadedStatus = (state: any) => (subject: string) =>
     (state.loadingStatus[subject] = {
       status: LOADING_STATUS.LOADED,
     });
 
-  const setLoadingStatus = (state) => (subject) =>
+  const setLoadingStatus = (state: any) => (subject: string) =>
     (state.loadingStatus[subject] = {
       status: LOADING_STATUS.LOADING,
     });
 
-  const fetchAnchorRow = (state) => () => {
+  const fetchAnchorRow = (state: any) => async () => {
     const {
       queryParameters: { indexPatternId, anchorId, sort, tieBreakerField },
     } = state;
@@ -64,28 +63,27 @@ export function QueryActionsProvider(Promise) {
 
     setLoadingStatus(state)('anchor');
 
-    return Promise.try(() =>
-      fetchAnchor(indexPatternId, anchorId, [_.fromPairs([sort]), { [tieBreakerField]: sort[1] }])
-    ).then(
-      (anchorDocument) => {
-        setLoadedStatus(state)('anchor');
-        state.rows.anchor = anchorDocument;
-        return anchorDocument;
-      },
-      (error) => {
-        setFailedStatus(state)('anchor', { error });
-        getServices().toastNotifications.addDanger({
-          title: i18n.translate('discover.context.unableToLoadAnchorDocumentDescription', {
-            defaultMessage: 'Unable to load the anchor document',
-          }),
-          text: <MarkdownSimple>{error.message}</MarkdownSimple>,
-        });
-        throw error;
-      }
-    );
+    try {
+      const doc = await fetchAnchor(indexPatternId, anchorId, [
+        _.fromPairs([sort]),
+        { [tieBreakerField]: sort[1] },
+      ]);
+      setLoadedStatus(state)('anchor');
+      state.rows.anchor = doc;
+      return doc;
+    } catch (error) {
+      setFailedStatus(state)('anchor', { error });
+      getServices().toastNotifications.addDanger({
+        title: i18n.translate('discover.context.unableToLoadAnchorDocumentDescription', {
+          defaultMessage: 'Unable to load the anchor document',
+        }),
+        text: error.message,
+      });
+      throw error;
+    }
   };
 
-  const fetchSurroundingRows = (type, state) => {
+  const fetchSurroundingRows = async (type: string, state: any) => {
     const {
       queryParameters: { indexPatternId, sort, tieBreakerField },
       rows: { anchor },
@@ -108,9 +106,9 @@ export function QueryActionsProvider(Promise) {
     setLoadingStatus(state)(type);
     const [sortField, sortDir] = sort;
 
-    return Promise.try(() =>
-      fetchSurroundingDocs(
-        type,
+    try {
+      const documents = await fetchSurroundingDocs(
+        type as SurrDocType,
         indexPatternId,
         anchor,
         sortField,
@@ -118,56 +116,59 @@ export function QueryActionsProvider(Promise) {
         sortDir,
         count,
         filters
-      )
-    ).then(
-      (documents) => {
-        setLoadedStatus(state)(type);
-        state.rows[type] = documents;
-        return documents;
-      },
-      (error) => {
-        setFailedStatus(state)(type, { error });
-        getServices().toastNotifications.addDanger({
-          title: i18n.translate('discover.context.unableToLoadDocumentDescription', {
-            defaultMessage: 'Unable to load documents',
-          }),
-          text: <MarkdownSimple>{error.message}</MarkdownSimple>,
-        });
-        throw error;
-      }
-    );
+      );
+      setLoadedStatus(state)(type);
+      state.rows[type] = documents;
+      return documents;
+    } catch (error) {
+      setFailedStatus(state)(type, { error });
+      getServices().toastNotifications.addDanger({
+        title: i18n.translate('discover.context.unableToLoadDocumentDescription', {
+          defaultMessage: 'Unable to load documents',
+        }),
+        text: error.message,
+      });
+      throw error;
+    }
   };
 
-  const fetchContextRows = (state) => () =>
+  const fetchContextRows = (state: any) => () =>
     Promise.all([
       fetchSurroundingRows('predecessors', state),
       fetchSurroundingRows('successors', state),
     ]);
 
-  const fetchAllRows = (state) => () =>
-    Promise.try(fetchAnchorRow(state)).then(fetchContextRows(state));
+  const fetchAllRows = (state: any) => async () => {
+    try {
+      await fetchAnchorRow(state)();
+      return fetchContextRows(state);
+    } catch (error) {
+      setFailedStatus(state)('fetchAllRows', { error });
+      return Promise.reject('no!');
+    }
+  };
 
-  const fetchContextRowsWithNewQueryParameters = (state) => (queryParameters) => {
+  const fetchContextRowsWithNewQueryParameters = (state: any) => (queryParameters: any) => {
     setQueryParameters(state)(queryParameters);
     return fetchContextRows(state)();
   };
 
-  const fetchAllRowsWithNewQueryParameters = (state) => (queryParameters) => {
+  const fetchAllRowsWithNewQueryParameters = (state: any) => (queryParameters: any) => {
     setQueryParameters(state)(queryParameters);
     return fetchAllRows(state)();
   };
 
-  const fetchGivenPredecessorRows = (state) => (count) => {
+  const fetchGivenPredecessorRows = (state: any) => (count: any) => {
     setPredecessorCount(state)(count);
     return fetchSurroundingRows('predecessors', state);
   };
 
-  const fetchGivenSuccessorRows = (state) => (count) => {
+  const fetchGivenSuccessorRows = (state: any) => (count: any) => {
     setSuccessorCount(state)(count);
     return fetchSurroundingRows('successors', state);
   };
 
-  const setAllRows = (state) => (predecessorRows, anchorRow, successorRows) =>
+  const setAllRows = (state: any) => (predecessorRows: any, anchorRow: any, successorRows: any) =>
     (state.rows.all = [
       ...(predecessorRows || []),
       ...(anchorRow ? [anchorRow] : []),

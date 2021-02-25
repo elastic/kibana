@@ -6,6 +6,6 @@
  * Side Public License, v 1.
  */
 
-export { QueryActionsProvider } from './actions';
+export { queryActionsProvider } from './actions';
 export { FAILURE_REASONS, LOADING_STATUS } from '../../../components/context_app/constants';
 export { createInitialLoadingStatusState } from './state';

@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { cloneDeep } from 'lodash';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
 import { EuiHorizontalRule, EuiText, EuiPageContent, EuiPage } from '@elastic/eui';
 import { ContextErrorMessage } from '../context_error_message';
@@ -18,6 +19,7 @@ import { IIndexPattern, IndexPatternField } from '../../../../../data/common/ind
 import { LOADING_STATUS } from './constants';
 import { ActionBar, ActionBarProps } from '../../angular/context/components/action_bar/action_bar';
 import { TopNavMenuProps } from '../../../../../navigation/public';
+import { queryActionsProvider } from '../../angular/context/query';
 
 export interface ContextAppProps {
   topNavMenu: React.ComponentType<TopNavMenuProps>;
@@ -41,6 +43,46 @@ export interface ContextAppProps {
   useNewFieldsApi?: boolean;
 }
 
+const defaultUiState = {
+  status: '',
+  reason: '',
+  defaultStepSize: 5,
+  predecessorCount: 5,
+  successorCount: 5,
+  predecessorAvailable: 5,
+  successorAvailable: 5,
+  predecessorStatus: '',
+  successorStatus: '',
+  useNewFieldsApi: '',
+  hits: [],
+};
+function getDefaultDataState(
+  indexPatternId: string,
+  sort: any,
+  anchorId: string = 'LP8g2HcBw7hdgosZTHIo',
+  tieBreaker = '_doc'
+) {
+  return {
+    queryParameters: {
+      indexPatternId,
+      anchorId,
+      sort,
+      tieBreakerField: tieBreaker,
+    },
+    loadingStatus: {
+      anchor: LOADING_STATUS.UNINITIALIZED,
+      predecessors: LOADING_STATUS.UNINITIALIZED,
+      successors: LOADING_STATUS.UNINITIALIZED,
+    },
+    rows: {
+      all: [],
+      anchor: null,
+      predecessors: [],
+      successors: [],
+    },
+  };
+}
+
 const PREDECESSOR_TYPE = 'predecessors';
 const SUCCESSOR_TYPE = 'successors';
 
@@ -49,28 +91,53 @@ function isLoading(status: string) {
 }
 
 export function ContextAppLegacy(renderProps: ContextAppProps) {
+  const [uiState, setUiState] = useState(defaultUiState);
+  const [dataState, setDataState] = useState(
+    getDefaultDataState(renderProps.indexPattern.id as string, renderProps.sorting)
+  );
+  const {
+    defaultStepSize,
+    predecessorAvailable,
+    successorAvailable,
+    predecessorStatus,
+    successorStatus,
+  } = renderProps;
+
+  const { successorCount, predecessorCount } = uiState;
+
+  const {
+    hits,
+    filter,
+    sorting,
+    columns,
+    indexPattern,
+    minimumVisibleRows,
+    useNewFieldsApi,
+  } = renderProps;
+  const queryActions = queryActionsProvider();
+  useEffect(() => {
+    const mutateAbleDataState = cloneDeep(dataState);
+
+    queryActions
+      .fetchAllRows(mutateAbleDataState)()
+      .then(async () => {
+        setDataState(mutateAbleDataState);
+      });
+  }, [dataState, queryActions]);
+
   const status = renderProps.status;
   const isLoaded = status === LOADING_STATUS.LOADED;
   const isFailed = status === LOADING_STATUS.FAILED;
 
   const actionBarProps = (type: string) => {
-    const {
-      defaultStepSize,
-      successorCount,
-      predecessorCount,
-      predecessorAvailable,
-      successorAvailable,
-      predecessorStatus,
-      successorStatus,
-      onChangePredecessorCount,
-      onChangeSuccessorCount,
-    } = renderProps;
     const isPredecessorType = type === PREDECESSOR_TYPE;
     return {
       defaultStepSize,
       docCount: isPredecessorType ? predecessorCount : successorCount,
       docCountAvailable: isPredecessorType ? predecessorAvailable : successorAvailable,
-      onChangeCount: isPredecessorType ? onChangePredecessorCount : onChangeSuccessorCount,
+      onChangeCount: isPredecessorType
+        ? (value) => setUiState({ ...uiState, predecessorCount: value })
+        : (value) => setUiState({ ...uiState, successorCount: value }),
       isLoading: isPredecessorType ? isLoading(predecessorStatus) : isLoading(successorStatus),
       type,
       isDisabled: !isLoaded,
@@ -78,15 +145,6 @@ export function ContextAppLegacy(renderProps: ContextAppProps) {
   };
 
   const docTableProps = () => {
-    const {
-      hits,
-      filter,
-      sorting,
-      columns,
-      indexPattern,
-      minimumVisibleRows,
-      useNewFieldsApi,
-    } = renderProps;
     return {
       columns,
       indexPattern,
