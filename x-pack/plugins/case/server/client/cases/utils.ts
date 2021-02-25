@@ -40,6 +40,15 @@ import {
 } from './types';
 import { getAlertIds } from '../../routes/api/utils';
 
+interface CreateIncidentArgs {
+  actionsClient: ActionsClient;
+  theCase: CaseResponse;
+  userActions: CaseUserActionsResponse;
+  connector: ActionConnector;
+  mappings: ConnectorMappingsAttributes[];
+  alerts: CaseClientGetAlertsResponse;
+}
+
 export const getLatestPushInfo = (
   connectorId: string,
   userActions: CaseUserActionsResponse
@@ -75,14 +84,13 @@ const getCommentContent = (comment: CommentResponse): string => {
   return '';
 };
 
-interface CreateIncidentArgs {
-  actionsClient: ActionsClient;
-  theCase: CaseResponse;
-  userActions: CaseUserActionsResponse;
-  connector: ActionConnector;
-  mappings: ConnectorMappingsAttributes[];
-  alerts: CaseClientGetAlertsResponse;
-}
+const countAlerts = (comments: CaseResponse['comments']): number =>
+  comments?.reduce<number>((total, comment) => {
+    if (comment.type === CommentType.alert || comment.type === CommentType.generatedAlert) {
+      return total + (Array.isArray(comment.alertId) ? comment.alertId.length : 1);
+    }
+    return total;
+  }, 0) ?? 0;
 
 export const createIncident = async ({
   actionsClient,
@@ -152,22 +160,34 @@ export const createIncident = async ({
     userActions
       .slice(latestPushInfo?.index ?? 0)
       .filter(
-        (action, index) =>
-          Array.isArray(action.action_field) && action.action_field[0] === 'comment'
+        (action) => Array.isArray(action.action_field) && action.action_field[0] === 'comment'
       )
       .map((action) => action.comment_id)
   );
-  const commentsToBeUpdated = caseComments?.filter((comment) =>
-    commentsIdsToBeUpdated.has(comment.id)
+
+  const commentsToBeUpdated = caseComments?.filter(
+    (comment) =>
+      // We push only user's comments
+      comment.type === CommentType.user && commentsIdsToBeUpdated.has(comment.id)
   );
 
+  const totalAlerts = countAlerts(caseComments);
+
   let comments: ExternalServiceComment[] = [];
+
   if (commentsToBeUpdated && Array.isArray(commentsToBeUpdated) && commentsToBeUpdated.length > 0) {
     const commentsMapping = mappings.find((m) => m.source === 'comments');
     if (commentsMapping?.action_type !== 'nothing') {
       comments = transformComments(commentsToBeUpdated, ['informationAdded']);
     }
   }
+
+  if (totalAlerts > 0) {
+    comments.push({
+      comment: `Elastic Security Alerts attached to the case: ${totalAlerts}`,
+    });
+  }
+
   return { incident, comments };
 };
 
@@ -247,7 +267,13 @@ export const prepareFieldsForTransformation = ({
               key: mapping.target,
               value: params[mapping.source] ?? '',
               actionType: mapping.action_type,
-              pipes: mapping.action_type === 'append' ? [...defaultPipes, 'append'] : defaultPipes,
+              pipes:
+                // Do not transform titles
+                mapping.source !== 'title'
+                  ? mapping.action_type === 'append'
+                    ? [...defaultPipes, 'append']
+                    : defaultPipes
+                  : [],
             },
           ]
         : acc,

@@ -72,7 +72,7 @@ export interface TransformFieldsArgs<P, S> {
 
 export interface ExternalServiceComment {
   comment: string;
-  commentId: string;
+  commentId?: string;
 }
 
 export interface MapIncident {
