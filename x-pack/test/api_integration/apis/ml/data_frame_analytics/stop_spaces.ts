@@ -22,9 +22,14 @@ export default ({ getService }: FtrProviderContext) => {
   const idSpace3 = 'space3';
   const idSpace4 = 'space4';
 
-  async function runStopRequest(jobId: string, space: string, expectedStatusCode: number) {
+  async function runRequest(
+    jobId: string,
+    space: string,
+    action: string,
+    expectedStatusCode: number
+  ) {
     const { body } = await supertest
-      .post(`/s/${space}/api/ml/data_frame/analytics/${jobId}/_stop`)
+      .post(`/s/${space}/api/ml/data_frame/analytics/${jobId}/${action}`)
       .auth(
         USER.ML_POWERUSER_ALL_SPACES,
         ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER_ALL_SPACES)
@@ -35,42 +40,40 @@ export default ({ getService }: FtrProviderContext) => {
     return body;
   }
 
-  let space3JobDestIndex: string;
-  let space4JobDestIndex: string;
-
   describe('POST data_frame/analytics/{analyticsId}/_stop with spaces', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('ml/bm_classification');
       await spacesService.create({ id: idSpace3, name: 'space_three', disabledFeatures: [] });
-      await spacesService.create({ id: jobIdSpace4, name: 'space_four', disabledFeatures: [] });
+      await spacesService.create({ id: idSpace4, name: 'space_four', disabledFeatures: [] });
       // job config with high training percent so it takes longer to run
       const jobConfigSpace3 = ml.commonConfig.getDFABmClassificationJobConfig(jobIdSpace3);
-      await ml.api.createDataFrameAnalyticsJob(jobConfigSpace3, idSpace3);
-
       const jobConfigSpace4 = ml.commonConfig.getDFABmClassificationJobConfig(jobIdSpace4);
+      // create jobs
+      await ml.api.createDataFrameAnalyticsJob(jobConfigSpace3, idSpace3);
       await ml.api.createDataFrameAnalyticsJob(jobConfigSpace4, idSpace4);
-      await ml.testResources.setKibanaTimeZoneToUTC();
+      // start jobs
+      await runRequest(jobIdSpace3, idSpace3, '_start', 200);
+      await runRequest(jobIdSpace4, idSpace4, '_start', 200);
 
-      space3JobDestIndex = jobConfigSpace3.dest.index;
-      space4JobDestIndex = jobConfigSpace4.dest.index;
+      await ml.testResources.setKibanaTimeZoneToUTC();
     });
 
     after(async () => {
       await spacesService.delete(idSpace3);
       await spacesService.delete(idSpace4);
-      await ml.api.deleteIndices(space3JobDestIndex);
-      await ml.api.deleteIndices(space4JobDestIndex);
+      await ml.api.deleteIndices(`user-${jobIdSpace3}`);
+      await ml.api.deleteIndices(`user-${jobIdSpace4}`);
       await ml.api.cleanMlIndices();
       await ml.testResources.cleanMLSavedObjects();
     });
 
     it('should stop job from same space', async () => {
-      const body = await runStopRequest(jobIdSpace3, idSpace3, 200);
+      const body = await runRequest(jobIdSpace3, idSpace3, '_stop', 200);
       expect(body).to.have.property('stopped', true);
     });
 
     it('should fail to stop job from different space', async () => {
-      const body = await runStopRequest(jobIdSpace4, idSpace3, 404);
+      const body = await runRequest(jobIdSpace4, idSpace3, '_stop', 404);
       expect(body.error).to.eql('Not Found');
     });
   });

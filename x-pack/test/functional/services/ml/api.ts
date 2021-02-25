@@ -295,11 +295,14 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
 
     async waitForAnalyticsState(
       analyticsId: string,
-      expectedAnalyticsState: DataFrameTaskStateType
+      expectedAnalyticsState: DataFrameTaskStateType,
+      timeoutInMs?: number
     ) {
+      const defaultTimeout = 2 * 60 * 1000;
+
       await retry.waitForWithTimeout(
         `analytics state to be ${expectedAnalyticsState}`,
-        2 * 60 * 1000,
+        timeoutInMs ? timeoutInMs : defaultTimeout,
         async () => {
           const state = await this.getAnalyticsState(analyticsId);
           if (state === expectedAnalyticsState) {

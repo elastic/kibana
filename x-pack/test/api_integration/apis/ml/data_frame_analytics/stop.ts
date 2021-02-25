@@ -8,9 +8,8 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../../functional/services/ml/security_common';
-import { DataFrameAnalyticsConfig } from '../../../../../plugins/ml/public/application/data_frame_analytics/common';
-import { DeepPartial } from '../../../../../plugins/ml/common/types/common';
 import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common_api';
+import { DATA_FRAME_TASK_STATE } from '../../../../../plugins/ml/common/constants/data_frame_analytics';
 
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
@@ -18,58 +17,19 @@ export default ({ getService }: FtrProviderContext) => {
   const ml = getService('ml');
 
   const jobId = `bm_${Date.now()}`;
-  const generateDestinationIndex = (analyticsId: string) => `user-${analyticsId}`;
-  const commonJobConfig = {
-    source: {
-      index: ['ft_bank_marketing'],
-      query: {
-        match_all: {},
-      },
-    },
-    analysis: {
-      classification: {
-        dependent_variable: 'y',
-        training_percent: 80, // increase to ensure slow running job
-      },
-    },
-    analyzed_fields: {
-      includes: [],
-      excludes: [],
-    },
-    model_memory_limit: '80mb',
-    allow_lazy_start: false, // default value
-    max_num_threads: 1, // default value
-  };
-
   const analyticsId = `${jobId}_1`;
-  const destinationIndex = generateDestinationIndex(analyticsId);
-
-  const testJobConfigs: Array<DeepPartial<DataFrameAnalyticsConfig>> = [
-    {
-      id: analyticsId,
-      description: 'Test stop for analytics',
-      dest: {
-        index: destinationIndex,
-        results_field: 'ml',
-      },
-      ...commonJobConfig,
-    },
-  ];
-
-  async function createJobs(mockJobConfigs: Array<DeepPartial<DataFrameAnalyticsConfig>>) {
-    for (const jobConfig of mockJobConfigs) {
-      if (jobConfig) {
-        await ml.api.createDataFrameAnalyticsJob(jobConfig as DataFrameAnalyticsConfig);
-        await ml.api.runDFAJob(jobConfig.id!);
-      }
-    }
-  }
+  let destinationIndex: string;
 
   describe('POST data_frame/analytics/{analyticsId}/_stop', () => {
     before(async () => {
       await esArchiver.loadIfNeeded('ml/bm_classification');
       await ml.testResources.setKibanaTimeZoneToUTC();
-      await createJobs(testJobConfigs);
+      // job config with high training percent so it takes longer to run
+      const slowRunningConfig = ml.commonConfig.getDFABmClassificationJobConfig(analyticsId);
+      destinationIndex = slowRunningConfig.dest.index;
+
+      await ml.api.createDataFrameAnalyticsJob(slowRunningConfig);
+      await ml.api.runDFAJob(analyticsId);
     });
 
     after(async () => {
@@ -87,6 +47,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(body).not.to.be(undefined);
         expect(body.stopped).to.be(true);
+        await ml.api.waitForAnalyticsState(analyticsId, DATA_FRAME_TASK_STATE.STOPPED, 5000);
       });
 
       it('should show 404 error if job does not exist', async () => {
