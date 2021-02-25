@@ -15,15 +15,15 @@ import { getRoleAbilities } from './utils/role';
 
 interface AppValues {
   ilmEnabled: boolean;
-  configuredLimits: Partial<ConfiguredLimits>;
-  account: Partial<Account>;
-  myRole: Partial<Role>;
+  configuredLimits: ConfiguredLimits;
+  account: Account;
+  myRole: Role;
 }
 interface AppActions {
   setOnboardingComplete(): boolean;
 }
 
-export const AppLogic = kea<MakeLogicType<AppValues, AppActions>>({
+export const AppLogic = kea<MakeLogicType<AppValues, AppActions, Required<InitialAppData>>>({
   path: ['enterprise_search', 'app_search', 'app_logic'],
   actions: {
     setOnboardingComplete: () => true,

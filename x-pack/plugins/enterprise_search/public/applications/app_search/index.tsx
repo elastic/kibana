@@ -44,7 +44,11 @@ import {
 
 export const AppSearch: React.FC<InitialAppData> = (props) => {
   const { config } = useValues(KibanaLogic);
-  return !config.host ? <AppSearchUnconfigured /> : <AppSearchConfigured {...props} />;
+  return !config.host ? (
+    <AppSearchUnconfigured />
+  ) : (
+    <AppSearchConfigured {...(props as Required<InitialAppData>)} />
+  );
 };
 
 export const AppSearchUnconfigured: React.FC = () => (
@@ -58,7 +62,7 @@ export const AppSearchUnconfigured: React.FC = () => (
   </Switch>
 );
 
-export const AppSearchConfigured: React.FC<InitialAppData> = (props) => {
+export const AppSearchConfigured: React.FC<Required<InitialAppData>> = (props) => {
   const {
     myRole: { canManageEngines, canManageMetaEngines },
   } = useValues(AppLogic(props));
