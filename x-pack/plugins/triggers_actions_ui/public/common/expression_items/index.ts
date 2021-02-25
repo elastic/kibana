@@ -8,9 +8,17 @@
 import { lazy } from 'react';
 import { suspendedComponentWithProps } from '../../application/lib/suspended_component_with_props';
 
-export const WhenExpression = suspendedComponentWithProps(lazy(() => import('./when')));
-export const OfExpression = suspendedComponentWithProps(lazy(() => import('./of')));
 export const GroupByExpression = suspendedComponentWithProps(lazy(() => import('./group_by_over')));
-export const ThresholdExpression = suspendedComponentWithProps(lazy(() => import('./threshold')));
 export const ForLastExpression = suspendedComponentWithProps(lazy(() => import('./for_the_last')));
 export const ValueExpression = suspendedComponentWithProps(lazy(() => import('./value')));
+
+// export const WhenExpression = suspendedComponentWithProps(lazy(() => import('./when')));
+// export const OfExpression = suspendedComponentWithProps(lazy(() => import('./of')));
+// export const ThresholdExpression = suspendedComponentWithProps(lazy(() => import('./threshold')));
+
+export { WhenExpression } from './when';
+export { OfExpression } from './of';
+export { ThresholdExpression } from './threshold';
+// export { GroupByExpression } from './group_by_over';
+// export { ForLastExpression } from './for_the_last';
+// export { ValueExpression } from './value';

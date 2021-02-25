@@ -1,22 +1,1051 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`ExpressionRow should render a helpText for the of expression 1`] = `
-<FormattedMessage
-  defaultMessage="Can't find a metric? {documentationLink}."
-  id="xpack.infra.metrics.alertFlyout.ofExpression.helpTextDetail"
-  values={
+.c0 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-wrap: wrap;
+  -ms-flex-wrap: wrap;
+  flex-wrap: wrap;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  margin: 0 -4px;
+}
+
+.c1 {
+  padding: 0 4px;
+}
+
+<ExpressionRow
+  addExpression={[Function]}
+  canDelete={false}
+  errors={
     Object {
-      "documentationLink": <EuiLink
-        href="https://www.elastic.co/guide/en/observability/current/configure-settings.html"
-        target="BLANK"
-      >
-        <FormattedMessage
-          defaultMessage="Learn how to add more data"
-          id="xpack.infra.metrics.alertFlyout.ofExpression.popoverLinkLabel"
-          values={Object {}}
-        />
-      </EuiLink>,
+      "aggField": Array [],
+      "timeSizeUnit": Array [],
+      "timeWindowSize": Array [],
     }
   }
-/>
+  expression={
+    Object {
+      "aggType": "avg",
+      "comparator": ">",
+      "metric": "system.load.1",
+      "threshold": Array [
+        0.5,
+      ],
+      "timeSize": 1,
+      "timeUnit": "m",
+    }
+  }
+  expressionId={1}
+  fields={
+    Array [
+      Object {
+        "name": "system.cpu.user.pct",
+        "type": "test",
+      },
+      Object {
+        "name": "system.load.1",
+        "type": "test",
+      },
+    ]
+  }
+  intl={
+    Object {
+      "defaultFormats": Object {},
+      "defaultLocale": "en",
+      "formatDate": [Function],
+      "formatHTMLMessage": [Function],
+      "formatMessage": [Function],
+      "formatNumber": [Function],
+      "formatPlural": [Function],
+      "formatRelative": [Function],
+      "formatTime": [Function],
+      "formats": Object {
+        "date": Object {
+          "full": Object {
+            "day": "numeric",
+            "month": "long",
+            "weekday": "long",
+            "year": "numeric",
+          },
+          "long": Object {
+            "day": "numeric",
+            "month": "long",
+            "year": "numeric",
+          },
+          "medium": Object {
+            "day": "numeric",
+            "month": "short",
+            "year": "numeric",
+          },
+          "short": Object {
+            "day": "numeric",
+            "month": "numeric",
+            "year": "2-digit",
+          },
+        },
+        "number": Object {
+          "currency": Object {
+            "style": "currency",
+          },
+          "percent": Object {
+            "style": "percent",
+          },
+        },
+        "relative": Object {
+          "days": Object {
+            "units": "day",
+          },
+          "hours": Object {
+            "units": "hour",
+          },
+          "minutes": Object {
+            "units": "minute",
+          },
+          "months": Object {
+            "units": "month",
+          },
+          "seconds": Object {
+            "units": "second",
+          },
+          "years": Object {
+            "units": "year",
+          },
+        },
+        "time": Object {
+          "full": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "long": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "medium": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+          },
+          "short": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+          },
+        },
+      },
+      "formatters": Object {
+        "getDateTimeFormat": [Function],
+        "getMessageFormat": [Function],
+        "getNumberFormat": [Function],
+        "getPluralFormat": [Function],
+        "getRelativeFormat": [Function],
+      },
+      "locale": "en",
+      "messages": Object {},
+      "now": [Function],
+      "onError": [Function],
+      "textComponent": Symbol(react.fragment),
+      "timeZone": null,
+    }
+  }
+  remove={[Function]}
+  setAlertParams={[Function]}
+>
+  <EuiFlexGroup
+    gutterSize="xs"
+  >
+    <div
+      className="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--directionRow euiFlexGroup--responsive"
+    >
+      <EuiFlexItem
+        grow={false}
+      >
+        <div
+          className="euiFlexItem euiFlexItem--flexGrowZero"
+        >
+          <EuiButtonIcon
+            aria-label="Expand row."
+            iconType="arrowDown"
+            onClick={[Function]}
+          >
+            <button
+              aria-label="Expand row."
+              className="euiButtonIcon euiButtonIcon--primary"
+              disabled={false}
+              onClick={[Function]}
+              type="button"
+            >
+              <EuiIcon
+                aria-hidden="true"
+                className="euiButtonIcon__icon"
+                size="m"
+                type="arrowDown"
+              >
+                <span
+                  aria-hidden="true"
+                  className="euiButtonIcon__icon"
+                  data-euiicon-type="arrowDown"
+                  size="m"
+                />
+              </EuiIcon>
+            </button>
+          </EuiButtonIcon>
+        </div>
+      </EuiFlexItem>
+      <EuiFlexItem
+        grow={true}
+      >
+        <div
+          className="euiFlexItem"
+        >
+          <Styled(EuiFlexGroup)>
+            <EuiFlexGroup
+              className="c0"
+            >
+              <div
+                className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive c0"
+              >
+                <styled.div>
+                  <div
+                    className="c1"
+                  >
+                    <Component
+                      aggType="avg"
+                      customAggTypesOptions={
+                        Object {
+                          "avg": Object {
+                            "fieldRequired": true,
+                            "text": "Average",
+                            "validNormalizedTypes": Array [
+                              "number",
+                            ],
+                            "value": "avg",
+                          },
+                          "cardinality": Object {
+                            "fieldRequired": false,
+                            "text": "Cardinality",
+                            "validNormalizedTypes": Array [
+                              "number",
+                            ],
+                            "value": "cardinality",
+                          },
+                          "count": Object {
+                            "fieldRequired": false,
+                            "text": "Document count",
+                            "validNormalizedTypes": Array [
+                              "number",
+                            ],
+                            "value": "count",
+                          },
+                          "max": Object {
+                            "fieldRequired": true,
+                            "text": "Max",
+                            "validNormalizedTypes": Array [
+                              "number",
+                              "date",
+                            ],
+                            "value": "max",
+                          },
+                          "min": Object {
+                            "fieldRequired": true,
+                            "text": "Min",
+                            "validNormalizedTypes": Array [
+                              "number",
+                              "date",
+                            ],
+                            "value": "min",
+                          },
+                          "p95": Object {
+                            "fieldRequired": false,
+                            "text": "95th Percentile",
+                            "validNormalizedTypes": Array [
+                              "number",
+                            ],
+                            "value": "p95",
+                          },
+                          "p99": Object {
+                            "fieldRequired": false,
+                            "text": "99th Percentile",
+                            "validNormalizedTypes": Array [
+                              "number",
+                            ],
+                            "value": "p99",
+                          },
+                          "rate": Object {
+                            "fieldRequired": false,
+                            "text": "Rate",
+                            "validNormalizedTypes": Array [
+                              "number",
+                            ],
+                            "value": "rate",
+                          },
+                          "sum": Object {
+                            "fieldRequired": false,
+                            "text": "Sum",
+                            "validNormalizedTypes": Array [
+                              "number",
+                            ],
+                            "value": "sum",
+                          },
+                        }
+                      }
+                      onChangeSelectedAggType={[Function]}
+                    >
+                      <Suspense
+                        fallback={
+                          <CenterJustifiedSpinner
+                            size="m"
+                          />
+                        }
+                      >
+                        <WhenExpression
+                          aggType="avg"
+                          customAggTypesOptions={
+                            Object {
+                              "avg": Object {
+                                "fieldRequired": true,
+                                "text": "Average",
+                                "validNormalizedTypes": Array [
+                                  "number",
+                                ],
+                                "value": "avg",
+                              },
+                              "cardinality": Object {
+                                "fieldRequired": false,
+                                "text": "Cardinality",
+                                "validNormalizedTypes": Array [
+                                  "number",
+                                ],
+                                "value": "cardinality",
+                              },
+                              "count": Object {
+                                "fieldRequired": false,
+                                "text": "Document count",
+                                "validNormalizedTypes": Array [
+                                  "number",
+                                ],
+                                "value": "count",
+                              },
+                              "max": Object {
+                                "fieldRequired": true,
+                                "text": "Max",
+                                "validNormalizedTypes": Array [
+                                  "number",
+                                  "date",
+                                ],
+                                "value": "max",
+                              },
+                              "min": Object {
+                                "fieldRequired": true,
+                                "text": "Min",
+                                "validNormalizedTypes": Array [
+                                  "number",
+                                  "date",
+                                ],
+                                "value": "min",
+                              },
+                              "p95": Object {
+                                "fieldRequired": false,
+                                "text": "95th Percentile",
+                                "validNormalizedTypes": Array [
+                                  "number",
+                                ],
+                                "value": "p95",
+                              },
+                              "p99": Object {
+                                "fieldRequired": false,
+                                "text": "99th Percentile",
+                                "validNormalizedTypes": Array [
+                                  "number",
+                                ],
+                                "value": "p99",
+                              },
+                              "rate": Object {
+                                "fieldRequired": false,
+                                "text": "Rate",
+                                "validNormalizedTypes": Array [
+                                  "number",
+                                ],
+                                "value": "rate",
+                              },
+                              "sum": Object {
+                                "fieldRequired": false,
+                                "text": "Sum",
+                                "validNormalizedTypes": Array [
+                                  "number",
+                                ],
+                                "value": "sum",
+                              },
+                            }
+                          }
+                          onChangeSelectedAggType={[Function]}
+                        >
+                          <EuiPopover
+                            anchorPosition="downLeft"
+                            button={
+                              <EuiExpression
+                                data-test-subj="whenExpression"
+                                description="when"
+                                display="inline"
+                                isActive={false}
+                                onClick={[Function]}
+                                value="Average"
+                              />
+                            }
+                            closePopover={[Function]}
+                            display="inlineBlock"
+                            hasArrow={true}
+                            isOpen={false}
+                            ownFocus={true}
+                            panelPaddingSize="m"
+                            repositionOnScroll={true}
+                          >
+                            <div
+                              className="euiPopover euiPopover--anchorDownLeft"
+                            >
+                              <div
+                                className="euiPopover__anchor"
+                              >
+                                <EuiExpression
+                                  data-test-subj="whenExpression"
+                                  description="when"
+                                  display="inline"
+                                  isActive={false}
+                                  onClick={[Function]}
+                                  value="Average"
+                                >
+                                  <button
+                                    className="euiExpression euiExpression-isClickable euiExpression-isUppercase euiExpression--secondary"
+                                    data-test-subj="whenExpression"
+                                    onClick={[Function]}
+                                  >
+                                    <span
+                                      className="euiExpression__description"
+                                    >
+                                      when
+                                    </span>
+                                     
+                                    <span
+                                      className="euiExpression__value"
+                                    >
+                                      Average
+                                    </span>
+                                  </button>
+                                </EuiExpression>
+                              </div>
+                            </div>
+                          </EuiPopover>
+                        </WhenExpression>
+                      </Suspense>
+                    </Component>
+                  </div>
+                </styled.div>
+                <styled.div>
+                  <div
+                    className="c1"
+                  >
+                    <Component
+                      aggField="system.load.1"
+                      aggType="avg"
+                      customAggTypesOptions={
+                        Object {
+                          "avg": Object {
+                            "fieldRequired": true,
+                            "text": "Average",
+                            "validNormalizedTypes": Array [
+                              "number",
+                            ],
+                            "value": "avg",
+                          },
+                          "cardinality": Object {
+                            "fieldRequired": false,
+                            "text": "Cardinality",
+                            "validNormalizedTypes": Array [
+                              "number",
+                            ],
+                            "value": "cardinality",
+                          },
+                          "count": Object {
+                            "fieldRequired": false,
+                            "text": "Document count",
+                            "validNormalizedTypes": Array [
+                              "number",
+                            ],
+                            "value": "count",
+                          },
+                          "max": Object {
+                            "fieldRequired": true,
+                            "text": "Max",
+                            "validNormalizedTypes": Array [
+                              "number",
+                              "date",
+                            ],
+                            "value": "max",
+                          },
+                          "min": Object {
+                            "fieldRequired": true,
+                            "text": "Min",
+                            "validNormalizedTypes": Array [
+                              "number",
+                              "date",
+                            ],
+                            "value": "min",
+                          },
+                          "p95": Object {
+                            "fieldRequired": false,
+                            "text": "95th Percentile",
+                            "validNormalizedTypes": Array [
+                              "number",
+                            ],
+                            "value": "p95",
+                          },
+                          "p99": Object {
+                            "fieldRequired": false,
+                            "text": "99th Percentile",
+                            "validNormalizedTypes": Array [
+                              "number",
+                            ],
+                            "value": "p99",
+                          },
+                          "rate": Object {
+                            "fieldRequired": false,
+                            "text": "Rate",
+                            "validNormalizedTypes": Array [
+                              "number",
+                            ],
+                            "value": "rate",
+                          },
+                          "sum": Object {
+                            "fieldRequired": false,
+                            "text": "Sum",
+                            "validNormalizedTypes": Array [
+                              "number",
+                            ],
+                            "value": "sum",
+                          },
+                        }
+                      }
+                      data-test-subj="ofExpression"
+                      errors={
+                        Object {
+                          "aggField": Array [],
+                          "timeSizeUnit": Array [],
+                          "timeWindowSize": Array [],
+                        }
+                      }
+                      fields={
+                        Array [
+                          Object {
+                            "name": "system.cpu.user.pct",
+                            "normalizedType": "test",
+                          },
+                          Object {
+                            "name": "system.load.1",
+                            "normalizedType": "test",
+                          },
+                        ]
+                      }
+                      helpText={
+                        <FormattedMessage
+                          defaultMessage="Can't find a metric? {documentationLink}."
+                          id="xpack.infra.metrics.alertFlyout.ofExpression.helpTextDetail"
+                          values={
+                            Object {
+                              "documentationLink": <EuiLink
+                                href="https://www.elastic.co/guide/en/observability/current/configure-settings.html"
+                                target="BLANK"
+                              >
+                                <FormattedMessage
+                                  defaultMessage="Learn how to add more data"
+                                  id="xpack.infra.metrics.alertFlyout.ofExpression.popoverLinkLabel"
+                                  values={Object {}}
+                                />
+                              </EuiLink>,
+                            }
+                          }
+                        />
+                      }
+                      onChangeSelectedAggField={[Function]}
+                    >
+                      <Suspense
+                        fallback={
+                          <CenterJustifiedSpinner
+                            size="m"
+                          />
+                        }
+                      >
+                        <OfExpression
+                          aggField="system.load.1"
+                          aggType="avg"
+                          customAggTypesOptions={
+                            Object {
+                              "avg": Object {
+                                "fieldRequired": true,
+                                "text": "Average",
+                                "validNormalizedTypes": Array [
+                                  "number",
+                                ],
+                                "value": "avg",
+                              },
+                              "cardinality": Object {
+                                "fieldRequired": false,
+                                "text": "Cardinality",
+                                "validNormalizedTypes": Array [
+                                  "number",
+                                ],
+                                "value": "cardinality",
+                              },
+                              "count": Object {
+                                "fieldRequired": false,
+                                "text": "Document count",
+                                "validNormalizedTypes": Array [
+                                  "number",
+                                ],
+                                "value": "count",
+                              },
+                              "max": Object {
+                                "fieldRequired": true,
+                                "text": "Max",
+                                "validNormalizedTypes": Array [
+                                  "number",
+                                  "date",
+                                ],
+                                "value": "max",
+                              },
+                              "min": Object {
+                                "fieldRequired": true,
+                                "text": "Min",
+                                "validNormalizedTypes": Array [
+                                  "number",
+                                  "date",
+                                ],
+                                "value": "min",
+                              },
+                              "p95": Object {
+                                "fieldRequired": false,
+                                "text": "95th Percentile",
+                                "validNormalizedTypes": Array [
+                                  "number",
+                                ],
+                                "value": "p95",
+                              },
+                              "p99": Object {
+                                "fieldRequired": false,
+                                "text": "99th Percentile",
+                                "validNormalizedTypes": Array [
+                                  "number",
+                                ],
+                                "value": "p99",
+                              },
+                              "rate": Object {
+                                "fieldRequired": false,
+                                "text": "Rate",
+                                "validNormalizedTypes": Array [
+                                  "number",
+                                ],
+                                "value": "rate",
+                              },
+                              "sum": Object {
+                                "fieldRequired": false,
+                                "text": "Sum",
+                                "validNormalizedTypes": Array [
+                                  "number",
+                                ],
+                                "value": "sum",
+                              },
+                            }
+                          }
+                          data-test-subj="ofExpression"
+                          errors={
+                            Object {
+                              "aggField": Array [],
+                              "timeSizeUnit": Array [],
+                              "timeWindowSize": Array [],
+                            }
+                          }
+                          fields={
+                            Array [
+                              Object {
+                                "name": "system.cpu.user.pct",
+                                "normalizedType": "test",
+                              },
+                              Object {
+                                "name": "system.load.1",
+                                "normalizedType": "test",
+                              },
+                            ]
+                          }
+                          helpText={
+                            <FormattedMessage
+                              defaultMessage="Can't find a metric? {documentationLink}."
+                              id="xpack.infra.metrics.alertFlyout.ofExpression.helpTextDetail"
+                              values={
+                                Object {
+                                  "documentationLink": <EuiLink
+                                    href="https://www.elastic.co/guide/en/observability/current/configure-settings.html"
+                                    target="BLANK"
+                                  >
+                                    <FormattedMessage
+                                      defaultMessage="Learn how to add more data"
+                                      id="xpack.infra.metrics.alertFlyout.ofExpression.popoverLinkLabel"
+                                      values={Object {}}
+                                    />
+                                  </EuiLink>,
+                                }
+                              }
+                            />
+                          }
+                          onChangeSelectedAggField={[Function]}
+                        >
+                          <EuiPopover
+                            anchorPosition="downRight"
+                            button={
+                              <EuiExpression
+                                data-test-subj="ofExpressionPopover"
+                                description="of"
+                                display="inline"
+                                isActive={false}
+                                isInvalid={false}
+                                onClick={[Function]}
+                                value="system.load.1"
+                              />
+                            }
+                            closePopover={[Function]}
+                            display="inlineBlock"
+                            hasArrow={true}
+                            id="aggFieldPopover"
+                            isOpen={false}
+                            ownFocus={false}
+                            panelPaddingSize="m"
+                            repositionOnScroll={true}
+                            zIndex={8000}
+                          >
+                            <EuiOutsideClickDetector
+                              onOutsideClick={[Function]}
+                            >
+                              <div
+                                className="euiPopover euiPopover--anchorDownRight"
+                                id="aggFieldPopover"
+                                onKeyDown={[Function]}
+                                onMouseDown={[Function]}
+                                onMouseUp={[Function]}
+                                onTouchEnd={[Function]}
+                                onTouchStart={[Function]}
+                              >
+                                <div
+                                  className="euiPopover__anchor"
+                                >
+                                  <EuiExpression
+                                    data-test-subj="ofExpressionPopover"
+                                    description="of"
+                                    display="inline"
+                                    isActive={false}
+                                    isInvalid={false}
+                                    onClick={[Function]}
+                                    value="system.load.1"
+                                  >
+                                    <button
+                                      className="euiExpression euiExpression-isClickable euiExpression-isUppercase euiExpression--secondary"
+                                      data-test-subj="ofExpressionPopover"
+                                      onClick={[Function]}
+                                    >
+                                      <span
+                                        className="euiExpression__description"
+                                      >
+                                        of
+                                      </span>
+                                       
+                                      <span
+                                        className="euiExpression__value"
+                                      >
+                                        system.load.1
+                                      </span>
+                                    </button>
+                                  </EuiExpression>
+                                </div>
+                              </div>
+                            </EuiOutsideClickDetector>
+                          </EuiPopover>
+                        </OfExpression>
+                      </Suspense>
+                    </Component>
+                  </div>
+                </styled.div>
+                <ThresholdElement
+                  comparator=">"
+                  errors={Object {}}
+                  isMetricPct={false}
+                  threshold={
+                    Array [
+                      0.5,
+                    ]
+                  }
+                  updateComparator={[Function]}
+                  updateThreshold={[Function]}
+                >
+                  <styled.div>
+                    <div
+                      className="c1"
+                    >
+                      <Component
+                        customComparators={
+                          Object {
+                            "<": Object {
+                              "requiredValues": 1,
+                              "text": "Is below",
+                              "value": "<",
+                            },
+                            "<=": Object {
+                              "requiredValues": 1,
+                              "text": "Is below or equals",
+                              "value": "<=",
+                            },
+                            ">": Object {
+                              "requiredValues": 1,
+                              "text": "Is above",
+                              "value": ">",
+                            },
+                            ">=": Object {
+                              "requiredValues": 1,
+                              "text": "Is above or equals",
+                              "value": ">=",
+                            },
+                            "between": Object {
+                              "requiredValues": 2,
+                              "text": "Is between",
+                              "value": "between",
+                            },
+                            "outside": Object {
+                              "requiredValues": 2,
+                              "text": "Is not between",
+                              "value": "outside",
+                            },
+                          }
+                        }
+                        errors={Object {}}
+                        onChangeSelectedThreshold={[Function]}
+                        onChangeSelectedThresholdComparator={[Function]}
+                        threshold={
+                          Array [
+                            0.5,
+                          ]
+                        }
+                        thresholdComparator=">"
+                      >
+                        <Suspense
+                          fallback={
+                            <CenterJustifiedSpinner
+                              size="m"
+                            />
+                          }
+                        >
+                          <ThresholdExpression
+                            customComparators={
+                              Object {
+                                "<": Object {
+                                  "requiredValues": 1,
+                                  "text": "Is below",
+                                  "value": "<",
+                                },
+                                "<=": Object {
+                                  "requiredValues": 1,
+                                  "text": "Is below or equals",
+                                  "value": "<=",
+                                },
+                                ">": Object {
+                                  "requiredValues": 1,
+                                  "text": "Is above",
+                                  "value": ">",
+                                },
+                                ">=": Object {
+                                  "requiredValues": 1,
+                                  "text": "Is above or equals",
+                                  "value": ">=",
+                                },
+                                "between": Object {
+                                  "requiredValues": 2,
+                                  "text": "Is between",
+                                  "value": "between",
+                                },
+                                "outside": Object {
+                                  "requiredValues": 2,
+                                  "text": "Is not between",
+                                  "value": "outside",
+                                },
+                              }
+                            }
+                            errors={Object {}}
+                            onChangeSelectedThreshold={[Function]}
+                            onChangeSelectedThresholdComparator={[Function]}
+                            threshold={
+                              Array [
+                                0.5,
+                              ]
+                            }
+                            thresholdComparator=">"
+                          >
+                            <EuiPopover
+                              anchorPosition="downLeft"
+                              button={
+                                <EuiExpression
+                                  data-test-subj="thresholdPopover"
+                                  description="Is above"
+                                  display="inline"
+                                  isActive={false}
+                                  isInvalid={false}
+                                  onClick={[Function]}
+                                  value="0.5"
+                                />
+                              }
+                              closePopover={[Function]}
+                              display="inlineBlock"
+                              hasArrow={true}
+                              isOpen={false}
+                              ownFocus={true}
+                              panelPaddingSize="m"
+                              repositionOnScroll={true}
+                            >
+                              <div
+                                className="euiPopover euiPopover--anchorDownLeft"
+                              >
+                                <div
+                                  className="euiPopover__anchor"
+                                >
+                                  <EuiExpression
+                                    data-test-subj="thresholdPopover"
+                                    description="Is above"
+                                    display="inline"
+                                    isActive={false}
+                                    isInvalid={false}
+                                    onClick={[Function]}
+                                    value="0.5"
+                                  >
+                                    <button
+                                      className="euiExpression euiExpression-isClickable euiExpression-isUppercase euiExpression--secondary"
+                                      data-test-subj="thresholdPopover"
+                                      onClick={[Function]}
+                                    >
+                                      <span
+                                        className="euiExpression__description"
+                                      >
+                                        Is above
+                                      </span>
+                                       
+                                      <span
+                                        className="euiExpression__value"
+                                      >
+                                        0.5
+                                      </span>
+                                    </button>
+                                  </EuiExpression>
+                                </div>
+                              </div>
+                            </EuiPopover>
+                          </ThresholdExpression>
+                        </Suspense>
+                      </Component>
+                    </div>
+                  </styled.div>
+                </ThresholdElement>
+              </div>
+            </EuiFlexGroup>
+          </Styled(EuiFlexGroup)>
+           
+          <EuiSpacer
+            size="xs"
+          >
+            <div
+              className="euiSpacer euiSpacer--xs"
+            />
+          </EuiSpacer>
+          <Styled(EuiFlexGroup)>
+            <EuiFlexGroup
+              className="c0"
+            >
+              <div
+                className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive c0"
+              >
+                <EuiButtonEmpty
+                  color="primary"
+                  flush="left"
+                  iconType="plusInCircleFilled"
+                  onClick={[Function]}
+                  size="xs"
+                >
+                  <button
+                    className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiButtonEmpty--flushLeft"
+                    disabled={false}
+                    onClick={[Function]}
+                    type="button"
+                  >
+                    <EuiButtonContent
+                      className="euiButtonEmpty__content"
+                      iconSide="left"
+                      iconType="plusInCircleFilled"
+                      textProps={
+                        Object {
+                          "className": "euiButtonEmpty__text",
+                        }
+                      }
+                    >
+                      <span
+                        className="euiButtonContent euiButtonEmpty__content"
+                      >
+                        <EuiIcon
+                          className="euiButtonContent__icon"
+                          size="m"
+                          type="plusInCircleFilled"
+                        >
+                          <span
+                            className="euiButtonContent__icon"
+                            data-euiicon-type="plusInCircleFilled"
+                            size="m"
+                          />
+                        </EuiIcon>
+                        <span
+                          className="euiButtonEmpty__text"
+                        >
+                          <FormattedMessage
+                            defaultMessage="Add warning threshold"
+                            id="xpack.infra.metrics.alertFlyout.addWarningThreshold"
+                            values={Object {}}
+                          >
+                            Add warning threshold
+                          </FormattedMessage>
+                        </span>
+                      </span>
+                    </EuiButtonContent>
+                  </button>
+                </EuiButtonEmpty>
+              </div>
+            </EuiFlexGroup>
+          </Styled(EuiFlexGroup)>
+        </div>
+      </EuiFlexItem>
+    </div>
+  </EuiFlexGroup>
+  <div
+    style={
+      Object {
+        "padding": "0 0 0 28px",
+      }
+    }
+  />
+  <EuiSpacer
+    size="s"
+  >
+    <div
+      className="euiSpacer euiSpacer--s"
+    />
+  </EuiSpacer>
+</ExpressionRow>
 `;

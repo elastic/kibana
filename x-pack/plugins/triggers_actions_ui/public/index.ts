@@ -29,6 +29,7 @@ export type {
   ActionConnector,
   IErrorObject,
   AlertFlyoutCloseReason,
+  AlertTypeParams,
 } from './types';
 
 export {

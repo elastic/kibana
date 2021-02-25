@@ -10,13 +10,8 @@ import { suspendedComponentWithProps } from '../lib/suspended_component_with_pro
 
 export type { ActionGroupWithCondition, AlertConditionsProps } from './alert_form/alert_conditions';
 
-export const AlertConditions = suspendedComponentWithProps(
-  lazy(() => import('./alert_form/alert_conditions'))
-);
-
-export const AlertConditionsGroup = suspendedComponentWithProps(
-  lazy(() => import('./alert_form/alert_conditions_group'))
-);
+export const AlertConditions = lazy(() => import('./alert_form/alert_conditions'));
+export const AlertConditionsGroup = lazy(() => import('./alert_form/alert_conditions_group'));
 
 export const AlertAdd = suspendedComponentWithProps(lazy(() => import('./alert_form/alert_add')));
 export const AlertEdit = suspendedComponentWithProps(lazy(() => import('./alert_form/alert_edit')));
