@@ -39,6 +39,7 @@ const statusHelpers = {
 
 export class HapiResponseAdapter {
   constructor(private readonly responseToolkit: HapiResponseToolkit) {}
+
   public toBadRequest(message: string) {
     const error = Boom.badRequest();
     error.output.payload.message = message;
@@ -87,6 +88,9 @@ export class HapiResponseAdapter {
       .response(kibanaResponse.payload)
       .code(kibanaResponse.status);
     setHeaders(response, kibanaResponse.options.headers);
+    if (kibanaResponse.options.etag) {
+      response.etag(kibanaResponse.options.etag);
+    }
     return response;
   }
 
@@ -115,6 +119,9 @@ export class HapiResponseAdapter {
         .response(kibanaResponse.payload)
         .code(kibanaResponse.status);
       setHeaders(response, kibanaResponse.options.headers);
+      if (kibanaResponse.options.etag) {
+        response.etag(kibanaResponse.options.etag);
+      }
       return response;
     }
 

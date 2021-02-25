@@ -62,6 +62,8 @@ export interface HttpResponseOptions {
   body?: HttpResponsePayload;
   /** HTTP Headers with additional information about response */
   headers?: ResponseHeaders;
+  /** HTTP ETag value for the response */
+  etag?: string;
 }
 
 /**
