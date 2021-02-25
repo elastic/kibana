@@ -25,6 +25,7 @@ import {
 } from '../../../../../../src/plugins/kibana_react/public';
 
 import { AppState } from '../../state';
+import { stringifyUrlParams } from './stringify_url_params';
 
 interface KibanaProps {
   services?: KibanaServices;
@@ -43,10 +44,18 @@ interface MockRouterProps<ExtraCore> extends MockKibanaProviderProps<ExtraCore> 
   history?: History;
 }
 
+type Url =
+  | string
+  | {
+      path: string;
+      queryParams: Record<string, string | number>;
+    };
+
 interface RenderRouterOptions<ExtraCore> extends KibanaProviderOptions<ExtraCore> {
   history?: History;
   renderOptions?: Omit<RenderOptions, 'queries'>;
   state?: Partial<AppState>;
+  url?: Url;
 }
 
 /* default mock core */
@@ -90,10 +99,9 @@ export function MockKibanaProvider<ExtraCore>({
 export function MockRouter<ExtraCore>({
   children,
   core,
-  history: customHistory,
+  history = createMemoryHistory(),
   kibanaProps,
 }: MockRouterProps<ExtraCore>) {
-  const history = customHistory || createMemoryHistory();
   return (
     <Router history={history}>
       <MockKibanaProvider core={core} kibanaProps={kibanaProps}>
@@ -107,20 +115,35 @@ configure({ testIdAttribute: 'data-test-subj' });
 /* Custom react testing library render */
 export function render<ExtraCore>(
   ui: ReactElement,
-  { history, core, kibanaProps, renderOptions, state }: RenderRouterOptions<ExtraCore> = {}
+  {
+    history = createMemoryHistory(),
+    core,
+    kibanaProps,
+    renderOptions,
+    state,
+    url,
+  }: RenderRouterOptions<ExtraCore> = {}
 ) {
   const testState: AppState = {
     ...mockState,
     ...state,
   };
-  return reactTestLibRender(
-    <MountWithReduxProvider state={testState}>
-      <MockRouter history={history} kibanaProps={kibanaProps} core={core}>
-        {ui}
-      </MockRouter>
-    </MountWithReduxProvider>,
-    renderOptions
-  );
+
+  if (url) {
+    history = getHistoryFromUrl(url);
+  }
+
+  return {
+    ...reactTestLibRender(
+      <MountWithReduxProvider state={testState}>
+        <MockRouter history={history} kibanaProps={kibanaProps} core={core}>
+          {ui}
+        </MockRouter>
+      </MountWithReduxProvider>,
+      renderOptions
+    ),
+    history,
+  };
 }
 
 export const MountWithReduxProvider: React.FC<{ state?: AppState }> = ({ children, state }) => (
@@ -195,4 +218,15 @@ export const mountWithRouterRedux = (
     true,
     options?.storeState
   );
+
+const getHistoryFromUrl = (url: Url) => {
+  if (typeof url === 'string') {
+    return createMemoryHistory({
+      initialEntries: [url],
+    });
+  }
+
+  return createMemoryHistory({
+    initialEntries: [url.path + stringifyUrlParams(url.queryParams)],
+  });
 };
