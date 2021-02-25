@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React, { lazy, useEffect, useState } from 'react';
+import React, { lazy } from 'react';
+import useAsync from 'react-use/lib/useAsync';
 
 import { i18n } from '@kbn/i18n';
-import type { NotificationsStart, StartServicesAccessor } from 'src/core/public';
+import type { StartServicesAccessor } from 'src/core/public';
 import type { SavedObjectsManagementRecord } from 'src/plugins/saved_objects_management/public';
 
 import { SavedObjectsManagementAction } from '../../../../../src/plugins/saved_objects_management/public';
@@ -27,12 +28,8 @@ interface WrapperProps {
 }
 
 const Wrapper = ({ getStartServices, props }: WrapperProps) => {
-  const [notifications, setNotifications] = useState<NotificationsStart | undefined>();
-  useEffect(() => {
-    getStartServices().then(([coreStart]) => {
-      setNotifications(coreStart.notifications);
-    });
-  });
+  const { value: startServices = [{ notifications: undefined }] } = useAsync(getStartServices);
+  const [{ notifications }] = startServices;
 
   if (!notifications) {
     return null;

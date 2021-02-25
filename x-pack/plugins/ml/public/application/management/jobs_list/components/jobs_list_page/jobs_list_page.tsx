@@ -148,9 +148,8 @@ export const JobsListPage: FC<{
     check();
   }, []);
 
-  const ContextWrapper = useMemo(
-    () =>
-      spacesApi ? spacesApi.ui.components.getSpacesContextProvider : getEmptyFunctionComponent,
+  const ContextWrapper = useCallback(
+    spacesApi ? spacesApi.ui.components.getSpacesContextProvider : getEmptyFunctionComponent,
     [spacesApi]
   );
 

@@ -6,9 +6,10 @@
  */
 
 import type { FC, PropsWithChildren, PropsWithRef, ReactElement } from 'react';
-import React, { lazy, useEffect, useMemo, useState } from 'react';
+import React, { lazy, useMemo } from 'react';
+import useAsync from 'react-use/lib/useAsync';
 
-import type { NotificationsStart, StartServicesAccessor } from 'src/core/public';
+import type { StartServicesAccessor } from 'src/core/public';
 
 import type { PluginsStart } from '../plugin';
 import { SuspenseErrorBoundary } from '../suspense_error_boundary';
@@ -19,22 +20,18 @@ interface InternalProps<T> {
   props: JSX.IntrinsicAttributes & PropsWithRef<PropsWithChildren<T>>;
 }
 
-export const LazyWrapper: <T>(props: InternalProps<T>) => ReactElement = ({
+export const LazyWrapper: <T>(props: InternalProps<T>) => ReactElement | null = ({
   fn,
   getStartServices,
   props,
 }) => {
-  const [notifications, setNotifications] = useState<NotificationsStart | undefined>(undefined);
-  useEffect(() => {
-    getStartServices().then(([coreStart]) => {
-      setNotifications(coreStart.notifications);
-    });
-  });
+  const { value: startServices = [{ notifications: undefined }] } = useAsync(getStartServices);
+  const [{ notifications }] = startServices;
 
   const LazyComponent = useMemo(() => lazy(() => fn().then((x) => ({ default: x }))), [fn]);
 
   if (!notifications) {
-    return <></>;
+    return null;
   }
 
   return (

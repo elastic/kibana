@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useMemo, useState } from 'react';
+import React, { FC, useCallback, useState } from 'react';
 
 import { EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -66,8 +66,8 @@ export const JobSpacesList: FC<Props> = ({ spacesApi, spaceIds, jobId, jobType, 
     });
   }
 
-  const LazySpaceList = useMemo(() => spacesApi.ui.components.getSpaceList, [spacesApi]);
-  const LazyShareToSpaceFlyout = useMemo(() => spacesApi.ui.components.getShareToSpaceFlyout, [
+  const LazySpaceList = useCallback(spacesApi.ui.components.getSpaceList, [spacesApi]);
+  const LazyShareToSpaceFlyout = useCallback(spacesApi.ui.components.getShareToSpaceFlyout, [
     spacesApi,
   ]);
 
