@@ -347,7 +347,16 @@ describe('Custom detection rules deletion and edition', () => {
       goToAboutStepTab();
       cy.get(TAGS_CLEAR_BUTTON).click({ force: true });
       fillAboutRule(editedRule);
+
+      cy.intercept('GET', '/api/detection_engine/rules?id').as('getRule');
+
       saveEditedRule();
+
+      cy.wait('@getRule').then(({ response }) => {
+        cy.wrap(response!.statusCode).should('eql', 200);
+        // ensure that editing rule does not modify
+        cy.wrap(response!.body.max_signals).should('eql', existingRule.maxSignals);
+      });
 
       cy.get(RULE_NAME_HEADER).should('have.text', `${editedRule.name}`);
       cy.get(ABOUT_RULE_DESCRIPTION).should('have.text', editedRule.description);
