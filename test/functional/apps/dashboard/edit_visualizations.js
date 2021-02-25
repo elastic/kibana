@@ -113,7 +113,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.dashboard.gotoDashboardLandingPage();
       await PageObjects.dashboard.clickNewDashboard();
 
-      // Create markdown by value.
+      // Create markdown by reference.
       await createMarkdownVis('by reference');
 
       // Edit then save and return
