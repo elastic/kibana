@@ -21,6 +21,7 @@ import {
   htmlIdGenerator,
   EuiPortal,
   EuiIcon,
+  EuiIconProps,
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -56,7 +57,15 @@ export interface QueryStringInputProps {
   size?: SuggestionsListSize;
   className?: string;
   isInvalid?: boolean;
-  iconType?: string;
+  isClearable?: boolean;
+  iconType?: EuiIconProps['type'];
+
+  /**
+   * @param nonKqlMode by default if language switch is enabled, user can switch between kql and lucene syntax mode
+   * this params add another option text, which is just a  simple keyword search mode, the way a simple search box works
+   */
+  nonKqlMode?: 'lucene' | 'text';
+  nonKqlModeHelpText?: string;
 }
 
 interface Props extends QueryStringInputProps {
@@ -698,8 +707,24 @@ export default class QueryStringInputUI extends Component<Props, State> {
                   <EuiIcon
                     className="euiFormControlLayoutCustomIcon__icon"
                     aria-hidden="true"
-                    type="search"
+                    type={this.props.iconType}
                   />
+                </div>
+              ) : null}
+              {this.props.isClearable && this.props.query.query ? (
+                <div className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right">
+                  <button
+                    type="button"
+                    className="euiFormControlLayoutClearButton"
+                    title={i18n.translate('data.query.queryBar.clearInputLabel', {
+                      defaultMessage: 'Clear input',
+                    })}
+                    onClick={() => {
+                      this.onQueryStringChange('');
+                    }}
+                  >
+                    <EuiIcon className="euiFormControlLayoutClearButton__icon" type="cross" />
+                  </button>
                 </div>
               ) : null}
             </div>
@@ -722,6 +747,8 @@ export default class QueryStringInputUI extends Component<Props, State> {
             language={this.props.query.language}
             anchorPosition={this.props.languageSwitcherPopoverAnchorPosition}
             onSelectLanguage={this.onSelectLanguage}
+            nonKqlMode={this.props.nonKqlMode}
+            nonKqlModeHelpText={this.props.nonKqlModeHelpText}
           />
         )}
       </div>
