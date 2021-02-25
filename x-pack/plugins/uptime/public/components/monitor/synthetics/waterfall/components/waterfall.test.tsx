@@ -11,6 +11,7 @@ import { renderLegendItem } from '../../step_detail/waterfall/waterfall_chart_wr
 import { render } from '../../../../../lib/helper/rtl_helpers';
 
 import 'jest-canvas-mock';
+import { waitFor } from '@testing-library/dom';
 
 describe('waterfall', () => {
   it('sets the correct height in case of full height', () => {
@@ -38,6 +39,8 @@ describe('waterfall', () => {
 
     const chartWrapper = getByTestId('waterfallOuterContainer');
 
-    expect(chartWrapper).toHaveStyleRule('height', 'calc(100vh - 62px)');
+    waitFor(() => {
+      expect(chartWrapper).toHaveStyleRule('height', 'calc(100vh - 62px)');
+    });
   });
 });
